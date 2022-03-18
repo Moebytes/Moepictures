@@ -1,0 +1,59 @@
+@import "../index.less";
+
+.navbar {
+    position: sticky;
+    top: 77px;
+    z-index: 1500;
+    display: flex;
+    background-color: var(--navbarBG);
+    width: 100%;
+    height: 35px;
+    align-items: center;
+    transition: all 0.5s,  background-color 0s;
+}
+
+.hide-navbar {
+    top: 0px;
+}
+
+.translate-navbar {
+    transform: translateY(-35px);
+}
+
+.nav-text-container {
+    display: flex;
+    margin-left: 14px;
+    width: 100%;
+    justify-content: flex-start;
+}
+
+.nav-text {
+    font-family: Tahoma, sans-serif;
+    font-size: 20px;
+    color: var(--navbarText);
+    margin-right: 70px;
+    cursor: pointer;
+    &:hover {
+        filter: brightness(150%);
+    }
+    .stroke-black();
+}
+
+.nav-user-text {
+    color: var(--navbarUserText);
+}
+
+.nav-color-container {
+    display: flex;
+    justify-content: flex-start;
+}
+
+.nav-color {
+    height: 27px;
+    width: auto;
+    margin-right: 14px;
+    cursor: pointer;
+    &:hover {
+        filter: brightness(150%);
+    }
+}

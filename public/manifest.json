@@ -1,0 +1,16 @@
+{
+    "short_name": "moebooru.moe",
+    "name": "Moebooru.moe",
+    "description": "A moe anime image board.",
+    "icons": [
+      {
+        "src": "assets/purple/favicon.png",
+        "sizes": "128x128",
+        "type": "image/gif"
+      }
+    ],
+    "start_url": ".",
+    "display": "standalone",
+    "theme_color": "#ff4df6",
+    "background_color": "#000000"
+  }

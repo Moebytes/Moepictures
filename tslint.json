@@ -1,0 +1,6 @@
+{ 
+    "extends": ["@tenpi/tslint"],
+    "rules": {
+        "arrow-parens": false
+    }
+}

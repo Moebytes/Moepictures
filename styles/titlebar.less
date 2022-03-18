@@ -1,0 +1,78 @@
+@import "../index.less";
+
+.titlebar {
+    position: sticky;
+    top: 0px;
+    z-index: 2000;
+    display: flex;
+    width: 100%;
+    height: 77px;
+    background-color: var(--titlebarBG);
+    transition: top 0.3s, background-color 0s;
+}
+
+.hide-titlebar {
+    transition: top 0.7s, background-color 0s;
+    top: -77px;
+}
+
+.titlebar-logo-container {
+    display: flex;
+    justify-content: flex-start;
+    text-decoration: none;
+    cursor: default;
+}
+
+.titlebar-text-container {
+    display: flex;
+    align-items: center;
+    margin-left: 15px;
+    margin-right: 15px;
+}
+
+.titlebar-hover {
+    display: inline-flex;
+    &:hover {
+        filter: saturate(75%) brightness(150%);
+    }
+}
+
+.titlebar-text() {
+    font-family: Tahoma, sans-serif;
+    font-size: 55px;
+    .stroke-black();
+}
+
+.titlebar-text-a {
+    .titlebar-text();
+    color: var(--titleTextA);
+}
+
+.titlebar-text-b {
+    .titlebar-text();
+    color: var(--titleTextB);
+}
+
+.titlebar-img {
+    padding-top: 3px;
+    filter: contrast(200%);
+    margin-right: -25px;
+}
+
+.titlebar-search-text-container {
+    display: flex;
+    flex-direction: row;
+    width: 100%;
+    height: 100%;
+    align-items: center;
+}
+
+.titlebar-search-text {
+    font-family: Tahoma, sans-serif;
+    font-size: 30px;
+    color: var(--titlebarText);
+    .stroke-black();
+    &:hover {
+        filter: brightness(140%);
+    }
+}

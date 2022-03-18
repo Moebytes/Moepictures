@@ -1,0 +1,22 @@
+{
+    "compilerOptions": {
+        "outDir": "dist",
+        "noImplicitAny": false,
+        "moduleResolution": "node",
+        "target": "es2017",
+        "module": "esnext",
+        "lib": ["esnext", "dom"],
+        "allowJs": true,
+        "allowSyntheticDefaultImports": true,
+        "jsx": "react",
+        "esModuleInterop": true,
+        "strict": true,
+        "strictNullChecks": true,
+        "skipLibCheck": true,
+        "resolveJsonModule": true
+    },
+    "exclude": [
+        "node_modules",
+        "dist"
+    ]
+}

@@ -1,0 +1,177 @@
+@font-face {
+    font-family: "Apple Symbols";
+    src: url("/assets/fonts/Apple Symbols.ttf") format("truetype");
+}
+
+:root {
+    --selection: #6c69fc;
+    --background: #0f0b35;
+    --titlebarBG: #1d0a71;
+    --titleTextA: #6814ff;
+    --titleTextB: #4214ff;
+    --titlebarText: #3b14ff;
+    --navbarBG: #230089;
+    --navbarText: #3516ff;
+    --navbarUserText: #fe23ae;
+    --sidebarBG: #1b0c50;
+    --sidebarText: #ff11df;
+    --sidebarSearchFocus: #2908e0;
+    --sidebarSearchBG: #32179f;
+    --tagColor: #641fff;
+    --tagCountColor: #ff1fe7;
+    --sortbarBG: rgba(15, 11, 53, 0.95);
+    --sortbarText: #3538fc;
+    --imageBorder: #0a0f7f;
+    --text: #4311ff;
+}
+
+.purple-light {
+    --selection: #8e8cff;
+    --background: #c7c6fb;
+    --titlebarBG: #8789ff;
+    --titleTextA: #745dff;
+    --titleTextB: #5d60ff;
+    --titlebarText: #7e66ff;
+    --navbarBG: #888bff;
+    --navbarText: #6c47ff;
+    --navbarUserText: #ad3cff;
+    --sidebarBG: #9094ff;
+    --sidebarText: #a92fff;
+    --sidebarSearchFocus: #8581ff;
+    --sidebarSearchBG: #6f6bff;
+    --tagColor: #9957ff;
+    --tagCountColor: #6b59ff;
+    --sortbarBG: rgba(199, 198, 251, 0.5);
+    --sortbarText: #6d77ff;
+    --imageBorder: #7fa0ff;
+    --text: #9488ff;
+}
+
+.magenta {
+    --selection: #fc69c4;
+    --background: #350b2c;
+    --titlebarBG: #710a65;
+    --titleTextA: #ff14b6;
+    --titleTextB: #ff14dc;
+    --titlebarText: #ff14d8;
+    --navbarBG: #890085;
+    --navbarText: #ff16cc;
+    --navbarUserText: #fe23ae;
+    --sidebarBG: #500c4a;
+    --sidebarText: #ff11af;
+    --sidebarSearchFocus: #e0089f;
+    --sidebarSearchBG: #9f177d;
+    --tagColor: #ff1ff4;
+    --tagCountColor: #b11fff;
+    --sortbarBG: rgba(53, 11, 44, 0.95);
+    --sortbarText: #f71ec1;
+    --imageBorder: #7f0a5c;
+    --text: #ff11cb;
+}
+
+.magenta-light {
+    --selection: #ff85d0;
+    --background: #f4dbfd;
+    --titlebarBG: #ee9bff;
+    --titleTextA: #ff62dd;
+    --titleTextB: #ee6cff;
+    --titlebarText: #fb76ff;
+    --navbarBG: #e49dff;
+    --navbarText: #da53ff;
+    --navbarUserText: #ff46ce;
+    --sidebarBG: #f3a5ff;
+    --sidebarText: #ff37da;
+    --sidebarSearchFocus: #fc38c1;
+    --sidebarSearchBG: #f67cff;
+    --tagColor: #ed65ff;
+    --tagCountColor: #ff57cd;
+    --sortbarBG: rgba(244, 219, 253, 0.5);
+    --sortbarText: #e47eff;
+    --imageBorder: #fb92ff;
+    --text: #ff85cc;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+
+html, body {
+    width: 100%;
+    height: 100%;
+    background-color: black;
+    position: relative;
+    z-index: -1000;
+    -webkit-touch-callout: none;
+}
+
+body {
+    overflow-x: hidden;
+}
+
+.app {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    height: 100%;
+    background-color: var(--background);
+}
+
+.body {
+    display: flex;
+    flex-direction: row;
+    width: 100%;
+    height: 100%;
+}
+
+.content {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    height: 100%;
+}
+
+::selection {
+    background-color: var(--selection);
+}
+
+
+::-webkit-scrollbar {
+    width: 10px;
+}
+  
+::-webkit-scrollbar-track {
+    background: var(--background);
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--titlebarBG);
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--navbarBG);
+}
+
+.stroke-black() {
+    text-shadow: 0 0 2px black, 0 0 2px black, 0 0 2px black, 0 0 2px black, 0 0 2px black,0 0 2px black, 0 0 2px black, 0 0 2px black, 0 0 2px black, 0 0 2px black,0 0 2px black, 0 0 2px black, 0 0 2px black, 0 0 2px black, 0 0 2px black,0 0 2px black, 0 0 2px black, 0 0 2px black, 0 0 2px black, 0 0 2px black;
+}
+
+.stroke-white() {
+    text-shadow: 0 0 2px white, 0 0 2px white, 0 0 2px white, 0 0 2px white, 0 0 2px white,0 0 2px white, 0 0 2px white, 0 0 2px white, 0 0 2px white, 0 0 2px white,0 0 2px white, 0 0 2px white, 0 0 2px white, 0 0 2px white, 0 0 2px white,0 0 2px white, 0 0 2px white, 0 0 2px white, 0 0 2px white, 0 0 2px white;
+}
+
+input[type="search"]::-webkit-search-decoration,
+input[type="search"]::-webkit-search-cancel-button,
+input[type="search"]::-webkit-search-results-button,
+input[type="search"]::-webkit-search-results-decoration { display: none; }
+
+input:focus, button:focus {
+    outline: none;
+}
+
+a {
+    display: flex;
+    text-decoration: none;
+}
