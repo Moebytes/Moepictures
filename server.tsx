@@ -31,7 +31,7 @@ if (process.env.TESTING === "yes") {
   app.use(middleware(compiler, {
     index: false,
     serverSideRender: true,
-    writeToDisk: false,
+    writeToDisk: true,
   }))
   app.use(hot(compiler))
 }

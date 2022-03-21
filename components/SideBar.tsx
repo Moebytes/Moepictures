@@ -1,5 +1,6 @@
-import React, {useContext, useState} from "react"
-import {ThemeContext, HideSidebarContext, HideNavbarContext} from "../App"
+import React, {useContext, useEffect, useState} from "react"
+import {ThemeContext, HideSidebarContext, HideNavbarContext, EnableDragContext} from "../App"
+import {HashLink as Link} from "react-router-hash-link"
 import search from "../assets/purple/search.png"
 import searchImage from "../assets/purple/search-image.png"
 import searchMagenta from "../assets/magenta/search.png"
@@ -14,10 +15,17 @@ import randomPurpleLight from "../assets/purple-light/random.png"
 import randomMagentaLight from "../assets/magenta-light/random.png"
 import terms from "../assets/purple/terms.png"
 import termsMagenta from "../assets/magenta/terms.png"
+import termsPurpleLight from "../assets/purple-light/terms.png"
+import termsMagentaLight from "../assets/magenta-light/terms.png"
 import contact from "../assets/purple/contact.png"
 import contactMagenta from "../assets/magenta/contact.png"
+import contactPurpleLight from "../assets/purple-light/contact.png"
+import contactMagentaLight from "../assets/magenta-light/contact.png"
 import code from "../assets/purple/code.png"
 import codeMagenta from "../assets/magenta/code.png"
+import codePurpleLight from "../assets/purple-light/code.png"
+import codeMagentaLight from "../assets/magenta-light/code.png"
+import pack from "../package.json"
 import "../styles/sidebar.less"
 
 interface Props {
@@ -28,6 +36,52 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
     const {theme, setTheme} = useContext(ThemeContext)
     const {hideSidebar, setHideSidebar} = useContext(HideSidebarContext)
     const {hideNavbar, setHideNavbar} = useContext(HideNavbarContext)
+    const {enableDrag, setEnableDrag} = useContext(EnableDragContext)
+    const [tags, setTags] = useState([]) as any
+    const [maxTags, setMaxTags] = useState(26)
+
+    useEffect(() => {
+        setTags(["loli", "azur lane", "animated", "with audio", "kancolle", "leggings", "stockings",
+    "gabriel dropout", "kiniro mosaic", "himouto! umaru-chan", "sword art online", "is the order a rabbit?", "sexual intercourse", 
+    "saliva", "cum",
+    "loli", "copulation", "animated", "with audio", "kancolle", "leggings", "stockings",
+    "gabriel dropout", "kiniro mosaic", "himouto! umaru-chan", "sword art online", "is the order a rabbit?", "sexual intercourse", 
+    "saliva", "cum"])
+    }, [])
+
+    useEffect(() => {
+        const scrollHandler = () => {
+            const sidebar = document.querySelector(".sidebar") as HTMLElement
+            if (hideNavbar) {
+                if (window.scrollY === 0) {
+                    sidebar.style.height = "calc(100vh - 35px - 77px)"
+                    if (maxTags !== 26) setMaxTags(26)
+                } else {
+                    sidebar.style.height = "calc(100vh - 35px)"
+                    if (maxTags !== 30) setMaxTags(30)
+                }
+            }
+        }
+        window.addEventListener("scroll", scrollHandler)
+        return () => {
+            setTimeout(() => {
+                window.removeEventListener("scroll", scrollHandler)
+            }, 10)
+        }
+    })
+
+    useEffect(() => {
+        const sidebar = document.querySelector(".sidebar") as HTMLElement
+        if (!hideNavbar) {
+            sidebar.style.height = "calc(100vh - 35px - 77px)"
+            if (maxTags !== 26) setMaxTags(26)
+        } else {
+            if (window.scrollY !== 0) {
+                sidebar.style.height = "calc(100vh - 35px)"
+                if (maxTags !== 30) setMaxTags(30)
+            }
+        }
+    }, [hideNavbar])
 
     const getSearchIcon = () => {
         if (theme === "purple") return search
@@ -54,22 +108,47 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
     }
 
     const getTermsIcon = () => {
-        if (theme.includes("magenta")) return termsMagenta
+        if (theme === "purple") return terms
+        if (theme === "purple-light") return termsPurpleLight
+        if (theme === "magenta") return termsMagenta
+        if (theme === "magenta-light") return termsMagentaLight
         return terms
     }
 
     const getContactIcon = () => {
-        if (theme.includes("magenta")) return contactMagenta
+        if (theme === "purple") return contact
+        if (theme === "purple-light") return contactPurpleLight
+        if (theme === "magenta") return contactMagenta
+        if (theme === "magenta-light") return contactMagentaLight
         return contact
     }
 
     const getCodeIcon = () => {
-        if (theme.includes("magenta")) return codeMagenta
+        if (theme === "purple") return code
+        if (theme === "purple-light") return codePurpleLight
+        if (theme === "magenta") return codeMagenta
+        if (theme === "magenta-light") return codeMagentaLight
         return code
     }
 
+    const generateTagJSX = () => {
+        let jsx = [] as any
+        let max = tags.length > maxTags ? maxTags : tags.length
+        for (let i = 0; i < max; i++) {
+            jsx.push(
+                <div className="tag-row">
+                    <span className="tag-hover">
+                        <span className="tag">{tags[i]}</span>
+                        <span className="tag-count">{Math.floor(Math.random() * 1000)}</span>
+                    </span>
+                </div>
+            )
+        }
+        return jsx
+    }
+
     return (
-        <div className={`sidebar ${hideSidebar ? "hide-sidebar" : ""} ${hideNavbar ? "sidebar-top" : ""}`}>
+        <div className={`sidebar ${hideSidebar ? "hide-sidebar" : ""} ${hideNavbar ? "sidebar-top" : ""}`} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
             <div className="sidebar-container">
                 <div className="sidebar-text-container">
                     <span className="sidebar-text">{props.text}</span>
@@ -83,175 +162,17 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
                     <img className={!theme || theme === "purple" ? "random" : `random-${theme}`} src={getRandomIcon()}/>
                 </div>
                 <div className="tag-container">
-                    <div className="tag-row">
-                        <span className="tag-hover">
-                            <span className="tag">Loli</span>
-                            <span className="tag-count">4566</span>
-                        </span>
-                    </div>
-                    <div className="tag-row">
-                        <span className="tag-hover">
-                        <span className="tag">Azur Lane</span>
-                        <span className="tag-count">1567</span>
-                        </span>
-                    </div>
-                    <div className="tag-row">
-                        <span className="tag-hover">
-                        <span className="tag">Animated</span>
-                        <span className="tag-count">87564</span>
-                        </span>
-                    </div>
-                    <div className="tag-row">
-                        <span className="tag-hover">
-                        <span className="tag">With Audio</span>
-                        <span className="tag-count">4543</span>
-                        </span>
-                    </div>
-                    <div className="tag-row">
-                        <span className="tag-hover">
-                        <span className="tag">KanColle</span>
-                        <span className="tag-count">4565</span>
-                        </span>
-                    </div>
-                    <div className="tag-row">
-                        <span className="tag-hover">
-                        <span className="tag">Leggings</span>
-                        <span className="tag-count">7654</span>
-                        </span>
-                    </div>
-                    <div className="tag-row">
-                        <span className="tag-hover">
-                        <span className="tag">Stockings</span>
-                        <span className="tag-count">8755</span>
-                        </span>
-                    </div>
-                    <div className="tag-row">
-                        <span className="tag-hover">
-                        <span className="tag">Gabriel Dropout</span>
-                        <span className="tag-count">76</span>
-                        </span>
-                    </div>
-                    <div className="tag-row">
-                        <span className="tag-hover">
-                        <span className="tag">Kiniro Mosaic</span>
-                        <span className="tag-count">886</span>
-                        </span>
-                    </div>
-                    <div className="tag-row">
-                        <span className="tag-hover">
-                        <span className="tag">Umaru-Chan</span>
-                        <span className="tag-count">885</span>
-                        </span>
-                    </div>
-                    <div className="tag-row">
-                        <span className="tag-hover">
-                        <span className="tag">GochiUsa</span>
-                        <span className="tag-count">5473</span>
-                        </span>
-                    </div>
-                    <div className="tag-row">
-                        <span className="tag-hover">
-                        <span className="tag">Sex</span>
-                        <span className="tag-count">990</span>
-                        </span>
-                    </div>
-                    <div className="tag-row">
-                        <span className="tag-hover">
-                        </span>
-                        <span className="tag">Saliva</span>
-                        <span className="tag-count">6545</span>
-                    </div>
-                    <div className="tag-row">
-                        <span className="tag-hover">
-                        <span className="tag">Cum</span>
-                        <span className="tag-count">43</span>
-                        </span>
-                    </div>
-                    <div className="tag-row">
-                        <span className="tag-hover">
-                        <span className="tag">School</span>
-                        <span className="tag-count">788</span>
-                        </span>
-                    </div>
-                    <div className="tag-row">
-                        <span className="tag-hover">
-                        <span className="tag">Music</span>
-                        <span className="tag-count">643</span>
-                        </span>
-                    </div>
-                    <div className="tag-row">
-                        <span className="tag-hover">
-                        <span className="tag">Hibiki</span>
-                        <span className="tag-count">998</span>
-                        </span>
-                    </div>
-                    <div className="tag-row">
-                        <span className="tag-hover">
-                        <span className="tag">Hot</span>
-                        <span className="tag-count">6543</span>
-                        </span>
-                    </div>
-                    <div className="tag-row">
-                        <span className="tag-hover">
-                        <span className="tag">Hot</span>
-                        <span className="tag-count">6543</span>
-                        </span>
-                    </div>
-                    <div className="tag-row">
-                        <span className="tag-hover">
-                        <span className="tag">Hot</span>
-                        <span className="tag-count">6543</span>
-                        </span>
-                    </div>
-                    <div className="tag-row">
-                        <span className="tag-hover">
-                        <span className="tag">Hot</span>
-                        <span className="tag-count">6543</span>
-                        </span>
-                    </div>
-                    <div className="tag-row">
-                        <span className="tag-hover">
-                        <span className="tag">Hot</span>
-                        <span className="tag-count">6543</span>
-                        </span>
-                    </div>
-                    <div className="tag-row">
-                        <span className="tag-hover">
-                        <span className="tag">Hot</span>
-                        <span className="tag-count">6543</span>
-                        </span>
-                    </div>
-                    <div className="tag-row">
-                        <span className="tag-hover">
-                        <span className="tag">Hot</span>
-                        <span className="tag-count">6543</span>
-                        </span>
-                    </div>
-                    <div className="tag-row">
-                        <span className="tag-hover">
-                        <span className="tag">Hot</span>
-                        <span className="tag-count">6543</span>
-                        </span>
-                    </div>
-                    <div className="tag-row">
-                        <span className="tag-hover">
-                        <span className="tag">Hot</span>
-                        <span className="tag-count">6543</span>
-                        </span>
-                    </div>
-                    <div className="tag-row">
-                        <span className="tag-hover">
-                        <span className="tag">Hot</span>
-                        <span className="tag-count">6543</span>
-                        </span>
-                    </div>
-                    {/*27 tags can fit*/}
+                    {generateTagJSX()}
                 </div>
                 <div className="sidebar-footer">
                     <span className="sidebar-footer-text">©{new Date().getFullYear()} Tenpi</span>
-                    <img className="sidebar-footer-icon" src={getTermsIcon()}/>
-                    <img className="sidebar-footer-icon" src={getContactIcon()}/>
-                    <img className="sidebar-footer-icon" src={getCodeIcon()}/>
+                    <Link to="/terms">
+                        <img className="sidebar-footer-icon" src={getTermsIcon()}/>
+                    </Link>
+                    <Link to="/contact">
+                        <img className="sidebar-footer-icon" src={getContactIcon()}/>
+                    </Link>
+                    <img className="sidebar-footer-icon" src={getCodeIcon()} onClick={() => window.open(pack.repository.url, "_blank")}/>
                 </div>
             </div>
         </div>

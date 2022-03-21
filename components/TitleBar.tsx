@@ -1,8 +1,8 @@
-import React, {useContext} from "react"
+import React, {useContext, useEffect} from "react"
 import {HashLink as Link} from "react-router-hash-link"
 import favicon from "../assets/purple/favicon.png"
 import faviconMagenta from "../assets/magenta/favicon.png"
-import {ThemeContext, HideNavbarContext} from "../App"
+import {ThemeContext, HideNavbarContext, EnableDragContext} from "../App"
 import "../styles/titlebar.less"
 
 interface Props {
@@ -12,6 +12,12 @@ interface Props {
 const TitleBar: React.FunctionComponent<Props> = (props) => {
     const {theme, setTheme} = useContext(ThemeContext)
     const {hideNavbar, setHideNavbar} = useContext(HideNavbarContext)
+    const {enableDrag, setEnableDrag} = useContext(EnableDragContext)
+
+    useEffect(() => {
+        const savedTheme = localStorage.getItem("theme")
+        if (savedTheme) setTheme(savedTheme)
+    }, [])
 
     const getImg = () => {
         if (theme.includes("magenta")) return faviconMagenta
@@ -19,7 +25,7 @@ const TitleBar: React.FunctionComponent<Props> = (props) => {
     }
 
     return (
-        <div className={`titlebar ${hideNavbar ? "hide-titlebar" : ""}`}>
+        <div className={`titlebar ${hideNavbar ? "hide-titlebar" : ""}`} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
            <Link to="/" className="titlebar-logo-container">
                 <span className="titlebar-hover">
                     <div className="titlebar-text-container">

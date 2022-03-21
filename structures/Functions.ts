@@ -1,11 +1,24 @@
+import e from "express"
 import commonPasswords from "../json/common-passwords.json"
 
 let newScrollY = 0
-let dragged = [] as any
-let direction = ""
-let lastPageY = 0
+let lastScrollTop = 0
+let element = null as any
+let inertia = false
+let mouseDown = false
 
 export default class Functions {
+    public static timeout = (ms: number) => {
+        return new Promise((resolve) => setTimeout(resolve, ms))
+    }
+    
+    public static toProperCase = (str: string) => {
+        return str.replace(/\w\S*/g, (txt) => {
+                return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase()
+            }
+        )
+    }
+
     public static alphaNumeric(str: string) {
         for (let i = 0; i < str.length; i++) {
           const code = str.charCodeAt(i)
@@ -65,85 +78,64 @@ export default class Functions {
     }
 
     public static dragScroll = (enabled?: boolean) => {
-        let element: any
-        for (let i = 0; i < dragged.length; i++) {
-            element = dragged[i]
-            element = element.container || element
-            element.removeEventListener("mousedown", element.md, false)
-            window.removeEventListener("mouseup", element.mu, false)
-            window.removeEventListener("mousemove", element.mm, false)
-        }
-        if (!enabled) return
-        dragged = [].slice.call(document.getElementsByClassName("dragscroll"))
-        for (let i = 0; i < dragged.length; i++) {
-            const element = dragged[i]
-            let lastClientY = 0
-            let mouseDown = false
-            let momentum = false
-            let time: any
-            let container = element.container || element
+        if (inertia || mouseDown) return
+        element?.removeEventListener("mousedown", element?.mouseDownFunc, false)
+        window.removeEventListener("mouseup", element?.mouseUpFunc, false)
+        window.removeEventListener("mousemove", element?.mouseMoveFunc, false)
 
-            container.addEventListener("mousedown", container.md = function(event) {
-                if (!element.hasAttribute("nochilddrag") || document.elementFromPoint(event.pageX, event.pageY) == container) {
-                    mouseDown = true
-                    time = new Date()
-                    lastClientY = event.clientY
-                    event.preventDefault()
-                }
-            }, false)
+        element = document.querySelector(".drag") as HTMLElement
+        if (!element || !enabled) return
+        let lastClientY = 0
+        mouseDown = false
+        let time = null as any
+        let id = 0
 
-            window.addEventListener("mouseup", container.mu = function(event) {
-                mouseDown = false
-                /*
-                const timeDiff = (new Date() as any - time)
-                let scroller = element.scroller || element
-                if (element == document.body) scroller = document.documentElement
-                let speedY = (-newScrollY + scroller.scrollTop) / timeDiff * 10
-                const draw = () => {
+        element.addEventListener("mousedown", element.mouseDownFunc = (event) => {
+                event.preventDefault()
+                mouseDown = true
+                inertia = false
+                time = new Date()
+                lastClientY = event.clientY
+                let scrollElement = element
+                if (element == document.body) scrollElement = document.documentElement
+                lastScrollTop = scrollElement.scrollTop
+                cancelAnimationFrame(id)
+        }, false)
+
+        window.addEventListener("mouseup", element.mouseUpFunc = (event) => {
+            mouseDown = false
+            const timeDiff = (new Date() as any - time)
+            let scrollElement = element
+            if (element == document.body) scrollElement = document.documentElement
+            let speedY = (scrollElement.scrollTop - lastScrollTop) / timeDiff * 25
+            let speedYAbsolute = Math.abs(speedY)
+
+            const draw = () => {
+                let scrollElement = element
+                if (element == document.body) scrollElement = document.documentElement
+                if (speedYAbsolute > 0) {
                     if (speedY > 0) {
-                        let scroller = element.scroller || element
-                        if (element == document.body) scroller = document.documentElement
-                        newScrollY = (-lastClientY + (lastClientY = event.clientY))
-                        let value = scroller.scrollTop
-                        if (direction === "up") {
-                            value += newScrollY - speedY--
-                        } else {
-                            value -= newScrollY - speedY--
-                        }
-                        if (value < 0) value = 0
-                        if (value > scroller.scrollHeight) value = scroller.scrollHeight
-                        scroller.scrollTop = value
-                        
-                        console.log(scroller.screenHeight)
-                        console.log(scroller.scrollTop)
+                        scrollElement.scrollTop += speedYAbsolute--
                     } else {
-                        momentum = false
+                        scrollElement.scrollTop -= speedYAbsolute--
                     }
-                    requestAnimationFrame(draw)
-                }
-                momentum = true
-                draw()*/
-            }, false)
-
-            window.addEventListener("mousemove", container.mm = function(event) {
-                if (!mouseDown) return
-                let scroller = element.scroller || element
-                if (element == document.body) scroller = document.documentElement
-                newScrollY = (-lastClientY + (lastClientY = event.clientY))
-                scroller.scrollTop -= newScrollY
-            }, false)
-            /*
-            window.addEventListener("scroll", () => {
-                if (!mouseDown) return
-                var offset = window.pageYOffset || document.documentElement.scrollTop
-                if (offset > lastPageY) {
-                    direction = "down"
                 } else {
-                    direction = "up"
+                    inertia = false
                 }
-                lastPageY = offset <= 0 ? 0 : offset
-            })*/
-        }
+                id = requestAnimationFrame(draw)
+            }
+            inertia = true
+            draw()
+        }, false)
+
+        window.addEventListener("mousemove", element.mouseMoveFunc = (event) => {
+            if (!mouseDown) return
+            let scrollElement = element
+            if (element == document.body) scrollElement = document.documentElement
+            newScrollY = event.clientY - lastClientY
+            lastClientY = event.clientY
+            scrollElement.scrollTop -= newScrollY
+        }, false)
     }
 
     public static updateHeight = () => {
@@ -152,5 +144,53 @@ export default class Functions {
             const height = imageContainer.clientHeight
             imageContainer.style.height = `${height}px`
         }
+    }
+
+    public static scrolledToBottom = () => {
+        return (window.innerHeight + window.scrollY) >= document.body.scrollHeight
+    }
+
+    public static trimCanvas = (canvas: any) => {
+        const context = canvas.getContext('2d');
+
+        const topLeft = {
+            x: canvas.width,
+            y: canvas.height,
+            update(x,y){
+                this.x = Math.min(this.x,x);
+                this.y = Math.min(this.y,y);
+            }
+        };
+
+        const bottomRight = {
+            x: 0,
+            y: 0,
+            update(x,y){
+                this.x = Math.max(this.x,x);
+                this.y = Math.max(this.y,y);
+            }
+        };
+
+        const imageData = context.getImageData(0,0,canvas.width,canvas.height);
+
+        for(let x = 0; x < canvas.width; x++){
+            for(let y = 0; y < canvas.height; y++){
+                const alpha = imageData.data[((y * (canvas.width * 4)) + (x * 4)) + 3];
+                if(alpha !== 0){
+                    topLeft.update(x,y);
+                    bottomRight.update(x,y);
+                }
+            }
+        }
+
+        const width = bottomRight.x - topLeft.x;
+        const height = bottomRight.y - topLeft.y;
+
+        const croppedCanvas = context.getImageData(topLeft.x,topLeft.y,width,height);
+        canvas.width = width;
+        canvas.height = height;
+        context.putImageData(croppedCanvas,0,0);
+
+        return canvas;
     }
 }

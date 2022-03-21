@@ -15,6 +15,10 @@
     "image board",
     "booru"
   ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Tenpi/Moebooru.moe"
+  },
   "author": "Tenpi",
   "license": "MIT",
   "devDependencies": {
@@ -27,6 +31,7 @@
     "@types/react": "^16.9.48",
     "@types/react-dom": "^16.9.8",
     "@types/react-router-dom": "^5.1.5",
+    "@types/react-slider": "^1.3.1",
     "@types/webpack-env": "^1.15.2",
     "css-loader": "^4.2.2",
     "del-cli": "^3.0.1",
@@ -64,6 +69,7 @@
     "react": "^17.0.2",
     "react-dom": "^17.0.2",
     "react-router-hash-link": "^2.4.3",
+    "react-slider": "^1.3.1",
     "react-string-replace": "^0.4.4"
   }
 }

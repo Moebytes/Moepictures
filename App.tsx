@@ -1,9 +1,20 @@
 import React, {useEffect, useState} from "react"
-import {Switch, Route} from "react-router-dom"
-import PostsPage from "./components/PostsPage"
-import $404Page from "./components/404Page"
-import HelpPage from "./components/HelpPage"
+import {Switch, Route, Redirect} from "react-router-dom"
+import PostsPage from "./pages/PostsPage"
+import $404Page from "./pages/404Page"
+import HelpPage from "./pages/HelpPage"
+import TermsPage from "./pages/TermsPage"
+import LoginPage from "./pages/LoginPage"
+import SignUpPage from "./pages/SignUpPage"
+import $2FAPage from "./pages/2FAPage"
+import ContactPage from "./pages/ContactPage"
+import ChangeUsernamePage from "./pages/ChangeUsernamePage"
+import ChangeEmailPage from "./pages/ChangeEmailPage"
+import ChangePasswordPage from "./pages/ChangePasswordPage"
+import ResetPasswordPage from "./pages/ResetPasswordPage"
+import ForgotPasswordPage from "./pages/ForgotPasswordPage"
 import functions from "./structures/Functions"
+import ScrollToTop from "./components/ScrollToTop"
 import "./index.less"
 
 export const ThemeContext = React.createContext<any>(null)
@@ -11,6 +22,19 @@ export const HideSortbarContext = React.createContext<any>(null)
 export const HideSidebarContext = React.createContext<any>(null)
 export const HideNavbarContext = React.createContext<any>(null)
 export const EnableDragContext = React.createContext<any>(null)
+export const ActiveDropdownContext = React.createContext<any>(null)
+export const SizeTypeContext = React.createContext<any>(null)
+export const FilterDropActiveContext = React.createContext<any>(null)
+export const SquareContext = React.createContext<any>(null)
+
+export const BrightnessContext = React.createContext<any>(null)
+export const ContrastContext = React.createContext<any>(null)
+export const HueContext = React.createContext<any>(null)
+export const SaturationContext = React.createContext<any>(null)
+export const LightnessContext = React.createContext<any>(null)
+export const BlurContext = React.createContext<any>(null)
+export const SharpenContext = React.createContext<any>(null)
+export const PixelateContext = React.createContext<any>(null)
 
 const App: React.FunctionComponent = (props) => {
     const [theme, setTheme] = useState("purple")
@@ -18,24 +42,48 @@ const App: React.FunctionComponent = (props) => {
     const [hideSidebar, setHideSidebar] = useState(false)
     const [hideNavbar, setHideNavbar] = useState(false)
     const [enableDrag, setEnableDrag] = useState(false)
+    const [sizeType, setSizeType] = useState("medium")
+    const [loaded, setLoaded] = useState(false)
+    const [activeDropdown, setActiveDropdown] = useState("none")
+    const [filterDropActive, setFilterDropActive] = useState(false)
+    const [brightness, setBrightness] = useState(100)
+    const [contrast, setContrast] = useState(100)
+    const [hue, setHue] = useState(180)
+    const [saturation, setSaturation] = useState(100)
+    const [lightness, setLightness] = useState(100)
+    const [blur, setBlur] = useState(0)
+    const [sharpen, setSharpen] = useState(0)
+    const [pixelate, setPixelate] = useState(1)
+    const [square, setSquare] = useState(false)
 
     useEffect(() => {
-        const savedTheme = localStorage.getItem("theme")
-        if (savedTheme) setTheme(savedTheme)
+        setTimeout(() => {
+            setLoaded(true)
+        }, 100)
     }, [])
 
     useEffect(() => {
-        window.addEventListener("scroll", () => {
+        const handleScroll = () => {
+            if (filterDropActive) return setHideSortbar(false)
             if (window.scrollY === 0) return setHideSortbar(false)
+            setActiveDropdown("none")
             return setHideSortbar(true)
-        })
-        window.addEventListener("mousemove", (event) => {
+        }
+        const handleMouseMove = (event: any) => {
+            if (filterDropActive) return setHideSortbar(false)
+            if (activeDropdown !== "none") return setHideSortbar(false)
             if (window.scrollY === 0) return setHideSortbar(false)
             const amt = hideNavbar ? (35 + 40) : (77 + 35 + 40)
             if (event.clientY < amt) return setHideSortbar(false)
             return setHideSortbar(true)
-        })
-    }, [hideNavbar])
+        }
+        window.addEventListener("scroll", handleScroll)
+        window.addEventListener("mousemove", handleMouseMove)
+        return () => {
+            window.removeEventListener("scroll", handleScroll)
+            window.removeEventListener("mousemove", handleMouseMove)
+        }
+    }, [hideNavbar, activeDropdown])
 
     
     useEffect(() => {
@@ -64,22 +112,59 @@ const App: React.FunctionComponent = (props) => {
     }, [theme])
 
     return (
-        <div className={`app ${theme}`}>
+        <div className={`app ${theme} ${!loaded ? "stop-transitions" : ""}`}>
+            <PixelateContext.Provider value={{pixelate, setPixelate}}>
+            <SquareContext.Provider value={{square, setSquare}}>
+            <FilterDropActiveContext.Provider value={{filterDropActive, setFilterDropActive}}>
+            <BrightnessContext.Provider value={{brightness, setBrightness}}>
+            <ContrastContext.Provider value={{contrast, setContrast}}>
+            <HueContext.Provider value={{hue, setHue}}>
+            <SaturationContext.Provider value={{saturation, setSaturation}}>
+            <LightnessContext.Provider value={{lightness, setLightness}}>
+            <BlurContext.Provider value={{blur, setBlur}}>
+            <SharpenContext.Provider value={{sharpen, setSharpen}}>
+            <SizeTypeContext.Provider value={{sizeType, setSizeType}}>
+            <ActiveDropdownContext.Provider value={{activeDropdown, setActiveDropdown}}>
             <EnableDragContext.Provider value={{enableDrag, setEnableDrag}}>
             <HideSortbarContext.Provider value={{hideSortbar, setHideSortbar}}>
             <HideNavbarContext.Provider value={{hideNavbar, setHideNavbar}}>
             <HideSidebarContext.Provider value={{hideSidebar, setHideSidebar}}>
             <ThemeContext.Provider value={{theme, setTheme}}>
-                <Switch>
-                    <Route exact path={["/", "/posts", "/home"]}><PostsPage/></Route>
-                    <Route exact path="/help"><HelpPage/></Route>
-                    <Route path="*"><$404Page/></Route>
-                </Switch>
+                <ScrollToTop>
+                    <Switch>
+                        <Route exact path={["/", "/posts", "/home"]}><PostsPage/></Route>
+                        <Route exact path="/help"><HelpPage/></Route>
+                        <Route exact path="/change-username"><ChangeUsernamePage/></Route>
+                        <Route exact path="/change-email"><ChangeEmailPage/></Route>
+                        <Route exact path="/reset-password"><ResetPasswordPage/></Route>
+                        <Route exact path="/change-password"><ChangePasswordPage/></Route>
+                        <Route exact path="/forgot-password"><ForgotPasswordPage/></Route>
+                        <Route exact path={["/signup", "/register"]}><SignUpPage/></Route>
+                        <Route exact path="/login"><LoginPage/></Route>
+                        <Route exact path="/2fa"><$2FAPage/></Route>
+                        <Route exact path="/contact"><ContactPage/></Route>
+                        <Route exact path={["/privacy", "/privacypolicy"]}><Redirect to="/terms#privacy"/></Route>
+                        <Route exact path={["/terms", "termsofservice"]}><TermsPage/></Route>
+                        <Route path="*"><$404Page/></Route>
+                    </Switch>
+                </ScrollToTop>
             </ThemeContext.Provider>
             </HideSidebarContext.Provider>
             </HideNavbarContext.Provider>
             </HideSortbarContext.Provider>
             </EnableDragContext.Provider>
+            </ActiveDropdownContext.Provider>
+            </SizeTypeContext.Provider>
+            </SharpenContext.Provider>
+            </BlurContext.Provider>
+            </LightnessContext.Provider>
+            </SaturationContext.Provider>
+            </HueContext.Provider>
+            </ContrastContext.Provider>
+            </BrightnessContext.Provider>
+            </FilterDropActiveContext.Provider>
+            </SquareContext.Provider>
+            </PixelateContext.Provider>
         </div>
     )
 }

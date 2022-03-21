@@ -1,134 +1,120 @@
-import React, {useContext} from "react"
-import {ThemeContext, EnableDragContext} from "../App"
+import React, {useContext, useEffect, useRef, useState} from "react"
+import {ThemeContext, SizeTypeContext} from "../App"
+import Image from "./Image"
 import img1 from "../assets/images/img1.png"
-import img2 from "../assets/images/img2.png"
+import img2 from "../assets/images/img2.jpg"
 import img3 from "../assets/images/img3.png"
-import img4 from "../assets/images/img4.png"
-import img5 from "../assets/images/img5.png"
-import img6 from "../assets/images/img6.png"
-import img7 from "../assets/images/img7.png"
-import img8 from "../assets/images/img8.png"
+import img4 from "../assets/images/img4.jpg"
+import img5 from "../assets/images/img5.jpg"
+import img6 from "../assets/images/img6.jpg"
+import img7 from "../assets/images/img7.jpg"
+import img8 from "../assets/images/img8.jpg"
+import img9 from "../assets/images/img9.png"
+import img10 from "../assets/images/img10.png"
+import img11 from "../assets/images/img11.png"
+import img12 from "../assets/images/img12.png"
+import img13 from "../assets/images/img13.png"
+import img14 from "../assets/images/img14.jpg"
+import functions from "../structures/Functions"
 import "../styles/imagegrid.less"
 
 const ImageGrid: React.FunctionComponent = (props) => {
     const {theme, setTheme} = useContext(ThemeContext)
-    const {enableDrag, setEnableDrag} = useContext(EnableDragContext)
+    const {sizeType, setSizeType} = useContext(SizeTypeContext)
+    const [images, setImages] = useState([]) as any
+    const [index, setIndex] = useState(0)
+    const [visibleImages, setVisibleImages] = useState([]) as any
+    const [delayLoad, setDelayLoad] = useState(false) as any
+
+    const getInitLoadAmount = () => {
+        if (sizeType === "tiny") return 45
+        if (sizeType === "small") return 28
+        if (sizeType === "medium") return 15
+        if (sizeType === "large") return 12
+        if (sizeType === "massive") return 6
+        return 45
+    }
+
+    const getLoadAmount = () => {
+        if (sizeType === "tiny") return 18
+        if (sizeType === "small") return 14
+        if (sizeType === "medium") return 10
+        if (sizeType === "large") return 7
+        if (sizeType === "massive") return 4
+        return 10
+    }
+
+    useEffect(() => {
+        const newImages = [img1, img2, img3, img4, img5, img6, img7, img8, img9, img10, img11, img12, img13, img14,
+            img1, img2, img3, img4, img5, img6, img7, img8, img9, img10, img11, img12, img13, img14,
+            img1, img2, img3, img4, img5, img6, img7, img8, img9, img10, img11, img12, img13, img14,
+            img1, img2, img3, img4, img5, img6, img7, img8, img9, img10, img11, img12, img13, img14,
+            img1, img2, img3, img4, img5, img6, img7, img8, img9, img10, img11, img12, img13, img14,
+            img1, img2, img3, img4, img5, img6, img7, img8, img9, img10, img11, img12, img13, img14]
+        setImages(newImages)
+    }, [])
+
+    useEffect(() => {
+        let currentIndex = index
+        const newVisibleImages = visibleImages as any
+        for (let i = 0; i < getInitLoadAmount(); i++) {
+            if (!images[currentIndex]) break
+            newVisibleImages.push(images[currentIndex])
+            currentIndex++
+        }
+        setIndex(currentIndex)
+        setVisibleImages(newVisibleImages)
+    }, [images])
+
+    useEffect(() => {
+        if (visibleImages.length < getInitLoadAmount()) {
+            let currentIndex = index
+            const newVisibleImages = visibleImages as any
+            const max = getInitLoadAmount() - visibleImages.length 
+            for (let i = 0; i < max; i++) {
+                if (!images[currentIndex]) break
+                newVisibleImages.push(images[currentIndex])
+                currentIndex++
+            }
+            setIndex(currentIndex)
+            setVisibleImages(newVisibleImages)
+        }
+    }, [sizeType])
+
+    useEffect(() => {
+        const scrollHandler = async () => {
+            if (functions.scrolledToBottom()) {
+                let currentIndex = index
+                if (!images[currentIndex]) return
+                const newImages = visibleImages as any
+                for (let i = 0; i < getLoadAmount(); i++) {
+                    if (!images[currentIndex]) break
+                    newImages.push(images[currentIndex])
+                    currentIndex++
+                }
+                setIndex(currentIndex)
+                setVisibleImages(newImages)
+            }
+        }
+        window.addEventListener("scroll", scrollHandler)
+        return () => {
+            window.removeEventListener("scroll", scrollHandler)
+        }
+    })
+
+
+    const generateImagesJSX = () => {
+        const jsx = [] as any
+        for (let i = 0; i < visibleImages.length; i++) {
+            jsx.push(<Image img={visibleImages[i]}/>)
+        }
+        return jsx
+    }
 
     return (
-        <div className="imagegrid dragscroll" onMouseEnter={() => setEnableDrag(true)} onMouseLeave={() => setEnableDrag(false)}>
-            <div className="image-container">
-                <img className="image" src={img1}/>
-                <img className="image" src={img2}/>
-                <img className="image" src={img3}/>
-                <img className="image" src={img4}/>
-                <img className="image" src={img5}/>
-                <img className="image" src={img6}/>
-                <img className="image" src={img7}/>
-                <img className="image" src={img8}/>
-                <img className="image" src={img1}/>
-                <img className="image" src={img2}/>
-                <img className="image" src={img3}/>
-                <img className="image" src={img4}/>
-                <img className="image" src={img5}/>
-                <img className="image" src={img6}/>
-                <img className="image" src={img7}/>
-                <img className="image" src={img8}/>
-                <img className="image" src={img1}/>
-                <img className="image" src={img2}/>
-                <img className="image" src={img3}/>
-                <img className="image" src={img4}/>
-                <img className="image" src={img5}/>
-                <img className="image" src={img6}/>
-                <img className="image" src={img7}/>
-                <img className="image" src={img8}/>
-                <img className="image" src={img1}/>
-                <img className="image" src={img2}/>
-                <img className="image" src={img3}/>
-                <img className="image" src={img4}/>
-                <img className="image" src={img5}/>
-                <img className="image" src={img6}/>
-                <img className="image" src={img7}/>
-                <img className="image" src={img8}/>
-                <img className="image" src={img1}/>
-                <img className="image" src={img2}/>
-                <img className="image" src={img3}/>
-                <img className="image" src={img4}/>
-                <img className="image" src={img5}/>
-                <img className="image" src={img6}/>
-                <img className="image" src={img7}/>
-                <img className="image" src={img8}/>
-                <img className="image" src={img1}/>
-                <img className="image" src={img2}/>
-                <img className="image" src={img3}/>
-                <img className="image" src={img4}/>
-                <img className="image" src={img5}/>
-                <img className="image" src={img6}/>
-                <img className="image" src={img7}/>
-                <img className="image" src={img8}/>
-                <img className="image" src={img1}/>
-                <img className="image" src={img2}/>
-                <img className="image" src={img3}/>
-                <img className="image" src={img4}/>
-                <img className="image" src={img5}/>
-                <img className="image" src={img6}/>
-                <img className="image" src={img7}/>
-                <img className="image" src={img8}/>
-                <img className="image" src={img1}/>
-                <img className="image" src={img2}/>
-                <img className="image" src={img3}/>
-                <img className="image" src={img4}/>
-                <img className="image" src={img5}/>
-                <img className="image" src={img6}/>
-                <img className="image" src={img7}/>
-                <img className="image" src={img8}/>
-                <img className="image" src={img1}/>
-                <img className="image" src={img2}/>
-                <img className="image" src={img3}/>
-                <img className="image" src={img4}/>
-                <img className="image" src={img5}/>
-                <img className="image" src={img6}/>
-                <img className="image" src={img7}/>
-                <img className="image" src={img8}/>
-                <img className="image" src={img1}/>
-                <img className="image" src={img2}/>
-                <img className="image" src={img3}/>
-                <img className="image" src={img4}/>
-                <img className="image" src={img5}/>
-                <img className="image" src={img6}/>
-                <img className="image" src={img7}/>
-                <img className="image" src={img8}/>
-                <img className="image" src={img1}/>
-                <img className="image" src={img2}/>
-                <img className="image" src={img3}/>
-                <img className="image" src={img4}/>
-                <img className="image" src={img5}/>
-                <img className="image" src={img6}/>
-                <img className="image" src={img7}/>
-                <img className="image" src={img8}/>
-                <img className="image" src={img1}/>
-                <img className="image" src={img2}/>
-                <img className="image" src={img3}/>
-                <img className="image" src={img4}/>
-                <img className="image" src={img5}/>
-                <img className="image" src={img6}/>
-                <img className="image" src={img7}/>
-                <img className="image" src={img8}/>
-                <img className="image" src={img1}/>
-                <img className="image" src={img2}/>
-                <img className="image" src={img3}/>
-                <img className="image" src={img4}/>
-                <img className="image" src={img5}/>
-                <img className="image" src={img6}/>
-                <img className="image" src={img7}/>
-                <img className="image" src={img8}/>
-                <img className="image" src={img1}/>
-                <img className="image" src={img2}/>
-                <img className="image" src={img3}/>
-                <img className="image" src={img4}/>
-                <img className="image" src={img5}/>
-                <img className="image" src={img6}/>
-                <img className="image" src={img7}/>
-                <img className="image" src={img8}/>
+        <div className="imagegrid">
+            <div className="image-container" style={{justifyContent: `${sizeType === "massive" || sizeType === "large" ? "space-around" : "space-between"}`}}>
+                {generateImagesJSX()}
             </div>
         </div>
     )
