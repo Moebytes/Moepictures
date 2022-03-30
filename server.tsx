@@ -30,8 +30,8 @@ routes.sessionRoutes(app)
 if (process.env.TESTING === "yes") {
   app.use(middleware(compiler, {
     index: false,
-    serverSideRender: true,
-    writeToDisk: true,
+    serverSideRender: false,
+    writeToDisk: false,
   }))
   app.use(hot(compiler))
 }
@@ -40,8 +40,10 @@ app.use(express.static(path.join(__dirname, "./public")))
 app.use(express.static(path.join(__dirname, "./dist"), {index: false}))
 app.use("/assets", express.static(path.join(__dirname, "./assets")))
 
-app.get("*", function(req, res) {
+app.get("/*", function(req, res) {
   res.setHeader("Content-Type", mime.getType(req.path) ?? "")
+  res.setHeader("Cross-Origin-Opener-Policy", "same-origin")
+  res.setHeader("Cross-Origin-Embedder-Policy", "require-corp")
   const document = fs.readFileSync(path.join(__dirname, "./dist/index.html"), {encoding: "utf-8"})
   const html = renderToString(<Router location={req.url}><App/></Router>)
   res.send(document.replace(`<div id="root"></div>`, `<div id="root">${html}</div>`))

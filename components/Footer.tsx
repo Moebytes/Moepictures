@@ -18,7 +18,7 @@ import backToTopMagenta from "../assets/magenta/backtotop.png"
 import backToTopPurpleLight from "../assets/purple-light/backtotop.png"
 import backToTopMagentaLight from "../assets/magenta-light/backtotop.png"
 import pack from "../package.json"
-import "../styles/footer.less"
+import "./styles/footer.less"
 
 const Footer: React.FunctionComponent = (props) => {
     const {theme, setTheme} = useContext(ThemeContext)

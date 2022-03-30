@@ -1,5 +1,5 @@
 import React, {useContext, useEffect, useState} from "react"
-import {ThemeContext, HideSidebarContext, HideNavbarContext, EnableDragContext} from "../App"
+import {ThemeContext, HideSidebarContext, HideNavbarContext, EnableDragContext, RelativeContext} from "../App"
 import {HashLink as Link} from "react-router-hash-link"
 import search from "../assets/purple/search.png"
 import searchImage from "../assets/purple/search-image.png"
@@ -25,11 +25,31 @@ import code from "../assets/purple/code.png"
 import codeMagenta from "../assets/magenta/code.png"
 import codePurpleLight from "../assets/purple-light/code.png"
 import codeMagentaLight from "../assets/magenta-light/code.png"
+import artistImg from "../assets/images/artist.png"
+import userImg from "../assets/images/user.png"
+import setAvatar from "../assets/purple/setavatar.png"
+import setAvatarMagenta from "../assets/magenta/setavatar.png"
+import addTranslation from "../assets/purple/addtranslation.png"
+import addTranslationMagenta from "../assets/magenta/addtranslation.png"
+import report from "../assets/purple/report.png"
+import reportMagenta from "../assets/magenta/report.png"
+import edit from "../assets/purple/edit.png"
+import editMagenta from "../assets/magenta/edit.png"
+import history from "../assets/purple/history.png"
+import historyMagenta from "../assets/magenta/history.png"
+import deleteIcon from "../assets/purple/delete.png"
+import deleteIconMagenta from "../assets/magenta/delete.png"
 import pack from "../package.json"
-import "../styles/sidebar.less"
+import "./styles/sidebar.less"
 
 interface Props {
     text?: string
+    artist?: any
+    characters?: any 
+    series?: any
+    tags?: any
+    details?: any
+    postID?: number
 }
 
 const SideBar: React.FunctionComponent<Props> = (props) => {
@@ -37,29 +57,34 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
     const {hideSidebar, setHideSidebar} = useContext(HideSidebarContext)
     const {hideNavbar, setHideNavbar} = useContext(HideNavbarContext)
     const {enableDrag, setEnableDrag} = useContext(EnableDragContext)
+    const {relative, setRelative} = useContext(RelativeContext)
     const [tags, setTags] = useState([]) as any
     const [maxTags, setMaxTags] = useState(26)
 
     useEffect(() => {
         setTags(["loli", "azur lane", "animated", "with audio", "kancolle", "leggings", "stockings",
-    "gabriel dropout", "kiniro mosaic", "himouto! umaru-chan", "sword art online", "is the order a rabbit?", "sexual intercourse", 
-    "saliva", "cum",
+    "gabriel dropout", "kiniro mosaic", "himouto! umaru-chan", "sword art online", "is the order a rabbit?",
     "loli", "copulation", "animated", "with audio", "kancolle", "leggings", "stockings",
-    "gabriel dropout", "kiniro mosaic", "himouto! umaru-chan", "sword art online", "is the order a rabbit?", "sexual intercourse", 
-    "saliva", "cum"])
+    "gabriel dropout", "kiniro mosaic", "himouto! umaru-chan", "sword art online", "is the order a rabbit?", 
+    "loli", "copulation", "animated", "with audio", "kancolle", "leggings", "stockings"])
     }, [])
 
     useEffect(() => {
         const scrollHandler = () => {
             const sidebar = document.querySelector(".sidebar") as HTMLElement
-            if (hideNavbar) {
-                if (window.scrollY === 0) {
+            if (!relative) {
+                if (!hideNavbar) {
                     sidebar.style.height = "calc(100vh - 35px - 77px)"
                     if (maxTags !== 26) setMaxTags(26)
                 } else {
-                    sidebar.style.height = "calc(100vh - 35px)"
-                    if (maxTags !== 30) setMaxTags(30)
+                    if (window.scrollY !== 0) {
+                        sidebar.style.height = "calc(100vh - 35px)"
+                        if (maxTags !== 30) setMaxTags(30)
+                    }
                 }
+            } else {
+                sidebar.style.height = "auto"
+                if (maxTags !== 30) setMaxTags(30)
             }
         }
         window.addEventListener("scroll", scrollHandler)
@@ -72,14 +97,19 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
 
     useEffect(() => {
         const sidebar = document.querySelector(".sidebar") as HTMLElement
-        if (!hideNavbar) {
-            sidebar.style.height = "calc(100vh - 35px - 77px)"
-            if (maxTags !== 26) setMaxTags(26)
-        } else {
-            if (window.scrollY !== 0) {
-                sidebar.style.height = "calc(100vh - 35px)"
-                if (maxTags !== 30) setMaxTags(30)
+        if (!relative) {
+            if (!hideNavbar) {
+                sidebar.style.height = "calc(100vh - 35px - 77px)"
+                if (maxTags !== 26) setMaxTags(26)
+            } else {
+                if (window.scrollY !== 0) {
+                    sidebar.style.height = "calc(100vh - 35px)"
+                    if (maxTags !== 30) setMaxTags(30)
+                }
             }
+        } else {
+            sidebar.style.height = "auto"
+            if (maxTags !== 30) setMaxTags(30)
         }
     }, [hideNavbar])
 
@@ -131,12 +161,42 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
         return code
     }
 
+    const getSetAvatar = () => {
+        if (theme.includes("magenta")) return setAvatarMagenta
+        return setAvatar
+    }
+
+    const getAddTranslation = () => {
+        if (theme.includes("magenta")) return addTranslationMagenta
+        return addTranslation
+    }
+
+    const getReport = () => {
+        if (theme.includes("magenta")) return reportMagenta
+        return report
+    }
+
+    const getEdit = () => {
+        if (theme.includes("magenta")) return editMagenta
+        return edit
+    }
+
+    const getHistory = () => {
+        if (theme.includes("magenta")) return historyMagenta
+        return history
+    }
+
+    const getDeleteIcon = () => {
+        if (theme.includes("magenta")) return deleteIconMagenta
+        return deleteIcon
+    }
+
     const generateTagJSX = () => {
         let jsx = [] as any
         let max = tags.length > maxTags ? maxTags : tags.length
         for (let i = 0; i < max; i++) {
             jsx.push(
-                <div className="tag-row">
+                <div className="sidebar-row">
                     <span className="tag-hover">
                         <span className="tag">{tags[i]}</span>
                         <span className="tag-count">{Math.floor(Math.random() * 1000)}</span>
@@ -148,8 +208,10 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
     }
 
     return (
-        <div className={`sidebar ${hideSidebar ? "hide-sidebar" : ""} ${hideNavbar ? "sidebar-top" : ""}`} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
+        <div className={`sidebar ${hideSidebar ? "hide-sidebar" : ""} ${hideNavbar ? "sidebar-top" : ""}
+        ${relative ? "sidebar-relative" : ""}`} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
             <div className="sidebar-container">
+            <div className="sidebar-content">
                 <div className="sidebar-text-container">
                     <span className="sidebar-text">{props.text}</span>
                 </div>
@@ -161,10 +223,147 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
                 <div className="random-container">
                     <img className={!theme || theme === "purple" ? "random" : `random-${theme}`} src={getRandomIcon()}/>
                 </div>
-                <div className="tag-container">
+
+                {props.artist ? 
+                    <div className="sidebar-subcontainer">
+                        <div className="sidebar-row">
+                            <span className="sidebar-title">Artist</span>
+                        </div>
+                        <div className="sidebar-row">
+                            <img className="sidebar-img" src={artistImg}/>
+                        </div>
+                        <div className="sidebar-row">
+                            <span className="tag-hover">
+                                <span className="tag">Liely</span>
+                                <span className="tag-count">{Math.floor(Math.random() * 1000)}</span>
+                            </span>
+                        </div>
+                        <div className="sidebar-row">
+                            <span className="tag">Title:</span>
+                            <span className="tag-alt">None</span>
+                        </div>
+                        <div className="sidebar-row">
+                            <span className="tag">Drawn:</span>
+                            <span className="tag-alt">3-7-2018</span>
+                        </div>
+                        <div className="sidebar-row">
+                            <span className="tag">Source:</span>
+                            <span className="tag-alt">Pixiv</span>
+                        </div>
+                    </div>
+                : null}
+
+                {props.characters ? 
+                    <div className="sidebar-subcontainer">
+                        <div className="sidebar-row">
+                            <span className="sidebar-title">Characters</span>
+                        </div>
+                        <div className="sidebar-row">
+                            <span className="tag-hover">
+                                <span className="tag">klee</span>
+                                <span className="tag-count">{Math.floor(Math.random() * 1000)}</span>
+                            </span>
+                        </div>
+                    </div>
+                : null}
+
+                {props.series ? 
+                    <div className="sidebar-subcontainer">
+                        <div className="sidebar-row">
+                            <span className="sidebar-title">Series</span>
+                        </div>
+                        <div className="sidebar-row">
+                            <span className="tag-hover">
+                                <span className="tag">genshin impact</span>
+                                <span className="tag-count">{Math.floor(Math.random() * 1000)}</span>
+                            </span>
+                        </div>
+                    </div>
+                : null}
+
+                <div className="sidebar-subcontainer">
+                    {props.tags ? 
+                        <div className="sidebar-row">
+                            <span className="sidebar-title">Tags</span>
+                        </div>
+                    : null}
                     {generateTagJSX()}
                 </div>
-                <div className="sidebar-footer">
+
+                {props.details ? 
+                    <div className="sidebar-subcontainer">
+                        <div className="sidebar-row">
+                            <span className="sidebar-title">Details</span>
+                        </div>
+                        <div className="sidebar-row">
+                            <img className="sidebar-img" src={userImg}/>
+                        </div>
+                        <div className="sidebar-row">
+                            <span className="tag">Uploader:</span>
+                            <span className="tag-alt">Tenpi</span>
+                        </div>
+                        <div className="sidebar-row">
+                            <span className="tag">Date:</span>
+                            <span className="tag-alt">3-11-2022</span>
+                        </div>
+                        <div className="sidebar-row">
+                            <span className="tag">Rating:</span>
+                            <span className="tag-alt">Safe</span>
+                        </div>
+                        <div className="sidebar-row">
+                            <span className="tag">Favorites:</span>
+                            <span className="tag-alt">300</span>
+                        </div>
+                        <div className="sidebar-row">
+                            <span className="tag">Cuteness:</span>
+                            <span className="tag-alt">700</span>
+                        </div>
+                    </div>
+                : null}  
+
+                {props.postID ? 
+                    <div className="sidebar-subcontainer">
+                        <div className="sidebar-row">
+                            <span className="tag-hover">
+                                <img className="sidebar-icon" src={getSetAvatar()}/>
+                                <span className="tag">Set Avatar</span>
+                            </span>
+                        </div>
+                        <div className="sidebar-row">
+                            <span className="tag-hover">
+                                <img className="sidebar-icon" src={getAddTranslation()}/>
+                                <span className="tag">Add Translation</span>
+                            </span>
+                        </div>
+                        <div className="sidebar-row">
+                            <span className="tag-hover">
+                                <img className="sidebar-icon" src={getReport()}/>
+                                <span className="tag">Report</span>
+                            </span>
+                        </div>
+                        <div className="sidebar-row">
+                            <span className="tag-hover">
+                                <img className="sidebar-icon" src={getEdit()}/>
+                                <span className="tag-red">Edit</span>
+                            </span>
+                        </div>
+                        <div className="sidebar-row">
+                            <span className="tag-hover">
+                                <img className="sidebar-icon" src={getHistory()}/>
+                                <span className="tag-red">History</span>
+                            </span>
+                        </div>
+                        <div className="sidebar-row">
+                            <span className="tag-hover">
+                                <img className="sidebar-icon" src={getDeleteIcon()}/>
+                                <span className="tag-red">Delete</span>
+                            </span>
+                        </div>
+                    </div>
+                : null}
+            </div>
+
+            <div className="sidebar-footer">
                     <span className="sidebar-footer-text">©{new Date().getFullYear()} Tenpi</span>
                     <Link to="/terms">
                         <img className="sidebar-footer-icon" src={getTermsIcon()}/>

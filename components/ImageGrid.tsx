@@ -1,6 +1,6 @@
 import React, {useContext, useEffect, useRef, useState} from "react"
-import {ThemeContext, SizeTypeContext} from "../App"
-import Image from "./Image"
+import {ThemeContext, SizeTypeContext, ImageAmountContext, ImagesContext} from "../App"
+import GridImage from "./GridImage"
 import img1 from "../assets/images/img1.png"
 import img2 from "../assets/images/img2.jpg"
 import img3 from "../assets/images/img3.png"
@@ -16,12 +16,14 @@ import img12 from "../assets/images/img12.png"
 import img13 from "../assets/images/img13.png"
 import img14 from "../assets/images/img14.jpg"
 import functions from "../structures/Functions"
-import "../styles/imagegrid.less"
+import path from "path"
+import "./styles/imagegrid.less"
 
 const ImageGrid: React.FunctionComponent = (props) => {
     const {theme, setTheme} = useContext(ThemeContext)
     const {sizeType, setSizeType} = useContext(SizeTypeContext)
-    const [images, setImages] = useState([]) as any
+    const {imageAmount, setImageAmount} = useContext(ImageAmountContext)
+    const {images, setImages} = useContext(ImagesContext) as any
     const [index, setIndex] = useState(0)
     const [visibleImages, setVisibleImages] = useState([]) as any
     const [delayLoad, setDelayLoad] = useState(false) as any
@@ -36,12 +38,7 @@ const ImageGrid: React.FunctionComponent = (props) => {
     }
 
     const getLoadAmount = () => {
-        if (sizeType === "tiny") return 18
-        if (sizeType === "small") return 14
-        if (sizeType === "medium") return 10
-        if (sizeType === "large") return 7
-        if (sizeType === "massive") return 4
-        return 10
+        return functions.getImagesPerRow(sizeType) * 2
     }
 
     useEffect(() => {
@@ -53,6 +50,10 @@ const ImageGrid: React.FunctionComponent = (props) => {
             img1, img2, img3, img4, img5, img6, img7, img8, img9, img10, img11, img12, img13, img14]
         setImages(newImages)
     }, [])
+
+    useEffect(() => {
+        setImageAmount(index)
+    }, [index])
 
     useEffect(() => {
         let currentIndex = index
@@ -106,7 +107,8 @@ const ImageGrid: React.FunctionComponent = (props) => {
     const generateImagesJSX = () => {
         const jsx = [] as any
         for (let i = 0; i < visibleImages.length; i++) {
-            jsx.push(<Image img={visibleImages[i]}/>)
+            const base = path.basename(visibleImages[i], path.extname(visibleImages[i])).replace("img", "")
+            jsx.push(<GridImage key={i + 1} id={parseInt(base)} img={visibleImages[i]}/>)
         }
         return jsx
     }

@@ -15,8 +15,8 @@ import eyedropperMagentaLight from "../assets/magenta-light/eyedropper.png"
 import lightMagentaLight from "../assets/magenta-light/light.png"
 import darkMagentaLight from "../assets/magenta-light/dark.png"
 import search2 from "../assets/purple/search2.png"
-import {ThemeContext, HideNavbarContext, HideSortbarContext, HideSidebarContext, EnableDragContext} from "../App"
-import "../styles/navbar.less"
+import {ThemeContext, HideNavbarContext, HideSortbarContext, HideSidebarContext, EnableDragContext, RelativeContext} from "../App"
+import "./styles/navbar.less"
 
 const NavBar: React.FunctionComponent = (props) => {
     const {theme, setTheme} = useContext(ThemeContext)
@@ -24,6 +24,7 @@ const NavBar: React.FunctionComponent = (props) => {
     const {hideSidebar, setHideSidebar} = useContext(HideSidebarContext)
     const {hideSortbar, setHideSortbar} = useContext(HideSortbarContext)
     const {enableDrag, setEnableDrag} = useContext(EnableDragContext)
+    const {relative, setRelative} = useContext(RelativeContext)
     const [showMiniTitle, setShowMiniTitle] = useState(false)
 
     useEffect(() => {
@@ -113,7 +114,8 @@ const NavBar: React.FunctionComponent = (props) => {
     }
 
     return (
-        <div className={`navbar ${hideNavbar ? "hide-navbar" : ""} ${hideSortbar && hideNavbar && hideSidebar ? "translate-navbar" : ""}`} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
+        <div className={`navbar ${hideNavbar ? "hide-navbar" : ""} ${hideSortbar && hideNavbar && hideSidebar ? "translate-navbar" : ""}
+        ${relative ? "navbar-relative" : ""}`} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
             {showMiniTitle ? 
                 <Link to="/" className="nav-mini-title-container">
                     <span className="nav-mini-title-a">M</span>

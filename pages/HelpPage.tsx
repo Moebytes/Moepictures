@@ -1,18 +1,20 @@
 import React, {useContext, useEffect} from "react"
-import TitleBar from "./TitleBar"
-import NavBar from "./NavBar"
-import SideBar from "./SideBar"
-import Footer from "./Footer"
-import {HideNavbarContext, HideSidebarContext} from "../App"
-import "../styles/helppage.less"
+import TitleBar from "../components/TitleBar"
+import NavBar from "../components/NavBar"
+import SideBar from "../components/SideBar"
+import Footer from "../components/Footer"
+import {HideNavbarContext, HideSidebarContext, RelativeContext} from "../App"
+import "./styles/helppage.less"
 
 const HelpPage: React.FunctionComponent = (props) => {
     const {hideNavbar, setHideNavbar} = useContext(HideNavbarContext)
     const {hideSidebar, setHideSidebar} = useContext(HideSidebarContext)
+    const {relative, setRelative} = useContext(RelativeContext)
 
     useEffect(() => {
-        setHideNavbar(false)
+        setHideNavbar(true)
         setHideSidebar(false)
+        setRelative(false)
         document.title = "Moebooru: Help"
     }, [])
     
@@ -92,9 +94,10 @@ const HelpPage: React.FunctionComponent = (props) => {
                     <span className="help-heading">Cuteness</span>
                     <span className="help-text">
                         The rating system on Moebooru is called the cuteness meter. When you rate an
-                        image you are not necessarily rating the quality, instead you are rating the amount
+                        image you are not rating the quality, instead you are rating the amount
                         of cuteness that the image evokes. The scale is from 0 (Not cute) to 500 (Pretty
-                        cute) to 1000 (Diabetes).
+                        cute) to 1000 (Insanely cute). Note that the exact value of cuteness is not publicly visible,
+                        you will only see the icon.
                     </span>
                     <span className="help-heading">Favorites</span>
                     <span className="help-text">

@@ -1,0 +1,20 @@
+@import "../../index.less";
+
+.artists {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    height: max-content; // calc(100vh - 35px - 77px);
+    padding: 10px 30px;
+}
+
+.artists-heading {
+    font-family: Tahoma, sans-serif;
+    font-weight: bold;
+    font-size: 35px;
+    color: var(--text);
+    margin-bottom: 10px;
+    &:hover {
+        filter: brightness(130%);
+    }
+}

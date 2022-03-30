@@ -1,19 +1,22 @@
 import React, {useEffect, useContext} from "react"
-import TitleBar from "./TitleBar"
-import NavBar from "./NavBar"
-import SideBar from "./SideBar"
-import SortBar from "./SortBar"
-import ImageGrid from "./ImageGrid"
-import Footer from "./Footer"
-import {HideNavbarContext, HideSidebarContext, SquareContext} from "../App"
+import TitleBar from "../components/TitleBar"
+import NavBar from "../components/NavBar"
+import SideBar from "../components/SideBar"
+import SortBar from "../components/SortBar"
+import ImageGrid from "../components/ImageGrid"
+import Footer from "../components/Footer"
+import DownloadDialog from "../dialogs/DownloadDialog"
+import {HideNavbarContext, HideSidebarContext, SquareContext, RelativeContext} from "../App"
 
 const PostsPage: React.FunctionComponent = (props) => {
     const {hideNavbar, setHideNavbar} = useContext(HideNavbarContext)
     const {hideSidebar, setHideSidebar} = useContext(HideSidebarContext)
     const {square, setSquare} = useContext(SquareContext)
+    const {relative, setRelative} = useContext(RelativeContext)
 
     useEffect(() => {
-        document.title = "Moebooru: Cutest Anime Art on the Internet ♡"
+        setRelative(false)
+        document.title = "Moebooru: Cutest Anime Art ♡"
         const savedNavbar = localStorage.getItem("navbar")
         if (savedNavbar === "false") setHideNavbar(true)
         const savedSidebar = localStorage.getItem("sidebar")
@@ -24,6 +27,7 @@ const PostsPage: React.FunctionComponent = (props) => {
 
     return (
         <>
+        <DownloadDialog/>
         <TitleBar text="Animated, With Audio, Loli"/>
         <NavBar/>
         <div className="body">

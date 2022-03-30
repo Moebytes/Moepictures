@@ -1,5 +1,8 @@
 import e from "express"
+import { read } from "fs"
+import path from "path"
 import commonPasswords from "../json/common-passwords.json"
+import MP4Demuxer from "./MP4Demuxer"
 
 let newScrollY = 0
 let lastScrollTop = 0
@@ -7,7 +10,63 @@ let element = null as any
 let inertia = false
 let mouseDown = false
 
+const imageExtensions = [".jpg", ".jpeg", ".png", ".webp"]
+const videoExtensions = [".mp4", ".mov", ".avi", ".mkv", ".webm"]
+
 export default class Functions {
+    public static formatSeconds = (duration: number) => {
+        let seconds = Math.floor(duration % 60) as any
+        let minutes = Math.floor((duration / 60) % 60) as any
+        let hours = Math.floor((duration / (60 * 60)) % 24) as any
+        if (Number.isNaN(seconds) || seconds < 0) seconds = 0
+        if (Number.isNaN(minutes) || minutes < 0) minutes = 0
+        if (Number.isNaN(hours) || hours < 0) hours = 0
+
+        hours = (hours === 0) ? "" : ((hours < 10) ? "0" + hours + ":" : hours + ":")
+        minutes = hours && (minutes < 10) ? "0" + minutes : minutes
+        seconds = (seconds < 10) ? "0" + seconds : seconds
+        return `${hours}${minutes}:${seconds}`
+    }
+    
+    public static arrayIncludes = (str: string, arr: string[]) => {
+        for (let i = 0; i < arr.length; i++) {
+            if (str.includes(arr[i])) return true
+        }
+        return false
+    }
+
+    public static isImage = (file: string) => {
+        if (file.startsWith("blob:")) {
+            const ext = file.split("#")?.[1] || ""
+            return Functions.arrayIncludes(ext, imageExtensions)
+        }
+        return Functions.arrayIncludes(path.extname(file), imageExtensions)
+    }
+
+    public static isGIF = (file: string) => {
+        if (file.startsWith("blob:")) {
+            const ext = file.split("#")?.[1] || ""
+            return ext === ".gif"
+        }
+        return path.extname(file) === ".gif"
+    }
+
+    public static isVideo = (file: string) => {
+        if (file.startsWith("blob:")) {
+            const ext = file.split("#")?.[1] || ""
+            return Functions.arrayIncludes(ext, videoExtensions)
+        }
+        return Functions.arrayIncludes(path.extname(file), videoExtensions)
+    }
+
+    public static isMP4 = (file: string) => {
+        if (file.startsWith("blob:")) {
+            const ext = file.split("#")?.[1] || ""
+            return ext === ".mp4"
+        }
+        return path.extname(file) === ".mp4"
+    }
+
     public static timeout = (ms: number) => {
         return new Promise((resolve) => setTimeout(resolve, ms))
     }
@@ -82,6 +141,7 @@ export default class Functions {
         element?.removeEventListener("mousedown", element?.mouseDownFunc, false)
         window.removeEventListener("mouseup", element?.mouseUpFunc, false)
         window.removeEventListener("mousemove", element?.mouseMoveFunc, false)
+        window.removeEventListener("scroll", element?.scrollFunc, false)
 
         element = document.querySelector(".drag") as HTMLElement
         if (!element || !enabled) return
@@ -90,8 +150,10 @@ export default class Functions {
         let time = null as any
         let id = 0
 
-        element.addEventListener("mousedown", element.mouseDownFunc = (event) => {
+        element.addEventListener("mousedown", element.mouseDownFunc = (event: MouseEvent) => {
+                if (event.button === 2) return
                 event.preventDefault()
+                Functions.clearSelection()
                 mouseDown = true
                 inertia = false
                 time = new Date()
@@ -100,6 +162,10 @@ export default class Functions {
                 if (element == document.body) scrollElement = document.documentElement
                 lastScrollTop = scrollElement.scrollTop
                 cancelAnimationFrame(id)
+        }, false)
+
+        window.addEventListener("scroll", element.scrollFunc = () => {
+            cancelAnimationFrame(id)
         }, false)
 
         window.addEventListener("mouseup", element.mouseUpFunc = (event) => {
@@ -193,4 +259,207 @@ export default class Functions {
 
         return canvas;
     }
+
+    public static download = (filename: string, url: string) => {
+            const a = document.createElement("a")
+            a.setAttribute("href", url)
+            a.setAttribute("download", filename)
+            a.style.display = "none"
+            document.body.appendChild(a)
+            a.click()
+            document.body.removeChild(a)
+    }
+
+    public static getImagesPerRow = (sizeType: string) => {
+        if (sizeType === "tiny") return 9
+        if (sizeType === "small") return 7
+        if (sizeType === "medium") return 5
+        if (sizeType === "large") return 4
+        if (sizeType === "massive") return 3
+        return 9
+    }
+
+    public static round = (value: number, step?: number) => {
+        if (!step) step = 1.0
+        const inverse = 1.0 / step
+        return Math.round(value * inverse) / inverse
+    }
+
+    public static getScrollPercent = () => {
+            return (document.documentElement.scrollTop) / 
+            (document.documentElement.scrollHeight - document.documentElement.clientHeight)
+    }
+
+    public static getScrollPercentAdjusted = (sizeType: string) => {
+        if (sizeType === "tiny") return Functions.getScrollPercent() - 0.55
+        if (sizeType === "small") return Functions.getScrollPercent() - 0.4
+        if (sizeType === "medium") return Functions.getScrollPercent() - 0.2
+        if (sizeType === "large") return Functions.getScrollPercent() - 0.15
+        if (sizeType === "massive") return Functions.getScrollPercent() - 0.07
+        return Functions.getScrollPercent()
+    }
+
+    public static preventDragging = () => {
+        document.querySelectorAll("img").forEach((img) => {
+          img.draggable = false
+        })
+    }
+
+    public static clearSelection() {
+        window.getSelection()?.removeAllRanges()
+    }
+
+    public static getImageOrFallback = async (path: string, fallback: string) => {
+        return new Promise<string>(resolve => {
+          const img = new Image()
+          img.src = path
+          img.onload = () => resolve(path)
+          img.onerror = () => resolve(fallback)
+        })
+    }
+
+    public static calcDistance(elementOne: any, elementTwo: any) {
+        let distance = 0
+        
+        const x1 = elementOne.offsetTop
+        const y1 = elementOne.offsetLeft
+        const x2 = elementTwo.offsetTop
+        const y2 = elementTwo.offsetLeft
+        const xDistance = x1 - x2
+        const yDistance = y1 - y2
+        
+        distance = Math.sqrt(
+            (xDistance * xDistance) + (yDistance * yDistance)
+        )
+        return distance
+    }
+
+    public static extractVideoFrames = async (video: HTMLVideoElement) => {
+        // @ts-ignore
+        const [track] = video.captureStream().getVideoTracks()
+        // @ts-ignore
+        const processor = new MediaStreamTrackProcessor({track})
+        const reader = processor.readable.getReader()
+        
+        let frames = [] as any
+        async function read() {
+            const {value, done} = await reader.read()
+            console.log(frames.length)
+            if (done || !value) return
+            const bitmap = await createImageBitmap(value)
+            frames.push(bitmap)
+            value.close()
+            await read()
+         }
+        await read()
+        return frames
+    }
+
+    public static extractMP4Frames = async (videoFile: string, duration: number) => {
+        let minFrames = duration * 12
+        let frames = [] as any
+        await new Promise<void>(async (resolve) => {
+            let demuxer = new MP4Demuxer(videoFile)
+            let timeout: any 
+            // @ts-ignore
+            let decoder = new VideoDecoder({
+                output : (frame: any) => {
+                    clearTimeout(timeout)
+                    const bitmap = createImageBitmap(frame)
+                    frames.push(bitmap)
+                    frame.close()
+                    timeout = setTimeout(() => {
+                        if (frames.length < minFrames) return 
+                        resolve()
+                    }, 500)
+                },
+                error : (e: any) => console.error(e)
+            })
+            const config = await demuxer.getConfig()
+            decoder.configure(config)
+            demuxer.start((chunk: any) => decoder.decode(chunk))
+        })
+        return Promise.all(frames)
+    }
+
+    public static gifSpeed = (data: any[], speed: number) => {
+        if (speed === 1) return data 
+        const constraint = speed > 1 ? data.length / speed : data.length
+        let step = Math.ceil(data.length / constraint)
+        let newData = [] as any 
+        for (let i = 0; i < data.length; i += step) {
+            const frame = data[i].frame 
+            let delay = data[i].delay 
+            if (speed < 1) delay = delay / speed 
+            newData.push({frame, delay})
+        }
+        return newData
+    }
+
+    public static videoSpeed = (data: any[], speed: number) => {
+        if (speed === 1) return data 
+        const constraint = speed > 1 ? data.length / speed : data.length
+        let step = Math.ceil(data.length / constraint)
+        let newData = [] as any 
+        for (let i = 0; i < data.length; i += step) {
+            const frame = data[i]
+            newData.push(frame)
+            if (speed < 1) {
+                const amount = (1 / speed) - 1 
+                for (let i = 0; i < amount; i++) {
+                    newData.push(frame)
+                }
+            }
+        }
+        return newData
+    }
+
+    public static logSlider = (position: number) => {
+        const minPos = 0
+        const maxPos = 1
+        const minValue = Math.log(0.01)
+        const maxValue = Math.log(1)
+        const scale = (maxValue - minValue) / (maxPos - minPos)
+        const value = Math.exp(minValue + scale * (position - minPos))
+        return value
+      }
+
+      public static renderCumulativeFrames = (frameData: any) => {
+        if (frameData.length === 0) {
+          return frameData
+        }
+        const previous = document.createElement("canvas") as any
+        const previousContext = previous.getContext("2d") as any
+        const current = document.createElement("canvas") as any
+        const currentContext = current.getContext("2d") as any
+      
+        const firstFrameCanvas = frameData[0].getImage()
+      
+        previous.width = firstFrameCanvas.width
+        previous.height = firstFrameCanvas.height
+        current.width = firstFrameCanvas.width
+        current.height = firstFrameCanvas.height
+      
+        for (const frame of frameData) {
+          previousContext.clearRect(0, 0, previous.width, previous.height)
+          previousContext.drawImage(current, 0, 0)
+      
+          const canvas = frame.getImage()
+          const context = canvas.getContext("2d")
+          currentContext.drawImage(canvas, 0, 0)
+          context.clearRect(0, 0, canvas.width, canvas.height)
+          context.drawImage(current, 0, 0)
+      
+          const {frameInfo} = frame
+          const {disposal} = frameInfo
+          if (disposal === 2) {
+            currentContext.clearRect(frameInfo.x, frameInfo.y, frameInfo.width, frameInfo.height)
+          } else if (disposal === 3) {
+            currentContext.clearRect(0, 0, current.width, current.height)
+            currentContext.drawImage(previous, 0, 0)
+          }
+          frame.getImage = () => canvas
+        }
+        return frameData
+      }
 }

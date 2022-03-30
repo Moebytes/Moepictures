@@ -1,6 +1,16 @@
 import React, {useEffect, useState} from "react"
-import {Switch, Route, Redirect} from "react-router-dom"
+import {Switch, Route, Redirect, useHistory} from "react-router-dom"
 import PostsPage from "./pages/PostsPage"
+import CommentsPage from "./pages/CommentsPage"
+import ArtistsPage from "./pages/ArtistsPage"
+import CharactersPage from "./pages/CharactersPage"
+import SeriesPage from "./pages/SeriesPage"
+import TagsPage from "./pages/TagsPage"
+import PostPage from "./pages/PostPage"
+import ComicPage from "./pages/ComicPage"
+import GIFPage from "./pages/GIFPage"
+import VideoPage from "./pages/VideoPage"
+import UploadPage from "./pages/UploadPage"
 import $404Page from "./pages/404Page"
 import HelpPage from "./pages/HelpPage"
 import TermsPage from "./pages/TermsPage"
@@ -16,6 +26,12 @@ import ForgotPasswordPage from "./pages/ForgotPasswordPage"
 import functions from "./structures/Functions"
 import ScrollToTop from "./components/ScrollToTop"
 import "./index.less"
+
+require.context("./assets/images", true)
+require.context("./assets/purple", true)
+require.context("./assets/purple-light", true)
+require.context("./assets/magenta", true)
+require.context("./assets/magenta-light", true)
 
 export const ThemeContext = React.createContext<any>(null)
 export const HideSortbarContext = React.createContext<any>(null)
@@ -35,6 +51,14 @@ export const LightnessContext = React.createContext<any>(null)
 export const BlurContext = React.createContext<any>(null)
 export const SharpenContext = React.createContext<any>(null)
 export const PixelateContext = React.createContext<any>(null)
+export const ImageAmountContext = React.createContext<any>(null)
+export const ImagesContext = React.createContext<any>(null)
+export const DownloadURLsContext = React.createContext<any>(null)
+export const DownloadFlagContext = React.createContext<any>(null)
+export const RelativeContext = React.createContext<any>(null)
+
+export const ShowDownloadDialogContext = React.createContext<any>(null)
+export const DisableZoomContext = React.createContext<any>(null)
 
 const App: React.FunctionComponent = (props) => {
     const [theme, setTheme] = useState("purple")
@@ -55,8 +79,17 @@ const App: React.FunctionComponent = (props) => {
     const [sharpen, setSharpen] = useState(0)
     const [pixelate, setPixelate] = useState(1)
     const [square, setSquare] = useState(false)
+    const [showDownloadDialog, setShowDownloadDialog] = useState(false)
+    const [imageAmount, setImageAmount] = useState(0)
+    const [downloadURLs, setDownloadURLs] = useState([])
+    const [downloadFlag, setDownloadFlag] = useState(false)
+    const [relative, setRelative] = useState(false)
+    const [images, setImages] = useState([]) as any
+    const [disableZoom, setDisableZoom] = useState(true)
+    const history = useHistory()
 
     useEffect(() => {
+        functions.preventDragging()
         setTimeout(() => {
             setLoaded(true)
         }, 100)
@@ -85,10 +118,9 @@ const App: React.FunctionComponent = (props) => {
         }
     }, [hideNavbar, activeDropdown])
 
-    
     useEffect(() => {
         functions.dragScroll(enableDrag)
-    }, [enableDrag])
+    }, [enableDrag, history])
 
     useEffect(() => {
         if (!theme || theme === "purple") {
@@ -113,6 +145,13 @@ const App: React.FunctionComponent = (props) => {
 
     return (
         <div className={`app ${theme} ${!loaded ? "stop-transitions" : ""}`}>
+            <DisableZoomContext.Provider value={{disableZoom, setDisableZoom}}>
+            <RelativeContext.Provider value={{relative, setRelative}}>
+            <DownloadURLsContext.Provider value={{downloadURLs, setDownloadURLs}}>
+            <DownloadFlagContext.Provider value={{downloadFlag, setDownloadFlag}}>
+            <ImagesContext.Provider value={{images, setImages}}>
+            <ImageAmountContext.Provider value={{imageAmount, setImageAmount}}>
+            <ShowDownloadDialogContext.Provider value={{showDownloadDialog, setShowDownloadDialog}}>
             <PixelateContext.Provider value={{pixelate, setPixelate}}>
             <SquareContext.Provider value={{square, setSquare}}>
             <FilterDropActiveContext.Provider value={{filterDropActive, setFilterDropActive}}>
@@ -132,7 +171,17 @@ const App: React.FunctionComponent = (props) => {
             <ThemeContext.Provider value={{theme, setTheme}}>
                 <ScrollToTop>
                     <Switch>
+                        <Route exact path="/upload"><UploadPage/></Route>
+                        <Route exact path="/comic"><ComicPage/></Route>
+                        <Route exact path="/video"><VideoPage/></Route>
+                        <Route exact path="/gif"><GIFPage/></Route>
+                        <Route exact path="/tags"><TagsPage/></Route>
+                        <Route exact path="/series"><SeriesPage/></Route>
+                        <Route exact path="/characters"><CharactersPage/></Route>
+                        <Route exact path="/artists"><ArtistsPage/></Route>
+                        <Route exact path="/comments"><CommentsPage/></Route>
                         <Route exact path={["/", "/posts", "/home"]}><PostsPage/></Route>
+                        <Route exact path="/post/:id" render={(props) => <PostPage {...props}/>}></Route>
                         <Route exact path="/help"><HelpPage/></Route>
                         <Route exact path="/change-username"><ChangeUsernamePage/></Route>
                         <Route exact path="/change-email"><ChangeEmailPage/></Route>
@@ -165,6 +214,13 @@ const App: React.FunctionComponent = (props) => {
             </FilterDropActiveContext.Provider>
             </SquareContext.Provider>
             </PixelateContext.Provider>
+            </ShowDownloadDialogContext.Provider>
+            </ImageAmountContext.Provider>
+            </ImagesContext.Provider>
+            </DownloadFlagContext.Provider>
+            </DownloadURLsContext.Provider>
+            </RelativeContext.Provider>
+            </DisableZoomContext.Provider>
         </div>
     )
 }

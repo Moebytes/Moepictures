@@ -1,0 +1,35 @@
+@import "../../index.less";
+
+.help {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    height: max-content; // calc(100vh - 35px - 77px);
+    padding: 10px 30px;
+}
+
+.help-heading {
+    font-family: Tahoma, sans-serif;
+    font-weight: bold;
+    font-size: 35px;
+    color: var(--text);
+    margin-bottom: 10px;
+    &:hover {
+        filter: brightness(130%);
+    }
+}
+
+.help-text {
+    font-family: "Apple Symbols", sans-serif;
+    font-size: 27px;
+    color: var(--text);
+    margin-bottom: 10px;
+}
+
+
+.help-alt {
+    font-family: "Apple Symbols", sans-serif;
+    font-size: 27px;
+    color: var(--text-alt);
+    margin-bottom: 10px;
+}

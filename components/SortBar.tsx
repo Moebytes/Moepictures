@@ -3,7 +3,8 @@ import {HashLink as Link} from "react-router-hash-link"
 import Slider from "react-slider"
 import {ThemeContext, HideSidebarContext, HideNavbarContext, HideSortbarContext, ActiveDropdownContext, 
 SizeTypeContext, BrightnessContext, ContrastContext, HueContext, SaturationContext, LightnessContext,
-BlurContext, SharpenContext, EnableDragContext, FilterDropActiveContext, SquareContext, PixelateContext} from "../App"
+BlurContext, SharpenContext, EnableDragContext, FilterDropActiveContext, SquareContext, PixelateContext,
+ShowDownloadDialogContext} from "../App"
 import leftArrow from "../assets/purple/leftArrow.png"
 import leftArrowMagenta from "../assets/magenta/leftArrow.png"
 import rightArrow from "../assets/purple/rightArrow.png"
@@ -67,7 +68,7 @@ import squareMagentaIcon from "../assets/magenta/square.png"
 import pixelateIcon from "../assets/purple/pixelate.png"
 import pixelateMagentaIcon from "../assets/magenta/pixelate.png"
 import functions from "../structures/Functions"
-import "../styles/sortbar.less"
+import "./styles/sortbar.less"
 
 const SortBar: React.FunctionComponent = (props) => {
     const {theme, setTheme} = useContext(ThemeContext)
@@ -86,6 +87,7 @@ const SortBar: React.FunctionComponent = (props) => {
     const {pixelate, setPixelate} = useContext(PixelateContext)
     const {blur, setBlur} = useContext(BlurContext)
     const {sharpen, setSharpen} = useContext(SharpenContext)
+    const {showDownloadDialog, setShowDownloadDialog} = useContext(ShowDownloadDialogContext)
     const [ignored, forceUpdate] = useReducer(x => x + 1, 0)
     const [mouseOver, setMouseOver] = useState(false)
     const [imageType, setImageType] = useState("all")
@@ -354,7 +356,7 @@ const SortBar: React.FunctionComponent = (props) => {
         } else {
             return (
                 <div className="sortbar-item" ref={imageRef} onClick={() => {setActiveDropdown(activeDropdown === "image" ? "none" : "image"); setFilterDropActive(false)}}>
-                    <img className="sortbar-img" src={getAll()}/>
+                    <img className="sortbar-img rotate" src={getAll()}/>
                     <span className="sortbar-text">All</span>
                 </div>
             )
@@ -399,7 +401,7 @@ const SortBar: React.FunctionComponent = (props) => {
         } else {
             return (
                 <div className="sortbar-item" ref={restrictRef} onClick={() => {setActiveDropdown(activeDropdown === "restrict" ? "none" : "restrict"); setFilterDropActive(false)}}>
-                    <img className="sortbar-img" src={getAll()}/>
+                    <img className="sortbar-img rotate" src={getAll()}/>
                     <span className="sortbar-text">All</span>
                 </div>
             )
@@ -450,7 +452,7 @@ const SortBar: React.FunctionComponent = (props) => {
         } else {
             return (
                 <div className="sortbar-item" ref={styleRef} onClick={() => {setActiveDropdown(activeDropdown === "style" ? "none" : "style"); setFilterDropActive(false)}}>
-                    <img className="sortbar-img" src={getAll()}/>
+                    <img className="sortbar-img rotate" src={getAll()}/>
                     <span className="sortbar-text">All</span>
                 </div>
             )
@@ -561,7 +563,7 @@ const SortBar: React.FunctionComponent = (props) => {
         <>
         <div className={`sortbar ${hideSortbar ? "hide-sortbar" : ""} ${hideNavbar ? "sortbar-top" : ""} 
         ${hideSortbar && hideNavbar && hideSidebar ? "translate-sortbar" : ""}`}
-        onMouseEnter={() => {setEnableDrag(false); setMouseOver(true)}} onMouseLeave={() => {setEnableDrag(true); setMouseOver(false)}}>
+        onMouseEnter={() => setMouseOver(true)} onMouseLeave={() => setMouseOver(false)}>
             <div className="sortbar-left">
                 <div className="sortbar-item">
                     <img className="sortbar-img" src={getLeftArrow()} onClick={() => hideTheSidebar()}/>
@@ -569,11 +571,11 @@ const SortBar: React.FunctionComponent = (props) => {
                 <div className="sortbar-item">
                     <img className="sortbar-img" src={getUpArrow()} onClick={() => hideTheNavbar()}/>
                 </div>
-                <div className="sortbar-item">
+                <Link to="/upload" className="sortbar-item">
                     <img className="sortbar-img" src={getUpload()}/>
                     <span className="sortbar-text">Upload</span>
-                </div>
-                <div className="sortbar-item">
+                </Link>
+                <div className="sortbar-item" onClick={() => setShowDownloadDialog((prev: boolean) => !prev)}>
                     <img className="sortbar-img" src={getDownload()}/>
                     <span className="sortbar-text">Download</span>
                 </div>
@@ -602,7 +604,7 @@ const SortBar: React.FunctionComponent = (props) => {
             <div className={`dropdown ${activeDropdown === "image" ? "" : "hide-dropdown"}`}
             style={{marginLeft: getImageMargin(), left: dropLeft, top: dropTop}} onClick={() => setActiveDropdown("none")}>
                 <div className="sortbar-dropdown-row" onClick={() => setImageType("all")} >
-                    <img className="sortbar-dropdown-img" src={getAll()}/>
+                    <img className="sortbar-dropdown-img rotate" src={getAll()}/>
                     <span className="sortbar-dropdown-text">All</span>
                 </div>
                 <div className="sortbar-dropdown-row" onClick={() => setImageType("image")}>
@@ -625,7 +627,7 @@ const SortBar: React.FunctionComponent = (props) => {
             <div className={`dropdown ${activeDropdown === "restrict" ? "" : "hide-dropdown"}`} 
             style={{marginLeft: getRestrictMargin(), left: dropLeft, top: dropTop}} onClick={() => setActiveDropdown("none")}>
                 <div className="sortbar-dropdown-row" onClick={() => setRestrictType("all")}>
-                    <img className="sortbar-dropdown-img" src={getAll()}/>
+                    <img className="sortbar-dropdown-img rotate" src={getAll()}/>
                     <span className="sortbar-dropdown-text">All</span>
                 </div>
                 <div className="sortbar-dropdown-row" onClick={() => setRestrictType("safe")}>
@@ -644,7 +646,7 @@ const SortBar: React.FunctionComponent = (props) => {
             <div className={`dropdown ${activeDropdown === "style" ? "" : "hide-dropdown"}`} 
             style={{marginLeft: getStyleMargin(), left: dropLeft, top: dropTop}} onClick={() => setActiveDropdown("none")}>
                 <div className="sortbar-dropdown-row" onClick={() => setStyleType("all")}>
-                    <img className="sortbar-dropdown-img" src={getAll()}/>
+                    <img className="sortbar-dropdown-img rotate" src={getAll()}/>
                     <span className="sortbar-dropdown-text">All</span>
                 </div>
                 <div className="sortbar-dropdown-row" onClick={() => setStyleType("2d")}>

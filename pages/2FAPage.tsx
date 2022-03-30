@@ -1,11 +1,11 @@
 import React, {useEffect, useContext, useState} from "react"
 import {HashLink as Link} from "react-router-hash-link"
-import TitleBar from "./TitleBar"
-import NavBar from "./NavBar"
-import Footer from "./Footer"
-import SideBar from "./SideBar"
-import {HideNavbarContext, HideSidebarContext, ThemeContext, EnableDragContext} from "../App"
-import "../styles/2fapage.less"
+import TitleBar from "../components/TitleBar"
+import NavBar from "../components/NavBar"
+import Footer from "../components/Footer"
+import SideBar from "../components/SideBar"
+import {HideNavbarContext, HideSidebarContext, ThemeContext, EnableDragContext, RelativeContext} from "../App"
+import "./styles/2fapage.less"
 
 const f2aPage: React.FunctionComponent = (props) => {
     const {theme, setTheme} = useContext(ThemeContext)
@@ -13,10 +13,12 @@ const f2aPage: React.FunctionComponent = (props) => {
     const {hideSidebar, setHideSidebar} = useContext(HideSidebarContext)
     const {enableDrag, setEnableDrag} = useContext(EnableDragContext)
     const [showPassword, setShowPassword] = useState(false)
+    const {relative, setRelative} = useContext(RelativeContext)
 
     useEffect(() => {
         setHideNavbar(false)
         setHideSidebar(false)
+        setRelative(false)
         document.title = "Moebooru: 2-Factor Authentication"
     }, [])
 

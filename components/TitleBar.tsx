@@ -2,8 +2,8 @@ import React, {useContext, useEffect} from "react"
 import {HashLink as Link} from "react-router-hash-link"
 import favicon from "../assets/purple/favicon.png"
 import faviconMagenta from "../assets/magenta/favicon.png"
-import {ThemeContext, HideNavbarContext, EnableDragContext} from "../App"
-import "../styles/titlebar.less"
+import {ThemeContext, HideNavbarContext, EnableDragContext, RelativeContext} from "../App"
+import "./styles/titlebar.less"
 
 interface Props {
     text?: string
@@ -13,6 +13,7 @@ const TitleBar: React.FunctionComponent<Props> = (props) => {
     const {theme, setTheme} = useContext(ThemeContext)
     const {hideNavbar, setHideNavbar} = useContext(HideNavbarContext)
     const {enableDrag, setEnableDrag} = useContext(EnableDragContext)
+    const {relative, setRelative} = useContext(RelativeContext)
 
     useEffect(() => {
         const savedTheme = localStorage.getItem("theme")
@@ -25,7 +26,7 @@ const TitleBar: React.FunctionComponent<Props> = (props) => {
     }
 
     return (
-        <div className={`titlebar ${hideNavbar ? "hide-titlebar" : ""}`} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
+        <div className={`titlebar ${hideNavbar ? "hide-titlebar" : ""} ${relative ? "titlebar-relative" : ""}`} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
            <Link to="/" className="titlebar-logo-container">
                 <span className="titlebar-hover">
                     <div className="titlebar-text-container">

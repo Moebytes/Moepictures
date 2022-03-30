@@ -11,18 +11,20 @@ import tosPurpleLight from "../assets/purple-light/tos.png"
 import privacyPurpleLight from "../assets/purple-light/privacy.png"
 import tosMagentaLight from "../assets/magenta-light/tos.png"
 import privacyMagentaLight from "../assets/magenta-light/privacy.png"
-import {HideNavbarContext, HideSidebarContext, ThemeContext} from "../App"
-import "../styles/tospage.less"
+import {HideNavbarContext, HideSidebarContext, ThemeContext, RelativeContext} from "../App"
+import "./styles/tospage.less"
 
 const TermsPage: React.FunctionComponent = (props) => {
     const {theme, setTheme} = useContext(ThemeContext)
     const {hideNavbar, setHideNavbar} = useContext(HideNavbarContext)
     const {hideSidebar, setHideSidebar} = useContext(HideSidebarContext)
+    const {relative, setRelative} = useContext(RelativeContext)
     const [onPrivacy, setOnPrivacy] = useState(false)
 
     useEffect(() => {
-        setHideNavbar(false)
+        setHideNavbar(true)
         setHideSidebar(false)
+        setRelative(false)
     }, [])
 
     useEffect(() => {

@@ -1,22 +1,24 @@
 import React, {useEffect, useContext, useState} from "react"
 import {HashLink as Link} from "react-router-hash-link"
-import TitleBar from "./TitleBar"
-import Footer from "./Footer"
-import NavBar from "./NavBar"
-import SideBar from "./SideBar"
-import {HideNavbarContext, HideSidebarContext, ThemeContext, EnableDragContext} from "../App"
-import "../styles/changeemailpage.less"
+import TitleBar from "../components/TitleBar"
+import Footer from "../components/Footer"
+import NavBar from "../components/NavBar"
+import SideBar from "../components/SideBar"
+import {HideNavbarContext, HideSidebarContext, ThemeContext, EnableDragContext, RelativeContext} from "../App"
+import "./styles/changeemailpage.less"
 
 const ChangeEmailPage: React.FunctionComponent = (props) => {
     const {theme, setTheme} = useContext(ThemeContext)
     const {hideNavbar, setHideNavbar} = useContext(HideNavbarContext)
     const {hideSidebar, setHideSidebar} = useContext(HideSidebarContext)
     const {enableDrag, setEnableDrag} = useContext(EnableDragContext)
+    const {relative, setRelative} = useContext(RelativeContext)
     const [clicked, setClicked] = useState(false)
 
     useEffect(() => {
         setHideNavbar(false)
         setHideSidebar(false)
+        setRelative(false)
         document.title = "Moebooru: Change Email"
     }, [])
 

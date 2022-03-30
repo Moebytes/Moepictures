@@ -1,0 +1,66 @@
+@import "../../index.less";
+
+.carousel {
+    position: relative;
+    display: flex;
+    flex-direction: row;
+    width: calc(100vw - 230px - 120px);
+    height: 100%;
+    align-items: center;
+    margin-top: 20px;
+    margin-left: 60px;
+    margin-right: 60px;
+    overflow: hidden;
+}
+
+.slider {
+    position: relative;
+    top: 0;
+    left: 0;
+    display: flex;
+    //width: 100%;
+    height: 100%;
+    flex-wrap: nowrap;
+    transition: margin-left 0.05s;
+}
+
+.carousel-img {
+    width: auto;
+    height: 170px;
+    cursor: pointer;
+    &:hover {
+        border: 3px solid var(--text-strong) !important;
+    }
+}
+
+.carousel-left {
+    opacity: 0;
+    position: absolute;
+    z-index: 1000;
+    left: 10px;
+    cursor: pointer;
+    width: 20px;
+    height: 50px;
+    &:hover {
+        filter: brightness(130%);
+    }
+    transition: opacity 0.3s;
+}
+
+.carousel-right {
+    opacity: 0;
+    position: absolute;
+    z-index: 1000;
+    right: 10px;
+    cursor: pointer;
+    width: 20px;
+    height: 50px;
+    &:hover {
+        filter: brightness(130%);
+    }
+    transition: opacity 0.3s;
+}
+
+.arrow-visible {
+    opacity: 1;
+}

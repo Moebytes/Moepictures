@@ -15,7 +15,7 @@ module.exports = [
     target: "web",
     entry: "./index",
     mode: "production",
-    node: {__dirname: false},
+    node: {__dirname: false, fs: "empty"},
     output: {filename: "script.js", chunkFilename: "script.js", path: path.resolve(__dirname, "./dist")},
     resolve: {extensions: [".js", ".jsx", ".ts", ".tsx"], alias: {"react-dom$": "react-dom/profiling", "scheduler/tracing": "scheduler/tracing-profiling"}},
     performance: {hints: false},

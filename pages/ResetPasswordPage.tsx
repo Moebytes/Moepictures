@@ -1,9 +1,9 @@
 import React, {useEffect, useContext, useState} from "react"
 import {HashLink as Link} from "react-router-hash-link"
-import TitleBar from "./TitleBar"
-import NavBar from "./NavBar"
-import SideBar from "./SideBar"
-import Footer from "./Footer"
+import TitleBar from "../components/TitleBar"
+import NavBar from "../components/NavBar"
+import SideBar from "../components/SideBar"
+import Footer from "../components/Footer"
 import show from "../assets/purple/show.png"
 import hide from "../assets/purple/hide.png"
 import showPurpleLight from "../assets/purple-light/show.png"
@@ -12,14 +12,15 @@ import showMagenta from "../assets/magenta/show.png"
 import hideMagenta from "../assets/magenta/hide.png"
 import showMagentaLight from "../assets/magenta-light/show.png"
 import hideMagentaLight from "../assets/magenta-light/hide.png"
-import {HideNavbarContext, HideSidebarContext, ThemeContext, EnableDragContext} from "../App"
-import "../styles/resetpasspage.less"
+import {HideNavbarContext, HideSidebarContext, ThemeContext, EnableDragContext, RelativeContext} from "../App"
+import "./styles/resetpasspage.less"
 
 const ResetPasswordPage: React.FunctionComponent = (props) => {
     const {theme, setTheme} = useContext(ThemeContext)
     const {hideNavbar, setHideNavbar} = useContext(HideNavbarContext)
     const {hideSidebar, setHideSidebar} = useContext(HideSidebarContext)
     const {enableDrag, setEnableDrag} = useContext(EnableDragContext)
+    const {relative, setRelative} = useContext(RelativeContext)
     const [clicked, setClicked] = useState(false)
     const [showPassword, setShowPassword] = useState(false)
     const [showPassword2, setShowPassword2] = useState(false)
@@ -28,6 +29,7 @@ const ResetPasswordPage: React.FunctionComponent = (props) => {
     useEffect(() => {
         setHideNavbar(false)
         setHideSidebar(false)
+        setRelative(false)
         document.title = "Moebooru: Reset Password"
     }, [])
 

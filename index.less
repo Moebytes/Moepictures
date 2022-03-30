@@ -6,6 +6,7 @@
 :root {
     --selection: #6c69fc;
     --background: #0f0b35;
+    --background2: #0e0b3d;
     --titlebarBG: #1d0a71;
     --titleTextA: #6814ff;
     --titleTextB: #4214ff;
@@ -34,6 +35,7 @@
 .purple-light {
     --selection: #8e8cff;
     --background: #f0f0ff;
+    --background2: #e9e9ff;
     --titlebarBG: #8789ff;
     --titleTextA: #745dff;
     --titleTextB: #5d60ff;
@@ -47,7 +49,7 @@
     --sidebarSearchBG: #6f6bff;
     --tagColor: #9957ff;
     --tagCountColor: #6b59ff;
-    --sortbarBG: rgba(240, 240, 255, 0.7);
+    --sortbarBG: rgba(240, 240, 255, 0.3);
     --sortbarText: #6d77ff;
     --imageBorder: #7fa0ff;
     --inputBorder: #7fa0ff;
@@ -62,6 +64,7 @@
 .magenta {
     --selection: #fc69c4;
     --background: #350b19;
+    --background2: #380a26;
     --titlebarBG: #710a43;
     --titleTextA: #ff14b6;
     --titleTextB: #ff14a5;
@@ -90,6 +93,7 @@
 .magenta-light {
     --selection: #ff85d0;
     --background: #fff1fb;
+    --background2: #ffeaf5;
     --titlebarBG: #ff82c7;
     --titleTextA: #ff62b8;
     --titleTextB: #ff6cda;
@@ -103,7 +107,7 @@
     --sidebarSearchBG: #ff92f0;
     --tagColor: #ff65de;
     --tagCountColor: #ff57b3;
-    --sortbarBG: rgba(255, 241, 251, 0.7);
+    --sortbarBG: rgba(255, 241, 251, 0.3);
     --sortbarText: #ff7ee9;
     --imageBorder: #ff92c9;
     --inputBorder: #ff92db;
@@ -157,7 +161,7 @@ body {
     display: flex;
     flex-direction: column;
     width: 100%;
-    height: 100%;
+    height: auto;
 }
 
 ::selection {
@@ -198,6 +202,10 @@ input[type="search"]::-webkit-search-cancel-button,
 input[type="search"]::-webkit-search-results-button,
 input[type="search"]::-webkit-search-results-decoration { display: none; }
 
+input[type=number]::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+  }
+
 input:focus, button:focus, textarea:focus {
     outline: none;
 }
@@ -213,4 +221,63 @@ a {
 
 img {
     image-rendering: crisp-edges;
+}
+
+.rotate {
+    animation: rotate 3.5s linear infinite;
+}
+
+@keyframes rotate {
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+.cloth-background() {
+    @color: var(--background);
+    @color2: var(--background2);
+    background-color: @color;
+    background-image: linear-gradient(90deg, @color2 50%, transparent 50%),
+    linear-gradient(@color2 50%, transparent 50%);
+    background-size: 60px 60px;
+}
+
+.polkadot-background() {
+    @color: var(--background);
+    @color2: var(--background2);
+    background-color: @color;
+    background-image: radial-gradient(@color2 15%, transparent 16%),
+    radial-gradient(@color2 15%, transparent 16%);
+    background-size: 30px 30px;
+    background-position: 0 0, 30px 30px;
+}
+
+.zags-background() {
+    @color: var(--background);
+    @color2: var(--background2);
+    background: linear-gradient(135deg, @color2 25%, transparent 25%) -50px 0,
+      linear-gradient(225deg, @color2 25%, transparent 25%) -50px 0,
+      linear-gradient(315deg, @color2 25%, transparent 25%),
+      linear-gradient(45deg, @color2 25%, transparent 25%);
+    background-size: 100px 100px;
+    background-color: @color;
+}
+  
+.arrow-background() {
+    @color: var(--background);
+    @color2: var(--background2);
+    background:
+    linear-gradient(45deg, @color2 45px, transparent 45px)64px 64px,
+    linear-gradient(45deg, @color2 45px, transparent 45px, transparent 91px, @color 91px, @color 135px, transparent 135px),
+    linear-gradient(-45deg, @color2 23px, transparent 23px, transparent 68px, @color2 68px, @color2 113px,transparent 113px, transparent 158px, @color2 158px);
+    background-color: @color;
+    background-size: 128px 128px;
+}
+
+.react-transform-wrapper {
+    height: 100% !important;
+}
+
+.react-transform-component {
+    height: 100% !important;
 }
