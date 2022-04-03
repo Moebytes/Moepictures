@@ -4,12 +4,14 @@ import TitleBar from "../components/TitleBar"
 import NavBar from "../components/NavBar"
 import SideBar from "../components/SideBar"
 import Footer from "../components/Footer"
-import {HideNavbarContext, HideSidebarContext, ThemeContext, EnableDragContext, RelativeContext} from "../App"
+import DragAndDrop from "../components/DragAndDrop"
+import {HideNavbarContext, HideSidebarContext, ThemeContext, EnableDragContext, RelativeContext, HideTitlebarContext} from "../Context"
 import "./styles/changeusernamepage.less"
 
 const ChangeUsernamePage: React.FunctionComponent = (props) => {
     const {theme, setTheme} = useContext(ThemeContext)
     const {hideNavbar, setHideNavbar} = useContext(HideNavbarContext)
+    const {hideTitlebar, setHideTitlebar} = useContext(HideTitlebarContext)
     const {hideSidebar, setHideSidebar} = useContext(HideSidebarContext)
     const {enableDrag, setEnableDrag} = useContext(EnableDragContext)
     const {relative, setRelative} = useContext(RelativeContext)
@@ -17,6 +19,7 @@ const ChangeUsernamePage: React.FunctionComponent = (props) => {
 
     useEffect(() => {
         setHideNavbar(false)
+        setHideTitlebar(false)
         setHideSidebar(false)
         setRelative(false)
         document.title = "Moebooru: Change Username"
@@ -24,6 +27,7 @@ const ChangeUsernamePage: React.FunctionComponent = (props) => {
 
     return (
         <>
+        <DragAndDrop/>
         <TitleBar/>
         <NavBar/>
         <div className="body">

@@ -1,5 +1,5 @@
 import React, {useContext, useEffect, useState} from "react"
-import {ThemeContext, HideSidebarContext, HideNavbarContext} from "../App"
+import {ThemeContext, HideSidebarContext, HideNavbarContext, HideTitlebarContext} from "../Context"
 import {HashLink as Link} from "react-router-hash-link"
 import terms from "../assets/purple/terms.png"
 import termsMagenta from "../assets/magenta/terms.png"
@@ -24,6 +24,7 @@ const Footer: React.FunctionComponent = (props) => {
     const {theme, setTheme} = useContext(ThemeContext)
     const {hideSidebar, setHideSidebar} = useContext(HideSidebarContext)
     const {hideNavbar, setHideNavbar} = useContext(HideNavbarContext)
+    const {hideTitlebar, setHideTitlebar} = useContext(HideTitlebarContext)
 
     const getTermsIcon = () => {
         if (theme === "purple") return terms

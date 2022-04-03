@@ -1,4 +1,5 @@
 import React, {useEffect, useContext, useState} from "react"
+import {useHistory} from "react-router-dom"
 import TitleBar from "../components/TitleBar"
 import NavBar from "../components/NavBar"
 import SideBar from "../components/SideBar"
@@ -9,7 +10,10 @@ import CutenessMeter from "../components/CutenessMeter"
 import Comments from "../components/Comments"
 import Commentary from "../components/Commentary"
 import functions from "../structures/Functions"
-import {HideNavbarContext, HideSidebarContext, RelativeContext, DownloadFlagContext, DownloadURLsContext} from "../App"
+import DragAndDrop from "../components/DragAndDrop"
+import {HideNavbarContext, HideSidebarContext, RelativeContext, DownloadFlagContext, DownloadURLsContext, HideTitlebarContext,
+ImagesContext} from "../Context"
+import path from "path"
 import "./styles/postpage.less"
 
 interface Props {
@@ -18,30 +22,57 @@ interface Props {
 
 const PostPage: React.FunctionComponent<Props> = (props) => {
     const {hideNavbar, setHideNavbar} = useContext(HideNavbarContext)
+    const {hideTitlebar, setHideTitlebar} = useContext(HideTitlebarContext)
     const {hideSidebar, setHideSidebar} = useContext(HideSidebarContext)
     const {relative, setRelative} = useContext(RelativeContext)
     const {downloadFlag, setDownloadFlag} = useContext(DownloadFlagContext)
     const {downloadURLs, setDownloadURLs} = useContext(DownloadURLsContext)
-    const [img, setImg] = useState(`../assets/images/img${props?.match.params.id}.jpg`)
+    const {images, setImages} = useContext(ImagesContext)
+    const [img, setImg] = useState(`../assets/images/${props?.match.params.id}`)
+    const history = useHistory()
 
     useEffect(() => {
         setHideNavbar(false)
+        setHideTitlebar(false)
         setHideSidebar(false)
         setRelative(true)
         document.title = "Moebooru: Post"
-
-        functions.getImageOrFallback(`../assets/images/img${props?.match.params.id}.jpg`, 
-        `../assets/images/img${props?.match.params.id}.png`)
-        .then((r) => setImg(r))
     }, [])
+
+    useEffect(() => {
+        setImg(`../assets/images/${props?.match.params.id}`)
+    }, [props?.match.params.id])
 
     const download = () => {
         setDownloadURLs([img])
         setDownloadFlag(true)
     }
 
+    const next = () => {
+        let currentIndex = images.findIndex((i: string) => path.basename(i) === props?.match.params.id)
+        if (currentIndex !== -1) {
+            currentIndex++
+            if (images[currentIndex]) {
+                const id = path.basename(images[currentIndex])
+                history.push(`/post/${id}`)
+            }
+        }
+    }
+
+    const previous = () => {
+        let currentIndex = images.findIndex((i: string) => path.basename(i) === props?.match.params.id)
+        if (currentIndex !== -1) {
+            currentIndex--
+            if (images[currentIndex]) {
+                const id = path.basename(images[currentIndex])
+                history.push(`/post/${id}`)
+            }
+        }
+    }
+
     return (
         <>
+        <DragAndDrop/>
         <TitleBar/>
         <NavBar/>
         <div className="body">
@@ -49,7 +80,7 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
             <div className="content">
                 <div className="post-container">
                     <PostImage img={img}/>
-                    <PostImageOptions download={download}/>
+                    <PostImageOptions download={download} next={next} previous={previous}/>
                     <CutenessMeter/>
                     <Commentary/>
                     <Comments/>

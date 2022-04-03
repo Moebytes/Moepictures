@@ -1,13 +1,14 @@
 import React, {useEffect, useContext, useState} from "react"
 import {HashLink as Link} from "react-router-hash-link"
 import {HideNavbarContext, HideSidebarContext, ThemeContext, EnableDragContext, ShowDownloadDialogContext, ImageAmountContext, 
-ImagesContext, SizeTypeContext, DownloadURLsContext, DownloadFlagContext} from "../App"
+ImagesContext, SizeTypeContext, DownloadURLsContext, DownloadFlagContext, HideTitlebarContext} from "../Context"
 import functions from "../structures/Functions"
 import "./styles/downloaddialog.less"
 
 const DownloadDialog: React.FunctionComponent = (props) => {
     const {theme, setTheme} = useContext(ThemeContext)
     const {hideNavbar, setHideNavbar} = useContext(HideNavbarContext)
+    const {hideTitlebar, setHideTitlebar} = useContext(HideTitlebarContext)
     const {hideSidebar, setHideSidebar} = useContext(HideSidebarContext)
     const {enableDrag, setEnableDrag} = useContext(EnableDragContext)
     const {showDownloadDialog, setShowDownloadDialog} = useContext(ShowDownloadDialogContext)

@@ -1,6 +1,6 @@
 import React, {useContext, useEffect, useRef, useState} from "react"
 import {ThemeContext, EnableDragContext, BrightnessContext, ContrastContext, HueContext, SaturationContext, LightnessContext,
-BlurContext, SharpenContext, PixelateContext, DownloadFlagContext, DownloadURLsContext, DisableZoomContext} from "../App"
+BlurContext, SharpenContext, PixelateContext, DownloadFlagContext, DownloadURLsContext, DisableZoomContext} from "../Context"
 import {HashLink as Link} from "react-router-hash-link"
 import {createFFmpeg, fetchFile} from "@ffmpeg/ffmpeg"
 import functions from "../structures/Functions"
@@ -36,7 +36,7 @@ import imageFullscreenIcon from "../assets/purple/image-fullscreen.png"
 import gifFrames from "gif-frames"
 import {TransformWrapper, TransformComponent} from "react-zoom-pan-pinch"
 import path from "path"
-import "./styles/post-image.less"
+import "./styles/postimage.less"
 import mime from "mime-types"
 const ffmpeg = createFFmpeg()
 
@@ -68,7 +68,9 @@ const PostImage: React.FunctionComponent<Props> = (props) => {
     const pixelateRef = useRef<HTMLCanvasElement>(null)
     const overlayRef = useRef<HTMLImageElement>(null)
     const lightnessRef = useRef<HTMLImageElement>(null)
-    const videoOverlayRef = useRef<HTMLImageElement>(null)
+    const gifOverlayRef = useRef<HTMLImageElement>(null)
+    const gifLightnessRef = useRef<HTMLImageElement>(null)
+    const videoOverlayRef = useRef<HTMLCanvasElement>(null)
     const videoLightnessRef = useRef<HTMLImageElement>(null)
     const ref = useRef<HTMLImageElement>(null)
     const gifRef = useRef<HTMLCanvasElement>(null)
@@ -109,7 +111,7 @@ const PostImage: React.FunctionComponent<Props> = (props) => {
     const [duration, setDuration] = useState(0)
     const [zoom, setZoom] = useState(1)
     const [dragging, setDragging] = useState(false)
-    const [imageDragging, setImageDragging] = useState(false)
+    const [encodingOverlay, setEncodingOverlay] = useState(false)
     const [seekTo, setSeekTo] = useState(null) as any
 
     useEffect(() => {
@@ -131,21 +133,12 @@ const PostImage: React.FunctionComponent<Props> = (props) => {
         if (videoRef.current) videoRef.current.style.opacity = "1"
     }, [props.img])
 
-    const memoryUsage = async () => {
-        // @ts-ignore
-        const result = await performance.measureUserAgentSpecificMemory()
-        const usage = result.bytes / 1000000
-        console.log(`${usage}MB`)
-        // if (functions.isImage(props.img) && usage > 1000) window.location.reload()
-    }
-
     useEffect(() => {
         if (gifSliderRef.current) gifSliderRef.current.resize()
         if (gifSpeedSliderRef.current) gifSpeedSliderRef.current.resize()
         if (videoSliderRef.current) videoSliderRef.current.resize()
         if (videoSpeedSliderRef.current) videoSpeedSliderRef.current.resize()
         if (videoVolumeSliderRef.current) videoVolumeSliderRef.current.resize()
-        memoryUsage()
     })
 
     const resizeImageCanvas = () => {
@@ -162,10 +155,12 @@ const PostImage: React.FunctionComponent<Props> = (props) => {
     }
 
     const resizeVideoCanvas = () => {
-        if (!videoCanvasRef.current || !videoRef.current) return
+        if (!videoCanvasRef.current || !videoRef.current || !videoOverlayRef.current) return
         if (videoRef.current.clientWidth === 0) return
         videoCanvasRef.current.width = videoRef.current.clientWidth
         videoCanvasRef.current.height = videoRef.current.clientHeight
+        videoOverlayRef.current.width = videoRef.current.clientWidth
+        videoOverlayRef.current.height = videoRef.current.clientHeight
     }
 
     const handleKeydown = (event: any) => {
@@ -221,14 +216,18 @@ const PostImage: React.FunctionComponent<Props> = (props) => {
             if (!videoRef.current) return
             if (functions.isMP4(props.img)) {
                 const frames = await functions.extractMP4Frames(props.img, videoRef.current!.duration)
-                setVideoData(frames)
-                const canvas = document.createElement("canvas")
-                const img = frames[0]
-                canvas.width = img.width 
-                canvas.height = img.height 
-                const ctx = canvas.getContext("bitmaprenderer") as any
-                ctx.transferFromImageBitmap(img)
-                setBackFrame(canvas.toDataURL())
+                let canvasFrames = [] as any 
+                for (let i = 0; i < frames.length; i++) {
+                    const canvas = document.createElement("canvas")
+                    const img = frames[i]
+                    canvas.width = img.width
+                    canvas.height = img.height
+                    const ctx = canvas.getContext("bitmaprenderer") as any
+                    ctx.transferFromImageBitmap(img)
+                    canvasFrames.push(canvas)
+                }
+                setVideoData(canvasFrames)
+                setBackFrame(canvasFrames[0].toDataURL())
                 if (backFrameRef.current && videoRef.current) {
                     backFrameRef.current.style.display = "flex"
                     backFrameRef.current.style.position = "relative"
@@ -255,7 +254,7 @@ const PostImage: React.FunctionComponent<Props> = (props) => {
                 setReverseVideo(`${url}#${ext}`)
             }
             ffmpeg.FS("unlink", output)
-            ffmpeg.exit()
+            // ffmpeg.exit()
         }
         if (!videoData && videoLoaded && functions.isVideo(props.img)) {
             parseVideo()
@@ -321,10 +320,12 @@ const PostImage: React.FunctionComponent<Props> = (props) => {
                         gifCanvas.style.height = `${gifCanvas.height * pixelate}px`
                     }
                     gifCanvas.style.imageRendering = "pixelated"
+                    gifCanvas.style.opacity = "1"
                 } else {
                     gifCanvas.style.width = `${gifCanvas.width}px`
                     gifCanvas.style.height = `${gifCanvas.height}px`
                     gifCanvas.style.imageRendering = "none"
+                    gifCanvas.style.opacity = "1"
                     ctx.clearRect(0, 0, gifCanvas.width, gifCanvas.height)
                     ctx.drawImage(frame, 0, 0, gifCanvas.width, gifCanvas.height)
                 }
@@ -354,7 +355,7 @@ const PostImage: React.FunctionComponent<Props> = (props) => {
 
     useEffect(() => {
         let id = 0
-        if (!videoRef.current || !videoCanvasRef.current) return
+        if (!videoRef.current || !videoCanvasRef.current || !videoOverlayRef.current) return
         if (videoLoaded && functions.isVideo(props.img)) {
             if (paused) {
                 videoRef.current.pause()
@@ -366,19 +367,31 @@ const PostImage: React.FunctionComponent<Props> = (props) => {
             if (preservePitch) {
                 // @ts-ignore
                 videoRef.current.preservesPitch = true
+                // @ts-ignore
+                videoRef.current.mozPreservesPitch = true
+                // @ts-ignore
+                videoRef.current.webkitPreservesPitch = true
             } else {
                 // @ts-ignore
                 videoRef.current.preservesPitch = false 
+                // @ts-ignore
+                videoRef.current.mozPreservesPitch = false 
+                // @ts-ignore
+                videoRef.current.webkitPreservesPitch = false 
             }
             const adjustedData = videoData ? functions.videoSpeed(videoData, speed) : null
             videoRef.current.playbackRate = speed 
             const videoCanvas = videoCanvasRef.current
+            const sharpenOverlay = videoOverlayRef.current
             videoCanvas.style.opacity = "1"
             videoRef.current.style.opacity = "0"
             videoCanvas.width = videoRef.current.clientWidth
             videoCanvas.height = videoRef.current.clientHeight
+            sharpenOverlay.width = videoRef.current.clientWidth
+            sharpenOverlay.height = videoRef.current.clientHeight
             const landscape = videoCanvas.width >= videoCanvas.height
             const ctx = videoCanvas.getContext("2d") as any
+            const sharpenCtx = sharpenOverlay.getContext("2d") as any
             let frames = adjustedData ? adjustedData.length - 1 : 1
             let interval = duration / frames
             let sp = seekTo !== null ? seekTo : secondsProgress
@@ -389,8 +402,9 @@ const PostImage: React.FunctionComponent<Props> = (props) => {
             seekValue = dragging ? dragProgress * speed : seekValue
             if (seekValue !== null) if (Number.isNaN(seekValue) || !Number.isFinite(seekValue)) seekValue = 0
             if (seekValue) videoRef.current.currentTime = seekValue
-            let frame = adjustedData ? adjustedData[pos] : videoRef.current as any
             setDuration(videoRef.current.duration / speed)
+            if (reverse && adjustedData) pos = (adjustedData.length - 1) - pos
+            let frame = adjustedData ? adjustedData[pos] : videoRef.current as any
 
             const update = () => {
                 if (!videoRef.current) return
@@ -414,6 +428,18 @@ const PostImage: React.FunctionComponent<Props> = (props) => {
                 if (!videoRef.current || !videoCanvasRef.current) return
                 const pixelWidth = videoCanvas.width / pixelate 
                 const pixelHeight = videoCanvas.height / pixelate
+                if (sharpen !== 0) {
+                    const sharpenOpacity = sharpen / 5
+                    sharpenOverlay.style.filter = `blur(4px) invert(1) contrast(75%)`
+                    sharpenOverlay.style.mixBlendMode = "overlay"
+                    sharpenOverlay.style.opacity = `${sharpenOpacity}`
+                    sharpenCtx.clearRect(0, 0, sharpenOverlay.width, sharpenOverlay.height)
+                    sharpenCtx.drawImage(frame, 0, 0, sharpenOverlay.width, sharpenOverlay.height)
+                } else {
+                    sharpenOverlay.style.filter = "none"
+                    sharpenOverlay.style.mixBlendMode = "normal"
+                    sharpenOverlay.style.opacity = "0"
+                }
                 if (pixelate !== 1) {
                     ctx.clearRect(0, 0, videoCanvas.width, videoCanvas.height)
                     ctx.drawImage(frame, 0, 0, pixelWidth, pixelHeight)
@@ -436,19 +462,41 @@ const PostImage: React.FunctionComponent<Props> = (props) => {
 
             const videoLoop = () => {
                 draw()
-                // @ts-ignore
-                if (paused) return videoRef.current?.cancelVideoFrameCallback(id)
+                if (paused) {
+                    // @ts-ignore
+                    if (videoRef.current?.cancelVideoFrameCallback) {
+                        // @ts-ignore
+                        return videoRef.current?.cancelVideoFrameCallback(id)
+                    } else {
+                        return window.cancelAnimationFrame(id)
+                    }
+                }
                 update()
                 // @ts-ignore
-                id = videoRef.current?.requestVideoFrameCallback(videoLoop)
+                if (videoRef.current?.requestVideoFrameCallback) {
+                    // @ts-ignore
+                    id = videoRef.current?.requestVideoFrameCallback(videoLoop)
+                } else {
+                    id = window.requestAnimationFrame(videoLoop)
+                }
             }
             // @ts-ignore
-            id = videoRef.current?.requestVideoFrameCallback(videoLoop)
+            if (videoRef.current?.requestVideoFrameCallback) {
+                // @ts-ignore
+                id = videoRef.current?.requestVideoFrameCallback(videoLoop)
+            } else {
+                id = window.requestAnimationFrame(videoLoop)
+            }
         } return () => {
             // @ts-ignore
-            videoRef.current?.cancelVideoFrameCallback(id)
+            if (videoRef.current?.cancelVideoFrameCallback) {
+                // @ts-ignore
+                videoRef.current?.cancelVideoFrameCallback(id)
+            } else {
+                window.cancelAnimationFrame(id)
+            }
         }
-    }, [videoLoaded, reverse, seekTo, pixelate, paused, speed, preservePitch, dragging, dragProgress])
+    }, [videoLoaded, reverse, seekTo, pixelate, paused, speed, preservePitch, dragging, dragProgress, sharpen])
 
     useEffect(() => {
         if (!functions.isVideo(props.img)) return
@@ -593,13 +641,13 @@ const PostImage: React.FunctionComponent<Props> = (props) => {
     }
 
     useEffect(() => {
-        if (!containerRef.current) return
-        const element = containerRef.current.querySelector(".post-image-filters") as any
-        if (!element) return
+        if (!fullscreenRef.current) return
+        const element = fullscreenRef.current
         let newContrast = contrast
-        const image = functions.isVideo(props.img) ? element.querySelector(".post-video") : element.querySelector(".post-image") as any
-        const sharpenOverlay = functions.isVideo(props.img) ? element.querySelector(".video-sharpen-overlay")  : element.querySelector(".post-sharpen-overlay") as any
-        const lightnessOverlay = functions.isVideo(props.img) ? element.querySelector(".video-lightness-overlay") : element.querySelector(".post-lightness-overlay") as any
+        const image = functions.isVideo(props.img) ? videoRef.current : ref.current
+        const sharpenOverlay = functions.isVideo(props.img) ? videoOverlayRef.current : functions.isGIF(props.img) ? gifOverlayRef.current : overlayRef.current
+        const lightnessOverlay = functions.isVideo(props.img) ? videoLightnessRef.current : functions.isGIF(props.img) ? gifLightnessRef.current : lightnessRef.current
+        if (!image || !sharpenOverlay || !lightnessOverlay) return
         if (sharpen !== 0) {
             const sharpenOpacity = sharpen / 5
             newContrast += 25 * sharpenOpacity
@@ -661,8 +709,7 @@ const PostImage: React.FunctionComponent<Props> = (props) => {
             setNaturalWidth(event.target.videoWidth)
             setNaturalHeight(event.target.videoHeight)
             if (videoRef.current) videoRef.current.style.display = "flex"
-            if (videoRef.current?.paused) await videoRef.current!.play()
-            if (!videoLoaded) setVideoLoaded(true)
+            setVideoLoaded(true)
             setTimeout(() => {
                 seek(0)
             }, 70)
@@ -677,27 +724,32 @@ const PostImage: React.FunctionComponent<Props> = (props) => {
         }
     }
 
-    const render = () => {
-        if (!ref.current || !pixelateRef.current || !lightnessRef.current || !overlayRef.current) return
+    const render = (frame: any, buffer?: boolean) => {
         const canvas = document.createElement("canvas") as any
         canvas.width = naturalWidth
         canvas.height = naturalHeight
         const ctx = canvas.getContext("2d") as any
         let newContrast = contrast
         ctx.filter = `brightness(${brightness}%) contrast(${newContrast}%) hue-rotate(${hue - 180}deg) saturate(${saturation}%) blur(${blur}px)`
-        ctx.drawImage(ref.current, 0, 0, canvas.width, canvas.height)
+        ctx.drawImage(frame, 0, 0, canvas.width, canvas.height)
         if (pixelate !== 1) {
-            const pixelWidth = ref.current.width / pixelate 
-            const pixelHeight = ref.current.height / pixelate
+            const pixelateCanvas = document.createElement("canvas")
+            const pixelWidth = frame.width / pixelate 
+            const pixelHeight = frame.height / pixelate
+            pixelateCanvas.width = pixelWidth 
+            pixelateCanvas.height = pixelHeight
+            const pixelateCtx = pixelateCanvas.getContext("2d") as any
+            pixelateCtx.imageSmoothingEnabled = false
+            pixelateCtx.drawImage(frame, 0, 0, pixelWidth, pixelHeight)
             ctx.imageSmoothingEnabled = false
-            ctx.drawImage(pixelateRef.current, 0, 0, pixelWidth, pixelHeight, 0, 0, canvas.width, canvas.height)
+            ctx.drawImage(pixelateCanvas, 0, 0, canvas.width, canvas.height)
         }
         if (sharpen !== 0) {
             const sharpnessCanvas = document.createElement("canvas")
             sharpnessCanvas.width = naturalWidth
             sharpnessCanvas.height = naturalHeight
             const sharpnessCtx = sharpnessCanvas.getContext("2d")
-            sharpnessCtx?.drawImage(overlayRef.current, 0, 0, sharpnessCanvas.width, sharpnessCanvas.height)
+            sharpnessCtx?.drawImage(frame, 0, 0, sharpnessCanvas.width, sharpnessCanvas.height)
             const sharpenOpacity = sharpen / 5
             newContrast += 25 * sharpenOpacity
             const filter = `blur(4px) invert(1) contrast(75%)`
@@ -711,22 +763,154 @@ const PostImage: React.FunctionComponent<Props> = (props) => {
             lightnessCanvas.width = naturalWidth
             lightnessCanvas.height = naturalHeight
             const lightnessCtx = lightnessCanvas.getContext("2d")
-            lightnessCtx?.drawImage(lightnessRef.current, 0, 0, lightnessCanvas.width, lightnessCanvas.height)
+            lightnessCtx?.drawImage(frame, 0, 0, lightnessCanvas.width, lightnessCanvas.height)
             const filter = lightness < 100 ? "brightness(0)" : "brightness(0) invert(1)"
             ctx.filter = filter
             ctx.globalAlpha = `${Math.abs((lightness - 100) / 100)}`
             ctx.drawImage(lightnessCanvas, 0, 0, canvas.width, canvas.height)
         }
+        if (buffer) {
+            const img = ctx.getImageData(0, 0, canvas.width, canvas.height)
+            return img.data.buffer
+        }
         return canvas.toDataURL("image/png")
+    }
+
+    const filtersOn = () => {
+        if ((brightness !== 100) ||
+            (contrast !== 100) ||
+            (hue !== 180) ||
+            (saturation !== 100) ||
+            (lightness !== 100) ||
+            (blur !== 0) ||
+            (sharpen !== 0) ||
+            (pixelate !== 1)) {
+                return true 
+            } else {
+                return false
+            }
+    }
+
+    const rateOn = () => {
+        if ((speed !== 1) || (reverse !== false)) return true 
+        return false
+    }
+
+    const renderImage = () => {
+        if ((filtersOn())) {
+            return render(ref.current)
+        } else {
+            return props.img
+        }
+    }
+
+    const renderGIF = async () => {
+        if ((filtersOn() || rateOn()) && gifData) {
+            setPaused(true)
+            setEncodingOverlay(true)
+            const adjustedData = functions.gifSpeed(gifData, speed)
+            let frames = [] as any
+            let delays = [] as any
+            for (let i = 0; i < adjustedData.length; i++) {
+                frames.push(render(adjustedData[i].frame, true))
+                delays.push(adjustedData[i].delay)
+            }
+            if (reverse) {
+                frames = frames.reverse()
+                delays = delays.reverse()
+            }
+            const buffer = await functions.encodeGIF(frames, delays, gifData[0].frame.width, gifData[0].frame.height, {transparentColor: "#000000"})
+            const blob = new Blob([buffer])
+            setEncodingOverlay(false)
+            setPaused(false)
+            return window.URL.createObjectURL(blob)
+        } else {
+            return props.img
+        }
+    }
+
+    const encodeVideo = async (frames: string[], audio: string) => {
+        if (!ffmpeg.isLoaded()) await ffmpeg.load()
+        for (let i = 0; i < frames.length; i++) {
+            const num = `00${i}`.slice(-3)
+            ffmpeg.FS("writeFile", `${num}.png`, await fetchFile(frames[i]))
+        }
+        ffmpeg.FS("writeFile", "audio.wav", await fetchFile(audio))
+        await ffmpeg.run("-framerate", "30", "-pattern_type", "glob", "-i", "*.png", "-i", "audio.wav", "-c:a", "aac", "-shortest", "-c:v", "libx264", "-pix_fmt", "yuv420p", "video.mp4")
+        const binary = ffmpeg.FS("readFile", "video.mp4")
+        let url = ""
+        if (binary) {
+            const blob = new Blob([new DataView(binary.buffer)], {type: "video/mp4"})
+            url = URL.createObjectURL(blob)
+        }
+        try {
+            for (let i = 0; i < frames.length; i++) {
+                const num = `00${i}`.slice(-3)
+                ffmpeg.FS("unlink", `${num}.png`)
+            }
+            ffmpeg.FS("unlink", "video.mp4")
+            ffmpeg.FS("unlink", "audio.wav")
+        } catch {
+            // ignore
+        }
+        return url
+    }
+
+    const audioSpeed = async (audioFile: string) => {
+        if (!ffmpeg.isLoaded()) await ffmpeg.load()
+        ffmpeg.FS("writeFile", "input.wav", await fetchFile(audioFile))
+        let audioSpeed = preservePitch ? `atempo=${speed}` : `asetrate=44100*${speed},aresample=44100`
+        let filter = ["-filter_complex", `[0:a]${audioSpeed}${reverse ? ",areverse" : ""}[a]`, "-map", "[a]"]
+        await ffmpeg.run("-i", "input.wav", ...filter, "audio.wav")
+        const binary = ffmpeg.FS("readFile", "audio.wav")
+        let url = ""
+        if (binary) {
+            const blob = new Blob([new DataView(binary.buffer)], {type: "audio/x-wav"})
+            url = URL.createObjectURL(blob)
+        }
+        try {
+            ffmpeg.FS("unlink", "input.wav")
+            ffmpeg.FS("unlink", "audio.wav")
+        } catch {
+            // ignore
+        }
+        return url
+    }
+
+    const renderVideo = async () => {
+        if ((filtersOn() || rateOn()) && videoData) {
+            setPaused(true)
+            setEncodingOverlay(true)
+            let audio = await functions.videoToWAV(props.img).then((a) => audioSpeed(a))
+            const adjustedData = functions.videoSpeed(videoData, speed)
+            let frames = adjustedData.map((a: any) => render(a))
+            if (reverse) frames = frames.reverse()
+            const url = await encodeVideo(frames, audio)
+            setEncodingOverlay(false)
+            setPaused(false)
+            return url
+        } else {
+            return props.img
+        }
     }
 
     useEffect(() => {
         if (downloadFlag) {
             if (downloadURLs.includes(props.img)) {
-                if (functions.isGIF(props.img)) {
-                    functions.download(path.basename(props.img), props.img)
+                if (functions.isVideo(props.img)) {
+                    renderVideo().then((video: any) => {
+                        functions.download(path.basename(props.img), video)
+                        window.URL.revokeObjectURL(video)
+                    })
+                } else if (functions.isGIF(props.img)) {
+                    renderGIF().then((gif: any) => {
+                        functions.download(path.basename(props.img), gif)
+                        window.URL.revokeObjectURL(gif)
+                    })
                 } else {
-                    functions.download(path.basename(props.img), render())
+                    const image = renderImage()
+                    functions.download(path.basename(props.img), image)
+                    window.URL.revokeObjectURL(image)
                 }
                 setDownloadURLs(downloadURLs.filter((s: string) => s !== props.img))
                 setDownloadFlag(false)
@@ -843,6 +1027,11 @@ const PostImage: React.FunctionComponent<Props> = (props) => {
         <div className="post-image-container" style={{zoom: props.scale ? props.scale : 1}}>
             <div className="post-image-box" ref={containerRef}>
                 <div className="post-image-filters" ref={fullscreenRef}>
+                    {encodingOverlay ? 
+                    <div className="encoding-overlay">
+                        <span className="encoding-overlay-text">{functions.isVideo(props.img) ? "Rendering Video..." : "Rendering GIF..."}</span>
+                    </div>
+                    : null}
                     {functions.isVideo(props.img) ? <>
                         <div className="video-controls" ref={videoControls} onMouseUp={() => setDragging(false)} onMouseOver={controlMouseEnter} onMouseLeave={controlMouseLeave}>
                         <div className="video-control-row" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
@@ -909,8 +1098,8 @@ const PostImage: React.FunctionComponent<Props> = (props) => {
                             value={volume} min={0} max={1} step={0.01} onChange={(value) => changeVolume(value)}/>
                         </div>
                     </div>
-                    <img className="video-lightness-overlay" ref={videoLightnessRef} src={props.img}/>
-                    <img className="video-sharpen-overlay" ref={videoOverlayRef} src={props.img}/>
+                    <img className="video-lightness-overlay" ref={videoLightnessRef} src={backFrame}/>
+                    <canvas className="video-sharpen-overlay" ref={videoOverlayRef}></canvas>
                     <canvas className="post-video-canvas" ref={videoCanvasRef}></canvas>
                     <video loop muted disablePictureInPicture className="post-video" ref={videoRef} src={props.img} onLoadedData={(event) => onLoad(event)}></video>
                     <img ref={backFrameRef} src={backFrame} className="back-frame"/>
@@ -973,6 +1162,8 @@ const PostImage: React.FunctionComponent<Props> = (props) => {
                             </div>
                         </div>
                     </div>
+                    <img className="post-lightness-overlay" ref={gifLightnessRef} src={props.img}/>
+                    <img className="post-sharpen-overlay" ref={gifOverlayRef} src={props.img}/>
                     <canvas className="post-gif-canvas" ref={gifRef}></canvas> 
                     </>
                     : null}

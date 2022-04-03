@@ -36,8 +36,16 @@
     margin-right: 15px;
 }
 
+.titlebar-image-container {
+    display: flex;
+    align-items: center;
+    width: 100px;
+}
+
 .titlebar-hover {
-    display: inline-flex;
+    display: flex;
+    width: 100%;
+    height: 100%;
     &:hover {
         filter: saturate(75%) brightness(150%);
     }
@@ -62,7 +70,8 @@
 .titlebar-img {
     padding-top: 3px;
     filter: contrast(200%);
-    margin-right: -25px;
+    width: auto;
+    height: 100%;
 }
 
 .titlebar-search-text-container {

@@ -1,8 +1,9 @@
-import e from "express"
-import { read } from "fs"
+import GifEncoder from "gif-encoder"
+import pixels from "image-pixels"
 import path from "path"
 import commonPasswords from "../json/common-passwords.json"
 import MP4Demuxer from "./MP4Demuxer"
+import audioEncoder from "audio-encoder"
 
 let newScrollY = 0
 let lastScrollTop = 0
@@ -14,6 +15,27 @@ const imageExtensions = [".jpg", ".jpeg", ".png", ".webp"]
 const videoExtensions = [".mp4", ".mov", ".avi", ".mkv", ".webm"]
 
 export default class Functions {
+    public static proxyImage = async (link: string) => {
+        try {
+            const response = await fetch(`https://anime-pictures.herokuapp.com/proxy?url=${link}`).then((r) => r.arrayBuffer())
+            const blob = new Blob([new Uint8Array(response)])
+            const file = new File([blob], path.basename(link))
+            return file
+        } catch {
+            const response = await fetch(link).then((r) => r.arrayBuffer())
+            const blob = new Blob([new Uint8Array(response)])
+            const file = new File([blob], path.basename(link))
+            return file
+        }
+    }
+
+    public static twitterLink = () => {
+        window.open("https://twitter.com/i/user/754445878501466112", "__blank")
+    }
+
+    public static removeDuplicates = <T>(array: T[]) => {
+        return array.filter((a, b) => array.indexOf(a) === b)
+    }
     public static formatSeconds = (duration: number) => {
         let seconds = Math.floor(duration % 60) as any
         let minutes = Math.floor((duration / 60) % 60) as any
@@ -154,6 +176,8 @@ export default class Functions {
                 if (event.button === 2) return
                 event.preventDefault()
                 Functions.clearSelection()
+                // @ts-ignore
+                document.activeElement.blur()
                 mouseDown = true
                 inertia = false
                 time = new Date()
@@ -462,4 +486,83 @@ export default class Functions {
         }
         return frameData
       }
+
+    private static parseTransparentColor = (color: string) => {
+        return Number(`0x${color.replace(/^#/, "")}`)
+    }
+
+    public static streamToBuffer = async (stream: NodeJS.ReadableStream) => {
+        const chunks: Buffer[] = []
+        const buffer = await new Promise<Buffer>((resolve, reject) => {
+          stream.on("data", (chunk: Buffer) => chunks.push(Buffer.from(chunk)))
+          stream.on("error", (err) => reject(err))
+          stream.on("end", () => resolve(Buffer.concat(chunks)))
+        })
+        return buffer
+    }
+
+    public static encodeGIF = async (frames: Buffer[], delays: number[], width: number, height: number, options?: {transparentColor?: string}) => {
+        if (!options) options = {} as {transparentColor?: string}
+        const gif = new GifEncoder(width, height, {highWaterMark: 5 * 1024 * 1024})
+        gif.setQuality(10)
+        gif.setRepeat(0)
+        gif.writeHeader()
+        if (options?.transparentColor) gif.setTransparent(Functions.parseTransparentColor(options.transparentColor))
+        let counter = 0
+
+        const addToGif = async (frames: Buffer[]) => {
+            if (!frames[counter]) {
+                gif.finish()
+            } else {
+                const {data} = await pixels(frames[counter], {width, height})
+                gif.setDelay(delays[counter])
+                gif.addFrame(data)
+                counter++
+                addToGif(frames)
+            }
+        }
+        await addToGif(frames)
+        return Functions.streamToBuffer(gif as NodeJS.ReadableStream)
+    }
+
+    public static noteFactor = (scaleFactor: number) => {
+        if (scaleFactor === 1) return 0
+        if (scaleFactor < 1) {
+            return Math.round(-1 * ((1 / scaleFactor) * 600))
+        } else {
+            return Math.round(scaleFactor * 600)
+        }
+    }
+
+    public static videoToWAV = async (videoFile: string, speed?: number, preservePitch?: boolean) => {
+        const audioContext = new AudioContext()
+        const reader = new FileReader()
+
+        return new Promise<string>(async (resolve) => {
+            reader.onload = async () => {
+                if (!speed) speed = 1
+                const arrayBuffer = reader.result as ArrayBuffer
+                const decoded = await audioContext.decodeAudioData(arrayBuffer)
+                const duration = decoded.duration
+                const offlineAudioContext = new OfflineAudioContext(2, 44100 * (duration / speed), 44100)
+                const source = offlineAudioContext.createBufferSource()
+                source.buffer = decoded 
+                if (speed !== 1) {
+                    source.playbackRate.value = speed
+                    if (preservePitch) {
+                        source.detune.value = -Functions.noteFactor(speed)
+                    }
+                }
+                source.connect(offlineAudioContext.destination)
+                source.start()
+                const audioBuffer = await offlineAudioContext.startRendering()
+                audioEncoder(audioBuffer, null, null, async (blob: Blob) => {
+                    resolve(URL.createObjectURL(blob))
+                })
+                
+            }
+            const blob = await fetch(videoFile).then((r) => r.blob())
+            reader.readAsArrayBuffer(blob)
+        })
+    }
 }

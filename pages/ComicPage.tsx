@@ -10,7 +10,8 @@ import Comments from "../components/Comments"
 import Commentary from "../components/Commentary"
 import Carousel from "../components/Carousel"
 import functions from "../structures/Functions"
-import {HideNavbarContext, HideSidebarContext, RelativeContext, DownloadFlagContext, DownloadURLsContext} from "../App"
+import DragAndDrop from "../components/DragAndDrop"
+import {HideNavbarContext, HideSidebarContext, RelativeContext, DownloadFlagContext, DownloadURLsContext, HideTitlebarContext} from "../Context"
 import page1 from "../assets/images/KarenComplex/001.jpg"
 import page2 from "../assets/images/KarenComplex/002.jpg"
 import page3 from "../assets/images/KarenComplex/003.jpg"
@@ -49,6 +50,7 @@ interface Props {
 
 const ComicPage: React.FunctionComponent<Props> = (props) => {
     const {hideNavbar, setHideNavbar} = useContext(HideNavbarContext)
+    const {hideTitlebar, setHideTitlebar} = useContext(HideTitlebarContext)
     const {hideSidebar, setHideSidebar} = useContext(HideSidebarContext)
     const {relative, setRelative} = useContext(RelativeContext)
     const {downloadFlag, setDownloadFlag} = useContext(DownloadFlagContext)
@@ -64,6 +66,7 @@ const ComicPage: React.FunctionComponent<Props> = (props) => {
 
     useEffect(() => {
         setHideNavbar(false)
+        setHideTitlebar(false)
         setHideSidebar(false)
         setRelative(true)
         document.title = "Moebooru: Post"
@@ -80,13 +83,16 @@ const ComicPage: React.FunctionComponent<Props> = (props) => {
 
     return (
         <>
+        <DragAndDrop/>
         <TitleBar/>
         <NavBar/>
         <div className="body">
             <SideBar artist="liely" characters="klee" series="genshin impact" tags="hi" details="tenpi" postID={1}/>
             <div className="content">
                 <div className="post-container">
-                    <Carousel images={pages} set={set}/>
+                    <div className="carousel-container">
+                        <Carousel images={pages} set={set}/>
+                    </div>
                     <PostImage img={img}/>
                     <PostImageOptions download={download}/>
                     <CutenessMeter/>

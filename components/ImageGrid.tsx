@@ -1,5 +1,5 @@
 import React, {useContext, useEffect, useRef, useState} from "react"
-import {ThemeContext, SizeTypeContext, ImageAmountContext, ImagesContext} from "../App"
+import {ThemeContext, SizeTypeContext, ImageAmountContext, ImagesContext} from "../Context"
 import GridImage from "./GridImage"
 import img1 from "../assets/images/img1.png"
 import img2 from "../assets/images/img2.jpg"
@@ -15,6 +15,8 @@ import img11 from "../assets/images/img11.png"
 import img12 from "../assets/images/img12.png"
 import img13 from "../assets/images/img13.png"
 import img14 from "../assets/images/img14.jpg"
+import gif from "../assets/images/gif3.gif"
+import vid from "../assets/images/vid1.mp4"
 import functions from "../structures/Functions"
 import path from "path"
 import "./styles/imagegrid.less"
@@ -42,12 +44,12 @@ const ImageGrid: React.FunctionComponent = (props) => {
     }
 
     useEffect(() => {
-        const newImages = [img1, img2, img3, img4, img5, img6, img7, img8, img9, img10, img11, img12, img13, img14,
-            img1, img2, img3, img4, img5, img6, img7, img8, img9, img10, img11, img12, img13, img14,
-            img1, img2, img3, img4, img5, img6, img7, img8, img9, img10, img11, img12, img13, img14,
-            img1, img2, img3, img4, img5, img6, img7, img8, img9, img10, img11, img12, img13, img14,
-            img1, img2, img3, img4, img5, img6, img7, img8, img9, img10, img11, img12, img13, img14,
-            img1, img2, img3, img4, img5, img6, img7, img8, img9, img10, img11, img12, img13, img14]
+        const newImages = [img1, img2, img3, img4, img5, img6, img7, img8, img9, img10, img11, img12, img13, img14, vid, gif,
+            img1, img2, img3, img4, img5, img6, img7, img8, img9, img10, img11, img12, img13, img14, vid, gif,
+            img1, img2, img3, img4, img5, img6, img7, img8, img9, img10, img11, img12, img13, img14, vid, gif,
+            img1, img2, img3, img4, img5, img6, img7, img8, img9, img10, img11, img12, img13, img14, vid, gif,
+            img1, img2, img3, img4, img5, img6, img7, img8, img9, img10, img11, img12, img13, img14, vid, gif,
+            img1, img2, img3, img4, img5, img6, img7, img8, img9, img10, img11, img12, img13, img14, vid, gif]
         setImages(newImages)
     }, [])
 
@@ -107,8 +109,8 @@ const ImageGrid: React.FunctionComponent = (props) => {
     const generateImagesJSX = () => {
         const jsx = [] as any
         for (let i = 0; i < visibleImages.length; i++) {
-            const base = path.basename(visibleImages[i], path.extname(visibleImages[i])).replace("img", "")
-            jsx.push(<GridImage key={i + 1} id={parseInt(base)} img={visibleImages[i]}/>)
+            const base = path.basename(visibleImages[i])
+            jsx.push(<GridImage key={i + 1} id={base} img={visibleImages[i]}/>)
         }
         return jsx
     }

@@ -1,25 +1,31 @@
 import React, {useContext, useEffect} from "react"
+import {HashLink as Link} from "react-router-hash-link"
 import TitleBar from "../components/TitleBar"
 import NavBar from "../components/NavBar"
 import SideBar from "../components/SideBar"
 import Footer from "../components/Footer"
-import {HideNavbarContext, HideSidebarContext, RelativeContext} from "../App"
+import DragAndDrop from "../components/DragAndDrop"
+import {HideNavbarContext, HideSidebarContext, RelativeContext, HideTitlebarContext} from "../Context"
 import "./styles/helppage.less"
 
 const HelpPage: React.FunctionComponent = (props) => {
     const {hideNavbar, setHideNavbar} = useContext(HideNavbarContext)
+    const {hideTitlebar, setHideTitlebar} = useContext(HideTitlebarContext)
     const {hideSidebar, setHideSidebar} = useContext(HideSidebarContext)
     const {relative, setRelative} = useContext(RelativeContext)
 
     useEffect(() => {
         setHideNavbar(true)
+        setHideTitlebar(true)
         setHideSidebar(false)
         setRelative(false)
         document.title = "Moebooru: Help"
+        window.scrollTo(0, 0)
     }, [])
     
     return (
         <>
+        <DragAndDrop/>
         <TitleBar/>
         <NavBar/>
         <div className="body">
@@ -29,30 +35,43 @@ const HelpPage: React.FunctionComponent = (props) => {
                     <span className="help-heading">Help</span>
                     <span className="help-text">Welcome to Moebooru!</span>
                     <span className="help-text">
-                        Moebooru is an image board organized by tags, centered exclusively around the art of moe anime girls. Unlike most other
-                        image boards, Moebooru has several improvements such as allowing spaces in tags and having tag aliases. Also, since Moebooru
-                        has a smaller focus it contains a much smaller collection of images. In short, you will only find images that are really cute. Our 
-                        rating system is also based on rating cuteness rather than quality. I hope that you prefer using Moebooru's tag system 
-                        and overall find it friendly to navigate.
+                        Moebooru is an image board organized by tags, centered exclusively around the art of cute anime girls. Unlike most other
+                        image boards, Moebooru has several improvements such as allowing spaces in tags and having multiple images per post. We also have a 
+                        much stricter quality control overall. I hope that you like using Moebooru's tag system and overall find it friendly to navigate.
+
+                        Click on any of the links below to jump to a specific section. 
+                        <div className="help-link-container">
+                            <Link className="help-link" to="/help#account">Account</Link>
+                            <Link className="help-link" to="/help#searching">Searching</Link>
+                            <Link className="help-link" to="/help#favorites">Favorites</Link>
+                            <Link className="help-link" to="/help#cuteness-meter">Cuteness Meter</Link>
+                            <Link className="help-link" to="/help#uploading">Uploading</Link>
+                            <Link className="help-link" to="/help#variations">Variations</Link>
+                            <Link className="help-link" to="/help#third-party-edits">Third-Party Edits</Link>
+                            <Link className="help-link" to="/help#tagging">Tagging</Link>
+                            <Link className="help-link" to="/help#aliases">Aliases</Link>
+                            <Link className="help-link" to="/help#commenting">Commenting</Link>
+                            <Link className="help-link" to="/help#reporting">Reporting</Link>
+                            <Link className="help-link" to="/help#bans">Bans</Link>
+                        </div>
                     </span>
-                    <span className="help-heading">Account</span>
+                    <span className="help-heading" id="account">Account</span>
                     <span className="help-text">
-                        You must be 18 or older in order to create an account on Moebooru. Having an account
+                        You must be 18 or older in order to create an account. Having an account
                         with a verified email address allows you to view questionable posts, upload, favorite, 
                         comment, rate cuteness and edit tags and translations. Accounts that are not verified behave the same as 
                         having no account. <br/><br/> You can change your avatar by clicking on “set avatar” under any post. You are only allowed to use
                         images from the site as your avatar. Username changes are allowed once per week and you can change your email as many times as you'd like. <br/><br/>
                         Some actions such as uploading a new post or aliasing a tag to another tag will need to get approved by a moderator.
                     </span>
-                    <span className="help-heading">Searching</span>
+                    <span className="help-heading" id="searching">Searching</span>
                     <span className="help-text">
                         The tags on Moebooru can contain spaces, because the search is smart enough to parse out the tags.
-                        If you encounter a problem, you can also use dashes or hashtags as delimiters. These are examples
+                        If you encounter a problem, you can also use dashed version of the tag. These are examples
                         of valid searches: <br/>
                         <span className="help-alt">
                         Tag 1 Tag 2 Tag 3 <br/>
                         Tag-1 Tag-2 Tag-3 <br/>
-                        #Tag 1 #Tag 2 #Tag 3 <br/>
                         </span>
 
                         The following are special tag modifiers: <br/>
@@ -78,8 +97,6 @@ const HelpPage: React.FunctionComponent = (props) => {
                         <span className="help-alt">reverse drawn</span> - sort posts by drawn date in ascending order. <br/>
                         <span className="help-alt">cuteness</span> - sort posts by cuteness in descending order. <br/>
                         <span className="help-alt">reverse cuteness</span> - sort posts by cuteness in ascending order. <br/>
-                        <span className="help-alt">favorites</span> - sort posts by favorites in descending order. <br/>
-                        <span className="help-alt">reverse favorites</span> - sort posts by favorites in ascending order. <br/><br/>
                         These are special tags not in the sort bar. <br/>
                         <span className="help-alt">original</span> - the drawing is original, ie. not fanart. <br/>
                         <span className="help-alt">unknown artist</span> - the artist is not known. <br/>
@@ -91,7 +108,13 @@ const HelpPage: React.FunctionComponent = (props) => {
                         <span className="help-alt">no audio</span> - the post is a video with no audio. <br/>
                         <span className="help-alt">with audio</span> - the post is a video that has audio.
                     </span>
-                    <span className="help-heading">Cuteness</span>
+                    <span className="help-heading" id="favorites">Favorites</span>
+                    <span className="help-text">
+                        If you like an image, you can add it to your favorites for easier access later on.
+                        By default, your favorites are public but they can be made private in your account
+                        settings.
+                    </span>
+                    <span className="help-heading" id="cuteness-meter">Cuteness Meter</span>
                     <span className="help-text">
                         The rating system on Moebooru is called the cuteness meter. When you rate an
                         image you are not rating the quality, instead you are rating the amount
@@ -99,13 +122,7 @@ const HelpPage: React.FunctionComponent = (props) => {
                         cute) to 1000 (Insanely cute). Note that the exact value of cuteness is not publicly visible,
                         you will only see the icon.
                     </span>
-                    <span className="help-heading">Favorites</span>
-                    <span className="help-text">
-                        If you like an image, you can add it to your favorites for easier access later on.
-                        By default, your favorites are public but they can be made private in your account
-                        settings.
-                    </span>
-                    <span className="help-heading">Uploading</span>
+                    <span className="help-heading" id="uploading">Uploading</span>
                     <span className="help-text">
                         Moebooru has a strict criteria for uploading, so don't take it personally if
                         your post doesn't get approved. You can upload images, gifs, videos, and comics.<br/><br/>
@@ -124,18 +141,18 @@ const HelpPage: React.FunctionComponent = (props) => {
                         ⇾ The coloring/lineart should be clean and shouldn't look messy. <br/>
                         ⇾ Perspective, proportions, and anatomy shouldn’t look weird. <br/>
                         ⇾ Animations shouldn't look choppy. <br/>
-                        ⇾ A source is required for all posts unless you're posting your own artwork. <br/>
+                        ⇾ Source information is required for all posts even if you're posting your own artwork. <br/>
                         ⇾ All tags should be romanized. 
                         </span>
                     </span>
-                    <span className="help-heading">Variations</span>
+                    <span className="help-heading" id="variations">Variations</span>
                     <span className="help-text">
                         All variations of the same image are combined into a single post. If one of the variations is a video or
                         animated image, it will be displayed at the front. The tags of the post can describe features in any of the 
                         images. If an image has significantly different tags, then it is probably best to make that image it's own
                         post instead of a variation.
                     </span>
-                    <span className="help-heading">Third-Party Edits</span>
+                    <span className="help-heading" id="third-party-edits">Third-Party Edits</span>
                     <span className="help-text">
                         Third-party edits are modifications to a work not done by the original artist. For
                         example, a manga with all the text translated to English, or animation of an 
@@ -143,7 +160,7 @@ const HelpPage: React.FunctionComponent = (props) => {
                         of the original work in a separate section. If a search result yields both a third-party edit 
                         and its original work, only the original work is shown in the search results.
                     </span>
-                    <span className="help-heading">Tagging</span>
+                    <span className="help-heading" id="tagging">Tagging</span>
                     <span className="help-text">
                         In order to make images searchable at all, an artist and character is required for every
                         post. If you cannot figure out the artist or character use the tags “unknown artist”
@@ -166,7 +183,7 @@ const HelpPage: React.FunctionComponent = (props) => {
                         ⇾ Software (live2d, blender, etc).
                         </span>
                     </span>
-                    <span className="help-heading">Aliases</span>
+                    <span className="help-heading" id="aliases">Aliases</span>
                     <span className="help-text">
                         A tag can have multiple aliases that yield the same result. This is to
                         facilitate better searching for tags that have nearly the same name such as 
@@ -175,7 +192,7 @@ const HelpPage: React.FunctionComponent = (props) => {
                         You can freely add aliases to tags in the tags page, but aliasing a tag
                         to another tag will need to be manually approved. 
                     </span>
-                    <span className="help-heading">Commenting</span>
+                    <span className="help-heading" id="commenting">Commenting</span>
                     <span className="help-text">
                         The comments are for sharing your thoughts of the work. These are the rules for the comment section: <br/>
                         <span className="help-alt">
@@ -184,12 +201,12 @@ const HelpPage: React.FunctionComponent = (props) => {
                         ⇾ No distasteful comments. <br/>
                         </span>
                     </span>
-                    <span className="help-heading">Reporting</span>
+                    <span className="help-heading" id="reporting">Reporting</span>
                     <span className="help-text">
                         If you see anything that is amiss, please report it. You can report posts for not 
                         being cute, users that are breaking rules, translations that are wrong, etc.
                     </span>
-                    <span className="help-heading">Bans</span>
+                    <span className="help-heading" id="bans">Bans</span>
                     <span className="help-text">
                         If you break the rules severely or consistently, you might get banned. If you get banned, you 
                         are not allowed to register for another account. You can still freely browse the site without an account.

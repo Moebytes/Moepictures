@@ -1,6 +1,6 @@
 import React, {useContext, useEffect, useRef, useState} from "react"
 import {ThemeContext, EnableDragContext, BrightnessContext, ContrastContext, HueContext, SaturationContext, LightnessContext,
-BlurContext, SharpenContext, PixelateContext} from "../App"
+BlurContext, SharpenContext, PixelateContext} from "../Context"
 import {HashLink as Link} from "react-router-hash-link"
 import functions from "../structures/Functions"
 import Slider from "react-slider"
@@ -32,10 +32,12 @@ import nextIcon from "../assets/purple/next.png"
 import prevIcon from "../assets/purple/prev.png"
 import nextIconMagenta from "../assets/magenta/next.png"
 import prevIconMagenta from "../assets/magenta/prev.png"
-import "./styles/post-image-options.less"
+import "./styles/postimageoptions.less"
 
 interface Props {
     download: () => void
+    previous?: () => void
+    next?: () => void 
 }
 
 const PostImageOptions: React.FunctionComponent<Props> = (props) => {
@@ -135,21 +137,21 @@ const PostImageOptions: React.FunctionComponent<Props> = (props) => {
     }
 
     const getFilterMarginRight = () => {
+        if (typeof document === "undefined") return "0px"
         const rect = filterRef.current?.getBoundingClientRect()
-        if (!rect) return "400px"
+        if (!rect) return "0px"
         const raw = window.innerWidth - rect.right
         let offset = -120
-        console.log(raw + offset)
         return `${raw + offset}px`
     }
 
     const getFilterMarginTop = () => {
         if (typeof document === "undefined") return "0px"
-        const bodyRect = document.body.getBoundingClientRect()
+        const bodyRect = document.querySelector(".post-image-box")?.getBoundingClientRect()
         const rect = filterRef.current?.getBoundingClientRect()
-        if (!rect) return "400px"
-        const raw = rect.top - bodyRect.top
-        let offset = -1174
+        if (!rect || !bodyRect) return "0px"
+        const raw = bodyRect.bottom - rect.bottom
+        let offset = -225
         return `${raw + offset}px`
     }
 
@@ -157,7 +159,7 @@ const PostImageOptions: React.FunctionComponent<Props> = (props) => {
         <div className="post-image-options-container">
             <div className="post-image-options">
                 <div className="post-image-options-left">
-                    <div className="post-image-options-box" style={{marginRight: "15px"}} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
+                    <div className="post-image-options-box" onClick={() => props.previous?.()} style={{marginRight: "15px"}} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                         <img className="post-image-icon-small" src={getPrevIcon()}/>
                         <div className="post-image-text-small">Prev</div>
                     </div>
@@ -178,7 +180,7 @@ const PostImageOptions: React.FunctionComponent<Props> = (props) => {
                         <img className="post-image-icon" src={getFilters()}/>
                         <div className="post-image-text">Filters</div>
                     </div>
-                    <div className="post-image-options-box" style={{marginLeft: "25px"}} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
+                    <div className="post-image-options-box" onClick={() => props.next?.()} style={{marginLeft: "25px"}} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                         <div className="post-image-text-small">Next</div>
                         <img className="post-image-icon-small" src={getNextIcon()}/>
                     </div>

@@ -1,5 +1,5 @@
 import React, {useContext, useEffect, useRef, useState} from "react"
-import {ThemeContext, EnableDragContext} from "../App"
+import {ThemeContext, EnableDragContext} from "../Context"
 import {HashLink as Link} from "react-router-hash-link"
 import functions from "../structures/Functions"
 import arrowLeft from "../assets/purple/carousel-left.png"
@@ -15,6 +15,7 @@ import "./styles/carousel.less"
 interface Props {
     set?: (img: string) => any
     images: any[]
+    height?: number
 }
 
 let startX = 0
@@ -137,9 +138,9 @@ const Carousel: React.FunctionComponent<Props> = (props) => {
         for (let i = 0; i < props.images.length; i++) {
             const img = props.images[i]
             if (functions.isVideo(img)) {
-                jsx.push(<video autoPlay muted loop disablePictureInPicture ref={imagesRef[i]} className="carousel-img" src={img} onClick={() => {props.set?.(img); setActive(imagesRef[i])}}></video>)
+                jsx.push(<video autoPlay muted loop disablePictureInPicture ref={imagesRef[i]} className="carousel-img" src={img} onClick={() => {props.set?.(img); setActive(imagesRef[i])}} style={props.height ? {height: `${props.height}px`} : {}}></video>)
             } else {
-                jsx.push(<img ref={imagesRef[i]} className="carousel-img" src={img} onClick={() => {props.set?.(img); setActive(imagesRef[i])}}/>)
+                jsx.push(<img ref={imagesRef[i]} className="carousel-img" src={img} onClick={() => {props.set?.(img); setActive(imagesRef[i])}} style={props.height ? {height: `${props.height}px`} : {}}/>)
             }
         }
         return jsx
@@ -150,7 +151,6 @@ const Carousel: React.FunctionComponent<Props> = (props) => {
         let marginLeft = parseInt(sliderRef.current.style.marginLeft)
         if (Number.isNaN(marginLeft)) marginLeft = 0
         const trackPad = event.wheelDeltaY ? event.wheelDeltaY === -3 * event.deltaY : event.deltaMode === 0
-        console.log(event.deltaY)
         if (Math.abs(event.deltaY) < 5) {
             if (event.deltaX < 0) {
                 marginLeft += 25

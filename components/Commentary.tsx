@@ -1,5 +1,5 @@
 import React, {useContext, useEffect, useRef, useState} from "react"
-import {ThemeContext, EnableDragContext} from "../App"
+import {ThemeContext, EnableDragContext} from "../Context"
 import {HashLink as Link} from "react-router-hash-link"
 import functions from "../structures/Functions"
 import commentaryTranslate from "../assets/purple/commentarytranslate.png"

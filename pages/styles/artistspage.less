@@ -10,11 +10,150 @@
 
 .artists-heading {
     font-family: Tahoma, sans-serif;
-    font-weight: bold;
     font-size: 35px;
     color: var(--text);
     margin-bottom: 10px;
     &:hover {
         filter: brightness(130%);
     }
+}
+
+.artists-row {
+    display: flex;
+    flex-direction: row;
+    width: 100%;
+    height: 100%;
+}
+
+.artist-search-container {
+    display: flex;
+    border: 2px solid black;
+}
+
+.artist-search {
+    height: 30px;
+    background-color: var(--sidebarSearchBG);
+    border: none;
+    font-family: Tahoma, sans-serif;
+    font-size: 17px;
+    color: black;
+    padding: 5px;
+    width: 190px;
+    transition: width 0.3s;
+    &:focus {
+        width: 230px;
+    }
+}
+
+.artist-search-icon {
+    width: auto;
+    height: 30px;
+    cursor: pointer;
+    &:hover {
+        content: url(../../assets/purple/search-hover.png);
+    }
+}
+
+.artist-search-icon-magenta {
+    width: auto;
+    height: 30px;
+    cursor: pointer;
+    &:hover {
+        content: url(../../assets/magenta/search-hover.png);
+    }
+}
+
+.artist-search-icon-purple-light {
+    width: auto;
+    height: 30px;
+    cursor: pointer;
+    &:hover {
+        content: url(../../assets/purple-light/search-hover.png);
+    }
+}
+
+.artist-search-icon-magenta-light {
+    width: auto;
+    height: 30px;
+    cursor: pointer;
+    &:hover {
+        content: url(../../assets/magenta-light/search-hover.png);
+    }
+}
+
+.artistsort-item {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    &:hover {
+        filter: brightness(150%);
+    }
+    margin-left: 15px;
+}
+
+.artistsort-text {
+    font-family: Tahoma, sans-serif;
+    font-size: 16px;
+    margin-left: 5px;
+    color: var(--sortbarText);
+    .stroke-black();
+}
+
+.artistsort-img {
+    width: auto;
+    height: 20px;
+}
+
+.artist-dropdown {
+    position: absolute;
+    z-index: 850;
+    top: 0;
+    right: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--sortbarBG);
+    transform-origin: top;
+    transition: all 0.3s;
+}
+
+
+.hide-artist-dropdown {
+    transform-origin: top;
+    transform: scaleY(0);
+}
+
+.artist-dropdown-row {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    height: 100%;
+    padding: 5px;
+    cursor: pointer;
+    &:hover {
+        filter: brightness(140%);
+    }
+}
+
+.artist-dropdown-text {
+    font-family: Tahoma, sans-serif;
+    font-size: 16px;
+    margin-left: 5px;
+    color: var(--sortbarText);
+    .stroke-black();
+}
+
+.artist-dropdown-img {
+    width: auto;
+    height: 20px;
+}
+
+.artists-container {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    height: 100%;
 }

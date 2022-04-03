@@ -1,5 +1,6 @@
 import React, {useContext, useEffect, useState} from "react"
-import {ThemeContext, HideSidebarContext, HideNavbarContext, EnableDragContext, RelativeContext} from "../App"
+import {ThemeContext, HideSidebarContext, HideNavbarContext, HideSortbarContext, EnableDragContext, 
+RelativeContext, HideTitlebarContext, SidebarHoverContext} from "../Context"
 import {HashLink as Link} from "react-router-hash-link"
 import search from "../assets/purple/search.png"
 import searchImage from "../assets/purple/search-image.png"
@@ -54,10 +55,13 @@ interface Props {
 
 const SideBar: React.FunctionComponent<Props> = (props) => {
     const {theme, setTheme} = useContext(ThemeContext)
+    const {hideSortbar, setHideSortbar} = useContext(HideSortbarContext)
     const {hideSidebar, setHideSidebar} = useContext(HideSidebarContext)
     const {hideNavbar, setHideNavbar} = useContext(HideNavbarContext)
+    const {hideTitlebar, setHideTitlebar} = useContext(HideTitlebarContext)
     const {enableDrag, setEnableDrag} = useContext(EnableDragContext)
     const {relative, setRelative} = useContext(RelativeContext)
+    const {sidebarHover, setSidebarHover} = useContext(SidebarHoverContext)
     const [tags, setTags] = useState([]) as any
     const [maxTags, setMaxTags] = useState(26)
 
@@ -73,16 +77,29 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
         const scrollHandler = () => {
             const sidebar = document.querySelector(".sidebar") as HTMLElement
             if (!relative) {
-                if (!hideNavbar) {
+                if (!hideTitlebar) {
+                    sidebar.style.top = "112px"
                     sidebar.style.height = "calc(100vh - 35px - 77px)"
                     if (maxTags !== 26) setMaxTags(26)
                 } else {
                     if (window.scrollY !== 0) {
-                        sidebar.style.height = "calc(100vh - 35px)"
-                        if (maxTags !== 30) setMaxTags(30)
+                        if (hideNavbar && window.scrollY > 77) {
+                            sidebar.style.top = "0px"
+                            sidebar.style.height = "100vh"
+                            if (maxTags !== 30) setMaxTags(30)
+                        } else {
+                            sidebar.style.top = "35px"
+                            sidebar.style.height = "calc(100vh - 35px)"
+                            if (maxTags !== 30) setMaxTags(30)
+                        }
+                    } else {
+                        sidebar.style.top = "112px"
+                        sidebar.style.height = "calc(100vh - 35px - 77px)"
+                        if (maxTags !== 26) setMaxTags(26)
                     }
                 }
             } else {
+                sidebar.style.top = "0px"
                 sidebar.style.height = "auto"
                 if (maxTags !== 30) setMaxTags(30)
             }
@@ -98,20 +115,68 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
     useEffect(() => {
         const sidebar = document.querySelector(".sidebar") as HTMLElement
         if (!relative) {
-            if (!hideNavbar) {
+            if (!hideTitlebar) {
+                sidebar.style.top = "112px"
                 sidebar.style.height = "calc(100vh - 35px - 77px)"
                 if (maxTags !== 26) setMaxTags(26)
             } else {
                 if (window.scrollY !== 0) {
-                    sidebar.style.height = "calc(100vh - 35px)"
-                    if (maxTags !== 30) setMaxTags(30)
+                    if (hideNavbar && window.scrollY > 77) {
+                        sidebar.style.top = "0px"
+                        sidebar.style.height = "100vh"
+                        if (maxTags !== 32) setMaxTags(32)
+                    } else {
+                        sidebar.style.top = "35px"
+                        sidebar.style.height = "calc(100vh - 35px)"
+                        if (maxTags !== 30) setMaxTags(30)
+                    }
+                } else {
+                    sidebar.style.top = "112px"
+                    sidebar.style.height = "calc(100vh - 35px - 77px)"
+                    if (maxTags !== 26) setMaxTags(26)
                 }
             }
         } else {
+            sidebar.style.top = "0px"
             sidebar.style.height = "auto"
             if (maxTags !== 30) setMaxTags(30)
         }
-    }, [hideNavbar])
+    }, [hideTitlebar, relative])
+
+    useEffect(() => {
+        const sidebar = document.querySelector(".sidebar") as HTMLElement
+        if (!relative) {
+            if (!hideNavbar) {
+                if (!hideTitlebar) {
+                    sidebar.style.top = "112px"
+                    sidebar.style.height = "calc(100vh - 35px - 77px)"
+                    if (maxTags !== 26) setMaxTags(26)
+                } else {
+                    sidebar.style.top = "35px"
+                    sidebar.style.height = "calc(100vh - 35px)"
+                    if (maxTags !== 30) setMaxTags(30)
+                }
+                return
+            }
+            if (!hideSortbar) {
+                if (sidebar.style.top === "0px") {
+                    sidebar.style.top = "35px"
+                    sidebar.style.height = "calc(100vh - 35px)"
+                    if (maxTags !== 30) setMaxTags(30)
+                }
+            } else {
+                if (sidebar.style.top === "35px") {
+                    sidebar.style.top = "0px"
+                    sidebar.style.height = "100vh"
+                    if (maxTags !== 32) setMaxTags(32)
+                }
+            }
+        } else {
+            sidebar.style.top = "0px"
+            sidebar.style.height = "auto"
+            if (maxTags !== 30) setMaxTags(30)
+        }
+    }, [hideSortbar, hideNavbar, hideTitlebar])
 
     const getSearchIcon = () => {
         if (theme === "purple") return search
@@ -208,8 +273,8 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
     }
 
     return (
-        <div className={`sidebar ${hideSidebar ? "hide-sidebar" : ""} ${hideNavbar ? "sidebar-top" : ""}
-        ${relative ? "sidebar-relative" : ""}`} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
+        <div className={`sidebar ${hideSidebar ? "hide-sidebar" : ""} ${hideTitlebar ? "sidebar-top" : ""}
+        ${relative ? "sidebar-relative" : ""}`} onMouseEnter={() => {setEnableDrag(false); setSidebarHover(true)}} onMouseLeave={() => {setEnableDrag(true); setSidebarHover(false)}}>
             <div className="sidebar-container">
             <div className="sidebar-content">
                 <div className="sidebar-text-container">

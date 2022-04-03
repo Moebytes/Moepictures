@@ -4,7 +4,7 @@ import Slider from "react-slider"
 import {ThemeContext, HideSidebarContext, HideNavbarContext, HideSortbarContext, ActiveDropdownContext, 
 SizeTypeContext, BrightnessContext, ContrastContext, HueContext, SaturationContext, LightnessContext,
 BlurContext, SharpenContext, EnableDragContext, FilterDropActiveContext, SquareContext, PixelateContext,
-ShowDownloadDialogContext} from "../App"
+ShowDownloadDialogContext, HideTitlebarContext} from "../Context"
 import leftArrow from "../assets/purple/leftArrow.png"
 import leftArrowMagenta from "../assets/magenta/leftArrow.png"
 import rightArrow from "../assets/purple/rightArrow.png"
@@ -75,6 +75,7 @@ const SortBar: React.FunctionComponent = (props) => {
     const {hideSortbar, setHideSortbar} = useContext(HideSortbarContext)
     const {hideSidebar, setHideSidebar} = useContext(HideSidebarContext)
     const {hideNavbar, setHideNavbar} = useContext(HideNavbarContext)
+    const {hideTitlebar, setHideTitlebar} = useContext(HideTitlebarContext)
     const {enableDrag, setEnableDrag} = useContext(EnableDragContext)
     const {activeDropdown, setActiveDropdown} = useContext(ActiveDropdownContext)
     const {filterDropActive, setFilterDropActive} = useContext(FilterDropActiveContext)
@@ -127,7 +128,7 @@ const SortBar: React.FunctionComponent = (props) => {
         }
         const scrollHandler = () => {
             if (window.scrollY === 0) return setDropTop(0)
-            const newDropTop = hideNavbar ? -Number(document.querySelector(".titlebar")?.clientHeight) : 0
+            const newDropTop = hideTitlebar ? -Number(document.querySelector(".titlebar")?.clientHeight) - 2 : 0
             if (dropTop === newDropTop) return
             setDropTop(newDropTop)
         }
@@ -150,12 +151,12 @@ const SortBar: React.FunctionComponent = (props) => {
 
     useEffect(() => {
         setActiveDropdown("none")
-        if (hideNavbar) {
-            setDropTop(-Number(document.querySelector(".titlebar")?.clientHeight))
+        if (hideTitlebar) {
+            setDropTop(-Number(document.querySelector(".titlebar")?.clientHeight) - 2)
         } else {
             setDropTop(0)
         }
-    }, [hideNavbar])
+    }, [hideTitlebar])
 
     useEffect(() => {
         localStorage.setItem("type", imageType)
@@ -171,8 +172,8 @@ const SortBar: React.FunctionComponent = (props) => {
     }
 
     const getUpArrow = () => {
-        if (theme.includes("magenta")) return hideNavbar ? downArrowMagenta : upArrowMagenta
-        return hideNavbar ? downArrow : upArrow
+        if (theme.includes("magenta")) return hideTitlebar ? downArrowMagenta : upArrowMagenta
+        return hideTitlebar ? downArrow : upArrow
     }
 
     const getUpload = () => {
@@ -317,10 +318,12 @@ const SortBar: React.FunctionComponent = (props) => {
         })
     }
 
-    const hideTheNavbar = () => {
-        setHideNavbar((prev: boolean) => {
-            localStorage.setItem("navbar", `${prev}`)
-            return !prev
+    const hideTheTitlebar = () => {
+        setHideTitlebar((prev: boolean) => {
+            let val = !prev
+            setHideNavbar(val)
+            localStorage.setItem("titlebar", `${!val}`)
+            return val
         })
     }
 
@@ -561,15 +564,15 @@ const SortBar: React.FunctionComponent = (props) => {
 
     return (
         <>
-        <div className={`sortbar ${hideSortbar ? "hide-sortbar" : ""} ${hideNavbar ? "sortbar-top" : ""} 
-        ${hideSortbar && hideNavbar && hideSidebar ? "translate-sortbar" : ""}`}
+        <div className={`sortbar ${hideSortbar ? "hide-sortbar" : ""} ${hideTitlebar ? "sortbar-top" : ""} 
+        ${hideSortbar && hideTitlebar && hideSidebar ? "translate-sortbar" : ""}`}
         onMouseEnter={() => setMouseOver(true)} onMouseLeave={() => setMouseOver(false)}>
             <div className="sortbar-left">
                 <div className="sortbar-item">
                     <img className="sortbar-img" src={getLeftArrow()} onClick={() => hideTheSidebar()}/>
                 </div>
                 <div className="sortbar-item">
-                    <img className="sortbar-img" src={getUpArrow()} onClick={() => hideTheNavbar()}/>
+                    <img className="sortbar-img" src={getUpArrow()} onClick={() => hideTheTitlebar()}/>
                 </div>
                 <Link to="/upload" className="sortbar-item">
                     <img className="sortbar-img" src={getUpload()}/>
@@ -704,12 +707,6 @@ const SortBar: React.FunctionComponent = (props) => {
                 <div className="sortbar-dropdown-row" onClick={() => setSortType("reverse cuteness")}>
                     <span className="sortbar-dropdown-text">Reverse Cuteness</span>
                 </div>
-                {/* <div className="sortbar-dropdown-row" onClick={() => setSortType("favorites")}>
-                    <span className="sortbar-dropdown-text">Favorites</span>
-                </div>
-                <div className="sortbar-dropdown-row" onClick={() => setSortType("reverse favorites")}>
-                    <span className="sortbar-dropdown-text">Reverse Favorites</span>
-                </div> */}
             </div>
             <div className={`dropdown-right ${activeDropdown === "filters" ? "" : "hide-dropdown"}`} 
             style={{marginRight: getFiltersMargin(), top: dropTop}}>

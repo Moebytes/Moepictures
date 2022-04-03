@@ -11,20 +11,25 @@ import tosPurpleLight from "../assets/purple-light/tos.png"
 import privacyPurpleLight from "../assets/purple-light/privacy.png"
 import tosMagentaLight from "../assets/magenta-light/tos.png"
 import privacyMagentaLight from "../assets/magenta-light/privacy.png"
-import {HideNavbarContext, HideSidebarContext, ThemeContext, RelativeContext} from "../App"
+import DragAndDrop from "../components/DragAndDrop"
+import functions from "../structures/Functions"
+import {HideNavbarContext, HideSidebarContext, ThemeContext, RelativeContext, HideTitlebarContext} from "../Context"
 import "./styles/tospage.less"
 
 const TermsPage: React.FunctionComponent = (props) => {
     const {theme, setTheme} = useContext(ThemeContext)
     const {hideNavbar, setHideNavbar} = useContext(HideNavbarContext)
+    const {hideTitlebar, setHideTitlebar} = useContext(HideTitlebarContext)
     const {hideSidebar, setHideSidebar} = useContext(HideSidebarContext)
     const {relative, setRelative} = useContext(RelativeContext)
     const [onPrivacy, setOnPrivacy] = useState(false)
 
     useEffect(() => {
         setHideNavbar(true)
+        setHideTitlebar(true)
         setHideSidebar(false)
         setRelative(false)
+        window.scrollTo(0, 0)
     }, [])
 
     useEffect(() => {
@@ -53,6 +58,7 @@ const TermsPage: React.FunctionComponent = (props) => {
     
     return (
         <>
+        <DragAndDrop/>
         <TitleBar/>
         <NavBar/>
         <div className="body">
@@ -74,7 +80,7 @@ const TermsPage: React.FunctionComponent = (props) => {
 
                             Your Access to the Services<br/>
                             <span className="terms-text-alt">
-                            ⇾ You must be 18 or older to create an account on our services, and by creating an 
+                            ⇾ You must be 18 or older to create an account on our service, and by creating an 
                             account you are affirming that you are an adult by the laws of your country of 
                             residence.<br/>
                             ⇾ Your account may be terminated at any time for any or no reason, including but not
@@ -82,7 +88,7 @@ const TermsPage: React.FunctionComponent = (props) => {
                             </span>
 
                             Things You Cannot Do<br/>
-                            When you are using or accessing our services, you may not do any of the following: <br/>
+                            When you are using or accessing my services, you may not do any of the following: <br/>
                             <span className="terms-text-alt">
                             ⇾ Send spam in the comments or through unsolicited private messages.<br/>
                             ⇾ Vandalize tags or translations.<br/>
@@ -114,11 +120,10 @@ const TermsPage: React.FunctionComponent = (props) => {
                             </span>
                             These are acceptable proofs of identity:<br/>
                             <span className="terms-text-alt">
-                            ⇾ Post on one of your social media profiles affirming that you sent this<br/>
-                            ⇾ Source file to one of your works which is not available publicly<br/>
+                            ⇾ <span className="terms-weblink" onClick={() => functions.twitterLink()}>Private message us on Twitter</span><br/>
+                            ⇾ Attach a source file to one of your works which is not available publicly<br/>
                             </span>
-                            The infringing content will be removed from the service, and we will make sure
-                            that none of your work is ever posted again.<br/><br/>
+                            We do not remove material not protected by copyright, such as your artist tag and social links.<br/><br/>
 
                             Liability<br/>
                             The service is provided "as is", without warranty of any kind, express or implied. 

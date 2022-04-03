@@ -6,19 +6,25 @@ import SortBar from "../components/SortBar"
 import ImageGrid from "../components/ImageGrid"
 import Footer from "../components/Footer"
 import DownloadDialog from "../dialogs/DownloadDialog"
-import {HideNavbarContext, HideSidebarContext, SquareContext, RelativeContext} from "../App"
+import DragAndDrop from "../components/DragAndDrop"
+import {HideNavbarContext, HideSidebarContext, SquareContext, RelativeContext, HideTitlebarContext} from "../Context"
 
 const PostsPage: React.FunctionComponent = (props) => {
     const {hideNavbar, setHideNavbar} = useContext(HideNavbarContext)
+    const {hideTitlebar, setHideTitlebar} = useContext(HideTitlebarContext)
     const {hideSidebar, setHideSidebar} = useContext(HideSidebarContext)
     const {square, setSquare} = useContext(SquareContext)
     const {relative, setRelative} = useContext(RelativeContext)
 
     useEffect(() => {
         setRelative(false)
+        setHideNavbar(false)
         document.title = "Moebooru: Cutest Anime Art ♡"
-        const savedNavbar = localStorage.getItem("navbar")
-        if (savedNavbar === "false") setHideNavbar(true)
+        const savedTitlebar = localStorage.getItem("titlebar")
+        if (savedTitlebar === "false") {
+            setHideTitlebar(true)
+            setHideNavbar(true)
+        }
         const savedSidebar = localStorage.getItem("sidebar")
         if (savedSidebar === "false") setHideSidebar(true)
         const savedSquare = localStorage.getItem("square")
@@ -27,6 +33,7 @@ const PostsPage: React.FunctionComponent = (props) => {
 
     return (
         <>
+        <DragAndDrop/>
         <DownloadDialog/>
         <TitleBar text="Animated, With Audio, Loli"/>
         <NavBar/>

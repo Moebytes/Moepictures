@@ -9,9 +9,10 @@ import CutenessMeter from "../components/CutenessMeter"
 import Comments from "../components/Comments"
 import Commentary from "../components/Commentary"
 import functions from "../structures/Functions"
+import DragAndDrop from "../components/DragAndDrop"
 import {HideNavbarContext, HideSidebarContext, RelativeContext, DownloadFlagContext, DownloadURLsContext,
-EnableDragContext} from "../App"
-import klee from "../assets/images/vid1.mp4"
+EnableDragContext, HideTitlebarContext} from "../Context"
+import klee from "../assets/images/vid5.mp4"
 import "./styles/postpage.less"
 
 interface Props {
@@ -20,6 +21,7 @@ interface Props {
 
 const PostPage: React.FunctionComponent<Props> = (props) => {
     const {hideNavbar, setHideNavbar} = useContext(HideNavbarContext)
+    const {hideTitlebar, setHideTitlebar} = useContext(HideTitlebarContext)
     const {hideSidebar, setHideSidebar} = useContext(HideSidebarContext)
     const {relative, setRelative} = useContext(RelativeContext)
     const {downloadFlag, setDownloadFlag} = useContext(DownloadFlagContext)
@@ -28,6 +30,7 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
 
     useEffect(() => {
         setHideNavbar(false)
+        setHideTitlebar(false)
         setHideSidebar(false)
         setRelative(true)
         document.title = "Moebooru: Post"
@@ -40,6 +43,7 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
 
     return (
         <>
+        <DragAndDrop/>
         <TitleBar/>
         <NavBar/>
         <div className="body">

@@ -1,27 +1,87 @@
-import React, {useEffect, useContext, useState} from "react"
+import React, {useEffect, useContext, useState, useRef} from "react"
 import TitleBar from "../components/TitleBar"
 import NavBar from "../components/NavBar"
 import SideBar from "../components/SideBar"
 import Footer from "../components/Footer"
 import functions from "../structures/Functions"
-import {HideNavbarContext, HideSidebarContext, RelativeContext} from "../App"
+import DragAndDrop from "../components/DragAndDrop"
+import search from "../assets/purple/search.png"
+import searchMagenta from "../assets/magenta/search.png"
+import searchPurpleLight from "../assets/purple-light/search.png"
+import searchMagentaLight from "../assets/magenta-light/search.png"
+import sort from "../assets/purple/sort.png"
+import CharacterRow from "../components/CharacterRow"
+import sortMagenta from "../assets/magenta/sort.png"
+import {ThemeContext, EnableDragContext, HideNavbarContext, HideSidebarContext, RelativeContext, HideTitlebarContext, ActiveDropdownContext} from "../Context"
 import "./styles/characterspage.less"
 
 const CharactersPage: React.FunctionComponent = (props) => {
+    const {theme, setTheme} = useContext(ThemeContext)
+    const {enableDrag, setEnableDrag} = useContext(EnableDragContext)
     const {hideNavbar, setHideNavbar} = useContext(HideNavbarContext)
+    const {hideTitlebar, setHideTitlebar} = useContext(HideTitlebarContext)
     const {hideSidebar, setHideSidebar} = useContext(HideSidebarContext)
     const {relative, setRelative} = useContext(RelativeContext)
+    const {activeDropdown, setActiveDropdown} = useContext(ActiveDropdownContext)
+    const [sortType, setSortType] = useState("cuteness")
+    const sortRef = useRef(null) as any
 
     useEffect(() => {
-        setHideNavbar(false)
+        setHideNavbar(true)
+        setHideTitlebar(true)
         setHideSidebar(false)
-        setRelative(true)
+        setRelative(false)
+        setActiveDropdown("none")
         document.title = "Moebooru: Characters"
     }, [])
 
+    const getSearchIcon = () => {
+        if (theme === "purple") return search
+        if (theme === "purple-light") return searchPurpleLight
+        if (theme === "magenta") return searchMagenta
+        if (theme === "magenta-light") return searchMagentaLight
+        return search
+    }
+
+    const getSort = () => {
+        if (theme.includes("magenta")) return sortMagenta
+        return sort
+    }
+
+    const getSortMargin = () => {
+        const rect = sortRef.current?.getBoundingClientRect()
+        if (!rect) return "0px"
+        const raw = window.innerWidth - rect.right
+        let offset = 0
+        if (sortType === "cuteness") offset = -40
+        if (sortType === "reverse cuteness") offset = -10
+        if (sortType === "posts") offset = -45
+        if (sortType === "reverse posts") offset = -15
+        if (sortType === "alphabetic") offset = -25
+        if (sortType === "reverse alphabetic") offset = 0
+        return `${raw + offset}px`
+    }
+
+    const getSortJSX = () => {
+        return (
+            <div className="charactersort-item" ref={sortRef} onClick={() => {setActiveDropdown(activeDropdown === "sort" ? "none" : "sort")}}>
+                <img className="charactersort-img" src={getSort()}/>
+                <span className="charactersort-text">{functions.toProperCase(sortType)}</span>
+            </div>
+        )
+    }
+
+    const generateCharactersJSX = () => {
+        const jsx = [] as any 
+        for (let i = 0; i < 20; i++) {
+            jsx.push(<CharacterRow/>)
+        }
+        return jsx
+    }
 
     return (
         <>
+        <DragAndDrop/>
         <TitleBar/>
         <NavBar/>
         <div className="body">
@@ -29,6 +89,37 @@ const CharactersPage: React.FunctionComponent = (props) => {
             <div className="content">
                 <div className="characters">
                     <span className="characters-heading">Characters</span>
+                    <div className="characters-row">
+                        <div className="character-search-container" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
+                            <input className="character-search" type="search" spellCheck="false"/>
+                            <img className={!theme || theme === "purple" ? "character-search-icon" : `character-search-icon-${theme}`} src={getSearchIcon()}/>
+                        </div>
+                        {getSortJSX()}
+                        <div className={`character-dropdown ${activeDropdown === "sort" ? "" : "hide-character-dropdown"}`} 
+                        style={{marginRight: getSortMargin(), top: "209px"}} onClick={() => setActiveDropdown("none")}>
+                            <div className="character-dropdown-row" onClick={() => setSortType("cuteness")}>
+                                <span className="character-dropdown-text">Cuteness</span>
+                            </div>
+                            <div className="character-dropdown-row" onClick={() => setSortType("reverse cuteness")}>
+                                <span className="character-dropdown-text">Reverse Cuteness</span>
+                            </div>
+                            <div className="character-dropdown-row" onClick={() => setSortType("posts")}>
+                                <span className="character-dropdown-text">Posts</span>
+                            </div>
+                            <div className="character-dropdown-row" onClick={() => setSortType("reverse posts")}>
+                                <span className="character-dropdown-text">Reverse Posts</span>
+                            </div>
+                            <div className="character-dropdown-row" onClick={() => setSortType("alphabetic")}>
+                                <span className="character-dropdown-text">Alphabetic</span>
+                            </div>
+                            <div className="character-dropdown-row" onClick={() => setSortType("reverse alphabetic")}>
+                                <span className="character-dropdown-text">Reverse Alphabetic</span>
+                            </div>
+                        </div>
+                    </div>
+                    <table className="characters-container">
+                        {generateCharactersJSX()}
+                    </table>
                 </div>
                 <Footer/>
             </div>

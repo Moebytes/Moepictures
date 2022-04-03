@@ -47,7 +47,7 @@
 .post-video {
     position: relative;
     display: flex;
-    z-index: 810;
+    z-index: 800;
     margin: auto;
     margin-top: 0;
     margin-bottom: 0;
@@ -150,10 +150,12 @@
 
 .video-sharpen-overlay {
     .post-sharpen-overlay();
+    z-index: 825;
 }
 
 .video-lightness-overlay {
     .post-lightness-overlay();
+    z-index: 820;
 }
 
 
@@ -593,4 +595,27 @@
     &:hover {
         filter: brightness(130%);
     }
+}
+
+.encoding-overlay {
+    z-index: 900;
+    position: absolute;
+    margin: auto;
+    margin-top: 0;
+    margin-bottom: 0;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: rgba(0, 0, 0, 0.9);
+}
+
+.encoding-overlay-text {
+    font-family: Tahoma, sans-serif;
+    font-size: 40px;
+    color: var(--text);
+    .stroke-black();
 }

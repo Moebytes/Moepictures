@@ -12,12 +12,14 @@ import showMagenta from "../assets/magenta/show.png"
 import hideMagenta from "../assets/magenta/hide.png"
 import showMagentaLight from "../assets/magenta-light/show.png"
 import hideMagentaLight from "../assets/magenta-light/hide.png"
-import {HideNavbarContext, HideSidebarContext, ThemeContext, EnableDragContext, RelativeContext} from "../App"
+import DragAndDrop from "../components/DragAndDrop"
+import {HideNavbarContext, HideSidebarContext, ThemeContext, EnableDragContext, RelativeContext, HideTitlebarContext} from "../Context"
 import "./styles/changepasspage.less"
 
 const ChangePasswordPage: React.FunctionComponent = (props) => {
     const {theme, setTheme} = useContext(ThemeContext)
     const {hideNavbar, setHideNavbar} = useContext(HideNavbarContext)
+    const {hideTitlebar, setHideTitlebar} = useContext(HideTitlebarContext)
     const {hideSidebar, setHideSidebar} = useContext(HideSidebarContext)
     const {enableDrag, setEnableDrag} = useContext(EnableDragContext)
     const {relative, setRelative} = useContext(RelativeContext)
@@ -28,6 +30,7 @@ const ChangePasswordPage: React.FunctionComponent = (props) => {
 
     useEffect(() => {
         setHideNavbar(false)
+        setHideTitlebar(false)
         setHideSidebar(false)
         setRelative(false)
         document.title = "Moebooru: Change Password"
@@ -59,6 +62,7 @@ const ChangePasswordPage: React.FunctionComponent = (props) => {
 
     return (
         <>
+        <DragAndDrop/>
         <TitleBar/>
         <NavBar/>
         <div className="body">

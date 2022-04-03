@@ -8,12 +8,15 @@ import XButton from "../assets/purple/x-button.png"
 import XButtonPurpleLight from "../assets/purple-light/x-button.png"
 import XButtonMagenta from "../assets/magenta/x-button.png"
 import XButtonMagentaLight from "../assets/magenta-light/x-button.png"
-import {HideNavbarContext, HideSidebarContext, ThemeContext, EnableDragContext, RelativeContext} from "../App"
+import DragAndDrop from "../components/DragAndDrop"
+import functions from "../structures/Functions"
+import {HideNavbarContext, HideSidebarContext, ThemeContext, EnableDragContext, RelativeContext, HideTitlebarContext} from "../Context"
 import "./styles/contactpage.less"
 
 const ContactPage: React.FunctionComponent = (props) => {
     const {theme, setTheme} = useContext(ThemeContext)
     const {hideNavbar, setHideNavbar} = useContext(HideNavbarContext)
+    const {hideTitlebar, setHideTitlebar} = useContext(HideTitlebarContext)
     const {hideSidebar, setHideSidebar} = useContext(HideSidebarContext)
     const {enableDrag, setEnableDrag} = useContext(EnableDragContext)
     const {relative, setRelative} = useContext(RelativeContext)
@@ -22,6 +25,7 @@ const ContactPage: React.FunctionComponent = (props) => {
 
     useEffect(() => {
         setHideNavbar(false)
+        setHideTitlebar(false)
         setHideSidebar(false)
         setRelative(false)
         document.title = "Moebooru: Contact"
@@ -44,6 +48,7 @@ const ContactPage: React.FunctionComponent = (props) => {
 
     return (
         <>
+        <DragAndDrop/>
         <TitleBar/>
         <NavBar/>
         <div className="body">
@@ -67,9 +72,10 @@ const ContactPage: React.FunctionComponent = (props) => {
                         </span>
                         These are acceptable proofs of identity:<br/>
                         <span className="contact-text-alt">
-                        ⇾ Post on one of your social media profiles affirming that you sent this<br/>
-                        ⇾ Source file to one of your works which isn't available publicly<br/>
+                        ⇾ <span className="contact-weblink" onClick={() => functions.twitterLink()}>Private message us on Twitter</span><br/>
+                        ⇾ Attach a source file to one of your works which isn't available publicly<br/>
                         </span>
+                        We do not remove material not protected by copyright, such as your artist tag and social links.
                     </span>
                     <div className="contact-row">
                         <span className="contact-text">Subject:</span>

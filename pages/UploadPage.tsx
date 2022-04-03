@@ -22,52 +22,68 @@ import pixel from "../assets/purple/pixel.png"
 import chibi from "../assets/purple/chibi.png"
 import Carousel from "../components/Carousel"
 import PostImage from "../components/PostImage"
-import {HideNavbarContext, HideSidebarContext, RelativeContext, ThemeContext, EnableDragContext} from "../App"
+import DragAndDrop from "../components/DragAndDrop"
+import {HideNavbarContext, HideSidebarContext, RelativeContext, ThemeContext, EnableDragContext, HideTitlebarContext, 
+UploadDropFilesContext} from "../Context"
 import fileType from "magic-bytes.js"
 import JSZip from "jszip"
 import "./styles/uploadpage.less"
+import path from "path"
+
+let enterLinksTimer = null as any
 
 const UploadPage: React.FunctionComponent = (props) => {
     const {enableDrag, setEnableDrag} = useContext(EnableDragContext)
     const {hideNavbar, setHideNavbar} = useContext(HideNavbarContext)
+    const {hideTitlebar, setHideTitlebar} = useContext(HideTitlebarContext)
     const {hideSidebar, setHideSidebar} = useContext(HideSidebarContext)
     const {relative, setRelative} = useContext(RelativeContext)
+    const {uploadDropFiles, setUploadDropFiles} = useContext(UploadDropFilesContext)
     const [getSelectFilesHover, setSelectFilesHover] = useState(false)
     const [getEnterLinksHover, setEnterLinksHover] = useState(false)
     const [getUploadXHover, setUploadXHover] = useState(false)
     const [displayImage, setDisplayImage] = useState(false)
     const [uploadError, setUploadError] = useState(false)
     const [acceptedURLs, setAcceptedURLs] = useState([])
-    const uploadErrorRef = useRef(null) as any
+    const uploadErrorRef = useRef<any>(null)
+    const enterLinksRef = useRef<any>(null)
     const [currentImg, setCurrentImg] = useState(null) as any
     const [type, setType] = useState("image")
     const [restrict, setRestrict] = useState("safe")
     const [style, setStyle] = useState("2D")
+    const [showLinksInput, setShowLinksInput] = useState(false)
     const history = useHistory()
 
     useEffect(() => {
-        setHideNavbar(false)
+        setHideNavbar(true)
+        setHideTitlebar(true)
         setHideSidebar(false)
-        setRelative(true)
+        setRelative(false)
         document.title = "Moebooru: Upload"
+        window.scrollTo(0, 0)
     }, [])
 
-    const upload = async (event: any) => {
-        const files = event.target.files 
-        console.log(files)
-        if (!files?.[0]) return
+    useEffect(() => {
+        if (uploadDropFiles?.length) {
+            validate(uploadDropFiles)
+            setUploadDropFiles([])
+        }
+    }, [uploadDropFiles])
+
+    const validate = async (files: File[]) => {
         let acceptedArray = [] as any 
+        let error = ""
         for (let i = 0; i < files.length; i++) {
             const fileReader = new FileReader()
             await new Promise<void>((resolve) => {
                 fileReader.onloadend = async (f: any) => {
                     const bytes = new Uint8Array(f.target.result)
                     const result = fileType(bytes)?.[0]
-                    const jpg = result.mime === "image/jpeg"
-                    const png = result.mime === "image/png"
-                    const gif = result.mime === "image/gif"
-                    const mp4 = result.mime === "video/mp4"
-                    const zip = result.mime === "application/zip"
+                    const jpg = result?.mime === "image/jpeg"
+                    const png = result?.mime === "image/png"
+                    const gif = result?.mime === "image/gif"
+                    const mp4 = result?.mime === "video/mp4"
+                    const zip = result?.mime === "application/zip"
                     if (jpg || png || gif || mp4 || zip) {
                         const MB = files[i].size / (1024*1024)
                         const maxSize = jpg ? 5 :
@@ -83,18 +99,14 @@ const UploadPage: React.FunctionComponent = (props) => {
                                     if (file.dir || filename.startsWith("__MACOSX/")) continue
                                     const data = await file.async("uint8array")
                                     const result = fileType(data)?.[0]
-                                    const jpg = result.mime === "image/jpeg"
-                                    const png = result.mime === "image/png"
-                                    const gif = result.mime === "image/gif"
-                                    const mp4 = result.mime === "video/mp4"
+                                    const jpg = result?.mime === "image/jpeg"
+                                    const png = result?.mime === "image/png"
+                                    const gif = result?.mime === "image/gif"
+                                    const mp4 = result?.mime === "video/mp4"
                                     if (jpg || png || gif || mp4) {
                                         acceptedArray.push({file: new File([data], filename), ext: result.typename})
                                     } else {
-                                        setUploadError(true)
-                                        uploadErrorRef.current.innerText = `Supported types in zip: png, jpg, gif, mp4.`
-                                        await functions.timeout(1000)
-                                        setUploadError(false)
-                                        await functions.timeout(1000)
+                                        error = `Supported types in zip: png, jpg, gif, mp4.`
                                     }
                                 }
                                 resolve()
@@ -103,19 +115,11 @@ const UploadPage: React.FunctionComponent = (props) => {
                                 resolve()
                             }
                         } else {
-                            setUploadError(true)
-                            uploadErrorRef.current.innerText = `${result.typename.toUpperCase()} max file size: ${maxSize}MB`
-                            await functions.timeout(1000)
-                            setUploadError(false)
-                            await functions.timeout(1000)
+                            error = `${result.typename.toUpperCase()} max file size: ${maxSize}MB`
                             resolve()
                         }
                     } else {
-                        setUploadError(true)
-                        uploadErrorRef.current.innerText = `Supported file types: png, jpg, gif, mp4, zip.`
-                        await functions.timeout(1000)
-                        setUploadError(false)
-                        await functions.timeout(1000)
+                        error = `Supported file types: png, jpg, gif, mp4, zip.`
                         resolve()
                     }
                 }
@@ -131,7 +135,33 @@ const UploadPage: React.FunctionComponent = (props) => {
             setCurrentImg(urls[0])
             setAcceptedURLs(urls)
         }
+        if (error) {
+            setUploadError(true)
+            uploadErrorRef.current.innerText = error
+            await functions.timeout(3000)
+            setUploadError(false)
+        }
+    }
+
+    const upload = async (event: any) => {
+        const files = event.target.files
+        if (!files?.[0]) return
+        await validate(files)
         event.target.value = ""
+    }
+
+    const linkUpload = async (event: any) => {
+        const links = functions.removeDuplicates(event.target.value.split(/[\n\r\s]+/g).filter((l: string) => l.startsWith("http"))) as string[]
+        if (!links?.[0]) return
+        clearTimeout(enterLinksTimer)
+        enterLinksTimer = setTimeout(async () => {
+            let files = [] as any
+            for (let i = 0; i < links.length; i++) {
+                const file = await functions.proxyImage(links[i])
+                files.push(file)
+            }
+            await validate(files)
+        }, 500)
     }
 
     const set = (img: string) => {
@@ -142,11 +172,14 @@ const UploadPage: React.FunctionComponent = (props) => {
         setAcceptedURLs([])
         setCurrentImg(null)
         setUploadXHover(false)
+        if (enterLinksRef.current) enterLinksRef.current.value = ""
+        setShowLinksInput(false)
     }
 
 
     return (
         <>
+        <DragAndDrop/>
         <TitleBar/>
         <NavBar/>
         <div className="body">
@@ -161,7 +194,7 @@ const UploadPage: React.FunctionComponent = (props) => {
                             <span className="upload-button-text">Select Files</span>
                         </label>
                         <input id="file-upload" type="file" multiple onChange={(event) => upload(event)}/>
-                        <button className="upload-button">
+                        <button className="upload-button" onClick={() => setShowLinksInput((prev) => !prev)}>
                                 <img className="upload-button-img" src={linkIcon}/>
                                 <span className="upload-button-text">Enter Links</span>
                         </button>
@@ -171,18 +204,23 @@ const UploadPage: React.FunctionComponent = (props) => {
                         </button>
                         : null}
                     </div>
-                    {acceptedURLs.length ?
+                    {showLinksInput ?
                     <div className="upload-row">
-                        {acceptedURLs.length > 1 ? 
-                        <div className="upload-container">
-                            <Carousel images={acceptedURLs} set={set}/>
-                            <PostImage img={currentImg}/>
-                        </div>
-                        :
+                        <textarea ref={enterLinksRef} className="upload-textarea" spellCheck={false} onChange={(event) => linkUpload(event)}
+                        onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}></textarea>
+                    </div> : null}
+                {acceptedURLs.length ?
+                <div className="upload-row">
+                    {acceptedURLs.length > 1 ? 
+                    <div className="upload-container">
+                        <Carousel images={acceptedURLs} set={set}/>
                         <PostImage img={currentImg}/>
-                        }
                     </div>
-                    : null}
+                    :
+                    <PostImage img={currentImg}/>
+                    }
+                </div>
+                : null}
                 <span className="upload-heading">Classification</span>
                 <span className="upload-text-alt">If there are multiple images, select the rightmost tag that fits.</span>
                 <div className="upload-row">
@@ -282,10 +320,11 @@ const UploadPage: React.FunctionComponent = (props) => {
                     </div>
                     <div className="upload-container-row">
                         <span className="upload-text margin-right">Artist Image</span>
-                        <button className="upload-button">
+                        <label htmlFor="artist-upload" className="upload-button">
                                 <img className="upload-button-img" src={uploadIcon}/>
                                 <span className="upload-button-text">Upload</span>
-                        </button>
+                        </label>
+                        <input id="artist-upload" type="file" multiple onChange={(event) => upload(event)}/>
                     </div>
                     <div className="upload-container-row">
                         <span className="upload-link">+ Another artist</span>
@@ -300,10 +339,11 @@ const UploadPage: React.FunctionComponent = (props) => {
                     </div>
                     <div className="upload-container-row">
                         <span className="upload-text margin-right">Character Image</span>
-                        <button className="upload-button">
+                        <label htmlFor="character-upload" className="upload-button">
                                 <img className="upload-button-img" src={uploadIcon}/>
                                 <span className="upload-button-text">Upload</span>
-                        </button>
+                        </label>
+                        <input id="character-upload" type="file" multiple onChange={(event) => upload(event)}/>
                     </div>
                     <div className="upload-container-row">
                         <span className="upload-link">+ Another character</span>
@@ -318,10 +358,11 @@ const UploadPage: React.FunctionComponent = (props) => {
                     </div>
                     <div className="upload-container-row">
                         <span className="upload-text margin-right">Series Image</span>
-                        <button className="upload-button">
+                        <label htmlFor="series-upload" className="upload-button">
                                 <img className="upload-button-img" src={uploadIcon}/>
                                 <span className="upload-button-text">Upload</span>
-                        </button>
+                        </label>
+                        <input id="series-upload" type="file" multiple onChange={(event) => upload(event)}/>
                     </div>
                     <div className="upload-container-row">
                         <span className="upload-link">+ Another series</span>
@@ -346,7 +387,7 @@ const UploadPage: React.FunctionComponent = (props) => {
                     </div>
                 </div>
                 <span className="upload-text-alt">Enter the dashed version of the tag. If the tag doesn't exist, you will be promted to create it.
-                If you need help with tags, read the <span className="upload-link" onClick={() => history.push("/help")}>tagging guide.</span></span>
+                If you need help with tags, read the <Link className="upload-link" to="/help#tagging">tagging guide.</Link></span>
                 <div className="upload-container">
                     <div className="upload-container-row">
                         <textarea className="upload-textarea" spellCheck={false} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}></textarea>

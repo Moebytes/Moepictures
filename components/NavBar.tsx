@@ -1,5 +1,6 @@
 import React, {useContext, useState, useEffect} from "react"
 import {HashLink as Link} from "react-router-hash-link"
+import {useHistory} from "react-router-dom"
 import favicon from "../assets/purple/favicon.png"
 import faviconMagenta from "../assets/magenta/favicon.png"
 import eyedropper from "../assets/purple/eyedropper.png"
@@ -15,21 +16,24 @@ import eyedropperMagentaLight from "../assets/magenta-light/eyedropper.png"
 import lightMagentaLight from "../assets/magenta-light/light.png"
 import darkMagentaLight from "../assets/magenta-light/dark.png"
 import search2 from "../assets/purple/search2.png"
-import {ThemeContext, HideNavbarContext, HideSortbarContext, HideSidebarContext, EnableDragContext, RelativeContext} from "../App"
+import {ThemeContext, HideNavbarContext, HideSortbarContext, HideSidebarContext, EnableDragContext, RelativeContext, HideTitlebarContext} from "../Context"
 import "./styles/navbar.less"
 
 const NavBar: React.FunctionComponent = (props) => {
     const {theme, setTheme} = useContext(ThemeContext)
     const {hideNavbar, setHideNavbar} = useContext(HideNavbarContext)
+    const {hideTitlebar, setHideTitlebar} = useContext(HideTitlebarContext)
     const {hideSidebar, setHideSidebar} = useContext(HideSidebarContext)
     const {hideSortbar, setHideSortbar} = useContext(HideSortbarContext)
     const {enableDrag, setEnableDrag} = useContext(EnableDragContext)
     const {relative, setRelative} = useContext(RelativeContext)
     const [showMiniTitle, setShowMiniTitle] = useState(false)
+    const history = useHistory()
 
     useEffect(() => {
         const scrollHandler = () => {
-            if (hideNavbar) {
+            const navbar = document.querySelector(".navbar") as HTMLElement
+            if (hideTitlebar) {
                 if (window.scrollY < 77) {
                     setShowMiniTitle(false)
                 } else {
@@ -46,14 +50,14 @@ const NavBar: React.FunctionComponent = (props) => {
     })
 
     useEffect(() => {
-        if (!hideNavbar) {
+        if (!hideTitlebar) {
                 setShowMiniTitle(false)
         } else {
             if (window.scrollY > 77) {
                 setShowMiniTitle(true)
             }
         }
-    }, [hideNavbar])
+    }, [hideTitlebar])
 
     const colorChange = () => {
         let newTheme = ""
@@ -114,9 +118,9 @@ const NavBar: React.FunctionComponent = (props) => {
     }
 
     return (
-        <div className={`navbar ${hideNavbar ? "hide-navbar" : ""} ${hideSortbar && hideNavbar && hideSidebar ? "translate-navbar" : ""}
+        <div className={`navbar ${hideTitlebar ? "translate-navbar" : ""} ${hideSortbar && hideTitlebar && hideSidebar ? "hide-navbar" : ""} ${hideSortbar && hideNavbar && showMiniTitle ? "hide-navbar" : ""}
         ${relative ? "navbar-relative" : ""}`} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
-            {showMiniTitle ? 
+            {showMiniTitle && !relative ? 
                 <Link to="/" className="nav-mini-title-container">
                     <span className="nav-mini-title-a">M</span>
                     <span className="nav-mini-title-b">o</span>
@@ -130,30 +134,14 @@ const NavBar: React.FunctionComponent = (props) => {
                 </Link>
             : null}
             <div className="nav-text-container">
-                <Link to="/login">
-                    <span className="nav-text nav-user-text">Login</span>
-                </Link>
-                <Link to="/posts">
-                    <span className="nav-text">Posts</span>
-                </Link>
-                <Link to="/comments">
-                    <span className="nav-text">Comments</span>
-                </Link>
-                <Link to="/artists">
-                    <span className="nav-text">Artists</span>
-                </Link>
-                <Link to="/characters">
-                    <span className="nav-text">Characters</span>
-                </Link>
-                <Link to="/series">
-                    <span className="nav-text">Series</span>
-                </Link>
-                <Link to="/tags">
-                    <span className="nav-text">Tags</span>
-                </Link>
-                <Link to="/help">
-                    <span className="nav-text">Help</span>
-                </Link>
+                <span className="nav-text nav-user-text" onClick={() => history.push("/login")}>Login</span>
+                <span className="nav-text" onClick={() => history.push("/posts")}>Posts</span>
+                <span className="nav-text" onClick={() => history.push("/comments")}>Comments</span>
+                <span className="nav-text" onClick={() => history.push("/artists")}>Artists</span>
+                <span className="nav-text" onClick={() => history.push("/characters")}>Characters</span>
+                <span className="nav-text" onClick={() => history.push("/series")}>Series</span>
+                <span className="nav-text" onClick={() => history.push("/tags")}>Tags</span>
+                <span className="nav-text" onClick={() => history.push("/help")}>Help</span>
             </div>
             <div className="nav-color-container">
                 <div className={`nav-search-container ${!hideSidebar ? "hide-nav-search" : ""}`}>

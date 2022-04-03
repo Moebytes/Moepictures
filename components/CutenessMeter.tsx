@@ -1,5 +1,5 @@
 import React, {useContext, useEffect, useRef, useState, useReducer} from "react"
-import {ThemeContext} from "../App"
+import {ThemeContext} from "../Context"
 import Slider from "react-slider"
 import {HashLink as Link} from "react-router-hash-link"
 import functions from "../structures/Functions"
@@ -13,7 +13,6 @@ import "./styles/cutenessmeter.less"
 const CutenessMeter: React.FunctionComponent = (props) => {
     const {theme, setTheme} = useContext(ThemeContext)
     const [cuteness, setCuteness] = useState(500)
-    const [ignored, forceUpdate] = useReducer(x => x + 1, 0)
     const sliderRef = useRef<any>(null)
     useEffect(() => sliderRef.current ? sliderRef.current.resize() : null)
 
