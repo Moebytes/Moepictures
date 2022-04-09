@@ -4,12 +4,34 @@ import {HashLink as Link} from "react-router-hash-link"
 import functions from "../structures/Functions"
 import commentaryTranslate from "../assets/purple/commentarytranslate.png"
 import commentaryTranslateMagenta from "../assets/magenta/commentarytranslate.png"
+import axios from "axios"
 import "./styles/commentary.less"
 
-const Commentary: React.FunctionComponent = (props) => {
+interface Props {
+    text: string
+}
+
+const Commentary: React.FunctionComponent<Props> = (props) => {
     const {theme, setTheme} = useContext(ThemeContext)
     const {enableDrag, setEnableDrag} = useContext(EnableDragContext)
     const [showTranslated, setShowTranslated] = useState(false)
+    const [text, setText] = useState(props.text)
+    const [translatedText, setTranslatedText] = useState(null)
+
+    useEffect(() => {
+        if (showTranslated) {
+            if (translatedText) {
+                setText(translatedText)
+            } else {
+                axios.post("/api/translate", [props.text]).then((r) => {
+                    setTranslatedText(r.data[0])
+                    setText(r.data[0])
+                })
+            }
+        } else {
+            setText(props.text)
+        }
+    }, [showTranslated])
 
     const getCommentaryTranslate = () => {
         if (theme.includes("magenta")) return commentaryTranslateMagenta
@@ -20,11 +42,11 @@ const Commentary: React.FunctionComponent = (props) => {
         <div className="commentary">
             <div className="commentary-title-container">
                 <div className="commentary-title">Artist's Commentary</div>
-                <img className="commentary-img" src={getCommentaryTranslate()}/>
+                <img className="commentary-img" src={getCommentaryTranslate()} onClick={() => setShowTranslated((prev: boolean) => !prev)}/>
             </div>
             <div className="commentary-container" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                 <span className="commentary-text">
-                    This is some example commentary.     
+                    {text}   
                 </span>
             </div>
         </div>

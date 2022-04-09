@@ -13,9 +13,10 @@ import arrowRightMagentaLight from "../assets/magenta-light/carousel-right.png"
 import "./styles/carousel.less"
 
 interface Props {
-    set?: (img: string) => any
+    set?: (img: string, index: number) => any
     images: any[]
     height?: number
+    index?: number
 }
 
 let startX = 0
@@ -26,22 +27,28 @@ const Carousel: React.FunctionComponent<Props> = (props) => {
     const [lastPos, setLastPos] = useState(null) as any
     const [dragging, setDragging] = useState(false) as any
     const [imagesRef, setImagesRef] = useState(props.images.map(() => React.createRef())) as any
-    const [lastActive, setLastActive] = useState(imagesRef[0])
-    const [active, setActive] = useState(imagesRef[0])
+    const [lastActive, setLastActive] = useState(imagesRef[props.index ? props.index : 0])
+    const [active, setActive] = useState(imagesRef[props.index ? props.index : 0])
     const [showLeftArrow, setShowLeftArrow] = useState(false)
     const [showRightArrow, setShowRightArrow] = useState(false)
     const sliderRef = useRef<any>(null)
 
     useEffect(() => {
-        const newImagesRef = props.images.map(() => React.createRef())
+        const newImagesRef = props.images.map(() => React.createRef()) as any
         setImagesRef(newImagesRef) as any
-        setActive(newImagesRef[0])
-        setLastActive(newImagesRef[0])
+        setActive(newImagesRef[props.index ? props.index : 0])
+        setLastActive(newImagesRef[props.index ? props.index : 0])
         setShowLeftArrow(false)
         setShowRightArrow(false)
         setLastPos(null)
         setDragging(false)
     }, [props.images])
+
+    useEffect(() => {
+        if (props.index !== undefined) {
+            setActive(imagesRef[props.index])
+        }
+    }, [props.index])
 
     const getArrowLeft = () => {
         if (theme === "purple") return arrowLeft
@@ -62,6 +69,7 @@ const Carousel: React.FunctionComponent<Props> = (props) => {
     const handleIntersection = (entries: any) => {
         for (let entry of entries) {
             if (entry.intersectionRatio === 1) {
+                if (!sliderRef.current) return
                 const margin = parseInt(sliderRef.current.style.marginLeft)
                 if (margin < 0) setLastPos(margin)
             }
@@ -79,6 +87,7 @@ const Carousel: React.FunctionComponent<Props> = (props) => {
     }
 
     const handleKeydown = (event: any) => {
+        if (!sliderRef.current) return
         let marginLeft = parseInt(sliderRef.current.style.marginLeft)
         if (Number.isNaN(marginLeft)) marginLeft = 0
         const width = document.querySelector(".carousel-img")?.clientWidth || 0
@@ -92,7 +101,7 @@ const Carousel: React.FunctionComponent<Props> = (props) => {
         } 
         if (index < 0) index = 0
         if (index > imagesRef.length - 1) index = imagesRef.length - 1
-        if (props.set) props.set(props.images[index])
+        if (props.set) props.set(props.images[index], index)
         setActive(imagesRef[index])
 
         if (marginLeft > 0) marginLeft = 0
@@ -101,6 +110,7 @@ const Carousel: React.FunctionComponent<Props> = (props) => {
         sliderRef.current.style.transition = "margin-left 0.75s"
         sliderRef.current.style.marginLeft = `${marginLeft}px`
         setTimeout(() => {
+            if (!sliderRef.current) return
             sliderRef.current.style.transition = "margin-left 0.05s"
         }, 1000)
     }
@@ -126,9 +136,8 @@ const Carousel: React.FunctionComponent<Props> = (props) => {
 
     useEffect(() => {
         for (let i = 0; i < imagesRef.length; i++) {
-            imagesRef[i].current.style.border = "0"
+            if (imagesRef[i].current) imagesRef[i].current.style.border = "0"
         }
-        // if (lastActive.current) lastActive.current.style.border = "0"
         if (active.current) active.current.style.border = "3px solid var(--text)"
         setLastActive(active)
     }, [active])
@@ -138,9 +147,9 @@ const Carousel: React.FunctionComponent<Props> = (props) => {
         for (let i = 0; i < props.images.length; i++) {
             const img = props.images[i]
             if (functions.isVideo(img)) {
-                jsx.push(<video autoPlay muted loop disablePictureInPicture ref={imagesRef[i]} className="carousel-img" src={img} onClick={() => {props.set?.(img); setActive(imagesRef[i])}} style={props.height ? {height: `${props.height}px`} : {}}></video>)
+                jsx.push(<video autoPlay muted loop disablePictureInPicture ref={imagesRef[i]} className="carousel-img" src={img} onClick={() => {props.set?.(img, i); setActive(imagesRef[i])}} style={props.height ? {height: `${props.height}px`} : {}}></video>)
             } else {
-                jsx.push(<img ref={imagesRef[i]} className="carousel-img" src={img} onClick={() => {props.set?.(img); setActive(imagesRef[i])}} style={props.height ? {height: `${props.height}px`} : {}}/>)
+                jsx.push(<img ref={imagesRef[i]} className="carousel-img" src={img} onClick={() => {props.set?.(img, i); setActive(imagesRef[i])}} style={props.height ? {height: `${props.height}px`} : {}}/>)
             }
         }
         return jsx
@@ -148,6 +157,7 @@ const Carousel: React.FunctionComponent<Props> = (props) => {
 
     const handleWheel = (event: any) => {
         event.preventDefault()
+        if (!sliderRef.current) return
         let marginLeft = parseInt(sliderRef.current.style.marginLeft)
         if (Number.isNaN(marginLeft)) marginLeft = 0
         const trackPad = event.wheelDeltaY ? event.wheelDeltaY === -3 * event.deltaY : event.deltaMode === 0
@@ -184,6 +194,7 @@ const Carousel: React.FunctionComponent<Props> = (props) => {
 
     const handleMouseMove = (event: any) => {
         if (!dragging) return
+        if (!sliderRef.current) return
         let marginLeft = parseInt(sliderRef.current.style.marginLeft)
         if (Number.isNaN(marginLeft)) marginLeft = 0
         if (event.pageX < startX) {
@@ -202,6 +213,7 @@ const Carousel: React.FunctionComponent<Props> = (props) => {
     }
 
     const arrowLeftEnter = () => {
+        if (!sliderRef.current) return
         let marginLeft = parseInt(sliderRef.current.style.marginLeft)
         if (Number.isNaN(marginLeft)) marginLeft = 0
         if (marginLeft < 0) setShowLeftArrow(true)
@@ -209,6 +221,7 @@ const Carousel: React.FunctionComponent<Props> = (props) => {
 
     const arrowRightEnter = () => {
         if (!lastPos) setShowRightArrow(true)
+        if (!sliderRef.current) return
         let marginLeft = parseInt(sliderRef.current.style.marginLeft)
         if (Number.isNaN(marginLeft)) marginLeft = 0
         if (marginLeft > lastPos) setShowRightArrow(true)
@@ -216,6 +229,7 @@ const Carousel: React.FunctionComponent<Props> = (props) => {
 
     const arrowLeftClick = () => {
         if (!showLeftArrow) return
+        if (!sliderRef.current) return
         let marginLeft = parseInt(sliderRef.current.style.marginLeft)
         if (Number.isNaN(marginLeft)) marginLeft = 0
         const sidebarWidth = document.querySelector(".sidebar")?.clientWidth || 0
@@ -224,12 +238,14 @@ const Carousel: React.FunctionComponent<Props> = (props) => {
         sliderRef.current.style.transition = "margin-left 0.75s"
         sliderRef.current.style.marginLeft = `${newMargin}px`
         setTimeout(() => {
+            if (!sliderRef.current) return
             sliderRef.current.style.transition = "margin-left 0.05s"
         }, 1000)
     }
 
     const arrowRightClick = () => {
         if (!showRightArrow) return
+        if (!sliderRef.current) return
         let marginLeft = parseInt(sliderRef.current.style.marginLeft)
         if (Number.isNaN(marginLeft)) marginLeft = 0
         const sidebarWidth = document.querySelector(".sidebar")?.clientWidth || 0
@@ -238,6 +254,7 @@ const Carousel: React.FunctionComponent<Props> = (props) => {
         sliderRef.current.style.transition = "margin-left 0.75s"
         sliderRef.current.style.marginLeft = `${newMargin}px`
         setTimeout(() => {
+            if (!sliderRef.current) return
             sliderRef.current.style.transition = "margin-left 0.05s"
         }, 1000)
     }

@@ -24,6 +24,9 @@ const SeriesPage: React.FunctionComponent = (props) => {
     const {relative, setRelative} = useContext(RelativeContext)
     const {activeDropdown, setActiveDropdown} = useContext(ActiveDropdownContext)
     const [sortType, setSortType] = useState("cuteness")
+    const [series, setSeries] = useState([]) as any
+    const [index, setIndex] = useState(0)
+    const [visibleSeries, setVisibleSeries] = useState([]) as any
     const sortRef = useRef(null) as any
 
     useEffect(() => {
@@ -33,7 +36,46 @@ const SeriesPage: React.FunctionComponent = (props) => {
         setRelative(false)
         setActiveDropdown("none")
         document.title = "Moebooru: Series"
+
+        const newSeries = [] as any 
+        for (let i = 0; i < 100; i++) {
+            newSeries.push(<SeriesRow/>)
+        }
+        setSeries(newSeries)
     }, [])
+
+    useEffect(() => {
+        let currentIndex = index
+        const newVisibleSeries = visibleSeries as any
+        for (let i = 0; i < 10; i++) {
+            if (!series[currentIndex]) break
+            newVisibleSeries.push(series[currentIndex])
+            currentIndex++
+        }
+        setIndex(currentIndex)
+        setVisibleSeries(newVisibleSeries)
+    }, [series])
+
+    useEffect(() => {
+        const scrollHandler = async () => {
+            if (functions.scrolledToBottom()) {
+                let currentIndex = index
+                if (!series[currentIndex]) return
+                const newSeries = visibleSeries as any
+                for (let i = 0; i < 10; i++) {
+                    if (!series[currentIndex]) break
+                    newSeries.push(series[currentIndex])
+                    currentIndex++
+                }
+                setIndex(currentIndex)
+                setVisibleSeries(newSeries)
+            }
+        }
+        window.addEventListener("scroll", scrollHandler)
+        return () => {
+            window.removeEventListener("scroll", scrollHandler)
+        }
+    })
 
     const getSearchIcon = () => {
         if (theme === "purple") return search
@@ -72,8 +114,8 @@ const SeriesPage: React.FunctionComponent = (props) => {
     }
 
     const generateSeriesJSX = () => {
-        const jsx = [] as any 
-        for (let i = 0; i < 20; i++) {
+        const jsx = [] as any
+        for (let i = 0; i < visibleSeries.length; i++) {
             jsx.push(<SeriesRow/>)
         }
         return jsx

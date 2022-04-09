@@ -23,7 +23,7 @@ module.exports = [
     module: {
       rules: [
         {test: /\.(jpe?g|png|gif|svg|mp3|wav|mp4|ttf|otf)$/, exclude: webExclude, use: [{loader: "file-loader", options: {name: "[path][name].[ext]"}}]},
-        {test: /\.txt$/, exclude: webExclude, use: ["raw-loader"]},
+        {test: /\.(txt|sql)$/, exclude: webExclude, use: ["raw-loader"]},
         {test: /\.html$/, exclude: webExclude, use: [{loader: "html-loader", query: {minimize: false}}]},
         {test: /\.css$/, exclude: webExclude, use: [{loader: MiniCssExtractPlugin.loader, options: {hmr: true}}, "css-loader"]},
         {test: /\.less$/, exclude: webExclude, use: [{loader: MiniCssExtractPlugin.loader, options: {hmr: true}}, "css-loader", {loader: "less-loader"}]},
@@ -58,7 +58,7 @@ module.exports = [
     module: {
       rules: [
         {test: /\.(jpe?g|png|gif|svg|mp3|wav|mp4|ttf|otf)$/, exclude, use: [{loader: "file-loader", options: {name: "[path][name].[ext]"}}]},
-        {test: /\.txt$/, exclude, use: ["raw-loader"]},
+        {test: /\.(txt|sql)$/, exclude, use: ["raw-loader"]},
         {test: /\.html$/, exclude, use: [{loader: "html-loader", query: {minimize: false}}]},
         {test: /\.css$/, exclude, use: [{loader: MiniCssExtractPlugin.loader, options: {hmr: true}}, "css-loader"]},
         {test: /\.less$/, exclude, use: [{loader: MiniCssExtractPlugin.loader, options: {hmr: true}}, "css-loader", {loader: "less-loader"}]},

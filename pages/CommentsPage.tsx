@@ -24,6 +24,9 @@ const CommentsPage: React.FunctionComponent = (props) => {
     const {relative, setRelative} = useContext(RelativeContext)
     const {activeDropdown, setActiveDropdown} = useContext(ActiveDropdownContext)
     const [sortType, setSortType] = useState("date")
+    const [comments, setComments] = useState([]) as any
+    const [index, setIndex] = useState(0)
+    const [visibleComments, setVisibleComments] = useState([]) as any
     const sortRef = useRef(null) as any
 
     useEffect(() => {
@@ -33,7 +36,46 @@ const CommentsPage: React.FunctionComponent = (props) => {
         setRelative(false)
         setActiveDropdown("none")
         document.title = "Moebooru: Comments"
+
+        const newComments = [] as any 
+        for (let i = 0; i < 100; i++) {
+            newComments.push(<CommentRow/>)
+        }
+        setComments(newComments)
     }, [])
+
+    useEffect(() => {
+        let currentIndex = index
+        const newVisibleComments = visibleComments as any
+        for (let i = 0; i < 10; i++) {
+            if (!comments[currentIndex]) break
+            newVisibleComments.push(comments[currentIndex])
+            currentIndex++
+        }
+        setIndex(currentIndex)
+        setVisibleComments(newVisibleComments)
+    }, [comments])
+
+    useEffect(() => {
+        const scrollHandler = async () => {
+            if (functions.scrolledToBottom()) {
+                let currentIndex = index
+                if (!comments[currentIndex]) return
+                const newComments = visibleComments as any
+                for (let i = 0; i < 10; i++) {
+                    if (!comments[currentIndex]) break
+                    newComments.push(comments[currentIndex])
+                    currentIndex++
+                }
+                setIndex(currentIndex)
+                setVisibleComments(newComments)
+            }
+        }
+        window.addEventListener("scroll", scrollHandler)
+        return () => {
+            window.removeEventListener("scroll", scrollHandler)
+        }
+    })
 
     const getSearchIcon = () => {
         if (theme === "purple") return search
@@ -68,8 +110,8 @@ const CommentsPage: React.FunctionComponent = (props) => {
     }
 
     const generateCommentsJSX = () => {
-        const jsx = [] as any 
-        for (let i = 0; i < 20; i++) {
+        const jsx = [] as any
+        for (let i = 0; i < visibleComments.length; i++) {
             jsx.push(<CommentRow/>)
         }
         return jsx

@@ -1,5 +1,6 @@
 import React, {useContext, useEffect, useState} from "react"
-import {ThemeContext, HideSidebarContext, HideNavbarContext, HideTitlebarContext} from "../Context"
+import {ThemeContext, HideSidebarContext, HideNavbarContext, HideTitlebarContext,
+SearchContext, SearchFlagContext, ImageTypeContext, RestrictTypeContext, StyleTypeContext, SortTypeContext} from "../Context"
 import {HashLink as Link} from "react-router-hash-link"
 import terms from "../assets/purple/terms.png"
 import termsMagenta from "../assets/magenta/terms.png"
@@ -25,6 +26,12 @@ const Footer: React.FunctionComponent = (props) => {
     const {hideSidebar, setHideSidebar} = useContext(HideSidebarContext)
     const {hideNavbar, setHideNavbar} = useContext(HideNavbarContext)
     const {hideTitlebar, setHideTitlebar} = useContext(HideTitlebarContext)
+    const {search, setSearch} = useContext(SearchContext)
+    const {searchFlag, setSearchFlag} = useContext(SearchFlagContext)
+    const {imageType, setImageType} = useContext(ImageTypeContext)
+    const {restrictType, setRestrictType} = useContext(RestrictTypeContext)
+    const {styleType, setStyleType} = useContext(StyleTypeContext)
+    const {sortType, setSortType} = useContext(SortTypeContext)
 
     const getTermsIcon = () => {
         if (theme === "purple") return terms
@@ -62,9 +69,19 @@ const Footer: React.FunctionComponent = (props) => {
         window.scrollTo({top: 0, behavior: "smooth"})
     }
 
+    const footerClick = () => {
+        setSearch("")
+        setImageType("all")
+        setRestrictType("all")
+        setStyleType("all")
+        setSortType("date")
+        setSearchFlag(true)
+        window.scrollTo(0, 0)
+    }
+
     return (
         <div className="footer">
-            <Link to="/" className="footer-title-container">
+            <div className="footer-title-container" onClick={footerClick}>
                     <span className="footer-title-a">M</span>
                     <span className="footer-title-b">o</span>
                     <span className="footer-title-a">e</span>
@@ -73,7 +90,7 @@ const Footer: React.FunctionComponent = (props) => {
                     <span className="footer-title-b">o</span>
                     <span className="footer-title-a">r</span>
                     <span className="footer-title-b">u</span>
-            </Link>
+            </div>
             <div className="footer-text-container">
                 <span className="footer-text">- This is the bottom of the page -</span>
             </div>

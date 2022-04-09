@@ -35,10 +35,10 @@ const PostsPage: React.FunctionComponent = (props) => {
         <>
         <DragAndDrop/>
         <DownloadDialog/>
-        <TitleBar text="Animated, With Audio, Loli"/>
+        <TitleBar/>
         <NavBar/>
         <div className="body">
-            <SideBar text="146 results."/>
+            <SideBar/>
             <div className="content">
                 <SortBar/>
                 <ImageGrid/>

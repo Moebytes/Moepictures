@@ -2,6 +2,7 @@ import GifEncoder from "gif-encoder"
 import pixels from "image-pixels"
 import path from "path"
 import commonPasswords from "../json/common-passwords.json"
+import axios from "axios"
 import MP4Demuxer from "./MP4Demuxer"
 import audioEncoder from "audio-encoder"
 
@@ -17,7 +18,7 @@ const videoExtensions = [".mp4", ".mov", ".avi", ".mkv", ".webm"]
 export default class Functions {
     public static proxyImage = async (link: string) => {
         try {
-            const response = await fetch(`https://anime-pictures.herokuapp.com/proxy?url=${link}`).then((r) => r.arrayBuffer())
+            const response = await fetch(`/api/proxy?url=${link}`).then((r) => r.arrayBuffer())
             const blob = new Blob([new Uint8Array(response)])
             const file = new File([blob], path.basename(link))
             return file
@@ -58,7 +59,7 @@ export default class Functions {
     }
 
     public static isImage = (file: string) => {
-        if (file.startsWith("blob:")) {
+        if (file?.startsWith("blob:")) {
             const ext = file.split("#")?.[1] || ""
             return Functions.arrayIncludes(ext, imageExtensions)
         }
@@ -66,7 +67,7 @@ export default class Functions {
     }
 
     public static isGIF = (file: string) => {
-        if (file.startsWith("blob:")) {
+        if (file?.startsWith("blob:")) {
             const ext = file.split("#")?.[1] || ""
             return ext === ".gif"
         }
@@ -74,7 +75,7 @@ export default class Functions {
     }
 
     public static isVideo = (file: string) => {
-        if (file.startsWith("blob:")) {
+        if (file?.startsWith("blob:")) {
             const ext = file.split("#")?.[1] || ""
             return Functions.arrayIncludes(ext, videoExtensions)
         }
@@ -82,7 +83,7 @@ export default class Functions {
     }
 
     public static isMP4 = (file: string) => {
-        if (file.startsWith("blob:")) {
+        if (file?.startsWith("blob:")) {
             const ext = file.split("#")?.[1] || ""
             return ext === ".mp4"
         }
@@ -140,7 +141,7 @@ export default class Functions {
     }
 
     public static validateEmail = (email: string) => {
-        const regex = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/
+        const regex = /^[a-zA-Z0-9.!#$%&"*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/
         return regex.test(email)
     }
 
@@ -237,11 +238,12 @@ export default class Functions {
     }
 
     public static scrolledToBottom = () => {
-        return (window.innerHeight + window.scrollY) >= document.body.scrollHeight
+        const c = [document.scrollingElement!.scrollHeight, document.body.scrollHeight, document.body.offsetHeight].sort(function(a,b){return b-a})
+        return (window.innerHeight + window.scrollY + 2 >= c[0])
     }
 
     public static trimCanvas = (canvas: any) => {
-        const context = canvas.getContext('2d');
+        const context = canvas.getContext("2d");
 
         const topLeft = {
             x: canvas.width,
@@ -287,7 +289,7 @@ export default class Functions {
     public static download = (filename: string, url: string) => {
             const a = document.createElement("a")
             a.setAttribute("href", url)
-            a.setAttribute("download", filename)
+            a.setAttribute("download", decodeURIComponent(filename))
             a.style.display = "none"
             document.body.appendChild(a)
             a.click()
@@ -564,5 +566,121 @@ export default class Functions {
             const blob = await fetch(videoFile).then((r) => r.blob())
             reader.readAsArrayBuffer(blob)
         })
+    }
+
+    public static getImagePath = (folder: string, postID: number, filename: string) => {
+        return path.join(__dirname, `../media/${folder}s/${postID}/${filename}`)
+    }
+
+    public static getImageLink = (folder: string, postID: number, filename: string) => {
+        return `${window.location.protocol}//${window.location.host}/${folder}s/${postID}/${encodeURIComponent(filename)}`
+    }
+
+    public static getTagPath = (folder: string, filename: string) => {
+        return path.join(__dirname, `../media/${folder}/${filename}`)
+    }
+
+    public static formatDate(date: Date) {
+        let year = date.getFullYear()
+        let month = (1 + date.getMonth()).toString().padStart(2, "0")
+        let day = date.getDate().toString().padStart(2, "0")
+        return `${year}-${month}-${day}`
+    }
+
+    public static binaryToHex = (bin: string) => {
+        return bin.match(/.{4}/g)?.reduce(function(acc, i) {
+            return acc + parseInt(i, 2).toString(16).toUpperCase()
+        }, "") || ""
+    }
+
+    public static hexToBinary = (hex: string) => {
+        return hex.split("").reduce(function(acc, i) {
+            return acc + ("000" + parseInt(i, 16).toString(2)).substr(-4, 4)
+        }, "")
+    }
+
+    public static videoThumbnail = (link: string) => {
+        return new Promise<string>((resolve) => {
+            const video = document.createElement("video")
+            video.src = link 
+            video.addEventListener("loadeddata", (event) => {
+                video.currentTime = 0.001
+            })
+            video.addEventListener("seeked", () => {
+                const canvas = document.createElement("canvas")
+                const ctx = canvas.getContext("2d") as any
+                canvas.width = video.videoWidth 
+                canvas.height = video.videoHeight
+                ctx?.drawImage(video, 0, 0, canvas.width, canvas.height)
+                resolve(canvas.toDataURL())
+            })
+            video.load()
+        })
+    }
+
+    public static base64ToBuffer = (base64: string) => {
+        const matches = base64.match(/^data:([A-Za-z-+\/]+);base64,(.+)$/)!
+        return Buffer.from(matches[2], "base64")
+    }
+
+    public static base64toUint8Array = async (base64: string) => {
+        return fetch(base64).then((r) => r.arrayBuffer()).then((a) => new Uint8Array(a))
+    }
+
+    public static validType = (type: string, all?: boolean) => {
+        if (all) if (type === "all") return true
+        if (type === "image" ||
+            type === "animation" ||
+            type === "video" ||
+            type === "comic") return true 
+        return false
+    }
+      
+    public static validRestrict = (restrict: string, all?: boolean) => {
+        if (all) if (restrict === "all") return true
+        if (restrict === "safe" ||
+            restrict === "questionable" ||
+            restrict === "explicit") return true 
+        return false
+    }
+      
+    public static validStyle = (style: string, all?: boolean) => {
+        if (all) if (style === "all") return true
+        if (style === "2d" ||
+            style === "3d" ||
+            style === "pixel" ||
+            style === "chibi") return true 
+        return false
+    }
+
+    public static validSort = (sort: string) => {
+        if (sort === "date" ||
+            sort === "reverse date" ||
+            sort === "drawn" ||
+            sort === "reverse drawn" || 
+            sort === "cuteness" ||
+            sort === "reverse cuteness") return true 
+        return false
+    }
+
+    public static multiTrim = (str: string) => {
+        return str.replace(/^\s+/gm, "").replace(/\s+$/gm, "").replace(/newline/g, " ")
+    }
+
+    public static linkExists = async (link: string) => {
+        const response = await fetch(link, {method: "HEAD"}).then((r) => r.status)
+        return response !== 404
+    }
+
+    public static parseTags = async (posts: any) => {
+        let uniqueTags = new Set()
+        for (let i = 0; i < posts.length; i++) {
+            for (let j = 0; j < posts[i].tags.length; j++) {
+                uniqueTags.add(posts[i].tags[j])
+            }
+        }
+        if (!uniqueTags.size) return []
+        let result = await axios.get("/api/tags/count", {params: {tags: Array.from(uniqueTags)}}).then((r) => r.data)
+        return result
     }
 }

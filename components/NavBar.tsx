@@ -16,7 +16,8 @@ import eyedropperMagentaLight from "../assets/magenta-light/eyedropper.png"
 import lightMagentaLight from "../assets/magenta-light/light.png"
 import darkMagentaLight from "../assets/magenta-light/dark.png"
 import search2 from "../assets/purple/search2.png"
-import {ThemeContext, HideNavbarContext, HideSortbarContext, HideSidebarContext, EnableDragContext, RelativeContext, HideTitlebarContext} from "../Context"
+import {ThemeContext, HideNavbarContext, HideSortbarContext, HideSidebarContext, EnableDragContext, 
+RelativeContext, HideTitlebarContext, SearchContext, SearchFlagContext} from "../Context"
 import "./styles/navbar.less"
 
 const NavBar: React.FunctionComponent = (props) => {
@@ -27,12 +28,17 @@ const NavBar: React.FunctionComponent = (props) => {
     const {hideSortbar, setHideSortbar} = useContext(HideSortbarContext)
     const {enableDrag, setEnableDrag} = useContext(EnableDragContext)
     const {relative, setRelative} = useContext(RelativeContext)
+    const {search, setSearch} = useContext(SearchContext)
+    const {searchFlag, setSearchFlag} = useContext(SearchFlagContext)
     const [showMiniTitle, setShowMiniTitle] = useState(false)
     const history = useHistory()
 
     useEffect(() => {
+        setShowMiniTitle(false)
+    }, [])
+
+    useEffect(() => {
         const scrollHandler = () => {
-            const navbar = document.querySelector(".navbar") as HTMLElement
             if (hideTitlebar) {
                 if (window.scrollY < 77) {
                     setShowMiniTitle(false)
@@ -134,19 +140,19 @@ const NavBar: React.FunctionComponent = (props) => {
                 </Link>
             : null}
             <div className="nav-text-container">
-                <span className="nav-text nav-user-text" onClick={() => history.push("/login")}>Login</span>
-                <span className="nav-text" onClick={() => history.push("/posts")}>Posts</span>
-                <span className="nav-text" onClick={() => history.push("/comments")}>Comments</span>
-                <span className="nav-text" onClick={() => history.push("/artists")}>Artists</span>
-                <span className="nav-text" onClick={() => history.push("/characters")}>Characters</span>
-                <span className="nav-text" onClick={() => history.push("/series")}>Series</span>
-                <span className="nav-text" onClick={() => history.push("/tags")}>Tags</span>
-                <span className="nav-text" onClick={() => history.push("/help")}>Help</span>
+                <span style={{marginRight: showMiniTitle ? "45px" : "70px"}} className="nav-text nav-user-text" onClick={() => history.push("/login")}>Login</span>
+                <span style={{marginRight: showMiniTitle ? "45px" : "70px"}} className="nav-text" onClick={() => history.push("/posts")}>Posts</span>
+                <span style={{marginRight: showMiniTitle ? "45px" : "70px"}} className="nav-text" onClick={() => history.push("/comments")}>Comments</span>
+                <span style={{marginRight: showMiniTitle ? "45px" : "70px"}} className="nav-text" onClick={() => history.push("/artists")}>Artists</span>
+                <span style={{marginRight: showMiniTitle ? "45px" : "70px"}} className="nav-text" onClick={() => history.push("/characters")}>Characters</span>
+                <span style={{marginRight: showMiniTitle ? "45px" : "70px"}} className="nav-text" onClick={() => history.push("/series")}>Series</span>
+                <span style={{marginRight: showMiniTitle ? "45px" : "70px"}} className="nav-text" onClick={() => history.push("/tags")}>Tags</span>
+                <span style={{marginRight: showMiniTitle ? "45px" : "70px"}} className="nav-text" onClick={() => history.push("/help")}>Help</span>
             </div>
             <div className="nav-color-container">
                 <div className={`nav-search-container ${!hideSidebar ? "hide-nav-search" : ""}`}>
-                    <img className="nav-search-icon" src={search2}/>
-                    <input className="nav-search" type="search" spellCheck={false}/>
+                    <img className="nav-search-icon" src={search2} onClick={() => setSearchFlag(true)}/>
+                    <input className="nav-search" type="search" spellCheck={false} value={search} onChange={(event) => setSearch(event.target.value)} onKeyDown={(event) => event.key === "Enter" ? setSearchFlag(true) : null}/>
                 </div>
                 <img className="nav-color" src={getEyeDropper()} onClick={colorChange}/>
                 <img className="nav-color" src={getLight()} onClick={lightChange}/>

@@ -10,9 +10,6 @@ import CharactersPage from "./pages/CharactersPage"
 import SeriesPage from "./pages/SeriesPage"
 import TagsPage from "./pages/TagsPage"
 import PostPage from "./pages/PostPage"
-import ComicPage from "./pages/ComicPage"
-import GIFPage from "./pages/GIFPage"
-import VideoPage from "./pages/VideoPage"
 import UploadPage from "./pages/UploadPage"
 import $404Page from "./pages/404Page"
 import HelpPage from "./pages/HelpPage"
@@ -126,9 +123,6 @@ const App: React.FunctionComponent = (props) => {
                     <Switch>
                         <Route exact path={["/", "/posts", "/home"]}><PostsPage/></Route>
                         <Route exact path="/upload"><UploadPage/></Route>
-                        <Route exact path="/comic"><ComicPage/></Route>
-                        <Route exact path="/video"><VideoPage/></Route>
-                        <Route exact path="/gif"><GIFPage/></Route>
                         <Route exact path="/tags"><TagsPage/></Route>
                         <Route exact path="/series"><SeriesPage/></Route>
                         <Route exact path="/characters"><CharactersPage/></Route>

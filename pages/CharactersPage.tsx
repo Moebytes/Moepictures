@@ -24,6 +24,9 @@ const CharactersPage: React.FunctionComponent = (props) => {
     const {relative, setRelative} = useContext(RelativeContext)
     const {activeDropdown, setActiveDropdown} = useContext(ActiveDropdownContext)
     const [sortType, setSortType] = useState("cuteness")
+    const [characters, setCharacters] = useState([]) as any
+    const [index, setIndex] = useState(0)
+    const [visibleCharacters, setVisibleCharacters] = useState([]) as any
     const sortRef = useRef(null) as any
 
     useEffect(() => {
@@ -33,7 +36,46 @@ const CharactersPage: React.FunctionComponent = (props) => {
         setRelative(false)
         setActiveDropdown("none")
         document.title = "Moebooru: Characters"
+
+        const newCharacters = [] as any 
+        for (let i = 0; i < 100; i++) {
+            newCharacters.push(<CharacterRow/>)
+        }
+        setCharacters(newCharacters)
     }, [])
+
+    useEffect(() => {
+        let currentIndex = index
+        const newVisibleCharacters = visibleCharacters as any
+        for (let i = 0; i < 10; i++) {
+            if (!characters[currentIndex]) break
+            newVisibleCharacters.push(characters[currentIndex])
+            currentIndex++
+        }
+        setIndex(currentIndex)
+        setVisibleCharacters(newVisibleCharacters)
+    }, [characters])
+
+    useEffect(() => {
+        const scrollHandler = async () => {
+            if (functions.scrolledToBottom()) {
+                let currentIndex = index
+                if (!characters[currentIndex]) return
+                const newCharacters = visibleCharacters as any
+                for (let i = 0; i < 10; i++) {
+                    if (!characters[currentIndex]) break
+                    newCharacters.push(characters[currentIndex])
+                    currentIndex++
+                }
+                setIndex(currentIndex)
+                setVisibleCharacters(newCharacters)
+            }
+        }
+        window.addEventListener("scroll", scrollHandler)
+        return () => {
+            window.removeEventListener("scroll", scrollHandler)
+        }
+    })
 
     const getSearchIcon = () => {
         if (theme === "purple") return search
@@ -72,8 +114,8 @@ const CharactersPage: React.FunctionComponent = (props) => {
     }
 
     const generateCharactersJSX = () => {
-        const jsx = [] as any 
-        for (let i = 0; i < 20; i++) {
+        const jsx = [] as any
+        for (let i = 0; i < visibleCharacters.length; i++) {
             jsx.push(<CharacterRow/>)
         }
         return jsx

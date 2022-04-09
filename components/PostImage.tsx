@@ -1,6 +1,7 @@
 import React, {useContext, useEffect, useRef, useState} from "react"
 import {ThemeContext, EnableDragContext, BrightnessContext, ContrastContext, HueContext, SaturationContext, LightnessContext,
-BlurContext, SharpenContext, PixelateContext, DownloadFlagContext, DownloadURLsContext, DisableZoomContext} from "../Context"
+BlurContext, SharpenContext, PixelateContext, DownloadFlagContext, DownloadURLsContext, DisableZoomContext, SpeedContext,
+ReverseContext} from "../Context"
 import {HashLink as Link} from "react-router-hash-link"
 import {createFFmpeg, fetchFile} from "@ffmpeg/ffmpeg"
 import functions from "../structures/Functions"
@@ -45,6 +46,7 @@ interface Props {
     width?: number
     height?: number
     scale?: number
+    noKeydown?: boolean
 }
 
 const PostImage: React.FunctionComponent<Props> = (props) => {
@@ -102,8 +104,8 @@ const PostImage: React.FunctionComponent<Props> = (props) => {
     const [secondsProgress, setSecondsProgress] = useState(0)
     const [progress, setProgress] = useState(0)
     const [dragProgress, setDragProgress] = useState(0) as any
-    const [reverse, setReverse] = useState(false)
-    const [speed, setSpeed] = useState(1)
+    const {reverse, setReverse} = useContext(ReverseContext)
+    const {speed, setSpeed} = useContext(SpeedContext)
     const [volume, setVolume] = useState(0)
     const [previousVolume, setPreviousVolume] = useState(0)
     const [paused, setPaused] = useState(false)
@@ -167,21 +169,18 @@ const PostImage: React.FunctionComponent<Props> = (props) => {
         const key = event.keyCode
         const value = String.fromCharCode((96 <= key && key <= 105) ? key - 48 : key).toLowerCase()
         if (value === "f") {
-            fullscreen()
+            if (!props.noKeydown) fullscreen()
         }
     }
 
     useEffect(() => {
         if (functions.isImage(props.img)) {
-            // @ts-ignore
             new ResizeObserver(resizeImageCanvas).observe(ref.current!)
         }
         if (functions.isGIF(props.img)) {
-            // @ts-ignore
             new ResizeObserver(resizeGIFCanvas).observe(ref.current!)
         }
         if (functions.isVideo(props.img)) {
-            // @ts-ignore
             new ResizeObserver(resizeVideoCanvas).observe(videoRef.current!)
         }
         window.addEventListener("keydown", handleKeydown)
@@ -806,8 +805,10 @@ const PostImage: React.FunctionComponent<Props> = (props) => {
 
     const renderGIF = async () => {
         if ((filtersOn() || rateOn()) && gifData) {
-            setPaused(true)
+            if (encodingOverlay) return
             setEncodingOverlay(true)
+            setPaused(true)
+            await functions.timeout(50)
             const adjustedData = functions.gifSpeed(gifData, speed)
             let frames = [] as any
             let delays = [] as any
@@ -879,8 +880,9 @@ const PostImage: React.FunctionComponent<Props> = (props) => {
 
     const renderVideo = async () => {
         if ((filtersOn() || rateOn()) && videoData) {
-            setPaused(true)
+            if (encodingOverlay) return
             setEncodingOverlay(true)
+            setPaused(true)
             let audio = await functions.videoToWAV(props.img).then((a) => audioSpeed(a))
             const adjustedData = functions.videoSpeed(videoData, speed)
             let frames = adjustedData.map((a: any) => render(a))
@@ -899,11 +901,13 @@ const PostImage: React.FunctionComponent<Props> = (props) => {
             if (downloadURLs.includes(props.img)) {
                 if (functions.isVideo(props.img)) {
                     renderVideo().then((video: any) => {
+                        if (!video) return
                         functions.download(path.basename(props.img), video)
                         window.URL.revokeObjectURL(video)
                     })
                 } else if (functions.isGIF(props.img)) {
                     renderGIF().then((gif: any) => {
+                        if (!gif) return
                         functions.download(path.basename(props.img), gif)
                         window.URL.revokeObjectURL(gif)
                     })
@@ -1027,11 +1031,9 @@ const PostImage: React.FunctionComponent<Props> = (props) => {
         <div className="post-image-container" style={{zoom: props.scale ? props.scale : 1}}>
             <div className="post-image-box" ref={containerRef}>
                 <div className="post-image-filters" ref={fullscreenRef}>
-                    {encodingOverlay ? 
-                    <div className="encoding-overlay">
+                    <div className="encoding-overlay" style={{display: encodingOverlay ? "flex" : "none"}}>
                         <span className="encoding-overlay-text">{functions.isVideo(props.img) ? "Rendering Video..." : "Rendering GIF..."}</span>
                     </div>
-                    : null}
                     {functions.isVideo(props.img) ? <>
                         <div className="video-controls" ref={videoControls} onMouseUp={() => setDragging(false)} onMouseOver={controlMouseEnter} onMouseLeave={controlMouseLeave}>
                         <div className="video-control-row" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
@@ -1182,9 +1184,9 @@ const PostImage: React.FunctionComponent<Props> = (props) => {
                         </div>
                         </>
                         : null}
+                        <img className="post-lightness-overlay" ref={lightnessRef} src={props.img}/>
                         <TransformWrapper disabled={disableZoom} ref={zoomRef} minScale={1} maxScale={4} onZoomStop={(ref) => setZoom(ref.state.scale)} wheel={{step: 0.1, touchPadDisabled: true}} pinch={{disabled: true}} zoomAnimation={{size: 0, disabled: true}} alignmentAnimation={{disabled: true}} doubleClick={{mode: "reset", animationTime: 0}} panning={{disabled: zoom === 1}}>
                         <TransformComponent>
-                            <img className="post-lightness-overlay" ref={lightnessRef} src={props.img}/>
                             <img className="post-sharpen-overlay" ref={overlayRef} src={props.img}/>
                             <canvas className="post-pixelate-canvas" ref={pixelateRef}></canvas>
                             <img className="post-image" ref={ref} src={props.img} onLoad={(event) => onLoad(event)}/>

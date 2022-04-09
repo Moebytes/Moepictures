@@ -24,6 +24,9 @@ const ArtistsPage: React.FunctionComponent = (props) => {
     const {relative, setRelative} = useContext(RelativeContext)
     const {activeDropdown, setActiveDropdown} = useContext(ActiveDropdownContext)
     const [sortType, setSortType] = useState("cuteness")
+    const [artists, setArtists] = useState([]) as any
+    const [index, setIndex] = useState(0)
+    const [visibleArtists, setVisibleArtists] = useState([]) as any
     const sortRef = useRef(null) as any
 
     useEffect(() => {
@@ -33,7 +36,46 @@ const ArtistsPage: React.FunctionComponent = (props) => {
         setRelative(false)
         setActiveDropdown("none")
         document.title = "Moebooru: Artists"
+
+        const newArtists = [] as any 
+        for (let i = 0; i < 100; i++) {
+            newArtists.push(<ArtistRow/>)
+        }
+        setArtists(newArtists)
     }, [])
+
+    useEffect(() => {
+        let currentIndex = index
+        const newVisibleArtists = visibleArtists as any
+        for (let i = 0; i < 10; i++) {
+            if (!artists[currentIndex]) break
+            newVisibleArtists.push(artists[currentIndex])
+            currentIndex++
+        }
+        setIndex(currentIndex)
+        setVisibleArtists(newVisibleArtists)
+    }, [artists])
+
+    useEffect(() => {
+        const scrollHandler = async () => {
+            if (functions.scrolledToBottom()) {
+                let currentIndex = index
+                if (!artists[currentIndex]) return
+                const newArtists = visibleArtists as any
+                for (let i = 0; i < 10; i++) {
+                    if (!artists[currentIndex]) break
+                    newArtists.push(artists[currentIndex])
+                    currentIndex++
+                }
+                setIndex(currentIndex)
+                setVisibleArtists(newArtists)
+            }
+        }
+        window.addEventListener("scroll", scrollHandler)
+        return () => {
+            window.removeEventListener("scroll", scrollHandler)
+        }
+    })
 
     const getSearchIcon = () => {
         if (theme === "purple") return search
@@ -72,8 +114,8 @@ const ArtistsPage: React.FunctionComponent = (props) => {
     }
 
     const generateArtistsJSX = () => {
-        const jsx = [] as any 
-        for (let i = 0; i < 20; i++) {
+        const jsx = [] as any
+        for (let i = 0; i < visibleArtists.length; i++) {
             jsx.push(<ArtistRow/>)
         }
         return jsx

@@ -81,7 +81,7 @@ const HelpPage: React.FunctionComponent = (props) => {
 
                         These are special tags for filtering search results, you don't need to type them directly because they're in the sorting options. <br/>
                         <span className="help-alt">image</span> - only display static images. <br/>
-                        <span className="help-alt">animated</span> - only display animated images (excluding videos). <br/>
+                        <span className="help-alt">animation</span> - only display animations (excluding videos). <br/>
                         <span className="help-alt">video</span> - only display videos. <br/>
                         <span className="help-alt">comic</span> - only display comics/manga. <br/>
                         <span className="help-alt">safe</span> - only display safe images. <br/>
@@ -147,10 +147,10 @@ const HelpPage: React.FunctionComponent = (props) => {
                     </span>
                     <span className="help-heading" id="variations">Variations</span>
                     <span className="help-text">
-                        All variations of the same image are combined into a single post. If one of the variations is a video or
-                        animated image, it will be displayed at the front. The tags of the post can describe features in any of the 
-                        images. If an image has significantly different tags, then it is probably best to make that image it's own
-                        post instead of a variation.
+                        All variations of the same image are combined into a single post. You can add a variation to an existing post 
+                        by specifying the variationID. All variations of an image should be created by the original artist, otherwise it is 
+                        considered a third party edit instead. If an image has significantly different tags, then it is probably best 
+                        to make that image it's own post instead of a variation.
                     </span>
                     <span className="help-heading" id="third-party-edits">Third-Party Edits</span>
                     <span className="help-text">

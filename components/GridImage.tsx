@@ -3,8 +3,9 @@ import {useHistory} from "react-router-dom"
 import loading from "../assets/purple/loading.gif"
 import loadingMagenta from "../assets/magenta/loading.gif"
 import {ThemeContext, SizeTypeContext, BrightnessContext, ContrastContext, HueContext, SaturationContext, LightnessContext,
-BlurContext, SharpenContext, SquareContext, PixelateContext, DownloadFlagContext, DownloadURLsContext} from "../Context"
+BlurContext, SharpenContext, SquareContext, PixelateContext, DownloadFlagContext, DownloadURLsContext, SpeedContext, ReverseContext} from "../Context"
 import {HashLink as Link} from "react-router-hash-link"
+import gifFrames from "gif-frames"
 import path from "path"
 import functions from "../structures/Functions"
 import "./styles/gridimage.less"
@@ -37,13 +38,197 @@ const GridImage: React.FunctionComponent<Props> = (props) => {
     const lightnessRef = useRef<HTMLImageElement>(null)
     const ref = useRef<HTMLImageElement>(null)
     const videoRef = useRef<HTMLVideoElement>(null)
+    const imageFiltersRef = useRef<HTMLDivElement>(null)
+    const videoOverlayRef = useRef<HTMLCanvasElement>(null)
     const [imageWidth, setImageWidth] = useState(0)
     const [imageHeight, setImageHeight] = useState(0)
     const [naturalWidth, setNaturalWidth] = useState(0)
     const [naturalHeight, setNaturalHeight] = useState(0)
     const [imageLoaded, setImageLoaded] = useState(false)
+    const [backFrame, setBackFrame] = useState("")
     const [drag, setDrag] = useState(false)
+    const [gifData, setGIFData] = useState(null) as any
+    const {speed, setSpeed} = useContext(SpeedContext)
+    const {reverse, setReverse} = useContext(ReverseContext)
+    const [seekTo, setSeekTo] = useState(null) as any
     const history = useHistory()
+
+    useEffect(() => {
+        const parseGIF = async () => {
+            const start = new Date()
+            const frames = await gifFrames({url: props.img, frames: "all", outputType: "canvas"})
+            const newGIFData = [] as any
+            for (let i = 0; i < frames.length; i++) {
+                newGIFData.push({
+                    frame: frames[i].getImage(),
+                    delay: frames[i].frameInfo.delay * 10
+                })
+            }
+            setGIFData(newGIFData)
+            const end = new Date()
+            const seconds = (end.getTime() - start.getTime()) / 1000
+            setSeekTo(seconds)
+        }
+        if (imageLoaded && functions.isGIF(props.img)) {
+            parseGIF()
+        }
+    }, [imageLoaded])
+
+    useEffect(() => {
+        if (!functions.isVideo(props.img) && !functions.isGIF(props.img)) return
+        let id = 0
+        let timeout = null as any
+        if (imageLoaded) {
+            const adjustedData = gifData ? functions.gifSpeed(gifData, speed) : null
+            if (videoRef.current) videoRef.current.playbackRate = speed 
+            const pixelateCanvas = pixelateRef.current 
+            if (!pixelateCanvas) return
+            if (functions.isGIF(props.img) && adjustedData) {
+                pixelateCanvas.style.opacity = "1"
+            } else if (functions.isVideo(props.img)) {
+                pixelateCanvas.style.opacity = "1"
+            }
+            const pixelateCtx = pixelateCanvas?.getContext("2d")
+            const sharpenOverlay = videoOverlayRef.current
+            let sharpenCtx = null as any
+            if (sharpenOverlay && videoRef.current) {
+                sharpenOverlay.width = videoRef.current.clientWidth
+                sharpenOverlay.height = videoRef.current.clientHeight
+                sharpenCtx = sharpenOverlay.getContext("2d") as any
+            }
+            let frame = videoRef.current ? videoRef.current! : ref.current!
+            let delay = 0
+            let pos = 0
+            if (adjustedData) {
+                const frames = adjustedData.length - 1
+                const duration = adjustedData.map((d: any) => d.delay).reduce((p: any, c: any) => p + c) / 1000
+                let interval = duration / frames
+                let sp = seekTo !== null ? seekTo : 0
+                pos = Math.floor(sp / interval)
+                if (!adjustedData[pos]) pos = 0
+                frame = adjustedData[pos].frame
+                delay = adjustedData[pos].delay
+            }
+
+            const update = () => {
+                if (adjustedData) {
+                    if (reverse) {
+                        pos--
+                    } else {
+                        pos++
+                    }
+                    if (pos > adjustedData.length - 1) pos = 0
+                    if (pos < 0) pos = adjustedData.length - 1
+                    frame = adjustedData[pos].frame
+                    delay = adjustedData[pos].delay
+                    if (delay < 0) delay = 0
+                }
+            }
+
+            const draw = async () => {
+                if (sharpenOverlay) {
+                    if (sharpen !== 0) {
+                        const sharpenOpacity = sharpen / 5
+                        sharpenOverlay.style.filter = `blur(4px) invert(1) contrast(75%)`
+                        sharpenOverlay.style.mixBlendMode = "overlay"
+                        sharpenOverlay.style.opacity = `${sharpenOpacity}`
+                        sharpenCtx?.clearRect(0, 0, sharpenOverlay.width, sharpenOverlay.height)
+                        sharpenCtx?.drawImage(frame, 0, 0, sharpenOverlay.width, sharpenOverlay.height)
+                    } else {
+                        sharpenOverlay.style.filter = "none"
+                        sharpenOverlay.style.mixBlendMode = "normal"
+                        sharpenOverlay.style.opacity = "0"
+                    }
+                }
+                if (pixelateCanvas) {
+                    if (pixelate !== 1) {
+                        const pixelWidth = pixelateCanvas.width / pixelate 
+                        const pixelHeight = pixelateCanvas.height / pixelate
+                        pixelateCtx?.clearRect(0, 0, pixelateCanvas.width, pixelateCanvas.height)
+                        pixelateCtx?.drawImage(frame, 0, 0, pixelWidth, pixelHeight)
+                        const landscape = pixelateCanvas.width >= pixelateCanvas.height
+                        if (landscape) {
+                            pixelateCanvas.style.width = `${pixelateCanvas.width * pixelate}px`
+                            pixelateCanvas.style.height = "auto"
+                        } else {
+                            pixelateCanvas.style.width = "auto"
+                            pixelateCanvas.style.height = `${pixelateCanvas.height * pixelate}px`
+                        }
+                        pixelateCanvas.style.imageRendering = "pixelated"
+                    } else {
+                        pixelateCanvas.style.width = `${pixelateCanvas.width}px`
+                        pixelateCanvas.style.height = `${pixelateCanvas.height}px`
+                        pixelateCanvas.style.imageRendering = "none"
+                        pixelateCtx?.clearRect(0, 0, pixelateCanvas.width, pixelateCanvas.height)
+                        pixelateCtx?.drawImage(frame, 0, 0, pixelateCanvas.width, pixelateCanvas.height)
+                    }
+                }
+            }
+
+            const videoLoop = () => {
+                update()
+                draw()
+                if (gifData && functions.isGIF(props.img)) {
+                    timeout = setTimeout(() => {
+                        videoLoop()
+                    }, delay)
+                } else {
+                    // @ts-ignore
+                    if (videoRef.current?.requestVideoFrameCallback) {
+                        // @ts-ignore
+                        id = videoRef.current?.requestVideoFrameCallback(videoLoop)
+                    } else {
+                        id = window.requestAnimationFrame(videoLoop)
+                    }
+                }
+            }
+            // @ts-ignore
+            if (videoRef.current?.requestVideoFrameCallback) {
+                // @ts-ignore
+                id = videoRef.current?.requestVideoFrameCallback(videoLoop)
+            } else {
+                id = window.requestAnimationFrame(videoLoop)
+            }
+        } return () => {
+            clearTimeout(timeout)
+            // @ts-ignore
+            if (videoRef.current?.cancelVideoFrameCallback) {
+                // @ts-ignore
+                videoRef.current?.cancelVideoFrameCallback(id)
+            } else {
+                window.cancelAnimationFrame(id)
+            }
+        }
+    }, [imageLoaded, gifData, sharpen, pixelate, square, imageSize, reverse, speed])
+
+    const resizeOverlay = () => {
+        if (functions.isVideo(props.img)) {
+            if (!videoRef.current || !videoOverlayRef.current || !pixelateRef.current) return
+            if (videoRef.current.clientWidth === 0) return
+            videoOverlayRef.current.width = videoRef.current.clientWidth
+            videoOverlayRef.current.height = videoRef.current.clientHeight
+            pixelateRef.current.width = videoRef.current.clientWidth
+            pixelateRef.current.height = videoRef.current.clientHeight
+        } else {
+            if (!ref.current || !pixelateRef.current) return 
+            pixelateRef.current.width = ref.current.width
+            pixelateRef.current.height = ref.current.height
+        }
+    }
+
+    useEffect(() => {
+        const element = functions.isVideo(props.img) ? videoRef.current! : ref.current!
+        new ResizeObserver(resizeOverlay).observe(element)
+    }, [])
+
+    useEffect(() => {
+        const parseVideo = async () => {
+            if (backFrame) return 
+            const thumb = await functions.videoThumbnail(props.img)
+            setBackFrame(thumb)
+        }
+        if (functions.isVideo(props.img)) parseVideo()
+    }, [imageLoaded])
 
     const getBorder = () => {
         if (sizeType === "tiny" || sizeType === "small") {
@@ -63,7 +248,7 @@ const GridImage: React.FunctionComponent<Props> = (props) => {
     }
 
     const updateSquare = () => {
-        if (!containerRef.current || !pixelateRef.current) return
+        if (!containerRef.current) return
         const currentRef = functions.isVideo(props.img) ? videoRef.current! : ref.current!
         const refWidth = functions.isVideo(props.img) ? videoRef.current!.clientWidth : ref.current!.width
         const refHeight = functions.isVideo(props.img) ? videoRef.current!.clientHeight : ref.current!.height
@@ -119,12 +304,13 @@ const GridImage: React.FunctionComponent<Props> = (props) => {
     }, [sizeType])
 
     useEffect(() => {
-        if (!containerRef.current) return
-        const element = containerRef.current.querySelector(".image-filters") as any
+        if (!imageFiltersRef.current) return
+        const element = imageFiltersRef.current
         let newContrast = contrast
-        const image = element.querySelector(".image") as any
-        const sharpenOverlay = element.querySelector(".sharpen-overlay") as any
-        const lightnessOverlay = element.querySelector(".lightness-overlay") as any
+        const image = functions.isVideo(props.img) ? videoRef.current : ref.current
+        const sharpenOverlay = overlayRef.current
+        const lightnessOverlay = lightnessRef.current
+        if (!image || !sharpenOverlay || !lightnessOverlay) return
         if (sharpen !== 0) {
             const sharpenOpacity = sharpen / 5
             newContrast += 25 * sharpenOpacity
@@ -149,9 +335,9 @@ const GridImage: React.FunctionComponent<Props> = (props) => {
         element.style.filter = `brightness(${brightness}%) contrast(${newContrast}%) hue-rotate(${hue - 180}deg) saturate(${saturation}%) blur(${blur}px)`
     }, [brightness, contrast, hue, saturation, lightness, blur, sharpen])
 
-    useEffect(() => {
-        if (!pixelateRef.current || !containerRef.current) return
-        const currentRef = functions.isVideo(props.img) ? videoRef.current! : ref.current!
+    const imagePixelate = () => {
+        if (functions.isGIF(props.img) || functions.isVideo(props.img)) return
+        if (!pixelateRef.current) return
         const pixelateCanvas = pixelateRef.current
         const ctx = pixelateCanvas.getContext("2d") as any
         const imageWidth = functions.isVideo(props.img) ? videoRef.current!.clientWidth : ref.current!.width 
@@ -163,7 +349,7 @@ const GridImage: React.FunctionComponent<Props> = (props) => {
         const pixelWidth = imageWidth / pixelate 
         const pixelHeight = imageHeight / pixelate
         if (pixelate !== 1) {
-            ctx.drawImage(currentRef, 0, 0, pixelWidth, pixelHeight)
+            ctx.drawImage(ref.current, 0, 0, pixelWidth, pixelHeight)
             if (landscape) {
                 pixelateCanvas.style.width = `${imageWidth * pixelate}px`
                 pixelateCanvas.style.height = "auto"
@@ -177,6 +363,18 @@ const GridImage: React.FunctionComponent<Props> = (props) => {
             pixelateCanvas.style.height = "none"
             pixelateCanvas.style.opacity = "0"
         }
+    }
+
+    useEffect(() => {
+        setTimeout(() => {
+            imagePixelate()
+        }, 50)
+    }, [])
+
+    useEffect(() => {
+        setTimeout(() => {
+            imagePixelate()
+        }, 50)
     }, [pixelate, square, imageSize])
 
     const imageAnimation = (event: React.MouseEvent<HTMLDivElement>) => {
@@ -308,12 +506,13 @@ const GridImage: React.FunctionComponent<Props> = (props) => {
 
     return (
         <div className="image-box" ref={containerRef} onMouseDown={mouseDown} onMouseUp={mouseUp} onMouseMove={mouseMove}>
-            <div className="image-filters" onMouseMove={(event) => imageAnimation(event)} onMouseLeave={() => cancelImageAnimation()}>
-                <img className="lightness-overlay" ref={lightnessRef} src={props.img}/>
+            <div className="image-filters" ref={imageFiltersRef} onMouseMove={(event) => imageAnimation(event)} onMouseLeave={() => cancelImageAnimation()}>
+                <img className="lightness-overlay" ref={lightnessRef} src={functions.isVideo(props.img) ? backFrame : props.img}/>
                 <img className="sharpen-overlay" ref={overlayRef} src={props.img}/>
+                {functions.isVideo(props.img) ? <canvas className="sharpen-overlay" ref={videoOverlayRef}></canvas> : null}
                 <canvas className="pixelate-canvas" ref={pixelateRef}></canvas>
-                {functions.isVideo(props.img) ? 
-                <video autoPlay loop muted disablePictureInPicture className="video" ref={videoRef} src={props.img} onLoadedData={(event) => onLoad(event)}></video> :
+                {functions.isVideo(props.img) ? <>
+                <video autoPlay loop muted disablePictureInPicture className="video" ref={videoRef} src={props.img} onLoadedData={(event) => onLoad(event)}></video></> :
                 <img className="image" ref={ref} src={props.img} onLoad={(event) => onLoad(event)}/>}
             </div>
             {!imageLoaded ? 

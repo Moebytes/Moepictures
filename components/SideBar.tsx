@@ -1,8 +1,10 @@
 import React, {useContext, useEffect, useState} from "react"
+import {useHistory} from "react-router-dom"
 import {ThemeContext, HideSidebarContext, HideNavbarContext, HideSortbarContext, EnableDragContext, 
-RelativeContext, HideTitlebarContext, SidebarHoverContext} from "../Context"
+RelativeContext, HideTitlebarContext, SidebarHoverContext, SearchContext, SearchFlagContext, PostsContext,
+TagsContext} from "../Context"
 import {HashLink as Link} from "react-router-hash-link"
-import search from "../assets/purple/search.png"
+import searchIcon from "../assets/purple/search.png"
 import searchImage from "../assets/purple/search-image.png"
 import searchMagenta from "../assets/magenta/search.png"
 import searchImageMagenta from "../assets/magenta/search-image.png"
@@ -36,21 +38,17 @@ import report from "../assets/purple/report.png"
 import reportMagenta from "../assets/magenta/report.png"
 import edit from "../assets/purple/edit.png"
 import editMagenta from "../assets/magenta/edit.png"
-import history from "../assets/purple/history.png"
+import historyIcon from "../assets/purple/history.png"
 import historyMagenta from "../assets/magenta/history.png"
 import deleteIcon from "../assets/purple/delete.png"
 import deleteIconMagenta from "../assets/magenta/delete.png"
 import pack from "../package.json"
+import functions from "../structures/Functions"
 import "./styles/sidebar.less"
 
 interface Props {
-    text?: string
-    artist?: any
-    characters?: any 
-    series?: any
-    tags?: any
-    details?: any
-    postID?: number
+    post?: any
+    text?: any
 }
 
 const SideBar: React.FunctionComponent<Props> = (props) => {
@@ -62,46 +60,56 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
     const {enableDrag, setEnableDrag} = useContext(EnableDragContext)
     const {relative, setRelative} = useContext(RelativeContext)
     const {sidebarHover, setSidebarHover} = useContext(SidebarHoverContext)
-    const [tags, setTags] = useState([]) as any
-    const [maxTags, setMaxTags] = useState(26)
+    const {posts, setPosts} = useContext(PostsContext)
+    const {search, setSearch} = useContext(SearchContext)
+    const {searchFlag, setSearchFlag} = useContext(SearchFlagContext)
+    const {tags, setTags} = useContext(TagsContext)
+    const [maxTags, setMaxTags] = useState(23)
+    const history = useHistory()
+
+    const updateTags = async () => {
+        const tags = await functions.parseTags(posts)
+        setTags(tags)
+    }
 
     useEffect(() => {
-        setTags(["loli", "azur lane", "animated", "with audio", "kancolle", "leggings", "stockings",
-    "gabriel dropout", "kiniro mosaic", "himouto! umaru-chan", "sword art online", "is the order a rabbit?",
-    "loli", "copulation", "animated", "with audio", "kancolle", "leggings", "stockings",
-    "gabriel dropout", "kiniro mosaic", "himouto! umaru-chan", "sword art online", "is the order a rabbit?", 
-    "loli", "copulation", "animated", "with audio", "kancolle", "leggings", "stockings"])
+        updateTags()
     }, [])
+
+    useEffect(() => {
+        updateTags()
+    }, [posts])
 
     useEffect(() => {
         const scrollHandler = () => {
             const sidebar = document.querySelector(".sidebar") as HTMLElement
+            if (!sidebar) return
             if (!relative) {
                 if (!hideTitlebar) {
                     sidebar.style.top = "112px"
                     sidebar.style.height = "calc(100vh - 35px - 77px)"
-                    if (maxTags !== 26) setMaxTags(26)
+                    if (maxTags !== 26) setMaxTags(23)
                 } else {
                     if (window.scrollY !== 0) {
                         if (hideNavbar && window.scrollY > 77) {
                             sidebar.style.top = "0px"
                             sidebar.style.height = "100vh"
-                            if (maxTags !== 30) setMaxTags(30)
+                            if (maxTags !== 30) setMaxTags(29)
                         } else {
                             sidebar.style.top = "35px"
                             sidebar.style.height = "calc(100vh - 35px)"
-                            if (maxTags !== 30) setMaxTags(30)
+                            if (maxTags !== 30) setMaxTags(27)
                         }
                     } else {
                         sidebar.style.top = "112px"
                         sidebar.style.height = "calc(100vh - 35px - 77px)"
-                        if (maxTags !== 26) setMaxTags(26)
+                        if (maxTags !== 26) setMaxTags(23)
                     }
                 }
             } else {
                 sidebar.style.top = "0px"
                 sidebar.style.height = "auto"
-                if (maxTags !== 30) setMaxTags(30)
+                if (maxTags !== 30) setMaxTags(29)
             }
         }
         window.addEventListener("scroll", scrollHandler)
@@ -114,47 +122,49 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
 
     useEffect(() => {
         const sidebar = document.querySelector(".sidebar") as HTMLElement
+        if (!sidebar) return
         if (!relative) {
             if (!hideTitlebar) {
                 sidebar.style.top = "112px"
                 sidebar.style.height = "calc(100vh - 35px - 77px)"
-                if (maxTags !== 26) setMaxTags(26)
+                if (maxTags !== 26) setMaxTags(23)
             } else {
                 if (window.scrollY !== 0) {
                     if (hideNavbar && window.scrollY > 77) {
                         sidebar.style.top = "0px"
                         sidebar.style.height = "100vh"
-                        if (maxTags !== 32) setMaxTags(32)
+                        if (maxTags !== 32) setMaxTags(29)
                     } else {
                         sidebar.style.top = "35px"
                         sidebar.style.height = "calc(100vh - 35px)"
-                        if (maxTags !== 30) setMaxTags(30)
+                        if (maxTags !== 30) setMaxTags(27)
                     }
                 } else {
                     sidebar.style.top = "112px"
                     sidebar.style.height = "calc(100vh - 35px - 77px)"
-                    if (maxTags !== 26) setMaxTags(26)
+                    if (maxTags !== 26) setMaxTags(23)
                 }
             }
         } else {
             sidebar.style.top = "0px"
             sidebar.style.height = "auto"
-            if (maxTags !== 30) setMaxTags(30)
+            if (maxTags !== 30) setMaxTags(29)
         }
     }, [hideTitlebar, relative])
 
     useEffect(() => {
         const sidebar = document.querySelector(".sidebar") as HTMLElement
+        if (!sidebar) return
         if (!relative) {
             if (!hideNavbar) {
                 if (!hideTitlebar) {
                     sidebar.style.top = "112px"
                     sidebar.style.height = "calc(100vh - 35px - 77px)"
-                    if (maxTags !== 26) setMaxTags(26)
+                    if (maxTags !== 26) setMaxTags(23)
                 } else {
                     sidebar.style.top = "35px"
                     sidebar.style.height = "calc(100vh - 35px)"
-                    if (maxTags !== 30) setMaxTags(30)
+                    if (maxTags !== 30) setMaxTags(27)
                 }
                 return
             }
@@ -162,28 +172,28 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
                 if (sidebar.style.top === "0px") {
                     sidebar.style.top = "35px"
                     sidebar.style.height = "calc(100vh - 35px)"
-                    if (maxTags !== 30) setMaxTags(30)
+                    if (maxTags !== 30) setMaxTags(27)
                 }
             } else {
                 if (sidebar.style.top === "35px") {
                     sidebar.style.top = "0px"
                     sidebar.style.height = "100vh"
-                    if (maxTags !== 32) setMaxTags(32)
+                    if (maxTags !== 32) setMaxTags(29)
                 }
             }
         } else {
             sidebar.style.top = "0px"
             sidebar.style.height = "auto"
-            if (maxTags !== 30) setMaxTags(30)
+            if (maxTags !== 30) setMaxTags(29)
         }
     }, [hideSortbar, hideNavbar, hideTitlebar])
 
     const getSearchIcon = () => {
-        if (theme === "purple") return search
+        if (theme === "purple") return searchIcon
         if (theme === "purple-light") return searchPurpleLight
         if (theme === "magenta") return searchMagenta
         if (theme === "magenta-light") return searchMagentaLight
-        return search
+        return searchIcon
     }
 
     const getSearchImageIcon = () => {
@@ -248,7 +258,7 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
 
     const getHistory = () => {
         if (theme.includes("magenta")) return historyMagenta
-        return history
+        return historyIcon
     }
 
     const getDeleteIcon = () => {
@@ -258,18 +268,38 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
 
     const generateTagJSX = () => {
         let jsx = [] as any
-        let max = tags.length > maxTags ? maxTags : tags.length
+        let currentTags = props.post ? props.post.tags : tags
+        let max = currentTags.length > maxTags ? maxTags : currentTags.length
         for (let i = 0; i < max; i++) {
+            const tagClick = () => {
+                setSearch(currentTags[i].tag)
+                setSearchFlag(true)
+                history.push(`/posts?query=${currentTags[i].tag}`)
+            }
             jsx.push(
                 <div className="sidebar-row">
-                    <span className="tag-hover">
-                        <span className="tag">{tags[i]}</span>
-                        <span className="tag-count">{Math.floor(Math.random() * 1000)}</span>
+                    <span className="tag-hover" onClick={() => tagClick()}>
+                        <span className="tag">{currentTags[i].tag}</span>
+                        <span className="tag-count">{currentTags[i].count}</span>
                     </span>
                 </div>
             )
         }
         return jsx
+    }
+
+    const getDomain = () => {
+        if (props.post.link) {
+            const domain = new URL(props.post.link).hostname.replace("www.", "")
+            .split(".")?.[0] || ""
+            return functions.toProperCase(domain)
+        }
+        return "Unknown"
+    }
+
+    const triggerSearch = () => {
+        setSearchFlag(true)
+        history.push(`/posts?query=${search}`)
     }
 
     return (
@@ -278,18 +308,18 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
             <div className="sidebar-container">
             <div className="sidebar-content">
                 <div className="sidebar-text-container">
-                    <span className="sidebar-text">{props.text}</span>
+                    <span className="sidebar-text">{props.text ? props.text : `${posts.length} results.`}</span>
                 </div>
                 <div className="search-container">
-                    <input className="search" type="search" spellCheck="false"/>
-                    <img className={!theme || theme === "purple" ? "search-icon" : `search-icon-${theme}`} src={getSearchIcon()}/>
+                    <input className="search" type="search" spellCheck="false" value={search} onChange={(event) => setSearch(event.target.value)} onKeyDown={(event) => event.key === "Enter" ? triggerSearch() : null}/>
+                    <img className={!theme || theme === "purple" ? "search-icon" : `search-icon-${theme}`} src={getSearchIcon()} onClick={() => triggerSearch()}/>
                     <img className={!theme || theme === "purple" ? "search-image-icon" : `search-image-icon-${theme}`} src={getSearchImageIcon()}/>
                 </div>
                 <div className="random-container">
                     <img className={!theme || theme === "purple" ? "random" : `random-${theme}`} src={getRandomIcon()}/>
                 </div>
 
-                {props.artist ? 
+                {props.post ? 
                     <div className="sidebar-subcontainer">
                         <div className="sidebar-row">
                             <span className="sidebar-title">Artist</span>
@@ -299,26 +329,26 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
                         </div>
                         <div className="sidebar-row">
                             <span className="tag-hover">
-                                <span className="tag">Liely</span>
-                                <span className="tag-count">{Math.floor(Math.random() * 1000)}</span>
+                                <span className="tag">{}</span>
+                                <span className="tag-count">{}</span>
                             </span>
                         </div>
                         <div className="sidebar-row">
                             <span className="tag">Title:</span>
-                            <span className="tag-alt">None</span>
+                            <span className="tag-alt">{props.post.title || "None"}</span>
                         </div>
                         <div className="sidebar-row">
                             <span className="tag">Drawn:</span>
-                            <span className="tag-alt">3-7-2018</span>
+                            <span className="tag-alt">{props.post.drawn ? functions.formatDate(new Date(props.post.drawn)) : "Unknown"}</span>
                         </div>
                         <div className="sidebar-row">
                             <span className="tag">Source:</span>
-                            <span className="tag-alt">Pixiv</span>
+                            <span className="tag-alt-link" onClick={() => window.open(props.post.link, "_blank")}>{getDomain()}</span>
                         </div>
                     </div>
                 : null}
 
-                {props.characters ? 
+                {props.post ? 
                     <div className="sidebar-subcontainer">
                         <div className="sidebar-row">
                             <span className="sidebar-title">Characters</span>
@@ -332,7 +362,7 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
                     </div>
                 : null}
 
-                {props.series ? 
+                {props.post ? 
                     <div className="sidebar-subcontainer">
                         <div className="sidebar-row">
                             <span className="sidebar-title">Series</span>
@@ -347,7 +377,7 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
                 : null}
 
                 <div className="sidebar-subcontainer">
-                    {props.tags ? 
+                    {props.post ? 
                         <div className="sidebar-row">
                             <span className="sidebar-title">Tags</span>
                         </div>
@@ -355,7 +385,7 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
                     {generateTagJSX()}
                 </div>
 
-                {props.details ? 
+                {props.post ? 
                     <div className="sidebar-subcontainer">
                         <div className="sidebar-row">
                             <span className="sidebar-title">Details</span>
@@ -368,12 +398,16 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
                             <span className="tag-alt">Tenpi</span>
                         </div>
                         <div className="sidebar-row">
-                            <span className="tag">Date:</span>
-                            <span className="tag-alt">3-11-2022</span>
+                            <span className="tag">Uploaded:</span>
+                            <span className="tag-alt">{functions.formatDate(new Date(props.post.uploaded))}</span>
+                        </div>
+                        <div className="sidebar-row">
+                            <span className="tag">Updated:</span>
+                            <span className="tag-alt">{functions.formatDate(new Date(props.post.updated))}</span>
                         </div>
                         <div className="sidebar-row">
                             <span className="tag">Rating:</span>
-                            <span className="tag-alt">Safe</span>
+                            <span className="tag-alt">{functions.toProperCase(props.post.restrict)}</span>
                         </div>
                         <div className="sidebar-row">
                             <span className="tag">Favorites:</span>
@@ -381,12 +415,12 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
                         </div>
                         <div className="sidebar-row">
                             <span className="tag">Cuteness:</span>
-                            <span className="tag-alt">700</span>
+                            <span className="tag-alt">{props.post.cuteness}</span>
                         </div>
                     </div>
                 : null}  
 
-                {props.postID ? 
+                {props.post ? 
                     <div className="sidebar-subcontainer">
                         <div className="sidebar-row">
                             <span className="tag-hover">

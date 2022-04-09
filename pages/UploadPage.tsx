@@ -1,5 +1,4 @@
-import React, {useEffect, useContext, useState, useRef} from "react"
-import {useHistory} from "react-router-dom"
+import React, {useEffect, useContext, useState, useRef, useReducer} from "react"
 import {HashLink as Link} from "react-router-hash-link"
 import TitleBar from "../components/TitleBar"
 import NavBar from "../components/NavBar"
@@ -8,9 +7,11 @@ import Footer from "../components/Footer"
 import functions from "../structures/Functions"
 import uploadIcon from "../assets/purple/upload.png"
 import xIcon from "../assets/purple/x.png"
+import rightIcon from "../assets/purple/right.png"
+import leftIcon from "../assets/purple/left.png"
 import linkIcon from "../assets/purple/link.png"
 import image from "../assets/purple/image.png"
-import animated from "../assets/purple/animated.png"
+import animation from "../assets/purple/animation.png"
 import video from "../assets/purple/video.png"
 import comic from "../assets/purple/comic.png"
 import explicit from "../assets/purple/explicit.png"
@@ -24,35 +25,61 @@ import Carousel from "../components/Carousel"
 import PostImage from "../components/PostImage"
 import DragAndDrop from "../components/DragAndDrop"
 import {HideNavbarContext, HideSidebarContext, RelativeContext, ThemeContext, EnableDragContext, HideTitlebarContext, 
-UploadDropFilesContext} from "../Context"
+UploadDropFilesContext, BrightnessContext, ContrastContext, HueContext, SaturationContext, LightnessContext,
+BlurContext, SharpenContext, PixelateContext} from "../Context"
 import fileType from "magic-bytes.js"
 import JSZip from "jszip"
+import axios from "axios"
 import "./styles/uploadpage.less"
 import path from "path"
 
 let enterLinksTimer = null as any
+let saucenaoTimeout = false
 
 const UploadPage: React.FunctionComponent = (props) => {
+    const [ignored, forceUpdate] = useReducer(x => x + 1, 0)
     const {enableDrag, setEnableDrag} = useContext(EnableDragContext)
     const {hideNavbar, setHideNavbar} = useContext(HideNavbarContext)
     const {hideTitlebar, setHideTitlebar} = useContext(HideTitlebarContext)
     const {hideSidebar, setHideSidebar} = useContext(HideSidebarContext)
     const {relative, setRelative} = useContext(RelativeContext)
+    const {brightness, setBrightness} = useContext(BrightnessContext)
+    const {contrast, setContrast} = useContext(ContrastContext)
+    const {hue, setHue} = useContext(HueContext)
+    const {saturation, setSaturation} = useContext(SaturationContext)
+    const {lightness, setLightness} = useContext(LightnessContext)
+    const {pixelate, setPixelate} = useContext(PixelateContext)
+    const {blur, setBlur} = useContext(BlurContext)
+    const {sharpen, setSharpen} = useContext(SharpenContext)
     const {uploadDropFiles, setUploadDropFiles} = useContext(UploadDropFilesContext)
-    const [getSelectFilesHover, setSelectFilesHover] = useState(false)
-    const [getEnterLinksHover, setEnterLinksHover] = useState(false)
-    const [getUploadXHover, setUploadXHover] = useState(false)
     const [displayImage, setDisplayImage] = useState(false)
     const [uploadError, setUploadError] = useState(false)
-    const [acceptedURLs, setAcceptedURLs] = useState([])
+    const [submitError, setSubmitError] = useState(false)
+    const [saucenaoError, setSaucenaoError] = useState(false)
+    const [acceptedURLs, setAcceptedURLs] = useState([]) as any
     const uploadErrorRef = useRef<any>(null)
+    const submitErrorRef = useRef<any>(null)
+    const saucenaoErrorRef = useRef<any>(null)
     const enterLinksRef = useRef<any>(null)
     const [currentImg, setCurrentImg] = useState(null) as any
+    const [currentIndex, setCurrentIndex] = useState(0) as any
+    const [currentDupIndex, setCurrentDupIndex] = useState(0) as any
     const [type, setType] = useState("image")
     const [restrict, setRestrict] = useState("safe")
-    const [style, setStyle] = useState("2D")
+    const [style, setStyle] = useState("2d")
     const [showLinksInput, setShowLinksInput] = useState(false)
-    const history = useHistory()
+    const [variationID, setVariationID] = useState("")
+    const [thirdPartyID, setThirdPartyID] = useState("")
+    const [sourceTitle, setSourceTitle] = useState("")
+    const [sourceArtist, setSourceArtist] = useState("")
+    const [sourceDate, setSourceDate] = useState("")
+    const [sourceLink, setSourceLink] = useState("")
+    const [sourceCommentary, setSourceCommentary] = useState("")
+    const [artists, setArtists] = useState([{}]) as any
+    const [characters, setCharacters] = useState([{}]) as any
+    const [series, setSeries] = useState([{}]) as any
+    const [rawTags, setRawTags] = useState("")
+    const [submitted, setSubmitted] = useState(false)
 
     useEffect(() => {
         setHideNavbar(true)
@@ -61,6 +88,15 @@ const UploadPage: React.FunctionComponent = (props) => {
         setRelative(false)
         document.title = "Moebooru: Upload"
         window.scrollTo(0, 0)
+
+        setBrightness(100)
+        setContrast(100)
+        setHue(180)
+        setSaturation(100)
+        setLightness(100)
+        setBlur(0)
+        setSharpen(0)
+        setPixelate(1)
     }, [])
 
     useEffect(() => {
@@ -70,7 +106,7 @@ const UploadPage: React.FunctionComponent = (props) => {
         }
     }, [uploadDropFiles])
 
-    const validate = async (files: File[]) => {
+    const validate = async (files: File[], links?: string[]) => {
         let acceptedArray = [] as any 
         let error = ""
         for (let i = 0; i < files.length; i++) {
@@ -104,14 +140,14 @@ const UploadPage: React.FunctionComponent = (props) => {
                                     const gif = result?.mime === "image/gif"
                                     const mp4 = result?.mime === "video/mp4"
                                     if (jpg || png || gif || mp4) {
-                                        acceptedArray.push({file: new File([data], filename), ext: result.typename})
+                                        acceptedArray.push({file: new File([data], filename), ext: result.typename, originalLink: links ? links[i] : null, bytes: data})
                                     } else {
                                         error = `Supported types in zip: png, jpg, gif, mp4.`
                                     }
                                 }
                                 resolve()
                             } else {
-                                acceptedArray.push({file: files[i], ext: result.typename})
+                                acceptedArray.push({file: files[i], ext: result.typename, originalLink: links ? links[i] : null, bytes})
                                 resolve()
                             }
                         } else {
@@ -130,17 +166,41 @@ const UploadPage: React.FunctionComponent = (props) => {
             let urls = [] as any
             for (let i = 0; i < acceptedArray.length; i++) {
                 const url = URL.createObjectURL(acceptedArray[i].file)
-                urls.push(`${url}#.${acceptedArray[i].ext}`)
+                let thumbnail = ""
+                if (acceptedArray[i].ext === "mp4") {
+                    thumbnail = await functions.videoThumbnail(url)
+                }
+                urls.push({link: `${url}#.${acceptedArray[i].ext}`, ext: acceptedArray[i].ext, size: acceptedArray[i].file.size, thumbnail,
+                originalLink: acceptedArray[i].originalLink, bytes: acceptedArray[i].bytes, name: acceptedArray[i].file.name})
             }
-            setCurrentImg(urls[0])
+            setCurrentImg(urls[0].link)
+            setCurrentIndex(0)
             setAcceptedURLs(urls)
         }
         if (error) {
             setUploadError(true)
+            await functions.timeout(20)
             uploadErrorRef.current.innerText = error
             await functions.timeout(3000)
             setUploadError(false)
         }
+    }
+
+    const reset = () => {
+        setThirdPartyID("")
+        setVariationID("")
+        setSourceTitle("")
+        setSourceArtist("")
+        setSourceCommentary("")
+        setSourceDate("")
+        setSourceLink("")
+        setRawTags("")
+        setArtists([{}])
+        setCharacters([{}])
+        setSeries([{}])
+        setType("image")
+        setRestrict("safe")
+        setStyle("2d")
     }
 
     const upload = async (event: any) => {
@@ -148,6 +208,193 @@ const UploadPage: React.FunctionComponent = (props) => {
         if (!files?.[0]) return
         await validate(files)
         event.target.value = ""
+        reset()
+    }
+
+    const uploadTagImg = async (event: any, type: string, index: number) => {
+        const file = event instanceof File ? event : event.target.files?.[0]
+        if (!file) return
+        const fileReader = new FileReader()
+        await new Promise<void>((resolve) => {
+            fileReader.onloadend = async (f: any) => {
+                const bytes = new Uint8Array(f.target.result)
+                const result = fileType(bytes)?.[0]
+                const jpg = result?.mime === "image/jpeg"
+                const png = result?.mime === "image/png"
+                const gif = result?.mime === "image/gif"
+                let ext = jpg ? ".jpg" : png ? ".png" : gif ? ".gif" : null
+                if (jpg || png || gif) {
+                    const url = URL.createObjectURL(file)
+                    if (type === "artist") {
+                        artists[index].image = `${url}#.${ext}`
+                        artists[index].ext = result.typename
+                        artists[index].bytes = Object.values(bytes)
+                        setArtists(artists)
+                    } else if (type === "character") {
+                        characters[index].image = `${url}#.${ext}`
+                        characters[index].ext = result.typename
+                        characters[index].bytes = Object.values(bytes)
+                        setCharacters(characters)
+                    } else if (type === "series") {
+                        series[index].image = `${url}#.${ext}`
+                        series[index].ext = result.typename
+                        series[index].bytes = Object.values(bytes)
+                        setSeries(series)
+                    }
+                }
+                resolve()
+            }
+            fileReader.readAsArrayBuffer(file)
+        })
+        if (event.target) event.target.value = ""
+        forceUpdate()
+    }
+
+    const generateArtistsJSX = () => {
+        const jsx = [] as any
+        for (let i = 0; i < artists.length; i++) {
+            const changeTagInput = (value: string) => {
+                artists[i].tag = value 
+                setArtists(artists)
+            }
+            jsx.push(
+                <>
+                <div className="upload-container-row" style={{marginTop: "10px"}}>
+                    <span className="upload-text">Romanized Artist Tag: </span>
+                    <input className="upload-input-wide" type="text" value={artists[i].tag} onChange={(event) => changeTagInput(event.target.value)} spellCheck={false} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}/>
+                </div>
+                <div className="upload-container-row">
+                    <span className="upload-text margin-right">Artist Image: </span>
+                    <label htmlFor={`artist-upload-${i}`} className="upload-button">
+                            <img className="upload-button-img-small" src={uploadIcon}/>
+                            <span className="upload-button-text-small">Upload</span>
+                    </label>
+                    <input id={`artist-upload-${i}`} type="file" onChange={(event) => uploadTagImg(event, "artist", i)}/>
+                </div>
+                {artists[i].image ?
+                <div className="upload-container-row">
+                    <img className="upload-tag-img" src={artists[i].image}/>
+                </div> : null}
+                </>
+            )
+        }
+        const add = () => {
+            artists.push({})
+            setArtists(artists)
+            forceUpdate()
+        }
+        const remove = () => {
+            artists.pop()
+            setArtists(artists)
+            forceUpdate()
+        }
+        jsx.push(
+            <div className="upload-container-row">
+                <span className="upload-link" onClick={add}>+ Add artist</span>
+                {artists.length > 1 ?
+                <span className="upload-link" onClick={remove} style={{marginLeft: "20px"}}>- Remove artist</span>
+                : null}
+            </div>
+        )
+        return jsx
+    }
+
+    const generateCharactersJSX = () => {
+        const jsx = [] as any
+        for (let i = 0; i < characters.length; i++) {
+            const changeTagInput = (value: string) => {
+                characters[i].tag = value 
+                setCharacters(characters)
+            }
+            jsx.push(
+                <>
+                <div className="upload-container-row" style={{marginTop: "10px"}}>
+                    <span className="upload-text">Romanized Character Tag: </span>
+                    <input className="upload-input-wide" type="text" value={characters[i].tag} onChange={(event) => changeTagInput(event.target.value)} spellCheck={false} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}/>
+                </div>
+                <div className="upload-container-row">
+                    <span className="upload-text margin-right">Character Image: </span>
+                    <label htmlFor={`character-upload-${i}`} className="upload-button">
+                            <img className="upload-button-img-small" src={uploadIcon}/>
+                            <span className="upload-button-text-small">Upload</span>
+                    </label>
+                    <input id={`character-upload-${i}`} type="file" onChange={(event) => uploadTagImg(event, "character", i)}/>
+                </div>
+                {characters[i].image ?
+                <div className="upload-container-row">
+                    <img className="upload-tag-img" src={characters[i].image}/>
+                </div> : null}
+                </>
+            )
+        }
+        const add = () => {
+            characters.push({})
+            setCharacters(characters)
+            forceUpdate()
+        }
+        const remove = () => {
+            characters.pop()
+            setCharacters(characters)
+            forceUpdate()
+        }
+        jsx.push(
+            <div className="upload-container-row">
+                <span className="upload-link" onClick={add}>+ Add character</span>
+                {characters.length > 1 ?
+                <span className="upload-link" onClick={remove} style={{marginLeft: "20px"}}>- Remove character</span>
+                : null}
+            </div>
+        )
+        return jsx
+    }
+
+    const generateSeriesJSX = () => {
+        const jsx = [] as any
+        for (let i = 0; i < series.length; i++) {
+            const changeTagInput = (value: string) => {
+                series[i].tag = value 
+                setSeries(series)
+            }
+            jsx.push(
+                <>
+                <div className="upload-container-row" style={{marginTop: "10px"}}>
+                    <span className="upload-text">Romanized Series Tag: </span>
+                    <input className="upload-input-wide" type="text" value={series[i].tag} onChange={(event) => changeTagInput(event.target.value)} spellCheck={false} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}/>
+                </div>
+                <div className="upload-container-row">
+                    <span className="upload-text margin-right">Series Image: </span>
+                    <label htmlFor={`series-upload-${i}`} className="upload-button">
+                            <img className="upload-button-img-small" src={uploadIcon}/>
+                            <span className="upload-button-text-small">Upload</span>
+                    </label>
+                    <input id={`series-upload-${i}`} type="file" onChange={(event) => uploadTagImg(event, "series", i)}/>
+                </div>
+                {series[i].image ?
+                <div className="upload-container-row">
+                    <img className="upload-tag-img" src={series[i].image}/>
+                </div> : null}
+                </>
+            )
+        }
+        const add = () => {
+            series.push({})
+            setSeries(series)
+            forceUpdate()
+        }
+        const remove = () => {
+            series.pop()
+            setSeries(series)
+            forceUpdate()
+        }
+        jsx.push(
+            <div className="upload-container-row">
+                <span className="upload-link" onClick={add}>+ Add series</span>
+                {series.length > 1 ?
+                <span className="upload-link" onClick={remove} style={{marginLeft: "20px"}}>- Remove series</span>
+                : null}
+            </div>
+        )
+        return jsx
     }
 
     const linkUpload = async (event: any) => {
@@ -160,20 +407,222 @@ const UploadPage: React.FunctionComponent = (props) => {
                 const file = await functions.proxyImage(links[i])
                 files.push(file)
             }
-            await validate(files)
+            await validate(files, links)
+            reset()
         }, 500)
     }
 
-    const set = (img: string) => {
+    const set = (img: string, index: number) => {
         setCurrentImg(img)
+        setCurrentIndex(index)
+    }
+
+    const setDup = (img: string, index: number) => {
+        setCurrentDupIndex(index)
     }
 
     const clear = () => {
+        const currentIndex = acceptedURLs.findIndex((a: any) => a.link === currentImg)
+        if (enterLinksRef.current) {
+            const link = acceptedURLs[currentIndex]?.originalLink
+            if (link) {
+                enterLinksRef.current.value = enterLinksRef.current.value.replaceAll(link, "")
+            }
+            if (!enterLinksRef.current.value.trim()) {
+                setShowLinksInput(false)
+            }
+        }
+        acceptedURLs.splice(currentIndex, 1)
+        const newIndex = currentIndex > acceptedURLs.length - 1 ? acceptedURLs.length - 1 : currentIndex
+        const newLink = acceptedURLs[newIndex]?.link || null
+        setAcceptedURLs(acceptedURLs)
+        setCurrentImg(newLink)
+        forceUpdate()
+    }
+    
+    const left = () => {
+        const currentIndex = acceptedURLs.findIndex((a: any) => a.link === currentImg)
+        let newIndex = currentIndex - 1
+        if (newIndex < 0) newIndex = 0
+        acceptedURLs.splice(newIndex, 0, acceptedURLs.splice(currentIndex, 1)[0])
+        setAcceptedURLs(acceptedURLs)
+        setCurrentIndex(newIndex)
+        forceUpdate()
+    }
+
+    const right = () => {
+        const currentIndex = acceptedURLs.findIndex((a: any) => a.link === currentImg)
+        let newIndex = currentIndex + 1
+        if (newIndex > acceptedURLs.length - 1) newIndex = acceptedURLs.length - 1
+        acceptedURLs.splice(newIndex, 0, acceptedURLs.splice(currentIndex, 1)[0])
+        setAcceptedURLs(acceptedURLs)
+        setCurrentIndex(newIndex)
+        forceUpdate()
+    }
+
+    const submit = async () => {
+        const MB = acceptedURLs.reduce((acc: any, obj: any) => acc + obj.size, 0) / (1024*1024)
+        if (MB > 200) {
+            setSubmitError(true)
+            await functions.timeout(20)
+            submitErrorRef.current.innerText = "Combined file size shouldn't exceed 200MB."
+            await functions.timeout(3000)
+            return setSubmitError(false)
+        }
+        let newAcceptedURLs = acceptedURLs.map((a: any) => {
+            a.bytes = Object.values(a.bytes)
+            return a
+        })
+        const data = {
+            images: newAcceptedURLs,
+            type,
+            restrict,
+            style,
+            variationID,
+            thirdPartyID,
+            source: {
+                title: sourceTitle,
+                artist: sourceArtist,
+                date: sourceDate,
+                link: sourceLink,
+                commentary: sourceCommentary
+            },
+            artists,
+            characters,
+            series,
+            tags: rawTags.split(/[\n\r\s]+/g)
+        }
+        setSubmitError(true)
+        await functions.timeout(20)
+        submitErrorRef.current.innerText = "Submitting..."
+        try {
+            await axios.post("/api/upload", data).then((r) => r.data)
+            setSubmitted(true)
+            return setSubmitError(false)
+        } catch {
+            submitErrorRef.current.innerText = "Failed to submit. You might be missing required fields."
+            await functions.timeout(3000)
+            return setSubmitError(false)
+        }
+    }
+
+    const sourceLookup = async () => {
+        setSaucenaoError(true)
+        await functions.timeout(20)
+        saucenaoErrorRef.current.innerText = "Fetching..."
+        if (saucenaoTimeout) {
+            saucenaoErrorRef.current.innerText = "Wait a few seconds."
+            await functions.timeout(3000)
+            return setSaucenaoError(false)
+        }
+        let current = acceptedURLs[currentIndex]
+        let bytes = "" as any 
+        if (functions.isVideo(current.link)) {
+            bytes = await functions.base64toUint8Array(current.thumbnail).then((a) => Object.values(a))
+        } else {
+            bytes = Object.values(current.bytes) as any
+        }
+        saucenaoTimeout = true
+        try {
+            let results = await axios.post(`/api/saucenao`, bytes).then((r) => r.data)
+            let link = ""
+            let artist = ""
+            let title = ""
+            let commentary = ""
+            let date = ""
+            if (results.length) {
+                const pixiv = results.filter((r: any) => r.header.index_id === 5)
+                const twitter = results.filter((r: any) => r.header.index_id === 41)
+                const deviantart = results.filter((r: any) => r.header.index_id === 34)
+                const danbooru = results.filter((r: any) => r.header.index_id === 9)
+                const gelbooru = results.filter((r: any) => r.header.index_id === 25)
+                const konachan = results.filter((r: any) => r.header.index_id === 26)
+                const yandere = results.filter((r: any) => r.header.index_id === 12)
+                const anime = results.filter((r: any) => r.header.index_id === 21)
+                if (pixiv.length) {
+                    link = pixiv[0].data.ext_urls[0]
+                    artist = pixiv[0].data.author_name
+                    title = pixiv[0].data.title
+                    try {
+                        const illust = await axios.get(`/api/pixiv?url=https://www.pixiv.net/en/artworks/${pixiv[0].data.pixiv_id}`).then((r: any) => r.data)
+                        commentary = `${illust.caption.replace(/<\/?[^>]+(>|$)/g, "")}\n\n${illust.tags.map((t: any) => `#${t.name}`).join(" ")}` 
+                        date = functions.formatDate(new Date(illust.create_date))
+                        link = illust.url 
+                        title = illust.title
+                        artist = illust.user.name
+                        if (illust.x_restrict !== 0) {
+                            setRestrict("explicit")
+                        } else {
+                            setRestrict("safe")
+                        }
+                        const pfp = await functions.proxyImage(illust.user.profile_image_urls.medium)
+                        artists[artists.length - 1].tag = await axios.post("/api/translate", [artist]).then((r) => r.data[0])
+                        await uploadTagImg(pfp, "artist", artists.length - 1)
+                        artists.push({})
+                        setArtists(artists)
+                        forceUpdate()
+                        const translated = await axios.post("/api/translate", illust.tags.map((t: any) => t.name)).then((r) => r.data)
+                        setRawTags(translated.join(" "))
+                    } catch (e) {
+                        console.log(e)
+                    }
+                } else if (deviantart.length) {
+                    link = deviantart[0].data.ext_urls[0]
+                    artist = deviantart[0].data.member_name 
+                    title = deviantart[0].data.title
+                } else if (anime.length) {
+                    title = anime[0].data.source 
+                    link = `https://myanimelist.net/anime/${anime[0].data.mal_id}/`
+                } else if (twitter.length) {
+                    link = twitter[0].data.ext_urls[0]
+                    artist = twitter[0].data.twitter_user_handle
+                } else if (danbooru.length) {
+                    link = danbooru[0].data.ext_urls[0]
+                    artist = danbooru[0].data.creator
+                    title = danbooru[0].data.characters
+                } else if (gelbooru.length) {
+                    link = gelbooru[0].data.ext_urls[0]
+                    artist = gelbooru[0].data.creator
+                    title = gelbooru[0].data.characters
+                } else if (yandere.length) {
+                    link = yandere[0].data.ext_urls[0]
+                    artist = yandere[0].data.creator
+                    title = yandere[0].data.characters
+                } else if (konachan.length) {
+                    link = konachan[0].data.ext_urls[0]
+                    artist = konachan[0].data.creator
+                    title = konachan[0].data.characters
+                }
+            }
+            setSourceTitle(title)
+            setSourceArtist(artist)
+            setSourceLink(link)
+            setSourceCommentary(commentary)
+            setSourceDate(date)
+            if (!title && !artist && !link) {
+                saucenaoErrorRef.current.innerText = "No results found."
+                await functions.timeout(3000)
+            }
+            setSaucenaoError(false)
+        } catch (e) {
+            console.log(e)
+            saucenaoErrorRef.current.innerText = "No results found."
+            await functions.timeout(3000)
+            setSaucenaoError(false)
+        }
+        setTimeout(async () => {
+            saucenaoTimeout = false
+        }, 3000)
+    }
+
+    const resetAll = () => {
+        reset()
         setAcceptedURLs([])
         setCurrentImg(null)
-        setUploadXHover(false)
-        if (enterLinksRef.current) enterLinksRef.current.value = ""
+        setCurrentIndex(0)
+        setCurrentDupIndex(0)
         setShowLinksInput(false)
+        setSubmitted(false)
     }
 
 
@@ -187,6 +636,17 @@ const UploadPage: React.FunctionComponent = (props) => {
             <div className="content">
                 <div className="upload">
                     <span className="upload-heading">Upload</span>
+                    {submitted ?
+                    <div className="upload-container">
+                        <div className="upload-container-row">
+                            <span className="upload-text-alt">Your post was submitted and will appear on the site if approved.</span>
+                        </div> 
+                        <div className="upload-container-row" style={{marginTop: "10px"}}>
+                            <button className="upload-button" onClick={resetAll}>
+                                    <span className="upload-button-text">←Submit More</span>
+                            </button>
+                        </div>
+                    </div> : <>
                     {uploadError ? <div className="upload-row"><span ref={uploadErrorRef} className="upload-text-alt"></span></div> : null}
                     <div className="upload-row">
                         <label htmlFor="file-upload" className="upload-button">
@@ -198,11 +658,19 @@ const UploadPage: React.FunctionComponent = (props) => {
                                 <img className="upload-button-img" src={linkIcon}/>
                                 <span className="upload-button-text">Enter Links</span>
                         </button>
+                        {acceptedURLs.length > 1 ?
+                        <button className="upload-button" onClick={left}>
+                            <img className="upload-button-img" src={leftIcon}/>
+                        </button> : null}
                         {currentImg ? 
                         <button className="upload-button" onClick={clear}>
                             <img className="upload-button-img" src={xIcon}/>
                         </button>
                         : null}
+                        {acceptedURLs.length > 1 ?
+                        <button className="upload-button" onClick={right}>
+                            <img className="upload-button-img" src={rightIcon}/>
+                        </button> : null}
                     </div>
                     {showLinksInput ?
                     <div className="upload-row">
@@ -213,11 +681,11 @@ const UploadPage: React.FunctionComponent = (props) => {
                 <div className="upload-row">
                     {acceptedURLs.length > 1 ? 
                     <div className="upload-container">
-                        <Carousel images={acceptedURLs} set={set}/>
-                        <PostImage img={currentImg}/>
+                        <Carousel images={acceptedURLs.map((u: any) => u.link)} set={set} index={currentIndex}/>
+                        <PostImage img={currentImg} noKeydown={true}/>
                     </div>
                     :
-                    <PostImage img={currentImg}/>
+                    <PostImage img={currentImg} noKeydown={true}/>
                     }
                 </div>
                 : null}
@@ -228,9 +696,9 @@ const UploadPage: React.FunctionComponent = (props) => {
                         <img className="upload-button-img" src={image}/>
                         <span className="upload-button-text">Image</span>
                     </button>
-                    <button className={`upload-button ${type === "animated" ? "button-selected" : ""}`} onClick={() => setType("animated")}>
-                        <img className="upload-button-img" src={animated}/>
-                        <span className="upload-button-text">Animated</span>
+                    <button className={`upload-button ${type === "animation" ? "button-selected" : ""}`} onClick={() => setType("animation")}>
+                        <img className="upload-button-img" src={animation}/>
+                        <span className="upload-button-text">Animation</span>
                     </button>
                     <button className={`upload-button ${type === "video" ? "button-selected" : ""}`} onClick={() => setType("video")}>
                         <img className="upload-button-img" src={video}/>
@@ -256,117 +724,80 @@ const UploadPage: React.FunctionComponent = (props) => {
                     </button>
                 </div>
                 <div className="upload-row">
-                    <button className={`upload-button ${style === "2D" ? "button-selected" : ""}`} onClick={() => setStyle("2D")}>
+                    <button className={`upload-button ${style === "2d" ? "button-selected" : ""}`} onClick={() => setStyle("2d")}>
                         <img className="upload-button-img" src={$2d}/>
                         <span className="upload-button-text">2D</span>
                     </button>
-                    <button className={`upload-button ${style === "3D" ? "button-selected" : ""}`} onClick={() => setStyle("3D")}>
+                    <button className={`upload-button ${style === "3d" ? "button-selected" : ""}`} onClick={() => setStyle("3d")}>
                         <img className="upload-button-img" src={$3d}/>
                         <span className="upload-button-text">3D</span>
-                    </button>
-                    <button className={`upload-button ${style === "pixel" ? "button-selected" : ""}`} onClick={() => setStyle("pixel")}>
-                        <img className="upload-button-img" src={pixel}/>
-                        <span className="upload-button-text">Pixel</span>
                     </button>
                     <button className={`upload-button ${style === "chibi" ? "button-selected" : ""}`} onClick={() => setStyle("chibi")}>
                         <img className="upload-button-img" src={chibi}/>
                         <span className="upload-button-text">Chibi</span>
                     </button>
+                    <button className={`upload-button ${style === "pixel" ? "button-selected" : ""}`} onClick={() => setStyle("pixel")}>
+                        <img className="upload-button-img" src={pixel}/>
+                        <span className="upload-button-text">Pixel</span>
+                    </button>
                 </div>
                 {acceptedURLs.length ? <>
                 <span className="upload-heading">Possible Duplicates</span>
                 <div className="upload-row">
-                    <Carousel images={acceptedURLs}/>
+                    <Carousel images={acceptedURLs.map((u: any) => u.link)} set={setDup} index={currentDupIndex}/>
                 </div>
                 </> : null}
                 <div className="upload-container">
                         <div className="upload-container-row">
                             <span className="upload-text-alt">If this is a variation, enter the original post ID: </span>
-                            <input className="upload-input" type="text" spellCheck={false} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}/>
+                            <input className="upload-input" type="number" value={variationID} onChange={(event) => setVariationID(event.target.value)} spellCheck={false} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}/>
                         </div>
                         <div className="upload-container-row">
                             <span className="upload-text-alt">If this is a third-party edit, enter the original post ID: </span>
-                            <input className="upload-input" type="text" spellCheck={false} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}/>
+                            <input className="upload-input" type="number" value={thirdPartyID} onChange={(event) => setThirdPartyID(event.target.value)} spellCheck={false} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}/>
                         </div>
                 </div>
                 <span className="upload-heading">Source</span>
                 <div className="upload-container">
-                    <span className="upload-link">Fetch from Saucnao</span>
+                    {saucenaoError ? <span ref={saucenaoErrorRef} className="submit-error-text"></span> : null}
+                    <span className="upload-link" onClick={sourceLookup}>Fetch from Saucenao</span>
                     <div className="upload-container-row">
                         <span className="upload-text">Title: </span>
-                        <input className="upload-input" type="text" spellCheck={false} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}/>
+                        <input className="upload-input-wide2" type="text" value={sourceTitle} onChange={(event) => setSourceTitle(event.target.value)} spellCheck={false} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}/>
                     </div>
                     <div className="upload-container-row">
                         <span className="upload-text">Artist: </span>
-                        <input className="upload-input" type="text" spellCheck={false} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}/>
+                        <input className="upload-input-wide" type="text" value={sourceArtist} onChange={(event) => setSourceArtist(event.target.value)} spellCheck={false} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}/>
                     </div>
                     <div className="upload-container-row">
                         <span className="upload-text">Drawn Date: </span>
-                        <input className="upload-input" type="text" spellCheck={false} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}/>
+                        <input className="upload-input-wide" type="date" value={sourceDate} onChange={(event) => setSourceDate(event.target.value)} spellCheck={false} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}/>
                     </div>
                     <div className="upload-container-row">
-                        <span className="upload-text">Commentary</span>
+                        <span className="upload-text">Link: </span>
+                        <input className="upload-input-wide2" type="url" value={sourceLink} onChange={(event) => setSourceLink(event.target.value)} spellCheck={false} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}/>
                     </div>
                     <div className="upload-container-row">
-                        <textarea className="upload-textarea" spellCheck={false} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}></textarea>
+                        <span className="upload-text">Commentary: </span>
+                    </div>
+                    <div className="upload-container-row">
+                        <textarea className="upload-textarea-small" style={{height: "80px"}} value={sourceCommentary} onChange={(event) => setSourceCommentary(event.target.value)} spellCheck={false} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}></textarea>
                     </div>
                 </div>
                 <span className="upload-heading">Artist</span>
                 <span className="upload-text-alt">If the artist tag does not yet exist, please upload an artist image.</span>
                 <div className="upload-container">
-                    <div className="upload-container-row">
-                        <span className="upload-text">Romanized Artist Tag: </span>
-                        <input className="upload-input" type="text" spellCheck={false} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}/>
-                    </div>
-                    <div className="upload-container-row">
-                        <span className="upload-text margin-right">Artist Image</span>
-                        <label htmlFor="artist-upload" className="upload-button">
-                                <img className="upload-button-img" src={uploadIcon}/>
-                                <span className="upload-button-text">Upload</span>
-                        </label>
-                        <input id="artist-upload" type="file" multiple onChange={(event) => upload(event)}/>
-                    </div>
-                    <div className="upload-container-row">
-                        <span className="upload-link">+ Another artist</span>
-                    </div>
+                    {generateArtistsJSX()}
                 </div>
                 <span className="upload-heading">Characters</span>
                 <span className="upload-text-alt">If the character tag does not yet exist, please upload a character image.</span>
                 <div className="upload-container">
-                    <div className="upload-container-row">
-                        <span className="upload-text">Romanized Character Tag: </span>
-                        <input className="upload-input" type="text" spellCheck={false} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}/>
-                    </div>
-                    <div className="upload-container-row">
-                        <span className="upload-text margin-right">Character Image</span>
-                        <label htmlFor="character-upload" className="upload-button">
-                                <img className="upload-button-img" src={uploadIcon}/>
-                                <span className="upload-button-text">Upload</span>
-                        </label>
-                        <input id="character-upload" type="file" multiple onChange={(event) => upload(event)}/>
-                    </div>
-                    <div className="upload-container-row">
-                        <span className="upload-link">+ Another character</span>
-                    </div>
+                    {generateCharactersJSX()}
                 </div>
                 <span className="upload-heading">Series</span>
                 <span className="upload-text-alt">If the series tag does not yet exist, please upload a series image.</span>
                 <div className="upload-container">
-                    <div className="upload-container-row">
-                        <span className="upload-text">Romanized Series Tag: </span>
-                        <input className="upload-input" type="text" spellCheck={false} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}/>
-                    </div>
-                    <div className="upload-container-row">
-                        <span className="upload-text margin-right">Series Image</span>
-                        <label htmlFor="series-upload" className="upload-button">
-                                <img className="upload-button-img" src={uploadIcon}/>
-                                <span className="upload-button-text">Upload</span>
-                        </label>
-                        <input id="series-upload" type="file" multiple onChange={(event) => upload(event)}/>
-                    </div>
-                    <div className="upload-container-row">
-                        <span className="upload-link">+ Another series</span>
-                    </div>
+                    {generateSeriesJSX()}
                 </div>
                 {displayImage && acceptedURLs.length ?
                 <div className="upload-row">
@@ -386,18 +817,20 @@ const UploadPage: React.FunctionComponent = (props) => {
                         </button>
                     </div>
                 </div>
-                <span className="upload-text-alt">Enter the dashed version of the tag. If the tag doesn't exist, you will be promted to create it.
-                If you need help with tags, read the <Link className="upload-link" to="/help#tagging">tagging guide.</Link></span>
+                <span className="upload-text-alt">Enter dashed tags separated by spaces. Tags can describe any of the images. If the tag doesn't exist, you will be promted to create it.
+                If you need help with tags, read the <Link className="upload-link" target="_blank" to="/help#tagging">tagging guide.</Link></span>
                 <div className="upload-container">
                     <div className="upload-container-row">
-                        <textarea className="upload-textarea" spellCheck={false} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}></textarea>
+                        <textarea className="upload-textarea" spellCheck={false} value={rawTags} onChange={(event) => setRawTags(event.target.value)} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}></textarea>
                     </div>
                 </div>
                 <div className="upload-center-row">
-                    <button className="upload-button">
+                    {submitError ? <span ref={submitErrorRef} className="submit-error-text"></span> : null}
+                    <button className="upload-button" onClick={() => submit()}>
                             <span className="upload-button-submit-text">Submit</span>
                     </button>
                 </div>
+                </>}
                 </div>
                 <Footer/>
             </div>

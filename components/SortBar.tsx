@@ -4,7 +4,8 @@ import Slider from "react-slider"
 import {ThemeContext, HideSidebarContext, HideNavbarContext, HideSortbarContext, ActiveDropdownContext, 
 SizeTypeContext, BrightnessContext, ContrastContext, HueContext, SaturationContext, LightnessContext,
 BlurContext, SharpenContext, EnableDragContext, FilterDropActiveContext, SquareContext, PixelateContext,
-ShowDownloadDialogContext, HideTitlebarContext} from "../Context"
+ShowDownloadDialogContext, HideTitlebarContext, ImageTypeContext, RestrictTypeContext, SortTypeContext,
+StyleTypeContext, SpeedContext, ReverseContext} from "../Context"
 import leftArrow from "../assets/purple/leftArrow.png"
 import leftArrowMagenta from "../assets/magenta/leftArrow.png"
 import rightArrow from "../assets/purple/rightArrow.png"
@@ -23,8 +24,8 @@ import all from "../assets/purple/all.png"
 import allMagenta from "../assets/magenta/all.png"
 import image from "../assets/purple/image.png"
 import imageMagenta from "../assets/magenta/image.png"
-import animated from "../assets/purple/animated.png"
-import animatedMagenta from "../assets/magenta/animated.png"
+import animation from "../assets/purple/animation.png"
+import animationMagenta from "../assets/magenta/animation.png"
 import video from "../assets/purple/video.png"
 import videoMagenta from "../assets/magenta/video.png"
 import comic from "../assets/purple/comic.png"
@@ -67,6 +68,10 @@ import squareIcon from "../assets/purple/square.png"
 import squareMagentaIcon from "../assets/magenta/square.png"
 import pixelateIcon from "../assets/purple/pixelate.png"
 import pixelateMagentaIcon from "../assets/magenta/pixelate.png"
+import speedIcon from "../assets/purple/video-speed.png"
+import speedIconMagenta from "../assets/purple/gif-speed.png"
+import reverseIcon from "../assets/purple/video-reverse.png"
+import reverseIconMagenta from "../assets/purple/gif-reverse.png"
 import functions from "../structures/Functions"
 import "./styles/sortbar.less"
 
@@ -91,11 +96,13 @@ const SortBar: React.FunctionComponent = (props) => {
     const {showDownloadDialog, setShowDownloadDialog} = useContext(ShowDownloadDialogContext)
     const [ignored, forceUpdate] = useReducer(x => x + 1, 0)
     const [mouseOver, setMouseOver] = useState(false)
-    const [imageType, setImageType] = useState("all")
-    const [restrictType, setRestrictType] = useState("all")
-    const [styleType, setStyleType] = useState("all")
+    const {imageType, setImageType} = useContext(ImageTypeContext)
+    const {restrictType, setRestrictType} = useContext(RestrictTypeContext)
+    const {styleType, setStyleType} = useContext(StyleTypeContext)
     const {sizeType, setSizeType} = useContext(SizeTypeContext)
-    const [sortType, setSortType] = useState("date")
+    const {sortType, setSortType} = useContext(SortTypeContext)
+    const {speed, setSpeed} = useContext(SpeedContext)
+    const {reverse, setReverse} = useContext(ReverseContext)
     const [dropLeft, setDropLeft] = useState(0)
     const [dropTop, setDropTop] = useState(0)
     const imageRef = useRef(null) as any
@@ -104,6 +111,7 @@ const SortBar: React.FunctionComponent = (props) => {
     const sizeRef = useRef(null) as any 
     const sortRef = useRef(null) as any
     const filterRef = useRef(null) as any
+    const speedRef = useRef(null) as any
 
     useEffect(() => {
         const savedType = localStorage.getItem("type")
@@ -116,6 +124,23 @@ const SortBar: React.FunctionComponent = (props) => {
         if (savedStyle) setStyleType(savedStyle)
         if (savedSize) setSizeType(savedSize)
         if (savedSort) setSortType(savedSort)
+
+        const savedBrightness = localStorage.getItem("brightness")
+        const savedContrast = localStorage.getItem("contrast")
+        const savedHue = localStorage.getItem("hue")
+        const savedSaturation = localStorage.getItem("saturation")
+        const savedLightness = localStorage.getItem("lightness")
+        const savedBlur = localStorage.getItem("blur")
+        const savedSharpen = localStorage.getItem("sharpen")
+        const savedPixelate = localStorage.getItem("pixelate")
+        if (savedBrightness) setBrightness(Number(savedBrightness))
+        if (savedContrast) setContrast(Number(savedContrast))
+        if (savedHue) setHue(Number(savedHue))
+        if (savedSaturation) setSaturation(Number(savedSaturation))
+        if (savedLightness) setLightness(Number(savedLightness))
+        if (savedBlur) setBlur(Number(savedBlur))
+        if (savedSharpen) setSharpen(Number(savedSharpen))
+        if (savedPixelate) setPixelate(Number(savedPixelate))
     }, [])
 
     useEffect(() => {
@@ -201,9 +226,9 @@ const SortBar: React.FunctionComponent = (props) => {
         return image
     }
 
-    const getAnimated = () => {
-        if (theme.includes("magenta")) return animatedMagenta
-        return animated
+    const getAnimation = () => {
+        if (theme.includes("magenta")) return animationMagenta
+        return animation
     }
 
     const getVideo = () => {
@@ -311,6 +336,16 @@ const SortBar: React.FunctionComponent = (props) => {
         return pixelateIcon
     }
 
+    const getSpeed = () => {
+        if (theme.includes("magenta")) return speedIconMagenta
+        return speedIcon
+    }
+
+    const getReverse = () => {
+        if (theme.includes("magenta")) return reverseIconMagenta
+        return reverseIcon
+    }
+
     const hideTheSidebar = () => {
         setHideSidebar((prev: boolean) => {
             localStorage.setItem("sidebar", `${prev}`)
@@ -335,11 +370,11 @@ const SortBar: React.FunctionComponent = (props) => {
                     <span className="sortbar-text">Image</span>
                 </div>
             )
-        } else if (imageType === "animated") {
+        } else if (imageType === "animation") {
             return (
                 <div className="sortbar-item" ref={imageRef} onClick={() => {setActiveDropdown(activeDropdown === "image" ? "none" : "image"); setFilterDropActive(false)}}>
-                    <img className="sortbar-img" src={getAnimated()}/>
-                    <span className="sortbar-text">Animated</span>
+                    <img className="sortbar-img" src={getAnimation()}/>
+                    <span className="sortbar-text">Animation</span>
                 </div>
             )
         } else if (imageType === "video") {
@@ -373,7 +408,7 @@ const SortBar: React.FunctionComponent = (props) => {
         let offset = 0
         if (imageType === "all") offset = -30
         if (imageType === "image") offset = -10
-        if (imageType === "animated") offset = -5
+        if (imageType === "animation") offset = -5
         if (imageType === "video") offset = -15
         if (imageType === "comic") offset = -15
         return `${raw + offset}px`
@@ -504,6 +539,14 @@ const SortBar: React.FunctionComponent = (props) => {
         return `${raw + offset}px`
     }
 
+    const getSpeedMargin = () => {
+        const rect = speedRef.current?.getBoundingClientRect()
+        if (!rect) return "250px"
+        const raw = window.innerWidth - rect.right
+        let offset = 0
+        return `${raw + offset}px`
+    }
+
     const getSortMargin = () => {
         const rect = sortRef.current?.getBoundingClientRect()
         if (!rect) return "0px"
@@ -542,6 +585,23 @@ const SortBar: React.FunctionComponent = (props) => {
         setActiveDropdown(newValue)
         setFilterDropActive(newValue === "filters")
     }
+
+    const toggleSpeedDrop = () => {
+        const newValue = activeDropdown === "speed" ? "none" : "speed"
+        setActiveDropdown(newValue)
+        setFilterDropActive(newValue === "speed")
+    }
+
+    useEffect(() => {
+        localStorage.setItem("brightness", brightness)
+        localStorage.setItem("contrast", contrast)
+        localStorage.setItem("hue", hue)
+        localStorage.setItem("saturation", saturation)
+        localStorage.setItem("lightness", lightness)
+        localStorage.setItem("blur", blur)
+        localStorage.setItem("sharpen", sharpen)
+        localStorage.setItem("pixelate", pixelate)
+    }, [brightness, contrast, hue, saturation, lightness, blur, sharpen, pixelate])
 
     const resetFilters = () => {
         setBrightness(100)
@@ -594,6 +654,19 @@ const SortBar: React.FunctionComponent = (props) => {
                 <div className="sortbar-item" onClick={() => toggleSquare()}>
                     <img className="sortbar-img" src={getSquare()}/>
                 </div>
+                <div className="sortbar-item" onClick={() => setReverse((prev: boolean) => !prev)}>
+                    {reverse ? <>
+                    <img className="sortbar-img" src={getReverse()} style={{transform: "scaleX(-1)"}}/>
+                    <span className="sortbar-text">Forward</span>
+                    </> : <>
+                    <img className="sortbar-img" src={getReverse()}/>
+                    <span className="sortbar-text">Reverse</span>
+                    </>}
+                </div>
+                <div className="sortbar-item" ref={speedRef} onClick={() => toggleSpeedDrop()}>
+                    <img className="sortbar-img" src={getSpeed()}/>
+                    <span className="sortbar-text">Speed</span>
+                </div>
                 <div className="sortbar-item" ref={filterRef} onClick={() => toggleFilterDrop()}>
                     <img className="sortbar-img" src={getFilters()}/>
                     <span className="sortbar-text">Filters</span>
@@ -614,9 +687,9 @@ const SortBar: React.FunctionComponent = (props) => {
                     <img className="sortbar-dropdown-img" src={getImage()}/>
                     <span className="sortbar-dropdown-text">Image</span>
                 </div>
-                <div className="sortbar-dropdown-row" onClick={() => setImageType("animated")}>
-                    <img className="sortbar-dropdown-img" src={getAnimated()}/>
-                    <span className="sortbar-dropdown-text">Animated</span>
+                <div className="sortbar-dropdown-row" onClick={() => setImageType("animation")}>
+                    <img className="sortbar-dropdown-img" src={getAnimation()}/>
+                    <span className="sortbar-dropdown-text">Animation</span>
                 </div>
                 <div className="sortbar-dropdown-row" onClick={() => setImageType("video")}>
                     <img className="sortbar-dropdown-img" src={getVideo()}/>
@@ -660,13 +733,43 @@ const SortBar: React.FunctionComponent = (props) => {
                     <img className="sortbar-dropdown-img" src={get3D()}/>
                     <span className="sortbar-dropdown-text">3D</span>
                 </div>
+                <div className="sortbar-dropdown-row" onClick={() => setStyleType("chibi")}>
+                    <img className="sortbar-dropdown-img" src={getChibi()}/>
+                    <span className="sortbar-dropdown-text">Chibi</span>
+                </div>
                 <div className="sortbar-dropdown-row" onClick={() => setStyleType("pixel")}>
                     <img className="sortbar-dropdown-img" src={getPixel()}/>
                     <span className="sortbar-dropdown-text">Pixel</span>
                 </div>
-                <div className="sortbar-dropdown-row" onClick={() => setStyleType("chibi")}>
-                    <img className="sortbar-dropdown-img" src={getChibi()}/>
-                    <span className="sortbar-dropdown-text">Chibi</span>
+            </div>
+            <div className={`dropdown-right ${activeDropdown === "speed" ? "" : "hide-dropdown"}`} 
+            style={{marginRight: getSpeedMargin(), top: dropTop}} onClick={() => setActiveDropdown("none")}>
+                <div className="sortbar-dropdown-row" onClick={() => setSpeed(4)}>
+                    <span className="sortbar-dropdown-text">4x</span>
+                </div>
+                <div className="sortbar-dropdown-row" onClick={() => setSpeed(2)}>
+                    <span className="sortbar-dropdown-text">2x</span>
+                </div>
+                <div className="sortbar-dropdown-row" onClick={() => setSpeed(1.75)}>
+                    <span className="sortbar-dropdown-text">1.75x</span>
+                </div>
+                <div className="sortbar-dropdown-row" onClick={() => setSpeed(1.5)}>
+                    <span className="sortbar-dropdown-text">1.5x</span>
+                </div>
+                <div className="sortbar-dropdown-row" onClick={() => setSpeed(1.25)}>
+                    <span className="sortbar-dropdown-text">1.25x</span>
+                </div>
+                <div className="sortbar-dropdown-row" onClick={() => setSpeed(1)}>
+                    <span className="sortbar-dropdown-text">1x</span>
+                </div>
+                <div className="sortbar-dropdown-row" onClick={() => setSpeed(0.75)}>
+                    <span className="sortbar-dropdown-text">0.75x</span>
+                </div>
+                <div className="sortbar-dropdown-row" onClick={() => setSpeed(0.5)}>
+                    <span className="sortbar-dropdown-text">0.5x</span>
+                </div>
+                <div className="sortbar-dropdown-row" onClick={() => setSpeed(0.25)}>
+                    <span className="sortbar-dropdown-text">0.25x</span>
                 </div>
             </div>
             <div className={`dropdown-right ${activeDropdown === "size" ? "" : "hide-dropdown"}`} 

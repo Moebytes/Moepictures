@@ -55,6 +55,17 @@ const PostImageOptions: React.FunctionComponent<Props> = (props) => {
     const [showFilterDropdown, setShowFilterDropdown] = useState(false)
     const filterRef = useRef(null) as any
 
+    useEffect(() => {
+        localStorage.setItem("brightness", brightness)
+        localStorage.setItem("contrast", contrast)
+        localStorage.setItem("hue", hue)
+        localStorage.setItem("saturation", saturation)
+        localStorage.setItem("lightness", lightness)
+        localStorage.setItem("blur", blur)
+        localStorage.setItem("sharpen", sharpen)
+        localStorage.setItem("pixelate", pixelate)
+    }, [brightness, contrast, hue, saturation, lightness, blur, sharpen, pixelate])
+
     const getStar = () => {
         if (favorited) {
             if (theme.includes("magenta")) return starFavoritedMagenta

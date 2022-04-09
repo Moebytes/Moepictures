@@ -1,7 +1,7 @@
 import React, {useEffect, useContext, useState} from "react"
 import {HashLink as Link} from "react-router-hash-link"
-import {HideNavbarContext, HideSidebarContext, ThemeContext, EnableDragContext, ShowDownloadDialogContext, ImageAmountContext, 
-ImagesContext, SizeTypeContext, DownloadURLsContext, DownloadFlagContext, HideTitlebarContext} from "../Context"
+import {HideNavbarContext, HideSidebarContext, ThemeContext, EnableDragContext, ShowDownloadDialogContext, PostAmountContext, 
+PostsContext, SizeTypeContext, DownloadURLsContext, DownloadFlagContext, HideTitlebarContext} from "../Context"
 import functions from "../structures/Functions"
 import "./styles/downloaddialog.less"
 
@@ -12,8 +12,8 @@ const DownloadDialog: React.FunctionComponent = (props) => {
     const {hideSidebar, setHideSidebar} = useContext(HideSidebarContext)
     const {enableDrag, setEnableDrag} = useContext(EnableDragContext)
     const {showDownloadDialog, setShowDownloadDialog} = useContext(ShowDownloadDialogContext)
-    const {imageAmount, setImageAmount} = useContext(ImageAmountContext)
-    const {images, setImages} = useContext(ImagesContext)
+    const {postAmount, setPostAmount} = useContext(PostAmountContext)
+    const {posts, setPosts} = useContext(PostsContext)
     const {sizeType, setSizeType} = useContext(SizeTypeContext)
     const {downloadURLs, setDownloadURLs} = useContext(DownloadURLsContext)
     const {downloadFlag, setDownloadFlag} = useContext(DownloadFlagContext)
@@ -26,17 +26,17 @@ const DownloadDialog: React.FunctionComponent = (props) => {
 
     useEffect(() => {
         setTimeout(() => {
-            let offset = Math.floor(functions.round(imageAmount * functions.getScrollPercentAdjusted(sizeType), functions.getImagesPerRow(sizeType)))
+            let offset = Math.floor(functions.round(postAmount * functions.getScrollPercentAdjusted(sizeType), functions.getImagesPerRow(sizeType)))
             if (offset < 0) offset = 0
-            let amount = imageAmount - offset
+            let amount = postAmount - offset
             if (amount < 0) amount = 0
             setOffsetField(String(offset))
             setAmountField(String(amount))
         }, 500)
         const scrollHandler = () => {
-            let offset = functions.round(imageAmount * functions.getScrollPercentAdjusted(sizeType), functions.getImagesPerRow(sizeType))
+            let offset = functions.round(postAmount * functions.getScrollPercentAdjusted(sizeType), functions.getImagesPerRow(sizeType))
             if (offset < 0) offset = 0
-            let amount = imageAmount - offset
+            let amount = postAmount - offset
             if (amount < 0) amount = 0
             setOffsetField(String(offset))
             setAmountField(String(amount))
@@ -45,7 +45,7 @@ const DownloadDialog: React.FunctionComponent = (props) => {
         return () => {
             window.removeEventListener("scroll", scrollHandler)
         }
-    }, [imageAmount, sizeType])
+    }, [postAmount, sizeType])
 
     useEffect(() => {
         if (showDownloadDialog) {
@@ -66,11 +66,13 @@ const DownloadDialog: React.FunctionComponent = (props) => {
         if (Number.isNaN(end)) end = 0
         if (start < 0) start = 0
         if (end < 0) end = 0
-        const downloadArray = images.slice(start, end)
+        const postArray = posts.slice(start, end)
         const newDownloadURLs = [] as any
-        for (let i = 0; i < downloadArray.length; i++) {
-            const img = downloadArray[i]
-            newDownloadURLs.push(img)
+        for (let i = 0; i < postArray.length; i++) {
+            const post = postArray[i]
+            const image = post.images[0] 
+            if (!image) continue 
+            newDownloadURLs.push(functions.getImageLink(image.type, post.postID, image.filename))
         }
         setDownloadURLs(newDownloadURLs)
         setDownloadFlag(true)

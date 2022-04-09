@@ -24,6 +24,9 @@ const TagsPage: React.FunctionComponent = (props) => {
     const {relative, setRelative} = useContext(RelativeContext)
     const {activeDropdown, setActiveDropdown} = useContext(ActiveDropdownContext)
     const [sortType, setSortType] = useState("alphabetic")
+    const [tags, setTags] = useState([]) as any
+    const [index, setIndex] = useState(0)
+    const [visibleTags, setVisibleTags] = useState([]) as any
     const sortRef = useRef(null) as any
 
     useEffect(() => {
@@ -33,7 +36,46 @@ const TagsPage: React.FunctionComponent = (props) => {
         setRelative(false)
         setActiveDropdown("none")
         document.title = "Moebooru: Tags"
+
+        const newTags = [] as any 
+        for (let i = 0; i < 100; i++) {
+            newTags.push(<TagRow/>)
+        }
+        setTags(newTags)
     }, [])
+
+    useEffect(() => {
+        let currentIndex = index
+        const newVisibleTags = visibleTags as any
+        for (let i = 0; i < 15; i++) {
+            if (!tags[currentIndex]) break
+            newVisibleTags.push(tags[currentIndex])
+            currentIndex++
+        }
+        setIndex(currentIndex)
+        setVisibleTags(newVisibleTags)
+    }, [tags])
+
+    useEffect(() => {
+        const scrollHandler = async () => {
+            if (functions.scrolledToBottom()) {
+                let currentIndex = index
+                if (!tags[currentIndex]) return
+                const newTags = visibleTags as any
+                for (let i = 0; i < 15; i++) {
+                    if (!tags[currentIndex]) break
+                    newTags.push(tags[currentIndex])
+                    currentIndex++
+                }
+                setIndex(currentIndex)
+                setVisibleTags(newTags)
+            }
+        }
+        window.addEventListener("scroll", scrollHandler)
+        return () => {
+            window.removeEventListener("scroll", scrollHandler)
+        }
+    })
 
     const getSearchIcon = () => {
         if (theme === "purple") return search
@@ -74,8 +116,8 @@ const TagsPage: React.FunctionComponent = (props) => {
     }
 
     const generateTagsJSX = () => {
-        const jsx = [] as any 
-        for (let i = 0; i < 20; i++) {
+        const jsx = [] as any
+        for (let i = 0; i < visibleTags.length; i++) {
             jsx.push(<TagRow/>)
         }
         return jsx
