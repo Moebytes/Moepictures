@@ -1,4 +1,5 @@
-import React, {useEffect, useContext, useState} from "react"
+import React, {useEffect, useContext, useState, useRef} from "react"
+import {useHistory} from "react-router-dom"
 import {HashLink as Link} from "react-router-hash-link"
 import TitleBar from "../components/TitleBar"
 import NavBar from "../components/NavBar"
@@ -13,7 +14,10 @@ import hideMagenta from "../assets/magenta/hide.png"
 import showMagentaLight from "../assets/magenta-light/show.png"
 import hideMagentaLight from "../assets/magenta-light/hide.png"
 import DragAndDrop from "../components/DragAndDrop"
-import {HideNavbarContext, HideSidebarContext, ThemeContext, EnableDragContext, RelativeContext, HideTitlebarContext} from "../Context"
+import functions from "../structures/Functions"
+import {HideNavbarContext, HideSidebarContext, ThemeContext, EnableDragContext, RedirectContext,
+RelativeContext, HideTitlebarContext, HeaderTextContext, SidebarTextContext, SessionContext} from "../Context"
+import axios from "axios"
 import "./styles/changepasspage.less"
 
 const ChangePasswordPage: React.FunctionComponent = (props) => {
@@ -22,19 +26,41 @@ const ChangePasswordPage: React.FunctionComponent = (props) => {
     const {hideTitlebar, setHideTitlebar} = useContext(HideTitlebarContext)
     const {hideSidebar, setHideSidebar} = useContext(HideSidebarContext)
     const {enableDrag, setEnableDrag} = useContext(EnableDragContext)
+    const {headerText, setHeaderText} = useContext(HeaderTextContext)
+    const {sidebarText, setSidebarText} = useContext(SidebarTextContext)
     const {relative, setRelative} = useContext(RelativeContext)
-    const [clicked, setClicked] = useState(false)
+    const {session, setSession} = useContext(SessionContext)
+    const {redirect, setRedirect} = useContext(RedirectContext)
+
+    const [submitted, setSubmitted] = useState(false)
     const [showPassword, setShowPassword] = useState(false)
     const [showPassword2, setShowPassword2] = useState(false)
     const [showPassword3, setShowPassword3] = useState(false)
+    const [oldPassword, setOldPassword] = useState("")
+    const [newPassword, setNewPassword] = useState("")
+    const [confirmNewPassword, setConfirmNewPassword] = useState("")
+    const [error, setError] = useState(false)
+    const errorRef = useRef<any>(null)
+    const history = useHistory()
 
     useEffect(() => {
         setHideNavbar(false)
         setHideTitlebar(false)
         setHideSidebar(false)
         setRelative(false)
+        setHeaderText("")
+        setSidebarText("")
         document.title = "Moebooru: Change Password"
     }, [])
+
+    useEffect(() => {
+        if (!session.cookie) return
+        if (!session.username) {
+            setRedirect("/change-password")
+            history.push("/login")
+            setSidebarText("Login required.")
+        }
+    }, [session])
 
     const getEye = () => {
         if (theme === "purple") return showPassword ? hide : show
@@ -60,6 +86,38 @@ const ChangePasswordPage: React.FunctionComponent = (props) => {
         return showPassword3 ? hide : show
     }
 
+    const submit = async () => {
+        if (newPassword.trim() !== confirmNewPassword.trim()) {
+            setError(true)
+            if (!errorRef.current) await functions.timeout(20)
+            errorRef.current!.innerText = "Passwords don't match."
+            await functions.timeout(2000)
+            setError(false)
+            return
+        }
+        const badPassword = functions.validatePassword(session.username.trim(), newPassword.trim())
+        if (badPassword) {
+            setError(true)
+            if (!errorRef.current) await functions.timeout(20)
+            errorRef.current!.innerText = badPassword
+            await functions.timeout(2000)
+            setError(false)
+            return
+        }
+        setError(true)
+        if (!errorRef.current) await functions.timeout(20)
+        errorRef.current!.innerText = "Submitting..."
+        try {
+            await axios.post("/api/changepassword", {oldPassword, newPassword}, {withCredentials: true})
+            setSubmitted(true)
+            setError(false)
+        } catch {
+            errorRef.current!.innerText = "Bad password."
+            await functions.timeout(2000)
+            setError(false)
+        }
+    }
+
     return (
         <>
         <DragAndDrop/>
@@ -68,44 +126,45 @@ const ChangePasswordPage: React.FunctionComponent = (props) => {
         <div className="body">
             <SideBar/>
             <div className="content">
-                <div className="change-pass" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
+                <div className="change-pass">
                     <span className="change-pass-title">Change Password</span>
-                    {clicked ?
+                    {submitted ?
                     <>
                     <span className="change-pass-link">Your password has been changed.</span>
                     <div className="change-pass-button-container-left">
-                        <button className="change-pass-button" onClick={() => setClicked(false)}>←Back</button>
+                        <button className="change-pass-button" onClick={() => history.push("/profile")}>←Back</button>
                     </div>
                     </> : <>
                     <div className="change-pass-row">
                         <span className="change-pass-text">Old Password:</span>
                         <div className="change-pass-pass">
                             <img className="change-pass-pass-show" src={getEye()} onClick={() => setShowPassword((prev) => !prev)}/>
-                            <input className="change-pass-pass-input" type={showPassword ? "text" : "password"} spellCheck={false}/>
+                            <input className="change-pass-pass-input" type={showPassword ? "text" : "password"} spellCheck={false} value={oldPassword} onChange={(event) => setOldPassword(event.target.value)} onKeyDown={(event) => event.key === "Enter" ? submit() : null} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}/>
                         </div>
                     </div>
                     <div className="change-pass-row">
                         <span className="change-pass-text">New Password:</span>
                         <div className="change-pass-pass">
                             <img className="change-pass-pass-show" src={getEye2()} onClick={() => setShowPassword2((prev) => !prev)}/>
-                            <input className="change-pass-pass-input" type={showPassword2 ? "text" : "password"} spellCheck={false}/>
+                            <input className="change-pass-pass-input" type={showPassword2 ? "text" : "password"} spellCheck={false} value={newPassword} onChange={(event) => setNewPassword(event.target.value)} onKeyDown={(event) => event.key === "Enter" ? submit() : null} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}/>
                         </div>
                     </div>
                     <div className="change-pass-row">
                         <span className="change-pass-text">Confirm New Password:</span>
                         <div className="change-pass-pass">
                             <img className="change-pass-pass-show" src={getEye3()} onClick={() => setShowPassword3((prev) => !prev)}/>
-                            <input className="change-pass-pass-input" type={showPassword3 ? "text" : "password"} spellCheck={false}/>
+                            <input className="change-pass-pass-input" type={showPassword3 ? "text" : "password"} spellCheck={false} value={confirmNewPassword} onChange={(event) => setConfirmNewPassword(event.target.value)} onKeyDown={(event) => event.key === "Enter" ? submit() : null} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}/>
                         </div>
                     </div>
+                    {error ? <div className="change-pass-validation-container"><span className="change-pass-validation" ref={errorRef}></span></div> : null}
                     <div className="change-pass-button-container">
-                        <button className="change-pass-button" onClick={() => setClicked(true)}>Change Password</button>
+                        <button className="change-pass-button" onClick={() => submit()}>Change Password</button>
                     </div>
                     </>
                     }
                 </div>
-            </div>
             <Footer/>
+            </div>
         </div>
         </>
     )

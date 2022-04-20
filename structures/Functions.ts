@@ -2,9 +2,15 @@ import GifEncoder from "gif-encoder"
 import pixels from "image-pixels"
 import path from "path"
 import commonPasswords from "../json/common-passwords.json"
+import bannedUsernames from "../json/banned-usernames.json"
 import axios from "axios"
 import MP4Demuxer from "./MP4Demuxer"
 import audioEncoder from "audio-encoder"
+import fileType from "magic-bytes.js"
+import gibberish from "./Gibberish"
+import JsWebm from "jswebm"
+import gifFrames from "gif-frames"
+import profaneWords from "profane-words"
 
 let newScrollY = 0
 let lastScrollTop = 0
@@ -18,7 +24,7 @@ const videoExtensions = [".mp4", ".mov", ".avi", ".mkv", ".webm"]
 export default class Functions {
     public static proxyImage = async (link: string) => {
         try {
-            const response = await fetch(`/api/proxy?url=${link}`).then((r) => r.arrayBuffer())
+            const response = await axios.get(`/api/proxy?url=${link}`, {withCredentials: true, responseType: "arraybuffer"}).then((r) => r.data)
             const blob = new Blob([new Uint8Array(response)])
             const file = new File([blob], path.basename(link))
             return file
@@ -74,6 +80,28 @@ export default class Functions {
         return path.extname(file) === ".gif"
     }
 
+    public static isWebP = (file: string) => {
+        if (file?.startsWith("blob:")) {
+            const ext = file.split("#")?.[1] || ""
+            return ext === ".webp"
+        }
+        return path.extname(file) === ".webp"
+    }
+
+    public static isAnimatedWebp = async (buffer: ArrayBuffer) => {
+        let str: any
+        if (typeof window === "undefined") {
+            str = buffer
+        } else {
+            str = await new Blob([buffer]).text()
+        }
+        if (str.indexOf("ANMF") != -1) {
+            return true
+        } else {
+            return false
+        }
+    }
+
     public static isVideo = (file: string) => {
         if (file?.startsWith("blob:")) {
             const ext = file.split("#")?.[1] || ""
@@ -90,11 +118,20 @@ export default class Functions {
         return path.extname(file) === ".mp4"
     }
 
+    public static isWebM = (file: string) => {
+        if (file?.startsWith("blob:")) {
+            const ext = file.split("#")?.[1] || ""
+            return ext === ".webm"
+        }
+        return path.extname(file) === ".webm"
+    }
+
     public static timeout = (ms: number) => {
         return new Promise((resolve) => setTimeout(resolve, ms))
     }
     
     public static toProperCase = (str: string) => {
+        if (!str) return ""
         return str.replace(/\w\S*/g, (txt) => {
                 return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase()
             }
@@ -113,36 +150,90 @@ export default class Functions {
         return true
     }
 
+    public static validateUsername = (username: string) => {
+        const alphaNumeric = Functions.alphaNumeric(username)
+        if (!alphaNumeric || /[\n\r\s]+/g.test(username)) return "Usernames cannot contain special characters or spaces."
+        if (profaneWords.includes(username.toLowerCase())) return "Username is profane."
+        if (gibberish(username)) return "Username cannot be gibberish."
+        if (bannedUsernames.includes(username.toLowerCase())) return "This username isn't allowed to be used."
+        return null
+    }
+
     public static passwordStrength = (password: string) => {
         let counter = 0
         if (/[a-z]/.test(password)) counter++
         if (/[A-Z]/.test(password)) counter++
         if (/[0-9]/.test(password)) counter++
         if (!/^[a-zA-Z0-9]+$/.test(password)) counter++
-        if (password.length < 10 || counter < 4) return "weak"
+        if (password.length < 10 || counter < 3) return "weak"
         if (password.length < 15) return "decent"
         return "strong"
     }
 
     public static validatePassword = (username: string, password: string) => {
-        if (password.toLowerCase().includes(username.toLowerCase())) return "Password should not contain username"
-        if (commonPasswords.includes(password)) return "Password is too common"
-        if (/ +/.test(password)) return "Password should not contain spaces"
-        if (password.length < 10) return "Password must be at least 10 characters"
+        if (password.toLowerCase().includes(username.toLowerCase())) return "Password should not contain username."
+        if (commonPasswords.includes(password)) return "Password is too common."
+        if (/ +/.test(password)) return "Password should not contain spaces."
+        if (password.length < 10) return "Password must be at least 10 characters."
         const strength = Functions.passwordStrength(password)
-        if (strength === "weak") {
-            return "Password should satisfy at least 3 of these rules:\n" +
-            "-Should contain lowercase letters\n" +
-            "-Should contain uppercase letters\n" +
-            "-Should contain numbers\n" +
-            "-Should contain special characters"
-        }
+        if (strength === "weak") return "Password is too weak."
         return null
     }
 
     public static validateEmail = (email: string) => {
         const regex = /^[a-zA-Z0-9.!#$%&"*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/
-        return regex.test(email)
+        if (!regex.test(email)) return "Email is not valid."
+        if (!email.endsWith("@gmail.com") &&
+            !email.endsWith("@icloud.com") && 
+            !email.endsWith("@yahoo.com") &&
+            !email.endsWith("@hotmail.com") &&
+            !email.endsWith("@outlook.com")) return "Email provider not accepted. Allowed providers: gmail.com, icloud.com, yahoo.com, hotmail.com, outlook.com."
+        return null
+    }
+
+    public static parseComment = (comment: string) => {
+        let segments = [] as any
+        const pieces = comment.split(/\n+/gm)
+        let intermediate = [] as any
+        for (let i = 0; i < pieces.length; i++) {
+            let piece = pieces[i].trim()
+            if (piece.startsWith(">>>") || piece.startsWith(">")) {
+                intermediate.push(piece)
+            } else {
+                if (intermediate.length) {
+                    segments.push(intermediate.join(""))
+                    intermediate = []
+                }
+                segments.push(piece)
+            }
+        }
+        if (intermediate.length) {
+            segments.push(intermediate.join(""))
+        }
+        return segments.filter(Boolean)
+    }
+
+    public static validateComment = (comment: string) => {
+        if (comment.length > 1000) return "Comment cannot exceed 1000 characters."
+        if (!/[a-zA-Z\-\u3000-\u303f\u3040-\u309f\u30a0-\u30ff\uff00-\uff9f\u4e00-\u9faf\u3400-\u4dbf]/.test(comment)) return "Comment cannot be gibberish."
+        const pieces = Functions.parseComment(comment)
+        for (let i = 0; i < pieces.length; i++) {
+            const piece = pieces[i]
+            if (piece.includes(">")) {
+                const username = piece.match(/(?<=>>>)(.*?)(?=$|>)/gm)?.[0] ?? ""
+                const text = piece.replace(username, "").replaceAll(">", "")
+                if (!text && !username) continue
+                if (gibberish(username)) return "Comment cannot be gibberish."
+                if (gibberish(text)) return "Comment cannot be gibberish."
+            } else {
+                if (gibberish(piece)) return "Comment cannot be gibberish."
+            }
+        }
+        const words = comment.split(/ +/g)
+        for (let i = 0; i < words.length; i++) {
+            if (profaneWords.includes(words[i])) return "Comment is profane."
+        }
+        return null
     }
 
     public static changeFavicon = (theme: string) => {
@@ -360,27 +451,6 @@ export default class Functions {
         return distance
     }
 
-    public static extractVideoFrames = async (video: HTMLVideoElement) => {
-        // @ts-ignore
-        const [track] = video.captureStream().getVideoTracks()
-        // @ts-ignore
-        const processor = new MediaStreamTrackProcessor({track})
-        const reader = processor.readable.getReader()
-        
-        let frames = [] as any
-        async function read() {
-            const {value, done} = await reader.read()
-            console.log(frames.length)
-            if (done || !value) return
-            const bitmap = await createImageBitmap(value)
-            frames.push(bitmap)
-            value.close()
-            await read()
-         }
-        await read()
-        return frames
-    }
-
     public static extractMP4Frames = async (videoFile: string, duration: number) => {
         let minFrames = duration * 12
         let frames = [] as any
@@ -406,6 +476,118 @@ export default class Functions {
             demuxer.start((chunk: any) => decoder.decode(chunk))
         })
         return Promise.all(frames)
+    }
+
+    public static extractWebMFrames = async (videoFile: string, duration: number) => {
+        let minFrames = duration * 12
+        let frames = [] as any
+        await new Promise<void>(async (resolve) => {
+            let demuxer = new JsWebm()
+            const arrayBuffer = await fetch(videoFile).then((r) => r.arrayBuffer())
+            demuxer.queueData(arrayBuffer)
+            let timeout: any 
+            // @ts-ignore
+            let decoder = new VideoDecoder({
+                output : (frame: any) => {
+                    clearTimeout(timeout)
+                    const bitmap = createImageBitmap(frame)
+                    frames.push(bitmap)
+                    frame.close()
+                    timeout = setTimeout(() => {
+                        if (frames.length < minFrames) return 
+                        resolve()
+                    }, 500)
+                },
+                error : (e: any) => console.error(e)
+            })
+            while (!demuxer.eof) {
+                demuxer.demux()
+            }
+            decoder.configure({
+                codec: "vp09.00.10.08",
+                codedWidth: demuxer.videoTrack.width,
+                codedHeight: demuxer.videoTrack.height,
+                displayAspectWidth: demuxer.videoTrack.width,
+                displayAspectHeight: demuxer.videoTrack.height,
+                colorSpace: {
+                    primaries: "bt709",
+                    transfer: "bt709",
+                    matrix: "rgb"
+                },
+                hardwareAcceleration: "no-preference",
+                optimizeForLatency: true
+            })
+            let foundKeyframe = false
+            for (let i = 0; i < demuxer.videoPackets.length; i++) {
+                const packet = demuxer.videoPackets[i]
+                if (packet.keyframeTimestamp) foundKeyframe = true 
+                if (!foundKeyframe) continue
+                // @ts-ignore
+                const chunk = new EncodedVideoChunk({type: packet.keyframeTimestamp ? "key" : "delta", data: packet.data, timestamp: packet.timestamp * demuxer.segmentInfo.timecodeScale / 1000})
+                decoder.decode(chunk)
+            }
+        })
+        return Promise.all(frames)
+  }
+
+    public static extractAnimatedWebpFrames = async (webp: string) => {
+        const data = await fetch(webp).then((r) => r.arrayBuffer())
+        let index = 0
+        // @ts-ignore
+        let imageDecoder = new ImageDecoder({data, type: "image/webp", preferAnimation: true})
+
+        let result = [] as any
+
+        while (true) {
+            try {
+                const decoded = await imageDecoder.decode({frameIndex: index++})
+                const canvas = document.createElement("canvas") as any
+                const canvasContext = canvas.getContext("2d")
+                canvasContext.drawImage(decoded.image, 0, 0)
+                result.push({frame: await createImageBitmap(decoded.image), delay: decoded.image.duration / 1000.0})
+            } catch {
+                break
+            }
+        }
+
+        return result
+    }
+
+    public static extractGIFFrames = async (gif: string) => {
+        const frames = await gifFrames({url: gif, frames: "all", outputType: "canvas"})
+        const newGIFData = [] as any
+        for (let i = 0; i < frames.length; i++) {
+            newGIFData.push({
+                frame: frames[i].getImage(),
+                delay: frames[i].frameInfo.delay * 10
+            })
+        }
+        return newGIFData
+    }
+
+    public static extractGIFFrames2 = async (gif: string) => {
+        const data = await fetch(gif).then((r) => r.arrayBuffer())
+        let index = 0
+        // @ts-ignore
+        let imageDecoder = new ImageDecoder({data, type: "image/gif", preferAnimation: true})
+
+        let result = [] as any
+
+        while (true) {
+            try {
+                const decoded = await imageDecoder.decode({frameIndex: index++})
+                const canvas = document.createElement("canvas") as any
+                canvas.width = decoded.codedWidth 
+                canvas.height = decoded.codedHeight
+                const canvasContext = canvas.getContext("2d")
+                canvasContext.drawImage(decoded.image, 0, 0)
+                result.push({frame: await createImageBitmap(decoded.image), delay: decoded.image.duration / 1000.0})
+            } catch {
+                break
+            }
+        }
+
+        return result
     }
 
     public static gifSpeed = (data: any[], speed: number) => {
@@ -569,15 +751,22 @@ export default class Functions {
     }
 
     public static getImagePath = (folder: string, postID: number, filename: string) => {
-        return path.join(__dirname, `../media/${folder}s/${postID}/${filename}`)
+        return path.join(__dirname, `../files/${folder}s/${postID}/${filename}`)
     }
 
     public static getImageLink = (folder: string, postID: number, filename: string) => {
-        return `${window.location.protocol}//${window.location.host}/${folder}s/${postID}/${encodeURIComponent(filename)}`
+        if (!filename) return ""
+        return `${window.location.protocol}//${window.location.host}/${folder}/${postID}/${encodeURIComponent(filename)}`
     }
 
     public static getTagPath = (folder: string, filename: string) => {
-        return path.join(__dirname, `../media/${folder}/${filename}`)
+        return path.join(__dirname, `../files/${folder}/${filename}`)
+    }
+
+    public static getTagLink = (folder: string, filename: string) => {
+        if (!filename) return ""
+        if (folder === "attribute") folder = "tag"
+        return `${window.location.protocol}//${window.location.host}/${folder}/${encodeURIComponent(filename)}`
     }
 
     public static formatDate(date: Date) {
@@ -663,6 +852,34 @@ export default class Functions {
         return false
     }
 
+    public static validCategorySort = (sort: string) => {
+        if (sort === "cuteness" ||
+            sort === "reverse cuteness" ||
+            sort === "posts" ||
+            sort === "reverse posts" || 
+            sort === "alphabetic" ||
+            sort === "reverse alphabetic") return true 
+        return false
+    }
+
+    public static validTagSort = (sort: string) => {
+        if (sort === "image" ||
+            sort === "reverse image" ||
+            sort === "aliases" ||
+            sort === "reverse aliases" ||
+            sort === "posts" ||
+            sort === "reverse posts" || 
+            sort === "alphabetic" ||
+            sort === "reverse alphabetic") return true 
+        return false
+    }
+
+    public static validCommentSort = (sort: string) => {
+        if (sort === "date" ||
+            sort === "reverse date") return true 
+        return false
+    }
+
     public static multiTrim = (str: string) => {
         return str.replace(/^\s+/gm, "").replace(/\s+$/gm, "").replace(/newline/g, " ")
     }
@@ -679,8 +896,177 @@ export default class Functions {
                 uniqueTags.add(posts[i].tags[j])
             }
         }
-        if (!uniqueTags.size) return []
-        let result = await axios.get("/api/tags/count", {params: {tags: Array.from(uniqueTags)}}).then((r) => r.data)
+        let result = await axios.get("/api/tags/count", {params: {tags: Array.from(uniqueTags)}, withCredentials: true}).then((r) => r.data)
         return result
+    }
+
+    public static tagCategories = async (parsedTags: any[]) => {
+        let result = await axios.get("/api/tags", {params: {tags: parsedTags.map((t: any) => t.tag)}, withCredentials: true}).then((r) => r.data)
+        let artists = [] as any 
+        let characters = [] as any 
+        let series = [] as any 
+        let tags = [] as any
+        for (let i = 0; i < parsedTags.length; i++) {
+            const index = result.findIndex((r: any) => parsedTags[i].tag === r.tag)
+            const obj = {} as any 
+            obj.tag = parsedTags[i].tag 
+            obj.count = parsedTags[i].count 
+            obj.image = result[index].image 
+            obj.name = result[index].name 
+            obj.description = result[index].description 
+            if (result[index].type === "artist") {
+                artists.push(obj)
+            } else if (result[index].type === "character") {
+                characters.push(obj)
+            } else if (result[index].type === "series") {
+                series.push(obj)
+            } else {
+                tags.push(obj)
+            }
+        }
+        return {artists, characters, series, tags}
+    }
+
+    public static readableFileSize = (bytes: number) => {
+        const i = bytes === 0 ? 0 : Math.floor(Math.log(bytes) / Math.log(1024))
+        return `${Number((bytes / Math.pow(1024, i)).toFixed(2))} ${["B", "KB", "MB", "GB", "TB"][i]}`
+    }
+
+    public static imageDimensions = async (image: string) => {
+        return new Promise<any>((resolve) => {
+            if (Functions.isVideo(image)) {
+                const video = document.createElement("video")
+                video.addEventListener("loadedmetadata", async () => {
+                    let width = video.videoWidth 
+                    let height = video.videoHeight
+                    try {
+                        const r = await fetch(image, {method: "HEAD"})
+                        const size = Number(r.headers.get("Content-Length"))
+                        resolve({width, height, size})
+                    } catch {
+                        resolve({width, height, size: 0})
+                    }
+                })
+                video.src = image
+            } else {
+                const img = document.createElement("img")
+                img.addEventListener("load", async () => {
+                    let width = img.width
+                    let height = img.height
+                    try {
+                        const r = await fetch(image, {method: "HEAD"})
+                        const size = Number(r.headers.get("Content-Length"))
+                        resolve({width, height, size})
+                    } catch {
+                        resolve({width, height, size: 0})
+                    }
+                })
+                img.src = image
+            }
+        })
+    }
+
+    public static imageSearch = async (file: File) => {
+        const fileReader = new FileReader()
+        return new Promise<any>((resolve) => {
+            fileReader.onloadend = async (f: any) => {
+                let bytes = new Uint8Array(f.target.result)
+                const result = fileType(bytes)?.[0]
+                const jpg = result?.mime === "image/jpeg"
+                const png = result?.mime === "image/png"
+                const webp = result?.mime === "image/webp"
+                const gif = result?.mime === "image/gif"
+                const mp4 = result?.mime === "video/mp4"
+                if (jpg || png || webp || gif || mp4) {
+                    if (mp4) {
+                        const url = URL.createObjectURL(file)
+                        const thumbnail = await Functions.videoThumbnail(url)
+                        bytes = await Functions.base64toUint8Array(thumbnail)
+                    }
+                    const result = await axios.post("/api/similar", Object.values(bytes), {withCredentials: true}).then((r) => r.data)
+                    resolve(result)
+                }
+            }
+            fileReader.readAsArrayBuffer(file)
+        })
+    }
+
+    public static createImage = async (image: string) => {
+        const img = new Image()
+        img.src = image
+        return new Promise<HTMLImageElement>((resolve) => {
+            img.onload = () => resolve(img)
+        })
+    }
+
+    public static crop = async (url: string, aspectRatio: number, buffer?: boolean) => {
+        return new Promise<any>((resolve) => {
+            const inputImage = new Image()
+            inputImage.onload = () => {
+                const inputWidth = inputImage.naturalWidth
+                const inputHeight = inputImage.naturalHeight
+                const inputImageAspectRatio = inputWidth / inputHeight
+                let outputWidth = inputWidth
+                let outputHeight = inputHeight
+                if (inputImageAspectRatio > aspectRatio) {
+                    outputWidth = inputHeight * aspectRatio
+                } else if (inputImageAspectRatio < aspectRatio) {
+                    outputHeight = inputWidth / aspectRatio
+                }
+    
+                const outputX = (outputWidth - inputWidth) * 0.5
+                const outputY = (outputHeight - inputHeight) * 0.5
+                const outputImage = document.createElement("canvas")
+    
+                outputImage.width = outputWidth
+                outputImage.height = outputHeight
+    
+                const ctx = outputImage.getContext("2d") as any
+                ctx.drawImage(inputImage, outputX, outputY)
+                if (buffer) {
+                    const img = ctx.getImageData(0, 0, outputImage.width, outputImage.height)
+                    resolve(img.data.buffer)
+                } else {
+                    resolve(outputImage.toDataURL())
+                }
+            }
+            inputImage.src = url
+        })
+    }
+
+    public static arrayBufferToBase64 = (arrayBuffer: ArrayBuffer) => {
+        return `data:image/png;base64,${Buffer.from(arrayBuffer).toString("base64")}`
+    }
+
+    public static timeAgo = (input: string) => {
+        const date = new Date(input.replace(/ +/g, "T"))
+        const seconds = Math.floor(((new Date().getTime() / 1000) - (date.getTime() / 1000)))
+        const years = seconds / 31536000
+        if (years > 1) {
+            const rounded = Math.floor(years)
+            return `${rounded} year${rounded === 1 ? "" : "s"} ago`
+        }
+        const months = seconds / 2592000
+        if (months > 1) {
+            const rounded = Math.floor(months)
+            return `${rounded} month${rounded === 1 ? "" : "s"} ago`
+        }
+        const days = seconds / 86400
+        if (days > 1) {
+            const rounded = Math.floor(days)
+            return `${rounded} day${rounded === 1 ? "" : "s"} ago`
+        }
+        const hours = seconds / 3600
+        if (hours > 1) {
+            const rounded = Math.floor(hours)
+            return `${rounded} hour${rounded === 1 ? "" : "s"} ago`
+        }
+        const minutes = seconds / 60
+        if (minutes > 1) {
+            const rounded = Math.floor(minutes)
+            return `${rounded} minute${rounded === 1 ? "" : "s"} ago`
+        }
+        const rounded = Math.floor(seconds)
+        return `${rounded} second${rounded === 1 ? "" : "s"} ago`
     }
 }

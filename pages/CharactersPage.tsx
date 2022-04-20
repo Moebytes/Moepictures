@@ -12,7 +12,9 @@ import searchMagentaLight from "../assets/magenta-light/search.png"
 import sort from "../assets/purple/sort.png"
 import CharacterRow from "../components/CharacterRow"
 import sortMagenta from "../assets/magenta/sort.png"
-import {ThemeContext, EnableDragContext, HideNavbarContext, HideSidebarContext, RelativeContext, HideTitlebarContext, ActiveDropdownContext} from "../Context"
+import axios from "axios"
+import {ThemeContext, EnableDragContext, HideNavbarContext, HideSidebarContext, RelativeContext, 
+HideTitlebarContext, ActiveDropdownContext, HeaderTextContext, SidebarTextContext} from "../Context"
 import "./styles/characterspage.less"
 
 const CharactersPage: React.FunctionComponent = (props) => {
@@ -23,11 +25,21 @@ const CharactersPage: React.FunctionComponent = (props) => {
     const {hideSidebar, setHideSidebar} = useContext(HideSidebarContext)
     const {relative, setRelative} = useContext(RelativeContext)
     const {activeDropdown, setActiveDropdown} = useContext(ActiveDropdownContext)
-    const [sortType, setSortType] = useState("cuteness")
+    const {headerText, setHeaderText} = useContext(HeaderTextContext)
+    const {sidebarText, setSidebarText} = useContext(SidebarTextContext)
+    const [sortType, setSortType] = useState("alphabetic")
     const [characters, setCharacters] = useState([]) as any
     const [index, setIndex] = useState(0)
+    const [searchQuery, setSearchQuery] = useState("")
     const [visibleCharacters, setVisibleCharacters] = useState([]) as any
     const sortRef = useRef(null) as any
+
+    const updateCharacters = async () => {
+        const result = await axios.get("/api/characters", {params: {sort: sortType, query: searchQuery}, withCredentials: true}).then((r) => r.data)
+        setIndex(0)
+        setVisibleCharacters([])
+        setCharacters(result)
+    }
 
     useEffect(() => {
         setHideNavbar(true)
@@ -35,14 +47,15 @@ const CharactersPage: React.FunctionComponent = (props) => {
         setHideSidebar(false)
         setRelative(false)
         setActiveDropdown("none")
+        setHeaderText("")
+        setSidebarText("")
         document.title = "Moebooru: Characters"
-
-        const newCharacters = [] as any 
-        for (let i = 0; i < 100; i++) {
-            newCharacters.push(<CharacterRow/>)
-        }
-        setCharacters(newCharacters)
+        updateCharacters()
     }, [])
+
+    useEffect(() => {
+        updateCharacters()
+    }, [sortType])
 
     useEffect(() => {
         let currentIndex = index
@@ -116,7 +129,7 @@ const CharactersPage: React.FunctionComponent = (props) => {
     const generateCharactersJSX = () => {
         const jsx = [] as any
         for (let i = 0; i < visibleCharacters.length; i++) {
-            jsx.push(<CharacterRow/>)
+            jsx.push(<CharacterRow character={visibleCharacters[i]}/>)
         }
         return jsx
     }
@@ -133,17 +146,17 @@ const CharactersPage: React.FunctionComponent = (props) => {
                     <span className="characters-heading">Characters</span>
                     <div className="characters-row">
                         <div className="character-search-container" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
-                            <input className="character-search" type="search" spellCheck="false"/>
-                            <img className={!theme || theme === "purple" ? "character-search-icon" : `character-search-icon-${theme}`} src={getSearchIcon()}/>
+                            <input className="character-search" type="search" spellCheck="false" value={searchQuery} onChange={(event) => setSearchQuery(event.target.value)} onKeyDown={(event) => event.key === "Enter" ? updateCharacters() : null}/>
+                            <img className={!theme || theme === "purple" ? "character-search-icon" : `character-search-icon-${theme}`} src={getSearchIcon()} onClick={updateCharacters}/>
                         </div>
                         {getSortJSX()}
                         <div className={`character-dropdown ${activeDropdown === "sort" ? "" : "hide-character-dropdown"}`} 
                         style={{marginRight: getSortMargin(), top: "209px"}} onClick={() => setActiveDropdown("none")}>
-                            <div className="character-dropdown-row" onClick={() => setSortType("cuteness")}>
-                                <span className="character-dropdown-text">Cuteness</span>
+                            <div className="character-dropdown-row" onClick={() => setSortType("alphabetic")}>
+                                <span className="character-dropdown-text">Alphabetic</span>
                             </div>
-                            <div className="character-dropdown-row" onClick={() => setSortType("reverse cuteness")}>
-                                <span className="character-dropdown-text">Reverse Cuteness</span>
+                            <div className="character-dropdown-row" onClick={() => setSortType("reverse alphabetic")}>
+                                <span className="character-dropdown-text">Reverse Alphabetic</span>
                             </div>
                             <div className="character-dropdown-row" onClick={() => setSortType("posts")}>
                                 <span className="character-dropdown-text">Posts</span>
@@ -151,11 +164,11 @@ const CharactersPage: React.FunctionComponent = (props) => {
                             <div className="character-dropdown-row" onClick={() => setSortType("reverse posts")}>
                                 <span className="character-dropdown-text">Reverse Posts</span>
                             </div>
-                            <div className="character-dropdown-row" onClick={() => setSortType("alphabetic")}>
-                                <span className="character-dropdown-text">Alphabetic</span>
+                            <div className="character-dropdown-row" onClick={() => setSortType("cuteness")}>
+                                <span className="character-dropdown-text">Cuteness</span>
                             </div>
-                            <div className="character-dropdown-row" onClick={() => setSortType("reverse alphabetic")}>
-                                <span className="character-dropdown-text">Reverse Alphabetic</span>
+                            <div className="character-dropdown-row" onClick={() => setSortType("reverse cuteness")}>
+                                <span className="character-dropdown-text">Reverse Cuteness</span>
                             </div>
                         </div>
                     </div>

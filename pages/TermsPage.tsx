@@ -13,7 +13,7 @@ import tosMagentaLight from "../assets/magenta-light/tos.png"
 import privacyMagentaLight from "../assets/magenta-light/privacy.png"
 import DragAndDrop from "../components/DragAndDrop"
 import functions from "../structures/Functions"
-import {HideNavbarContext, HideSidebarContext, ThemeContext, RelativeContext, HideTitlebarContext} from "../Context"
+import {HideNavbarContext, HideSidebarContext, ThemeContext, RelativeContext, HideTitlebarContext, HeaderTextContext, SidebarTextContext} from "../Context"
 import "./styles/tospage.less"
 
 const TermsPage: React.FunctionComponent = (props) => {
@@ -22,6 +22,8 @@ const TermsPage: React.FunctionComponent = (props) => {
     const {hideTitlebar, setHideTitlebar} = useContext(HideTitlebarContext)
     const {hideSidebar, setHideSidebar} = useContext(HideSidebarContext)
     const {relative, setRelative} = useContext(RelativeContext)
+    const {headerText, setHeaderText} = useContext(HeaderTextContext)
+    const {sidebarText, setSidebarText} = useContext(SidebarTextContext)
     const [onPrivacy, setOnPrivacy] = useState(false)
 
     useEffect(() => {
@@ -29,6 +31,8 @@ const TermsPage: React.FunctionComponent = (props) => {
         setHideTitlebar(true)
         setHideSidebar(false)
         setRelative(false)
+        setHeaderText("")
+        setSidebarText("")
         window.scrollTo(0, 0)
     }, [])
 

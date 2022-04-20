@@ -1,0 +1,110 @@
+@import "../../index.less";
+
+.comment {
+    position: relative;
+    display: flex;
+    flex-direction: row;
+    width: 100%;
+    margin-top: 15px;
+    border-radius: 7px;
+    border: 2px solid var(--inputBG);
+    &:hover {
+        border: 2px solid var(--navbarText);
+    }
+}
+
+.comment-container {
+    display: flex;
+    flex-direction: column;
+    padding: 10px;
+    border: 2px solid var(--inputBG);
+    &:last-child {
+        width: 100%;
+    }
+
+}
+
+.comment-user-container {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+}
+
+.comment-img {
+    width: auto;
+    height: 110px;
+    cursor: pointer;
+}
+
+.comment-user-img {
+    width: auto;
+    height: 45px;
+}
+
+.comment-user-text {
+    margin-top: 8px;
+    font-family: Tahoma, sans-serif;
+    font-size: 20px;
+    color: var(--text-strong);
+}
+
+.comment-date-text {
+    font-family: Tahoma, sans-serif;
+    font-size: 18px;
+    color: var(--text-strong);
+}
+
+.comment-text {
+    font-family: Tahoma, sans-serif;
+    font-size: 17px;
+    color: var(--text);
+}
+
+.comment-options {
+    position: absolute;
+    display: flex;
+    flex-direction: row;
+    top: 10px;
+    right: 10px;
+}
+
+.comment-options-container {
+    cursor: pointer;
+    margin-right: 10px;
+    &:hover {
+        filter: brightness(130%);
+    }
+}
+
+.comment-options-img {
+    width: auto;
+    height: 16px;
+}
+
+.comment-options-text {
+    margin-left: 5px;
+    font-family: Tahoma, sans-serif;
+    font-size: 16px;
+    color: var(--text-strong);
+}
+
+.comment-quote-container {
+    display: flex;
+    flex-direction: column;
+    background-color: var(--inputBG);
+}
+
+.comment-quote-user {
+    font-family: Tahoma, sans-serif;
+    font-size: 15px;
+    color: var(--text-strong);
+
+}
+
+.comment-quote-text {
+    font-family: Tahoma, sans-serif;
+    font-size: 13px;
+    color: var(--text);
+}

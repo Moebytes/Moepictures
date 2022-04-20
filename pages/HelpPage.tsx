@@ -5,7 +5,7 @@ import NavBar from "../components/NavBar"
 import SideBar from "../components/SideBar"
 import Footer from "../components/Footer"
 import DragAndDrop from "../components/DragAndDrop"
-import {HideNavbarContext, HideSidebarContext, RelativeContext, HideTitlebarContext} from "../Context"
+import {HideNavbarContext, HideSidebarContext, RelativeContext, HideTitlebarContext, HeaderTextContext, SidebarTextContext} from "../Context"
 import "./styles/helppage.less"
 
 const HelpPage: React.FunctionComponent = (props) => {
@@ -13,12 +13,16 @@ const HelpPage: React.FunctionComponent = (props) => {
     const {hideTitlebar, setHideTitlebar} = useContext(HideTitlebarContext)
     const {hideSidebar, setHideSidebar} = useContext(HideSidebarContext)
     const {relative, setRelative} = useContext(RelativeContext)
+    const {headerText, setHeaderText} = useContext(HeaderTextContext)
+    const {sidebarText, setSidebarText} = useContext(SidebarTextContext)
 
     useEffect(() => {
         setHideNavbar(true)
         setHideTitlebar(true)
         setHideSidebar(false)
         setRelative(false)
+        setHeaderText("")
+        setSidebarText("")
         document.title = "Moebooru: Help"
         window.scrollTo(0, 0)
     }, [])
@@ -38,11 +42,10 @@ const HelpPage: React.FunctionComponent = (props) => {
                         Moebooru is an image board organized by tags, centered exclusively around the art of cute anime girls. Unlike most other
                         image boards, Moebooru has several improvements such as allowing spaces in tags and having multiple images per post. We also have a 
                         much stricter quality control overall. I hope that you like using Moebooru's tag system and overall find it friendly to navigate.
-
-                        Click on any of the links below to jump to a specific section. 
                         <div className="help-link-container">
                             <Link className="help-link" to="/help#account">Account</Link>
                             <Link className="help-link" to="/help#searching">Searching</Link>
+                            <Link className="help-link" to="/help#image-searching">Image Searching</Link>
                             <Link className="help-link" to="/help#favorites">Favorites</Link>
                             <Link className="help-link" to="/help#cuteness-meter">Cuteness Meter</Link>
                             <Link className="help-link" to="/help#uploading">Uploading</Link>
@@ -53,60 +56,58 @@ const HelpPage: React.FunctionComponent = (props) => {
                             <Link className="help-link" to="/help#commenting">Commenting</Link>
                             <Link className="help-link" to="/help#reporting">Reporting</Link>
                             <Link className="help-link" to="/help#bans">Bans</Link>
+                            <Link className="help-link" to="/help#deleting-account">Deleting Your Account</Link>
                         </div>
                     </span>
                     <span className="help-heading" id="account">Account</span>
                     <span className="help-text">
-                        You must be 18 or older in order to create an account. Having an account
-                        with a verified email address allows you to view questionable posts, upload, favorite, 
-                        comment, rate cuteness and edit tags and translations. Accounts that are not verified behave the same as 
-                        having no account. <br/><br/> You can change your avatar by clicking on “set avatar” under any post. You are only allowed to use
-                        images from the site as your avatar. Username changes are allowed once per week and you can change your email as many times as you'd like. <br/><br/>
-                        Some actions such as uploading a new post or aliasing a tag to another tag will need to get approved by a moderator.
+                        You must be 18 or older in order to create an account. All accounts must have
+                        a verified email address. An account lets you view questionable posts, upload, favorite, 
+                        comment, rate cuteness and edit tags and translations. <br/><br/> 
+                        
+                        You can change your avatar by clicking on “set avatar” under any post or by uploading an image. Only anime 
+                        avatars are allowed. Username changes are allowed once per week and you can change your email and password as many times as you'd like. <br/><br/>
+
+                        For greater account security, you can enable 2-factor authentication. This will prompt you for a 2fa token in addition to your password while logging in.
+                        Do note that if you lose the ability to generate your 2fa tokens, we won't be able to help you. <br/><br/>
+
+                        Some actions such as uploading a new post or aliasing a tag to another tag will be reviewed by the site staff.
                     </span>
                     <span className="help-heading" id="searching">Searching</span>
                     <span className="help-text">
-                        The tags on Moebooru can contain spaces, because the search is smart enough to parse out the tags.
-                        If you encounter a problem, you can also use dashed version of the tag. These are examples
+                        The tags on Moebooru use a dash ("-") as a delimeter, but you can also search with spaces because the search is smart enough to parse out the tags.
+                        If you encounter a problem with this, use dashed versions of the tags. These are examples
                         of valid searches: <br/>
                         <span className="help-alt">
                         Tag 1 Tag 2 Tag 3 <br/>
                         Tag-1 Tag-2 Tag-3 <br/>
                         </span>
 
-                        The following are special tag modifiers: <br/>
-                        <span className="help-alt">-Tag 1</span> - Exclude posts containing Tag 1. <br/>
+                        Special tag modifiers: <br/>
+                        <span className="help-alt">-Tag 1 -Tag 2</span> - Exclude posts containing Tag 1 and Tag 2. <br/>
                         <span className="help-alt">+Tag 1 +Tag 2</span> - Include posts containing either Tag 1 or Tag 2. <br/>
-                        <span className="help-alt">*string</span> - Match all tags containing this string. <br/><br/>
 
-                        These are special tags for filtering search results, you don't need to type them directly because they're in the sorting options. <br/>
-                        <span className="help-alt">image</span> - only display static images. <br/>
-                        <span className="help-alt">animation</span> - only display animations (excluding videos). <br/>
-                        <span className="help-alt">video</span> - only display videos. <br/>
-                        <span className="help-alt">comic</span> - only display comics/manga. <br/>
-                        <span className="help-alt">safe</span> - only display safe images. <br/>
-                        <span className="help-alt">questionable</span> - only display images that are not sexually explicit, but still questionable. <br/>
-                        <span className="help-alt">explicit</span> - only display sexually explicit images. <br/>
-                        <span className="help-alt">2D</span> - only display 2D art. 2D art with some 3D elements also falls under here. <br/>
-                        <span className="help-alt">3D</span> - only display 3D art. <br/>
-                        <span className="help-alt">pixel</span> - only display pixel art. <br/>
-                        <span className="help-alt">chibi</span> - only display chibi art. <br/>
-                        <span className="help-alt">date</span> - sort posts by uploaded date in descending order. <br/>
-                        <span className="help-alt">reverse date</span> - sort posts by uploaded date in ascending order. <br/>
-                        <span className="help-alt">drawn</span> - sort posts by drawn date in descending order. <br/>
-                        <span className="help-alt">reverse drawn</span> - sort posts by drawn date in ascending order. <br/>
-                        <span className="help-alt">cuteness</span> - sort posts by cuteness in descending order. <br/>
-                        <span className="help-alt">reverse cuteness</span> - sort posts by cuteness in ascending order. <br/>
-                        These are special tags not in the sort bar. <br/>
+                        These are some various tags with special uses. <br/>
                         <span className="help-alt">original</span> - the drawing is original, ie. not fanart. <br/>
                         <span className="help-alt">unknown artist</span> - the artist is not known. <br/>
                         <span className="help-alt">unknown character</span> - the character is unknown and might not be original. <br/>
+                        <span className="help-alt">unknown series</span> - the series is unknown. <br/>
                         <span className="help-alt">untranslated</span> - the post contains text that is untranslated. <br/>
                         <span className="help-alt">partially translated</span> - the post is only partially translated. <br/>
                         <span className="help-alt">check translation</span> - the translations in the post might be incorrect. <br/>
                         <span className="help-alt">translated</span> - the post is fully translated. <br/>
                         <span className="help-alt">no audio</span> - the post is a video with no audio. <br/>
                         <span className="help-alt">with audio</span> - the post is a video that has audio.
+                    </span>
+                    <span className="help-heading" id="image-searching">Image Searching</span>
+                    <span className="help-text">
+                        Every image uploaded to Moebooru is hashed with a perceptual hash algorithm, which basically means 
+                        that images that look the same should yield similar hashes. This is different from binary hashes which only hash the 
+                        binary data of the image, so for example if you were to resize the same image it would yield totally different hashes 
+                        with a binary hashing algorithm. <br/><br/>
+
+                        When you do an image search your upload is hashed in the same way and we try to find a matching hash in our database. Usually 
+                        this is very accurate at finding duplicate images. If you upload a video, then only the first frame of the video will be hashed.
                     </span>
                     <span className="help-heading" id="favorites">Favorites</span>
                     <span className="help-text">
@@ -119,54 +120,45 @@ const HelpPage: React.FunctionComponent = (props) => {
                         The rating system on Moebooru is called the cuteness meter. When you rate an
                         image you are not rating the quality, instead you are rating the amount
                         of cuteness that the image evokes. The scale is from 0 (Not cute) to 500 (Pretty
-                        cute) to 1000 (Insanely cute). Note that the exact value of cuteness is not publicly visible,
-                        you will only see the icon.
+                        cute) to 1000 (Insanely cute).
                     </span>
                     <span className="help-heading" id="uploading">Uploading</span>
                     <span className="help-text">
-                        Moebooru has a strict criteria for uploading, so don't take it personally if
-                        your post doesn't get approved. You can upload images, gifs, videos, and comics.<br/><br/>
+                        Moebooru is much pickier with posts than most other image boards. We allow images, gifs, videos, and comics.<br/><br/>
                         Please read carefully through all of the uploading guidelines. <br/>
                         <span className="help-alt">
                         ⇾ Must be drawn in the anime art style. No photographs or art drawn in other styles. <br/>
-                        ⇾ The main character must be a girl. Boys are only allowed as supporting characters.
-                        Other misc art (animals, food, backgrounds, etc). is not allowed. <br/>
-                        ⇾ It must be cute. If it doesn’t evoke some feelings of cuteness, it won’t get accepted. <br/>
-                        ⇾ No duplicates are allowed whatsover, variations of the same image should be
+                        ⇾ The main subject should be a girl. Boys are allowed only as supporting characters.
+                        And art with other subjects (animals, food, backgrounds, etc). is not allowed. <br/>
+                        ⇾ It should be cute. If it doesn't evoke some feelings of cuteness, it won't get accepted. <br/>
+                        ⇾ No duplicates are allowed, variations of the same image should be
                         added to the original post. <br/>
-                        ⇾ Higher resolutions of an image should replace the original post. However, there is a point of diminishing
-                        returns where the quality improvement doesn't justify the filesize. <br/>
-                        ⇾ No sketches or otherwise unfinished art, unless they are very good. <br/>
-                        ⇾ Colors should be pleasant, no overly saturated colors or palettes that clash. <br/>
-                        ⇾ The coloring/lineart should be clean and shouldn't look messy. <br/>
-                        ⇾ Perspective, proportions, and anatomy shouldn’t look weird. <br/>
-                        ⇾ Animations shouldn't look choppy. <br/>
-                        ⇾ Source information is required for all posts even if you're posting your own artwork. <br/>
-                        ⇾ All tags should be romanized. 
+                        ⇾ Sketches and unfinished art may be allowed if they are very good. <br/>
+                        ⇾ Color palette should be pleasant to look at, ie. there are no oversaturated colors that clash too much. <br/>
+                        ⇾ The drawing should look clean overall and shouldn't look messy or have obvious mistakes. <br/>
+                        ⇾ The perspective, proportions, and anatomy shouldn't look weird. <br/>
+                        ⇾ Animations should be higher than 2fps. <br/>
+                        ⇾ Source information is required for all posts. <br/>
+                        ⇾ All tags should be romanized. Titles and commentary doesn't have to be romanized.
                         </span>
                     </span>
                     <span className="help-heading" id="variations">Variations</span>
                     <span className="help-text">
                         All variations of the same image are combined into a single post. You can add a variation to an existing post 
-                        by specifying the variationID. All variations of an image should be created by the original artist, otherwise it is 
-                        considered a third party edit instead. If an image has significantly different tags, then it is probably best 
-                        to make that image it's own post instead of a variation.
+                        by specifying the variationID (postID of the existing post) while uploading. All variations of an image should 
+                        be created by the original artist, otherwise it is considered a third party edit instead. If you are uploading a variation,
+                        all post fields are optional. You may specify additional tags which will be added to the original post.
+                        If an image has significantly different tags, then it is probably best to make that image it's own post instead of a variation.
                     </span>
                     <span className="help-heading" id="third-party-edits">Third-Party Edits</span>
                     <span className="help-text">
                         Third-party edits are modifications to a work not done by the original artist. For
-                        example, a manga with all the text translated to English, or animation of an 
-                        image not done by the original artist. All third-party edits can be found in the post 
-                        of the original work in a separate section. If a search result yields both a third-party edit 
-                        and its original work, only the original work is shown in the search results.
+                        example, a manga with all text translated to English, or animation of an 
+                        image not done by the original artist. Third-party edits behave like their own separate post,
+                        but each third party edit is added to the original post in a separate section.
                     </span>
                     <span className="help-heading" id="tagging">Tagging</span>
                     <span className="help-text">
-                        In order to make images searchable at all, an artist and character is required for every
-                        post. If you cannot figure out the artist or character use the tags “unknown artist”
-                        or “unknown character”. The series from where the character is from is also required if
-                        the character is not “original”. All of classification tags such as "image", "safe", and "2D" are 
-                        automatically added so you don't need to include them. <br/><br/>
                         You don’t have to be exceedingly thorough but some effort placed on tags is required, 
                         these are some guidelines on what features to tag: <br/>
                         <span className="help-alt">
@@ -194,22 +186,36 @@ const HelpPage: React.FunctionComponent = (props) => {
                     </span>
                     <span className="help-heading" id="commenting">Commenting</span>
                     <span className="help-text">
-                        The comments are for sharing your thoughts of the work. These are the rules for the comment section: <br/>
+                        Comments are for sharing your thoughts of the work. These are the rules for the comment section: <br/>
                         <span className="help-alt">
                         ⇾ No spam, jibberish, or otherwise off-topic comments. <br/>
                         ⇾ No fights with each other. <br/>
                         ⇾ No distasteful comments. <br/>
                         </span>
+
+                        Quotes are supported and we have a syntax that makes it easy to do quotes.
+                        <span className="help-alt">
+                        &gt;&gt;&gt; User said:
+                        &gt; Comment 
+                        </span>
+                        Nested quotes are not supported.
                     </span>
                     <span className="help-heading" id="reporting">Reporting</span>
                     <span className="help-text">
-                        If you see anything that is amiss, please report it. You can report posts for not 
-                        being cute, users that are breaking rules, translations that are wrong, etc.
+                        If you see anything that is amiss, please report it. You can report posts, users,
+                        tags, comments, etc.
                     </span>
                     <span className="help-heading" id="bans">Bans</span>
                     <span className="help-text">
-                        If you break the rules severely or consistently, you might get banned. If you get banned, you 
+                        If you break the rules severely or consistently, you will likely get banned. If you get banned, you 
                         are not allowed to register for another account. You can still freely browse the site without an account.
+                    </span>
+                    <span className="help-heading" id="deleting-account">Deleting Your Account</span>
+                    <span className="help-text">
+                        Because Moebooru is a site that is focused on community contributions, when you delete your account we will not 
+                        remove any of your public contributions like uploads. Your uploads will remain but the account will 
+                        show up as "deleted". All the rest of your account data and comments will be deleted. If someone else quoted you 
+                        in the comments section some of your comments might still remain though.
                     </span>
                 </div>
                 <Footer/>

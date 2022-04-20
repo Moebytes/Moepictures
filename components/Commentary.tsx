@@ -9,6 +9,7 @@ import "./styles/commentary.less"
 
 interface Props {
     text: string
+    translated?: string
 }
 
 const Commentary: React.FunctionComponent<Props> = (props) => {
@@ -20,13 +21,17 @@ const Commentary: React.FunctionComponent<Props> = (props) => {
 
     useEffect(() => {
         if (showTranslated) {
-            if (translatedText) {
-                setText(translatedText)
+            if (props.translated) {
+                setText(props.translated)
             } else {
-                axios.post("/api/translate", [props.text]).then((r) => {
-                    setTranslatedText(r.data[0])
-                    setText(r.data[0])
-                })
+                if (!translatedText) {
+                    axios.post("/api/translate", [props.text], {withCredentials: true}).then((r) => {
+                        setTranslatedText(r.data[0])
+                        setText(r.data[0])
+                    })
+                } else {
+                    setText(translatedText)
+                }
             }
         } else {
             setText(props.text)

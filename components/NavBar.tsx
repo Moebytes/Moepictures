@@ -5,6 +5,7 @@ import favicon from "../assets/purple/favicon.png"
 import faviconMagenta from "../assets/magenta/favicon.png"
 import eyedropper from "../assets/purple/eyedropper.png"
 import light from "../assets/purple/light.png"
+import logoutIcon from "../assets/purple/logout.png"
 import dark from "../assets/purple/dark.png"
 import eyedropperPurpleLight from "../assets/purple-light/eyedropper.png"
 import lightPurpleLight from "../assets/purple-light/light.png"
@@ -16,8 +17,10 @@ import eyedropperMagentaLight from "../assets/magenta-light/eyedropper.png"
 import lightMagentaLight from "../assets/magenta-light/light.png"
 import darkMagentaLight from "../assets/magenta-light/dark.png"
 import search2 from "../assets/purple/search2.png"
+import axios from "axios"
+import functions from "../structures/functions"
 import {ThemeContext, HideNavbarContext, HideSortbarContext, HideSidebarContext, EnableDragContext, 
-RelativeContext, HideTitlebarContext, SearchContext, SearchFlagContext} from "../Context"
+RelativeContext, HideTitlebarContext, SearchContext, SearchFlagContext, SessionContext, SessionFlagContext, UserImgContext} from "../Context"
 import "./styles/navbar.less"
 
 const NavBar: React.FunctionComponent = (props) => {
@@ -30,6 +33,9 @@ const NavBar: React.FunctionComponent = (props) => {
     const {relative, setRelative} = useContext(RelativeContext)
     const {search, setSearch} = useContext(SearchContext)
     const {searchFlag, setSearchFlag} = useContext(SearchFlagContext)
+    const {session, setSession} = useContext(SessionContext)
+    const {sessionFlag, setSessionFlag} = useContext(SessionFlagContext)
+    const {userImg, setUserImg} = useContext(UserImgContext)
     const [showMiniTitle, setShowMiniTitle] = useState(false)
     const history = useHistory()
 
@@ -123,6 +129,17 @@ const NavBar: React.FunctionComponent = (props) => {
         return light
     }
 
+    const getFavicon = () => {
+        if (theme.includes("magenta")) return faviconMagenta 
+        return favicon
+    }
+
+    const logout = async () => {
+        await axios.post("/api/logout", null, {withCredentials: true})
+        setSessionFlag(true)
+        history.go(0)
+    }
+
     return (
         <div className={`navbar ${hideTitlebar ? "translate-navbar" : ""} ${hideSortbar && hideTitlebar && hideSidebar ? "hide-navbar" : ""} ${hideSortbar && hideNavbar && showMiniTitle ? "hide-navbar" : ""}
         ${relative ? "navbar-relative" : ""}`} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
@@ -136,11 +153,17 @@ const NavBar: React.FunctionComponent = (props) => {
                     <span className="nav-mini-title-b">o</span>
                     <span className="nav-mini-title-a">r</span>
                     <span className="nav-mini-title-b">u</span>
-                    <img className="nav-mini-img" src={theme.includes("magenta") ? faviconMagenta : favicon}/>
+                    <img className="nav-mini-img" src={getFavicon()}/>
                 </Link>
             : null}
             <div className="nav-text-container">
-                <span style={{marginRight: showMiniTitle ? "45px" : "70px"}} className="nav-text nav-user-text" onClick={() => history.push("/login")}>Login</span>
+                {session.username ? 
+                <div className="nav-user-container" style={{marginRight: showMiniTitle ? "45px" : "70px"}}>
+                    {!showMiniTitle || relative ? <img className="nav-user-img" src={userImg}/> : null}
+                    <span className="nav-text nav-user-text" onClick={() => history.push("/profile")}>{session.username}</span>
+                    <img className="nav-logout-img" src={logoutIcon} onClick={logout}/>
+                </div> :
+                <span style={{marginRight: showMiniTitle ? "45px" : "70px"}} className="nav-text nav-user-text" onClick={() => history.push("/login")}>Login</span>}
                 <span style={{marginRight: showMiniTitle ? "45px" : "70px"}} className="nav-text" onClick={() => history.push("/posts")}>Posts</span>
                 <span style={{marginRight: showMiniTitle ? "45px" : "70px"}} className="nav-text" onClick={() => history.push("/comments")}>Comments</span>
                 <span style={{marginRight: showMiniTitle ? "45px" : "70px"}} className="nav-text" onClick={() => history.push("/artists")}>Artists</span>

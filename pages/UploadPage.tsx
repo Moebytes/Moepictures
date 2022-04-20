@@ -1,4 +1,5 @@
 import React, {useEffect, useContext, useState, useRef, useReducer} from "react"
+import {useHistory} from "react-router-dom"
 import {HashLink as Link} from "react-router-hash-link"
 import TitleBar from "../components/TitleBar"
 import NavBar from "../components/NavBar"
@@ -26,8 +27,9 @@ import PostImage from "../components/PostImage"
 import DragAndDrop from "../components/DragAndDrop"
 import {HideNavbarContext, HideSidebarContext, RelativeContext, ThemeContext, EnableDragContext, HideTitlebarContext, 
 UploadDropFilesContext, BrightnessContext, ContrastContext, HueContext, SaturationContext, LightnessContext,
-BlurContext, SharpenContext, PixelateContext} from "../Context"
+BlurContext, SharpenContext, PixelateContext, HeaderTextContext, SessionContext, SidebarTextContext, RedirectContext} from "../Context"
 import fileType from "magic-bytes.js"
+import localforage from "localforage"
 import JSZip from "jszip"
 import axios from "axios"
 import "./styles/uploadpage.less"
@@ -35,6 +37,7 @@ import path from "path"
 
 let enterLinksTimer = null as any
 let saucenaoTimeout = false
+let tagsTimer = null as any
 
 const UploadPage: React.FunctionComponent = (props) => {
     const [ignored, forceUpdate] = useReducer(x => x + 1, 0)
@@ -51,12 +54,17 @@ const UploadPage: React.FunctionComponent = (props) => {
     const {pixelate, setPixelate} = useContext(PixelateContext)
     const {blur, setBlur} = useContext(BlurContext)
     const {sharpen, setSharpen} = useContext(SharpenContext)
+    const {headerText, setHeaderText} = useContext(HeaderTextContext)
+    const {sidebarText, setSidebarText} = useContext(SidebarTextContext)
+    const {session, setSession} = useContext(SessionContext)
+    const {redirect, setRedirect} = useContext(RedirectContext)
     const {uploadDropFiles, setUploadDropFiles} = useContext(UploadDropFilesContext)
     const [displayImage, setDisplayImage] = useState(false)
     const [uploadError, setUploadError] = useState(false)
     const [submitError, setSubmitError] = useState(false)
     const [saucenaoError, setSaucenaoError] = useState(false)
     const [acceptedURLs, setAcceptedURLs] = useState([]) as any
+    const [dupPosts, setDupPosts] = useState([]) as any
     const uploadErrorRef = useRef<any>(null)
     const submitErrorRef = useRef<any>(null)
     const saucenaoErrorRef = useRef<any>(null)
@@ -71,21 +79,27 @@ const UploadPage: React.FunctionComponent = (props) => {
     const [variationID, setVariationID] = useState("")
     const [thirdPartyID, setThirdPartyID] = useState("")
     const [sourceTitle, setSourceTitle] = useState("")
+    const [sourceTranslatedTitle, setSourceTranslatedTitle] = useState("")
     const [sourceArtist, setSourceArtist] = useState("")
     const [sourceDate, setSourceDate] = useState("")
     const [sourceLink, setSourceLink] = useState("")
     const [sourceCommentary, setSourceCommentary] = useState("")
+    const [sourceTranslatedCommentary, setSourceTranslatedCommentary] = useState("")
     const [artists, setArtists] = useState([{}]) as any
     const [characters, setCharacters] = useState([{}]) as any
     const [series, setSeries] = useState([{}]) as any
+    const [newTags, setNewTags] = useState([]) as any
     const [rawTags, setRawTags] = useState("")
     const [submitted, setSubmitted] = useState(false)
+    const history = useHistory()
 
     useEffect(() => {
         setHideNavbar(true)
         setHideTitlebar(true)
         setHideSidebar(false)
         setRelative(false)
+        setHeaderText("")
+        setSidebarText("")
         document.title = "Moebooru: Upload"
         window.scrollTo(0, 0)
 
@@ -98,6 +112,27 @@ const UploadPage: React.FunctionComponent = (props) => {
         setSharpen(0)
         setPixelate(1)
     }, [])
+
+    useEffect(() => {
+        if (!session.cookie) return
+        if (!session.username) {
+            setRedirect("/upload")
+            history.push("/login")
+            setSidebarText("Login required.")
+        }
+    }, [session])
+
+    const getSimilar = async () => {
+        if (acceptedURLs[currentIndex]) {
+            const img = acceptedURLs[currentIndex]
+            const dupes = await axios.post("/api/similar", Object.values(img.bytes)).then((r) => r.data)
+            setDupPosts(dupes)
+        }
+    }
+
+    useEffect(() => {
+        getSimilar()
+    }, [acceptedURLs, currentIndex])
 
     useEffect(() => {
         if (uploadDropFiles?.length) {
@@ -118,12 +153,14 @@ const UploadPage: React.FunctionComponent = (props) => {
                     const jpg = result?.mime === "image/jpeg"
                     const png = result?.mime === "image/png"
                     const gif = result?.mime === "image/gif"
+                    const webp = result?.mime === "image/webp"
                     const mp4 = result?.mime === "video/mp4"
                     const zip = result?.mime === "application/zip"
-                    if (jpg || png || gif || mp4 || zip) {
+                    if (jpg || png || webp || gif || mp4 || zip) {
                         const MB = files[i].size / (1024*1024)
                         const maxSize = jpg ? 5 :
                                         png ? 10 :
+                                        webp ? 10 :
                                         gif ? 50 :
                                         mp4 ? 100 : 100
                         if (MB <= maxSize) {
@@ -137,12 +174,13 @@ const UploadPage: React.FunctionComponent = (props) => {
                                     const result = fileType(data)?.[0]
                                     const jpg = result?.mime === "image/jpeg"
                                     const png = result?.mime === "image/png"
+                                    let webp = result?.mime === "image/webp"
                                     const gif = result?.mime === "image/gif"
                                     const mp4 = result?.mime === "video/mp4"
-                                    if (jpg || png || gif || mp4) {
+                                    if (jpg || png || webp || gif || mp4) {
                                         acceptedArray.push({file: new File([data], filename), ext: result.typename, originalLink: links ? links[i] : null, bytes: data})
                                     } else {
-                                        error = `Supported types in zip: png, jpg, gif, mp4.`
+                                        error = `Supported types in zip: png, jpg, webp, gif, mp4.`
                                     }
                                 }
                                 resolve()
@@ -155,7 +193,7 @@ const UploadPage: React.FunctionComponent = (props) => {
                             resolve()
                         }
                     } else {
-                        error = `Supported file types: png, jpg, gif, mp4, zip.`
+                        error = `Supported file types: png, jpg, webp, gif, mp4, zip.`
                         resolve()
                     }
                 }
@@ -190,8 +228,10 @@ const UploadPage: React.FunctionComponent = (props) => {
         setThirdPartyID("")
         setVariationID("")
         setSourceTitle("")
+        setSourceTranslatedTitle("")
         setSourceArtist("")
         setSourceCommentary("")
+        setSourceTranslatedCommentary("")
         setSourceDate("")
         setSourceLink("")
         setRawTags("")
@@ -217,14 +257,37 @@ const UploadPage: React.FunctionComponent = (props) => {
         const fileReader = new FileReader()
         await new Promise<void>((resolve) => {
             fileReader.onloadend = async (f: any) => {
-                const bytes = new Uint8Array(f.target.result)
+                let bytes = new Uint8Array(f.target.result)
                 const result = fileType(bytes)?.[0]
                 const jpg = result?.mime === "image/jpeg"
                 const png = result?.mime === "image/png"
                 const gif = result?.mime === "image/gif"
-                let ext = jpg ? ".jpg" : png ? ".png" : gif ? ".gif" : null
+                let ext = jpg ? "jpg" : png ? "png" : gif ? "gif" : null
                 if (jpg || png || gif) {
-                    const url = URL.createObjectURL(file)
+                    let url = URL.createObjectURL(file)
+                    let croppedURL = ""
+                    if (gif) {
+                        const gifData = await functions.extractGIFFrames(url)
+                        let frameArray = [] as any 
+                        let delayArray = [] as any
+                        for (let i = 0; i < gifData.length; i++) {
+                            const canvas = gifData[i].frame as HTMLCanvasElement
+                            const cropped = await functions.crop(canvas.toDataURL(), 1, true)
+                            frameArray.push(cropped)
+                            delayArray.push(gifData[i].delay)
+                        }
+                        const firstURL = await functions.crop(gifData[0].frame.toDataURL(), 1)
+                        const {width, height} = await functions.imageDimensions(firstURL)
+                        const buffer = await functions.encodeGIF(frameArray, delayArray, width, height)
+                        const blob = new Blob([buffer])
+                        croppedURL = URL.createObjectURL(blob)
+                    } else {
+                        croppedURL = await functions.crop(url, 1)
+                    }
+                    const arrayBuffer = await fetch(croppedURL).then((r) => r.arrayBuffer())
+                    bytes = new Uint8Array(arrayBuffer)
+                    const blob = new Blob([bytes])
+                    url = URL.createObjectURL(blob)
                     if (type === "artist") {
                         artists[index].image = `${url}#.${ext}`
                         artists[index].ext = result.typename
@@ -240,6 +303,11 @@ const UploadPage: React.FunctionComponent = (props) => {
                         series[index].ext = result.typename
                         series[index].bytes = Object.values(bytes)
                         setSeries(series)
+                    } else if (type === "tag") {
+                        newTags[index].image = `${url}#.${ext}`
+                        newTags[index].ext = result.typename
+                        newTags[index].bytes = Object.values(bytes)
+                        setNewTags(newTags)
                     }
                 }
                 resolve()
@@ -256,6 +324,7 @@ const UploadPage: React.FunctionComponent = (props) => {
             const changeTagInput = (value: string) => {
                 artists[i].tag = value 
                 setArtists(artists)
+                forceUpdate()
             }
             jsx.push(
                 <>
@@ -305,6 +374,7 @@ const UploadPage: React.FunctionComponent = (props) => {
             const changeTagInput = (value: string) => {
                 characters[i].tag = value 
                 setCharacters(characters)
+                forceUpdate()
             }
             jsx.push(
                 <>
@@ -354,6 +424,7 @@ const UploadPage: React.FunctionComponent = (props) => {
             const changeTagInput = (value: string) => {
                 series[i].tag = value 
                 setSeries(series)
+                forceUpdate()
             }
             jsx.push(
                 <>
@@ -419,6 +490,8 @@ const UploadPage: React.FunctionComponent = (props) => {
 
     const setDup = (img: string, index: number) => {
         setCurrentDupIndex(index)
+        const postID = dupPosts[index].postID
+        history.push(`/post/${postID}`)
     }
 
     const clear = () => {
@@ -482,21 +555,24 @@ const UploadPage: React.FunctionComponent = (props) => {
             thirdPartyID,
             source: {
                 title: sourceTitle,
+                translatedTitle: sourceTranslatedTitle,
                 artist: sourceArtist,
                 date: sourceDate,
                 link: sourceLink,
-                commentary: sourceCommentary
+                commentary: sourceCommentary,
+                translatedCommentary: sourceTranslatedCommentary
             },
             artists,
             characters,
             series,
+            newTags,
             tags: rawTags.split(/[\n\r\s]+/g)
         }
         setSubmitError(true)
         await functions.timeout(20)
         submitErrorRef.current.innerText = "Submitting..."
         try {
-            await axios.post("/api/upload", data).then((r) => r.data)
+            await axios.post("/api/upload", data, {withCredentials: true}).then((r) => r.data)
             setSubmitted(true)
             return setSubmitError(false)
         } catch {
@@ -524,11 +600,13 @@ const UploadPage: React.FunctionComponent = (props) => {
         }
         saucenaoTimeout = true
         try {
-            let results = await axios.post(`/api/saucenao`, bytes).then((r) => r.data)
+            let results = await axios.post(`/api/saucenao`, bytes, {withCredentials: true}).then((r) => r.data)
             let link = ""
             let artist = ""
             let title = ""
+            let translatedTitle = ""
             let commentary = ""
+            let translatedCommentary = ""
             let date = ""
             if (results.length) {
                 const pixiv = results.filter((r: any) => r.header.index_id === 5)
@@ -540,36 +618,67 @@ const UploadPage: React.FunctionComponent = (props) => {
                 const yandere = results.filter((r: any) => r.header.index_id === 12)
                 const anime = results.filter((r: any) => r.header.index_id === 21)
                 if (pixiv.length) {
-                    link = pixiv[0].data.ext_urls[0]
+                    link = `https://www.pixiv.net/en/artworks/${pixiv[0].data.pixiv_id}`
                     artist = pixiv[0].data.author_name
                     title = pixiv[0].data.title
                     try {
-                        const illust = await axios.get(`/api/pixiv?url=https://www.pixiv.net/en/artworks/${pixiv[0].data.pixiv_id}`).then((r: any) => r.data)
+                        const illust = await axios.get(`/api/pixiv?url=${link}`, {withCredentials: true}).then((r: any) => r.data)
                         commentary = `${illust.caption.replace(/<\/?[^>]+(>|$)/g, "")}\n\n${illust.tags.map((t: any) => `#${t.name}`).join(" ")}` 
                         date = functions.formatDate(new Date(illust.create_date))
                         link = illust.url 
                         title = illust.title
                         artist = illust.user.name
+                        const translated = await axios.post("/api/translate", [title, commentary], {withCredentials: true}).then((r) => r.data)
+                        translatedTitle = translated[0]
+                        translatedCommentary = translated[1]
                         if (illust.x_restrict !== 0) {
                             setRestrict("explicit")
                         } else {
                             setRestrict("safe")
                         }
                         const pfp = await functions.proxyImage(illust.user.profile_image_urls.medium)
-                        artists[artists.length - 1].tag = await axios.post("/api/translate", [artist]).then((r) => r.data[0])
+                        artists[artists.length - 1].tag = await axios.post("/api/romajinize", [artist], {withCredentials: true}).then((r) => r.data[0])
                         await uploadTagImg(pfp, "artist", artists.length - 1)
                         artists.push({})
                         setArtists(artists)
                         forceUpdate()
-                        const translated = await axios.post("/api/translate", illust.tags.map((t: any) => t.name)).then((r) => r.data)
-                        setRawTags(translated.join(" "))
+                        const translatedTags = await axios.post("/api/translate", illust.tags.map((t: any) => t.name), {withCredentials: true}).then((r) => r.data)
+                        setRawTags(translatedTags.map((t: string) => t.toLowerCase()).join(" "))
                     } catch (e) {
                         console.log(e)
                     }
                 } else if (deviantart.length) {
-                    link = deviantart[0].data.ext_urls[0]
+                    let redirectedLink = ""
+                    try {
+                        redirectedLink = await axios.get(`/api/redirect?url=${deviantart[0].data.ext_urls[0]}`, {withCredentials: true}).then((r) => r.data)
+                    } catch {
+                        // ignore
+                    }
+                    link = redirectedLink ? redirectedLink : deviantart[0].data.ext_urls[0]
                     artist = deviantart[0].data.member_name 
                     title = deviantart[0].data.title
+                    try {
+                        const deviation = await axios.get(`/api/deviantart?url=${link}`, {withCredentials: true}).then((r: any) => r.data)
+                        title = deviation.title
+                        artist = deviation.author.user.username
+                        link = deviation.url
+                        commentary = deviation.description
+                        date = functions.formatDate(new Date(deviation.date))
+                        if (deviation.rating === "adult") {
+                            setRestrict("questionable")
+                        } else {
+                            setRestrict("safe")
+                        }
+                        const pfp = await functions.proxyImage(deviation.author.user.usericon)
+                        artists[artists.length - 1].tag = artist
+                        await uploadTagImg(pfp, "artist", artists.length - 1)
+                        artists.push({})
+                        setArtists(artists)
+                        forceUpdate()
+                        setRawTags(deviation.keywords.map((k: string) => k.toLowerCase()).join(" "))
+                    } catch (e) {
+                        console.log(e)
+                    } 
                 } else if (anime.length) {
                     title = anime[0].data.source 
                     link = `https://myanimelist.net/anime/${anime[0].data.mal_id}/`
@@ -595,9 +704,11 @@ const UploadPage: React.FunctionComponent = (props) => {
                 }
             }
             setSourceTitle(title)
+            setSourceTranslatedTitle(translatedTitle)
             setSourceArtist(artist)
             setSourceLink(link)
             setSourceCommentary(commentary)
+            setSourceTranslatedCommentary(translatedCommentary)
             setSourceDate(date)
             if (!title && !artist && !link) {
                 saucenaoErrorRef.current.innerText = "No results found."
@@ -625,6 +736,67 @@ const UploadPage: React.FunctionComponent = (props) => {
         setSubmitted(false)
     }
 
+    useEffect(() => {
+        updateTags()
+    }, [rawTags])
+
+    const updateTags = async () => {
+        const tags = functions.removeDuplicates(rawTags.trim().split(/[\n\r\s]+/g).map((t) => t.trim().toLowerCase())) as string[]
+        clearTimeout(tagsTimer)
+        tagsTimer = setTimeout(async () => {
+            if (!tags?.[0]) return setNewTags([])
+            const savedTags = await localforage.getItem("tags") as any
+            console.log(savedTags)
+            let notExists = [] as any
+            for (let i = 0; i < tags.length; i++) {
+                const exists = savedTags.find((t: any) => t.tag === tags[i])
+                if (!exists) notExists.push({tag: tags[i]})
+            }
+            for (let i = 0; i < notExists.length; i++) {
+                const index = newTags.findIndex((t: any) => t.tag === notExists[i].tag)
+                if (index !== -1) notExists[i] = newTags[index]
+            }
+            setNewTags(notExists)
+        }, 500)
+    }
+
+    const generateTagsJSX = () => {
+        const jsx = [] as any
+        for (let i = 0; i < newTags.length; i++) {
+            const changeTagDesc = (value: string) => {
+                newTags[i].desc = value 
+                setNewTags(newTags)
+                forceUpdate()
+            }
+            jsx.push(
+                <>
+                <div className="upload-container-row" style={{marginTop: "10px"}}>
+                    <span className="upload-text">Tag: </span>
+                    <span className="upload-text" style={{marginLeft: "10px"}}>{newTags[i].tag}</span>
+                </div>
+                <div className="upload-container-row">
+                    <span className="upload-text">Description: </span>
+                </div>
+                <div className="upload-container-row">
+                <textarea className="upload-textarea-small" style={{height: "80px"}} value={newTags[i].desc} onChange={(event) => changeTagDesc(event.target.value)} spellCheck={false} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}></textarea>
+                </div>
+                <div className="upload-container-row">
+                    <span className="upload-text margin-right">Optional Tag Image: </span>
+                    <label htmlFor={`tag-upload-${i}`} className="upload-button">
+                            <img className="upload-button-img-small" src={uploadIcon}/>
+                            <span className="upload-button-text-small">Upload</span>
+                    </label>
+                    <input id={`tag-upload-${i}`} type="file" onChange={(event) => uploadTagImg(event, "tag", i)}/>
+                </div>
+                {newTags[i].image ?
+                <div className="upload-container-row">
+                    <img className="upload-tag-img" src={newTags[i].image}/>
+                </div> : null}
+                </>
+            )
+        }
+        return jsx
+    }
 
     return (
         <>
@@ -741,10 +913,10 @@ const UploadPage: React.FunctionComponent = (props) => {
                         <span className="upload-button-text">Pixel</span>
                     </button>
                 </div>
-                {acceptedURLs.length ? <>
+                {dupPosts.length ? <>
                 <span className="upload-heading">Possible Duplicates</span>
                 <div className="upload-row">
-                    <Carousel images={acceptedURLs.map((u: any) => u.link)} set={setDup} index={currentDupIndex}/>
+                    <Carousel images={dupPosts.map((p: any) => functions.getImageLink(p.images[0].type, p.postID, p.images[0].filename))} set={setDup} index={currentDupIndex}/>
                 </div>
                 </> : null}
                 <div className="upload-container">
@@ -766,6 +938,10 @@ const UploadPage: React.FunctionComponent = (props) => {
                         <input className="upload-input-wide2" type="text" value={sourceTitle} onChange={(event) => setSourceTitle(event.target.value)} spellCheck={false} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}/>
                     </div>
                     <div className="upload-container-row">
+                        <span className="upload-text">Translated Title: </span>
+                        <input className="upload-input-wide2" type="text" value={sourceTranslatedTitle} onChange={(event) => setSourceTranslatedTitle(event.target.value)} spellCheck={false} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}/>
+                    </div>
+                    <div className="upload-container-row">
                         <span className="upload-text">Artist: </span>
                         <input className="upload-input-wide" type="text" value={sourceArtist} onChange={(event) => setSourceArtist(event.target.value)} spellCheck={false} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}/>
                     </div>
@@ -782,6 +958,12 @@ const UploadPage: React.FunctionComponent = (props) => {
                     </div>
                     <div className="upload-container-row">
                         <textarea className="upload-textarea-small" style={{height: "80px"}} value={sourceCommentary} onChange={(event) => setSourceCommentary(event.target.value)} spellCheck={false} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}></textarea>
+                    </div>
+                    <div className="upload-container-row">
+                        <span className="upload-text">Translated Commentary: </span>
+                    </div>
+                    <div className="upload-container-row">
+                        <textarea className="upload-textarea-small" style={{height: "80px"}} value={sourceTranslatedCommentary} onChange={(event) => setSourceTranslatedCommentary(event.target.value)} spellCheck={false} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}></textarea>
                     </div>
                 </div>
                 <span className="upload-heading">Artist</span>
@@ -824,6 +1006,12 @@ const UploadPage: React.FunctionComponent = (props) => {
                         <textarea className="upload-textarea" spellCheck={false} value={rawTags} onChange={(event) => setRawTags(event.target.value)} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}></textarea>
                     </div>
                 </div>
+                {newTags.length ? <>
+                <span className="upload-heading">New Tags</span>
+                <div className="upload-container">
+                    {generateTagsJSX()}
+                </div>
+                </> : null}
                 <div className="upload-center-row">
                     {submitError ? <span ref={submitErrorRef} className="submit-error-text"></span> : null}
                     <button className="upload-button" onClick={() => submit()}>

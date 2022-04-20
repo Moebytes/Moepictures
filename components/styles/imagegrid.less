@@ -15,11 +15,24 @@
     height: 100%;
     flex-wrap: wrap;
     transition: width 3s;
-    justify-content: space-between;
+    justify-content: space-around;
     padding-left: 30px;
     padding-right: 30px;
     &::after {
         content: "";
         flex: 0 0 45%;
     }
+}
+
+.noresults-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+}
+
+.noresults {
+    width: auto;
+    height: 500px;
 }

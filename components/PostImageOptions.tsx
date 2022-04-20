@@ -1,6 +1,6 @@
 import React, {useContext, useEffect, useRef, useState} from "react"
 import {ThemeContext, EnableDragContext, BrightnessContext, ContrastContext, HueContext, SaturationContext, LightnessContext,
-BlurContext, SharpenContext, PixelateContext} from "../Context"
+BlurContext, SharpenContext, PixelateContext, SessionContext} from "../Context"
 import {HashLink as Link} from "react-router-hash-link"
 import functions from "../structures/Functions"
 import Slider from "react-slider"
@@ -33,11 +33,15 @@ import prevIcon from "../assets/purple/prev.png"
 import nextIconMagenta from "../assets/magenta/next.png"
 import prevIconMagenta from "../assets/magenta/prev.png"
 import "./styles/postimageoptions.less"
+import axios from "axios"
 
 interface Props {
+    img: string
+    post?: any
+    comicPages?: any
     download: () => void
     previous?: () => void
-    next?: () => void 
+    next?: () => void
 }
 
 const PostImageOptions: React.FunctionComponent<Props> = (props) => {
@@ -51,9 +55,28 @@ const PostImageOptions: React.FunctionComponent<Props> = (props) => {
     const {pixelate, setPixelate} = useContext(PixelateContext)
     const {blur, setBlur} = useContext(BlurContext)
     const {sharpen, setSharpen} = useContext(SharpenContext)
+    const {session, setSession} = useContext(SessionContext)
     const [favorited, setFavorited] = useState(false)
     const [showFilterDropdown, setShowFilterDropdown] = useState(false)
+    const [downloadText, setDownloadText] = useState("")
     const filterRef = useRef(null) as any
+
+    useEffect(() => {
+        const getDLText = async () => {
+            if (props.comicPages) {
+                let sizeTotal = 0
+                for (let i = 0; i < props.comicPages.length; i++) {
+                    let {size} = await functions.imageDimensions(props.comicPages[i])
+                    sizeTotal += size
+                }
+                setDownloadText(`${props.comicPages.length} pages (${functions.readableFileSize(sizeTotal)})`)
+            } else {
+                let {width, height, size} = await functions.imageDimensions(props.img)
+                setDownloadText(`${width}x${height} (${functions.readableFileSize(size)})`)
+            }
+        }
+        getDLText()
+    }, [props.img, props.comicPages])
 
     useEffect(() => {
         localStorage.setItem("brightness", brightness)
@@ -166,6 +189,15 @@ const PostImageOptions: React.FunctionComponent<Props> = (props) => {
         return `${raw + offset}px`
     }
 
+    const updateFavorite = async () => {
+        if (!props.post) return
+        await axios.post("/api/favorite", {postID: props.post.postID, favorited}, {withCredentials: true})
+    }
+
+    useEffect(() => {
+        updateFavorite()
+    }, [favorited])
+
     return (
         <div className="post-image-options-container">
             <div className="post-image-options">
@@ -174,14 +206,15 @@ const PostImageOptions: React.FunctionComponent<Props> = (props) => {
                         <img className="post-image-icon-small" src={getPrevIcon()}/>
                         <div className="post-image-text-small">Prev</div>
                     </div>
+                    {session.username ?
                     <div className="post-image-options-box" onClick={() => setFavorited((prev) => !prev)} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                         <img className="post-image-icon" src={getStar()}/>
                         <div className={`post-image-text ${favorited ? "favorited" : ""}`}>{favorited ? "Favorited" : "Favorite"}</div>
-                    </div>
+                    </div> : null}
                 </div>
                 <div className="post-image-options-right">
                     <div className="post-image-options-box" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
-                        <div className="post-image-text-alt">1920x1080 (7.5MB)</div>
+                        <div className="post-image-text-alt">{downloadText}</div>
                     </div>
                     <div className="post-image-options-box" onClick={() => props.download?.()} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                         <img className="post-image-icon" src={getDownload()}/>

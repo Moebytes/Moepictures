@@ -14,6 +14,7 @@ import "./styles/carousel.less"
 
 interface Props {
     set?: (img: string, index: number) => any
+    noKey?: boolean
     images: any[]
     height?: number
     index?: number
@@ -87,6 +88,8 @@ const Carousel: React.FunctionComponent<Props> = (props) => {
     }
 
     const handleKeydown = (event: any) => {
+        if (props.noKey) return
+        if (event.key !== "ArrowLeft" && event.key !== "ArrowRight") return
         if (!sliderRef.current) return
         let marginLeft = parseInt(sliderRef.current.style.marginLeft)
         if (Number.isNaN(marginLeft)) marginLeft = 0

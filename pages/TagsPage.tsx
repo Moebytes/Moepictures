@@ -12,7 +12,9 @@ import searchMagentaLight from "../assets/magenta-light/search.png"
 import sort from "../assets/purple/sort.png"
 import TagRow from "../components/TagRow"
 import sortMagenta from "../assets/magenta/sort.png"
-import {ThemeContext, EnableDragContext, HideNavbarContext, HideSidebarContext, RelativeContext, HideTitlebarContext, ActiveDropdownContext} from "../Context"
+import axios from "axios"
+import {ThemeContext, EnableDragContext, HideNavbarContext, HideSidebarContext, RelativeContext, HideTitlebarContext, 
+ActiveDropdownContext, HeaderTextContext, SidebarTextContext} from "../Context"
 import "./styles/tagspage.less"
 
 const TagsPage: React.FunctionComponent = (props) => {
@@ -23,11 +25,21 @@ const TagsPage: React.FunctionComponent = (props) => {
     const {hideSidebar, setHideSidebar} = useContext(HideSidebarContext)
     const {relative, setRelative} = useContext(RelativeContext)
     const {activeDropdown, setActiveDropdown} = useContext(ActiveDropdownContext)
+    const {headerText, setHeaderText} = useContext(HeaderTextContext)
+    const {sidebarText, setSidebarText} = useContext(SidebarTextContext)
     const [sortType, setSortType] = useState("alphabetic")
     const [tags, setTags] = useState([]) as any
     const [index, setIndex] = useState(0)
+    const [searchQuery, setSearchQuery] = useState("")
     const [visibleTags, setVisibleTags] = useState([]) as any
     const sortRef = useRef(null) as any
+
+    const updateTags = async () => {
+        const result = await axios.get("/api/tagsearch", {params: {sort: sortType, query: searchQuery}, withCredentials: true}).then((r) => r.data)
+        setIndex(0)
+        setVisibleTags([])
+        setTags(result)
+    }
 
     useEffect(() => {
         setHideNavbar(true)
@@ -35,14 +47,15 @@ const TagsPage: React.FunctionComponent = (props) => {
         setHideSidebar(false)
         setRelative(false)
         setActiveDropdown("none")
+        setHeaderText("")
+        setSidebarText("")
         document.title = "Moebooru: Tags"
-
-        const newTags = [] as any 
-        for (let i = 0; i < 100; i++) {
-            newTags.push(<TagRow/>)
-        }
-        setTags(newTags)
+        updateTags()
     }, [])
+
+    useEffect(() => {
+        updateTags()
+    }, [sortType])
 
     useEffect(() => {
         let currentIndex = index
@@ -118,7 +131,7 @@ const TagsPage: React.FunctionComponent = (props) => {
     const generateTagsJSX = () => {
         const jsx = [] as any
         for (let i = 0; i < visibleTags.length; i++) {
-            jsx.push(<TagRow/>)
+            jsx.push(<TagRow tag={visibleTags[i]} onDelete={updateTags}/>)
         }
         return jsx
     }
@@ -135,8 +148,8 @@ const TagsPage: React.FunctionComponent = (props) => {
                     <span className="tags-heading">Tags</span>
                     <div className="tags-row">
                         <div className="tag-search-container" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
-                            <input className="tag-search" type="search" spellCheck="false"/>
-                            <img className={!theme || theme === "purple" ? "tag-search-icon" : `tag-search-icon-${theme}`} src={getSearchIcon()}/>
+                            <input className="tag-search" type="search" spellCheck="false" value={searchQuery} onChange={(event) => setSearchQuery(event.target.value)} onKeyDown={(event) => event.key === "Enter" ? updateTags() : null}/>
+                            <img className={!theme || theme === "purple" ? "tag-search-icon" : `tag-search-icon-${theme}`} src={getSearchIcon()} onClick={updateTags}/>
                         </div>
                         {getSortJSX()}
                         <div className={`tag-dropdown ${activeDropdown === "sort" ? "" : "hide-tag-dropdown"}`} 

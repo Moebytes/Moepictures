@@ -6,7 +6,7 @@ import SortBar from "../components/SortBar"
 import Footer from "../components/Footer"
 import $404 from "../assets/misc/404.png"
 import DragAndDrop from "../components/DragAndDrop"
-import {HideNavbarContext, HideSidebarContext, ThemeContext, RelativeContext, HideTitlebarContext} from "../Context"
+import {HideNavbarContext, HideSidebarContext, ThemeContext, RelativeContext, HideTitlebarContext, HeaderTextContext, SidebarTextContext} from "../Context"
 import "./styles/404page.less"
 
 const $404Page: React.FunctionComponent = (props) => {
@@ -15,12 +15,16 @@ const $404Page: React.FunctionComponent = (props) => {
     const {hideTitlebar, setHideTitlebar} = useContext(HideTitlebarContext)
     const {hideSidebar, setHideSidebar} = useContext(HideSidebarContext)
     const {relative, setRelative} = useContext(RelativeContext)
+    const {headerText, setHeaderText} = useContext(HeaderTextContext)
+    const {sidebarText, setSidebarText} = useContext(SidebarTextContext)
 
     useEffect(() => {
         setHideNavbar(false)
         setHideTitlebar(false)
         setHideSidebar(false)
         setRelative(false)
+        setHeaderText("")
+        setSidebarText("404 error.")
         document.title = "Moebooru: 404 Error"
     }, [])
 
@@ -30,7 +34,7 @@ const $404Page: React.FunctionComponent = (props) => {
         <TitleBar/>
         <NavBar/>
         <div className="body">
-            <SideBar text="404 error."/>
+            <SideBar/>
             <div className="content">
                 <div className="f404-container">
                     <span className={`f404-text ${!theme.includes("light") ? "f404-darker" : ""}`}>404 Error</span>

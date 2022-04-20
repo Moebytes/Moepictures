@@ -13,7 +13,7 @@ import functions from "../structures/Functions"
 import DragAndDrop from "../components/DragAndDrop"
 import Carousel from "../components/Carousel"
 import {HideNavbarContext, HideSidebarContext, RelativeContext, DownloadFlagContext, DownloadURLsContext, HideTitlebarContext,
-PostsContext, TagsContext, HeaderTextContext} from "../Context"
+PostsContext, TagsContext, HeaderTextContext, SearchContext, SidebarTextContext, SessionContext} from "../Context"
 import axios from "axios"
 import "./styles/postpage.less"
 
@@ -31,9 +31,12 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
     const {posts, setPosts} = useContext(PostsContext)
     const {tags, setTags} = useContext(TagsContext)
     const {headerText, setHeaderText} = useContext(HeaderTextContext)
+    const {sidebarText, setSidebarText} = useContext(SidebarTextContext)
+    const {session, setSession} = useContext(SessionContext)
     const [images, setImages] = useState([]) as any
     const [image, setImage] = useState("") as any
     const [post, setPost] = useState(null) as any
+    const [tagCategories, setTagCategories] = useState(null) as any
     const history = useHistory()
 
     useEffect(() => {
@@ -41,29 +44,34 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
         setHideTitlebar(false)
         setHideSidebar(false)
         setRelative(true)
+        setSidebarText("")
         document.title = "Moebooru: Post"
     }, [])
 
     useEffect(() => {
-        if (post) {
-            const title = post.title ? post.title : "Post"
-            document.title = `Moebooru: ${title}`
-            setHeaderText(title)
+        const updatePost = async () => {
+            if (post) {
+                const title = post.translatedTitle ? functions.toProperCase(post.translatedTitle) : 
+                              post.title ? post.title : "Post"
+                document.title = `Moebooru: ${title}`
+                if (title !== "Post") setHeaderText(title.replaceAll("-", " "))
+            }
         }
+        updatePost()
     }, [post])
 
     useEffect(() => {
         const updatePost = async () => {
             let post = posts.find((p: any) => p.postID === Number(props?.match.params.id))
-            if (!post) post = await axios.get("/api/post", {params: {id: props?.match.params.id}}).then((r) => r.data)
+            if (!post) post = await axios.get("/api/post", {params: {postID: props?.match.params.id}, withCredentials: true}).then((r) => r.data)
             if (post) {
                 const images = post.images.map((i: any) => functions.getImageLink(i.type, post.postID, i.filename))
                 setImages(images)
                 setImage(images[0])
-                if (!tags.length) {
-                    const tags = await functions.parseTags([post])
-                    setTags(tags)
-                }
+                const tags = await functions.parseTags([post])
+                const categories = await functions.tagCategories(tags)
+                setTagCategories(categories)
+                setTags(tags)
                 setPost(post)
             } else {
                 history.push("/404")
@@ -73,7 +81,7 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
     }, [props?.match.params.id, posts])
 
     const download = () => {
-        setDownloadURLs(images)
+        setDownloadURLs([image])
         setDownloadFlag(true)
     }
 
@@ -109,18 +117,31 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
         <TitleBar/>
         <NavBar/>
         <div className="body">
-            <SideBar post={post}/>
+            {post && tagCategories ? 
+            <SideBar post={post} artists={tagCategories.artists} characters={tagCategories.characters} series={tagCategories.series} tags={tagCategories.tags}/> : 
+            <SideBar/>
+            }
             <div className="content">
                 <div className="post-container">
                     {images.length > 1 ?
                     <div className="carousel-container">
                         <Carousel images={images} set={set}/>
                     </div> : null}
+                    {post ? 
+                    <>
+                    <PostImage img={image} comicPages={post.type === "comic" ? images : null}/>
+                    <PostImageOptions img={image} post={post} comicPages={post.type === "comic" ? images : null} download={download} next={next} previous={previous}/>
+                    </> : 
+                    <>
                     <PostImage img={image}/>
-                    <PostImageOptions download={download} next={next} previous={previous}/>
-                    <CutenessMeter/>
-                    {post?.commentary ? <Commentary text={post.commentary}/> : null}
-                    <Comments/>
+                    <PostImageOptions img={image} download={download} next={next} previous={previous}/>
+                    </>
+                    }
+                    {session.username ? <CutenessMeter/> : null}
+                    {post?.commentary ? <Commentary text={post.commentary} translated={post.translatedCommentary}/> : null}
+                    {post ?
+                    <Comments post={post}/>
+                    : null}
                     <Footer/>
                 </div>
             </div>

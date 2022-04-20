@@ -10,7 +10,8 @@ import XButtonMagenta from "../assets/magenta/x-button.png"
 import XButtonMagentaLight from "../assets/magenta-light/x-button.png"
 import DragAndDrop from "../components/DragAndDrop"
 import functions from "../structures/Functions"
-import {HideNavbarContext, HideSidebarContext, ThemeContext, EnableDragContext, RelativeContext, HideTitlebarContext} from "../Context"
+import {HideNavbarContext, HideSidebarContext, ThemeContext, EnableDragContext, 
+RelativeContext, HideTitlebarContext, HeaderTextContext, SidebarTextContext} from "../Context"
 import "./styles/contactpage.less"
 
 const ContactPage: React.FunctionComponent = (props) => {
@@ -20,6 +21,8 @@ const ContactPage: React.FunctionComponent = (props) => {
     const {hideSidebar, setHideSidebar} = useContext(HideSidebarContext)
     const {enableDrag, setEnableDrag} = useContext(EnableDragContext)
     const {relative, setRelative} = useContext(RelativeContext)
+    const {headerText, setHeaderText} = useContext(HeaderTextContext)
+    const {sidebarText, setSidebarText} = useContext(SidebarTextContext)
     const [clicked, setClicked] = useState(false)
     const [filename, setFileName] = useState("")
 
@@ -28,6 +31,8 @@ const ContactPage: React.FunctionComponent = (props) => {
         setHideTitlebar(false)
         setHideSidebar(false)
         setRelative(false)
+        setHeaderText("")
+        setSidebarText("")
         document.title = "Moebooru: Contact"
     }, [])
 
@@ -54,7 +59,7 @@ const ContactPage: React.FunctionComponent = (props) => {
         <div className="body">
             <SideBar/>
             <div className="content">
-                <div className="contact" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
+                <div className="contact">
                     <span className="contact-title">Contact</span>
                     {clicked ? <>
                     <span className="contact-link">Your message has been delivered.</span>
@@ -79,7 +84,7 @@ const ContactPage: React.FunctionComponent = (props) => {
                     </span>
                     <div className="contact-row">
                         <span className="contact-text">Subject:</span>
-                        <input className="contact-input" type="text" spellCheck={false}/>
+                        <input className="contact-input" type="text" spellCheck={false} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}/>
                     </div>
                     <div className="contact-row">
                         <span className="contact-text">Attach File:</span>
@@ -90,7 +95,7 @@ const ContactPage: React.FunctionComponent = (props) => {
                     </div>
                     <div className="contact-row-start">
                         <span className="contact-text">Message:</span>
-                        <textarea className="contact-textarea" spellCheck={false}></textarea>
+                        <textarea className="contact-textarea" spellCheck={false} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}></textarea>
                     </div>
                     <div className="contact-button-container">
                         <button className="contact-button" onClick={() => setClicked(true)}>Send Message</button>

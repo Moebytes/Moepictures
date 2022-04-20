@@ -3,8 +3,19 @@ import sql from "../structures/SQLQuery"
 import fs from "fs"
 import path from "path"
 import functions from "../structures/Functions"
+import rateLimit from "express-rate-limit"
 import phash from "sharp-phash"
 import fileType from "magic-bytes.js"
+import imageSize from "image-size"
+
+const uploadLimiter = rateLimit({
+	windowMs: 5 * 60 * 1000,
+	max: 20,
+	message: "Too many uploads, try again later.",
+	standardHeaders: true,
+	legacyHeaders: false
+})
+
 
 const altPath = (imagePath: string) => {
   let i = 2
@@ -22,11 +33,13 @@ const validImages = (images: any[]) => {
     const result = fileType(images[i].bytes)?.[0]
     const jpg = result?.mime === "image/jpeg"
     const png = result?.mime === "image/png"
+    const webp = result?.mime === "image/webp"
     const gif = result?.mime === "image/gif"
     const mp4 = result?.mime === "video/mp4"
-    if (jpg || png || gif || mp4) {
+    if (jpg || png || webp || gif || mp4) {
       const MB = images[i].size / (1024*1024)
       const maxSize = jpg ? 5 :
+                      webp ? 10 :
                       png ? 10 :
                       gif ? 50 :
                       mp4 ? 100 : 100
@@ -40,7 +53,7 @@ const validImages = (images: any[]) => {
 
 
 const CreateRoutes = (app: Express) => {
-    app.post("/api/upload", async (req: Request, res: Response, next: NextFunction) => {
+    app.post("/api/upload", uploadLimiter, async (req: Request, res: Response, next: NextFunction) => {
       try {
         const images = req.body.images 
         let type = req.body.type 
@@ -49,11 +62,41 @@ const CreateRoutes = (app: Express) => {
         const variationID = req.body.variationID 
         const thirdPartyID = req.body.thirdPartyID 
         const source = req.body.source 
-        let artists = req.body.artists 
-        let characters = req.body.characters 
-        let series = req.body.series 
-        const tags = req.body.tags
+        let artists = req.body.artists
+        let characters = req.body.characters
+        let series = req.body.series
+        let tags = req.body.tags
+        let newTags = req.body.newTags
 
+        if (!artists?.[0]?.tag) artists = [{tag: "unknown-artist"}]
+        if (!characters?.[0]?.tag) characters = [{tag: "unknown-character"}]
+        if (!series?.[0]?.tag) series = [{tag: "unknown-series"}]
+        if (!tags?.[0]) tags = ["needs-tags"]
+        if (!newTags?.[0]) newTags = []
+
+        artists = artists.filter(Boolean).map((a: any) => {
+          if (a.tag) a.tag = a.tag.toLowerCase().replace(/[\n\r\s]+/g, "-")
+          return a
+        })
+
+        characters = characters.filter(Boolean).map((c: any) => {
+          if (c.tag) c.tag = c.tag.toLowerCase().replace(/[\n\r\s]+/g, "-")
+          return c
+        })
+
+        series = series.filter(Boolean).map((s: any) => {
+          if (s.tag) s.tag = s.tag.toLowerCase().replace(/[\n\r\s]+/g, "-")
+          return s
+        })
+
+        newTags = newTags.filter(Boolean).map((t: any) => {
+          if (t.tag) t.tag = t.tag.toLowerCase().replace(/[\n\r\s]+/g, "-")
+          return t
+        })
+
+        tags = tags.filter(Boolean).map((t: string) => t.toLowerCase().replace(/[\n\r\s]+/g, "-"))
+
+        if (!req.session.username) return res.status(400).send("Not logged in")
         if (!validImages(images)) return res.status(400).send("Invalid images")
         const totalMB = images.reduce((acc: any, obj: any) => acc + obj.size, 0) / (1024*1024)
         if (totalMB > 200) return res.status(400).send("Invalid size")
@@ -61,24 +104,37 @@ const CreateRoutes = (app: Express) => {
         if (!functions.validRestrict(restrict)) return res.status(400).send("Invalid restrict")
         if (!functions.validStyle(style)) return res.status(400).send("Invalid style")
 
-        if (!artists?.[0]?.tag) artists = [{tag: "unknown-artist"}]
-        if (!characters?.[0]?.tag) characters = [{tag: "unknown-character"}]
-        if (!series?.[0]?.tag) series = [{tag: "unknown-series"}]
-
+        const variation = variationID ? true : false
         const postID = variationID ? Number(variationID) : await sql.insertPost()
+        
 
-        await sql.updatePost(postID, "restrict", restrict)
-        await sql.updatePost(postID, "style", style)
-        await sql.updatePost(postID, "cuteness", 500)
-        await sql.updatePost(postID, "thirdParty", thirdPartyID ? true : false)
-        await sql.updatePost(postID, "title", source.title ? source.title : null)
-        await sql.updatePost(postID, "artist", source.artist ? source.artist : null)
-        await sql.updatePost(postID, "drawn", source.date ? source.date : null)
-        await sql.updatePost(postID, "link", source.link ? source.link : null)
-        await sql.updatePost(postID, "commentary", source.commentary ? source.commentary : null)
-        const uploadDate = new Date().toISOString()
-        await sql.updatePost(postID, "uploaded", uploadDate)
-        await sql.updatePost(postID, "updated", uploadDate)
+        if (variation) {
+          const post = await sql.post(postID)
+          type = post.type
+          const uploadDate = new Date().toISOString()
+          await sql.updatePost(postID, "updater", req.session.username)
+          await sql.updatePost(postID, "updatedDate", uploadDate)
+          tags = functions.removeDuplicates([...tags, ...post.tags])
+        } else {
+          await sql.updatePost(postID, "restrict", restrict)
+          await sql.updatePost(postID, "style", style)
+          await sql.updatePost(postID, "cuteness", 500)
+          await sql.updatePost(postID, "favorites", 0)
+          await sql.updatePost(postID, "thirdParty", thirdPartyID ? true : false)
+          await sql.updatePost(postID, "title", source.title ? source.title : null)
+          await sql.updatePost(postID, "translatedTitle", source.translatedTitle ? source.translatedTitle : null)
+          await sql.updatePost(postID, "artist", source.artist ? source.artist : null)
+          await sql.updatePost(postID, "drawn", source.date ? source.date : null)
+          await sql.updatePost(postID, "link", source.link ? source.link : null)
+          await sql.updatePost(postID, "commentary", source.commentary ? source.commentary : null)
+          await sql.updatePost(postID, "translatedCommentary", source.translatedCommentary ? source.translatedCommentary : null)
+          const uploadDate = new Date().toISOString()
+          await sql.updatePost(postID, "uploadDate", uploadDate)
+          await sql.updatePost(postID, "uploader", req.session.username)
+          await sql.updatePost(postID, "updater", req.session.username)
+          await sql.updatePost(postID, "updatedDate", uploadDate)
+        }
+
 
         if (type !== "comic") type = "image"
 
@@ -94,6 +150,14 @@ const CreateRoutes = (app: Express) => {
             kind = "comic"
           } else if (ext === "jpg" || ext === "png") {
             kind = "image"
+          } else if (ext === "webp") {
+            const animated = await functions.isAnimatedWebp(Buffer.from(images[i].bytes))
+            if (animated) {
+              kind = "animation"
+              if (type !== "video") type = "animation"
+            } else {
+              kind = "image"
+            }
           } else if (ext === "gif") {
             kind = "animation"
             if (type !== "video") type = "animation"
@@ -108,71 +172,99 @@ const CreateRoutes = (app: Express) => {
           if (!fs.existsSync(dir)) fs.mkdirSync(dir, {recursive: true})
           const buffer = Buffer.from(Object.values(images[i].bytes))
           fs.writeFileSync(imagePath, buffer)
+          let dimensions = null as any
           let hash = ""
           if (kind === "video") {
             const buffer = functions.base64ToBuffer(images[i].thumbnail)
             hash = await phash(buffer).then((hash: string) => functions.binaryToHex(hash))
+            dimensions = imageSize(buffer)
           } else {
             hash = await phash(buffer).then((hash: string) => functions.binaryToHex(hash))
+            dimensions = imageSize(buffer)
           }
           const imageID = await sql.insertImage(postID)
           await sql.updateImage(imageID, "filename", filename)
           await sql.updateImage(imageID, "type", kind)
           await sql.updateImage(imageID, "order", order)
           await sql.updateImage(imageID, "hash", hash)
+          await sql.updateImage(imageID, "width", dimensions.width)
+          await sql.updateImage(imageID, "height", dimensions.height)
+          await sql.updateImage(imageID, "size", images[i].size)
         }
 
         await sql.updatePost(postID, "type", type)
 
-        for (let i = 0; i < artists.length; i++) {
-          if (!artists[i].tag) continue
-          const exists = await sql.insertTag(artists[i].tag)
-          await sql.updateTag(artists[i].tag, "type", "artist")
-          if (!exists && artists[i].image) {
-            const filename = `${artists[i].tag}.${artists[i].ext}`
-            const imagePath = functions.getTagPath("artists", filename)
-            const dir = path.dirname(imagePath)
-            if (!fs.existsSync(dir)) fs.mkdirSync(dir, {recursive: true})
-            fs.writeFileSync(imagePath, Buffer.from(Object.values(artists[i].bytes)))
-            await sql.updateTag(artists[i].tag, "image", filename)
+        let tagMap = tags
+
+        if (!variation) {
+          for (let i = 0; i < artists.length; i++) {
+            if (!artists[i].tag) continue
+            const exists = await sql.insertTag(artists[i].tag)
+            await sql.updateTag(artists[i].tag, "type", "artist")
+            await sql.updateTag(artists[i].tag, "description", "Artist.")
+            if (!exists && artists[i].image) {
+              const filename = `${artists[i].tag}.${artists[i].ext}`
+              const imagePath = functions.getTagPath("artists", filename)
+              const dir = path.dirname(imagePath)
+              if (!fs.existsSync(dir)) fs.mkdirSync(dir, {recursive: true})
+              fs.writeFileSync(imagePath, Buffer.from(Object.values(artists[i].bytes)))
+              await sql.updateTag(artists[i].tag, "image", filename)
+            }
+            tagMap.push(artists[i].tag)
           }
-          await sql.insertTagMap(postID, artists[i].tag)
+
+          for (let i = 0; i < characters.length; i++) {
+            if (!characters[i].tag) continue
+            const exists = await sql.insertTag(characters[i].tag)
+            await sql.updateTag(characters[i].tag, "type", "character")
+            await sql.updateTag(characters[i].tag, "description", "Character.")
+            if (!exists && characters[i].image) {
+              const filename = `${characters[i].tag}.${characters[i].ext}`
+              const imagePath = functions.getTagPath("characters", filename)
+              const dir = path.dirname(imagePath)
+              if (!fs.existsSync(dir)) fs.mkdirSync(dir, {recursive: true})
+              fs.writeFileSync(imagePath, Buffer.from(Object.values(characters[i].bytes)))
+              await sql.updateTag(characters[i].tag, "image", filename)
+            }
+            tagMap.push(characters[i].tag)
+          }
+
+          for (let i = 0; i < series.length; i++) {
+            if (!series[i].tag) continue
+            const exists = await sql.insertTag(series[i].tag)
+            await sql.updateTag(series[i].tag, "type", "series")
+            await sql.updateTag(series[i].tag, "description", "Series.")
+            if (!exists && series[i].image) {
+              const filename = `${series[i].tag}.${series[i].ext}`
+              const imagePath = functions.getTagPath("series", filename)
+              const dir = path.dirname(imagePath)
+              if (!fs.existsSync(dir)) fs.mkdirSync(dir, {recursive: true})
+              fs.writeFileSync(imagePath, Buffer.from(Object.values(series[i].bytes)))
+              await sql.updateTag(series[i].tag, "image", filename)
+            }
+            tagMap.push(series[i].tag)
+          }
         }
 
-        for (let i = 0; i < characters.length; i++) {
-          if (!characters[i].tag) continue
-          const exists = await sql.insertTag(characters[i].tag)
-          await sql.updateTag(characters[i].tag, "type", "character")
-          if (!exists && characters[i].image) {
-            const filename = `${characters[i].tag}.${characters[i].ext}`
-            const imagePath = functions.getTagPath("characters", filename)
+        for (let i = 0; i < newTags.length; i++) {
+          if (!newTags[i].tag) continue
+          const exists = await sql.insertTag(newTags[i].tag)
+          await sql.updateTag(newTags[i].tag, "type", "attribute")
+          await sql.updateTag(newTags[i].tag, "description", newTags[i].desc)
+          if (!exists && newTags[i].image) {
+            const filename = `${newTags[i].tag}.${newTags[i].ext}`
+            const imagePath = functions.getTagPath("tags", filename)
             const dir = path.dirname(imagePath)
             if (!fs.existsSync(dir)) fs.mkdirSync(dir, {recursive: true})
-            fs.writeFileSync(imagePath, Buffer.from(Object.values(characters[i].bytes)))
-            await sql.updateTag(characters[i].tag, "image", filename)
+            fs.writeFileSync(imagePath, Buffer.from(Object.values(newTags[i].bytes)))
+            await sql.updateTag(newTags[i].tag, "image", filename)
           }
-          await sql.insertTagMap(postID, characters[i].tag)
         }
 
-        for (let i = 0; i < series.length; i++) {
-          if (!series[i].tag) continue
-          const exists = await sql.insertTag(series[i].tag)
-          await sql.updateTag(series[i].tag, "type", "series")
-          if (!exists && series[i].image) {
-            const filename = `${series[i].tag}.${series[i].ext}`
-            const imagePath = functions.getTagPath("series", filename)
-            const dir = path.dirname(imagePath)
-            if (!fs.existsSync(dir)) fs.mkdirSync(dir, {recursive: true})
-            fs.writeFileSync(imagePath, Buffer.from(Object.values(series[i].bytes)))
-            await sql.updateTag(series[i].tag, "image", filename)
-          }
-          await sql.insertTagMap(postID, series[i].tag)
-        }
+        tagMap = functions.removeDuplicates(tagMap)
 
-        for (let i = 0; i < tags.length; i++) {
-          await sql.insertTag(tags[i]) 
-          await sql.updateTag(tags[i], "type", "attribute")
-          await sql.insertTagMap(postID, tags[i])
+        for (let i = 0; i < tagMap.length; i++) {
+          await sql.insertTagMap(postID, tagMap[i])
         }
 
         res.status(200).send("Success")

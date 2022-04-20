@@ -2,8 +2,10 @@ import React, {useContext, useEffect, useState} from "react"
 import {useHistory} from "react-router-dom"
 import {ThemeContext, HideSidebarContext, HideNavbarContext, HideSortbarContext, EnableDragContext, 
 RelativeContext, HideTitlebarContext, SidebarHoverContext, SearchContext, SearchFlagContext, PostsContext,
-TagsContext} from "../Context"
+TagsContext, RandomFlagContext, ImageSearchFlagContext, SidebarTextContext, SessionContext} from "../Context"
 import {HashLink as Link} from "react-router-hash-link"
+import favicon from "../assets/purple/favicon.png"
+import faviconMagenta from "../assets/magenta/favicon.png"
 import searchIcon from "../assets/purple/search.png"
 import searchImage from "../assets/purple/search-image.png"
 import searchMagenta from "../assets/magenta/search.png"
@@ -29,7 +31,6 @@ import codeMagenta from "../assets/magenta/code.png"
 import codePurpleLight from "../assets/purple-light/code.png"
 import codeMagentaLight from "../assets/magenta-light/code.png"
 import artistImg from "../assets/images/artist.png"
-import userImg from "../assets/images/user.png"
 import setAvatar from "../assets/purple/setavatar.png"
 import setAvatarMagenta from "../assets/magenta/setavatar.png"
 import addTranslation from "../assets/purple/addtranslation.png"
@@ -44,11 +45,16 @@ import deleteIcon from "../assets/purple/delete.png"
 import deleteIconMagenta from "../assets/magenta/delete.png"
 import pack from "../package.json"
 import functions from "../structures/Functions"
+import fileType from "magic-bytes.js"
+import axios from "axios"
 import "./styles/sidebar.less"
 
 interface Props {
     post?: any
-    text?: any
+    artists?: any 
+    characters?: any 
+    series?: any
+    tags?: any
 }
 
 const SideBar: React.FunctionComponent<Props> = (props) => {
@@ -64,7 +70,12 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
     const {search, setSearch} = useContext(SearchContext)
     const {searchFlag, setSearchFlag} = useContext(SearchFlagContext)
     const {tags, setTags} = useContext(TagsContext)
+    const {randomFlag, setRandomFlag} = useContext(RandomFlagContext)
+    const {imageSearchFlag, setImageSearchFlag} = useContext(ImageSearchFlagContext)
+    const {sidebarText, setSidebarText} = useContext(SidebarTextContext)
+    const {session, setSession} = useContext(SessionContext)
     const [maxTags, setMaxTags] = useState(23)
+    const [userImage, setUserImage] = useState("")
     const history = useHistory()
 
     const updateTags = async () => {
@@ -72,9 +83,26 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
         setTags(tags)
     }
 
+    const getFavicon = () => {
+        if (theme.includes("magenta")) return faviconMagenta 
+        return favicon
+    }
+
+    const updateUserImg = async () => {
+        if (props.post) {
+            const user = await axios.get("/api/user", {params: {username: props.post.uploader}, withCredentials: true}).then((r) => r.data)
+            setUserImage(user.image ? functions.getTagLink("pfp", user.image) : getFavicon())
+        }
+    }
+
     useEffect(() => {
         updateTags()
+        updateUserImg()
     }, [])
+
+    useEffect(() => {
+        updateUserImg()
+    }, [props.post])
 
     useEffect(() => {
         updateTags()
@@ -266,20 +294,85 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
         return deleteIcon
     }
 
+    const generateArtistsJSX = () => {
+        let jsx = [] as any
+        for (let i = 0; i < props.artists.length; i++) {
+            const link = functions.getTagLink("artist", props.artists[i].image)
+            const tagClick = () => {
+                setSearch(props.artists[i].tag)
+                setSearchFlag(true)
+                history.push(`/posts`)
+            }
+            jsx.push(<>
+                    {link ?
+                    <div className="sidebar-row">
+                        <img className="sidebar-img" src={link}/>
+                    </div> : null}
+                    <div className="sidebar-row">
+                        <span className="tag-hover" onClick={() => tagClick()}>
+                            <span className="tag">{props.artists[i].tag.replaceAll("-", " ")}</span>
+                            <span className="tag-count">{props.artists[i].count}</span>
+                        </span>
+                    </div>
+                </>)
+        }
+        return jsx
+    }
+
+    const generateCharactersJSX = () => {
+        let jsx = [] as any
+        for (let i = 0; i < props.characters.length; i++) {
+            const tagClick = () => {
+                setSearch(props.characters[i].tag)
+                setSearchFlag(true)
+                history.push(`/posts`)
+            }
+            jsx.push(
+                <div className="sidebar-row">
+                    <span className="tag-hover" onClick={() => tagClick()}>
+                        <span className="tag">{props.characters[i].tag.replaceAll("-", " ")}</span>
+                        <span className="tag-count">{props.characters[i].count}</span>
+                    </span>
+                </div>
+                )
+        }
+        return jsx
+    }
+
+    const generateSeriesJSX = () => {
+        let jsx = [] as any
+        for (let i = 0; i < props.series.length; i++) {
+            const tagClick = () => {
+                setSearch(props.series[i].tag)
+                setSearchFlag(true)
+                history.push(`/posts`)
+            }
+            jsx.push(
+                <div className="sidebar-row">
+                    <span className="tag-hover" onClick={() => tagClick()}>
+                        <span className="tag">{props.series[i].tag.replaceAll("-", " ")}</span>
+                        <span className="tag-count">{props.series[i].count}</span>
+                    </span>
+                </div>
+                )
+        }
+        return jsx
+    }
+
     const generateTagJSX = () => {
         let jsx = [] as any
-        let currentTags = props.post ? props.post.tags : tags
+        let currentTags = props.tags ? props.tags : tags
         let max = currentTags.length > maxTags ? maxTags : currentTags.length
         for (let i = 0; i < max; i++) {
             const tagClick = () => {
                 setSearch(currentTags[i].tag)
                 setSearchFlag(true)
-                history.push(`/posts?query=${currentTags[i].tag}`)
+                history.push(`/posts`)
             }
             jsx.push(
                 <div className="sidebar-row">
                     <span className="tag-hover" onClick={() => tagClick()}>
-                        <span className="tag">{currentTags[i].tag}</span>
+                        <span className="tag">{currentTags[i].tag.replaceAll("-", " ")}</span>
                         <span className="tag-count">{currentTags[i].count}</span>
                     </span>
                 </div>
@@ -299,7 +392,26 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
 
     const triggerSearch = () => {
         setSearchFlag(true)
-        history.push(`/posts?query=${search}`)
+        history.push(`/posts`)
+    }
+
+    const randomSearch = () => {
+        setRandomFlag(true)
+        history.push(`/posts`)
+    }
+
+    const imageSearch = async (event: any) => {
+        const file = event.target.files?.[0]
+        if (!file) return
+        const result = await functions.imageSearch(file)
+        setImageSearchFlag(result)
+        history.push("/posts")
+        event.target.value = ""
+    }
+
+    const deletePost = async () => {
+        await axios.delete("/api/post", {params: {postID: props.post.postID}, withCredentials: true})
+        history.push("/posts")
     }
 
     return (
@@ -307,36 +419,38 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
         ${relative ? "sidebar-relative" : ""}`} onMouseEnter={() => {setEnableDrag(false); setSidebarHover(true)}} onMouseLeave={() => {setEnableDrag(true); setSidebarHover(false)}}>
             <div className="sidebar-container">
             <div className="sidebar-content">
+                {sidebarText ?
                 <div className="sidebar-text-container">
-                    <span className="sidebar-text">{props.text ? props.text : `${posts.length} results.`}</span>
-                </div>
+                    <span className="sidebar-text">{sidebarText}</span>
+                </div> : null}
                 <div className="search-container">
                     <input className="search" type="search" spellCheck="false" value={search} onChange={(event) => setSearch(event.target.value)} onKeyDown={(event) => event.key === "Enter" ? triggerSearch() : null}/>
                     <img className={!theme || theme === "purple" ? "search-icon" : `search-icon-${theme}`} src={getSearchIcon()} onClick={() => triggerSearch()}/>
-                    <img className={!theme || theme === "purple" ? "search-image-icon" : `search-image-icon-${theme}`} src={getSearchImageIcon()}/>
+                    <label style={{display: "flex", width: "max-content", height: "max-content"}} htmlFor="image-search">
+                        <img className={!theme || theme === "purple" ? "search-image-icon" : `search-image-icon-${theme}`} src={getSearchImageIcon()}/>
+                    </label>
+                    <input id="image-search" type="file" onChange={(event) => imageSearch(event)}/>
                 </div>
                 <div className="random-container">
-                    <img className={!theme || theme === "purple" ? "random" : `random-${theme}`} src={getRandomIcon()}/>
+                    <img className={!theme || theme === "purple" ? "random" : `random-${theme}`} src={getRandomIcon()} onClick={randomSearch}/>
                 </div>
 
-                {props.post ? 
+                {props.artists ?
                     <div className="sidebar-subcontainer">
                         <div className="sidebar-row">
-                            <span className="sidebar-title">Artist</span>
+                            <span className="sidebar-title">{props.artists.length > 1 ? "Artists" : "Artist"}</span>
                         </div>
-                        <div className="sidebar-row">
-                            <img className="sidebar-img" src={artistImg}/>
-                        </div>
-                        <div className="sidebar-row">
-                            <span className="tag-hover">
-                                <span className="tag">{}</span>
-                                <span className="tag-count">{}</span>
-                            </span>
-                        </div>
+                        {generateArtistsJSX()}
                         <div className="sidebar-row">
                             <span className="tag">Title:</span>
                             <span className="tag-alt">{props.post.title || "None"}</span>
                         </div>
+                        {props.post.translatedTitle ? 
+                        <div className="sidebar-row">
+                            <span className="tag">Translated:</span>
+                            <span className="tag-alt">{functions.toProperCase(props.post.translatedTitle)}</span>
+                        </div>
+                        : null}
                         <div className="sidebar-row">
                             <span className="tag">Drawn:</span>
                             <span className="tag-alt">{props.post.drawn ? functions.formatDate(new Date(props.post.drawn)) : "Unknown"}</span>
@@ -348,36 +462,26 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
                     </div>
                 : null}
 
-                {props.post ? 
+                {props.characters ? 
                     <div className="sidebar-subcontainer">
                         <div className="sidebar-row">
-                            <span className="sidebar-title">Characters</span>
+                            <span className="sidebar-title">{props.characters.length > 1 ? "Characters" : "Character"}</span>
                         </div>
-                        <div className="sidebar-row">
-                            <span className="tag-hover">
-                                <span className="tag">klee</span>
-                                <span className="tag-count">{Math.floor(Math.random() * 1000)}</span>
-                            </span>
-                        </div>
+                        {generateCharactersJSX()}
                     </div>
                 : null}
 
-                {props.post ? 
+                {props.series ? 
                     <div className="sidebar-subcontainer">
                         <div className="sidebar-row">
                             <span className="sidebar-title">Series</span>
                         </div>
-                        <div className="sidebar-row">
-                            <span className="tag-hover">
-                                <span className="tag">genshin impact</span>
-                                <span className="tag-count">{Math.floor(Math.random() * 1000)}</span>
-                            </span>
-                        </div>
+                        {generateSeriesJSX()}
                     </div>
                 : null}
 
                 <div className="sidebar-subcontainer">
-                    {props.post ? 
+                    {props.tags ?
                         <div className="sidebar-row">
                             <span className="sidebar-title">Tags</span>
                         </div>
@@ -391,19 +495,23 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
                             <span className="sidebar-title">Details</span>
                         </div>
                         <div className="sidebar-row">
-                            <img className="sidebar-img" src={userImg}/>
+                            <img className="sidebar-img" src={userImage}/>
                         </div>
                         <div className="sidebar-row">
                             <span className="tag">Uploader:</span>
-                            <span className="tag-alt">Tenpi</span>
+                            <span className="tag-alt">{functions.toProperCase(props.post.uploader) || "deleted"}</span>
                         </div>
                         <div className="sidebar-row">
                             <span className="tag">Uploaded:</span>
-                            <span className="tag-alt">{functions.formatDate(new Date(props.post.uploaded))}</span>
+                            <span className="tag-alt">{functions.formatDate(new Date(props.post.uploadDate))}</span>
+                        </div>
+                        <div className="sidebar-row">
+                            <span className="tag">Updater:</span>
+                            <span className="tag-alt">{functions.toProperCase(props.post.updater) || "deleted"}</span>
                         </div>
                         <div className="sidebar-row">
                             <span className="tag">Updated:</span>
-                            <span className="tag-alt">{functions.formatDate(new Date(props.post.updated))}</span>
+                            <span className="tag-alt">{functions.formatDate(new Date(props.post.updatedDate))}</span>
                         </div>
                         <div className="sidebar-row">
                             <span className="tag">Rating:</span>
@@ -411,7 +519,7 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
                         </div>
                         <div className="sidebar-row">
                             <span className="tag">Favorites:</span>
-                            <span className="tag-alt">300</span>
+                            <span className="tag-alt">{props.post.favorites || 0}</span>
                         </div>
                         <div className="sidebar-row">
                             <span className="tag">Cuteness:</span>
@@ -420,7 +528,7 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
                     </div>
                 : null}  
 
-                {props.post ? 
+                {props.post && session.username ? 
                     <div className="sidebar-subcontainer">
                         <div className="sidebar-row">
                             <span className="tag-hover">
@@ -453,7 +561,7 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
                             </span>
                         </div>
                         <div className="sidebar-row">
-                            <span className="tag-hover">
+                            <span className="tag-hover" onClick={deletePost}>
                                 <img className="sidebar-icon" src={getDeleteIcon()}/>
                                 <span className="tag-red">Delete</span>
                             </span>

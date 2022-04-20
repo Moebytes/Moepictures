@@ -22,7 +22,7 @@ module.exports = [
     optimization: {minimize: false, minimizer: [new TerserJSPlugin(), new OptimizeCSSAssetsPlugin()], namedModules: true},
     module: {
       rules: [
-        {test: /\.(jpe?g|png|gif|svg|mp3|wav|mp4|ttf|otf)$/, exclude: webExclude, use: [{loader: "file-loader", options: {name: "[path][name].[ext]"}}]},
+        {test: /\.(jpe?g|png|gif|webp|svg|mp3|wav|mp4|webm|ttf|otf)$/, exclude: webExclude, use: [{loader: "file-loader", options: {name: "[path][name].[ext]"}}]},
         {test: /\.(txt|sql)$/, exclude: webExclude, use: ["raw-loader"]},
         {test: /\.html$/, exclude: webExclude, use: [{loader: "html-loader", query: {minimize: false}}]},
         {test: /\.css$/, exclude: webExclude, use: [{loader: MiniCssExtractPlugin.loader, options: {hmr: true}}, "css-loader"]},
@@ -57,7 +57,7 @@ module.exports = [
     optimization: {minimize: false, minimizer: [new TerserJSPlugin()], namedModules: true},
     module: {
       rules: [
-        {test: /\.(jpe?g|png|gif|svg|mp3|wav|mp4|ttf|otf)$/, exclude, use: [{loader: "file-loader", options: {name: "[path][name].[ext]"}}]},
+        {test: /\.(jpe?g|png|webp|gif|svg|mp3|wav|mp4|webm|ttf|otf)$/, exclude, use: [{loader: "file-loader", options: {name: "[path][name].[ext]"}}]},
         {test: /\.(txt|sql)$/, exclude, use: ["raw-loader"]},
         {test: /\.html$/, exclude, use: [{loader: "html-loader", query: {minimize: false}}]},
         {test: /\.css$/, exclude, use: [{loader: MiniCssExtractPlugin.loader, options: {hmr: true}}, "css-loader"]},

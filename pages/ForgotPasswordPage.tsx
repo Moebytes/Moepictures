@@ -1,11 +1,14 @@
-import React, {useEffect, useContext, useState} from "react"
+import React, {useEffect, useContext, useState, useRef} from "react"
 import {HashLink as Link} from "react-router-hash-link"
 import TitleBar from "../components/TitleBar"
 import NavBar from "../components/NavBar"
 import SideBar from "../components/SideBar"
 import Footer from "../components/Footer"
 import DragAndDrop from "../components/DragAndDrop"
-import {HideNavbarContext, HideSidebarContext, ThemeContext, EnableDragContext, RelativeContext, HideTitlebarContext} from "../Context"
+import {HideNavbarContext, HideSidebarContext, ThemeContext, EnableDragContext, 
+RelativeContext, HideTitlebarContext, HeaderTextContext, SidebarTextContext} from "../Context"
+import functions from "../structures/Functions"
+import axios from "axios"
 import "./styles/forgotpasspage.less"
 
 const ForgotPasswordPage: React.FunctionComponent = (props) => {
@@ -15,16 +18,32 @@ const ForgotPasswordPage: React.FunctionComponent = (props) => {
     const {hideSidebar, setHideSidebar} = useContext(HideSidebarContext)
     const {enableDrag, setEnableDrag} = useContext(EnableDragContext)
     const {relative, setRelative} = useContext(RelativeContext)
-    const [clicked, setClicked] = useState(false)
+    const {headerText, setHeaderText} = useContext(HeaderTextContext)
+    const {sidebarText, setSidebarText} = useContext(SidebarTextContext)
+    const [submitted, setSubmitted] = useState(false)
+    const [error, setError] = useState(false)
+    const [email, setEmail] = useState("")
+    const errorRef = useRef<any>(null)
 
     useEffect(() => {
         setHideNavbar(false)
         setHideTitlebar(false)
         setHideSidebar(false)
         setRelative(false)
+        setHeaderText("")
+        setSidebarText("")
         document.title = "Moebooru: Forgot Password"
     }, [])
 
+    const submit = async () => {
+        setError(true)
+        if (!errorRef.current) await functions.timeout(20)
+        errorRef.current!.innerText = "Submitting..."
+        await axios.post("/api/forgotpassword", {email}, {withCredentials: true})
+        setSubmitted(true)
+        setError(false)
+        setEmail("")
+    }
 
     return (
         <>
@@ -34,22 +53,23 @@ const ForgotPasswordPage: React.FunctionComponent = (props) => {
         <div className="body">
             <SideBar/>
             <div className="content">
-                <div className="forgot-pass" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
+                <div className="forgot-pass">
                     <span className="forgot-pass-title">Forgot Password</span>
-                    {clicked ?
+                    {submitted ?
                     <>
-                    <span className="forgot-pass-link">Reset password link sent. Check your email.</span>
+                    <span className="forgot-pass-link">A password reset link was sent if this account exists.</span>
                     <div className="forgot-pass-button-container-left">
-                        <button className="forgot-pass-button" onClick={() => setClicked(false)}>←Back</button>
+                        <button className="forgot-pass-button" onClick={() => setSubmitted(false)}>←Back</button>
                     </div>
                     </> : <>
                     <span className="forgot-pass-link">Enter your email to receive a password reset link.</span>
                     <div className="forgot-pass-row">
                         <span className="forgot-pass-text">Email Address:</span>
-                        <input className="forgot-pass-input" type="text" spellCheck={false}/>
+                        <input className="forgot-pass-input" type="text" spellCheck={false} value={email} onChange={(event) => setEmail(event.target.value)} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)} onKeyDown={(event) => event.key === "Enter" ? submit() : null}/>
                     </div>
+                    {error ? <div className="forgot-pass-validation-container"><span className="forgot-pass-validation" ref={errorRef}></span></div> : null}
                     <div className="forgot-pass-button-container">
-                        <button className="forgot-pass-button" onClick={() => setClicked(true)}>Send Link</button>
+                        <button className="forgot-pass-button" onClick={() => submit()}>Send Link</button>
                     </div>
                     </>
                     }

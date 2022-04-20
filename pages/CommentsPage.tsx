@@ -12,8 +12,10 @@ import searchMagentaLight from "../assets/magenta-light/search.png"
 import sort from "../assets/purple/sort.png"
 import CommentRow from "../components/CommentRow"
 import sortMagenta from "../assets/magenta/sort.png"
-import {ThemeContext, EnableDragContext, HideNavbarContext, HideSidebarContext, RelativeContext, HideTitlebarContext, ActiveDropdownContext} from "../Context"
+import {ThemeContext, EnableDragContext, HideNavbarContext, HideSidebarContext, 
+RelativeContext, HideTitlebarContext, ActiveDropdownContext, HeaderTextContext, SidebarTextContext} from "../Context"
 import "./styles/commentspage.less"
+import axios from "axios"
 
 const CommentsPage: React.FunctionComponent = (props) => {
     const {theme, setTheme} = useContext(ThemeContext)
@@ -23,11 +25,21 @@ const CommentsPage: React.FunctionComponent = (props) => {
     const {hideSidebar, setHideSidebar} = useContext(HideSidebarContext)
     const {relative, setRelative} = useContext(RelativeContext)
     const {activeDropdown, setActiveDropdown} = useContext(ActiveDropdownContext)
+    const {headerText, setHeaderText} = useContext(HeaderTextContext)
+    const {sidebarText, setSidebarText} = useContext(SidebarTextContext)
     const [sortType, setSortType] = useState("date")
     const [comments, setComments] = useState([]) as any
     const [index, setIndex] = useState(0)
+    const [searchQuery, setSearchQuery] = useState("")
     const [visibleComments, setVisibleComments] = useState([]) as any
     const sortRef = useRef(null) as any
+
+    const updateComments = async () => {
+        const result = await axios.get("/api/commentsearch", {params: {sort: sortType, query: searchQuery}, withCredentials: true}).then((r) => r.data)
+        setIndex(0)
+        setVisibleComments([])
+        setComments(result)
+    }
 
     useEffect(() => {
         setHideNavbar(true)
@@ -35,14 +47,15 @@ const CommentsPage: React.FunctionComponent = (props) => {
         setHideSidebar(false)
         setRelative(false)
         setActiveDropdown("none")
+        setHeaderText("")
+        setSidebarText("")
         document.title = "Moebooru: Comments"
-
-        const newComments = [] as any 
-        for (let i = 0; i < 100; i++) {
-            newComments.push(<CommentRow/>)
-        }
-        setComments(newComments)
+        updateComments()
     }, [])
+
+    useEffect(() => {
+        updateComments()
+    }, [sortType])
 
     useEffect(() => {
         let currentIndex = index
@@ -112,7 +125,7 @@ const CommentsPage: React.FunctionComponent = (props) => {
     const generateCommentsJSX = () => {
         const jsx = [] as any
         for (let i = 0; i < visibleComments.length; i++) {
-            jsx.push(<CommentRow/>)
+            jsx.push(<CommentRow comment={visibleComments[i]} onDelete={updateComments}/>)
         }
         return jsx
     }
@@ -129,8 +142,8 @@ const CommentsPage: React.FunctionComponent = (props) => {
                     <span className="comments-heading">Comments</span>
                     <div className="comments-row">
                         <div className="comment-search-container" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
-                            <input className="comment-search" type="search" spellCheck="false"/>
-                            <img className={!theme || theme === "purple" ? "comment-search-icon" : `comment-search-icon-${theme}`} src={getSearchIcon()}/>
+                            <input className="comment-search" type="search" spellCheck="false" value={searchQuery} onChange={(event) => setSearchQuery(event.target.value)} onKeyDown={(event) => event.key === "Enter" ? updateComments() : null}/>
+                            <img className={!theme || theme === "purple" ? "comment-search-icon" : `comment-search-icon-${theme}`} src={getSearchIcon()} onClick={updateComments}/>
                         </div>
                         {getSortJSX()}
                         <div className={`comment-dropdown ${activeDropdown === "sort" ? "" : "hide-comment-dropdown"}`} 

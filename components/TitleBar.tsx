@@ -9,7 +9,11 @@ HeaderTextContext} from "../Context"
 import functions from "../structures/Functions"
 import "./styles/titlebar.less"
 
-const TitleBar: React.FunctionComponent = (props) => {
+interface Props {
+    reset?: boolean
+}
+
+const TitleBar: React.FunctionComponent<Props> = (props) => {
     const {theme, setTheme} = useContext(ThemeContext)
     const {hideNavbar, setHideNavbar} = useContext(HideNavbarContext)
     const {hideTitlebar, setHideTitlebar} = useContext(HideTitlebarContext)
@@ -31,7 +35,7 @@ const TitleBar: React.FunctionComponent = (props) => {
 
     useEffect(() => {
         if (searchFlag) {
-            const text = functions.toProperCase(search.trim().split(/ +/g).join(", "))
+            const text = functions.toProperCase(search.trim().split(/ +/g).map((t: string) => t.replaceAll("-", " ")).join(", "))
             document.title = `Moebooru: ${text}`
             setHeaderText(text)
         }
@@ -43,11 +47,13 @@ const TitleBar: React.FunctionComponent = (props) => {
     }
 
     const titleClick = () => {
-        setSearch("")
-        setImageType("all")
-        setRestrictType("all")
-        setStyleType("all")
-        setSortType("date")
+        if (props.reset) {
+            setSearch("")
+            setImageType("all")
+            setRestrictType("all")
+            setStyleType("all")
+            setSortType("date")
+        }
         setSearchFlag(true)
         history.push("/")
         window.scrollTo(0, 0)

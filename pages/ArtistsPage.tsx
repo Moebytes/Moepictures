@@ -12,7 +12,9 @@ import searchMagentaLight from "../assets/magenta-light/search.png"
 import sort from "../assets/purple/sort.png"
 import ArtistRow from "../components/ArtistRow"
 import sortMagenta from "../assets/magenta/sort.png"
-import {ThemeContext, EnableDragContext, HideNavbarContext, HideSidebarContext, RelativeContext, HideTitlebarContext, ActiveDropdownContext} from "../Context"
+import axios from "axios"
+import {ThemeContext, EnableDragContext, HideNavbarContext, HideSidebarContext, RelativeContext, 
+HideTitlebarContext, ActiveDropdownContext, HeaderTextContext, SidebarTextContext} from "../Context"
 import "./styles/artistspage.less"
 
 const ArtistsPage: React.FunctionComponent = (props) => {
@@ -23,11 +25,21 @@ const ArtistsPage: React.FunctionComponent = (props) => {
     const {hideSidebar, setHideSidebar} = useContext(HideSidebarContext)
     const {relative, setRelative} = useContext(RelativeContext)
     const {activeDropdown, setActiveDropdown} = useContext(ActiveDropdownContext)
-    const [sortType, setSortType] = useState("cuteness")
+    const {headerText, setHeaderText} = useContext(HeaderTextContext)
+    const {sidebarText, setSidebarText} = useContext(SidebarTextContext)
+    const [sortType, setSortType] = useState("alphabetic")
     const [artists, setArtists] = useState([]) as any
     const [index, setIndex] = useState(0)
+    const [searchQuery, setSearchQuery] = useState("")
     const [visibleArtists, setVisibleArtists] = useState([]) as any
     const sortRef = useRef(null) as any
+
+    const updateArtists = async () => {
+        const result = await axios.get("/api/artists", {params: {sort: sortType, query: searchQuery}, withCredentials: true}).then((r) => r.data)
+        setIndex(0)
+        setVisibleArtists([])
+        setArtists(result)
+    }
 
     useEffect(() => {
         setHideNavbar(true)
@@ -35,14 +47,15 @@ const ArtistsPage: React.FunctionComponent = (props) => {
         setHideSidebar(false)
         setRelative(false)
         setActiveDropdown("none")
+        setHeaderText("")
+        setSidebarText("")
         document.title = "Moebooru: Artists"
-
-        const newArtists = [] as any 
-        for (let i = 0; i < 100; i++) {
-            newArtists.push(<ArtistRow/>)
-        }
-        setArtists(newArtists)
+        updateArtists()
     }, [])
+
+    useEffect(() => {
+        updateArtists()
+    }, [sortType])
 
     useEffect(() => {
         let currentIndex = index
@@ -116,7 +129,7 @@ const ArtistsPage: React.FunctionComponent = (props) => {
     const generateArtistsJSX = () => {
         const jsx = [] as any
         for (let i = 0; i < visibleArtists.length; i++) {
-            jsx.push(<ArtistRow/>)
+            jsx.push(<ArtistRow artist={visibleArtists[i]}/>)
         }
         return jsx
     }
@@ -133,17 +146,17 @@ const ArtistsPage: React.FunctionComponent = (props) => {
                     <span className="artists-heading">Artists</span>
                     <div className="artists-row">
                         <div className="artist-search-container" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
-                            <input className="artist-search" type="search" spellCheck="false"/>
-                            <img className={!theme || theme === "purple" ? "artist-search-icon" : `artist-search-icon-${theme}`} src={getSearchIcon()}/>
+                            <input className="artist-search" type="search" spellCheck="false" value={searchQuery} onChange={(event) => setSearchQuery(event.target.value)} onKeyDown={(event) => event.key === "Enter" ? updateArtists() : null}/>
+                            <img className={!theme || theme === "purple" ? "artist-search-icon" : `artist-search-icon-${theme}`} src={getSearchIcon()} onClick={updateArtists}/>
                         </div>
                         {getSortJSX()}
                         <div className={`artist-dropdown ${activeDropdown === "sort" ? "" : "hide-artist-dropdown"}`} 
                         style={{marginRight: getSortMargin(), top: "209px"}} onClick={() => setActiveDropdown("none")}>
-                            <div className="artist-dropdown-row" onClick={() => setSortType("cuteness")}>
-                                <span className="artist-dropdown-text">Cuteness</span>
+                            <div className="artist-dropdown-row" onClick={() => setSortType("alphabetic")}>
+                                <span className="artist-dropdown-text">Alphabetic</span>
                             </div>
-                            <div className="artist-dropdown-row" onClick={() => setSortType("reverse cuteness")}>
-                                <span className="artist-dropdown-text">Reverse Cuteness</span>
+                            <div className="artist-dropdown-row" onClick={() => setSortType("reverse alphabetic")}>
+                                <span className="artist-dropdown-text">Reverse Alphabetic</span>
                             </div>
                             <div className="artist-dropdown-row" onClick={() => setSortType("posts")}>
                                 <span className="artist-dropdown-text">Posts</span>
@@ -151,11 +164,11 @@ const ArtistsPage: React.FunctionComponent = (props) => {
                             <div className="artist-dropdown-row" onClick={() => setSortType("reverse posts")}>
                                 <span className="artist-dropdown-text">Reverse Posts</span>
                             </div>
-                            <div className="artist-dropdown-row" onClick={() => setSortType("alphabetic")}>
-                                <span className="artist-dropdown-text">Alphabetic</span>
+                            <div className="artist-dropdown-row" onClick={() => setSortType("cuteness")}>
+                                <span className="artist-dropdown-text">Cuteness</span>
                             </div>
-                            <div className="artist-dropdown-row" onClick={() => setSortType("reverse alphabetic")}>
-                                <span className="artist-dropdown-text">Reverse Alphabetic</span>
+                            <div className="artist-dropdown-row" onClick={() => setSortType("reverse cuteness")}>
+                                <span className="artist-dropdown-text">Reverse Cuteness</span>
                             </div>
                         </div>
                     </div>

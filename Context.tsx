@@ -25,7 +25,6 @@ export const DownloadFlagContext = React.createContext<any>(null)
 export const RelativeContext = React.createContext<any>(null)
 export const ShowDownloadDialogContext = React.createContext<any>(null)
 export const DisableZoomContext = React.createContext<any>(null)
-export const SearchDropFilesContext = React.createContext<any>(null)
 export const UploadDropFilesContext = React.createContext<any>(null)
 export const SidebarHoverContext = React.createContext<any>(null)
 export const ImageTypeContext = React.createContext<any>(null)
@@ -34,10 +33,18 @@ export const StyleTypeContext = React.createContext<any>(null)
 export const SortTypeContext = React.createContext<any>(null)
 export const SearchContext = React.createContext<any>(null)
 export const SearchFlagContext = React.createContext<any>(null)
+export const RandomFlagContext = React.createContext<any>(null)
+export const ImageSearchFlagContext = React.createContext<any>(null)
 export const TagsContext = React.createContext<any>(null)
 export const SpeedContext = React.createContext<any>(null)
 export const ReverseContext = React.createContext<any>(null)
 export const HeaderTextContext = React.createContext<any>(null)
+export const SidebarTextContext = React.createContext<any>(null)
+export const SessionContext = React.createContext<any>(null)
+export const SessionFlagContext = React.createContext<any>(null)
+export const RedirectContext = React.createContext<any>(null)
+export const UserImgContext = React.createContext<any>(null)
+export const QuoteTextContext = React.createContext<any>(null)
 
 const Context: React.FunctionComponent = (props) => {
     const [brightness, setBrightness] = useState(100)
@@ -56,7 +63,6 @@ const Context: React.FunctionComponent = (props) => {
     const [relative, setRelative] = useState(false)
     const [posts, setPosts] = useState([]) as any
     const [disableZoom, setDisableZoom] = useState(true)
-    const [searchDropFiles, setSearchDropFiles] = useState([])
     const [uploadDropFiles, setUploadDropFiles] = useState([])
     const [imageType, setImageType] = useState("all")
     const [restrictType, setRestrictType] = useState("all")
@@ -69,9 +75,18 @@ const Context: React.FunctionComponent = (props) => {
     const [reverse, setReverse] = useState(false)
     const [tags, setTags] = useState([])
     const [headerText, setHeaderText] = useState("")
-
+    const [sidebarText, setSidebarText] = useState("")
+    const [randomFlag, setRandomFlag] = useState(false)
+    const [imageSearchFlag, setImageSearchFlag] = useState(null)
+    const [redirect, setRedirect] = useState(null)
+    const [quoteText, setQuoteText] = useState(null)
 return (
     <>
+        <QuoteTextContext.Provider value={{quoteText, setQuoteText}}>
+        <RedirectContext.Provider value={{redirect, setRedirect}}>
+        <SidebarTextContext.Provider value={{sidebarText, setSidebarText}}>
+        <ImageSearchFlagContext.Provider value={{imageSearchFlag, setImageSearchFlag}}>
+        <RandomFlagContext.Provider value={{randomFlag, setRandomFlag}}>
         <HeaderTextContext.Provider value={{headerText, setHeaderText}}>
         <TagsContext.Provider value={{tags, setTags}}>
         <ReverseContext.Provider value={{reverse, setReverse}}>
@@ -82,7 +97,6 @@ return (
         <StyleTypeContext.Provider value={{styleType, setStyleType}}>
         <RestrictTypeContext.Provider value={{restrictType, setRestrictType}}>
         <ImageTypeContext.Provider value={{imageType, setImageType}}>
-        <SearchDropFilesContext.Provider value={{searchDropFiles, setSearchDropFiles}}>
         <UploadDropFilesContext.Provider value={{uploadDropFiles, setUploadDropFiles}}>
         <DisableZoomContext.Provider value={{disableZoom, setDisableZoom}}>
         <RelativeContext.Provider value={{relative, setRelative}}>
@@ -120,7 +134,6 @@ return (
         </RelativeContext.Provider>
         </DisableZoomContext.Provider>
         </UploadDropFilesContext.Provider>
-        </SearchDropFilesContext.Provider>
         </ImageTypeContext.Provider>
         </RestrictTypeContext.Provider>
         </StyleTypeContext.Provider>
@@ -131,6 +144,11 @@ return (
         </ReverseContext.Provider>
         </TagsContext.Provider>
         </HeaderTextContext.Provider>
+        </RandomFlagContext.Provider>
+        </ImageSearchFlagContext.Provider>
+        </SidebarTextContext.Provider>
+        </RedirectContext.Provider>
+        </QuoteTextContext.Provider>
     </>
     )
 }

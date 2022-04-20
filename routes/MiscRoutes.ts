@@ -4,7 +4,10 @@ import FormData from "form-data"
 import fileType from "magic-bytes.js"
 import path from "path"
 import Pixiv from "pixiv.ts"
+import DeviantArt from "deviantart.ts"
 import googleTranslate from "@vitalets/google-translate-api"
+import Kuroshiro from "kuroshiro"
+import KuromojiAnalyzer from "kuroshiro-analyzer-kuromoji"
 import functions from "../structures/Functions"
 
 const MiscRoutes = (app: Express) => {
@@ -23,8 +26,7 @@ const MiscRoutes = (app: Express) => {
             result = result.sort((a: any, b: any) => b.header.similarity - a.header.similarity)
             result = result.filter((r: any) => Number(r.header.similarity) > 70)
             res.status(200).json(result)
-        } catch (e) {
-            console.log(e)
+        } catch {
             res.status(404).end()
         }
     })
@@ -49,10 +51,36 @@ const MiscRoutes = (app: Express) => {
         }
     })
 
+    app.get("/api/deviantart", async (req: Request, res: Response, next: NextFunction) => {
+        const link = req.query.url as string
+        if (link.includes("deviantart.com")) {
+            try {
+                const deviantart = await DeviantArt.login(process.env.DEVIANTART_CLIENT_ID!, process.env.DEVIANTART_CLIENT_SECRET!)
+                const deviationRSS = await deviantart.rss.get(link)
+                const deviation = await deviantart.extendRSSDeviations([deviationRSS]).then((r) => r[0])
+                res.status(200).json(deviation)
+            } catch {
+                res.status(404).end()
+            }
+        } else {
+            res.status(404).end()
+        }
+    })
+
     app.get("/api/proxy", async (req: Request, res: Response, next: NextFunction) => {
         const link = req.query.url as string
         try {
             const response = await axios.get(link, {responseType: "arraybuffer", headers: {Referer: "https://www.pixiv.net/"}}).then((r) => r.data)
+            res.status(200).send(response)
+        } catch {
+            res.status(404).end()
+        }
+    })
+
+    app.get("/api/redirect", async (req: Request, res: Response, next: NextFunction) => {
+        const link = req.query.url as string
+        try {
+            const response = await axios.head(link).then((r) => r.request.res.responseUrl)
             res.status(200).send(response)
         } catch {
             res.status(404).end()
@@ -71,6 +99,18 @@ const MiscRoutes = (app: Express) => {
         const words = req.body as string[]
         let translated = await Promise.all(words.map((w) => translate(w)))
         res.status(200).send(translated)
+    })
+
+    app.post("/api/romajinize", async (req: Request, res: Response, next: NextFunction) => {
+        const kuroshiro = new Kuroshiro()
+        await kuroshiro.init(new KuromojiAnalyzer())
+        const romajinize = async (text: string) => {
+            const result = await kuroshiro.convert(text, {mode: "spaced", to: "romaji"})
+            return result.replace(/<\/?[^>]+(>|$)/g, "")
+        }
+        const words = req.body as string[]
+        let romajinized = await Promise.all(words.map((w) => romajinize(w)))
+        res.status(200).send(romajinized)
     })
 }
 

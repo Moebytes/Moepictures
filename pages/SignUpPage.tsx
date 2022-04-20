@@ -1,4 +1,5 @@
-import React, {useEffect, useContext, useState} from "react"
+import React, {useEffect, useContext, useState, useRef} from "react"
+import {useHistory} from "react-router-dom"
 import {HashLink as Link} from "react-router-hash-link"
 import TitleBar from "../components/TitleBar"
 import NavBar from "../components/NavBar"
@@ -13,8 +14,11 @@ import hideMagenta from "../assets/magenta/hide.png"
 import showMagentaLight from "../assets/magenta-light/show.png"
 import hideMagentaLight from "../assets/magenta-light/hide.png"
 import DragAndDrop from "../components/DragAndDrop"
-import {HideNavbarContext, HideSidebarContext, ThemeContext, EnableDragContext, RelativeContext, HideTitlebarContext} from "../Context"
+import functions from "../structures/Functions"
+import {HideNavbarContext, HideSidebarContext, ThemeContext, EnableDragContext, RelativeContext, HideTitlebarContext,
+HeaderTextContext, SidebarTextContext, SessionContext} from "../Context"
 import "./styles/signuppage.less"
+import axios from "axios"
 
 const SignUpPage: React.FunctionComponent = (props) => {
     const {theme, setTheme} = useContext(ThemeContext)
@@ -23,16 +27,36 @@ const SignUpPage: React.FunctionComponent = (props) => {
     const {hideSidebar, setHideSidebar} = useContext(HideSidebarContext)
     const {enableDrag, setEnableDrag} = useContext(EnableDragContext)
     const {relative, setRelative} = useContext(RelativeContext)
+    const {headerText, setHeaderText} = useContext(HeaderTextContext)
+    const {sidebarText, setSidebarText} = useContext(SidebarTextContext)
+    const {session, setSession} = useContext(SessionContext)
     const [showPassword, setShowPassword] = useState(false)
     const [showPassword2, setShowPassword2] = useState(false)
+    const [email, setEmail] = useState("")
+    const [username, setUsername] = useState("")
+    const [password, setPassword] = useState("")
+    const [confirmPassword, setConfirmPassword] = useState("")
+    const [error, setError] = useState(false)
+    const [submitted, setSubmitted] = useState(false)
+    const errorRef = useRef<any>(null)
+    const history = useHistory()
 
     useEffect(() => {
         setHideNavbar(false)
         setHideTitlebar(false)
         setHideSidebar(false)
         setRelative(false)
+        setHeaderText("")
+        setSidebarText("")
         document.title = "Moebooru: Sign Up"
     }, [])
+
+    useEffect(() => {
+        if (!session.cookie) return
+        if (session.username) {
+            history.push("/profile")
+        }
+    }, [session])
 
     const getEye = () => {
         if (theme === "purple") return showPassword ? hide : show
@@ -50,6 +74,60 @@ const SignUpPage: React.FunctionComponent = (props) => {
         return showPassword2 ? hide : show
     }
 
+    const submit = async () => {
+        if (password.trim() !== confirmPassword.trim()) {
+            setError(true)
+            if (!errorRef.current) await functions.timeout(20)
+            errorRef.current!.innerText = "Passwords don't match."
+            await functions.timeout(2000)
+            setError(false)
+            return
+        }
+        const badPassword = functions.validatePassword(username.trim(), password.trim())
+        if (badPassword) {
+            setError(true)
+            if (!errorRef.current) await functions.timeout(20)
+            errorRef.current!.innerText = badPassword
+            await functions.timeout(2000)
+            setError(false)
+            return
+        }
+        const badEmail = functions.validateEmail(email.trim())
+        if (badEmail) {
+            setError(true)
+            if (!errorRef.current) await functions.timeout(20)
+            errorRef.current!.innerText = badEmail
+            await functions.timeout(2000)
+            setError(false)
+            return
+        }
+        const badUsername = functions.validateUsername(username.trim())
+        if (badUsername) {
+            setError(true)
+            if (!errorRef.current) await functions.timeout(20)
+            errorRef.current!.innerText = badUsername
+            await functions.timeout(2000)
+            setError(false)
+            return
+        }
+        setError(true)
+        if (!errorRef.current) await functions.timeout(20)
+        errorRef.current!.innerText = "Submitting..."
+        try {
+            await axios.post("/api/signup", {username, email, password}, {withCredentials: true})
+            setSubmitted(true)
+            setError(false)
+        } catch {
+            errorRef.current!.innerText = "Bad username, password, or email."
+            await functions.timeout(2000)
+            setError(false)
+        }
+    }
+
+    const goToLogin = () => {
+        history.push("/login")
+    }
+
     return (
         <>
         <DragAndDrop/>
@@ -60,29 +138,36 @@ const SignUpPage: React.FunctionComponent = (props) => {
             <div className="content">
                 <div className="signup" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                     <span className="signup-title">Sign Up</span>
+                    {submitted ? <>
+                    <span className="signup-validation">Your account has been created. You should have received a confirmation link in your email. Please verify your email and login again.</span>
+                    <div className="signup-button-container" style={{justifyContent: "flex-start"}}>
+                        <button className="signup-button" onClick={() => goToLogin()}>Login</button>
+                    </div>
+                    </> :
+                    <>
                     <Link to="/login">
                         <span className="signup-link">Already have an account? Login.</span>
                     </Link>
                     <div className="signup-row">
                         <span className="signup-text">Email Address:</span>
-                        <input className="signup-input" type="text" spellCheck={false}/>
+                        <input className="signup-input" type="text" spellCheck={false} value={email} onChange={(event) => setEmail(event.target.value)} onKeyDown={(event) => event.key === "Enter" ? submit() : null}/>
                     </div>
                     <div className="signup-row">
                         <span className="signup-text">Username:</span>
-                        <input className="signup-input" type="text" spellCheck={false}/>
+                        <input className="signup-input" type="text" spellCheck={false} value={username} onChange={(event) => setUsername(event.target.value)} onKeyDown={(event) => event.key === "Enter" ? submit() : null}/>
                     </div>
                     <div className="signup-row">
                         <span className="signup-text">Password:</span>
                         <div className="signup-pass">
                             <img className="signup-pass-show" src={getEye()} onClick={() => setShowPassword((prev) => !prev)}/>
-                            <input className="signup-pass-input" type={showPassword ? "text" : "password"} spellCheck={false}/>
+                            <input className="signup-pass-input" type={showPassword ? "text" : "password"} spellCheck={false} value={password} onChange={(event) => setPassword(event.target.value)} onKeyDown={(event) => event.key === "Enter" ? submit() : null}/>
                         </div>
                     </div>
                     <div className="signup-row">
                         <span className="signup-text">Confirm Password:</span>
                         <div className="signup-pass">
                             <img className="signup-pass-show" src={getEye2()} onClick={() => setShowPassword2((prev) => !prev)}/>
-                            <input className="signup-pass-input" type={showPassword2 ? "text" : "password"} spellCheck={false}/>
+                            <input className="signup-pass-input" type={showPassword2 ? "text" : "password"} spellCheck={false} value={confirmPassword} onChange={(event) => setConfirmPassword(event.target.value)} onKeyDown={(event) => event.key === "Enter" ? submit() : null}/>
                         </div>
                     </div>
                     <span className="signup-validation">
@@ -90,9 +175,10 @@ const SignUpPage: React.FunctionComponent = (props) => {
                         -At least three of the following: lowercase letters, uppercase
                         letters, numbers, and special symbols
                     </span>
+                    {error ? <div className="signup-validation-container"><span className="signup-validation" ref={errorRef}></span></div> : null}
                     <div className="signup-button-container">
-                        <button className="signup-button">Sign Up</button>
-                    </div>
+                        <button className="signup-button" onClick={() => submit()}>Sign Up</button>
+                    </div></>}
                 </div>
                 <Footer/>
             </div>

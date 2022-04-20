@@ -12,7 +12,9 @@ import searchMagentaLight from "../assets/magenta-light/search.png"
 import sort from "../assets/purple/sort.png"
 import SeriesRow from "../components/SeriesRow"
 import sortMagenta from "../assets/magenta/sort.png"
-import {ThemeContext, EnableDragContext, HideNavbarContext, HideSidebarContext, RelativeContext, HideTitlebarContext, ActiveDropdownContext} from "../Context"
+import axios from "axios"
+import {ThemeContext, EnableDragContext, HideNavbarContext, HideSidebarContext, RelativeContext, HideTitlebarContext, 
+ActiveDropdownContext, HeaderTextContext, SidebarTextContext} from "../Context"
 import "./styles/seriespage.less"
 
 const SeriesPage: React.FunctionComponent = (props) => {
@@ -23,11 +25,21 @@ const SeriesPage: React.FunctionComponent = (props) => {
     const {hideSidebar, setHideSidebar} = useContext(HideSidebarContext)
     const {relative, setRelative} = useContext(RelativeContext)
     const {activeDropdown, setActiveDropdown} = useContext(ActiveDropdownContext)
-    const [sortType, setSortType] = useState("cuteness")
+    const {headerText, setHeaderText} = useContext(HeaderTextContext)
+    const {sidebarText, setSidebarText} = useContext(SidebarTextContext)
+    const [sortType, setSortType] = useState("alphabetic")
     const [series, setSeries] = useState([]) as any
     const [index, setIndex] = useState(0)
+    const [searchQuery, setSearchQuery] = useState("")
     const [visibleSeries, setVisibleSeries] = useState([]) as any
     const sortRef = useRef(null) as any
+
+    const updateSeries = async () => {
+        const result = await axios.get("/api/series", {params: {sort: sortType, query: searchQuery}, withCredentials: true}).then((r) => r.data)
+        setIndex(0)
+        setVisibleSeries([])
+        setSeries(result)
+    }
 
     useEffect(() => {
         setHideNavbar(true)
@@ -35,14 +47,15 @@ const SeriesPage: React.FunctionComponent = (props) => {
         setHideSidebar(false)
         setRelative(false)
         setActiveDropdown("none")
+        setHeaderText("")
+        setSidebarText("")
         document.title = "Moebooru: Series"
-
-        const newSeries = [] as any 
-        for (let i = 0; i < 100; i++) {
-            newSeries.push(<SeriesRow/>)
-        }
-        setSeries(newSeries)
+        updateSeries()
     }, [])
+
+    useEffect(() => {
+        updateSeries()
+    }, [sortType])
 
     useEffect(() => {
         let currentIndex = index
@@ -116,7 +129,7 @@ const SeriesPage: React.FunctionComponent = (props) => {
     const generateSeriesJSX = () => {
         const jsx = [] as any
         for (let i = 0; i < visibleSeries.length; i++) {
-            jsx.push(<SeriesRow/>)
+            jsx.push(<SeriesRow series={visibleSeries[i]}/>)
         }
         return jsx
     }
@@ -133,17 +146,17 @@ const SeriesPage: React.FunctionComponent = (props) => {
                     <span className="series-heading">Series</span>
                     <div className="series-row">
                         <div className="series-search-container" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
-                            <input className="series-search" type="search" spellCheck="false"/>
-                            <img className={!theme || theme === "purple" ? "series-search-icon" : `series-search-icon-${theme}`} src={getSearchIcon()}/>
+                            <input className="series-search" type="search" spellCheck="false" value={searchQuery} onChange={(event) => setSearchQuery(event.target.value)} onKeyDown={(event) => event.key === "Enter" ? updateSeries() : null}/>
+                            <img className={!theme || theme === "purple" ? "series-search-icon" : `series-search-icon-${theme}`} src={getSearchIcon()} onClick={updateSeries}/>
                         </div>
                         {getSortJSX()}
                         <div className={`series-dropdown ${activeDropdown === "sort" ? "" : "hide-series-dropdown"}`} 
                         style={{marginRight: getSortMargin(), top: "209px"}} onClick={() => setActiveDropdown("none")}>
-                            <div className="series-dropdown-row" onClick={() => setSortType("cuteness")}>
-                                <span className="series-dropdown-text">Cuteness</span>
+                            <div className="series-dropdown-row" onClick={() => setSortType("alphabetic")}>
+                                <span className="series-dropdown-text">Alphabetic</span>
                             </div>
-                            <div className="series-dropdown-row" onClick={() => setSortType("reverse cuteness")}>
-                                <span className="series-dropdown-text">Reverse Cuteness</span>
+                            <div className="series-dropdown-row" onClick={() => setSortType("reverse alphabetic")}>
+                                <span className="series-dropdown-text">Reverse Alphabetic</span>
                             </div>
                             <div className="series-dropdown-row" onClick={() => setSortType("posts")}>
                                 <span className="series-dropdown-text">Posts</span>
@@ -151,11 +164,11 @@ const SeriesPage: React.FunctionComponent = (props) => {
                             <div className="series-dropdown-row" onClick={() => setSortType("reverse posts")}>
                                 <span className="series-dropdown-text">Reverse Posts</span>
                             </div>
-                            <div className="series-dropdown-row" onClick={() => setSortType("alphabetic")}>
-                                <span className="series-dropdown-text">Alphabetic</span>
+                            <div className="series-dropdown-row" onClick={() => setSortType("cuteness")}>
+                                <span className="series-dropdown-text">Cuteness</span>
                             </div>
-                            <div className="series-dropdown-row" onClick={() => setSortType("reverse alphabetic")}>
-                                <span className="series-dropdown-text">Reverse Alphabetic</span>
+                            <div className="series-dropdown-row" onClick={() => setSortType("reverse cuteness")}>
+                                <span className="series-dropdown-text">Reverse Cuteness</span>
                             </div>
                         </div>
                     </div>

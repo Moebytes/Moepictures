@@ -1,4 +1,4 @@
-import React, {useContext, useEffect, useRef, useState} from "react"
+import React, {useContext, useEffect, useRef, useState, useReducer} from "react"
 import {ThemeContext, EnableDragContext, BrightnessContext, ContrastContext, HueContext, SaturationContext, LightnessContext,
 BlurContext, SharpenContext, PixelateContext, DownloadFlagContext, DownloadURLsContext, DisableZoomContext, SpeedContext,
 ReverseContext} from "../Context"
@@ -35,6 +35,7 @@ import imageZoomOffIcon from "../assets/purple/image-zoom-off.png"
 import imageZoomOffEnabledIcon from "../assets/purple/image-zoom-off-enabled.png"
 import imageFullscreenIcon from "../assets/purple/image-fullscreen.png"
 import gifFrames from "gif-frames"
+import JSZip from "jszip"
 import {TransformWrapper, TransformComponent} from "react-zoom-pan-pinch"
 import path from "path"
 import "./styles/postimage.less"
@@ -47,9 +48,11 @@ interface Props {
     height?: number
     scale?: number
     noKeydown?: boolean
+    comicPages?: any
 }
 
 const PostImage: React.FunctionComponent<Props> = (props) => {
+    const [ignored, forceUpdate] = useReducer(x => x + 1, 0)
     const {theme, setTheme} = useContext(ThemeContext)
     const {enableDrag, setEnableDrag} = useContext(EnableDragContext)
     const {brightness, setBrightness} = useContext(BrightnessContext)
@@ -174,17 +177,22 @@ const PostImage: React.FunctionComponent<Props> = (props) => {
     }
 
     useEffect(() => {
+        let observer = null as any
         if (functions.isImage(props.img)) {
-            new ResizeObserver(resizeImageCanvas).observe(ref.current!)
+            observer = new ResizeObserver(resizeImageCanvas)
+            observer.observe(ref.current!)
         }
-        if (functions.isGIF(props.img)) {
-            new ResizeObserver(resizeGIFCanvas).observe(ref.current!)
+        if (functions.isGIF(props.img) || functions.isWebP(props.img)) {
+            observer = new ResizeObserver(resizeGIFCanvas)
+            observer.observe(ref.current!)
         }
         if (functions.isVideo(props.img)) {
-            new ResizeObserver(resizeVideoCanvas).observe(videoRef.current!)
+            observer = new ResizeObserver(resizeVideoCanvas)
+            observer.observe(videoRef.current!)
         }
         window.addEventListener("keydown", handleKeydown)
         return () => {
+            observer?.disconnect()
             window.removeEventListener("keydown", handleKeydown)
         }
     }, [])
@@ -205,39 +213,58 @@ const PostImage: React.FunctionComponent<Props> = (props) => {
             const seconds = (end.getTime() - start.getTime()) / 1000
             setSeekTo(seconds)
         }
+        const parseAnimatedWebP = async () => {
+            const start = new Date()
+            const arraybuffer = await fetch(props.img).then((r) => r.arrayBuffer())
+            const animated = await functions.isAnimatedWebp(arraybuffer)
+            if (!animated) return 
+            const frames = await functions.extractAnimatedWebpFrames(props.img)
+            setGIFData(frames)
+            const end = new Date()
+            const seconds = (end.getTime() - start.getTime()) / 1000
+            setSeekTo(seconds)
+        }
         if (imageLoaded && functions.isGIF(props.img)) {
             parseGIF()
+        }
+        if (imageLoaded && functions.isWebP(props.img)) {
+            parseAnimatedWebP()
         }
     }, [imageLoaded])
 
     useEffect(() => {
         const parseVideo = async () => {
             if (!videoRef.current) return
+            let frames = null as any
             if (functions.isMP4(props.img)) {
-                const frames = await functions.extractMP4Frames(props.img, videoRef.current!.duration)
-                let canvasFrames = [] as any 
-                for (let i = 0; i < frames.length; i++) {
-                    const canvas = document.createElement("canvas")
-                    const img = frames[i]
-                    canvas.width = img.width
-                    canvas.height = img.height
-                    const ctx = canvas.getContext("bitmaprenderer") as any
-                    ctx.transferFromImageBitmap(img)
-                    canvasFrames.push(canvas)
-                }
-                setVideoData(canvasFrames)
-                setBackFrame(canvasFrames[0].toDataURL())
-                if (backFrameRef.current && videoRef.current) {
-                    backFrameRef.current.style.display = "flex"
-                    backFrameRef.current.style.position = "relative"
-                    videoRef.current.style.position = "absolute"
-                    videoRef.current.style.top = "0px"
-                    videoRef.current.style.bottom = "0px"
-                    videoRef.current.style.right = "0px"
-                    videoRef.current.style.left = "0px"
-                }
+                frames = await functions.extractMP4Frames(props.img, videoRef.current!.duration)
+            } else if (functions.isWebM(props.img)) {
+                frames = await functions.extractWebMFrames(props.img, videoRef.current!.duration)
+                console.log(frames)
+            }
+            let canvasFrames = [] as any 
+            for (let i = 0; i < frames.length; i++) {
+                const canvas = document.createElement("canvas")
+                const img = frames[i]
+                canvas.width = img.width
+                canvas.height = img.height
+                const ctx = canvas.getContext("bitmaprenderer") as any
+                ctx.transferFromImageBitmap(img)
+                canvasFrames.push(canvas)
+            }
+            setVideoData(canvasFrames)
+            setBackFrame(canvasFrames[0].toDataURL())
+            if (backFrameRef.current && videoRef.current) {
+                backFrameRef.current.style.display = "flex"
+                backFrameRef.current.style.position = "relative"
+                videoRef.current.style.position = "absolute"
+                videoRef.current.style.top = "0px"
+                videoRef.current.style.bottom = "0px"
+                videoRef.current.style.right = "0px"
+                videoRef.current.style.left = "0px"
             }
         }
+        
         const reverseAudioStream = async () => {
             if (!ffmpeg.isLoaded()) await ffmpeg.load()
             const name = path.basename(props.img, path.extname(props.img))
@@ -268,7 +295,7 @@ const PostImage: React.FunctionComponent<Props> = (props) => {
         let id = 0
         let timeout = null as any
         if (!ref.current || !gifRef.current) return
-        if (gifData && functions.isGIF(props.img)) {
+        if (gifData) {
             if (paused && !dragging) return clearTimeout(timeout)
             const adjustedData = functions.gifSpeed(gifData, speed)
             const gifCanvas = gifRef.current
@@ -304,7 +331,7 @@ const PostImage: React.FunctionComponent<Props> = (props) => {
                 setProgress((secondsProgress / duration) * 100)
             }
 
-            const draw = async () => {
+            const draw = () => {
                 const landscape = gifCanvas.width >= gifCanvas.height
                 const pixelWidth = gifCanvas.width / pixelate 
                 const pixelHeight = gifCanvas.height / pixelate
@@ -334,13 +361,17 @@ const PostImage: React.FunctionComponent<Props> = (props) => {
                 draw()
                 if (paused) return clearTimeout(timeout)
                 update()
-                timeout = setTimeout(() => {
-                    gifLoop()
-                }, delay)
+                await new Promise<void>((resolve) => {
+                    clearTimeout(timeout)
+                    timeout = setTimeout(() => {
+                        resolve()
+                    }, delay)
+                }).then(gifLoop)
             }
             gifLoop()
         } return () => {
             clearTimeout(timeout)
+            window.cancelAnimationFrame(id)
         }
     }, [gifData, reverse, seekTo, pixelate, paused, speed, dragging, dragProgress])
 
@@ -383,12 +414,12 @@ const PostImage: React.FunctionComponent<Props> = (props) => {
             const videoCanvas = videoCanvasRef.current
             const sharpenOverlay = videoOverlayRef.current
             videoCanvas.style.opacity = "1"
-            videoRef.current.style.opacity = "0"
+            videoRef.current.style.opacity = "1"
+            const landscape = videoRef.current.videoWidth >= videoRef.current.videoHeight
             videoCanvas.width = videoRef.current.clientWidth
             videoCanvas.height = videoRef.current.clientHeight
             sharpenOverlay.width = videoRef.current.clientWidth
             sharpenOverlay.height = videoRef.current.clientHeight
-            const landscape = videoCanvas.width >= videoCanvas.height
             const ctx = videoCanvas.getContext("2d") as any
             const sharpenCtx = sharpenOverlay.getContext("2d") as any
             let frames = adjustedData ? adjustedData.length - 1 : 1
@@ -423,7 +454,7 @@ const PostImage: React.FunctionComponent<Props> = (props) => {
                 setProgress((secondsProgress / duration) * 100)
             }
 
-            const draw = async () => {
+            const draw = () => {
                 if (!videoRef.current || !videoCanvasRef.current) return
                 const pixelWidth = videoCanvas.width / pixelate 
                 const pixelHeight = videoCanvas.height / pixelate
@@ -459,7 +490,7 @@ const PostImage: React.FunctionComponent<Props> = (props) => {
                 }
             }
 
-            const videoLoop = () => {
+            const videoLoop = async () => {
                 draw()
                 if (paused) {
                     // @ts-ignore
@@ -471,13 +502,15 @@ const PostImage: React.FunctionComponent<Props> = (props) => {
                     }
                 }
                 update()
-                // @ts-ignore
-                if (videoRef.current?.requestVideoFrameCallback) {
+                await new Promise<void>((resolve) => {
                     // @ts-ignore
-                    id = videoRef.current?.requestVideoFrameCallback(videoLoop)
-                } else {
-                    id = window.requestAnimationFrame(videoLoop)
-                }
+                    if (videoRef.current?.requestVideoFrameCallback) {
+                        // @ts-ignore
+                        id = videoRef.current?.requestVideoFrameCallback(() => resolve())
+                    } else {
+                        id = window.requestAnimationFrame(() => resolve())
+                    }
+                }).then(videoLoop)
             }
             // @ts-ignore
             if (videoRef.current?.requestVideoFrameCallback) {
@@ -504,7 +537,7 @@ const PostImage: React.FunctionComponent<Props> = (props) => {
             if (videoRef.current.src !== reverseVideo) {
                 videoRef.current.src = reverseVideo
                 setTimeout(() => {
-                    seek(progress)
+                    seek(100 - progress)
                 }, 100)
             }
         } else {
@@ -571,8 +604,8 @@ const PostImage: React.FunctionComponent<Props> = (props) => {
     }
 
     const seek = (position: number) => {
-        let secondsProgress = reverse ? ((100 - position) / 100) * duration : (position / 100) * duration
-        let progress = reverse ? (duration / 100) * (100 - position) : (duration / 100) * position
+        let secondsProgress = (position / 100) * duration
+        let progress = (duration / 100) * position
         setProgress(progress)
         setDragging(false)
         setSeekTo(secondsProgress)
@@ -582,7 +615,7 @@ const PostImage: React.FunctionComponent<Props> = (props) => {
         if (functions.isVideo(props.img) && !videoData) return
         const val = value !== undefined ? value : !reverse 
         let secondsProgress = val === true ? (duration / 100) * (100 - progress) : (duration / 100) * progress
-        if (functions.isGIF(props.img)) secondsProgress = (duration / 100) * progress
+        if (gifData) secondsProgress = (duration / 100) * progress
         setReverse(val)
         setSeekTo(secondsProgress)
     }
@@ -644,8 +677,8 @@ const PostImage: React.FunctionComponent<Props> = (props) => {
         const element = fullscreenRef.current
         let newContrast = contrast
         const image = functions.isVideo(props.img) ? videoRef.current : ref.current
-        const sharpenOverlay = functions.isVideo(props.img) ? videoOverlayRef.current : functions.isGIF(props.img) ? gifOverlayRef.current : overlayRef.current
-        const lightnessOverlay = functions.isVideo(props.img) ? videoLightnessRef.current : functions.isGIF(props.img) ? gifLightnessRef.current : lightnessRef.current
+        const sharpenOverlay = functions.isVideo(props.img) ? videoOverlayRef.current : (functions.isGIF(props.img) || gifData) ? gifOverlayRef.current : overlayRef.current
+        const lightnessOverlay = functions.isVideo(props.img) ? videoLightnessRef.current : (functions.isGIF(props.img) || gifData) ? gifLightnessRef.current : lightnessRef.current
         if (!image || !sharpenOverlay || !lightnessOverlay) return
         if (sharpen !== 0) {
             const sharpenOpacity = sharpen / 5
@@ -672,7 +705,7 @@ const PostImage: React.FunctionComponent<Props> = (props) => {
     }, [brightness, contrast, hue, saturation, lightness, blur, sharpen])
 
     useEffect(() => {
-        if (functions.isGIF(props.img) || functions.isVideo(props.img)) return
+        if (gifData || functions.isGIF(props.img) || functions.isVideo(props.img)) return
         if (!pixelateRef.current || !containerRef.current || !ref.current) return
         const pixelateCanvas = pixelateRef.current
         const ctx = pixelateCanvas.getContext("2d") as any
@@ -717,7 +750,6 @@ const PostImage: React.FunctionComponent<Props> = (props) => {
             setImageHeight(event.target.height)
             setNaturalWidth(event.target.naturalWidth)
             setNaturalHeight(event.target.naturalHeight)
-            // if (!functions.isGIF(props.img)) setImageLoaded(true)
             if (ref.current) ref.current.style.display = "flex"
             setImageLoaded(true)
         }
@@ -795,11 +827,20 @@ const PostImage: React.FunctionComponent<Props> = (props) => {
         return false
     }
 
-    const renderImage = () => {
+    const renderImage = async (image?: string) => {
         if ((filtersOn())) {
-            return render(ref.current)
+            if (image) {
+                const img = await functions.createImage(image)
+                return render(img)
+            } else {
+                return render(ref.current)
+            }
         } else {
-            return props.img
+            if (image) {
+                return image
+            } else {
+                return props.img
+            }
         }
     }
 
@@ -896,26 +937,44 @@ const PostImage: React.FunctionComponent<Props> = (props) => {
         }
     }
 
+    const multiRender = async () => {
+        if (functions.isVideo(props.img)) {
+            const video = await renderVideo()
+            if (!video) return
+            functions.download(path.basename(props.img), video)
+            window.URL.revokeObjectURL(video)
+        } else if (functions.isGIF(props.img) || gifData) {
+            const gif = await renderGIF()
+            if (!gif) return
+            functions.download(path.basename(props.img), gif)
+            window.URL.revokeObjectURL(gif)
+        } else {
+            if (props.comicPages) {
+                const zip = new JSZip()
+                for (let i = 0; i < props.comicPages.length; i++) {
+                    const page = props.comicPages[i]
+                    const image = await renderImage(page)
+                    const data = await fetch(image).then((r) => r.arrayBuffer())
+                    zip.file(path.basename(page), data, {binary: true})
+                }
+                const decoded = decodeURIComponent(props.img)
+                const filename = `${path.basename(decoded, path.extname(decoded)).replace(/\d+$/, "")}.zip`
+                const blob = await zip.generateAsync({type: "blob"})
+                const url = window.URL.createObjectURL(blob)
+                functions.download(filename , url)
+                window.URL.revokeObjectURL(url)
+            } else {
+                const image = await renderImage()
+                functions.download(path.basename(props.img), image)
+                window.URL.revokeObjectURL(image)
+            }
+        }
+    }
+
     useEffect(() => {
         if (downloadFlag) {
             if (downloadURLs.includes(props.img)) {
-                if (functions.isVideo(props.img)) {
-                    renderVideo().then((video: any) => {
-                        if (!video) return
-                        functions.download(path.basename(props.img), video)
-                        window.URL.revokeObjectURL(video)
-                    })
-                } else if (functions.isGIF(props.img)) {
-                    renderGIF().then((gif: any) => {
-                        if (!gif) return
-                        functions.download(path.basename(props.img), gif)
-                        window.URL.revokeObjectURL(gif)
-                    })
-                } else {
-                    const image = renderImage()
-                    functions.download(path.basename(props.img), image)
-                    window.URL.revokeObjectURL(image)
-                }
+                multiRender()
                 setDownloadURLs(downloadURLs.filter((s: string) => s !== props.img))
                 setDownloadFlag(false)
             }
@@ -977,11 +1036,26 @@ const PostImage: React.FunctionComponent<Props> = (props) => {
                     videoRef.current.style.position = "absolute"
                     backFrameRef.current.style.display = "flex"
                 }
+                videoCanvasRef.current!.style.marginTop = "0px"
+                videoCanvasRef.current!.style.marginBottom = "0px"
             }
             if (ref.current) {
                 ref.current.style.maxWidth = "calc(100vw - 230px - 70px)"
                 ref.current.style.maxHeight = "calc(100vh - 35px - 77px)"
+                if (functions.isGIF(props.img) || gifData) {
+                    gifRef.current!.style.marginTop = "0px"
+                    gifRef.current!.style.marginBottom = "0px"
+                }
             }
+            setTimeout(() => {
+                if (functions.isImage(props.img)) {
+                    resizeImageCanvas()
+                } else if (functions.isGIF(props.img) || gifData) {
+                    resizeGIFCanvas()
+                } else if (functions.isVideo(props.img)) {
+                    resizeVideoCanvas()
+                }
+            }, 100)
         } else {
             fullscreenRef.current?.requestFullscreen()
             if (videoRef.current) {
@@ -991,11 +1065,26 @@ const PostImage: React.FunctionComponent<Props> = (props) => {
                     videoRef.current.style.position = "relative"
                     backFrameRef.current.style.display = "none"
                 }
+                videoCanvasRef.current!.style.marginTop = "auto"
+                videoCanvasRef.current!.style.marginBottom = "auto"
             }
             if (ref.current) {
                 ref.current.style.maxWidth = "100vw"
                 ref.current.style.maxHeight = "100vh"
+                if (functions.isGIF(props.img) || gifData) {
+                    gifRef.current!.style.marginTop = "auto"
+                    gifRef.current!.style.marginBottom = "auto"
+                }
             }
+            setTimeout(() => {
+                if (functions.isImage(props.img)) {
+                    resizeImageCanvas()
+                } else if (functions.isGIF(props.img) || gifData) {
+                    resizeGIFCanvas()
+                } else if (functions.isVideo(props.img)) {
+                    resizeVideoCanvas()
+                }
+            }, 100)
         }
     }
 
@@ -1038,7 +1127,7 @@ const PostImage: React.FunctionComponent<Props> = (props) => {
                         <div className="video-controls" ref={videoControls} onMouseUp={() => setDragging(false)} onMouseOver={controlMouseEnter} onMouseLeave={controlMouseLeave}>
                         <div className="video-control-row" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                             <p className="video-control-text">{dragging ? functions.formatSeconds(dragProgress) : functions.formatSeconds(secondsProgress)}</p>
-                            <Slider ref={videoSliderRef} className="video-slider" trackClassName="video-slider-track" thumbClassName="video-slider-thumb" min={0} max={100} value={progress} onBeforeChange={() => setDragging(true)} onChange={(value) => updateProgressText(value)} onAfterChange={(value) => seek(value)}/>
+                            <Slider ref={videoSliderRef} className="video-slider" trackClassName="video-slider-track" thumbClassName="video-slider-thumb" min={0} max={100} value={progress} onBeforeChange={() => setDragging(true)} onChange={(value) => updateProgressText(value)} onAfterChange={(value) => seek(reverse ? 100 - value : value)}/>
                             <p className="video-control-text">{functions.formatSeconds(duration)}</p>
                         </div>
                         <div className="video-control-row" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
@@ -1106,7 +1195,7 @@ const PostImage: React.FunctionComponent<Props> = (props) => {
                     <video loop muted disablePictureInPicture className="post-video" ref={videoRef} src={props.img} onLoadedData={(event) => onLoad(event)}></video>
                     <img ref={backFrameRef} src={backFrame} className="back-frame"/>
                     </> : <>
-                    {functions.isGIF(props.img) ? 
+                    {functions.isGIF(props.img) || gifData ? 
                     <>
                     <div className="gif-controls" ref={gifControls} onMouseUp={() => setDragging(false)} onMouseOver={controlMouseEnter} onMouseLeave={controlMouseLeave}>
                         <div className="gif-control-row" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
@@ -1170,7 +1259,7 @@ const PostImage: React.FunctionComponent<Props> = (props) => {
                     </>
                     : null}
                     <div className="relative-ref" onMouseMove={dragImgDown} onMouseLeave={dragImgUp}>
-                        {functions.isImage(props.img) ?
+                        {functions.isImage(props.img) && !gifData ?
                         <>
                         <div className="image-controls" ref={imageControls} onMouseOver={controlMouseEnter} onMouseLeave={controlMouseLeave}>
                             <div className="image-control-row" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
@@ -1184,16 +1273,19 @@ const PostImage: React.FunctionComponent<Props> = (props) => {
                         </div>
                         </>
                         : null}
-                        <img className="post-lightness-overlay" ref={lightnessRef} src={props.img}/>
                         <TransformWrapper disabled={disableZoom} ref={zoomRef} minScale={1} maxScale={4} onZoomStop={(ref) => setZoom(ref.state.scale)} wheel={{step: 0.1, touchPadDisabled: true}} pinch={{disabled: true}} zoomAnimation={{size: 0, disabled: true}} alignmentAnimation={{disabled: true}} doubleClick={{mode: "reset", animationTime: 0}} panning={{disabled: zoom === 1}}>
                         <TransformComponent>
+                            <img className="post-lightness-overlay" ref={lightnessRef} src={props.img}/>
                             <img className="post-sharpen-overlay" ref={overlayRef} src={props.img}/>
                             <canvas className="post-pixelate-canvas" ref={pixelateRef}></canvas>
                             <img className="post-image" ref={ref} src={props.img} onLoad={(event) => onLoad(event)}/>
                         </TransformComponent>
                         </TransformWrapper>
                     </div>
-                    {!imageLoaded ? <img className="post-loading" src={getLoading()}/> : null}
+                    {!imageLoaded ? 
+                    <div className="post-loading-container">
+                        <img className="loading" src={getLoading()}/>
+                    </div> : null}
                     </>}
                 </div>
             </div>

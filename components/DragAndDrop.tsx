@@ -1,6 +1,6 @@
 import React, {useContext, useEffect, useRef, useState, useReducer} from "react"
 import {useHistory} from "react-router-dom"
-import {ThemeContext, SearchDropFilesContext, UploadDropFilesContext} from "../Context"
+import {ThemeContext, UploadDropFilesContext, ImageSearchFlagContext} from "../Context"
 import {HashLink as Link} from "react-router-hash-link"
 import functions from "../structures/Functions"
 import "./styles/draganddrop.less"
@@ -10,8 +10,8 @@ let timeout = null as any
 
 const DragAndDrop: React.FunctionComponent = (props) => {
     const {theme, setTheme} = useContext(ThemeContext)
-    const {searchDropFiles, setSearchDropFiles} = useContext(SearchDropFilesContext)
     const {uploadDropFiles, setUploadDropFiles} = useContext(UploadDropFilesContext)
+    const {imageSearchFlag, setImageSearchFlag} = useContext(ImageSearchFlagContext)
     const [ignored, forceUpdate] = useReducer(x => x + 1, 0)
     const [visible, setVisible] = useState(false)
     const [searchHover, setSearchHover] = useState(false)
@@ -74,13 +74,18 @@ const DragAndDrop: React.FunctionComponent = (props) => {
         }
     }
 
-    const searchDrop = (event: React.DragEvent) => {
+    const searchDrop = async (event: React.DragEvent) => {
         event.preventDefault()
         setSearchHover(false)
         setUploadHover(false)
         const files = event.dataTransfer.files 
-        if (!files?.[0]) return
-        setSearchDropFiles(Array.from(files))
+        if (!files?.[0]) return 
+        let result = [] as any
+        for (let i = 0; i < files.length; i++) {
+            result.push(...await functions.imageSearch(files[i]))
+        }
+        setImageSearchFlag(result)
+        history.push("/posts")
     }
 
     const uploadDrop = (event: React.DragEvent) => {
