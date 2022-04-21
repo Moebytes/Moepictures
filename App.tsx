@@ -31,7 +31,6 @@ import ChangePasswordPage from "./pages/ChangePasswordPage"
 import ResetPasswordPage from "./pages/ResetPasswordPage"
 import ForgotPasswordPage from "./pages/ForgotPasswordPage"
 import functions from "./structures/Functions"
-import WebM from "./pages/WebM"
 import localforage from "localforage"
 import axios from "axios"
 import "./index.less"
@@ -211,7 +210,6 @@ const App: React.FunctionComponent = (props) => {
             <ThemeContext.Provider value={{theme, setTheme}}>
                 <Context>
                     <Switch>
-                        <Route exact path="/webm"><WebM/></Route>
                         <Route exact path={["/", "/posts", "/home"]}><PostsPage/></Route>
                         <Route exact path="/profile"><UserProfilePage/></Route>
                         <Route exact path="/upload"><UploadPage/></Route>
