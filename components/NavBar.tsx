@@ -18,7 +18,7 @@ import lightMagentaLight from "../assets/magenta-light/light.png"
 import darkMagentaLight from "../assets/magenta-light/dark.png"
 import search2 from "../assets/purple/search2.png"
 import axios from "axios"
-import functions from "../structures/functions"
+import functions from "../structures/Functions"
 import {ThemeContext, HideNavbarContext, HideSortbarContext, HideSidebarContext, EnableDragContext, 
 RelativeContext, HideTitlebarContext, SearchContext, SearchFlagContext, SessionContext, SessionFlagContext, UserImgContext} from "../Context"
 import "./styles/navbar.less"
