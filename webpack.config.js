@@ -32,7 +32,7 @@ module.exports = [
     },
     plugins: [
       new Dotenv(),
-      new ForkTsCheckerWebpackPlugin(),
+      new ForkTsCheckerWebpackPlugin({typescript: {memoryLimit: 8192}}),
       new webpack.HotModuleReplacementPlugin(),
       new webpack.HashedModuleIdsPlugin(),
       new MiniCssExtractPlugin({
