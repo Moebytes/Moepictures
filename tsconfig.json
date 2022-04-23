@@ -10,9 +10,8 @@
         "allowSyntheticDefaultImports": true,
         "jsx": "react",
         "esModuleInterop": true,
-        "strict": false,
-        "strictNullChecks": false,
-        "strictPropertyInitialization": false,
+        "strict": true,
+        "strictNullChecks": true,
         "noEmit": true,
         "skipLibCheck": true,
         "resolveJsonModule": true

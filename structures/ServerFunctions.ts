@@ -3,7 +3,7 @@ import handlebars from "handlebars"
 import path from "path"
 import fs from "fs"
 import crypto from "crypto"
-import AWS from "aws-sdk"
+import S3 from "aws-sdk/clients/s3"
 import Evaporate from "evaporate"
 
 export default class ServerFunctions {
@@ -27,7 +27,7 @@ export default class ServerFunctions {
     }
 
     public static uploadFile = async (file: string, content: any) => {
-        const s3 = new AWS.S3({
+        const s3 = new S3({
             accessKeyId: process.env.AWS_ACCESS_KEY,
             secretAccessKey: process.env.AWS_SECRET_KEY
         })
@@ -36,7 +36,7 @@ export default class ServerFunctions {
     }
 
     public static deleteFile = async (file: string) => {
-        const s3 = new AWS.S3({
+        const s3 = new S3({
             accessKeyId: process.env.AWS_ACCESS_KEY,
             secretAccessKey: process.env.AWS_SECRET_KEY
         })
