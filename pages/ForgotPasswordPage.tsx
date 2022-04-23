@@ -1,5 +1,4 @@
 import React, {useEffect, useContext, useState, useRef} from "react"
-import {HashLink as Link} from "react-router-hash-link"
 import TitleBar from "../components/TitleBar"
 import NavBar from "../components/NavBar"
 import SideBar from "../components/SideBar"
