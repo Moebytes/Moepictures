@@ -49,7 +49,7 @@ const Comment: React.FunctionComponent<Props> = (props) => {
         for (let i = 0; i < pieces.length; i++) {
             const piece = pieces[i]
             if (piece.includes(">")) {
-                const userPart = piece.match(/(?<=>>>)(.*?)(?=$|>)/gm)?.[0] ?? ""
+                const userPart = piece.match(/(>>>)(.*?)(?=$|>)/gm)?.[0].replace(">>>", "") ?? ""
                 let username = ""
                 let said = ""
                 if (userPart) {

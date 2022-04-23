@@ -3,6 +3,7 @@ import sql from "../structures/SQLQuery"
 import fs from "fs"
 import path from "path"
 import functions from "../structures/Functions"
+import serverFunctions from "../structures/ServerFunctions"
 import rateLimit from "express-rate-limit"
 import phash from "sharp-phash"
 import fileType from "magic-bytes.js"
@@ -171,7 +172,7 @@ const CreateRoutes = (app: Express) => {
           const dir = path.dirname(imagePath)
           if (!fs.existsSync(dir)) fs.mkdirSync(dir, {recursive: true})
           const buffer = Buffer.from(Object.values(images[i].bytes))
-          fs.writeFileSync(imagePath, buffer)
+          await serverFunctions.uploadFile(imagePath, buffer)
           let dimensions = null as any
           let hash = ""
           if (kind === "video") {
@@ -204,10 +205,10 @@ const CreateRoutes = (app: Express) => {
             await sql.updateTag(artists[i].tag, "description", "Artist.")
             if (!exists && artists[i].image) {
               const filename = `${artists[i].tag}.${artists[i].ext}`
-              const imagePath = functions.getTagPath("artists", filename)
+              const imagePath = functions.getTagPath("artist", filename)
               const dir = path.dirname(imagePath)
               if (!fs.existsSync(dir)) fs.mkdirSync(dir, {recursive: true})
-              fs.writeFileSync(imagePath, Buffer.from(Object.values(artists[i].bytes)))
+              await serverFunctions.uploadFile(imagePath, Buffer.from(Object.values(artists[i].bytes)))
               await sql.updateTag(artists[i].tag, "image", filename)
             }
             tagMap.push(artists[i].tag)
@@ -220,10 +221,10 @@ const CreateRoutes = (app: Express) => {
             await sql.updateTag(characters[i].tag, "description", "Character.")
             if (!exists && characters[i].image) {
               const filename = `${characters[i].tag}.${characters[i].ext}`
-              const imagePath = functions.getTagPath("characters", filename)
+              const imagePath = functions.getTagPath("character", filename)
               const dir = path.dirname(imagePath)
               if (!fs.existsSync(dir)) fs.mkdirSync(dir, {recursive: true})
-              fs.writeFileSync(imagePath, Buffer.from(Object.values(characters[i].bytes)))
+              await serverFunctions.uploadFile(imagePath, Buffer.from(Object.values(characters[i].bytes)))
               await sql.updateTag(characters[i].tag, "image", filename)
             }
             tagMap.push(characters[i].tag)
@@ -239,7 +240,7 @@ const CreateRoutes = (app: Express) => {
               const imagePath = functions.getTagPath("series", filename)
               const dir = path.dirname(imagePath)
               if (!fs.existsSync(dir)) fs.mkdirSync(dir, {recursive: true})
-              fs.writeFileSync(imagePath, Buffer.from(Object.values(series[i].bytes)))
+              await serverFunctions.uploadFile(imagePath, Buffer.from(Object.values(series[i].bytes)))
               await sql.updateTag(series[i].tag, "image", filename)
             }
             tagMap.push(series[i].tag)
@@ -253,10 +254,10 @@ const CreateRoutes = (app: Express) => {
           await sql.updateTag(newTags[i].tag, "description", newTags[i].desc)
           if (!exists && newTags[i].image) {
             const filename = `${newTags[i].tag}.${newTags[i].ext}`
-            const imagePath = functions.getTagPath("tags", filename)
+            const imagePath = functions.getTagPath("tag", filename)
             const dir = path.dirname(imagePath)
             if (!fs.existsSync(dir)) fs.mkdirSync(dir, {recursive: true})
-            fs.writeFileSync(imagePath, Buffer.from(Object.values(newTags[i].bytes)))
+            await serverFunctions.uploadFile(imagePath, Buffer.from(Object.values(newTags[i].bytes)))
             await sql.updateTag(newTags[i].tag, "image", filename)
           }
         }

@@ -15,12 +15,14 @@ import React from "react"
 import App from "./App"
 import {renderToString} from "react-dom/server"
 import {StaticRouter as Router} from "react-router-dom"
+import serverFunctions from "./structures/ServerFunctions"
 import sql from "./structures/SQLQuery"
 import MiscRoutes from "./routes/MiscRoutes"
 import CreateRoutes from "./routes/CreateRoutes"
 import UserRoutes from "./routes/UserRoutes"
 import SearchRoutes from "./routes/SearchRoutes"
 import PostRoutes from "./routes/PostRoutes"
+import s3Proxy from "s3-proxy"
 const __dirname = path.resolve()
 
 dotenv.config()
@@ -86,32 +88,28 @@ app.use(express.static(path.join(__dirname, "./public")))
 app.use(express.static(path.join(__dirname, "./dist"), {index: false}))
 app.use("/assets", express.static(path.join(__dirname, "./assets")))
 
-if (!fs.existsSync("./files/images")) fs.mkdirSync("./files/images", {recursive: true})
-if (!fs.existsSync("./files/animations")) fs.mkdirSync("./files/animations", {recursive: true})
-if (!fs.existsSync("./files/videos")) fs.mkdirSync("./files/videos", {recursive: true})
-if (!fs.existsSync("./files/comics")) fs.mkdirSync("./files/comics", {recursive: true})
-if (!fs.existsSync("./files/artists")) fs.mkdirSync("./files/artists", {recursive: true})
-if (!fs.existsSync("./files/characters")) fs.mkdirSync("./files/characters", {recursive: true})
-if (!fs.existsSync("./files/series")) fs.mkdirSync("./files/series", {recursive: true})
-if (!fs.existsSync("./files/tags")) fs.mkdirSync("./files/tags", {recursive: true})
-if (!fs.existsSync("./files/pfp")) fs.mkdirSync("./files/pfp", {recursive: true})
-app.use("/image", express.static(path.join(__dirname, "./files/images")))
-app.use("/animation", express.static(path.join(__dirname, "./files/animations")))
-app.use("/video", express.static(path.join(__dirname, "./files/videos")))
-app.use("/comic", express.static(path.join(__dirname, "./files/comics")))
-app.use("/artist", express.static(path.join(__dirname, "./files/artists")))
-app.use("/character", express.static(path.join(__dirname, "./files/characters")))
-app.use("/series", express.static(path.join(__dirname, "./files/series")))
-app.use("/tag", express.static(path.join(__dirname, "./files/tags")))
-app.use("/pfp", express.static(path.join(__dirname, "./files/pfp")))
+let folders = ["animation", "artist", "character", "comic", "image", "pfp", "series", "tag", "video"]
+
+for (let i = 0; i < folders.length; i++) {
+  serverFunctions.uploadFile(`${folders[i]}/`, "")
+  app.get(`/${folders[i]}/*`, (req, res, next) => {
+    req.baseUrl = `/${folders[i]}`
+    s3Proxy({
+      bucket: "moebooru",
+      prefix: `${folders[i]}`,
+      accessKeyId: process.env.AWS_ACCESS_KEY,
+      secretAccessKey: process.env.AWS_SECRET_KEY
+    })(req, res, next)
+  })
+}
 
 app.get("/*", function(req, res) {
-  res.setHeader("Content-Type", mime.getType(req.path) ?? "")
-  res.setHeader("Cross-Origin-Opener-Policy", "same-origin")
-  res.setHeader("Cross-Origin-Embedder-Policy", "require-corp")
-  const document = fs.readFileSync(path.join(__dirname, "./dist/index.html"), {encoding: "utf-8"})
-  const html = renderToString(<Router location={req.url}><App/></Router>)
-  res.send(document?.replace(`<div id="root"></div>`, `<div id="root">${html}</div>`))
+    res.setHeader("Content-Type", mime.getType(req.path) ?? "")
+    res.setHeader("Cross-Origin-Opener-Policy", "same-origin")
+    res.setHeader("Cross-Origin-Embedder-Policy", "require-corp")
+    const document = fs.readFileSync(path.join(__dirname, "./dist/index.html"), {encoding: "utf-8"})
+    const html = renderToString(<Router location={req.url}><App/></Router>)
+    res.status(200).send(document?.replace(`<div id="root"></div>`, `<div id="root">${html}</div>`))
 })
 
 const run = async () => {

@@ -5,7 +5,7 @@ import {ThemeContext, HideSidebarContext, HideNavbarContext, HideSortbarContext,
 SizeTypeContext, BrightnessContext, ContrastContext, HueContext, SaturationContext, LightnessContext,
 BlurContext, SharpenContext, EnableDragContext, FilterDropActiveContext, SquareContext, PixelateContext,
 ShowDownloadDialogContext, HideTitlebarContext, ImageTypeContext, RestrictTypeContext, SortTypeContext,
-StyleTypeContext, SpeedContext, ReverseContext} from "../Context"
+StyleTypeContext, SpeedContext, ReverseContext, MobileContext} from "../Context"
 import leftArrow from "../assets/purple/leftArrow.png"
 import leftArrowMagenta from "../assets/magenta/leftArrow.png"
 import rightArrow from "../assets/purple/rightArrow.png"
@@ -103,6 +103,7 @@ const SortBar: React.FunctionComponent = (props) => {
     const {sortType, setSortType} = useContext(SortTypeContext)
     const {speed, setSpeed} = useContext(SpeedContext)
     const {reverse, setReverse} = useContext(ReverseContext)
+    const {mobile, setMobile} = useContext(MobileContext)
     const [dropLeft, setDropLeft] = useState(0)
     const [dropTop, setDropTop] = useState(0)
     const imageRef = useRef(null) as any
@@ -401,6 +402,20 @@ const SortBar: React.FunctionComponent = (props) => {
         }
     }
 
+    const getMobileImageJSX = () => {
+        if (imageType === "image") {
+            return <img style={{height: "30px"}} className="sortbar-img" src={getImage()}/>
+        } else if (imageType === "animation") {
+            return <img style={{height: "30px"}} className="sortbar-img" src={getAnimation()}/>
+        } else if (imageType === "video") {
+            return <img style={{height: "30px"}} className="sortbar-img" src={getVideo()}/>
+        } else if (imageType === "comic") {
+            return <img style={{height: "30px"}} className="sortbar-img" src={getComic()}/>
+        } else {
+            return <img style={{height: "30px"}} className="sortbar-img rotate" src={getAll()}/>
+        }
+    }
+
     const getImageMargin = () => {
         const rect = imageRef.current?.getBoundingClientRect()
         if (!rect) return "240px"
@@ -443,6 +458,18 @@ const SortBar: React.FunctionComponent = (props) => {
                     <span className="sortbar-text">All</span>
                 </div>
             )
+        }
+    }
+
+    const getMobileRestrictJSX = () => {
+        if (restrictType === "safe") {
+            return <img style={{height: "30px"}} className="sortbar-img" src={getSafe()}/>
+        } else if (restrictType === "questionable") {
+            return <img style={{height: "30px"}} className="sortbar-img" src={getQuestionable()}/>
+        } else if (restrictType === "explicit") {
+            return <img style={{height: "30px"}} className="sortbar-img" src={getExplicit()}/>
+        } else {
+            return <img style={{height: "30px"}} className="sortbar-img rotate" src={getAll()}/>
         }
     }
 
@@ -494,6 +521,20 @@ const SortBar: React.FunctionComponent = (props) => {
                     <span className="sortbar-text">All</span>
                 </div>
             )
+        }
+    }
+
+    const getMobileStyleJSX = () => {
+        if (styleType === "2d") {
+            return <img style={{height: "30px"}} className="sortbar-img" src={get2D()}/>
+        } else if (styleType === "3d") {
+            return <img style={{height: "30px"}} className="sortbar-img" src={get3D()}/>
+        } else if (styleType === "pixel") {
+            return <img style={{height: "30px"}} className="sortbar-img" src={getPixel()}/>
+        } else if (styleType === "chibi") {
+            return <img style={{height: "30px"}} className="sortbar-img" src={getChibi()}/>
+        } else {
+            return <img style={{height: "30px"}} className="sortbar-img rotate" src={getAll()}/>
         }
     }
 
@@ -621,6 +662,23 @@ const SortBar: React.FunctionComponent = (props) => {
             return newValue
         })
     }
+
+    if (mobile) return (
+        <div className="mobile-sortbar">
+            <img style={{height: "30px"}} className="sortbar-img" src={getUpload()}/>
+            <img style={{height: "30px"}} className="sortbar-img" src={getDownload()}/>
+            {getMobileImageJSX()}
+            {getMobileRestrictJSX()}
+            {getMobileStyleJSX()}
+            <img style={{height: "30px"}} className="sortbar-img" src={getSquare()}/>{/* 
+            {reverse ? <img className="sortbar-img" src={getReverse()} style={{transform: "scaleX(-1)"}}/> :
+            <img className="sortbar-img" src={getReverse()}/>}
+            <img className="sortbar-img" src={getSpeed()}/> */}
+            <img style={{height: "30px"}} className="sortbar-img" src={getFilters()}/>
+            <img style={{height: "30px"}} className="sortbar-img" src={getSize()}/>
+            <img style={{height: "30px"}} className="sortbar-img" src={getSort()}/>
+        </div>
+    )
 
     return (
         <>

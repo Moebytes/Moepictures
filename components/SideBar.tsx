@@ -1,6 +1,6 @@
 import React, {useContext, useEffect, useState} from "react"
 import {useHistory} from "react-router-dom"
-import {ThemeContext, HideSidebarContext, HideNavbarContext, HideSortbarContext, EnableDragContext, 
+import {ThemeContext, HideSidebarContext, HideNavbarContext, HideSortbarContext, EnableDragContext, MobileContext,
 RelativeContext, HideTitlebarContext, SidebarHoverContext, SearchContext, SearchFlagContext, PostsContext,
 TagsContext, RandomFlagContext, ImageSearchFlagContext, SidebarTextContext, SessionContext} from "../Context"
 import {HashLink as Link} from "react-router-hash-link"
@@ -73,6 +73,7 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
     const {randomFlag, setRandomFlag} = useContext(RandomFlagContext)
     const {imageSearchFlag, setImageSearchFlag} = useContext(ImageSearchFlagContext)
     const {sidebarText, setSidebarText} = useContext(SidebarTextContext)
+    const {mobile, setMobile} = useContext(MobileContext)
     const {session, setSession} = useContext(SessionContext)
     const [maxTags, setMaxTags] = useState(23)
     const [userImage, setUserImage] = useState("")
@@ -111,7 +112,12 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
     useEffect(() => {
         const scrollHandler = () => {
             const sidebar = document.querySelector(".sidebar") as HTMLElement
-            if (!sidebar) return
+            const mobileSidebar = document.querySelector(".mobile-sidebar") as HTMLElement
+            if (!sidebar || !mobileSidebar) return
+            if (mobile) {
+                mobileSidebar.style.height = "auto"
+                return
+            }
             if (!relative) {
                 if (!hideTitlebar) {
                     sidebar.style.top = "112px"
@@ -150,7 +156,12 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
 
     useEffect(() => {
         const sidebar = document.querySelector(".sidebar") as HTMLElement
-        if (!sidebar) return
+        const mobileSidebar = document.querySelector(".mobile-sidebar") as HTMLElement
+        if (!sidebar || !mobileSidebar) return
+        if (mobile) {
+            mobileSidebar.style.height = "auto"
+            return
+        }
         if (!relative) {
             if (!hideTitlebar) {
                 sidebar.style.top = "112px"
@@ -178,11 +189,16 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
             sidebar.style.height = "auto"
             if (maxTags !== 30) setMaxTags(29)
         }
-    }, [hideTitlebar, relative])
+    }, [hideTitlebar, relative, mobile])
 
     useEffect(() => {
         const sidebar = document.querySelector(".sidebar") as HTMLElement
-        if (!sidebar) return
+        const mobileSidebar = document.querySelector(".mobile-sidebar") as HTMLElement
+        if (!sidebar || !mobileSidebar) return
+        if (mobile) {
+            mobileSidebar.style.height = "auto"
+            return
+        }
         if (!relative) {
             if (!hideNavbar) {
                 if (!hideTitlebar) {
@@ -214,7 +230,7 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
             sidebar.style.height = "auto"
             if (maxTags !== 30) setMaxTags(29)
         }
-    }, [hideSortbar, hideNavbar, hideTitlebar])
+    }, [hideSortbar, hideNavbar, hideTitlebar, mobile])
 
     const getSearchIcon = () => {
         if (theme === "purple") return searchIcon
@@ -413,6 +429,19 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
         await axios.delete("/api/post", {params: {postID: props.post.postID}, withCredentials: true})
         history.push("/posts")
     }
+
+    if (mobile) return (
+        <div className="mobile-sidebar">
+            <div className="mobile-search-container">
+                <input className="mobile-search" type="search" spellCheck="false" value={search} onChange={(event) => setSearch(event.target.value)} onKeyDown={(event) => event.key === "Enter" ? triggerSearch() : null}/>
+                <img style={{height: "40px"}} className={!theme || theme === "purple" ? "search-icon" : `search-icon-${theme}`} src={getSearchIcon()} onClick={() => triggerSearch()}/>
+                <label style={{display: "flex", width: "max-content", height: "max-content"}} htmlFor="image-search">
+                    <img style={{height: "40px"}} className={!theme || theme === "purple" ? "search-image-icon" : `search-image-icon-${theme}`} src={getSearchImageIcon()}/>
+                </label>
+                <input id="image-search" type="file" onChange={(event) => imageSearch(event)}/>
+            </div>
+        </div>
+    )
 
     return (
         <div className={`sidebar ${hideSidebar ? "hide-sidebar" : ""} ${hideTitlebar ? "sidebar-top" : ""}

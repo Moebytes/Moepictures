@@ -56,6 +56,10 @@ const PostRoutes = (app: Express) => {
             const post = await sql.post(Number(postID))
             if (post?.uploader !== req.session.username) return res.status(400).send("Bad request")
             await sql.deletePost(Number(postID))
+            for (let i = 0; i < post.images.length; i++) {
+                const file = functions.getImagePath(post.images[i].type, post.postID, post.images[i].filename)
+                await serverFunctions.deleteFile(file)
+            }
             res.status(200).send("Success")
         } catch (e) {
             console.log(e)

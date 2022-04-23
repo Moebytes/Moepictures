@@ -91,3 +91,40 @@
         filter: brightness(140%);
     }
 }
+
+.titlebar-hamburger-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.titlebar-hamburger {
+    width: auto;
+    height: 30px;
+    &:hover {
+        filter: brightness(150%);
+    }
+}
+
+@media screen and (max-width: 500px) {
+    .titlebar {
+        justify-content: center;
+    }
+
+    .titlebar-text-a {
+        font-size: 50px;
+    }
+    
+    .titlebar-text-b {
+        font-size: 50px;
+    }
+
+    .titlebar-image-container {
+        width: 80px;
+    }
+    
+    .titlebar-img {
+        margin-top: 7px;
+        height: 90%;
+    }
+}

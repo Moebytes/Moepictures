@@ -220,7 +220,7 @@ export default class Functions {
         for (let i = 0; i < pieces.length; i++) {
             const piece = pieces[i]
             if (piece.includes(">")) {
-                const username = piece.match(/(?<=>>>)(.*?)(?=$|>)/gm)?.[0] ?? ""
+                const username = piece.match(/(>>>)(.*?)(?=$|>)/gm)?.[0].replace(">>>", "") ?? ""
                 const text = piece.replace(username, "").replaceAll(">", "")
                 if (!text && !username) continue
                 if (gibberish(username)) return "Comment cannot be gibberish."
@@ -751,7 +751,7 @@ export default class Functions {
     }
 
     public static getImagePath = (folder: string, postID: number, filename: string) => {
-        return path.join(__dirname, `../files/${folder}s/${postID}/${filename}`)
+        return `${folder}/${postID}/${filename}`
     }
 
     public static getImageLink = (folder: string, postID: number, filename: string) => {
@@ -760,7 +760,7 @@ export default class Functions {
     }
 
     public static getTagPath = (folder: string, filename: string) => {
-        return path.join(__dirname, `../files/${folder}/${filename}`)
+        return `${folder}/${filename}`
     }
 
     public static getTagLink = (folder: string, filename: string) => {

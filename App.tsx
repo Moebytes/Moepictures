@@ -2,7 +2,7 @@ import React, {useEffect, useState, useContext} from "react"
 import {Switch, Route, Redirect, useHistory, useLocation} from "react-router-dom"
 import Context, {ThemeContext, HideNavbarContext, HideSidebarContext, HideSortbarContext,
 HideTitlebarContext, EnableDragContext, ActiveDropdownContext, FilterDropActiveContext,
-SidebarHoverContext, SessionContext, SessionFlagContext, UserImgContext} from "./Context"
+SidebarHoverContext, SessionContext, SessionFlagContext, UserImgContext, MobileContext} from "./Context"
 import favicon from "./assets/purple/favicon.png"
 import faviconMagenta from "./assets/magenta/favicon.png"
 import PostsPage from "./pages/PostsPage"
@@ -57,6 +57,7 @@ const App: React.FunctionComponent = (props) => {
     const [session, setSession] = useState({}) as any
     const [sessionFlag, setSessionFlag] = useState(false)
     const [userImg, setUserImg] = useState("")
+    const [mobile, setMobile] = useState(false)
 
     const history = useHistory()
     const location = useLocation()
@@ -170,6 +171,7 @@ const App: React.FunctionComponent = (props) => {
     }, [hideTitlebar, activeDropdown, sidebarHover])
 
     useEffect(() => {
+        if (mobile) return functions.dragScroll(false)
         functions.dragScroll(enableDrag)
     }, [enableDrag, history])
 
@@ -194,8 +196,23 @@ const App: React.FunctionComponent = (props) => {
         functions.changeFavicon(theme)
     }, [theme])
 
+    useEffect(() => {
+        const mobileQuery = (query: any) => {
+            if (query.matches) {
+                setMobile(true)
+            } else {
+                setMobile(false)
+            }
+        }
+        const media = window.matchMedia("(max-width: 500px)")
+        media.addEventListener("change", mobileQuery)
+        mobileQuery(media)
+        document.documentElement.style.visibility = "visible"
+    }, [])
+
     return (
         <div className={`app ${theme} ${!loaded ? "stop-transitions" : ""}`}>
+            <MobileContext.Provider value={{mobile, setMobile}}>
             <UserImgContext.Provider value={{userImg, setUserImg}}>
             <SessionFlagContext.Provider value={{sessionFlag, setSessionFlag}}>
             <SessionContext.Provider value={{session, setSession}}>
@@ -250,6 +267,7 @@ const App: React.FunctionComponent = (props) => {
             </SessionContext.Provider>
             </SessionFlagContext.Provider>
             </UserImgContext.Provider>
+            </MobileContext.Provider>
         </div>
     )
 }

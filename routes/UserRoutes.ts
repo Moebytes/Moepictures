@@ -59,9 +59,8 @@ const UserRoutes = (app: Express) => {
                 const hashToken = crypto.createHash("sha256").update(token).digest("hex")
                 await sql.insertEmailToken(hashToken, email)
                 const user = functions.toProperCase(username)
-                const logo = `${req.protocol}://${req.get("host")}/assets/purple/logo.png`
                 const link = `${req.protocol}://${req.get("host")}/api/verifyemail?token=${token}`
-                await serverFunctions.email(email, "Moebooru Email Address Verification", {username: user, logo, link}, "verifyemail.html")
+                await serverFunctions.email(email, "Moebooru Email Address Verification", {username: user, link}, "verifyemail.html")
                 return res.status(200).send("Success")
             } catch {
                 return res.status(400).send("Username taken")
@@ -132,7 +131,7 @@ const UserRoutes = (app: Express) => {
                     if (req.session.image) {
                         let oldImagePath = functions.getTagPath("pfp", req.session.image)
                         try {
-                            fs.unlinkSync(oldImagePath)
+                            await serverFunctions.deleteFile(oldImagePath)
                         } catch {
                             // ignore
                         }
@@ -140,7 +139,7 @@ const UserRoutes = (app: Express) => {
                     const filename = `${req.session.username}.${result.extension}`
                     let imagePath = functions.getTagPath("pfp", filename)
                     const buffer = Buffer.from(Object.values(bytes))
-                    fs.writeFileSync(imagePath, buffer)
+                    await serverFunctions.uploadFile(imagePath, buffer)
                     await sql.updateUser(req.session.username, "image", filename)
                     req.session.image = filename
                     res.status(200).send("Success")
@@ -251,9 +250,8 @@ const UserRoutes = (app: Express) => {
             const hashToken = crypto.createHash("sha256").update(token).digest("hex")
             await sql.insertEmailToken(hashToken, newEmail)
             const username = functions.toProperCase(req.session.username)
-            const logo = `${req.protocol}://${req.get("host")}/assets/purple/logo.png`
             const link = `${req.protocol}://${req.get("host")}/api/changeemail?token=${token}`
-            await serverFunctions.email(newEmail, "Moebooru Email Address Change", {username, logo, link}, "changeemail.html")
+            await serverFunctions.email(newEmail, "Moebooru Email Address Change", {username, link}, "changeemail.html")
             res.status(200).send("Success")
         } catch {
             res.status(400).send("Bad request")
@@ -272,9 +270,8 @@ const UserRoutes = (app: Express) => {
             const hashToken = crypto.createHash("sha256").update(token).digest("hex")
             await sql.insertEmailToken(hashToken, email)
             const username = functions.toProperCase(req.session.username)
-            const logo = `${req.protocol}://${req.get("host")}/assets/purple/logo.png`
             const link = `${req.protocol}://${req.get("host")}/api/verifyemail?token=${token}`
-            await serverFunctions.email(email, "Moebooru Email Address Verification", {username, logo, link}, "verifyemail.html")
+            await serverFunctions.email(email, "Moebooru Email Address Verification", {username, link}, "verifyemail.html")
             await sql.updateUser(req.session.username, "email", email)
             req.session.email = email
             res.status(200).send("Success")
@@ -434,9 +431,8 @@ const UserRoutes = (app: Express) => {
             const hashToken =  await bcrypt.hash(token, 13)
             await sql.insertPasswordToken(user.username, hashToken)
             const username = functions.toProperCase(user.username)
-            const logo = `${req.protocol}://${req.get("host")}/assets/purple/logo.png`
             const link = `${req.protocol}://${req.get("host")}/reset-password?token=${token}&username=${user.username}`
-            await serverFunctions.email(user.email, "Moebooru Password Reset", {username, logo, link}, "resetpassword.html")
+            await serverFunctions.email(user.email, "Moebooru Password Reset", {username, link}, "resetpassword.html")
             res.status(200).send("Success")
         } catch {
             res.status(200).send("Success")

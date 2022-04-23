@@ -5,8 +5,10 @@ import favicon from "../assets/purple/favicon.png"
 import faviconMagenta from "../assets/magenta/favicon.png"
 import {ThemeContext, HideNavbarContext, EnableDragContext, RelativeContext, HideTitlebarContext,
 SearchContext, SearchFlagContext, ImageTypeContext, RestrictTypeContext, StyleTypeContext, SortTypeContext,
-HeaderTextContext} from "../Context"
+HeaderTextContext, HideMobileNavbarContext, MobileContext} from "../Context"
 import functions from "../structures/Functions"
+import hamburger from "../assets/purple/hamburger.png"
+import hamburgerMagenta from "../assets/magenta/hamburger.png"
 import "./styles/titlebar.less"
 
 interface Props {
@@ -26,6 +28,8 @@ const TitleBar: React.FunctionComponent<Props> = (props) => {
     const {styleType, setStyleType} = useContext(StyleTypeContext)
     const {sortType, setSortType} = useContext(SortTypeContext)
     const {headerText, setHeaderText} = useContext(HeaderTextContext)
+    const {mobile, setMobile} = useContext(MobileContext)
+    const {hideMobileNavbar, setHideMobileNavbar} = useContext(HideMobileNavbarContext)
     const history = useHistory()
 
     useEffect(() => {
@@ -46,6 +50,15 @@ const TitleBar: React.FunctionComponent<Props> = (props) => {
         return favicon
     }
 
+    const getBurger = () => {
+        if (theme.includes("magenta")) return hamburgerMagenta
+        return hamburger
+    }
+
+    const toggleMobileNavbar = () => {
+        setHideMobileNavbar((prev: boolean) => !prev)
+    }
+
     const titleClick = () => {
         if (props.reset) {
             setSearch("")
@@ -59,9 +72,21 @@ const TitleBar: React.FunctionComponent<Props> = (props) => {
         window.scrollTo(0, 0)
     }
 
+    useEffect(() => {
+        if (mobile) {
+            setHideTitlebar(false)
+            setRelative(false)
+        }
+    }, [mobile])
+
     return (
         <div className={`titlebar ${hideTitlebar ? "hide-titlebar" : ""} ${relative ? "titlebar-relative" : ""}`} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
-           <div onClick={titleClick} className="titlebar-logo-container">
+            {mobile ?
+            <div className="titlebar-hamburger-container">
+                <img className="titlebar-hamburger" src={getBurger()} onClick={toggleMobileNavbar}/>
+            </div>
+            : null}
+            <div onClick={titleClick} className="titlebar-logo-container">
                 <span className="titlebar-hover">
                     <div className="titlebar-text-container">
                             <span className="titlebar-text-a">M</span>
@@ -78,9 +103,10 @@ const TitleBar: React.FunctionComponent<Props> = (props) => {
                     </div>
                 </span>
             </div>
+            {!mobile ? 
             <div className="titlebar-search-text-container">
                 <span className="titlebar-search-text">{headerText}</span>
-            </div>
+            </div> : null}
         </div>
     )
 }

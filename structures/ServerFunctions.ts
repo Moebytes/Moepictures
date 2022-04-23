@@ -2,6 +2,9 @@ import nodemailer from "nodemailer"
 import handlebars from "handlebars"
 import path from "path"
 import fs from "fs"
+import crypto from "crypto"
+import AWS from "aws-sdk"
+import Evaporate from "evaporate"
 
 export default class ServerFunctions {
     public static email = async (email: string, subject: string, payload: any, template: string) => {
@@ -21,5 +24,22 @@ export default class ServerFunctions {
             subject: subject,
             html
         })
+    }
+
+    public static uploadFile = async (file: string, content: any) => {
+        const s3 = new AWS.S3({
+            accessKeyId: process.env.AWS_ACCESS_KEY,
+            secretAccessKey: process.env.AWS_SECRET_KEY
+        })
+        const upload = await s3.upload({Key: file, Body: content, Bucket: "moebooru"}).promise()
+        return upload.Location
+    }
+
+    public static deleteFile = async (file: string) => {
+        const s3 = new AWS.S3({
+            accessKeyId: process.env.AWS_ACCESS_KEY,
+            secretAccessKey: process.env.AWS_SECRET_KEY
+        })
+        await s3.deleteObject({Key: file, Bucket: "moebooru"}).promise()
     }
 }

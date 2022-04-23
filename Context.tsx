@@ -45,6 +45,8 @@ export const SessionFlagContext = React.createContext<any>(null)
 export const RedirectContext = React.createContext<any>(null)
 export const UserImgContext = React.createContext<any>(null)
 export const QuoteTextContext = React.createContext<any>(null)
+export const MobileContext = React.createContext<any>(null)
+export const HideMobileNavbarContext = React.createContext<any>(null)
 
 const Context: React.FunctionComponent = (props) => {
     const [brightness, setBrightness] = useState(100)
@@ -80,8 +82,10 @@ const Context: React.FunctionComponent = (props) => {
     const [imageSearchFlag, setImageSearchFlag] = useState(null)
     const [redirect, setRedirect] = useState(null)
     const [quoteText, setQuoteText] = useState(null)
+    const [hideMobileNavbar, setHideMobileNavbar] = useState(true)
 return (
     <>
+        <HideMobileNavbarContext.Provider value={{hideMobileNavbar, setHideMobileNavbar}}>
         <QuoteTextContext.Provider value={{quoteText, setQuoteText}}>
         <RedirectContext.Provider value={{redirect, setRedirect}}>
         <SidebarTextContext.Provider value={{sidebarText, setSidebarText}}>
@@ -149,6 +153,7 @@ return (
         </SidebarTextContext.Provider>
         </RedirectContext.Provider>
         </QuoteTextContext.Provider>
+        </HideMobileNavbarContext.Provider>
     </>
     )
 }

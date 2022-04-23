@@ -1282,10 +1282,6 @@ const PostImage: React.FunctionComponent<Props> = (props) => {
                         </TransformComponent>
                         </TransformWrapper>
                     </div>
-                    {!imageLoaded ? 
-                    <div className="post-loading-container">
-                        <img className="loading" src={getLoading()}/>
-                    </div> : null}
                     </>}
                 </div>
             </div>

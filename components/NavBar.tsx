@@ -19,7 +19,7 @@ import darkMagentaLight from "../assets/magenta-light/dark.png"
 import search2 from "../assets/purple/search2.png"
 import axios from "axios"
 import functions from "../structures/Functions"
-import {ThemeContext, HideNavbarContext, HideSortbarContext, HideSidebarContext, EnableDragContext, 
+import {ThemeContext, HideNavbarContext, HideSortbarContext, HideSidebarContext, EnableDragContext,  HideMobileNavbarContext, MobileContext,
 RelativeContext, HideTitlebarContext, SearchContext, SearchFlagContext, SessionContext, SessionFlagContext, UserImgContext} from "../Context"
 import "./styles/navbar.less"
 
@@ -36,7 +36,10 @@ const NavBar: React.FunctionComponent = (props) => {
     const {session, setSession} = useContext(SessionContext)
     const {sessionFlag, setSessionFlag} = useContext(SessionFlagContext)
     const {userImg, setUserImg} = useContext(UserImgContext)
+    const {hideMobileNavbar, setHideMobileNavbar} = useContext(HideMobileNavbarContext)
+    const {mobile, setMobile} = useContext(MobileContext)
     const [showMiniTitle, setShowMiniTitle] = useState(false)
+    const [marginR, setMarginR] = useState("70px")
     const history = useHistory()
 
     useEffect(() => {
@@ -140,48 +143,94 @@ const NavBar: React.FunctionComponent = (props) => {
         history.go(0)
     }
 
-    return (
-        <div className={`navbar ${hideTitlebar ? "translate-navbar" : ""} ${hideSortbar && hideTitlebar && hideSidebar ? "hide-navbar" : ""} ${hideSortbar && hideNavbar && showMiniTitle ? "hide-navbar" : ""}
-        ${relative ? "navbar-relative" : ""}`} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
-            {showMiniTitle && !relative ? 
-                <Link to="/" className="nav-mini-title-container">
-                    <span className="nav-mini-title-a">M</span>
-                    <span className="nav-mini-title-b">o</span>
-                    <span className="nav-mini-title-a">e</span>
-                    <span className="nav-mini-title-b">b</span>
-                    <span className="nav-mini-title-a">o</span>
-                    <span className="nav-mini-title-b">o</span>
-                    <span className="nav-mini-title-a">r</span>
-                    <span className="nav-mini-title-b">u</span>
-                    <img className="nav-mini-img" src={getFavicon()}/>
-                </Link>
-            : null}
-            <div className="nav-text-container">
-                {session.username ? 
-                <div className="nav-user-container" style={{marginRight: showMiniTitle ? "45px" : "70px"}}>
-                    {!showMiniTitle || relative ? <img className="nav-user-img" src={userImg}/> : null}
-                    <span className="nav-text nav-user-text" onClick={() => history.push("/profile")}>{session.username}</span>
-                    <img className="nav-logout-img" src={logoutIcon} onClick={logout}/>
-                </div> :
-                <span style={{marginRight: showMiniTitle ? "45px" : "70px"}} className="nav-text nav-user-text" onClick={() => history.push("/login")}>Login</span>}
-                <span style={{marginRight: showMiniTitle ? "45px" : "70px"}} className="nav-text" onClick={() => history.push("/posts")}>Posts</span>
-                <span style={{marginRight: showMiniTitle ? "45px" : "70px"}} className="nav-text" onClick={() => history.push("/comments")}>Comments</span>
-                <span style={{marginRight: showMiniTitle ? "45px" : "70px"}} className="nav-text" onClick={() => history.push("/artists")}>Artists</span>
-                <span style={{marginRight: showMiniTitle ? "45px" : "70px"}} className="nav-text" onClick={() => history.push("/characters")}>Characters</span>
-                <span style={{marginRight: showMiniTitle ? "45px" : "70px"}} className="nav-text" onClick={() => history.push("/series")}>Series</span>
-                <span style={{marginRight: showMiniTitle ? "45px" : "70px"}} className="nav-text" onClick={() => history.push("/tags")}>Tags</span>
-                <span style={{marginRight: showMiniTitle ? "45px" : "70px"}} className="nav-text" onClick={() => history.push("/help")}>Help</span>
-            </div>
-            <div className="nav-color-container">
-                <div className={`nav-search-container ${!hideSidebar ? "hide-nav-search" : ""}`}>
-                    <img className="nav-search-icon" src={search2} onClick={() => setSearchFlag(true)}/>
-                    <input className="nav-search" type="search" spellCheck={false} value={search} onChange={(event) => setSearch(event.target.value)} onKeyDown={(event) => event.key === "Enter" ? setSearchFlag(true) : null}/>
+    /* JS Media Queries */
+    useEffect(() => {
+        const query1 = (query: any) => {
+            if (query.matches) {
+                let marginR = showMiniTitle ? "40px" : "50px"
+                setMarginR(marginR)
+            } else {
+                let marginR = showMiniTitle ? "45px" : "70px"
+                setMarginR(marginR)
+            }
+        }
+        const media = window.matchMedia("(max-width: 1200px)")
+        media.addEventListener("change", query1)
+        query1(media)
+    }, [])
+
+    if (mobile) {
+        const getMobileMargin = () => {
+            return hideMobileNavbar ? `-${document.querySelector(".mobile-navbar")?.clientHeight}px` : "0px"
+        }
+        return (
+            <div className={`mobile-navbar ${hideMobileNavbar ? "hide-mobile-navbar" : ""}`} style={{marginTop: getMobileMargin()}}>
+                <div className="mobile-nav-text-container">
+                    {session.username ? 
+                    <div className="mobile-nav-user-container">
+                        <img className="mobile-nav-user-img" src={userImg}/>
+                        <span className="mobile-nav-text mobile-nav-user-text" onClick={() => history.push("/profile")}>{session.username}</span>
+                        <img className="mobile-nav-logout-img" src={logoutIcon} onClick={logout}/>
+                    </div> :
+                    <span className="mobile-nav-text mobile-nav-user-text" onClick={() => history.push("/login")}>Login</span>}
+                    <span className="mobile-nav-text" onClick={() => history.push("/posts")}>Posts</span>
+                    <span className="mobile-nav-text" onClick={() => history.push("/comments")}>Comments</span>
+                    <span className="mobile-nav-text" onClick={() => history.push("/artists")}>Artists</span>
+                    <span className="mobile-nav-text" onClick={() => history.push("/characters")}>Characters</span>
+                    <span className="mobile-nav-text" onClick={() => history.push("/series")}>Series</span>
+                    <span className="mobile-nav-text" onClick={() => history.push("/tags")}>Tags</span>
+                    <span className="mobile-nav-text" onClick={() => history.push("/help")}>Help</span>
                 </div>
-                <img className="nav-color" src={getEyeDropper()} onClick={colorChange}/>
-                <img className="nav-color" src={getLight()} onClick={lightChange}/>
+                <div className="mobile-nav-color-container">
+                    <img className="mobile-nav-color" src={getEyeDropper()} onClick={colorChange}/>
+                    <img className="mobile-nav-color" src={getLight()} onClick={lightChange}/>
+                </div>
             </div>
-        </div>
-    )
+        )
+    } else {
+        return (
+            <div className={`navbar ${hideTitlebar ? "translate-navbar" : ""} ${hideSortbar && hideTitlebar && hideSidebar ? "hide-navbar" : ""} ${hideSortbar && hideNavbar && showMiniTitle ? "hide-navbar" : ""}
+            ${relative ? "navbar-relative" : ""}`} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
+                {showMiniTitle && !relative ? 
+                    <Link to="/" className="nav-mini-title-container">
+                        <span className="nav-mini-title-a">M</span>
+                        <span className="nav-mini-title-b">o</span>
+                        <span className="nav-mini-title-a">e</span>
+                        <span className="nav-mini-title-b">b</span>
+                        <span className="nav-mini-title-a">o</span>
+                        <span className="nav-mini-title-b">o</span>
+                        <span className="nav-mini-title-a">r</span>
+                        <span className="nav-mini-title-b">u</span>
+                        <img className="nav-mini-img" src={getFavicon()}/>
+                    </Link>
+                : null}
+                <div className="nav-text-container">
+                    {session.username ? 
+                    <div className="nav-user-container" style={{marginRight: marginR}}>
+                        {!showMiniTitle || relative ? <img className="nav-user-img" src={userImg}/> : null}
+                        <span className="nav-text nav-user-text" onClick={() => history.push("/profile")}>{session.username}</span>
+                        <img className="nav-logout-img" src={logoutIcon} onClick={logout}/>
+                    </div> :
+                    <span style={{marginRight: marginR}} className="nav-text nav-user-text" onClick={() => history.push("/login")}>Login</span>}
+                    <span style={{marginRight: marginR}} className="nav-text" onClick={() => history.push("/posts")}>Posts</span>
+                    <span style={{marginRight: marginR}} className="nav-text" onClick={() => history.push("/comments")}>Comments</span>
+                    <span style={{marginRight: marginR}} className="nav-text" onClick={() => history.push("/artists")}>Artists</span>
+                    <span style={{marginRight: marginR}} className="nav-text" onClick={() => history.push("/characters")}>Characters</span>
+                    <span style={{marginRight: marginR}} className="nav-text" onClick={() => history.push("/series")}>Series</span>
+                    <span style={{marginRight: marginR}} className="nav-text" onClick={() => history.push("/tags")}>Tags</span>
+                    <span style={{marginRight: "0px"}} className="nav-text" onClick={() => history.push("/help")}>Help</span>
+                </div>
+                <div className="nav-color-container">
+                    <div className={`nav-search-container ${!hideSidebar ? "hide-nav-search" : ""}`}>
+                        <img className="nav-search-icon" src={search2} onClick={() => setSearchFlag(true)}/>
+                        <input className="nav-search" type="search" spellCheck={false} value={search} onChange={(event) => setSearch(event.target.value)} onKeyDown={(event) => event.key === "Enter" ? setSearchFlag(true) : null}/>
+                    </div>
+                    <img className="nav-color" src={getEyeDropper()} onClick={colorChange}/>
+                    <img className="nav-color" src={getLight()} onClick={lightChange}/>
+                </div>
+            </div>
+        )
+    }
 }
 
 export default NavBar
