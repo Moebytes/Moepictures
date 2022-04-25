@@ -3,7 +3,8 @@ import handlebars from "handlebars"
 import path from "path"
 import fs from "fs"
 import crypto from "crypto"
-import S3 from "aws-sdk/clients/s3"
+import {Upload} from "@aws-sdk/lib-storage"
+import {S3Client, DeleteObjectCommand} from "@aws-sdk/client-s3"
 import Evaporate from "evaporate"
 
 export default class ServerFunctions {
@@ -27,19 +28,22 @@ export default class ServerFunctions {
     }
 
     public static uploadFile = async (file: string, content: any) => {
-        const s3 = new S3({
-            accessKeyId: process.env.AWS_ACCESS_KEY,
-            secretAccessKey: process.env.AWS_SECRET_KEY
+        const s3 = new S3Client({region: "us-east-1", credentials: {
+            accessKeyId: process.env.AWS_ACCESS_KEY!,
+            secretAccessKey: process.env.AWS_SECRET_KEY!
+        }})
+        const upload = new Upload({
+            client: s3,
+            params: {Body: content, Key: file, Bucket: "moebooru"}
         })
-        const upload = await s3.upload({Key: file, Body: content, Bucket: "moebooru"}).promise()
-        return upload.Location
+        return upload.done()
     }
 
     public static deleteFile = async (file: string) => {
-        const s3 = new S3({
-            accessKeyId: process.env.AWS_ACCESS_KEY,
-            secretAccessKey: process.env.AWS_SECRET_KEY
-        })
-        await s3.deleteObject({Key: file, Bucket: "moebooru"}).promise()
+        const s3 = new S3Client({region: "us-east-1", credentials: {
+            accessKeyId: process.env.AWS_ACCESS_KEY!,
+            secretAccessKey: process.env.AWS_SECRET_KEY!
+        }})
+        await s3.send(new DeleteObjectCommand({Key: file, Bucket: "moebooru"}))
     }
 }

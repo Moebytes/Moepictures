@@ -6,7 +6,7 @@ import {Pool} from "pg"
 import fs from "fs"
 import express from "express"
 import session from "express-session"
-import S3 from "aws-sdk/clients/s3"
+import {S3Client, GetObjectCommand} from "@aws-sdk/client-s3"
 import PGSession from "connect-pg-simple"
 import webpack from "webpack"
 import middleware from "webpack-dev-middleware"
@@ -17,6 +17,7 @@ import React from "react"
 import App from "./App"
 import {renderToString} from "react-dom/server"
 import {StaticRouter as Router} from "react-router-dom"
+import functions from "./structures/Functions"
 import serverFunctions from "./structures/ServerFunctions"
 import sql from "./structures/SQLQuery"
 import MiscRoutes from "./routes/MiscRoutes"
@@ -24,7 +25,6 @@ import CreateRoutes from "./routes/CreateRoutes"
 import UserRoutes from "./routes/UserRoutes"
 import SearchRoutes from "./routes/SearchRoutes"
 import PostRoutes from "./routes/PostRoutes"
-import s3Proxy from "s3-proxy"
 const __dirname = path.resolve()
 
 dotenv.config()
@@ -49,10 +49,10 @@ declare module "express-session" {
   }
 }
 
-const s3 = new S3({
-  accessKeyId: process.env.AWS_ACCESS_KEY,
-  secretAccessKey: process.env.AWS_SECRET_KEY
-})
+const s3 = new S3Client({region: "us-east-1", credentials: {
+  accessKeyId: process.env.AWS_ACCESS_KEY!,
+  secretAccessKey: process.env.AWS_SECRET_KEY!
+}})
 
 const pgPool = new Pool({
   user: process.env.PG_USER,
@@ -105,11 +105,11 @@ for (let i = 0; i < folders.length; i++) {
     try {
       req.baseUrl = `/${folders[i]}`
       res.setHeader("Content-Type", mime.getType(req.path) ?? "")
+      const key = req.path.slice(1)
+      const body = cache[key] ? cache[key] : await functions.streamToBuffer(await s3.send(new GetObjectCommand({Key: key, Bucket: "moebooru"})).then((r: any) => r.Body))
+      if (!cache[key]) cache[key] = body
       if (req.headers.range) {
-        const key = req.path.slice(1)
-        const obj = cache[key] ? cache[key] : await s3.getObject({Key: key, Bucket: "moebooru"}).promise()
-        if (!cache[key]) cache[key] = obj
-        const contentLength = (obj.Body as Buffer).length
+        const contentLength = body.length
         const parts = req.headers.range.replace(/bytes=/, "").split("-")
         const start = parseInt(parts[0])
         const end = parts[1] ? parseInt(parts[1]) : contentLength - 1
@@ -118,16 +118,11 @@ for (let i = 0; i < folders.length; i++) {
           "Accept-Ranges": "bytes",
           "Content-Length": end - start + 1
         })
-        const stream = Readable.from((obj.Body as Buffer).slice(start, end + 1))
+        const stream = Readable.from(body.slice(start, end + 1))
         stream.pipe(res)
         return
       }
-      s3Proxy({
-        bucket: "moebooru",
-        prefix: `${folders[i]}`,
-        accessKeyId: process.env.AWS_ACCESS_KEY,
-        secretAccessKey: process.env.AWS_SECRET_KEY
-      })(req, res, next)
+      res.status(200).end(body)
     } catch (e) {
       console.log(e)
       res.status(400).end()
