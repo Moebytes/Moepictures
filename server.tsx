@@ -6,7 +6,7 @@ import {Pool} from "pg"
 import fs from "fs"
 import express from "express"
 import session from "express-session"
-import {S3Client, GetObjectCommand} from "@aws-sdk/client-s3"
+import S3 from "aws-sdk/clients/s3"
 import PGSession from "connect-pg-simple"
 import webpack from "webpack"
 import middleware from "webpack-dev-middleware"
@@ -49,7 +49,7 @@ declare module "express-session" {
   }
 }
 
-const s3 = new S3Client({region: "us-east-1", credentials: {
+const s3 = new S3({region: "us-east-1", credentials: {
   accessKeyId: process.env.AWS_ACCESS_KEY!,
   secretAccessKey: process.env.AWS_SECRET_KEY!
 }})
@@ -106,7 +106,7 @@ for (let i = 0; i < folders.length; i++) {
       req.baseUrl = `/${folders[i]}`
       res.setHeader("Content-Type", mime.getType(req.path) ?? "")
       const key = req.path.slice(1)
-      const body = cache[key] ? cache[key] : await functions.streamToBuffer(await s3.send(new GetObjectCommand({Key: key, Bucket: "moebooru"})).then((r: any) => r.Body))
+      const body = cache[key] ? cache[key] : await s3.getObject({Key: key, Bucket: "moebooru"}).promise().then((r) => r.Body)
       if (!cache[key]) cache[key] = body
       if (req.headers.range) {
         const contentLength = body.length
