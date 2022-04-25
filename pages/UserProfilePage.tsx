@@ -10,7 +10,7 @@ import NavBar from "../components/NavBar"
 import SideBar from "../components/SideBar"
 import Footer from "../components/Footer"
 import DragAndDrop from "../components/DragAndDrop"
-import {HideNavbarContext, HideSidebarContext, ThemeContext, EnableDragContext, RelativeContext, HideTitlebarContext,
+import {HideNavbarContext, HideSidebarContext, ThemeContext, EnableDragContext, RelativeContext, HideTitlebarContext, MobileContext,
 HeaderTextContext, SidebarTextContext, SessionContext, RedirectContext, SessionFlagContext, UserImgContext} from "../Context"
 import axios from "axios"
 import fileType from "magic-bytes.js"
@@ -30,6 +30,7 @@ const UserProfilePage: React.FunctionComponent = (props) => {
     const {session, setSession} = useContext(SessionContext)
     const {sessionFlag, setSessionFlag} = useContext(SessionFlagContext)
     const {redirect, setRedirect} = useContext(RedirectContext)
+    const {mobile, setMobile} = useContext(MobileContext)
     const {userImg, setUserImg} = useContext(UserImgContext)
     const bioRef = useRef<any>(null)
     const [showBioInput, setShowBioInput] = useState(false)
@@ -45,6 +46,14 @@ const UserProfilePage: React.FunctionComponent = (props) => {
         setSidebarText("")
         document.title = "Moebooru: User Profile"
     }, [])
+
+    useEffect(() => {
+        if (mobile) {
+            setRelative(true)
+        } else {
+            setRelative(false)
+        }
+    }, [mobile])
 
     useEffect(() => {
         if (!session.cookie) return

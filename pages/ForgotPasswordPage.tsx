@@ -4,7 +4,7 @@ import NavBar from "../components/NavBar"
 import SideBar from "../components/SideBar"
 import Footer from "../components/Footer"
 import DragAndDrop from "../components/DragAndDrop"
-import {HideNavbarContext, HideSidebarContext, ThemeContext, EnableDragContext, 
+import {HideNavbarContext, HideSidebarContext, ThemeContext, EnableDragContext, MobileContext,
 RelativeContext, HideTitlebarContext, HeaderTextContext, SidebarTextContext} from "../Context"
 import functions from "../structures/Functions"
 import axios from "axios"
@@ -19,6 +19,7 @@ const ForgotPasswordPage: React.FunctionComponent = (props) => {
     const {relative, setRelative} = useContext(RelativeContext)
     const {headerText, setHeaderText} = useContext(HeaderTextContext)
     const {sidebarText, setSidebarText} = useContext(SidebarTextContext)
+    const {mobile, setMobile} = useContext(MobileContext)
     const [submitted, setSubmitted] = useState(false)
     const [error, setError] = useState(false)
     const [email, setEmail] = useState("")
@@ -33,6 +34,14 @@ const ForgotPasswordPage: React.FunctionComponent = (props) => {
         setSidebarText("")
         document.title = "Moebooru: Forgot Password"
     }, [])
+
+    useEffect(() => {
+        if (mobile) {
+            setRelative(true)
+        } else {
+            setRelative(false)
+        }
+    }, [mobile])
 
     const submit = async () => {
         setError(true)

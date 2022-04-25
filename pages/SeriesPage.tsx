@@ -13,7 +13,7 @@ import sort from "../assets/purple/sort.png"
 import SeriesRow from "../components/SeriesRow"
 import sortMagenta from "../assets/magenta/sort.png"
 import axios from "axios"
-import {ThemeContext, EnableDragContext, HideNavbarContext, HideSidebarContext, RelativeContext, HideTitlebarContext, 
+import {ThemeContext, EnableDragContext, HideNavbarContext, HideSidebarContext, RelativeContext, HideTitlebarContext, MobileContext,
 ActiveDropdownContext, HeaderTextContext, SidebarTextContext} from "../Context"
 import "./styles/seriespage.less"
 
@@ -27,6 +27,7 @@ const SeriesPage: React.FunctionComponent = (props) => {
     const {activeDropdown, setActiveDropdown} = useContext(ActiveDropdownContext)
     const {headerText, setHeaderText} = useContext(HeaderTextContext)
     const {sidebarText, setSidebarText} = useContext(SidebarTextContext)
+    const {mobile, setMobile} = useContext(MobileContext)
     const [sortType, setSortType] = useState("alphabetic")
     const [series, setSeries] = useState([]) as any
     const [index, setIndex] = useState(0)
@@ -52,6 +53,14 @@ const SeriesPage: React.FunctionComponent = (props) => {
         document.title = "Moebooru: Series"
         updateSeries()
     }, [])
+
+    useEffect(() => {
+        if (mobile) {
+            setRelative(true)
+        } else {
+            setRelative(false)
+        }
+    }, [mobile])
 
     useEffect(() => {
         updateSeries()

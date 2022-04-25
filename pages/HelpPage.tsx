@@ -5,7 +5,8 @@ import NavBar from "../components/NavBar"
 import SideBar from "../components/SideBar"
 import Footer from "../components/Footer"
 import DragAndDrop from "../components/DragAndDrop"
-import {HideNavbarContext, HideSidebarContext, RelativeContext, HideTitlebarContext, HeaderTextContext, SidebarTextContext} from "../Context"
+import {HideNavbarContext, HideSidebarContext, RelativeContext, HideTitlebarContext, HeaderTextContext, SidebarTextContext,
+MobileContext} from "../Context"
 import "./styles/helppage.less"
 
 const HelpPage: React.FunctionComponent = (props) => {
@@ -15,6 +16,7 @@ const HelpPage: React.FunctionComponent = (props) => {
     const {relative, setRelative} = useContext(RelativeContext)
     const {headerText, setHeaderText} = useContext(HeaderTextContext)
     const {sidebarText, setSidebarText} = useContext(SidebarTextContext)
+    const {mobile, setMobile} = useContext(MobileContext)
 
     useEffect(() => {
         setHideNavbar(true)
@@ -26,6 +28,22 @@ const HelpPage: React.FunctionComponent = (props) => {
         document.title = "Moebooru: Help"
         window.scrollTo(0, 0)
     }, [])
+
+    useEffect(() => {
+        if (mobile) {
+            setRelative(true)
+        } else {
+            setRelative(false)
+        }
+    }, [mobile])
+
+    useEffect(() => {
+        if (mobile) {
+            setRelative(true)
+        } else {
+            setRelative(false)
+        }
+    }, [mobile])
     
     return (
         <>
@@ -68,8 +86,7 @@ const HelpPage: React.FunctionComponent = (props) => {
                         You can change your avatar by clicking on “set avatar” under any post or by uploading an image. Only anime 
                         avatars are allowed. Username changes are allowed once per week and you can change your email and password as many times as you'd like. <br/><br/>
 
-                        For greater account security, you can enable 2-factor authentication. This will prompt you for a 2fa token in addition to your password while logging in.
-                        Do note that if you lose the ability to generate your 2fa tokens, we won't be able to help you. <br/><br/>
+                        For greater account security, you can enable 2-factor authentication. This will prompt you for a time-sensitive 2fa token in addition to your password while logging in.<br/><br/>
 
                         Some actions such as uploading a new post or aliasing a tag to another tag will be reviewed by the site staff.
                     </span>

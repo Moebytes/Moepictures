@@ -1,10 +1,12 @@
 import path from "path"
 import cors from "cors"
 import mime from "mime"
+import {Readable} from "stream"
 import {Pool} from "pg"
 import fs from "fs"
 import express from "express"
 import session from "express-session"
+import S3 from "aws-sdk/clients/s3"
 import PGSession from "connect-pg-simple"
 import webpack from "webpack"
 import middleware from "webpack-dev-middleware"
@@ -46,6 +48,11 @@ declare module "express-session" {
       $2fa: boolean
   }
 }
+
+const s3 = new S3({
+  accessKeyId: process.env.AWS_ACCESS_KEY,
+  secretAccessKey: process.env.AWS_SECRET_KEY
+})
 
 const pgPool = new Pool({
   user: process.env.PG_USER,
@@ -90,16 +97,41 @@ app.use("/assets", express.static(path.join(__dirname, "./assets")))
 
 let folders = ["animation", "artist", "character", "comic", "image", "pfp", "series", "tag", "video"]
 
+let cache = {} as any
+
 for (let i = 0; i < folders.length; i++) {
   serverFunctions.uploadFile(`${folders[i]}/`, "")
-  app.get(`/${folders[i]}/*`, (req, res, next) => {
-    req.baseUrl = `/${folders[i]}`
-    s3Proxy({
-      bucket: "moebooru",
-      prefix: `${folders[i]}`,
-      accessKeyId: process.env.AWS_ACCESS_KEY,
-      secretAccessKey: process.env.AWS_SECRET_KEY
-    })(req, res, next)
+  app.get(`/${folders[i]}/*`, async (req, res, next) => {
+    try {
+      req.baseUrl = `/${folders[i]}`
+      res.setHeader("Content-Type", mime.getType(req.path) ?? "")
+      if (req.headers.range) {
+        const key = req.path.slice(1)
+        const obj = cache[key] ? cache[key] : await s3.getObject({Key: key, Bucket: "moebooru"}).promise()
+        if (!cache[key]) cache[key] = obj
+        const contentLength = (obj.Body as Buffer).length
+        const parts = req.headers.range.replace(/bytes=/, "").split("-")
+        const start = parseInt(parts[0])
+        const end = parts[1] ? parseInt(parts[1]) : contentLength - 1
+        res.writeHead(206, {
+          "Content-Range": `bytes ${start}-${end}/${contentLength}`,
+          "Accept-Ranges": "bytes",
+          "Content-Length": end - start + 1
+        })
+        const stream = Readable.from((obj.Body as Buffer).slice(start, end + 1))
+        stream.pipe(res)
+        return
+      }
+      s3Proxy({
+        bucket: "moebooru",
+        prefix: `${folders[i]}`,
+        accessKeyId: process.env.AWS_ACCESS_KEY,
+        secretAccessKey: process.env.AWS_SECRET_KEY
+      })(req, res, next)
+    } catch (e) {
+      console.log(e)
+      res.status(400).end()
+    }
   })
 }
 

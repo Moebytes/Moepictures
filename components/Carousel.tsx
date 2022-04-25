@@ -141,6 +141,7 @@ const Carousel: React.FunctionComponent<Props> = (props) => {
         for (let i = 0; i < imagesRef.length; i++) {
             if (imagesRef[i].current) imagesRef[i].current.style.border = "0"
         }
+        if (!active) return
         if (active.current) active.current.style.border = "3px solid var(--text)"
         setLastActive(active)
     }, [active])
@@ -150,19 +151,20 @@ const Carousel: React.FunctionComponent<Props> = (props) => {
         for (let i = 0; i < props.images.length; i++) {
             const img = props.images[i]
             if (functions.isVideo(img)) {
-                jsx.push(<video autoPlay muted loop disablePictureInPicture ref={imagesRef[i]} className="carousel-img" src={img} onClick={() => {props.set?.(img, i); setActive(imagesRef[i])}} style={props.height ? {height: `${props.height}px`} : {}}></video>)
+                jsx.push(<video key={i} autoPlay muted loop disablePictureInPicture ref={imagesRef[i]} className="carousel-img" src={img} onClick={() => {props.set?.(img, i); setActive(imagesRef[i])}} style={props.height ? {height: `${props.height}px`} : {}}></video>)
             } else {
-                jsx.push(<img ref={imagesRef[i]} className="carousel-img" src={img} onClick={() => {props.set?.(img, i); setActive(imagesRef[i])}} style={props.height ? {height: `${props.height}px`} : {}}/>)
+                jsx.push(<img key={i} ref={imagesRef[i]} className="carousel-img" src={img} onClick={() => {props.set?.(img, i); setActive(imagesRef[i])}} style={props.height ? {height: `${props.height}px`} : {}}/>)
             }
         }
         return jsx
     }
 
-    const handleWheel = (event: any) => {
+    const handleWheel = (event: React.WheelEvent) => {
         event.preventDefault()
         if (!sliderRef.current) return
         let marginLeft = parseInt(sliderRef.current.style.marginLeft)
         if (Number.isNaN(marginLeft)) marginLeft = 0
+        // @ts-ignore
         const trackPad = event.wheelDeltaY ? event.wheelDeltaY === -3 * event.deltaY : event.deltaMode === 0
         if (Math.abs(event.deltaY) < 5) {
             if (event.deltaX < 0) {
@@ -190,12 +192,12 @@ const Carousel: React.FunctionComponent<Props> = (props) => {
         sliderRef.current.style.marginLeft = `${marginLeft}px`
     }
     
-    const handleMouseDown = (event: any) => {
+    const handleMouseDown = (event: React.MouseEvent) => {
         setDragging(true)
         startX = event.pageX
     }
 
-    const handleMouseMove = (event: any) => {
+    const handleMouseMove = (event: React.MouseEvent) => {
         if (!dragging) return
         if (!sliderRef.current) return
         let marginLeft = parseInt(sliderRef.current.style.marginLeft)
@@ -211,7 +213,34 @@ const Carousel: React.FunctionComponent<Props> = (props) => {
         startX = event.pageX
     }
 
-    const handleMouseUp = (event: any) => {
+    const handleMouseUp = (event: React.MouseEvent) => {
+        setDragging(false)
+    }
+
+    const handleTouchStart = (event: React.TouchEvent) => {
+        if (!event.touches.length) return
+        setDragging(true)
+        startX = event.touches[0].pageX
+    }
+
+    const handleTouchMove = (event: React.TouchEvent) => {
+        if (!event.touches.length) return
+        if (!dragging) return
+        if (!sliderRef.current) return
+        let marginLeft = parseInt(sliderRef.current.style.marginLeft)
+        if (Number.isNaN(marginLeft)) marginLeft = 0
+        if (event.touches[0].pageX < startX) {
+            marginLeft -= 10
+        } else if (event.touches[0].pageX > startX) {
+            marginLeft += 10
+        }
+        if (marginLeft > 0) marginLeft = 0
+        if (lastPos) if (marginLeft < lastPos) marginLeft = lastPos
+        sliderRef.current.style.marginLeft = `${marginLeft}px`
+        startX = event.touches[0].pageX
+    }
+
+    const handleTouchEnd = (event: React.TouchEvent) => {
         setDragging(false)
     }
 
@@ -265,7 +294,7 @@ const Carousel: React.FunctionComponent<Props> = (props) => {
     return (
         <div className="carousel">
             <img className={`carousel-left ${showLeftArrow ? "arrow-visible" : ""}`} src={getArrowLeft()} onMouseEnter={arrowLeftEnter} onMouseLeave={() => setShowLeftArrow(false)} onClick={arrowLeftClick}/>
-            <div ref={sliderRef} className="slider" onMouseDown={handleMouseDown} onMouseMove={handleMouseMove} onMouseUp={handleMouseUp}
+            <div ref={sliderRef} className="slider" onMouseDown={handleMouseDown} onMouseMove={handleMouseMove} onMouseUp={handleMouseUp} onTouchStart={handleTouchStart} onTouchMove={handleTouchMove} onTouchEnd={handleTouchEnd}
             onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                 {generateJSX()}
             </div>

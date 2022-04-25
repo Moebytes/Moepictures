@@ -1,11 +1,12 @@
 import React, {useContext, useEffect, useState, useRef, useReducer} from "react"
+import {useHistory} from "react-router-dom"
 import {HashLink as Link} from "react-router-hash-link"
 import Slider from "react-slider"
 import {ThemeContext, HideSidebarContext, HideNavbarContext, HideSortbarContext, ActiveDropdownContext, 
 SizeTypeContext, BrightnessContext, ContrastContext, HueContext, SaturationContext, LightnessContext,
 BlurContext, SharpenContext, EnableDragContext, FilterDropActiveContext, SquareContext, PixelateContext,
 ShowDownloadDialogContext, HideTitlebarContext, ImageTypeContext, RestrictTypeContext, SortTypeContext,
-StyleTypeContext, SpeedContext, ReverseContext, MobileContext} from "../Context"
+StyleTypeContext, SpeedContext, ReverseContext, MobileContext, RelativeContext} from "../Context"
 import leftArrow from "../assets/purple/leftArrow.png"
 import leftArrowMagenta from "../assets/magenta/leftArrow.png"
 import rightArrow from "../assets/purple/rightArrow.png"
@@ -104,6 +105,7 @@ const SortBar: React.FunctionComponent = (props) => {
     const {speed, setSpeed} = useContext(SpeedContext)
     const {reverse, setReverse} = useContext(ReverseContext)
     const {mobile, setMobile} = useContext(MobileContext)
+    const {relative, setRelative} = useContext(RelativeContext)
     const [dropLeft, setDropLeft] = useState(0)
     const [dropTop, setDropTop] = useState(0)
     const imageRef = useRef(null) as any
@@ -113,6 +115,7 @@ const SortBar: React.FunctionComponent = (props) => {
     const sortRef = useRef(null) as any
     const filterRef = useRef(null) as any
     const speedRef = useRef(null) as any
+    const history = useHistory()
 
     useEffect(() => {
         const savedType = localStorage.getItem("type")
@@ -168,10 +171,10 @@ const SortBar: React.FunctionComponent = (props) => {
 
     useEffect(() => {
         setActiveDropdown("none")
-        if (hideSidebar) {
+        if (hideSidebar || mobile) {
             setDropLeft(0)
         } else {
-            setDropLeft(-Number(document.querySelector(".sidebar")?.clientWidth))
+            setDropLeft(-Number(document.querySelector(".sidebar")?.clientWidth || 0))
         }
     }, [hideSidebar])
 
@@ -404,21 +407,21 @@ const SortBar: React.FunctionComponent = (props) => {
 
     const getMobileImageJSX = () => {
         if (imageType === "image") {
-            return <img style={{height: "30px"}} className="sortbar-img" src={getImage()}/>
+            return <img style={{height: "30px"}} className="sortbar-img" src={getImage()} onClick={() => {setActiveDropdown(activeDropdown === "image" ? "none" : "image"); setFilterDropActive(false)}}/>
         } else if (imageType === "animation") {
-            return <img style={{height: "30px"}} className="sortbar-img" src={getAnimation()}/>
+            return <img style={{height: "30px"}} className="sortbar-img" src={getAnimation()} onClick={() => {setActiveDropdown(activeDropdown === "image" ? "none" : "image"); setFilterDropActive(false)}}/>
         } else if (imageType === "video") {
-            return <img style={{height: "30px"}} className="sortbar-img" src={getVideo()}/>
+            return <img style={{height: "30px"}} className="sortbar-img" src={getVideo()} onClick={() => {setActiveDropdown(activeDropdown === "image" ? "none" : "image"); setFilterDropActive(false)}}/>
         } else if (imageType === "comic") {
-            return <img style={{height: "30px"}} className="sortbar-img" src={getComic()}/>
+            return <img style={{height: "30px"}} className="sortbar-img" src={getComic()} onClick={() => {setActiveDropdown(activeDropdown === "image" ? "none" : "image"); setFilterDropActive(false)}}/>
         } else {
-            return <img style={{height: "30px"}} className="sortbar-img rotate" src={getAll()}/>
+            return <img style={{height: "30px"}} className="sortbar-img rotate" src={getAll()} onClick={() => {setActiveDropdown(activeDropdown === "image" ? "none" : "image"); setFilterDropActive(false)}}/>
         }
     }
 
     const getImageMargin = () => {
         const rect = imageRef.current?.getBoundingClientRect()
-        if (!rect) return "240px"
+        if (!rect || mobile) return "290px"
         const raw = rect.x
         let offset = 0
         if (imageType === "all") offset = -30
@@ -463,19 +466,19 @@ const SortBar: React.FunctionComponent = (props) => {
 
     const getMobileRestrictJSX = () => {
         if (restrictType === "safe") {
-            return <img style={{height: "30px"}} className="sortbar-img" src={getSafe()}/>
+            return <img style={{height: "30px"}} className="sortbar-img" src={getSafe()} onClick={() => {setActiveDropdown(activeDropdown === "restrict" ? "none" : "restrict"); setFilterDropActive(false)}}/>
         } else if (restrictType === "questionable") {
-            return <img style={{height: "30px"}} className="sortbar-img" src={getQuestionable()}/>
+            return <img style={{height: "30px"}} className="sortbar-img" src={getQuestionable()} onClick={() => {setActiveDropdown(activeDropdown === "restrict" ? "none" : "restrict"); setFilterDropActive(false)}}/>
         } else if (restrictType === "explicit") {
-            return <img style={{height: "30px"}} className="sortbar-img" src={getExplicit()}/>
+            return <img style={{height: "30px"}} className="sortbar-img" src={getExplicit()} onClick={() => {setActiveDropdown(activeDropdown === "restrict" ? "none" : "restrict"); setFilterDropActive(false)}}/>
         } else {
-            return <img style={{height: "30px"}} className="sortbar-img rotate" src={getAll()}/>
+            return <img style={{height: "30px"}} className="sortbar-img rotate" src={getAll()} onClick={() => {setActiveDropdown(activeDropdown === "restrict" ? "none" : "restrict"); setFilterDropActive(false)}}/>
         }
     }
 
     const getRestrictMargin = () => {
         const rect = restrictRef.current?.getBoundingClientRect()
-        if (!rect) return "300px"
+        if (!rect || mobile) return "325px"
         const raw = rect.x
         let offset = 0
         if (restrictType === "all") offset = -35
@@ -526,21 +529,21 @@ const SortBar: React.FunctionComponent = (props) => {
 
     const getMobileStyleJSX = () => {
         if (styleType === "2d") {
-            return <img style={{height: "30px"}} className="sortbar-img" src={get2D()}/>
+            return <img style={{height: "30px"}} className="sortbar-img" src={get2D()} onClick={() => {setActiveDropdown(activeDropdown === "style" ? "none" : "style"); setFilterDropActive(false)}}/>
         } else if (styleType === "3d") {
-            return <img style={{height: "30px"}} className="sortbar-img" src={get3D()}/>
+            return <img style={{height: "30px"}} className="sortbar-img" src={get3D()} onClick={() => {setActiveDropdown(activeDropdown === "style" ? "none" : "style"); setFilterDropActive(false)}}/>
         } else if (styleType === "pixel") {
-            return <img style={{height: "30px"}} className="sortbar-img" src={getPixel()}/>
+            return <img style={{height: "30px"}} className="sortbar-img" src={getPixel()} onClick={() => {setActiveDropdown(activeDropdown === "style" ? "none" : "style"); setFilterDropActive(false)}}/>
         } else if (styleType === "chibi") {
-            return <img style={{height: "30px"}} className="sortbar-img" src={getChibi()}/>
+            return <img style={{height: "30px"}} className="sortbar-img" src={getChibi()} onClick={() => {setActiveDropdown(activeDropdown === "style" ? "none" : "style"); setFilterDropActive(false)}}/>
         } else {
-            return <img style={{height: "30px"}} className="sortbar-img rotate" src={getAll()}/>
+            return <img style={{height: "30px"}} className="sortbar-img rotate" src={getAll()} onClick={() => {setActiveDropdown(activeDropdown === "style" ? "none" : "style"); setFilterDropActive(false)}}/>
         }
     }
 
     const getStyleMargin = () => {
         const rect = styleRef.current?.getBoundingClientRect()
-        if (!rect) return "350px"
+        if (!rect || mobile) return "395px"
         const raw = rect.x
         let offset = 0
         if (styleType === "all") offset = -15
@@ -569,7 +572,7 @@ const SortBar: React.FunctionComponent = (props) => {
 
     const getSizeMargin = () => {
         const rect = sizeRef.current?.getBoundingClientRect()
-        if (!rect) return "250px"
+        if (!rect || mobile) return "45px"
         const raw = window.innerWidth - rect.right
         let offset = 0
         if (sizeType === "tiny") offset = -20
@@ -590,7 +593,7 @@ const SortBar: React.FunctionComponent = (props) => {
 
     const getSortMargin = () => {
         const rect = sortRef.current?.getBoundingClientRect()
-        if (!rect) return "0px"
+        if (!rect || mobile) return "0px"
         const raw = window.innerWidth - rect.right
         let offset = 0
         if (sortType === "date") offset = -50
@@ -615,7 +618,7 @@ const SortBar: React.FunctionComponent = (props) => {
 
     const getFiltersMargin = () => {
         const rect = filterRef.current?.getBoundingClientRect()
-        if (!rect) return "400px"
+        if (!rect) return "30px"
         const raw = window.innerWidth - rect.right
         let offset = -120
         return `${raw + offset}px`
@@ -663,76 +666,81 @@ const SortBar: React.FunctionComponent = (props) => {
         })
     }
 
-    if (mobile) return (
-        <div className="mobile-sortbar">
-            <img style={{height: "30px"}} className="sortbar-img" src={getUpload()}/>
-            <img style={{height: "30px"}} className="sortbar-img" src={getDownload()}/>
-            {getMobileImageJSX()}
-            {getMobileRestrictJSX()}
-            {getMobileStyleJSX()}
-            <img style={{height: "30px"}} className="sortbar-img" src={getSquare()}/>{/* 
-            {reverse ? <img className="sortbar-img" src={getReverse()} style={{transform: "scaleX(-1)"}}/> :
-            <img className="sortbar-img" src={getReverse()}/>}
-            <img className="sortbar-img" src={getSpeed()}/> */}
-            <img style={{height: "30px"}} className="sortbar-img" src={getFilters()}/>
-            <img style={{height: "30px"}} className="sortbar-img" src={getSize()}/>
-            <img style={{height: "30px"}} className="sortbar-img" src={getSort()}/>
-        </div>
-    )
+    let sortBarJSX = () => {
+        if (mobile) return (
+            <div className={`mobile-sortbar ${relative ? "mobile-sortbar-relative" : ""}`}>
+                <img style={{height: "30px"}} className="sortbar-img" src={getUpload()} onClick={() => history.push("/upload")}/>
+                <img style={{height: "30px"}} className="sortbar-img" src={getDownload()} onClick={() => setShowDownloadDialog((prev: boolean) => !prev)}/>
+                {getMobileImageJSX()}
+                {getMobileRestrictJSX()}
+                {getMobileStyleJSX()}
+                <img style={{height: "30px"}} className="sortbar-img" src={getSquare()} onClick={() => toggleSquare()}/>
+                {/* {reverse ? <img className="sortbar-img" src={getReverse()} style={{transform: "scaleX(-1)"}}/> :
+                <img className="sortbar-img" src={getReverse()}/>}
+                <img className="sortbar-img" src={getSpeed()}/> */}
+                <img style={{height: "30px"}} className="sortbar-img" src={getFilters()} onClick={() => toggleFilterDrop()}/>
+                <img style={{height: "30px"}} className="sortbar-img" src={getSize()} onClick={() => {setActiveDropdown(activeDropdown === "size" ? "none" : "size"); setFilterDropActive(false)}}/>
+                <img style={{height: "30px"}} className="sortbar-img" src={getSort()} onClick={() => {setActiveDropdown(activeDropdown === "sort" ? "none" : "sort"); setFilterDropActive(false)}}/>
+            </div>
+        )
+        return (
+            <div className={`sortbar ${hideSortbar ? "hide-sortbar" : ""} ${hideTitlebar ? "sortbar-top" : ""} 
+            ${hideSortbar && hideTitlebar && hideSidebar ? "translate-sortbar" : ""}`}
+            onMouseEnter={() => setMouseOver(true)} onMouseLeave={() => setMouseOver(false)}>
+                <div className="sortbar-left">
+                    <div className="sortbar-item">
+                        <img className="sortbar-img" src={getLeftArrow()} onClick={() => hideTheSidebar()}/>
+                    </div>
+                    <div className="sortbar-item">
+                        <img className="sortbar-img" src={getUpArrow()} onClick={() => hideTheTitlebar()}/>
+                    </div>
+                    <Link to="/upload" className="sortbar-item">
+                        <img className="sortbar-img" src={getUpload()}/>
+                        <span className="sortbar-text">Upload</span>
+                    </Link>
+                    <div className="sortbar-item" onClick={() => setShowDownloadDialog((prev: boolean) => !prev)}>
+                        <img className="sortbar-img" src={getDownload()}/>
+                        <span className="sortbar-text">Download</span>
+                    </div>
+                    {imageType !== "all" || styleType !== "all" || restrictType !== "all" ?
+                    <div className="sortbar-item" onClick={() => resetAll()}>
+                        <img className="sortbar-img-small" src={getReset()}/>
+                    </div> : null}
+                    {getImageJSX()}
+                    {getRestrictJSX()}
+                    {getStyleJSX()}
+                </div>
+                <div className="sortbar-right">
+                    <div className="sortbar-item" onClick={() => toggleSquare()}>
+                        <img className="sortbar-img" src={getSquare()}/>
+                    </div>
+                    <div className="sortbar-item" onClick={() => setReverse((prev: boolean) => !prev)}>
+                        {reverse ? <>
+                        <img className="sortbar-img" src={getReverse()} style={{transform: "scaleX(-1)"}}/>
+                        <span className="sortbar-text">Forward</span>
+                        </> : <>
+                        <img className="sortbar-img" src={getReverse()}/>
+                        <span className="sortbar-text">Reverse</span>
+                        </>}
+                    </div>
+                    <div className="sortbar-item" ref={speedRef} onClick={() => toggleSpeedDrop()}>
+                        <img className="sortbar-img" src={getSpeed()}/>
+                        <span className="sortbar-text">Speed</span>
+                    </div>
+                    <div className="sortbar-item" ref={filterRef} onClick={() => toggleFilterDrop()}>
+                        <img className="sortbar-img" src={getFilters()}/>
+                        <span className="sortbar-text">Filters</span>
+                    </div>
+                    {getSizeJSX()}
+                    {getSortJSX()}
+                </div>
+            </div>
+        )
+    }
 
     return (
         <>
-        <div className={`sortbar ${hideSortbar ? "hide-sortbar" : ""} ${hideTitlebar ? "sortbar-top" : ""} 
-        ${hideSortbar && hideTitlebar && hideSidebar ? "translate-sortbar" : ""}`}
-        onMouseEnter={() => setMouseOver(true)} onMouseLeave={() => setMouseOver(false)}>
-            <div className="sortbar-left">
-                <div className="sortbar-item">
-                    <img className="sortbar-img" src={getLeftArrow()} onClick={() => hideTheSidebar()}/>
-                </div>
-                <div className="sortbar-item">
-                    <img className="sortbar-img" src={getUpArrow()} onClick={() => hideTheTitlebar()}/>
-                </div>
-                <Link to="/upload" className="sortbar-item">
-                    <img className="sortbar-img" src={getUpload()}/>
-                    <span className="sortbar-text">Upload</span>
-                </Link>
-                <div className="sortbar-item" onClick={() => setShowDownloadDialog((prev: boolean) => !prev)}>
-                    <img className="sortbar-img" src={getDownload()}/>
-                    <span className="sortbar-text">Download</span>
-                </div>
-                {imageType !== "all" || styleType !== "all" || restrictType !== "all" ?
-                <div className="sortbar-item" onClick={() => resetAll()}>
-                    <img className="sortbar-img-small" src={getReset()}/>
-                </div> : null}
-                {getImageJSX()}
-                {getRestrictJSX()}
-                {getStyleJSX()}
-            </div>
-            <div className="sortbar-right">
-                <div className="sortbar-item" onClick={() => toggleSquare()}>
-                    <img className="sortbar-img" src={getSquare()}/>
-                </div>
-                <div className="sortbar-item" onClick={() => setReverse((prev: boolean) => !prev)}>
-                    {reverse ? <>
-                    <img className="sortbar-img" src={getReverse()} style={{transform: "scaleX(-1)"}}/>
-                    <span className="sortbar-text">Forward</span>
-                    </> : <>
-                    <img className="sortbar-img" src={getReverse()}/>
-                    <span className="sortbar-text">Reverse</span>
-                    </>}
-                </div>
-                <div className="sortbar-item" ref={speedRef} onClick={() => toggleSpeedDrop()}>
-                    <img className="sortbar-img" src={getSpeed()}/>
-                    <span className="sortbar-text">Speed</span>
-                </div>
-                <div className="sortbar-item" ref={filterRef} onClick={() => toggleFilterDrop()}>
-                    <img className="sortbar-img" src={getFilters()}/>
-                    <span className="sortbar-text">Filters</span>
-                </div>
-                {getSizeJSX()}
-                {getSortJSX()}
-            </div>
-        </div>
+        {sortBarJSX()}
         <div className="sortbar-dropdowns"
         onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
             <div className={`dropdown ${activeDropdown === "image" ? "" : "hide-dropdown"}`}

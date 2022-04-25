@@ -113,8 +113,9 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
         const scrollHandler = () => {
             const sidebar = document.querySelector(".sidebar") as HTMLElement
             const mobileSidebar = document.querySelector(".mobile-sidebar") as HTMLElement
-            if (!sidebar || !mobileSidebar) return
+            if (!sidebar && !mobileSidebar) return
             if (mobile) {
+                mobileSidebar.style.top = "0px"
                 mobileSidebar.style.height = "auto"
                 return
             }
@@ -157,8 +158,9 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
     useEffect(() => {
         const sidebar = document.querySelector(".sidebar") as HTMLElement
         const mobileSidebar = document.querySelector(".mobile-sidebar") as HTMLElement
-        if (!sidebar || !mobileSidebar) return
+        if (!sidebar && !mobileSidebar) return
         if (mobile) {
+            mobileSidebar.style.top = "0px"
             mobileSidebar.style.height = "auto"
             return
         }
@@ -194,8 +196,9 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
     useEffect(() => {
         const sidebar = document.querySelector(".sidebar") as HTMLElement
         const mobileSidebar = document.querySelector(".mobile-sidebar") as HTMLElement
-        if (!sidebar || !mobileSidebar) return
+        if (!sidebar && !mobileSidebar) return
         if (mobile) {
+            mobileSidebar.style.top = "0px"
             mobileSidebar.style.height = "auto"
             return
         }
@@ -431,7 +434,7 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
     }
 
     if (mobile) return (
-        <div className="mobile-sidebar">
+        <div className={`mobile-sidebar ${relative ? "mobile-sidebar-relative" : ""}`}>
             <div className="mobile-search-container">
                 <input className="mobile-search" type="search" spellCheck="false" value={search} onChange={(event) => setSearch(event.target.value)} onKeyDown={(event) => event.key === "Enter" ? triggerSearch() : null}/>
                 <img style={{height: "40px"}} className={!theme || theme === "purple" ? "search-icon" : `search-icon-${theme}`} src={getSearchIcon()} onClick={() => triggerSearch()}/>

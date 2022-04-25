@@ -44,6 +44,15 @@ const NavBar: React.FunctionComponent = (props) => {
 
     useEffect(() => {
         setShowMiniTitle(false)
+
+        const handleScroll = () => {
+            if (window.scrollY === 0) return
+            return setHideMobileNavbar(true)
+        }
+        window.addEventListener("scroll", handleScroll)
+        return () => {
+            window.removeEventListener("scroll", handleScroll)
+        }
     }, [])
 
     useEffect(() => {
@@ -147,7 +156,7 @@ const NavBar: React.FunctionComponent = (props) => {
     useEffect(() => {
         const query1 = (query: any) => {
             if (query.matches) {
-                let marginR = showMiniTitle ? "40px" : "50px"
+                let marginR = showMiniTitle ? "20px" : "50px"
                 setMarginR(marginR)
             } else {
                 let marginR = showMiniTitle ? "45px" : "70px"
@@ -169,17 +178,19 @@ const NavBar: React.FunctionComponent = (props) => {
                     {session.username ? 
                     <div className="mobile-nav-user-container">
                         <img className="mobile-nav-user-img" src={userImg}/>
-                        <span className="mobile-nav-text mobile-nav-user-text" onClick={() => history.push("/profile")}>{session.username}</span>
-                        <img className="mobile-nav-logout-img" src={logoutIcon} onClick={logout}/>
+                        <span className="mobile-nav-text mobile-nav-user-text" onClick={() => {history.push("/profile"); setHideMobileNavbar(true)}}>{session.username}</span>
+                        <img className="mobile-nav-logout-img" src={logoutIcon} onClick={() => {logout(); setHideMobileNavbar(true)}}/>
                     </div> :
-                    <span className="mobile-nav-text mobile-nav-user-text" onClick={() => history.push("/login")}>Login</span>}
-                    <span className="mobile-nav-text" onClick={() => history.push("/posts")}>Posts</span>
-                    <span className="mobile-nav-text" onClick={() => history.push("/comments")}>Comments</span>
-                    <span className="mobile-nav-text" onClick={() => history.push("/artists")}>Artists</span>
-                    <span className="mobile-nav-text" onClick={() => history.push("/characters")}>Characters</span>
-                    <span className="mobile-nav-text" onClick={() => history.push("/series")}>Series</span>
-                    <span className="mobile-nav-text" onClick={() => history.push("/tags")}>Tags</span>
-                    <span className="mobile-nav-text" onClick={() => history.push("/help")}>Help</span>
+                    <span className="mobile-nav-text mobile-nav-user-text" onClick={() => {history.push("/login"); setHideMobileNavbar(true)}}>Login</span>}
+                    <span className="mobile-nav-text" onClick={() => {history.push("/posts"); setHideMobileNavbar(true)}}>Posts</span>
+                    <span className="mobile-nav-text" onClick={() => {history.push("/comments"); setHideMobileNavbar(true)}}>Comments</span>
+                    <span className="mobile-nav-text" onClick={() => {history.push("/artists"); setHideMobileNavbar(true)}}>Artists</span>
+                    <span className="mobile-nav-text" onClick={() => {history.push("/characters"); setHideMobileNavbar(true)}}>Characters</span>
+                    <span className="mobile-nav-text" onClick={() => {history.push("/series"); setHideMobileNavbar(true)}}>Series</span>
+                    <span className="mobile-nav-text" onClick={() => {history.push("/tags"); setHideMobileNavbar(true)}}>Tags</span>
+                    <span className="mobile-nav-text" onClick={() => {history.push("/help"); setHideMobileNavbar(true)}}>Help</span>
+                    <span className="mobile-nav-text" onClick={() => {history.push("/terms"); setHideMobileNavbar(true)}}>Terms</span>
+                    <span className="mobile-nav-text" onClick={() => {history.push("/contact"); setHideMobileNavbar(true)}}>Contact</span>
                 </div>
                 <div className="mobile-nav-color-container">
                     <img className="mobile-nav-color" src={getEyeDropper()} onClick={colorChange}/>

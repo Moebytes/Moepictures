@@ -10,7 +10,7 @@ import XButtonMagenta from "../assets/magenta/x-button.png"
 import XButtonMagentaLight from "../assets/magenta-light/x-button.png"
 import DragAndDrop from "../components/DragAndDrop"
 import functions from "../structures/Functions"
-import {HideNavbarContext, HideSidebarContext, ThemeContext, EnableDragContext, 
+import {HideNavbarContext, HideSidebarContext, ThemeContext, EnableDragContext, MobileContext,
 RelativeContext, HideTitlebarContext, HeaderTextContext, SidebarTextContext} from "../Context"
 import "./styles/contactpage.less"
 
@@ -23,6 +23,7 @@ const ContactPage: React.FunctionComponent = (props) => {
     const {relative, setRelative} = useContext(RelativeContext)
     const {headerText, setHeaderText} = useContext(HeaderTextContext)
     const {sidebarText, setSidebarText} = useContext(SidebarTextContext)
+    const {mobile, setMobile} = useContext(MobileContext)
     const [clicked, setClicked] = useState(false)
     const [filename, setFileName] = useState("")
 
@@ -35,6 +36,14 @@ const ContactPage: React.FunctionComponent = (props) => {
         setSidebarText("")
         document.title = "Moebooru: Contact"
     }, [])
+
+    useEffect(() => {
+        if (mobile) {
+            setRelative(true)
+        } else {
+            setRelative(false)
+        }
+    }, [mobile])
 
     const fileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
         if (event.target.files) {

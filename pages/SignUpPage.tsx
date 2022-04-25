@@ -15,7 +15,7 @@ import showMagentaLight from "../assets/magenta-light/show.png"
 import hideMagentaLight from "../assets/magenta-light/hide.png"
 import DragAndDrop from "../components/DragAndDrop"
 import functions from "../structures/Functions"
-import {HideNavbarContext, HideSidebarContext, ThemeContext, EnableDragContext, RelativeContext, HideTitlebarContext,
+import {HideNavbarContext, HideSidebarContext, ThemeContext, EnableDragContext, RelativeContext, HideTitlebarContext, MobileContext,
 HeaderTextContext, SidebarTextContext, SessionContext} from "../Context"
 import "./styles/signuppage.less"
 import axios from "axios"
@@ -30,6 +30,7 @@ const SignUpPage: React.FunctionComponent = (props) => {
     const {headerText, setHeaderText} = useContext(HeaderTextContext)
     const {sidebarText, setSidebarText} = useContext(SidebarTextContext)
     const {session, setSession} = useContext(SessionContext)
+    const {mobile, setMobile} = useContext(MobileContext)
     const [showPassword, setShowPassword] = useState(false)
     const [showPassword2, setShowPassword2] = useState(false)
     const [email, setEmail] = useState("")
@@ -50,6 +51,14 @@ const SignUpPage: React.FunctionComponent = (props) => {
         setSidebarText("")
         document.title = "Moebooru: Sign Up"
     }, [])
+
+    useEffect(() => {
+        if (mobile) {
+            setRelative(true)
+        } else {
+            setRelative(false)
+        }
+    }, [mobile])
 
     useEffect(() => {
         if (!session.cookie) return

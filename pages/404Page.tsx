@@ -6,7 +6,8 @@ import SortBar from "../components/SortBar"
 import Footer from "../components/Footer"
 import $404 from "../assets/misc/404.png"
 import DragAndDrop from "../components/DragAndDrop"
-import {HideNavbarContext, HideSidebarContext, ThemeContext, RelativeContext, HideTitlebarContext, HeaderTextContext, SidebarTextContext} from "../Context"
+import {HideNavbarContext, HideSidebarContext, ThemeContext, RelativeContext, HideTitlebarContext, HeaderTextContext, SidebarTextContext,
+MobileContext} from "../Context"
 import "./styles/404page.less"
 
 const $404Page: React.FunctionComponent = (props) => {
@@ -17,6 +18,7 @@ const $404Page: React.FunctionComponent = (props) => {
     const {relative, setRelative} = useContext(RelativeContext)
     const {headerText, setHeaderText} = useContext(HeaderTextContext)
     const {sidebarText, setSidebarText} = useContext(SidebarTextContext)
+    const {mobile, setMobile} = useContext(MobileContext)
 
     useEffect(() => {
         setHideNavbar(false)
@@ -27,6 +29,14 @@ const $404Page: React.FunctionComponent = (props) => {
         setSidebarText("404 error.")
         document.title = "Moebooru: 404 Error"
     }, [])
+
+    useEffect(() => {
+        if (mobile) {
+            setRelative(true)
+        } else {
+            setRelative(false)
+        }
+    }, [mobile])
 
     return (
         <>

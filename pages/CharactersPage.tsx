@@ -13,7 +13,7 @@ import sort from "../assets/purple/sort.png"
 import CharacterRow from "../components/CharacterRow"
 import sortMagenta from "../assets/magenta/sort.png"
 import axios from "axios"
-import {ThemeContext, EnableDragContext, HideNavbarContext, HideSidebarContext, RelativeContext, 
+import {ThemeContext, EnableDragContext, HideNavbarContext, HideSidebarContext, RelativeContext, MobileContext,
 HideTitlebarContext, ActiveDropdownContext, HeaderTextContext, SidebarTextContext} from "../Context"
 import "./styles/characterspage.less"
 
@@ -27,6 +27,7 @@ const CharactersPage: React.FunctionComponent = (props) => {
     const {activeDropdown, setActiveDropdown} = useContext(ActiveDropdownContext)
     const {headerText, setHeaderText} = useContext(HeaderTextContext)
     const {sidebarText, setSidebarText} = useContext(SidebarTextContext)
+    const {mobile, setMobile} = useContext(MobileContext)
     const [sortType, setSortType] = useState("alphabetic")
     const [characters, setCharacters] = useState([]) as any
     const [index, setIndex] = useState(0)
@@ -52,6 +53,14 @@ const CharactersPage: React.FunctionComponent = (props) => {
         document.title = "Moebooru: Characters"
         updateCharacters()
     }, [])
+
+    useEffect(() => {
+        if (mobile) {
+            setRelative(true)
+        } else {
+            setRelative(false)
+        }
+    }, [mobile])
 
     useEffect(() => {
         updateCharacters()

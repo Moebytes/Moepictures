@@ -311,6 +311,7 @@
 .mobile-sidebar {
     position: sticky;
     top: 77px;
+    top: 0px;
     z-index: 1000;
     display: flex;
     flex-direction: column;
@@ -319,6 +320,11 @@
     background-color: var(--sidebarBG);
     transition: background-color 0s;
     padding: 10px;
+}
+
+.mobile-sidebar-relative {
+    position: relative;
+    top: 0px;
 }
 
 .mobile-search-container {

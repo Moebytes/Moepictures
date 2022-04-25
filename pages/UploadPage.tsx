@@ -26,7 +26,7 @@ import Carousel from "../components/Carousel"
 import PostImage from "../components/PostImage"
 import DragAndDrop from "../components/DragAndDrop"
 import {HideNavbarContext, HideSidebarContext, RelativeContext, ThemeContext, EnableDragContext, HideTitlebarContext, 
-UploadDropFilesContext, BrightnessContext, ContrastContext, HueContext, SaturationContext, LightnessContext,
+UploadDropFilesContext, BrightnessContext, ContrastContext, HueContext, SaturationContext, LightnessContext, MobileContext,
 BlurContext, SharpenContext, PixelateContext, HeaderTextContext, SessionContext, SidebarTextContext, RedirectContext} from "../Context"
 import fileType from "magic-bytes.js"
 import localforage from "localforage"
@@ -59,6 +59,7 @@ const UploadPage: React.FunctionComponent = (props) => {
     const {session, setSession} = useContext(SessionContext)
     const {redirect, setRedirect} = useContext(RedirectContext)
     const {uploadDropFiles, setUploadDropFiles} = useContext(UploadDropFilesContext)
+    const {mobile, setMobile} = useContext(MobileContext)
     const [displayImage, setDisplayImage] = useState(false)
     const [uploadError, setUploadError] = useState(false)
     const [submitError, setSubmitError] = useState(false)
@@ -112,6 +113,14 @@ const UploadPage: React.FunctionComponent = (props) => {
         setSharpen(0)
         setPixelate(1)
     }, [])
+
+    useEffect(() => {
+        if (mobile) {
+            setRelative(true)
+        } else {
+            setRelative(false)
+        }
+    }, [mobile])
 
     useEffect(() => {
         if (!session.cookie) return
@@ -820,6 +829,34 @@ const UploadPage: React.FunctionComponent = (props) => {
                         </div>
                     </div> : <>
                     {uploadError ? <div className="upload-row"><span ref={uploadErrorRef} className="upload-text-alt"></span></div> : null}
+                    {mobile ? <>
+                    <div className="upload-row">
+                        <label htmlFor="file-upload" className="upload-button">
+                            <img className="upload-button-img" src={uploadIcon}/>
+                            <span className="upload-button-text">Select Files</span>
+                        </label>
+                        <input id="file-upload" type="file" multiple onChange={(event) => upload(event)}/>
+                        <button className="upload-button" onClick={() => setShowLinksInput((prev) => !prev)}>
+                                <img className="upload-button-img" src={linkIcon}/>
+                                <span className="upload-button-text">Enter Links</span>
+                        </button>
+                    </div>
+                    <div className="upload-row">
+                        {acceptedURLs.length > 1 ?
+                        <button className="upload-button" onClick={left}>
+                            <img className="upload-button-img" src={leftIcon}/>
+                        </button> : null}
+                        {currentImg ? 
+                        <button className="upload-button" onClick={clear}>
+                            <img className="upload-button-img" src={xIcon}/>
+                        </button>
+                        : null}
+                        {acceptedURLs.length > 1 ?
+                        <button className="upload-button" onClick={right}>
+                            <img className="upload-button-img" src={rightIcon}/>
+                        </button> : null}
+                    </div> </>
+                    :
                     <div className="upload-row">
                         <label htmlFor="file-upload" className="upload-button">
                             <img className="upload-button-img" src={uploadIcon}/>
@@ -843,7 +880,7 @@ const UploadPage: React.FunctionComponent = (props) => {
                         <button className="upload-button" onClick={right}>
                             <img className="upload-button-img" src={rightIcon}/>
                         </button> : null}
-                    </div>
+                    </div>}
                     {showLinksInput ?
                     <div className="upload-row">
                         <textarea ref={enterLinksRef} className="upload-textarea" spellCheck={false} onChange={(event) => linkUpload(event)}
@@ -863,6 +900,28 @@ const UploadPage: React.FunctionComponent = (props) => {
                 : null}
                 <span className="upload-heading">Classification</span>
                 <span className="upload-text-alt">If there are multiple images, select the rightmost tag that fits.</span>
+                {mobile ? <>
+                <div className="upload-row">
+                    <button className={`upload-button ${type === "image" ? "button-selected" : ""}`} onClick={() => setType("image")}>
+                        <img className="upload-button-img" src={image}/>
+                        <span className="upload-button-text">Image</span>
+                    </button>
+                    <button className={`upload-button ${type === "animation" ? "button-selected" : ""}`} onClick={() => setType("animation")}>
+                        <img className="upload-button-img" src={animation}/>
+                        <span className="upload-button-text">Animation</span>
+                    </button>
+                </div>
+                <div className="upload-row">
+                    <button className={`upload-button ${type === "video" ? "button-selected" : ""}`} onClick={() => setType("video")}>
+                        <img className="upload-button-img" src={video}/>
+                        <span className="upload-button-text">Video</span>
+                    </button>
+                    <button className={`upload-button ${type === "comic" ? "button-selected" : ""}`} onClick={() => setType("comic")}>
+                        <img className="upload-button-img" src={comic}/>
+                        <span className="upload-button-text">Comic</span>
+                    </button>
+                </div> </>
+                :
                 <div className="upload-row">
                     <button className={`upload-button ${type === "image" ? "button-selected" : ""}`} onClick={() => setType("image")}>
                         <img className="upload-button-img" src={image}/>
@@ -880,7 +939,25 @@ const UploadPage: React.FunctionComponent = (props) => {
                         <img className="upload-button-img" src={comic}/>
                         <span className="upload-button-text">Comic</span>
                     </button>
+                </div>}
+                {mobile ? <>
+                <div className="upload-row">
+                    <button className={`upload-button ${restrict === "safe" ? "button-selected" : ""}`} onClick={() => setRestrict("safe")}>
+                        <img className="upload-button-img" src={safe}/>
+                        <span className="upload-button-text">Safe</span>
+                    </button>
+                    <button className={`upload-button ${restrict === "questionable" ? "button-selected" : ""}`} onClick={() => setRestrict("questionable")}>
+                        <img className="upload-button-img" src={questionable}/>
+                        <span className="upload-button-text">Questionable</span>
+                    </button>
                 </div>
+                <div className="upload-row">
+                    <button className={`upload-button ${restrict === "explicit" ? "button-selected" : ""}`} onClick={() => setRestrict("explicit")}>
+                        <img className="upload-button-img" src={explicit}/>
+                        <span className="upload-button-text">Explicit</span>
+                    </button>
+                </div> </>
+                :
                 <div className="upload-row">
                     <button className={`upload-button ${restrict === "safe" ? "button-selected" : ""}`} onClick={() => setRestrict("safe")}>
                         <img className="upload-button-img" src={safe}/>
@@ -894,7 +971,7 @@ const UploadPage: React.FunctionComponent = (props) => {
                         <img className="upload-button-img" src={explicit}/>
                         <span className="upload-button-text">Explicit</span>
                     </button>
-                </div>
+                </div>}
                 <div className="upload-row">
                     <button className={`upload-button ${style === "2d" ? "button-selected" : ""}`} onClick={() => setStyle("2d")}>
                         <img className="upload-button-img" src={$2d}/>

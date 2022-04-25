@@ -2,7 +2,7 @@ import React, {useContext, useEffect, useRef, useState} from "react"
 import {useHistory} from "react-router-dom"
 import loading from "../assets/purple/loading.gif"
 import loadingMagenta from "../assets/magenta/loading.gif"
-import {ThemeContext, SizeTypeContext, BrightnessContext, ContrastContext, HueContext, SaturationContext, LightnessContext,
+import {ThemeContext, SizeTypeContext, BrightnessContext, ContrastContext, HueContext, SaturationContext, LightnessContext, MobileContext,
 BlurContext, SharpenContext, SquareContext, PixelateContext, DownloadFlagContext, DownloadURLsContext, SpeedContext, ReverseContext} from "../Context"
 import {HashLink as Link} from "react-router-hash-link"
 import gifFrames from "gif-frames"
@@ -34,6 +34,7 @@ const GridImage: React.FunctionComponent<Props> = (props) => {
     const {square, setSquare} = useContext(SquareContext)
     const {downloadFlag, setDownloadFlag} = useContext(DownloadFlagContext)
     const {downloadURLs, setDownloadURLs} = useContext(DownloadURLsContext)
+    const {mobile, setMobile} = useContext(MobileContext)
     const containerRef = useRef<HTMLDivElement>(null)
     const pixelateRef = useRef<HTMLCanvasElement>(null)
     const overlayRef = useRef<HTMLImageElement>(null)
@@ -306,6 +307,13 @@ const GridImage: React.FunctionComponent<Props> = (props) => {
     }
 
     const getSquareOffset = () => {
+        if (mobile) {
+            if (sizeType === "tiny") return 20
+            if (sizeType === "small") return 20
+            if (sizeType === "medium") return 25
+            if (sizeType === "large") return 30
+            if (sizeType === "massive") return 30
+        }
         if (sizeType === "tiny") return 10
         if (sizeType === "small") return 12
         if (sizeType === "medium") return 15
@@ -320,8 +328,9 @@ const GridImage: React.FunctionComponent<Props> = (props) => {
         const refWidth = functions.isVideo(props.img) ? videoRef.current!.clientWidth : ref.current!.width
         const refHeight = functions.isVideo(props.img) ? videoRef.current!.clientHeight : ref.current!.height
         if (square) {
-            const width = window.innerWidth - document.querySelector(".sidebar")?.clientWidth!
-            const containerWidth = Math.floor(width / functions.getImagesPerRow(sizeType)) - getSquareOffset()
+            const sidebarWidth = document.querySelector(".sidebar")?.clientWidth || 0
+            const width = window.innerWidth - sidebarWidth
+            const containerWidth = Math.floor(width / (mobile ? functions.getImagesPerRowMobile(sizeType) : functions.getImagesPerRow(sizeType))) - getSquareOffset()
             containerRef.current.style.width = `${containerWidth}px`
             containerRef.current.style.height = `${containerWidth}px`
             containerRef.current.style.marginBottom = "3px"
@@ -357,16 +366,30 @@ const GridImage: React.FunctionComponent<Props> = (props) => {
     }, [imageLoaded, sizeType])
 
     useEffect(() => {
-        if (sizeType === "tiny") {
-            setImageSize(160)
-        } else if (sizeType === "small") {
-            setImageSize(200)
-        } else if (sizeType === "medium") {
-            setImageSize(270)
-        } else if (sizeType === "large") {
-            setImageSize(400)
-        } else if (sizeType === "massive") {
-            setImageSize(500)
+        if (mobile) {
+            if (sizeType === "tiny") {
+                setImageSize(70)
+            } else if (sizeType === "small") {
+                setImageSize(100)
+            } else if (sizeType === "medium") {
+                setImageSize(150)
+            } else if (sizeType === "large") {
+                setImageSize(230)
+            } else if (sizeType === "massive") {
+                setImageSize(500)
+            }
+        } else {
+            if (sizeType === "tiny") {
+                setImageSize(160)
+            } else if (sizeType === "small") {
+                setImageSize(200)
+            } else if (sizeType === "medium") {
+                setImageSize(270)
+            } else if (sizeType === "large") {
+                setImageSize(400)
+            } else if (sizeType === "massive") {
+                setImageSize(500)
+            }
         }
     }, [sizeType])
 
@@ -595,12 +618,13 @@ const GridImage: React.FunctionComponent<Props> = (props) => {
     return (
         <div className="image-box" id={String(props.id)} ref={containerRef} onMouseDown={mouseDown} onMouseUp={mouseUp} onMouseMove={mouseMove}>
             <div className="image-filters" ref={imageFiltersRef} onMouseMove={(event) => imageAnimation(event)} onMouseLeave={() => cancelImageAnimation()}>
+                {functions.isVideo(props.img) ? <video autoPlay loop muted disablePictureInPicture playsInline className="dummy-video" ref={videoRef} src={props.img}></video> : null}   
                 <img className="lightness-overlay" ref={lightnessRef} src={functions.isVideo(props.img) ? backFrame : props.img}/>
                 <img className="sharpen-overlay" ref={overlayRef} src={props.img}/>
                 {functions.isVideo(props.img) ? <canvas className="sharpen-overlay" ref={videoOverlayRef}></canvas> : null}
                 <canvas className="pixelate-canvas" ref={pixelateRef}></canvas>
                 {functions.isVideo(props.img) ? <>
-                <video autoPlay loop muted disablePictureInPicture className="video" ref={videoRef} src={props.img} onLoadedData={(event) => onLoad(event)}></video></> :
+                <video autoPlay loop muted disablePictureInPicture playsInline className="video" ref={videoRef} src={props.img} onLoadedData={(event) => onLoad(event)}></video></> :
                 <img className="image" ref={ref} src={props.img} onLoad={(event) => onLoad(event)}/>}
                 </div>
         </div>

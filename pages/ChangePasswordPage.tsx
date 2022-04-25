@@ -15,7 +15,7 @@ import showMagentaLight from "../assets/magenta-light/show.png"
 import hideMagentaLight from "../assets/magenta-light/hide.png"
 import DragAndDrop from "../components/DragAndDrop"
 import functions from "../structures/Functions"
-import {HideNavbarContext, HideSidebarContext, ThemeContext, EnableDragContext, RedirectContext,
+import {HideNavbarContext, HideSidebarContext, ThemeContext, EnableDragContext, RedirectContext, MobileContext,
 RelativeContext, HideTitlebarContext, HeaderTextContext, SidebarTextContext, SessionContext} from "../Context"
 import axios from "axios"
 import "./styles/changepasspage.less"
@@ -31,6 +31,7 @@ const ChangePasswordPage: React.FunctionComponent = (props) => {
     const {relative, setRelative} = useContext(RelativeContext)
     const {session, setSession} = useContext(SessionContext)
     const {redirect, setRedirect} = useContext(RedirectContext)
+    const {mobile, setMobile} = useContext(MobileContext)
 
     const [submitted, setSubmitted] = useState(false)
     const [showPassword, setShowPassword] = useState(false)
@@ -52,6 +53,14 @@ const ChangePasswordPage: React.FunctionComponent = (props) => {
         setSidebarText("")
         document.title = "Moebooru: Change Password"
     }, [])
+
+    useEffect(() => {
+        if (mobile) {
+            setRelative(true)
+        } else {
+            setRelative(false)
+        }
+    }, [mobile])
 
     useEffect(() => {
         if (!session.cookie) return

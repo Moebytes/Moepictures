@@ -74,7 +74,6 @@
     width: 100%;
     height: 100%;
     opacity: 1;
-    visibility: visible;
     transition: opacity 0.4s;
 }
 
@@ -108,7 +107,7 @@
 
 .hide-nav-search {
     opacity: 0;
-    visibility: hidden;
+    display: none;
 }
 
 .nav-mini-title-container {
@@ -223,9 +222,10 @@
 
 .mobile-nav-logout-img {
     width: auto;
-    height: 15px;
+    height: 18px;
     margin-left: 7px;
     cursor: pointer;
+    margin-top: 6px;
     &:hover {
         filter: brightness(130%);
     }

@@ -12,7 +12,7 @@ import searchMagentaLight from "../assets/magenta-light/search.png"
 import sort from "../assets/purple/sort.png"
 import CommentRow from "../components/CommentRow"
 import sortMagenta from "../assets/magenta/sort.png"
-import {ThemeContext, EnableDragContext, HideNavbarContext, HideSidebarContext, 
+import {ThemeContext, EnableDragContext, HideNavbarContext, HideSidebarContext, MobileContext,
 RelativeContext, HideTitlebarContext, ActiveDropdownContext, HeaderTextContext, SidebarTextContext} from "../Context"
 import "./styles/commentspage.less"
 import axios from "axios"
@@ -27,6 +27,7 @@ const CommentsPage: React.FunctionComponent = (props) => {
     const {activeDropdown, setActiveDropdown} = useContext(ActiveDropdownContext)
     const {headerText, setHeaderText} = useContext(HeaderTextContext)
     const {sidebarText, setSidebarText} = useContext(SidebarTextContext)
+    const {mobile, setMobile} = useContext(MobileContext)
     const [sortType, setSortType] = useState("date")
     const [comments, setComments] = useState([]) as any
     const [index, setIndex] = useState(0)
@@ -52,6 +53,14 @@ const CommentsPage: React.FunctionComponent = (props) => {
         document.title = "Moebooru: Comments"
         updateComments()
     }, [])
+
+    useEffect(() => {
+        if (mobile) {
+            setRelative(true)
+        } else {
+            setRelative(false)
+        }
+    }, [mobile])
 
     useEffect(() => {
         updateComments()

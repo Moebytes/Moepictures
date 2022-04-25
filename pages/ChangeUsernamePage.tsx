@@ -8,7 +8,7 @@ import Footer from "../components/Footer"
 import DragAndDrop from "../components/DragAndDrop"
 import functions from "../structures/Functions"
 import axios from "axios"
-import {HideNavbarContext, HideSidebarContext, ThemeContext, EnableDragContext, SessionFlagContext, RedirectContext,
+import {HideNavbarContext, HideSidebarContext, ThemeContext, EnableDragContext, SessionFlagContext, RedirectContext, MobileContext,
 RelativeContext, HideTitlebarContext, HeaderTextContext, SidebarTextContext, SessionContext} from "../Context"
 import "./styles/changeusernamepage.less"
 
@@ -24,6 +24,7 @@ const ChangeUsernamePage: React.FunctionComponent = (props) => {
     const {session, setSession} = useContext(SessionContext)
     const {sessionFlag, setSessionFlag} = useContext(SessionFlagContext)
     const {redirect, setRedirect} = useContext(RedirectContext)
+    const {mobile, setMobile} = useContext(MobileContext)
     const [submitted, setSubmitted] = useState(false)
     const [newUsername, setNewUsername] = useState("")
     const [error, setError] = useState(false)
@@ -39,6 +40,14 @@ const ChangeUsernamePage: React.FunctionComponent = (props) => {
         setSidebarText("")
         document.title = "Moebooru: Change Username"
     }, [])
+
+    useEffect(() => {
+        if (mobile) {
+            setRelative(true)
+        } else {
+            setRelative(false)
+        }
+    }, [mobile])
 
     useEffect(() => {
         if (!session.cookie) return

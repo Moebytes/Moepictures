@@ -12,7 +12,7 @@ import Commentary from "../components/Commentary"
 import functions from "../structures/Functions"
 import DragAndDrop from "../components/DragAndDrop"
 import Carousel from "../components/Carousel"
-import {HideNavbarContext, HideSidebarContext, RelativeContext, DownloadFlagContext, DownloadURLsContext, HideTitlebarContext,
+import {HideNavbarContext, HideSidebarContext, RelativeContext, DownloadFlagContext, DownloadURLsContext, HideTitlebarContext, MobileContext,
 PostsContext, TagsContext, HeaderTextContext, SearchContext, SidebarTextContext, SessionContext} from "../Context"
 import axios from "axios"
 import "./styles/postpage.less"
@@ -33,6 +33,7 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
     const {headerText, setHeaderText} = useContext(HeaderTextContext)
     const {sidebarText, setSidebarText} = useContext(SidebarTextContext)
     const {session, setSession} = useContext(SessionContext)
+    const {mobile, setMobile} = useContext(MobileContext)
     const [images, setImages] = useState([]) as any
     const [image, setImage] = useState("") as any
     const [post, setPost] = useState(null) as any
@@ -47,6 +48,12 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
         setSidebarText("")
         document.title = "Moebooru: Post"
     }, [])
+
+    useEffect(() => {
+        if (mobile) {
+            setRelative(true)
+        }
+    }, [mobile])
 
     useEffect(() => {
         const updatePost = async () => {

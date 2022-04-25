@@ -15,7 +15,7 @@ import showMagentaLight from "../assets/magenta-light/show.png"
 import hideMagentaLight from "../assets/magenta-light/hide.png"
 import DragAndDrop from "../components/DragAndDrop"
 import functions from "../structures/Functions"
-import {HideNavbarContext, HideSidebarContext, ThemeContext, EnableDragContext, RelativeContext, HideTitlebarContext,
+import {HideNavbarContext, HideSidebarContext, ThemeContext, EnableDragContext, RelativeContext, HideTitlebarContext, MobileContext,
 HeaderTextContext, SidebarTextContext} from "../Context"
 import axios from "axios"
 import "./styles/resetpasspage.less"
@@ -29,6 +29,7 @@ const ResetPasswordPage: React.FunctionComponent = (props) => {
     const {relative, setRelative} = useContext(RelativeContext)
     const {headerText, setHeaderText} = useContext(HeaderTextContext)
     const {sidebarText, setSidebarText} = useContext(SidebarTextContext)
+    const {mobile, setMobile} = useContext(MobileContext)
     const [submitted, setSubmitted] = useState(false)
     const [showPassword, setShowPassword] = useState(false)
     const [showPassword2, setShowPassword2] = useState(false)
@@ -52,6 +53,14 @@ const ResetPasswordPage: React.FunctionComponent = (props) => {
         const username = new URLSearchParams(window.location.search).get("username")
         if (!token || !username) history.push("/posts")
     }, [])
+
+    useEffect(() => {
+        if (mobile) {
+            setRelative(true)
+        } else {
+            setRelative(false)
+        }
+    }, [mobile])
 
     const getEye = () => {
         if (theme === "purple") return showPassword ? hide : show

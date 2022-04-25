@@ -13,7 +13,7 @@ import sort from "../assets/purple/sort.png"
 import ArtistRow from "../components/ArtistRow"
 import sortMagenta from "../assets/magenta/sort.png"
 import axios from "axios"
-import {ThemeContext, EnableDragContext, HideNavbarContext, HideSidebarContext, RelativeContext, 
+import {ThemeContext, EnableDragContext, HideNavbarContext, HideSidebarContext, RelativeContext, MobileContext,
 HideTitlebarContext, ActiveDropdownContext, HeaderTextContext, SidebarTextContext} from "../Context"
 import "./styles/artistspage.less"
 
@@ -27,6 +27,7 @@ const ArtistsPage: React.FunctionComponent = (props) => {
     const {activeDropdown, setActiveDropdown} = useContext(ActiveDropdownContext)
     const {headerText, setHeaderText} = useContext(HeaderTextContext)
     const {sidebarText, setSidebarText} = useContext(SidebarTextContext)
+    const {mobile, setMobile} = useContext(MobileContext)
     const [sortType, setSortType] = useState("alphabetic")
     const [artists, setArtists] = useState([]) as any
     const [index, setIndex] = useState(0)
@@ -52,6 +53,14 @@ const ArtistsPage: React.FunctionComponent = (props) => {
         document.title = "Moebooru: Artists"
         updateArtists()
     }, [])
+
+    useEffect(() => {
+        if (mobile) {
+            setRelative(true)
+        } else {
+            setRelative(false)
+        }
+    }, [mobile])
 
     useEffect(() => {
         updateArtists()

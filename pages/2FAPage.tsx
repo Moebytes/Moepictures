@@ -6,7 +6,7 @@ import NavBar from "../components/NavBar"
 import Footer from "../components/Footer"
 import SideBar from "../components/SideBar"
 import DragAndDrop from "../components/DragAndDrop"
-import {HideNavbarContext, HideSidebarContext, ThemeContext, EnableDragContext, RelativeContext, HideTitlebarContext, 
+import {HideNavbarContext, HideSidebarContext, ThemeContext, EnableDragContext, RelativeContext, HideTitlebarContext, MobileContext,
 HeaderTextContext, SidebarTextContext, SessionContext, SessionFlagContext} from "../Context"
 import functions from "../structures/Functions"
 import axios from "axios"
@@ -24,6 +24,7 @@ const $2FAPage: React.FunctionComponent = (props) => {
     const {sidebarText, setSidebarText} = useContext(SidebarTextContext)
     const {session, setSession} = useContext(SessionContext)
     const {sessionFlag, setSessionFlag} = useContext(SessionFlagContext)
+    const {mobile, setMobile} = useContext(MobileContext)
     const [error, setError] = useState(false)
     const [token, setToken] = useState("")
     const errorRef = useRef<any>(null)
@@ -38,6 +39,14 @@ const $2FAPage: React.FunctionComponent = (props) => {
         setSidebarText("")
         document.title = "Moebooru: 2-Factor Authentication"
     }, [])
+
+    useEffect(() => {
+        if (mobile) {
+            setRelative(true)
+        } else {
+            setRelative(false)
+        }
+    }, [mobile])
 
     useEffect(() => {
         if (!session.cookie) return

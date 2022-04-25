@@ -1,6 +1,6 @@
 import React, {useContext, useEffect, useRef, useState} from "react"
 import {ThemeContext, EnableDragContext, BrightnessContext, ContrastContext, HueContext, SaturationContext, LightnessContext,
-BlurContext, SharpenContext, PixelateContext, SessionContext} from "../Context"
+BlurContext, SharpenContext, PixelateContext, SessionContext, MobileContext} from "../Context"
 import {HashLink as Link} from "react-router-hash-link"
 import functions from "../structures/Functions"
 import Slider from "react-slider"
@@ -56,6 +56,7 @@ const PostImageOptions: React.FunctionComponent<Props> = (props) => {
     const {blur, setBlur} = useContext(BlurContext)
     const {sharpen, setSharpen} = useContext(SharpenContext)
     const {session, setSession} = useContext(SessionContext)
+    const {mobile, setMobile} = useContext(MobileContext)
     const [favorited, setFavorited] = useState(false)
     const [showFilterDropdown, setShowFilterDropdown] = useState(false)
     const [downloadText, setDownloadText] = useState("")
@@ -176,6 +177,7 @@ const PostImageOptions: React.FunctionComponent<Props> = (props) => {
         if (!rect) return "0px"
         const raw = window.innerWidth - rect.right
         let offset = -120
+        if (mobile) offset += 80
         return `${raw + offset}px`
     }
 
@@ -186,6 +188,7 @@ const PostImageOptions: React.FunctionComponent<Props> = (props) => {
         if (!rect || !bodyRect) return "0px"
         const raw = bodyRect.bottom - rect.bottom
         let offset = -225
+        if (mobile) offset += 25
         return `${raw + offset}px`
     }
 
@@ -200,6 +203,33 @@ const PostImageOptions: React.FunctionComponent<Props> = (props) => {
 
     return (
         <div className="post-image-options-container">
+            {mobile ? <>
+            <div className="post-image-options">
+                <div className="post-image-options-box" onClick={() => props.previous?.()} style={{marginRight: "15px"}} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
+                    <img className="post-image-icon-small" src={getPrevIcon()}/>
+                    <div className="post-image-text-small">Prev</div>
+                </div>
+                {session.username ?
+                <div className="post-image-options-box" onClick={() => setFavorited((prev) => !prev)} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
+                    <img className="post-image-icon" src={getStar()}/>
+                    <div className={`post-image-text ${favorited ? "favorited" : ""}`}>{favorited ? "Favorited" : "Favorite"}</div>
+                </div> : null}
+                <div className="post-image-options-box" onClick={() => props.next?.()} style={{marginLeft: "25px"}} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
+                    <div className="post-image-text-small">Next</div>
+                    <img className="post-image-icon-small" src={getNextIcon()}/>
+                </div>
+            </div>
+            <div className="post-image-options">
+                <div className="post-image-options-box" onClick={() => props.download?.()} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
+                    <img className="post-image-icon" src={getDownload()}/>
+                    <div className="post-image-text">Download</div>
+                </div>
+                <div className="post-image-options-box" ref={filterRef} onClick={() => setShowFilterDropdown((prev) => !prev)} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
+                    <img className="post-image-icon" src={getFilters()}/>
+                    <div className="post-image-text">Filters</div>
+                </div>
+            </div> </>
+             :
             <div className="post-image-options">
                 <div className="post-image-options-left">
                     <div className="post-image-options-box" onClick={() => props.previous?.()} style={{marginRight: "15px"}} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
@@ -228,52 +258,52 @@ const PostImageOptions: React.FunctionComponent<Props> = (props) => {
                         <div className="post-image-text-small">Next</div>
                         <img className="post-image-icon-small" src={getNextIcon()}/>
                     </div>
-                    <div className={`post-dropdown ${showFilterDropdown ? "" : "hide-post-dropdown"}`}
-                    style={{marginRight: getFilterMarginRight(), marginTop: getFilterMarginTop()}}>
-                        <div className="post-dropdown-row filters-row">
-                            <img className="post-dropdown-img" src={getBrightness()}/>
-                            <span className="post-dropdown-text">Brightness</span>
-                            <Slider className="filters-slider" trackClassName="filters-slider-track" thumbClassName="filters-slider-thumb" onChange={(value) => setBrightness(value)} min={60} max={140} step={1} value={brightness}/>
-                        </div>
-                        <div className="post-dropdown-row filters-row">
-                            <img className="post-dropdown-img" src={getContrast()} style={{marginLeft: "7px", marginRight: "-7px"}}/>
-                            <span className="post-dropdown-text">Contrast</span>
-                            <Slider className="filters-slider" trackClassName="filters-slider-track" thumbClassName="filters-slider-thumb" onChange={(value) => setContrast(value)} min={60} max={140} step={1} value={contrast}/>
-                        </div>
-                        <div className="post-dropdown-row filters-row">
-                            <img className="post-dropdown-img" src={getHue()} style={{marginLeft: "20px", marginRight: "-20px"}}/>
-                            <span className="post-dropdown-text">Hue</span>
-                            <Slider className="filters-slider" trackClassName="filters-slider-track" thumbClassName="filters-slider-thumb" onChange={(value) => setHue(value)} min={150} max={210} step={1} value={hue}/>
-                        </div>
-                        <div className="post-dropdown-row filters-row">
-                            <img className="post-dropdown-img" src={getSaturation()}/>
-                            <span className="post-dropdown-text">Saturation</span>
-                            <Slider className="filters-slider" trackClassName="filters-slider-track" thumbClassName="filters-slider-thumb" onChange={(value) => setSaturation(value)} min={60} max={140} step={1} value={saturation}/>
-                        </div>
-                        <div className="post-dropdown-row filters-row">
-                            <img className="post-dropdown-img" src={getLightness()}/>
-                            <span className="post-dropdown-text">Lightness</span>
-                            <Slider className="filters-slider" trackClassName="filters-slider-track" thumbClassName="filters-slider-thumb" onChange={(value) => setLightness(value)} min={60} max={140} step={1} value={lightness}/>
-                        </div>
-                        <div className="post-dropdown-row filters-row">
-                            <img className="post-dropdown-img" src={getBlur()} style={{marginLeft: "20px", marginRight: "-20px"}}/>
-                            <span className="post-dropdown-text">Blur</span>
-                            <Slider className="filters-slider" trackClassName="filters-slider-track" thumbClassName="filters-slider-thumb" onChange={(value) => setBlur(value)} min={0} max={2} step={0.1} value={blur}/>
-                        </div>
-                        <div className="post-dropdown-row filters-row">
-                            <img className="post-dropdown-img" src={getSharpen()} style={{marginLeft: "8px", marginRight: "-8px"}}/>
-                            <span className="post-dropdown-text">Sharpen</span>
-                            <Slider className="filters-slider" trackClassName="filters-slider-track" thumbClassName="filters-slider-thumb" onChange={(value) => setSharpen(value)} min={0} max={5} step={0.1} value={sharpen}/>
-                        </div>
-                        <div className="post-dropdown-row filters-row">
-                            <img className="post-dropdown-img" src={getPixelate()}/>
-                            <span className="post-dropdown-text">Pixelate</span>
-                            <Slider className="filters-slider" trackClassName="filters-slider-track" thumbClassName="filters-slider-thumb" onChange={(value) => setPixelate(value)} min={1} max={10} step={0.1} value={pixelate}/>
-                        </div>
-                        <div className="post-dropdown-row filters-row">
-                            <button className="filters-button" onClick={() => resetFilters()}>Reset</button>
-                        </div>
-                    </div>
+                </div>
+            </div>}
+            <div className={`post-dropdown ${showFilterDropdown ? "" : "hide-post-dropdown"}`}
+            style={{marginRight: getFilterMarginRight(), marginTop: getFilterMarginTop()}}>
+                <div className="post-dropdown-row filters-row">
+                    <img className="post-dropdown-img" src={getBrightness()}/>
+                    <span className="post-dropdown-text">Brightness</span>
+                    <Slider className="filters-slider" trackClassName="filters-slider-track" thumbClassName="filters-slider-thumb" onChange={(value) => setBrightness(value)} min={60} max={140} step={1} value={brightness}/>
+                </div>
+                <div className="post-dropdown-row filters-row">
+                    <img className="post-dropdown-img" src={getContrast()} style={{marginLeft: "7px", marginRight: "-7px"}}/>
+                    <span className="post-dropdown-text">Contrast</span>
+                    <Slider className="filters-slider" trackClassName="filters-slider-track" thumbClassName="filters-slider-thumb" onChange={(value) => setContrast(value)} min={60} max={140} step={1} value={contrast}/>
+                </div>
+                <div className="post-dropdown-row filters-row">
+                    <img className="post-dropdown-img" src={getHue()} style={{marginLeft: "20px", marginRight: "-20px"}}/>
+                    <span className="post-dropdown-text">Hue</span>
+                    <Slider className="filters-slider" trackClassName="filters-slider-track" thumbClassName="filters-slider-thumb" onChange={(value) => setHue(value)} min={150} max={210} step={1} value={hue}/>
+                </div>
+                <div className="post-dropdown-row filters-row">
+                    <img className="post-dropdown-img" src={getSaturation()}/>
+                    <span className="post-dropdown-text">Saturation</span>
+                    <Slider className="filters-slider" trackClassName="filters-slider-track" thumbClassName="filters-slider-thumb" onChange={(value) => setSaturation(value)} min={60} max={140} step={1} value={saturation}/>
+                </div>
+                <div className="post-dropdown-row filters-row">
+                    <img className="post-dropdown-img" src={getLightness()}/>
+                    <span className="post-dropdown-text">Lightness</span>
+                    <Slider className="filters-slider" trackClassName="filters-slider-track" thumbClassName="filters-slider-thumb" onChange={(value) => setLightness(value)} min={60} max={140} step={1} value={lightness}/>
+                </div>
+                <div className="post-dropdown-row filters-row">
+                    <img className="post-dropdown-img" src={getBlur()} style={{marginLeft: "20px", marginRight: "-20px"}}/>
+                    <span className="post-dropdown-text">Blur</span>
+                    <Slider className="filters-slider" trackClassName="filters-slider-track" thumbClassName="filters-slider-thumb" onChange={(value) => setBlur(value)} min={0} max={2} step={0.1} value={blur}/>
+                </div>
+                <div className="post-dropdown-row filters-row">
+                    <img className="post-dropdown-img" src={getSharpen()} style={{marginLeft: "8px", marginRight: "-8px"}}/>
+                    <span className="post-dropdown-text">Sharpen</span>
+                    <Slider className="filters-slider" trackClassName="filters-slider-track" thumbClassName="filters-slider-thumb" onChange={(value) => setSharpen(value)} min={0} max={5} step={0.1} value={sharpen}/>
+                </div>
+                <div className="post-dropdown-row filters-row">
+                    <img className="post-dropdown-img" src={getPixelate()}/>
+                    <span className="post-dropdown-text">Pixelate</span>
+                    <Slider className="filters-slider" trackClassName="filters-slider-track" thumbClassName="filters-slider-thumb" onChange={(value) => setPixelate(value)} min={1} max={10} step={0.1} value={pixelate}/>
+                </div>
+                <div className="post-dropdown-row filters-row">
+                    <button className="filters-button" onClick={() => resetFilters()}>Reset</button>
                 </div>
             </div>
         </div>

@@ -14,7 +14,7 @@ import hideMagenta from "../assets/magenta/hide.png"
 import showMagentaLight from "../assets/magenta-light/show.png"
 import hideMagentaLight from "../assets/magenta-light/hide.png"
 import DragAndDrop from "../components/DragAndDrop"
-import {HideNavbarContext, HideSidebarContext, ThemeContext, EnableDragContext, RelativeContext, SessionContext,
+import {HideNavbarContext, HideSidebarContext, ThemeContext, EnableDragContext, RelativeContext, SessionContext, MobileContext,
 HideTitlebarContext, HeaderTextContext, SessionFlagContext, SidebarTextContext, RedirectContext} from "../Context"
 import "./styles/loginpage.less"
 import axios from "axios"
@@ -32,6 +32,7 @@ const LoginPage: React.FunctionComponent = (props) => {
     const {redirect, setRedirect} = useContext(RedirectContext)
     const {session, setSession} = useContext(SessionContext)
     const {sessionFlag, setSessionFlag} = useContext(SessionFlagContext)
+    const {mobile, setMobile} = useContext(MobileContext)
     const [showPassword, setShowPassword] = useState(false)
     const [username, setUsername] = useState("")
     const [password, setPassword] = useState("")
@@ -48,6 +49,14 @@ const LoginPage: React.FunctionComponent = (props) => {
         if (sidebarText !== "Login required.") setSidebarText("")
         document.title = "Moebooru: Login"
     }, [])
+
+    useEffect(() => {
+        if (mobile) {
+            setRelative(true)
+        } else {
+            setRelative(false)
+        }
+    }, [mobile])
 
     useEffect(() => {
         if (!session.cookie) return

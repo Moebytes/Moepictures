@@ -31,6 +31,10 @@ const Comments: React.FunctionComponent<Props> = (props) => {
     }, [])
 
     useEffect(() => {
+        updateComments()
+    }, [props.post])
+
+    useEffect(() => {
         if (commentFlag) {
             setCommentFlag(false)
             updateComments()

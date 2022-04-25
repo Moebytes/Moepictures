@@ -2,7 +2,7 @@ import React, {useContext, useEffect, useRef, useState} from "react"
 import {useHistory} from "react-router-dom"
 import {ThemeContext, SizeTypeContext, PostAmountContext, PostsContext, ImageTypeContext,
 RestrictTypeContext, StyleTypeContext, SortTypeContext, SearchContext, SearchFlagContext,
-RandomFlagContext, ImageSearchFlagContext, SidebarTextContext} from "../Context"
+RandomFlagContext, ImageSearchFlagContext, SidebarTextContext, MobileContext} from "../Context"
 import GridImage from "./GridImage"
 import noresults from "../assets/misc/noresults.png"
 import axios from "axios"
@@ -26,11 +26,13 @@ const ImageGrid: React.FunctionComponent = (props) => {
     const {randomFlag, setRandomFlag} = useContext(RandomFlagContext)
     const {sidebarText, setSidebarText} = useContext(SidebarTextContext)
     const {imageSearchFlag, setImageSearchFlag} = useContext(ImageSearchFlagContext)
+    const {mobile, setMobile} = useContext(MobileContext)
     const [loaded, setLoaded] = useState(false)
     const [noResults, setNoResults] = useState(false)
     const history = useHistory()
 
     const getInitLoadAmount = () => {
+        if (mobile) return 3
         if (sizeType === "tiny") return 45
         if (sizeType === "small") return 28
         if (sizeType === "medium") return 15
@@ -40,7 +42,7 @@ const ImageGrid: React.FunctionComponent = (props) => {
     }
 
     const getLoadAmount = () => {
-        return functions.getImagesPerRow(sizeType)
+        return mobile ? functions.getImagesPerRowMobile(sizeType) : functions.getImagesPerRow(sizeType)
     }
 
     const searchPosts = async () => {
@@ -183,7 +185,7 @@ const ImageGrid: React.FunctionComponent = (props) => {
     }
 
     return (
-        <div className="imagegrid">
+        <div className="imagegrid" style={{marginTop: mobile ? "10px" : "0px"}}>
             <div className="image-container">
                 {generateImagesJSX()}
             </div>

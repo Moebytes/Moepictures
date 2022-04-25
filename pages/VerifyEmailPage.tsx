@@ -9,7 +9,7 @@ import DragAndDrop from "../components/DragAndDrop"
 import functions from "../structures/Functions"
 import axios from "axios"
 import {HideNavbarContext, HideSidebarContext, ThemeContext, EnableDragContext, RedirectContext,
-RelativeContext, HideTitlebarContext, HeaderTextContext, SidebarTextContext, SessionContext,
+RelativeContext, HideTitlebarContext, HeaderTextContext, SidebarTextContext, SessionContext, MobileContext,
 SessionFlagContext} from "../Context"
 import "./styles/verifyemailpage.less"
 import session from "express-session"
@@ -26,6 +26,7 @@ const VerifyEmailPage: React.FunctionComponent = (props) => {
     const {session, setSession} = useContext(SessionContext)
     const {sessionFlag, setSessionFlag} = useContext(SessionFlagContext)
     const {redirect, setRedirect} = useContext(RedirectContext)
+    const {mobile, setMobile} = useContext(MobileContext)
     const [submitted, setSubmitted] = useState(false)
     const [newEmail, setNewEmail] = useState("")
     const [error, setError] = useState(false)
@@ -41,6 +42,14 @@ const VerifyEmailPage: React.FunctionComponent = (props) => {
         setSidebarText("")
         document.title = "Moebooru: Verify Email"
     }, [])
+
+    useEffect(() => {
+        if (mobile) {
+            setRelative(true)
+        } else {
+            setRelative(false)
+        }
+    }, [mobile])
 
     useEffect(() => {
         if (!session.cookie) return

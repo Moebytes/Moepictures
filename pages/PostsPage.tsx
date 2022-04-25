@@ -7,7 +7,7 @@ import ImageGrid from "../components/ImageGrid"
 import Footer from "../components/Footer"
 import DownloadDialog from "../dialogs/DownloadDialog"
 import DragAndDrop from "../components/DragAndDrop"
-import {HideNavbarContext, HideSidebarContext, SquareContext, RelativeContext, HideTitlebarContext, HeaderTextContext, SidebarTextContext} from "../Context"
+import {HideNavbarContext, HideSidebarContext, SquareContext, RelativeContext, HideTitlebarContext, HeaderTextContext, SidebarTextContext, MobileContext} from "../Context"
 
 const PostsPage: React.FunctionComponent = (props) => {
     const [ignored, forceUpdate] = useReducer(x => x + 1, 0)
@@ -18,6 +18,7 @@ const PostsPage: React.FunctionComponent = (props) => {
     const {sidebarText, setSidebarText} = useContext(SidebarTextContext)
     const {square, setSquare} = useContext(SquareContext)
     const {relative, setRelative} = useContext(RelativeContext)
+    const {mobile, setMobile} = useContext(MobileContext)
 
     useEffect(() => {
         setRelative(false)
@@ -35,6 +36,14 @@ const PostsPage: React.FunctionComponent = (props) => {
         const savedSquare = localStorage.getItem("square")
         if (savedSquare === "true") setSquare(true)
     }, [])
+
+    useEffect(() => {
+        if (mobile) {
+            setRelative(true)
+        } else {
+            setRelative(false)
+        }
+    }, [mobile])
 
     return (
         <>

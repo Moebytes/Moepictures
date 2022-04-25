@@ -8,7 +8,7 @@ import SideBar from "../components/SideBar"
 import DragAndDrop from "../components/DragAndDrop"
 import functions from "../structures/Functions"
 import axios from "axios"
-import {HideNavbarContext, HideSidebarContext, ThemeContext, EnableDragContext, RedirectContext,
+import {HideNavbarContext, HideSidebarContext, ThemeContext, EnableDragContext, RedirectContext, MobileContext,
 RelativeContext, HideTitlebarContext, HeaderTextContext, SidebarTextContext, SessionContext} from "../Context"
 import "./styles/changeemailsuccesspage.less"
 import session from "express-session"
@@ -24,6 +24,7 @@ const ChangeEmailSuccessPage: React.FunctionComponent = (props) => {
     const {sidebarText, setSidebarText} = useContext(SidebarTextContext)
     const {session, setSession} = useContext(SessionContext)
     const {redirect, setRedirect} = useContext(RedirectContext)
+    const {mobile, setMobile} = useContext(MobileContext)
     const [submitted, setSubmitted] = useState(false)
     const [newEmail, setNewEmail] = useState("")
     const [error, setError] = useState(false)
@@ -39,6 +40,14 @@ const ChangeEmailSuccessPage: React.FunctionComponent = (props) => {
         setSidebarText("")
         document.title = "Moebooru: Change Email Success"
     }, [])
+
+    useEffect(() => {
+        if (mobile) {
+            setRelative(true)
+        } else {
+            setRelative(false)
+        }
+    }, [mobile])
 
     useEffect(() => {
         if (!session.cookie) return

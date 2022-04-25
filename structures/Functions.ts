@@ -22,6 +22,11 @@ const imageExtensions = [".jpg", ".jpeg", ".png", ".webp"]
 const videoExtensions = [".mp4", ".mov", ".avi", ".mkv", ".webm"]
 
 export default class Functions {
+    public static isSafari = () => {
+        // @ts-ignore
+        return /constructor/i.test(window.HTMLElement) || (function (p) {return p.toString() === "[object SafariRemoteNotification]" })(!window["safari"] || (typeof safari !== "undefined" && safari.pushNotification))
+    }
+    
     public static proxyImage = async (link: string) => {
         try {
             const response = await axios.get(`/api/proxy?url=${link}`, {withCredentials: true, responseType: "arraybuffer"}).then((r) => r.data)
@@ -394,6 +399,15 @@ export default class Functions {
         if (sizeType === "large") return 4
         if (sizeType === "massive") return 3
         return 9
+    }
+
+    public static getImagesPerRowMobile = (sizeType: string) => {
+        if (sizeType === "tiny") return 5
+        if (sizeType === "small") return 4
+        if (sizeType === "medium") return 3
+        if (sizeType === "large") return 2
+        if (sizeType === "massive") return 1
+        return 5
     }
 
     public static round = (value: number, step?: number) => {

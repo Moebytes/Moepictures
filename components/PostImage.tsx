@@ -1,7 +1,7 @@
 import React, {useContext, useEffect, useRef, useState, useReducer} from "react"
 import {ThemeContext, EnableDragContext, BrightnessContext, ContrastContext, HueContext, SaturationContext, LightnessContext,
 BlurContext, SharpenContext, PixelateContext, DownloadFlagContext, DownloadURLsContext, DisableZoomContext, SpeedContext,
-ReverseContext} from "../Context"
+ReverseContext, MobileContext} from "../Context"
 import {HashLink as Link} from "react-router-hash-link"
 import {createFFmpeg, fetchFile} from "@ffmpeg/ffmpeg"
 import functions from "../structures/Functions"
@@ -66,6 +66,7 @@ const PostImage: React.FunctionComponent<Props> = (props) => {
     const {downloadFlag, setDownloadFlag} = useContext(DownloadFlagContext)
     const {downloadURLs, setDownloadURLs} = useContext(DownloadURLsContext)
     const {disableZoom, setDisableZoom} = useContext(DisableZoomContext)
+    const {mobile, setMobile} = useContext(MobileContext)
     const [showSpeedDropdown, setShowSpeedDropdown] = useState(false)
     const [showVolumeSlider, setShowVolumeSlider] = useState(false)
     const containerRef = useRef<HTMLDivElement>(null)
@@ -136,6 +137,7 @@ const PostImage: React.FunctionComponent<Props> = (props) => {
         setSeekTo(null)
         if (ref.current) ref.current.style.opacity = "1"
         if (videoRef.current) videoRef.current.style.opacity = "1"
+        if (mobile) fetchVideo()
     }, [props.img])
 
     useEffect(() => {
@@ -176,6 +178,24 @@ const PostImage: React.FunctionComponent<Props> = (props) => {
         }
     }
 
+    const fetchVideo = async () => {
+        if (!videoRef.current) return
+        const blob = await fetch(props.img).then((r) => r.blob())
+        const url = URL.createObjectURL(blob)
+        videoRef.current.src = url
+    }
+
+    const exitFullScreen = async () => {
+        // @ts-ignore
+        if (!document.fullscreenElement && !document.webkitIsFullScreen) {
+            await fullscreen(true)
+            resizeImageCanvas()
+            resizeGIFCanvas()
+            resizeVideoCanvas()
+            forceUpdate()
+        }
+    }
+
     useEffect(() => {
         let observer = null as any
         if (functions.isImage(props.img)) {
@@ -191,9 +211,14 @@ const PostImage: React.FunctionComponent<Props> = (props) => {
             observer.observe(videoRef.current!)
         }
         window.addEventListener("keydown", handleKeydown)
+        window.addEventListener("fullscreenchange", exitFullScreen)
+        window.addEventListener("webkitfullscreenchange", exitFullScreen)
+        if (mobile) fetchVideo()
         return () => {
             observer?.disconnect()
             window.removeEventListener("keydown", handleKeydown)
+            window.removeEventListener("fullscreenchange", exitFullScreen)
+            window.removeEventListener("webkitfullscreenchange", exitFullScreen)
         }
     }, [])
 
@@ -282,6 +307,7 @@ const PostImage: React.FunctionComponent<Props> = (props) => {
             ffmpeg.FS("unlink", output)
             // ffmpeg.exit()
         }
+
         if (!videoData && videoLoaded && functions.isVideo(props.img)) {
             parseVideo()
             if (!reverseVideo) reverseAudioStream()
@@ -1026,9 +1052,16 @@ const PostImage: React.FunctionComponent<Props> = (props) => {
         }, 300)
     }
 
-    const fullscreen = () => {
-        if (document.fullscreenElement) {
-            document.exitFullscreen()
+    const fullscreen = async (exit?: boolean) => {
+        // @ts-ignore
+        if (document.fullscreenElement || document.webkitIsFullScreen || exit) {
+            try {
+                await document.exitFullscreen?.()
+                // @ts-ignore
+                await document.webkitExitFullscreen?.()
+            } catch {
+                // ignore
+            }
             if (videoRef.current) {
                 videoRef.current.style.maxWidth = "calc(100vw - 230px - 70px)"
                 videoRef.current.style.maxHeight = "calc(100vh - 35px - 77px)"
@@ -1057,7 +1090,13 @@ const PostImage: React.FunctionComponent<Props> = (props) => {
                 }
             }, 100)
         } else {
-            fullscreenRef.current?.requestFullscreen()
+            try {
+                await fullscreenRef.current?.requestFullscreen?.()
+                // @ts-ignore
+                await fullscreenRef.current?.webkitRequestFullscreen?.()
+            } catch {
+                // ignore
+            }
             if (videoRef.current) {
                 videoRef.current.style.maxWidth = "100vw"
                 videoRef.current.style.maxHeight = "100vh"
@@ -1120,6 +1159,9 @@ const PostImage: React.FunctionComponent<Props> = (props) => {
         <div className="post-image-container" style={{zoom: props.scale ? props.scale : 1}}>
             <div className="post-image-box" ref={containerRef}>
                 <div className="post-image-filters" ref={fullscreenRef}>
+                    {functions.isVideo(props.img) ? 
+                    <video loop muted disablePictureInPicture playsInline className="dummy-post-video" src={props.img}></video> :
+                    <img className="dummy-post-image" src={props.img}/>}
                     <div className="encoding-overlay" style={{display: encodingOverlay ? "flex" : "none"}}>
                         <span className="encoding-overlay-text">{functions.isVideo(props.img) ? "Rendering Video..." : "Rendering GIF..."}</span>
                     </div>
@@ -1145,7 +1187,7 @@ const PostImage: React.FunctionComponent<Props> = (props) => {
                                 <img className="video-control-img" src={videoClearIcon} onClick={reset}/>
                             </div>  
                             <div className="video-control-row-container">
-                                <img className="video-control-img" src={videoFullscreenIcon} onClick={fullscreen}/>
+                                <img className="video-control-img" src={videoFullscreenIcon} onClick={() => fullscreen()}/>
                             </div> 
                             <div className="video-control-row-container" onMouseEnter={() => setShowVolumeSlider(true)} onMouseLeave={() => setShowVolumeSlider(false)}>
                                 <img className="video-control-img" ref={videoVolumeRef} src={getVideoVolumeIcon()} onClick={mute}/>
@@ -1192,7 +1234,7 @@ const PostImage: React.FunctionComponent<Props> = (props) => {
                     <img className="video-lightness-overlay" ref={videoLightnessRef} src={backFrame}/>
                     <canvas className="video-sharpen-overlay" ref={videoOverlayRef}></canvas>
                     <canvas className="post-video-canvas" ref={videoCanvasRef}></canvas>
-                    <video loop muted disablePictureInPicture className="post-video" ref={videoRef} src={props.img} onLoadedData={(event) => onLoad(event)}></video>
+                    <video autoPlay loop muted disablePictureInPicture playsInline className="post-video" ref={videoRef} src={props.img} onLoadedData={(event) => onLoad(event)}></video>
                     <img ref={backFrameRef} src={backFrame} className="back-frame"/>
                     </> : <>
                     {functions.isGIF(props.img) || gifData ? 
@@ -1217,7 +1259,7 @@ const PostImage: React.FunctionComponent<Props> = (props) => {
                                 <img className="gif-control-img" src={gifClearIcon} onClick={reset}/>
                             </div> 
                             <div className="gif-control-row-container">
-                                <img className="gif-control-img" src={gifFullscreenIcon} onClick={fullscreen}/>
+                                <img className="gif-control-img" src={gifFullscreenIcon} onClick={() => fullscreen()}/>
                             </div> 
                         </div>
                         <div className={`gif-speed-dropdown ${showSpeedDropdown ? "" : "hide-speed-dropdown"}`} style={{marginRight: getGIFSpeedMarginRight(), marginTop: "-240px"}}
@@ -1267,14 +1309,15 @@ const PostImage: React.FunctionComponent<Props> = (props) => {
                                     <img className="image-control-img" onClick={() => setDisableZoom((prev) => !prev)} src={getZoomOffIcon()}/>
                                     <img className="image-control-img" onClick={zoomOut} src={imageZoomOutIcon}/>
                                     <img className="image-control-img" onClick={zoomIn} src={imageZoomInIcon}/>
-                                    <img className="image-control-img" onClick={fullscreen} src={imageFullscreenIcon}/>
+                                    <img className="image-control-img" onClick={() => fullscreen()} src={imageFullscreenIcon}/>
                                 </div> 
                             </div>
                         </div>
                         </>
                         : null}
-                        <TransformWrapper disabled={disableZoom} ref={zoomRef} minScale={1} maxScale={4} onZoomStop={(ref) => setZoom(ref.state.scale)} wheel={{step: 0.1, touchPadDisabled: true}} pinch={{disabled: true}} zoomAnimation={{size: 0, disabled: true}} alignmentAnimation={{disabled: true}} doubleClick={{mode: "reset", animationTime: 0}} panning={{disabled: zoom === 1}}>
-                        <TransformComponent>
+                        <TransformWrapper disabled={disableZoom} ref={zoomRef} minScale={1} maxScale={4} onZoomStop={(ref) => setZoom(ref.state.scale)} wheel={{step: 0.1, touchPadDisabled: true}}
+                        zoomAnimation={{size: 0, disabled: true}} alignmentAnimation={{disabled: true}} doubleClick={{mode: "reset", animationTime: 0}} panning={{disabled: zoom === 1}}>
+                        <TransformComponent wrapperStyle={{pointerEvents: disableZoom ? "none" : "all"}}>
                             <img className="post-lightness-overlay" ref={lightnessRef} src={props.img}/>
                             <img className="post-sharpen-overlay" ref={overlayRef} src={props.img}/>
                             <canvas className="post-pixelate-canvas" ref={pixelateRef}></canvas>

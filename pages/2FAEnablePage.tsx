@@ -7,7 +7,7 @@ import Footer from "../components/Footer"
 import SideBar from "../components/SideBar"
 import DragAndDrop from "../components/DragAndDrop"
 import {HideNavbarContext, HideSidebarContext, ThemeContext, EnableDragContext, RelativeContext, HideTitlebarContext, 
-HeaderTextContext, SidebarTextContext, SessionContext, SessionFlagContext, RedirectContext} from "../Context"
+HeaderTextContext, SidebarTextContext, SessionContext, SessionFlagContext, RedirectContext, MobileContext} from "../Context"
 import "./styles/2faenablepage.less"
 import functions from "../structures/Functions"
 import axios from "axios"
@@ -25,6 +25,7 @@ const $2FAEnablePage: React.FunctionComponent = (props) => {
     const {redirect, setRedirect} = useContext(RedirectContext)
     const {session, setSession} = useContext(SessionContext)
     const {sessionFlag, setSessionFlag} = useContext(SessionFlagContext)
+    const {mobile, setMobile} = useContext(MobileContext)
     const [qr, setQR] = useState(null) as any
     const [showValidation, setShowValidation] = useState(false)
     const [token, setToken] = useState("")
@@ -42,6 +43,14 @@ const $2FAEnablePage: React.FunctionComponent = (props) => {
         document.title = "Moebooru: Enable 2-Factor Authentication"
         if (session?.$2fa) get2FAQRCode()
     }, [])
+
+    useEffect(() => {
+        if (mobile) {
+            setRelative(true)
+        } else {
+            setRelative(false)
+        }
+    }, [mobile])
 
     const get2FAQRCode = async () => {
         const qrcode = await axios.post("/api/2faqr", null, {withCredentials: true}).then((r) => r.data)
@@ -110,8 +119,7 @@ const $2FAEnablePage: React.FunctionComponent = (props) => {
             <div className="content">
                 <div className="f2a-enable">
                     <span className="f2a-enable-title">2-Factor Authentication</span>
-                    <span className="f2a-enable-link">2fa provides much stronger security for your account during login. However, if you ever lose the ability 
-                    to generate your 2fa tokens, we cannot help you.</span>
+                    <span className="f2a-enable-link">2fa provides much stronger security for your account during login, by requiring an additional time-sensitive code.</span>
                     <div className="f2a-enable-row">
                         <span className="f2a-enable-text">Status: </span>
                         <span className="f2a-enable-text" style={{cursor: "pointer", marginLeft: "10px"}} onClick={toggle}>{session.$2fa ? "Enabled" : "Disabled"}</span>
