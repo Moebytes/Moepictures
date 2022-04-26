@@ -1,6 +1,8 @@
 import React, {useContext, useEffect, useRef, useState} from "react"
 import {useHistory} from "react-router-dom"
-import {ThemeContext, SearchContext, SearchFlagContext} from "../Context"
+import {ThemeContext, SearchContext, SearchFlagContext, DeleteTagFlagContext, DeleteTagIDContext,
+EditTagAliasesContext, EditTagDescriptionContext, EditTagIDContext, EditTagFlagContext,
+EditTagImageContext, EditTagKeyContext, AliasTagFlagContext, AliasTagIDContext, AliasTagNameContext} from "../Context"
 import {HashLink as Link} from "react-router-hash-link"
 import functions from "../structures/Functions"
 import alias from "../assets/purple/alias.png"
@@ -16,6 +18,7 @@ import axios from "axios"
 interface Props {
     tag: any
     onDelete?: () => void
+    onEdit?: () => void
 }
 
 const TagRow: React.FunctionComponent<Props> = (props) => {
@@ -23,6 +26,17 @@ const TagRow: React.FunctionComponent<Props> = (props) => {
     const [hover, setHover] = useState(false)
     const {search, setSearch} = useContext(SearchContext)
     const {searchFlag, setSearchFlag} = useContext(SearchFlagContext)
+    const {deleteTagID, setDeleteTagID} = useContext(DeleteTagIDContext)
+    const {deleteTagFlag, setDeleteTagFlag} = useContext(DeleteTagFlagContext)
+    const {editTagFlag, setEditTagFlag} = useContext(EditTagFlagContext)
+    const {editTagID, setEditTagID} = useContext(EditTagIDContext)
+    const {editTagAliases, setEditTagAliases} = useContext(EditTagAliasesContext)
+    const {editTagDescription, setEditTagDescription} = useContext(EditTagDescriptionContext)
+    const {editTagImage, setEditTagImage} = useContext(EditTagImageContext)
+    const {editTagKey, setEditTagKey} = useContext(EditTagKeyContext)
+    const {aliasTagID, setAliasTagID} = useContext(AliasTagIDContext)
+    const {aliasTagFlag, setAliasTagFlag} = useContext(AliasTagFlagContext)
+    const {aliasTagName, setAliasTagName} = useContext(AliasTagNameContext)
     const history = useHistory()
 
     const searchTag = () => {
@@ -34,7 +48,7 @@ const TagRow: React.FunctionComponent<Props> = (props) => {
     const generateAliasesJSX = () => {
         let jsx = [] as any 
         for (let i = 0; i < props.tag.aliases.length; i++) {
-            jsx.push(<span className="tagrow-alias">{props.tag.aliases[i].replaceAll("-", " ")}</span>)
+            jsx.push(<span className="tagrow-alias">{props.tag.aliases[i].alias.replaceAll("-", " ")}</span>)
         }
         return jsx
     }
@@ -42,6 +56,60 @@ const TagRow: React.FunctionComponent<Props> = (props) => {
     const deleteTag = async () => {
         await axios.delete("/api/tag", {params: {tag: props.tag.tag}, withCredentials: true})
         props.onDelete?.()
+    }
+
+    useEffect(() => {
+        if (deleteTagFlag && deleteTagID === props.tag.tag) {
+            deleteTag()
+            setDeleteTagFlag(false)
+            setDeleteTagID(null)
+        }
+    }, [deleteTagFlag])
+
+    const deleteTagDialog = async () => {
+        setDeleteTagID(props.tag.tag)
+    }
+
+    const editTag = async () => {
+        const arrayBuffer = await fetch(editTagImage).then((r) => r.arrayBuffer())
+        const bytes = new Uint8Array(arrayBuffer)
+        await axios.put("/api/tag", {tag: props.tag.tag, key: editTagKey, description: editTagDescription,
+        image: Object.values(bytes), aliases: editTagAliases}, {withCredentials: true})
+        props.onEdit?.()
+    }
+
+    useEffect(() => {
+        if (editTagFlag && editTagID === props.tag.tag) {
+            editTag()
+            setEditTagFlag(false)
+            setEditTagID(null)
+        }
+    }, [editTagFlag])
+
+    const editTagDialog = async () => {
+        setEditTagKey(props.tag.tag)
+        setEditTagDescription(props.tag.description)
+        setEditTagImage(functions.getTagLink(props.tag.type, props.tag.image))
+        setEditTagAliases(props.tag.aliases?.[0] ? props.tag.aliases.map((a: any) => a.alias) : [])
+        setEditTagID(props.tag.tag)
+    }
+
+    const aliasTag = async () => {
+        await axios.post("/api/aliastag", {tag: props.tag.tag, aliasTo: aliasTagName}, {withCredentials: true})
+        props.onEdit?.()
+    }
+
+    useEffect(() => {
+        if (aliasTagFlag && aliasTagID === props.tag.tag) {
+            aliasTag()
+            setAliasTagFlag(false)
+            setAliasTagID(null)
+        }
+    }, [aliasTagFlag])
+
+    const aliasTagDialog = async () => {
+        setAliasTagName("")
+        setAliasTagID(props.tag.tag)
     }
 
     return (
@@ -65,10 +133,10 @@ const TagRow: React.FunctionComponent<Props> = (props) => {
                 <span className="tagrow-desc-text">{props.tag.description || "No description."}</span>
             </td>
             <div className="tag-buttons">
-                <img className="tag-button" src={historyIcon}/>
-                <img className="tag-button" src={alias}/>
-                <img className="tag-button" src={edit}/>
-                <img className="tag-button" src={deleteIcon} onClick={deleteTag}/>
+                {/* <img className="tag-button" src={historyIcon}/> */}
+                <img className="tag-button" src={alias} onClick={aliasTagDialog}/>
+                <img className="tag-button" src={edit} onClick={editTagDialog}/>
+                <img className="tag-button" src={deleteIcon} onClick={deleteTagDialog}/>
             </div>
         </tr>
     )

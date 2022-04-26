@@ -6,7 +6,7 @@ import {ThemeContext, HideSidebarContext, HideNavbarContext, HideSortbarContext,
 SizeTypeContext, BrightnessContext, ContrastContext, HueContext, SaturationContext, LightnessContext,
 BlurContext, SharpenContext, EnableDragContext, FilterDropActiveContext, SquareContext, PixelateContext,
 ShowDownloadDialogContext, HideTitlebarContext, ImageTypeContext, RestrictTypeContext, SortTypeContext,
-StyleTypeContext, SpeedContext, ReverseContext, MobileContext, RelativeContext} from "../Context"
+StyleTypeContext, SpeedContext, ReverseContext, MobileContext, RelativeContext, SessionContext} from "../Context"
 import leftArrow from "../assets/purple/leftArrow.png"
 import leftArrowMagenta from "../assets/magenta/leftArrow.png"
 import rightArrow from "../assets/purple/rightArrow.png"
@@ -106,6 +106,7 @@ const SortBar: React.FunctionComponent = (props) => {
     const {reverse, setReverse} = useContext(ReverseContext)
     const {mobile, setMobile} = useContext(MobileContext)
     const {relative, setRelative} = useContext(RelativeContext)
+    const {session, setSession} = useContext(SessionContext)
     const [dropLeft, setDropLeft] = useState(0)
     const [dropTop, setDropTop] = useState(0)
     const imageRef = useRef(null) as any
@@ -876,6 +877,14 @@ const SortBar: React.FunctionComponent = (props) => {
                 <div className="sortbar-dropdown-row" onClick={() => setSortType("reverse cuteness")}>
                     <span className="sortbar-dropdown-text">Reverse Cuteness</span>
                 </div>
+                {session.username ? <>
+                <div className="sortbar-dropdown-row" onClick={() => setSortType("favorites")}>
+                    <span className="sortbar-dropdown-text">Favorites</span>
+                </div> 
+                <div className="sortbar-dropdown-row" onClick={() => setSortType("reverse favorites")}>
+                    <span className="sortbar-dropdown-text">Reverse Favorites</span>
+                </div> 
+                </> : null}
             </div>
             <div className={`dropdown-right ${activeDropdown === "filters" ? "" : "hide-dropdown"}`} 
             style={{marginRight: getFiltersMargin(), top: dropTop}}>

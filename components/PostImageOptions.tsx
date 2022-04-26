@@ -79,6 +79,20 @@ const PostImageOptions: React.FunctionComponent<Props> = (props) => {
         getDLText()
     }, [props.img, props.comicPages])
 
+    const getFavorite = async () => {
+        if (!props.post) return
+        const favorite = await axios.get("/api/favorite", {params: {postID: props.post.postID}, withCredentials: true}).then((r) => r.data)
+        setFavorited(favorite ? true : false)
+    }
+
+    useEffect(() => {
+        getFavorite()
+    }, [props.post])
+
+    useEffect(() => {
+        getFavorite()
+    }, [])
+
     useEffect(() => {
         localStorage.setItem("brightness", brightness)
         localStorage.setItem("contrast", contrast)

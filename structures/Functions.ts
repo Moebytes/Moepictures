@@ -774,6 +774,7 @@ export default class Functions {
     }
 
     public static getTagPath = (folder: string, filename: string) => {
+        if (folder === "attribute") folder = "tag"
         return `${folder}/${filename}`
     }
 
@@ -862,7 +863,9 @@ export default class Functions {
             sort === "drawn" ||
             sort === "reverse drawn" || 
             sort === "cuteness" ||
-            sort === "reverse cuteness") return true 
+            sort === "reverse cuteness" ||
+            sort === "favorites" || 
+            sort === "reverse favorites") return true 
         return false
     }
 
@@ -954,7 +957,7 @@ export default class Functions {
                     let width = video.videoWidth 
                     let height = video.videoHeight
                     try {
-                        const r = await fetch(image, {method: "HEAD"})
+                        const r = await fetch(image)
                         const size = Number(r.headers.get("Content-Length"))
                         resolve({width, height, size})
                     } catch {
@@ -968,7 +971,7 @@ export default class Functions {
                     let width = img.width
                     let height = img.height
                     try {
-                        const r = await fetch(image, {method: "HEAD"})
+                        const r = await fetch(image)
                         const size = Number(r.headers.get("Content-Length"))
                         resolve({width, height, size})
                     } catch {
@@ -1082,5 +1085,10 @@ export default class Functions {
         }
         const rounded = Math.floor(seconds)
         return `${rounded} second${rounded === 1 ? "" : "s"} ago`
+    }
+
+    public static fileExtension = (uint8Array: Uint8Array) => {
+        const result = fileType(uint8Array)?.[0]
+        return result.extension
     }
 }

@@ -4,7 +4,6 @@ import path from "path"
 import fs from "fs"
 import crypto from "crypto"
 import S3 from "aws-sdk/clients/s3"
-import Evaporate from "evaporate"
 
 export default class ServerFunctions {
     public static email = async (email: string, subject: string, payload: any, template: string) => {
@@ -41,5 +40,14 @@ export default class ServerFunctions {
             secretAccessKey: process.env.AWS_SECRET_KEY!
         }})
         await s3.deleteObject({Key: file, Bucket: "moebooru"}).promise()
+    }
+
+    public static renameFile = async (oldFile: string, newFile: string) => {
+        const s3 = new S3({region: "us-east-1", credentials: {
+            accessKeyId: process.env.AWS_ACCESS_KEY!,
+            secretAccessKey: process.env.AWS_SECRET_KEY!
+        }})
+        await s3.copyObject({CopySource: `moebooru/${oldFile}`, Key: newFile, Bucket: "moebooru"}).promise()
+        await s3.deleteObject({Key: oldFile, Bucket: "moebooru"}).promise()
     }
 }

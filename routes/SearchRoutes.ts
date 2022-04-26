@@ -17,7 +17,21 @@ const SearchRoutes = (app: Express) => {
             if (!functions.validStyle(style, true)) return res.status(400).send("Invalid style")
             if (!functions.validSort(sort)) return res.status(400).send("Invalid sort")
             const tags = query.trim().split(/ +/g).filter(Boolean)
-            let result = await sql.search(tags, type, restrict, style, sort)
+            for (let i = 0; i < tags.length; i++) {
+                const tag = await sql.tag(tags[i])
+                if (!tag) {
+                    const alias = await sql.alias(tags[i])
+                    if (alias) tags[i] = alias.tag
+                }
+            }
+            let result = null as any
+            if (sort === "favorites" || sort === "reverse favorites") {
+                if (!req.session.username) return res.status(400).send("Bad request")
+                const favorites = await sql.searchFavorites(req.session.username, tags, type, restrict, style, sort)
+                result = favorites.map((f: any) => f.post)
+            } else {
+                result = await sql.search(tags, type, restrict, style, sort)
+            }
             result = result.map((p: any) => {
                 if (p.images.length > 1) {
                     p.images = p.images.sort((a: any, b: any) => a.order - b.order)
@@ -25,7 +39,8 @@ const SearchRoutes = (app: Express) => {
                 return p 
             })
             res.status(200).json(result)
-        } catch {
+        } catch (e) {
+            console.log(e)
             return res.status(400).send("Bad request")
         }
     })
@@ -171,7 +186,8 @@ const SearchRoutes = (app: Express) => {
             const query = req.query.query as string
             let sort = req.query.sort as string
             if (!functions.validTagSort(sort)) return res.status(400).send("Invalid sort")
-            const search = query?.trim().split(/ +/g).filter(Boolean).join("-") ?? ""
+            let search = query?.trim().split(/ +/g).filter(Boolean).join("-") ?? ""
+            const aliases = await sql.aliasSearch(search)
             let result = await sql.tagSearch(search, sort)
             res.status(200).json(result)
         } catch {

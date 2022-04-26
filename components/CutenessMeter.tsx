@@ -1,5 +1,5 @@
 import React, {useContext, useEffect, useRef, useState, useReducer} from "react"
-import {ThemeContext} from "../Context"
+import {ThemeContext, SessionContext} from "../Context"
 import Slider from "react-slider"
 import {HashLink as Link} from "react-router-hash-link"
 import functions from "../structures/Functions"
@@ -9,12 +9,37 @@ import cuteness3 from "../assets/misc/cuteness3.png"
 import cuteness4 from "../assets/misc/cuteness4.png"
 import cuteness5 from "../assets/misc/cuteness5.png"
 import "./styles/cutenessmeter.less"
+import axios from "axios"
 
-const CutenessMeter: React.FunctionComponent = (props) => {
+interface Props {
+    post: any
+}
+
+let cutenessTimer = null as any
+
+const CutenessMeter: React.FunctionComponent<Props> = (props) => {
     const {theme, setTheme} = useContext(ThemeContext)
+    const {session, setSession} = useContext(SessionContext)
     const [cuteness, setCuteness] = useState(500)
     const sliderRef = useRef<any>(null)
     useEffect(() => sliderRef.current ? sliderRef.current.resize() : null)
+
+    const getCuteness = async () => {
+        const cuteness = await axios.get("/api/cuteness", {params: {postID: props.post.postID}, withCredentials: true}).then((r) => r.data)
+        if (cuteness) setCuteness(Number(cuteness.cuteness))
+    }
+
+    const updateCuteness = async () => {
+        await axios.post("/api/cuteness", {cuteness, postID: props.post.postID}, {withCredentials: true})
+    }
+
+    useEffect(() => {
+        getCuteness()
+    }, [])
+
+    useEffect(() => {
+        getCuteness()
+    }, [props.post])
 
     const getImg = () => {
         if (cuteness < 200) {
@@ -34,6 +59,10 @@ const CutenessMeter: React.FunctionComponent = (props) => {
         const thumb = document.querySelector(".cuteness-thumb") as any
         if (!thumb) return 
         thumb.style.backgroundImage = `url(${getImg()})`
+        clearTimeout(cutenessTimer)
+        cutenessTimer = setTimeout(() => {
+            updateCuteness()
+        }, 500)
     }, [cuteness])
 
     return (

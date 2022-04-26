@@ -1,6 +1,7 @@
 import React, {useContext, useEffect, useRef, useState} from "react"
 import {useHistory} from "react-router-dom"
-import {ThemeContext, QuoteTextContext, SessionContext} from "../Context"
+import {ThemeContext, QuoteTextContext, SessionContext, DeleteCommentIDContext, DeleteCommentFlagContext,
+EditCommentFlagContext, EditCommentIDContext, EditCommentTextContext} from "../Context"
 import {HashLink as Link} from "react-router-hash-link"
 import functions from "../structures/Functions"
 import favicon from "../assets/purple/favicon.png"
@@ -15,12 +16,18 @@ import axios from "axios"
 interface Props {
     comment: any
     onDelete?: () => void
+    onEdit?: () => void
 }
 
 const CommentRow: React.FunctionComponent<Props> = (props) => {
     const {theme, setTheme} = useContext(ThemeContext)
     const {quoteText, setQuoteText} = useContext(QuoteTextContext)
     const {session, setSession} = useContext(SessionContext)
+    const {deleteCommentID, setDeleteCommentID} = useContext(DeleteCommentIDContext)
+    const {deleteCommentFlag, setDeleteCommentFlag} = useContext(DeleteCommentFlagContext)
+    const {editCommentFlag, setEditCommentFlag} = useContext(EditCommentFlagContext)
+    const {editCommentID, setEditCommentID} = useContext(EditCommentIDContext)
+    const {editCommentText, setEditCommentText} = useContext(EditCommentTextContext)
     const [hover, setHover] = useState(false)
     const history = useHistory()
     const img = functions.getImageLink(props.comment.post.images[0].type, props.comment.postID, props.comment.post.images[0].filename)
@@ -84,15 +91,45 @@ const CommentRow: React.FunctionComponent<Props> = (props) => {
         props.onDelete?.()
     }
 
+    useEffect(() => {
+        if (deleteCommentFlag && deleteCommentID === props.comment.commentID) {
+            deleteComment()
+            setDeleteCommentFlag(false)
+            setDeleteCommentID(null)
+        }
+    }, [deleteCommentFlag])
+
+    const deleteCommentDialog = async () => {
+        setDeleteCommentID(props.comment.commentID)
+    }
+
+    const editComment = async () => {
+        await axios.put("/api/comment", {commentID: props.comment.commentID, comment: editCommentText}, {withCredentials: true})
+        props.onEdit?.()
+    }
+
+    useEffect(() => {
+        if (editCommentFlag && editCommentID === props.comment.commentID) {
+            editComment()
+            setEditCommentFlag(false)
+            setEditCommentID(null)
+        }
+    }, [editCommentFlag])
+
+    const editCommentDialog = async () => {
+        setEditCommentText(comment)
+        setEditCommentID(props.comment.commentID)
+    }
+
     const commentOptions = () => {
         if (session.username === props.comment.username) {
             return (
                 <div className="commentrow-options">
-                    <div className="commentrow-options-container">
+                    <div className="commentrow-options-container" onClick={editCommentDialog}>
                         <img className="commentrow-options-img" src={commentEdit}/>
                         <span className="commentrow-options-text">Edit</span>
                     </div>
-                    <div className="commentrow-options-container" onClick={deleteComment}>
+                    <div className="commentrow-options-container" onClick={deleteCommentDialog}>
                         <img className="commentrow-options-img" src={commentDelete}/>
                         <span className="commentrow-options-text">Delete</span>
                     </div>
@@ -105,10 +142,10 @@ const CommentRow: React.FunctionComponent<Props> = (props) => {
                         <img className="commentrow-options-img" src={commentQuote}/>
                         <span className="commentrow-options-text">Quote</span>
                     </div>
-                    <div className="commentrow-options-container">
+                    {/* <div className="commentrow-options-container">
                         <img className="commentrow-options-img" src={commentReport}/>
                         <span className="commentrow-options-text">Report</span>
-                    </div>
+                    </div> */}
                 </div>
             )
         }
@@ -128,7 +165,7 @@ const CommentRow: React.FunctionComponent<Props> = (props) => {
                 </div>
             </div>
             <div className="commentrow-container" style={{width: "100%"}}>
-                <span className="commentrow-date-text">{functions.timeAgo(props.comment.posted)}:</span>
+                <span className="commentrow-date-text">{functions.timeAgo(props.comment.postDate)}:</span>
                 {parseText()}
             </div>
             {session.username ? commentOptions() : null}

@@ -47,6 +47,23 @@ export const UserImgContext = React.createContext<any>(null)
 export const QuoteTextContext = React.createContext<any>(null)
 export const MobileContext = React.createContext<any>(null)
 export const HideMobileNavbarContext = React.createContext<any>(null)
+export const ShowDeletePostDialogContext = React.createContext<any>(null)
+export const DeleteCommentIDContext = React.createContext<any>(null)
+export const DeleteCommentFlagContext = React.createContext<any>(null)
+export const EditCommentIDContext = React.createContext<any>(null)
+export const EditCommentFlagContext = React.createContext<any>(null)
+export const EditCommentTextContext = React.createContext<any>(null)
+export const DeleteTagIDContext = React.createContext<any>(null)
+export const DeleteTagFlagContext = React.createContext<any>(null)
+export const EditTagIDContext = React.createContext<any>(null)
+export const EditTagFlagContext = React.createContext<any>(null)
+export const EditTagKeyContext = React.createContext<any>(null)
+export const EditTagImageContext = React.createContext<any>(null)
+export const EditTagDescriptionContext = React.createContext<any>(null)
+export const EditTagAliasesContext = React.createContext<any>(null)
+export const AliasTagIDContext = React.createContext<any>(null)
+export const AliasTagFlagContext = React.createContext<any>(null)
+export const AliasTagNameContext = React.createContext<any>(null)
 
 const Context: React.FunctionComponent = (props) => {
     const [brightness, setBrightness] = useState(100)
@@ -83,8 +100,43 @@ const Context: React.FunctionComponent = (props) => {
     const [redirect, setRedirect] = useState(null)
     const [quoteText, setQuoteText] = useState(null)
     const [hideMobileNavbar, setHideMobileNavbar] = useState(true)
+    const [showDeletePostDialog, setShowDeletePostDialog] = useState(false)
+    const [showDeleteCommentDialog, setShowDeleteCommentDialog] = useState(false)
+    const [deleteCommentID, setDeleteCommentID] = useState(null)
+    const [deleteCommentFlag, setDeleteCommentFlag] = useState(false)
+    const [editCommentFlag, setEditCommentFlag] = useState(false)
+    const [editCommentID, setEditCommentID] = useState(false)
+    const [editCommentText, setEditCommentText] = useState(false)
+    const [deleteTagID, setDeleteTagID] = useState(null)
+    const [deleteTagFlag, setDeleteTagFlag] = useState(false)
+    const [editTagFlag, setEditTagFlag] = useState(false)
+    const [editTagID, setEditTagID] = useState(false)
+    const [editTagKey, setEditTagKey] = useState(false)
+    const [editTagImage, setEditTagImage] = useState(false)
+    const [editTagDescription, setEditTagDescription] = useState(false)
+    const [editTagAliases, setEditTagAliases] = useState(false)
+    const [aliasTagID, setAliasTagID] = useState(null)
+    const [aliasTagFlag, setAliasTagFlag] = useState(false)
+    const [aliasTagName, setAliasTagName] = useState("")
 return (
     <>
+        <AliasTagNameContext.Provider value={{aliasTagName, setAliasTagName}}>
+        <AliasTagIDContext.Provider value={{aliasTagID, setAliasTagID}}>
+        <AliasTagFlagContext.Provider value={{aliasTagFlag, setAliasTagFlag}}>
+        <EditTagAliasesContext.Provider value={{editTagAliases, setEditTagAliases}}>
+        <EditTagDescriptionContext.Provider value={{editTagDescription, setEditTagDescription}}>
+        <EditTagImageContext.Provider value={{editTagImage, setEditTagImage}}>
+        <EditTagKeyContext.Provider value={{editTagKey, setEditTagKey}}>
+        <EditTagIDContext.Provider value={{editTagID, setEditTagID}}>
+        <EditTagFlagContext.Provider value={{editTagFlag, setEditTagFlag}}>
+        <DeleteTagFlagContext.Provider value={{deleteTagFlag, setDeleteTagFlag}}>
+        <DeleteTagIDContext.Provider value={{deleteTagID, setDeleteTagID}}>
+        <EditCommentTextContext.Provider value={{editCommentText, setEditCommentText}}>
+        <EditCommentIDContext.Provider value={{editCommentID, setEditCommentID}}>
+        <EditCommentFlagContext.Provider value={{editCommentFlag, setEditCommentFlag}}>
+        <DeleteCommentFlagContext.Provider value={{deleteCommentFlag, setDeleteCommentFlag}}>
+        <DeleteCommentIDContext.Provider value={{deleteCommentID, setDeleteCommentID}}>
+        <ShowDeletePostDialogContext.Provider value={{showDeletePostDialog, setShowDeletePostDialog}}>
         <HideMobileNavbarContext.Provider value={{hideMobileNavbar, setHideMobileNavbar}}>
         <QuoteTextContext.Provider value={{quoteText, setQuoteText}}>
         <RedirectContext.Provider value={{redirect, setRedirect}}>
@@ -154,6 +206,23 @@ return (
         </RedirectContext.Provider>
         </QuoteTextContext.Provider>
         </HideMobileNavbarContext.Provider>
+        </ShowDeletePostDialogContext.Provider>
+        </DeleteCommentIDContext.Provider>
+        </DeleteCommentFlagContext.Provider>
+        </EditCommentFlagContext.Provider>
+        </EditCommentIDContext.Provider>
+        </EditCommentTextContext.Provider>
+        </DeleteTagIDContext.Provider>
+        </DeleteTagFlagContext.Provider>
+        </EditTagFlagContext.Provider>
+        </EditTagIDContext.Provider>
+        </EditTagKeyContext.Provider>
+        </EditTagImageContext.Provider>
+        </EditTagDescriptionContext.Provider>
+        </EditTagAliasesContext.Provider>
+        </AliasTagFlagContext.Provider>
+        </AliasTagIDContext.Provider>
+        </AliasTagNameContext.Provider>
     </>
     )
 }

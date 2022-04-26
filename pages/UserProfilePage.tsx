@@ -12,10 +12,11 @@ import Footer from "../components/Footer"
 import DragAndDrop from "../components/DragAndDrop"
 import {HideNavbarContext, HideSidebarContext, ThemeContext, EnableDragContext, RelativeContext, HideTitlebarContext, MobileContext,
 HeaderTextContext, SidebarTextContext, SessionContext, RedirectContext, SessionFlagContext, UserImgContext} from "../Context"
-import axios from "axios"
 import fileType from "magic-bytes.js"
 import functions from "../structures/Functions"
+import Carousel from "../components/Carousel"
 import "./styles/userprofilepage.less"
+import axios from "axios"
 
 const UserProfilePage: React.FunctionComponent = (props) => {
     const [ignored, forceUpdate] = useReducer(x => x + 1, 0)
@@ -34,8 +35,28 @@ const UserProfilePage: React.FunctionComponent = (props) => {
     const {userImg, setUserImg} = useContext(UserImgContext)
     const bioRef = useRef<any>(null)
     const [showBioInput, setShowBioInput] = useState(false)
+    const [uploadIndex, setUploadIndex] = useState(0)
+    const [favoriteIndex, setFavoriteIndex] = useState(0) as any
+    const [uploads, setUploads] = useState([]) as any
+    const [favorites, setFavorites] = useState([]) as any
+    const [uploadImages, setUploadImages] = useState([]) as any
+    const [favoriteImages, setFavoriteImages] = useState([]) as any
     const [bio, setBio] = useState("")
     const history = useHistory()
+
+    const updateUploads = async () => {
+        const uploads = await axios.get("/api/uploads", {withCredentials: true}).then((r) => r.data)
+        const images = uploads.map((p: any) => functions.getImageLink(p.images[0].type, p.postID, p.images[0].filename))
+        setUploads(uploads)
+        setUploadImages(images)
+    }
+
+    const updateFavorites = async () => {
+        const favorites = await axios.get("/api/favorites", {withCredentials: true}).then((r) => r.data)
+        const images = favorites.map((f: any) => functions.getImageLink(f.post.images[0].type, f.postID, f.post.images[0].filename))
+        setFavorites(favorites)
+        setFavoriteImages(images)
+    }
 
     useEffect(() => {
         setHideNavbar(false)
@@ -45,6 +66,8 @@ const UserProfilePage: React.FunctionComponent = (props) => {
         setHeaderText("")
         setSidebarText("")
         document.title = "Moebooru: User Profile"
+        updateUploads()
+        updateFavorites()
     }, [])
 
     useEffect(() => {
@@ -137,6 +160,18 @@ const UserProfilePage: React.FunctionComponent = (props) => {
         setShowBioInput(false)
     }
 
+    const setUp = (img: string, index: number) => {
+        setUploadIndex(index)
+        const postID = uploads[index].postID
+        history.push(`/post/${postID}`)
+    }
+
+    const setFav = (img: string, index: number) => {
+        setFavoriteIndex(index)
+        const postID = favorites[index].postID
+        history.push(`/post/${postID}`)
+    }
+
     return (
         <>
         <DragAndDrop/>
@@ -187,6 +222,16 @@ const UserProfilePage: React.FunctionComponent = (props) => {
                     <Link to="/enable-2fa" className="userprofile-row">
                         <span className="userprofile-link">{session.$2fa ? "Disable" : "Enable"} 2-Factor Authentication</span>
                     </Link>
+                    {uploads.length ?
+                    <div className="userprofile-column">
+                        <span className="userprofile-text">Uploads <span className="userprofile-text-alt">{uploads.length}</span></span>
+                        <Carousel images={uploadImages} noKey={true} set={setUp} index={uploadIndex}/>
+                    </div> : null}
+                    {favorites.length ?
+                    <div className="userprofile-column">
+                        <span className="userprofile-text">Favorites <span className="userprofile-text-alt">{favorites.length}</span></span>
+                        <Carousel images={favoriteImages} noKey={true} set={setFav} index={favoriteIndex}/>
+                    </div> : null}
                     <div className="userprofile-row">
                         <span className="userprofile-link">Delete Account</span>
                     </div>

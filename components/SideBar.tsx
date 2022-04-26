@@ -1,7 +1,7 @@
 import React, {useContext, useEffect, useState} from "react"
 import {useHistory} from "react-router-dom"
 import {ThemeContext, HideSidebarContext, HideNavbarContext, HideSortbarContext, EnableDragContext, MobileContext,
-RelativeContext, HideTitlebarContext, SidebarHoverContext, SearchContext, SearchFlagContext, PostsContext,
+RelativeContext, HideTitlebarContext, SidebarHoverContext, SearchContext, SearchFlagContext, PostsContext, ShowDeletePostDialogContext,
 TagsContext, RandomFlagContext, ImageSearchFlagContext, SidebarTextContext, SessionContext} from "../Context"
 import {HashLink as Link} from "react-router-hash-link"
 import favicon from "../assets/purple/favicon.png"
@@ -73,6 +73,7 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
     const {randomFlag, setRandomFlag} = useContext(RandomFlagContext)
     const {imageSearchFlag, setImageSearchFlag} = useContext(ImageSearchFlagContext)
     const {sidebarText, setSidebarText} = useContext(SidebarTextContext)
+    const {showDeletePostDialog, setShowDeletePostDialog} = useContext(ShowDeletePostDialogContext)
     const {mobile, setMobile} = useContext(MobileContext)
     const {session, setSession} = useContext(SessionContext)
     const [maxTags, setMaxTags] = useState(23)
@@ -429,8 +430,11 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
     }
 
     const deletePost = async () => {
-        await axios.delete("/api/post", {params: {postID: props.post.postID}, withCredentials: true})
-        history.push("/posts")
+        setShowDeletePostDialog((prev: boolean) => !prev)
+    }
+
+    const editPost = async () => {
+        history.push(`/edit-post/${props.post.postID}`)
     }
 
     if (mobile) return (
@@ -551,18 +555,18 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
                         </div>
                         <div className="sidebar-row">
                             <span className="tag">Favorites:</span>
-                            <span className="tag-alt">{props.post.favorites || 0}</span>
+                            <span className="tag-alt">{props.post.favoriteCount || 0}</span>
                         </div>
                         <div className="sidebar-row">
                             <span className="tag">Cuteness:</span>
-                            <span className="tag-alt">{props.post.cuteness}</span>
+                            <span className="tag-alt">{props.post.cutenessAvg || 500}</span>
                         </div>
                     </div>
                 : null}  
 
                 {props.post && session.username ? 
                     <div className="sidebar-subcontainer">
-                        <div className="sidebar-row">
+                        {/* <div className="sidebar-row">
                             <span className="tag-hover">
                                 <img className="sidebar-icon" src={getSetAvatar()}/>
                                 <span className="tag">Set Avatar</span>
@@ -579,19 +583,19 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
                                 <img className="sidebar-icon" src={getReport()}/>
                                 <span className="tag">Report</span>
                             </span>
-                        </div>
+                        </div> */}
                         <div className="sidebar-row">
-                            <span className="tag-hover">
+                            <span className="tag-hover" onClick={editPost}>
                                 <img className="sidebar-icon" src={getEdit()}/>
                                 <span className="tag-red">Edit</span>
                             </span>
                         </div>
-                        <div className="sidebar-row">
+                        {/* <div className="sidebar-row">
                             <span className="tag-hover">
                                 <img className="sidebar-icon" src={getHistory()}/>
                                 <span className="tag-red">History</span>
                             </span>
-                        </div>
+                        </div> */}
                         <div className="sidebar-row">
                             <span className="tag-hover" onClick={deletePost}>
                                 <img className="sidebar-icon" src={getDeleteIcon()}/>

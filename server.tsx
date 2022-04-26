@@ -105,11 +105,11 @@ for (let i = 0; i < folders.length; i++) {
     try {
       req.baseUrl = `/${folders[i]}`
       res.setHeader("Content-Type", mime.getType(req.path) ?? "")
-      const key = req.path.slice(1)
+      const key = decodeURIComponent(req.path.slice(1))
       const body = cache[key] ? cache[key] : await s3.getObject({Key: key, Bucket: "moebooru"}).promise().then((r) => r.Body)
       if (!cache[key]) cache[key] = body
+      const contentLength = body.length
       if (req.headers.range) {
-        const contentLength = body.length
         const parts = req.headers.range.replace(/bytes=/, "").split("-")
         const start = parseInt(parts[0])
         const end = parts[1] ? parseInt(parts[1]) : contentLength - 1
@@ -122,6 +122,7 @@ for (let i = 0; i < folders.length; i++) {
         stream.pipe(res)
         return
       }
+      res.setHeader("Content-Length", contentLength)
       res.status(200).end(body)
     } catch (e) {
       console.log(e)

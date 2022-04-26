@@ -30,6 +30,7 @@ import VerifyEmailSuccessPage from "./pages/VerifyEmailSuccessPage"
 import ChangePasswordPage from "./pages/ChangePasswordPage"
 import ResetPasswordPage from "./pages/ResetPasswordPage"
 import ForgotPasswordPage from "./pages/ForgotPasswordPage"
+import EditPostPage from "./pages/EditPostPage"
 import functions from "./structures/Functions"
 import localforage from "localforage"
 import axios from "axios"
@@ -236,6 +237,7 @@ const App: React.FunctionComponent = (props) => {
                         <Route exact path="/artists"><ArtistsPage/></Route>
                         <Route exact path="/comments"><CommentsPage/></Route>
                         <Route exact path="/post/:id" render={(props) => <PostPage {...props}/>}></Route>
+                        <Route exact path="/edit-post/:id" render={(props) => <EditPostPage {...props}/>}></Route>
                         <Route exact path="/help"><HelpPage/></Route>
                         <Route exact path="/change-username"><ChangeUsernamePage/></Route>
                         <Route exact path="/change-email"><ChangeEmailPage/></Route>

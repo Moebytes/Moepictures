@@ -88,7 +88,7 @@ const Comments: React.FunctionComponent<Props> = (props) => {
     const generateCommentsJSX = () => {
         let jsx = [] as any
         for (let i = 0; i < comments.length; i++) {
-            jsx.push(<Comment comment={comments[i]} onDelete={updateComments}/>)
+            jsx.push(<Comment comment={comments[i]} onDelete={updateComments} onEdit={updateComments}/>)
         }
         return jsx
     }

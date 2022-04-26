@@ -12,6 +12,8 @@ import searchMagentaLight from "../assets/magenta-light/search.png"
 import sort from "../assets/purple/sort.png"
 import CommentRow from "../components/CommentRow"
 import sortMagenta from "../assets/magenta/sort.png"
+import DeleteCommentDialog from "../dialogs/DeleteCommentDialog"
+import EditCommentDialog from "../dialogs/EditCommentDialog"
 import {ThemeContext, EnableDragContext, HideNavbarContext, HideSidebarContext, MobileContext,
 RelativeContext, HideTitlebarContext, ActiveDropdownContext, HeaderTextContext, SidebarTextContext} from "../Context"
 import "./styles/commentspage.less"
@@ -134,7 +136,7 @@ const CommentsPage: React.FunctionComponent = (props) => {
     const generateCommentsJSX = () => {
         const jsx = [] as any
         for (let i = 0; i < visibleComments.length; i++) {
-            jsx.push(<CommentRow comment={visibleComments[i]} onDelete={updateComments}/>)
+            jsx.push(<CommentRow comment={visibleComments[i]} onDelete={updateComments} onEdit={updateComments}/>)
         }
         return jsx
     }
@@ -142,6 +144,8 @@ const CommentsPage: React.FunctionComponent = (props) => {
     return (
         <>
         <DragAndDrop/>
+        <EditCommentDialog/>
+        <DeleteCommentDialog/>
         <TitleBar/>
         <NavBar/>
         <div className="body">

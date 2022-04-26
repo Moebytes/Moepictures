@@ -13,6 +13,9 @@ import sort from "../assets/purple/sort.png"
 import TagRow from "../components/TagRow"
 import sortMagenta from "../assets/magenta/sort.png"
 import axios from "axios"
+import AliasTagDialog from "../dialogs/AliasTagDialog"
+import EditTagDialog from "../dialogs/EditTagDialog"
+import DeleteTagDialog from "../dialogs/DeleteTagDialog"
 import {ThemeContext, EnableDragContext, HideNavbarContext, HideSidebarContext, RelativeContext, HideTitlebarContext, MobileContext,
 ActiveDropdownContext, HeaderTextContext, SidebarTextContext} from "../Context"
 import "./styles/tagspage.less"
@@ -140,7 +143,7 @@ const TagsPage: React.FunctionComponent = (props) => {
     const generateTagsJSX = () => {
         const jsx = [] as any
         for (let i = 0; i < visibleTags.length; i++) {
-            jsx.push(<TagRow tag={visibleTags[i]} onDelete={updateTags}/>)
+            jsx.push(<TagRow tag={visibleTags[i]} onDelete={updateTags} onEdit={updateTags}/>)
         }
         return jsx
     }
@@ -148,6 +151,9 @@ const TagsPage: React.FunctionComponent = (props) => {
     return (
         <>
         <DragAndDrop/>
+        <AliasTagDialog/>
+        <EditTagDialog/>
+        <DeleteTagDialog/>
         <TitleBar/>
         <NavBar/>
         <div className="body">

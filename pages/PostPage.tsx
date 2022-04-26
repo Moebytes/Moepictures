@@ -12,6 +12,9 @@ import Commentary from "../components/Commentary"
 import functions from "../structures/Functions"
 import DragAndDrop from "../components/DragAndDrop"
 import Carousel from "../components/Carousel"
+import DeletePostDialog from "../dialogs/DeletePostDialog"
+import DeleteCommentDialog from "../dialogs/DeleteCommentDialog"
+import EditCommentDialog from "../dialogs/EditCommentDialog"
 import {HideNavbarContext, HideSidebarContext, RelativeContext, DownloadFlagContext, DownloadURLsContext, HideTitlebarContext, MobileContext,
 PostsContext, TagsContext, HeaderTextContext, SearchContext, SidebarTextContext, SessionContext} from "../Context"
 import axios from "axios"
@@ -121,6 +124,9 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
     return (
         <>
         <DragAndDrop/>
+        <EditCommentDialog/>
+        <DeleteCommentDialog/>
+        {post ? <DeletePostDialog post={post}/> : null}
         <TitleBar/>
         <NavBar/>
         <div className="body">
@@ -144,7 +150,7 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
                     <PostImageOptions img={image} download={download} next={next} previous={previous}/>
                     </>
                     }
-                    {session.username ? <CutenessMeter/> : null}
+                    {session.username && post ? <CutenessMeter post={post}/> : null}
                     {post?.commentary ? <Commentary text={post.commentary} translated={post.translatedCommentary}/> : null}
                     {post ?
                     <Comments post={post}/>
