@@ -11,10 +11,12 @@ import SideBar from "../components/SideBar"
 import Footer from "../components/Footer"
 import DragAndDrop from "../components/DragAndDrop"
 import {HideNavbarContext, HideSidebarContext, ThemeContext, EnableDragContext, RelativeContext, HideTitlebarContext, MobileContext,
-HeaderTextContext, SidebarTextContext, SessionContext, RedirectContext, SessionFlagContext, UserImgContext} from "../Context"
+HeaderTextContext, SidebarTextContext, SessionContext, RedirectContext, SessionFlagContext, UserImgContext, ShowDeleteAccountDialogContext,
+CommentSearchFlagContext} from "../Context"
 import fileType from "magic-bytes.js"
 import functions from "../structures/Functions"
 import Carousel from "../components/Carousel"
+import DeleteAccountDialog from "../dialogs/DeleteAccountDialog"
 import "./styles/userprofilepage.less"
 import axios from "axios"
 
@@ -33,7 +35,11 @@ const UserProfilePage: React.FunctionComponent = (props) => {
     const {redirect, setRedirect} = useContext(RedirectContext)
     const {mobile, setMobile} = useContext(MobileContext)
     const {userImg, setUserImg} = useContext(UserImgContext)
+    const {showDeleteAccountDialog, setShowDeleteAccountDialog} = useContext(ShowDeleteAccountDialogContext)
+    const {commentSearchFlag, setCommentSearchFlag} = useContext(CommentSearchFlagContext)
     const bioRef = useRef<any>(null)
+    const errorRef = useRef<any>(null)
+    const [error, setError] = useState(false)
     const [showBioInput, setShowBioInput] = useState(false)
     const [uploadIndex, setUploadIndex] = useState(0)
     const [favoriteIndex, setFavoriteIndex] = useState(0) as any
@@ -45,14 +51,14 @@ const UserProfilePage: React.FunctionComponent = (props) => {
     const history = useHistory()
 
     const updateUploads = async () => {
-        const uploads = await axios.get("/api/uploads", {withCredentials: true}).then((r) => r.data)
+        const uploads = await axios.get("/api/user/uploads", {withCredentials: true}).then((r) => r.data)
         const images = uploads.map((p: any) => functions.getImageLink(p.images[0].type, p.postID, p.images[0].filename))
         setUploads(uploads)
         setUploadImages(images)
     }
 
     const updateFavorites = async () => {
-        const favorites = await axios.get("/api/favorites", {withCredentials: true}).then((r) => r.data)
+        const favorites = await axios.get("/api/user/favorites", {withCredentials: true}).then((r) => r.data)
         const images = favorites.map((f: any) => functions.getImageLink(f.post.images[0].type, f.postID, f.post.images[0].filename))
         setFavorites(favorites)
         setFavoriteImages(images)
@@ -138,7 +144,7 @@ const UserProfilePage: React.FunctionComponent = (props) => {
                         }
                         const arrayBuffer = await fetch(croppedURL).then((r) => r.arrayBuffer())
                         const bytes = Object.values(new Uint8Array(arrayBuffer))
-                        await axios.post("/api/updatepfp", bytes, {withCredentials: true})
+                        await axios.post("/api/user/updatepfp", bytes, {withCredentials: true})
                         setUserImg("")
                         setSessionFlag(true)
                     }
@@ -150,14 +156,33 @@ const UserProfilePage: React.FunctionComponent = (props) => {
     }
 
     const favoritesPrivacy = async () => {
-        await axios.post("/api/favoritesprivacy", null, {withCredentials: true})
+        await axios.post("/api/user/favoritesprivacy", null, {withCredentials: true})
         setSessionFlag(true)
     }
 
     const changeBio = async () => {
-        await axios.post("/api/changebio", {bio}, {withCredentials: true})
-        setSessionFlag(true)
-        setShowBioInput(false)
+        const badBio = functions.validateBio(bio)
+        if (badBio) {
+            setError(true)
+            if (!errorRef.current) await functions.timeout(20)
+            errorRef.current!.innerText = badBio
+            await functions.timeout(2000)
+            setError(false)
+            return
+        }
+        setError(true)
+        if (!errorRef.current) await functions.timeout(20)
+        errorRef.current!.innerText = "Submitting..."
+        try {
+            await axios.post("/api/user/changebio", {bio}, {withCredentials: true})
+            setSessionFlag(true)
+            setError(false)
+            setShowBioInput(false)
+        } catch {
+            errorRef.current!.innerText = "Bad bio."
+            await functions.timeout(2000)
+            setError(false)
+        }
     }
 
     const setUp = (img: string, index: number) => {
@@ -172,9 +197,19 @@ const UserProfilePage: React.FunctionComponent = (props) => {
         history.push(`/post/${postID}`)
     }
 
+    const deleteAccountDialog = () => {
+        setShowDeleteAccountDialog((prev: boolean) => !prev)
+    }
+
+    const viewComments = () => {
+        history.push("/comments")
+        setCommentSearchFlag(`user:${session.username}`)
+    }
+
     return (
         <>
         <DragAndDrop/>
+        <DeleteAccountDialog/>
         <TitleBar/>
         <NavBar/>
         <div className="body">
@@ -205,8 +240,12 @@ const UserProfilePage: React.FunctionComponent = (props) => {
                     <div className="userprofile-column">
                         <textarea ref={bioRef} className="userprofile-textarea" spellCheck={false} value={bio} onChange={(event) => setBio(event.target.value)}
                         onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}></textarea>
+                        {error ? <div className="userprofile-validation-container"><span className="userprofile-validation" ref={errorRef}></span></div> : null}
                         <button className="userprofile-button" onClick={changeBio}>Ok</button>
                     </div> : null}
+                    <div className="userprofile-row">
+                        <span className="userprofile-link" onClick={viewComments}>View Comments</span>
+                    </div>
                     <div className="userprofile-row">
                         <span className="userprofile-text">Favorites Privacy: <span className="userprofile-text-action" onClick={favoritesPrivacy}>{session.publicFavorites ? "Public" : "Private"}</span></span>
                     </div>
@@ -222,18 +261,18 @@ const UserProfilePage: React.FunctionComponent = (props) => {
                     <Link to="/enable-2fa" className="userprofile-row">
                         <span className="userprofile-link">{session.$2fa ? "Disable" : "Enable"} 2-Factor Authentication</span>
                     </Link>
-                    {uploads.length ?
-                    <div className="userprofile-column">
-                        <span className="userprofile-text">Uploads <span className="userprofile-text-alt">{uploads.length}</span></span>
-                        <Carousel images={uploadImages} noKey={true} set={setUp} index={uploadIndex}/>
-                    </div> : null}
                     {favorites.length ?
                     <div className="userprofile-column">
                         <span className="userprofile-text">Favorites <span className="userprofile-text-alt">{favorites.length}</span></span>
                         <Carousel images={favoriteImages} noKey={true} set={setFav} index={favoriteIndex}/>
                     </div> : null}
+                    {uploads.length ?
+                    <div className="userprofile-column">
+                        <span className="userprofile-text">Uploads <span className="userprofile-text-alt">{uploads.length}</span></span>
+                        <Carousel images={uploadImages} noKey={true} set={setUp} index={uploadIndex}/>
+                    </div> : null}
                     <div className="userprofile-row">
-                        <span className="userprofile-link">Delete Account</span>
+                        <span className="userprofile-link" onClick={deleteAccountDialog}>Delete Account</span>
                     </div>
                 </div>
                 <Footer/>

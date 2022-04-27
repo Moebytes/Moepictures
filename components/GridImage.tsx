@@ -368,7 +368,7 @@ const GridImage: React.FunctionComponent<Props> = (props) => {
     useEffect(() => {
         if (mobile) {
             if (sizeType === "tiny") {
-                setImageSize(70)
+                setImageSize(80)
             } else if (sizeType === "small") {
                 setImageSize(100)
             } else if (sizeType === "medium") {

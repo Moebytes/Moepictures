@@ -743,7 +743,7 @@ const SortBar: React.FunctionComponent = (props) => {
         <>
         {sortBarJSX()}
         <div className="sortbar-dropdowns"
-        onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
+        onMouseEnter={() => setEnableDrag(false)}>
             <div className={`dropdown ${activeDropdown === "image" ? "" : "hide-dropdown"}`}
             style={{marginLeft: getImageMargin(), left: dropLeft, top: dropTop}} onClick={() => setActiveDropdown("none")}>
                 <div className="sortbar-dropdown-row" onClick={() => setImageType("all")} >

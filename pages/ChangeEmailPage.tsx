@@ -38,6 +38,7 @@ const ChangeEmailPage: React.FunctionComponent = (props) => {
         setRelative(false)
         setHeaderText("")
         setSidebarText("")
+        setEnableDrag(false)
         document.title = "Moebooru: Change Email"
     }, [])
 
@@ -72,7 +73,7 @@ const ChangeEmailPage: React.FunctionComponent = (props) => {
         if (!errorRef.current) await functions.timeout(20)
         errorRef.current!.innerText = "Submitting..."
         try {
-            await axios.post("/api/changeemail", {newEmail}, {withCredentials: true})
+            await axios.post("/api/user/changeemail", {newEmail}, {withCredentials: true})
             setSubmitted(true)
             setError(false)
         } catch {
@@ -107,10 +108,11 @@ const ChangeEmailPage: React.FunctionComponent = (props) => {
                     </div>
                     <div className="change-email-row">
                         <span className="change-email-text">New Email: </span>
-                        <input className="change-email-input" type="text" spellCheck={false} value={newEmail} onChange={(event) => setNewEmail(event.target.value)} onKeyDown={(event) => event.key === "Enter" ? submit() : null} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}/>
+                        <input className="change-email-input" type="text" spellCheck={false} value={newEmail} onChange={(event) => setNewEmail(event.target.value)} onKeyDown={(event) => event.key === "Enter" ? submit() : null}/>
                     </div>
                     {error ? <div className="change-email-validation-container"><span className="change-email-validation" ref={errorRef}></span></div> : null}
                     <div className="change-email-button-container">
+                        <button style={{marginRight: "20px"}} className="change-username-button" onClick={() => history.push("/profile")}>←Back</button>
                         <button className="change-email-button" onClick={() => submit()}>Change Email</button>
                     </div>
                     </>

@@ -387,11 +387,16 @@ export default class SQLQuery {
     return result
   }
 
-  public static tagSearch = async (search: string, sort: string, aliases?: string[]) => {
-    let whereArray = [] as any
-    if (search) whereArray.push(`tags.tag LIKE $1 || '%'`)
+  public static tagSearch = async (search: string, sort: string) => {
     let whereQuery = ""
-    if (whereArray.length) whereQuery = `WHERE ${whereArray.join(" OR ")}`
+    if (search) whereQuery = 
+    `WHERE tags.tag LIKE $1 || '%'
+    OR EXISTS (
+      SELECT 1 
+      FROM aliases
+      WHERE aliases.tag = tags.tag 
+      AND aliases.alias LIKE $1 || '%'
+    )`
     let sortQuery = ""
     if (sort === "alphabetic") sortQuery = `ORDER BY tags.tag ASC`
     if (sort === "reverse alphabetic") sortQuery = `ORDER BY tags.tag DESC`
@@ -407,7 +412,7 @@ export default class SQLQuery {
                   COUNT(DISTINCT posts."postID") AS "postCount", 
                   COUNT(DISTINCT tags."image") AS "imageCount", 
                   COUNT(DISTINCT aliases."alias") AS "aliasCount"
-                  FROM tags, unnest(aliases) AS alias
+                  FROM tags
                   FULL JOIN aliases ON aliases."tag" = tags."tag"
                   JOIN "tag map" ON "tag map"."tag" = tags."tag"
                   JOIN posts ON posts."postID" = "tag map"."postID"
@@ -480,6 +485,16 @@ export default class SQLQuery {
     return result[0]
   }
 
+  /** Delete user. */
+  public static deleteUser = async (username: string) => {
+    const query: QueryConfig = {
+      text: functions.multiTrim(`DELETE FROM users WHERE users."username" = $1`),
+      values: [username]
+    }
+    const result = await SQLQuery.run(query)
+    return result
+  }
+
   /** Insert email token. */
   public static insertEmailToken = async (token: string, email: string) => {
     let now = new Date() as any
@@ -508,10 +523,10 @@ export default class SQLQuery {
   }
 
   /** Delete email token. */
-  public static deleteEmailToken = async (token: string) => {
+  public static deleteEmailToken = async (email: string) => {
     const query: QueryConfig = {
-      text: `DELETE FROM "email tokens" WHERE "email tokens"."token" = $1`,
-      values: [token]
+      text: `DELETE FROM "email tokens" WHERE "email tokens"."email" = $1`,
+      values: [email]
     }
     const result = await SQLQuery.run(query)
     return result
@@ -659,6 +674,41 @@ export default class SQLQuery {
           `)
     }
     if (search) query.values = [search]
+    const result = await SQLQuery.run(query)
+    return result
+  }
+
+  /** Comments by usernames. */
+  public static searchCommentsByUsername = async (usernames: string[], search: string, sort: string) => {
+    let whereQuery = `WHERE comments."username" = ANY ($1)`
+    if (search) whereQuery += `AND comments."comment" LIKE '%' || $2 || '%'`
+    let sortQuery = ""
+    if (sort === "date") sortQuery = `ORDER BY comments."postDate" DESC`
+    if (sort === "reverse date") sortQuery = `ORDER BY comments."postDate" ASC`
+    const query: QueryConfig = {
+          text: functions.multiTrim(`
+            WITH post_json AS (
+              SELECT posts.*, json_agg(DISTINCT images.*) AS images
+              FROM posts
+              JOIN images ON images."postID" = posts."postID"
+              GROUP BY posts."postID"
+            )
+            SELECT comments.*, users."image", json_build_object(
+              'type', post_json."type",
+              'restrict', post_json."restrict",
+              'style', post_json."style",
+              'images', (array_agg(post_json."images"))[1]
+            ) AS post
+            FROM comments
+            JOIN "users" ON "users"."username" = "comments"."username"
+            JOIN post_json ON post_json."postID" = "comments"."postID"
+            ${whereQuery}
+            GROUP BY comments."commentID", users."image", post_json."type", post_json."restrict", post_json."style"
+            ${sortQuery}
+          `),
+          values: [usernames]
+    }
+    if (search) query.values?.push(search)
     const result = await SQLQuery.run(query)
     return result
   }
@@ -993,5 +1043,83 @@ export default class SQLQuery {
         values: [postID]
     }
     return SQLQuery.run(query)
+  }
+
+  /** Insert third party relation. */
+  public static insertThirdParty = async (postID: number, parentID: number) => {
+    const query: QueryConfig = {
+      text: `INSERT INTO "third party" ("postID", "parentID") VALUES ($1, $2)`,
+      values: [postID, parentID]
+    }
+    const result = await SQLQuery.run(query)
+    return result
+  }
+
+  /** Delete third party relation. */
+  public static deleteThirdParty = async (postID: number) => {
+    const query: QueryConfig = {
+      text: `DELETE FROM "third party" WHERE "third party"."postID" = $1`,
+      values: [postID]
+    }
+    const result = await SQLQuery.run(query)
+    return result
+  }
+
+  /** Get third party posts. */
+  public static thirdParty = async (parentID: number) => {
+    const query: QueryConfig = {
+      text: functions.multiTrim(`
+            WITH post_json AS (
+              SELECT posts.*, json_agg(DISTINCT images.*) AS images,
+              ROUND(AVG(DISTINCT cuteness."cuteness")) AS "cutenessAvg"
+              FROM posts
+              JOIN images ON images."postID" = posts."postID"
+              FULL JOIN "cuteness" ON posts."postID" = "cuteness"."postID"
+              GROUP BY posts."postID"
+            )
+            SELECT "third party".*, json_build_object(
+              'type', post_json."type",
+              'restrict', post_json."restrict",
+              'style', post_json."style",
+              'images', (array_agg(post_json."images"))[1]
+            ) AS post
+            FROM "third party"
+            JOIN post_json ON post_json."postID" = "third party"."postID"
+            WHERE "third party"."parentID" = $1
+            GROUP BY "third party"."thirdPartyID", post_json."type", post_json."restrict", post_json."style"
+          `),
+      values: [parentID]
+    }
+    const result = await SQLQuery.run(query)
+    return result
+  }
+
+  /** Get the parent of a third party post. */
+  public static parent = async (postID: number) => {
+    const query: QueryConfig = {
+      text: functions.multiTrim(`
+            WITH post_json AS (
+              SELECT posts.*, json_agg(DISTINCT images.*) AS images,
+              ROUND(AVG(DISTINCT cuteness."cuteness")) AS "cutenessAvg"
+              FROM posts
+              JOIN images ON images."postID" = posts."postID"
+              FULL JOIN "cuteness" ON posts."postID" = "cuteness"."postID"
+              GROUP BY posts."postID"
+            )
+            SELECT "third party".*, json_build_object(
+              'type', post_json."type",
+              'restrict', post_json."restrict",
+              'style', post_json."style",
+              'images', (array_agg(post_json."images"))[1]
+            ) AS post
+            FROM "third party"
+            JOIN post_json ON post_json."postID" = "third party"."parentID"
+            WHERE "third party"."postID" = $1
+            GROUP BY "third party"."thirdPartyID", post_json."type", post_json."restrict", post_json."style"
+          `),
+      values: [postID]
+    }
+    const result = await SQLQuery.run(query)
+    return result[0]
   }
 }

@@ -25,7 +25,7 @@ const Commentary: React.FunctionComponent<Props> = (props) => {
                 setText(props.translated)
             } else {
                 if (!translatedText) {
-                    axios.post("/api/translate", [props.text], {withCredentials: true}).then((r) => {
+                    axios.post("/api/misc/translate", [props.text], {withCredentials: true}).then((r) => {
                         setTranslatedText(r.data[0])
                         setText(r.data[0])
                     })

@@ -15,7 +15,8 @@ import sortMagenta from "../assets/magenta/sort.png"
 import DeleteCommentDialog from "../dialogs/DeleteCommentDialog"
 import EditCommentDialog from "../dialogs/EditCommentDialog"
 import {ThemeContext, EnableDragContext, HideNavbarContext, HideSidebarContext, MobileContext,
-RelativeContext, HideTitlebarContext, ActiveDropdownContext, HeaderTextContext, SidebarTextContext} from "../Context"
+RelativeContext, HideTitlebarContext, ActiveDropdownContext, HeaderTextContext, SidebarTextContext,
+CommentSearchFlagContext} from "../Context"
 import "./styles/commentspage.less"
 import axios from "axios"
 
@@ -30,19 +31,28 @@ const CommentsPage: React.FunctionComponent = (props) => {
     const {headerText, setHeaderText} = useContext(HeaderTextContext)
     const {sidebarText, setSidebarText} = useContext(SidebarTextContext)
     const {mobile, setMobile} = useContext(MobileContext)
+    const {commentSearchFlag, setCommentSearchFlag} = useContext(CommentSearchFlagContext)
     const [sortType, setSortType] = useState("date")
     const [comments, setComments] = useState([]) as any
-    const [index, setIndex] = useState(0)
     const [searchQuery, setSearchQuery] = useState("")
+    const [index, setIndex] = useState(0)
     const [visibleComments, setVisibleComments] = useState([]) as any
     const sortRef = useRef(null) as any
 
     const updateComments = async () => {
-        const result = await axios.get("/api/commentsearch", {params: {sort: sortType, query: searchQuery}, withCredentials: true}).then((r) => r.data)
+        const result = await axios.get("/api/search/comments", {params: {sort: sortType, query: searchQuery}, withCredentials: true}).then((r) => r.data)
         setIndex(0)
         setVisibleComments([])
         setComments(result)
     }
+
+    useEffect(() => {
+        if (commentSearchFlag) {
+            setSearchQuery(commentSearchFlag)
+            setCommentSearchFlag(null)
+            updateComments()
+        }
+    }, [commentSearchFlag])
 
     useEffect(() => {
         setHideNavbar(true)
@@ -150,7 +160,7 @@ const CommentsPage: React.FunctionComponent = (props) => {
         <NavBar/>
         <div className="body">
             <SideBar/>
-            <div className="content">
+            <div className="content" onMouseEnter={() => setEnableDrag(true)}>
                 <div className="comments-page">
                     <span className="comments-heading">Comments</span>
                     <div className="comments-row">

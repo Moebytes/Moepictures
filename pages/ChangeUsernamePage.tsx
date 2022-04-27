@@ -38,6 +38,7 @@ const ChangeUsernamePage: React.FunctionComponent = (props) => {
         setRelative(false)
         setHeaderText("")
         setSidebarText("")
+        setEnableDrag(false)
         document.title = "Moebooru: Change Username"
     }, [])
 
@@ -72,7 +73,7 @@ const ChangeUsernamePage: React.FunctionComponent = (props) => {
         if (!errorRef.current) await functions.timeout(20)
         errorRef.current!.innerText = "Submitting..."
         try {
-            await axios.post("/api/changeusername", {newUsername}, {withCredentials: true})
+            await axios.post("/api/user/changeusername", {newUsername}, {withCredentials: true})
             setSubmitted(true)
             setSessionFlag(true)
             setError(false)
@@ -100,18 +101,18 @@ const ChangeUsernamePage: React.FunctionComponent = (props) => {
                         <button className="change-username-button" onClick={() => history.push("/profile")}>←Back</button>
                     </div>
                     </> : <>
-                    <span className="change-username-link">You can change your username once per week. Your old username 
-                    will become available after the change.</span>
+                    <span className="change-username-link">Your old username will become available after the change.</span>
                     <div className="change-username-row">
                         <span className="change-username-text">Username: </span>
                         <span className="change-username-text-small">{session.username}</span>
                     </div>
                     <div className="change-username-row">
                         <span className="change-username-text">New Username: </span>
-                        <input className="change-username-input" type="text" spellCheck={false} value={newUsername} onChange={(event) => setNewUsername(event.target.value)} onKeyDown={(event) => event.key === "Enter" ? submit() : null} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}/>
+                        <input className="change-username-input" type="text" spellCheck={false} value={newUsername} onChange={(event) => setNewUsername(event.target.value)} onKeyDown={(event) => event.key === "Enter" ? submit() : null}/>
                     </div>
                     {error ? <div className="change-username-validation-container"><span className="change-username-validation" ref={errorRef}></span></div> : null}
                     <div className="change-username-button-container">
+                        <button style={{marginRight: "20px"}} className="change-username-button" onClick={() => history.push("/profile")}>←Back</button>
                         <button className="change-username-button" onClick={() => submit()}>Change Username</button>
                     </div>
                     </>

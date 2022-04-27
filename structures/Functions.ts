@@ -11,6 +11,7 @@ import gibberish from "./Gibberish"
 import JsWebm from "jswebm"
 import gifFrames from "gif-frames"
 import profaneWords from "profane-words"
+import localforage from "localforage"
 
 let newScrollY = 0
 let lastScrollTop = 0
@@ -29,7 +30,7 @@ export default class Functions {
     
     public static proxyImage = async (link: string) => {
         try {
-            const response = await axios.get(`/api/proxy?url=${link}`, {withCredentials: true, responseType: "arraybuffer"}).then((r) => r.data)
+            const response = await axios.get(`/api/misc/proxy?url=${link}`, {withCredentials: true, responseType: "arraybuffer"}).then((r) => r.data)
             const blob = new Blob([new Uint8Array(response)])
             const file = new File([blob], path.basename(link))
             return file
@@ -156,6 +157,7 @@ export default class Functions {
     }
 
     public static validateUsername = (username: string) => {
+        if (!username) return "No username."
         const alphaNumeric = Functions.alphaNumeric(username)
         if (!alphaNumeric || /[\n\r\s]+/g.test(username)) return "Usernames cannot contain special characters or spaces."
         if (profaneWords.includes(username.toLowerCase())) return "Username is profane."
@@ -176,6 +178,7 @@ export default class Functions {
     }
 
     public static validatePassword = (username: string, password: string) => {
+        if (!password) return "No password."
         if (password.toLowerCase().includes(username.toLowerCase())) return "Password should not contain username."
         if (commonPasswords.includes(password)) return "Password is too common."
         if (/ +/.test(password)) return "Password should not contain spaces."
@@ -186,6 +189,7 @@ export default class Functions {
     }
 
     public static validateEmail = (email: string) => {
+        if (!email) return "No email."
         const regex = /^[a-zA-Z0-9.!#$%&"*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/
         if (!regex.test(email)) return "Email is not valid."
         if (!email.endsWith("@gmail.com") &&
@@ -219,6 +223,7 @@ export default class Functions {
     }
 
     public static validateComment = (comment: string) => {
+        if (!comment) return "No comment."
         if (comment.length > 1000) return "Comment cannot exceed 1000 characters."
         if (!/[a-zA-Z\-\u3000-\u303f\u3040-\u309f\u30a0-\u30ff\uff00-\uff9f\u4e00-\u9faf\u3400-\u4dbf]/.test(comment)) return "Comment cannot be gibberish."
         const pieces = Functions.parseComment(comment)
@@ -237,6 +242,22 @@ export default class Functions {
         const words = comment.split(/ +/g)
         for (let i = 0; i < words.length; i++) {
             if (profaneWords.includes(words[i])) return "Comment is profane."
+        }
+        return null
+    }
+
+    public static validateMessage = (message: string) => {
+        if (!message) return "No message."
+        if (gibberish(message)) return "Message cannot be gibberish."
+        return null
+    }
+
+    public static validateBio = (bio: string) => {
+        if (!bio) return "No bio."
+        if (gibberish(bio)) return "Bio cannot be gibberish."
+        const bioArray = bio.split(/ +/g)
+        for (let i = 0; i < bioArray.length; i++) {
+            if (profaneWords.includes(bioArray[i].toLowerCase())) return "Bio is profane."
         }
         return null
     }
@@ -913,12 +934,12 @@ export default class Functions {
                 uniqueTags.add(posts[i].tags[j])
             }
         }
-        let result = await axios.get("/api/tags/count", {params: {tags: Array.from(uniqueTags)}, withCredentials: true}).then((r) => r.data)
+        let result = await axios.get("/api/tag/counts", {params: {tags: Array.from(uniqueTags)}, withCredentials: true}).then((r) => r.data)
         return result
     }
 
     public static tagCategories = async (parsedTags: any[]) => {
-        let result = await axios.get("/api/tags", {params: {tags: parsedTags.map((t: any) => t.tag)}, withCredentials: true}).then((r) => r.data)
+        let result = await axios.get("/api/tag/list", {params: {tags: parsedTags.map((t: any) => t.tag)}, withCredentials: true}).then((r) => r.data)
         let artists = [] as any 
         let characters = [] as any 
         let series = [] as any 
@@ -1000,7 +1021,7 @@ export default class Functions {
                         const thumbnail = await Functions.videoThumbnail(url)
                         bytes = await Functions.base64toUint8Array(thumbnail)
                     }
-                    const result = await axios.post("/api/similar", Object.values(bytes), {withCredentials: true}).then((r) => r.data)
+                    const result = await axios.post("/api/search/similar", Object.values(bytes), {withCredentials: true}).then((r) => r.data)
                     resolve(result)
                 }
             }
@@ -1089,6 +1110,28 @@ export default class Functions {
 
     public static fileExtension = (uint8Array: Uint8Array) => {
         const result = fileType(uint8Array)?.[0]
-        return result.extension
+        return result?.extension || ""
+    }
+
+    public static parseSpaceEnabledSearch = async (query: string) => {
+        const savedTags = await localforage.getItem("tags") as any
+        if (!savedTags) return query 
+        const slicedTags = query.split(/ +/g)
+        let permutations = [] as any
+        for (let i = 1; i <= slicedTags.length; i++) {
+            let permuteArr = [] as any
+		    for (let j = 0; j < slicedTags.length; j+=i) {
+                permuteArr.push(slicedTags.slice(j, j+i).join("-"))
+          }
+          permutations.push(permuteArr)
+        }
+        permutations = permutations.reverse()
+        for (let i = 0; i < permutations.length; i++) {
+            for (let j = 0; j < permutations[i].length; j++) {
+                const exists = savedTags.find((t: any) => t.tag === permutations[i][j])
+                if (exists) return permutations[i].join(" ")
+            }
+        }
+        return query
     }
 }

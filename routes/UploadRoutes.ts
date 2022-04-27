@@ -54,13 +54,12 @@ const validImages = (images: any[]) => {
 
 
 const CreateRoutes = (app: Express) => {
-    app.post("/api/upload", uploadLimiter, async (req: Request, res: Response, next: NextFunction) => {
+    app.post("/api/post/upload", uploadLimiter, async (req: Request, res: Response, next: NextFunction) => {
       try {
         const images = req.body.images 
         let type = req.body.type 
         const restrict = req.body.restrict 
-        const style = req.body.style 
-        const variationID = req.body.variationID 
+        const style = req.body.style
         const thirdPartyID = req.body.thirdPartyID 
         const source = req.body.source 
         let artists = req.body.artists
@@ -106,34 +105,24 @@ const CreateRoutes = (app: Express) => {
         if (!functions.validRestrict(restrict)) return res.status(400).send("Invalid restrict")
         if (!functions.validStyle(style)) return res.status(400).send("Invalid style")
 
-        const variation = variationID ? true : false
-        const postID = variationID ? Number(variationID) : await sql.insertPost()
-        
+        const postID = await sql.insertPost()
+        if (thirdPartyID && !Number.isNaN(Number(thirdPartyID))) await sql.insertThirdParty(postID, Number(thirdPartyID))
 
-        if (variation) {
-          const post = await sql.post(postID)
-          type = post.type
-          const uploadDate = new Date().toISOString()
-          await sql.updatePost(postID, "updater", req.session.username)
-          await sql.updatePost(postID, "updatedDate", uploadDate)
-          tags = functions.removeDuplicates([...tags, ...post.tags])
-        } else {
-          await sql.updatePost(postID, "restrict", restrict)
-          await sql.updatePost(postID, "style", style)
-          await sql.updatePost(postID, "thirdParty", thirdPartyID ? true : false)
-          await sql.updatePost(postID, "title", source.title ? source.title : null)
-          await sql.updatePost(postID, "translatedTitle", source.translatedTitle ? source.translatedTitle : null)
-          await sql.updatePost(postID, "artist", source.artist ? source.artist : null)
-          await sql.updatePost(postID, "drawn", source.date ? source.date : null)
-          await sql.updatePost(postID, "link", source.link ? source.link : null)
-          await sql.updatePost(postID, "commentary", source.commentary ? source.commentary : null)
-          await sql.updatePost(postID, "translatedCommentary", source.translatedCommentary ? source.translatedCommentary : null)
-          const uploadDate = new Date().toISOString()
-          await sql.updatePost(postID, "uploadDate", uploadDate)
-          await sql.updatePost(postID, "uploader", req.session.username)
-          await sql.updatePost(postID, "updater", req.session.username)
-          await sql.updatePost(postID, "updatedDate", uploadDate)
-        }
+        await sql.updatePost(postID, "restrict", restrict)
+        await sql.updatePost(postID, "style", style)
+        await sql.updatePost(postID, "thirdParty", thirdPartyID ? true : false)
+        await sql.updatePost(postID, "title", source.title ? source.title : null)
+        await sql.updatePost(postID, "translatedTitle", source.translatedTitle ? source.translatedTitle : null)
+        await sql.updatePost(postID, "artist", source.artist ? source.artist : null)
+        await sql.updatePost(postID, "drawn", source.date ? source.date : null)
+        await sql.updatePost(postID, "link", source.link ? source.link : null)
+        await sql.updatePost(postID, "commentary", source.commentary ? source.commentary : null)
+        await sql.updatePost(postID, "translatedCommentary", source.translatedCommentary ? source.translatedCommentary : null)
+        const uploadDate = new Date().toISOString()
+        await sql.updatePost(postID, "uploadDate", uploadDate)
+        await sql.updatePost(postID, "uploader", req.session.username)
+        await sql.updatePost(postID, "updater", req.session.username)
+        await sql.updatePost(postID, "updatedDate", uploadDate)
 
 
         if (type !== "comic") type = "image"
@@ -207,50 +196,48 @@ const CreateRoutes = (app: Express) => {
           }
         }
 
-        if (!variation) {
-          for (let i = 0; i < artists.length; i++) {
-            if (!artists[i].tag) continue
-            const exists = await sql.insertTag(artists[i].tag)
-            await sql.updateTag(artists[i].tag, "type", "artist")
-            if (!exists) await sql.updateTag(artists[i].tag, "description", "Artist.")
-            if (!exists && artists[i].image) {
-              const filename = `${artists[i].tag}.${artists[i].ext}`
-              const imagePath = functions.getTagPath("artist", filename)
-              await serverFunctions.uploadFile(imagePath, Buffer.from(Object.values(artists[i].bytes)))
-              await sql.updateTag(artists[i].tag, "image", filename)
-            }
-            tagMap.push(artists[i].tag)
+        for (let i = 0; i < artists.length; i++) {
+          if (!artists[i].tag) continue
+          const exists = await sql.insertTag(artists[i].tag)
+          await sql.updateTag(artists[i].tag, "type", "artist")
+          if (!exists) await sql.updateTag(artists[i].tag, "description", "Artist.")
+          if (!exists && artists[i].image) {
+            const filename = `${artists[i].tag}.${artists[i].ext}`
+            const imagePath = functions.getTagPath("artist", filename)
+            await serverFunctions.uploadFile(imagePath, Buffer.from(Object.values(artists[i].bytes)))
+            await sql.updateTag(artists[i].tag, "image", filename)
           }
-
-          for (let i = 0; i < characters.length; i++) {
-            if (!characters[i].tag) continue
-            const exists = await sql.insertTag(characters[i].tag)
-            await sql.updateTag(characters[i].tag, "type", "character")
-            if (!exists) await sql.updateTag(characters[i].tag, "description", "Character.")
-            if (!exists && characters[i].image) {
-              const filename = `${characters[i].tag}.${characters[i].ext}`
-              const imagePath = functions.getTagPath("character", filename)
-              await serverFunctions.uploadFile(imagePath, Buffer.from(Object.values(characters[i].bytes)))
-              await sql.updateTag(characters[i].tag, "image", filename)
-            }
-            tagMap.push(characters[i].tag)
-          }
-
-          for (let i = 0; i < series.length; i++) {
-            if (!series[i].tag) continue
-            const exists = await sql.insertTag(series[i].tag)
-            await sql.updateTag(series[i].tag, "type", "series")
-            if (!exists) await sql.updateTag(series[i].tag, "description", "Series.")
-            if (!exists && series[i].image) {
-              const filename = `${series[i].tag}.${series[i].ext}`
-              const imagePath = functions.getTagPath("series", filename)
-              await serverFunctions.uploadFile(imagePath, Buffer.from(Object.values(series[i].bytes)))
-              await sql.updateTag(series[i].tag, "image", filename)
-            }
-            tagMap.push(series[i].tag)
-          }
-          await sql.insertCuteness(postID, req.session.username, 500)
+          tagMap.push(artists[i].tag)
         }
+
+        for (let i = 0; i < characters.length; i++) {
+          if (!characters[i].tag) continue
+          const exists = await sql.insertTag(characters[i].tag)
+          await sql.updateTag(characters[i].tag, "type", "character")
+          if (!exists) await sql.updateTag(characters[i].tag, "description", "Character.")
+          if (!exists && characters[i].image) {
+            const filename = `${characters[i].tag}.${characters[i].ext}`
+            const imagePath = functions.getTagPath("character", filename)
+            await serverFunctions.uploadFile(imagePath, Buffer.from(Object.values(characters[i].bytes)))
+            await sql.updateTag(characters[i].tag, "image", filename)
+          }
+          tagMap.push(characters[i].tag)
+        }
+
+        for (let i = 0; i < series.length; i++) {
+          if (!series[i].tag) continue
+          const exists = await sql.insertTag(series[i].tag)
+          await sql.updateTag(series[i].tag, "type", "series")
+          if (!exists) await sql.updateTag(series[i].tag, "description", "Series.")
+          if (!exists && series[i].image) {
+            const filename = `${series[i].tag}.${series[i].ext}`
+            const imagePath = functions.getTagPath("series", filename)
+            await serverFunctions.uploadFile(imagePath, Buffer.from(Object.values(series[i].bytes)))
+            await sql.updateTag(series[i].tag, "image", filename)
+          }
+          tagMap.push(series[i].tag)
+        }
+        await sql.insertCuteness(postID, req.session.username, 500)
 
         tagMap = functions.removeDuplicates(tagMap)
 
@@ -265,7 +252,7 @@ const CreateRoutes = (app: Express) => {
       }
     })
 
-    app.put("/api/editpost", async (req: Request, res: Response, next: NextFunction) => {
+    app.put("/api/post/edit", async (req: Request, res: Response, next: NextFunction) => {
       try {
         const postID = Number(req.body.postID)
         const images = req.body.images 
@@ -324,6 +311,9 @@ const CreateRoutes = (app: Express) => {
           await sql.deleteImage(post.images[i].imageID)
           await serverFunctions.deleteFile(functions.getImagePath(post.images[i].type, postID, post.images[i].filename))
         }
+
+        await sql.deleteThirdParty(postID)
+        if (thirdPartyID && !Number.isNaN(Number(thirdPartyID))) await sql.insertThirdParty(postID, Number(thirdPartyID))
         
         await sql.updatePost(postID, "restrict", restrict)
         await sql.updatePost(postID, "style", style)

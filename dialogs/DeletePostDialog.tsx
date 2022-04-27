@@ -35,7 +35,7 @@ const DeletePostDialog: React.FunctionComponent<Props> = (props) => {
     }, [showDeletePostDialog])
 
     const deletePost = async () => {
-        await axios.delete("/api/post", {params: {postID: props.post.postID}, withCredentials: true})
+        await axios.delete("/api/post/delete", {params: {postID: props.post.postID}, withCredentials: true})
         history.push("/posts")
     }
 

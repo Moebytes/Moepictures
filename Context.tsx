@@ -64,6 +64,9 @@ export const EditTagAliasesContext = React.createContext<any>(null)
 export const AliasTagIDContext = React.createContext<any>(null)
 export const AliasTagFlagContext = React.createContext<any>(null)
 export const AliasTagNameContext = React.createContext<any>(null)
+export const ShowDeleteAccountDialogContext = React.createContext<any>(null)
+export const HeaderFlagContext = React.createContext<any>(null)
+export const CommentSearchFlagContext = React.createContext<any>(null)
 
 const Context: React.FunctionComponent = (props) => {
     const [brightness, setBrightness] = useState(100)
@@ -101,7 +104,6 @@ const Context: React.FunctionComponent = (props) => {
     const [quoteText, setQuoteText] = useState(null)
     const [hideMobileNavbar, setHideMobileNavbar] = useState(true)
     const [showDeletePostDialog, setShowDeletePostDialog] = useState(false)
-    const [showDeleteCommentDialog, setShowDeleteCommentDialog] = useState(false)
     const [deleteCommentID, setDeleteCommentID] = useState(null)
     const [deleteCommentFlag, setDeleteCommentFlag] = useState(false)
     const [editCommentFlag, setEditCommentFlag] = useState(false)
@@ -118,8 +120,14 @@ const Context: React.FunctionComponent = (props) => {
     const [aliasTagID, setAliasTagID] = useState(null)
     const [aliasTagFlag, setAliasTagFlag] = useState(false)
     const [aliasTagName, setAliasTagName] = useState("")
+    const [showDeleteAccountDialog, setShowDeleteAccountDialog] = useState(false)
+    const [headerFlag, setHeaderFlag] = useState(false)
+    const [commentSearchFlag, setCommentSearchFlag] = useState(null)
 return (
     <>
+        <CommentSearchFlagContext.Provider value={{commentSearchFlag, setCommentSearchFlag}}>
+        <HeaderFlagContext.Provider value={{headerFlag, setHeaderFlag}}>
+        <ShowDeleteAccountDialogContext.Provider value={{showDeleteAccountDialog, setShowDeleteAccountDialog}}>
         <AliasTagNameContext.Provider value={{aliasTagName, setAliasTagName}}>
         <AliasTagIDContext.Provider value={{aliasTagID, setAliasTagID}}>
         <AliasTagFlagContext.Provider value={{aliasTagFlag, setAliasTagFlag}}>
@@ -223,6 +231,9 @@ return (
         </AliasTagFlagContext.Provider>
         </AliasTagIDContext.Provider>
         </AliasTagNameContext.Provider>
+        </ShowDeleteAccountDialogContext.Provider>
+        </HeaderFlagContext.Provider>
+        </CommentSearchFlagContext.Provider>
     </>
     )
 }

@@ -15,8 +15,10 @@ import Carousel from "../components/Carousel"
 import DeletePostDialog from "../dialogs/DeletePostDialog"
 import DeleteCommentDialog from "../dialogs/DeleteCommentDialog"
 import EditCommentDialog from "../dialogs/EditCommentDialog"
+import ThirdParty from "../components/ThirdParty"
+import Parent from "../components/Parent"
 import {HideNavbarContext, HideSidebarContext, RelativeContext, DownloadFlagContext, DownloadURLsContext, HideTitlebarContext, MobileContext,
-PostsContext, TagsContext, HeaderTextContext, SearchContext, SidebarTextContext, SessionContext} from "../Context"
+PostsContext, TagsContext, HeaderTextContext, SearchContext, SidebarTextContext, SessionContext, EnableDragContext} from "../Context"
 import axios from "axios"
 import "./styles/postpage.less"
 
@@ -28,6 +30,7 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
     const {hideNavbar, setHideNavbar} = useContext(HideNavbarContext)
     const {hideTitlebar, setHideTitlebar} = useContext(HideTitlebarContext)
     const {hideSidebar, setHideSidebar} = useContext(HideSidebarContext)
+    const {enableDrag, setEnableDrag} = useContext(EnableDragContext)
     const {relative, setRelative} = useContext(RelativeContext)
     const {downloadFlag, setDownloadFlag} = useContext(DownloadFlagContext)
     const {downloadURLs, setDownloadURLs} = useContext(DownloadURLsContext)
@@ -38,10 +41,13 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
     const {session, setSession} = useContext(SessionContext)
     const {mobile, setMobile} = useContext(MobileContext)
     const [images, setImages] = useState([]) as any
+    const [thirdPartyPosts, setThirdPartyPosts] = useState([]) as any
+    const [parentPost, setParentPost] = useState(null) as any
     const [image, setImage] = useState("") as any
     const [post, setPost] = useState(null) as any
     const [tagCategories, setTagCategories] = useState(null) as any
     const history = useHistory()
+    const postID = Number(props?.match.params.id)
 
     useEffect(() => {
         setHideNavbar(false)
@@ -58,6 +64,28 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
         }
     }, [mobile])
 
+    const updateThirdParty = async () => {
+        if (post) {
+            const thirdPartyPosts = await axios.get("/api/post/thirdparty", {params: {postID: post.postID}, withCredentials: true}).then((r) => r.data)
+            if (thirdPartyPosts?.[0]) {
+                setThirdPartyPosts(thirdPartyPosts)
+            } else {
+                setThirdPartyPosts([])
+            }
+        }
+    }
+
+    const updateParent = async () => {
+        if (post) {
+            const parentPost = await axios.get("/api/post/parent", {params: {postID: post.postID}, withCredentials: true}).then((r) => r.data)
+            if (parentPost) {
+                setParentPost(parentPost)
+            } else {
+                setParentPost(null)
+            }
+        }
+    }
+
     useEffect(() => {
         const updatePost = async () => {
             if (post) {
@@ -68,12 +96,14 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
             }
         }
         updatePost()
+        updateThirdParty()
+        updateParent()
     }, [post])
 
     useEffect(() => {
         const updatePost = async () => {
-            let post = posts.find((p: any) => p.postID === Number(props?.match.params.id))
-            if (!post) post = await axios.get("/api/post", {params: {postID: props?.match.params.id}, withCredentials: true}).then((r) => r.data)
+            let post = posts.find((p: any) => p.postID === postID)
+            if (!post) post = await axios.get("/api/post", {params: {postID}, withCredentials: true}).then((r) => r.data)
             if (post) {
                 const images = post.images.map((i: any) => functions.getImageLink(i.type, post.postID, i.filename))
                 setImages(images)
@@ -88,7 +118,7 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
             }
         }
         updatePost()
-    }, [props?.match.params.id, posts])
+    }, [postID, posts])
 
     const download = () => {
         setDownloadURLs([image])
@@ -96,7 +126,7 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
     }
 
     const next = () => {
-        let currentIndex = posts.findIndex((p: any) => p.postID === Number(props?.match.params.id))
+        let currentIndex = posts.findIndex((p: any) => p.postID === postID)
         if (currentIndex !== -1) {
             currentIndex++
             if (posts[currentIndex]) {
@@ -107,7 +137,7 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
     }
 
     const previous = () => {
-        let currentIndex = posts.findIndex((p: any) => p.postID === Number(props?.match.params.id))
+        let currentIndex = posts.findIndex((p: any) => p.postID === postID)
         if (currentIndex !== -1) {
             currentIndex--
             if (posts[currentIndex]) {
@@ -134,27 +164,24 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
             <SideBar post={post} artists={tagCategories.artists} characters={tagCategories.characters} series={tagCategories.series} tags={tagCategories.tags}/> : 
             <SideBar/>
             }
-            <div className="content">
+            <div className="content" onMouseEnter={() => setEnableDrag(true)}>
                 <div className="post-container">
                     {images.length > 1 ?
                     <div className="carousel-container">
                         <Carousel images={images} set={set}/>
                     </div> : null}
-                    {post ? 
-                    <>
+                    {post ? <>
                     <PostImage img={image} comicPages={post.type === "comic" ? images : null}/>
                     <PostImageOptions img={image} post={post} comicPages={post.type === "comic" ? images : null} download={download} next={next} previous={previous}/>
-                    </> : 
-                    <>
+                    </> : <>
                     <PostImage img={image}/>
                     <PostImageOptions img={image} download={download} next={next} previous={previous}/>
-                    </>
-                    }
+                    </>}
+                    {parentPost ? <Parent post={parentPost}/>: null}
+                    {thirdPartyPosts.length ? <ThirdParty posts={thirdPartyPosts}/>: null}
                     {session.username && post ? <CutenessMeter post={post}/> : null}
                     {post?.commentary ? <Commentary text={post.commentary} translated={post.translatedCommentary}/> : null}
-                    {post ?
-                    <Comments post={post}/>
-                    : null}
+                    {post ? <Comments post={post}/> : null}
                     <Footer/>
                 </div>
             </div>

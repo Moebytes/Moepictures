@@ -36,7 +36,7 @@ const SeriesPage: React.FunctionComponent = (props) => {
     const sortRef = useRef(null) as any
 
     const updateSeries = async () => {
-        const result = await axios.get("/api/series", {params: {sort: sortType, query: searchQuery}, withCredentials: true}).then((r) => r.data)
+        const result = await axios.get("/api/search/series", {params: {sort: sortType, query: searchQuery}, withCredentials: true}).then((r) => r.data)
         setIndex(0)
         setVisibleSeries([])
         setSeries(result)
@@ -150,7 +150,7 @@ const SeriesPage: React.FunctionComponent = (props) => {
         <NavBar/>
         <div className="body">
             <SideBar/>
-            <div className="content">
+            <div className="content" onMouseEnter={() => setEnableDrag(true)}>
                 <div className="series">
                     <span className="series-heading">Series</span>
                     <div className="series-row">

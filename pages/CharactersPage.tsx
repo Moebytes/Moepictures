@@ -36,7 +36,7 @@ const CharactersPage: React.FunctionComponent = (props) => {
     const sortRef = useRef(null) as any
 
     const updateCharacters = async () => {
-        const result = await axios.get("/api/characters", {params: {sort: sortType, query: searchQuery}, withCredentials: true}).then((r) => r.data)
+        const result = await axios.get("/api/search/characters", {params: {sort: sortType, query: searchQuery}, withCredentials: true}).then((r) => r.data)
         setIndex(0)
         setVisibleCharacters([])
         setCharacters(result)
@@ -150,7 +150,7 @@ const CharactersPage: React.FunctionComponent = (props) => {
         <NavBar/>
         <div className="body">
             <SideBar/>
-            <div className="content">
+            <div className="content" onMouseEnter={() => setEnableDrag(true)}>
                 <div className="characters">
                     <span className="characters-heading">Characters</span>
                     <div className="characters-row">

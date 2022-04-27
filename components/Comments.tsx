@@ -22,7 +22,7 @@ const Comments: React.FunctionComponent<Props> = (props) => {
     const errorRef = useRef(null) as any
 
     const updateComments = async () => {
-        const comments = await axios.get("/api/comments", {params: {postID: props.post.postID}, withCredentials: true}).then((r) => r.data)
+        const comments = await axios.get("/api/post/comments", {params: {postID: props.post.postID}, withCredentials: true}).then((r) => r.data)
         setComments(comments)
     }
 
@@ -72,7 +72,7 @@ const Comments: React.FunctionComponent<Props> = (props) => {
         if (!errorRef.current) await functions.timeout(20)
         errorRef.current!.innerText = "Submitting..."
         try {
-            await axios.post("/api/comment", {postID: props.post.postID, comment: text}, {withCredentials: true})
+            await axios.post("/api/comment/create", {postID: props.post.postID, comment: text}, {withCredentials: true})
             errorRef.current!.innerText = "Comment added."
             setCommentFlag(true)
             setText("")

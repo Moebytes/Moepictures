@@ -20,11 +20,16 @@ import {StaticRouter as Router} from "react-router-dom"
 import functions from "./structures/Functions"
 import serverFunctions from "./structures/ServerFunctions"
 import sql from "./structures/SQLQuery"
+import $2FARoutes from "./routes/2FARoutes"
+import CommentRoutes from "./routes/CommentRoutes"
+import CutenessRoutes from "./routes/CutenessRoutes"
+import FavoriteRoutes from "./routes/FavoriteRoutes"
 import MiscRoutes from "./routes/MiscRoutes"
-import CreateRoutes from "./routes/CreateRoutes"
-import UserRoutes from "./routes/UserRoutes"
-import SearchRoutes from "./routes/SearchRoutes"
 import PostRoutes from "./routes/PostRoutes"
+import SearchRoutes from "./routes/SearchRoutes"
+import TagRoutes from "./routes/TagRoutes"
+import UploadRoutes from "./routes/UploadRoutes"
+import UserRoutes from "./routes/UserRoutes"
 const __dirname = path.resolve()
 
 dotenv.config()
@@ -76,11 +81,16 @@ app.use(session({
   saveUninitialized: false
 }))
 
+$2FARoutes(app)
+CommentRoutes(app)
+CutenessRoutes(app)
+FavoriteRoutes(app)
 MiscRoutes(app)
-CreateRoutes(app)
-UserRoutes(app)
-SearchRoutes(app)
 PostRoutes(app)
+SearchRoutes(app)
+TagRoutes(app)
+UploadRoutes(app)
+UserRoutes(app)
 
 if (process.env.TESTING === "yes") {
   app.use(middleware(compiler, {

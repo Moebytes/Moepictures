@@ -3,7 +3,7 @@ import {useHistory} from "react-router-dom"
 import {HashLink as Link} from "react-router-hash-link"
 import favicon from "../assets/purple/favicon.png"
 import faviconMagenta from "../assets/magenta/favicon.png"
-import {ThemeContext, HideNavbarContext, EnableDragContext, RelativeContext, HideTitlebarContext,
+import {ThemeContext, HideNavbarContext, EnableDragContext, RelativeContext, HideTitlebarContext, HeaderFlagContext,
 SearchContext, SearchFlagContext, ImageTypeContext, RestrictTypeContext, StyleTypeContext, SortTypeContext,
 HeaderTextContext, HideMobileNavbarContext, MobileContext} from "../Context"
 import functions from "../structures/Functions"
@@ -30,6 +30,7 @@ const TitleBar: React.FunctionComponent<Props> = (props) => {
     const {headerText, setHeaderText} = useContext(HeaderTextContext)
     const {mobile, setMobile} = useContext(MobileContext)
     const {hideMobileNavbar, setHideMobileNavbar} = useContext(HideMobileNavbarContext)
+    const {headerFlag, setHeaderFlag} = useContext(HeaderFlagContext)
     const history = useHistory()
 
     useEffect(() => {
@@ -38,12 +39,13 @@ const TitleBar: React.FunctionComponent<Props> = (props) => {
     }, [])
 
     useEffect(() => {
-        if (searchFlag) {
+        if (headerFlag) {
+            setHeaderFlag(false)
             const text = functions.toProperCase(search.trim().split(/ +/g).map((t: string) => t.replaceAll("-", " ")).join(", "))
             document.title = `Moebooru: ${text}`
             setHeaderText(text)
         }
-    }, [searchFlag, imageType, restrictType, styleType, sortType])
+    }, [headerFlag])
 
     const getImg = () => {
         if (theme.includes("magenta")) return faviconMagenta
@@ -80,7 +82,7 @@ const TitleBar: React.FunctionComponent<Props> = (props) => {
     }, [mobile])
 
     return (
-        <div className={`titlebar ${hideTitlebar ? "hide-titlebar" : ""} ${relative ? "titlebar-relative" : ""}`} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
+        <div className={`titlebar ${hideTitlebar ? "hide-titlebar" : ""} ${relative ? "titlebar-relative" : ""}`} onMouseEnter={() => setEnableDrag(false)}>
             {mobile ?
             <div className="titlebar-hamburger-container">
                 <img className="titlebar-hamburger" src={getBurger()} onClick={toggleMobileNavbar}/>

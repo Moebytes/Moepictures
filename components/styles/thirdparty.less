@@ -1,0 +1,45 @@
+@import "../../index.less";
+
+.third-party {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: flex-start;
+    width: 100%;
+    //height: 100%;
+    padding-left: 200px;
+    padding-right: 200px;
+    margin-top: 20px;
+    margin-bottom: 20px;
+}
+
+.third-party-title {
+    font-family: Tahoma, sans-serif;
+    font-size: 29px;
+    color: var(--text-strong);
+    margin-bottom: 15px;
+    .stroke-black();
+}
+
+.third-party-text {
+    font-family: Tahoma, sans-serif;
+    font-size: 15px;
+    color: var(--text);
+    .stroke-black-thin();
+}
+
+.third-party-container {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    width: 100%;
+    height: 100%;
+}
+
+@media screen and (max-width: 500px) {
+    .third-party {
+        padding-left: 20px;
+        padding-right: 20px;
+    }
+}

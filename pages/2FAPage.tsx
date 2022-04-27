@@ -37,6 +37,7 @@ const $2FAPage: React.FunctionComponent = (props) => {
         setRelative(false)
         setHeaderText("")
         setSidebarText("")
+        setEnableDrag(false)
         document.title = "Moebooru: 2-Factor Authentication"
     }, [])
 
@@ -68,7 +69,7 @@ const $2FAPage: React.FunctionComponent = (props) => {
         if (!errorRef.current) await functions.timeout(20)
         errorRef.current!.innerText = "Submitting..."
         try {
-            await axios.post("/api/verify2fa", {token}, {withCredentials: true})
+            await axios.post("/api/2fa", {token}, {withCredentials: true})
             setSessionFlag(true)
             history.push("/posts")
             setError(false)
@@ -92,7 +93,7 @@ const $2FAPage: React.FunctionComponent = (props) => {
                     <span className="f2a-link">Please enter your 2FA token.</span>
                     <div className="f2a-row">
                         <span className="f2a-text">2FA Token:</span>
-                        <input className="f2a-input" type="text" spellCheck={false} value={token} onChange={(event) => setToken(event.target.value)} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)} onKeyDown={(event) => event.key === "Enter" ? validate() : null}/>
+                        <input className="f2a-input" type="text" spellCheck={false} value={token} onChange={(event) => setToken(event.target.value)} onKeyDown={(event) => event.key === "Enter" ? validate() : null}/>
                     </div>
                     {error ? <div className="f2a-validation-container"><span className="f2a-validation" ref={errorRef}></span></div> : null}
                     <div className="f2a-button-container">

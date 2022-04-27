@@ -1,4 +1,5 @@
 import React, {useContext, useEffect, useRef, useState} from "react"
+import {useHistory} from "react-router-dom"
 import {ThemeContext, QuoteTextContext, SessionContext, DeleteCommentIDContext, DeleteCommentFlagContext,
 EditCommentIDContext, EditCommentFlagContext, EditCommentTextContext} from "../Context"
 import {HashLink as Link} from "react-router-hash-link"
@@ -28,6 +29,7 @@ const Comment: React.FunctionComponent<Props> = (props) => {
     const {editCommentFlag, setEditCommentFlag} = useContext(EditCommentFlagContext)
     const {editCommentID, setEditCommentID} = useContext(EditCommentIDContext)
     const {editCommentText, setEditCommentText} = useContext(EditCommentTextContext)
+    const history = useHistory()
     const comment = props.comment.comment
 
     const getFavicon = () => {
@@ -79,7 +81,7 @@ const Comment: React.FunctionComponent<Props> = (props) => {
     }
 
     const deleteComment = async () => {
-        await axios.delete("/api/comment", {params: {commentID: props.comment.commentID}, withCredentials: true})
+        await axios.delete("/api/comment/delete", {params: {commentID: props.comment.commentID}, withCredentials: true})
         props.onDelete?.()
     }
 
@@ -96,7 +98,7 @@ const Comment: React.FunctionComponent<Props> = (props) => {
     }
 
     const editComment = async () => {
-        await axios.put("/api/comment", {commentID: props.comment.commentID, comment: editCommentText}, {withCredentials: true})
+        await axios.put("/api/comment/edit", {commentID: props.comment.commentID, comment: editCommentText}, {withCredentials: true})
         props.onEdit?.()
     }
 
@@ -143,10 +145,14 @@ const Comment: React.FunctionComponent<Props> = (props) => {
         }
     }
 
+    const userClick = () => {
+        history.push(`/user/${props.comment.username}`)
+    }
+
     return (
         <div className="comment">
             <div className="comment-container">
-                <div className="comment-user-container">
+                <div className="comment-user-container" onClick={userClick}>
                     <img className="comment-user-img" src={getCommentPFP()}/>
                     <span className="comment-user-text">{functions.toProperCase(props.comment.username)}</span>
                 </div>

@@ -40,6 +40,7 @@ const VerifyEmailPage: React.FunctionComponent = (props) => {
         setRelative(false)
         setHeaderText("")
         setSidebarText("")
+        setEnableDrag(false)
         document.title = "Moebooru: Verify Email"
     }, [])
 
@@ -78,7 +79,7 @@ const VerifyEmailPage: React.FunctionComponent = (props) => {
         if (!errorRef.current) await functions.timeout(20)
         errorRef.current!.innerText = "Submitting..."
         try {
-            await axios.post("/api/verifyemail", {email}, {withCredentials: true})
+            await axios.post("/api/user/verifyemail", {email}, {withCredentials: true})
             setSubmitted(true)
             setSessionFlag(true)
             setError(false)
@@ -115,7 +116,7 @@ const VerifyEmailPage: React.FunctionComponent = (props) => {
                     </div>
                     <div className="verify-email-row">
                         <span className="verify-email-text">Optional Address Change: </span>
-                        <input className="verify-email-input" type="text" spellCheck={false} value={newEmail} onChange={(event) => setNewEmail(event.target.value)} onKeyDown={(event) => event.key === "Enter" ? submit() : null} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}/>
+                        <input className="verify-email-input" type="text" spellCheck={false} value={newEmail} onChange={(event) => setNewEmail(event.target.value)} onKeyDown={(event) => event.key === "Enter" ? submit() : null}/>
                     </div>
                     {error ? <div className="verify-email-validation-container"><span className="verify-email-validation" ref={errorRef}></span></div> : null}
                     <div className="verify-email-button-container">

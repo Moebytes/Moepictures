@@ -34,7 +34,22 @@ const loginSpeedLimiter = slowDown({
 })
 
 const UserRoutes = (app: Express) => {
-    app.post("/api/signup", signupLimiter, async (req: Request, res: Response) => {
+    app.get("/api/user", async (req: Request, res: Response, next: NextFunction) => {
+        try {
+            const username = req.query.username as string
+            if (!username) return res.status(200).json(null)
+            let user = await sql.user(username.trim())
+            if (!user) return res.status(200).json(null)
+            delete user.$2fa
+            delete user.email
+            delete user.password
+            res.status(200).json(user)
+        } catch {
+            return res.status(400).send("Bad request")
+        }
+    })
+    
+    app.post("/api/user/signup", signupLimiter, async (req: Request, res: Response) => {
         try {
             let {username, email, password} = req.body 
             if (!username || !email || !password) return res.status(400).send("Bad request.")
@@ -70,7 +85,7 @@ const UserRoutes = (app: Express) => {
         }
     })
 
-    app.post("/api/login", loginLimiter, loginSpeedLimiter, async (req: Request, res: Response) => {
+    app.post("/api/user/login", loginLimiter, loginSpeedLimiter, async (req: Request, res: Response) => {
         try {
             let {username, password} = req.body
             if (!username || !password) return res.status(400).send("Bad request")
@@ -99,7 +114,7 @@ const UserRoutes = (app: Express) => {
         }
     })
 
-    app.post("/api/logout", async (req: Request, res: Response) => {
+    app.post("/api/user/logout", async (req: Request, res: Response) => {
         try {
             req.session.destroy((err) => {
                 if (err) throw err
@@ -110,7 +125,7 @@ const UserRoutes = (app: Express) => {
         }
     })
 
-    app.get("/api/session", async (req: Request, res: Response) => {
+    app.get("/api/user/session", async (req: Request, res: Response) => {
         try {
             res.status(200).json(req.session)
         } catch {
@@ -118,7 +133,7 @@ const UserRoutes = (app: Express) => {
         }
     })
 
-    app.post("/api/updatepfp", async (req: Request, res: Response) => {
+    app.post("/api/user/updatepfp", async (req: Request, res: Response) => {
         try {
             const bytes = req.body 
             if (req.session.username) {
@@ -154,7 +169,7 @@ const UserRoutes = (app: Express) => {
         }
     })
 
-    app.post("/api/favoritesprivacy", async (req: Request, res: Response) => {
+    app.post("/api/user/favoritesprivacy", async (req: Request, res: Response) => {
         try {
             if (!req.session.username) return res.status(400).send("Bad request")
             const user = await sql.user(req.session.username)
@@ -168,7 +183,7 @@ const UserRoutes = (app: Express) => {
         }
     })
 
-    app.post("/api/changeusername", async (req: Request, res: Response) => {
+    app.post("/api/user/changeusername", async (req: Request, res: Response) => {
         try {
             let {newUsername} = req.body
             if (!req.session.username) return res.status(400).send("Bad request")
@@ -193,7 +208,7 @@ const UserRoutes = (app: Express) => {
         }
     })
 
-    app.post("/api/changepassword", async (req: Request, res: Response) => {
+    app.post("/api/user/changepassword", async (req: Request, res: Response) => {
         try {
             let {oldPassword, newPassword} = req.body
             if (!oldPassword || !newPassword || !req.session.username) return res.status(400).send("Bad request")
@@ -216,7 +231,7 @@ const UserRoutes = (app: Express) => {
         }
     })
 
-    app.get("/api/changeemail", async (req: Request, res: Response) => {
+    app.get("/api/user/changeemail", async (req: Request, res: Response) => {
         try {
             let token = req.query.token as string
             if (!token || !req.session.username) return res.status(400).send("Bad request")
@@ -227,10 +242,10 @@ const UserRoutes = (app: Express) => {
             if (new Date() <= expireDate) {
                 await sql.updateUser(req.session.username, "email", tokenData.email)
                 req.session.email = tokenData.email
-                await sql.deleteEmailToken(hashToken)
+                await sql.deleteEmailToken(tokenData.email)
                 res.status(200).redirect("/change-email-success")
             } else {
-                await sql.deleteEmailToken(hashToken)
+                await sql.deleteEmailToken(tokenData.email)
                 res.status(400).send("Bad request")
             }
         } catch {
@@ -238,7 +253,7 @@ const UserRoutes = (app: Express) => {
         }
     })
 
-    app.post("/api/changeemail", async (req: Request, res: Response) => {
+    app.post("/api/user/changeemail", async (req: Request, res: Response) => {
         try {
             let {newEmail} = req.body
             if (!req.session.username) return res.status(400).send("Bad request")
@@ -258,7 +273,7 @@ const UserRoutes = (app: Express) => {
         }
     })
 
-    app.post("/api/verifyemail", async (req: Request, res: Response) => {
+    app.post("/api/user/verifyemail", async (req: Request, res: Response) => {
         try {
             let {email} = req.body
             if (!req.session.username) return res.status(400).send("Bad request")
@@ -280,7 +295,7 @@ const UserRoutes = (app: Express) => {
         }
     })
 
-    app.get("/api/verifyemail", async (req: Request, res: Response) => {
+    app.get("/api/user/verifyemail", async (req: Request, res: Response) => {
         try {
             let token = req.query.token as string
             if (!token || !req.session.username) return res.status(400).send("Bad request")
@@ -293,18 +308,19 @@ const UserRoutes = (app: Express) => {
                 await sql.updateUser(req.session.username, "emailVerified", true)
                 req.session.email = tokenData.email
                 req.session.emailVerified = true
-                await sql.deleteEmailToken(hashToken)
+                await sql.deleteEmailToken(tokenData.email)
                 res.status(200).redirect("/verify-email-success")
             } else {
-                await sql.deleteEmailToken(hashToken)
+                await sql.deleteEmailToken(tokenData.email)
                 res.status(400).send("Bad request")
             }
-        } catch {
+        } catch (e) {
+            console.log(e)
             res.status(400).send("Bad request")
         }
     })
 
-    app.post("/api/changebio", async (req: Request, res: Response) => {
+    app.post("/api/user/changebio", async (req: Request, res: Response) => {
         try {
             let {bio} = req.body
             if (!req.session.username || !bio) return res.status(400).send("Bad request")
@@ -319,103 +335,7 @@ const UserRoutes = (app: Express) => {
         }
     })
 
-    app.post("/api/enable2fa", async (req: Request, res: Response) => {
-        try {
-            if (!req.session.username) return res.status(400).send("Bad request")
-            const user = await sql.user(req.session.username)
-            if (!user) return res.status(400).send("Bad request")
-            const enabled = !Boolean(user.$2fa)
-            if (enabled) {
-                await sql.delete2faToken(req.session.username)
-                const token = generateSecret({name: "Moebooru", account: functions.toProperCase(req.session.username)})
-                await sql.insert2faToken(req.session.username, token.secret, token.qr)
-                res.status(200).json({qr: token.qr})
-            } else {
-                await sql.updateUser(req.session.username, "$2fa", false)
-                req.session.$2fa = false
-                await sql.delete2faToken(req.session.username)
-                res.status(200).send("Success")
-            }
-        } catch {
-            res.status(400).send("Bad request")
-        }
-    })
-
-    app.post("/api/2faqr", async (req: Request, res: Response) => {
-        try {
-            if (!req.session.username) return res.status(400).send("Bad request")
-            const $2FAToken = await sql.$2faToken(req.session.username)
-            if (!$2FAToken) return res.status(400).send("Bad request")
-            res.status(200).json($2FAToken.qrcode)
-        } catch {
-            res.status(400).send("Bad request")
-        }
-    })
-
-    app.post("/api/commit2fa", async (req: Request, res: Response) => {
-        try {
-            let {token} = req.body 
-            if (!req.session.username || !token) return res.status(400).send("Bad request")
-            token = token.trim()
-            const user = await sql.user(req.session.username)
-            if (!user) return res.status(400).send("Bad request")
-            const $2FAToken = await sql.$2faToken(user.username)
-            if (!$2FAToken) return res.status(400).send("Bad request")
-            const valid = verifyToken($2FAToken.token, token, 60)
-            if (valid) {
-                await sql.updateUser(req.session.username, "$2fa", true)
-                req.session.$2fa = true
-                res.status(200).send("Success")
-            } else {
-                res.status(400).send("Bad request")
-            }
-        } catch {
-            res.status(400).send("Bad request")
-        }
-    })
-
-    app.post("/api/verify2fa", async (req: Request, res: Response) => {
-        try {
-            let {token} = req.body 
-            if (!req.session.$2fa || !req.session.email || !token) return res.status(400).send("Bad request")
-            if (req.session.username) return res.status(400).send("Bad request")
-            token = token.trim()
-            const user = await sql.userByEmail(req.session.email)
-            if (!user) return res.status(400).send("Bad request")
-            const $2FAToken = await sql.$2faToken(user.username)
-            const valid = verifyToken($2FAToken.token, token, 60)
-            if (valid) {
-                req.session.$2fa = user.$2fa
-                req.session.email = user.email
-                req.session.emailVerified = user.emailVerified
-                req.session.username = user.username
-                req.session.joinDate = user.joinDate
-                req.session.image = user.image 
-                req.session.bio = user.bio
-                req.session.publicFavorites = user.publicFavorites
-                req.session.image = user.image
-                res.status(200).send("Success")
-            } else {
-                res.status(400).send("Bad request")
-            }
-        } catch {
-            res.status(400).send("Bad request")
-        }
-    })
-
-    app.post("/api/destroy2FA", async (req: Request, res: Response) => {
-        try {
-            if (req.session.username) return res.status(400).send("Bad request")
-            req.session.destroy((err) => {
-                if (err) throw err
-                res.status(200).send("Success")
-            })
-        } catch {
-            res.status(400).send("Bad request")
-        }
-    })
-
-    app.post("/api/forgotpassword", async (req: Request, res: Response) => {
+    app.post("/api/user/forgotpassword", async (req: Request, res: Response) => {
         try {
             const {email} = req.body
             if (!email) {
@@ -439,7 +359,7 @@ const UserRoutes = (app: Express) => {
         }
     })
 
-    app.post("/api/resetpassword", async (req: Request, res: Response) => {
+    app.post("/api/user/resetpassword", async (req: Request, res: Response) => {
         try {
             const {username, password, token} = req.body
             if (!username || !token || !password) return res.status(400).send("Bad request")
@@ -461,6 +381,61 @@ const UserRoutes = (app: Express) => {
             }
         } catch {
             res.status(400).send("Bad request")
+        }
+    })
+
+    app.delete("/api/user/delete", async (req: Request, res: Response, next: NextFunction) => {
+        try {
+            if (!req.session.username) return res.status(400).send("Bad request")
+            const user = await sql.user(req.session.username)
+            if (!user) return res.status(400).send("Bad request")
+            await sql.deleteUser(req.session.username)
+            await serverFunctions.deleteFile(functions.getTagLink("pfp", user.image))
+            await sql.delete2faToken(req.session.username)
+            await sql.deleteEmailToken(user.email)
+            await sql.deletePasswordToken(req.session.username)
+            req.session.destroy((err) => {
+                if (err) throw err
+                res.status(200).send("Success")
+            })
+        } catch (e) {
+            console.log(e)
+            return res.status(400).send("Bad request")
+        }
+    })
+
+    app.get("/api/user/favorites", async (req: Request, res: Response) => {
+        try {
+            const username = req.query.username
+            if (username) {
+                const user = await sql.user(username as string)
+                if (!user || !user.publicFavorites) return res.status(200).send([])
+                const favorites = await sql.favorites(username as string)
+                res.status(200).send(favorites)
+            } else {
+                if (!req.session.username) return res.status(400).send("Bad request")
+                const favorites = await sql.favorites(req.session.username)
+                res.status(200).send(favorites)
+            }
+        } catch {
+            res.status(400).send("Bad request") 
+        }
+    })
+
+    app.get("/api/user/uploads", async (req: Request, res: Response) => {
+        try {
+            const username = req.query.username
+            if (!req.session.username && !username) return res.status(400).send("Bad request")
+            if (username) {
+                const uploads = await sql.uploads(username as string)
+                res.status(200).send(uploads)
+            } else {
+                if (!req.session.username) return res.status(400).send("Bad request")
+                const uploads = await sql.uploads(req.session.username)
+                res.status(200).send(uploads)
+            }
+        } catch {
+            res.status(400).send("Bad request") 
         }
     })
 }

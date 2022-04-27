@@ -25,6 +25,24 @@ export default class ServerFunctions {
         })
     }
 
+    public static contactEmail = async (email: string, subject: string, message: string, attachments?: any[]) => {
+        const transporter = nodemailer.createTransport({
+            service: "gmail",
+            auth: {
+              user: process.env.EMAIL_ADDRESS,
+              pass: process.env.EMAIL_PASSWORD,
+            }
+        })
+        return transporter.sendMail({
+            from: {name: "Moebooru", address: process.env.EMAIL_ADDRESS},
+            to: process.env.EMAIL_ADDRESS,
+            replyTo: email,
+            subject: subject,
+            text: message,
+            attachments
+        })
+    }
+
     public static uploadFile = async (file: string, content: any) => {
         const s3 = new S3({region: "us-east-1", credentials: {
             accessKeyId: process.env.AWS_ACCESS_KEY!,

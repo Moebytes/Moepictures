@@ -31,6 +31,7 @@ import ChangePasswordPage from "./pages/ChangePasswordPage"
 import ResetPasswordPage from "./pages/ResetPasswordPage"
 import ForgotPasswordPage from "./pages/ForgotPasswordPage"
 import EditPostPage from "./pages/EditPostPage"
+import UserPage from "./pages/UserPage"
 import functions from "./structures/Functions"
 import localforage from "localforage"
 import axios from "axios"
@@ -64,12 +65,12 @@ const App: React.FunctionComponent = (props) => {
     const location = useLocation()
 
     const getSessionCookie = async () => {
-        const cookie = await axios.get("/api/session", {withCredentials: true}).then((r) => r.data)
+        const cookie = await axios.get("/api/user/session", {withCredentials: true}).then((r) => r.data)
         setSession(cookie)
     }
 
     const saveTags = async () => {
-        const tags = await axios.get("/api/tags", {withCredentials: true}).then((r) => r.data)
+        const tags = await axios.get("/api/tag/list", {withCredentials: true}).then((r) => r.data)
         await localforage.setItem("tags", tags)
     }
 
@@ -110,7 +111,7 @@ const App: React.FunctionComponent = (props) => {
 
     const destroy2FA = async () => {
         try {
-            await axios.post("/api/destroy2FA", null, {withCredentials: true})
+            await axios.post("/api/2fa/delete", null, {withCredentials: true})
             setSessionFlag(true)
         } catch {
             // ignore
@@ -236,6 +237,7 @@ const App: React.FunctionComponent = (props) => {
                         <Route exact path="/characters"><CharactersPage/></Route>
                         <Route exact path="/artists"><ArtistsPage/></Route>
                         <Route exact path="/comments"><CommentsPage/></Route>
+                        <Route exact path="/user/:username" render={(props) => <UserPage {...props}/>}></Route>
                         <Route exact path="/post/:id" render={(props) => <PostPage {...props}/>}></Route>
                         <Route exact path="/edit-post/:id" render={(props) => <EditPostPage {...props}/>}></Route>
                         <Route exact path="/help"><HelpPage/></Route>

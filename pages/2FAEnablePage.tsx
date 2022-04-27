@@ -40,6 +40,7 @@ const $2FAEnablePage: React.FunctionComponent = (props) => {
         setRelative(false)
         setHeaderText("")
         setSidebarText("")
+        setEnableDrag(false)
         document.title = "Moebooru: Enable 2-Factor Authentication"
         if (session?.$2fa) get2FAQRCode()
     }, [])
@@ -53,7 +54,7 @@ const $2FAEnablePage: React.FunctionComponent = (props) => {
     }, [mobile])
 
     const get2FAQRCode = async () => {
-        const qrcode = await axios.post("/api/2faqr", null, {withCredentials: true}).then((r) => r.data)
+        const qrcode = await axios.post("/api/2fa/qr", null, {withCredentials: true}).then((r) => r.data)
         if (qrcode) {
             const arrayBuffer = await fetch(qrcode).then((r) => r.arrayBuffer())
             setQR(functions.arrayBufferToBase64(arrayBuffer))
@@ -73,7 +74,7 @@ const $2FAEnablePage: React.FunctionComponent = (props) => {
     }, [session])
 
     const toggle = async () => {
-        const {qr} = await axios.post("/api/enable2fa", null, {withCredentials: true}).then((r) => r.data)
+        const {qr} = await axios.post("/api/2fa/create", null, {withCredentials: true}).then((r) => r.data)
         if (qr) {
             const arrayBuffer = await fetch(qr).then((r) => r.arrayBuffer())
             setQR(functions.arrayBufferToBase64(arrayBuffer))
@@ -85,7 +86,7 @@ const $2FAEnablePage: React.FunctionComponent = (props) => {
         setSessionFlag(true)
     }
 
-    const commit2FA = async () => {
+    const enable2FA = async () => {
         if (!token.trim()) {
             setError(true)
             if (!errorRef.current) await functions.timeout(20)
@@ -98,7 +99,7 @@ const $2FAEnablePage: React.FunctionComponent = (props) => {
         if (!errorRef.current) await functions.timeout(20)
         errorRef.current!.innerText = "Submitting..."
         try {
-            await axios.post("/api/commit2fa", {token}, {withCredentials: true})
+            await axios.post("/api/2fa/enable", {token}, {withCredentials: true})
             setSessionFlag(true)
             setShowValidation(false)
             setError(false)
@@ -124,6 +125,11 @@ const $2FAEnablePage: React.FunctionComponent = (props) => {
                         <span className="f2a-enable-text">Status: </span>
                         <span className="f2a-enable-text" style={{cursor: "pointer", marginLeft: "10px"}} onClick={toggle}>{session.$2fa ? "Enabled" : "Disabled"}</span>
                     </div>
+                    {!qr ? 
+                    <div className="f2a-enable-row">
+                        <button className="change-username-button" onClick={() => history.push("/profile")}>←Back</button>
+                    </div>
+                    : null}
                     {qr ? <>
                     <div className="f2a-enable-row">
                         <span className="f2a-enable-link">Scan the following QR Code in a 2FA authentication app (eg. Authy). </span>
@@ -138,11 +144,12 @@ const $2FAEnablePage: React.FunctionComponent = (props) => {
                     </div>
                     <div className="f2a-enable-row">
                         <span className="f2a-enable-text">2FA Token:</span>
-                        <input className="f2a-enable-input" type="text" spellCheck={false} value={token} onChange={(event) => setToken(event.target.value)} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)} onKeyDown={(event) => event.key === "Enter" ? commit2FA() : null}/>
+                        <input className="f2a-enable-input" type="text" spellCheck={false} value={token} onChange={(event) => setToken(event.target.value)} onKeyDown={(event) => event.key === "Enter" ? enable2FA() : null}/>
                     </div>
                     {error ? <div className="f2a-enable-validation-container"><span className="f2a-enable-validation" ref={errorRef}></span></div> : null}
                     <div className="f2a-enable-row">
-                        <button className="f2a-button" onClick={commit2FA}>Enable 2FA</button>
+                        <button style={{marginRight: "20px"}} className="change-username-button" onClick={() => history.push("/profile")}>←Back</button>
+                        <button className="f2a-button" onClick={enable2FA}>Enable 2FA</button>
                     </div>
                     </> : null}
                 </div>

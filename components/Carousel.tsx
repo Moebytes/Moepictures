@@ -160,6 +160,7 @@ const Carousel: React.FunctionComponent<Props> = (props) => {
     }
 
     const handleWheel = (event: React.WheelEvent) => {
+        if (props.images.length <= 3) return
         event.preventDefault()
         if (!sliderRef.current) return
         let marginLeft = parseInt(sliderRef.current.style.marginLeft)
@@ -198,6 +199,7 @@ const Carousel: React.FunctionComponent<Props> = (props) => {
     }
 
     const handleMouseMove = (event: React.MouseEvent) => {
+        if (props.images.length <= 3) return
         if (!dragging) return
         if (!sliderRef.current) return
         let marginLeft = parseInt(sliderRef.current.style.marginLeft)
@@ -224,6 +226,7 @@ const Carousel: React.FunctionComponent<Props> = (props) => {
     }
 
     const handleTouchMove = (event: React.TouchEvent) => {
+        if (props.images.length <= 3) return
         if (!event.touches.length) return
         if (!dragging) return
         if (!sliderRef.current) return

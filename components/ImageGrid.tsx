@@ -1,7 +1,7 @@
 import React, {useContext, useEffect, useRef, useState} from "react"
 import {useHistory} from "react-router-dom"
-import {ThemeContext, SizeTypeContext, PostAmountContext, PostsContext, ImageTypeContext,
-RestrictTypeContext, StyleTypeContext, SortTypeContext, SearchContext, SearchFlagContext,
+import {ThemeContext, SizeTypeContext, PostAmountContext, PostsContext, ImageTypeContext, EnableDragContext,
+RestrictTypeContext, StyleTypeContext, SortTypeContext, SearchContext, SearchFlagContext, HeaderFlagContext,
 RandomFlagContext, ImageSearchFlagContext, SidebarTextContext, MobileContext} from "../Context"
 import GridImage from "./GridImage"
 import noresults from "../assets/misc/noresults.png"
@@ -13,6 +13,7 @@ import "./styles/imagegrid.less"
 const ImageGrid: React.FunctionComponent = (props) => {
     const {theme, setTheme} = useContext(ThemeContext)
     const {sizeType, setSizeType} = useContext(SizeTypeContext)
+    const {enableDrag, setEnableDrag} = useContext(EnableDragContext)
     const {postAmount, setPostAmount} = useContext(PostAmountContext)
     const {posts, setPosts} = useContext(PostsContext) as any
     const [index, setIndex] = useState(0)
@@ -26,6 +27,7 @@ const ImageGrid: React.FunctionComponent = (props) => {
     const {randomFlag, setRandomFlag} = useContext(RandomFlagContext)
     const {sidebarText, setSidebarText} = useContext(SidebarTextContext)
     const {imageSearchFlag, setImageSearchFlag} = useContext(ImageSearchFlagContext)
+    const {headerFlag, setHeaderFlag} = useContext(HeaderFlagContext)
     const {mobile, setMobile} = useContext(MobileContext)
     const [loaded, setLoaded] = useState(false)
     const [noResults, setNoResults] = useState(false)
@@ -50,7 +52,10 @@ const ImageGrid: React.FunctionComponent = (props) => {
         setNoResults(false)
         setIndex(0)
         setVisiblePosts([])
-        const result = await axios.get("/api/search", {params: {query: search, type: imageType, restrict: restrictType, style: styleType, sort: sortType}, withCredentials: true}).then((r) => r.data)
+        const query = await functions.parseSpaceEnabledSearch(search)
+        setSearch(query)
+        const result = await axios.get("/api/search/posts", {params: {query, type: imageType, restrict: restrictType, style: styleType, sort: sortType}, withCredentials: true}).then((r) => r.data)
+        setHeaderFlag(true)
         setPosts(result)
         if (!result.length) setNoResults(true)
         if (!search) {
@@ -65,9 +70,10 @@ const ImageGrid: React.FunctionComponent = (props) => {
     
     useEffect(() => {
         let timeout = null as any
-        if (!noResults) {
+        clearTimeout(timeout)
+        if (!noResults && !visiblePosts.length) {
             timeout = setTimeout(() => {
-                if (!visiblePosts.length) searchPosts()
+                searchPosts()
             }, 100)
         }
         return () => {
@@ -83,7 +89,7 @@ const ImageGrid: React.FunctionComponent = (props) => {
         const randomPosts = async () => {
             setRandomFlag(false)
             setSearch("")
-            const result = await axios.get("/api/random", {params: {type: imageType, restrict: restrictType, style: styleType}, withCredentials: true}).then((r) => r.data)
+            const result = await axios.get("/api/search/random", {params: {type: imageType, restrict: restrictType, style: styleType}, withCredentials: true}).then((r) => r.data)
             setIndex(0)
             setVisiblePosts([])
             setPosts(result)
@@ -169,6 +175,7 @@ const ImageGrid: React.FunctionComponent = (props) => {
         const jsx = [] as any
         for (let i = 0; i < visiblePosts.length; i++) {
             const post = visiblePosts[i]
+            // if (post.thirdParty) continue
             const image = visiblePosts[i].images[0]
             if (!image) continue
             const images = post.images.map((i: any) => functions.getImageLink(i.type, post.postID, i.filename))
@@ -185,7 +192,7 @@ const ImageGrid: React.FunctionComponent = (props) => {
     }
 
     return (
-        <div className="imagegrid" style={{marginTop: mobile ? "10px" : "0px"}}>
+        <div className="imagegrid" style={{marginTop: mobile ? "10px" : "0px"}} onMouseEnter={() => setEnableDrag(true)}>
             <div className="image-container">
                 {generateImagesJSX()}
             </div>

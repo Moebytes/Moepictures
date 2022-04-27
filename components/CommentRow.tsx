@@ -87,7 +87,7 @@ const CommentRow: React.FunctionComponent<Props> = (props) => {
     }
 
     const deleteComment = async () => {
-        await axios.delete("/api/comment", {params: {commentID: props.comment.commentID}, withCredentials: true})
+        await axios.delete("/api/comment/delete", {params: {commentID: props.comment.commentID}, withCredentials: true})
         props.onDelete?.()
     }
 
@@ -104,7 +104,7 @@ const CommentRow: React.FunctionComponent<Props> = (props) => {
     }
 
     const editComment = async () => {
-        await axios.put("/api/comment", {commentID: props.comment.commentID, comment: editCommentText}, {withCredentials: true})
+        await axios.put("/api/comment/edit", {commentID: props.comment.commentID, comment: editCommentText}, {withCredentials: true})
         props.onEdit?.()
     }
 
@@ -151,6 +151,10 @@ const CommentRow: React.FunctionComponent<Props> = (props) => {
         }
     }
 
+    const userClick = () => {
+        history.push(`/user/${props.comment.username}`)
+    }
+
     return (
         <div className="commentrow" onMouseEnter={() =>setHover(true)} onMouseLeave={() => setHover(false)}>
             <div className="commentrow-container">
@@ -159,7 +163,7 @@ const CommentRow: React.FunctionComponent<Props> = (props) => {
                 <img className="commentrow-img" src={img} onClick={imgClick}/>}
             </div>
             <div className="commentrow-container">
-                <div className="commentrow-user-container">
+                <div className="commentrow-user-container" onClick={userClick}>
                     <img className="commentrow-user-img" src={getCommentPFP()}/>
                     <span className="commentrow-user-text">{functions.toProperCase(props.comment.username)}</span>
                 </div>

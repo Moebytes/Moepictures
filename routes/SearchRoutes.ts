@@ -5,7 +5,7 @@ import phash from "sharp-phash"
 import dist from "sharp-phash/distance"
 
 const SearchRoutes = (app: Express) => {
-    app.get("/api/search", async (req: Request, res: Response, next: NextFunction) => {
+    app.get("/api/search/posts", async (req: Request, res: Response, next: NextFunction) => {
         try {
             const query = req.query.query as string
             const type = req.query.type as string
@@ -45,7 +45,7 @@ const SearchRoutes = (app: Express) => {
         }
     })
 
-    app.get("/api/random", async (req: Request, res: Response, next: NextFunction) => {
+    app.get("/api/search/random", async (req: Request, res: Response, next: NextFunction) => {
         try {
             const type = req.query.type as string
             const restrict = req.query.restrict as string
@@ -67,61 +67,7 @@ const SearchRoutes = (app: Express) => {
         }
     })
 
-    app.get("/api/post", async (req: Request, res: Response, next: NextFunction) => {
-        try {
-            const postID = req.query.postID as string
-            if (Number.isNaN(Number(postID))) return res.status(400).send("Invalid postID")
-            let result = await sql.post(Number(postID))
-            if (result.images.length > 1) {
-                result.images = result.images.sort((a: any, b: any) => a.order - b.order)
-            }
-            res.status(200).json(result)
-        } catch (e) {
-            console.log(e)
-            return res.status(400).send("Bad request")
-        }
-    })
-
-    app.get("/api/user", async (req: Request, res: Response, next: NextFunction) => {
-        try {
-            const username = req.query.username as string
-            if (!username) return res.status(400).send("Invalid username")
-            let user = await sql.user(username.trim())
-            delete user.$2fa
-            delete user.email
-            delete user.password
-            res.status(200).json(user)
-        } catch (e) {
-            console.log(e)
-            return res.status(400).send("Bad request")
-        }
-    })
-
-    app.get("/api/tags/count", async (req: Request, res: Response, next: NextFunction) => {
-        try {
-            let tags = req.query.tags as string[]
-            if (!tags) tags = []
-            let result = await sql.tagCounts(tags.filter(Boolean))
-            res.status(200).json(result)
-        } catch (e) {
-            console.log(e)
-            return res.status(400).send("Bad request")
-        }
-    })
-
-    app.get("/api/tags", async (req: Request, res: Response, next: NextFunction) => {
-        try {
-            let tags = req.query.tags as string[]
-            if (!tags) tags = []
-            let result = await sql.tags(tags.filter(Boolean))
-            res.status(200).json(result)
-        } catch (e) {
-            console.log(e)
-            return res.status(400).send("Bad request")
-        }
-    })
-
-    app.post("/api/similar", async (req: Request, res: Response, next: NextFunction) => {
+    app.post("/api/search/similar", async (req: Request, res: Response, next: NextFunction) => {
         try {
             const buffer = Buffer.from(Object.values(req.body))
             const hash = await phash(buffer)
@@ -139,7 +85,7 @@ const SearchRoutes = (app: Express) => {
         }
     })
 
-    app.get("/api/artists", async (req: Request, res: Response, next: NextFunction) => {
+    app.get("/api/search/artists", async (req: Request, res: Response, next: NextFunction) => {
         try {
             const query = req.query.query as string
             let sort = req.query.sort as string
@@ -153,7 +99,7 @@ const SearchRoutes = (app: Express) => {
         }
     })
 
-    app.get("/api/characters", async (req: Request, res: Response, next: NextFunction) => {
+    app.get("/api/search/characters", async (req: Request, res: Response, next: NextFunction) => {
         try {
             const query = req.query.query as string
             let sort = req.query.sort as string
@@ -167,7 +113,7 @@ const SearchRoutes = (app: Express) => {
         }
     })
 
-    app.get("/api/series", async (req: Request, res: Response, next: NextFunction) => {
+    app.get("/api/search/series", async (req: Request, res: Response, next: NextFunction) => {
         try {
             const query = req.query.query as string
             let sort = req.query.sort as string
@@ -181,13 +127,12 @@ const SearchRoutes = (app: Express) => {
         }
     })
 
-    app.get("/api/tagsearch", async (req: Request, res: Response, next: NextFunction) => {
+    app.get("/api/search/tags", async (req: Request, res: Response, next: NextFunction) => {
         try {
             const query = req.query.query as string
             let sort = req.query.sort as string
             if (!functions.validTagSort(sort)) return res.status(400).send("Invalid sort")
             let search = query?.trim().split(/ +/g).filter(Boolean).join("-") ?? ""
-            const aliases = await sql.aliasSearch(search)
             let result = await sql.tagSearch(search, sort)
             res.status(200).json(result)
         } catch {
@@ -195,16 +140,45 @@ const SearchRoutes = (app: Express) => {
         }
     })
 
-    app.get("/api/commentsearch", async (req: Request, res: Response, next: NextFunction) => {
+    app.get("/api/search/comments", async (req: Request, res: Response, next: NextFunction) => {
         try {
             const query = req.query.query as string
             let sort = req.query.sort as string
             if (!functions.validCommentSort(sort)) return res.status(400).send("Invalid sort")
             const search = query?.trim() ?? ""
-            let result = await sql.searchComments(search, sort)
+            let parts = search.split(/ +/g)
+            let usernames = [] as any 
+            let parsedSearch = ""
+            for (let i = 0; i < parts.length; i++) {
+                if (parts[i].includes("user:")) {
+                    const username = parts[i].split("user:")[1]
+                    usernames.push(username)
+                } else {
+                    parsedSearch += `${parts[i]} `
+                }
+            }
+            let result = [] as any
+            if (usernames.length) {
+                result = await sql.searchCommentsByUsername(usernames, parsedSearch.trim(), sort)
+            } else {
+                result = await sql.searchComments(parsedSearch.trim(), sort)
+            }
             res.status(200).json(result)
         } catch (e) {
             console.log(e)
+            return res.status(400).send("Bad request")
+        }
+    })
+
+    app.get("/api/search/suggestions", async (req: Request, res: Response, next: NextFunction) => {
+        try {
+            const query = req.query.query as string
+            let search = query?.trim().split(/ +/g).filter(Boolean).join("-") ?? ""
+            let result = await sql.tagSearch(search, "posts").then((r) => r.slice(0, 10))
+            if (!result?.[0]) return res.status(200).json([])
+            const tags = await sql.tagCounts(result.map((r: any) => r.tag))
+            res.status(200).json(tags.slice(0, 10))
+        } catch {
             return res.status(400).send("Bad request")
         }
     })

@@ -47,6 +47,7 @@ const ResetPasswordPage: React.FunctionComponent = (props) => {
         setRelative(false)
         setHeaderText("")
         setSidebarText("")
+        setEnableDrag(false)
         document.title = "Moebooru: Reset Password"
 
         const token = new URLSearchParams(window.location.search).get("token")
@@ -102,7 +103,7 @@ const ResetPasswordPage: React.FunctionComponent = (props) => {
         if (!errorRef.current) await functions.timeout(20)
         errorRef.current!.innerText = "Submitting..."
         try {
-            await axios.post("/api/resetpassword", {username, token, password: newPassword}, {withCredentials: true})
+            await axios.post("/api/user/resetpassword", {username, token, password: newPassword}, {withCredentials: true})
             setSubmitted(true)
             setError(false)
         } catch {
@@ -135,14 +136,14 @@ const ResetPasswordPage: React.FunctionComponent = (props) => {
                         <span className="reset-pass-text">New Password:</span>
                         <div className="reset-pass-pass">
                             <img className="reset-pass-pass-show" src={getEye()} onClick={() => setShowPassword((prev) => !prev)}/>
-                            <input className="reset-pass-pass-input" type={showPassword ? "text" : "password"} spellCheck={false} value={newPassword} onChange={(event) => setNewPassword(event.target.value)} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)} onKeyDown={(event) => event.key === "Enter" ? submit() : null}/>
+                            <input className="reset-pass-pass-input" type={showPassword ? "text" : "password"} spellCheck={false} value={newPassword} onChange={(event) => setNewPassword(event.target.value)} onKeyDown={(event) => event.key === "Enter" ? submit() : null}/>
                         </div>
                     </div>
                     <div className="reset-pass-row">
                         <span className="reset-pass-text">Confirm New Password:</span>
                         <div className="reset-pass-pass">
                             <img className="reset-pass-pass-show" src={getEye2()} onClick={() => setShowPassword2((prev) => !prev)}/>
-                            <input className="reset-pass-pass-input" type={showPassword2 ? "text" : "password"} spellCheck={false} value={confirmNewPassword} onChange={(event) => setConfirmNewPassword(event.target.value)} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)} onKeyDown={(event) => event.key === "Enter" ? submit() : null}/>
+                            <input className="reset-pass-pass-input" type={showPassword2 ? "text" : "password"} spellCheck={false} value={confirmNewPassword} onChange={(event) => setConfirmNewPassword(event.target.value)} onKeyDown={(event) => event.key === "Enter" ? submit() : null}/>
                         </div>
                     </div>
                     {error ? <div className="reset-pass-validation-container"><span className="reset-pass-validation" ref={errorRef}></span></div> : null}

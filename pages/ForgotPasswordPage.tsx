@@ -32,6 +32,7 @@ const ForgotPasswordPage: React.FunctionComponent = (props) => {
         setRelative(false)
         setHeaderText("")
         setSidebarText("")
+        setEnableDrag(false)
         document.title = "Moebooru: Forgot Password"
     }, [])
 
@@ -47,7 +48,7 @@ const ForgotPasswordPage: React.FunctionComponent = (props) => {
         setError(true)
         if (!errorRef.current) await functions.timeout(20)
         errorRef.current!.innerText = "Submitting..."
-        await axios.post("/api/forgotpassword", {email}, {withCredentials: true})
+        await axios.post("/api/user/forgotpassword", {email}, {withCredentials: true})
         setSubmitted(true)
         setError(false)
         setEmail("")
@@ -73,7 +74,7 @@ const ForgotPasswordPage: React.FunctionComponent = (props) => {
                     <span className="forgot-pass-link">Enter your email to receive a password reset link.</span>
                     <div className="forgot-pass-row">
                         <span className="forgot-pass-text">Email Address:</span>
-                        <input className="forgot-pass-input" type="text" spellCheck={false} value={email} onChange={(event) => setEmail(event.target.value)} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)} onKeyDown={(event) => event.key === "Enter" ? submit() : null}/>
+                        <input className="forgot-pass-input" type="text" spellCheck={false} value={email} onChange={(event) => setEmail(event.target.value)} onKeyDown={(event) => event.key === "Enter" ? submit() : null}/>
                     </div>
                     {error ? <div className="forgot-pass-validation-container"><span className="forgot-pass-validation" ref={errorRef}></span></div> : null}
                     <div className="forgot-pass-button-container">

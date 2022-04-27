@@ -6,13 +6,14 @@ import SideBar from "../components/SideBar"
 import Footer from "../components/Footer"
 import DragAndDrop from "../components/DragAndDrop"
 import {HideNavbarContext, HideSidebarContext, RelativeContext, HideTitlebarContext, HeaderTextContext, SidebarTextContext,
-MobileContext} from "../Context"
+MobileContext, EnableDragContext} from "../Context"
 import "./styles/helppage.less"
 
 const HelpPage: React.FunctionComponent = (props) => {
     const {hideNavbar, setHideNavbar} = useContext(HideNavbarContext)
     const {hideTitlebar, setHideTitlebar} = useContext(HideTitlebarContext)
     const {hideSidebar, setHideSidebar} = useContext(HideSidebarContext)
+    const {enableDrag, setEnableDrag} = useContext(EnableDragContext)
     const {relative, setRelative} = useContext(RelativeContext)
     const {headerText, setHeaderText} = useContext(HeaderTextContext)
     const {sidebarText, setSidebarText} = useContext(SidebarTextContext)
@@ -52,7 +53,7 @@ const HelpPage: React.FunctionComponent = (props) => {
         <NavBar/>
         <div className="body">
             <SideBar/>
-            <div className="content">
+            <div className="content" onMouseEnter={() => setEnableDrag(true)}>
                 <div className="help">
                     <span className="help-heading">Help</span>
                     <span className="help-text">Welcome to Moebooru!</span>

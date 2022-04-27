@@ -54,7 +54,7 @@ const TagRow: React.FunctionComponent<Props> = (props) => {
     }
 
     const deleteTag = async () => {
-        await axios.delete("/api/tag", {params: {tag: props.tag.tag}, withCredentials: true})
+        await axios.delete("/api/tag/delete", {params: {tag: props.tag.tag}, withCredentials: true})
         props.onDelete?.()
     }
 
@@ -71,10 +71,14 @@ const TagRow: React.FunctionComponent<Props> = (props) => {
     }
 
     const editTag = async () => {
-        const arrayBuffer = await fetch(editTagImage).then((r) => r.arrayBuffer())
-        const bytes = new Uint8Array(arrayBuffer)
-        await axios.put("/api/tag", {tag: props.tag.tag, key: editTagKey, description: editTagDescription,
-        image: Object.values(bytes), aliases: editTagAliases}, {withCredentials: true})
+        let image = null as any
+        if (editTagImage) {
+            const arrayBuffer = await fetch(editTagImage).then((r) => r.arrayBuffer())
+            const bytes = new Uint8Array(arrayBuffer)
+            image = Object.values(bytes)
+        }
+        await axios.put("/api/tag/edit", {tag: props.tag.tag, key: editTagKey, description: editTagDescription,
+        image, aliases: editTagAliases}, {withCredentials: true})
         props.onEdit?.()
     }
 
@@ -89,13 +93,13 @@ const TagRow: React.FunctionComponent<Props> = (props) => {
     const editTagDialog = async () => {
         setEditTagKey(props.tag.tag)
         setEditTagDescription(props.tag.description)
-        setEditTagImage(functions.getTagLink(props.tag.type, props.tag.image))
+        setEditTagImage(props.tag.image ? functions.getTagLink(props.tag.type, props.tag.image) : null)
         setEditTagAliases(props.tag.aliases?.[0] ? props.tag.aliases.map((a: any) => a.alias) : [])
         setEditTagID(props.tag.tag)
     }
 
     const aliasTag = async () => {
-        await axios.post("/api/aliastag", {tag: props.tag.tag, aliasTo: aliasTagName}, {withCredentials: true})
+        await axios.post("/api/tag/aliastag", {tag: props.tag.tag, aliasTo: aliasTagName}, {withCredentials: true})
         props.onEdit?.()
     }
 

@@ -18,6 +18,10 @@ import random from "../assets/purple/random.png"
 import randomMagenta from "../assets/magenta/random.png"
 import randomPurpleLight from "../assets/purple-light/random.png"
 import randomMagentaLight from "../assets/magenta-light/random.png"
+import randomMobile from "../assets/purple/random-mobile.png"
+import randomMobileMagenta from "../assets/magenta/random-mobile.png"
+import randomMobilePurpleLight from "../assets/purple-light/random-mobile.png"
+import randomMobileMagentaLight from "../assets/magenta-light/random-mobile.png"
 import terms from "../assets/purple/terms.png"
 import termsMagenta from "../assets/magenta/terms.png"
 import termsPurpleLight from "../assets/purple-light/terms.png"
@@ -47,6 +51,7 @@ import pack from "../package.json"
 import functions from "../structures/Functions"
 import fileType from "magic-bytes.js"
 import axios from "axios"
+import SearchSuggestions from "./SearchSuggestions"
 import "./styles/sidebar.less"
 
 interface Props {
@@ -78,6 +83,7 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
     const {session, setSession} = useContext(SessionContext)
     const [maxTags, setMaxTags] = useState(23)
     const [userImage, setUserImage] = useState("")
+    const [suggestionsActive, setSuggestionsActive] = useState(false)
     const history = useHistory()
 
     const updateTags = async () => {
@@ -93,7 +99,7 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
     const updateUserImg = async () => {
         if (props.post) {
             const user = await axios.get("/api/user", {params: {username: props.post.uploader}, withCredentials: true}).then((r) => r.data)
-            setUserImage(user.image ? functions.getTagLink("pfp", user.image) : getFavicon())
+            setUserImage(user?.image ? functions.getTagLink("pfp", user.image) : getFavicon())
         }
     }
 
@@ -258,6 +264,14 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
         if (theme === "magenta") return randomMagenta
         if (theme === "magenta-light") return randomMagentaLight
         return random
+    }
+
+    const getRandomMobileIcon = () => {
+        if (theme === "purple") return randomMobile
+        if (theme === "purple-light") return randomMobilePurpleLight
+        if (theme === "magenta") return randomMobileMagenta
+        if (theme === "magenta-light") return randomMobileMagentaLight
+        return randomMobile
     }
 
     const getTermsIcon = () => {
@@ -438,29 +452,35 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
     }
 
     if (mobile) return (
+        <>
+        <SearchSuggestions active={suggestionsActive}/>
         <div className={`mobile-sidebar ${relative ? "mobile-sidebar-relative" : ""}`}>
             <div className="mobile-search-container">
-                <input className="mobile-search" type="search" spellCheck="false" value={search} onChange={(event) => setSearch(event.target.value)} onKeyDown={(event) => event.key === "Enter" ? triggerSearch() : null}/>
+                <input className="mobile-search" type="search" spellCheck="false" value={search} onChange={(event) => setSearch(event.target.value)} onKeyDown={(event) => event.key === "Enter" ? triggerSearch() : null} onFocus={() => setSuggestionsActive(true)} onBlur={() => setSuggestionsActive(false)}/>
                 <img style={{height: "40px"}} className={!theme || theme === "purple" ? "search-icon" : `search-icon-${theme}`} src={getSearchIcon()} onClick={() => triggerSearch()}/>
                 <label style={{display: "flex", width: "max-content", height: "max-content"}} htmlFor="image-search">
                     <img style={{height: "40px"}} className={!theme || theme === "purple" ? "search-image-icon" : `search-image-icon-${theme}`} src={getSearchImageIcon()}/>
                 </label>
                 <input id="image-search" type="file" onChange={(event) => imageSearch(event)}/>
+                <img style={{height: "40px"}} className={!theme || theme === "purple" ? "random-mobile" : `random-mobile-${theme}`} src={getRandomMobileIcon()} onClick={randomSearch}/>
             </div>
         </div>
+        </>
     )
 
     return (
+        <>
+        <SearchSuggestions active={suggestionsActive}/>
         <div className={`sidebar ${hideSidebar ? "hide-sidebar" : ""} ${hideTitlebar ? "sidebar-top" : ""}
-        ${relative ? "sidebar-relative" : ""}`} onMouseEnter={() => {setEnableDrag(false); setSidebarHover(true)}} onMouseLeave={() => {setEnableDrag(true); setSidebarHover(false)}}>
+        ${relative ? "sidebar-relative" : ""}`} onMouseEnter={() => {setEnableDrag(false); setSidebarHover(true)}} onMouseLeave={() => {setSidebarHover(false)}}>
             <div className="sidebar-container">
             <div className="sidebar-content">
                 {sidebarText ?
                 <div className="sidebar-text-container">
                     <span className="sidebar-text">{sidebarText}</span>
                 </div> : null}
-                <div className="search-container">
-                    <input className="search" type="search" spellCheck="false" value={search} onChange={(event) => setSearch(event.target.value)} onKeyDown={(event) => event.key === "Enter" ? triggerSearch() : null}/>
+                <div className="search-container" onMouseEnter={() => setEnableDrag(false)}>
+                    <input className="search" type="search" spellCheck="false" value={search} onChange={(event) => setSearch(event.target.value)} onKeyDown={(event) => event.key === "Enter" ? triggerSearch() : null} onFocus={() => setSuggestionsActive(true)} onBlur={() => setSuggestionsActive(false)}/>
                     <img className={!theme || theme === "purple" ? "search-icon" : `search-icon-${theme}`} src={getSearchIcon()} onClick={() => triggerSearch()}/>
                     <label style={{display: "flex", width: "max-content", height: "max-content"}} htmlFor="image-search">
                         <img className={!theme || theme === "purple" ? "search-image-icon" : `search-image-icon-${theme}`} src={getSearchImageIcon()}/>
@@ -535,7 +555,7 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
                         </div>
                         <div className="sidebar-row">
                             <span className="tag">Uploader:</span>
-                            <span className="tag-alt">{functions.toProperCase(props.post.uploader) || "deleted"}</span>
+                            <span className="tag-alt-link" onClick={() => props.post.uploader ? history.push(`/user/${props.post.uploader}`) : null}>{functions.toProperCase(props.post.uploader) || "deleted"}</span>
                         </div>
                         <div className="sidebar-row">
                             <span className="tag">Uploaded:</span>
@@ -543,7 +563,7 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
                         </div>
                         <div className="sidebar-row">
                             <span className="tag">Updater:</span>
-                            <span className="tag-alt">{functions.toProperCase(props.post.updater) || "deleted"}</span>
+                            <span className="tag-alt-link" onClick={() => props.post.updater ? history.push(`/user/${props.post.updater}`) : null}>{functions.toProperCase(props.post.updater) || "deleted"}</span>
                         </div>
                         <div className="sidebar-row">
                             <span className="tag">Updated:</span>
@@ -618,6 +638,7 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
                 </div>
             </div>
         </div>
+        </>
     )
 }
 

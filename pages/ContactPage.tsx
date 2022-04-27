@@ -1,4 +1,5 @@
-import React, {useEffect, useContext, useState} from "react"
+import React, {useEffect, useContext, useState, useRef, useReducer} from "react"
+import {useHistory} from "react-router-dom"
 import {HashLink as Link} from "react-router-hash-link"
 import TitleBar from "../components/TitleBar"
 import NavBar from "../components/NavBar"
@@ -12,9 +13,11 @@ import DragAndDrop from "../components/DragAndDrop"
 import functions from "../structures/Functions"
 import {HideNavbarContext, HideSidebarContext, ThemeContext, EnableDragContext, MobileContext,
 RelativeContext, HideTitlebarContext, HeaderTextContext, SidebarTextContext} from "../Context"
+import axios from "axios"
 import "./styles/contactpage.less"
 
 const ContactPage: React.FunctionComponent = (props) => {
+    const [ignored, forceUpdate] = useReducer(x => x + 1, 0)
     const {theme, setTheme} = useContext(ThemeContext)
     const {hideNavbar, setHideNavbar} = useContext(HideNavbarContext)
     const {hideTitlebar, setHideTitlebar} = useContext(HideTitlebarContext)
@@ -24,8 +27,14 @@ const ContactPage: React.FunctionComponent = (props) => {
     const {headerText, setHeaderText} = useContext(HeaderTextContext)
     const {sidebarText, setSidebarText} = useContext(SidebarTextContext)
     const {mobile, setMobile} = useContext(MobileContext)
-    const [clicked, setClicked] = useState(false)
-    const [filename, setFileName] = useState("")
+    const [submitted, setSubmitted] = useState(false)
+    const [error, setError] = useState(false)
+    const [files, setFiles] = useState([]) as any
+    const [email, setEmail] = useState("")
+    const [subject, setSubject] = useState("")
+    const [message, setMessage] = useState("")
+    const errorRef = useRef(null) as any
+    const history = useHistory()
 
     useEffect(() => {
         setHideNavbar(false)
@@ -34,6 +43,7 @@ const ContactPage: React.FunctionComponent = (props) => {
         setRelative(false)
         setHeaderText("")
         setSidebarText("")
+        setEnableDrag(false)
         document.title = "Moebooru: Contact"
     }, [])
 
@@ -45,11 +55,19 @@ const ContactPage: React.FunctionComponent = (props) => {
         }
     }, [mobile])
 
-    const fileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
-        if (event.target.files) {
-            const files = Array.from(event.target.files)
-            setFileName(files[0].name)
+    const fileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+        if (!event.target.files?.[0]) return
+        const fileArray = Array.from(event.target.files)
+        const acceptedFiles = [] as any
+        for (let i = 0; i < fileArray.length; i++) {
+            const MB = fileArray[i].size / (1024*1024)
+            if (MB > 25) continue
+            let obj = {} as any
+            obj.bytes = Object.values(new Uint8Array(await fileArray[i].arrayBuffer()))
+            obj.name = fileArray[i].name
+            acceptedFiles.push(obj)
         }
+        setFiles([...files, ...acceptedFiles])
     }
     
     const getX = () => {
@@ -58,6 +76,57 @@ const ContactPage: React.FunctionComponent = (props) => {
         if (theme === "magenta") return XButtonMagenta
         if (theme === "magenta-light") return XButtonMagentaLight
         return XButton
+    }
+
+    const submit = async () => {
+        const badEmail = functions.validateEmail(email)
+        if (badEmail) {
+            setError(true)
+            if (!errorRef.current) await functions.timeout(20)
+            errorRef.current!.innerText = badEmail
+            await functions.timeout(2000)
+            setError(false)
+            return
+        }
+        const badMessage = functions.validateMessage(message)
+        if (badMessage) {
+            setError(true)
+            if (!errorRef.current) await functions.timeout(20)
+            errorRef.current!.innerText = badMessage
+            await functions.timeout(2000)
+            setError(false)
+            return
+        }
+        setError(true)
+        if (!errorRef.current) await functions.timeout(20)
+        errorRef.current!.innerText = "Submitting..."
+        try {
+            await axios.post("/api/misc/contact", {email, subject, message, files}, {withCredentials: true})
+            setSubmitted(true)
+            setError(false)
+        } catch {
+            errorRef.current!.innerText = "Bad email or message."
+            await functions.timeout(2000)
+            setError(false)
+        }
+    }
+
+    const generateFilesJSX = () => {
+        let jsx = [] as any
+        console.log(files)
+        for (let i = 0; i < files.length; i++) {
+            const deleteFile = () => {
+                files.splice(i, 1)
+                setFiles(files)
+                forceUpdate()
+            }
+            jsx.push(<>
+                    <span className="contact-text-small">{files[i].name}</span>
+                    <img className="x-button" src={getX()} onClick={() => deleteFile()}/>
+                </>
+            )
+        }
+        return jsx
     }
 
     return (
@@ -70,10 +139,10 @@ const ContactPage: React.FunctionComponent = (props) => {
             <div className="content">
                 <div className="contact">
                     <span className="contact-title">Contact</span>
-                    {clicked ? <>
-                    <span className="contact-link">Your message has been delivered.</span>
+                    {submitted ? <>
+                    <span className="contact-link">Your message was delivered.</span>
                     <div className="contact-button-container-left">
-                        <button className="contact-button" onClick={() => setClicked(false)}>←Back</button>
+                        <button className="contact-button" onClick={() => history.push("/posts")}>←Back</button>
                     </div>
                     </> : <>
                     <span className="contact-link">
@@ -92,22 +161,26 @@ const ContactPage: React.FunctionComponent = (props) => {
                         We do not remove material not protected by copyright, such as your artist tag and social links.
                     </span>
                     <div className="contact-row">
-                        <span className="contact-text">Subject:</span>
-                        <input className="contact-input" type="text" spellCheck={false} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}/>
+                        <span className="contact-text">Email:</span>
+                        <input className="contact-input" type="text" spellCheck={false} value={email} onChange={(event) => setEmail(event.target.value)}/>
                     </div>
                     <div className="contact-row">
-                        <span className="contact-text">Attach File:</span>
-                        <label htmlFor="contact-file-upload" className="contact-file-input">Select File</label>
-                        <span className="contact-text-small">{filename}</span>
-                        <input id="contact-file-upload" type="file" onChange={(event) => fileUpload(event)}/>
-                        {filename ? <img className="x-button" src={getX()} onClick={() => setFileName("")}/> : null}
+                        <span className="contact-text">Subject:</span>
+                        <input className="contact-input" type="text" spellCheck={false} value={subject} onChange={(event) => setSubject(event.target.value)}/>
+                    </div>
+                    <div className="contact-row">
+                        <span className="contact-text">Attach Files:</span>
+                        <label htmlFor="contact-file-upload" className="contact-file-input">Select Files</label>
+                        <input id="contact-file-upload" type="file" multiple onChange={(event) => fileUpload(event)}/>
+                        {generateFilesJSX()}
                     </div>
                     <div className="contact-row-start">
                         <span className="contact-text">Message:</span>
-                        <textarea className="contact-textarea" spellCheck={false} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}></textarea>
+                        <textarea className="contact-textarea" spellCheck={false} value={message} onChange={(event) => setMessage(event.target.value)}></textarea>
                     </div>
+                    {error ? <div className="contact-validation-container"><span className="contact-validation" ref={errorRef}></span></div> : null}
                     <div className="contact-button-container">
-                        <button className="contact-button" onClick={() => setClicked(true)}>Send Message</button>
+                        <button className="contact-button" onClick={submit}>Send Message</button>
                     </div>
                     </> }
                 </div>

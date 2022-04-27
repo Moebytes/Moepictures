@@ -46,6 +46,7 @@ const LoginPage: React.FunctionComponent = (props) => {
         setHideSidebar(false)
         setRelative(false)
         setHeaderText("")
+        setEnableDrag(false)
         if (sidebarText !== "Login required.") setSidebarText("")
         document.title = "Moebooru: Login"
     }, [])
@@ -78,7 +79,7 @@ const LoginPage: React.FunctionComponent = (props) => {
         if (!errorRef.current) await functions.timeout(20)
         errorRef.current!.innerText = "Submitting..."
         try {
-            const result = await axios.post("/api/login", {username, password}, {withCredentials: true}).then((r) => r.data)
+            const result = await axios.post("/api/user/login", {username, password}, {withCredentials: true}).then((r) => r.data)
             setSessionFlag(true)
             if (redirect) {
                 await functions.timeout(20)
@@ -114,13 +115,13 @@ const LoginPage: React.FunctionComponent = (props) => {
                     </Link>
                     <div className="login-row">
                         <span className="login-text">Username:</span>
-                        <input className="login-input" type="text" spellCheck={false} value={username} onChange={(event) => setUsername(event.target.value)} onKeyDown={(event) => event.key === "Enter" ? login() : null} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}/>
+                        <input className="login-input" type="text" spellCheck={false} value={username} onChange={(event) => setUsername(event.target.value)} onKeyDown={(event) => event.key === "Enter" ? login() : null}/>
                     </div>
                     <div className="login-row">
                         <span className="login-text">Password:</span>
                         <div className="login-pass">
                             <img className="login-pass-show" src={getEye()} onClick={() => setShowPassword((prev) => !prev)}/>
-                            <input className="login-pass-input" type={showPassword ? "text" : "password"} spellCheck={false} value={password} onChange={(event) => setPassword(event.target.value)} onKeyDown={(event) => event.key === "Enter" ? login() : null} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}/>
+                            <input className="login-pass-input" type={showPassword ? "text" : "password"} spellCheck={false} value={password} onChange={(event) => setPassword(event.target.value)} onKeyDown={(event) => event.key === "Enter" ? login() : null}/>
                         </div>
                     </div>
                     <Link to ="/forgot-password">

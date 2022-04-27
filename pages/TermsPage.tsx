@@ -13,7 +13,7 @@ import tosMagentaLight from "../assets/magenta-light/tos.png"
 import privacyMagentaLight from "../assets/magenta-light/privacy.png"
 import DragAndDrop from "../components/DragAndDrop"
 import functions from "../structures/Functions"
-import {HideNavbarContext, HideSidebarContext, ThemeContext, RelativeContext, HideTitlebarContext, HeaderTextContext, SidebarTextContext, MobileContext} from "../Context"
+import {HideNavbarContext, HideSidebarContext, ThemeContext, RelativeContext, HideTitlebarContext, HeaderTextContext, SidebarTextContext, MobileContext, EnableDragContext} from "../Context"
 import "./styles/tospage.less"
 
 const TermsPage: React.FunctionComponent = (props) => {
@@ -21,6 +21,7 @@ const TermsPage: React.FunctionComponent = (props) => {
     const {hideNavbar, setHideNavbar} = useContext(HideNavbarContext)
     const {hideTitlebar, setHideTitlebar} = useContext(HideTitlebarContext)
     const {hideSidebar, setHideSidebar} = useContext(HideSidebarContext)
+    const {enableDrag, setEnableDrag} = useContext(EnableDragContext)
     const {relative, setRelative} = useContext(RelativeContext)
     const {headerText, setHeaderText} = useContext(HeaderTextContext)
     const {sidebarText, setSidebarText} = useContext(SidebarTextContext)
@@ -76,7 +77,7 @@ const TermsPage: React.FunctionComponent = (props) => {
         <NavBar/>
         <div className="body">
             <SideBar/>
-            <div className="content">
+            <div className="content" onMouseEnter={() => setEnableDrag(true)}>
                 <div className="terms-container">
                     <div className="terms">
                         <div className="terms-title-container">

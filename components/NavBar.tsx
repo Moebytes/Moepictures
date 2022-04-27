@@ -19,6 +19,7 @@ import darkMagentaLight from "../assets/magenta-light/dark.png"
 import search2 from "../assets/purple/search2.png"
 import axios from "axios"
 import functions from "../structures/Functions"
+import SearchSuggestions from "./SearchSuggestions"
 import {ThemeContext, HideNavbarContext, HideSortbarContext, HideSidebarContext, EnableDragContext,  HideMobileNavbarContext, MobileContext,
 RelativeContext, HideTitlebarContext, SearchContext, SearchFlagContext, SessionContext, SessionFlagContext, UserImgContext} from "../Context"
 import "./styles/navbar.less"
@@ -39,6 +40,7 @@ const NavBar: React.FunctionComponent = (props) => {
     const {hideMobileNavbar, setHideMobileNavbar} = useContext(HideMobileNavbarContext)
     const {mobile, setMobile} = useContext(MobileContext)
     const [showMiniTitle, setShowMiniTitle] = useState(false)
+    const [suggestionsActive, setSuggestionsActive] = useState(false)
     const [marginR, setMarginR] = useState("70px")
     const history = useHistory()
 
@@ -147,7 +149,7 @@ const NavBar: React.FunctionComponent = (props) => {
     }
 
     const logout = async () => {
-        await axios.post("/api/logout", null, {withCredentials: true})
+        await axios.post("/api/user/logout", null, {withCredentials: true})
         setSessionFlag(true)
         history.go(0)
     }
@@ -199,9 +201,26 @@ const NavBar: React.FunctionComponent = (props) => {
             </div>
         )
     } else {
+        const getX = () => {
+            if (typeof document === "undefined") return 1220
+            const element = document.querySelector(".nav-search")
+            if (!element) return 1220
+            const rect = element.getBoundingClientRect()
+            return rect.right - 200
+        }
+
+        const getY = () => {
+            if (typeof document === "undefined") return 1220
+            const element = document.querySelector(".nav-search")
+            if (!element) return 100
+            const rect = element.getBoundingClientRect()
+            return rect.bottom + window.scrollY
+        }
         return (
+            <>
+            <SearchSuggestions active={suggestionsActive && hideSidebar} width={200} x={getX()} y={getY()}/>
             <div className={`navbar ${hideTitlebar ? "translate-navbar" : ""} ${hideSortbar && hideTitlebar && hideSidebar ? "hide-navbar" : ""} ${hideSortbar && hideNavbar && showMiniTitle ? "hide-navbar" : ""}
-            ${relative ? "navbar-relative" : ""}`} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
+            ${relative ? "navbar-relative" : ""}`} onMouseEnter={() => setEnableDrag(false)}>
                 {showMiniTitle && !relative ? 
                     <Link to="/" className="nav-mini-title-container">
                         <span className="nav-mini-title-a">M</span>
@@ -234,12 +253,13 @@ const NavBar: React.FunctionComponent = (props) => {
                 <div className="nav-color-container">
                     <div className={`nav-search-container ${!hideSidebar ? "hide-nav-search" : ""}`}>
                         <img className="nav-search-icon" src={search2} onClick={() => setSearchFlag(true)}/>
-                        <input className="nav-search" type="search" spellCheck={false} value={search} onChange={(event) => setSearch(event.target.value)} onKeyDown={(event) => event.key === "Enter" ? setSearchFlag(true) : null}/>
+                        <input className="nav-search" type="search" spellCheck={false} value={search} onChange={(event) => setSearch(event.target.value)} onKeyDown={(event) => event.key === "Enter" ? setSearchFlag(true) : null} onFocus={() => setSuggestionsActive(true)} onBlur={() => setSuggestionsActive(false)}/>
                     </div>
                     <img className="nav-color" src={getEyeDropper()} onClick={colorChange}/>
                     <img className="nav-color" src={getLight()} onClick={lightChange}/>
                 </div>
             </div>
+            </>
         )
     }
 }

@@ -80,7 +80,7 @@ const PostImageOptions: React.FunctionComponent<Props> = (props) => {
     }, [props.img, props.comicPages])
 
     const getFavorite = async () => {
-        if (!props.post) return
+        if (!props.post || !session.username) return
         const favorite = await axios.get("/api/favorite", {params: {postID: props.post.postID}, withCredentials: true}).then((r) => r.data)
         setFavorited(favorite ? true : false)
     }
@@ -207,8 +207,8 @@ const PostImageOptions: React.FunctionComponent<Props> = (props) => {
     }
 
     const updateFavorite = async () => {
-        if (!props.post) return
-        await axios.post("/api/favorite", {postID: props.post.postID, favorited}, {withCredentials: true})
+        if (!props.post || !session.username) return
+        await axios.post("/api/favorite/update", {postID: props.post.postID, favorited}, {withCredentials: true})
     }
 
     useEffect(() => {

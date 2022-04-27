@@ -49,6 +49,7 @@ const SignUpPage: React.FunctionComponent = (props) => {
         setRelative(false)
         setHeaderText("")
         setSidebarText("")
+        setEnableDrag(false)
         document.title = "Moebooru: Sign Up"
     }, [])
 
@@ -123,7 +124,7 @@ const SignUpPage: React.FunctionComponent = (props) => {
         if (!errorRef.current) await functions.timeout(20)
         errorRef.current!.innerText = "Submitting..."
         try {
-            await axios.post("/api/signup", {username, email, password}, {withCredentials: true})
+            await axios.post("/api/user/signup", {username, email, password}, {withCredentials: true})
             setSubmitted(true)
             setError(false)
         } catch {
@@ -145,7 +146,7 @@ const SignUpPage: React.FunctionComponent = (props) => {
         <div className="body">
             <SideBar/>
             <div className="content">
-                <div className="signup" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
+                <div className="signup">
                     <span className="signup-title">Sign Up</span>
                     {submitted ? <>
                     <span className="signup-validation">Your account has been created. You should have received a confirmation link in your email. Please verify your email and login again.</span>
