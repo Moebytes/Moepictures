@@ -50,7 +50,8 @@ declare module "express-session" {
       bio: string 
       emailVerified: boolean
       publicFavorites: boolean
-      $2fa: boolean
+      $2fa: boolean,
+      ip: string
   }
 }
 

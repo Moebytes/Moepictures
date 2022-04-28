@@ -7,6 +7,7 @@ CREATE TABLE IF NOT EXISTS "users" (
     "$2fa" boolean,
     "publicFavorites" boolean,
     "image" text,
+    "ip" inet,
     "password" text
 );
 

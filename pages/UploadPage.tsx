@@ -32,6 +32,8 @@ import fileType from "magic-bytes.js"
 import localforage from "localforage"
 import JSZip from "jszip"
 import axios from "axios"
+import SearchSuggestions from "../components/SearchSuggestions"
+import ContentEditable from "react-contenteditable"
 import "./styles/uploadpage.less"
 import path from "path"
 
@@ -91,6 +93,16 @@ const UploadPage: React.FunctionComponent = (props) => {
     const [newTags, setNewTags] = useState([]) as any
     const [rawTags, setRawTags] = useState("")
     const [submitted, setSubmitted] = useState(false)
+    const [artistActive, setArtistActive] = useState([]) as any
+    const [artistInputRefs, setArtistInputRefs] = useState(artists.map((a: any) => React.createRef())) as any
+    const [characterActive, setCharacterActive] = useState([]) as any
+    const [characterInputRefs, setCharacterInputRefs] = useState(characters.map((a: any) => React.createRef())) as any
+    const [seriesActive, setSeriesActive] = useState([]) as any
+    const [seriesInputRefs, setSeriesInputRefs] = useState(series.map((a: any) => React.createRef())) as any
+    const [tagActive, setTagActive] = useState(false)
+    const [tagX, setTagX] = useState(0)
+    const [tagY, setTagY] = useState(0)
+    const rawTagRef = useRef<any>(null)
     const history = useHistory()
 
     useEffect(() => {
@@ -325,6 +337,50 @@ const UploadPage: React.FunctionComponent = (props) => {
         forceUpdate()
     }
 
+    const handleTagClick = async (tag: string, index: number) => {
+        const tagDetail = await axios.get("/api/tag", {params: {tag}, withCredentials: true}).then((r) => r.data)
+        if (tagDetail.image) {
+            const tagLink = functions.getTagLink(tagDetail.type, tagDetail.image)
+            const arrayBuffer = await fetch(tagLink).then((r) => r.arrayBuffer())
+            const bytes = new Uint8Array(arrayBuffer)
+            const ext = path.extname(tagLink).replace(".", "")
+            if (tagDetail.type === "artist") {
+                artists[index].tag = tagDetail.tag
+                artists[index].image = tagLink
+                artists[index].ext = ext
+                artists[index].bytes = Object.values(bytes)
+                setArtists(artists)
+            } else if (tagDetail.type === "character") {
+                characters[index].tag = tagDetail.tag
+                characters[index].image = tagLink
+                characters[index].ext = ext
+                characters[index].bytes = Object.values(bytes)
+                setCharacters(characters)
+            } else if (tagDetail.type === "series") {
+                series[index].tag = tagDetail.tag
+                series[index].image = tagLink
+                series[index].ext = ext
+                series[index].bytes = Object.values(bytes)
+                setSeries(series)
+            }
+        } else {
+            if (tagDetail.type === "artist") {
+                artists[index].tag = tagDetail.tag
+                artists[index].image = ""
+                setArtists(artists)
+            } else if (tagDetail.type === "character") {
+                characters[index].tag = tagDetail.tag
+                characters[index].image = ""
+                setCharacters(characters)
+            } else if (tagDetail.type === "series") {
+                series[index].tag = tagDetail.tag
+                series[index].image = ""
+                setSeries(series)
+            }
+        }
+        forceUpdate()
+    }
+
     const generateArtistsJSX = () => {
         const jsx = [] as any
         for (let i = 0; i < artists.length; i++) {
@@ -333,11 +389,32 @@ const UploadPage: React.FunctionComponent = (props) => {
                 setArtists(artists)
                 forceUpdate()
             }
+            const changeActive = (value: boolean) => {
+                artistActive[i] = value
+                setArtistActive(artistActive)
+                forceUpdate()
+            }
+            const getX = () => {
+                if (typeof document === "undefined") return 15
+                const element = artistInputRefs[i]?.current
+                if (!element) return 15
+                const rect = element.getBoundingClientRect()
+                return rect.left
+            }
+        
+            const getY = () => {
+                if (typeof document === "undefined") return 177
+                const element = artistInputRefs[i]?.current
+                if (!element) return 177
+                const rect = element.getBoundingClientRect()
+                return rect.bottom + window.scrollY
+            }
             jsx.push(
                 <>
+                <SearchSuggestions active={artistActive[i]} x={getX()} y={getY()} width={mobile ? 150 : 200} text={artists[i].tag} click={(tag) => handleTagClick(tag, i)} type="artist"/>
                 <div className="upload-container-row" style={{marginTop: "10px"}}>
                     <span className="upload-text">Romanized Artist Tag: </span>
-                    <input className="upload-input-wide" type="text" value={artists[i].tag} onChange={(event) => changeTagInput(event.target.value)} spellCheck={false} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}/>
+                    <input ref={artistInputRefs[i]} className="upload-input-wide" type="text" value={artists[i].tag} onChange={(event) => changeTagInput(event.target.value)} spellCheck={false} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)} onFocus={() => changeActive(true)} onBlur={() => changeActive(false)}/>
                 </div>
                 <div className="upload-container-row">
                     <span className="upload-text margin-right">Artist Image: </span>
@@ -356,12 +433,16 @@ const UploadPage: React.FunctionComponent = (props) => {
         }
         const add = () => {
             artists.push({})
+            artistInputRefs.push(React.createRef())
             setArtists(artists)
+            setArtistInputRefs(artistInputRefs)
             forceUpdate()
         }
         const remove = () => {
             artists.pop()
+            artistInputRefs.pop()
             setArtists(artists)
+            setArtistInputRefs(artistInputRefs)
             forceUpdate()
         }
         jsx.push(
@@ -383,11 +464,32 @@ const UploadPage: React.FunctionComponent = (props) => {
                 setCharacters(characters)
                 forceUpdate()
             }
+            const changeActive = (value: boolean) => {
+                characterActive[i] = value
+                setCharacterActive(characterActive)
+                forceUpdate()
+            }
+            const getX = () => {
+                if (typeof document === "undefined") return 15
+                const element = characterInputRefs[i]?.current
+                if (!element) return 15
+                const rect = element.getBoundingClientRect()
+                return rect.left
+            }
+        
+            const getY = () => {
+                if (typeof document === "undefined") return 177
+                const element = characterInputRefs[i]?.current
+                if (!element) return 177
+                const rect = element.getBoundingClientRect()
+                return rect.bottom + window.scrollY
+            }
             jsx.push(
                 <>
+                <SearchSuggestions active={characterActive[i]} x={getX()} y={getY()} width={mobile ? 110 : 200} text={characters[i].tag} click={(tag) => handleTagClick(tag, i)} type="character"/>
                 <div className="upload-container-row" style={{marginTop: "10px"}}>
                     <span className="upload-text">Romanized Character Tag: </span>
-                    <input className="upload-input-wide" type="text" value={characters[i].tag} onChange={(event) => changeTagInput(event.target.value)} spellCheck={false} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}/>
+                    <input ref={characterInputRefs[i]} className="upload-input-wide" type="text" value={characters[i].tag} onChange={(event) => changeTagInput(event.target.value)} spellCheck={false} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)} onFocus={() => changeActive(true)} onBlur={() => changeActive(false)}/>
                 </div>
                 <div className="upload-container-row">
                     <span className="upload-text margin-right">Character Image: </span>
@@ -406,12 +508,16 @@ const UploadPage: React.FunctionComponent = (props) => {
         }
         const add = () => {
             characters.push({})
+            characterInputRefs.push(React.createRef())
             setCharacters(characters)
+            setCharacterInputRefs(characterInputRefs)
             forceUpdate()
         }
         const remove = () => {
             characters.pop()
+            characterInputRefs.pop()
             setCharacters(characters)
+            setCharacterInputRefs(characterInputRefs)
             forceUpdate()
         }
         jsx.push(
@@ -433,11 +539,32 @@ const UploadPage: React.FunctionComponent = (props) => {
                 setSeries(series)
                 forceUpdate()
             }
+            const changeActive = (value: boolean) => {
+                seriesActive[i] = value
+                setSeriesActive(seriesActive)
+                forceUpdate()
+            }
+            const getX = () => {
+                if (typeof document === "undefined") return 15
+                const element = seriesInputRefs[i]?.current
+                if (!element) return 15
+                const rect = element.getBoundingClientRect()
+                return rect.left
+            }
+        
+            const getY = () => {
+                if (typeof document === "undefined") return 177
+                const element = seriesInputRefs[i]?.current
+                if (!element) return 177
+                const rect = element.getBoundingClientRect()
+                return rect.bottom + window.scrollY
+            }
             jsx.push(
                 <>
+                <SearchSuggestions active={seriesActive[i]} x={getX()} y={getY()} width={mobile ? 140 : 200} text={series[i].tag} click={(tag) => handleTagClick(tag, i)} type="series"/>
                 <div className="upload-container-row" style={{marginTop: "10px"}}>
                     <span className="upload-text">Romanized Series Tag: </span>
-                    <input className="upload-input-wide" type="text" value={series[i].tag} onChange={(event) => changeTagInput(event.target.value)} spellCheck={false} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}/>
+                    <input ref={seriesInputRefs[i]} className="upload-input-wide" type="text" value={series[i].tag} onChange={(event) => changeTagInput(event.target.value)} spellCheck={false} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)} onFocus={() => changeActive(true)} onBlur={() => changeActive(false)}/>
                 </div>
                 <div className="upload-container-row">
                     <span className="upload-text margin-right">Series Image: </span>
@@ -456,12 +583,16 @@ const UploadPage: React.FunctionComponent = (props) => {
         }
         const add = () => {
             series.push({})
+            seriesInputRefs.push(React.createRef())
             setSeries(series)
+            setSeriesInputRefs(seriesInputRefs)
             forceUpdate()
         }
         const remove = () => {
             series.pop()
+            seriesInputRefs.pop()
             setSeries(series)
+            setSeriesInputRefs(seriesInputRefs)
             forceUpdate()
         }
         jsx.push(
@@ -572,7 +703,7 @@ const UploadPage: React.FunctionComponent = (props) => {
             characters,
             series,
             newTags,
-            tags: rawTags.split(/[\n\r\s]+/g)
+            tags: functions.cleanHTML(rawTags).split(/[\n\r\s]+/g)
         }
         setSubmitError(true)
         await functions.timeout(20)
@@ -646,6 +777,7 @@ const UploadPage: React.FunctionComponent = (props) => {
                         artists[artists.length - 1].tag = await axios.post("/api/misc/romajinize", [artist], {withCredentials: true}).then((r) => r.data[0])
                         await uploadTagImg(pfp, "artist", artists.length - 1)
                         artists.push({})
+                        artistInputRefs.push(React.createRef())
                         setArtists(artists)
                         forceUpdate()
                         const translatedTags = await axios.post("/api/misc/translate", illust.tags.map((t: any) => t.name), {withCredentials: true}).then((r) => r.data)
@@ -679,6 +811,7 @@ const UploadPage: React.FunctionComponent = (props) => {
                         artists[artists.length - 1].tag = artist
                         await uploadTagImg(pfp, "artist", artists.length - 1)
                         artists.push({})
+                        artistInputRefs.push(React.createRef())
                         setArtists(artists)
                         forceUpdate()
                         setRawTags(deviation.keywords.map((k: string) => k.toLowerCase()).join(" "))
@@ -747,7 +880,7 @@ const UploadPage: React.FunctionComponent = (props) => {
     }, [rawTags])
 
     const updateTags = async () => {
-        const tags = functions.removeDuplicates(rawTags.trim().split(/[\n\r\s]+/g).map((t) => t.trim().toLowerCase())) as string[]
+        const tags = functions.removeDuplicates(functions.cleanHTML(rawTags).trim().split(/[\n\r\s]+/g).map((t) => t.trim().toLowerCase())) as string[]
         clearTimeout(tagsTimer)
         tagsTimer = setTimeout(async () => {
             if (!tags?.[0]) return setNewTags([])
@@ -801,6 +934,52 @@ const UploadPage: React.FunctionComponent = (props) => {
             )
         }
         return jsx
+    }
+
+    const getTagX = () => {
+        if (typeof window === "undefined") return 0
+        const selection = window.getSelection()
+        if (selection && selection.rangeCount > 0) {
+            const range = selection.getRangeAt(0)
+            const rect = functions.rangeRect(range, rawTagRef)
+            return rect.left - 10
+        }
+        return 0
+    }
+
+    const getTagY = () => {
+        if (typeof window === "undefined") return 0
+        const selection = window.getSelection()
+        if (selection && selection.rangeCount > 0) {
+            const range = selection.getRangeAt(0)
+            const rect = functions.rangeRect(range, rawTagRef)
+            return rect.bottom + window.scrollY + 10
+        }
+        return 0
+    }
+
+    useEffect(() => {
+        const tagX = getTagX()
+        const tagY = getTagY()
+        setTagX(tagX)
+        setTagY(tagY)
+    }, [rawTags])
+
+    useEffect(() => {
+        if (tagActive) {
+            const tagX = getTagX()
+            const tagY = getTagY()
+            setTagX(tagX)
+            setTagY(tagY)
+        }
+    }, [tagActive])
+
+    const handleRawTagClick = (tag: string) => {
+        setRawTags((prev: string) => {
+            const parts = functions.cleanHTML(prev).split(/ +/g)
+            parts[parts.length - 1] = tag
+            return parts.join(" ")
+        })
     }
 
     return (
@@ -1071,8 +1250,9 @@ const UploadPage: React.FunctionComponent = (props) => {
                 <span className="upload-text-alt">Enter dashed tags separated by spaces. Tags can describe any of the images. If the tag doesn't exist, you will be promted to create it.
                 If you need help with tags, read the <Link className="upload-link" target="_blank" to="/help#tagging">tagging guide.</Link></span>
                 <div className="upload-container">
-                    <div className="upload-container-row">
-                        <textarea className="upload-textarea" spellCheck={false} value={rawTags} onChange={(event) => setRawTags(event.target.value)} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}></textarea>
+                    <SearchSuggestions active={tagActive} text={functions.cleanHTML(rawTags)} x={tagX} y={tagY} width={200} click={handleRawTagClick} type="attribute"/>
+                    <div className="upload-container-row" onMouseOver={() => setEnableDrag(false)}>
+                        <ContentEditable innerRef={rawTagRef} className="upload-textarea" spellCheck={false} html={rawTags} onChange={(event) => setRawTags(event.target.value)} onFocus={() => setTagActive(true)} onBlur={() => setTagActive(false)}/>
                     </div>
                 </div>
                 {newTags.length ? <>

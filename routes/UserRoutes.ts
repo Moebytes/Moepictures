@@ -40,6 +40,7 @@ const UserRoutes = (app: Express) => {
             if (!username) return res.status(200).json(null)
             let user = await sql.user(username.trim())
             if (!user) return res.status(200).json(null)
+            delete user.ip
             delete user.$2fa
             delete user.email
             delete user.password
@@ -67,6 +68,8 @@ const UserRoutes = (app: Express) => {
                 await sql.updateUser(username, "emailVerified", false)
                 await sql.updateUser(username, "$2fa", false)
                 await sql.updateUser(username, "bio", "This user has not written anything.")
+                const ip = req.headers["x-forwarded-for"] || req.socket.remoteAddress
+                await sql.updateUser(username, "ip", ip as string)
                 const passwordHash = await bcrypt.hash(password, 13)
                 await sql.updateUser(username, "password", passwordHash)
 
@@ -105,6 +108,9 @@ const UserRoutes = (app: Express) => {
                 req.session.bio = user.bio
                 req.session.publicFavorites = user.publicFavorites
                 req.session.image = user.image
+                const ip = req.headers["x-forwarded-for"] || req.socket.remoteAddress
+                await sql.updateUser(username, "ip", ip as string)
+                req.session.ip = ip as string
                 return res.status(200).send("Success")
             } else {
                 return res.status(400).send("Bad request")

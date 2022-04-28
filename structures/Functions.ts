@@ -27,6 +27,27 @@ export default class Functions {
         // @ts-ignore
         return /constructor/i.test(window.HTMLElement) || (function (p) {return p.toString() === "[object SafariRemoteNotification]" })(!window["safari"] || (typeof safari !== "undefined" && safari.pushNotification))
     }
+
+    public static decodeEntities(encodedString: string) {
+        const regex = /&(nbsp|amp|quot|lt|gt);/g
+        const translate = {
+            nbsp: " ",
+            amp : "&",
+            quot: "\"",
+            lt  : "<",
+            gt  : ">"
+        }
+        return encodedString.replace(regex, function(match, entity) {
+            return translate[entity]
+        }).replace(/&#(\d+);/gi, function(match, numStr) {
+            const num = parseInt(numStr, 10)
+            return String.fromCharCode(num)
+        })
+    }
+
+    public static cleanHTML = (str: string) => {
+        return Functions.decodeEntities(str).replace(/<\/?[^>]+(>|$)/g, "")
+    }
     
     public static proxyImage = async (link: string) => {
         try {
@@ -1133,5 +1154,30 @@ export default class Functions {
             }
         }
         return query
+    }
+
+    public static insertNodeAtCaret(node: any) {
+        var selection = window.getSelection()!
+        if (selection.rangeCount) {
+            var range = selection.getRangeAt(0)
+            range.collapse(false)
+            range.insertNode(node)
+            range = range.cloneRange()
+            range.selectNodeContents(node)
+            range.collapse(false)
+            selection.removeAllRanges()
+            selection.addRange(range)
+        }
+    }
+
+    public static rangeRect = (range: Range, ref: any) => {
+        let rect = range.getBoundingClientRect()
+        if (range.collapsed && rect.top === 0 && rect.left === 0) {
+          let node = document.createTextNode("\ufeff")
+          range.insertNode(node)
+          rect = range.getBoundingClientRect()
+          node.remove()
+        }
+        return rect
     }
 }

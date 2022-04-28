@@ -1,4 +1,4 @@
-import React, {useContext, useEffect, useState} from "react"
+import React, {useContext, useEffect, useState, useReducer} from "react"
 import {useHistory} from "react-router-dom"
 import {ThemeContext, HideSidebarContext, HideNavbarContext, HideSortbarContext, EnableDragContext, MobileContext,
 RelativeContext, HideTitlebarContext, SidebarHoverContext, SearchContext, SearchFlagContext, PostsContext, ShowDeletePostDialogContext,
@@ -49,8 +49,8 @@ import deleteIcon from "../assets/purple/delete.png"
 import deleteIconMagenta from "../assets/magenta/delete.png"
 import pack from "../package.json"
 import functions from "../structures/Functions"
-import fileType from "magic-bytes.js"
 import axios from "axios"
+import TagHover from "./TagHover"
 import SearchSuggestions from "./SearchSuggestions"
 import "./styles/sidebar.less"
 
@@ -63,6 +63,7 @@ interface Props {
 }
 
 const SideBar: React.FunctionComponent<Props> = (props) => {
+    const [ignored, forceUpdate] = useReducer(x => x + 1, 0)
     const {theme, setTheme} = useContext(ThemeContext)
     const {hideSortbar, setHideSortbar} = useContext(HideSortbarContext)
     const {hideSidebar, setHideSidebar} = useContext(HideSidebarContext)
@@ -130,28 +131,28 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
                 if (!hideTitlebar) {
                     sidebar.style.top = "112px"
                     sidebar.style.height = "calc(100vh - 35px - 77px)"
-                    if (maxTags !== 26) setMaxTags(23)
+                    if (maxTags !== 23) setMaxTags(23)
                 } else {
                     if (window.scrollY !== 0) {
                         if (hideNavbar && window.scrollY > 77) {
                             sidebar.style.top = "0px"
                             sidebar.style.height = "100vh"
-                            if (maxTags !== 30) setMaxTags(29)
+                            if (maxTags !== 29) setMaxTags(29)
                         } else {
                             sidebar.style.top = "35px"
                             sidebar.style.height = "calc(100vh - 35px)"
-                            if (maxTags !== 30) setMaxTags(27)
+                            if (maxTags !== 27) setMaxTags(27)
                         }
                     } else {
                         sidebar.style.top = "112px"
                         sidebar.style.height = "calc(100vh - 35px - 77px)"
-                        if (maxTags !== 26) setMaxTags(23)
+                        if (maxTags !== 23) setMaxTags(23)
                     }
                 }
             } else {
                 sidebar.style.top = "0px"
                 sidebar.style.height = "auto"
-                if (maxTags !== 30) setMaxTags(29)
+                if (maxTags !== 29) setMaxTags(29)
             }
         }
         window.addEventListener("scroll", scrollHandler)
@@ -175,28 +176,28 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
             if (!hideTitlebar) {
                 sidebar.style.top = "112px"
                 sidebar.style.height = "calc(100vh - 35px - 77px)"
-                if (maxTags !== 26) setMaxTags(23)
+                if (maxTags !== 23) setMaxTags(23)
             } else {
                 if (window.scrollY !== 0) {
                     if (hideNavbar && window.scrollY > 77) {
                         sidebar.style.top = "0px"
                         sidebar.style.height = "100vh"
-                        if (maxTags !== 32) setMaxTags(29)
+                        if (maxTags !== 29) setMaxTags(29)
                     } else {
                         sidebar.style.top = "35px"
                         sidebar.style.height = "calc(100vh - 35px)"
-                        if (maxTags !== 30) setMaxTags(27)
+                        if (maxTags !== 27) setMaxTags(27)
                     }
                 } else {
                     sidebar.style.top = "112px"
                     sidebar.style.height = "calc(100vh - 35px - 77px)"
-                    if (maxTags !== 26) setMaxTags(23)
+                    if (maxTags !== 23) setMaxTags(23)
                 }
             }
         } else {
             sidebar.style.top = "0px"
             sidebar.style.height = "auto"
-            if (maxTags !== 30) setMaxTags(29)
+            if (maxTags !== 29) setMaxTags(29)
         }
     }, [hideTitlebar, relative, mobile])
 
@@ -214,11 +215,11 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
                 if (!hideTitlebar) {
                     sidebar.style.top = "112px"
                     sidebar.style.height = "calc(100vh - 35px - 77px)"
-                    if (maxTags !== 26) setMaxTags(23)
+                    if (maxTags !== 23) setMaxTags(23)
                 } else {
                     sidebar.style.top = "35px"
                     sidebar.style.height = "calc(100vh - 35px)"
-                    if (maxTags !== 30) setMaxTags(27)
+                    if (maxTags !== 27) setMaxTags(27)
                 }
                 return
             }
@@ -226,19 +227,19 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
                 if (sidebar.style.top === "0px") {
                     sidebar.style.top = "35px"
                     sidebar.style.height = "calc(100vh - 35px)"
-                    if (maxTags !== 30) setMaxTags(27)
+                    if (maxTags !== 27) setMaxTags(27)
                 }
             } else {
                 if (sidebar.style.top === "35px") {
                     sidebar.style.top = "0px"
                     sidebar.style.height = "100vh"
-                    if (maxTags !== 32) setMaxTags(29)
+                    if (maxTags !== 29) setMaxTags(29)
                 }
             }
         } else {
             sidebar.style.top = "0px"
             sidebar.style.height = "auto"
-            if (maxTags !== 30) setMaxTags(29)
+            if (maxTags !== 29) setMaxTags(29)
         }
     }, [hideSortbar, hideNavbar, hideTitlebar, mobile])
 

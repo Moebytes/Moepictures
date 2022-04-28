@@ -387,16 +387,18 @@ export default class SQLQuery {
     return result
   }
 
-  public static tagSearch = async (search: string, sort: string) => {
-    let whereQuery = ""
-    if (search) whereQuery = 
-    `WHERE tags.tag LIKE $1 || '%'
+  public static tagSearch = async (search: string, sort: string, type?: string) => {
+    let whereArray = [] as string[]
+    if (search) whereArray.push( 
+    `(tags.tag LIKE $1 || '%'
     OR EXISTS (
       SELECT 1 
       FROM aliases
       WHERE aliases.tag = tags.tag 
       AND aliases.alias LIKE $1 || '%'
-    )`
+    ))`)
+    if (type) whereArray.push(`tags.type = $2`)
+    let whereQuery = whereArray.length ? `WHERE ${whereArray.join(" AND ")}` : ""
     let sortQuery = ""
     if (sort === "alphabetic") sortQuery = `ORDER BY tags.tag ASC`
     if (sort === "reverse alphabetic") sortQuery = `ORDER BY tags.tag DESC`
@@ -419,9 +421,11 @@ export default class SQLQuery {
                   ${whereQuery}
                   GROUP BY "tags".tag
                   ${sortQuery}
-          `)
+          `),
+          values: []
     }
-    if (search) query.values = [search]
+    if (search) query.values?.push(search)
+    if (type) query.values?.push(type)
     const result = await SQLQuery.run(query)
     return result
   }

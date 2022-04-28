@@ -10,6 +10,8 @@ interface Props {
     x?: number 
     y?: number
     width?: number
+    click?: (tag: string) => void
+    type?: string
 }
 
 const SearchSuggestions: React.FunctionComponent<Props> = (props) => {
@@ -29,18 +31,18 @@ const SearchSuggestions: React.FunctionComponent<Props> = (props) => {
         } else {
             setTimeout(() => {
                 setActive(false)
-            }, 50)
+            }, 200)
         }
     }, [props.active])
 
     const updateSearchSuggestions = async () => {
         const query = props.text ? props.text : search
         if (!query) return setSuggestions([])
-        let suggestions = await axios.get("/api/search/suggestions", {params: {query}, withCredentials: true}).then((r) => r.data)
+        let suggestions = await axios.get("/api/search/suggestions", {params: {query, type: props.type}, withCredentials: true}).then((r) => r.data)
         if (!suggestions?.length) {
             const newQuery = query.split(/ +/g).slice(-1).join("")
             if (!newQuery) return setSuggestions([])
-            suggestions = await axios.get("/api/search/suggestions", {params: {query: newQuery}, withCredentials: true}).then((r) => r.data)
+            suggestions = await axios.get("/api/search/suggestions", {params: {query: newQuery, type: props.type}, withCredentials: true}).then((r) => r.data)
         }
         setSuggestions(suggestions)
     }
@@ -57,6 +59,7 @@ const SearchSuggestions: React.FunctionComponent<Props> = (props) => {
         let jsx = [] as any
         for (let i = 0; i < suggestions.length; i++) {
             const tagClick = () => {
+                if (props.click) return props.click(suggestions[i].tag)
                 setSearch((prev: string) => {
                     const parts = prev.split(/ +/g)
                     parts[parts.length - 1] = suggestions[i].tag
@@ -108,6 +111,10 @@ const SearchSuggestions: React.FunctionComponent<Props> = (props) => {
         } else {
             return "195px"
         }
+    }
+
+    if (props.x !== undefined && props.y !== undefined) {
+        if (!props.x && !props.y) return null
     }
 
     if (active && suggestions.length) return (
