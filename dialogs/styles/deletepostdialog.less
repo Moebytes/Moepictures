@@ -34,6 +34,15 @@
     align-items: center;
 }
 
+.deletepost-dialog-title-container {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    cursor: move;
+}
+
 .deletepost-dialog-row {
     display: flex;
     flex-direction: row;
@@ -55,6 +64,7 @@
     font-family: Tahoma, sans-serif;
     font-weight: bold;
     .stroke-black();
+    cursor: move;
 }
 
 .deletepost-dialog-text {
@@ -66,10 +76,19 @@
     .stroke-black();
 }
 
+.deletepost-dialog-text-small {
+    color: var(--text);
+    cursor: text;
+    user-select: text;
+    font-size: 18px;
+    font-family: Tahoma, sans-serif;
+    .stroke-black();
+}
+
 .deletepost-dialog-input {
     background-color: var(--inputBG);
     border: 2px solid var(--inputBorder);
-    width: 100px;
+    width: 100%;
     height: 30px;
     font-family: Tahoma, sans-serif;
     font-weight: bold;
@@ -95,4 +114,18 @@
         filter: brightness(130%);
         cursor: pointer;
     }
+}
+
+.deletepost-dialog-validation-container {
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+}
+
+.deletepost-dialog-validation {
+    font-family: Tahoma, sans-serif;
+    color: var(--text-strong);
+    font-size: 16px;
+    margin-top: 10px;
 }

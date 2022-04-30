@@ -40,10 +40,29 @@ export default class SQLQuery {
     return result.flat(Infinity)[0] as number
   }
 
+  /** Create a new post (unverified). */
+  public static insertUnverifiedPost = async () => {
+    const query: QueryArrayConfig = {
+      text: `INSERT INTO "unverified posts" VALUES (default) RETURNING "postID"`,
+      rowMode: "array"
+    }
+    const result = await SQLQuery.run(query)
+    return result.flat(Infinity)[0] as number
+  }
+
   /** Updates a post */
   public static updatePost = async (postID: number, column: string, value: string | number | boolean) => {
     const query: QueryConfig = {
         text: `UPDATE "posts" SET "${column}" = $1 WHERE "postID" = $2`,
+        values: [value, postID]
+    }
+    return SQLQuery.run(query)
+  }
+
+  /** Updates a post (unverified) */
+  public static updateUnverifiedPost = async (postID: number, column: string, value: string | number | boolean) => {
+    const query: QueryConfig = {
+        text: `UPDATE "unverified posts" SET "${column}" = $1 WHERE "postID" = $2`,
         values: [value, postID]
     }
     return SQLQuery.run(query)
@@ -60,6 +79,17 @@ export default class SQLQuery {
     return result.flat(Infinity)[0] as number
   }
 
+  /** Insert a new image. */
+  public static insertUnverifiedImage = async (postID: number) => {
+    const query: QueryArrayConfig = {
+      text: `INSERT INTO "unverified images" ("postID") VALUES ($1) RETURNING "imageID"`,
+      rowMode: "array",
+      values: [postID]
+    }
+    const result = await SQLQuery.run(query)
+    return result.flat(Infinity)[0] as number
+  }
+
   /** Updates an image */
   public static updateImage = async (imageID: number, column: string, value: string | number | boolean) => {
     const query: QueryConfig = {
@@ -69,10 +99,29 @@ export default class SQLQuery {
     return SQLQuery.run(query)
   }
 
+  /** Updates an image (unverified) */
+  public static updateUnverifiedImage = async (imageID: number, column: string, value: string | number | boolean) => {
+    const query: QueryConfig = {
+        text: `UPDATE "unverified images" SET "${column}" = $1 WHERE "imageID" = $2`,
+        values: [value, imageID]
+    }
+    return SQLQuery.run(query)
+  }
+
   /** Delete an image. */
   public static deleteImage = async (imageID: number) => {
     const query: QueryConfig = {
       text: functions.multiTrim(`DELETE FROM images WHERE images."imageID" = $1`),
+      values: [imageID]
+    }
+    const result = await SQLQuery.run(query)
+    return result
+  }
+
+  /** Delete an image (unverified). */
+  public static deleteUnverifiedImage = async (imageID: number) => {
+    const query: QueryConfig = {
+      text: functions.multiTrim(`DELETE FROM "unverified images" WHERE "unverified images"."imageID" = $1`),
       values: [imageID]
     }
     const result = await SQLQuery.run(query)
@@ -94,6 +143,21 @@ export default class SQLQuery {
     }
   }
 
+  /** Insert a new tag (unverified). */
+  public static insertUnverifiedTag = async (tag: string, type?: string) => {
+    const query: QueryConfig = {
+      text: `INSERT INTO "unverified tags" ("tag"${type ? `, "type"` : ""}) VALUES ($1${type ? `, $2` : ""})`,
+      values: [tag]
+    }
+    if (type) query.values?.push(type)
+    try {
+      await SQLQuery.run(query)
+      return false
+    } catch {
+      return true
+    }
+  }
+
   /** Update a tag. */
   public static updateTag = async (tag: string, column: string, value: string) => {
     const query: QueryConfig = {
@@ -103,10 +167,30 @@ export default class SQLQuery {
     return SQLQuery.run(query)
   }
 
+  /** Update a tag (unverified). */
+  public static updateUnverifiedTag = async (tag: string, column: string, value: string) => {
+    const query: QueryConfig = {
+      text: `UPDATE "unverified tags" SET "${column}" = $1 WHERE "tag" = $2`,
+      values: [value, tag]
+    }
+    return SQLQuery.run(query)
+  }
+
   /** Insert a new tag map. */
   public static insertTagMap = async (postID: number, tag: string) => {
     const query: QueryArrayConfig = {
       text: `INSERT INTO "tag map" ("postID", "tag") VALUES ($1, $2)`,
+      rowMode: "array",
+      values: [postID, tag]
+    }
+    const result = await SQLQuery.run(query)
+    return result.flat(Infinity)[0] as number
+  }
+
+  /** Insert a new tag map (unverified). */
+  public static insertUnverifiedTagMap = async (postID: number, tag: string) => {
+    const query: QueryArrayConfig = {
+      text: `INSERT INTO "unverified tag map" ("postID", "tag") VALUES ($1, $2)`,
       rowMode: "array",
       values: [postID, tag]
     }
@@ -214,6 +298,40 @@ export default class SQLQuery {
     return result
   }
 
+  /** Get posts (unverified). */
+  public static unverifiedPosts = async () => {
+    const query: QueryConfig = {
+      text: functions.multiTrim(`
+          SELECT "unverified posts".*, json_agg(DISTINCT "unverified images".*) AS images, json_agg(DISTINCT "unverified tag map".tag) AS tags
+          FROM "unverified posts"
+          JOIN "unverified images" ON "unverified posts"."postID" = "unverified images"."postID"
+          JOIN "unverified tag map" ON "unverified posts"."postID" = "unverified tag map"."postID"
+          WHERE "originalID" IS NULL
+          GROUP BY "unverified posts"."postID"
+          ORDER BY "unverified posts"."uploadDate" ASC
+          `)
+    }
+    const result = await SQLQuery.run(query)
+    return result
+  }
+
+   /** Get post edits (unverified). */
+   public static unverifiedPostEdits = async () => {
+    const query: QueryConfig = {
+      text: functions.multiTrim(`
+          SELECT "unverified posts".*, json_agg(DISTINCT "unverified images".*) AS images, json_agg(DISTINCT "unverified tag map".tag) AS tags
+          FROM "unverified posts"
+          JOIN "unverified images" ON "unverified posts"."postID" = "unverified images"."postID"
+          JOIN "unverified tag map" ON "unverified posts"."postID" = "unverified tag map"."postID"
+          WHERE "originalID" IS NOT NULL
+          GROUP BY "unverified posts"."postID"
+          ORDER BY "unverified posts"."uploadDate" ASC
+          `)
+    }
+    const result = await SQLQuery.run(query)
+    return result
+  }
+
   /** Get post. */
   public static post = async (postID: number) => {
     const query: QueryConfig = {
@@ -235,10 +353,37 @@ export default class SQLQuery {
     return result[0]
   }
 
+  /** Get post (unverified). */
+  public static unverifiedPost = async (postID: number) => {
+    const query: QueryConfig = {
+      text: functions.multiTrim(`
+          SELECT "unverified posts".*, json_agg(DISTINCT "unverified images".*) AS images, json_agg(DISTINCT "unverified tag map".tag) AS tags
+          FROM "unverified posts"
+          JOIN "unverified images" ON "unverified posts"."postID" = "unverified images"."postID"
+          JOIN "unverified tag map" ON "unverified posts"."postID" = "unverified tag map"."postID"
+          WHERE "unverified posts"."postID" = $1
+          GROUP BY "unverified posts"."postID"
+          `),
+          values: [postID]
+    }
+    const result = await SQLQuery.run(query)
+    return result[0]
+  }
+
   /** Delete post. */
   public static deletePost = async (postID: number) => {
     const query: QueryConfig = {
       text: functions.multiTrim(`DELETE FROM posts WHERE posts."postID" = $1`),
+      values: [postID]
+    }
+    const result = await SQLQuery.run(query)
+    return result
+  }
+
+  /** Delete post (unverified). */
+  public static deleteUnverifiedPost = async (postID: number) => {
+    const query: QueryConfig = {
+      text: functions.multiTrim(`DELETE FROM "unverified posts" WHERE "unverified posts"."postID" = $1`),
       values: [postID]
     }
     const result = await SQLQuery.run(query)
@@ -266,10 +411,27 @@ export default class SQLQuery {
     let whereQuery = tags?.[0] ? `WHERE "tags".tag = ANY ($1)` : ""
     const query: QueryConfig = {
           text: functions.multiTrim(`
-                  SELECT tags.*
+                  SELECT tags.*, json_agg(DISTINCT aliases.*) AS aliases
                   FROM tags
+                  FULL JOIN aliases ON aliases."tag" = tags."tag"
                   ${whereQuery}
                   GROUP BY "tags".tag
+          `)
+    }
+    if (tags?.[0]) query.values = [tags]
+    const result = await SQLQuery.run(query)
+    return result
+  }
+
+  public static unverifiedTags = async (tags: string[]) => {
+    let whereQuery = tags?.[0] ? `WHERE "unverified tags".tag = ANY ($1)` : ""
+    const query: QueryConfig = {
+          text: functions.multiTrim(`
+                  SELECT "unverified tags".*, json_agg(DISTINCT "unverified aliases".*) AS aliases
+                  FROM "unverified tags"
+                  FULL JOIN "unverified aliases" ON "unverified aliases"."tag" = "unverified tags"."tag"
+                  ${whereQuery}
+                  GROUP BY "unverified tags".tag
           `)
     }
     if (tags?.[0]) query.values = [tags]
@@ -280,8 +442,9 @@ export default class SQLQuery {
   public static tag = async (tag: string) => {
     const query: QueryConfig = {
           text: functions.multiTrim(`
-                  SELECT tags.*
+                  SELECT tags.*, json_agg(DISTINCT aliases.*) AS aliases
                   FROM tags
+                  FULL JOIN aliases ON aliases."tag" = tags."tag"
                   WHERE "tags".tag = $1
                   GROUP BY "tags".tag
           `),
@@ -351,7 +514,7 @@ export default class SQLQuery {
     if (category === "artists") whereQueries.push(`tags.type = 'artist'`)
     if (category === "characters") whereQueries.push(`tags.type = 'character'`)
     if (category === "series") whereQueries.push(`tags.type = 'series'`)
-    if (category === "attributes") whereQueries.push(`tags.type = 'attribute'`)
+    if (category === "tags") whereQueries.push(`tags.type = 'tag'`)
     if (search) whereQueries.push(`tags.tag LIKE $1 || '%'`)
     let whereQuery = whereQueries.length ? `WHERE ${whereQueries.join(" AND ")}` : ""
     let sortQuery = ""
@@ -440,6 +603,16 @@ export default class SQLQuery {
     return result
   }
 
+  /** Delete tag (unverified). */
+  public static deleteUnverifiedTag = async (tag: string) => {
+    const query: QueryConfig = {
+      text: functions.multiTrim(`DELETE FROM "unverified tags" WHERE "unverified tags"."tag" = $1`),
+      values: [tag]
+    }
+    const result = await SQLQuery.run(query)
+    return result
+  }
+
    /** Create a new user. */
    public static insertUser = async (username: string, email: string) => {
     const query: QueryConfig = {
@@ -500,15 +673,26 @@ export default class SQLQuery {
   }
 
   /** Insert email token. */
-  public static insertEmailToken = async (token: string, email: string) => {
+  public static insertEmailToken = async (email: string, token: string) => {
     let now = new Date() as any
     now.setHours(now.getHours() + 1)
     const query: QueryConfig = {
-      text: `INSERT INTO "email tokens" ("token", "email", "expires") VALUES ($1, $2, $3)`,
-      values: [token, email, now.toISOString()]
+      text: `INSERT INTO "email tokens" ("email", "token", "expires") VALUES ($1, $2, $3)`,
+      values: [email, token, now.toISOString()]
     }
     const result = await SQLQuery.run(query)
     return result
+  }
+
+  /** Updates email token. */
+  public static updateEmailToken = async (email: string, token: string) => {
+    let now = new Date() as any
+    now.setHours(now.getHours() + 1)
+    const query: QueryConfig = {
+        text: `UPDATE "email tokens" SET "token" = $1, "expires" = $2 WHERE "email" = $3`,
+        values: [token, now.toISOString(), email]
+    }
+    return SQLQuery.run(query)
   }
 
   /** Get email token. */
@@ -518,7 +702,7 @@ export default class SQLQuery {
           SELECT "email tokens".*
           FROM "email tokens"
           WHERE "email tokens"."token" = $1
-          GROUP BY "email tokens"."token"
+          GROUP BY "email tokens"."email"
           `),
           values: [token]
     }
@@ -990,6 +1174,20 @@ export default class SQLQuery {
     }
   }
 
+  /** Insert a new alias (unverified). */
+  public static insertUnverifiedAlias = async (tag: string, alias: string) => {
+    const query: QueryConfig = {
+      text: `INSERT INTO "unverified aliases" ("tag", "alias") VALUES ($1, $2)`,
+      values: [tag, alias]
+    }
+    try {
+      await SQLQuery.run(query)
+      return false
+    } catch {
+      return true
+    }
+  }
+
   /** Get alias. */
   public static alias = async (alias: string) => {
     const query: QueryConfig = {
@@ -1009,6 +1207,15 @@ export default class SQLQuery {
   public static purgeAliases = async (tag: string) => {
     const query: QueryConfig = {
       text: `DELETE FROM "aliases" WHERE aliases."tag" = $1`,
+      values: [tag]
+    }
+    return SQLQuery.run(query)
+  }
+
+   /** Purge aliases (unverified). */
+   public static purgeUnverifiedAliases = async (tag: string) => {
+    const query: QueryConfig = {
+      text: `DELETE FROM "unverified aliases" WHERE "unverified aliases"."tag" = $1`,
       values: [tag]
     }
     return SQLQuery.run(query)
@@ -1049,6 +1256,15 @@ export default class SQLQuery {
     return SQLQuery.run(query)
   }
 
+  /** Purge tag map (unverified). */
+  public static purgeUnverifiedTagMap = async (postID: number) => {
+    const query: QueryConfig = {
+        text: `DELETE FROM "unverified tag map" WHERE "unverified tag map"."postID" = $1`,
+        values: [postID]
+    }
+    return SQLQuery.run(query)
+  }
+
   /** Insert third party relation. */
   public static insertThirdParty = async (postID: number, parentID: number) => {
     const query: QueryConfig = {
@@ -1059,10 +1275,30 @@ export default class SQLQuery {
     return result
   }
 
+  /** Insert third party relation (unverified). */
+  public static insertUnverifiedThirdParty = async (postID: number, parentID: number) => {
+    const query: QueryConfig = {
+      text: `INSERT INTO "unverified third party" ("postID", "parentID") VALUES ($1, $2)`,
+      values: [postID, parentID]
+    }
+    const result = await SQLQuery.run(query)
+    return result
+  }
+
   /** Delete third party relation. */
   public static deleteThirdParty = async (postID: number) => {
     const query: QueryConfig = {
       text: `DELETE FROM "third party" WHERE "third party"."postID" = $1`,
+      values: [postID]
+    }
+    const result = await SQLQuery.run(query)
+    return result
+  }
+
+  /** Delete third party relation (unverified). */
+  public static deleteUnverifiedThirdParty = async (postID: number) => {
+    const query: QueryConfig = {
+      text: `DELETE FROM "unverified third party" WHERE "unverified third party"."postID" = $1`,
       values: [postID]
     }
     const result = await SQLQuery.run(query)
@@ -1098,6 +1334,35 @@ export default class SQLQuery {
     return result
   }
 
+  /** Get third party posts (unverified). */
+  public static unverifiedThirdParty = async (parentID: number) => {
+    const query: QueryConfig = {
+      text: functions.multiTrim(`
+            WITH post_json AS (
+              SELECT posts.*, json_agg(DISTINCT images.*) AS images,
+              ROUND(AVG(DISTINCT cuteness."cuteness")) AS "cutenessAvg"
+              FROM posts
+              JOIN images ON images."postID" = posts."postID"
+              FULL JOIN "cuteness" ON posts."postID" = "cuteness"."postID"
+              GROUP BY posts."postID"
+            )
+            SELECT "unverified third party".*, json_build_object(
+              'type', post_json."type",
+              'restrict', post_json."restrict",
+              'style', post_json."style",
+              'images', (array_agg(post_json."images"))[1]
+            ) AS post
+            FROM "unverified third party"
+            JOIN post_json ON post_json."postID" = "unverified third party"."postID"
+            WHERE "unverified third party"."parentID" = $1
+            GROUP BY "unverified third party"."thirdPartyID", post_json."type", post_json."restrict", post_json."style"
+          `),
+      values: [parentID]
+    }
+    const result = await SQLQuery.run(query)
+    return result
+  }
+
   /** Get the parent of a third party post. */
   public static parent = async (postID: number) => {
     const query: QueryConfig = {
@@ -1125,5 +1390,180 @@ export default class SQLQuery {
     }
     const result = await SQLQuery.run(query)
     return result[0]
+  }
+
+  /** Get the parent of a third party post (unverified). */
+  public static unverifiedParent = async (postID: number) => {
+    const query: QueryConfig = {
+      text: functions.multiTrim(`
+            WITH post_json AS (
+              SELECT posts.*, json_agg(DISTINCT images.*) AS images,
+              ROUND(AVG(DISTINCT cuteness."cuteness")) AS "cutenessAvg"
+              FROM posts
+              JOIN images ON images."postID" = posts."postID"
+              FULL JOIN "cuteness" ON posts."postID" = "cuteness"."postID"
+              GROUP BY posts."postID"
+            )
+            SELECT "unverified third party".*, json_build_object(
+              'type', post_json."type",
+              'restrict', post_json."restrict",
+              'style', post_json."style",
+              'images', (array_agg(post_json."images"))[1]
+            ) AS post
+            FROM "unverified third party"
+            JOIN post_json ON post_json."postID" = "unverified third party"."parentID"
+            WHERE "unverified third party"."postID" = $1
+            GROUP BY "unverified third party"."thirdPartyID", post_json."type", post_json."restrict", post_json."style"
+          `),
+      values: [postID]
+    }
+    const result = await SQLQuery.run(query)
+    return result[0]
+  }
+
+  /** Insert pending post delete. */
+  public static insertPostDeleteRequest = async (username: string, postID: number, reason: string) => {
+    const query: QueryConfig = {
+      text: `INSERT INTO "delete requests" ("username", "postID", "reason") VALUES ($1, $2, $3)`,
+      values: [username, postID, reason]
+    }
+    const result = await SQLQuery.run(query)
+    return result
+  }
+
+  /** Delete pending post delete. */
+  public static deletePostDeleteRequest = async (username: string, postID: number) => {
+    const query: QueryConfig = {
+      text: `DELETE FROM "delete requests" WHERE "delete requests"."username" = $1 AND "delete requests"."postID" = $2`,
+      values: [username, postID]
+    }
+    const result = await SQLQuery.run(query)
+    return result
+  }
+
+  public static postDeleteRequests = async () => {
+    const query: QueryConfig = {
+      text: functions.multiTrim(`
+        WITH post_json AS (
+          SELECT posts.*, json_agg(DISTINCT images.*) AS images
+          FROM posts
+          JOIN images ON images."postID" = posts."postID"
+          GROUP BY posts."postID"
+        )
+        SELECT "delete requests".*, json_build_object(
+          'type', post_json."type",
+          'restrict', post_json."restrict",
+          'style', post_json."style",
+          'images', (array_agg(post_json."images"))[1]
+        ) AS post
+        FROM "delete requests"
+        JOIN post_json ON post_json."postID" = "delete requests"."postID"
+        WHERE "delete requests"."postID" IS NOT NULL
+        GROUP BY "delete requests"."deleteRequestID", post_json."type", post_json."restrict", post_json."style"
+      `),
+    }
+    const result = await SQLQuery.run(query)
+    return result
+  }
+
+  /** Insert pending tag delete. */
+  public static insertTagDeleteRequest = async (username: string, tag: string, reason: string) => {
+    const query: QueryConfig = {
+      text: `INSERT INTO "delete requests" ("username", "tag", "reason") VALUES ($1, $2, $3)`,
+      values: [username, tag, reason]
+    }
+    const result = await SQLQuery.run(query)
+    return result
+  }
+
+   /** Delete pending post delete. */
+   public static deleteTagDeleteRequest = async (username: string, tag: string) => {
+    const query: QueryConfig = {
+      text: `DELETE FROM "delete requests" WHERE "delete requests"."username" = $1 AND "delete requests"."tag" = $2`,
+      values: [username, tag]
+    }
+    const result = await SQLQuery.run(query)
+    return result
+  }
+
+  public static tagDeleteRequests = async () => {
+    const query: QueryConfig = {
+      text: functions.multiTrim(`
+        SELECT "delete requests".*, tags.*
+        FROM "delete requests"
+        JOIN tags ON tags.tag = "delete requests".tag
+        WHERE "delete requests"."tag" IS NOT NULL
+        GROUP BY "delete requests"."deleteRequestID", tags.tag
+      `),
+    }
+    const result = await SQLQuery.run(query)
+    return result
+  }
+
+  /** Insert alias request. */
+  public static insertAliasRequest = async (username: string, tag: string, aliasTo: string, reason: string) => {
+    const query: QueryConfig = {
+      text: `INSERT INTO "alias requests" ("username", "tag", "aliasTo", "reason") VALUES ($1, $2, $3, $4)`,
+      values: [username, tag, aliasTo, reason]
+    }
+    const result = await SQLQuery.run(query)
+    return result
+  }
+
+   /** Delete alias request. */
+   public static deleteAliasRequest = async (username: string, tag: string) => {
+    const query: QueryConfig = {
+      text: `DELETE FROM "alias requests" WHERE "alias requests"."username" = $1 AND "alias requests"."tag" = $2`,
+      values: [username, tag]
+    }
+    const result = await SQLQuery.run(query)
+    return result
+  }
+
+  public static aliasRequests = async () => {
+    const query: QueryConfig = {
+      text: functions.multiTrim(`
+        SELECT "alias requests".*, tags.*
+        FROM "alias requests"
+        JOIN tags ON tags.tag = "alias requests".tag
+        WHERE "alias requests"."tag" IS NOT NULL
+        GROUP BY "alias requests"."aliasRequestID", tags.tag
+      `),
+    }
+    const result = await SQLQuery.run(query)
+    return result
+  }
+
+  /** Insert tag edit request. */
+  public static insertTagEditRequest = async (username: string, tag: string, key: string, description: string, image: string, aliases: string[], reason: string) => {
+    const query: QueryConfig = {
+      text: `INSERT INTO "tag edit requests" ("username", "tag", "key", "description", "image", "aliases", "reason") VALUES ($1, $2, $3, $4, $5, $6, $7)`,
+      values: [username, tag, key, description, image, aliases, reason]
+    }
+    const result = await SQLQuery.run(query)
+    return result
+  }
+
+  /** Delete tag edit request. */
+  public static deleteTagEditRequest = async (username: string, tag: string) => {
+    const query: QueryConfig = {
+      text: `DELETE FROM "tag edit requests" WHERE "tag edit requests"."username" = $1 AND "tag edit requests"."tag" = $2`,
+      values: [username, tag]
+    }
+    const result = await SQLQuery.run(query)
+    return result
+  }
+
+  public static tagEditRequests = async () => {
+    const query: QueryConfig = {
+      text: functions.multiTrim(`
+        SELECT tags.type, "tag edit requests".*
+        FROM "tag edit requests"
+        JOIN tags ON tags.tag = "tag edit requests".tag
+        GROUP BY "tag edit requests"."tagEditRequestID", tags.type
+      `),
+    }
+    const result = await SQLQuery.run(query)
+    return result
   }
 }

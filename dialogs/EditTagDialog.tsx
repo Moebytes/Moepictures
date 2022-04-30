@@ -1,12 +1,14 @@
-import React, {useEffect, useContext, useState} from "react"
+import React, {useEffect, useContext, useState, useRef} from "react"
 import {useHistory} from "react-router-dom"
 import {HashLink as Link} from "react-router-hash-link"
 import {HideNavbarContext, HideSidebarContext, ThemeContext, EnableDragContext, EditTagIDContext, EditTagFlagContext, 
-EditTagKeyContext, EditTagAliasesContext, EditTagImageContext, EditTagDescriptionContext, HideTitlebarContext} from "../Context"
+EditTagKeyContext, EditTagAliasesContext, EditTagImageContext, EditTagDescriptionContext, HideTitlebarContext, SessionContext} from "../Context"
 import functions from "../structures/Functions"
 import uploadIcon from "../assets/purple/upload.png"
 import "./styles/edittagdialog.less"
 import fileType from "magic-bytes.js"
+import Draggable from "react-draggable"
+import permissions from "../structures/Permissions"
 import axios from "axios"
 
 const EditTagDialog: React.FunctionComponent = (props) => {
@@ -21,6 +23,11 @@ const EditTagDialog: React.FunctionComponent = (props) => {
     const {editTagImage, setEditTagImage} = useContext(EditTagImageContext)
     const {editTagDescription, setEditTagDescription} = useContext(EditTagDescriptionContext)
     const {editTagAliases, setEditTagAliases} = useContext(EditTagAliasesContext)
+    const {session, setSession} = useContext(SessionContext)
+    const [submitted, setSubmitted] = useState(false)
+    const [reason, setReason] = useState("")
+    const [error, setError] = useState(false)
+    const errorRef = useRef<any>(null)
     const history = useHistory()
 
     useEffect(() => {
@@ -29,18 +36,42 @@ const EditTagDialog: React.FunctionComponent = (props) => {
 
     useEffect(() => {
         if (editTagID) {
-            document.body.style.overflowY = "hidden"
+            // document.body.style.overflowY = "hidden"
             document.body.style.pointerEvents = "none"
         } else {
-            document.body.style.overflowY = "visible"
+            // document.body.style.overflowY = "visible"
             document.body.style.pointerEvents = "all"
             setEnableDrag(true)
         }
     }, [editTagID])
 
+    const editTag = async () => {
+        if (permissions.isStaff(session)) {
+            setEditTagFlag(true)
+        } else {
+            const badReason = functions.validateReason(reason)
+            if (badReason) {
+                setError(true)
+                if (!errorRef.current) await functions.timeout(20)
+                errorRef.current!.innerText = badReason
+                await functions.timeout(2000)
+                setError(false)
+                return
+            }
+            let image = null as any
+            if (editTagImage) {
+                const arrayBuffer = await fetch(editTagImage).then((r) => r.arrayBuffer())
+                const bytes = new Uint8Array(arrayBuffer)
+                image = Object.values(bytes)
+            }
+            await axios.post("/api/tag/edit/request", {tag: editTagID, key: editTagKey, description: editTagDescription, image, aliases: editTagAliases, reason}, {withCredentials: true})
+            setSubmitted(true)
+        }
+    }
+
     const click = (button: "accept" | "reject") => {
         if (button === "accept") {
-            setEditTagFlag(true)
+            editTag()
         } else {
             setEditTagID(null)
         }
@@ -92,11 +123,72 @@ const EditTagDialog: React.FunctionComponent = (props) => {
     }
 
     if (editTagID) {
+        if (permissions.isStaff(session)) {
+            return (
+                <div className="edittag-dialog">
+                    <Draggable handle=".edittag-dialog-title-container">
+                    <div className="edittag-dialog-box" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
+                        <div className="edittag-container">
+                            <div className="edittag-dialog-title-container">
+                                <span className="edittag-dialog-title">Edit Tag</span>
+                            </div>
+                            <div className="edittag-dialog-row">
+                                <span className="edittag-dialog-text">Tag: </span>
+                                <input className="edittag-dialog-input" type="text" spellCheck={false} value={editTagKey} onChange={(event) => setEditTagKey(event.target.value)}/>
+                            </div>
+                            <div className="edittag-dialog-row">
+                                <span className="edittag-dialog-text">Image: </span>
+                                <label htmlFor="tag-img" className="edittag-dialog-button">
+                                    <img className="edittag-button-img-small" src={uploadIcon}/>
+                                    <span className="edittag-button-text-small">Upload</span>
+                                </label>
+                                <input id="tag-img" type="file" onChange={(event) => uploadTagImg(event)}/>
+                            </div>
+                            {editTagImage ? 
+                            <div className="edittag-dialog-row">
+                                <img className="edittag-img" src={editTagImage}/>
+                            </div>
+                            : null}
+                            <div className="edittag-dialog-row">
+                                <span className="edittag-dialog-text">Description: </span>
+                            </div>
+                            <div className="edittag-dialog-row">
+                                <textarea className="edittag-textarea" spellCheck={false} value={editTagDescription} onChange={(event) => setEditTagDescription(event.target.value)}></textarea>
+                            </div>
+                            <div className="edittag-dialog-row">
+                                <span className="edittag-dialog-text">Aliases: </span>
+                            </div>
+                            <div className="edittag-dialog-row">
+                                <textarea className="edittag-textarea" spellCheck={false} value={editTagAliases.join(" ")} onChange={(event) => setEditTagAliases(event.target.value.split(/ +/g))}></textarea>
+                            </div>
+                            <div className="edittag-dialog-row">
+                                <button onClick={() => click("reject")} className="edittag-button">{"Cancel"}</button>
+                                <button onClick={() => click("accept")} className="edittag-button">{"Edit"}</button>
+                            </div>
+                        </div>
+                    </div>
+                    </Draggable>
+                </div>
+            )
+        }
+
         return (
             <div className="edittag-dialog">
-                <div className="edittag-dialog-box" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
+                <Draggable handle=".edittag-dialog-title-container">
+                <div className="edittag-dialog-box" style={{height: submitted ? "125px" : "max-content"}} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                     <div className="edittag-container">
-                        <span className="edittag-dialog-title">Edit Tag</span>
+                        <div className="edittag-dialog-title-container">
+                            <span className="edittag-dialog-title">Edit Tag Request</span>
+                        </div>
+                        {submitted ? <>
+                        <div className="edittag-dialog-row">
+                            <span className="edittag-dialog-text">Your tag edit was submitted.</span>
+                        </div>
+                        <div className="edittag-dialog-row">
+                            <button onClick={() => setEditTagID(null)} className="edittag-button">{"Cancel"}</button>
+                            <button onClick={() => setEditTagID(null)} className="edittag-button">{"OK"}</button>
+                        </div> 
+                        </> : <>
                         <div className="edittag-dialog-row">
                             <span className="edittag-dialog-text">Tag: </span>
                             <input className="edittag-dialog-input" type="text" spellCheck={false} value={editTagKey} onChange={(event) => setEditTagKey(event.target.value)}/>
@@ -127,11 +219,17 @@ const EditTagDialog: React.FunctionComponent = (props) => {
                             <textarea className="edittag-textarea" spellCheck={false} value={editTagAliases.join(" ")} onChange={(event) => setEditTagAliases(event.target.value.split(/ +/g))}></textarea>
                         </div>
                         <div className="edittag-dialog-row">
-                            <button onClick={() => click("reject")} className="edittag-button">{"Cancel"}</button>
-                            <button onClick={() => click("accept")} className="edittag-button">{"Edit"}</button>
+                            <span className="edittag-dialog-text">Reason: </span>
+                            <input style={{width: "100%"}} className="edittag-dialog-input" type="text" spellCheck={false} value={reason} onChange={(event) => setReason(event.target.value)}/>
                         </div>
+                        {error ? <div className="edittag-dialog-validation-container"><span className="edittag-dialog-validation" ref={errorRef}></span></div> : null}
+                        <div className="edittag-dialog-row">
+                            <button onClick={() => click("reject")} className="edittag-button">{"Cancel"}</button>
+                            <button onClick={() => click("accept")} className="edittag-button">{"Submit Request"}</button>
+                        </div> </>}
                     </div>
                 </div>
+                </Draggable>
             </div>
         )
     }

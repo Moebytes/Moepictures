@@ -17,7 +17,12 @@ import eyedropperMagentaLight from "../assets/magenta-light/eyedropper.png"
 import lightMagentaLight from "../assets/magenta-light/light.png"
 import darkMagentaLight from "../assets/magenta-light/dark.png"
 import search2 from "../assets/purple/search2.png"
+import crown from "../assets/purple/crown.png"
+import crownMagenta from "../assets/magenta/crown.png"
+import crownPurpleLight from "../assets/purple-light/crown.png"
+import crownMagentaLight from "../assets/magenta-light/crown.png"
 import axios from "axios"
+import permissions from "../structures/Permissions"
 import functions from "../structures/Functions"
 import SearchSuggestions from "./SearchSuggestions"
 import {ThemeContext, HideNavbarContext, HideSortbarContext, HideSidebarContext, EnableDragContext,  HideMobileNavbarContext, MobileContext,
@@ -143,6 +148,14 @@ const NavBar: React.FunctionComponent = (props) => {
         return light
     }
 
+    const getCrown = () => {
+        if (theme === "purple") return crown
+        if (theme === "purple-light") return crownPurpleLight
+        if (theme === "magenta") return crownMagenta
+        if (theme === "magenta-light") return crownMagentaLight
+        return crown
+    }
+
     const getFavicon = () => {
         if (theme.includes("magenta")) return faviconMagenta 
         return favicon
@@ -197,6 +210,7 @@ const NavBar: React.FunctionComponent = (props) => {
                 <div className="mobile-nav-color-container">
                     <img className="mobile-nav-color" src={getEyeDropper()} onClick={colorChange}/>
                     <img className="mobile-nav-color" src={getLight()} onClick={lightChange}/>
+                    {permissions.isStaff(session) ? <img className="nav-color" src={getCrown()} onClick={() => history.push("/mod-queue")}/> : null}
                 </div>
             </div>
         )
@@ -257,6 +271,7 @@ const NavBar: React.FunctionComponent = (props) => {
                     </div>
                     <img className="nav-color" src={getEyeDropper()} onClick={colorChange}/>
                     <img className="nav-color" src={getLight()} onClick={lightChange}/>
+                    {permissions.isStaff(session) ? <img className="nav-color" src={getCrown()} onClick={() => history.push("/mod-queue")}/> : null}
                 </div>
             </div>
             </>

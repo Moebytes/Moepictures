@@ -174,7 +174,7 @@ const PostImage: React.FunctionComponent<Props> = (props) => {
         const key = event.keyCode
         const value = String.fromCharCode((96 <= key && key <= 105) ? key - 48 : key).toLowerCase()
         if (value === "f") {
-            if (!props.noKeydown) fullscreen()
+            // if (!props.noKeydown) fullscreen()
         }
     }
 

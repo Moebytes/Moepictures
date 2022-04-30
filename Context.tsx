@@ -67,6 +67,8 @@ export const AliasTagNameContext = React.createContext<any>(null)
 export const ShowDeleteAccountDialogContext = React.createContext<any>(null)
 export const HeaderFlagContext = React.createContext<any>(null)
 export const CommentSearchFlagContext = React.createContext<any>(null)
+export const UnverifiedPostsContext = React.createContext<any>(null)
+export const ModStateContext = React.createContext<any>(null)
 
 const Context: React.FunctionComponent = (props) => {
     const [brightness, setBrightness] = useState(100)
@@ -123,8 +125,12 @@ const Context: React.FunctionComponent = (props) => {
     const [showDeleteAccountDialog, setShowDeleteAccountDialog] = useState(false)
     const [headerFlag, setHeaderFlag] = useState(false)
     const [commentSearchFlag, setCommentSearchFlag] = useState(null)
+    const [unverifiedPosts, setUnverifiedPosts] = useState([])
+    const [modState, setModState] = useState("posts")
 return (
     <>
+        <ModStateContext.Provider value={{modState, setModState}}>
+        <UnverifiedPostsContext.Provider value={{unverifiedPosts, setUnverifiedPosts}}>
         <CommentSearchFlagContext.Provider value={{commentSearchFlag, setCommentSearchFlag}}>
         <HeaderFlagContext.Provider value={{headerFlag, setHeaderFlag}}>
         <ShowDeleteAccountDialogContext.Provider value={{showDeleteAccountDialog, setShowDeleteAccountDialog}}>
@@ -234,6 +240,8 @@ return (
         </ShowDeleteAccountDialogContext.Provider>
         </HeaderFlagContext.Provider>
         </CommentSearchFlagContext.Provider>
+        </UnverifiedPostsContext.Provider>
+        </ModStateContext.Provider>
     </>
     )
 }

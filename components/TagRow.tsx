@@ -1,7 +1,7 @@
 import React, {useContext, useEffect, useRef, useState} from "react"
 import {useHistory} from "react-router-dom"
 import {ThemeContext, SearchContext, SearchFlagContext, DeleteTagFlagContext, DeleteTagIDContext,
-EditTagAliasesContext, EditTagDescriptionContext, EditTagIDContext, EditTagFlagContext,
+EditTagAliasesContext, EditTagDescriptionContext, EditTagIDContext, EditTagFlagContext, SessionContext,
 EditTagImageContext, EditTagKeyContext, AliasTagFlagContext, AliasTagIDContext, AliasTagNameContext} from "../Context"
 import {HashLink as Link} from "react-router-hash-link"
 import functions from "../structures/Functions"
@@ -37,6 +37,7 @@ const TagRow: React.FunctionComponent<Props> = (props) => {
     const {aliasTagID, setAliasTagID} = useContext(AliasTagIDContext)
     const {aliasTagFlag, setAliasTagFlag} = useContext(AliasTagFlagContext)
     const {aliasTagName, setAliasTagName} = useContext(AliasTagNameContext)
+    const {session, setSession} = useContext(SessionContext)
     const history = useHistory()
 
     const searchTag = () => {
@@ -99,7 +100,7 @@ const TagRow: React.FunctionComponent<Props> = (props) => {
     }
 
     const aliasTag = async () => {
-        await axios.post("/api/tag/aliastag", {tag: props.tag.tag, aliasTo: aliasTagName}, {withCredentials: true})
+        await axios.post("/api/tag/aliasto", {tag: props.tag.tag, aliasTo: aliasTagName}, {withCredentials: true})
         props.onEdit?.()
     }
 
@@ -136,12 +137,13 @@ const TagRow: React.FunctionComponent<Props> = (props) => {
             <td className="tagrow-description">
                 <span className="tagrow-desc-text">{props.tag.description || "No description."}</span>
             </td>
+            {session.username ?
             <div className="tag-buttons">
                 {/* <img className="tag-button" src={historyIcon}/> */}
                 <img className="tag-button" src={alias} onClick={aliasTagDialog}/>
                 <img className="tag-button" src={edit} onClick={editTagDialog}/>
                 <img className="tag-button" src={deleteIcon} onClick={deleteTagDialog}/>
-            </div>
+            </div> : null}
         </tr>
     )
 }

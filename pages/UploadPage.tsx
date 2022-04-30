@@ -34,6 +34,7 @@ import JSZip from "jszip"
 import axios from "axios"
 import SearchSuggestions from "../components/SearchSuggestions"
 import ContentEditable from "react-contenteditable"
+import permissions from "../structures/Permissions"
 import "./styles/uploadpage.less"
 import path from "path"
 
@@ -703,13 +704,18 @@ const UploadPage: React.FunctionComponent = (props) => {
             characters,
             series,
             newTags,
-            tags: functions.cleanHTML(rawTags).split(/[\n\r\s]+/g)
+            tags: functions.cleanHTML(rawTags).split(/[\n\r\s]+/g),
+            duplicates: dupPosts.length ? true : false
         }
         setSubmitError(true)
         await functions.timeout(20)
         submitErrorRef.current.innerText = "Submitting..."
         try {
-            await axios.post("/api/post/upload", data, {withCredentials: true}).then((r) => r.data)
+            if (permissions.isStaff(session)) {
+                await axios.post("/api/post/upload", data, {withCredentials: true}).then((r) => r.data)
+            } else {
+                await axios.post("/api/post/upload/unverified", data, {withCredentials: true}).then((r) => r.data)
+            }
             setSubmitted(true)
             return setSubmitError(false)
         } catch {
@@ -995,7 +1001,9 @@ const UploadPage: React.FunctionComponent = (props) => {
                     {submitted ?
                     <div className="upload-container">
                         <div className="upload-container-row">
-                            <span className="upload-text-alt">Your post was submitted and will appear on the site if approved.</span>
+                            {permissions.isStaff(session) ?
+                            <span className="upload-text-alt">Post was uploaded.</span> :
+                            <span className="upload-text-alt">Your post was submitted and will appear on the site if approved.</span>}
                         </div> 
                         <div className="upload-container-row" style={{marginTop: "10px"}}>
                             <button className="upload-button" onClick={resetAll}>
@@ -1250,7 +1258,7 @@ const UploadPage: React.FunctionComponent = (props) => {
                 <span className="upload-text-alt">Enter dashed tags separated by spaces. Tags can describe any of the images. If the tag doesn't exist, you will be promted to create it.
                 If you need help with tags, read the <Link className="upload-link" target="_blank" to="/help#tagging">tagging guide.</Link></span>
                 <div className="upload-container">
-                    <SearchSuggestions active={tagActive} text={functions.cleanHTML(rawTags)} x={tagX} y={tagY} width={200} click={handleRawTagClick} type="attribute"/>
+                    <SearchSuggestions active={tagActive} text={functions.cleanHTML(rawTags)} x={tagX} y={tagY} width={200} click={handleRawTagClick} type="tag"/>
                     <div className="upload-container-row" onMouseOver={() => setEnableDrag(false)}>
                         <ContentEditable innerRef={rawTagRef} className="upload-textarea" spellCheck={false} html={rawTags} onChange={(event) => setRawTags(event.target.value)} onFocus={() => setTagActive(true)} onBlur={() => setTagActive(false)}/>
                     </div>

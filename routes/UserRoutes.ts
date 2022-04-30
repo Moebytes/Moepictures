@@ -68,6 +68,7 @@ const UserRoutes = (app: Express) => {
                 await sql.updateUser(username, "emailVerified", false)
                 await sql.updateUser(username, "$2fa", false)
                 await sql.updateUser(username, "bio", "This user has not written anything.")
+                await sql.updateUser(username, "role", "user")
                 const ip = req.headers["x-forwarded-for"] || req.socket.remoteAddress
                 await sql.updateUser(username, "ip", ip as string)
                 const passwordHash = await bcrypt.hash(password, 13)
@@ -75,9 +76,13 @@ const UserRoutes = (app: Express) => {
 
                 const token = crypto.randomBytes(32).toString("hex")
                 const hashToken = crypto.createHash("sha256").update(token).digest("hex")
-                await sql.insertEmailToken(hashToken, email)
+                try {
+                    await sql.insertEmailToken(email, hashToken)
+                } catch {
+                    await sql.updateEmailToken(email, hashToken)
+                }
                 const user = functions.toProperCase(username)
-                const link = `${req.protocol}://${req.get("host")}/api/verifyemail?token=${token}`
+                const link = `${req.protocol}://${req.get("host")}/api/user/verifyemail?token=${token}`
                 await serverFunctions.email(email, "Moebooru Email Address Verification", {username: user, link}, "verifyemail.html")
                 return res.status(200).send("Success")
             } catch {
@@ -108,6 +113,7 @@ const UserRoutes = (app: Express) => {
                 req.session.bio = user.bio
                 req.session.publicFavorites = user.publicFavorites
                 req.session.image = user.image
+                req.session.role = user.role
                 const ip = req.headers["x-forwarded-for"] || req.socket.remoteAddress
                 await sql.updateUser(username, "ip", ip as string)
                 req.session.ip = ip as string
@@ -269,9 +275,13 @@ const UserRoutes = (app: Express) => {
             if (!user) return res.status(400).send("Bad request")
             const token = crypto.randomBytes(32).toString("hex")
             const hashToken = crypto.createHash("sha256").update(token).digest("hex")
-            await sql.insertEmailToken(hashToken, newEmail)
+            try {
+                await sql.insertEmailToken(newEmail, hashToken)
+            } catch {
+                await sql.updateEmailToken(newEmail, hashToken)
+            }
             const username = functions.toProperCase(req.session.username)
-            const link = `${req.protocol}://${req.get("host")}/api/changeemail?token=${token}`
+            const link = `${req.protocol}://${req.get("host")}/api/user/changeemail?token=${token}`
             await serverFunctions.email(newEmail, "Moebooru Email Address Change", {username, link}, "changeemail.html")
             res.status(200).send("Success")
         } catch {
@@ -289,9 +299,13 @@ const UserRoutes = (app: Express) => {
             if (!user) return res.status(400).send("Bad request")
             const token = crypto.randomBytes(32).toString("hex")
             const hashToken = crypto.createHash("sha256").update(token).digest("hex")
-            await sql.insertEmailToken(hashToken, email)
+            try {
+                await sql.insertEmailToken(email, hashToken)
+            } catch {
+                await sql.updateEmailToken(email, hashToken)
+            }
             const username = functions.toProperCase(req.session.username)
-            const link = `${req.protocol}://${req.get("host")}/api/verifyemail?token=${token}`
+            const link = `${req.protocol}://${req.get("host")}/api/user/verifyemail?token=${token}`
             await serverFunctions.email(email, "Moebooru Email Address Verification", {username, link}, "verifyemail.html")
             await sql.updateUser(req.session.username, "email", email)
             req.session.email = email
@@ -397,9 +411,6 @@ const UserRoutes = (app: Express) => {
             if (!user) return res.status(400).send("Bad request")
             await sql.deleteUser(req.session.username)
             await serverFunctions.deleteFile(functions.getTagLink("pfp", user.image))
-            await sql.delete2faToken(req.session.username)
-            await sql.deleteEmailToken(user.email)
-            await sql.deletePasswordToken(req.session.username)
             req.session.destroy((err) => {
                 if (err) throw err
                 res.status(200).send("Success")

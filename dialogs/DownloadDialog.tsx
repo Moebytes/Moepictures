@@ -4,6 +4,7 @@ import {HideNavbarContext, HideSidebarContext, ThemeContext, EnableDragContext, 
 PostsContext, SizeTypeContext, DownloadURLsContext, DownloadFlagContext, HideTitlebarContext} from "../Context"
 import functions from "../structures/Functions"
 import "./styles/downloaddialog.less"
+import Draggable from "react-draggable"
 
 const DownloadDialog: React.FunctionComponent = (props) => {
     const {theme, setTheme} = useContext(ThemeContext)
@@ -49,10 +50,10 @@ const DownloadDialog: React.FunctionComponent = (props) => {
 
     useEffect(() => {
         if (showDownloadDialog) {
-            document.body.style.overflowY = "hidden"
+            // document.body.style.overflowY = "hidden"
             document.body.style.pointerEvents = "none"
         } else {
-            document.body.style.overflowY = "visible"
+            // document.body.style.overflowY = "visible"
             document.body.style.pointerEvents = "all"
             setEnableDrag(true)
         }
@@ -88,9 +89,12 @@ const DownloadDialog: React.FunctionComponent = (props) => {
     if (showDownloadDialog) {
         return (
             <div className="download-dialog">
+                <Draggable handle=".download-dialog-title-container">
                 <div className="download-dialog-box" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                     <div className="download-container">
-                        <span className="download-dialog-title">Download</span>
+                        <div className="download-dialog-title-container">
+                            <span className="download-dialog-title">Download</span>
+                        </div>
                         <div className="download-dialog-row">
                             <span className="download-dialog-text">Offset: </span>
                             <input className="download-dialog-input" type="number" spellCheck={false} value={offsetField} onChange={(event) => setOffsetField(event.target.value)}/>
@@ -105,6 +109,7 @@ const DownloadDialog: React.FunctionComponent = (props) => {
                         </div>
                     </div>
                 </div>
+                </Draggable>
             </div>
         )
     }

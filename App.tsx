@@ -14,6 +14,7 @@ import TagsPage from "./pages/TagsPage"
 import PostPage from "./pages/PostPage"
 import UploadPage from "./pages/UploadPage"
 import $404Page from "./pages/404Page"
+import $403Page from "./pages/403Page"
 import HelpPage from "./pages/HelpPage"
 import TermsPage from "./pages/TermsPage"
 import LoginPage from "./pages/LoginPage"
@@ -32,8 +33,12 @@ import ResetPasswordPage from "./pages/ResetPasswordPage"
 import ForgotPasswordPage from "./pages/ForgotPasswordPage"
 import EditPostPage from "./pages/EditPostPage"
 import UserPage from "./pages/UserPage"
+import UnverifiedPostPage from "./pages/UnverifiedPostPage"
 import functions from "./structures/Functions"
 import localforage from "localforage"
+import ModQueuePage from "./pages/ModQueuePage"
+import EditUnverifiedPostPage from "./pages/EditUnverifiedPostPage"
+import WebM from "./pages/WebM"
 import axios from "axios"
 import "./index.less"
 
@@ -239,7 +244,9 @@ const App: React.FunctionComponent = (props) => {
                         <Route exact path="/comments"><CommentsPage/></Route>
                         <Route exact path="/user/:username" render={(props) => <UserPage {...props}/>}></Route>
                         <Route exact path="/post/:id" render={(props) => <PostPage {...props}/>}></Route>
+                        <Route exact path="/unverified/post/:id" render={(props) => <UnverifiedPostPage {...props}/>}></Route>
                         <Route exact path="/edit-post/:id" render={(props) => <EditPostPage {...props}/>}></Route>
+                        <Route exact path="/unverified/edit-post/:id" render={(props) => <EditUnverifiedPostPage {...props}/>}></Route>
                         <Route exact path="/help"><HelpPage/></Route>
                         <Route exact path="/change-username"><ChangeUsernamePage/></Route>
                         <Route exact path="/change-email"><ChangeEmailPage/></Route>
@@ -254,8 +261,10 @@ const App: React.FunctionComponent = (props) => {
                         <Route exact path="/2fa"><$2FAPage/></Route>
                         <Route exact path="/enable-2fa"><$2FAEnablePage/></Route>
                         <Route exact path="/contact"><ContactPage/></Route>
+                        <Route exact path="/mod-queue"><ModQueuePage/></Route>
                         <Route exact path={["/privacy", "/privacypolicy"]}><Redirect to="/terms#privacy"/></Route>
                         <Route exact path={["/terms", "termsofservice"]}><TermsPage/></Route>
+                        <Route exact path="/403"><$403Page/></Route>
                         <Route path="*"><$404Page/></Route>
                     </Switch>
                 </Context>

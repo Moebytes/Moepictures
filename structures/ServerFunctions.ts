@@ -1,8 +1,10 @@
 import nodemailer from "nodemailer"
+import {Request} from "express"
 import handlebars from "handlebars"
 import path from "path"
 import fs from "fs"
 import crypto from "crypto"
+import sql from "../structures/SQLQuery"
 import S3 from "aws-sdk/clients/s3"
 
 export default class ServerFunctions {
@@ -43,6 +45,14 @@ export default class ServerFunctions {
         })
     }
 
+    public static getFile = async (file: string) => {
+        const s3 = new S3({region: "us-east-1", credentials: {
+            accessKeyId: process.env.AWS_ACCESS_KEY!,
+            secretAccessKey: process.env.AWS_SECRET_KEY!
+        }})
+        return s3.getObject({Key: decodeURIComponent(file), Bucket: "moebooru"}).promise().then((r) => r.Body)
+    }
+
     public static uploadFile = async (file: string, content: any) => {
         const s3 = new S3({region: "us-east-1", credentials: {
             accessKeyId: process.env.AWS_ACCESS_KEY!,
@@ -67,5 +77,55 @@ export default class ServerFunctions {
         }})
         await s3.copyObject({CopySource: `moebooru/${oldFile}`, Key: newFile, Bucket: "moebooru"}).promise()
         await s3.deleteObject({Key: oldFile, Bucket: "moebooru"}).promise()
+    }
+
+    public static uploadUnverifiedFile = async (file: string, content: any) => {
+        const s3 = new S3({region: "us-east-1", credentials: {
+            accessKeyId: process.env.AWS_ACCESS_KEY!,
+            secretAccessKey: process.env.AWS_SECRET_KEY!
+        }})
+        const upload = await s3.upload({Body: content, Key: file, Bucket: "moebooru-unverified"}).promise()
+        return upload.Location
+    }
+
+    public static getUnverifiedFile = async (file: string) => {
+        const s3 = new S3({region: "us-east-1", credentials: {
+            accessKeyId: process.env.AWS_ACCESS_KEY!,
+            secretAccessKey: process.env.AWS_SECRET_KEY!
+        }})
+        return s3.getObject({Key: decodeURIComponent(file), Bucket: "moebooru-unverified"}).promise().then((r) => r.Body)
+    }
+
+    public static deleteUnverifiedFile = async (file: string) => {
+        const s3 = new S3({region: "us-east-1", credentials: {
+            accessKeyId: process.env.AWS_ACCESS_KEY!,
+            secretAccessKey: process.env.AWS_SECRET_KEY!
+        }})
+        await s3.deleteObject({Key: file, Bucket: "moebooru-unverified"}).promise()
+    }
+
+    public static unverifiedTagCategories = async (tags: any[]) => {
+        let result = await sql.unverifiedTags(tags.filter(Boolean))
+        let artists = [] as any 
+        let characters = [] as any 
+        let series = [] as any 
+        let newTags = [] as any
+        for (let i = 0; i < tags.length; i++) {
+            const index = result.findIndex((r: any) => tags[i] === r.tag)
+            const obj = {} as any 
+            obj.tag = tags[i]
+            obj.image = result[index].image 
+            obj.description = result[index].description 
+            if (result[index].type === "artist") {
+                artists.push(obj)
+            } else if (result[index].type === "character") {
+                characters.push(obj)
+            } else if (result[index].type === "series") {
+                series.push(obj)
+            } else {
+                newTags.push(obj)
+            }
+        }
+        return {artists, characters, series, tags: newTags}
     }
 }

@@ -8,8 +8,8 @@ import MP4Demuxer from "./MP4Demuxer"
 import audioEncoder from "audio-encoder"
 import fileType from "magic-bytes.js"
 import gibberish from "./Gibberish"
-import JsWebm from "jswebm"
 import gifFrames from "gif-frames"
+import {JsWebm} from "jswebm"
 import profaneWords from "profane-words"
 import localforage from "localforage"
 
@@ -270,6 +270,12 @@ export default class Functions {
     public static validateMessage = (message: string) => {
         if (!message) return "No message."
         if (gibberish(message)) return "Message cannot be gibberish."
+        return null
+    }
+
+    public static validateReason = (reason: string) => {
+        if (!reason) return "Reason is required."
+        if (gibberish(reason)) return "Reason cannot be gibberish."
         return null
     }
 
@@ -576,10 +582,10 @@ export default class Functions {
             let foundKeyframe = false
             for (let i = 0; i < demuxer.videoPackets.length; i++) {
                 const packet = demuxer.videoPackets[i]
-                if (packet.keyframeTimestamp) foundKeyframe = true 
+                if (packet.isKeyframe) foundKeyframe = true 
                 if (!foundKeyframe) continue
                 // @ts-ignore
-                const chunk = new EncodedVideoChunk({type: packet.keyframeTimestamp ? "key" : "delta", data: packet.data, timestamp: packet.timestamp * demuxer.segmentInfo.timecodeScale / 1000})
+                const chunk = new EncodedVideoChunk({type: packet.isKeyframe ? "key" : "delta", data: packet.data, timestamp: packet.timestamp * demuxer.segmentInfo.timecodeScale / 1000})
                 decoder.decode(chunk)
             }
         })
@@ -815,6 +821,11 @@ export default class Functions {
         return `${window.location.protocol}//${window.location.host}/${folder}/${postID}/${encodeURIComponent(filename)}`
     }
 
+    public static getUnverifiedImageLink = (folder: string, postID: number, filename: string) => {
+        if (!filename) return ""
+        return `${window.location.protocol}//${window.location.host}/unverified/${folder}/${postID}/${encodeURIComponent(filename)}`
+    }
+
     public static getTagPath = (folder: string, filename: string) => {
         if (folder === "attribute") folder = "tag"
         return `${folder}/${filename}`
@@ -826,12 +837,33 @@ export default class Functions {
         return `${window.location.protocol}//${window.location.host}/${folder}/${encodeURIComponent(filename)}`
     }
 
+    public static getUnverifiedTagLink = (folder: string, filename: string) => {
+        if (!filename) return ""
+        if (folder === "attribute") folder = "tag"
+        return `${window.location.protocol}//${window.location.host}/unverified/${folder}/${encodeURIComponent(filename)}`
+    }
+
     public static formatDate(date: Date) {
         let year = date.getFullYear()
         let month = (1 + date.getMonth()).toString().padStart(2, "0")
         let day = date.getDate().toString().padStart(2, "0")
         return `${year}-${month}-${day}`
     }
+
+    public static prettyDate = (inputDate: Date) => {
+        const monthNames = [
+          "January", "February", "March",
+          "April", "May", "June", "July",
+          "August", "September", "October",
+          "November", "December"
+        ]
+        const date = new Date(inputDate)
+        const day = date.getDate()
+        const monthIndex = date.getMonth()
+        const year = date.getFullYear()
+
+        return `${monthNames[monthIndex]} ${day}, ${year}`
+      }
 
     public static binaryToHex = (bin: string) => {
         return bin.match(/.{4}/g)?.reduce(function(acc, i) {
@@ -970,8 +1002,7 @@ export default class Functions {
             const obj = {} as any 
             obj.tag = parsedTags[i].tag 
             obj.count = parsedTags[i].count 
-            obj.image = result[index].image 
-            obj.name = result[index].name 
+            obj.image = result[index].image
             obj.description = result[index].description 
             if (result[index].type === "artist") {
                 artists.push(obj)

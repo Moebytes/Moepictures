@@ -42,6 +42,7 @@ interface Props {
     download: () => void
     previous?: () => void
     next?: () => void
+    noFavorite?: boolean
 }
 
 const PostImageOptions: React.FunctionComponent<Props> = (props) => {
@@ -250,7 +251,7 @@ const PostImageOptions: React.FunctionComponent<Props> = (props) => {
                         <img className="post-image-icon-small" src={getPrevIcon()}/>
                         <div className="post-image-text-small">Prev</div>
                     </div>
-                    {session.username ?
+                    {session.username && !props.noFavorite ?
                     <div className="post-image-options-box" onClick={() => setFavorited((prev) => !prev)} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                         <img className="post-image-icon" src={getStar()}/>
                         <div className={`post-image-text ${favorited ? "favorited" : ""}`}>{favorited ? "Favorited" : "Favorite"}</div>

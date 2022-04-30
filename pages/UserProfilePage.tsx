@@ -228,7 +228,7 @@ const UserProfilePage: React.FunctionComponent = (props) => {
                         <span className="userprofile-text">Email: {session.email}</span>
                     </div>
                     <div className="userprofile-row">
-                        <span className="userprofile-text">Join Date: {functions.formatDate(new Date(session.joinDate))}</span>
+                        <span className="userprofile-text">Join Date: {functions.prettyDate(new Date(session.joinDate))}</span>
                     </div>
                     <div className="userprofile-row">
                         <span className="userprofile-text">Bio: {session.bio || "This user has not written anything."}</span>

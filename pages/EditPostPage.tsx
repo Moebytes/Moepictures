@@ -34,6 +34,7 @@ import axios from "axios"
 import "./styles/editpostpage.less"
 import ContentEditable from "react-contenteditable"
 import SearchSuggestions from "../components/SearchSuggestions"
+import permissions from "../structures/Permissions"
 import path from "path"
 
 let enterLinksTimer = null as any
@@ -104,6 +105,7 @@ const EditPostPage: React.FunctionComponent<Props> = (props) => {
     const [tagY, setTagY] = useState(0)
     const rawTagRef = useRef<any>(null)
     const [edited, setEdited] = useState(false)
+    const [reason, setReason] = useState("")
     const postID = Number(props?.match.params.id)
     const history = useHistory()
 
@@ -745,6 +747,13 @@ const EditPostPage: React.FunctionComponent<Props> = (props) => {
             await functions.timeout(3000)
             return setSubmitError(false)
         }
+        if (!reason && !permissions.isStaff(session)) {
+            setSubmitError(true)
+            await functions.timeout(20)
+            submitErrorRef.current.innerText = "Edit reason is required."
+            await functions.timeout(3000)
+            return setSubmitError(false)
+        }
         let newAcceptedURLs = acceptedURLs.map((a: any) => {
             a.bytes = Object.values(a.bytes)
             return a
@@ -769,13 +778,18 @@ const EditPostPage: React.FunctionComponent<Props> = (props) => {
             characters,
             series,
             newTags,
-            tags: functions.cleanHTML(rawTags).split(/[\n\r\s]+/g)
+            tags: functions.cleanHTML(rawTags).split(/[\n\r\s]+/g),
+            reason
         }
         setSubmitError(true)
         await functions.timeout(20)
         submitErrorRef.current.innerText = "Submitting..."
         try {
-            await axios.put("/api/post/edit", data, {withCredentials: true}).then((r) => r.data)
+            if (permissions.isStaff(session)) {
+                await axios.put("/api/post/edit", data, {withCredentials: true}).then((r) => r.data)
+            } else {
+                await axios.put("/api/post/edit/unverified", data, {withCredentials: true}).then((r) => r.data)
+            }
             setSubmitted(true)
             return setSubmitError(false)
         } catch {
@@ -1060,7 +1074,9 @@ const EditPostPage: React.FunctionComponent<Props> = (props) => {
                     {submitted ?
                     <div className="editpost-container">
                         <div className="editpost-container-row">
-                            <span className="editpost-text-alt">The post edit was submitted and will appear on the site if approved.</span>
+                            {permissions.isStaff(session) ?
+                            <span className="editpost-text-alt">Post was edited.</span> :
+                            <span className="editpost-text-alt">The post edit was submitted and will appear on the site if approved.</span>}
                         </div> 
                         <div className="editpost-container-row" style={{marginTop: "10px"}}>
                             <button className="editpost-button" onClick={() => history.push(`/post/${postID}`)}>
@@ -1309,10 +1325,14 @@ const EditPostPage: React.FunctionComponent<Props> = (props) => {
                 <span className="editpost-text-alt">Enter dashed tags separated by spaces. Tags can describe any of the images. If the tag doesn't exist, you will be promted to create it.
                 If you need help with tags, read the <Link className="editpost-link" target="_blank" to="/help#tagging">tagging guide.</Link></span>
                 <div className="editpost-container">
-                    <SearchSuggestions active={tagActive} text={functions.cleanHTML(rawTags)} x={tagX} y={tagY} width={200} click={handleRawTagClick} type="attribute"/>
+                    <SearchSuggestions active={tagActive} text={functions.cleanHTML(rawTags)} x={tagX} y={tagY} width={200} click={handleRawTagClick} type="tag"/>
                     <div className="editpost-container-row" onMouseOver={() => setEnableDrag(false)}>
                         <ContentEditable innerRef={rawTagRef} className="editpost-textarea" spellCheck={false} html={rawTags} onChange={(event) => setRawTags(event.target.value)} onFocus={() => setTagActive(true)} onBlur={() => setTagActive(false)}/>
                     </div>
+                </div>
+                <div className="editpost-row">
+                    <span className="editpost-text">Edit Reason: </span>
+                    <input style={{width: "100%"}} className="editpost-input-wide2" type="text" value={reason} onChange={(event) => setReason(event.target.value)} spellCheck={false} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}/>
                 </div>
                 {newTags.length ? <>
                 <span className="editpost-heading">New Tags</span>

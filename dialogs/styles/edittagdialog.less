@@ -34,6 +34,16 @@
     align-items: center;
 }
 
+.edittag-dialog-title-container {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    cursor: move;
+}
+
+
 .edittag-dialog-row {
     display: flex;
     flex-direction: row;
@@ -54,6 +64,7 @@
     font-family: Tahoma, sans-serif;
     font-weight: bold;
     .stroke-black();
+    cursor: move;
 }
 
 .edittag-dialog-text {
@@ -145,4 +156,18 @@
     height: 120px;
     margin-top: 5px;
     margin-bottom: 5px;
+}
+
+.edittag-dialog-validation-container {
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+}
+
+.edittag-dialog-validation {
+    font-family: Tahoma, sans-serif;
+    color: var(--text-strong);
+    font-size: 16px;
+    margin-top: 10px;
 }

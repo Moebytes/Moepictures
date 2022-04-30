@@ -153,7 +153,7 @@ const UserPage: React.FunctionComponent<Props> = (props) => {
                         <span className="user-text">Bio: {user.bio || "This user has not written anything."}</span>
                     </div>
                     <div className="user-row">
-                        <span className="user-text">Join Date: {functions.formatDate(new Date(user.joinDate || ""))}</span>
+                        <span className="user-text">Join Date: {functions.prettyDate(new Date(user.joinDate || ""))}</span>
                     </div>
                     <div className="user-row">
                         <span className="user-link" onClick={viewComments}>View Comments</span>

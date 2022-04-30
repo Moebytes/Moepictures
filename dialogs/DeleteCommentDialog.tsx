@@ -4,6 +4,7 @@ import {HashLink as Link} from "react-router-hash-link"
 import {HideNavbarContext, HideSidebarContext, ThemeContext, EnableDragContext, DeleteCommentIDContext, DeleteCommentFlagContext, HideTitlebarContext} from "../Context"
 import functions from "../structures/Functions"
 import "./styles/deletecommentdialog.less"
+import Draggable from "react-draggable"
 import axios from "axios"
 
 const DeleteCommentDialog: React.FunctionComponent = (props) => {
@@ -22,10 +23,10 @@ const DeleteCommentDialog: React.FunctionComponent = (props) => {
 
     useEffect(() => {
         if (deleteCommentID) {
-            document.body.style.overflowY = "hidden"
+            // document.body.style.overflowY = "hidden"
             document.body.style.pointerEvents = "none"
         } else {
-            document.body.style.overflowY = "visible"
+            // document.body.style.overflowY = "visible"
             document.body.style.pointerEvents = "all"
             setEnableDrag(true)
         }
@@ -42,9 +43,12 @@ const DeleteCommentDialog: React.FunctionComponent = (props) => {
     if (deleteCommentID) {
         return (
             <div className="deletecomment-dialog">
+                <Draggable handle=".deletecomment-dialog-title-container">
                 <div className="deletecomment-dialog-box" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                     <div className="deletecomment-container">
-                        <span className="deletecomment-dialog-title">Delete Comment</span>
+                        <div className="deletecomment-dialog-title-container">
+                            <span className="deletecomment-dialog-title">Delete Comment</span>
+                        </div>
                         <div className="deletecomment-dialog-row">
                             <span className="deletecomment-dialog-text">Are you sure that you want to delete this comment?</span>
                         </div>
@@ -54,6 +58,7 @@ const DeleteCommentDialog: React.FunctionComponent = (props) => {
                         </div>
                     </div>
                 </div>
+                </Draggable>
             </div>
         )
     }

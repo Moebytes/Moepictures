@@ -4,6 +4,7 @@ import {HashLink as Link} from "react-router-hash-link"
 import {HideNavbarContext, HideSidebarContext, ThemeContext, EnableDragContext, SidebarTextContext,
 ShowDeleteAccountDialogContext, HideTitlebarContext, SessionFlagContext} from "../Context"
 import functions from "../structures/Functions"
+import Draggable from "react-draggable"
 import "./styles/deleteaccountdialog.less"
 import axios from "axios"
 
@@ -24,10 +25,10 @@ const DeleteAccountDialog: React.FunctionComponent = (props) => {
 
     useEffect(() => {
         if (showDeleteAccountDialog) {
-            document.body.style.overflowY = "hidden"
+            // document.body.style.overflowY = "hidden"
             document.body.style.pointerEvents = "none"
         } else {
-            document.body.style.overflowY = "visible"
+            // document.body.style.overflowY = "visible"
             document.body.style.pointerEvents = "all"
             setEnableDrag(true)
         }
@@ -50,9 +51,12 @@ const DeleteAccountDialog: React.FunctionComponent = (props) => {
     if (showDeleteAccountDialog) {
         return (
             <div className="deleteaccount-dialog">
+                <Draggable handle=".deleteaccount-dialog-title-container">
                 <div className="deleteaccount-dialog-box" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                     <div className="deleteaccount-container">
-                        <span className="deleteaccount-dialog-title">Delete Account</span>
+                        <div className="deleteaccount-dialog-title-container">
+                            <span className="deleteaccount-dialog-title">Delete Account</span>
+                        </div>
                         <div className="deleteaccount-dialog-row">
                             <span className="deleteaccount-dialog-text">
                                 Are you sure that you want to delete your account? This action is irreversible. You will permanently lose all of your favorites, comments, cuteness ratings, etc.<br/><br/>
@@ -66,6 +70,7 @@ const DeleteAccountDialog: React.FunctionComponent = (props) => {
                         </div>
                     </div>
                 </div>
+                </Draggable>
             </div>
         )
     }

@@ -1,6 +1,6 @@
 import React, {useContext, useEffect, useState, useReducer} from "react"
 import {useHistory} from "react-router-dom"
-import {ThemeContext, HideSidebarContext, HideNavbarContext, HideSortbarContext, EnableDragContext, MobileContext,
+import {ThemeContext, HideSidebarContext, HideNavbarContext, HideSortbarContext, EnableDragContext, MobileContext, UnverifiedPostsContext,
 RelativeContext, HideTitlebarContext, SidebarHoverContext, SearchContext, SearchFlagContext, PostsContext, ShowDeletePostDialogContext,
 TagsContext, RandomFlagContext, ImageSearchFlagContext, SidebarTextContext, SessionContext} from "../Context"
 import {HashLink as Link} from "react-router-hash-link"
@@ -47,6 +47,8 @@ import historyIcon from "../assets/purple/history.png"
 import historyMagenta from "../assets/magenta/history.png"
 import deleteIcon from "../assets/purple/delete.png"
 import deleteIconMagenta from "../assets/magenta/delete.png"
+import rejectRed from "../assets/purple/reject-red.png"
+import approveGreen from "../assets/purple/approve-green.png"
 import pack from "../package.json"
 import functions from "../structures/Functions"
 import axios from "axios"
@@ -60,6 +62,7 @@ interface Props {
     characters?: any 
     series?: any
     tags?: any
+    unverified?: boolean
 }
 
 const SideBar: React.FunctionComponent<Props> = (props) => {
@@ -73,6 +76,7 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
     const {relative, setRelative} = useContext(RelativeContext)
     const {sidebarHover, setSidebarHover} = useContext(SidebarHoverContext)
     const {posts, setPosts} = useContext(PostsContext)
+    const {unverifiedPosts, setUnverifiedPosts} = useContext(UnverifiedPostsContext)
     const {search, setSearch} = useContext(SearchContext)
     const {searchFlag, setSearchFlag} = useContext(SearchFlagContext)
     const {tags, setTags} = useContext(TagsContext)
@@ -449,7 +453,30 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
     }
 
     const editPost = async () => {
+        if (props.unverified) return history.push(`/unverified/edit-post/${props.post.postID}`)
         history.push(`/edit-post/${props.post.postID}`)
+    }
+
+    const modNext = () => {
+        let currentIndex = unverifiedPosts.findIndex((p: any) => p.postID === props.post.postID)
+        if (currentIndex !== -1) {
+            currentIndex++
+            if (unverifiedPosts[currentIndex]) {
+                const id = unverifiedPosts[currentIndex].postID
+                history.push(`/unverified/post/${id}`)
+            }
+        }
+        history.push(`/mod-queue`)
+    }
+
+    const approvePost = async () => {
+        await axios.post("/api/post/approve", {postID: props.post.postID}, {withCredentials: true})
+        modNext()
+    }
+
+    const rejectPost = async () => {
+        await axios.post("/api/post/reject", {postID: props.post.postID}, {withCredentials: true})
+        modNext()
     }
 
     if (mobile) return (
@@ -611,18 +638,33 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
                                 <span className="tag-red">Edit</span>
                             </span>
                         </div>
+                        {props.unverified ? <>
+                        <div className="sidebar-row">
+                            <span className="tag-hover" onClick={approvePost}>
+                                <img className="sidebar-icon" src={approveGreen}/>
+                                <span className="tag-green">Approve</span>
+                            </span>
+                        </div>
+                        <div className="sidebar-row">
+                            <span className="tag-hover" onClick={rejectPost}>
+                                <img className="sidebar-icon" src={rejectRed}/>
+                                <span className="tag-red">Reject</span>
+                            </span>
+                        </div>
+                        </> : null}
                         {/* <div className="sidebar-row">
                             <span className="tag-hover">
                                 <img className="sidebar-icon" src={getHistory()}/>
                                 <span className="tag-red">History</span>
                             </span>
                         </div> */}
+                        {!props.unverified ?
                         <div className="sidebar-row">
                             <span className="tag-hover" onClick={deletePost}>
                                 <img className="sidebar-icon" src={getDeleteIcon()}/>
                                 <span className="tag-red">Delete</span>
                             </span>
-                        </div>
+                        </div> : null}
                     </div>
                 : null}
             </div>

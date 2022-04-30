@@ -50,8 +50,9 @@ declare module "express-session" {
       bio: string 
       emailVerified: boolean
       publicFavorites: boolean
-      $2fa: boolean,
+      $2fa: boolean
       ip: string
+      role: string
   }
 }
 
@@ -112,12 +113,39 @@ let cache = {} as any
 
 for (let i = 0; i < folders.length; i++) {
   serverFunctions.uploadFile(`${folders[i]}/`, "")
+  serverFunctions.uploadUnverifiedFile(`${folders[i]}/`, "")
   app.get(`/${folders[i]}/*`, async (req, res, next) => {
     try {
-      req.baseUrl = `/${folders[i]}`
       res.setHeader("Content-Type", mime.getType(req.path) ?? "")
       const key = decodeURIComponent(req.path.slice(1))
       const body = cache[key] ? cache[key] : await s3.getObject({Key: key, Bucket: "moebooru"}).promise().then((r) => r.Body)
+      if (!cache[key]) cache[key] = body
+      const contentLength = body.length
+      if (req.headers.range) {
+        const parts = req.headers.range.replace(/bytes=/, "").split("-")
+        const start = parseInt(parts[0])
+        const end = parts[1] ? parseInt(parts[1]) : contentLength - 1
+        res.writeHead(206, {
+          "Content-Range": `bytes ${start}-${end}/${contentLength}`,
+          "Accept-Ranges": "bytes",
+          "Content-Length": end - start + 1
+        })
+        const stream = Readable.from(body.slice(start, end + 1))
+        stream.pipe(res)
+        return
+      }
+      res.setHeader("Content-Length", contentLength)
+      res.status(200).end(body)
+    } catch {
+      res.status(400).end()
+    }
+  })
+  app.get(`/unverified/${folders[i]}/*`, async (req, res, next) => {
+    try {
+      if (req.session.role !== "admin" && req.session.role !== "mod") return res.status(403).end()
+      res.setHeader("Content-Type", mime.getType(req.path) ?? "")
+      const key = decodeURIComponent(req.path.replace("/unverified/", ""))
+      const body = cache[key] ? cache[key] : await s3.getObject({Key: key, Bucket: "moebooru-unverified"}).promise().then((r) => r.Body)
       if (!cache[key]) cache[key] = body
       const contentLength = body.length
       if (req.headers.range) {
@@ -154,6 +182,12 @@ app.get("/*", function(req, res) {
 const run = async () => {
   await sql.createDB()
 
+  /** Unverified tags */
+  await sql.insertUnverifiedTag("unknown-artist", "artist")
+  await sql.insertUnverifiedTag("unknown-character", "character")
+  await sql.insertUnverifiedTag("unknown-series", "series")
+  await sql.insertUnverifiedTag("needs-tags", "tag")
+
   /* Default artist tags */
   let exists = await sql.insertTag("unknown-artist", "artist")
   if (!exists) await sql.updateTag("unknown-artist", "description", "The artist is unknown.")
@@ -171,47 +205,47 @@ const run = async () => {
   if (!exists) await sql.updateTag("unknown-series", "description", "The series is unknown.")
 
   /* Default meta tags */
-  exists = await sql.insertTag("needs-tags", "attribute")
+  exists = await sql.insertTag("needs-tags", "tag")
   if (!exists) await sql.updateTag("needs-tags", "description", "The post needs tags.")
-  exists = await sql.insertTag("no-audio", "attribute")
+  exists = await sql.insertTag("no-audio", "tag")
   if (!exists) await sql.updateTag("no-audio", "description", "The post is a video with no audio.")
-  exists = await sql.insertTag("with-audio", "attribute")
+  exists = await sql.insertTag("with-audio", "tag")
   if (!exists) await sql.updateTag("with-audio", "description", "The post is a video with audio.")
-  exists = await sql.insertTag("self-post", "attribute")
+  exists = await sql.insertTag("self-post", "tag")
   if (!exists) await sql.updateTag("self-post", "description", "The artwork was posted by the original creator.")
-  exists = await sql.insertTag("transparent", "attribute")
+  exists = await sql.insertTag("transparent", "tag")
   if (!exists) await sql.updateTag("transparent", "description", "The post has a transparent background.")
-  exists = await sql.insertTag("commentary", "attribute")
+  exists = await sql.insertTag("commentary", "tag")
   if (!exists) await sql.updateTag("commentary", "description", "The post has artist commentary.")
-  exists = await sql.insertTag("translated", "attribute")
+  exists = await sql.insertTag("translated", "tag")
   if (!exists) await sql.updateTag("translated", "description", "The post contains complete translations.")
-  exists = await sql.insertTag("partially-translated", "attribute")
+  exists = await sql.insertTag("partially-translated", "tag")
   if (!exists) await sql.updateTag("partially-translated", "description", "Post is only partially translated.")
-  exists = await sql.insertTag("check-translation", "attribute")
+  exists = await sql.insertTag("check-translation", "tag")
   if (!exists) await sql.updateTag("check-translation", "description", "Check the translations, because they might be incorrect.")
 
   /* Default software tags */
-  exists = await sql.insertTag("photoshop", "attribute")
+  exists = await sql.insertTag("photoshop", "tag")
   if (!exists) await sql.updateTag("photoshop", "description", "Photoshop is an image editing software primarily used for image editing, color correction, and drawing. It is developed by Adobe.")
-  exists = await sql.insertTag("premiere-pro", "attribute")
+  exists = await sql.insertTag("premiere-pro", "tag")
   if (!exists) await sql.updateTag("premiere-pro", "description", "Premiere Pro is a video editing software primarily used for video editing and color correction. It is developed by Adobe.")
-  exists = await sql.insertTag("after-effects", "attribute")
+  exists = await sql.insertTag("after-effects", "tag")
   if (!exists) await sql.updateTag("after-effects", "description", "After Effects is a video compositing software primarily used for video effects, motion graphics, and tween animation. It is developed by Adobe.")
-  exists = await sql.insertTag("clip-studio-paint", "attribute")
+  exists = await sql.insertTag("clip-studio-paint", "tag")
   if (!exists) await sql.updateTag("clip-studio-paint", "description", "Clip Studio Paint is a drawing software that allows the creation of illustrations, comics, and frame-by-frame animations. It is developed by CELSYS.")
-  exists = await sql.insertTag("live2d", "attribute")
+  exists = await sql.insertTag("live2d", "tag")
   if (!exists) await sql.updateTag("live2d", "description", "Live2D is an animation software that allows the creation of 2D animation by using mesh deformations, warp/rotation deformers, and parameter keyframes. It is developed by Live2D.")
-  exists = await sql.insertTag("blender", "attribute")
+  exists = await sql.insertTag("blender", "tag")
   if (!exists) await sql.updateTag("blender", "description", "Blender is a 3D software primarily used for 3D modeling, 3D sculpting, 3D animation, and particle simulations. It is developed by the Blender Foundation.")
-  exists = await sql.insertTag("krita", "attribute")
+  exists = await sql.insertTag("krita", "tag")
   if (!exists) await sql.updateTag("krita", "description", "Krita is a drawing software primarily used for drawing and 2D animation. It is developed by the Krita Foundation.")
-  exists = await sql.insertTag("sai", "attribute")
+  exists = await sql.insertTag("sai", "tag")
   if (!exists) await sql.updateTag("sai", "description", "Sai is a lightweight drawing software developed by Systemax Software.")
-  exists = await sql.insertTag("procreate", "attribute")
+  exists = await sql.insertTag("procreate", "tag")
   if (!exists) await sql.updateTag("procreate", "description", "Procreate is a drawing software for iPad developed by Savage Interactive.")
-  exists = await sql.insertTag("mspaint", "attribute")
+  exists = await sql.insertTag("mspaint", "tag")
   if (!exists) await sql.updateTag("mspaint", "description", "MS Paint is a basic image editing software included with Windows. It is developed by Microsoft.")
-  exists = await sql.insertTag("gimp", "attribute")
+  exists = await sql.insertTag("gimp", "tag")
   if (!exists) await sql.updateTag("gimp", "description", "Gimp is a free image editing software developed by GIMP Development Team.")
   
   

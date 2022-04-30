@@ -28,7 +28,9 @@ const CommentRoutes = (app: Express) => {
             if (Number.isNaN(Number(commentID))) return res.status(400).send("Invalid commentID")
             if (!req.session.username) return res.status(400).send("Bad request")
             const comment = await sql.comment(Number(commentID))
-            if (comment?.username !== req.session.username) return res.status(400).send("Bad request")
+            if (comment?.username !== req.session.username) {
+                if (req.session.role !== "admin" && req.session.role !== "mod") return res.status(403).end()
+            }
             await sql.deleteComment(Number(commentID))
             res.status(200).send("Success")
         } catch (e) {

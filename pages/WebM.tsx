@@ -14,7 +14,7 @@ import DragAndDrop from "../components/DragAndDrop"
 import Carousel from "../components/Carousel"
 import {HideNavbarContext, HideSidebarContext, RelativeContext, DownloadFlagContext, DownloadURLsContext, HideTitlebarContext,
 PostsContext, TagsContext, HeaderTextContext, SearchContext} from "../Context"
-import paimon from "../assets/images/kleegif.webm"
+import paimon from "../assets/images/icecream.webm"
 import axios from "axios"
 import "./styles/postpage.less"
 
@@ -91,7 +91,7 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
                 <div className="post-container">
                     <PostImage img={paimon}/>
                     <PostImageOptions img={paimon} download={download} next={next} previous={previous}/>
-                    <CutenessMeter/>
+                    {post ? <CutenessMeter post={post}/> : null}
                     {post?.commentary ? <Commentary text={post.commentary}/> : null}
                     <Footer/>
                 </div>

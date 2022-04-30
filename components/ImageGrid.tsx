@@ -175,7 +175,7 @@ const ImageGrid: React.FunctionComponent = (props) => {
         const jsx = [] as any
         for (let i = 0; i < visiblePosts.length; i++) {
             const post = visiblePosts[i]
-            // if (post.thirdParty) continue
+            if (post.thirdParty) continue
             const image = visiblePosts[i].images[0]
             if (!image) continue
             const images = post.images.map((i: any) => functions.getImageLink(i.type, post.postID, i.filename))

@@ -5,6 +5,7 @@ import {HideNavbarContext, HideSidebarContext, ThemeContext, EnableDragContext, 
 EditCommentTextContext, HideTitlebarContext} from "../Context"
 import functions from "../structures/Functions"
 import "./styles/editcommentdialog.less"
+import Draggable from "react-draggable"
 import axios from "axios"
 
 const EditCommentDialog: React.FunctionComponent = (props) => {
@@ -24,10 +25,10 @@ const EditCommentDialog: React.FunctionComponent = (props) => {
 
     useEffect(() => {
         if (editCommentID) {
-            document.body.style.overflowY = "hidden"
+            // document.body.style.overflowY = "hidden"
             document.body.style.pointerEvents = "none"
         } else {
-            document.body.style.overflowY = "visible"
+            // document.body.style.overflowY = "visible"
             document.body.style.pointerEvents = "all"
             setEnableDrag(true)
         }
@@ -44,9 +45,12 @@ const EditCommentDialog: React.FunctionComponent = (props) => {
     if (editCommentID) {
         return (
             <div className="editcomment-dialog">
+                <Draggable handle=".editcomment-dialog-title-container">
                 <div className="editcomment-dialog-box" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                     <div className="editcomment-container">
-                        <span className="editcomment-dialog-title">Edit Comment</span>
+                        <div className="editcomment-dialog-title-container">
+                            <span className="editcomment-dialog-title">Edit Comment</span>
+                        </div>
                         <div className="editcomment-dialog-row">
                             <textarea className="editcomment-textarea" spellCheck={false} value={editCommentText} onChange={(event) => setEditCommentText(event.target.value)}></textarea>
                         </div>
@@ -56,6 +60,7 @@ const EditCommentDialog: React.FunctionComponent = (props) => {
                         </div>
                     </div>
                 </div>
+                </Draggable>
             </div>
         )
     }
