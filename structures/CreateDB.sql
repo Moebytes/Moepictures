@@ -9,6 +9,7 @@ CREATE TABLE IF NOT EXISTS "users" (
     "publicFavorites" boolean,
     "image" text,
     "ip" inet,
+    "banned" boolean,
     "password" text
 );
 

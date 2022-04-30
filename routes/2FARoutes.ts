@@ -92,6 +92,10 @@ const $2FARoutes = (app: Express) => {
                 req.session.bio = user.bio
                 req.session.publicFavorites = user.publicFavorites
                 req.session.image = user.image
+                req.session.role = user.role
+                const ip = req.headers["x-forwarded-for"] || req.socket.remoteAddress
+                await sql.updateUser(user.username, "ip", ip as string)
+                req.session.ip = ip as string
                 res.status(200).send("Success")
             } else {
                 res.status(400).send("Bad request")

@@ -22,8 +22,39 @@ const SearchSuggestions: React.FunctionComponent<Props> = (props) => {
     const {search, setSearch} = useContext(SearchContext)
     const {searchFlag, setSearchFlag} = useContext(SearchFlagContext)
     const [suggestions, setSuggestions] = useState([]) as any
+    const [activeIndex, setActiveIndex] = useState(0)
     const [active, setActive] = useState(props.active)
     const history = useHistory()
+
+    const handleKeydown = (event: any) => {
+        if (event.key === "Enter") {
+            if (!suggestions[activeIndex]) return
+            if (props.click) return props.click(suggestions[activeIndex].tag)
+            setSearch((prev: string) => {
+                const parts = prev.split(/ +/g)
+                parts[parts.length - 1] = suggestions[activeIndex].tag
+                return parts.join(" ")
+            })
+            setSearchFlag(true)
+            return history.push(`/posts`)
+        }
+        let newActiveIndex = activeIndex
+        if (event.key === "ArrowUp") {
+            newActiveIndex-- 
+        } else if (event.key === "ArrowDown") {
+            newActiveIndex++
+        }
+        if (activeIndex < 0) newActiveIndex = 0 
+        if (activeIndex > suggestions.length - 1) newActiveIndex = suggestions.length - 1
+        setActiveIndex(newActiveIndex)
+    }
+
+    useEffect(() => {
+        window.addEventListener("keydown", handleKeydown)
+        return () => {
+            window.removeEventListener("keydown", handleKeydown)
+        }
+    }, [activeIndex])
 
     useEffect(() => {
         if (props.active) {
@@ -69,7 +100,7 @@ const SearchSuggestions: React.FunctionComponent<Props> = (props) => {
                 history.push(`/posts`)
             }
             jsx.push(
-                <div className="search-suggestions-row" onClick={() => tagClick()}>
+                <div className={`search-suggestions-row ${activeIndex === i ? "search-suggestions-active" : ""}`} onClick={() => tagClick()} onMouseEnter={() => setActiveIndex(i)}>
                     <span className="search-suggestions-tag">{suggestions[i].tag.replaceAll("-", " ")}</span>
                     <span className="search-suggestions-count">{suggestions[i].count}</span>
                 </div>

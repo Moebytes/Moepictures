@@ -894,7 +894,7 @@ const UploadPage: React.FunctionComponent = (props) => {
             let notExists = [] as any
             for (let i = 0; i < tags.length; i++) {
                 const exists = savedTags.find((t: any) => t.tag === tags[i])
-                if (!exists) notExists.push({tag: tags[i]})
+                if (!exists) notExists.push({tag: tags[i], desc: `${functions.toProperCase(tags[i])}.`})
             }
             for (let i = 0; i < notExists.length; i++) {
                 const index = newTags.findIndex((t: any) => t.tag === notExists[i].tag)
