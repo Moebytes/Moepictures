@@ -57,7 +57,7 @@ const TagRoutes = (app: Express) => {
             if (!tag) return res.status(400).send("Invalid tag")
             const tagExists = await sql.tag(tag.trim())
             if (!req.session.username || !tagExists) return res.status(400).send("Bad request")
-            if (req.session.role !== "admin" && req.session.role !== "mod") return res.status(403).end()
+            if (req.session.role !== "admin") return res.status(403).end()
             await sql.deleteTag(tag.trim())
             res.status(200).send("Success")
         } catch {

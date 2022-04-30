@@ -125,9 +125,10 @@ const ModTagEdits: React.FunctionComponent = (props) => {
             jsx.push(
                 <div className="mod-post" onMouseEnter={() =>setHover(true)} onMouseLeave={() => setHover(false)}>
                     {showOldTags[i] && oldTag ? <>
+                    {oldImg ?
                     <div className="mod-post-img-container">
                         <img className="mod-post-tag-img" src={oldImg}/>
-                    </div>
+                    </div> : null}
                     <div className="mod-post-text-column">
                         <span className="mod-post-link" onClick={() => history.push(`/user/${request.username}`)}>Requester: {functions.toProperCase(request.username || "Deleted")}</span>
                         <span className="mod-post-text">Reason: {request.reason}</span>
@@ -136,9 +137,10 @@ const ModTagEdits: React.FunctionComponent = (props) => {
                         <span className="mod-post-text">Old Aliases: {oldTag.aliases?.[0] ? oldTag.aliases.map((a: any) => a.tag).join(", ") : "None"}</span>
                     </div>
                     </> : <>
+                    {img ?
                     <div className="mod-post-img-container">
                         <img className="mod-post-tag-img" src={img}/>
-                    </div>
+                    </div> : null}
                     <div className="mod-post-text-column">
                         <span className="mod-post-link" onClick={() => history.push(`/user/${request.username}`)}>Requester: {functions.toProperCase(request.username || "Deleted")}</span>
                         <span className="mod-post-text">Reason: {request.reason}</span>

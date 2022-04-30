@@ -96,9 +96,10 @@ const ModTagAliases: React.FunctionComponent = (props) => {
             const img = functions.getTagLink(request.type, request.image)
             jsx.push(
                 <div className="mod-post" onMouseEnter={() =>setHover(true)} onMouseLeave={() => setHover(false)}>
+                    {img ?
                     <div className="mod-post-img-container">
                         <img className="mod-post-tag-img" src={img}/>
-                    </div>
+                    </div> : null}
                     <div className="mod-post-text-column">
                         <span className="mod-post-link" onClick={() => history.push(`/user/${request.username}`)}>Requester: {functions.toProperCase(request.username || "Deleted")}</span>
                         <span className="mod-post-text">Reason: {request.reason}</span>

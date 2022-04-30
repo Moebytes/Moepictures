@@ -46,7 +46,7 @@ const PostRoutes = (app: Express) => {
         try {
             const postID = req.query.postID
             if (Number.isNaN(Number(postID))) return res.status(400).send("Invalid postID")
-            if (req.session.role !== "admin" && req.session.role !== "mod") return res.status(403).end()
+            if (req.session.role !== "admin") return res.status(403).end()
             if (!req.session.username) return res.status(400).send("Bad request")
             const post = await sql.post(Number(postID))
             await sql.deletePost(Number(postID))
