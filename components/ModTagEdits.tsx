@@ -1,4 +1,4 @@
-import React, {useContext, useEffect, useRef, useState} from "react"
+import React, {useContext, useEffect, useRef, useState, useReducer} from "react"
 import {useHistory} from "react-router-dom"
 import {ThemeContext, SearchContext, SearchFlagContext, UnverifiedPostsContext} from "../Context"
 import {HashLink as Link} from "react-router-hash-link"
@@ -13,13 +13,16 @@ import "./styles/modposts.less"
 import axios from "axios"
 
 const ModTagEdits: React.FunctionComponent = (props) => {
+    const [ignored, forceUpdate] = useReducer(x => x + 1, 0)
     const {theme, setTheme} = useContext(ThemeContext)
     const [hover, setHover] = useState(false)
     const {search, setSearch} = useContext(SearchContext)
     const {searchFlag, setSearchFlag} = useContext(SearchFlagContext)
     const [requests, setRequests] = useState([]) as any
     const [oldTags, setOldTags] = useState([]) as any
-    const [showOldTag, setShowOldTag] = useState(false)
+    const [showOldTags, setShowOldTags] = useState([]) as any
+    const [index, setIndex] = useState(0)
+    const [visibleRequests, setVisibleRequests] = useState([]) as any
     const history = useHistory()
 
     const updateTags = async () => {
@@ -66,22 +69,62 @@ const ModTagEdits: React.FunctionComponent = (props) => {
         updateTags()
     }
 
+    useEffect(() => {
+        let currentIndex = index
+        const newVisibleRequests = visibleRequests as any
+        for (let i = 0; i < 10; i++) {
+            if (!requests[currentIndex]) break
+            newVisibleRequests.push(requests[currentIndex])
+            currentIndex++
+        }
+        setIndex(currentIndex)
+        setVisibleRequests(newVisibleRequests)
+    }, [requests])
+
+    useEffect(() => {
+        const scrollHandler = async () => {
+            if (functions.scrolledToBottom()) {
+                let currentIndex = index
+                if (!requests[currentIndex]) return
+                const newPosts = visibleRequests as any
+                for (let i = 0; i < 10; i++) {
+                    if (!requests[currentIndex]) break
+                    newPosts.push(requests[currentIndex])
+                    currentIndex++
+                }
+                setIndex(currentIndex)
+                setVisibleRequests(newPosts)
+            }
+        }
+        window.addEventListener("scroll", scrollHandler)
+        return () => {
+            window.removeEventListener("scroll", scrollHandler)
+        }
+    })
+
     const generateTagsJSX = () => {
         let jsx = [] as any
-        for (let i = 0; i < requests.length; i++) {
+        for (let i = 0; i < visibleRequests.length; i++) {
             const request = requests[i]
+            if (!request) break
             const oldTag = oldTags[i]
             const searchTag = () => {
                 setSearch(request.tag)
                 setSearchFlag(true)
                 history.push(`/posts`)
             }
+            const changeOldTag = () => {
+                const value = showOldTags[i] || false 
+                showOldTags[i] = !value 
+                setShowOldTags(showOldTags)
+                forceUpdate()
+            }
             const parts = request.image?.split("/")
             const img = parts ? `${window.location.protocol}//${window.location.host}/unverified/${parts[0]}/${encodeURIComponent(parts[1])}` : ""
             const oldImg = oldTag ? functions.getTagLink(oldTag.type, oldTag.image) : ""
             jsx.push(
                 <div className="mod-post" onMouseEnter={() =>setHover(true)} onMouseLeave={() => setHover(false)}>
-                    {showOldTag && oldTag ? <>
+                    {showOldTags[i] && oldTag ? <>
                     <div className="mod-post-img-container">
                         <img className="mod-post-tag-img" src={oldImg}/>
                     </div>
@@ -104,9 +147,9 @@ const ModTagEdits: React.FunctionComponent = (props) => {
                         <span className="mod-post-text">New Aliases: {request.aliases?.[0] ? request.aliases.join(", ") : "None"}</span>
                     </div> </>}
                     <div className="mod-post-options">
-                        <div className="mod-post-options-container" onClick={() => setShowOldTag((prev: boolean) => !prev)}>
+                        <div className="mod-post-options-container" onClick={() => changeOldTag()}>
                             <img className="mod-post-options-img" src={getTagDiff()}/>
-                            <span className="mod-post-options-text">{showOldTag ? "New" : "Old"}</span>
+                            <span className="mod-post-options-text">{showOldTags[i] ? "New" : "Old"}</span>
                         </div>
                         <div className="mod-post-options-container" onClick={() => rejectRequest(request.username, request.tag, request.image)}>
                             <img className="mod-post-options-img" src={getReject()}/>

@@ -15,12 +15,13 @@ const ModPostDeletions: React.FunctionComponent = (props) => {
     const [hover, setHover] = useState(false)
     const {search, setSearch} = useContext(SearchContext)
     const {searchFlag, setSearchFlag} = useContext(SearchFlagContext)
+    const [index, setIndex] = useState(0)
+    const [visibleRequests, setVisibleRequests] = useState([]) as any
     const [requests, setRequests] = useState([]) as any
     const history = useHistory()
 
     const updatePosts = async () => {
         const requests = await axios.get("/api/post/delete/request/list", {withCredentials: true}).then((r) => r.data)
-        console.log(requests)
         setRequests(requests)
     }
 
@@ -49,10 +50,44 @@ const ModPostDeletions: React.FunctionComponent = (props) => {
         updatePosts()
     }
 
+    useEffect(() => {
+        let currentIndex = index
+        const newVisibleRequests = visibleRequests as any
+        for (let i = 0; i < 10; i++) {
+            if (!requests[currentIndex]) break
+            newVisibleRequests.push(requests[currentIndex])
+            currentIndex++
+        }
+        setIndex(currentIndex)
+        setVisibleRequests(newVisibleRequests)
+    }, [requests])
+
+    useEffect(() => {
+        const scrollHandler = async () => {
+            if (functions.scrolledToBottom()) {
+                let currentIndex = index
+                if (!requests[currentIndex]) return
+                const newPosts = visibleRequests as any
+                for (let i = 0; i < 10; i++) {
+                    if (!requests[currentIndex]) break
+                    newPosts.push(requests[currentIndex])
+                    currentIndex++
+                }
+                setIndex(currentIndex)
+                setVisibleRequests(newPosts)
+            }
+        }
+        window.addEventListener("scroll", scrollHandler)
+        return () => {
+            window.removeEventListener("scroll", scrollHandler)
+        }
+    })
+
     const generatePostsJSX = () => {
         let jsx = [] as any
-        for (let i = 0; i < requests.length; i++) {
+        for (let i = 0; i < visibleRequests.length; i++) {
             const request = requests[i]
+            if (!request) break
             const imgClick = () => {
                 history.push(`/post/${request.postID}`)
             }

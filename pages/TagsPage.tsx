@@ -54,7 +54,9 @@ const TagsPage: React.FunctionComponent = (props) => {
         setHeaderText("")
         setSidebarText("")
         document.title = "Moebooru: Tags"
-        updateTags()
+        setTimeout(() => {
+            updateTags()
+        }, 200)
     }, [])
 
     useEffect(() => {
@@ -168,7 +170,7 @@ const TagsPage: React.FunctionComponent = (props) => {
                         </div>
                         {getSortJSX()}
                         <div className={`tag-dropdown ${activeDropdown === "sort" ? "" : "hide-tag-dropdown"}`} 
-                        style={{marginRight: getSortMargin(), top: "209px"}} onClick={() => setActiveDropdown("none")}>
+                        style={{marginRight: getSortMargin(), top: mobile ? "229px" : "209px"}} onClick={() => setActiveDropdown("none")}>
                             <div className="tag-dropdown-row" onClick={() => setSortType("alphabetic")}>
                                 <span className="tag-dropdown-text">Alphabetic</span>
                             </div>

@@ -2,7 +2,7 @@ import React, {useContext, useEffect, useRef, useState} from "react"
 import {useHistory} from "react-router-dom"
 import {ThemeContext, SizeTypeContext, PostAmountContext, PostsContext, ImageTypeContext, EnableDragContext,
 RestrictTypeContext, StyleTypeContext, SortTypeContext, SearchContext, SearchFlagContext, HeaderFlagContext,
-RandomFlagContext, ImageSearchFlagContext, SidebarTextContext, MobileContext} from "../Context"
+RandomFlagContext, ImageSearchFlagContext, SidebarTextContext, MobileContext, SessionContext} from "../Context"
 import GridImage from "./GridImage"
 import noresults from "../assets/misc/noresults.png"
 import axios from "axios"
@@ -29,6 +29,7 @@ const ImageGrid: React.FunctionComponent = (props) => {
     const {imageSearchFlag, setImageSearchFlag} = useContext(ImageSearchFlagContext)
     const {headerFlag, setHeaderFlag} = useContext(HeaderFlagContext)
     const {mobile, setMobile} = useContext(MobileContext)
+    const {session, setSession} = useContext(SessionContext)
     const [loaded, setLoaded] = useState(false)
     const [noResults, setNoResults] = useState(false)
     const history = useHistory()
@@ -176,6 +177,7 @@ const ImageGrid: React.FunctionComponent = (props) => {
         for (let i = 0; i < visiblePosts.length; i++) {
             const post = visiblePosts[i]
             if (post.thirdParty) continue
+            if (!session.username) if (post.restrict !== "safe") continue
             const image = visiblePosts[i].images[0]
             if (!image) continue
             const images = post.images.map((i: any) => functions.getImageLink(i.type, post.postID, i.filename))

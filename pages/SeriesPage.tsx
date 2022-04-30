@@ -51,7 +51,9 @@ const SeriesPage: React.FunctionComponent = (props) => {
         setHeaderText("")
         setSidebarText("")
         document.title = "Moebooru: Series"
-        updateSeries()
+        setTimeout(() => {
+            updateSeries()
+        }, 200)
     }, [])
 
     useEffect(() => {
@@ -160,7 +162,7 @@ const SeriesPage: React.FunctionComponent = (props) => {
                         </div>
                         {getSortJSX()}
                         <div className={`series-dropdown ${activeDropdown === "sort" ? "" : "hide-series-dropdown"}`} 
-                        style={{marginRight: getSortMargin(), top: "209px"}} onClick={() => setActiveDropdown("none")}>
+                        style={{marginRight: getSortMargin(), top: mobile ? "229px" : "209px"}} onClick={() => setActiveDropdown("none")}>
                             <div className="series-dropdown-row" onClick={() => setSortType("alphabetic")}>
                                 <span className="series-dropdown-text">Alphabetic</span>
                             </div>

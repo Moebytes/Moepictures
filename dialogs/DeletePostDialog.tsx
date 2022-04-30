@@ -68,6 +68,12 @@ const DeletePostDialog: React.FunctionComponent<Props> = (props) => {
         if (!keep) setShowDeletePostDialog(false)
     }
 
+    const close = () => {
+        setShowDeletePostDialog(false)
+        setSubmitted(false)
+        setReason("")
+    }
+
     if (showDeletePostDialog) {
         if (permissions.isStaff(session)) {
             return (
@@ -105,8 +111,8 @@ const DeletePostDialog: React.FunctionComponent<Props> = (props) => {
                             <span className="deletepost-dialog-text">Your delete request was submitted.</span>
                         </div>
                         <div className="deletepost-dialog-row">
-                            <button onClick={() => setShowDeletePostDialog(false)} className="download-button">{"Cancel"}</button>
-                            <button onClick={() => setShowDeletePostDialog(false)} className="download-button">{"OK"}</button>
+                            <button onClick={() => close()} className="download-button">{"Cancel"}</button>
+                            <button onClick={() => close()} className="download-button">{"OK"}</button>
                         </div>
                         </> : <>
                         <div className="deletepost-dialog-row">

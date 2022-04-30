@@ -15,10 +15,11 @@ import Carousel from "../components/Carousel"
 import DeletePostDialog from "../dialogs/DeletePostDialog"
 import DeleteCommentDialog from "../dialogs/DeleteCommentDialog"
 import EditCommentDialog from "../dialogs/EditCommentDialog"
+import ReportCommentDialog from "../dialogs/ReportCommentDialog"
 import ThirdParty from "../components/ThirdParty"
 import Parent from "../components/Parent"
 import {HideNavbarContext, HideSidebarContext, RelativeContext, DownloadFlagContext, DownloadURLsContext, HideTitlebarContext, MobileContext,
-PostsContext, TagsContext, HeaderTextContext, SearchContext, SidebarTextContext, SessionContext, EnableDragContext} from "../Context"
+PostsContext, TagsContext, HeaderTextContext, SearchContext, RedirectContext, SidebarTextContext, SessionContext, EnableDragContext} from "../Context"
 import axios from "axios"
 import "./styles/postpage.less"
 
@@ -39,6 +40,7 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
     const {headerText, setHeaderText} = useContext(HeaderTextContext)
     const {sidebarText, setSidebarText} = useContext(SidebarTextContext)
     const {session, setSession} = useContext(SessionContext)
+    const {redirect, setRedirect} = useContext(RedirectContext)
     const {mobile, setMobile} = useContext(MobileContext)
     const [images, setImages] = useState([]) as any
     const [thirdPartyPosts, setThirdPartyPosts] = useState([]) as any
@@ -48,6 +50,18 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
     const [tagCategories, setTagCategories] = useState(null) as any
     const history = useHistory()
     const postID = Number(props?.match.params.id)
+
+    const refreshCache = async () => {
+        try {
+            await axios.post(image, null, {withCredentials: true})
+        } catch {
+            // ignore
+        }
+    }
+
+    useEffect(() => {
+        if (image) refreshCache()
+    }, [image])
 
     useEffect(() => {
         setHideNavbar(false)
@@ -63,6 +77,15 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
             setRelative(true)
         }
     }, [mobile])
+
+    useEffect(() => {
+        if (!session.cookie || !post) return
+        if (!session.username && post.restrict !== "safe") {
+            setRedirect(`/post/${postID}`)
+            history.push("/login")
+            setSidebarText("Login required.")
+        }
+    }, [session, post])
 
     const updateThirdParty = async () => {
         if (post) {
@@ -156,6 +179,7 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
         <DragAndDrop/>
         <EditCommentDialog/>
         <DeleteCommentDialog/>
+        <ReportCommentDialog/>
         {post ? <DeletePostDialog post={post}/> : null}
         <TitleBar/>
         <NavBar/>

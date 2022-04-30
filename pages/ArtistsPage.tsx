@@ -51,7 +51,9 @@ const ArtistsPage: React.FunctionComponent = (props) => {
         setHeaderText("")
         setSidebarText("")
         document.title = "Moebooru: Artists"
-        updateArtists()
+        setTimeout(() => {
+            updateArtists()
+        }, 200)
     }, [])
 
     useEffect(() => {
@@ -160,7 +162,7 @@ const ArtistsPage: React.FunctionComponent = (props) => {
                         </div>
                         {getSortJSX()}
                         <div className={`artist-dropdown ${activeDropdown === "sort" ? "" : "hide-artist-dropdown"}`} 
-                        style={{marginRight: getSortMargin(), top: "209px"}} onClick={() => setActiveDropdown("none")}>
+                        style={{marginRight: getSortMargin(), top: mobile ? "229px" : "209px"}} onClick={() => setActiveDropdown("none")}>
                             <div className="artist-dropdown-row" onClick={() => setSortType("alphabetic")}>
                                 <span className="artist-dropdown-text">Alphabetic</span>
                             </div>

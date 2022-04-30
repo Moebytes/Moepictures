@@ -8,8 +8,16 @@ import {generateSecret, verifyToken} from "node-2fa"
 import fs from "fs"
 import path from "path"
 
+const $2faLimiter = rateLimit({
+	windowMs: 5 * 60 * 1000,
+	max: 30,
+	message: "Too many requests, try again later.",
+	standardHeaders: true,
+	legacyHeaders: false
+})
+
 const $2FARoutes = (app: Express) => {
-    app.post("/api/2fa/create", async (req: Request, res: Response) => {
+    app.post("/api/2fa/create", $2faLimiter, async (req: Request, res: Response) => {
         try {
             if (!req.session.username) return res.status(400).send("Bad request")
             const user = await sql.user(req.session.username)
@@ -31,7 +39,7 @@ const $2FARoutes = (app: Express) => {
         }
     })
 
-    app.post("/api/2fa/qr", async (req: Request, res: Response) => {
+    app.post("/api/2fa/qr", $2faLimiter, async (req: Request, res: Response) => {
         try {
             if (!req.session.username) return res.status(400).send("Bad request")
             const $2FAToken = await sql.$2faToken(req.session.username)
@@ -42,7 +50,7 @@ const $2FARoutes = (app: Express) => {
         }
     })
 
-    app.post("/api/2fa/enable", async (req: Request, res: Response) => {
+    app.post("/api/2fa/enable", $2faLimiter, async (req: Request, res: Response) => {
         try {
             let {token} = req.body 
             if (!req.session.username || !token) return res.status(400).send("Bad request")
@@ -64,7 +72,7 @@ const $2FARoutes = (app: Express) => {
         }
     })
 
-    app.post("/api/2fa", async (req: Request, res: Response) => {
+    app.post("/api/2fa", $2faLimiter, async (req: Request, res: Response) => {
         try {
             let {token} = req.body 
             if (!req.session.$2fa || !req.session.email || !token) return res.status(400).send("Bad request")
@@ -93,7 +101,7 @@ const $2FARoutes = (app: Express) => {
         }
     })
 
-    app.delete("/api/2fa/delete", async (req: Request, res: Response) => {
+    app.delete("/api/2fa/delete", $2faLimiter, async (req: Request, res: Response) => {
         try {
             if (req.session.username) return res.status(400).send("Bad request")
             req.session.destroy((err) => {

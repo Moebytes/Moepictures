@@ -3,9 +3,18 @@ import functions from "../structures/Functions"
 import sql from "../structures/SQLQuery"
 import phash from "sharp-phash"
 import dist from "sharp-phash/distance"
+import rateLimit from "express-rate-limit"
+
+const searchLimiter = rateLimit({
+	windowMs: 5 * 60 * 1000,
+	max: 1000,
+	message: "Too many requests, try again later.",
+	standardHeaders: true,
+	legacyHeaders: false
+})
 
 const SearchRoutes = (app: Express) => {
-    app.get("/api/search/posts", async (req: Request, res: Response, next: NextFunction) => {
+    app.get("/api/search/posts", searchLimiter, async (req: Request, res: Response, next: NextFunction) => {
         try {
             const query = req.query.query as string
             const type = req.query.type as string
@@ -45,7 +54,7 @@ const SearchRoutes = (app: Express) => {
         }
     })
 
-    app.get("/api/search/random", async (req: Request, res: Response, next: NextFunction) => {
+    app.get("/api/search/random", searchLimiter, async (req: Request, res: Response, next: NextFunction) => {
         try {
             const type = req.query.type as string
             const restrict = req.query.restrict as string
@@ -67,7 +76,7 @@ const SearchRoutes = (app: Express) => {
         }
     })
 
-    app.post("/api/search/similar", async (req: Request, res: Response, next: NextFunction) => {
+    app.post("/api/search/similar", searchLimiter, async (req: Request, res: Response, next: NextFunction) => {
         try {
             const buffer = Buffer.from(Object.values(req.body))
             const hash = await phash(buffer)
@@ -85,7 +94,7 @@ const SearchRoutes = (app: Express) => {
         }
     })
 
-    app.get("/api/search/artists", async (req: Request, res: Response, next: NextFunction) => {
+    app.get("/api/search/artists", searchLimiter, async (req: Request, res: Response, next: NextFunction) => {
         try {
             const query = req.query.query as string
             let sort = req.query.sort as string
@@ -99,7 +108,7 @@ const SearchRoutes = (app: Express) => {
         }
     })
 
-    app.get("/api/search/characters", async (req: Request, res: Response, next: NextFunction) => {
+    app.get("/api/search/characters", searchLimiter, async (req: Request, res: Response, next: NextFunction) => {
         try {
             const query = req.query.query as string
             let sort = req.query.sort as string
@@ -113,7 +122,7 @@ const SearchRoutes = (app: Express) => {
         }
     })
 
-    app.get("/api/search/series", async (req: Request, res: Response, next: NextFunction) => {
+    app.get("/api/search/series", searchLimiter, async (req: Request, res: Response, next: NextFunction) => {
         try {
             const query = req.query.query as string
             let sort = req.query.sort as string
@@ -127,7 +136,7 @@ const SearchRoutes = (app: Express) => {
         }
     })
 
-    app.get("/api/search/tags", async (req: Request, res: Response, next: NextFunction) => {
+    app.get("/api/search/tags", searchLimiter, async (req: Request, res: Response, next: NextFunction) => {
         try {
             const query = req.query.query as string
             let sort = req.query.sort as string
@@ -140,7 +149,7 @@ const SearchRoutes = (app: Express) => {
         }
     })
 
-    app.get("/api/search/comments", async (req: Request, res: Response, next: NextFunction) => {
+    app.get("/api/search/comments", searchLimiter, async (req: Request, res: Response, next: NextFunction) => {
         try {
             const query = req.query.query as string
             let sort = req.query.sort as string
@@ -151,7 +160,7 @@ const SearchRoutes = (app: Express) => {
             let parsedSearch = ""
             for (let i = 0; i < parts.length; i++) {
                 if (parts[i].includes("user:")) {
-                    const username = parts[i].split("user:")[1]
+                    const username = parts[i].split(":")[1]
                     usernames.push(username)
                 } else {
                     parsedSearch += `${parts[i]} `
@@ -170,7 +179,7 @@ const SearchRoutes = (app: Express) => {
         }
     })
 
-    app.get("/api/search/suggestions", async (req: Request, res: Response, next: NextFunction) => {
+    app.get("/api/search/suggestions", searchLimiter, async (req: Request, res: Response, next: NextFunction) => {
         try {
             const query = req.query.query as string
             const type = req.query.type as string

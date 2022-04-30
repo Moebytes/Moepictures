@@ -10,9 +10,26 @@ import Kuroshiro from "kuroshiro"
 import KuromojiAnalyzer from "kuroshiro-analyzer-kuromoji"
 import functions from "../structures/Functions"
 import serverFunctions from "../structures/ServerFunctions"
+import rateLimit from "express-rate-limit"
+
+const miscLimiter = rateLimit({
+	windowMs: 5 * 60 * 1000,
+	max: 1000,
+	message: "Too many requests, try again later.",
+	standardHeaders: true,
+	legacyHeaders: false
+})
+
+const contactLimiter = rateLimit({
+	windowMs: 5 * 60 * 1000,
+	max: 10,
+	message: "Too many requests, try again later.",
+	standardHeaders: true,
+	legacyHeaders: false
+})
 
 const MiscRoutes = (app: Express) => {
-    app.post("/api/misc/saucenao", async (req: Request, res: Response, next: NextFunction) => {
+    app.post("/api/misc/saucenao", miscLimiter, async (req: Request, res: Response, next: NextFunction) => {
         try {
             const form = new FormData()
             form.append("db", "999")
@@ -32,7 +49,7 @@ const MiscRoutes = (app: Express) => {
         }
     })
 
-    app.get("/api/misc/pixiv", async (req: Request, res: Response, next: NextFunction) => {
+    app.get("/api/misc/pixiv", miscLimiter, async (req: Request, res: Response, next: NextFunction) => {
         const link = req.query.url as string
         if (link.includes("pixiv.net") || link.includes("pximg.net")) {
             const pixiv = await Pixiv.refreshLogin(process.env.PIXIV_TOKEN!)
@@ -52,7 +69,7 @@ const MiscRoutes = (app: Express) => {
         }
     })
 
-    app.get("/api/misc/deviantart", async (req: Request, res: Response, next: NextFunction) => {
+    app.get("/api/misc/deviantart", miscLimiter, async (req: Request, res: Response, next: NextFunction) => {
         const link = req.query.url as string
         if (link.includes("deviantart.com")) {
             try {
@@ -68,7 +85,7 @@ const MiscRoutes = (app: Express) => {
         }
     })
 
-    app.get("/api/misc/proxy", async (req: Request, res: Response, next: NextFunction) => {
+    app.get("/api/misc/proxy", miscLimiter, async (req: Request, res: Response, next: NextFunction) => {
         const link = req.query.url as string
         try {
             const response = await axios.get(link, {responseType: "arraybuffer", headers: {Referer: "https://www.pixiv.net/"}}).then((r) => r.data)
@@ -78,7 +95,7 @@ const MiscRoutes = (app: Express) => {
         }
     })
 
-    app.get("/api/misc/redirect", async (req: Request, res: Response, next: NextFunction) => {
+    app.get("/api/misc/redirect", miscLimiter, async (req: Request, res: Response, next: NextFunction) => {
         const link = req.query.url as string
         try {
             const response = await axios.head(link).then((r) => r.request.res.responseUrl)
@@ -88,7 +105,7 @@ const MiscRoutes = (app: Express) => {
         }
     })
 
-    app.post("/api/misc/translate", async (req: Request, res: Response, next: NextFunction) => {
+    app.post("/api/misc/translate", miscLimiter, async (req: Request, res: Response, next: NextFunction) => {
         const translate = async (text: string) => {
             try {
                 const translated = await googleTranslate(text, {from: "ja", to:"en"})
@@ -102,7 +119,7 @@ const MiscRoutes = (app: Express) => {
         res.status(200).send(translated)
     })
 
-    app.post("/api/misc/romajinize", async (req: Request, res: Response, next: NextFunction) => {
+    app.post("/api/misc/romajinize", miscLimiter, async (req: Request, res: Response, next: NextFunction) => {
         const kuroshiro = new Kuroshiro()
         await kuroshiro.init(new KuromojiAnalyzer())
         const romajinize = async (text: string) => {
@@ -114,7 +131,7 @@ const MiscRoutes = (app: Express) => {
         res.status(200).send(romajinized)
     })
 
-    app.post("/api/misc/contact", async (req: Request, res: Response, next: NextFunction) => {
+    app.post("/api/misc/contact", contactLimiter, async (req: Request, res: Response, next: NextFunction) => {
         try {
             const {email, subject, message, files} = req.body 
             if (!email || !subject || !message || !files) return res.status(400).send("Bad request")

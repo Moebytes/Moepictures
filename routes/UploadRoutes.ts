@@ -13,11 +13,26 @@ import axios from "axios"
 const uploadLimiter = rateLimit({
 	windowMs: 5 * 60 * 1000,
 	max: 20,
-	message: "Too many uploads, try again later.",
+	message: "Too many requests, try again later.",
 	standardHeaders: true,
 	legacyHeaders: false
 })
 
+const editLimiter = rateLimit({
+	windowMs: 5 * 60 * 1000,
+	max: 20,
+	message: "Too many requests, try again later.",
+	standardHeaders: true,
+	legacyHeaders: false
+})
+
+const modLimiter = rateLimit({
+	windowMs: 5 * 60 * 1000,
+	max: 500,
+	message: "Too many requests, try again later.",
+	standardHeaders: true,
+	legacyHeaders: false
+})
 
 const altPath = (imagePath: string) => {
   let i = 2
@@ -264,7 +279,7 @@ const CreateRoutes = (app: Express) => {
       }
     })
 
-    app.put("/api/post/edit", async (req: Request, res: Response, next: NextFunction) => {
+    app.put("/api/post/edit", editLimiter, async (req: Request, res: Response, next: NextFunction) => {
       try {
         const postID = Number(req.body.postID)
         const images = req.body.images 
@@ -678,7 +693,7 @@ const CreateRoutes = (app: Express) => {
       }
     })
 
-    app.put("/api/post/edit/unverified", async (req: Request, res: Response, next: NextFunction) => {
+    app.put("/api/post/edit/unverified", editLimiter, async (req: Request, res: Response, next: NextFunction) => {
       try {
         let postID = Number(req.body.postID)
         let unverifiedID = Number(req.body.unverifiedID)
@@ -898,7 +913,7 @@ const CreateRoutes = (app: Express) => {
       }
     })
 
-    app.post("/api/post/approve", async (req: Request, res: Response, next: NextFunction) => {
+    app.post("/api/post/approve", modLimiter, async (req: Request, res: Response, next: NextFunction) => {
       try {
         let postID = Number(req.body.postID)
         if (Number.isNaN(postID)) return res.status(400).send("Bad request")
@@ -1067,7 +1082,7 @@ const CreateRoutes = (app: Express) => {
       }
     })
 
-    app.post("/api/post/reject", async (req: Request, res: Response, next: NextFunction) => {
+    app.post("/api/post/reject", modLimiter, async (req: Request, res: Response, next: NextFunction) => {
       try {
         let postID = Number(req.body.postID)
         if (Number.isNaN(postID)) return res.status(400).send("Bad request")

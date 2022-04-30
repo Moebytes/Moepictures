@@ -69,6 +69,7 @@ export const HeaderFlagContext = React.createContext<any>(null)
 export const CommentSearchFlagContext = React.createContext<any>(null)
 export const UnverifiedPostsContext = React.createContext<any>(null)
 export const ModStateContext = React.createContext<any>(null)
+export const ReportCommentIDContext = React.createContext<any>(null)
 
 const Context: React.FunctionComponent = (props) => {
     const [brightness, setBrightness] = useState(100)
@@ -127,8 +128,10 @@ const Context: React.FunctionComponent = (props) => {
     const [commentSearchFlag, setCommentSearchFlag] = useState(null)
     const [unverifiedPosts, setUnverifiedPosts] = useState([])
     const [modState, setModState] = useState("posts")
+    const [reportCommentID, setReportCommentID] = useState(null)
 return (
     <>
+        <ReportCommentIDContext.Provider value={{reportCommentID, setReportCommentID}}>
         <ModStateContext.Provider value={{modState, setModState}}>
         <UnverifiedPostsContext.Provider value={{unverifiedPosts, setUnverifiedPosts}}>
         <CommentSearchFlagContext.Provider value={{commentSearchFlag, setCommentSearchFlag}}>
@@ -242,6 +245,7 @@ return (
         </CommentSearchFlagContext.Provider>
         </UnverifiedPostsContext.Provider>
         </ModStateContext.Provider>
+        </ReportCommentIDContext.Provider>
     </>
     )
 }

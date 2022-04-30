@@ -75,6 +75,12 @@ const AliasTagDialog: React.FunctionComponent = (props) => {
         }
     }
 
+    const close = () => {
+        setAliasTagID(null)
+        setSubmitted(false)
+        setReason("")
+    }
+
     if (aliasTagID) {
         if (permissions.isStaff(session)) {
             return (
@@ -113,8 +119,8 @@ const AliasTagDialog: React.FunctionComponent = (props) => {
                             <span className="aliastag-dialog-text">Your alias request was submitted.</span>
                         </div>
                         <div className="aliastag-dialog-row">
-                            <button onClick={() => setAliasTagID(null)} className="download-button">{"Cancel"}</button>
-                            <button onClick={() => setAliasTagID(null)} className="download-button">{"OK"}</button>
+                            <button onClick={() => close()} className="download-button">{"Cancel"}</button>
+                            <button onClick={() => close()} className="download-button">{"OK"}</button>
                         </div> 
                         </> : <>
                         <div className="aliastag-dialog-row">

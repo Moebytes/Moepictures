@@ -12,7 +12,7 @@ import fs from "fs"
 import path from "path"
 
 const signupLimiter = rateLimit({
-	windowMs: 60 * 60 * 1000,
+	windowMs: 30 * 60 * 1000,
 	max: 5,
 	message: "Too many accounts created from this IP, try again later.",
 	standardHeaders: true,
@@ -21,7 +21,7 @@ const signupLimiter = rateLimit({
 
 const loginLimiter = rateLimit({
 	windowMs: 5 * 60 * 1000,
-	max: 10,
+	max: 30,
 	message: "Too many login attempts, try again later.",
 	standardHeaders: true,
 	legacyHeaders: false
@@ -33,8 +33,16 @@ const loginSpeedLimiter = slowDown({
     delayMs: 200
 })
 
+const userLimiter = rateLimit({
+	windowMs: 5 * 60 * 1000,
+	max: 50,
+	message: "Too many requests, try again later.",
+	standardHeaders: true,
+	legacyHeaders: false
+})
+
 const UserRoutes = (app: Express) => {
-    app.get("/api/user", async (req: Request, res: Response, next: NextFunction) => {
+    app.get("/api/user", userLimiter, async (req: Request, res: Response, next: NextFunction) => {
         try {
             const username = req.query.username as string
             if (!username) return res.status(200).json(null)
@@ -126,7 +134,7 @@ const UserRoutes = (app: Express) => {
         }
     })
 
-    app.post("/api/user/logout", async (req: Request, res: Response) => {
+    app.post("/api/user/logout", userLimiter, async (req: Request, res: Response) => {
         try {
             req.session.destroy((err) => {
                 if (err) throw err
@@ -137,7 +145,7 @@ const UserRoutes = (app: Express) => {
         }
     })
 
-    app.get("/api/user/session", async (req: Request, res: Response) => {
+    app.get("/api/user/session", userLimiter, async (req: Request, res: Response) => {
         try {
             res.status(200).json(req.session)
         } catch {
@@ -145,7 +153,7 @@ const UserRoutes = (app: Express) => {
         }
     })
 
-    app.post("/api/user/updatepfp", async (req: Request, res: Response) => {
+    app.post("/api/user/updatepfp", userLimiter, async (req: Request, res: Response) => {
         try {
             const bytes = req.body 
             if (req.session.username) {
@@ -181,7 +189,7 @@ const UserRoutes = (app: Express) => {
         }
     })
 
-    app.post("/api/user/favoritesprivacy", async (req: Request, res: Response) => {
+    app.post("/api/user/favoritesprivacy", userLimiter, async (req: Request, res: Response) => {
         try {
             if (!req.session.username) return res.status(400).send("Bad request")
             const user = await sql.user(req.session.username)
@@ -195,7 +203,7 @@ const UserRoutes = (app: Express) => {
         }
     })
 
-    app.post("/api/user/changeusername", async (req: Request, res: Response) => {
+    app.post("/api/user/changeusername", userLimiter, async (req: Request, res: Response) => {
         try {
             let {newUsername} = req.body
             if (!req.session.username) return res.status(400).send("Bad request")
@@ -220,7 +228,7 @@ const UserRoutes = (app: Express) => {
         }
     })
 
-    app.post("/api/user/changepassword", async (req: Request, res: Response) => {
+    app.post("/api/user/changepassword", userLimiter, async (req: Request, res: Response) => {
         try {
             let {oldPassword, newPassword} = req.body
             if (!oldPassword || !newPassword || !req.session.username) return res.status(400).send("Bad request")
@@ -243,7 +251,7 @@ const UserRoutes = (app: Express) => {
         }
     })
 
-    app.get("/api/user/changeemail", async (req: Request, res: Response) => {
+    app.get("/api/user/changeemail", userLimiter, async (req: Request, res: Response) => {
         try {
             let token = req.query.token as string
             if (!token || !req.session.username) return res.status(400).send("Bad request")
@@ -265,7 +273,7 @@ const UserRoutes = (app: Express) => {
         }
     })
 
-    app.post("/api/user/changeemail", async (req: Request, res: Response) => {
+    app.post("/api/user/changeemail", userLimiter, async (req: Request, res: Response) => {
         try {
             let {newEmail} = req.body
             if (!req.session.username) return res.status(400).send("Bad request")
@@ -277,7 +285,8 @@ const UserRoutes = (app: Express) => {
             const hashToken = crypto.createHash("sha256").update(token).digest("hex")
             try {
                 await sql.insertEmailToken(newEmail, hashToken)
-            } catch {
+            } catch (e) {
+                console.log(e)
                 await sql.updateEmailToken(newEmail, hashToken)
             }
             const username = functions.toProperCase(req.session.username)
@@ -289,7 +298,7 @@ const UserRoutes = (app: Express) => {
         }
     })
 
-    app.post("/api/user/verifyemail", async (req: Request, res: Response) => {
+    app.post("/api/user/verifyemail", userLimiter, async (req: Request, res: Response) => {
         try {
             let {email} = req.body
             if (!req.session.username) return res.status(400).send("Bad request")
@@ -315,17 +324,18 @@ const UserRoutes = (app: Express) => {
         }
     })
 
-    app.get("/api/user/verifyemail", async (req: Request, res: Response) => {
+    app.get("/api/user/verifyemail", userLimiter, async (req: Request, res: Response) => {
         try {
             let token = req.query.token as string
-            if (!token || !req.session.username) return res.status(400).send("Bad request")
+            if (!token) return res.status(400).send("Bad request")
             const hashToken = crypto.createHash("sha256").update(token.trim()).digest("hex")
             const tokenData = await sql.emailToken(hashToken)
             if (!tokenData) return res.status(400).send("Bad request")
             const expireDate = new Date(tokenData.expires)
             if (new Date() <= expireDate) {
-                await sql.updateUser(req.session.username, "email", tokenData.email)
-                await sql.updateUser(req.session.username, "emailVerified", true)
+                const user = await sql.userByEmail(tokenData.email)
+                await sql.updateUser(user.username, "email", tokenData.email)
+                await sql.updateUser(user.username, "emailVerified", true)
                 req.session.email = tokenData.email
                 req.session.emailVerified = true
                 await sql.deleteEmailToken(tokenData.email)
@@ -340,7 +350,7 @@ const UserRoutes = (app: Express) => {
         }
     })
 
-    app.post("/api/user/changebio", async (req: Request, res: Response) => {
+    app.post("/api/user/changebio", userLimiter, async (req: Request, res: Response) => {
         try {
             let {bio} = req.body
             if (!req.session.username || !bio) return res.status(400).send("Bad request")
@@ -355,7 +365,7 @@ const UserRoutes = (app: Express) => {
         }
     })
 
-    app.post("/api/user/forgotpassword", async (req: Request, res: Response) => {
+    app.post("/api/user/forgotpassword", userLimiter, async (req: Request, res: Response) => {
         try {
             const {email} = req.body
             if (!email) {
@@ -379,7 +389,7 @@ const UserRoutes = (app: Express) => {
         }
     })
 
-    app.post("/api/user/resetpassword", async (req: Request, res: Response) => {
+    app.post("/api/user/resetpassword", userLimiter, async (req: Request, res: Response) => {
         try {
             const {username, password, token} = req.body
             if (!username || !token || !password) return res.status(400).send("Bad request")
@@ -404,13 +414,18 @@ const UserRoutes = (app: Express) => {
         }
     })
 
-    app.delete("/api/user/delete", async (req: Request, res: Response, next: NextFunction) => {
+    app.delete("/api/user/delete", userLimiter, async (req: Request, res: Response, next: NextFunction) => {
         try {
             if (!req.session.username) return res.status(400).send("Bad request")
             const user = await sql.user(req.session.username)
             if (!user) return res.status(400).send("Bad request")
+            try {
+                await sql.deleteEmailToken(user.email)
+                await serverFunctions.deleteFile(functions.getTagLink("pfp", user.image))
+            } catch {
+                // ignore
+            }
             await sql.deleteUser(req.session.username)
-            await serverFunctions.deleteFile(functions.getTagLink("pfp", user.image))
             req.session.destroy((err) => {
                 if (err) throw err
                 res.status(200).send("Success")
@@ -421,7 +436,7 @@ const UserRoutes = (app: Express) => {
         }
     })
 
-    app.get("/api/user/favorites", async (req: Request, res: Response) => {
+    app.get("/api/user/favorites", userLimiter, async (req: Request, res: Response) => {
         try {
             const username = req.query.username
             if (username) {
@@ -439,7 +454,7 @@ const UserRoutes = (app: Express) => {
         }
     })
 
-    app.get("/api/user/uploads", async (req: Request, res: Response) => {
+    app.get("/api/user/uploads", userLimiter, async (req: Request, res: Response) => {
         try {
             const username = req.query.username
             if (!req.session.username && !username) return res.status(400).send("Bad request")

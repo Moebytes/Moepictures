@@ -7,8 +7,16 @@ import serverFunctions from "../structures/ServerFunctions"
 import fs from "fs"
 import path from "path"
 
+const tagLimiter = rateLimit({
+	windowMs: 5 * 60 * 1000,
+	max: 1000,
+	message: "Too many requests, try again later.",
+	standardHeaders: true,
+	legacyHeaders: false
+})
+
 const TagRoutes = (app: Express) => {
-    app.get("/api/tag", async (req: Request, res: Response, next: NextFunction) => {
+    app.get("/api/tag", tagLimiter, async (req: Request, res: Response, next: NextFunction) => {
         try {
             let tag = req.query.tag as string
             if (!tag) return res.status(400).send("Bad request")
@@ -19,7 +27,7 @@ const TagRoutes = (app: Express) => {
         }
     })
 
-    app.get("/api/tag/counts", async (req: Request, res: Response, next: NextFunction) => {
+    app.get("/api/tag/counts", tagLimiter, async (req: Request, res: Response, next: NextFunction) => {
         try {
             let tags = req.query.tags as string[]
             if (!tags) tags = []
@@ -31,7 +39,7 @@ const TagRoutes = (app: Express) => {
         }
     })
 
-    app.get("/api/tag/list", async (req: Request, res: Response, next: NextFunction) => {
+    app.get("/api/tag/list", tagLimiter, async (req: Request, res: Response, next: NextFunction) => {
         try {
             let tags = req.query.tags as string[]
             if (!tags) tags = []
@@ -43,7 +51,7 @@ const TagRoutes = (app: Express) => {
         }
     })
 
-    app.delete("/api/tag/delete", async (req: Request, res: Response) => {
+    app.delete("/api/tag/delete", tagLimiter, async (req: Request, res: Response) => {
         try {
             const tag = req.query.tag as string
             if (!tag) return res.status(400).send("Invalid tag")
@@ -57,7 +65,7 @@ const TagRoutes = (app: Express) => {
         }
     })
 
-    app.put("/api/tag/edit", async (req: Request, res: Response) => {
+    app.put("/api/tag/edit", tagLimiter, async (req: Request, res: Response) => {
         try {
             const {tag, key, description, image, aliases} = req.body
             if (!req.session.username || !tag) return res.status(400).send("Bad request")
@@ -102,7 +110,7 @@ const TagRoutes = (app: Express) => {
         }
     })
 
-    app.post("/api/tag/aliasto", async (req: Request, res: Response) => {
+    app.post("/api/tag/aliasto", tagLimiter, async (req: Request, res: Response) => {
         try {
             const {tag, aliasTo} = req.body
             if (!req.session.username || !tag || !aliasTo) return res.status(400).send("Bad request")
@@ -118,7 +126,7 @@ const TagRoutes = (app: Express) => {
         }
     })
 
-    app.get("/api/tag/list/unverified", async (req: Request, res: Response, next: NextFunction) => {
+    app.get("/api/tag/list/unverified", tagLimiter, async (req: Request, res: Response, next: NextFunction) => {
         try {
             if (req.session.role !== "admin" && req.session.role !== "mod") return res.status(403).end()
             let tags = req.query.tags as string[]
@@ -131,7 +139,7 @@ const TagRoutes = (app: Express) => {
         }
     })
 
-    app.post("/api/tag/delete/request", async (req: Request, res: Response) => {
+    app.post("/api/tag/delete/request", tagLimiter, async (req: Request, res: Response) => {
         try {
             const {tag, reason} = req.body
             if (!tag) return res.status(400).send("Invalid postID")
@@ -146,7 +154,7 @@ const TagRoutes = (app: Express) => {
         }
     })
 
-    app.get("/api/tag/delete/request/list", async (req: Request, res: Response) => {
+    app.get("/api/tag/delete/request/list", tagLimiter, async (req: Request, res: Response) => {
         try {
             if (!req.session.username) return res.status(400).send("Bad request")
             if (req.session.role !== "admin" && req.session.role !== "mod") return res.status(403).end()
@@ -158,7 +166,7 @@ const TagRoutes = (app: Express) => {
         }
     })
 
-    app.post("/api/tag/delete/request/fulfill", async (req: Request, res: Response) => {
+    app.post("/api/tag/delete/request/fulfill", tagLimiter, async (req: Request, res: Response) => {
         try {
             const {username, tag} = req.body
             if (!tag) return res.status(400).send("Invalid tag")
@@ -172,7 +180,7 @@ const TagRoutes = (app: Express) => {
         }
     })
 
-    app.post("/api/tag/aliasto/request", async (req: Request, res: Response) => {
+    app.post("/api/tag/aliasto/request", tagLimiter, async (req: Request, res: Response) => {
         try {
             const {tag, aliasTo, reason} = req.body
             if (!tag || !aliasTo) return res.status(400).send("Bad request")
@@ -189,7 +197,7 @@ const TagRoutes = (app: Express) => {
         }
     })
 
-    app.get("/api/tag/aliasto/request/list", async (req: Request, res: Response) => {
+    app.get("/api/tag/aliasto/request/list", tagLimiter, async (req: Request, res: Response) => {
         try {
             if (!req.session.username) return res.status(400).send("Bad request")
             if (req.session.role !== "admin" && req.session.role !== "mod") return res.status(403).end()
@@ -201,7 +209,7 @@ const TagRoutes = (app: Express) => {
         }
     })
 
-    app.post("/api/tag/aliasto/request/fulfill", async (req: Request, res: Response) => {
+    app.post("/api/tag/aliasto/request/fulfill", tagLimiter, async (req: Request, res: Response) => {
         try {
             const {username, tag} = req.body
             if (!tag) return res.status(400).send("Invalid tag")
@@ -215,7 +223,7 @@ const TagRoutes = (app: Express) => {
         }
     })
 
-    app.post("/api/tag/edit/request", async (req: Request, res: Response) => {
+    app.post("/api/tag/edit/request", tagLimiter, async (req: Request, res: Response) => {
         try {
             const {tag, key, description, image, aliases, reason} = req.body
             if (!req.session.username || !tag) return res.status(400).send("Bad request")
@@ -235,7 +243,7 @@ const TagRoutes = (app: Express) => {
         }
     })
 
-    app.get("/api/tag/edit/request/list", async (req: Request, res: Response) => {
+    app.get("/api/tag/edit/request/list", tagLimiter, async (req: Request, res: Response) => {
         try {
             if (!req.session.username) return res.status(400).send("Bad request")
             if (req.session.role !== "admin" && req.session.role !== "mod") return res.status(403).end()
@@ -247,7 +255,7 @@ const TagRoutes = (app: Express) => {
         }
     })
 
-    app.post("/api/tag/edit/request/fulfill", async (req: Request, res: Response) => {
+    app.post("/api/tag/edit/request/fulfill", tagLimiter, async (req: Request, res: Response) => {
         try {
             const {username, tag, image} = req.body
             if (!tag) return res.status(400).send("Invalid tag")

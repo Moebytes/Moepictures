@@ -113,7 +113,6 @@ const ContactPage: React.FunctionComponent = (props) => {
 
     const generateFilesJSX = () => {
         let jsx = [] as any
-        console.log(files)
         for (let i = 0; i < files.length; i++) {
             const deleteFile = () => {
                 files.splice(i, 1)

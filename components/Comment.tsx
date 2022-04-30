@@ -1,7 +1,7 @@
 import React, {useContext, useEffect, useRef, useState} from "react"
 import {useHistory} from "react-router-dom"
 import {ThemeContext, QuoteTextContext, SessionContext, DeleteCommentIDContext, DeleteCommentFlagContext,
-EditCommentIDContext, EditCommentFlagContext, EditCommentTextContext} from "../Context"
+EditCommentIDContext, EditCommentFlagContext, EditCommentTextContext, ReportCommentIDContext} from "../Context"
 import {HashLink as Link} from "react-router-hash-link"
 import functions from "../structures/Functions"
 import favicon from "../assets/purple/favicon.png"
@@ -29,6 +29,7 @@ const Comment: React.FunctionComponent<Props> = (props) => {
     const {editCommentFlag, setEditCommentFlag} = useContext(EditCommentFlagContext)
     const {editCommentID, setEditCommentID} = useContext(EditCommentIDContext)
     const {editCommentText, setEditCommentText} = useContext(EditCommentTextContext)
+    const {reportCommentID, setReportCommentID} = useContext(ReportCommentIDContext)
     const history = useHistory()
     const comment = props.comment.comment
 
@@ -115,6 +116,10 @@ const Comment: React.FunctionComponent<Props> = (props) => {
         setEditCommentID(props.comment.commentID)
     }
 
+    const reportCommentDialog = async () => {
+        setReportCommentID(props.comment.commentID)
+    }
+
     const commentOptions = () => {
         if (session.username === props.comment.username) {
             return (
@@ -136,10 +141,10 @@ const Comment: React.FunctionComponent<Props> = (props) => {
                         <img className="comment-options-img" src={commentQuote}/>
                         <span className="comment-options-text">Quote</span>
                     </div>
-                    {/* <div className="comment-options-container">
+                    <div className="comment-options-container" onClick={reportCommentDialog}>
                         <img className="comment-options-img" src={commentReport}/>
                         <span className="comment-options-text">Report</span>
-                    </div> */}
+                    </div>
                 </div>
             )
         }

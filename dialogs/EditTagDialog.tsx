@@ -49,6 +49,15 @@ const EditTagDialog: React.FunctionComponent = (props) => {
         if (permissions.isStaff(session)) {
             setEditTagFlag(true)
         } else {
+            const badDesc = functions.validateDescription(editTagDescription)
+            if (badDesc) {
+                setError(true)
+                if (!errorRef.current) await functions.timeout(20)
+                errorRef.current!.innerText = badDesc
+                await functions.timeout(2000)
+                setError(false)
+                return
+            }
             const badReason = functions.validateReason(reason)
             if (badReason) {
                 setError(true)
@@ -75,6 +84,12 @@ const EditTagDialog: React.FunctionComponent = (props) => {
         } else {
             setEditTagID(null)
         }
+    }
+
+    const close = () => {
+        setEditTagID(null)
+        setSubmitted(false)
+        setReason("")
     }
 
     const uploadTagImg = async (event: any) => {
@@ -182,11 +197,11 @@ const EditTagDialog: React.FunctionComponent = (props) => {
                         </div>
                         {submitted ? <>
                         <div className="edittag-dialog-row">
-                            <span className="edittag-dialog-text">Your tag edit was submitted.</span>
+                            <span className="edittag-dialog-text">Your tag edit request was submitted.</span>
                         </div>
                         <div className="edittag-dialog-row">
-                            <button onClick={() => setEditTagID(null)} className="edittag-button">{"Cancel"}</button>
-                            <button onClick={() => setEditTagID(null)} className="edittag-button">{"OK"}</button>
+                            <button onClick={() => close()} className="edittag-button">{"Cancel"}</button>
+                            <button onClick={() => close()} className="edittag-button">{"OK"}</button>
                         </div> 
                         </> : <>
                         <div className="edittag-dialog-row">

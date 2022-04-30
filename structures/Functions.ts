@@ -279,6 +279,12 @@ export default class Functions {
         return null
     }
 
+    public static validateDescription = (desc: string) => {
+        if (!desc) return null
+        if (gibberish(desc)) return "Description cannot be gibberish."
+        return null
+    }
+
     public static validateBio = (bio: string) => {
         if (!bio) return "No bio."
         if (gibberish(bio)) return "Bio cannot be gibberish."

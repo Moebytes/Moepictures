@@ -1,7 +1,7 @@
 import React, {useContext, useEffect, useRef, useState} from "react"
 import {useHistory} from "react-router-dom"
-import {ThemeContext, QuoteTextContext, SessionContext, DeleteCommentIDContext, DeleteCommentFlagContext,
-EditCommentFlagContext, EditCommentIDContext, EditCommentTextContext} from "../Context"
+import {ThemeContext, QuoteTextContext, SessionContext, DeleteCommentIDContext, DeleteCommentFlagContext, MobileContext,
+EditCommentFlagContext, EditCommentIDContext, EditCommentTextContext, ReportCommentIDContext} from "../Context"
 import {HashLink as Link} from "react-router-hash-link"
 import functions from "../structures/Functions"
 import favicon from "../assets/purple/favicon.png"
@@ -22,12 +22,14 @@ interface Props {
 const CommentRow: React.FunctionComponent<Props> = (props) => {
     const {theme, setTheme} = useContext(ThemeContext)
     const {quoteText, setQuoteText} = useContext(QuoteTextContext)
+    const {mobile, setMobile} = useContext(MobileContext)
     const {session, setSession} = useContext(SessionContext)
     const {deleteCommentID, setDeleteCommentID} = useContext(DeleteCommentIDContext)
     const {deleteCommentFlag, setDeleteCommentFlag} = useContext(DeleteCommentFlagContext)
     const {editCommentFlag, setEditCommentFlag} = useContext(EditCommentFlagContext)
     const {editCommentID, setEditCommentID} = useContext(EditCommentIDContext)
     const {editCommentText, setEditCommentText} = useContext(EditCommentTextContext)
+    const {reportCommentID, setReportCommentID} = useContext(ReportCommentIDContext)
     const [hover, setHover] = useState(false)
     const history = useHistory()
     const img = functions.getImageLink(props.comment.post.images[0].type, props.comment.postID, props.comment.post.images[0].filename)
@@ -121,7 +123,12 @@ const CommentRow: React.FunctionComponent<Props> = (props) => {
         setEditCommentID(props.comment.commentID)
     }
 
+    const reportCommentDialog = async () => {
+        setReportCommentID(props.comment.commentID)
+    }
+
     const commentOptions = () => {
+        if (mobile) return null
         if (session.username === props.comment.username) {
             return (
                 <div className="commentrow-options">
@@ -142,10 +149,10 @@ const CommentRow: React.FunctionComponent<Props> = (props) => {
                         <img className="commentrow-options-img" src={commentQuote}/>
                         <span className="commentrow-options-text">Quote</span>
                     </div>
-                    {/* <div className="commentrow-options-container">
+                    <div className="commentrow-options-container" onClick={reportCommentDialog}>
                         <img className="commentrow-options-img" src={commentReport}/>
                         <span className="commentrow-options-text">Report</span>
-                    </div> */}
+                    </div>
                 </div>
             )
         }

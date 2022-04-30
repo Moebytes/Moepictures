@@ -14,6 +14,7 @@ import ModPostDeletions from "../components/ModPostDeletions"
 import ModTagDeletions from "../components/ModTagDeletions"
 import ModTagAliases from "../components/ModTagAliases"
 import ModTagEdits from "../components/ModTagEdits"
+import ModCommentReports from "../components/ModCommentReports"
 import "./styles/modqueuepage.less"
 
 const ModQueuePage: React.FunctionComponent = (props) => {
@@ -60,7 +61,7 @@ const ModQueuePage: React.FunctionComponent = (props) => {
         if (modState === "tag-edits") return <ModTagEdits/>
         if (modState === "tag-aliasing") return <ModTagAliases/>
         if (modState === "tag-deletions") return <ModTagDeletions/>
-        if (modState === "reported-comments") return null
+        if (modState === "reported-comments") return <ModCommentReports/>
         return null
     }
 
@@ -73,6 +74,23 @@ const ModQueuePage: React.FunctionComponent = (props) => {
             <SideBar/>
             <div className="content">
                 <div className="modqueue">
+                    {mobile ? <>
+                    <div className="modqueue-buttons">
+                        <div className={`modqueue-button ${modState === "posts" ? "modqueue-button-active" : ""}`} onClick={() => setModState("posts")}>Posts</div>
+                        <div className={`modqueue-button ${modState === "post-edits" ? "modqueue-button-active" : ""}`} onClick={() => setModState("post-edits")}>Post Edits</div>
+                    </div>
+                    <div className="modqueue-buttons">
+                        <div className={`modqueue-button ${modState === "post-deletions" ? "modqueue-button-active" : ""}`} onClick={() => setModState("post-deletions")}>Post Deletions</div>
+                        <div className={`modqueue-button ${modState === "tag-edits" ? "modqueue-button-active" : ""}`} onClick={() => setModState("tag-edits")}>Tag Edits</div>
+                    </div>
+                    <div className="modqueue-buttons">
+                        <div className={`modqueue-button ${modState === "tag-aliasing" ? "modqueue-button-active" : ""}`} onClick={() => setModState("tag-aliasing")}>Tag Aliasing</div>
+                        <div className={`modqueue-button ${modState === "tag-deletions" ? "modqueue-button-active" : ""}`} onClick={() => setModState("tag-deletions")}>Tag Deletions</div>
+                    </div>
+                    <div className="modqueue-buttons">
+                        <div className={`modqueue-button ${modState === "reported-comments" ? "modqueue-button-active" : ""}`} onClick={() => setModState("reported-comments")}>Reported Comments</div>
+                    </div>
+                    </> : <>
                     <div className="modqueue-buttons">
                         <div className={`modqueue-button ${modState === "posts" ? "modqueue-button-active" : ""}`} onClick={() => setModState("posts")}>Posts</div>
                         <div className={`modqueue-button ${modState === "post-edits" ? "modqueue-button-active" : ""}`} onClick={() => setModState("post-edits")}>Post Edits</div>
@@ -82,7 +100,7 @@ const ModQueuePage: React.FunctionComponent = (props) => {
                         <div className={`modqueue-button ${modState === "tag-deletions" ? "modqueue-button-active" : ""}`} onClick={() => setModState("tag-deletions")}>Tag Deletions</div>
                         <div className={`modqueue-button ${modState === "reported-comments" ? "modqueue-button-active" : ""}`} onClick={() => setModState("reported-comments")}>Reported Comments</div>
                     </div>
-                    <div className="modqueue-line"></div>
+                    <div className="modqueue-line"></div> </>}
                     {generateModJSX()}
                 </div>
                 <Footer/>

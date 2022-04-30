@@ -7,8 +7,16 @@ import serverFunctions from "../structures/ServerFunctions"
 import fs from "fs"
 import path from "path"
 
-const PostRoutes = (app: Express) => {
-    app.post("/api/cuteness/update", async (req: Request, res: Response) => {
+const cutenessLimiter = rateLimit({
+	windowMs: 5 * 60 * 1000,
+	max: 2000,
+	message: "Too many requests, try again later.",
+	standardHeaders: true,
+	legacyHeaders: false
+})
+
+const CutenessRoutes = (app: Express) => {
+    app.post("/api/cuteness/update", cutenessLimiter, async (req: Request, res: Response) => {
         try {
             const {postID, cuteness} = req.body
             if (Number.isNaN(Number(postID)) || Number.isNaN(Number(cuteness))) return res.status(400).send("Bad request")
@@ -27,7 +35,7 @@ const PostRoutes = (app: Express) => {
         }
     })
 
-    app.get("/api/cuteness", async (req: Request, res: Response) => {
+    app.get("/api/cuteness", cutenessLimiter, async (req: Request, res: Response) => {
         try {
             const postID = req.query.postID
             if (Number.isNaN(Number(postID))) return res.status(400).send("Invalid postID")
@@ -39,7 +47,7 @@ const PostRoutes = (app: Express) => {
         }
     })
 
-    app.delete("/api/cuteness/delete", async (req: Request, res: Response) => {
+    app.delete("/api/cuteness/delete", cutenessLimiter, async (req: Request, res: Response) => {
         try {
             const postID = req.query.postID
             if (Number.isNaN(Number(postID))) return res.status(400).send("Invalid postID")
@@ -54,4 +62,4 @@ const PostRoutes = (app: Express) => {
     })
 }
 
-export default PostRoutes
+export default CutenessRoutes

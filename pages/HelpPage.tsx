@@ -58,9 +58,8 @@ const HelpPage: React.FunctionComponent = (props) => {
                     <span className="help-heading">Help</span>
                     <span className="help-text">Welcome to Moebooru!</span>
                     <span className="help-text">
-                        Moebooru is an image board organized by tags, centered exclusively around the art of cute anime girls. Unlike most other
-                        image boards, Moebooru has several improvements such as allowing spaces in tags and having multiple images per post. We also have a 
-                        much stricter quality control overall. I hope that you like using Moebooru's tag system and overall find it friendly to navigate.
+                        Moebooru is an image board organized by tags, centered exclusively around the art of cute anime girls. If you need specific help with 
+                        anything, scroll to a section below!
                         <div className="help-link-container">
                             <Link className="help-link" to="/help#account">Account</Link>
                             <Link className="help-link" to="/help#searching">Searching</Link>
@@ -73,7 +72,6 @@ const HelpPage: React.FunctionComponent = (props) => {
                             <Link className="help-link" to="/help#tagging">Tagging</Link>
                             <Link className="help-link" to="/help#aliases">Aliases</Link>
                             <Link className="help-link" to="/help#commenting">Commenting</Link>
-                            <Link className="help-link" to="/help#reporting">Reporting</Link>
                             <Link className="help-link" to="/help#bans">Bans</Link>
                             <Link className="help-link" to="/help#deleting-account">Deleting Your Account</Link>
                         </div>
@@ -82,18 +80,17 @@ const HelpPage: React.FunctionComponent = (props) => {
                     <span className="help-text">
                         You must be 18 or older in order to create an account. All accounts must have
                         a verified email address. An account lets you view questionable posts, upload, favorite, 
-                        comment, rate cuteness and edit tags and translations. <br/><br/> 
+                        comment, rate cuteness and edit posts and tags. <br/><br/> 
                         
-                        You can change your avatar by clicking on “set avatar” under any post or by uploading an image. Only anime 
-                        avatars are allowed. Username changes are allowed once per week and you can change your email and password as many times as you'd like. <br/><br/>
+                        You can change your avatar, bio, and account settings in your profile page. Only anime avatars are allowed. <br/><br/>
 
                         For greater account security, you can enable 2-factor authentication. This will prompt you for a time-sensitive 2fa token in addition to your password while logging in.<br/><br/>
 
-                        Some actions such as uploading a new post or aliasing a tag to another tag will be reviewed by the site staff.
+                        Most actions such as uploading a new post or aliasing a tag to another tag will be reviewed by the site staff.
                     </span>
                     <span className="help-heading" id="searching">Searching</span>
                     <span className="help-text">
-                        The tags on Moebooru use a dash ("-") as a delimeter, but you can also search with spaces because the search is smart enough to parse out the tags.
+                        The tags on Moebooru use a dash ("-") as a delimeter, but you can also search with spaces because the search can guess what tags you are searching for.
                         If you encounter a problem with this, use dashed versions of the tags. These are examples
                         of valid searches: <br/>
                         <span className="help-alt">
@@ -142,7 +139,7 @@ const HelpPage: React.FunctionComponent = (props) => {
                     </span>
                     <span className="help-heading" id="uploading">Uploading</span>
                     <span className="help-text">
-                        Moebooru is much pickier with posts than most other image boards. We allow images, gifs, videos, and comics.<br/><br/>
+                        Moebooru is a lot stricter with posts than most other image boards. We allow images, gifs, videos, and comics.<br/><br/>
                         Please read carefully through all of the uploading guidelines. <br/>
                         <span className="help-alt">
                         ⇾ Must be drawn in the anime art style. No photographs or art drawn in other styles. <br/>
@@ -163,17 +160,15 @@ const HelpPage: React.FunctionComponent = (props) => {
                     <span className="help-heading" id="variations">Variations</span>
                     <span className="help-text">
                         All variations of the same image are combined into a single post. You can add a variation to an existing post 
-                        by specifying the variationID (postID of the existing post) while uploading. All variations of an image should 
-                        be created by the original artist, otherwise it is considered a third party edit instead. If you are uploading a variation,
-                        all post fields are optional. You may specify additional tags which will be added to the original post.
-                        If an image has significantly different tags, then it is probably best to make that image it's own post instead of a variation.
+                        by editing it. All variations of an image should be created by the original artist, otherwise it is considered a third party edit instead.
+                        If an image has significantly different tags to the main post, then it is probably best to make that image it's own post instead of a variation.
                     </span>
-                    <span className="help-heading" id="third-party-edits">Third-Party Edits</span>
+                    <span className="help-heading" id="third-party-edits">Third Party Edits</span>
                     <span className="help-text">
-                        Third-party edits are modifications to a work not done by the original artist. For
+                        Third party edits are modifications to a work not done by the original artist. For
                         example, a manga with all text translated to English, or animation of an 
-                        image not done by the original artist. Third-party edits behave like their own separate post,
-                        but each third party edit is added to the original post in a separate section.
+                        image not done by the original artist. Third party edits behave like their own separate post,
+                        but each third party edit is added to the original post in a separate section and it doesn't appear directly in search.
                     </span>
                     <span className="help-heading" id="tagging">Tagging</span>
                     <span className="help-text">
@@ -196,11 +191,9 @@ const HelpPage: React.FunctionComponent = (props) => {
                     <span className="help-heading" id="aliases">Aliases</span>
                     <span className="help-text">
                         A tag can have multiple aliases that yield the same result. This is to
-                        facilitate better searching for tags that have nearly the same name such as 
-                        “with audio” and “has audio”. Unlike tags, aliases can include non-ASCII characters 
-                        so it is possible to add an alias in Japanese in order to enable Japanese searching. 
-                        You can freely add aliases to tags in the tags page, but aliasing a tag
-                        to another tag will need to be manually approved. 
+                        facilitate better searching for synonyms like "has audio" and "with audio". Unlike tags, aliases can include non-ASCII characters 
+                        so it is possible to add an alias in Japanese in order to enable Japanese searching. You can also alias an existing tag to another tag,
+                        but this is an action that needs to be approved by the site staff.
                     </span>
                     <span className="help-heading" id="commenting">Commenting</span>
                     <span className="help-text">
@@ -216,24 +209,19 @@ const HelpPage: React.FunctionComponent = (props) => {
                         &gt;&gt;&gt; User said:
                         &gt; Comment 
                         </span>
-                        Nested quotes are not supported.
-                    </span>
-                    <span className="help-heading" id="reporting">Reporting</span>
-                    <span className="help-text">
-                        If you see anything that is amiss, please report it. You can report posts, users,
-                        tags, comments, etc.
+                        Nested quotes are not supported. If you see a comment that is breaking the rules, please report it.
                     </span>
                     <span className="help-heading" id="bans">Bans</span>
                     <span className="help-text">
-                        If you break the rules severely or consistently, you will likely get banned. If you get banned, you 
-                        are not allowed to register for another account. You can still freely browse the site without an account.
+                        If you break the rules severely or consistently, you might get banned. If you get banned, you 
+                        are not allowed to register another account.
                     </span>
                     <span className="help-heading" id="deleting-account">Deleting Your Account</span>
                     <span className="help-text">
                         Because Moebooru is a site that is focused on community contributions, when you delete your account we will not 
-                        remove any of your public contributions like uploads. Your uploads will remain but the account will 
-                        show up as "deleted". All the rest of your account data and comments will be deleted. If someone else quoted you 
-                        in the comments section some of your comments might still remain though.
+                        remove any of your public contributions like submitted posts. Your uploads will remain but the account that uploaded them will 
+                        show up as "deleted". All the rest of your account data and comments will be deleted. If someone quoted you 
+                        in the comments section, some of your comments might still remain.
                     </span>
                 </div>
                 <Footer/>

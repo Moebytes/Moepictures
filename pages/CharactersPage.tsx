@@ -51,7 +51,9 @@ const CharactersPage: React.FunctionComponent = (props) => {
         setHeaderText("")
         setSidebarText("")
         document.title = "Moebooru: Characters"
-        updateCharacters()
+        setTimeout(() => {
+            updateCharacters()
+        }, 200)
     }, [])
 
     useEffect(() => {
@@ -160,7 +162,7 @@ const CharactersPage: React.FunctionComponent = (props) => {
                         </div>
                         {getSortJSX()}
                         <div className={`character-dropdown ${activeDropdown === "sort" ? "" : "hide-character-dropdown"}`} 
-                        style={{marginRight: getSortMargin(), top: "209px"}} onClick={() => setActiveDropdown("none")}>
+                        style={{marginRight: getSortMargin(), top: mobile ? "229px" : "209px"}} onClick={() => setActiveDropdown("none")}>
                             <div className="character-dropdown-row" onClick={() => setSortType("alphabetic")}>
                                 <span className="character-dropdown-text">Alphabetic</span>
                             </div>

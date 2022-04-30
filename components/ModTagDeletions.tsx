@@ -16,6 +16,8 @@ const ModTagDeletions: React.FunctionComponent = (props) => {
     const {search, setSearch} = useContext(SearchContext)
     const {searchFlag, setSearchFlag} = useContext(SearchFlagContext)
     const [requests, setRequests] = useState([]) as any
+    const [index, setIndex] = useState(0)
+    const [visibleRequests, setVisibleRequests] = useState([]) as any
     const history = useHistory()
 
     const updateTags = async () => {
@@ -48,10 +50,44 @@ const ModTagDeletions: React.FunctionComponent = (props) => {
         updateTags()
     }
 
+    useEffect(() => {
+        let currentIndex = index
+        const newVisibleRequests = visibleRequests as any
+        for (let i = 0; i < 10; i++) {
+            if (!requests[currentIndex]) break
+            newVisibleRequests.push(requests[currentIndex])
+            currentIndex++
+        }
+        setIndex(currentIndex)
+        setVisibleRequests(newVisibleRequests)
+    }, [requests])
+
+    useEffect(() => {
+        const scrollHandler = async () => {
+            if (functions.scrolledToBottom()) {
+                let currentIndex = index
+                if (!requests[currentIndex]) return
+                const newPosts = visibleRequests as any
+                for (let i = 0; i < 10; i++) {
+                    if (!requests[currentIndex]) break
+                    newPosts.push(requests[currentIndex])
+                    currentIndex++
+                }
+                setIndex(currentIndex)
+                setVisibleRequests(newPosts)
+            }
+        }
+        window.addEventListener("scroll", scrollHandler)
+        return () => {
+            window.removeEventListener("scroll", scrollHandler)
+        }
+    })
+
     const generateTagsJSX = () => {
         let jsx = [] as any
-        for (let i = 0; i < requests.length; i++) {
+        for (let i = 0; i < visibleRequests.length; i++) {
             const request = requests[i]
+            if (!request) break
             const searchTag = () => {
                 setSearch(request.tag)
                 setSearchFlag(true)

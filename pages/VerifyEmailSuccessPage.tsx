@@ -50,15 +50,6 @@ const VerifyEmailSuccessPage: React.FunctionComponent = (props) => {
         }
     }, [mobile])
 
-    useEffect(() => {
-        if (!session.cookie) return
-        if (!session.username) {
-            setRedirect("/verify-email-success")
-            history.push("/login")
-            setSidebarText("Login required.")
-        }
-    }, [session])
-
     return (
         <>
         <DragAndDrop/>

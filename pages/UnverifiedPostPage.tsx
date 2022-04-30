@@ -51,6 +51,18 @@ const UnverifiedPostPage: React.FunctionComponent<Props> = (props) => {
     const history = useHistory()
     const postID = Number(props?.match.params.id)
 
+    const refreshCache = async () => {
+        try {
+            await axios.post(image, null, {withCredentials: true})
+        } catch {
+            // ignore
+        }
+    }
+
+    useEffect(() => {
+        if (image) refreshCache()
+    }, [image])
+
     useEffect(() => {
         setHideNavbar(false)
         setHideTitlebar(false)

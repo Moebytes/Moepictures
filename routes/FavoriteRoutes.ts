@@ -7,8 +7,16 @@ import serverFunctions from "../structures/ServerFunctions"
 import fs from "fs"
 import path from "path"
 
+const favoriteLimiter = rateLimit({
+	windowMs: 5 * 60 * 1000,
+	max: 2000,
+	message: "Too many requests, try again later.",
+	standardHeaders: true,
+	legacyHeaders: false
+})
+
 const FavoriteRoutes = (app: Express) => {
-    app.post("/api/favorite/update", async (req: Request, res: Response) => {
+    app.post("/api/favorite/update", favoriteLimiter, async (req: Request, res: Response) => {
         try {
             const {postID, favorited} = req.body
             if (Number.isNaN(Number(postID))) return res.status(400).send("Invalid postID")
@@ -25,7 +33,7 @@ const FavoriteRoutes = (app: Express) => {
         }
     })
 
-    app.get("/api/favorite", async (req: Request, res: Response) => {
+    app.get("/api/favorite", favoriteLimiter, async (req: Request, res: Response) => {
         try {
             const postID = req.query.postID
             if (Number.isNaN(Number(postID))) return res.status(400).send("Invalid postID")

@@ -25,10 +25,8 @@ const DeleteAccountDialog: React.FunctionComponent = (props) => {
 
     useEffect(() => {
         if (showDeleteAccountDialog) {
-            // document.body.style.overflowY = "hidden"
             document.body.style.pointerEvents = "none"
         } else {
-            // document.body.style.overflowY = "visible"
             document.body.style.pointerEvents = "all"
             setEnableDrag(true)
         }
@@ -37,8 +35,8 @@ const DeleteAccountDialog: React.FunctionComponent = (props) => {
     const deleteAccount = async () => {
         await axios.delete("/api/user/delete", {withCredentials: true})
         setSessionFlag(true)
-        setSidebarText("Account Deleted.")
         history.push("/posts")
+        setSidebarText("Account Deleted.")
     }
 
     const click = (button: "accept" | "reject") => {

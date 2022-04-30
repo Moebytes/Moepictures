@@ -1,4 +1,4 @@
-import React, {useEffect, useContext, useState, useRef} from "react"
+import React, {useEffect, useContext, useState, useRef, useReducer} from "react"
 import TitleBar from "../components/TitleBar"
 import NavBar from "../components/NavBar"
 import SideBar from "../components/SideBar"
@@ -14,13 +14,15 @@ import CommentRow from "../components/CommentRow"
 import sortMagenta from "../assets/magenta/sort.png"
 import DeleteCommentDialog from "../dialogs/DeleteCommentDialog"
 import EditCommentDialog from "../dialogs/EditCommentDialog"
-import {ThemeContext, EnableDragContext, HideNavbarContext, HideSidebarContext, MobileContext,
+import ReportCommentDialog from "../dialogs/ReportCommentDialog"
+import {ThemeContext, EnableDragContext, HideNavbarContext, HideSidebarContext, MobileContext, SessionContext,
 RelativeContext, HideTitlebarContext, ActiveDropdownContext, HeaderTextContext, SidebarTextContext,
 CommentSearchFlagContext} from "../Context"
 import "./styles/commentspage.less"
 import axios from "axios"
 
 const CommentsPage: React.FunctionComponent = (props) => {
+    const [ignored, forceUpdate] = useReducer(x => x + 1, 0)
     const {theme, setTheme} = useContext(ThemeContext)
     const {enableDrag, setEnableDrag} = useContext(EnableDragContext)
     const {hideNavbar, setHideNavbar} = useContext(HideNavbarContext)
@@ -32,6 +34,7 @@ const CommentsPage: React.FunctionComponent = (props) => {
     const {sidebarText, setSidebarText} = useContext(SidebarTextContext)
     const {mobile, setMobile} = useContext(MobileContext)
     const {commentSearchFlag, setCommentSearchFlag} = useContext(CommentSearchFlagContext)
+    const {session, setSession} = useContext(SessionContext)
     const [sortType, setSortType] = useState("date")
     const [comments, setComments] = useState([]) as any
     const [searchQuery, setSearchQuery] = useState("")
@@ -39,8 +42,8 @@ const CommentsPage: React.FunctionComponent = (props) => {
     const [visibleComments, setVisibleComments] = useState([]) as any
     const sortRef = useRef(null) as any
 
-    const updateComments = async () => {
-        const result = await axios.get("/api/search/comments", {params: {sort: sortType, query: searchQuery}, withCredentials: true}).then((r) => r.data)
+    const updateComments = async (query?: string) => {
+        const result = await axios.get("/api/search/comments", {params: {sort: sortType, query: query ? query : searchQuery}, withCredentials: true}).then((r) => r.data)
         setIndex(0)
         setVisibleComments([])
         setComments(result)
@@ -48,9 +51,11 @@ const CommentsPage: React.FunctionComponent = (props) => {
 
     useEffect(() => {
         if (commentSearchFlag) {
-            setSearchQuery(commentSearchFlag)
-            setCommentSearchFlag(null)
-            updateComments()
+            setTimeout(() => {
+                setSearchQuery(commentSearchFlag)
+                updateComments(commentSearchFlag)
+                setCommentSearchFlag(null)
+            }, 500)
         }
     }, [commentSearchFlag])
 
@@ -63,7 +68,9 @@ const CommentsPage: React.FunctionComponent = (props) => {
         setHeaderText("")
         setSidebarText("")
         document.title = "Moebooru: Comments"
-        updateComments()
+        setTimeout(() => {
+            updateComments()
+        }, 200)
     }, [])
 
     useEffect(() => {
@@ -146,6 +153,7 @@ const CommentsPage: React.FunctionComponent = (props) => {
     const generateCommentsJSX = () => {
         const jsx = [] as any
         for (let i = 0; i < visibleComments.length; i++) {
+            if (!session.username) if (visibleComments[i].post.restrict !== "safe") continue
             jsx.push(<CommentRow comment={visibleComments[i]} onDelete={updateComments} onEdit={updateComments}/>)
         }
         return jsx
@@ -156,6 +164,7 @@ const CommentsPage: React.FunctionComponent = (props) => {
         <DragAndDrop/>
         <EditCommentDialog/>
         <DeleteCommentDialog/>
+        <ReportCommentDialog/>
         <TitleBar/>
         <NavBar/>
         <div className="body">
@@ -166,11 +175,11 @@ const CommentsPage: React.FunctionComponent = (props) => {
                     <div className="comments-row">
                         <div className="comment-search-container" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                             <input className="comment-search" type="search" spellCheck="false" value={searchQuery} onChange={(event) => setSearchQuery(event.target.value)} onKeyDown={(event) => event.key === "Enter" ? updateComments() : null}/>
-                            <img className={!theme || theme === "purple" ? "comment-search-icon" : `comment-search-icon-${theme}`} src={getSearchIcon()} onClick={updateComments}/>
+                            <img className={!theme || theme === "purple" ? "comment-search-icon" : `comment-search-icon-${theme}`} src={getSearchIcon()} onClick={() => updateComments()}/>
                         </div>
                         {getSortJSX()}
                         <div className={`comment-dropdown ${activeDropdown === "sort" ? "" : "hide-comment-dropdown"}`} 
-                        style={{marginRight: getSortMargin(), top: "209px"}} onClick={() => setActiveDropdown("none")}>
+                        style={{marginRight: getSortMargin(), top: mobile ? "229px" : "209px"}} onClick={() => setActiveDropdown("none")}>
                             <div className="comment-dropdown-row" onClick={() => setSortType("date")}>
                                 <span className="comment-dropdown-text">Date</span>
                             </div>

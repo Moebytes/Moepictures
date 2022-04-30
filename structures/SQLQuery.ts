@@ -1566,4 +1566,41 @@ export default class SQLQuery {
     const result = await SQLQuery.run(query)
     return result
   }
+
+  /** Insert comment report. */
+  public static inserCommentReport = async (username: string, commentID: number, reason: string) => {
+    const query: QueryConfig = {
+      text: `INSERT INTO "reported comments" ("reporter", "commentID", "reason") VALUES ($1, $2, $3)`,
+      values: [username, commentID, reason]
+    }
+    const result = await SQLQuery.run(query)
+    return result
+  }
+
+  /** Delete comment report. */
+  public static deleteCommentReport = async (username: string, commentID: number) => {
+    const query: QueryConfig = {
+      text: `DELETE FROM "reported comments" WHERE "reported comments"."reporter" = $1 AND "reported comments"."commentID" = $2`,
+      values: [username, commentID]
+    }
+    const result = await SQLQuery.run(query)
+    return result
+  }
+
+  public static reportedComments = async () => {
+    const query: QueryConfig = {
+      text: functions.multiTrim(`
+        SELECT comments.*, "reported comments".*, json_build_object(
+          'username', users.username,
+          'image', users.image
+        ) AS user
+        FROM "reported comments"
+        JOIN comments ON comments."commentID" = "reported comments"."commentID"
+        JOIN users ON users."username" = "comments"."username"
+        GROUP BY "reported comments"."commentReportID", comments."commentID", users.username, users.image
+      `),
+    }
+    const result = await SQLQuery.run(query)
+    return result
+  }
 }

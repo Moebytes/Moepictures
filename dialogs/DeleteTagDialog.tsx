@@ -65,6 +65,12 @@ const DeleteTagDialog: React.FunctionComponent = (props) => {
         }
     }
 
+    const close = () => {
+        setDeleteTagID(null)
+        setSubmitted(false)
+        setReason("")
+    }
+
     if (deleteTagID) {
         if (permissions.isStaff(session)) {
             return (
@@ -102,8 +108,8 @@ const DeleteTagDialog: React.FunctionComponent = (props) => {
                             <span className="deletetag-dialog-text">Your delete request was submitted.</span>
                         </div>
                         <div className="deletetag-dialog-row">
-                            <button onClick={() => setDeleteTagID(null)} className="download-button">{"Cancel"}</button>
-                            <button onClick={() => setDeleteTagID(null)} className="download-button">{"OK"}</button>
+                            <button onClick={() => close()} className="download-button">{"Cancel"}</button>
+                            <button onClick={() => close()} className="download-button">{"OK"}</button>
                         </div>
                         </> : <>
                         <div className="deletetag-dialog-row">

@@ -16,6 +16,8 @@ const ModPostEdits: React.FunctionComponent = (props) => {
     const {search, setSearch} = useContext(SearchContext)
     const {searchFlag, setSearchFlag} = useContext(SearchFlagContext)
     const {unverifiedPosts, setUnverifiedPosts} = useContext(UnverifiedPostsContext)
+    const [index, setIndex] = useState(0)
+    const [visiblePosts, setVisiblePosts] = useState([]) as any
     const history = useHistory()
 
     const updatePosts = async () => {
@@ -47,10 +49,44 @@ const ModPostEdits: React.FunctionComponent = (props) => {
         updatePosts()
     }
 
+    useEffect(() => {
+        let currentIndex = index
+        const newVisiblePosts = visiblePosts as any
+        for (let i = 0; i < 10; i++) {
+            if (!unverifiedPosts[currentIndex]) break
+            newVisiblePosts.push(unverifiedPosts[currentIndex])
+            currentIndex++
+        }
+        setIndex(currentIndex)
+        setVisiblePosts(newVisiblePosts)
+    }, [unverifiedPosts])
+
+    useEffect(() => {
+        const scrollHandler = async () => {
+            if (functions.scrolledToBottom()) {
+                let currentIndex = index
+                if (!unverifiedPosts[currentIndex]) return
+                const newPosts = visiblePosts as any
+                for (let i = 0; i < 10; i++) {
+                    if (!unverifiedPosts[currentIndex]) break
+                    newPosts.push(unverifiedPosts[currentIndex])
+                    currentIndex++
+                }
+                setIndex(currentIndex)
+                setVisiblePosts(newPosts)
+            }
+        }
+        window.addEventListener("scroll", scrollHandler)
+        return () => {
+            window.removeEventListener("scroll", scrollHandler)
+        }
+    })
+
     const generatePostsJSX = () => {
         let jsx = [] as any
-        for (let i = 0; i < unverifiedPosts.length; i++) {
+        for (let i = 0; i < visiblePosts.length; i++) {
             const post = unverifiedPosts[i]
+            if (!post) break
             const imgClick = () => {
                 history.push(`/unverified/post/${post.postID}`)
             }

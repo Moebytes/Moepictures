@@ -7,8 +7,16 @@ import serverFunctions from "../structures/ServerFunctions"
 import fs from "fs"
 import path from "path"
 
+const postLimiter = rateLimit({
+	windowMs: 5 * 60 * 1000,
+	max: 1000,
+	message: "Too many requests, try again later.",
+	standardHeaders: true,
+	legacyHeaders: false
+})
+
 const PostRoutes = (app: Express) => {
-    app.get("/api/post", async (req: Request, res: Response, next: NextFunction) => {
+    app.get("/api/post", postLimiter, async (req: Request, res: Response, next: NextFunction) => {
         try {
             const postID = req.query.postID as string
             if (Number.isNaN(Number(postID))) return res.status(400).send("Invalid postID")
@@ -23,7 +31,7 @@ const PostRoutes = (app: Express) => {
         }
     })
     
-    app.get("/api/post/comments", async (req: Request, res: Response) => {
+    app.get("/api/post/comments", postLimiter, async (req: Request, res: Response) => {
         try {
             const postID = req.query.postID
             if (Number.isNaN(Number(postID))) return res.status(400).send("Invalid postID")
@@ -34,7 +42,7 @@ const PostRoutes = (app: Express) => {
         }
     })
 
-    app.delete("/api/post/delete", async (req: Request, res: Response) => {
+    app.delete("/api/post/delete", postLimiter, async (req: Request, res: Response) => {
         try {
             const postID = req.query.postID
             if (Number.isNaN(Number(postID))) return res.status(400).send("Invalid postID")
@@ -53,7 +61,7 @@ const PostRoutes = (app: Express) => {
         }
     })
 
-    app.get("/api/post/thirdparty", async (req: Request, res: Response, next: NextFunction) => {
+    app.get("/api/post/thirdparty", postLimiter, async (req: Request, res: Response, next: NextFunction) => {
         try {
             const postID = req.query.postID as string
             if (Number.isNaN(Number(postID))) return res.status(400).send("Invalid postID")
@@ -64,7 +72,7 @@ const PostRoutes = (app: Express) => {
         }
     })
 
-    app.get("/api/post/parent", async (req: Request, res: Response, next: NextFunction) => {
+    app.get("/api/post/parent", postLimiter, async (req: Request, res: Response, next: NextFunction) => {
         try {
             const postID = req.query.postID as string
             if (Number.isNaN(Number(postID))) return res.status(400).send("Invalid postID")
@@ -75,7 +83,7 @@ const PostRoutes = (app: Express) => {
         }
     })
 
-    app.get("/api/post/unverified", async (req: Request, res: Response, next: NextFunction) => {
+    app.get("/api/post/unverified", postLimiter, async (req: Request, res: Response, next: NextFunction) => {
         try {
             const postID = req.query.postID as string
             if (Number.isNaN(Number(postID))) return res.status(400).send("Invalid postID")
@@ -91,7 +99,7 @@ const PostRoutes = (app: Express) => {
         }
     })
 
-    app.get("/api/post/list/unverified", async (req: Request, res: Response, next: NextFunction) => {
+    app.get("/api/post/list/unverified", postLimiter, async (req: Request, res: Response, next: NextFunction) => {
         try {
             if (!req.session.username) return res.status(400).send("Bad request")
             if (req.session.role !== "admin" && req.session.role !== "mod") return res.status(403).end()
@@ -103,7 +111,7 @@ const PostRoutes = (app: Express) => {
         }
     })
 
-    app.get("/api/post-edits/list/unverified", async (req: Request, res: Response, next: NextFunction) => {
+    app.get("/api/post-edits/list/unverified", postLimiter, async (req: Request, res: Response, next: NextFunction) => {
         try {
             if (!req.session.username) return res.status(400).send("Bad request")
             if (req.session.role !== "admin" && req.session.role !== "mod") return res.status(403).end()
@@ -115,7 +123,7 @@ const PostRoutes = (app: Express) => {
         }
     })
 
-    app.get("/api/post/thirdparty/unverified", async (req: Request, res: Response, next: NextFunction) => {
+    app.get("/api/post/thirdparty/unverified", postLimiter, async (req: Request, res: Response, next: NextFunction) => {
         try {
             const postID = req.query.postID as string
             if (Number.isNaN(Number(postID))) return res.status(400).send("Invalid postID")
@@ -127,7 +135,7 @@ const PostRoutes = (app: Express) => {
         }
     })
 
-    app.get("/api/post/parent/unverified", async (req: Request, res: Response, next: NextFunction) => {
+    app.get("/api/post/parent/unverified", postLimiter, async (req: Request, res: Response, next: NextFunction) => {
         try {
             const postID = req.query.postID as string
             if (Number.isNaN(Number(postID))) return res.status(400).send("Invalid postID")
@@ -139,7 +147,7 @@ const PostRoutes = (app: Express) => {
         }
     })
 
-    app.post("/api/post/delete/request", async (req: Request, res: Response) => {
+    app.post("/api/post/delete/request", postLimiter, async (req: Request, res: Response) => {
         try {
             const {postID, reason} = req.body
             if (Number.isNaN(Number(postID))) return res.status(400).send("Invalid postID")
@@ -154,7 +162,7 @@ const PostRoutes = (app: Express) => {
         }
     })
 
-    app.get("/api/post/delete/request/list", async (req: Request, res: Response) => {
+    app.get("/api/post/delete/request/list", postLimiter, async (req: Request, res: Response) => {
         try {
             if (!req.session.username) return res.status(400).send("Bad request")
             if (req.session.role !== "admin" && req.session.role !== "mod") return res.status(403).end()
@@ -166,7 +174,7 @@ const PostRoutes = (app: Express) => {
         }
     })
 
-    app.post("/api/post/delete/request/fulfill", async (req: Request, res: Response) => {
+    app.post("/api/post/delete/request/fulfill", postLimiter, async (req: Request, res: Response) => {
         try {
             const {username, postID} = req.body
             if (Number.isNaN(Number(postID))) return res.status(400).send("Invalid postID")
