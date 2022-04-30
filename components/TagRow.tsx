@@ -123,7 +123,7 @@ const TagRow: React.FunctionComponent<Props> = (props) => {
             <td className="tagrow-img-container">
                 <img className="tagrow-img" src={functions.getTagLink(props.tag.type, props.tag.image)}/>
             </td> : null}
-            <td className="tagrow-container">
+            <td className="tagrow-container" style={{width: props.tag.image ? "16%" : "25%"}}>
                 <div className="tagrow-row" onClick={searchTag}>
                     <span className="tagrow-tag">{props.tag.tag.replaceAll("-", " ")}</span>
                     <span className="tagrow-tag-count">{props.tag.postCount}</span>
