@@ -766,7 +766,7 @@ const UploadPage: React.FunctionComponent = (props) => {
                     title = pixiv[0].data.title
                     try {
                         const illust = await axios.get(`/api/misc/pixiv?url=${link}`, {withCredentials: true}).then((r: any) => r.data)
-                        commentary = `${illust.caption.replace(/<\/?[^>]+(>|$)/g, "")}\n\n${illust.tags.map((t: any) => `#${t.name}`).join(" ")}` 
+                        commentary = `${illust.caption.replace(/<\/?[^>]+(>|$)/g, "")}` 
                         date = functions.formatDate(new Date(illust.create_date))
                         link = illust.url 
                         title = illust.title
