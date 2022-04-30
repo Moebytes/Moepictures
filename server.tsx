@@ -109,8 +109,6 @@ app.use("/assets", express.static(path.join(__dirname, "./assets")))
 
 let folders = ["animation", "artist", "character", "comic", "image", "pfp", "series", "tag", "video"]
 
-let cache = {} as any
-
 for (let i = 0; i < folders.length; i++) {
   serverFunctions.uploadFile(`${folders[i]}/`, "")
   serverFunctions.uploadUnverifiedFile(`${folders[i]}/`, "")
@@ -118,8 +116,7 @@ for (let i = 0; i < folders.length; i++) {
     try {
       res.setHeader("Content-Type", mime.getType(req.path) ?? "")
       const key = decodeURIComponent(req.path.slice(1))
-      const body = cache[key] ? cache[key] : await s3.getObject({Key: key, Bucket: "moebooru"}).promise().then((r) => r.Body)
-      if (!cache[key]) cache[key] = body
+      const body = await s3.getObject({Key: key, Bucket: "moebooru"}).promise().then((r) => r.Body) as any
       const contentLength = body.length
       if (req.headers.range) {
         const parts = req.headers.range.replace(/bytes=/, "").split("-")
@@ -145,8 +142,7 @@ for (let i = 0; i < folders.length; i++) {
       if (req.session.role !== "admin" && req.session.role !== "mod") return res.status(403).end()
       res.setHeader("Content-Type", mime.getType(req.path) ?? "")
       const key = decodeURIComponent(req.path.replace("/unverified/", ""))
-      const body = cache[key] ? cache[key] : await s3.getObject({Key: key, Bucket: "moebooru-unverified"}).promise().then((r) => r.Body)
-      if (!cache[key]) cache[key] = body
+      const body = await s3.getObject({Key: key, Bucket: "moebooru-unverified"}).promise().then((r) => r.Body) as any
       const contentLength = body.length
       if (req.headers.range) {
         const parts = req.headers.range.replace(/bytes=/, "").split("-")

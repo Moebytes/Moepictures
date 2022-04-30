@@ -142,6 +142,7 @@ const EditPostPage: React.FunctionComponent<Props> = (props) => {
 
         let artists = [{}] as any
         for (let i = 0; i < tagCategories.artists.length; i++) {
+            if (!artists[i]) artists[i] = {}
             artists[i].tag = tagCategories.artists[i].tag
             if (tagCategories.artists[i].image) {
                 const imageLink = functions.getTagLink("artist", tagCategories.artists[i].image)
@@ -155,9 +156,10 @@ const EditPostPage: React.FunctionComponent<Props> = (props) => {
 
         let characters = [{}] as any
         for (let i = 0; i < tagCategories.characters.length; i++) {
+            if (!characters[i]) characters[i] = {}
             characters[i].tag = tagCategories.characters[i].tag
             if (tagCategories.characters[i].image) {
-                const imageLink = functions.getTagLink("artist", tagCategories.characters[i].image)
+                const imageLink = functions.getTagLink("character", tagCategories.characters[i].image)
                 characters[i].image = imageLink
                 const arrayBuffer = await fetch(imageLink).then((r) => r.arrayBuffer())
                 characters[i].ext = path.extname(imageLink).replace(".", "")
@@ -168,9 +170,10 @@ const EditPostPage: React.FunctionComponent<Props> = (props) => {
 
         let series = [{}] as any
         for (let i = 0; i < tagCategories.series.length; i++) {
+            if (!series[i]) series[i] = {}
             series[i].tag = tagCategories.series[i].tag
             if (tagCategories.series[i].image) {
-                const imageLink = functions.getTagLink("artist", tagCategories.series[i].image)
+                const imageLink = functions.getTagLink("series", tagCategories.series[i].image)
                 series[i].image = imageLink
                 const arrayBuffer = await fetch(imageLink).then((r) => r.arrayBuffer())
                 series[i].ext = path.extname(imageLink).replace(".", "")
