@@ -243,8 +243,7 @@ const run = async () => {
   if (!exists) await sql.updateTag("mspaint", "description", "MS Paint is a basic image editing software included with Windows. It is developed by Microsoft.")
   exists = await sql.insertTag("gimp", "tag")
   if (!exists) await sql.updateTag("gimp", "description", "Gimp is a free image editing software developed by GIMP Development Team.")
-  
-  
+
   app.listen(process.env.PORT || 8080, () => console.log("Started the website server!"))
 }
 

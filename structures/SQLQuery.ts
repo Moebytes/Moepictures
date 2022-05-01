@@ -59,6 +59,207 @@ export default class SQLQuery {
     return SQLQuery.run(query)
   }
 
+  /** Bulk updates a post */
+  public static bulkUpdatePost = async (postID: number, params: {restrict?: string, style?: string, thirdParty?: boolean, title?: string, translatedTitle?: string,
+    artist?: string, drawn?: string, link?: string, commentary?: string, translatedCommentary?: string, type?: string, uploadDate?: string, uploader?: string, updatedDate?: string, updater?: string}) => {
+    const {restrict, style, thirdParty, title, translatedTitle, artist, drawn, link, commentary, translatedCommentary, type, uploadDate, uploader, updatedDate, updater} = params
+    let setArray = [] as any
+    let values = [] as any
+    let i = 1 
+    if (restrict) {
+      setArray.push(`"restrict" = $${i}`)
+      values.push(restrict)
+      i++
+    }
+    if (style) {
+      setArray.push(`"style" = $${i}`)
+      values.push(style)
+      i++
+    }
+    if (thirdParty) {
+      setArray.push(`"thirdParty" = $${i}`)
+      values.push(thirdParty)
+      i++
+    }
+    if (title) {
+      setArray.push(`"title" = $${i}`)
+      values.push(title)
+      i++
+    }
+    if (translatedTitle) {
+      setArray.push(`"translatedTitle" = $${i}`)
+      values.push(translatedTitle)
+      i++
+    }
+    if (artist) {
+      setArray.push(`"artist" = $${i}`)
+      values.push(artist)
+      i++
+    }
+    if (drawn) {
+      setArray.push(`"drawn" = $${i}`)
+      values.push(drawn)
+      i++
+    }
+    if (link) {
+      setArray.push(`"link" = $${i}`)
+      values.push(link)
+      i++
+    }
+    if (commentary) {
+      setArray.push(`"commentary" = $${i}`)
+      values.push(commentary)
+      i++
+    }
+    if (translatedCommentary) {
+      setArray.push(`"translatedCommentary" = $${i}`)
+      values.push(translatedCommentary)
+      i++
+    }
+    if (type) {
+      setArray.push(`"type" = $${i}`)
+      values.push(type)
+      i++
+    }
+    if (uploadDate) {
+      setArray.push(`"uploadDate" = $${i}`)
+      values.push(uploadDate)
+      i++
+    }
+    if (uploader) {
+      setArray.push(`"uploader" = $${i}`)
+      values.push(uploader)
+      i++
+    }
+    if (updatedDate) {
+      setArray.push(`"updatedDate" = $${i}`)
+      values.push(updatedDate)
+      i++
+    }
+    if (updater) {
+      setArray.push(`"updater" = $${i}`)
+      values.push(updater)
+      i++
+    }
+    let setQuery = `SET ${setArray.join(", ")}`
+    const query: QueryConfig = {
+        text: `UPDATE "posts" ${setQuery} WHERE "postID" = $${i}`,
+        values: [...values, postID]
+    }
+    return SQLQuery.run(query)
+  }
+
+  /** Bulk updates a post (unverified). */
+  public static bulkUpdateUnverifiedPost = async (postID: number, params: {restrict?: string, style?: string, thirdParty?: boolean, title?: string, translatedTitle?: string,
+    artist?: string, drawn?: string, link?: string, commentary?: string, translatedCommentary?: string, type?: string, uploadDate?: string, uploader?: string, updatedDate?: string, updater?: string
+  duplicates?: boolean, newTags?: number, originalID?: number, reason?: string}) => {
+    const {restrict, style, thirdParty, title, translatedTitle, artist, drawn, link, commentary, translatedCommentary, type, uploadDate, uploader, updatedDate, updater, duplicates, originalID, newTags, reason} = params
+    let setArray = [] as any
+    let values = [] as any
+    let i = 1 
+    if (restrict) {
+      setArray.push(`"restrict" = $${i}`)
+      values.push(restrict)
+      i++
+    }
+    if (style) {
+      setArray.push(`"style" = $${i}`)
+      values.push(style)
+      i++
+    }
+    if (thirdParty) {
+      setArray.push(`"thirdParty" = $${i}`)
+      values.push(thirdParty)
+      i++
+    }
+    if (title) {
+      setArray.push(`"title" = $${i}`)
+      values.push(title)
+      i++
+    }
+    if (translatedTitle) {
+      setArray.push(`"translatedTitle" = $${i}`)
+      values.push(translatedTitle)
+      i++
+    }
+    if (artist) {
+      setArray.push(`"artist" = $${i}`)
+      values.push(artist)
+      i++
+    }
+    if (drawn) {
+      setArray.push(`"drawn" = $${i}`)
+      values.push(drawn)
+      i++
+    }
+    if (link) {
+      setArray.push(`"link" = $${i}`)
+      values.push(link)
+      i++
+    }
+    if (commentary) {
+      setArray.push(`"commentary" = $${i}`)
+      values.push(commentary)
+      i++
+    }
+    if (translatedCommentary) {
+      setArray.push(`"translatedCommentary" = $${i}`)
+      values.push(translatedCommentary)
+      i++
+    }
+    if (type) {
+      setArray.push(`"type" = $${i}`)
+      values.push(type)
+      i++
+    }
+    if (uploadDate) {
+      setArray.push(`"uploadDate" = $${i}`)
+      values.push(uploadDate)
+      i++
+    }
+    if (uploader) {
+      setArray.push(`"uploader" = $${i}`)
+      values.push(uploader)
+      i++
+    }
+    if (updatedDate) {
+      setArray.push(`"updatedDate" = $${i}`)
+      values.push(updatedDate)
+      i++
+    }
+    if (updater) {
+      setArray.push(`"updater" = $${i}`)
+      values.push(updater)
+      i++
+    }
+    if (duplicates) {
+      setArray.push(`"duplicates" = $${i}`)
+      values.push(duplicates)
+      i++
+    }
+    if (newTags) {
+      setArray.push(`"newTags" = $${i}`)
+      values.push(newTags)
+      i++
+    }
+    if (originalID) {
+      setArray.push(`"originalID" = $${i}`)
+      values.push(originalID)
+      i++
+    }
+    if (reason) {
+      setArray.push(`"reason" = $${i}`)
+      values.push(reason)
+      i++
+    }
+    let setQuery = `SET ${setArray.join(", ")}`
+    const query: QueryConfig = {
+        text: `UPDATE "unverified posts" ${setQuery} WHERE "postID" = $${i}`,
+        values: [...values, postID]
+    }
+    return SQLQuery.run(query)
+  }
+
   /** Updates a post (unverified) */
   public static updateUnverifiedPost = async (postID: number, column: string, value: string | number | boolean) => {
     const query: QueryConfig = {
@@ -69,22 +270,22 @@ export default class SQLQuery {
   }
 
   /** Insert a new image. */
-  public static insertImage = async (postID: number) => {
+  public static insertImage = async (postID: number, filename: string, type: string, order: number, hash: string, width: string, height: string, size: number) => {
     const query: QueryArrayConfig = {
-      text: `INSERT INTO "images" ("postID") VALUES ($1) RETURNING "imageID"`,
+      text: `INSERT INTO "images" ("postID", "filename", "type", "order", "hash", "width", "height", "size") VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING "imageID"`,
       rowMode: "array",
-      values: [postID]
+      values: [postID, filename, type, order, hash, width, height, size]
     }
     const result = await SQLQuery.run(query)
     return result.flat(Infinity)[0] as number
   }
 
-  /** Insert a new image. */
-  public static insertUnverifiedImage = async (postID: number) => {
+  /** Insert a new image (unverified). */
+  public static insertUnverifiedImage = async (postID: number, filename: string, type: string, order: number, hash: string, width: string, height: string, size: string) => {
     const query: QueryArrayConfig = {
-      text: `INSERT INTO "unverified images" ("postID") VALUES ($1) RETURNING "imageID"`,
+      text: `INSERT INTO "unverified images" ("postID", "filename", "type", "order", "hash", "width", "height", "size") VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING "imageID"`,
       rowMode: "array",
-      values: [postID]
+      values: [postID, filename, type, order, hash, width, height, size]
     }
     const result = await SQLQuery.run(query)
     return result.flat(Infinity)[0] as number
@@ -143,6 +344,28 @@ export default class SQLQuery {
     }
   }
 
+  /** Bulk insert new tags. */
+  public static bulkInsertTags = async (bulkTags: any[]) => {
+    let rawValues = [] as any
+    let valueArray = [] as any 
+    let i = 1 
+    for (let j = 0; j < bulkTags.length; j++) {
+      valueArray.push(`($${i}, $${i + 1}, $${i + 2}, $${i + 3})`)
+      rawValues.push(bulkTags[j].tag)
+      rawValues.push(bulkTags[j].type)
+      rawValues.push(bulkTags[j].description)
+      rawValues.push(bulkTags[j].image)
+      i += 4
+    }
+    let valueQuery = `VALUES ${valueArray.join(", ")}`
+    const query: QueryConfig = {
+      text: `INSERT INTO "tags" ("tag", "type", "description", "image") ${valueQuery} 
+             ON CONFLICT ("tag") DO UPDATE SET "type" = EXCLUDED."type", "image" = EXCLUDED."image"`,
+      values: [...rawValues]
+    }
+    return SQLQuery.run(query)
+  }
+
   /** Insert a new tag (unverified). */
   public static insertUnverifiedTag = async (tag: string, type?: string) => {
     const query: QueryConfig = {
@@ -156,6 +379,28 @@ export default class SQLQuery {
     } catch {
       return true
     }
+  }
+
+  /** Bulk insert new tags (unverified). */
+  public static bulkInsertUnverifiedTags = async (bulkTags: any[]) => {
+    let rawValues = [] as any
+    let valueArray = [] as any 
+    let i = 1 
+    for (let j = 0; j < bulkTags.length; j++) {
+      valueArray.push(`($${i}, $${i + 1}, $${i + 2}, $${i + 3})`)
+      rawValues.push(bulkTags[j].tag)
+      rawValues.push(bulkTags[j].type)
+      rawValues.push(bulkTags[j].description)
+      rawValues.push(bulkTags[j].image)
+      i += 4
+    }
+    let valueQuery = `VALUES ${valueArray.join(", ")}`
+    const query: QueryConfig = {
+      text: `INSERT INTO "unverified tags" ("tag", "type", "description", "image") ${valueQuery} 
+             ON CONFLICT ("tag") DO UPDATE SET "type" = EXCLUDED."type", "image" = EXCLUDED."image"`,
+      values: [...rawValues]
+    }
+    return SQLQuery.run(query)
   }
 
   /** Update a tag. */
@@ -177,22 +422,36 @@ export default class SQLQuery {
   }
 
   /** Insert a new tag map. */
-  public static insertTagMap = async (postID: number, tag: string) => {
+  public static insertTagMap = async (postID: number, tags: string[]) => {
+    let i = 2
+    let valueArray = [] as any
+    for (let j = 0; j < tags.length; j++) {
+      valueArray.push(`($1, $${i})`)
+      i++
+    }
+    let valueQuery = `VALUES ${valueArray.join(", ")}`
     const query: QueryArrayConfig = {
-      text: `INSERT INTO "tag map" ("postID", "tag") VALUES ($1, $2)`,
+      text: `INSERT INTO "tag map" ("postID", "tag") ${valueQuery}`,
       rowMode: "array",
-      values: [postID, tag]
+      values: [postID, ...tags]
     }
     const result = await SQLQuery.run(query)
     return result.flat(Infinity)[0] as number
   }
 
   /** Insert a new tag map (unverified). */
-  public static insertUnverifiedTagMap = async (postID: number, tag: string) => {
+  public static insertUnverifiedTagMap = async (postID: number, tags: string[]) => {
+    let i = 2
+    let valueArray = [] as any
+    for (let j = 0; j < tags.length; j++) {
+      valueArray.push(`($1, $${i})`)
+      i++
+    }
+    let valueQuery = `VALUES ${valueArray.join(", ")}`
     const query: QueryArrayConfig = {
-      text: `INSERT INTO "unverified tag map" ("postID", "tag") VALUES ($1, $2)`,
+      text: `INSERT INTO "unverified tag map" ("postID", "tag") ${valueQuery}`,
       rowMode: "array",
-      values: [postID, tag]
+      values: [postID, ...tags]
     }
     const result = await SQLQuery.run(query)
     return result.flat(Infinity)[0] as number
