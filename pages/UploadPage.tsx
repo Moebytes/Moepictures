@@ -674,6 +674,14 @@ const UploadPage: React.FunctionComponent = (props) => {
     }
 
     const submit = async () => {
+        const tags = functions.cleanHTML(rawTags).split(/[\n\r\s]+/g)
+        if (tags.length < 5) {
+            setSubmitError(true)
+            await functions.timeout(20)
+            submitErrorRef.current.innerText = "Minimum of 5 tags is required."
+            await functions.timeout(3000)
+            return setSubmitError(false)
+        }
         const MB = acceptedURLs.reduce((acc: any, obj: any) => acc + obj.size, 0) / (1024*1024)
         if (MB > 200) {
             setSubmitError(true)
@@ -705,7 +713,7 @@ const UploadPage: React.FunctionComponent = (props) => {
             characters,
             series,
             newTags,
-            tags: functions.cleanHTML(rawTags).split(/[\n\r\s]+/g),
+            tags,
             duplicates: dupPosts.length ? true : false
         }
         setSubmitError(true)

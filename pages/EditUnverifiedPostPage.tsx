@@ -735,6 +735,14 @@ const EditUnverifiedPostPage: React.FunctionComponent<Props> = (props) => {
     }
 
     const submit = async () => {
+        const tags = functions.cleanHTML(rawTags).split(/[\n\r\s]+/g)
+        if (tags.length < 5) {
+            setSubmitError(true)
+            await functions.timeout(20)
+            submitErrorRef.current.innerText = "Minimum of 5 tags is required."
+            await functions.timeout(3000)
+            return setSubmitError(false)
+        }
         if (!edited) {
             setSubmitError(true)
             await functions.timeout(20)
@@ -775,7 +783,7 @@ const EditUnverifiedPostPage: React.FunctionComponent<Props> = (props) => {
             characters,
             series,
             newTags,
-            tags: functions.cleanHTML(rawTags).split(/[\n\r\s]+/g)
+            tags
         }
         setSubmitError(true)
         await functions.timeout(20)
