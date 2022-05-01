@@ -1069,7 +1069,7 @@ const EditPostPage: React.FunctionComponent<Props> = (props) => {
         setRawTags((prev: string) => {
             const parts = functions.cleanHTML(prev).split(/ +/g)
             parts[parts.length - 1] = tag
-            return parts.join(" ")
+            return parts.join(" ") + " "
         })
     }
 

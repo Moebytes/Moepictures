@@ -28,7 +28,8 @@ const SearchSuggestions: React.FunctionComponent<Props> = (props) => {
 
     const handleKeydown = (event: any) => {
         if (event.key === "Enter") {
-            if (!suggestions[activeIndex]) return
+            if (!suggestions.length) return
+            event.preventDefault()
             if (props.click) return props.click(suggestions[activeIndex].tag)
             setSearch((prev: string) => {
                 const parts = prev.split(/ +/g)
@@ -54,7 +55,7 @@ const SearchSuggestions: React.FunctionComponent<Props> = (props) => {
         return () => {
             window.removeEventListener("keydown", handleKeydown)
         }
-    }, [activeIndex])
+    }, [suggestions, activeIndex])
 
     useEffect(() => {
         if (props.active) {
