@@ -350,8 +350,9 @@ const EditPostPage: React.FunctionComponent<Props> = (props) => {
                 const jpg = result?.mime === "image/jpeg"
                 const png = result?.mime === "image/png"
                 const gif = result?.mime === "image/gif"
-                let ext = jpg ? "jpg" : png ? "png" : gif ? "gif" : null
-                if (jpg || png || gif) {
+                const webp = result?.mime === "image/webp"
+                let ext = jpg ? "jpg" : png ? "png" : gif ? "gif" : webp ? "webp" : null
+                if (jpg || png || gif || webp) {
                     let url = URL.createObjectURL(file)
                     let croppedURL = ""
                     if (gif) {
