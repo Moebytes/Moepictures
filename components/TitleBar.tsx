@@ -62,6 +62,8 @@ const TitleBar: React.FunctionComponent<Props> = (props) => {
     }
 
     const titleClick = () => {
+        history.push("/")
+        /*
         if (props.reset) {
             setSearch("")
             setImageType("all")
@@ -71,7 +73,7 @@ const TitleBar: React.FunctionComponent<Props> = (props) => {
         }
         setSearchFlag(true)
         history.push("/")
-        window.scrollTo(0, 0)
+        window.scrollTo(0, 0)*/
     }
 
     useEffect(() => {

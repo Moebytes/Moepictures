@@ -36,10 +36,13 @@ const TagsPage: React.FunctionComponent = (props) => {
     const [index, setIndex] = useState(0)
     const [searchQuery, setSearchQuery] = useState("")
     const [visibleTags, setVisibleTags] = useState([]) as any
+    const [offset, setOffset] = useState(0)
+    const [ended, setEnded] = useState(false)
     const sortRef = useRef(null) as any
 
     const updateTags = async () => {
         const result = await axios.get("/api/search/tags", {params: {sort: sortType, query: searchQuery}, withCredentials: true}).then((r) => r.data)
+        setEnded(false)
         setIndex(0)
         setVisibleTags([])
         setTags(result)
@@ -83,14 +86,26 @@ const TagsPage: React.FunctionComponent = (props) => {
         setVisibleTags(newVisibleTags)
     }, [tags])
 
+    const updateOffset = async () => {
+        if (ended) return
+        const newOffset = offset + 100
+        const result = await axios.get("/api/search/tags", {params: {sort: sortType, query: searchQuery, offset: newOffset}, withCredentials: true}).then((r) => r.data)
+        if (result?.length) {
+            setOffset(newOffset)
+            setTags((prev: any) => [...prev, ...result])
+        } else {
+            setEnded(true)
+        }
+    }
+
     useEffect(() => {
         const scrollHandler = async () => {
             if (functions.scrolledToBottom()) {
                 let currentIndex = index
-                if (!tags[currentIndex]) return
+                if (!tags[currentIndex]) return updateOffset()
                 const newTags = visibleTags as any
                 for (let i = 0; i < 15; i++) {
-                    if (!tags[currentIndex]) break
+                    if (!tags[currentIndex]) return updateOffset()
                     newTags.push(tags[currentIndex])
                     currentIndex++
                 }

@@ -1,4 +1,4 @@
-import React, {useContext, useEffect, useRef, useState} from "react"
+import React, {useContext, useEffect, useRef, useState, useReducer} from "react"
 import {useHistory} from "react-router-dom"
 import {ThemeContext, SizeTypeContext, PostAmountContext, PostsContext, ImageTypeContext, EnableDragContext,
 RestrictTypeContext, StyleTypeContext, SortTypeContext, SearchContext, SearchFlagContext, HeaderFlagContext,
@@ -11,6 +11,7 @@ import path from "path"
 import "./styles/imagegrid.less"
 
 const ImageGrid: React.FunctionComponent = (props) => {
+    const [ignored, forceUpdate] = useReducer(x => x + 1, 0)
     const {theme, setTheme} = useContext(ThemeContext)
     const {sizeType, setSizeType} = useContext(SizeTypeContext)
     const {enableDrag, setEnableDrag} = useContext(EnableDragContext)
@@ -32,6 +33,9 @@ const ImageGrid: React.FunctionComponent = (props) => {
     const {session, setSession} = useContext(SessionContext)
     const [loaded, setLoaded] = useState(false)
     const [noResults, setNoResults] = useState(false)
+    const [isRandomSearch, setIsRandomSearch] = useState(false)
+    const [offset, setOffset] = useState(0)
+    const [ended, setEnded] = useState(false)
     const history = useHistory()
 
     const getInitLoadAmount = () => {
@@ -51,6 +55,7 @@ const ImageGrid: React.FunctionComponent = (props) => {
     const searchPosts = async () => {
         if (searchFlag) setSearchFlag(false)
         setNoResults(false)
+        setEnded(false)
         setIndex(0)
         setVisiblePosts([])
         const query = await functions.parseSpaceEnabledSearch(search)
@@ -58,6 +63,7 @@ const ImageGrid: React.FunctionComponent = (props) => {
         const result = await axios.get("/api/search/posts", {params: {query, type: imageType, restrict: restrictType, style: styleType, sort: sortType}, withCredentials: true}).then((r) => r.data)
         setHeaderFlag(true)
         setPosts(result)
+        setIsRandomSearch(false)
         if (!result.length) setNoResults(true)
         if (!search) {
             document.title = "Moebooru: Cutest Anime Art ♡"
@@ -66,21 +72,21 @@ const ImageGrid: React.FunctionComponent = (props) => {
 
     useEffect(() => {
         if (!loaded) setLoaded(true)
-        if (searchFlag) searchPosts()
+        if (searchFlag) searchPosts().then(() => forceUpdate())
     }, [])
     
     useEffect(() => {
         let timeout = null as any
         clearTimeout(timeout)
-        if (!noResults && !visiblePosts.length) {
+        if (!noResults && !ended && !visiblePosts.length && loaded) {
             timeout = setTimeout(() => {
-                searchPosts()
+                // searchPosts()
             }, 100)
         }
         return () => {
             clearTimeout(timeout)
         }
-    }, [visiblePosts])
+    }, [visiblePosts, noResults, ended, loaded])
 
     useEffect(() => {
         if (loaded) searchPosts()
@@ -91,9 +97,11 @@ const ImageGrid: React.FunctionComponent = (props) => {
             setRandomFlag(false)
             setSearch("")
             const result = await axios.get("/api/search/random", {params: {type: imageType, restrict: restrictType, style: styleType}, withCredentials: true}).then((r) => r.data)
+            setEnded(false)
             setIndex(0)
             setVisiblePosts([])
             setPosts(result)
+            setIsRandomSearch(true)
             document.title = "Moebooru: Random"
         }
         if (randomFlag) randomPosts()
@@ -101,6 +109,7 @@ const ImageGrid: React.FunctionComponent = (props) => {
 
     useEffect(() => {
         if (imageSearchFlag) {
+            setEnded(false)
             setIndex(0)
             setVisiblePosts([])
             setPosts(imageSearchFlag)
@@ -125,10 +134,31 @@ const ImageGrid: React.FunctionComponent = (props) => {
             }
             setIndex(currentIndex)
             setVisiblePosts(functions.removeDuplicates(newVisiblePosts))
-            setSidebarText(`${posts.length === 1 ? `${posts.length} result.` : `${posts.length} results.`}`)
+            setSidebarText(`${Number(posts[0]?.postCount) === 1 ? `1 result.` : `${posts[0]?.postCount || 0} results.`}`)
+            localStorage.setItem("savedPosts", JSON.stringify(posts))
         }
         updatePosts()
     }, [posts])
+
+    const updateOffset = async () => {
+        if (noResults) return
+        if (ended) return
+        const newOffset = offset + 100
+        let result = null as any
+        if (isRandomSearch) {
+            result = await axios.get("/api/search/random", {params: {type: imageType, restrict: restrictType, style: styleType, offset: newOffset}, withCredentials: true}).then((r) => r.data)
+        } else {
+            const query = await functions.parseSpaceEnabledSearch(search)
+            result = await axios.get("/api/search/posts", {params: {query, type: imageType, restrict: restrictType, style: styleType, sort: sortType, offset: newOffset}, withCredentials: true}).then((r) => r.data)
+        }
+        console.log(result)
+        if (result?.length) {
+            setOffset(newOffset)
+            setPosts((prev: any) => [...prev, ...result])
+        } else {
+            setEnded(true)
+        }
+    }
 
     useEffect(() => {
         const updatePosts = async () => {
@@ -137,7 +167,7 @@ const ImageGrid: React.FunctionComponent = (props) => {
                 const newVisiblePosts = visiblePosts as any
                 const max = getInitLoadAmount() - visiblePosts.length 
                 for (let i = 0; i < max; i++) {
-                    if (!posts[currentIndex]) break
+                    if (!posts[currentIndex]) return updateOffset()
                     const post = posts[currentIndex]
                     currentIndex++
                     newVisiblePosts.push(post)
@@ -153,10 +183,10 @@ const ImageGrid: React.FunctionComponent = (props) => {
         const scrollHandler = async () => {
             if (functions.scrolledToBottom()) {
                 let currentIndex = index
-                if (!posts[currentIndex]) return
+                if (!posts[currentIndex]) return updateOffset()
                 const newVisiblePosts = visiblePosts as any
                 for (let i = 0; i < getLoadAmount(); i++) {
-                    if (!posts[currentIndex]) break
+                    if (!posts[currentIndex]) return updateOffset()
                     const post = posts[currentIndex]
                     currentIndex++
                     newVisiblePosts.push(post)

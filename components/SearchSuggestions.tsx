@@ -28,12 +28,12 @@ const SearchSuggestions: React.FunctionComponent<Props> = (props) => {
 
     const handleKeydown = (event: any) => {
         if (event.key === "Enter") {
-            if (!suggestions.length) return
+            if (!active || !suggestions.length) return
             event.preventDefault()
-            if (props.click) return props.click(suggestions[activeIndex].tag)
+            if (props.click) return props.click(suggestions[activeIndex]?.tag)
             setSearch((prev: string) => {
                 const parts = prev.split(/ +/g)
-                parts[parts.length - 1] = suggestions[activeIndex].tag
+                parts[parts.length - 1] = suggestions[activeIndex]?.tag
                 return parts.join(" ")
             })
             setSearchFlag(true)
@@ -90,6 +90,7 @@ const SearchSuggestions: React.FunctionComponent<Props> = (props) => {
     const generateSuggestionsJSX = () => {
         let jsx = [] as any
         for (let i = 0; i < suggestions.length; i++) {
+            if (!suggestions[i]) break
             const tagClick = () => {
                 if (props.click) return props.click(suggestions[i].tag)
                 setSearch((prev: string) => {

@@ -33,10 +33,13 @@ const ArtistsPage: React.FunctionComponent = (props) => {
     const [index, setIndex] = useState(0)
     const [searchQuery, setSearchQuery] = useState("")
     const [visibleArtists, setVisibleArtists] = useState([]) as any
+    const [offset, setOffset] = useState(0)
+    const [ended, setEnded] = useState(false)
     const sortRef = useRef(null) as any
 
     const updateArtists = async () => {
         const result = await axios.get("/api/search/artists", {params: {sort: sortType, query: searchQuery}, withCredentials: true}).then((r) => r.data)
+        setEnded(false)
         setIndex(0)
         setVisibleArtists([])
         setArtists(result)
@@ -80,14 +83,26 @@ const ArtistsPage: React.FunctionComponent = (props) => {
         setVisibleArtists(newVisibleArtists)
     }, [artists])
 
+    const updateOffset = async () => {
+        if (ended) return
+        const newOffset = offset + 100
+        const result = await axios.get("/api/search/artists", {params: {sort: sortType, query: searchQuery, offset: newOffset}, withCredentials: true}).then((r) => r.data)
+        if (result?.length) {
+            setOffset(newOffset)
+            setArtists((prev: any) => [...prev, ...result])
+        } else {
+            setEnded(true)
+        }
+    }
+
     useEffect(() => {
         const scrollHandler = async () => {
             if (functions.scrolledToBottom()) {
                 let currentIndex = index
-                if (!artists[currentIndex]) return
+                if (!artists[currentIndex]) return updateOffset()
                 const newArtists = visibleArtists as any
                 for (let i = 0; i < 10; i++) {
-                    if (!artists[currentIndex]) break
+                    if (!artists[currentIndex]) return updateOffset()
                     newArtists.push(artists[currentIndex])
                     currentIndex++
                 }

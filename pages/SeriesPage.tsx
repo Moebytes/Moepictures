@@ -33,10 +33,13 @@ const SeriesPage: React.FunctionComponent = (props) => {
     const [index, setIndex] = useState(0)
     const [searchQuery, setSearchQuery] = useState("")
     const [visibleSeries, setVisibleSeries] = useState([]) as any
+    const [offset, setOffset] = useState(0)
+    const [ended, setEnded] = useState(false)
     const sortRef = useRef(null) as any
 
     const updateSeries = async () => {
         const result = await axios.get("/api/search/series", {params: {sort: sortType, query: searchQuery}, withCredentials: true}).then((r) => r.data)
+        setEnded(false)
         setIndex(0)
         setVisibleSeries([])
         setSeries(result)
@@ -80,14 +83,26 @@ const SeriesPage: React.FunctionComponent = (props) => {
         setVisibleSeries(newVisibleSeries)
     }, [series])
 
+    const updateOffset = async () => {
+        if (ended) return
+        const newOffset = offset + 100
+        const result = await axios.get("/api/search/series", {params: {sort: sortType, query: searchQuery, offset: newOffset}, withCredentials: true}).then((r) => r.data)
+        if (result?.length) {
+            setOffset(newOffset)
+            setSeries((prev: any) => [...prev, ...result])
+        } else {
+            setEnded(true)
+        }
+    }
+
     useEffect(() => {
         const scrollHandler = async () => {
             if (functions.scrolledToBottom()) {
                 let currentIndex = index
-                if (!series[currentIndex]) return
+                if (!series[currentIndex]) return updateOffset()
                 const newSeries = visibleSeries as any
                 for (let i = 0; i < 10; i++) {
-                    if (!series[currentIndex]) break
+                    if (!series[currentIndex]) return updateOffset()
                     newSeries.push(series[currentIndex])
                     currentIndex++
                 }

@@ -156,9 +156,10 @@ const TagRoutes = (app: Express) => {
 
     app.get("/api/tag/delete/request/list", tagLimiter, async (req: Request, res: Response) => {
         try {
+            const offset = req.query.offset as string
             if (!req.session.username) return res.status(400).send("Bad request")
             if (req.session.role !== "admin" && req.session.role !== "mod") return res.status(403).end()
-            const result = await sql.tagDeleteRequests()
+            const result = await sql.tagDeleteRequests(offset)
             res.status(200).json(result)
         } catch (e) {
             console.log(e)
@@ -199,9 +200,10 @@ const TagRoutes = (app: Express) => {
 
     app.get("/api/tag/aliasto/request/list", tagLimiter, async (req: Request, res: Response) => {
         try {
+            const offset = req.query.offset as string
             if (!req.session.username) return res.status(400).send("Bad request")
             if (req.session.role !== "admin" && req.session.role !== "mod") return res.status(403).end()
-            const result = await sql.aliasRequests()
+            const result = await sql.aliasRequests(offset)
             res.status(200).json(result)
         } catch (e) {
             console.log(e)
@@ -245,9 +247,10 @@ const TagRoutes = (app: Express) => {
 
     app.get("/api/tag/edit/request/list", tagLimiter, async (req: Request, res: Response) => {
         try {
+            const offset = req.query.offset as string
             if (!req.session.username) return res.status(400).send("Bad request")
             if (req.session.role !== "admin" && req.session.role !== "mod") return res.status(403).end()
-            const result = await sql.tagEditRequests()
+            const result = await sql.tagEditRequests(offset)
             res.status(200).json(result)
         } catch (e) {
             console.log(e)

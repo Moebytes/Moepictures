@@ -33,10 +33,13 @@ const CharactersPage: React.FunctionComponent = (props) => {
     const [index, setIndex] = useState(0)
     const [searchQuery, setSearchQuery] = useState("")
     const [visibleCharacters, setVisibleCharacters] = useState([]) as any
+    const [offset, setOffset] = useState(0)
+    const [ended, setEnded] = useState(false)
     const sortRef = useRef(null) as any
 
     const updateCharacters = async () => {
         const result = await axios.get("/api/search/characters", {params: {sort: sortType, query: searchQuery}, withCredentials: true}).then((r) => r.data)
+        setEnded(false)
         setIndex(0)
         setVisibleCharacters([])
         setCharacters(result)
@@ -80,14 +83,26 @@ const CharactersPage: React.FunctionComponent = (props) => {
         setVisibleCharacters(newVisibleCharacters)
     }, [characters])
 
+    const updateOffset = async () => {
+        if (ended) return
+        const newOffset = offset + 100
+        const result = await axios.get("/api/search/characters", {params: {sort: sortType, query: searchQuery, offset: newOffset}, withCredentials: true}).then((r) => r.data)
+        if (result?.length) {
+            setOffset(newOffset)
+            setCharacters((prev: any) => [...prev, ...result])
+        } else {
+            setEnded(true)
+        }
+    }
+
     useEffect(() => {
         const scrollHandler = async () => {
             if (functions.scrolledToBottom()) {
                 let currentIndex = index
-                if (!characters[currentIndex]) return
+                if (!characters[currentIndex]) return updateOffset()
                 const newCharacters = visibleCharacters as any
                 for (let i = 0; i < 10; i++) {
-                    if (!characters[currentIndex]) break
+                    if (!characters[currentIndex]) return updateOffset()
                     newCharacters.push(characters[currentIndex])
                     currentIndex++
                 }

@@ -79,9 +79,10 @@ const CommentRoutes = (app: Express) => {
 
     app.get("/api/comment/report/list", commentLimiter, async (req: Request, res: Response) => {
         try {
+            const offset = req.query.offset as string
             if (!req.session.username) return res.status(400).send("Bad request")
             if (req.session.role !== "admin" && req.session.role !== "mod") return res.status(403).end()
-            const result = await sql.reportedComments()
+            const result = await sql.reportedComments(offset)
             res.status(200).json(result)
         } catch {
             res.status(400).send("Bad request") 

@@ -23,11 +23,14 @@ const ModTagEdits: React.FunctionComponent = (props) => {
     const [showOldTags, setShowOldTags] = useState([]) as any
     const [index, setIndex] = useState(0)
     const [visibleRequests, setVisibleRequests] = useState([]) as any
+    const [offset, setOffset] = useState(0)
+    const [ended, setEnded] = useState(false)
     const history = useHistory()
 
     const updateTags = async () => {
         const requests = await axios.get("/api/tag/edit/request/list", {withCredentials: true}).then((r) => r.data)
         const oldTags = await axios.get("/api/tag/list", {params: {tags: requests.map((r: any) => r.tag)}, withCredentials: true}).then((r) => r.data)
+        setEnded(false)
         setRequests(requests)
         setOldTags(oldTags)
     }
@@ -81,14 +84,29 @@ const ModTagEdits: React.FunctionComponent = (props) => {
         setVisibleRequests(newVisibleRequests)
     }, [requests])
 
+    const updateOffset = async () => {
+        if (ended) return
+        const newOffset = offset + 100
+        const result = await axios.get("/api/tag/edit/request/list", {params: {offset: newOffset}, withCredentials: true}).then((r) => r.data)
+        if (result?.length) {
+            const oldTags = await axios.get("/api/tag/list", {params: {tags: requests.map((r: any) => r.tag)}, withCredentials: true}).then((r) => r.data)
+            setOffset(newOffset)
+            setRequests((prev: any) => [...prev, ...result])
+            setOldTags((prev: any) => [...prev, ...oldTags])
+        } else {
+            setEnded(true)
+        }
+    }
+
+
     useEffect(() => {
         const scrollHandler = async () => {
             if (functions.scrolledToBottom()) {
                 let currentIndex = index
-                if (!requests[currentIndex]) return
+                if (!requests[currentIndex]) return updateOffset()
                 const newPosts = visibleRequests as any
                 for (let i = 0; i < 10; i++) {
-                    if (!requests[currentIndex]) break
+                    if (!requests[currentIndex]) return updateOffset()
                     newPosts.push(requests[currentIndex])
                     currentIndex++
                 }

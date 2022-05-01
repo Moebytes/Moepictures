@@ -337,6 +337,7 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
         let jsx = [] as any
         for (let i = 0; i < props.artists.length; i++) {
             const link = functions.getTagLink("artist", props.artists[i].image)
+            if (!props.artists[i]) break
             const tagClick = () => {
                 setSearch(props.artists[i].tag)
                 setSearchFlag(true)
@@ -361,6 +362,7 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
     const generateCharactersJSX = () => {
         let jsx = [] as any
         for (let i = 0; i < props.characters.length; i++) {
+            if (!props.characters[i]) break
             const tagClick = () => {
                 setSearch(props.characters[i].tag)
                 setSearchFlag(true)
@@ -381,6 +383,7 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
     const generateSeriesJSX = () => {
         let jsx = [] as any
         for (let i = 0; i < props.series.length; i++) {
+            if (!props.series[i]) break
             const tagClick = () => {
                 setSearch(props.series[i].tag)
                 setSearchFlag(true)
@@ -403,6 +406,7 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
         let currentTags = props.tags ? props.tags : tags
         let max = currentTags.length > maxTags ? maxTags : currentTags.length
         for (let i = 0; i < max; i++) {
+            if (!currentTags[i]) break
             const tagClick = () => {
                 setSearch(currentTags[i].tag)
                 setSearchFlag(true)

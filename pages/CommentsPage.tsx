@@ -40,10 +40,13 @@ const CommentsPage: React.FunctionComponent = (props) => {
     const [searchQuery, setSearchQuery] = useState("")
     const [index, setIndex] = useState(0)
     const [visibleComments, setVisibleComments] = useState([]) as any
+    const [offset, setOffset] = useState(0)
+    const [ended, setEnded] = useState(false)
     const sortRef = useRef(null) as any
 
     const updateComments = async (query?: string) => {
         const result = await axios.get("/api/search/comments", {params: {sort: sortType, query: query ? query : searchQuery}, withCredentials: true}).then((r) => r.data)
+        setEnded(false)
         setIndex(0)
         setVisibleComments([])
         setComments(result)
@@ -97,14 +100,26 @@ const CommentsPage: React.FunctionComponent = (props) => {
         setVisibleComments(newVisibleComments)
     }, [comments])
 
+    const updateOffset = async () => {
+        if (ended) return
+        const newOffset = offset + 100
+        const result = await axios.get("/api/search/comments", {params: {sort: sortType, query: searchQuery, offset: newOffset}, withCredentials: true}).then((r) => r.data)
+        if (result?.length) {
+            setOffset(newOffset)
+            setComments((prev: any) => [...prev, ...result])
+        } else {
+            setEnded(true)
+        }
+    }
+
     useEffect(() => {
         const scrollHandler = async () => {
             if (functions.scrolledToBottom()) {
                 let currentIndex = index
-                if (!comments[currentIndex]) return
+                if (!comments[currentIndex]) return updateOffset()
                 const newComments = visibleComments as any
                 for (let i = 0; i < 10; i++) {
-                    if (!comments[currentIndex]) break
+                    if (!comments[currentIndex]) return updateOffset()
                     newComments.push(comments[currentIndex])
                     currentIndex++
                 }

@@ -21,6 +21,7 @@ const SearchRoutes = (app: Express) => {
             const restrict = req.query.restrict as string
             const style = req.query.style as string
             const sort = req.query.sort as string
+            const offset = req.query.offset as string
             if (!functions.validType(type, true)) return res.status(400).send("Invalid type")
             if (!functions.validRestrict(restrict, true)) return res.status(400).send("Invalid restrict")
             if (!functions.validStyle(style, true)) return res.status(400).send("Invalid style")
@@ -36,10 +37,11 @@ const SearchRoutes = (app: Express) => {
             let result = null as any
             if (sort === "favorites" || sort === "reverse favorites") {
                 if (!req.session.username) return res.status(400).send("Bad request")
-                const favorites = await sql.searchFavorites(req.session.username, tags, type, restrict, style, sort)
+                const favorites = await sql.searchFavorites(req.session.username, tags, type, restrict, style, sort, offset)
                 result = favorites.map((f: any) => f.post)
+                result[0].postCount = favorites[0].postCount
             } else {
-                result = await sql.search(tags, type, restrict, style, sort)
+                result = await sql.search(tags, type, restrict, style, sort, offset)
             }
             result = result.map((p: any) => {
                 if (p.images.length > 1) {
@@ -59,10 +61,11 @@ const SearchRoutes = (app: Express) => {
             const type = req.query.type as string
             const restrict = req.query.restrict as string
             const style = req.query.style as string
+            const offset = req.query.offset as string
             if (!functions.validType(type, true)) return res.status(400).send("Invalid type")
             if (!functions.validRestrict(restrict, true)) return res.status(400).send("Invalid restrict")
             if (!functions.validStyle(style, true)) return res.status(400).send("Invalid style")
-            let result = await sql.random(type, restrict, style)
+            let result = await sql.random(type, restrict, style, offset)
             result = result.map((p: any) => {
                 if (p.images.length > 1) {
                     p.images = p.images.sort((a: any, b: any) => a.order - b.order)
@@ -98,9 +101,10 @@ const SearchRoutes = (app: Express) => {
         try {
             const query = req.query.query as string
             let sort = req.query.sort as string
+            const offset = req.query.offset as string
             if (!functions.validCategorySort(sort)) return res.status(400).send("Invalid sort")
             const search = query.trim().split(/ +/g).filter(Boolean).join("-")
-            let result = await sql.tagCategory("artists", sort, search)
+            let result = await sql.tagCategory("artists", sort, search, offset)
             res.status(200).json(result)
         } catch (e) {
             console.log(e)
@@ -112,9 +116,10 @@ const SearchRoutes = (app: Express) => {
         try {
             const query = req.query.query as string
             let sort = req.query.sort as string
+            const offset = req.query.offset as string
             if (!functions.validCategorySort(sort)) return res.status(400).send("Invalid sort")
             const search = query.trim().split(/ +/g).filter(Boolean).join("-")
-            let result = await sql.tagCategory("characters", sort, search)
+            let result = await sql.tagCategory("characters", sort, search, offset)
             res.status(200).json(result)
         } catch (e) {
             console.log(e)
@@ -126,9 +131,10 @@ const SearchRoutes = (app: Express) => {
         try {
             const query = req.query.query as string
             let sort = req.query.sort as string
+            const offset = req.query.offset as string
             if (!functions.validCategorySort(sort)) return res.status(400).send("Invalid sort")
             const search = query.trim().split(/ +/g).filter(Boolean).join("-")
-            let result = await sql.tagCategory("series", sort, search)
+            let result = await sql.tagCategory("series", sort, search, offset)
             res.status(200).json(result)
         } catch (e) {
             console.log(e)
@@ -140,9 +146,10 @@ const SearchRoutes = (app: Express) => {
         try {
             const query = req.query.query as string
             let sort = req.query.sort as string
+            const offset = req.query.offset as string
             if (!functions.validTagSort(sort)) return res.status(400).send("Invalid sort")
             let search = query?.trim().split(/ +/g).filter(Boolean).join("-") ?? ""
-            let result = await sql.tagSearch(search, sort)
+            let result = await sql.tagSearch(search, sort, offset)
             res.status(200).json(result)
         } catch {
             return res.status(400).send("Bad request")
@@ -153,6 +160,7 @@ const SearchRoutes = (app: Express) => {
         try {
             const query = req.query.query as string
             let sort = req.query.sort as string
+            const offset = req.query.offset as string
             if (!functions.validCommentSort(sort)) return res.status(400).send("Invalid sort")
             const search = query?.trim() ?? ""
             let parts = search.split(/ +/g)
@@ -168,9 +176,9 @@ const SearchRoutes = (app: Express) => {
             }
             let result = [] as any
             if (usernames.length) {
-                result = await sql.searchCommentsByUsername(usernames, parsedSearch.trim(), sort)
+                result = await sql.searchCommentsByUsername(usernames, parsedSearch.trim(), sort, offset)
             } else {
-                result = await sql.searchComments(parsedSearch.trim(), sort)
+                result = await sql.searchComments(parsedSearch.trim(), sort, offset)
             }
             res.status(200).json(result)
         } catch (e) {

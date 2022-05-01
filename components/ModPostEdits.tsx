@@ -18,10 +18,13 @@ const ModPostEdits: React.FunctionComponent = (props) => {
     const {unverifiedPosts, setUnverifiedPosts} = useContext(UnverifiedPostsContext)
     const [index, setIndex] = useState(0)
     const [visiblePosts, setVisiblePosts] = useState([]) as any
+    const [offset, setOffset] = useState(0)
+    const [ended, setEnded] = useState(false)
     const history = useHistory()
 
     const updatePosts = async () => {
         const posts = await axios.get("/api/post-edits/list/unverified", {withCredentials: true}).then((r) => r.data)
+        setEnded(false)
         setUnverifiedPosts(posts)
     }
 
@@ -61,14 +64,26 @@ const ModPostEdits: React.FunctionComponent = (props) => {
         setVisiblePosts(newVisiblePosts)
     }, [unverifiedPosts])
 
+    const updateOffset = async () => {
+        if (ended) return
+        const newOffset = offset + 100
+        const result = await axios.get("/api/post-edits/list/unverified", {params: {offset: newOffset}, withCredentials: true}).then((r) => r.data)
+        if (result?.length) {
+            setOffset(newOffset)
+            setUnverifiedPosts((prev: any) => [...prev, ...result])
+        } else {
+            setEnded(true)
+        }
+    }
+
     useEffect(() => {
         const scrollHandler = async () => {
             if (functions.scrolledToBottom()) {
                 let currentIndex = index
-                if (!unverifiedPosts[currentIndex]) return
+                if (!unverifiedPosts[currentIndex]) return updateOffset()
                 const newPosts = visiblePosts as any
                 for (let i = 0; i < 10; i++) {
-                    if (!unverifiedPosts[currentIndex]) break
+                    if (!unverifiedPosts[currentIndex]) return updateOffset()
                     newPosts.push(unverifiedPosts[currentIndex])
                     currentIndex++
                 }

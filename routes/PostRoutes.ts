@@ -101,9 +101,10 @@ const PostRoutes = (app: Express) => {
 
     app.get("/api/post/list/unverified", postLimiter, async (req: Request, res: Response, next: NextFunction) => {
         try {
+            const offset = req.query.offset as string
             if (!req.session.username) return res.status(400).send("Bad request")
             if (req.session.role !== "admin" && req.session.role !== "mod") return res.status(403).end()
-            const result = await sql.unverifiedPosts()
+            const result = await sql.unverifiedPosts(offset)
             res.status(200).json(result)
         } catch (e) {
             console.log(e)
@@ -113,9 +114,10 @@ const PostRoutes = (app: Express) => {
 
     app.get("/api/post-edits/list/unverified", postLimiter, async (req: Request, res: Response, next: NextFunction) => {
         try {
+            const offset = req.query.offset as string
             if (!req.session.username) return res.status(400).send("Bad request")
             if (req.session.role !== "admin" && req.session.role !== "mod") return res.status(403).end()
-            const result = await sql.unverifiedPostEdits()
+            const result = await sql.unverifiedPostEdits(offset)
             res.status(200).json(result)
         } catch (e) {
             console.log(e)
@@ -164,9 +166,10 @@ const PostRoutes = (app: Express) => {
 
     app.get("/api/post/delete/request/list", postLimiter, async (req: Request, res: Response) => {
         try {
+            const offset = req.query.offset as string
             if (!req.session.username) return res.status(400).send("Bad request")
             if (req.session.role !== "admin" && req.session.role !== "mod") return res.status(403).end()
-            const result = await sql.postDeleteRequests()
+            const result = await sql.postDeleteRequests(offset)
             res.status(200).json(result)
         } catch (e) {
             console.log(e)

@@ -458,7 +458,7 @@ export default class SQLQuery {
   }
 
   /** Search posts. */
-  public static search = async (tags: string[], type: string, restrict: string, style: string, sort: string) => {
+  public static search = async (tags: string[], type: string, restrict: string, style: string, sort: string, offset?: string) => {
     let typeQuery = ""
     if (type === "image") typeQuery = `posts.type = 'image'`
     if (type === "animation") typeQuery = `posts.type = 'animation'`
@@ -478,8 +478,8 @@ export default class SQLQuery {
     if (sort === "reverse date") sortQuery = `ORDER BY posts."updatedDate" ASC`
     if (sort === "drawn") sortQuery = `ORDER BY posts.drawn DESC NULLS LAST`
     if (sort === "reverse drawn") sortQuery = `ORDER BY posts.drawn ASC NULLS LAST`
-    if (sort === "cuteness") sortQuery = `ORDER BY posts."cutenessAvg" DESC`
-    if (sort === "reverse cuteness") sortQuery = `ORDER BY posts."cutenessAvg" ASC`
+    if (sort === "cuteness") sortQuery = `ORDER BY "cutenessAvg" DESC`
+    if (sort === "reverse cuteness") sortQuery = `ORDER BY "cutenessAvg" ASC`
     let ANDtags = [] as string[]
     let ORtags = [] as string[]
     let NOTtags = [] as string[]
@@ -513,7 +513,8 @@ export default class SQLQuery {
     const whereQueries = [typeQuery, restrictQuery, styleQuery].filter(Boolean).join(" AND ")
     const query: QueryConfig = {
       text: functions.multiTrim(`
-        SELECT *
+        SELECT *,
+        COUNT(*) OVER() AS "postCount"
         FROM (
           SELECT posts.*, json_agg(DISTINCT images.*) AS images, array_agg(DISTINCT "tag map".tag) AS tags,
           COUNT(DISTINCT favorites."favoriteID") AS "favoriteCount",
@@ -526,9 +527,9 @@ export default class SQLQuery {
           ${whereQueries ? `WHERE ${whereQueries}` : ""}
           GROUP BY posts."postID"
           ${sortQuery}
-          LIMIT 100
         ) AS posts
         ${tagQuery}
+        LIMIT 100 ${offset ? `OFFSET ${offset}` : ""}
       `)
     }
     if (values?.[0]) query.values = values
@@ -558,7 +559,7 @@ export default class SQLQuery {
   }
 
   /** Get posts (unverified). */
-  public static unverifiedPosts = async () => {
+  public static unverifiedPosts = async (offset?: string) => {
     const query: QueryConfig = {
       text: functions.multiTrim(`
           SELECT "unverified posts".*, json_agg(DISTINCT "unverified images".*) AS images, json_agg(DISTINCT "unverified tag map".tag) AS tags
@@ -568,6 +569,7 @@ export default class SQLQuery {
           WHERE "originalID" IS NULL
           GROUP BY "unverified posts"."postID"
           ORDER BY "unverified posts"."uploadDate" ASC
+          LIMIT 100 ${offset ? `OFFSET ${offset}` : ""}
           `)
     }
     const result = await SQLQuery.run(query)
@@ -575,7 +577,7 @@ export default class SQLQuery {
   }
 
    /** Get post edits (unverified). */
-   public static unverifiedPostEdits = async () => {
+   public static unverifiedPostEdits = async (offset?: string) => {
     const query: QueryConfig = {
       text: functions.multiTrim(`
           SELECT "unverified posts".*, json_agg(DISTINCT "unverified images".*) AS images, json_agg(DISTINCT "unverified tag map".tag) AS tags
@@ -585,6 +587,7 @@ export default class SQLQuery {
           WHERE "originalID" IS NOT NULL
           GROUP BY "unverified posts"."postID"
           ORDER BY "unverified posts"."uploadDate" ASC
+          LIMIT 100 ${offset ? `OFFSET ${offset}` : ""}
           `)
     }
     const result = await SQLQuery.run(query)
@@ -729,7 +732,7 @@ export default class SQLQuery {
     return result
   }
 
-  public static random = async (type: string, restrict: string, style: string) => {
+  public static random = async (type: string, restrict: string, style: string, offset?: string) => {
     let typeQuery = ""
     if (type === "image") typeQuery = `posts.type = 'image'`
     if (type === "animation") typeQuery = `posts.type = 'animation'`
@@ -747,7 +750,8 @@ export default class SQLQuery {
     const whereQueries = [typeQuery, restrictQuery, styleQuery].filter(Boolean).join(" AND ")
     const query: QueryConfig = {
       text: functions.multiTrim(`
-        SELECT *
+        SELECT *, 
+        COUNT(*) OVER() AS "postCount"
         FROM (
           SELECT posts.*, json_agg(DISTINCT images.*) AS images, array_agg(DISTINCT "tag map".tag) AS tags,
           COUNT(DISTINCT favorites."favoriteID") AS "favoriteCount",
@@ -760,15 +764,15 @@ export default class SQLQuery {
           ${whereQueries ? `WHERE ${whereQueries}` : ""}
           GROUP BY posts."postID"
           ORDER BY random()
-          LIMIT 100
         ) AS posts
+        LIMIT 100 ${offset ? `OFFSET ${offset}` : ""}
       `)
     }
     const result = await SQLQuery.run(query)
     return result
   }
 
-  public static tagCategory = async (category: string, sort: string, search?: string) => {
+  public static tagCategory = async (category: string, sort: string, search?: string, offset?: string) => {
     let whereQueries = [] as string[]
     if (category === "artists") whereQueries.push(`tags.type = 'artist'`)
     if (category === "characters") whereQueries.push(`tags.type = 'character'`)
@@ -802,6 +806,7 @@ export default class SQLQuery {
                   ${whereQuery}
                   GROUP BY "tags".tag
                   ${sortQuery}
+                  LIMIT 100 ${offset ? `OFFSET ${offset}` : ""}
           `)
     }
     if (search) query.values = [search]
@@ -809,7 +814,7 @@ export default class SQLQuery {
     return result
   }
 
-  public static tagSearch = async (search: string, sort: string, type?: string) => {
+  public static tagSearch = async (search: string, sort: string, type?: string, offset?: string) => {
     let whereArray = [] as string[]
     if (search) whereArray.push( 
     `(tags.tag LIKE $1 || '%'
@@ -843,6 +848,7 @@ export default class SQLQuery {
                   ${whereQuery}
                   GROUP BY "tags".tag
                   ${sortQuery}
+                  LIMIT 100 ${offset ? `OFFSET ${offset}` : ""}
           `),
           values: []
     }
@@ -1092,7 +1098,7 @@ export default class SQLQuery {
   }
 
   /** Search comments. */
-  public static searchComments = async (search: string, sort: string) => {
+  public static searchComments = async (search: string, sort: string, offset?: string) => {
     let whereQuery = ""
     if (search) whereQuery = `WHERE comments."comment" LIKE '%' || $1 || '%'`
     let sortQuery = ""
@@ -1118,6 +1124,7 @@ export default class SQLQuery {
             ${whereQuery}
             GROUP BY comments."commentID", users."image", post_json."type", post_json."restrict", post_json."style"
             ${sortQuery}
+            LIMIT 100 ${offset ? `OFFSET ${offset}` : ""}
           `)
     }
     if (search) query.values = [search]
@@ -1126,7 +1133,7 @@ export default class SQLQuery {
   }
 
   /** Comments by usernames. */
-  public static searchCommentsByUsername = async (usernames: string[], search: string, sort: string) => {
+  public static searchCommentsByUsername = async (usernames: string[], search: string, sort: string, offset?: string) => {
     let whereQuery = `WHERE comments."username" = ANY ($1)`
     if (search) whereQuery += `AND comments."comment" LIKE '%' || $2 || '%'`
     let sortQuery = ""
@@ -1152,6 +1159,7 @@ export default class SQLQuery {
             ${whereQuery}
             GROUP BY comments."commentID", users."image", post_json."type", post_json."restrict", post_json."style"
             ${sortQuery}
+            LIMIT 100 ${offset ? `OFFSET ${offset}` : ""}
           `),
           values: [usernames]
     }
@@ -1262,7 +1270,7 @@ export default class SQLQuery {
   }
 
   /** Search posts. */
-  public static searchFavorites = async (username: string, tags: string[], type: string, restrict: string, style: string, sort: string) => {
+  public static searchFavorites = async (username: string, tags: string[], type: string, restrict: string, style: string, sort: string, offset?: string) => {
     let userQuery = `favorites."username" = $1`
     let typeQuery = ""
     if (type === "image") typeQuery = `post_json.type = 'image'`
@@ -1325,15 +1333,17 @@ export default class SQLQuery {
           FULL JOIN "cuteness" ON posts."postID" = "cuteness"."postID"
           GROUP BY posts."postID"
         )
-        SELECT favorites.*, json_build_object(
+        SELECT favorites.*, 
+        COUNT(*) OVER() AS "postCount",
+        json_build_object(
           'postID', post_json."postID",
           'uploader', post_json."uploader",
           'updater', post_json."updater",
           'type', post_json."type",
           'restrict', post_json."restrict",
           'style', post_json."style",
-          'cuteness', post_json."cuteness",
-          'favorites', post_json."favorites",
+          'cuteness', post_json."cutenessAvg",
+          'favorites', post_json."favoriteCount",
           'thirdParty', post_json."thirdParty",
           'drawn', post_json."drawn",
           'uploadDate', post_json."uploadDate",
@@ -1351,10 +1361,11 @@ export default class SQLQuery {
         JOIN post_json ON post_json."postID" = favorites."postID"
         ${whereQueries ? `WHERE ${whereQueries}` : ""}
         GROUP BY favorites."favoriteID", post_json."postID", post_json."uploader", post_json."updater", post_json."tags",
-        post_json."type", post_json."restrict", post_json."style", post_json."cuteness", post_json."favorites",
+        post_json."type", post_json."restrict", post_json."style", post_json."cutenessAvg", post_json."favoriteCount",
         post_json."thirdParty", post_json."drawn", post_json."uploadDate", post_json."updatedDate", post_json."title",
         post_json."translatedTitle", post_json."artist", post_json."link", post_json."commentary", post_json."translatedCommentary"
         ${sortQuery}
+        LIMIT 100 ${offset ? `OFFSET ${offset}` : ""}
       `),
       values: [username]
     }
@@ -1700,7 +1711,7 @@ export default class SQLQuery {
     return result
   }
 
-  public static postDeleteRequests = async () => {
+  public static postDeleteRequests = async (offset?: string) => {
     const query: QueryConfig = {
       text: functions.multiTrim(`
         WITH post_json AS (
@@ -1719,6 +1730,7 @@ export default class SQLQuery {
         JOIN post_json ON post_json."postID" = "delete requests"."postID"
         WHERE "delete requests"."postID" IS NOT NULL
         GROUP BY "delete requests"."deleteRequestID", post_json."type", post_json."restrict", post_json."style"
+        LIMIT 100 ${offset ? `OFFSET ${offset}` : ""}
       `),
     }
     const result = await SQLQuery.run(query)
@@ -1745,7 +1757,7 @@ export default class SQLQuery {
     return result
   }
 
-  public static tagDeleteRequests = async () => {
+  public static tagDeleteRequests = async (offset?: string) => {
     const query: QueryConfig = {
       text: functions.multiTrim(`
         SELECT "delete requests".*, tags.*
@@ -1753,6 +1765,7 @@ export default class SQLQuery {
         JOIN tags ON tags.tag = "delete requests".tag
         WHERE "delete requests"."tag" IS NOT NULL
         GROUP BY "delete requests"."deleteRequestID", tags.tag
+        LIMIT 100 ${offset ? `OFFSET ${offset}` : ""}
       `),
     }
     const result = await SQLQuery.run(query)
@@ -1779,7 +1792,7 @@ export default class SQLQuery {
     return result
   }
 
-  public static aliasRequests = async () => {
+  public static aliasRequests = async (offset?: string) => {
     const query: QueryConfig = {
       text: functions.multiTrim(`
         SELECT "alias requests".*, tags.*
@@ -1787,6 +1800,7 @@ export default class SQLQuery {
         JOIN tags ON tags.tag = "alias requests".tag
         WHERE "alias requests"."tag" IS NOT NULL
         GROUP BY "alias requests"."aliasRequestID", tags.tag
+        LIMIT 100 ${offset ? `OFFSET ${offset}` : ""}
       `),
     }
     const result = await SQLQuery.run(query)
@@ -1813,13 +1827,14 @@ export default class SQLQuery {
     return result
   }
 
-  public static tagEditRequests = async () => {
+  public static tagEditRequests = async (offset?: string) => {
     const query: QueryConfig = {
       text: functions.multiTrim(`
         SELECT tags.type, "tag edit requests".*
         FROM "tag edit requests"
         JOIN tags ON tags.tag = "tag edit requests".tag
         GROUP BY "tag edit requests"."tagEditRequestID", tags.type
+        LIMIT 100 ${offset ? `OFFSET ${offset}` : ""}
       `),
     }
     const result = await SQLQuery.run(query)
@@ -1846,7 +1861,7 @@ export default class SQLQuery {
     return result
   }
 
-  public static reportedComments = async () => {
+  public static reportedComments = async (offset?: string) => {
     const query: QueryConfig = {
       text: functions.multiTrim(`
         SELECT comments.*, "reported comments".*, json_build_object(
@@ -1857,6 +1872,7 @@ export default class SQLQuery {
         JOIN comments ON comments."commentID" = "reported comments"."commentID"
         JOIN users ON users."username" = "comments"."username"
         GROUP BY "reported comments"."commentReportID", comments."commentID", users.username, users.image
+        LIMIT 100 ${offset ? `OFFSET ${offset}` : ""}
       `),
     }
     const result = await SQLQuery.run(query)

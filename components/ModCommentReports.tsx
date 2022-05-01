@@ -20,10 +20,13 @@ const ModCommentReports: React.FunctionComponent = (props) => {
     const [requests, setRequests] = useState([]) as any
     const [index, setIndex] = useState(0)
     const [visibleRequests, setVisibleRequests] = useState([]) as any
+    const [offset, setOffset] = useState(0)
+    const [ended, setEnded] = useState(false)
     const history = useHistory()
 
     const updateComments = async () => {
         const requests = await axios.get("/api/comment/report/list", {withCredentials: true}).then((r) => r.data)
+        setEnded(false)
         setRequests(requests)
     }
 
@@ -70,14 +73,26 @@ const ModCommentReports: React.FunctionComponent = (props) => {
         setVisibleRequests(newVisibleRequests)
     }, [requests])
 
+    const updateOffset = async () => {
+        if (ended) return
+        const newOffset = offset + 100
+        const result = await axios.get("/api/comment/report/list", {params: {offset: newOffset}, withCredentials: true}).then((r) => r.data)
+        if (result?.length) {
+            setOffset(newOffset)
+            setRequests((prev: any) => [...prev, ...result])
+        } else {
+            setEnded(true)
+        }
+    }
+
     useEffect(() => {
         const scrollHandler = async () => {
             if (functions.scrolledToBottom()) {
                 let currentIndex = index
-                if (!requests[currentIndex]) return
+                if (!requests[currentIndex]) return updateOffset()
                 const newPosts = visibleRequests as any
                 for (let i = 0; i < 10; i++) {
-                    if (!requests[currentIndex]) break
+                    if (!requests[currentIndex]) return updateOffset()
                     newPosts.push(requests[currentIndex])
                     currentIndex++
                 }

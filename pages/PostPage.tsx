@@ -70,6 +70,10 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
         setRelative(true)
         setSidebarText("")
         document.title = "Moebooru: Post"
+        if (!posts?.length) {
+            const savedPosts = localStorage.getItem("savedPosts")
+            if (savedPosts) setPosts(JSON.parse(savedPosts))
+        }
     }, [])
 
     useEffect(() => {
