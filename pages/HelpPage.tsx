@@ -7,6 +7,11 @@ import Footer from "../components/Footer"
 import DragAndDrop from "../components/DragAndDrop"
 import {HideNavbarContext, HideSidebarContext, RelativeContext, HideTitlebarContext, HeaderTextContext, SidebarTextContext,
 MobileContext, EnableDragContext} from "../Context"
+import imagefiltersImg from "../assets/misc/imagefilters.png"
+import gifPlayerImg from "../assets/misc/gifplayer.png"
+import videoPlayerImg from "../assets/misc/videoplayer.png"
+import cutenessMeterImg from "../assets/misc/cutenessmeter.png"
+import searchingImg from "../assets/misc/searching.png"
 import "./styles/helppage.less"
 
 const HelpPage: React.FunctionComponent = (props) => {
@@ -64,6 +69,9 @@ const HelpPage: React.FunctionComponent = (props) => {
                             <Link className="help-link" to="/help#account">Account</Link>
                             <Link className="help-link" to="/help#searching">Searching</Link>
                             <Link className="help-link" to="/help#image-searching">Image Searching</Link>
+                            <Link className="help-link" to="/help#image-filters">Image Filters</Link>
+                            <Link className="help-link" to="/help#gif-player">GIF Player</Link>
+                            <Link className="help-link" to="/help#video-player">Video Player</Link>
                             <Link className="help-link" to="/help#favorites">Favorites</Link>
                             <Link className="help-link" to="/help#cuteness-meter">Cuteness Meter</Link>
                             <Link className="help-link" to="/help#uploading">Uploading</Link>
@@ -89,6 +97,7 @@ const HelpPage: React.FunctionComponent = (props) => {
                         Most actions such as uploading a new post or aliasing a tag to another tag will be reviewed by the site staff.
                     </span>
                     <span className="help-heading" id="searching">Searching</span>
+                    <div className="help-img-container"><img className="help-img" src={searchingImg}/></div>
                     <span className="help-text">
                         The tags on Moebooru use a dash ("-") as a delimeter, but you can also search with spaces because the search can guess what tags you are searching for.
                         If you encounter a problem with this, use dashed versions of the tags. These are examples
@@ -124,6 +133,28 @@ const HelpPage: React.FunctionComponent = (props) => {
                         When you do an image search your upload is hashed in the same way and we try to find a matching hash in our database. Usually 
                         this is very accurate at finding duplicate images. If you upload a video, then only the first frame of the video will be hashed.
                     </span>
+                    <span className="help-heading" id="image-filters">Image Filters</span>
+                    <div className="help-img-container"><img className="help-img" src={imagefiltersImg}/></div>
+                    <span className="help-text">
+                        You can apply custom filters to image, such as brightness, contrast, hue, and sharpen. Most images will look a little better 
+                        with some additional brightness/contrast. Some filters like blur and pixelate will completely destroy most images, and they 
+                        are purely for fun.
+                    </span>
+                    <span className="help-heading" id="gif-player">GIF Player</span>
+                    <div className="help-img-container"><img className="help-img" src={gifPlayerImg}/></div>
+                    <span className="help-text">
+                        Moebooru has a custom GIF player, which allows additionally functionality which is normally not possible with gifs such as 
+                        seeking, pausing, playback in reverse, and modification of the playback speed.
+                    </span>
+                    <span className="help-heading" id="video-player">Video Player</span>
+                    <div className="help-img-container"><img className="help-img" src={videoPlayerImg}/></div>
+                    <span className="help-text">
+                        Moebooru also has a custom video player, which allows some additional functionality such as modification of playback speed, reverse 
+                        playback, and toggleable pitch preservement (ie, if a video is sped up, then this controls if the audio pitch will also get pitched up). <br/><br/>
+
+                        The reverse playback only works in Chromium-based browsers (Chrome, Opera, Edge) and will not work in Safari or Firefox because they don't yet support the 
+                        API. Also, full-screening videos will not work in iOS Safari.
+                    </span>
                     <span className="help-heading" id="favorites">Favorites</span>
                     <span className="help-text">
                         If you like an image, you can add it to your favorites for easier access later on.
@@ -131,6 +162,7 @@ const HelpPage: React.FunctionComponent = (props) => {
                         settings.
                     </span>
                     <span className="help-heading" id="cuteness-meter">Cuteness Meter</span>
+                    <div className="help-img-container"><img className="help-img" src={cutenessMeterImg}/></div>
                     <span className="help-text">
                         The rating system on Moebooru is called the cuteness meter. When you rate an
                         image you are not rating the quality, instead you are rating the amount
@@ -204,10 +236,10 @@ const HelpPage: React.FunctionComponent = (props) => {
                         ⇾ No distasteful comments. <br/>
                         </span>
 
-                        Quotes are supported and we have a syntax that makes it easy to do quotes.
+                        Quotes are supported and we have a syntax that makes it easy to do quotes. <br/>
                         <span className="help-alt">
-                        &gt;&gt;&gt; User said:
-                        &gt; Comment 
+                        &gt;&gt;&gt; User said:<br/>
+                        &gt; Comment <br/><br/>
                         </span>
                         Nested quotes are not supported. If you see a comment that is breaking the rules, please report it.
                     </span>

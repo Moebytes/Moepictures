@@ -89,7 +89,7 @@ const ArtistsPage: React.FunctionComponent = (props) => {
         const result = await axios.get("/api/search/artists", {params: {sort: sortType, query: searchQuery, offset: newOffset}, withCredentials: true}).then((r) => r.data)
         if (result?.length) {
             setOffset(newOffset)
-            setArtists((prev: any) => [...prev, ...result])
+            setArtists((prev: any) => functions.removeDuplicates([...prev, ...result]))
         } else {
             setEnded(true)
         }

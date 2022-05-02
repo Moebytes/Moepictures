@@ -26,7 +26,7 @@ import Carousel from "../components/Carousel"
 import PostImage from "../components/PostImage"
 import DragAndDrop from "../components/DragAndDrop"
 import {HideNavbarContext, HideSidebarContext, RelativeContext, ThemeContext, EnableDragContext, HideTitlebarContext, BrightnessContext, ContrastContext, HueContext, SaturationContext, LightnessContext, MobileContext,
-BlurContext, SharpenContext, PixelateContext, HeaderTextContext, SessionContext, SidebarTextContext, RedirectContext} from "../Context"
+BlurContext, SharpenContext, PixelateContext, HeaderTextContext, SessionContext, SidebarTextContext, RedirectContext, PostFlagContext} from "../Context"
 import fileType from "magic-bytes.js"
 import localforage from "localforage"
 import JSZip from "jszip"
@@ -65,6 +65,7 @@ const EditPostPage: React.FunctionComponent<Props> = (props) => {
     const {session, setSession} = useContext(SessionContext)
     const {redirect, setRedirect} = useContext(RedirectContext)
     const {mobile, setMobile} = useContext(MobileContext)
+    const {postFlag, setPostFlag} = useContext(PostFlagContext)
     const [displayImage, setDisplayImage] = useState(false)
     const [editpostError, setEditPostError] = useState(false)
     const [submitError, setSubmitError] = useState(false)
@@ -302,7 +303,7 @@ const EditPostPage: React.FunctionComponent<Props> = (props) => {
             }
             setCurrentImg(urls[0].link)
             setCurrentIndex(0)
-            setAcceptedURLs(urls)
+            setAcceptedURLs((prev: any) => [...prev, ...urls])
         }
         if (error) {
             setEditPostError(true)
@@ -336,7 +337,7 @@ const EditPostPage: React.FunctionComponent<Props> = (props) => {
         if (!files?.[0]) return
         await validate(files)
         event.target.value = ""
-        reset()
+        // reset()
     }
 
     const uploadTagImg = async (event: any, type: string, index: number) => {
@@ -687,7 +688,7 @@ const EditPostPage: React.FunctionComponent<Props> = (props) => {
                 files.push(file)
             }
             await validate(files, links)
-            reset()
+            // reset()
         }, 500)
     }
 
@@ -744,13 +745,14 @@ const EditPostPage: React.FunctionComponent<Props> = (props) => {
             await functions.timeout(3000)
             return setSubmitError(false)
         }
+        /*
         if (!edited) {
             setSubmitError(true)
             await functions.timeout(20)
             submitErrorRef.current.innerText = "No post edits were made."
             await functions.timeout(3000)
             return setSubmitError(false)
-        }
+        }*/
         const MB = acceptedURLs.reduce((acc: any, obj: any) => acc + obj.size, 0) / (1024*1024)
         if (MB > 200) {
             setSubmitError(true)
@@ -1091,7 +1093,7 @@ const EditPostPage: React.FunctionComponent<Props> = (props) => {
                             <span className="editpost-text-alt">The post edit was submitted and will appear on the site if approved.</span>}
                         </div> 
                         <div className="editpost-container-row" style={{marginTop: "10px"}}>
-                            <button className="editpost-button" onClick={() => history.push(`/post/${postID}`)}>
+                            <button className="editpost-button" onClick={() => {history.push(`/post/${postID}`); setPostFlag(true)}}>
                                     <span className="editpost-button-text">←Back</span>
                             </button>
                         </div>

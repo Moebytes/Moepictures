@@ -26,6 +26,11 @@ const CharacterRow: React.FunctionComponent<Props> = (props) => {
     }
 
     const set = (image: string, index: number) => {
+        if (!session.username) {
+            const filtered = props.character.posts.filter((p: any) => p.restrict === "safe")
+            const post = filtered[index] 
+            return history.push(`/post/${post.postID}`)
+        }
         const post = props.character.posts[index] 
         history.push(`/post/${post.postID}`)
     }

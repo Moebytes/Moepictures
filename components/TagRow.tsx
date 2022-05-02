@@ -1,6 +1,6 @@
 import React, {useContext, useEffect, useRef, useState} from "react"
 import {useHistory} from "react-router-dom"
-import {ThemeContext, SearchContext, SearchFlagContext, DeleteTagFlagContext, DeleteTagIDContext,
+import {ThemeContext, SearchContext, SearchFlagContext, DeleteTagFlagContext, DeleteTagIDContext, MobileContext,
 EditTagAliasesContext, EditTagDescriptionContext, EditTagIDContext, EditTagFlagContext, SessionContext,
 EditTagImageContext, EditTagKeyContext, AliasTagFlagContext, AliasTagIDContext, AliasTagNameContext} from "../Context"
 import {HashLink as Link} from "react-router-hash-link"
@@ -26,6 +26,7 @@ const TagRow: React.FunctionComponent<Props> = (props) => {
     const [hover, setHover] = useState(false)
     const {search, setSearch} = useContext(SearchContext)
     const {searchFlag, setSearchFlag} = useContext(SearchFlagContext)
+    const {mobile, setMobile} = useContext(MobileContext)
     const {deleteTagID, setDeleteTagID} = useContext(DeleteTagIDContext)
     const {deleteTagFlag, setDeleteTagFlag} = useContext(DeleteTagFlagContext)
     const {editTagFlag, setEditTagFlag} = useContext(EditTagFlagContext)
@@ -123,20 +124,22 @@ const TagRow: React.FunctionComponent<Props> = (props) => {
             <td className="tagrow-img-container">
                 <img className="tagrow-img" src={functions.getTagLink(props.tag.type, props.tag.image)}/>
             </td> : null}
-            <td className="tagrow-container" style={{width: props.tag.image ? "16%" : "25%"}}>
-                <div className="tagrow-row" onClick={searchTag}>
-                    <span className="tagrow-tag">{props.tag.tag.replaceAll("-", " ")}</span>
-                    <span className="tagrow-tag-count">{props.tag.postCount}</span>
-                </div>
-                {props.tag.aliases?.[0] ?
-                <div className="tagrow-column">
-                    <span className="tagrow-alias-header">Aliases: </span>
-                    {generateAliasesJSX()}
-                </div> : null}
-            </td>
-            <td className="tagrow-description">
-                <span className="tagrow-desc-text">{props.tag.description || "No description."}</span>
-            </td>
+            <div className="tagrow-content-container">
+                <td className="tagrow-container" style={{width: props.tag.image ? "16%" : "25%"}}>
+                    <div className="tagrow-row" onClick={searchTag}>
+                        <span className="tagrow-tag">{props.tag.tag.replaceAll("-", " ")}</span>
+                        <span className="tagrow-tag-count">{props.tag.postCount}</span>
+                    </div>
+                    {props.tag.aliases?.[0] ?
+                    <div className="tagrow-column">
+                        <span className="tagrow-alias-header">Aliases: </span>
+                        {generateAliasesJSX()}
+                    </div> : null}
+                </td>
+                <td className="tagrow-description">
+                    <span className="tagrow-desc-text">{props.tag.description || "No description."}</span>
+                </td>
+            </div>
             {session.username ?
             <div className="tag-buttons">
                 {/* <img className="tag-button" src={historyIcon}/> */}

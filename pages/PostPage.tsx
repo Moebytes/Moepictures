@@ -19,7 +19,7 @@ import ReportCommentDialog from "../dialogs/ReportCommentDialog"
 import ThirdParty from "../components/ThirdParty"
 import Parent from "../components/Parent"
 import {HideNavbarContext, HideSidebarContext, RelativeContext, DownloadFlagContext, DownloadURLsContext, HideTitlebarContext, MobileContext,
-PostsContext, TagsContext, HeaderTextContext, SearchContext, RedirectContext, SidebarTextContext, SessionContext, EnableDragContext} from "../Context"
+PostsContext, TagsContext, HeaderTextContext, PostFlagContext, RedirectContext, SidebarTextContext, SessionContext, EnableDragContext} from "../Context"
 import axios from "axios"
 import "./styles/postpage.less"
 
@@ -42,6 +42,7 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
     const {session, setSession} = useContext(SessionContext)
     const {redirect, setRedirect} = useContext(RedirectContext)
     const {mobile, setMobile} = useContext(MobileContext)
+    const {postFlag, setPostFlag} = useContext(PostFlagContext)
     const [images, setImages] = useState([]) as any
     const [thirdPartyPosts, setThirdPartyPosts] = useState([]) as any
     const [parentPost, setParentPost] = useState(null) as any
@@ -156,6 +157,28 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
         updatePost()
         return () => source.cancel()
     }, [postID, posts])
+
+    useEffect(() => {
+        const source = axios.CancelToken.source()
+        const updatePost = async () => {
+            setPostFlag(false)
+            let post = await axios.get("/api/post", {params: {postID}, withCredentials: true, cancelToken: source.token}).then((r) => r.data)
+            if (post) {
+                const images = post.images.map((i: any) => functions.getImageLink(i.type, post.postID, i.filename))
+                setImages(images)
+                setImage(images[0])
+                const tags = await functions.parseTags([post])
+                const categories = await functions.tagCategories(tags)
+                setTagCategories(categories)
+                setTags(tags)
+                setPost(post)
+            } else {
+                history.push("/404")
+            }
+        }
+        if (postFlag) updatePost()
+        return () => source.cancel()
+    }, [postFlag])
 
     const download = () => {
         setDownloadURLs([image])

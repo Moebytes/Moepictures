@@ -170,7 +170,7 @@ const CreateRoutes = (app: Express) => {
             hash = await phash(buffer).then((hash: string) => functions.binaryToHex(hash))
             dimensions = imageSize(buffer)
           }
-          await sql.insertImage(postID, filename, type, order, hash, dimensions.width, dimensions.height, images[i].size)
+          await sql.insertImage(postID, filename, kind, order, hash, dimensions.width, dimensions.height, images[i].size)
         }
 
         const uploadDate = new Date().toISOString()
@@ -377,7 +377,7 @@ const CreateRoutes = (app: Express) => {
             hash = await phash(buffer).then((hash: string) => functions.binaryToHex(hash))
             dimensions = imageSize(buffer)
           }
-          await sql.insertImage(postID, filename, type, order, hash, dimensions.width, dimensions.height, images[i].size)
+          await sql.insertImage(postID, filename, kind, order, hash, dimensions.width, dimensions.height, images[i].size)
         }
 
         await sql.updatePost(postID, "type", type)
@@ -575,7 +575,7 @@ const CreateRoutes = (app: Express) => {
             hash = await phash(buffer).then((hash: string) => functions.binaryToHex(hash))
             dimensions = imageSize(buffer)
           }
-          await sql.insertUnverifiedImage(postID, filename, type, order, hash, dimensions.width, dimensions.height, images[i].size)
+          await sql.insertUnverifiedImage(postID, filename, kind, order, hash, dimensions.width, dimensions.height, images[i].size)
         }
 
         const uploadDate = new Date().toISOString()
@@ -793,7 +793,7 @@ const CreateRoutes = (app: Express) => {
             hash = await phash(buffer).then((hash: string) => functions.binaryToHex(hash))
             dimensions = imageSize(buffer)
           }
-          await sql.insertUnverifiedImage(postID, filename, type, order, hash, dimensions.width, dimensions.height, images[i].size)
+          await sql.insertUnverifiedImage(postID, filename, kind, order, hash, dimensions.width, dimensions.height, images[i].size)
         }
 
         const updatedDate = new Date().toISOString()

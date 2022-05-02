@@ -428,6 +428,7 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
         if (props.post.link) {
             const domain = new URL(props.post.link).hostname.replace("www.", "")
             .split(".")?.[0] || ""
+            if (domain.toLowerCase() === "yande") return "Yandere"
             return functions.toProperCase(domain)
         }
         return "Unknown"

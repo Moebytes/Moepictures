@@ -70,7 +70,7 @@ const ModPostEdits: React.FunctionComponent = (props) => {
         const result = await axios.get("/api/post-edits/list/unverified", {params: {offset: newOffset}, withCredentials: true}).then((r) => r.data)
         if (result?.length) {
             setOffset(newOffset)
-            setUnverifiedPosts((prev: any) => [...prev, ...result])
+            setUnverifiedPosts((prev: any) => functions.removeDuplicates([...prev, ...result]))
         } else {
             setEnded(true)
         }

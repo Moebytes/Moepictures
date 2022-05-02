@@ -91,8 +91,8 @@ const ModTagEdits: React.FunctionComponent = (props) => {
         if (result?.length) {
             const oldTags = await axios.get("/api/tag/list", {params: {tags: requests.map((r: any) => r.tag)}, withCredentials: true}).then((r) => r.data)
             setOffset(newOffset)
-            setRequests((prev: any) => [...prev, ...result])
-            setOldTags((prev: any) => [...prev, ...oldTags])
+            setRequests((prev: any) => functions.removeDuplicates([...prev, ...result]))
+            setOldTags((prev: any) => functions.removeDuplicates([...prev, ...oldTags]))
         } else {
             setEnded(true)
         }

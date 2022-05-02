@@ -19,7 +19,7 @@ import ThirdParty from "../components/ThirdParty"
 import Parent from "../components/Parent"
 import NewTags from "../components/NewTags"
 import {HideNavbarContext, HideSidebarContext, RelativeContext, DownloadFlagContext, DownloadURLsContext, HideTitlebarContext, MobileContext,
-UnverifiedPostsContext, TagsContext, HeaderTextContext, SearchContext, SidebarTextContext, SessionContext, EnableDragContext} from "../Context"
+UnverifiedPostsContext, TagsContext, HeaderTextContext, PostFlagContext, SidebarTextContext, SessionContext, EnableDragContext} from "../Context"
 import axios from "axios"
 import permissions from "../structures/Permissions"
 import "./styles/postpage.less"
@@ -42,6 +42,7 @@ const UnverifiedPostPage: React.FunctionComponent<Props> = (props) => {
     const {sidebarText, setSidebarText} = useContext(SidebarTextContext)
     const {session, setSession} = useContext(SessionContext)
     const {mobile, setMobile} = useContext(MobileContext)
+    const {postFlag, setPostFlag} = useContext(PostFlagContext)
     const [images, setImages] = useState([]) as any
     const [thirdPartyPosts, setThirdPartyPosts] = useState([]) as any
     const [parentPost, setParentPost] = useState(null) as any
@@ -140,6 +141,26 @@ const UnverifiedPostPage: React.FunctionComponent<Props> = (props) => {
         }
         updatePost()
     }, [postID, unverifiedPosts])
+
+    useEffect(() => {
+        const updatePost = async () => {
+            setPostFlag(false)
+            let post = await axios.get("/api/post/unverified", {params: {postID}, withCredentials: true}).then((r) => r.data)
+            if (post) {
+                const images = post.images.map((i: any) => functions.getUnverifiedImageLink(i.type, post.postID, i.filename))
+                setImages(images)
+                setImage(images[0])
+                const tags = await functions.parseTags([post])
+                const categories = await functions.tagCategories(tags)
+                setTagCategories(categories)
+                setTags(tags)
+                setPost(post)
+            } else {
+                history.push("/404")
+            }
+        }
+        if (postFlag) updatePost()
+    }, [postFlag])
 
     const download = () => {
         setDownloadURLs([image])

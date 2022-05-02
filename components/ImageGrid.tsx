@@ -170,7 +170,7 @@ const ImageGrid: React.FunctionComponent = (props) => {
         }
         if (result?.length) {
             setOffset(newOffset)
-            setPosts((prev: any) => [...prev, ...result])
+            setPosts((prev: any) => functions.removeDuplicates([...prev, ...result]))
         } else {
             setEnded(true)
         }

@@ -71,7 +71,7 @@ const ModTagDeletions: React.FunctionComponent = (props) => {
         const result = await axios.get("/api/tag/delete/request/list", {params: {offset: newOffset}, withCredentials: true}).then((r) => r.data)
         if (result?.length) {
             setOffset(newOffset)
-            setRequests((prev: any) => [...prev, ...result])
+            setRequests((prev: any) => functions.removeDuplicates([...prev, ...result]))
         } else {
             setEnded(true)
         }

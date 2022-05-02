@@ -72,6 +72,7 @@ export const ModStateContext = React.createContext<any>(null)
 export const ReportCommentIDContext = React.createContext<any>(null)
 export const VisiblePostsContext = React.createContext<any>(null)
 export const ScrollYContext = React.createContext<any>(null)
+export const PostFlagContext = React.createContext<any>(null)
 
 const Context: React.FunctionComponent = (props) => {
     const [brightness, setBrightness] = useState(100)
@@ -133,8 +134,10 @@ const Context: React.FunctionComponent = (props) => {
     const [reportCommentID, setReportCommentID] = useState(null)
     const [visiblePosts, setVisiblePosts] = useState([])
     const [scrollY, setScrollY] = useState(null)
+    const [postFlag, setPostFlag] = useState(false)
 return (
     <>
+        <PostFlagContext.Provider value={{postFlag, setPostFlag}}>
         <ScrollYContext.Provider value={{scrollY, setScrollY}}>
         <VisiblePostsContext.Provider value={{visiblePosts, setVisiblePosts}}>
         <ReportCommentIDContext.Provider value={{reportCommentID, setReportCommentID}}>
@@ -254,6 +257,7 @@ return (
         </ReportCommentIDContext.Provider>
         </VisiblePostsContext.Provider>
         </ScrollYContext.Provider>
+        </PostFlagContext.Provider>
     </>
     )
 }

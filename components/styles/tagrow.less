@@ -111,3 +111,15 @@
     width: auto;
     height: 70px;
 }
+
+.tagrow-content-container {
+    display: flex;
+    flex-direction: row;
+    width: 100%;
+}
+
+@media screen and (max-width: 500px) {
+    .tagrow-content-container {
+        flex-direction: column;
+    }
+}

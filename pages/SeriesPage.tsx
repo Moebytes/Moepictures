@@ -89,7 +89,7 @@ const SeriesPage: React.FunctionComponent = (props) => {
         const result = await axios.get("/api/search/series", {params: {sort: sortType, query: searchQuery, offset: newOffset}, withCredentials: true}).then((r) => r.data)
         if (result?.length) {
             setOffset(newOffset)
-            setSeries((prev: any) => [...prev, ...result])
+            setSeries((prev: any) => functions.removeDuplicates([...prev, ...result]))
         } else {
             setEnded(true)
         }

@@ -234,7 +234,7 @@ const UploadPage: React.FunctionComponent = (props) => {
             }
             setCurrentImg(urls[0].link)
             setCurrentIndex(0)
-            setAcceptedURLs(urls)
+            setAcceptedURLs((prev: any) => [...prev, ...urls])
         }
         if (error) {
             setUploadError(true)
@@ -268,7 +268,7 @@ const UploadPage: React.FunctionComponent = (props) => {
         if (!files?.[0]) return
         await validate(files)
         event.target.value = ""
-        reset()
+        // reset()
     }
 
     const uploadTagImg = async (event: any, type: string, index: number) => {
@@ -619,7 +619,7 @@ const UploadPage: React.FunctionComponent = (props) => {
                 files.push(file)
             }
             await validate(files, links)
-            reset()
+            // reset()
         }, 500)
     }
 
