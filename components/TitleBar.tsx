@@ -5,7 +5,7 @@ import favicon from "../assets/purple/favicon.png"
 import faviconMagenta from "../assets/magenta/favicon.png"
 import {ThemeContext, HideNavbarContext, EnableDragContext, RelativeContext, HideTitlebarContext, HeaderFlagContext,
 SearchContext, SearchFlagContext, ImageTypeContext, RestrictTypeContext, StyleTypeContext, SortTypeContext,
-HeaderTextContext, HideMobileNavbarContext, MobileContext} from "../Context"
+HeaderTextContext, HideMobileNavbarContext, MobileContext, VisiblePostsContext, ScrollYContext} from "../Context"
 import functions from "../structures/Functions"
 import hamburger from "../assets/purple/hamburger.png"
 import hamburgerMagenta from "../assets/magenta/hamburger.png"
@@ -13,6 +13,7 @@ import "./styles/titlebar.less"
 
 interface Props {
     reset?: boolean
+    goBack?: boolean
 }
 
 const TitleBar: React.FunctionComponent<Props> = (props) => {
@@ -31,6 +32,8 @@ const TitleBar: React.FunctionComponent<Props> = (props) => {
     const {mobile, setMobile} = useContext(MobileContext)
     const {hideMobileNavbar, setHideMobileNavbar} = useContext(HideMobileNavbarContext)
     const {headerFlag, setHeaderFlag} = useContext(HeaderFlagContext)
+    const {visiblePosts, setVisiblePosts} = useContext(VisiblePostsContext)
+    const {scrollY, setScrollY} = useContext(ScrollYContext)
     const history = useHistory()
 
     useEffect(() => {
@@ -62,18 +65,23 @@ const TitleBar: React.FunctionComponent<Props> = (props) => {
     }
 
     const titleClick = () => {
-        history.push("/")
-        /*
         if (props.reset) {
             setSearch("")
             setImageType("all")
             setRestrictType("all")
             setStyleType("all")
             setSortType("date")
+            setSearchFlag(true)
+            history.push("/posts")
+            window.scrollTo(0, 0)
+            setScrollY(null)
+        } else {
+            const saved = visiblePosts
+            const savedScrollY = scrollY
+            history.push("/posts")
+            setVisiblePosts(saved)
+            if (savedScrollY) window.scrollTo(0, savedScrollY)
         }
-        setSearchFlag(true)
-        history.push("/")
-        window.scrollTo(0, 0)*/
     }
 
     useEffect(() => {

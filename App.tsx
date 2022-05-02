@@ -76,7 +76,13 @@ const App: React.FunctionComponent = (props) => {
 
     const saveTags = async () => {
         const tags = await axios.get("/api/tag/list", {withCredentials: true}).then((r) => r.data)
-        await localforage.setItem("tags", tags)
+        const tagCounts = await axios.get("/api/tag/counts", {withCredentials: true}).then((r) => r.data)
+        let tagArray = [] as any
+        for (let i = 0; i < tags.length; i++) {
+            const tagCount = tagCounts.find((t: any) => t.tag === tags[i].tag) || {}
+            tagArray.push({...tags[i], ...tagCount})
+        }
+        await localforage.setItem("tags", tagArray)
     }
 
     useEffect(() => {

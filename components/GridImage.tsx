@@ -2,7 +2,7 @@ import React, {useContext, useEffect, useRef, useState} from "react"
 import {useHistory} from "react-router-dom"
 import loading from "../assets/purple/loading.gif"
 import loadingMagenta from "../assets/magenta/loading.gif"
-import {ThemeContext, SizeTypeContext, BrightnessContext, ContrastContext, HueContext, SaturationContext, LightnessContext, MobileContext,
+import {ThemeContext, SizeTypeContext, BrightnessContext, ContrastContext, HueContext, SaturationContext, LightnessContext, MobileContext, ScrollYContext,
 BlurContext, SharpenContext, SquareContext, PixelateContext, DownloadFlagContext, DownloadURLsContext, SpeedContext, ReverseContext} from "../Context"
 import {HashLink as Link} from "react-router-hash-link"
 import gifFrames from "gif-frames"
@@ -17,6 +17,7 @@ interface Props {
     width?: number
     height?: number
     comicPages?: any
+    post: any
 }
 
 const GridImage: React.FunctionComponent<Props> = (props) => {
@@ -34,6 +35,7 @@ const GridImage: React.FunctionComponent<Props> = (props) => {
     const {square, setSquare} = useContext(SquareContext)
     const {downloadFlag, setDownloadFlag} = useContext(DownloadFlagContext)
     const {downloadURLs, setDownloadURLs} = useContext(DownloadURLsContext)
+    const {scrollY, setScrollY} = useContext(ScrollYContext)
     const {mobile, setMobile} = useContext(MobileContext)
     const containerRef = useRef<HTMLDivElement>(null)
     const pixelateRef = useRef<HTMLCanvasElement>(null)
@@ -610,8 +612,15 @@ const GridImage: React.FunctionComponent<Props> = (props) => {
         setDrag(true)
     }
 
-    const mouseUp = (event: React.MouseEvent<HTMLElement>) => {
-        if (!drag) history.push(`/post/${props.id}`)
+    const mouseUp = async (event: React.MouseEvent<HTMLElement>) => {
+        setScrollY(window.scrollY)
+        localStorage.setItem("savedPost", JSON.stringify(props.post))
+        const tagCache = await functions.tagCategoriesCache(props.post.tags)
+        localStorage.setItem("savedTags", JSON.stringify(tagCache))
+        if (!drag) {
+            history.push(`/post/${props.id}`)
+            window.scrollTo(0, 0)
+        }
     }
 
 

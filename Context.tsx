@@ -70,6 +70,8 @@ export const CommentSearchFlagContext = React.createContext<any>(null)
 export const UnverifiedPostsContext = React.createContext<any>(null)
 export const ModStateContext = React.createContext<any>(null)
 export const ReportCommentIDContext = React.createContext<any>(null)
+export const VisiblePostsContext = React.createContext<any>(null)
+export const ScrollYContext = React.createContext<any>(null)
 
 const Context: React.FunctionComponent = (props) => {
     const [brightness, setBrightness] = useState(100)
@@ -129,8 +131,12 @@ const Context: React.FunctionComponent = (props) => {
     const [unverifiedPosts, setUnverifiedPosts] = useState([])
     const [modState, setModState] = useState("posts")
     const [reportCommentID, setReportCommentID] = useState(null)
+    const [visiblePosts, setVisiblePosts] = useState([])
+    const [scrollY, setScrollY] = useState(null)
 return (
     <>
+        <ScrollYContext.Provider value={{scrollY, setScrollY}}>
+        <VisiblePostsContext.Provider value={{visiblePosts, setVisiblePosts}}>
         <ReportCommentIDContext.Provider value={{reportCommentID, setReportCommentID}}>
         <ModStateContext.Provider value={{modState, setModState}}>
         <UnverifiedPostsContext.Provider value={{unverifiedPosts, setUnverifiedPosts}}>
@@ -246,6 +252,8 @@ return (
         </UnverifiedPostsContext.Provider>
         </ModStateContext.Provider>
         </ReportCommentIDContext.Provider>
+        </VisiblePostsContext.Provider>
+        </ScrollYContext.Provider>
     </>
     )
 }

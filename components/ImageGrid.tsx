@@ -2,7 +2,8 @@ import React, {useContext, useEffect, useRef, useState, useReducer} from "react"
 import {useHistory} from "react-router-dom"
 import {ThemeContext, SizeTypeContext, PostAmountContext, PostsContext, ImageTypeContext, EnableDragContext,
 RestrictTypeContext, StyleTypeContext, SortTypeContext, SearchContext, SearchFlagContext, HeaderFlagContext,
-RandomFlagContext, ImageSearchFlagContext, SidebarTextContext, MobileContext, SessionContext} from "../Context"
+RandomFlagContext, ImageSearchFlagContext, SidebarTextContext, MobileContext, SessionContext, VisiblePostsContext,
+ScrollYContext} from "../Context"
 import GridImage from "./GridImage"
 import noresults from "../assets/misc/noresults.png"
 import axios from "axios"
@@ -18,7 +19,8 @@ const ImageGrid: React.FunctionComponent = (props) => {
     const {postAmount, setPostAmount} = useContext(PostAmountContext)
     const {posts, setPosts} = useContext(PostsContext) as any
     const [index, setIndex] = useState(0)
-    const [visiblePosts, setVisiblePosts] = useState([]) as any
+    const {visiblePosts, setVisiblePosts} = useContext(VisiblePostsContext)
+    const {scrollY, setScrollY} = useContext(ScrollYContext)
     const {imageType, setImageType} = useContext(ImageTypeContext)
     const {restrictType, setRestrictType} = useContext(RestrictTypeContext)
     const {styleType, setStyleType} = useContext(StyleTypeContext)
@@ -73,16 +75,21 @@ const ImageGrid: React.FunctionComponent = (props) => {
     useEffect(() => {
         if (!loaded) setLoaded(true)
         if (searchFlag) searchPosts()
-        setTimeout(() => {
-            const elements = document.querySelectorAll(".sortbar-text") as any
-            if (!elements) return
-            let counter = 0
-            for (let i = 0; i < elements.length; i++) {
-                if (elements[i]?.innerText?.toLowerCase() === "all") counter++
-                if (elements[i]?.innerText?.toLowerCase() === "date") counter++
-            }
-            if (counter >= 4) searchPosts()
-        }, 300)
+        if (!scrollY) {
+            setTimeout(() => {
+                const elements = document.querySelectorAll(".sortbar-text") as any
+                const img = document.querySelector(".image")
+                if (!img && !elements?.[0]) return searchPosts()
+                let counter = 0
+                for (let i = 0; i < elements.length; i++) {
+                    if (elements[i]?.innerText?.toLowerCase() === "all") counter++
+                    if (elements[i]?.innerText?.toLowerCase() === "date") counter++
+                }
+                if (!img && counter >= 4) searchPosts()
+            }, 300)
+        } else {
+            setScrollY(null)
+        }
     }, [])
     
     useEffect(() => {
@@ -161,7 +168,6 @@ const ImageGrid: React.FunctionComponent = (props) => {
             const query = await functions.parseSpaceEnabledSearch(search)
             result = await axios.get("/api/search/posts", {params: {query, type: imageType, restrict: restrictType, style: styleType, sort: sortType, offset: newOffset}, withCredentials: true}).then((r) => r.data)
         }
-        console.log(result)
         if (result?.length) {
             setOffset(newOffset)
             setPosts((prev: any) => [...prev, ...result])
@@ -221,7 +227,7 @@ const ImageGrid: React.FunctionComponent = (props) => {
             const image = visiblePosts[i].images[0]
             if (!image) continue
             const images = post.images.map((i: any) => functions.getImageLink(i.type, post.postID, i.filename))
-            jsx.push(<GridImage key={post.postID} id={post.postID} img={functions.getImageLink(image.type, post.postID, image.filename)} comicPages={post.type === "comic" ? images : null}/>)
+            jsx.push(<GridImage key={post.postID} id={post.postID} img={functions.getImageLink(image.type, post.postID, image.filename)} comicPages={post.type === "comic" ? images : null} post={post}/>)
         }
         if (!jsx.length && noResults) {
             jsx.push(

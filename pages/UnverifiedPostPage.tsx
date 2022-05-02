@@ -175,7 +175,7 @@ const UnverifiedPostPage: React.FunctionComponent<Props> = (props) => {
     return (
         <>
         <DragAndDrop/>
-        <TitleBar/>
+        <TitleBar goBack={true}/>
         <NavBar/>
         <div className="body">
             {post && tagCategories ? 

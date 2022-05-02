@@ -1023,6 +1023,32 @@ export default class Functions {
         return {artists, characters, series, tags}
     }
 
+    public static tagCategoriesCache = async (parsedTags: any[]) => {
+        let result = await localforage.getItem("tags") as any
+        let artists = [] as any 
+        let characters = [] as any 
+        let series = [] as any 
+        let tags = [] as any
+        for (let i = 0; i < parsedTags.length; i++) {
+            const index = result.findIndex((r: any) => parsedTags[i] === r.tag)
+            const obj = {} as any 
+            obj.tag = parsedTags[i]
+            obj.count = result[index].count 
+            obj.image = result[index].image
+            obj.description = result[index].description 
+            if (result[index].type === "artist") {
+                artists.push(obj)
+            } else if (result[index].type === "character") {
+                characters.push(obj)
+            } else if (result[index].type === "series") {
+                series.push(obj)
+            } else {
+                tags.push(obj)
+            }
+        }
+        return {artists, characters, series, tags}
+    }
+
     public static readableFileSize = (bytes: number) => {
         const i = bytes === 0 ? 0 : Math.floor(Math.log(bytes) / Math.log(1024))
         return `${Number((bytes / Math.pow(1024, i)).toFixed(2))} ${["B", "KB", "MB", "GB", "TB"][i]}`

@@ -51,16 +51,18 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
     const history = useHistory()
     const postID = Number(props?.match.params.id)
 
-    const refreshCache = async () => {
+    const refreshCache = async (source: any) => {
         try {
-            await axios.post(image, null, {withCredentials: true})
+           await axios.post(image, null, {withCredentials: true, cancelToken: source.token})
         } catch {
             // ignore
         }
     }
 
     useEffect(() => {
-        if (image) refreshCache()
+        const source = axios.CancelToken.source()
+        if (image) refreshCache(source)
+        return () => source.cancel()
     }, [image])
 
     useEffect(() => {
@@ -70,6 +72,10 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
         setRelative(true)
         setSidebarText("")
         document.title = "Moebooru: Post"
+        const savedPost = localStorage.getItem("savedPost")
+        const savedTags = localStorage.getItem("savedTags")
+        if (savedPost) setPost(JSON.parse(savedPost))
+        if (savedTags) setTagCategories(JSON.parse(savedTags))
         if (!posts?.length) {
             const savedPosts = localStorage.getItem("savedPosts")
             if (savedPosts) setPosts(JSON.parse(savedPosts))
@@ -91,9 +97,9 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
         }
     }, [session, post])
 
-    const updateThirdParty = async () => {
+    const updateThirdParty = async (source: any) => {
         if (post) {
-            const thirdPartyPosts = await axios.get("/api/post/thirdparty", {params: {postID: post.postID}, withCredentials: true}).then((r) => r.data)
+            const thirdPartyPosts = await axios.get("/api/post/thirdparty", {params: {postID: post.postID}, withCredentials: true, cancelToken: source.token}).then((r) => r.data)
             if (thirdPartyPosts?.[0]) {
                 setThirdPartyPosts(thirdPartyPosts)
             } else {
@@ -102,9 +108,9 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
         }
     }
 
-    const updateParent = async () => {
+    const updateParent = async (source: any) => {
         if (post) {
-            const parentPost = await axios.get("/api/post/parent", {params: {postID: post.postID}, withCredentials: true}).then((r) => r.data)
+            const parentPost = await axios.get("/api/post/parent", {params: {postID: post.postID}, withCredentials: true, cancelToken: source.token}).then((r) => r.data)
             if (parentPost) {
                 setParentPost(parentPost)
             } else {
@@ -114,6 +120,7 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
     }
 
     useEffect(() => {
+        const source = axios.CancelToken.source()
         const updatePost = async () => {
             if (post) {
                 const title = post.translatedTitle ? functions.toProperCase(post.translatedTitle) : 
@@ -123,14 +130,16 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
             }
         }
         updatePost()
-        updateThirdParty()
-        updateParent()
+        updateThirdParty(source)
+        updateParent(source)
+        return () => source.cancel()
     }, [post])
 
     useEffect(() => {
+        const source = axios.CancelToken.source()
         const updatePost = async () => {
             let post = posts.find((p: any) => p.postID === postID)
-            if (!post) post = await axios.get("/api/post", {params: {postID}, withCredentials: true}).then((r) => r.data)
+            if (!post) post = await axios.get("/api/post", {params: {postID}, withCredentials: true, cancelToken: source.token}).then((r) => r.data)
             if (post) {
                 const images = post.images.map((i: any) => functions.getImageLink(i.type, post.postID, i.filename))
                 setImages(images)
@@ -145,6 +154,7 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
             }
         }
         updatePost()
+        return () => source.cancel()
     }, [postID, posts])
 
     const download = () => {
@@ -152,24 +162,24 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
         setDownloadFlag(true)
     }
 
-    const next = () => {
+    const next = async () => {
         let currentIndex = posts.findIndex((p: any) => p.postID === postID)
         if (currentIndex !== -1) {
             currentIndex++
             if (posts[currentIndex]) {
-                const id = posts[currentIndex].postID
-                history.push(`/post/${id}`)
+                const post = posts[currentIndex]
+                history.push(`/post/${post.postID}`)
             }
         }
     }
 
-    const previous = () => {
+    const previous = async () => {
         let currentIndex = posts.findIndex((p: any) => p.postID === postID)
         if (currentIndex !== -1) {
             currentIndex--
             if (posts[currentIndex]) {
-                const id = posts[currentIndex].postID
-                history.push(`/post/${id}`)
+                const post = posts[currentIndex]
+                history.push(`/post/${post.postID}`)
             }
         }
     }
@@ -185,7 +195,7 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
         <DeleteCommentDialog/>
         <ReportCommentDialog/>
         {post ? <DeletePostDialog post={post}/> : null}
-        <TitleBar/>
+        <TitleBar goBack={true}/>
         <NavBar/>
         <div className="body">
             {post && tagCategories ? 
