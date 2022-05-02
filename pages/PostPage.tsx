@@ -18,6 +18,7 @@ import EditCommentDialog from "../dialogs/EditCommentDialog"
 import ReportCommentDialog from "../dialogs/ReportCommentDialog"
 import ThirdParty from "../components/ThirdParty"
 import Parent from "../components/Parent"
+import MobileInfo from "../components/MobileInfo"
 import {HideNavbarContext, HideSidebarContext, RelativeContext, DownloadFlagContext, DownloadURLsContext, HideTitlebarContext, MobileContext,
 PostsContext, TagsContext, HeaderTextContext, PostFlagContext, RedirectContext, SidebarTextContext, SessionContext, EnableDragContext} from "../Context"
 import axios from "axios"
@@ -238,6 +239,7 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
                     <PostImage img={image}/>
                     <PostImageOptions img={image} download={download} next={next} previous={previous}/>
                     </>}
+                    {mobile && post && tagCategories ? <MobileInfo post={post} artists={tagCategories.artists} characters={tagCategories.characters} series={tagCategories.series} tags={tagCategories.tags}/> : null}
                     {parentPost ? <Parent post={parentPost}/>: null}
                     {thirdPartyPosts.length ? <ThirdParty posts={thirdPartyPosts}/>: null}
                     {session.username && post ? <CutenessMeter post={post}/> : null}

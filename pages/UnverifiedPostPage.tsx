@@ -18,6 +18,7 @@ import EditCommentDialog from "../dialogs/EditCommentDialog"
 import ThirdParty from "../components/ThirdParty"
 import Parent from "../components/Parent"
 import NewTags from "../components/NewTags"
+import MobileInfo from "../components/MobileInfo"
 import {HideNavbarContext, HideSidebarContext, RelativeContext, DownloadFlagContext, DownloadURLsContext, HideTitlebarContext, MobileContext,
 UnverifiedPostsContext, TagsContext, HeaderTextContext, PostFlagContext, SidebarTextContext, SessionContext, EnableDragContext} from "../Context"
 import axios from "axios"
@@ -216,6 +217,7 @@ const UnverifiedPostPage: React.FunctionComponent<Props> = (props) => {
                     <PostImage img={image}/>
                     <PostImageOptions noFavorite={true} img={image} download={download} next={next} previous={previous}/>
                     </>}
+                    {mobile && post && tagCategories ? <MobileInfo post={post} artists={tagCategories.artists} characters={tagCategories.characters} series={tagCategories.series} tags={tagCategories.tags}/> : null}
                     {post ? <NewTags post={post}/> : null}
                     {parentPost ? <Parent post={parentPost}/>: null}
                     {thirdPartyPosts.length ? <ThirdParty posts={thirdPartyPosts}/>: null}

@@ -1,0 +1,135 @@
+@import "../../index.less";
+
+.mobileinfo {
+    position: relative;
+    z-index: 1000;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    transition: margin-left 0.5s, height 0.2s, top 0.4s, background-color 0s;
+}
+
+.mobileinfo-header-title {
+    font-family: Tahoma, sans-serif;
+    font-size: 29px;
+    color: var(--text-strong);
+    .stroke-black();
+}
+
+.mobileinfo-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px;
+    padding-top: 0px;
+    height: 100%;
+}
+
+.mobileinfo-content {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 10px;
+    padding-top: 0px;
+    height: 100%;
+}
+
+.mobileinfo-subcontainer-column {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    margin-top: 3px;
+}
+
+
+.mobileinfo-subcontainer {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    width: 100%;
+    //height: 100%;
+    margin-top: 3px;
+}
+
+.mobileinfo-sub-row {
+    display: flex;
+    flex-direction: row;
+    width: 100%;
+    justify-content: flex-start;
+    align-items: center;
+}
+
+.mobileinfo-row {
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-start;
+    align-items: baseline;
+    margin-top: 2px;
+    margin-right: 10px;
+}
+
+.mobileinfo-footer {
+    width: 100%;
+    height: 40px;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-evenly;
+}
+
+.mobileinfo-footer-text {
+    font-family: Tahoma, sans-serif;
+    color: var(--navbarText);
+    font-size: 13px;
+}
+
+.mobileinfo-footer-icon {
+    cursor: pointer;
+    &:hover {
+        filter: brightness(200%);
+    }
+}
+
+.mobileinfo-text-container {
+    display: flex;
+    flex-direction: row;
+    width: 100%;
+    justify-content: flex-start;
+    margin-bottom: 3px;
+}
+
+.mobileinfo-text {
+    font-family: Tahoma, sans-serif;
+    font-size: 16px;
+    color: var(--sidebarText);
+    .stroke-black();
+}
+
+.mobileinfo-title-container {
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-start;
+    width: 100%;
+}
+
+.mobileinfo-title {
+    font-family: Tahoma, sans-serif;
+    font-size: 20px;
+    color: var(--sidebarText);
+    .stroke-black();
+    margin-top: 5px;
+}
+
+.mobileinfo-img {
+    width: auto;
+    height: 70px;
+    margin-top: 5px;
+    margin-bottom: 5px;
+}
+
+.mobileinfo-icon {
+    width: auto;
+    height: 15px;
+    margin-right: 5px;
+}
