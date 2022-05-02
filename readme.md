@@ -36,7 +36,9 @@ The video player has some additional controls over the gif player, such as volum
 
 ### Tech Stack
 
+- Languages: Typescript, LESS, HTML, SQL
 - Front-end: React
+- Bundler: Webpack
 - Back-end: Node
 - Database: PostgreSQL
 - Hosting: AWS

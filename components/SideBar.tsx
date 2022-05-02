@@ -602,8 +602,16 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
                             <span className="tag-alt">{functions.formatDate(new Date(props.post.updatedDate))}</span>
                         </div>
                         <div className="sidebar-row">
-                            <span className="tag">Rating:</span>
+                            <span className="tag">Type:</span>
+                            <span className="tag-alt">{functions.toProperCase(props.post.type)}</span>
+                        </div>
+                        <div className="sidebar-row">
+                            <span className="tag">Restrict:</span>
                             <span className="tag-alt">{functions.toProperCase(props.post.restrict)}</span>
+                        </div>
+                        <div className="sidebar-row">
+                            <span className="tag">Style:</span>
+                            <span className="tag-alt">{functions.toProperCase(props.post.style)}</span>
                         </div>
                         <div className="sidebar-row">
                             <span className="tag">Favorites:</span>

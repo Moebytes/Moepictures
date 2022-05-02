@@ -43,7 +43,7 @@ const ArtistRow: React.FunctionComponent<Props> = (props) => {
             <div className="artistrow-row">
                 {props.artist.image ? <img className="artistrow-img" src={functions.getTagLink("artist", props.artist.image)}/> : null}
                 <span className="artistrow-text-hover" onClick={searchTag}>
-                    <span className="artistrow-text">{props.artist.tag.replaceAll("-", " ")}</span>
+                    <span className="artistrow-text">{functions.toProperCase(props.artist.tag.replaceAll("-", " "))}</span>
                     <span className="artistrow-text-alt">{props.artist.postCount}</span>
                 </span>
             </div>

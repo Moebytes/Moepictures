@@ -43,7 +43,7 @@ const CharacterRow: React.FunctionComponent<Props> = (props) => {
             <div className="characterrow-row">
                 {props.character.image ? <img className="characterrow-img" src={functions.getTagLink("character", props.character.image)}/> : null}
                 <span className="characterrow-text-hover" onClick={searchTag}>
-                    <span className="characterrow-text">{props.character.tag.replaceAll("-", " ")}</span>
+                    <span className="characterrow-text">{functions.toProperCase(props.character.tag.replaceAll("-", " "))}</span>
                     <span className="characterrow-text-alt">{props.character.postCount}</span>
                 </span>
             </div>
