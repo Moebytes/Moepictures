@@ -61,7 +61,7 @@ const ModPosts: React.FunctionComponent = (props) => {
             currentIndex++
         }
         setIndex(currentIndex)
-        setVisiblePosts(newVisiblePosts)
+        setVisiblePosts(functions.removeDuplicates(newVisiblePosts))
     }, [unverifiedPosts])
 
     const updateOffset = async () => {
@@ -88,7 +88,7 @@ const ModPosts: React.FunctionComponent = (props) => {
                     currentIndex++
                 }
                 setIndex(currentIndex)
-                setVisiblePosts(newPosts)
+                setVisiblePosts(functions.removeDuplicates(newPosts))
             }
         }
         window.addEventListener("scroll", scrollHandler)

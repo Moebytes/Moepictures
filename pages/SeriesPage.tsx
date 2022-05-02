@@ -80,7 +80,7 @@ const SeriesPage: React.FunctionComponent = (props) => {
             currentIndex++
         }
         setIndex(currentIndex)
-        setVisibleSeries(newVisibleSeries)
+        setVisibleSeries(functions.removeDuplicates(newVisibleSeries))
     }, [series])
 
     const updateOffset = async () => {

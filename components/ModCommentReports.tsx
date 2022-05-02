@@ -70,7 +70,7 @@ const ModCommentReports: React.FunctionComponent = (props) => {
             currentIndex++
         }
         setIndex(currentIndex)
-        setVisibleRequests(newVisibleRequests)
+        setVisibleRequests(functions.removeDuplicates(newVisibleRequests))
     }, [requests])
 
     const updateOffset = async () => {
@@ -97,7 +97,7 @@ const ModCommentReports: React.FunctionComponent = (props) => {
                     currentIndex++
                 }
                 setIndex(currentIndex)
-                setVisibleRequests(newPosts)
+                setVisibleRequests(functions.removeDuplicates(newPosts))
             }
         }
         window.addEventListener("scroll", scrollHandler)

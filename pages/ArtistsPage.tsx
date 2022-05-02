@@ -80,7 +80,7 @@ const ArtistsPage: React.FunctionComponent = (props) => {
             currentIndex++
         }
         setIndex(currentIndex)
-        setVisibleArtists(newVisibleArtists)
+        setVisibleArtists(functions.removeDuplicates(newVisibleArtists))
     }, [artists])
 
     const updateOffset = async () => {
@@ -100,14 +100,14 @@ const ArtistsPage: React.FunctionComponent = (props) => {
             if (functions.scrolledToBottom()) {
                 let currentIndex = index
                 if (!artists[currentIndex]) return updateOffset()
-                const newArtists = visibleArtists as any
+                const newVisibleArtists = visibleArtists as any
                 for (let i = 0; i < 10; i++) {
                     if (!artists[currentIndex]) return updateOffset()
-                    newArtists.push(artists[currentIndex])
+                    newVisibleArtists.push(artists[currentIndex])
                     currentIndex++
                 }
                 setIndex(currentIndex)
-                setVisibleArtists(newArtists)
+                setVisibleArtists(functions.removeDuplicates(newVisibleArtists))
             }
         }
         window.addEventListener("scroll", scrollHandler)

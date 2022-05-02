@@ -83,7 +83,7 @@ const TagsPage: React.FunctionComponent = (props) => {
             currentIndex++
         }
         setIndex(currentIndex)
-        setVisibleTags(newVisibleTags)
+        setVisibleTags(functions.removeDuplicates(newVisibleTags))
     }, [tags])
 
     const updateOffset = async () => {
@@ -103,14 +103,14 @@ const TagsPage: React.FunctionComponent = (props) => {
             if (functions.scrolledToBottom()) {
                 let currentIndex = index
                 if (!tags[currentIndex]) return updateOffset()
-                const newTags = visibleTags as any
+                const newVisibleTags = visibleTags as any
                 for (let i = 0; i < 15; i++) {
                     if (!tags[currentIndex]) return updateOffset()
-                    newTags.push(tags[currentIndex])
+                    newVisibleTags.push(tags[currentIndex])
                     currentIndex++
                 }
                 setIndex(currentIndex)
-                setVisibleTags(newTags)
+                setVisibleTags(functions.removeDuplicates(newVisibleTags))
             }
         }
         window.addEventListener("scroll", scrollHandler)

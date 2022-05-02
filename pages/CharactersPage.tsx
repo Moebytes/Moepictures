@@ -80,7 +80,7 @@ const CharactersPage: React.FunctionComponent = (props) => {
             currentIndex++
         }
         setIndex(currentIndex)
-        setVisibleCharacters(newVisibleCharacters)
+        setVisibleCharacters(functions.removeDuplicates(newVisibleCharacters))
     }, [characters])
 
     const updateOffset = async () => {
@@ -100,14 +100,14 @@ const CharactersPage: React.FunctionComponent = (props) => {
             if (functions.scrolledToBottom()) {
                 let currentIndex = index
                 if (!characters[currentIndex]) return updateOffset()
-                const newCharacters = visibleCharacters as any
+                const newVisibleCharacters = visibleCharacters as any
                 for (let i = 0; i < 10; i++) {
                     if (!characters[currentIndex]) return updateOffset()
-                    newCharacters.push(characters[currentIndex])
+                    newVisibleCharacters.push(characters[currentIndex])
                     currentIndex++
                 }
                 setIndex(currentIndex)
-                setVisibleCharacters(newCharacters)
+                setVisibleCharacters(functions.removeDuplicates(newVisibleCharacters))
             }
         }
         window.addEventListener("scroll", scrollHandler)

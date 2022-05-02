@@ -62,7 +62,7 @@ const ModTagDeletions: React.FunctionComponent = (props) => {
             currentIndex++
         }
         setIndex(currentIndex)
-        setVisibleRequests(newVisibleRequests)
+        setVisibleRequests(functions.removeDuplicates(newVisibleRequests))
     }, [requests])
 
     const updateOffset = async () => {
@@ -89,7 +89,7 @@ const ModTagDeletions: React.FunctionComponent = (props) => {
                     currentIndex++
                 }
                 setIndex(currentIndex)
-                setVisibleRequests(newPosts)
+                setVisibleRequests(functions.removeDuplicates(newPosts))
             }
         }
         window.addEventListener("scroll", scrollHandler)
