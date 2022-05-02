@@ -14,13 +14,25 @@ Moebooru supports multiple images per post, which is great for comics and posts 
 
 ### Image Filters
 
+![Image](https://github.com/Tenpi/Moebooru.moe/blob/main/assets/misc/imagefilters.png?raw=true)
+
 You can apply image filters such as brightness, contrast, and hue in realtime. There is also a very fun pixelate filter that 
 can make everything look like a pixel game.
 
 ### Custom GIF/Video Players
 
 Moebooru uses custom javascript gif/video players, so you can do many things that aren't normally possible like pausing/seeking 
-gifs, reverse playback, and modifying playback speed.
+gifs, reverse playback, and modifying playback speed. 
+
+GIF Player:
+
+![Image](https://github.com/Tenpi/Moebooru.moe/blob/main/assets/misc/gifplayer.png?raw=true)
+
+Video Player:
+
+![Image](https://github.com/Tenpi/Moebooru.moe/blob/main/assets/misc/videoplayer.png?raw=true)
+
+The video player has some additional controls over the gif player, such as volume and pitch preservement. 
 
 ### Tech Stack
 
