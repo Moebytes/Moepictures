@@ -619,7 +619,7 @@ const UploadPage: React.FunctionComponent = (props) => {
                 files.push(file)
             }
             await validate(files, links)
-            // reset()
+            reset()
         }, 500)
     }
 

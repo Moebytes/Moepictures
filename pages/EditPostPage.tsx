@@ -688,7 +688,7 @@ const EditPostPage: React.FunctionComponent<Props> = (props) => {
                 files.push(file)
             }
             await validate(files, links)
-            // reset()
+            reset()
         }, 500)
     }
 
