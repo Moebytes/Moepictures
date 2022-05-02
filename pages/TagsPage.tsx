@@ -159,8 +159,9 @@ const TagsPage: React.FunctionComponent = (props) => {
 
     const generateTagsJSX = () => {
         const jsx = [] as any
-        for (let i = 0; i < visibleTags.length; i++) {
-            jsx.push(<TagRow tag={visibleTags[i]} onDelete={updateTags} onEdit={updateTags}/>)
+        const tags = functions.removeDuplicates(visibleTags)
+        for (let i = 0; i < tags.length; i++) {
+            jsx.push(<TagRow tag={tags[i]} onDelete={updateTags} onEdit={updateTags}/>)
         }
         return jsx
     }

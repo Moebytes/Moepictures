@@ -100,14 +100,14 @@ const SeriesPage: React.FunctionComponent = (props) => {
             if (functions.scrolledToBottom()) {
                 let currentIndex = index
                 if (!series[currentIndex]) return updateOffset()
-                const newSeries = visibleSeries as any
+                const newVisibleSeries = visibleSeries as any
                 for (let i = 0; i < 10; i++) {
                     if (!series[currentIndex]) return updateOffset()
-                    newSeries.push(series[currentIndex])
+                    newVisibleSeries.push(series[currentIndex])
                     currentIndex++
                 }
                 setIndex(currentIndex)
-                setVisibleSeries(newSeries)
+                setVisibleSeries(functions.removeDuplicates(newVisibleSeries))
             }
         }
         window.addEventListener("scroll", scrollHandler)
@@ -154,8 +154,9 @@ const SeriesPage: React.FunctionComponent = (props) => {
 
     const generateSeriesJSX = () => {
         const jsx = [] as any
-        for (let i = 0; i < visibleSeries.length; i++) {
-            jsx.push(<SeriesRow series={visibleSeries[i]}/>)
+        const series = functions.removeDuplicates(visibleSeries)
+        for (let i = 0; i < series.length; i++) {
+            jsx.push(<SeriesRow series={series[i]}/>)
         }
         return jsx
     }

@@ -154,8 +154,9 @@ const ArtistsPage: React.FunctionComponent = (props) => {
 
     const generateArtistsJSX = () => {
         const jsx = [] as any
-        for (let i = 0; i < visibleArtists.length; i++) {
-            jsx.push(<ArtistRow artist={visibleArtists[i]}/>)
+        const artists = functions.removeDuplicates(visibleArtists)
+        for (let i = 0; i < artists.length; i++) {
+            jsx.push(<ArtistRow artist={artists[i]}/>)
         }
         return jsx
     }

@@ -220,11 +220,12 @@ const ImageGrid: React.FunctionComponent = (props) => {
 
     const generateImagesJSX = () => {
         const jsx = [] as any
-        for (let i = 0; i < visiblePosts.length; i++) {
-            const post = visiblePosts[i]
+        const posts = functions.removeDuplicates(visiblePosts)
+        for (let i = 0; i < posts.length; i++) {
+            const post = posts[i] as any
             if (post.thirdParty) continue
             if (!session.username) if (post.restrict !== "safe") continue
-            const image = visiblePosts[i].images[0]
+            const image = post.images[0]
             if (!image) continue
             const images = post.images.map((i: any) => functions.getImageLink(i.type, post.postID, i.filename))
             jsx.push(<GridImage key={post.postID} id={post.postID} img={functions.getImageLink(image.type, post.postID, image.filename)} comicPages={post.type === "comic" ? images : null} post={post}/>)

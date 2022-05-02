@@ -99,8 +99,9 @@ const ModPosts: React.FunctionComponent = (props) => {
 
     const generatePostsJSX = () => {
         let jsx = [] as any
-        for (let i = 0; i < visiblePosts.length; i++) {
-            const post = unverifiedPosts[i]
+        const posts = functions.removeDuplicates(visiblePosts)
+        for (let i = 0; i < posts.length; i++) {
+            const post = posts[i] as any
             if (!post) break
             const imgClick = () => {
                 history.push(`/unverified/post/${post.postID}`)

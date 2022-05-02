@@ -154,8 +154,9 @@ const CharactersPage: React.FunctionComponent = (props) => {
 
     const generateCharactersJSX = () => {
         const jsx = [] as any
-        for (let i = 0; i < visibleCharacters.length; i++) {
-            jsx.push(<CharacterRow character={visibleCharacters[i]}/>)
+        const characters = functions.removeDuplicates(visibleCharacters)
+        for (let i = 0; i < characters.length; i++) {
+            jsx.push(<CharacterRow character={characters[i]}/>)
         }
         return jsx
     }

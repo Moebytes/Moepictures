@@ -122,8 +122,9 @@ const ModTagEdits: React.FunctionComponent = (props) => {
 
     const generateTagsJSX = () => {
         let jsx = [] as any
-        for (let i = 0; i < visibleRequests.length; i++) {
-            const request = requests[i]
+        const requests = functions.removeDuplicates(visibleRequests)
+        for (let i = 0; i < requests.length; i++) {
+            const request = requests[i] as any
             if (!request) break
             const oldTag = oldTags[i]
             const searchTag = () => {

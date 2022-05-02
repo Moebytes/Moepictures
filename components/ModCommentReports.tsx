@@ -108,8 +108,9 @@ const ModCommentReports: React.FunctionComponent = (props) => {
 
     const generateTagsJSX = () => {
         let jsx = [] as any
-        for (let i = 0; i < visibleRequests.length; i++) {
-            const request = requests[i]
+        const requests = functions.removeDuplicates(visibleRequests)
+        for (let i = 0; i < requests.length; i++) {
+            const request = requests[i] as any
             if (!request) break
             const img = request.user.image ? functions.getTagLink("pfp", request.user.image) : getFavicon()
             jsx.push(

@@ -100,8 +100,9 @@ const ModPostDeletions: React.FunctionComponent = (props) => {
 
     const generatePostsJSX = () => {
         let jsx = [] as any
-        for (let i = 0; i < visibleRequests.length; i++) {
-            const request = requests[i]
+        const requests = functions.removeDuplicates(visibleRequests)
+        for (let i = 0; i < requests.length; i++) {
+            const request = requests[i] as any
             if (!request) break
             const imgClick = () => {
                 history.push(`/post/${request.postID}`)
