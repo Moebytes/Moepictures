@@ -78,7 +78,7 @@ const UserRoutes = (app: Express) => {
                 await sql.updateUser(username, "bio", "This user has not written anything.")
                 await sql.updateUser(username, "role", "user")
                 const ip = req.headers["x-forwarded-for"] || req.socket.remoteAddress
-                await sql.updateUser(username, "ip", ip as string)
+                await sql.updateUser(username, "ip", ip?.toString().replace("::ffff:", "") || "")
                 const passwordHash = await bcrypt.hash(password, 13)
                 await sql.updateUser(username, "password", passwordHash)
 
@@ -123,8 +123,8 @@ const UserRoutes = (app: Express) => {
                 req.session.image = user.image
                 req.session.role = user.role
                 const ip = req.headers["x-forwarded-for"] || req.socket.remoteAddress
-                await sql.updateUser(username, "ip", ip as string)
-                req.session.ip = ip as string
+                await sql.updateUser(username, "ip", ip?.toString().replace("::ffff:", "") || "")
+                req.session.ip = ip?.toString().replace("::ffff:", "") || ""
                 return res.status(200).send("Success")
             } else {
                 return res.status(400).send("Bad request")
