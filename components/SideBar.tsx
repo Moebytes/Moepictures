@@ -339,9 +339,9 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
             const link = functions.getTagLink("artist", props.artists[i].image)
             if (!props.artists[i]) break
             const tagClick = () => {
+                history.push(`/posts`)
                 setSearch(props.artists[i].tag)
                 setSearchFlag(true)
-                history.push(`/posts`)
             }
             jsx.push(<>
                     {link ?
@@ -364,9 +364,9 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
         for (let i = 0; i < props.characters.length; i++) {
             if (!props.characters[i]) break
             const tagClick = () => {
+                history.push(`/posts`)
                 setSearch(props.characters[i].tag)
                 setSearchFlag(true)
-                history.push(`/posts`)
             }
             jsx.push(
                 <div className="sidebar-row">
@@ -385,9 +385,9 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
         for (let i = 0; i < props.series.length; i++) {
             if (!props.series[i]) break
             const tagClick = () => {
+                history.push(`/posts`)
                 setSearch(props.series[i].tag)
                 setSearchFlag(true)
-                history.push(`/posts`)
             }
             jsx.push(
                 <div className="sidebar-row">
@@ -408,9 +408,9 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
         for (let i = 0; i < max; i++) {
             if (!currentTags[i]) break
             const tagClick = () => {
+                history.push(`/posts`)
                 setSearch(currentTags[i].tag)
                 setSearchFlag(true)
-                history.push(`/posts`)
             }
             jsx.push(
                 <div className="sidebar-row">
@@ -435,13 +435,13 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
     }
 
     const triggerSearch = () => {
-        setSearchFlag(true)
         history.push(`/posts`)
+        setSearchFlag(true)
     }
 
     const randomSearch = () => {
-        setRandomFlag(true)
         history.push(`/posts`)
+        setRandomFlag(true)
     }
 
     const imageSearch = async (event: any) => {

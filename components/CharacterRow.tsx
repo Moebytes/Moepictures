@@ -20,9 +20,9 @@ const CharacterRow: React.FunctionComponent<Props> = (props) => {
     const history = useHistory()
 
     const searchTag = () => {
+        history.push("/posts")
         setSearch(props.character.tag)
         setSearchFlag(true)
-        history.push("/posts")
     }
 
     const set = (image: string, index: number) => {

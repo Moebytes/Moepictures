@@ -20,9 +20,9 @@ const ArtistRow: React.FunctionComponent<Props> = (props) => {
     const history = useHistory()
 
     const searchTag = () => {
+        history.push("/posts")
         setSearch(props.artist.tag)
         setSearchFlag(true)
-        history.push("/posts")
     }
 
     const set = (image: string, index: number) => {

@@ -42,9 +42,9 @@ const TagRow: React.FunctionComponent<Props> = (props) => {
     const history = useHistory()
 
     const searchTag = () => {
+        history.push("/posts")
         setSearch(props.tag.tag)
         setSearchFlag(true)
-        history.push("/posts")
     }
 
     const generateAliasesJSX = () => {

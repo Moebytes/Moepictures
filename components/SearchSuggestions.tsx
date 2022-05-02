@@ -31,13 +31,13 @@ const SearchSuggestions: React.FunctionComponent<Props> = (props) => {
             if (!active || !suggestions.length) return
             event.preventDefault()
             if (props.click) return props.click(suggestions[activeIndex]?.tag)
+            return history.push(`/posts`)
             setSearch((prev: string) => {
                 const parts = prev.split(/ +/g)
                 parts[parts.length - 1] = suggestions[activeIndex]?.tag
                 return parts.join(" ")
             })
             setSearchFlag(true)
-            return history.push(`/posts`)
         }
         let newActiveIndex = activeIndex
         if (event.key === "ArrowUp") {
@@ -93,13 +93,13 @@ const SearchSuggestions: React.FunctionComponent<Props> = (props) => {
             if (!suggestions[i]) break
             const tagClick = () => {
                 if (props.click) return props.click(suggestions[i].tag)
+                history.push(`/posts`)
                 setSearch((prev: string) => {
                     const parts = prev.split(/ +/g)
                     parts[parts.length - 1] = suggestions[i].tag
                     return parts.join(" ")
                 })
                 setSearchFlag(true)
-                history.push(`/posts`)
             }
             jsx.push(
                 <div className={`search-suggestions-row ${activeIndex === i ? "search-suggestions-active" : ""}`} onClick={() => tagClick()} onMouseEnter={() => setActiveIndex(i)}>

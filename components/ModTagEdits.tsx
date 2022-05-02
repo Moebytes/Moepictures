@@ -128,9 +128,9 @@ const ModTagEdits: React.FunctionComponent = (props) => {
             if (!request) break
             const oldTag = oldTags[i]
             const searchTag = () => {
+                history.push(`/posts`)
                 setSearch(request.tag)
                 setSearchFlag(true)
-                history.push(`/posts`)
             }
             const changeOldTag = () => {
                 const value = showOldTags[i] || false 

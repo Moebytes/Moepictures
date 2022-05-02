@@ -105,9 +105,9 @@ const ModTagAliases: React.FunctionComponent = (props) => {
             const request = requests[i] as any
             if (!request) break
             const searchTag = () => {
+                history.push(`/posts`)
                 setSearch(request.tag)
                 setSearchFlag(true)
-                history.push(`/posts`)
             }
             const img = functions.getTagLink(request.type, request.image)
             jsx.push(
