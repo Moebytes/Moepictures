@@ -72,7 +72,17 @@ const ImageGrid: React.FunctionComponent = (props) => {
 
     useEffect(() => {
         if (!loaded) setLoaded(true)
-        if (searchFlag) searchPosts().then(() => forceUpdate())
+        if (searchFlag) searchPosts()
+        setTimeout(() => {
+            const elements = document.querySelectorAll(".sortbar-text") as any
+            if (!elements) return
+            let counter = 0
+            for (let i = 0; i < elements.length; i++) {
+                if (elements[i]?.innerText?.toLowerCase() === "all") counter++
+                if (elements[i]?.innerText?.toLowerCase() === "date") counter++
+            }
+            if (counter >= 4) searchPosts()
+        }, 300)
     }, [])
     
     useEffect(() => {
