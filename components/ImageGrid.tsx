@@ -168,7 +168,6 @@ const ImageGrid: React.FunctionComponent = (props) => {
             const query = await functions.parseSpaceEnabledSearch(search)
             result = await axios.get("/api/search/posts", {params: {query, type: imageType, restrict: restrictType, style: styleType, sort: sortType, offset: newOffset}, withCredentials: true}).then((r) => r.data)
         }
-        console.log(result)
         if (result?.length >= 100) {
             setOffset(newOffset)
             setPosts((prev: any) => functions.removeDuplicates([...prev, ...result]))
@@ -180,6 +179,7 @@ const ImageGrid: React.FunctionComponent = (props) => {
 
     useEffect(() => {
         const updatePosts = async () => {
+            if (!loaded) return
             if (visiblePosts.length < getInitLoadAmount()) {
                 let currentIndex = index
                 const newVisiblePosts = visiblePosts as any
@@ -199,6 +199,7 @@ const ImageGrid: React.FunctionComponent = (props) => {
 
     useEffect(() => {
         const scrollHandler = async () => {
+            if (!loaded) return
             if (functions.scrolledToBottom()) {
                 let currentIndex = index
                 if (!posts[currentIndex]) return updateOffset()
@@ -217,7 +218,7 @@ const ImageGrid: React.FunctionComponent = (props) => {
         return () => {
             window.removeEventListener("scroll", scrollHandler)
         }
-    })
+    }, [posts, visiblePosts, ended, noResults, offset])
 
 
     const generateImagesJSX = () => {

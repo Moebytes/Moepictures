@@ -207,16 +207,16 @@ const HelpPage: React.FunctionComponent = (props) => {
                         You don’t have to be exceedingly thorough but some effort placed on tags is required, 
                         these are some guidelines on what features to tag: <br/>
                         <span className="help-alt">
-                        ⇾ Clothing (school uniform, sailor uniform, skirt, leggings, etc). <br/>
-                        ⇾ Hair Color (blonde, redhead, blue hair, etc). <br/>
-                        ⇾ Hair Length (short hair, medium hair, long hair, etc). <br/>
-                        ⇾ Hair Styles (ponytail, pigtail, braid, etc). <br/>
+                        ⇾ Clothing (school-uniform, sailor-uniform, coat, skirt, leggings, etc). <br/>
+                        ⇾ Hair Color (blonde-hair, red-hair, blue-hair, etc). <br/>
+                        ⇾ Hair Length (short-hair, medium-hair, long-hair, etc). <br/>
+                        ⇾ Hair Styles (twintails, ponytail, braid, etc). <br/>
                         ⇾ Special Accessories (hat, ribbon, bracelet, etc). <br/>
                         ⇾ Expressions (smiling, crying, surprised, etc). <br/>
                         ⇾ Actions (sleeping, running, eating, etc). <br/>
-                        ⇾ Body Parts (small breasts, long legs, etc). <br/>
+                        ⇾ Body Parts (small-breasts, long-legs, etc). <br/>
                         ⇾ Objects (coffee, umbrella, flower, etc). <br/>
-                        ⇾ Environment (night, sunrise, sunset, snow, rain, fog, etc). <br/>
+                        ⇾ Environment (daytime, nighttime, sunrise, sunset, snow, rain, fog, etc). <br/>
                         ⇾ Software (live2d, blender, etc).
                         </span>
                     </span>

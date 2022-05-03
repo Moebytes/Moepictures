@@ -68,7 +68,11 @@ export default class Functions {
     }
 
     public static removeDuplicates = <T>(array: T[]) => {
-        return array.filter((a, b) => array.indexOf(a) === b)
+        return array.filter((value, index) => {
+            return index === array.findIndex(obj => {
+              return JSON.stringify(obj) === JSON.stringify(value)
+            })
+        })
     }
     public static formatSeconds = (duration: number) => {
         let seconds = Math.floor(duration % 60) as any
