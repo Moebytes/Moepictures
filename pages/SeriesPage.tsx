@@ -87,7 +87,7 @@ const SeriesPage: React.FunctionComponent = (props) => {
         if (ended) return
         const newOffset = offset + 100
         const result = await axios.get("/api/search/series", {params: {sort: sortType, query: searchQuery, offset: newOffset}, withCredentials: true}).then((r) => r.data)
-        if (result?.length) {
+        if (result?.length >= 100) {
             setOffset(newOffset)
             setSeries((prev: any) => functions.removeDuplicates([...prev, ...result]))
         } else {
@@ -154,8 +154,10 @@ const SeriesPage: React.FunctionComponent = (props) => {
 
     const generateSeriesJSX = () => {
         const jsx = [] as any
-        const series = functions.removeDuplicates(visibleSeries)
+        const series = functions.removeDuplicates(visibleSeries) as any
         for (let i = 0; i < series.length; i++) {
+            if (series[i].tag === "no-series") continue
+            if (series[i].tag === "unknown-series") continue
             jsx.push(<SeriesRow series={series[i]}/>)
         }
         return jsx

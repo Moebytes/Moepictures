@@ -116,6 +116,7 @@ const HelpPage: React.FunctionComponent = (props) => {
                         <span className="help-alt">unknown artist</span> - the artist is not known. <br/>
                         <span className="help-alt">unknown character</span> - the character is unknown and might not be original. <br/>
                         <span className="help-alt">unknown series</span> - the series is unknown. <br/>
+                        <span className="help-alt">no series</span> - not part of any series. <br/>
                         <span className="help-alt">needs tags</span> - current post tags are insufficient. <br/>
                         <span className="help-alt">text</span> - the post contains text. <br/>
                         <span className="help-alt">transparent</span> - the post has transparency. <br/>

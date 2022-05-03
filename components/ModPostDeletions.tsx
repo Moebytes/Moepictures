@@ -69,7 +69,7 @@ const ModPostDeletions: React.FunctionComponent = (props) => {
         if (ended) return
         const newOffset = offset + 100
         const result = await axios.get("/api/post/delete/request/list", {params: {offset: newOffset}, withCredentials: true}).then((r) => r.data)
-        if (result?.length) {
+        if (result?.length >= 100) {
             setOffset(newOffset)
             setRequests((prev: any) => functions.removeDuplicates([...prev, ...result]))
         } else {

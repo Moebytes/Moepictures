@@ -87,7 +87,7 @@ const CharactersPage: React.FunctionComponent = (props) => {
         if (ended) return
         const newOffset = offset + 100
         const result = await axios.get("/api/search/characters", {params: {sort: sortType, query: searchQuery, offset: newOffset}, withCredentials: true}).then((r) => r.data)
-        if (result?.length) {
+        if (result?.length >= 100) {
             setOffset(newOffset)
             setCharacters((prev: any) => functions.removeDuplicates([...prev, ...result]))
         } else {
@@ -154,8 +154,10 @@ const CharactersPage: React.FunctionComponent = (props) => {
 
     const generateCharactersJSX = () => {
         const jsx = [] as any
-        const characters = functions.removeDuplicates(visibleCharacters)
+        const characters = functions.removeDuplicates(visibleCharacters) as any
         for (let i = 0; i < characters.length; i++) {
+            if (characters[i].tag === "original") continue
+            if (characters[i].tag === "unknown-character") continue
             jsx.push(<CharacterRow character={characters[i]}/>)
         }
         return jsx

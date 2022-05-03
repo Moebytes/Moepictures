@@ -87,7 +87,7 @@ const ArtistsPage: React.FunctionComponent = (props) => {
         if (ended) return
         const newOffset = offset + 100
         const result = await axios.get("/api/search/artists", {params: {sort: sortType, query: searchQuery, offset: newOffset}, withCredentials: true}).then((r) => r.data)
-        if (result?.length) {
+        if (result?.length >= 100) {
             setOffset(newOffset)
             setArtists((prev: any) => functions.removeDuplicates([...prev, ...result]))
         } else {
@@ -154,8 +154,9 @@ const ArtistsPage: React.FunctionComponent = (props) => {
 
     const generateArtistsJSX = () => {
         const jsx = [] as any
-        const artists = functions.removeDuplicates(visibleArtists)
+        const artists = functions.removeDuplicates(visibleArtists) as any
         for (let i = 0; i < artists.length; i++) {
+            if (artists[i].tag === "unknown-artist") continue
             jsx.push(<ArtistRow artist={artists[i]}/>)
         }
         return jsx

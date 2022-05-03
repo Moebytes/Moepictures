@@ -90,8 +90,10 @@ const CreateRoutes = (app: Express) => {
         if (req.session.role !== "admin" && req.session.role !== "mod") return res.status(403).end()
 
         if (!artists?.[0]?.tag) artists = [{tag: "unknown-artist"}]
+        if (!series?.[0]?.tag) {
+          series = characters?.[0]?.tag ? [{tag: "no-series"}] : [{tag: "unknown-series"}]
+        }
         if (!characters?.[0]?.tag) characters = [{tag: "unknown-character"}]
-        if (!series?.[0]?.tag) series = [{tag: "unknown-series"}]
         if (!tags?.[0]) tags = ["needs-tags"]
         if (!newTags?.[0]) newTags = []
 
@@ -290,8 +292,10 @@ const CreateRoutes = (app: Express) => {
         if (req.session.role !== "admin" && req.session.role !== "mod") return res.status(403).end()
 
         if (!artists?.[0]?.tag) artists = [{tag: "unknown-artist"}]
+        if (!series?.[0]?.tag) {
+          series = characters?.[0]?.tag ? [{tag: "no-series"}] : [{tag: "unknown-series"}]
+        }
         if (!characters?.[0]?.tag) characters = [{tag: "unknown-character"}]
-        if (!series?.[0]?.tag) series = [{tag: "unknown-series"}]
         if (!tags?.[0]) tags = ["needs-tags"]
         if (!newTags?.[0]) newTags = []
 
@@ -493,8 +497,10 @@ const CreateRoutes = (app: Express) => {
         if (!req.session.username) return res.status(400).send("Not logged in")
 
         if (!artists?.[0]?.tag) artists = [{tag: "unknown-artist"}]
+        if (!series?.[0]?.tag) {
+          series = characters?.[0]?.tag ? [{tag: "no-series"}] : [{tag: "unknown-series"}]
+        }
         if (!characters?.[0]?.tag) characters = [{tag: "unknown-character"}]
-        if (!series?.[0]?.tag) series = [{tag: "unknown-series"}]
         if (!tags?.[0]) tags = ["needs-tags"]
         if (!newTags?.[0]) newTags = []
 
@@ -692,8 +698,10 @@ const CreateRoutes = (app: Express) => {
         if (!req.session.username) return res.status(400).send("Not logged in")
 
         if (!artists?.[0]?.tag) artists = [{tag: "unknown-artist"}]
+        if (!series?.[0]?.tag) {
+          series = characters?.[0]?.tag ? [{tag: "no-series"}] : [{tag: "unknown-series"}]
+        }
         if (!characters?.[0]?.tag) characters = [{tag: "unknown-character"}]
-        if (!series?.[0]?.tag) series = [{tag: "unknown-series"}]
         if (!tags?.[0]) tags = ["needs-tags"]
         if (!newTags?.[0]) newTags = []
 

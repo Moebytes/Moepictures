@@ -168,7 +168,7 @@ const ImageGrid: React.FunctionComponent = (props) => {
             const query = await functions.parseSpaceEnabledSearch(search)
             result = await axios.get("/api/search/posts", {params: {query, type: imageType, restrict: restrictType, style: styleType, sort: sortType, offset: newOffset}, withCredentials: true}).then((r) => r.data)
         }
-        if (result?.length) {
+        if (result?.length >= 100) {
             setOffset(newOffset)
             setPosts((prev: any) => functions.removeDuplicates([...prev, ...result]))
         } else {

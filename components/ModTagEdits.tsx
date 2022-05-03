@@ -88,7 +88,7 @@ const ModTagEdits: React.FunctionComponent = (props) => {
         if (ended) return
         const newOffset = offset + 100
         const result = await axios.get("/api/tag/edit/request/list", {params: {offset: newOffset}, withCredentials: true}).then((r) => r.data)
-        if (result?.length) {
+        if (result?.length >= 100) {
             const oldTags = await axios.get("/api/tag/list", {params: {tags: requests.map((r: any) => r.tag)}, withCredentials: true}).then((r) => r.data)
             setOffset(newOffset)
             setRequests((prev: any) => functions.removeDuplicates([...prev, ...result]))
