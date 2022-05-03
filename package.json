@@ -1,7 +1,7 @@
 {
   "name": "moebooru.moe",
   "version": "1.0.0",
-  "description": "A moe anime image board for the cutest art on the internet.",
+  "description": "A moe anime image board.",
   "main": "dist/server.js",
   "scripts": {
     "start": "npm run clean && webpack && node dist/server.js",
