@@ -131,6 +131,7 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
                 mobileSidebar.style.height = "auto"
                 return
             }
+            if (!sidebar) return
             if (!relative) {
                 if (!hideTitlebar) {
                     sidebar.style.top = "112px"
@@ -176,6 +177,7 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
             mobileSidebar.style.height = "auto"
             return
         }
+        if (!sidebar) return
         if (!relative) {
             if (!hideTitlebar) {
                 sidebar.style.top = "112px"
@@ -214,6 +216,7 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
             mobileSidebar.style.height = "auto"
             return
         }
+        if (!sidebar) return
         if (!relative) {
             if (!hideNavbar) {
                 if (!hideTitlebar) {

@@ -31,7 +31,6 @@ const SearchSuggestions: React.FunctionComponent<Props> = (props) => {
             if (!active || !suggestions.length) return
             event.preventDefault()
             if (props.click) return props.click(suggestions[activeIndex]?.tag)
-            return history.push(`/posts`)
             setSearch((prev: string) => {
                 const parts = prev.split(/ +/g)
                 parts[parts.length - 1] = suggestions[activeIndex]?.tag

@@ -72,6 +72,14 @@ const TagRow: React.FunctionComponent<Props> = (props) => {
         setDeleteTagID(props.tag.tag)
     }
 
+    const refreshCache = async (image: any) => {
+        try {
+           await axios.post(image, null, {withCredentials: true})
+        } catch {
+            // ignore
+        }
+    }
+
     const editTag = async () => {
         let image = null as any
         if (editTagImage) {
@@ -81,6 +89,7 @@ const TagRow: React.FunctionComponent<Props> = (props) => {
         }
         await axios.put("/api/tag/edit", {tag: props.tag.tag, key: editTagKey, description: editTagDescription,
         image, aliases: editTagAliases}, {withCredentials: true})
+        if (editTagImage) refreshCache(editTagImage)
         props.onEdit?.()
     }
 

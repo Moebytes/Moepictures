@@ -97,7 +97,6 @@ const HelpPage: React.FunctionComponent = (props) => {
                         Most actions such as uploading a new post or aliasing a tag to another tag will be reviewed by the site staff.
                     </span>
                     <span className="help-heading" id="searching">Searching</span>
-                    <div className="help-img-container"><img className="help-img" src={searchingImg}/></div>
                     <span className="help-text">
                         The tags on Moebooru use a dash ("-") as a delimeter, but you can also search with spaces because the search can guess what tags you are searching for.
                         If you encounter a problem with this, use dashed versions of the tags. These are examples
@@ -113,25 +112,25 @@ const HelpPage: React.FunctionComponent = (props) => {
 
                         These are some various tags with special uses. <br/>
                         <span className="help-alt">original</span> - the drawing is original, ie. not fanart. <br/>
+                        <span className="help-alt">self post</span> - the post was uploaded by its original creator. <br/>
                         <span className="help-alt">unknown artist</span> - the artist is not known. <br/>
                         <span className="help-alt">unknown character</span> - the character is unknown and might not be original. <br/>
                         <span className="help-alt">unknown series</span> - the series is unknown. <br/>
-                        <span className="help-alt">untranslated</span> - the post contains text that is untranslated. <br/>
-                        <span className="help-alt">partially translated</span> - the post is only partially translated. <br/>
-                        <span className="help-alt">check translation</span> - the translations in the post might be incorrect. <br/>
-                        <span className="help-alt">translated</span> - the post is fully translated. <br/>
+                        <span className="help-alt">needs tags</span> - current post tags are insufficient. <br/>
+                        <span className="help-alt">text</span> - the post contains text. <br/>
+                        <span className="help-alt">transparent</span> - the post has transparency. <br/>
                         <span className="help-alt">no audio</span> - the post is a video with no audio. <br/>
-                        <span className="help-alt">with audio</span> - the post is a video that has audio.
+                        <span className="help-alt">with audio</span> - the post is a video that has audio. <br/>
                     </span>
                     <span className="help-heading" id="image-searching">Image Searching</span>
                     <span className="help-text">
-                        Every image uploaded to Moebooru is hashed with a perceptual hash algorithm, which basically means 
+                        Every image uploaded to Moebooru is hashed with a perceptual hash algorithm, which means 
                         that images that look the same should yield similar hashes. This is different from binary hashes which only hash the 
                         binary data of the image, so for example if you were to resize the same image it would yield totally different hashes 
                         with a binary hashing algorithm. <br/><br/>
 
-                        When you do an image search your upload is hashed in the same way and we try to find a matching hash in our database. Usually 
-                        this is very accurate at finding duplicate images. If you upload a video, then only the first frame of the video will be hashed.
+                        When you do an image search your upload is perceptually hashed and we try to find a matching hash in our database. Usually 
+                        this is very accurate at finding duplicate images. If you upload a video, only the first frame of the video is hashed.
                     </span>
                     <span className="help-heading" id="image-filters">Image Filters</span>
                     <div className="help-img-container"><img className="help-img" src={imagefiltersImg}/></div>
@@ -239,7 +238,7 @@ const HelpPage: React.FunctionComponent = (props) => {
                         Quotes are supported and we have a syntax that makes it easy to do quotes. <br/>
                         <span className="help-alt">
                         &gt;&gt;&gt; User said:<br/>
-                        &gt; Comment <br/><br/>
+                        &gt; Comment <br/>
                         </span>
                         Nested quotes are not supported. If you see a comment that is breaking the rules, please report it.
                     </span>

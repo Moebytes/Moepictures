@@ -816,15 +816,19 @@ export default class SQLQuery {
 
   public static tagSearch = async (search: string, sort: string, type?: string, offset?: string) => {
     let whereArray = [] as string[]
-    if (search) whereArray.push( 
-    `(tags.tag LIKE $1 || '%'
+    let i = 1
+    if (search) {
+      whereArray.push( 
+    `(tags.tag LIKE $${i} || '%'
     OR EXISTS (
       SELECT 1 
       FROM aliases
       WHERE aliases.tag = tags.tag 
       AND aliases.alias LIKE $1 || '%'
     ))`)
-    if (type) whereArray.push(`tags.type = $2`)
+      i++
+    }
+    if (type) whereArray.push(`tags.type = $${i}`)
     let whereQuery = whereArray.length ? `WHERE ${whereArray.join(" AND ")}` : ""
     let sortQuery = ""
     if (sort === "alphabetic") sortQuery = `ORDER BY tags.tag ASC`

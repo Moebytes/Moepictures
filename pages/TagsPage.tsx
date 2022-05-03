@@ -90,7 +90,8 @@ const TagsPage: React.FunctionComponent = (props) => {
         if (ended) return
         const newOffset = offset + 100
         const result = await axios.get("/api/search/tags", {params: {sort: sortType, query: searchQuery, offset: newOffset}, withCredentials: true}).then((r) => r.data)
-        if (result?.length) {
+        console.log(result)
+        if (result?.length >= 100) {
             setOffset(newOffset)
             setTags((prev: any) => functions.removeDuplicates([...prev, ...result]))
         } else {

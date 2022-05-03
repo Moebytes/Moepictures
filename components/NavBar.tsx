@@ -197,7 +197,7 @@ const NavBar: React.FunctionComponent = (props) => {
                         <img className="mobile-nav-logout-img" src={logoutIcon} onClick={() => {logout(); setHideMobileNavbar(true)}}/>
                     </div> :
                     <span className="mobile-nav-text mobile-nav-user-text" onClick={() => {history.push("/login"); setHideMobileNavbar(true)}}>Login</span>}
-                    <span className="mobile-nav-text" onClick={() => {history.push("/posts"); setHideMobileNavbar(true)}}>Posts</span>
+                    <span className="mobile-nav-text" onClick={() => {history.push("/posts"); setHideMobileNavbar(true); setSearchFlag(true)}}>Posts</span>
                     <span className="mobile-nav-text" onClick={() => {history.push("/comments"); setHideMobileNavbar(true)}}>Comments</span>
                     <span className="mobile-nav-text" onClick={() => {history.push("/artists"); setHideMobileNavbar(true)}}>Artists</span>
                     <span className="mobile-nav-text" onClick={() => {history.push("/characters"); setHideMobileNavbar(true)}}>Characters</span>
@@ -256,7 +256,7 @@ const NavBar: React.FunctionComponent = (props) => {
                         <img className="nav-logout-img" src={logoutIcon} onClick={logout}/>
                     </div> :
                     <span style={{marginRight: marginR}} className="nav-text nav-user-text" onClick={() => history.push("/login")}>Login</span>}
-                    <span style={{marginRight: marginR}} className="nav-text" onClick={() => history.push("/posts")}>Posts</span>
+                    <span style={{marginRight: marginR}} className="nav-text" onClick={() => {history.push("/posts"); setSearchFlag(true)}}>Posts</span>
                     <span style={{marginRight: marginR}} className="nav-text" onClick={() => history.push("/comments")}>Comments</span>
                     <span style={{marginRight: marginR}} className="nav-text" onClick={() => history.push("/artists")}>Artists</span>
                     <span style={{marginRight: marginR}} className="nav-text" onClick={() => history.push("/characters")}>Characters</span>

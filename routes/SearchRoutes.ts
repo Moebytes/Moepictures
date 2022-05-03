@@ -149,9 +149,10 @@ const SearchRoutes = (app: Express) => {
             const offset = req.query.offset as string
             if (!functions.validTagSort(sort)) return res.status(400).send("Invalid sort")
             let search = query?.trim().split(/ +/g).filter(Boolean).join("-") ?? ""
-            let result = await sql.tagSearch(search, sort, offset)
+            let result = await sql.tagSearch(search, sort, undefined, offset)
             res.status(200).json(result)
-        } catch {
+        } catch (e) {
+            console.log(e)
             return res.status(400).send("Bad request")
         }
     })
