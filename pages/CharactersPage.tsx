@@ -91,6 +91,7 @@ const CharactersPage: React.FunctionComponent = (props) => {
             setOffset(newOffset)
             setCharacters((prev: any) => functions.removeDuplicates([...prev, ...result]))
         } else {
+            if (result?.length) setCharacters((prev: any) => functions.removeDuplicates([...prev, ...result]))
             setEnded(true)
         }
     }

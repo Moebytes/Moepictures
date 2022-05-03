@@ -190,6 +190,7 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
         let currentIndex = posts.findIndex((p: any) => p.postID === postID)
         if (currentIndex !== -1) {
             currentIndex++
+            if (!session.username) while (posts[currentIndex]?.restrict !== "safe") currentIndex++
             if (posts[currentIndex]) {
                 const post = posts[currentIndex]
                 history.push(`/post/${post.postID}`)
@@ -201,6 +202,7 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
         let currentIndex = posts.findIndex((p: any) => p.postID === postID)
         if (currentIndex !== -1) {
             currentIndex--
+            if (!session.username) while (posts[currentIndex]?.restrict !== "safe") currentIndex--
             if (posts[currentIndex]) {
                 const post = posts[currentIndex]
                 history.push(`/post/${post.postID}`)

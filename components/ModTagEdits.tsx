@@ -94,6 +94,10 @@ const ModTagEdits: React.FunctionComponent = (props) => {
             setRequests((prev: any) => functions.removeDuplicates([...prev, ...result]))
             setOldTags((prev: any) => functions.removeDuplicates([...prev, ...oldTags]))
         } else {
+            if (result?.length) {
+                setRequests((prev: any) => functions.removeDuplicates([...prev, ...result]))
+                setOldTags((prev: any) => functions.removeDuplicates([...prev, ...oldTags]))
+            }
             setEnded(true)
         }
     }

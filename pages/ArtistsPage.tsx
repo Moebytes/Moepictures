@@ -91,6 +91,7 @@ const ArtistsPage: React.FunctionComponent = (props) => {
             setOffset(newOffset)
             setArtists((prev: any) => functions.removeDuplicates([...prev, ...result]))
         } else {
+            if (result?.length) setArtists((prev: any) => functions.removeDuplicates([...prev, ...result]))
             setEnded(true)
         }
     }

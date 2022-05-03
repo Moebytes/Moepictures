@@ -95,6 +95,7 @@ const TagsPage: React.FunctionComponent = (props) => {
             setOffset(newOffset)
             setTags((prev: any) => functions.removeDuplicates([...prev, ...result]))
         } else {
+            if (result?.length) setTags((prev: any) => functions.removeDuplicates([...prev, ...result]))
             setEnded(true)
         }
     }

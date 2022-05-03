@@ -73,6 +73,7 @@ const ModTagDeletions: React.FunctionComponent = (props) => {
             setOffset(newOffset)
             setRequests((prev: any) => functions.removeDuplicates([...prev, ...result]))
         } else {
+            if (result?.length) setRequests((prev: any) => functions.removeDuplicates([...prev, ...result]))
             setEnded(true)
         }
     }

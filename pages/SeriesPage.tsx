@@ -91,6 +91,7 @@ const SeriesPage: React.FunctionComponent = (props) => {
             setOffset(newOffset)
             setSeries((prev: any) => functions.removeDuplicates([...prev, ...result]))
         } else {
+            if (result?.length) setSeries((prev: any) => functions.removeDuplicates([...prev, ...result]))
             setEnded(true)
         }
     }

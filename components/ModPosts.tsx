@@ -72,6 +72,7 @@ const ModPosts: React.FunctionComponent = (props) => {
             setOffset(newOffset)
             setUnverifiedPosts((prev: any) => functions.removeDuplicates([...prev, ...result]))
         } else {
+            if (result?.length) setUnverifiedPosts((prev: any) => functions.removeDuplicates([...prev, ...result]))
             setEnded(true)
         }
     }
