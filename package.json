@@ -1,7 +1,7 @@
 {
   "name": "moebooru.moe",
   "version": "1.0.0",
-  "description": "A moe anime image board.",
+  "description": "Moebooru is a moe anime image board for cute anime art. We exclusively collect the art of cute anime girls. Search for the most moe art on the internet! You can also apply image filters to posts and reverse/change speed of videos and gifs. Posts are organzied by artists, characters, series, and tags.",
   "main": "dist/server.js",
   "scripts": {
     "start": "npm run clean && webpack && node dist/server.js",
@@ -15,7 +15,8 @@
     "kawaii",
     "anime art",
     "image board",
-    "booru"
+    "booru",
+    "moebooru"
   ],
   "repository": {
     "type": "git",

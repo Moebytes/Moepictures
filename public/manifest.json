@@ -1,7 +1,7 @@
 {
     "short_name": "moebooru.moe",
     "name": "Moebooru.moe",
-    "description": "Moebooru is a moe anime image board for cute anime art!",
+    "description": "Moebooru is a moe anime image board for cute anime art. We exclusively collect heart-warming art of cute anime girls. Search for the most moe art on the internet! You can also apply image filters and reverse/change speed of videos and gifs. Posts are organzied by artists, characters, series, and tags.",
     "icons": [
       {
         "src": "assets/purple/favicon.png",
