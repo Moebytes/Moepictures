@@ -1214,25 +1214,41 @@ export default class Functions {
         return [...iterRecur(sliced)]
     }
 
+    public static indexOfMax = (arr: number[]) => {
+        if (arr.length === 0) return -1
+        let max = arr[0]
+        let maxIndex = 0
+        for (var i = 1; i < arr.length; i++) {
+            if (arr[i] > max) {
+                maxIndex = i
+                max = arr[i]
+            }
+        }
+        return maxIndex
+    }
+
     public static parseSpaceEnabledSearch = async (query: string) => {
         if (!query) return query
         const savedTags = await localforage.getItem("tags") as any
         if (!savedTags) return query
         let permutations = Functions.permutations(query)
+        let matchesArray = new Array(permutations.length).fill(0)
         for (let i = 0; i < permutations.length; i++) {
             for (let j = 0; j < permutations[i].length; j++) {
                 const exists = savedTags.find((t: any) => t.tag === permutations[i][j])
-                if (exists) return permutations[i].join(" ")
+                if (exists) matchesArray[i]++
             }
         }
         for (let i = 0; i < permutations.length; i++) {
             for (let j = 0; j < permutations[i].length; j++) {
                 for (let k = 0; k < savedTags.length; k++) {
                     const exists = savedTags[k].aliases.find((a: any) => a?.alias === permutations[i][j])
-                    if (exists) return permutations[i].join(" ")
+                    if (exists) matchesArray[i]++
                 }
             }
         }
+        const index = Functions.indexOfMax(matchesArray)
+        if (index !== -1) return permutations[index].join(" ")
         return query
     }
 
