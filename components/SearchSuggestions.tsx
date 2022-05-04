@@ -3,6 +3,7 @@ import {useHistory} from "react-router-dom"
 import {ThemeContext, EnableDragContext, SessionContext, MobileContext, SearchContext, SearchFlagContext} from "../Context"
 import "./styles/searchsuggestions.less"
 import axios from "axios"
+import functions from "../structures/Functions"
 
 interface Props {
     active: boolean
@@ -31,10 +32,12 @@ const SearchSuggestions: React.FunctionComponent<Props> = (props) => {
             if (!active || !suggestions.length) return
             event.preventDefault()
             if (props.click) return props.click(suggestions[activeIndex]?.tag)
-            setSearch((prev: string) => {
-                const parts = prev.split(/ +/g)
-                parts[parts.length - 1] = suggestions[activeIndex]?.tag
-                return parts.join(" ")
+            setSearch(async (prev: string) => {
+                functions.parseSpaceEnabledSearch(prev).then((query) => {
+                    const parts = query.split(/ +/g)
+                    parts[parts.length - 1] = suggestions[activeIndex]?.tag
+                    return parts.join(" ")
+                }) 
             })
             setSearchFlag(true)
         }

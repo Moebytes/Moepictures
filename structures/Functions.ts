@@ -1202,9 +1202,11 @@ export default class Functions {
     }
 
     public static parseSpaceEnabledSearch = async (query: string) => {
+        if (!query) return query
         const savedTags = await localforage.getItem("tags") as any
-        if (!savedTags) return query 
+        if (!savedTags) return query
         const slicedTags = query.split(/ +/g)
+        if (!slicedTags) return query
         let permutations = [] as any
         for (let i = 1; i <= slicedTags.length; i++) {
             let permuteArr = [] as any
@@ -1213,11 +1215,20 @@ export default class Functions {
           }
           permutations.push(permuteArr)
         }
-        permutations = permutations.reverse()
+        permutations = Functions.removeDuplicates(permutations.reverse())
+        console.log(permutations)
         for (let i = 0; i < permutations.length; i++) {
             for (let j = 0; j < permutations[i].length; j++) {
                 const exists = savedTags.find((t: any) => t.tag === permutations[i][j])
                 if (exists) return permutations[i].join(" ")
+            }
+        }
+        for (let i = 0; i < permutations.length; i++) {
+            for (let j = 0; j < permutations[i].length; j++) {
+                for (let k = 0; k < savedTags.length; k++) {
+                    const exists = savedTags[k].aliases.find((a: any) => a?.alias === permutations[i][j])
+                    if (exists) return permutations[i].join(" ").replace(exists.alias, exists.tag)
+                }
             }
         }
         return query
