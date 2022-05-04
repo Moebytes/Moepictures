@@ -1201,22 +1201,24 @@ export default class Functions {
         return result?.extension || ""
     }
 
+    public static permutations(query: string) {
+        const sliced = query.split(/ +/g)
+        
+        function* iterRecur(sliced: string[]) {
+            if (sliced.length == 1) return yield sliced;
+            for (const result of iterRecur(sliced.slice(1))) {
+                yield [sliced[0] + "-" + result[0], ...result.slice(1)]
+                yield [sliced[0], ...result]
+            }
+        }
+        return [...iterRecur(sliced)]
+    }
+
     public static parseSpaceEnabledSearch = async (query: string) => {
         if (!query) return query
         const savedTags = await localforage.getItem("tags") as any
         if (!savedTags) return query
-        const slicedTags = query.split(/ +/g)
-        if (!slicedTags) return query
-        let permutations = [] as any
-        for (let i = 1; i <= slicedTags.length; i++) {
-            let permuteArr = [] as any
-		    for (let j = 0; j < slicedTags.length; j+=i) {
-                permuteArr.push(slicedTags.slice(j, j+i).join("-"))
-          }
-          permutations.push(permuteArr)
-        }
-        permutations = Functions.removeDuplicates(permutations.reverse())
-        console.log(permutations)
+        let permutations = Functions.permutations(query)
         for (let i = 0; i < permutations.length; i++) {
             for (let j = 0; j < permutations[i].length; j++) {
                 const exists = savedTags.find((t: any) => t.tag === permutations[i][j])
