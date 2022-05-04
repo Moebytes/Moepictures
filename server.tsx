@@ -167,7 +167,7 @@ for (let i = 0; i < folders.length; i++) {
 }
 
 app.get("/*", function(req, res) {
-    if (!req.hostname.includes("moebooru")) {
+    if (!req.hostname.includes("moebooru") && !req.hostname.includes("localhost")) {
       res.redirect(301, `https://moebooru.moe${req.path}`)
     }
     res.setHeader("Content-Type", mime.getType(req.path) ?? "")
