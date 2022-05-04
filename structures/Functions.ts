@@ -1229,7 +1229,7 @@ export default class Functions {
             for (let j = 0; j < permutations[i].length; j++) {
                 for (let k = 0; k < savedTags.length; k++) {
                     const exists = savedTags[k].aliases.find((a: any) => a?.alias === permutations[i][j])
-                    if (exists) return permutations[i].join(" ").replace(exists.alias, exists.tag)
+                    if (exists) return permutations[i].join(" ")
                 }
             }
         }
