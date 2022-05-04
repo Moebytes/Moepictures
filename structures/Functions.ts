@@ -1233,8 +1233,17 @@ export default class Functions {
         if (!savedTags) return query
         let permutations = Functions.permutations(query)
         let matchesArray = new Array(permutations.length).fill(0)
+        let specialFlagsArray = new Array(permutations.length).fill("")
         for (let i = 0; i < permutations.length; i++) {
             for (let j = 0; j < permutations[i].length; j++) {
+                if (permutations[i][j]?.startsWith("+")) {
+                    specialFlagsArray[j] = "+"
+                    permutations[i][j] = permutations[i][j].replace("+", "")
+                }
+                if (permutations[i][j]?.startsWith("-")) {
+                    specialFlagsArray[j] = "-"
+                    permutations[i][j] = permutations[i][j].replace("-", "")
+                }
                 const exists = savedTags.find((t: any) => t.tag === permutations[i][j])
                 if (exists) matchesArray[i]++
             }
@@ -1248,7 +1257,13 @@ export default class Functions {
             }
         }
         const index = Functions.indexOfMax(matchesArray)
-        if (index !== -1) return permutations[index].join(" ")
+        if (index !== -1 && matchesArray[index] !== 0) {
+            let queries = [] as any 
+            for (let j = 0; j < permutations[index].length; j++) {
+                queries.push(`${specialFlagsArray[j]}${permutations[index][j]}`)
+            }
+            return queries.join(" ")
+        }
         return query
     }
 

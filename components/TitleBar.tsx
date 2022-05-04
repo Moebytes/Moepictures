@@ -44,7 +44,10 @@ const TitleBar: React.FunctionComponent<Props> = (props) => {
     useEffect(() => {
         if (headerFlag) {
             setHeaderFlag(false)
-            const text = functions.toProperCase(search.trim().split(/ +/g).map((t: string) => t.replaceAll("-", " ")).join(", "))
+            const text = functions.toProperCase(search.trim().split(/ +/g).map((t: string) => {
+                if (t.startsWith("-")) return `-${t.replaceAll("-", " ").trim()}`
+                return t.replaceAll("-", " ")
+            }).join(", "))
             document.title = `Moebooru: ${text}`
             setHeaderText(text)
         }
