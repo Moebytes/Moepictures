@@ -415,9 +415,9 @@ const MobileInfo: React.FunctionComponent<Props> = (props) => {
                         <span className="mobileinfo-title">Details</span>
                     </div>
                     <div className="mobileinfo-subcontainer-column">
-                        <div className="mobileinfo-row">
+                        {/* <div className="mobileinfo-row">
                                 <img className="mobileinfo-img" src={userImage}/>
-                        </div>
+                        </div> */}
                         <div className="mobileinfo-sub-row">
                             <div className="mobileinfo-row">
                                 <span className="tag">Uploader:</span>

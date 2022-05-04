@@ -339,8 +339,8 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
     const generateArtistsJSX = () => {
         let jsx = [] as any
         for (let i = 0; i < props.artists.length; i++) {
-            const link = functions.getTagLink("artist", props.artists[i].image)
             if (!props.artists[i]) break
+            const link = functions.getTagLink("artist", props.artists[i].image)
             const tagClick = () => {
                 history.push(`/posts`)
                 setSearch(props.artists[i].tag)
@@ -366,18 +366,23 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
         let jsx = [] as any
         for (let i = 0; i < props.characters.length; i++) {
             if (!props.characters[i]) break
+            const link = functions.getTagLink("character", props.characters[i].image)
             const tagClick = () => {
                 history.push(`/posts`)
                 setSearch(props.characters[i].tag)
                 setSearchFlag(true)
             }
-            jsx.push(
+            jsx.push(<>
+                {link ?
+                <div className="sidebar-row">
+                    <img className="sidebar-img" src={link}/>
+                </div> : null}
                 <div className="sidebar-row">
                     <span className="tag-hover" onClick={() => tagClick()}>
                         <span className="tag">{props.characters[i].tag.replaceAll("-", " ")}</span>
                         <span className="tag-count">{props.characters[i].count}</span>
                     </span>
-                </div>
+                </div> </>
                 )
         }
         return jsx
@@ -387,18 +392,23 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
         let jsx = [] as any
         for (let i = 0; i < props.series.length; i++) {
             if (!props.series[i]) break
+            const link = functions.getTagLink("series", props.series[i].image)
             const tagClick = () => {
                 history.push(`/posts`)
                 setSearch(props.series[i].tag)
                 setSearchFlag(true)
             }
-            jsx.push(
+            jsx.push(<>
+                {link ?
+                <div className="sidebar-row">
+                    <img className="sidebar-img" src={link}/>
+                </div> : null}
                 <div className="sidebar-row">
                     <span className="tag-hover" onClick={() => tagClick()}>
                         <span className="tag">{props.series[i].tag.replaceAll("-", " ")}</span>
                         <span className="tag-count">{props.series[i].count}</span>
                     </span>
-                </div>
+                </div> </>
                 )
         }
         return jsx
