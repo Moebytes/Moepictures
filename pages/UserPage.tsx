@@ -11,7 +11,10 @@ import DragAndDrop from "../components/DragAndDrop"
 import {HideNavbarContext, HideSidebarContext, ThemeContext, EnableDragContext, RelativeContext, HideTitlebarContext, MobileContext, CommentSearchFlagContext,
 HeaderTextContext, SidebarTextContext, SessionContext, RedirectContext, SessionFlagContext, UserImgContext, ShowDeleteAccountDialogContext} from "../Context"
 import functions from "../structures/Functions"
+import permissions from "../structures/Permissions"
 import Carousel from "../components/Carousel"
+import adminLabel from "../assets/purple/admin-label.png"
+import modLabel from "../assets/purple/mod-label.png"
 import "./styles/userpage.less"
 import axios from "axios"
 
@@ -135,6 +138,25 @@ const UserPage: React.FunctionComponent<Props> = (props) => {
         setCommentSearchFlag(`user:${username}`)
     }
 
+    const generateUsernameJSX = () => {
+        if (user?.role === "admin") {
+            return (
+                <div className="user-name-container">
+                    <span className="user-name-plain admin-color">{functions.toProperCase(username)}</span>
+                    <img className="user-name-label" src={adminLabel}/>
+                </div>
+            )
+        } else if (user?.role === "mod") {
+            return (
+                <div className="user-name-container">
+                    <span className="user-name-plain mod-color">{functions.toProperCase(username)}</span>
+                    <img className="user-name-label" src={modLabel}/>
+                </div>
+            )
+        }
+        return <span className="user-name">{functions.toProperCase(username)}</span>
+    }
+
     return (
         <>
         <DragAndDrop/>
@@ -147,7 +169,7 @@ const UserPage: React.FunctionComponent<Props> = (props) => {
                 <div className="user">
                     <div className="user-top-container">
                         <img className="user-img" src={getUserImg()}/>
-                        <span className="user-name">{functions.toProperCase(username)}</span>
+                        {generateUsernameJSX()}
                     </div>
                     <div className="user-row">
                         <span className="user-text">Bio: {user.bio || "This user has not written anything."}</span>

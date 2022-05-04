@@ -49,6 +49,8 @@ import deleteIcon from "../assets/purple/delete.png"
 import deleteIconMagenta from "../assets/magenta/delete.png"
 import rejectRed from "../assets/purple/reject-red.png"
 import approveGreen from "../assets/purple/approve-green.png"
+import adminCrown from "../assets/purple/admin-crown.png"
+import modCrown from "../assets/purple/mod-crown.png"
 import functions from "../structures/Functions"
 import axios from "axios"
 import "./styles/mobileinfo.less"
@@ -81,7 +83,9 @@ const MobileInfo: React.FunctionComponent<Props> = (props) => {
     const {mobile, setMobile} = useContext(MobileContext)
     const {session, setSession} = useContext(SessionContext)
     const [maxTags, setMaxTags] = useState(23)
-    const [userImage, setUserImage] = useState("")
+    const [uploaderImage, setUploaderImage] = useState("")
+    const [uploaderRole, setUploaderRole] = useState("")
+    const [updaterRole, setUpdaterRole] = useState("")
     const [suggestionsActive, setSuggestionsActive] = useState(false)
     const history = useHistory()
 
@@ -97,8 +101,11 @@ const MobileInfo: React.FunctionComponent<Props> = (props) => {
 
     const updateUserImg = async () => {
         if (props.post) {
-            const user = await axios.get("/api/user", {params: {username: props.post.uploader}, withCredentials: true}).then((r) => r.data)
-            setUserImage(user?.image ? functions.getTagLink("pfp", user.image) : getFavicon())
+            const uploader = await axios.get("/api/user", {params: {username: props.post.uploader}, withCredentials: true}).then((r) => r.data)
+            setUploaderImage(uploader?.image ? functions.getTagLink("pfp", uploader.image) : getFavicon())
+            if (uploader?.role) setUploaderRole(uploader.role)
+            const updater = await axios.get("/api/user", {params: {username: props.post.updater}, withCredentials: true}).then((r) => r.data)
+            if (updater?.role) setUpdaterRole(updater.role)
         }
     }
 
@@ -352,6 +359,27 @@ const MobileInfo: React.FunctionComponent<Props> = (props) => {
         modNext()
     }
 
+    const generateUsernameJSX = (type?: string) => {
+        let username = type === "uploader" ? props.post.uploader : props.post.updater 
+        const role = type === "uploader" ? uploaderRole : updaterRole
+        if (role === "admin") {
+            return (
+                <div className="mobileinfo-username-container" onClick={() => username ? history.push(`/user/${username}`) : null}>
+                     <span className="tag-alt admin-color">{functions.toProperCase(username) || "deleted"}</span>
+                    <img className="mobileinfo-user-label" src={adminCrown}/>
+                </div>
+            )
+        } else if (role === "mod") {
+            return (
+                <div className="mobileinfo-username-container" onClick={() => username ? history.push(`/user/${username}`) : null}>
+                    <span className="tag-alt mod-color">{functions.toProperCase(username) || "deleted"}</span>
+                    <img className="mobileinfo-user-label" src={modCrown}/>
+                </div>
+            )
+        }
+        return <span className="tag-alt-link" onClick={() => username ? history.push(`/user/${username}`) : null}>{functions.toProperCase(username) || "deleted"}</span>
+    }
+
     return (
         <div className="mobileinfo" onMouseEnter={() => setEnableDrag(false)}>
             <div className="mobileinfo-container">
@@ -421,7 +449,7 @@ const MobileInfo: React.FunctionComponent<Props> = (props) => {
                         <div className="mobileinfo-sub-row">
                             <div className="mobileinfo-row">
                                 <span className="tag">Uploader:</span>
-                                <span className="tag-alt-link" onClick={() => props.post.uploader ? history.push(`/user/${props.post.uploader}`) : null}>{functions.toProperCase(props.post.uploader) || "deleted"}</span>
+                                {generateUsernameJSX("uploader")}
                             </div>
                             <div className="mobileinfo-row">
                                 <span className="tag">Uploaded:</span>
@@ -431,7 +459,7 @@ const MobileInfo: React.FunctionComponent<Props> = (props) => {
                         <div className="mobileinfo-sub-row">
                             <div className="mobileinfo-row">
                                 <span className="tag">Updater:</span>
-                                <span className="tag-alt-link" onClick={() => props.post.updater ? history.push(`/user/${props.post.updater}`) : null}>{functions.toProperCase(props.post.updater) || "deleted"}</span>
+                                {generateUsernameJSX("updater")}
                             </div>
                             <div className="mobileinfo-row">
                                 <span className="tag">Updated:</span>

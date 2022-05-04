@@ -6,6 +6,8 @@ import faviconMagenta from "../assets/magenta/favicon.png"
 import eyedropper from "../assets/purple/eyedropper.png"
 import light from "../assets/purple/light.png"
 import logoutIcon from "../assets/purple/logout.png"
+import logoutModIcon from "../assets/purple/logout-mod.png"
+import logoutAdminIcon from "../assets/purple/logout-admin.png"
 import dark from "../assets/purple/dark.png"
 import eyedropperPurpleLight from "../assets/purple-light/eyedropper.png"
 import lightPurpleLight from "../assets/purple-light/light.png"
@@ -183,6 +185,50 @@ const NavBar: React.FunctionComponent = (props) => {
         query1(media)
     }, [])
 
+    const generateMobileUsernameJSX = () => {
+        if (session.role === "admin") {
+            return (<>
+                <span className="mobile-nav-text mobile-nav-user-text admin-color" onClick={() => {history.push("/profile"); setHideMobileNavbar(true)}}>{functions.toProperCase(session.username)}</span>
+                <img className="mobile-nav-logout-img" src={logoutAdminIcon} onClick={() => {logout(); setHideMobileNavbar(true)}}/>
+            </>
+            )
+        } else if (session.role === "mod") {
+            return (<>
+                <span className="mobile-nav-text mobile-nav-user-text mod-color" onClick={() => {history.push("/profile"); setHideMobileNavbar(true)}}>{functions.toProperCase(session.username)}</span>
+                <img className="mobile-nav-logout-img" src={logoutModIcon} onClick={() => {logout(); setHideMobileNavbar(true)}}/>
+            </>
+            )
+        } else {
+            return (<>
+                    <span className="mobile-nav-text mobile-nav-user-text" onClick={() => {history.push("/profile"); setHideMobileNavbar(true)}}>{functions.toProperCase(session.username)}</span>
+                    <img className="mobile-nav-logout-img" src={logoutIcon} onClick={() => {logout(); setHideMobileNavbar(true)}}/>
+                </>
+            )
+        }
+    }
+
+    const generateUsernameJSX = () => {
+        if (session.role === "admin") {
+            return (<>
+                <span className="nav-text nav-user-text admin-color" onClick={() => history.push("/profile")}>{functions.toProperCase(session.username)}</span>
+                <img className="nav-logout-img" src={logoutAdminIcon} onClick={logout}/>
+            </>
+            )
+        } else if (session.role === "mod") {
+            return (<>
+                <span className="nav-text nav-user-text mod-color" onClick={() => history.push("/profile")}>{functions.toProperCase(session.username)}</span>
+                <img className="nav-logout-img" src={logoutModIcon} onClick={logout}/>
+            </>
+            )
+        } else {
+            return (<>
+                <span className="nav-text nav-user-text" onClick={() => history.push("/profile")}>{functions.toProperCase(session.username)}</span>
+                <img className="nav-logout-img" src={logoutIcon} onClick={logout}/>
+            </>
+            )
+        }
+    }
+
     if (mobile) {
         const getMobileMargin = () => {
             return hideMobileNavbar ? `-${document.querySelector(".mobile-navbar")?.clientHeight}px` : "0px"
@@ -193,8 +239,7 @@ const NavBar: React.FunctionComponent = (props) => {
                     {session.username ? 
                     <div className="mobile-nav-user-container">
                         <img className="mobile-nav-user-img" src={userImg}/>
-                        <span className="mobile-nav-text mobile-nav-user-text" onClick={() => {history.push("/profile"); setHideMobileNavbar(true)}}>{session.username}</span>
-                        <img className="mobile-nav-logout-img" src={logoutIcon} onClick={() => {logout(); setHideMobileNavbar(true)}}/>
+                        {generateMobileUsernameJSX()}
                     </div> :
                     <span className="mobile-nav-text mobile-nav-user-text" onClick={() => {history.push("/login"); setHideMobileNavbar(true)}}>Login</span>}
                     <span className="mobile-nav-text" onClick={() => {history.push("/posts"); setHideMobileNavbar(true); setSearchFlag(true)}}>Posts</span>
@@ -252,8 +297,7 @@ const NavBar: React.FunctionComponent = (props) => {
                     {session.username ? 
                     <div className="nav-user-container" style={{marginRight: marginR}}>
                         {!showMiniTitle || relative ? <img className="nav-user-img" src={userImg}/> : null}
-                        <span className="nav-text nav-user-text" onClick={() => history.push("/profile")}>{session.username}</span>
-                        <img className="nav-logout-img" src={logoutIcon} onClick={logout}/>
+                        {generateUsernameJSX()}
                     </div> :
                     <span style={{marginRight: marginR}} className="nav-text nav-user-text" onClick={() => history.push("/login")}>Login</span>}
                     <span style={{marginRight: marginR}} className="nav-text" onClick={() => {history.push("/posts"); setSearchFlag(true)}}>Posts</span>

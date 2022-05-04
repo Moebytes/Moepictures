@@ -1088,11 +1088,11 @@ export default class SQLQuery {
   public static comments = async (postID: number) => {
     const query: QueryConfig = {
       text: functions.multiTrim(`
-            SELECT comments.*, users."image"
+            SELECT comments.*, users."image", users."role"
             FROM comments
             JOIN "users" ON "users"."username" = "comments"."username"
             WHERE comments."postID" = $1
-            GROUP BY comments."commentID", users."image"
+            GROUP BY comments."commentID", users."image", users."role"
             ORDER BY comments."postDate" ASC
           `),
           values: [postID]
@@ -1116,7 +1116,7 @@ export default class SQLQuery {
               JOIN images ON images."postID" = posts."postID"
               GROUP BY posts."postID"
             )
-            SELECT comments.*, users."image", json_build_object(
+            SELECT comments.*, users."image", users."role", json_build_object(
               'type', post_json."type",
               'restrict', post_json."restrict",
               'style', post_json."style",
@@ -1126,7 +1126,7 @@ export default class SQLQuery {
             JOIN "users" ON "users"."username" = "comments"."username"
             JOIN post_json ON post_json."postID" = "comments"."postID"
             ${whereQuery}
-            GROUP BY comments."commentID", users."image", post_json."type", post_json."restrict", post_json."style"
+            GROUP BY comments."commentID", users."image", users."role", post_json."type", post_json."restrict", post_json."style"
             ${sortQuery}
             LIMIT 100 ${offset ? `OFFSET ${offset}` : ""}
           `)
@@ -1151,7 +1151,7 @@ export default class SQLQuery {
               JOIN images ON images."postID" = posts."postID"
               GROUP BY posts."postID"
             )
-            SELECT comments.*, users."image", json_build_object(
+            SELECT comments.*, users."image", users."role", json_build_object(
               'type', post_json."type",
               'restrict', post_json."restrict",
               'style', post_json."style",
@@ -1161,7 +1161,7 @@ export default class SQLQuery {
             JOIN "users" ON "users"."username" = "comments"."username"
             JOIN post_json ON post_json."postID" = "comments"."postID"
             ${whereQuery}
-            GROUP BY comments."commentID", users."image", post_json."type", post_json."restrict", post_json."style"
+            GROUP BY comments."commentID", users."image", users."role", post_json."type", post_json."restrict", post_json."style"
             ${sortQuery}
             LIMIT 100 ${offset ? `OFFSET ${offset}` : ""}
           `),
@@ -1176,11 +1176,11 @@ export default class SQLQuery {
   public static comment = async (commentID: number) => {
     const query: QueryConfig = {
       text: functions.multiTrim(`
-            SELECT comments.*, users."image"
+            SELECT comments.*, users."image", users."role"
             FROM comments
             JOIN "users" ON "users"."username" = "comments"."username"
             WHERE comments."commentID" = $1
-            GROUP BY comments."commentID", users."image"
+            GROUP BY comments."commentID", users."image", users."role"
             ORDER BY comments."postDate" ASC
           `),
           values: [commentID]

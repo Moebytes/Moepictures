@@ -85,7 +85,7 @@ const TermsPage: React.FunctionComponent = (props) => {
                             <span className="terms-title">Terms of Service</span>
                         </div>
                         <div className="terms-text">
-                            Last Updated: March 15, 2022 <br/><br/>
+                            Last Updated: May 4, 2022 <br/><br/>
 
                             This Terms of Service (”terms”) applies to any websites, apps, and APIs provided 
                             by Moebooru (”we”, “us”, “our”) (collectively, the “services”). By using these 
@@ -157,7 +157,7 @@ const TermsPage: React.FunctionComponent = (props) => {
                             <span className="privacy-title">Privacy Policy</span>
                         </div>
                         <div className="privacy-text">
-                            Last Updated: March 15, 2022<br/><br/>
+                            Last Updated: May 4, 2022<br/><br/>
 
                             This Privacy Policy ("policy") outlines the information that Moebooru (”we”, “us”, “our”) 
                             collects when you use our websites, apps, and APIs (collectively, the “services”). It

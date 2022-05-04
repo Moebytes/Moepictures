@@ -11,6 +11,9 @@ import commentReport from "../assets/purple/commentreport.png"
 import commentEdit from "../assets/purple/commentedit.png"
 import commentDelete from "../assets/purple/commentdelete.png"
 import DeleteCommentDialog from "../dialogs/DeleteCommentDialog"
+import permissions from "../structures/Permissions"
+import adminCrown from "../assets/purple/admin-crown.png"
+import modCrown from "../assets/purple/mod-crown.png"
 import "./styles/comment.less"
 import axios from "axios"
 
@@ -154,12 +157,31 @@ const Comment: React.FunctionComponent<Props> = (props) => {
         history.push(`/user/${props.comment.username}`)
     }
 
+    const generateUsernameJSX = () => {
+        if (props.comment.role === "admin") {
+            return (
+                <div className="comment-username-container">
+                    <span className="comment-user-text admin-color">{functions.toProperCase(props.comment.username)}</span>
+                    <img className="comment-user-label" src={adminCrown}/>
+                </div>
+            )
+        } else if (props.comment.role === "mod") {
+            return (
+                <div className="comment-username-container">
+                <span className="comment-user-text mod-color">{functions.toProperCase(props.comment.username)}</span>
+                    <img className="comment-user-label" src={modCrown}/>
+                </div>
+            )
+        }
+        return <span className="comment-user-text">{functions.toProperCase(props.comment.username)}</span>
+    }
+
     return (
         <div className="comment">
             <div className="comment-container">
                 <div className="comment-user-container" onClick={userClick}>
                     <img className="comment-user-img" src={getCommentPFP()}/>
-                    <span className="comment-user-text">{functions.toProperCase(props.comment.username)}</span>
+                    {generateUsernameJSX()}
                 </div>
             </div>
             <div className="comment-container" style={{width: "100%"}}>

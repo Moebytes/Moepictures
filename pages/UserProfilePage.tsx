@@ -17,6 +17,8 @@ import fileType from "magic-bytes.js"
 import functions from "../structures/Functions"
 import Carousel from "../components/Carousel"
 import DeleteAccountDialog from "../dialogs/DeleteAccountDialog"
+import adminLabel from "../assets/purple/admin-label.png"
+import modLabel from "../assets/purple/mod-label.png"
 import "./styles/userprofilepage.less"
 import axios from "axios"
 
@@ -206,6 +208,25 @@ const UserProfilePage: React.FunctionComponent = (props) => {
         setCommentSearchFlag(`user:${session.username}`)
     }
 
+    const generateUsernameJSX = () => {
+        if (session.role === "admin") {
+            return (
+                <div className="userprofile-name-container">
+                    <span className="userprofile-name-plain admin-color">{functions.toProperCase(session.username)}</span>
+                    <img className="userprofile-name-label" src={adminLabel}/>
+                </div>
+            )
+        } else if (session.role === "mod") {
+            return (
+                <div className="userprofile-name-container">
+                    <span className="userprofile-name-plain mod-color">{functions.toProperCase(session.username)}</span>
+                    <img className="userprofile-name-label" src={modLabel}/>
+                </div>
+            )
+        }
+        return <span className="userprofile-name">{functions.toProperCase(session.username)}</span>
+    }
+
     return (
         <>
         <DragAndDrop/>
@@ -218,7 +239,7 @@ const UserProfilePage: React.FunctionComponent = (props) => {
                 <div className="userprofile">
                     <div className="userprofile-top-container">
                         <img className="userprofile-img" src={userImg}/>
-                        <span className="userprofile-name">{functions.toProperCase(session.username || "")}</span>
+                        {generateUsernameJSX()}
                         <label htmlFor="upload-pfp" className="uploadpfp-label">
                             <img className="userprofile-uploadimg" src={getUploadPfp()}/>
                         </label>

@@ -10,6 +10,8 @@ import commentQuote from "../assets/purple/commentquote.png"
 import commentReport from "../assets/purple/commentreport.png"
 import commentEdit from "../assets/purple/commentedit.png"
 import commentDelete from "../assets/purple/commentdelete.png"
+import adminCrown from "../assets/purple/admin-crown.png"
+import modCrown from "../assets/purple/mod-crown.png"
 import "./styles/commentrow.less"
 import axios from "axios"
 
@@ -162,6 +164,25 @@ const CommentRow: React.FunctionComponent<Props> = (props) => {
         history.push(`/user/${props.comment.username}`)
     }
 
+    const generateUsernameJSX = () => {
+        if (props.comment.role === "admin") {
+            return (
+                <div className="commentrow-username-container">
+                    <span className="commentrow-user-text admin-color">{functions.toProperCase(props.comment.username)}</span>
+                    <img className="commentrow-user-label" src={adminCrown}/>
+                </div>
+            )
+        } else if (props.comment.role === "mod") {
+            return (
+                <div className="commentrow-username-container">
+                <span className="commentrow-user-text mod-color">{functions.toProperCase(props.comment.username)}</span>
+                    <img className="commentrow-user-label" src={modCrown}/>
+                </div>
+            )
+        }
+        return <span className="commentrow-user-text">{functions.toProperCase(props.comment.username)}</span>
+    }
+
     return (
         <div className="commentrow" onMouseEnter={() =>setHover(true)} onMouseLeave={() => setHover(false)}>
             <div className="commentrow-container">
@@ -172,7 +193,7 @@ const CommentRow: React.FunctionComponent<Props> = (props) => {
             <div className="commentrow-container">
                 <div className="commentrow-user-container" onClick={userClick}>
                     <img className="commentrow-user-img" src={getCommentPFP()}/>
-                    <span className="commentrow-user-text">{functions.toProperCase(props.comment.username)}</span>
+                    {generateUsernameJSX()}
                 </div>
             </div>
             <div className="commentrow-container" style={{width: "100%"}}>

@@ -42,6 +42,14 @@
     }
 }
 
+.userprofile-name-plain {
+    font-family: Tahoma, sans-serif;
+    margin-left: 10px;
+    font-size: 35px;
+    font-weight: bold;
+    color: var(--text);
+}
+
 .userprofile-row {
     display: flex;
     flex-direction: row;
@@ -107,4 +115,20 @@
 .userprofile-validation-container {
     .form-validation-container();
     justify-content: flex-start;
+}
+
+.userprofile-name-container {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    &:hover {
+        filter: brightness(130%);
+    }
+}
+
+.userprofile-name-label {
+    margin-top: 5px;
+    margin-left: 10px;
+    width: auto;
+    height: 40px;
 }

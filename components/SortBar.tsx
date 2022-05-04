@@ -177,7 +177,7 @@ const SortBar: React.FunctionComponent = (props) => {
         } else {
             setDropLeft(-Number(document.querySelector(".sidebar")?.clientWidth || 0))
         }
-    }, [hideSidebar])
+    }, [hideSidebar, mobile])
 
     useEffect(() => {
         setActiveDropdown("none")
@@ -421,8 +421,9 @@ const SortBar: React.FunctionComponent = (props) => {
     }
 
     const getImageMargin = () => {
+        if (mobile) return "62px"
         const rect = imageRef.current?.getBoundingClientRect()
-        if (!rect || mobile) return "290px"
+        if (!rect) return "290px"
         const raw = rect.x
         let offset = 0
         if (imageType === "all") offset = -30
@@ -478,8 +479,9 @@ const SortBar: React.FunctionComponent = (props) => {
     }
 
     const getRestrictMargin = () => {
+        if (mobile) return "95px"
         const rect = restrictRef.current?.getBoundingClientRect()
-        if (!rect || mobile) return "325px"
+        if (!rect) return "325px"
         const raw = rect.x
         let offset = 0
         if (restrictType === "all") offset = -35
@@ -543,8 +545,9 @@ const SortBar: React.FunctionComponent = (props) => {
     }
 
     const getStyleMargin = () => {
+        if (mobile) return "165px"
         const rect = styleRef.current?.getBoundingClientRect()
-        if (!rect || mobile) return "395px"
+        if (!rect) return "395px"
         const raw = rect.x
         let offset = 0
         if (styleType === "all") offset = -15
@@ -745,7 +748,7 @@ const SortBar: React.FunctionComponent = (props) => {
         <div className="sortbar-dropdowns"
         onMouseEnter={() => setEnableDrag(false)}>
             <div className={`dropdown ${activeDropdown === "image" ? "" : "hide-dropdown"}`}
-            style={{marginLeft: getImageMargin(), left: dropLeft, top: dropTop}} onClick={() => setActiveDropdown("none")}>
+            style={{marginLeft: getImageMargin(), left: `${dropLeft}px`, top: `${dropTop}px`}} onClick={() => setActiveDropdown("none")}>
                 <div className="sortbar-dropdown-row" onClick={() => setImageType("all")} >
                     <img className="sortbar-dropdown-img rotate" src={getAll()}/>
                     <span className="sortbar-dropdown-text">All</span>
@@ -768,7 +771,7 @@ const SortBar: React.FunctionComponent = (props) => {
                 </div>
             </div>
             <div className={`dropdown ${activeDropdown === "restrict" ? "" : "hide-dropdown"}`} 
-            style={{marginLeft: getRestrictMargin(), left: dropLeft, top: dropTop}} onClick={() => setActiveDropdown("none")}>
+            style={{marginLeft: getRestrictMargin(), left: `${dropLeft}px`, top: `${dropTop}px`}} onClick={() => setActiveDropdown("none")}>
                 <div className="sortbar-dropdown-row" onClick={() => setRestrictType("all")}>
                     <img className="sortbar-dropdown-img rotate" src={getAll()}/>
                     <span className="sortbar-dropdown-text">All</span>
@@ -787,7 +790,7 @@ const SortBar: React.FunctionComponent = (props) => {
                 </div>
             </div>
             <div className={`dropdown ${activeDropdown === "style" ? "" : "hide-dropdown"}`} 
-            style={{marginLeft: getStyleMargin(), left: dropLeft, top: dropTop}} onClick={() => setActiveDropdown("none")}>
+            style={{marginLeft: getStyleMargin(), left: `${dropLeft}px`, top: `${dropTop}px`}} onClick={() => setActiveDropdown("none")}>
                 <div className="sortbar-dropdown-row" onClick={() => setStyleType("all")}>
                     <img className="sortbar-dropdown-img rotate" src={getAll()}/>
                     <span className="sortbar-dropdown-text">All</span>
@@ -810,7 +813,7 @@ const SortBar: React.FunctionComponent = (props) => {
                 </div>
             </div>
             <div className={`dropdown-right ${activeDropdown === "speed" ? "" : "hide-dropdown"}`} 
-            style={{marginRight: getSpeedMargin(), top: dropTop}} onClick={() => setActiveDropdown("none")}>
+            style={{marginRight: getSpeedMargin(), top: `${dropTop}px`}} onClick={() => setActiveDropdown("none")}>
                 <div className="sortbar-dropdown-row" onClick={() => setSpeed(4)}>
                     <span className="sortbar-dropdown-text">4x</span>
                 </div>
@@ -840,7 +843,7 @@ const SortBar: React.FunctionComponent = (props) => {
                 </div>
             </div>
             <div className={`dropdown-right ${activeDropdown === "size" ? "" : "hide-dropdown"}`} 
-            style={{marginRight: getSizeMargin(), top: dropTop}} onClick={() => setActiveDropdown("none")}>
+            style={{marginRight: getSizeMargin(), top: `${dropTop}px`}} onClick={() => setActiveDropdown("none")}>
                 <div className="sortbar-dropdown-row" onClick={() => setSizeType("tiny")}>
                     <span className="sortbar-dropdown-text">Tiny</span>
                 </div>
@@ -858,7 +861,7 @@ const SortBar: React.FunctionComponent = (props) => {
                 </div>
             </div>
             <div className={`dropdown-right ${activeDropdown === "sort" ? "" : "hide-dropdown"}`} 
-            style={{marginRight: getSortMargin(), top: dropTop}} onClick={() => setActiveDropdown("none")}>
+            style={{marginRight: getSortMargin(), top: `${dropTop}px`}} onClick={() => setActiveDropdown("none")}>
                 <div className="sortbar-dropdown-row" onClick={() => setSortType("date")}>
                     <span className="sortbar-dropdown-text">Date</span>
                 </div>
@@ -887,7 +890,7 @@ const SortBar: React.FunctionComponent = (props) => {
                 </> : null}
             </div>
             <div className={`dropdown-right ${activeDropdown === "filters" ? "" : "hide-dropdown"}`} 
-            style={{marginRight: getFiltersMargin(), top: dropTop}}>
+            style={{marginRight: getFiltersMargin(), top: `${dropTop}px`}}>
                 <div className="sortbar-dropdown-row filters-row">
                     <img className="sortbar-dropdown-img" src={getBrightness()}/>
                     <span className="sortbar-dropdown-text">Brightness</span>
