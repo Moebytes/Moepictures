@@ -83,7 +83,8 @@ const SearchRoutes = (app: Express) => {
         try {
             const buffer = Buffer.from(Object.values(req.body))
             const hash = await phash(buffer)
-            let images = await sql.run(`SELECT * FROM "images"`)
+            let images = await sql.run(`SELECT * FROM "images" WHERE "images".hash = '${functions.binaryToHex(hash)}'`)
+            if (!images.length) images = await sql.run(`SELECT * FROM "images"`)
             let postIDs = new Set<number>()
             for (let i = 0; i < images.length; i++) {
                 const imgHash = functions.hexToBinary(images[i].hash)
