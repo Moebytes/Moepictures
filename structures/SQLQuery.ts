@@ -508,7 +508,9 @@ export default class SQLQuery {
     if (NOTtags.length) {
       values.push(NOTtags)
       tagQueryArray.push(`NOT tags @> $${i}`)
+      i++
     }
+    if (offset) values.push(offset)
     let tagQuery = tagQueryArray.length ? "WHERE " + tagQueryArray.join(" AND ") : ""
     const whereQueries = [typeQuery, restrictQuery, styleQuery].filter(Boolean).join(" AND ")
     const query: QueryConfig = {
@@ -529,7 +531,7 @@ export default class SQLQuery {
           ${sortQuery}
         ) AS posts
         ${tagQuery}
-        LIMIT 100 ${offset ? `OFFSET ${offset}` : ""}
+        LIMIT 100 ${offset ? `OFFSET $${i}` : ""}
       `)
     }
     if (values?.[0]) query.values = values
@@ -569,9 +571,10 @@ export default class SQLQuery {
           WHERE "originalID" IS NULL
           GROUP BY "unverified posts"."postID"
           ORDER BY "unverified posts"."uploadDate" ASC
-          LIMIT 100 ${offset ? `OFFSET ${offset}` : ""}
+          LIMIT 100 ${offset ? `OFFSET $1` : ""}
           `)
     }
+    if (offset) query.values = [offset]
     const result = await SQLQuery.run(query)
     return result
   }
@@ -587,9 +590,10 @@ export default class SQLQuery {
           WHERE "originalID" IS NOT NULL
           GROUP BY "unverified posts"."postID"
           ORDER BY "unverified posts"."uploadDate" ASC
-          LIMIT 100 ${offset ? `OFFSET ${offset}` : ""}
+          LIMIT 100 ${offset ? `OFFSET $1` : ""}
           `)
     }
+    if (offset) query.values = [offset]
     const result = await SQLQuery.run(query)
     return result
   }
@@ -765,9 +769,10 @@ export default class SQLQuery {
           GROUP BY posts."postID"
           ORDER BY random()
         ) AS posts
-        LIMIT 100 ${offset ? `OFFSET ${offset}` : ""}
+        LIMIT 100 ${offset ? `OFFSET $1` : ""}
       `)
     }
+    if (offset) query.values = [offset]
     const result = await SQLQuery.run(query)
     return result
   }
@@ -778,7 +783,11 @@ export default class SQLQuery {
     if (category === "characters") whereQueries.push(`tags.type = 'character'`)
     if (category === "series") whereQueries.push(`tags.type = 'series'`)
     if (category === "tags") whereQueries.push(`tags.type = 'tag'`)
-    if (search) whereQueries.push(`tags.tag LIKE $1 || '%'`)
+    let i = 1
+    if (search) {
+      whereQueries.push(`tags.tag LIKE $${i} || '%'`)
+      i++
+    }
     let whereQuery = whereQueries.length ? `WHERE ${whereQueries.join(" AND ")}` : ""
     let sortQuery = ""
     if (sort === "cuteness") sortQuery = `ORDER BY "cutenessAvg" DESC`
@@ -806,10 +815,12 @@ export default class SQLQuery {
                   ${whereQuery}
                   GROUP BY "tags".tag
                   ${sortQuery}
-                  LIMIT 100 ${offset ? `OFFSET ${offset}` : ""}
-          `)
+                  LIMIT 100 ${offset ? `OFFSET $${i}` : ""}
+          `),
+          values: []
     }
-    if (search) query.values = [search]
+    if (search) query.values?.push(search)
+    if (offset) query.values?.push(offset)
     const result = await SQLQuery.run(query)
     return result
   }
@@ -828,7 +839,10 @@ export default class SQLQuery {
     ))`)
       i++
     }
-    if (type) whereArray.push(`tags.type = $${i}`)
+    if (type) {
+      whereArray.push(`tags.type = $${i}`)
+      i++
+    }
     let whereQuery = whereArray.length ? `WHERE ${whereArray.join(" AND ")}` : ""
     let sortQuery = ""
     if (sort === "alphabetic") sortQuery = `ORDER BY tags.tag ASC`
@@ -852,12 +866,13 @@ export default class SQLQuery {
                   ${whereQuery}
                   GROUP BY "tags".tag
                   ${sortQuery}
-                  LIMIT 100 ${offset ? `OFFSET ${offset}` : ""}
+                  LIMIT 100 ${offset ? `OFFSET $${i}` : ""}
           `),
           values: []
     }
     if (search) query.values?.push(search)
     if (type) query.values?.push(type)
+    if (offset) query.values?.push(offset)
     const result = await SQLQuery.run(query)
     return result
   }
@@ -1104,7 +1119,11 @@ export default class SQLQuery {
   /** Search comments. */
   public static searchComments = async (search: string, sort: string, offset?: string) => {
     let whereQuery = ""
-    if (search) whereQuery = `WHERE comments."comment" LIKE '%' || $1 || '%'`
+    let i = 1
+    if (search) {
+      whereQuery = `WHERE comments."comment" LIKE '%' || $${i} || '%'`
+      i++
+    }
     let sortQuery = ""
     if (sort === "date") sortQuery = `ORDER BY comments."postDate" DESC`
     if (sort === "reverse date") sortQuery = `ORDER BY comments."postDate" ASC`
@@ -1128,18 +1147,24 @@ export default class SQLQuery {
             ${whereQuery}
             GROUP BY comments."commentID", users."image", users."role", post_json."type", post_json."restrict", post_json."style"
             ${sortQuery}
-            LIMIT 100 ${offset ? `OFFSET ${offset}` : ""}
-          `)
+            LIMIT 100 ${offset ? `OFFSET $${i}` : ""}
+          `),
+          values: []
     }
-    if (search) query.values = [search]
+    if (search) query.values?.push(search)
+    if (offset) query.values?.push(offset)
     const result = await SQLQuery.run(query)
     return result
   }
 
   /** Comments by usernames. */
   public static searchCommentsByUsername = async (usernames: string[], search: string, sort: string, offset?: string) => {
+    let i = 2
     let whereQuery = `WHERE comments."username" = ANY ($1)`
-    if (search) whereQuery += `AND comments."comment" LIKE '%' || $2 || '%'`
+    if (search) {
+      whereQuery += `AND comments."comment" LIKE '%' || $${i} || '%'`
+      i++
+    }
     let sortQuery = ""
     if (sort === "date") sortQuery = `ORDER BY comments."postDate" DESC`
     if (sort === "reverse date") sortQuery = `ORDER BY comments."postDate" ASC`
@@ -1163,11 +1188,12 @@ export default class SQLQuery {
             ${whereQuery}
             GROUP BY comments."commentID", users."image", users."role", post_json."type", post_json."restrict", post_json."style"
             ${sortQuery}
-            LIMIT 100 ${offset ? `OFFSET ${offset}` : ""}
+            LIMIT 100 ${offset ? `OFFSET $${i}` : ""}
           `),
           values: [usernames]
     }
     if (search) query.values?.push(search)
+    if (offset) query.values?.push(offset)
     const result = await SQLQuery.run(query)
     return result
   }
@@ -1321,6 +1347,7 @@ export default class SQLQuery {
     if (NOTtags.length) {
       values.push(NOTtags)
       tagQueryArray.push(`NOT post_json.tags @> $${i}`)
+      i++
     }
     let tagQuery = tagQueryArray.length ? tagQueryArray.join(" AND ") : ""
     const whereQueries = [userQuery, typeQuery, restrictQuery, styleQuery, tagQuery].filter(Boolean).join(" AND ")
@@ -1369,11 +1396,12 @@ export default class SQLQuery {
         post_json."thirdParty", post_json."drawn", post_json."uploadDate", post_json."updatedDate", post_json."title",
         post_json."translatedTitle", post_json."artist", post_json."link", post_json."commentary", post_json."translatedCommentary"
         ${sortQuery}
-        LIMIT 100 ${offset ? `OFFSET ${offset}` : ""}
+        LIMIT 100 ${offset ? `OFFSET $${i}` : ""}
       `),
       values: [username]
     }
     if (values?.[0]) query.values?.push(...values)
+    if (offset) query.values?.push(offset)
     const result = await SQLQuery.run(query)
     return result
   }
@@ -1734,9 +1762,10 @@ export default class SQLQuery {
         JOIN post_json ON post_json."postID" = "delete requests"."postID"
         WHERE "delete requests"."postID" IS NOT NULL
         GROUP BY "delete requests"."deleteRequestID", post_json."type", post_json."restrict", post_json."style"
-        LIMIT 100 ${offset ? `OFFSET ${offset}` : ""}
+        LIMIT 100 ${offset ? `OFFSET $1` : ""}
       `),
     }
+    if (offset) query.values = [offset]
     const result = await SQLQuery.run(query)
     return result
   }
@@ -1769,9 +1798,10 @@ export default class SQLQuery {
         JOIN tags ON tags.tag = "delete requests".tag
         WHERE "delete requests"."tag" IS NOT NULL
         GROUP BY "delete requests"."deleteRequestID", tags.tag
-        LIMIT 100 ${offset ? `OFFSET ${offset}` : ""}
+        LIMIT 100 ${offset ? `OFFSET $1` : ""}
       `),
     }
+    if (offset) query.values = [offset]
     const result = await SQLQuery.run(query)
     return result
   }
@@ -1804,9 +1834,10 @@ export default class SQLQuery {
         JOIN tags ON tags.tag = "alias requests".tag
         WHERE "alias requests"."tag" IS NOT NULL
         GROUP BY "alias requests"."aliasRequestID", tags.tag
-        LIMIT 100 ${offset ? `OFFSET ${offset}` : ""}
+        LIMIT 100 ${offset ? `OFFSET $1` : ""}
       `),
     }
+    if (offset) query.values = [offset]
     const result = await SQLQuery.run(query)
     return result
   }
@@ -1838,9 +1869,10 @@ export default class SQLQuery {
         FROM "tag edit requests"
         JOIN tags ON tags.tag = "tag edit requests".tag
         GROUP BY "tag edit requests"."tagEditRequestID", tags.type
-        LIMIT 100 ${offset ? `OFFSET ${offset}` : ""}
+        LIMIT 100 ${offset ? `OFFSET $1` : ""}
       `),
     }
+    if (offset) query.values = [offset]
     const result = await SQLQuery.run(query)
     return result
   }
@@ -1876,9 +1908,10 @@ export default class SQLQuery {
         JOIN comments ON comments."commentID" = "reported comments"."commentID"
         JOIN users ON users."username" = "comments"."username"
         GROUP BY "reported comments"."commentReportID", comments."commentID", users.username, users.image
-        LIMIT 100 ${offset ? `OFFSET ${offset}` : ""}
+        LIMIT 100 ${offset ? `OFFSET $1` : ""}
       `),
     }
+    if (offset) query.values = [offset]
     const result = await SQLQuery.run(query)
     return result
   }
