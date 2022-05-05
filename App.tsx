@@ -38,7 +38,6 @@ import functions from "./structures/Functions"
 import localforage from "localforage"
 import ModQueuePage from "./pages/ModQueuePage"
 import EditUnverifiedPostPage from "./pages/EditUnverifiedPostPage"
-import WebM from "./pages/WebM"
 import axios from "axios"
 import "./index.less"
 

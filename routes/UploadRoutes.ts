@@ -54,13 +54,15 @@ const validImages = (images: any[]) => {
     const webp = result?.mime === "image/webp"
     const gif = result?.mime === "image/gif"
     const mp4 = result?.mime === "video/mp4"
-    if (jpg || png || webp || gif || mp4) {
+    const webm = result?.mime === "video/webm"
+    if (jpg || png || webp || gif || mp4 || webm) {
       const MB = images[i].size / (1024*1024)
       const maxSize = jpg ? 5 :
                       webp ? 10 :
                       png ? 10 :
                       gif ? 50 :
-                      mp4 ? 100 : 100
+                      mp4 ? 100 :
+                      webm ? 100 : 100
       if (images[i].ext !== result.typename) return false
       if (MB <= maxSize) continue
     }
@@ -154,7 +156,7 @@ const CreateRoutes = (app: Express) => {
           } else if (ext === "gif") {
             kind = "animation"
             if (type !== "video") type = "animation"
-          } else if (ext === "mp4") {
+          } else if (ext === "mp4" || ext === "webm") {
             kind = "video"
             type = "video"
           }
@@ -363,7 +365,7 @@ const CreateRoutes = (app: Express) => {
           } else if (ext === "gif") {
             kind = "animation"
             if (type !== "video") type = "animation"
-          } else if (ext === "mp4") {
+          } else if (ext === "mp4" || ext === "webm") {
             kind = "video"
             type = "video"
           }
@@ -562,7 +564,7 @@ const CreateRoutes = (app: Express) => {
           } else if (ext === "gif") {
             kind = "animation"
             if (type !== "video") type = "animation"
-          } else if (ext === "mp4") {
+          } else if (ext === "mp4" || ext === "webm") {
             kind = "video"
             type = "video"
           }
@@ -783,7 +785,7 @@ const CreateRoutes = (app: Express) => {
           } else if (ext === "gif") {
             kind = "animation"
             if (type !== "video") type = "animation"
-          } else if (ext === "mp4") {
+          } else if (ext === "mp4" || ext === "webm") {
             kind = "video"
             type = "video"
           }
@@ -947,7 +949,7 @@ const CreateRoutes = (app: Express) => {
           } else if (ext === "gif") {
             kind = "animation"
             if (type !== "video") type = "animation"
-          } else if (ext === "mp4") {
+          } else if (ext === "mp4" || ext === "webm") {
             kind = "video"
             type = "video"
           }

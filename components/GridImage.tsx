@@ -618,7 +618,14 @@ const GridImage: React.FunctionComponent<Props> = (props) => {
         const tagCache = await functions.tagCategoriesCache(props.post.tags)
         localStorage.setItem("savedTags", JSON.stringify(tagCache))
         if (!drag) {
-            history.push(`/post/${props.id}`)
+            if (event.metaKey || event.ctrlKey || event.button == 1) {
+                event.preventDefault()
+                const newWindow = window.open(`/post/${props.id}`, "_blank")
+                newWindow?.blur()
+                window.focus()
+            } else {
+                history.push(`/post/${props.id}`)
+            }
             window.scrollTo(0, 0)
         }
     }

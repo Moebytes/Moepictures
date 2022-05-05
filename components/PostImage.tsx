@@ -265,7 +265,6 @@ const PostImage: React.FunctionComponent<Props> = (props) => {
                 frames = await functions.extractMP4Frames(props.img, videoRef.current!.duration)
             } else if (functions.isWebM(props.img)) {
                 frames = await functions.extractWebMFrames(props.img, videoRef.current!.duration)
-                console.log(frames)
             }
             let canvasFrames = [] as any 
             for (let i = 0; i < frames.length; i++) {
@@ -302,6 +301,7 @@ const PostImage: React.FunctionComponent<Props> = (props) => {
             if (binary) {
                 const blob = new Blob([new DataView(binary.buffer)], {type: mime.lookup(path.extname(props.img)) || "video/mp4"})
                 const url = URL.createObjectURL(blob)
+                console.log(url)
                 setReverseVideo(`${url}#${ext}`)
             }
             ffmpeg.FS("unlink", output)
@@ -310,7 +310,7 @@ const PostImage: React.FunctionComponent<Props> = (props) => {
 
         if (!videoData && videoLoaded && functions.isVideo(props.img)) {
             parseVideo()
-            if (!reverseVideo) reverseAudioStream()
+            if (!reverseVideo && functions.isMP4(props.img)) reverseAudioStream()
         }
         return () => {
             if (reverseVideo) URL.revokeObjectURL(reverseVideo)

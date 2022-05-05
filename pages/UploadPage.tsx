@@ -176,14 +176,16 @@ const UploadPage: React.FunctionComponent = (props) => {
                     const gif = result?.mime === "image/gif"
                     const webp = result?.mime === "image/webp"
                     const mp4 = result?.mime === "video/mp4"
+                    const webm = result?.mime === "video/webm"
                     const zip = result?.mime === "application/zip"
-                    if (jpg || png || webp || gif || mp4 || zip) {
+                    if (jpg || png || webp || gif || mp4 || webm || zip) {
                         const MB = files[i].size / (1024*1024)
                         const maxSize = jpg ? 5 :
                                         png ? 10 :
                                         webp ? 10 :
                                         gif ? 50 :
-                                        mp4 ? 100 : 100
+                                        mp4 ? 100 :
+                                        webm ? 100 : 100
                         if (MB <= maxSize) {
                             if (zip) {
                                 const reader = new JSZip()
@@ -198,10 +200,11 @@ const UploadPage: React.FunctionComponent = (props) => {
                                     let webp = result?.mime === "image/webp"
                                     const gif = result?.mime === "image/gif"
                                     const mp4 = result?.mime === "video/mp4"
-                                    if (jpg || png || webp || gif || mp4) {
+                                    const webm = result?.mime === "video/webm"
+                                    if (jpg || png || webp || gif || mp4 || webm) {
                                         acceptedArray.push({file: new File([data], filename), ext: result.typename, originalLink: links ? links[i] : null, bytes: data})
                                     } else {
-                                        error = `Supported types in zip: png, jpg, webp, gif, mp4.`
+                                        error = `Supported types in zip: png, jpg, webp, gif, mp4, webm.`
                                     }
                                 }
                                 resolve()
@@ -214,7 +217,7 @@ const UploadPage: React.FunctionComponent = (props) => {
                             resolve()
                         }
                     } else {
-                        error = `Supported file types: png, jpg, webp, gif, mp4, zip.`
+                        error = `Supported file types: png, jpg, webp, gif, mp4, webm, zip.`
                         resolve()
                     }
                 }
@@ -226,7 +229,7 @@ const UploadPage: React.FunctionComponent = (props) => {
             for (let i = 0; i < acceptedArray.length; i++) {
                 const url = URL.createObjectURL(acceptedArray[i].file)
                 let thumbnail = ""
-                if (acceptedArray[i].ext === "mp4") {
+                if (acceptedArray[i].ext === "mp4" || acceptedArray[i].ext === "webm") {
                     thumbnail = await functions.videoThumbnail(url)
                 }
                 urls.push({link: `${url}#.${acceptedArray[i].ext}`, ext: acceptedArray[i].ext, size: acceptedArray[i].file.size, thumbnail,

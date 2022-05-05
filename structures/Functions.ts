@@ -328,7 +328,7 @@ export default class Functions {
         let id = 0
 
         element.addEventListener("mousedown", element.mouseDownFunc = (event: MouseEvent) => {
-                if (event.button === 2) return
+                if (event.button === 2) return 
                 event.preventDefault()
                 Functions.clearSelection()
                 // @ts-ignore
@@ -550,7 +550,7 @@ export default class Functions {
         return Promise.all(frames)
     }
 
-    public static extractWebMFrames = async (videoFile: string, duration: number) => {
+    public static extractWebMFrames = async (videoFile: string, duration: number, vp9?: boolean) => {
         let minFrames = duration * 12
         let frames = [] as any
         await new Promise<void>(async (resolve) => {
@@ -576,7 +576,7 @@ export default class Functions {
                 demuxer.demux()
             }
             decoder.configure({
-                codec: "vp09.00.10.08",
+                codec: vp9 ? "vp09.00.10.08" : "vp8",
                 codedWidth: demuxer.videoTrack.width,
                 codedHeight: demuxer.videoTrack.height,
                 displayAspectWidth: demuxer.videoTrack.width,
@@ -1103,8 +1103,9 @@ export default class Functions {
                 const webp = result?.mime === "image/webp"
                 const gif = result?.mime === "image/gif"
                 const mp4 = result?.mime === "video/mp4"
-                if (jpg || png || webp || gif || mp4) {
-                    if (mp4) {
+                const webm = result?.mime === "video/webm"
+                if (jpg || png || webp || gif || mp4 || webm) {
+                    if (mp4 || webm) {
                         const url = URL.createObjectURL(file)
                         const thumbnail = await Functions.videoThumbnail(url)
                         bytes = await Functions.base64toUint8Array(thumbnail)
