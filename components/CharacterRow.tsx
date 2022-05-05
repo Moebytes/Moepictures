@@ -19,20 +19,32 @@ const CharacterRow: React.FunctionComponent<Props> = (props) => {
     const {session, setSession} = useContext(SessionContext)
     const history = useHistory()
 
-    const searchTag = () => {
-        history.push("/posts")
+    const searchTag = (event: React.MouseEvent) => {
+        if (event.ctrlKey || event.metaKey || event.button === 1) {
+            window.open("/posts", "_blank")
+        } else {
+            history.push("/posts")
+        }
         setSearch(props.character.tag)
         setSearchFlag(true)
     }
 
-    const set = (image: string, index: number) => {
+    const set = (image: string, index: number, newTab: boolean) => {
         if (!session.username) {
             const filtered = props.character.posts.filter((p: any) => p.restrict === "safe")
             const post = filtered[index] 
-            return history.push(`/post/${post.postID}`)
+            if (newTab) {
+                return window.open(`/post/${post.postID}`, "_blank")
+            } else {
+                return history.push(`/post/${post.postID}`)
+            }
         }
         const post = props.character.posts[index] 
-        history.push(`/post/${post.postID}`)
+        if (newTab) {
+            window.open(`/post/${post.postID}`, "_blank")
+        } else {
+            history.push(`/post/${post.postID}`)
+        }
     }
 
     const getImages = () => {
@@ -47,7 +59,7 @@ const CharacterRow: React.FunctionComponent<Props> = (props) => {
         <div className="characterrow" onMouseEnter={() =>setHover(true)} onMouseLeave={() => setHover(false)}>
             <div className="characterrow-row">
                 {props.character.image ? <img className="characterrow-img" src={functions.getTagLink("character", props.character.image)}/> : null}
-                <span className="characterrow-text-hover" onClick={searchTag}>
+                <span className="characterrow-text-hover" onClick={searchTag} onAuxClick={searchTag}>
                     <span className="characterrow-text">{functions.toProperCase(props.character.tag.replaceAll("-", " "))}</span>
                     <span className="characterrow-text-alt">{props.character.postCount}</span>
                 </span>

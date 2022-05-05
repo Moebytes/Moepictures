@@ -187,16 +187,24 @@ const UserProfilePage: React.FunctionComponent = (props) => {
         }
     }
 
-    const setUp = (img: string, index: number) => {
+    const setUp = (img: string, index: number, newTab: boolean) => {
         setUploadIndex(index)
         const postID = uploads[index].postID
-        history.push(`/post/${postID}`)
+        if (newTab) {
+            window.open(`/post/${postID}`, "_blank")
+        } else {
+            history.push(`/post/${postID}`)
+        }
     }
 
-    const setFav = (img: string, index: number) => {
+    const setFav = (img: string, index: number, newTab: boolean) => {
         setFavoriteIndex(index)
         const postID = favorites[index].postID
-        history.push(`/post/${postID}`)
+        if (newTab) {
+            window.open(`/post/${postID}`, "_blank")
+        } else {
+            history.push(`/post/${postID}`)
+        }
     }
 
     const deleteAccountDialog = () => {

@@ -41,8 +41,12 @@ const TagRow: React.FunctionComponent<Props> = (props) => {
     const {session, setSession} = useContext(SessionContext)
     const history = useHistory()
 
-    const searchTag = () => {
-        history.push("/posts")
+    const searchTag = (event: React.MouseEvent) => {
+        if (event.ctrlKey || event.metaKey || event.button === 1) {
+            window.open("/posts", "_blank")
+        } else {
+            history.push("/posts")
+        }
         setSearch(props.tag.tag)
         setSearchFlag(true)
     }
@@ -135,7 +139,7 @@ const TagRow: React.FunctionComponent<Props> = (props) => {
             </td> : null}
             <div className="tagrow-content-container">
                 <td className="tagrow-container" style={{width: props.tag.image ? "16%" : "25%"}}>
-                    <div className="tagrow-row" onClick={searchTag}>
+                    <div className="tagrow-row" onClick={searchTag} onAuxClick={searchTag}>
                         <span className="tagrow-tag">{props.tag.tag.replaceAll("-", " ")}</span>
                         <span className="tagrow-tag-count">{props.tag.postCount}</span>
                     </div>

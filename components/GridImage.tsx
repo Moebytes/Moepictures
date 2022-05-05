@@ -604,6 +604,15 @@ const GridImage: React.FunctionComponent<Props> = (props) => {
         }
     }, [downloadFlag])
 
+    const onClick = (event: React.MouseEvent<HTMLElement>) => {
+        if (event.metaKey || event.ctrlKey || event.button === 1) {
+            event.preventDefault()
+            const newWindow = window.open(`/post/${props.id}`, "_blank")
+            newWindow?.blur()
+            window.focus()
+        }
+    }
+
     const mouseDown = (event: React.MouseEvent<HTMLElement>) => {
         setDrag(false)
     }
@@ -619,20 +628,17 @@ const GridImage: React.FunctionComponent<Props> = (props) => {
         localStorage.setItem("savedTags", JSON.stringify(tagCache))
         if (!drag) {
             if (event.metaKey || event.ctrlKey || event.button == 1) {
-                event.preventDefault()
-                const newWindow = window.open(`/post/${props.id}`, "_blank")
-                newWindow?.blur()
-                window.focus()
+                return
             } else {
                 history.push(`/post/${props.id}`)
+                window.scrollTo(0, 0)
             }
-            window.scrollTo(0, 0)
         }
     }
 
 
     return (
-        <div className="image-box" id={String(props.id)} ref={containerRef} onMouseDown={mouseDown} onMouseUp={mouseUp} onMouseMove={mouseMove}>
+        <div className="image-box" id={String(props.id)} ref={containerRef} onClick={onClick} onAuxClick={onClick} onMouseDown={mouseDown} onMouseUp={mouseUp} onMouseMove={mouseMove}>
             <div className="image-filters" ref={imageFiltersRef} onMouseMove={(event) => imageAnimation(event)} onMouseLeave={() => cancelImageAnimation()}>
                 {functions.isVideo(props.img) ? <video autoPlay loop muted disablePictureInPicture playsInline className="dummy-video" ref={videoRef} src={props.img}></video> : null}   
                 <img className="lightness-overlay" ref={lightnessRef} src={functions.isVideo(props.img) ? backFrame : props.img}/>

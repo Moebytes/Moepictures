@@ -19,20 +19,32 @@ const SeriesRow: React.FunctionComponent<Props> = (props) => {
     const {session, setSession} = useContext(SessionContext)
     const history = useHistory()
 
-    const searchTag = () => {
-        history.push("/posts")
+    const searchTag = (event: React.MouseEvent) => {
+        if (event.ctrlKey || event.metaKey || event.button === 1) {
+            window.open("/posts", "_blank")
+        } else {
+            history.push("/posts")
+        }
         setSearch(props.series.tag)
         setSearchFlag(true)
     }
 
-    const set = (image: string, index: number) => {
+    const set = (image: string, index: number, newTab: boolean) => {
         if (!session.username) {
             const filtered = props.series.posts.filter((p: any) => p.restrict === "safe")
             const post = filtered[index] 
-            return history.push(`/post/${post.postID}`)
+            if (newTab) {
+                return window.open(`/post/${post.postID}`, "_blank")
+            } else {
+                return history.push(`/post/${post.postID}`)
+            }
         }
         const post = props.series.posts[index] 
-        history.push(`/post/${post.postID}`)
+        if (newTab) {
+            window.open(`/post/${post.postID}`, "_blank")
+        } else {
+            history.push(`/post/${post.postID}`)
+        }
     }
 
     const getImages = () => {
@@ -47,7 +59,7 @@ const SeriesRow: React.FunctionComponent<Props> = (props) => {
         <div className="seriesrow" onMouseEnter={() =>setHover(true)} onMouseLeave={() => setHover(false)}>
             <div className="seriesrow-row">
                 {props.series.image ? <img className="seriesrow-img" src={functions.getTagLink("series", props.series.image)}/> : null}
-                <span className="seriesrow-text-hover" onClick={searchTag}>
+                <span className="seriesrow-text-hover" onClick={searchTag} onAuxClick={searchTag}>
                     <span className="seriesrow-text">{functions.toProperCase(props.series.tag.replaceAll("-", " "))}</span>
                     <span className="seriesrow-text-alt">{props.series.postCount}</span>
                 </span>

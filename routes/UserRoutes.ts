@@ -50,7 +50,7 @@ const userLimiter = rateLimit({
 })
 
 const UserRoutes = (app: Express) => {
-    app.get("/api/user", userLimiter, async (req: Request, res: Response, next: NextFunction) => {
+    app.get("/api/user", sessionLimiter, async (req: Request, res: Response, next: NextFunction) => {
         try {
             const username = req.query.username as string
             if (!username) return res.status(200).json(null)
@@ -197,7 +197,7 @@ const UserRoutes = (app: Express) => {
         }
     })
 
-    app.post("/api/user/favoritesprivacy", userLimiter, async (req: Request, res: Response) => {
+    app.post("/api/user/favoritesprivacy", sessionLimiter, async (req: Request, res: Response) => {
         try {
             if (!req.session.username) return res.status(400).send("Bad request")
             const user = await sql.user(req.session.username)
@@ -444,7 +444,7 @@ const UserRoutes = (app: Express) => {
         }
     })
 
-    app.get("/api/user/favorites", userLimiter, async (req: Request, res: Response) => {
+    app.get("/api/user/favorites", sessionLimiter, async (req: Request, res: Response) => {
         try {
             const username = req.query.username
             if (username) {
@@ -462,7 +462,7 @@ const UserRoutes = (app: Express) => {
         }
     })
 
-    app.get("/api/user/uploads", userLimiter, async (req: Request, res: Response) => {
+    app.get("/api/user/uploads", sessionLimiter, async (req: Request, res: Response) => {
         try {
             const username = req.query.username
             if (!req.session.username && !username) return res.status(400).send("Bad request")

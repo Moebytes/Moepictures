@@ -153,8 +153,12 @@ const Comment: React.FunctionComponent<Props> = (props) => {
         }
     }
 
-    const userClick = () => {
-        history.push(`/user/${props.comment.username}`)
+    const userClick = (event: React.MouseEvent) => {
+        if (event.ctrlKey || event.metaKey || event.button === 1) {
+            window.open(`/user/${props.comment.username}`, "_blank")
+        } else {
+            history.push(`/user/${props.comment.username}`)
+        }
     }
 
     const generateUsernameJSX = () => {
@@ -179,7 +183,7 @@ const Comment: React.FunctionComponent<Props> = (props) => {
     return (
         <div className="comment">
             <div className="comment-container">
-                <div className="comment-user-container" onClick={userClick}>
+                <div className="comment-user-container" onClick={userClick} onAuxClick={userClick}>
                     <img className="comment-user-img" src={getCommentPFP()}/>
                     {generateUsernameJSX()}
                 </div>

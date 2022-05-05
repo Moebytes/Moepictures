@@ -50,8 +50,12 @@ const CommentRow: React.FunctionComponent<Props> = (props) => {
         }
     }
 
-    const imgClick = () => {
-        history.push(`/post/${props.comment.postID}`)
+    const imgClick = (event: React.MouseEvent) => {
+        if (event.ctrlKey || event.metaKey || event.button === 1) {
+            window.open(`/post/${props.comment.postID}`, "_blank")
+        } else {
+            history.push(`/post/${props.comment.postID}`)
+        }
     }
 
     const parseText = () => {
@@ -160,8 +164,12 @@ const CommentRow: React.FunctionComponent<Props> = (props) => {
         }
     }
 
-    const userClick = () => {
-        history.push(`/user/${props.comment.username}`)
+    const userClick = (event: React.MouseEvent) => {
+        if (event.ctrlKey || event.metaKey || event.button === 1) {
+            window.open(`/user/${props.comment.username}`, "_blank")
+        } else {
+            history.push(`/user/${props.comment.username}`)
+        }
     }
 
     const generateUsernameJSX = () => {
@@ -187,11 +195,11 @@ const CommentRow: React.FunctionComponent<Props> = (props) => {
         <div className="commentrow" onMouseEnter={() =>setHover(true)} onMouseLeave={() => setHover(false)}>
             <div className="commentrow-container">
                 {functions.isVideo(img) ? 
-                <video className="commentrow-img" src={img} onClick={imgClick}></video> :
+                <video className="commentrow-img" src={img} onClick={imgClick} onAuxClick={imgClick}></video> :
                 <img className="commentrow-img" src={img} onClick={imgClick}/>}
             </div>
             <div className="commentrow-container">
-                <div className="commentrow-user-container" onClick={userClick}>
+                <div className="commentrow-user-container" onClick={userClick} onAuxClick={userClick}>
                     <img className="commentrow-user-img" src={getCommentPFP()}/>
                     {generateUsernameJSX()}
                 </div>

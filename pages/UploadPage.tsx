@@ -631,10 +631,14 @@ const UploadPage: React.FunctionComponent = (props) => {
         setCurrentIndex(index)
     }
 
-    const setDup = (img: string, index: number) => {
+    const setDup = (img: string, index: number, newTab: boolean) => {
         setCurrentDupIndex(index)
         const postID = dupPosts[index].postID
-        history.push(`/post/${postID}`)
+        if (newTab) {
+            window.open(`/post/${postID}`, "_blank")
+        } else {
+            history.push(`/post/${postID}`)
+        }
     }
 
     const clear = () => {
