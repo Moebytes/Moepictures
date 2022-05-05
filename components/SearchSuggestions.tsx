@@ -1,4 +1,4 @@
-import React, {useContext, useEffect, useRef, useState} from "react"
+import React, {useContext, useEffect, useRef, useState, useReducer} from "react"
 import {useHistory} from "react-router-dom"
 import {ThemeContext, EnableDragContext, SessionContext, MobileContext, SearchContext, SearchFlagContext} from "../Context"
 import "./styles/searchsuggestions.less"
@@ -16,6 +16,7 @@ interface Props {
 }
 
 const SearchSuggestions: React.FunctionComponent<Props> = (props) => {
+    const [ignored, forceUpdate] = useReducer(x => x + 1, 0)
     const {theme, setTheme} = useContext(ThemeContext)
     const {enableDrag, setEnableDrag} = useContext(EnableDragContext)
     const {session, setSession} = useContext(SessionContext)
@@ -23,32 +24,36 @@ const SearchSuggestions: React.FunctionComponent<Props> = (props) => {
     const {search, setSearch} = useContext(SearchContext)
     const {searchFlag, setSearchFlag} = useContext(SearchFlagContext)
     const [suggestions, setSuggestions] = useState([]) as any
-    const [activeIndex, setActiveIndex] = useState(0)
+    const [activeIndex, setActiveIndex] = useState(-1)
     const [active, setActive] = useState(props.active)
     const history = useHistory()
 
     const handleKeydown = (event: any) => {
         if (event.key === "Enter") {
-            if (!active || !suggestions.length) return
+            if (!active || !suggestions.length || !suggestions[activeIndex]) return
             event.preventDefault()
-            if (props.click) return props.click(suggestions[activeIndex]?.tag)
-            setSearch(async (prev: string) => {
-                functions.parseSpaceEnabledSearch(prev).then((query) => {
-                    const parts = query.split(/ +/g)
-                    parts[parts.length - 1] = suggestions[activeIndex]?.tag
-                    return parts.join(" ")
-                }) 
+            if (props.click) {
+                props.click(suggestions[activeIndex]?.tag)
+                return setActiveIndex(-1)
+            }
+            setSearch((prev: string) => {
+                const parts = prev.split(/ +/g)
+                parts[parts.length - 1] = suggestions[activeIndex]?.tag
+                return parts.join(" ") + " "
             })
             setSearchFlag(true)
+            setActiveIndex(-1)
         }
         let newActiveIndex = activeIndex
         if (event.key === "ArrowUp") {
+            event.preventDefault()
             newActiveIndex-- 
         } else if (event.key === "ArrowDown") {
+            event.preventDefault()
             newActiveIndex++
         }
-        if (activeIndex < 0) newActiveIndex = 0 
-        if (activeIndex > suggestions.length - 1) newActiveIndex = suggestions.length - 1
+        if (activeIndex < -1) newActiveIndex = suggestions.length - 1
+        if (activeIndex > suggestions.length - 1) newActiveIndex = 0
         setActiveIndex(newActiveIndex)
     }
 
@@ -65,6 +70,7 @@ const SearchSuggestions: React.FunctionComponent<Props> = (props) => {
         } else {
             setTimeout(() => {
                 setActive(false)
+                setActiveIndex(-1)
             }, 200)
         }
     }, [props.active])

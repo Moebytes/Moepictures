@@ -167,10 +167,9 @@ for (let i = 0; i < folders.length; i++) {
 }
 
 app.get("/*", function(req, res) {
-  /*
-    if (!req.hostname.includes("moebooru") && !req.hostname.includes("localhost")) {
+    if (!req.hostname.includes("moebooru") && !req.hostname.includes("localhost") && !req.hostname.includes("192.168.68")) {
       res.redirect(301, `https://moebooru.moe${req.path}`)
-    }*/
+    }
     res.setHeader("Content-Type", mime.getType(req.path) ?? "")
     res.setHeader("Cross-Origin-Opener-Policy", "same-origin")
     res.setHeader("Cross-Origin-Embedder-Policy", "require-corp")
