@@ -41,7 +41,6 @@ const ImageGrid: React.FunctionComponent = (props) => {
     const history = useHistory()
 
     const getInitLoadAmount = () => {
-        if (mobile) return 3
         if (sizeType === "tiny") return 45
         if (sizeType === "small") return 28
         if (sizeType === "medium") return 15

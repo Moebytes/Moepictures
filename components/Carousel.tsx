@@ -1,5 +1,5 @@
 import React, {useContext, useEffect, useRef, useState} from "react"
-import {ThemeContext, EnableDragContext} from "../Context"
+import {ThemeContext, EnableDragContext, MobileContext} from "../Context"
 import {HashLink as Link} from "react-router-hash-link"
 import functions from "../structures/Functions"
 import arrowLeft from "../assets/purple/carousel-left.png"
@@ -25,6 +25,7 @@ let startX = 0
 const Carousel: React.FunctionComponent<Props> = (props) => {
     const {theme, setTheme} = useContext(ThemeContext)
     const {enableDrag, setEnableDrag} = useContext(EnableDragContext)
+    const {mobile, setMobile} = useContext(MobileContext)
     const [lastPos, setLastPos] = useState(null) as any
     const [dragging, setDragging] = useState(false) as any
     const [imagesRef, setImagesRef] = useState(props.images.map(() => React.createRef())) as any
@@ -160,7 +161,7 @@ const Carousel: React.FunctionComponent<Props> = (props) => {
     }
 
     const handleWheel = (event: React.WheelEvent) => {
-        if (props.images.length <= 3) return
+        if (props.images.length <= 1) return
         event.preventDefault()
         if (!sliderRef.current) return
         let marginLeft = parseInt(sliderRef.current.style.marginLeft)
@@ -199,7 +200,7 @@ const Carousel: React.FunctionComponent<Props> = (props) => {
     }
 
     const handleMouseMove = (event: React.MouseEvent) => {
-        if (props.images.length <= 3) return
+        if (props.images.length <= 1) return
         if (!dragging) return
         if (!sliderRef.current) return
         let marginLeft = parseInt(sliderRef.current.style.marginLeft)
@@ -226,7 +227,7 @@ const Carousel: React.FunctionComponent<Props> = (props) => {
     }
 
     const handleTouchMove = (event: React.TouchEvent) => {
-        if (props.images.length <= 3) return
+        if (props.images.length <= 1) return
         if (!event.touches.length) return
         if (!dragging) return
         if (!sliderRef.current) return

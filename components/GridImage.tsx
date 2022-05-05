@@ -58,7 +58,27 @@ const GridImage: React.FunctionComponent<Props> = (props) => {
     const {reverse, setReverse} = useContext(ReverseContext)
     const [seekTo, setSeekTo] = useState(null) as any
     const [secondsProgress, setSecondsProgress] = useState(0)
+    const [visible, setVisible] = useState(true)
     const history = useHistory()
+
+    const handleIntersection = (entries: any) => {
+        const entry = entries[0]
+        if (entry.intersectionRatio > 0) {
+          setVisible(true)
+        } else {
+          setVisible(false)
+        }
+    }
+
+    useEffect(() => {
+        if (typeof window === "undefined") return
+        const observer = new IntersectionObserver(handleIntersection, {root: null, rootMargin: "0px 0px 100px 100px", threshold: 0.01})
+        const element = containerRef.current
+        if (element) observer.observe(element)
+        return () => {
+            observer.disconnect()
+        }
+    })
 
     useEffect(() => {
         setImageLoaded(false)
@@ -638,7 +658,7 @@ const GridImage: React.FunctionComponent<Props> = (props) => {
 
 
     return (
-        <div className="image-box" id={String(props.id)} ref={containerRef} onClick={onClick} onAuxClick={onClick} onMouseDown={mouseDown} onMouseUp={mouseUp} onMouseMove={mouseMove}>
+        <div style={{opacity: visible ? "1" : "0", transition: "opacity 0.1s"}} className="image-box" id={String(props.id)} ref={containerRef} onClick={onClick} onAuxClick={onClick} onMouseDown={mouseDown} onMouseUp={mouseUp} onMouseMove={mouseMove}>
             <div className="image-filters" ref={imageFiltersRef} onMouseMove={(event) => imageAnimation(event)} onMouseLeave={() => cancelImageAnimation()}>
                 {functions.isVideo(props.img) ? <video autoPlay loop muted disablePictureInPicture playsInline className="dummy-video" ref={videoRef} src={props.img}></video> : null}   
                 <img className="lightness-overlay" ref={lightnessRef} src={functions.isVideo(props.img) ? backFrame : props.img}/>
