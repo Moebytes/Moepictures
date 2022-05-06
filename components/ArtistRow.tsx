@@ -39,7 +39,8 @@ const ArtistRow: React.FunctionComponent<Props> = (props) => {
                 return history.push(`/post/${post.postID}`)
             }
         }
-        const post = props.artist.posts[index] 
+        const filtered = props.artist.posts.filter((p: any) => p.restrict !== "explicit")
+        const post = filtered[index] 
         if (newTab) {
             window.open(`/post/${post.postID}`, "_blank")
         } else {
@@ -52,7 +53,8 @@ const ArtistRow: React.FunctionComponent<Props> = (props) => {
             const filtered = props.artist.posts.filter((p: any) => p.restrict === "safe")
             return filtered.map((p: any) => functions.getImageLink(p.images[0].type, p.postID, p.images[0].filename))
         }
-        return props.artist.posts.map((p: any) => functions.getImageLink(p.images[0].type, p.postID, p.images[0].filename))
+        const filtered = props.artist.posts.filter((p: any) => p.restrict !== "explicit")
+        return filtered.map((p: any) => functions.getImageLink(p.images[0].type, p.postID, p.images[0].filename))
     }
 
     return (

@@ -16,8 +16,9 @@ import axios from "axios"
 import AliasTagDialog from "../dialogs/AliasTagDialog"
 import EditTagDialog from "../dialogs/EditTagDialog"
 import DeleteTagDialog from "../dialogs/DeleteTagDialog"
+import matureTags from "../json/mature-tags.json"
 import {ThemeContext, EnableDragContext, HideNavbarContext, HideSidebarContext, RelativeContext, HideTitlebarContext, MobileContext,
-ActiveDropdownContext, HeaderTextContext, SidebarTextContext} from "../Context"
+ActiveDropdownContext, HeaderTextContext, SidebarTextContext, SessionContext} from "../Context"
 import "./styles/tagspage.less"
 
 const TagsPage: React.FunctionComponent = (props) => {
@@ -30,6 +31,7 @@ const TagsPage: React.FunctionComponent = (props) => {
     const {activeDropdown, setActiveDropdown} = useContext(ActiveDropdownContext)
     const {headerText, setHeaderText} = useContext(HeaderTextContext)
     const {sidebarText, setSidebarText} = useContext(SidebarTextContext)
+    const {session, setSession} = useContext(SessionContext)
     const {mobile, setMobile} = useContext(MobileContext)
     const [sortType, setSortType] = useState("posts")
     const [tags, setTags] = useState([]) as any
@@ -161,8 +163,9 @@ const TagsPage: React.FunctionComponent = (props) => {
 
     const generateTagsJSX = () => {
         const jsx = [] as any
-        const tags = functions.removeDuplicates(visibleTags)
+        const tags = functions.removeDuplicates(visibleTags) as any
         for (let i = 0; i < tags.length; i++) {
+            if (!session.username) if (functions.arrayIncludes(tags[i].tag, matureTags)) continue
             jsx.push(<TagRow tag={tags[i]} onDelete={updateTags} onEdit={updateTags}/>)
         }
         return jsx

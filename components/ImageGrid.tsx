@@ -41,12 +41,12 @@ const ImageGrid: React.FunctionComponent = (props) => {
     const history = useHistory()
 
     const getInitLoadAmount = () => {
-        if (sizeType === "tiny") return 45
-        if (sizeType === "small") return 28
-        if (sizeType === "medium") return 15
-        if (sizeType === "large") return 12
-        if (sizeType === "massive") return 6
-        return 45
+        if (sizeType === "tiny") return 55
+        if (sizeType === "small") return 35
+        if (sizeType === "medium") return 20
+        if (sizeType === "large") return 16
+        if (sizeType === "massive") return 10
+        return 55
     }
 
     const getLoadAmount = () => {
@@ -227,6 +227,7 @@ const ImageGrid: React.FunctionComponent = (props) => {
             const post = posts[i] as any
             if (post.thirdParty) continue
             if (!session.username) if (post.restrict !== "safe") continue
+            if (restrictType !== "explicit") if (post.restrict === "explicit") continue
             const image = post.images[0]
             if (!image) continue
             const images = post.images.map((i: any) => functions.getImageLink(i.type, post.postID, i.filename))
