@@ -1009,6 +1009,7 @@ export default class Functions {
         let tags = [] as any
         for (let i = 0; i < parsedTags.length; i++) {
             const index = result.findIndex((r: any) => parsedTags[i].tag === r.tag)
+            if (index === -1) return {artists, characters, series, tags}
             const obj = {} as any 
             obj.tag = parsedTags[i].tag 
             obj.count = parsedTags[i].count 
@@ -1035,6 +1036,7 @@ export default class Functions {
         let tags = [] as any
         for (let i = 0; i < parsedTags.length; i++) {
             const index = result.findIndex((r: any) => parsedTags[i] === r.tag)
+            if (index === -1) return Functions.tagCategories(parsedTags.map((t) => ({tag: t})))
             const obj = {} as any 
             obj.tag = parsedTags[i]
             obj.count = result[index].count 
