@@ -28,7 +28,7 @@ const CharactersPage: React.FunctionComponent = (props) => {
     const {headerText, setHeaderText} = useContext(HeaderTextContext)
     const {sidebarText, setSidebarText} = useContext(SidebarTextContext)
     const {mobile, setMobile} = useContext(MobileContext)
-    const [sortType, setSortType] = useState("alphabetic")
+    const [sortType, setSortType] = useState("posts")
     const [characters, setCharacters] = useState([]) as any
     const [index, setIndex] = useState(0)
     const [searchQuery, setSearchQuery] = useState("")
