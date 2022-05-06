@@ -130,7 +130,7 @@ const GridImage: React.FunctionComponent<Props> = (props) => {
     const getVideoData = async () => {
         if (!videoRef.current) return
         if (functions.isMP4(props.img)) {
-            const frames = await functions.extractMP4Frames(props.img, videoRef.current!.duration)
+            const frames = await functions.extractMP4Frames(props.img)
             let canvasFrames = [] as any 
             for (let i = 0; i < frames.length; i++) {
                 const canvas = document.createElement("canvas")
