@@ -262,9 +262,9 @@ const PostImage: React.FunctionComponent<Props> = (props) => {
             if (!videoRef.current) return
             let frames = null as any
             if (functions.isMP4(props.img)) {
-                frames = await functions.extractMP4Frames(props.img, videoRef.current!.duration)
+                frames = await functions.extractMP4Frames(props.img)
             } else if (functions.isWebM(props.img)) {
-                frames = await functions.extractWebMFrames(props.img, videoRef.current!.duration)
+                frames = await functions.extractWebMFrames(props.img)
             }
             let canvasFrames = [] as any 
             for (let i = 0; i < frames.length; i++) {

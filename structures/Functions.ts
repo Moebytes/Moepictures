@@ -523,8 +523,7 @@ export default class Functions {
         return distance
     }
 
-    public static extractMP4Frames = async (videoFile: string, duration: number) => {
-        let minFrames = duration * 12
+    public static extractMP4Frames = async (videoFile: string) => {
         let frames = [] as any
         await new Promise<void>(async (resolve) => {
             let demuxer = new MP4Demuxer(videoFile)
@@ -537,7 +536,6 @@ export default class Functions {
                     frames.push(bitmap)
                     frame.close()
                     timeout = setTimeout(() => {
-                        if (frames.length < minFrames) return 
                         resolve()
                     }, 500)
                 },
@@ -550,8 +548,7 @@ export default class Functions {
         return Promise.all(frames)
     }
 
-    public static extractWebMFrames = async (videoFile: string, duration: number, vp9?: boolean) => {
-        let minFrames = duration * 12
+    public static extractWebMFrames = async (videoFile: string, vp9?: boolean) => {
         let frames = [] as any
         await new Promise<void>(async (resolve) => {
             let demuxer = new JsWebm()
@@ -566,7 +563,6 @@ export default class Functions {
                     frames.push(bitmap)
                     frame.close()
                     timeout = setTimeout(() => {
-                        if (frames.length < minFrames) return 
                         resolve()
                     }, 500)
                 },
@@ -1106,7 +1102,7 @@ export default class Functions {
                 const webp = result?.mime === "image/webp"
                 const gif = result?.mime === "image/gif"
                 const mp4 = result?.mime === "video/mp4"
-                const webm = result?.mime === "video/webm"
+                const webm = (path.extname(file.name) === ".webm" && result?.typename === "mkv")
                 if (jpg || png || webp || gif || mp4 || webm) {
                     if (mp4 || webm) {
                         const url = URL.createObjectURL(file)

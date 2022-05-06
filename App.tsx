@@ -41,7 +41,6 @@ import EditUnverifiedPostPage from "./pages/EditUnverifiedPostPage"
 import axios from "axios"
 import "./index.less"
 
-require.context("./assets/images", true)
 require.context("./assets/purple", true)
 require.context("./assets/purple-light", true)
 require.context("./assets/magenta", true)

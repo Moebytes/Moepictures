@@ -54,7 +54,7 @@ const validImages = (images: any[]) => {
     const webp = result?.mime === "image/webp"
     const gif = result?.mime === "image/gif"
     const mp4 = result?.mime === "video/mp4"
-    const webm = result?.mime === "video/webm"
+    const webm = (path.extname(images[i].filename) === ".webm" && result?.typename === "mkv")
     if (jpg || png || webp || gif || mp4 || webm) {
       const MB = images[i].size / (1024*1024)
       const maxSize = jpg ? 5 :

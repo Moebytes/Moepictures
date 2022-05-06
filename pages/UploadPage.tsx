@@ -146,7 +146,14 @@ const UploadPage: React.FunctionComponent = (props) => {
     const getSimilar = async () => {
         if (acceptedURLs[currentIndex]) {
             const img = acceptedURLs[currentIndex]
-            const dupes = await axios.post("/api/search/similar", Object.values(img.bytes)).then((r) => r.data)
+            console.log(img)
+            let dupes = null as any
+            if (img.thumbnail) {
+                const bytes = await functions.base64toUint8Array(img.thumbnail)
+                dupes = await axios.post("/api/search/similar", Object.values(bytes)).then((r) => r.data)
+            } else {
+                dupes = await axios.post("/api/search/similar", Object.values(img.bytes)).then((r) => r.data)
+            }
             setDupPosts(dupes)
         }
     }
@@ -176,7 +183,7 @@ const UploadPage: React.FunctionComponent = (props) => {
                     const gif = result?.mime === "image/gif"
                     const webp = result?.mime === "image/webp"
                     const mp4 = result?.mime === "video/mp4"
-                    const webm = result?.mime === "video/webm"
+                    const webm = (path.extname(files[i].name) === ".webm" && result?.typename === "mkv")
                     const zip = result?.mime === "application/zip"
                     if (jpg || png || webp || gif || mp4 || webm || zip) {
                         const MB = files[i].size / (1024*1024)
@@ -200,20 +207,20 @@ const UploadPage: React.FunctionComponent = (props) => {
                                     let webp = result?.mime === "image/webp"
                                     const gif = result?.mime === "image/gif"
                                     const mp4 = result?.mime === "video/mp4"
-                                    const webm = result?.mime === "video/webm"
+                                    const webm = (path.extname(files[i].name) === ".webm" && result?.typename === "mkv")
                                     if (jpg || png || webp || gif || mp4 || webm) {
-                                        acceptedArray.push({file: new File([data], filename), ext: result.typename, originalLink: links ? links[i] : null, bytes: data})
+                                        acceptedArray.push({file: new File([data], filename), ext: result.typename === "mkv" ? "webm" : result.typename, originalLink: links ? links[i] : null, bytes: data})
                                     } else {
                                         error = `Supported types in zip: png, jpg, webp, gif, mp4, webm.`
                                     }
                                 }
                                 resolve()
                             } else {
-                                acceptedArray.push({file: files[i], ext: result.typename, originalLink: links ? links[i] : null, bytes})
+                                acceptedArray.push({file: files[i], ext: result.typename === "mkv" ? "webm" : result.typename, originalLink: links ? links[i] : null, bytes})
                                 resolve()
                             }
                         } else {
-                            error = `${result.typename.toUpperCase()} max file size: ${maxSize}MB`
+                            error = `${(result.typename === "mkv" ? "webm" : result.typename).toUpperCase()} max file size: ${maxSize}MB`
                             resolve()
                         }
                     } else {
