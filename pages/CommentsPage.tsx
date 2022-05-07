@@ -18,6 +18,7 @@ import ReportCommentDialog from "../dialogs/ReportCommentDialog"
 import {ThemeContext, EnableDragContext, HideNavbarContext, HideSidebarContext, MobileContext, SessionContext,
 RelativeContext, HideTitlebarContext, ActiveDropdownContext, HeaderTextContext, SidebarTextContext,
 CommentSearchFlagContext} from "../Context"
+import permissions from "../structures/Permissions"
 import "./styles/commentspage.less"
 import axios from "axios"
 
@@ -169,6 +170,7 @@ const CommentsPage: React.FunctionComponent = (props) => {
         const jsx = [] as any
         for (let i = 0; i < visibleComments.length; i++) {
             if (!session.username) if (visibleComments[i].post.restrict !== "safe") continue
+            if (!permissions.isAdmin(session)) if (visibleComments[i].post.restrict === "explicit") continue
             jsx.push(<CommentRow comment={visibleComments[i]} onDelete={updateComments} onEdit={updateComments}/>)
         }
         return jsx

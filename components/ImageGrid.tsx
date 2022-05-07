@@ -8,6 +8,7 @@ import GridImage from "./GridImage"
 import noresults from "../assets/misc/noresults.png"
 import axios from "axios"
 import functions from "../structures/Functions"
+import permissions from "../structures/Permissions"
 import path from "path"
 import "./styles/imagegrid.less"
 
@@ -228,6 +229,7 @@ const ImageGrid: React.FunctionComponent = (props) => {
             if (post.thirdParty) continue
             if (!session.username) if (post.restrict !== "safe") continue
             if (restrictType !== "explicit") if (post.restrict === "explicit") continue
+            if (!permissions.isAdmin(session)) if (post.restrict === "explicit") continue
             const image = post.images[0]
             if (!image) continue
             const images = post.images.map((i: any) => functions.getImageLink(i.type, post.postID, i.filename))

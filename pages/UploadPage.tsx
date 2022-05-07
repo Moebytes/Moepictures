@@ -798,7 +798,7 @@ const UploadPage: React.FunctionComponent = (props) => {
                         translatedTitle = translated[0]
                         translatedCommentary = translated[1]
                         if (illust.x_restrict !== 0) {
-                            setRestrict("explicit")
+                            setRestrict("questionable")
                         } else {
                             setRestrict("safe")
                         }
@@ -1158,10 +1158,11 @@ const UploadPage: React.FunctionComponent = (props) => {
                     </button>
                 </div>
                 <div className="upload-row">
+                    {permissions.isAdmin(session) ?
                     <button className={`upload-button ${restrict === "explicit" ? "button-selected" : ""}`} onClick={() => setRestrict("explicit")}>
                         <img className="upload-button-img" src={explicit}/>
                         <span className="upload-button-text">Explicit</span>
-                    </button>
+                    </button> : null}
                 </div> </>
                 :
                 <div className="upload-row">
@@ -1173,10 +1174,11 @@ const UploadPage: React.FunctionComponent = (props) => {
                         <img className="upload-button-img" src={questionable}/>
                         <span className="upload-button-text">Questionable</span>
                     </button>
+                    {permissions.isAdmin(session) ?
                     <button className={`upload-button ${restrict === "explicit" ? "button-selected" : ""}`} onClick={() => setRestrict("explicit")}>
                         <img className="upload-button-img" src={explicit}/>
                         <span className="upload-button-text">Explicit</span>
-                    </button>
+                    </button> : null}
                 </div>}
                 <div className="upload-row">
                     <button className={`upload-button ${style === "2d" ? "button-selected" : ""}`} onClick={() => setStyle("2d")}>

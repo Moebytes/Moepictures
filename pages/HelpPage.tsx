@@ -187,6 +187,7 @@ const HelpPage: React.FunctionComponent = (props) => {
                         ⇾ Animations should be higher than 2fps. <br/>
                         ⇾ Source information is required for all posts. <br/>
                         ⇾ All tags should be romanized. Titles and commentary doesn't have to be romanized.
+                        ⇾ No hentai. I don't want this to become a hentai-focused site, so for now this is not allowed.
                         </span>
                     </span>
                     <span className="help-heading" id="variations">Variations</span>

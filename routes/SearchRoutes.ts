@@ -24,6 +24,7 @@ const SearchRoutes = (app: Express) => {
             const offset = req.query.offset as string
             if (!functions.validType(type, true)) return res.status(400).send("Invalid type")
             if (!functions.validRestrict(restrict, true)) return res.status(400).send("Invalid restrict")
+            if (restrict === "explicit") if (req.session?.role !== "admin") return res.status(403).send("No permission")
             if (!functions.validStyle(style, true)) return res.status(400).send("Invalid style")
             if (!functions.validSort(sort)) return res.status(400).send("Invalid sort")
             const tags = query.trim().split(/ +/g).filter(Boolean)
@@ -64,6 +65,7 @@ const SearchRoutes = (app: Express) => {
             const offset = req.query.offset as string
             if (!functions.validType(type, true)) return res.status(400).send("Invalid type")
             if (!functions.validRestrict(restrict, true)) return res.status(400).send("Invalid restrict")
+            if (restrict === "explicit") if (req.session?.role !== "admin") return res.status(403).send("No permission")
             if (!functions.validStyle(style, true)) return res.status(400).send("Invalid style")
             let result = await sql.random(type, restrict, style, offset)
             result = result.map((p: any) => {

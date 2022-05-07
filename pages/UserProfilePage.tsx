@@ -54,15 +54,17 @@ const UserProfilePage: React.FunctionComponent = (props) => {
 
     const updateUploads = async () => {
         const uploads = await axios.get("/api/user/uploads", {withCredentials: true}).then((r) => r.data)
-        const images = uploads.map((p: any) => functions.getImageLink(p.images[0].type, p.postID, p.images[0].filename))
-        setUploads(uploads)
+        const filtered = uploads.map((u: any) => u.post.restrict !== "explicit")
+        const images = filtered.map((p: any) => functions.getImageLink(p.images[0].type, p.postID, p.images[0].filename))
+        setUploads(filtered)
         setUploadImages(images)
     }
 
     const updateFavorites = async () => {
         const favorites = await axios.get("/api/user/favorites", {withCredentials: true}).then((r) => r.data)
-        const images = favorites.map((f: any) => functions.getImageLink(f.post.images[0].type, f.postID, f.post.images[0].filename))
-        setFavorites(favorites)
+        const filtered = favorites.map((f: any) => f.post.restrict !== "explicit")
+        const images = filtered.map((f: any) => functions.getImageLink(f.post.images[0].type, f.postID, f.post.images[0].filename))
+        setFavorites(filtered)
         setFavoriteImages(images)
     }
 

@@ -74,6 +74,7 @@ import speedIconMagenta from "../assets/magenta/speed.png"
 import reverseIcon from "../assets/purple/reverse.png"
 import reverseIconMagenta from "../assets/magenta/reverse.png"
 import functions from "../structures/Functions"
+import permissions from "../structures/Permissions"
 import "./styles/sortbar.less"
 
 const SortBar: React.FunctionComponent = (props) => {
@@ -784,10 +785,11 @@ const SortBar: React.FunctionComponent = (props) => {
                     <img className="sortbar-dropdown-img" src={getQuestionable()}/>
                     <span className="sortbar-dropdown-text">Questionable</span>
                 </div>
+                {permissions.isAdmin(session) ?
                 <div className="sortbar-dropdown-row" onClick={() => setRestrictType("explicit")}>
                     <img className="sortbar-dropdown-img" src={getExplicit()}/>
                     <span className="sortbar-dropdown-text">Explicit</span>
-                </div>
+                </div> : null}
             </div>
             <div className={`dropdown ${activeDropdown === "style" ? "" : "hide-dropdown"}`} 
             style={{marginLeft: getStyleMargin(), left: `${dropLeft}px`, top: `${dropTop}px`}} onClick={() => setActiveDropdown("none")}>

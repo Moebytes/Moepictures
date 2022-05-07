@@ -854,7 +854,7 @@ const EditUnverifiedPostPage: React.FunctionComponent<Props> = (props) => {
                         translatedTitle = translated[0]
                         translatedCommentary = translated[1]
                         if (illust.x_restrict !== 0) {
-                            setRestrict("explicit")
+                            setRestrict("questionable")
                         } else {
                             setRestrict("safe")
                         }
@@ -1211,10 +1211,11 @@ const EditUnverifiedPostPage: React.FunctionComponent<Props> = (props) => {
                     </button>
                 </div>
                 <div className="editpost-row">
+                    {permissions.isAdmin(session) ?
                     <button className={`editpost-button ${restrict === "explicit" ? "button-selected" : ""}`} onClick={() => setRestrict("explicit")}>
                         <img className="editpost-button-img" src={explicit}/>
                         <span className="editpost-button-text">Explicit</span>
-                    </button>
+                    </button> : null}
                 </div> </>
                 :
                 <div className="editpost-row">
@@ -1226,10 +1227,11 @@ const EditUnverifiedPostPage: React.FunctionComponent<Props> = (props) => {
                         <img className="editpost-button-img" src={questionable}/>
                         <span className="editpost-button-text">Questionable</span>
                     </button>
+                    {permissions.isAdmin(session) ?
                     <button className={`editpost-button ${restrict === "explicit" ? "button-selected" : ""}`} onClick={() => setRestrict("explicit")}>
                         <img className="editpost-button-img" src={explicit}/>
                         <span className="editpost-button-text">Explicit</span>
-                    </button>
+                    </button> : null}
                 </div>}
                 <div className="editpost-row">
                     <button className={`editpost-button ${style === "2d" ? "button-selected" : ""}`} onClick={() => setStyle("2d")}>

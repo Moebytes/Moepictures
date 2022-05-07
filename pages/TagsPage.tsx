@@ -17,6 +17,7 @@ import AliasTagDialog from "../dialogs/AliasTagDialog"
 import EditTagDialog from "../dialogs/EditTagDialog"
 import DeleteTagDialog from "../dialogs/DeleteTagDialog"
 import matureTags from "../json/mature-tags.json"
+import permissions from "../structures/Permissions"
 import {ThemeContext, EnableDragContext, HideNavbarContext, HideSidebarContext, RelativeContext, HideTitlebarContext, MobileContext,
 ActiveDropdownContext, HeaderTextContext, SidebarTextContext, SessionContext} from "../Context"
 import "./styles/tagspage.less"
@@ -166,6 +167,7 @@ const TagsPage: React.FunctionComponent = (props) => {
         const tags = functions.removeDuplicates(visibleTags) as any
         for (let i = 0; i < tags.length; i++) {
             if (!session.username) if (functions.arrayIncludes(tags[i].tag, matureTags)) continue
+            if (!permissions.isAdmin(session)) if (functions.arrayIncludes(tags[i].tag, matureTags)) continue
             jsx.push(<TagRow tag={tags[i]} onDelete={updateTags} onEdit={updateTags}/>)
         }
         return jsx
