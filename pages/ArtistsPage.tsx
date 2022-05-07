@@ -9,6 +9,10 @@ import search from "../assets/purple/search.png"
 import searchMagenta from "../assets/magenta/search.png"
 import searchPurpleLight from "../assets/purple-light/search.png"
 import searchMagentaLight from "../assets/magenta-light/search.png"
+import searchIconHover from "../assets/purple/search-hover.png"
+import searchMagentaHover from "../assets/magenta/search-hover.png"
+import searchMagentaLightHover from "../assets/magenta-light/search-hover.png"
+import searchPurpleLightHover from "../assets/purple-light/search-hover.png"
 import sort from "../assets/purple/sort.png"
 import ArtistRow from "../components/ArtistRow"
 import sortMagenta from "../assets/magenta/sort.png"
@@ -35,6 +39,7 @@ const ArtistsPage: React.FunctionComponent = (props) => {
     const [visibleArtists, setVisibleArtists] = useState([]) as any
     const [offset, setOffset] = useState(0)
     const [ended, setEnded] = useState(false)
+    const [getSearchIconHover, setSearchIconHover] = useState(false)
     const sortRef = useRef(null) as any
 
     const updateArtists = async () => {
@@ -118,11 +123,11 @@ const ArtistsPage: React.FunctionComponent = (props) => {
     })
 
     const getSearchIcon = () => {
-        if (theme === "purple") return search
-        if (theme === "purple-light") return searchPurpleLight
-        if (theme === "magenta") return searchMagenta
-        if (theme === "magenta-light") return searchMagentaLight
-        return search
+        if (theme === "purple") return getSearchIconHover ? searchIconHover : search
+        if (theme === "purple-light") return getSearchIconHover ? searchPurpleLightHover : searchPurpleLight
+        if (theme === "magenta") return getSearchIconHover ? searchMagentaHover : searchMagenta
+        if (theme === "magenta-light") return getSearchIconHover ? searchMagentaLightHover : searchMagentaLight
+        return getSearchIconHover ? searchIconHover : search
     }
 
     const getSort = () => {
@@ -176,7 +181,7 @@ const ArtistsPage: React.FunctionComponent = (props) => {
                     <div className="artists-row">
                         <div className="artist-search-container" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                             <input className="artist-search" type="search" spellCheck="false" value={searchQuery} onChange={(event) => setSearchQuery(event.target.value)} onKeyDown={(event) => event.key === "Enter" ? updateArtists() : null}/>
-                            <img className={!theme || theme === "purple" ? "artist-search-icon" : `artist-search-icon-${theme}`} src={getSearchIcon()} onClick={updateArtists}/>
+                            <img className="artist-search-icon" src={getSearchIcon()} onClick={updateArtists}/>
                         </div>
                         {getSortJSX()}
                         <div className={`artist-dropdown ${activeDropdown === "sort" ? "" : "hide-artist-dropdown"}`} 

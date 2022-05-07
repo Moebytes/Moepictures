@@ -9,6 +9,10 @@ import search from "../assets/purple/search.png"
 import searchMagenta from "../assets/magenta/search.png"
 import searchPurpleLight from "../assets/purple-light/search.png"
 import searchMagentaLight from "../assets/magenta-light/search.png"
+import searchIconHover from "../assets/purple/search-hover.png"
+import searchMagentaHover from "../assets/magenta/search-hover.png"
+import searchMagentaLightHover from "../assets/magenta-light/search-hover.png"
+import searchPurpleLightHover from "../assets/purple-light/search-hover.png"
 import sort from "../assets/purple/sort.png"
 import SeriesRow from "../components/SeriesRow"
 import sortMagenta from "../assets/magenta/sort.png"
@@ -35,6 +39,7 @@ const SeriesPage: React.FunctionComponent = (props) => {
     const [visibleSeries, setVisibleSeries] = useState([]) as any
     const [offset, setOffset] = useState(0)
     const [ended, setEnded] = useState(false)
+    const [getSearchIconHover, setSearchIconHover] = useState(false)
     const sortRef = useRef(null) as any
 
     const updateSeries = async () => {
@@ -118,11 +123,11 @@ const SeriesPage: React.FunctionComponent = (props) => {
     })
 
     const getSearchIcon = () => {
-        if (theme === "purple") return search
-        if (theme === "purple-light") return searchPurpleLight
-        if (theme === "magenta") return searchMagenta
-        if (theme === "magenta-light") return searchMagentaLight
-        return search
+        if (theme === "purple") return getSearchIconHover ? searchIconHover : search
+        if (theme === "purple-light") return getSearchIconHover ? searchPurpleLightHover : searchPurpleLight
+        if (theme === "magenta") return getSearchIconHover ? searchMagentaHover : searchMagenta
+        if (theme === "magenta-light") return getSearchIconHover ? searchMagentaLightHover : searchMagentaLight
+        return getSearchIconHover ? searchIconHover : search
     }
 
     const getSort = () => {
@@ -177,7 +182,7 @@ const SeriesPage: React.FunctionComponent = (props) => {
                     <div className="series-row">
                         <div className="series-search-container" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                             <input className="series-search" type="search" spellCheck="false" value={searchQuery} onChange={(event) => setSearchQuery(event.target.value)} onKeyDown={(event) => event.key === "Enter" ? updateSeries() : null}/>
-                            <img className={!theme || theme === "purple" ? "series-search-icon" : `series-search-icon-${theme}`} src={getSearchIcon()} onClick={updateSeries}/>
+                            <img className="series-search-icon" src={getSearchIcon()} onClick={updateSeries}/>
                         </div>
                         {getSortJSX()}
                         <div className={`series-dropdown ${activeDropdown === "sort" ? "" : "hide-series-dropdown"}`} 

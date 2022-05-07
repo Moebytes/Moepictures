@@ -7,21 +7,37 @@ import {HashLink as Link} from "react-router-hash-link"
 import favicon from "../assets/purple/favicon.png"
 import faviconMagenta from "../assets/magenta/favicon.png"
 import searchIcon from "../assets/purple/search.png"
-import searchImage from "../assets/purple/search-image.png"
 import searchMagenta from "../assets/magenta/search.png"
-import searchImageMagenta from "../assets/magenta/search-image.png"
-import searchPurpleLight from "../assets/purple-light/search.png"
-import searchImagePurpleLight from "../assets/purple-light/search-image.png"
 import searchMagentaLight from "../assets/magenta-light/search.png"
+import searchPurpleLight from "../assets/purple-light/search.png"
+import searchIconHover from "../assets/purple/search-hover.png"
+import searchMagentaHover from "../assets/magenta/search-hover.png"
+import searchMagentaLightHover from "../assets/magenta-light/search-hover.png"
+import searchPurpleLightHover from "../assets/purple-light/search-hover.png"
+import searchImage from "../assets/purple/search-image.png"
+import searchImageMagenta from "../assets/magenta/search-image.png"
+import searchImagePurpleLight from "../assets/purple-light/search-image.png"
 import searchImageMagentaLight from "../assets/magenta-light/search-image.png"
+import searchImageHover from "../assets/purple/search-image-hover.png"
+import searchImageMagentaHover from "../assets/magenta/search-image-hover.png"
+import searchImagePurpleLightHover from "../assets/purple-light/search-image-hover.png"
+import searchImageMagentaLightHover from "../assets/magenta-light/search-image-hover.png"
 import random from "../assets/purple/random.png"
 import randomMagenta from "../assets/magenta/random.png"
 import randomPurpleLight from "../assets/purple-light/random.png"
 import randomMagentaLight from "../assets/magenta-light/random.png"
+import randomHover from "../assets/purple/random-hover.png"
+import randomMagentaHover from "../assets/magenta/random-hover.png"
+import randomPurpleLightHover from "../assets/purple-light/random-hover.png"
+import randomMagentaLightHover from "../assets/magenta-light/random-hover.png"
 import randomMobile from "../assets/purple/random-mobile.png"
 import randomMobileMagenta from "../assets/magenta/random-mobile.png"
 import randomMobilePurpleLight from "../assets/purple-light/random-mobile.png"
 import randomMobileMagentaLight from "../assets/magenta-light/random-mobile.png"
+import randomMobileHover from "../assets/purple/random-mobile-hover.png"
+import randomMobileMagentaHover from "../assets/magenta/random-mobile-hover.png"
+import randomMobilePurpleLightHover from "../assets/purple-light/random-mobile-hover.png"
+import randomMobileMagentaLightHover from "../assets/magenta-light/random-mobile-hover.png"
 import terms from "../assets/purple/terms.png"
 import termsMagenta from "../assets/magenta/terms.png"
 import termsPurpleLight from "../assets/purple-light/terms.png"
@@ -93,6 +109,10 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
     const [uploaderRole, setUploaderRole] = useState("")
     const [updaterRole, setUpdaterRole] = useState("")
     const [suggestionsActive, setSuggestionsActive] = useState(false)
+    const [getSearchIconHover, setSearchIconHover] = useState(false)
+    const [getSearchImageIconHover, setSearchImageIconHover] = useState(false)
+    const [getRandomIconHover, setRandomIconHover] = useState(false)
+    const [getRandomMobileIconHover, setRandomMobileIconHover] = useState(false)
     const history = useHistory()
 
     const updateTags = async () => {
@@ -258,35 +278,35 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
     }, [hideSortbar, hideNavbar, hideTitlebar, mobile])
 
     const getSearchIcon = () => {
-        if (theme === "purple") return searchIcon
-        if (theme === "purple-light") return searchPurpleLight
-        if (theme === "magenta") return searchMagenta
-        if (theme === "magenta-light") return searchMagentaLight
-        return searchIcon
+        if (theme === "purple") return getSearchIconHover ? searchIconHover : searchIcon
+        if (theme === "purple-light") return getSearchIconHover ? searchPurpleLightHover : searchPurpleLight
+        if (theme === "magenta") return getSearchIconHover ? searchMagentaHover : searchMagenta
+        if (theme === "magenta-light") return getSearchIconHover ? searchMagentaLightHover : searchMagentaLight
+        return getSearchIconHover ? searchIconHover : searchIcon
     }
 
     const getSearchImageIcon = () => {
-        if (theme === "purple") return searchImage
-        if (theme === "purple-light") return searchImagePurpleLight
-        if (theme === "magenta") return searchImageMagenta
-        if (theme === "magenta-light") return searchImageMagentaLight
-        return searchImage
+        if (theme === "purple") return getSearchImageIconHover ? searchImageHover : searchImage
+        if (theme === "purple-light") return getSearchImageIconHover ? searchImagePurpleLightHover : searchImagePurpleLight
+        if (theme === "magenta") return getSearchImageIconHover ? searchImageMagentaHover : searchImageMagenta
+        if (theme === "magenta-light") return getSearchImageIconHover ? searchImageMagentaLightHover : searchImageMagentaLight
+        return getSearchImageIconHover ? searchImageHover : searchImage
     }
 
     const getRandomIcon = () => {
-        if (theme === "purple") return random
-        if (theme === "purple-light") return randomPurpleLight
-        if (theme === "magenta") return randomMagenta
-        if (theme === "magenta-light") return randomMagentaLight
-        return random
+        if (theme === "purple") return getRandomIconHover ? randomHover : random
+        if (theme === "purple-light") return getRandomIconHover ? randomPurpleLightHover : randomPurpleLight
+        if (theme === "magenta") return getRandomIconHover ? randomMagentaHover : randomMagenta
+        if (theme === "magenta-light") return getRandomIconHover ? randomMagentaLightHover : randomMagentaLight
+        return getRandomIconHover ? randomHover : random
     }
 
     const getRandomMobileIcon = () => {
-        if (theme === "purple") return randomMobile
-        if (theme === "purple-light") return randomMobilePurpleLight
-        if (theme === "magenta") return randomMobileMagenta
-        if (theme === "magenta-light") return randomMobileMagentaLight
-        return randomMobile
+        if (theme === "purple") return getRandomMobileIconHover ? randomMobileHover : randomMobile
+        if (theme === "purple-light") return getRandomMobileIconHover ? randomMobilePurpleLightHover : randomMobilePurpleLight
+        if (theme === "magenta") return getRandomMobileIconHover ? randomMobileMagentaHover : randomMobileMagenta
+        if (theme === "magenta-light") return getRandomMobileIconHover ? randomMobileMagentaLightHover : randomMobileMagentaLight
+        return getRandomMobileIconHover ? randomMobileHover : randomMobile
     }
 
     const getTermsIcon = () => {
@@ -510,12 +530,12 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
         <div className={`mobile-sidebar ${relative ? "mobile-sidebar-relative" : ""}`}>
             <div className="mobile-search-container">
                 <input className="mobile-search" type="search" spellCheck="false" value={search} onChange={(event) => setSearch(event.target.value)} onKeyDown={(event) => event.key === "Enter" ? triggerSearch() : null} onFocus={() => setSuggestionsActive(true)} onBlur={() => setSuggestionsActive(false)}/>
-                <img style={{height: "40px"}} className={!theme || theme === "purple" ? "search-icon" : `search-icon-${theme}`} src={getSearchIcon()} onClick={() => triggerSearch()}/>
+                <img style={{height: "40px"}} className="search-icon" src={getSearchIcon()} onClick={() => triggerSearch()}  onMouseEnter={() => setSearchIconHover(true)} onMouseLeave={() => setSearchIconHover(false)}/>
                 <label style={{display: "flex", width: "max-content", height: "max-content"}} htmlFor="image-search">
-                    <img style={{height: "40px"}} className={!theme || theme === "purple" ? "search-image-icon" : `search-image-icon-${theme}`} src={getSearchImageIcon()}/>
+                    <img style={{height: "40px"}} className="search-image-icon" src={getSearchImageIcon()} onMouseEnter={() => setSearchImageIconHover(true)} onMouseLeave={() => setSearchImageIconHover(false)}/>
                 </label>
                 <input id="image-search" type="file" onChange={(event) => imageSearch(event)}/>
-                <img style={{height: "40px"}} className={!theme || theme === "purple" ? "random-mobile" : `random-mobile-${theme}`} src={getRandomMobileIcon()} onClick={randomSearch}/>
+                <img style={{height: "40px"}} className="random-mobile" src={getRandomMobileIcon()} onClick={randomSearch} onMouseEnter={() => setRandomMobileIconHover(true)} onMouseLeave={() => setRandomMobileIconHover(false)}/>
             </div>
         </div>
         </>
@@ -556,14 +576,14 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
                 </div> : null}
                 <div className="search-container" onMouseEnter={() => setEnableDrag(false)}>
                     <input className="search" type="search" spellCheck="false" value={search} onChange={(event) => setSearch(event.target.value)} onKeyDown={(event) => event.key === "Enter" ? triggerSearch() : null} onFocus={() => setSuggestionsActive(true)} onBlur={() => setSuggestionsActive(false)}/>
-                    <img className={!theme || theme === "purple" ? "search-icon" : `search-icon-${theme}`} src={getSearchIcon()} onClick={() => triggerSearch()}/>
+                    <img className="search-icon" src={getSearchIcon()} onClick={() => triggerSearch()} onMouseEnter={() => setSearchIconHover(true)} onMouseLeave={() => setSearchIconHover(false)}/>
                     <label style={{display: "flex", width: "max-content", height: "max-content"}} htmlFor="image-search">
-                        <img className={!theme || theme === "purple" ? "search-image-icon" : `search-image-icon-${theme}`} src={getSearchImageIcon()}/>
+                        <img className="search-image-icon" src={getSearchImageIcon()} onMouseEnter={() => setSearchImageIconHover(true)} onMouseLeave={() => setSearchImageIconHover(false)}/>
                     </label>
                     <input id="image-search" type="file" onChange={(event) => imageSearch(event)}/>
                 </div>
                 <div className="random-container">
-                    <img className={!theme || theme === "purple" ? "random" : `random-${theme}`} src={getRandomIcon()} onClick={randomSearch}/>
+                    <img className="random" src={getRandomIcon()} onClick={randomSearch} onMouseEnter={() => setRandomIconHover(true)} onMouseLeave={() => setRandomIconHover(false)}/>
                 </div>
 
                 {props.artists ?

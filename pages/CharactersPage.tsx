@@ -9,6 +9,10 @@ import search from "../assets/purple/search.png"
 import searchMagenta from "../assets/magenta/search.png"
 import searchPurpleLight from "../assets/purple-light/search.png"
 import searchMagentaLight from "../assets/magenta-light/search.png"
+import searchIconHover from "../assets/purple/search-hover.png"
+import searchMagentaHover from "../assets/magenta/search-hover.png"
+import searchMagentaLightHover from "../assets/magenta-light/search-hover.png"
+import searchPurpleLightHover from "../assets/purple-light/search-hover.png"
 import sort from "../assets/purple/sort.png"
 import CharacterRow from "../components/CharacterRow"
 import sortMagenta from "../assets/magenta/sort.png"
@@ -35,6 +39,7 @@ const CharactersPage: React.FunctionComponent = (props) => {
     const [visibleCharacters, setVisibleCharacters] = useState([]) as any
     const [offset, setOffset] = useState(0)
     const [ended, setEnded] = useState(false)
+    const [getSearchIconHover, setSearchIconHover] = useState(false)
     const sortRef = useRef(null) as any
 
     const updateCharacters = async () => {
@@ -118,11 +123,11 @@ const CharactersPage: React.FunctionComponent = (props) => {
     })
 
     const getSearchIcon = () => {
-        if (theme === "purple") return search
-        if (theme === "purple-light") return searchPurpleLight
-        if (theme === "magenta") return searchMagenta
-        if (theme === "magenta-light") return searchMagentaLight
-        return search
+        if (theme === "purple") return getSearchIconHover ? searchIconHover : search
+        if (theme === "purple-light") return getSearchIconHover ? searchPurpleLightHover : searchPurpleLight
+        if (theme === "magenta") return getSearchIconHover ? searchMagentaHover : searchMagenta
+        if (theme === "magenta-light") return getSearchIconHover ? searchMagentaLightHover : searchMagentaLight
+        return getSearchIconHover ? searchIconHover : search
     }
 
     const getSort = () => {
@@ -177,7 +182,7 @@ const CharactersPage: React.FunctionComponent = (props) => {
                     <div className="characters-row">
                         <div className="character-search-container" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                             <input className="character-search" type="search" spellCheck="false" value={searchQuery} onChange={(event) => setSearchQuery(event.target.value)} onKeyDown={(event) => event.key === "Enter" ? updateCharacters() : null}/>
-                            <img className={!theme || theme === "purple" ? "character-search-icon" : `character-search-icon-${theme}`} src={getSearchIcon()} onClick={updateCharacters}/>
+                            <img className="character-search-icon" src={getSearchIcon()} onClick={updateCharacters}/>
                         </div>
                         {getSortJSX()}
                         <div className={`character-dropdown ${activeDropdown === "sort" ? "" : "hide-character-dropdown"}`} 
