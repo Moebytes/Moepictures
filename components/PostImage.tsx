@@ -1,7 +1,7 @@
 import React, {useContext, useEffect, useRef, useState, useReducer} from "react"
 import {ThemeContext, EnableDragContext, BrightnessContext, ContrastContext, HueContext, SaturationContext, LightnessContext,
 BlurContext, SharpenContext, PixelateContext, DownloadFlagContext, DownloadURLsContext, DisableZoomContext, SpeedContext,
-ReverseContext, MobileContext} from "../Context"
+ReverseContext, MobileContext, CropEnabledContext} from "../Context"
 import {HashLink as Link} from "react-router-hash-link"
 import {createFFmpeg, fetchFile} from "@ffmpeg/ffmpeg"
 import functions from "../structures/Functions"
@@ -40,6 +40,7 @@ import {TransformWrapper, TransformComponent} from "react-zoom-pan-pinch"
 import path from "path"
 import "./styles/postimage.less"
 import mime from "mime-types"
+import ReactCrop from "react-image-crop"
 const ffmpeg = createFFmpeg()
 
 interface Props {
@@ -78,7 +79,7 @@ const PostImage: React.FunctionComponent<Props> = (props) => {
     const gifLightnessRef = useRef<HTMLImageElement>(null)
     const videoOverlayRef = useRef<HTMLCanvasElement>(null)
     const videoLightnessRef = useRef<HTMLImageElement>(null)
-    const ref = useRef<HTMLImageElement>(null)
+    const ref = useRef<any>(null)
     const gifRef = useRef<HTMLCanvasElement>(null)
     const gifControls = useRef<HTMLDivElement>(null)
     const gifSpeedRef = useRef(null) as any
@@ -119,6 +120,9 @@ const PostImage: React.FunctionComponent<Props> = (props) => {
     const [dragging, setDragging] = useState(false)
     const [encodingOverlay, setEncodingOverlay] = useState(false)
     const [seekTo, setSeekTo] = useState(null) as any
+    const initialCropState = {unit: "%", x: 0, y: 0, width: 100, height: 100, aspect: undefined}
+    const [cropState, setCropState] = useState(initialCropState)
+    const {cropEnabled, setCropEnabled} = useContext(CropEnabledContext)
 
     useEffect(() => {
         setVideoLoaded(false)
@@ -139,6 +143,23 @@ const PostImage: React.FunctionComponent<Props> = (props) => {
         if (videoRef.current) videoRef.current.style.opacity = "1"
         if (mobile) fetchVideo()
     }, [props.img])
+
+    useEffect(() => {
+        if (cropEnabled) {
+            const selection = document.querySelector(".ReactCrop__crop-selection") as HTMLDivElement
+            if (!selection?.style) return
+            selection.style.opacity = "1"
+            setCropState((prev) => {
+                return {...prev, x: 0, y: 0, width: 100, height: 100}
+            })
+            setCropEnabled(true)
+        } else {
+            const selection = document.querySelector(".ReactCrop__crop-selection") as HTMLDivElement
+            if (!selection?.style) return
+            selection.style.opacity = "0"
+            setCropEnabled(false)
+        }
+    }, [cropEnabled])
 
     useEffect(() => {
         if (gifSliderRef.current) gifSliderRef.current.resize()
@@ -760,7 +781,7 @@ const PostImage: React.FunctionComponent<Props> = (props) => {
         }
     }, [pixelate])
 
-    const onLoad = async (event: any) => {
+    const onLoad = (event: any) => {
         if (functions.isVideo(props.img)) {
             setImageWidth(event.target.clientWidth)
             setImageHeight(event.target.clientHeight)
@@ -1321,7 +1342,9 @@ const PostImage: React.FunctionComponent<Props> = (props) => {
                             <img className="post-lightness-overlay" ref={lightnessRef} src={props.img}/>
                             <img className="post-sharpen-overlay" ref={overlayRef} src={props.img}/>
                             <canvas className="post-pixelate-canvas" ref={pixelateRef}></canvas>
-                            <img className="post-image" ref={ref} src={props.img} onLoad={(event) => onLoad(event)}/>
+                            <ReactCrop crop={cropState as any} onChange={(crop: any, percentCrop: any) => setCropState(percentCrop as any)} disabled={!cropEnabled} keepSelection={true}>
+                                <img className="post-image" ref={ref} src={props.img} onLoad={(event) => onLoad(event)}/>
+                            </ReactCrop>
                         </TransformComponent>
                         </TransformWrapper>
                     </div>

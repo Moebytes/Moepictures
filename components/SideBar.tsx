@@ -2,7 +2,7 @@ import React, {useContext, useEffect, useState, useReducer} from "react"
 import {useHistory} from "react-router-dom"
 import {ThemeContext, HideSidebarContext, HideNavbarContext, HideSortbarContext, EnableDragContext, MobileContext, UnverifiedPostsContext,
 RelativeContext, HideTitlebarContext, SidebarHoverContext, SearchContext, SearchFlagContext, PostsContext, ShowDeletePostDialogContext,
-TagsContext, RandomFlagContext, ImageSearchFlagContext, SidebarTextContext, SessionContext} from "../Context"
+TagsContext, RandomFlagContext, ImageSearchFlagContext, SidebarTextContext, SessionContext, CropEnabledContext} from "../Context"
 import {HashLink as Link} from "react-router-hash-link"
 import favicon from "../assets/purple/favicon.png"
 import faviconMagenta from "../assets/magenta/favicon.png"
@@ -113,6 +113,7 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
     const [getSearchImageIconHover, setSearchImageIconHover] = useState(false)
     const [getRandomIconHover, setRandomIconHover] = useState(false)
     const [getRandomMobileIconHover, setRandomMobileIconHover] = useState(false)
+    const {cropEnabled, setCropEnabled} = useContext(CropEnabledContext)
     const history = useHistory()
 
     const updateTags = async () => {
@@ -524,6 +525,11 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
         modNext()
     }
 
+    const triggerSetAvatar = () => {
+        window.scrollTo(0, 0)
+        setCropEnabled(true)
+    }
+
     if (mobile) return (
         <>
         <SearchSuggestions active={suggestionsActive}/>
@@ -689,12 +695,13 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
 
                 {props.post && session.username ? 
                     <div className="sidebar-subcontainer">
-                        {/* <div className="sidebar-row">
-                            <span className="tag-hover">
+                        <div className="sidebar-row">
+                            <span className="tag-hover" onClick={triggerSetAvatar}>
                                 <img className="sidebar-icon" src={getSetAvatar()}/>
                                 <span className="tag">Set Avatar</span>
                             </span>
                         </div>
+                        {/* 
                         <div className="sidebar-row">
                             <span className="tag-hover">
                                 <img className="sidebar-icon" src={getAddTranslation()}/>
@@ -745,7 +752,7 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
             </div>
 
             <div className="sidebar-footer">
-                    <span className="sidebar-footer-text">©{new Date().getFullYear()} Pripy</span>
+                    <span className="sidebar-footer-text">©{new Date().getFullYear()} Tenpi</span>
                     <Link to="/terms">
                         <img className="sidebar-footer-icon" src={getTermsIcon()}/>
                     </Link>
