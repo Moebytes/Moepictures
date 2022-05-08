@@ -181,7 +181,7 @@ const ArtistsPage: React.FunctionComponent = (props) => {
                     <div className="artists-row">
                         <div className="artist-search-container" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                             <input className="artist-search" type="search" spellCheck="false" value={searchQuery} onChange={(event) => setSearchQuery(event.target.value)} onKeyDown={(event) => event.key === "Enter" ? updateArtists() : null}/>
-                            <img className="artist-search-icon" src={getSearchIcon()} onClick={updateArtists}/>
+                            <img className="artist-search-icon" src={getSearchIcon()} onClick={updateArtists} onMouseEnter={() => setSearchIconHover(true)} onMouseLeave={() => setSearchIconHover(false)}/>
                         </div>
                         {getSortJSX()}
                         <div className={`artist-dropdown ${activeDropdown === "sort" ? "" : "hide-artist-dropdown"}`} 

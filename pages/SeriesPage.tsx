@@ -182,7 +182,7 @@ const SeriesPage: React.FunctionComponent = (props) => {
                     <div className="series-row">
                         <div className="series-search-container" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                             <input className="series-search" type="search" spellCheck="false" value={searchQuery} onChange={(event) => setSearchQuery(event.target.value)} onKeyDown={(event) => event.key === "Enter" ? updateSeries() : null}/>
-                            <img className="series-search-icon" src={getSearchIcon()} onClick={updateSeries}/>
+                            <img className="series-search-icon" src={getSearchIcon()} onClick={updateSeries} onMouseEnter={() => setSearchIconHover(true)} onMouseLeave={() => setSearchIconHover(false)}/>
                         </div>
                         {getSortJSX()}
                         <div className={`series-dropdown ${activeDropdown === "sort" ? "" : "hide-series-dropdown"}`} 

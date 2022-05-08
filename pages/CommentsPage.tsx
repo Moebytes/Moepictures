@@ -197,7 +197,7 @@ const CommentsPage: React.FunctionComponent = (props) => {
                     <div className="comments-row">
                         <div className="comment-search-container" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                             <input className="comment-search" type="search" spellCheck="false" value={searchQuery} onChange={(event) => setSearchQuery(event.target.value)} onKeyDown={(event) => event.key === "Enter" ? updateComments() : null}/>
-                            <img className="comment-search-icon" src={getSearchIcon()} onClick={() => updateComments()}/>
+                            <img className="comment-search-icon" src={getSearchIcon()} onClick={() => updateComments()} onMouseEnter={() => setSearchIconHover(true)} onMouseLeave={() => setSearchIconHover(false)}/>
                         </div>
                         {getSortJSX()}
                         <div className={`comment-dropdown ${activeDropdown === "sort" ? "" : "hide-comment-dropdown"}`} 

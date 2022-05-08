@@ -182,7 +182,7 @@ const CharactersPage: React.FunctionComponent = (props) => {
                     <div className="characters-row">
                         <div className="character-search-container" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                             <input className="character-search" type="search" spellCheck="false" value={searchQuery} onChange={(event) => setSearchQuery(event.target.value)} onKeyDown={(event) => event.key === "Enter" ? updateCharacters() : null}/>
-                            <img className="character-search-icon" src={getSearchIcon()} onClick={updateCharacters}/>
+                            <img className="character-search-icon" src={getSearchIcon()} onClick={updateCharacters} onMouseEnter={() => setSearchIconHover(true)} onMouseLeave={() => setSearchIconHover(false)}/>
                         </div>
                         {getSortJSX()}
                         <div className={`character-dropdown ${activeDropdown === "sort" ? "" : "hide-character-dropdown"}`} 

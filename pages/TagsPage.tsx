@@ -194,7 +194,7 @@ const TagsPage: React.FunctionComponent = (props) => {
                     <div className="tags-row">
                         <div className="tag-search-container" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                             <input className="tag-search" type="search" spellCheck="false" value={searchQuery} onChange={(event) => setSearchQuery(event.target.value)} onKeyDown={(event) => event.key === "Enter" ? updateTags() : null}/>
-                            <img className="tag-search-icon" src={getSearchIcon()} onClick={updateTags}/>
+                            <img className="tag-search-icon" src={getSearchIcon()} onClick={updateTags} onMouseEnter={() => setSearchIconHover(true)} onMouseLeave={() => setSearchIconHover(false)}/>
                         </div>
                         {getSortJSX()}
                         <div className={`tag-dropdown ${activeDropdown === "sort" ? "" : "hide-tag-dropdown"}`} 
