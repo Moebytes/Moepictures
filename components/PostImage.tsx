@@ -1342,9 +1342,7 @@ const PostImage: React.FunctionComponent<Props> = (props) => {
                             <img className="post-lightness-overlay" ref={lightnessRef} src={props.img}/>
                             <img className="post-sharpen-overlay" ref={overlayRef} src={props.img}/>
                             <canvas className="post-pixelate-canvas" ref={pixelateRef}></canvas>
-                            <ReactCrop crop={cropState as any} onChange={(crop: any, percentCrop: any) => setCropState(percentCrop as any)} disabled={!cropEnabled} keepSelection={true}>
-                                <img className="post-image" ref={ref} src={props.img} onLoad={(event) => onLoad(event)}/>
-                            </ReactCrop>
+                            <img className="post-image" ref={ref} src={props.img} onLoad={(event) => onLoad(event)}/>
                         </TransformComponent>
                         </TransformWrapper>
                     </div>

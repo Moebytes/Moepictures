@@ -695,13 +695,12 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
 
                 {props.post && session.username ? 
                     <div className="sidebar-subcontainer">
-                        <div className="sidebar-row">
+                        {/* <div className="sidebar-row">
                             <span className="tag-hover" onClick={triggerSetAvatar}>
                                 <img className="sidebar-icon" src={getSetAvatar()}/>
                                 <span className="tag">Set Avatar</span>
                             </span>
                         </div>
-                        {/* 
                         <div className="sidebar-row">
                             <span className="tag-hover">
                                 <img className="sidebar-icon" src={getAddTranslation()}/>
