@@ -78,7 +78,8 @@ app.use(session({
     expireColumnName: "expires"
   }),
   secret: process.env.COOKIE_SECRET!,
-  cookie: {maxAge: 1000 * 60 * 60 * 24},
+  cookie: {maxAge: 1000 * 60 * 60 * 24 * 30},
+  rolling: true,
   resave: false,
   saveUninitialized: false
 }))
@@ -128,8 +129,7 @@ for (let i = 0; i < folders.length; i++) {
           "Content-Length": end - start + 1
         })
         const stream = Readable.from(body.slice(start, end + 1))
-        stream.pipe(res)
-        return
+        return stream.pipe(res)
       }
       res.setHeader("Content-Length", contentLength)
       res.status(200).end(body)
