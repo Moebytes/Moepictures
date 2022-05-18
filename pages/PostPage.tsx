@@ -22,6 +22,7 @@ import MobileInfo from "../components/MobileInfo"
 import {HideNavbarContext, HideSidebarContext, RelativeContext, DownloadFlagContext, DownloadURLsContext, HideTitlebarContext, MobileContext,
 PostsContext, TagsContext, HeaderTextContext, PostFlagContext, RedirectContext, SidebarTextContext, SessionContext, EnableDragContext} from "../Context"
 import axios from "axios"
+import permissions from "../structures/Permissions"
 import "./styles/postpage.less"
 
 interface Props {
@@ -96,6 +97,11 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
             setRedirect(`/post/${postID}`)
             history.push("/login")
             setSidebarText("Login required.")
+        }
+        if (post.restrict === "explicit") {
+            if (!permissions.isAdmin(session)) {
+                history.push("/403")
+            }
         }
     }, [session, post])
 
@@ -237,10 +243,7 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
                     {post ? <>
                     <PostImage img={image} comicPages={post.type === "comic" ? images : null}/>
                     <PostImageOptions img={image} post={post} comicPages={post.type === "comic" ? images : null} download={download} next={next} previous={previous}/>
-                    </> : <>
-                    <PostImage img={image}/>
-                    <PostImageOptions img={image} download={download} next={next} previous={previous}/>
-                    </>}
+                    </> : null}
                     {mobile && post && tagCategories ? <MobileInfo post={post} artists={tagCategories.artists} characters={tagCategories.characters} series={tagCategories.series} tags={tagCategories.tags}/> : null}
                     {parentPost ? <Parent post={parentPost}/>: null}
                     {thirdPartyPosts.length ? <ThirdParty posts={thirdPartyPosts}/>: null}
