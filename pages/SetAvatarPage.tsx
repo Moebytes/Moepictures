@@ -135,15 +135,10 @@ const SetAvatarPage: React.FunctionComponent<Props> = (props) => {
     }, [postFlag])
 
     useEffect(() => {
-        if (!previewRef.current || !ref.current) return 
+        if (!previewRef.current || !ref.current) return
         const image = ref.current
         const canvas = previewRef.current
-        const ctx = canvas.getContext("2d")
-        if (!ctx) return
-        canvas.width = Math.floor(pixelCrop.width)
-        canvas.height = Math.floor(pixelCrop.height)
-        ctx.imageSmoothingQuality = "high"
-        ctx.drawImage(image, pixelCrop.x, pixelCrop.y, pixelCrop.width, pixelCrop.height, 0, 0, canvas.width, canvas.height)
+        drawCanvas(image, canvas, pixelCrop)
     }, [pixelCrop])
 
     const onImageLoad = (event: React.SyntheticEvent<HTMLImageElement>) => {
@@ -157,6 +152,25 @@ const SetAvatarPage: React.FunctionComponent<Props> = (props) => {
         setPixelCrop({unit: "px", x, y, width: pixelWidth, height: pixelHeight, aspect: 1})
     }
 
+    const drawCanvas = (image: HTMLImageElement, canvas: HTMLCanvasElement, crop: any)  => {
+        const ctx = canvas.getContext("2d")
+        if (!ctx) return
+        const scaleX = image.naturalWidth / image.width
+        const scaleY = image.naturalHeight / image.height
+        const pixelRatio = window.devicePixelRatio
+        canvas.width = Math.floor(crop.width * scaleX * pixelRatio)
+        canvas.height = Math.floor(crop.height * scaleY * pixelRatio)
+        ctx.scale(pixelRatio, pixelRatio)
+        ctx.imageSmoothingQuality = "high"
+        const cropX = crop.x * scaleX
+        const cropY = crop.y * scaleY
+        ctx.save()
+        ctx.translate(-cropX, -cropY)
+        ctx.drawImage(image, 0, 0, image.naturalWidth, image.naturalHeight, 0, 0, image.naturalWidth, image.naturalHeight)
+        ctx.restore()
+    }
+      
+
     const setAvatar = async () => {
         if (!previewRef.current) return
         const url = previewRef.current.toDataURL()
@@ -169,12 +183,12 @@ const SetAvatarPage: React.FunctionComponent<Props> = (props) => {
             for (let i = 0; i < gifData.length; i++) {
                 const frame = gifData[i].frame as HTMLCanvasElement
                 const canvas = document.createElement("canvas")
-                const ctx = canvas.getContext("2d")
-                if (!ctx) continue
-                canvas.width = Math.floor(pixelCrop.width)
-                canvas.height = Math.floor(pixelCrop.height)
-                ctx.imageSmoothingQuality = "high"
-                ctx.drawImage(frame, pixelCrop.x, pixelCrop.y, pixelCrop.width, pixelCrop.height, 0, 0, canvas.width, canvas.height)
+                const image = document.createElement("img")
+                image.src = frame.toDataURL()
+                await new Promise<void>((resolve) => {
+                    image.onload = () => resolve()
+                })
+                drawCanvas(image, canvas, pixelCrop)
                 const cropped = await functions.crop(canvas.toDataURL(), 1, true)
                 if (!firstURL) firstURL = await functions.crop(canvas.toDataURL(), 1)
                 frameArray.push(cropped)

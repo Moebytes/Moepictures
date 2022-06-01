@@ -359,6 +359,11 @@ const MobileInfo: React.FunctionComponent<Props> = (props) => {
         modNext()
     }
 
+    const triggerSetAvatar = () => {
+        window.scrollTo(0, 0)
+        history.push(`/set-avatar/${props.post.postID}`)
+    }
+
     const generateUsernameJSX = (type?: string) => {
         let username = type === "uploader" ? props.post.uploader : props.post.updater 
         const role = type === "uploader" ? uploaderRole : updaterRole
@@ -495,12 +500,12 @@ const MobileInfo: React.FunctionComponent<Props> = (props) => {
 
                 {props.post && session.username ? 
                     <div className="mobileinfo-subcontainer-column">
-                        {/* <div className="mobileinfo-row">
-                            <span className="tag-hover">
+                        <div className="mobileinfo-row">
+                            <span className="tag-hover" onClick={triggerSetAvatar}>
                                 <img className="mobileinfo-icon" src={getSetAvatar()}/>
                                 <span className="tag">Set Avatar</span>
                             </span>
-                        </div>
+                        </div>{/* 
                         <div className="mobileinfo-row">
                             <span className="tag-hover">
                                 <img className="mobileinfo-icon" src={getAddTranslation()}/>

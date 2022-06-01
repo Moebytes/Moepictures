@@ -35,6 +35,7 @@
     position: relative;
     width: max-content;
     height: max-content;
+    min-width: 350px;
     max-width: calc(100vw - 230px - 70px - 300px);
     max-height: calc(100vh - 35px - 77px);
 }
@@ -47,6 +48,8 @@
     margin-bottom: 0px;
     width: auto;
     height: auto;
+    max-width: calc(100vw - 230px - 70px - 300px);
+    max-height: calc(100vh - 35px - 77px);
 }
 
 .ReactCrop__crop-selection {
@@ -92,4 +95,19 @@
 .set-avatar-preview {
     width: auto;
     height: 200px;
+}
+
+@media screen and (max-width: 500px) {
+    .set-avatar-container {
+        flex-direction: column;
+    }
+
+    .set-avatar-preview-container {
+        margin-top: 15px;
+    }
+
+    .set-avatar-preview {
+        width: 200px;
+        height: 200px;
+    }
 }
