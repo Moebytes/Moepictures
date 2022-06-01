@@ -90,7 +90,7 @@ const HelpPage: React.FunctionComponent = (props) => {
                         a verified email address. An account lets you view questionable posts, upload, favorite, 
                         comment, rate cuteness and edit posts and tags. <br/><br/> 
                         
-                        You can change your avatar, bio, and account settings in your profile page. Only anime avatars are allowed. <br/><br/>
+                        You can change your avatar by clicking on "Set Avatar" in any post page. Only anime avatars are allowed, so you can only use images from the site.<br/><br/>
 
                         For greater account security, you can enable 2-factor authentication. This will prompt you for a time-sensitive 2fa token in addition to your password while logging in.<br/><br/>
 

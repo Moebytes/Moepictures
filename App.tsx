@@ -38,6 +38,7 @@ import functions from "./structures/Functions"
 import localforage from "localforage"
 import ModQueuePage from "./pages/ModQueuePage"
 import EditUnverifiedPostPage from "./pages/EditUnverifiedPostPage"
+import SetAvatarPage from "./pages/SetAvatarPage"
 import axios from "axios"
 import "./index.less"
 
@@ -251,6 +252,7 @@ const App: React.FunctionComponent = (props) => {
                         <Route exact path="/unverified/post/:id" render={(props) => <UnverifiedPostPage {...props}/>}></Route>
                         <Route exact path="/edit-post/:id" render={(props) => <EditPostPage {...props}/>}></Route>
                         <Route exact path="/unverified/edit-post/:id" render={(props) => <EditUnverifiedPostPage {...props}/>}></Route>
+                        <Route exact path="/set-avatar/:id" render={(props) => <SetAvatarPage {...props}/>}></Route>
                         <Route exact path="/help"><HelpPage/></Route>
                         <Route exact path="/change-username"><ChangeUsernamePage/></Route>
                         <Route exact path="/change-email"><ChangeEmailPage/></Route>

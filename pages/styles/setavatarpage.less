@@ -1,0 +1,95 @@
+@import "../../index.less";
+@import "../../components/styles/form.less";
+
+.post-container {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    height: 100%;
+    .zags-background();
+}
+
+.set-avatar-title {
+    .form-title();
+}
+
+.set-avatar {
+    display: flex;
+    flex-direction: column;
+    margin-left: 20px;
+    margin-right: 20px;
+    margin-top: 10px;
+    margin-bottom: 10px;
+}
+
+.set-avatar-crop > div {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    height: 100%;
+}
+
+.set-avatar-crop {
+    cursor: inherit;
+    position: relative;
+    width: max-content;
+    height: max-content;
+    max-width: calc(100vw - 230px - 70px - 300px);
+    max-height: calc(100vh - 35px - 77px);
+}
+
+.set-avatar-image {
+    position: relative;
+    display: flex;
+    margin: auto;
+    margin-top: 0px;
+    margin-bottom: 0px;
+    width: auto;
+    height: auto;
+}
+
+.ReactCrop__crop-selection {
+    position: absolute;
+    //border: 2px solid;
+    //border-image-source: url("../../assets/purple/cropBorder.gif");
+    //border-image-slice: 1;
+    //border-image-repeat: repeat;
+}
+
+/*
+.ReactCrop__drag-handle::after {
+    width: 7px;
+    height: 7px;
+    background-color: #091a36;
+    border: 1px solid #4284ff;
+}*/
+
+.set-avatar-container {
+    display: flex;
+    flex-direction: row;
+    width: 100%;
+    height: 100%;
+}
+
+.set-avatar-button-container {
+    .form-button-container();
+    justify-content: space-around;
+}
+
+.set-avatar-button {
+    .form-button();
+    margin-top: 5px;
+    font-size: 19px;
+}
+
+.set-avatar-preview-container {
+    display: flex;
+    flex-direction: column;
+    margin-left: 10px;
+}
+
+.set-avatar-preview {
+    width: auto;
+    height: 200px;
+}

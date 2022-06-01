@@ -19,6 +19,7 @@ import Carousel from "../components/Carousel"
 import DeleteAccountDialog from "../dialogs/DeleteAccountDialog"
 import adminLabel from "../assets/purple/admin-label.png"
 import modLabel from "../assets/purple/mod-label.png"
+import permissions from "../structures/Permissions"
 import "./styles/userprofilepage.less"
 import axios from "axios"
 
@@ -250,10 +251,12 @@ const UserProfilePage: React.FunctionComponent = (props) => {
                     <div className="userprofile-top-container">
                         <img className="userprofile-img" src={userImg}/>
                         {generateUsernameJSX()}
+                        {permissions.isStaff(session) && <>
                         <label htmlFor="upload-pfp" className="uploadpfp-label">
                             <img className="userprofile-uploadimg" src={getUploadPfp()}/>
                         </label>
                         <input id="upload-pfp" type="file" onChange={(event) => uploadPfp(event)}/>
+                        </>}
                     </div>
                     <div className="userprofile-row">
                         <span className="userprofile-text">Email: {session.email}</span>

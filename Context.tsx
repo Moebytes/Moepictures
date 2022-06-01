@@ -73,7 +73,6 @@ export const ReportCommentIDContext = React.createContext<any>(null)
 export const VisiblePostsContext = React.createContext<any>(null)
 export const ScrollYContext = React.createContext<any>(null)
 export const PostFlagContext = React.createContext<any>(null)
-export const CropEnabledContext = React.createContext<any>(null)
 
 const Context: React.FunctionComponent = (props) => {
     const [brightness, setBrightness] = useState(100)
@@ -136,10 +135,8 @@ const Context: React.FunctionComponent = (props) => {
     const [visiblePosts, setVisiblePosts] = useState([])
     const [scrollY, setScrollY] = useState(null)
     const [postFlag, setPostFlag] = useState(false)
-    const [cropEnabled, setCropEnabled] = useState(false)
 return (
     <>
-        <CropEnabledContext.Provider value={{cropEnabled, setCropEnabled}}>
         <PostFlagContext.Provider value={{postFlag, setPostFlag}}>
         <ScrollYContext.Provider value={{scrollY, setScrollY}}>
         <VisiblePostsContext.Provider value={{visiblePosts, setVisiblePosts}}>
@@ -261,7 +258,6 @@ return (
         </VisiblePostsContext.Provider>
         </ScrollYContext.Provider>
         </PostFlagContext.Provider>
-        </CropEnabledContext.Provider>
     </>
     )
 }

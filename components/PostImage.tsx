@@ -1,7 +1,7 @@
 import React, {useContext, useEffect, useRef, useState, useReducer} from "react"
 import {ThemeContext, EnableDragContext, BrightnessContext, ContrastContext, HueContext, SaturationContext, LightnessContext,
 BlurContext, SharpenContext, PixelateContext, DownloadFlagContext, DownloadURLsContext, DisableZoomContext, SpeedContext,
-ReverseContext, MobileContext, CropEnabledContext} from "../Context"
+ReverseContext, MobileContext} from "../Context"
 import {HashLink as Link} from "react-router-hash-link"
 import {createFFmpeg, fetchFile} from "@ffmpeg/ffmpeg"
 import functions from "../structures/Functions"
@@ -40,7 +40,6 @@ import {TransformWrapper, TransformComponent} from "react-zoom-pan-pinch"
 import path from "path"
 import "./styles/postimage.less"
 import mime from "mime-types"
-import ReactCrop from "react-image-crop"
 const ffmpeg = createFFmpeg()
 
 interface Props {
@@ -122,7 +121,6 @@ const PostImage: React.FunctionComponent<Props> = (props) => {
     const [seekTo, setSeekTo] = useState(null) as any
     const initialCropState = {unit: "%", x: 0, y: 0, width: 100, height: 100, aspect: undefined}
     const [cropState, setCropState] = useState(initialCropState)
-    const {cropEnabled, setCropEnabled} = useContext(CropEnabledContext)
 
     useEffect(() => {
         setVideoLoaded(false)
@@ -143,23 +141,6 @@ const PostImage: React.FunctionComponent<Props> = (props) => {
         if (videoRef.current) videoRef.current.style.opacity = "1"
         if (mobile) fetchVideo()
     }, [props.img])
-
-    useEffect(() => {
-        if (cropEnabled) {
-            const selection = document.querySelector(".ReactCrop__crop-selection") as HTMLDivElement
-            if (!selection?.style) return
-            selection.style.opacity = "1"
-            setCropState((prev) => {
-                return {...prev, x: 0, y: 0, width: 100, height: 100}
-            })
-            setCropEnabled(true)
-        } else {
-            const selection = document.querySelector(".ReactCrop__crop-selection") as HTMLDivElement
-            if (!selection?.style) return
-            selection.style.opacity = "0"
-            setCropEnabled(false)
-        }
-    }, [cropEnabled])
 
     useEffect(() => {
         if (gifSliderRef.current) gifSliderRef.current.resize()
