@@ -237,20 +237,25 @@ const MobileInfo: React.FunctionComponent<Props> = (props) => {
     const generateCharactersJSX = () => {
         let jsx = [] as any
         for (let i = 0; i < props.characters.length; i++) {
+            const link = functions.getTagLink("character", props.characters[i].image)
             if (!props.characters[i]) break
             const tagClick = () => {
                 history.push(`/posts`)
                 setSearch(props.characters[i].tag)
                 setSearchFlag(true)
             }
-            jsx.push(
+            jsx.push(<>
+                {link ?
+                <div className="mobileinfo-row">
+                    <img className="mobileinfo-img" src={link}/>
+                </div> : null}
                 <div className="mobileinfo-row">
                     <span className="tag-hover" onClick={() => tagClick()}>
                         <span className="tag">{props.characters[i].tag.replaceAll("-", " ")}</span>
                         <span className="tag-count">{props.characters[i].count}</span>
                     </span>
                 </div>
-                )
+                </>)
         }
         return jsx
     }
@@ -258,20 +263,25 @@ const MobileInfo: React.FunctionComponent<Props> = (props) => {
     const generateSeriesJSX = () => {
         let jsx = [] as any
         for (let i = 0; i < props.series.length; i++) {
+            const link = functions.getTagLink("series", props.series[i].image)
             if (!props.series[i]) break
             const tagClick = () => {
                 history.push(`/posts`)
                 setSearch(props.series[i].tag)
                 setSearchFlag(true)
             }
-            jsx.push(
+            jsx.push(<>
+                {link ?
+                <div className="mobileinfo-row">
+                    <img className="mobileinfo-img" src={link}/>
+                </div> : null}
                 <div className="mobileinfo-row">
                     <span className="tag-hover" onClick={() => tagClick()}>
                         <span className="tag">{props.series[i].tag.replaceAll("-", " ")}</span>
                         <span className="tag-count">{props.series[i].count}</span>
                     </span>
                 </div>
-                )
+                </>)
         }
         return jsx
     }
@@ -420,7 +430,7 @@ const MobileInfo: React.FunctionComponent<Props> = (props) => {
                     <div className="mobileinfo-title-container">
                         <span className="mobileinfo-title">{props.characters.length > 1 ? "Characters" : "Character"}</span>
                     </div>
-                    <div className="mobileinfo-subcontainer">
+                    <div className="mobileinfo-subcontainer-column">
                         {generateCharactersJSX()}
                     </div> </>
                 : null}
@@ -429,7 +439,7 @@ const MobileInfo: React.FunctionComponent<Props> = (props) => {
                     <div className="mobileinfo-title-container">
                             <span className="mobileinfo-title">Series</span>
                         </div>
-                    <div className="mobileinfo-subcontainer">
+                    <div className="mobileinfo-subcontainer-column">
                         {generateSeriesJSX()}
                     </div> </>
                 : null}
@@ -448,9 +458,9 @@ const MobileInfo: React.FunctionComponent<Props> = (props) => {
                         <span className="mobileinfo-title">Details</span>
                     </div>
                     <div className="mobileinfo-subcontainer-column">
-                        {/* <div className="mobileinfo-row">
-                                <img className="mobileinfo-img" src={userImage}/>
-                        </div> */}
+                        <div className="mobileinfo-row">
+                                <img className="mobileinfo-img" src={uploaderImage}/>
+                        </div>
                         <div className="mobileinfo-sub-row">
                             <div className="mobileinfo-row">
                                 <span className="tag">Uploader:</span>

@@ -129,8 +129,13 @@ const GridImage: React.FunctionComponent<Props> = (props) => {
 
     const getVideoData = async () => {
         if (!videoRef.current) return
-        if (functions.isMP4(props.img)) {
-            const frames = await functions.extractMP4Frames(props.img)
+        if (functions.isVideo(props.img) && !mobile) {
+            let frames = null as any
+            if (functions.isMP4(props.img)) {
+                frames = await functions.extractMP4Frames(props.img)
+            } else if (functions.isWebM(props.img)) {
+                frames = await functions.extractWebMFrames(props.img)
+            }
             let canvasFrames = [] as any 
             for (let i = 0; i < frames.length; i++) {
                 const canvas = document.createElement("canvas")
@@ -301,7 +306,7 @@ const GridImage: React.FunctionComponent<Props> = (props) => {
     }, [imageLoaded, gifData, videoData, sharpen, pixelate, square, imageSize, reverse, speed])
 
     const resizeOverlay = () => {
-        if (functions.isVideo(props.img)) {
+        if (functions.isVideo(props.img) && !mobile) {
             if (!videoRef.current || !videoOverlayRef.current || !pixelateRef.current) return
             if (videoRef.current.clientWidth === 0) return
             videoOverlayRef.current.width = videoRef.current.clientWidth
@@ -316,7 +321,7 @@ const GridImage: React.FunctionComponent<Props> = (props) => {
     }
 
     useEffect(() => {
-        const element = functions.isVideo(props.img) ? videoRef.current! : ref.current!
+        const element = functions.isVideo(props.img) && !mobile ? videoRef.current! : ref.current!
         new ResizeObserver(resizeOverlay).observe(element)
     }, [])
 
@@ -346,9 +351,9 @@ const GridImage: React.FunctionComponent<Props> = (props) => {
 
     const updateSquare = () => {
         if (!containerRef.current) return
-        const currentRef = functions.isVideo(props.img) ? videoRef.current! : ref.current!
-        const refWidth = functions.isVideo(props.img) ? videoRef.current!.clientWidth : ref.current!.width
-        const refHeight = functions.isVideo(props.img) ? videoRef.current!.clientHeight : ref.current!.height
+        const currentRef = functions.isVideo(props.img) && !mobile ? videoRef.current! : ref.current!
+        const refWidth = functions.isVideo(props.img) && !mobile ? videoRef.current!.clientWidth : ref.current!.width
+        const refHeight = functions.isVideo(props.img) && !mobile ? videoRef.current!.clientHeight : ref.current!.height
         if (square) {
             const sidebarWidth = document.querySelector(".sidebar")?.clientWidth || 0
             const width = window.innerWidth - sidebarWidth
@@ -419,7 +424,7 @@ const GridImage: React.FunctionComponent<Props> = (props) => {
         if (!imageFiltersRef.current) return
         const element = imageFiltersRef.current
         let newContrast = contrast
-        const image = functions.isVideo(props.img) ? videoRef.current : ref.current
+        const image = functions.isVideo(props.img) && !mobile ? videoRef.current : ref.current
         const sharpenOverlay = overlayRef.current
         const lightnessOverlay = lightnessRef.current
         if (!image || !sharpenOverlay || !lightnessOverlay) return
@@ -452,8 +457,8 @@ const GridImage: React.FunctionComponent<Props> = (props) => {
         if (!pixelateRef.current) return
         const pixelateCanvas = pixelateRef.current
         const ctx = pixelateCanvas.getContext("2d") as any
-        const imageWidth = functions.isVideo(props.img) ? videoRef.current!.clientWidth : ref.current!.width 
-        const imageHeight = functions.isVideo(props.img) ? videoRef.current!.clientHeight : ref.current!.height
+        const imageWidth = functions.isVideo(props.img) && !mobile ? videoRef.current!.clientWidth : ref.current!.width 
+        const imageHeight = functions.isVideo(props.img) && !mobile ? videoRef.current!.clientHeight : ref.current!.height
         const landscape = imageWidth >= imageHeight
         ctx.clearRect(0, 0, pixelateCanvas.width, pixelateCanvas.height)
         pixelateCanvas.width = imageWidth
@@ -491,7 +496,7 @@ const GridImage: React.FunctionComponent<Props> = (props) => {
 
     const imageAnimation = (event: React.MouseEvent<HTMLDivElement>) => {
         if (!overlayRef.current || !pixelateRef.current || !lightnessRef.current) return
-        const currentRef = functions.isVideo(props.img) ? videoRef.current! : ref.current!
+        const currentRef = functions.isVideo(props.img) && !mobile ? videoRef.current! : ref.current!
         const rect = currentRef.getBoundingClientRect()
         const width = rect?.width
         const height = rect?.height
@@ -508,7 +513,7 @@ const GridImage: React.FunctionComponent<Props> = (props) => {
 
     const cancelImageAnimation = () => {
         if (!overlayRef.current || !pixelateRef.current || !lightnessRef.current) return
-        const currentRef = functions.isVideo(props.img) ? videoRef.current! : ref.current!
+        const currentRef = functions.isVideo(props.img) && !mobile ? videoRef.current! : ref.current!
         currentRef.style.transform = "scale(1)"
         overlayRef.current.style.transform = "scale(1)"
         lightnessRef.current.style.transform = "scale(1)"
@@ -522,7 +527,7 @@ const GridImage: React.FunctionComponent<Props> = (props) => {
     }
 
     const onLoad = (event: any) => {
-        if (functions.isVideo(props.img)) {
+        if (functions.isVideo(props.img) && !mobile) {
             setImageWidth(event.target.clientWidth)
             setImageHeight(event.target.clientHeight)
             setNaturalWidth(event.target.videoWidth)
@@ -660,14 +665,14 @@ const GridImage: React.FunctionComponent<Props> = (props) => {
     return (
         <div style={{opacity: visible ? "1" : "0", transition: "opacity 0.1s"}} className="image-box" id={String(props.id)} ref={containerRef} onClick={onClick} onAuxClick={onClick} onMouseDown={mouseDown} onMouseUp={mouseUp} onMouseMove={mouseMove}>
             <div className="image-filters" ref={imageFiltersRef} onMouseMove={(event) => imageAnimation(event)} onMouseLeave={() => cancelImageAnimation()}>
-                {functions.isVideo(props.img) ? <video autoPlay loop muted disablePictureInPicture playsInline className="dummy-video" ref={videoRef} src={props.img}></video> : null}   
+                {functions.isVideo(props.img) && !mobile ? <video autoPlay loop muted disablePictureInPicture playsInline className="dummy-video" ref={videoRef} src={props.img}></video> : null}   
                 <img className="lightness-overlay" ref={lightnessRef} src={functions.isVideo(props.img) ? backFrame : props.img}/>
-                <img className="sharpen-overlay" ref={overlayRef} src={props.img}/>
-                {functions.isVideo(props.img) ? <canvas className="sharpen-overlay" ref={videoOverlayRef}></canvas> : null}
+                <img className="sharpen-overlay" ref={overlayRef} src={functions.isVideo(props.img) ? backFrame : props.img}/>
+                {functions.isVideo(props.img) && !mobile ? <canvas className="sharpen-overlay" ref={videoOverlayRef}></canvas> : null}
                 <canvas className="pixelate-canvas" ref={pixelateRef}></canvas>
-                {functions.isVideo(props.img) ? <>
+                {functions.isVideo(props.img) && !mobile ? <>
                 <video autoPlay loop muted disablePictureInPicture playsInline className="video" ref={videoRef} src={props.img} onLoadedData={(event) => onLoad(event)}></video></> :
-                <img className="image" ref={ref} src={props.img} onLoad={(event) => onLoad(event)}/>}
+                <img className="image" ref={ref} src={functions.isVideo(props.img) ? backFrame : props.img} onLoad={(event) => onLoad(event)}/>}
                 </div>
         </div>
     )

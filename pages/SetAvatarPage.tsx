@@ -209,6 +209,14 @@ const SetAvatarPage: React.FunctionComponent<Props> = (props) => {
         history.push(`/post/${postID}`)
     }
 
+    const toggleScroll = (on: boolean) => {
+        if (on) {
+            document.body.style.overflowY = "visible"
+        } else {
+            document.body.style.overflowY = "hidden"
+        }
+    }
+
     return (
         <>
         <DragAndDrop/>
@@ -224,8 +232,7 @@ const SetAvatarPage: React.FunctionComponent<Props> = (props) => {
                     <div className="set-avatar">
                         <span className="set-avatar-title">Set Avatar</span>
                         <div className="set-avatar-container">
-                            {typeof document !== "undefined" && <>
-                            <ReactCrop className="set-avatar-crop" crop={crop as any} onChange={(crop, percentCrop) => {setCrop(percentCrop as any); setPixelCrop(crop as any)}} keepSelection={true} minWidth={25} minHeight={25} aspect={1}>
+                            <ReactCrop className="set-avatar-crop" crop={crop as any} onChange={(crop, percentCrop) => {setCrop(percentCrop as any); setPixelCrop(crop as any); toggleScroll(false)}} keepSelection={true} minWidth={25} minHeight={25} aspect={1} onComplete={() => toggleScroll(true)}>
                                 <img className="set-avatar-image" src={image} onLoad={onImageLoad} ref={ref}/>
                             </ReactCrop>
                             <div className="set-avatar-preview-container">
@@ -235,7 +242,6 @@ const SetAvatarPage: React.FunctionComponent<Props> = (props) => {
                                     <button className="set-avatar-button" onClick={() => setAvatar()}>Set Avatar</button>
                                 </div>
                             </div>
-                            </>}
                         </div>
                     </div>
                     <Footer/>
