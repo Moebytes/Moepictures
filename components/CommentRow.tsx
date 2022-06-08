@@ -34,7 +34,8 @@ const CommentRow: React.FunctionComponent<Props> = (props) => {
     const {reportCommentID, setReportCommentID} = useContext(ReportCommentIDContext)
     const [hover, setHover] = useState(false)
     const history = useHistory()
-    const img = functions.getImageLink(props.comment.post.images[0].type, props.comment.postID, props.comment.post.images[0].filename)
+    const initialImg = functions.getImageLink(props.comment.post.images[0].type, props.comment.postID, props.comment.post.images[0].filename)
+    const [img, setImg] = useState(initialImg)
     const comment = props.comment.comment
 
     const getFavicon = () => {
@@ -191,22 +192,32 @@ const CommentRow: React.FunctionComponent<Props> = (props) => {
         return <span className="commentrow-user-text">{functions.toProperCase(props.comment.username)}</span>
     }
 
+    useEffect(() => {
+        if (functions.isVideo(img) && mobile) {
+            functions.videoThumbnail(img).then((thumbnail) => {
+                setImg(thumbnail)
+            })
+        }
+    }, [])
+
     return (
         <div className="commentrow" onMouseEnter={() =>setHover(true)} onMouseLeave={() => setHover(false)}>
             <div className="commentrow-container">
-                {functions.isVideo(img) ? 
+                {functions.isVideo(img) && !mobile ? 
                 <video className="commentrow-img" src={img} onClick={imgClick} onAuxClick={imgClick}></video> :
                 <img className="commentrow-img" src={img} onClick={imgClick}/>}
             </div>
-            <div className="commentrow-container">
-                <div className="commentrow-user-container" onClick={userClick} onAuxClick={userClick}>
-                    <img className="commentrow-user-img" src={getCommentPFP()}/>
-                    {generateUsernameJSX()}
+            <div className="commentrow-container-row">
+                <div className="commentrow-container">
+                    <div className="commentrow-user-container" onClick={userClick} onAuxClick={userClick}>
+                        <img className="commentrow-user-img" src={getCommentPFP()}/>
+                        {generateUsernameJSX()}
+                    </div>
                 </div>
-            </div>
-            <div className="commentrow-container" style={{width: "100%"}}>
-                <span className="commentrow-date-text">{functions.timeAgo(props.comment.postDate)}:</span>
-                {parseText()}
+                <div className="commentrow-container" style={{width: "100%"}}>
+                    <span className="commentrow-date-text">{functions.timeAgo(props.comment.postDate)}:</span>
+                    {parseText()}
+                </div>
             </div>
             {session.username ? commentOptions() : null}
         </div>

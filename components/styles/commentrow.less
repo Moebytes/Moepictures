@@ -18,6 +18,7 @@
     flex-direction: column;
     padding: 10px;
     border: 2px solid var(--inputBG);
+    align-items: flex-start;
     &:last-child {
         width: 100%;
     }
@@ -125,4 +126,16 @@
     margin-left: 3px;
     width: auto;
     height: 20px;
+}
+
+.commentrow-container-row {
+    display: flex;
+    flex-direction: row;
+    width: 100%;
+}
+
+@media screen and (max-width: 500px) {
+    .commentrow {
+        flex-direction: column;
+    }
 }
