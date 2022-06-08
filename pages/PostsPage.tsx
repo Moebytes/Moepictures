@@ -41,6 +41,10 @@ const PostsPage: React.FunctionComponent = (props) => {
         if (savedSidebar === "false") setHideSidebar(true)
         const savedSquare = localStorage.getItem("square")
         if (savedSquare === "true") setSquare(true)
+
+        return () => {
+            setMobileScrolling(false)
+        }
     }, [])
 
     useEffect(() => {
