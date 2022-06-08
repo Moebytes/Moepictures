@@ -6,7 +6,7 @@ import {ThemeContext, HideSidebarContext, HideNavbarContext, HideSortbarContext,
 SizeTypeContext, BrightnessContext, ContrastContext, HueContext, SaturationContext, LightnessContext,
 BlurContext, SharpenContext, EnableDragContext, FilterDropActiveContext, SquareContext, PixelateContext,
 ShowDownloadDialogContext, HideTitlebarContext, ImageTypeContext, RestrictTypeContext, SortTypeContext,
-StyleTypeContext, SpeedContext, ReverseContext, MobileContext, RelativeContext, SessionContext} from "../Context"
+StyleTypeContext, SpeedContext, ReverseContext, MobileContext, RelativeContext, SessionContext, MobileScrollingContext} from "../Context"
 import leftArrow from "../assets/purple/leftArrow.png"
 import leftArrowMagenta from "../assets/magenta/leftArrow.png"
 import rightArrow from "../assets/purple/rightArrow.png"
@@ -106,6 +106,7 @@ const SortBar: React.FunctionComponent = (props) => {
     const {speed, setSpeed} = useContext(SpeedContext)
     const {reverse, setReverse} = useContext(ReverseContext)
     const {mobile, setMobile} = useContext(MobileContext)
+    const {mobileScrolling, setMobileScrolling} = useContext(MobileScrollingContext)
     const {relative, setRelative} = useContext(RelativeContext)
     const {session, setSession} = useContext(SessionContext)
     const [dropLeft, setDropLeft] = useState(0)
@@ -159,7 +160,8 @@ const SortBar: React.FunctionComponent = (props) => {
         }
         const scrollHandler = () => {
             if (window.scrollY === 0) return setDropTop(0)
-            const newDropTop = hideTitlebar ? -Number(document.querySelector(".titlebar")?.clientHeight) - 2 : 0
+            let newDropTop = hideTitlebar ? -Number(document.querySelector(".titlebar")?.clientHeight) - 2 : 0
+            if (mobile) newDropTop = 32
             if (dropTop === newDropTop) return
             setDropTop(newDropTop)
         }
@@ -673,7 +675,7 @@ const SortBar: React.FunctionComponent = (props) => {
 
     let sortBarJSX = () => {
         if (mobile) return (
-            <div className={`mobile-sortbar ${relative ? "mobile-sortbar-relative" : ""}`}>
+            <div className={`mobile-sortbar ${relative ? "mobile-sortbar-relative" : ""} ${mobileScrolling ? "hide-mobile-sortbar" : ""}`}>
                 <img style={{height: "30px"}} className="sortbar-img" src={getUpload()} onClick={() => history.push("/upload")}/>
                 <img style={{height: "30px"}} className="sortbar-img" src={getDownload()} onClick={() => setShowDownloadDialog((prev: boolean) => !prev)}/>
                 {getMobileImageJSX()}

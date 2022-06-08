@@ -228,21 +228,27 @@
 
 .mobile-sidebar {
     position: sticky;
-    top: 77px;
-    top: 0px;
+    top: 77px !important;
+    //top: 0px;
     z-index: 1000;
     display: flex;
     flex-direction: column;
     align-items: center;
     width: 100%;
     background-color: var(--sidebarBG);
-    transition: background-color 0s;
+    transition: transform 0.3s background-color 0s;
     padding: 10px;
 }
 
 .mobile-sidebar-relative {
     position: relative;
+    top: 0px !important;
+}
+
+.hide-mobile-sidebar {
+    position: relative;
     top: 0px;
+    transform: translateY(-137px);
 }
 
 .mobile-search-container {

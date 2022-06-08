@@ -2,7 +2,7 @@ import React, {useContext, useEffect, useState, useReducer} from "react"
 import {useHistory} from "react-router-dom"
 import {ThemeContext, HideSidebarContext, HideNavbarContext, HideSortbarContext, EnableDragContext, MobileContext, UnverifiedPostsContext,
 RelativeContext, HideTitlebarContext, SidebarHoverContext, SearchContext, SearchFlagContext, PostsContext, ShowDeletePostDialogContext,
-TagsContext, RandomFlagContext, ImageSearchFlagContext, SidebarTextContext, SessionContext} from "../Context"
+TagsContext, RandomFlagContext, ImageSearchFlagContext, SidebarTextContext, SessionContext, MobileScrollingContext} from "../Context"
 import {HashLink as Link} from "react-router-hash-link"
 import favicon from "../assets/purple/favicon.png"
 import faviconMagenta from "../assets/magenta/favicon.png"
@@ -104,6 +104,7 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
     const {sidebarText, setSidebarText} = useContext(SidebarTextContext)
     const {showDeletePostDialog, setShowDeletePostDialog} = useContext(ShowDeletePostDialogContext)
     const {mobile, setMobile} = useContext(MobileContext)
+    const {mobileScrolling, setMobileScrolling} = useContext(MobileScrollingContext)
     const {session, setSession} = useContext(SessionContext)
     const [maxTags, setMaxTags] = useState(23)
     const [uploaderImage, setUploaderImage] = useState("")
@@ -532,10 +533,10 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
 
     if (mobile) return (
         <>
-        <SearchSuggestions active={suggestionsActive}/>
-        <div className={`mobile-sidebar ${relative ? "mobile-sidebar-relative" : ""}`}>
+        <SearchSuggestions active={suggestionsActive} sticky={true}/>
+        <div className={`mobile-sidebar ${relative ? "mobile-sidebar-relative" : ""} ${mobileScrolling ? "hide-mobile-sidebar" : ""}`}>
             <div className="mobile-search-container">
-                <input className="mobile-search" type="search" spellCheck="false" value={search} onChange={(event) => setSearch(event.target.value)} onKeyDown={(event) => event.key === "Enter" ? triggerSearch() : null} onFocus={() => setSuggestionsActive(true)} onBlur={() => setSuggestionsActive(false)}/>
+                <input className="mobile-search" type="search" spellCheck="false" value={search} onChange={(event) => setSearch(event.target.value)} onKeyDown={(event) => event.key === "Enter" ? triggerSearch() : null} onFocus={(event) => setSuggestionsActive(true)} onBlur={() => setSuggestionsActive(false)}/>
                 <img style={{height: "40px"}} className="search-icon" src={getSearchIcon()} onClick={() => triggerSearch()}  onMouseEnter={() => setSearchIconHover(true)} onMouseLeave={() => setSearchIconHover(false)}/>
                 <label style={{display: "flex", width: "max-content", height: "max-content"}} htmlFor="image-search">
                     <img style={{height: "40px"}} className="search-image-icon" src={getSearchImageIcon()} onMouseEnter={() => setSearchImageIconHover(true)} onMouseLeave={() => setSearchImageIconHover(false)}/>

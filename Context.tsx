@@ -73,6 +73,7 @@ export const ReportCommentIDContext = React.createContext<any>(null)
 export const VisiblePostsContext = React.createContext<any>(null)
 export const ScrollYContext = React.createContext<any>(null)
 export const PostFlagContext = React.createContext<any>(null)
+export const MobileScrollingContext = React.createContext<any>(null)
 
 const Context: React.FunctionComponent = (props) => {
     const [brightness, setBrightness] = useState(100)

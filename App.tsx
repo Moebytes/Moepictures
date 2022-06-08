@@ -1,7 +1,7 @@
 import React, {useEffect, useState, useContext} from "react"
 import {Switch, Route, Redirect, useHistory, useLocation} from "react-router-dom"
 import Context, {ThemeContext, HideNavbarContext, HideSidebarContext, HideSortbarContext,
-HideTitlebarContext, EnableDragContext, ActiveDropdownContext, FilterDropActiveContext,
+HideTitlebarContext, EnableDragContext, ActiveDropdownContext, FilterDropActiveContext, MobileScrollingContext,
 SidebarHoverContext, SessionContext, SessionFlagContext, UserImgContext, MobileContext} from "./Context"
 import favicon from "./assets/purple/favicon.png"
 import faviconMagenta from "./assets/magenta/favicon.png"
@@ -64,6 +64,7 @@ const App: React.FunctionComponent = (props) => {
     const [sessionFlag, setSessionFlag] = useState(false)
     const [userImg, setUserImg] = useState("")
     const [mobile, setMobile] = useState(false)
+    const [mobileScrolling, setMobileScrolling] = useState(false)
 
     const history = useHistory()
     const location = useLocation()
@@ -158,14 +159,20 @@ const App: React.FunctionComponent = (props) => {
 
     useEffect(() => {
         const handleScroll = () => {
-            if (filterDropActive) return setHideSortbar(false)
+            if (filterDropActive) {
+                setMobileScrolling(false)
+                return setHideSortbar(false)
+            }
             if (window.scrollY === 0) return setHideSortbar(false)
             if (sidebarHover) return setHideSortbar(true)
             setActiveDropdown("none")
             return setHideSortbar(true)
         }
         const handleMouseMove = (event: any) => {
-            if (filterDropActive) return setHideSortbar(false)
+            if (filterDropActive) {
+                setMobileScrolling(false)
+                return setHideSortbar(false)
+            }
             if (activeDropdown !== "none") return setHideSortbar(false)
             if (window.scrollY === 0) return setHideSortbar(false)
             if (sidebarHover) return setHideSortbar(true)
@@ -224,6 +231,7 @@ const App: React.FunctionComponent = (props) => {
 
     return (
         <div className={`app ${theme} ${!loaded ? "stop-transitions" : ""}`}>
+            <MobileScrollingContext.Provider value={{mobileScrolling, setMobileScrolling}}>
             <MobileContext.Provider value={{mobile, setMobile}}>
             <UserImgContext.Provider value={{userImg, setUserImg}}>
             <SessionFlagContext.Provider value={{sessionFlag, setSessionFlag}}>
@@ -287,6 +295,7 @@ const App: React.FunctionComponent = (props) => {
             </SessionFlagContext.Provider>
             </UserImgContext.Provider>
             </MobileContext.Provider>
+            </MobileScrollingContext.Provider>
         </div>
     )
 }

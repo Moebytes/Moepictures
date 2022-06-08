@@ -15,6 +15,7 @@ interface Props {
     width?: number
     click?: (tag: string) => void
     type?: string
+    sticky?: boolean
 }
 
 const SearchSuggestions: React.FunctionComponent<Props> = (props) => {
@@ -163,7 +164,7 @@ const SearchSuggestions: React.FunctionComponent<Props> = (props) => {
     }
 
     if (active && suggestions.length) return (
-        <div className="search-suggestions" style={{width: getWidth(), top: getY(), left: getX()}}>
+        <div className="search-suggestions" style={{width: getWidth(), top: getY(), left: getX(), position: props.sticky ? "sticky" : "absolute"}}>
             {generateSuggestionsJSX()}
         </div>
     )
