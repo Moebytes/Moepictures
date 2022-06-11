@@ -327,9 +327,9 @@ const GridImage: React.FunctionComponent<Props> = (props) => {
 
     const getBorder = () => {
         if (sizeType === "tiny" || sizeType === "small") {
-            return "2px solid var(--imageBorder)"
+            return "1px solid var(--imageBorder)"
         } else {
-            return "3px solid var(--imageBorder)"
+            return "2px solid var(--imageBorder)"
         }
     }
 
