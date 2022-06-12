@@ -4,6 +4,7 @@ import mime from "mime"
 import {Readable} from "stream"
 import {Pool} from "pg"
 import fs from "fs"
+import sharp from "sharp"
 import express from "express"
 import session from "express-session"
 import S3 from "aws-sdk/clients/s3"
@@ -161,6 +162,39 @@ for (let i = 0; i < folders.length; i++) {
       res.status(200).end(body)
     } catch (e) {
       console.log(e)
+      res.status(400).end()
+    }
+  })
+  app.get(`/thumbnail/:size/${folders[i]}/*`, async (req, res, next) => {
+    try {
+      const mimeType = mime.getType(req.path)
+      res.setHeader("Content-Type", mimeType ?? "")
+      const key = decodeURIComponent(req.path.replace(`/thumbnail/${req.params.size}/`, ""))
+      let body = await s3.getObject({Key: key, Bucket: "moebooru"}).promise().then((r) => r.Body) as any
+      let contentLength = body.length
+      if (mimeType?.includes("image")) {
+        const metadata = await sharp(body).metadata()
+        const ratio = metadata.height! / Number(req.params.size)
+        body = await sharp(body, {animated: true, limitInputPixels: false})
+        .resize(Math.round(metadata.width! / ratio), Number(req.params.size), {fit: "fill", kernel: "cubic"})
+        .toBuffer()
+        contentLength = body.length
+      }
+      if (req.headers.range) {
+        const parts = req.headers.range.replace(/bytes=/, "").split("-")
+        const start = parseInt(parts[0])
+        const end = parts[1] ? parseInt(parts[1]) : contentLength - 1
+        res.writeHead(206, {
+          "Content-Range": `bytes ${start}-${end}/${contentLength}`,
+          "Accept-Ranges": "bytes",
+          "Content-Length": end - start + 1
+        })
+        const stream = Readable.from(body.slice(start, end + 1))
+        return stream.pipe(res)
+      }
+      res.setHeader("Content-Length", contentLength)
+      res.status(200).end(body)
+    } catch {
       res.status(400).end()
     }
   })

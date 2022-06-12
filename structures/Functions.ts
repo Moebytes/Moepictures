@@ -832,6 +832,17 @@ export default class Functions {
         return `${window.location.protocol}//${window.location.host}/unverified/${folder}/${postID}/${encodeURIComponent(filename)}`
     }
 
+    public static getThumbnailLink = (folder: string, postID: number, filename: string, sizeType: string) => {
+        if (!filename) return ""
+        let size = 265
+        if (sizeType === "tiny") size = 350
+        if (sizeType === "small") size = 400
+        if (sizeType === "medium") size = 600
+        if (sizeType === "large") size = 800
+        if (sizeType === "massive") size = 1000
+        return `${window.location.protocol}//${window.location.host}/thumbnail/${size}/${folder}/${postID}/${encodeURIComponent(filename)}`
+    }
+
     public static getTagPath = (folder: string, filename: string) => {
         if (folder === "attribute") folder = "tag"
         return `${folder}/${filename}`

@@ -233,7 +233,7 @@ const ImageGrid: React.FunctionComponent = (props) => {
             const image = post.images[0]
             if (!image) continue
             const images = post.images.map((i: any) => functions.getImageLink(i.type, post.postID, i.filename))
-            jsx.push(<GridImage key={post.postID} id={post.postID} img={functions.getImageLink(image.type, post.postID, image.filename)} comicPages={post.type === "comic" ? images : null} post={post}/>)
+            jsx.push(<GridImage key={post.postID} id={post.postID} img={functions.getThumbnailLink(image.type, post.postID, image.filename, sizeType)} comicPages={post.type === "comic" ? images : null} post={post}/>)
         }
         if (!jsx.length && noResults) {
             jsx.push(
