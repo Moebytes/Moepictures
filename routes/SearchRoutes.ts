@@ -199,7 +199,7 @@ const SearchRoutes = (app: Express) => {
         try {
             const query = req.query.query as string
             const type = req.query.type as string
-            let search = query?.trim().split(/ +/g).filter(Boolean).join("-") ?? ""
+            let search = query?.trim().toLowerCase().split(/ +/g).filter(Boolean).join("-") ?? ""
             let result = await sql.tagSearch(search, "posts", type).then((r) => r.slice(0, 10))
             if (!result?.[0]) return res.status(200).json([])
             const tags = await sql.tagCounts(result.map((r: any) => r.tag))
