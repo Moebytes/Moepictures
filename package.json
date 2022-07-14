@@ -107,7 +107,6 @@
     "nodemailer": "^6.7.3",
     "pg": "^8.7.3",
     "pixiv.ts": "^0.5.4",
-    "profane-words": "^1.4.0",
     "react": "^17.0.2",
     "react-contenteditable": "^3.3.6",
     "react-dom": "^17.0.2",

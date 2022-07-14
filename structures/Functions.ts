@@ -3,6 +3,7 @@ import pixels from "image-pixels"
 import path from "path"
 import commonPasswords from "../json/common-passwords.json"
 import bannedUsernames from "../json/banned-usernames.json"
+import profaneWords from "../json/profane-words.json"
 import axios from "axios"
 import MP4Demuxer from "./MP4Demuxer"
 import audioEncoder from "audio-encoder"
@@ -10,7 +11,6 @@ import fileType from "magic-bytes.js"
 import gibberish from "./Gibberish"
 import gifFrames from "gif-frames"
 import {JsWebm} from "jswebm"
-import profaneWords from "profane-words"
 import localforage from "localforage"
 
 let newScrollY = 0
@@ -264,7 +264,7 @@ export default class Functions {
                 if (gibberish(piece)) return "Comment cannot be gibberish."
             }
         }
-        const words = comment.split(/ +/g)
+        const words = comment.replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g, "").split(/ +/g)
         for (let i = 0; i < words.length; i++) {
             if (profaneWords.includes(words[i])) return "Comment is profane."
         }

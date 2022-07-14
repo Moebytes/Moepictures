@@ -102,6 +102,9 @@ const Comment: React.FunctionComponent<Props> = (props) => {
     }
 
     const editComment = async () => {
+        if (!editCommentText) return
+        const badComment = functions.validateComment(editCommentText)
+        if (badComment) return
         await axios.put("/api/comment/edit", {commentID: props.comment.commentID, comment: editCommentText}, {withCredentials: true})
         props.onEdit?.()
     }
