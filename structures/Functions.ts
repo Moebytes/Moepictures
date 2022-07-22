@@ -186,7 +186,7 @@ export default class Functions {
         const alphaNumeric = Functions.alphaNumeric(username)
         if (!alphaNumeric || /[\n\r\s]+/g.test(username)) return "Usernames cannot contain special characters or spaces."
         if (profaneWords.includes(username.toLowerCase())) return "Username is profane."
-        if (gibberish(username)) return "Username cannot be gibberish."
+        //if (gibberish(username)) return "Username cannot be gibberish."
         if (bannedUsernames.includes(username.toLowerCase())) return "This username isn't allowed to be used."
         return null
     }

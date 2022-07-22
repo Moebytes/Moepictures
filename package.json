@@ -22,7 +22,7 @@
     "type": "git",
     "url": "https://github.com/Tenpi/Moebooru.moe"
   },
-  "author": "Tenpi",
+  "author": "Moepi",
   "license": "MIT",
   "devDependencies": {
     "@tenpi/tslint": "^1.1.0",
