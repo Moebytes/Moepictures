@@ -57,7 +57,7 @@ Images are uploaded to Amazon S3 buckets called "moebooru" and "moebooru-unverif
 
 https://aws.amazon.com/s3/
 
-If you want to instead upload to the local filesystem you can modify tbe functions in the file `structures/ServerFunctions.ts` to write to the local filesystem instead of uploading to the S3 bucket. In these functions the "file" argument will be a string like `foldername/filename.png` where these are all the folders, you need to create all of these if you are uploading locally.
+If you want to instead upload to the local filesystem you can modify the functions in the file `structures/ServerFunctions.ts` to write to the local filesystem instead of uploading to the S3 bucket. In these functions the "file" argument will be a string like `foldername/filename.png` where these are all the folders, you need to create all of these if you are uploading locally.
 
 `["animation", "artist", "character", "comic", "image", "pfp", "series", "tag", "video"]`
 
@@ -69,7 +69,7 @@ The other keys in this file are largely optional, for example if you want to fet
 
 Install all of the dependencies for this project by running `npm install`. \
 Build the project by running `webpack`. \
-Start the project by running the server `node dist/server.js`. \
+Start the project by running the server `node dist/server.js`.
 
 The script `npm start` is a shorthand for building and starting the project. \
 In production, you should run this file with pm2 so it automatically restarts if for some reason there was an error: `pm2 start dist/server.js`.
