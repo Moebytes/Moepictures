@@ -5,6 +5,7 @@ import path from "path"
 import fs from "fs"
 import crypto from "crypto"
 import sql from "../structures/SQLQuery"
+import functions from "../structures/Functions"
 import S3 from "aws-sdk/clients/s3"
 
 export default class ServerFunctions {
@@ -127,5 +128,22 @@ export default class ServerFunctions {
             }
         }
         return {artists, characters, series, tags: newTags}
+    }
+
+    public static batchUpdateImplications = async () => {
+        console.log("Updating all tag implications...")
+        const posts = await sql.posts()
+        for (let i = 0; i < posts.length; i++) {
+            const postID = posts[i].postID
+            let tagMap = posts[i].tags
+            for (let i = 0; i < tagMap.length; i++) {
+                const implications = await sql.implications(tagMap[i])
+                if (implications?.[0]) tagMap.push(...implications.map(((i: any) => i.implication)))
+            }
+            tagMap = functions.removeDuplicates(tagMap)
+            await sql.purgeTagMap(postID)
+            await sql.insertTagMap(postID, tagMap)
+        }
+        console.log("Done")
     }
 }

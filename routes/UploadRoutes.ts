@@ -254,6 +254,11 @@ const CreateRoutes = (app: Express) => {
         }
         await sql.insertCuteness(postID, req.session.username, 500)
 
+        for (let i = 0; i < tagMap.length; i++) {
+          const implications = await sql.implications(tagMap[i])
+          if (implications?.[0]) tagMap.push(...implications.map(((i: any) => i.implication)))
+        }
+
         tagMap = functions.removeDuplicates(tagMap)
 
         await sql.bulkInsertTags(bulkTagUpdate)
@@ -461,6 +466,11 @@ const CreateRoutes = (app: Express) => {
           tagMap.push(series[i].tag)
         }
 
+        for (let i = 0; i < tagMap.length; i++) {
+          const implications = await sql.implications(tagMap[i])
+          if (implications?.[0]) tagMap.push(...implications.map(((i: any) => i.implication)))
+        }
+
         tagMap = functions.removeDuplicates(tagMap)
         await sql.purgeTagMap(postID)
         await sql.bulkInsertTags(bulkTagUpdate)
@@ -665,6 +675,11 @@ const CreateRoutes = (app: Express) => {
           }
           bulkTagUpdate.push(bulkObj)
           tagMap.push(series[i].tag)
+        }
+
+        for (let i = 0; i < tagMap.length; i++) {
+          const implications = await sql.implications(tagMap[i])
+          if (implications?.[0]) tagMap.push(...implications.map(((i: any) => i.implication)))
         }
 
         tagMap = functions.removeDuplicates(tagMap)
@@ -885,6 +900,11 @@ const CreateRoutes = (app: Express) => {
           tagMap.push(series[i].tag)
         }
 
+        for (let i = 0; i < tagMap.length; i++) {
+          const implications = await sql.implications(tagMap[i])
+          if (implications?.[0]) tagMap.push(...implications.map(((i: any) => i.implication)))
+        }
+
         tagMap = functions.removeDuplicates(tagMap)
         await sql.purgeUnverifiedTagMap(postID)
         await sql.bulkInsertUnverifiedTags(bulkTagUpdate)
@@ -1038,6 +1058,11 @@ const CreateRoutes = (app: Express) => {
             bulkObj.image = series[i].image
           }
           bulkTagUpdate.push(bulkObj)
+        }
+
+        for (let i = 0; i < tagMap.length; i++) {
+          const implications = await sql.implications(tagMap[i])
+          if (implications?.[0]) tagMap.push(...implications.map(((i: any) => i.implication)))
         }
 
         tagMap = functions.removeDuplicates(tagMap)

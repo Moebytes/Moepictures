@@ -276,6 +276,11 @@ const PostRoutes = (app: Express) => {
                 bulkTagUpdate.push(bulkObj)
                 tagMap.push(tags[i])
             }
+
+            for (let i = 0; i < tagMap.length; i++) {
+                const implications = await sql.implications(tagMap[i])
+                if (implications?.[0]) tagMap.push(...implications.map(((i: any) => i.implication)))
+            }
     
             tagMap = functions.removeDuplicates(tagMap)
             if (unverified) {
@@ -469,6 +474,11 @@ const PostRoutes = (app: Express) => {
                 }
                 bulkTagUpdate.push(bulkObj)
                 tagMap.push(tags[i])
+            }
+
+            for (let i = 0; i < tagMap.length; i++) {
+                const implications = await sql.implications(tagMap[i])
+                if (implications?.[0]) tagMap.push(...implications.map(((i: any) => i.implication)))
             }
     
             tagMap = functions.removeDuplicates(tagMap)

@@ -54,7 +54,7 @@ const ModTagEdits: React.FunctionComponent = (props) => {
         return tagDiff
     }
 
-    const editTag = async (username: string, tag: string, key: string, description: string, image: string, aliases: string[]) => {
+    const editTag = async (username: string, tag: string, key: string, description: string, image: string, aliases: string[], implications: string[]) => {
         let bytes = null as any
         if (image) {
             const parts = image.split("/")
@@ -62,7 +62,7 @@ const ModTagEdits: React.FunctionComponent = (props) => {
             const arrayBuffer = await fetch(link).then((r) => r.arrayBuffer())
             bytes = new Uint8Array(arrayBuffer)
         }
-        await axios.put("/api/tag/edit", {tag, key, description, image: bytes ? Object.values(bytes) : null, aliases}, {withCredentials: true})
+        await axios.put("/api/tag/edit", {tag, key, description, image: bytes ? Object.values(bytes) : null, aliases, implications}, {withCredentials: true})
         await axios.post("/api/tag/edit/request/fulfill", {username, tag, image}, {withCredentials: true})
         updateTags()
     }
@@ -157,7 +157,8 @@ const ModTagEdits: React.FunctionComponent = (props) => {
                         <span className="mod-post-text">Reason: {request.reason}</span>
                         <span className="mod-post-link" onClick={searchTag}>Old Tag: {oldTag.tag}</span>
                         <span className="mod-post-text">Old Description: {oldTag.description || "No description."}</span>
-                        <span className="mod-post-text">Old Aliases: {oldTag.aliases?.[0] ? oldTag.aliases.map((a: any) => a.tag).join(", ") : "None"}</span>
+                        <span className="mod-post-text">Old Aliases: {oldTag.aliases?.[0] ? oldTag.aliases.map((a: any) => a.alias).join(", ") : "None"}</span>
+                        <span className="mod-post-text">Old Implications: {oldTag.implications?.[0] ? oldTag.implications.map((i: any) => i.implication).join(", ") : "None"}</span>
                     </div>
                     </> : <>
                     {img ?
@@ -170,6 +171,7 @@ const ModTagEdits: React.FunctionComponent = (props) => {
                         <span className="mod-post-link" onClick={searchTag}>New Tag: {request.key}</span>
                         <span className="mod-post-text">New Description: {request.description || "No description."}</span>
                         <span className="mod-post-text">New Aliases: {request.aliases?.[0] ? request.aliases.join(", ") : "None"}</span>
+                        <span className="mod-post-text">New Implications: {request.implications?.[0] ? request.implications.join(", ") : "None"}</span>
                     </div> </>}
                     <div className="mod-post-options">
                         <div className="mod-post-options-container" onClick={() => changeOldTag()}>
@@ -180,7 +182,7 @@ const ModTagEdits: React.FunctionComponent = (props) => {
                             <img className="mod-post-options-img" src={getReject()}/>
                             <span className="mod-post-options-text">Reject</span>
                         </div>
-                        <div className="mod-post-options-container" onClick={() => editTag(request.username, request.tag, request.key, request.description, request.image, request.aliases)}>
+                        <div className="mod-post-options-container" onClick={() => editTag(request.username, request.tag, request.key, request.description, request.image, request.aliases, request.implications)}>
                             <img className="mod-post-options-img" src={getApprove()}/>
                             <span className="mod-post-options-text">Approve</span>
                         </div>

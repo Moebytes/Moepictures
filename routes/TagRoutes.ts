@@ -78,7 +78,7 @@ const TagRoutes = (app: Express) => {
 
     app.put("/api/tag/edit", tagLimiter, async (req: Request, res: Response) => {
         try {
-            const {tag, key, description, image, aliases} = req.body
+            const {tag, key, description, image, aliases, implications} = req.body
             if (!req.session.username || !tag) return res.status(400).send("Bad request")
             if (req.session.role !== "admin" && req.session.role !== "mod") return res.status(403).end()
             const tagObj = await sql.tag(tag)
@@ -87,7 +87,6 @@ const TagRoutes = (app: Express) => {
                 await sql.updateTag(tag, "description", description)
             }
             if (image?.[0]) {
-                console.log(image?.[0])
                 if (tagObj.image) {
                     const imagePath = functions.getTagPath(tagObj.type, tagObj.image)
                     await serverFunctions.deleteFile(imagePath)
@@ -98,10 +97,18 @@ const TagRoutes = (app: Express) => {
                 await sql.updateTag(tag, "image", filename)
                 tagObj.image = filename
             }
-            if (aliases?.[0]) {
+            if (aliases) {
                 await sql.purgeAliases(tag)
                 for (let i = 0; i < aliases.length; i++) {
+                    if (!aliases[i]) break
                     await sql.insertAlias(tag, aliases[i])
+                }
+            } 
+            if (implications) {
+                await sql.purgeImplications(tag)
+                for (let i = 0; i < implications.length; i++) {
+                    if (!implications[i]) break
+                    await sql.insertImplication(tag, implications[i])
                 }
             }
             if (key.trim() !== tag) {
@@ -238,7 +245,7 @@ const TagRoutes = (app: Express) => {
 
     app.post("/api/tag/edit/request", tagLimiter, async (req: Request, res: Response) => {
         try {
-            const {tag, key, description, image, aliases, reason} = req.body
+            const {tag, key, description, image, aliases, implications, reason} = req.body
             if (!req.session.username || !tag) return res.status(400).send("Bad request")
             const tagObj = await sql.tag(tag)
             if (!tagObj) return res.status(400).send("Bad request")
@@ -248,7 +255,7 @@ const TagRoutes = (app: Express) => {
                 imagePath = functions.getTagPath(tagObj.type, filename)
                 await serverFunctions.uploadUnverifiedFile(imagePath, Buffer.from(Object.values(image)))
             }
-            await sql.insertTagEditRequest(req.session.username, tag, key, description, imagePath, aliases?.[0] ? aliases : null, reason)
+            await sql.insertTagEditRequest(req.session.username, tag, key, description, imagePath, aliases?.[0] ? aliases : null, implications?.[0] ? implications : null, reason)
             res.status(200).send("Success")
         } catch (e) {
             console.log(e)

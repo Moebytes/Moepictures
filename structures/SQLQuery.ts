@@ -540,7 +540,7 @@ export default class SQLQuery {
   }
 
   /** Get posts. */
-  public static posts = async (postIDs: number[]) => {
+  public static posts = async (postIDs?: number[]) => {
     const query: QueryConfig = {
       text: functions.multiTrim(`
           SELECT posts.*, json_agg(DISTINCT images.*) AS images, json_agg(DISTINCT "tag map".tag) AS tags,
@@ -551,11 +551,11 @@ export default class SQLQuery {
           JOIN "tag map" ON posts."postID" = "tag map"."postID"
           FULL JOIN "favorites" ON posts."postID" = "favorites"."postID"
           FULL JOIN "cuteness" ON posts."postID" = "cuteness"."postID"
-          WHERE posts."postID" = ANY ($1)
+          ${postIDs ? "WHERE posts.\"postID\" = ANY ($1)" : ""}
           GROUP BY posts."postID"
-          `),
-          values: [postIDs]
+          `)
     }
+    if (postIDs) query.values = [postIDs]
     const result = await SQLQuery.run(query)
     return result
   }
@@ -677,9 +677,10 @@ export default class SQLQuery {
     let whereQuery = tags?.[0] ? `WHERE "tags".tag = ANY ($1)` : ""
     const query: QueryConfig = {
           text: functions.multiTrim(`
-                  SELECT tags.*, json_agg(DISTINCT aliases.*) AS aliases
+                  SELECT tags.*, json_agg(DISTINCT aliases.*) AS aliases, json_agg(DISTINCT "implication map".*) AS implications
                   FROM tags
                   FULL JOIN aliases ON aliases."tag" = tags."tag"
+                  FULL JOIN "implication map" ON "implication map"."tag" = tags."tag"
                   ${whereQuery}
                   GROUP BY "tags".tag
           `)
@@ -693,9 +694,10 @@ export default class SQLQuery {
     let whereQuery = tags?.[0] ? `WHERE "unverified tags".tag = ANY ($1)` : ""
     const query: QueryConfig = {
           text: functions.multiTrim(`
-                  SELECT "unverified tags".*, json_agg(DISTINCT "unverified aliases".*) AS aliases
+                  SELECT "unverified tags".*, json_agg(DISTINCT "unverified aliases".*) AS aliases, json_agg(DISTINCT "implication map".*) AS implications
                   FROM "unverified tags"
                   FULL JOIN "unverified aliases" ON "unverified aliases"."tag" = "unverified tags"."tag"
+                  FULL JOIN "implication map" ON "implication map"."tag" = "unverified tags"."tag"
                   ${whereQuery}
                   GROUP BY "unverified tags".tag
           `)
@@ -708,9 +710,10 @@ export default class SQLQuery {
   public static tag = async (tag: string) => {
     const query: QueryConfig = {
           text: functions.multiTrim(`
-                  SELECT tags.*, json_agg(DISTINCT aliases.*) AS aliases
+                  SELECT tags.*, json_agg(DISTINCT aliases.*) AS aliases, json_agg(DISTINCT "implication map".*) AS implications
                   FROM tags
                   FULL JOIN aliases ON aliases."tag" = tags."tag"
+                  FULL JOIN "implication map" ON "implication map"."tag" = tags."tag"
                   WHERE "tags".tag = $1
                   GROUP BY "tags".tag
           `),
@@ -830,12 +833,12 @@ export default class SQLQuery {
     let i = 1
     if (search) {
       whereArray.push( 
-    `(tags.tag LIKE $${i} || '%'
+    `(tags.tag LIKE '%' || $${i} || '%'
     OR EXISTS (
       SELECT 1 
       FROM aliases
       WHERE aliases.tag = tags.tag 
-      AND aliases.alias LIKE $1 || '%'
+      AND aliases.alias LIKE '%' || $1 || '%'
     ))`)
       i++
     }
@@ -855,12 +858,13 @@ export default class SQLQuery {
     if (sort === "reverse aliases") sortQuery = `ORDER BY "aliasCount" ASC`
     const query: QueryConfig = {
           text: functions.multiTrim(`
-                  SELECT tags.*, json_agg(DISTINCT aliases.*) AS aliases, 
+                  SELECT tags.*, json_agg(DISTINCT aliases.*) AS aliases, json_agg(DISTINCT "implication map".*) AS implications,
                   COUNT(DISTINCT posts."postID") AS "postCount", 
                   COUNT(DISTINCT tags."image") AS "imageCount", 
                   COUNT(DISTINCT aliases."alias") AS "aliasCount"
                   FROM tags
                   FULL JOIN aliases ON aliases."tag" = tags."tag"
+                  FULL JOIN "implication map" ON "implication map"."tag" = tags."tag"
                   JOIN "tag map" ON "tag map"."tag" = tags."tag"
                   JOIN posts ON posts."postID" = "tag map"."postID"
                   ${whereQuery}
@@ -1540,6 +1544,44 @@ export default class SQLQuery {
     return result
   }
 
+   /** Insert a new implication. */
+   public static insertImplication = async (tag: string, implication: string) => {
+    const query: QueryConfig = {
+      text: `INSERT INTO "implication map" ("tag", "implication") VALUES ($1, $2)`,
+      values: [tag, implication]
+    }
+    try {
+      await SQLQuery.run(query)
+      return false
+    } catch {
+      return true
+    }
+  }
+
+  /** Get implications. */
+  public static implications = async (tag: string) => {
+    const query: QueryConfig = {
+          text: functions.multiTrim(`
+                  SELECT "implication map".*
+                  FROM "implication map"
+                  WHERE "implication map".tag = $1
+                  GROUP BY "implication map"."implicationID"
+          `),
+          values: [tag]
+    }
+    const result = await SQLQuery.run(query)
+    return result
+  }
+
+  /** Purge implications. */
+  public static purgeImplications = async (tag: string) => {
+    const query: QueryConfig = {
+      text: `DELETE FROM "implication map" WHERE "implication map"."tag" = $1`,
+      values: [tag]
+    }
+    return SQLQuery.run(query)
+  }
+
   /** Rename tag map. */
   public static renameTagMap = async (tag: string, newTag: string) => {
     const query: QueryConfig = {
@@ -1843,10 +1885,10 @@ export default class SQLQuery {
   }
 
   /** Insert tag edit request. */
-  public static insertTagEditRequest = async (username: string, tag: string, key: string, description: string, image: string, aliases: string[], reason: string) => {
+  public static insertTagEditRequest = async (username: string, tag: string, key: string, description: string, image: string, aliases: string[], implications: string[], reason: string) => {
     const query: QueryConfig = {
-      text: `INSERT INTO "tag edit requests" ("username", "tag", "key", "description", "image", "aliases", "reason") VALUES ($1, $2, $3, $4, $5, $6, $7)`,
-      values: [username, tag, key, description, image, aliases, reason]
+      text: `INSERT INTO "tag edit requests" ("username", "tag", "key", "description", "image", "aliases", "implications", "reason") VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`,
+      values: [username, tag, key, description, image, aliases, implications, reason]
     }
     const result = await SQLQuery.run(query)
     return result

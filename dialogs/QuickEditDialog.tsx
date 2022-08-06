@@ -257,7 +257,7 @@ const QuickEditDialog: React.FunctionComponent = (props) => {
                                     <span className="quickedit-button-text">Comic</span>
                                 </button>
                             </div>
-                            </> : <> :
+                            </> : <>
                             <div className="quickedit-dialog-row">
                                 <button className={`quickedit-button ${type === "image" ? "button-selected" : ""}`} onClick={() => setType("image")}>
                                     <img className="quickedit-button-img" src={image}/>

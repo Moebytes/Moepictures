@@ -61,6 +61,7 @@ export const EditTagKeyContext = React.createContext<any>(null)
 export const EditTagImageContext = React.createContext<any>(null)
 export const EditTagDescriptionContext = React.createContext<any>(null)
 export const EditTagAliasesContext = React.createContext<any>(null)
+export const EditTagImplicationsContext = React.createContext<any>(null)
 export const AliasTagIDContext = React.createContext<any>(null)
 export const AliasTagFlagContext = React.createContext<any>(null)
 export const AliasTagNameContext = React.createContext<any>(null)
@@ -126,6 +127,7 @@ const Context: React.FunctionComponent = (props) => {
     const [editTagImage, setEditTagImage] = useState(false)
     const [editTagDescription, setEditTagDescription] = useState(false)
     const [editTagAliases, setEditTagAliases] = useState(false)
+    const [editTagImplications, setEditTagImplications] = useState(false)
     const [aliasTagID, setAliasTagID] = useState(null)
     const [aliasTagFlag, setAliasTagFlag] = useState(false)
     const [aliasTagName, setAliasTagName] = useState("")
@@ -156,6 +158,7 @@ return (
         <AliasTagNameContext.Provider value={{aliasTagName, setAliasTagName}}>
         <AliasTagIDContext.Provider value={{aliasTagID, setAliasTagID}}>
         <AliasTagFlagContext.Provider value={{aliasTagFlag, setAliasTagFlag}}>
+        <EditTagImplicationsContext.Provider value={{editTagImplications, setEditTagImplications}}>
         <EditTagAliasesContext.Provider value={{editTagAliases, setEditTagAliases}}>
         <EditTagDescriptionContext.Provider value={{editTagDescription, setEditTagDescription}}>
         <EditTagImageContext.Provider value={{editTagImage, setEditTagImage}}>
@@ -253,6 +256,7 @@ return (
         </EditTagImageContext.Provider>
         </EditTagDescriptionContext.Provider>
         </EditTagAliasesContext.Provider>
+        </EditTagImplicationsContext.Provider>
         </AliasTagFlagContext.Provider>
         </AliasTagIDContext.Provider>
         </AliasTagNameContext.Provider>

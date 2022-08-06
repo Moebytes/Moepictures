@@ -1,7 +1,7 @@
 import React, {useContext, useEffect, useRef, useState} from "react"
 import {useHistory} from "react-router-dom"
 import {ThemeContext, SearchContext, SearchFlagContext, DeleteTagFlagContext, DeleteTagIDContext, MobileContext,
-EditTagAliasesContext, EditTagDescriptionContext, EditTagIDContext, EditTagFlagContext, SessionContext,
+EditTagAliasesContext, EditTagImplicationsContext, EditTagDescriptionContext, EditTagIDContext, EditTagFlagContext, SessionContext,
 EditTagImageContext, EditTagKeyContext, AliasTagFlagContext, AliasTagIDContext, AliasTagNameContext} from "../Context"
 import {HashLink as Link} from "react-router-hash-link"
 import functions from "../structures/Functions"
@@ -32,6 +32,7 @@ const TagRow: React.FunctionComponent<Props> = (props) => {
     const {editTagFlag, setEditTagFlag} = useContext(EditTagFlagContext)
     const {editTagID, setEditTagID} = useContext(EditTagIDContext)
     const {editTagAliases, setEditTagAliases} = useContext(EditTagAliasesContext)
+    const {editTagImplications, setEditTagImplications} = useContext(EditTagImplicationsContext)
     const {editTagDescription, setEditTagDescription} = useContext(EditTagDescriptionContext)
     const {editTagImage, setEditTagImage} = useContext(EditTagImageContext)
     const {editTagKey, setEditTagKey} = useContext(EditTagKeyContext)
@@ -55,6 +56,14 @@ const TagRow: React.FunctionComponent<Props> = (props) => {
         let jsx = [] as any 
         for (let i = 0; i < props.tag.aliases.length; i++) {
             jsx.push(<span className="tagrow-alias">{props.tag.aliases[i].alias.replaceAll("-", " ")}</span>)
+        }
+        return jsx
+    }
+
+    const generateImplicationsJSX = () => {
+        let jsx = [] as any 
+        for (let i = 0; i < props.tag.implications.length; i++) {
+            jsx.push(<span className="tagrow-alias">{props.tag.implications[i].implication.replaceAll("-", " ")}</span>)
         }
         return jsx
     }
@@ -92,7 +101,7 @@ const TagRow: React.FunctionComponent<Props> = (props) => {
             image = Object.values(bytes)
         }
         await axios.put("/api/tag/edit", {tag: props.tag.tag, key: editTagKey, description: editTagDescription,
-        image, aliases: editTagAliases}, {withCredentials: true})
+        image, aliases: editTagAliases, implications: editTagImplications}, {withCredentials: true})
         if (editTagImage) refreshCache(editTagImage)
         props.onEdit?.()
     }
@@ -110,6 +119,7 @@ const TagRow: React.FunctionComponent<Props> = (props) => {
         setEditTagDescription(props.tag.description)
         setEditTagImage(props.tag.image ? functions.getTagLink(props.tag.type, props.tag.image) : null)
         setEditTagAliases(props.tag.aliases?.[0] ? props.tag.aliases.map((a: any) => a.alias) : [])
+        setEditTagImplications(props.tag.implications?.[0] ? props.tag.implications.map((i: any) => i.implication) : [])
         setEditTagID(props.tag.tag)
     }
 
@@ -147,6 +157,11 @@ const TagRow: React.FunctionComponent<Props> = (props) => {
                     <div className="tagrow-column">
                         <span className="tagrow-alias-header">Aliases: </span>
                         {generateAliasesJSX()}
+                    </div> : null}
+                    {props.tag.implications?.[0] ?
+                    <div className="tagrow-column">
+                        <span className="tagrow-alias-header">Implies: </span>
+                        {generateImplicationsJSX()}
                     </div> : null}
                 </td>
                 <td className="tagrow-description">

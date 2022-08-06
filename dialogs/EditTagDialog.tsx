@@ -1,7 +1,7 @@
 import React, {useEffect, useContext, useState, useRef} from "react"
 import {useHistory} from "react-router-dom"
 import {HashLink as Link} from "react-router-hash-link"
-import {HideNavbarContext, HideSidebarContext, ThemeContext, EnableDragContext, EditTagIDContext, EditTagFlagContext, 
+import {HideNavbarContext, HideSidebarContext, ThemeContext, EnableDragContext, EditTagIDContext, EditTagFlagContext, EditTagImplicationsContext,
 EditTagKeyContext, EditTagAliasesContext, EditTagImageContext, EditTagDescriptionContext, HideTitlebarContext, SessionContext} from "../Context"
 import functions from "../structures/Functions"
 import uploadIcon from "../assets/purple/upload.png"
@@ -23,6 +23,7 @@ const EditTagDialog: React.FunctionComponent = (props) => {
     const {editTagImage, setEditTagImage} = useContext(EditTagImageContext)
     const {editTagDescription, setEditTagDescription} = useContext(EditTagDescriptionContext)
     const {editTagAliases, setEditTagAliases} = useContext(EditTagAliasesContext)
+    const {editTagImplications, setEditTagImplications} = useContext(EditTagImplicationsContext)
     const {session, setSession} = useContext(SessionContext)
     const [submitted, setSubmitted] = useState(false)
     const [reason, setReason] = useState("")
@@ -73,7 +74,7 @@ const EditTagDialog: React.FunctionComponent = (props) => {
                 const bytes = new Uint8Array(arrayBuffer)
                 image = Object.values(bytes)
             }
-            await axios.post("/api/tag/edit/request", {tag: editTagID, key: editTagKey, description: editTagDescription, image, aliases: editTagAliases, reason}, {withCredentials: true})
+            await axios.post("/api/tag/edit/request", {tag: editTagID, key: editTagKey, description: editTagDescription, image, aliases: editTagAliases, implications: editTagImplications, reason}, {withCredentials: true})
             setSubmitted(true)
         }
     }
@@ -177,6 +178,12 @@ const EditTagDialog: React.FunctionComponent = (props) => {
                                 <textarea className="edittag-textarea" spellCheck={false} value={editTagAliases.join(" ")} onChange={(event) => setEditTagAliases(event.target.value.split(/ +/g))}></textarea>
                             </div>
                             <div className="edittag-dialog-row">
+                                <span className="edittag-dialog-text">Implications: </span>
+                            </div>
+                            <div className="edittag-dialog-row">
+                                <textarea className="edittag-textarea" spellCheck={false} value={editTagImplications.join(" ")} onChange={(event) => setEditTagImplications(event.target.value.split(/ +/g))}></textarea>
+                            </div>
+                            <div className="edittag-dialog-row">
                                 <button onClick={() => click("reject")} className="edittag-button">{"Cancel"}</button>
                                 <button onClick={() => click("accept")} className="edittag-button">{"Edit"}</button>
                             </div>
@@ -232,6 +239,12 @@ const EditTagDialog: React.FunctionComponent = (props) => {
                         </div>
                         <div className="edittag-dialog-row">
                             <textarea className="edittag-textarea" spellCheck={false} value={editTagAliases.join(" ")} onChange={(event) => setEditTagAliases(event.target.value.split(/ +/g))}></textarea>
+                        </div>
+                        <div className="edittag-dialog-row">
+                            <span className="edittag-dialog-text">Implications: </span>
+                        </div>
+                        <div className="edittag-dialog-row">
+                            <textarea className="edittag-textarea" spellCheck={false} value={editTagImplications.join(" ")} onChange={(event) => setEditTagImplications(event.target.value.split(/ +/g))}></textarea>
                         </div>
                         <div className="edittag-dialog-row">
                             <span className="edittag-dialog-text">Reason: </span>
