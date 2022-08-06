@@ -16,6 +16,7 @@ import DeletePostDialog from "../dialogs/DeletePostDialog"
 import DeleteCommentDialog from "../dialogs/DeleteCommentDialog"
 import EditCommentDialog from "../dialogs/EditCommentDialog"
 import ReportCommentDialog from "../dialogs/ReportCommentDialog"
+import QuickEditDialog from "../dialogs/QuickEditDialog"
 import ThirdParty from "../components/ThirdParty"
 import Parent from "../components/Parent"
 import MobileInfo from "../components/MobileInfo"
@@ -223,6 +224,7 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
     return (
         <>
         <DragAndDrop/>
+        <QuickEditDialog/>
         <EditCommentDialog/>
         <DeleteCommentDialog/>
         <ReportCommentDialog/>

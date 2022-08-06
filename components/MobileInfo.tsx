@@ -2,7 +2,7 @@ import React, {useContext, useEffect, useState, useReducer} from "react"
 import {useHistory} from "react-router-dom"
 import {ThemeContext, HideNavbarContext, HideSortbarContext, EnableDragContext, MobileContext, UnverifiedPostsContext,
 RelativeContext, HideTitlebarContext, SearchContext, SearchFlagContext, PostsContext, ShowDeletePostDialogContext,
-TagsContext, RandomFlagContext, ImageSearchFlagContext, SessionContext} from "../Context"
+TagsContext, RandomFlagContext, ImageSearchFlagContext, SessionContext, QuickEditIDContext, QuickEditUnverifiedContext} from "../Context"
 import {HashLink as Link} from "react-router-hash-link"
 import favicon from "../assets/purple/favicon.png"
 import faviconMagenta from "../assets/magenta/favicon.png"
@@ -45,6 +45,8 @@ import edit from "../assets/purple/edit.png"
 import editMagenta from "../assets/magenta/edit.png"
 import historyIcon from "../assets/purple/history.png"
 import historyMagenta from "../assets/magenta/history.png"
+import quickEdit from "../assets/purple/quickedit.png"
+import quickEditMagenta from "../assets/magenta/quickedit.png"
 import deleteIcon from "../assets/purple/delete.png"
 import deleteIconMagenta from "../assets/magenta/delete.png"
 import rejectRed from "../assets/purple/reject-red.png"
@@ -87,6 +89,8 @@ const MobileInfo: React.FunctionComponent<Props> = (props) => {
     const [uploaderRole, setUploaderRole] = useState("")
     const [updaterRole, setUpdaterRole] = useState("")
     const [suggestionsActive, setSuggestionsActive] = useState(false)
+    const {quickEditID, setQuickEditID} = useContext(QuickEditIDContext)
+    const {quickEditUnverified, setQuickEditUnverified} = useContext(QuickEditUnverifiedContext)
     const history = useHistory()
 
     const updateTags = async () => {
@@ -206,6 +210,11 @@ const MobileInfo: React.FunctionComponent<Props> = (props) => {
     const getDeleteIcon = () => {
         if (theme.includes("magenta")) return deleteIconMagenta
         return deleteIcon
+    }
+
+    const getQuickEdit = () => {
+        if (theme.includes("magenta")) return quickEditMagenta
+        return quickEdit
     }
 
     const generateArtistsJSX = () => {
@@ -374,6 +383,15 @@ const MobileInfo: React.FunctionComponent<Props> = (props) => {
         history.push(`/set-avatar/${props.post.postID}`)
     }
 
+    const triggerQuickEdit = () => {
+        if (props.unverified) {
+            setQuickEditUnverified(true)
+        } else {
+            setQuickEditUnverified(false)
+        }
+        setQuickEditID(props.post.postID)
+    }
+
     const generateUsernameJSX = (type?: string) => {
         let username = type === "uploader" ? props.post.uploader : props.post.updater 
         const role = type === "uploader" ? uploaderRole : updaterRole
@@ -510,6 +528,12 @@ const MobileInfo: React.FunctionComponent<Props> = (props) => {
 
                 {props.post && session.username ? 
                     <div className="mobileinfo-subcontainer-column">
+                        <div className="mobileinfo-row">
+                            <span className="tag-hover" onClick={triggerQuickEdit}>
+                                <img className="mobileinfo-icon" src={getQuickEdit()}/>
+                                <span className="tag">Quick Edit</span>
+                            </span>
+                        </div>
                         <div className="mobileinfo-row">
                             <span className="tag-hover" onClick={triggerSetAvatar}>
                                 <img className="mobileinfo-icon" src={getSetAvatar()}/>

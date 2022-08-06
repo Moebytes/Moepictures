@@ -15,7 +15,7 @@ const ModPostEdits: React.FunctionComponent = (props) => {
     const [hover, setHover] = useState(false)
     const {search, setSearch} = useContext(SearchContext)
     const {searchFlag, setSearchFlag} = useContext(SearchFlagContext)
-    const {unverifiedPosts, setUnverifiedPosts} = useContext(UnverifiedPostsContext)
+    const [unverifiedPosts, setUnverifiedPosts] = useState([]) as any
     const [index, setIndex] = useState(0)
     const [visiblePosts, setVisiblePosts] = useState([]) as any
     const [offset, setOffset] = useState(0)
@@ -119,7 +119,6 @@ const ModPostEdits: React.FunctionComponent = (props) => {
                         <span className="mod-post-link" onClick={() => history.push(`/user/${post.updater}`)}>Edited By: {functions.toProperCase(post.updater || "Deleted")}</span>
                         <span className="mod-post-text">Reason: {post.reason || "None provided."}</span>
                         <span className="mod-post-text">Tags: {post.tags.length}</span>
-                        <span className="mod-post-text">New Tags: {post.newTags}</span>
                         <span className="mod-post-text">Updated Date: {functions.prettyDate(new Date(post.updatedDate))}</span>
                     </div>
                     <div className="mod-post-options">

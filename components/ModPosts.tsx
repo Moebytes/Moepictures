@@ -15,7 +15,7 @@ const ModPosts: React.FunctionComponent = (props) => {
     const [hover, setHover] = useState(false)
     const {search, setSearch} = useContext(SearchContext)
     const {searchFlag, setSearchFlag} = useContext(SearchFlagContext)
-    const {unverifiedPosts, setUnverifiedPosts} = useContext(UnverifiedPostsContext)
+    const [unverifiedPosts, setUnverifiedPosts] = useState([]) as any
     const [index, setIndex] = useState(0)
     const [visiblePosts, setVisiblePosts] = useState([]) as any
     const [offset, setOffset] = useState(0)
@@ -119,7 +119,7 @@ const ModPosts: React.FunctionComponent = (props) => {
                         <span className="mod-post-link" onClick={() => history.push(`/user/${post.uploader}`)}>Uploader: {functions.toProperCase(post.uploader || "Deleted")}</span>
                         <span className="mod-post-text">Artist: {functions.toProperCase(post.artist || "None")} {post.thirdParty ? "(TP)" : ""}</span>
                         <span className="mod-post-text">Tags: {post.tags.length}</span>
-                        <span className="mod-post-text">New Tags: {post.newTags}</span>
+                        <span className="mod-post-text">New Tags: {post.newTags || 0}</span>
                     </div>
                     <div className="mod-post-text-column">
                         <span className="mod-post-text">Source: {post.link ? "yes" : "no"}</span>

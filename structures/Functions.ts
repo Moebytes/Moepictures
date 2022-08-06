@@ -1005,7 +1005,12 @@ export default class Functions {
                 uniqueTags.add(posts[i].tags[j])
             }
         }
-        let result = await axios.get("/api/tag/counts", {params: {tags: Array.from(uniqueTags)}, withCredentials: true}).then((r) => r.data)
+        const uniqueTagArray = Array.from(uniqueTags)
+        let result = await axios.get("/api/tag/counts", {params: {tags: uniqueTagArray}, withCredentials: true}).then((r) => r.data)
+        for (let i = 0; i < uniqueTagArray.length; i++) {
+            const found = result.find((r: any) => r.tag === uniqueTagArray[i])
+            if (!found) result.push({tag: uniqueTagArray[i], count: "0"})
+        }
         return result
     }
 
@@ -1017,7 +1022,26 @@ export default class Functions {
         let tags = [] as any
         for (let i = 0; i < parsedTags.length; i++) {
             const index = result.findIndex((r: any) => parsedTags[i].tag === r.tag)
-            if (index === -1) return {artists, characters, series, tags}
+            if (index === -1) {
+                const unverifiedTag = await axios.get("/api/tag/unverified", {params: {tag: parsedTags[i].tag}, withCredentials: true}).then((r) => r.data)
+                if (unverifiedTag) {
+                    const obj = {} as any 
+                    obj.tag = parsedTags[i].tag 
+                    obj.count = parsedTags[i].count 
+                    obj.image = unverifiedTag.image
+                    obj.description = unverifiedTag.description 
+                    if (unverifiedTag.type === "artist") {
+                        artists.push(obj)
+                    } else if (unverifiedTag.type === "character") {
+                        characters.push(obj)
+                    } else if (unverifiedTag.type === "series") {
+                        series.push(obj)
+                    } else {
+                        tags.push(obj)
+                    }
+                }
+                continue
+            }
             const obj = {} as any 
             obj.tag = parsedTags[i].tag 
             obj.count = parsedTags[i].count 

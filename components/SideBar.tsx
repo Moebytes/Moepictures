@@ -2,7 +2,7 @@ import React, {useContext, useEffect, useState, useReducer} from "react"
 import {useHistory} from "react-router-dom"
 import {ThemeContext, HideSidebarContext, HideNavbarContext, HideSortbarContext, EnableDragContext, MobileContext, UnverifiedPostsContext,
 RelativeContext, HideTitlebarContext, SidebarHoverContext, SearchContext, SearchFlagContext, PostsContext, ShowDeletePostDialogContext,
-TagsContext, RandomFlagContext, ImageSearchFlagContext, SidebarTextContext, SessionContext, MobileScrollingContext} from "../Context"
+TagsContext, RandomFlagContext, ImageSearchFlagContext, SidebarTextContext, SessionContext, MobileScrollingContext, QuickEditIDContext, QuickEditUnverifiedContext} from "../Context"
 import {HashLink as Link} from "react-router-hash-link"
 import favicon from "../assets/purple/favicon.png"
 import faviconMagenta from "../assets/magenta/favicon.png"
@@ -57,6 +57,8 @@ import addTranslation from "../assets/purple/addtranslation.png"
 import addTranslationMagenta from "../assets/magenta/addtranslation.png"
 import report from "../assets/purple/report.png"
 import reportMagenta from "../assets/magenta/report.png"
+import quickEdit from "../assets/purple/quickedit.png"
+import quickEditMagenta from "../assets/magenta/quickedit.png"
 import edit from "../assets/purple/edit.png"
 import editMagenta from "../assets/magenta/edit.png"
 import historyIcon from "../assets/purple/history.png"
@@ -115,6 +117,8 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
     const [getSearchImageIconHover, setSearchImageIconHover] = useState(false)
     const [getRandomIconHover, setRandomIconHover] = useState(false)
     const [getRandomMobileIconHover, setRandomMobileIconHover] = useState(false)
+    const {quickEditID, setQuickEditID} = useContext(QuickEditIDContext)
+    const {quickEditUnverified, setQuickEditUnverified} = useContext(QuickEditUnverifiedContext)
     const history = useHistory()
 
     const updateTags = async () => {
@@ -340,6 +344,11 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
         return setAvatar
     }
 
+    const getQuickEdit = () => {
+        if (theme.includes("magenta")) return quickEditMagenta
+        return quickEdit
+    }
+
     const getAddTranslation = () => {
         if (theme.includes("magenta")) return addTranslationMagenta
         return addTranslation
@@ -530,6 +539,15 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
         window.scrollTo(0, 0)
         history.push(`/set-avatar/${props.post.postID}`)
     }
+    
+    const triggerQuickEdit = () => {
+        if (props.unverified) {
+            setQuickEditUnverified(true)
+        } else {
+            setQuickEditUnverified(false)
+        }
+        setQuickEditID(props.post.postID)
+    }
 
     if (mobile) return (
         <>
@@ -696,6 +714,12 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
 
                 {props.post && session.username && !props.noActions ? 
                     <div className="sidebar-subcontainer">
+                        <div className="sidebar-row">
+                            <span className="tag-hover" onClick={triggerQuickEdit}>
+                                <img className="sidebar-icon" src={getQuickEdit()}/>
+                                <span className="tag">Quick Edit</span>
+                            </span>
+                        </div>
                         <div className="sidebar-row">
                             <span className="tag-hover" onClick={triggerSetAvatar}>
                                 <img className="sidebar-icon" src={getSetAvatar()}/>

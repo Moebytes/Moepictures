@@ -74,6 +74,8 @@ export const VisiblePostsContext = React.createContext<any>(null)
 export const ScrollYContext = React.createContext<any>(null)
 export const PostFlagContext = React.createContext<any>(null)
 export const MobileScrollingContext = React.createContext<any>(null)
+export const QuickEditIDContext = React.createContext<any>(null)
+export const QuickEditUnverifiedContext = React.createContext<any>(null)
 
 const Context: React.FunctionComponent = (props) => {
     const [brightness, setBrightness] = useState(100)
@@ -136,8 +138,12 @@ const Context: React.FunctionComponent = (props) => {
     const [visiblePosts, setVisiblePosts] = useState([])
     const [scrollY, setScrollY] = useState(null)
     const [postFlag, setPostFlag] = useState(false)
+    const [quickEditID, setQuickEditID] = useState(null)
+    const [quickEditUnverified, setQuickEditUnverified] = useState(false)
 return (
     <>
+        <QuickEditUnverifiedContext.Provider value={{quickEditUnverified, setQuickEditUnverified}}>
+        <QuickEditIDContext.Provider value={{quickEditID, setQuickEditID}}>
         <PostFlagContext.Provider value={{postFlag, setPostFlag}}>
         <ScrollYContext.Provider value={{scrollY, setScrollY}}>
         <VisiblePostsContext.Provider value={{visiblePosts, setVisiblePosts}}>
@@ -259,6 +265,8 @@ return (
         </VisiblePostsContext.Provider>
         </ScrollYContext.Provider>
         </PostFlagContext.Provider>
+        </QuickEditIDContext.Provider>
+        </QuickEditUnverifiedContext.Provider>
     </>
     )
 }

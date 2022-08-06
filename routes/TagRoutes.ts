@@ -27,6 +27,17 @@ const TagRoutes = (app: Express) => {
         }
     })
 
+    app.get("/api/tag/unverified", tagLimiter, async (req: Request, res: Response, next: NextFunction) => {
+        try {
+            let tag = req.query.tag as string
+            if (!tag) return res.status(400).send("Bad request")
+            let result = await sql.unverifiedTags([tag])
+            res.status(200).json(result?.[0])
+        } catch {
+            return res.status(400).send("Bad request")
+        }
+    })
+
     app.get("/api/tag/counts", tagLimiter, async (req: Request, res: Response, next: NextFunction) => {
         try {
             let tags = req.query.tags as string[]

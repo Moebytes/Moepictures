@@ -345,7 +345,7 @@ export default class SQLQuery {
   }
 
   /** Bulk insert new tags. */
-  public static bulkInsertTags = async (bulkTags: any[]) => {
+  public static bulkInsertTags = async (bulkTags: any[], noImageUpdate?: boolean) => {
     let rawValues = [] as any
     let valueArray = [] as any 
     let i = 1 
@@ -360,7 +360,7 @@ export default class SQLQuery {
     let valueQuery = `VALUES ${valueArray.join(", ")}`
     const query: QueryConfig = {
       text: `INSERT INTO "tags" ("tag", "type", "description", "image") ${valueQuery} 
-             ON CONFLICT ("tag") DO UPDATE SET "type" = EXCLUDED."type", "image" = EXCLUDED."image"`,
+             ON CONFLICT ("tag") DO UPDATE SET "type" = EXCLUDED."type"${noImageUpdate ? "" : ", \"image\" = EXCLUDED.\"image\""}`,
       values: [...rawValues]
     }
     return SQLQuery.run(query)
@@ -382,7 +382,7 @@ export default class SQLQuery {
   }
 
   /** Bulk insert new tags (unverified). */
-  public static bulkInsertUnverifiedTags = async (bulkTags: any[]) => {
+  public static bulkInsertUnverifiedTags = async (bulkTags: any[], noImageUpdate?: boolean) => {
     let rawValues = [] as any
     let valueArray = [] as any 
     let i = 1 
@@ -397,7 +397,7 @@ export default class SQLQuery {
     let valueQuery = `VALUES ${valueArray.join(", ")}`
     const query: QueryConfig = {
       text: `INSERT INTO "unverified tags" ("tag", "type", "description", "image") ${valueQuery} 
-             ON CONFLICT ("tag") DO UPDATE SET "type" = EXCLUDED."type", "image" = EXCLUDED."image"`,
+             ON CONFLICT ("tag") DO UPDATE SET "type" = EXCLUDED."type"${noImageUpdate ? "" : ", \"image\" = EXCLUDED.\"image\""}`,
       values: [...rawValues]
     }
     return SQLQuery.run(query)

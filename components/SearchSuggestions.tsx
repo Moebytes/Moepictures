@@ -16,6 +16,7 @@ interface Props {
     click?: (tag: string) => void
     type?: string
     sticky?: boolean
+    fontSize?: number
 }
 
 const SearchSuggestions: React.FunctionComponent<Props> = (props) => {
@@ -116,8 +117,8 @@ const SearchSuggestions: React.FunctionComponent<Props> = (props) => {
             }
             jsx.push(
                 <div className={`search-suggestions-row ${activeIndex === i ? "search-suggestions-active" : ""}`} onClick={() => tagClick()} onMouseEnter={() => setActiveIndex(i)}>
-                    <span className="search-suggestions-tag">{suggestions[i].tag.replaceAll("-", " ")}</span>
-                    <span className="search-suggestions-count">{suggestions[i].count}</span>
+                    <span className="search-suggestions-tag" style={props.fontSize ? {fontSize: `${props.fontSize}px`} : {}}>{suggestions[i].tag.replaceAll("-", " ")}</span>
+                    <span className="search-suggestions-count" style={props.fontSize ? {fontSize: `${props.fontSize - 3}px`} : {}}>{suggestions[i].count}</span>
                 </div>
             )
         }

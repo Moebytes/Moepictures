@@ -4,6 +4,8 @@ import slowDown from "express-slow-down"
 import sql from "../structures/SQLQuery"
 import functions from "../structures/Functions"
 import serverFunctions from "../structures/ServerFunctions"
+import phash from "sharp-phash"
+import imageSize from "image-size"
 import fs from "fs"
 import path from "path"
 
@@ -189,6 +191,296 @@ const PostRoutes = (app: Express) => {
             console.log(e)
             res.status(400).send("Bad request") 
         }
+    })
+
+    app.put("/api/post/quickedit", postLimiter, async (req: Request, res: Response, next: NextFunction) => {
+        try {
+            const postID = Number(req.body.postID)
+            const unverified = String(req.body.unverified) === "true"
+            let type = req.body.type 
+            const restrict = req.body.restrict 
+            const style = req.body.style
+            let artists = req.body.artists
+            let characters = req.body.characters
+            let series = req.body.series
+            let tags = req.body.tags
+    
+            if (Number.isNaN(postID)) return res.status(400).send("Bad request")
+            if (!req.session.username) return res.status(400).send("Not logged in")
+            if (req.session.role !== "admin" && req.session.role !== "mod") return res.status(403).end()
+    
+            if (!artists?.[0]) artists = ["unknown-artist"]
+            if (!series?.[0]) series = characters.includes("original") ? ["no-series"] : ["unknown-series"]
+            if (!characters?.[0]) characters = ["unknown-character"]
+            if (!tags?.[0]) tags = ["needs-tags"]
+    
+            artists = artists.filter(Boolean).map((t: string) => t.toLowerCase().replace(/[\n\r\s]+/g, "-"))
+            characters = characters.filter(Boolean).map((t: string) => t.toLowerCase().replace(/[\n\r\s]+/g, "-"))
+            series = series.filter(Boolean).map((t: string) => t.toLowerCase().replace(/[\n\r\s]+/g, "-"))
+            tags = tags.filter(Boolean).map((t: string) => t.toLowerCase().replace(/[\n\r\s]+/g, "-"))
+    
+            if (!functions.validType(type)) return res.status(400).send("Invalid type")
+            if (!functions.validRestrict(restrict)) return res.status(400).send("Invalid restrict")
+            if (!functions.validStyle(style)) return res.status(400).send("Invalid style")
+    
+            const post = await sql.post(postID)
+            if (!post) return res.status(400).send("Bad request")
+    
+            const updatedDate = new Date().toISOString()
+
+            if (unverified) {
+                await sql.bulkUpdateUnverifiedPost(postID, {
+                    type,
+                    restrict, 
+                    style,
+                    updatedDate,
+                    updater: req.session.username
+                })
+            } else {
+                await sql.bulkUpdatePost(postID, {
+                    type,
+                    restrict, 
+                    style,
+                    updatedDate,
+                    updater: req.session.username
+                })
+            }
+    
+            let tagMap = [] as any
+            let bulkTagUpdate = [] as any
+    
+            for (let i = 0; i < artists.length; i++) {
+              if (!artists[i]) continue
+              let bulkObj = {tag: artists[i], type: "artist", description: "Artist.", image: null} as any
+              bulkTagUpdate.push(bulkObj)
+              tagMap.push(artists[i])
+            }
+            
+            for (let i = 0; i < characters.length; i++) {
+                if (!characters[i]) continue
+                let bulkObj = {tag: characters[i], type: "character", description: "Character.", image: null} as any
+                bulkTagUpdate.push(bulkObj)
+                tagMap.push(characters[i])
+            }
+
+            for (let i = 0; i < series.length; i++) {
+                if (!series[i]) continue
+                let bulkObj = {tag: series[i], type: "series", description: "Series.", image: null} as any
+                bulkTagUpdate.push(bulkObj)
+                tagMap.push(series[i])
+            }
+
+            for (let i = 0; i < tags.length; i++) {
+                if (!tags[i]) continue
+                let bulkObj = {tag: tags[i], type: "tag", description: `${functions.toProperCase(tags[i]).replaceAll("-", " ")}.`, image: null} as any
+                bulkTagUpdate.push(bulkObj)
+                tagMap.push(tags[i])
+            }
+    
+            tagMap = functions.removeDuplicates(tagMap)
+            if (unverified) {
+                await sql.purgeUnverifiedTagMap(postID)
+                await sql.bulkInsertUnverifiedTags(bulkTagUpdate, true)
+                await sql.insertUnverifiedTagMap(postID, tagMap)
+            } else {
+                await sql.purgeTagMap(postID)
+                await sql.bulkInsertTags(bulkTagUpdate, true)
+                await sql.insertTagMap(postID, tagMap)
+            }
+            res.status(200).send("Success")
+          } catch (e) {
+            console.log(e)
+            res.status(400).send("Bad request")
+          }
+    })
+
+    app.put("/api/post/quickedit/unverified", postLimiter, async (req: Request, res: Response, next: NextFunction) => {
+        try {
+            let postID = Number(req.body.postID)
+            let type = req.body.type 
+            const restrict = req.body.restrict 
+            const style = req.body.style
+            let artists = req.body.artists
+            let characters = req.body.characters
+            let series = req.body.series
+            let tags = req.body.tags
+            let reason = req.body.reason
+    
+            if (Number.isNaN(postID)) return res.status(400).send("Bad request")
+            if (!req.session.username) return res.status(400).send("Not logged in")
+    
+            if (!artists?.[0]) artists = ["unknown-artist"]
+            if (!series?.[0]) series = characters.includes("original") ? ["no-series"] : ["unknown-series"]
+            if (!characters?.[0]) characters = ["unknown-character"]
+            if (!tags?.[0]) tags = ["needs-tags"]
+    
+            artists = artists.filter(Boolean).map((t: string) => t.toLowerCase().replace(/[\n\r\s]+/g, "-"))
+            characters = characters.filter(Boolean).map((t: string) => t.toLowerCase().replace(/[\n\r\s]+/g, "-"))
+            series = series.filter(Boolean).map((t: string) => t.toLowerCase().replace(/[\n\r\s]+/g, "-"))
+            tags = tags.filter(Boolean).map((t: string) => t.toLowerCase().replace(/[\n\r\s]+/g, "-"))
+    
+            if (!functions.validType(type)) return res.status(400).send("Invalid type")
+            if (!functions.validRestrict(restrict)) return res.status(400).send("Invalid restrict")
+            if (!functions.validStyle(style)) return res.status(400).send("Invalid style")
+    
+            const originalPostID = postID as any
+            const post = await sql.post(originalPostID)
+            if (!post) return res.status(400).send("Bad request")
+            postID = await sql.insertUnverifiedPost()
+
+            if (post.thirdParty) {
+                const thirdPartyID = await sql.parent(originalPostID).then((r) => r.parentID)
+                await sql.insertUnverifiedThirdParty(postID, Number(thirdPartyID))
+            }
+            if (type !== "comic") type = "image"
+
+            for (let i = 0; i < post.images.length; i++) {
+                const imagePath = functions.getImagePath(post.images[i].type, originalPostID, post.images[i].filename)
+                const buffer = await serverFunctions.getFile(imagePath) as Buffer
+                let order = i + 1
+                const ext = path.extname(post.images[i].filename).replace(".", "")
+                let fileOrder = post.images.length > 1 ? `${order}` : ""
+                const filename = post.title ? `${post.title}${fileOrder}.${ext}` : 
+                characters[0] !== "unknown-character" ? `${characters[0]}${fileOrder}.${ext}` :
+                `${postID}${fileOrder ? `-${fileOrder}` : ""}.${ext}`
+                let kind = "image" as any
+                if (type === "comic") {
+                    kind = "comic"
+                } else if (ext === "jpg" || ext === "png") {
+                    kind = "image"
+                } else if (ext === "webp") {
+                    const animated = await functions.isAnimatedWebp(buffer)
+                    if (animated) {
+                        kind = "animation"
+                    if (type !== "video") type = "animation"
+                    } else {
+                        kind = "image"
+                    }
+                } else if (ext === "gif") {
+                    kind = "animation"
+                    if (type !== "video") type = "animation"
+                } else if (ext === "mp4" || ext === "webm") {
+                    kind = "video"
+                    type = "video"
+                }
+
+                let newImagePath = functions.getImagePath(kind, postID, filename)
+                await serverFunctions.uploadUnverifiedFile(newImagePath, buffer)
+                let dimensions = null as any
+                let hash = ""
+                if (kind === "video") {
+                    const buffer = functions.base64ToBuffer(post.thumbnail)
+                    hash = await phash(buffer).then((hash: string) => functions.binaryToHex(hash))
+                    dimensions = imageSize(buffer)
+                } else {
+                    hash = await phash(buffer).then((hash: string) => functions.binaryToHex(hash))
+                    dimensions = imageSize(buffer)
+                }
+                await sql.insertUnverifiedImage(postID, filename, type, order, hash, dimensions.width, dimensions.height, String(buffer.byteLength))
+            }
+    
+            const updatedDate = new Date().toISOString()
+            await sql.bulkUpdateUnverifiedPost(postID, {
+                originalID: originalPostID ? originalPostID : null,
+                reason: reason ? reason : null,
+                type,
+                restrict, 
+                style, 
+                thirdParty: post.thirdParty,
+                title: post.title ? post.title : null,
+                translatedTitle: post.translatedTitle ? post.translatedTitle : null,
+                artist: post.artist ? post.artist : null,
+                drawn: post.date ? post.date : null,
+                link: post.link ? post.link : null,
+                commentary: post.commentary ? post.commentary : null,
+                translatedCommentary: post.translatedCommentary ? post.translatedCommentary : null,
+                uploader: post.uploader,
+                uploadDate: post.uploadDate,
+                updatedDate,
+                updater: req.session.username
+            })
+
+            let tagMap = [] as any
+            let bulkTagUpdate = [] as any
+    
+            for (let i = 0; i < artists.length; i++) {
+                if (!artists[i]) continue
+                let bulkObj = {tag: artists[i], type: "artist", description: "Artist.", image: null} as any
+                const existingTag = await sql.tag(artists[i])
+                if (existingTag) {
+                    if (existingTag.description) bulkObj.description = existingTag.description
+                    if (existingTag.image) {
+                        const imagePath = functions.getTagPath("artist", existingTag.image)
+                        const buffer = await serverFunctions.getFile(imagePath)
+                        await serverFunctions.uploadUnverifiedFile(imagePath, buffer)
+                        bulkObj.image = existingTag.image
+                    }
+                }
+                bulkTagUpdate.push(bulkObj)
+                tagMap.push(artists[i])
+            }
+            
+            for (let i = 0; i < characters.length; i++) {
+                if (!characters[i]) continue
+                let bulkObj = {tag: characters[i], type: "character", description: "Character.", image: null} as any
+                const existingTag = await sql.tag(characters[i])
+                if (existingTag) {
+                    if (existingTag.description) bulkObj.description = existingTag.description
+                    if (existingTag.image) {
+                        const imagePath = functions.getTagPath("character", existingTag.image)
+                        const buffer = await serverFunctions.getFile(imagePath)
+                        await serverFunctions.uploadUnverifiedFile(imagePath, buffer)
+                        bulkObj.image = existingTag.image
+                    }
+                }
+                bulkTagUpdate.push(bulkObj)
+                tagMap.push(characters[i])
+            }
+
+            for (let i = 0; i < series.length; i++) {
+                if (!series[i]) continue
+                let bulkObj = {tag: series[i], type: "series", description: "Series.", image: null} as any
+                const existingTag = await sql.tag(series[i])
+                if (existingTag) {
+                    if (existingTag.description) bulkObj.description = existingTag.description
+                    if (existingTag.image) {
+                        const imagePath = functions.getTagPath("series", existingTag.image)
+                        const buffer = await serverFunctions.getFile(imagePath)
+                        await serverFunctions.uploadUnverifiedFile(imagePath, buffer)
+                        bulkObj.image = existingTag.image
+                    }
+                }
+                bulkTagUpdate.push(bulkObj)
+                tagMap.push(series[i])
+            }
+
+            for (let i = 0; i < tags.length; i++) {
+                if (!tags[i]) continue
+                let bulkObj = {tag: tags[i], type: "tag", description: `${functions.toProperCase(tags[i]).replaceAll("-", " ")}.`, image: null} as any
+                const existingTag = await sql.tag(tags[i])
+                if (existingTag) {
+                    if (existingTag.description) bulkObj.description = existingTag.description
+                    if (existingTag.image) {
+                        const imagePath = functions.getTagPath("tag", existingTag.image)
+                        const buffer = await serverFunctions.getFile(imagePath)
+                        await serverFunctions.uploadUnverifiedFile(imagePath, buffer)
+                        bulkObj.image = existingTag.image
+                    }
+                }
+                bulkTagUpdate.push(bulkObj)
+                tagMap.push(tags[i])
+            }
+    
+            tagMap = functions.removeDuplicates(tagMap)
+            await sql.purgeUnverifiedTagMap(postID)
+            await sql.bulkInsertUnverifiedTags(bulkTagUpdate, true)
+            await sql.insertUnverifiedTagMap(postID, tagMap)
+    
+            res.status(200).send("Success")
+          } catch (e) {
+            console.log(e)
+            res.status(400).send("Bad request")
+          }
     })
 }
 
