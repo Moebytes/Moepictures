@@ -20,6 +20,10 @@ const Commentary: React.FunctionComponent<Props> = (props) => {
     const [translatedText, setTranslatedText] = useState(null)
 
     useEffect(() => {
+        setText(props.text)
+    }, [props.text])
+
+    useEffect(() => {
         if (showTranslated) {
             if (props.translated) {
                 setText(props.translated)

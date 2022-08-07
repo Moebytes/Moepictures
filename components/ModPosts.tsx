@@ -107,7 +107,7 @@ const ModPosts: React.FunctionComponent = (props) => {
             const imgClick = () => {
                 history.push(`/unverified/post/${post.postID}`)
             }
-            const img = functions.getUnverifiedImageLink(post.images[0].type, post.postID, post.images[0].filename)
+            const img = functions.getUnverifiedThumbnailLink(post.images[0].type, post.postID, post.images[0].filename, "tiny")
             jsx.push(
                 <div className="mod-post" onMouseEnter={() =>setHover(true)} onMouseLeave={() => setHover(false)}>
                     <div className="mod-post-img-container">

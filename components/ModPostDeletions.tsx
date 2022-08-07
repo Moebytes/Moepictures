@@ -108,7 +108,7 @@ const ModPostDeletions: React.FunctionComponent = (props) => {
             const imgClick = () => {
                 history.push(`/post/${request.postID}`)
             }
-            const img = functions.getImageLink(request.post.images[0].type, request.postID, request.post.images[0].filename)
+            const img = functions.getThumbnailLink(request.post.images[0].type, request.postID, request.post.images[0].filename, "tiny")
             jsx.push(
                 <div className="mod-post" onMouseEnter={() =>setHover(true)} onMouseLeave={() => setHover(false)}>
                     <div className="mod-post-img-container">

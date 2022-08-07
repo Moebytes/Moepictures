@@ -61,7 +61,7 @@ const UserPage: React.FunctionComponent<Props> = (props) => {
     const updateUploads = async () => {
         const uploads = await axios.get("/api/user/uploads", {params: {username}, withCredentials: true}).then((r) => r.data)
         const filtered = uploads.filter((u: any) => u.post?.restrict !== "explicit")
-        const images = filtered.map((p: any) => functions.getImageLink(p.images[0].type, p.postID, p.images[0].filename))
+        const images = filtered.map((p: any) => functions.getThumbnailLink(p.images[0].type, p.postID, p.images[0].filename, "tiny"))
         setUploads(filtered)
         setUploadImages(images)
     }
@@ -69,7 +69,7 @@ const UserPage: React.FunctionComponent<Props> = (props) => {
     const updateFavorites = async () => {
         const favorites = await axios.get("/api/user/favorites", {params: {username}, withCredentials: true}).then((r) => r.data)
         const filtered = favorites.filter((f: any) => f.post?.restrict !== "explicit")
-        const images = filtered.map((f: any) => functions.getImageLink(f.post.images[0].type, f.postID, f.post.images[0].filename))
+        const images = filtered.map((f: any) => functions.getThumbnailLink(f.post.images[0].type, f.postID, f.post.images[0].filename, "tiny"))
         setFavorites(filtered)
         setFavoriteImages(images)
     }

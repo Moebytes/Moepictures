@@ -54,6 +54,10 @@ const ImageGrid: React.FunctionComponent = (props) => {
         return mobile ? functions.getImagesPerRowMobile(sizeType) : functions.getImagesPerRow(sizeType)
     }
 
+    useEffect(() => {
+        console.log(visiblePosts)
+    }, [visiblePosts])
+
     const searchPosts = async () => {
         if (searchFlag) setSearchFlag(false)
         setNoResults(false)
@@ -141,8 +145,8 @@ const ImageGrid: React.FunctionComponent = (props) => {
 
     useEffect(() => {
         const updatePosts = async () => {
-            let currentIndex = index
-            const newVisiblePosts = visiblePosts as any
+            let currentIndex = 0
+            const newVisiblePosts = [] as any
             for (let i = 0; i < getInitLoadAmount(); i++) {
                 if (!posts[currentIndex]) break
                 const post = posts[currentIndex]
