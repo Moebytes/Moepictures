@@ -54,10 +54,6 @@ const ImageGrid: React.FunctionComponent = (props) => {
         return mobile ? functions.getImagesPerRowMobile(sizeType) : functions.getImagesPerRow(sizeType)
     }
 
-    useEffect(() => {
-        console.log(visiblePosts)
-    }, [visiblePosts])
-
     const searchPosts = async () => {
         if (searchFlag) setSearchFlag(false)
         setNoResults(false)
