@@ -221,7 +221,11 @@ export default class Functions {
             !email.endsWith("@icloud.com") && 
             !email.endsWith("@yahoo.com") &&
             !email.endsWith("@hotmail.com") &&
-            !email.endsWith("@outlook.com")) return "Email provider not accepted. Allowed providers: gmail.com, icloud.com, yahoo.com, hotmail.com, outlook.com."
+            !email.endsWith("@outlook.com") && 
+            !email.endsWith("@protonmail.com") &&
+            !email.endsWith("@proton.me") &&
+            !email.endsWith("@aol.com") &&
+            !email.endsWith("@zoho.com")) return "Email provider not accepted. Allowed providers: gmail.com, icloud.com, yahoo.com, hotmail.com, outlook.com, protonmail.com, proton.me, aol.com, zoho.com."
         return null
     }
 
