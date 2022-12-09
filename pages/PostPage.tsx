@@ -51,6 +51,7 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
     const [parentPost, setParentPost] = useState(null) as any
     const [image, setImage] = useState("") as any
     const [post, setPost] = useState(null) as any
+    const [loaded, setLoaded] = useState(false)
     const [tagCategories, setTagCategories] = useState(null) as any
     const history = useHistory()
     const postID = Number(props?.match.params.id)
@@ -94,6 +95,7 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
 
     useEffect(() => {
         if (!session.cookie || !post) return
+        if (post.postID !== postID) return
         if (!session.username && post.restrict !== "safe") {
             setRedirect(`/post/${postID}`)
             history.push("/login")
@@ -102,7 +104,11 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
         if (post.restrict === "explicit") {
             if (!permissions.isAdmin(session)) {
                 history.push("/403")
+            } else {
+                setLoaded(true)
             }
+        } else {
+            setLoaded(true)
         }
     }, [session, post])
 
@@ -147,6 +153,7 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
     useEffect(() => {
         const source = axios.CancelToken.source()
         const updatePost = async () => {
+            setLoaded(false)
             let post = posts.find((p: any) => p.postID === postID)
             if (!post) post = await axios.get("/api/post", {params: {postID}, withCredentials: true, cancelToken: source.token}).then((r) => r.data)
             if (post) {
@@ -169,6 +176,7 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
     useEffect(() => {
         const source = axios.CancelToken.source()
         const updatePost = async () => {
+            setLoaded(false)
             setPostFlag(false)
             let post = await axios.get("/api/post", {params: {postID}, withCredentials: true, cancelToken: source.token}).then((r) => r.data)
             if (post) {
@@ -221,6 +229,17 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
         setImage(image)
     }
 
+    const nsfwChecker = () => {
+        if (!post) return false
+        if (post.postID !== postID) return false
+        if (post.restrict !== "safe") {
+            if (loaded) return true 
+            return false
+        } else {
+            return true
+        }
+    }
+
     return (
         <>
         <DragAndDrop/>
@@ -238,11 +257,11 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
             }
             <div className="content" onMouseEnter={() => setEnableDrag(true)}>
                 <div className="post-container">
-                    {images.length > 1 ?
+                    {nsfwChecker() && images.length > 1 ?
                     <div className="carousel-container">
                         <Carousel images={images} set={set}/>
                     </div> : null}
-                    {post ? <>
+                    {nsfwChecker() && post ? <>
                     <PostImage img={image} comicPages={post.type === "comic" ? images : null}/>
                     <PostImageOptions img={image} post={post} comicPages={post.type === "comic" ? images : null} download={download} next={next} previous={previous}/>
                     </> : null}
