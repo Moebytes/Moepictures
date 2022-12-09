@@ -139,6 +139,21 @@ const ImageGrid: React.FunctionComponent = (props) => {
         setPostAmount(index)
     }, [index])
 
+    const getResultCount = () => {
+        let resultPosts = [] as any
+        for (let i = 0; i < posts.length; i++) {
+            const post = posts[i] as any
+            if (post.thirdParty) continue
+            if (!session.username) if (post.restrict !== "safe") continue
+            if (restrictType !== "explicit") if (post.restrict === "explicit") continue
+            if (!permissions.isStaff(session)) if (post.restrict === "explicit") continue
+            const image = post.images[0]
+            if (!image) continue
+            resultPosts.push(post)
+        }
+        return resultPosts.length
+    }
+
     useEffect(() => {
         const updatePosts = async () => {
             let currentIndex = 0
@@ -151,7 +166,8 @@ const ImageGrid: React.FunctionComponent = (props) => {
             }
             setIndex(currentIndex)
             setVisiblePosts(functions.removeDuplicates(newVisiblePosts))
-            setSidebarText(`${Number(posts[0]?.postCount) === 1 ? `1 result.` : `${posts[0]?.postCount || 0} results.`}`)
+            const resultCount = getResultCount()
+            setSidebarText(`${resultCount === 1 ? `1 result.` : `${resultCount || 0} results.`}`)
             localStorage.setItem("savedPosts", JSON.stringify(posts))
         }
         updatePosts()
@@ -229,7 +245,7 @@ const ImageGrid: React.FunctionComponent = (props) => {
             if (post.thirdParty) continue
             if (!session.username) if (post.restrict !== "safe") continue
             if (restrictType !== "explicit") if (post.restrict === "explicit") continue
-            if (!permissions.isAdmin(session)) if (post.restrict === "explicit") continue
+            if (!permissions.isStaff(session)) if (post.restrict === "explicit") continue
             const image = post.images[0]
             if (!image) continue
             const images = post.images.map((i: any) => functions.getImageLink(i.type, post.postID, i.filename))

@@ -172,7 +172,7 @@ const TagsPage: React.FunctionComponent = (props) => {
         const tags = functions.removeDuplicates(visibleTags) as any
         for (let i = 0; i < tags.length; i++) {
             if (!session.username) if (functions.arrayIncludes(tags[i].tag, matureTags)) continue
-            if (!permissions.isAdmin(session)) if (functions.arrayIncludes(tags[i].tag, matureTags)) continue
+            if (!permissions.isStaff(session)) if (functions.arrayIncludes(tags[i].tag, matureTags)) continue
             jsx.push(<TagRow tag={tags[i]} onDelete={updateTags} onEdit={updateTags}/>)
         }
         return jsx

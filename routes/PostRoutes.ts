@@ -23,6 +23,9 @@ const PostRoutes = (app: Express) => {
             const postID = req.query.postID as string
             if (Number.isNaN(Number(postID))) return res.status(400).send("Invalid postID")
             let result = await sql.post(Number(postID))
+            if (req.session.role !== "admin" && req.session.role !== "mod") {
+                if (result.restrict === "explicit") return res.status(403).send("No permission")
+            }
             if (result.images.length > 1) {
                 result.images = result.images.sort((a: any, b: any) => a.order - b.order)
             }
@@ -38,6 +41,9 @@ const PostRoutes = (app: Express) => {
             const postID = req.query.postID
             if (Number.isNaN(Number(postID))) return res.status(400).send("Invalid postID")
             const result = await sql.comments(Number(postID))
+            if (req.session.role !== "admin" && req.session.role !== "mod") {
+                if (result.restrict === "explicit") return res.status(403).send("No permission")
+            }
             res.status(200).json(result)
         } catch {
             res.status(400).send("Bad request") 
@@ -67,7 +73,10 @@ const PostRoutes = (app: Express) => {
         try {
             const postID = req.query.postID as string
             if (Number.isNaN(Number(postID))) return res.status(400).send("Invalid postID")
-            const posts = await sql.thirdParty(Number(postID))
+            let posts = await sql.thirdParty(Number(postID))
+            if (req.session.role !== "admin" && req.session.role !== "mod") {
+                posts = posts.filter((p: any) => p.restrict !== "explicit")
+            }
             res.status(200).json(posts)
         } catch {
             return res.status(400).send("Bad request")
@@ -79,6 +88,9 @@ const PostRoutes = (app: Express) => {
             const postID = req.query.postID as string
             if (Number.isNaN(Number(postID))) return res.status(400).send("Invalid postID")
             const post = await sql.parent(Number(postID))
+            if (req.session.role !== "admin" && req.session.role !== "mod") {
+                if (post.restrict === "explicit") return res.status(403).send("No permission")
+            }
             res.status(200).json(post)
         } catch {
             return res.status(400).send("Bad request")

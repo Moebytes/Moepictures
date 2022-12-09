@@ -59,7 +59,7 @@ const CommentRoutes = (app: Express) => {
             await sql.updateComment(Number(commentID), comment as string)
             res.status(200).send("Success")
         } catch {
-            res.status(400).send("Bad request") 
+            res.status(400).send("Bad request")
         }
     })
 

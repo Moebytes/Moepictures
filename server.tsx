@@ -118,6 +118,13 @@ for (let i = 0; i < folders.length; i++) {
     try {
       res.setHeader("Content-Type", mime.getType(req.path) ?? "")
       const key = decodeURIComponent(req.path.slice(1))
+      if (req.session.role !== "admin" && req.session.role !== "mod") {
+        const postID = key.match(/(?<=\/)\d+(?=\/)/)?.[0]
+        if (postID) {
+          const post = await sql.post(Number(postID))
+          if (post.restrict === "explicit") return res.status(403).send("No permission")
+        }
+      }
       const body = await s3.getObject({Key: key, Bucket: "moebooru"}).promise().then((r) => r.Body) as any
       const contentLength = body.length
       if (req.headers.range) {
@@ -170,6 +177,13 @@ for (let i = 0; i < folders.length; i++) {
       const mimeType = mime.getType(req.path)
       res.setHeader("Content-Type", mimeType ?? "")
       const key = decodeURIComponent(req.path.replace(`/thumbnail/${req.params.size}/`, ""))
+      if (req.session.role !== "admin" && req.session.role !== "mod") {
+        const postID = key.match(/(?<=\/)\d+(?=\/)/)?.[0]
+        if (postID) {
+          const post = await sql.post(Number(postID))
+          if (post.restrict === "explicit") return res.status(403).send("No permission")
+        }
+      }
       let body = await s3.getObject({Key: key, Bucket: "moebooru"}).promise().then((r) => r.Body) as any
       let contentLength = body.length
       if (mimeType?.includes("image")) {

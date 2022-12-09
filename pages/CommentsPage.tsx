@@ -175,7 +175,7 @@ const CommentsPage: React.FunctionComponent = (props) => {
         const jsx = [] as any
         for (let i = 0; i < visibleComments.length; i++) {
             if (!session.username) if (visibleComments[i].post.restrict !== "safe") continue
-            if (!permissions.isAdmin(session)) if (visibleComments[i].post.restrict === "explicit") continue
+            if (!permissions.isStaff(session)) if (visibleComments[i].post.restrict === "explicit") continue
             jsx.push(<CommentRow comment={visibleComments[i]} onDelete={updateComments} onEdit={updateComments}/>)
         }
         return jsx

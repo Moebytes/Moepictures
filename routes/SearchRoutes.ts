@@ -24,7 +24,7 @@ const SearchRoutes = (app: Express) => {
             const offset = req.query.offset as string
             if (!functions.validType(type, true)) return res.status(400).send("Invalid type")
             if (!functions.validRestrict(restrict, true)) return res.status(400).send("Invalid restrict")
-            if (restrict === "explicit") if (req.session?.role !== "admin") return res.status(403).send("No permission")
+            if (restrict === "explicit") if (req.session.role !== "admin" && req.session.role !== "mod") return res.status(403).send("No permission")
             if (!functions.validStyle(style, true)) return res.status(400).send("Invalid style")
             if (!functions.validSort(sort)) return res.status(400).send("Invalid sort")
             const tags = query.trim().split(/ +/g).filter(Boolean)
@@ -50,6 +50,9 @@ const SearchRoutes = (app: Express) => {
                 }
                 return p 
             })
+            if (req.session.role !== "admin" && req.session.role !== "mod") {
+                result = result.filter((p: any) => p.restrict !== "explicit")
+            }
             res.status(200).json(result)
         } catch (e) {
             console.log(e)
@@ -65,7 +68,7 @@ const SearchRoutes = (app: Express) => {
             const offset = req.query.offset as string
             if (!functions.validType(type, true)) return res.status(400).send("Invalid type")
             if (!functions.validRestrict(restrict, true)) return res.status(400).send("Invalid restrict")
-            if (restrict === "explicit") if (req.session?.role !== "admin") return res.status(403).send("No permission")
+            if (restrict === "explicit") if (req.session.role !== "admin" && req.session.role !== "mod") return res.status(403).send("No permission")
             if (!functions.validStyle(style, true)) return res.status(400).send("Invalid style")
             let result = await sql.random(type, restrict, style, offset)
             result = result.map((p: any) => {
@@ -74,6 +77,9 @@ const SearchRoutes = (app: Express) => {
                 }
                 return p 
             })
+            if (req.session.role !== "admin" && req.session.role !== "mod") {
+                result = result.filter((p: any) => p.restrict !== "explicit")
+            }
             res.status(200).json(result)
         } catch (e) {
             console.log(e)

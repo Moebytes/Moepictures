@@ -1211,7 +1211,7 @@ const EditUnverifiedPostPage: React.FunctionComponent<Props> = (props) => {
                     </button>
                 </div>
                 <div className="editpost-row">
-                    {permissions.isAdmin(session) ?
+                    {permissions.isStaff(session) ?
                     <button className={`editpost-button ${restrict === "explicit" ? "button-selected" : ""}`} onClick={() => setRestrict("explicit")}>
                         <img className="editpost-button-img" src={explicit}/>
                         <span className="editpost-button-text">Explicit</span>
@@ -1227,7 +1227,7 @@ const EditUnverifiedPostPage: React.FunctionComponent<Props> = (props) => {
                         <img className="editpost-button-img" src={questionable}/>
                         <span className="editpost-button-text">Questionable</span>
                     </button>
-                    {permissions.isAdmin(session) ?
+                    {permissions.isStaff(session) ?
                     <button className={`editpost-button ${restrict === "explicit" ? "button-selected" : ""}`} onClick={() => setRestrict("explicit")}>
                         <img className="editpost-button-img" src={explicit}/>
                         <span className="editpost-button-text">Explicit</span>

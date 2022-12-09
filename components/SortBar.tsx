@@ -787,7 +787,7 @@ const SortBar: React.FunctionComponent = (props) => {
                     <img className="sortbar-dropdown-img" src={getQuestionable()}/>
                     <span className="sortbar-dropdown-text">Questionable</span>
                 </div>
-                {permissions.isAdmin(session) ?
+                {permissions.isStaff(session) ?
                 <div className="sortbar-dropdown-row" onClick={() => setRestrictType("explicit")}>
                     <img className="sortbar-dropdown-img" src={getExplicit()}/>
                     <span className="sortbar-dropdown-text">Explicit</span>

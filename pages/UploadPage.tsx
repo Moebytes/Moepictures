@@ -1158,7 +1158,7 @@ const UploadPage: React.FunctionComponent = (props) => {
                     </button>
                 </div>
                 <div className="upload-row">
-                    {permissions.isAdmin(session) ?
+                    {permissions.isStaff(session) ?
                     <button className={`upload-button ${restrict === "explicit" ? "button-selected" : ""}`} onClick={() => setRestrict("explicit")}>
                         <img className="upload-button-img" src={explicit}/>
                         <span className="upload-button-text">Explicit</span>
@@ -1174,7 +1174,7 @@ const UploadPage: React.FunctionComponent = (props) => {
                         <img className="upload-button-img" src={questionable}/>
                         <span className="upload-button-text">Questionable</span>
                     </button>
-                    {permissions.isAdmin(session) ?
+                    {permissions.isStaff(session) ?
                     <button className={`upload-button ${restrict === "explicit" ? "button-selected" : ""}`} onClick={() => setRestrict("explicit")}>
                         <img className="upload-button-img" src={explicit}/>
                         <span className="upload-button-text">Explicit</span>

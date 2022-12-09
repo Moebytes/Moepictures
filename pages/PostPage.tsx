@@ -102,7 +102,7 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
             setSidebarText("Login required.")
         }
         if (post.restrict === "explicit") {
-            if (!permissions.isAdmin(session)) {
+            if (!permissions.isStaff(session)) {
                 history.push("/403")
             } else {
                 setLoaded(true)

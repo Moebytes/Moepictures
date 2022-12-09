@@ -288,7 +288,7 @@ const QuickEditDialog: React.FunctionComponent = (props) => {
                                 </button>
                             </div>
                             <div className="quickedit-dialog-row">
-                                {permissions.isAdmin(session) ?
+                                {permissions.isStaff(session) ?
                                 <button className={`quickedit-button ${restrict === "explicit" ? "button-selected" : ""}`} onClick={() => setRestrict("explicit")}>
                                     <img className="quickedit-button-img" src={explicit}/>
                                     <span className="quickedit-button-text">Explicit</span>
@@ -304,7 +304,7 @@ const QuickEditDialog: React.FunctionComponent = (props) => {
                                     <img className="quickedit-button-img" src={questionable}/>
                                     <span className="quickedit-button-text">Questionable</span>
                                 </button>
-                                {permissions.isAdmin(session) ?
+                                {permissions.isStaff(session) ?
                                 <button className={`quickedit-button ${restrict === "explicit" ? "button-selected" : ""}`} onClick={() => setRestrict("explicit")}>
                                     <img className="quickedit-button-img" src={explicit}/>
                                     <span className="quickedit-button-text">Explicit</span>
@@ -409,7 +409,7 @@ const QuickEditDialog: React.FunctionComponent = (props) => {
                                 <img className="quickedit-button-img" src={questionable}/>
                                 <span className="quickedit-button-text">Questionable</span>
                             </button>
-                            {permissions.isAdmin(session) ?
+                            {permissions.isStaff(session) ?
                             <button className={`quickedit-button ${restrict === "explicit" ? "button-selected" : ""}`} onClick={() => setRestrict("explicit")}>
                                 <img className="quickedit-button-img" src={explicit}/>
                                 <span className="quickedit-button-text">Explicit</span>
