@@ -88,6 +88,7 @@ const CreateRoutes = (app: Express) => {
         let tags = req.body.tags
         let newTags = req.body.newTags
         let unverifiedID = req.body.unverifiedID
+        const noImageUpdate = req.body.noImageUpdate
 
         if (!req.session.username) return res.status(400).send("Not logged in")
         if (req.session.role !== "admin" && req.session.role !== "mod") return res.status(403).end()
@@ -203,6 +204,8 @@ const CreateRoutes = (app: Express) => {
 
         for (let i = 0; i < newTags.length; i++) {
           if (!newTags[i].tag) continue
+          const isAlias = await sql.alias(newTags[i].tag)
+          if (isAlias) continue
           let bulkObj = {tag: newTags[i].tag, type: "tag", description: null, image: null} as any
           if (newTags[i].desc) bulkObj.description = newTags[i].desc
           if (newTags[i].image) {
@@ -261,7 +264,7 @@ const CreateRoutes = (app: Express) => {
 
         tagMap = functions.removeDuplicates(tagMap)
 
-        await sql.bulkInsertTags(bulkTagUpdate)
+        await sql.bulkInsertTags(bulkTagUpdate, noImageUpdate ? true : false)
         await sql.insertTagMap(postID, tagMap)
 
         if (unverifiedID) {
