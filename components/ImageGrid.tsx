@@ -42,12 +42,12 @@ const ImageGrid: React.FunctionComponent = (props) => {
     const history = useHistory()
 
     const getInitLoadAmount = () => {
-        if (sizeType === "tiny") return 55
-        if (sizeType === "small") return 35
-        if (sizeType === "medium") return 20
-        if (sizeType === "large") return 16
-        if (sizeType === "massive") return 10
-        return 55
+        if (sizeType === "tiny") return 60
+        if (sizeType === "small") return 40
+        if (sizeType === "medium") return 25
+        if (sizeType === "large") return 20
+        if (sizeType === "massive") return 15
+        return 60
     }
 
     const getLoadAmount = () => {
@@ -139,21 +139,6 @@ const ImageGrid: React.FunctionComponent = (props) => {
         setPostAmount(index)
     }, [index])
 
-    const getResultCount = () => {
-        let resultPosts = [] as any
-        for (let i = 0; i < posts.length; i++) {
-            const post = posts[i] as any
-            if (post.thirdParty) continue
-            if (!session.username) if (post.restrict !== "safe") continue
-            if (restrictType !== "explicit") if (post.restrict === "explicit") continue
-            if (!permissions.isStaff(session)) if (post.restrict === "explicit") continue
-            const image = post.images[0]
-            if (!image) continue
-            resultPosts.push(post)
-        }
-        return resultPosts.length
-    }
-
     useEffect(() => {
         const updatePosts = async () => {
             let currentIndex = 0
@@ -166,7 +151,7 @@ const ImageGrid: React.FunctionComponent = (props) => {
             }
             setIndex(currentIndex)
             setVisiblePosts(functions.removeDuplicates(newVisiblePosts))
-            const resultCount = getResultCount()
+            const resultCount = Number(posts[0]?.postCount)
             setSidebarText(`${resultCount === 1 ? `1 result.` : `${resultCount || 0} results.`}`)
             localStorage.setItem("savedPosts", JSON.stringify(posts))
         }
