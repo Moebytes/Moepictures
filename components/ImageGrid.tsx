@@ -39,6 +39,7 @@ const ImageGrid: React.FunctionComponent = (props) => {
     const [isRandomSearch, setIsRandomSearch] = useState(false)
     const [offset, setOffset] = useState(0)
     const [ended, setEnded] = useState(false)
+    const [updatePostFlag, setUpdatePostFlag] = useState(false)
     const history = useHistory()
 
     const getInitLoadAmount = () => {
@@ -66,6 +67,7 @@ const ImageGrid: React.FunctionComponent = (props) => {
         setHeaderFlag(true)
         setPosts(result)
         setIsRandomSearch(false)
+        setUpdatePostFlag(true)
         if (!result.length) setNoResults(true)
         if (!search) {
             document.title = "Moebooru: Cutest Anime Art ♡"
@@ -119,6 +121,7 @@ const ImageGrid: React.FunctionComponent = (props) => {
             setVisiblePosts([])
             setPosts(result)
             setIsRandomSearch(true)
+            setUpdatePostFlag(true)
             document.title = "Moebooru: Random"
         }
         if (randomFlag) randomPosts()
@@ -130,6 +133,7 @@ const ImageGrid: React.FunctionComponent = (props) => {
             setIndex(0)
             setVisiblePosts([])
             setPosts(imageSearchFlag)
+            setUpdatePostFlag(true)
             document.title = "Moebooru: Image Search"
             setImageSearchFlag(null)
         }
@@ -154,9 +158,10 @@ const ImageGrid: React.FunctionComponent = (props) => {
             const resultCount = Number(posts[0]?.postCount)
             setSidebarText(`${resultCount === 1 ? `1 result.` : `${resultCount || 0} results.`}`)
             localStorage.setItem("savedPosts", JSON.stringify(posts))
+            setUpdatePostFlag(false)
         }
-        updatePosts()
-    }, [posts])
+        if (updatePostFlag) updatePosts()
+    }, [updatePostFlag])
 
     const updateOffset = async () => {
         if (noResults) return

@@ -582,11 +582,11 @@ const SortBar: React.FunctionComponent = (props) => {
         if (!rect || mobile) return "45px"
         const raw = window.innerWidth - rect.right
         let offset = 0
-        if (sizeType === "tiny") offset = -20
-        if (sizeType === "small") offset = -15
-        if (sizeType === "medium") offset = -10
-        if (sizeType === "large") offset = -15
-        if (sizeType === "massive") offset = -10
+        if (sizeType === "tiny") offset = -23
+        if (sizeType === "small") offset = -18
+        if (sizeType === "medium") offset = -13
+        if (sizeType === "large") offset = -18
+        if (sizeType === "massive") offset = -13
         return `${raw + offset}px`
     }
 
@@ -594,7 +594,7 @@ const SortBar: React.FunctionComponent = (props) => {
         const rect = speedRef.current?.getBoundingClientRect()
         if (!rect) return "250px"
         const raw = window.innerWidth - rect.right
-        let offset = 0
+        let offset = -8
         return `${raw + offset}px`
     }
 
