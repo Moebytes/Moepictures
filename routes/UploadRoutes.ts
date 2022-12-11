@@ -204,8 +204,6 @@ const CreateRoutes = (app: Express) => {
 
         for (let i = 0; i < newTags.length; i++) {
           if (!newTags[i].tag) continue
-          const isAlias = await sql.alias(newTags[i].tag)
-          if (isAlias) continue
           let bulkObj = {tag: newTags[i].tag, type: "tag", description: null, image: null} as any
           if (newTags[i].desc) bulkObj.description = newTags[i].desc
           if (newTags[i].image) {
