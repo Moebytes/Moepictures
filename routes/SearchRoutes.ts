@@ -224,7 +224,13 @@ const SearchRoutes = (app: Express) => {
     app.post("/api/search/sidebartags", searchLimiter, async (req: Request, res: Response, next: NextFunction) => {
         try {
             const {postIDs} = req.body
-            let posts = await sql.posts(Array.from(postIDs))
+            const postArray = Array.from(postIDs) as any
+            if (!postArray.length) return res.status(200).json([])
+            if (postArray.length < 50) {
+                if (req.session.captchaAmount === undefined) req.session.captchaAmount = 51
+                if (req.session.captchaAmount > 50) return res.status(401).end()
+            }
+            let posts = await sql.posts(postArray)
             let uniqueTags = new Set()
             for (let i = 0; i < posts.length; i++) {
                 for (let j = 0; j < posts[i].tags.length; j++) {

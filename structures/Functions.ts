@@ -831,6 +831,12 @@ export default class Functions {
         return `${window.location.protocol}//${window.location.host}/${folder}/${postID}/${encodeURIComponent(filename)}`
     }
 
+    public static linkToBase64 = async (link: string) => {
+        const arrayBuffer = await axios.get(link, {responseType: "arraybuffer"}).then((r) => r.data) as ArrayBuffer
+        const buffer = Buffer.from(arrayBuffer)
+        return `data:image/jpeg;base64,${buffer.toString("base64")}`
+    }
+
     public static getUnverifiedImageLink = (folder: string, postID: number, filename: string) => {
         if (!filename) return ""
         return `${window.location.protocol}//${window.location.host}/unverified/${folder}/${postID}/${encodeURIComponent(filename)}`
@@ -1015,8 +1021,8 @@ export default class Functions {
 
     public static parseTags = async (posts: any) => {
         const postIDs = posts.map((post: any) => post.postID)
-        let result = await axios.post("/api/search/sidebartags", {postIDs}, {withCredentials: true}).then((r) => r.data)
-        return result
+        let result = await axios.post("/api/search/sidebartags", {postIDs}, {withCredentials: true}).then((r) => r.data).catch(() => null)
+        return result ? result : []
     }
 
     public static tagCategories = async (parsedTags: any[]) => {

@@ -60,6 +60,7 @@ const GridImage: React.FunctionComponent<Props> = (props) => {
     const [seekTo, setSeekTo] = useState(null) as any
     const [secondsProgress, setSecondsProgress] = useState(0)
     const [visible, setVisible] = useState(true)
+    const [img, setImg] = useState(props.img)
     const history = useHistory()
 
     const handleIntersection = (entries: any) => {
@@ -91,6 +92,11 @@ const GridImage: React.FunctionComponent<Props> = (props) => {
         setSeekTo(null)
         if (ref.current) ref.current.style.opacity = "1"
         if (videoRef.current) videoRef.current.style.opacity = "1"
+        const base64Img = async () => {
+            const base64 = await functions.linkToBase64(props.img)
+            setImg(base64)
+        }
+        base64Img()
     }, [props.img])
 
     useEffect(() => {
@@ -654,7 +660,7 @@ const GridImage: React.FunctionComponent<Props> = (props) => {
             localStorage.setItem("savedPost", JSON.stringify(post))
             const tagCache = await functions.tagCategoriesCache(post.tags)
             localStorage.setItem("savedTags", JSON.stringify(tagCache))
-        })
+        }).catch(() => null)
         if (!drag) {
             if (event.metaKey || event.ctrlKey || event.button == 1) {
                 return
@@ -676,7 +682,7 @@ const GridImage: React.FunctionComponent<Props> = (props) => {
                 <canvas className="pixelate-canvas" ref={pixelateRef}></canvas>
                 {functions.isVideo(props.img) && !mobile ? <>
                 <video autoPlay loop muted disablePictureInPicture playsInline className="video" ref={videoRef} src={props.img} onLoadedData={(event) => onLoad(event)}></video></> :
-                <img className="image" ref={ref} src={functions.isVideo(props.img) ? backFrame : props.img} onLoad={(event) => onLoad(event)}/>}
+                <img className="image" ref={ref} src={functions.isVideo(props.img) ? backFrame : img} onLoad={(event) => onLoad(event)}/>}
                 </div>
         </div>
     )

@@ -9,7 +9,11 @@ import permissions from "../structures/Permissions"
 import HCaptcha from "@hcaptcha/react-hcaptcha"
 import axios from "axios"
 
-const CaptchaDialog: React.FunctionComponent = (props) => {
+interface Props {
+    forceCaptcha?: boolean
+}
+
+const CaptchaDialog: React.FunctionComponent<Props> = (props) => {
     const {theme, setTheme} = useContext(ThemeContext)
     const {hideNavbar, setHideNavbar} = useContext(HideNavbarContext)
     const {hideTitlebar, setHideTitlebar} = useContext(HideTitlebarContext)
@@ -34,7 +38,12 @@ const CaptchaDialog: React.FunctionComponent = (props) => {
 
     useEffect(() => {
         if (!session.cookie) return
-        if (session.captchaAmount === undefined) session.captchaAmount = 0
+        if (session.captchaAmount === undefined) session.captchaAmount = 51
+        if (!props.forceCaptcha) {
+            let ignoreCaptcha = sessionStorage.getItem("ignoreCaptcha") as any
+            ignoreCaptcha = ignoreCaptcha ? ignoreCaptcha === "true" : false
+            if (ignoreCaptcha) return setNeedsVerification(false)
+        }
         if (session.captchaAmount > 50) {
             if (!needsVerification) setNeedsVerification(true)
         } else {
@@ -80,13 +89,14 @@ const CaptchaDialog: React.FunctionComponent = (props) => {
     const click = (button: "accept" | "reject") => {
         if (button === "accept") {
             captcha()
+            sessionStorage.setItem("ignoreCaptcha", "false")
         } else {
-            // setNeedsVerification(false)
+            sessionStorage.setItem("ignoreCaptcha", "true")
+            setNeedsVerification(false)
         }
     }
 
     const close = () => {
-        // setNeedsVerification(false)
         setSubmitted(false)
     }
 
@@ -104,7 +114,7 @@ const CaptchaDialog: React.FunctionComponent = (props) => {
                             </div>
                             {error ? <div className="captcha-dialog-validation-container"><span className="captcha-dialog-validation" ref={errorRef}></span></div> : null}
                             <div className="captcha-dialog-row">
-                                {/* <button onClick={() => click("reject")} className="download-button">{"Cancel"}</button> */}
+                                <button onClick={() => click("reject")} className="download-button">{"No Tags"}</button>
                                 <button onClick={() => click("accept")} className="download-button">{"Solve"}</button>
                             </div>
                         </div>

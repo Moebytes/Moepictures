@@ -50,10 +50,15 @@ const SetAvatarPage: React.FunctionComponent<Props> = (props) => {
         setRelative(true)
         setSidebarText("")
         document.title = "Moebooru: Set Avatar"
-        const savedPost = localStorage.getItem("savedPost")
-        const savedTags = localStorage.getItem("savedTags")
-        if (savedPost) setPost(JSON.parse(savedPost))
-        if (savedTags) setTagCategories(JSON.parse(savedTags))
+        if (session?.captchaAmount <= 50) {
+            const savedPost = localStorage.getItem("savedPost")
+            const savedTags = localStorage.getItem("savedTags")
+            if (savedPost) setPost(JSON.parse(savedPost))
+            if (savedTags) setTagCategories(JSON.parse(savedTags))
+        } else {
+            setPost({})
+            setTagCategories([])
+        }
         if (!posts?.length) {
             const savedPosts = localStorage.getItem("savedPosts")
             if (savedPosts) setPosts(JSON.parse(savedPosts))
@@ -84,9 +89,15 @@ const SetAvatarPage: React.FunctionComponent<Props> = (props) => {
         const source = axios.CancelToken.source()
         const updatePost = async () => {
             let post = posts.find((p: any) => p.postID === postID)
-            if (!post?.tags) post = await axios.get("/api/post", {params: {postID}, withCredentials: true, cancelToken: source.token}).then((r) => r.data)
+            let $401Error = false
+            try {
+                if (!post) post = await axios.get("/api/post", {params: {postID}, withCredentials: true, cancelToken: source.token}).then((r) => r.data)
+            } catch (e) {
+                if (String(e).includes("401")) $401Error = true
+            }
             if (post) {
-                const images = post.images.map((i: any) => functions.getImageLink(i.type, post.postID, i.filename))
+                let images = post.images.map((i: any) => functions.getImageLink(i.type, post.postID, i.filename))
+                images = await Promise.all(images.map((img: string) => functions.linkToBase64(img)))
                 setImages(images)
                 if (functions.isVideo(images[0])) {
                     const thumb = await functions.videoThumbnail(images[0])
@@ -100,7 +111,7 @@ const SetAvatarPage: React.FunctionComponent<Props> = (props) => {
                 setTags(tags)
                 setPost(post)
             } else {
-                history.push("/404")
+                if (!$401Error) history.push("/404")
             }
         }
         updatePost()
@@ -111,9 +122,16 @@ const SetAvatarPage: React.FunctionComponent<Props> = (props) => {
         const source = axios.CancelToken.source()
         const updatePost = async () => {
             setPostFlag(false)
-            let post = await axios.get("/api/post", {params: {postID}, withCredentials: true, cancelToken: source.token}).then((r) => r.data)
+            let post = null as any
+            let $401Error = false
+            try {
+                post = await axios.get("/api/post", {params: {postID}, withCredentials: true, cancelToken: source.token}).then((r) => r.data)
+            } catch (e) {
+                if (String(e).includes("401")) $401Error = true
+            }
             if (post) {
-                const images = post.images.map((i: any) => functions.getImageLink(i.type, post.postID, i.filename))
+                let images = post.images.map((i: any) => functions.getImageLink(i.type, post.postID, i.filename))
+                images = await Promise.all(images.map((img: string) => functions.linkToBase64(img)))
                 setImages(images) 
                 if (functions.isVideo(images[0])) {
                     const thumb = await functions.videoThumbnail(images[0])
@@ -127,7 +145,7 @@ const SetAvatarPage: React.FunctionComponent<Props> = (props) => {
                 setTags(tags)
                 setPost(post)
             } else {
-                history.push("/404")
+                if (!$401Error) history.push("/404")
             }
         }
         if (postFlag) updatePost()

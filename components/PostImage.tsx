@@ -119,6 +119,7 @@ const PostImage: React.FunctionComponent<Props> = (props) => {
     const [dragging, setDragging] = useState(false)
     const [encodingOverlay, setEncodingOverlay] = useState(false)
     const [seekTo, setSeekTo] = useState(null) as any
+    const [img, setImg] = useState(props.img)
     const initialCropState = {unit: "%", x: 0, y: 0, width: 100, height: 100, aspect: undefined}
     const [cropState, setCropState] = useState(initialCropState)
 
@@ -140,6 +141,11 @@ const PostImage: React.FunctionComponent<Props> = (props) => {
         if (ref.current) ref.current.style.opacity = "1"
         if (videoRef.current) videoRef.current.style.opacity = "1"
         if (mobile) fetchVideo()
+        const base64Img = async () => {
+            const base64 = await functions.linkToBase64(props.img)
+            setImg(base64)
+        }
+        base64Img()
     }, [props.img])
 
     useEffect(() => {
@@ -1163,7 +1169,7 @@ const PostImage: React.FunctionComponent<Props> = (props) => {
                 <div className="post-image-filters" ref={fullscreenRef}>
                     {functions.isVideo(props.img) ? 
                     <video loop muted disablePictureInPicture playsInline className="dummy-post-video" src={props.img}></video> :
-                    <img className="dummy-post-image" src={props.img}/>}
+                    <img className="dummy-post-image" src={img}/>}
                     <div className="encoding-overlay" style={{display: encodingOverlay ? "flex" : "none"}}>
                         <span className="encoding-overlay-text">{functions.isVideo(props.img) ? "Rendering Video..." : "Rendering GIF..."}</span>
                     </div>
@@ -1297,8 +1303,8 @@ const PostImage: React.FunctionComponent<Props> = (props) => {
                             </div>
                         </div>
                     </div>
-                    <img className="post-lightness-overlay" ref={gifLightnessRef} src={props.img}/>
-                    <img className="post-sharpen-overlay" ref={gifOverlayRef} src={props.img}/>
+                    <img className="post-lightness-overlay" ref={gifLightnessRef} src={img}/>
+                    <img className="post-sharpen-overlay" ref={gifOverlayRef} src={img}/>
                     <canvas className="post-gif-canvas" ref={gifRef}></canvas> 
                     </>
                     : null}
@@ -1320,10 +1326,10 @@ const PostImage: React.FunctionComponent<Props> = (props) => {
                         <TransformWrapper disabled={disableZoom} ref={zoomRef} minScale={1} maxScale={4} onZoomStop={(ref) => setZoom(ref.state.scale)} wheel={{step: 0.1, touchPadDisabled: true}}
                         zoomAnimation={{size: 0, disabled: true}} alignmentAnimation={{disabled: true}} doubleClick={{mode: "reset", animationTime: 0}} panning={{disabled: zoom === 1}}>
                         <TransformComponent wrapperStyle={{pointerEvents: disableZoom ? "none" : "all"}}>
-                            <img className="post-lightness-overlay" ref={lightnessRef} src={props.img}/>
-                            <img className="post-sharpen-overlay" ref={overlayRef} src={props.img}/>
+                            <img className="post-lightness-overlay" ref={lightnessRef} src={img}/>
+                            <img className="post-sharpen-overlay" ref={overlayRef} src={img}/>
                             <canvas className="post-pixelate-canvas" ref={pixelateRef}></canvas>
-                            <img className="post-image" ref={ref} src={props.img} onLoad={(event) => onLoad(event)}/>
+                            <img className="post-image" ref={ref} src={img} onLoad={(event) => onLoad(event)}/>
                         </TransformComponent>
                         </TransformWrapper>
                     </div>

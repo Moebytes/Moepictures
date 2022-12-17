@@ -79,10 +79,15 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
         setRelative(true)
         setSidebarText("")
         document.title = "Moebooru: Post"
-        const savedPost = localStorage.getItem("savedPost")
-        const savedTags = localStorage.getItem("savedTags")
-        if (savedPost) setPost(JSON.parse(savedPost))
-        if (savedTags) setTagCategories(JSON.parse(savedTags))
+        if (session?.captchaAmount <= 50) {
+            const savedPost = localStorage.getItem("savedPost")
+            const savedTags = localStorage.getItem("savedTags")
+            if (savedPost) setPost(JSON.parse(savedPost))
+            if (savedTags) setTagCategories(JSON.parse(savedTags))
+        } else {
+            setPost({})
+            setTagCategories([])
+        }
         if (!posts?.length) {
             const savedPosts = localStorage.getItem("savedPosts")
             if (savedPosts) setPosts(JSON.parse(savedPosts))
@@ -157,9 +162,14 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
         const updatePost = async () => {
             setLoaded(false)
             let post = posts.find((p: any) => p.postID === postID)
-            if (!post) post = await axios.get("/api/post", {params: {postID}, withCredentials: true, cancelToken: source.token}).then((r) => r.data)
+            try {
+                if (!post) post = await axios.get("/api/post", {params: {postID}, withCredentials: true, cancelToken: source.token}).then((r) => r.data)
+            } catch {
+                return
+            }
             if (post) {
-                const images = post.images.map((i: any) => functions.getImageLink(i.type, post.postID, i.filename))
+                let images = post.images.map((i: any) => functions.getImageLink(i.type, post.postID, i.filename))
+                images = await Promise.all(images.map((img: string) => functions.linkToBase64(img)))
                 setImages(images)
                 setImage(images[0])
                 const tags = await functions.parseTags([post])
@@ -168,8 +178,12 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
                 setTags(tags)
                 setPost(post)
                 if (!post.tags) {
-                    post = await axios.get("/api/post", {params: {postID}, withCredentials: true, cancelToken: source.token}).then((r) => r.data)
-                    setPost(post)
+                    try {
+                        post = await axios.get("/api/post", {params: {postID}, withCredentials: true, cancelToken: source.token}).then((r) => r.data)
+                        setPost(post)
+                    } catch {
+                        return
+                    }
                 }
                 setSessionFlag(true)
             } else {
@@ -185,9 +199,15 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
         const updatePost = async () => {
             setLoaded(false)
             setPostFlag(false)
-            let post = await axios.get("/api/post", {params: {postID}, withCredentials: true, cancelToken: source.token}).then((r) => r.data)
+            let post = null as any
+            try {
+                post = await axios.get("/api/post", {params: {postID}, withCredentials: true, cancelToken: source.token}).then((r) => r.data)
+            } catch {
+                return
+            }
             if (post) {
-                const images = post.images.map((i: any) => functions.getImageLink(i.type, post.postID, i.filename))
+                let images = post.images.map((i: any) => functions.getImageLink(i.type, post.postID, i.filename))
+                images = await Promise.all(images.map((img: string) => functions.linkToBase64(img)))
                 setImages(images)
                 setImage(images[0])
                 const tags = await functions.parseTags([post])

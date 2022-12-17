@@ -33,6 +33,7 @@ const Carousel: React.FunctionComponent<Props> = (props) => {
     const [active, setActive] = useState(imagesRef[props.index ? props.index : 0])
     const [showLeftArrow, setShowLeftArrow] = useState(false)
     const [showRightArrow, setShowRightArrow] = useState(false)
+    const [images, setImages] = useState(props.images)
     const sliderRef = useRef<any>(null)
 
     useEffect(() => {
@@ -44,6 +45,11 @@ const Carousel: React.FunctionComponent<Props> = (props) => {
         setShowRightArrow(false)
         setLastPos(null)
         setDragging(false)
+        const base64Images = async () => {
+            const base64Images = await Promise.all(props.images.map((image) => functions.linkToBase64(image)))
+            setImages(base64Images)
+        }
+        base64Images()
     }, [props.images])
 
     useEffect(() => {
@@ -151,10 +157,11 @@ const Carousel: React.FunctionComponent<Props> = (props) => {
         const jsx = [] as any
         for (let i = 0; i < props.images.length; i++) {
             const img = props.images[i]
+            const base64 = images[i]
             if (functions.isVideo(img)) {
                 jsx.push(<video key={i} autoPlay muted loop disablePictureInPicture ref={imagesRef[i]} className="carousel-img" src={img} onClick={(event) => {props.set?.(img, i, event.ctrlKey || event.metaKey || event.button === 1); setActive(imagesRef[i])}} onAuxClick={(event) => {props.set?.(img, i, event.ctrlKey || event.metaKey || event.button === 1); setActive(imagesRef[i])}} style={props.height ? {height: `${props.height}px`} : {}}></video>)
             } else {
-                jsx.push(<img key={i} ref={imagesRef[i]} className="carousel-img" src={img} onClick={(event) => {props.set?.(img, i, event.ctrlKey || event.metaKey || event.button === 1); setActive(imagesRef[i])}} onAuxClick={(event) => {props.set?.(img, i, event.ctrlKey || event.metaKey || event.button === 1); setActive(imagesRef[i])}} style={props.height ? {height: `${props.height}px`} : {}}/>)
+                jsx.push(<img key={i} ref={imagesRef[i]} className="carousel-img" src={base64} onClick={(event) => {props.set?.(img, i, event.ctrlKey || event.metaKey || event.button === 1); setActive(imagesRef[i])}} onAuxClick={(event) => {props.set?.(img, i, event.ctrlKey || event.metaKey || event.button === 1); setActive(imagesRef[i])}} style={props.height ? {height: `${props.height}px`} : {}}/>)
             }
         }
         return jsx

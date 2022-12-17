@@ -67,6 +67,7 @@ import deleteIcon from "../assets/purple/delete.png"
 import deleteIconMagenta from "../assets/magenta/delete.png"
 import rejectRed from "../assets/purple/reject-red.png"
 import approveGreen from "../assets/purple/approve-green.png"
+import tagIcon from "../assets/purple/tag.png"
 import pack from "../package.json"
 import functions from "../structures/Functions"
 import axios from "axios"
@@ -364,6 +365,10 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
         return edit
     }
 
+    const getShowTags = () => {
+        return tagIcon
+    }
+
     const getHistory = () => {
         if (theme.includes("magenta")) return historyMagenta
         return historyIcon
@@ -587,6 +592,28 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
         return <span className="tag-alt-link" onClick={() => username ? history.push(`/user/${username}`) : null}>{functions.toProperCase(username) || "deleted"}</span>
     }
 
+    const tagCaptchaJSX = () => {
+        if (!session) return
+        if (session.captchaAmount === undefined) session.captchaAmount = 51
+        if (session.captchaAmount > 50) {
+            if (!history.location.pathname.includes("/post/") && !history.location.pathname.includes("/edit-post")) return
+            const toggleCaptcha = () => {
+                sessionStorage.setItem("ignoreCaptcha", "false")
+                history.go(0)
+            }
+            return (
+                <div className="sidebar-subcontainer">
+                    <div className="sidebar-row">
+                        <span className="tag-hover" onClick={toggleCaptcha}>
+                            <img className="sidebar-icon" src={getShowTags()}/>
+                            <span className="tag-red">Show Tags</span>
+                        </span>
+                    </div>
+                </div>
+            )
+        }
+    }
+
 
     return (
         <>
@@ -610,6 +637,8 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
                 <div className="random-container">
                     <img className="random" src={getRandomIcon()} onClick={randomSearch} onMouseEnter={() => setRandomIconHover(true)} onMouseLeave={() => setRandomIconHover(false)}/>
                 </div>
+
+                {tagCaptchaJSX()}
 
                 {props.artists ?
                     <div className="sidebar-subcontainer">

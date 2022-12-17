@@ -112,7 +112,12 @@ const EditPostPage: React.FunctionComponent<Props> = (props) => {
     const history = useHistory()
 
     const updateFields = async () => {
-        const post = await axios.get("/api/post", {params: {postID}, withCredentials: true}).then((r) => r.data)
+        let post = null as any 
+        try {
+            post = await axios.get("/api/post", {params: {postID}, withCredentials: true}).then((r) => r.data)
+        } catch (e: any) {
+            if (String(e).includes("401")) return
+        }
         if (!post) return history.push("/404")
         setType(post.type)
         setRestrict(post.restrict)
@@ -1082,7 +1087,7 @@ const EditPostPage: React.FunctionComponent<Props> = (props) => {
     return (
         <>
         <DragAndDrop/>
-        <CaptchaDialog/>
+        <CaptchaDialog forceCaptcha={true}/>
         <TitleBar/>
         <NavBar/>
         <div className="body">
