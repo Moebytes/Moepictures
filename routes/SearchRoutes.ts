@@ -220,6 +220,29 @@ const SearchRoutes = (app: Express) => {
             return res.status(400).send("Bad request")
         }
     })
+
+    app.post("/api/search/sidebartags", searchLimiter, async (req: Request, res: Response, next: NextFunction) => {
+        try {
+            const {postIDs} = req.body
+            let posts = await sql.posts(Array.from(postIDs))
+            let uniqueTags = new Set()
+            for (let i = 0; i < posts.length; i++) {
+                for (let j = 0; j < posts[i].tags.length; j++) {
+                    uniqueTags.add(posts[i].tags[j])
+                }
+            }
+            const uniqueTagArray = Array.from(uniqueTags) as any
+            let result = await sql.tagCounts(uniqueTagArray.filter(Boolean))
+            for (let i = 0; i < uniqueTagArray.length; i++) {
+                const found = result.find((r: any) => r.tag === uniqueTagArray[i])
+                if (!found) result.push({tag: uniqueTagArray[i], count: "0"})
+            }
+            res.status(200).json(result)
+        } catch (e) {
+            console.log(e)
+            return res.status(400).send("Bad request")
+        }
+    })
 }
 
 export default SearchRoutes

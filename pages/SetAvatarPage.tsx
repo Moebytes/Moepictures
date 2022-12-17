@@ -84,7 +84,7 @@ const SetAvatarPage: React.FunctionComponent<Props> = (props) => {
         const source = axios.CancelToken.source()
         const updatePost = async () => {
             let post = posts.find((p: any) => p.postID === postID)
-            if (!post) post = await axios.get("/api/post", {params: {postID}, withCredentials: true, cancelToken: source.token}).then((r) => r.data)
+            if (!post?.tags) post = await axios.get("/api/post", {params: {postID}, withCredentials: true, cancelToken: source.token}).then((r) => r.data)
             if (post) {
                 const images = post.images.map((i: any) => functions.getImageLink(i.type, post.postID, i.filename))
                 setImages(images)

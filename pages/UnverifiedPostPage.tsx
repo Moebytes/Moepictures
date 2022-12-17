@@ -127,7 +127,7 @@ const UnverifiedPostPage: React.FunctionComponent<Props> = (props) => {
     useEffect(() => {
         const updatePost = async () => {
             let post = unverifiedPosts.find((p: any) => p.postID === postID)
-            if (!post) post = await axios.get("/api/post/unverified", {params: {postID}, withCredentials: true}).then((r) => r.data)
+            if (!post?.tags) post = await axios.get("/api/post/unverified", {params: {postID}, withCredentials: true}).then((r) => r.data)
             if (post) {
                 const images = post.images.map((i: any) => functions.getUnverifiedImageLink(i.type, post.postID, i.filename))
                 setImages(images)

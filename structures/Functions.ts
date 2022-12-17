@@ -1014,18 +1014,8 @@ export default class Functions {
     }
 
     public static parseTags = async (posts: any) => {
-        let uniqueTags = new Set()
-        for (let i = 0; i < posts.length; i++) {
-            for (let j = 0; j < posts[i].tags.length; j++) {
-                uniqueTags.add(posts[i].tags[j])
-            }
-        }
-        const uniqueTagArray = Array.from(uniqueTags)
-        let result = await axios.get("/api/tag/counts", {params: {tags: uniqueTagArray}, withCredentials: true}).then((r) => r.data)
-        for (let i = 0; i < uniqueTagArray.length; i++) {
-            const found = result.find((r: any) => r.tag === uniqueTagArray[i])
-            if (!found) result.push({tag: uniqueTagArray[i], count: "0"})
-        }
+        const postIDs = posts.map((post: any) => post.postID)
+        let result = await axios.post("/api/search/sidebartags", {postIDs}, {withCredentials: true}).then((r) => r.data)
         return result
     }
 
