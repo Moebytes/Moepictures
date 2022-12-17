@@ -22,7 +22,7 @@ import ThirdParty from "../components/ThirdParty"
 import Parent from "../components/Parent"
 import MobileInfo from "../components/MobileInfo"
 import {HideNavbarContext, HideSidebarContext, RelativeContext, DownloadFlagContext, DownloadURLsContext, HideTitlebarContext, MobileContext,
-PostsContext, TagsContext, HeaderTextContext, PostFlagContext, RedirectContext, SidebarTextContext, SessionContext, EnableDragContext} from "../Context"
+PostsContext, TagsContext, HeaderTextContext, PostFlagContext, RedirectContext, SidebarTextContext, SessionContext, SessionFlagContext, EnableDragContext} from "../Context"
 import axios from "axios"
 import permissions from "../structures/Permissions"
 import "./styles/postpage.less"
@@ -44,6 +44,7 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
     const {headerText, setHeaderText} = useContext(HeaderTextContext)
     const {sidebarText, setSidebarText} = useContext(SidebarTextContext)
     const {session, setSession} = useContext(SessionContext)
+    const {sessionFlag, setSessionFlag} = useContext(SessionFlagContext)
     const {redirect, setRedirect} = useContext(RedirectContext)
     const {mobile, setMobile} = useContext(MobileContext)
     const {postFlag, setPostFlag} = useContext(PostFlagContext)
@@ -156,7 +157,7 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
         const updatePost = async () => {
             setLoaded(false)
             let post = posts.find((p: any) => p.postID === postID)
-            if (!post?.tags) post = await axios.get("/api/post", {params: {postID}, withCredentials: true, cancelToken: source.token}).then((r) => r.data)
+            if (!post) post = await axios.get("/api/post", {params: {postID}, withCredentials: true, cancelToken: source.token}).then((r) => r.data)
             if (post) {
                 const images = post.images.map((i: any) => functions.getImageLink(i.type, post.postID, i.filename))
                 setImages(images)
@@ -166,6 +167,11 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
                 setTagCategories(categories)
                 setTags(tags)
                 setPost(post)
+                if (!post.tags) {
+                    post = await axios.get("/api/post", {params: {postID}, withCredentials: true, cancelToken: source.token}).then((r) => r.data)
+                    setPost(post)
+                }
+                setSessionFlag(true)
             } else {
                 history.push("/404")
             }
@@ -189,6 +195,7 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
                 setTagCategories(categories)
                 setTags(tags)
                 setPost(post)
+                setSessionFlag(true)
             } else {
                 history.push("/404")
             }

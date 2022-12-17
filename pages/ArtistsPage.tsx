@@ -172,7 +172,6 @@ const ArtistsPage: React.FunctionComponent = (props) => {
     return (
         <>
         <DragAndDrop/>
-        <CaptchaDialog/>
         <TitleBar/>
         <NavBar/>
         <div className="body">

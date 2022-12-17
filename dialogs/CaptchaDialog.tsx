@@ -1,7 +1,7 @@
 import React, {useEffect, useContext, useState, useRef} from "react"
 import {useHistory} from "react-router-dom"
 import {HashLink as Link} from "react-router-hash-link"
-import {HideNavbarContext, HideSidebarContext, ThemeContext, EnableDragContext, HideTitlebarContext, SessionContext, MobileContext} from "../Context"
+import {HideNavbarContext, HideSidebarContext, ThemeContext, EnableDragContext, HideTitlebarContext, SessionContext, MobileContext, SessionFlagContext} from "../Context"
 import functions from "../structures/Functions"
 import "./styles/captchadialog.less"
 import Draggable from "react-draggable"
@@ -15,6 +15,7 @@ const CaptchaDialog: React.FunctionComponent = (props) => {
     const {hideTitlebar, setHideTitlebar} = useContext(HideTitlebarContext)
     const {hideSidebar, setHideSidebar} = useContext(HideSidebarContext)
     const {enableDrag, setEnableDrag} = useContext(EnableDragContext)
+    const {sessionFlag, setSessionFlag} = useContext(SessionFlagContext)
     const {session, setSession} = useContext(SessionContext)
     const {mobile, setMobile} = useContext(MobileContext)
     const [posX, setPosX] = useState(0)
@@ -33,7 +34,8 @@ const CaptchaDialog: React.FunctionComponent = (props) => {
 
     useEffect(() => {
         if (!session.cookie) return
-        if (session.captchaAmount || 51 > 50) {
+        if (session.captchaAmount === undefined) session.captchaAmount = 0
+        if (session.captchaAmount > 50) {
             if (!needsVerification) setNeedsVerification(true)
         } else {
             if (needsVerification) setNeedsVerification(false)
@@ -43,7 +45,7 @@ const CaptchaDialog: React.FunctionComponent = (props) => {
     useEffect(() => {
         if (needsVerification) {
             // document.body.style.overflowY = "hidden"
-            document.body.style.pointerEvents = "none"
+            document.body.style.pointerEvents = "all"
         } else {
             // document.body.style.overflowY = "visible"
             document.body.style.pointerEvents = "all"
@@ -54,7 +56,6 @@ const CaptchaDialog: React.FunctionComponent = (props) => {
     const siteKey = "123c92b0-ebd6-4dd7-b152-46a9c503510c"
 
     const captcha = async () => {
-        // let captchaResponse = captchaRef.current?.querySelector("iframe")?.getAttribute("data-hcaptcha-response")
         if (!captchaResponse) {
             setError(true)
             await functions.timeout(20)
@@ -64,6 +65,9 @@ const CaptchaDialog: React.FunctionComponent = (props) => {
         }
         try {
             await axios.post("/api/misc/captcha", {siteKey, captchaResponse}, {withCredentials: true})
+            setSessionFlag(true)
+            setNeedsVerification(false)
+            history.go(0)
         } catch {
             setError(true)
             await functions.timeout(20)
@@ -71,7 +75,6 @@ const CaptchaDialog: React.FunctionComponent = (props) => {
             await functions.timeout(3000)
             return setError(false)
         }
-        history.go(0)
     }
 
     const click = (button: "accept" | "reject") => {
@@ -96,9 +99,8 @@ const CaptchaDialog: React.FunctionComponent = (props) => {
                             <div className="captcha-dialog-title-container">
                                 <span className="captcha-dialog-title">Human Verification</span>
                             </div>
-                            <div className="captcha-dialog-row">
-                                {/* <div ref={captchaRef} className="h-captcha" data-sitekey={`${siteKey}`} data-theme="dark"></div> */}
-                                <HCaptcha sitekey={siteKey} theme="dark" onVerify={(response) => setCaptchaResponse(response)}/>
+                            <div className="captcha-dialog-row" style={{pointerEvents: "all"}}>
+                                <HCaptcha sitekey={siteKey} theme="dark" onVerify={(response) => setCaptchaResponse(response)} />
                             </div>
                             {error ? <div className="captcha-dialog-validation-container"><span className="captcha-dialog-validation" ref={errorRef}></span></div> : null}
                             <div className="captcha-dialog-row">

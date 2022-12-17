@@ -20,7 +20,8 @@ const postLimiter = rateLimit({
 const PostRoutes = (app: Express) => {
     app.get("/api/post", postLimiter, async (req: Request, res: Response, next: NextFunction) => {
         try {
-            if (req.session.captchaAmount || 51 > 50) return res.status(401).end()
+            if (req.session.captchaAmount === undefined) req.session.captchaAmount = 0
+            if (req.session.captchaAmount > 50) return res.status(401).end()
             const postID = req.query.postID as string
             if (Number.isNaN(Number(postID))) return res.status(400).send("Invalid postID")
             let result = await sql.post(Number(postID))
@@ -30,8 +31,10 @@ const PostRoutes = (app: Express) => {
             if (result.images.length > 1) {
                 result.images = result.images.sort((a: any, b: any) => a.order - b.order)
             }
-            if (!req.session.captchaAmount) req.session.captchaAmount = 0
-            req.session.captchaAmount += 1
+            if (Number(postID) !== req.session.lastPostID) {
+                req.session.captchaAmount = req.session.captchaAmount + 1
+            }
+            req.session.lastPostID = Number(postID)
             res.status(200).json(result)
         } catch (e) {
             console.log(e)
@@ -78,7 +81,7 @@ const PostRoutes = (app: Express) => {
             if (Number.isNaN(Number(postID))) return res.status(400).send("Invalid postID")
             let posts = await sql.thirdParty(Number(postID))
             if (req.session.role !== "admin" && req.session.role !== "mod") {
-                posts = posts.filter((p: any) => p.restrict !== "explicit")
+                posts = posts.filter((p: any) => p?.restrict !== "explicit")
             }
             posts = functions.stripTags(posts)
             res.status(200).json(posts)
@@ -92,6 +95,7 @@ const PostRoutes = (app: Express) => {
             const postID = req.query.postID as string
             if (Number.isNaN(Number(postID))) return res.status(400).send("Invalid postID")
             const post = await sql.parent(Number(postID))
+            if (!post) return res.status(200).json()
             if (req.session.role !== "admin" && req.session.role !== "mod") {
                 if (post.restrict === "explicit") return res.status(403).send("No permission")
             }

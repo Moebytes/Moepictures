@@ -118,7 +118,7 @@ const ModPosts: React.FunctionComponent = (props) => {
                     <div className="mod-post-text-column">
                         <span className="mod-post-link" onClick={() => history.push(`/user/${post.uploader}`)}>Uploader: {functions.toProperCase(post.uploader || "Deleted")}</span>
                         <span className="mod-post-text">Artist: {functions.toProperCase(post.artist || "None")} {post.thirdParty ? "(TP)" : ""}</span>
-                        <span className="mod-post-text">Tags: {post.tags.length}</span>
+                        <span className="mod-post-text">Tags: {post.tags?.length}</span>
                         <span className="mod-post-text">New Tags: {post.newTags || 0}</span>
                     </div>
                     <div className="mod-post-text-column">

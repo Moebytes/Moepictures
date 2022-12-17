@@ -185,7 +185,6 @@ const CommentsPage: React.FunctionComponent = (props) => {
     return (
         <>
         <DragAndDrop/>
-        <CaptchaDialog/>
         <EditCommentDialog/>
         <DeleteCommentDialog/>
         <ReportCommentDialog/>

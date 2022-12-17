@@ -91,7 +91,6 @@ const PostsPage: React.FunctionComponent = (props) => {
     return (
         <>
         <DragAndDrop/>
-        <CaptchaDialog/>
         <DownloadDialog/>
         <TitleBar reset={true}/>
         <NavBar/>

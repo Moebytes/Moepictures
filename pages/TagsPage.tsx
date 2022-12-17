@@ -182,7 +182,6 @@ const TagsPage: React.FunctionComponent = (props) => {
     return (
         <>
         <DragAndDrop/>
-        <CaptchaDialog/>
         <AliasTagDialog/>
         <EditTagDialog/>
         <DeleteTagDialog/>

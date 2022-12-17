@@ -55,6 +55,7 @@ declare module "express-session" {
       ip: string
       role: string
       captchaAmount: number 
+      lastPostID: number
   }
 }
 

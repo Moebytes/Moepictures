@@ -10,6 +10,7 @@ import JSZip from "jszip"
 import path from "path"
 import functions from "../structures/Functions"
 import "./styles/gridimage.less"
+import axios from "axios"
 
 interface Props {
     id: number
@@ -648,9 +649,12 @@ const GridImage: React.FunctionComponent<Props> = (props) => {
 
     const mouseUp = async (event: React.MouseEvent<HTMLElement>) => {
         setScrollY(window.scrollY)
-        localStorage.setItem("savedPost", JSON.stringify(props.post))
-        const tagCache = await functions.tagCategoriesCache(props.post.tags)
-        localStorage.setItem("savedTags", JSON.stringify(tagCache))
+        axios.get("/api/post", {params: {postID: props.post.postID}, withCredentials: true}).then(async (r) => {
+            const post = r.data
+            localStorage.setItem("savedPost", JSON.stringify(post))
+            const tagCache = await functions.tagCategoriesCache(post.tags)
+            localStorage.setItem("savedTags", JSON.stringify(tagCache))
+        })
         if (!drag) {
             if (event.metaKey || event.ctrlKey || event.button == 1) {
                 return
