@@ -70,6 +70,7 @@
   "dependencies": {
     "@ffmpeg/core": "^0.10.0",
     "@ffmpeg/ffmpeg": "^0.10.1",
+    "@hcaptcha/react-hcaptcha": "^1.4.4",
     "@vitalets/google-translate-api": "^8.0.0",
     "audio-encoder": "^1.0.4",
     "aws-sdk": "^2.1120.0",

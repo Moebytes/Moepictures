@@ -6,6 +6,7 @@ import functions from "../structures/Functions"
 import "./styles/captchadialog.less"
 import Draggable from "react-draggable"
 import permissions from "../structures/Permissions"
+import HCaptcha from "@hcaptcha/react-hcaptcha"
 import axios from "axios"
 
 const CaptchaDialog: React.FunctionComponent = (props) => {
@@ -23,6 +24,7 @@ const CaptchaDialog: React.FunctionComponent = (props) => {
     const errorRef = useRef<any>(null)
     const history = useHistory()
     const [needsVerification, setNeedsVerification] = useState(false)
+    const [captchaResponse, setCaptchaResponse] = useState("")
     const captchaRef = useRef<HTMLDivElement>(null)
 
     useEffect(() => {
@@ -52,7 +54,7 @@ const CaptchaDialog: React.FunctionComponent = (props) => {
     const siteKey = "123c92b0-ebd6-4dd7-b152-46a9c503510c"
 
     const captcha = async () => {
-        let captchaResponse = captchaRef.current?.querySelector("iframe")?.getAttribute("data-hcaptcha-response")
+        // let captchaResponse = captchaRef.current?.querySelector("iframe")?.getAttribute("data-hcaptcha-response")
         if (!captchaResponse) {
             setError(true)
             await functions.timeout(20)
@@ -95,7 +97,8 @@ const CaptchaDialog: React.FunctionComponent = (props) => {
                                 <span className="captcha-dialog-title">Human Verification</span>
                             </div>
                             <div className="captcha-dialog-row">
-                                <div ref={captchaRef} className="h-captcha" data-sitekey={`${siteKey}`} data-theme="dark"></div>
+                                {/* <div ref={captchaRef} className="h-captcha" data-sitekey={`${siteKey}`} data-theme="dark"></div> */}
+                                <HCaptcha sitekey={siteKey} theme="dark" onVerify={(response) => setCaptchaResponse(response)}/>
                             </div>
                             {error ? <div className="captcha-dialog-validation-container"><span className="captcha-dialog-validation" ref={errorRef}></span></div> : null}
                             <div className="captcha-dialog-row">
