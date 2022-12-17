@@ -256,8 +256,6 @@ app.get("/*", function(req, res) {
       res.redirect(301, `https://moebooru.moe${req.path}`)
     }*/
     res.setHeader("Content-Type", mime.getType(req.path) ?? "")
-    res.setHeader("Cross-Origin-Opener-Policy", "same-origin")
-    res.setHeader("Cross-Origin-Embedder-Policy", "require-corp")
     const document = fs.readFileSync(path.join(__dirname, "./dist/index.html"), {encoding: "utf-8"})
     const html = renderToString(<Router location={req.url}><App/></Router>)
     res.status(200).send(document?.replace(`<div id="root"></div>`, `<div id="root">${html}</div>`))
