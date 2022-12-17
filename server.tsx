@@ -34,7 +34,7 @@ import UserRoutes from "./routes/UserRoutes"
 const __dirname = path.resolve()
 
 dotenv.config()
-const app = express()
+const app = express() as any
 let compiler = webpack(config as any)
 app.use(express.urlencoded({extended: true, limit: "1gb", parameterLimit: 50000}))
 app.use(express.json({limit: "1gb"}))
@@ -54,6 +54,7 @@ declare module "express-session" {
       $2fa: boolean
       ip: string
       role: string
+      captchaAmount: number 
   }
 }
 
@@ -250,9 +251,10 @@ for (let i = 0; i < folders.length; i++) {
 }
 
 app.get("/*", function(req, res) {
-    if (!req.hostname.includes("moebooru") && !req.hostname.includes("localhost") && !req.hostname.includes("192.168.68")) {
+  /*
+    if (!req.hostname.includes("moebooru") && !req.hostname.includes("localhost") && !req.hostname.includes("192.168.68") && !req.hostname.includes("mydomain")) {
       res.redirect(301, `https://moebooru.moe${req.path}`)
-    }
+    }*/
     res.setHeader("Content-Type", mime.getType(req.path) ?? "")
     res.setHeader("Cross-Origin-Opener-Policy", "same-origin")
     res.setHeader("Cross-Origin-Embedder-Policy", "require-corp")
@@ -329,7 +331,6 @@ const run = async () => {
   if (!exists) await sql.updateTag("mspaint", "description", "MS Paint is a basic image editing software included with Windows. It is developed by Microsoft.")
   exists = await sql.insertTag("gimp", "tag")
   if (!exists) await sql.updateTag("gimp", "description", "Gimp is a free image editing software developed by GIMP Development Team.")
-
   app.listen(process.env.PORT || 8080, () => console.log("Started the website server!"))
 }
 

@@ -53,6 +53,7 @@ const SearchRoutes = (app: Express) => {
             if (req.session.role !== "admin" && req.session.role !== "mod") {
                 result = result.filter((p: any) => p.restrict !== "explicit")
             }
+            result = functions.stripTags(result)
             res.status(200).json(result)
         } catch (e) {
             console.log(e)
@@ -80,6 +81,7 @@ const SearchRoutes = (app: Express) => {
             if (req.session.role !== "admin" && req.session.role !== "mod") {
                 result = result.filter((p: any) => p.restrict !== "explicit")
             }
+            result = functions.stripTags(result)
             res.status(200).json(result)
         } catch (e) {
             console.log(e)
@@ -103,6 +105,7 @@ const SearchRoutes = (app: Express) => {
                 if (dist(imgHash, hash) < 10) postIDs.add(images[i].postID)
             }
             let result = await sql.posts(Array.from(postIDs))
+            result = functions.stripTags(result)
             res.status(200).json(result)
         } catch (e) {
             console.log(e)
@@ -118,6 +121,7 @@ const SearchRoutes = (app: Express) => {
             if (!functions.validCategorySort(sort)) return res.status(400).send("Invalid sort")
             const search = query.trim().split(/ +/g).filter(Boolean).join("-")
             let result = await sql.tagCategory("artists", sort, search, offset)
+            result = functions.stripTags(result)
             res.status(200).json(result)
         } catch (e) {
             console.log(e)
@@ -133,6 +137,7 @@ const SearchRoutes = (app: Express) => {
             if (!functions.validCategorySort(sort)) return res.status(400).send("Invalid sort")
             const search = query.trim().split(/ +/g).filter(Boolean).join("-")
             let result = await sql.tagCategory("characters", sort, search, offset)
+            result = functions.stripTags(result)
             res.status(200).json(result)
         } catch (e) {
             console.log(e)
@@ -148,6 +153,7 @@ const SearchRoutes = (app: Express) => {
             if (!functions.validCategorySort(sort)) return res.status(400).send("Invalid sort")
             const search = query.trim().split(/ +/g).filter(Boolean).join("-")
             let result = await sql.tagCategory("series", sort, search, offset)
+            result = functions.stripTags(result)
             res.status(200).json(result)
         } catch (e) {
             console.log(e)

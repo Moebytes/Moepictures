@@ -22,6 +22,7 @@ import EditTagDialog from "../dialogs/EditTagDialog"
 import DeleteTagDialog from "../dialogs/DeleteTagDialog"
 import matureTags from "../json/mature-tags.json"
 import permissions from "../structures/Permissions"
+import CaptchaDialog from "../dialogs/CaptchaDialog"
 import {ThemeContext, EnableDragContext, HideNavbarContext, HideSidebarContext, RelativeContext, HideTitlebarContext, MobileContext,
 ActiveDropdownContext, HeaderTextContext, SidebarTextContext, SessionContext} from "../Context"
 import "./styles/tagspage.less"
@@ -181,6 +182,7 @@ const TagsPage: React.FunctionComponent = (props) => {
     return (
         <>
         <DragAndDrop/>
+        <CaptchaDialog/>
         <AliasTagDialog/>
         <EditTagDialog/>
         <DeleteTagDialog/>

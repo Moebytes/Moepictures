@@ -20,6 +20,7 @@ const postLimiter = rateLimit({
 const PostRoutes = (app: Express) => {
     app.get("/api/post", postLimiter, async (req: Request, res: Response, next: NextFunction) => {
         try {
+            if (req.session.captchaAmount || 51 > 50) return res.status(401).end()
             const postID = req.query.postID as string
             if (Number.isNaN(Number(postID))) return res.status(400).send("Invalid postID")
             let result = await sql.post(Number(postID))
@@ -29,6 +30,8 @@ const PostRoutes = (app: Express) => {
             if (result.images.length > 1) {
                 result.images = result.images.sort((a: any, b: any) => a.order - b.order)
             }
+            if (!req.session.captchaAmount) req.session.captchaAmount = 0
+            req.session.captchaAmount += 1
             res.status(200).json(result)
         } catch (e) {
             console.log(e)
@@ -77,6 +80,7 @@ const PostRoutes = (app: Express) => {
             if (req.session.role !== "admin" && req.session.role !== "mod") {
                 posts = posts.filter((p: any) => p.restrict !== "explicit")
             }
+            posts = functions.stripTags(posts)
             res.status(200).json(posts)
         } catch {
             return res.status(400).send("Bad request")
@@ -91,6 +95,7 @@ const PostRoutes = (app: Express) => {
             if (req.session.role !== "admin" && req.session.role !== "mod") {
                 if (post.restrict === "explicit") return res.status(403).send("No permission")
             }
+            delete post.tags
             res.status(200).json(post)
         } catch {
             return res.status(400).send("Bad request")

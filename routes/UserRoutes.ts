@@ -450,11 +450,13 @@ const UserRoutes = (app: Express) => {
             if (username) {
                 const user = await sql.user(username as string)
                 if (!user || !user.publicFavorites) return res.status(200).send([])
-                const favorites = await sql.favorites(username as string)
+                let favorites = await sql.favorites(username as string)
+                favorites = functions.stripTags(favorites)
                 res.status(200).send(favorites)
             } else {
                 if (!req.session.username) return res.status(400).send("Bad request")
-                const favorites = await sql.favorites(req.session.username)
+                let favorites = await sql.favorites(req.session.username)
+                favorites = functions.stripTags(favorites)
                 res.status(200).send(favorites)
             }
         } catch {
@@ -467,11 +469,13 @@ const UserRoutes = (app: Express) => {
             const username = req.query.username
             if (!req.session.username && !username) return res.status(400).send("Bad request")
             if (username) {
-                const uploads = await sql.uploads(username as string)
+                let uploads = await sql.uploads(username as string)
+                uploads = functions.stripTags(uploads)
                 res.status(200).send(uploads)
             } else {
                 if (!req.session.username) return res.status(400).send("Bad request")
-                const uploads = await sql.uploads(req.session.username)
+                let uploads = await sql.uploads(req.session.username)
+                uploads = functions.stripTags(uploads)
                 res.status(200).send(uploads)
             }
         } catch {

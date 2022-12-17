@@ -19,6 +19,7 @@ import sortMagenta from "../assets/magenta/sort.png"
 import DeleteCommentDialog from "../dialogs/DeleteCommentDialog"
 import EditCommentDialog from "../dialogs/EditCommentDialog"
 import ReportCommentDialog from "../dialogs/ReportCommentDialog"
+import CaptchaDialog from "../dialogs/CaptchaDialog"
 import {ThemeContext, EnableDragContext, HideNavbarContext, HideSidebarContext, MobileContext, SessionContext,
 RelativeContext, HideTitlebarContext, ActiveDropdownContext, HeaderTextContext, SidebarTextContext,
 CommentSearchFlagContext} from "../Context"
@@ -184,6 +185,7 @@ const CommentsPage: React.FunctionComponent = (props) => {
     return (
         <>
         <DragAndDrop/>
+        <CaptchaDialog/>
         <EditCommentDialog/>
         <DeleteCommentDialog/>
         <ReportCommentDialog/>

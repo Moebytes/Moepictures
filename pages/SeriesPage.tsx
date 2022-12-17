@@ -16,6 +16,7 @@ import searchPurpleLightHover from "../assets/purple-light/search-hover.png"
 import sort from "../assets/purple/sort.png"
 import SeriesRow from "../components/SeriesRow"
 import sortMagenta from "../assets/magenta/sort.png"
+import CaptchaDialog from "../dialogs/CaptchaDialog"
 import axios from "axios"
 import {ThemeContext, EnableDragContext, HideNavbarContext, HideSidebarContext, RelativeContext, HideTitlebarContext, MobileContext,
 ActiveDropdownContext, HeaderTextContext, SidebarTextContext} from "../Context"
@@ -172,6 +173,7 @@ const SeriesPage: React.FunctionComponent = (props) => {
     return (
         <>
         <DragAndDrop/>
+        <CaptchaDialog/>
         <TitleBar/>
         <NavBar/>
         <div className="body">

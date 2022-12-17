@@ -1341,4 +1341,11 @@ export default class Functions {
         }
         return rect
     }
+
+    public static stripTags = (posts: any) => {
+        for (let i = 0; i < posts.length; i++) {
+            delete posts[i].tags
+        }
+        return posts
+    }
 }

@@ -64,7 +64,7 @@ const ModQueuePage: React.FunctionComponent = (props) => {
         if (modState === "reported-comments") return <ModCommentReports/>
         return null
     }
-
+    if (!session.cookie) return null
     return (
         <>
         <DragAndDrop/>

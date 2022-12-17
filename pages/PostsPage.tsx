@@ -6,6 +6,7 @@ import SortBar from "../components/SortBar"
 import ImageGrid from "../components/ImageGrid"
 import Footer from "../components/Footer"
 import DownloadDialog from "../dialogs/DownloadDialog"
+import CaptchaDialog from "../dialogs/CaptchaDialog"
 import DragAndDrop from "../components/DragAndDrop"
 import {HideNavbarContext, HideSidebarContext, SquareContext, RelativeContext, HideTitlebarContext, 
 HeaderTextContext, SidebarTextContext, MobileContext, MobileScrollingContext} from "../Context"
@@ -90,6 +91,7 @@ const PostsPage: React.FunctionComponent = (props) => {
     return (
         <>
         <DragAndDrop/>
+        <CaptchaDialog/>
         <DownloadDialog/>
         <TitleBar reset={true}/>
         <NavBar/>

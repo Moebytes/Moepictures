@@ -25,6 +25,7 @@ import chibi from "../assets/purple/chibi.png"
 import Carousel from "../components/Carousel"
 import PostImage from "../components/PostImage"
 import DragAndDrop from "../components/DragAndDrop"
+import CaptchaDialog from "../dialogs/CaptchaDialog"
 import {HideNavbarContext, HideSidebarContext, RelativeContext, ThemeContext, EnableDragContext, HideTitlebarContext, BrightnessContext, ContrastContext, HueContext, SaturationContext, LightnessContext, MobileContext,
 BlurContext, SharpenContext, PixelateContext, HeaderTextContext, SessionContext, SidebarTextContext, RedirectContext, PostFlagContext} from "../Context"
 import fileType from "magic-bytes.js"
@@ -1081,6 +1082,7 @@ const EditPostPage: React.FunctionComponent<Props> = (props) => {
     return (
         <>
         <DragAndDrop/>
+        <CaptchaDialog/>
         <TitleBar/>
         <NavBar/>
         <div className="body">

@@ -25,6 +25,7 @@
   "author": "Moepi",
   "license": "MIT",
   "devDependencies": {
+    "@hcaptcha/types": "^1.0.3",
     "@tenpi/tslint": "^1.1.0",
     "@types/bcrypt": "^3.0.0",
     "@types/cors": "^2.8.12",

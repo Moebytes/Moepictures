@@ -14,6 +14,7 @@ import searchMagentaHover from "../assets/magenta/search-hover.png"
 import searchMagentaLightHover from "../assets/magenta-light/search-hover.png"
 import searchPurpleLightHover from "../assets/purple-light/search-hover.png"
 import sort from "../assets/purple/sort.png"
+import CaptchaDialog from "../dialogs/CaptchaDialog"
 import ArtistRow from "../components/ArtistRow"
 import sortMagenta from "../assets/magenta/sort.png"
 import axios from "axios"
@@ -171,6 +172,7 @@ const ArtistsPage: React.FunctionComponent = (props) => {
     return (
         <>
         <DragAndDrop/>
+        <CaptchaDialog/>
         <TitleBar/>
         <NavBar/>
         <div className="body">

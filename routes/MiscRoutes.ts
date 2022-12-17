@@ -20,6 +20,14 @@ const miscLimiter = rateLimit({
 	legacyHeaders: false
 })
 
+const captchaLimiter = rateLimit({
+	windowMs: 5 * 60 * 1000,
+	max: 30,
+	message: "Too many requests, try again later.",
+	standardHeaders: true,
+	legacyHeaders: false
+})
+
 const contactLimiter = rateLimit({
 	windowMs: 5 * 60 * 1000,
 	max: 10,
@@ -150,6 +158,30 @@ const MiscRoutes = (app: Express) => {
             res.status(200).send("Success")
         } catch {
             res.status(400).send("Bad request")
+        }
+    })
+
+    app.post("/api/misc/captcha", captchaLimiter, async (req: Request, res: Response, next: NextFunction) => {
+        try {
+            const {siteKey, captchaResponse} = req.body 
+            let ip = req.headers["x-forwarded-for"] || req.socket.remoteAddress
+            ip = ip?.toString().replace("::ffff:", "") || ""
+            const form = new FormData()
+            form.append("response", captchaResponse)
+            form.append("secret", process.env.CAPTCHA_SECRET)
+            form.append("sitekey", siteKey)
+            form.append("remoteip", ip)
+            const response = await axios.post("https://hcaptcha.com/siteverify", form, {headers: form.getHeaders()}).then((r) => r.data)
+            if (response.success) {
+                const challengeTime = response.challenge_ts
+                req.session.captchaAmount = 0
+                res.status(200).send("Success")
+            } else {
+                res.status(400).send("Bad request") 
+            }
+        } catch (e) {
+            console.log(e)
+            res.status(400).send("Bad request") 
         }
     })
 }

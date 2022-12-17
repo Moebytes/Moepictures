@@ -79,9 +79,11 @@ const TagRoutes = (app: Express) => {
     app.put("/api/tag/edit", tagLimiter, async (req: Request, res: Response) => {
         try {
             const {tag, key, description, image, aliases, implications} = req.body
+            console.log(req.body)
             if (!req.session.username || !tag) return res.status(400).send("Bad request")
             if (req.session.role !== "admin" && req.session.role !== "mod") return res.status(403).end()
             const tagObj = await sql.tag(tag)
+            console.log(tagObj)
             if (!tagObj) return res.status(400).send("Bad request")
             if (description) {
                 await sql.updateTag(tag, "description", description)

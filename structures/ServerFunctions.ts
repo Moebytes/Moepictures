@@ -76,7 +76,11 @@ export default class ServerFunctions {
             accessKeyId: process.env.AWS_ACCESS_KEY!,
             secretAccessKey: process.env.AWS_SECRET_KEY!
         }})
-        await s3.copyObject({CopySource: `moebooru/${oldFile}`, Key: newFile, Bucket: "moebooru"}).promise()
+        try {
+            await s3.copyObject({CopySource: `moebooru/${oldFile}`, Key: newFile, Bucket: "moebooru"}).promise()
+        } catch {
+            await s3.copyObject({CopySource: `moebooru/${encodeURI(oldFile)}`, Key: newFile, Bucket: "moebooru"}).promise()
+        }
         await s3.deleteObject({Key: oldFile, Bucket: "moebooru"}).promise()
     }
 
