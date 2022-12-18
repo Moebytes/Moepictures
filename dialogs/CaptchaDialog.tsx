@@ -30,7 +30,7 @@ const CaptchaDialog: React.FunctionComponent<Props> = (props) => {
     const history = useHistory()
     const [needsVerification, setNeedsVerification] = useState(false)
     const [captchaResponse, setCaptchaResponse] = useState("")
-    const captchaRef = useRef<HTMLDivElement>(null)
+    const captchaRef = useRef<any>(null)
 
     useEffect(() => {
         document.title = "Moebooru: Captcha"
@@ -55,6 +55,7 @@ const CaptchaDialog: React.FunctionComponent<Props> = (props) => {
         if (needsVerification) {
             // document.body.style.overflowY = "hidden"
             document.body.style.pointerEvents = "all"
+            captchaRef.current.resetCaptcha()
         } else {
             // document.body.style.overflowY = "visible"
             document.body.style.pointerEvents = "all"
@@ -74,6 +75,7 @@ const CaptchaDialog: React.FunctionComponent<Props> = (props) => {
         }
         try {
             await axios.post("/api/misc/captcha", {siteKey, captchaResponse}, {withCredentials: true})
+            captchaRef.current.resetCaptcha()
             setSessionFlag(true)
             setNeedsVerification(false)
             history.go(0)
