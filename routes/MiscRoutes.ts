@@ -181,7 +181,7 @@ const MiscRoutes = (app: Express) => {
             }
         } catch (e) {
             console.log(e)
-            res.status(400).send("Bad request") 
+            res.status(400).send(e) 
         }
     })
 }
