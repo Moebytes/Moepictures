@@ -55,7 +55,7 @@ const CaptchaDialog: React.FunctionComponent<Props> = (props) => {
         if (needsVerification) {
             // document.body.style.overflowY = "hidden"
             document.body.style.pointerEvents = "all"
-            captchaRef.current.resetCaptcha()
+            captchaRef.current?.resetCaptcha()
         } else {
             // document.body.style.overflowY = "visible"
             document.body.style.pointerEvents = "all"
@@ -75,7 +75,7 @@ const CaptchaDialog: React.FunctionComponent<Props> = (props) => {
         }
         try {
             await axios.post("/api/misc/captcha", {siteKey, captchaResponse}, {withCredentials: true})
-            captchaRef.current.resetCaptcha()
+            captchaRef.current?.resetCaptcha()
             setSessionFlag(true)
             setNeedsVerification(false)
             history.go(0)
