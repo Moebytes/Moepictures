@@ -177,7 +177,7 @@ const MiscRoutes = (app: Express) => {
                 req.session.captchaAmount = 0
                 res.status(200).send("Success")
             } else {
-                res.status(400).send("Bad request") 
+                res.status(400).send(response) 
             }
         } catch (e) {
             console.log(e)
