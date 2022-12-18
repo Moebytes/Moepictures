@@ -53,6 +53,7 @@ import rejectRed from "../assets/purple/reject-red.png"
 import approveGreen from "../assets/purple/approve-green.png"
 import adminCrown from "../assets/purple/admin-crown.png"
 import modCrown from "../assets/purple/mod-crown.png"
+import tagIcon from "../assets/purple/tag.png"
 import functions from "../structures/Functions"
 import axios from "axios"
 import "./styles/mobileinfo.less"
@@ -200,6 +201,10 @@ const MobileInfo: React.FunctionComponent<Props> = (props) => {
     const getEdit = () => {
         if (theme.includes("magenta")) return editMagenta
         return edit
+    }
+
+    const getShowTags = () => {
+        return tagIcon
     }
 
     const getHistory = () => {
@@ -413,10 +418,36 @@ const MobileInfo: React.FunctionComponent<Props> = (props) => {
         return <span className="tag-alt-link" onClick={() => username ? history.push(`/user/${username}`) : null}>{functions.toProperCase(username) || "deleted"}</span>
     }
 
+    const tagCaptchaJSX = () => {
+        if (!session) return
+        if (session.captchaAmount === undefined) session.captchaAmount = 51
+        if (session.captchaAmount > 50) {
+            if (!history.location.pathname.includes("/post/") && !history.location.pathname.includes("/edit-post")) return
+            const toggleCaptcha = () => {
+                sessionStorage.setItem("ignoreCaptcha", "false")
+                history.go(0)
+            }
+            return (
+                <div className="mobileinfo-subcontainer-column">
+                    <div className="mobileinfo-row">
+                        <span className="tag-hover" onClick={toggleCaptcha}>
+                            <img className="mobileinfo-icon" src={getShowTags()}/>
+                            <span className="tag-red">Show Tags</span>
+                        </span>
+                    </div>
+                </div>
+            )
+        }
+    }
+
+
     return (
         <div className="mobileinfo" onMouseEnter={() => setEnableDrag(false)}>
             <div className="mobileinfo-container">
             <div className="mobileinfo-content">
+
+                {tagCaptchaJSX()}
+
                 {props.artists ? <>
                     <div className="mobileinfo-title-container">
                         <span className="mobileinfo-title">{props.artists.length > 1 ? "Artists" : "Artist"}</span>

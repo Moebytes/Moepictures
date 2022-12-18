@@ -205,7 +205,7 @@ const CommentRow: React.FunctionComponent<Props> = (props) => {
             const base64 = await functions.linkToBase64(img)
             setImg(base64)
         }
-        base64Img()
+        // base64Img()
     }, [])
 
     return (

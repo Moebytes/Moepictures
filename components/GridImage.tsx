@@ -96,7 +96,7 @@ const GridImage: React.FunctionComponent<Props> = (props) => {
             const base64 = await functions.linkToBase64(props.img)
             setImg(base64)
         }
-        base64Img()
+        // base64Img()
     }, [props.img])
 
     useEffect(() => {

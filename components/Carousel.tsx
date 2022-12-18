@@ -49,7 +49,7 @@ const Carousel: React.FunctionComponent<Props> = (props) => {
             const base64Images = await Promise.all(props.images.map((image) => functions.linkToBase64(image)))
             setImages(base64Images)
         }
-        base64Images()
+        // base64Images()
     }, [props.images])
 
     useEffect(() => {
