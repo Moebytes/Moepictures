@@ -43,16 +43,18 @@ const ImageGrid: React.FunctionComponent = (props) => {
     const history = useHistory()
 
     const getInitLoadAmount = () => {
-        if (sizeType === "tiny") return 60
-        if (sizeType === "small") return 40
-        if (sizeType === "medium") return 25
-        if (sizeType === "large") return 20
-        if (sizeType === "massive") return 15
-        return 60
+        let loadAmount = 60
+        if (sizeType === "tiny") loadAmount = 60
+        if (sizeType === "small") loadAmount = 40
+        if (sizeType === "medium") loadAmount = 25
+        if (sizeType === "large") loadAmount = 20
+        if (sizeType === "massive") loadAmount = 15
+        return loadAmount * 2
     }
 
     const getLoadAmount = () => {
-        return mobile ? functions.getImagesPerRowMobile(sizeType) : functions.getImagesPerRow(sizeType)
+        const loadAmount = mobile ? functions.getImagesPerRowMobile(sizeType) : functions.getImagesPerRow(sizeType)
+        return loadAmount * 10
     }
 
     const searchPosts = async () => {

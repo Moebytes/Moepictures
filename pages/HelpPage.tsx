@@ -255,9 +255,7 @@ const HelpPage: React.FunctionComponent = (props) => {
                     <span className="help-text">
                         Accessing the tags of a specific post is considered to be protected information and you will need to solve a captcha 
                         after viewing the tags of 50 posts. There is no way to bypass the captcha, but you can choose to not solve it and you will be
-                        able to browse posts without seeing their tags. 
-
-                        This is by no means a perfect solution, but I hope that by making my website difficult to scrape it would make scrapers go somewhere else. 
+                        able to browse posts without seeing their tags. This is by no means a perfect solution, but I hope that by making my website difficult to scrape it would make scrapers go somewhere else. 
                         If you have anymore ideas on how to protect my website from robotic scrapers, feel free to contact me.
                     </span>
                     <span className="help-heading" id="deleting-account">Deleting Your Account</span>
