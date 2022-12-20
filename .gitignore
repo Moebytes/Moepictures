@@ -7,3 +7,4 @@ assets/images
 files
 *.pem
 .ssh
+dump

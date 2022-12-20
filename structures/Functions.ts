@@ -1344,4 +1344,31 @@ export default class Functions {
         }
         return posts
     }
+
+    public static blockedTags = () => {
+        return ["rating", "girl", "boy", "chibi", "pixel-art", "comic", "tress-ribbon", "no-hat", "ribbon-trimmed-sleeves",
+        "hair-between-eyes", "solo", "looking-at-viewer", "eyebrows-visible-through-hair", "one-side-up", "tareme", "caustics",
+        "kemonomimi-mode", "cowboy-shot", "underwear", "depth-of-field", "holding", "bangs", "short-sleeves", "hair-tubes",
+        "v-shaped-eyebrows", "v-arms", "v-over-eye", "pixiv-id", "long-sleeves", "frills", "collarbone", "midriff", "argyle",
+        "bangs", "ahoge", "two-side-up", "sleeves-past-wrists", "sleeves-past-fingers", "legwear", "serafuku", "copyright", 
+        "hand-on-another", "^^^", "+ +", "2021", "1other"]
+    }
+
+    public static tagReplaceMap = () => {
+        return {
+            "-(symbol)": "",
+            "-(sky)": "",
+            "-(object)": "",
+            "-(medium)": "",
+            "-(machine)": "",
+            "transparent-background": "transparent",
+            "background": "bg",
+            "headwear": "hat",
+            "pantyhose": "leggings",
+            "neckerchief": "necktie",
+            "hand-on-own": "hand-on",
+            "hand-in-own": "hand-on",
+            "x-hair-ornament": "hair-ornament"
+        }
+    }
 }

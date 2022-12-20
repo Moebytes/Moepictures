@@ -67,11 +67,13 @@ const UploadPage: React.FunctionComponent = (props) => {
     const [uploadError, setUploadError] = useState(false)
     const [submitError, setSubmitError] = useState(false)
     const [saucenaoError, setSaucenaoError] = useState(false)
+    const [danbooruError, setDanbooruError] = useState(false)
     const [acceptedURLs, setAcceptedURLs] = useState([]) as any
     const [dupPosts, setDupPosts] = useState([]) as any
     const uploadErrorRef = useRef<any>(null)
     const submitErrorRef = useRef<any>(null)
     const saucenaoErrorRef = useRef<any>(null)
+    const danbooruErrorRef = useRef<any>(null)
     const enterLinksRef = useRef<any>(null)
     const [currentImg, setCurrentImg] = useState(null) as any
     const [currentIndex, setCurrentIndex] = useState(0) as any
@@ -103,6 +105,7 @@ const UploadPage: React.FunctionComponent = (props) => {
     const [tagActive, setTagActive] = useState(false)
     const [tagX, setTagX] = useState(0)
     const [tagY, setTagY] = useState(0)
+    const [danbooruLink, setDanbooruLink] = useState("")
     const rawTagRef = useRef<any>(null)
     const history = useHistory()
 
@@ -783,8 +786,13 @@ const UploadPage: React.FunctionComponent = (props) => {
                 const konachan = results.filter((r: any) => r.header.index_id === 26)
                 const yandere = results.filter((r: any) => r.header.index_id === 12)
                 const anime = results.filter((r: any) => r.header.index_id === 21)
+                if (danbooru.length) setDanbooruLink(`https://danbooru.donmai.us/posts/${danbooru[0].data.danbooru_id}.json`)
                 if (pixiv.length) {
                     link = `https://www.pixiv.net/en/artworks/${pixiv[0].data.pixiv_id}`
+                    if (!danbooru.length) {
+                        const result = await axios.get(`https://danbooru.donmai.us/posts.json?tags=pixiv_id%3A${pixiv[0].data.pixiv_id}`).then((r) => r.data)
+                        if (result.length) setDanbooruLink(`https://danbooru.donmai.us/posts/${result[0].id}.json`)
+                    }
                     artist = pixiv[0].data.author_name
                     title = pixiv[0].data.title
                     try {
@@ -810,7 +818,7 @@ const UploadPage: React.FunctionComponent = (props) => {
                         setArtists(artists)
                         forceUpdate()
                         const translatedTags = await axios.post("/api/misc/translate", illust.tags.map((t: any) => t.name), {withCredentials: true}).then((r) => r.data)
-                        setRawTags(translatedTags.map((t: string) => t.toLowerCase()).join(" "))
+                        // setRawTags(translatedTags.map((t: string) => t.toLowerCase()).join(" "))
                     } catch (e) {
                         console.log(e)
                     }
@@ -843,7 +851,7 @@ const UploadPage: React.FunctionComponent = (props) => {
                         artistInputRefs.push(React.createRef())
                         setArtists(artists)
                         forceUpdate()
-                        setRawTags(deviation.keywords.map((k: string) => k.toLowerCase()).join(" "))
+                        // setRawTags(deviation.keywords.map((k: string) => k.toLowerCase()).join(" "))
                     } catch (e) {
                         console.log(e)
                     } 
@@ -892,6 +900,125 @@ const UploadPage: React.FunctionComponent = (props) => {
         setTimeout(async () => {
             saucenaoTimeout = false
         }, 3000)
+    }
+
+    const tagLookup = async () => {
+        setDanbooruError(true)
+        await functions.timeout(20)
+        danbooruErrorRef.current.innerText = "Fetching..."
+        let tagArr = [] as any
+
+        let blockedTags = functions.blockedTags()
+        let tagReplaceMap = functions.tagReplaceMap()
+
+        try {
+        if (danbooruLink) {
+            const json = await axios.get(danbooruLink).then((r) => r.data)
+            tagArr = json.tag_string_general.split(" ").map((tag: string) => tag.replaceAll("_", "-"))
+            tagArr.push("autotags")
+            let charStrArr = json.tag_string_character.split(" ").map((tag: string) => tag.replaceAll("_", "-"))
+            let seriesStrArr = json.tag_string_copyright.split(" ").map((tag: string) => tag.replaceAll("_", "-"))
+
+            if (tagArr.includes("chibi")) setStyle("chibi")
+            if (tagArr.includes("pixel-art")) setStyle("pixel")
+            if (tagArr.includes("comic")) setType("comic")
+
+            for (let i = 0; i < Object.keys(tagReplaceMap).length; i++) {
+                const key = Object.keys(tagReplaceMap)[i]
+                const value = Object.values(tagReplaceMap)[i]
+                tagArr = tagArr.map((tag: string) => tag.replaceAll(key, value))
+            }
+            tagArr = tagArr.filter((tag: string) => tag.length >= 3)
+
+            for (let i = 0; i < blockedTags.length; i++) {
+                tagArr = tagArr.filter((tag: string) => !tag.includes(blockedTags[i]))
+            }
+
+            for (let i = 0; i < charStrArr.length; i++) {
+                characters[characters.length - 1].tag = charStrArr[i]
+                const seriesName = charStrArr[i].match(/(\()(.*?)(\))/)?.[0].replace("(", "").replace(")", "")
+                seriesStrArr.push(seriesName)
+                characters.push({})
+                characterInputRefs.push(React.createRef())
+                setCharacters(characters)
+                forceUpdate()
+            }
+
+            seriesStrArr = functions.removeDuplicates(seriesStrArr)
+
+            for (let i = 0; i < seriesStrArr.length; i++) {
+                series[series.length - 1].tag = seriesStrArr[i]
+                series.push({})
+                seriesInputRefs.push(React.createRef())
+                setSeries(series)
+                forceUpdate()
+            }
+
+            setRawTags(tagArr.join(" "))
+        } else {
+            let current = acceptedURLs[currentIndex]
+            let bytes = "" as any 
+            if (functions.isVideo(current.link)) {
+                bytes = await functions.base64toUint8Array(current.thumbnail).then((a) => Object.values(a))
+            } else {
+                bytes = Object.values(current.bytes) as any
+            }
+            let tagArr = await axios.post(`/api/misc/deepdanbooru`, bytes, {withCredentials: true}).then((r) => r.data).catch(() => null)
+            if (!tagArr) return
+
+            if (tagArr.includes("chibi")) setStyle("chibi")
+            if (tagArr.includes("pixel-art")) setStyle("pixel")
+            if (tagArr.includes("comic")) setType("comic")
+
+            for (let i = 0; i < Object.keys(tagReplaceMap).length; i++) {
+                const key = Object.keys(tagReplaceMap)[i]
+                const value = Object.values(tagReplaceMap)[i]
+                tagArr = tagArr.map((tag: string) => tag.replaceAll(key, value))
+            }
+            for (let i = 0; i < blockedTags.length; i++) {
+                tagArr = tagArr.filter((tag: string) => !tag.includes(blockedTags[i]))
+            }
+            tagArr = tagArr.filter((tag: string) => tag.length >= 3)
+
+
+            let tagMapArr = tagArr.filter((tag: string) => !tag.includes("("))
+            tagMapArr.push("autotags")
+            tagMapArr.push("needscheck")
+            let charStrArr = tagArr.filter((tag: string) => tag.includes("("))
+
+            let seriesStrArr = [] as string[]
+
+            for (let i = 0; i < charStrArr.length; i++) {
+                const seriesName = charStrArr[i].match(/(\()(.*?)(\))/)?.[0].replace("(", "").replace(")", "")
+                seriesStrArr.push(seriesName)
+            }
+
+            seriesStrArr = functions.removeDuplicates(seriesStrArr)
+
+            for (let i = 0; i < charStrArr.length; i++) {
+                characters[characters.length - 1].tag = charStrArr[i]
+                characters.push({})
+                characterInputRefs.push(React.createRef())
+                setCharacters(characters)
+                forceUpdate()
+            }
+
+            for (let i = 0; i < seriesStrArr.length; i++) {
+                series[series.length - 1].tag = seriesStrArr[i]
+                series.push({})
+                seriesInputRefs.push(React.createRef())
+                setSeries(series)
+                forceUpdate()
+            }
+
+            setRawTags(tagMapArr.join(" "))
+        }
+        setDanbooruError(false)
+        } catch {
+            danbooruErrorRef.current.innerText = "Nothing found."
+            await functions.timeout(3000)
+            setDanbooruError(false)
+        }
     }
 
     const resetAll = () => {
@@ -1269,7 +1396,7 @@ const UploadPage: React.FunctionComponent = (props) => {
                     <img className="tag-img-preview" src={currentImg}/>}
                 </div>
                 : null}
-                <div className="upload-row">
+                <div className="upload-row" style={{marginBottom: "5px"}}>
                     <span className="upload-heading">Tags</span>
                     <div className="upload-button-container">
                         <button className="upload-button" onClick={() => setDisplayImage((prev) => !prev)}>
@@ -1280,6 +1407,8 @@ const UploadPage: React.FunctionComponent = (props) => {
                         </button>
                     </div>
                 </div>
+                {danbooruError ? <span ref={danbooruErrorRef} className="submit-error-text"></span> : null}
+                <span className="upload-link" onClick={tagLookup} style={{marginBottom: "5px"}}>Fetch from Danbooru</span>
                 <span className="upload-text-alt">Enter dashed tags separated by spaces. Tags can describe any of the images. If the tag doesn't exist, you will be promted to create it.
                 If you need help with tags, read the <Link className="upload-link" target="_blank" to="/help#tagging">tagging guide.</Link></span>
                 <div className="upload-container">

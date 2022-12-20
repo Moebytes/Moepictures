@@ -11,6 +11,12 @@ import KuromojiAnalyzer from "kuroshiro-analyzer-kuromoji"
 import functions from "../structures/Functions"
 import serverFunctions from "../structures/ServerFunctions"
 import rateLimit from "express-rate-limit"
+import fs from "fs"
+import child_process from "child_process"
+import util from "util"
+
+const exec = util.promisify(child_process.exec)
+
 
 const miscLimiter = rateLimit({
 	windowMs: 5 * 60 * 1000,
@@ -179,6 +185,27 @@ const MiscRoutes = (app: Express) => {
             } else {
                 res.status(400).send("Bad request") 
             }
+        } catch (e) {
+            console.log(e)
+            res.status(400).send("Bad request") 
+        }
+    })
+
+    app.post("/api/misc/deepdanbooru", miscLimiter, async (req: Request, res: Response, next: NextFunction) => {
+        try {
+            const buffer = Buffer.from(req.body, "binary")
+
+            const folder = path.join(__dirname, "./dump")
+            if (!fs.existsSync(folder)) fs.mkdirSync(folder, {recursive: true})
+
+            const filename = `${Math.floor(Math.random() * 100000000)}.jpg`
+            const imagePath = path.join(folder, filename)
+            fs.writeFileSync(imagePath, buffer)
+            let command = `deepdanbooru evaluate "${imagePath}" --project-path "${process.env.DEEPDANBOORU_PATH}" --allow-folder`
+            const str = await exec(command).then((s: any) => s.stdout).catch((e: any) => e.stderr)
+            const result = str.match(/(?<=\) )(.*?)$/gm)
+            fs.unlinkSync(imagePath)
+            res.status(200).json(result)
         } catch (e) {
             console.log(e)
             res.status(400).send("Bad request") 
