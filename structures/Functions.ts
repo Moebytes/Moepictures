@@ -1351,7 +1351,9 @@ export default class Functions {
         "kemonomimi-mode", "cowboy-shot", "underwear", "depth-of-field", "holding", "bangs", "short-sleeves", "hair-tubes",
         "v-shaped-eyebrows", "v-arms", "v-over-eye", "pixiv-id", "long-sleeves", "frills", "collarbone", "midriff", "argyle",
         "bangs", "ahoge", "two-side-up", "sleeves-past-wrists", "sleeves-past-fingers", "legwear", "serafuku", "copyright", 
-        "hand-on-another", "^^^", "+ +", "2021", "1other"]
+        "hand-on-another", "^^^", "+ +", "2021", "1other", "vision-(genshin-impact)", "jumpy-dumpty", "pom-pom-(clothes)",
+        "boo-tao-(genshin-impact)", "baron-bunny-(genshin-impact)", "lily-(flower)", "abyss-mage-(genshin-impact)",
+        "crystalfly-(genshin-impact)"]
     }
 
     public static tagReplaceMap = () => {
@@ -1368,7 +1370,28 @@ export default class Functions {
             "neckerchief": "necktie",
             "hand-on-own": "hand-on",
             "hand-in-own": "hand-on",
-            "x-hair-ornament": "hair-ornament"
+            "x-hair-ornament": "hair-ornament",
+            "dodoco-(genshin-impact)": "dodoco",
+            "gabriel-tenma-white": "gabriel-(gabriel-dropout)",
+            "kanna-kamui": "kanna-kamui-(dragon-maid)",
+            "tedeza-rize": "rize-tedeza-(is-the-order-a-rabbit)",
+            "hakurei-reimu": "reimu-hakurei-(touhou)",
+            "kirima-sharo": "sharo-kirima-(is-the-order-a-rabbit)",
+            "kirima-syaro": "sharo-kirima-(is-the-order-a-rabbit)",
+            "ujimatsu-chiya": "chiya-ujimatsu-(is-the-order-a-rabbit)",
+            "flandre-scarlet": "flandre-scarlet-(touhou)",
+            "llenn-(sao)": "llenn-(sword-art-online)",
+            "slime-(genshin-impact)": "slime",
+            "tippy-(gochiusa)": "tippy",
+            "doma-umaru": "umaru-doma-(himouto-umaru-chan)",
+            "firo-(tate-no-yuusha-no-nariagari)": "filo-(shield-hero)",
+            "tate-no-yuusha-no-nariagari": "shield-hero",
+            "raphtalia": "raphtalia-(shield-hero)",
+            "satanichia-kurumizawa-mcdowell": "satania-(gabriel-dropout)",
+            "tapris-chisaki-sugarbell": "tapris-(gabriel-dropout)",
+            "platelet-(hataraku-saibou)": "platelet-(cells-at-work)",
+            "megumin": "megumin-(konosuba)",
+            "tohru-(maidragon)": "tohru-(dragon-maid)"
         }
     }
 }

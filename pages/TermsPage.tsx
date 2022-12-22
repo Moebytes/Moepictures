@@ -85,7 +85,7 @@ const TermsPage: React.FunctionComponent = (props) => {
                             <span className="terms-title">Terms of Service</span>
                         </div>
                         <div className="terms-text">
-                            Last Updated: May 4, 2022 <br/><br/>
+                            Last Updated: December 22, 2022 <br/><br/>
 
                             This Terms of Service applies to the website ("site") provided 
                             by Moebooru (”we”, “us”, “our”). By using our site, you agree with these terms. If you do not agree with these 
@@ -101,9 +101,10 @@ const TermsPage: React.FunctionComponent = (props) => {
                             Prohibited Actions<br/>
                             When you are using our site, you may not do any of the following: <br/>
                             <span className="terms-text-alt">
+                            ⇾ Robotically scrape artworks and tags for use in generative AI.<br/>
                             ⇾ Send spam in the comments or through unsolicited private messages.<br/>
-                            ⇾ Vandalize tags or translations.<br/>
-                            ⇾ Create multiple accounts to spam or circumvent bans.<br/>
+                            ⇾ Vandalize classifications, tags, or translations.<br/>
+                            ⇾ Create multiple accounts to circumvent bans.<br/>
                             ⇾ Share or transfer your account to anyone else.<br/>
                             ⇾ Attempt to gain unauthorized access to another user’s account.<br/>
                             ⇾ Attempt to upload computer viruses or other malicious content.<br/>
@@ -123,17 +124,16 @@ const TermsPage: React.FunctionComponent = (props) => {
                             on our site infringes on your copyright, you can contact us through the contact form 
                             and provide the following pieces of information:<br/>
                             <span className="terms-text-alt">
-                            ⇾ Contact information (Name, Mailing Address, Phone Number, Email)<br/>
+                            ⇾ Contact information (eg. social media, email)<br/>
+                            ⇾ Your artist tag or links to specific works<br/>
                             ⇾ Proof of your identity<br/>
-                            ⇾ Links to the infringing content<br/>
-                            ⇾ A statement affirming that you are the copyright holder of the content in question<br/>
+                            ⇾ A statement affirming that you are the copyright holder of the content<br/>
                             </span>
                             These are acceptable proofs of identity:<br/>
                             <span className="terms-text-alt">
-                            ⇾ <span className="terms-weblink" onClick={() => functions.twitterLink()}>Private message us on Twitter</span><br/>
+                            ⇾ Respond to social media contact (say which account you would prefer being contacted at)<br/>
                             ⇾ Attach a source file to one of your works which is not available publicly<br/>
-                            </span>
-                            We do not remove material not protected by copyright, such as your artist tag and social links.<br/><br/>
+                            </span><br/><br/>
 
                             Liability<br/>
                             The site is provided "as is", without warranty of any kind, express or implied. 
@@ -152,7 +152,7 @@ const TermsPage: React.FunctionComponent = (props) => {
                             <span className="privacy-title">Privacy Policy</span>
                         </div>
                         <div className="privacy-text">
-                            Last Updated: May 4, 2022<br/><br/>
+                            Last Updated: December 22, 2022<br/><br/>
 
                             This Privacy Policy outlines the information that Moebooru (”we”, “us”, “our”) 
                             collects when you use our website ("site"). It
@@ -183,8 +183,7 @@ const TermsPage: React.FunctionComponent = (props) => {
                             How We Use Your Information<br/>
                             We use your information in order to:<br/>
                             <span className="privacy-text-alt">
-                            ⇾ Provide and improve our site's functionality.<br/>
-                            ⇾ Allow you to login and manage your account.<br/>
+                            ⇾ Provide our site's functionality.<br/>
                             ⇾ Protect our site from abuse and spam.<br/>
                             ⇾ Analyze usage data in connection with our site.<br/><br/>
                             </span>
@@ -192,7 +191,7 @@ const TermsPage: React.FunctionComponent = (props) => {
                             How Information About You Is Shared<br/>
                             <span className="privacy-text-alt">
                             ⇾ Unless it is stated otherwise, any content that you submit to our site is
-                            visible to the public. This includes posts and comments. <br/>
+                            visible to the public. <br/>
                             ⇾ You can choose to make certain information private, such as
                             your favorites. <br/><br/>
                             </span>
