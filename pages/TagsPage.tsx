@@ -14,8 +14,10 @@ import searchMagentaHover from "../assets/magenta/search-hover.png"
 import searchMagentaLightHover from "../assets/magenta-light/search-hover.png"
 import searchPurpleLightHover from "../assets/purple-light/search-hover.png"
 import sort from "../assets/purple/sort.png"
+import type from "../assets/purple/all.png"
 import TagRow from "../components/TagRow"
 import sortMagenta from "../assets/magenta/sort.png"
+import typeMagenta from "../assets/magenta/all.png"
 import axios from "axios"
 import AliasTagDialog from "../dialogs/AliasTagDialog"
 import EditTagDialog from "../dialogs/EditTagDialog"
@@ -39,6 +41,7 @@ const TagsPage: React.FunctionComponent = (props) => {
     const {session, setSession} = useContext(SessionContext)
     const {mobile, setMobile} = useContext(MobileContext)
     const [sortType, setSortType] = useState("posts")
+    const [typeType, setTypeType] = useState("all")
     const [tags, setTags] = useState([]) as any
     const [index, setIndex] = useState(0)
     const [searchQuery, setSearchQuery] = useState("")
@@ -47,9 +50,10 @@ const TagsPage: React.FunctionComponent = (props) => {
     const [ended, setEnded] = useState(false)
     const [getSearchIconHover, setSearchIconHover] = useState(false)
     const sortRef = useRef(null) as any
+    const typeRef = useRef(null) as any
 
     const updateTags = async () => {
-        const result = await axios.get("/api/search/tags", {params: {sort: sortType, query: searchQuery}, withCredentials: true}).then((r) => r.data)
+        const result = await axios.get("/api/search/tags", {params: {sort: sortType, type: typeType, query: searchQuery}, withCredentials: true}).then((r) => r.data)
         setEnded(false)
         setIndex(0)
         setVisibleTags([])
@@ -80,7 +84,7 @@ const TagsPage: React.FunctionComponent = (props) => {
 
     useEffect(() => {
         updateTags()
-    }, [sortType])
+    }, [sortType, typeType])
 
     useEffect(() => {
         let currentIndex = index
@@ -97,7 +101,7 @@ const TagsPage: React.FunctionComponent = (props) => {
     const updateOffset = async () => {
         if (ended) return
         const newOffset = offset + 100
-        const result = await axios.get("/api/search/tags", {params: {sort: sortType, query: searchQuery, offset: newOffset}, withCredentials: true}).then((r) => r.data)
+        const result = await axios.get("/api/search/tags", {params: {sort: sortType, type: typeType, query: searchQuery, offset: newOffset}, withCredentials: true}).then((r) => r.data)
         console.log(result)
         if (result?.length >= 100) {
             setOffset(newOffset)
@@ -142,6 +146,11 @@ const TagsPage: React.FunctionComponent = (props) => {
         return sort
     }
 
+    const getType = () => {
+        if (theme.includes("magenta")) return typeMagenta
+        return type
+    }
+
     const getSortMargin = () => {
         const rect = sortRef.current?.getBoundingClientRect()
         if (!rect) return "0px"
@@ -158,11 +167,33 @@ const TagsPage: React.FunctionComponent = (props) => {
         return `${raw + offset}px`
     }
 
+    const getTypeMargin = () => {
+        const rect = typeRef.current?.getBoundingClientRect()
+        if (!rect) return "0px"
+        const raw = window.innerWidth - rect.right
+        let offset = 0
+        if (typeType === "all") offset = -35
+        if (typeType === "artist") offset = -25
+        if (typeType === "character") offset = -5
+        if (typeType === "series") offset = -25
+        if (typeType === "tag") offset = -33
+        return `${raw + offset}px`
+    }
+
     const getSortJSX = () => {
         return (
             <div className="tagsort-item" ref={sortRef} onClick={() => {setActiveDropdown(activeDropdown === "sort" ? "none" : "sort")}}>
                 <img className="tagsort-img" src={getSort()}/>
                 <span className="tagsort-text">{functions.toProperCase(sortType)}</span>
+            </div>
+        )
+    }
+
+    const getTypeJSX = () => {
+        return (
+            <div className="tagsort-item" ref={typeRef} onClick={() => {setActiveDropdown(activeDropdown === "type" ? "none" : "type")}}>
+                <img className="tagsort-img rotate" src={getType()}/>
+                <span className="tagsort-text">{functions.toProperCase(typeType)}</span>
             </div>
         )
     }
@@ -222,6 +253,25 @@ const TagsPage: React.FunctionComponent = (props) => {
                             </div>
                             <div className="tag-dropdown-row" onClick={() => setSortType("reverse aliases")}>
                                 <span className="tag-dropdown-text">Reverse Aliases</span>
+                            </div>
+                        </div>
+                        {getTypeJSX()}
+                        <div className={`tag-dropdown ${activeDropdown === "type" ? "" : "hide-tag-dropdown"}`} 
+                        style={{marginRight: getTypeMargin(), top: mobile ? "229px" : "209px"}} onClick={() => setActiveDropdown("none")}>
+                            <div className="tag-dropdown-row" onClick={() => setTypeType("all")}>
+                                <span className="tag-dropdown-text">All</span>
+                            </div>
+                            <div className="tag-dropdown-row" onClick={() => setTypeType("artist")}>
+                                <span className="tag-dropdown-text">Artist</span>
+                            </div>
+                            <div className="tag-dropdown-row" onClick={() => setTypeType("character")}>
+                                <span className="tag-dropdown-text">Character</span>
+                            </div>
+                            <div className="tag-dropdown-row" onClick={() => setTypeType("series")}>
+                                <span className="tag-dropdown-text">Series</span>
+                            </div>
+                            <div className="tag-dropdown-row" onClick={() => setTypeType("tag")}>
+                                <span className="tag-dropdown-text">Tag</span>
                             </div>
                         </div>
                     </div>

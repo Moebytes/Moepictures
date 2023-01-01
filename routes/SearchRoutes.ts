@@ -165,10 +165,12 @@ const SearchRoutes = (app: Express) => {
         try {
             const query = req.query.query as string
             let sort = req.query.sort as string
+            let type = req.query.type as string
             const offset = req.query.offset as string
             if (!functions.validTagSort(sort)) return res.status(400).send("Invalid sort")
+            if (!functions.validTagType(type)) return res.status(400).send("Invalid type")
             let search = query?.trim().split(/ +/g).filter(Boolean).join("-") ?? ""
-            let result = await sql.tagSearch(search, sort, undefined, offset)
+            let result = await sql.tagSearch(search, sort, type, offset)
             res.status(200).json(result)
         } catch (e) {
             console.log(e)
@@ -211,6 +213,7 @@ const SearchRoutes = (app: Express) => {
         try {
             const query = req.query.query as string
             const type = req.query.type as string
+            if (!functions.validTagType(type)) return res.status(400).send("Invalid type")
             let search = query?.trim().toLowerCase().split(/ +/g).filter(Boolean).join("-") ?? ""
             let result = await sql.tagSearch(search, "posts", type).then((r) => r.slice(0, 10))
             if (!result?.[0]) return res.status(200).json([])

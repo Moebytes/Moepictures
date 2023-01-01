@@ -5,6 +5,8 @@ import {HashLink as Link} from "react-router-hash-link"
 import functions from "../structures/Functions"
 import artistImg from "../assets/images/artist.png"
 import Carousel from "./Carousel"
+import pixiv from "../assets/purple/pixiv.png"
+import twitter from "../assets/purple/twitter.png"
 import "./styles/artistrow.less"
 
 interface Props {
@@ -57,12 +59,24 @@ const ArtistRow: React.FunctionComponent<Props> = (props) => {
         return filtered.map((p: any) => functions.getThumbnailLink(p.images[0].type, p.postID, p.images[0].filename, "tiny"))
     }
 
+    const artistSocialJSX = () => {
+        let jsx = [] as any
+        if (props.artist.pixiv) {
+            jsx.push(<img className="artistrow-social" src={pixiv} onClick={() => window.open(props.artist.pixiv, "_blank")}/>)
+        }
+        if (props.artist.twitter) {
+            jsx.push(<img className="artistrow-social" src={twitter} onClick={() => window.open(props.artist.twitter, "_blank")}/>)
+        }
+        return jsx
+    }
+
     return (
         <div className="artistrow" onMouseEnter={() =>setHover(true)} onMouseLeave={() => setHover(false)}>
             <div className="artistrow-row">
                 {props.artist.image ? <img className="artistrow-img" src={functions.getTagLink("artist", props.artist.image)}/> : null}
-                <span className="artistrow-text-hover" onClick={searchTag}>
-                    <span className="artistrow-text">{functions.toProperCase(props.artist.tag.replaceAll("-", " "))}</span>
+                <span className="artistrow-text-hover">
+                    <span className="artistrow-text" onClick={searchTag} onAuxClick={searchTag}>{functions.toProperCase(props.artist.tag.replaceAll("-", " "))}</span>
+                    {artistSocialJSX()}
                     <span className="artistrow-text-alt">{props.artist.postCount}</span>
                 </span>
             </div>

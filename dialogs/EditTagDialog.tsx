@@ -1,8 +1,9 @@
 import React, {useEffect, useContext, useState, useRef} from "react"
 import {useHistory} from "react-router-dom"
 import {HashLink as Link} from "react-router-hash-link"
-import {HideNavbarContext, HideSidebarContext, ThemeContext, EnableDragContext, EditTagIDContext, EditTagFlagContext, EditTagImplicationsContext,
-EditTagKeyContext, EditTagAliasesContext, EditTagImageContext, EditTagDescriptionContext, HideTitlebarContext, SessionContext} from "../Context"
+import {HideNavbarContext, HideSidebarContext, ThemeContext, EnableDragContext, EditTagIDContext, EditTagFlagContext, EditTagImplicationsContext, 
+EditTagTypeContext, EditTagPixivContext, EditTagTwitterContext, EditTagKeyContext, EditTagAliasesContext, EditTagImageContext, 
+EditTagDescriptionContext, HideTitlebarContext, SessionContext} from "../Context"
 import functions from "../structures/Functions"
 import uploadIcon from "../assets/purple/upload.png"
 import "./styles/edittagdialog.less"
@@ -24,6 +25,9 @@ const EditTagDialog: React.FunctionComponent = (props) => {
     const {editTagDescription, setEditTagDescription} = useContext(EditTagDescriptionContext)
     const {editTagAliases, setEditTagAliases} = useContext(EditTagAliasesContext)
     const {editTagImplications, setEditTagImplications} = useContext(EditTagImplicationsContext)
+    const {editTagType, setEditTagType} = useContext(EditTagTypeContext)
+    const {editTagPixiv, setEditTagPixiv} = useContext(EditTagPixivContext)
+    const {editTagTwitter, setEditTagTwitter} = useContext(EditTagTwitterContext)
     const {session, setSession} = useContext(SessionContext)
     const [submitted, setSubmitted] = useState(false)
     const [reason, setReason] = useState("")
@@ -74,7 +78,7 @@ const EditTagDialog: React.FunctionComponent = (props) => {
                 const bytes = new Uint8Array(arrayBuffer)
                 image = Object.values(bytes)
             }
-            await axios.post("/api/tag/edit/request", {tag: editTagID, key: editTagKey, description: editTagDescription, image, aliases: editTagAliases, implications: editTagImplications, reason}, {withCredentials: true})
+            await axios.post("/api/tag/edit/request", {tag: editTagID, key: editTagKey, description: editTagDescription, image, aliases: editTagAliases, implications: editTagImplications, pixiv: editTagPixiv, twitter: editTagTwitter, reason}, {withCredentials: true})
             setSubmitted(true)
         }
     }
@@ -138,6 +142,25 @@ const EditTagDialog: React.FunctionComponent = (props) => {
         if (event.target) event.target.value = ""
     }
 
+    const tagSocialJSX = () => {
+        let jsx = [] as any 
+        if (editTagType === "artist") {
+            jsx.push(
+                <>
+                <div className="edittag-dialog-row">
+                    <span className="edittag-dialog-text">Pixiv: </span>
+                    <input className="edittag-dialog-input" type="text" spellCheck={false} value={editTagPixiv} onChange={(event) => setEditTagPixiv(event.target.value)}/>
+                </div>
+                <div className="edittag-dialog-row">
+                    <span className="edittag-dialog-text">Twitter: </span>
+                    <input className="edittag-dialog-input" type="text" spellCheck={false} value={editTagTwitter} onChange={(event) => setEditTagTwitter(event.target.value)}/>
+                </div>
+                </>
+            )
+        }
+        return jsx 
+    }
+
     if (editTagID) {
         if (permissions.isStaff(session)) {
             return (
@@ -150,8 +173,9 @@ const EditTagDialog: React.FunctionComponent = (props) => {
                             </div>
                             <div className="edittag-dialog-row">
                                 <span className="edittag-dialog-text">Tag: </span>
-                                <input className="edittag-dialog-input" type="text" spellCheck={false} value={editTagKey} onChange={(event) => setEditTagKey(event.target.value)}/>
+                                <input className="edittag-dialog-input" type="text" spellCheck={false} value={editTagKey} onChange={(event) => setEditTagKey(event.target.value)} style={{width: "max-content"}}/>
                             </div>
+                            {tagSocialJSX()}
                             <div className="edittag-dialog-row">
                                 <span className="edittag-dialog-text">Image: </span>
                                 <label htmlFor="tag-img" className="edittag-dialog-button">
@@ -213,8 +237,9 @@ const EditTagDialog: React.FunctionComponent = (props) => {
                         </> : <>
                         <div className="edittag-dialog-row">
                             <span className="edittag-dialog-text">Tag: </span>
-                            <input className="edittag-dialog-input" type="text" spellCheck={false} value={editTagKey} onChange={(event) => setEditTagKey(event.target.value)}/>
+                            <input className="edittag-dialog-input" type="text" spellCheck={false} value={editTagKey} onChange={(event) => setEditTagKey(event.target.value)} style={{width: "max-content"}}/>
                         </div>
+                        {tagSocialJSX()}
                         <div className="edittag-dialog-row">
                             <span className="edittag-dialog-text">Image: </span>
                             <label htmlFor="tag-img" className="edittag-dialog-button">

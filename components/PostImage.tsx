@@ -1169,7 +1169,7 @@ const PostImage: React.FunctionComponent<Props> = (props) => {
                 <div className="post-image-filters" ref={fullscreenRef}>
                     {functions.isVideo(props.img) ? 
                     <video loop muted disablePictureInPicture playsInline className="dummy-post-video" src={props.img}></video> :
-                    <img className="dummy-post-image" src={img}/>}
+                    <img className="dummy-post-image" src={props.img}/>}
                     <div className="encoding-overlay" style={{display: encodingOverlay ? "flex" : "none"}}>
                         <span className="encoding-overlay-text">{functions.isVideo(props.img) ? "Rendering Video..." : "Rendering GIF..."}</span>
                     </div>
@@ -1303,8 +1303,8 @@ const PostImage: React.FunctionComponent<Props> = (props) => {
                             </div>
                         </div>
                     </div>
-                    <img className="post-lightness-overlay" ref={gifLightnessRef} src={img}/>
-                    <img className="post-sharpen-overlay" ref={gifOverlayRef} src={img}/>
+                    <img className="post-lightness-overlay" ref={gifLightnessRef} src={props.img}/>
+                    <img className="post-sharpen-overlay" ref={gifOverlayRef} src={props.img}/>
                     <canvas className="post-gif-canvas" ref={gifRef}></canvas> 
                     </>
                     : null}
@@ -1326,10 +1326,10 @@ const PostImage: React.FunctionComponent<Props> = (props) => {
                         <TransformWrapper disabled={disableZoom} ref={zoomRef} minScale={1} maxScale={4} onZoomStop={(ref) => setZoom(ref.state.scale)} wheel={{step: 0.1, touchPadDisabled: true}}
                         zoomAnimation={{size: 0, disabled: true}} alignmentAnimation={{disabled: true}} doubleClick={{mode: "reset", animationTime: 0}} panning={{disabled: zoom === 1}}>
                         <TransformComponent wrapperStyle={{pointerEvents: disableZoom ? "none" : "all"}}>
-                            <img className="post-lightness-overlay" ref={lightnessRef} src={img}/>
-                            <img className="post-sharpen-overlay" ref={overlayRef} src={img}/>
+                            <img className="post-lightness-overlay" ref={lightnessRef} src={props.img}/>
+                            <img className="post-sharpen-overlay" ref={overlayRef} src={props.img}/>
                             <canvas className="post-pixelate-canvas" ref={pixelateRef}></canvas>
-                            <img className="post-image" ref={ref} src={img} onLoad={(event) => onLoad(event)}/>
+                            <img className="post-image" ref={ref} src={props.img} onLoad={(event) => onLoad(event)}/>
                         </TransformComponent>
                         </TransformWrapper>
                     </div>

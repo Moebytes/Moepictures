@@ -62,6 +62,9 @@ export const EditTagImageContext = React.createContext<any>(null)
 export const EditTagDescriptionContext = React.createContext<any>(null)
 export const EditTagAliasesContext = React.createContext<any>(null)
 export const EditTagImplicationsContext = React.createContext<any>(null)
+export const EditTagTypeContext = React.createContext<any>(null)
+export const EditTagPixivContext = React.createContext<any>(null)
+export const EditTagTwitterContext = React.createContext<any>(null)
 export const AliasTagIDContext = React.createContext<any>(null)
 export const AliasTagFlagContext = React.createContext<any>(null)
 export const AliasTagNameContext = React.createContext<any>(null)
@@ -128,6 +131,9 @@ const Context: React.FunctionComponent = (props) => {
     const [editTagDescription, setEditTagDescription] = useState(false)
     const [editTagAliases, setEditTagAliases] = useState(false)
     const [editTagImplications, setEditTagImplications] = useState(false)
+    const [editTagType, setEditTagType] = useState(false)
+    const [editTagPixiv, setEditTagPixiv] = useState(false)
+    const [editTagTwitter, setEditTagTwitter] = useState(false)
     const [aliasTagID, setAliasTagID] = useState(null)
     const [aliasTagFlag, setAliasTagFlag] = useState(false)
     const [aliasTagName, setAliasTagName] = useState("")
@@ -144,6 +150,9 @@ const Context: React.FunctionComponent = (props) => {
     const [quickEditUnverified, setQuickEditUnverified] = useState(false)
 return (
     <>
+        <EditTagTwitterContext.Provider value={{editTagTwitter, setEditTagTwitter}}>
+        <EditTagPixivContext.Provider value={{editTagPixiv, setEditTagPixiv}}>
+        <EditTagTypeContext.Provider value={{editTagType, setEditTagType}}>
         <QuickEditUnverifiedContext.Provider value={{quickEditUnverified, setQuickEditUnverified}}>
         <QuickEditIDContext.Provider value={{quickEditID, setQuickEditID}}>
         <PostFlagContext.Provider value={{postFlag, setPostFlag}}>
@@ -271,6 +280,9 @@ return (
         </PostFlagContext.Provider>
         </QuickEditIDContext.Provider>
         </QuickEditUnverifiedContext.Provider>
+        </EditTagTypeContext.Provider>
+        </EditTagPixivContext.Provider>
+        </EditTagTwitterContext.Provider>
     </>
     )
 }

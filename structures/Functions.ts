@@ -1004,6 +1004,15 @@ export default class Functions {
         return false
     }
 
+    public static validTagType = (type: string) => {
+        if (type === "all" ||
+            type === "artist" ||
+            type === "character" ||
+            type === "series" ||
+            type === "tag") return true 
+        return false
+    }
+
     public static validCommentSort = (sort: string) => {
         if (sort === "date" ||
             sort === "reverse date") return true 
@@ -1041,6 +1050,8 @@ export default class Functions {
                     obj.count = parsedTags[i].count 
                     obj.image = unverifiedTag.image
                     obj.description = unverifiedTag.description 
+                    obj.pixiv = unverifiedTag.pixiv
+                    obj.twitter = unverifiedTag.twitter
                     if (unverifiedTag.type === "artist") {
                         artists.push(obj)
                     } else if (unverifiedTag.type === "character") {
@@ -1058,6 +1069,8 @@ export default class Functions {
             obj.count = parsedTags[i].count 
             obj.image = result[index].image
             obj.description = result[index].description 
+            obj.pixiv = result[index].pixiv
+            obj.twitter = result[index].twitter
             if (result[index].type === "artist") {
                 artists.push(obj)
             } else if (result[index].type === "character") {

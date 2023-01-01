@@ -147,17 +147,16 @@ const ContactPage: React.FunctionComponent = (props) => {
                     <span className="contact-link">
                         If you are contacting for copyright reasons, you must provide the following: <br/>
                         <span className="contact-text-alt">
-                        ⇾ Contact information (Name, Mailing Address, Phone Number, Email)<br/>
+                        ⇾ Contact information (eg. social media, email)<br/>
+                        ⇾ Your artist tag or links to specific works<br/>
                         ⇾ Proof of your identity<br/>
-                        ⇾ Links to the infringing content<br/>
-                        ⇾ A statement affirming that you are the copyright holder of the content in question<br/>
+                        ⇾ A statement affirming that you are the copyright holder of the content<br/>
                         </span>
                         These are acceptable proofs of identity:<br/>
                         <span className="contact-text-alt">
-                        ⇾ <span className="contact-weblink" onClick={() => functions.twitterLink()}>Private message us on Twitter</span><br/>
-                        ⇾ Attach a source file to one of your works which isn't available publicly<br/>
+                        ⇾ Respond to social media contact (say which account you would prefer being contacted at)<br/>
+                        ⇾ Attach a source file to one of your works which is not available publicly<br/>
                         </span>
-                        We do not remove material not protected by copyright, such as your artist tag and social links.
                     </span>
                     <div className="contact-row">
                         <span className="contact-text">Email:</span>

@@ -54,7 +54,7 @@ const ModTagEdits: React.FunctionComponent = (props) => {
         return tagDiff
     }
 
-    const editTag = async (username: string, tag: string, key: string, description: string, image: string, aliases: string[], implications: string[]) => {
+    const editTag = async (username: string, tag: string, key: string, description: string, image: string, aliases: string[], implications: string[], pixiv: string, twitter: string) => {
         let bytes = null as any
         if (image) {
             const parts = image.split("/")
@@ -62,7 +62,7 @@ const ModTagEdits: React.FunctionComponent = (props) => {
             const arrayBuffer = await fetch(link).then((r) => r.arrayBuffer())
             bytes = new Uint8Array(arrayBuffer)
         }
-        await axios.put("/api/tag/edit", {tag, key, description, image: bytes ? Object.values(bytes) : null, aliases, implications}, {withCredentials: true})
+        await axios.put("/api/tag/edit", {tag, key, description, image: bytes ? Object.values(bytes) : null, aliases, implications, pixiv, twitter}, {withCredentials: true})
         await axios.post("/api/tag/edit/request/fulfill", {username, tag, image}, {withCredentials: true})
         updateTags()
     }
@@ -159,6 +159,10 @@ const ModTagEdits: React.FunctionComponent = (props) => {
                         <span className="mod-post-text">Old Description: {oldTag.description || "No description."}</span>
                         <span className="mod-post-text">Old Aliases: {oldTag.aliases?.[0] ? oldTag.aliases.map((a: any) => a.alias).join(", ") : "None"}</span>
                         <span className="mod-post-text">Old Implications: {oldTag.implications?.[0] ? oldTag.implications.map((i: any) => i.implication).join(", ") : "None"}</span>
+                        {oldTag.type === "artist" ? <>
+                        <span className="mod-post-text mod-post-hover" onClick={() => window.open(oldTag.pixiv, "_blank")}>Old Pixiv: {oldTag.pixiv || "None."}</span>
+                        <span className="mod-post-text mod-post-hover" onClick={() => window.open(oldTag.twitter, "_blank")}>Old Twitter: {oldTag.twitter || "None."}</span>
+                        </> : null}
                     </div>
                     </> : <>
                     {img ?
@@ -172,6 +176,10 @@ const ModTagEdits: React.FunctionComponent = (props) => {
                         <span className="mod-post-text">New Description: {request.description || "No description."}</span>
                         <span className="mod-post-text">New Aliases: {request.aliases?.[0] ? request.aliases.join(", ") : "None"}</span>
                         <span className="mod-post-text">New Implications: {request.implications?.[0] ? request.implications.join(", ") : "None"}</span>
+                        {oldTag.type === "artist" ? <>
+                        <span className="mod-post-text mod-post-hover" onClick={() => window.open(request.pixiv, "_blank")}>New Pixiv: {request.pixiv || "None."}</span>
+                        <span className="mod-post-text mod-post-hover" onClick={() => window.open(request.twitter, "_blank")}>New Twitter: {request.twitter || "None."}</span>
+                        </> : null}
                     </div> </>}
                     <div className="mod-post-options">
                         <div className="mod-post-options-container" onClick={() => changeOldTag()}>
@@ -182,7 +190,7 @@ const ModTagEdits: React.FunctionComponent = (props) => {
                             <img className="mod-post-options-img" src={getReject()}/>
                             <span className="mod-post-options-text">Reject</span>
                         </div>
-                        <div className="mod-post-options-container" onClick={() => editTag(request.username, request.tag, request.key, request.description, request.image, request.aliases, request.implications)}>
+                        <div className="mod-post-options-container" onClick={() => editTag(request.username, request.tag, request.key, request.description, request.image, request.aliases, request.implications, request.pixiv, request.twitter)}>
                             <img className="mod-post-options-img" src={getApprove()}/>
                             <span className="mod-post-options-text">Approve</span>
                         </div>

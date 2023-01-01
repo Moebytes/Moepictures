@@ -84,14 +84,18 @@ CREATE TABLE IF NOT EXISTS "tags" (
     "tag" text PRIMARY KEY,
     "type" text,
     "image" text,
-    "description" text
+    "description" text,
+    "pixiv" text,
+    "twitter" text
 );
 
 CREATE TABLE IF NOT EXISTS "unverified tags" (
     "tag" text PRIMARY KEY,
     "type" text,
     "image" text,
-    "description" text
+    "description" text,
+    "pixiv" text,
+    "twitter" text
 );
 
 CREATE TABLE IF NOT EXISTS "tag map" (
@@ -211,6 +215,8 @@ CREATE TABLE IF NOT EXISTS "tag edit requests" (
     "image" text,
     "aliases" text[],
     "implications" text[],
+    "pixiv" text,
+    "twitter" text,
     "reason" text
 );
 

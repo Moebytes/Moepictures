@@ -1,8 +1,9 @@
 import React, {useContext, useEffect, useRef, useState} from "react"
 import {useHistory} from "react-router-dom"
-import {ThemeContext, SearchContext, SearchFlagContext, DeleteTagFlagContext, DeleteTagIDContext, MobileContext,
-EditTagAliasesContext, EditTagImplicationsContext, EditTagDescriptionContext, EditTagIDContext, EditTagFlagContext, SessionContext,
-EditTagImageContext, EditTagKeyContext, AliasTagFlagContext, AliasTagIDContext, AliasTagNameContext} from "../Context"
+import {ThemeContext, SearchContext, SearchFlagContext, DeleteTagFlagContext, DeleteTagIDContext, MobileContext, EditTagTypeContext, 
+EditTagPixivContext, EditTagTwitterContext, EditTagAliasesContext, EditTagImplicationsContext, EditTagDescriptionContext, 
+EditTagIDContext, EditTagFlagContext, SessionContext, EditTagImageContext, EditTagKeyContext, AliasTagFlagContext, 
+AliasTagIDContext, AliasTagNameContext} from "../Context"
 import {HashLink as Link} from "react-router-hash-link"
 import functions from "../structures/Functions"
 import alias from "../assets/purple/alias.png"
@@ -12,6 +13,8 @@ import historyIcon from "../assets/purple/history.png"
 import historyMagenta from "../assets/magenta/history.png"
 import deleteIcon from "../assets/purple/delete.png"
 import deleteIconMagenta from "../assets/magenta/delete.png"
+import pixiv from "../assets/purple/pixiv.png"
+import twitter from "../assets/purple/twitter.png"
 import "./styles/tagrow.less"
 import axios from "axios"
 
@@ -34,6 +37,9 @@ const TagRow: React.FunctionComponent<Props> = (props) => {
     const {editTagAliases, setEditTagAliases} = useContext(EditTagAliasesContext)
     const {editTagImplications, setEditTagImplications} = useContext(EditTagImplicationsContext)
     const {editTagDescription, setEditTagDescription} = useContext(EditTagDescriptionContext)
+    const {editTagType, setEditTagType} = useContext(EditTagTypeContext)
+    const {editTagPixiv, setEditTagPixiv} = useContext(EditTagPixivContext)
+    const {editTagTwitter, setEditTagTwitter} = useContext(EditTagTwitterContext)
     const {editTagImage, setEditTagImage} = useContext(EditTagImageContext)
     const {editTagKey, setEditTagKey} = useContext(EditTagKeyContext)
     const {aliasTagID, setAliasTagID} = useContext(AliasTagIDContext)
@@ -101,7 +107,7 @@ const TagRow: React.FunctionComponent<Props> = (props) => {
             image = Object.values(bytes)
         }
         await axios.put("/api/tag/edit", {tag: props.tag.tag, key: editTagKey, description: editTagDescription,
-        image, aliases: editTagAliases, implications: editTagImplications}, {withCredentials: true})
+        image, aliases: editTagAliases, implications: editTagImplications, pixiv: editTagPixiv, twitter: editTagTwitter}, {withCredentials: true})
         if (editTagImage) refreshCache(editTagImage)
         props.onEdit?.()
     }
@@ -121,6 +127,9 @@ const TagRow: React.FunctionComponent<Props> = (props) => {
         setEditTagAliases(props.tag.aliases?.[0] ? props.tag.aliases.map((a: any) => a.alias) : [])
         setEditTagImplications(props.tag.implications?.[0] ? props.tag.implications.map((i: any) => i.implication) : [])
         setEditTagID(props.tag.tag)
+        setEditTagType(props.tag.type)
+        setEditTagPixiv(props.tag.pixiv)
+        setEditTagTwitter(props.tag.twitter)
     }
 
     const aliasTag = async () => {
@@ -141,6 +150,19 @@ const TagRow: React.FunctionComponent<Props> = (props) => {
         setAliasTagID(props.tag.tag)
     }
 
+    const artistSocialJSX = () => {
+        let jsx = [] as any
+        if (props.tag.type === "artist") {
+            if (props.tag.pixiv) {
+                jsx.push(<img className="tagrow-social" src={pixiv} onClick={() => window.open(props.tag.pixiv, "_blank")}/>)
+            }
+            if (props.tag.twitter) {
+                jsx.push(<img className="tagrow-social" src={twitter} onClick={() => window.open(props.tag.twitter, "_blank")}/>)
+            }
+        }
+        return jsx
+    }
+
     return (
         <tr className="tagrow" onMouseEnter={() =>setHover(true)} onMouseLeave={() => setHover(false)}>
             {props.tag.image ?
@@ -149,8 +171,9 @@ const TagRow: React.FunctionComponent<Props> = (props) => {
             </td> : null}
             <div className="tagrow-content-container">
                 <td className="tagrow-container" style={{width: props.tag.image ? "16%" : "25%"}}>
-                    <div className="tagrow-row" onClick={searchTag} onAuxClick={searchTag}>
-                        <span className="tagrow-tag">{props.tag.tag.replaceAll("-", " ")}</span>
+                    <div className="tagrow-row">
+                        <span className="tagrow-tag" onClick={searchTag} onAuxClick={searchTag}>{props.tag.tag.replaceAll("-", " ")}</span>
+                        {artistSocialJSX()}
                         <span className="tagrow-tag-count">{props.tag.postCount}</span>
                     </div>
                     {props.tag.aliases?.[0] ?

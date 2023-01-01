@@ -1,4 +1,4 @@
-import React, {useEffect, useContext, useState} from "react"
+import React, {useEffect, useContext, useState, useReducer} from "react"
 import {useHistory} from "react-router-dom"
 import TitleBar from "../components/TitleBar"
 import NavBar from "../components/NavBar"
@@ -32,6 +32,7 @@ interface Props {
 }
 
 const PostPage: React.FunctionComponent<Props> = (props) => {
+    const [ignored, forceUpdate] = useReducer(x => x + 1, 0)
     const {hideNavbar, setHideNavbar} = useContext(HideNavbarContext)
     const {hideTitlebar, setHideTitlebar} = useContext(HideTitlebarContext)
     const {hideSidebar, setHideSidebar} = useContext(HideSidebarContext)
@@ -59,11 +60,7 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
     const postID = Number(props?.match.params.id)
 
     const refreshCache = async (source: any) => {
-        try {
-           await axios.post(image, null, {withCredentials: true, cancelToken: source.token})
-        } catch {
-            // ignore
-        }
+        axios.post(image, null, {withCredentials: true, cancelToken: source.token}).catch(() => null)
     }
 
     useEffect(() => {
@@ -255,6 +252,7 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
 
     const set = (image: string) => {
         setImage(image)
+        forceUpdate()
     }
 
     const nsfwChecker = () => {

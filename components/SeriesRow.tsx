@@ -61,8 +61,8 @@ const SeriesRow: React.FunctionComponent<Props> = (props) => {
         <div className="seriesrow" onMouseEnter={() =>setHover(true)} onMouseLeave={() => setHover(false)}>
             <div className="seriesrow-row">
                 {props.series.image ? <img className="seriesrow-img" src={functions.getTagLink("series", props.series.image)}/> : null}
-                <span className="seriesrow-text-hover" onClick={searchTag} onAuxClick={searchTag}>
-                    <span className="seriesrow-text">{functions.toProperCase(props.series.tag.replaceAll("-", " "))}</span>
+                <span className="seriesrow-text-hover">
+                    <span className="seriesrow-text" onClick={searchTag} onAuxClick={searchTag}>{functions.toProperCase(props.series.tag.replaceAll("-", " "))}</span>
                     <span className="seriesrow-text-alt">{props.series.postCount}</span>
                 </span>
             </div>

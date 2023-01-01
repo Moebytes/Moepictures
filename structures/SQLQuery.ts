@@ -842,6 +842,7 @@ export default class SQLQuery {
     ))`)
       i++
     }
+    if (type === "all") type = undefined
     if (type) {
       whereArray.push(`tags.type = $${i}`)
       i++
@@ -1885,10 +1886,10 @@ export default class SQLQuery {
   }
 
   /** Insert tag edit request. */
-  public static insertTagEditRequest = async (username: string, tag: string, key: string, description: string, image: string, aliases: string[], implications: string[], reason: string) => {
+  public static insertTagEditRequest = async (username: string, tag: string, key: string, description: string, image: string, aliases: string[], implications: string[], pixiv: string, twitter: string, reason: string) => {
     const query: QueryConfig = {
-      text: `INSERT INTO "tag edit requests" ("username", "tag", "key", "description", "image", "aliases", "implications", "reason") VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`,
-      values: [username, tag, key, description, image, aliases, implications, reason]
+      text: `INSERT INTO "tag edit requests" ("username", "tag", "key", "description", "image", "aliases", "implications", "pixiv", "twitter", "reason") VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)`,
+      values: [username, tag, key, description, image, aliases, implications, pixiv, twitter, reason]
     }
     const result = await SQLQuery.run(query)
     return result

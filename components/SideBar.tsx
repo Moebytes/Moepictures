@@ -72,6 +72,8 @@ import pack from "../package.json"
 import functions from "../structures/Functions"
 import axios from "axios"
 import TagHover from "./TagHover"
+import pixiv from "../assets/purple/pixiv.png"
+import twitter from "../assets/purple/twitter.png"
 import SearchSuggestions from "./SearchSuggestions"
 import adminCrown from "../assets/purple/admin-crown.png"
 import modCrown from "../assets/purple/mod-crown.png"
@@ -389,14 +391,25 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
                 setSearch(props.artists[i].tag)
                 setSearchFlag(true)
             }
+            const artistSocials = () => {
+                let jsx = [] as any 
+                if (props.artists[i].pixiv) {
+                    jsx.push(<img className="sidebar-social" src={pixiv} onClick={() => window.open(props.artists[i].pixiv, "_blank")}/>)
+                }
+                if (props.artists[i].twitter) {
+                    jsx.push(<img className="sidebar-social" src={twitter} onClick={() => window.open(props.artists[i].twitter, "_blank")}/>)
+                }
+                return jsx 
+            }
             jsx.push(<>
                     {link ?
                     <div className="sidebar-row">
                         <img className="sidebar-img" src={link}/>
                     </div> : null}
                     <div className="sidebar-row">
-                        <span className="tag-hover" onClick={() => tagClick()}>
-                            <span className="tag">{props.artists[i].tag.replaceAll("-", " ")}</span>
+                        <span className="tag-hover">
+                            <span className="tag" onClick={() => tagClick()}>{props.artists[i].tag.replaceAll("-", " ")}</span>
+                            {artistSocials()}
                             <span className="tag-count">{props.artists[i].count}</span>
                         </span>
                     </div>
@@ -614,6 +627,19 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
         }
     }
 
+    const noTagsArtist = () => {
+        if (!session) return
+        if (session.captchaAmount === undefined) session.captchaAmount = 51
+        if (session.captchaAmount > 50) {
+            return (
+                <div className="sidebar-row">
+                    <span className="tag">Artist:</span>
+                    <span className="tag-alt">{props.post.artist || "None"}</span>
+                </div>
+            )
+        }
+    }
+
 
     return (
         <>
@@ -646,6 +672,7 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
                             <span className="sidebar-title">{props.artists.length > 1 ? "Artists" : "Artist"}</span>
                         </div>
                         {generateArtistsJSX()}
+                        {noTagsArtist()}
                         <div className="sidebar-row">
                             <span className="tag">Title:</span>
                             <span className="tag-alt">{props.post.title || "None"}</span>
@@ -806,7 +833,7 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
             </div>
 
             <div className="sidebar-footer">
-                    <span className="sidebar-footer-text">©{new Date().getFullYear()} Moepi</span>
+                    <span className="sidebar-footer-text">©{new Date().getFullYear()} Moebooru</span>
                     <Link to="/terms">
                         <img className="sidebar-footer-icon" src={getTermsIcon()}/>
                     </Link>
