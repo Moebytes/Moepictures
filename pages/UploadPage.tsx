@@ -35,6 +35,7 @@ import axios from "axios"
 import SearchSuggestions from "../components/SearchSuggestions"
 import ContentEditable from "react-contenteditable"
 import permissions from "../structures/Permissions"
+import xButton from "../assets/magenta/x-button.png"
 import "./styles/uploadpage.less"
 import path from "path"
 
@@ -409,6 +410,11 @@ const UploadPage: React.FunctionComponent = (props) => {
                 setArtistActive(artistActive)
                 forceUpdate()
             }
+            const deleteImage = () => {
+                artists[i].image = "" 
+                setArtists(artists)
+                forceUpdate()
+            }
             const getX = () => {
                 if (typeof document === "undefined") return 15
                 const element = artistInputRefs[i]?.current
@@ -438,6 +444,9 @@ const UploadPage: React.FunctionComponent = (props) => {
                             <span className="upload-button-text-small">Upload</span>
                     </label>
                     <input id={`artist-upload-${i}`} type="file" onChange={(event) => uploadTagImg(event, "artist", i)}/>
+                    {artists[i].image ? 
+                    <img className="upload-x-button" src={xButton} onClick={() => deleteImage()}/>
+                    : null}
                 </div>
                 {artists[i].image ?
                 <div className="upload-container-row">
@@ -484,6 +493,11 @@ const UploadPage: React.FunctionComponent = (props) => {
                 setCharacterActive(characterActive)
                 forceUpdate()
             }
+            const deleteImage = () => {
+                characters[i].image = ""
+                setCharacters(characters)
+                forceUpdate()
+            }
             const getX = () => {
                 if (typeof document === "undefined") return 15
                 const element = characterInputRefs[i]?.current
@@ -513,6 +527,9 @@ const UploadPage: React.FunctionComponent = (props) => {
                             <span className="upload-button-text-small">Upload</span>
                     </label>
                     <input id={`character-upload-${i}`} type="file" onChange={(event) => uploadTagImg(event, "character", i)}/>
+                    {characters[i].image ? 
+                    <img className="upload-x-button" src={xButton} onClick={() => deleteImage()}/>
+                    : null}
                 </div>
                 {characters[i].image ?
                 <div className="upload-container-row">
@@ -559,6 +576,11 @@ const UploadPage: React.FunctionComponent = (props) => {
                 setSeriesActive(seriesActive)
                 forceUpdate()
             }
+            const deleteImage = () => {
+                series[i].image = ""
+                setSeries(series)
+                forceUpdate()
+            }
             const getX = () => {
                 if (typeof document === "undefined") return 15
                 const element = seriesInputRefs[i]?.current
@@ -588,6 +610,9 @@ const UploadPage: React.FunctionComponent = (props) => {
                             <span className="upload-button-text-small">Upload</span>
                     </label>
                     <input id={`series-upload-${i}`} type="file" onChange={(event) => uploadTagImg(event, "series", i)}/>
+                    {series[i].image ? 
+                    <img className="upload-x-button" src={xButton} onClick={() => deleteImage()}/>
+                    : null}
                 </div>
                 {series[i].image ?
                 <div className="upload-container-row">
@@ -1062,6 +1087,11 @@ const UploadPage: React.FunctionComponent = (props) => {
                 setNewTags(newTags)
                 forceUpdate()
             }
+            const deleteImage = () => {
+                newTags[i].image = ""
+                setNewTags(newTags)
+                forceUpdate()
+            }
             jsx.push(
                 <>
                 <div className="upload-container-row" style={{marginTop: "10px"}}>
@@ -1081,6 +1111,9 @@ const UploadPage: React.FunctionComponent = (props) => {
                             <span className="upload-button-text-small">Upload</span>
                     </label>
                     <input id={`tag-upload-${i}`} type="file" onChange={(event) => uploadTagImg(event, "tag", i)}/>
+                    {newTags[i].image ? 
+                    <img className="upload-x-button" src={xButton} onClick={() => deleteImage()}/>
+                    : null}
                 </div>
                 {newTags[i].image ?
                 <div className="upload-container-row">

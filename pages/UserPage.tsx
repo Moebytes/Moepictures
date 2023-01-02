@@ -56,7 +56,9 @@ const UserPage: React.FunctionComponent<Props> = (props) => {
 
     useEffect(() => {
         fetchUser()
-    }, [])
+        updateUploads()
+        updateFavorites()
+    }, [username])
 
     const updateUploads = async () => {
         const uploads = await axios.get("/api/user/uploads", {params: {username}, withCredentials: true}).then((r) => r.data)
@@ -82,8 +84,6 @@ const UserPage: React.FunctionComponent<Props> = (props) => {
         setHeaderText("")
         setSidebarText("")
         document.title = `Moebooru: ${functions.toProperCase(username)}`
-        updateUploads()
-        updateFavorites()
     }, [])
 
     useEffect(() => {

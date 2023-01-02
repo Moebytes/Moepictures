@@ -1052,6 +1052,8 @@ export default class Functions {
                     obj.description = unverifiedTag.description 
                     obj.pixiv = unverifiedTag.pixiv
                     obj.twitter = unverifiedTag.twitter
+                    obj.website = unverifiedTag.website
+                    obj.fandom = unverifiedTag.fandom
                     if (unverifiedTag.type === "artist") {
                         artists.push(obj)
                     } else if (unverifiedTag.type === "character") {
@@ -1071,6 +1073,8 @@ export default class Functions {
             obj.description = result[index].description 
             obj.pixiv = result[index].pixiv
             obj.twitter = result[index].twitter
+            obj.website = result[index].website
+            obj.fandom = result[index].fandom
             if (result[index].type === "artist") {
                 artists.push(obj)
             } else if (result[index].type === "character") {

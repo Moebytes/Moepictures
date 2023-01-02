@@ -54,8 +54,10 @@ import approveGreen from "../assets/purple/approve-green.png"
 import adminCrown from "../assets/purple/admin-crown.png"
 import modCrown from "../assets/purple/mod-crown.png"
 import tagIcon from "../assets/purple/tag.png"
+import website from "../assets/purple/support.png"
 import pixiv from "../assets/purple/pixiv.png"
 import twitter from "../assets/purple/twitter.png"
+import fandom from "../assets/purple/fandom.png"
 import functions from "../structures/Functions"
 import axios from "axios"
 import "./styles/mobileinfo.less"
@@ -236,6 +238,9 @@ const MobileInfo: React.FunctionComponent<Props> = (props) => {
             }
             const artistSocials = () => {
                 let jsx = [] as any 
+                if (props.artists[i].website) {
+                    jsx.push(<img className="mobileinfo-social" src={website} onClick={() => window.open(props.artists[i].website, "_blank")}/>)
+                }
                 if (props.artists[i].pixiv) {
                     jsx.push(<img className="mobileinfo-social" src={pixiv} onClick={() => window.open(props.artists[i].pixiv, "_blank")}/>)
                 }
@@ -271,14 +276,22 @@ const MobileInfo: React.FunctionComponent<Props> = (props) => {
                 setSearch(props.characters[i].tag)
                 setSearchFlag(true)
             }
+            const characterSocials = () => {
+                let jsx = [] as any 
+                if (props.characters[i].fandom) {
+                    jsx.push(<img className="mobileinfo-social" src={fandom} onClick={() => window.open(props.characters[i].fandom, "_blank")}/>)
+                }
+                return jsx 
+            }
             jsx.push(<>
                 {link ?
                 <div className="mobileinfo-row">
                     <img className="mobileinfo-img" src={link}/>
                 </div> : null}
                 <div className="mobileinfo-row">
-                    <span className="tag-hover" onClick={() => tagClick()}>
-                        <span className="tag">{props.characters[i].tag.replaceAll("-", " ")}</span>
+                    <span className="tag-hover">
+                        <span className="tag" onClick={() => tagClick()}>{props.characters[i].tag.replaceAll("-", " ")}</span>
+                        {characterSocials()}
                         <span className="tag-count">{props.characters[i].count}</span>
                     </span>
                 </div>
@@ -297,14 +310,25 @@ const MobileInfo: React.FunctionComponent<Props> = (props) => {
                 setSearch(props.series[i].tag)
                 setSearchFlag(true)
             }
+            const seriesSocials = () => {
+                let jsx = [] as any 
+                if (props.series[i].website) {
+                    jsx.push(<img className="mobileinfo-social" src={website} onClick={() => window.open(props.series[i].website, "_blank")}/>)
+                }
+                if (props.series[i].twitter) {
+                    jsx.push(<img className="mobileinfo-social" src={twitter} onClick={() => window.open(props.series[i].twitter, "_blank")}/>)
+                }
+                return jsx 
+            }
             jsx.push(<>
                 {link ?
                 <div className="mobileinfo-row">
                     <img className="mobileinfo-img" src={link}/>
                 </div> : null}
                 <div className="mobileinfo-row">
-                    <span className="tag-hover" onClick={() => tagClick()}>
-                        <span className="tag">{props.series[i].tag.replaceAll("-", " ")}</span>
+                    <span className="tag-hover">
+                        <span className="tag" onClick={() => tagClick()}>{props.series[i].tag.replaceAll("-", " ")}</span>
+                        {seriesSocials()}
                         <span className="tag-count">{props.series[i].count}</span>
                     </span>
                 </div>

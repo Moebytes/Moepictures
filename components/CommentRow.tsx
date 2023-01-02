@@ -209,7 +209,7 @@ const CommentRow: React.FunctionComponent<Props> = (props) => {
     }, [])
 
     return (
-        <div className="commentrow" onMouseEnter={() =>setHover(true)} onMouseLeave={() => setHover(false)}>
+        <div className="commentrow">
             <div className="commentrow-container">
                 {functions.isVideo(img) && !mobile ? 
                 <video className="commentrow-img" src={img} onClick={imgClick} onAuxClick={imgClick}></video> :

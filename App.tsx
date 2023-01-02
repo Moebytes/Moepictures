@@ -33,6 +33,7 @@ import ResetPasswordPage from "./pages/ResetPasswordPage"
 import ForgotPasswordPage from "./pages/ForgotPasswordPage"
 import EditPostPage from "./pages/EditPostPage"
 import UserPage from "./pages/UserPage"
+import TagPage from "./pages/TagPage"
 import UnverifiedPostPage from "./pages/UnverifiedPostPage"
 import functions from "./structures/Functions"
 import localforage from "localforage"
@@ -256,6 +257,7 @@ const App: React.FunctionComponent = (props) => {
                         <Route exact path="/artists"><ArtistsPage/></Route>
                         <Route exact path="/comments"><CommentsPage/></Route>
                         <Route exact path="/user/:username" render={(props) => <UserPage {...props}/>}></Route>
+                        <Route exact path="/tag/:tag" render={(props) => <TagPage {...props}/>}></Route>
                         <Route exact path="/post/:id" render={(props) => <PostPage {...props}/>}></Route>
                         <Route exact path="/unverified/post/:id" render={(props) => <UnverifiedPostPage {...props}/>}></Route>
                         <Route exact path="/edit-post/:id" render={(props) => <EditPostPage {...props}/>}></Route>

@@ -64,6 +64,8 @@ export const EditTagAliasesContext = React.createContext<any>(null)
 export const EditTagImplicationsContext = React.createContext<any>(null)
 export const EditTagTypeContext = React.createContext<any>(null)
 export const EditTagPixivContext = React.createContext<any>(null)
+export const EditTagWebsiteContext = React.createContext<any>(null)
+export const EditTagFandomContext = React.createContext<any>(null)
 export const EditTagTwitterContext = React.createContext<any>(null)
 export const AliasTagIDContext = React.createContext<any>(null)
 export const AliasTagFlagContext = React.createContext<any>(null)
@@ -133,6 +135,8 @@ const Context: React.FunctionComponent = (props) => {
     const [editTagImplications, setEditTagImplications] = useState(false)
     const [editTagType, setEditTagType] = useState(false)
     const [editTagPixiv, setEditTagPixiv] = useState(false)
+    const [editTagWebsite, setEditTagWebsite] = useState(false)
+    const [editTagFandom, setEditTagFandom] = useState(false)
     const [editTagTwitter, setEditTagTwitter] = useState(false)
     const [aliasTagID, setAliasTagID] = useState(null)
     const [aliasTagFlag, setAliasTagFlag] = useState(false)
@@ -150,6 +154,8 @@ const Context: React.FunctionComponent = (props) => {
     const [quickEditUnverified, setQuickEditUnverified] = useState(false)
 return (
     <>
+        <EditTagFandomContext.Provider value={{editTagFandom, setEditTagFandom}}>
+        <EditTagWebsiteContext.Provider value={{editTagWebsite, setEditTagWebsite}}>
         <EditTagTwitterContext.Provider value={{editTagTwitter, setEditTagTwitter}}>
         <EditTagPixivContext.Provider value={{editTagPixiv, setEditTagPixiv}}>
         <EditTagTypeContext.Provider value={{editTagType, setEditTagType}}>
@@ -283,6 +289,8 @@ return (
         </EditTagTypeContext.Provider>
         </EditTagPixivContext.Provider>
         </EditTagTwitterContext.Provider>
+        </EditTagWebsiteContext.Provider>
+        </EditTagFandomContext.Provider>
     </>
     )
 }

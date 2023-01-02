@@ -72,11 +72,14 @@ import pack from "../package.json"
 import functions from "../structures/Functions"
 import axios from "axios"
 import TagHover from "./TagHover"
+import website from "../assets/purple/support.png"
+import fandom from "../assets/purple/fandom.png"
 import pixiv from "../assets/purple/pixiv.png"
 import twitter from "../assets/purple/twitter.png"
 import SearchSuggestions from "./SearchSuggestions"
 import adminCrown from "../assets/purple/admin-crown.png"
 import modCrown from "../assets/purple/mod-crown.png"
+import question from "../assets/purple/question.png"
 import "./styles/sidebar.less"
 
 interface Props {
@@ -381,6 +384,14 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
         return deleteIcon
     }
 
+    const tagInfo = (event: React.MouseEvent, tag: string) => {
+        if (event.ctrlKey || event.metaKey || event.button === 1) {
+            window.open(`/tag/${tag}`, "_blank")
+        } else {
+            history.push(`/tag/${tag}`)
+        }
+    }
+
     const generateArtistsJSX = () => {
         let jsx = [] as any
         for (let i = 0; i < props.artists.length; i++) {
@@ -392,7 +403,10 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
                 setSearchFlag(true)
             }
             const artistSocials = () => {
-                let jsx = [] as any 
+                let jsx = [] as any
+                if (props.artists[i].website) {
+                    jsx.push(<img className="sidebar-social" src={website} onClick={() => window.open(props.artists[i].website, "_blank")}/>)
+                }
                 if (props.artists[i].pixiv) {
                     jsx.push(<img className="sidebar-social" src={pixiv} onClick={() => window.open(props.artists[i].pixiv, "_blank")}/>)
                 }
@@ -408,6 +422,7 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
                     </div> : null}
                     <div className="sidebar-row">
                         <span className="tag-hover">
+                            <img className="tag-info" src={question} onClick={(event) => tagInfo(event, props.artists[i].tag)}/>
                             <span className="tag" onClick={() => tagClick()}>{props.artists[i].tag.replaceAll("-", " ")}</span>
                             {artistSocials()}
                             <span className="tag-count">{props.artists[i].count}</span>
@@ -428,14 +443,23 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
                 setSearch(props.characters[i].tag)
                 setSearchFlag(true)
             }
+            const characterSocials = () => {
+                let jsx = [] as any 
+                if (props.characters[i].fandom) {
+                    jsx.push(<img className="sidebar-social" src={fandom} onClick={() => window.open(props.characters[i].fandom, "_blank")}/>)
+                }
+                return jsx 
+            }
             jsx.push(<>
                 {link ?
                 <div className="sidebar-row">
                     <img className="sidebar-img" src={link}/>
                 </div> : null}
                 <div className="sidebar-row">
-                    <span className="tag-hover" onClick={() => tagClick()}>
-                        <span className="tag">{props.characters[i].tag.replaceAll("-", " ")}</span>
+                    <span className="tag-hover">
+                        <img className="tag-info" src={question} onClick={(event) => tagInfo(event, props.characters[i].tag)}/>
+                        <span className="tag" onClick={() => tagClick()}>{props.characters[i].tag.replaceAll("-", " ")}</span>
+                        {characterSocials()}
                         <span className="tag-count">{props.characters[i].count}</span>
                     </span>
                 </div> </>
@@ -454,14 +478,26 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
                 setSearch(props.series[i].tag)
                 setSearchFlag(true)
             }
+            const seriesSocials = () => {
+                let jsx = [] as any 
+                if (props.series[i].website) {
+                    jsx.push(<img className="sidebar-social" src={website} onClick={() => window.open(props.series[i].website, "_blank")}/>)
+                }
+                if (props.series[i].twitter) {
+                    jsx.push(<img className="sidebar-social" src={twitter} onClick={() => window.open(props.series[i].twitter, "_blank")}/>)
+                }
+                return jsx 
+            }
             jsx.push(<>
                 {link ?
                 <div className="sidebar-row">
                     <img className="sidebar-img" src={link}/>
                 </div> : null}
                 <div className="sidebar-row">
-                    <span className="tag-hover" onClick={() => tagClick()}>
-                        <span className="tag">{props.series[i].tag.replaceAll("-", " ")}</span>
+                    <span className="tag-hover">
+                        <img className="tag-info" src={question} onClick={(event) => tagInfo(event, props.series[i].tag)}/>
+                        <span className="tag" onClick={() => tagClick()}>{props.series[i].tag.replaceAll("-", " ")}</span>
+                        {seriesSocials()}
                         <span className="tag-count">{props.series[i].count}</span>
                     </span>
                 </div> </>
@@ -483,8 +519,9 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
             }
             jsx.push(
                 <div className="sidebar-row">
-                    <span className="tag-hover" onClick={() => tagClick()}>
-                        <span className="tag">{currentTags[i].tag.replaceAll("-", " ")}</span>
+                    <span className="tag-hover">
+                        <img className="tag-info" src={question} onClick={(event) => tagInfo(event, currentTags[i].tag)}/>
+                        <span className="tag" onClick={() => tagClick()}>{currentTags[i].tag.replaceAll("-", " ")}</span>
                         <span className="tag-count">{currentTags[i].count}</span>
                     </span>
                 </div>

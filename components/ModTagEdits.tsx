@@ -54,15 +54,19 @@ const ModTagEdits: React.FunctionComponent = (props) => {
         return tagDiff
     }
 
-    const editTag = async (username: string, tag: string, key: string, description: string, image: string, aliases: string[], implications: string[], pixiv: string, twitter: string) => {
+    const editTag = async (username: string, tag: string, key: string, description: string, image: string, aliases: string[], implications: string[], pixiv: string, twitter: string, website: string, fandom: string) => {
         let bytes = null as any
         if (image) {
-            const parts = image.split("/")
-            const link = `${window.location.protocol}//${window.location.host}/unverified/${parts[0]}/${encodeURIComponent(parts[1])}`
-            const arrayBuffer = await fetch(link).then((r) => r.arrayBuffer())
-            bytes = new Uint8Array(arrayBuffer)
+            if (image === "delete") {
+                bytes = ["delete"]
+            } else {
+                const parts = image.split("/")
+                const link = `${window.location.protocol}//${window.location.host}/unverified/${parts[0]}/${encodeURIComponent(parts[1])}`
+                const arrayBuffer = await fetch(link).then((r) => r.arrayBuffer())
+                bytes = Object.values(new Uint8Array(arrayBuffer))
+            }
         }
-        await axios.put("/api/tag/edit", {tag, key, description, image: bytes ? Object.values(bytes) : null, aliases, implications, pixiv, twitter}, {withCredentials: true})
+        await axios.put("/api/tag/edit", {tag, key, description, image: bytes, aliases, implications, pixiv, twitter, website, fandom}, {withCredentials: true})
         await axios.post("/api/tag/edit/request/fulfill", {username, tag, image}, {withCredentials: true})
         updateTags()
     }
@@ -142,7 +146,8 @@ const ModTagEdits: React.FunctionComponent = (props) => {
                 setShowOldTags(showOldTags)
                 forceUpdate()
             }
-            const parts = request.image?.split("/")
+            let parts = request.image?.split("/")
+            if (request.image === "delete") parts = null
             const img = parts ? `${window.location.protocol}//${window.location.host}/unverified/${parts[0]}/${encodeURIComponent(parts[1])}` : ""
             const oldImg = oldTag ? functions.getTagLink(oldTag.type, oldTag.image) : ""
             jsx.push(
@@ -160,7 +165,15 @@ const ModTagEdits: React.FunctionComponent = (props) => {
                         <span className="mod-post-text">Old Aliases: {oldTag.aliases?.[0] ? oldTag.aliases.map((a: any) => a.alias).join(", ") : "None"}</span>
                         <span className="mod-post-text">Old Implications: {oldTag.implications?.[0] ? oldTag.implications.map((i: any) => i.implication).join(", ") : "None"}</span>
                         {oldTag.type === "artist" ? <>
+                        <span className="mod-post-text mod-post-hover" onClick={() => window.open(oldTag.website, "_blank")}>Old Website: {oldTag.website || "None."}</span>
                         <span className="mod-post-text mod-post-hover" onClick={() => window.open(oldTag.pixiv, "_blank")}>Old Pixiv: {oldTag.pixiv || "None."}</span>
+                        <span className="mod-post-text mod-post-hover" onClick={() => window.open(oldTag.twitter, "_blank")}>Old Twitter: {oldTag.twitter || "None."}</span>
+                        </> : null}
+                        {oldTag.type === "character" ? <>
+                        <span className="mod-post-text mod-post-hover" onClick={() => window.open(oldTag.fandom, "_blank")}>Old Fandom: {oldTag.fandom || "None."}</span>
+                        </> : null}
+                        {oldTag.type === "series" ? <>
+                        <span className="mod-post-text mod-post-hover" onClick={() => window.open(oldTag.website, "_blank")}>Old Website: {oldTag.website || "None."}</span>
                         <span className="mod-post-text mod-post-hover" onClick={() => window.open(oldTag.twitter, "_blank")}>Old Twitter: {oldTag.twitter || "None."}</span>
                         </> : null}
                     </div>
@@ -177,7 +190,15 @@ const ModTagEdits: React.FunctionComponent = (props) => {
                         <span className="mod-post-text">New Aliases: {request.aliases?.[0] ? request.aliases.join(", ") : "None"}</span>
                         <span className="mod-post-text">New Implications: {request.implications?.[0] ? request.implications.join(", ") : "None"}</span>
                         {oldTag.type === "artist" ? <>
+                        <span className="mod-post-text mod-post-hover" onClick={() => window.open(request.website, "_blank")}>New Website: {request.website || "None."}</span>
                         <span className="mod-post-text mod-post-hover" onClick={() => window.open(request.pixiv, "_blank")}>New Pixiv: {request.pixiv || "None."}</span>
+                        <span className="mod-post-text mod-post-hover" onClick={() => window.open(request.twitter, "_blank")}>New Twitter: {request.twitter || "None."}</span>
+                        </> : null}
+                        {oldTag.type === "character" ? <>
+                        <span className="mod-post-text mod-post-hover" onClick={() => window.open(request.fandom, "_blank")}>New Fandom: {request.fandom || "None."}</span>
+                        </> : null}
+                        {oldTag.type === "series" ? <>
+                        <span className="mod-post-text mod-post-hover" onClick={() => window.open(request.website, "_blank")}>New Website: {request.website || "None."}</span>
                         <span className="mod-post-text mod-post-hover" onClick={() => window.open(request.twitter, "_blank")}>New Twitter: {request.twitter || "None."}</span>
                         </> : null}
                     </div> </>}
@@ -190,7 +211,7 @@ const ModTagEdits: React.FunctionComponent = (props) => {
                             <img className="mod-post-options-img" src={getReject()}/>
                             <span className="mod-post-options-text">Reject</span>
                         </div>
-                        <div className="mod-post-options-container" onClick={() => editTag(request.username, request.tag, request.key, request.description, request.image, request.aliases, request.implications, request.pixiv, request.twitter)}>
+                        <div className="mod-post-options-container" onClick={() => editTag(request.username, request.tag, request.key, request.description, request.image, request.aliases, request.implications, request.pixiv, request.twitter, request.website, request.fandom)}>
                             <img className="mod-post-options-img" src={getApprove()}/>
                             <span className="mod-post-options-text">Approve</span>
                         </div>

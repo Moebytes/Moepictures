@@ -5,6 +5,7 @@ import {HashLink as Link} from "react-router-hash-link"
 import functions from "../structures/Functions"
 import artistImg from "../assets/images/artist.png"
 import Carousel from "./Carousel"
+import website from "../assets/purple/support.png"
 import pixiv from "../assets/purple/pixiv.png"
 import twitter from "../assets/purple/twitter.png"
 import "./styles/artistrow.less"
@@ -61,6 +62,9 @@ const ArtistRow: React.FunctionComponent<Props> = (props) => {
 
     const artistSocialJSX = () => {
         let jsx = [] as any
+        if (props.artist.website) {
+            jsx.push(<img className="artistrow-social" src={website} onClick={() => window.open(props.artist.website, "_blank")}/>)
+        }
         if (props.artist.pixiv) {
             jsx.push(<img className="artistrow-social" src={pixiv} onClick={() => window.open(props.artist.pixiv, "_blank")}/>)
         }
@@ -71,7 +75,7 @@ const ArtistRow: React.FunctionComponent<Props> = (props) => {
     }
 
     return (
-        <div className="artistrow" onMouseEnter={() =>setHover(true)} onMouseLeave={() => setHover(false)}>
+        <div className="artistrow">
             <div className="artistrow-row">
                 {props.artist.image ? <img className="artistrow-img" src={functions.getTagLink("artist", props.artist.image)}/> : null}
                 <span className="artistrow-text-hover">

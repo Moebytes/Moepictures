@@ -5,6 +5,7 @@ import {HashLink as Link} from "react-router-hash-link"
 import functions from "../structures/Functions"
 import characterImg from "../assets/images/character.png"
 import Carousel from "./Carousel"
+import fandom from "../assets/purple/fandom.png"
 import "./styles/characterrow.less"
 
 interface Props {
@@ -57,12 +58,21 @@ const CharacterRow: React.FunctionComponent<Props> = (props) => {
         return filtered.map((p: any) => functions.getThumbnailLink(p.images[0].type, p.postID, p.images[0].filename, "tiny"))
     }
 
+    const characterSocialJSX = () => {
+        let jsx = [] as any
+        if (props.character.fandom) {
+            jsx.push(<img className="characterrow-social" src={fandom} onClick={() => window.open(props.character.fandom, "_blank")}/>)
+        }
+        return jsx
+    }
+
     return (
-        <div className="characterrow" onMouseEnter={() =>setHover(true)} onMouseLeave={() => setHover(false)}>
+        <div className="characterrow">
             <div className="characterrow-row">
                 {props.character.image ? <img className="characterrow-img" src={functions.getTagLink("character", props.character.image)}/> : null}
                 <span className="characterrow-text-hover">
                     <span className="characterrow-text" onClick={searchTag} onAuxClick={searchTag}>{functions.toProperCase(props.character.tag.replaceAll("-", " "))}</span>
+                    {characterSocialJSX()}
                     <span className="characterrow-text-alt">{props.character.postCount}</span>
                 </span>
             </div>

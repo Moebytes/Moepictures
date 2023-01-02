@@ -2,14 +2,15 @@ import React, {useEffect, useContext, useState, useRef} from "react"
 import {useHistory} from "react-router-dom"
 import {HashLink as Link} from "react-router-hash-link"
 import {HideNavbarContext, HideSidebarContext, ThemeContext, EnableDragContext, EditTagIDContext, EditTagFlagContext, EditTagImplicationsContext, 
-EditTagTypeContext, EditTagPixivContext, EditTagTwitterContext, EditTagKeyContext, EditTagAliasesContext, EditTagImageContext, 
-EditTagDescriptionContext, HideTitlebarContext, SessionContext} from "../Context"
+EditTagTypeContext, EditTagPixivContext, EditTagTwitterContext, EditTagKeyContext, EditTagAliasesContext, EditTagImageContext, EditTagWebsiteContext, 
+EditTagFandomContext, EditTagDescriptionContext, HideTitlebarContext, SessionContext} from "../Context"
 import functions from "../structures/Functions"
 import uploadIcon from "../assets/purple/upload.png"
 import "./styles/edittagdialog.less"
 import fileType from "magic-bytes.js"
 import Draggable from "react-draggable"
 import permissions from "../structures/Permissions"
+import xButton from "../assets/magenta/x-button.png"
 import axios from "axios"
 
 const EditTagDialog: React.FunctionComponent = (props) => {
@@ -28,6 +29,8 @@ const EditTagDialog: React.FunctionComponent = (props) => {
     const {editTagType, setEditTagType} = useContext(EditTagTypeContext)
     const {editTagPixiv, setEditTagPixiv} = useContext(EditTagPixivContext)
     const {editTagTwitter, setEditTagTwitter} = useContext(EditTagTwitterContext)
+    const {editTagWebsite, setEditTagWebsite} = useContext(EditTagWebsiteContext)
+    const {editTagFandom, setEditTagFandom} = useContext(EditTagFandomContext)
     const {session, setSession} = useContext(SessionContext)
     const [submitted, setSubmitted] = useState(false)
     const [reason, setReason] = useState("")
@@ -74,11 +77,15 @@ const EditTagDialog: React.FunctionComponent = (props) => {
             }
             let image = null as any
             if (editTagImage) {
-                const arrayBuffer = await fetch(editTagImage).then((r) => r.arrayBuffer())
-                const bytes = new Uint8Array(arrayBuffer)
-                image = Object.values(bytes)
+                if (editTagImage === "delete") {
+                    image = ["delete"]
+                } else {
+                    const arrayBuffer = await fetch(editTagImage).then((r) => r.arrayBuffer())
+                    const bytes = new Uint8Array(arrayBuffer)
+                    image = Object.values(bytes)
+                }
             }
-            await axios.post("/api/tag/edit/request", {tag: editTagID, key: editTagKey, description: editTagDescription, image, aliases: editTagAliases, implications: editTagImplications, pixiv: editTagPixiv, twitter: editTagTwitter, reason}, {withCredentials: true})
+            await axios.post("/api/tag/edit/request", {tag: editTagID, key: editTagKey, description: editTagDescription, image, aliases: editTagAliases, implications: editTagImplications, pixiv: editTagPixiv, twitter: editTagTwitter, website: editTagWebsite, fandom: editTagFandom, reason}, {withCredentials: true})
             setSubmitted(true)
         }
     }
@@ -148,8 +155,36 @@ const EditTagDialog: React.FunctionComponent = (props) => {
             jsx.push(
                 <>
                 <div className="edittag-dialog-row">
+                    <span className="edittag-dialog-text">Website: </span>
+                    <input className="edittag-dialog-input" type="text" spellCheck={false} value={editTagWebsite} onChange={(event) => setEditTagWebsite(event.target.value)}/>
+                </div>
+                <div className="edittag-dialog-row">
                     <span className="edittag-dialog-text">Pixiv: </span>
                     <input className="edittag-dialog-input" type="text" spellCheck={false} value={editTagPixiv} onChange={(event) => setEditTagPixiv(event.target.value)}/>
+                </div>
+                <div className="edittag-dialog-row">
+                    <span className="edittag-dialog-text">Twitter: </span>
+                    <input className="edittag-dialog-input" type="text" spellCheck={false} value={editTagTwitter} onChange={(event) => setEditTagTwitter(event.target.value)}/>
+                </div>
+                </>
+            )
+        }
+        if (editTagType === "character") {
+            jsx.push(
+                <>
+                <div className="edittag-dialog-row">
+                    <span className="edittag-dialog-text">Wiki: </span>
+                    <input className="edittag-dialog-input" type="text" spellCheck={false} value={editTagFandom} onChange={(event) => setEditTagFandom(event.target.value)}/>
+                </div>
+                </>
+            )
+        }
+        if (editTagType === "series") {
+            jsx.push(
+                <>
+                <div className="edittag-dialog-row">
+                    <span className="edittag-dialog-text">Website: </span>
+                    <input className="edittag-dialog-input" type="text" spellCheck={false} value={editTagWebsite} onChange={(event) => setEditTagWebsite(event.target.value)}/>
                 </div>
                 <div className="edittag-dialog-row">
                     <span className="edittag-dialog-text">Twitter: </span>
@@ -183,10 +218,13 @@ const EditTagDialog: React.FunctionComponent = (props) => {
                                     <span className="edittag-button-text-small">Upload</span>
                                 </label>
                                 <input id="tag-img" type="file" onChange={(event) => uploadTagImg(event)}/>
+                                {editTagImage && editTagImage !== "delete" ? 
+                                <img className="edittag-x-button" src={xButton} onClick={() => setEditTagImage("delete")}/>
+                                : null}
                             </div>
-                            {editTagImage ? 
+                            {editTagImage && editTagImage !== "delete" ? 
                             <div className="edittag-dialog-row">
-                                <img className="edittag-img" src={editTagImage}/>
+                                <img className="edittag-img" src={editTagImage === "delete" ? "" : editTagImage}/>
                             </div>
                             : null}
                             <div className="edittag-dialog-row">
@@ -247,10 +285,13 @@ const EditTagDialog: React.FunctionComponent = (props) => {
                                 <span className="edittag-button-text-small">Upload</span>
                             </label>
                             <input id="tag-img" type="file" onChange={(event) => uploadTagImg(event)}/>
+                            {editTagImage && editTagImage !== "delete" ? 
+                            <img className="edittag-x-button" src={xButton} onClick={() => setEditTagImage("delete")}/>
+                            : null}
                         </div>
-                        {editTagImage ? 
+                        {editTagImage && editTagImage !== "delete" ? 
                         <div className="edittag-dialog-row">
-                            <img className="edittag-img" src={editTagImage}/>
+                            <img className="edittag-img" src={editTagImage === "delete" ? "" : editTagImage}/>
                         </div>
                         : null}
                         <div className="edittag-dialog-row">

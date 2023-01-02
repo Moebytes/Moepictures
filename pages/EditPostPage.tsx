@@ -36,6 +36,7 @@ import "./styles/editpostpage.less"
 import ContentEditable from "react-contenteditable"
 import SearchSuggestions from "../components/SearchSuggestions"
 import permissions from "../structures/Permissions"
+import xButton from "../assets/magenta/x-button.png"
 import path from "path"
 
 let enterLinksTimer = null as any
@@ -477,6 +478,11 @@ const EditPostPage: React.FunctionComponent<Props> = (props) => {
                 setArtistActive(artistActive)
                 forceUpdate()
             }
+            const deleteImage = () => {
+                artists[i].image = "" 
+                setArtists(artists)
+                forceUpdate()
+            }
             const getX = () => {
                 if (typeof document === "undefined") return 15
                 const element = artistInputRefs[i]?.current
@@ -506,6 +512,9 @@ const EditPostPage: React.FunctionComponent<Props> = (props) => {
                             <span className="upload-button-text-small">Upload</span>
                     </label>
                     <input id={`artist-upload-${i}`} type="file" onChange={(event) => uploadTagImg(event, "artist", i)}/>
+                    {artists[i].image ? 
+                    <img className="editpost-x-button" src={xButton} onClick={() => deleteImage()}/>
+                    : null}
                 </div>
                 {artists[i].image ?
                 <div className="upload-container-row">
@@ -552,6 +561,11 @@ const EditPostPage: React.FunctionComponent<Props> = (props) => {
                 setCharacterActive(characterActive)
                 forceUpdate()
             }
+            const deleteImage = () => {
+                characters[i].image = "" 
+                setCharacters(characters)
+                forceUpdate()
+            }
             const getX = () => {
                 if (typeof document === "undefined") return 15
                 const element = characterInputRefs[i]?.current
@@ -581,6 +595,9 @@ const EditPostPage: React.FunctionComponent<Props> = (props) => {
                             <span className="upload-button-text-small">Upload</span>
                     </label>
                     <input id={`character-upload-${i}`} type="file" onChange={(event) => uploadTagImg(event, "character", i)}/>
+                    {characters[i].image ? 
+                    <img className="editpost-x-button" src={xButton} onClick={() => deleteImage()}/>
+                    : null}
                 </div>
                 {characters[i].image ?
                 <div className="upload-container-row">
@@ -627,6 +644,11 @@ const EditPostPage: React.FunctionComponent<Props> = (props) => {
                 setSeriesActive(seriesActive)
                 forceUpdate()
             }
+            const deleteImage = () => {
+                series[i].image = "" 
+                setSeries(series)
+                forceUpdate()
+            }
             const getX = () => {
                 if (typeof document === "undefined") return 15
                 const element = seriesInputRefs[i]?.current
@@ -656,6 +678,9 @@ const EditPostPage: React.FunctionComponent<Props> = (props) => {
                             <span className="upload-button-text-small">Upload</span>
                     </label>
                     <input id={`series-upload-${i}`} type="file" onChange={(event) => uploadTagImg(event, "series", i)}/>
+                    {series[i].image ? 
+                    <img className="editpost-x-button" src={xButton} onClick={() => deleteImage()}/>
+                    : null}
                 </div>
                 {series[i].image ?
                 <div className="upload-container-row">
@@ -1135,6 +1160,11 @@ const EditPostPage: React.FunctionComponent<Props> = (props) => {
                 setNewTags(newTags)
                 forceUpdate()
             }
+            const deleteImage = () => {
+                newTags[i].image = "" 
+                setNewTags(newTags)
+                forceUpdate()
+            }
             jsx.push(
                 <>
                 <div className="editpost-container-row" style={{marginTop: "10px"}}>
@@ -1154,6 +1184,9 @@ const EditPostPage: React.FunctionComponent<Props> = (props) => {
                             <span className="editpost-button-text-small">Upload</span>
                     </label>
                     <input id={`tag-editpost-${i}`} type="file" onChange={(event) => uploadTagImg(event, "tag", i)}/>
+                    {newTags[i].image ? 
+                    <img className="editpost-x-button" src={xButton} onClick={() => deleteImage()}/>
+                    : null}
                 </div>
                 {newTags[i].image ?
                 <div className="editpost-container-row">

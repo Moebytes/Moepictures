@@ -5,6 +5,8 @@ import {HashLink as Link} from "react-router-hash-link"
 import functions from "../structures/Functions"
 import seriesImg from "../assets/images/series.png"
 import Carousel from "./Carousel"
+import website from "../assets/purple/support.png"
+import twitter from "../assets/purple/twitter.png"
 import "./styles/seriesrow.less"
 
 interface Props {
@@ -57,12 +59,24 @@ const SeriesRow: React.FunctionComponent<Props> = (props) => {
         return filtered.map((p: any) => functions.getThumbnailLink(p.images[0].type, p.postID, p.images[0].filename, "tiny"))
     }
 
+    const seriesSocialJSX = () => {
+        let jsx = [] as any
+        if (props.series.website) {
+            jsx.push(<img className="artistrow-social" src={website} onClick={() => window.open(props.series.website, "_blank")}/>)
+        }
+        if (props.series.twitter) {
+            jsx.push(<img className="artistrow-social" src={twitter} onClick={() => window.open(props.series.twitter, "_blank")}/>)
+        }
+        return jsx
+    }
+
     return (
-        <div className="seriesrow" onMouseEnter={() =>setHover(true)} onMouseLeave={() => setHover(false)}>
+        <div className="seriesrow">
             <div className="seriesrow-row">
                 {props.series.image ? <img className="seriesrow-img" src={functions.getTagLink("series", props.series.image)}/> : null}
                 <span className="seriesrow-text-hover">
                     <span className="seriesrow-text" onClick={searchTag} onAuxClick={searchTag}>{functions.toProperCase(props.series.tag.replaceAll("-", " "))}</span>
+                    {seriesSocialJSX()}
                     <span className="seriesrow-text-alt">{props.series.postCount}</span>
                 </span>
             </div>
