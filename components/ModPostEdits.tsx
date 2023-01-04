@@ -104,7 +104,8 @@ const ModPostEdits: React.FunctionComponent = (props) => {
         for (let i = 0; i < posts.length; i++) {
             const post = posts[i] as any
             if (!post) break
-            const imgClick = () => {
+            const imgClick = (event?: any, middle?: boolean) => {
+                if (middle) return window.open(`/unverified/post/${post.postID}`, "_blank")
                 history.push(`/unverified/post/${post.postID}`)
             }
             const img = functions.getUnverifiedThumbnailLink(post.images[0].type, post.postID, post.images[0].filename, "tiny")
@@ -112,8 +113,8 @@ const ModPostEdits: React.FunctionComponent = (props) => {
                 <div className="mod-post" onMouseEnter={() =>setHover(true)} onMouseLeave={() => setHover(false)}>
                     <div className="mod-post-img-container">
                         {functions.isVideo(img) ? 
-                        <video className="mod-post-img" src={img} onClick={imgClick}></video> :
-                        <img className="mod-post-img" src={img} onClick={imgClick}/>}
+                        <video className="mod-post-img" src={img} onClick={imgClick} onAuxClick={(event) => imgClick(event, true)}></video> :
+                        <img className="mod-post-img" src={img} onClick={imgClick} onAuxClick={(event) => imgClick(event, true)}/>}
                     </div>
                     <div className="mod-post-text-column">
                         <span className="mod-post-link" onClick={() => history.push(`/user/${post.updater}`)}>Edited By: {functions.toProperCase(post.updater || "Deleted")}</span>

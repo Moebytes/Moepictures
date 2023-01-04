@@ -81,7 +81,7 @@ const HelpPage: React.FunctionComponent = (props) => {
                             <Link className="help-link" to="/help#aliases">Aliases</Link>
                             <Link className="help-link" to="/help#commenting">Commenting</Link>
                             <Link className="help-link" to="/help#bans">Bans</Link>
-                            <Link className="help-link" to="/help#ai-protection">AI Protection</Link>
+                            <Link className="help-link" to="/help#ai-protection">Bot Protection</Link>
                             <Link className="help-link" to="/help#deleting-account">Deleting Your Account</Link>
                         </div>
                     </span>
@@ -251,12 +251,17 @@ const HelpPage: React.FunctionComponent = (props) => {
                         If you break the rules severely or consistently, you might get banned. If you get banned, you 
                         are not allowed to register another account.
                     </span>
-                    <span className="help-heading" id="ai-protection">AI Protection</span>
+                    <span className="help-heading" id="bot-protection">Bot Protection</span>
                     <span className="help-text">
-                        Accessing the tags of a specific post is considered to be protected information and you will need to solve a captcha 
+                        All images are sent encrypted and they are decrypted in the browser. This prevents direct image downloads without first
+                        decrypting the binary data.<br/><br/>
+
+                        Accessing the tags of a specific post is protected information, you will need to solve a captcha 
                         after viewing the tags of 50 posts. There is no way to bypass the captcha, but you can choose to not solve it and you will be
-                        able to browse posts without seeing their tags. This is by no means a perfect solution, but I hope that by making my website difficult to scrape it would make scrapers go somewhere else. 
-                        If you have anymore ideas on how to protect my website from robotic scrapers, feel free to contact me.
+                        able to browse posts without seeing their tags.<br/><br/> 
+                        
+                        These are by no means perfect solutions, but I hope that by making my website difficult to scrape it would make scrapers go somewhere else. 
+                        If you have anymore ideas on how to protect my website against scrapers, feel free to contact me.
                     </span>
                     <span className="help-heading" id="deleting-account">Deleting Your Account</span>
                     <span className="help-text">

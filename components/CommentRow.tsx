@@ -1,9 +1,11 @@
 import React, {useContext, useEffect, useRef, useState} from "react"
 import {useHistory} from "react-router-dom"
 import {ThemeContext, QuoteTextContext, SessionContext, DeleteCommentIDContext, DeleteCommentFlagContext, MobileContext,
-EditCommentFlagContext, EditCommentIDContext, EditCommentTextContext, ReportCommentIDContext} from "../Context"
+EditCommentFlagContext, EditCommentIDContext, EditCommentTextContext, ReportCommentIDContext, BrightnessContext, ContrastContext, 
+HueContext, SaturationContext, LightnessContext, BlurContext, SharpenContext, PixelateContext} from "../Context"
 import {HashLink as Link} from "react-router-hash-link"
 import functions from "../structures/Functions"
+import cryptoFunctions from "../structures/CryptoFunctions"
 import favicon from "../assets/purple/favicon.png"
 import faviconMagenta from "../assets/magenta/favicon.png"
 import commentQuote from "../assets/purple/commentquote.png"
@@ -26,6 +28,14 @@ const CommentRow: React.FunctionComponent<Props> = (props) => {
     const {quoteText, setQuoteText} = useContext(QuoteTextContext)
     const {mobile, setMobile} = useContext(MobileContext)
     const {session, setSession} = useContext(SessionContext)
+    const {brightness, setBrightness} = useContext(BrightnessContext)
+    const {contrast, setContrast} = useContext(ContrastContext)
+    const {hue, setHue} = useContext(HueContext)
+    const {saturation, setSaturation} = useContext(SaturationContext)
+    const {lightness, setLightness} = useContext(LightnessContext)
+    const {blur, setBlur} = useContext(BlurContext)
+    const {sharpen, setSharpen} = useContext(SharpenContext)
+    const {pixelate, setPixelate} = useContext(PixelateContext)
     const {deleteCommentID, setDeleteCommentID} = useContext(DeleteCommentIDContext)
     const {deleteCommentFlag, setDeleteCommentFlag} = useContext(DeleteCommentFlagContext)
     const {editCommentFlag, setEditCommentFlag} = useContext(EditCommentFlagContext)
@@ -36,6 +46,7 @@ const CommentRow: React.FunctionComponent<Props> = (props) => {
     const history = useHistory()
     const initialImg = functions.getThumbnailLink(props.comment.post.images[0].type, props.comment.postID, props.comment.post.images[0].filename, "tiny")
     const [img, setImg] = useState(initialImg)
+    const ref = useRef<HTMLCanvasElement>(null)
     const comment = props.comment.comment
 
     const getFavicon = () => {
@@ -208,12 +219,36 @@ const CommentRow: React.FunctionComponent<Props> = (props) => {
         // base64Img()
     }, [])
 
+    const loadImage = async () => {
+        if (functions.isGIF(img)) return
+        if (!ref.current) return
+        let src = img
+        if (functions.isImage(src)) {
+            src = await cryptoFunctions.decryptedLink(src)
+        }
+        const imgElement = document.createElement("img")
+        imgElement.src = src 
+        imgElement.onload = () => {
+            if (!ref.current) return
+            const rendered = functions.render(imgElement, brightness, contrast, hue, saturation, lightness, blur, sharpen, pixelate)
+            const refCtx = ref.current.getContext("2d")
+            ref.current.width = rendered.width
+            ref.current.height = rendered.height
+            refCtx?.drawImage(rendered, 0, 0, rendered.width, rendered.height)
+        }
+    }
+
+    useEffect(() => {
+        loadImage()
+    }, [img, brightness, contrast, hue, saturation, lightness, blur, sharpen, pixelate])
+
     return (
         <div className="commentrow">
             <div className="commentrow-container">
                 {functions.isVideo(img) && !mobile ? 
                 <video className="commentrow-img" src={img} onClick={imgClick} onAuxClick={imgClick}></video> :
-                <img className="commentrow-img" src={img} onClick={imgClick}/>}
+                functions.isGIF(img) ? <img className="commentrow-img" src={img} onClick={imgClick} onAuxClick={imgClick}/> :
+                <canvas className="commentrow-img" ref={ref} onClick={imgClick} onAuxClick={imgClick}></canvas>}
             </div>
             <div className="commentrow-container-row">
                 <div className="commentrow-container">

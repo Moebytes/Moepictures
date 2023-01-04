@@ -7,6 +7,7 @@ import approveMagenta from "../assets/magenta/approve.png"
 import reject from "../assets/purple/reject.png"
 import rejectMagenta from "../assets/magenta/reject.png"
 import functions from "../structures/Functions"
+import cryptoFunctions from "../structures/CryptoFunctions"
 import "./styles/modposts.less"
 import axios from "axios"
 
@@ -18,9 +19,11 @@ const ModPostDeletions: React.FunctionComponent = (props) => {
     const [index, setIndex] = useState(0)
     const [visibleRequests, setVisibleRequests] = useState([]) as any
     const [requests, setRequests] = useState([]) as any
+    const [imagesRef, setImagesRef] = useState([]) as any
     const [offset, setOffset] = useState(0)
     const [ended, setEnded] = useState(false)
     const history = useHistory()
+    const ref = useRef<HTMLCanvasElement>(null)
 
     const updatePosts = async () => {
         const requests = await axios.get("/api/post/delete/request/list", {withCredentials: true}).then((r) => r.data)
@@ -55,14 +58,17 @@ const ModPostDeletions: React.FunctionComponent = (props) => {
 
     useEffect(() => {
         let currentIndex = index
-        const newVisibleRequests = visibleRequests as any
+        let newVisibleRequests = visibleRequests as any
         for (let i = 0; i < 10; i++) {
             if (!requests[currentIndex]) break
             newVisibleRequests.push(requests[currentIndex])
             currentIndex++
         }
         setIndex(currentIndex)
-        setVisibleRequests(functions.removeDuplicates(newVisibleRequests))
+        newVisibleRequests = functions.removeDuplicates(newVisibleRequests)
+        setVisibleRequests(newVisibleRequests)
+        const newImagesRef = newVisibleRequests.map(() => React.createRef()) as any
+        setImagesRef(newImagesRef) as any
     }, [requests])
 
     const updateOffset = async () => {
@@ -83,14 +89,17 @@ const ModPostDeletions: React.FunctionComponent = (props) => {
             if (functions.scrolledToBottom()) {
                 let currentIndex = index
                 if (!requests[currentIndex]) return updateOffset()
-                const newPosts = visibleRequests as any
+                let newPosts = visibleRequests as any
                 for (let i = 0; i < 10; i++) {
                     if (!requests[currentIndex]) return updateOffset()
                     newPosts.push(requests[currentIndex])
                     currentIndex++
                 }
                 setIndex(currentIndex)
-                setVisibleRequests(functions.removeDuplicates(newPosts))
+                newPosts = functions.removeDuplicates(newPosts)
+                setVisibleRequests()
+                const newImagesRef = newPosts.map(() => React.createRef()) as any
+                setImagesRef(newImagesRef) as any
             }
         }
         window.addEventListener("scroll", scrollHandler)
@@ -99,13 +108,41 @@ const ModPostDeletions: React.FunctionComponent = (props) => {
         }
     })
 
+    const loadImages = async () => {
+        for (let i = 0; i < visibleRequests.length; i++) {
+            const request = visibleRequests[i]
+            const ref = imagesRef[i]
+            const img = functions.getThumbnailLink(request.post.images[0].type, request.postID, request.post.images[0].filename, "tiny")
+            if (functions.isGIF(img)) continue
+            if (!ref.current) continue
+            let src = img
+            if (functions.isImage(src)) {
+                src = await cryptoFunctions.decryptedLink(src)
+            }
+            const imgElement = document.createElement("img")
+            imgElement.src = src 
+            imgElement.onload = () => {
+                if (!ref.current) return
+                const refCtx = ref.current.getContext("2d")
+                ref.current.width = imgElement.width
+                ref.current.height = imgElement.height
+                refCtx?.drawImage(imgElement, 0, 0, imgElement.width, imgElement.height)
+            }
+        }
+    }
+
+    useEffect(() => {
+        loadImages()
+    }, [visibleRequests])
+
     const generatePostsJSX = () => {
         let jsx = [] as any
         const requests = functions.removeDuplicates(visibleRequests)
         for (let i = 0; i < requests.length; i++) {
             const request = requests[i] as any
             if (!request) break
-            const imgClick = () => {
+            const imgClick = (event: any, middle?: boolean) => {
+                if (middle) return window.open(`/post/${request.postID}`, "_blank")
                 history.push(`/post/${request.postID}`)
             }
             const img = functions.getThumbnailLink(request.post.images[0].type, request.postID, request.post.images[0].filename, "tiny")
@@ -113,8 +150,9 @@ const ModPostDeletions: React.FunctionComponent = (props) => {
                 <div className="mod-post" onMouseEnter={() =>setHover(true)} onMouseLeave={() => setHover(false)}>
                     <div className="mod-post-img-container">
                         {functions.isVideo(img) ? 
-                        <video className="mod-post-img" src={img} onClick={imgClick}></video> :
-                        <img className="mod-post-img" src={img} onClick={imgClick}/>}
+                        <video className="mod-post-img" src={img} onClick={imgClick} onAuxClick={(event) => imgClick(event, true)}></video> :
+                        functions.isGIF(img) ? <img className="mod-post-img" src={img} onClick={imgClick} onAuxClick={(event) => imgClick(event, true)}/> :
+                        <canvas className="mod-post-img" ref={imagesRef[i]} onClick={imgClick} onAuxClick={(event) => imgClick(event, true)}></canvas>}
                     </div>
                     <div className="mod-post-text-column">
                         <span className="mod-post-link" onClick={() => history.push(`/user/${request.username}`)}>Requester: {functions.toProperCase(request.username || "Deleted")}</span>

@@ -948,6 +948,7 @@ const UploadPage: React.FunctionComponent = (props) => {
             if (tagArr.includes("pixel-art")) setStyle("pixel")
             if (tagArr.includes("comic")) setType("comic")
 
+            tagArr = tagArr.map((tag: string) => functions.cleanTag(tag))
             for (let i = 0; i < Object.keys(tagReplaceMap).length; i++) {
                 const key = Object.keys(tagReplaceMap)[i]
                 const value = Object.values(tagReplaceMap)[i]
@@ -958,6 +959,9 @@ const UploadPage: React.FunctionComponent = (props) => {
             for (let i = 0; i < blockedTags.length; i++) {
                 tagArr = tagArr.filter((tag: string) => !tag.includes(blockedTags[i]))
             }
+
+            charStrArr = charStrArr.map((tag: string) => functions.cleanTag(tag))
+            seriesStrArr = seriesStrArr.map((tag: string) => functions.cleanTag(tag))
 
             for (let i = 0; i < charStrArr.length; i++) {
                 characters[characters.length - 1].tag = charStrArr[i]
@@ -995,6 +999,7 @@ const UploadPage: React.FunctionComponent = (props) => {
             if (tagArr.includes("pixel-art")) setStyle("pixel")
             if (tagArr.includes("comic")) setType("comic")
 
+            tagArr = tagArr.map((tag: string) => functions.cleanTag(tag))
             for (let i = 0; i < Object.keys(tagReplaceMap).length; i++) {
                 const key = Object.keys(tagReplaceMap)[i]
                 const value = Object.values(tagReplaceMap)[i]

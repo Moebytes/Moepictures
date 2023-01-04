@@ -5,7 +5,7 @@ import {Readable} from "stream"
 import {Pool} from "pg"
 import fs from "fs"
 import sharp from "sharp"
-import express from "express"
+import express, {Request, NextFunction} from "express"
 import session from "express-session"
 import S3 from "aws-sdk/clients/s3"
 import PGSession from "connect-pg-simple"
@@ -19,6 +19,7 @@ import App from "./App"
 import {renderToString} from "react-dom/server"
 import {StaticRouter as Router} from "react-router-dom"
 import functions from "./structures/Functions"
+import cryptoFunctions from "./structures/CryptoFunctions"
 import serverFunctions from "./structures/ServerFunctions"
 import sql from "./structures/SQLQuery"
 import $2FARoutes from "./routes/2FARoutes"
@@ -116,8 +117,12 @@ let folders = ["animation", "artist", "character", "comic", "image", "pfp", "ser
 for (let i = 0; i < folders.length; i++) {
   serverFunctions.uploadFile(`${folders[i]}/`, "")
   serverFunctions.uploadUnverifiedFile(`${folders[i]}/`, "")
-  app.get(`/${folders[i]}/*`, async (req, res, next) => {
+  app.get(`/${folders[i]}/*`, async (req: Request, res, next: NextFunction) => {
     try {
+      if (folders[i] === "tag") {
+        if (!req.url.endsWith(".png") || !req.url.endsWith(".jpg") || !req.url.endsWith(".jpeg") ||
+        !req.url.endsWith(".webp") || !req.url.endsWith(".gif")) return next()
+      }
       res.setHeader("Content-Type", mime.getType(req.path) ?? "")
       const key = decodeURIComponent(req.path.slice(1))
       if (req.session.role !== "admin" && req.session.role !== "mod") {
@@ -140,6 +145,11 @@ for (let i = 0; i < folders.length; i++) {
         })
         const stream = Readable.from(body.slice(start, end + 1))
         return stream.pipe(res)
+      }
+      if (folders[i] === "image" || folders[i] === "comic") {
+        const encrypted = cryptoFunctions.encrypt(body)
+        res.setHeader("Content-Length", encrypted.length)
+        return res.status(200).end(encrypted)
       }
       res.setHeader("Content-Length", contentLength)
       res.status(200).end(body)
@@ -208,9 +218,15 @@ for (let i = 0; i < folders.length; i++) {
         const stream = Readable.from(body.slice(start, end + 1))
         return stream.pipe(res)
       }
+      if (folders[i] === "image" || folders[i] === "comic") {
+        const encrypted = cryptoFunctions.encrypt(body)
+        res.setHeader("Content-Length", encrypted.length)
+        return res.status(200).end(encrypted)
+      }
       res.setHeader("Content-Length", contentLength)
       res.status(200).end(body)
-    } catch {
+    } catch (e) {
+      console.log(e)
       res.status(400).end()
     }
   })

@@ -8,3 +8,4 @@ files
 *.pem
 .ssh
 dump
+structures/CryptoFunctions.ts

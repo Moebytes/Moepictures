@@ -5,6 +5,7 @@ ReverseContext, MobileContext} from "../Context"
 import {HashLink as Link} from "react-router-hash-link"
 import {createFFmpeg, fetchFile} from "@ffmpeg/ffmpeg"
 import functions from "../structures/Functions"
+import cryptoFunctions from "../structures/CryptoFunctions"
 import loading from "../assets/purple/loading.gif"
 import loadingMagenta from "../assets/magenta/loading.gif"
 import Slider from "react-slider"
@@ -72,13 +73,14 @@ const PostImage: React.FunctionComponent<Props> = (props) => {
     const containerRef = useRef<HTMLDivElement>(null)
     const fullscreenRef = useRef<HTMLDivElement>(null)
     const pixelateRef = useRef<HTMLCanvasElement>(null)
-    const overlayRef = useRef<HTMLImageElement>(null)
-    const lightnessRef = useRef<HTMLImageElement>(null)
+    const dummyRef = useRef<HTMLCanvasElement>(null)
+    const overlayRef = useRef<HTMLCanvasElement>(null)
+    const lightnessRef = useRef<HTMLCanvasElement>(null)
     const gifOverlayRef = useRef<HTMLImageElement>(null)
     const gifLightnessRef = useRef<HTMLImageElement>(null)
     const videoOverlayRef = useRef<HTMLCanvasElement>(null)
     const videoLightnessRef = useRef<HTMLImageElement>(null)
-    const ref = useRef<any>(null)
+    const ref = useRef<HTMLCanvasElement>(null)
     const gifRef = useRef<HTMLCanvasElement>(null)
     const gifControls = useRef<HTMLDivElement>(null)
     const gifSpeedRef = useRef(null) as any
@@ -146,6 +148,7 @@ const PostImage: React.FunctionComponent<Props> = (props) => {
             setImg(base64)
         }
         // base64Img()
+        loadImage()
     }, [props.img])
 
     useEffect(() => {
@@ -158,15 +161,15 @@ const PostImage: React.FunctionComponent<Props> = (props) => {
 
     const resizeImageCanvas = () => {
         if (!pixelateRef.current || !ref.current) return
-        pixelateRef.current.width = ref.current.width
-        pixelateRef.current.height = ref.current.height
+        pixelateRef.current.width = ref.current.clientWidth
+        pixelateRef.current.height = ref.current.clientHeight
     }
 
     const resizeGIFCanvas = () => {
         if (!gifRef.current || !ref.current) return
         if (ref.current.clientWidth === 0) return
-        gifRef.current.width = ref.current.width
-        gifRef.current.height = ref.current.height
+        gifRef.current.width = ref.current.clientWidth
+        gifRef.current.height = ref.current.clientHeight
     }
 
     const resizeVideoCanvas = () => {
@@ -335,8 +338,8 @@ const PostImage: React.FunctionComponent<Props> = (props) => {
             const gifCanvas = gifRef.current
             gifCanvas.style.opacity = "1"
             ref.current.style.opacity = "0"
-            gifCanvas.width = ref.current.width
-            gifCanvas.height = ref.current.height
+            gifCanvas.width = ref.current.clientWidth
+            gifCanvas.height = ref.current.clientHeight
             const ctx = gifCanvas.getContext("2d") as any
             const frames = adjustedData.length - 1
             const duration = adjustedData.map((d: any) => d.delay).reduce((p: any, c: any) => p + c) / 1000
@@ -710,14 +713,14 @@ const PostImage: React.FunctionComponent<Props> = (props) => {
         if (!fullscreenRef.current) return
         const element = fullscreenRef.current
         let newContrast = contrast
-        const image = functions.isVideo(props.img) ? videoRef.current : ref.current
+        const image = props.img
         const sharpenOverlay = functions.isVideo(props.img) ? videoOverlayRef.current : (functions.isGIF(props.img) || gifData) ? gifOverlayRef.current : overlayRef.current
         const lightnessOverlay = functions.isVideo(props.img) ? videoLightnessRef.current : (functions.isGIF(props.img) || gifData) ? gifLightnessRef.current : lightnessRef.current
         if (!image || !sharpenOverlay || !lightnessOverlay) return
         if (sharpen !== 0) {
             const sharpenOpacity = sharpen / 5
             newContrast += 25 * sharpenOpacity
-            sharpenOverlay.style.backgroundImage = `url(${image.src})`
+            sharpenOverlay.style.backgroundImage = `url(${image})`
             sharpenOverlay.style.filter = `blur(4px) invert(1) contrast(75%)`
             sharpenOverlay.style.mixBlendMode = "overlay"
             sharpenOverlay.style.opacity = `${sharpenOpacity}`
@@ -738,17 +741,17 @@ const PostImage: React.FunctionComponent<Props> = (props) => {
         element.style.filter = `brightness(${brightness}%) contrast(${newContrast}%) hue-rotate(${hue - 180}deg) saturate(${saturation}%) blur(${blur}px)`
     }, [brightness, contrast, hue, saturation, lightness, blur, sharpen])
 
-    useEffect(() => {
+    const imagePixelate = () => {
         if (gifData || functions.isGIF(props.img) || functions.isVideo(props.img)) return
         if (!pixelateRef.current || !containerRef.current || !ref.current) return
         const pixelateCanvas = pixelateRef.current
         const ctx = pixelateCanvas.getContext("2d") as any
-        const imageWidth = ref.current.width 
-        const imageHeight = ref.current.height
+        const imageWidth = ref.current.clientWidth 
+        const imageHeight = ref.current.clientHeight
         const landscape = imageWidth >= imageHeight
         ctx.clearRect(0, 0, pixelateCanvas.width, pixelateCanvas.height)
-        pixelateCanvas.width = ref.current.width
-        pixelateCanvas.height = ref.current.height
+        pixelateCanvas.width = imageWidth
+        pixelateCanvas.height = imageHeight
         const pixelWidth = imageWidth / pixelate 
         const pixelHeight = imageHeight / pixelate
         if (pixelate !== 1) {
@@ -766,6 +769,18 @@ const PostImage: React.FunctionComponent<Props> = (props) => {
             pixelateCanvas.style.height = "none"
             pixelateCanvas.style.opacity = "0"
         }
+    }
+
+    useEffect(() => {
+        setTimeout(() => {
+            imagePixelate()
+        }, 50)
+    }, [imageLoaded])
+
+    useEffect(() => {
+        setTimeout(() => {
+            imagePixelate()
+        }, 50)
     }, [pixelate])
 
     const onLoad = (event: any) => {
@@ -799,8 +814,8 @@ const PostImage: React.FunctionComponent<Props> = (props) => {
         ctx.drawImage(frame, 0, 0, canvas.width, canvas.height)
         if (pixelate !== 1) {
             const pixelateCanvas = document.createElement("canvas")
-            const pixelWidth = frame.width / pixelate 
-            const pixelHeight = frame.height / pixelate
+            const pixelWidth = frame.clientWidth / pixelate 
+            const pixelHeight = frame.clientHeight / pixelate
             pixelateCanvas.width = pixelWidth 
             pixelateCanvas.height = pixelHeight
             const pixelateCtx = pixelateCanvas.getContext("2d") as any
@@ -1163,13 +1178,48 @@ const PostImage: React.FunctionComponent<Props> = (props) => {
         setEnableDrag(true)
     }
 
+    const loadImage = async () => {
+        if (!ref.current || !overlayRef.current || !lightnessRef.current || !dummyRef.current) return
+        let src = functions.isVideo(props.img) ? backFrame : props.img
+        if (functions.isImage(src)) {
+            src = await cryptoFunctions.decryptedLink(src)
+        }
+        const img = document.createElement("img")
+        img.src = src 
+        img.onload = () => {
+            if (!ref.current || !overlayRef.current || !lightnessRef.current || !dummyRef.current) return
+            setImageWidth(img.width)
+            setImageHeight(img.height)
+            setNaturalWidth(img.naturalWidth)
+            setNaturalHeight(img.naturalHeight)
+            const refCtx = ref.current.getContext("2d")
+            ref.current.width = img.width
+            ref.current.height = img.height
+            refCtx?.drawImage(img, 0, 0, img.width, img.height)
+            const overlayCtx = overlayRef.current.getContext("2d")
+            overlayRef.current.width = img.width
+            overlayRef.current.height = img.height
+            overlayCtx?.drawImage(img, 0, 0, img.width, img.height)
+            const lightnessCtx = lightnessRef.current.getContext("2d")
+            lightnessRef.current.width = img.width
+            lightnessRef.current.height = img.height
+            lightnessCtx?.drawImage(img, 0, 0, img.width, img.height)
+            const dummyCtx = dummyRef.current.getContext("2d")
+            dummyRef.current.width = img.width
+            dummyRef.current.height = img.height
+            dummyCtx?.drawImage(img, 0, 0, img.width, img.height)
+            setImageLoaded(true)
+            ref.current.style.display = "flex"
+        }
+    }
+
     return (
         <div className="post-image-container" style={{zoom: props.scale ? props.scale : 1}}>
             <div className="post-image-box" ref={containerRef}>
                 <div className="post-image-filters" ref={fullscreenRef}>
                     {functions.isVideo(props.img) ? 
                     <video loop muted disablePictureInPicture playsInline className="dummy-post-video" src={props.img}></video> :
-                    <img className="dummy-post-image" src={props.img}/>}
+                    <canvas className="dummy-post-image" ref={dummyRef}></canvas>/*<img className="dummy-post-image" src={props.img}/>*/}
                     <div className="encoding-overlay" style={{display: encodingOverlay ? "flex" : "none"}}>
                         <span className="encoding-overlay-text">{functions.isVideo(props.img) ? "Rendering Video..." : "Rendering GIF..."}</span>
                     </div>
@@ -1326,10 +1376,13 @@ const PostImage: React.FunctionComponent<Props> = (props) => {
                         <TransformWrapper disabled={disableZoom} ref={zoomRef} minScale={1} maxScale={4} onZoomStop={(ref) => setZoom(ref.state.scale)} wheel={{step: 0.1, touchPadDisabled: true}}
                         zoomAnimation={{size: 0, disabled: true}} alignmentAnimation={{disabled: true}} doubleClick={{mode: "reset", animationTime: 0}} panning={{disabled: zoom === 1}}>
                         <TransformComponent wrapperStyle={{pointerEvents: disableZoom ? "none" : "all"}}>
-                            <img className="post-lightness-overlay" ref={lightnessRef} src={props.img}/>
-                            <img className="post-sharpen-overlay" ref={overlayRef} src={props.img}/>
+                            <canvas className="post-lightness-overlay" ref={lightnessRef}></canvas>
+                            <canvas className="post-sharpen-overlay" ref={overlayRef}></canvas>
+                            {/* <img className="post-lightness-overlay" ref={lightnessRef} src={props.img}/> */}
+                            {/* <img className="post-sharpen-overlay" ref={overlayRef} src={props.img}/> */}
                             <canvas className="post-pixelate-canvas" ref={pixelateRef}></canvas>
-                            <img className="post-image" ref={ref} src={props.img} onLoad={(event) => onLoad(event)}/>
+                            <canvas className="post-image" ref={ref}></canvas>
+                            {/* <img className="post-image" ref={ref} src={props.img} onLoad={(event) => onLoad(event)}/> */}
                         </TransformComponent>
                         </TransformWrapper>
                     </div>

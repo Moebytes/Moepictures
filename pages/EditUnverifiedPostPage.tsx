@@ -151,11 +151,20 @@ const EditUnverifiedPostPage: React.FunctionComponent<Props> = (props) => {
             if (!artists[i]) artists[i] = {}
             artists[i].tag = tagCategories.artists[i].tag
             if (tagCategories.artists[i].image) {
-                const imageLink = functions.getUnverifiedTagLink("artist", tagCategories.artists[i].image)
-                artists[i].image = imageLink
-                const arrayBuffer = await fetch(imageLink).then((r) => r.arrayBuffer())
-                artists[i].ext = path.extname(imageLink).replace(".", "")
-                artists[i].bytes = Object.values(new Uint8Array(arrayBuffer))
+                try {
+                    const imageLink = functions.getTagLink("artist", tagCategories.artists[i].image)
+                    artists[i].image = imageLink
+                    const arrayBuffer = await fetch(imageLink).then((r) => r.arrayBuffer()).catch(() => null)
+                    if (!arrayBuffer) throw "bad"
+                    artists[i].ext = path.extname(imageLink).replace(".", "")
+                    artists[i].bytes = Object.values(new Uint8Array(arrayBuffer))
+                } catch {
+                    const imageLink = functions.getUnverifiedTagLink("artist", tagCategories.artists[i].image)
+                    artists[i].image = imageLink
+                    const arrayBuffer = await fetch(imageLink).then((r) => r.arrayBuffer())
+                    artists[i].ext = path.extname(imageLink).replace(".", "")
+                    artists[i].bytes = Object.values(new Uint8Array(arrayBuffer))
+                }
             }
         }
         setArtists(artists)
@@ -165,11 +174,20 @@ const EditUnverifiedPostPage: React.FunctionComponent<Props> = (props) => {
             if (!characters[i]) characters[i] = {}
             characters[i].tag = tagCategories.characters[i].tag
             if (tagCategories.characters[i].image) {
-                const imageLink = functions.getUnverifiedTagLink("character", tagCategories.characters[i].image)
-                characters[i].image = imageLink
-                const arrayBuffer = await fetch(imageLink).then((r) => r.arrayBuffer())
-                characters[i].ext = path.extname(imageLink).replace(".", "")
-                characters[i].bytes = Object.values(new Uint8Array(arrayBuffer))
+                try {
+                    const imageLink = functions.getTagLink("character", tagCategories.characters[i].image)
+                    characters[i].image = imageLink
+                    const arrayBuffer = await fetch(imageLink).then((r) => r.arrayBuffer()).catch(() => null)
+                    if (!arrayBuffer) throw "bad"
+                    characters[i].ext = path.extname(imageLink).replace(".", "")
+                    characters[i].bytes = Object.values(new Uint8Array(arrayBuffer))
+                } catch {
+                    const imageLink = functions.getUnverifiedTagLink("character", tagCategories.characters[i].image)
+                    characters[i].image = imageLink
+                    const arrayBuffer = await fetch(imageLink).then((r) => r.arrayBuffer())
+                    characters[i].ext = path.extname(imageLink).replace(".", "")
+                    characters[i].bytes = Object.values(new Uint8Array(arrayBuffer))
+                }
             }
         }
         setCharacters(characters)
@@ -179,11 +197,20 @@ const EditUnverifiedPostPage: React.FunctionComponent<Props> = (props) => {
             if (!series[i]) series[i] = {}
             series[i].tag = tagCategories.series[i].tag
             if (tagCategories.series[i].image) {
-                const imageLink = functions.getUnverifiedTagLink("series", tagCategories.series[i].image)
-                series[i].image = imageLink
-                const arrayBuffer = await fetch(imageLink).then((r) => r.arrayBuffer())
-                series[i].ext = path.extname(imageLink).replace(".", "")
-                series[i].bytes = Object.values(new Uint8Array(arrayBuffer))
+                try {
+                    const imageLink = functions.getTagLink("series", tagCategories.series[i].image)
+                    series[i].image = imageLink
+                    const arrayBuffer = await fetch(imageLink).then((r) => r.arrayBuffer()).catch(() => null)
+                    if (!arrayBuffer) throw "bad"
+                    series[i].ext = path.extname(imageLink).replace(".", "")
+                    series[i].bytes = Object.values(new Uint8Array(arrayBuffer))
+                } catch {
+                    const imageLink = functions.getUnverifiedTagLink("series", tagCategories.series[i].image)
+                    series[i].image = imageLink
+                    const arrayBuffer = await fetch(imageLink).then((r) => r.arrayBuffer())
+                    series[i].ext = path.extname(imageLink).replace(".", "")
+                    series[i].bytes = Object.values(new Uint8Array(arrayBuffer))
+                }
             }
         }
         setSeries(series)

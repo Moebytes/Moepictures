@@ -5,6 +5,7 @@ import NavBar from "../components/NavBar"
 import SideBar from "../components/SideBar"
 import Footer from "../components/Footer"
 import functions from "../structures/Functions"
+import cryptoFunctions from "../structures/CryptoFunctions"
 import DragAndDrop from "../components/DragAndDrop"
 import {HideNavbarContext, HideSidebarContext, RelativeContext, HideTitlebarContext, MobileContext, UserImgContext, SessionFlagContext,
 PostsContext, TagsContext, PostFlagContext, RedirectContext, SidebarTextContext, SessionContext, EnableDragContext} from "../Context"
@@ -38,7 +39,8 @@ const SetAvatarPage: React.FunctionComponent<Props> = (props) => {
     const [tagCategories, setTagCategories] = useState(null) as any
     const [crop, setCrop] = useState({unit: "%", x: 25, y: 25, width: 50, height: 50, aspect: 1})
     const [pixelCrop, setPixelCrop] = useState({unit: "px", x: 0, y: 0, width: 100, height: 100, aspect: 1})
-    const ref = useRef<HTMLImageElement>(null)
+    const [imageLoaded, setImageLoaded] = useState(false)
+    const ref = useRef<any>(null)
     const previewRef = useRef<HTMLCanvasElement>(null)
     const history = useHistory()
     const postID = Number(props?.match.params.id)
@@ -91,7 +93,7 @@ const SetAvatarPage: React.FunctionComponent<Props> = (props) => {
             let post = posts.find((p: any) => p.postID === postID)
             let $401Error = false
             try {
-                if (!post) post = await axios.get("/api/post", {params: {postID}, withCredentials: true, cancelToken: source.token}).then((r) => r.data)
+                if (!post) post = await axios.get("/api/post", {params: {postID}, withCredentials: true}).then((r) => r.data)
             } catch (e) {
                 if (String(e).includes("401")) $401Error = true
             }
@@ -159,8 +161,14 @@ const SetAvatarPage: React.FunctionComponent<Props> = (props) => {
         drawCanvas(image, canvas, pixelCrop)
     }, [pixelCrop])
 
-    const onImageLoad = (event: React.SyntheticEvent<HTMLImageElement>) => {
-        const {width, height} = event.currentTarget
+    const onImageLoad = (event?: React.SyntheticEvent<HTMLImageElement>) => {
+        if (!ref.current) return
+        let width = ref.current.clientWidth
+        let height = ref.current.clientHeight
+        if (event) {
+            width = event.currentTarget.width
+            height = event.currentTarget.height
+        }
         const newCrop = centerCrop(makeAspectCrop({unit: "%", width: 50} as any, 1, width, height), width, height)
         setCrop(newCrop as any)
         const x = newCrop.x / 100 * width
@@ -170,11 +178,27 @@ const SetAvatarPage: React.FunctionComponent<Props> = (props) => {
         setPixelCrop({unit: "px", x, y, width: pixelWidth, height: pixelHeight, aspect: 1})
     }
 
-    const drawCanvas = (image: HTMLImageElement, canvas: HTMLCanvasElement, crop: any)  => {
+    useEffect(() => {
+        if (imageLoaded) {
+            onImageLoad()
+        }
+    }, [imageLoaded])
+
+    const drawCanvas = (image: any, canvas: HTMLCanvasElement, crop: any)  => {
         const ctx = canvas.getContext("2d")
         if (!ctx) return
-        const scaleX = image.naturalWidth / image.width
-        const scaleY = image.naturalHeight / image.height
+        let naturalWidth = image.naturalWidth 
+        let naturalHeight = image.naturalHeight
+        let imageWidth = image.width 
+        let imageHeight = image.height
+        if (image instanceof HTMLCanvasElement) {
+            naturalWidth = image.width 
+            naturalHeight = image.height
+            imageWidth = image.clientWidth 
+            imageHeight = image.clientHeight
+        }
+        const scaleX = naturalWidth / imageWidth
+        const scaleY = naturalHeight / imageHeight
         const pixelRatio = window.devicePixelRatio
         canvas.width = Math.floor(crop.width * scaleX * pixelRatio)
         canvas.height = Math.floor(crop.height * scaleY * pixelRatio)
@@ -184,9 +208,33 @@ const SetAvatarPage: React.FunctionComponent<Props> = (props) => {
         const cropY = crop.y * scaleY
         ctx.save()
         ctx.translate(-cropX, -cropY)
-        ctx.drawImage(image, 0, 0, image.naturalWidth, image.naturalHeight, 0, 0, image.naturalWidth, image.naturalHeight)
+        ctx.drawImage(image, 0, 0, naturalWidth, naturalHeight, 0, 0, naturalWidth, naturalHeight)
         ctx.restore()
     }
+
+    const loadImage = async () => {
+        if (!ref.current) return
+        if (functions.isGIF(image)) return
+        let src = image
+        if (functions.isImage(src)) {
+            src = await cryptoFunctions.decryptedLink(src)
+        }
+        const img = document.createElement("img")
+        img.src = src 
+        img.onload = () => {
+            if (!ref.current) return
+            const refCtx = ref.current.getContext("2d")
+            ref.current.width = img.width
+            ref.current.height = img.height
+            refCtx?.drawImage(img, 0, 0, img.width, img.height)
+            setImageLoaded(true)
+        }
+    }
+
+    useEffect(() => {
+        setImageLoaded(false)
+        loadImage()
+    }, [image])
       
 
     const setAvatar = async () => {
@@ -251,7 +299,8 @@ const SetAvatarPage: React.FunctionComponent<Props> = (props) => {
                         <span className="set-avatar-title">Set Avatar</span>
                         <div className="set-avatar-container">
                             <ReactCrop className="set-avatar-crop" crop={crop as any} onChange={(crop, percentCrop) => {setCrop(percentCrop as any); setPixelCrop(crop as any); toggleScroll(false)}} keepSelection={true} minWidth={25} minHeight={25} aspect={1} onComplete={() => toggleScroll(true)}>
-                                <img className="set-avatar-image" src={image} onLoad={onImageLoad} ref={ref}/>
+                                {functions.isGIF(image) ? <img className="set-avatar-image" src={image} onLoad={onImageLoad} ref={ref}/> : 
+                                <canvas className="set-avatar-image" ref={ref}></canvas>}
                             </ReactCrop>
                             <div className="set-avatar-preview-container">
                                 <canvas className="set-avatar-preview" ref={previewRef}></canvas>

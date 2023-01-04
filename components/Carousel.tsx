@@ -1,7 +1,9 @@
 import React, {useContext, useEffect, useRef, useState, useReducer, useMemo} from "react"
-import {ThemeContext, EnableDragContext, MobileContext} from "../Context"
+import {ThemeContext, EnableDragContext, MobileContext, BrightnessContext, ContrastContext, HueContext, SaturationContext, LightnessContext,
+BlurContext, SharpenContext, PixelateContext} from "../Context"
 import {HashLink as Link} from "react-router-hash-link"
 import functions from "../structures/Functions"
+import cryptoFunctions from "../structures/CryptoFunctions"
 import arrowLeft from "../assets/purple/carousel-left.png"
 import arrowRight from "../assets/purple/carousel-right.png"
 import arrowLeftPurpleLight from "../assets/purple-light/carousel-left.png"
@@ -29,6 +31,14 @@ const Carousel: React.FunctionComponent<Props> = (props) => {
     const {theme, setTheme} = useContext(ThemeContext)
     const {enableDrag, setEnableDrag} = useContext(EnableDragContext)
     const {mobile, setMobile} = useContext(MobileContext)
+    const {brightness, setBrightness} = useContext(BrightnessContext)
+    const {contrast, setContrast} = useContext(ContrastContext)
+    const {hue, setHue} = useContext(HueContext)
+    const {saturation, setSaturation} = useContext(SaturationContext)
+    const {lightness, setLightness} = useContext(LightnessContext)
+    const {blur, setBlur} = useContext(BlurContext)
+    const {sharpen, setSharpen} = useContext(SharpenContext)
+    const {pixelate, setPixelate} = useContext(PixelateContext)
     const [lastPos, setLastPos] = useState(null) as any
     const [dragging, setDragging] = useState(false) as any
     const [imagesRef, setImagesRef] = useState(props.images.map(() => React.createRef())) as any
@@ -359,14 +369,43 @@ const Carousel: React.FunctionComponent<Props> = (props) => {
         }, 1000)
     }
 
+    const loadImages = async () => {
+        if (!imagesRef?.length) return
+        for (let i = 0; i < imagesRef.length; i++) {
+            const ref = imagesRef[i]
+            if (!ref.current) continue
+            let src = visibleImages[i]
+            if (functions.isVideo(src) || functions.isGIF(src)) continue
+            if (functions.isImage(src)) {
+                src = await cryptoFunctions.decryptedLink(src)
+            }
+            const imgElement = document.createElement("img")
+            imgElement.src = src
+            imgElement.onload = () => {
+                if (!ref.current) return
+                const rendered = functions.render(imgElement, brightness, contrast, hue, saturation, lightness, blur, sharpen, pixelate)
+                const refCtx = ref.current.getContext("2d")
+                ref.current.width = rendered.width
+                ref.current.height = rendered.height
+                refCtx?.drawImage(rendered, 0, 0, rendered.width, rendered.height)
+            }
+        }
+    }
+
+    useEffect(() => {
+        loadImages()
+    }, [visibleImages, imagesRef, brightness, contrast, hue, saturation, lightness, blur, sharpen, pixelate])
+
     const generateJSX = () => {
         const jsx = [] as any
         for (let i = 0; i < visibleImages.length; i++) {
             const img = visibleImages[i]
             if (functions.isVideo(img)) {
                 jsx.push(<video key={i} autoPlay muted loop disablePictureInPicture ref={imagesRef[i]} className="carousel-img" src={img} onClick={(event) => {props.set?.(img, i, event.ctrlKey || event.metaKey || event.button === 1); setActive(imagesRef[i])}} onAuxClick={(event) => {props.set?.(img, i, event.ctrlKey || event.metaKey || event.button === 1); setActive(imagesRef[i])}} style={props.height ? {height: `${props.height}px`} : {}}></video>)
-            } else {
+            } else if (functions.isGIF(img)) {
                 jsx.push(<img key={i} ref={imagesRef[i]} className="carousel-img" src={img} onClick={(event) => {props.set?.(img, i, event.ctrlKey || event.metaKey || event.button === 1); setActive(imagesRef[i])}} onAuxClick={(event) => {props.set?.(img, i, event.ctrlKey || event.metaKey || event.button === 1); setActive(imagesRef[i])}} style={props.height ? {height: `${props.height}px`} : {}}/>)
+            } else {
+                jsx.push(<canvas key={i} ref={imagesRef[i]} className="carousel-img" onClick={(event) => {props.set?.(img, i, event.ctrlKey || event.metaKey || event.button === 1); setActive(imagesRef[i])}} onAuxClick={(event) => {props.set?.(img, i, event.ctrlKey || event.metaKey || event.button === 1); setActive(imagesRef[i])}} style={props.height ? {height: `${props.height}px`} : {}}></canvas>)
             }
         }
         return jsx

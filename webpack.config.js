@@ -2,7 +2,8 @@ const HtmlWebpackPlugin = require("html-webpack-plugin")
 const ForkTsCheckerWebpackPlugin = require("fork-ts-checker-webpack-plugin")
 const MiniCssExtractPlugin = require("mini-css-extract-plugin")
 const TerserJSPlugin = require("terser-webpack-plugin")
-const OptimizeCSSAssetsPlugin = require("optimize-css-assets-webpack-plugin")
+const WebpackObfuscator = require("webpack-obfuscator")
+const MinimizerCSSPlugin = require("css-minimizer-webpack-plugin")
 const nodeExternals = require("webpack-node-externals")
 const webpack = require("webpack")
 const path = require("path")
@@ -15,18 +16,19 @@ module.exports = [
     target: "web",
     entry: "./index",
     mode: "production",
-    node: {__dirname: false, fs: "empty"},
+    node: {__dirname: false},
     output: {filename: "script.js", chunkFilename: "script.js", path: path.resolve(__dirname, "./dist")},
-    resolve: {extensions: [".js", ".jsx", ".ts", ".tsx"], alias: {"react-dom$": "react-dom/profiling", "scheduler/tracing": "scheduler/tracing-profiling"}},
+    resolve: {extensions: [".js", ".jsx", ".ts", ".tsx"], alias: {"react-dom$": "react-dom/profiling", "scheduler/tracing": "scheduler/tracing-profiling"}, 
+    fallback: {fs: false, path: require.resolve("path-browserify"), crypto: require.resolve("crypto-browserify"), stream: require.resolve("stream-browserify"), assert: require.resolve("assert/"), zlib: require.resolve("browserify-zlib")}},
     performance: {hints: false},
-    optimization: {minimize: true, minimizer: [new TerserJSPlugin(), new OptimizeCSSAssetsPlugin()], namedModules: true},
+    optimization: {minimize: true, minimizer: [new TerserJSPlugin({extractComments: false}), new WebpackObfuscator(), new MinimizerCSSPlugin()], moduleIds: "named"},
     module: {
       rules: [
         {test: /\.(jpe?g|png|gif|webp|svg|mp3|wav|mp4|webm|ttf|otf)$/, exclude: webExclude, use: [{loader: "file-loader", options: {name: "[path][name].[ext]"}}]},
         {test: /\.(txt|sql)$/, exclude: webExclude, use: ["raw-loader"]},
-        {test: /\.html$/, exclude: webExclude, use: [{loader: "html-loader", query: {minimize: false}}]},
-        {test: /\.css$/, exclude: webExclude, use: [{loader: MiniCssExtractPlugin.loader, options: {hmr: true}}, "css-loader"]},
-        {test: /\.less$/, exclude: webExclude, use: [{loader: MiniCssExtractPlugin.loader, options: {hmr: true}}, "css-loader", {loader: "less-loader"}]},
+        {test: /\.html$/, exclude: webExclude, use: [{loader: "html-loader", options: {sources: false, minimize: false}}]},
+        {test: /\.css$/, exclude: webExclude, use: [{loader: MiniCssExtractPlugin.loader}, "css-loader"]},
+        {test: /\.less$/, exclude: webExclude, use: [{loader: MiniCssExtractPlugin.loader}, "css-loader", {loader: "less-loader"}]},
         {test: /\.(tsx?|jsx?)$/, exclude: webExclude, use: [{loader: "ts-loader", options: {transpileOnly: true}}]}
       ]
     },
@@ -34,7 +36,6 @@ module.exports = [
       new Dotenv(),
       new ForkTsCheckerWebpackPlugin({typescript: {memoryLimit: 8192}}),
       new webpack.HotModuleReplacementPlugin(),
-      new webpack.HashedModuleIdsPlugin(),
       new MiniCssExtractPlugin({
         filename: "styles.css",
         chunkFilename: "styles.css"
@@ -42,6 +43,10 @@ module.exports = [
       new HtmlWebpackPlugin({
         template: path.resolve(__dirname, "./index.html"),
         minify: false
+      }),
+      new webpack.ProvidePlugin({
+        process: "process/browser",
+        Buffer: ["buffer", "Buffer"],
       })
     ]
   }, 
@@ -52,16 +57,17 @@ module.exports = [
     node: {__dirname: false},
     externals: [nodeExternals()],
     output: {filename: "server.js", chunkFilename: "server.js", path: path.resolve(__dirname, "./dist")},
-    resolve: {extensions: [".js", ".jsx", ".ts", ".tsx"]},
+    resolve: {extensions: [".js", ".jsx", ".ts", ".tsx"], 
+    fallback: {zlib: require.resolve("browserify-zlib")}},
     performance: {hints: false},
-    optimization: {minimize: false, minimizer: [new TerserJSPlugin()], namedModules: true},
+    optimization: {minimize: false, minimizer: [new TerserJSPlugin({extractComments: false}), new WebpackObfuscator()], moduleIds: "named"},
     module: {
       rules: [
         {test: /\.(jpe?g|png|webp|gif|svg|mp3|wav|mp4|webm|ttf|otf)$/, exclude, use: [{loader: "file-loader", options: {name: "[path][name].[ext]"}}]},
         {test: /\.(txt|sql)$/, exclude, use: ["raw-loader"]},
-        {test: /\.html$/, exclude, use: [{loader: "html-loader", query: {minimize: false}}]},
-        {test: /\.css$/, exclude, use: [{loader: MiniCssExtractPlugin.loader, options: {hmr: true}}, "css-loader"]},
-        {test: /\.less$/, exclude, use: [{loader: MiniCssExtractPlugin.loader, options: {hmr: true}}, "css-loader", {loader: "less-loader"}]},
+        {test: /\.html$/, exclude, use: [{loader: "html-loader", options: {minimize: false}}]},
+        {test: /\.css$/, exclude, use: [{loader: MiniCssExtractPlugin.loader}, "css-loader"]},
+        {test: /\.less$/, exclude, use: [{loader: MiniCssExtractPlugin.loader}, "css-loader", {loader: "less-loader"}]},
         {test: /\.(tsx?|jsx?)$/, exclude, use: [{loader: "ts-loader", options: {transpileOnly: true}}]}
       ]
     },
@@ -69,7 +75,6 @@ module.exports = [
       new Dotenv(),
       new ForkTsCheckerWebpackPlugin(),
       new webpack.HotModuleReplacementPlugin(),
-      new webpack.HashedModuleIdsPlugin(),
       new MiniCssExtractPlugin({
         filename: "styles.css",
         chunkFilename: "styles.css"

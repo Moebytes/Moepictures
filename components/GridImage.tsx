@@ -9,6 +9,7 @@ import gifFrames from "gif-frames"
 import JSZip from "jszip"
 import path from "path"
 import functions from "../structures/Functions"
+import cryptoFunctions from "../structures/CryptoFunctions"
 import "./styles/gridimage.less"
 import axios from "axios"
 
@@ -40,9 +41,9 @@ const GridImage: React.FunctionComponent<Props> = (props) => {
     const {mobile, setMobile} = useContext(MobileContext)
     const containerRef = useRef<HTMLDivElement>(null)
     const pixelateRef = useRef<HTMLCanvasElement>(null)
-    const overlayRef = useRef<HTMLImageElement>(null)
-    const lightnessRef = useRef<HTMLImageElement>(null)
-    const ref = useRef<HTMLImageElement>(null)
+    const overlayRef = useRef<HTMLCanvasElement>(null)
+    const lightnessRef = useRef<HTMLCanvasElement>(null)
+    const ref = useRef<HTMLCanvasElement>(null)
     const videoRef = useRef<HTMLVideoElement>(null)
     const imageFiltersRef = useRef<HTMLDivElement>(null)
     const videoOverlayRef = useRef<HTMLCanvasElement>(null)
@@ -97,7 +98,25 @@ const GridImage: React.FunctionComponent<Props> = (props) => {
             setImg(base64)
         }
         // base64Img()
+        loadImage()
     }, [props.img])
+
+    const resizePixelateCanvas = () => {
+        if (!pixelateRef.current || !ref.current) return
+        pixelateRef.current.width = ref.current.clientWidth
+        pixelateRef.current.height = ref.current.clientHeight
+    }
+
+    useEffect(() => {
+        let observer = null as any
+        if (functions.isImage(props.img) || functions.isGIF(props.img) || functions.isWebP(props.img)) {
+            observer = new ResizeObserver(resizePixelateCanvas)
+            observer.observe(ref.current!)
+        }
+        return () => {
+            observer?.disconnect()
+        }
+    }, [])
 
     useEffect(() => {
         const parseGIF = async () => {
@@ -178,7 +197,11 @@ const GridImage: React.FunctionComponent<Props> = (props) => {
                 if (videoRef.current) videoRef.current.playbackRate = speed 
                 const pixelateCanvas = pixelateRef.current
                 if (gifData) {
-                    if (pixelateCanvas) pixelateCanvas.style.opacity = "1"
+                    if (pixelateCanvas && ref.current) {
+                        pixelateCanvas.style.opacity = "1"
+                        pixelateCanvas.width = ref.current.clientWidth
+                        pixelateCanvas.height = ref.current.clientHeight
+                    }
                 } else if (functions.isVideo(props.img)) {
                     if (pixelateCanvas) pixelateCanvas.style.opacity = "1"
                 }
@@ -431,14 +454,15 @@ const GridImage: React.FunctionComponent<Props> = (props) => {
         if (!imageFiltersRef.current) return
         const element = imageFiltersRef.current
         let newContrast = contrast
-        const image = functions.isVideo(props.img) && !mobile ? videoRef.current : ref.current
+        let image = props.img
+        if (functions.isVideo(props.img) && mobile && backFrame) image = backFrame
         const sharpenOverlay = overlayRef.current
         const lightnessOverlay = lightnessRef.current
         if (!image || !sharpenOverlay || !lightnessOverlay) return
         if (sharpen !== 0) {
             const sharpenOpacity = sharpen / 5
             newContrast += 25 * sharpenOpacity
-            sharpenOverlay.style.backgroundImage = `url(${image.src})`
+            sharpenOverlay.style.backgroundImage = `url(${image})`
             sharpenOverlay.style.filter = `blur(4px) invert(1) contrast(75%)`
             sharpenOverlay.style.mixBlendMode = "overlay"
             sharpenOverlay.style.opacity = `${sharpenOpacity}`
@@ -464,8 +488,8 @@ const GridImage: React.FunctionComponent<Props> = (props) => {
         if (!pixelateRef.current) return
         const pixelateCanvas = pixelateRef.current
         const ctx = pixelateCanvas.getContext("2d") as any
-        const imageWidth = functions.isVideo(props.img) && !mobile ? videoRef.current!.clientWidth : ref.current!.width 
-        const imageHeight = functions.isVideo(props.img) && !mobile ? videoRef.current!.clientHeight : ref.current!.height
+        const imageWidth = functions.isVideo(props.img) && !mobile ? videoRef.current!.clientWidth : ref.current!.clientWidth 
+        const imageHeight = functions.isVideo(props.img) && !mobile ? videoRef.current!.clientHeight : ref.current!.clientHeight
         const landscape = imageWidth >= imageHeight
         ctx.clearRect(0, 0, pixelateCanvas.width, pixelateCanvas.height)
         pixelateCanvas.width = imageWidth
@@ -493,7 +517,7 @@ const GridImage: React.FunctionComponent<Props> = (props) => {
         setTimeout(() => {
             imagePixelate()
         }, 50)
-    }, [])
+    }, [imageLoaded])
 
     useEffect(() => {
         setTimeout(() => {
@@ -559,8 +583,8 @@ const GridImage: React.FunctionComponent<Props> = (props) => {
         ctx.drawImage(frame, 0, 0, canvas.width, canvas.height)
         if (pixelate !== 1) {
             const pixelateCanvas = document.createElement("canvas")
-            const pixelWidth = frame.width / pixelate 
-            const pixelHeight = frame.height / pixelate
+            const pixelWidth = frame.clientWidth / pixelate 
+            const pixelHeight = frame.clientHeight / pixelate
             pixelateCanvas.width = pixelWidth 
             pixelateCanvas.height = pixelHeight
             const pixelateCtx = pixelateCanvas.getContext("2d") as any
@@ -671,18 +695,52 @@ const GridImage: React.FunctionComponent<Props> = (props) => {
         }
     }
 
+    const loadImage = async () => {
+        if (!ref.current || !overlayRef.current || !lightnessRef.current) return
+        let src = functions.isVideo(props.img) ? backFrame : props.img
+        if (functions.isImage(src)) {
+            src = await cryptoFunctions.decryptedLink(src)
+        }
+        const img = document.createElement("img")
+        img.src = src 
+        img.onload = () => {
+            if (!ref.current || !overlayRef.current || !lightnessRef.current) return
+            setImageWidth(img.width)
+            setImageHeight(img.height)
+            setNaturalWidth(img.naturalWidth)
+            setNaturalHeight(img.naturalHeight)
+            const refCtx = ref.current.getContext("2d")
+            ref.current.width = img.width
+            ref.current.height = img.height
+            refCtx?.drawImage(img, 0, 0, img.width, img.height)
+            const overlayCtx = overlayRef.current.getContext("2d")
+            overlayRef.current.width = img.width
+            overlayRef.current.height = img.height
+            overlayCtx?.drawImage(img, 0, 0, img.width, img.height)
+            const lightnessCtx = lightnessRef.current.getContext("2d")
+            lightnessRef.current.width = img.width
+            lightnessRef.current.height = img.height
+            lightnessCtx?.drawImage(img, 0, 0, img.width, img.height)
+            setImageLoaded(true)
+            ref.current.style.opacity = "1"
+        }
+    }
+
 
     return (
         <div style={{opacity: visible ? "1" : "0", transition: "opacity 0.1s"}} className="image-box" id={String(props.id)} ref={containerRef} onClick={onClick} onAuxClick={onClick} onMouseDown={mouseDown} onMouseUp={mouseUp} onMouseMove={mouseMove}>
             <div className="image-filters" ref={imageFiltersRef} onMouseMove={(event) => imageAnimation(event)} onMouseLeave={() => cancelImageAnimation()}>
                 {functions.isVideo(props.img) && !mobile ? <video autoPlay loop muted disablePictureInPicture playsInline className="dummy-video" ref={videoRef} src={props.img}></video> : null}   
-                <img className="lightness-overlay" ref={lightnessRef} src={functions.isVideo(props.img) ? backFrame : props.img}/>
-                <img className="sharpen-overlay" ref={overlayRef} src={functions.isVideo(props.img) ? backFrame : props.img}/>
+                <canvas className="lightness-overlay" ref={lightnessRef}></canvas>
+                <canvas className="sharpen-overlay" ref={overlayRef}></canvas>
+                {/* <img className="lightness-overlay" ref={lightnessRef} src={functions.isVideo(props.img) ? backFrame : props.img}/> */}
+                {/* <img className="sharpen-overlay" ref={overlayRef} src={functions.isVideo(props.img) ? backFrame : props.img}/> */}
                 {functions.isVideo(props.img) && !mobile ? <canvas className="sharpen-overlay" ref={videoOverlayRef}></canvas> : null}
                 <canvas className="pixelate-canvas" ref={pixelateRef}></canvas>
                 {functions.isVideo(props.img) && !mobile ? <>
                 <video autoPlay loop muted disablePictureInPicture playsInline className="video" ref={videoRef} src={props.img} onLoadedData={(event) => onLoad(event)}></video></> :
-                <img className="image" ref={ref} src={functions.isVideo(props.img) ? backFrame : img} onLoad={(event) => onLoad(event)}/>}
+                /*<img className="image" ref={ref} src={functions.isVideo(props.img) ? backFrame : props.img} onLoad={(event) => onLoad(event)}/>*/
+                <canvas className="image" ref={ref}></canvas>}
                 </div>
         </div>
     )

@@ -12,6 +12,7 @@ import gibberish from "./Gibberish"
 import gifFrames from "gif-frames"
 import {JsWebm} from "jswebm"
 import localforage from "localforage"
+import crypto from "crypto"
 
 let newScrollY = 0
 let lastScrollTop = 0
@@ -1408,7 +1409,79 @@ export default class Functions {
             "tapris-chisaki-sugarbell": "tapris-(gabriel-dropout)",
             "platelet-(hataraku-saibou)": "platelet-(cells-at-work)",
             "megumin": "megumin-(konosuba)",
-            "tohru-(maidragon)": "tohru-(dragon-maid)"
+            "tohru-(maidragon)": "tohru-(dragon-maid)",
+            "fhilippe124": "fhilippe",
+            "setoman": "setmen",
+            "aruka@2nichimehigashishi-20a": "aruka",
+            "arlenetachibana": "arlene",
+            "ratsuchi": "racchi",
+            "sakuraani": "sakura-ani",
+            "shibainu-niki": "shibainuniki",
+            "kusakashi": "yukki",
+            "捺": "natsu",
+            "tsubasatsubasa": "tsubasa",
+            "mitsumurazaja": "mimurazaja",
+            "zaja": "mimurazaja",
+            "nogitakayoshimi": "nogi-takayoshi",
+            "kyūkon": "usanagi",
+            "azumiichiju": "kazukiadumi",
+            "2drr/diru@fanbox": "2drr",
+            "fujichoko(fujiwara)": "fuzichoco",
+            "naruyashin@skebboshūchū": "naruyashin",
+            "nanamiyarin@oshigotoboshūchū": "bitter-crown"
         }
+    }
+
+    public static cleanTag = (tag: string) => {
+        return tag.normalize("NFD").replace(/[^a-z0-9_\-()><&!#@]/gi, "").replaceAll("_", "-")
+    }
+
+    public static render = (image: HTMLImageElement, brightness: number, contrast: number,
+        hue: number, saturation: number, lightness: number, blur: number, sharpen: number, pixelate: number) => {
+        const canvas = document.createElement("canvas") as HTMLCanvasElement
+        canvas.width = image.naturalWidth
+        canvas.height = image.naturalHeight
+        const ctx = canvas.getContext("2d") as any
+        let newContrast = contrast
+        ctx.filter = `brightness(${brightness}%) contrast(${newContrast}%) hue-rotate(${hue - 180}deg) saturate(${saturation}%) blur(${blur}px)`
+        ctx.drawImage(image, 0, 0, canvas.width, canvas.height)
+        if (pixelate !== 1) {
+            const pixelateCanvas = document.createElement("canvas")
+            const pixelWidth = image.width / pixelate 
+            const pixelHeight = image.height / pixelate
+            pixelateCanvas.width = pixelWidth 
+            pixelateCanvas.height = pixelHeight
+            const pixelateCtx = pixelateCanvas.getContext("2d") as any
+            pixelateCtx.imageSmoothingEnabled = false
+            pixelateCtx.drawImage(image, 0, 0, pixelWidth, pixelHeight)
+            ctx.imageSmoothingEnabled = false
+            ctx.drawImage(pixelateCanvas, 0, 0, canvas.width, canvas.height)
+        }
+        if (sharpen !== 0) {
+            const sharpnessCanvas = document.createElement("canvas")
+            sharpnessCanvas.width = image.naturalWidth
+            sharpnessCanvas.height = image.naturalHeight
+            const sharpnessCtx = sharpnessCanvas.getContext("2d")
+            sharpnessCtx?.drawImage(image, 0, 0, sharpnessCanvas.width, sharpnessCanvas.height)
+            const sharpenOpacity = sharpen / 5
+            newContrast += 25 * sharpenOpacity
+            const filter = `blur(4px) invert(1) contrast(75%)`
+            ctx.filter = filter 
+            ctx.globalAlpha = sharpenOpacity
+            ctx.globalCompositeOperation = "overlay"
+            ctx.drawImage(sharpnessCanvas, 0, 0, canvas.width, canvas.height)
+        }
+        if (lightness !== 100) {
+            const lightnessCanvas = document.createElement("canvas")
+            lightnessCanvas.width = image.naturalWidth
+            lightnessCanvas.height = image.naturalHeight
+            const lightnessCtx = lightnessCanvas.getContext("2d")
+            lightnessCtx?.drawImage(image, 0, 0, lightnessCanvas.width, lightnessCanvas.height)
+            const filter = lightness < 100 ? "brightness(0)" : "brightness(0) invert(1)"
+            ctx.filter = filter
+            ctx.globalAlpha = `${Math.abs((lightness - 100) / 100)}`
+            ctx.drawImage(lightnessCanvas, 0, 0, canvas.width, canvas.height)
+        }
+        return canvas
     }
 }

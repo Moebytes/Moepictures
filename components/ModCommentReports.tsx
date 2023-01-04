@@ -117,7 +117,7 @@ const ModCommentReports: React.FunctionComponent = (props) => {
             jsx.push(
                 <div className="mod-post" onMouseEnter={() =>setHover(true)} onMouseLeave={() => setHover(false)}>
                     <div className="mod-post-img-container">
-                        <img className="mod-post-img" src={img} onClick={() => history.push(`/post/${request.postID}`)}/>
+                        <img className="mod-post-img" src={img} onClick={() => history.push(`/post/${request.postID}`)} onAuxClick={() => window.open(`/post/${request.postID}`, "_blank")}/>
                     </div>
                     <div className="mod-post-text-column">
                         <span className="mod-post-link" onClick={() => history.push(`/user/${request.reporter}`)}>Requester: {functions.toProperCase(request.reporter || "Deleted")}</span>
