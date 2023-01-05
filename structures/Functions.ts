@@ -12,7 +12,7 @@ import gibberish from "./Gibberish"
 import gifFrames from "gif-frames"
 import {JsWebm} from "jswebm"
 import localforage from "localforage"
-import crypto from "crypto"
+import cryptoFunctions from "./CryptoFunctions"
 
 let newScrollY = 0
 let lastScrollTop = 0
@@ -1122,7 +1122,7 @@ export default class Functions {
     }
 
     public static imageDimensions = async (image: string) => {
-        return new Promise<any>((resolve) => {
+        return new Promise<any>(async (resolve) => {
             if (Functions.isVideo(image)) {
                 const video = document.createElement("video")
                 video.addEventListener("loadedmetadata", async () => {
@@ -1150,7 +1150,11 @@ export default class Functions {
                         resolve({width, height, size: 0})
                     }
                 })
-                img.src = image
+                if (Functions.isImage(image)) {
+                    img.src = await cryptoFunctions.decryptedLink(image)
+                } else {
+                    img.src = image
+                }
             }
         })
     }
