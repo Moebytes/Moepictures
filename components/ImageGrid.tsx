@@ -123,7 +123,6 @@ const ImageGrid: React.FunctionComponent<Props> = (props) => {
         if (searchFlag) searchPosts()
         if (!scrollY) {
             setTimeout(() => {
-                if (!scroll) return
                 const elements = document.querySelectorAll(".sortbar-text") as any
                 const img = document.querySelector(".image")
                 if (!img && !elements?.[0]) {
