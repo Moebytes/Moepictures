@@ -92,7 +92,10 @@ const TitleBar: React.FunctionComponent<Props> = (props) => {
     useEffect(() => {
         if (mobile) {
             setHideTitlebar(false)
+            setHideMobileNavbar(true)
             setRelative(false)
+        } else {
+            setMobileScrolling(false)
         }
     }, [mobile])
 

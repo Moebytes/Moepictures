@@ -1,4 +1,4 @@
-import React, {useContext, useState, useEffect} from "react"
+import React, {useContext, useState, useEffect, useReducer} from "react"
 import {HashLink as Link} from "react-router-hash-link"
 import {useHistory} from "react-router-dom"
 import favicon from "../assets/purple/favicon.png"
@@ -32,6 +32,7 @@ RelativeContext, HideTitlebarContext, SearchContext, SearchFlagContext, SessionC
 import "./styles/navbar.less"
 
 const NavBar: React.FunctionComponent = (props) => {
+    const [ignored, forceUpdate] = useReducer(x => x + 1, 0)
     const {theme, setTheme} = useContext(ThemeContext)
     const {hideNavbar, setHideNavbar} = useContext(HideNavbarContext)
     const {hideTitlebar, setHideTitlebar} = useContext(HideTitlebarContext)
@@ -67,7 +68,7 @@ const NavBar: React.FunctionComponent = (props) => {
     useEffect(() => {
         const scrollHandler = () => {
             if (hideTitlebar) {
-                if (window.scrollY < 77) {
+                if (window.scrollY < functions.titlebarHeight()) {
                     setShowMiniTitle(false)
                 } else {
                     setShowMiniTitle(true)
@@ -86,7 +87,7 @@ const NavBar: React.FunctionComponent = (props) => {
         if (!hideTitlebar) {
                 setShowMiniTitle(false)
         } else {
-            if (window.scrollY > 77) {
+            if (window.scrollY > functions.titlebarHeight()) {
                 setShowMiniTitle(true)
             }
         }
@@ -176,7 +177,7 @@ const NavBar: React.FunctionComponent = (props) => {
                 let marginR = showMiniTitle ? "20px" : "50px"
                 setMarginR(marginR)
             } else {
-                let marginR = showMiniTitle ? "45px" : "70px"
+                let marginR = showMiniTitle ? "45px" : "60px"
                 setMarginR(marginR)
             }
         }
@@ -229,9 +230,13 @@ const NavBar: React.FunctionComponent = (props) => {
         }
     }
 
+    useEffect(() => {
+        if (mobile) setTimeout(() => forceUpdate(), 50)
+    }, [mobile])
+
     if (mobile) {
         const getMobileMargin = () => {
-            return hideMobileNavbar ? `-${document.querySelector(".mobile-navbar")?.clientHeight}px` : "0px"
+            return hideMobileNavbar ? `-${document.querySelector(".mobile-navbar")?.clientHeight || 500}px` : "0px"
         }
         return (
             <div className={`mobile-navbar ${hideMobileNavbar ? "hide-mobile-navbar" : ""}`} style={{marginTop: getMobileMargin()}}>

@@ -178,7 +178,7 @@ const App: React.FunctionComponent = (props) => {
             if (window.scrollY === 0) return setHideSortbar(false)
             if (sidebarHover) return setHideSortbar(true)
             const sortbar = document.querySelector(".sortbar")
-            const amt = hideTitlebar ? (sortbar ? (35 + 40) : 35) : (77 + 35 + 40)
+            const amt = hideTitlebar ? (sortbar ? (functions.navbarHeight() + functions.sortbarHeight()) : functions.navbarHeight()) : (functions.titlebarHeight() + functions.navbarHeight() + functions.sortbarHeight())
             if (event.clientY < amt) return setHideSortbar(false)
             return setHideSortbar(true)
         }

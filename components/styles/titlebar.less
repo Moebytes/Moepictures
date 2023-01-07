@@ -6,14 +6,14 @@
     z-index: 2000;
     display: flex;
     width: 100%;
-    height: 77px;
+    height: @title-bar-height;
     background-color: var(--titlebarBG);
     transition: top 0.1s, background-color 0s;
 }
 
 .hide-titlebar {
     transition: top 0.7s, background-color 0s;
-    top: -77px;
+    top: -@title-bar-height;
 }
 
 .titlebar-relative {
@@ -109,7 +109,7 @@
 .hide-mobile-titlebar {
     transition: transform 0.1s background-color 0s;
     position: sticky;
-    transform: translateY(-77px);
+    transform: translateY(-@title-bar-height);
 }
 
 @media screen and (max-width: 500px) {

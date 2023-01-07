@@ -2,7 +2,7 @@ import React, {useContext, useEffect, useState, useRef, useReducer} from "react"
 import {useHistory} from "react-router-dom"
 import {HashLink as Link} from "react-router-hash-link"
 import Slider from "react-slider"
-import {ThemeContext, HideSidebarContext, HideNavbarContext, HideSortbarContext, ActiveDropdownContext, 
+import {ThemeContext, HideSidebarContext, HideNavbarContext, HideSortbarContext, ActiveDropdownContext, ScrollContext,
 SizeTypeContext, BrightnessContext, ContrastContext, HueContext, SaturationContext, LightnessContext,
 BlurContext, SharpenContext, EnableDragContext, FilterDropActiveContext, SquareContext, PixelateContext,
 ShowDownloadDialogContext, HideTitlebarContext, ImageTypeContext, RestrictTypeContext, SortTypeContext,
@@ -73,6 +73,10 @@ import speedIcon from "../assets/purple/speed.png"
 import speedIconMagenta from "../assets/magenta/speed.png"
 import reverseIcon from "../assets/purple/reverse.png"
 import reverseIconMagenta from "../assets/magenta/reverse.png"
+import scrollIcon from "../assets/purple/scroll.png"
+import scrollMagentaIcon from "../assets/magenta/scroll.png"
+import pageIcon from "../assets/purple/page.png"
+import pageMagentaIcon from "../assets/magenta/page.png"
 import functions from "../structures/Functions"
 import permissions from "../structures/Permissions"
 import "./styles/sortbar.less"
@@ -109,6 +113,7 @@ const SortBar: React.FunctionComponent = (props) => {
     const {mobileScrolling, setMobileScrolling} = useContext(MobileScrollingContext)
     const {relative, setRelative} = useContext(RelativeContext)
     const {session, setSession} = useContext(SessionContext)
+    const {scroll, setScroll} = useContext(ScrollContext)
     const [dropLeft, setDropLeft] = useState(0)
     const [dropTop, setDropTop] = useState(0)
     const imageRef = useRef(null) as any
@@ -126,11 +131,15 @@ const SortBar: React.FunctionComponent = (props) => {
         const savedStyle = localStorage.getItem("style")
         const savedSize = localStorage.getItem("size")
         const savedSort = localStorage.getItem("sort")
+        const savedSquare = localStorage.getItem("square")
+        const savedScroll = localStorage.getItem("scroll")
         if (savedType) setImageType(savedType)
         if (savedRestrict) setRestrictType(savedRestrict)
         if (savedStyle) setStyleType(savedStyle)
         if (savedSize) setSizeType(savedSize)
         if (savedSort) setSortType(savedSort)
+        if (savedSquare) setSquare(savedSquare === "true")
+        if (savedScroll) setScroll(savedScroll === "true")
 
         const savedBrightness = localStorage.getItem("brightness")
         const savedContrast = localStorage.getItem("contrast")
@@ -337,6 +346,16 @@ const SortBar: React.FunctionComponent = (props) => {
     const getSquare = () => {
         if (theme.includes("magenta")) return squareMagentaIcon
         return squareIcon
+    }
+
+    const getScroll = () => {
+        if (theme.includes("magenta")) return scrollMagentaIcon
+        return scrollIcon
+    }
+
+    const getPage = () => {
+        if (theme.includes("magenta")) return pageMagentaIcon
+        return pageIcon
     }
 
     const getPixelate = () => {
@@ -673,6 +692,14 @@ const SortBar: React.FunctionComponent = (props) => {
         })
     }
 
+    const toggleScroll = () => {
+        setScroll((prev: boolean) => {
+            const newValue = !prev
+            localStorage.setItem("scroll", `${newValue}`)
+            return newValue
+        })
+    }
+
     let sortBarJSX = () => {
         if (mobile) return (
             <div className={`mobile-sortbar ${relative ? "mobile-sortbar-relative" : ""} ${mobileScrolling ? "hide-mobile-sortbar" : ""}`}>
@@ -718,6 +745,10 @@ const SortBar: React.FunctionComponent = (props) => {
                     {getStyleJSX()}
                 </div>
                 <div className="sortbar-right">
+                    <div className="sortbar-item" onClick={() => toggleScroll()}>
+                        <img className="sortbar-img" src={scroll ? getScroll() : getPage()}/>
+                        <span className="sortbar-text">{scroll ? "Scrolling" : "Pages"}</span>
+                    </div>
                     <div className="sortbar-item" onClick={() => toggleSquare()}>
                         <img className="sortbar-img" src={getSquare()}/>
                     </div>

@@ -10,6 +10,8 @@ export const ActiveDropdownContext = React.createContext<any>(null)
 export const SizeTypeContext = React.createContext<any>(null)
 export const FilterDropActiveContext = React.createContext<any>(null)
 export const SquareContext = React.createContext<any>(null)
+export const ScrollContext = React.createContext<any>(null)
+export const PageContext = React.createContext<any>(null)
 export const BrightnessContext = React.createContext<any>(null)
 export const ContrastContext = React.createContext<any>(null)
 export const HueContext = React.createContext<any>(null)
@@ -93,6 +95,8 @@ const Context: React.FunctionComponent = (props) => {
     const [sharpen, setSharpen] = useState(0)
     const [pixelate, setPixelate] = useState(1)
     const [square, setSquare] = useState(false)
+    const [scroll, setScroll] = useState(false)
+    const [page, setPage] = useState(1)
     const [showDownloadDialog, setShowDownloadDialog] = useState(false)
     const [postAmount, setPostAmount] = useState(0)
     const [downloadURLs, setDownloadURLs] = useState([])
@@ -154,6 +158,8 @@ const Context: React.FunctionComponent = (props) => {
     const [quickEditUnverified, setQuickEditUnverified] = useState(false)
 return (
     <>
+        <PageContext.Provider value={{page, setPage}}>
+        <ScrollContext.Provider value={{scroll, setScroll}}>
         <EditTagFandomContext.Provider value={{editTagFandom, setEditTagFandom}}>
         <EditTagWebsiteContext.Provider value={{editTagWebsite, setEditTagWebsite}}>
         <EditTagTwitterContext.Provider value={{editTagTwitter, setEditTagTwitter}}>
@@ -291,6 +297,8 @@ return (
         </EditTagTwitterContext.Provider>
         </EditTagWebsiteContext.Provider>
         </EditTagFandomContext.Provider>
+        </ScrollContext.Provider>
+        </PageContext.Provider>
     </>
     )
 }

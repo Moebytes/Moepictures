@@ -2,12 +2,12 @@
 
 .navbar {
     position: sticky;
-    top: 77px;
+    top: @title-bar-height;
     z-index: 1500;
     display: flex;
     background-color: var(--navbarBG);
     width: 100%;
-    height: 35px;
+    height: @nav-bar-height;
     align-items: center;
     transition: all 0.35s,  background-color 0s;
 }
@@ -18,7 +18,7 @@
 
 .hide-navbar {
     transition: all 0.5s;
-    transform: translateY(-35px);
+    transform: translateY(-@nav-bar-height);
 }
 
 .navbar-relative {
@@ -142,7 +142,7 @@
 
 .nav-mini-img {
     width: auto;
-    height: 30px;
+    height: 28px;
     margin-left: 5px;
 }
 
@@ -170,7 +170,7 @@
 
 .mobile-navbar {
     position: sticky;
-    top: 77px;
+    top: @title-bar-height;
     z-index: 1500;
     display: flex;
     background-color: var(--navbarBG);

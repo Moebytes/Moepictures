@@ -1086,8 +1086,8 @@ const PostImage: React.FunctionComponent<Props> = (props) => {
                 // ignore
             }
             if (videoRef.current) {
-                videoRef.current.style.maxWidth = "calc(100vw - 230px - 70px)"
-                videoRef.current.style.maxHeight = "calc(100vh - 35px - 77px)"
+                videoRef.current.style.maxWidth = `calc(100vw - ${functions.sidebarWidth()}px - 70px)`
+                videoRef.current.style.maxHeight = `calc(100vh - ${functions.navbarHeight()}px - ${functions.titlebarHeight()}px)`
                 if (backFrame && backFrameRef.current) {
                     videoRef.current.style.position = "absolute"
                     backFrameRef.current.style.display = "flex"
@@ -1096,8 +1096,8 @@ const PostImage: React.FunctionComponent<Props> = (props) => {
                 videoCanvasRef.current!.style.marginBottom = "0px"
             }
             if (ref.current) {
-                ref.current.style.maxWidth = "calc(100vw - 230px - 70px)"
-                ref.current.style.maxHeight = "calc(100vh - 35px - 77px)"
+                ref.current.style.maxWidth = `calc(100vw - ${functions.sidebarWidth()}px - 70px)`
+                ref.current.style.maxHeight = `calc(100vh - ${functions.navbarHeight()}px - ${functions.titlebarHeight()}px)`
                 if (functions.isGIF(props.img) || gifData) {
                     gifRef.current!.style.marginTop = "0px"
                     gifRef.current!.style.marginBottom = "0px"

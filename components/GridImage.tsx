@@ -3,7 +3,7 @@ import {useHistory} from "react-router-dom"
 import loading from "../assets/purple/loading.gif"
 import loadingMagenta from "../assets/magenta/loading.gif"
 import {ThemeContext, SizeTypeContext, BrightnessContext, ContrastContext, HueContext, SaturationContext, LightnessContext, MobileContext, ScrollYContext,
-BlurContext, SharpenContext, SquareContext, PixelateContext, DownloadFlagContext, DownloadURLsContext, SpeedContext, ReverseContext} from "../Context"
+BlurContext, SharpenContext, SquareContext, PixelateContext, DownloadFlagContext, DownloadURLsContext, SpeedContext, ReverseContext, ScrollContext} from "../Context"
 import {HashLink as Link} from "react-router-hash-link"
 import gifFrames from "gif-frames"
 import JSZip from "jszip"
@@ -61,6 +61,7 @@ const GridImage: React.FunctionComponent<Props> = (props) => {
     const [seekTo, setSeekTo] = useState(null) as any
     const [secondsProgress, setSecondsProgress] = useState(0)
     const [visible, setVisible] = useState(true)
+    const {scroll, setScroll} = useContext(ScrollContext)
     const [img, setImg] = useState(props.img)
     const history = useHistory()
 
@@ -69,9 +70,13 @@ const GridImage: React.FunctionComponent<Props> = (props) => {
         if (entry.intersectionRatio > 0) {
           setVisible(true)
         } else {
-          setVisible(false)
+          if (scroll) setVisible(false)
         }
     }
+
+    useEffect(() => {
+        if (!scroll) if (!visible) setVisible(true)
+    }, [scroll])
 
     useEffect(() => {
         if (typeof window === "undefined") return

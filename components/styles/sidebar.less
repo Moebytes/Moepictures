@@ -2,23 +2,23 @@
 
 .sidebar {
     position: sticky;
-    top: 112px;
+    top: calc(@title-bar-height + @nav-bar-height);
     z-index: 1000;
     display: flex;
     flex-direction: column;
-    width: 230px;
-    height: calc(100vh - 35px - 77px);
+    width: @sidebar-width;
+    height: calc(100vh - @nav-bar-height - @title-bar-height);
     background-color: var(--sidebarBG);
     transition: margin-left 0.5s, height 0.2s, top 0.4s, background-color 0s;
 }
 
 .hide-sidebar {
-    margin-left: -230px;
+    margin-left: -@sidebar-width;
 }
 
 .sidebar-top {
-    top: 35px;
-    height: calc(100vh - 35px);
+    top: @nav-bar-height;
+    height: calc(100vh - @nav-bar-height);
 }
 
 .sidebar-relative {
@@ -126,14 +126,14 @@
 .tag {
     font-family: Tahoma, sans-serif;
     color: var(--tagColor);
-    font-size: 17px;
+    font-size: 16px;
     .stroke-black-thin();
 }
 
 .tag-alt {
     font-family: Tahoma, sans-serif;
     color: var(--tagCountColor);
-    font-size: 16px;
+    font-size: 15px;
     margin-left: 10px;
     .stroke-black-thin();
 }
@@ -149,14 +149,14 @@
 .tag-count {
     font-family: Tahoma, sans-serif;
     color: var(--tagCountColor);
-    font-size: 15px;
+    font-size: 14px;
     margin-left: 10px;
     .stroke-black-thin();
 }
 
 .tag-info {
     width: auto;
-    height: 14px;
+    height: 13px;
     cursor: pointer;
     margin-top: 3px;
     margin-right: 4px;
@@ -177,7 +177,7 @@
 .sidebar-footer-text {
     font-family: Tahoma, sans-serif;
     color: var(--navbarText);
-    font-size: 13px;
+    font-size: 12px;
 }
 
 .sidebar-footer-icon {
@@ -239,7 +239,7 @@
 
 .mobile-sidebar {
     position: sticky;
-    top: 77px !important;
+    top: @title-bar-height;
     //top: 0px;
     z-index: 1000;
     display: flex;

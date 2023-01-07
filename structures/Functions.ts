@@ -398,7 +398,7 @@ export default class Functions {
 
     public static scrolledToBottom = () => {
         const c = [document.scrollingElement!.scrollHeight, document.body.scrollHeight, document.body.offsetHeight].sort(function(a,b){return b-a})
-        return (window.innerHeight + window.scrollY + 20 >= c[0])
+        return (window.innerHeight + window.scrollY + 30 >= c[0])
     }
 
     public static trimCanvas = (canvas: any) => {
@@ -1487,5 +1487,35 @@ export default class Functions {
             ctx.drawImage(lightnessCanvas, 0, 0, canvas.width, canvas.height)
         }
         return canvas
+    }
+
+    public static titlebarHeight = () => {
+        const titlebar = document.querySelector(".titlebar")
+        if (!titlebar) return 70
+        return titlebar.clientHeight
+    }
+
+    public static navbarHeight = () => {
+        const navbar = document.querySelector(".navbar")
+        if (!navbar) {
+            const mobileNavbar = document.querySelector(".mobile-navbar") as HTMLElement
+            return mobileNavbar ? mobileNavbar.clientHeight : 32
+        }
+        return navbar.clientHeight
+    }
+
+    public static sortbarHeight = () => {
+        const sortbar = document.querySelector(".sortbar")
+        if (!sortbar) return 40
+        return sortbar.clientHeight
+    }
+
+    public static sidebarWidth = () => {
+        const sidebar = document.querySelector(".sidebar")
+        if (!sidebar) {
+            const mobileSidebar = document.querySelector(".mobile-sidebar") as HTMLElement
+            return mobileSidebar ? 0 : 230
+        }
+        return sidebar.clientWidth
     }
 }

@@ -92,6 +92,10 @@ interface Props {
     noActions?: boolean
 }
 
+const maxTags1 = 27
+const maxTags2 = 30
+const maxTags3 = 32
+
 const SideBar: React.FunctionComponent<Props> = (props) => {
     const [ignored, forceUpdate] = useReducer(x => x + 1, 0)
     const {theme, setTheme} = useContext(ThemeContext)
@@ -114,7 +118,7 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
     const {mobile, setMobile} = useContext(MobileContext)
     const {mobileScrolling, setMobileScrolling} = useContext(MobileScrollingContext)
     const {session, setSession} = useContext(SessionContext)
-    const [maxTags, setMaxTags] = useState(23)
+    const [maxTags, setMaxTags] = useState(maxTags1)
     const [uploaderImage, setUploaderImage] = useState("")
     const [uploaderRole, setUploaderRole] = useState("")
     const [updaterRole, setUpdaterRole] = useState("")
@@ -166,37 +170,37 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
             const mobileSidebar = document.querySelector(".mobile-sidebar") as HTMLElement
             if (!sidebar && !mobileSidebar) return
             if (mobile) {
-                mobileSidebar.style.top = "0px"
+                mobileSidebar.style.top = `${functions.titlebarHeight()}px`
                 mobileSidebar.style.height = "auto"
                 return
             }
             if (!sidebar) return
             if (!relative) {
                 if (!hideTitlebar) {
-                    sidebar.style.top = "112px"
-                    sidebar.style.height = "calc(100vh - 35px - 77px)"
-                    if (maxTags !== 23) setMaxTags(23)
+                    sidebar.style.top = `${functions.navbarHeight() + functions.titlebarHeight()}px`
+                    sidebar.style.height = `calc(100vh - ${functions.navbarHeight()}px - ${functions.titlebarHeight()}px)`
+                    if (maxTags !== maxTags1) setMaxTags(maxTags1)
                 } else {
                     if (window.scrollY !== 0) {
-                        if (hideNavbar && window.scrollY > 77) {
+                        if (hideNavbar && window.scrollY > functions.titlebarHeight()) {
                             sidebar.style.top = "0px"
                             sidebar.style.height = "100vh"
-                            if (maxTags !== 29) setMaxTags(29)
+                            if (maxTags !== maxTags3) setMaxTags(maxTags3)
                         } else {
-                            sidebar.style.top = "35px"
-                            sidebar.style.height = "calc(100vh - 35px)"
-                            if (maxTags !== 27) setMaxTags(27)
+                            sidebar.style.top = `${functions.navbarHeight()}px`
+                            sidebar.style.height = `calc(100vh - ${functions.navbarHeight()}px)`
+                            if (maxTags !== maxTags2) setMaxTags(maxTags2)
                         }
                     } else {
-                        sidebar.style.top = "112px"
-                        sidebar.style.height = "calc(100vh - 35px - 77px)"
-                        if (maxTags !== 23) setMaxTags(23)
+                        sidebar.style.top = `${functions.navbarHeight() + functions.titlebarHeight()}px`
+                        sidebar.style.height = `calc(100vh - ${functions.navbarHeight()}px - ${functions.titlebarHeight()}px)`
+                        if (maxTags !== maxTags1) setMaxTags(maxTags1)
                     }
                 }
             } else {
                 sidebar.style.top = "0px"
                 sidebar.style.height = "auto"
-                if (maxTags !== 29) setMaxTags(29)
+                if (maxTags !== maxTags3) setMaxTags(maxTags3)
             }
         }
         window.addEventListener("scroll", scrollHandler)
@@ -212,37 +216,37 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
         const mobileSidebar = document.querySelector(".mobile-sidebar") as HTMLElement
         if (!sidebar && !mobileSidebar) return
         if (mobile) {
-            mobileSidebar.style.top = "0px"
+            mobileSidebar.style.top = `${functions.titlebarHeight()}px`
             mobileSidebar.style.height = "auto"
             return
         }
         if (!sidebar) return
         if (!relative) {
             if (!hideTitlebar) {
-                sidebar.style.top = "112px"
-                sidebar.style.height = "calc(100vh - 35px - 77px)"
-                if (maxTags !== 23) setMaxTags(23)
+                sidebar.style.top = `${functions.navbarHeight() + functions.titlebarHeight()}px`
+                sidebar.style.height = `calc(100vh - ${functions.navbarHeight()}px - ${functions.titlebarHeight()}px)`
+                if (maxTags !== maxTags1) setMaxTags(maxTags1)
             } else {
                 if (window.scrollY !== 0) {
-                    if (hideNavbar && window.scrollY > 77) {
+                    if (hideNavbar && window.scrollY > functions.titlebarHeight()) {
                         sidebar.style.top = "0px"
                         sidebar.style.height = "100vh"
-                        if (maxTags !== 29) setMaxTags(29)
+                        if (maxTags !== maxTags3) setMaxTags(maxTags3)
                     } else {
-                        sidebar.style.top = "35px"
-                        sidebar.style.height = "calc(100vh - 35px)"
-                        if (maxTags !== 27) setMaxTags(27)
+                        sidebar.style.top = `${functions.navbarHeight()}px`
+                        sidebar.style.height = `calc(100vh - ${functions.navbarHeight()}px)`
+                        if (maxTags !== maxTags2) setMaxTags(maxTags2)
                     }
                 } else {
-                    sidebar.style.top = "112px"
-                    sidebar.style.height = "calc(100vh - 35px - 77px)"
-                    if (maxTags !== 23) setMaxTags(23)
+                    sidebar.style.top = `${functions.navbarHeight() + functions.titlebarHeight()}px`
+                    sidebar.style.height = `calc(100vh - ${functions.navbarHeight()}px - ${functions.titlebarHeight()}px)`
+                    if (maxTags !== maxTags1) setMaxTags(maxTags1)
                 }
             }
         } else {
             sidebar.style.top = "0px"
             sidebar.style.height = "auto"
-            if (maxTags !== 29) setMaxTags(29)
+            if (maxTags !== maxTags3) setMaxTags(maxTags3)
         }
     }, [hideTitlebar, relative, mobile])
 
@@ -251,7 +255,7 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
         const mobileSidebar = document.querySelector(".mobile-sidebar") as HTMLElement
         if (!sidebar && !mobileSidebar) return
         if (mobile) {
-            mobileSidebar.style.top = "0px"
+            mobileSidebar.style.top = `${functions.titlebarHeight()}px`
             mobileSidebar.style.height = "auto"
             return
         }
@@ -259,33 +263,33 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
         if (!relative) {
             if (!hideNavbar) {
                 if (!hideTitlebar) {
-                    sidebar.style.top = "112px"
-                    sidebar.style.height = "calc(100vh - 35px - 77px)"
-                    if (maxTags !== 23) setMaxTags(23)
+                    sidebar.style.top = `${functions.navbarHeight() + functions.titlebarHeight()}px`
+                    sidebar.style.height = `calc(100vh - ${functions.navbarHeight()}px - ${functions.titlebarHeight()}px)`
+                    if (maxTags !== maxTags1) setMaxTags(maxTags1)
                 } else {
-                    sidebar.style.top = "35px"
-                    sidebar.style.height = "calc(100vh - 35px)"
-                    if (maxTags !== 27) setMaxTags(27)
+                    sidebar.style.top = `${functions.navbarHeight()}px`
+                    sidebar.style.height = `calc(100vh - ${functions.navbarHeight()}px)`
+                    if (maxTags !== maxTags2) setMaxTags(maxTags2)
                 }
                 return
             }
             if (!hideSortbar) {
                 if (sidebar.style.top === "0px") {
-                    sidebar.style.top = "35px"
-                    sidebar.style.height = "calc(100vh - 35px)"
-                    if (maxTags !== 27) setMaxTags(27)
+                    sidebar.style.top = `${functions.navbarHeight()}px`
+                    sidebar.style.height = `calc(100vh - ${functions.navbarHeight()}px)`
+                    if (maxTags !== maxTags2) setMaxTags(maxTags2)
                 }
             } else {
-                if (sidebar.style.top === "35px") {
+                if (sidebar.style.top === `${functions.navbarHeight()}px`) {
                     sidebar.style.top = "0px"
                     sidebar.style.height = "100vh"
-                    if (maxTags !== 29) setMaxTags(29)
+                    if (maxTags !== maxTags3) setMaxTags(maxTags3)
                 }
             }
         } else {
             sidebar.style.top = "0px"
             sidebar.style.height = "auto"
-            if (maxTags !== 29) setMaxTags(29)
+            if (maxTags !== maxTags3) setMaxTags(maxTags3)
         }
     }, [hideSortbar, hideNavbar, hideTitlebar, mobile])
 
