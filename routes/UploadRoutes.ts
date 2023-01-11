@@ -63,7 +63,7 @@ const validImages = (images: any[]) => {
     const mp3 = result?.mime === "audio/mpeg"
     const wav = result?.mime === "audio/x-wav"
     const webm = (path.extname(images[i].link) === ".webm" && result?.typename === "mkv")
-    if (jpg || png || webp || gif || mp4 || webm) {
+    if (jpg || png || webp || gif || mp4 || webm || mp3 || wav) {
       const MB = images[i].size / (1024*1024)
       const maxSize = jpg ? 5 :
                       webp ? 10 :
