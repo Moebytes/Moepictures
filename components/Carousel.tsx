@@ -370,13 +370,28 @@ const Carousel: React.FunctionComponent<Props> = (props) => {
         }, 1000)
     }
 
+    const filtersOn = () => {
+        if ((brightness !== 100) ||
+            (contrast !== 100) ||
+            (hue !== 180) ||
+            (saturation !== 100) ||
+            (lightness !== 100) ||
+            (blur !== 0) ||
+            (sharpen !== 0) ||
+            (pixelate !== 1)) {
+                return true 
+            } else {
+                return false
+            }
+    }
+
     const loadImages = async () => {
         if (!imagesRef?.length) return
-        if (effectTimer) return
+        if (filtersOn() && effectTimer) return
         effectTimer = setTimeout(() => {
             effectTimer = null
             forceUpdate()
-        }, 1000)
+        }, 500)
         for (let i = 0; i < imagesRef.length; i++) {
             const ref = imagesRef[i]
             if (!ref.current) continue
