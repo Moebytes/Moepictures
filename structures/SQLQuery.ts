@@ -464,6 +464,8 @@ export default class SQLQuery {
     if (type === "animation") typeQuery = `posts.type = 'animation'`
     if (type === "video") typeQuery = `posts.type = 'video'`
     if (type === "comic") typeQuery = `posts.type = 'comic'`
+    if (type === "audio") typeQuery = `posts.type = 'audio'`
+    if (type === "model") typeQuery = `posts.type = 'model'`
     let restrictQuery = ""
     if (restrict === "safe") restrictQuery = `posts.restrict = 'safe'`
     if (restrict === "questionable") restrictQuery = `posts.restrict = 'questionable'`
@@ -745,6 +747,8 @@ export default class SQLQuery {
     if (type === "animation") typeQuery = `posts.type = 'animation'`
     if (type === "video") typeQuery = `posts.type = 'video'`
     if (type === "comic") typeQuery = `posts.type = 'comic'`
+    if (type === "audio") typeQuery = `posts.type = 'audio'`
+    if (type === "model") typeQuery = `posts.type = 'model'`
     let restrictQuery = ""
     if (restrict === "safe") restrictQuery = `posts.restrict = 'safe'`
     if (restrict === "questionable") restrictQuery = `posts.restrict = 'questionable'`
@@ -1312,6 +1316,8 @@ export default class SQLQuery {
     if (type === "animation") typeQuery = `post_json.type = 'animation'`
     if (type === "video") typeQuery = `post_json.type = 'video'`
     if (type === "comic") typeQuery = `post_json.type = 'comic'`
+    if (type === "audio") typeQuery = `post_json.type = 'audio'`
+    if (type === "model") typeQuery = `post_json.type = 'model'`
     let restrictQuery = ""
     if (restrict === "safe") restrictQuery = `post_json.restrict = 'safe'`
     if (restrict === "questionable") restrictQuery = `post_json.restrict = 'questionable'`

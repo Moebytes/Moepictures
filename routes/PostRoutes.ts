@@ -21,6 +21,7 @@ const PostRoutes = (app: Express) => {
     app.get("/api/post", postLimiter, async (req: Request, res: Response, next: NextFunction) => {
         try {
             if (req.session.captchaAmount === undefined) req.session.captchaAmount = 51
+            if (req.session.role === "admin" || req.session.role === "mod") req.session.captchaAmount = 0
             if (req.session.captchaAmount > 50) return res.status(401).end()
             const postID = req.query.postID as string
             if (Number.isNaN(Number(postID))) return res.status(400).send("Invalid postID")
@@ -388,13 +389,19 @@ const PostRoutes = (app: Express) => {
                 } else if (ext === "mp4" || ext === "webm") {
                     kind = "video"
                     type = "video"
+                } else if (ext === "mp3" || ext === "wav") {
+                    kind = "audio"
+                    type = "audio"
+                } else if (ext === "glb" || ext === "obj" || ext === "fbx") {
+                    kind = "model"
+                    type = "model"
                 }
 
                 let newImagePath = functions.getImagePath(kind, postID, filename)
                 await serverFunctions.uploadUnverifiedFile(newImagePath, buffer)
                 let dimensions = null as any
                 let hash = ""
-                if (kind === "video") {
+                if (kind === "video" || kind === "audio" || kind === "model") {
                     const buffer = functions.base64ToBuffer(post.thumbnail)
                     hash = await phash(buffer).then((hash: string) => functions.binaryToHex(hash))
                     dimensions = imageSize(buffer)

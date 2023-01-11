@@ -25,6 +25,7 @@ interface Props {
 }
 
 let startX = 0
+let effectTimer = null as any
 
 const Carousel: React.FunctionComponent<Props> = (props) => {
     const [ignored, forceUpdate] = useReducer(x => x + 1, 0)
@@ -371,6 +372,11 @@ const Carousel: React.FunctionComponent<Props> = (props) => {
 
     const loadImages = async () => {
         if (!imagesRef?.length) return
+        if (effectTimer) return
+        effectTimer = setTimeout(() => {
+            effectTimer = null
+            forceUpdate()
+        }, 1000)
         for (let i = 0; i < imagesRef.length; i++) {
             const ref = imagesRef[i]
             if (!ref.current) continue
@@ -378,6 +384,10 @@ const Carousel: React.FunctionComponent<Props> = (props) => {
             if (functions.isVideo(src) || functions.isGIF(src)) continue
             if (functions.isImage(src)) {
                 src = await cryptoFunctions.decryptedLink(src)
+            } else if (functions.isModel(src)) {
+                src = await functions.modelImage(src)
+            } else if (functions.isAudio(src)) {
+                src = await functions.songCover(src)
             }
             const imgElement = document.createElement("img")
             imgElement.src = src

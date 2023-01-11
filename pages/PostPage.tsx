@@ -5,6 +5,8 @@ import NavBar from "../components/NavBar"
 import SideBar from "../components/SideBar"
 import Footer from "../components/Footer"
 import PostImage from "../components/PostImage"
+import PostModel from "../components/PostModel"
+import PostSong from "../components/PostSong"
 import PostImageOptions from "../components/PostImageOptions"
 import CutenessMeter from "../components/CutenessMeter"
 import Comments from "../components/Comments"
@@ -230,9 +232,15 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
         let currentIndex = posts.findIndex((p: any) => p.postID === postID)
         if (currentIndex !== -1) {
             currentIndex++
-            if (!session.username) while (posts[currentIndex]?.restrict !== "safe") currentIndex++
+            if (!session.username) {
+                while (posts[currentIndex]?.restrict !== "safe") {
+                    currentIndex++
+                    if (currentIndex >= posts.length) break
+                }
+            }
             if (posts[currentIndex]) {
                 const post = posts[currentIndex]
+                if (post.fake) return
                 history.push(`/post/${post.postID}`)
             }
         }
@@ -242,9 +250,15 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
         let currentIndex = posts.findIndex((p: any) => p.postID === postID)
         if (currentIndex !== -1) {
             currentIndex--
-            if (!session.username) while (posts[currentIndex]?.restrict !== "safe") currentIndex--
+            if (!session.username) {
+                while (posts[currentIndex]?.restrict !== "safe") {
+                    currentIndex--
+                    if (currentIndex <= -1) break
+                }
+            }
             if (posts[currentIndex]) {
                 const post = posts[currentIndex]
+                if (post.fake) return
                 history.push(`/post/${post.postID}`)
             }
         }
@@ -263,6 +277,32 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
             return false
         } else {
             return true
+        }
+    }
+
+    const getPostJSX = () => {
+        if (!post) return
+        if (post.type === "model") {
+            return (
+                <>
+                <PostModel model={image}/>
+                <PostImageOptions model={image} post={post} download={download} next={next} previous={previous}/>
+                </>
+            )
+        } else if (post.type === "audio") {
+            return (
+                <>
+                <PostSong audio={image}/>
+                <PostImageOptions audio={image} post={post} download={download} next={next} previous={previous}/>
+                </>
+            )
+        } else {
+            return (
+                <>
+                <PostImage img={image} comicPages={post.type === "comic" ? images : null}/>
+                <PostImageOptions img={image} post={post} comicPages={post.type === "comic" ? images : null} download={download} next={next} previous={previous}/>
+                </>
+            )
         }
     }
 
@@ -288,10 +328,7 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
                     <div className="carousel-container">
                         <Carousel images={images} set={set}/>
                     </div> : null}
-                    {nsfwChecker() && post ? <>
-                    <PostImage img={image} comicPages={post.type === "comic" ? images : null}/>
-                    <PostImageOptions img={image} post={post} comicPages={post.type === "comic" ? images : null} download={download} next={next} previous={previous}/>
-                    </> : null}
+                    {nsfwChecker() && post ? getPostJSX() : null}
                     {mobile && post && tagCategories ? <MobileInfo post={post} artists={tagCategories.artists} characters={tagCategories.characters} series={tagCategories.series} tags={tagCategories.tags}/> : null}
                     {parentPost ? <Parent post={parentPost}/>: null}
                     {thirdPartyPosts.length ? <ThirdParty posts={thirdPartyPosts}/>: null}

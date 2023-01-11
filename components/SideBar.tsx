@@ -598,6 +598,11 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
         window.scrollTo(0, 0)
         history.push(`/set-avatar/${props.post.postID}`)
     }
+
+    const postHistory = () => {
+        window.scrollTo(0, 0)
+        history.push(`/post/history/${props.post.postID}`)
+    }
     
     const triggerQuickEdit = () => {
         if (props.unverified) {
@@ -856,12 +861,13 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
                             </span>
                         </div>
                         </> : null}
-                        {/* <div className="sidebar-row">
-                            <span className="tag-hover">
+                        {/*
+                        <div className="sidebar-row">
+                            <span className="tag-hover" onClick={postHistory}>
                                 <img className="sidebar-icon" src={getHistory()}/>
                                 <span className="tag-red">History</span>
                             </span>
-                        </div> */}
+                        </div>*/}
                         {!props.unverified ?
                         <div className="sidebar-row">
                             <span className="tag-hover" onClick={deletePost}>

@@ -218,6 +218,10 @@ const SetAvatarPage: React.FunctionComponent<Props> = (props) => {
         let src = image
         if (functions.isImage(src)) {
             src = await cryptoFunctions.decryptedLink(src)
+        } else if (functions.isModel(src)) {
+            src = await functions.modelImage(src)
+        } else if (functions.isAudio(src)) {
+            src = await functions.songCover(src)
         }
         const img = document.createElement("img")
         img.src = src 

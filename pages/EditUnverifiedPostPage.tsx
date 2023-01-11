@@ -15,6 +15,8 @@ import image from "../assets/purple/image.png"
 import animation from "../assets/purple/animation.png"
 import video from "../assets/purple/video.png"
 import comic from "../assets/purple/comic.png"
+import audio from "../assets/purple/audio.png"
+import model from "../assets/purple/model.png"
 import explicit from "../assets/purple/explicit.png"
 import questionable from "../assets/purple/questionable.png"
 import safe from "../assets/purple/safe.png"
@@ -24,6 +26,8 @@ import pixel from "../assets/purple/pixel.png"
 import chibi from "../assets/purple/chibi.png"
 import Carousel from "../components/Carousel"
 import PostImage from "../components/PostImage"
+import PostModel from "../components/PostModel"
+import PostSong from "../components/PostSong"
 import DragAndDrop from "../components/DragAndDrop"
 import {HideNavbarContext, HideSidebarContext, RelativeContext, ThemeContext, EnableDragContext, HideTitlebarContext, BrightnessContext, ContrastContext, HueContext, SaturationContext, LightnessContext, MobileContext,
 BlurContext, SharpenContext, PixelateContext, HeaderTextContext, SessionContext, SidebarTextContext, RedirectContext, PostFlagContext} from "../Context"
@@ -68,12 +72,12 @@ const EditUnverifiedPostPage: React.FunctionComponent<Props> = (props) => {
     const {mobile, setMobile} = useContext(MobileContext)
     const {postFlag, setPostFlag} = useContext(PostFlagContext)
     const [displayImage, setDisplayImage] = useState(false)
-    const [editpostError, setEditPostError] = useState(false)
+    const [editPostError, setEditPostError] = useState(false)
     const [submitError, setSubmitError] = useState(false)
     const [saucenaoError, setSaucenaoError] = useState(false)
     const [danbooruError, setDanbooruError] = useState(false)
     const [acceptedURLs, setAcceptedURLs] = useState([]) as any
-    const editpostErrorRef = useRef<any>(null)
+    const editPostErrorRef = useRef<any>(null)
     const submitErrorRef = useRef<any>(null)
     const saucenaoErrorRef = useRef<any>(null)
     const danbooruErrorRef = useRef<any>(null)
@@ -269,20 +273,33 @@ const EditUnverifiedPostPage: React.FunctionComponent<Props> = (props) => {
             await new Promise<void>((resolve) => {
                 fileReader.onloadend = async (f: any) => {
                     const bytes = new Uint8Array(f.target.result)
-                    const result = fileType(bytes)?.[0]
+                    const result = fileType(bytes)?.[0] || {}
                     const jpg = result?.mime === "image/jpeg"
                     const png = result?.mime === "image/png"
                     const gif = result?.mime === "image/gif"
                     const webp = result?.mime === "image/webp"
                     const mp4 = result?.mime === "video/mp4"
+                    const mp3 = result?.mime === "audio/mpeg"
+                    const wav = result?.mime === "audio/x-wav"
+                    const glb = functions.isGLTF(files[i].name)
+                    const fbx = functions.isFBX(files[i].name)
+                    const obj = functions.isOBJ(files[i].name)
+                    if (glb) result.typename = "glb"
+                    if (fbx) result.typename = "fbx"
+                    if (obj) result.typename = "obj"
                     const webm = (path.extname(files[i].name) === ".webm" && result?.typename === "mkv")
                     const zip = result?.mime === "application/zip"
-                    if (jpg || png || webp || gif || mp4 || webm || zip) {
+                    if (jpg || png || webp || gif || mp4 || webm || mp3 || wav || glb || fbx || obj || zip) {
                         const MB = files[i].size / (1024*1024)
                         const maxSize = jpg ? 5 :
                                         png ? 10 :
                                         webp ? 10 :
+                                        mp3 ? 25 :
+                                        wav ? 25 :
                                         gif ? 50 :
+                                        glb ? 50 :
+                                        fbx ? 50 :
+                                        obj ? 50 :
                                         mp4 ? 100 :
                                         webm ? 100 : 100
                         if (MB <= maxSize) {
@@ -293,17 +310,25 @@ const EditUnverifiedPostPage: React.FunctionComponent<Props> = (props) => {
                                     const file = content.files[filename]
                                     if (file.dir || filename.startsWith("__MACOSX/")) continue
                                     const data = await file.async("uint8array")
-                                    const result = fileType(data)?.[0]
+                                    const result = fileType(data)?.[0] || {}
                                     const jpg = result?.mime === "image/jpeg"
                                     const png = result?.mime === "image/png"
                                     let webp = result?.mime === "image/webp"
                                     const gif = result?.mime === "image/gif"
                                     const mp4 = result?.mime === "video/mp4"
-                                    const webm = (path.extname(files[i].name) === ".webm" && result?.typename === "mkv")
-                                    if (jpg || png || webp || gif || mp4 || webm) {
+                                    const mp3 = result?.mime === "audio/mpeg"
+                                    const wav = result?.mime === "audio/x-wav"
+                                    const glb = functions.isGLTF(filename)
+                                    const fbx = functions.isFBX(filename)
+                                    const obj = functions.isOBJ(filename)
+                                    if (glb) result.typename = "glb"
+                                    if (fbx) result.typename = "fbx"
+                                    if (obj) result.typename = "obj"
+                                    const webm = (path.extname(filename) === ".webm" && result?.typename === "mkv")
+                                    if (jpg || png || webp || gif || mp4 || webm || mp3 || wav || glb || fbx || obj) {
                                         acceptedArray.push({file: new File([data], filename), ext: result.typename === "mkv" ? "webm" : result.typename, originalLink: links ? links[i] : null, bytes: data})
                                     } else {
-                                        error = `Supported types in zip: png, jpg, webp, gif, mp4, webm.`
+                                        error = `Supported types in zip: png, jpg, webp, gif, mp4, webm, mp3, wav, glb, fbx, obj.`
                                     }
                                 }
                                 resolve()
@@ -316,22 +341,27 @@ const EditUnverifiedPostPage: React.FunctionComponent<Props> = (props) => {
                             resolve()
                         }
                     } else {
-                        error = `Supported file types: png, jpg, webp, gif, mp4, webm, zip.`
+                        error = `Supported file types: png, jpg, webp, gif, mp4, webm, mp3, wav, glb, fbx, obj, zip.`
                         resolve()
                     }
                 }
                 fileReader.readAsArrayBuffer(files[i])
-            })  
+            })
         }
         if (acceptedArray.length) {
             let urls = [] as any
             for (let i = 0; i < acceptedArray.length; i++) {
-                const url = URL.createObjectURL(acceptedArray[i].file)
+                let url = URL.createObjectURL(acceptedArray[i].file)
+                let link = `${url}#.${acceptedArray[i].ext}`
                 let thumbnail = ""
                 if (acceptedArray[i].ext === "mp4" || acceptedArray[i].ext === "webm") {
-                    thumbnail = await functions.videoThumbnail(url)
+                    thumbnail = await functions.videoThumbnail(link)
+                } else if (acceptedArray[i].ext === "glb" || acceptedArray[i].ext === "fbx" || acceptedArray[i].ext === "obj") {
+                    thumbnail = await functions.modelImage(link)
+                } else if (acceptedArray[i].ext === "mp3" || acceptedArray[i].ext === "wav") {
+                    thumbnail = await functions.songCover(link)
                 }
-                urls.push({link: `${url}#.${acceptedArray[i].ext}`, ext: acceptedArray[i].ext, size: acceptedArray[i].file.size, thumbnail,
+                urls.push({link, ext: acceptedArray[i].ext, size: acceptedArray[i].file.size, thumbnail,
                 originalLink: acceptedArray[i].originalLink, bytes: acceptedArray[i].bytes, name: acceptedArray[i].file.name})
             }
             setCurrentImg(urls[0].link)
@@ -341,7 +371,7 @@ const EditUnverifiedPostPage: React.FunctionComponent<Props> = (props) => {
         if (error) {
             setEditPostError(true)
             await functions.timeout(20)
-            editpostErrorRef.current.innerText = error
+            editPostErrorRef.current.innerText = error
             await functions.timeout(3000)
             setEditPostError(false)
         }
@@ -1253,6 +1283,71 @@ const EditUnverifiedPostPage: React.FunctionComponent<Props> = (props) => {
         })
     }
 
+    const getPostJSX = () => {
+        if (functions.isModel(currentImg)) {
+            return <PostModel model={currentImg} noKeydown={true}/>
+        } else if (functions.isAudio(currentImg)) {
+            return <PostSong audio={currentImg} noKeydown={true}/>
+        } else {
+            return <PostImage img={currentImg} noKeydown={true}/>
+        }
+    }
+
+    const getStyleJSX = () => {
+        if (type === "model") {
+            return (
+                <div className="editpost-row">
+                    <button className={`editpost-button ${style === "3d" ? "button-selected" : ""}`} onClick={() => setStyle("3d")}>
+                        <img className="editpost-button-img" src={$3d}/>
+                        <span className="editpost-button-text">3D</span>
+                    </button>
+                    <button className={`editpost-button ${style === "chibi" ? "button-selected" : ""}`} onClick={() => setStyle("chibi")}>
+                        <img className="editpost-button-img" src={chibi}/>
+                        <span className="editpost-button-text">Chibi</span>
+                    </button>
+                    <button className={`editpost-button ${style === "pixel" ? "button-selected" : ""}`} onClick={() => setStyle("pixel")}>
+                        <img className="editpost-button-img" src={pixel}/>
+                        <span className="editpost-button-text">Pixel</span>
+                    </button>
+                </div>
+            )
+        } else if (type === "audio") {
+            return (
+                <div className="editpost-row">
+                    <button className={`editpost-button ${style === "2d" ? "button-selected" : ""}`} onClick={() => setStyle("2d")}>
+                        <img className="editpost-button-img" src={$2d}/>
+                        <span className="editpost-button-text">2D</span>
+                    </button>
+                    <button className={`editpost-button ${style === "pixel" ? "button-selected" : ""}`} onClick={() => setStyle("pixel")}>
+                        <img className="editpost-button-img" src={pixel}/>
+                        <span className="editpost-button-text">Pixel</span>
+                    </button>
+                </div>
+            )
+        } else {
+            return (
+                <div className="editpost-row">
+                    <button className={`editpost-button ${style === "2d" ? "button-selected" : ""}`} onClick={() => setStyle("2d")}>
+                        <img className="editpost-button-img" src={$2d}/>
+                        <span className="editpost-button-text">2D</span>
+                    </button>
+                    <button className={`editpost-button ${style === "3d" ? "button-selected" : ""}`} onClick={() => setStyle("3d")}>
+                        <img className="editpost-button-img" src={$3d}/>
+                        <span className="editpost-button-text">3D</span>
+                    </button>
+                    <button className={`editpost-button ${style === "chibi" ? "button-selected" : ""}`} onClick={() => setStyle("chibi")}>
+                        <img className="editpost-button-img" src={chibi}/>
+                        <span className="editpost-button-text">Chibi</span>
+                    </button>
+                    <button className={`editpost-button ${style === "pixel" ? "button-selected" : ""}`} onClick={() => setStyle("pixel")}>
+                        <img className="editpost-button-img" src={pixel}/>
+                        <span className="editpost-button-text">Pixel</span>
+                    </button>
+                </div>
+            )
+        }
+    }
+
     return (
         <>
         <DragAndDrop/>
@@ -1274,7 +1369,7 @@ const EditUnverifiedPostPage: React.FunctionComponent<Props> = (props) => {
                             </button>
                         </div>
                     </div> : <>
-                    {editpostError ? <div className="editpost-row"><span ref={editpostErrorRef} className="editpost-text-alt"></span></div> : null}
+                    {editPostError ? <div className="editpost-row"><span ref={editPostErrorRef} className="editpost-text-alt"></span></div> : null}
                     {mobile ? <>
                     <div className="editpost-row">
                         <label htmlFor="file-editpost" className="editpost-button">
@@ -1366,6 +1461,16 @@ const EditUnverifiedPostPage: React.FunctionComponent<Props> = (props) => {
                         <img className="editpost-button-img" src={comic}/>
                         <span className="editpost-button-text">Comic</span>
                     </button>
+                </div> 
+                <div className="editpost-row">
+                    <button className={`editpost-button ${type === "audio" ? "button-selected" : ""}`} onClick={() => setType("audio")}>
+                        <img className="editpost-button-img" src={audio}/>
+                        <span className="editpost-button-text">Audio</span>
+                    </button>
+                    <button className={`editpost-button ${type === "model" ? "button-selected" : ""}`} onClick={() => setType("model")}>
+                        <img className="editpost-button-img" src={model}/>
+                        <span className="editpost-button-text">Model</span>
+                    </button>
                 </div> </>
                 :
                 <div className="editpost-row">
@@ -1384,6 +1489,14 @@ const EditUnverifiedPostPage: React.FunctionComponent<Props> = (props) => {
                     <button className={`editpost-button ${type === "comic" ? "button-selected" : ""}`} onClick={() => setType("comic")}>
                         <img className="editpost-button-img" src={comic}/>
                         <span className="editpost-button-text">Comic</span>
+                    </button>
+                    <button className={`editpost-button ${type === "audio" ? "button-selected" : ""}`} onClick={() => setType("audio")}>
+                        <img className="editpost-button-img" src={audio}/>
+                        <span className="editpost-button-text">Audio</span>
+                    </button>
+                    <button className={`editpost-button ${type === "model" ? "button-selected" : ""}`} onClick={() => setType("model")}>
+                        <img className="editpost-button-img" src={model}/>
+                        <span className="editpost-button-text">Model</span>
                     </button>
                 </div>}
                 {mobile ? <>
@@ -1420,24 +1533,7 @@ const EditUnverifiedPostPage: React.FunctionComponent<Props> = (props) => {
                         <span className="editpost-button-text">Explicit</span>
                     </button> : null}
                 </div>}
-                <div className="editpost-row">
-                    <button className={`editpost-button ${style === "2d" ? "button-selected" : ""}`} onClick={() => setStyle("2d")}>
-                        <img className="editpost-button-img" src={$2d}/>
-                        <span className="editpost-button-text">2D</span>
-                    </button>
-                    <button className={`editpost-button ${style === "3d" ? "button-selected" : ""}`} onClick={() => setStyle("3d")}>
-                        <img className="editpost-button-img" src={$3d}/>
-                        <span className="editpost-button-text">3D</span>
-                    </button>
-                    <button className={`editpost-button ${style === "chibi" ? "button-selected" : ""}`} onClick={() => setStyle("chibi")}>
-                        <img className="editpost-button-img" src={chibi}/>
-                        <span className="editpost-button-text">Chibi</span>
-                    </button>
-                    <button className={`editpost-button ${style === "pixel" ? "button-selected" : ""}`} onClick={() => setStyle("pixel")}>
-                        <img className="editpost-button-img" src={pixel}/>
-                        <span className="editpost-button-text">Pixel</span>
-                    </button>
-                </div>
+                {getStyleJSX()}
                 <div className="editpost-container">
                         <div className="editpost-container-row">
                             <span className="editpost-text-alt">If this is a third-party edit, enter the original post ID: </span>

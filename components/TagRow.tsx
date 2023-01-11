@@ -169,6 +169,11 @@ const TagRow: React.FunctionComponent<Props> = (props) => {
         setAliasTagID(props.tag.tag)
     }
 
+    const tagHistory = async () => {
+        window.scrollTo(0, 0)
+        history.push(`/tag/history/${props.tag.tag}`)
+    }
+
     const socialJSX = () => {
         let jsx = [] as any
         if (props.tag.type === "artist") {
@@ -228,7 +233,7 @@ const TagRow: React.FunctionComponent<Props> = (props) => {
             </div>
             {session.username ?
             <div className="tag-buttons">
-                {/* <img className="tag-button" src={historyIcon}/> */}
+                {/* <img className="tag-button" src={historyIcon} onClick={tagHistory}/> */}
                 <img className="tag-button" src={alias} onClick={aliasTagDialog}/>
                 <img className="tag-button" src={edit} onClick={editTagDialog}/>
                 <img className="tag-button" src={deleteIcon} onClick={deleteTagDialog}/>

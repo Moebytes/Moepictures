@@ -48,18 +48,28 @@ const altPath = (imagePath: string) => {
 const validImages = (images: any[]) => {
   if (!images.length) return false
   for (let i = 0; i < images.length; i++) {
+    if (functions.isModel(images[i].link)) {
+      const MB = images[i].size / (1024*1024)
+      const maxSize = 50
+      if (MB <= maxSize) continue
+      return false
+    }
     const result = fileType(images[i].bytes)?.[0]
     const jpg = result?.mime === "image/jpeg"
     const png = result?.mime === "image/png"
     const webp = result?.mime === "image/webp"
     const gif = result?.mime === "image/gif"
     const mp4 = result?.mime === "video/mp4"
+    const mp3 = result?.mime === "audio/mpeg"
+    const wav = result?.mime === "audio/x-wav"
     const webm = (path.extname(images[i].link) === ".webm" && result?.typename === "mkv")
     if (jpg || png || webp || gif || mp4 || webm) {
       const MB = images[i].size / (1024*1024)
       const maxSize = jpg ? 5 :
                       webp ? 10 :
                       png ? 10 :
+                      mp3 ? 25 :
+                      wav ? 25 :
                       gif ? 50 :
                       mp4 ? 100 :
                       webm ? 100 : 100
@@ -161,6 +171,12 @@ const CreateRoutes = (app: Express) => {
           } else if (ext === "mp4" || ext === "webm") {
             kind = "video"
             type = "video"
+          } else if (ext === "mp3" || ext === "wav") {
+            kind = "audio"
+            type = "audio"
+          } else if (ext === "glb" || ext === "obj" || ext === "fbx") {
+            kind = "model"
+            type = "model"
           }
 
           let imagePath = functions.getImagePath(kind, postID, filename)
@@ -168,13 +184,13 @@ const CreateRoutes = (app: Express) => {
           await serverFunctions.uploadFile(imagePath, buffer)
           let dimensions = null as any
           let hash = ""
-          if (kind === "video") {
+          if (kind === "video" || kind === "audio" || kind === "model") {
             const buffer = functions.base64ToBuffer(images[i].thumbnail)
             hash = await phash(buffer).then((hash: string) => functions.binaryToHex(hash))
             dimensions = imageSize(buffer)
           } else {
-            hash = await phash(buffer).then((hash: string) => functions.binaryToHex(hash))
-            dimensions = imageSize(buffer)
+              hash = await phash(buffer).then((hash: string) => functions.binaryToHex(hash))
+              dimensions = imageSize(buffer)
           }
           await sql.insertImage(postID, filename, kind, order, hash, dimensions.width, dimensions.height, images[i].size)
         }
@@ -375,20 +391,26 @@ const CreateRoutes = (app: Express) => {
           } else if (ext === "mp4" || ext === "webm") {
             kind = "video"
             type = "video"
-          }
+          } else if (ext === "mp3" || ext === "wav") {
+            kind = "audio"
+            type = "audio"
+        } else if (ext === "glb" || ext === "obj" || ext === "fbx") {
+            kind = "model"
+            type = "model"
+        }
 
           let imagePath = functions.getImagePath(kind, postID, filename)
           const buffer = Buffer.from(Object.values(images[i].bytes))
           await serverFunctions.uploadFile(imagePath, buffer)
           let dimensions = null as any
           let hash = ""
-          if (kind === "video") {
+          if (kind === "video" || kind === "audio" || kind === "model") {
             const buffer = functions.base64ToBuffer(images[i].thumbnail)
             hash = await phash(buffer).then((hash: string) => functions.binaryToHex(hash))
             dimensions = imageSize(buffer)
           } else {
-            hash = await phash(buffer).then((hash: string) => functions.binaryToHex(hash))
-            dimensions = imageSize(buffer)
+              hash = await phash(buffer).then((hash: string) => functions.binaryToHex(hash))
+              dimensions = imageSize(buffer)
           }
           await sql.insertImage(postID, filename, kind, order, hash, dimensions.width, dimensions.height, images[i].size)
         }
@@ -579,21 +601,26 @@ const CreateRoutes = (app: Express) => {
           } else if (ext === "mp4" || ext === "webm") {
             kind = "video"
             type = "video"
-          }
+          } else if (ext === "mp3" || ext === "wav") {
+            kind = "audio"
+            type = "audio"
+        } else if (ext === "glb" || ext === "obj" || ext === "fbx") {
+            kind = "model"
+            type = "model"
+        }
 
           let imagePath = functions.getImagePath(kind, postID, filename)
           const buffer = Buffer.from(Object.values(images[i].bytes))
           await serverFunctions.uploadUnverifiedFile(imagePath, buffer)
           let dimensions = null as any
           let hash = ""
-          if (kind === "video") {
-            await sql.updateUnverifiedPost(postID, "thumbnail", images[i].thumbnail)
+          if (kind === "video" || kind === "audio" || kind === "model") {
             const buffer = functions.base64ToBuffer(images[i].thumbnail)
             hash = await phash(buffer).then((hash: string) => functions.binaryToHex(hash))
             dimensions = imageSize(buffer)
           } else {
-            hash = await phash(buffer).then((hash: string) => functions.binaryToHex(hash))
-            dimensions = imageSize(buffer)
+              hash = await phash(buffer).then((hash: string) => functions.binaryToHex(hash))
+              dimensions = imageSize(buffer)
           }
           await sql.insertUnverifiedImage(postID, filename, kind, order, hash, dimensions.width, dimensions.height, images[i].size)
         }
@@ -805,20 +832,26 @@ const CreateRoutes = (app: Express) => {
           } else if (ext === "mp4" || ext === "webm") {
             kind = "video"
             type = "video"
-          }
+          } else if (ext === "mp3" || ext === "wav") {
+            kind = "audio"
+            type = "audio"
+        } else if (ext === "glb" || ext === "obj" || ext === "fbx") {
+            kind = "model"
+            type = "model"
+        }
 
           let imagePath = functions.getImagePath(kind, postID, filename)
           const buffer = Buffer.from(Object.values(images[i].bytes))
           await serverFunctions.uploadUnverifiedFile(imagePath, buffer)
           let dimensions = null as any
           let hash = ""
-          if (kind === "video") {
+          if (kind === "video" || kind === "audio" || kind === "model") {
             const buffer = functions.base64ToBuffer(images[i].thumbnail)
             hash = await phash(buffer).then((hash: string) => functions.binaryToHex(hash))
             dimensions = imageSize(buffer)
           } else {
-            hash = await phash(buffer).then((hash: string) => functions.binaryToHex(hash))
-            dimensions = imageSize(buffer)
+              hash = await phash(buffer).then((hash: string) => functions.binaryToHex(hash))
+              dimensions = imageSize(buffer)
           }
           await sql.insertUnverifiedImage(postID, filename, kind, order, hash, dimensions.width, dimensions.height, images[i].size)
         }
@@ -974,19 +1007,25 @@ const CreateRoutes = (app: Express) => {
           } else if (ext === "mp4" || ext === "webm") {
             kind = "video"
             type = "video"
-          }
+          } else if (ext === "mp3" || ext === "wav") {
+            kind = "audio"
+            type = "audio"
+        } else if (ext === "glb" || ext === "obj" || ext === "fbx") {
+            kind = "model"
+            type = "model"
+        }
 
           let newImagePath = functions.getImagePath(kind, newPostID, filename)
           await serverFunctions.uploadFile(newImagePath, buffer)
           let dimensions = null as any
           let hash = ""
-          if (kind === "video") {
+          if (kind === "video" || kind === "audio" || kind === "model") {
             const buffer = functions.base64ToBuffer(unverified.thumbnail)
             hash = await phash(buffer).then((hash: string) => functions.binaryToHex(hash))
             dimensions = imageSize(buffer)
           } else {
-            hash = await phash(buffer).then((hash: string) => functions.binaryToHex(hash))
-            dimensions = imageSize(buffer)
+              hash = await phash(buffer).then((hash: string) => functions.binaryToHex(hash))
+              dimensions = imageSize(buffer)
           }
           await sql.insertImage(newPostID, filename, type, order, hash, dimensions.width, dimensions.height, buffer.byteLength)
         }

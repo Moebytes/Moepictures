@@ -20,6 +20,7 @@ const ModPosts: React.FunctionComponent = (props) => {
     const [visiblePosts, setVisiblePosts] = useState([]) as any
     const [offset, setOffset] = useState(0)
     const [ended, setEnded] = useState(false)
+    const [imagesRef, setImagesRef] = useState([]) as any
     const history = useHistory()
 
     const updatePosts = async () => {
@@ -62,6 +63,8 @@ const ModPosts: React.FunctionComponent = (props) => {
         }
         setIndex(currentIndex)
         setVisiblePosts(functions.removeDuplicates(newVisiblePosts))
+        const newImagesRef = newVisiblePosts.map(() => React.createRef()) as any
+        setImagesRef(newImagesRef) as any
     }, [unverifiedPosts])
 
     const updateOffset = async () => {
@@ -98,6 +101,35 @@ const ModPosts: React.FunctionComponent = (props) => {
         }
     })
 
+    const loadImages = async () => {
+        for (let i = 0; i < visiblePosts.length; i++) {
+            const post = visiblePosts[i]
+            const ref = imagesRef[i]
+            const img = functions.getUnverifiedThumbnailLink(post.images[0].type, post.postID, post.images[0].filename, "tiny")
+            if (functions.isGIF(img)) continue
+            if (!ref.current) continue
+            let src = img
+            if (functions.isModel(img)) {
+                src = await functions.modelImage(img)
+            } else if (functions.isAudio(img)) {
+                src = await functions.songCover(img)
+            }
+            const imgElement = document.createElement("img")
+            imgElement.src = src 
+            imgElement.onload = () => {
+                if (!ref.current) return
+                const refCtx = ref.current.getContext("2d")
+                ref.current.width = imgElement.width
+                ref.current.height = imgElement.height
+                refCtx?.drawImage(imgElement, 0, 0, imgElement.width, imgElement.height)
+            }
+        }
+    }
+
+    useEffect(() => {
+        loadImages()
+    }, [visiblePosts])
+
     const generatePostsJSX = () => {
         let jsx = [] as any
         const posts = functions.removeDuplicates(visiblePosts)
@@ -114,7 +146,8 @@ const ModPosts: React.FunctionComponent = (props) => {
                     <div className="mod-post-img-container">
                         {functions.isVideo(img) ? 
                         <video className="mod-post-img" src={img} onClick={imgClick} onAuxClick={(event) => imgClick(event, true)}></video> :
-                        <img className="mod-post-img" src={img} onClick={imgClick} onAuxClick={(event) => imgClick(event, true)}/>}
+                        functions.isGIF(img) ? <img className="mod-post-img" src={img} onClick={imgClick} onAuxClick={(event) => imgClick(event, true)}/> :
+                        <canvas className="mod-post-img" ref={imagesRef[i]} onClick={imgClick} onAuxClick={(event) => imgClick(event, true)}></canvas>}
                     </div>
                     <div className="mod-post-text-column">
                         <span className="mod-post-link" onClick={() => history.push(`/user/${post.uploader}`)}>Uploader: {functions.toProperCase(post.uploader || "Deleted")}</span>

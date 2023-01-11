@@ -15,6 +15,8 @@ import image from "../assets/purple/image.png"
 import animation from "../assets/purple/animation.png"
 import video from "../assets/purple/video.png"
 import comic from "../assets/purple/comic.png"
+import audio from "../assets/purple/audio.png"
+import model from "../assets/purple/model.png"
 import explicit from "../assets/purple/explicit.png"
 import questionable from "../assets/purple/questionable.png"
 import safe from "../assets/purple/safe.png"
@@ -24,6 +26,8 @@ import pixel from "../assets/purple/pixel.png"
 import chibi from "../assets/purple/chibi.png"
 import Carousel from "../components/Carousel"
 import PostImage from "../components/PostImage"
+import PostModel from "../components/PostModel"
+import PostSong from "../components/PostSong"
 import DragAndDrop from "../components/DragAndDrop"
 import {HideNavbarContext, HideSidebarContext, RelativeContext, ThemeContext, EnableDragContext, HideTitlebarContext, 
 UploadDropFilesContext, BrightnessContext, ContrastContext, HueContext, SaturationContext, LightnessContext, MobileContext,
@@ -150,7 +154,6 @@ const UploadPage: React.FunctionComponent = (props) => {
     const getSimilar = async () => {
         if (acceptedURLs[currentIndex]) {
             const img = acceptedURLs[currentIndex]
-            console.log(img)
             let dupes = null as any
             if (img.thumbnail) {
                 const bytes = await functions.base64toUint8Array(img.thumbnail)
@@ -181,20 +184,33 @@ const UploadPage: React.FunctionComponent = (props) => {
             await new Promise<void>((resolve) => {
                 fileReader.onloadend = async (f: any) => {
                     const bytes = new Uint8Array(f.target.result)
-                    const result = fileType(bytes)?.[0]
+                    const result = fileType(bytes)?.[0] || {}
                     const jpg = result?.mime === "image/jpeg"
                     const png = result?.mime === "image/png"
                     const gif = result?.mime === "image/gif"
                     const webp = result?.mime === "image/webp"
                     const mp4 = result?.mime === "video/mp4"
+                    const mp3 = result?.mime === "audio/mpeg"
+                    const wav = result?.mime === "audio/x-wav"
+                    const glb = functions.isGLTF(files[i].name)
+                    const fbx = functions.isFBX(files[i].name)
+                    const obj = functions.isOBJ(files[i].name)
+                    if (glb) result.typename = "glb"
+                    if (fbx) result.typename = "fbx"
+                    if (obj) result.typename = "obj"
                     const webm = (path.extname(files[i].name) === ".webm" && result?.typename === "mkv")
                     const zip = result?.mime === "application/zip"
-                    if (jpg || png || webp || gif || mp4 || webm || zip) {
+                    if (jpg || png || webp || gif || mp4 || webm || mp3 || wav || glb || fbx || obj || zip) {
                         const MB = files[i].size / (1024*1024)
                         const maxSize = jpg ? 5 :
                                         png ? 10 :
                                         webp ? 10 :
+                                        mp3 ? 25 :
+                                        wav ? 25 :
                                         gif ? 50 :
+                                        glb ? 50 :
+                                        fbx ? 50 :
+                                        obj ? 50 :
                                         mp4 ? 100 :
                                         webm ? 100 : 100
                         if (MB <= maxSize) {
@@ -205,17 +221,25 @@ const UploadPage: React.FunctionComponent = (props) => {
                                     const file = content.files[filename]
                                     if (file.dir || filename.startsWith("__MACOSX/")) continue
                                     const data = await file.async("uint8array")
-                                    const result = fileType(data)?.[0]
+                                    const result = fileType(data)?.[0] || {}
                                     const jpg = result?.mime === "image/jpeg"
                                     const png = result?.mime === "image/png"
                                     let webp = result?.mime === "image/webp"
                                     const gif = result?.mime === "image/gif"
                                     const mp4 = result?.mime === "video/mp4"
-                                    const webm = (path.extname(files[i].name) === ".webm" && result?.typename === "mkv")
-                                    if (jpg || png || webp || gif || mp4 || webm) {
+                                    const mp3 = result?.mime === "audio/mpeg"
+                                    const wav = result?.mime === "audio/x-wav"
+                                    const glb = functions.isGLTF(filename)
+                                    const fbx = functions.isFBX(filename)
+                                    const obj = functions.isOBJ(filename)
+                                    if (glb) result.typename = "glb"
+                                    if (fbx) result.typename = "fbx"
+                                    if (obj) result.typename = "obj"
+                                    const webm = (path.extname(filename) === ".webm" && result?.typename === "mkv")
+                                    if (jpg || png || webp || gif || mp4 || webm || mp3 || wav || glb || fbx || obj) {
                                         acceptedArray.push({file: new File([data], filename), ext: result.typename === "mkv" ? "webm" : result.typename, originalLink: links ? links[i] : null, bytes: data})
                                     } else {
-                                        error = `Supported types in zip: png, jpg, webp, gif, mp4, webm.`
+                                        error = `Supported types in zip: png, jpg, webp, gif, mp4, webm, mp3, wav, glb, fbx, obj.`
                                     }
                                 }
                                 resolve()
@@ -228,22 +252,27 @@ const UploadPage: React.FunctionComponent = (props) => {
                             resolve()
                         }
                     } else {
-                        error = `Supported file types: png, jpg, webp, gif, mp4, webm, zip.`
+                        error = `Supported file types: png, jpg, webp, gif, mp4, webm, mp3, wav, glb, fbx, obj, zip.`
                         resolve()
                     }
                 }
                 fileReader.readAsArrayBuffer(files[i])
-            })  
+            })
         }
         if (acceptedArray.length) {
             let urls = [] as any
             for (let i = 0; i < acceptedArray.length; i++) {
-                const url = URL.createObjectURL(acceptedArray[i].file)
+                let url = URL.createObjectURL(acceptedArray[i].file)
+                let link = `${url}#.${acceptedArray[i].ext}`
                 let thumbnail = ""
                 if (acceptedArray[i].ext === "mp4" || acceptedArray[i].ext === "webm") {
-                    thumbnail = await functions.videoThumbnail(url)
+                    thumbnail = await functions.videoThumbnail(link)
+                } else if (acceptedArray[i].ext === "glb" || acceptedArray[i].ext === "fbx" || acceptedArray[i].ext === "obj") {
+                    thumbnail = await functions.modelImage(link)
+                } else if (acceptedArray[i].ext === "mp3" || acceptedArray[i].ext === "wav") {
+                    thumbnail = await functions.songCover(link)
                 }
-                urls.push({link: `${url}#.${acceptedArray[i].ext}`, ext: acceptedArray[i].ext, size: acceptedArray[i].file.size, thumbnail,
+                urls.push({link, ext: acceptedArray[i].ext, size: acceptedArray[i].file.size, thumbnail,
                 originalLink: acceptedArray[i].originalLink, bytes: acceptedArray[i].bytes, name: acceptedArray[i].file.name})
             }
             setCurrentImg(urls[0].link)
@@ -787,7 +816,7 @@ const UploadPage: React.FunctionComponent = (props) => {
         }
         let current = acceptedURLs[currentIndex]
         let bytes = "" as any 
-        if (functions.isVideo(current.link)) {
+        if (current.thumbnail) {
             bytes = await functions.base64toUint8Array(current.thumbnail).then((a) => Object.values(a))
         } else {
             bytes = Object.values(current.bytes) as any
@@ -987,7 +1016,7 @@ const UploadPage: React.FunctionComponent = (props) => {
         } else {
             let current = acceptedURLs[currentIndex]
             let bytes = "" as any 
-            if (functions.isVideo(current.link)) {
+            if (current.thumbnail) {
                 bytes = await functions.base64toUint8Array(current.thumbnail).then((a) => Object.values(a))
             } else {
                 bytes = Object.values(current.bytes) as any
@@ -1176,6 +1205,71 @@ const UploadPage: React.FunctionComponent = (props) => {
         })
     }
 
+    const getPostJSX = () => {
+        if (functions.isModel(currentImg)) {
+            return <PostModel model={currentImg} noKeydown={true}/>
+        } else if (functions.isAudio(currentImg)) {
+            return <PostSong audio={currentImg} noKeydown={true}/>
+        } else {
+            return <PostImage img={currentImg} noKeydown={true}/>
+        }
+    }
+
+    const getStyleJSX = () => {
+        if (type === "model") {
+            return (
+                <div className="upload-row">
+                    <button className={`upload-button ${style === "3d" ? "button-selected" : ""}`} onClick={() => setStyle("3d")}>
+                        <img className="upload-button-img" src={$3d}/>
+                        <span className="upload-button-text">3D</span>
+                    </button>
+                    <button className={`upload-button ${style === "chibi" ? "button-selected" : ""}`} onClick={() => setStyle("chibi")}>
+                        <img className="upload-button-img" src={chibi}/>
+                        <span className="upload-button-text">Chibi</span>
+                    </button>
+                    <button className={`upload-button ${style === "pixel" ? "button-selected" : ""}`} onClick={() => setStyle("pixel")}>
+                        <img className="upload-button-img" src={pixel}/>
+                        <span className="upload-button-text">Pixel</span>
+                    </button>
+                </div>
+            )
+        } else if (type === "audio") {
+            return (
+                <div className="upload-row">
+                    <button className={`upload-button ${style === "2d" ? "button-selected" : ""}`} onClick={() => setStyle("2d")}>
+                        <img className="upload-button-img" src={$2d}/>
+                        <span className="upload-button-text">2D</span>
+                    </button>
+                    <button className={`upload-button ${style === "pixel" ? "button-selected" : ""}`} onClick={() => setStyle("pixel")}>
+                        <img className="upload-button-img" src={pixel}/>
+                        <span className="upload-button-text">Pixel</span>
+                    </button>
+                </div>
+            )
+        } else {
+            return (
+                <div className="upload-row">
+                    <button className={`upload-button ${style === "2d" ? "button-selected" : ""}`} onClick={() => setStyle("2d")}>
+                        <img className="upload-button-img" src={$2d}/>
+                        <span className="upload-button-text">2D</span>
+                    </button>
+                    <button className={`upload-button ${style === "3d" ? "button-selected" : ""}`} onClick={() => setStyle("3d")}>
+                        <img className="upload-button-img" src={$3d}/>
+                        <span className="upload-button-text">3D</span>
+                    </button>
+                    <button className={`upload-button ${style === "chibi" ? "button-selected" : ""}`} onClick={() => setStyle("chibi")}>
+                        <img className="upload-button-img" src={chibi}/>
+                        <span className="upload-button-text">Chibi</span>
+                    </button>
+                    <button className={`upload-button ${style === "pixel" ? "button-selected" : ""}`} onClick={() => setStyle("pixel")}>
+                        <img className="upload-button-img" src={pixel}/>
+                        <span className="upload-button-text">Pixel</span>
+                    </button>
+                </div>
+            )
+        }
+    }
+
     return (
         <>
         <DragAndDrop/>
@@ -1262,11 +1356,9 @@ const UploadPage: React.FunctionComponent = (props) => {
                     {acceptedURLs.length > 1 ? 
                     <div className="upload-container">
                         <Carousel images={acceptedURLs.map((u: any) => u.link)} set={set} index={currentIndex}/>
-                        <PostImage img={currentImg} noKeydown={true}/>
+                        {getPostJSX()}
                     </div>
-                    :
-                    <PostImage img={currentImg} noKeydown={true}/>
-                    }
+                    : getPostJSX()}
                 </div>
                 : null}
                 <span className="upload-heading">Classification</span>
@@ -1291,6 +1383,16 @@ const UploadPage: React.FunctionComponent = (props) => {
                         <img className="upload-button-img" src={comic}/>
                         <span className="upload-button-text">Comic</span>
                     </button>
+                </div>
+                <div className="upload-row">
+                    <button className={`upload-button ${type === "audio" ? "button-selected" : ""}`} onClick={() => setType("audio")}>
+                        <img className="upload-button-img" src={audio}/>
+                        <span className="upload-button-text">Audio</span>
+                    </button>
+                    <button className={`upload-button ${type === "model" ? "button-selected" : ""}`} onClick={() => setType("model")}>
+                        <img className="upload-button-img" src={model}/>
+                        <span className="upload-button-text">Model</span>
+                    </button>
                 </div> </>
                 :
                 <div className="upload-row">
@@ -1309,6 +1411,14 @@ const UploadPage: React.FunctionComponent = (props) => {
                     <button className={`upload-button ${type === "comic" ? "button-selected" : ""}`} onClick={() => setType("comic")}>
                         <img className="upload-button-img" src={comic}/>
                         <span className="upload-button-text">Comic</span>
+                    </button>
+                    <button className={`upload-button ${type === "audio" ? "button-selected" : ""}`} onClick={() => setType("audio")}>
+                        <img className="upload-button-img" src={audio}/>
+                        <span className="upload-button-text">Audio</span>
+                    </button>
+                    <button className={`upload-button ${type === "model" ? "button-selected" : ""}`} onClick={() => setType("model")}>
+                        <img className="upload-button-img" src={model}/>
+                        <span className="upload-button-text">Model</span>
                     </button>
                 </div>}
                 {mobile ? <>
@@ -1345,24 +1455,7 @@ const UploadPage: React.FunctionComponent = (props) => {
                         <span className="upload-button-text">Explicit</span>
                     </button> : null}
                 </div>}
-                <div className="upload-row">
-                    <button className={`upload-button ${style === "2d" ? "button-selected" : ""}`} onClick={() => setStyle("2d")}>
-                        <img className="upload-button-img" src={$2d}/>
-                        <span className="upload-button-text">2D</span>
-                    </button>
-                    <button className={`upload-button ${style === "3d" ? "button-selected" : ""}`} onClick={() => setStyle("3d")}>
-                        <img className="upload-button-img" src={$3d}/>
-                        <span className="upload-button-text">3D</span>
-                    </button>
-                    <button className={`upload-button ${style === "chibi" ? "button-selected" : ""}`} onClick={() => setStyle("chibi")}>
-                        <img className="upload-button-img" src={chibi}/>
-                        <span className="upload-button-text">Chibi</span>
-                    </button>
-                    <button className={`upload-button ${style === "pixel" ? "button-selected" : ""}`} onClick={() => setStyle("pixel")}>
-                        <img className="upload-button-img" src={pixel}/>
-                        <span className="upload-button-text">Pixel</span>
-                    </button>
-                </div>
+                {getStyleJSX()}
                 {dupPosts.length ? <>
                 <span className="upload-heading">Possible Duplicates</span>
                 <div className="upload-row">
@@ -1430,8 +1523,8 @@ const UploadPage: React.FunctionComponent = (props) => {
                 {displayImage && acceptedURLs.length ?
                 <div className="upload-row">
                     {functions.isVideo(currentImg) ? 
-                    <video autoPlay muted loop disablePictureInPicture className="tag-img-preview" src={currentImg}></video>:
-                    <img className="tag-img-preview" src={currentImg}/>}
+                    <video autoPlay muted loop disablePictureInPicture className="tag-img-preview" src={currentImg}></video> :
+                    <img className="tag-img-preview" src={acceptedURLs[currentIndex]?.thumbnail ? acceptedURLs[currentIndex].thumbnail : currentImg}/>}
                 </div>
                 : null}
                 <div className="upload-row" style={{marginBottom: "5px"}}>

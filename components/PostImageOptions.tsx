@@ -36,7 +36,9 @@ import "./styles/postimageoptions.less"
 import axios from "axios"
 
 interface Props {
-    img: string
+    img?: string
+    model?: string
+    audio?: string
     post?: any
     comicPages?: any
     download: () => void
@@ -65,20 +67,28 @@ const PostImageOptions: React.FunctionComponent<Props> = (props) => {
 
     useEffect(() => {
         const getDLText = async () => {
-            if (props.comicPages) {
-                let sizeTotal = 0
-                for (let i = 0; i < props.comicPages.length; i++) {
-                    let {size} = await functions.imageDimensions(props.comicPages[i])
-                    sizeTotal += size
+            if (props.img) {
+                if (props.comicPages) {
+                    let sizeTotal = 0
+                    for (let i = 0; i < props.comicPages.length; i++) {
+                        let {size} = await functions.imageDimensions(props.comicPages[i])
+                        sizeTotal += size
+                    }
+                    setDownloadText(`${props.comicPages.length} pages (${functions.readableFileSize(sizeTotal)})`)
+                } else {
+                    let {width, height, size} = await functions.imageDimensions(props.img)
+                    setDownloadText(`${width}x${height} (${functions.readableFileSize(size)})`)
                 }
-                setDownloadText(`${props.comicPages.length} pages (${functions.readableFileSize(sizeTotal)})`)
-            } else {
-                let {width, height, size} = await functions.imageDimensions(props.img)
-                setDownloadText(`${width}x${height} (${functions.readableFileSize(size)})`)
+            } else if (props.model) {
+                let {polycount, size} = await functions.modelDimensions(props.model)
+                setDownloadText(`${functions.readablePolycount(polycount)} (${functions.readableFileSize(size)})`)
+            } else if (props.audio) {
+                let {duration, size} = await functions.audioDimensions(props.audio)
+                setDownloadText(`${functions.formatSeconds(duration)} (${functions.readableFileSize(size)})`)
             }
         }
         getDLText()
-    }, [props.img, props.comicPages])
+    }, [props.img, props.model, props.audio, props.comicPages])
 
     const getFavorite = async () => {
         if (!props.post || !session.username) return
@@ -198,7 +208,10 @@ const PostImageOptions: React.FunctionComponent<Props> = (props) => {
 
     const getFilterMarginTop = () => {
         if (typeof document === "undefined") return "0px"
-        const bodyRect = document.querySelector(".post-image-box")?.getBoundingClientRect()
+        let elementName = ".post-image-box"
+        if (props.model) elementName = ".post-model-box"
+        if (props.audio) elementName = ".post-song-box"
+        const bodyRect = document.querySelector(elementName)?.getBoundingClientRect()
         const rect = filterRef.current?.getBoundingClientRect()
         if (!rect || !bodyRect) return "0px"
         const raw = bodyRect.bottom - rect.bottom

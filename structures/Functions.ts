@@ -13,6 +13,9 @@ import gifFrames from "gif-frames"
 import {JsWebm} from "jswebm"
 import localforage from "localforage"
 import cryptoFunctions from "./CryptoFunctions"
+import mm from "music-metadata"
+import * as THREE from "three"
+import {GLTFLoader, OBJLoader, FBXLoader} from "three-stdlib"
 
 let newScrollY = 0
 let lastScrollTop = 0
@@ -22,6 +25,8 @@ let mouseDown = false
 
 const imageExtensions = [".jpg", ".jpeg", ".png", ".webp"]
 const videoExtensions = [".mp4", ".mov", ".avi", ".mkv", ".webm"]
+const audioExtensions = [".mp3", ".wav"]
+const modelExtensions = [".glb", ".gltf", ".obj", ".fbx"]
 
 export default class Functions {
     public static isSafari = () => {
@@ -75,6 +80,11 @@ export default class Functions {
             })
         })
     }
+
+    public static removeItem = <T>(array: T[], value: T) => {
+        return array.filter((item) => JSON.stringify(item) !== JSON.stringify(value))
+    }
+
     public static formatSeconds = (duration: number) => {
         let seconds = Math.floor(duration % 60) as any
         let minutes = Math.floor((duration / 60) % 60) as any
@@ -96,7 +106,8 @@ export default class Functions {
         return false
     }
 
-    public static isImage = (file: string) => {
+    public static isImage = (file?: string) => {
+        if (!file) return false
         if (file?.startsWith("blob:")) {
             const ext = file.split("#")?.[1] || ""
             return Functions.arrayIncludes(ext, imageExtensions)
@@ -104,7 +115,26 @@ export default class Functions {
         return Functions.arrayIncludes(path.extname(file), imageExtensions)
     }
 
-    public static isGIF = (file: string) => {
+    public static isAudio = (file?: string) => {
+        if (!file) return false
+        if (file?.startsWith("blob:")) {
+            const ext = file.split("#")?.[1] || ""
+            return Functions.arrayIncludes(ext, audioExtensions)
+        }
+        return Functions.arrayIncludes(path.extname(file), audioExtensions)
+    }
+
+    public static isModel = (file?: string) => {
+        if (!file) return false
+        if (file?.startsWith("blob:")) {
+            const ext = file.split("#")?.[1] || ""
+            return Functions.arrayIncludes(ext, modelExtensions)
+        }
+        return Functions.arrayIncludes(path.extname(file), modelExtensions)
+    }
+
+    public static isGIF = (file?: string) => {
+        if (!file) return false
         if (file?.startsWith("blob:")) {
             const ext = file.split("#")?.[1] || ""
             return ext === ".gif"
@@ -112,12 +142,40 @@ export default class Functions {
         return path.extname(file) === ".gif"
     }
 
-    public static isWebP = (file: string) => {
+    public static isWebP = (file?: string) => {
+        if (!file) return false
         if (file?.startsWith("blob:")) {
             const ext = file.split("#")?.[1] || ""
             return ext === ".webp"
         }
         return path.extname(file) === ".webp"
+    }
+
+    public static isGLTF = (file?: string) => {
+        if (!file) return false
+        if (file?.startsWith("blob:")) {
+            const ext = file.split("#")?.[1] || ""
+            return ext === ".glb"
+        }
+        return path.extname(file) === ".glb"
+    }
+
+    public static isOBJ = (file?: string) => {
+        if (!file) return false
+        if (file?.startsWith("blob:")) {
+            const ext = file.split("#")?.[1] || ""
+            return ext === ".obj"
+        }
+        return path.extname(file) === ".obj"
+    }
+
+    public static isFBX = (file?: string) => {
+        if (!file) return false
+        if (file?.startsWith("blob:")) {
+            const ext = file.split("#")?.[1] || ""
+            return ext === ".fbx"
+        }
+        return path.extname(file) === ".fbx"
     }
 
     public static isAnimatedWebp = async (buffer: ArrayBuffer) => {
@@ -134,7 +192,8 @@ export default class Functions {
         }
     }
 
-    public static isVideo = (file: string) => {
+    public static isVideo = (file?: string) => {
+        if (!file) return false
         if (file?.startsWith("blob:")) {
             const ext = file.split("#")?.[1] || ""
             return Functions.arrayIncludes(ext, videoExtensions)
@@ -142,7 +201,8 @@ export default class Functions {
         return Functions.arrayIncludes(path.extname(file), videoExtensions)
     }
 
-    public static isMP4 = (file: string) => {
+    public static isMP4 = (file?: string) => {
+        if (!file) return false
         if (file?.startsWith("blob:")) {
             const ext = file.split("#")?.[1] || ""
             return ext === ".mp4"
@@ -150,7 +210,8 @@ export default class Functions {
         return path.extname(file) === ".mp4"
     }
 
-    public static isWebM = (file: string) => {
+    public static isWebM = (file?: string) => {
+        if (!file) return false
         if (file?.startsWith("blob:")) {
             const ext = file.split("#")?.[1] || ""
             return ext === ".webm"
@@ -705,6 +766,11 @@ export default class Functions {
         return value
       }
 
+      public static linearToDecibels = (value: number) => {
+        if (value === 0) return -Infinity
+        return 20 * Math.log10(value)
+      }
+
       public static renderCumulativeFrames = (frameData: any) => {
         if (frameData.length === 0) {
           return frameData
@@ -950,7 +1016,9 @@ export default class Functions {
         if (type === "image" ||
             type === "animation" ||
             type === "video" ||
-            type === "comic") return true 
+            type === "comic" ||
+            type === "audio" ||
+            type === "model") return true 
         return false
     }
       
@@ -1030,7 +1098,8 @@ export default class Functions {
     }
 
     public static parseTags = async (posts: any) => {
-        const postIDs = posts.map((post: any) => post.postID)
+        let cleanPosts = posts.filter((p: any) => !p.fake)
+        const postIDs = cleanPosts.map((post: any) => post.postID)
         let result = await axios.post("/api/search/sidebartags", {postIDs}, {withCredentials: true}).then((r) => r.data).catch(() => null)
         return result ? result : []
     }
@@ -1129,8 +1198,8 @@ export default class Functions {
                     let width = video.videoWidth 
                     let height = video.videoHeight
                     try {
-                        const r = await fetch(image)
-                        const size = Number(r.headers.get("Content-Length"))
+                        const r = await fetch(image).then(((r) => r.arrayBuffer()))
+                        const size = r.byteLength // Number(r.headers.get("Content-Length"))
                         resolve({width, height, size})
                     } catch {
                         resolve({width, height, size: 0})
@@ -1138,25 +1207,123 @@ export default class Functions {
                 })
                 video.src = image
             } else {
+                let imageLink = Functions.isImage(image) ? await cryptoFunctions.decryptedLink(image) : image
                 const img = document.createElement("img")
                 img.addEventListener("load", async () => {
                     let width = img.width
                     let height = img.height
                     try {
-                        const r = await fetch(image)
-                        const size = Number(r.headers.get("Content-Length"))
+                        const r = await fetch(imageLink).then((r) => r.arrayBuffer())
+                        const size = r.byteLength // Number(r.headers.get("Content-Length"))
                         resolve({width, height, size})
                     } catch {
                         resolve({width, height, size: 0})
                     }
                 })
-                if (Functions.isImage(image)) {
-                    img.src = await cryptoFunctions.decryptedLink(image)
-                } else {
-                    img.src = image
-                }
+                img.src = imageLink
             }
         })
+    }
+
+    public static readablePolycount = (polycount: number) => {
+        const i = polycount === 0 ? 0 : Math.floor(Math.log(polycount) / Math.log(1000))
+        return `${Number((polycount / Math.pow(1000, i)).toFixed(2))} ${["P", "KP", "MP", "GP", "TP"][i]}`
+    }
+
+    public static modelDimensions = async (model: string) => {
+        const scene = new THREE.Scene()
+        const renderer = new THREE.WebGLRenderer()
+
+        let object = null as unknown as THREE.Object3D
+        if (Functions.isGLTF(model)) {
+            const loader = new GLTFLoader()
+            object = await loader.loadAsync(model).then((l) => l.scene)
+        } else if (Functions.isOBJ(model)) {
+            const loader = new OBJLoader()
+            object = await loader.loadAsync(model)
+        } else if (Functions.isFBX(model)) {
+            const loader = new FBXLoader()
+            object = await loader.loadAsync(model)
+        }
+        scene.add(object)
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000)
+        renderer.render(scene, camera)
+        const polycount = renderer.info.render.triangles
+        const r = await fetch(model).then((r) => r.arrayBuffer())
+        const size = r.byteLength
+        return {polycount, size}
+    }
+
+    public static modelImage = async (model: string, imageSize?: number) => {
+        if (!imageSize) imageSize = 350
+        const width = imageSize
+        const height = imageSize
+        const scene = new THREE.Scene()
+        const camera = new THREE.PerspectiveCamera(75, width / height, 0.1, 1000)
+        const light = new THREE.AmbientLight(0xffffff, 1)
+        scene.add(light)
+        
+        const renderer = new THREE.WebGLRenderer({alpha: true, preserveDrawingBuffer: true})
+        renderer.setClearColor(0x000000, 1)
+        renderer.setSize(width, height)
+        renderer.setPixelRatio(window.devicePixelRatio)
+
+        let object = null as unknown as THREE.Object3D
+        if (Functions.isGLTF(model)) {
+            const loader = new GLTFLoader()
+            object = await loader.loadAsync(model).then((l) => l.scene)
+        } else if (Functions.isOBJ(model)) {
+            const loader = new OBJLoader()
+            object = await loader.loadAsync(model)
+        } else if (Functions.isFBX(model)) {
+            const loader = new FBXLoader()
+            object = await loader.loadAsync(model)
+        }
+        scene.add(object)
+
+        const box = new THREE.Box3().setFromObject(object)
+        const size = box.getSize(new THREE.Vector3()).length()
+        const center = box.getCenter(new THREE.Vector3())
+
+        object.position.x += (object.position.x - center.x)
+        object.position.y += (object.position.y - center.y)
+        object.position.z += (object.position.z - center.z)
+
+        camera.near = size / 100
+        camera.far = size * 100
+        camera.updateProjectionMatrix()
+
+        camera.position.copy(center)
+        camera.position.x += size / 2.0
+        camera.position.y += size / 5.0
+        camera.position.z += size / 2.0
+        camera.lookAt(center)
+        renderer.render(scene, camera)
+        return renderer.domElement.toDataURL()
+    }
+
+    
+    public static audioDimensions = async (audio: string) => {
+        const buffer = await fetch(audio).then((r) => r.arrayBuffer())
+        const tagInfo = await mm.parseBuffer(new Uint8Array(buffer))
+        const duration = tagInfo.format.duration || 0
+        const size = buffer.byteLength
+        return {duration, size}
+    }
+
+    public static songCover = async (audio: string) => {
+        const buffer = await fetch(audio).then((r) => r.arrayBuffer())
+        const tagInfo = await mm.parseBuffer(new Uint8Array(buffer))
+        const picture = tagInfo.common.picture
+        if (picture) {
+            let buffer = new Uint8Array() as Buffer
+            for (let i = 0; i < picture.length; i++) {
+                buffer = Buffer.concat([buffer, picture[i].data])
+            }
+            return `data:${picture[0].format};base64,${buffer.toString("base64")}`
+        } else {
+            return ""
+        }
     }
 
     public static imageSearch = async (file: File) => {
@@ -1517,5 +1684,15 @@ export default class Functions {
             return mobileSidebar ? 0 : 230
         }
         return sidebar.clientWidth
+    }
+
+    public static getFile = async (filepath: string) => {
+        const blob = await axios.get(filepath, {responseType: "blob"}).then((r) => r.data)
+        const name = path.basename(filepath).replace(".mp3", "").replace(".wav", "").replace(".flac", "").replace(".ogg", "")
+        // @ts-ignore
+        blob.lastModifiedDate = new Date()
+        // @ts-ignore
+        blob.name = name
+        return blob as File
     }
 }

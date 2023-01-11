@@ -231,6 +231,7 @@ const SearchRoutes = (app: Express) => {
             if (!postArray.length) return res.status(200).json([])
             if (postArray.length < 50) {
                 if (req.session.captchaAmount === undefined) req.session.captchaAmount = 51
+                if (req.session.role === "admin" || req.session.role === "mod") req.session.captchaAmount = 0
                 if (req.session.captchaAmount > 50) return res.status(401).end()
             }
             let posts = await sql.posts(postArray)

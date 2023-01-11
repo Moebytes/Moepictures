@@ -5,6 +5,8 @@ RestrictTypeContext, StyleTypeContext, SortTypeContext, SearchContext, SearchFla
 RandomFlagContext, ImageSearchFlagContext, SidebarTextContext, MobileContext, SessionContext, VisiblePostsContext,
 ScrollYContext, ScrollContext, PageContext} from "../Context"
 import GridImage from "./GridImage"
+import GridModel from "./GridModel"
+import GridSong from "./GridSong"
 import noresults from "../assets/misc/noresults.png"
 import axios from "axios"
 import functions from "../structures/Functions"
@@ -402,7 +404,13 @@ const ImageGrid: React.FunctionComponent<Props> = (props) => {
             const image = post.images[0]
             if (!image) continue
             const images = post.images.map((i: any) => functions.getImageLink(i.type, post.postID, i.filename))
-            jsx.push(<GridImage key={post.postID} id={post.postID} img={functions.getThumbnailLink(image.type, post.postID, image.filename, sizeType)} comicPages={post.type === "comic" ? images : null} post={post}/>)
+            if (post.type === "model") {
+                jsx.push(<GridModel key={post.postID} id={post.postID} model={functions.getThumbnailLink(image.type, post.postID, image.filename, sizeType)} post={post}/>)
+            } else if (post.type === "audio") {
+                jsx.push(<GridSong key={post.postID} id={post.postID} audio={functions.getThumbnailLink(image.type, post.postID, image.filename, sizeType)} post={post}/>)
+            } else {
+                jsx.push(<GridImage key={post.postID} id={post.postID} img={functions.getThumbnailLink(image.type, post.postID, image.filename, sizeType)} comicPages={post.type === "comic" ? images : null} post={post}/>)
+            }
         }
         if (!jsx.length && noResults) {
             jsx.push(

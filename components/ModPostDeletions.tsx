@@ -116,8 +116,12 @@ const ModPostDeletions: React.FunctionComponent = (props) => {
             if (functions.isGIF(img)) continue
             if (!ref.current) continue
             let src = img
-            if (functions.isImage(src)) {
-                src = await cryptoFunctions.decryptedLink(src)
+            if (functions.isImage(img)) {
+                src = await cryptoFunctions.decryptedLink(img)
+            } else if (functions.isModel(img)) {
+                src = await functions.modelImage(img)
+            } else if (functions.isAudio(img)) {
+                src = await functions.songCover(img)
             }
             const imgElement = document.createElement("img")
             imgElement.src = src 

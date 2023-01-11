@@ -31,6 +31,10 @@ import video from "../assets/purple/video.png"
 import videoMagenta from "../assets/magenta/video.png"
 import comic from "../assets/purple/comic.png"
 import comicMagenta from "../assets/magenta/comic.png"
+import model from "../assets/purple/model.png"
+import modelMagenta from "../assets/magenta/model.png"
+import audio from "../assets/purple/audio.png"
+import audioMagenta from "../assets/magenta/audio.png"
 import explicit from "../assets/purple/explicit.png"
 import explicitMagenta from "../assets/magenta/explicit.png"
 import questionable from "../assets/purple/questionable.png"
@@ -116,6 +120,9 @@ const SortBar: React.FunctionComponent = (props) => {
     const {scroll, setScroll} = useContext(ScrollContext)
     const [dropLeft, setDropLeft] = useState(0)
     const [dropTop, setDropTop] = useState(0)
+    const [lastImageType, setLastImageType] = useState(null) as any
+    const [lastRestrictType, setLastRestrictType] = useState(null) as any
+    const [lastStyleType, setLastStyleType] = useState(null) as any
     const imageRef = useRef(null) as any
     const restrictRef = useRef(null) as any
     const styleRef = useRef(null) as any
@@ -256,6 +263,16 @@ const SortBar: React.FunctionComponent = (props) => {
     const getComic = () => {
         if (theme.includes("magenta")) return comicMagenta
         return comic
+    }
+
+    const getModel = () => {
+        if (theme.includes("magenta")) return modelMagenta
+        return model
+    }
+
+    const getAudio = () => {
+        if (theme.includes("magenta")) return audioMagenta
+        return audio
     }
 
     const getSafe = () => {
@@ -418,6 +435,20 @@ const SortBar: React.FunctionComponent = (props) => {
                     <span className="sortbar-text">Comic</span>
                 </div>
             )
+        } else if (imageType === "model") {
+                return (
+                    <div className="sortbar-item" ref={imageRef} onClick={() => {setActiveDropdown(activeDropdown === "image" ? "none" : "image"); setFilterDropActive(false)}}>
+                        <img className="sortbar-img" src={getModel()}/>
+                        <span className="sortbar-text">Model</span>
+                    </div>
+                )
+        } else if (imageType === "audio") {
+                return (
+                    <div className="sortbar-item" ref={imageRef} onClick={() => {setActiveDropdown(activeDropdown === "image" ? "none" : "image"); setFilterDropActive(false)}}>
+                        <img className="sortbar-img" src={getAudio()}/>
+                        <span className="sortbar-text">Audio</span>
+                    </div>
+                )
         } else {
             return (
                 <div className="sortbar-item" ref={imageRef} onClick={() => {setActiveDropdown(activeDropdown === "image" ? "none" : "image"); setFilterDropActive(false)}}>
@@ -437,6 +468,10 @@ const SortBar: React.FunctionComponent = (props) => {
             return <img style={{height: "30px"}} className="sortbar-img" src={getVideo()} onClick={() => {setActiveDropdown(activeDropdown === "image" ? "none" : "image"); setFilterDropActive(false)}}/>
         } else if (imageType === "comic") {
             return <img style={{height: "30px"}} className="sortbar-img" src={getComic()} onClick={() => {setActiveDropdown(activeDropdown === "image" ? "none" : "image"); setFilterDropActive(false)}}/>
+        } else if (imageType === "model") {
+                return <img style={{height: "30px"}} className="sortbar-img" src={getModel()} onClick={() => {setActiveDropdown(activeDropdown === "image" ? "none" : "image"); setFilterDropActive(false)}}/>
+        } else if (imageType === "audio") {
+                    return <img style={{height: "30px"}} className="sortbar-img" src={getAudio()} onClick={() => {setActiveDropdown(activeDropdown === "image" ? "none" : "image"); setFilterDropActive(false)}}/>
         } else {
             return <img style={{height: "30px"}} className="sortbar-img rotate" src={getAll()} onClick={() => {setActiveDropdown(activeDropdown === "image" ? "none" : "image"); setFilterDropActive(false)}}/>
         }
@@ -453,6 +488,8 @@ const SortBar: React.FunctionComponent = (props) => {
         if (imageType === "animation") offset = -5
         if (imageType === "video") offset = -15
         if (imageType === "comic") offset = -15
+        if (imageType === "audio") offset = -15
+        if (imageType === "model") offset = -15
         return `${raw + offset}px`
     }
 
@@ -700,6 +737,86 @@ const SortBar: React.FunctionComponent = (props) => {
         })
     }
 
+    const styleDropdownJSX = () => {
+        if (imageType === "model") {
+            return (
+                <>
+                    <div className="sortbar-dropdown-row" onClick={() => setStyleType("all")}>
+                        <img className="sortbar-dropdown-img rotate" src={getAll()}/>
+                        <span className="sortbar-dropdown-text">All</span>
+                    </div>
+                    <div className="sortbar-dropdown-row" onClick={() => setStyleType("3d")}>
+                        <img className="sortbar-dropdown-img" src={get3D()}/>
+                        <span className="sortbar-dropdown-text">3D</span>
+                    </div>
+                    <div className="sortbar-dropdown-row" onClick={() => setStyleType("chibi")}>
+                        <img className="sortbar-dropdown-img" src={getChibi()}/>
+                        <span className="sortbar-dropdown-text">Chibi</span>
+                    </div>
+                    <div className="sortbar-dropdown-row" onClick={() => setStyleType("pixel")}>
+                        <img className="sortbar-dropdown-img" src={getPixel()}/>
+                        <span className="sortbar-dropdown-text">Pixel</span>
+                    </div>
+                </>
+            )
+
+        } else if (imageType === "audio") {
+            return (
+                <>
+                    <div className="sortbar-dropdown-row" onClick={() => setStyleType("all")}>
+                        <img className="sortbar-dropdown-img rotate" src={getAll()}/>
+                        <span className="sortbar-dropdown-text">All</span>
+                    </div>
+                    <div className="sortbar-dropdown-row" onClick={() => setStyleType("2d")}>
+                        <img className="sortbar-dropdown-img" src={get2D()}/>
+                        <span className="sortbar-dropdown-text">2D</span>
+                    </div>
+                    <div className="sortbar-dropdown-row" onClick={() => setStyleType("pixel")}>
+                        <img className="sortbar-dropdown-img" src={getPixel()}/>
+                        <span className="sortbar-dropdown-text">Pixel</span>
+                    </div>
+                </>
+            )
+        } else {
+            return (
+                <>
+                    <div className="sortbar-dropdown-row" onClick={() => setStyleType("all")}>
+                        <img className="sortbar-dropdown-img rotate" src={getAll()}/>
+                        <span className="sortbar-dropdown-text">All</span>
+                    </div>
+                    <div className="sortbar-dropdown-row" onClick={() => setStyleType("2d")}>
+                        <img className="sortbar-dropdown-img" src={get2D()}/>
+                        <span className="sortbar-dropdown-text">2D</span>
+                    </div>
+                    <div className="sortbar-dropdown-row" onClick={() => setStyleType("3d")}>
+                        <img className="sortbar-dropdown-img" src={get3D()}/>
+                        <span className="sortbar-dropdown-text">3D</span>
+                    </div>
+                    <div className="sortbar-dropdown-row" onClick={() => setStyleType("chibi")}>
+                        <img className="sortbar-dropdown-img" src={getChibi()}/>
+                        <span className="sortbar-dropdown-text">Chibi</span>
+                    </div>
+                    <div className="sortbar-dropdown-row" onClick={() => setStyleType("pixel")}>
+                        <img className="sortbar-dropdown-img" src={getPixel()}/>
+                        <span className="sortbar-dropdown-text">Pixel</span>
+                    </div>
+                </>
+            )
+        }
+    }
+
+    useEffect(() => {
+        if (imageType === "model") {
+            if (styleType === "2d") {
+                setStyleType("3d")
+            }
+        } else if (imageType === "audio") {
+            if (styleType === "3d" || styleType === "chibi") {
+                setStyleType("2d")
+            }
+        }
+    }, [imageType, styleType])
+
     let sortBarJSX = () => {
         if (mobile) return (
             <div className={`mobile-sortbar ${relative ? "mobile-sortbar-relative" : ""} ${mobileScrolling ? "hide-mobile-sortbar" : ""}`}>
@@ -803,6 +920,14 @@ const SortBar: React.FunctionComponent = (props) => {
                     <img className="sortbar-dropdown-img" src={getComic()}/>
                     <span className="sortbar-dropdown-text">Comic</span>
                 </div>
+                <div className="sortbar-dropdown-row" onClick={() => setImageType("audio")}>
+                    <img className="sortbar-dropdown-img" src={getAudio()}/>
+                    <span className="sortbar-dropdown-text">Audio</span>
+                </div>
+                <div className="sortbar-dropdown-row" onClick={() => setImageType("model")}>
+                    <img className="sortbar-dropdown-img" src={getModel()}/>
+                    <span className="sortbar-dropdown-text">Model</span>
+                </div>
             </div>
             <div className={`dropdown ${activeDropdown === "restrict" ? "" : "hide-dropdown"}`} 
             style={{marginLeft: getRestrictMargin(), left: `${dropLeft}px`, top: `${dropTop}px`}} onClick={() => setActiveDropdown("none")}>
@@ -826,26 +951,7 @@ const SortBar: React.FunctionComponent = (props) => {
             </div>
             <div className={`dropdown ${activeDropdown === "style" ? "" : "hide-dropdown"}`} 
             style={{marginLeft: getStyleMargin(), left: `${dropLeft}px`, top: `${dropTop}px`}} onClick={() => setActiveDropdown("none")}>
-                <div className="sortbar-dropdown-row" onClick={() => setStyleType("all")}>
-                    <img className="sortbar-dropdown-img rotate" src={getAll()}/>
-                    <span className="sortbar-dropdown-text">All</span>
-                </div>
-                <div className="sortbar-dropdown-row" onClick={() => setStyleType("2d")}>
-                    <img className="sortbar-dropdown-img" src={get2D()}/>
-                    <span className="sortbar-dropdown-text">2D</span>
-                </div>
-                <div className="sortbar-dropdown-row" onClick={() => setStyleType("3d")}>
-                    <img className="sortbar-dropdown-img" src={get3D()}/>
-                    <span className="sortbar-dropdown-text">3D</span>
-                </div>
-                <div className="sortbar-dropdown-row" onClick={() => setStyleType("chibi")}>
-                    <img className="sortbar-dropdown-img" src={getChibi()}/>
-                    <span className="sortbar-dropdown-text">Chibi</span>
-                </div>
-                <div className="sortbar-dropdown-row" onClick={() => setStyleType("pixel")}>
-                    <img className="sortbar-dropdown-img" src={getPixel()}/>
-                    <span className="sortbar-dropdown-text">Pixel</span>
-                </div>
+                {styleDropdownJSX()}
             </div>
             <div className={`dropdown-right ${activeDropdown === "speed" ? "" : "hide-dropdown"}`} 
             style={{marginRight: getSpeedMargin(), top: `${dropTop}px`}} onClick={() => setActiveDropdown("none")}>

@@ -112,7 +112,7 @@ app.use(express.static(path.join(__dirname, "./public")))
 app.use(express.static(path.join(__dirname, "./dist"), {index: false}))
 app.use("/assets", express.static(path.join(__dirname, "./assets")))
 
-let folders = ["animation", "artist", "character", "comic", "image", "pfp", "series", "tag", "video"]
+let folders = ["animation", "artist", "character", "comic", "image", "pfp", "series", "tag", "video", "audio", "model"]
 
 for (let i = 0; i < folders.length; i++) {
   serverFunctions.uploadFile(`${folders[i]}/`, "")
