@@ -1280,7 +1280,7 @@ const EditPostPage: React.FunctionComponent<Props> = (props) => {
         } else if (functions.isAudio(currentImg)) {
             return <PostSong audio={currentImg} noKeydown={true}/>
         } else {
-            return <PostImage img={currentImg} noKeydown={true}/>
+            return <PostImage img={currentImg} noKeydown={true} noEncryption={true}/>
         }
     }
 
@@ -1338,6 +1338,14 @@ const EditPostPage: React.FunctionComponent<Props> = (props) => {
             )
         }
     }
+
+    useEffect(() => {
+        if (type === "model") {
+            if (style === "2d") setStyle("3d")
+        } else if (type === "audio") {
+            if (style === "3d" || style === "chibi") setStyle("2d")
+        }
+    }, [type, style])
 
     return (
         <>
@@ -1425,7 +1433,7 @@ const EditPostPage: React.FunctionComponent<Props> = (props) => {
                 <div className="editpost-row">
                     {acceptedURLs.length > 1 ? 
                     <div className="editpost-container">
-                        <Carousel images={acceptedURLs.map((u: any) => u.link)} set={set} index={currentIndex}/>
+                        <Carousel images={acceptedURLs.map((u: any) => u.link)} set={set} index={currentIndex} noEncryption={true}/>
                         {getPostJSX()}
                     </div>
                     : getPostJSX()}

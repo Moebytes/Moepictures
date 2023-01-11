@@ -50,6 +50,7 @@ interface Props {
     scale?: number
     noKeydown?: boolean
     comicPages?: any
+    noEncryption?: boolean
 }
 
 const PostImage: React.FunctionComponent<Props> = (props) => {
@@ -1182,7 +1183,7 @@ const PostImage: React.FunctionComponent<Props> = (props) => {
         if (!ref.current || !overlayRef.current || !lightnessRef.current || !dummyRef.current) return
         let src = functions.isVideo(props.img) ? backFrame : props.img
         if (functions.isImage(src)) {
-            src = await cryptoFunctions.decryptedLink(src)
+            if (!props.noEncryption) src = await cryptoFunctions.decryptedLink(src)
         }
         const img = document.createElement("img")
         img.src = src 

@@ -81,7 +81,7 @@ const HelpPage: React.FunctionComponent = (props) => {
                             <Link className="help-link" to="/help#aliases">Aliases</Link>
                             <Link className="help-link" to="/help#commenting">Commenting</Link>
                             <Link className="help-link" to="/help#bans">Bans</Link>
-                            <Link className="help-link" to="/help#ai-protection">Bot Protection</Link>
+                            <Link className="help-link" to="/help#ai-protection">AI Protection</Link>
                             <Link className="help-link" to="/help#deleting-account">Deleting Your Account</Link>
                         </div>
                     </span>
@@ -251,7 +251,7 @@ const HelpPage: React.FunctionComponent = (props) => {
                         If you break the rules severely or consistently, you might get banned. If you get banned, you 
                         are not allowed to register another account.
                     </span>
-                    <span className="help-heading" id="bot-protection">Bot Protection</span>
+                    <span className="help-heading" id="ai-protection">AI Protection</span>
                     <span className="help-text">
                         All images are sent encrypted and they are decrypted in the browser. This prevents direct image downloads without first
                         decrypting the binary data.<br/><br/>

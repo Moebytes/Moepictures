@@ -90,10 +90,10 @@ const PostModel: React.FunctionComponent<Props> = (props) => {
         const camera = new THREE.PerspectiveCamera(75, width / height, 0.1, 1000)
         const light = new THREE.AmbientLight(0xffffff, 0.5)
         scene.add(light)
-        const light2 = new THREE.DirectionalLight(0xffffff, 0.3)
+        const light2 = new THREE.DirectionalLight(0xffffff, 0.2)
         light2.position.set(30, 100, 100)
         scene.add(light2)
-        const light3 = new THREE.DirectionalLight(0xffffff, 0.3)
+        const light3 = new THREE.DirectionalLight(0xffffff, 0.2)
         light3.position.set(-30, 100, -100)
         scene.add(light3)
         
@@ -144,10 +144,10 @@ const PostModel: React.FunctionComponent<Props> = (props) => {
         }
         scene.add(model)
 
-        const controlElement = document.querySelector(".post-model-filters") as HTMLElement
+        const controlElement = fullscreenRef.current || undefined
 
         const controls = new OrbitControls(camera, controlElement)
-        controlElement.addEventListener("doubleclick", () => {
+        controlElement?.addEventListener("doubleclick", () => {
             controls.reset()
         })
 

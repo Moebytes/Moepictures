@@ -1348,6 +1348,14 @@ const EditUnverifiedPostPage: React.FunctionComponent<Props> = (props) => {
         }
     }
 
+    useEffect(() => {
+        if (type === "model") {
+            if (style === "2d") setStyle("3d")
+        } else if (type === "audio") {
+            if (style === "3d" || style === "chibi") setStyle("2d")
+        }
+    }, [type, style])
+
     return (
         <>
         <DragAndDrop/>
@@ -1431,12 +1439,10 @@ const EditUnverifiedPostPage: React.FunctionComponent<Props> = (props) => {
                 <div className="editpost-row">
                     {acceptedURLs.length > 1 ? 
                     <div className="editpost-container">
-                        <Carousel images={acceptedURLs.map((u: any) => u.link)} set={set} index={currentIndex}/>
-                        <PostImage img={currentImg} noKeydown={true}/>
+                        <Carousel images={acceptedURLs.map((u: any) => u.link)} set={set} index={currentIndex} noEncryption={true}/>
+                        {getPostJSX()}
                     </div>
-                    :
-                    <PostImage img={currentImg} noKeydown={true}/>
-                    }
+                    : getPostJSX()}
                 </div>
                 : null}
                 <span className="editpost-heading">Classification</span>
