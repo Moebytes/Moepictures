@@ -15,6 +15,14 @@ const tagLimiter = rateLimit({
 	legacyHeaders: false
 })
 
+const tagEditLimiter = rateLimit({
+	windowMs: 5 * 60 * 1000,
+	max: 100,
+	message: "Too many requests, try again later.",
+	standardHeaders: true,
+	legacyHeaders: false
+})
+
 const TagRoutes = (app: Express) => {
     app.get("/api/tag", tagLimiter, async (req: Request, res: Response, next: NextFunction) => {
         try {
@@ -69,6 +77,8 @@ const TagRoutes = (app: Express) => {
             const tagExists = await sql.tag(tag.trim())
             if (!req.session.username || !tagExists) return res.status(400).send("Bad request")
             if (req.session.role !== "admin") return res.status(403).end()
+            await serverFunctions.deleteFolder(`history/tag/${tag.trim()}`).catch(() => null)
+            await serverFunctions.deleteFile(functions.getTagPath(tagExists.type, tagExists.image)).catch(() => null)
             await sql.deleteTag(tag.trim())
             res.status(200).send("Success")
         } catch {
@@ -76,19 +86,23 @@ const TagRoutes = (app: Express) => {
         }
     })
 
-    app.put("/api/tag/edit", tagLimiter, async (req: Request, res: Response) => {
+    app.put("/api/tag/edit", tagEditLimiter, async (req: Request, res: Response) => {
         try {
-            const {tag, key, description, image, aliases, implications, pixiv, twitter, website, fandom} = req.body
+            const {tag, key, description, image, aliases, implications, pixiv, twitter, website, fandom, reason} = req.body
             if (!req.session.username || !tag) return res.status(400).send("Bad request")
-            if (req.session.role !== "admin" && req.session.role !== "mod") return res.status(403).end()
             const tagObj = await sql.tag(tag)
             if (!tagObj) return res.status(400).send("Bad request")
+            let imageFilename = tagObj.image
+            let tagDescription = tagObj.description
             if (description !== undefined) {
                 await sql.updateTag(tag, "description", description)
+                tagDescription = description
             }
+            let vanillaImageBuffer = null as any
             if (image?.[0]) {
                 if (tagObj.image) {
                     const imagePath = functions.getTagPath(tagObj.type, tagObj.image)
+                    vanillaImageBuffer = await serverFunctions.getFile(imagePath)
                     await serverFunctions.deleteFile(imagePath)
                     tagObj.image = null
                 }
@@ -98,8 +112,10 @@ const TagRoutes = (app: Express) => {
                     await serverFunctions.uploadFile(imagePath, Buffer.from(Object.values(image)))
                     await sql.updateTag(tag, "image", filename)
                     tagObj.image = filename
+                    imageFilename = filename
                 } else {
                     await sql.updateTag(tag, "image", null as any)
+                    imageFilename = null
                 }
             }
             if (aliases) {
@@ -123,6 +139,7 @@ const TagRoutes = (app: Express) => {
                     const newImagePath = functions.getTagPath(tagObj.type, newFilename)
                     await serverFunctions.renameFile(oldImagePath, newImagePath)
                     await sql.updateTag(tag, "image", newFilename)
+                    imageFilename = newFilename
                 }
                 await sql.updateTag(tag, "tag", key.trim())
             }
@@ -149,6 +166,38 @@ const TagRoutes = (app: Express) => {
                 if (twitter !== undefined) {
                     await sql.updateTag(tag, "twitter", twitter)
                 }
+            }
+            const tagHistory = await sql.tagHistory(tag)
+            if (!tagHistory.length) {
+                const vanilla = await sql.tag(tag)
+                const posts = await sql.search([tag], "all", "all", "all", "reverse date", undefined, "1")
+                vanilla.date = posts[0].uploadDate 
+                vanilla.user = posts[0].uploader
+                vanilla.key = tag
+                vanilla.aliases = vanilla.aliases.map((alias: any) => alias?.alias)
+                vanilla.implications = vanilla.implications.map((implication: any) => implication?.implication)
+                if (vanilla.image && vanillaImageBuffer) {
+                    const newImagePath = functions.getTagHistoryPath(tag, 1, vanilla.image)
+                    await serverFunctions.uploadFile(newImagePath, vanillaImageBuffer)
+                    vanilla.image = newImagePath
+                } else {
+                    vanilla.image = null
+                }
+                await sql.insertTagHistory(vanilla.user, vanilla.tag, vanilla.key, vanilla.type, vanilla.image, vanilla.description, vanilla.aliases, vanilla.implications, vanilla.website, vanilla.pixiv, vanilla.twitter, vanilla.fandom)
+                if (image?.[0] && imageFilename) {
+                    const imagePath = functions.getTagHistoryPath(key, 2, imageFilename)
+                    await serverFunctions.uploadFile(imagePath, Buffer.from(Object.values(image)))
+                    imageFilename = imagePath
+                }
+                await sql.insertTagHistory(req.session.username, tag, key, tagObj.type, imageFilename, tagDescription, aliases, implications, website, pixiv, twitter, fandom, reason)
+            } else {
+                if (image?.[0] && imageFilename) {
+                    const nextKey = await serverFunctions.getNextKey("tag", key)
+                    const imagePath = functions.getTagHistoryPath(key, nextKey, imageFilename)
+                    await serverFunctions.uploadFile(imagePath, Buffer.from(Object.values(image)))
+                    imageFilename = imagePath
+                }
+                await sql.insertTagHistory(req.session.username, tag, key, tagObj.type, imageFilename, tagDescription, aliases, implications, website, pixiv, twitter, fandom, reason)
             }
             res.status(200).send("Success")
         } catch (e) {
@@ -321,6 +370,42 @@ const TagRoutes = (app: Express) => {
         } catch (e) {
             console.log(e)
             res.status(400).send("Bad request") 
+        }
+    })
+
+    app.get("/api/tag/history", tagLimiter, async (req: Request, res: Response) => {
+        try {
+            const tag = req.query.tag as string
+            const offset = req.query.offset as string
+            if (!req.session.username) return res.status(400).send("Bad request")
+            const result = await sql.tagHistory(tag, offset)
+            res.status(200).json(result)
+        } catch (e) {
+            console.log(e)
+            res.status(400).send("Bad request")
+        }
+    })
+
+    app.delete("/api/tag/history/delete", tagLimiter, async (req: Request, res: Response) => {
+        try {
+            const {tag, historyID} = req.query
+            if (Number.isNaN(Number(historyID))) return res.status(400).send("Invalid historyID")
+            if (!req.session.username) return res.status(400).send("Bad request")
+            if (req.session.role !== "admin" && req.session.role !== "mod") return res.status(403).end()
+            const tagHistory = await sql.tagHistory(tag as string)
+            if (tagHistory[0]?.historyID === Number(historyID)) {
+                return res.status(400).send("Bad request")
+            } else {
+                const currentHistory = tagHistory.find((history) => history.historyID === Number(historyID))
+                if (currentHistory.image?.includes("history/")) {
+                    await serverFunctions.deleteFile(currentHistory.image)
+                }
+                await sql.deleteTagHistory(Number(historyID))
+            }
+            res.status(200).send("Success")
+        } catch (e) {
+            console.log(e)
+            res.status(400).send("Bad request")
         }
     })
 }

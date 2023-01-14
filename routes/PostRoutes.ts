@@ -29,7 +29,7 @@ const PostRoutes = (app: Express) => {
             if (req.session.role !== "admin" && req.session.role !== "mod") {
                 if (result.restrict === "explicit") return res.status(403).send("No permission")
             }
-            if (result.images.length > 1) {
+            if (result?.images.length > 1) {
                 result.images = result.images.sort((a: any, b: any) => a.order - b.order)
             }
             if (Number(postID) !== req.session.lastPostID) {
@@ -69,6 +69,7 @@ const PostRoutes = (app: Express) => {
                 const file = functions.getImagePath(post.images[i].type, post.postID, post.images[i].filename)
                 await serverFunctions.deleteFile(file)
             }
+            await serverFunctions.deleteFolder(`history/post/${postID}`).catch(() => null)
             res.status(200).send("Success")
         } catch (e) {
             console.log(e)
@@ -226,6 +227,7 @@ const PostRoutes = (app: Express) => {
             let characters = req.body.characters
             let series = req.body.series
             let tags = req.body.tags
+            let reason = req.body.reason
     
             if (Number.isNaN(postID)) return res.status(400).send("Bad request")
             if (!req.session.username) return res.status(400).send("Not logged in")
@@ -313,6 +315,54 @@ const PostRoutes = (app: Express) => {
                 await sql.purgeTagMap(postID)
                 await sql.bulkInsertTags(bulkTagUpdate, true)
                 await sql.insertTagMap(postID, tagMap)
+            }
+
+            const postHistory = await sql.postHistory(postID)
+            if (!postHistory.length) {
+                const vanilla = JSON.parse(JSON.stringify(post))
+                vanilla.date = vanilla.uploadDate 
+                vanilla.user = vanilla.uploader
+                const categories = await serverFunctions.tagCategories(vanilla.tags)
+                vanilla.artists = categories.artists.map((a: any) => a.tag)
+                vanilla.characters = categories.characters.map((c: any) => c.tag)
+                vanilla.series = categories.series.map((s: any) => s.tag)
+                vanilla.tags = categories.tags.map((t: any) => t.tag)
+                let vanillaImages = [] as any
+                for (let i = 0; i < vanilla.images.length; i++) {
+                    const imagePath = functions.getImagePath(vanilla.images[i].type, postID, vanilla.images[i].filename)
+                    const buffer = await serverFunctions.getFile(imagePath)
+                    const newImagePath = functions.getImageHistoryPath(postID, 1, vanilla.images[i].filename)
+                    await serverFunctions.uploadFile(newImagePath, buffer)
+                    vanillaImages.push(newImagePath)
+                }
+                await sql.insertPostHistory(vanilla.user, postID, vanillaImages, vanilla.uploader, vanilla.updater, vanilla.uploadDate, vanilla.updatedDate,
+                    vanilla.type, vanilla.restrict, vanilla.style, vanilla.thirdParty, vanilla.title, vanilla.translatedTitle, vanilla.drawn, vanilla.artist,
+                    vanilla.link, vanilla.commentary, vanilla.translatedCommentary, vanilla.artists, vanilla.characters, vanilla.series, vanilla.tags)
+
+                let images = [] as any
+                for (let i = 0; i < post.images.length; i++) {
+                    const imagePath = functions.getImagePath(post.images[i].type, postID, post.images[i].filename)
+                    const buffer = await serverFunctions.getFile(imagePath)
+                    const newImagePath = functions.getImageHistoryPath(postID, 2, post.images[i].filename)
+                    await serverFunctions.uploadFile(newImagePath, buffer)
+                    images.push(newImagePath)
+                }
+                await sql.insertPostHistory(req.session.username, postID, images, post.uploader, post.updater, post.uploadDate, post.updatedDate,
+                post.type, post.restrict, post.style, post.thirdParty, post.title, post.translatedTitle, post.drawn, post.artist,
+                post.link, post.commentary, post.translatedCommentary, artists, characters, series, tags, reason)
+            } else {
+                let images = [] as any
+                const nextKey = await serverFunctions.getNextKey("post", String(postID))
+                for (let i = 0; i < post.images.length; i++) {
+                    const imagePath = functions.getImagePath(post.images[i].type, postID, post.images[i].filename)
+                    const buffer = await serverFunctions.getFile(imagePath)
+                    const newImagePath = functions.getImageHistoryPath(postID, nextKey, post.images[i].filename)
+                    await serverFunctions.uploadFile(newImagePath, buffer)
+                    images.push(newImagePath)
+                }
+                await sql.insertPostHistory(req.session.username, postID, images, post.uploader, post.updater, post.uploadDate, post.updatedDate,
+                post.type, post.restrict, post.style, post.thirdParty, post.title, post.translatedTitle, post.drawn, post.artist,
+                post.link, post.commentary, post.translatedCommentary, artists, characters, series, tags, reason)
             }
             res.status(200).send("Success")
           } catch (e) {
@@ -519,6 +569,50 @@ const PostRoutes = (app: Express) => {
             console.log(e)
             res.status(400).send("Bad request")
           }
+    })
+
+
+    app.get("/api/post/history", postLimiter, async (req: Request, res: Response) => {
+        try {
+            const postID = req.query.postID as string
+            const offset = req.query.offset as string
+            if (req.session.captchaAmount === undefined) req.session.captchaAmount = 51
+            if (req.session.role === "admin" || req.session.role === "mod") req.session.captchaAmount = 0
+            if (req.session.captchaAmount > 50) return res.status(401).end()
+            if (!req.session.username) return res.status(400).send("Bad request")
+            if (Number.isNaN(Number(postID))) return res.status(400).send("Bad request")
+            const result = await sql.postHistory(Number(postID), offset)
+            res.status(200).json(result)
+        } catch (e) {
+            console.log(e)
+            res.status(400).send("Bad request")
+        }
+    })
+
+    app.delete("/api/post/history/delete", postLimiter, async (req: Request, res: Response) => {
+        try {
+            const {postID, historyID} = req.query
+            if (Number.isNaN(Number(historyID))) return res.status(400).send("Invalid historyID")
+            if (!req.session.username) return res.status(400).send("Bad request")
+            if (req.session.role !== "admin" && req.session.role !== "mod") return res.status(403).end()
+            const postHistory = await sql.postHistory(Number(postID))
+            if (postHistory[0]?.historyID === Number(historyID)) {
+                return res.status(400).send("Bad request")
+            } else {
+                const currentHistory = postHistory.find((history) => history.historyID === Number(historyID))
+                for (let i = 0; i < currentHistory.images?.length; i++) {
+                    const image = currentHistory.images[i]
+                    if (image?.includes("history/")) {
+                        await serverFunctions.deleteFile(image)
+                    }
+                }
+                await sql.deletePostHistory(Number(historyID))
+            }
+            res.status(200).send("Success")
+        } catch (e) {
+            console.log(e)
+            res.status(400).send("Bad request")
+        }
     })
 }
 

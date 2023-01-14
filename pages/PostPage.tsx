@@ -61,14 +61,12 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
     const history = useHistory()
     const postID = Number(props?.match.params.id)
 
-    const refreshCache = async (source: any) => {
-        axios.post(image, null, {withCredentials: true, cancelToken: source.token}).catch(() => null)
+    const refreshCache = async () => {
+        axios.post(image, null, {withCredentials: true}).catch(() => null)
     }
 
     useEffect(() => {
-        const source = axios.CancelToken.source()
-        if (image) refreshCache(source)
-        return () => source.cancel()
+        if (image) refreshCache()
     }, [image])
 
     useEffect(() => {
@@ -120,7 +118,7 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
 
     const updateThirdParty = async (source: any) => {
         if (post) {
-            const thirdPartyPosts = await axios.get("/api/post/thirdparty", {params: {postID: post.postID}, withCredentials: true, cancelToken: source.token}).then((r) => r.data)
+            const thirdPartyPosts = await axios.get("/api/post/thirdparty", {params: {postID: post.postID}, withCredentials: true}).then((r) => r.data)
             if (thirdPartyPosts?.[0]) {
                 setThirdPartyPosts(thirdPartyPosts)
             } else {
@@ -129,9 +127,9 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
         }
     }
 
-    const updateParent = async (source: any) => {
+    const updateParent = async () => {
         if (post) {
-            const parentPost = await axios.get("/api/post/parent", {params: {postID: post.postID}, withCredentials: true, cancelToken: source.token}).then((r) => r.data)
+            const parentPost = await axios.get("/api/post/parent", {params: {postID: post.postID}, withCredentials: true}).then((r) => r.data)
             if (parentPost) {
                 setParentPost(parentPost)
             } else {
@@ -141,7 +139,6 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
     }
 
     useEffect(() => {
-        const source = axios.CancelToken.source()
         const updatePost = async () => {
             if (post) {
                 const title = post.translatedTitle ? functions.toProperCase(post.translatedTitle) : 
@@ -151,18 +148,15 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
             }
         }
         updatePost()
-        updateThirdParty(source)
-        updateParent(source)
-        return () => source.cancel()
+        updateParent()
     }, [post])
 
     useEffect(() => {
-        const source = axios.CancelToken.source()
         const updatePost = async () => {
             setLoaded(false)
             let post = posts.find((p: any) => p.postID === postID)
             try {
-                if (!post) post = await axios.get("/api/post", {params: {postID}, withCredentials: true, cancelToken: source.token}).then((r) => r.data)
+                if (!post) post = await axios.get("/api/post", {params: {postID}, withCredentials: true}).then((r) => r.data)
             } catch {
                 return
             }
@@ -178,7 +172,7 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
                 setPost(post)
                 if (!post.tags) {
                     try {
-                        post = await axios.get("/api/post", {params: {postID}, withCredentials: true, cancelToken: source.token}).then((r) => r.data)
+                        post = await axios.get("/api/post", {params: {postID}, withCredentials: true}).then((r) => r.data)
                         setPost(post)
                     } catch {
                         return
@@ -190,17 +184,15 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
             }
         }
         updatePost()
-        return () => source.cancel()
     }, [postID, posts])
 
     useEffect(() => {
-        const source = axios.CancelToken.source()
         const updatePost = async () => {
             setLoaded(false)
             setPostFlag(false)
             let post = null as any
             try {
-                post = await axios.get("/api/post", {params: {postID}, withCredentials: true, cancelToken: source.token}).then((r) => r.data)
+                post = await axios.get("/api/post", {params: {postID}, withCredentials: true}).then((r) => r.data)
             } catch {
                 return
             }
@@ -220,7 +212,6 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
             }
         }
         if (postFlag) updatePost()
-        return () => source.cancel()
     }, [postFlag])
 
     const download = () => {

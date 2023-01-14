@@ -36,6 +36,7 @@ import fileType from "magic-bytes.js"
 import localforage from "localforage"
 import JSZip from "jszip"
 import axios from "axios"
+import cryptoFunctions from "../structures/CryptoFunctions"
 import "./styles/editpostpage.less"
 import ContentEditable from "react-contenteditable"
 import SearchSuggestions from "../components/SearchSuggestions"
@@ -116,6 +117,7 @@ const EditPostPage: React.FunctionComponent<Props> = (props) => {
     const [edited, setEdited] = useState(false)
     const [reason, setReason] = useState("")
     const [danbooruLink, setDanbooruLink] = useState("")
+    const [needsPermission, setNeedsPermission] = useState(false)
     const postID = Number(props?.match.params.id)
     const history = useHistory()
 
@@ -143,7 +145,14 @@ const EditPostPage: React.FunctionComponent<Props> = (props) => {
         let files = [] as any
         let links = [] as any
         for (let i = 0; i < post.images.length; i++) {
-            const imageLink = functions.getImageLink(post.images[i].type, postID, post.images[i].filename)
+            let imageLink = functions.getImageLink(post.images[i].type, postID, post.images[i].filename)
+            if (functions.isImage(imageLink)) {
+                imageLink = await cryptoFunctions.decryptedLink(imageLink)
+            } else if (functions.isModel(imageLink)) {
+                imageLink = await functions.modelImage(imageLink)
+            } else if (functions.isAudio(imageLink)) {
+                imageLink = await functions.songCover(imageLink)
+            }
             const response = await fetch(imageLink).then((r) => r.arrayBuffer())
             const blob = new Blob([new Uint8Array(response)])
             const file = new File([blob], path.basename(imageLink))
@@ -196,9 +205,7 @@ const EditPostPage: React.FunctionComponent<Props> = (props) => {
             }
         }
         setSeries(series)
-
         setRawTags(tagCategories.tags.map((t: any) => t.tag).join(" "))
-
         setEdited(false)
     }
 
@@ -866,17 +873,19 @@ const EditPostPage: React.FunctionComponent<Props> = (props) => {
         await functions.timeout(20)
         submitErrorRef.current.innerText = "Submitting..."
         try {
-            if (permissions.isStaff(session)) {
-                await axios.put("/api/post/edit", data, {withCredentials: true}).then((r) => r.data)
-            } else {
-                await axios.put("/api/post/edit/unverified", data, {withCredentials: true}).then((r) => r.data)
-            }
+            await axios.put("/api/post/edit", data, {withCredentials: true}).then((r) => r.data)
             setSubmitted(true)
             return setSubmitError(false)
-        } catch {
-            submitErrorRef.current.innerText = "Failed to submit. You might be missing required fields."
-            await functions.timeout(3000)
-            return setSubmitError(false)
+        } catch (error: any) {
+            if (String(error)?.includes("403")) {
+                await axios.put("/api/post/edit/unverified", data, {withCredentials: true}).then((r) => r.data)
+                setNeedsPermission(true)
+                setSubmitted(true)
+            } else {
+                submitErrorRef.current.innerText = "Failed to submit. You might be missing required fields."
+                await functions.timeout(3000)
+                return setSubmitError(false)
+            }
         }
     }
 
@@ -1157,6 +1166,7 @@ const EditPostPage: React.FunctionComponent<Props> = (props) => {
         setCurrentIndex(0)
         setShowLinksInput(false)
         setSubmitted(false)
+        setNeedsPermission(false)
     }
 
     useEffect(() => {
@@ -1361,9 +1371,9 @@ const EditPostPage: React.FunctionComponent<Props> = (props) => {
                     {submitted ?
                     <div className="editpost-container">
                         <div className="editpost-container-row">
-                            {permissions.isStaff(session) ?
-                            <span className="editpost-text-alt">Post was edited.</span> :
-                            <span className="editpost-text-alt">The post edit was submitted and will appear on the site if approved.</span>}
+                            {needsPermission ?
+                            <span className="editpost-text-alt">The post edit was submitted and will appear on the site if approved.</span> :
+                            <span className="editpost-text-alt">Post was edited.</span>}
                         </div> 
                         <div className="editpost-container-row" style={{marginTop: "10px"}}>
                             <button className="editpost-button" onClick={() => {history.push(`/post/${postID}`); setPostFlag(true)}}>

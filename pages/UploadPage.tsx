@@ -157,9 +157,9 @@ const UploadPage: React.FunctionComponent = (props) => {
             let dupes = null as any
             if (img.thumbnail) {
                 const bytes = await functions.base64toUint8Array(img.thumbnail)
-                dupes = await axios.post("/api/search/similar", Object.values(bytes)).then((r) => r.data)
+                dupes = await axios.post("/api/search/similar", {bytes: Object.values(bytes), type: img.ext}).then((r) => r.data)
             } else {
-                dupes = await axios.post("/api/search/similar", Object.values(img.bytes)).then((r) => r.data)
+                dupes = await axios.post("/api/search/similar", {bytes: Object.values(img.bytes), type: img.ext}).then((r) => r.data)
             }
             setDupPosts(dupes)
         }

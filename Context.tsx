@@ -50,6 +50,14 @@ export const QuoteTextContext = React.createContext<any>(null)
 export const MobileContext = React.createContext<any>(null)
 export const HideMobileNavbarContext = React.createContext<any>(null)
 export const ShowDeletePostDialogContext = React.createContext<any>(null)
+export const DeleteTagHistoryIDContext = React.createContext<any>(null)
+export const RevertTagHistoryIDContext = React.createContext<any>(null)
+export const DeleteTagHistoryFlagContext = React.createContext<any>(null)
+export const RevertTagHistoryFlagContext = React.createContext<any>(null)
+export const DeletePostHistoryIDContext = React.createContext<any>(null)
+export const RevertPostHistoryIDContext = React.createContext<any>(null)
+export const DeletePostHistoryFlagContext = React.createContext<any>(null)
+export const RevertPostHistoryFlagContext = React.createContext<any>(null)
 export const DeleteCommentIDContext = React.createContext<any>(null)
 export const DeleteCommentFlagContext = React.createContext<any>(null)
 export const EditCommentIDContext = React.createContext<any>(null)
@@ -69,6 +77,7 @@ export const EditTagPixivContext = React.createContext<any>(null)
 export const EditTagWebsiteContext = React.createContext<any>(null)
 export const EditTagFandomContext = React.createContext<any>(null)
 export const EditTagTwitterContext = React.createContext<any>(null)
+export const EditTagReasonContext = React.createContext<any>(null)
 export const AliasTagIDContext = React.createContext<any>(null)
 export const AliasTagFlagContext = React.createContext<any>(null)
 export const AliasTagNameContext = React.createContext<any>(null)
@@ -123,6 +132,14 @@ const Context: React.FunctionComponent = (props) => {
     const [quoteText, setQuoteText] = useState(null)
     const [hideMobileNavbar, setHideMobileNavbar] = useState(true)
     const [showDeletePostDialog, setShowDeletePostDialog] = useState(false)
+    const [deleteTagHistoryID, setDeleteTagHistoryID] = useState(null)
+    const [revertTagHistoryID, setRevertTagHistoryID] = useState(null)
+    const [deleteTagHistoryFlag, setDeleteTagHistoryFlag] = useState(null)
+    const [revertTagHistoryFlag, setRevertTagHistoryFlag] = useState(null)
+    const [deletePostHistoryID, setDeletePostHistoryID] = useState(null)
+    const [revertPostHistoryID, setRevertPostHistoryID] = useState(null)
+    const [deletePostHistoryFlag, setDeletePostHistoryFlag] = useState(null)
+    const [revertPostHistoryFlag, setRevertPostHistoryFlag] = useState(null)
     const [deleteCommentID, setDeleteCommentID] = useState(null)
     const [deleteCommentFlag, setDeleteCommentFlag] = useState(false)
     const [editCommentFlag, setEditCommentFlag] = useState(false)
@@ -142,6 +159,7 @@ const Context: React.FunctionComponent = (props) => {
     const [editTagWebsite, setEditTagWebsite] = useState(false)
     const [editTagFandom, setEditTagFandom] = useState(false)
     const [editTagTwitter, setEditTagTwitter] = useState(false)
+    const [editTagReason, setEditTagReason] = useState("")
     const [aliasTagID, setAliasTagID] = useState(null)
     const [aliasTagFlag, setAliasTagFlag] = useState(false)
     const [aliasTagName, setAliasTagName] = useState("")
@@ -158,8 +176,17 @@ const Context: React.FunctionComponent = (props) => {
     const [quickEditUnverified, setQuickEditUnverified] = useState(false)
 return (
     <>
+        <RevertPostHistoryFlagContext.Provider value={{revertPostHistoryFlag, setRevertPostHistoryFlag}}>
+        <DeletePostHistoryFlagContext.Provider value={{deletePostHistoryFlag, setDeletePostHistoryFlag}}>
+        <RevertPostHistoryIDContext.Provider value={{revertPostHistoryID, setRevertPostHistoryID}}>
+        <DeletePostHistoryIDContext.Provider value={{deletePostHistoryID, setDeletePostHistoryID}}>
+        <RevertTagHistoryFlagContext.Provider value={{revertTagHistoryFlag, setRevertTagHistoryFlag}}>
+        <DeleteTagHistoryFlagContext.Provider value={{deleteTagHistoryFlag, setDeleteTagHistoryFlag}}>
+        <RevertTagHistoryIDContext.Provider value={{revertTagHistoryID, setRevertTagHistoryID}}>
+        <DeleteTagHistoryIDContext.Provider value={{deleteTagHistoryID, setDeleteTagHistoryID}}>
         <PageContext.Provider value={{page, setPage}}>
         <ScrollContext.Provider value={{scroll, setScroll}}>
+        <EditTagReasonContext.Provider value={{editTagReason, setEditTagReason}}>
         <EditTagFandomContext.Provider value={{editTagFandom, setEditTagFandom}}>
         <EditTagWebsiteContext.Provider value={{editTagWebsite, setEditTagWebsite}}>
         <EditTagTwitterContext.Provider value={{editTagTwitter, setEditTagTwitter}}>
@@ -297,8 +324,17 @@ return (
         </EditTagTwitterContext.Provider>
         </EditTagWebsiteContext.Provider>
         </EditTagFandomContext.Provider>
+        </EditTagReasonContext.Provider>
         </ScrollContext.Provider>
         </PageContext.Provider>
+        </DeleteTagHistoryIDContext.Provider>
+        </RevertTagHistoryIDContext.Provider>
+        </DeleteTagHistoryFlagContext.Provider>
+        </RevertTagHistoryFlagContext.Provider>
+        </DeletePostHistoryIDContext.Provider>
+        </RevertPostHistoryIDContext.Provider>
+        </DeletePostHistoryFlagContext.Provider>
+        </RevertPostHistoryFlagContext.Provider>
     </>
     )
 }

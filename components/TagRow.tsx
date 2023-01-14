@@ -1,6 +1,6 @@
 import React, {useContext, useEffect, useRef, useState} from "react"
 import {useHistory} from "react-router-dom"
-import {ThemeContext, SearchContext, SearchFlagContext, DeleteTagFlagContext, DeleteTagIDContext, MobileContext, EditTagTypeContext, 
+import {ThemeContext, SearchContext, SearchFlagContext, DeleteTagFlagContext, DeleteTagIDContext, MobileContext, EditTagTypeContext, EditTagReasonContext,
 EditTagPixivContext, EditTagTwitterContext, EditTagWebsiteContext, EditTagFandomContext, EditTagAliasesContext, EditTagImplicationsContext, 
 EditTagDescriptionContext, EditTagIDContext, EditTagFlagContext, SessionContext, EditTagImageContext, EditTagKeyContext, AliasTagFlagContext, 
 AliasTagIDContext, AliasTagNameContext} from "../Context"
@@ -34,6 +34,7 @@ const TagRow: React.FunctionComponent<Props> = (props) => {
     const {mobile, setMobile} = useContext(MobileContext)
     const {deleteTagID, setDeleteTagID} = useContext(DeleteTagIDContext)
     const {deleteTagFlag, setDeleteTagFlag} = useContext(DeleteTagFlagContext)
+    const {editTagReason, setEditTagReason} = useContext(EditTagReasonContext)
     const {editTagFlag, setEditTagFlag} = useContext(EditTagFlagContext)
     const {editTagID, setEditTagID} = useContext(EditTagIDContext)
     const {editTagAliases, setEditTagAliases} = useContext(EditTagAliasesContext)
@@ -124,7 +125,7 @@ const TagRow: React.FunctionComponent<Props> = (props) => {
         }
         await axios.put("/api/tag/edit", {tag: props.tag.tag, key: editTagKey, description: editTagDescription,
         image, aliases: editTagAliases, implications: editTagImplications, pixiv: editTagPixiv, twitter: editTagTwitter,
-        website: editTagWebsite, fandom: editTagFandom}, {withCredentials: true})
+        website: editTagWebsite, fandom: editTagFandom, reason: editTagReason}, {withCredentials: true})
         if (editTagImage) refreshCache(editTagImage)
         props.onEdit?.()
     }
@@ -149,6 +150,7 @@ const TagRow: React.FunctionComponent<Props> = (props) => {
         setEditTagTwitter(props.tag.twitter)
         setEditTagWebsite(props.tag.website)
         setEditTagFandom(props.tag.fandom)
+        setEditTagReason("")
     }
 
     const aliasTag = async () => {
@@ -233,7 +235,7 @@ const TagRow: React.FunctionComponent<Props> = (props) => {
             </div>
             {session.username ?
             <div className="tag-buttons">
-                {/* <img className="tag-button" src={historyIcon} onClick={tagHistory}/> */}
+                <img className="tag-button" src={historyIcon} onClick={tagHistory}/>
                 <img className="tag-button" src={alias} onClick={aliasTagDialog}/>
                 <img className="tag-button" src={edit} onClick={editTagDialog}/>
                 <img className="tag-button" src={deleteIcon} onClick={deleteTagDialog}/>

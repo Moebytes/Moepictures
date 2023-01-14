@@ -1,4 +1,5 @@
 import {Express, NextFunction, Request, Response} from "express"
+import crypto from "crypto"
 import functions from "../structures/Functions"
 import sql from "../structures/SQLQuery"
 import phash from "sharp-phash"
@@ -22,6 +23,7 @@ const SearchRoutes = (app: Express) => {
             const style = req.query.style as string
             const sort = req.query.sort as string
             const offset = req.query.offset as string
+            const limit = req.query.limit as string
             if (!functions.validType(type, true)) return res.status(400).send("Invalid type")
             if (!functions.validRestrict(restrict, true)) return res.status(400).send("Invalid restrict")
             if (restrict === "explicit") if (req.session.role !== "admin" && req.session.role !== "mod") return res.status(403).send("No permission")
@@ -38,11 +40,11 @@ const SearchRoutes = (app: Express) => {
             let result = null as any
             if (sort === "favorites" || sort === "reverse favorites") {
                 if (!req.session.username) return res.status(400).send("Bad request")
-                const favorites = await sql.searchFavorites(req.session.username, tags, type, restrict, style, sort, offset)
+                const favorites = await sql.searchFavorites(req.session.username, tags, type, restrict, style, sort, offset, limit)
                 result = favorites.map((f: any) => f.post)
                 result[0].postCount = favorites[0].postCount
             } else {
-                result = await sql.search(tags, type, restrict, style, sort, offset)
+                result = await sql.search(tags, type, restrict, style, sort, offset, limit)
             }
             result = result.map((p: any) => {
                 if (p.images.length > 1) {
@@ -91,18 +93,30 @@ const SearchRoutes = (app: Express) => {
 
     app.post("/api/search/similar", searchLimiter, async (req: Request, res: Response, next: NextFunction) => {
         try {
-            const buffer = Buffer.from(Object.values(req.body))
-            const hash = await phash(buffer)
+            const {type, bytes} = req.body
+            const buffer = Buffer.from(Object.values(bytes))
+            let hash = ""
+            const useMD5 = type === "mp3" || type === "wav" || type === "glb" || type === "fbx" || type === "obj"
+            if (useMD5) {
+                hash = crypto.createHash("md5").update(buffer).digest("hex")
+            } else {
+                hash = await phash(buffer).then((hash: any) => functions.binaryToHex(hash))
+            }
             const query = {
                 text: `SELECT * FROM "images" WHERE "images".hash = $1`,
-                values: [functions.binaryToHex(hash)]
+                values: [hash]
               }
             let images = await sql.run(query)
             if (!images.length) images = await sql.run(`SELECT * FROM "images"`)
             let postIDs = new Set<number>()
             for (let i = 0; i < images.length; i++) {
-                const imgHash = functions.hexToBinary(images[i].hash)
-                if (dist(imgHash, hash) < 10) postIDs.add(images[i].postID)
+                if (useMD5) {
+                    const imgHash = images[i].hash
+                    if (imgHash === hash) postIDs.add(images[i].postID)
+                } else {
+                    const imgHash = functions.hexToBinary(images[i].hash)
+                    if (dist(imgHash, hash) < 10) postIDs.add(images[i].postID)
+                }
             }
             let result = await sql.posts(Array.from(postIDs))
             result = functions.stripTags(result)

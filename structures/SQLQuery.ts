@@ -458,7 +458,7 @@ export default class SQLQuery {
   }
 
   /** Search posts. */
-  public static search = async (tags: string[], type: string, restrict: string, style: string, sort: string, offset?: string) => {
+  public static search = async (tags: string[], type: string, restrict: string, style: string, sort: string, offset?: string, limit?: string) => {
     let typeQuery = ""
     if (type === "image") typeQuery = `posts.type = 'image'`
     if (type === "animation") typeQuery = `posts.type = 'animation'`
@@ -476,8 +476,8 @@ export default class SQLQuery {
     if (style === "pixel") styleQuery = `posts.style = 'pixel'`
     if (style === "chibi") styleQuery = `posts.style = 'chibi'`
     let sortQuery = ""
-    if (sort === "date") sortQuery = `ORDER BY posts."updatedDate" DESC`
-    if (sort === "reverse date") sortQuery = `ORDER BY posts."updatedDate" ASC`
+    if (sort === "date") sortQuery = `ORDER BY posts."uploadDate" DESC`
+    if (sort === "reverse date") sortQuery = `ORDER BY posts."uploadDate" ASC`
     if (sort === "drawn") sortQuery = `ORDER BY posts.drawn DESC NULLS LAST`
     if (sort === "reverse drawn") sortQuery = `ORDER BY posts.drawn ASC NULLS LAST`
     if (sort === "cuteness") sortQuery = `ORDER BY "cutenessAvg" DESC`
@@ -512,6 +512,11 @@ export default class SQLQuery {
       tagQueryArray.push(`NOT tags @> $${i}`)
       i++
     }
+    let limitValue = i
+    if (limit) {
+      values.push(limit)
+      i++
+    }
     if (offset) values.push(offset)
     let tagQuery = tagQueryArray.length ? "WHERE " + tagQueryArray.join(" AND ") : ""
     const whereQueries = [typeQuery, restrictQuery, styleQuery].filter(Boolean).join(" AND ")
@@ -533,7 +538,7 @@ export default class SQLQuery {
           ${sortQuery}
         ) AS posts
         ${tagQuery}
-        LIMIT 100 ${offset ? `OFFSET $${i}` : ""}
+        ${limit ? `LIMIT $${limitValue}` : "LIMIT 100"} ${offset ? `OFFSET $${i}` : ""}
       `)
     }
     if (values?.[0]) query.values = values
@@ -1309,7 +1314,7 @@ export default class SQLQuery {
   }
 
   /** Search posts. */
-  public static searchFavorites = async (username: string, tags: string[], type: string, restrict: string, style: string, sort: string, offset?: string) => {
+  public static searchFavorites = async (username: string, tags: string[], type: string, restrict: string, style: string, sort: string, offset?: string, limit?: string) => {
     let userQuery = `favorites."username" = $1`
     let typeQuery = ""
     if (type === "image") typeQuery = `post_json.type = 'image'`
@@ -1360,6 +1365,12 @@ export default class SQLQuery {
       tagQueryArray.push(`NOT post_json.tags @> $${i}`)
       i++
     }
+    let limitValue = i
+    if (limit) {
+      values.push(limit)
+      i++
+    }
+    if (offset) values.push(offset)
     let tagQuery = tagQueryArray.length ? tagQueryArray.join(" AND ") : ""
     const whereQueries = [userQuery, typeQuery, restrictQuery, styleQuery, tagQuery].filter(Boolean).join(" AND ")
     const query: QueryConfig = {
@@ -1407,12 +1418,11 @@ export default class SQLQuery {
         post_json."thirdParty", post_json."drawn", post_json."uploadDate", post_json."updatedDate", post_json."title",
         post_json."translatedTitle", post_json."artist", post_json."link", post_json."commentary", post_json."translatedCommentary"
         ${sortQuery}
-        LIMIT 100 ${offset ? `OFFSET $${i}` : ""}
+        ${limit ? `LIMIT $${limitValue}` : "LIMIT 100"} ${offset ? `OFFSET $${i}` : ""}
       `),
       values: [username]
     }
     if (values?.[0]) query.values?.push(...values)
-    if (offset) query.values?.push(offset)
     const result = await SQLQuery.run(query)
     return result
   }
@@ -1961,6 +1971,89 @@ export default class SQLQuery {
       `),
     }
     if (offset) query.values = [offset]
+    const result = await SQLQuery.run(query)
+    return result
+  }
+
+  public static insertTagHistory = async (username: string, tag: string, key: string, type: string, image?: string, description?: string, 
+    aliases?: string[], implications?: string[], website?: string, pixiv?: string, twitter?: string, fandom?: string, reason?: string) => {
+    const now = new Date().toISOString()
+    const query: QueryConfig = {
+      text: `INSERT INTO "tag history" ("tag", "user", "date", "key", "type", "image", "description", "aliases", "implications", "website", "pixiv", "twitter", "fandom", "reason") VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)`,
+      values: [tag, username, now, key, type, image, description, aliases, implications, website, pixiv, twitter, fandom, reason]
+    }
+    const result = await SQLQuery.run(query)
+    return result
+  }
+
+  public static deleteTagHistory = async (historyID: number) => {
+    const query: QueryConfig = {
+      text: functions.multiTrim(`DELETE FROM "tag history" WHERE "tag history"."historyID" = $1`),
+      values: [historyID]
+    }
+    const result = await SQLQuery.run(query)
+    return result
+  }
+
+  public static tagHistory = async (tag?: string, offset?: string) => {
+    const offsetAmt = tag ? 2 : 1
+    const query: QueryConfig = {
+      text: functions.multiTrim(`
+            SELECT "tag history".*
+            FROM "tag history"
+            ${tag ? `WHERE "tag history"."tag" = $1` : ""}
+            GROUP BY "tag history"."historyID"
+            ORDER BY "tag history"."date" DESC
+            ${offset ? `OFFSET $${offsetAmt}` : ""}
+          `),
+          values: []
+    }
+    if (tag) query.values?.push(tag)
+    if (offset) query.values?.push(offset)
+    const result = await SQLQuery.run(query)
+    return result
+  }
+
+  public static insertPostHistory = async (username: string, postID: number, images?: string[], uploader?: string, updater?: string, uploadDate?: string, updatedDate?: string,
+    type?: string, restrict?: string, style?: string, thirdParty?: string, title?: string, translatedTitle?: string, drawn?: string, artist?: string, link?: string,
+    commentary?: string, translatedCommentary?: string, artists?: string[], characters?: string[], series?: string[], tags?: string[], reason?: string) => {
+    const now = new Date().toISOString()
+    const query: QueryConfig = {
+      text: `INSERT INTO "post history" ("postID", "user", "date", "images", "uploader", "updater", "uploadDate", "updatedDate",
+      "type", "restrict", "style", "thirdParty", "title", "translatedTitle", "drawn", "artist", "link", "commentary",
+      "translatedCommentary", "artists", "characters", "series", "tags", "reason") VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, 
+        $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24)`,
+      values: [postID, username, now, images, uploader, updater, uploadDate, updatedDate, type, restrict, style, thirdParty, 
+        title, translatedTitle, drawn, artist, link, commentary, translatedCommentary, artists, characters, series, tags, reason]
+    }
+    const result = await SQLQuery.run(query)
+    return result
+  }
+
+  public static deletePostHistory = async (historyID: number) => {
+    const query: QueryConfig = {
+      text: functions.multiTrim(`DELETE FROM "post history" WHERE "post history"."historyID" = $1`),
+      values: [historyID]
+    }
+    const result = await SQLQuery.run(query)
+    return result
+  }
+
+  public static postHistory = async (postID?: number, offset?: string) => {
+    const offsetAmt = postID ? 2 : 1
+    const query: QueryConfig = {
+      text: functions.multiTrim(`
+            SELECT "post history".*
+            FROM "post history"
+            ${postID ? `WHERE "post history"."postID" = $1` : ""}
+            GROUP BY "post history"."historyID"
+            ORDER BY "post history"."date" DESC
+            ${offset ? `OFFSET $${offsetAmt}` : ""}
+          `),
+          values: []
+    }
+    if (postID) query.values?.push(postID)
+    if (offset) query.values?.push(offset)
     const result = await SQLQuery.run(query)
     return result
   }

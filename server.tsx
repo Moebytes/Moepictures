@@ -112,7 +112,7 @@ app.use(express.static(path.join(__dirname, "./public")))
 app.use(express.static(path.join(__dirname, "./dist"), {index: false}))
 app.use("/assets", express.static(path.join(__dirname, "./assets")))
 
-let folders = ["animation", "artist", "character", "comic", "image", "pfp", "series", "tag", "video", "audio", "model"]
+let folders = ["animation", "artist", "character", "comic", "image", "pfp", "series", "tag", "video", "audio", "model", "history"]
 
 for (let i = 0; i < folders.length; i++) {
   serverFunctions.uploadFile(`${folders[i]}/`, "")
@@ -120,8 +120,8 @@ for (let i = 0; i < folders.length; i++) {
   app.get(`/${folders[i]}/*`, async (req: Request, res, next: NextFunction) => {
     try {
       if (folders[i] === "tag") {
-        if (!req.url.endsWith(".png") || !req.url.endsWith(".jpg") || !req.url.endsWith(".jpeg") ||
-        !req.url.endsWith(".webp") || !req.url.endsWith(".gif")) return next()
+        if (!req.url.endsWith(".png") && !req.url.endsWith(".jpg") && !req.url.endsWith(".jpeg") &&
+        !req.url.endsWith(".webp") && !req.url.endsWith(".gif")) return next()
       }
       res.setHeader("Content-Type", mime.getType(req.path) ?? "")
       const key = decodeURIComponent(req.path.slice(1))

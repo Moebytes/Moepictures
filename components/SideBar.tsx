@@ -536,10 +536,14 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
 
     const getDomain = () => {
         if (props.post.link) {
-            const domain = new URL(props.post.link).hostname.replace("www.", "")
-            .split(".")?.[0] || ""
-            if (domain.toLowerCase() === "yande") return "Yandere"
-            return functions.toProperCase(domain)
+            try {
+                const domain = new URL(props.post.link).hostname.replace("www.", "")
+                .split(".")?.[0] || ""
+                if (domain.toLowerCase() === "yande") return "Yandere"
+                return functions.toProperCase(domain)
+            } catch {
+                return "Unknown"
+            }
         }
         return "Unknown"
     }
@@ -861,13 +865,12 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
                             </span>
                         </div>
                         </> : null}
-                        {/*
                         <div className="sidebar-row">
                             <span className="tag-hover" onClick={postHistory}>
                                 <img className="sidebar-icon" src={getHistory()}/>
                                 <span className="tag-red">History</span>
                             </span>
-                        </div>*/}
+                        </div>
                         {!props.unverified ?
                         <div className="sidebar-row">
                             <span className="tag-hover" onClick={deletePost}>

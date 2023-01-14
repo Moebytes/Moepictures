@@ -21,7 +21,7 @@ const uploadLimiter = rateLimit({
 
 const editLimiter = rateLimit({
 	windowMs: 5 * 60 * 1000,
-	max: 20,
+	max: 50,
 	message: "Too many requests, try again later.",
 	standardHeaders: true,
 	legacyHeaders: false
@@ -296,7 +296,7 @@ const CreateRoutes = (app: Express) => {
       }
     })
 
-    app.put("/api/post/edit", modLimiter, async (req: Request, res: Response, next: NextFunction) => {
+    app.put("/api/post/edit", editLimiter, async (req: Request, res: Response, next: NextFunction) => {
       try {
         const postID = Number(req.body.postID)
         const images = req.body.images 
@@ -311,10 +311,13 @@ const CreateRoutes = (app: Express) => {
         let tags = req.body.tags
         let newTags = req.body.newTags
         let unverifiedID = req.body.unverifiedID
+        let reason = req.body.reason
+        let noImageUpdate = req.body.noImageUpdate
+        let preserveThirdParty = req.body.preserveThirdParty
 
         if (Number.isNaN(postID)) return res.status(400).send("Bad request")
         if (!req.session.username) return res.status(400).send("Not logged in")
-        if (req.session.role !== "admin" && req.session.role !== "mod") return res.status(403).end()
+        if (req.session.role !== "admin" && req.session.role !== "mod") noImageUpdate = true
 
         if (!artists?.[0]?.tag) artists = [{tag: "unknown-artist"}]
         if (!series?.[0]?.tag) {
@@ -355,16 +358,29 @@ const CreateRoutes = (app: Express) => {
 
         const post = await sql.post(postID)
         if (!post) return res.status(400).send("Bad request")
-        for (let i = 0; i < post.images.length; i++) {
-          await sql.deleteImage(post.images[i].imageID)
-          await serverFunctions.deleteFile(functions.getImagePath(post.images[i].type, postID, post.images[i].filename))
+
+        const imgChanged = await serverFunctions.imagesChanged(post.images, images)
+
+        let vanillaBuffers = [] as any
+        if (imgChanged) {
+          if (req.session.role !== "admin" && req.session.role !== "mod") return res.status(403).send("No permission to modify images")
+          for (let i = 0; i < post.images.length; i++) {
+            const imagePath = functions.getImagePath(post.images[i].type, postID, post.images[i].filename)
+            const oldImage = await serverFunctions.getFile(imagePath) as Buffer
+            vanillaBuffers.push(oldImage)
+            await sql.deleteImage(post.images[i].imageID)
+            await serverFunctions.deleteFile(imagePath)
+          }
         }
 
-        await sql.deleteThirdParty(postID)
-        if (thirdPartyID && !Number.isNaN(Number(thirdPartyID))) await sql.insertThirdParty(postID, Number(thirdPartyID))
+        if (String(preserveThirdParty) !== "true") {
+          await sql.deleteThirdParty(postID)
+          if (thirdPartyID && !Number.isNaN(Number(thirdPartyID))) await sql.insertThirdParty(postID, Number(thirdPartyID))
+        }
 
         if (type !== "comic") type = "image"
 
+        let imageFilenames = [] as any
         for (let i = 0; i < images.length; i++) {
           let order = i + 1
           const ext = images[i].ext
@@ -372,6 +388,7 @@ const CreateRoutes = (app: Express) => {
           const filename = source.title ? `${source.title}${fileOrder}.${ext}` : 
           characters[0].tag !== "unknown-character" ? `${characters[0].tag}${fileOrder}.${ext}` :
           `${postID}${fileOrder ? `-${fileOrder}` : ""}.${ext}`
+          imageFilenames.push(filename)
           let kind = "image" as any
           if (type === "comic") {
             kind = "comic"
@@ -398,21 +415,22 @@ const CreateRoutes = (app: Express) => {
             kind = "model"
             type = "model"
         }
-
-          let imagePath = functions.getImagePath(kind, postID, filename)
-          const buffer = Buffer.from(Object.values(images[i].bytes))
-          await serverFunctions.uploadFile(imagePath, buffer)
-          let dimensions = null as any
-          let hash = ""
-          if (kind === "video" || kind === "audio" || kind === "model") {
-            const buffer = functions.base64ToBuffer(images[i].thumbnail)
-            hash = await phash(buffer).then((hash: string) => functions.binaryToHex(hash))
-            dimensions = imageSize(buffer)
-          } else {
+        if (imgChanged) {
+            let imagePath = functions.getImagePath(kind, postID, filename)
+            const buffer = Buffer.from(Object.values(images[i].bytes))
+            await serverFunctions.uploadFile(imagePath, buffer)
+            let dimensions = null as any
+            let hash = ""
+            if (kind === "video" || kind === "audio" || kind === "model") {
+              const buffer = functions.base64ToBuffer(images[i].thumbnail)
               hash = await phash(buffer).then((hash: string) => functions.binaryToHex(hash))
               dimensions = imageSize(buffer)
+            } else {
+                hash = await phash(buffer).then((hash: string) => functions.binaryToHex(hash))
+                dimensions = imageSize(buffer)
+            }
+            await sql.insertImage(postID, filename, kind, order, hash, dimensions.width, dimensions.height, images[i].size)
           }
-          await sql.insertImage(postID, filename, kind, order, hash, dimensions.width, dimensions.height, images[i].size)
         }
 
         await sql.updatePost(postID, "type", type)
@@ -496,7 +514,7 @@ const CreateRoutes = (app: Express) => {
 
         tagMap = functions.removeDuplicates(tagMap)
         await sql.purgeTagMap(postID)
-        await sql.bulkInsertTags(bulkTagUpdate)
+        await sql.bulkInsertTags(bulkTagUpdate, noImageUpdate ? true : false)
         await sql.insertTagMap(postID, tagMap)
 
         if (unverifiedID) {
@@ -508,6 +526,53 @@ const CreateRoutes = (app: Express) => {
           await sql.deleteUnverifiedPost(Number(unverifiedID))
         }
 
+        artists = artists.map((a: any) => a.tag)
+        characters = characters.map((c: any) => c.tag)
+        series = series.map((s: any) => s.tag)
+
+        const postHistory = await sql.postHistory(postID)
+        if (!postHistory.length) {
+            const vanilla = JSON.parse(JSON.stringify(post))
+            vanilla.date = vanilla.uploadDate 
+            vanilla.user = vanilla.uploader
+            const categories = await serverFunctions.tagCategories(vanilla.tags)
+            vanilla.artists = categories.artists.map((a: any) => a.tag)
+            vanilla.characters = categories.characters.map((c: any) => c.tag)
+            vanilla.series = categories.series.map((s: any) => s.tag)
+            vanilla.tags = categories.tags.map((t: any) => t.tag)
+            let vanillaImages = [] as any
+            for (let i = 0; i < vanilla.images.length; i++) {
+                const newImagePath = functions.getImageHistoryPath(postID, 1, vanilla.images[i].filename)
+                await serverFunctions.uploadFile(newImagePath, vanillaBuffers[i])
+                vanillaImages.push(newImagePath)
+            }
+            await sql.insertPostHistory(vanilla.user, postID, vanillaImages, vanilla.uploader, vanilla.updater, vanilla.uploadDate, vanilla.updatedDate,
+                vanilla.type, vanilla.restrict, vanilla.style, vanilla.thirdParty, vanilla.title, vanilla.translatedTitle, vanilla.drawn, vanilla.artist,
+                vanilla.link, vanilla.commentary, vanilla.translatedCommentary, vanilla.artists, vanilla.characters, vanilla.series, vanilla.tags)
+
+            let newImages = [] as any
+            for (let i = 0; i < images.length; i++) {
+                const buffer = Buffer.from(Object.values(images[i].bytes))
+                const newImagePath = functions.getImageHistoryPath(postID, 2, imageFilenames[i])
+                await serverFunctions.uploadFile(newImagePath, buffer)
+                newImages.push(newImagePath)
+            }
+            await sql.insertPostHistory(req.session.username, postID, newImages, post.uploader, post.updater, post.uploadDate, post.updatedDate,
+            post.type, post.restrict, post.style, post.thirdParty, post.title, post.translatedTitle, post.drawn, post.artist,
+            post.link, post.commentary, post.translatedCommentary, artists, characters, series, tags, reason)
+        } else {
+            let newImages = [] as any
+            const nextKey = await serverFunctions.getNextKey("post", String(postID))
+            for (let i = 0; i < images.length; i++) {
+                const buffer = Buffer.from(Object.values(images[i].bytes))
+                const newImagePath = functions.getImageHistoryPath(postID, nextKey, imageFilenames[i])
+                await serverFunctions.uploadFile(newImagePath, buffer)
+                newImages.push(newImagePath)
+            }
+            await sql.insertPostHistory(req.session.username, postID, newImages, post.uploader, post.updater, post.uploadDate, post.updatedDate,
+            post.type, post.restrict, post.style, post.thirdParty, post.title, post.translatedTitle, post.drawn, post.artist,
+            post.link, post.commentary, post.translatedCommentary, artists, characters, series, tags, reason)
+        }
         res.status(200).send("Success")
       } catch (e) {
         console.log(e)

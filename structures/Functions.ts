@@ -893,8 +893,13 @@ export default class Functions {
         return `${folder}/${postID}/${filename}`
     }
 
+    public static getImageHistoryPath = (postID: number, key: number, filename: string) => {
+        return `history/post/${postID}/${key}/${filename}`
+    }
+
     public static getImageLink = (folder: string, postID: number, filename: string) => {
         if (!filename) return ""
+        if (filename.includes("history/")) return `${window.location.protocol}//${window.location.host}/${filename}`
         return `${window.location.protocol}//${window.location.host}/${folder}/${postID}/${encodeURIComponent(filename)}`
     }
 
@@ -936,9 +941,14 @@ export default class Functions {
         return `${folder}/${filename}`
     }
 
+    public static getTagHistoryPath = (tag: string, key: number, filename: string) => {
+        return `history/tag/${tag}/${key}/${filename}`
+    }
+
     public static getTagLink = (folder: string, filename: string) => {
         if (!filename) return ""
         if (folder === "attribute") folder = "tag"
+        if (filename.includes("history/")) return `${window.location.protocol}//${window.location.host}/${filename}`
         return `${window.location.protocol}//${window.location.host}/${folder}/${encodeURIComponent(filename)}`
     }
 
@@ -1331,21 +1341,29 @@ export default class Functions {
         return new Promise<any>((resolve) => {
             fileReader.onloadend = async (f: any) => {
                 let bytes = new Uint8Array(f.target.result)
-                const result = fileType(bytes)?.[0]
+                const result = fileType(bytes)?.[0] || {}
                 const jpg = result?.mime === "image/jpeg"
                 const png = result?.mime === "image/png"
                 const webp = result?.mime === "image/webp"
                 const gif = result?.mime === "image/gif"
                 const mp4 = result?.mime === "video/mp4"
+                const mp3 = result?.mime === "audio/mpeg"
+                const wav = result?.mime === "audio/x-wav"
+                const glb = Functions.isGLTF(file.name)
+                const fbx = Functions.isFBX(file.name)
+                const obj = Functions.isOBJ(file.name)
+                if (glb) result.typename = "glb"
+                if (fbx) result.typename = "fbx"
+                if (obj) result.typename = "obj"
                 const webm = (path.extname(file.name) === ".webm" && result?.typename === "mkv")
-                if (jpg || png || webp || gif || mp4 || webm) {
+                if (jpg || png || webp || gif || mp4 || webm || mp3 || wav || glb || fbx || obj) {
                     if (mp4 || webm) {
                         const url = URL.createObjectURL(file)
                         const thumbnail = await Functions.videoThumbnail(url)
                         bytes = await Functions.base64toUint8Array(thumbnail)
                     }
-                    const result = await axios.post("/api/search/similar", Object.values(bytes), {withCredentials: true}).then((r) => r.data)
-                    resolve(result)
+                    const similar = await axios.post("/api/search/similar", {bytes: Object.values(bytes), type: result.typename}, {withCredentials: true}).then((r) => r.data)
+                    resolve(similar)
                 }
             }
             fileReader.readAsArrayBuffer(file)

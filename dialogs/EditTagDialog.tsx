@@ -3,7 +3,7 @@ import {useHistory} from "react-router-dom"
 import {HashLink as Link} from "react-router-hash-link"
 import {HideNavbarContext, HideSidebarContext, ThemeContext, EnableDragContext, EditTagIDContext, EditTagFlagContext, EditTagImplicationsContext, 
 EditTagTypeContext, EditTagPixivContext, EditTagTwitterContext, EditTagKeyContext, EditTagAliasesContext, EditTagImageContext, EditTagWebsiteContext, 
-EditTagFandomContext, EditTagDescriptionContext, HideTitlebarContext, SessionContext} from "../Context"
+EditTagFandomContext, EditTagDescriptionContext, EditTagReasonContext, HideTitlebarContext, SessionContext} from "../Context"
 import functions from "../structures/Functions"
 import uploadIcon from "../assets/purple/upload.png"
 import "./styles/edittagdialog.less"
@@ -31,9 +31,9 @@ const EditTagDialog: React.FunctionComponent = (props) => {
     const {editTagTwitter, setEditTagTwitter} = useContext(EditTagTwitterContext)
     const {editTagWebsite, setEditTagWebsite} = useContext(EditTagWebsiteContext)
     const {editTagFandom, setEditTagFandom} = useContext(EditTagFandomContext)
+    const {editTagReason, setEditTagReason} = useContext(EditTagReasonContext)
     const {session, setSession} = useContext(SessionContext)
     const [submitted, setSubmitted] = useState(false)
-    const [reason, setReason] = useState("")
     const [error, setError] = useState(false)
     const errorRef = useRef<any>(null)
     const history = useHistory()
@@ -54,7 +54,16 @@ const EditTagDialog: React.FunctionComponent = (props) => {
     }, [editTagID])
 
     const editTag = async () => {
-        if (permissions.isStaff(session)) {
+        if (session.username) {
+            const badDesc = functions.validateDescription(editTagDescription)
+            if (badDesc) {
+                setError(true)
+                if (!errorRef.current) await functions.timeout(20)
+                errorRef.current!.innerText = badDesc
+                await functions.timeout(2000)
+                setError(false)
+                return
+            }
             setEditTagFlag(true)
         } else {
             const badDesc = functions.validateDescription(editTagDescription)
@@ -66,7 +75,7 @@ const EditTagDialog: React.FunctionComponent = (props) => {
                 setError(false)
                 return
             }
-            const badReason = functions.validateReason(reason)
+            const badReason = functions.validateReason(editTagReason)
             if (badReason) {
                 setError(true)
                 if (!errorRef.current) await functions.timeout(20)
@@ -85,7 +94,7 @@ const EditTagDialog: React.FunctionComponent = (props) => {
                     image = Object.values(bytes)
                 }
             }
-            await axios.post("/api/tag/edit/request", {tag: editTagID, key: editTagKey, description: editTagDescription, image, aliases: editTagAliases, implications: editTagImplications, pixiv: editTagPixiv, twitter: editTagTwitter, website: editTagWebsite, fandom: editTagFandom, reason}, {withCredentials: true})
+            await axios.post("/api/tag/edit/request", {tag: editTagID, key: editTagKey, description: editTagDescription, image, aliases: editTagAliases, implications: editTagImplications, pixiv: editTagPixiv, twitter: editTagTwitter, website: editTagWebsite, fandom: editTagFandom, reason: editTagReason}, {withCredentials: true})
             setSubmitted(true)
         }
     }
@@ -101,7 +110,7 @@ const EditTagDialog: React.FunctionComponent = (props) => {
     const close = () => {
         setEditTagID(null)
         setSubmitted(false)
-        setReason("")
+        setEditTagReason("")
     }
 
     const uploadTagImg = async (event: any) => {
@@ -197,7 +206,7 @@ const EditTagDialog: React.FunctionComponent = (props) => {
     }
 
     if (editTagID) {
-        if (permissions.isStaff(session)) {
+        if (session.username) {
             return (
                 <div className="edittag-dialog">
                     <Draggable handle=".edittag-dialog-title-container">
@@ -245,6 +254,11 @@ const EditTagDialog: React.FunctionComponent = (props) => {
                             <div className="edittag-dialog-row">
                                 <textarea className="edittag-textarea" spellCheck={false} value={editTagImplications.join(" ")} onChange={(event) => setEditTagImplications(event.target.value.split(/ +/g))}></textarea>
                             </div>
+                            <div className="edittag-dialog-row">
+                                <span className="edittag-dialog-text">Reason: </span>
+                                <input style={{width: "100%"}} className="edittag-dialog-input" type="text" spellCheck={false} value={editTagReason} onChange={(event) => setEditTagReason(event.target.value)}/>
+                            </div>
+                            {error ? <div className="edittag-dialog-validation-container"><span className="edittag-dialog-validation" ref={errorRef}></span></div> : null}
                             <div className="edittag-dialog-row">
                                 <button onClick={() => click("reject")} className="edittag-button">{"Cancel"}</button>
                                 <button onClick={() => click("accept")} className="edittag-button">{"Edit"}</button>
@@ -314,9 +328,9 @@ const EditTagDialog: React.FunctionComponent = (props) => {
                         </div>
                         <div className="edittag-dialog-row">
                             <span className="edittag-dialog-text">Reason: </span>
-                            <input style={{width: "100%"}} className="edittag-dialog-input" type="text" spellCheck={false} value={reason} onChange={(event) => setReason(event.target.value)}/>
+                            <input style={{width: "100%"}} className="edittag-dialog-input" type="text" spellCheck={false} value={editTagReason} onChange={(event) => setEditTagReason(event.target.value)}/>
                         </div>
-                        {error ? <div className="edittag-dialog-validation-container"><span className="edittag-dialog-validation" ref={errorRef}></span></div> : null}
+                        {/*error ? <div className="edittag-dialog-validation-container"><span className="edittag-dialog-validation" ref={errorRef}></span></div> : null*/}
                         <div className="edittag-dialog-row">
                             <button onClick={() => click("reject")} className="edittag-button">{"Cancel"}</button>
                             <button onClick={() => click("accept")} className="edittag-button">{"Submit Request"}</button>

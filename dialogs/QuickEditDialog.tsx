@@ -17,6 +17,8 @@ import $2d from "../assets/purple/2d.png"
 import $3d from "../assets/purple/3d.png"
 import pixel from "../assets/purple/pixel.png"
 import chibi from "../assets/purple/chibi.png"
+import audio from "../assets/purple/audio.png"
+import model from "../assets/purple/model.png"
 import SearchSuggestions from "../components/SearchSuggestions"
 import ContentEditable from "react-contenteditable"
 import axios from "axios"
@@ -113,7 +115,15 @@ const QuickEditDialog: React.FunctionComponent = (props) => {
     }, [quickEditID])
 
     const quickEdit = async () => {
-        if (permissions.isStaff(session)) {
+        if (session.username) {
+            const tagArr = functions.cleanHTML(tags).split(/[\n\r\s]+/g)
+            if (tagArr.length < 5) {
+                setError(true)
+                await functions.timeout(20)
+                errorRef.current.innerText = "Minimum of 5 tags is required."
+                await functions.timeout(3000)
+                return setError(false)
+            }
             const data = {
                 postID: quickEditID,
                 unverified: quickEditUnverified,
@@ -123,7 +133,8 @@ const QuickEditDialog: React.FunctionComponent = (props) => {
                 artists: functions.cleanHTML(artists).split(/[\n\r\s]+/g),
                 characters: functions.cleanHTML(characters).split(/[\n\r\s]+/g),
                 series: functions.cleanHTML(series).split(/[\n\r\s]+/g),
-                tags: functions.cleanHTML(tags).split(/[\n\r\s]+/g)
+                tags: functions.cleanHTML(tags).split(/[\n\r\s]+/g),
+                reason
             }
             await axios.put("/api/post/quickedit", data, {withCredentials: true})
             setQuickEditID(null)
@@ -223,8 +234,71 @@ const QuickEditDialog: React.FunctionComponent = (props) => {
         })
     }
 
+    const getStyleJSX = () => {
+        if (type === "model") {
+            return (
+                <div className="quickedit-dialog-row">
+                    <button className={`quickedit-button ${style === "3d" ? "button-selected" : ""}`} onClick={() => setStyle("3d")}>
+                        <img className="quickedit-button-img" src={$3d}/>
+                        <span className="quickedit-button-text">3D</span>
+                    </button>
+                    <button className={`quickedit-button ${style === "chibi" ? "button-selected" : ""}`} onClick={() => setStyle("chibi")}>
+                        <img className="quickedit-button-img" src={chibi}/>
+                        <span className="quickedit-button-text">Chibi</span>
+                    </button>
+                    <button className={`quickedit-button ${style === "pixel" ? "button-selected" : ""}`} onClick={() => setStyle("pixel")}>
+                        <img className="quickedit-button-img" src={pixel}/>
+                        <span className="quickedit-button-text">Pixel</span>
+                    </button>
+                </div>
+            )
+        } else if (type === "audio") {
+            return (
+                <div className="quickedit-dialog-row">
+                    <button className={`quickedit-button ${style === "2d" ? "button-selected" : ""}`} onClick={() => setStyle("2d")}>
+                        <img className="quickedit-button-img" src={$2d}/>
+                        <span className="quickedit-button-text">2D</span>
+                    </button>
+                    <button className={`quickedit-button ${style === "pixel" ? "button-selected" : ""}`} onClick={() => setStyle("pixel")}>
+                        <img className="quickedit-button-img" src={pixel}/>
+                        <span className="quickedit-button-text">Pixel</span>
+                    </button>
+                </div>
+            )
+        } else {
+            return (
+                <div className="quickedit-dialog-row">
+                    <button className={`quickedit-button ${style === "2d" ? "button-selected" : ""}`} onClick={() => setStyle("2d")}>
+                        <img className="quickedit-button-img" src={$2d}/>
+                        <span className="quickedit-button-text">2D</span>
+                    </button>
+                    <button className={`quickedit-button ${style === "3d" ? "button-selected" : ""}`} onClick={() => setStyle("3d")}>
+                        <img className="quickedit-button-img" src={$3d}/>
+                        <span className="quickedit-button-text">3D</span>
+                    </button>
+                    <button className={`quickedit-button ${style === "chibi" ? "button-selected" : ""}`} onClick={() => setStyle("chibi")}>
+                        <img className="quickedit-button-img" src={chibi}/>
+                        <span className="quickedit-button-text">Chibi</span>
+                    </button>
+                    <button className={`quickedit-button ${style === "pixel" ? "button-selected" : ""}`} onClick={() => setStyle("pixel")}>
+                        <img className="quickedit-button-img" src={pixel}/>
+                        <span className="quickedit-button-text">Pixel</span>
+                    </button>
+                </div>
+            )
+        }
+    }
+
+    useEffect(() => {
+        if (type === "model") {
+            if (style === "2d") setStyle("3d")
+        } else if (type === "audio") {
+            if (style === "3d" || style === "chibi") setStyle("2d")
+        }
+    }, [type, style])
+
     if (quickEditID) {
-        if (permissions.isStaff(session)) {
+        if (session.username) {
             return (
                 <div className="quickedit-dialog">
                     <Draggable handle=".quickedit-dialog-title-container">
@@ -257,6 +331,16 @@ const QuickEditDialog: React.FunctionComponent = (props) => {
                                     <span className="quickedit-button-text">Comic</span>
                                 </button>
                             </div>
+                            <div className="quickedit-dialog-row">
+                                <button className={`quickedit-button ${type === "audio" ? "button-selected" : ""}`} onClick={() => setType("audio")}>
+                                    <img className="quickedit-button-img" src={audio}/>
+                                    <span className="quickedit-button-text">Audio</span>
+                                </button>
+                                <button className={`quickedit-button ${type === "model" ? "button-selected" : ""}`} onClick={() => setType("model")}>
+                                    <img className="quickedit-button-img" src={model}/>
+                                    <span className="quickedit-button-text">Model</span>
+                                </button>
+                            </div>
                             </> : <>
                             <div className="quickedit-dialog-row">
                                 <button className={`quickedit-button ${type === "image" ? "button-selected" : ""}`} onClick={() => setType("image")}>
@@ -271,9 +355,19 @@ const QuickEditDialog: React.FunctionComponent = (props) => {
                                     <img className="quickedit-button-img" src={video}/>
                                     <span className="quickedit-button-text">Video</span>
                                 </button>
+                            </div>
+                            <div className="quickedit-dialog-row">
                                 <button className={`quickedit-button ${type === "comic" ? "button-selected" : ""}`} onClick={() => setType("comic")}>
                                     <img className="quickedit-button-img" src={comic}/>
                                     <span className="quickedit-button-text">Comic</span>
+                                </button>
+                                <button className={`quickedit-button ${type === "audio" ? "button-selected" : ""}`} onClick={() => setType("audio")}>
+                                    <img className="quickedit-button-img" src={audio}/>
+                                    <span className="quickedit-button-text">Audio</span>
+                                </button>
+                                <button className={`quickedit-button ${type === "model" ? "button-selected" : ""}`} onClick={() => setType("model")}>
+                                    <img className="quickedit-button-img" src={model}/>
+                                    <span className="quickedit-button-text">Model</span>
                                 </button>
                             </div> </>}
                             {mobile ? <>
@@ -311,24 +405,7 @@ const QuickEditDialog: React.FunctionComponent = (props) => {
                                 </button> : null}
                             </div>
                             </>}
-                            <div className="quickedit-dialog-row">
-                                <button className={`quickedit-button ${style === "2d" ? "button-selected" : ""}`} onClick={() => setStyle("2d")}>
-                                    <img className="quickedit-button-img" src={$2d}/>
-                                    <span className="quickedit-button-text">2D</span>
-                                </button>
-                                <button className={`quickedit-button ${style === "3d" ? "button-selected" : ""}`} onClick={() => setStyle("3d")}>
-                                    <img className="quickedit-button-img" src={$3d}/>
-                                    <span className="quickedit-button-text">3D</span>
-                                </button>
-                                <button className={`quickedit-button ${style === "chibi" ? "button-selected" : ""}`} onClick={() => setStyle("chibi")}>
-                                    <img className="quickedit-button-img" src={chibi}/>
-                                    <span className="quickedit-button-text">Chibi</span>
-                                </button>
-                                <button className={`quickedit-button ${style === "pixel" ? "button-selected" : ""}`} onClick={() => setStyle("pixel")}>
-                                    <img className="quickedit-button-img" src={pixel}/>
-                                    <span className="quickedit-button-text">Pixel</span>
-                                </button>
-                                </div>
+                            {getStyleJSX()}
                             <div className="quickedit-dialog-row">
                                 <SearchSuggestions active={artistsActive} x={tagX} y={tagY} width={mobile ? 140 : 200} fontSize={17} text={functions.cleanHTML(artists)} click={(tag) => handleArtistClick(tag)} type="artist"/>
                                 <span className="quickedit-dialog-text">Artists: </span>
@@ -351,6 +428,11 @@ const QuickEditDialog: React.FunctionComponent = (props) => {
                                 <SearchSuggestions active={tagActive} text={functions.cleanHTML(tags)} x={tagX} y={tagY} width={mobile ? 140 : 200} fontSize={17} click={handleTagClick} type="tag"/>
                                 <ContentEditable innerRef={tagRef} className="quickedit-textarea" spellCheck={false} html={tags} onChange={(event) => setTags(event.target.value)} onFocus={() => setTagActive(true)} onBlur={() => setTagActive(false)}/>
                             </div>
+                            <div className="quickedit-dialog-row">
+                                <span className="quickedit-dialog-text">Reason: </span>
+                                <input style={{width: "100%"}} className="quickedit-dialog-input" type="text" spellCheck={false} value={reason} onChange={(event) => setReason(event.target.value)}/>
+                            </div>
+                            {error ? <div className="quickedit-dialog-validation-container"><span className="quickedit-dialog-validation" ref={errorRef}></span></div> : null}
                             <div className="quickedit-dialog-row">
                                 <button onClick={() => click("reject")} className="download-button">{"Cancel"}</button>
                                 <button onClick={() => click("accept")} className="download-button">{"Edit"}</button>
@@ -459,7 +541,7 @@ const QuickEditDialog: React.FunctionComponent = (props) => {
                             <span className="quickedit-dialog-text">Reason: </span>
                             <input style={{width: "100%"}} className="quickedit-dialog-input" type="text" spellCheck={false} value={reason} onChange={(event) => setReason(event.target.value)}/>
                         </div>
-                        {error ? <div className="quickedit-dialog-validation-container"><span className="quickedit-dialog-validation" ref={errorRef}></span></div> : null}
+                        {/*error ? <div className="quickedit-dialog-validation-container"><span className="quickedit-dialog-validation" ref={errorRef}></span></div> : null*/}
                         <div className="quickedit-dialog-row">
                             <button onClick={() => click("reject")} className="download-button">{"Cancel"}</button>
                             <button onClick={() => click("accept")} className="download-button">{"Submit Request"}</button>
