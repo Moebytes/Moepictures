@@ -20,6 +20,10 @@ import modelMatcapIcon from "../assets/purple/model-matcap.png"
 import modelTexturedIcon from "../assets/purple/model-textured.png"
 import modelShapeKeysIcon from "../assets/purple/model-shapekeys.png"
 import modelLightIcon from "../assets/purple/model-light.png"
+import ambientLightIcon from "../assets/purple/ambient.png"
+import ambientLightIconMagenta from "../assets/magenta/ambient.png"
+import directionalLightIcon from "../assets/purple/directional.png"
+import directionalLightIconMagenta from "../assets/magenta/directional.png"
 import path from "path"
 import "./styles/postmodel.less"
 import mime from "mime-types"
@@ -55,6 +59,7 @@ const PostModel: React.FunctionComponent<Props> = (props) => {
     const {disableZoom, setDisableZoom} = useContext(DisableZoomContext)
     const {mobile, setMobile} = useContext(MobileContext)
     const [showSpeedDropdown, setShowSpeedDropdown] = useState(false)
+    const [showLightDropdown, setShowLightDropdown] = useState(false)
     const containerRef = useRef<HTMLDivElement>(null)
     const fullscreenRef = useRef<HTMLDivElement>(null)
     const rendererRef = useRef<HTMLDivElement>(null)
@@ -64,6 +69,7 @@ const PostModel: React.FunctionComponent<Props> = (props) => {
     const modelSliderRef = useRef<any>(null)
     const modelControls = useRef<HTMLDivElement>(null)
     const modelSpeedRef = useRef(null) as any
+    const modelLightRef = useRef(null) as any
     const [secondsProgress, setSecondsProgress] = useState(0)
     const [progress, setProgress] = useState(0)
     const [dragProgress, setDragProgress] = useState(0) as any
@@ -79,6 +85,10 @@ const PostModel: React.FunctionComponent<Props> = (props) => {
     const [ref, setRef] = useState(null as unknown as HTMLCanvasElement)
     const [wireframe, setWireframe] = useState(false)
     const [matcap, setMatcap] = useState(false)
+    const [ambient, setAmbient] = useState(0.5)
+    const [directionalFront, setDirectionalFront] = useState(0.2)
+    const [directionalBack, setDirectionalBack] = useState(0.2)
+    const [lights, setLights] = useState([]) as any
 
     const loadModel = async () => {
         const element = rendererRef.current
@@ -88,14 +98,15 @@ const PostModel: React.FunctionComponent<Props> = (props) => {
         const height = window.innerHeight - functions.titlebarHeight() - functions.navbarHeight() - 150
         const scene = new THREE.Scene()
         const camera = new THREE.PerspectiveCamera(75, width / height, 0.1, 1000)
-        const light = new THREE.AmbientLight(0xffffff, 0.5)
+        const light = new THREE.AmbientLight(0xffffff, ambient)
         scene.add(light)
-        const light2 = new THREE.DirectionalLight(0xffffff, 0.2)
+        const light2 = new THREE.DirectionalLight(0xffffff, directionalFront)
         light2.position.set(30, 100, 100)
         scene.add(light2)
-        const light3 = new THREE.DirectionalLight(0xffffff, 0.2)
+        const light3 = new THREE.DirectionalLight(0xffffff, directionalBack)
         light3.position.set(-30, 100, -100)
         scene.add(light3)
+        setLights([light, light2, light3])
         
         const renderer = new THREE.WebGLRenderer({alpha: true, antialias: true, preserveDrawingBuffer: true})
         renderer.outputEncoding = THREE.sRGBEncoding
@@ -256,6 +267,14 @@ const PostModel: React.FunctionComponent<Props> = (props) => {
     }, [wireframe, matcap])
 
     useEffect(() => {
+        if (lights.length === 3) {
+            lights[0].intensity = ambient
+            lights[1].intensity = directionalFront
+            lights[2].intensity = directionalBack
+        }
+    }, [ambient, directionalBack, directionalFront])
+
+    useEffect(() => {
         if (mixer) {
             if (paused) {
                 mixer.timeScale = 0
@@ -324,6 +343,16 @@ const PostModel: React.FunctionComponent<Props> = (props) => {
         let offset = -5
         return `${raw + offset}px`
     }
+
+    const getModelLightMarginRight = () => {
+        const controlRect = modelControls.current?.getBoundingClientRect()
+        const rect = modelLightRef.current?.getBoundingClientRect()
+        if (!rect || !controlRect) return "400px"
+        const raw = controlRect.right - rect.right
+        let offset = -150
+        return `${raw + offset}px`
+    }
+
     const updateProgressText = (value: number) => {
         let percent = value / 100
         if (reverse === true) {
@@ -439,6 +468,7 @@ const PostModel: React.FunctionComponent<Props> = (props) => {
 
     const controlMouseLeave = () => {
         setShowSpeedDropdown(false)
+        setShowLightDropdown(false)
         if (modelControls.current) modelControls.current.style.opacity = "0"
     }
 
@@ -457,14 +487,32 @@ const PostModel: React.FunctionComponent<Props> = (props) => {
         return modelMatcapIcon
     }
 
+    const getAmbientIcon = () => {
+        if (theme.includes("magenta")) return ambientLightIconMagenta
+        return ambientLightIcon
+    }
+
+    const getDirectionalIcon = () => {
+        if (theme.includes("magenta")) return directionalLightIconMagenta
+        return directionalLightIcon
+    }
+
     const reset = () => {
         changeReverse(false)
         setSpeed(1)
         setPaused(false)
         setShowSpeedDropdown(false)
+        setShowLightDropdown(false)
+        resetLights()
         setTimeout(() => {
             seek(0)
         }, 300)
+    }
+
+    const resetLights = () => {
+        setAmbient(0.5)
+        setDirectionalBack(0.2)
+        setDirectionalFront(0.2)
     }
 
     const fullscreen = async (exit?: boolean) => {
@@ -550,7 +598,7 @@ const PostModel: React.FunctionComponent<Props> = (props) => {
                                     <img className="model-control-img" onClick={() => setWireframe((prev) => !prev)} src={getModelWireframeIcon()}/>
                                     <img className="model-control-img" onClick={() => setMatcap((prev) => !prev)} src={getModelMatcapIcon()}/>
                                     {/* <img className="model-control-img" src={modelShapeKeysIcon} onClick={() => null}/> */}
-                                    {/* <img className="model-control-img" src={modelLightIcon} onClick={() => null}/> */}
+                                    <img className="model-control-img" ref={modelLightRef}  src={modelLightIcon} onClick={() => setShowLightDropdown((prev) => !prev)}/>
                                 </div> 
                                 <div className="model-control-row-container">
                                     <img className="model-control-img" src={modelFullscreenIcon} onClick={() => fullscreen()}/>
@@ -586,6 +634,27 @@ const PostModel: React.FunctionComponent<Props> = (props) => {
                                 </div>
                                 <div className="model-speed-dropdown-item" onClick={() => {setSpeed(0.25); setShowSpeedDropdown(false)}}>
                                     <span className="model-speed-dropdown-text">0.25x</span>
+                                </div>
+                            </div>
+                            <div className={`model-light-dropdown ${showLightDropdown ? "" : "hide-light-dropdown"}`} 
+                            style={{marginRight: getModelLightMarginRight(), top: `-125px`}}>
+                                <div className="model-light-dropdown-row lights-row">
+                                    <img className="light-dropdown-img" src={getAmbientIcon()}/>
+                                    <span className="light-dropdown-text">Ambient</span>
+                                    <Slider className="lights-slider" trackClassName="lights-slider-track" thumbClassName="lights-slider-thumb" onChange={(value) => setAmbient(value)} min={0.05} max={1} step={0.05} value={ambient}/>
+                                </div>
+                                <div className="model-light-dropdown-row lights-row">
+                                    <img className="light-dropdown-img" src={getDirectionalIcon()}/>
+                                    <span className="light-dropdown-text">Directional Front</span>
+                                    <Slider className="lights-slider" trackClassName="lights-slider-track" thumbClassName="lights-slider-thumb" onChange={(value) => setDirectionalFront(value)} min={0.05} max={1} step={0.05} value={directionalFront}/>
+                                </div>
+                                <div className="model-light-dropdown-row lights-row">
+                                    <img className="light-dropdown-img" src={getDirectionalIcon()}/>
+                                    <span className="light-dropdown-text">Directional Back</span>
+                                    <Slider className="lights-slider" trackClassName="lights-slider-track" thumbClassName="lights-slider-thumb" onChange={(value) => setDirectionalBack(value)} min={0.05} max={1} step={0.05} value={directionalBack}/>
+                                </div>
+                                <div className="model-light-dropdown-row lights-row">
+                                    <button className="lights-button" onClick={() => resetLights()}>Reset</button>
                                 </div>
                             </div>
                         </div>

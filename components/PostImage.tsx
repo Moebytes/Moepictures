@@ -1005,7 +1005,8 @@ const PostImage: React.FunctionComponent<Props> = (props) => {
                     const page = props.comicPages[i]
                     const image = await renderImage(page)
                     const data = await fetch(image).then((r) => r.arrayBuffer())
-                    zip.file(path.basename(page), data, {binary: true})
+                    const decryptedData = cryptoFunctions.decrypt(Buffer.from(data))
+                    zip.file(path.basename(page), decryptedData, {binary: true})
                 }
                 const decoded = decodeURIComponent(props.img)
                 const filename = `${path.basename(decoded, path.extname(decoded)).replace(/\d+$/, "")}.zip`
