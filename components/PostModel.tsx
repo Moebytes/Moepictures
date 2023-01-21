@@ -60,6 +60,7 @@ const PostModel: React.FunctionComponent<Props> = (props) => {
     const {mobile, setMobile} = useContext(MobileContext)
     const [showSpeedDropdown, setShowSpeedDropdown] = useState(false)
     const [showLightDropdown, setShowLightDropdown] = useState(false)
+    const [showMorphDropdown, setShowMorphDropdown] = useState(false)
     const containerRef = useRef<HTMLDivElement>(null)
     const fullscreenRef = useRef<HTMLDivElement>(null)
     const rendererRef = useRef<HTMLDivElement>(null)
@@ -70,6 +71,7 @@ const PostModel: React.FunctionComponent<Props> = (props) => {
     const modelControls = useRef<HTMLDivElement>(null)
     const modelSpeedRef = useRef(null) as any
     const modelLightRef = useRef(null) as any
+    const modelMorphRef = useRef(null) as any
     const [secondsProgress, setSecondsProgress] = useState(0)
     const [progress, setProgress] = useState(0)
     const [dragProgress, setDragProgress] = useState(0) as any
@@ -89,6 +91,12 @@ const PostModel: React.FunctionComponent<Props> = (props) => {
     const [directionalFront, setDirectionalFront] = useState(0.2)
     const [directionalBack, setDirectionalBack] = useState(0.2)
     const [lights, setLights] = useState([]) as any
+    const [morphMesh, setMorphMesh] = useState(null) as any
+    const [initMorphTargets, setInitMorphTargets] = useState([]) as any
+    const [morphTargets, setMorphTargets] = useState([]) as any
+    const [model, setModel] = useState(null) as any
+    const [scene, setScene] = useState(null) as any
+    const [objMaterials, setObjMaterials] = useState([]) as any
 
     const loadModel = async () => {
         const element = rendererRef.current
@@ -129,6 +137,7 @@ const PostModel: React.FunctionComponent<Props> = (props) => {
             model = await loader.loadAsync(props.model)
         }
 
+        let objMaterials = [] as any
         if (wireframe) {
             await new Promise<void>((resolve) => {
                 model.traverse((obj: any) => {
@@ -136,31 +145,53 @@ const PostModel: React.FunctionComponent<Props> = (props) => {
                         const geometry = new THREE.WireframeGeometry(obj.geometry)
                         const material = new THREE.LineBasicMaterial({color: 0xf64dff})
                         const wireframe = new THREE.LineSegments(geometry, material)
+                        wireframe.name = "wireframe"
                         model.add(wireframe)
                     }
                     resolve()
                 })
             })
         }
-        if (matcap) {
-            const matcap = new THREE.MeshStandardMaterial({color: 0xffffff, roughness: 0.5, metalness: 1.0, envMap: scene.environment})
-            await new Promise<void>((resolve) => {
-                model.traverse((obj: any) => {
-                    if (obj.isMesh) {
-                        obj.material = matcap
-                    }
-                    resolve()
-                })
+        const matcapMaterial = new THREE.MeshStandardMaterial({color: 0xffffff, roughness: 0.5, metalness: 1.0, envMap: scene.environment})
+        await new Promise<void>((resolve) => {
+            model.traverse((obj: any) => {
+                if (obj.isMesh) {
+                    objMaterials.push(obj.material)
+                    if (matcap) obj.material = matcapMaterial
+                }
+                resolve()
             })
-        }
+        })
+
+        setModel(model)
+        setScene(scene)
+        setObjMaterials(objMaterials)
+
+        let morphTargets  = [] as any
+        let morphMesh = null as any
+        model.traverse((mesh) => {
+            // @ts-ignore
+            if (mesh.isMesh && mesh.morphTargetInfluences?.length) {
+                // @ts-ignore
+                for (let i = 0; i < mesh.morphTargetInfluences.length; i++) {
+                    // @ts-ignore
+                    Object.keys(mesh.morphTargetDictionary).forEach((key) => {
+                        // @ts-ignore
+                        if (key && mesh.morphTargetDictionary[key] === i) morphTargets.push({name: key, value: mesh.morphTargetInfluences[i]})
+                    })
+                }
+                morphMesh = mesh
+            }
+        })
+        setMorphMesh(morphMesh)
+        setInitMorphTargets(JSON.parse(JSON.stringify(morphTargets)))
+        setMorphTargets(morphTargets)
+
         scene.add(model)
 
         const controlElement = fullscreenRef.current || undefined
 
         const controls = new OrbitControls(camera, controlElement)
-        controlElement?.addEventListener("doubleclick", () => {
-            controls.reset()
-        })
 
         const box = new THREE.Box3().setFromObject(model)
         const size = box.getSize(new THREE.Vector3()).length()
@@ -251,6 +282,49 @@ const PostModel: React.FunctionComponent<Props> = (props) => {
         })
     }
 
+    const updateMaterials = async () => {
+        if (!scene || !model) return
+        if (wireframe) {
+            await new Promise<void>((resolve) => {
+                model.traverse((obj: any) => {
+                    if (obj.isMesh) {
+                        const geometry = new THREE.WireframeGeometry(obj.geometry)
+                        const material = new THREE.LineBasicMaterial({color: 0xf64dff})
+                        const wireframe = new THREE.LineSegments(geometry, material)
+                        wireframe.name = "wireframe"
+                        model.add(wireframe)
+                    }
+                    resolve()
+                })
+            })
+        } else {
+            scene.remove(scene.getObjectByName("wireframe"))
+        }
+
+        if (matcap) {
+            const matcapMaterial = new THREE.MeshStandardMaterial({color: 0xffffff, roughness: 0.5, metalness: 1.0, envMap: scene.environment})
+            await new Promise<void>((resolve) => {
+                model.traverse((obj: any) => {
+                    if (obj.isMesh) {
+                        obj.material = matcapMaterial
+                    }
+                    resolve()
+                })
+            })
+        } else {
+            let i = 0
+            await new Promise<void>((resolve) => {
+                model.traverse((obj: any) => {
+                    if (obj.isMesh) {
+                        obj.material = objMaterials[i]
+                        i++
+                    }
+                    resolve()
+                })
+            })
+        }
+    }
+
     useEffect(() => {
         setReverse(false)
         setSecondsProgress(0)
@@ -260,11 +334,12 @@ const PostModel: React.FunctionComponent<Props> = (props) => {
         setDragging(false)
         setSeekTo(null)
         if (ref) ref.style.opacity = "1"
+        loadModel()
     }, [props.model])
 
     useEffect(() => {
-        loadModel()
-    }, [wireframe, matcap])
+        updateMaterials()
+    }, [scene, model, objMaterials, wireframe, matcap])
 
     useEffect(() => {
         if (lights.length === 3) {
@@ -347,6 +422,15 @@ const PostModel: React.FunctionComponent<Props> = (props) => {
     const getModelLightMarginRight = () => {
         const controlRect = modelControls.current?.getBoundingClientRect()
         const rect = modelLightRef.current?.getBoundingClientRect()
+        if (!rect || !controlRect) return "400px"
+        const raw = controlRect.right - rect.right
+        let offset = -150
+        return `${raw + offset}px`
+    }
+
+    const getModelMorphMarginRight = () => {
+        const controlRect = modelControls.current?.getBoundingClientRect()
+        const rect = modelMorphRef.current?.getBoundingClientRect()
         if (!rect || !controlRect) return "400px"
         const raw = controlRect.right - rect.right
         let offset = -150
@@ -469,6 +553,7 @@ const PostModel: React.FunctionComponent<Props> = (props) => {
     const controlMouseLeave = () => {
         setShowSpeedDropdown(false)
         setShowLightDropdown(false)
+        setShowMorphDropdown(false)
         if (modelControls.current) modelControls.current.style.opacity = "0"
     }
 
@@ -503,7 +588,9 @@ const PostModel: React.FunctionComponent<Props> = (props) => {
         setPaused(false)
         setShowSpeedDropdown(false)
         setShowLightDropdown(false)
+        setShowMorphDropdown(false)
         resetLights()
+        resetMorphTargets()
         setTimeout(() => {
             seek(0)
         }, 300)
@@ -571,6 +658,57 @@ const PostModel: React.FunctionComponent<Props> = (props) => {
         loadImage()
     }, [image])
 
+    const updateMorphTargets = (value?: number, index?: number) => {
+        if (!morphMesh?.morphTargetInfluences?.length || !morphTargets?.length) return 
+        if (value && index) {
+            morphMesh.morphTargetInfluences[index] = value
+            morphTargets[index].value = value
+        } else {
+            for (let i = 0; i < morphTargets.length; i++) {
+                morphMesh.morphTargetInfluences[i] = morphTargets[i].value
+            }
+        }
+        setMorphTargets(morphTargets)
+    }
+
+    useEffect(() => {
+        updateMorphTargets()
+    }, [morphMesh, morphTargets])
+
+    const resetMorphTargets = () => {
+        if (!morphMesh?.morphTargetInfluences?.length || !initMorphTargets?.length) return 
+        for (let i = 0; i < initMorphTargets.length; i++) {
+            morphMesh.morphTargetInfluences[i] = initMorphTargets[i].value
+        }
+        setMorphTargets(JSON.parse(JSON.stringify(initMorphTargets)))
+    }
+
+    const shapeKeysDropdownJSX = () => {
+        let jsx = [] as any
+
+        for (let i = 0; i < morphTargets.length; i++) {
+            jsx.push(
+                <div className="model-morph-dropdown-row morph-row">
+                    {/* <img className="morph-dropdown-img" src={getAmbientIcon()}/> */}
+                    <span className="morph-dropdown-text">{morphTargets[i].name}</span>
+                    <Slider className="morph-slider" trackClassName="morph-slider-track" thumbClassName="morph-slider-thumb" onChange={(value) => updateMorphTargets(value, i)} min={0} max={1} step={0.05} value={morphTargets[i].value}/>
+                </div>
+            )
+        }
+
+        return (
+            <div className={`model-morph-dropdown ${showMorphDropdown ? "" : "hide-morph-dropdown"}`}
+            style={{marginRight: getModelMorphMarginRight(), top: `-300px`}}>
+                <div className="model-morph-dropdown-container">
+                    {jsx}
+                    <div className="model-morph-dropdown-row morph-row">
+                        <button className="morph-button" onClick={() => resetMorphTargets()}>Reset</button>
+                    </div>
+                </div>
+            </div>
+        )
+    }
+
     return (
         <div className="post-model-container" style={{zoom: props.scale ? props.scale : 1}}>
             <div className="post-model-box" ref={containerRef}>
@@ -597,7 +735,7 @@ const PostModel: React.FunctionComponent<Props> = (props) => {
                                 <div className="model-control-row-container">
                                     <img className="model-control-img" onClick={() => setWireframe((prev) => !prev)} src={getModelWireframeIcon()}/>
                                     <img className="model-control-img" onClick={() => setMatcap((prev) => !prev)} src={getModelMatcapIcon()}/>
-                                    {/* <img className="model-control-img" src={modelShapeKeysIcon} onClick={() => null}/> */}
+                                    <img className="model-control-img" ref={modelMorphRef} src={modelShapeKeysIcon} onClick={() => setShowMorphDropdown((prev) => !prev)}/>
                                     <img className="model-control-img" ref={modelLightRef}  src={modelLightIcon} onClick={() => setShowLightDropdown((prev) => !prev)}/>
                                 </div> 
                                 <div className="model-control-row-container">
@@ -636,8 +774,9 @@ const PostModel: React.FunctionComponent<Props> = (props) => {
                                     <span className="model-speed-dropdown-text">0.25x</span>
                                 </div>
                             </div>
-                            <div className={`model-light-dropdown ${showLightDropdown ? "" : "hide-light-dropdown"}`} 
-                            style={{marginRight: getModelLightMarginRight(), top: `-125px`}}>
+                            {shapeKeysDropdownJSX()}
+                            <div className={`model-light-dropdown ${showLightDropdown ? "" : "hide-light-dropdown"}`}
+                            style={{marginRight: getModelLightMarginRight(), top: `-120px`}}>
                                 <div className="model-light-dropdown-row lights-row">
                                     <img className="light-dropdown-img" src={getAmbientIcon()}/>
                                     <span className="light-dropdown-text">Ambient</span>
