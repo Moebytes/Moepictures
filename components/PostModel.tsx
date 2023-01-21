@@ -284,23 +284,6 @@ const PostModel: React.FunctionComponent<Props> = (props) => {
 
     const updateMaterials = async () => {
         if (!scene || !model) return
-        if (wireframe) {
-            await new Promise<void>((resolve) => {
-                model.traverse((obj: any) => {
-                    if (obj.isMesh) {
-                        const geometry = new THREE.WireframeGeometry(obj.geometry)
-                        const material = new THREE.LineBasicMaterial({color: 0xf64dff})
-                        const wireframe = new THREE.LineSegments(geometry, material)
-                        wireframe.name = "wireframe"
-                        model.add(wireframe)
-                    }
-                    resolve()
-                })
-            })
-        } else {
-            scene.remove(scene.getObjectByName("wireframe"))
-        }
-
         if (matcap) {
             const matcapMaterial = new THREE.MeshStandardMaterial({color: 0xffffff, roughness: 0.5, metalness: 1.0, envMap: scene.environment})
             await new Promise<void>((resolve) => {
@@ -334,12 +317,15 @@ const PostModel: React.FunctionComponent<Props> = (props) => {
         setDragging(false)
         setSeekTo(null)
         if (ref) ref.style.opacity = "1"
-        loadModel()
     }, [props.model])
 
     useEffect(() => {
+        loadModel()
+    }, [wireframe])
+
+    useEffect(() => {
         updateMaterials()
-    }, [scene, model, objMaterials, wireframe, matcap])
+    }, [scene, model, objMaterials, matcap])
 
     useEffect(() => {
         if (lights.length === 3) {

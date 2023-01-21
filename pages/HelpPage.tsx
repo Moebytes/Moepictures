@@ -10,6 +10,8 @@ MobileContext, EnableDragContext} from "../Context"
 import imagefiltersImg from "../assets/misc/imagefilters.png"
 import gifPlayerImg from "../assets/misc/gifplayer.png"
 import videoPlayerImg from "../assets/misc/videoplayer.png"
+import musicPlayerImg from "../assets/misc/musicplayer.png"
+import $3dPlayerImg from "../assets/misc/3dplayer.png"
 import cutenessMeterImg from "../assets/misc/cutenessmeter.png"
 import searchingImg from "../assets/misc/searching.png"
 import "./styles/helppage.less"
@@ -72,6 +74,8 @@ const HelpPage: React.FunctionComponent = (props) => {
                             <Link className="help-link" to="/help#image-filters">Image Filters</Link>
                             <Link className="help-link" to="/help#gif-player">GIF Player</Link>
                             <Link className="help-link" to="/help#video-player">Video Player</Link>
+                            <Link className="help-link" to="/help#3d-model-player">3D Model Player</Link>
+                            <Link className="help-link" to="/help#music-player">Music Player</Link>
                             <Link className="help-link" to="/help#favorites">Favorites</Link>
                             <Link className="help-link" to="/help#cuteness-meter">Cuteness Meter</Link>
                             <Link className="help-link" to="/help#uploading">Uploading</Link>
@@ -150,11 +154,22 @@ const HelpPage: React.FunctionComponent = (props) => {
                     <span className="help-heading" id="video-player">Video Player</span>
                     <div className="help-img-container"><img className="help-img" src={videoPlayerImg}/></div>
                     <span className="help-text">
-                        Moebooru also has a custom video player, which allows some additional functionality such as modification of playback speed, reverse 
+                        The video player allows some additional functionality such as modification of playback speed, reverse 
                         playback, and toggleable pitch preservement (ie, if a video is sped up, then this controls if the audio pitch will also get pitched up). <br/><br/>
 
                         The reverse playback only works in Chromium-based browsers (Chrome, Opera, Edge) and will not work in Safari or Firefox because they don't yet support the 
                         API. Also, full-screening videos will not work in iOS Safari.
+                    </span>
+                    <span className="help-heading" id="3d-model-player">3D Model Player</span>
+                    <div className="help-img-container"><img className="help-img" src={$3dPlayerImg}/></div>
+                    <span className="help-text">
+                        The 3d model player supports 3d models and animations. There are additional controls for toggling wireframe, matcap, editing shapekeys and lighting. Due 
+                        to limitations animations are not supported in wireframe mode.
+                    </span>
+                    <span className="help-heading" id="music-player">Music Player</span>
+                    <div className="help-img-container"><img className="help-img" src={musicPlayerImg}/></div>
+                    <span className="help-text">
+                        The music player supports most of the controls seen on the video player. Reverse audio playback should not have any browser limitations.
                     </span>
                     <span className="help-heading" id="favorites">Favorites</span>
                     <span className="help-text">
@@ -189,7 +204,8 @@ const HelpPage: React.FunctionComponent = (props) => {
                         ⇾ Source information is required for all posts. <br/>
                         ⇾ All tags should be romanized. Titles and commentary doesn't have to be romanized. <br/>
                         ⇾ No hentai. I don't want this to become a hentai-focused site, so for now this is not allowed. <br/>
-                        ⇾ No AI generated works. I only want art with real human love and passion behind it, and most of these are plagiarized from stolen works.
+                        ⇾ No AI generated works. I only want art with real human love and passion behind it, and most of these are plagiarized from stolen works. <br/>
+                        ⇾ No paid rewards. This is not a piracy site, please support artists for their hard work.
                         </span>
                     </span>
                     <span className="help-heading" id="variations">Variations</span>
