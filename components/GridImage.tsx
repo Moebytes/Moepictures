@@ -641,7 +641,8 @@ const GridImage: React.FunctionComponent<Props> = (props) => {
                     const img = await functions.createImage(page)
                     const image = await render(img)
                     const data = await fetch(image).then((r) => r.arrayBuffer())
-                    zip.file(path.basename(page), data, {binary: true})
+                    const decryptedData = cryptoFunctions.decrypt(Buffer.from(data))
+                    zip.file(path.basename(page), decryptedData, {binary: true})
                 }
                 const decoded = decodeURIComponent(props.img)
                 const filename = `${path.basename(decoded, path.extname(decoded)).replace(/\d+$/, "")}.zip`

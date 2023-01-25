@@ -65,8 +65,9 @@ const HelpPage: React.FunctionComponent = (props) => {
                     <span className="help-heading">Help</span>
                     <span className="help-text">Welcome to Moebooru!</span>
                     <span className="help-text">
-                        Moebooru is an image board organized by tags, centered exclusively around the art of cute anime girls. If you need specific help with 
-                        anything, scroll to a section below!
+                        Moebooru is a search board organized by tags, dedicated exclusively to showcasing the cutest works made by creatives. While the majority of content is (and will likely be)
+                        digital art, we are open to any other artforms including animations, music, and 3d models. If you need specific help with 
+                        anything, you can navigate by clicking on a specific category!
                         <div className="help-link-container">
                             <Link className="help-link" to="/help#account">Account</Link>
                             <Link className="help-link" to="/help#searching">Searching</Link>
@@ -91,15 +92,15 @@ const HelpPage: React.FunctionComponent = (props) => {
                     </span>
                     <span className="help-heading" id="account">Account</span>
                     <span className="help-text">
-                        You must be 18 or older in order to create an account. All accounts must have
+                        By creating an account you affirm that you are 18 years or older. All accounts must have
                         a verified email address. An account lets you view questionable posts, upload, favorite, 
                         comment, rate cuteness and edit posts and tags. <br/><br/> 
                         
-                        You can change your avatar by clicking on "Set Avatar" in any post page. Only anime avatars are allowed, so you can only use images from the site.<br/><br/>
+                        You can change your avatar by clicking on "Set Avatar" under any post page. Because only anime avatars are allowed, you can only use images from the site.<br/><br/>
 
                         For greater account security, you can enable 2-factor authentication. This will prompt you for a time-sensitive 2fa token in addition to your password while logging in.<br/><br/>
 
-                        Most actions such as uploading a new post or aliasing a tag to another tag will be reviewed by the site staff.
+                        Some actions such as uploading a new post or aliasing a tag to another tag will be reviewed by the site staff.
                     </span>
                     <span className="help-heading" id="searching">Searching</span>
                     <span className="help-text">
@@ -121,7 +122,8 @@ const HelpPage: React.FunctionComponent = (props) => {
                         <span className="help-alt">unknown artist</span> - the artist is not known. <br/>
                         <span className="help-alt">unknown character</span> - the character is unknown and might not be original. <br/>
                         <span className="help-alt">unknown series</span> - the series is unknown. <br/>
-                        <span className="help-alt">no series</span> - not part of any series. <br/>
+                        <span className="help-alt">no character</span> - no character or not applicable. <br/>
+                        <span className="help-alt">no series</span> - not part of any series or not applicable. <br/>
                         <span className="help-alt">needs tags</span> - current post tags are insufficient. <br/>
                         <span className="help-alt">text</span> - the post contains text. <br/>
                         <span className="help-alt">transparent</span> - the post has transparency. <br/>
@@ -136,7 +138,8 @@ const HelpPage: React.FunctionComponent = (props) => {
                         with a binary hashing algorithm. <br/><br/>
 
                         When you do an image search your upload is perceptually hashed and we try to find a matching hash in our database. Usually 
-                        this is very accurate at finding duplicate images. If you upload a video, only the first frame of the video is hashed.
+                        this is very accurate at finding duplicate images. If you upload a video, song, or model, we use a binary hash instead, so only 
+                        perfect matches to these works will be able to be found.
                     </span>
                     <span className="help-heading" id="image-filters">Image Filters</span>
                     <div className="help-img-container"><img className="help-img" src={imagefiltersImg}/></div>
@@ -187,23 +190,23 @@ const HelpPage: React.FunctionComponent = (props) => {
                     </span>
                     <span className="help-heading" id="uploading">Uploading</span>
                     <span className="help-text">
-                        Moebooru is a lot stricter with posts than most other image boards. We allow images, gifs, videos, and comics.<br/><br/>
+                        Moebooru is a lot stricter with posts than most other image boards. We allow images, gifs, videos, comics, music, and models.<br/><br/>
                         Please read carefully through all of the uploading guidelines. <br/>
                         <span className="help-alt">
-                        ⇾ Must be drawn in the anime art style. No photographs or art drawn in other styles. <br/>
+                        ⇾ Must be drawn or modeled in the anime art style. No photographs or art drawn/modeled in other styles. <br/>
+                        ⇾ (Music only) The song should include elements that make it sound kawaii, including samples from anime is a good example. <br/>
                         ⇾ The main subject should be a girl. Boys are allowed only as supporting characters.
                         And art with other subjects (animals, food, backgrounds, etc). is not allowed. <br/>
                         ⇾ It should be cute. If it doesn't evoke some feelings of cuteness, it won't get accepted. <br/>
-                        ⇾ No duplicates are allowed, variations of the same image should be
-                        added to the original post. <br/>
-                        ⇾ Sketches and unfinished art may be allowed if they are very good. <br/>
+                        ⇾ No duplicates are allowed. Variations of the same image should be added to the original post. <br/>
+                        ⇾ Sketches and unfinished art might be allowed only if they are very good. <br/>
                         ⇾ Color palette should be pleasant to look at, ie. there are no oversaturated colors that clash too much. <br/>
                         ⇾ The drawing should look clean overall and shouldn't look messy or have obvious mistakes. <br/>
                         ⇾ The perspective, proportions, and anatomy shouldn't look weird. <br/>
-                        ⇾ Animations should be higher than 2fps. <br/>
+                        ⇾ Animations should play faster than 2fps (shouldn't look stuttery). <br/>
                         ⇾ Source information is required for all posts. <br/>
-                        ⇾ All tags should be romanized. Titles and commentary doesn't have to be romanized. <br/>
-                        ⇾ No hentai. I don't want this to become a hentai-focused site, so for now this is not allowed. <br/>
+                        ⇾ All tags should be romanized. Titles and commentary don't have to be romanized. <br/>
+                        ⇾ No hentai. We allow light nudity but don't allow any sexual acts. <br/>
                         ⇾ No AI generated works. I only want art with real human love and passion behind it, and most of these are plagiarized from stolen works. <br/>
                         ⇾ No paid rewards. This is not a piracy site, please support artists for their hard work.
                         </span>
@@ -265,7 +268,8 @@ const HelpPage: React.FunctionComponent = (props) => {
                     <span className="help-heading" id="bans">Bans</span>
                     <span className="help-text">
                         If you break the rules severely or consistently, you might get banned. If you get banned, you 
-                        are not allowed to register another account.
+                        are not allowed to register another account. Depending on the severity, we might delete all of your comments 
+                        and edit history.
                     </span>
                     <span className="help-heading" id="ai-protection">AI Protection</span>
                     <span className="help-text">
@@ -276,8 +280,8 @@ const HelpPage: React.FunctionComponent = (props) => {
                         after viewing the tags of 50 posts. There is no way to bypass the captcha, but you can choose to not solve it and you will be
                         able to browse posts without seeing their tags.<br/><br/> 
                         
-                        These are by no means perfect solutions, but I hope that by making my website difficult to scrape it would make scrapers go somewhere else. 
-                        If you have anymore ideas on how to protect my website against scrapers, feel free to contact me.
+                        These are by no means perfect solutions, but I hope that by making our website difficult to scrape it would deter 
+                        scrapers to go somewhere else. If you have any other ideas on how to protect our website against scrapers, feel free to contact us.
                     </span>
                     <span className="help-heading" id="deleting-account">Deleting Your Account</span>
                     <span className="help-text">

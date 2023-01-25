@@ -887,9 +887,9 @@ const PostImage: React.FunctionComponent<Props> = (props) => {
             }
         } else {
             if (image) {
-                return image
+                return cryptoFunctions.decryptedLink(image)
             } else {
-                return props.img
+                return cryptoFunctions.decryptedLink(props.img)
             }
         }
     }
