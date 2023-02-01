@@ -520,17 +520,18 @@ export default class SQLQuery {
     if (offset) values.push(offset)
     let tagQuery = tagQueryArray.length ? "WHERE " + tagQueryArray.join(" AND ") : ""
     const whereQueries = [typeQuery, restrictQuery, styleQuery].filter(Boolean).join(" AND ")
+    let includeTags = withTags || tagQuery
     const query: QueryConfig = {
       text: functions.multiTrim(`
         SELECT *,
         COUNT(*) OVER() AS "postCount"
         FROM (
-          SELECT posts.*, json_agg(DISTINCT images.*) AS images, ${withTags ? `array_agg(DISTINCT "tag map".tag) AS tags,` : ""}
+          SELECT posts.*, json_agg(DISTINCT images.*) AS images, ${includeTags ? `array_agg(DISTINCT "tag map".tag) AS tags,` : ""}
           COUNT(DISTINCT favorites."favoriteID") AS "favoriteCount",
           ROUND(AVG(DISTINCT cuteness."cuteness")) AS "cutenessAvg"
           FROM posts
           JOIN images ON posts."postID" = images."postID"
-          ${withTags ? `JOIN "tag map" ON posts."postID" = "tag map"."postID"` : ""}
+          ${includeTags ? `JOIN "tag map" ON posts."postID" = "tag map"."postID"` : ""}
           FULL JOIN "favorites" ON posts."postID" = "favorites"."postID"
           FULL JOIN "cuteness" ON posts."postID" = "cuteness"."postID"
           ${whereQueries ? `WHERE ${whereQueries}` : ""}
@@ -1371,15 +1372,16 @@ export default class SQLQuery {
     if (offset) values.push(offset)
     let tagQuery = tagQueryArray.length ? tagQueryArray.join(" AND ") : ""
     const whereQueries = [userQuery, typeQuery, restrictQuery, styleQuery, tagQuery].filter(Boolean).join(" AND ")
+    let includeTags = withTags || tagQuery
     const query: QueryConfig = {
       text: functions.multiTrim(`
         WITH post_json AS (
-          SELECT posts.*, json_agg(DISTINCT images.*) AS images, ${withTags ? `array_agg(DISTINCT "tag map".tag) AS tags,` : ""}
+          SELECT posts.*, json_agg(DISTINCT images.*) AS images, ${includeTags ? `array_agg(DISTINCT "tag map".tag) AS tags,` : ""}
           COUNT(DISTINCT favorites."favoriteID") AS "favoriteCount",
           AVG(DISTINCT cuteness."cuteness") AS "cutenessAvg"
           FROM posts
           JOIN images ON images."postID" = posts."postID"
-          ${withTags ? `JOIN "tag map" ON posts."postID" = "tag map"."postID"` : ""}
+          ${includeTags ? `JOIN "tag map" ON posts."postID" = "tag map"."postID"` : ""}
           FULL JOIN "favorites" ON posts."postID" = "favorites"."postID"
           FULL JOIN "cuteness" ON posts."postID" = "cuteness"."postID"
           GROUP BY posts."postID"
@@ -1405,13 +1407,13 @@ export default class SQLQuery {
           'link', post_json."link",
           'commentary', post_json."commentary",
           'translatedCommentary', post_json."translatedCommentary",
-          'images', (array_agg(post_json."images"))[1]${withTags ? `,
+          'images', (array_agg(post_json."images"))[1]${includeTags ? `,
           'tags', post_json."tags"` : ""}
         ) AS post
         FROM favorites
         JOIN post_json ON post_json."postID" = favorites."postID"
         ${whereQueries ? `WHERE ${whereQueries}` : ""}
-        GROUP BY favorites."favoriteID", post_json."postID", post_json."uploader", post_json."updater", ${withTags ? `post_json."tags",` : ""}
+        GROUP BY favorites."favoriteID", post_json."postID", post_json."uploader", post_json."updater", ${includeTags ? `post_json."tags",` : ""}
         post_json."type", post_json."restrict", post_json."style", post_json."cutenessAvg", post_json."favoriteCount",
         post_json."thirdParty", post_json."drawn", post_json."uploadDate", post_json."updatedDate", post_json."title",
         post_json."translatedTitle", post_json."artist", post_json."link", post_json."commentary", post_json."translatedCommentary"
