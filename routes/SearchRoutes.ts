@@ -24,6 +24,7 @@ const SearchRoutes = (app: Express) => {
             const sort = req.query.sort as string
             const offset = req.query.offset as string
             const limit = req.query.limit as string
+            const withTags = req.query.withTags === "true"
             if (!functions.validType(type, true)) return res.status(400).send("Invalid type")
             if (!functions.validRestrict(restrict, true)) return res.status(400).send("Invalid restrict")
             if (restrict === "explicit") if (req.session.role !== "admin" && req.session.role !== "mod") return res.status(403).send("No permission")
@@ -40,11 +41,11 @@ const SearchRoutes = (app: Express) => {
             let result = null as any
             if (sort === "favorites" || sort === "reverse favorites") {
                 if (!req.session.username) return res.status(400).send("Bad request")
-                const favorites = await sql.searchFavorites(req.session.username, tags, type, restrict, style, sort, offset, limit)
+                const favorites = await sql.searchFavorites(req.session.username, tags, type, restrict, style, sort, offset, limit, withTags)
                 result = favorites.map((f: any) => f.post)
                 result[0].postCount = favorites[0].postCount
             } else {
-                result = await sql.search(tags, type, restrict, style, sort, offset, limit)
+                result = await sql.search(tags, type, restrict, style, sort, offset, limit, withTags)
             }
             result = result.map((p: any) => {
                 if (p.images.length > 1) {
@@ -54,8 +55,8 @@ const SearchRoutes = (app: Express) => {
             })
             if (req.session.role !== "admin" && req.session.role !== "mod") {
                 result = result.filter((p: any) => p.restrict !== "explicit")
+                result = functions.stripTags(result)
             }
-            result = functions.stripTags(result)
             res.status(200).json(result)
         } catch (e) {
             console.log(e)
@@ -82,8 +83,8 @@ const SearchRoutes = (app: Express) => {
             })
             if (req.session.role !== "admin" && req.session.role !== "mod") {
                 result = result.filter((p: any) => p.restrict !== "explicit")
+                result = functions.stripTags(result)
             }
-            result = functions.stripTags(result)
             res.status(200).json(result)
         } catch (e) {
             console.log(e)
@@ -226,14 +227,16 @@ const SearchRoutes = (app: Express) => {
     app.get("/api/search/suggestions", searchLimiter, async (req: Request, res: Response, next: NextFunction) => {
         try {
             const query = req.query.query as string
-            const type = req.query.type as string
+            let type = req.query.type as string
+            if (!type) type = "all"
             if (!functions.validTagType(type)) return res.status(400).send("Invalid type")
             let search = query?.trim().toLowerCase().split(/ +/g).filter(Boolean).join("-") ?? ""
             let result = await sql.tagSearch(search, "posts", type).then((r) => r.slice(0, 10))
             if (!result?.[0]) return res.status(200).json([])
             const tags = await sql.tagCounts(result.map((r: any) => r.tag))
             res.status(200).json(tags.slice(0, 10))
-        } catch {
+        } catch (e) {
+            console.log(e)
             return res.status(400).send("Bad request")
         }
     })

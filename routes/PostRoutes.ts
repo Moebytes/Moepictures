@@ -231,7 +231,7 @@ const PostRoutes = (app: Express) => {
     
             if (Number.isNaN(postID)) return res.status(400).send("Bad request")
             if (!req.session.username) return res.status(400).send("Not logged in")
-            if (req.session.role !== "admin" && req.session.role !== "mod") return res.status(403).end()
+            // if (req.session.role !== "admin" && req.session.role !== "mod") return res.status(403).end()
     
             if (!artists?.[0]) artists = ["unknown-artist"]
             if (!series?.[0]) series = characters.includes("original") ? ["no-series"] : ["unknown-series"]

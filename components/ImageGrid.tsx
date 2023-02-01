@@ -75,7 +75,7 @@ const ImageGrid: React.FunctionComponent<Props> = (props) => {
         setVisiblePosts([])
         if (!query) query = await functions.parseSpaceEnabledSearch(search)
         setSearch(query)
-        const result = await axios.get("/api/search/posts", {params: {query, type: imageType, restrict: restrictType, style: styleType, sort: sortType}, withCredentials: true}).then((r) => r.data)
+        const result = await axios.get("/api/search/posts", {params: {query, type: imageType, restrict: restrictType, style: styleType, sort: sortType, limit: 1000}, withCredentials: true}).then((r) => r.data)
         setHeaderFlag(true)
         setPosts(result)
         setIsRandomSearch(false)
@@ -176,7 +176,7 @@ const ImageGrid: React.FunctionComponent<Props> = (props) => {
         const randomPosts = async () => {
             setRandomFlag(false)
             setSearch("")
-            const result = await axios.get("/api/search/random", {params: {type: imageType, restrict: restrictType, style: styleType}, withCredentials: true}).then((r) => r.data)
+            const result = await axios.get("/api/search/random", {params: {type: imageType, restrict: restrictType, style: styleType, limit: 1000}, withCredentials: true}).then((r) => r.data)
             setEnded(false)
             setIndex(0)
             setVisiblePosts([])
@@ -231,19 +231,19 @@ const ImageGrid: React.FunctionComponent<Props> = (props) => {
     const updateOffset = async () => {
         if (noResults) return
         if (ended) return
-        let newOffset = offset + 100
+        let newOffset = offset + 1000
         if (!scroll) {
             newOffset = (page - 1) * getPageAmount()
             if (newOffset === 0) return
         }
         let result = null as any
         if (isRandomSearch) {
-            result = await axios.get("/api/search/random", {params: {type: imageType, restrict: restrictType, style: styleType, offset: newOffset}, withCredentials: true}).then((r) => r.data)
+            result = await axios.get("/api/search/random", {params: {type: imageType, restrict: restrictType, style: styleType, limit: 1000, offset: newOffset}, withCredentials: true}).then((r) => r.data)
         } else {
             const query = await functions.parseSpaceEnabledSearch(search)
-            result = await axios.get("/api/search/posts", {params: {query, type: imageType, restrict: restrictType, style: styleType, sort: sortType, offset: newOffset}, withCredentials: true}).then((r) => r.data)
+            result = await axios.get("/api/search/posts", {params: {query, type: imageType, restrict: restrictType, style: styleType, sort: sortType, limit: 1000, offset: newOffset}, withCredentials: true}).then((r) => r.data)
         }
-        let hasMore = result?.length >= 100
+        let hasMore = result?.length >= 1000
         let padded = false
         const cleanPosts = posts.filter((p: any) => !p.fake)
         if (!scroll) {

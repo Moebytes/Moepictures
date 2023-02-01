@@ -458,7 +458,7 @@ export default class SQLQuery {
   }
 
   /** Search posts. */
-  public static search = async (tags: string[], type: string, restrict: string, style: string, sort: string, offset?: string, limit?: string) => {
+  public static search = async (tags: string[], type: string, restrict: string, style: string, sort: string, offset?: string, limit?: string, withTags?: boolean) => {
     let typeQuery = ""
     if (type === "image") typeQuery = `posts.type = 'image'`
     if (type === "animation") typeQuery = `posts.type = 'animation'`
@@ -525,12 +525,12 @@ export default class SQLQuery {
         SELECT *,
         COUNT(*) OVER() AS "postCount"
         FROM (
-          SELECT posts.*, json_agg(DISTINCT images.*) AS images, array_agg(DISTINCT "tag map".tag) AS tags,
+          SELECT posts.*, json_agg(DISTINCT images.*) AS images, ${withTags ? `array_agg(DISTINCT "tag map".tag) AS tags,` : ""}
           COUNT(DISTINCT favorites."favoriteID") AS "favoriteCount",
           ROUND(AVG(DISTINCT cuteness."cuteness")) AS "cutenessAvg"
           FROM posts
           JOIN images ON posts."postID" = images."postID"
-          JOIN "tag map" ON posts."postID" = "tag map"."postID"
+          ${withTags ? `JOIN "tag map" ON posts."postID" = "tag map"."postID"` : ""}
           FULL JOIN "favorites" ON posts."postID" = "favorites"."postID"
           FULL JOIN "cuteness" ON posts."postID" = "cuteness"."postID"
           ${whereQueries ? `WHERE ${whereQueries}` : ""}
@@ -746,7 +746,7 @@ export default class SQLQuery {
     return result
   }
 
-  public static random = async (type: string, restrict: string, style: string, offset?: string) => {
+  public static random = async (type: string, restrict: string, style: string, offset?: string, withTags?: boolean) => {
     let typeQuery = ""
     if (type === "image") typeQuery = `posts.type = 'image'`
     if (type === "animation") typeQuery = `posts.type = 'animation'`
@@ -769,12 +769,12 @@ export default class SQLQuery {
         SELECT *, 
         COUNT(*) OVER() AS "postCount"
         FROM (
-          SELECT posts.*, json_agg(DISTINCT images.*) AS images, array_agg(DISTINCT "tag map".tag) AS tags,
+          SELECT posts.*, json_agg(DISTINCT images.*) AS images, ${withTags ? `array_agg(DISTINCT "tag map".tag) AS tags,` : ""}
           COUNT(DISTINCT favorites."favoriteID") AS "favoriteCount",
           ROUND(AVG(DISTINCT cuteness."cuteness")) AS "cutenessAvg"
           FROM posts
           JOIN images ON posts."postID" = images."postID"
-          JOIN "tag map" ON posts."postID" = "tag map"."postID"
+          ${withTags ? `JOIN "tag map" ON posts."postID" = "tag map"."postID"` : ""}
           FULL JOIN "favorites" ON posts."postID" = "favorites"."postID"
           FULL JOIN "cuteness" ON posts."postID" = "cuteness"."postID"
           ${whereQueries ? `WHERE ${whereQueries}` : ""}
@@ -789,7 +789,7 @@ export default class SQLQuery {
     return result
   }
 
-  public static tagCategory = async (category: string, sort: string, search?: string, offset?: string) => {
+  public static tagCategory = async (category: string, sort: string, search?: string, offset?: string, withTags?: boolean) => {
     let whereQueries = [] as string[]
     if (category === "artists") whereQueries.push(`tags.type = 'artist'`)
     if (category === "characters") whereQueries.push(`tags.type = 'character'`)
@@ -800,7 +800,7 @@ export default class SQLQuery {
       whereQueries.push(`tags.tag LIKE $${i} || '%'`)
       i++
     }
-    let whereQuery = whereQueries.length ? `WHERE ${whereQueries.join(" AND ")}` : ""
+    let whereQuery = whereQueries.length ? `AND ${whereQueries.join(" AND ")}` : ""
     let sortQuery = ""
     if (sort === "cuteness") sortQuery = `ORDER BY "cutenessAvg" DESC`
     if (sort === "reverse cuteness") sortQuery = `ORDER BY "cutenessAvg" ASC`
@@ -822,12 +822,11 @@ export default class SQLQuery {
                   COUNT(DISTINCT post_json."postID") AS "postCount",
                   ROUND(AVG(DISTINCT post_json."cutenessAvg")) AS "cutenessAvg"
                   FROM tags
-                  JOIN "tag map" ON "tag map"."tag" = tags."tag"
+                  JOIN "tag map" ON "tag map"."tag" = tags."tag" ${whereQuery}
                   JOIN post_json ON post_json."postID" = "tag map"."postID"
-                  ${whereQuery}
                   GROUP BY "tags".tag
                   ${sortQuery}
-                  LIMIT 100 ${offset ? `OFFSET $${i}` : ""}
+                  LIMIT 10 ${offset ? `OFFSET $${i}` : ""}
           `),
           values: []
     }
@@ -846,7 +845,7 @@ export default class SQLQuery {
     OR EXISTS (
       SELECT 1 
       FROM aliases
-      WHERE aliases.tag = tags.tag 
+      WHERE aliases.tag = "tags".tag 
       AND aliases.alias LIKE '%' || $1 || '%'
     ))`)
       i++
@@ -856,7 +855,7 @@ export default class SQLQuery {
       whereArray.push(`tags.type = $${i}`)
       i++
     }
-    let whereQuery = whereArray.length ? `WHERE ${whereArray.join(" AND ")}` : ""
+    let whereQuery = whereArray.length ? `AND ${whereArray.join(" AND ")}` : ""
     let sortQuery = ""
     if (sort === "alphabetic") sortQuery = `ORDER BY tags.tag ASC`
     if (sort === "reverse alphabetic") sortQuery = `ORDER BY tags.tag DESC`
@@ -875,9 +874,8 @@ export default class SQLQuery {
                   FROM tags
                   FULL JOIN aliases ON aliases."tag" = tags."tag"
                   FULL JOIN "implication map" ON "implication map"."tag" = tags."tag"
-                  JOIN "tag map" ON "tag map"."tag" = tags."tag"
+                  JOIN "tag map" ON "tag map"."tag" = tags."tag" ${whereQuery}
                   JOIN posts ON posts."postID" = "tag map"."postID"
-                  ${whereQuery}
                   GROUP BY "tags".tag
                   ${sortQuery}
                   LIMIT 100 ${offset ? `OFFSET $${i}` : ""}
@@ -1314,7 +1312,7 @@ export default class SQLQuery {
   }
 
   /** Search posts. */
-  public static searchFavorites = async (username: string, tags: string[], type: string, restrict: string, style: string, sort: string, offset?: string, limit?: string) => {
+  public static searchFavorites = async (username: string, tags: string[], type: string, restrict: string, style: string, sort: string, offset?: string, limit?: string, withTags?: boolean) => {
     let userQuery = `favorites."username" = $1`
     let typeQuery = ""
     if (type === "image") typeQuery = `post_json.type = 'image'`
@@ -1376,12 +1374,12 @@ export default class SQLQuery {
     const query: QueryConfig = {
       text: functions.multiTrim(`
         WITH post_json AS (
-          SELECT posts.*, json_agg(DISTINCT images.*) AS images, array_agg(DISTINCT "tag map".tag) AS tags,
+          SELECT posts.*, json_agg(DISTINCT images.*) AS images, ${withTags ? `array_agg(DISTINCT "tag map".tag) AS tags,` : ""}
           COUNT(DISTINCT favorites."favoriteID") AS "favoriteCount",
           AVG(DISTINCT cuteness."cuteness") AS "cutenessAvg"
           FROM posts
           JOIN images ON images."postID" = posts."postID"
-          JOIN "tag map" ON posts."postID" = "tag map"."postID"
+          ${withTags ? `JOIN "tag map" ON posts."postID" = "tag map"."postID"` : ""}
           FULL JOIN "favorites" ON posts."postID" = "favorites"."postID"
           FULL JOIN "cuteness" ON posts."postID" = "cuteness"."postID"
           GROUP BY posts."postID"
@@ -1407,13 +1405,13 @@ export default class SQLQuery {
           'link', post_json."link",
           'commentary', post_json."commentary",
           'translatedCommentary', post_json."translatedCommentary",
-          'images', (array_agg(post_json."images"))[1],
-          'tags', post_json."tags"
+          'images', (array_agg(post_json."images"))[1]${withTags ? `,
+          'tags', post_json."tags"` : ""}
         ) AS post
         FROM favorites
         JOIN post_json ON post_json."postID" = favorites."postID"
         ${whereQueries ? `WHERE ${whereQueries}` : ""}
-        GROUP BY favorites."favoriteID", post_json."postID", post_json."uploader", post_json."updater", post_json."tags",
+        GROUP BY favorites."favoriteID", post_json."postID", post_json."uploader", post_json."updater", ${withTags ? `post_json."tags",` : ""}
         post_json."type", post_json."restrict", post_json."style", post_json."cutenessAvg", post_json."favoriteCount",
         post_json."thirdParty", post_json."drawn", post_json."uploadDate", post_json."updatedDate", post_json."title",
         post_json."translatedTitle", post_json."artist", post_json."link", post_json."commentary", post_json."translatedCommentary"
