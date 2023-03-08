@@ -54,19 +54,40 @@ export default class ServerFunctions {
     }
 
     public static getFile = async (file: string) => {
-        return s3.getObject({Key: decodeURIComponent(file), Bucket: "moebooru"}).promise().then((r) => r.Body)
+        if (functions.isLocalHost()) {
+            return fs.readFileSync(`/Volumes/Files/moebooru/${decodeURIComponent(file)}`)
+        }
+        return s3.getObject({Key: decodeURIComponent(file), Bucket: "moebooru"}).promise().then((r) => r.Body) as unknown as Buffer
     }
 
     public static uploadFile = async (file: string, content: any) => {
+        if (functions.isLocalHost()) {
+            const dir = path.dirname(`/Volumes/Files/moebooru/${file}`)
+            if (!fs.existsSync(dir)) fs.mkdirSync(dir, {recursive: true})
+            fs.writeFileSync(`/Volumes/Files/moebooru/${file}`, content)
+            return `/Volumes/Files/moebooru/${file}`
+        }
         const upload = await s3.upload({Body: content, Key: file, Bucket: "moebooru"}).promise()
         return upload.Location
     }
 
     public static deleteFile = async (file: string) => {
+        if (functions.isLocalHost()) {
+            const dir = path.dirname(`/Volumes/Files/moebooru/${file}`)
+            fs.unlinkSync(`/Volumes/Files/moebooru/${file}`)
+            try {
+                fs.rmdirSync(dir)
+            } catch {}
+            return
+        }
         await s3.deleteObject({Key: file, Bucket: "moebooru"}).promise()
     }
 
     public static deleteFolder = async (folder: string) => {
+        if (functions.isLocalHost()) {
+            const dir = path.dirname(`/Volumes/Files/moebooru/${folder}`)
+            return ServerFunctions.removeLocalDirectory(dir)
+        }
         const listedObjects = await s3.listObjectsV2({Bucket: "moebooru", Prefix: folder}).promise()
         if (listedObjects.Contents?.length === 0) return
     
@@ -80,10 +101,14 @@ export default class ServerFunctions {
     }
 
     public static renameFile = async (oldFile: string, newFile: string) => {
-        const s3 = new S3({region: "us-east-1", credentials: {
-            accessKeyId: process.env.AWS_ACCESS_KEY!,
-            secretAccessKey: process.env.AWS_SECRET_KEY!
-        }})
+        if (functions.isLocalHost()) {
+            try {
+                fs.renameSync(`/Volumes/Files/moebooru/${oldFile}`, newFile)
+            } catch {
+                fs.renameSync(`/Volumes/Files/moebooru/${encodeURI(oldFile)}`, newFile)
+            }
+            return 
+        }
         try {
             await s3.copyObject({CopySource: `moebooru/${oldFile}`, Key: newFile, Bucket: "moebooru"}).promise()
         } catch {
@@ -93,11 +118,19 @@ export default class ServerFunctions {
     }
 
     public static getNextKey = async (type: string, name: string) => {
-        const s3 = new S3({region: "us-east-1", credentials: {
-            accessKeyId: process.env.AWS_ACCESS_KEY!,
-            secretAccessKey: process.env.AWS_SECRET_KEY!
-        }})
         const key = `history/${type}/${name}`
+        if (functions.isLocalHost()) {
+            const objects = fs.readdirSync(`/Volumes/Files/moebooru/${key}`)
+            let nextKey = 0
+            for (let i = 0; i < objects.length; i++) {
+                const object = objects[i]
+                if (!object) continue
+                const keyMatch = object.replace(key, "").match(/\d+/)?.[0]
+                const keyNumber = Number(keyMatch)
+                if (keyNumber >= nextKey) nextKey = keyNumber
+            }
+            return nextKey + 1
+        }
         const objects = await s3.listObjects({Prefix: key, Bucket: "moebooru"}).promise()
         let nextKey = 0
         for (let i = 0; i < (objects.Contents || []).length; i++) {
@@ -110,28 +143,33 @@ export default class ServerFunctions {
         return nextKey + 1
     }
 
+    public static getUnverifiedFile = async (file: string) => {
+        if (functions.isLocalHost()) {
+            return fs.readFileSync(`/Volumes/Files/moebooru-unverified/${decodeURIComponent(file)}`)
+        }
+        return s3.getObject({Key: decodeURIComponent(file), Bucket: "moebooru-unverified"}).promise().then((r) => r.Body) as unknown as Buffer
+    }
+
     public static uploadUnverifiedFile = async (file: string, content: any) => {
-        const s3 = new S3({region: "us-east-1", credentials: {
-            accessKeyId: process.env.AWS_ACCESS_KEY!,
-            secretAccessKey: process.env.AWS_SECRET_KEY!
-        }})
+        if (functions.isLocalHost()) {
+            const dir = path.dirname(`/Volumes/Files/moebooru-unverified/${file}`)
+            if (!fs.existsSync(dir)) fs.mkdirSync(dir, {recursive: true})
+            fs.writeFileSync(`/Volumes/Files/moebooru-unverified/${file}`, content)
+            return `/Volumes/Files/moebooru-unverified/${file}`
+        }
         const upload = await s3.upload({Body: content, Key: file, Bucket: "moebooru-unverified"}).promise()
         return upload.Location
     }
 
-    public static getUnverifiedFile = async (file: string) => {
-        const s3 = new S3({region: "us-east-1", credentials: {
-            accessKeyId: process.env.AWS_ACCESS_KEY!,
-            secretAccessKey: process.env.AWS_SECRET_KEY!
-        }})
-        return s3.getObject({Key: decodeURIComponent(file), Bucket: "moebooru-unverified"}).promise().then((r) => r.Body)
-    }
-
     public static deleteUnverifiedFile = async (file: string) => {
-        const s3 = new S3({region: "us-east-1", credentials: {
-            accessKeyId: process.env.AWS_ACCESS_KEY!,
-            secretAccessKey: process.env.AWS_SECRET_KEY!
-        }})
+        if (functions.isLocalHost()) {
+            const dir = path.dirname(`/Volumes/Files/moebooru-unverified/${file}`)
+            fs.unlinkSync(`/Volumes/Files/moebooru-unverified/${file}`)
+            try {
+                fs.rmdirSync(dir)
+            } catch {}
+            return
+        }
         await s3.deleteObject({Key: file, Bucket: "moebooru-unverified"}).promise()
     }
 
@@ -239,5 +277,22 @@ export default class ServerFunctions {
             }
         }
         console.log("Done")
+    }
+
+    private static removeLocalDirectory = (dir: string) => {
+        if (!fs.existsSync(dir)) return
+        fs.readdirSync(dir).forEach((file) => {
+            const current = path.join(dir, file)
+            if (fs.lstatSync(current).isDirectory()) {
+                ServerFunctions.removeLocalDirectory(current)
+            } else {
+                fs.unlinkSync(current)
+            }
+        })
+        try {
+            fs.rmdirSync(dir)
+        } catch (error) {
+            console.log(error)
+        }
     }
 }

@@ -1,5 +1,8 @@
 # Moebooru.moe
 
+**Update - 3/8/2023**
+I took down the online website because I can't afford the hosting costs for the time being. You can still run it locally using your own database and images. 
+
 Moebooru is an image board site for cute anime art, organized by tags. It is inspired from other similar image boards (danbooru, yandere, etc.)
 
 ![Image](https://github.com/Tenpi/Moebooru.moe/blob/main/assets/misc/readme.png?raw=true)
@@ -66,9 +69,10 @@ Images are uploaded to Amazon S3 buckets called "moebooru" and "moebooru-unverif
 
 https://aws.amazon.com/s3/
 
-If you want to instead upload to the local filesystem you can modify the functions in the file `structures/ServerFunctions.ts` to write to the local filesystem instead of uploading to the S3 bucket. In these functions the "file" argument will be a string like `foldername/filename.png` where these are all the folders, you need to create all of these if you are uploading locally.
+If you want to use the local filesystem instead you can edit the file `structures/ServerFunctions.ts` and add in your path to folders "moebooru" and
+"moebooru-unverified", each containing the following subfolders:
 
-`["animation", "artist", "character", "comic", "image", "pfp", "series", "tag", "video"]`
+`["animation", "artist", "character", "comic", "image", "pfp", "series", "tag", "video", "audio", "model"]`
 
 Rename the file `.env.example` to `.env` and this is where you should put in your database and aws credentials. `COOKIE_SECRET` should be a string of random characters. `EMAIL_ADDRESS` and `EMAIL_PASSWORD` is the email address used to send people email verification emails, password resets, etc.
 

@@ -65,7 +65,13 @@ const s3 = new S3({region: "us-east-1", credentials: {
   secretAccessKey: process.env.AWS_SECRET_KEY!
 }})
 
-const pgPool = new Pool({
+const pgPool = functions.isLocalHost() ? new Pool({
+  user: process.env.PG_LOCAL_USER,
+  host: process.env.PG_LOCAL_HOST,
+  database: process.env.PG_LOCAL_DATABASE,
+  password: process.env.PG_LOCAL_PASSWORD,
+  port: Number(process.env.PG_LOCAL_PORT)
+}) : new Pool({
   user: process.env.PG_USER,
   host: process.env.PG_HOST,
   database: process.env.PG_DATABASE,
@@ -115,8 +121,8 @@ app.use("/assets", express.static(path.join(__dirname, "./assets")))
 let folders = ["animation", "artist", "character", "comic", "image", "pfp", "series", "tag", "video", "audio", "model", "history"]
 
 for (let i = 0; i < folders.length; i++) {
-  serverFunctions.uploadFile(`${folders[i]}/`, "")
-  serverFunctions.uploadUnverifiedFile(`${folders[i]}/`, "")
+  //serverFunctions.uploadFile(`${folders[i]}/`, "")
+  //serverFunctions.uploadUnverifiedFile(`${folders[i]}/`, "")
   app.get(`/${folders[i]}/*`, async (req: Request, res, next: NextFunction) => {
     try {
       if (folders[i] === "tag") {
@@ -132,7 +138,7 @@ for (let i = 0; i < folders.length; i++) {
           if (post.restrict === "explicit") return res.status(403).send("No permission")
         }
       }
-      const body = await s3.getObject({Key: key, Bucket: "moebooru"}).promise().then((r) => r.Body) as any
+      const body = await serverFunctions.getFile(key)
       const contentLength = body.length
       if (req.headers.range) {
         const parts = req.headers.range.replace(/bytes=/, "").split("-")
@@ -162,7 +168,7 @@ for (let i = 0; i < folders.length; i++) {
       if (req.session.role !== "admin" && req.session.role !== "mod") return res.status(403).end()
       res.setHeader("Content-Type", mime.getType(req.path) ?? "")
       const key = decodeURIComponent(req.path.replace("/unverified/", ""))
-      const body = await s3.getObject({Key: key, Bucket: "moebooru-unverified"}).promise().then((r) => r.Body) as any
+      const body = await serverFunctions.getUnverifiedFile(key)
       const contentLength = body.length
       if (req.headers.range) {
         const parts = req.headers.range.replace(/bytes=/, "").split("-")
@@ -196,7 +202,7 @@ for (let i = 0; i < folders.length; i++) {
           if (post.restrict === "explicit") return res.status(403).send("No permission")
         }
       }
-      let body = await s3.getObject({Key: key, Bucket: "moebooru"}).promise().then((r) => r.Body) as any
+      let body = await serverFunctions.getFile(key)
       let contentLength = body.length
       if (mimeType?.includes("image")) {
         const metadata = await sharp(body).metadata()
@@ -237,7 +243,7 @@ for (let i = 0; i < folders.length; i++) {
       const mimeType = mime.getType(req.path)
       res.setHeader("Content-Type", mimeType ?? "")
       const key = decodeURIComponent(req.path.replace(`/thumbnail/${req.params.size}/`, "").replace("unverified/", ""))
-      let body = await s3.getObject({Key: key, Bucket: "moebooru-unverified"}).promise().then((r) => r.Body) as any
+      let body = await serverFunctions.getUnverifiedFile(key)
       let contentLength = body.length
       if (mimeType?.includes("image")) {
         const metadata = await sharp(body).metadata()
@@ -348,7 +354,7 @@ const run = async () => {
   if (!exists) await sql.updateTag("mspaint", "description", "MS Paint is a basic image editing software included with Windows. It is developed by Microsoft.")
   exists = await sql.insertTag("gimp", "tag")
   if (!exists) await sql.updateTag("gimp", "description", "Gimp is a free image editing software developed by GIMP Development Team.")
-  app.listen(process.env.PORT || 8080, () => console.log("Started the website server!"))
+  app.listen(process.env.PORT || 8082, () => console.log("Started the website server!"))
 }
 
 run()

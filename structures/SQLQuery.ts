@@ -3,7 +3,13 @@ import fs from "fs"
 import CreateDB from "./CreateDB.sql"
 import functions from "./Functions"
 
-const pgPool = new Pool({
+const pgPool = functions.isLocalHost() ? new Pool({
+  user: process.env.PG_LOCAL_USER,
+  host: process.env.PG_LOCAL_HOST,
+  database: process.env.PG_LOCAL_DATABASE,
+  password: process.env.PG_LOCAL_PASSWORD,
+  port: Number(process.env.PG_LOCAL_PORT)
+}) : new Pool({
   user: process.env.PG_USER,
   host: process.env.PG_HOST,
   database: process.env.PG_DATABASE,
