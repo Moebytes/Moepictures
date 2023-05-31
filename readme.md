@@ -1,9 +1,9 @@
 # Moebooru.moe
 
 **Update - 3/8/2023**
-I took down the online website because I can't afford the hosting costs for the time being. You can still run it locally using your own database and images. 
+I took down the online website because I can't afford the hosting costs. You can still run it locally using your own database and images. 
 
-Moebooru is an image board site for cute anime art, organized by tags. It is inspired from other similar image boards (danbooru, yandere, etc.)
+Moebooru is an image board site for cute anime art, organized by tags.
 
 ![Image](https://github.com/Tenpi/Moebooru.moe/blob/main/assets/misc/readme.png?raw=true)
 
@@ -13,7 +13,7 @@ Moebooru's tags use the dash ("-") as the delimeter, but the search can guess wh
 
 ### Multiple Images Per Post
 
-Moebooru supports multiple images per post, which is great for comics and posts with lots of variations. We also still have the usual parent/child relationships for third-party posts.
+Moebooru supports multiple images per post, which is great for comics and posts with lots of variations. We also have parent/child relationships for third-party posts.
 
 ### Image Filters
 
@@ -44,7 +44,7 @@ Music Player:
 ![Image](https://github.com/Tenpi/Moebooru.moe/blob/main/assets/misc/musicplayer.png?raw=true)
 
 The video player has some additional controls over the gif player, such as volume and pitch preservement. The 3d model player has 
-controls for wireframe, matcap, shapekeys, and lighting. The music player can playback audio in reverse. 
+controls for wireframe, matcap, shapekeys, and lighting. The music player can playback audio in reverse.
 
 ### Tech Stack
 
@@ -54,6 +54,12 @@ controls for wireframe, matcap, shapekeys, and lighting. The music player can pl
 - Back-end: Node
 - Database: PostgreSQL
 - Hosting: AWS
+
+### AI Theft
+
+I have taken measures to protect my site and the artists/artworks from data scraping theft. All images are sent encrypted and post 
+tag reads are captcha protected. I will also consider splitting the images into a jigsaw puzzle on the frontend. If you have any other 
+ideas let me know.
 
 ### Self-hosting
 
