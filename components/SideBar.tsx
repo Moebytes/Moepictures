@@ -1,7 +1,7 @@
 import React, {useContext, useEffect, useState, useReducer} from "react"
 import {useHistory} from "react-router-dom"
 import {ThemeContext, HideSidebarContext, HideNavbarContext, HideSortbarContext, EnableDragContext, MobileContext, UnverifiedPostsContext,
-RelativeContext, HideTitlebarContext, SidebarHoverContext, SearchContext, SearchFlagContext, PostsContext, ShowDeletePostDialogContext,
+RelativeContext, HideTitlebarContext, SidebarHoverContext, SearchContext, SearchFlagContext, PostsContext, ShowDeletePostDialogContext, AutoSearchContext,
 TagsContext, RandomFlagContext, ImageSearchFlagContext, SidebarTextContext, SessionContext, MobileScrollingContext, QuickEditIDContext, QuickEditUnverifiedContext} from "../Context"
 import {HashLink as Link} from "react-router-hash-link"
 import favicon from "../assets/purple/favicon.png"
@@ -80,6 +80,10 @@ import SearchSuggestions from "./SearchSuggestions"
 import adminCrown from "../assets/purple/admin-crown.png"
 import modCrown from "../assets/purple/mod-crown.png"
 import question from "../assets/purple/question.png"
+import autoSearchIconPurple from "../assets/purple/autosearch.png"
+import autoSearchActiveIconPurple from "../assets/purple/autosearch-active.png"
+import autoSearchIconMagenta from "../assets/magenta/autosearch.png"
+import autoSearchActiveIconMagenta from "../assets/magenta/autosearch-active.png"
 import "./styles/sidebar.less"
 
 interface Props {
@@ -129,6 +133,7 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
     const [getRandomMobileIconHover, setRandomMobileIconHover] = useState(false)
     const {quickEditID, setQuickEditID} = useContext(QuickEditIDContext)
     const {quickEditUnverified, setQuickEditUnverified} = useContext(QuickEditUnverifiedContext)
+    const {autoSearch, setAutoSearch} = useContext(AutoSearchContext)
     const history = useHistory()
 
     const updateTags = async () => {
@@ -386,6 +391,16 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
     const getDeleteIcon = () => {
         if (theme.includes("magenta")) return deleteIconMagenta
         return deleteIcon
+    }
+
+    const getAutoSearch = () => {
+        if (autoSearch) {
+            if (theme.includes("magenta")) return autoSearchActiveIconMagenta
+            return autoSearchActiveIconPurple
+        } else {
+            if (theme.includes("magenta")) return autoSearchIconMagenta
+            return autoSearchIconPurple
+        }
     }
 
     const tagInfo = (event: React.MouseEvent, tag: string) => {
@@ -712,6 +727,7 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
                 </div>
                 <div className="random-container">
                     <img className="random" src={getRandomIcon()} onClick={randomSearch} onMouseEnter={() => setRandomIconHover(true)} onMouseLeave={() => setRandomIconHover(false)}/>
+                    <img className="autosearch" src={getAutoSearch()} onClick={() => setAutoSearch((prev: boolean) => !prev)}/>
                 </div>
 
                 {tagCaptchaJSX()}

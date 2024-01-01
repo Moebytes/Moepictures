@@ -3,7 +3,7 @@ import {useHistory, useLocation} from "react-router-dom"
 import {ThemeContext, SizeTypeContext, PostAmountContext, PostsContext, ImageTypeContext, EnableDragContext,
 RestrictTypeContext, StyleTypeContext, SortTypeContext, SearchContext, SearchFlagContext, HeaderFlagContext,
 RandomFlagContext, ImageSearchFlagContext, SidebarTextContext, MobileContext, SessionContext, VisiblePostsContext,
-ScrollYContext, ScrollContext, PageContext} from "../Context"
+ScrollYContext, ScrollContext, PageContext, AutoSearchContext} from "../Context"
 import GridImage from "./GridImage"
 import GridModel from "./GridModel"
 import GridSong from "./GridSong"
@@ -13,6 +13,8 @@ import functions from "../structures/Functions"
 import permissions from "../structures/Permissions"
 import path from "path"
 import "./styles/imagegrid.less"
+
+let timeout = null as any
 
 interface Props {
     location?: any
@@ -48,6 +50,7 @@ const ImageGrid: React.FunctionComponent<Props> = (props) => {
     const [ended, setEnded] = useState(false)
     const [updatePostFlag, setUpdatePostFlag] = useState(false)
     const {page, setPage} = useContext(PageContext)
+    const {autoSearch, setAutoSearch} = useContext(AutoSearchContext)
     const [queryPage, setQueryPage] = useState(1)
     const history = useHistory()
     const location = useLocation()
@@ -85,6 +88,33 @@ const ImageGrid: React.FunctionComponent<Props> = (props) => {
             document.title = "Moebooru: Cutest Anime Art ♡"
         }
     }
+
+    const randomPosts = async () => {
+        setRandomFlag(false)
+        setSearch("")
+        const result = await axios.get("/api/search/random", {params: {type: imageType, restrict: restrictType, style: styleType, limit: 1000}, withCredentials: true}).then((r) => r.data)
+        setEnded(false)
+        setIndex(0)
+        setVisiblePosts([])
+        setPosts(result)
+        setIsRandomSearch(true)
+        setUpdatePostFlag(true)
+        document.title = "Moebooru: Random"
+    }
+
+    useEffect(() => {
+        console.log(autoSearch)
+        clearTimeout(timeout)
+        if (autoSearch) {
+            const searchLoop = async () => {
+                await randomPosts()
+                timeout = setTimeout(() => {
+                    searchLoop()
+                }, 5000)
+            }
+            searchLoop()
+        }
+    }, [autoSearch])
 
     useEffect(() => {
         window.scrollTo(0, 0)
@@ -135,7 +165,7 @@ const ImageGrid: React.FunctionComponent<Props> = (props) => {
                         if (elements[i]?.innerText?.toLowerCase() === "all") counter++
                         if (elements[i]?.innerText?.toLowerCase() === "date") counter++
                     }
-                    if (!img && counter >= 4) searchPosts()
+                    if (!img && counter >= 4) randomPosts()
                 }
             }, 300)
         } else {
@@ -173,18 +203,6 @@ const ImageGrid: React.FunctionComponent<Props> = (props) => {
     }, [searchFlag, imageType, restrictType, styleType, sortType])
 
     useEffect(() => {
-        const randomPosts = async () => {
-            setRandomFlag(false)
-            setSearch("")
-            const result = await axios.get("/api/search/random", {params: {type: imageType, restrict: restrictType, style: styleType, limit: 1000}, withCredentials: true}).then((r) => r.data)
-            setEnded(false)
-            setIndex(0)
-            setVisiblePosts([])
-            setPosts(result)
-            setIsRandomSearch(true)
-            setUpdatePostFlag(true)
-            document.title = "Moebooru: Random"
-        }
         if (randomFlag) {
             setPage(1)
             randomPosts()

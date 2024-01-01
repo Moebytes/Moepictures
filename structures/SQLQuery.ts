@@ -352,10 +352,13 @@ export default class SQLQuery {
 
   /** Bulk insert new tags. */
   public static bulkInsertTags = async (bulkTags: any[], noImageUpdate?: boolean) => {
+    let tagValues = [] as any
     let rawValues = [] as any
     let valueArray = [] as any 
     let i = 1 
     for (let j = 0; j < bulkTags.length; j++) {
+      if (tagValues.includes(bulkTags[j].tag)) continue
+      tagValues.push(bulkTags[j].tag)
       valueArray.push(`($${i}, $${i + 1}, $${i + 2}, $${i + 3})`)
       rawValues.push(bulkTags[j].tag)
       rawValues.push(bulkTags[j].type)
@@ -389,10 +392,13 @@ export default class SQLQuery {
 
   /** Bulk insert new tags (unverified). */
   public static bulkInsertUnverifiedTags = async (bulkTags: any[], noImageUpdate?: boolean) => {
+    let tagValues = [] as any
     let rawValues = [] as any
     let valueArray = [] as any 
     let i = 1 
     for (let j = 0; j < bulkTags.length; j++) {
+      if (tagValues.includes(bulkTags[j].tag)) continue
+      tagValues.push(bulkTags[j].tag)
       valueArray.push(`($${i}, $${i + 1}, $${i + 2}, $${i + 3})`)
       rawValues.push(bulkTags[j].tag)
       rawValues.push(bulkTags[j].type)
@@ -476,6 +482,7 @@ export default class SQLQuery {
     if (restrict === "safe") restrictQuery = `posts.restrict = 'safe'`
     if (restrict === "questionable") restrictQuery = `posts.restrict = 'questionable'`
     if (restrict === "explicit") restrictQuery = `posts.restrict = 'explicit'`
+    if (restrict === "all") restrictQuery = `(posts.restrict = 'safe' OR posts.restrict = 'questionable')`
     let styleQuery = ""
     if (style === "2d") styleQuery = `lower(posts.style) = '2d'`
     if (style === "3d") styleQuery = `lower(posts.style) = '3d'`
@@ -765,6 +772,7 @@ export default class SQLQuery {
     if (restrict === "safe") restrictQuery = `posts.restrict = 'safe'`
     if (restrict === "questionable") restrictQuery = `posts.restrict = 'questionable'`
     if (restrict === "explicit") restrictQuery = `posts.restrict = 'explicit'`
+    if (restrict === "all") restrictQuery = `(posts.restrict = 'safe' OR posts.restrict = 'questionable')`
     let styleQuery = ""
     if (style === "2d") styleQuery = `lower(posts.style) = '2d'`
     if (style === "3d") styleQuery = `lower(posts.style) = '3d'`
@@ -1332,6 +1340,7 @@ export default class SQLQuery {
     if (restrict === "safe") restrictQuery = `post_json.restrict = 'safe'`
     if (restrict === "questionable") restrictQuery = `post_json.restrict = 'questionable'`
     if (restrict === "explicit") restrictQuery = `post_json.restrict = 'explicit'`
+    if (restrict === "all") restrictQuery = `(post_json.restrict = 'safe' OR post_json.restrict = 'questionable')`
     let styleQuery = ""
     if (style === "2d") styleQuery = `lower(post_json.style) = '2d'`
     if (style === "3d") styleQuery = `lower(post_json.style) = '3d'`

@@ -93,6 +93,7 @@ export const PostFlagContext = React.createContext<any>(null)
 export const MobileScrollingContext = React.createContext<any>(null)
 export const QuickEditIDContext = React.createContext<any>(null)
 export const QuickEditUnverifiedContext = React.createContext<any>(null)
+export const AutoSearchContext = React.createContext<any>(null)
 
 const Context: React.FunctionComponent = (props) => {
     const [brightness, setBrightness] = useState(100)
@@ -174,8 +175,10 @@ const Context: React.FunctionComponent = (props) => {
     const [postFlag, setPostFlag] = useState(false)
     const [quickEditID, setQuickEditID] = useState(null)
     const [quickEditUnverified, setQuickEditUnverified] = useState(false)
+    const [autoSearch, setAutoSearch] = useState(false)
 return (
     <>
+        <AutoSearchContext.Provider value={{autoSearch, setAutoSearch}}>
         <RevertPostHistoryFlagContext.Provider value={{revertPostHistoryFlag, setRevertPostHistoryFlag}}>
         <DeletePostHistoryFlagContext.Provider value={{deletePostHistoryFlag, setDeletePostHistoryFlag}}>
         <RevertPostHistoryIDContext.Provider value={{revertPostHistoryID, setRevertPostHistoryID}}>
@@ -335,6 +338,7 @@ return (
         </RevertPostHistoryIDContext.Provider>
         </DeletePostHistoryFlagContext.Provider>
         </RevertPostHistoryFlagContext.Provider>
+        </AutoSearchContext.Provider>
     </>
     )
 }

@@ -57,13 +57,14 @@ const PostRoutes = (app: Express) => {
         }
     })
 
-    app.delete("/api/post/delete", postLimiter, async (req: Request, res: Response) => {
+    app.delete("/api/post/delete", async (req: Request, res: Response) => {
         try {
             const postID = req.query.postID
             if (Number.isNaN(Number(postID))) return res.status(400).send("Invalid postID")
             if (req.session.role !== "admin") return res.status(403).end()
             if (!req.session.username) return res.status(400).send("Bad request")
-            const post = await sql.post(Number(postID))
+            const post = await sql.post(Number(postID)).catch(() => null)
+            if (!post) return res.status(200).send("Doesn't exist")
             await sql.deletePost(Number(postID))
             for (let i = 0; i < post.images.length; i++) {
                 const file = functions.getImagePath(post.images[i].type, post.postID, post.images[i].filename)
@@ -72,8 +73,8 @@ const PostRoutes = (app: Express) => {
             await serverFunctions.deleteFolder(`history/post/${postID}`).catch(() => null)
             res.status(200).send("Success")
         } catch (e) {
-            console.log(e)
-            res.status(400).send("Bad request") 
+            console.log(e) 
+            res.status(400).send("Bad request")
         }
     })
 

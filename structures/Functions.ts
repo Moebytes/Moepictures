@@ -1274,7 +1274,7 @@ export default class Functions {
         scene.add(light)
         
         const renderer = new THREE.WebGLRenderer({alpha: true, preserveDrawingBuffer: true})
-        renderer.setClearColor(0x000000, 1)
+        renderer.setClearColor(0x000000, 0)
         renderer.setSize(width, height)
         renderer.setPixelRatio(window.devicePixelRatio)
 
@@ -1305,11 +1305,22 @@ export default class Functions {
 
         camera.position.copy(center)
         camera.position.x += size / 2.0
-        camera.position.y += size / 5.0
+        camera.position.y += size / 3.0
         camera.position.z += size / 2.0
         camera.lookAt(center)
+
         renderer.render(scene, camera)
-        return renderer.domElement.toDataURL()
+
+        const animate = async () => {
+            let id = window.requestAnimationFrame(animate)
+            await Functions.timeout(500)
+            renderer.setClearColor(0x000000, 1)
+            renderer.render(scene, camera)
+            window.cancelAnimationFrame(id)
+            return renderer.domElement.toDataURL()
+        }
+
+        return animate()
     }
 
     
