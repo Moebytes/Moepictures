@@ -55,12 +55,6 @@ controls for wireframe, matcap, shapekeys, and lighting. The music player can pl
 - Database: PostgreSQL
 - Hosting: AWS
 
-### AI Theft
-
-I have taken measures to protect my site and the artists/artworks from data scraping theft. All images are sent encrypted and post 
-tag reads are captcha protected. I will also consider splitting the images into a jigsaw puzzle on the frontend. If you have any other 
-ideas let me know.
-
 ### Self-hosting
 
 If you want to self host this website the first step is to clone the code and install Node.js v16.6.2 (a newer version might have breaking changes and is not guaranteed to work).
