@@ -57,7 +57,7 @@ controls for wireframe, matcap, shapekeys, and lighting. The music player can pl
 
 ### Self-hosting
 
-If you want to self host this website the first step is to clone the code and install Node.js v16.6.2 (a newer version might have breaking changes and is not guaranteed to work).
+If you want to self host this website the first step is to clone the code and install Node.js v20.11.1 (a newer version might have breaking changes and is not guaranteed to work).
 
 https://nodejs.org/en/ 
 
