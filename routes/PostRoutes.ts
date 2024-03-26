@@ -20,9 +20,9 @@ const postLimiter = rateLimit({
 const PostRoutes = (app: Express) => {
     app.get("/api/post", postLimiter, async (req: Request, res: Response, next: NextFunction) => {
         try {
-            if (req.session.captchaAmount === undefined) req.session.captchaAmount = 51
+            if (req.session.captchaAmount === undefined) req.session.captchaAmount = 501
             if (req.session.role === "admin" || req.session.role === "mod") req.session.captchaAmount = 0
-            if (req.session.captchaAmount > 50) return res.status(401).end()
+            if (req.session.captchaAmount > 500) return res.status(401).end()
             const postID = req.query.postID as string
             if (Number.isNaN(Number(postID))) return res.status(400).send("Invalid postID")
             let result = await sql.post(Number(postID))
@@ -577,9 +577,9 @@ const PostRoutes = (app: Express) => {
         try {
             const postID = req.query.postID as string
             const offset = req.query.offset as string
-            if (req.session.captchaAmount === undefined) req.session.captchaAmount = 51
+            if (req.session.captchaAmount === undefined) req.session.captchaAmount = 501
             if (req.session.role === "admin" || req.session.role === "mod") req.session.captchaAmount = 0
-            if (req.session.captchaAmount > 50) return res.status(401).end()
+            if (req.session.captchaAmount > 500) return res.status(401).end()
             if (!req.session.username) return res.status(400).send("Bad request")
             if (Number.isNaN(Number(postID))) return res.status(400).send("Bad request")
             const result = await sql.postHistory(Number(postID), offset)

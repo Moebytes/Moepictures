@@ -41,9 +41,9 @@ const GridImage: React.FunctionComponent<Props> = (props) => {
     const {mobile, setMobile} = useContext(MobileContext)
     const containerRef = useRef<HTMLDivElement>(null)
     const pixelateRef = useRef<HTMLCanvasElement>(null)
-    const overlayRef = useRef<HTMLCanvasElement>(null)
-    const lightnessRef = useRef<HTMLCanvasElement>(null)
-    const ref = useRef<HTMLCanvasElement>(null)
+    const overlayRef = useRef<HTMLImageElement>(null)
+    const lightnessRef = useRef<HTMLImageElement>(null)
+    const ref = useRef<HTMLImageElement>(null)
     const videoRef = useRef<HTMLVideoElement>(null)
     const imageFiltersRef = useRef<HTMLDivElement>(null)
     const videoOverlayRef = useRef<HTMLCanvasElement>(null)
@@ -103,7 +103,7 @@ const GridImage: React.FunctionComponent<Props> = (props) => {
             setImg(base64)
         }
         // base64Img()
-        loadImage()
+        // loadImage()
     }, [props.img])
 
     const resizePixelateCanvas = () => {
@@ -701,6 +701,7 @@ const GridImage: React.FunctionComponent<Props> = (props) => {
         }
     }
 
+    /*
     const loadImage = async () => {
         if (!ref.current || !overlayRef.current || !lightnessRef.current) return
         let src = functions.isVideo(props.img) ? backFrame : props.img
@@ -730,23 +731,22 @@ const GridImage: React.FunctionComponent<Props> = (props) => {
             setImageLoaded(true)
             ref.current.style.opacity = "1"
         }
-    }
-
+    }*/
 
     return (
         <div style={{opacity: visible ? "1" : "0", transition: "opacity 0.1s"}} className="image-box" id={String(props.id)} ref={containerRef} onClick={onClick} onAuxClick={onClick} onMouseDown={mouseDown} onMouseUp={mouseUp} onMouseMove={mouseMove}>
             <div className="image-filters" ref={imageFiltersRef} onMouseMove={(event) => imageAnimation(event)} onMouseLeave={() => cancelImageAnimation()}>
                 {functions.isVideo(props.img) && !mobile ? <video autoPlay loop muted disablePictureInPicture playsInline className="dummy-video" ref={videoRef} src={props.img}></video> : null}   
-                <canvas className="lightness-overlay" ref={lightnessRef}></canvas>
-                <canvas className="sharpen-overlay" ref={overlayRef}></canvas>
-                {/* <img className="lightness-overlay" ref={lightnessRef} src={functions.isVideo(props.img) ? backFrame : props.img}/> */}
-                {/* <img className="sharpen-overlay" ref={overlayRef} src={functions.isVideo(props.img) ? backFrame : props.img}/> */}
+                {/* <canvas className="lightness-overlay" ref={lightnessRef}></canvas> */}
+                {/* <canvas className="sharpen-overlay" ref={overlayRef}></canvas> */}
+                <img className="lightness-overlay" ref={lightnessRef} src={functions.isVideo(props.img) ? backFrame : props.img}/>
+                <img className="sharpen-overlay" ref={overlayRef} src={functions.isVideo(props.img) ? backFrame : props.img}/>
                 {functions.isVideo(props.img) && !mobile ? <canvas className="sharpen-overlay" ref={videoOverlayRef}></canvas> : null}
                 <canvas className="pixelate-canvas" ref={pixelateRef}></canvas>
                 {functions.isVideo(props.img) && !mobile ? <>
                 <video autoPlay loop muted disablePictureInPicture playsInline className="video" ref={videoRef} src={props.img} onLoadedData={(event) => onLoad(event)}></video></> :
-                /*<img className="image" ref={ref} src={functions.isVideo(props.img) ? backFrame : props.img} onLoad={(event) => onLoad(event)}/>*/
-                <canvas className="image" ref={ref}></canvas>}
+                <img className="image" ref={ref} src={functions.isVideo(props.img) ? backFrame : props.img} onLoad={(event) => onLoad(event)}/>
+                /*<canvas className="image" ref={ref}></canvas>*/}
                 </div>
         </div>
     )

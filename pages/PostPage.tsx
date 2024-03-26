@@ -76,15 +76,10 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
         setRelative(true)
         setSidebarText("")
         document.title = "Moebooru: Post"
-        if (session?.captchaAmount <= 50) {
-            const savedPost = localStorage.getItem("savedPost")
-            const savedTags = localStorage.getItem("savedTags")
-            if (savedPost) setPost(JSON.parse(savedPost))
-            if (savedTags) setTagCategories(JSON.parse(savedTags))
-        } else {
-            setPost({})
-            setTagCategories([])
-        }
+        const savedPost = localStorage.getItem("savedPost")
+        const savedTags = localStorage.getItem("savedTags")
+        if (savedPost) setPost(JSON.parse(savedPost))
+        if (savedTags) setTagCategories(JSON.parse(savedTags))
         if (!posts?.length) {
             const savedPosts = localStorage.getItem("savedPosts")
             if (savedPosts) setPosts(JSON.parse(savedPosts))
@@ -307,11 +302,11 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
         <ReportCommentDialog/>
         {post ? <DeletePostDialog post={post}/> : null}
         <TitleBar goBack={true}/>
-        <NavBar/>
+        <NavBar goBack={true}/>
         <div className="body">
             {post && tagCategories ? 
             <SideBar post={post} artists={tagCategories.artists} characters={tagCategories.characters} series={tagCategories.series} tags={tagCategories.tags}/> : 
-            <SideBar/>
+            <SideBar artists={tagCategories?.artists} characters={tagCategories?.characters} series={tagCategories?.series} tags={tagCategories?.tags}/>
             }
             <div className="content" onMouseEnter={() => setEnableDrag(true)}>
                 <div className="post-container">

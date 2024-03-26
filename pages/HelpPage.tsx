@@ -86,7 +86,7 @@ const HelpPage: React.FunctionComponent = (props) => {
                             <Link className="help-link" to="/help#aliases">Aliases</Link>
                             <Link className="help-link" to="/help#commenting">Commenting</Link>
                             <Link className="help-link" to="/help#bans">Bans</Link>
-                            <Link className="help-link" to="/help#ai-protection">AI Protection</Link>
+                            <Link className="help-link" to="/help#captcha">Captcha</Link>
                             <Link className="help-link" to="/help#deleting-account">Deleting Your Account</Link>
                         </div>
                     </span>
@@ -271,17 +271,9 @@ const HelpPage: React.FunctionComponent = (props) => {
                         are not allowed to register another account. Depending on the severity, we might delete all of your comments 
                         and edit history.
                     </span>
-                    <span className="help-heading" id="ai-protection">AI Protection</span>
+                    <span className="help-heading" id="captcha">Captcha</span>
                     <span className="help-text">
-                        All images are sent encrypted and they are decrypted in the browser. This prevents direct image downloads without first
-                        decrypting the binary data.<br/><br/>
-
-                        Accessing the tags of a specific post is protected information, you will need to solve a captcha 
-                        after viewing the tags of 50 posts. There is no way to bypass the captcha, but you can choose to not solve it and you will be
-                        able to browse posts without seeing their tags.<br/><br/> 
-                        
-                        These are by no means perfect solutions, but I hope that by making our website difficult to scrape it would deter 
-                        scrapers to go somewhere else. If you have any other ideas on how to protect our website against scrapers, feel free to contact us.
+                        You will need to solve a captcha after viewing X posts. The amount for X is subject to change at anytime.
                     </span>
                     <span className="help-heading" id="deleting-account">Deleting Your Account</span>
                     <span className="help-text">

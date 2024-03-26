@@ -31,7 +31,11 @@ import {ThemeContext, HideNavbarContext, HideSortbarContext, HideSidebarContext,
 RelativeContext, HideTitlebarContext, SearchContext, SearchFlagContext, SessionContext, SessionFlagContext, UserImgContext} from "../Context"
 import "./styles/navbar.less"
 
-const NavBar: React.FunctionComponent = (props) => {
+interface Props {
+    goBack?: boolean
+}
+
+const NavBar: React.FunctionComponent<Props> = (props) => {
     const [ignored, forceUpdate] = useReducer(x => x + 1, 0)
     const {theme, setTheme} = useContext(ThemeContext)
     const {hideNavbar, setHideNavbar} = useContext(HideNavbarContext)
@@ -55,6 +59,9 @@ const NavBar: React.FunctionComponent = (props) => {
     useEffect(() => {
         setShowMiniTitle(false)
 
+        const savedUserImg = localStorage.getItem("userImg")
+        if (savedUserImg) setUserImg(savedUserImg)
+
         const handleScroll = () => {
             if (window.scrollY === 0) return
             return setHideMobileNavbar(true)
@@ -64,6 +71,12 @@ const NavBar: React.FunctionComponent = (props) => {
             window.removeEventListener("scroll", handleScroll)
         }
     }, [])
+
+    useEffect(() => {
+        functions.linkToBase64(userImg).then((userImg) => {
+            localStorage.setItem("userImg", userImg)
+        })
+    }, [userImg])
 
     useEffect(() => {
         const scrollHandler = () => {
@@ -168,6 +181,15 @@ const NavBar: React.FunctionComponent = (props) => {
         await axios.post("/api/user/logout", null, {withCredentials: true})
         setSessionFlag(true)
         history.go(0)
+    }
+
+    const postsClick = () => {
+        if (props.goBack) {
+            history.push("/posts")
+        } else {
+            history.push("/posts")
+            setSearchFlag(true)
+        }
     }
 
     /* JS Media Queries */
@@ -305,7 +327,7 @@ const NavBar: React.FunctionComponent = (props) => {
                         {generateUsernameJSX()}
                     </div> :
                     <span style={{marginRight: marginR}} className="nav-text nav-user-text" onClick={() => history.push("/login")}>Login</span>}
-                    <span style={{marginRight: marginR}} className="nav-text" onClick={() => {history.push("/posts"); setSearchFlag(true)}}>Posts</span>
+                    <span style={{marginRight: marginR}} className="nav-text" onClick={() => postsClick()}>Posts</span>
                     <span style={{marginRight: marginR}} className="nav-text" onClick={() => history.push("/comments")}>Comments</span>
                     <span style={{marginRight: marginR}} className="nav-text" onClick={() => history.push("/artists")}>Artists</span>
                     <span style={{marginRight: marginR}} className="nav-text" onClick={() => history.push("/characters")}>Characters</span>

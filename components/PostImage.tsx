@@ -75,13 +75,13 @@ const PostImage: React.FunctionComponent<Props> = (props) => {
     const fullscreenRef = useRef<HTMLDivElement>(null)
     const pixelateRef = useRef<HTMLCanvasElement>(null)
     const dummyRef = useRef<HTMLCanvasElement>(null)
-    const overlayRef = useRef<HTMLCanvasElement>(null)
-    const lightnessRef = useRef<HTMLCanvasElement>(null)
+    const overlayRef = useRef<HTMLImageElement>(null)
+    const lightnessRef = useRef<HTMLImageElement>(null)
     const gifOverlayRef = useRef<HTMLImageElement>(null)
     const gifLightnessRef = useRef<HTMLImageElement>(null)
     const videoOverlayRef = useRef<HTMLCanvasElement>(null)
     const videoLightnessRef = useRef<HTMLImageElement>(null)
-    const ref = useRef<HTMLCanvasElement>(null)
+    const ref = useRef<HTMLImageElement>(null)
     const gifRef = useRef<HTMLCanvasElement>(null)
     const gifControls = useRef<HTMLDivElement>(null)
     const gifSpeedRef = useRef(null) as any
@@ -148,8 +148,8 @@ const PostImage: React.FunctionComponent<Props> = (props) => {
             const base64 = await functions.linkToBase64(props.img)
             setImg(base64)
         }
-        // base64Img()
-        loadImage()
+        base64Img()
+        // loadImage()
     }, [props.img])
 
     useEffect(() => {
@@ -313,7 +313,6 @@ const PostImage: React.FunctionComponent<Props> = (props) => {
             if (binary) {
                 const blob = new Blob([new DataView(binary.buffer)], {type: mime.lookup(path.extname(props.img)) || "video/mp4"})
                 const url = URL.createObjectURL(blob)
-                console.log(url)
                 setReverseVideo(`${url}#${ext}`)
             }
             ffmpeg.FS("unlink", output)
@@ -887,9 +886,11 @@ const PostImage: React.FunctionComponent<Props> = (props) => {
             }
         } else {
             if (image) {
-                return cryptoFunctions.decryptedLink(image)
+                return image
+                //return cryptoFunctions.decryptedLink(image)
             } else {
-                return cryptoFunctions.decryptedLink(props.img)
+                return props.img
+                //return cryptoFunctions.decryptedLink(props.img)
             }
         }
     }
@@ -1180,6 +1181,7 @@ const PostImage: React.FunctionComponent<Props> = (props) => {
         setEnableDrag(true)
     }
 
+    /*
     const loadImage = async () => {
         if (!ref.current || !overlayRef.current || !lightnessRef.current || !dummyRef.current) return
         let src = functions.isVideo(props.img) ? backFrame : props.img
@@ -1213,7 +1215,7 @@ const PostImage: React.FunctionComponent<Props> = (props) => {
             setImageLoaded(true)
             ref.current.style.display = "flex"
         }
-    }
+    }*/
 
     return (
         <div className="post-image-container" style={{zoom: props.scale ? props.scale : 1}}>
@@ -1221,7 +1223,7 @@ const PostImage: React.FunctionComponent<Props> = (props) => {
                 <div className="post-image-filters" ref={fullscreenRef}>
                     {functions.isVideo(props.img) ? 
                     <video loop muted disablePictureInPicture playsInline className="dummy-post-video" src={props.img}></video> :
-                    <canvas className="dummy-post-image" ref={dummyRef}></canvas>/*<img className="dummy-post-image" src={props.img}/>*/}
+                    <img className="dummy-post-image" src={props.img}/>/*<canvas className="dummy-post-image" ref={dummyRef}></canvas>*/}
                     <div className="encoding-overlay" style={{display: encodingOverlay ? "flex" : "none"}}>
                         <span className="encoding-overlay-text">{functions.isVideo(props.img) ? "Rendering Video..." : "Rendering GIF..."}</span>
                     </div>
@@ -1378,13 +1380,13 @@ const PostImage: React.FunctionComponent<Props> = (props) => {
                         <TransformWrapper disabled={disableZoom} ref={zoomRef} minScale={1} maxScale={4} onZoomStop={(ref) => setZoom(ref.state.scale)} wheel={{step: 0.1, touchPadDisabled: true}}
                         zoomAnimation={{size: 0, disabled: true}} alignmentAnimation={{disabled: true}} doubleClick={{mode: "reset", animationTime: 0}} panning={{disabled: zoom === 1}}>
                         <TransformComponent wrapperStyle={{pointerEvents: disableZoom ? "none" : "all"}}>
-                            <canvas className="post-lightness-overlay" ref={lightnessRef}></canvas>
-                            <canvas className="post-sharpen-overlay" ref={overlayRef}></canvas>
-                            {/* <img className="post-lightness-overlay" ref={lightnessRef} src={props.img}/> */}
-                            {/* <img className="post-sharpen-overlay" ref={overlayRef} src={props.img}/> */}
+                            {/* <canvas className="post-lightness-overlay" ref={lightnessRef}></canvas> */}
+                            {/* <canvas className="post-sharpen-overlay" ref={overlayRef}></canvas> */}
+                            <img className="post-lightness-overlay" ref={lightnessRef} src={props.img}/>
+                            <img className="post-sharpen-overlay" ref={overlayRef} src={props.img}/>
                             <canvas className="post-pixelate-canvas" ref={pixelateRef}></canvas>
-                            <canvas className="post-image" ref={ref}></canvas>
-                            {/* <img className="post-image" ref={ref} src={props.img} onLoad={(event) => onLoad(event)}/> */}
+                            {/* <canvas className="post-image" ref={ref}></canvas> */}
+                            <img className="post-image" ref={ref} src={img} onLoad={(event) => onLoad(event)}/>
                         </TransformComponent>
                         </TransformWrapper>
                     </div>

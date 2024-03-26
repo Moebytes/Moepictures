@@ -52,15 +52,10 @@ const SetAvatarPage: React.FunctionComponent<Props> = (props) => {
         setRelative(true)
         setSidebarText("")
         document.title = "Moebooru: Set Avatar"
-        if (session?.captchaAmount <= 50) {
-            const savedPost = localStorage.getItem("savedPost")
-            const savedTags = localStorage.getItem("savedTags")
-            if (savedPost) setPost(JSON.parse(savedPost))
-            if (savedTags) setTagCategories(JSON.parse(savedTags))
-        } else {
-            setPost({})
-            setTagCategories([])
-        }
+        const savedPost = localStorage.getItem("savedPost")
+        const savedTags = localStorage.getItem("savedTags")
+        if (savedPost) setPost(JSON.parse(savedPost))
+        if (savedTags) setTagCategories(JSON.parse(savedTags))
         if (!posts?.length) {
             const savedPosts = localStorage.getItem("savedPosts")
             if (savedPosts) setPosts(JSON.parse(savedPosts))

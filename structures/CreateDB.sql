@@ -278,3 +278,51 @@ CREATE TABLE IF NOT EXISTS "post history" (
     "tags" text[],
     "reason" text
 );
+
+CREATE INDEX IF NOT EXISTS "posts_index"
+    ON "posts" USING btree
+    ("postID" DESC NULLS LAST);
+
+CREATE INDEX IF NOT EXISTS "images_index"
+    ON "images" USING btree
+    ("imageID" DESC NULLS LAST);
+
+CREATE INDEX IF NOT EXISTS "cuteness_index"
+    ON "cuteness" USING btree
+    ("cutenessID" DESC NULLS LAST);
+
+CREATE INDEX IF NOT EXISTS "comments_index"
+    ON "comments" USING btree
+    ("commentID" DESC NULLS LAST);
+
+CREATE INDEX IF NOT EXISTS "favorites_index"
+    ON "favorites" USING btree
+    ("favoriteID" DESC NULLS LAST);
+
+CREATE INDEX IF NOT EXISTS "tag_map_index"
+    ON "tag map" USING btree
+    ("tagID" ASC NULLS LAST);
+
+CREATE INDEX IF NOT EXISTS "tags_index"
+    ON "tags" USING btree
+    (tag ASC NULLS LAST);
+
+CREATE INDEX IF NOT EXISTS "users_index"
+    ON "users" USING btree
+    (username ASC NULLS LAST);
+
+CREATE INDEX IF NOT EXISTS "unverified_images_index"
+    ON "unverified images" USING btree
+    ("imageID" DESC NULLS LAST);
+
+CREATE INDEX IF NOT EXISTS "unverified_posts_index"
+    ON "unverified posts" USING btree
+    ("postID" DESC NULLS LAST);
+
+CREATE INDEX IF NOT EXISTS "unverified_tag_map_index"
+    ON "unverified tag map" USING btree
+    ("tagID" ASC NULLS LAST);
+
+CREATE INDEX IF NOT EXISTS "unverified_tags_index"
+    ON "unverified tags" USING btree
+    (tag ASC NULLS LAST);

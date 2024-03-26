@@ -399,7 +399,7 @@ const Carousel: React.FunctionComponent<Props> = (props) => {
             let src = visibleImages[i]
             if (functions.isVideo(src) || functions.isGIF(src)) continue
             if (functions.isImage(src)) {
-                if (!props.noEncryption) src = await cryptoFunctions.decryptedLink(src)
+                // if (!props.noEncryption) src = await cryptoFunctions.decryptedLink(src)
             } else if (functions.isModel(src)) {
                 src = await functions.modelImage(src)
             } else if (functions.isAudio(src)) {

@@ -66,6 +66,16 @@ const PostImageOptions: React.FunctionComponent<Props> = (props) => {
     const filterRef = useRef(null) as any
 
     useEffect(() => {
+        getFavorite()
+        const savedDownloadText = localStorage.getItem("downloadText")
+        if (savedDownloadText) setDownloadText(savedDownloadText)
+    }, [])
+
+    useEffect(() => {
+        localStorage.setItem("downloadText", downloadText)
+    }, [downloadText])
+
+    useEffect(() => {
         const getDLText = async () => {
             if (props.img) {
                 if (props.comicPages) {
@@ -99,10 +109,6 @@ const PostImageOptions: React.FunctionComponent<Props> = (props) => {
     useEffect(() => {
         getFavorite()
     }, [props.post])
-
-    useEffect(() => {
-        getFavorite()
-    }, [])
 
     useEffect(() => {
         localStorage.setItem("brightness", brightness)

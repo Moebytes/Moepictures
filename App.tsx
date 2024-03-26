@@ -199,21 +199,21 @@ const App: React.FunctionComponent = (props) => {
 
     useEffect(() => {
         if (!theme || theme === "purple") {
-            document.documentElement.style.setProperty("--background", "#0f0b35")
-            document.documentElement.style.setProperty("--titlebarBG", "#1d0a71")
-            document.documentElement.style.setProperty("--navbarBG", "#230089")
+            document.documentElement.style.setProperty("--background", "#09071c")
+            document.documentElement.style.setProperty("--titlebarBG", "#090420")
+            document.documentElement.style.setProperty("--navbarBG", "#0b0322")
         } else if (theme === "purple-light") {
-            document.documentElement.style.setProperty("--background", "#c7c6fb")
-            document.documentElement.style.setProperty("--titlebarBG", "#8789ff")
-            document.documentElement.style.setProperty("--navbarBG", "#888bff")
+            document.documentElement.style.setProperty("--background", "#ffffff")
+            document.documentElement.style.setProperty("--titlebarBG", "#dfdfff")
+            document.documentElement.style.setProperty("--navbarBG", "#dbddff")
         } else if (theme === "magenta") {
-            document.documentElement.style.setProperty("--background", "#350b2c")
-            document.documentElement.style.setProperty("--titlebarBG", "#710a65")
-            document.documentElement.style.setProperty("--navbarBG", "#890085")
+            document.documentElement.style.setProperty("--background", "#17040e")
+            document.documentElement.style.setProperty("--titlebarBG", "#1c0511")
+            document.documentElement.style.setProperty("--navbarBG", "#1e0514")
         } else if (theme === "magenta-light") {
-            document.documentElement.style.setProperty("--background", "#f4dbfd")
-            document.documentElement.style.setProperty("--titlebarBG", "#ee9bff")
-            document.documentElement.style.setProperty("--navbarBG", "#e49dff")
+            document.documentElement.style.setProperty("--background", "#ffffff")
+            document.documentElement.style.setProperty("--titlebarBG", "#ffe2f2")
+            document.documentElement.style.setProperty("--navbarBG", "#ffe0f1")
         }
         functions.changeFavicon(theme)
     }, [theme])

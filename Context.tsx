@@ -94,6 +94,8 @@ export const MobileScrollingContext = React.createContext<any>(null)
 export const QuickEditIDContext = React.createContext<any>(null)
 export const QuickEditUnverifiedContext = React.createContext<any>(null)
 export const AutoSearchContext = React.createContext<any>(null)
+export const ShowPageDialogContext = React.createContext<any>(null)
+export const PageFlagContext = React.createContext<any>(null)
 
 const Context: React.FunctionComponent = (props) => {
     const [brightness, setBrightness] = useState(100)
@@ -176,8 +178,12 @@ const Context: React.FunctionComponent = (props) => {
     const [quickEditID, setQuickEditID] = useState(null)
     const [quickEditUnverified, setQuickEditUnverified] = useState(false)
     const [autoSearch, setAutoSearch] = useState(false)
+    const [showPageDialog, setShowPageDialog] = useState(false)
+    const [pageFlag, setPageFlag] = useState(null)
 return (
     <>
+        <PageFlagContext.Provider value={{pageFlag, setPageFlag}}>
+        <ShowPageDialogContext.Provider value={{showPageDialog, setShowPageDialog}}>
         <AutoSearchContext.Provider value={{autoSearch, setAutoSearch}}>
         <RevertPostHistoryFlagContext.Provider value={{revertPostHistoryFlag, setRevertPostHistoryFlag}}>
         <DeletePostHistoryFlagContext.Provider value={{deletePostHistoryFlag, setDeletePostHistoryFlag}}>
@@ -339,6 +345,8 @@ return (
         </DeletePostHistoryFlagContext.Provider>
         </RevertPostHistoryFlagContext.Provider>
         </AutoSearchContext.Provider>
+        </ShowPageDialogContext.Provider>
+        </PageFlagContext.Provider>
     </>
     )
 }

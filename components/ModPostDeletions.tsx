@@ -117,7 +117,7 @@ const ModPostDeletions: React.FunctionComponent = (props) => {
             if (!ref.current) continue
             let src = img
             if (functions.isImage(img)) {
-                src = await cryptoFunctions.decryptedLink(img)
+                // src = await cryptoFunctions.decryptedLink(img)
             } else if (functions.isModel(img)) {
                 src = await functions.modelImage(img)
             } else if (functions.isAudio(img)) {

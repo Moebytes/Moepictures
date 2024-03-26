@@ -3,7 +3,7 @@ import {useHistory, useLocation} from "react-router-dom"
 import {ThemeContext, SizeTypeContext, PostAmountContext, PostsContext, ImageTypeContext, EnableDragContext,
 RestrictTypeContext, StyleTypeContext, SortTypeContext, SearchContext, SearchFlagContext, HeaderFlagContext,
 RandomFlagContext, ImageSearchFlagContext, SidebarTextContext, MobileContext, SessionContext, VisiblePostsContext,
-ScrollYContext, ScrollContext, PageContext, AutoSearchContext} from "../Context"
+ScrollYContext, ScrollContext, PageContext, AutoSearchContext, ShowPageDialogContext, PageFlagContext} from "../Context"
 import GridImage from "./GridImage"
 import GridModel from "./GridModel"
 import GridSong from "./GridSong"
@@ -51,6 +51,8 @@ const ImageGrid: React.FunctionComponent<Props> = (props) => {
     const [updatePostFlag, setUpdatePostFlag] = useState(false)
     const {page, setPage} = useContext(PageContext)
     const {autoSearch, setAutoSearch} = useContext(AutoSearchContext)
+    const {showPageDialog, setShowPageDialog} = useContext(ShowPageDialogContext)
+    const {pageFlag, setPageFlag} = useContext(PageFlagContext)
     const [queryPage, setQueryPage] = useState(1)
     const history = useHistory()
     const location = useLocation()
@@ -103,7 +105,6 @@ const ImageGrid: React.FunctionComponent<Props> = (props) => {
     }
 
     useEffect(() => {
-        console.log(autoSearch)
         clearTimeout(timeout)
         if (autoSearch) {
             const searchLoop = async () => {
@@ -357,7 +358,12 @@ const ImageGrid: React.FunctionComponent<Props> = (props) => {
         }
     }, [posts, page, queryPage])
 
-    const lastPage = () => {
+    const firstPage = () => {
+        setPage(1)
+        window.scrollTo(0, 0)
+    }
+
+    const previousPage = () => {
         let newPage = page - 1 
         if (newPage < 1) newPage = 1 
         setPage(newPage)
@@ -371,10 +377,22 @@ const ImageGrid: React.FunctionComponent<Props> = (props) => {
         window.scrollTo(0, 0)
     }
 
+    const lastPage = () => {
+        setPage(maxPage())
+        window.scrollTo(0, 0)
+    }
+
     const goToPage = (newPage: number) => {
         setPage(newPage)
         window.scrollTo(0, 0)
     }
+
+    useEffect(() => {
+        if (pageFlag) {
+            goToPage(pageFlag)
+            setPageFlag(null)
+        }
+    }, [pageFlag])
 
     const generatePageButtonsJSX = () => {
         const jsx = [] as any
@@ -395,7 +413,7 @@ const ImageGrid: React.FunctionComponent<Props> = (props) => {
             const pageNumber = page + increment
             if (pageNumber > maxPage()) break
             if (pageNumber >= 1) {
-                jsx.push(<button className={`imagegrid-page-button ${increment === 0 ? "imagegrid-page-button-active" : ""}`} onClick={() => goToPage(pageNumber)}>{pageNumber}</button>)
+                jsx.push(<button key={pageNumber} className={`imagegrid-page-button ${increment === 0 ? "imagegrid-page-button-active" : ""}`} onClick={() => goToPage(pageNumber)}>{pageNumber}</button>)
                 counter++
             }
             increment++
@@ -439,9 +457,12 @@ const ImageGrid: React.FunctionComponent<Props> = (props) => {
         } else if (!scroll) {
             jsx.push(
                 <div className="imagegrid-page-container">
-                    {page <= 1 ? null : <button className="imagegrid-page-button" onClick={lastPage}>{"<"}</button>}
+                    {page <= 1 ? null : <button className="imagegrid-page-button" onClick={firstPage}>{"<<"}</button>}
+                    {page <= 1 ? null : <button className="imagegrid-page-button" onClick={previousPage}>{"<"}</button>}
                     {generatePageButtonsJSX()}
                     {page >= maxPage() ? null : <button className="imagegrid-page-button" onClick={nextPage}>{">"}</button>}
+                    {page >= maxPage() ? null : <button className="imagegrid-page-button" onClick={lastPage}>{">>"}</button>}
+                    {<button className="imagegrid-page-button" onClick={() => setShowPageDialog(true)}>{"?"}</button>}
                 </div>
             )
         }
