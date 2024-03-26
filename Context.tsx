@@ -96,6 +96,7 @@ export const QuickEditUnverifiedContext = React.createContext<any>(null)
 export const AutoSearchContext = React.createContext<any>(null)
 export const ShowPageDialogContext = React.createContext<any>(null)
 export const PageFlagContext = React.createContext<any>(null)
+export const ReloadPostFlagContext = React.createContext<any>(null)
 
 const Context: React.FunctionComponent = (props) => {
     const [brightness, setBrightness] = useState(100)
@@ -180,8 +181,10 @@ const Context: React.FunctionComponent = (props) => {
     const [autoSearch, setAutoSearch] = useState(false)
     const [showPageDialog, setShowPageDialog] = useState(false)
     const [pageFlag, setPageFlag] = useState(null)
+    const [reloadPostFlag, setReloadPostFlag] = useState(false)
 return (
     <>
+        <ReloadPostFlagContext.Provider value={{reloadPostFlag, setReloadPostFlag}}>
         <PageFlagContext.Provider value={{pageFlag, setPageFlag}}>
         <ShowPageDialogContext.Provider value={{showPageDialog, setShowPageDialog}}>
         <AutoSearchContext.Provider value={{autoSearch, setAutoSearch}}>
@@ -347,6 +350,7 @@ return (
         </AutoSearchContext.Provider>
         </ShowPageDialogContext.Provider>
         </PageFlagContext.Provider>
+        </ReloadPostFlagContext.Provider>
     </>
     )
 }

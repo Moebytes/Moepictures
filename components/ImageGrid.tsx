@@ -3,7 +3,7 @@ import {useHistory, useLocation} from "react-router-dom"
 import {ThemeContext, SizeTypeContext, PostAmountContext, PostsContext, ImageTypeContext, EnableDragContext,
 RestrictTypeContext, StyleTypeContext, SortTypeContext, SearchContext, SearchFlagContext, HeaderFlagContext,
 RandomFlagContext, ImageSearchFlagContext, SidebarTextContext, MobileContext, SessionContext, VisiblePostsContext,
-ScrollYContext, ScrollContext, PageContext, AutoSearchContext, ShowPageDialogContext, PageFlagContext} from "../Context"
+ScrollYContext, ScrollContext, PageContext, AutoSearchContext, ShowPageDialogContext, PageFlagContext, ReloadPostFlagContext} from "../Context"
 import GridImage from "./GridImage"
 import GridModel from "./GridModel"
 import GridSong from "./GridSong"
@@ -15,6 +15,7 @@ import path from "path"
 import "./styles/imagegrid.less"
 
 let timeout = null as any
+let reloadedPost = false
 
 interface Props {
     location?: any
@@ -53,6 +54,7 @@ const ImageGrid: React.FunctionComponent<Props> = (props) => {
     const {autoSearch, setAutoSearch} = useContext(AutoSearchContext)
     const {showPageDialog, setShowPageDialog} = useContext(ShowPageDialogContext)
     const {pageFlag, setPageFlag} = useContext(PageFlagContext)
+    const {reloadPostFlag, setReloadPostFlag} = useContext(ReloadPostFlagContext)
     const [queryPage, setQueryPage] = useState(1)
     const history = useHistory()
     const location = useLocation()
@@ -197,11 +199,23 @@ const ImageGrid: React.FunctionComponent<Props> = (props) => {
     }, [visiblePosts, noResults, ended, loaded])
 
     useEffect(() => {
+        if (reloadedPost) {
+            reloadedPost = false
+            if (!scroll) {
+                const savedPage = localStorage.getItem("page")
+                if (savedPage) setPage(Number(savedPage))
+            }
+            return
+        }
         if (loaded) {
             setPage(1)
             searchPosts()
         }
-    }, [searchFlag, imageType, restrictType, styleType, sortType])
+    }, [searchFlag, imageType, restrictType, styleType, sortType, scroll])
+
+    useEffect(() => {
+        if (reloadPostFlag) reloadedPost = true
+    }, [reloadPostFlag])
 
     useEffect(() => {
         if (randomFlag) {
@@ -393,6 +407,10 @@ const ImageGrid: React.FunctionComponent<Props> = (props) => {
             setPageFlag(null)
         }
     }, [pageFlag])
+
+    useEffect(() => {
+        localStorage.setItem("page", String(page))
+    }, [page])
 
     const generatePageButtonsJSX = () => {
         const jsx = [] as any

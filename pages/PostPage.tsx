@@ -23,7 +23,7 @@ import CaptchaDialog from "../dialogs/CaptchaDialog"
 import ThirdParty from "../components/ThirdParty"
 import Parent from "../components/Parent"
 import MobileInfo from "../components/MobileInfo"
-import {HideNavbarContext, HideSidebarContext, RelativeContext, DownloadFlagContext, DownloadURLsContext, HideTitlebarContext, MobileContext,
+import {HideNavbarContext, HideSidebarContext, RelativeContext, DownloadFlagContext, DownloadURLsContext, HideTitlebarContext, MobileContext, ReloadPostFlagContext,
 PostsContext, TagsContext, HeaderTextContext, PostFlagContext, RedirectContext, SidebarTextContext, SessionContext, SessionFlagContext, EnableDragContext} from "../Context"
 import axios from "axios"
 import permissions from "../structures/Permissions"
@@ -51,6 +51,7 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
     const {redirect, setRedirect} = useContext(RedirectContext)
     const {mobile, setMobile} = useContext(MobileContext)
     const {postFlag, setPostFlag} = useContext(PostFlagContext)
+    const {reloadPostFlag, setReloadPostFlag} = useContext(ReloadPostFlagContext)
     const [images, setImages] = useState([]) as any
     const [thirdPartyPosts, setThirdPartyPosts] = useState([]) as any
     const [parentPost, setParentPost] = useState(null) as any
@@ -75,6 +76,7 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
         setHideSidebar(false)
         setRelative(true)
         setSidebarText("")
+        setReloadPostFlag(true)
         document.title = "Moebooru: Post"
         const savedPost = localStorage.getItem("savedPost")
         const savedTags = localStorage.getItem("savedTags")
@@ -306,7 +308,7 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
         <div className="body">
             {post && tagCategories ? 
             <SideBar post={post} artists={tagCategories.artists} characters={tagCategories.characters} series={tagCategories.series} tags={tagCategories.tags}/> : 
-            <SideBar artists={tagCategories?.artists} characters={tagCategories?.characters} series={tagCategories?.series} tags={tagCategories?.tags}/>
+            <SideBar/>
             }
             <div className="content" onMouseEnter={() => setEnableDrag(true)}>
                 <div className="post-container">

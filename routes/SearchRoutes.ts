@@ -246,11 +246,11 @@ const SearchRoutes = (app: Express) => {
             const {postIDs} = req.body
             const postArray = Array.from(postIDs) as any
             if (!postArray.length) return res.status(200).json([])
-            if (postArray.length < 500) {
-                if (req.session.captchaAmount === undefined) req.session.captchaAmount = 501
+            if (postArray.length < 300) {
+                if (req.session.captchaAmount === undefined) req.session.captchaAmount = 301
                 req.session.captchaAmount = req.session.captchaAmount + postArray.length
                 if (req.session.role === "admin" || req.session.role === "mod") req.session.captchaAmount = 0
-                if (req.session.captchaAmount! > 500) return res.status(401).end()
+                if (req.session.captchaAmount! > 300) return res.status(401).end()
             } else {
                 if (req.session.role !== "admin" && req.session.role !== "mod") return res.status(401).end()
             }
