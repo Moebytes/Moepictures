@@ -77,7 +77,7 @@ const CharacterRow: React.FunctionComponent<Props> = (props) => {
                 </span>
             </div>
             <div className="characterrow-row">
-                <Carousel set={set} noKey={true} images={getImages()} height={130}/>
+                <Carousel set={set} noKey={true} images={getImages()} height={200}/>
             </div>
         </div>
     )

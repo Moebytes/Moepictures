@@ -205,6 +205,14 @@ const TagRow: React.FunctionComponent<Props> = (props) => {
         return jsx
     }
 
+    const getClass = () => {
+        if (props.tag.type === "artist") return "tagrow-artist-tag"
+        if (props.tag.type === "character") return "tagrow-character-tag"
+        if (props.tag.type === "series") return "tagrow-series-tag"
+        if (props.tag.type === "meta") return "tagrow-meta-tag"
+        return "tagrow-tag"
+    }
+
     return (
         <tr className="tagrow">
             {props.tag.image ?
@@ -214,7 +222,7 @@ const TagRow: React.FunctionComponent<Props> = (props) => {
             <div className="tagrow-content-container">
                 <td className="tagrow-container" style={{width: props.tag.image ? "16%" : "25%"}}>
                     <div className="tagrow-row">
-                        <span className="tagrow-tag" onClick={tagPage} onAuxClick={tagPage}>{props.tag.tag.replaceAll("-", " ")}</span>
+                        <span className={getClass()} onClick={tagPage} onAuxClick={tagPage}>{props.tag.tag.replaceAll("-", " ")}</span>
                         {socialJSX()}
                         <span className="tagrow-tag-count">{props.tag.postCount}</span>
                     </div>

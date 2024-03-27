@@ -265,7 +265,7 @@ const SearchRoutes = (app: Express) => {
             let result = await sql.tagCounts(uniqueTagArray.filter(Boolean))
             for (let i = 0; i < uniqueTagArray.length; i++) {
                 const found = result.find((r: any) => r.tag === uniqueTagArray[i])
-                if (!found) result.push({tag: uniqueTagArray[i], count: "0"})
+                if (!found) result.push({tag: uniqueTagArray[i], count: "0", type: "tag"})
             }
             res.status(200).json(result)
         } catch (e) {

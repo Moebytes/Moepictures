@@ -158,7 +158,7 @@ const ImageGrid: React.FunctionComponent<Props> = (props) => {
             }
         }
         if (!scroll) updatePageOffset()
-    }, [scroll, page, ended, noResults, imageType, restrictType, styleType])
+    }, [scroll, page, ended, noResults, sizeType, imageType, restrictType, styleType])
 
     useEffect(() => {
         if (!loaded) setLoaded(true)
@@ -333,7 +333,7 @@ const ImageGrid: React.FunctionComponent<Props> = (props) => {
             }
         }
         if (scroll) updatePosts()
-    }, [sizeType, scroll, imageType, restrictType, styleType])
+    }, [sizeType, scroll, sizeType, imageType, restrictType, styleType])
 
     useEffect(() => {
         const scrollHandler = async () => {
@@ -356,7 +356,7 @@ const ImageGrid: React.FunctionComponent<Props> = (props) => {
         return () => {
             window.removeEventListener("scroll", scrollHandler)
         }
-    }, [posts, visiblePosts, ended, noResults, offset, scroll, imageType, restrictType, styleType])
+    }, [posts, visiblePosts, ended, noResults, offset, scroll, sizeType, imageType, restrictType, styleType])
 
     useEffect(() => {
         if (search) {

@@ -293,7 +293,7 @@ const run = async () => {
   await sql.insertUnverifiedTag("unknown-artist", "artist")
   await sql.insertUnverifiedTag("unknown-character", "character")
   await sql.insertUnverifiedTag("unknown-series", "series")
-  await sql.insertUnverifiedTag("needs-tags", "tag")
+  await sql.insertUnverifiedTag("needs-tags", "meta")
 
   /* Default artist tags */
   let exists = await sql.insertTag("unknown-artist", "artist")
@@ -312,23 +312,23 @@ const run = async () => {
   if (!exists) await sql.updateTag("unknown-series", "description", "The series is unknown.")
 
   /* Default meta tags */
-  exists = await sql.insertTag("needs-tags", "tag")
+  exists = await sql.insertTag("needs-tags", "meta")
   if (!exists) await sql.updateTag("needs-tags", "description", "The post needs tags.")
-  exists = await sql.insertTag("no-audio", "tag")
+  exists = await sql.insertTag("no-audio", "meta")
   if (!exists) await sql.updateTag("no-audio", "description", "The post is a video with no audio.")
-  exists = await sql.insertTag("with-audio", "tag")
+  exists = await sql.insertTag("with-audio", "meta")
   if (!exists) await sql.updateTag("with-audio", "description", "The post is a video with audio.")
-  exists = await sql.insertTag("self-post", "tag")
+  exists = await sql.insertTag("self-post", "meta")
   if (!exists) await sql.updateTag("self-post", "description", "The artwork was posted by the original creator.")
-  exists = await sql.insertTag("transparent", "tag")
+  exists = await sql.insertTag("transparent", "meta")
   if (!exists) await sql.updateTag("transparent", "description", "The post has a transparent background.")
-  exists = await sql.insertTag("commentary", "tag")
+  exists = await sql.insertTag("commentary", "meta")
   if (!exists) await sql.updateTag("commentary", "description", "The post has artist commentary.")
-  exists = await sql.insertTag("translated", "tag")
+  exists = await sql.insertTag("translated", "meta")
   if (!exists) await sql.updateTag("translated", "description", "The post contains complete translations.")
-  exists = await sql.insertTag("partially-translated", "tag")
+  exists = await sql.insertTag("partially-translated", "meta")
   if (!exists) await sql.updateTag("partially-translated", "description", "Post is only partially translated.")
-  exists = await sql.insertTag("check-translation", "tag")
+  exists = await sql.insertTag("check-translation", "meta")
   if (!exists) await sql.updateTag("check-translation", "description", "Check the translations, because they might be incorrect.")
 
   /* Default software tags */

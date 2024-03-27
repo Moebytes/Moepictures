@@ -748,10 +748,11 @@ export default class SQLQuery {
     let whereQuery = tags?.[0] ? `WHERE "tag map".tag = ANY ($1)` : ""
     const query: QueryConfig = {
           text: functions.multiTrim(`
-                  SELECT "tag map".tag, COUNT(*) AS count
+                  SELECT "tag map".tag, "tags".type, COUNT(*) AS count
                   FROM "tag map"
+                  LEFT JOIN tags ON tags."tag" = "tag map".tag
                   ${whereQuery}
-                  GROUP BY "tag map".tag
+                  GROUP BY "tag map".tag, "tags".type
                   ORDER BY count DESC
           `)
     }
@@ -1422,6 +1423,7 @@ export default class SQLQuery {
           'link', post_json."link",
           'commentary', post_json."commentary",
           'translatedCommentary', post_json."translatedCommentary",
+          'mirrors', post_json."mirrors",
           'images', (array_agg(post_json."images"))[1]${includeTags ? `,
           'tags', post_json."tags"` : ""}
         ) AS post

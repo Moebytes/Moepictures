@@ -84,6 +84,11 @@ import autoSearchIconPurple from "../assets/purple/autosearch.png"
 import autoSearchActiveIconPurple from "../assets/purple/autosearch-active.png"
 import autoSearchIconMagenta from "../assets/magenta/autosearch.png"
 import autoSearchActiveIconMagenta from "../assets/magenta/autosearch-active.png"
+import danbooru from "../assets/purple/danbooru.png"
+import gelbooru from "../assets/purple/gelbooru.png"
+import safebooru from "../assets/purple/safebooru.png"
+import yandere from "../assets/purple/yandere.png"
+import konachan from "../assets/purple/konachan.png"
 import "./styles/sidebar.less"
 
 interface Props {
@@ -451,7 +456,7 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
                     <div className="sidebar-row">
                         <span className="tag-hover">
                             <img className="tag-info" src={question} onClick={(event) => tagInfo(event, props.artists[i].tag)} onAuxClick={(event) => tagInfo(event, props.artists[i].tag)}/>
-                            <span className="tag" onClick={() => tagClick()}>{props.artists[i].tag.replaceAll("-", " ")}</span>
+                            <span className="artist-tag" onClick={() => tagClick()}>{props.artists[i].tag.replaceAll("-", " ")}</span>
                             {artistSocials()}
                             <span className="tag-count">{props.artists[i].count}</span>
                         </span>
@@ -486,7 +491,7 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
                 <div className="sidebar-row">
                     <span className="tag-hover">
                         <img className="tag-info" src={question} onClick={(event) => tagInfo(event, props.characters[i].tag)} onAuxClick={(event) => tagInfo(event, props.characters[i].tag)}/>
-                        <span className="tag" onClick={() => tagClick()}>{props.characters[i].tag.replaceAll("-", " ")}</span>
+                        <span className="character-tag" onClick={() => tagClick()}>{props.characters[i].tag.replaceAll("-", " ")}</span>
                         {characterSocials()}
                         <span className="tag-count">{props.characters[i].count}</span>
                     </span>
@@ -524,7 +529,7 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
                 <div className="sidebar-row">
                     <span className="tag-hover">
                         <img className="tag-info" src={question} onClick={(event) => tagInfo(event, props.series[i].tag)} onAuxClick={(event) => tagInfo(event, props.series[i].tag)}/>
-                        <span className="tag" onClick={() => tagClick()}>{props.series[i].tag.replaceAll("-", " ")}</span>
+                        <span className="series-tag" onClick={() => tagClick()}>{props.series[i].tag.replaceAll("-", " ")}</span>
                         {seriesSocials()}
                         <span className="tag-count">{props.series[i].count}</span>
                     </span>
@@ -545,17 +550,54 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
                 setSearch(currentTags[i].tag)
                 setSearchFlag(true)
             }
+            const tagClass = () => {
+                if (currentTags[i].type === "artist") return "artist-tag"
+                if (currentTags[i].type === "character") return "character-tag"
+                if (currentTags[i].type === "series") return "series-tag"
+                if (currentTags[i].type === "meta") return "meta-tag"
+                return "tag"
+            }
             jsx.push(
                 <div className="sidebar-row">
                     <span className="tag-hover">
                         <img className="tag-info" src={question} onClick={(event) => tagInfo(event, currentTags[i].tag)} onAuxClick={(event) => tagInfo(event, currentTags[i].tag)}/>
-                        <span className="tag" onClick={() => tagClick()}>{currentTags[i].tag.replaceAll("-", " ")}</span>
+                        <span className={tagClass()} onClick={() => tagClick()}>{currentTags[i].tag.replaceAll("-", " ")}</span>
                         <span className="tag-count">{currentTags[i].count}</span>
                     </span>
                 </div>
             )
         }
         return jsx
+    }
+
+    const generateMirrorsJSX = () => {
+        let jsx = [] as any
+        if (props.post.mirrors) {
+            if (props.post.mirrors.danbooru) {
+                jsx.push(<img className="sidebar-social" src={danbooru} onClick={() => window.open(props.post.mirrors.danbooru, "_blank")}/>)
+            }
+            if (props.post.mirrors.gelbooru) {
+                jsx.push(<img className="sidebar-social" src={gelbooru} onClick={() => window.open(props.post.mirrors.gelbooru, "_blank")}/>)
+            }
+            if (props.post.mirrors.safebooru) {
+                jsx.push(<img className="sidebar-social" src={safebooru} onClick={() => window.open(props.post.mirrors.safebooru, "_blank")}/>)
+            }
+            if (props.post.mirrors.yandere) {
+                jsx.push(<img className="sidebar-social" src={yandere} onClick={() => window.open(props.post.mirrors.yandere, "_blank")}/>)
+            }
+            if (props.post.mirrors.konachan) {
+                jsx.push(<img className="sidebar-social" src={konachan} onClick={() => window.open(props.post.mirrors.konachan, "_blank")}/>)
+            }
+        }
+        if (jsx.length) {
+            return (
+                <div className="sidebar-row">
+                    <span className="tag">Mirrors:</span>
+                    {jsx}
+                </div>
+            )
+        }
+        return null
     }
 
     const getDomain = () => {
@@ -681,8 +723,8 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
 
     const tagCaptchaJSX = () => {
         if (!session) return
-        if (session.captchaAmount === undefined) session.captchaAmount = 51
-        if (session.captchaAmount > 50) {
+        if (session.captchaAmount === undefined) session.captchaAmount = 301
+        if (session.captchaAmount > 300) {
             if (!history.location.pathname.includes("/post/") && !history.location.pathname.includes("/edit-post")) return
             const toggleCaptcha = () => {
                 sessionStorage.setItem("ignoreCaptcha", "false")
@@ -703,8 +745,8 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
 
     const noTagsArtist = () => {
         if (!session) return
-        if (session.captchaAmount === undefined) session.captchaAmount = 51
-        if (session.captchaAmount > 50) {
+        if (session.captchaAmount === undefined) session.captchaAmount = 301
+        if (session.captchaAmount > 300) {
             return (
                 <div className="sidebar-row">
                     <span className="tag">Artist:</span>
@@ -712,6 +754,16 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
                 </div>
             )
         }
+    }
+
+    const copyTags = (replaceDash?: boolean) => {
+        const artists = props.artists.map((a: any) => a.tag)
+        const characters = props.characters.map((c: any) => c.tag)
+        const series = props.series.map((s: any) => s.tag)
+        const tags = props.tags.map((t: any) => t.tag)
+        let combined = [...artists, ...characters, ...series, ...tags]
+        if (replaceDash) combined = combined.map((c: string) => c.replaceAll("-", " "))
+        navigator.clipboard.writeText(combined.join(", "))
     }
 
 
@@ -738,6 +790,16 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
                     <img className="random" src={getRandomIcon()} onClick={randomSearch} onMouseEnter={() => setRandomIconHover(true)} onMouseLeave={() => setRandomIconHover(false)}/>
                     <img className="autosearch" src={getAutoSearch()} onClick={() => setAutoSearch((prev: boolean) => !prev)}/>
                 </div>
+
+                {props.artists && props.characters && props.series && props.tags ?
+                <div className="sidebar-subcontainer">
+                    <div className="sidebar-row">
+                        <span className="tag-hover" onClick={() => copyTags()} onContextMenu={(event) => {event.preventDefault(); copyTags(true)}}>
+                            <img className="sidebar-icon" src={getShowTags()}/>
+                            <span className="tag-red">Copy Tags</span>
+                        </span>
+                    </div>
+                </div> : null}
 
                 {tagCaptchaJSX()}
 
@@ -766,6 +828,7 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
                             <span className="tag">Source:</span>
                             <span className="tag-alt-link" onClick={() => window.open(props.post.link, "_blank")}>{getDomain()}</span>
                         </div>
+                        {generateMirrorsJSX()}
                     </div>
                 : null}
 

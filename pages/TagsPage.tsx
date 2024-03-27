@@ -102,7 +102,6 @@ const TagsPage: React.FunctionComponent = (props) => {
         if (ended) return
         const newOffset = offset + 100
         const result = await axios.get("/api/search/tags", {params: {sort: sortType, type: typeType, query: searchQuery, offset: newOffset}, withCredentials: true}).then((r) => r.data)
-        console.log(result)
         if (result?.length >= 100) {
             setOffset(newOffset)
             setTags((prev: any) => functions.removeDuplicates([...prev, ...result]))
@@ -269,6 +268,9 @@ const TagsPage: React.FunctionComponent = (props) => {
                             </div>
                             <div className="tag-dropdown-row" onClick={() => setTypeType("series")}>
                                 <span className="tag-dropdown-text">Series</span>
+                            </div>
+                            <div className="tag-dropdown-row" onClick={() => setTypeType("meta")}>
+                                <span className="tag-dropdown-text">Meta</span>
                             </div>
                             <div className="tag-dropdown-row" onClick={() => setTypeType("tag")}>
                                 <span className="tag-dropdown-text">Tag</span>

@@ -1229,7 +1229,7 @@ const PostImage: React.FunctionComponent<Props> = (props) => {
                 <div className="post-image-filters" ref={fullscreenRef}>
                     {functions.isVideo(props.img) ? 
                     <video loop muted disablePictureInPicture playsInline className="dummy-post-video" src={props.img}></video> :
-                    <img className="dummy-post-image" src={props.img}/>/*<canvas className="dummy-post-image" ref={dummyRef}></canvas>*/}
+                    <img className="dummy-post-image" src={img}/>/*<canvas className="dummy-post-image" ref={dummyRef}></canvas>*/}
                     <div className="encoding-overlay" style={{display: encodingOverlay ? "flex" : "none"}}>
                         <span className="encoding-overlay-text">{functions.isVideo(props.img) ? "Rendering Video..." : "Rendering GIF..."}</span>
                     </div>

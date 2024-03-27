@@ -1088,6 +1088,7 @@ export default class Functions {
             type === "artist" ||
             type === "character" ||
             type === "series" ||
+            type === "meta" ||
             type === "tag") return true 
         return false
     }
@@ -1129,6 +1130,7 @@ export default class Functions {
                     obj.tag = parsedTags[i].tag 
                     obj.count = parsedTags[i].count 
                     obj.image = unverifiedTag.image
+                    obj.type = unverifiedTag.type
                     obj.description = unverifiedTag.description 
                     obj.pixiv = unverifiedTag.pixiv
                     obj.twitter = unverifiedTag.twitter
@@ -1148,7 +1150,8 @@ export default class Functions {
             }
             const obj = {} as any 
             obj.tag = parsedTags[i].tag 
-            obj.count = parsedTags[i].count 
+            obj.count = parsedTags[i].count
+            obj.type = result[index].type
             obj.image = result[index].image
             obj.description = result[index].description 
             obj.pixiv = result[index].pixiv
