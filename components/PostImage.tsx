@@ -122,7 +122,7 @@ const PostImage: React.FunctionComponent<Props> = (props) => {
     const [dragging, setDragging] = useState(false)
     const [encodingOverlay, setEncodingOverlay] = useState(false)
     const [seekTo, setSeekTo] = useState(null) as any
-    const [img, setImg] = useState(props.img)
+    const [img, setImg] = useState("")
     const initialCropState = {unit: "%", x: 0, y: 0, width: 100, height: 100, aspect: undefined}
     const [cropState, setCropState] = useState(initialCropState)
 
@@ -148,7 +148,13 @@ const PostImage: React.FunctionComponent<Props> = (props) => {
             const base64 = await functions.linkToBase64(props.img)
             setImg(base64)
         }
-        base64Img()
+        const decryptImg = async () => {
+            const url = await cryptoFunctions.decryptedLink(props.img)
+            const base64 = await functions.linkToBase64(url)
+            setImg(base64)
+        }
+        decryptImg()
+        // base64Img()
         // loadImage()
     }, [props.img])
 
@@ -886,11 +892,11 @@ const PostImage: React.FunctionComponent<Props> = (props) => {
             }
         } else {
             if (image) {
-                return image
-                //return cryptoFunctions.decryptedLink(image)
+                //return image
+                return cryptoFunctions.decryptedLink(image)
             } else {
-                return props.img
-                //return cryptoFunctions.decryptedLink(props.img)
+                //return props.img
+                return cryptoFunctions.decryptedLink(props.img)
             }
         }
     }
@@ -1382,8 +1388,8 @@ const PostImage: React.FunctionComponent<Props> = (props) => {
                         <TransformComponent wrapperStyle={{pointerEvents: disableZoom ? "none" : "all"}}>
                             {/* <canvas className="post-lightness-overlay" ref={lightnessRef}></canvas> */}
                             {/* <canvas className="post-sharpen-overlay" ref={overlayRef}></canvas> */}
-                            <img className="post-lightness-overlay" ref={lightnessRef} src={props.img}/>
-                            <img className="post-sharpen-overlay" ref={overlayRef} src={props.img}/>
+                            <img className="post-lightness-overlay" ref={lightnessRef} src={img}/>
+                            <img className="post-sharpen-overlay" ref={overlayRef} src={img}/>
                             <canvas className="post-pixelate-canvas" ref={pixelateRef}></canvas>
                             {/* <canvas className="post-image" ref={ref}></canvas> */}
                             <img className="post-image" ref={ref} src={img} onLoad={(event) => onLoad(event)}/>

@@ -508,7 +508,7 @@ const GridModel: React.FunctionComponent<Props> = (props) => {
         if (!ref || !overlayRef.current || !lightnessRef.current) return
         let src = image
         if (functions.isImage(src)) {
-            // src = await cryptoFunctions.decryptedLink(src)
+            src = await cryptoFunctions.decryptedLink(src)
         }
         const img = document.createElement("img")
         img.src = src 

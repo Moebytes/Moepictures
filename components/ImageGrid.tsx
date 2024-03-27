@@ -59,6 +59,13 @@ const ImageGrid: React.FunctionComponent<Props> = (props) => {
     const history = useHistory()
     const location = useLocation()
 
+    useEffect(() => {
+        const savedPosts = localStorage.getItem("savedPosts")
+        if (savedPosts) setPosts(JSON.parse(savedPosts))
+        const savedPage = localStorage.getItem("page")
+        if (savedPage) setTimeout(() => {setPage(Number(savedPage))}, 100)
+    }, [])
+
     const getPageAmount = () => {
         let loadAmount = 60
         if (sizeType === "tiny") loadAmount = 60
@@ -125,7 +132,7 @@ const ImageGrid: React.FunctionComponent<Props> = (props) => {
             setEnded(false)
             setIndex(0)
             setVisiblePosts([])
-            setPage(1)
+            setPage(1).fake
             setSearchFlag(true)
         }
     }, [scroll])
@@ -151,7 +158,7 @@ const ImageGrid: React.FunctionComponent<Props> = (props) => {
             }
         }
         if (!scroll) updatePageOffset()
-    }, [scroll, page, ended, noResults])
+    }, [scroll, page, ended, noResults, imageType, restrictType, styleType])
 
     useEffect(() => {
         if (!loaded) setLoaded(true)
@@ -201,10 +208,8 @@ const ImageGrid: React.FunctionComponent<Props> = (props) => {
     useEffect(() => {
         if (reloadedPost) {
             reloadedPost = false
-            if (!scroll) {
-                const savedPage = localStorage.getItem("page")
-                if (savedPage) setPage(Number(savedPage))
-            }
+            const savedPage = localStorage.getItem("page")
+            if (savedPage) setPage(Number(savedPage))
             return
         }
         if (loaded) {
@@ -265,9 +270,16 @@ const ImageGrid: React.FunctionComponent<Props> = (props) => {
         if (noResults) return
         if (ended) return
         let newOffset = offset + 1000
+        let padded = false
         if (!scroll) {
             newOffset = (page - 1) * getPageAmount()
-            if (newOffset === 0) return
+            if (newOffset === 0) {
+                if (posts[newOffset]?.fake) {
+                    padded = true
+                } else {
+                    return
+                }
+            }
         }
         let result = null as any
         if (isRandomSearch) {
@@ -277,7 +289,6 @@ const ImageGrid: React.FunctionComponent<Props> = (props) => {
             result = await axios.get("/api/search/posts", {params: {query, type: imageType, restrict: restrictType, style: styleType, sort: sortType, limit: 1000, offset: newOffset}, withCredentials: true}).then((r) => r.data)
         }
         let hasMore = result?.length >= 1000
-        let padded = false
         const cleanPosts = posts.filter((p: any) => !p.fake)
         if (!scroll) {
             if (cleanPosts.length <= newOffset) {
@@ -322,7 +333,7 @@ const ImageGrid: React.FunctionComponent<Props> = (props) => {
             }
         }
         if (scroll) updatePosts()
-    }, [sizeType, scroll])
+    }, [sizeType, scroll, imageType, restrictType, styleType])
 
     useEffect(() => {
         const scrollHandler = async () => {
@@ -345,7 +356,7 @@ const ImageGrid: React.FunctionComponent<Props> = (props) => {
         return () => {
             window.removeEventListener("scroll", scrollHandler)
         }
-    }, [posts, visiblePosts, ended, noResults, offset, scroll])
+    }, [posts, visiblePosts, ended, noResults, offset, scroll, imageType, restrictType, styleType])
 
     useEffect(() => {
         if (search) {

@@ -152,12 +152,11 @@ for (let i = 0; i < folders.length; i++) {
         const stream = Readable.from(body.slice(start, end + 1))
         return stream.pipe(res)
       }
-      /*
       if (folders[i] === "image" || folders[i] === "comic") {
         const encrypted = cryptoFunctions.encrypt(body)
         res.setHeader("Content-Length", encrypted.length)
         return res.status(200).end(encrypted)
-      }*/
+      }
       res.setHeader("Content-Length", contentLength)
       res.status(200).end(body)
     } catch {
@@ -225,12 +224,11 @@ for (let i = 0; i < folders.length; i++) {
         const stream = Readable.from(body.slice(start, end + 1))
         return stream.pipe(res)
       }
-      /*
       if (folders[i] === "image" || folders[i] === "comic") {
         const encrypted = cryptoFunctions.encrypt(body)
         res.setHeader("Content-Length", encrypted.length)
         return res.status(200).end(encrypted)
-      }*/
+      }
       res.setHeader("Content-Length", contentLength)
       res.status(200).end(body)
     } catch (e) {

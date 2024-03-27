@@ -58,7 +58,7 @@ const PostHistoryRow: React.FunctionComponent<Props> = (props) => {
 
             let img = imgLink
             if (functions.isImage(img)) {
-                // img = await cryptoFunctions.decryptedLink(img)
+                img = await cryptoFunctions.decryptedLink(img)
             } else if (functions.isModel(img)) {
                 img = await functions.modelImage(img)
             } else if (functions.isAudio(img)) {
@@ -66,7 +66,7 @@ const PostHistoryRow: React.FunctionComponent<Props> = (props) => {
             }
             let current = currentLink
             if (functions.isImage(current)) {
-                // current = await cryptoFunctions.decryptedLink(current)
+                current = await cryptoFunctions.decryptedLink(current)
             } else if (functions.isModel(img)) {
                 current = await functions.modelImage(current)
             } else if (functions.isAudio(img)) {
@@ -101,7 +101,7 @@ const PostHistoryRow: React.FunctionComponent<Props> = (props) => {
             let link = imgLink
             let ext = path.extname(imgLink)
             if (functions.isImage(link)) {
-                // link = await cryptoFunctions.decryptedLink(link)
+                link = await cryptoFunctions.decryptedLink(link)
                 link += `#${ext}`
             }
             const buffer = await axios.get(link, {responseType: "arraybuffer", withCredentials: true}).then((r) => r.data) as Buffer
@@ -277,7 +277,7 @@ const PostHistoryRow: React.FunctionComponent<Props> = (props) => {
         if (!ref.current) return
         let src = img
         if (functions.isImage(src)) {
-            // src = await cryptoFunctions.decryptedLink(src)
+            src = await cryptoFunctions.decryptedLink(src)
         } else if (functions.isModel(src)) {
             src = await functions.modelImage(src)
         } else if (functions.isAudio(src)) {

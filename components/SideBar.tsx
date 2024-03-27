@@ -96,9 +96,9 @@ interface Props {
     noActions?: boolean
 }
 
-const maxTags1 = 27
-const maxTags2 = 30
-const maxTags3 = 32
+const maxTags1 = 26
+const maxTags2 = 29
+const maxTags3 = 31
 
 const SideBar: React.FunctionComponent<Props> = (props) => {
     const [ignored, forceUpdate] = useReducer(x => x + 1, 0)

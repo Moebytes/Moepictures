@@ -224,7 +224,7 @@ const CommentRow: React.FunctionComponent<Props> = (props) => {
         if (!ref.current) return
         let src = img
         if (functions.isImage(img)) {
-            // src = await cryptoFunctions.decryptedLink(src)
+            src = await cryptoFunctions.decryptedLink(src)
         } else if (functions.isModel(src)) {
             src = await functions.modelImage(src)
         } else if (functions.isAudio(src)) {
