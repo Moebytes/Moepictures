@@ -54,6 +54,7 @@ CREATE TABLE IF NOT EXISTS "unverified posts" (
     "link" text,
     "commentary" text,
     "translatedCommentary" text,
+    "mirrors" json,
     "thumbnail" text
 );
 
@@ -273,6 +274,7 @@ CREATE TABLE IF NOT EXISTS "post history" (
     "link" text,
     "commentary" text,
     "translatedCommentary" text,
+    "mirrors" json,
     "artists" text[],
     "characters" text[],
     "series" text[],

@@ -96,6 +96,7 @@ const EditUnverifiedPostPage: React.FunctionComponent<Props> = (props) => {
     const [sourceLink, setSourceLink] = useState("")
     const [sourceCommentary, setSourceCommentary] = useState("")
     const [sourceTranslatedCommentary, setSourceTranslatedCommentary] = useState("")
+    const [sourceMirrors, setSourceMirrors] = useState("")
     const [artists, setArtists] = useState([{}]) as any
     const [characters, setCharacters] = useState([{}]) as any
     const [series, setSeries] = useState([{}]) as any
@@ -130,6 +131,7 @@ const EditUnverifiedPostPage: React.FunctionComponent<Props> = (props) => {
         setSourceArtist(post.artist || "")
         setSourceCommentary(post.commentary || "")
         setSourceTranslatedCommentary(post.translatedCommentary || "")
+        setSourceMirrors(post.mirrors ? Object.values(post.mirrors).join("\n") : "")
         if (post.drawn) setSourceDate(functions.formatDate(new Date(post.drawn)))
         setSourceLink(post.link || "")
         const parentPost = await axios.get("/api/post/parent/unverified", {params: {postID}, withCredentials: true}).then((r) => r.data)
@@ -231,7 +233,7 @@ const EditUnverifiedPostPage: React.FunctionComponent<Props> = (props) => {
 
     useEffect(() => {
         if (!edited) setEdited(true)
-    }, [type, restrict, style, sourceTitle, sourceArtist, sourceCommentary, sourceTranslatedCommentary, sourceTranslatedTitle,
+    }, [type, restrict, style, sourceTitle, sourceArtist, sourceCommentary, sourceTranslatedCommentary, sourceMirrors, sourceTranslatedTitle,
     sourceLink, sourceDate, acceptedURLs, artists, characters, series, rawTags])
 
     useEffect(() => {
@@ -389,6 +391,7 @@ const EditUnverifiedPostPage: React.FunctionComponent<Props> = (props) => {
         setSourceArtist("")
         setSourceCommentary("")
         setSourceTranslatedCommentary("")
+        setSourceMirrors("")
         setSourceDate("")
         setSourceLink("")
         setRawTags("")
@@ -872,7 +875,8 @@ const EditUnverifiedPostPage: React.FunctionComponent<Props> = (props) => {
                 date: sourceDate,
                 link: sourceLink,
                 commentary: sourceCommentary,
-                translatedCommentary: sourceTranslatedCommentary
+                translatedCommentary: sourceTranslatedCommentary,
+                mirrors: sourceMirrors
             },
             artists,
             characters,
@@ -905,7 +909,7 @@ const EditUnverifiedPostPage: React.FunctionComponent<Props> = (props) => {
         }
         let current = acceptedURLs[currentIndex]
         let bytes = "" as any 
-        if (functions.isVideo(current.link)) {
+        if (current.thumbnail) {
             bytes = await functions.base64toUint8Array(current.thumbnail).then((a) => Object.values(a))
         } else {
             bytes = Object.values(current.bytes) as any
@@ -920,15 +924,33 @@ const EditUnverifiedPostPage: React.FunctionComponent<Props> = (props) => {
             let commentary = ""
             let translatedCommentary = ""
             let date = ""
+            let mirrors = [] as any
             if (results.length) {
                 const pixiv = results.filter((r: any) => r.header.index_id === 5)
                 const twitter = results.filter((r: any) => r.header.index_id === 41)
+                const artstation = results.filter((r: any) => r.header.index_id === 39)
                 const deviantart = results.filter((r: any) => r.header.index_id === 34)
                 const danbooru = results.filter((r: any) => r.header.index_id === 9)
                 const gelbooru = results.filter((r: any) => r.header.index_id === 25)
                 const konachan = results.filter((r: any) => r.header.index_id === 26)
                 const yandere = results.filter((r: any) => r.header.index_id === 12)
                 const anime = results.filter((r: any) => r.header.index_id === 21)
+                if (pixiv.length) mirrors.push(`https://www.pixiv.net/en/artworks/${pixiv[0].data.pixiv_id}`)
+                if (twitter.length) mirrors.push(twitter[0].data.ext_urls[0])
+                if (deviantart.length) {
+                    let redirectedLink = ""
+                    try {
+                        redirectedLink = await axios.get(`/api/misc/redirect?url=${deviantart[0].data.ext_urls[0]}`, {withCredentials: true}).then((r) => r.data)
+                    } catch {
+                        // ignore
+                    }
+                    mirrors.push(redirectedLink ? redirectedLink : deviantart[0].data.ext_urls[0])
+                }
+                if (artstation.length) mirrors.push(artstation[0].data.ext_urls[0])
+                if (danbooru.length) mirrors.push(danbooru[0].data.ext_urls[0])
+                if (gelbooru.length) mirrors.push(gelbooru[0].data.ext_urls[0])
+                if (yandere.length) mirrors.push(yandere[0].data.ext_urls[0])
+                if (konachan.length) mirrors.push(konachan[0].data.ext_urls[0])
                 if (danbooru.length) setDanbooruLink(`https://danbooru.donmai.us/posts/${danbooru[0].data.danbooru_id}.json`)
                 if (pixiv.length) {
                     link = `https://www.pixiv.net/en/artworks/${pixiv[0].data.pixiv_id}`
@@ -1029,6 +1051,8 @@ const EditUnverifiedPostPage: React.FunctionComponent<Props> = (props) => {
             setSourceCommentary(commentary)
             setSourceTranslatedCommentary(translatedCommentary)
             setSourceDate(date)
+            mirrors = functions.removeItem(mirrors, link)
+            setSourceMirrors(mirrors.join("\n"))
             if (!title && !artist && !link) {
                 saucenaoErrorRef.current.innerText = "No results found."
                 await functions.timeout(3000)
@@ -1586,6 +1610,12 @@ const EditUnverifiedPostPage: React.FunctionComponent<Props> = (props) => {
                     </div>
                     <div className="editpost-container-row">
                         <textarea className="editpost-textarea-small" style={{height: "80px"}} value={sourceTranslatedCommentary} onChange={(event) => setSourceTranslatedCommentary(event.target.value)} spellCheck={false} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}></textarea>
+                    </div>
+                    <div className="editpost-container-row">
+                        <span className="editpost-text">Mirrors: </span>
+                    </div>
+                    <div className="editpost-container-row">
+                        <textarea className="editpost-textarea-small" style={{height: "80px"}} value={sourceMirrors} onChange={(event) => setSourceMirrors(event.target.value)} spellCheck={false} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}></textarea>
                     </div>
                 </div>
                 <span className="editpost-heading">Artist</span>

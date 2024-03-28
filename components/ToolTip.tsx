@@ -7,6 +7,8 @@ import functions from "../structures/Functions"
 import "./styles/tooltip.less"
 import pixiv from "../assets/purple/pixiv.png"
 import twitter from "../assets/purple/twitter.png"
+import deviantart from "../assets/purple/deviantart.png"
+import artstation from "../assets/purple/artstation.png"
 import danbooru from "../assets/purple/danbooru.png"
 import gelbooru from "../assets/purple/gelbooru.png"
 import safebooru from "../assets/purple/safebooru.png"
@@ -102,6 +104,10 @@ const ToolTip: React.FunctionComponent = (props) => {
         if (tooltipPost.link?.includes("pixiv")) jsx.push(<img className="tooltip-img" style={{cursor: "pointer"}} src={pixiv} onClick={() => window.open(tooltipPost.link, "_blank")}/>)
         if (tooltipPost.link?.includes("twitter") || tooltipPost.link?.includes("x.com")) jsx.push(<img className="tooltip-img" style={{cursor: "pointer"}} src={twitter} onClick={() => window.open(tooltipPost.link, "_blank")}/>)
         if (tooltipPost.mirrors) {
+            if (tooltipPost.mirrors.pixiv) jsx.push(<img className="tooltip-img" style={{cursor: "pointer"}} src={pixiv} onClick={() => window.open(tooltipPost.mirrors.pixiv, "_blank")}/>)
+            if (tooltipPost.mirrors.twitter) jsx.push(<img className="tooltip-img" style={{cursor: "pointer"}} src={twitter} onClick={() => window.open(tooltipPost.mirrors.twitter, "_blank")}/>)
+            if (tooltipPost.mirrors.deviantart) jsx.push(<img className="tooltip-img" style={{cursor: "pointer"}} src={deviantart} onClick={() => window.open(tooltipPost.mirrors.deviantart, "_blank")}/>)
+            if (tooltipPost.mirrors.artstation) jsx.push(<img className="tooltip-img" style={{cursor: "pointer"}} src={artstation} onClick={() => window.open(tooltipPost.mirrors.artstation, "_blank")}/>)
             if (tooltipPost.mirrors.danbooru) jsx.push(<img className="tooltip-img" style={{cursor: "pointer"}} src={danbooru} onClick={() => window.open(tooltipPost.mirrors.danbooru, "_blank")}/>)
             if (tooltipPost.mirrors.gelbooru) jsx.push(<img className="tooltip-img" style={{cursor: "pointer"}} src={gelbooru} onClick={() => window.open(tooltipPost.mirrors.gelbooru, "_blank")}/>)
             if (tooltipPost.mirrors.safebooru) jsx.push(<img className="tooltip-img" style={{cursor: "pointer"}} src={safebooru} onClick={() => window.open(tooltipPost.mirrors.safebooru, "_blank")}/>)
@@ -111,10 +117,10 @@ const ToolTip: React.FunctionComponent = (props) => {
         return jsx
     }
 
-    const copyTags = (removeDashes?: boolean) => {
+    const copyTags = (removeDashes?: boolean, noCommas?: boolean) => {
         let tagArr = [artist.tag, ...tags.map((t: any) => t.tag)]
         if (removeDashes) tagArr = tagArr.map((t: any) => t.replaceAll("-", " "))
-        navigator.clipboard.writeText(tagArr.join(", "))
+        navigator.clipboard.writeText(noCommas ? tagArr.join(" ") : tagArr.join(", "))
     }
 
     if (!artist || !tags || !tooltipPost) return null
@@ -125,7 +131,7 @@ const ToolTip: React.FunctionComponent = (props) => {
                 <div className="tooltip-artist-container">
                     <img className="tooltip-img" src={functions.getTagLink(artist.type, artist.image)}/>
                     <span className="tooltip-artist-tag" style={{marginRight: "5px"}} onClick={() => window.open(artist.pixiv ? artist.pixiv : artist.twitter, "_blank")}>{artist.tag}</span>
-                    <img className="tooltip-img-small" src={tagIcon} onClick={() => copyTags()} onContextMenu={(event) => {event.preventDefault(); copyTags(true)}}/>
+                    <img className="tooltip-img-small" src={tagIcon} onClick={() => copyTags()} onAuxClick={() => copyTags(false, true)} onContextMenu={(event) => {event.preventDefault(); copyTags(true)}}/>
                 </div>
                 <div className="tooltip-artist-container">
                     <span className="tooltip-artist-tag" onClick={download}>{getImageDimensions()}</span>

@@ -1496,6 +1496,7 @@ export default class Functions {
 
     public static parseSpaceEnabledSearch = async (query: string) => {
         if (!query) return query
+        if (query.split(/ +/g).length > 10) return query
         const savedTags = await localforage.getItem("tags") as any
         if (!savedTags) return query
         let permutations = Functions.permutations(query)
@@ -1731,5 +1732,22 @@ export default class Functions {
     public static isLocalHost = () => {
         if (typeof window === "undefined") return process.env.TESTING === "yes"
         return window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1"
+    }
+
+    public static mirrorsJSON = (sourceMirrors: string) => {
+        if (!sourceMirrors.trim()) return ""
+        const mirrorsArr = sourceMirrors.split("\n")
+        let json = {}
+        for (const mirror of mirrorsArr) {
+            if (mirror.includes("danbooru")) json["danbooru"] = mirror
+            if (mirror.includes("gelbooru")) json["gelbooru"] = mirror
+            if (mirror.includes("safebooru")) json["safebooru"] = mirror
+            if (mirror.includes("yande.re")) json["yandere"] = mirror
+            if (mirror.includes("konachan")) json["konachan"] = mirror
+            if (mirror.includes("deviantart")) json["deviantart"] = mirror
+            if (mirror.includes("artstation")) json["artstation"] = mirror
+            if (mirror.includes("twitter") || mirror.includes("x.com")) json["twitter"] = mirror
+        }
+        return JSON.stringify(json) as any
     }
 }

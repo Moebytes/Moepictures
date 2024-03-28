@@ -76,6 +76,8 @@ import website from "../assets/purple/support.png"
 import fandom from "../assets/purple/fandom.png"
 import pixiv from "../assets/purple/pixiv.png"
 import twitter from "../assets/purple/twitter.png"
+import deviantart from "../assets/purple/deviantart.png"
+import artstation from "../assets/purple/artstation.png"
 import SearchSuggestions from "./SearchSuggestions"
 import adminCrown from "../assets/purple/admin-crown.png"
 import modCrown from "../assets/purple/mod-crown.png"
@@ -573,6 +575,18 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
     const generateMirrorsJSX = () => {
         let jsx = [] as any
         if (props.post.mirrors) {
+            if (props.post.mirrors.pixiv) {
+                jsx.push(<img className="sidebar-social" src={pixiv} onClick={() => window.open(props.post.mirrors.pixiv, "_blank")}/>)
+            }
+            if (props.post.mirrors.twitter) {
+                jsx.push(<img className="sidebar-social" src={twitter} onClick={() => window.open(props.post.mirrors.twitter, "_blank")}/>)
+            }
+            if (props.post.mirrors.deviantart) {
+                jsx.push(<img className="sidebar-social" src={deviantart} onClick={() => window.open(props.post.mirrors.deviantart, "_blank")}/>)
+            }
+            if (props.post.mirrors.artstation) {
+                jsx.push(<img className="sidebar-social" src={artstation} onClick={() => window.open(props.post.mirrors.artstation, "_blank")}/>)
+            }
             if (props.post.mirrors.danbooru) {
                 jsx.push(<img className="sidebar-social" src={danbooru} onClick={() => window.open(props.post.mirrors.danbooru, "_blank")}/>)
             }
@@ -729,7 +743,7 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
             return (
                 <div className="sidebar-subcontainer">
                     <div className="sidebar-row">
-                        <span className="tag-hover" onClick={() => copyTags()} onContextMenu={(event) => {event.preventDefault(); copyTags(true)}}>
+                        <span className="tag-hover" onClick={() => copyTags()} onAuxClick={() => copyTags(false, true)} onContextMenu={(event) => {event.preventDefault(); copyTags(true)}}>
                             <img className="sidebar-icon" src={getShowTags()}/>
                             <span className="tag-red">Copy Tags</span>
                         </span>
@@ -774,14 +788,14 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
         }
     }
 
-    const copyTags = (replaceDash?: boolean) => {
+    const copyTags = (replaceDash?: boolean, noCommas?: boolean) => {
         const artists = props.artists.map((a: any) => a.tag)
         const characters = props.characters.map((c: any) => c.tag)
         const series = props.series.map((s: any) => s.tag)
         const tags = props.tags.map((t: any) => t.tag)
         let combined = [...artists, ...characters, ...series, ...tags]
         if (replaceDash) combined = combined.map((c: string) => c.replaceAll("-", " "))
-        navigator.clipboard.writeText(combined.join(", "))
+        navigator.clipboard.writeText(noCommas ? combined.join(" ") : combined.join(", "))
     }
 
 

@@ -207,6 +207,7 @@ const CreateRoutes = (app: Express) => {
           link: source.link ? source.link : null,
           commentary: source.commentary ? source.commentary : null,
           translatedCommentary: source.translatedCommentary ? source.translatedCommentary : null,
+          mirrors: source.mirrors ? functions.mirrorsJSON(source.mirrors) : null,
           type,
           uploadDate,
           updatedDate: uploadDate,
@@ -362,12 +363,12 @@ const CreateRoutes = (app: Express) => {
         const imgChanged = await serverFunctions.imagesChanged(post.images, images)
 
         let vanillaBuffers = [] as any
-        if (imgChanged) {
-          if (req.session.role !== "admin" && req.session.role !== "mod") return res.status(403).send("No permission to modify images")
-          for (let i = 0; i < post.images.length; i++) {
-            const imagePath = functions.getImagePath(post.images[i].type, postID, post.images[i].filename)
-            const oldImage = await serverFunctions.getFile(imagePath) as Buffer
-            vanillaBuffers.push(oldImage)
+        for (let i = 0; i < post.images.length; i++) {
+          const imagePath = functions.getImagePath(post.images[i].type, postID, post.images[i].filename)
+          const oldImage = await serverFunctions.getFile(imagePath) as Buffer
+          vanillaBuffers.push(oldImage)
+          if (imgChanged) {
+            if (req.session.role !== "admin" && req.session.role !== "mod") return res.status(403).send("No permission to modify images")
             await sql.deleteImage(post.images[i].imageID)
             await serverFunctions.deleteFile(imagePath)
           }
@@ -446,6 +447,7 @@ const CreateRoutes = (app: Express) => {
           link: source.link ? source.link : null,
           commentary: source.commentary ? source.commentary : null,
           translatedCommentary: source.translatedCommentary ? source.translatedCommentary : null,
+          mirrors: source.mirrors ? functions.mirrorsJSON(source.mirrors) : null,
           type,
           updatedDate,
           updater: req.session.username
@@ -548,7 +550,7 @@ const CreateRoutes = (app: Express) => {
             }
             await sql.insertPostHistory(vanilla.user, postID, vanillaImages, vanilla.uploader, vanilla.updater, vanilla.uploadDate, vanilla.updatedDate,
                 vanilla.type, vanilla.restrict, vanilla.style, vanilla.thirdParty, vanilla.title, vanilla.translatedTitle, vanilla.drawn, vanilla.artist,
-                vanilla.link, vanilla.commentary, vanilla.translatedCommentary, vanilla.artists, vanilla.characters, vanilla.series, vanilla.tags)
+                vanilla.link, vanilla.commentary, vanilla.translatedCommentary, vanilla.mirrors, vanilla.artists, vanilla.characters, vanilla.series, vanilla.tags)
 
             let newImages = [] as any
             for (let i = 0; i < images.length; i++) {
@@ -559,7 +561,7 @@ const CreateRoutes = (app: Express) => {
             }
             await sql.insertPostHistory(req.session.username, postID, newImages, post.uploader, post.updater, post.uploadDate, post.updatedDate,
             post.type, post.restrict, post.style, post.thirdParty, post.title, post.translatedTitle, post.drawn, post.artist,
-            post.link, post.commentary, post.translatedCommentary, artists, characters, series, tags, reason)
+            post.link, post.commentary, post.translatedCommentary, post.mirrors, artists, characters, series, tags, reason)
         } else {
             let newImages = [] as any
             const nextKey = await serverFunctions.getNextKey("post", String(postID))
@@ -571,7 +573,7 @@ const CreateRoutes = (app: Express) => {
             }
             await sql.insertPostHistory(req.session.username, postID, newImages, post.uploader, post.updater, post.uploadDate, post.updatedDate,
             post.type, post.restrict, post.style, post.thirdParty, post.title, post.translatedTitle, post.drawn, post.artist,
-            post.link, post.commentary, post.translatedCommentary, artists, characters, series, tags, reason)
+            post.link, post.commentary, post.translatedCommentary, post.mirrors, artists, characters, series, tags, reason)
         }
         res.status(200).send("Success")
       } catch (e) {
@@ -702,6 +704,7 @@ const CreateRoutes = (app: Express) => {
           link: source.link ? source.link : null,
           commentary: source.commentary ? source.commentary : null,
           translatedCommentary: source.translatedCommentary ? source.translatedCommentary : null,
+          mirrors: source.mirrors ? functions.mirrorsJSON(source.mirrors) : null,
           type,
           uploadDate,
           updatedDate: uploadDate,
@@ -935,6 +938,7 @@ const CreateRoutes = (app: Express) => {
           link: source.link ? source.link : null,
           commentary: source.commentary ? source.commentary : null,
           translatedCommentary: source.translatedCommentary ? source.translatedCommentary : null,
+          mirrors: source.mirrors ? functions.mirrorsJSON(source.mirrors) : null,
           type,
           updatedDate,
           updater: req.session.username
@@ -1106,6 +1110,7 @@ const CreateRoutes = (app: Express) => {
           link: unverified.link ? unverified.link : null,
           commentary: unverified.commentary ? unverified.commentary : null,
           translatedCommentary: unverified.translatedCommentary ? unverified.translatedCommentary : null,
+          mirrors: unverified.mirrors ? functions.mirrorsJSON(unverified.mirrors) : null,
           type,
           uploadDate: unverified.uploadDate,
           updatedDate: unverified.updatedDate,

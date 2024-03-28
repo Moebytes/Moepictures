@@ -298,7 +298,8 @@ const PostHistoryRow: React.FunctionComponent<Props> = (props) => {
         loadImage()
     }, [img])
 
-    const updateImg = () => {
+    const updateImg = (event: React.MouseEvent) => {
+        event.preventDefault()
         if (props.postHistory.images.length > 1) {
             let newImageIndex = imageIndex + 1 
             if (newImageIndex > props.postHistory.images.length - 1) newImageIndex = 0
@@ -311,9 +312,9 @@ const PostHistoryRow: React.FunctionComponent<Props> = (props) => {
     return (
         <div className="posthistoryrow">
             <div className="posthistoryrow-container">
-                {functions.isVideo(img) ? <video className="posthistoryrow-img" autoPlay muted loop disablePictureInPicture src={img} onClick={updateImg} onAuxClick={imgClick}></video> :
-                functions.isGIF(img) ? <img className="posthistoryrow-img" src={img} onClick={updateImg} onAuxClick={imgClick}/> : 
-                <canvas className="posthistoryrow-img" ref={ref} onClick={updateImg} onAuxClick={imgClick}></canvas>}
+                {functions.isVideo(img) ? <video className="posthistoryrow-img" autoPlay muted loop disablePictureInPicture src={img} onClick={imgClick} onAuxClick={imgClick} onContextMenu={updateImg}></video> :
+                functions.isGIF(img) ? <img className="posthistoryrow-img" src={img} onClick={imgClick} onAuxClick={imgClick} onContextMenu={updateImg}/> : 
+                <canvas className="posthistoryrow-img" ref={ref} onClick={imgClick} onAuxClick={imgClick} onContextMenu={updateImg}></canvas>}
             </div>
             <div className="posthistoryrow-container-row">
                 <div className="posthistoryrow-container">
@@ -327,7 +328,7 @@ const PostHistoryRow: React.FunctionComponent<Props> = (props) => {
                         <span className="posthistoryrow-text"><span className="posthistoryrow-label-text">Characters:</span> {props.postHistory.characters.join(" ")}</span>
                         <span className="posthistoryrow-text"><span className="posthistoryrow-label-text">Series:</span> {props.postHistory.series.join(" ")}</span>
                         <span className="posthistoryrow-text"><span className="posthistoryrow-label-text">Tags:</span> {props.postHistory.tags.join(" ")}</span>
-                        <span className="posthistoryrow-text"><span className="posthistoryrow-label-text">Title:</span> <span className="posthistoryrow-label-link" onClick={imgClick} onAuxClick={imgClick}>{props.postHistory.title || "None"}</span></span>
+                        <span className="posthistoryrow-text"><span className="posthistoryrow-label-text">Title:</span>{props.postHistory.title || "None"}</span>
                         {props.postHistory.translatedTitle ? <span className="posthistoryrow-text"><span className="posthistoryrow-label-text">Translated:</span> {props.postHistory.translatedTitle}</span> : null}
                         <span className="posthistoryrow-text"><span className="posthistoryrow-label-text">Drawn:</span> {props.postHistory.drawn ? functions.formatDate(new Date(props.postHistory.drawn)) : "Unknown"}</span>
                         <span className="posthistoryrow-text"><span className="posthistoryrow-label-text">Link:</span> <span className="posthistoryrow-label-link" onClick={() => window.open(props.postHistory.link, "_blank")}>{getDomain()}</span></span>
