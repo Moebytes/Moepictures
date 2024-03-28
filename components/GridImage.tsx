@@ -3,7 +3,8 @@ import {useHistory} from "react-router-dom"
 import loading from "../assets/purple/loading.gif"
 import loadingMagenta from "../assets/magenta/loading.gif"
 import {ThemeContext, SizeTypeContext, BrightnessContext, ContrastContext, HueContext, SaturationContext, LightnessContext, MobileContext, ScrollYContext,
-BlurContext, SharpenContext, SquareContext, PixelateContext, DownloadFlagContext, DownloadURLsContext, SpeedContext, ReverseContext, ScrollContext} from "../Context"
+BlurContext, SharpenContext, SquareContext, PixelateContext, DownloadFlagContext, DownloadURLsContext, SpeedContext, ReverseContext, ScrollContext,
+ToolTipXContext, ToolTipYContext, ToolTipEnabledContext, ToolTipPostContext, ToolTipImgContext} from "../Context"
 import {HashLink as Link} from "react-router-hash-link"
 import gifFrames from "gif-frames"
 import JSZip from "jszip"
@@ -12,6 +13,8 @@ import functions from "../structures/Functions"
 import cryptoFunctions from "../structures/CryptoFunctions"
 import "./styles/gridimage.less"
 import axios from "axios"
+
+let tooltipTimer = null as any
 
 interface Props {
     id: number
@@ -39,6 +42,11 @@ const GridImage: React.FunctionComponent<Props> = (props) => {
     const {downloadURLs, setDownloadURLs} = useContext(DownloadURLsContext)
     const {scrollY, setScrollY} = useContext(ScrollYContext)
     const {mobile, setMobile} = useContext(MobileContext)
+    const {tooltipX, setToolTipX} = useContext(ToolTipXContext)
+    const {tooltipY, setToolTipY} = useContext(ToolTipYContext)
+    const {tooltipEnabled, setToolTipEnabled} = useContext(ToolTipEnabledContext)
+    const {tooltipPost, setToolTipPost} = useContext(ToolTipPostContext)
+    const {tooltipImg, setToolTipImg} = useContext(ToolTipImgContext)
     const containerRef = useRef<HTMLDivElement>(null)
     const pixelateRef = useRef<HTMLCanvasElement>(null)
     const overlayRef = useRef<HTMLImageElement>(null)
@@ -63,6 +71,7 @@ const GridImage: React.FunctionComponent<Props> = (props) => {
     const [visible, setVisible] = useState(true)
     const {scroll, setScroll} = useContext(ScrollContext)
     const [img, setImg] = useState("")
+    const [pageBuffering, setPageBuffering] = useState(true)
     const history = useHistory()
 
     const handleIntersection = (entries: any) => {
@@ -363,6 +372,9 @@ const GridImage: React.FunctionComponent<Props> = (props) => {
     useEffect(() => {
         const element = functions.isVideo(props.img) && !mobile ? videoRef.current! : ref.current!
         new ResizeObserver(resizeOverlay).observe(element)
+        setTimeout(() => {
+            setPageBuffering(false)
+        }, 500)
     }, [])
 
     const getBorder = () => {
@@ -585,8 +597,8 @@ const GridImage: React.FunctionComponent<Props> = (props) => {
 
     const render = (frame: any, buffer?: boolean) => {
         const canvas = document.createElement("canvas") as any
-        canvas.width = naturalWidth
-        canvas.height = naturalHeight
+        canvas.width = frame.naturalWidth ? frame.naturalWidth : naturalWidth
+        canvas.height = frame.naturalHeight ? frame.naturalHeight : naturalHeight
         const ctx = canvas.getContext("2d") as any
         let newContrast = contrast
         ctx.filter = `brightness(${brightness}%) contrast(${newContrast}%) hue-rotate(${hue - 180}deg) saturate(${saturation}%) blur(${blur}px)`
@@ -605,8 +617,8 @@ const GridImage: React.FunctionComponent<Props> = (props) => {
         }
         if (sharpen !== 0) {
             const sharpnessCanvas = document.createElement("canvas")
-            sharpnessCanvas.width = naturalWidth
-            sharpnessCanvas.height = naturalHeight
+            sharpnessCanvas.width = frame.naturalWidth ? frame.naturalWidth : naturalWidth
+            sharpnessCanvas.height = frame.naturalHeight ? frame.naturalHeight : naturalHeight
             const sharpnessCtx = sharpnessCanvas.getContext("2d")
             sharpnessCtx?.drawImage(frame, 0, 0, sharpnessCanvas.width, sharpnessCanvas.height)
             const sharpenOpacity = sharpen / 5
@@ -619,8 +631,8 @@ const GridImage: React.FunctionComponent<Props> = (props) => {
         }
         if (lightness !== 100) {
             const lightnessCanvas = document.createElement("canvas")
-            lightnessCanvas.width = naturalWidth
-            lightnessCanvas.height = naturalHeight
+            lightnessCanvas.width = frame.naturalWidth ? frame.naturalWidth : naturalWidth
+            lightnessCanvas.height = frame.naturalHeight ? frame.naturalHeight : naturalHeight
             const lightnessCtx = lightnessCanvas.getContext("2d")
             lightnessCtx?.drawImage(frame, 0, 0, lightnessCanvas.width, lightnessCanvas.height)
             const filter = lightness < 100 ? "brightness(0)" : "brightness(0) invert(1)"
@@ -632,7 +644,7 @@ const GridImage: React.FunctionComponent<Props> = (props) => {
             const img = ctx.getImageData(0, 0, canvas.width, canvas.height)
             return img.data.buffer
         }
-        return canvas.toDataURL("image/png")
+        return canvas.toDataURL("image/jpeg")
     }
 
     const multiRender = async () => {
@@ -656,7 +668,9 @@ const GridImage: React.FunctionComponent<Props> = (props) => {
                 functions.download(filename , url)
                 window.URL.revokeObjectURL(url)
             } else {
-                functions.download(path.basename(props.img), render(ref.current))
+                const url = await cryptoFunctions.decryptedLink(props.img.replace(/thumbnail\/\d+\//, ""))
+                const img = await functions.createImage(url)
+                functions.download(path.basename(props.img), render(img))
             }
         }
     }
@@ -738,8 +752,31 @@ const GridImage: React.FunctionComponent<Props> = (props) => {
         }
     }*/
 
+    const mouseEnter = () => {
+        if (pageBuffering) return
+        tooltipTimer = setTimeout(() => {
+            if (!containerRef.current) return
+            const rect = containerRef.current.getBoundingClientRect()
+            const toolTipWidth = 325
+            const toolTipHeight = 150
+            const midpoint = (rect.left + rect.right) / 2
+            setToolTipX(Math.floor(midpoint - (toolTipWidth / 2)))
+            setToolTipY(Math.floor(rect.y - (toolTipHeight / 1.05)))
+            setToolTipPost(props.post)
+            setToolTipImg(props.img)
+            setToolTipEnabled(true)
+        }, 400)
+    }
+
+    const mouseLeave = () => {
+        if (pageBuffering) return
+        if (tooltipTimer) clearTimeout(tooltipTimer)
+        setToolTipEnabled(false)
+    }
+
     return (
-        <div style={{opacity: visible ? "1" : "0", transition: "opacity 0.1s"}} className="image-box" id={String(props.id)} ref={containerRef} onClick={onClick} onAuxClick={onClick} onMouseDown={mouseDown} onMouseUp={mouseUp} onMouseMove={mouseMove}>
+        <div style={{opacity: visible ? "1" : "0", transition: "opacity 0.1s"}} className="image-box" id={String(props.id)} ref={containerRef} 
+        onClick={onClick} onAuxClick={onClick} onMouseDown={mouseDown} onMouseUp={mouseUp} onMouseMove={mouseMove} onMouseEnter={mouseEnter} onMouseLeave={mouseLeave}>
             <div className="image-filters" ref={imageFiltersRef} onMouseMove={(event) => imageAnimation(event)} onMouseLeave={() => cancelImageAnimation()}>
                 {functions.isVideo(props.img) && !mobile ? <video autoPlay loop muted disablePictureInPicture playsInline className="dummy-video" ref={videoRef} src={props.img}></video> : null}   
                 {/* <canvas className="lightness-overlay" ref={lightnessRef}></canvas> */}

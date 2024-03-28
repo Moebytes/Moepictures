@@ -29,7 +29,8 @@ CREATE TABLE IF NOT EXISTS "posts" (
     "artist" text,
     "link" text,
     "commentary" text,
-    "translatedCommentary" text
+    "translatedCommentary" text,
+    "mirrors" json
 );
 
 CREATE TABLE IF NOT EXISTS "unverified posts" (

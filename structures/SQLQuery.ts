@@ -657,6 +657,22 @@ export default class SQLQuery {
     return result[0]
   }
 
+  /** Get post tags. */
+  public static postTags = async (postID: number) => {
+    const query: QueryConfig = {
+      text: functions.multiTrim(`
+          SELECT json_agg(json_build_object('tag', "tags".tag, 'type', "tags".type, 'image', "tags".image, 'pixiv', "tags".pixiv, 'twitter', "tags".twitter)) AS tags
+          FROM "tag map"
+          JOIN tags ON "tag map".tag = "tags".tag
+          WHERE "tag map"."postID" = $1
+          GROUP BY "tag map"."postID"
+          `),
+          values: [postID]
+    }
+    const result = await SQLQuery.run(query)
+    return result[0]
+  }
+
   /** Delete post. */
   public static deletePost = async (postID: number) => {
     const query: QueryConfig = {

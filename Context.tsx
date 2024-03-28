@@ -97,6 +97,11 @@ export const AutoSearchContext = React.createContext<any>(null)
 export const ShowPageDialogContext = React.createContext<any>(null)
 export const PageFlagContext = React.createContext<any>(null)
 export const ReloadPostFlagContext = React.createContext<any>(null)
+export const ToolTipXContext = React.createContext<any>(null)
+export const ToolTipYContext = React.createContext<any>(null)
+export const ToolTipEnabledContext = React.createContext<any>(null)
+export const ToolTipPostContext = React.createContext<any>(null)
+export const ToolTipImgContext = React.createContext<any>(null)
 
 const Context: React.FunctionComponent = (props) => {
     const [brightness, setBrightness] = useState(100)
@@ -182,8 +187,19 @@ const Context: React.FunctionComponent = (props) => {
     const [showPageDialog, setShowPageDialog] = useState(false)
     const [pageFlag, setPageFlag] = useState(null)
     const [reloadPostFlag, setReloadPostFlag] = useState(false)
+    const [tooltipX, setToolTipX] = useState(0)
+    const [tooltipY, setToolTipY] = useState(0)
+    const [tooltipEnabled, setToolTipEnabled] = useState(false)
+    const [tooltipPost, setToolTipPost] = useState(null)
+    const [tooltipImg, setToolTipImg] = useState(null)
+
 return (
     <>
+        <ToolTipImgContext.Provider value={{tooltipImg, setToolTipImg}}>
+        <ToolTipPostContext.Provider value={{tooltipPost, setToolTipPost}}>
+        <ToolTipEnabledContext.Provider value={{tooltipEnabled, setToolTipEnabled}}>
+        <ToolTipYContext.Provider value={{tooltipY, setToolTipY}}>
+        <ToolTipXContext.Provider value={{tooltipX, setToolTipX}}>
         <ReloadPostFlagContext.Provider value={{reloadPostFlag, setReloadPostFlag}}>
         <PageFlagContext.Provider value={{pageFlag, setPageFlag}}>
         <ShowPageDialogContext.Provider value={{showPageDialog, setShowPageDialog}}>
@@ -351,6 +367,11 @@ return (
         </ShowPageDialogContext.Provider>
         </PageFlagContext.Provider>
         </ReloadPostFlagContext.Provider>
+        </ToolTipXContext.Provider>
+        </ToolTipYContext.Provider>
+        </ToolTipEnabledContext.Provider>
+        </ToolTipPostContext.Provider>
+        </ToolTipImgContext.Provider>
     </>
     )
 }

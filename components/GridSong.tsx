@@ -389,7 +389,7 @@ const GridSong: React.FunctionComponent<Props> = (props) => {
             const img = ctx.getImageData(0, 0, canvas.width, canvas.height)
             return img.data.buffer
         }
-        return canvas.toDataURL("image/png")
+        return canvas.toDataURL("image/jpeg")
     }
 
     useEffect(() => {

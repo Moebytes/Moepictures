@@ -721,10 +721,28 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
         return <span className="tag-alt-link" onClick={() => username ? history.push(`/user/${username}`) : null}>{functions.toProperCase(username) || "deleted"}</span>
     }
 
+    const copyTagsJSX = () => {
+        if (!session) return
+        if (session.captchaAmount === undefined) session.captchaAmount = 501
+        if (session.captchaAmount > 500) return null
+        if (props.artists && props.characters && props.series && props.tags) {
+            return (
+                <div className="sidebar-subcontainer">
+                    <div className="sidebar-row">
+                        <span className="tag-hover" onClick={() => copyTags()} onContextMenu={(event) => {event.preventDefault(); copyTags(true)}}>
+                            <img className="sidebar-icon" src={getShowTags()}/>
+                            <span className="tag-red">Copy Tags</span>
+                        </span>
+                    </div>
+                </div>
+            )
+        }
+    }
+
     const tagCaptchaJSX = () => {
         if (!session) return
-        if (session.captchaAmount === undefined) session.captchaAmount = 301
-        if (session.captchaAmount > 300) {
+        if (session.captchaAmount === undefined) session.captchaAmount = 501
+        if (session.captchaAmount > 500) {
             if (!history.location.pathname.includes("/post/") && !history.location.pathname.includes("/edit-post")) return
             const toggleCaptcha = () => {
                 sessionStorage.setItem("ignoreCaptcha", "false")
@@ -745,8 +763,8 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
 
     const noTagsArtist = () => {
         if (!session) return
-        if (session.captchaAmount === undefined) session.captchaAmount = 301
-        if (session.captchaAmount > 300) {
+        if (session.captchaAmount === undefined) session.captchaAmount = 501
+        if (session.captchaAmount > 500) {
             return (
                 <div className="sidebar-row">
                     <span className="tag">Artist:</span>
@@ -791,16 +809,7 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
                     <img className="autosearch" src={getAutoSearch()} onClick={() => setAutoSearch((prev: boolean) => !prev)}/>
                 </div>
 
-                {props.artists && props.characters && props.series && props.tags ?
-                <div className="sidebar-subcontainer">
-                    <div className="sidebar-row">
-                        <span className="tag-hover" onClick={() => copyTags()} onContextMenu={(event) => {event.preventDefault(); copyTags(true)}}>
-                            <img className="sidebar-icon" src={getShowTags()}/>
-                            <span className="tag-red">Copy Tags</span>
-                        </span>
-                    </div>
-                </div> : null}
-
+                {copyTagsJSX()}
                 {tagCaptchaJSX()}
 
                 {props.artists ?

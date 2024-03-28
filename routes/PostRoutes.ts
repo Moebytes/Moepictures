@@ -20,9 +20,9 @@ const postLimiter = rateLimit({
 const PostRoutes = (app: Express) => {
     app.get("/api/post", postLimiter, async (req: Request, res: Response, next: NextFunction) => {
         try {
-            if (req.session.captchaAmount === undefined) req.session.captchaAmount = 301
+            if (req.session.captchaAmount === undefined) req.session.captchaAmount = 501
             if (req.session.role === "admin" || req.session.role === "mod") req.session.captchaAmount = 0
-            if (req.session.captchaAmount > 300) return res.status(401).end()
+            if (req.session.captchaAmount > 500) return res.status(401).end()
             const postID = req.query.postID as string
             if (Number.isNaN(Number(postID))) return res.status(400).send("Invalid postID")
             let result = await sql.post(Number(postID))
@@ -31,6 +31,28 @@ const PostRoutes = (app: Express) => {
             }
             if (result?.images.length > 1) {
                 result.images = result.images.sort((a: any, b: any) => a.order - b.order)
+            }
+            if (Number(postID) !== req.session.lastPostID) {
+                req.session.captchaAmount = req.session.captchaAmount + 1
+            }
+            req.session.lastPostID = Number(postID)
+            res.status(200).json(result)
+        } catch (e) {
+            console.log(e)
+            return res.status(400).send("Bad request")
+        }
+    })
+
+    app.get("/api/post/tags", postLimiter, async (req: Request, res: Response, next: NextFunction) => {
+        try {
+            if (req.session.captchaAmount === undefined) req.session.captchaAmount = 501
+            if (req.session.role === "admin" || req.session.role === "mod") req.session.captchaAmount = 0
+            if (req.session.captchaAmount > 500) return res.status(401).end()
+            const postID = req.query.postID as string
+            if (Number.isNaN(Number(postID))) return res.status(400).send("Invalid postID")
+            let result = await sql.postTags(Number(postID))
+            if (req.session.role !== "admin" && req.session.role !== "mod") {
+                if (result.restrict === "explicit") return res.status(403).send("No permission")
             }
             if (Number(postID) !== req.session.lastPostID) {
                 req.session.captchaAmount = req.session.captchaAmount + 1
@@ -577,9 +599,9 @@ const PostRoutes = (app: Express) => {
         try {
             const postID = req.query.postID as string
             const offset = req.query.offset as string
-            if (req.session.captchaAmount === undefined) req.session.captchaAmount = 301
+            if (req.session.captchaAmount === undefined) req.session.captchaAmount = 501
             if (req.session.role === "admin" || req.session.role === "mod") req.session.captchaAmount = 0
-            if (req.session.captchaAmount > 300) return res.status(401).end()
+            if (req.session.captchaAmount > 500) return res.status(401).end()
             if (!req.session.username) return res.status(400).send("Bad request")
             if (Number.isNaN(Number(postID))) return res.status(400).send("Bad request")
             const result = await sql.postHistory(Number(postID), offset)

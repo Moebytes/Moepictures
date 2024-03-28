@@ -457,8 +457,8 @@ const MobileInfo: React.FunctionComponent<Props> = (props) => {
 
     const tagCaptchaJSX = () => {
         if (!session) return
-        if (session.captchaAmount === undefined) session.captchaAmount = 51
-        if (session.captchaAmount > 50) {
+        if (session.captchaAmount === undefined) session.captchaAmount = 501
+        if (session.captchaAmount > 500) {
             if (!history.location.pathname.includes("/post/") && !history.location.pathname.includes("/edit-post")) return
             const toggleCaptcha = () => {
                 sessionStorage.setItem("ignoreCaptcha", "false")
@@ -479,8 +479,8 @@ const MobileInfo: React.FunctionComponent<Props> = (props) => {
 
     const noTagsArtist = () => {
         if (!session) return
-        if (session.captchaAmount === undefined) session.captchaAmount = 51
-        if (session.captchaAmount > 50) {
+        if (session.captchaAmount === undefined) session.captchaAmount = 501
+        if (session.captchaAmount > 500) {
             return (
             <div className="mobileinfo-row">
                 <span className="tag">Artist:</span>

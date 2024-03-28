@@ -8,6 +8,7 @@ import Footer from "../components/Footer"
 import DownloadDialog from "../dialogs/DownloadDialog"
 import PageDialog from "../dialogs/PageDialog"
 import DragAndDrop from "../components/DragAndDrop"
+import ToolTip from "../components/ToolTip"
 import {HideNavbarContext, HideSidebarContext, SquareContext, RelativeContext, HideTitlebarContext, 
 HeaderTextContext, SidebarTextContext, MobileContext, MobileScrollingContext} from "../Context"
 
@@ -98,6 +99,7 @@ const PostsPage: React.FunctionComponent = (props) => {
         <div className="body">
             <SideBar/>
             <div className="content">
+                <ToolTip/>
                 <SortBar/>
                 <ImageGrid/>
                 <Footer/>
