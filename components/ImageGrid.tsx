@@ -132,7 +132,7 @@ const ImageGrid: React.FunctionComponent<Props> = (props) => {
             setEnded(false)
             setIndex(0)
             setVisiblePosts([])
-            setPage(1).fake
+            setPage(1)
             setSearchFlag(true)
         }
     }, [scroll])

@@ -132,7 +132,7 @@ const ToolTip: React.FunctionComponent = (props) => {
                     {getPostLinkJSX()}
                 </div>
             </div>
-            <div className="tooltip-column" ref={scrollRef} style={{overflowY: "scroll"}}>
+            <div className="tooltip-column" ref={scrollRef} style={{overflowY: "auto"}}>
                 <div className="tooltip-tag-container">
                     <span className="tooltip-artist-tag">{tooltipPost.translatedTitle}</span>
                     <span className="tooltip-artist-tag">{functions.formatDate(new Date(tooltipPost.drawn))}</span>

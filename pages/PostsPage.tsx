@@ -9,6 +9,7 @@ import DownloadDialog from "../dialogs/DownloadDialog"
 import PageDialog from "../dialogs/PageDialog"
 import DragAndDrop from "../components/DragAndDrop"
 import ToolTip from "../components/ToolTip"
+import TagBanner from "../components/TagBanner"
 import {HideNavbarContext, HideSidebarContext, SquareContext, RelativeContext, HideTitlebarContext, 
 HeaderTextContext, SidebarTextContext, MobileContext, MobileScrollingContext} from "../Context"
 
@@ -101,6 +102,7 @@ const PostsPage: React.FunctionComponent = (props) => {
             <div className="content">
                 <ToolTip/>
                 <SortBar/>
+                <TagBanner/>
                 <ImageGrid/>
                 <Footer/>
             </div>

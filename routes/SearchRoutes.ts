@@ -246,9 +246,9 @@ const SearchRoutes = (app: Express) => {
             const {postIDs} = req.body
             const postArray = Array.from(postIDs) as any
             if (!postArray.length) return res.status(200).json([])
-            if (postArray.length < 300) {
+            if (postArray.length < 500) {
                 if (req.session.captchaAmount === undefined) req.session.captchaAmount = 501
-                req.session.captchaAmount = req.session.captchaAmount + postArray.length
+                req.session.captchaAmount = req.session.captchaAmount + 1
                 if (req.session.role === "admin" || req.session.role === "mod") req.session.captchaAmount = 0
                 if (req.session.captchaAmount! > 500) return res.status(401).end()
             } else {
@@ -265,7 +265,7 @@ const SearchRoutes = (app: Express) => {
             let result = await sql.tagCounts(uniqueTagArray.filter(Boolean))
             for (let i = 0; i < uniqueTagArray.length; i++) {
                 const found = result.find((r: any) => r.tag === uniqueTagArray[i])
-                if (!found) result.push({tag: uniqueTagArray[i], count: "0", type: "tag"})
+                if (!found) result.push({tag: uniqueTagArray[i], count: "0", type: "tag", image: ""})
             }
             res.status(200).json(result)
         } catch (e) {

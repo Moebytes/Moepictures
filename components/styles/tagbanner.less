@@ -1,0 +1,54 @@
+@import "../../index.less";
+
+.tagbanner {
+    position: relative;
+    display: flex;
+    flex-direction: row;
+    width: calc(100vw - @sidebar-width);
+    height: max-content;
+    overflow-y: hidden;
+    overflow-x: auto;
+    margin-top: 5px;
+    margin-bottom: 5px;
+}
+
+.tagbanner-box {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: flex-start;
+    margin-right: 10px;
+}
+
+.tagbanner-img {
+    width: auto;
+    height: 35px;
+    margin-right: 10px;
+}
+
+.tagbanner-tag {
+    font-family: Tahoma, sans-serif;
+    color: var(--tagColor);
+    font-size: 20px;
+    white-space: nowrap;
+    user-select: none;
+    cursor: pointer;
+    &:hover {
+        filter: brightness(130%);
+    }
+}
+
+.tagbanner-artist-tag {
+    .tagbanner-tag();
+    color: var(--artistTagColor);
+}
+
+.tagbanner-character-tag {
+    .tagbanner-tag();
+    color: var(--characterTagColor);
+}
+
+.tagbanner-series-tag {
+    .tagbanner-tag();
+    color: var(--seriesTagColor);
+}

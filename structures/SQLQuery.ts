@@ -764,11 +764,11 @@ export default class SQLQuery {
     let whereQuery = tags?.[0] ? `WHERE "tag map".tag = ANY ($1)` : ""
     const query: QueryConfig = {
           text: functions.multiTrim(`
-                  SELECT "tag map".tag, "tags".type, COUNT(*) AS count
+                  SELECT "tag map".tag, "tags".type, "tags".image, COUNT(*) AS count
                   FROM "tag map"
                   LEFT JOIN tags ON tags."tag" = "tag map".tag
                   ${whereQuery}
-                  GROUP BY "tag map".tag, "tags".type
+                  GROUP BY "tag map".tag, "tags".type, "tags".image
                   ORDER BY count DESC
           `)
     }
