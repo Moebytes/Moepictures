@@ -16,6 +16,7 @@ CommentSearchFlagContext} from "../Context"
 import fileType from "magic-bytes.js"
 import functions from "../structures/Functions"
 import Carousel from "../components/Carousel"
+import CommentCarousel from "../components/CommentCarousel"
 import DeleteAccountDialog from "../dialogs/DeleteAccountDialog"
 import adminLabel from "../assets/purple/admin-label.png"
 import modLabel from "../assets/purple/mod-label.png"
@@ -48,6 +49,7 @@ const UserProfilePage: React.FunctionComponent = (props) => {
     const [favoriteIndex, setFavoriteIndex] = useState(0) as any
     const [uploads, setUploads] = useState([]) as any
     const [favorites, setFavorites] = useState([]) as any
+    const [comments, setComments] = useState([]) as any
     const [uploadImages, setUploadImages] = useState([]) as any
     const [favoriteImages, setFavoriteImages] = useState([]) as any
     const [bio, setBio] = useState("")
@@ -69,6 +71,11 @@ const UserProfilePage: React.FunctionComponent = (props) => {
         setFavoriteImages(images)
     }
 
+    const updateComments = async () => {
+        const comments = await axios.get("/api/user/comments", {params: {sort: "date"}, withCredentials: true}).then((r) => r.data)
+        setComments(comments)
+    }
+
     useEffect(() => {
         setHideNavbar(false)
         setHideTitlebar(false)
@@ -79,6 +86,7 @@ const UserProfilePage: React.FunctionComponent = (props) => {
         document.title = "Moebooru: User Profile"
         updateUploads()
         updateFavorites()
+        updateComments()
     }, [])
 
     useEffect(() => {
@@ -277,9 +285,9 @@ const UserProfilePage: React.FunctionComponent = (props) => {
                         {error ? <div className="userprofile-validation-container"><span className="userprofile-validation" ref={errorRef}></span></div> : null}
                         <button className="userprofile-button" onClick={changeBio}>Ok</button>
                     </div> : null}
-                    <div className="userprofile-row">
+                    {/*<div className="userprofile-row">
                         <span className="userprofile-link" onClick={viewComments}>View Comments</span>
-                    </div>
+                    </div>*/}
                     <div className="userprofile-row">
                         <span className="userprofile-text">Favorites Privacy: <span className="userprofile-text-action" onClick={favoritesPrivacy}>{session.publicFavorites ? "Public" : "Private"}</span></span>
                     </div>
@@ -304,6 +312,11 @@ const UserProfilePage: React.FunctionComponent = (props) => {
                     <div className="userprofile-column">
                         <span className="userprofile-text">Uploads <span className="userprofile-text-alt">{uploads.length}</span></span>
                         <Carousel images={uploadImages} noKey={true} set={setUp} index={uploadIndex}/>
+                    </div> : null}
+                    {comments.length ?
+                    <div className="userprofile-column">
+                        <span className="userprofile-text">Comments <span className="userprofile-text-alt">{comments.length}</span></span>
+                        <CommentCarousel comments={comments}/>
                     </div> : null}
                     <div className="userprofile-row">
                         <span className="userprofile-link" onClick={deleteAccountDialog}>Delete Account</span>

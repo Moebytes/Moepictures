@@ -482,6 +482,26 @@ const UserRoutes = (app: Express) => {
             res.status(400).send("Bad request") 
         }
     })
+
+    app.get("/api/user/comments", sessionLimiter, async (req: Request, res: Response) => {
+        try {
+            const query = req.query.query as string
+            const sort = req.query.sort as string
+            const offset = req.query.offset as string
+            const username = req.query.username as string
+            if (!req.session.username && !username) return res.status(400).send("Bad request")
+            if (username) {
+                let comments = await sql.searchCommentsByUsername([username], query, sort, offset)
+                res.status(200).send(comments)
+            } else {
+                if (!req.session.username) return res.status(400).send("Bad request")
+                let comments = await sql.searchCommentsByUsername([req.session.username], query, sort, offset)
+                res.status(200).send(comments)
+            }
+        } catch {
+            res.status(400).send("Bad request") 
+        }
+    })
 }
 
 export default UserRoutes

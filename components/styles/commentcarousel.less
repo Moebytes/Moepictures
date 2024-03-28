@@ -1,0 +1,94 @@
+@import "../../index.less";
+
+.comment-carousel {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    max-height: 400px;
+    width: 100%;
+    height: 100%;
+    margin-top: 20px;
+    overflow-x: hidden;
+    overflow-y: auto;
+}
+
+.comment-carousel-comment {
+    font-family: Tahoma, sans-serif;
+    font-size: 17px;
+    color: var(--text);
+}
+
+.comment-carousel-commentrow {
+    position: relative;
+    display: flex;
+    flex-direction: row;
+    width: 100%;
+    margin-top: 15px;
+    border-radius: 7px;
+    border: 2px solid var(--inputBG);
+    &:hover {
+        border: 2px solid var(--navbarText);
+    }
+}
+
+.comment-carousel-commentrow-container {
+    display: flex;
+    flex-direction: column;
+    padding: 10px;
+    border: 2px solid var(--inputBG);
+    align-items: flex-start;
+    &:last-child {
+        width: 100%;
+    }
+
+}
+
+.comment-carousel-commentrow-img {
+    width: auto;
+    height: 110px;
+    cursor: pointer;
+}
+
+.comment-carousel-commentrow-date-text {
+    font-family: Tahoma, sans-serif;
+    font-size: 18px;
+    color: var(--text-strong);
+}
+
+.comment-carousel-commentrow-text {
+    font-family: Tahoma, sans-serif;
+    font-size: 17px;
+    color: var(--text);
+    word-wrap: break-word;
+}
+
+.comment-carousel-commentrow-quote-container {
+    display: flex;
+    flex-direction: column;
+    background-color: var(--inputBG);
+}
+
+.comment-carousel-commentrow-quote-user {
+    font-family: Tahoma, sans-serif;
+    font-size: 15px;
+    color: var(--text-strong);
+
+}
+
+.comment-carousel-commentrow-quote-text {
+    font-family: Tahoma, sans-serif;
+    font-size: 13px;
+    color: var(--text);
+}
+
+.comment-carousel-commentrow-container-row {
+    display: flex;
+    flex-direction: row;
+    width: 100%;
+}
+
+@media screen and (max-width: 500px) {
+    .comment-carousel-commentrow {
+        flex-direction: column;
+    }
+}

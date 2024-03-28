@@ -13,6 +13,7 @@ HeaderTextContext, SidebarTextContext, SessionContext, RedirectContext, SessionF
 import functions from "../structures/Functions"
 import permissions from "../structures/Permissions"
 import Carousel from "../components/Carousel"
+import CommentCarousel from "../components/CommentCarousel"
 import adminLabel from "../assets/purple/admin-label.png"
 import modLabel from "../assets/purple/mod-label.png"
 import "./styles/userpage.less"
@@ -42,6 +43,7 @@ const UserPage: React.FunctionComponent<Props> = (props) => {
     const [favoriteIndex, setFavoriteIndex] = useState(0) as any
     const [uploads, setUploads] = useState([]) as any
     const [favorites, setFavorites] = useState([]) as any
+    const [comments, setComments] = useState([]) as any
     const [uploadImages, setUploadImages] = useState([]) as any
     const [favoriteImages, setFavoriteImages] = useState([]) as any
     const [user, setUser] = useState(null) as any
@@ -58,6 +60,7 @@ const UserPage: React.FunctionComponent<Props> = (props) => {
         fetchUser()
         updateUploads()
         updateFavorites()
+        updateComments()
     }, [username])
 
     const updateUploads = async () => {
@@ -74,6 +77,11 @@ const UserPage: React.FunctionComponent<Props> = (props) => {
         const images = filtered.map((f: any) => functions.getThumbnailLink(f.post.images[0].type, f.postID, f.post.images[0].filename, "tiny"))
         setFavorites(filtered)
         setFavoriteImages(images)
+    }
+
+    const updateComments = async () => {
+        const comments = await axios.get("/api/user/comments", {params: {username, sort: "date"}, withCredentials: true}).then((r) => r.data)
+        setComments(comments)
     }
 
     useEffect(() => {
@@ -187,14 +195,19 @@ const UserPage: React.FunctionComponent<Props> = (props) => {
                     <div className="user-row">
                         <span className="user-text">Join Date: {functions.prettyDate(new Date(user.joinDate || ""))}</span>
                     </div>
-                    <div className="user-row">
+                    {/*<div className="user-row">
                         <span className="user-link" onClick={viewComments}>View Comments</span>
-                    </div>
+                    </div>*/}
                     {generateFavoritesJSX()}
                     {uploads.length ?
                     <div className="user-column">
                         <span className="user-text">Uploads <span className="user-text-alt">{uploads.length}</span></span>
                         <Carousel images={uploadImages} noKey={true} set={setUp} index={uploadIndex}/>
+                    </div> : null}
+                    {comments.length ?
+                    <div className="userprofile-column">
+                        <span className="userprofile-text">Comments <span className="userprofile-text-alt">{comments.length}</span></span>
+                        <CommentCarousel comments={comments}/>
                     </div> : null}
                 </div> : null}
                 <Footer/>
