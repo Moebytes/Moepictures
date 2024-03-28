@@ -240,22 +240,25 @@ const PostHistoryRow: React.FunctionComponent<Props> = (props) => {
     }
 
     const dateTextJSX = () => {
+        const historyIndex = typeof props.postHistory.images[0] === "string" ? Number(props.postHistory.images[0].match(/\d+/g)?.[1]) : 0
+        const targetDate = historyIndex === 1 ? props.postHistory.uploadDate : props.postHistory.date
+        const editText = historyIndex === 1 ? "Uploaded" : "Edited"
         if (userRole === "admin") {
             return (
                 <div className="posthistoryrow-username-container" onClick={userClick} onAuxClick={userClick}>
-                    <span className="posthistoryrow-user-text admin-color">Edited {functions.timeAgo(props.postHistory.date)} by {functions.toProperCase(props.postHistory.user)}</span>
+                    <span className="posthistoryrow-user-text admin-color">{editText} {functions.timeAgo(targetDate)} by {functions.toProperCase(props.postHistory.user)}</span>
                     <img className="posthistoryrow-user-label" src={adminCrown}/>
                 </div>
             )
         } else if (userRole === "mod") {
             return (
                 <div className="posthistoryrow-username-container" onClick={userClick} onAuxClick={userClick}>
-                    <span className="posthistoryrow-user-text mod-color">Edited {functions.timeAgo(props.postHistory.date)} by {functions.toProperCase(props.postHistory.user)}</span>
+                    <span className="posthistoryrow-user-text mod-color">{editText} {functions.timeAgo(targetDate)} by {functions.toProperCase(props.postHistory.user)}</span>
                     <img className="posthistoryrow-user-label" src={modCrown}/>
                 </div>
             )
         }
-        return <span className="posthistoryrow-user-text" onClick={userClick} onAuxClick={userClick}>Edited {functions.timeAgo(props.postHistory.date)} by {functions.toProperCase(props.postHistory.user)}</span>
+        return <span className="posthistoryrow-user-text" onClick={userClick} onAuxClick={userClick}>{editText} {functions.timeAgo(targetDate)} by {functions.toProperCase(props.postHistory.user)}</span>
     }
 
     const getDomain = () => {

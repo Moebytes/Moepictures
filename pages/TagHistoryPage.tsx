@@ -45,11 +45,16 @@ const TagHistoryPage: React.FunctionComponent<Props> = (props) => {
             result = await axios.get("/api/tag/history", {withCredentials: true}).then((r) => r.data)
         } else {
             result = await axios.get("/api/tag/history", {params: {tag}, withCredentials: true}).then((r) => r.data)
+            const posts = await axios.get("/api/search/posts", {params: {query: tag, type: "all", restrict: "all", style: "all", sort: "reverse date", limit: 1}, withCredentials: true}).then((r) => r.data)
+            for (let i = 0; i < result.length; i++) {
+                result[i].uploadDate = posts[0].uploadDate
+                result[i].uploader = posts[0].uploader
+                if (i === result.length - 1) result[i].date = null
+            }
             if (!result.length) {
                 const tagObject = await axios.get("/api/tag", {params: {tag}, withCredentials: true}).then((r) => r.data)
-                const posts = await axios.get("/api/search/posts", {params: {query: tag, type: "all", restrict: "all", style: "all", sort: "reverse date", limit: 1}, withCredentials: true}).then((r) => r.data)
-                tagObject.date = posts[0].uploadDate 
-                tagObject.user = posts[0].uploader
+                tagObject.uploadDate = posts[0].uploadDate
+                tagObject.uploader = posts[0].uploader
                 tagObject.key = tag
                 tagObject.aliases = tagObject.aliases.map((alias: any) => alias?.alias)
                 tagObject.implications = tagObject.implications.map((implication: any) => implication?.implication)

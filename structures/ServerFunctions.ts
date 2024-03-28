@@ -85,7 +85,7 @@ export default class ServerFunctions {
 
     public static deleteFolder = async (folder: string) => {
         if (functions.isLocalHost()) {
-            const dir = path.dirname(`/Volumes/Files/moebooru/${folder}`)
+            const dir = `/Volumes/Files/moebooru/${folder}`
             return ServerFunctions.removeLocalDirectory(dir)
         }
         const listedObjects = await s3.listObjectsV2({Bucket: "moebooru", Prefix: folder}).promise()
