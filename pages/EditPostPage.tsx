@@ -1125,7 +1125,7 @@ const EditPostPage: React.FunctionComponent<Props> = (props) => {
             } else {
                 bytes = Object.values(current.bytes) as any
             }
-            let tagArr = await axios.post(`/api/misc/deepdanbooru`, bytes, {withCredentials: true}).then((r) => r.data).catch(() => null)
+            let tagArr = await axios.post(`/api/misc/wdtagger`, bytes, {withCredentials: true}).then((r) => r.data).catch(() => null)
             if (!tagArr) return
 
             if (tagArr.includes("chibi")) setStyle("chibi")

@@ -43,7 +43,7 @@ const SetAvatarPage: React.FunctionComponent<Props> = (props) => {
     const ref = useRef<any>(null)
     const previewRef = useRef<HTMLCanvasElement>(null)
     const history = useHistory()
-    const postID = Number(props?.match.params.id)
+    const postID = props?.match.params.id
 
     useEffect(() => {
         setHideNavbar(false)

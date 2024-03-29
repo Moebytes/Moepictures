@@ -1735,7 +1735,7 @@ export default class Functions {
     }
 
     public static mirrorsJSON = (sourceMirrors: string) => {
-        if (!sourceMirrors.trim()) return ""
+        if (!sourceMirrors) return ""
         const mirrorsArr = sourceMirrors.split("\n")
         let json = {}
         for (const mirror of mirrorsArr) {

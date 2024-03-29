@@ -226,14 +226,11 @@ const PostImageOptions: React.FunctionComponent<Props> = (props) => {
         return `${raw + offset}px`
     }
 
-    const updateFavorite = async () => {
+    const updateFavorite = async (value: boolean) => {
         if (!props.post || !session.username) return
-        await axios.post("/api/favorite/update", {postID: props.post.postID, favorited}, {withCredentials: true})
+        await axios.post("/api/favorite/update", {postID: props.post.postID, favorited: value}, {withCredentials: true})
+        setFavorited(value)
     }
-
-    useEffect(() => {
-        updateFavorite()
-    }, [favorited])
 
     return (
         <div className="post-image-options-container">
@@ -244,7 +241,7 @@ const PostImageOptions: React.FunctionComponent<Props> = (props) => {
                     <div className="post-image-text-small">Prev</div>
                 </div>
                 {session.username ?
-                <div className="post-image-options-box" onClick={() => setFavorited((prev) => !prev)} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
+                <div className="post-image-options-box" onClick={() => updateFavorite(!favorited)} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                     <img className="post-image-icon" src={getStar()}/>
                     <div className={`post-image-text ${favorited ? "favorited" : ""}`}>{favorited ? "Favorited" : "Favorite"}</div>
                 </div> : null}
@@ -271,7 +268,7 @@ const PostImageOptions: React.FunctionComponent<Props> = (props) => {
                         <div className="post-image-text-small">Prev</div>
                     </div>
                     {session.username && !props.noFavorite ?
-                    <div className="post-image-options-box" onClick={() => setFavorited((prev) => !prev)} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
+                    <div className="post-image-options-box" onClick={() => updateFavorite(!favorited)} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                         <img className="post-image-icon" src={getStar()}/>
                         <div className={`post-image-text ${favorited ? "favorited" : ""}`}>{favorited ? "Favorited" : "Favorite"}</div>
                     </div> : null}

@@ -60,7 +60,7 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
     const [loaded, setLoaded] = useState(false)
     const [tagCategories, setTagCategories] = useState(null) as any
     const history = useHistory()
-    const postID = Number(props?.match.params.id)
+    const postID = props?.match.params.id
 
     const refreshCache = async () => {
         axios.post(image, null, {withCredentials: true}).catch(() => null)

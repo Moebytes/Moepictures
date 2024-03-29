@@ -18,7 +18,7 @@ const postLimiter = rateLimit({
 })
 
 const PostRoutes = (app: Express) => {
-    app.get("/api/post", postLimiter, async (req: Request, res: Response, next: NextFunction) => {
+    app.get("/api/post", async (req: Request, res: Response, next: NextFunction) => {
         try {
             if (req.session.captchaAmount === undefined) req.session.captchaAmount = 501
             if (req.session.role === "admin" || req.session.role === "mod") req.session.captchaAmount = 0

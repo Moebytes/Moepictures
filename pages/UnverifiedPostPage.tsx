@@ -54,7 +54,7 @@ const UnverifiedPostPage: React.FunctionComponent<Props> = (props) => {
     const [post, setPost] = useState(null) as any
     const [tagCategories, setTagCategories] = useState(null) as any
     const history = useHistory()
-    const postID = Number(props?.match.params.id)
+    const postID = props?.match.params.id
 
     const refreshCache = async () => {
         try {

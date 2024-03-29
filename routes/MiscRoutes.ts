@@ -191,7 +191,7 @@ const MiscRoutes = (app: Express) => {
         }
     })
 
-    app.post("/api/misc/deepdanbooru", miscLimiter, async (req: Request, res: Response, next: NextFunction) => {
+    app.post("/api/misc/wdtagger", miscLimiter, async (req: Request, res: Response, next: NextFunction) => {
         try {
             const buffer = Buffer.from(req.body, "binary")
 
@@ -201,9 +201,10 @@ const MiscRoutes = (app: Express) => {
             const filename = `${Math.floor(Math.random() * 100000000)}.jpg`
             const imagePath = path.join(folder, filename)
             fs.writeFileSync(imagePath, buffer)
-            let command = `deepdanbooru evaluate "${imagePath}" --project-path "${process.env.DEEPDANBOORU_PATH}" --allow-folder`
+            const scriptPath = path.join(__dirname, "../structures/wdtagger.py")
+            let command = `python3 "${scriptPath}" -i "${imagePath}" -m "${process.env.WDTAGGER_PATH}"`
             const str = await exec(command).then((s: any) => s.stdout).catch((e: any) => e.stderr)
-            const result = str.match(/(?<=\) )(.*?)$/gm)
+            const result = str.split(", ")
             fs.unlinkSync(imagePath)
             res.status(200).json(result)
         } catch (e) {

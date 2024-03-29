@@ -1459,7 +1459,7 @@ export default class SQLQuery {
         GROUP BY favorites."favoriteID", post_json."postID", post_json."uploader", post_json."updater", ${includeTags ? `post_json."tags",` : ""}
         post_json."type", post_json."restrict", post_json."style", post_json."cutenessAvg", post_json."favoriteCount",
         post_json."thirdParty", post_json."drawn", post_json."uploadDate", post_json."updatedDate", post_json."title",
-        post_json."translatedTitle", post_json."artist", post_json."link", post_json."commentary", post_json."translatedCommentary"
+        post_json."translatedTitle", post_json."artist", post_json."link", post_json."commentary", post_json."translatedCommentary", post_json."mirrors"
         ${sortQuery}
         ${limit ? `LIMIT $${limitValue}` : "LIMIT 100"} ${offset ? `OFFSET $${i}` : ""}
       `),
