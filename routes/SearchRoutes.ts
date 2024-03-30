@@ -24,7 +24,7 @@ const SearchRoutes = (app: Express) => {
             const sort = req.query.sort as string
             const offset = req.query.offset as string
             const limit = req.query.limit as string
-            const withTags = req.query.withTags === "true"
+            let withTags = req.query.withTags === "true"
             if (!functions.validType(type, true)) return res.status(400).send("Invalid type")
             if (!functions.validRestrict(restrict, true)) return res.status(400).send("Invalid restrict")
             if (restrict === "explicit") if (req.session.role !== "admin" && req.session.role !== "mod") return res.status(403).send("No permission")
@@ -39,13 +39,19 @@ const SearchRoutes = (app: Express) => {
                 }
             }
             let result = null as any
+            if (sort === "tagcount" || sort === "reverse tagcount") withTags = true
             if (sort === "favorites" || sort === "reverse favorites") {
                 if (!req.session.username) return res.status(400).send("Bad request")
                 const favorites = await sql.searchFavorites(req.session.username, tags, type, restrict, style, sort, offset, limit, withTags)
                 result = favorites.map((f: any) => f.post)
                 result[0].postCount = favorites[0].postCount
             } else {
-                result = await sql.search(tags, type, restrict, style, sort, offset, limit, withTags)
+                if (query.startsWith("pixiv:")) {
+                    const pixivID = Number(query.match(/(?<=pixiv-id:)(\d+)/g)?.[0])
+                    result = await sql.searchPixivID(pixivID, withTags)
+                } else {
+                    result = await sql.search(tags, type, restrict, style, sort, offset, limit, withTags)
+                }
             }
             result = result.map((p: any) => {
                 if (p.images.length > 1) {

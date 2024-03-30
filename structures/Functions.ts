@@ -79,10 +79,14 @@ export default class Functions {
     }
 
     public static removeDuplicates = <T>(array: T[]) => {
-        return array.filter((value, index) => {
-            return index === array.findIndex(obj => {
-              return JSON.stringify(obj) === JSON.stringify(value)
-            })
+        const set = new Set<T>()
+        return array.filter(item => {
+            if (set.has(item)) {
+                return false
+            } else {
+                set.add(item)
+                return true
+            }
         })
     }
 
@@ -1062,7 +1066,11 @@ export default class Functions {
             sort === "cuteness" ||
             sort === "reverse cuteness" ||
             sort === "favorites" || 
-            sort === "reverse favorites") return true 
+            sort === "reverse favorites" ||
+            sort === "tagcount" || 
+            sort === "reverse tagcount" ||
+            sort === "filesize" || 
+            sort === "reverse filesize") return true 
         return false
     }
 

@@ -50,6 +50,10 @@
     font-size: 17px;
     color: var(--text-alt);
     margin-left: 6px;
+    cursor: pointer;
+    &:hover {
+        filter: brightness(130%);
+    }
 }
 
 .tag-img-container {
@@ -97,6 +101,7 @@
     flex-direction: row;
     width: 100%;
     align-items: center;
+    flex-wrap: wrap;
 }
 
 .tag-alias-button {
@@ -107,6 +112,31 @@
     background-color: var(--text-alt);
     border-radius: 8px;
     border: 2px solid black;
+    padding: 4px 8px;
+    margin-top: 15px;
+    margin-right: 13px;
+    cursor: pointer;
+    &:hover {
+        filter: brightness(130%);
+    }
+}
+
+.tag-pixtag-button-container {
+    display: flex;
+    flex-direction: row;
+    width: 100%;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.tag-pixtag-button {
+    font-family: Tahoma, sans-serif;
+    font-size: 15px;
+    //font-weight: bold;
+    color: var(--text-alt);
+    background-color: black;
+    border-radius: 8px;
+    border: 1px solid var(--text-alt);
     padding: 4px 8px;
     margin-top: 15px;
     margin-right: 13px;

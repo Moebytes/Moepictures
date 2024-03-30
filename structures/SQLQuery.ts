@@ -505,6 +505,10 @@ export default class SQLQuery {
     if (sort === "reverse drawn") sortQuery = `ORDER BY posts.drawn ASC NULLS LAST`
     if (sort === "cuteness") sortQuery = `ORDER BY "cutenessAvg" DESC`
     if (sort === "reverse cuteness") sortQuery = `ORDER BY "cutenessAvg" ASC`
+    if (sort === "tagcount") sortQuery = `ORDER BY "tagCount" DESC`
+    if (sort === "reverse tagcount") sortQuery = `ORDER BY "tagCount" ASC`
+    if (sort === "filesize") sortQuery = `ORDER BY "imageSize" DESC`
+    if (sort === "reverse filesize") sortQuery = `ORDER BY "imageSize" ASC`
     let ANDtags = [] as string[]
     let ORtags = [] as string[]
     let NOTtags = [] as string[]
@@ -551,6 +555,8 @@ export default class SQLQuery {
         FROM (
           SELECT posts.*, json_agg(DISTINCT images.*) AS images, ${includeTags ? `array_agg(DISTINCT "tag map".tag) AS tags,` : ""}
           COUNT(DISTINCT favorites."favoriteID") AS "favoriteCount",
+          ${includeTags ? `COUNT(DISTINCT "tag map"."tagID") AS "tagCount",` : ""}
+          MAX(DISTINCT images."size") AS "imageSize",
           ROUND(AVG(DISTINCT cuteness."cuteness")) AS "cutenessAvg"
           FROM posts
           JOIN images ON posts."postID" = images."postID"
@@ -566,6 +572,33 @@ export default class SQLQuery {
       `)
     }
     if (values?.[0]) query.values = values
+    const result = await SQLQuery.run(query)
+    return result
+  }
+
+  /** Search pixiv id. */
+  public static searchPixivID = async (pixivID: number, withTags?: boolean) => {
+    const pixivURL = `https://www.pixiv.net/en/artworks/${pixivID}`
+    const query: QueryConfig = {
+      text: functions.multiTrim(`
+        SELECT *,
+        COUNT(*) OVER() AS "postCount"
+        FROM (
+          SELECT posts.*, json_agg(DISTINCT images.*) AS images, ${withTags ? `array_agg(DISTINCT "tag map".tag) AS tags,` : ""}
+          COUNT(DISTINCT favorites."favoriteID") AS "favoriteCount",
+          ROUND(AVG(DISTINCT cuteness."cuteness")) AS "cutenessAvg"
+          FROM posts
+          JOIN images ON posts."postID" = images."postID"
+          ${withTags ? `JOIN "tag map" ON posts."postID" = "tag map"."postID"` : ""}
+          FULL JOIN "favorites" ON posts."postID" = "favorites"."postID"
+          FULL JOIN "cuteness" ON posts."postID" = "cuteness"."postID"
+          WHERE posts."link" = $1
+          GROUP BY posts."postID"
+        ) AS posts
+        LIMIT 1
+      `),
+      values: [pixivURL]
+    }
     const result = await SQLQuery.run(query)
     return result
   }
@@ -785,6 +818,19 @@ export default class SQLQuery {
     if (tags?.[0]) query.values = [tags]
     const result = await SQLQuery.run(query)
     return result
+  }
+
+  public static relatedTags = async (tag: string) => {
+    const query: QueryConfig = {
+          text: functions.multiTrim(`
+              SELECT json_agg(DISTINCT "implication map".tag) AS related FROM "implication map"
+              WHERE "implication map".implication = $1
+              GROUP BY "implication map"."implication"
+          `),
+          values: [tag]
+    }
+    const result = await SQLQuery.run(query)
+    return result[0]
   }
 
   public static random = async (type: string, restrict: string, style: string, offset?: string, withTags?: boolean) => {

@@ -31,6 +31,8 @@ let deltaCounter = 0
 let lastDeltaY = 0
 let effectTimer = null as any
 
+const loadAmount = 30
+
 const Carousel: React.FunctionComponent<Props> = (props) => {
     const [ignored, forceUpdate] = useReducer(x => x + 1, 0)
     const {theme, setTheme} = useContext(ThemeContext)
@@ -58,10 +60,11 @@ const Carousel: React.FunctionComponent<Props> = (props) => {
     const [scrollTimeout, setScrollTimeout] = useState(false)
     const [trackPad, setTrackPad] = useState(false)
     const [lastResetFlag, setLastResetFlag] = useState(null)
+    const carouselRef = useRef<any>(null)
     const sliderRef = useRef<any>(null)
 
     useEffect(() => {
-        const newImagesRef = props.images.slice(0, 30).map(() => React.createRef()) as any
+        const newImagesRef = props.images.slice(0, loadAmount).map(() => React.createRef()) as any
         setActive(newImagesRef[props.index ? props.index : 0])
         setLastActive(newImagesRef[props.index ? props.index : 0])
         setShowLeftArrow(false)
@@ -92,8 +95,7 @@ const Carousel: React.FunctionComponent<Props> = (props) => {
     useEffect(() => {
         let newVisibleImages = [] as any
         let currentIndex = 0
-        if (newVisibleImages.length > 30) return
-        for (let i = 0; i < 30; i++) {
+        for (let i = 0; i < loadAmount; i++) {
             if (!props.images[currentIndex]) break
             newVisibleImages.push(props.images[currentIndex])
             currentIndex++
@@ -109,7 +111,7 @@ const Carousel: React.FunctionComponent<Props> = (props) => {
             const newImages = [...images, ...props.appendImages]
             setImages(functions.removeDuplicates(newImages))
         }
-    }, [props.appendImages, images])
+    }, [props.appendImages])
 
     useEffect(() => {
         if (updateImagesFlag) {
@@ -121,7 +123,7 @@ const Carousel: React.FunctionComponent<Props> = (props) => {
             if (visibleImages.length < images.length) {
                 let newVisibleImages = visibleImages
                 let currentIndex = visibleIndex
-                for (let i = 0; i < 30; i++) {
+                for (let i = 0; i < loadAmount; i++) {
                     if (!images[currentIndex]) break
                     newVisibleImages.push(images[currentIndex])
                     currentIndex++
@@ -248,12 +250,13 @@ const Carousel: React.FunctionComponent<Props> = (props) => {
         if (Number.isNaN(marginLeft)) marginLeft = 0
         let trackPadScroll = false
         if (deltaCounter < 15) trackPadScroll = true
-        if (Math.abs(event.deltaY) === lastDeltaY) {
+        const skipDelta = Math.abs(event.deltaY) === lastDeltaY*2
+        if (Math.abs(event.deltaY) === lastDeltaY || skipDelta) {
             deltaCounter += 1
         } else {
             deltaCounter = 0
         }
-        if (Math.abs(event.deltaY) > 0) lastDeltaY = Math.abs(event.deltaY)
+        if (Math.abs(event.deltaY) > 0 && !skipDelta) lastDeltaY = Math.abs(event.deltaY)
         if (trackPadScroll) {
             sliderRef.current.style.marginLeft = `0px`
             return setTrackPad(true)
@@ -275,6 +278,14 @@ const Carousel: React.FunctionComponent<Props> = (props) => {
         if (marginLeft > 0) marginLeft = 0
         if (lastPos) if (marginLeft < lastPos) marginLeft = lastPos
         sliderRef.current.style.marginLeft = `${marginLeft}px`
+    }
+
+    const handleScroll = () => {
+        if (!trackPad) return
+        if (!carouselRef.current) return
+        if (carouselRef.current.scrollLeft + carouselRef.current.clientWidth >= carouselRef.current.scrollWidth) {
+            setUpdateImagesFlag(true)
+        }
     }
     
     const handleMouseDown = (event: React.MouseEvent) => {
@@ -406,7 +417,8 @@ const Carousel: React.FunctionComponent<Props> = (props) => {
             effectTimer = null
             forceUpdate()
         }, 500)
-        for (let i = 0; i < imagesRef.length; i++) {
+        const startIndex = visibleIndex - loadAmount  > 0 ? visibleIndex - loadAmount : 0
+        for (let i = startIndex; i < imagesRef.length; i++) {
             const ref = imagesRef[i]
             if (!ref.current) continue
             let src = visibleImages[i]
@@ -433,7 +445,7 @@ const Carousel: React.FunctionComponent<Props> = (props) => {
 
     useEffect(() => {
         loadImages()
-    }, [visibleImages, imagesRef, brightness, contrast, hue, saturation, lightness, blur, sharpen, pixelate])
+    }, [visibleImages, visibleIndex, imagesRef, brightness, contrast, hue, saturation, lightness, blur, sharpen, pixelate])
 
     const generateJSX = () => {
         const jsx = [] as any
@@ -451,12 +463,12 @@ const Carousel: React.FunctionComponent<Props> = (props) => {
     }
 
     return (
-        <div className="carousel" style={{maxWidth: props.marginLeft ? `calc(100vw - ${functions.sidebarWidth()}px - 120px - ${props.marginLeft}px)` : `calc(100vw - ${functions.sidebarWidth()}px - 120px)`, overflowX: trackPad ? "auto" : "hidden"}}>
-            <img className={`carousel-left ${showLeftArrow ? "arrow-visible" : ""}`} style={{marginLeft: "0px"}} src={getArrowLeft()} onMouseEnter={arrowLeftEnter} onMouseLeave={() => setShowLeftArrow(false)} onClick={arrowLeftClick}/>
-            <div ref={sliderRef} className="slider" onMouseDown={handleMouseDown} onMouseMove={handleMouseMove} onMouseUp={handleMouseUp} onTouchStart={handleTouchStart} onTouchMove={handleTouchMove} onTouchEnd={handleTouchEnd}>
+        <div className="carousel" ref={carouselRef} style={{maxWidth: props.marginLeft ? `calc(100vw - ${functions.sidebarWidth()}px - 120px - ${props.marginLeft}px)` : `calc(100vw - ${functions.sidebarWidth()}px - 120px)`, overflowX: trackPad ? "auto" : "hidden"}} onScroll={handleScroll}>
+            <img className={`carousel-left ${showLeftArrow ? "arrow-visible" : ""}`} src={getArrowLeft()} onMouseEnter={arrowLeftEnter} onMouseLeave={() => setShowLeftArrow(false)} onClick={arrowLeftClick}/>
+            <div className="slider" ref={sliderRef} onMouseDown={handleMouseDown} onMouseMove={handleMouseMove} onMouseUp={handleMouseUp} onTouchStart={handleTouchStart} onTouchMove={handleTouchMove} onTouchEnd={handleTouchEnd}>
                 {generateJSX()}
             </div>
-            <img className={`carousel-right ${showRightArrow ? "arrow-visible" : ""}`} style={{marginLeft: props.marginLeft ? `${props.marginLeft}px` : ""}} src={getArrowRight()} onMouseEnter={arrowRightEnter} onMouseLeave={() => setShowRightArrow(false)} onClick={arrowRightClick}/>
+            <img className={`carousel-right ${showRightArrow ? "arrow-visible" : ""}`} src={getArrowRight()} onMouseEnter={arrowRightEnter} onMouseLeave={() => setShowRightArrow(false)} onClick={arrowRightClick}/>
         </div>
     )
 }

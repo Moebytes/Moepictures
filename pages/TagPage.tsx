@@ -41,6 +41,7 @@ const TagPage: React.FunctionComponent<Props> = (props) => {
     const [postImages, setPostImages] = useState([]) as any
     const [appendImages, setAppendImages] = useState([]) as any
     const [postIndex, setPostIndex] = useState(0)
+    const [relatedTags, setRelatedTags] = useState([]) as any
     const [count, setCount] = useState(0)
     const history = useHistory()
     const tagName = props?.match.params.tag
@@ -51,6 +52,11 @@ const TagPage: React.FunctionComponent<Props> = (props) => {
         const tagCount = await axios.get("/api/tag/counts", {params: {tags: [tagName]}}).then((r) => Number(r.data?.[0]?.count || 0))
         setTag(tag)
         setCount(tagCount)
+    }
+
+    const updateRelatedTags = async () => {
+        const related = await axios.get("/api/tag/related", {params: {tag: tagName}}).then((r) => r.data)
+        setRelatedTags(related)
     }
 
     const updatePosts = async () => {
@@ -74,6 +80,7 @@ const TagPage: React.FunctionComponent<Props> = (props) => {
 
     useEffect(() => {
         tagInfo()
+        updateRelatedTags()
         updatePosts()
     }, [tagName])
 
@@ -145,6 +152,20 @@ const TagPage: React.FunctionComponent<Props> = (props) => {
         return jsx
     }
 
+    const pixivTagsJSX = () => {
+        let jsx = [] as any
+        if (tag.pixivTags?.[0]) {
+            for (let i = 0; i < tag.pixivTags.length; i++) {
+                jsx.push(<button className="tag-pixtag-button" onClick={() => window.open(`https://www.pixiv.net/en/tags/${tag.pixivTags[i]}/artworks`, "_blank")}>{tag.pixivTags[i]}</button>)
+            }
+        }
+        if (jsx.length) {
+            return <div className="tag-pixtag-button-container">{jsx}</div>
+        } else {
+            return null
+        }
+    }
+
     const tagAliasJSX = () => {
         let jsx = [] as any
         if (tag.aliases?.[0]) {
@@ -154,6 +175,48 @@ const TagPage: React.FunctionComponent<Props> = (props) => {
         }
         if (jsx.length) {
             return <div className="tag-alias-button-container">{jsx}</div>
+        } else {
+            return null
+        }
+    }
+
+    const tagImplicationJSX = () => {
+        let jsx = [] as any
+        if (tag.implications?.[0]) {
+            for (let i = 0; i < tag.implications.length; i++) {
+                let implication = tag.implications[i].implication.replaceAll("-", " ")
+                if (i !== tag.implications.length - 1) implication += ", "
+                jsx.push(<span className="tag-text-alt" onClick={() => history.push(`/tag/${tag.implications[i].implication}`)}>{implication}</span>)
+            }
+        }
+        if (jsx.length) {
+            return (
+                <div className="tag-row">
+                    <span className="tag-text-italic">This tag implies the following: </span>
+                    {jsx}
+                </div>
+            )
+        } else {
+            return null
+        }
+    }
+
+    const relatedTagJSX = () => {
+        let jsx = [] as any
+        if (relatedTags.length) {
+            for (let i = 0; i < relatedTags.length; i++) {
+                let relatedTag = relatedTags[i].replaceAll("-", " ")
+                if (i !== relatedTags.length - 1) relatedTag += ", "
+                jsx.push(<span className="tag-text-alt" onClick={() => history.push(`/tag/${relatedTags[i]}`)}>{relatedTag}</span>)
+            }
+        }
+        if (jsx.length) {
+            return (
+                <div className="tag-row">
+                    <span className="tag-text-italic">Related tags: </span>
+                    {jsx}
+                </div>
+            )
         } else {
             return null
         }
@@ -177,19 +240,17 @@ const TagPage: React.FunctionComponent<Props> = (props) => {
                         <span className="tag-heading">{functions.toProperCase(tag.tag.replaceAll("-", " "))}</span>
                         {tagSocialJSX()}
                     </div>
+                    {pixivTagsJSX()}
                     {tagAliasJSX()}
                     <div className="tag-row">
                         <span className="tag-text">{tag.description}</span>
                     </div>
-                    {tag.implications?.[0] ?
-                    <div className="tag-row">
-                        <span className="tag-text-italic">This tag implies the following: </span>
-                        <span className="tag-text-alt">{tag.implications.map((i: any) => i.implication.replaceAll("-", " ")).join(", ")}</span>
-                    </div> : null}
+                    {tagImplicationJSX()}
+                    {relatedTagJSX()}
                     {posts.length ?
                     <div className="tag-column">
                         <span><span className="tag-label" onClick={searchTag}>Posts</span> <span className="tag-label-alt">{count}</span></span>
-                        <Carousel images={postImages} noKey={true} set={set} index={postIndex} update={updateOffset} appendImages={appendImages} height={300}/>
+                        <Carousel images={postImages} noKey={true} set={set} index={postIndex} update={updateOffset} appendImages={appendImages} height={250}/>
                     </div> : null}
                 </div> : null}
                 <Footer/>

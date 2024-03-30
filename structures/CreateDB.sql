@@ -90,7 +90,8 @@ CREATE TABLE IF NOT EXISTS "tags" (
     "website" text,
     "pixiv" text,
     "twitter" text,
-    "fandom" text
+    "fandom" text,
+    "pixivTags" text[]
 );
 
 CREATE TABLE IF NOT EXISTS "unverified tags" (

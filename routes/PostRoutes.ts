@@ -360,7 +360,7 @@ const PostRoutes = (app: Express) => {
                 }
                 await sql.insertPostHistory(vanilla.user, postID, vanillaImages, vanilla.uploader, vanilla.updater, vanilla.uploadDate, vanilla.updatedDate,
                     vanilla.type, vanilla.restrict, vanilla.style, vanilla.thirdParty, vanilla.title, vanilla.translatedTitle, vanilla.drawn, vanilla.artist,
-                    vanilla.link, vanilla.commentary, vanilla.translatedCommentary, vanilla.artists, vanilla.characters, vanilla.series, vanilla.tags)
+                    vanilla.link, vanilla.commentary, vanilla.translatedCommentary, vanilla.mirrors, vanilla.artists, vanilla.characters, vanilla.series, vanilla.tags)
 
                 let images = [] as any
                 for (let i = 0; i < post.images.length; i++) {
@@ -372,7 +372,7 @@ const PostRoutes = (app: Express) => {
                 }
                 await sql.insertPostHistory(req.session.username, postID, images, post.uploader, post.updater, post.uploadDate, post.updatedDate,
                 post.type, post.restrict, post.style, post.thirdParty, post.title, post.translatedTitle, post.drawn, post.artist,
-                post.link, post.commentary, post.translatedCommentary, artists, characters, series, tags, reason)
+                post.link, post.commentary, post.translatedCommentary, post.mirrors, artists, characters, series, tags, reason)
             } else {
                 let images = [] as any
                 const nextKey = await serverFunctions.getNextKey("post", String(postID))
@@ -385,7 +385,7 @@ const PostRoutes = (app: Express) => {
                 }
                 await sql.insertPostHistory(req.session.username, postID, images, post.uploader, post.updater, post.uploadDate, post.updatedDate,
                 post.type, post.restrict, post.style, post.thirdParty, post.title, post.translatedTitle, post.drawn, post.artist,
-                post.link, post.commentary, post.translatedCommentary, artists, characters, series, tags, reason)
+                post.link, post.commentary, post.translatedCommentary, post.mirrors, artists, characters, series, tags, reason)
             }
             res.status(200).send("Success")
           } catch (e) {
@@ -500,6 +500,7 @@ const PostRoutes = (app: Express) => {
                 link: post.link ? post.link : null,
                 commentary: post.commentary ? post.commentary : null,
                 translatedCommentary: post.translatedCommentary ? post.translatedCommentary : null,
+                mirrors: post.mirrors ? functions.mirrorsJSON(post.mirrors) : null,
                 uploader: post.uploader,
                 uploadDate: post.uploadDate,
                 updatedDate,

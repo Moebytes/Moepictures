@@ -116,6 +116,9 @@ const HelpPage: React.FunctionComponent = (props) => {
                         <span className="help-alt">-Tag 1 -Tag 2</span> - Exclude posts containing Tag 1 and Tag 2. <br/>
                         <span className="help-alt">+Tag 1 +Tag 2</span> - Include posts containing either Tag 1 or Tag 2. <br/>
 
+                        Special searches: <br/>
+                        <span className="help-alt">pixiv:id</span> - Search for post matching the pixiv id (if it exists). <br/>
+
                         These are some various tags with special uses. <br/>
                         <span className="help-alt">original</span> - the drawing is original, ie. not fanart. <br/>
                         <span className="help-alt">self post</span> - the post was uploaded by its original creator. <br/>

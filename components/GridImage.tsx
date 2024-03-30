@@ -91,7 +91,7 @@ const GridImage: React.FunctionComponent<Props> = (props) => {
 
     useEffect(() => {
         if (typeof window === "undefined") return
-        const observer = new IntersectionObserver(handleIntersection, {root: null, rootMargin: "0px 0px 100px 100px", threshold: 0.01})
+        const observer = new IntersectionObserver(handleIntersection, {root: null, rootMargin: "1000px 0px 1000px 0px", threshold: 0.01})
         const element = containerRef.current
         if (element) observer.observe(element)
         return () => {

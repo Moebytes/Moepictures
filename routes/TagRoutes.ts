@@ -35,6 +35,17 @@ const TagRoutes = (app: Express) => {
         }
     })
 
+    app.get("/api/tag/related", tagLimiter, async (req: Request, res: Response, next: NextFunction) => {
+        try {
+            let tag = req.query.tag as string
+            if (!tag) return res.status(400).send("Bad request")
+            let result = await sql.relatedTags(tag)
+            res.status(200).json(result?.related || [])
+        } catch {
+            return res.status(400).send("Bad request")
+        }
+    })
+
     app.get("/api/tag/unverified", tagLimiter, async (req: Request, res: Response, next: NextFunction) => {
         try {
             let tag = req.query.tag as string

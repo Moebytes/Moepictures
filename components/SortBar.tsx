@@ -667,6 +667,10 @@ const SortBar: React.FunctionComponent = (props) => {
         if (sortType === "reverse cuteness") offset = -10
         if (sortType === "favorites") offset = -45
         if (sortType === "reverse favorites") offset = -10
+        if (sortType === "tagcount") offset = -45
+        if (sortType === "reverse tagcount") offset = -10
+        if (sortType === "filesize") offset = -45
+        if (sortType === "reverse filesize") offset = -10
         return `${raw + offset}px`
     }
 
@@ -1020,6 +1024,18 @@ const SortBar: React.FunctionComponent = (props) => {
                 </div>
                 <div className="sortbar-dropdown-row" onClick={() => setSortType("reverse cuteness")}>
                     <span className="sortbar-dropdown-text">Reverse Cuteness</span>
+                </div>
+                <div className="sortbar-dropdown-row" onClick={() => setSortType("tagcount")}>
+                    <span className="sortbar-dropdown-text">Tagcount</span>
+                </div>
+                <div className="sortbar-dropdown-row" onClick={() => setSortType("reverse tagcount")}>
+                    <span className="sortbar-dropdown-text">Reverse Tagcount</span>
+                </div>
+                <div className="sortbar-dropdown-row" onClick={() => setSortType("filesize")}>
+                    <span className="sortbar-dropdown-text">Filesize</span>
+                </div>
+                <div className="sortbar-dropdown-row" onClick={() => setSortType("reverse filesize")}>
+                    <span className="sortbar-dropdown-text">Reverse Filesize</span>
                 </div>
                 {session.username ? <>
                 <div className="sortbar-dropdown-row" onClick={() => setSortType("favorites")}>
