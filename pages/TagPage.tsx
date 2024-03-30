@@ -56,7 +56,7 @@ const TagPage: React.FunctionComponent<Props> = (props) => {
     const updatePosts = async () => {
         let uploads = await axios.get("/api/search/posts", {params: {query: tagName, type: "all", restrict: "all", style: "all", sort: "date"}, withCredentials: true}).then((r) => r.data)
         const filtered = uploads.filter((u: any) => u.post?.restrict !== "explicit")
-        const images = filtered.map((p: any) => functions.getThumbnailLink(p.images[0].type, p.postID, p.images[0].order, p.images[0].filename, "tiny"))
+        const images = filtered.map((p: any) => functions.getThumbnailLink(p.images[0].type, p.postID, p.images[0].order, p.images[0].filename, "large"))
         setPosts(filtered)
         setPostImages(images)
     }
@@ -67,7 +67,7 @@ const TagPage: React.FunctionComponent<Props> = (props) => {
         const result = await axios.get("/api/search/posts", {params: {query: tag.tag, type: "all", restrict: "all", style: "all", sort: "date", offset}, withCredentials: true}).then((r) => r.data)
         uploads.push(...result)
         const filtered = uploads.filter((u: any) => u.post?.restrict !== "explicit")
-        const images = filtered.map((p: any) => functions.getThumbnailLink(p.images[0].type, p.postID, p.images[0].order, p.images[0].filename, "tiny"))
+        const images = filtered.map((p: any) => functions.getThumbnailLink(p.images[0].type, p.postID, p.images[0].order, p.images[0].filename, "large"))
         setPosts(filtered)
         setAppendImages(images)
     }
@@ -189,7 +189,7 @@ const TagPage: React.FunctionComponent<Props> = (props) => {
                     {posts.length ?
                     <div className="tag-column">
                         <span><span className="tag-label" onClick={searchTag}>Posts</span> <span className="tag-label-alt">{count}</span></span>
-                        <Carousel images={postImages} noKey={true} set={set} index={postIndex} update={updateOffset} appendImages={appendImages}/>
+                        <Carousel images={postImages} noKey={true} set={set} index={postIndex} update={updateOffset} appendImages={appendImages} height={300}/>
                     </div> : null}
                 </div> : null}
                 <Footer/>

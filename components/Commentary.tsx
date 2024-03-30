@@ -50,7 +50,7 @@ const Commentary: React.FunctionComponent<Props> = (props) => {
     return (
         <div className="commentary">
             <div className="commentary-title-container">
-                <div className="commentary-title">Artist's Commentary</div>
+                <div className="commentary-title">Artist Commentary</div>
                 <img className="commentary-img" src={getCommentaryTranslate()} onClick={() => setShowTranslated((prev: boolean) => !prev)}/>
             </div>
             <div className="commentary-container" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>

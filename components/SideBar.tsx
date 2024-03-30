@@ -633,9 +633,14 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
         setSearchFlag(true)
     }
 
-    const randomSearch = () => {
-        history.push(`/posts`)
-        setRandomFlag(true)
+    const randomSearch = async () => {
+        if (history.location.pathname.includes("/post/")) {
+            const posts = await axios.get("/api/search/random", {params: {type: "all", restrict: props.post.restrict === "explicit" ? "explicit" : "all", style: "all"}}).then((r) => r.data)
+            history.push(`/post/${posts[0].postID}`)
+        } else {
+            history.push(`/posts`)
+            setRandomFlag(true)
+        }
     }
 
     const imageSearch = async (event: any) => {

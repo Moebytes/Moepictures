@@ -9,7 +9,12 @@
     height: 100%;
     align-items: center;
     margin-top: 20px;
-    overflow: hidden;
+    overflow-x: hidden;
+    overflow-y: hidden;
+    scrollbar-width: none;
+    &::-webkit-scrollbar {
+        display: none;
+    }
 }
 
 .slider {

@@ -10,7 +10,7 @@ import axios from "axios"
 import "./styles/related.less"
 
 interface Props {
-    post: any
+    related: any
 }
 
 const Related: React.FunctionComponent<Props> = (props) => {
@@ -18,43 +18,15 @@ const Related: React.FunctionComponent<Props> = (props) => {
     const {enableDrag, setEnableDrag} = useContext(EnableDragContext)
     const {session, setSession} = useContext(SessionContext)
     const {restrictType, setRestrictType} = useContext(RestrictTypeContext)
-    const {posts, setPosts} = useContext(PostsContext)
     const [related, setRelated] = useState([]) as any
-    const [images, setImages] = useState([])
     const history = useHistory()
-
-    const updateRelated = async () => {
-        let cleanPosts = posts.filter((p: any) => !p.fake)
-        let related = [] as any 
-        let max = 10 
-        if (cleanPosts.length < max) max = cleanPosts.length
-        let counter = 0
-        while (counter < max) {
-            const randNum = Math.floor(Math.random() * cleanPosts.length)
-            const randPost = cleanPosts[randNum]
-            related.push(randPost)
-            cleanPosts = functions.removeItem(cleanPosts, randPost)
-            console.log(cleanPosts)
-            counter++
-        }
-        related = functions.removeDuplicates(related)
-        setRelated(related)
-        const images = related.map((post: any) => functions.getThumbnailLink(post.images[0].type, post.postID, post.images[0].order, post.images[0].filename, "small"))
-        setImages(images)
-    }
-
-    useEffect(() => {
-        updateRelated()
-    }, [])
-
-    useEffect(() => {
-        updateRelated()
-    }, [props.post])
 
     const generateImagesJSX = () => {
         let jsx = [] as any
-        for (let i = 0; i < related.length; i++) {
-            const post = related[i] as any
+        // props.related.length
+        for (let i = 0; i < 12; i++) {
+            const post = props.related[i] as any
+            if (!post) break
             if (post.fake) continue
             if (post.thirdParty) continue
             if (!session.username) if (post.restrict !== "safe") continue
@@ -63,9 +35,22 @@ const Related: React.FunctionComponent<Props> = (props) => {
             const image = post.images[0]
             if (!image) continue
             const images = post.images.map((i: any) => functions.getImageLink(i.type, post.postID, i.order, i.filename))
-            jsx.push(<GridImage key={post.postID} id={post.postID} img={functions.getThumbnailLink(image.type, post.postID, image.order, image.filename, "small")} comicPages={post.type === "comic" ? images : null} post={post}/>)
+            jsx.push(<GridImage square={true} marginBottom={30} key={post.postID} id={post.postID} img={functions.getThumbnailLink(image.type, post.postID, image.order, image.filename, "medium")} comicPages={post.type === "comic" ? images : null} post={post}/>)
         }
         return jsx
+    }
+
+    const updateRelated = () => {
+        setRelated(functions.shuffleArray(props.related).slice(0, 30))
+    }
+
+    useEffect(() => {
+        updateRelated()
+    }, [props.related])
+
+
+    const getImages = () => {
+        return related.map((post: any) => functions.getThumbnailLink(post.images[0].type, post.postID, post.images[0].order, post.images[0].filename, "medium"))
     }
 
     const click = (img: string, index: number) => {
@@ -77,11 +62,11 @@ const Related: React.FunctionComponent<Props> = (props) => {
     if (!related.length) return null
 
     return (
-        <div className="related">
-            <div className="related-title">Related</div>
-            <div className="related-container">
+        <div className="related" style={{paddingLeft: "100px", marginTop: "0px", marginBottom: "10px"}}>
+            {/* <div className="related-title">Related</div> */}
+            <div className="related-container" style={{width: "90%", flexWrap: "wrap", justifyContent: "space-between"}}>
                 {/* {generateImagesJSX()} */}
-                <Carousel images={images} set={click} noKey={true}/>
+                <Carousel images={getImages()} set={click} noKey={true} marginLeft={100} height={250}/>
             </div>
         </div>
     )

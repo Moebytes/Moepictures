@@ -22,12 +22,16 @@ import QuickEditDialog from "../dialogs/QuickEditDialog"
 import CaptchaDialog from "../dialogs/CaptchaDialog"
 import ThirdParty from "../components/ThirdParty"
 import Parent from "../components/Parent"
+import ArtistPosts from "../components/ArtistPosts"
+import Related from "../components/Related"
 import MobileInfo from "../components/MobileInfo"
 import {HideNavbarContext, HideSidebarContext, RelativeContext, DownloadFlagContext, DownloadURLsContext, HideTitlebarContext, MobileContext, ReloadPostFlagContext,
 PostsContext, TagsContext, HeaderTextContext, PostFlagContext, RedirectContext, SidebarTextContext, SessionContext, SessionFlagContext, EnableDragContext} from "../Context"
 import axios from "axios"
 import permissions from "../structures/Permissions"
 import "./styles/postpage.less"
+
+let characterTag = ""
 
 interface Props {
     match?: any
@@ -54,6 +58,8 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
     const {reloadPostFlag, setReloadPostFlag} = useContext(ReloadPostFlagContext)
     const [images, setImages] = useState([]) as any
     const [thirdPartyPosts, setThirdPartyPosts] = useState([]) as any
+    const [artistPosts, setArtistPosts] = useState([]) as any
+    const [relatedPosts, setRelatedPosts] = useState([]) as any
     const [parentPost, setParentPost] = useState(null) as any
     const [image, setImage] = useState("") as any
     const [post, setPost] = useState(null) as any
@@ -148,6 +154,24 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
         updateParent()
         updateThirdParty()
     }, [post])
+
+    useEffect(() => {
+        const updateArtistPosts = async () => {
+            if (tagCategories?.artists?.[0].tag) {
+                const artistPosts = await axios.get("/api/search/posts", {params: {query: tagCategories.artists[0].tag, type: "all", restrict: "all", style: "all", sort: "drawn", limit: 10000}, withCredentials: true}).then((r) => r.data)
+                setArtistPosts(artistPosts)
+            }
+        }
+        const updateRelatedPosts = async () => {
+            if (tagCategories?.characters?.[0].tag !== characterTag) {
+                const relatedPosts = await axios.get("/api/search/posts", {params: {query: tagCategories.characters[0].tag, type: post.type, restrict: post.restrict === "explicit" ? "explicit" : "all", style: post.style, sort: Math.random() > 0.5 ? "date" : "reverse date", limit: 200}, withCredentials: true}).then((r) => r.data)
+                setRelatedPosts(relatedPosts)
+                characterTag = tagCategories.characters[0].tag
+            }
+        }
+        updateArtistPosts()
+        updateRelatedPosts()
+    }, [post, tagCategories])
 
     useEffect(() => {
         const updatePost = async () => {
@@ -320,10 +344,12 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
                     {nsfwChecker() && post ? getPostJSX() : null}
                     {mobile && post && tagCategories ? <MobileInfo post={post} artists={tagCategories.artists} characters={tagCategories.characters} series={tagCategories.series} tags={tagCategories.tags}/> : null}
                     {parentPost ? <Parent post={parentPost}/>: null}
-                    {thirdPartyPosts.length ? <ThirdParty posts={thirdPartyPosts}/>: null}
+                    {thirdPartyPosts.length ? <ThirdParty posts={thirdPartyPosts}/> : null}
+                    {artistPosts.length ? <ArtistPosts posts={artistPosts}/> : null}
                     {session.username && post ? <CutenessMeter post={post}/> : null}
                     {post?.commentary ? <Commentary text={post.commentary} translated={post.translatedCommentary}/> : null}
                     {post ? <Comments post={post}/> : null}
+                    {relatedPosts.length ? <Related related={relatedPosts}/> : null}
                     <Footer/>
                 </div>
             </div>

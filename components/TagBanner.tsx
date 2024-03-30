@@ -8,6 +8,9 @@ import localforage from "localforage"
 import "./styles/tagbanner.less"
 import axios from "axios"
 
+let deltaCounter = 0
+let lastDeltaY = 0
+
 const TagBanner: React.FunctionComponent = (props) => {
     const {theme, setTheme} = useContext(ThemeContext)
     const [hover, setHover] = useState(false)
@@ -23,8 +26,55 @@ const TagBanner: React.FunctionComponent = (props) => {
     const {scroll, setScroll} = useContext(ScrollContext)
     const [dragging, setDragging] = useState(false)
     const [bannerTags, setBannerTags] = useState([]) as any
+    const [trackPad, setTrackPad] = useState(false)
     const containerRef = useRef(null) as any
+    const [marginLeft, setMarginLeft] = useState(0)
     const history = useHistory()
+
+    useEffect(() => {
+        containerRef.current?.addEventListener("wheel", handleWheel, {passive: false})
+        return () => {
+            containerRef.current?.removeEventListener("wheel", handleWheel, {passive: false})
+        }
+    })
+
+    const handleWheel = (event: React.WheelEvent) => {
+        if (!containerRef.current) return
+        if (!trackPad) event.preventDefault()
+        let marginLeft = parseInt(containerRef.current.style.marginLeft)
+        if (Number.isNaN(marginLeft)) marginLeft = 0
+        let trackPadScroll = false
+        if (deltaCounter < 15) trackPadScroll = true
+        if (Math.abs(event.deltaY) === lastDeltaY) {
+            deltaCounter += 1
+        } else {
+            deltaCounter = 0
+        }
+        if (Math.abs(event.deltaY) > 0) lastDeltaY = Math.abs(event.deltaY)
+        if (trackPadScroll) {
+            containerRef.current.style.marginLeft = "0px"
+            return setTrackPad(true)
+        }
+        setTrackPad(false)
+        if (Math.abs(event.deltaY) < 5) {
+            if (event.deltaX < 0) {
+                marginLeft += 25
+            } else {
+                marginLeft -= 25
+            }
+        } else {
+            if (event.deltaY < 0) {
+                marginLeft -= 25
+            } else {
+                marginLeft += 25
+            }
+        }
+        if (marginLeft > 0) marginLeft = 0
+        const maxScrollLeft = containerRef.current.scrollWidth - containerRef.current.clientWidth
+        if (marginLeft < -maxScrollLeft) marginLeft = -maxScrollLeft
+        containerRef.current.style.marginLeft = `${marginLeft}px`
+        setMarginLeft(marginLeft)
+    }
 
     const getPageAmount = () => {
         let loadAmount = 60
@@ -94,8 +144,13 @@ const TagBanner: React.FunctionComponent = (props) => {
 
     if (!bannerTags.length) return null
 
+    const getWidth = () => {
+        if (trackPad) return mobile ? "100%" : ""
+        return mobile ? `calc(100vw + ${Math.abs(marginLeft)}px)` : `calc(100vw - ${functions.sidebarWidth()}px + ${Math.abs(marginLeft)}px)`
+    }
+
     return (
-        <div className="tagbanner" ref={containerRef} style={mobile ? {width: "100%"} : {}}>
+        <div className="tagbanner" ref={containerRef} style={{width: getWidth(), overflowX: trackPad ? "auto" : "hidden"}}>
             {bannerTagJSX()}
         </div>
     )

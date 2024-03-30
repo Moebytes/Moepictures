@@ -22,7 +22,9 @@ interface Props {
     width?: number
     height?: number
     comicPages?: any
-    post: any
+    post: any,
+    square?: boolean
+    marginBottom?: number
 }
 
 const GridImage: React.FunctionComponent<Props> = (props) => {
@@ -406,13 +408,13 @@ const GridImage: React.FunctionComponent<Props> = (props) => {
         const currentRef = functions.isVideo(props.img) && !mobile ? videoRef.current! : ref.current!
         const refWidth = functions.isVideo(props.img) && !mobile ? videoRef.current!.clientWidth : ref.current!.width
         const refHeight = functions.isVideo(props.img) && !mobile ? videoRef.current!.clientHeight : ref.current!.height
-        if (square) {
+        if (square || props.square) {
             const sidebarWidth = document.querySelector(".sidebar")?.clientWidth || 0
             const width = window.innerWidth - sidebarWidth
             const containerWidth = Math.floor(width / (mobile ? functions.getImagesPerRowMobile(sizeType) : functions.getImagesPerRow(sizeType))) - getSquareOffset()
             containerRef.current.style.width = `${containerWidth}px`
             containerRef.current.style.height = `${containerWidth}px`
-            containerRef.current.style.marginBottom = "3px"
+            containerRef.current.style.marginBottom = props.marginBottom ? `${props.marginBottom}px` : "3px"
             const landscape = refWidth <=refHeight
             if (landscape) {
                 currentRef.style.width = `${containerWidth}px`
@@ -426,7 +428,7 @@ const GridImage: React.FunctionComponent<Props> = (props) => {
             containerRef.current.style.height = "max-content"
             currentRef.style.width = "auto"
             currentRef.style.height = `${imageSize}px`
-            containerRef.current.style.marginBottom = "10px"
+            containerRef.current.style.marginBottom = props.marginBottom ? `${props.marginBottom}px` : "10px"
         }
     }
 

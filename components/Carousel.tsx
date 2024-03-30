@@ -23,9 +23,12 @@ interface Props {
     update?: () => void
     appendImages?: any[]
     noEncryption?: boolean
+    marginLeft?: number
 }
 
 let startX = 0
+let deltaCounter = 0
+let lastDeltaY = 0
 let effectTimer = null as any
 
 const Carousel: React.FunctionComponent<Props> = (props) => {
@@ -53,6 +56,7 @@ const Carousel: React.FunctionComponent<Props> = (props) => {
     const [visibleIndex, setVisibleIndex] = useState(0) as any
     const [updateImagesFlag, setUpdateImagesFlag] = useState(false) as any
     const [scrollTimeout, setScrollTimeout] = useState(false)
+    const [trackPad, setTrackPad] = useState(false)
     const [lastResetFlag, setLastResetFlag] = useState(null)
     const sliderRef = useRef<any>(null)
 
@@ -115,7 +119,7 @@ const Carousel: React.FunctionComponent<Props> = (props) => {
                 setScrollTimeout(false)
             }, 1000)
             if (visibleImages.length < images.length) {
-                const newVisibleImages = visibleImages
+                let newVisibleImages = visibleImages
                 let currentIndex = visibleIndex
                 for (let i = 0; i < 30; i++) {
                     if (!images[currentIndex]) break
@@ -237,13 +241,24 @@ const Carousel: React.FunctionComponent<Props> = (props) => {
     }, [active, imagesRef])
 
     const handleWheel = (event: React.WheelEvent) => {
-        if (props.images.length <= 1) return
-        event.preventDefault()
         if (!sliderRef.current) return
+        if (props.images.length <= 3) return
+        if (!trackPad) event.preventDefault()
         let marginLeft = parseInt(sliderRef.current.style.marginLeft)
         if (Number.isNaN(marginLeft)) marginLeft = 0
-        // @ts-ignore
-        const trackPad = event.wheelDeltaY ? event.wheelDeltaY === -3 * event.deltaY : event.deltaMode === 0
+        let trackPadScroll = false
+        if (deltaCounter < 15) trackPadScroll = true
+        if (Math.abs(event.deltaY) === lastDeltaY) {
+            deltaCounter += 1
+        } else {
+            deltaCounter = 0
+        }
+        if (Math.abs(event.deltaY) > 0) lastDeltaY = Math.abs(event.deltaY)
+        if (trackPadScroll) {
+            sliderRef.current.style.marginLeft = `0px`
+            return setTrackPad(true)
+        }
+        setTrackPad(false)
         if (Math.abs(event.deltaY) < 5) {
             if (event.deltaX < 0) {
                 marginLeft += 25
@@ -252,17 +267,9 @@ const Carousel: React.FunctionComponent<Props> = (props) => {
             }
         } else {
             if (event.deltaY < 0) {
-                if (trackPad) {
-                    marginLeft += 25
-                } else {
-                    marginLeft -= 25
-                }
+                marginLeft -= 25
             } else {
-                if (trackPad) {
-                    marginLeft -= 25
-                } else {
-                    marginLeft += 25
-                }
+                marginLeft += 25
             }
         }
         if (marginLeft > 0) marginLeft = 0
@@ -276,9 +283,9 @@ const Carousel: React.FunctionComponent<Props> = (props) => {
     }
 
     const handleMouseMove = (event: React.MouseEvent) => {
-        if (props.images.length <= 1) return
-        if (!dragging) return
         if (!sliderRef.current) return
+        if (props.images.length <= 3) return
+        if (!dragging) return
         let marginLeft = parseInt(sliderRef.current.style.marginLeft)
         if (Number.isNaN(marginLeft)) marginLeft = 0
         if (event.pageX < startX) {
@@ -296,6 +303,12 @@ const Carousel: React.FunctionComponent<Props> = (props) => {
         setDragging(false)
     }
 
+    useEffect(() => {
+        const winMouseUp = () => setDragging(false)
+        window.addEventListener("mouseup", winMouseUp)
+        return () => window.removeEventListener("mouseup", winMouseUp)
+    }, [])
+
     const handleTouchStart = (event: React.TouchEvent) => {
         if (!event.touches.length) return
         setDragging(true)
@@ -303,10 +316,10 @@ const Carousel: React.FunctionComponent<Props> = (props) => {
     }
 
     const handleTouchMove = (event: React.TouchEvent) => {
-        if (props.images.length <= 1) return
+        if (!sliderRef.current) return
+        if (props.images.length <= 3) return
         if (!event.touches.length) return
         if (!dragging) return
-        if (!sliderRef.current) return
         let marginLeft = parseInt(sliderRef.current.style.marginLeft)
         if (Number.isNaN(marginLeft)) marginLeft = 0
         if (event.touches[0].pageX < startX) {
@@ -438,12 +451,12 @@ const Carousel: React.FunctionComponent<Props> = (props) => {
     }
 
     return (
-        <div className="carousel">
-            <img className={`carousel-left ${showLeftArrow ? "arrow-visible" : ""}`} src={getArrowLeft()} onMouseEnter={arrowLeftEnter} onMouseLeave={() => setShowLeftArrow(false)} onClick={arrowLeftClick}/>
+        <div className="carousel" style={{maxWidth: props.marginLeft ? `calc(100vw - ${functions.sidebarWidth()}px - 120px - ${props.marginLeft}px)` : `calc(100vw - ${functions.sidebarWidth()}px - 120px)`, overflowX: trackPad ? "auto" : "hidden"}}>
+            <img className={`carousel-left ${showLeftArrow ? "arrow-visible" : ""}`} style={{marginLeft: "0px"}} src={getArrowLeft()} onMouseEnter={arrowLeftEnter} onMouseLeave={() => setShowLeftArrow(false)} onClick={arrowLeftClick}/>
             <div ref={sliderRef} className="slider" onMouseDown={handleMouseDown} onMouseMove={handleMouseMove} onMouseUp={handleMouseUp} onTouchStart={handleTouchStart} onTouchMove={handleTouchMove} onTouchEnd={handleTouchEnd}>
                 {generateJSX()}
             </div>
-            <img className={`carousel-right ${showRightArrow ? "arrow-visible" : ""}`} src={getArrowRight()} onMouseEnter={arrowRightEnter} onMouseLeave={() => setShowRightArrow(false)} onClick={arrowRightClick}/>
+            <img className={`carousel-right ${showRightArrow ? "arrow-visible" : ""}`} style={{marginLeft: props.marginLeft ? `${props.marginLeft}px` : ""}} src={getArrowRight()} onMouseEnter={arrowRightEnter} onMouseLeave={() => setShowRightArrow(false)} onClick={arrowRightClick}/>
         </div>
     )
 }

@@ -18,7 +18,7 @@ const postLimiter = rateLimit({
 })
 
 const PostRoutes = (app: Express) => {
-    app.get("/api/post", async (req: Request, res: Response, next: NextFunction) => {
+    app.get("/api/post", postLimiter, async (req: Request, res: Response, next: NextFunction) => {
         try {
             if (req.session.captchaAmount === undefined) req.session.captchaAmount = 501
             if (req.session.role === "admin" || req.session.role === "mod") req.session.captchaAmount = 0
@@ -79,7 +79,7 @@ const PostRoutes = (app: Express) => {
         }
     })
 
-    app.delete("/api/post/delete", async (req: Request, res: Response) => {
+    app.delete("/api/post/delete", postLimiter, async (req: Request, res: Response) => {
         try {
             const postID = req.query.postID
             if (Number.isNaN(Number(postID))) return res.status(400).send("Invalid postID")

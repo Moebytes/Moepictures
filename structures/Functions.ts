@@ -17,11 +17,16 @@ import mm from "music-metadata"
 import * as THREE from "three"
 import {GLTFLoader, OBJLoader, FBXLoader} from "three-stdlib"
 
+// drag scroll
 let newScrollY = 0
 let lastScrollTop = 0
 let element = null as any
 let inertia = false
 let mouseDown = false
+
+// detect trackpad
+let eventCount = 0
+let eventCountStart = null as any
 
 const imageExtensions = [".jpg", ".jpeg", ".png", ".webp"]
 const videoExtensions = [".mp4", ".mov", ".avi", ".mkv", ".webm"]
@@ -1749,5 +1754,32 @@ export default class Functions {
             if (mirror.includes("twitter") || mirror.includes("x.com")) json["twitter"] = mirror
         }
         return JSON.stringify(json) as any
+    }
+
+    public static detectTrackPad = (event: any) => {
+        let isTrackPad = false
+        if (eventCount === 0) {
+          eventCountStart = performance.now()
+        }
+        eventCount++
+        console.log(performance.now() - eventCountStart)
+        if (performance.now() - eventCountStart > 66) {
+          if (eventCount > 5) {
+            isTrackPad = true
+          } else {
+            isTrackPad = false
+          }
+        }
+        eventCount = 0
+        eventCountStart = undefined
+        return isTrackPad
+    }
+
+    public static shuffleArray = <T>(array: T[]) => {
+        for (let i = array.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [array[i], array[j]] = [array[j], array[i]]
+        }
+        return array
     }
 }
