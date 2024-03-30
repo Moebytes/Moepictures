@@ -56,7 +56,7 @@ const TagPage: React.FunctionComponent<Props> = (props) => {
     const updatePosts = async () => {
         let uploads = await axios.get("/api/search/posts", {params: {query: tagName, type: "all", restrict: "all", style: "all", sort: "date"}, withCredentials: true}).then((r) => r.data)
         const filtered = uploads.filter((u: any) => u.post?.restrict !== "explicit")
-        const images = filtered.map((p: any) => functions.getThumbnailLink(p.images[0].type, p.postID, p.images[0].filename, "tiny"))
+        const images = filtered.map((p: any) => functions.getThumbnailLink(p.images[0].type, p.postID, p.images[0].order, p.images[0].filename, "tiny"))
         setPosts(filtered)
         setPostImages(images)
     }
@@ -67,7 +67,7 @@ const TagPage: React.FunctionComponent<Props> = (props) => {
         const result = await axios.get("/api/search/posts", {params: {query: tag.tag, type: "all", restrict: "all", style: "all", sort: "date", offset}, withCredentials: true}).then((r) => r.data)
         uploads.push(...result)
         const filtered = uploads.filter((u: any) => u.post?.restrict !== "explicit")
-        const images = filtered.map((p: any) => functions.getThumbnailLink(p.images[0].type, p.postID, p.images[0].filename, "tiny"))
+        const images = filtered.map((p: any) => functions.getThumbnailLink(p.images[0].type, p.postID, p.images[0].order, p.images[0].filename, "tiny"))
         setPosts(filtered)
         setAppendImages(images)
     }

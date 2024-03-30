@@ -39,7 +39,7 @@ const Related: React.FunctionComponent<Props> = (props) => {
         }
         related = functions.removeDuplicates(related)
         setRelated(related)
-        const images = related.map((post: any) => functions.getThumbnailLink(post.images[0].type, post.postID, post.images[0].filename, "small"))
+        const images = related.map((post: any) => functions.getThumbnailLink(post.images[0].type, post.postID, post.images[0].order, post.images[0].filename, "small"))
         setImages(images)
     }
 
@@ -62,8 +62,8 @@ const Related: React.FunctionComponent<Props> = (props) => {
             if (!permissions.isStaff(session)) if (post.restrict === "explicit") continue
             const image = post.images[0]
             if (!image) continue
-            const images = post.images.map((i: any) => functions.getImageLink(i.type, post.postID, i.filename))
-            jsx.push(<GridImage key={post.postID} id={post.postID} img={functions.getThumbnailLink(image.type, post.postID, image.filename, "small")} comicPages={post.type === "comic" ? images : null} post={post}/>)
+            const images = post.images.map((i: any) => functions.getImageLink(i.type, post.postID, i.order, i.filename))
+            jsx.push(<GridImage key={post.postID} id={post.postID} img={functions.getThumbnailLink(image.type, post.postID, image.order, image.filename, "small")} comicPages={post.type === "comic" ? images : null} post={post}/>)
         }
         return jsx
     }

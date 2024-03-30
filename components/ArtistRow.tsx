@@ -54,10 +54,10 @@ const ArtistRow: React.FunctionComponent<Props> = (props) => {
     const getImages = () => {
         if (!session.username) {
             const filtered = props.artist.posts.filter((p: any) => p.restrict === "safe")
-            return filtered.map((p: any) => functions.getThumbnailLink(p.images[0].type, p.postID, p.images[0].filename, "tiny"))
+            return filtered.map((p: any) => functions.getThumbnailLink(p.images[0].type, p.postID, p.images[0].order, p.images[0].filename, "tiny"))
         }
         const filtered = props.artist.posts.filter((p: any) => p.restrict !== "explicit")
-        return filtered.map((p: any) => functions.getThumbnailLink(p.images[0].type, p.postID, p.images[0].filename, "tiny"))
+        return filtered.map((p: any) => functions.getThumbnailLink(p.images[0].type, p.postID, p.images[0].order, p.images[0].filename, "tiny"))
     }
 
     const artistSocialJSX = () => {

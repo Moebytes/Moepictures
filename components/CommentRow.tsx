@@ -44,7 +44,7 @@ const CommentRow: React.FunctionComponent<Props> = (props) => {
     const {reportCommentID, setReportCommentID} = useContext(ReportCommentIDContext)
     const [hover, setHover] = useState(false)
     const history = useHistory()
-    const initialImg = functions.getThumbnailLink(props.comment.post.images[0].type, props.comment.postID, props.comment.post.images[0].filename, "tiny")
+    const initialImg = functions.getThumbnailLink(props.comment.post.images[0].type, props.comment.postID, props.comment.post.images[0].order, props.comment.post.images[0].filename, "tiny")
     const [img, setImg] = useState(initialImg)
     const ref = useRef<HTMLCanvasElement>(null)
     const comment = props.comment.comment

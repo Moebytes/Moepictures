@@ -93,7 +93,7 @@ const SetAvatarPage: React.FunctionComponent<Props> = (props) => {
                 if (String(e).includes("401")) $401Error = true
             }
             if (post) {
-                let images = post.images.map((i: any) => functions.getImageLink(i.type, post.postID, i.filename))
+                let images = post.images.map((i: any) => functions.getImageLink(i.type, post.postID, i.order, i.filename))
                 // images = await Promise.all(images.map((img: string) => functions.linkToBase64(img)))
                 setImages(images)
                 if (functions.isVideo(images[0])) {
@@ -127,7 +127,7 @@ const SetAvatarPage: React.FunctionComponent<Props> = (props) => {
                 if (String(e).includes("401")) $401Error = true
             }
             if (post) {
-                let images = post.images.map((i: any) => functions.getImageLink(i.type, post.postID, i.filename))
+                let images = post.images.map((i: any) => functions.getImageLink(i.type, post.postID, i.order, i.filename))
                 // images = await Promise.all(images.map((img: string) => functions.linkToBase64(img)))
                 setImages(images) 
                 if (functions.isVideo(images[0])) {

@@ -112,7 +112,7 @@ const ModPostDeletions: React.FunctionComponent = (props) => {
         for (let i = 0; i < visibleRequests.length; i++) {
             const request = visibleRequests[i]
             const ref = imagesRef[i]
-            const img = functions.getThumbnailLink(request.post.images[0].type, request.postID, request.post.images[0].filename, "tiny")
+            const img = functions.getThumbnailLink(request.post.images[0].type, request.postID, request.post.images[0].order, request.post.images[0].filename, "tiny")
             if (functions.isGIF(img)) continue
             if (!ref.current) continue
             let src = img
@@ -149,7 +149,7 @@ const ModPostDeletions: React.FunctionComponent = (props) => {
                 if (middle) return window.open(`/post/${request.postID}`, "_blank")
                 history.push(`/post/${request.postID}`)
             }
-            const img = functions.getThumbnailLink(request.post.images[0].type, request.postID, request.post.images[0].filename, "tiny")
+            const img = functions.getThumbnailLink(request.post.images[0].type, request.postID, request.post.images[0].order, request.post.images[0].filename, "tiny")
             jsx.push(
                 <div className="mod-post" onMouseEnter={() =>setHover(true)} onMouseLeave={() => setHover(false)}>
                     <div className="mod-post-img-container">

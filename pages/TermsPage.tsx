@@ -133,7 +133,7 @@ const TermsPage: React.FunctionComponent = (props) => {
                             <span className="terms-text-alt">
                             ⇾ Respond to social media contact (say which account you would prefer being contacted at)<br/>
                             ⇾ Attach a source file to one of your works which is not available publicly<br/>
-                            </span><br/><br/>
+                            </span><br/>
 
                             Liability<br/>
                             The site is provided "as is", without warranty of any kind, express or implied. 

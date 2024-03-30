@@ -131,7 +131,7 @@ const UnverifiedPostPage: React.FunctionComponent<Props> = (props) => {
             let post = unverifiedPosts.find((p: any) => p.postID === postID)
             if (!post?.tags) post = await axios.get("/api/post/unverified", {params: {postID}, withCredentials: true}).then((r) => r.data)
             if (post) {
-                const images = post.images.map((i: any) => functions.getUnverifiedImageLink(i.type, post.postID, i.filename))
+                const images = post.images.map((i: any) => functions.getUnverifiedImageLink(i.type, post.postID, i.order, i.filename))
                 setImages(images)
                 setImage(images[0])
                 const tags = await functions.parseTags([post])
@@ -151,7 +151,7 @@ const UnverifiedPostPage: React.FunctionComponent<Props> = (props) => {
             setPostFlag(false)
             let post = await axios.get("/api/post/unverified", {params: {postID}, withCredentials: true}).then((r) => r.data)
             if (post) {
-                const images = post.images.map((i: any) => functions.getUnverifiedImageLink(i.type, post.postID, i.filename))
+                const images = post.images.map((i: any) => functions.getUnverifiedImageLink(i.type, post.postID, i.order, i.filename))
                 setImages(images)
                 setImage(images[0])
                 const tags = await functions.parseTags([post])

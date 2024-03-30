@@ -13,7 +13,7 @@ const Parent: React.FunctionComponent<Props> = (props) => {
     const {theme, setTheme} = useContext(ThemeContext)
     const {session, setSession} = useContext(SessionContext)
     const history = useHistory()
-    const image = functions.getThumbnailLink(props.post.post.images[0].type, props.post.parentID, props.post.post.images[0].filename, "small")
+    const image = functions.getThumbnailLink(props.post.post.images[0].type, props.post.parentID, props.post.post.images[0].order, props.post.post.images[0].filename, "small")
 
     const click = (img: string, index: number) => {
         const postID = props.post.parentID

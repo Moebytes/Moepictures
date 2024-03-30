@@ -113,7 +113,7 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
         }
     }, [session, post])
 
-    const updateThirdParty = async (source: any) => {
+    const updateThirdParty = async () => {
         if (post) {
             const thirdPartyPosts = await axios.get("/api/post/thirdparty", {params: {postID: post.postID}, withCredentials: true}).then((r) => r.data)
             if (thirdPartyPosts?.[0]) {
@@ -146,6 +146,7 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
         }
         updatePost()
         updateParent()
+        updateThirdParty()
     }, [post])
 
     useEffect(() => {
@@ -158,7 +159,7 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
                 return
             }
             if (post) {
-                let images = post.images.map((i: any) => functions.getImageLink(i.type, post.postID, i.filename))
+                let images = post.images.map((i: any) => functions.getImageLink(i.type, post.postID, i.order, i.filename))
                 // images = await Promise.all(images.map((img: string) => functions.linkToBase64(img)))
                 setImages(images)
                 setImage(images[0])
@@ -194,7 +195,7 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
                 return
             }
             if (post) {
-                let images = post.images.map((i: any) => functions.getImageLink(i.type, post.postID, i.filename))
+                let images = post.images.map((i: any) => functions.getImageLink(i.type, post.postID, i.order, i.filename))
                 // images = await Promise.all(images.map((img: string) => functions.linkToBase64(img)))
                 setImages(images)
                 setImage(images[0])

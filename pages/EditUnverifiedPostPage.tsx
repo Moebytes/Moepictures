@@ -140,7 +140,7 @@ const EditUnverifiedPostPage: React.FunctionComponent<Props> = (props) => {
         let files = [] as any
         let links = [] as any
         for (let i = 0; i < post.images.length; i++) {
-            let imageLink = functions.getUnverifiedImageLink(post.images[i].type, postID, post.images[i].filename)
+            let imageLink = functions.getUnverifiedImageLink(post.images[i].type, postID, post.images[i].order, post.images[i].filename)
             if (functions.isModel(imageLink)) {
                 imageLink = await functions.modelImage(imageLink)
             } else if (functions.isAudio(imageLink)) {

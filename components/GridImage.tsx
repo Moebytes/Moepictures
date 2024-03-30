@@ -655,14 +655,16 @@ const GridImage: React.FunctionComponent<Props> = (props) => {
                 const zip = new JSZip()
                 for (let i = 0; i < props.comicPages.length; i++) {
                     const page = props.comicPages[i]
-                    const img = await functions.createImage(page)
+                    const decryptedPage = await cryptoFunctions.decryptedLink(page)
+                    const img = await functions.createImage(decryptedPage)
                     const image = await render(img)
                     const data = await fetch(image).then((r) => r.arrayBuffer())
-                    const decryptedData = cryptoFunctions.decrypt(Buffer.from(data))
-                    zip.file(path.basename(page), decryptedData, {binary: true})
+                    zip.file(decodeURIComponent(path.basename(page)), data, {binary: true})
                 }
-                const decoded = decodeURIComponent(props.img)
-                const filename = `${path.basename(decoded, path.extname(decoded)).replace(/\d+$/, "")}.zip`
+                const decoded = decodeURIComponent(path.basename(props.img))
+                const id = decoded.split("-")[0]
+                const basename = path.basename(decoded.split("-")[2], path.extname(decoded.split("-")[2]))
+                const filename = `${id}-${basename}.zip`
                 const blob = await zip.generateAsync({type: "blob"})
                 const url = window.URL.createObjectURL(blob)
                 functions.download(filename , url)

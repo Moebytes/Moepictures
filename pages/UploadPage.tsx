@@ -1490,7 +1490,7 @@ const UploadPage: React.FunctionComponent = (props) => {
                 {dupPosts.length ? <>
                 <span className="upload-heading">Possible Duplicates</span>
                 <div className="upload-row">
-                    <Carousel images={dupPosts.map((p: any) => functions.getImageLink(p.images[0].type, p.postID, p.images[0].filename))} set={setDup} index={currentDupIndex}/>
+                    <Carousel images={dupPosts.map((p: any) => functions.getImageLink(p.images[0].type, p.postID, p.images[0].order, p.images[0].filename))} set={setDup} index={currentDupIndex}/>
                 </div>
                 </> : null}
                 <div className="upload-container">

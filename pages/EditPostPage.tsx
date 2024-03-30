@@ -147,7 +147,7 @@ const EditPostPage: React.FunctionComponent<Props> = (props) => {
         let files = [] as any
         let links = [] as any
         for (let i = 0; i < post.images.length; i++) {
-            let imageLink = functions.getImageLink(post.images[i].type, postID, post.images[i].filename)
+            let imageLink = functions.getImageLink(post.images[i].type, postID, post.images[i].order, post.images[i].filename)
             if (functions.isImage(imageLink)) {
                 imageLink = await cryptoFunctions.decryptedLink(imageLink)
             } else if (functions.isModel(imageLink)) {

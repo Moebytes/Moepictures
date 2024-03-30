@@ -885,17 +885,16 @@ const PostImage: React.FunctionComponent<Props> = (props) => {
     const renderImage = async (image?: string) => {
         if ((filtersOn())) {
             if (image) {
-                const img = await functions.createImage(image)
+                const decrypted = await cryptoFunctions.decryptedLink(image)
+                const img = await functions.createImage(decrypted)
                 return render(img)
             } else {
                 return render(ref.current)
             }
         } else {
             if (image) {
-                //return image
                 return cryptoFunctions.decryptedLink(image)
             } else {
-                //return props.img
                 return cryptoFunctions.decryptedLink(props.img)
             }
         }
@@ -1010,13 +1009,15 @@ const PostImage: React.FunctionComponent<Props> = (props) => {
                 const zip = new JSZip()
                 for (let i = 0; i < props.comicPages.length; i++) {
                     const page = props.comicPages[i]
-                    const image = await renderImage(page)
+                    const decryptedPage = await cryptoFunctions.decryptedLink(page)
+                    const image = await renderImage(decryptedPage)
                     const data = await fetch(image).then((r) => r.arrayBuffer())
-                    const decryptedData = cryptoFunctions.decrypt(Buffer.from(data))
-                    zip.file(path.basename(page), decryptedData, {binary: true})
+                    zip.file(decodeURIComponent(path.basename(page)), data, {binary: true})
                 }
-                const decoded = decodeURIComponent(props.img)
-                const filename = `${path.basename(decoded, path.extname(decoded)).replace(/\d+$/, "")}.zip`
+                const decoded = decodeURIComponent(path.basename(props.img))
+                const id = decoded.split("-")[0]
+                const basename = path.basename(decoded.split("-")[2], path.extname(decoded.split("-")[2]))
+                const filename = `${id}-${basename}.zip`
                 const blob = await zip.generateAsync({type: "blob"})
                 const url = window.URL.createObjectURL(blob)
                 functions.download(filename , url)

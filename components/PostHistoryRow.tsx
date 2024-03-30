@@ -33,8 +33,8 @@ const PostHistoryRow: React.FunctionComponent<Props> = (props) => {
     const {deletePostHistoryFlag, setDeletePostHistoryFlag} = useContext(DeletePostHistoryFlagContext)
     const {revertPostHistoryFlag, setRevertPostHistoryFlag} = useContext(RevertPostHistoryFlagContext)
     const history = useHistory()
-    const initialImg = functions.getImageLink(props.postHistory.images[0]?.type, props.postHistory.postID, props.postHistory.images[0]?.filename ? props.postHistory.images[0].filename : props.postHistory.images[0])
-    const currentImg = functions.getImageLink(props.currentHistory.images[0]?.type, props.currentHistory.postID, props.currentHistory.images[0]?.filename ? props.currentHistory.images[0].filename : props.currentHistory.images[0])
+    const initialImg = functions.getImageLink(props.postHistory.images[0]?.type, props.postHistory.postID, 1, props.postHistory.images[0]?.filename ? props.postHistory.images[0].filename : props.postHistory.images[0])
+    const currentImg = functions.getImageLink(props.currentHistory.images[0]?.type, props.currentHistory.postID, 1, props.currentHistory.images[0]?.filename ? props.currentHistory.images[0].filename : props.currentHistory.images[0])
     const [img, setImg] = useState(initialImg)
     const [imageIndex, setImageIndex] = useState(0)
     const [userRole, setUserRole] = useState("")
@@ -53,8 +53,8 @@ const PostHistoryRow: React.FunctionComponent<Props> = (props) => {
     const imagesChanged = async () => {
         if (props.postHistory.images.length !== props.currentHistory.images.length) return true
         for (let i = 0; i < props.postHistory.images.length; i++) {
-            const imgLink = functions.getImageLink(props.postHistory.images[i]?.type, props.postHistory.postID, props.postHistory.images[i]?.filename ? props.postHistory.images[i].filename : props.postHistory.images[i])
-            const currentLink = functions.getImageLink(props.currentHistory.images[i]?.type, props.currentHistory.postID, props.currentHistory.images[i]?.filename ? props.currentHistory.images[i].filename : props.currentHistory.images[i])
+            const imgLink = functions.getImageLink(props.postHistory.images[i]?.type, props.postHistory.postID, 1, props.postHistory.images[i]?.filename ? props.postHistory.images[i].filename : props.postHistory.images[i])
+            const currentLink = functions.getImageLink(props.currentHistory.images[i]?.type, props.currentHistory.postID, 1, props.currentHistory.images[i]?.filename ? props.currentHistory.images[i].filename : props.currentHistory.images[i])
 
             let img = imgLink
             if (functions.isImage(img)) {
@@ -97,7 +97,7 @@ const PostHistoryRow: React.FunctionComponent<Props> = (props) => {
     const parseImages = async () => {
         let images = [] as any
         for (let i = 0; i < props.postHistory.images.length; i++) {
-            const imgLink = functions.getImageLink(props.postHistory.images[i]?.type, props.postHistory.postID, props.postHistory.images[i]?.filename ? props.postHistory.images[i].filename : props.postHistory.images[i])
+            const imgLink = functions.getImageLink(props.postHistory.images[i]?.type, props.postHistory.postID, 1, props.postHistory.images[i]?.filename ? props.postHistory.images[i].filename : props.postHistory.images[i])
             let link = imgLink
             let ext = path.extname(imgLink)
             if (functions.isImage(link)) {
@@ -306,7 +306,7 @@ const PostHistoryRow: React.FunctionComponent<Props> = (props) => {
         if (props.postHistory.images.length > 1) {
             let newImageIndex = imageIndex + 1 
             if (newImageIndex > props.postHistory.images.length - 1) newImageIndex = 0
-            const newImg = functions.getImageLink(props.postHistory.images[newImageIndex]?.type, props.postHistory.postID, props.postHistory.images[newImageIndex]?.filename ? props.postHistory.images[newImageIndex].filename : props.postHistory.images[newImageIndex])
+            const newImg = functions.getImageLink(props.postHistory.images[newImageIndex]?.type, props.postHistory.postID, 1, props.postHistory.images[newImageIndex]?.filename ? props.postHistory.images[newImageIndex].filename : props.postHistory.images[newImageIndex])
             setImageIndex(newImageIndex)
             setImg(newImg)
         }

@@ -889,18 +889,18 @@ export default class Functions {
         })
     }
 
-    public static getImagePath = (folder: string, postID: number, filename: string) => {
-        return `${folder}/${postID}/${filename}`
+    public static getImagePath = (folder: string, postID: number, order: number, filename: string) => {
+        return `${folder}/${postID}-${order}-${filename}`
     }
 
     public static getImageHistoryPath = (postID: number, key: number, filename: string) => {
         return `history/post/${postID}/${key}/${filename}`
     }
 
-    public static getImageLink = (folder: string, postID: number, filename: string) => {
+    public static getImageLink = (folder: string, postID: number, order: number, filename: string) => {
         if (!filename) return ""
         if (filename.includes("history/")) return `${window.location.protocol}//${window.location.host}/${filename}`
-        return `${window.location.protocol}//${window.location.host}/${folder}/${postID}/${encodeURIComponent(filename)}`
+        return `${window.location.protocol}//${window.location.host}/${folder}/${postID}-${order}-${encodeURIComponent(filename)}`
     }
 
     public static linkToBase64 = async (link: string) => {
@@ -909,12 +909,12 @@ export default class Functions {
         return `data:image/jpeg;base64,${buffer.toString("base64")}`
     }
 
-    public static getUnverifiedImageLink = (folder: string, postID: number, filename: string) => {
+    public static getUnverifiedImageLink = (folder: string, postID: number, order: number, filename: string) => {
         if (!filename) return ""
-        return `${window.location.protocol}//${window.location.host}/unverified/${folder}/${postID}/${encodeURIComponent(filename)}`
+        return `${window.location.protocol}//${window.location.host}/unverified/${folder}/${postID}-${order}-${encodeURIComponent(filename)}`
     }
 
-    public static getThumbnailLink = (folder: string, postID: number, filename: string, sizeType: string) => {
+    public static getThumbnailLink = (folder: string, postID: number, order: number, filename: string, sizeType: string) => {
         if (!filename) return ""
         let size = 265
         if (sizeType === "tiny") size = 350
@@ -922,10 +922,10 @@ export default class Functions {
         if (sizeType === "medium") size = 600
         if (sizeType === "large") size = 800
         if (sizeType === "massive") size = 1000
-        return `${window.location.protocol}//${window.location.host}/thumbnail/${size}/${folder}/${postID}/${encodeURIComponent(filename)}`
+        return `${window.location.protocol}//${window.location.host}/thumbnail/${size}/${folder}/${postID}-${order}-${encodeURIComponent(filename)}`
     }
 
-    public static getUnverifiedThumbnailLink = (folder: string, postID: number, filename: string, sizeType: string) => {
+    public static getUnverifiedThumbnailLink = (folder: string, postID: number, order: number, filename: string, sizeType: string) => {
         if (!filename) return ""
         let size = 265
         if (sizeType === "tiny") size = 350
@@ -933,7 +933,7 @@ export default class Functions {
         if (sizeType === "medium") size = 600
         if (sizeType === "large") size = 800
         if (sizeType === "massive") size = 1000
-        return `${window.location.protocol}//${window.location.host}/thumbnail/${size}/unverified/${folder}/${postID}/${encodeURIComponent(filename)}`
+        return `${window.location.protocol}//${window.location.host}/thumbnail/${size}/unverified/${folder}/${postID}-${order}-${encodeURIComponent(filename)}`
     }
 
     public static getTagPath = (folder: string, filename: string) => {

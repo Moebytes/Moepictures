@@ -148,10 +148,10 @@ const CreateRoutes = (app: Express) => {
         for (let i = 0; i < images.length; i++) {
           let order = i + 1
           const ext = images[i].ext
-          let fileOrder = images.length > 1 ? `${order}` : ""
-          const filename = source.title ? `${source.title}${fileOrder}.${ext}` : 
-          characters[0].tag !== "unknown-character" ? `${characters[0].tag}${fileOrder}.${ext}` :
-          `${postID}${fileOrder ? `-${fileOrder}` : ""}.${ext}`
+          let fileOrder = images.length > 1 ? `${order}` : "1"
+          const filename = source.title ? `${source.title}.${ext}` : 
+          characters[0].tag !== "unknown-character" ? `${characters[0].tag}.${ext}` :
+          `${postID}.${ext}`
           let kind = "image" as any
           if (type === "comic") {
             kind = "comic"
@@ -179,7 +179,7 @@ const CreateRoutes = (app: Express) => {
             type = "model"
           }
 
-          let imagePath = functions.getImagePath(kind, postID, filename)
+          let imagePath = functions.getImagePath(kind, postID, Number(fileOrder), filename)
           const buffer = Buffer.from(Object.values(images[i].bytes))
           await serverFunctions.uploadFile(imagePath, buffer)
           let dimensions = null as any
@@ -285,7 +285,7 @@ const CreateRoutes = (app: Express) => {
         if (unverifiedID) {
           const unverifiedPost = await sql.unverifiedPost(Number(unverifiedID))
           for (let i = 0; i < unverifiedPost.images.length; i++) {
-            const imgPath = functions.getImagePath(unverifiedPost.images[i].type, Number(unverifiedID), unverifiedPost.images[i].filename)
+            const imgPath = functions.getImagePath(unverifiedPost.images[i].type, Number(unverifiedID), unverifiedPost.images[i].order, unverifiedPost.images[i].filename)
             await serverFunctions.deleteUnverifiedFile(imgPath)
           }
           await sql.deleteUnverifiedPost(Number(unverifiedID))
@@ -364,7 +364,7 @@ const CreateRoutes = (app: Express) => {
 
         let vanillaBuffers = [] as any
         for (let i = 0; i < post.images.length; i++) {
-          const imagePath = functions.getImagePath(post.images[i].type, postID, post.images[i].filename)
+          const imagePath = functions.getImagePath(post.images[i].type, postID, post.images[i].order, post.images[i].filename)
           const oldImage = await serverFunctions.getFile(imagePath) as Buffer
           vanillaBuffers.push(oldImage)
           if (imgChanged) {
@@ -385,10 +385,10 @@ const CreateRoutes = (app: Express) => {
         for (let i = 0; i < images.length; i++) {
           let order = i + 1
           const ext = images[i].ext
-          let fileOrder = images.length > 1 ? `${order}` : ""
-          const filename = source.title ? `${source.title}${fileOrder}.${ext}` : 
-          characters[0].tag !== "unknown-character" ? `${characters[0].tag}${fileOrder}.${ext}` :
-          `${postID}${fileOrder ? `-${fileOrder}` : ""}.${ext}`
+          let fileOrder = images.length > 1 ? `${order}` : "1"
+          const filename = source.title ? `${source.title}.${ext}` : 
+          characters[0].tag !== "unknown-character" ? `${characters[0].tag}.${ext}` :
+          `${postID}.${ext}`
           imageFilenames.push(filename)
           let kind = "image" as any
           if (type === "comic") {
@@ -417,7 +417,7 @@ const CreateRoutes = (app: Express) => {
             type = "model"
         }
         if (imgChanged) {
-            let imagePath = functions.getImagePath(kind, postID, filename)
+            let imagePath = functions.getImagePath(kind, postID, Number(fileOrder), filename)
             const buffer = Buffer.from(Object.values(images[i].bytes))
             await serverFunctions.uploadFile(imagePath, buffer)
             let dimensions = null as any
@@ -522,7 +522,7 @@ const CreateRoutes = (app: Express) => {
         if (unverifiedID) {
           const unverifiedPost = await sql.unverifiedPost(Number(unverifiedID))
           for (let i = 0; i < unverifiedPost.images.length; i++) {
-            const imgPath = functions.getImagePath(unverifiedPost.images[i].type, Number(unverifiedID), unverifiedPost.images[i].filename)
+            const imgPath = functions.getImagePath(unverifiedPost.images[i].type, Number(unverifiedID), unverifiedPost.images[i].order, unverifiedPost.images[i].filename)
             await serverFunctions.deleteUnverifiedFile(imgPath)
           }
           await sql.deleteUnverifiedPost(Number(unverifiedID))
@@ -645,10 +645,10 @@ const CreateRoutes = (app: Express) => {
         for (let i = 0; i < images.length; i++) {
           let order = i + 1
           const ext = images[i].ext
-          let fileOrder = images.length > 1 ? `${order}` : ""
-          const filename = source.title ? `${source.title}${fileOrder}.${ext}` : 
-          characters[0].tag !== "unknown-character" ? `${characters[0].tag}${fileOrder}.${ext}` :
-          `${postID}${fileOrder ? `-${fileOrder}` : ""}.${ext}`
+          let fileOrder = images.length > 1 ? `${order}` : "1"
+          const filename = source.title ? `${source.title}.${ext}` : 
+          characters[0].tag !== "unknown-character" ? `${characters[0].tag}.${ext}` :
+          `${postID}.${ext}`
           let kind = "image" as any
           if (type === "comic") {
             kind = "comic"
@@ -676,7 +676,7 @@ const CreateRoutes = (app: Express) => {
             type = "model"
         }
 
-          let imagePath = functions.getImagePath(kind, postID, filename)
+          let imagePath = functions.getImagePath(kind, postID, Number(fileOrder), filename)
           const buffer = Buffer.from(Object.values(images[i].bytes))
           await serverFunctions.uploadUnverifiedFile(imagePath, buffer)
           let dimensions = null as any
@@ -853,7 +853,7 @@ const CreateRoutes = (app: Express) => {
           if (!unverified) return res.status(400).send("Bad request")
           for (let i = 0; i < unverified.images.length; i++) {
             await sql.deleteUnverifiedImage(unverified.images[i].imageID)
-            await serverFunctions.deleteUnverifiedFile(functions.getImagePath(unverified.images[i].type, unverifiedID, unverified.images[i].filename))
+            await serverFunctions.deleteUnverifiedFile(functions.getImagePath(unverified.images[i].type, unverifiedID, unverified.images[i].order, unverified.images[i].filename))
           }
         }
 
@@ -877,10 +877,10 @@ const CreateRoutes = (app: Express) => {
         for (let i = 0; i < images.length; i++) {
           let order = i + 1
           const ext = images[i].ext
-          let fileOrder = images.length > 1 ? `${order}` : ""
-          const filename = source.title ? `${source.title}${fileOrder}.${ext}` : 
-          characters[0].tag !== "unknown-character" ? `${characters[0].tag}${fileOrder}.${ext}` :
-          `${postID}${fileOrder ? `-${fileOrder}` : ""}.${ext}`
+          let fileOrder = images.length > 1 ? `${order}` : "1"
+          const filename = source.title ? `${source.title}.${ext}` : 
+          characters[0].tag !== "unknown-character" ? `${characters[0].tag}.${ext}` :
+          `${postID}.${ext}`
           let kind = "image" as any
           if (type === "comic") {
             kind = "comic"
@@ -908,7 +908,7 @@ const CreateRoutes = (app: Express) => {
             type = "model"
         }
 
-          let imagePath = functions.getImagePath(kind, postID, filename)
+          let imagePath = functions.getImagePath(kind, postID, Number(fileOrder), filename)
           const buffer = Buffer.from(Object.values(images[i].bytes))
           await serverFunctions.uploadUnverifiedFile(imagePath, buffer)
           let dimensions = null as any
@@ -1035,7 +1035,7 @@ const CreateRoutes = (app: Express) => {
           if (!post) return res.status(400).send("Bad request")
           for (let i = 0; i < post.images.length; i++) {
             await sql.deleteImage(post.images[i].imageID)
-            await serverFunctions.deleteFile(functions.getImagePath(post.images[i].type, postID, post.images[i].filename))
+            await serverFunctions.deleteFile(functions.getImagePath(post.images[i].type, postID, post.images[i].order, post.images[i].filename))
           }
         }
         if (unverified.thirdParty) {
@@ -1049,14 +1049,14 @@ const CreateRoutes = (app: Express) => {
         if (type !== "comic") type = "image"
 
         for (let i = 0; i < unverified.images.length; i++) {
-          const imagePath = functions.getImagePath(unverified.images[i].type, postID, unverified.images[i].filename)
+          const imagePath = functions.getImagePath(unverified.images[i].type, postID, unverified.images[i].order, unverified.images[i].filename)
           const buffer = await serverFunctions.getUnverifiedFile(imagePath) as Buffer
           let order = i + 1
           const ext = path.extname(unverified.images[i].filename).replace(".", "")
-          let fileOrder = unverified.images.length > 1 ? `${order}` : ""
-          const filename = unverified.title ? `${unverified.title}${fileOrder}.${ext}` : 
-          characters[0].tag !== "unknown-character" ? `${characters[0].tag}${fileOrder}.${ext}` :
-          `${newPostID}${fileOrder ? `-${fileOrder}` : ""}.${ext}`
+          let fileOrder = unverified.images.length > 1 ? `${order}` : "1"
+          const filename = unverified.title ? `${unverified.title}.${ext}` : 
+          characters[0].tag !== "unknown-character" ? `${characters[0].tag}.${ext}` :
+          `${newPostID}.${ext}`
           let kind = "image" as any
           if (type === "comic") {
             kind = "comic"
@@ -1084,7 +1084,7 @@ const CreateRoutes = (app: Express) => {
             type = "model"
         }
 
-          let newImagePath = functions.getImagePath(kind, newPostID, filename)
+          let newImagePath = functions.getImagePath(kind, newPostID, Number(fileOrder), filename)
           await serverFunctions.uploadFile(newImagePath, buffer)
           let dimensions = null as any
           let hash = ""
@@ -1182,7 +1182,7 @@ const CreateRoutes = (app: Express) => {
 
         await sql.deleteUnverifiedPost(Number(postID))
         for (let i = 0; i < unverified.images.length; i++) {
-            const file = functions.getImagePath(unverified.images[i].type, unverified.postID, unverified.images[i].filename)
+            const file = functions.getImagePath(unverified.images[i].type, unverified.postID, unverified.images[i].order, unverified.images[i].filename)
             await serverFunctions.deleteUnverifiedFile(file)
         }
         
@@ -1202,7 +1202,7 @@ const CreateRoutes = (app: Express) => {
         if (!unverified) return res.status(400).send("Bad request")
         await sql.deleteUnverifiedPost(Number(postID))
         for (let i = 0; i < unverified.images.length; i++) {
-            const file = functions.getImagePath(unverified.images[i].type, unverified.postID, unverified.images[i].filename)
+            const file = functions.getImagePath(unverified.images[i].type, unverified.postID, unverified.images[i].order, unverified.images[i].filename)
             await serverFunctions.deleteUnverifiedFile(file)
         }
         res.status(200).send("Success")

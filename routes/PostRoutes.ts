@@ -89,7 +89,7 @@ const PostRoutes = (app: Express) => {
             if (!post) return res.status(200).send("Doesn't exist")
             await sql.deletePost(Number(postID))
             for (let i = 0; i < post.images.length; i++) {
-                const file = functions.getImagePath(post.images[i].type, post.postID, post.images[i].filename)
+                const file = functions.getImagePath(post.images[i].type, post.postID, post.images[i].order, post.images[i].filename)
                 await serverFunctions.deleteFile(file)
             }
             await serverFunctions.deleteFolder(`history/post/${postID}`).catch(() => null)
@@ -352,7 +352,7 @@ const PostRoutes = (app: Express) => {
                 vanilla.tags = categories.tags.map((t: any) => t.tag)
                 let vanillaImages = [] as any
                 for (let i = 0; i < vanilla.images.length; i++) {
-                    const imagePath = functions.getImagePath(vanilla.images[i].type, postID, vanilla.images[i].filename)
+                    const imagePath = functions.getImagePath(vanilla.images[i].type, postID, vanilla.images[i].order, vanilla.images[i].filename)
                     const buffer = await serverFunctions.getFile(imagePath)
                     const newImagePath = functions.getImageHistoryPath(postID, 1, vanilla.images[i].filename)
                     await serverFunctions.uploadFile(newImagePath, buffer)
@@ -364,7 +364,7 @@ const PostRoutes = (app: Express) => {
 
                 let images = [] as any
                 for (let i = 0; i < post.images.length; i++) {
-                    const imagePath = functions.getImagePath(post.images[i].type, postID, post.images[i].filename)
+                    const imagePath = functions.getImagePath(post.images[i].type, postID, post.images[i].order, post.images[i].filename)
                     const buffer = await serverFunctions.getFile(imagePath)
                     const newImagePath = functions.getImageHistoryPath(postID, 2, post.images[i].filename)
                     await serverFunctions.uploadFile(newImagePath, buffer)
@@ -377,7 +377,7 @@ const PostRoutes = (app: Express) => {
                 let images = [] as any
                 const nextKey = await serverFunctions.getNextKey("post", String(postID))
                 for (let i = 0; i < post.images.length; i++) {
-                    const imagePath = functions.getImagePath(post.images[i].type, postID, post.images[i].filename)
+                    const imagePath = functions.getImagePath(post.images[i].type, postID, post.images[i].order, post.images[i].filename)
                     const buffer = await serverFunctions.getFile(imagePath)
                     const newImagePath = functions.getImageHistoryPath(postID, nextKey, post.images[i].filename)
                     await serverFunctions.uploadFile(newImagePath, buffer)
@@ -435,14 +435,14 @@ const PostRoutes = (app: Express) => {
             if (type !== "comic") type = "image"
 
             for (let i = 0; i < post.images.length; i++) {
-                const imagePath = functions.getImagePath(post.images[i].type, originalPostID, post.images[i].filename)
+                const imagePath = functions.getImagePath(post.images[i].type, originalPostID, post.images[i].order, post.images[i].filename)
                 const buffer = await serverFunctions.getFile(imagePath) as Buffer
                 let order = i + 1
                 const ext = path.extname(post.images[i].filename).replace(".", "")
-                let fileOrder = post.images.length > 1 ? `${order}` : ""
-                const filename = post.title ? `${post.title}${fileOrder}.${ext}` : 
-                characters[0] !== "unknown-character" ? `${characters[0]}${fileOrder}.${ext}` :
-                `${postID}${fileOrder ? `-${fileOrder}` : ""}.${ext}`
+                let fileOrder = post.images.length > 1 ? `${order}` : "1"
+                const filename = post.title ? `${post.title}.${ext}` : 
+                characters[0] !== "unknown-character" ? `${characters[0]}.${ext}` :
+                `${postID}.${ext}`
                 let kind = "image" as any
                 if (type === "comic") {
                     kind = "comic"
@@ -470,7 +470,7 @@ const PostRoutes = (app: Express) => {
                     type = "model"
                 }
 
-                let newImagePath = functions.getImagePath(kind, postID, filename)
+                let newImagePath = functions.getImagePath(kind, postID, Number(fileOrder), filename)
                 await serverFunctions.uploadUnverifiedFile(newImagePath, buffer)
                 let dimensions = null as any
                 let hash = ""

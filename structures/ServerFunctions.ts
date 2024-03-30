@@ -231,7 +231,7 @@ export default class ServerFunctions {
         if (oldImages.length !== currentImages.length) return true
         for (let i = 0; i < oldImages.length; i++) {
             const oldImage = oldImages[i]
-            const oldPath = functions.getImagePath(oldImage.type, oldImage.postID, oldImage.filename)
+            const oldPath = functions.getImagePath(oldImage.type, oldImage.postID, oldImage.order, oldImage.filename)
             const oldBuffer = await ServerFunctions.getFile(oldPath) as Buffer
             const currentImage = currentImages[i]
             const currentBuffer = Buffer.from(currentImage.bytes)
@@ -268,7 +268,7 @@ export default class ServerFunctions {
             const post = posts[i]
             for (let j = 0; j < post.images.length; j++) {
                 const image = post.images[j]
-                const imgPath = functions.getImagePath(image.type, post.postID, image.filename)
+                const imgPath = functions.getImagePath(image.type, post.postID, image.order, image.filename)
                 console.log(imgPath)
                 const buffer = await ServerFunctions.getFile(imgPath) as Buffer
                 const md5 = crypto.createHash("md5").update(buffer).digest("hex")
