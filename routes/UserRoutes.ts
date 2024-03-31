@@ -178,7 +178,8 @@ const UserRoutes = (app: Express) => {
             const session = structuredClone(req.session)
             delete session.captchaCache
             delete session.csrfSecret
-            res.status(200).json(req.session)
+            delete session.ip
+            res.status(200).json(session)
         } catch {
             res.status(400).send("Bad request")
         }
