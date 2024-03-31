@@ -12,8 +12,11 @@ import functions from "../structures/Functions"
 import serverFunctions from "../structures/ServerFunctions"
 import rateLimit from "express-rate-limit"
 import fs from "fs"
+import CSRF from "csrf"
 import child_process from "child_process"
 import util from "util"
+
+const csrf = new CSRF()
 
 const exec = util.promisify(child_process.exec)
 
@@ -42,6 +45,39 @@ const contactLimiter = rateLimit({
 })
 
 const MiscRoutes = (app: Express) => {
+    app.get("/api/misc/csrf", miscLimiter, async (req: Request, res: Response, next: NextFunction) => {
+        try {
+            const secret = await csrf.secret()
+            req.session.csrfSecret = secret
+            const token = csrf.create(secret)
+            res.status(200).send(token)
+        } catch (e) {
+            console.log(e)
+            res.status(400).send("Bad request") 
+        }
+    })
+
+    app.post("/api/misc/captcha", captchaLimiter, async (req: Request, res: Response, next: NextFunction) => {
+        try {
+            const {captchaResponse} = req.body
+            const csrfToken = req.headers["x-csrf-token"] as string
+            const valid = csrf.verify(req.session.csrfSecret!, csrfToken)
+            if (!valid) return res.status(400).send("Bad request")
+            let ip = req.headers["x-forwarded-for"] || req.socket.remoteAddress
+            ip = ip?.toString().replace("::ffff:", "") || ""
+            const success = await serverFunctions.validateCapthca(captchaResponse, ip)
+            if (success) {
+                req.session.captchaAmount = 0
+                res.status(200).send("Success")
+            } else {
+                res.status(400).send("Bad request") 
+            }
+        } catch (e) {
+            console.log(e)
+            res.status(400).send("Bad request") 
+        }
+    })
+
     app.post("/api/misc/saucenao", miscLimiter, async (req: Request, res: Response, next: NextFunction) => {
         try {
             const form = new FormData()
@@ -147,6 +183,9 @@ const MiscRoutes = (app: Express) => {
     app.post("/api/misc/contact", contactLimiter, async (req: Request, res: Response, next: NextFunction) => {
         try {
             const {email, subject, message, files} = req.body 
+            const csrfToken = req.headers["x-csrf-token"] as string
+            const valid = csrf.verify(req.session.csrfSecret!, csrfToken)
+            if (!valid) return res.status(400).send("Bad request")
             if (!email || !subject || !message || !files) return res.status(400).send("Bad request")
             const badEmail = functions.validateEmail(email)
             if (badEmail) return res.status(400).send("Bad request")
@@ -166,28 +205,9 @@ const MiscRoutes = (app: Express) => {
         }
     })
 
-    app.post("/api/misc/captcha", captchaLimiter, async (req: Request, res: Response, next: NextFunction) => {
-        try {
-            const {captchaResponse} = req.body 
-            let ip = req.headers["x-forwarded-for"] || req.socket.remoteAddress
-            ip = ip?.toString().replace("::ffff:", "") || ""
-            const success = await serverFunctions.validateCapthca(captchaResponse, ip)
-            if (success) {
-                req.session.captchaAmount = 0
-                res.status(200).send("Success")
-            } else {
-                res.status(400).send("Bad request") 
-            }
-        } catch (e) {
-            console.log(e)
-            res.status(400).send("Bad request") 
-        }
-    })
-
     app.post("/api/misc/wdtagger", miscLimiter, async (req: Request, res: Response, next: NextFunction) => {
         try {
             const buffer = Buffer.from(req.body, "binary")
-
             const folder = path.join(__dirname, "./dump")
             if (!fs.existsSync(folder)) fs.mkdirSync(folder, {recursive: true})
 

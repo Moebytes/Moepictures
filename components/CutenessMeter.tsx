@@ -30,7 +30,7 @@ const CutenessMeter: React.FunctionComponent<Props> = (props) => {
     }
 
     const updateCuteness = async () => {
-        await axios.post("/api/cuteness/update", {cuteness, postID: props.post.postID}, {withCredentials: true})
+        await axios.post("/api/cuteness/update", {cuteness, postID: props.post.postID}, {headers: {"x-csrf-token": functions.getCSRFToken()}, withCredentials: true})
     }
 
     useEffect(() => {

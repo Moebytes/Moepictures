@@ -79,7 +79,7 @@ const VerifyEmailPage: React.FunctionComponent = (props) => {
         if (!errorRef.current) await functions.timeout(20)
         errorRef.current!.innerText = "Submitting..."
         try {
-            await axios.post("/api/user/verifyemail", {email}, {withCredentials: true})
+            await axios.post("/api/user/verifyemail", {email}, {headers: {"x-csrf-token": functions.getCSRFToken()}, withCredentials: true})
             setSubmitted(true)
             setSessionFlag(true)
             setError(false)

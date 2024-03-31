@@ -107,7 +107,7 @@ const CommentRow: React.FunctionComponent<Props> = (props) => {
     }
 
     const deleteComment = async () => {
-        await axios.delete("/api/comment/delete", {params: {commentID: props.comment.commentID}, withCredentials: true})
+        await axios.delete("/api/comment/delete", {params: {commentID: props.comment.commentID}, headers: {"x-csrf-token": functions.getCSRFToken()}, withCredentials: true})
         props.onDelete?.()
     }
 
@@ -127,7 +127,7 @@ const CommentRow: React.FunctionComponent<Props> = (props) => {
         if (!editCommentText) return
         const badComment = functions.validateComment(editCommentText)
         if (badComment) return
-        await axios.put("/api/comment/edit", {commentID: props.comment.commentID, comment: editCommentText}, {withCredentials: true})
+        await axios.put("/api/comment/edit", {commentID: props.comment.commentID, comment: editCommentText}, {headers: {"x-csrf-token": functions.getCSRFToken()}, withCredentials: true})
         props.onEdit?.()
     }
 

@@ -46,13 +46,13 @@ const ModPostDeletions: React.FunctionComponent = (props) => {
     }
 
     const deletePost = async (username: string, postID: number) => {
-        await axios.delete("/api/post/delete", {params: {postID}, withCredentials: true})
-        await axios.post("/api/post/delete/request/fulfill", {username, postID}, {withCredentials: true})
+        await axios.delete("/api/post/delete", {params: {postID}, headers: {"x-csrf-token": functions.getCSRFToken()}, withCredentials: true})
+        await axios.post("/api/post/delete/request/fulfill", {username, postID}, {headers: {"x-csrf-token": functions.getCSRFToken()}, withCredentials: true})
         updatePosts()
     }
 
     const rejectRequest = async (username: string, postID: number) => {
-        await axios.post("/api/post/delete/request/fulfill", {username, postID}, {withCredentials: true})
+        await axios.post("/api/post/delete/request/fulfill", {username, postID}, {headers: {"x-csrf-token": functions.getCSRFToken()}, withCredentials: true})
         updatePosts()
     }
 

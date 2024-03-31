@@ -4,8 +4,9 @@ import slowDown from "express-slow-down"
 import sql from "../structures/SQLQuery"
 import functions from "../structures/Functions"
 import serverFunctions from "../structures/ServerFunctions"
-import fs from "fs"
-import path from "path"
+import CSRF from "csrf"
+
+const csrf = new CSRF()
 
 const commentLimiter = rateLimit({
 	windowMs: 5 * 60 * 1000,
@@ -18,7 +19,10 @@ const commentLimiter = rateLimit({
 const CommentRoutes = (app: Express) => {
     app.post("/api/comment/create", commentLimiter, async (req: Request, res: Response) => {
         try {
-            const {comment, postID} = req.body 
+            const {comment, postID} = req.body
+            const csrfToken = req.headers["x-csrf-token"] as string
+            const valid = csrf.verify(req.session.csrfSecret!, csrfToken)
+            if (!valid) return res.status(400).send("Bad request")
             if (!req.session.username || !comment || !postID) return res.status(400).send("Bad request")
             if (Number.isNaN(Number(postID))) return res.status(400).send("Invalid postID")
             const badComment = functions.validateComment(comment) 
@@ -33,6 +37,9 @@ const CommentRoutes = (app: Express) => {
     app.delete("/api/comment/delete", commentLimiter, async (req: Request, res: Response) => {
         try {
             const commentID = req.query.commentID
+            const csrfToken = req.headers["x-csrf-token"] as string
+            const valid = csrf.verify(req.session.csrfSecret!, csrfToken)
+            if (!valid) return res.status(400).send("Bad request")
             if (Number.isNaN(Number(commentID))) return res.status(400).send("Invalid commentID")
             if (!req.session.username) return res.status(400).send("Bad request")
             const comment = await sql.comment(Number(commentID))
@@ -50,6 +57,9 @@ const CommentRoutes = (app: Express) => {
     app.put("/api/comment/edit", commentLimiter, async (req: Request, res: Response) => {
         try {
             const {comment, commentID} = req.body
+            const csrfToken = req.headers["x-csrf-token"] as string
+            const valid = csrf.verify(req.session.csrfSecret!, csrfToken)
+            if (!valid) return res.status(400).send("Bad request")
             if (!req.session.username || !comment || !commentID) return res.status(400).send("Bad request")
             if (Number.isNaN(Number(commentID))) return res.status(400).send("Invalid commentID")
             const badComment = functions.validateComment(comment as string) 
@@ -66,6 +76,9 @@ const CommentRoutes = (app: Express) => {
     app.post("/api/comment/report", commentLimiter, async (req: Request, res: Response) => {
         try {
             const {commentID, reason} = req.body
+            const csrfToken = req.headers["x-csrf-token"] as string
+            const valid = csrf.verify(req.session.csrfSecret!, csrfToken)
+            if (!valid) return res.status(400).send("Bad request")
             if (!req.session.username || !commentID) return res.status(400).send("Bad request")
             if (Number.isNaN(Number(commentID))) return res.status(400).send("Invalid commentID")
             const exists = await sql.comment(commentID)
@@ -92,6 +105,9 @@ const CommentRoutes = (app: Express) => {
     app.post("/api/comment/report/request/fulfill", commentLimiter, async (req: Request, res: Response) => {
         try {
             const {username, commentID} = req.body
+            const csrfToken = req.headers["x-csrf-token"] as string
+            const valid = csrf.verify(req.session.csrfSecret!, csrfToken)
+            if (!valid) return res.status(400).send("Bad request")
             if (!username || !commentID) return res.status(400).send("Bad request")
             if (req.session.role !== "admin" && req.session.role !== "mod") return res.status(403).end()
             await sql.deleteCommentReport(username, commentID)

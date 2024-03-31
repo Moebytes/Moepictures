@@ -6,6 +6,9 @@ import functions from "../structures/Functions"
 import serverFunctions from "../structures/ServerFunctions"
 import fs from "fs"
 import path from "path"
+import CSRF from "csrf"
+
+const csrf = new CSRF()
 
 const tagLimiter = rateLimit({
 	windowMs: 5 * 60 * 1000,
@@ -84,6 +87,9 @@ const TagRoutes = (app: Express) => {
     app.delete("/api/tag/delete", tagLimiter, async (req: Request, res: Response) => {
         try {
             const tag = req.query.tag as string
+            const csrfToken = req.headers["x-csrf-token"] as string
+            const valid = csrf.verify(req.session.csrfSecret!, csrfToken)
+            if (!valid) return res.status(400).send("Bad request")
             if (!tag) return res.status(400).send("Invalid tag")
             const tagExists = await sql.tag(tag.trim())
             if (!req.session.username || !tagExists) return res.status(400).send("Bad request")
@@ -100,6 +106,9 @@ const TagRoutes = (app: Express) => {
     app.put("/api/tag/edit", tagEditLimiter, async (req: Request, res: Response) => {
         try {
             const {tag, key, description, image, aliases, implications, pixiv, twitter, website, fandom, reason} = req.body
+            const csrfToken = req.headers["x-csrf-token"] as string
+            const valid = csrf.verify(req.session.csrfSecret!, csrfToken)
+            if (!valid) return res.status(400).send("Bad request")
             if (!req.session.username || !tag) return res.status(400).send("Bad request")
             const tagObj = await sql.tag(tag)
             if (!tagObj) return res.status(400).send("Bad request")
@@ -120,7 +129,7 @@ const TagRoutes = (app: Express) => {
                 if (image[0] !== "delete") {
                     const filename = `${tag}.${functions.fileExtension(image)}`
                     const imagePath = functions.getTagPath(tagObj.type, filename)
-                    await serverFunctions.uploadFile(imagePath, Buffer.from(Object.values(image)))
+                    await serverFunctions.uploadFile(imagePath, Buffer.from(Object.values(image) as any))
                     await sql.updateTag(tag, "image", filename)
                     tagObj.image = filename
                     imageFilename = filename
@@ -197,7 +206,7 @@ const TagRoutes = (app: Express) => {
                 await sql.insertTagHistory(vanilla.user, vanilla.tag, vanilla.key, vanilla.type, vanilla.image, vanilla.description, vanilla.aliases, vanilla.implications, vanilla.website, vanilla.pixiv, vanilla.twitter, vanilla.fandom)
                 if (image?.[0] && imageFilename) {
                     const imagePath = functions.getTagHistoryPath(key, 2, imageFilename)
-                    await serverFunctions.uploadFile(imagePath, Buffer.from(Object.values(image)))
+                    await serverFunctions.uploadFile(imagePath, Buffer.from(Object.values(image) as any))
                     imageFilename = imagePath
                 }
                 await sql.insertTagHistory(req.session.username, tag, key, tagObj.type, imageFilename, tagDescription, aliases, implications, website, pixiv, twitter, fandom, reason)
@@ -205,7 +214,7 @@ const TagRoutes = (app: Express) => {
                 if (image?.[0] && imageFilename) {
                     const nextKey = await serverFunctions.getNextKey("tag", key)
                     const imagePath = functions.getTagHistoryPath(key, nextKey, imageFilename)
-                    await serverFunctions.uploadFile(imagePath, Buffer.from(Object.values(image)))
+                    await serverFunctions.uploadFile(imagePath, Buffer.from(Object.values(image) as any))
                     imageFilename = imagePath
                 }
                 await sql.insertTagHistory(req.session.username, tag, key, tagObj.type, imageFilename, tagDescription, aliases, implications, website, pixiv, twitter, fandom, reason)
@@ -220,6 +229,9 @@ const TagRoutes = (app: Express) => {
     app.post("/api/tag/aliasto", tagLimiter, async (req: Request, res: Response) => {
         try {
             const {tag, aliasTo} = req.body
+            const csrfToken = req.headers["x-csrf-token"] as string
+            const valid = csrf.verify(req.session.csrfSecret!, csrfToken)
+            if (!valid) return res.status(400).send("Bad request")
             if (!req.session.username || !tag || !aliasTo) return res.status(400).send("Bad request")
             if (req.session.role !== "admin" && req.session.role !== "mod") return res.status(403).end()
             const exists = await sql.tag(aliasTo)
@@ -249,6 +261,9 @@ const TagRoutes = (app: Express) => {
     app.post("/api/tag/delete/request", tagLimiter, async (req: Request, res: Response) => {
         try {
             const {tag, reason} = req.body
+            const csrfToken = req.headers["x-csrf-token"] as string
+            const valid = csrf.verify(req.session.csrfSecret!, csrfToken)
+            if (!valid) return res.status(400).send("Bad request")
             if (!tag) return res.status(400).send("Invalid postID")
             if (!req.session.username) return res.status(400).send("Bad request")
             const exists = await sql.tag(tag)
@@ -277,6 +292,9 @@ const TagRoutes = (app: Express) => {
     app.post("/api/tag/delete/request/fulfill", tagLimiter, async (req: Request, res: Response) => {
         try {
             const {username, tag} = req.body
+            const csrfToken = req.headers["x-csrf-token"] as string
+            const valid = csrf.verify(req.session.csrfSecret!, csrfToken)
+            if (!valid) return res.status(400).send("Bad request")
             if (!tag) return res.status(400).send("Invalid tag")
             if (!req.session.username || !username) return res.status(400).send("Bad request")
             if (req.session.role !== "admin" && req.session.role !== "mod") return res.status(403).end()
@@ -291,6 +309,9 @@ const TagRoutes = (app: Express) => {
     app.post("/api/tag/aliasto/request", tagLimiter, async (req: Request, res: Response) => {
         try {
             const {tag, aliasTo, reason} = req.body
+            const csrfToken = req.headers["x-csrf-token"] as string
+            const valid = csrf.verify(req.session.csrfSecret!, csrfToken)
+            if (!valid) return res.status(400).send("Bad request")
             if (!tag || !aliasTo) return res.status(400).send("Bad request")
             if (!req.session.username) return res.status(400).send("Bad request")
             const exists = await sql.tag(tag)
@@ -321,6 +342,9 @@ const TagRoutes = (app: Express) => {
     app.post("/api/tag/aliasto/request/fulfill", tagLimiter, async (req: Request, res: Response) => {
         try {
             const {username, tag} = req.body
+            const csrfToken = req.headers["x-csrf-token"] as string
+            const valid = csrf.verify(req.session.csrfSecret!, csrfToken)
+            if (!valid) return res.status(400).send("Bad request")
             if (!tag) return res.status(400).send("Invalid tag")
             if (!req.session.username || !username) return res.status(400).send("Bad request")
             if (req.session.role !== "admin" && req.session.role !== "mod") return res.status(403).end()
@@ -335,6 +359,9 @@ const TagRoutes = (app: Express) => {
     app.post("/api/tag/edit/request", tagLimiter, async (req: Request, res: Response) => {
         try {
             const {tag, key, description, image, aliases, implications, pixiv, twitter, website, fandom, reason} = req.body
+            const csrfToken = req.headers["x-csrf-token"] as string
+            const valid = csrf.verify(req.session.csrfSecret!, csrfToken)
+            if (!valid) return res.status(400).send("Bad request")
             if (!req.session.username || !tag) return res.status(400).send("Bad request")
             const tagObj = await sql.tag(tag)
             if (!tagObj) return res.status(400).send("Bad request")
@@ -343,7 +370,7 @@ const TagRoutes = (app: Express) => {
                 if (image[0] !== "delete") {
                     const filename = `${tag}.${functions.fileExtension(image)}`
                     imagePath = functions.getTagPath(tagObj.type, filename)
-                    await serverFunctions.uploadUnverifiedFile(imagePath, Buffer.from(Object.values(image)))
+                    await serverFunctions.uploadUnverifiedFile(imagePath, Buffer.from(Object.values(image) as any))
                 } else {
                     imagePath = "delete"
                 }
@@ -372,6 +399,9 @@ const TagRoutes = (app: Express) => {
     app.post("/api/tag/edit/request/fulfill", tagLimiter, async (req: Request, res: Response) => {
         try {
             const {username, tag, image} = req.body
+            const csrfToken = req.headers["x-csrf-token"] as string
+            const valid = csrf.verify(req.session.csrfSecret!, csrfToken)
+            if (!valid) return res.status(400).send("Bad request")
             if (!tag) return res.status(400).send("Invalid tag")
             if (!req.session.username || !username) return res.status(400).send("Bad request")
             if (req.session.role !== "admin" && req.session.role !== "mod") return res.status(403).end()
@@ -400,6 +430,9 @@ const TagRoutes = (app: Express) => {
     app.delete("/api/tag/history/delete", tagLimiter, async (req: Request, res: Response) => {
         try {
             const {tag, historyID} = req.query
+            const csrfToken = req.headers["x-csrf-token"] as string
+            const valid = csrf.verify(req.session.csrfSecret!, csrfToken)
+            if (!valid) return res.status(400).send("Bad request")
             if (Number.isNaN(Number(historyID))) return res.status(400).send("Invalid historyID")
             if (!req.session.username) return res.status(400).send("Bad request")
             if (req.session.role !== "admin" && req.session.role !== "mod") return res.status(403).end()

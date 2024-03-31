@@ -17,6 +17,9 @@ import mm from "music-metadata"
 import * as THREE from "three"
 import {GLTFLoader, OBJLoader, FBXLoader} from "three-stdlib"
 
+// csrf token
+let csrfToken = ""
+
 // drag scroll
 let newScrollY = 0
 let lastScrollTop = 0
@@ -34,6 +37,14 @@ const audioExtensions = [".mp3", ".wav"]
 const modelExtensions = [".glb", ".gltf", ".obj", ".fbx"]
 
 export default class Functions {
+    public static updateCSRFToken = async () => {
+        csrfToken = await axios.get("/api/misc/csrf", {withCredentials: true}).then((r) => r.data)
+    }
+
+    public static getCSRFToken = () => {
+        return csrfToken
+    }
+
     public static captchaSiteKey = () => {
         return "123c92b0-ebd6-4dd7-b152-46a9c503510c"
     }

@@ -52,7 +52,7 @@ const DeleteTagDialog: React.FunctionComponent = (props) => {
                 setError(false)
                 return
             }
-            await axios.post("/api/tag/delete/request", {tag: deleteTagID, reason}, {withCredentials: true})
+            await axios.post("/api/tag/delete/request", {tag: deleteTagID, reason}, {headers: {"x-csrf-token": functions.getCSRFToken()}, withCredentials: true})
             setSubmitted(true)
         }
     }

@@ -44,7 +44,7 @@ const DeletePostDialog: React.FunctionComponent<Props> = (props) => {
 
     const deletePost = async () => {
         if (permissions.isStaff(session)) {
-            await axios.delete("/api/post/delete", {params: {postID: props.post.postID}, withCredentials: true})
+            await axios.delete("/api/post/delete", {params: {postID: props.post.postID}, headers: {"x-csrf-token": functions.getCSRFToken()}, withCredentials: true})
             history.push("/posts")
         } else {
             const badReason = functions.validateReason(reason)
@@ -56,7 +56,7 @@ const DeletePostDialog: React.FunctionComponent<Props> = (props) => {
                 setError(false)
                 return
             }
-            await axios.post("/api/post/delete/request", {postID: props.post.postID, reason}, {withCredentials: true})
+            await axios.post("/api/post/delete/request", {postID: props.post.postID, reason}, {headers: {"x-csrf-token": functions.getCSRFToken()}, withCredentials: true})
             setSubmitted(true)
         }
     }

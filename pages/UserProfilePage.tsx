@@ -157,7 +157,7 @@ const UserProfilePage: React.FunctionComponent = (props) => {
                         }
                         const arrayBuffer = await fetch(croppedURL).then((r) => r.arrayBuffer())
                         const bytes = Object.values(new Uint8Array(arrayBuffer))
-                        await axios.post("/api/user/updatepfp", bytes, {withCredentials: true})
+                        await axios.post("/api/user/updatepfp", bytes, {headers: {"x-csrf-token": functions.getCSRFToken()}, withCredentials: true})
                         setUserImg("")
                         setSessionFlag(true)
                     }
@@ -169,7 +169,7 @@ const UserProfilePage: React.FunctionComponent = (props) => {
     }
 
     const favoritesPrivacy = async () => {
-        await axios.post("/api/user/favoritesprivacy", null, {withCredentials: true})
+        await axios.post("/api/user/favoritesprivacy", null, {headers: {"x-csrf-token": functions.getCSRFToken()}, withCredentials: true})
         setSessionFlag(true)
     }
 
@@ -187,7 +187,7 @@ const UserProfilePage: React.FunctionComponent = (props) => {
         if (!errorRef.current) await functions.timeout(20)
         errorRef.current!.innerText = "Submitting..."
         try {
-            await axios.post("/api/user/changebio", {bio}, {withCredentials: true})
+            await axios.post("/api/user/changebio", {bio}, {headers: {"x-csrf-token": functions.getCSRFToken()}, withCredentials: true})
             setSessionFlag(true)
             setError(false)
             setShowBioInput(false)

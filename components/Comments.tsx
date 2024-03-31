@@ -72,7 +72,7 @@ const Comments: React.FunctionComponent<Props> = (props) => {
         if (!errorRef.current) await functions.timeout(20)
         errorRef.current!.innerText = "Submitting..."
         try {
-            await axios.post("/api/comment/create", {postID: props.post.postID, comment: text}, {withCredentials: true})
+            await axios.post("/api/comment/create", {postID: props.post.postID, comment: text}, {headers: {"x-csrf-token": functions.getCSRFToken()}, withCredentials: true})
             errorRef.current!.innerText = "Comment added."
             setCommentFlag(true)
             setText("")

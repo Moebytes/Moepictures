@@ -88,7 +88,7 @@ const TagRow: React.FunctionComponent<Props> = (props) => {
     }
 
     const deleteTag = async () => {
-        await axios.delete("/api/tag/delete", {params: {tag: props.tag.tag}, withCredentials: true})
+        await axios.delete("/api/tag/delete", {params: {tag: props.tag.tag}, headers: {"x-csrf-token": functions.getCSRFToken()}, withCredentials: true})
         props.onDelete?.()
     }
 
@@ -125,7 +125,7 @@ const TagRow: React.FunctionComponent<Props> = (props) => {
         }
         await axios.put("/api/tag/edit", {tag: props.tag.tag, key: editTagKey, description: editTagDescription,
         image, aliases: editTagAliases, implications: editTagImplications, pixiv: editTagPixiv, twitter: editTagTwitter,
-        website: editTagWebsite, fandom: editTagFandom, reason: editTagReason}, {withCredentials: true})
+        website: editTagWebsite, fandom: editTagFandom, reason: editTagReason}, {headers: {"x-csrf-token": functions.getCSRFToken()}, withCredentials: true})
         if (editTagImage) refreshCache(editTagImage)
         props.onEdit?.()
     }
@@ -154,7 +154,7 @@ const TagRow: React.FunctionComponent<Props> = (props) => {
     }
 
     const aliasTag = async () => {
-        await axios.post("/api/tag/aliasto", {tag: props.tag.tag, aliasTo: aliasTagName}, {withCredentials: true})
+        await axios.post("/api/tag/aliasto", {tag: props.tag.tag, aliasTo: aliasTagName}, {headers: {"x-csrf-token": functions.getCSRFToken()}, withCredentials: true})
         props.onEdit?.()
     }
 

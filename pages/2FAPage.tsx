@@ -69,7 +69,7 @@ const $2FAPage: React.FunctionComponent = (props) => {
         if (!errorRef.current) await functions.timeout(20)
         errorRef.current!.innerText = "Submitting..."
         try {
-            await axios.post("/api/2fa", {token}, {withCredentials: true})
+            await axios.post("/api/2fa", {token}, {headers: {"x-csrf-token": functions.getCSRFToken()}, withCredentials: true})
             setSessionFlag(true)
             history.push("/posts")
             setError(false)

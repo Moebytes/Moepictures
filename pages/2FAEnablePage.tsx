@@ -54,7 +54,7 @@ const $2FAEnablePage: React.FunctionComponent = (props) => {
     }, [mobile])
 
     const get2FAQRCode = async () => {
-        const qrcode = await axios.post("/api/2fa/qr", null, {withCredentials: true}).then((r) => r.data)
+        const qrcode = await axios.post("/api/2fa/qr", null, {headers: {"x-csrf-token": functions.getCSRFToken()}, withCredentials: true}).then((r) => r.data)
         if (qrcode) {
             const arrayBuffer = await fetch(qrcode).then((r) => r.arrayBuffer())
             setQR(functions.arrayBufferToBase64(arrayBuffer))
@@ -74,7 +74,7 @@ const $2FAEnablePage: React.FunctionComponent = (props) => {
     }, [session])
 
     const toggle = async () => {
-        const {qr} = await axios.post("/api/2fa/create", null, {withCredentials: true}).then((r) => r.data)
+        const {qr} = await axios.post("/api/2fa/create", null, {headers: {"x-csrf-token": functions.getCSRFToken()}, withCredentials: true}).then((r) => r.data)
         if (qr) {
             const arrayBuffer = await fetch(qr).then((r) => r.arrayBuffer())
             setQR(functions.arrayBufferToBase64(arrayBuffer))
@@ -99,7 +99,7 @@ const $2FAEnablePage: React.FunctionComponent = (props) => {
         if (!errorRef.current) await functions.timeout(20)
         errorRef.current!.innerText = "Submitting..."
         try {
-            await axios.post("/api/2fa/enable", {token}, {withCredentials: true})
+            await axios.post("/api/2fa/enable", {token}, {headers: {"x-csrf-token": functions.getCSRFToken()}, withCredentials: true})
             setSessionFlag(true)
             setShowValidation(false)
             setError(false)

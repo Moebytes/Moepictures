@@ -54,7 +54,7 @@ const AliasTagDialog: React.FunctionComponent = (props) => {
                 return
             }
             try {
-                await axios.post("/api/tag/aliasto/request", {tag: aliasTagID, aliasTo: aliasTagName, reason}, {withCredentials: true})
+                await axios.post("/api/tag/aliasto/request", {tag: aliasTagID, aliasTo: aliasTagName, reason}, {headers: {"x-csrf-token": functions.getCSRFToken()}, withCredentials: true})
                 setSubmitted(true)
             } catch {
                 setError(true)

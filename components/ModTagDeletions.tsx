@@ -43,13 +43,13 @@ const ModTagDeletions: React.FunctionComponent = (props) => {
     }
 
     const deleteTag = async (username: string, tag: string) => {
-        await axios.delete("/api/tag/delete", {params: {tag}, withCredentials: true})
-        await axios.post("/api/tag/delete/request/fulfill", {username, tag}, {withCredentials: true})
+        await axios.delete("/api/tag/delete", {params: {tag}, headers: {"x-csrf-token": functions.getCSRFToken()}, withCredentials: true})
+        await axios.post("/api/tag/delete/request/fulfill", {username, tag}, {headers: {"x-csrf-token": functions.getCSRFToken()}, withCredentials: true})
         updateTags()
     }
 
     const rejectRequest = async (username: string, tag: string) => {
-        await axios.post("/api/tag/delete/request/fulfill", {username, tag}, {withCredentials: true})
+        await axios.post("/api/tag/delete/request/fulfill", {username, tag}, {headers: {"x-csrf-token": functions.getCSRFToken()}, withCredentials: true})
         updateTags()
     }
 

@@ -43,13 +43,13 @@ const ModTagAliases: React.FunctionComponent = (props) => {
     }
 
     const aliasTag = async (username: string, tag: string, aliasTo: string) => {
-        await axios.post("/api/tag/aliasto", {tag, aliasTo}, {withCredentials: true})
-        await axios.post("/api/tag/aliasto/request/fulfill", {username, tag}, {withCredentials: true})
+        await axios.post("/api/tag/aliasto", {tag, aliasTo}, {headers: {"x-csrf-token": functions.getCSRFToken()}, withCredentials: true})
+        await axios.post("/api/tag/aliasto/request/fulfill", {username, tag}, {headers: {"x-csrf-token": functions.getCSRFToken()}, withCredentials: true})
         updateTags()
     }
 
     const rejectRequest = async (username: string, tag: string) => {
-        await axios.post("/api/tag/aliasto/request/fulfill", {username, tag}, {withCredentials: true})
+        await axios.post("/api/tag/aliasto/request/fulfill", {username, tag}, {headers: {"x-csrf-token": functions.getCSRFToken()}, withCredentials: true})
         updateTags()
     }
 

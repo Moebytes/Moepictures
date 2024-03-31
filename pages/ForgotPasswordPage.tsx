@@ -48,7 +48,7 @@ const ForgotPasswordPage: React.FunctionComponent = (props) => {
         setError(true)
         if (!errorRef.current) await functions.timeout(20)
         errorRef.current!.innerText = "Submitting..."
-        await axios.post("/api/user/forgotpassword", {email}, {withCredentials: true})
+        await axios.post("/api/user/forgotpassword", {email}, {headers: {"x-csrf-token": functions.getCSRFToken()}, withCredentials: true})
         setSubmitted(true)
         setError(false)
         setEmail("")

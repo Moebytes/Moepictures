@@ -150,11 +150,11 @@ const PostHistoryRow: React.FunctionComponent<Props> = (props) => {
             }
             await axios.put("/api/post/edit", {postID: props.postHistory.postID, images, type: props.postHistory.type, restrict: props.postHistory.restrict, source,
             style: props.postHistory.style, artists: props.postHistory.artists, characters: props.postHistory.characters, preserveThirdParty: props.postHistory.thirdParty,
-            series: props.postHistory.series, tags: props.postHistory.tags, newTags, reason: props.postHistory.reason}, {withCredentials: true})
+            series: props.postHistory.series, tags: props.postHistory.tags, newTags, reason: props.postHistory.reason}, {headers: {"x-csrf-token": functions.getCSRFToken()}, withCredentials: true})
         } else {
             await axios.put("/api/post/quickedit", {postID: props.postHistory.postID, type: props.postHistory.type, restrict: props.postHistory.restrict,
             style: props.postHistory.style, artists: props.postHistory.artists, characters: props.postHistory.characters, preserveThirdParty: props.postHistory.thirdParty,
-            series: props.postHistory.series, tags: props.postHistory.tags, reason: props.postHistory.reason}, {withCredentials: true})
+            series: props.postHistory.series, tags: props.postHistory.tags, reason: props.postHistory.reason}, {headers: {"x-csrf-token": functions.getCSRFToken()}, withCredentials: true})
         }
         props.onEdit?.()
     }
@@ -173,7 +173,7 @@ const PostHistoryRow: React.FunctionComponent<Props> = (props) => {
 
     const deletePostHistory = async () => {
         if (props.current) return Promise.reject()
-        await axios.delete("/api/post/history/delete", {params: {postID, historyID: props.postHistory.historyID}, withCredentials: true})
+        await axios.delete("/api/post/history/delete", {params: {postID, historyID: props.postHistory.historyID}, headers: {"x-csrf-token": functions.getCSRFToken()}, withCredentials: true})
         props.onDelete?.()
     }
 

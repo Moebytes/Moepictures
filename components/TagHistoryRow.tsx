@@ -59,7 +59,7 @@ const TagHistoryRow: React.FunctionComponent<Props> = (props) => {
         }
         await axios.put("/api/tag/edit", {tag: props.tagHistory.tag, key: props.tagHistory.key, description: props.tagHistory.description,
         image, aliases: props.tagHistory.aliases, implications: props.tagHistory.implications, pixiv: props.tagHistory.pixiv, twitter: props.tagHistory.twitter,
-        website: props.tagHistory.website, fandom: props.tagHistory.fandom}, {withCredentials: true})
+        website: props.tagHistory.website, fandom: props.tagHistory.fandom}, {headers: {"x-csrf-token": functions.getCSRFToken()}, withCredentials: true})
         props.onEdit?.()
     }
 
@@ -77,7 +77,7 @@ const TagHistoryRow: React.FunctionComponent<Props> = (props) => {
 
     const deleteTagHistory = async () => {
         if (props.current) return Promise.reject()
-        await axios.delete("/api/tag/history/delete", {params: {tag: props.tagHistory.tag, historyID: props.tagHistory.historyID}, withCredentials: true})
+        await axios.delete("/api/tag/history/delete", {params: {tag: props.tagHistory.tag, historyID: props.tagHistory.historyID}, headers: {"x-csrf-token": functions.getCSRFToken()}, withCredentials: true})
         props.onDelete?.()
     }
 

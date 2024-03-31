@@ -66,13 +66,13 @@ const ModTagEdits: React.FunctionComponent = (props) => {
                 bytes = Object.values(new Uint8Array(arrayBuffer))
             }
         }
-        await axios.put("/api/tag/edit", {tag, key, description, image: bytes, aliases, implications, pixiv, twitter, website, fandom}, {withCredentials: true})
-        await axios.post("/api/tag/edit/request/fulfill", {username, tag, image}, {withCredentials: true})
+        await axios.put("/api/tag/edit", {tag, key, description, image: bytes, aliases, implications, pixiv, twitter, website, fandom}, {headers: {"x-csrf-token": functions.getCSRFToken()}, withCredentials: true})
+        await axios.post("/api/tag/edit/request/fulfill", {username, tag, image}, {headers: {"x-csrf-token": functions.getCSRFToken()}, withCredentials: true})
         updateTags()
     }
 
     const rejectRequest = async (username: string, tag: string, image: string) => {
-        await axios.post("/api/tag/edit/request/fulfill", {username, tag, image}, {withCredentials: true})
+        await axios.post("/api/tag/edit/request/fulfill", {username, tag, image}, {headers: {"x-csrf-token": functions.getCSRFToken()}, withCredentials: true})
         updateTags()
     }
 

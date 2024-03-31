@@ -795,9 +795,9 @@ const UploadPage: React.FunctionComponent = (props) => {
         submitErrorRef.current.innerText = "Submitting..."
         try {
             if (permissions.isStaff(session)) {
-                await axios.post("/api/post/upload", data, {withCredentials: true}).then((r) => r.data)
+                await axios.post("/api/post/upload", data, {headers: {"x-csrf-token": functions.getCSRFToken()}, withCredentials: true}).then((r) => r.data)
             } else {
-                await axios.post("/api/post/upload/unverified", data, {withCredentials: true}).then((r) => r.data)
+                await axios.post("/api/post/upload/unverified", data, {headers: {"x-csrf-token": functions.getCSRFToken()}, withCredentials: true}).then((r) => r.data)
             }
             setSubmitted(true)
             return setSubmitError(false)

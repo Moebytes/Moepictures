@@ -10,6 +10,9 @@ import fileType from "magic-bytes.js"
 import imageSize from "image-size"
 import {performance} from "perf_hooks"
 import axios from "axios"
+import CSRF from "csrf"
+
+const csrf = new CSRF()
 
 const uploadLimiter = rateLimit({
 	windowMs: 5 * 60 * 1000,
@@ -86,6 +89,9 @@ const validImages = (images: any[]) => {
 const CreateRoutes = (app: Express) => {
     app.post("/api/post/upload", modLimiter, async (req: Request, res: Response, next: NextFunction) => {
       try {
+        const csrfToken = req.headers["x-csrf-token"] as string
+        const valid = csrf.verify(req.session.csrfSecret!, csrfToken)
+        if (!valid) return res.status(400).send("Bad request")
         const images = req.body.images 
         let type = req.body.type 
         const restrict = req.body.restrict 
@@ -180,7 +186,7 @@ const CreateRoutes = (app: Express) => {
           }
 
           let imagePath = functions.getImagePath(kind, postID, Number(fileOrder), filename)
-          const buffer = Buffer.from(Object.values(images[i].bytes))
+          const buffer = Buffer.from(Object.values(images[i].bytes) as any)
           await serverFunctions.uploadFile(imagePath, buffer)
           let dimensions = null as any
           let hash = ""
@@ -226,7 +232,7 @@ const CreateRoutes = (app: Express) => {
           if (newTags[i].image) {
             const filename = `${newTags[i].tag}.${newTags[i].ext}`
             const imagePath = functions.getTagPath("tag", filename)
-            await serverFunctions.uploadFile(imagePath, Buffer.from(Object.values(newTags[i].bytes)))
+            await serverFunctions.uploadFile(imagePath, Buffer.from(Object.values(newTags[i].bytes) as any))
             bulkObj.image = filename
           }
           bulkTagUpdate.push(bulkObj)
@@ -238,7 +244,7 @@ const CreateRoutes = (app: Express) => {
           if (artists[i].image) {
             const filename = `${artists[i].tag}.${artists[i].ext}`
             const imagePath = functions.getTagPath("artist", filename)
-            await serverFunctions.uploadFile(imagePath, Buffer.from(Object.values(artists[i].bytes)))
+            await serverFunctions.uploadFile(imagePath, Buffer.from(Object.values(artists[i].bytes) as any))
             bulkObj.image = filename
           }
           bulkTagUpdate.push(bulkObj)
@@ -251,7 +257,7 @@ const CreateRoutes = (app: Express) => {
           if (characters[i].image) {
             const filename = `${characters[i].tag}.${characters[i].ext}`
             const imagePath = functions.getTagPath("character", filename)
-            await serverFunctions.uploadFile(imagePath, Buffer.from(Object.values(characters[i].bytes)))
+            await serverFunctions.uploadFile(imagePath, Buffer.from(Object.values(characters[i].bytes) as any))
             bulkObj.image = filename
           }
           bulkTagUpdate.push(bulkObj)
@@ -264,7 +270,7 @@ const CreateRoutes = (app: Express) => {
           if (series[i].image) {
             const filename = `${series[i].tag}.${series[i].ext}`
             const imagePath = functions.getTagPath("series", filename)
-            await serverFunctions.uploadFile(imagePath, Buffer.from(Object.values(series[i].bytes)))
+            await serverFunctions.uploadFile(imagePath, Buffer.from(Object.values(series[i].bytes) as any))
             bulkObj.image = filename
           }
           bulkTagUpdate.push(bulkObj)
@@ -418,7 +424,7 @@ const CreateRoutes = (app: Express) => {
         }
         if (imgChanged) {
             let imagePath = functions.getImagePath(kind, postID, Number(fileOrder), filename)
-            const buffer = Buffer.from(Object.values(images[i].bytes))
+            const buffer = Buffer.from(Object.values(images[i].bytes) as any)
             await serverFunctions.uploadFile(imagePath, buffer)
             let dimensions = null as any
             let hash = ""
@@ -464,7 +470,7 @@ const CreateRoutes = (app: Express) => {
           if (newTags[i].image) {
             const filename = `${newTags[i].tag}.${newTags[i].ext}`
             const imagePath = functions.getTagPath("tag", filename)
-            await serverFunctions.uploadFile(imagePath, Buffer.from(Object.values(newTags[i].bytes)))
+            await serverFunctions.uploadFile(imagePath, Buffer.from(Object.values(newTags[i].bytes) as any))
             bulkObj.image = filename
           }
           bulkTagUpdate.push(bulkObj)
@@ -476,7 +482,7 @@ const CreateRoutes = (app: Express) => {
           if (artists[i].image) {
             const filename = `${artists[i].tag}.${artists[i].ext}`
             const imagePath = functions.getTagPath("artist", filename)
-            await serverFunctions.uploadFile(imagePath, Buffer.from(Object.values(artists[i].bytes)))
+            await serverFunctions.uploadFile(imagePath, Buffer.from(Object.values(artists[i].bytes) as any))
             bulkObj.image = filename
           }
           bulkTagUpdate.push(bulkObj)
@@ -489,7 +495,7 @@ const CreateRoutes = (app: Express) => {
           if (characters[i].image) {
             const filename = `${characters[i].tag}.${characters[i].ext}`
             const imagePath = functions.getTagPath("character", filename)
-            await serverFunctions.uploadFile(imagePath, Buffer.from(Object.values(characters[i].bytes)))
+            await serverFunctions.uploadFile(imagePath, Buffer.from(Object.values(characters[i].bytes) as any))
             bulkObj.image = filename
           }
           bulkTagUpdate.push(bulkObj)
@@ -502,7 +508,7 @@ const CreateRoutes = (app: Express) => {
           if (series[i].image) {
             const filename = `${series[i].tag}.${series[i].ext}`
             const imagePath = functions.getTagPath("series", filename)
-            await serverFunctions.uploadFile(imagePath, Buffer.from(Object.values(series[i].bytes)))
+            await serverFunctions.uploadFile(imagePath, Buffer.from(Object.values(series[i].bytes) as any))
             bulkObj.image = filename
           }
           bulkTagUpdate.push(bulkObj)
@@ -554,7 +560,7 @@ const CreateRoutes = (app: Express) => {
 
             let newImages = [] as any
             for (let i = 0; i < images.length; i++) {
-                const buffer = Buffer.from(Object.values(images[i].bytes))
+                const buffer = Buffer.from(Object.values(images[i].bytes) as any)
                 const newImagePath = functions.getImageHistoryPath(postID, 2, imageFilenames[i])
                 await serverFunctions.uploadFile(newImagePath, buffer)
                 newImages.push(newImagePath)
@@ -566,7 +572,7 @@ const CreateRoutes = (app: Express) => {
             let newImages = [] as any
             const nextKey = await serverFunctions.getNextKey("post", String(postID))
             for (let i = 0; i < images.length; i++) {
-                const buffer = Buffer.from(Object.values(images[i].bytes))
+                const buffer = Buffer.from(Object.values(images[i].bytes) as any)
                 const newImagePath = functions.getImageHistoryPath(postID, nextKey, imageFilenames[i])
                 await serverFunctions.uploadFile(newImagePath, buffer)
                 newImages.push(newImagePath)
@@ -584,6 +590,9 @@ const CreateRoutes = (app: Express) => {
 
     app.post("/api/post/upload/unverified", uploadLimiter, async (req: Request, res: Response, next: NextFunction) => {
       try {
+        const csrfToken = req.headers["x-csrf-token"] as string
+        const valid = csrf.verify(req.session.csrfSecret!, csrfToken)
+        if (!valid) return res.status(400).send("Bad request")
         const images = req.body.images 
         let type = req.body.type 
         const restrict = req.body.restrict 
@@ -677,7 +686,7 @@ const CreateRoutes = (app: Express) => {
         }
 
           let imagePath = functions.getImagePath(kind, postID, Number(fileOrder), filename)
-          const buffer = Buffer.from(Object.values(images[i].bytes))
+          const buffer = Buffer.from(Object.values(images[i].bytes) as any)
           await serverFunctions.uploadUnverifiedFile(imagePath, buffer)
           let dimensions = null as any
           let hash = ""
@@ -728,7 +737,7 @@ const CreateRoutes = (app: Express) => {
           if (newTags[i].image) {
             const filename = `${newTags[i].tag}.${newTags[i].ext}`
             const imagePath = functions.getTagPath("tag", filename)
-            await serverFunctions.uploadUnverifiedFile(imagePath, Buffer.from(Object.values(newTags[i].bytes)))
+            await serverFunctions.uploadUnverifiedFile(imagePath, Buffer.from(Object.values(newTags[i].bytes) as any))
             bulkObj.image = filename
           }
           bulkTagUpdate.push(bulkObj)
@@ -740,7 +749,7 @@ const CreateRoutes = (app: Express) => {
           if (artists[i].image) {
             const filename = `${artists[i].tag}.${artists[i].ext}`
             const imagePath = functions.getTagPath("artist", filename)
-            await serverFunctions.uploadUnverifiedFile(imagePath, Buffer.from(Object.values(artists[i].bytes)))
+            await serverFunctions.uploadUnverifiedFile(imagePath, Buffer.from(Object.values(artists[i].bytes) as any))
             bulkObj.image = filename
           }
           bulkTagUpdate.push(bulkObj)
@@ -753,7 +762,7 @@ const CreateRoutes = (app: Express) => {
           if (characters[i].image) {
             const filename = `${characters[i].tag}.${characters[i].ext}`
             const imagePath = functions.getTagPath("character", filename)
-            await serverFunctions.uploadUnverifiedFile(imagePath, Buffer.from(Object.values(characters[i].bytes)))
+            await serverFunctions.uploadUnverifiedFile(imagePath, Buffer.from(Object.values(characters[i].bytes) as any))
             bulkObj.image = filename
           }
           bulkTagUpdate.push(bulkObj)
@@ -766,7 +775,7 @@ const CreateRoutes = (app: Express) => {
           if (series[i].image) {
             const filename = `${series[i].tag}.${series[i].ext}`
             const imagePath = functions.getTagPath("series", filename)
-            await serverFunctions.uploadUnverifiedFile(imagePath, Buffer.from(Object.values(series[i].bytes)))
+            await serverFunctions.uploadUnverifiedFile(imagePath, Buffer.from(Object.values(series[i].bytes) as any))
             bulkObj.image = filename
           }
           bulkTagUpdate.push(bulkObj)
@@ -792,6 +801,9 @@ const CreateRoutes = (app: Express) => {
 
     app.put("/api/post/edit/unverified", editLimiter, async (req: Request, res: Response, next: NextFunction) => {
       try {
+        const csrfToken = req.headers["x-csrf-token"] as string
+        const valid = csrf.verify(req.session.csrfSecret!, csrfToken)
+        if (!valid) return res.status(400).send("Bad request")
         let postID = Number(req.body.postID)
         let unverifiedID = Number(req.body.unverifiedID)
         const images = req.body.images 
@@ -909,7 +921,7 @@ const CreateRoutes = (app: Express) => {
         }
 
           let imagePath = functions.getImagePath(kind, postID, Number(fileOrder), filename)
-          const buffer = Buffer.from(Object.values(images[i].bytes))
+          const buffer = Buffer.from(Object.values(images[i].bytes) as any)
           await serverFunctions.uploadUnverifiedFile(imagePath, buffer)
           let dimensions = null as any
           let hash = ""
@@ -958,7 +970,7 @@ const CreateRoutes = (app: Express) => {
           if (newTags[i].image) {
             const filename = `${newTags[i].tag}.${newTags[i].ext}`
             const imagePath = functions.getTagPath("tag", filename)
-            await serverFunctions.uploadUnverifiedFile(imagePath, Buffer.from(Object.values(newTags[i].bytes)))
+            await serverFunctions.uploadUnverifiedFile(imagePath, Buffer.from(Object.values(newTags[i].bytes) as any))
             bulkObj.image = filename
           }
           bulkTagUpdate.push(bulkObj)
@@ -970,7 +982,7 @@ const CreateRoutes = (app: Express) => {
           if (artists[i].image) {
             const filename = `${artists[i].tag}.${artists[i].ext}`
             const imagePath = functions.getTagPath("artist", filename)
-            await serverFunctions.uploadUnverifiedFile(imagePath, Buffer.from(Object.values(artists[i].bytes)))
+            await serverFunctions.uploadUnverifiedFile(imagePath, Buffer.from(Object.values(artists[i].bytes) as any))
             bulkObj.image = filename
           }
           bulkTagUpdate.push(bulkObj)
@@ -983,7 +995,7 @@ const CreateRoutes = (app: Express) => {
           if (characters[i].image) {
             const filename = `${characters[i].tag}.${characters[i].ext}`
             const imagePath = functions.getTagPath("character", filename)
-            await serverFunctions.uploadUnverifiedFile(imagePath, Buffer.from(Object.values(characters[i].bytes)))
+            await serverFunctions.uploadUnverifiedFile(imagePath, Buffer.from(Object.values(characters[i].bytes) as any))
             bulkObj.image = filename
           }
           bulkTagUpdate.push(bulkObj)
@@ -996,7 +1008,7 @@ const CreateRoutes = (app: Express) => {
           if (series[i].image) {
             const filename = `${series[i].tag}.${series[i].ext}`
             const imagePath = functions.getTagPath("series", filename)
-            await serverFunctions.uploadUnverifiedFile(imagePath, Buffer.from(Object.values(series[i].bytes)))
+            await serverFunctions.uploadUnverifiedFile(imagePath, Buffer.from(Object.values(series[i].bytes) as any))
             bulkObj.image = filename
           }
           bulkTagUpdate.push(bulkObj)
@@ -1022,6 +1034,9 @@ const CreateRoutes = (app: Express) => {
 
     app.post("/api/post/approve", modLimiter, async (req: Request, res: Response, next: NextFunction) => {
       try {
+        const csrfToken = req.headers["x-csrf-token"] as string
+        const valid = csrf.verify(req.session.csrfSecret!, csrfToken)
+        if (!valid) return res.status(400).send("Bad request")
         let postID = Number(req.body.postID)
         if (Number.isNaN(postID)) return res.status(400).send("Bad request")
         if (req.session.role !== "admin" && req.session.role !== "mod") return res.status(403).end()
@@ -1195,6 +1210,9 @@ const CreateRoutes = (app: Express) => {
 
     app.post("/api/post/reject", modLimiter, async (req: Request, res: Response, next: NextFunction) => {
       try {
+        const csrfToken = req.headers["x-csrf-token"] as string
+        const valid = csrf.verify(req.session.csrfSecret!, csrfToken)
+        if (!valid) return res.status(400).send("Bad request")
         let postID = Number(req.body.postID)
         if (Number.isNaN(postID)) return res.status(400).send("Bad request")
         if (req.session.role !== "admin" && req.session.role !== "mod") return res.status(403).end()

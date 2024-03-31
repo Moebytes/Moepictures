@@ -228,7 +228,7 @@ const PostImageOptions: React.FunctionComponent<Props> = (props) => {
 
     const updateFavorite = async (value: boolean) => {
         if (!props.post || !session.username) return
-        await axios.post("/api/favorite/update", {postID: props.post.postID, favorited: value}, {withCredentials: true})
+        await axios.post("/api/favorite/update", {postID: props.post.postID, favorited: value}, {headers: {"x-csrf-token": functions.getCSRFToken()}, withCredentials: true})
         setFavorited(value)
     }
 

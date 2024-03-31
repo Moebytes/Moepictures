@@ -44,12 +44,12 @@ const ModPosts: React.FunctionComponent = (props) => {
     }
 
     const approvePost = async (postID: number) => {
-        await axios.post("/api/post/approve", {postID}, {withCredentials: true})
+        await axios.post("/api/post/approve", {postID}, {headers: {"x-csrf-token": functions.getCSRFToken()}, withCredentials: true})
         updatePosts()
     }
 
     const rejectPost = async (postID: number) => {
-        await axios.post("/api/post/reject", {postID}, {withCredentials: true})
+        await axios.post("/api/post/reject", {postID}, {headers: {"x-csrf-token": functions.getCSRFToken()}, withCredentials: true})
         updatePosts()
     }
 

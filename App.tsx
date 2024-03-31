@@ -93,6 +93,7 @@ const App: React.FunctionComponent = (props) => {
             setLoaded(true)
         }, 100)
         getSessionCookie()
+        functions.updateCSRFToken()
         saveTags()
     }, [])
 

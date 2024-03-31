@@ -101,7 +101,7 @@ const SearchRoutes = (app: Express) => {
     app.post("/api/search/similar", searchLimiter, async (req: Request, res: Response, next: NextFunction) => {
         try {
             const {type, bytes} = req.body
-            const buffer = Buffer.from(Object.values(bytes))
+            const buffer = Buffer.from(Object.values(bytes) as any)
             let hash = ""
             const useMD5 = type === "mp3" || type === "wav" || type === "glb" || type === "fbx" || type === "obj"
             if (useMD5) {

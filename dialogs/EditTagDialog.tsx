@@ -94,7 +94,7 @@ const EditTagDialog: React.FunctionComponent = (props) => {
                     image = Object.values(bytes)
                 }
             }
-            await axios.post("/api/tag/edit/request", {tag: editTagID, key: editTagKey, description: editTagDescription, image, aliases: editTagAliases, implications: editTagImplications, pixiv: editTagPixiv, twitter: editTagTwitter, website: editTagWebsite, fandom: editTagFandom, reason: editTagReason}, {withCredentials: true})
+            await axios.post("/api/tag/edit/request", {tag: editTagID, key: editTagKey, description: editTagDescription, image, aliases: editTagAliases, implications: editTagImplications, pixiv: editTagPixiv, twitter: editTagTwitter, website: editTagWebsite, fandom: editTagFandom, reason: editTagReason}, {headers: {"x-csrf-token": functions.getCSRFToken()}, withCredentials: true})
             setSubmitted(true)
         }
     }

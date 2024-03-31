@@ -411,12 +411,12 @@ const MobileInfo: React.FunctionComponent<Props> = (props) => {
     }
 
     const approvePost = async () => {
-        await axios.post("/api/post/approve", {postID: props.post.postID}, {withCredentials: true})
+        await axios.post("/api/post/approve", {postID: props.post.postID}, {headers: {"x-csrf-token": functions.getCSRFToken()}, withCredentials: true})
         modNext()
     }
 
     const rejectPost = async () => {
-        await axios.post("/api/post/reject", {postID: props.post.postID}, {withCredentials: true})
+        await axios.post("/api/post/reject", {postID: props.post.postID}, {headers: {"x-csrf-token": functions.getCSRFToken()}, withCredentials: true})
         modNext()
     }
 

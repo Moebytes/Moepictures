@@ -88,7 +88,7 @@ const LoginPage: React.FunctionComponent = (props) => {
         if (!errorRef.current) await functions.timeout(20)
         errorRef.current!.innerText = "Submitting..."
         try {
-            const result = await axios.post("/api/user/login", {username, password, captchaResponse}, {withCredentials: true}).then((r) => r.data)
+            const result = await axios.post("/api/user/login", {username, password, captchaResponse}, {headers: {"x-csrf-token": functions.getCSRFToken()}, withCredentials: true}).then((r) => r.data)
             setSessionFlag(true)
             if (redirect) {
                 await functions.timeout(20)

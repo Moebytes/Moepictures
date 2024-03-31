@@ -133,7 +133,7 @@ const SignUpPage: React.FunctionComponent = (props) => {
         if (!errorRef.current) await functions.timeout(20)
         errorRef.current!.innerText = "Submitting..."
         try {
-            await axios.post("/api/user/signup", {username, email, password, captchaResponse}, {withCredentials: true})
+            await axios.post("/api/user/signup", {username, email, password, captchaResponse}, {headers: {"x-csrf-token": functions.getCSRFToken()}, withCredentials: true})
             setSubmitted(true)
             setError(false)
         } catch {

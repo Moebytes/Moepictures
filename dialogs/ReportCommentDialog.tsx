@@ -44,7 +44,7 @@ const ReportCommentDialog: React.FunctionComponent = (props) => {
             setError(false)
             return
         }
-        await axios.post("/api/comment/report", {commentID: reportCommentID, reason}, {withCredentials: true})
+        await axios.post("/api/comment/report", {commentID: reportCommentID, reason}, {headers: {"x-csrf-token": functions.getCSRFToken()}, withCredentials: true})
         setSubmitted(true)
     }
 

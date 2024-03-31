@@ -51,13 +51,13 @@ const ModCommentReports: React.FunctionComponent = (props) => {
     }
 
     const reportComment = async (username: string, commentID: number) => {
-        await axios.delete("/api/comment/delete", {params: {commentID}, withCredentials: true})
-        await axios.post("/api/comment/report/request/fulfill", {username, commentID}, {withCredentials: true})
+        await axios.delete("/api/comment/delete", {params: {commentID}, headers: {"x-csrf-token": functions.getCSRFToken()}, withCredentials: true})
+        await axios.post("/api/comment/report/request/fulfill", {username, commentID}, {headers: {"x-csrf-token": functions.getCSRFToken()}, withCredentials: true})
         updateComments()
     }
 
     const rejectRequest = async (username: string, commentID: string) => {
-        await axios.post("/api/comment/report/request/fulfill", {username, commentID}, {withCredentials: true})
+        await axios.post("/api/comment/report/request/fulfill", {username, commentID}, {headers: {"x-csrf-token": functions.getCSRFToken()}, withCredentials: true})
         updateComments()
     }
 

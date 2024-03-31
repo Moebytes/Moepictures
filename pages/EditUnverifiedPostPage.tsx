@@ -888,7 +888,7 @@ const EditUnverifiedPostPage: React.FunctionComponent<Props> = (props) => {
         await functions.timeout(20)
         submitErrorRef.current.innerText = "Submitting..."
         try {
-            await axios.put("/api/post/edit/unverified", data, {withCredentials: true}).then((r) => r.data)
+            await axios.put("/api/post/edit/unverified", data, {headers: {"x-csrf-token": functions.getCSRFToken()}, withCredentials: true}).then((r) => r.data)
             setSubmitted(true)
             return setSubmitError(false)
         } catch {

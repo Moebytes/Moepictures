@@ -33,7 +33,7 @@ const DeleteAccountDialog: React.FunctionComponent = (props) => {
     }, [showDeleteAccountDialog])
 
     const deleteAccount = async () => {
-        await axios.delete("/api/user/delete", {withCredentials: true})
+        await axios.delete("/api/user/delete", {headers: {"x-csrf-token": functions.getCSRFToken()}, withCredentials: true})
         setSessionFlag(true)
         history.push("/posts")
         setSidebarText("Account Deleted.")

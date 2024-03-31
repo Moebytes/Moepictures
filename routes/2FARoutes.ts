@@ -5,8 +5,9 @@ import sql from "../structures/SQLQuery"
 import functions from "../structures/Functions"
 import serverFunctions from "../structures/ServerFunctions"
 import {generateSecret, verifyToken} from "node-2fa"
-import fs from "fs"
-import path from "path"
+import CSRF from "csrf"
+
+const csrf = new CSRF()
 
 const $2faLimiter = rateLimit({
 	windowMs: 5 * 60 * 1000,
@@ -19,6 +20,9 @@ const $2faLimiter = rateLimit({
 const $2FARoutes = (app: Express) => {
     app.post("/api/2fa/create", $2faLimiter, async (req: Request, res: Response) => {
         try {
+            const csrfToken = req.headers["x-csrf-token"] as string
+            const valid = csrf.verify(req.session.csrfSecret!, csrfToken)
+            if (!valid) return res.status(400).send("Bad request")
             if (!req.session.username) return res.status(400).send("Bad request")
             const user = await sql.user(req.session.username)
             if (!user) return res.status(400).send("Bad request")
@@ -41,6 +45,9 @@ const $2FARoutes = (app: Express) => {
 
     app.post("/api/2fa/qr", $2faLimiter, async (req: Request, res: Response) => {
         try {
+            const csrfToken = req.headers["x-csrf-token"] as string
+            const valid = csrf.verify(req.session.csrfSecret!, csrfToken)
+            if (!valid) return res.status(400).send("Bad request")
             if (!req.session.username) return res.status(400).send("Bad request")
             const $2FAToken = await sql.$2faToken(req.session.username)
             if (!$2FAToken) return res.status(400).send("Bad request")
@@ -53,14 +60,17 @@ const $2FARoutes = (app: Express) => {
     app.post("/api/2fa/enable", $2faLimiter, async (req: Request, res: Response) => {
         try {
             let {token} = req.body 
+            const csrfToken = req.headers["x-csrf-token"] as string
+            const valid = csrf.verify(req.session.csrfSecret!, csrfToken)
+            if (!valid) return res.status(400).send("Bad request")
             if (!req.session.username || !token) return res.status(400).send("Bad request")
             token = token.trim()
             const user = await sql.user(req.session.username)
             if (!user) return res.status(400).send("Bad request")
             const $2FAToken = await sql.$2faToken(user.username)
             if (!$2FAToken) return res.status(400).send("Bad request")
-            const valid = verifyToken($2FAToken.token, token, 60)
-            if (valid) {
+            const validToken = verifyToken($2FAToken.token, token, 60)
+            if (validToken) {
                 await sql.updateUser(req.session.username, "$2fa", true)
                 req.session.$2fa = true
                 res.status(200).send("Success")
@@ -75,14 +85,17 @@ const $2FARoutes = (app: Express) => {
     app.post("/api/2fa", $2faLimiter, async (req: Request, res: Response) => {
         try {
             let {token} = req.body 
+            const csrfToken = req.headers["x-csrf-token"] as string
+            const valid = csrf.verify(req.session.csrfSecret!, csrfToken)
+            if (!valid) return res.status(400).send("Bad request")
             if (!req.session.$2fa || !req.session.email || !token) return res.status(400).send("Bad request")
             if (req.session.username) return res.status(400).send("Bad request")
             token = token.trim()
             const user = await sql.userByEmail(req.session.email)
             if (!user) return res.status(400).send("Bad request")
             const $2FAToken = await sql.$2faToken(user.username)
-            const valid = verifyToken($2FAToken.token, token, 60)
-            if (valid) {
+            const validToken = verifyToken($2FAToken.token, token, 60)
+            if (validToken) {
                 req.session.$2fa = user.$2fa
                 req.session.email = user.email
                 req.session.emailVerified = user.emailVerified

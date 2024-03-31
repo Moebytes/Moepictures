@@ -4,8 +4,9 @@ import slowDown from "express-slow-down"
 import sql from "../structures/SQLQuery"
 import functions from "../structures/Functions"
 import serverFunctions from "../structures/ServerFunctions"
-import fs from "fs"
-import path from "path"
+import CSRF from "csrf"
+
+const csrf = new CSRF()
 
 const favoriteLimiter = rateLimit({
 	windowMs: 5 * 60 * 1000,
@@ -19,6 +20,9 @@ const FavoriteRoutes = (app: Express) => {
     app.post("/api/favorite/update", favoriteLimiter, async (req: Request, res: Response) => {
         try {
             const {postID, favorited} = req.body
+            const csrfToken = req.headers["x-csrf-token"] as string
+            const valid = csrf.verify(req.session.csrfSecret!, csrfToken)
+            if (!valid) return res.status(400).send("Bad request")
             if (Number.isNaN(Number(postID))) return res.status(400).send("Invalid postID")
             if (favorited == null || !req.session.username) return res.status(400).send("Bad request")
             const favorite = await sql.favorite(Number(postID), req.session.username)

@@ -58,6 +58,7 @@ declare module "express-session" {
       captchaAmount: number 
       lastPostID: number
       captchaCache: string
+      csrfSecret: string
   }
 }
 

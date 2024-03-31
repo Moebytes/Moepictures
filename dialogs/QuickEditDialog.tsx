@@ -136,7 +136,7 @@ const QuickEditDialog: React.FunctionComponent = (props) => {
                 tags: functions.cleanHTML(tags).split(/[\n\r\s]+/g),
                 reason
             }
-            await axios.put("/api/post/quickedit", data, {withCredentials: true})
+            await axios.put("/api/post/quickedit", data, {headers: {"x-csrf-token": functions.getCSRFToken()}, withCredentials: true})
             setQuickEditID(null)
             history.go(0)
         } else {
@@ -167,7 +167,7 @@ const QuickEditDialog: React.FunctionComponent = (props) => {
                 tags: functions.cleanHTML(tags).split(/[\n\r\s]+/g),
                 reason
             }
-            await axios.put("/api/post/quickedit/unverified", data, {withCredentials: true})
+            await axios.put("/api/post/quickedit/unverified", data, {headers: {"x-csrf-token": functions.getCSRFToken()}, withCredentials: true})
             setSubmitted(true)
         }
     }
