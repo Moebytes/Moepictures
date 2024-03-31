@@ -14,6 +14,7 @@ import hideMagenta from "../assets/magenta/hide.png"
 import showMagentaLight from "../assets/magenta-light/show.png"
 import hideMagentaLight from "../assets/magenta-light/hide.png"
 import DragAndDrop from "../components/DragAndDrop"
+import HCaptcha from "@hcaptcha/react-hcaptcha"
 import functions from "../structures/Functions"
 import {HideNavbarContext, HideSidebarContext, ThemeContext, EnableDragContext, RelativeContext, HideTitlebarContext, MobileContext,
 HeaderTextContext, SidebarTextContext, SessionContext} from "../Context"
@@ -37,6 +38,7 @@ const SignUpPage: React.FunctionComponent = (props) => {
     const [username, setUsername] = useState("")
     const [password, setPassword] = useState("")
     const [confirmPassword, setConfirmPassword] = useState("")
+    const [captchaResponse, setCaptchaResponse] = useState("")
     const [error, setError] = useState(false)
     const [submitted, setSubmitted] = useState(false)
     const errorRef = useRef<any>(null)
@@ -120,11 +122,18 @@ const SignUpPage: React.FunctionComponent = (props) => {
             setError(false)
             return
         }
+        if (!captchaResponse) {
+            setError(true)
+            await functions.timeout(20)
+            errorRef.current.innerText = "Solve the captcha."
+            await functions.timeout(2000)
+            return setError(false)
+        }
         setError(true)
         if (!errorRef.current) await functions.timeout(20)
         errorRef.current!.innerText = "Submitting..."
         try {
-            await axios.post("/api/user/signup", {username, email, password}, {withCredentials: true})
+            await axios.post("/api/user/signup", {username, email, password, captchaResponse}, {withCredentials: true})
             setSubmitted(true)
             setError(false)
         } catch {
@@ -179,6 +188,9 @@ const SignUpPage: React.FunctionComponent = (props) => {
                             <img className="signup-pass-show" src={getEye2()} onClick={() => setShowPassword2((prev) => !prev)}/>
                             <input className="signup-pass-input" type={showPassword2 ? "text" : "password"} spellCheck={false} value={confirmPassword} onChange={(event) => setConfirmPassword(event.target.value)} onKeyDown={(event) => event.key === "Enter" ? submit() : null}/>
                         </div>
+                    </div>
+                    <div className="signup-row" style={{justifyContent: "center"}}>
+                        <HCaptcha sitekey={functions.captchaSiteKey()} theme="dark" onVerify={(response) => setCaptchaResponse(response)}/>
                     </div>
                     <span className="signup-validation">
                         -Passwords must contain at least 10 characters<br/>

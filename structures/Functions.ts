@@ -34,6 +34,10 @@ const audioExtensions = [".mp3", ".wav"]
 const modelExtensions = [".glb", ".gltf", ".obj", ".fbx"]
 
 export default class Functions {
+    public static captchaSiteKey = () => {
+        return "123c92b0-ebd6-4dd7-b152-46a9c503510c"
+    }
+    
     public static isSafari = () => {
         // @ts-ignore
         return /constructor/i.test(window.HTMLElement) || (function (p) {return p.toString() === "[object SafariRemoteNotification]" })(!window["safari"] || (typeof safari !== "undefined" && safari.pushNotification))

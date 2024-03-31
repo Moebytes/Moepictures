@@ -63,8 +63,6 @@ const CaptchaDialog: React.FunctionComponent<Props> = (props) => {
         }
     }, [needsVerification])
 
-    const siteKey = "123c92b0-ebd6-4dd7-b152-46a9c503510c"
-
     const captcha = async () => {
         if (!captchaResponse) {
             setError(true)
@@ -74,7 +72,7 @@ const CaptchaDialog: React.FunctionComponent<Props> = (props) => {
             return setError(false)
         }
         try {
-            await axios.post("/api/misc/captcha", {siteKey, captchaResponse}, {withCredentials: true})
+            await axios.post("/api/misc/captcha", {captchaResponse}, {withCredentials: true})
             captchaRef.current?.resetCaptcha()
             setSessionFlag(true)
             setNeedsVerification(false)
@@ -112,7 +110,7 @@ const CaptchaDialog: React.FunctionComponent<Props> = (props) => {
                                 <span className="captcha-dialog-title">Human Verification</span>
                             </div>
                             <div className="captcha-dialog-row" style={{pointerEvents: "all"}}>
-                                <HCaptcha sitekey={siteKey} theme="dark" onVerify={(response) => setCaptchaResponse(response)} />
+                                <HCaptcha sitekey={functions.captchaSiteKey()} theme="dark" onVerify={(response) => setCaptchaResponse(response)}/>
                             </div>
                             {error ? <div className="captcha-dialog-validation-container"><span className="captcha-dialog-validation" ref={errorRef}></span></div> : null}
                             <div className="captcha-dialog-row">

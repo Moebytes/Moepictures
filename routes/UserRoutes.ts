@@ -68,8 +68,8 @@ const UserRoutes = (app: Express) => {
     
     app.post("/api/user/signup", signupLimiter, async (req: Request, res: Response) => {
         try {
-            let {username, email, password} = req.body 
-            if (!username || !email || !password) return res.status(400).send("Bad request.")
+            let {username, email, password, captchaResponse} = req.body 
+            if (!username || !email || !password || !captchaResponse) return res.status(400).send("Bad request.")
             username = username.trim().toLowerCase()
             email = email.trim()
             password = password.trim()
@@ -77,6 +77,13 @@ const UserRoutes = (app: Express) => {
             const badEmail = functions.validateEmail(email)
             const badPassword = functions.validatePassword(username, password)
             if (badUsername || badEmail || badPassword) return res.status(400).send("Bad username, password, or email.")
+            let ip = req.headers["x-forwarded-for"] || req.socket.remoteAddress
+            ip = ip?.toString().replace("::ffff:", "") || ""
+            if (req.session.captchaCache !== captchaResponse) {
+                const success = await serverFunctions.validateCapthca(captchaResponse, ip)
+                if (!success) return res.status(400).send("Bad request")
+                req.session.captchaCache = captchaResponse
+            }
             try {
                 await sql.insertUser(username, email)
                 await sql.updateUser(username, "joinDate", new Date().toISOString())
@@ -85,8 +92,7 @@ const UserRoutes = (app: Express) => {
                 await sql.updateUser(username, "$2fa", false)
                 await sql.updateUser(username, "bio", "This user has not written anything.")
                 await sql.updateUser(username, "role", "user")
-                const ip = req.headers["x-forwarded-for"] || req.socket.remoteAddress
-                await sql.updateUser(username, "ip", ip?.toString().replace("::ffff:", "") || "")
+                await sql.updateUser(username, "ip", ip)
                 const passwordHash = await bcrypt.hash(password, 13)
                 await sql.updateUser(username, "password", passwordHash)
 
@@ -111,10 +117,17 @@ const UserRoutes = (app: Express) => {
 
     app.post("/api/user/login", loginLimiter, loginSpeedLimiter, async (req: Request, res: Response) => {
         try {
-            let {username, password} = req.body
-            if (!username || !password) return res.status(400).send("Bad request")
+            let {username, password, captchaResponse} = req.body
+            if (!username || !password || !captchaResponse) return res.status(400).send("Bad request")
             username = username.trim().toLowerCase()
             password = password.trim()
+            let ip = req.headers["x-forwarded-for"] || req.socket.remoteAddress
+            ip = ip?.toString().replace("::ffff:", "") || ""
+            if (req.session.captchaCache !== captchaResponse) {
+                const success = await serverFunctions.validateCapthca(captchaResponse, ip)
+                if (!success) return res.status(400).send("Bad request")
+                req.session.captchaCache = captchaResponse
+            }
             const user = await sql.user(username)
             if (!user) return res.status(400).send("Bad request")
             const matches = await bcrypt.compare(password, user.password)
@@ -130,9 +143,8 @@ const UserRoutes = (app: Express) => {
                 req.session.publicFavorites = user.publicFavorites
                 req.session.image = user.image
                 req.session.role = user.role
-                const ip = req.headers["x-forwarded-for"] || req.socket.remoteAddress
-                await sql.updateUser(username, "ip", ip?.toString().replace("::ffff:", "") || "")
-                req.session.ip = ip?.toString().replace("::ffff:", "") || ""
+                await sql.updateUser(username, "ip", ip)
+                req.session.ip = ip
                 return res.status(200).send("Success")
             } else {
                 return res.status(400).send("Bad request")

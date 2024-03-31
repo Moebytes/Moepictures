@@ -1019,6 +1019,14 @@ const SortBar: React.FunctionComponent = (props) => {
                 <div className="sortbar-dropdown-row" onClick={() => setSortType("reverse drawn")}>
                     <span className="sortbar-dropdown-text">Reverse Drawn</span>
                 </div>
+                {session.username ? <>
+                <div className="sortbar-dropdown-row" onClick={() => setSortType("favorites")}>
+                    <span className="sortbar-dropdown-text">Favorites</span>
+                </div> 
+                <div className="sortbar-dropdown-row" onClick={() => setSortType("reverse favorites")}>
+                    <span className="sortbar-dropdown-text">Reverse Favorites</span>
+                </div> 
+                </> : null}
                 <div className="sortbar-dropdown-row" onClick={() => setSortType("cuteness")}>
                     <span className="sortbar-dropdown-text">Cuteness</span>
                 </div>
@@ -1037,14 +1045,6 @@ const SortBar: React.FunctionComponent = (props) => {
                 <div className="sortbar-dropdown-row" onClick={() => setSortType("reverse filesize")}>
                     <span className="sortbar-dropdown-text">Reverse Filesize</span>
                 </div>
-                {session.username ? <>
-                <div className="sortbar-dropdown-row" onClick={() => setSortType("favorites")}>
-                    <span className="sortbar-dropdown-text">Favorites</span>
-                </div> 
-                <div className="sortbar-dropdown-row" onClick={() => setSortType("reverse favorites")}>
-                    <span className="sortbar-dropdown-text">Reverse Favorites</span>
-                </div> 
-                </> : null}
             </div>
             <div className={`dropdown-right ${activeDropdown === "filters" ? "" : "hide-dropdown"}`} 
             style={{marginRight: getFiltersMargin(), top: `${dropTop}px`}}>

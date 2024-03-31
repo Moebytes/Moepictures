@@ -14,6 +14,7 @@ import hideMagenta from "../assets/magenta/hide.png"
 import showMagentaLight from "../assets/magenta-light/show.png"
 import hideMagentaLight from "../assets/magenta-light/hide.png"
 import DragAndDrop from "../components/DragAndDrop"
+import HCaptcha from "@hcaptcha/react-hcaptcha"
 import {HideNavbarContext, HideSidebarContext, ThemeContext, EnableDragContext, RelativeContext, SessionContext, MobileContext,
 HideTitlebarContext, HeaderTextContext, SessionFlagContext, SidebarTextContext, RedirectContext} from "../Context"
 import "./styles/loginpage.less"
@@ -36,6 +37,7 @@ const LoginPage: React.FunctionComponent = (props) => {
     const [showPassword, setShowPassword] = useState(false)
     const [username, setUsername] = useState("")
     const [password, setPassword] = useState("")
+    const [captchaResponse, setCaptchaResponse] = useState("")
     const [error, setError] = useState(false)
     const errorRef = useRef<any>(null)
     const history = useHistory()
@@ -75,11 +77,18 @@ const LoginPage: React.FunctionComponent = (props) => {
     }
 
     const login = async () => {
+        if (!captchaResponse) {
+            setError(true)
+            await functions.timeout(20)
+            errorRef.current.innerText = "Solve the captcha."
+            await functions.timeout(2000)
+            return setError(false)
+        }
         setError(true)
         if (!errorRef.current) await functions.timeout(20)
         errorRef.current!.innerText = "Submitting..."
         try {
-            const result = await axios.post("/api/user/login", {username, password}, {withCredentials: true}).then((r) => r.data)
+            const result = await axios.post("/api/user/login", {username, password, captchaResponse}, {withCredentials: true}).then((r) => r.data)
             setSessionFlag(true)
             if (redirect) {
                 await functions.timeout(20)
@@ -127,6 +136,9 @@ const LoginPage: React.FunctionComponent = (props) => {
                     <Link to ="/forgot-password">
                         <span className="login-link">Forgot Password?</span>
                     </Link>
+                    <div className="login-row" style={{justifyContent: "center"}}>
+                        <HCaptcha sitekey={functions.captchaSiteKey()} theme="dark" onVerify={(response) => setCaptchaResponse(response)}/>
+                    </div>
                     {error ? <div className="login-validation-container"><span className="login-validation" ref={errorRef}></span></div> : null}
                     <div className="login-button-container">
                         <button className="login-button" onClick={() => login()}>Login</button>
