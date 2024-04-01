@@ -1,4 +1,4 @@
-import React, {useContext, useEffect, useRef, useState} from "react"
+import React, {useContext, useEffect, useRef, useState, useReducer} from "react"
 import {useHistory} from "react-router-dom"
 import {ThemeContext, SearchContext, SearchFlagContext, UnverifiedPostsContext} from "../Context"
 import {HashLink as Link} from "react-router-hash-link"
@@ -13,6 +13,7 @@ import "./styles/modposts.less"
 import axios from "axios"
 
 const ModCommentReports: React.FunctionComponent = (props) => {
+    const [ignored, forceUpdate] = useReducer(x => x + 1, 0)
     const {theme, setTheme} = useContext(ThemeContext)
     const [hover, setHover] = useState(false)
     const {search, setSearch} = useContext(SearchContext)
@@ -53,12 +54,14 @@ const ModCommentReports: React.FunctionComponent = (props) => {
     const reportComment = async (username: string, commentID: number) => {
         await axios.delete("/api/comment/delete", {params: {commentID}, headers: {"x-csrf-token": functions.getCSRFToken()}, withCredentials: true})
         await axios.post("/api/comment/report/request/fulfill", {username, commentID}, {headers: {"x-csrf-token": functions.getCSRFToken()}, withCredentials: true})
-        updateComments()
+        await updateComments()
+        forceUpdate()
     }
 
     const rejectRequest = async (username: string, commentID: string) => {
         await axios.post("/api/comment/report/request/fulfill", {username, commentID}, {headers: {"x-csrf-token": functions.getCSRFToken()}, withCredentials: true})
-        updateComments()
+        await updateComments()
+        forceUpdate()
     }
 
     useEffect(() => {

@@ -7,31 +7,32 @@ import approveMagenta from "../assets/magenta/approve.png"
 import reject from "../assets/purple/reject.png"
 import rejectMagenta from "../assets/magenta/reject.png"
 import functions from "../structures/Functions"
+import cryptoFunctions from "../structures/CryptoFunctions"
 import "./styles/modposts.less"
 import axios from "axios"
 
-const ModPosts: React.FunctionComponent = (props) => {
+const ModTranslations: React.FunctionComponent = (props) => {
     const [ignored, forceUpdate] = useReducer(x => x + 1, 0)
     const {theme, setTheme} = useContext(ThemeContext)
     const [hover, setHover] = useState(false)
     const {search, setSearch} = useContext(SearchContext)
     const {searchFlag, setSearchFlag} = useContext(SearchFlagContext)
-    const [unverifiedPosts, setUnverifiedPosts] = useState([]) as any
+    const [unverifiedTranslations, setUnverifiedTranslations] = useState([]) as any
     const [index, setIndex] = useState(0)
-    const [visiblePosts, setVisiblePosts] = useState([]) as any
+    const [visibleTranslations, setVisibleTranslations] = useState([]) as any
     const [offset, setOffset] = useState(0)
     const [ended, setEnded] = useState(false)
     const [imagesRef, setImagesRef] = useState([]) as any
     const history = useHistory()
 
-    const updatePosts = async () => {
-        const posts = await axios.get("/api/post/list/unverified", {withCredentials: true}).then((r) => r.data)
+    const updateTranslations = async () => {
+        const translations = await axios.get("/api/translation/list/unverified", {withCredentials: true}).then((r) => r.data)
         setEnded(false)
-        setUnverifiedPosts(posts)
+        setUnverifiedTranslations(translations)
     }
 
     useEffect(() => {
-        updatePosts()
+        updateTranslations()
     }, [])
 
     const getApprove = () => {
@@ -44,41 +45,41 @@ const ModPosts: React.FunctionComponent = (props) => {
         return reject
     }
 
-    const approvePost = async (postID: number) => {
-        await axios.post("/api/post/approve", {postID}, {headers: {"x-csrf-token": functions.getCSRFToken()}, withCredentials: true})
-        await updatePosts()
+    const approveTranslation = async (translationID: number) => {
+        await axios.post("/api/translation/approve", {translationID}, {headers: {"x-csrf-token": functions.getCSRFToken()}, withCredentials: true})
+        await updateTranslations()
         forceUpdate()
     }
 
-    const rejectPost = async (postID: number) => {
-        await axios.post("/api/post/reject", {postID}, {headers: {"x-csrf-token": functions.getCSRFToken()}, withCredentials: true})
-        await updatePosts()
+    const rejectTranslation = async (translationID: number) => {
+        await axios.post("/api/translation/reject", {translationID}, {headers: {"x-csrf-token": functions.getCSRFToken()}, withCredentials: true})
+        await updateTranslations()
         forceUpdate()
     }
 
     useEffect(() => {
         let currentIndex = index
-        const newVisiblePosts = visiblePosts as any
+        const newVisibleTranslations = visibleTranslations as any
         for (let i = 0; i < 10; i++) {
-            if (!unverifiedPosts[currentIndex]) break
-            newVisiblePosts.push(unverifiedPosts[currentIndex])
+            if (!unverifiedTranslations[currentIndex]) break
+            newVisibleTranslations.push(unverifiedTranslations[currentIndex])
             currentIndex++
         }
         setIndex(currentIndex)
-        setVisiblePosts(functions.removeDuplicates(newVisiblePosts))
-        const newImagesRef = newVisiblePosts.map(() => React.createRef()) as any
+        setVisibleTranslations(functions.removeDuplicates(newVisibleTranslations))
+        const newImagesRef = newVisibleTranslations.map(() => React.createRef()) as any
         setImagesRef(newImagesRef) as any
-    }, [unverifiedPosts])
+    }, [unverifiedTranslations])
 
     const updateOffset = async () => {
         if (ended) return
         const newOffset = offset + 100
-        const result = await axios.get("/api/post/list/unverified", {params: {offset: newOffset}, withCredentials: true}).then((r) => r.data)
+        const result = await axios.get("/api/translation/list/unverified", {params: {offset: newOffset}, withCredentials: true}).then((r) => r.data)
         if (result?.length >= 100) {
             setOffset(newOffset)
-            setUnverifiedPosts((prev: any) => functions.removeDuplicates([...prev, ...result]))
+            setUnverifiedTranslations((prev: any) => functions.removeDuplicates([...prev, ...result]))
         } else {
-            if (result?.length) setUnverifiedPosts((prev: any) => functions.removeDuplicates([...prev, ...result]))
+            if (result?.length) setUnverifiedTranslations((prev: any) => functions.removeDuplicates([...prev, ...result]))
             setEnded(true)
         }
     }
@@ -87,15 +88,15 @@ const ModPosts: React.FunctionComponent = (props) => {
         const scrollHandler = async () => {
             if (functions.scrolledToBottom()) {
                 let currentIndex = index
-                if (!unverifiedPosts[currentIndex]) return updateOffset()
-                const newPosts = visiblePosts as any
+                if (!unverifiedTranslations[currentIndex]) return updateOffset()
+                const newTranslations = visibleTranslations as any
                 for (let i = 0; i < 10; i++) {
-                    if (!unverifiedPosts[currentIndex]) return updateOffset()
-                    newPosts.push(unverifiedPosts[currentIndex])
+                    if (!unverifiedTranslations[currentIndex]) return updateOffset()
+                    newTranslations.push(unverifiedTranslations[currentIndex])
                     currentIndex++
                 }
                 setIndex(currentIndex)
-                setVisiblePosts(functions.removeDuplicates(newPosts))
+                setVisibleTranslations(functions.removeDuplicates(newTranslations))
             }
         }
         window.addEventListener("scroll", scrollHandler)
@@ -105,14 +106,17 @@ const ModPosts: React.FunctionComponent = (props) => {
     })
 
     const loadImages = async () => {
-        for (let i = 0; i < visiblePosts.length; i++) {
-            const post = visiblePosts[i]
+        for (let i = 0; i < visibleTranslations.length; i++) {
+            const translation = visibleTranslations[i]
             const ref = imagesRef[i]
-            const img = functions.getUnverifiedThumbnailLink(post.images[0].type, post.postID, post.images[0].order, post.images[0].filename, "tiny")
+            const img = functions.getThumbnailLink(translation.post.images[0].type, translation.postID, translation.post.images[0].order, translation.post.images[0].filename, "tiny")
             if (functions.isGIF(img)) continue
             if (!ref.current) continue
             let src = img
-            if (functions.isModel(img)) {
+            const type = translation.post.images[0].type
+            if (type === "image" || type === "comic") {
+                src = await cryptoFunctions.decryptedLink(img)
+            } else if (functions.isModel(img)) {
                 src = await functions.modelImage(img)
             } else if (functions.isAudio(img)) {
                 src = await functions.songCover(img)
@@ -131,19 +135,28 @@ const ModPosts: React.FunctionComponent = (props) => {
 
     useEffect(() => {
         loadImages()
-    }, [visiblePosts])
+    }, [visibleTranslations])
 
-    const generatePostsJSX = () => {
+    const translationDataJSX = (translation: any) => {
         let jsx = [] as any
-        const posts = functions.removeDuplicates(visiblePosts)
-        for (let i = 0; i < posts.length; i++) {
-            const post = posts[i] as any
-            if (!post) break
+        for (let i = 0; i < translation.data.length; i++) {
+            const item = translation.data[i]
+            jsx.push(<span className="mod-post-text">{`${item.transcript} -> ${item.translation}`}</span>)
+        }
+        return jsx
+    }
+
+    const generateTranslationsJSX = () => {
+        let jsx = [] as any
+        const translations = functions.removeDuplicates(visibleTranslations)
+        for (let i = 0; i < translations.length; i++) {
+            const translation = translations[i] as any
+            if (!translation) break
             const imgClick = (event?: any, middle?: boolean) => {
-                if (middle) return window.open(`/unverified/post/${post.postID}`, "_blank")
-                history.push(`/unverified/post/${post.postID}`)
+                if (middle) return window.open(`/post/${translation.postID}`, "_blank")
+                history.push(`/post/${translation.postID}`)
             }
-            const img = functions.getUnverifiedThumbnailLink(post.images[0].type, post.postID, post.images[0].order, post.images[0].filename, "tiny")
+            const img = functions.getThumbnailLink(translation.post.images[0].type, translation.postID, translation.post.images[0].order, translation.post.images[0].filename, "tiny")
             jsx.push(
                 <div className="mod-post" onMouseEnter={() =>setHover(true)} onMouseLeave={() => setHover(false)}>
                     <div className="mod-post-img-container">
@@ -153,29 +166,15 @@ const ModPosts: React.FunctionComponent = (props) => {
                         <canvas className="mod-post-img" ref={imagesRef[i]} onClick={imgClick} onAuxClick={(event) => imgClick(event, true)}></canvas>}
                     </div>
                     <div className="mod-post-text-column">
-                        <span className="mod-post-link" onClick={() => history.push(`/user/${post.uploader}`)}>Uploader: {functions.toProperCase(post.uploader || "Deleted")}</span>
-                        <span className="mod-post-text">Artist: {functions.toProperCase(post.artist || "None")} {post.thirdParty ? "(TP)" : ""}</span>
-                        <span className="mod-post-text">Tags: {post.tags?.length}</span>
-                        <span className="mod-post-text">New Tags: {post.newTags || 0}</span>
-                    </div>
-                    <div className="mod-post-text-column">
-                        <span className="mod-post-text">Source: {post.link ? "yes" : "no"}</span>
-                        <span className="mod-post-text">Similar Posts: {post.duplicates ? "yes" : "no"}</span>
-                        <span className="mod-post-text">Resolution: {post.images[0].width}x{post.images[0].height}</span>
-                        <span className="mod-post-text">Size: {post.images.length}→{functions.readableFileSize(post.images.reduce((acc: any, obj: any) => acc + obj.size, 0))}</span>
-                    </div>
-                    <div className="mod-post-text-column">
-                        <span className="mod-post-text">Type: {post.type}</span>
-                        <span className="mod-post-text">Restrict: {post.restrict}</span>
-                        <span className="mod-post-text">Style: {post.style}</span>
-                        <span className="mod-post-text">Upload Date: {functions.prettyDate(new Date(post.uploadDate))}</span>
+                        <span className="mod-post-link" onClick={() => history.push(`/user/${translation.updater}`)}>Updater: {functions.toProperCase(translation.updater || "Deleted")}</span>
+                        {translationDataJSX(translation)}
                     </div>
                     <div className="mod-post-options">
-                        <div className="mod-post-options-container" onClick={() => rejectPost(post.postID)}>
+                        <div className="mod-post-options-container" onClick={() => rejectTranslation(translation.translationID)}>
                             <img className="mod-post-options-img" src={getReject()}/>
                             <span className="mod-post-options-text">Reject</span>
                         </div>
-                        <div className="mod-post-options-container" onClick={() => approvePost(post.postID)}>
+                        <div className="mod-post-options-container" onClick={() => approveTranslation(translation.translationID)}>
                             <img className="mod-post-options-img" src={getApprove()}/>
                             <span className="mod-post-options-text">Approve</span>
                         </div>
@@ -188,9 +187,9 @@ const ModPosts: React.FunctionComponent = (props) => {
 
     return (
         <div className="mod-posts">
-            {generatePostsJSX()}
+            {generateTranslationsJSX()}
         </div>
     )
 }
 
-export default ModPosts
+export default ModTranslations

@@ -84,11 +84,7 @@ const UserRoutes = (app: Express) => {
             if (badUsername || badEmail || badPassword) return res.status(400).send("Bad username, password, or email.")
             let ip = req.headers["x-forwarded-for"] || req.socket.remoteAddress
             ip = ip?.toString().replace("::ffff:", "") || ""
-            if (req.session.captchaCache !== captchaResponse) {
-                const success = await serverFunctions.validateCapthca(captchaResponse, ip)
-                if (!success) return res.status(400).send("Bad request")
-                req.session.captchaCache = captchaResponse
-            }
+            if (req.session.captchaAnswer !== captchaResponse?.trim()) return res.status(400).send("Bad request")
             try {
                 await sql.insertUser(username, email)
                 await sql.updateUser(username, "joinDate", new Date().toISOString())
@@ -131,11 +127,7 @@ const UserRoutes = (app: Express) => {
             password = password.trim()
             let ip = req.headers["x-forwarded-for"] || req.socket.remoteAddress
             ip = ip?.toString().replace("::ffff:", "") || ""
-            if (req.session.captchaCache !== captchaResponse) {
-                const success = await serverFunctions.validateCapthca(captchaResponse, ip)
-                if (!success) return res.status(400).send("Bad request")
-                req.session.captchaCache = captchaResponse
-            }
+            if (req.session.captchaAnswer !== captchaResponse?.trim()) return res.status(400).send("Bad request")
             const user = await sql.user(username)
             if (!user) return res.status(400).send("Bad request")
             const matches = await bcrypt.compare(password, user.password)
@@ -177,6 +169,7 @@ const UserRoutes = (app: Express) => {
         try {
             const session = structuredClone(req.session)
             delete session.captchaCache
+            delete session.captchaAnswer
             delete session.csrfSecret
             delete session.ip
             res.status(200).json(session)

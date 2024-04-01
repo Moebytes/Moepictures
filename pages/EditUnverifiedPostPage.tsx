@@ -153,7 +153,7 @@ const EditUnverifiedPostPage: React.FunctionComponent<Props> = (props) => {
         }
         validate(files, links)
 
-        const parsedTags = await functions.parseTags([post])
+        const parsedTags = await functions.parseTagsUnverified([post])
         const tagCategories = await functions.tagCategories(parsedTags)
 
         let artists = [{}] as any

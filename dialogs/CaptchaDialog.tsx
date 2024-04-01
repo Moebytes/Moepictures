@@ -5,8 +5,6 @@ import {HideNavbarContext, HideSidebarContext, ThemeContext, EnableDragContext, 
 import functions from "../structures/Functions"
 import "./styles/captchadialog.less"
 import Draggable from "react-draggable"
-import permissions from "../structures/Permissions"
-import HCaptcha from "@hcaptcha/react-hcaptcha"
 import axios from "axios"
 
 interface Props {
@@ -30,7 +28,26 @@ const CaptchaDialog: React.FunctionComponent<Props> = (props) => {
     const history = useHistory()
     const [needsVerification, setNeedsVerification] = useState(false)
     const [captchaResponse, setCaptchaResponse] = useState("")
+    const [captcha, setCaptcha] = useState("")
     const captchaRef = useRef<any>(null)
+
+    const getCaptchaColor = () => {
+        if (theme === "purple") return "#09071c"
+        if (theme === "purple-light") return "#ffffff"
+        if (theme === "magenta") return "#17040e"
+        if (theme === "magenta-light") return "#ffffff"
+        return "#ffffff"
+    }
+
+    const updateCaptcha = async () => {
+        const captcha = await axios.get("/api/misc/captcha/create", {params: {color: getCaptchaColor()}, withCredentials: true}).then((r) => r.data)
+        setCaptcha(captcha)
+        setCaptchaResponse("")
+    }
+
+    useEffect(() => {
+        updateCaptcha()
+    }, [theme])
 
     useEffect(() => {
         document.title = "Moebooru: Captcha"
@@ -63,7 +80,7 @@ const CaptchaDialog: React.FunctionComponent<Props> = (props) => {
         }
     }, [needsVerification])
 
-    const captcha = async () => {
+    const submitCaptcha = async () => {
         if (!captchaResponse) {
             setError(true)
             await functions.timeout(20)
@@ -82,13 +99,14 @@ const CaptchaDialog: React.FunctionComponent<Props> = (props) => {
             await functions.timeout(20)
             errorRef.current.innerText = "Captcha error."
             await functions.timeout(3000)
-            return setError(false)
+            setError(false)
+            updateCaptcha()
         }
     }
 
     const click = (button: "accept" | "reject") => {
         if (button === "accept") {
-            captcha()
+            submitCaptcha()
             sessionStorage.setItem("ignoreCaptcha", "false")
         } else {
             sessionStorage.setItem("ignoreCaptcha", "true")
@@ -110,7 +128,8 @@ const CaptchaDialog: React.FunctionComponent<Props> = (props) => {
                                 <span className="captcha-dialog-title">Human Verification</span>
                             </div>
                             <div className="captcha-dialog-row" style={{pointerEvents: "all"}}>
-                                <HCaptcha sitekey={functions.captchaSiteKey()} theme="dark" onVerify={(response) => setCaptchaResponse(response)}/>
+                                <img src={`data:image/svg+xml;utf8,${encodeURIComponent(captcha)}`}/>
+                                <input className="captcha-dialog-input" type="text" spellCheck={false} value={captchaResponse} onChange={(event) => setCaptchaResponse(event.target.value)}/>
                             </div>
                             {error ? <div className="captcha-dialog-validation-container"><span className="captcha-dialog-validation" ref={errorRef}></span></div> : null}
                             <div className="captcha-dialog-row">

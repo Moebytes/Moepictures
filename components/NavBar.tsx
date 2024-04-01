@@ -326,7 +326,7 @@ const NavBar: React.FunctionComponent<Props> = (props) => {
                         {!showMiniTitle || relative ? <img className="nav-user-img" src={userImg}/> : null}
                         {generateUsernameJSX()}
                     </div> :
-                    <span style={{marginRight: marginR}} className="nav-text nav-user-text" onClick={() => history.push("/login")}>Login</span>}
+                    <span style={{marginRight: marginR}} className="nav-text nav-user-text" onClick={() => functions.serverPush("/login")}>Login</span>}
                     <span style={{marginRight: marginR}} className="nav-text" onClick={() => postsClick()}>Posts</span>
                     <span style={{marginRight: marginR}} className="nav-text" onClick={() => history.push("/comments")}>Comments</span>
                     <span style={{marginRight: marginR}} className="nav-text" onClick={() => history.push("/artists")}>Artists</span>

@@ -90,7 +90,7 @@ export default class ServerFunctions {
             const dir = path.dirname(`/Volumes/Files/moebooru/${file}`)
             fs.unlinkSync(`/Volumes/Files/moebooru/${file}`)
             try {
-                fs.rmdirSync(dir)
+                //fs.rmdirSync(dir)
             } catch {}
             return
         }
@@ -180,7 +180,7 @@ export default class ServerFunctions {
             const dir = path.dirname(`/Volumes/Files/moebooru-unverified/${file}`)
             fs.unlinkSync(`/Volumes/Files/moebooru-unverified/${file}`)
             try {
-                fs.rmdirSync(dir)
+                //fs.rmdirSync(dir)
             } catch {}
             return
         }

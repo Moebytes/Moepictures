@@ -1387,6 +1387,95 @@ export default class SQLQuery {
     return result
   }
 
+  /** Insert translation (unverified). */
+  public static insertUnverifiedTranslation = async (postID: number, updater: string, order: number, data: any, reason: string) => {
+    const now = new Date().toISOString()
+    const query: QueryConfig = {
+      text: `INSERT INTO "unverified translations" ("postID", "updater", "updatedDate", "order", "data", "reason") VALUES ($1, $2, $3, $4, $5, $6)`,
+      values: [postID, updater, now, order, data, reason]
+    }
+    const result = await SQLQuery.run(query)
+    return result
+  }
+
+  /** Updates a translation (unverified). */
+  public static updateUnverifiedTranslation = async (translationID: number, updater: string, data: any, reason: string) => {
+    const now = new Date().toISOString()
+    const query: QueryConfig = {
+        text: `UPDATE "unverified translations" SET "updater" = $1, "updatedDate" = $2, "data" = $3, "reason" = $4 WHERE "translationID" = $5`,
+        values: [updater, now, data, reason, translationID]
+    }
+    return SQLQuery.run(query)
+  }
+
+  /** Get translation (unverified). */
+  public static unverifiedTranslation = async (postID: number, order: number, updater: string) => {
+    const query: QueryConfig = {
+      text: functions.multiTrim(`
+            SELECT "unverified translations".*
+            FROM "unverified translations"
+            WHERE "unverified translations"."postID" = $1 AND "unverified translations"."order" = $2 AND "unverified translations"."updater" = $3
+            GROUP BY "unverified translations"."translationID"
+          `),
+          values: [postID, order, updater]
+    }
+    const result = await SQLQuery.run(query)
+    return result[0]
+  }
+
+  /** Get translation (unverified by id). */
+  public static unverifiedTranslationID = async (translationID: number) => {
+    const query: QueryConfig = {
+      text: functions.multiTrim(`
+            SELECT "unverified translations".*
+            FROM "unverified translations"
+            WHERE "unverified translations"."translationID" = $1
+            GROUP BY "unverified translations"."translationID"
+          `),
+          values: [translationID]
+    }
+    const result = await SQLQuery.run(query)
+    return result[0]
+  }
+
+  /** Delete translation (unverified). */
+  public static deleteUnverifiedTranslation = async (translationID: number) => {
+    const query: QueryConfig = {
+      text: functions.multiTrim(`DELETE FROM "unverified translations" WHERE "unverified translations"."translationID" = $1`),
+      values: [translationID]
+    }
+    const result = await SQLQuery.run(query)
+    return result
+  }
+
+  /** Get translations (unverified). */
+  public static unverifiedTranslations = async (offset?: string) => {
+    const query: QueryConfig = {
+      text: functions.multiTrim(`
+            WITH post_json AS (
+              SELECT posts.*, json_agg(DISTINCT images.*) AS images
+              FROM posts
+              JOIN images ON images."postID" = posts."postID"
+              GROUP BY posts."postID"
+            )
+            SELECT "unverified translations".*, json_build_object(
+              'type', post_json."type",
+              'restrict', post_json."restrict",
+              'style', post_json."style",
+              'images', (array_agg(post_json."images"))[1]
+            ) AS post
+            FROM "unverified translations"
+            JOIN post_json ON post_json."postID" = "unverified translations"."postID"
+            GROUP BY "unverified translations"."translationID", post_json."type", post_json."restrict", post_json."style"
+            ORDER BY "unverified translations"."updatedDate" ASC
+            LIMIT 100 ${offset ? `OFFSET $1` : ""}
+          `)
+    }
+    if (offset) query.values = [offset]
+    const result = await SQLQuery.run(query)
+    return result
+  }
+
   /** Insert favorite. */
   public static insertFavorite = async (postID: number, username: string) => {
     const query: QueryConfig = {

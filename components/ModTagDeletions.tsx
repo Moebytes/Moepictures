@@ -1,4 +1,4 @@
-import React, {useContext, useEffect, useRef, useState} from "react"
+import React, {useContext, useEffect, useRef, useState, useReducer} from "react"
 import {useHistory} from "react-router-dom"
 import {ThemeContext, SearchContext, SearchFlagContext, UnverifiedPostsContext} from "../Context"
 import {HashLink as Link} from "react-router-hash-link"
@@ -11,6 +11,7 @@ import "./styles/modposts.less"
 import axios from "axios"
 
 const ModTagDeletions: React.FunctionComponent = (props) => {
+    const [ignored, forceUpdate] = useReducer(x => x + 1, 0)
     const {theme, setTheme} = useContext(ThemeContext)
     const [hover, setHover] = useState(false)
     const {search, setSearch} = useContext(SearchContext)
@@ -45,12 +46,14 @@ const ModTagDeletions: React.FunctionComponent = (props) => {
     const deleteTag = async (username: string, tag: string) => {
         await axios.delete("/api/tag/delete", {params: {tag}, headers: {"x-csrf-token": functions.getCSRFToken()}, withCredentials: true})
         await axios.post("/api/tag/delete/request/fulfill", {username, tag}, {headers: {"x-csrf-token": functions.getCSRFToken()}, withCredentials: true})
-        updateTags()
+        await updateTags()
+        forceUpdate()
     }
 
     const rejectRequest = async (username: string, tag: string) => {
         await axios.post("/api/tag/delete/request/fulfill", {username, tag}, {headers: {"x-csrf-token": functions.getCSRFToken()}, withCredentials: true})
-        updateTags()
+        await updateTags()
+        forceUpdate()
     }
 
     useEffect(() => {

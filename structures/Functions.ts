@@ -1145,6 +1145,16 @@ export default class Functions {
         return result ? result : []
     }
 
+    public static parseTagsUnverified = async (posts: any) => {
+        let result = [] as any
+        for (let i = 0; i < posts.length; i++) {
+            for (let j = 0; j < posts[i].tags.length; j++) {
+                result.push({tag: posts[i].tags[j], count: 1})
+            }
+        }
+        return result
+    }
+
     public static tagCategories = async (parsedTags: any[], cache?: boolean) => {
         let result = cache ? Functions.tagsCache() : await axios.get("/api/tag/list", {params: {tags: parsedTags.map((t: any) => t.tag)}, withCredentials: true}).then((r) => r.data)
         let artists = [] as any 
@@ -1214,6 +1224,7 @@ export default class Functions {
 
     public static clearCache = () => {
         localforage.removeItem("tags")
+        localforage.removeItem("unverifiedTags")
     }
 
     public static readableFileSize = (bytes: number) => {
@@ -1797,5 +1808,9 @@ export default class Functions {
 
     public static insertAtIndex = <T>(array: T[], index: number, item: any) => {
         return [...array.slice(0, index), item, ...array.slice(index + 1)]
+    }
+
+    public static serverPush = (route: string) => {
+        window.location.href = route
     }
 }

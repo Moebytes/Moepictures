@@ -126,7 +126,7 @@ const TranslationEditor: React.FunctionComponent<Props> = (props) => {
         const translations = await axios.get("/api/translations", {params: {postID: props.post.postID}, withCredentials: true}).then((r) => r.data)
         if (translations?.length) {
             const translation = translations.find((t: any) => t.order === (props.order || 1))
-            if (translation) {
+            if (translation?.data?.length) {
                 let largestID = translation.data.reduce((prev: any, current: any) => {return Math.max(prev, current.id)}, -Infinity)
                 setItems(translation.data)
                 setID(largestID)

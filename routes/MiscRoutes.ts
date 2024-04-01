@@ -13,6 +13,7 @@ import serverFunctions from "../structures/ServerFunctions"
 import rateLimit from "express-rate-limit"
 import fs from "fs"
 import CSRF from "csrf"
+import svgCaptcha from "svg-captcha"
 import child_process from "child_process"
 import util from "util"
 
@@ -57,6 +58,26 @@ const MiscRoutes = (app: Express) => {
         }
     })
 
+    app.get("/api/misc/captcha/create", miscLimiter, async (req: Request, res: Response, next: NextFunction) => {
+        try {
+            const color = req.query.color as string || "#ffffff"
+            let captcha = svgCaptcha.create({
+                size: 8,
+                ignoreChars: "0oli",
+                noise: 2,
+                color: true,
+                fontSize: 80,
+                background: color,
+                width: 230
+            })
+            req.session.captchaAnswer = captcha.text
+            res.status(200).send(captcha.data)
+        } catch (e) {
+            console.log(e)
+            res.status(400).send("Bad request") 
+        }
+    })
+
     app.post("/api/misc/captcha", captchaLimiter, async (req: Request, res: Response, next: NextFunction) => {
         try {
             const {captchaResponse} = req.body
@@ -65,8 +86,7 @@ const MiscRoutes = (app: Express) => {
             if (!valid) return res.status(400).send("Bad request")
             let ip = req.headers["x-forwarded-for"] || req.socket.remoteAddress
             ip = ip?.toString().replace("::ffff:", "") || ""
-            const success = await serverFunctions.validateCapthca(captchaResponse, ip)
-            if (success) {
+            if (req.session.captchaAnswer === captchaResponse?.trim()) {
                 req.session.captchaAmount = 0
                 res.status(200).send("Success")
             } else {

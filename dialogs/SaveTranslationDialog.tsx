@@ -54,23 +54,25 @@ const SaveTranslationDialog: React.FunctionComponent<Props> = (props) => {
                 errorRef.current!.innerText = badReason
                 await functions.timeout(2000)
                 setError(false)
-                return
             }
             await axios.post("/api/translation/save/request", {postID: props.post.postID, data: saveTranslationData, order: saveTranslationOrder, reason}, {headers: {"x-csrf-token": functions.getCSRFToken()}, withCredentials: true})
             setSubmitted(true)
         }
     }
 
-    const click = (button: "accept" | "reject", keep?: boolean) => {
+    const click = async (button: "accept" | "reject", keep?: boolean) => {
         if (button === "accept") {
             saveTranslation()
         }
-        if (!keep) setShowSaveTranslationDialog(false)
-        setSaveTranslationData(null)
+        if (!keep) {
+            setShowSaveTranslationDialog(false)
+            setSaveTranslationData(null)
+        }
     }
 
     const close = () => {
         setShowSaveTranslationDialog(false)
+        setSaveTranslationData(null)
         setSubmitted(false)
         setReason("")
     }
@@ -102,7 +104,7 @@ const SaveTranslationDialog: React.FunctionComponent<Props> = (props) => {
         return (
             <div className="save-translation-dialog">
                 <Draggable handle=".save-translation-dialog-title-container">
-                <div className="save-translation-dialog-box" style={{width: "500px", height: submitted ? "125px" : "250px"}} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
+                <div className="save-translation-dialog-box" style={{width: "350px", height: submitted ? "125px" : "250px"}} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                     <div className="save-translation-container">
                         <div className="save-translation-dialog-title-container">
                             <span className="save-translation-dialog-title">Save Translation Request</span>

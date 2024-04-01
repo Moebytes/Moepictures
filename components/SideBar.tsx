@@ -946,24 +946,24 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
 
                 {props.post && session.username && !props.noActions ? 
                     <div className="sidebar-subcontainer">
-                        <div className="sidebar-row">
+                        {!props.unverified ? <div className="sidebar-row">
                             <span className="tag-hover" onClick={triggerQuickEdit}>
                                 <img className="sidebar-icon" src={getQuickEdit()}/>
                                 <span className="tag">Quick Edit</span>
                             </span>
-                        </div>
-                        <div className="sidebar-row">
+                        </div> : null}
+                        {!props.unverified ? <div className="sidebar-row">
                             <span className="tag-hover" onClick={triggerSetAvatar}>
                                 <img className="sidebar-icon" src={getSetAvatar()}/>
                                 <span className="tag">Set Avatar</span>
                             </span>
-                        </div>
-                        <div className="sidebar-row">
+                        </div> : null}
+                        {!props.unverified ? <div className="sidebar-row">
                             <span className="tag-hover" onClick={triggerAddTranslation}>
                                 <img className="sidebar-icon" src={getAddTranslation()}/>
                                 <span className="tag">Add Translation</span>
                             </span>
-                        </div>
+                        </div> : null}
                         {/* <div className="sidebar-row">
                             <span className="tag-hover">
                                 <img className="sidebar-icon" src={getReport()}/>
@@ -990,12 +990,12 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
                             </span>
                         </div>
                         </> : null}
-                        <div className="sidebar-row">
+                        {!props.unverified ? <div className="sidebar-row">
                             <span className="tag-hover" onClick={postHistory}>
                                 <img className="sidebar-icon" src={getHistory()}/>
                                 <span className="tag-red">History</span>
                             </span>
-                        </div>
+                        </div> : null}
                         {!props.unverified ?
                         <div className="sidebar-row">
                             <span className="tag-hover" onClick={deletePost}>

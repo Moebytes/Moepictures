@@ -14,7 +14,6 @@ import hideMagenta from "../assets/magenta/hide.png"
 import showMagentaLight from "../assets/magenta-light/show.png"
 import hideMagentaLight from "../assets/magenta-light/hide.png"
 import DragAndDrop from "../components/DragAndDrop"
-import HCaptcha from "@hcaptcha/react-hcaptcha"
 import {HideNavbarContext, HideSidebarContext, ThemeContext, EnableDragContext, RelativeContext, SessionContext, MobileContext,
 HideTitlebarContext, HeaderTextContext, SessionFlagContext, SidebarTextContext, RedirectContext} from "../Context"
 import "./styles/loginpage.less"
@@ -38,9 +37,28 @@ const LoginPage: React.FunctionComponent = (props) => {
     const [username, setUsername] = useState("")
     const [password, setPassword] = useState("")
     const [captchaResponse, setCaptchaResponse] = useState("")
+    const [captcha, setCaptcha] = useState("")
     const [error, setError] = useState(false)
     const errorRef = useRef<any>(null)
     const history = useHistory()
+
+    const getCaptchaColor = () => {
+        if (theme === "purple") return "#09071c"
+        if (theme === "purple-light") return "#ffffff"
+        if (theme === "magenta") return "#17040e"
+        if (theme === "magenta-light") return "#ffffff"
+        return "#ffffff"
+    }
+
+    const updateCaptcha = async () => {
+        const captcha = await axios.get("/api/misc/captcha/create", {params: {color: getCaptchaColor()}, withCredentials: true}).then((r) => r.data)
+        setCaptcha(captcha)
+        setCaptchaResponse("")
+    }
+
+    useEffect(() => {
+        updateCaptcha()
+    }, [theme])
 
     useEffect(() => {
         setHideNavbar(false)
@@ -101,11 +119,11 @@ const LoginPage: React.FunctionComponent = (props) => {
                 history.push("/2fa")
             }
             setError(false)
-        } catch (e) {
-            console.log(e)
-            errorRef.current!.innerText = "Invalid username or password."
+        } catch {
+            errorRef.current!.innerText = "Invalid username, password, or captcha."
             await functions.timeout(2000)
             setError(false)
+            updateCaptcha()
         }
     }
 
@@ -137,7 +155,8 @@ const LoginPage: React.FunctionComponent = (props) => {
                         <span className="login-link">Forgot Password?</span>
                     </Link>
                     <div className="login-row" style={{justifyContent: "center"}}>
-                        <HCaptcha sitekey={functions.captchaSiteKey()} theme="dark" onVerify={(response) => setCaptchaResponse(response)}/>
+                        <img src={`data:image/svg+xml;utf8,${encodeURIComponent(captcha)}`}/>
+                        <input className="login-input" type="text" spellCheck={false} value={captchaResponse} onChange={(event) => setCaptchaResponse(event.target.value)} onKeyDown={(event) => event.key === "Enter" ? login() : null}/>
                     </div>
                     {error ? <div className="login-validation-container"><span className="login-validation" ref={errorRef}></span></div> : null}
                     <div className="login-button-container">
