@@ -1,0 +1,72 @@
+@import "../../index.less";
+
+.translation-editor {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    margin-top: 20px;
+    margin-bottom: 20px;
+}
+
+.translation-editor-filters {
+    position: relative;
+    display: flex;
+    width: max-content;
+    height: max-content;
+}
+
+.translation-editor-buttons {
+    opacity: 0;
+    transition: opacity 0.6s;
+    position: absolute;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    right: 0;
+    top: 0;
+    padding: 10px;
+}
+
+.show-translation-buttons {
+    opacity: 1;
+    transition: opacity 0.6s;
+}
+
+.translation-editor-button {
+    width: auto;
+    height: 25px;
+    cursor: pointer;
+    margin-right: 10px;
+    &:hover {
+        filter: brightness(130%);
+    }
+    &:last-child {
+        margin-right: 0px;
+    }
+}
+
+.translation-bubble {
+    position: fixed;
+    z-index: 2000;
+    left: 0px;
+    top: 0px;
+    margin: 0px;
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    font-family: Tahoma, sans-serif;
+    font-size: 22px;
+    font-weight: bold;
+    width: max-content;
+    height: max-content;
+    color: black;
+    background-color: var(--bubbleBG);
+    border: 1px solid var(--text);
+    padding: 10px;
+    padding-top: 5px;
+    padding-bottom: 5px;
+    pointer-events: none;
+}

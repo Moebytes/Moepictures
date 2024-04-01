@@ -90,7 +90,6 @@ const Carousel: React.FunctionComponent<Props> = (props) => {
             setActive(imagesRef[props.index])
         }
     }, [props.index])
-
     
     useEffect(() => {
         let newVisibleImages = [] as any

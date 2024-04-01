@@ -1,4 +1,4 @@
-import React, {useContext, useEffect, useRef, useState} from "react"
+import React, {useContext, useEffect, useRef, useState, forwardRef, useImperativeHandle} from "react"
 import {useHistory} from "react-router-dom"
 import loading from "../assets/purple/loading.gif"
 import loadingMagenta from "../assets/magenta/loading.gif"
@@ -25,9 +25,16 @@ interface Props {
     post: any,
     square?: boolean
     marginBottom?: number
+    reupdate?: () => void
 }
 
-const GridImage: React.FunctionComponent<Props> = (props) => {
+interface Ref {
+    shouldWait: () => Promise<boolean>
+    load: () => Promise<void>
+    update: () => Promise<void>
+}
+
+const GridImage = forwardRef<Ref, Props>((props, componentRef) => {
     const {theme, setTheme} = useContext(ThemeContext)
     const {sizeType, setSizeType} = useContext(SizeTypeContext)
     const [imageSize, setImageSize] = useState(270) as any
@@ -73,8 +80,41 @@ const GridImage: React.FunctionComponent<Props> = (props) => {
     const [visible, setVisible] = useState(true)
     const {scroll, setScroll} = useContext(ScrollContext)
     const [img, setImg] = useState("")
+    const [loadingFrames, setLoadingFrames] = useState(false)
     const [pageBuffering, setPageBuffering] = useState(true)
     const history = useHistory()
+
+    useImperativeHandle(componentRef, () => ({
+        shouldWait: async () => {
+            let isAnimatedWebP = false
+            if (functions.isWebP(props.img)) {
+                const arraybuffer = await fetch(props.img).then((r) => r.arrayBuffer())
+                isAnimatedWebP = await functions.isAnimatedWebp(arraybuffer)
+            }
+            if (functions.isVideo(props.img) || functions.isGIF(props.img) || isAnimatedWebP) {
+                return true
+            } else {
+                return false
+            }
+        },
+        load: async () => {
+            if (img) return
+            return decryptImg()
+        },
+        update: async () => {
+            if (!gifData) {
+                if (functions.isGIF(props.img)) return parseGIF()
+                if (functions.isWebP(props.img)) return parseAnimatedWebP()
+            }
+            if (!videoData) {
+                if (functions.isVideo(props.img)) return getVideoData()
+            }
+        }
+    }))
+
+    useEffect(() => {
+        if (reverse !== false || speed !== 1 || sharpen !== 0 || pixelate !== 1) props.reupdate?.()
+    }, [imageLoaded, reverse, speed, sharpen, pixelate])
 
     const handleIntersection = (entries: any) => {
         const entry = entries[0]
@@ -99,6 +139,24 @@ const GridImage: React.FunctionComponent<Props> = (props) => {
         }
     })
 
+    const decryptImg = async () => {
+        let url = props.img
+        let isAnimatedWebP = false
+        if (functions.isImage(props.img)) {
+            if (functions.isWebP(props.img)) {
+                const arraybuffer = await fetch(props.img).then((r) => r.arrayBuffer())
+                isAnimatedWebP = await functions.isAnimatedWebp(arraybuffer)
+            }
+            if (!isAnimatedWebP) url = await cryptoFunctions.decryptedLink(props.img)
+        }
+        const base64 = await functions.linkToBase64(url)
+        if (functions.isVideo(props.img) || functions.isGIF(props.img) || isAnimatedWebP) {
+            setImg(props.img)
+        } else {
+            setImg(base64)
+        }
+    }
+
     useEffect(() => {
         setImageLoaded(false)
         setReverse(false)
@@ -109,17 +167,6 @@ const GridImage: React.FunctionComponent<Props> = (props) => {
         setSeekTo(null)
         if (ref.current) ref.current.style.opacity = "1"
         if (videoRef.current) videoRef.current.style.opacity = "1"
-        const base64Img = async () => {
-            const base64 = await functions.linkToBase64(props.img)
-            setImg(base64)
-        }
-        const decryptImg = async () => {
-            const url = await cryptoFunctions.decryptedLink(props.img)
-            setImg(url)
-        }
-        decryptImg()
-        // base64Img()
-        // loadImage()
     }, [props.img])
 
     const resizePixelateCanvas = () => {
@@ -139,40 +186,32 @@ const GridImage: React.FunctionComponent<Props> = (props) => {
         }
     }, [])
 
-    useEffect(() => {
-        const parseGIF = async () => {
-            const start = new Date()
-            const frames = await gifFrames({url: props.img, frames: "all", outputType: "canvas"})
-            const newGIFData = [] as any
-            for (let i = 0; i < frames.length; i++) {
-                newGIFData.push({
-                    frame: frames[i].getImage(),
-                    delay: frames[i].frameInfo.delay * 10
-                })
-            }
-            setGIFData(newGIFData)
-            const end = new Date()
-            const seconds = (end.getTime() - start.getTime()) / 1000
-            setSeekTo(seconds)
-        }
-        const parseAnimatedWebP = async () => {
-            const start = new Date()
-            const arraybuffer = await fetch(props.img).then((r) => r.arrayBuffer())
-            const animated = await functions.isAnimatedWebp(arraybuffer)
-            if (!animated) return 
-            const frames = await functions.extractAnimatedWebpFrames(props.img)
-            setGIFData(frames)
-            const end = new Date()
-            const seconds = (end.getTime() - start.getTime()) / 1000
-            setSeekTo(seconds)
-        }
-        if (imageLoaded && functions.isGIF(props.img)) {
-            parseGIF()
-        }
-        if (imageLoaded && functions.isWebP(props.img)) {
-            parseAnimatedWebP()
-        }
-    }, [imageLoaded])
+    const parseGIF = async () => {
+        if (loadingFrames) return
+        setLoadingFrames(true)
+        const start = new Date()
+        const frames = await functions.extractGIFFrames(props.img)
+        setGIFData(frames)
+        const end = new Date()
+        const seconds = (end.getTime() - start.getTime()) / 1000
+        setSeekTo(seconds)
+        setLoadingFrames(false)
+    }
+
+    const parseAnimatedWebP = async () => {
+        if (loadingFrames) return
+        setLoadingFrames(true)
+        const start = new Date()
+        const arraybuffer = await fetch(props.img).then((r) => r.arrayBuffer())
+        const animated = await functions.isAnimatedWebp(arraybuffer)
+        if (!animated) return 
+        const frames = await functions.extractAnimatedWebpFrames(props.img)
+        setGIFData(frames)
+        const end = new Date()
+        const seconds = (end.getTime() - start.getTime()) / 1000
+        setSeekTo(seconds)
+        setLoadingFrames(false)
+    }
 
     const getVideoData = async () => {
         if (!videoRef.current) return
@@ -212,7 +251,7 @@ const GridImage: React.FunctionComponent<Props> = (props) => {
         let timeout = null as any
         const animationLoop = async () => {
             if (imageLoaded) {
-                if (reverse && functions.isVideo(props.img) && !videoData) await getVideoData()
+                if (reverse && functions.isVideo(props.img) && !videoData) return
                 const adjustedData = gifData ? functions.gifSpeed(gifData, speed) : 
                                     videoData ? functions.videoSpeed(videoData, speed) : null
                 if (videoRef.current) videoRef.current.playbackRate = speed 
@@ -711,8 +750,8 @@ const GridImage: React.FunctionComponent<Props> = (props) => {
         axios.get("/api/post", {params: {postID: props.post.postID}, withCredentials: true}).then(async (r) => {
             const post = r.data
             localStorage.setItem("savedPost", JSON.stringify(post))
-            const tagCache = await functions.tagCategoriesCache(post.tags)
-            localStorage.setItem("savedTags", JSON.stringify(tagCache))
+            const tagCategories = await functions.tagCategories(post.tags, true)
+            localStorage.setItem("savedTags", JSON.stringify(tagCategories))
         }).catch(() => null)
         if (!drag) {
             if (event.metaKey || event.ctrlKey || event.button == 1) {
@@ -723,38 +762,6 @@ const GridImage: React.FunctionComponent<Props> = (props) => {
             }
         }
     }
-
-    /*
-    const loadImage = async () => {
-        if (!ref.current || !overlayRef.current || !lightnessRef.current) return
-        let src = functions.isVideo(props.img) ? backFrame : props.img
-        if (functions.isImage(src)) {
-            src = await cryptoFunctions.decryptedLink(src)
-        }
-        const img = document.createElement("img")
-        img.src = src 
-        img.onload = () => {
-            if (!ref.current || !overlayRef.current || !lightnessRef.current) return
-            setImageWidth(img.width)
-            setImageHeight(img.height)
-            setNaturalWidth(img.naturalWidth)
-            setNaturalHeight(img.naturalHeight)
-            const refCtx = ref.current.getContext("2d")
-            ref.current.width = img.width
-            ref.current.height = img.height
-            refCtx?.drawImage(img, 0, 0, img.width, img.height)
-            const overlayCtx = overlayRef.current.getContext("2d")
-            overlayRef.current.width = img.width
-            overlayRef.current.height = img.height
-            overlayCtx?.drawImage(img, 0, 0, img.width, img.height)
-            const lightnessCtx = lightnessRef.current.getContext("2d")
-            lightnessRef.current.width = img.width
-            lightnessRef.current.height = img.height
-            lightnessCtx?.drawImage(img, 0, 0, img.width, img.height)
-            setImageLoaded(true)
-            ref.current.style.opacity = "1"
-        }
-    }*/
 
     const mouseEnter = () => {
         if (pageBuffering) return
@@ -782,20 +789,20 @@ const GridImage: React.FunctionComponent<Props> = (props) => {
         <div style={{opacity: visible ? "1" : "0", transition: "opacity 0.1s"}} className="image-box" id={String(props.id)} ref={containerRef} 
         onClick={onClick} onAuxClick={onClick} onMouseDown={mouseDown} onMouseUp={mouseUp} onMouseMove={mouseMove} onMouseEnter={mouseEnter} onMouseLeave={mouseLeave}>
             <div className="image-filters" ref={imageFiltersRef} onMouseMove={(event) => imageAnimation(event)} onMouseLeave={() => cancelImageAnimation()}>
-                {functions.isVideo(props.img) && !mobile ? <video autoPlay loop muted disablePictureInPicture playsInline className="dummy-video" ref={videoRef} src={props.img}></video> : null}   
+                {functions.isVideo(props.img) && !mobile ? <video draggable={false} autoPlay loop muted disablePictureInPicture playsInline className="dummy-video" ref={videoRef} src={props.img}></video> : null}   
                 {/* <canvas className="lightness-overlay" ref={lightnessRef}></canvas> */}
                 {/* <canvas className="sharpen-overlay" ref={overlayRef}></canvas> */}
-                <img className="lightness-overlay" ref={lightnessRef} src={functions.isVideo(props.img) ? backFrame : img}/>
-                <img className="sharpen-overlay" ref={overlayRef} src={functions.isVideo(props.img) ? backFrame : img}/>
-                {functions.isVideo(props.img) && !mobile ? <canvas className="sharpen-overlay" ref={videoOverlayRef}></canvas> : null}
-                <canvas className="pixelate-canvas" ref={pixelateRef}></canvas>
+                <img draggable={false} className="lightness-overlay" ref={lightnessRef} src={functions.isVideo(props.img) ? backFrame : img}/>
+                <img draggable={false} className="sharpen-overlay" ref={overlayRef} src={functions.isVideo(props.img) ? backFrame : img}/>
+                {functions.isVideo(props.img) && !mobile ? <canvas draggable={false} className="sharpen-overlay" ref={videoOverlayRef}></canvas> : null}
+                <canvas draggable={false} className="pixelate-canvas" ref={pixelateRef}></canvas>
                 {functions.isVideo(props.img) && !mobile ? <>
-                <video autoPlay loop muted disablePictureInPicture playsInline className="video" ref={videoRef} src={props.img} onLoadedData={(event) => onLoad(event)}></video></> :
-                <img className="image" ref={ref} src={functions.isVideo(props.img) ? backFrame : img} onLoad={(event) => onLoad(event)}/>
+                <video draggable={false} autoPlay loop muted disablePictureInPicture playsInline className="video" ref={videoRef} src={props.img} onLoadedData={(event) => onLoad(event)}></video></> :
+                <img draggable={false} className="image" ref={ref} src={functions.isVideo(props.img) ? backFrame : img} onLoad={(event) => onLoad(event)}/>
                 /*<canvas className="image" ref={ref}></canvas>*/}
                 </div>
         </div>
     )
-}
+})
 
 export default GridImage

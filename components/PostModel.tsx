@@ -1,7 +1,7 @@
 import React, {useContext, useEffect, useRef, useState, useReducer} from "react"
 import {ThemeContext, EnableDragContext, BrightnessContext, ContrastContext, HueContext, SaturationContext, LightnessContext,
 BlurContext, SharpenContext, PixelateContext, DownloadFlagContext, DownloadURLsContext, DisableZoomContext, SpeedContext,
-ReverseContext, MobileContext} from "../Context"
+ReverseContext, MobileContext, TranslationModeContext, TranslationDrawingEnabledContext} from "../Context"
 import {HashLink as Link} from "react-router-hash-link"
 import functions from "../structures/Functions"
 import cryptoFunctions from "../structures/CryptoFunctions"
@@ -24,6 +24,9 @@ import ambientLightIcon from "../assets/purple/ambient.png"
 import ambientLightIconMagenta from "../assets/magenta/ambient.png"
 import directionalLightIcon from "../assets/purple/directional.png"
 import directionalLightIconMagenta from "../assets/magenta/directional.png"
+import translationToggleOn from "../assets/purple/translation-toggle-on.png"
+import translationToggleOnMagenta from "../assets/magenta/translation-toggle-on.png"
+import TranslationEditor from "./TranslationEditor"
 import path from "path"
 import "./styles/postmodel.less"
 import mime from "mime-types"
@@ -34,12 +37,16 @@ let imageTimer = null as any
 let id = null as any
 
 interface Props {
+    post?: any
     model: string
     width?: number
     height?: number
     scale?: number
     noKeydown?: boolean
     comicPages?: any
+    order?: number
+    noTranslations?: boolean
+    unverified?: boolean
 }
 
 const PostModel: React.FunctionComponent<Props> = (props) => {
@@ -57,6 +64,8 @@ const PostModel: React.FunctionComponent<Props> = (props) => {
     const {downloadFlag, setDownloadFlag} = useContext(DownloadFlagContext)
     const {downloadURLs, setDownloadURLs} = useContext(DownloadURLsContext)
     const {disableZoom, setDisableZoom} = useContext(DisableZoomContext)
+    const {translationMode, setTranslationMode} = useContext(TranslationModeContext)
+    const {translationDrawingEnabled, setTranslationDrawingEnabled} = useContext(TranslationDrawingEnabledContext)
     const {mobile, setMobile} = useContext(MobileContext)
     const [showSpeedDropdown, setShowSpeedDropdown] = useState(false)
     const [showLightDropdown, setShowLightDropdown] = useState(false)
@@ -97,6 +106,7 @@ const PostModel: React.FunctionComponent<Props> = (props) => {
     const [model, setModel] = useState(null) as any
     const [scene, setScene] = useState(null) as any
     const [objMaterials, setObjMaterials] = useState([]) as any
+    const [buttonHover, setButtonHover] = useState(false)
 
     const loadModel = async () => {
         const element = rendererRef.current
@@ -374,15 +384,31 @@ const PostModel: React.FunctionComponent<Props> = (props) => {
         }
     }
 
+    const handleKeydown = (event: any) => {
+        const key = event.keyCode
+        const value = String.fromCharCode((96 <= key && key <= 105) ? key - 48 : key).toLowerCase()
+        if (!(event.target instanceof HTMLTextAreaElement) && !(event.target instanceof HTMLInputElement)) {
+            if (value === "f") {
+                if (!props.noKeydown) fullscreen()
+            }
+            if (value === "t") {
+                setTranslationMode((prev: boolean) => !prev)
+                setTranslationDrawingEnabled(true)
+            }
+        }
+    }
+
     useEffect(() => {
         if (!ref) return
         let observer = null as any
         observer = new ResizeObserver(resizeImageCanvas)
         observer.observe(ref)
+        window.addEventListener("keydown", handleKeydown)
         window.addEventListener("fullscreenchange", exitFullScreen)
         window.addEventListener("webkitfullscreenchange", exitFullScreen)
         return () => {
             observer?.disconnect()
+            window.removeEventListener("keydown", handleKeydown)
             window.removeEventListener("fullscreenchange", exitFullScreen)
             window.removeEventListener("webkitfullscreenchange", exitFullScreen)
         }
@@ -395,6 +421,11 @@ const PostModel: React.FunctionComponent<Props> = (props) => {
             setDragProgress(null)
         }
     }, [dragging, dragProgress])
+
+    const getTranslationToggleOnIcon = () => {
+        if (theme.includes("magenta")) return translationToggleOnMagenta
+        return translationToggleOn
+    }
 
     const getModelSpeedMarginRight = () => {
         const controlRect = modelControls.current?.getBoundingClientRect()
@@ -697,8 +728,12 @@ const PostModel: React.FunctionComponent<Props> = (props) => {
 
     return (
         <div className="post-model-container" style={{zoom: props.scale ? props.scale : 1}}>
-            <div className="post-model-box" ref={containerRef}>
+            {!props.noTranslations ? <TranslationEditor post={props.post} img={props.model} order={props.order} unverified={props.unverified}/> : null}
+            <div className="post-model-box" ref={containerRef} style={{display: translationMode ? "none" : "flex"}}>
                 <div className="post-model-filters" ref={fullscreenRef} onMouseOver={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
+                <div className={`post-image-top-buttons ${buttonHover ? "show-post-image-top-buttons" : ""}`} onMouseEnter={() => setButtonHover(true)} onMouseLeave={() => setButtonHover(false)}>
+                        {!props.noTranslations ? <img draggable={false} className="post-image-top-button" src={getTranslationToggleOnIcon()} onClick={() => {setTranslationMode(true); setTranslationDrawingEnabled(true)}}/> : null}
+                    </div>
                     <div className="relative-ref" style={{alignItems: "center", justifyContent: "center"}}>
                         <div className="model-controls" ref={modelControls} onMouseUp={() => setDragging(false)} onMouseOver={controlMouseEnter} onMouseLeave={controlMouseLeave}>
                             {animations ? <div className="model-control-row" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
@@ -709,23 +744,23 @@ const PostModel: React.FunctionComponent<Props> = (props) => {
                             <div className="model-control-row" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                                 {animations ? <>
                                 <div className="model-control-row-container">
-                                    <img className="model-control-img" onClick={() => changeReverse()} src={modelReverseIcon}/>
-                                    <img className="model-control-img" ref={modelSpeedRef} src={modelSpeedIcon} onClick={() => setShowSpeedDropdown((prev) => !prev)}/>
+                                    <img draggable={false} className="model-control-img" onClick={() => changeReverse()} src={modelReverseIcon}/>
+                                    <img draggable={false} className="model-control-img" ref={modelSpeedRef} src={modelSpeedIcon} onClick={() => setShowSpeedDropdown((prev) => !prev)}/>
                                 </div> 
                                 <div className="model-control-row-container">
-                                    <img className="model-control-img" src={modelClearIcon} onClick={reset}/>
+                                    <img draggable={false} className="model-control-img" src={modelClearIcon} onClick={reset}/>
                                     {/* <img className="control-img" src={modelRewindIcon}/> */}
-                                    <img className="model-control-img" onClick={() => setPaused((prev) => !prev)} src={getModelPlayIcon()}/>
+                                    <img draggable={false} className="model-control-img" onClick={() => setPaused((prev) => !prev)} src={getModelPlayIcon()}/>
                                     {/* <img className="control-img" src={modelFastforwardIcon}/> */}
                                 </div></> : null}
                                 <div className="model-control-row-container">
-                                    <img className="model-control-img" onClick={() => setWireframe((prev) => !prev)} src={getModelWireframeIcon()}/>
-                                    <img className="model-control-img" onClick={() => setMatcap((prev) => !prev)} src={getModelMatcapIcon()}/>
-                                    <img className="model-control-img" ref={modelMorphRef} src={modelShapeKeysIcon} onClick={() => setShowMorphDropdown((prev) => !prev)}/>
-                                    <img className="model-control-img" ref={modelLightRef}  src={modelLightIcon} onClick={() => setShowLightDropdown((prev) => !prev)}/>
+                                    <img draggable={false} className="model-control-img" onClick={() => setWireframe((prev) => !prev)} src={getModelWireframeIcon()}/>
+                                    <img draggable={false} className="model-control-img" onClick={() => setMatcap((prev) => !prev)} src={getModelMatcapIcon()}/>
+                                    <img draggable={false} className="model-control-img" ref={modelMorphRef} src={modelShapeKeysIcon} onClick={() => setShowMorphDropdown((prev) => !prev)}/>
+                                    <img draggable={false} className="model-control-img" ref={modelLightRef}  src={modelLightIcon} onClick={() => setShowLightDropdown((prev) => !prev)}/>
                                 </div> 
                                 <div className="model-control-row-container">
-                                    <img className="model-control-img" src={modelFullscreenIcon} onClick={() => fullscreen()}/>
+                                    <img draggable={false} className="model-control-img" src={modelFullscreenIcon} onClick={() => fullscreen()}/>
                                 </div> 
                             </div>
                             <div className={`model-speed-dropdown ${showSpeedDropdown ? "" : "hide-speed-dropdown"}`} style={{marginRight: getModelSpeedMarginRight(), marginTop: "-240px"}}
@@ -764,17 +799,17 @@ const PostModel: React.FunctionComponent<Props> = (props) => {
                             <div className={`model-light-dropdown ${showLightDropdown ? "" : "hide-light-dropdown"}`}
                             style={{marginRight: getModelLightMarginRight(), top: `-120px`}}>
                                 <div className="model-light-dropdown-row lights-row">
-                                    <img className="light-dropdown-img" src={getAmbientIcon()}/>
+                                    <img draggable={false} className="light-dropdown-img" src={getAmbientIcon()}/>
                                     <span className="light-dropdown-text">Ambient</span>
                                     <Slider className="lights-slider" trackClassName="lights-slider-track" thumbClassName="lights-slider-thumb" onChange={(value) => setAmbient(value)} min={0.05} max={1} step={0.05} value={ambient}/>
                                 </div>
                                 <div className="model-light-dropdown-row lights-row">
-                                    <img className="light-dropdown-img" src={getDirectionalIcon()}/>
+                                    <img draggable={false} className="light-dropdown-img" src={getDirectionalIcon()}/>
                                     <span className="light-dropdown-text">Directional Front</span>
                                     <Slider className="lights-slider" trackClassName="lights-slider-track" thumbClassName="lights-slider-thumb" onChange={(value) => setDirectionalFront(value)} min={0.05} max={1} step={0.05} value={directionalFront}/>
                                 </div>
                                 <div className="model-light-dropdown-row lights-row">
-                                    <img className="light-dropdown-img" src={getDirectionalIcon()}/>
+                                    <img draggable={false} className="light-dropdown-img" src={getDirectionalIcon()}/>
                                     <span className="light-dropdown-text">Directional Back</span>
                                     <Slider className="lights-slider" trackClassName="lights-slider-track" thumbClassName="lights-slider-thumb" onChange={(value) => setDirectionalBack(value)} min={0.05} max={1} step={0.05} value={directionalBack}/>
                                 </div>
@@ -783,9 +818,9 @@ const PostModel: React.FunctionComponent<Props> = (props) => {
                                 </div>
                             </div>
                         </div>
-                        <canvas className="post-lightness-overlay" ref={lightnessRef}></canvas>
-                        <canvas className="post-sharpen-overlay" ref={overlayRef}></canvas>
-                        <canvas className="post-pixelate-canvas" ref={pixelateRef}></canvas>
+                        <canvas draggable={false} className="post-lightness-overlay" ref={lightnessRef}></canvas>
+                        <canvas draggable={false} className="post-sharpen-overlay" ref={overlayRef}></canvas>
+                        <canvas draggable={false} className="post-pixelate-canvas" ref={pixelateRef}></canvas>
                         <div className="post-model-renderer" ref={rendererRef}></div>
                     </div>
                 </div>

@@ -1,4 +1,4 @@
-import React, {useContext, useEffect, useRef, useState} from "react"
+import React, {useContext, useEffect, useRef, useState, forwardRef, useImperativeHandle} from "react"
 import {useHistory} from "react-router-dom"
 import loading from "../assets/purple/loading.gif"
 import loadingMagenta from "../assets/magenta/loading.gif"
@@ -22,9 +22,16 @@ interface Props {
     width?: number
     height?: number
     post: any
+    reupdate?: () => void
 }
 
-const GridModel: React.FunctionComponent<Props> = (props) => {
+interface Ref {
+    shouldWait: () => Promise<boolean>
+    load: () => Promise<void>
+    update: () => Promise<void>
+}
+
+const GridModel = forwardRef<Ref, Props>((props, componentRef) => {
     const {theme, setTheme} = useContext(ThemeContext)
     const {sizeType, setSizeType} = useContext(SizeTypeContext)
     const [imageSize, setImageSize] = useState(270) as any
@@ -72,6 +79,23 @@ const GridModel: React.FunctionComponent<Props> = (props) => {
     const [ref, setRef] = useState(null as unknown as HTMLCanvasElement)
     const history = useHistory()
 
+    useImperativeHandle(componentRef, () => ({
+        shouldWait: async () => {
+            return false
+        },
+        load: async () => {
+            if (ref) return
+            return loadModel()
+        },
+        update: async () => {
+            return loadModel()
+        }
+    }))
+
+    useEffect(() => {
+        props.reupdate?.()
+    }, [imageSize])
+
     const handleIntersection = (entries: any) => {
         const entry = entries[0]
         if (entry.intersectionRatio > 0) {
@@ -95,9 +119,7 @@ const GridModel: React.FunctionComponent<Props> = (props) => {
         }
     })
 
-
     const loadModel = async () => {
-        debugger
         const element = rendererRef.current
         window.cancelAnimationFrame(id)
         while (element?.lastChild) element?.removeChild(element.lastChild)
@@ -227,10 +249,10 @@ const GridModel: React.FunctionComponent<Props> = (props) => {
         setSeekTo(null)
     }, [props.model])
 
-
+    /*
     useEffect(() => {
         loadModel()
-    }, [imageSize])
+    }, [imageSize])*/
 
     useEffect(() => {
         if (mixer) {
@@ -290,7 +312,7 @@ const GridModel: React.FunctionComponent<Props> = (props) => {
         const refWidth = ref.clientWidth
         const refHeight = ref.clientHeight
         if (square) {
-            const sidebarWidth = document.querySelector(".sidebar")?.clientWidth || 0
+            const sidebarWidth = functions.sidebarWidth()
             const width = window.innerWidth - sidebarWidth
             const containerWidth = Math.floor(width / (mobile ? functions.getImagesPerRowMobile(sizeType) : functions.getImagesPerRow(sizeType))) - getSquareOffset()
             containerRef.current.style.width = `${containerWidth}px`
@@ -491,7 +513,7 @@ const GridModel: React.FunctionComponent<Props> = (props) => {
         axios.get("/api/post", {params: {postID: props.post.postID}, withCredentials: true}).then(async (r) => {
             const post = r.data
             localStorage.setItem("savedPost", JSON.stringify(post))
-            const tagCache = await functions.tagCategoriesCache(post.tags)
+            const tagCache = await functions.tagCategories(post.tags, true)
             localStorage.setItem("savedTags", JSON.stringify(tagCache))
         }).catch(() => null)
         if (!drag) {
@@ -541,15 +563,15 @@ const GridModel: React.FunctionComponent<Props> = (props) => {
 
 
     return (
-        <div style={{opacity: visible ? "1" : "0", transition: "opacity 0.1s"}} className="image-box" id={String(props.id)} ref={containerRef} onClick={onClick} onAuxClick={onClick} onMouseDown={mouseDown} onMouseUp={mouseUp} onMouseMove={mouseMove}>
+        <div style={{opacity: visible ? "1" : "0", transition: "opacity 0.1s", width: "max-content", height: "max-content"}} className="image-box" id={String(props.id)} ref={containerRef} onClick={onClick} onAuxClick={onClick} onMouseDown={mouseDown} onMouseUp={mouseUp} onMouseMove={mouseMove}>
             <div className="image-filters" ref={imageFiltersRef} onMouseMove={(event) => imageAnimation(event)} onMouseLeave={() => cancelImageAnimation()}>
-                <canvas className="lightness-overlay" ref={lightnessRef}></canvas>
-                <canvas className="sharpen-overlay" ref={overlayRef}></canvas>
-                <canvas className="pixelate-canvas" ref={pixelateRef}></canvas>
+                <canvas draggable={false} className="lightness-overlay" ref={lightnessRef}></canvas>
+                <canvas draggable={false} className="sharpen-overlay" ref={overlayRef}></canvas>
+                <canvas draggable={false} className="pixelate-canvas" ref={pixelateRef}></canvas>
                 <div className="grid-model-renderer" ref={rendererRef}></div>
             </div>
         </div>
     )
-}
+})
 
 export default GridModel

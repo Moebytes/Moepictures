@@ -33,7 +33,6 @@ import {HideNavbarContext, HideSidebarContext, RelativeContext, ThemeContext, En
 UploadDropFilesContext, BrightnessContext, ContrastContext, HueContext, SaturationContext, LightnessContext, MobileContext,
 BlurContext, SharpenContext, PixelateContext, HeaderTextContext, SessionContext, SidebarTextContext, RedirectContext} from "../Context"
 import fileType from "magic-bytes.js"
-import localforage from "localforage"
 import JSZip from "jszip"
 import axios from "axios"
 import SearchSuggestions from "../components/SearchSuggestions"
@@ -1122,10 +1121,10 @@ const UploadPage: React.FunctionComponent = (props) => {
         clearTimeout(tagsTimer)
         tagsTimer = setTimeout(async () => {
             if (!tags?.[0]) return setNewTags([])
-            const savedTags = await localforage.getItem("tags") as any
+            const tagList = await functions.tagsCache()
             let notExists = [] as any
             for (let i = 0; i < tags.length; i++) {
-                const exists = savedTags.find((t: any) => t.tag === tags[i])
+                const exists = tagList.find((t: any) => t.tag === tags[i])
                 if (!exists) notExists.push({tag: tags[i], desc: `${functions.toProperCase(tags[i]).replaceAll("-", " ")}.`})
             }
             for (let i = 0; i < notExists.length; i++) {
@@ -1230,11 +1229,11 @@ const UploadPage: React.FunctionComponent = (props) => {
 
     const getPostJSX = () => {
         if (functions.isModel(currentImg)) {
-            return <PostModel model={currentImg} noKeydown={true}/>
+            return <PostModel model={currentImg} noKeydown={true} noTranslations={true}/>
         } else if (functions.isAudio(currentImg)) {
-            return <PostSong audio={currentImg} noKeydown={true}/>
+            return <PostSong audio={currentImg} noKeydown={true} noTranslations={true}/>
         } else {
-            return <PostImage img={currentImg} noKeydown={true} noEncryption={true}/>
+            return <PostImage img={currentImg} noKeydown={true} noEncryption={true} noTranslations={true}/>
         }
     }
 

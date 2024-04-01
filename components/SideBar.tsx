@@ -2,7 +2,8 @@ import React, {useContext, useEffect, useState, useReducer} from "react"
 import {useHistory} from "react-router-dom"
 import {ThemeContext, HideSidebarContext, HideNavbarContext, HideSortbarContext, EnableDragContext, MobileContext, UnverifiedPostsContext,
 RelativeContext, HideTitlebarContext, SidebarHoverContext, SearchContext, SearchFlagContext, PostsContext, ShowDeletePostDialogContext, AutoSearchContext,
-TagsContext, RandomFlagContext, ImageSearchFlagContext, SidebarTextContext, SessionContext, MobileScrollingContext, QuickEditIDContext, QuickEditUnverifiedContext} from "../Context"
+TagsContext, RandomFlagContext, ImageSearchFlagContext, SidebarTextContext, SessionContext, MobileScrollingContext, QuickEditIDContext, QuickEditUnverifiedContext,
+TranslationModeContext, TranslationDrawingEnabledContext} from "../Context"
 import {HashLink as Link} from "react-router-hash-link"
 import favicon from "../assets/purple/favicon.png"
 import faviconMagenta from "../assets/magenta/favicon.png"
@@ -140,6 +141,8 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
     const [getRandomMobileIconHover, setRandomMobileIconHover] = useState(false)
     const {quickEditID, setQuickEditID} = useContext(QuickEditIDContext)
     const {quickEditUnverified, setQuickEditUnverified} = useContext(QuickEditUnverifiedContext)
+    const {translationMode, setTranslationMode} = useContext(TranslationModeContext)
+    const {translationDrawingEnabled, setTranslationDrawingEnabled} = useContext(TranslationDrawingEnabledContext)
     const {autoSearch, setAutoSearch} = useContext(AutoSearchContext)
     const history = useHistory()
 
@@ -702,6 +705,13 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
         setQuickEditID(props.post.postID)
     }
 
+    const triggerAddTranslation = () => {
+        window.scrollTo(0, 0)
+        const newMode = !translationMode
+        setTranslationMode(newMode)
+        if (newMode) setTranslationDrawingEnabled(true)
+    }
+
     if (mobile) return (
         <>
         <SearchSuggestions active={suggestionsActive} sticky={true}/>
@@ -948,14 +958,13 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
                                 <span className="tag">Set Avatar</span>
                             </span>
                         </div>
-                        {/* 
                         <div className="sidebar-row">
-                            <span className="tag-hover">
+                            <span className="tag-hover" onClick={triggerAddTranslation}>
                                 <img className="sidebar-icon" src={getAddTranslation()}/>
                                 <span className="tag">Add Translation</span>
                             </span>
                         </div>
-                        <div className="sidebar-row">
+                        {/* <div className="sidebar-row">
                             <span className="tag-hover">
                                 <img className="sidebar-icon" src={getReport()}/>
                                 <span className="tag">Report</span>

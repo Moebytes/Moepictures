@@ -4,7 +4,6 @@ import {ThemeContext, SessionContext, EnableDragContext, PostsContext, VisiblePo
 SearchContext, SearchFlagContext, MobileContext} from "../Context"
 import {HashLink as Link} from "react-router-hash-link"
 import functions from "../structures/Functions"
-import localforage from "localforage"
 import "./styles/tagbanner.less"
 import axios from "axios"
 

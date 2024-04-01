@@ -1325,6 +1325,68 @@ export default class SQLQuery {
     return result
   }
 
+  /** Insert translation. */
+  public static insertTranslation = async (postID: number, updater: string, order: number, data: any) => {
+    const now = new Date().toISOString()
+    const query: QueryConfig = {
+      text: `INSERT INTO "translations" ("postID", "updater", "updatedDate", "order", "data") VALUES ($1, $2, $3, $4, $5)`,
+      values: [postID, updater, now, order, data]
+    }
+    const result = await SQLQuery.run(query)
+    return result
+  }
+
+  /** Updates a translation. */
+  public static updateTranslation = async (translationID: number, updater: string, data: any) => {
+    const now = new Date().toISOString()
+    const query: QueryConfig = {
+        text: `UPDATE "translations" SET "updater" = $1, "updatedDate" = $2, "data" = $3 WHERE "translationID" = $4`,
+        values: [updater, now, data, translationID]
+    }
+    return SQLQuery.run(query)
+  }
+
+  /** Get post translations. */
+  public static translations = async (postID: number) => {
+    const query: QueryConfig = {
+      text: functions.multiTrim(`
+            SELECT translations.*
+            FROM translations
+            WHERE translations."postID" = $1
+            GROUP BY translations."translationID"
+            ORDER BY translations."updatedDate" DESC
+          `),
+          values: [postID]
+    }
+    const result = await SQLQuery.run(query)
+    return result
+  }
+
+  /** Get translation. */
+  public static translation = async (postID: number, order: number) => {
+    const query: QueryConfig = {
+      text: functions.multiTrim(`
+            SELECT translations.*
+            FROM translations
+            WHERE translations."postID" = $1 AND translations."order" = $2
+            GROUP BY translations."translationID"
+          `),
+          values: [postID, order]
+    }
+    const result = await SQLQuery.run(query)
+    return result[0]
+  }
+
+  /** Delete translation. */
+  public static deleteTranslation = async (translationID: number) => {
+    const query: QueryConfig = {
+      text: functions.multiTrim(`DELETE FROM translations WHERE translations."translationID" = $1`),
+      values: [translationID]
+    }
+    const result = await SQLQuery.run(query)
+    return result
+  }
+
   /** Insert favorite. */
   public static insertFavorite = async (postID: number, username: string) => {
     const query: QueryConfig = {

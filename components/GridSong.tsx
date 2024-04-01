@@ -1,4 +1,4 @@
-import React, {useContext, useEffect, useRef, useState} from "react"
+import React, {useContext, useEffect, useRef, useState, forwardRef, useImperativeHandle} from "react"
 import {useHistory} from "react-router-dom"
 import loading from "../assets/purple/loading.gif"
 import loadingMagenta from "../assets/magenta/loading.gif"
@@ -19,9 +19,15 @@ interface Props {
     width?: number
     height?: number
     post: any
+    reupdate?: () => void
 }
 
-const GridSong: React.FunctionComponent<Props> = (props) => {
+interface Ref {
+    shouldWait: () => Promise<boolean>
+    load: () => Promise<void>
+}
+
+const GridSong = forwardRef<Ref, Props>((props, componentRef) => {
     const {theme, setTheme} = useContext(ThemeContext)
     const {sizeType, setSizeType} = useContext(SizeTypeContext)
     const [imageSize, setImageSize] = useState(270) as any
@@ -60,6 +66,16 @@ const GridSong: React.FunctionComponent<Props> = (props) => {
     const [image, setImage] = useState(null) as any
     const history = useHistory()
 
+    useImperativeHandle(componentRef, () => ({
+        shouldWait: async () => {
+            return false
+        },
+        load: async () => {
+            if (image) return
+            return loadAudio()
+        }
+    }))
+
     const handleIntersection = (entries: any) => {
         const entry = entries[0]
         if (entry.intersectionRatio > 0) {
@@ -94,7 +110,6 @@ const GridSong: React.FunctionComponent<Props> = (props) => {
         setSecondsProgress(0)
         setSeekTo(null)
         if (ref.current) ref.current.style.opacity = "1"
-        loadAudio()
     }, [props.audio])
 
     const resizePixelateCanvas = () => {
@@ -424,7 +439,7 @@ const GridSong: React.FunctionComponent<Props> = (props) => {
         axios.get("/api/post", {params: {postID: props.post.postID}, withCredentials: true}).then(async (r) => {
             const post = r.data
             localStorage.setItem("savedPost", JSON.stringify(post))
-            const tagCache = await functions.tagCategoriesCache(post.tags)
+            const tagCache = await functions.tagCategories(post.tags, true)
             localStorage.setItem("savedTags", JSON.stringify(tagCache))
         }).catch(() => null)
         if (!drag) {
@@ -474,13 +489,13 @@ const GridSong: React.FunctionComponent<Props> = (props) => {
         <div style={{opacity: visible ? "1" : "0", transition: "opacity 0.1s"}} className="image-box" id={String(props.id)} ref={containerRef} onClick={onClick} onAuxClick={onClick} onMouseDown={mouseDown} onMouseUp={mouseUp} onMouseMove={mouseMove}>
             <div className="image-filters" ref={imageFiltersRef} onMouseMove={(event) => imageAnimation(event)} onMouseLeave={() => cancelImageAnimation()}>
                 <img className="song-icon" src={getMusicNote()} ref={songIconRef}/>
-                <canvas className="lightness-overlay" ref={lightnessRef}></canvas>
-                <canvas className="sharpen-overlay" ref={overlayRef}></canvas>
-                <canvas className="pixelate-canvas" ref={pixelateRef}></canvas>
-                <canvas className="image" ref={ref}></canvas>
+                <canvas draggable={false} className="lightness-overlay" ref={lightnessRef}></canvas>
+                <canvas draggable={false} className="sharpen-overlay" ref={overlayRef}></canvas>
+                <canvas draggable={false} className="pixelate-canvas" ref={pixelateRef}></canvas>
+                <canvas draggable={false} className="image" ref={ref}></canvas>
                 </div>
         </div>
     )
-}
+})
 
 export default GridSong

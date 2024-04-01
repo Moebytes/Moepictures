@@ -11,8 +11,8 @@ import fileType from "magic-bytes.js"
 import gibberish from "./Gibberish"
 import gifFrames from "gif-frames"
 import {JsWebm} from "jswebm"
-import localforage from "localforage"
 import cryptoFunctions from "./CryptoFunctions"
+import localforage from "localforage"
 import mm from "music-metadata"
 import * as THREE from "three"
 import {GLTFLoader, OBJLoader, FBXLoader} from "three-stdlib"
@@ -940,6 +940,7 @@ export default class Functions {
 
     public static getThumbnailLink = (folder: string, postID: number, order: number, filename: string, sizeType: string) => {
         if (!filename) return ""
+        if (folder !== "image" && folder !== "comic") return Functions.getImageLink(folder, postID, order, filename)
         let size = 265
         if (sizeType === "tiny") size = 350
         if (sizeType === "small") size = 400
@@ -951,6 +952,7 @@ export default class Functions {
 
     public static getUnverifiedThumbnailLink = (folder: string, postID: number, order: number, filename: string, sizeType: string) => {
         if (!filename) return ""
+        if (folder !== "image" && folder !== "comic") return Functions.getUnverifiedImageLink(folder, postID, order, filename)
         let size = 265
         if (sizeType === "tiny") size = 350
         if (sizeType === "small") size = 400
@@ -1143,8 +1145,8 @@ export default class Functions {
         return result ? result : []
     }
 
-    public static tagCategories = async (parsedTags: any[]) => {
-        let result = await axios.get("/api/tag/list", {params: {tags: parsedTags.map((t: any) => t.tag)}, withCredentials: true}).then((r) => r.data)
+    public static tagCategories = async (parsedTags: any[], cache?: boolean) => {
+        let result = cache ? Functions.tagsCache() : await axios.get("/api/tag/list", {params: {tags: parsedTags.map((t: any) => t.tag)}, withCredentials: true}).then((r) => r.data)
         let artists = [] as any 
         let characters = [] as any 
         let series = [] as any 
@@ -1199,31 +1201,19 @@ export default class Functions {
         return {artists, characters, series, tags}
     }
 
-    public static tagCategoriesCache = async (parsedTags: any[]) => {
-        let result = await localforage.getItem("tags") as any
-        let artists = [] as any 
-        let characters = [] as any 
-        let series = [] as any 
-        let tags = [] as any
-        for (let i = 0; i < parsedTags.length; i++) {
-            const index = result.findIndex((r: any) => parsedTags[i] === r.tag)
-            if (index === -1) return Functions.tagCategories(parsedTags.map((t) => ({tag: t})))
-            const obj = {} as any 
-            obj.tag = parsedTags[i]
-            obj.count = result[index].count 
-            obj.image = result[index].image
-            obj.description = result[index].description 
-            if (result[index].type === "artist") {
-                artists.push(obj)
-            } else if (result[index].type === "character") {
-                characters.push(obj)
-            } else if (result[index].type === "series") {
-                series.push(obj)
-            } else {
-                tags.push(obj)
-            }
+    public static tagsCache = async () => {
+        const cache = await localforage.getItem("tags")
+        if (cache) {
+            return JSON.parse(cache as any)
+        } else {
+            let tagList = await axios.get("/api/tag/list", {withCredentials: true}).then((r) => r.data)
+            localforage.setItem("tags", JSON.stringify(tagList))
+            return tagList
         }
-        return {artists, characters, series, tags}
+    }
+
+    public static clearCache = () => {
+        localforage.removeItem("tags")
     }
 
     public static readableFileSize = (bytes: number) => {
@@ -1525,8 +1515,7 @@ export default class Functions {
     public static parseSpaceEnabledSearch = async (query: string) => {
         if (!query) return query
         if (query.split(/ +/g).length > 10) return query
-        const savedTags = await localforage.getItem("tags") as any
-        if (!savedTags) return query
+        let savedTags = await Functions.tagsCache()
         let permutations = Functions.permutations(query)
         let matchesArray = new Array(permutations.length).fill(0)
         let specialFlagsArray = new Array(permutations.length).fill("")
@@ -1804,5 +1793,9 @@ export default class Functions {
             [array[i], array[j]] = [array[j], array[i]]
         }
         return array
+    }
+
+    public static insertAtIndex = <T>(array: T[], index: number, item: any) => {
+        return [...array.slice(0, index), item, ...array.slice(index + 1)]
     }
 }

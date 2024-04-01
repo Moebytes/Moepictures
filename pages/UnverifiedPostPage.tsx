@@ -202,22 +202,22 @@ const UnverifiedPostPage: React.FunctionComponent<Props> = (props) => {
         if (post.type === "model") {
             return (
                 <>
-                <PostModel model={image}/>
-                <PostImageOptions noFavorite={true} model={image} post={post} download={download} next={next} previous={previous}/>
+                <PostModel unverified={true} post={post} model={image}/>
+                <PostImageOptions post={post} noFavorite={true} model={image} download={download} next={next} previous={previous}/>
                 </>
             )
         } else if (post.type === "audio") {
             return (
                 <>
-                <PostSong audio={image}/>
+                <PostSong unverified={true} post={post} audio={image}/>
                 <PostImageOptions noFavorite={true} audio={image} post={post} download={download} next={next} previous={previous}/>
                 </>
             )
         } else {
             return (
                 <>
-                <PostImage img={image} comicPages={post.type === "comic" ? images : null}/>
-                <PostImageOptions noFavorite={true} img={image} post={post} comicPages={post.type === "comic" ? images : null} download={download} next={next} previous={previous}/>
+                <PostImage unverified={true} post={post} img={image} comicPages={post.type === "comic" ? images : null}/>
+                <PostImageOptions post={post} noFavorite={true} img={image} comicPages={post.type === "comic" ? images : null} download={download} next={next} previous={previous}/>
                 </>
             )
         }

@@ -17,16 +17,18 @@ import Carousel from "../components/Carousel"
 import DeletePostDialog from "../dialogs/DeletePostDialog"
 import DeleteCommentDialog from "../dialogs/DeleteCommentDialog"
 import EditCommentDialog from "../dialogs/EditCommentDialog"
+import EditTranslationDialog from "../dialogs/EditTranslationDialog"
+import SaveTranslationDialog from "../dialogs/SaveTranslationDialog"
 import ReportCommentDialog from "../dialogs/ReportCommentDialog"
 import QuickEditDialog from "../dialogs/QuickEditDialog"
 import CaptchaDialog from "../dialogs/CaptchaDialog"
 import ThirdParty from "../components/ThirdParty"
 import Parent from "../components/Parent"
-import ArtistPosts from "../components/ArtistPosts"
+import MoreFromArtist from "../components/MoreFromArtist"
 import Related from "../components/Related"
 import MobileInfo from "../components/MobileInfo"
 import {HideNavbarContext, HideSidebarContext, RelativeContext, DownloadFlagContext, DownloadURLsContext, HideTitlebarContext, MobileContext, ReloadPostFlagContext,
-PostsContext, TagsContext, HeaderTextContext, PostFlagContext, RedirectContext, SidebarTextContext, SessionContext, SessionFlagContext, EnableDragContext} from "../Context"
+PostsContext, TagsContext, HeaderTextContext, PostFlagContext, RedirectContext, SidebarTextContext, SessionContext, SessionFlagContext, EnableDragContext, TranslationModeContext} from "../Context"
 import axios from "axios"
 import permissions from "../structures/Permissions"
 import "./styles/postpage.less"
@@ -46,6 +48,7 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
     const {relative, setRelative} = useContext(RelativeContext)
     const {downloadFlag, setDownloadFlag} = useContext(DownloadFlagContext)
     const {downloadURLs, setDownloadURLs} = useContext(DownloadURLsContext)
+    const {translationMode, setTranslationMode} = useContext(TranslationModeContext)
     const {posts, setPosts} = useContext(PostsContext)
     const {tags, setTags} = useContext(TagsContext)
     const {headerText, setHeaderText} = useContext(HeaderTextContext)
@@ -65,6 +68,7 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
     const [post, setPost] = useState(null) as any
     const [loaded, setLoaded] = useState(false)
     const [tagCategories, setTagCategories] = useState(null) as any
+    const [order, setOrder] = useState(1)
     const history = useHistory()
     const postID = props?.match.params.id
 
@@ -86,13 +90,19 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
         document.title = "Moebooru: Post"
         const savedPost = localStorage.getItem("savedPost")
         const savedTags = localStorage.getItem("savedTags")
+        const savedOrder = localStorage.getItem("order")
         if (savedPost) setPost(JSON.parse(savedPost))
         if (savedTags) setTagCategories(JSON.parse(savedTags))
+        if (savedOrder) setTimeout(() => {setOrder(Number(savedOrder))}, 500)
         if (!posts?.length) {
             const savedPosts = localStorage.getItem("savedPosts")
             if (savedPosts) setPosts(JSON.parse(savedPosts))
         }
     }, [])
+
+    useEffect(() => {
+        localStorage.setItem("order", String(order))
+    }, [order])
 
     useEffect(() => {
         if (mobile) {
@@ -157,13 +167,14 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
 
     useEffect(() => {
         const updateArtistPosts = async () => {
-            if (tagCategories?.artists?.[0].tag) {
+            if (tagCategories?.artists?.[0]?.tag) {
                 const artistPosts = await axios.get("/api/search/posts", {params: {query: tagCategories.artists[0].tag, type: "all", restrict: "all", style: "all", sort: "drawn", limit: 10000}, withCredentials: true}).then((r) => r.data)
                 setArtistPosts(artistPosts)
             }
         }
         const updateRelatedPosts = async () => {
-            if (tagCategories?.characters?.[0].tag !== characterTag) {
+            if (!tagCategories?.characters?.[0].tag) return
+            if (tagCategories.characters[0].tag !== characterTag) {
                 const relatedPosts = await axios.get("/api/search/posts", {params: {query: tagCategories.characters[0].tag, type: post.type, restrict: post.restrict === "explicit" ? "explicit" : "all", style: post.style, sort: Math.random() > 0.5 ? "date" : "reverse date", limit: 200}, withCredentials: true}).then((r) => r.data)
                 setRelatedPosts(relatedPosts)
                 characterTag = tagCategories.characters[0].tag
@@ -186,7 +197,12 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
                 let images = post.images.map((i: any) => functions.getImageLink(i.type, post.postID, i.order, i.filename))
                 // images = await Promise.all(images.map((img: string) => functions.linkToBase64(img)))
                 setImages(images)
-                setImage(images[0])
+                if (images[order-1]) {
+                    setImage(images[order-1])
+                } else {
+                    setImages(images[0])
+                    setOrder(1)
+                }
                 const tags = await functions.parseTags([post])
                 const categories = await functions.tagCategories(tags)
                 setTagCategories(categories)
@@ -206,7 +222,7 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
             }
         }
         updatePost()
-    }, [postID, posts])
+    }, [postID, posts, order])
 
     useEffect(() => {
         const updatePost = async () => {
@@ -222,7 +238,12 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
                 let images = post.images.map((i: any) => functions.getImageLink(i.type, post.postID, i.order, i.filename))
                 // images = await Promise.all(images.map((img: string) => functions.linkToBase64(img)))
                 setImages(images)
-                setImage(images[0])
+                if (images[order-1]) {
+                    setImage(images[order-1])
+                } else {
+                    setImages(images[0])
+                    setOrder(1)
+                }
                 const tags = await functions.parseTags([post])
                 const categories = await functions.tagCategories(tags)
                 setTagCategories(categories)
@@ -234,7 +255,7 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
             }
         }
         if (postFlag) updatePost()
-    }, [postFlag])
+    }, [postFlag, order])
 
     const download = () => {
         setDownloadURLs([image])
@@ -277,8 +298,9 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
         }
     }
 
-    const set = (image: string) => {
+    const set = (image: string, index: number) => {
         setImage(image)
+        setOrder(index + 1)
         forceUpdate()
     }
 
@@ -298,22 +320,22 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
         if (post.type === "model") {
             return (
                 <>
-                <PostModel model={image}/>
-                <PostImageOptions model={image} post={post} download={download} next={next} previous={previous}/>
+                <PostModel post={post} model={image} order={order}/>
+                <PostImageOptions post={post} model={image} download={download} next={next} previous={previous}/>
                 </>
             )
         } else if (post.type === "audio") {
             return (
                 <>
-                <PostSong audio={image}/>
-                <PostImageOptions audio={image} post={post} download={download} next={next} previous={previous}/>
+                <PostSong post={post} audio={image} order={order}/>
+                <PostImageOptions post={post} audio={image} download={download} next={next} previous={previous}/>
                 </>
             )
         } else {
             return (
                 <>
-                <PostImage img={image} comicPages={post.type === "comic" ? images : null}/>
-                <PostImageOptions img={image} post={post} comicPages={post.type === "comic" ? images : null} download={download} next={next} previous={previous}/>
+                <PostImage post={post} img={image} comicPages={post.type === "comic" ? images : null} order={order}/>
+                <PostImageOptions post={post} img={image} comicPages={post.type === "comic" ? images : null} download={download} next={next} previous={previous}/>
                 </>
             )
         }
@@ -328,6 +350,8 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
         <DeleteCommentDialog/>
         <ReportCommentDialog/>
         {post ? <DeletePostDialog post={post}/> : null}
+        {post ? <SaveTranslationDialog post={post}/> : null}
+        <EditTranslationDialog/>
         <TitleBar goBack={true}/>
         <NavBar goBack={true}/>
         <div className="body">
@@ -339,17 +363,17 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
                 <div className="post-container">
                     {nsfwChecker() && images.length > 1 ?
                     <div className="carousel-container">
-                        <Carousel images={images} set={set}/>
+                        <Carousel images={images} set={set} index={order-1}/>
                     </div> : null}
                     {nsfwChecker() && post ? getPostJSX() : null}
                     {mobile && post && tagCategories ? <MobileInfo post={post} artists={tagCategories.artists} characters={tagCategories.characters} series={tagCategories.series} tags={tagCategories.tags}/> : null}
                     {parentPost ? <Parent post={parentPost}/>: null}
                     {thirdPartyPosts.length ? <ThirdParty posts={thirdPartyPosts}/> : null}
-                    {artistPosts.length ? <ArtistPosts posts={artistPosts}/> : null}
+                    {artistPosts.length ? <MoreFromArtist posts={artistPosts}/> : null}
                     {session.username && post ? <CutenessMeter post={post}/> : null}
                     {post?.commentary ? <Commentary text={post.commentary} translated={post.translatedCommentary}/> : null}
-                    {post ? <Comments post={post}/> : null}
                     {relatedPosts.length ? <Related related={relatedPosts}/> : null}
+                    {post ? <Comments post={post}/> : null}
                     <Footer/>
                 </div>
             </div>

@@ -3,7 +3,6 @@ import {useHistory} from "react-router-dom"
 import {ThemeContext, SessionContext} from "../Context"
 import functions from "../structures/Functions"
 import "./styles/newtags.less"
-import localforage from "localforage"
 import axios from "axios"
 
 interface Props {
@@ -28,10 +27,10 @@ const NewTags: React.FunctionComponent<Props> = (props) => {
     }, [rawNewTags])
 
     const updateRawNewTags = async () => {
-        const savedTags = await localforage.getItem("tags") as any
+        const tagList = await functions.tagsCache()
         let notExists = [] as any
         for (let i = 0; i < props.post.tags.length; i++) {
-            const exists = savedTags.find((t: any) => t.tag === props.post.tags[i])
+            const exists = tagList.find((t: any) => t.tag === props.post.tags[i])
             if (!exists) notExists.push(props.post.tags[i])
         }
         setRawNewTags(notExists)

@@ -41,8 +41,7 @@
     width: auto;
     height: auto;
     max-width: calc(100vw - @sidebar-width - 70px);
-    max-height: calc(100vh - @nav-bar-height - @title-bar-height);
-    //display: none;
+    max-height: 1000px; //calc(100vh - @nav-bar-height - @title-bar-height);
 }
 
 .post-video {
@@ -55,7 +54,7 @@
     width: auto;
     height: auto;
     max-width: calc(100vw - @sidebar-width - 70px);
-    max-height: calc(100vh - @nav-bar-height - @title-bar-height);
+    max-height: 1000px; //calc(100vh - @nav-bar-height - @title-bar-height);
     //display: none;
 }
 
@@ -99,7 +98,7 @@
     width: auto;
     height: auto;
     max-width: calc(100vw - @sidebar-width - 70px);
-    max-height: calc(100vh - @nav-bar-height - @title-bar-height);
+    max-height: 1000px; //calc(100vh - @nav-bar-height - @title-bar-height);
 }
 
 .post-video-canvas {
@@ -661,6 +660,7 @@
     .stroke-black();
 }
 
+
 @media screen and (max-width: 500px) {
     .post-image {
         max-width: calc(100vw - 20px);
@@ -672,5 +672,35 @@
 
     .back-frame {
         max-width: calc(100vw - 20px);
+    }
+}
+
+.post-image-top-buttons {
+    opacity: 0;
+    transition: opacity 0.6s;
+    position: absolute;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    right: 0;
+    top: 0;
+    padding: 10px;
+    z-index: 1500;
+}
+.show-post-image-top-buttons {
+    opacity: 1;
+    transition: opacity 0.6s;
+}
+
+.post-image-top-button {
+    width: auto;
+    height: 25px;
+    cursor: pointer;
+    margin-right: 10px;
+    &:hover {
+        filter: brightness(130%);
+    }
+    &:last-child {
+        margin-right: 0px;
     }
 }

@@ -102,6 +102,15 @@ export const ToolTipYContext = React.createContext<any>(null)
 export const ToolTipEnabledContext = React.createContext<any>(null)
 export const ToolTipPostContext = React.createContext<any>(null)
 export const ToolTipImgContext = React.createContext<any>(null)
+export const TranslationModeContext = React.createContext<any>(null)
+export const EditTranslationIDContext = React.createContext<any>(null)
+export const EditTranslationFlagContext = React.createContext<any>(null)
+export const EditTranslationTextContext = React.createContext<any>(null)
+export const EditTranslationTranscriptContext = React.createContext<any>(null)
+export const TranslationDrawingEnabledContext = React.createContext<any>(null)
+export const ShowSaveTranslationDialogContext = React.createContext<any>(null)
+export const SaveTranslationDataContext = React.createContext<any>(null)
+export const SaveTranslationOrderContext = React.createContext<any>(null)
 
 const Context: React.FunctionComponent = (props) => {
     const [brightness, setBrightness] = useState(100)
@@ -152,8 +161,8 @@ const Context: React.FunctionComponent = (props) => {
     const [deleteCommentID, setDeleteCommentID] = useState(null)
     const [deleteCommentFlag, setDeleteCommentFlag] = useState(false)
     const [editCommentFlag, setEditCommentFlag] = useState(false)
-    const [editCommentID, setEditCommentID] = useState(false)
-    const [editCommentText, setEditCommentText] = useState(false)
+    const [editCommentID, setEditCommentID] = useState(null)
+    const [editCommentText, setEditCommentText] = useState("")
     const [deleteTagID, setDeleteTagID] = useState(null)
     const [deleteTagFlag, setDeleteTagFlag] = useState(false)
     const [editTagFlag, setEditTagFlag] = useState(false)
@@ -192,9 +201,27 @@ const Context: React.FunctionComponent = (props) => {
     const [tooltipEnabled, setToolTipEnabled] = useState(false)
     const [tooltipPost, setToolTipPost] = useState(null)
     const [tooltipImg, setToolTipImg] = useState(null)
+    const [translationMode, setTranslationMode] = useState(false)
+    const [editTranslationFlag, setEditTranslationFlag] = useState(false)
+    const [editTranslationID, setEditTranslationID] = useState(null)
+    const [editTranslationText, setEditTranslationText] = useState("")
+    const [editTranslationTranscript, setEditTranslationTranscript] = useState("")
+    const [translationDrawingEnabled, setTranslationDrawingEnabled] = useState(false)
+    const [showSaveTranslationDialog, setShowSaveTranslationDialog] = useState(false)
+    const [saveTranslationData, setSaveTranslationData] = useState(null)
+    const [saveTranslationOrder, setSaveTranslationOrder] = useState(1)
 
 return (
     <>
+        <SaveTranslationOrderContext.Provider value={{saveTranslationOrder, setSaveTranslationOrder}}>
+        <SaveTranslationDataContext.Provider value={{saveTranslationData, setSaveTranslationData}}>
+        <ShowSaveTranslationDialogContext.Provider value={{showSaveTranslationDialog, setShowSaveTranslationDialog}}>
+        <TranslationDrawingEnabledContext.Provider value={{translationDrawingEnabled, setTranslationDrawingEnabled}}>
+        <EditTranslationTranscriptContext.Provider value={{editTranslationTranscript, setEditTranslationTranscript}}>
+        <EditTranslationTextContext.Provider value={{editTranslationText, setEditTranslationText}}>
+        <EditTranslationFlagContext.Provider value={{editTranslationFlag, setEditTranslationFlag}}>
+        <EditTranslationIDContext.Provider value={{editTranslationID, setEditTranslationID}}>
+        <TranslationModeContext.Provider value={{translationMode, setTranslationMode}}>
         <ToolTipImgContext.Provider value={{tooltipImg, setToolTipImg}}>
         <ToolTipPostContext.Provider value={{tooltipPost, setToolTipPost}}>
         <ToolTipEnabledContext.Provider value={{tooltipEnabled, setToolTipEnabled}}>
@@ -372,6 +399,15 @@ return (
         </ToolTipEnabledContext.Provider>
         </ToolTipPostContext.Provider>
         </ToolTipImgContext.Provider>
+        </TranslationModeContext.Provider>
+        </EditTranslationIDContext.Provider>
+        </EditTranslationFlagContext.Provider>
+        </EditTranslationTextContext.Provider>
+        </EditTranslationTranscriptContext.Provider>
+        </TranslationDrawingEnabledContext.Provider>
+        </ShowSaveTranslationDialogContext.Provider>
+        </SaveTranslationDataContext.Provider>
+        </SaveTranslationOrderContext.Provider>
     </>
     )
 }

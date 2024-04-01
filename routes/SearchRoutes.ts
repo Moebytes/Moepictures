@@ -47,7 +47,7 @@ const SearchRoutes = (app: Express) => {
                 result[0].postCount = favorites[0].postCount
             } else {
                 if (query.startsWith("pixiv:")) {
-                    const pixivID = Number(query.match(/(?<=pixiv-id:)(\d+)/g)?.[0])
+                    const pixivID = Number(query.match(/(?<=pixiv:)(\d+)/g)?.[0])
                     result = await sql.searchPixivID(pixivID, withTags)
                 } else {
                     result = await sql.search(tags, type, restrict, style, sort, offset, limit, withTags)

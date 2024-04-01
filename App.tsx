@@ -38,10 +38,10 @@ import TagHistoryPage from "./pages/TagHistoryPage"
 import PostHistoryPage from "./pages/PostHistoryPage"
 import UnverifiedPostPage from "./pages/UnverifiedPostPage"
 import functions from "./structures/Functions"
-import localforage from "localforage"
 import ModQueuePage from "./pages/ModQueuePage"
 import EditUnverifiedPostPage from "./pages/EditUnverifiedPostPage"
 import SetAvatarPage from "./pages/SetAvatarPage"
+import ForumPage from "./pages/ForumPage"
 import axios from "axios"
 import "./index.less"
 
@@ -77,24 +77,13 @@ const App: React.FunctionComponent = (props) => {
         setSession(cookie)
     }
 
-    const saveTags = async () => {
-        const tags = await axios.get("/api/tag/list", {withCredentials: true}).then((r) => r.data)
-        const tagCounts = await axios.get("/api/tag/counts", {withCredentials: true}).then((r) => r.data)
-        let tagArray = [] as any
-        for (let i = 0; i < tags.length; i++) {
-            const tagCount = tagCounts.find((t: any) => t.tag === tags[i].tag) || {}
-            tagArray.push({...tags[i], ...tagCount})
-        }
-        await localforage.setItem("tags", tagArray)
-    }
-
     useEffect(() => {
         setTimeout(() => {
             setLoaded(true)
         }, 100)
         getSessionCookie()
         functions.updateCSRFToken()
-        saveTags()
+        functions.clearCache()
     }, [])
 
     const getFavicon = () => {
@@ -271,6 +260,7 @@ const App: React.FunctionComponent = (props) => {
                         <Route exact path="/unverified/edit-post/:id" render={(props) => <EditUnverifiedPostPage {...props}/>}></Route>
                         <Route exact path="/set-avatar/:id" render={(props) => <SetAvatarPage {...props}/>}></Route>
                         <Route exact path="/help"><HelpPage/></Route>
+                        <Route exact path="/forum"><ForumPage/></Route>
                         <Route exact path="/change-username"><ChangeUsernamePage/></Route>
                         <Route exact path="/change-email"><ChangeEmailPage/></Route>
                         <Route exact path="/change-email-success"><ChangeEmailSuccessPage/></Route>

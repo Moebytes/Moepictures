@@ -1,7 +1,7 @@
 import React, {useContext, useEffect, useRef, useState, useReducer} from "react"
 import {ThemeContext, EnableDragContext, BrightnessContext, ContrastContext, HueContext, SaturationContext, LightnessContext,
 BlurContext, SharpenContext, PixelateContext, DownloadFlagContext, DownloadURLsContext, DisableZoomContext, SpeedContext,
-ReverseContext, MobileContext} from "../Context"
+ReverseContext, MobileContext, TranslationModeContext, TranslationDrawingEnabledContext} from "../Context"
 import {HashLink as Link} from "react-router-hash-link"
 import {createFFmpeg, fetchFile} from "@ffmpeg/ffmpeg"
 import functions from "../structures/Functions"
@@ -35,6 +35,9 @@ import imageZoomOutIcon from "../assets/purple/image-zoom-out.png"
 import imageZoomOffIcon from "../assets/purple/image-zoom-off.png"
 import imageZoomOffEnabledIcon from "../assets/purple/image-zoom-off-enabled.png"
 import imageFullscreenIcon from "../assets/purple/image-fullscreen.png"
+import translationToggleOn from "../assets/purple/translation-toggle-on.png"
+import translationToggleOnMagenta from "../assets/magenta/translation-toggle-on.png"
+import TranslationEditor from "./TranslationEditor"
 import gifFrames from "gif-frames"
 import JSZip from "jszip"
 import {TransformWrapper, TransformComponent} from "react-zoom-pan-pinch"
@@ -44,13 +47,17 @@ import mime from "mime-types"
 const ffmpeg = createFFmpeg()
 
 interface Props {
+    post?: any
     img: string
     width?: number
     height?: number
     scale?: number
     noKeydown?: boolean
     comicPages?: any
+    order?: number
     noEncryption?: boolean
+    noTranslations?: boolean
+    unverified?: boolean
 }
 
 const PostImage: React.FunctionComponent<Props> = (props) => {
@@ -68,6 +75,8 @@ const PostImage: React.FunctionComponent<Props> = (props) => {
     const {downloadFlag, setDownloadFlag} = useContext(DownloadFlagContext)
     const {downloadURLs, setDownloadURLs} = useContext(DownloadURLsContext)
     const {disableZoom, setDisableZoom} = useContext(DisableZoomContext)
+    const {translationMode, setTranslationMode} = useContext(TranslationModeContext)
+    const {translationDrawingEnabled, setTranslationDrawingEnabled} = useContext(TranslationDrawingEnabledContext)
     const {mobile, setMobile} = useContext(MobileContext)
     const [showSpeedDropdown, setShowSpeedDropdown] = useState(false)
     const [showVolumeSlider, setShowVolumeSlider] = useState(false)
@@ -122,9 +131,8 @@ const PostImage: React.FunctionComponent<Props> = (props) => {
     const [dragging, setDragging] = useState(false)
     const [encodingOverlay, setEncodingOverlay] = useState(false)
     const [seekTo, setSeekTo] = useState(null) as any
+    const [buttonHover, setButtonHover] = useState(false)
     const [img, setImg] = useState("")
-    const initialCropState = {unit: "%", x: 0, y: 0, width: 100, height: 100, aspect: undefined}
-    const [cropState, setCropState] = useState(initialCropState)
 
     useEffect(() => {
         setVideoLoaded(false)
@@ -144,17 +152,20 @@ const PostImage: React.FunctionComponent<Props> = (props) => {
         if (ref.current) ref.current.style.opacity = "1"
         if (videoRef.current) videoRef.current.style.opacity = "1"
         if (mobile) fetchVideo()
-        const base64Img = async () => {
-            const base64 = await functions.linkToBase64(props.img)
-            setImg(base64)
-        }
         const decryptImg = async () => {
-            const url = await cryptoFunctions.decryptedLink(props.img)
+            let url = props.img
+            if (functions.isImage(props.img)) {
+                let isAnimatedWebP = false
+                if (functions.isWebP(props.img)) {
+                    const arraybuffer = await fetch(props.img).then((r) => r.arrayBuffer())
+                    isAnimatedWebP = await functions.isAnimatedWebp(arraybuffer)
+                }
+                if (!isAnimatedWebP) url = await cryptoFunctions.decryptedLink(props.img)
+            }
             const base64 = await functions.linkToBase64(url)
             setImg(base64)
         }
         decryptImg()
-        // base64Img()
         // loadImage()
     }, [props.img])
 
@@ -188,14 +199,6 @@ const PostImage: React.FunctionComponent<Props> = (props) => {
         videoOverlayRef.current.height = videoRef.current.clientHeight
     }
 
-    const handleKeydown = (event: any) => {
-        const key = event.keyCode
-        const value = String.fromCharCode((96 <= key && key <= 105) ? key - 48 : key).toLowerCase()
-        if (value === "f") {
-            // if (!props.noKeydown) fullscreen()
-        }
-    }
-
     const fetchVideo = async () => {
         if (!videoRef.current) return
         const blob = await fetch(props.img).then((r) => r.blob())
@@ -211,6 +214,20 @@ const PostImage: React.FunctionComponent<Props> = (props) => {
             resizeGIFCanvas()
             resizeVideoCanvas()
             forceUpdate()
+        }
+    }
+
+    const handleKeydown = (event: any) => {
+        const key = event.keyCode
+        const value = String.fromCharCode((96 <= key && key <= 105) ? key - 48 : key).toLowerCase()
+        if (!(event.target instanceof HTMLTextAreaElement) && !(event.target instanceof HTMLInputElement)) {
+            if (value === "f") {
+                if (!props.noKeydown) fullscreen()
+            }
+            if (value === "t") {
+                setTranslationMode((prev: boolean) => !prev)
+                setTranslationDrawingEnabled(true)
+            }
         }
     }
 
@@ -243,15 +260,8 @@ const PostImage: React.FunctionComponent<Props> = (props) => {
     useEffect(() => {
         const parseGIF = async () => {
             const start = new Date()
-            const frames = await gifFrames({url: props.img, frames: "all", outputType: "canvas"})
-            const newGIFData = [] as any
-            for (let i = 0; i < frames.length; i++) {
-                newGIFData.push({
-                    frame: frames[i].getImage(),
-                    delay: frames[i].frameInfo.delay * 10
-                })
-            }
-            setGIFData(newGIFData)
+            const frames = await functions.extractGIFFrames(props.img)
+            setGIFData(frames)
             const end = new Date()
             const seconds = (end.getTime() - start.getTime()) / 1000
             setSeekTo(seconds)
@@ -606,6 +616,11 @@ const PostImage: React.FunctionComponent<Props> = (props) => {
     const getZoomOffIcon = () => {
         if (disableZoom) return imageZoomOffEnabledIcon
         return imageZoomOffIcon
+    }
+
+    const getTranslationToggleOnIcon = () => {
+        if (theme.includes("magenta")) return translationToggleOnMagenta
+        return translationToggleOn
     }
 
     const getGIFSpeedMarginRight = () => {
@@ -1188,49 +1203,17 @@ const PostImage: React.FunctionComponent<Props> = (props) => {
         setEnableDrag(true)
     }
 
-    /*
-    const loadImage = async () => {
-        if (!ref.current || !overlayRef.current || !lightnessRef.current || !dummyRef.current) return
-        let src = functions.isVideo(props.img) ? backFrame : props.img
-        if (functions.isImage(src)) {
-            if (!props.noEncryption) src = await cryptoFunctions.decryptedLink(src)
-        }
-        const img = document.createElement("img")
-        img.src = src 
-        img.onload = () => {
-            if (!ref.current || !overlayRef.current || !lightnessRef.current || !dummyRef.current) return
-            setImageWidth(img.width)
-            setImageHeight(img.height)
-            setNaturalWidth(img.naturalWidth)
-            setNaturalHeight(img.naturalHeight)
-            const refCtx = ref.current.getContext("2d")
-            ref.current.width = img.width
-            ref.current.height = img.height
-            refCtx?.drawImage(img, 0, 0, img.width, img.height)
-            const overlayCtx = overlayRef.current.getContext("2d")
-            overlayRef.current.width = img.width
-            overlayRef.current.height = img.height
-            overlayCtx?.drawImage(img, 0, 0, img.width, img.height)
-            const lightnessCtx = lightnessRef.current.getContext("2d")
-            lightnessRef.current.width = img.width
-            lightnessRef.current.height = img.height
-            lightnessCtx?.drawImage(img, 0, 0, img.width, img.height)
-            const dummyCtx = dummyRef.current.getContext("2d")
-            dummyRef.current.width = img.width
-            dummyRef.current.height = img.height
-            dummyCtx?.drawImage(img, 0, 0, img.width, img.height)
-            setImageLoaded(true)
-            ref.current.style.display = "flex"
-        }
-    }*/
-
     return (
         <div className="post-image-container" style={{zoom: props.scale ? props.scale : 1}}>
-            <div className="post-image-box" ref={containerRef}>
+            {!props.noTranslations ? <TranslationEditor post={props.post} img={props.img} order={props.order} unverified={props.unverified}/> : null}
+            <div className="post-image-box" ref={containerRef} style={{display: translationMode ? "none" : "flex"}}>
                 <div className="post-image-filters" ref={fullscreenRef}>
+                    <div className={`post-image-top-buttons ${buttonHover ? "show-post-image-top-buttons" : ""}`} onMouseEnter={() => setButtonHover(true)} onMouseLeave={() => setButtonHover(false)}>
+                        {!props.noTranslations ? <img draggable={false} className="post-image-top-button" src={getTranslationToggleOnIcon()} onClick={() => {setTranslationMode(true); setTranslationDrawingEnabled(true)}}/> : null}
+                    </div>
                     {functions.isVideo(props.img) ? 
-                    <video loop muted disablePictureInPicture playsInline className="dummy-post-video" src={props.img}></video> :
-                    <img className="dummy-post-image" src={img}/>/*<canvas className="dummy-post-image" ref={dummyRef}></canvas>*/}
+                    <video draggable={false} loop muted disablePictureInPicture playsInline className="dummy-post-video" src={props.img}></video> :
+                    <img draggable={false} className="dummy-post-image" src={img}/>/*<canvas className="dummy-post-image" ref={dummyRef}></canvas>*/}
                     <div className="encoding-overlay" style={{display: encodingOverlay ? "flex" : "none"}}>
                         <span className="encoding-overlay-text">{functions.isVideo(props.img) ? "Rendering Video..." : "Rendering GIF..."}</span>
                     </div>
@@ -1243,23 +1226,23 @@ const PostImage: React.FunctionComponent<Props> = (props) => {
                         </div>
                         <div className="video-control-row" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                             <div className="video-control-row-container">
-                                <img className="video-control-img" onClick={() => changeReverse()} src={videoReverseIcon}/>
-                                <img className="video-control-img" ref={videoSpeedRef} src={videoSpeedIcon} onClick={() => setShowSpeedDropdown((prev) => !prev)}/>
-                                <img className="video-control-img" onClick={() => changePreservesPitch()} src={getPreversePitchIcon()}/>
+                                <img draggable={false} className="video-control-img" onClick={() => changeReverse()} src={videoReverseIcon}/>
+                                <img draggable={false} className="video-control-img" ref={videoSpeedRef} src={videoSpeedIcon} onClick={() => setShowSpeedDropdown((prev) => !prev)}/>
+                                <img draggable={false} className="video-control-img" onClick={() => changePreservesPitch()} src={getPreversePitchIcon()}/>
                             </div> 
                             <div className="video-ontrol-row-container">
-                                <img className="video-control-img" src={videoRewindIcon} onClick={() => rewind()}/>
-                                <img className="video-control-img" onClick={() => setPaused((prev) => !prev)} src={getVideoPlayIcon()}/>
-                                <img className="video-control-img" src={videoFastforwardIcon} onClick={() => fastforward()}/>
+                                <img draggable={false} className="video-control-img" src={videoRewindIcon} onClick={() => rewind()}/>
+                                <img draggable={false} className="video-control-img" onClick={() => setPaused((prev) => !prev)} src={getVideoPlayIcon()}/>
+                                <img draggable={false} className="video-control-img" src={videoFastforwardIcon} onClick={() => fastforward()}/>
                             </div>    
                             <div className="video-control-row-container">
-                                <img className="video-control-img" src={videoClearIcon} onClick={reset}/>
+                                <img draggable={false} className="video-control-img" src={videoClearIcon} onClick={reset}/>
                             </div>  
                             <div className="video-control-row-container">
-                                <img className="video-control-img" src={videoFullscreenIcon} onClick={() => fullscreen()}/>
+                                <img draggable={false} className="video-control-img" src={videoFullscreenIcon} onClick={() => fullscreen()}/>
                             </div> 
                             <div className="video-control-row-container" onMouseEnter={() => setShowVolumeSlider(true)} onMouseLeave={() => setShowVolumeSlider(false)}>
-                                <img className="video-control-img" ref={videoVolumeRef} src={getVideoVolumeIcon()} onClick={mute}/>
+                                <img draggable={false} className="video-control-img" ref={videoVolumeRef} src={getVideoVolumeIcon()} onClick={mute}/>
                             </div> 
                         </div>
                         <div className={`video-speed-dropdown ${showSpeedDropdown ? "" : "hide-speed-dropdown"}`} style={{marginRight: getVideoSpeedMarginRight(), marginTop: "-240px"}}
@@ -1300,11 +1283,11 @@ const PostImage: React.FunctionComponent<Props> = (props) => {
                             value={volume} min={0} max={1} step={0.01} onChange={(value) => changeVolume(value)}/>
                         </div>
                     </div>
-                    <img className="video-lightness-overlay" ref={videoLightnessRef} src={backFrame}/>
-                    <canvas className="video-sharpen-overlay" ref={videoOverlayRef}></canvas>
-                    <canvas className="post-video-canvas" ref={videoCanvasRef}></canvas>
-                    <video autoPlay loop muted disablePictureInPicture playsInline className="post-video" ref={videoRef} src={props.img} onLoadedData={(event) => onLoad(event)}></video>
-                    <img ref={backFrameRef} src={backFrame} className="back-frame"/>
+                    <img draggable={false} className="video-lightness-overlay" ref={videoLightnessRef} src={backFrame}/>
+                    <canvas draggable={false} className="video-sharpen-overlay" ref={videoOverlayRef}></canvas>
+                    <canvas draggable={false} className="post-video-canvas" ref={videoCanvasRef}></canvas>
+                    <video draggable={false} autoPlay loop muted disablePictureInPicture playsInline className="post-video" ref={videoRef} src={props.img} onLoadedData={(event) => onLoad(event)}></video>
+                    <img draggable={false} ref={backFrameRef} src={backFrame} className="back-frame"/>
                     </> : <>
                     {functions.isGIF(props.img) || gifData ? 
                     <>
@@ -1316,19 +1299,19 @@ const PostImage: React.FunctionComponent<Props> = (props) => {
                         </div>
                         <div className="gif-control-row" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                             <div className="gif-control-row-container">
-                                <img className="gif-control-img" onClick={() => changeReverse()} src={gifReverseIcon}/>
-                                <img className="gif-control-img" ref={gifSpeedRef} src={gifSpeedIcon} onClick={() => setShowSpeedDropdown((prev) => !prev)}/>
+                                <img draggable={false} className="gif-control-img" onClick={() => changeReverse()} src={gifReverseIcon}/>
+                                <img draggable={false} className="gif-control-img" ref={gifSpeedRef} src={gifSpeedIcon} onClick={() => setShowSpeedDropdown((prev) => !prev)}/>
                             </div> 
                             <div className="gif-control-row-container">
                                 {/* <img className="control-img" src={gifRewindIcon}/> */}
-                                <img className="gif-control-img" onClick={() => setPaused((prev) => !prev)} src={getGIFPlayIcon()}/>
+                                <img draggable={false} className="gif-control-img" onClick={() => setPaused((prev) => !prev)} src={getGIFPlayIcon()}/>
                                 {/* <img className="control-img" src={gifFastforwardIcon}/> */}
                             </div>    
                             <div className="gif-control-row-container">
-                                <img className="gif-control-img" src={gifClearIcon} onClick={reset}/>
+                                <img draggable={false} className="gif-control-img" src={gifClearIcon} onClick={reset}/>
                             </div> 
                             <div className="gif-control-row-container">
-                                <img className="gif-control-img" src={gifFullscreenIcon} onClick={() => fullscreen()}/>
+                                <img draggable={false} className="gif-control-img" src={gifFullscreenIcon} onClick={() => fullscreen()}/>
                             </div> 
                         </div>
                         <div className={`gif-speed-dropdown ${showSpeedDropdown ? "" : "hide-speed-dropdown"}`} style={{marginRight: getGIFSpeedMarginRight(), marginTop: "-240px"}}
@@ -1364,9 +1347,9 @@ const PostImage: React.FunctionComponent<Props> = (props) => {
                             </div>
                         </div>
                     </div>
-                    <img className="post-lightness-overlay" ref={gifLightnessRef} src={props.img}/>
-                    <img className="post-sharpen-overlay" ref={gifOverlayRef} src={props.img}/>
-                    <canvas className="post-gif-canvas" ref={gifRef}></canvas> 
+                    <img draggable={false} className="post-lightness-overlay" ref={gifLightnessRef} src={props.img}/>
+                    <img draggable={false} className="post-sharpen-overlay" ref={gifOverlayRef} src={props.img}/>
+                    <canvas draggable={false} className="post-gif-canvas" ref={gifRef}></canvas> 
                     </>
                     : null}
                     <div className="relative-ref" onMouseMove={dragImgDown} onMouseLeave={dragImgUp}>
@@ -1375,10 +1358,10 @@ const PostImage: React.FunctionComponent<Props> = (props) => {
                         <div className="image-controls" ref={imageControls} onMouseOver={controlMouseEnter} onMouseLeave={controlMouseLeave}>
                             <div className="image-control-row" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                                 <div className="image-control-row-container">
-                                    <img className="image-control-img" onClick={() => setDisableZoom((prev) => !prev)} src={getZoomOffIcon()}/>
-                                    <img className="image-control-img" onClick={zoomOut} src={imageZoomOutIcon}/>
-                                    <img className="image-control-img" onClick={zoomIn} src={imageZoomInIcon}/>
-                                    <img className="image-control-img" onClick={() => fullscreen()} src={imageFullscreenIcon}/>
+                                    <img draggable={false} className="image-control-img" onClick={() => setDisableZoom((prev) => !prev)} src={getZoomOffIcon()}/>
+                                    <img draggable={false} className="image-control-img" onClick={zoomOut} src={imageZoomOutIcon}/>
+                                    <img draggable={false} className="image-control-img" onClick={zoomIn} src={imageZoomInIcon}/>
+                                    <img draggable={false} className="image-control-img" onClick={() => fullscreen()} src={imageFullscreenIcon}/>
                                 </div> 
                             </div>
                         </div>
@@ -1389,11 +1372,11 @@ const PostImage: React.FunctionComponent<Props> = (props) => {
                         <TransformComponent wrapperStyle={{pointerEvents: disableZoom ? "none" : "all"}}>
                             {/* <canvas className="post-lightness-overlay" ref={lightnessRef}></canvas> */}
                             {/* <canvas className="post-sharpen-overlay" ref={overlayRef}></canvas> */}
-                            <img className="post-lightness-overlay" ref={lightnessRef} src={img}/>
-                            <img className="post-sharpen-overlay" ref={overlayRef} src={img}/>
-                            <canvas className="post-pixelate-canvas" ref={pixelateRef}></canvas>
+                            <img draggable={false} className="post-lightness-overlay" ref={lightnessRef} src={img}/>
+                            <img draggable={false} className="post-sharpen-overlay" ref={overlayRef} src={img}/>
+                            <canvas draggable={false} className="post-pixelate-canvas" ref={pixelateRef}></canvas>
                             {/* <canvas className="post-image" ref={ref}></canvas> */}
-                            <img className="post-image" ref={ref} src={img} onLoad={(event) => onLoad(event)}/>
+                            <img draggable={false} className="post-image" ref={ref} src={img} onLoad={(event) => onLoad(event)}/>
                         </TransformComponent>
                         </TransformWrapper>
                     </div>

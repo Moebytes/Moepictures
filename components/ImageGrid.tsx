@@ -55,6 +55,8 @@ const ImageGrid: React.FunctionComponent<Props> = (props) => {
     const {showPageDialog, setShowPageDialog} = useContext(ShowPageDialogContext)
     const {pageFlag, setPageFlag} = useContext(PageFlagContext)
     const {reloadPostFlag, setReloadPostFlag} = useContext(ReloadPostFlagContext)
+    const [postsRef, setPostsRef] = useState([]) as any
+    const [reupdateFlag, setReupdateFlag] = useState(false)
     const [queryPage, setQueryPage] = useState(1)
     const history = useHistory()
     const location = useLocation()
@@ -374,6 +376,8 @@ const ImageGrid: React.FunctionComponent<Props> = (props) => {
 
     useEffect(() => {
         if (posts?.length) {
+            const newPostsRef = posts.map(() => React.createRef()) as any
+            setPostsRef(newPostsRef)
             const maxPostPage = maxPage()
             if (maxPostPage === 1) return
             if (queryPage > maxPostPage) {
@@ -382,6 +386,39 @@ const ImageGrid: React.FunctionComponent<Props> = (props) => {
             }
         }
     }, [posts, page, queryPage])
+
+    useEffect(() => {
+        const loadImages = async () => {
+            for (let i = 0; i < postsRef.length; i++) {
+                if (!postsRef[i].current) continue
+                const shouldWait = await postsRef[i].current?.shouldWait?.()
+                if (shouldWait) {
+                    await postsRef[i].current?.load?.()
+                } else {
+                    postsRef[i].current?.load?.()
+                }
+            }
+        }
+        loadImages()
+    }, [postsRef])
+
+    useEffect(() => {
+        if (reupdateFlag) {
+            const updateImages = async () => {
+                for (let i = 0; i < postsRef.length; i++) {
+                    if (!postsRef[i].current) continue
+                    const shouldWait = await postsRef[i].current?.shouldWait?.()
+                    if (shouldWait) {
+                        await postsRef[i].current?.update?.()
+                    } else {
+                        postsRef[i].current?.update?.()
+                    }
+                }
+            }
+            updateImages()
+            setReupdateFlag(false)
+        }
+    }, [reupdateFlag])
 
     const firstPage = () => {
         setPage(1)
@@ -470,11 +507,11 @@ const ImageGrid: React.FunctionComponent<Props> = (props) => {
             if (!image) continue
             const images = post.images.map((i: any) => functions.getImageLink(i.type, post.postID, i.order, i.filename))
             if (post.type === "model") {
-                jsx.push(<GridModel key={post.postID} id={post.postID} model={functions.getThumbnailLink(image.type, post.postID, image.order, image.filename, sizeType)} post={post}/>)
+                jsx.push(<GridModel ref={postsRef[i]} reupdate={() => setReupdateFlag(true)} key={post.postID} id={post.postID} model={functions.getThumbnailLink(image.type, post.postID, image.order, image.filename, sizeType)} post={post}/>)
             } else if (post.type === "audio") {
-                jsx.push(<GridSong key={post.postID} id={post.postID} audio={functions.getThumbnailLink(image.type, post.postID, image.order, image.filename, sizeType)} post={post}/>)
+                jsx.push(<GridSong ref={postsRef[i]} reupdate={() => setReupdateFlag(true)} key={post.postID} id={post.postID} audio={functions.getThumbnailLink(image.type, post.postID, image.order, image.filename, sizeType)} post={post}/>)
             } else {
-                jsx.push(<GridImage key={post.postID} id={post.postID} img={functions.getThumbnailLink(image.type, post.postID, image.order, image.filename, sizeType)} comicPages={post.type === "comic" ? images : null} post={post}/>)
+                jsx.push(<GridImage ref={postsRef[i]} reupdate={() => setReupdateFlag(true)} key={post.postID} id={post.postID} img={functions.getThumbnailLink(image.type, post.postID, image.order, image.filename, sizeType)} comicPages={post.type === "comic" ? images : null} post={post}/>)
             }
         }
         if (!jsx.length && noResults) {

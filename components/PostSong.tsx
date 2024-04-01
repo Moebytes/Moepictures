@@ -1,7 +1,7 @@
 import React, {useContext, useEffect, useRef, useState, useReducer} from "react"
 import {ThemeContext, EnableDragContext, BrightnessContext, ContrastContext, HueContext, SaturationContext, LightnessContext,
 BlurContext, SharpenContext, PixelateContext, DownloadFlagContext, DownloadURLsContext, DisableZoomContext, SpeedContext,
-ReverseContext, MobileContext} from "../Context"
+ReverseContext, MobileContext, TranslationModeContext, TranslationDrawingEnabledContext} from "../Context"
 import {HashLink as Link} from "react-router-hash-link"
 import functions from "../structures/Functions"
 import cryptoFunctions from "../structures/CryptoFunctions"
@@ -19,12 +19,16 @@ import audioFullscreenIcon from "../assets/purple/audio-fullscreen.png"
 import audioVolumeIcon from "../assets/purple/audio-volume.png"
 import audioVolumeLowIcon from "../assets/purple/audio-volume-low.png"
 import audioVolumeMuteIcon from "../assets/purple/audio-volume-mute.png"
+import translationToggleOn from "../assets/purple/translation-toggle-on.png"
+import translationToggleOnMagenta from "../assets/magenta/translation-toggle-on.png"
+import TranslationEditor from "./TranslationEditor"
 import path from "path"
 import * as Tone from "tone"
 import "./styles/postsong.less"
 import silence from "../assets/misc/silence.mp3"
 
 interface Props {
+    post?: any
     audio: string
     coverImg?: string
     width?: number
@@ -32,6 +36,9 @@ interface Props {
     scale?: number
     noKeydown?: boolean
     comicPages?: any
+    order?: number
+    noTranslations?: boolean
+    unverified?: boolean
 }
 
 let player: Tone.Player
@@ -73,6 +80,8 @@ const PostSong: React.FunctionComponent<Props> = (props) => {
     const {downloadFlag, setDownloadFlag} = useContext(DownloadFlagContext)
     const {downloadURLs, setDownloadURLs} = useContext(DownloadURLsContext)
     const {disableZoom, setDisableZoom} = useContext(DisableZoomContext)
+    const {translationMode, setTranslationMode} = useContext(TranslationModeContext)
+    const {translationDrawingEnabled, setTranslationDrawingEnabled} = useContext(TranslationDrawingEnabledContext)
     const {mobile, setMobile} = useContext(MobileContext)
     const [showSpeedDropdown, setShowSpeedDropdown] = useState(false)
     const [showVolumeSlider, setShowVolumeSlider] = useState(false)
@@ -104,6 +113,7 @@ const PostSong: React.FunctionComponent<Props> = (props) => {
     const [seekTo, setSeekTo] = useState(null) as any
     const [effects, setEffects] = useState([]) as any
     const [init, setInit] = useState(false)
+    const [buttonHover, setButtonHover] = useState(false)
     
     const loadAudio = async () => {
         if (!player || !grain) return
@@ -324,16 +334,32 @@ const PostSong: React.FunctionComponent<Props> = (props) => {
         }
     }
 
+    const handleKeydown = (event: any) => {
+        const key = event.keyCode
+        const value = String.fromCharCode((96 <= key && key <= 105) ? key - 48 : key).toLowerCase()
+        if (!(event.target instanceof HTMLTextAreaElement) && !(event.target instanceof HTMLInputElement)) {
+            if (value === "f") {
+                if (!props.noKeydown) fullscreen()
+            }
+            if (value === "t") {
+                setTranslationMode((prev: boolean) => !prev)
+                setTranslationDrawingEnabled(true)
+            }
+        }
+    }
+
     useEffect(() => {
         let observer = null as any
         if (functions.isImage(coverImg)) {
             observer = new ResizeObserver(resizeImageCanvas)
             observer.observe(ref.current!)
         }
+        window.addEventListener("keydown", handleKeydown)
         window.addEventListener("fullscreenchange", exitFullScreen)
         window.addEventListener("webkitfullscreenchange", exitFullScreen)
         return () => {
             observer?.disconnect()
+            window.removeEventListener("keydown", handleKeydown)
             window.removeEventListener("fullscreenchange", exitFullScreen)
             window.removeEventListener("webkitfullscreenchange", exitFullScreen)
         }
@@ -346,6 +372,11 @@ const PostSong: React.FunctionComponent<Props> = (props) => {
             setDragProgress(null)
         }
     }, [dragging, dragProgress])
+
+    const getTranslationToggleOnIcon = () => {
+        if (theme.includes("magenta")) return translationToggleOnMagenta
+        return translationToggleOn
+    }
 
     const getPreversePitchIcon = () => {
         if (preservesPitch) return audioPreservePitchIcon
@@ -654,9 +685,13 @@ const PostSong: React.FunctionComponent<Props> = (props) => {
 
     return (
         <div className="post-song-container" style={{zoom: props.scale ? props.scale : 1}}>
-            <div className="post-song-box" ref={containerRef}>
+            {!props.noTranslations ? <TranslationEditor post={props.post} img={props.audio} order={props.order} unverified={props.unverified}/> : null}
+            <div className="post-song-box" ref={containerRef} style={{display: translationMode ? "none" : "flex"}}>
                 <div className="post-song-filters" ref={fullscreenRef}>
-                    <canvas className="dummy-post-song" ref={dummyRef}></canvas>
+                    <div className={`post-image-top-buttons ${buttonHover ? "show-post-image-top-buttons" : ""}`} onMouseEnter={() => setButtonHover(true)} onMouseLeave={() => setButtonHover(false)}>
+                        {!props.noTranslations ? <img draggable={false} className="post-image-top-button" src={getTranslationToggleOnIcon()} onClick={() => {setTranslationMode(true); setTranslationDrawingEnabled(true)}}/> : null}
+                    </div>
+                    <canvas draggable={false} className="dummy-post-song" ref={dummyRef}></canvas>
                     <div className="relative-ref">
                         <div className="audio-controls" ref={audioControls} onMouseUp={() => setDragging(false)} onMouseOver={controlMouseEnter} onMouseLeave={controlMouseLeave}>
                             <div className="audio-control-row" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
@@ -666,23 +701,23 @@ const PostSong: React.FunctionComponent<Props> = (props) => {
                             </div>
                             <div className="audio-control-row" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                                 <div className="audio-control-row-container">
-                                    <img className="audio-control-img" onClick={() => changeReverse()} src={audioReverseIcon}/>
-                                    <img className="audio-control-img" ref={audioSpeedRef} src={audioSpeedIcon} onClick={() => setShowSpeedDropdown((prev) => !prev)}/>
-                                    <img className="audio-control-img" onClick={() => changePreservesPitch()} src={getPreversePitchIcon()}/>
+                                    <img draggable={false} className="audio-control-img" onClick={() => changeReverse()} src={audioReverseIcon}/>
+                                    <img draggable={false} className="audio-control-img" ref={audioSpeedRef} src={audioSpeedIcon} onClick={() => setShowSpeedDropdown((prev) => !prev)}/>
+                                    <img draggable={false} className="audio-control-img" onClick={() => changePreservesPitch()} src={getPreversePitchIcon()}/>
                                 </div> 
                                 <div className="audio-ontrol-row-container">
-                                    <img className="audio-control-img" src={audioRewindIcon} onClick={() => rewind()}/>
-                                    <img className="audio-control-img" onClick={() => updatePlay()} src={getAudioPlayIcon()}/>
-                                    <img className="audio-control-img" src={audioFastforwardIcon} onClick={() => fastforward()}/>
+                                    <img draggable={false} className="audio-control-img" src={audioRewindIcon} onClick={() => rewind()}/>
+                                    <img draggable={false} className="audio-control-img" onClick={() => updatePlay()} src={getAudioPlayIcon()}/>
+                                    <img draggable={false} className="audio-control-img" src={audioFastforwardIcon} onClick={() => fastforward()}/>
                                 </div>    
                                 <div className="audio-control-row-container">
-                                    <img className="audio-control-img" src={audioClearIcon} onClick={reset}/>
+                                    <img draggable={false} className="audio-control-img" src={audioClearIcon} onClick={reset}/>
                                 </div>  
                                 <div className="audio-control-row-container">
-                                    <img className="audio-control-img" src={audioFullscreenIcon} onClick={() => fullscreen()}/>
+                                    <img draggable={false} className="audio-control-img" src={audioFullscreenIcon} onClick={() => fullscreen()}/>
                                 </div> 
                                 <div className="audio-control-row-container" onMouseEnter={() => setShowVolumeSlider(true)} onMouseLeave={() => setShowVolumeSlider(false)}>
-                                    <img className="audio-control-img" ref={audioVolumeRef} src={getAudioVolumeIcon()} onClick={updateMute}/>
+                                    <img draggable={false} className="audio-control-img" ref={audioVolumeRef} src={getAudioVolumeIcon()} onClick={updateMute}/>
                                 </div> 
                             </div>
                             <div className={`audio-speed-dropdown ${showSpeedDropdown ? "" : "hide-speed-dropdown"}`} style={{marginRight: getAudioSpeedMarginRight(), marginTop: "-240px"}}
@@ -723,10 +758,10 @@ const PostSong: React.FunctionComponent<Props> = (props) => {
                                 value={volume} min={0} max={1} step={0.05} onChange={(value) => updateVolume(value)}/>
                             </div>
                         </div>
-                        <canvas className="post-lightness-overlay" ref={lightnessRef}></canvas>
-                        <canvas className="post-sharpen-overlay" ref={overlayRef}></canvas>
-                        <canvas className="post-pixelate-canvas" ref={pixelateRef}></canvas>
-                        <canvas className="post-song" ref={ref}></canvas>
+                        <canvas draggable={false} className="post-lightness-overlay" ref={lightnessRef}></canvas>
+                        <canvas draggable={false} className="post-sharpen-overlay" ref={overlayRef}></canvas>
+                        <canvas draggable={false} className="post-pixelate-canvas" ref={pixelateRef}></canvas>
+                        <canvas draggable={false} className="post-song" ref={ref}></canvas>
                     </div>
                 </div>
             </div>

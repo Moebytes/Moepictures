@@ -5,7 +5,7 @@ import {Readable} from "stream"
 import {Pool} from "pg"
 import fs from "fs"
 import sharp from "sharp"
-import express, {Request, NextFunction} from "express"
+import express, {Request, Response, NextFunction} from "express"
 import session from "express-session"
 import S3 from "aws-sdk/clients/s3"
 import PGSession from "connect-pg-simple"
@@ -32,6 +32,7 @@ import SearchRoutes from "./routes/SearchRoutes"
 import TagRoutes from "./routes/TagRoutes"
 import UploadRoutes from "./routes/UploadRoutes"
 import UserRoutes from "./routes/UserRoutes"
+import TranslationRoutes from "./routes/TranslationRoutes"
 const __dirname = path.resolve()
 
 dotenv.config()
@@ -106,6 +107,7 @@ SearchRoutes(app)
 TagRoutes(app)
 UploadRoutes(app)
 UserRoutes(app)
+TranslationRoutes(app)
 
 if (process.env.TESTING === "yes") {
   app.use(middleware(compiler, {
@@ -125,7 +127,7 @@ let folders = ["animation", "artist", "character", "comic", "image", "pfp", "ser
 for (let i = 0; i < folders.length; i++) {
   //serverFunctions.uploadFile(`${folders[i]}/`, "")
   //serverFunctions.uploadUnverifiedFile(`${folders[i]}/`, "")
-  app.get(`/${folders[i]}/*`, async (req: Request, res, next: NextFunction) => {
+  app.get(`/${folders[i]}/*`, async (req: Request, res: Response, next: NextFunction) => {
     try {
       if (folders[i] === "tag") {
         if (!req.url.endsWith(".png") && !req.url.endsWith(".jpg") && !req.url.endsWith(".jpeg") &&
@@ -165,7 +167,7 @@ for (let i = 0; i < folders.length; i++) {
       res.status(400).end()
     }
   })
-  app.get(`/unverified/${folders[i]}/*`, async (req, res, next) => {
+  app.get(`/unverified/${folders[i]}/*`, async (req: Request, res: Response, next: NextFunction) => {
     try {
       if (req.session.role !== "admin" && req.session.role !== "mod") return res.status(403).end()
       res.setHeader("Content-Type", mime.getType(req.path) ?? "")
@@ -192,7 +194,7 @@ for (let i = 0; i < folders.length; i++) {
       res.status(400).end()
     }
   })
-  app.get(`/thumbnail/:size/${folders[i]}/*`, async (req, res, next) => {
+  app.get(`/thumbnail/:size/${folders[i]}/*`, async (req: Request, res: Response, next: NextFunction) => {
     try {
       const mimeType = mime.getType(req.path)
       res.setHeader("Content-Type", mimeType ?? "")
@@ -209,7 +211,7 @@ for (let i = 0; i < folders.length; i++) {
       if (mimeType?.includes("image")) {
         const metadata = await sharp(body).metadata()
         const ratio = metadata.height! / Number(req.params.size)
-        body = await sharp(body, {animated: true, limitInputPixels: false})
+        body = await sharp(body, {animated: false, limitInputPixels: false})
         .resize(Math.round(metadata.width! / ratio), Number(req.params.size), {fit: "fill", kernel: "cubic"})
         .toBuffer()
         contentLength = body.length
@@ -239,7 +241,7 @@ for (let i = 0; i < folders.length; i++) {
     }
   })
 
-  app.get(`/thumbnail/:size/unverified/${folders[i]}/*`, async (req, res, next) => {
+  app.get(`/thumbnail/:size/unverified/${folders[i]}/*`, async (req: Request, res: Response, next: NextFunction) => {
     try {
       if (req.session.role !== "admin" && req.session.role !== "mod") return res.status(403).end()
       const mimeType = mime.getType(req.path)
@@ -250,7 +252,7 @@ for (let i = 0; i < folders.length; i++) {
       if (mimeType?.includes("image")) {
         const metadata = await sharp(body).metadata()
         const ratio = metadata.height! / Number(req.params.size)
-        body = await sharp(body, {animated: true, limitInputPixels: false})
+        body = await sharp(body, {animated: false, limitInputPixels: false})
         .resize(Math.round(metadata.width! / ratio), Number(req.params.size), {fit: "fill", kernel: "cubic"})
         .toBuffer()
         contentLength = body.length
@@ -275,14 +277,13 @@ for (let i = 0; i < folders.length; i++) {
   })
 }
 
-app.get("/*", function(req, res) {
-  /*
-    if (!req.hostname.includes("moebooru") && !req.hostname.includes("localhost") && !req.hostname.includes("192.168.68") && !req.hostname.includes("mydomain")) {
+app.get("/*", function(req: Request, res: Response) {
+    if (!req.hostname.includes("moebooru") && !req.hostname.includes("localhost") && !req.hostname.includes("192.168.68")) {
       res.redirect(301, `https://moebooru.moe${req.path}`)
-    }*/
+    }
     res.setHeader("Content-Type", mime.getType(req.path) ?? "")
     res.setHeader("Cross-Origin-Opener-Policy", "same-origin")
-    res.setHeader("Cross-Origin-Embedder-Policy", "unsafe-none")
+    res.setHeader("Cross-Origin-Embedder-Policy", "require-corp") // unsafe-none
     const document = fs.readFileSync(path.join(__dirname, "./dist/index.html"), {encoding: "utf-8"})
     const html = renderToString(<Router location={req.url}><App/></Router>)
     res.status(200).send(document?.replace(`<div id="root"></div>`, `<div id="root">${html}</div>`))

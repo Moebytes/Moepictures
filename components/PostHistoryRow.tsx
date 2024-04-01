@@ -11,7 +11,6 @@ import adminCrown from "../assets/purple/admin-crown.png"
 import modCrown from "../assets/purple/mod-crown.png"
 import permissions from "../structures/Permissions"
 import "./styles/posthistoryrow.less"
-import localforage from "localforage"
 import crypto from "crypto"
 import axios from "axios"
 import path from "path"
@@ -122,10 +121,10 @@ const PostHistoryRow: React.FunctionComponent<Props> = (props) => {
     const parseNewTags = async () => {
         const tags = props.postHistory.tags
         if (!tags?.[0]) return []
-        const savedTags = await localforage.getItem("tags") as any
+        const tagList = await functions.tagsCache()
         let notExists = [] as any
         for (let i = 0; i < tags.length; i++) {
-            const exists = savedTags.find((t: any) => t.tag === tags[i])
+            const exists = tagList.find((t: any) => t.tag === tags[i])
             if (!exists) notExists.push({tag: tags[i], desc: `${functions.toProperCase(tags[i]).replaceAll("-", " ")}.`})
         }
         return notExists

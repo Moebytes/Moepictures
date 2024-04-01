@@ -62,11 +62,11 @@ const Related: React.FunctionComponent<Props> = (props) => {
     if (!related.length) return null
 
     return (
-        <div className="related" style={{paddingLeft: "100px", marginTop: "0px", marginBottom: "10px"}}>
-            {/* <div className="related-title">Related</div> */}
-            <div className="related-container" style={{width: "90%", flexWrap: "wrap", justifyContent: "space-between"}}>
+        <div className="related" style={{paddingLeft: "200px", marginTop: "0px", marginBottom: "10px"}}>
+            <div className="related-title" style={{marginBottom: "0px"}}>Related</div>
+            <div className="related-container" style={{width: "80%", flexWrap: "wrap", justifyContent: "space-between"}}>
                 {/* {generateImagesJSX()} */}
-                <Carousel images={getImages()} set={click} noKey={true} marginLeft={100} height={250}/>
+                <Carousel images={getImages()} set={click} noKey={true} marginLeft={100} height={200}/>
             </div>
         </div>
     )

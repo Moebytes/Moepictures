@@ -1,6 +1,6 @@
 import React, {useContext, useEffect, useRef, useState} from "react"
 import {ThemeContext, EnableDragContext, BrightnessContext, ContrastContext, HueContext, SaturationContext, LightnessContext,
-BlurContext, SharpenContext, PixelateContext, SessionContext, MobileContext} from "../Context"
+BlurContext, SharpenContext, PixelateContext, SessionContext, MobileContext, TranslationModeContext} from "../Context"
 import {HashLink as Link} from "react-router-hash-link"
 import functions from "../structures/Functions"
 import Slider from "react-slider"
@@ -58,6 +58,7 @@ const PostImageOptions: React.FunctionComponent<Props> = (props) => {
     const {pixelate, setPixelate} = useContext(PixelateContext)
     const {blur, setBlur} = useContext(BlurContext)
     const {sharpen, setSharpen} = useContext(SharpenContext)
+    const {translationMode, setTranslationMode} = useContext(TranslationModeContext)
     const {session, setSession} = useContext(SessionContext)
     const {mobile, setMobile} = useContext(MobileContext)
     const [favorited, setFavorited] = useState(false)
@@ -209,6 +210,7 @@ const PostImageOptions: React.FunctionComponent<Props> = (props) => {
         const raw = window.innerWidth - rect.right
         let offset = -120
         if (mobile) offset += 80
+        if (translationMode) offset += 10
         return `${raw + offset}px`
     }
 
@@ -217,6 +219,7 @@ const PostImageOptions: React.FunctionComponent<Props> = (props) => {
         let elementName = ".post-image-box"
         if (props.model) elementName = ".post-model-box"
         if (props.audio) elementName = ".post-song-box"
+        if (translationMode) elementName = ".translation-editor"
         const bodyRect = document.querySelector(elementName)?.getBoundingClientRect()
         const rect = filterRef.current?.getBoundingClientRect()
         if (!rect || !bodyRect) return "0px"
