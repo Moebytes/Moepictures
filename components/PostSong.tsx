@@ -1,7 +1,7 @@
 import React, {useContext, useEffect, useRef, useState, useReducer} from "react"
 import {ThemeContext, EnableDragContext, BrightnessContext, ContrastContext, HueContext, SaturationContext, LightnessContext,
 BlurContext, SharpenContext, PixelateContext, DownloadFlagContext, DownloadURLsContext, DisableZoomContext, SpeedContext,
-ReverseContext, MobileContext, TranslationModeContext, TranslationDrawingEnabledContext} from "../Context"
+ReverseContext, MobileContext, TranslationModeContext, TranslationDrawingEnabledContext, SessionContext} from "../Context"
 import {HashLink as Link} from "react-router-hash-link"
 import functions from "../structures/Functions"
 import cryptoFunctions from "../structures/CryptoFunctions"
@@ -68,6 +68,7 @@ if (typeof window !== "undefined") initialize()
 const PostSong: React.FunctionComponent<Props> = (props) => {
     const [ignored, forceUpdate] = useReducer(x => x + 1, 0)
     const {theme, setTheme} = useContext(ThemeContext)
+    const {session, setSessions} = useContext(SessionContext)
     const {enableDrag, setEnableDrag} = useContext(EnableDragContext)
     const {brightness, setBrightness} = useContext(BrightnessContext)
     const {contrast, setContrast} = useContext(ContrastContext)
@@ -685,11 +686,11 @@ const PostSong: React.FunctionComponent<Props> = (props) => {
 
     return (
         <div className="post-song-container" style={{zoom: props.scale ? props.scale : 1}}>
-            {!props.noTranslations ? <TranslationEditor post={props.post} img={props.audio} order={props.order} unverified={props.unverified}/> : null}
+            {!props.noTranslations && session.username ? <TranslationEditor post={props.post} img={props.audio} order={props.order} unverified={props.unverified}/> : null}
             <div className="post-song-box" ref={containerRef} style={{display: translationMode ? "none" : "flex"}}>
                 <div className="post-song-filters" ref={fullscreenRef}>
                     <div className={`post-image-top-buttons ${buttonHover ? "show-post-image-top-buttons" : ""}`} onMouseEnter={() => setButtonHover(true)} onMouseLeave={() => setButtonHover(false)}>
-                        {!props.noTranslations ? <img draggable={false} className="post-image-top-button" src={getTranslationToggleOnIcon()} onClick={() => {setTranslationMode(true); setTranslationDrawingEnabled(true)}}/> : null}
+                        {!props.noTranslations && session.username ? <img draggable={false} className="post-image-top-button" src={getTranslationToggleOnIcon()} onClick={() => {setTranslationMode(true); setTranslationDrawingEnabled(true)}}/> : null}
                     </div>
                     <canvas draggable={false} className="dummy-post-song" ref={dummyRef}></canvas>
                     <div className="relative-ref">

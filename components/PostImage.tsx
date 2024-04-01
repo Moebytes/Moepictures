@@ -1,7 +1,7 @@
 import React, {useContext, useEffect, useRef, useState, useReducer} from "react"
 import {ThemeContext, EnableDragContext, BrightnessContext, ContrastContext, HueContext, SaturationContext, LightnessContext,
 BlurContext, SharpenContext, PixelateContext, DownloadFlagContext, DownloadURLsContext, DisableZoomContext, SpeedContext,
-ReverseContext, MobileContext, TranslationModeContext, TranslationDrawingEnabledContext} from "../Context"
+ReverseContext, MobileContext, TranslationModeContext, TranslationDrawingEnabledContext, SessionContext} from "../Context"
 import {HashLink as Link} from "react-router-hash-link"
 import {createFFmpeg, fetchFile} from "@ffmpeg/ffmpeg"
 import functions from "../structures/Functions"
@@ -63,6 +63,7 @@ interface Props {
 const PostImage: React.FunctionComponent<Props> = (props) => {
     const [ignored, forceUpdate] = useReducer(x => x + 1, 0)
     const {theme, setTheme} = useContext(ThemeContext)
+    const {session, setSessions} = useContext(SessionContext)
     const {enableDrag, setEnableDrag} = useContext(EnableDragContext)
     const {brightness, setBrightness} = useContext(BrightnessContext)
     const {contrast, setContrast} = useContext(ContrastContext)
@@ -1205,11 +1206,11 @@ const PostImage: React.FunctionComponent<Props> = (props) => {
 
     return (
         <div className="post-image-container" style={{zoom: props.scale ? props.scale : 1}}>
-            {!props.noTranslations ? <TranslationEditor post={props.post} img={props.img} order={props.order} unverified={props.unverified}/> : null}
+            {!props.noTranslations && session.username ? <TranslationEditor post={props.post} img={props.img} order={props.order} unverified={props.unverified}/> : null}
             <div className="post-image-box" ref={containerRef} style={{display: translationMode ? "none" : "flex"}}>
                 <div className="post-image-filters" ref={fullscreenRef}>
                     <div className={`post-image-top-buttons ${buttonHover ? "show-post-image-top-buttons" : ""}`} onMouseEnter={() => setButtonHover(true)} onMouseLeave={() => setButtonHover(false)}>
-                        {!props.noTranslations ? <img draggable={false} className="post-image-top-button" src={getTranslationToggleOnIcon()} onClick={() => {setTranslationMode(true); setTranslationDrawingEnabled(true)}}/> : null}
+                        {!props.noTranslations && session.username ? <img draggable={false} className="post-image-top-button" src={getTranslationToggleOnIcon()} onClick={() => {setTranslationMode(true); setTranslationDrawingEnabled(true)}}/> : null}
                     </div>
                     {functions.isVideo(props.img) ? 
                     <video draggable={false} loop muted disablePictureInPicture playsInline className="dummy-post-video" src={props.img}></video> :

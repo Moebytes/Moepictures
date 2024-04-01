@@ -104,6 +104,7 @@ interface Props {
     noActions?: boolean
 }
 
+let timeout = null as any
 const maxTags1 = 26
 const maxTags2 = 29
 const maxTags3 = 31
@@ -813,6 +814,26 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
         navigator.clipboard.writeText(noCommas ? combined.join(" ") : combined.join(", "))
     }
 
+    useEffect(() => {
+        clearTimeout(timeout)
+        if (autoSearch && history.location.pathname.includes("/post/")) {
+            const searchLoop = async () => {
+                if (!autoSearch) return
+                const posts = await axios.get("/api/search/random", {params: {type: "all", restrict: props.post.restrict === "explicit" ? "explicit" : "all", style: "all"}}).then((r) => r.data)
+                history.push(`/post/${posts[0].postID}`)
+                timeout = setTimeout(() => {
+                    searchLoop()
+                }, 3000)
+            }
+            searchLoop()
+        } else if (autoSearch && !history.location.pathname.includes("/posts")) {
+            history.push("/posts")
+        }
+    }, [autoSearch])
+
+    const toggleAutoSearch = async () => {
+        setAutoSearch((prev: boolean) => !prev)
+    }
 
     return (
         <>
@@ -835,7 +856,7 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
                 </div>
                 <div className="random-container">
                     <img className="random" src={getRandomIcon()} onClick={randomSearch} onMouseEnter={() => setRandomIconHover(true)} onMouseLeave={() => setRandomIconHover(false)}/>
-                    <img className="autosearch" src={getAutoSearch()} onClick={() => setAutoSearch((prev: boolean) => !prev)}/>
+                    <img className="autosearch" src={getAutoSearch()} onClick={toggleAutoSearch}/>
                 </div>
 
                 {copyTagsJSX()}

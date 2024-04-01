@@ -1,7 +1,7 @@
 import React, {useContext, useEffect, useRef, useState, useReducer} from "react"
 import {ThemeContext, EnableDragContext, BrightnessContext, ContrastContext, HueContext, SaturationContext, LightnessContext,
 BlurContext, SharpenContext, PixelateContext, DownloadFlagContext, DownloadURLsContext, DisableZoomContext, SpeedContext,
-ReverseContext, MobileContext, TranslationModeContext, TranslationDrawingEnabledContext} from "../Context"
+ReverseContext, MobileContext, TranslationModeContext, TranslationDrawingEnabledContext, SessionContext} from "../Context"
 import {HashLink as Link} from "react-router-hash-link"
 import functions from "../structures/Functions"
 import cryptoFunctions from "../structures/CryptoFunctions"
@@ -52,6 +52,7 @@ interface Props {
 const PostModel: React.FunctionComponent<Props> = (props) => {
     const [ignored, forceUpdate] = useReducer(x => x + 1, 0)
     const {theme, setTheme} = useContext(ThemeContext)
+    const {session, setSessions} = useContext(SessionContext)
     const {enableDrag, setEnableDrag} = useContext(EnableDragContext)
     const {brightness, setBrightness} = useContext(BrightnessContext)
     const {contrast, setContrast} = useContext(ContrastContext)
@@ -728,11 +729,11 @@ const PostModel: React.FunctionComponent<Props> = (props) => {
 
     return (
         <div className="post-model-container" style={{zoom: props.scale ? props.scale : 1}}>
-            {!props.noTranslations ? <TranslationEditor post={props.post} img={props.model} order={props.order} unverified={props.unverified}/> : null}
+            {!props.noTranslations && session.username ? <TranslationEditor post={props.post} img={props.model} order={props.order} unverified={props.unverified}/> : null}
             <div className="post-model-box" ref={containerRef} style={{display: translationMode ? "none" : "flex"}}>
                 <div className="post-model-filters" ref={fullscreenRef} onMouseOver={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                 <div className={`post-image-top-buttons ${buttonHover ? "show-post-image-top-buttons" : ""}`} onMouseEnter={() => setButtonHover(true)} onMouseLeave={() => setButtonHover(false)}>
-                        {!props.noTranslations ? <img draggable={false} className="post-image-top-button" src={getTranslationToggleOnIcon()} onClick={() => {setTranslationMode(true); setTranslationDrawingEnabled(true)}}/> : null}
+                        {!props.noTranslations && session.username ? <img draggable={false} className="post-image-top-button" src={getTranslationToggleOnIcon()} onClick={() => {setTranslationMode(true); setTranslationDrawingEnabled(true)}}/> : null}
                     </div>
                     <div className="relative-ref" style={{alignItems: "center", justifyContent: "center"}}>
                         <div className="model-controls" ref={modelControls} onMouseUp={() => setDragging(false)} onMouseOver={controlMouseEnter} onMouseLeave={controlMouseLeave}>

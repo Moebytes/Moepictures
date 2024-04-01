@@ -117,15 +117,14 @@ const ImageGrid: React.FunctionComponent<Props> = (props) => {
 
     useEffect(() => {
         clearTimeout(timeout)
-        if (autoSearch) {
-            const searchLoop = async () => {
-                await randomPosts()
-                timeout = setTimeout(() => {
-                    searchLoop()
-                }, 5000)
-            }
-            searchLoop()
+        const searchLoop = async () => {
+            if (!autoSearch) return
+            await randomPosts()
+            timeout = setTimeout(() => {
+                searchLoop()
+            }, 3000)
         }
+        searchLoop()
     }, [autoSearch])
 
     useEffect(() => {
