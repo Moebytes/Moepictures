@@ -1813,4 +1813,11 @@ export default class Functions {
     public static serverPush = (route: string) => {
         window.location.href = route
     }
+
+    public static tagType = (tag: string) => {
+        const metaTags = ["autotags", "upscaled", "needs-tags", "no-audio", "with-audio", "self-post", "transparent", 
+        "commentary", "translated", "partially-translated", "check-translation"]
+        if (metaTags.includes(tag)) return "meta"
+        return "tag"
+    }
 }

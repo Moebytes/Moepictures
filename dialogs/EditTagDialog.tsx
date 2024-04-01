@@ -3,7 +3,7 @@ import {useHistory} from "react-router-dom"
 import {HashLink as Link} from "react-router-hash-link"
 import {HideNavbarContext, HideSidebarContext, ThemeContext, EnableDragContext, EditTagIDContext, EditTagFlagContext, EditTagImplicationsContext, 
 EditTagTypeContext, EditTagPixivContext, EditTagTwitterContext, EditTagKeyContext, EditTagAliasesContext, EditTagImageContext, EditTagWebsiteContext, 
-EditTagFandomContext, EditTagDescriptionContext, EditTagReasonContext, HideTitlebarContext, SessionContext} from "../Context"
+EditTagFandomContext, EditTagDescriptionContext, EditTagReasonContext, HideTitlebarContext, SessionContext, EditTagPixivTagsContext} from "../Context"
 import functions from "../structures/Functions"
 import uploadIcon from "../assets/purple/upload.png"
 import "./styles/edittagdialog.less"
@@ -31,6 +31,7 @@ const EditTagDialog: React.FunctionComponent = (props) => {
     const {editTagTwitter, setEditTagTwitter} = useContext(EditTagTwitterContext)
     const {editTagWebsite, setEditTagWebsite} = useContext(EditTagWebsiteContext)
     const {editTagFandom, setEditTagFandom} = useContext(EditTagFandomContext)
+    const {editTagPixivTags, setEditTagPixivTags} = useContext(EditTagPixivTagsContext)
     const {editTagReason, setEditTagReason} = useContext(EditTagReasonContext)
     const {session, setSession} = useContext(SessionContext)
     const [submitted, setSubmitted] = useState(false)
@@ -94,7 +95,7 @@ const EditTagDialog: React.FunctionComponent = (props) => {
                     image = Object.values(bytes)
                 }
             }
-            await axios.post("/api/tag/edit/request", {tag: editTagID, key: editTagKey, description: editTagDescription, image, aliases: editTagAliases, implications: editTagImplications, pixiv: editTagPixiv, twitter: editTagTwitter, website: editTagWebsite, fandom: editTagFandom, reason: editTagReason}, {headers: {"x-csrf-token": functions.getCSRFToken()}, withCredentials: true})
+            await axios.post("/api/tag/edit/request", {tag: editTagID, key: editTagKey, description: editTagDescription, image, aliases: editTagAliases, implications: editTagImplications, pixivTags: editTagPixivTags, pixiv: editTagPixiv, twitter: editTagTwitter, website: editTagWebsite, fandom: editTagFandom, reason: editTagReason}, {headers: {"x-csrf-token": functions.getCSRFToken()}, withCredentials: true})
             setSubmitted(true)
         }
     }
@@ -255,6 +256,12 @@ const EditTagDialog: React.FunctionComponent = (props) => {
                                 <textarea className="edittag-textarea" spellCheck={false} value={editTagImplications.join(" ")} onChange={(event) => setEditTagImplications(event.target.value.split(/ +/g))}></textarea>
                             </div>
                             <div className="edittag-dialog-row">
+                                <span className="edittag-dialog-text">Pixiv Tags: </span>
+                            </div>
+                            <div className="edittag-dialog-row">
+                                <textarea className="edittag-textarea" spellCheck={false} value={editTagPixivTags.join(" ")} onChange={(event) => setEditTagPixivTags(event.target.value.split(/ +/g))}></textarea>
+                            </div>
+                            <div className="edittag-dialog-row">
                                 <span className="edittag-dialog-text">Reason: </span>
                                 <input style={{width: "100%"}} className="edittag-dialog-input" type="text" spellCheck={false} value={editTagReason} onChange={(event) => setEditTagReason(event.target.value)}/>
                             </div>
@@ -325,6 +332,12 @@ const EditTagDialog: React.FunctionComponent = (props) => {
                         </div>
                         <div className="edittag-dialog-row">
                             <textarea className="edittag-textarea" spellCheck={false} value={editTagImplications.join(" ")} onChange={(event) => setEditTagImplications(event.target.value.split(/ +/g))}></textarea>
+                        </div>
+                        <div className="edittag-dialog-row">
+                            <span className="edittag-dialog-text">Pixiv Tags: </span>
+                        </div>
+                        <div className="edittag-dialog-row">
+                            <textarea className="edittag-textarea" spellCheck={false} value={editTagPixivTags.join(" ")} onChange={(event) => setEditTagPixivTags(event.target.value.split(/ +/g))}></textarea>
                         </div>
                         <div className="edittag-dialog-row">
                             <span className="edittag-dialog-text">Reason: </span>

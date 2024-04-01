@@ -334,7 +334,7 @@ const PostRoutes = (app: Express) => {
 
             for (let i = 0; i < tags.length; i++) {
                 if (!tags[i]) continue
-                let bulkObj = {tag: tags[i], type: "tag", description: `${functions.toProperCase(tags[i]).replaceAll("-", " ")}.`, image: null} as any
+                let bulkObj = {tag: tags[i], type: functions.tagType(tags[i]), description: `${functions.toProperCase(tags[i]).replaceAll("-", " ")}.`, image: null} as any
                 bulkTagUpdate.push(bulkObj)
                 tagMap.push(tags[i])
             }
@@ -581,7 +581,7 @@ const PostRoutes = (app: Express) => {
 
             for (let i = 0; i < tags.length; i++) {
                 if (!tags[i]) continue
-                let bulkObj = {tag: tags[i], type: "tag", description: `${functions.toProperCase(tags[i]).replaceAll("-", " ")}.`, image: null} as any
+                let bulkObj = {tag: tags[i], type: functions.tagType(tags[i]), description: `${functions.toProperCase(tags[i]).replaceAll("-", " ")}.`, image: null} as any
                 const existingTag = await sql.tag(tags[i])
                 if (existingTag) {
                     if (existingTag.description) bulkObj.description = existingTag.description

@@ -2,7 +2,7 @@ import React, {useContext, useEffect, useRef, useState} from "react"
 import {useHistory} from "react-router-dom"
 import {ThemeContext, SearchContext, SearchFlagContext, DeleteTagFlagContext, DeleteTagIDContext, MobileContext, EditTagTypeContext, EditTagReasonContext,
 EditTagPixivContext, EditTagTwitterContext, EditTagWebsiteContext, EditTagFandomContext, EditTagAliasesContext, EditTagImplicationsContext, 
-EditTagDescriptionContext, EditTagIDContext, EditTagFlagContext, SessionContext, EditTagImageContext, EditTagKeyContext, AliasTagFlagContext, 
+EditTagDescriptionContext, EditTagIDContext, EditTagFlagContext, EditTagPixivTagsContext, SessionContext, EditTagImageContext, EditTagKeyContext, AliasTagFlagContext, 
 AliasTagIDContext, AliasTagNameContext} from "../Context"
 import {HashLink as Link} from "react-router-hash-link"
 import functions from "../structures/Functions"
@@ -45,6 +45,7 @@ const TagRow: React.FunctionComponent<Props> = (props) => {
     const {editTagTwitter, setEditTagTwitter} = useContext(EditTagTwitterContext)
     const {editTagWebsite, setEditTagWebsite} = useContext(EditTagWebsiteContext)
     const {editTagFandom, setEditTagFandom} = useContext(EditTagFandomContext)
+    const {editTagPixivTags, setEditTagPixivTags} = useContext(EditTagPixivTagsContext)
     const {editTagImage, setEditTagImage} = useContext(EditTagImageContext)
     const {editTagKey, setEditTagKey} = useContext(EditTagKeyContext)
     const {aliasTagID, setAliasTagID} = useContext(AliasTagIDContext)
@@ -124,7 +125,7 @@ const TagRow: React.FunctionComponent<Props> = (props) => {
             }
         }
         await axios.put("/api/tag/edit", {tag: props.tag.tag, key: editTagKey, description: editTagDescription,
-        image, aliases: editTagAliases, implications: editTagImplications, pixiv: editTagPixiv, twitter: editTagTwitter,
+        image, aliases: editTagAliases, implications: editTagImplications, pixivTags: editTagPixivTags, pixiv: editTagPixiv, twitter: editTagTwitter,
         website: editTagWebsite, fandom: editTagFandom, reason: editTagReason}, {headers: {"x-csrf-token": functions.getCSRFToken()}, withCredentials: true})
         if (editTagImage) refreshCache(editTagImage)
         props.onEdit?.()
@@ -144,6 +145,7 @@ const TagRow: React.FunctionComponent<Props> = (props) => {
         setEditTagImage(props.tag.image ? functions.getTagLink(props.tag.type, props.tag.image) : null)
         setEditTagAliases(props.tag.aliases?.[0] ? props.tag.aliases.map((a: any) => a.alias) : [])
         setEditTagImplications(props.tag.implications?.[0] ? props.tag.implications.map((i: any) => i.implication) : [])
+        setEditTagPixivTags(props.tag.pixivTags?.[0] ? props.tag.pixivTags : [])
         setEditTagID(props.tag.tag)
         setEditTagType(props.tag.type)
         setEditTagPixiv(props.tag.pixiv)

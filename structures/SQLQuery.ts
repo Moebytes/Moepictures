@@ -2142,10 +2142,10 @@ export default class SQLQuery {
   }
 
   /** Insert tag edit request. */
-  public static insertTagEditRequest = async (username: string, tag: string, key: string, description: string, image: string, aliases: string[], implications: string[], pixiv: string, twitter: string, website: string, fandom: string, reason: string) => {
+  public static insertTagEditRequest = async (username: string, tag: string, key: string, description: string, image: string, aliases: string[], implications: string[], pixivTags: string[], pixiv: string, twitter: string, website: string, fandom: string, reason: string) => {
     const query: QueryConfig = {
-      text: `INSERT INTO "tag edit requests" ("username", "tag", "key", "description", "image", "aliases", "implications", "pixiv", "twitter", "website", "fandom", "reason") VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)`,
-      values: [username, tag, key, description, image, aliases, implications, pixiv, twitter, website, fandom, reason]
+      text: `INSERT INTO "tag edit requests" ("username", "tag", "key", "description", "image", "aliases", "implications", "pixivTags", "pixiv", "twitter", "website", "fandom", "reason") VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)`,
+      values: [username, tag, key, description, image, aliases, implications, pixivTags, pixiv, twitter, website, fandom, reason]
     }
     const result = await SQLQuery.run(query)
     return result
@@ -2216,11 +2216,11 @@ export default class SQLQuery {
   }
 
   public static insertTagHistory = async (username: string, tag: string, key: string, type: string, image?: string, description?: string, 
-    aliases?: string[], implications?: string[], website?: string, pixiv?: string, twitter?: string, fandom?: string, reason?: string) => {
+    aliases?: string[], implications?: string[], pixivTags?: string[], website?: string, pixiv?: string, twitter?: string, fandom?: string, reason?: string) => {
     const now = new Date().toISOString()
     const query: QueryConfig = {
-      text: `INSERT INTO "tag history" ("tag", "user", "date", "key", "type", "image", "description", "aliases", "implications", "website", "pixiv", "twitter", "fandom", "reason") VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)`,
-      values: [tag, username, now, key, type, image, description, aliases, implications, website, pixiv, twitter, fandom, reason]
+      text: `INSERT INTO "tag history" ("tag", "user", "date", "key", "type", "image", "description", "aliases", "implications", "pixivTags", "website", "pixiv", "twitter", "fandom", "reason") VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15)`,
+      values: [tag, username, now, key, type, image, description, aliases, implications, pixivTags, website, pixiv, twitter, fandom, reason]
     }
     const result = await SQLQuery.run(query)
     return result

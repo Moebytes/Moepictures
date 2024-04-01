@@ -105,7 +105,7 @@ const TagRoutes = (app: Express) => {
 
     app.put("/api/tag/edit", tagEditLimiter, async (req: Request, res: Response) => {
         try {
-            const {tag, key, description, image, aliases, implications, pixiv, twitter, website, fandom, reason} = req.body
+            const {tag, key, description, image, aliases, implications, pixivTags, pixiv, twitter, website, fandom, reason} = req.body
             const csrfToken = req.headers["x-csrf-token"] as string
             const valid = csrf.verify(req.session.csrfSecret!, csrfToken)
             if (!valid) return res.status(400).send("Bad request")
@@ -151,6 +151,9 @@ const TagRoutes = (app: Express) => {
                     if (!implications[i]) break
                     await sql.insertImplication(tag, implications[i])
                 }
+            }
+            if (pixivTags) {
+                await sql.updateTag(tag, "pixivTags", pixivTags)
             }
             if (key.trim() !== tag) {
                 if (tagObj.image) {
@@ -203,13 +206,13 @@ const TagRoutes = (app: Express) => {
                 } else {
                     vanilla.image = null
                 }
-                await sql.insertTagHistory(vanilla.user, vanilla.tag, vanilla.key, vanilla.type, vanilla.image, vanilla.description, vanilla.aliases, vanilla.implications, vanilla.website, vanilla.pixiv, vanilla.twitter, vanilla.fandom)
+                await sql.insertTagHistory(vanilla.user, vanilla.tag, vanilla.key, vanilla.type, vanilla.image, vanilla.description, vanilla.aliases, vanilla.implications, vanilla.pixivTags, vanilla.website, vanilla.pixiv, vanilla.twitter, vanilla.fandom)
                 if (image?.[0] && imageFilename) {
                     const imagePath = functions.getTagHistoryPath(key, 2, imageFilename)
                     await serverFunctions.uploadFile(imagePath, Buffer.from(Object.values(image) as any))
                     imageFilename = imagePath
                 }
-                await sql.insertTagHistory(req.session.username, tag, key, tagObj.type, imageFilename, tagDescription, aliases, implications, website, pixiv, twitter, fandom, reason)
+                await sql.insertTagHistory(req.session.username, tag, key, tagObj.type, imageFilename, tagDescription, aliases, implications, pixivTags, website, pixiv, twitter, fandom, reason)
             } else {
                 if (image?.[0] && imageFilename) {
                     const nextKey = await serverFunctions.getNextKey("tag", key)
@@ -217,7 +220,7 @@ const TagRoutes = (app: Express) => {
                     await serverFunctions.uploadFile(imagePath, Buffer.from(Object.values(image) as any))
                     imageFilename = imagePath
                 }
-                await sql.insertTagHistory(req.session.username, tag, key, tagObj.type, imageFilename, tagDescription, aliases, implications, website, pixiv, twitter, fandom, reason)
+                await sql.insertTagHistory(req.session.username, tag, key, tagObj.type, imageFilename, tagDescription, aliases, implications, pixivTags, website, pixiv, twitter, fandom, reason)
             }
             res.status(200).send("Success")
         } catch (e) {
@@ -358,7 +361,7 @@ const TagRoutes = (app: Express) => {
 
     app.post("/api/tag/edit/request", tagLimiter, async (req: Request, res: Response) => {
         try {
-            const {tag, key, description, image, aliases, implications, pixiv, twitter, website, fandom, reason} = req.body
+            const {tag, key, description, image, aliases, implications, pixivTags, pixiv, twitter, website, fandom, reason} = req.body
             const csrfToken = req.headers["x-csrf-token"] as string
             const valid = csrf.verify(req.session.csrfSecret!, csrfToken)
             if (!valid) return res.status(400).send("Bad request")
@@ -375,7 +378,7 @@ const TagRoutes = (app: Express) => {
                     imagePath = "delete"
                 }
             }
-            await sql.insertTagEditRequest(req.session.username, tag, key, description, imagePath, aliases?.[0] ? aliases : null, implications?.[0] ? implications : null, pixiv, twitter, website, fandom, reason)
+            await sql.insertTagEditRequest(req.session.username, tag, key, description, imagePath, aliases?.[0] ? aliases : null, implications?.[0] ? implications : null, pixivTags?.[0] ? pixivTags : null, pixiv, twitter, website, fandom, reason)
             res.status(200).send("Success")
         } catch (e) {
             console.log(e)

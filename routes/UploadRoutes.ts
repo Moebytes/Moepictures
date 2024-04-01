@@ -227,7 +227,7 @@ const CreateRoutes = (app: Express) => {
 
         for (let i = 0; i < newTags.length; i++) {
           if (!newTags[i].tag) continue
-          let bulkObj = {tag: newTags[i].tag, type: "tag", description: null, image: null} as any
+          let bulkObj = {tag: newTags[i].tag, type: functions.tagType(newTags[i].tag), description: null, image: null} as any
           if (newTags[i].desc) bulkObj.description = newTags[i].desc
           if (newTags[i].image) {
             const filename = `${newTags[i].tag}.${newTags[i].ext}`
@@ -465,7 +465,7 @@ const CreateRoutes = (app: Express) => {
 
         for (let i = 0; i < newTags.length; i++) {
           if (!newTags[i].tag) continue
-          let bulkObj = {tag: newTags[i].tag, type: "tag", description: null, image: null} as any
+          let bulkObj = {tag: newTags[i].tag, type: functions.tagType(newTags[i].tag), description: null, image: null} as any
           if (newTags[i].desc) bulkObj.description = newTags[i].desc
           if (newTags[i].image) {
             const filename = `${newTags[i].tag}.${newTags[i].ext}`
@@ -727,12 +727,12 @@ const CreateRoutes = (app: Express) => {
 
         let bulkTagUpdate = [] as any
         for (let i = 0; i < tagMap.length; i++) {
-          bulkTagUpdate.push({tag: tagMap[i], type: "tag", description: null, image: null})
+          bulkTagUpdate.push({tag: tagMap[i], type: functions.tagType(tagMap[i]), description: null, image: null})
         }
 
         for (let i = 0; i < newTags.length; i++) {
           if (!newTags[i].tag) continue
-          let bulkObj = {tag: newTags[i].tag, type: "tag", description: null, image: null} as any
+          let bulkObj = {tag: newTags[i].tag, type: functions.tagType(newTags[i].tag), description: null, image: null} as any
           if (newTags[i].desc) bulkObj.description = newTags[i].desc
           if (newTags[i].image) {
             const filename = `${newTags[i].tag}.${newTags[i].ext}`
@@ -960,12 +960,12 @@ const CreateRoutes = (app: Express) => {
 
         let bulkTagUpdate = [] as any
         for (let i = 0; i < tagMap.length; i++) {
-          bulkTagUpdate.push({tag: tagMap[i], type: "tag", description: null, image: null})
+          bulkTagUpdate.push({tag: tagMap[i], type: functions.tagType(tagMap[i]), description: null, image: null})
         }
 
         for (let i = 0; i < newTags.length; i++) {
           if (!newTags[i].tag) continue
-          let bulkObj = {tag: newTags[i].tag, type: "tag", description: null, image: null} as any
+          let bulkObj = {tag: newTags[i].tag, type: functions.tagType(newTags[i].tag), description: null, image: null} as any
           if (newTags[i].desc) bulkObj.description = newTags[i].desc
           if (newTags[i].image) {
             const filename = `${newTags[i].tag}.${newTags[i].ext}`
@@ -1139,7 +1139,7 @@ const CreateRoutes = (app: Express) => {
 
         for (let i = 0; i < tags.length; i++) {
           if (!tags[i].tag) continue
-          let bulkObj = {tag: tags[i].tag, type: "tag", description: tags[i].description, image: null} as any
+          let bulkObj = {tag: tags[i].tag, type: functions.tagType(tags[i].tag), description: tags[i].description, image: null} as any
           if (tags[i].image) {
             const imagePath = functions.getTagPath("tag", tags[i].image)
             const buffer = await serverFunctions.getUnverifiedFile(imagePath)

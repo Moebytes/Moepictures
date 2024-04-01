@@ -30,9 +30,14 @@ const TranslationRoutes = (app: Express) => {
 
             const translation = await sql.translation(postID, order)
             if (!translation) {
+                if (JSON.stringify(data) === "[]") return res.status(200).send("Success")
                 await sql.insertTranslation(postID, req.session.username, order, JSON.stringify(data))
             } else {
-                await sql.updateTranslation(translation.translationID, req.session.username, JSON.stringify(data))
+                if (JSON.stringify(data) === "[]") {
+                    await sql.deleteTranslation(translation.translationID)
+                } else {
+                    await sql.updateTranslation(translation.translationID, req.session.username, JSON.stringify(data))
+                }
             }
             res.status(200).send("Success")
         } catch {
