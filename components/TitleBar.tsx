@@ -73,7 +73,6 @@ const lightColorList = {
 interface Props {
     reset?: boolean
     goBack?: boolean
-    rerender?: () => void
 }
 
 const TitleBar: React.FunctionComponent<Props> = (props) => {
@@ -114,35 +113,26 @@ const TitleBar: React.FunctionComponent<Props> = (props) => {
     useEffect(() => {
         if (typeof window === "undefined") return
         const colorList = theme.includes("light") ? lightColorList : darkColorList
+        let targetLightness = siteLightness
+        if (theme.includes("light") && siteLightness > 50) targetLightness = 50
         for (let i = 0; i < Object.keys(colorList).length; i++) {
             const key = Object.keys(colorList)[i]
             const color = Object.values(colorList)[i]
-            document.documentElement.style.setProperty(key, functions.rotateColor(color, siteHue, siteSaturation, siteLightness))
+            document.documentElement.style.setProperty(key, functions.rotateColor(color, siteHue, siteSaturation, targetLightness))
         }
-        setTimeout(() => {
-            props.rerender?.()
-        }, 100)
         localStorage.setItem("siteHue", siteHue)
         localStorage.setItem("siteSaturation", siteSaturation)
         localStorage.setItem("siteLightness", siteLightness)
     }, [theme, siteHue, siteSaturation, siteLightness])
 
+    /*
     useEffect(() => {
         if (theme.includes("magenta")) {
             setSiteHue(250)
         } else {
             setSiteHue(180)
         }
-    }, [theme])
-
-    const resetFilters = () => {
-        setSiteHue(180)
-        setSiteSaturation(100)
-        setSiteLightness(50)
-        setTimeout(() => {
-            props.rerender?.()
-        }, 100)
-    }
+    }, [theme])*/
 
     useEffect(() => {
         if (headerFlag) {

@@ -13,6 +13,7 @@ import axios from "axios"
 import permissions from "../structures/Permissions"
 import functions from "../structures/Functions"
 import SearchSuggestions from "./SearchSuggestions"
+import Slider from "react-slider"
 import {ThemeContext, HideNavbarContext, HideSortbarContext, HideSidebarContext, EnableDragContext,  HideMobileNavbarContext, MobileContext,
 RelativeContext, HideTitlebarContext, SearchContext, SearchFlagContext, SessionContext, SessionFlagContext, UserImgContext, SiteHueContext,
 SiteSaturationContext, SiteLightnessContext} from "../Context"
@@ -44,6 +45,7 @@ const NavBar: React.FunctionComponent<Props> = (props) => {
     const [showMiniTitle, setShowMiniTitle] = useState(false)
     const [suggestionsActive, setSuggestionsActive] = useState(false)
     const [marginR, setMarginR] = useState("70px")
+    const [activeDropdown, setActiveDropdown] = useState(false)
     const history = useHistory()
 
     const getFilter = () => {
@@ -101,6 +103,7 @@ const NavBar: React.FunctionComponent<Props> = (props) => {
     }, [hideTitlebar])
 
     const colorChange = () => {
+        /*
         let newTheme = ""
         if (!theme || theme === "purple") {
             newTheme = "magenta"
@@ -118,11 +121,13 @@ const NavBar: React.FunctionComponent<Props> = (props) => {
             newTheme = "purple-light"
             setTheme("purple-light")
         }
-        localStorage.setItem("theme", newTheme)
+        localStorage.setItem("theme", newTheme)*/
+        setActiveDropdown((prev: boolean) => !prev)
     }
 
     const lightChange = () => {
         let newTheme = ""
+        /*
         if (!theme || theme === "purple") {
             newTheme = "purple-light"
             setTheme("purple-light")
@@ -138,7 +143,13 @@ const NavBar: React.FunctionComponent<Props> = (props) => {
         if (theme === "magenta-light") {
             newTheme = "magenta"
             setTheme("magenta")
+        }*/
+        if (theme.includes("light")) {
+            newTheme = "dark"
+        } else {
+            newTheme = "light"
         }
+        setTheme(newTheme)
         localStorage.setItem("theme", newTheme)
     }
 
@@ -267,6 +278,13 @@ const NavBar: React.FunctionComponent<Props> = (props) => {
             const rect = element.getBoundingClientRect()
             return rect.bottom + window.scrollY
         }
+
+        const resetFilters = () => {
+            setSiteHue(180)
+            setSiteSaturation(100)
+            setSiteLightness(50)
+        }
+
         return (
             <>
             <SearchSuggestions active={suggestionsActive && hideSidebar} width={200} x={getX()} y={getY()}/>
@@ -309,6 +327,23 @@ const NavBar: React.FunctionComponent<Props> = (props) => {
                     <img className="nav-color" src={eyedropper} onClick={colorChange} style={{filter: getFilter()}}/>
                     <img className="nav-color" src={light} onClick={lightChange} style={{filter: getFilter()}}/>
                     {permissions.isStaff(session) ? <img className="nav-color" src={crown} onClick={() => history.push("/mod-queue")} style={{filter: getFilter()}}/> : null}
+                </div>
+                <div className={`title-dropdown ${activeDropdown ? "" : "hide-title-dropdown"}`}>
+                    <div className="title-dropdown-row">
+                        <span className="title-dropdown-text">Hue</span>
+                        <Slider className="title-dropdown-slider" trackClassName="title-dropdown-slider-track" thumbClassName="title-dropdown-slider-thumb" onChange={(value) => setSiteHue(value)} min={60} max={300} step={1} value={siteHue}/>
+                    </div>
+                    <div className="title-dropdown-row">
+                        <span className="title-dropdown-text">Saturation</span>
+                        <Slider className="title-dropdown-slider" trackClassName="title-dropdown-slider-track" thumbClassName="title-dropdown-slider-thumb" onChange={(value) => setSiteSaturation(value)} min={50} max={100} step={1} value={siteSaturation}/>
+                    </div>
+                    <div className="title-dropdown-row">
+                        <span className="title-dropdown-text">Lightness</span>
+                        <Slider className="title-dropdown-slider" trackClassName="title-dropdown-slider-track" thumbClassName="title-dropdown-slider-thumb" onChange={(value) => setSiteLightness(value)} min={45} max={55} step={1} value={siteLightness}/>
+                    </div>
+                    <div className="title-dropdown-row">
+                        <button className="title-dropdown-button" onClick={() => resetFilters()}>Reset</button>
+                    </div>
                 </div>
             </div>
             </>
