@@ -7,21 +7,19 @@ import SideBar from "../components/SideBar"
 import Footer from "../components/Footer"
 import show from "../assets/purple/show.png"
 import hide from "../assets/purple/hide.png"
-import showPurpleLight from "../assets/purple-light/show.png"
-import hidePurpleLight from "../assets/purple-light/hide.png"
-import showMagenta from "../assets/magenta/show.png"
-import hideMagenta from "../assets/magenta/hide.png"
-import showMagentaLight from "../assets/magenta-light/show.png"
-import hideMagentaLight from "../assets/magenta-light/hide.png"
 import DragAndDrop from "../components/DragAndDrop"
 import {HideNavbarContext, HideSidebarContext, ThemeContext, EnableDragContext, RelativeContext, SessionContext, MobileContext,
-HideTitlebarContext, HeaderTextContext, SessionFlagContext, SidebarTextContext, RedirectContext} from "../Context"
+HideTitlebarContext, HeaderTextContext, SessionFlagContext, SidebarTextContext, RedirectContext, SiteHueContext, SiteLightnessContext,
+SiteSaturationContext} from "../Context"
 import "./styles/loginpage.less"
 import axios from "axios"
 import functions from "../structures/Functions"
 
 const LoginPage: React.FunctionComponent = (props) => {
     const {theme, setTheme} = useContext(ThemeContext)
+    const {siteHue, setSiteHue} = useContext(SiteHueContext)
+    const {siteSaturation, setSiteSaturation} = useContext(SiteSaturationContext)
+    const {siteLightness, setSiteLightness} = useContext(SiteLightnessContext)
     const {hideNavbar, setHideNavbar} = useContext(HideNavbarContext)
     const {hideTitlebar, setHideTitlebar} = useContext(HideTitlebarContext)
     const {hideSidebar, setHideSidebar} = useContext(HideSidebarContext)
@@ -42,12 +40,13 @@ const LoginPage: React.FunctionComponent = (props) => {
     const errorRef = useRef<any>(null)
     const history = useHistory()
 
+    const getFilter = () => {
+        return `hue-rotate(${siteHue - 180}deg) saturate(${siteSaturation}%) brightness(${siteLightness + 70}%)`
+    }
+
     const getCaptchaColor = () => {
-        if (theme === "purple") return "#09071c"
-        if (theme === "purple-light") return "#ffffff"
-        if (theme === "magenta") return "#17040e"
-        if (theme === "magenta-light") return "#ffffff"
-        return "#ffffff"
+        if (theme.includes("light")) return "#ffffff"
+        return "#09071c"
     }
 
     const updateCaptcha = async () => {
@@ -87,10 +86,6 @@ const LoginPage: React.FunctionComponent = (props) => {
     }, [session])
 
     const getEye = () => {
-        if (theme === "purple") return showPassword ? hide : show
-        if (theme === "purple-light") return showPassword ? hidePurpleLight : showPurpleLight
-        if (theme === "magenta") return showPassword ? hideMagenta : showMagenta
-        if (theme === "magenta-light") return showPassword ? hideMagentaLight : showMagentaLight
         return showPassword ? hide : show
     }
 
@@ -147,7 +142,7 @@ const LoginPage: React.FunctionComponent = (props) => {
                     <div className="login-row">
                         <span className="login-text">Password:</span>
                         <div className="login-pass">
-                            <img className="login-pass-show" src={getEye()} onClick={() => setShowPassword((prev) => !prev)}/>
+                            <img className="login-pass-show" src={getEye()} style={{filter: getFilter()}} onClick={() => setShowPassword((prev) => !prev)}/>
                             <input className="login-pass-input" type={showPassword ? "text" : "password"} spellCheck={false} value={password} onChange={(event) => setPassword(event.target.value)} onKeyDown={(event) => event.key === "Enter" ? login() : null}/>
                         </div>
                     </div>
@@ -155,7 +150,7 @@ const LoginPage: React.FunctionComponent = (props) => {
                         <span className="login-link">Forgot Password?</span>
                     </Link>
                     <div className="login-row" style={{justifyContent: "center"}}>
-                        <img src={`data:image/svg+xml;utf8,${encodeURIComponent(captcha)}`}/>
+                        <img src={`data:image/svg+xml;utf8,${encodeURIComponent(captcha)}`} style={{filter: getFilter()}}/>
                         <input className="login-input" type="text" spellCheck={false} value={captchaResponse} onChange={(event) => setCaptchaResponse(event.target.value)} onKeyDown={(event) => event.key === "Enter" ? login() : null}/>
                     </div>
                     {error ? <div className="login-validation-container"><span className="login-validation" ref={errorRef}></span></div> : null}

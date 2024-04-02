@@ -1,11 +1,9 @@
 import React, {useContext, useEffect, useRef, useState, useReducer} from "react"
 import {useHistory} from "react-router-dom"
-import {ThemeContext, SearchContext, SearchFlagContext, UnverifiedPostsContext} from "../Context"
+import {ThemeContext, SearchContext, SearchFlagContext, SiteHueContext, SiteLightnessContext, SiteSaturationContext} from "../Context"
 import {HashLink as Link} from "react-router-hash-link"
 import approve from "../assets/purple/approve.png"
-import approveMagenta from "../assets/magenta/approve.png"
 import reject from "../assets/purple/reject.png"
-import rejectMagenta from "../assets/magenta/reject.png"
 import functions from "../structures/Functions"
 import cryptoFunctions from "../structures/CryptoFunctions"
 import "./styles/modposts.less"
@@ -14,6 +12,9 @@ import axios from "axios"
 const ModTranslations: React.FunctionComponent = (props) => {
     const [ignored, forceUpdate] = useReducer(x => x + 1, 0)
     const {theme, setTheme} = useContext(ThemeContext)
+    const {siteHue, setSiteHue} = useContext(SiteHueContext)
+    const {siteSaturation, setSiteSaturation} = useContext(SiteSaturationContext)
+    const {siteLightness, setSiteLightness} = useContext(SiteLightnessContext)
     const [hover, setHover] = useState(false)
     const {search, setSearch} = useContext(SearchContext)
     const {searchFlag, setSearchFlag} = useContext(SearchFlagContext)
@@ -25,6 +26,10 @@ const ModTranslations: React.FunctionComponent = (props) => {
     const [imagesRef, setImagesRef] = useState([]) as any
     const history = useHistory()
 
+    const getFilter = () => {
+        return `hue-rotate(${siteHue - 180}deg) saturate(${siteSaturation}%) brightness(${siteLightness + 70}%)`
+    }
+
     const updateTranslations = async () => {
         const translations = await axios.get("/api/translation/list/unverified", {withCredentials: true}).then((r) => r.data)
         setEnded(false)
@@ -34,16 +39,6 @@ const ModTranslations: React.FunctionComponent = (props) => {
     useEffect(() => {
         updateTranslations()
     }, [])
-
-    const getApprove = () => {
-        if (theme.includes("magenta")) return approveMagenta
-        return approve
-    }
-
-    const getReject = () => {
-        if (theme.includes("magenta")) return rejectMagenta
-        return reject
-    }
 
     const approveTranslation = async (translationID: number) => {
         await axios.post("/api/translation/approve", {translationID}, {headers: {"x-csrf-token": functions.getCSRFToken()}, withCredentials: true})
@@ -171,11 +166,11 @@ const ModTranslations: React.FunctionComponent = (props) => {
                     </div>
                     <div className="mod-post-options">
                         <div className="mod-post-options-container" onClick={() => rejectTranslation(translation.translationID)}>
-                            <img className="mod-post-options-img" src={getReject()}/>
+                            <img className="mod-post-options-img" src={reject} style={{filter: getFilter()}}/>
                             <span className="mod-post-options-text">Reject</span>
                         </div>
                         <div className="mod-post-options-container" onClick={() => approveTranslation(translation.translationID)}>
-                            <img className="mod-post-options-img" src={getApprove()}/>
+                            <img className="mod-post-options-img" src={approve} style={{filter: getFilter()}}/>
                             <span className="mod-post-options-text">Approve</span>
                         </div>
                     </div>

@@ -3,7 +3,7 @@ import {useHistory} from "react-router-dom"
 import {ThemeContext, EnableDragContext, SessionContext, BrightnessContext, ContrastContext, HueContext, SaturationContext, LightnessContext,
 BlurContext, SharpenContext, PixelateContext, TranslationModeContext, EditTranslationIDContext, MobileContext, ShowSaveTranslationDialogContext,
 EditTranslationFlagContext, EditTranslationTextContext, EditTranslationTranscriptContext, TranslationDrawingEnabledContext,
-SaveTranslationDataContext, SaveTranslationOrderContext} from "../Context"
+SaveTranslationDataContext, SaveTranslationOrderContext, SiteHueContext, SiteLightnessContext, SiteSaturationContext} from "../Context"
 import functions from "../structures/Functions"
 import cryptoFunctions from "../structures/CryptoFunctions"
 import {ShapeEditor, ImageLayer, DrawLayer, wrapShape} from "react-shape-editor"
@@ -85,6 +85,9 @@ const RectShape = wrapShape(({width, height, extraShapeProps, scale}) => {
 const TranslationEditor: React.FunctionComponent<Props> = (props) => {
     const {mobile, setMobile} = useContext(MobileContext)
     const {theme, setTheme} = useContext(ThemeContext)
+    const {siteHue, setSiteHue} = useContext(SiteHueContext)
+    const {siteSaturation, setSiteSaturation} = useContext(SiteSaturationContext)
+    const {siteLightness, setSiteLightness} = useContext(SiteLightnessContext)
     const {enableDrag, setEnableDrag} = useContext(EnableDragContext)
     const {session, setSession} = useContext(SessionContext)
     const {brightness, setBrightness} = useContext(BrightnessContext)
@@ -120,6 +123,10 @@ const TranslationEditor: React.FunctionComponent<Props> = (props) => {
     const [shiftKey, setShiftKey] = useState(false)
     const [showTranscript, setShowTranscript] = useState(false)
     const history = useHistory()
+
+    const getFilter = () => {
+        return `hue-rotate(${siteHue - 180}deg) saturate(${siteSaturation}%) brightness(${siteLightness + 70}%)`
+    }
 
     const updateTranslations = async () => {
         if (!props.post || props.unverified) return
@@ -163,38 +170,7 @@ const TranslationEditor: React.FunctionComponent<Props> = (props) => {
         localStorage.setItem("showTranscript", String(showTranscript))
     }, [showTranscript])
 
-    const getTranslationDeleteIcon = () => {
-        if (theme.includes("magenta")) return translationDeleteMagenta
-        return translationDelete
-    }
-
-    const getTranslationEditIcon = () => {
-        if (theme.includes("magenta")) return translationEditMagenta
-        return translationEdit
-    }
-
-    const getTranslationSaveIcon = () => {
-        if (theme.includes("magenta")) return translationSaveMagenta
-        return translationSave
-    }
-
-    const getTranslationTextIcon = () => {
-        if (theme.includes("magenta")) return translationTextMagenta
-        return translationText
-    }
-
-    const getTranslationHistoryIcon = () => {
-        if (theme.includes("magenta")) return translationHistoryMagenta
-        return translationHistory
-    }
-
-    const getTranslationToggleOffIcon = () => {
-        if (theme.includes("magenta")) return translationToggleOffMagenta
-        return translationToggleOff
-    }
-
     const getTranslationShowTranscriptIcon = () => {
-        if (theme.includes("magenta")) return showTranscript ? translationJAMagenta : translationENMagenta
         return showTranscript ? translationJA : translationEN
     }
 
@@ -361,13 +337,13 @@ const TranslationEditor: React.FunctionComponent<Props> = (props) => {
         <div className="translation-editor" style={{display: translationMode ? "flex" : "none"}}>
             <div className="translation-editor-filters" ref={filtersRef} onMouseOver={() => {if (enableDrag) setEnableDrag(false)}}>
                 <div className={`translation-editor-buttons ${buttonHover ? "show-translation-buttons" : ""}`} onMouseEnter={() => setButtonHover(true)} onMouseLeave={() => setButtonHover(false)}>
-                    <img draggable={false} className="translation-editor-button" src={getTranslationHistoryIcon()} onClick={() => showHistory()}/>
-                    <img draggable={false} className="translation-editor-button" src={getTranslationSaveIcon()} onClick={() => saveTextDialog()}/>
-                    <img draggable={false} className="translation-editor-button" src={getTranslationShowTranscriptIcon()} onClick={() => setShowTranscript((prev: boolean) => !prev)}/>
-                    <img draggable={false} className="translation-editor-button" src={getTranslationTextIcon()} onClick={() => editTextDialog()}/>
-                    <img draggable={false} className="translation-editor-button" src={getTranslationDeleteIcon()} onClick={() => deleteFocused()}/>
-                    <img draggable={false} className="translation-editor-button" src={getTranslationEditIcon()} onClick={() => setTranslationDrawingEnabled((prev: boolean) => !prev)}/>
-                    <img draggable={false} className="translation-editor-button" src={getTranslationToggleOffIcon()} onClick={() => setTranslationMode(false)}/>
+                    <img draggable={false} className="translation-editor-button" src={translationHistory} style={{filter: getFilter()}} onClick={() => showHistory()}/>
+                    <img draggable={false} className="translation-editor-button" src={translationSave} style={{filter: getFilter()}} onClick={() => saveTextDialog()}/>
+                    <img draggable={false} className="translation-editor-button" src={getTranslationShowTranscriptIcon()} style={{filter: getFilter()}} onClick={() => setShowTranscript((prev: boolean) => !prev)}/>
+                    <img draggable={false} className="translation-editor-button" src={translationText} style={{filter: getFilter()}} onClick={() => editTextDialog()}/>
+                    <img draggable={false} className="translation-editor-button" src={translationDelete} style={{filter: getFilter()}} onClick={() => deleteFocused()}/>
+                    <img draggable={false} className="translation-editor-button" src={translationEdit} style={{filter: getFilter()}} onClick={() => setTranslationDrawingEnabled((prev: boolean) => !prev)}/>
+                    <img draggable={false} className="translation-editor-button" src={translationToggleOff} style={{filter: getFilter()}} onClick={() => setTranslationMode(false)}/>
                 </div>
                 {bubbleToggle ? <div className="translation-bubble" style={{width: `${bubbleData.width}px`, minHeight: "25px", left: `${bubbleData.x}px`, top: `${bubbleData.y}px`}}>{getBubbleText()}</div> : null}
                 <img draggable={false} className="post-lightness-overlay" ref={lightnessRef} src={img} style={{pointerEvents: "none", width: `${Math.floor(imageWidth*scale)}px`, height: `${Math.floor(imageHeight*scale)}px`}}/>

@@ -117,9 +117,9 @@ export default class ServerFunctions {
     public static renameFile = async (oldFile: string, newFile: string) => {
         if (functions.isLocalHost()) {
             try {
-                fs.renameSync(`/Volumes/Files/moebooru/${oldFile}`, newFile)
+                fs.renameSync(`/Volumes/Files/moebooru/${oldFile}`, `/Volumes/Files/moebooru/${newFile}`)
             } catch {
-                fs.renameSync(`/Volumes/Files/moebooru/${encodeURI(oldFile)}`, newFile)
+                fs.renameSync(`/Volumes/Files/moebooru/${encodeURI(oldFile)}`, `/Volumes/Files/moebooru/${encodeURI(newFile)}`)
             }
             return 
         }

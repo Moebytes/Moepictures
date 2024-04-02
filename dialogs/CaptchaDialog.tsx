@@ -1,7 +1,8 @@
 import React, {useEffect, useContext, useState, useRef} from "react"
 import {useHistory} from "react-router-dom"
 import {HashLink as Link} from "react-router-hash-link"
-import {HideNavbarContext, HideSidebarContext, ThemeContext, EnableDragContext, HideTitlebarContext, SessionContext, MobileContext, SessionFlagContext} from "../Context"
+import {HideNavbarContext, HideSidebarContext, ThemeContext, EnableDragContext, HideTitlebarContext, 
+SessionContext, MobileContext, SessionFlagContext, SiteHueContext, SiteLightnessContext, SiteSaturationContext} from "../Context"
 import functions from "../structures/Functions"
 import "./styles/captchadialog.less"
 import Draggable from "react-draggable"
@@ -13,6 +14,9 @@ interface Props {
 
 const CaptchaDialog: React.FunctionComponent<Props> = (props) => {
     const {theme, setTheme} = useContext(ThemeContext)
+    const {siteHue, setSiteHue} = useContext(SiteHueContext)
+    const {siteSaturation, setSiteSaturation} = useContext(SiteSaturationContext)
+    const {siteLightness, setSiteLightness} = useContext(SiteLightnessContext)
     const {hideNavbar, setHideNavbar} = useContext(HideNavbarContext)
     const {hideTitlebar, setHideTitlebar} = useContext(HideTitlebarContext)
     const {hideSidebar, setHideSidebar} = useContext(HideSidebarContext)
@@ -31,12 +35,13 @@ const CaptchaDialog: React.FunctionComponent<Props> = (props) => {
     const [captcha, setCaptcha] = useState("")
     const captchaRef = useRef<any>(null)
 
+    const getFilter = () => {
+        return `hue-rotate(${siteHue - 180}deg) saturate(${siteSaturation}%) brightness(${siteLightness + 70}%)`
+    }
+
     const getCaptchaColor = () => {
-        if (theme === "purple") return "#09071c"
-        if (theme === "purple-light") return "#ffffff"
-        if (theme === "magenta") return "#17040e"
-        if (theme === "magenta-light") return "#ffffff"
-        return "#ffffff"
+        if (theme.includes("light")) return "#ffffff"
+        return "#09071c"
     }
 
     const updateCaptcha = async () => {
@@ -55,13 +60,13 @@ const CaptchaDialog: React.FunctionComponent<Props> = (props) => {
 
     useEffect(() => {
         if (!session.cookie) return
-        if (session.captchaAmount === undefined) session.captchaAmount = 51
+        if (session.captchaAmount === undefined) session.captchaAmount = 0
         if (!props.forceCaptcha) {
             let ignoreCaptcha = sessionStorage.getItem("ignoreCaptcha") as any
             ignoreCaptcha = ignoreCaptcha ? ignoreCaptcha === "true" : false
             if (ignoreCaptcha) return setNeedsVerification(false)
         }
-        if (session.captchaAmount > 50) {
+        if (session.captchaAmount > 1000) {
             if (!needsVerification) setNeedsVerification(true)
         } else {
             if (needsVerification) setNeedsVerification(false)
@@ -128,7 +133,7 @@ const CaptchaDialog: React.FunctionComponent<Props> = (props) => {
                                 <span className="captcha-dialog-title">Human Verification</span>
                             </div>
                             <div className="captcha-dialog-row" style={{pointerEvents: "all"}}>
-                                <img src={`data:image/svg+xml;utf8,${encodeURIComponent(captcha)}`}/>
+                                <img src={`data:image/svg+xml;utf8,${encodeURIComponent(captcha)}`} style={{filter: getFilter()}}/>
                                 <input className="captcha-dialog-input" type="text" spellCheck={false} value={captchaResponse} onChange={(event) => setCaptchaResponse(event.target.value)}/>
                             </div>
                             {error ? <div className="captcha-dialog-validation-container"><span className="captcha-dialog-validation" ref={errorRef}></span></div> : null}

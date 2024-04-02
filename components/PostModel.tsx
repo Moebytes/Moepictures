@@ -1,7 +1,8 @@
 import React, {useContext, useEffect, useRef, useState, useReducer} from "react"
 import {ThemeContext, EnableDragContext, BrightnessContext, ContrastContext, HueContext, SaturationContext, LightnessContext,
 BlurContext, SharpenContext, PixelateContext, DownloadFlagContext, DownloadURLsContext, DisableZoomContext, SpeedContext,
-ReverseContext, MobileContext, TranslationModeContext, TranslationDrawingEnabledContext, SessionContext} from "../Context"
+ReverseContext, MobileContext, TranslationModeContext, TranslationDrawingEnabledContext, SessionContext, SiteHueContext,
+SiteLightnessContext, SiteSaturationContext} from "../Context"
 import {HashLink as Link} from "react-router-hash-link"
 import functions from "../structures/Functions"
 import cryptoFunctions from "../structures/CryptoFunctions"
@@ -21,11 +22,8 @@ import modelTexturedIcon from "../assets/purple/model-textured.png"
 import modelShapeKeysIcon from "../assets/purple/model-shapekeys.png"
 import modelLightIcon from "../assets/purple/model-light.png"
 import ambientLightIcon from "../assets/purple/ambient.png"
-import ambientLightIconMagenta from "../assets/magenta/ambient.png"
 import directionalLightIcon from "../assets/purple/directional.png"
-import directionalLightIconMagenta from "../assets/magenta/directional.png"
 import translationToggleOn from "../assets/purple/translation-toggle-on.png"
-import translationToggleOnMagenta from "../assets/magenta/translation-toggle-on.png"
 import TranslationEditor from "./TranslationEditor"
 import path from "path"
 import "./styles/postmodel.less"
@@ -52,6 +50,9 @@ interface Props {
 const PostModel: React.FunctionComponent<Props> = (props) => {
     const [ignored, forceUpdate] = useReducer(x => x + 1, 0)
     const {theme, setTheme} = useContext(ThemeContext)
+    const {siteHue, setSiteHue} = useContext(SiteHueContext)
+    const {siteSaturation, setSiteSaturation} = useContext(SiteSaturationContext)
+    const {siteLightness, setSiteLightness} = useContext(SiteLightnessContext)
     const {session, setSessions} = useContext(SessionContext)
     const {enableDrag, setEnableDrag} = useContext(EnableDragContext)
     const {brightness, setBrightness} = useContext(BrightnessContext)
@@ -108,6 +109,10 @@ const PostModel: React.FunctionComponent<Props> = (props) => {
     const [scene, setScene] = useState(null) as any
     const [objMaterials, setObjMaterials] = useState([]) as any
     const [buttonHover, setButtonHover] = useState(false)
+
+    const getFilter = () => {
+        return `hue-rotate(${siteHue - 180}deg) saturate(${siteSaturation}%) brightness(${siteLightness + 70}%)`
+    }
 
     const loadModel = async () => {
         const element = rendererRef.current
@@ -423,11 +428,6 @@ const PostModel: React.FunctionComponent<Props> = (props) => {
         }
     }, [dragging, dragProgress])
 
-    const getTranslationToggleOnIcon = () => {
-        if (theme.includes("magenta")) return translationToggleOnMagenta
-        return translationToggleOn
-    }
-
     const getModelSpeedMarginRight = () => {
         const controlRect = modelControls.current?.getBoundingClientRect()
         const rect = modelSpeedRef.current?.getBoundingClientRect()
@@ -590,16 +590,6 @@ const PostModel: React.FunctionComponent<Props> = (props) => {
         return modelMatcapIcon
     }
 
-    const getAmbientIcon = () => {
-        if (theme.includes("magenta")) return ambientLightIconMagenta
-        return ambientLightIcon
-    }
-
-    const getDirectionalIcon = () => {
-        if (theme.includes("magenta")) return directionalLightIconMagenta
-        return directionalLightIcon
-    }
-
     const reset = () => {
         changeReverse(false)
         setSpeed(1)
@@ -733,7 +723,7 @@ const PostModel: React.FunctionComponent<Props> = (props) => {
             <div className="post-model-box" ref={containerRef} style={{display: translationMode ? "none" : "flex"}}>
                 <div className="post-model-filters" ref={fullscreenRef} onMouseOver={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                 <div className={`post-image-top-buttons ${buttonHover ? "show-post-image-top-buttons" : ""}`} onMouseEnter={() => setButtonHover(true)} onMouseLeave={() => setButtonHover(false)}>
-                        {!props.noTranslations && session.username ? <img draggable={false} className="post-image-top-button" src={getTranslationToggleOnIcon()} onClick={() => {setTranslationMode(true); setTranslationDrawingEnabled(true)}}/> : null}
+                        {!props.noTranslations && session.username ? <img draggable={false} className="post-image-top-button" src={translationToggleOn} style={{filter: getFilter()}} onClick={() => {setTranslationMode(true); setTranslationDrawingEnabled(true)}}/> : null}
                     </div>
                     <div className="relative-ref" style={{alignItems: "center", justifyContent: "center"}}>
                         <div className="model-controls" ref={modelControls} onMouseUp={() => setDragging(false)} onMouseOver={controlMouseEnter} onMouseLeave={controlMouseLeave}>
@@ -800,17 +790,17 @@ const PostModel: React.FunctionComponent<Props> = (props) => {
                             <div className={`model-light-dropdown ${showLightDropdown ? "" : "hide-light-dropdown"}`}
                             style={{marginRight: getModelLightMarginRight(), top: `-120px`}}>
                                 <div className="model-light-dropdown-row lights-row">
-                                    <img draggable={false} className="light-dropdown-img" src={getAmbientIcon()}/>
+                                    <img draggable={false} className="light-dropdown-img" src={ambientLightIcon} style={{filter: getFilter()}}/>
                                     <span className="light-dropdown-text">Ambient</span>
                                     <Slider className="lights-slider" trackClassName="lights-slider-track" thumbClassName="lights-slider-thumb" onChange={(value) => setAmbient(value)} min={0.05} max={1} step={0.05} value={ambient}/>
                                 </div>
                                 <div className="model-light-dropdown-row lights-row">
-                                    <img draggable={false} className="light-dropdown-img" src={getDirectionalIcon()}/>
+                                    <img draggable={false} className="light-dropdown-img" src={directionalLightIcon} style={{filter: getFilter()}}/>
                                     <span className="light-dropdown-text">Directional Front</span>
                                     <Slider className="lights-slider" trackClassName="lights-slider-track" thumbClassName="lights-slider-thumb" onChange={(value) => setDirectionalFront(value)} min={0.05} max={1} step={0.05} value={directionalFront}/>
                                 </div>
                                 <div className="model-light-dropdown-row lights-row">
-                                    <img draggable={false} className="light-dropdown-img" src={getDirectionalIcon()}/>
+                                    <img draggable={false} className="light-dropdown-img" src={directionalLightIcon} style={{filter: getFilter()}}/>
                                     <span className="light-dropdown-text">Directional Back</span>
                                     <Slider className="lights-slider" trackClassName="lights-slider-track" thumbClassName="lights-slider-thumb" onChange={(value) => setDirectionalBack(value)} min={0.05} max={1} step={0.05} value={directionalBack}/>
                                 </div>

@@ -38,7 +38,7 @@ import axios from "axios"
 import SearchSuggestions from "../components/SearchSuggestions"
 import ContentEditable from "react-contenteditable"
 import permissions from "../structures/Permissions"
-import xButton from "../assets/magenta/x-button.png"
+import xButton from "../assets/purple/x-button-magenta.png"
 import "./styles/uploadpage.less"
 import path from "path"
 
@@ -94,6 +94,7 @@ const UploadPage: React.FunctionComponent = (props) => {
     const [sourceLink, setSourceLink] = useState("")
     const [sourceCommentary, setSourceCommentary] = useState("")
     const [sourceTranslatedCommentary, setSourceTranslatedCommentary] = useState("")
+    const [sourceBookmarks, setSourceBookmarks] = useState("")
     const [sourceMirrors, setSourceMirrors] = useState("")
     const [artists, setArtists] = useState([{}]) as any
     const [characters, setCharacters] = useState([{}]) as any
@@ -298,6 +299,7 @@ const UploadPage: React.FunctionComponent = (props) => {
         setSourceMirrors("")
         setSourceDate("")
         setSourceLink("")
+        setSourceBookmarks("")
         setRawTags("")
         setArtists([{}])
         setCharacters([{}])
@@ -780,6 +782,7 @@ const UploadPage: React.FunctionComponent = (props) => {
                 link: sourceLink,
                 commentary: sourceCommentary,
                 translatedCommentary: sourceTranslatedCommentary,
+                bookmarks: sourceBookmarks,
                 mirrors: sourceMirrors
             },
             artists,
@@ -833,6 +836,7 @@ const UploadPage: React.FunctionComponent = (props) => {
             let commentary = ""
             let translatedCommentary = ""
             let date = ""
+            let bookmarks = ""
             let mirrors = [] as any
             if (results.length) {
                 const pixiv = results.filter((r: any) => r.header.index_id === 5)
@@ -872,10 +876,11 @@ const UploadPage: React.FunctionComponent = (props) => {
                     try {
                         const illust = await axios.get(`/api/misc/pixiv?url=${link}`, {withCredentials: true}).then((r: any) => r.data)
                         commentary = `${functions.decodeEntities(illust.caption.replace(/<\/?[^>]+(>|$)/g, ""))}` 
-                        date = functions.formatDate(new Date(illust.create_date))
+                        date = functions.formatDate(new Date(illust.create_date), true)
                         link = illust.url 
                         title = illust.title
                         artist = illust.user.name
+                        bookmarks = illust.total_bookmarks
                         const translated = await axios.post("/api/misc/translate", [title, commentary], {withCredentials: true}).then((r) => r.data)
                         translatedTitle = translated[0]
                         translatedCommentary = translated[1]
@@ -885,13 +890,13 @@ const UploadPage: React.FunctionComponent = (props) => {
                             setRestrict("safe")
                         }
                         const pfp = await functions.proxyImage(illust.user.profile_image_urls.medium)
-                        artists[artists.length - 1].tag = await axios.post("/api/misc/romajinize", [artist], {withCredentials: true}).then((r) => r.data[0])
+                        artists[artists.length - 1].tag = illust.user.twitter ? illust.user.twitter.replaceAll("_", "-") : await axios.post("/api/misc/romajinize", [artist], {withCredentials: true}).then((r) => r.data[0])
                         await uploadTagImg(pfp, "artist", artists.length - 1)
                         artists.push({})
                         artistInputRefs.push(React.createRef())
                         setArtists(artists)
                         forceUpdate()
-                        const translatedTags = await axios.post("/api/misc/translate", illust.tags.map((t: any) => t.name), {withCredentials: true}).then((r) => r.data)
+                        // const translatedTags = await axios.post("/api/misc/translate", illust.tags.map((t: any) => t.name), {withCredentials: true}).then((r) => r.data)
                         // setRawTags(translatedTags.map((t: string) => t.toLowerCase()).join(" "))
                     } catch (e) {
                         console.log(e)
@@ -912,7 +917,7 @@ const UploadPage: React.FunctionComponent = (props) => {
                         artist = deviation.author.user.username
                         link = deviation.url
                         commentary = deviation.description
-                        date = functions.formatDate(new Date(deviation.date))
+                        date = functions.formatDate(new Date(deviation.date), true)
                         if (deviation.rating === "adult") {
                             setRestrict("questionable")
                         } else {
@@ -959,6 +964,7 @@ const UploadPage: React.FunctionComponent = (props) => {
             setSourceLink(link)
             setSourceCommentary(commentary)
             setSourceTranslatedCommentary(translatedCommentary)
+            setSourceBookmarks(bookmarks)
             setSourceDate(date)
             mirrors = functions.removeItem(mirrors, link)
             setSourceMirrors(mirrors.join("\n"))
@@ -1521,6 +1527,10 @@ const UploadPage: React.FunctionComponent = (props) => {
                     <div className="upload-container-row">
                         <span className="upload-text">Link: </span>
                         <input className="upload-input-wide2" type="url" value={sourceLink} onChange={(event) => setSourceLink(event.target.value)} spellCheck={false} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}/>
+                    </div>
+                    <div className="upload-container-row">
+                        <span className="upload-text">Bookmarks: </span>
+                        <input className="upload-input-wide" type="number" value={sourceBookmarks} onChange={(event) => setSourceBookmarks(event.target.value)} spellCheck={false} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}/>
                     </div>
                     <div className="upload-container-row">
                         <span className="upload-text">Commentary: </span>

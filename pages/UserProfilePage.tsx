@@ -2,9 +2,6 @@ import React, {useEffect, useContext, useState, useReducer, useRef} from "react"
 import {useHistory} from "react-router-dom"
 import {HashLink as Link} from "react-router-hash-link"
 import uploadPfpIcon from "../assets/purple/uploadpfp.png"
-import uploadPfpMagenta from "../assets/magenta/uploadpfp.png"
-import uploadPfpPurpleLight from "../assets/purple-light/uploadpfp.png"
-import uploadPfpMagentaLight from "../assets/magenta-light/uploadpfp.png"
 import TitleBar from "../components/TitleBar"
 import NavBar from "../components/NavBar"
 import SideBar from "../components/SideBar"
@@ -12,7 +9,7 @@ import Footer from "../components/Footer"
 import DragAndDrop from "../components/DragAndDrop"
 import {HideNavbarContext, HideSidebarContext, ThemeContext, EnableDragContext, RelativeContext, HideTitlebarContext, MobileContext,
 HeaderTextContext, SidebarTextContext, SessionContext, RedirectContext, SessionFlagContext, UserImgContext, ShowDeleteAccountDialogContext,
-CommentSearchFlagContext} from "../Context"
+CommentSearchFlagContext, SiteHueContext, SiteLightnessContext, SiteSaturationContext} from "../Context"
 import fileType from "magic-bytes.js"
 import functions from "../structures/Functions"
 import Carousel from "../components/Carousel"
@@ -27,6 +24,9 @@ import axios from "axios"
 const UserProfilePage: React.FunctionComponent = (props) => {
     const [ignored, forceUpdate] = useReducer(x => x + 1, 0)
     const {theme, setTheme} = useContext(ThemeContext)
+    const {siteHue, setSiteHue} = useContext(SiteHueContext)
+    const {siteSaturation, setSiteSaturation} = useContext(SiteSaturationContext)
+    const {siteLightness, setSiteLightness} = useContext(SiteLightnessContext)
     const {hideNavbar, setHideNavbar} = useContext(HideNavbarContext)
     const {hideTitlebar, setHideTitlebar} = useContext(HideTitlebarContext)
     const {hideSidebar, setHideSidebar} = useContext(HideSidebarContext)
@@ -54,6 +54,10 @@ const UserProfilePage: React.FunctionComponent = (props) => {
     const [favoriteImages, setFavoriteImages] = useState([]) as any
     const [bio, setBio] = useState("")
     const history = useHistory()
+
+    const getFilter = () => {
+        return `hue-rotate(${siteHue - 180}deg) saturate(${siteSaturation}%) brightness(${siteLightness + 70}%)`
+    }
 
     const updateUploads = async () => {
         const uploads = await axios.get("/api/user/uploads", {withCredentials: true}).then((r) => r.data)
@@ -107,14 +111,6 @@ const UserProfilePage: React.FunctionComponent = (props) => {
             setBio(session.bio)
         }
     }, [session])
-
-    const getUploadPfp = () => {
-        if (theme === "purple") return uploadPfpIcon
-        if (theme === "purple-light") return uploadPfpPurpleLight
-        if (theme === "magenta") return uploadPfpMagenta
-        if (theme === "magenta-light") return uploadPfpMagentaLight
-        return uploadPfpIcon
-    }
 
     const uploadPfp = async (event: any) => {
         const file = event.target.files?.[0]
@@ -261,7 +257,7 @@ const UserProfilePage: React.FunctionComponent = (props) => {
                         {generateUsernameJSX()}
                         {permissions.isStaff(session) && <>
                         <label htmlFor="upload-pfp" className="uploadpfp-label">
-                            <img className="userprofile-uploadimg" src={getUploadPfp()}/>
+                            <img className="userprofile-uploadimg" src={uploadPfpIcon} style={{filter: getFilter()}}/>
                         </label>
                         <input id="upload-pfp" type="file" onChange={(event) => uploadPfp(event)}/>
                         </>}

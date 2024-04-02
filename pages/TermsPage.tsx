@@ -5,19 +5,17 @@ import SideBar from "../components/SideBar"
 import Footer from "../components/Footer"
 import tos from "../assets/purple/tos.png"
 import privacy from "../assets/purple/privacy.png"
-import tosMagenta from "../assets/magenta/tos.png"
-import privacyMagenta from "../assets/magenta/privacy.png"
-import tosPurpleLight from "../assets/purple-light/tos.png"
-import privacyPurpleLight from "../assets/purple-light/privacy.png"
-import tosMagentaLight from "../assets/magenta-light/tos.png"
-import privacyMagentaLight from "../assets/magenta-light/privacy.png"
 import DragAndDrop from "../components/DragAndDrop"
 import functions from "../structures/Functions"
-import {HideNavbarContext, HideSidebarContext, ThemeContext, RelativeContext, HideTitlebarContext, HeaderTextContext, SidebarTextContext, MobileContext, EnableDragContext} from "../Context"
+import {HideNavbarContext, HideSidebarContext, ThemeContext, RelativeContext, HideTitlebarContext, HeaderTextContext, 
+SidebarTextContext, MobileContext, EnableDragContext, SiteHueContext, SiteLightnessContext, SiteSaturationContext} from "../Context"
 import "./styles/tospage.less"
 
 const TermsPage: React.FunctionComponent = (props) => {
     const {theme, setTheme} = useContext(ThemeContext)
+    const {siteHue, setSiteHue} = useContext(SiteHueContext)
+    const {siteSaturation, setSiteSaturation} = useContext(SiteSaturationContext)
+    const {siteLightness, setSiteLightness} = useContext(SiteLightnessContext)
     const {hideNavbar, setHideNavbar} = useContext(HideNavbarContext)
     const {hideTitlebar, setHideTitlebar} = useContext(HideTitlebarContext)
     const {hideSidebar, setHideSidebar} = useContext(HideSidebarContext)
@@ -27,6 +25,10 @@ const TermsPage: React.FunctionComponent = (props) => {
     const {sidebarText, setSidebarText} = useContext(SidebarTextContext)
     const {mobile, setMobile} = useContext(MobileContext)
     const [onPrivacy, setOnPrivacy] = useState(false)
+
+    const getFilter = () => {
+        return `hue-rotate(${siteHue - 180}deg) saturate(${siteSaturation}%) brightness(${siteLightness + 70}%)`
+    }
 
     useEffect(() => {
         setHideNavbar(true)
@@ -53,22 +55,6 @@ const TermsPage: React.FunctionComponent = (props) => {
             document.title = "Moebooru: Terms of Service"
         }
     })
-
-    const getTOS = () => {
-        if (theme === "purple") return tos
-        if (theme === "purple-light") return tosPurpleLight
-        if (theme === "magenta") return tosMagenta
-        if (theme === "magenta-light") return tosMagentaLight
-        return tos
-    }
-
-    const getPrivacy = () => {
-        if (theme === "purple") return privacy
-        if (theme === "purple-light") return privacyPurpleLight
-        if (theme === "magenta") return privacyMagenta
-        if (theme === "magenta-light") return privacyMagentaLight
-        return privacy
-    }
     
     return (
         <>
@@ -81,7 +67,7 @@ const TermsPage: React.FunctionComponent = (props) => {
                 <div className="terms-container">
                     <div className="terms">
                         <div className="terms-title-container">
-                            <img className="terms-img" src={getTOS()}/>
+                            <img className="terms-img" src={tos} style={{filter: getFilter()}}/>
                             <span className="terms-title">Terms of Service</span>
                         </div>
                         <div className="terms-text">
@@ -146,7 +132,7 @@ const TermsPage: React.FunctionComponent = (props) => {
                     </div>
                     <div className="privacy" id="privacy" onMouseOver={() => setOnPrivacy(true)} onMouseLeave={() => setOnPrivacy(false)}>
                         <div className="privacy-title-container">
-                            <img className="privacy-img" src={getPrivacy()}/>
+                            <img className="privacy-img" src={privacy} style={{filter: getFilter()}}/>
                             <span className="privacy-title">Privacy Policy</span>
                         </div>
                         <div className="privacy-text">

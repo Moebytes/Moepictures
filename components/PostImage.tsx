@@ -1,13 +1,13 @@
 import React, {useContext, useEffect, useRef, useState, useReducer} from "react"
 import {ThemeContext, EnableDragContext, BrightnessContext, ContrastContext, HueContext, SaturationContext, LightnessContext,
 BlurContext, SharpenContext, PixelateContext, DownloadFlagContext, DownloadURLsContext, DisableZoomContext, SpeedContext,
-ReverseContext, MobileContext, TranslationModeContext, TranslationDrawingEnabledContext, SessionContext} from "../Context"
+ReverseContext, MobileContext, TranslationModeContext, TranslationDrawingEnabledContext, SessionContext, SiteHueContext,
+SiteLightnessContext, SiteSaturationContext} from "../Context"
 import {HashLink as Link} from "react-router-hash-link"
 import {createFFmpeg, fetchFile} from "@ffmpeg/ffmpeg"
 import functions from "../structures/Functions"
 import cryptoFunctions from "../structures/CryptoFunctions"
 import loading from "../assets/purple/loading.gif"
-import loadingMagenta from "../assets/magenta/loading.gif"
 import Slider from "react-slider"
 import gifReverseIcon from "../assets/purple/gif-reverse.png"
 import gifSpeedIcon from "../assets/purple/gif-speed.png"
@@ -36,7 +36,6 @@ import imageZoomOffIcon from "../assets/purple/image-zoom-off.png"
 import imageZoomOffEnabledIcon from "../assets/purple/image-zoom-off-enabled.png"
 import imageFullscreenIcon from "../assets/purple/image-fullscreen.png"
 import translationToggleOn from "../assets/purple/translation-toggle-on.png"
-import translationToggleOnMagenta from "../assets/magenta/translation-toggle-on.png"
 import TranslationEditor from "./TranslationEditor"
 import gifFrames from "gif-frames"
 import JSZip from "jszip"
@@ -63,6 +62,9 @@ interface Props {
 const PostImage: React.FunctionComponent<Props> = (props) => {
     const [ignored, forceUpdate] = useReducer(x => x + 1, 0)
     const {theme, setTheme} = useContext(ThemeContext)
+    const {siteHue, setSiteHue} = useContext(SiteHueContext)
+    const {siteSaturation, setSiteSaturation} = useContext(SiteSaturationContext)
+    const {siteLightness, setSiteLightness} = useContext(SiteLightnessContext)
     const {session, setSessions} = useContext(SessionContext)
     const {enableDrag, setEnableDrag} = useContext(EnableDragContext)
     const {brightness, setBrightness} = useContext(BrightnessContext)
@@ -134,6 +136,10 @@ const PostImage: React.FunctionComponent<Props> = (props) => {
     const [seekTo, setSeekTo] = useState(null) as any
     const [buttonHover, setButtonHover] = useState(false)
     const [img, setImg] = useState("")
+
+    const getFilter = () => {
+        return `hue-rotate(${siteHue - 180}deg) saturate(${siteSaturation}%) brightness(${siteLightness + 70}%)`
+    }
 
     useEffect(() => {
         setVideoLoaded(false)
@@ -603,12 +609,6 @@ const PostImage: React.FunctionComponent<Props> = (props) => {
             }
         }
     }, [reverse])
-
-    const getLoading = () => {
-        if (theme.includes("magenta")) return loadingMagenta
-        return loading
-    }
-
     const getPreversePitchIcon = () => {
         if (preservePitch) return videoPreservePitchIcon
         return videoPreservePitchOnIcon
@@ -617,11 +617,6 @@ const PostImage: React.FunctionComponent<Props> = (props) => {
     const getZoomOffIcon = () => {
         if (disableZoom) return imageZoomOffEnabledIcon
         return imageZoomOffIcon
-    }
-
-    const getTranslationToggleOnIcon = () => {
-        if (theme.includes("magenta")) return translationToggleOnMagenta
-        return translationToggleOn
     }
 
     const getGIFSpeedMarginRight = () => {
@@ -1210,7 +1205,7 @@ const PostImage: React.FunctionComponent<Props> = (props) => {
             <div className="post-image-box" ref={containerRef} style={{display: translationMode ? "none" : "flex"}}>
                 <div className="post-image-filters" ref={fullscreenRef}>
                     <div className={`post-image-top-buttons ${buttonHover ? "show-post-image-top-buttons" : ""}`} onMouseEnter={() => setButtonHover(true)} onMouseLeave={() => setButtonHover(false)}>
-                        {!props.noTranslations && session.username ? <img draggable={false} className="post-image-top-button" src={getTranslationToggleOnIcon()} onClick={() => {setTranslationMode(true); setTranslationDrawingEnabled(true)}}/> : null}
+                        {!props.noTranslations && session.username ? <img draggable={false} className="post-image-top-button" src={translationToggleOn} style={{filter: getFilter()}} onClick={() => {setTranslationMode(true); setTranslationDrawingEnabled(true)}}/> : null}
                     </div>
                     {functions.isVideo(props.img) ? 
                     <video draggable={false} loop muted disablePictureInPicture playsInline className="dummy-post-video" src={props.img}></video> :

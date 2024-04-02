@@ -30,6 +30,7 @@ CREATE TABLE IF NOT EXISTS "posts" (
     "link" text,
     "commentary" text,
     "translatedCommentary" text,
+    "bookmarks" int,
     "mirrors" jsonb
 );
 
@@ -54,6 +55,7 @@ CREATE TABLE IF NOT EXISTS "unverified posts" (
     "link" text,
     "commentary" text,
     "translatedCommentary" text,
+    "bookmarks" int,
     "mirrors" jsonb,
     "thumbnail" text
 );
@@ -307,6 +309,7 @@ CREATE TABLE IF NOT EXISTS "post history" (
     "link" text,
     "commentary" text,
     "translatedCommentary" text,
+    "bookmarks" int,
     "mirrors" jsonb,
     "artists" text[],
     "characters" text[],

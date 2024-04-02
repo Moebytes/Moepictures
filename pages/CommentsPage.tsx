@@ -6,22 +6,15 @@ import Footer from "../components/Footer"
 import functions from "../structures/Functions"
 import DragAndDrop from "../components/DragAndDrop"
 import search from "../assets/purple/search.png"
-import searchMagenta from "../assets/magenta/search.png"
-import searchPurpleLight from "../assets/purple-light/search.png"
-import searchMagentaLight from "../assets/magenta-light/search.png"
 import searchIconHover from "../assets/purple/search-hover.png"
-import searchMagentaHover from "../assets/magenta/search-hover.png"
-import searchMagentaLightHover from "../assets/magenta-light/search-hover.png"
-import searchPurpleLightHover from "../assets/purple-light/search-hover.png"
 import sort from "../assets/purple/sort.png"
 import CommentRow from "../components/CommentRow"
-import sortMagenta from "../assets/magenta/sort.png"
 import DeleteCommentDialog from "../dialogs/DeleteCommentDialog"
 import EditCommentDialog from "../dialogs/EditCommentDialog"
 import ReportCommentDialog from "../dialogs/ReportCommentDialog"
 import {ThemeContext, EnableDragContext, HideNavbarContext, HideSidebarContext, MobileContext, SessionContext,
 RelativeContext, HideTitlebarContext, ActiveDropdownContext, HeaderTextContext, SidebarTextContext,
-CommentSearchFlagContext} from "../Context"
+CommentSearchFlagContext, SiteHueContext, SiteLightnessContext, SiteSaturationContext} from "../Context"
 import permissions from "../structures/Permissions"
 import "./styles/commentspage.less"
 import axios from "axios"
@@ -29,6 +22,9 @@ import axios from "axios"
 const CommentsPage: React.FunctionComponent = (props) => {
     const [ignored, forceUpdate] = useReducer(x => x + 1, 0)
     const {theme, setTheme} = useContext(ThemeContext)
+    const {siteHue, setSiteHue} = useContext(SiteHueContext)
+    const {siteSaturation, setSiteSaturation} = useContext(SiteSaturationContext)
+    const {siteLightness, setSiteLightness} = useContext(SiteLightnessContext)
     const {enableDrag, setEnableDrag} = useContext(EnableDragContext)
     const {hideNavbar, setHideNavbar} = useContext(HideNavbarContext)
     const {hideTitlebar, setHideTitlebar} = useContext(HideTitlebarContext)
@@ -49,6 +45,15 @@ const CommentsPage: React.FunctionComponent = (props) => {
     const [ended, setEnded] = useState(false)
     const [getSearchIconHover, setSearchIconHover] = useState(false)
     const sortRef = useRef(null) as any
+
+    const getFilter = () => {
+        return `hue-rotate(${siteHue - 180}deg) saturate(${siteSaturation}%) brightness(${siteLightness + 70}%)`
+    }
+
+    const getFilterSearch = () => {
+        if (theme.includes("light")) return `hue-rotate(${siteHue - 180}deg) saturate(${siteSaturation - 60}%) brightness(${siteLightness + 220}%)`
+        return `hue-rotate(${siteHue - 180}deg) saturate(${siteSaturation}%) brightness(${siteLightness + 70}%)`
+    }
 
     const updateComments = async (query?: string) => {
         const result = await axios.get("/api/search/comments", {params: {sort: sortType, query: query ? query : searchQuery}, withCredentials: true}).then((r) => r.data)
@@ -140,16 +145,7 @@ const CommentsPage: React.FunctionComponent = (props) => {
     })
 
     const getSearchIcon = () => {
-        if (theme === "purple") return getSearchIconHover ? searchIconHover : search
-        if (theme === "purple-light") return getSearchIconHover ? searchPurpleLightHover : searchPurpleLight
-        if (theme === "magenta") return getSearchIconHover ? searchMagentaHover : searchMagenta
-        if (theme === "magenta-light") return getSearchIconHover ? searchMagentaLightHover : searchMagentaLight
         return getSearchIconHover ? searchIconHover : search
-    }
-
-    const getSort = () => {
-        if (theme.includes("magenta")) return sortMagenta
-        return sort
     }
 
     const getSortMargin = () => {
@@ -165,7 +161,7 @@ const CommentsPage: React.FunctionComponent = (props) => {
     const getSortJSX = () => {
         return (
             <div className="commentsort-item" ref={sortRef} onClick={() => {setActiveDropdown(activeDropdown === "sort" ? "none" : "sort")}}>
-                <img className="commentsort-img" src={getSort()}/>
+                <img className="commentsort-img" src={sort} style={{filter: getFilter()}}/>
                 <span className="commentsort-text">{functions.toProperCase(sortType)}</span>
             </div>
         )
@@ -197,7 +193,7 @@ const CommentsPage: React.FunctionComponent = (props) => {
                     <div className="comments-row">
                         <div className="comment-search-container" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                             <input className="comment-search" type="search" spellCheck="false" value={searchQuery} onChange={(event) => setSearchQuery(event.target.value)} onKeyDown={(event) => event.key === "Enter" ? updateComments() : null}/>
-                            <img className="comment-search-icon" src={getSearchIcon()} onClick={() => updateComments()} onMouseEnter={() => setSearchIconHover(true)} onMouseLeave={() => setSearchIconHover(false)}/>
+                            <img className="comment-search-icon" src={getSearchIcon()} style={{filter: getFilterSearch()}} onClick={() => updateComments()} onMouseEnter={() => setSearchIconHover(true)} onMouseLeave={() => setSearchIconHover(false)}/>
                         </div>
                         {getSortJSX()}
                         <div className={`comment-dropdown ${activeDropdown === "sort" ? "" : "hide-comment-dropdown"}`} 

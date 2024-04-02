@@ -10,7 +10,7 @@ import "./styles/edittagdialog.less"
 import fileType from "magic-bytes.js"
 import Draggable from "react-draggable"
 import permissions from "../structures/Permissions"
-import xButton from "../assets/magenta/x-button.png"
+import xButton from "../assets/purple/x-button-magenta.png"
 import axios from "axios"
 
 const EditTagDialog: React.FunctionComponent = (props) => {

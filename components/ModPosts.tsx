@@ -1,11 +1,9 @@
 import React, {useContext, useEffect, useRef, useState, useReducer} from "react"
 import {useHistory} from "react-router-dom"
-import {ThemeContext, SearchContext, SearchFlagContext, UnverifiedPostsContext} from "../Context"
+import {ThemeContext, SearchContext, SearchFlagContext, SiteHueContext, SiteLightnessContext, SiteSaturationContext} from "../Context"
 import {HashLink as Link} from "react-router-hash-link"
 import approve from "../assets/purple/approve.png"
-import approveMagenta from "../assets/magenta/approve.png"
 import reject from "../assets/purple/reject.png"
-import rejectMagenta from "../assets/magenta/reject.png"
 import functions from "../structures/Functions"
 import "./styles/modposts.less"
 import axios from "axios"
@@ -13,6 +11,9 @@ import axios from "axios"
 const ModPosts: React.FunctionComponent = (props) => {
     const [ignored, forceUpdate] = useReducer(x => x + 1, 0)
     const {theme, setTheme} = useContext(ThemeContext)
+    const {siteHue, setSiteHue} = useContext(SiteHueContext)
+    const {siteSaturation, setSiteSaturation} = useContext(SiteSaturationContext)
+    const {siteLightness, setSiteLightness} = useContext(SiteLightnessContext)
     const [hover, setHover] = useState(false)
     const {search, setSearch} = useContext(SearchContext)
     const {searchFlag, setSearchFlag} = useContext(SearchFlagContext)
@@ -24,6 +25,10 @@ const ModPosts: React.FunctionComponent = (props) => {
     const [imagesRef, setImagesRef] = useState([]) as any
     const history = useHistory()
 
+    const getFilter = () => {
+        return `hue-rotate(${siteHue - 180}deg) saturate(${siteSaturation}%) brightness(${siteLightness + 70}%)`
+    }
+
     const updatePosts = async () => {
         const posts = await axios.get("/api/post/list/unverified", {withCredentials: true}).then((r) => r.data)
         setEnded(false)
@@ -33,16 +38,6 @@ const ModPosts: React.FunctionComponent = (props) => {
     useEffect(() => {
         updatePosts()
     }, [])
-
-    const getApprove = () => {
-        if (theme.includes("magenta")) return approveMagenta
-        return approve
-    }
-
-    const getReject = () => {
-        if (theme.includes("magenta")) return rejectMagenta
-        return reject
-    }
 
     const approvePost = async (postID: number) => {
         await axios.post("/api/post/approve", {postID}, {headers: {"x-csrf-token": functions.getCSRFToken()}, withCredentials: true})
@@ -172,11 +167,11 @@ const ModPosts: React.FunctionComponent = (props) => {
                     </div>
                     <div className="mod-post-options">
                         <div className="mod-post-options-container" onClick={() => rejectPost(post.postID)}>
-                            <img className="mod-post-options-img" src={getReject()}/>
+                            <img className="mod-post-options-img" src={reject} style={{filter: getFilter()}}/>
                             <span className="mod-post-options-text">Reject</span>
                         </div>
                         <div className="mod-post-options-container" onClick={() => approvePost(post.postID)}>
-                            <img className="mod-post-options-img" src={getApprove()}/>
+                            <img className="mod-post-options-img" src={approve} style={{filter: getFilter()}}/>
                             <span className="mod-post-options-text">Approve</span>
                         </div>
                     </div>

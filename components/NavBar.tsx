@@ -2,33 +2,20 @@ import React, {useContext, useState, useEffect, useReducer} from "react"
 import {HashLink as Link} from "react-router-hash-link"
 import {useHistory} from "react-router-dom"
 import favicon from "../assets/purple/favicon.png"
-import faviconMagenta from "../assets/magenta/favicon.png"
 import eyedropper from "../assets/purple/eyedropper.png"
 import light from "../assets/purple/light.png"
 import logoutIcon from "../assets/purple/logout.png"
 import logoutModIcon from "../assets/purple/logout-mod.png"
 import logoutAdminIcon from "../assets/purple/logout-admin.png"
-import dark from "../assets/purple/dark.png"
-import eyedropperPurpleLight from "../assets/purple-light/eyedropper.png"
-import lightPurpleLight from "../assets/purple-light/light.png"
-import darkPurpleLight from "../assets/purple-light/dark.png"
-import eyedropperMagenta from "../assets/magenta/eyedropper.png"
-import lightMagenta from "../assets/magenta/light.png"
-import darkMagenta from "../assets/magenta/dark.png"
-import eyedropperMagentaLight from "../assets/magenta-light/eyedropper.png"
-import lightMagentaLight from "../assets/magenta-light/light.png"
-import darkMagentaLight from "../assets/magenta-light/dark.png"
 import search2 from "../assets/purple/search2.png"
 import crown from "../assets/purple/crown.png"
-import crownMagenta from "../assets/magenta/crown.png"
-import crownPurpleLight from "../assets/purple-light/crown.png"
-import crownMagentaLight from "../assets/magenta-light/crown.png"
 import axios from "axios"
 import permissions from "../structures/Permissions"
 import functions from "../structures/Functions"
 import SearchSuggestions from "./SearchSuggestions"
 import {ThemeContext, HideNavbarContext, HideSortbarContext, HideSidebarContext, EnableDragContext,  HideMobileNavbarContext, MobileContext,
-RelativeContext, HideTitlebarContext, SearchContext, SearchFlagContext, SessionContext, SessionFlagContext, UserImgContext} from "../Context"
+RelativeContext, HideTitlebarContext, SearchContext, SearchFlagContext, SessionContext, SessionFlagContext, UserImgContext, SiteHueContext,
+SiteSaturationContext, SiteLightnessContext} from "../Context"
 import "./styles/navbar.less"
 
 interface Props {
@@ -37,6 +24,9 @@ interface Props {
 
 const NavBar: React.FunctionComponent<Props> = (props) => {
     const [ignored, forceUpdate] = useReducer(x => x + 1, 0)
+    const {siteHue, setSiteHue} = useContext(SiteHueContext)
+    const {siteSaturation, setSiteSaturation} = useContext(SiteSaturationContext)
+    const {siteLightness, setSiteLightness} = useContext(SiteLightnessContext)
     const {theme, setTheme} = useContext(ThemeContext)
     const {hideNavbar, setHideNavbar} = useContext(HideNavbarContext)
     const {hideTitlebar, setHideTitlebar} = useContext(HideTitlebarContext)
@@ -55,6 +45,10 @@ const NavBar: React.FunctionComponent<Props> = (props) => {
     const [suggestionsActive, setSuggestionsActive] = useState(false)
     const [marginR, setMarginR] = useState("70px")
     const history = useHistory()
+
+    const getFilter = () => {
+        return `hue-rotate(${siteHue - 180}deg) saturate(${siteSaturation}%) brightness(${siteLightness + 70}%)`
+    }
 
     useEffect(() => {
         setShowMiniTitle(false)
@@ -146,35 +140,6 @@ const NavBar: React.FunctionComponent<Props> = (props) => {
             setTheme("magenta")
         }
         localStorage.setItem("theme", newTheme)
-    }
-
-    const getEyeDropper = () => {
-        if (theme === "purple") return eyedropper
-        if (theme === "purple-light") return eyedropperPurpleLight
-        if (theme === "magenta") return eyedropperMagenta
-        if (theme === "magenta-light") return eyedropperMagentaLight
-        return eyedropper
-    }
-
-    const getLight = () => {
-        if (theme === "purple") return light
-        if (theme === "purple-light") return darkPurpleLight
-        if (theme === "magenta") return lightMagenta
-        if (theme === "magenta-light") return darkMagentaLight
-        return light
-    }
-
-    const getCrown = () => {
-        if (theme === "purple") return crown
-        if (theme === "purple-light") return crownPurpleLight
-        if (theme === "magenta") return crownMagenta
-        if (theme === "magenta-light") return crownMagentaLight
-        return crown
-    }
-
-    const getFavicon = () => {
-        if (theme.includes("magenta")) return faviconMagenta 
-        return favicon
     }
 
     const logout = async () => {
@@ -280,9 +245,9 @@ const NavBar: React.FunctionComponent<Props> = (props) => {
                     <span className="mobile-nav-text" onClick={() => {history.push("/contact"); setHideMobileNavbar(true)}}>Contact</span>
                 </div>
                 <div className="mobile-nav-color-container">
-                    <img className="mobile-nav-color" src={getEyeDropper()} onClick={colorChange}/>
-                    <img className="mobile-nav-color" src={getLight()} onClick={lightChange}/>
-                    {permissions.isStaff(session) ? <img className="nav-color" src={getCrown()} onClick={() => history.push("/mod-queue")}/> : null}
+                    <img className="mobile-nav-color" src={eyedropper} onClick={colorChange} style={{filter: getFilter()}}/>
+                    <img className="mobile-nav-color" src={light} onClick={lightChange} style={{filter: getFilter()}}/>
+                    {permissions.isStaff(session) ? <img className="nav-color" src={crown} onClick={() => history.push("/mod-queue")} style={{filter: getFilter()}}/> : null}
                 </div>
             </div>
         )
@@ -317,7 +282,7 @@ const NavBar: React.FunctionComponent<Props> = (props) => {
                         <span className="nav-mini-title-b">o</span>
                         <span className="nav-mini-title-a">r</span>
                         <span className="nav-mini-title-b">u</span>
-                        <img className="nav-mini-img" src={getFavicon()}/>
+                        <img className="nav-mini-img" src={favicon} style={{filter: getFilter()}}/>
                     </Link>
                 : null}
                 <div className="nav-text-container">
@@ -341,9 +306,9 @@ const NavBar: React.FunctionComponent<Props> = (props) => {
                         <img className="nav-search-icon" src={search2} onClick={() => setSearchFlag(true)}/>
                         <input className="nav-search" type="search" spellCheck={false} value={search} onChange={(event) => setSearch(event.target.value)} onKeyDown={(event) => event.key === "Enter" ? setSearchFlag(true) : null} onFocus={() => setSuggestionsActive(true)} onBlur={() => setSuggestionsActive(false)}/>
                     </div>
-                    <img className="nav-color" src={getEyeDropper()} onClick={colorChange}/>
-                    <img className="nav-color" src={getLight()} onClick={lightChange}/>
-                    {permissions.isStaff(session) ? <img className="nav-color" src={getCrown()} onClick={() => history.push("/mod-queue")}/> : null}
+                    <img className="nav-color" src={eyedropper} onClick={colorChange} style={{filter: getFilter()}}/>
+                    <img className="nav-color" src={light} onClick={lightChange} style={{filter: getFilter()}}/>
+                    {permissions.isStaff(session) ? <img className="nav-color" src={crown} onClick={() => history.push("/mod-queue")} style={{filter: getFilter()}}/> : null}
                 </div>
             </div>
             </>

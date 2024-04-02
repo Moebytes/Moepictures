@@ -23,9 +23,10 @@ const postLimiter = rateLimit({
 const PostRoutes = (app: Express) => {
     app.get("/api/post", postLimiter, async (req: Request, res: Response, next: NextFunction) => {
         try {
-            if (req.session.captchaAmount === undefined) req.session.captchaAmount = 501
+            let stripTags = false
+            if (req.session.captchaAmount === undefined) req.session.captchaAmount = 0
             if (req.session.role === "admin" || req.session.role === "mod") req.session.captchaAmount = 0
-            if (req.session.captchaAmount > 500) return res.status(401).end()
+            if (req.session.captchaAmount > 1000) stripTags = true
             const postID = req.query.postID as string
             if (Number.isNaN(Number(postID))) return res.status(400).send("Invalid postID")
             let result = await sql.post(Number(postID))
@@ -39,6 +40,7 @@ const PostRoutes = (app: Express) => {
                 req.session.captchaAmount = req.session.captchaAmount + 1
             }
             req.session.lastPostID = Number(postID)
+            if (stripTags) delete result.tags
             res.status(200).json(result)
         } catch (e) {
             console.log(e)
@@ -48,9 +50,10 @@ const PostRoutes = (app: Express) => {
 
     app.get("/api/post/tags", postLimiter, async (req: Request, res: Response, next: NextFunction) => {
         try {
-            if (req.session.captchaAmount === undefined) req.session.captchaAmount = 501
+            let stripTags = false
+            if (req.session.captchaAmount === undefined) req.session.captchaAmount = 0
             if (req.session.role === "admin" || req.session.role === "mod") req.session.captchaAmount = 0
-            if (req.session.captchaAmount > 500) return res.status(401).end()
+            if (req.session.captchaAmount > 1000) stripTags = true
             const postID = req.query.postID as string
             if (Number.isNaN(Number(postID))) return res.status(400).send("Invalid postID")
             let result = await sql.postTags(Number(postID))
@@ -61,6 +64,7 @@ const PostRoutes = (app: Express) => {
                 req.session.captchaAmount = req.session.captchaAmount + 1
             }
             req.session.lastPostID = Number(postID)
+            if (stripTags) delete result.tags
             res.status(200).json(result)
         } catch (e) {
             console.log(e)
@@ -375,7 +379,7 @@ const PostRoutes = (app: Express) => {
                 }
                 await sql.insertPostHistory(vanilla.user, postID, vanillaImages, vanilla.uploader, vanilla.updater, vanilla.uploadDate, vanilla.updatedDate,
                     vanilla.type, vanilla.restrict, vanilla.style, vanilla.thirdParty, vanilla.title, vanilla.translatedTitle, vanilla.drawn, vanilla.artist,
-                    vanilla.link, vanilla.commentary, vanilla.translatedCommentary, vanilla.mirrors, vanilla.artists, vanilla.characters, vanilla.series, vanilla.tags)
+                    vanilla.link, vanilla.commentary, vanilla.translatedCommentary, vanilla.bookmarks, vanilla.mirrors, vanilla.artists, vanilla.characters, vanilla.series, vanilla.tags)
 
                 let images = [] as any
                 for (let i = 0; i < post.images.length; i++) {
@@ -387,7 +391,7 @@ const PostRoutes = (app: Express) => {
                 }
                 await sql.insertPostHistory(req.session.username, postID, images, post.uploader, post.updater, post.uploadDate, post.updatedDate,
                 post.type, post.restrict, post.style, post.thirdParty, post.title, post.translatedTitle, post.drawn, post.artist,
-                post.link, post.commentary, post.translatedCommentary, post.mirrors, artists, characters, series, tags, reason)
+                post.link, post.commentary, post.translatedCommentary, post.bookmarks, post.mirrors, artists, characters, series, tags, reason)
             } else {
                 let images = [] as any
                 const nextKey = await serverFunctions.getNextKey("post", String(postID))
@@ -400,7 +404,7 @@ const PostRoutes = (app: Express) => {
                 }
                 await sql.insertPostHistory(req.session.username, postID, images, post.uploader, post.updater, post.uploadDate, post.updatedDate,
                 post.type, post.restrict, post.style, post.thirdParty, post.title, post.translatedTitle, post.drawn, post.artist,
-                post.link, post.commentary, post.translatedCommentary, post.mirrors, artists, characters, series, tags, reason)
+                post.link, post.commentary, post.translatedCommentary, post.bookmarks, post.mirrors, artists, characters, series, tags, reason)
             }
             res.status(200).send("Success")
           } catch (e) {
@@ -518,6 +522,7 @@ const PostRoutes = (app: Express) => {
                 link: post.link ? post.link : null,
                 commentary: post.commentary ? post.commentary : null,
                 translatedCommentary: post.translatedCommentary ? post.translatedCommentary : null,
+                bookmarks: post.bookmarks ? post.bookmarks : null,
                 mirrors: post.mirrors ? functions.mirrorsJSON(post.mirrors) : null,
                 uploader: post.uploader,
                 uploadDate: post.uploadDate,
@@ -616,14 +621,16 @@ const PostRoutes = (app: Express) => {
 
     app.get("/api/post/history", postLimiter, async (req: Request, res: Response) => {
         try {
+            let stripTags = false
             const postID = req.query.postID as string
             const offset = req.query.offset as string
-            if (req.session.captchaAmount === undefined) req.session.captchaAmount = 501
+            if (req.session.captchaAmount === undefined) req.session.captchaAmount = 0
             if (req.session.role === "admin" || req.session.role === "mod") req.session.captchaAmount = 0
-            if (req.session.captchaAmount > 500) return res.status(401).end()
+            if (req.session.captchaAmount > 1000) stripTags = true
             if (!req.session.username) return res.status(400).send("Bad request")
             if (Number.isNaN(Number(postID))) return res.status(400).send("Bad request")
             const result = await sql.postHistory(Number(postID), offset)
+            if (stripTags) delete result.tags
             res.status(200).json(result)
         } catch (e) {
             console.log(e)

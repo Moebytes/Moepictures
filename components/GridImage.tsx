@@ -1,7 +1,6 @@
 import React, {useContext, useEffect, useRef, useState, forwardRef, useImperativeHandle} from "react"
 import {useHistory} from "react-router-dom"
 import loading from "../assets/purple/loading.gif"
-import loadingMagenta from "../assets/magenta/loading.gif"
 import {ThemeContext, SizeTypeContext, BrightnessContext, ContrastContext, HueContext, SaturationContext, LightnessContext, MobileContext, ScrollYContext,
 BlurContext, SharpenContext, SquareContext, PixelateContext, DownloadFlagContext, DownloadURLsContext, SpeedContext, ReverseContext, ScrollContext,
 ToolTipXContext, ToolTipYContext, ToolTipEnabledContext, ToolTipPostContext, ToolTipImgContext} from "../Context"
@@ -613,11 +612,6 @@ const GridImage = forwardRef<Ref, Props>((props, componentRef) => {
         lightnessRef.current.style.transform = "scale(1)"
         pixelateRef.current.style.transformOrigin = "none"
         pixelateRef.current.style.transform = "scale(1)"
-    }
-
-    const getLoading = () => {
-        if (theme.includes("magenta")) return loadingMagenta
-        return loading
     }
 
     const onLoad = (event: any) => {

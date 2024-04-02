@@ -4,7 +4,6 @@ import Context, {ThemeContext, HideNavbarContext, HideSidebarContext, HideSortba
 HideTitlebarContext, EnableDragContext, ActiveDropdownContext, FilterDropActiveContext, MobileScrollingContext,
 SidebarHoverContext, SessionContext, SessionFlagContext, UserImgContext, MobileContext} from "./Context"
 import favicon from "./assets/purple/favicon.png"
-import faviconMagenta from "./assets/magenta/favicon.png"
 import PostsPage from "./pages/PostsPage"
 import CommentsPage from "./pages/CommentsPage"
 import ArtistsPage from "./pages/ArtistsPage"
@@ -47,9 +46,6 @@ import axios from "axios"
 import "./index.less"
 
 require.context("./assets/purple", true)
-require.context("./assets/purple-light", true)
-require.context("./assets/magenta", true)
-require.context("./assets/magenta-light", true)
 
 let destroy2FATimeout = null as any
 
@@ -87,14 +83,9 @@ const App: React.FunctionComponent = (props) => {
         functions.clearCache()
     }, [])
 
-    const getFavicon = () => {
-        if (theme.includes("magenta")) return faviconMagenta 
-        return favicon
-    }
-
     const getImg = () => {
         if (session.username) {
-            return session.image ? functions.getTagLink("pfp", session.image) : getFavicon()
+            return session.image ? functions.getTagLink("pfp", session.image) : favicon
         } else {
             return ""
         }
@@ -223,8 +214,9 @@ const App: React.FunctionComponent = (props) => {
         document.documentElement.style.visibility = "visible"
     }, [])
 
+    // ${theme} 
     return (
-        <div className={`app ${theme} ${!loaded ? "stop-transitions" : ""}`}>
+        <div className={`app ${!loaded ? "stop-transitions" : ""}`}>
             <MobileScrollingContext.Provider value={{mobileScrolling, setMobileScrolling}}>
             <MobileContext.Provider value={{mobile, setMobile}}>
             <UserImgContext.Provider value={{userImg, setUserImg}}>

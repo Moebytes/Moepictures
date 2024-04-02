@@ -6,18 +6,10 @@ import Footer from "../components/Footer"
 import functions from "../structures/Functions"
 import DragAndDrop from "../components/DragAndDrop"
 import search from "../assets/purple/search.png"
-import searchMagenta from "../assets/magenta/search.png"
-import searchPurpleLight from "../assets/purple-light/search.png"
-import searchMagentaLight from "../assets/magenta-light/search.png"
 import searchIconHover from "../assets/purple/search-hover.png"
-import searchMagentaHover from "../assets/magenta/search-hover.png"
-import searchMagentaLightHover from "../assets/magenta-light/search-hover.png"
-import searchPurpleLightHover from "../assets/purple-light/search-hover.png"
 import sort from "../assets/purple/sort.png"
 import type from "../assets/purple/all.png"
 import TagRow from "../components/TagRow"
-import sortMagenta from "../assets/magenta/sort.png"
-import typeMagenta from "../assets/magenta/all.png"
 import axios from "axios"
 import AliasTagDialog from "../dialogs/AliasTagDialog"
 import EditTagDialog from "../dialogs/EditTagDialog"
@@ -25,11 +17,14 @@ import DeleteTagDialog from "../dialogs/DeleteTagDialog"
 import matureTags from "../json/mature-tags.json"
 import permissions from "../structures/Permissions"
 import {ThemeContext, EnableDragContext, HideNavbarContext, HideSidebarContext, RelativeContext, HideTitlebarContext, MobileContext,
-ActiveDropdownContext, HeaderTextContext, SidebarTextContext, SessionContext} from "../Context"
+ActiveDropdownContext, HeaderTextContext, SidebarTextContext, SessionContext, SiteHueContext, SiteLightnessContext, SiteSaturationContext} from "../Context"
 import "./styles/tagspage.less"
 
 const TagsPage: React.FunctionComponent = (props) => {
     const {theme, setTheme} = useContext(ThemeContext)
+    const {siteHue, setSiteHue} = useContext(SiteHueContext)
+    const {siteSaturation, setSiteSaturation} = useContext(SiteSaturationContext)
+    const {siteLightness, setSiteLightness} = useContext(SiteLightnessContext)
     const {enableDrag, setEnableDrag} = useContext(EnableDragContext)
     const {hideNavbar, setHideNavbar} = useContext(HideNavbarContext)
     const {hideTitlebar, setHideTitlebar} = useContext(HideTitlebarContext)
@@ -51,6 +46,15 @@ const TagsPage: React.FunctionComponent = (props) => {
     const [getSearchIconHover, setSearchIconHover] = useState(false)
     const sortRef = useRef(null) as any
     const typeRef = useRef(null) as any
+
+    const getFilter = () => {
+        return `hue-rotate(${siteHue - 180}deg) saturate(${siteSaturation}%) brightness(${siteLightness + 70}%)`
+    }
+
+    const getFilterSearch = () => {
+        if (theme.includes("light")) return `hue-rotate(${siteHue - 180}deg) saturate(${siteSaturation - 60}%) brightness(${siteLightness + 220}%)`
+        return `hue-rotate(${siteHue - 180}deg) saturate(${siteSaturation}%) brightness(${siteLightness + 70}%)`
+    }
 
     const updateTags = async () => {
         const result = await axios.get("/api/search/tags", {params: {sort: sortType, type: typeType, query: searchQuery}, withCredentials: true}).then((r) => r.data)
@@ -133,21 +137,7 @@ const TagsPage: React.FunctionComponent = (props) => {
     })
 
     const getSearchIcon = () => {
-        if (theme === "purple") return getSearchIconHover ? searchIconHover : search
-        if (theme === "purple-light") return getSearchIconHover ? searchPurpleLightHover : searchPurpleLight
-        if (theme === "magenta") return getSearchIconHover ? searchMagentaHover : searchMagenta
-        if (theme === "magenta-light") return getSearchIconHover ? searchMagentaLightHover : searchMagentaLight
         return getSearchIconHover ? searchIconHover : search
-    }
-
-    const getSort = () => {
-        if (theme.includes("magenta")) return sortMagenta
-        return sort
-    }
-
-    const getType = () => {
-        if (theme.includes("magenta")) return typeMagenta
-        return type
     }
 
     const getSortMargin = () => {
@@ -182,7 +172,7 @@ const TagsPage: React.FunctionComponent = (props) => {
     const getSortJSX = () => {
         return (
             <div className="tagsort-item" ref={sortRef} onClick={() => {setActiveDropdown(activeDropdown === "sort" ? "none" : "sort")}}>
-                <img className="tagsort-img" src={getSort()}/>
+                <img className="tagsort-img" src={sort} style={{filter: getFilter()}}/>
                 <span className="tagsort-text">{functions.toProperCase(sortType)}</span>
             </div>
         )
@@ -191,7 +181,7 @@ const TagsPage: React.FunctionComponent = (props) => {
     const getTypeJSX = () => {
         return (
             <div className="tagsort-item" ref={typeRef} onClick={() => {setActiveDropdown(activeDropdown === "type" ? "none" : "type")}}>
-                <img className="tagsort-img rotate" src={getType()}/>
+                <img className="tagsort-img rotate" src={type} style={{filter: getFilter()}}/>
                 <span className="tagsort-text">{functions.toProperCase(typeType)}</span>
             </div>
         )
@@ -224,7 +214,7 @@ const TagsPage: React.FunctionComponent = (props) => {
                     <div className="tags-row">
                         <div className="tag-search-container" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                             <input className="tag-search" type="search" spellCheck="false" value={searchQuery} onChange={(event) => setSearchQuery(event.target.value)} onKeyDown={(event) => event.key === "Enter" ? updateTags() : null}/>
-                            <img className="tag-search-icon" src={getSearchIcon()} onClick={updateTags} onMouseEnter={() => setSearchIconHover(true)} onMouseLeave={() => setSearchIconHover(false)}/>
+                            <img className="tag-search-icon" src={getSearchIcon()} style={{filter: getFilterSearch()}} onClick={updateTags} onMouseEnter={() => setSearchIconHover(true)} onMouseLeave={() => setSearchIconHover(false)}/>
                         </div>
                         {getSortJSX()}
                         <div className={`tag-dropdown ${activeDropdown === "sort" ? "" : "hide-tag-dropdown"}`} 

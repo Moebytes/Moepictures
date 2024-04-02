@@ -249,12 +249,16 @@ const SearchRoutes = (app: Express) => {
     app.post("/api/search/sidebartags", searchLimiter, async (req: Request, res: Response, next: NextFunction) => {
         try {
             const {postIDs} = req.body
-            const postArray = Array.from(postIDs) as any
-            if (!postArray.length) return res.status(200).json([])
-            if (req.session.captchaAmount === undefined) req.session.captchaAmount = 501
+            let postArray = Array.from(postIDs) as any
+            if (req.session.captchaAmount === undefined) req.session.captchaAmount = 0
             req.session.captchaAmount = req.session.captchaAmount + 1
             if (req.session.role === "admin" || req.session.role === "mod") req.session.captchaAmount = 0
-            if (req.session.captchaAmount! > 500) return res.status(401).end()
+            if (req.session.captchaAmount! > 1000) {
+                if (postArray.length === 1) return res.status(200).json([])
+                postArray = []
+            }
+            let slice = false
+            if (!postArray?.length) slice = true
             let posts = await sql.posts(postArray)
             let uniqueTags = new Set()
             for (let i = 0; i < posts.length; i++) {
@@ -268,7 +272,7 @@ const SearchRoutes = (app: Express) => {
                 const found = result.find((r: any) => r.tag === uniqueTagArray[i])
                 if (!found) result.push({tag: uniqueTagArray[i], count: "0", type: "tag", image: ""})
             }
-            res.status(200).json(result)
+            res.status(200).json(slice ? result.slice(0, 100) : result)
         } catch (e) {
             console.log(e)
             return res.status(400).send("Bad request")

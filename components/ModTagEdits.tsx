@@ -1,13 +1,10 @@
 import React, {useContext, useEffect, useRef, useState, useReducer} from "react"
 import {useHistory} from "react-router-dom"
-import {ThemeContext, SearchContext, SearchFlagContext, UnverifiedPostsContext} from "../Context"
+import {ThemeContext, SearchContext, SearchFlagContext, SiteHueContext, SiteLightnessContext, SiteSaturationContext} from "../Context"
 import {HashLink as Link} from "react-router-hash-link"
 import approve from "../assets/purple/approve.png"
-import approveMagenta from "../assets/magenta/approve.png"
 import reject from "../assets/purple/reject.png"
-import rejectMagenta from "../assets/magenta/reject.png"
 import tagDiff from "../assets/purple/tagdiff.png"
-import tagDiffMagenta from "../assets/magenta/tagdiff.png"
 import functions from "../structures/Functions"
 import "./styles/modposts.less"
 import axios from "axios"
@@ -15,6 +12,9 @@ import axios from "axios"
 const ModTagEdits: React.FunctionComponent = (props) => {
     const [ignored, forceUpdate] = useReducer(x => x + 1, 0)
     const {theme, setTheme} = useContext(ThemeContext)
+    const {siteHue, setSiteHue} = useContext(SiteHueContext)
+    const {siteSaturation, setSiteSaturation} = useContext(SiteSaturationContext)
+    const {siteLightness, setSiteLightness} = useContext(SiteLightnessContext)
     const [hover, setHover] = useState(false)
     const {search, setSearch} = useContext(SearchContext)
     const {searchFlag, setSearchFlag} = useContext(SearchFlagContext)
@@ -27,6 +27,10 @@ const ModTagEdits: React.FunctionComponent = (props) => {
     const [ended, setEnded] = useState(false)
     const history = useHistory()
 
+    const getFilter = () => {
+        return `hue-rotate(${siteHue - 180}deg) saturate(${siteSaturation}%) brightness(${siteLightness + 70}%)`
+    }
+
     const updateTags = async () => {
         const requests = await axios.get("/api/tag/edit/request/list", {withCredentials: true}).then((r) => r.data)
         const oldTags = await axios.get("/api/tag/list", {params: {tags: requests.map((r: any) => r.tag)}, withCredentials: true}).then((r) => r.data)
@@ -38,21 +42,6 @@ const ModTagEdits: React.FunctionComponent = (props) => {
     useEffect(() => {
         updateTags()
     }, [])
-
-    const getApprove = () => {
-        if (theme.includes("magenta")) return approveMagenta
-        return approve
-    }
-
-    const getReject = () => {
-        if (theme.includes("magenta")) return rejectMagenta
-        return reject
-    }
-
-    const getTagDiff = () => {
-        if (theme.includes("magenta")) return tagDiffMagenta
-        return tagDiff
-    }
 
     const editTag = async (username: string, tag: string, key: string, description: string, image: string, aliases: string[], implications: string[], pixiv: string, twitter: string, website: string, fandom: string) => {
         let bytes = null as any
@@ -206,15 +195,15 @@ const ModTagEdits: React.FunctionComponent = (props) => {
                     </div> </>}
                     <div className="mod-post-options">
                         <div className="mod-post-options-container" onClick={() => changeOldTag()}>
-                            <img className="mod-post-options-img" src={getTagDiff()}/>
+                            <img className="mod-post-options-img" src={tagDiff} style={{filter: getFilter()}}/>
                             <span className="mod-post-options-text">{showOldTags[i] ? "New" : "Old"}</span>
                         </div>
                         <div className="mod-post-options-container" onClick={() => rejectRequest(request.username, request.tag, request.image)}>
-                            <img className="mod-post-options-img" src={getReject()}/>
+                            <img className="mod-post-options-img" src={reject} style={{filter: getFilter()}}/>
                             <span className="mod-post-options-text">Reject</span>
                         </div>
                         <div className="mod-post-options-container" onClick={() => editTag(request.username, request.tag, request.key, request.description, request.image, request.aliases, request.implications, request.pixiv, request.twitter, request.website, request.fandom)}>
-                            <img className="mod-post-options-img" src={getApprove()}/>
+                            <img className="mod-post-options-img" src={approve} style={{filter: getFilter()}}/>
                             <span className="mod-post-options-text">Approve</span>
                         </div>
                     </div> 

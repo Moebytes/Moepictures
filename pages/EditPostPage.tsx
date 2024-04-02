@@ -40,7 +40,7 @@ import "./styles/editpostpage.less"
 import ContentEditable from "react-contenteditable"
 import SearchSuggestions from "../components/SearchSuggestions"
 import permissions from "../structures/Permissions"
-import xButton from "../assets/magenta/x-button.png"
+import xButton from "../assets/purple/x-button-magenta.png"
 import path from "path"
 
 let enterLinksTimer = null as any
@@ -95,6 +95,7 @@ const EditPostPage: React.FunctionComponent<Props> = (props) => {
     const [sourceArtist, setSourceArtist] = useState("")
     const [sourceDate, setSourceDate] = useState("")
     const [sourceLink, setSourceLink] = useState("")
+    const [sourceBookmarks, setSourceBookmarks] = useState("")
     const [sourceCommentary, setSourceCommentary] = useState("")
     const [sourceTranslatedCommentary, setSourceTranslatedCommentary] = useState("")
     const [sourceMirrors, setSourceMirrors] = useState("")
@@ -138,8 +139,9 @@ const EditPostPage: React.FunctionComponent<Props> = (props) => {
         setSourceCommentary(post.commentary || "")
         setSourceTranslatedCommentary(post.translatedCommentary || "")
         setSourceMirrors(post.mirrors ? Object.values(post.mirrors).join("\n") : "")
-        if (post.drawn) setSourceDate(functions.formatDate(new Date(post.drawn)))
+        if (post.drawn) setSourceDate(functions.formatDate(new Date(post.drawn), true))
         setSourceLink(post.link || "")
+        setSourceBookmarks(post.bookmarks || "")
         const parentPost = await axios.get("/api/post/parent", {params: {postID}, withCredentials: true}).then((r) => r.data)
         if (parentPost) setThirdPartyID(parentPost.parentID)
 
@@ -213,7 +215,7 @@ const EditPostPage: React.FunctionComponent<Props> = (props) => {
     useEffect(() => {
         if (!edited) setEdited(true)
     }, [type, restrict, style, sourceTitle, sourceArtist, sourceCommentary, sourceTranslatedCommentary, sourceMirrors, sourceTranslatedTitle,
-    sourceLink, sourceDate, acceptedURLs, artists, characters, series, rawTags])
+    sourceLink, sourceBookmarks, sourceDate, acceptedURLs, artists, characters, series, rawTags])
 
     useEffect(() => {
         setHideNavbar(true)
@@ -375,6 +377,7 @@ const EditPostPage: React.FunctionComponent<Props> = (props) => {
         setSourceMirrors("")
         setSourceDate("")
         setSourceLink("")
+        setSourceBookmarks("")
         setRawTags("")
         setArtists([{}])
         setCharacters([{}])
@@ -863,6 +866,7 @@ const EditPostPage: React.FunctionComponent<Props> = (props) => {
                 link: sourceLink,
                 commentary: sourceCommentary,
                 translatedCommentary: sourceTranslatedCommentary,
+                bookmarks: sourceBookmarks,
                 mirrors: sourceMirrors
             },
             artists,
@@ -918,6 +922,7 @@ const EditPostPage: React.FunctionComponent<Props> = (props) => {
             let commentary = ""
             let translatedCommentary = ""
             let date = ""
+            let bookmarks = ""
             let mirrors = [] as any
             if (results.length) {
                 const pixiv = results.filter((r: any) => r.header.index_id === 5)
@@ -957,10 +962,11 @@ const EditPostPage: React.FunctionComponent<Props> = (props) => {
                     try {
                         const illust = await axios.get(`/api/misc/pixiv?url=${link}`, {withCredentials: true}).then((r: any) => r.data)
                         commentary = `${functions.decodeEntities(illust.caption.replace(/<\/?[^>]+(>|$)/g, ""))}` 
-                        date = functions.formatDate(new Date(illust.create_date))
+                        date = functions.formatDate(new Date(illust.create_date), true)
                         link = illust.url 
                         title = illust.title
                         artist = illust.user.name
+                        bookmarks = illust.total_bookmarks
                         const translated = await axios.post("/api/misc/translate", [title, commentary], {withCredentials: true}).then((r) => r.data)
                         translatedTitle = translated[0]
                         translatedCommentary = translated[1]
@@ -970,13 +976,13 @@ const EditPostPage: React.FunctionComponent<Props> = (props) => {
                             setRestrict("safe")
                         }
                         const pfp = await functions.proxyImage(illust.user.profile_image_urls.medium)
-                        artists[artists.length - 1].tag = await axios.post("/api/misc/romajinize", [artist], {withCredentials: true}).then((r) => r.data[0])
+                        artists[artists.length - 1].tag = illust.user.twitter ? illust.user.twitter.replaceAll("_", "-") : await axios.post("/api/misc/romajinize", [artist], {withCredentials: true}).then((r) => r.data[0])
                         await uploadTagImg(pfp, "artist", artists.length - 1)
                         artists.push({})
                         artistInputRefs.push(React.createRef())
                         setArtists(artists)
                         forceUpdate()
-                        const translatedTags = await axios.post("/api/misc/translate", illust.tags.map((t: any) => t.name), {withCredentials: true}).then((r) => r.data)
+                        // const translatedTags = await axios.post("/api/misc/translate", illust.tags.map((t: any) => t.name), {withCredentials: true}).then((r) => r.data)
                         // setRawTags(translatedTags.map((t: string) => t.toLowerCase()).join(" "))
                     } catch (e) {
                         console.log(e)
@@ -997,7 +1003,7 @@ const EditPostPage: React.FunctionComponent<Props> = (props) => {
                         artist = deviation.author.user.username
                         link = deviation.url
                         commentary = deviation.description
-                        date = functions.formatDate(new Date(deviation.date))
+                        date = functions.formatDate(new Date(deviation.date), true)
                         if (deviation.rating === "adult") {
                             setRestrict("questionable")
                         } else {
@@ -1042,6 +1048,7 @@ const EditPostPage: React.FunctionComponent<Props> = (props) => {
             setSourceTranslatedTitle(translatedTitle)
             setSourceArtist(artist)
             setSourceLink(link)
+            setSourceBookmarks(bookmarks)
             setSourceCommentary(commentary)
             setSourceTranslatedCommentary(translatedCommentary)
             setSourceDate(date)
@@ -1596,6 +1603,10 @@ const EditPostPage: React.FunctionComponent<Props> = (props) => {
                     <div className="editpost-container-row">
                         <span className="editpost-text">Link: </span>
                         <input className="editpost-input-wide2" type="url" value={sourceLink} onChange={(event) => setSourceLink(event.target.value)} spellCheck={false} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}/>
+                    </div>
+                    <div className="editpost-container-row">
+                        <span className="editpost-text">Bookmarks: </span>
+                        <input className="editpost-input-wide" type="number" value={sourceBookmarks} onChange={(event) => setSourceBookmarks(event.target.value)} spellCheck={false} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}/>
                     </div>
                     <div className="editpost-container-row">
                         <span className="editpost-text">Commentary: </span>

@@ -9,7 +9,8 @@ import DragAndDrop from "../components/DragAndDrop"
 import functions from "../structures/Functions"
 import axios from "axios"
 import {HideNavbarContext, HideSidebarContext, ThemeContext, EnableDragContext, RedirectContext, MobileContext,
-RelativeContext, HideTitlebarContext, HeaderTextContext, SidebarTextContext, SessionContext} from "../Context"
+RelativeContext, HideTitlebarContext, HeaderTextContext, SidebarTextContext, SessionContext, SiteHueContext, SiteLightnessContext,
+SiteSaturationContext} from "../Context"
 import "./styles/changeemailpage.less"
 import session from "express-session"
 

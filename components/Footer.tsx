@@ -1,28 +1,16 @@
 import React, {useContext, useEffect, useState} from "react"
-import {ThemeContext, HideSidebarContext, HideNavbarContext, HideTitlebarContext,
+import {ThemeContext, HideSidebarContext, HideNavbarContext, HideTitlebarContext, SiteHueContext, SiteLightnessContext, SiteSaturationContext,
 SearchContext, SearchFlagContext, ImageTypeContext, RestrictTypeContext, StyleTypeContext, SortTypeContext} from "../Context"
 import {HashLink as Link} from "react-router-hash-link"
-import terms from "../assets/purple/terms.png"
-import termsMagenta from "../assets/magenta/terms.png"
-import termsPurpleLight from "../assets/purple-light/terms.png"
-import termsMagentaLight from "../assets/magenta-light/terms.png"
-import contact from "../assets/purple/contact.png"
-import contactMagenta from "../assets/magenta/contact.png"
-import contactPurpleLight from "../assets/purple-light/contact.png"
-import contactMagentaLight from "../assets/magenta-light/contact.png"
-import code from "../assets/purple/code.png"
-import codeMagenta from "../assets/magenta/code.png"
-import codePurpleLight from "../assets/purple-light/code.png"
-import codeMagentaLight from "../assets/magenta-light/code.png"
 import backToTop from "../assets/purple/backtotop.png"
-import backToTopMagenta from "../assets/magenta/backtotop.png"
-import backToTopPurpleLight from "../assets/purple-light/backtotop.png"
-import backToTopMagentaLight from "../assets/magenta-light/backtotop.png"
 import pack from "../package.json"
 import "./styles/footer.less"
 
 const Footer: React.FunctionComponent = (props) => {
     const {theme, setTheme} = useContext(ThemeContext)
+    const {siteHue, setSiteHue} = useContext(SiteHueContext)
+    const {siteSaturation, setSiteSaturation} = useContext(SiteSaturationContext)
+    const {siteLightness, setSiteLightness} = useContext(SiteLightnessContext)
     const {hideSidebar, setHideSidebar} = useContext(HideSidebarContext)
     const {hideNavbar, setHideNavbar} = useContext(HideNavbarContext)
     const {hideTitlebar, setHideTitlebar} = useContext(HideTitlebarContext)
@@ -33,36 +21,8 @@ const Footer: React.FunctionComponent = (props) => {
     const {styleType, setStyleType} = useContext(StyleTypeContext)
     const {sortType, setSortType} = useContext(SortTypeContext)
 
-    const getTermsIcon = () => {
-        if (theme === "purple") return terms
-        if (theme === "purple-light") return termsPurpleLight
-        if (theme === "magenta") return termsMagenta
-        if (theme === "magenta-light") return termsMagentaLight
-        return terms
-    }
-
-    const getContactIcon = () => {
-        if (theme === "purple") return contact
-        if (theme === "purple-light") return contactPurpleLight
-        if (theme === "magenta") return contactMagenta
-        if (theme === "magenta-light") return contactMagentaLight
-        return contact
-    }
-
-    const getCodeIcon = () => {
-        if (theme === "purple") return code
-        if (theme === "purple-light") return codePurpleLight
-        if (theme === "magenta") return codeMagenta
-        if (theme === "magenta-light") return codeMagentaLight
-        return code
-    }
-
-    const getBackToTop = () => {
-        if (theme === "purple") return backToTop
-        if (theme === "purple-light") return backToTopPurpleLight
-        if (theme === "magenta") return backToTopMagenta
-        if (theme === "magenta-light") return backToTopMagentaLight
-        return backToTop
+    const getFilter = () => {
+        return `hue-rotate(${siteHue - 180}deg) saturate(${siteSaturation}%) brightness(${siteLightness + 70}%)`
     }
 
     const goToTop = () => {
@@ -80,6 +40,8 @@ const Footer: React.FunctionComponent = (props) => {
     }
 
     return (
+        <>
+        <div style={{height: "100%", pointerEvents: "none"}}></div>
         <div className="footer">
             <div className="footer-title-container" onClick={footerClick}>
                     <span className="footer-title-a">M</span>
@@ -95,10 +57,11 @@ const Footer: React.FunctionComponent = (props) => {
                 <span className="footer-text">- This is the bottom of the page -</span>
             </div>
             <div className="footer-back-to-top" onClick={() => goToTop()}>
-                <img className="footer-img" src={getBackToTop()}/>
+                <img className="footer-img" src={backToTop} style={{filter: getFilter()}}/>
                 <span className="footer-text">Back to top</span>
             </div>
         </div>
+        </>
     )
 }
 

@@ -67,8 +67,8 @@ export default class SQLQuery {
 
   /** Bulk updates a post */
   public static bulkUpdatePost = async (postID: number, params: {restrict?: string, style?: string, thirdParty?: boolean, title?: string, translatedTitle?: string,
-    artist?: string, drawn?: string, link?: string, commentary?: string, translatedCommentary?: string, mirrors?: string, type?: string, uploadDate?: string, uploader?: string, updatedDate?: string, updater?: string}) => {
-    const {restrict, style, thirdParty, title, translatedTitle, artist, drawn, link, commentary, translatedCommentary, mirrors, type, uploadDate, uploader, updatedDate, updater} = params
+    artist?: string, drawn?: string, link?: string, commentary?: string, translatedCommentary?: string, bookmarks?: string, mirrors?: string, type?: string, uploadDate?: string, uploader?: string, updatedDate?: string, updater?: string}) => {
+    const {restrict, style, thirdParty, title, translatedTitle, artist, drawn, link, commentary, translatedCommentary, bookmarks, mirrors, type, uploadDate, uploader, updatedDate, updater} = params
     let setArray = [] as any
     let values = [] as any
     let i = 1 
@@ -120,6 +120,11 @@ export default class SQLQuery {
     if (translatedCommentary) {
       setArray.push(`"translatedCommentary" = $${i}`)
       values.push(translatedCommentary)
+      i++
+    }
+    if (bookmarks) {
+      setArray.push(`"bookmarks" = $${i}`)
+      values.push(bookmarks)
       i++
     }
     if (mirrors) {
@@ -162,9 +167,9 @@ export default class SQLQuery {
 
   /** Bulk updates a post (unverified). */
   public static bulkUpdateUnverifiedPost = async (postID: number, params: {restrict?: string, style?: string, thirdParty?: boolean, title?: string, translatedTitle?: string,
-    artist?: string, drawn?: string, link?: string, commentary?: string, translatedCommentary?: string, mirrors?: string, type?: string, uploadDate?: string, uploader?: string, updatedDate?: string, updater?: string
+    artist?: string, drawn?: string, link?: string, commentary?: string, translatedCommentary?: string, bookmarks?: string, mirrors?: string, type?: string, uploadDate?: string, uploader?: string, updatedDate?: string, updater?: string
   duplicates?: boolean, newTags?: number, originalID?: number, reason?: string}) => {
-    const {restrict, style, thirdParty, title, translatedTitle, artist, drawn, link, commentary, translatedCommentary, mirrors, type, uploadDate, uploader, updatedDate, updater, duplicates, originalID, newTags, reason} = params
+    const {restrict, style, thirdParty, title, translatedTitle, artist, drawn, link, commentary, translatedCommentary, bookmarks, mirrors, type, uploadDate, uploader, updatedDate, updater, duplicates, originalID, newTags, reason} = params
     let setArray = [] as any
     let values = [] as any
     let i = 1 
@@ -216,6 +221,11 @@ export default class SQLQuery {
     if (translatedCommentary) {
       setArray.push(`"translatedCommentary" = $${i}`)
       values.push(translatedCommentary)
+      i++
+    }
+    if (bookmarks) {
+      setArray.push(`"bookmarks" = $${i}`)
+      values.push(bookmarks)
       i++
     }
     if (mirrors) {
@@ -509,6 +519,8 @@ export default class SQLQuery {
     if (sort === "reverse tagcount") sortQuery = `ORDER BY "tagCount" ASC`
     if (sort === "filesize") sortQuery = `ORDER BY "imageSize" DESC`
     if (sort === "reverse filesize") sortQuery = `ORDER BY "imageSize" ASC`
+    if (sort === "bookmarks") sortQuery = `ORDER BY posts.bookmarks DESC NULLS LAST`
+    if (sort === "reverse bookmarks") sortQuery = `ORDER BY posts.bookmarks ASC NULLS LAST`
     let ANDtags = [] as string[]
     let ORtags = [] as string[]
     let NOTtags = [] as string[]
@@ -1646,6 +1658,7 @@ export default class SQLQuery {
           'link', post_json."link",
           'commentary', post_json."commentary",
           'translatedCommentary', post_json."translatedCommentary",
+          'bookmarks', post_json."bookmarks",
           'mirrors', post_json."mirrors",
           'images', (array_agg(post_json."images"))[1]${includeTags ? `,
           'tags', post_json."tags"` : ""}
@@ -1656,7 +1669,7 @@ export default class SQLQuery {
         GROUP BY favorites."favoriteID", post_json."postID", post_json."uploader", post_json."updater", ${includeTags ? `post_json."tags",` : ""}
         post_json."type", post_json."restrict", post_json."style", post_json."cutenessAvg", post_json."favoriteCount",
         post_json."thirdParty", post_json."drawn", post_json."uploadDate", post_json."updatedDate", post_json."title",
-        post_json."translatedTitle", post_json."artist", post_json."link", post_json."commentary", post_json."translatedCommentary", post_json."mirrors"
+        post_json."translatedTitle", post_json."artist", post_json."link", post_json."commentary", post_json."translatedCommentary", post_json."bookmarks", post_json."mirrors"
         ${sortQuery}
         ${limit ? `LIMIT $${limitValue}` : "LIMIT 100"} ${offset ? `OFFSET $${i}` : ""}
       `),
@@ -2256,15 +2269,15 @@ export default class SQLQuery {
 
   public static insertPostHistory = async (username: string, postID: number, images?: string[], uploader?: string, updater?: string, uploadDate?: string, updatedDate?: string,
     type?: string, restrict?: string, style?: string, thirdParty?: string, title?: string, translatedTitle?: string, drawn?: string, artist?: string, link?: string,
-    commentary?: string, translatedCommentary?: string, mirrors?: string, artists?: string[], characters?: string[], series?: string[], tags?: string[], reason?: string) => {
+    commentary?: string, translatedCommentary?: string, bookmarks?: string, mirrors?: string, artists?: string[], characters?: string[], series?: string[], tags?: string[], reason?: string) => {
     const now = new Date().toISOString()
     const query: QueryConfig = {
       text: `INSERT INTO "post history" ("postID", "user", "date", "images", "uploader", "updater", "uploadDate", "updatedDate",
       "type", "restrict", "style", "thirdParty", "title", "translatedTitle", "drawn", "artist", "link", "commentary",
-      "translatedCommentary", "mirrors", "artists", "characters", "series", "tags", "reason") VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, 
-        $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25)`,
+      "translatedCommentary", "bookmarks", "mirrors", "artists", "characters", "series", "tags", "reason") VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, 
+        $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25, $26)`,
       values: [postID, username, now, images, uploader, updater, uploadDate, updatedDate, type, restrict, style, thirdParty, 
-        title, translatedTitle, drawn, artist, link, commentary, translatedCommentary, mirrors, artists, characters, series, tags, reason]
+        title, translatedTitle, drawn, artist, link, commentary, translatedCommentary, bookmarks, mirrors, artists, characters, series, tags, reason]
     }
     const result = await SQLQuery.run(query)
     return result

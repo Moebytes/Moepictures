@@ -3,76 +3,30 @@ import {useHistory} from "react-router-dom"
 import {ThemeContext, HideSidebarContext, HideNavbarContext, HideSortbarContext, EnableDragContext, MobileContext, UnverifiedPostsContext,
 RelativeContext, HideTitlebarContext, SidebarHoverContext, SearchContext, SearchFlagContext, PostsContext, ShowDeletePostDialogContext, AutoSearchContext,
 TagsContext, RandomFlagContext, ImageSearchFlagContext, SidebarTextContext, SessionContext, MobileScrollingContext, QuickEditIDContext, QuickEditUnverifiedContext,
-TranslationModeContext, TranslationDrawingEnabledContext} from "../Context"
+TranslationModeContext, TranslationDrawingEnabledContext, SiteHueContext, SiteLightnessContext, SiteSaturationContext} from "../Context"
 import {HashLink as Link} from "react-router-hash-link"
 import favicon from "../assets/purple/favicon.png"
-import faviconMagenta from "../assets/magenta/favicon.png"
 import searchIcon from "../assets/purple/search.png"
-import searchMagenta from "../assets/magenta/search.png"
-import searchMagentaLight from "../assets/magenta-light/search.png"
-import searchPurpleLight from "../assets/purple-light/search.png"
 import searchIconHover from "../assets/purple/search-hover.png"
-import searchMagentaHover from "../assets/magenta/search-hover.png"
-import searchMagentaLightHover from "../assets/magenta-light/search-hover.png"
-import searchPurpleLightHover from "../assets/purple-light/search-hover.png"
 import searchImage from "../assets/purple/search-image.png"
-import searchImageMagenta from "../assets/magenta/search-image.png"
-import searchImagePurpleLight from "../assets/purple-light/search-image.png"
-import searchImageMagentaLight from "../assets/magenta-light/search-image.png"
 import searchImageHover from "../assets/purple/search-image-hover.png"
-import searchImageMagentaHover from "../assets/magenta/search-image-hover.png"
-import searchImagePurpleLightHover from "../assets/purple-light/search-image-hover.png"
-import searchImageMagentaLightHover from "../assets/magenta-light/search-image-hover.png"
 import random from "../assets/purple/random.png"
-import randomMagenta from "../assets/magenta/random.png"
-import randomPurpleLight from "../assets/purple-light/random.png"
-import randomMagentaLight from "../assets/magenta-light/random.png"
 import randomHover from "../assets/purple/random-hover.png"
-import randomMagentaHover from "../assets/magenta/random-hover.png"
-import randomPurpleLightHover from "../assets/purple-light/random-hover.png"
-import randomMagentaLightHover from "../assets/magenta-light/random-hover.png"
 import randomMobile from "../assets/purple/random-mobile.png"
-import randomMobileMagenta from "../assets/magenta/random-mobile.png"
-import randomMobilePurpleLight from "../assets/purple-light/random-mobile.png"
-import randomMobileMagentaLight from "../assets/magenta-light/random-mobile.png"
 import randomMobileHover from "../assets/purple/random-mobile-hover.png"
-import randomMobileMagentaHover from "../assets/magenta/random-mobile-hover.png"
-import randomMobilePurpleLightHover from "../assets/purple-light/random-mobile-hover.png"
-import randomMobileMagentaLightHover from "../assets/magenta-light/random-mobile-hover.png"
 import terms from "../assets/purple/terms.png"
-import termsMagenta from "../assets/magenta/terms.png"
-import termsPurpleLight from "../assets/purple-light/terms.png"
-import termsMagentaLight from "../assets/magenta-light/terms.png"
 import contact from "../assets/purple/contact.png"
-import contactMagenta from "../assets/magenta/contact.png"
-import contactPurpleLight from "../assets/purple-light/contact.png"
-import contactMagentaLight from "../assets/magenta-light/contact.png"
 import code from "../assets/purple/code.png"
-import codeMagenta from "../assets/magenta/code.png"
-import codePurpleLight from "../assets/purple-light/code.png"
-import codeMagentaLight from "../assets/magenta-light/code.png"
-import artistImg from "../assets/images/artist.png"
 import setAvatar from "../assets/purple/setavatar.png"
-import setAvatarMagenta from "../assets/magenta/setavatar.png"
 import addTranslation from "../assets/purple/addtranslation.png"
-import addTranslationMagenta from "../assets/magenta/addtranslation.png"
 import report from "../assets/purple/report.png"
-import reportMagenta from "../assets/magenta/report.png"
 import quickEdit from "../assets/purple/quickedit.png"
-import quickEditMagenta from "../assets/magenta/quickedit.png"
 import edit from "../assets/purple/edit.png"
-import editMagenta from "../assets/magenta/edit.png"
 import historyIcon from "../assets/purple/history.png"
-import historyMagenta from "../assets/magenta/history.png"
 import deleteIcon from "../assets/purple/delete.png"
-import deleteIconMagenta from "../assets/magenta/delete.png"
 import rejectRed from "../assets/purple/reject-red.png"
 import approveGreen from "../assets/purple/approve-green.png"
 import tagIcon from "../assets/purple/tag.png"
-import pack from "../package.json"
-import functions from "../structures/Functions"
-import axios from "axios"
-import TagHover from "./TagHover"
 import website from "../assets/purple/support.png"
 import fandom from "../assets/purple/fandom.png"
 import pixiv from "../assets/purple/pixiv.png"
@@ -83,15 +37,17 @@ import SearchSuggestions from "./SearchSuggestions"
 import adminCrown from "../assets/purple/admin-crown.png"
 import modCrown from "../assets/purple/mod-crown.png"
 import question from "../assets/purple/question.png"
-import autoSearchIconPurple from "../assets/purple/autosearch.png"
-import autoSearchActiveIconPurple from "../assets/purple/autosearch-active.png"
-import autoSearchIconMagenta from "../assets/magenta/autosearch.png"
-import autoSearchActiveIconMagenta from "../assets/magenta/autosearch-active.png"
+import autoSearchIcon from "../assets/purple/autosearch.png"
+import autoSearchActiveIcon from "../assets/purple/autosearch-active.png"
 import danbooru from "../assets/purple/danbooru.png"
 import gelbooru from "../assets/purple/gelbooru.png"
 import safebooru from "../assets/purple/safebooru.png"
 import yandere from "../assets/purple/yandere.png"
 import konachan from "../assets/purple/konachan.png"
+import pack from "../package.json"
+import functions from "../structures/Functions"
+import axios from "axios"
+import TagHover from "./TagHover"
 import "./styles/sidebar.less"
 
 interface Props {
@@ -112,6 +68,9 @@ const maxTags3 = 31
 const SideBar: React.FunctionComponent<Props> = (props) => {
     const [ignored, forceUpdate] = useReducer(x => x + 1, 0)
     const {theme, setTheme} = useContext(ThemeContext)
+    const {siteHue, setSiteHue} = useContext(SiteHueContext)
+    const {siteSaturation, setSiteSaturation} = useContext(SiteSaturationContext)
+    const {siteLightness, setSiteLightness} = useContext(SiteLightnessContext)
     const {hideSortbar, setHideSortbar} = useContext(HideSortbarContext)
     const {hideSidebar, setHideSidebar} = useContext(HideSidebarContext)
     const {hideNavbar, setHideNavbar} = useContext(HideNavbarContext)
@@ -147,20 +106,29 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
     const {autoSearch, setAutoSearch} = useContext(AutoSearchContext)
     const history = useHistory()
 
+    const getFilter = () => {
+        return `hue-rotate(${siteHue - 180}deg) saturate(${siteSaturation}%) brightness(${siteLightness + 70}%)`
+    }
+
+    const getFilterSearch = () => {
+        if (theme.includes("light")) return `hue-rotate(${siteHue - 180}deg) saturate(${siteSaturation - 60}%) brightness(${siteLightness + 220}%)`
+        return `hue-rotate(${siteHue - 180}deg) saturate(${siteSaturation}%) brightness(${siteLightness + 70}%)`
+    }
+
+    const getFilterRandom = () => {
+        if (theme.includes("light")) return `hue-rotate(${siteHue - 230}deg) saturate(${siteSaturation - 30}%) brightness(${siteLightness + 170}%)`
+        return `hue-rotate(${siteHue - 200}deg) saturate(${siteSaturation}%) brightness(${siteLightness + 70}%)`
+    }
+
     const updateTags = async () => {
         const tags = await functions.parseTags(posts)
         setTags(tags)
     }
 
-    const getFavicon = () => {
-        if (theme.includes("magenta")) return faviconMagenta 
-        return favicon
-    }
-
     const updateUserImg = async () => {
         if (props.post) {
             const uploader = await axios.get("/api/user", {params: {username: props.post.uploader}, withCredentials: true}).then((r) => r.data)
-            setUploaderImage(uploader?.image ? functions.getTagLink("pfp", uploader.image) : getFavicon())
+            setUploaderImage(uploader?.image ? functions.getTagLink("pfp", uploader.image) : favicon)
             if (uploader?.role) setUploaderRole(uploader.role)
             const updater = await axios.get("/api/user", {params: {username: props.post.updater}, withCredentials: true}).then((r) => r.data)
             if (updater?.role) setUpdaterRole(updater.role)
@@ -319,107 +287,26 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
     }, [hideSortbar, hideNavbar, hideTitlebar, mobile])
 
     const getSearchIcon = () => {
-        if (theme === "purple") return getSearchIconHover ? searchIconHover : searchIcon
-        if (theme === "purple-light") return getSearchIconHover ? searchPurpleLightHover : searchPurpleLight
-        if (theme === "magenta") return getSearchIconHover ? searchMagentaHover : searchMagenta
-        if (theme === "magenta-light") return getSearchIconHover ? searchMagentaLightHover : searchMagentaLight
         return getSearchIconHover ? searchIconHover : searchIcon
     }
 
     const getSearchImageIcon = () => {
-        if (theme === "purple") return getSearchImageIconHover ? searchImageHover : searchImage
-        if (theme === "purple-light") return getSearchImageIconHover ? searchImagePurpleLightHover : searchImagePurpleLight
-        if (theme === "magenta") return getSearchImageIconHover ? searchImageMagentaHover : searchImageMagenta
-        if (theme === "magenta-light") return getSearchImageIconHover ? searchImageMagentaLightHover : searchImageMagentaLight
         return getSearchImageIconHover ? searchImageHover : searchImage
     }
 
     const getRandomIcon = () => {
-        if (theme === "purple") return getRandomIconHover ? randomHover : random
-        if (theme === "purple-light") return getRandomIconHover ? randomPurpleLightHover : randomPurpleLight
-        if (theme === "magenta") return getRandomIconHover ? randomMagentaHover : randomMagenta
-        if (theme === "magenta-light") return getRandomIconHover ? randomMagentaLightHover : randomMagentaLight
         return getRandomIconHover ? randomHover : random
     }
 
     const getRandomMobileIcon = () => {
-        if (theme === "purple") return getRandomMobileIconHover ? randomMobileHover : randomMobile
-        if (theme === "purple-light") return getRandomMobileIconHover ? randomMobilePurpleLightHover : randomMobilePurpleLight
-        if (theme === "magenta") return getRandomMobileIconHover ? randomMobileMagentaHover : randomMobileMagenta
-        if (theme === "magenta-light") return getRandomMobileIconHover ? randomMobileMagentaLightHover : randomMobileMagentaLight
         return getRandomMobileIconHover ? randomMobileHover : randomMobile
-    }
-
-    const getTermsIcon = () => {
-        if (theme === "purple") return terms
-        if (theme === "purple-light") return termsPurpleLight
-        if (theme === "magenta") return termsMagenta
-        if (theme === "magenta-light") return termsMagentaLight
-        return terms
-    }
-
-    const getContactIcon = () => {
-        if (theme === "purple") return contact
-        if (theme === "purple-light") return contactPurpleLight
-        if (theme === "magenta") return contactMagenta
-        if (theme === "magenta-light") return contactMagentaLight
-        return contact
-    }
-
-    const getCodeIcon = () => {
-        if (theme === "purple") return code
-        if (theme === "purple-light") return codePurpleLight
-        if (theme === "magenta") return codeMagenta
-        if (theme === "magenta-light") return codeMagentaLight
-        return code
-    }
-
-    const getSetAvatar = () => {
-        if (theme.includes("magenta")) return setAvatarMagenta
-        return setAvatar
-    }
-
-    const getQuickEdit = () => {
-        if (theme.includes("magenta")) return quickEditMagenta
-        return quickEdit
-    }
-
-    const getAddTranslation = () => {
-        if (theme.includes("magenta")) return addTranslationMagenta
-        return addTranslation
-    }
-
-    const getReport = () => {
-        if (theme.includes("magenta")) return reportMagenta
-        return report
-    }
-
-    const getEdit = () => {
-        if (theme.includes("magenta")) return editMagenta
-        return edit
-    }
-
-    const getShowTags = () => {
-        return tagIcon
-    }
-
-    const getHistory = () => {
-        if (theme.includes("magenta")) return historyMagenta
-        return historyIcon
-    }
-
-    const getDeleteIcon = () => {
-        if (theme.includes("magenta")) return deleteIconMagenta
-        return deleteIcon
     }
 
     const getAutoSearch = () => {
         if (autoSearch) {
-            if (theme.includes("magenta")) return autoSearchActiveIconMagenta
-            return autoSearchActiveIconPurple
+            return autoSearchActiveIcon
         } else {
-            if (theme.includes("magenta")) return autoSearchIconMagenta
-            return autoSearchIconPurple
+            return autoSearchIcon
         }
     }
 
@@ -719,12 +606,12 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
         <div className={`mobile-sidebar ${relative ? "mobile-sidebar-relative" : ""} ${mobileScrolling ? "hide-mobile-sidebar" : ""}`}>
             <div className="mobile-search-container">
                 <input className="mobile-search" type="search" spellCheck="false" value={search} onChange={(event) => setSearch(event.target.value)} onKeyDown={(event) => event.key === "Enter" ? triggerSearch() : null} onFocus={(event) => setSuggestionsActive(true)} onBlur={() => setSuggestionsActive(false)}/>
-                <img style={{height: "40px"}} className="search-icon" src={getSearchIcon()} onClick={() => triggerSearch()}  onMouseEnter={() => setSearchIconHover(true)} onMouseLeave={() => setSearchIconHover(false)}/>
+                <img style={{height: "40px", filter: getFilterSearch()}} className="search-icon" src={getSearchIcon()} onClick={() => triggerSearch()}  onMouseEnter={() => setSearchIconHover(true)} onMouseLeave={() => setSearchIconHover(false)}/>
                 <label style={{display: "flex", width: "max-content", height: "max-content"}} htmlFor="image-search">
-                    <img style={{height: "40px"}} className="search-image-icon" src={getSearchImageIcon()} onMouseEnter={() => setSearchImageIconHover(true)} onMouseLeave={() => setSearchImageIconHover(false)}/>
+                    <img style={{height: "40px", filter: getFilterSearch()}} className="search-image-icon" src={getSearchImageIcon()} onMouseEnter={() => setSearchImageIconHover(true)} onMouseLeave={() => setSearchImageIconHover(false)}/>
                 </label>
                 <input id="image-search" type="file" onChange={(event) => imageSearch(event)}/>
-                <img style={{height: "40px"}} className="random-mobile" src={getRandomMobileIcon()} onClick={randomSearch} onMouseEnter={() => setRandomMobileIconHover(true)} onMouseLeave={() => setRandomMobileIconHover(false)}/>
+                <img style={{height: "40px", filter: getFilterRandom()}} className="random-mobile" src={getRandomMobileIcon()} onClick={randomSearch} onMouseEnter={() => setRandomMobileIconHover(true)} onMouseLeave={() => setRandomMobileIconHover(false)}/>
             </div>
         </div>
         </>
@@ -753,14 +640,14 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
 
     const copyTagsJSX = () => {
         if (!session) return
-        if (session.captchaAmount === undefined) session.captchaAmount = 501
-        if (session.captchaAmount > 500) return null
+        if (session.captchaAmount === undefined) session.captchaAmount = 0
+        if (session.captchaAmount > 1000) return null
         if (props.artists && props.characters && props.series && props.tags) {
             return (
                 <div className="sidebar-subcontainer">
                     <div className="sidebar-row">
                         <span className="tag-hover" onClick={() => copyTags()} onAuxClick={() => copyTags(false, true)} onContextMenu={(event) => {event.preventDefault(); copyTags(true)}}>
-                            <img className="sidebar-icon" src={getShowTags()}/>
+                            <img className="sidebar-icon" src={tagIcon}/>
                             <span className="tag-red">Copy Tags</span>
                         </span>
                     </div>
@@ -771,8 +658,8 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
 
     const tagCaptchaJSX = () => {
         if (!session) return
-        if (session.captchaAmount === undefined) session.captchaAmount = 501
-        if (session.captchaAmount > 500) {
+        if (session.captchaAmount === undefined) session.captchaAmount = 0
+        if (session.captchaAmount > 1000) {
             if (!history.location.pathname.includes("/post/") && !history.location.pathname.includes("/edit-post")) return
             const toggleCaptcha = () => {
                 sessionStorage.setItem("ignoreCaptcha", "false")
@@ -782,7 +669,7 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
                 <div className="sidebar-subcontainer">
                     <div className="sidebar-row">
                         <span className="tag-hover" onClick={toggleCaptcha}>
-                            <img className="sidebar-icon" src={getShowTags()}/>
+                            <img className="sidebar-icon" src={tagIcon}/>
                             <span className="tag-red">Show Tags</span>
                         </span>
                     </div>
@@ -793,8 +680,8 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
 
     const noTagsArtist = () => {
         if (!session) return
-        if (session.captchaAmount === undefined) session.captchaAmount = 501
-        if (session.captchaAmount > 500) {
+        if (session.captchaAmount === undefined) session.captchaAmount = 0
+        if (session.captchaAmount > 1000) {
             return (
                 <div className="sidebar-row">
                     <span className="tag">Artist:</span>
@@ -848,15 +735,15 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
                 </div> : null}
                 <div className="search-container" onMouseEnter={() => setEnableDrag(false)}>
                     <input className="search" type="search" spellCheck="false" value={search} onChange={(event) => setSearch(event.target.value)} onKeyDown={(event) => event.key === "Enter" ? triggerSearch() : null} onFocus={() => setSuggestionsActive(true)} onBlur={() => setSuggestionsActive(false)}/>
-                    <img className="search-icon" src={getSearchIcon()} onClick={() => triggerSearch()} onMouseEnter={() => setSearchIconHover(true)} onMouseLeave={() => setSearchIconHover(false)}/>
+                    <img className="search-icon" style={{filter: getFilterSearch()}} src={getSearchIcon()} onClick={() => triggerSearch()} onMouseEnter={() => setSearchIconHover(true)} onMouseLeave={() => setSearchIconHover(false)}/>
                     <label style={{display: "flex", width: "max-content", height: "max-content"}} htmlFor="image-search">
-                        <img className="search-image-icon" src={getSearchImageIcon()} onMouseEnter={() => setSearchImageIconHover(true)} onMouseLeave={() => setSearchImageIconHover(false)}/>
+                        <img className="search-image-icon" style={{filter: getFilterSearch()}} src={getSearchImageIcon()} onMouseEnter={() => setSearchImageIconHover(true)} onMouseLeave={() => setSearchImageIconHover(false)}/>
                     </label>
                     <input id="image-search" type="file" onChange={(event) => imageSearch(event)}/>
                 </div>
                 <div className="random-container">
-                    <img className="random" src={getRandomIcon()} onClick={randomSearch} onMouseEnter={() => setRandomIconHover(true)} onMouseLeave={() => setRandomIconHover(false)}/>
-                    <img className="autosearch" src={getAutoSearch()} onClick={toggleAutoSearch}/>
+                    <img className="random" src={getRandomIcon()} style={{filter: getFilterRandom()}} onClick={randomSearch} onMouseEnter={() => setRandomIconHover(true)} onMouseLeave={() => setRandomIconHover(false)}/>
+                    <img className="autosearch" style={{filter: getFilter()}} src={getAutoSearch()} onClick={toggleAutoSearch}/>
                 </div>
 
                 {copyTagsJSX()}
@@ -886,6 +773,10 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
                         <div className="sidebar-row">
                             <span className="tag">Source:</span>
                             <span className="tag-alt-link" onClick={() => window.open(props.post.link, "_blank")}>{getDomain()}</span>
+                        </div>
+                        <div className="sidebar-row">
+                            <span className="tag">Bookmarks:</span>
+                            <span className="tag-alt">{props.post.bookmarks ? props.post.bookmarks : "?"}</span>
                         </div>
                         {generateMirrorsJSX()}
                     </div>
@@ -969,19 +860,19 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
                     <div className="sidebar-subcontainer">
                         {!props.unverified ? <div className="sidebar-row">
                             <span className="tag-hover" onClick={triggerQuickEdit}>
-                                <img className="sidebar-icon" src={getQuickEdit()}/>
+                                <img className="sidebar-icon" src={quickEdit} style={{filter: getFilter()}}/>
                                 <span className="tag">Quick Edit</span>
                             </span>
                         </div> : null}
                         {!props.unverified ? <div className="sidebar-row">
                             <span className="tag-hover" onClick={triggerSetAvatar}>
-                                <img className="sidebar-icon" src={getSetAvatar()}/>
+                                <img className="sidebar-icon" src={setAvatar} style={{filter: getFilter()}}/>
                                 <span className="tag">Set Avatar</span>
                             </span>
                         </div> : null}
                         {!props.unverified ? <div className="sidebar-row">
                             <span className="tag-hover" onClick={triggerAddTranslation}>
-                                <img className="sidebar-icon" src={getAddTranslation()}/>
+                                <img className="sidebar-icon" src={addTranslation} style={{filter: getFilter()}}/>
                                 <span className="tag">Add Translation</span>
                             </span>
                         </div> : null}
@@ -993,7 +884,7 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
                         </div> */}
                         <div className="sidebar-row">
                             <span className="tag-hover" onClick={editPost}>
-                                <img className="sidebar-icon" src={getEdit()}/>
+                                <img className="sidebar-icon" src={edit}/>
                                 <span className="tag-red">Edit</span>
                             </span>
                         </div>
@@ -1013,14 +904,14 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
                         </> : null}
                         {!props.unverified ? <div className="sidebar-row">
                             <span className="tag-hover" onClick={postHistory}>
-                                <img className="sidebar-icon" src={getHistory()}/>
+                                <img className="sidebar-icon" src={historyIcon}/>
                                 <span className="tag-red">History</span>
                             </span>
                         </div> : null}
                         {!props.unverified ?
                         <div className="sidebar-row">
                             <span className="tag-hover" onClick={deletePost}>
-                                <img className="sidebar-icon" src={getDeleteIcon()}/>
+                                <img className="sidebar-icon" src={deleteIcon}/>
                                 <span className="tag-red">Delete</span>
                             </span>
                         </div> : null}
@@ -1031,12 +922,12 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
             <div className="sidebar-footer">
                     <span className="sidebar-footer-text">©{new Date().getFullYear()} Moebooru</span>
                     <Link to="/terms">
-                        <img className="sidebar-footer-icon" src={getTermsIcon()}/>
+                        <img className="sidebar-footer-icon" src={terms} style={{filter: getFilter()}}/>
                     </Link>
                     <Link to="/contact">
-                        <img className="sidebar-footer-icon" src={getContactIcon()}/>
+                        <img className="sidebar-footer-icon" src={contact} style={{filter: getFilter()}}/>
                     </Link>
-                    <img className="sidebar-footer-icon" src={getCodeIcon()} onClick={() => window.open(pack.repository.url, "_blank")}/>
+                    <img className="sidebar-footer-icon" src={code} style={{filter: getFilter()}} onClick={() => window.open(pack.repository.url, "_blank")}/>
                 </div>
             </div>
         </div>

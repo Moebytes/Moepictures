@@ -128,7 +128,10 @@ const MiscRoutes = (app: Express) => {
                 resolvable = Number(id)
             }
             try {
-                const illust = await pixiv.illust.get(resolvable)
+                const illust = await pixiv.illust.get(resolvable) as any
+                const html = await axios.get(`https://www.pixiv.net/en/users/${illust.user.id}`).then((r) => r.data)
+                const twitter = html.match(/(?<=twitter\.com\/)(.*?)(?=")/)?.[0]
+                illust.user.twitter = twitter
                 res.status(200).json(illust)
             } catch {
                 res.status(404).end()

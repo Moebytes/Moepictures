@@ -2,7 +2,6 @@ import React, {useEffect, useContext, useState, useReducer, useRef} from "react"
 import {useHistory} from "react-router-dom"
 import {HashLink as Link} from "react-router-hash-link"
 import favicon from "../assets/purple/favicon.png"
-import faviconMagenta from "../assets/magenta/favicon.png"
 import TitleBar from "../components/TitleBar"
 import NavBar from "../components/NavBar"
 import SideBar from "../components/SideBar"
@@ -122,14 +121,9 @@ const UserPage: React.FunctionComponent<Props> = (props) => {
         }
     }
 
-    const getFavicon = () => {
-        if (theme.includes("magenta")) return faviconMagenta 
-        return favicon
-    }
-
     const getUserImg = () => {
         if (!user) return ""
-        return user.image ? functions.getTagLink("pfp", user.image) : getFavicon()
+        return user.image ? functions.getTagLink("pfp", user.image) : favicon
     }
 
     const generateFavoritesJSX = () => {

@@ -1,5 +1,8 @@
 import React, {useState} from "react"
 
+export const SiteHueContext = React.createContext<any>(null)
+export const SiteSaturationContext = React.createContext<any>(null)
+export const SiteLightnessContext = React.createContext<any>(null)
 export const ThemeContext = React.createContext<any>(null)
 export const HideSortbarContext = React.createContext<any>(null)
 export const HideSidebarContext = React.createContext<any>(null)
@@ -118,6 +121,9 @@ export const RevertTranslationHistoryIDContext = React.createContext<any>(null)
 export const RevertTranslationHistoryFlagContext = React.createContext<any>(null)
 
 const Context: React.FunctionComponent = (props) => {
+    const [siteHue, setSiteHue] = useState(180)
+    const [siteSaturation, setSiteSaturation] = useState(100)
+    const [siteLightness, setSiteLightness] = useState(50)
     const [brightness, setBrightness] = useState(100)
     const [contrast, setContrast] = useState(100)
     const [hue, setHue] = useState(180)
@@ -224,6 +230,9 @@ const Context: React.FunctionComponent = (props) => {
 
 return (
     <>
+        <SiteLightnessContext.Provider value={{siteLightness, setSiteLightness}}>
+        <SiteSaturationContext.Provider value={{siteSaturation, setSiteSaturation}}>
+        <SiteHueContext.Provider value={{siteHue, setSiteHue}}>
         <RevertTranslationHistoryFlagContext.Provider value={{revertTranslationHistoryFlag, setRevertTranslationHistoryFlag}}>
         <DeleteTranslationHistoryFlagContext.Provider value={{deleteTranslationHistoryFlag, setDeleteTranslationHistoryFlag}}>
         <RevertTranslationHistoryIDContext.Provider value={{revertTranslationHistoryID, setRevertTranslationHistoryID}}>
@@ -429,6 +438,9 @@ return (
         </RevertTranslationHistoryIDContext.Provider>
         </DeleteTranslationHistoryFlagContext.Provider>
         </RevertTranslationHistoryFlagContext.Provider>
+        </SiteHueContext.Provider>
+        </SiteSaturationContext.Provider>
+        </SiteLightnessContext.Provider>
     </>
     )
 }

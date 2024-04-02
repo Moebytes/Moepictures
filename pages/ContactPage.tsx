@@ -6,19 +6,20 @@ import NavBar from "../components/NavBar"
 import SideBar from "../components/SideBar"
 import Footer from "../components/Footer"
 import XButton from "../assets/purple/x-button.png"
-import XButtonPurpleLight from "../assets/purple-light/x-button.png"
-import XButtonMagenta from "../assets/magenta/x-button.png"
-import XButtonMagentaLight from "../assets/magenta-light/x-button.png"
 import DragAndDrop from "../components/DragAndDrop"
 import functions from "../structures/Functions"
 import {HideNavbarContext, HideSidebarContext, ThemeContext, EnableDragContext, MobileContext,
-RelativeContext, HideTitlebarContext, HeaderTextContext, SidebarTextContext} from "../Context"
+RelativeContext, HideTitlebarContext, HeaderTextContext, SidebarTextContext, SiteHueContext, SiteLightnessContext,
+SiteSaturationContext} from "../Context"
 import axios from "axios"
 import "./styles/contactpage.less"
 
 const ContactPage: React.FunctionComponent = (props) => {
     const [ignored, forceUpdate] = useReducer(x => x + 1, 0)
     const {theme, setTheme} = useContext(ThemeContext)
+    const {siteHue, setSiteHue} = useContext(SiteHueContext)
+    const {siteSaturation, setSiteSaturation} = useContext(SiteSaturationContext)
+    const {siteLightness, setSiteLightness} = useContext(SiteLightnessContext)
     const {hideNavbar, setHideNavbar} = useContext(HideNavbarContext)
     const {hideTitlebar, setHideTitlebar} = useContext(HideTitlebarContext)
     const {hideSidebar, setHideSidebar} = useContext(HideSidebarContext)
@@ -35,6 +36,10 @@ const ContactPage: React.FunctionComponent = (props) => {
     const [message, setMessage] = useState("")
     const errorRef = useRef(null) as any
     const history = useHistory()
+
+    const getFilter = () => {
+        return `hue-rotate(${siteHue - 180}deg) saturate(${siteSaturation}%) brightness(${siteLightness + 70}%)`
+    }
 
     useEffect(() => {
         setHideNavbar(false)
@@ -70,14 +75,6 @@ const ContactPage: React.FunctionComponent = (props) => {
         setFiles([...files, ...acceptedFiles])
     }
     
-    const getX = () => {
-        if (theme === "purple") return XButton
-        if (theme === "purple-light") return XButtonPurpleLight
-        if (theme === "magenta") return XButtonMagenta
-        if (theme === "magenta-light") return XButtonMagentaLight
-        return XButton
-    }
-
     const submit = async () => {
         const badEmail = functions.validateEmail(email)
         if (badEmail) {
@@ -121,7 +118,7 @@ const ContactPage: React.FunctionComponent = (props) => {
             }
             jsx.push(<>
                     <span className="contact-text-small">{files[i].name}</span>
-                    <img className="x-button" src={getX()} onClick={() => deleteFile()}/>
+                    <img className="x-button" src={XButton} style={{filter: getFilter()}} onClick={() => deleteFile()}/>
                 </>
             )
         }

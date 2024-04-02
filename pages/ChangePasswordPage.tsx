@@ -7,21 +7,19 @@ import SideBar from "../components/SideBar"
 import Footer from "../components/Footer"
 import show from "../assets/purple/show.png"
 import hide from "../assets/purple/hide.png"
-import showPurpleLight from "../assets/purple-light/show.png"
-import hidePurpleLight from "../assets/purple-light/hide.png"
-import showMagenta from "../assets/magenta/show.png"
-import hideMagenta from "../assets/magenta/hide.png"
-import showMagentaLight from "../assets/magenta-light/show.png"
-import hideMagentaLight from "../assets/magenta-light/hide.png"
 import DragAndDrop from "../components/DragAndDrop"
 import functions from "../structures/Functions"
 import {HideNavbarContext, HideSidebarContext, ThemeContext, EnableDragContext, RedirectContext, MobileContext,
-RelativeContext, HideTitlebarContext, HeaderTextContext, SidebarTextContext, SessionContext} from "../Context"
+RelativeContext, HideTitlebarContext, HeaderTextContext, SidebarTextContext, SessionContext, SiteHueContext, SiteLightnessContext,
+SiteSaturationContext} from "../Context"
 import axios from "axios"
 import "./styles/changepasspage.less"
 
 const ChangePasswordPage: React.FunctionComponent = (props) => {
     const {theme, setTheme} = useContext(ThemeContext)
+    const {siteHue, setSiteHue} = useContext(SiteHueContext)
+    const {siteSaturation, setSiteSaturation} = useContext(SiteSaturationContext)
+    const {siteLightness, setSiteLightness} = useContext(SiteLightnessContext)
     const {hideNavbar, setHideNavbar} = useContext(HideNavbarContext)
     const {hideTitlebar, setHideTitlebar} = useContext(HideTitlebarContext)
     const {hideSidebar, setHideSidebar} = useContext(HideSidebarContext)
@@ -43,6 +41,10 @@ const ChangePasswordPage: React.FunctionComponent = (props) => {
     const [error, setError] = useState(false)
     const errorRef = useRef<any>(null)
     const history = useHistory()
+
+    const getFilter = () => {
+        return `hue-rotate(${siteHue - 180}deg) saturate(${siteSaturation}%) brightness(${siteLightness + 70}%)`
+    }
 
     useEffect(() => {
         setHideNavbar(false)
@@ -73,26 +75,14 @@ const ChangePasswordPage: React.FunctionComponent = (props) => {
     }, [session])
 
     const getEye = () => {
-        if (theme === "purple") return showPassword ? hide : show
-        if (theme === "purple-light") return showPassword ? hidePurpleLight : showPurpleLight
-        if (theme === "magenta") return showPassword ? hideMagenta : showMagenta
-        if (theme === "magenta-light") return showPassword ? hideMagentaLight : showMagentaLight
         return showPassword ? hide : show
     }
 
     const getEye2 = () => {
-        if (theme === "purple") return showPassword2 ? hide : show
-        if (theme === "purple-light") return showPassword2 ? hidePurpleLight : showPurpleLight
-        if (theme === "magenta") return showPassword2 ? hideMagenta : showMagenta
-        if (theme === "magenta-light") return showPassword2 ? hideMagentaLight : showMagentaLight
         return showPassword2 ? hide : show
     }
 
     const getEye3 = () => {
-        if (theme === "purple") return showPassword3 ? hide : show
-        if (theme === "purple-light") return showPassword3 ? hidePurpleLight : showPurpleLight
-        if (theme === "magenta") return showPassword3 ? hideMagenta : showMagenta
-        if (theme === "magenta-light") return showPassword3 ? hideMagentaLight : showMagentaLight
         return showPassword3 ? hide : show
     }
 
@@ -148,21 +138,21 @@ const ChangePasswordPage: React.FunctionComponent = (props) => {
                     <div className="change-pass-row">
                         <span className="change-pass-text">Old Password:</span>
                         <div className="change-pass-pass">
-                            <img className="change-pass-pass-show" src={getEye()} onClick={() => setShowPassword((prev) => !prev)}/>
+                            <img className="change-pass-pass-show" src={getEye()} style={{filter: getFilter()}} onClick={() => setShowPassword((prev) => !prev)}/>
                             <input className="change-pass-pass-input" type={showPassword ? "text" : "password"} spellCheck={false} value={oldPassword} onChange={(event) => setOldPassword(event.target.value)} onKeyDown={(event) => event.key === "Enter" ? submit() : null}/>
                         </div>
                     </div>
                     <div className="change-pass-row">
                         <span className="change-pass-text">New Password:</span>
                         <div className="change-pass-pass">
-                            <img className="change-pass-pass-show" src={getEye2()} onClick={() => setShowPassword2((prev) => !prev)}/>
+                            <img className="change-pass-pass-show" src={getEye2()} style={{filter: getFilter()}} onClick={() => setShowPassword2((prev) => !prev)}/>
                             <input className="change-pass-pass-input" type={showPassword2 ? "text" : "password"} spellCheck={false} value={newPassword} onChange={(event) => setNewPassword(event.target.value)} onKeyDown={(event) => event.key === "Enter" ? submit() : null}/>
                         </div>
                     </div>
                     <div className="change-pass-row">
                         <span className="change-pass-text">Confirm New Password:</span>
                         <div className="change-pass-pass">
-                            <img className="change-pass-pass-show" src={getEye3()} onClick={() => setShowPassword3((prev) => !prev)}/>
+                            <img className="change-pass-pass-show" src={getEye3()} style={{filter: getFilter()}} onClick={() => setShowPassword3((prev) => !prev)}/>
                             <input className="change-pass-pass-input" type={showPassword3 ? "text" : "password"} spellCheck={false} value={confirmNewPassword} onChange={(event) => setConfirmNewPassword(event.target.value)} onKeyDown={(event) => event.key === "Enter" ? submit() : null}/>
                         </div>
                     </div>

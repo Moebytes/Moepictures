@@ -2,53 +2,17 @@ import React, {useContext, useEffect, useState, useReducer} from "react"
 import {useHistory} from "react-router-dom"
 import {ThemeContext, HideNavbarContext, HideSortbarContext, EnableDragContext, MobileContext, UnverifiedPostsContext,
 RelativeContext, HideTitlebarContext, SearchContext, SearchFlagContext, PostsContext, ShowDeletePostDialogContext,
-TagsContext, RandomFlagContext, ImageSearchFlagContext, SessionContext, QuickEditIDContext, QuickEditUnverifiedContext} from "../Context"
+TagsContext, RandomFlagContext, ImageSearchFlagContext, SessionContext, QuickEditIDContext, QuickEditUnverifiedContext,
+SiteHueContext, SiteLightnessContext, SiteSaturationContext} from "../Context"
 import {HashLink as Link} from "react-router-hash-link"
 import favicon from "../assets/purple/favicon.png"
-import faviconMagenta from "../assets/magenta/favicon.png"
-import searchIcon from "../assets/purple/search.png"
-import searchImage from "../assets/purple/search-image.png"
-import searchMagenta from "../assets/magenta/search.png"
-import searchImageMagenta from "../assets/magenta/search-image.png"
-import searchPurpleLight from "../assets/purple-light/search.png"
-import searchImagePurpleLight from "../assets/purple-light/search-image.png"
-import searchMagentaLight from "../assets/magenta-light/search.png"
-import searchImageMagentaLight from "../assets/magenta-light/search-image.png"
-import random from "../assets/purple/random.png"
-import randomMagenta from "../assets/magenta/random.png"
-import randomPurpleLight from "../assets/purple-light/random.png"
-import randomMagentaLight from "../assets/magenta-light/random.png"
-import randomMobile from "../assets/purple/random-mobile.png"
-import randomMobileMagenta from "../assets/magenta/random-mobile.png"
-import randomMobilePurpleLight from "../assets/purple-light/random-mobile.png"
-import randomMobileMagentaLight from "../assets/magenta-light/random-mobile.png"
-import terms from "../assets/purple/terms.png"
-import termsMagenta from "../assets/magenta/terms.png"
-import termsPurpleLight from "../assets/purple-light/terms.png"
-import termsMagentaLight from "../assets/magenta-light/terms.png"
-import contact from "../assets/purple/contact.png"
-import contactMagenta from "../assets/magenta/contact.png"
-import contactPurpleLight from "../assets/purple-light/contact.png"
-import contactMagentaLight from "../assets/magenta-light/contact.png"
-import code from "../assets/purple/code.png"
-import codeMagenta from "../assets/magenta/code.png"
-import codePurpleLight from "../assets/purple-light/code.png"
-import codeMagentaLight from "../assets/magenta-light/code.png"
-import artistImg from "../assets/images/artist.png"
 import setAvatar from "../assets/purple/setavatar.png"
-import setAvatarMagenta from "../assets/magenta/setavatar.png"
 import addTranslation from "../assets/purple/addtranslation.png"
-import addTranslationMagenta from "../assets/magenta/addtranslation.png"
 import report from "../assets/purple/report.png"
-import reportMagenta from "../assets/magenta/report.png"
 import edit from "../assets/purple/edit.png"
-import editMagenta from "../assets/magenta/edit.png"
 import historyIcon from "../assets/purple/history.png"
-import historyMagenta from "../assets/magenta/history.png"
 import quickEdit from "../assets/purple/quickedit.png"
-import quickEditMagenta from "../assets/magenta/quickedit.png"
 import deleteIcon from "../assets/purple/delete.png"
-import deleteIconMagenta from "../assets/magenta/delete.png"
 import rejectRed from "../assets/purple/reject-red.png"
 import approveGreen from "../assets/purple/approve-green.png"
 import adminCrown from "../assets/purple/admin-crown.png"
@@ -74,6 +38,9 @@ interface Props {
 const MobileInfo: React.FunctionComponent<Props> = (props) => {
     const [ignored, forceUpdate] = useReducer(x => x + 1, 0)
     const {theme, setTheme} = useContext(ThemeContext)
+    const {siteHue, setSiteHue} = useContext(SiteHueContext)
+    const {siteSaturation, setSiteSaturation} = useContext(SiteSaturationContext)
+    const {siteLightness, setSiteLightness} = useContext(SiteLightnessContext)
     const {hideSortbar, setHideSortbar} = useContext(HideSortbarContext)
     const {hideNavbar, setHideNavbar} = useContext(HideNavbarContext)
     const {hideTitlebar, setHideTitlebar} = useContext(HideTitlebarContext)
@@ -98,20 +65,19 @@ const MobileInfo: React.FunctionComponent<Props> = (props) => {
     const {quickEditUnverified, setQuickEditUnverified} = useContext(QuickEditUnverifiedContext)
     const history = useHistory()
 
+    const getFilter = () => {
+        return `hue-rotate(${siteHue - 180}deg) saturate(${siteSaturation}%) brightness(${siteLightness + 70}%)`
+    }
+
     const updateTags = async () => {
         const tags = await functions.parseTags(posts)
         setTags(tags)
     }
 
-    const getFavicon = () => {
-        if (theme.includes("magenta")) return faviconMagenta 
-        return favicon
-    }
-
     const updateUserImg = async () => {
         if (props.post) {
             const uploader = await axios.get("/api/user", {params: {username: props.post.uploader}, withCredentials: true}).then((r) => r.data)
-            setUploaderImage(uploader?.image ? functions.getTagLink("pfp", uploader.image) : getFavicon())
+            setUploaderImage(uploader?.image ? functions.getTagLink("pfp", uploader.image) : favicon)
             if (uploader?.role) setUploaderRole(uploader.role)
             const updater = await axios.get("/api/user", {params: {username: props.post.updater}, withCredentials: true}).then((r) => r.data)
             if (updater?.role) setUpdaterRole(updater.role)
@@ -130,101 +96,6 @@ const MobileInfo: React.FunctionComponent<Props> = (props) => {
     useEffect(() => {
         updateTags()
     }, [posts])
-
-    const getSearchIcon = () => {
-        if (theme === "purple") return searchIcon
-        if (theme === "purple-light") return searchPurpleLight
-        if (theme === "magenta") return searchMagenta
-        if (theme === "magenta-light") return searchMagentaLight
-        return searchIcon
-    }
-
-    const getSearchImageIcon = () => {
-        if (theme === "purple") return searchImage
-        if (theme === "purple-light") return searchImagePurpleLight
-        if (theme === "magenta") return searchImageMagenta
-        if (theme === "magenta-light") return searchImageMagentaLight
-        return searchImage
-    }
-
-    const getRandomIcon = () => {
-        if (theme === "purple") return random
-        if (theme === "purple-light") return randomPurpleLight
-        if (theme === "magenta") return randomMagenta
-        if (theme === "magenta-light") return randomMagentaLight
-        return random
-    }
-
-    const getRandomMobileIcon = () => {
-        if (theme === "purple") return randomMobile
-        if (theme === "purple-light") return randomMobilePurpleLight
-        if (theme === "magenta") return randomMobileMagenta
-        if (theme === "magenta-light") return randomMobileMagentaLight
-        return randomMobile
-    }
-
-    const getTermsIcon = () => {
-        if (theme === "purple") return terms
-        if (theme === "purple-light") return termsPurpleLight
-        if (theme === "magenta") return termsMagenta
-        if (theme === "magenta-light") return termsMagentaLight
-        return terms
-    }
-
-    const getContactIcon = () => {
-        if (theme === "purple") return contact
-        if (theme === "purple-light") return contactPurpleLight
-        if (theme === "magenta") return contactMagenta
-        if (theme === "magenta-light") return contactMagentaLight
-        return contact
-    }
-
-    const getCodeIcon = () => {
-        if (theme === "purple") return code
-        if (theme === "purple-light") return codePurpleLight
-        if (theme === "magenta") return codeMagenta
-        if (theme === "magenta-light") return codeMagentaLight
-        return code
-    }
-
-    const getSetAvatar = () => {
-        if (theme.includes("magenta")) return setAvatarMagenta
-        return setAvatar
-    }
-
-    const getAddTranslation = () => {
-        if (theme.includes("magenta")) return addTranslationMagenta
-        return addTranslation
-    }
-
-    const getReport = () => {
-        if (theme.includes("magenta")) return reportMagenta
-        return report
-    }
-
-    const getEdit = () => {
-        if (theme.includes("magenta")) return editMagenta
-        return edit
-    }
-
-    const getShowTags = () => {
-        return tagIcon
-    }
-
-    const getHistory = () => {
-        if (theme.includes("magenta")) return historyMagenta
-        return historyIcon
-    }
-
-    const getDeleteIcon = () => {
-        if (theme.includes("magenta")) return deleteIconMagenta
-        return deleteIcon
-    }
-
-    const getQuickEdit = () => {
-        if (theme.includes("magenta")) return quickEditMagenta
-        return quickEdit
-    }
 
     const generateArtistsJSX = () => {
         let jsx = [] as any
@@ -457,8 +328,8 @@ const MobileInfo: React.FunctionComponent<Props> = (props) => {
 
     const tagCaptchaJSX = () => {
         if (!session) return
-        if (session.captchaAmount === undefined) session.captchaAmount = 501
-        if (session.captchaAmount > 500) {
+        if (session.captchaAmount === undefined) session.captchaAmount = 0
+        if (session.captchaAmount > 1000) {
             if (!history.location.pathname.includes("/post/") && !history.location.pathname.includes("/edit-post")) return
             const toggleCaptcha = () => {
                 sessionStorage.setItem("ignoreCaptcha", "false")
@@ -468,7 +339,7 @@ const MobileInfo: React.FunctionComponent<Props> = (props) => {
                 <div className="mobileinfo-subcontainer-column">
                     <div className="mobileinfo-row">
                         <span className="tag-hover" onClick={toggleCaptcha}>
-                            <img className="mobileinfo-icon" src={getShowTags()}/>
+                            <img className="mobileinfo-icon" src={tagIcon}/>
                             <span className="tag-red">Show Tags</span>
                         </span>
                     </div>
@@ -479,8 +350,8 @@ const MobileInfo: React.FunctionComponent<Props> = (props) => {
 
     const noTagsArtist = () => {
         if (!session) return
-        if (session.captchaAmount === undefined) session.captchaAmount = 501
-        if (session.captchaAmount > 500) {
+        if (session.captchaAmount === undefined) session.captchaAmount = 0
+        if (session.captchaAmount > 1000) {
             return (
             <div className="mobileinfo-row">
                 <span className="tag">Artist:</span>
@@ -522,6 +393,10 @@ const MobileInfo: React.FunctionComponent<Props> = (props) => {
                         <div className="mobileinfo-row">
                             <span className="tag">Source:</span>
                             <span className="tag-alt-link" onClick={() => window.open(props.post.link, "_blank")}>{getDomain()}</span>
+                        </div>
+                        <div className="mobileinfo-row">
+                            <span className="tag">Bookmarks:</span>
+                            <span className="tag-alt">{props.post.bookmarks ? props.post.bookmarks : "?"}</span>
                         </div>
                     </div> </>
                 : null}
@@ -612,22 +487,23 @@ const MobileInfo: React.FunctionComponent<Props> = (props) => {
                     <div className="mobileinfo-subcontainer-column">
                         <div className="mobileinfo-row">
                             <span className="tag-hover" onClick={triggerQuickEdit}>
-                                <img className="mobileinfo-icon" src={getQuickEdit()}/>
+                                <img className="mobileinfo-icon" src={quickEdit} style={{filter: getFilter()}}/>
                                 <span className="tag">Quick Edit</span>
                             </span>
                         </div>
                         <div className="mobileinfo-row">
                             <span className="tag-hover" onClick={triggerSetAvatar}>
-                                <img className="mobileinfo-icon" src={getSetAvatar()}/>
+                                <img className="mobileinfo-icon" src={setAvatar} style={{filter: getFilter()}}/>
                                 <span className="tag">Set Avatar</span>
                             </span>
-                        </div>{/* 
+                        </div>
                         <div className="mobileinfo-row">
                             <span className="tag-hover">
-                                <img className="mobileinfo-icon" src={getAddTranslation()}/>
+                                <img className="mobileinfo-icon" src={addTranslation} style={{filter: getFilter()}}/>
                                 <span className="tag">Add Translation</span>
                             </span>
                         </div>
+                        {/* 
                         <div className="mobileinfo-row">
                             <span className="tag-hover">
                                 <img className="mobileinfo-icon" src={getReport()}/>
@@ -636,7 +512,7 @@ const MobileInfo: React.FunctionComponent<Props> = (props) => {
                         </div> */}
                         <div className="mobileinfo-row">
                             <span className="tag-hover" onClick={editPost}>
-                                <img className="mobileinfo-icon" src={getEdit()}/>
+                                <img className="mobileinfo-icon" src={edit}/>
                                 <span className="tag-red">Edit</span>
                             </span>
                         </div>
@@ -654,16 +530,16 @@ const MobileInfo: React.FunctionComponent<Props> = (props) => {
                             </span>
                         </div>
                         </> : null}
-                        {/* <div className="mobileinfo-row">
+                        <div className="mobileinfo-row">
                             <span className="tag-hover">
-                                <img className="mobileinfo-icon" src={getHistory()}/>
+                                <img className="mobileinfo-icon" src={historyIcon}/>
                                 <span className="tag-red">History</span>
                             </span>
-                        </div> */}
+                        </div>
                         {!props.unverified ?
                         <div className="mobileinfo-row">
                             <span className="tag-hover" onClick={deletePost}>
-                                <img className="mobileinfo-icon" src={getDeleteIcon()}/>
+                                <img className="mobileinfo-icon" src={deleteIcon}/>
                                 <span className="tag-red">Delete</span>
                             </span>
                         </div> : null}

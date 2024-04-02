@@ -213,6 +213,7 @@ const CreateRoutes = (app: Express) => {
           link: source.link ? source.link : null,
           commentary: source.commentary ? source.commentary : null,
           translatedCommentary: source.translatedCommentary ? source.translatedCommentary : null,
+          bookmarks: source.bookmarks ? source.bookmarks : null,
           mirrors: source.mirrors ? functions.mirrorsJSON(source.mirrors) : null,
           type,
           uploadDate,
@@ -453,6 +454,7 @@ const CreateRoutes = (app: Express) => {
           link: source.link ? source.link : null,
           commentary: source.commentary ? source.commentary : null,
           translatedCommentary: source.translatedCommentary ? source.translatedCommentary : null,
+          bookmarks: source.bookmarks ? source.bookmarks : null,
           mirrors: source.mirrors ? functions.mirrorsJSON(source.mirrors) : null,
           type,
           updatedDate,
@@ -556,7 +558,7 @@ const CreateRoutes = (app: Express) => {
             }
             await sql.insertPostHistory(vanilla.user, postID, vanillaImages, vanilla.uploader, vanilla.updater, vanilla.uploadDate, vanilla.updatedDate,
                 vanilla.type, vanilla.restrict, vanilla.style, vanilla.thirdParty, vanilla.title, vanilla.translatedTitle, vanilla.drawn, vanilla.artist,
-                vanilla.link, vanilla.commentary, vanilla.translatedCommentary, vanilla.mirrors, vanilla.artists, vanilla.characters, vanilla.series, vanilla.tags)
+                vanilla.link, vanilla.commentary, vanilla.translatedCommentary, vanilla.bookmarks, vanilla.mirrors, vanilla.artists, vanilla.characters, vanilla.series, vanilla.tags)
 
             let newImages = [] as any
             for (let i = 0; i < images.length; i++) {
@@ -567,7 +569,7 @@ const CreateRoutes = (app: Express) => {
             }
             await sql.insertPostHistory(req.session.username, postID, newImages, post.uploader, post.updater, post.uploadDate, post.updatedDate,
             post.type, post.restrict, post.style, post.thirdParty, post.title, post.translatedTitle, post.drawn, post.artist,
-            post.link, post.commentary, post.translatedCommentary, post.mirrors, artists, characters, series, tags, reason)
+            post.link, post.commentary, post.translatedCommentary, post.bookmarks, post.mirrors, artists, characters, series, tags, reason)
         } else {
             let newImages = [] as any
             const nextKey = await serverFunctions.getNextKey("post", String(postID))
@@ -579,7 +581,7 @@ const CreateRoutes = (app: Express) => {
             }
             await sql.insertPostHistory(req.session.username, postID, newImages, post.uploader, post.updater, post.uploadDate, post.updatedDate,
             post.type, post.restrict, post.style, post.thirdParty, post.title, post.translatedTitle, post.drawn, post.artist,
-            post.link, post.commentary, post.translatedCommentary, post.mirrors, artists, characters, series, tags, reason)
+            post.link, post.commentary, post.translatedCommentary, post.bookmarks, post.mirrors, artists, characters, series, tags, reason)
         }
         res.status(200).send("Success")
       } catch (e) {
@@ -713,6 +715,7 @@ const CreateRoutes = (app: Express) => {
           link: source.link ? source.link : null,
           commentary: source.commentary ? source.commentary : null,
           translatedCommentary: source.translatedCommentary ? source.translatedCommentary : null,
+          bookmarks: source.bookmarks ? source.bookmarks : null,
           mirrors: source.mirrors ? functions.mirrorsJSON(source.mirrors) : null,
           type,
           uploadDate,
@@ -950,6 +953,7 @@ const CreateRoutes = (app: Express) => {
           link: source.link ? source.link : null,
           commentary: source.commentary ? source.commentary : null,
           translatedCommentary: source.translatedCommentary ? source.translatedCommentary : null,
+          bookmarks: source.bookmarks ? source.bookmarks : null,
           mirrors: source.mirrors ? functions.mirrorsJSON(source.mirrors) : null,
           type,
           updatedDate,
@@ -1125,6 +1129,7 @@ const CreateRoutes = (app: Express) => {
           link: unverified.link ? unverified.link : null,
           commentary: unverified.commentary ? unverified.commentary : null,
           translatedCommentary: unverified.translatedCommentary ? unverified.translatedCommentary : null,
+          bookmarks: unverified.bookmarks ? unverified.bookmarks : null,
           mirrors: unverified.mirrors ? functions.mirrorsJSON(unverified.mirrors) : null,
           type,
           uploadDate: unverified.uploadDate,

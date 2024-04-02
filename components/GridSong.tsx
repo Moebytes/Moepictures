@@ -1,16 +1,15 @@
 import React, {useContext, useEffect, useRef, useState, forwardRef, useImperativeHandle} from "react"
 import {useHistory} from "react-router-dom"
 import loading from "../assets/purple/loading.gif"
-import loadingMagenta from "../assets/magenta/loading.gif"
 import {ThemeContext, SizeTypeContext, BrightnessContext, ContrastContext, HueContext, SaturationContext, LightnessContext, MobileContext, ScrollYContext,
-BlurContext, SharpenContext, SquareContext, PixelateContext, DownloadFlagContext, DownloadURLsContext, SpeedContext, ReverseContext, ScrollContext} from "../Context"
+BlurContext, SharpenContext, SquareContext, PixelateContext, DownloadFlagContext, DownloadURLsContext, SpeedContext, ReverseContext, ScrollContext, SiteHueContext,
+SiteLightnessContext, SiteSaturationContext} from "../Context"
 import {HashLink as Link} from "react-router-hash-link"
 import path from "path"
 import functions from "../structures/Functions"
 import cryptoFunctions from "../structures/CryptoFunctions"
 import "./styles/gridimage.less"
 import musicNote from "../assets/purple/music-note.png"
-import musicNoteMagenta from "../assets/magenta/music-note.png"
 import axios from "axios"
 
 interface Props {
@@ -29,6 +28,9 @@ interface Ref {
 
 const GridSong = forwardRef<Ref, Props>((props, componentRef) => {
     const {theme, setTheme} = useContext(ThemeContext)
+    const {siteHue, setSiteHue} = useContext(SiteHueContext)
+    const {siteSaturation, setSiteSaturation} = useContext(SiteSaturationContext)
+    const {siteLightness, setSiteLightness} = useContext(SiteLightnessContext)
     const {sizeType, setSizeType} = useContext(SizeTypeContext)
     const [imageSize, setImageSize] = useState(270) as any
     const {brightness, setBrightness} = useContext(BrightnessContext)
@@ -65,6 +67,10 @@ const GridSong = forwardRef<Ref, Props>((props, componentRef) => {
     const {scroll, setScroll} = useContext(ScrollContext)
     const [image, setImage] = useState(null) as any
     const history = useHistory()
+
+    const getFilter = () => {
+        return `hue-rotate(${siteHue - 180}deg) saturate(${siteSaturation}%) brightness(${siteLightness + 70}%)`
+    }
 
     useImperativeHandle(componentRef, () => ({
         shouldWait: async () => {
@@ -336,16 +342,6 @@ const GridSong = forwardRef<Ref, Props>((props, componentRef) => {
         pixelateRef.current.style.transform = "scale(1)"
     }
 
-    const getLoading = () => {
-        if (theme.includes("magenta")) return loadingMagenta
-        return loading
-    }
-
-    const getMusicNote = () => {
-        if (theme.includes("magenta")) return musicNoteMagenta
-        return musicNote
-    }
-
     const onLoad = (event: any) => {
         setImageWidth(event.target.width)
         setImageHeight(event.target.height)
@@ -488,7 +484,7 @@ const GridSong = forwardRef<Ref, Props>((props, componentRef) => {
     return (
         <div style={{opacity: visible ? "1" : "0", transition: "opacity 0.1s"}} className="image-box" id={String(props.id)} ref={containerRef} onClick={onClick} onAuxClick={onClick} onMouseDown={mouseDown} onMouseUp={mouseUp} onMouseMove={mouseMove}>
             <div className="image-filters" ref={imageFiltersRef} onMouseMove={(event) => imageAnimation(event)} onMouseLeave={() => cancelImageAnimation()}>
-                <img className="song-icon" src={getMusicNote()} ref={songIconRef}/>
+                <img className="song-icon" src={musicNote} style={{filter: getFilter()}} ref={songIconRef}/>
                 <canvas draggable={false} className="lightness-overlay" ref={lightnessRef}></canvas>
                 <canvas draggable={false} className="sharpen-overlay" ref={overlayRef}></canvas>
                 <canvas draggable={false} className="pixelate-canvas" ref={pixelateRef}></canvas>

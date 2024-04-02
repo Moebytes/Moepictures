@@ -5,7 +5,6 @@ EditCommentIDContext, EditCommentFlagContext, EditCommentTextContext, ReportComm
 import {HashLink as Link} from "react-router-hash-link"
 import functions from "../structures/Functions"
 import favicon from "../assets/purple/favicon.png"
-import faviconMagenta from "../assets/magenta/favicon.png"
 import commentQuote from "../assets/purple/commentquote.png"
 import commentReport from "../assets/purple/commentreport.png"
 import commentEdit from "../assets/purple/commentedit.png"
@@ -36,16 +35,11 @@ const Comment: React.FunctionComponent<Props> = (props) => {
     const history = useHistory()
     const comment = props.comment.comment
 
-    const getFavicon = () => {
-        if (theme.includes("magenta")) return faviconMagenta 
-        return favicon
-    }
-
     const getCommentPFP = () => {
         if (props.comment.image) {
             return functions.getTagLink("pfp", props.comment.image)
         } else {
-            return getFavicon()
+            return favicon
         }
     }
 

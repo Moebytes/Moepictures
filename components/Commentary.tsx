@@ -1,9 +1,8 @@
 import React, {useContext, useEffect, useRef, useState} from "react"
-import {ThemeContext, EnableDragContext} from "../Context"
+import {ThemeContext, EnableDragContext, SiteHueContext, SiteLightnessContext, SiteSaturationContext} from "../Context"
 import {HashLink as Link} from "react-router-hash-link"
 import functions from "../structures/Functions"
 import commentaryTranslate from "../assets/purple/commentarytranslate.png"
-import commentaryTranslateMagenta from "../assets/magenta/commentarytranslate.png"
 import axios from "axios"
 import "./styles/commentary.less"
 
@@ -14,10 +13,17 @@ interface Props {
 
 const Commentary: React.FunctionComponent<Props> = (props) => {
     const {theme, setTheme} = useContext(ThemeContext)
+    const {siteHue, setSiteHue} = useContext(SiteHueContext)
+    const {siteSaturation, setSiteSaturation} = useContext(SiteSaturationContext)
+    const {siteLightness, setSiteLightness} = useContext(SiteLightnessContext)
     const {enableDrag, setEnableDrag} = useContext(EnableDragContext)
     const [showTranslated, setShowTranslated] = useState(false)
     const [text, setText] = useState(props.text)
     const [translatedText, setTranslatedText] = useState(null)
+
+    const getFilter = () => {
+        return `hue-rotate(${siteHue - 180}deg) saturate(${siteSaturation}%) brightness(${siteLightness + 70}%)`
+    }
 
     useEffect(() => {
         setText(props.text)
@@ -42,16 +48,11 @@ const Commentary: React.FunctionComponent<Props> = (props) => {
         }
     }, [showTranslated])
 
-    const getCommentaryTranslate = () => {
-        if (theme.includes("magenta")) return commentaryTranslateMagenta
-        return commentaryTranslate
-    }
-
     return (
         <div className="commentary">
             <div className="commentary-title-container">
                 <div className="commentary-title">Artist Commentary</div>
-                <img className="commentary-img" src={getCommentaryTranslate()} onClick={() => setShowTranslated((prev: boolean) => !prev)}/>
+                <img className="commentary-img" src={commentaryTranslate} style={{filter: getFilter()}} onClick={() => setShowTranslated((prev: boolean) => !prev)}/>
             </div>
             <div className="commentary-container" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                 <span className="commentary-text">

@@ -1,7 +1,8 @@
 import React, {useContext, useEffect, useRef, useState, useReducer} from "react"
 import {ThemeContext, EnableDragContext, BrightnessContext, ContrastContext, HueContext, SaturationContext, LightnessContext,
 BlurContext, SharpenContext, PixelateContext, DownloadFlagContext, DownloadURLsContext, DisableZoomContext, SpeedContext,
-ReverseContext, MobileContext, TranslationModeContext, TranslationDrawingEnabledContext, SessionContext} from "../Context"
+ReverseContext, MobileContext, TranslationModeContext, TranslationDrawingEnabledContext, SessionContext, SiteHueContext,
+SiteLightnessContext, SiteSaturationContext} from "../Context"
 import {HashLink as Link} from "react-router-hash-link"
 import functions from "../structures/Functions"
 import cryptoFunctions from "../structures/CryptoFunctions"
@@ -20,7 +21,6 @@ import audioVolumeIcon from "../assets/purple/audio-volume.png"
 import audioVolumeLowIcon from "../assets/purple/audio-volume-low.png"
 import audioVolumeMuteIcon from "../assets/purple/audio-volume-mute.png"
 import translationToggleOn from "../assets/purple/translation-toggle-on.png"
-import translationToggleOnMagenta from "../assets/magenta/translation-toggle-on.png"
 import TranslationEditor from "./TranslationEditor"
 import path from "path"
 import * as Tone from "tone"
@@ -68,6 +68,9 @@ if (typeof window !== "undefined") initialize()
 const PostSong: React.FunctionComponent<Props> = (props) => {
     const [ignored, forceUpdate] = useReducer(x => x + 1, 0)
     const {theme, setTheme} = useContext(ThemeContext)
+    const {siteHue, setSiteHue} = useContext(SiteHueContext)
+    const {siteSaturation, setSiteSaturation} = useContext(SiteSaturationContext)
+    const {siteLightness, setSiteLightness} = useContext(SiteLightnessContext)
     const {session, setSessions} = useContext(SessionContext)
     const {enableDrag, setEnableDrag} = useContext(EnableDragContext)
     const {brightness, setBrightness} = useContext(BrightnessContext)
@@ -115,6 +118,10 @@ const PostSong: React.FunctionComponent<Props> = (props) => {
     const [effects, setEffects] = useState([]) as any
     const [init, setInit] = useState(false)
     const [buttonHover, setButtonHover] = useState(false)
+
+    const getFilter = () => {
+        return `hue-rotate(${siteHue - 180}deg) saturate(${siteSaturation}%) brightness(${siteLightness + 70}%)`
+    }
     
     const loadAudio = async () => {
         if (!player || !grain) return
@@ -373,11 +380,6 @@ const PostSong: React.FunctionComponent<Props> = (props) => {
             setDragProgress(null)
         }
     }, [dragging, dragProgress])
-
-    const getTranslationToggleOnIcon = () => {
-        if (theme.includes("magenta")) return translationToggleOnMagenta
-        return translationToggleOn
-    }
 
     const getPreversePitchIcon = () => {
         if (preservesPitch) return audioPreservePitchIcon
@@ -690,7 +692,7 @@ const PostSong: React.FunctionComponent<Props> = (props) => {
             <div className="post-song-box" ref={containerRef} style={{display: translationMode ? "none" : "flex"}}>
                 <div className="post-song-filters" ref={fullscreenRef}>
                     <div className={`post-image-top-buttons ${buttonHover ? "show-post-image-top-buttons" : ""}`} onMouseEnter={() => setButtonHover(true)} onMouseLeave={() => setButtonHover(false)}>
-                        {!props.noTranslations && session.username ? <img draggable={false} className="post-image-top-button" src={getTranslationToggleOnIcon()} onClick={() => {setTranslationMode(true); setTranslationDrawingEnabled(true)}}/> : null}
+                        {!props.noTranslations && session.username ? <img draggable={false} className="post-image-top-button" src={translationToggleOn} style={{filter: getFilter()}} onClick={() => {setTranslationMode(true); setTranslationDrawingEnabled(true)}}/> : null}
                     </div>
                     <canvas draggable={false} className="dummy-post-song" ref={dummyRef}></canvas>
                     <div className="relative-ref">

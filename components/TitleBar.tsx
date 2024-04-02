@@ -2,21 +2,84 @@ import React, {useContext, useEffect, useState} from "react"
 import {useHistory} from "react-router-dom"
 import {HashLink as Link} from "react-router-hash-link"
 import favicon from "../assets/purple/favicon.png"
-import faviconMagenta from "../assets/magenta/favicon.png"
 import {ThemeContext, HideNavbarContext, EnableDragContext, RelativeContext, HideTitlebarContext, HeaderFlagContext,
 SearchContext, SearchFlagContext, ImageTypeContext, RestrictTypeContext, StyleTypeContext, SortTypeContext,
-HeaderTextContext, HideMobileNavbarContext, MobileContext, VisiblePostsContext, ScrollYContext, MobileScrollingContext} from "../Context"
+HeaderTextContext, HideMobileNavbarContext, MobileContext, VisiblePostsContext, ScrollYContext, MobileScrollingContext, 
+SiteHueContext, SiteLightnessContext, SiteSaturationContext} from "../Context"
 import functions from "../structures/Functions"
 import hamburger from "../assets/purple/hamburger.png"
-import hamburgerMagenta from "../assets/magenta/hamburger.png"
 import "./styles/titlebar.less"
+
+const darkColorList = {
+    "--selection": "#6c69fc",
+    "--background": "#09071c",
+    "--background2": "#080622",
+    "--titlebarBG": "#090420",
+    "--titleTextA": "#6814ff",
+    "--titleTextB": "#4214ff",
+    "--titlebarText": "#431dff",
+    "--navbarBG": "#0b0322",
+    "--navbarText": "#3a1cff",
+    "--navbarUserText": "#fe23ae",
+    "--sidebarBG": "#0a041e",
+    "--sidebarSearchFocus": "#2908e0",
+    "--sidebarSearchBG": "#0e0631",
+    "--tagColor": "#641fff",
+    "--sortbarBG": "rgba(11, 3, 34, 0.95)",
+    "--tooltipBG": "rgba(11, 3, 34, 0.85)",
+    "--sortbarText": "#3538fc",
+    "--imageBorder": "#0a0f7f",
+    "--inputBorder": "#000000",
+    "--text": "#5a56ff",
+    "--text-alt": "#8b4dff",
+    "--inputBG": "#050020",
+    "--footerBG": "#0b0322",
+    "--drop-color1": "rgba(59, 13, 165, 0.7)",
+    "--drop-color2": "rgba(86, 26, 226, 0.9)",
+    "--bubbleBG": "rgba(89, 43, 255, 0.8)",
+    "--binary": "#000000",
+}
+
+const lightColorList = {
+    "--selection": "#e0e0ff",
+    "--background": "#ffffff",
+    "--background2": "#f7f7ff",
+    "--titlebarBG": "#dfdfff",
+    "--titleTextA": "#745dff",
+    "--titleTextB": "#5d60ff",
+    "--titlebarText": "#7e66ff",
+    "--navbarBG": "#dbddff",
+    "--navbarText": "#6c47ff",
+    "--navbarUserText": "#ad3cff",
+    "--sidebarBG": "#e8e9ff",
+    "--sidebarSearchFocus": "#8581ff",
+    "--sidebarSearchBG": "#dbdaff",
+    "--tagColor": "#9957ff",
+    "--sortbarBG": "rgba(240, 240, 255, 0.3)",
+    "--tooltipBG": "rgba(240, 240, 255, 0.5)",
+    "--sortbarText": "#6d77ff",
+    "--imageBorder": "#7fa0ff",
+    "--inputBorder": "#7fa0ff",
+    "--text": "#7b6dff",
+    "--text-alt": "#cb7cff",
+    "--inputBG": "#f4f2ff",
+    "--footerBG": "#dfdfff",
+    "--drop-color1": "rgba(153, 112, 250, 0.7)",
+    "--drop-color2": "rgba(158, 124, 252, 0.9)",
+    "--bubbleBG": "rgba(202, 171, 255, 0.8)",
+    "--binary": "#ffffff",
+}
 
 interface Props {
     reset?: boolean
     goBack?: boolean
+    rerender?: () => void
 }
 
 const TitleBar: React.FunctionComponent<Props> = (props) => {
+    const {siteHue, setSiteHue} = useContext(SiteHueContext)
+    const {siteSaturation, setSiteSaturation} = useContext(SiteSaturationContext)
+    const {siteLightness, setSiteLightness} = useContext(SiteLightnessContext)
     const {theme, setTheme} = useContext(ThemeContext)
     const {hideNavbar, setHideNavbar} = useContext(HideNavbarContext)
     const {hideTitlebar, setHideTitlebar} = useContext(HideTitlebarContext)
@@ -40,7 +103,46 @@ const TitleBar: React.FunctionComponent<Props> = (props) => {
     useEffect(() => {
         const savedTheme = localStorage.getItem("theme")
         if (savedTheme) setTheme(savedTheme)
+        const savedHue = localStorage.getItem("siteHue")
+        const savedSaturation = localStorage.getItem("siteSaturation")
+        const savedLightness = localStorage.getItem("siteLightness")
+        if (savedHue) setSiteHue(Number(savedHue))
+        if (savedSaturation) setSiteSaturation(Number(savedSaturation))
+        if (savedLightness) setSiteLightness(Number(savedLightness))
     }, [])
+
+    useEffect(() => {
+        if (typeof window === "undefined") return
+        const colorList = theme.includes("light") ? lightColorList : darkColorList
+        for (let i = 0; i < Object.keys(colorList).length; i++) {
+            const key = Object.keys(colorList)[i]
+            const color = Object.values(colorList)[i]
+            document.documentElement.style.setProperty(key, functions.rotateColor(color, siteHue, siteSaturation, siteLightness))
+        }
+        setTimeout(() => {
+            props.rerender?.()
+        }, 100)
+        localStorage.setItem("siteHue", siteHue)
+        localStorage.setItem("siteSaturation", siteSaturation)
+        localStorage.setItem("siteLightness", siteLightness)
+    }, [theme, siteHue, siteSaturation, siteLightness])
+
+    useEffect(() => {
+        if (theme.includes("magenta")) {
+            setSiteHue(250)
+        } else {
+            setSiteHue(180)
+        }
+    }, [theme])
+
+    const resetFilters = () => {
+        setSiteHue(180)
+        setSiteSaturation(100)
+        setSiteLightness(50)
+        setTimeout(() => {
+            props.rerender?.()
+        }, 100)
+    }
 
     useEffect(() => {
         if (headerFlag) {
@@ -54,14 +156,8 @@ const TitleBar: React.FunctionComponent<Props> = (props) => {
         }
     }, [headerFlag])
 
-    const getImg = () => {
-        if (theme.includes("magenta")) return faviconMagenta
-        return favicon
-    }
-
-    const getBurger = () => {
-        if (theme.includes("magenta")) return hamburgerMagenta
-        return hamburger
+    const getFilter = () => {
+        return `hue-rotate(${siteHue - 180}deg) saturate(${siteSaturation}%) brightness(${siteLightness + 70}%)`
     }
 
     const toggleMobileNavbar = () => {
@@ -103,7 +199,7 @@ const TitleBar: React.FunctionComponent<Props> = (props) => {
         <div className={`titlebar ${hideTitlebar ? "hide-titlebar" : ""} ${relative ? "titlebar-relative" : ""} ${mobileScrolling ? "hide-mobile-titlebar" : ""}`} onMouseEnter={() => setEnableDrag(false)}>
             {mobile ?
             <div className="titlebar-hamburger-container">
-                <img className="titlebar-hamburger" src={getBurger()} onClick={toggleMobileNavbar}/>
+                <img className="titlebar-hamburger" src={hamburger} onClick={toggleMobileNavbar} style={{filter: getFilter()}}/>
             </div>
             : null}
             <div onClick={titleClick} className="titlebar-logo-container">
@@ -119,7 +215,7 @@ const TitleBar: React.FunctionComponent<Props> = (props) => {
                             <span className="titlebar-text-b">u</span>
                     </div>
                     <div className="titlebar-image-container">
-                        <img className="titlebar-img" src={getImg()}/>
+                        <img className="titlebar-img" src={favicon} style={{filter: getFilter()}}/>
                     </div>
                 </span>
             </div>

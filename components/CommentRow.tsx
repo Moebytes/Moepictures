@@ -7,7 +7,6 @@ import {HashLink as Link} from "react-router-hash-link"
 import functions from "../structures/Functions"
 import cryptoFunctions from "../structures/CryptoFunctions"
 import favicon from "../assets/purple/favicon.png"
-import faviconMagenta from "../assets/magenta/favicon.png"
 import commentQuote from "../assets/purple/commentquote.png"
 import commentReport from "../assets/purple/commentreport.png"
 import commentEdit from "../assets/purple/commentedit.png"
@@ -49,16 +48,11 @@ const CommentRow: React.FunctionComponent<Props> = (props) => {
     const ref = useRef<HTMLCanvasElement>(null)
     const comment = props.comment.comment
 
-    const getFavicon = () => {
-        if (theme.includes("magenta")) return faviconMagenta 
-        return favicon
-    }
-
     const getCommentPFP = () => {
         if (props.comment.image) {
             return functions.getTagLink("pfp", props.comment.image)
         } else {
-            return getFavicon()
+            return favicon
         }
     }
 

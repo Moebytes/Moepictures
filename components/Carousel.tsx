@@ -1,17 +1,11 @@
 import React, {useContext, useEffect, useRef, useState, useReducer, useMemo} from "react"
 import {ThemeContext, EnableDragContext, MobileContext, BrightnessContext, ContrastContext, HueContext, SaturationContext, LightnessContext,
-BlurContext, SharpenContext, PixelateContext} from "../Context"
+BlurContext, SharpenContext, PixelateContext, SiteHueContext, SiteLightnessContext, SiteSaturationContext} from "../Context"
 import {HashLink as Link} from "react-router-hash-link"
 import functions from "../structures/Functions"
 import cryptoFunctions from "../structures/CryptoFunctions"
 import arrowLeft from "../assets/purple/carousel-left.png"
 import arrowRight from "../assets/purple/carousel-right.png"
-import arrowLeftPurpleLight from "../assets/purple-light/carousel-left.png"
-import arrowRightPurpleLight from "../assets/purple-light/carousel-right.png"
-import arrowLeftMagenta from "../assets/magenta/carousel-left.png"
-import arrowRightMagenta from "../assets/magenta/carousel-right.png"
-import arrowLeftMagentaLight from "../assets/magenta-light/carousel-left.png"
-import arrowRightMagentaLight from "../assets/magenta-light/carousel-right.png"
 import "./styles/carousel.less"
 
 interface Props {
@@ -35,6 +29,9 @@ const loadAmount = 30
 
 const Carousel: React.FunctionComponent<Props> = (props) => {
     const [ignored, forceUpdate] = useReducer(x => x + 1, 0)
+    const {siteHue, setSiteHue} = useContext(SiteHueContext)
+    const {siteSaturation, setSiteSaturation} = useContext(SiteSaturationContext)
+    const {siteLightness, setSiteLightness} = useContext(SiteLightnessContext)
     const {theme, setTheme} = useContext(ThemeContext)
     const {enableDrag, setEnableDrag} = useContext(EnableDragContext)
     const {mobile, setMobile} = useContext(MobileContext)
@@ -62,6 +59,10 @@ const Carousel: React.FunctionComponent<Props> = (props) => {
     const [lastResetFlag, setLastResetFlag] = useState(null)
     const carouselRef = useRef<any>(null)
     const sliderRef = useRef<any>(null)
+
+    const getFilter = () => {
+        return `hue-rotate(${siteHue - 180}deg) saturate(${siteSaturation}%) brightness(${siteLightness + 70}%)`
+    }
 
     useEffect(() => {
         const newImagesRef = props.images.slice(0, loadAmount).map(() => React.createRef()) as any
@@ -140,22 +141,6 @@ const Carousel: React.FunctionComponent<Props> = (props) => {
             setUpdateImagesFlag(false)
         }
     }, [updateImagesFlag, images, visibleImages, visibleIndex, scrollTimeout])
-
-    const getArrowLeft = () => {
-        if (theme === "purple") return arrowLeft
-        if (theme === "magenta") return arrowLeftMagenta
-        if (theme === "purple-light") return arrowLeftPurpleLight
-        if (theme === "magenta-light") return arrowLeftMagentaLight
-        return arrowLeft
-    }
-
-    const getArrowRight = () => {
-        if (theme === "purple") return arrowRight
-        if (theme === "magenta") return arrowRightMagenta
-        if (theme === "purple-light") return arrowRightPurpleLight
-        if (theme === "magenta-light") return arrowRightMagentaLight
-        return arrowRight
-    }
 
     const handleIntersection = (entries: any) => {
         for (let entry of entries) {
@@ -463,11 +448,11 @@ const Carousel: React.FunctionComponent<Props> = (props) => {
 
     return (
         <div className="carousel" ref={carouselRef} style={{maxWidth: props.marginLeft ? `calc(100vw - ${functions.sidebarWidth()}px - 120px - ${props.marginLeft}px)` : `calc(100vw - ${functions.sidebarWidth()}px - 120px)`, overflowX: trackPad ? "auto" : "hidden"}} onScroll={handleScroll}>
-            <img className={`carousel-left ${showLeftArrow ? "arrow-visible" : ""}`} src={getArrowLeft()} onMouseEnter={arrowLeftEnter} onMouseLeave={() => setShowLeftArrow(false)} onClick={arrowLeftClick}/>
+            <img className={`carousel-left ${showLeftArrow ? "arrow-visible" : ""}`} src={arrowLeft} style={{filter: getFilter()}} onMouseEnter={arrowLeftEnter} onMouseLeave={() => setShowLeftArrow(false)} onClick={arrowLeftClick}/>
             <div className="slider" ref={sliderRef} onMouseDown={handleMouseDown} onMouseMove={handleMouseMove} onMouseUp={handleMouseUp} onTouchStart={handleTouchStart} onTouchMove={handleTouchMove} onTouchEnd={handleTouchEnd}>
                 {generateJSX()}
             </div>
-            <img className={`carousel-right ${showRightArrow ? "arrow-visible" : ""}`} src={getArrowRight()} onMouseEnter={arrowRightEnter} onMouseLeave={() => setShowRightArrow(false)} onClick={arrowRightClick}/>
+            <img className={`carousel-right ${showRightArrow ? "arrow-visible" : ""}`} src={arrowRight} style={{filter: getFilter()}} onMouseEnter={arrowRightEnter} onMouseLeave={() => setShowRightArrow(false)} onClick={arrowRightClick}/>
         </div>
     )
 }

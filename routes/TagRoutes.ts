@@ -192,15 +192,20 @@ const TagRoutes = (app: Express) => {
             }
             const tagHistory = await sql.tagHistory(tag)
             if (!tagHistory.length) {
-                const vanilla = await sql.tag(tag)
-                const posts = await sql.search([tag], "all", "all", "all", "reverse date", undefined, "1")
+                let targetTag = tag
+                let vanilla = await sql.tag(targetTag)
+                if (!vanilla) {
+                    targetTag = key.trim()
+                    vanilla = await sql.tag(targetTag)
+                }
+                let posts = await sql.search([targetTag], "all", "all", "all", "reverse date", undefined, "1")
                 vanilla.date = posts[0].uploadDate 
                 vanilla.user = posts[0].uploader
-                vanilla.key = tag
+                vanilla.key = targetTag
                 vanilla.aliases = vanilla.aliases.map((alias: any) => alias?.alias)
                 vanilla.implications = vanilla.implications.map((implication: any) => implication?.implication)
                 if (vanilla.image && vanillaImageBuffer) {
-                    const newImagePath = functions.getTagHistoryPath(tag, 1, vanilla.image)
+                    const newImagePath = functions.getTagHistoryPath(targetTag, 1, vanilla.image)
                     await serverFunctions.uploadFile(newImagePath, vanillaImageBuffer)
                     vanilla.image = newImagePath
                 } else {
