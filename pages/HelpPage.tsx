@@ -196,41 +196,41 @@ const HelpPage: React.FunctionComponent = (props) => {
                         Moebooru is a lot stricter with posts than most other image boards. We allow images, gifs, videos, comics, music, and models.<br/><br/>
                         Please read carefully through all of the uploading guidelines. <br/>
                         <span className="help-alt">
-                        ⇾ Must be drawn or modeled in the anime art style. No photographs or art drawn/modeled in other styles. <br/>
-                        ⇾ (Music only) The song should include elements that make it sound kawaii, including samples from anime is a good example. <br/>
-                        ⇾ The main subject should be a girl. Boys are allowed only as supporting characters.
-                        And art with other subjects (animals, food, backgrounds, etc). is not allowed. <br/>
-                        ⇾ It should be cute. If it doesn't evoke some feelings of cuteness, it won't get accepted. <br/>
-                        ⇾ No duplicates are allowed. Variations of the same image should be added to the original post. <br/>
-                        ⇾ Sketches and unfinished art might be allowed only if they are very good. <br/>
+                        ⇾ Must be drawn in the anime art style. No photographs/art drawn in other styles. <br/>
+                        ⇾ The main subject should be a girl. Boys are only allowed in minor roles. 
+                        Art with any other subjects (animals, food, backgrounds, etc). is not allowed. <br/>
+                        ⇾ (Music only) The song should include elements to make it sound kawaii, such as samples from anime. <br/>
+                        ⇾ It should be cute. That should be pretty self-explanatory. <br/>
+                        ⇾ No duplicates are allowed. Variations of the same image should get added to the original post. <br/>
+                        ⇾ Sketches and unfinished art may only be allowed only if they are very good. <br/>
                         ⇾ Color palette should be pleasant to look at, ie. there are no oversaturated colors that clash too much. <br/>
-                        ⇾ The drawing should look clean overall and shouldn't look messy or have obvious mistakes. <br/>
+                        ⇾ The drawing should be clean overall and shouldn't look messy or have obvious mistakes. <br/>
                         ⇾ The perspective, proportions, and anatomy shouldn't look weird. <br/>
                         ⇾ Animations should play faster than 2fps (shouldn't look stuttery). <br/>
                         ⇾ Source information is required for all posts. <br/>
                         ⇾ All tags should be romanized. Titles and commentary don't have to be romanized. <br/>
                         ⇾ No hentai. We allow light nudity but don't allow any sexual acts. <br/>
-                        ⇾ No AI generated works. I only want art with real human love and passion behind it, and most of these are plagiarized from stolen works. <br/>
-                        ⇾ No paid rewards. This is not a piracy site, please support artists for their hard work.
+                        ⇾ No AI generated works. We only want art with real human love and passion behind it. <br/>
+                        ⇾ No paid rewards. Please support artists for their hard work.
                         </span>
                     </span>
                     <span className="help-heading" id="variations">Variations</span>
                     <span className="help-text">
                         All variations of the same image are combined into a single post. You can add a variation to an existing post 
                         by editing it. All variations of an image should be created by the original artist, otherwise it is considered a third party edit instead.
-                        If an image has significantly different tags to the main post, then it is probably best to make that image it's own post instead of a variation.
+                        If an image has significantly different tags to the main post, it's probably better to make it it's own post instead of a variation.
                     </span>
                     <span className="help-heading" id="third-party-edits">Third Party Edits</span>
                     <span className="help-text">
                         Third party edits are modifications to a work not done by the original artist. For
                         example, a manga with all text translated to English, or animation of an 
-                        image not done by the original artist. Third party edits behave like their own separate post,
-                        but each third party edit is added to the original post in a separate section and it doesn't appear directly in search.
+                        artwork not done by the original artist. Third party edits behave like their own separate post,
+                        but each third party edit is added to the original post in a separate section and doesn't appear directly in search.
                     </span>
                     <span className="help-heading" id="tagging">Tagging</span>
                     <span className="help-text">
-                        You don’t have to be exceedingly thorough but some effort placed on tags is required, 
-                        these are some guidelines on what features to tag: <br/>
+                        You don’t have to be exceedingly thorough but some effort placed on tags is required. 
+                        These are some guidelines on what features to tag: <br/>
                         <span className="help-alt">
                         ⇾ Clothing (school-uniform, sailor-uniform, coat, skirt, leggings, etc). <br/>
                         ⇾ Hair Color (blonde-hair, red-hair, blue-hair, etc). <br/>
@@ -242,23 +242,24 @@ const HelpPage: React.FunctionComponent = (props) => {
                         ⇾ Body Parts (small-breasts, long-legs, etc). <br/>
                         ⇾ Objects (coffee, umbrella, flower, etc). <br/>
                         ⇾ Environment (daytime, nighttime, sunrise, sunset, snow, rain, fog, etc). <br/>
-                        ⇾ Software (live2d, blender, etc).
+                        ⇾ Software (live2d, clip-studio-paint, blender, etc).
                         </span>
                     </span>
                     <span className="help-heading" id="aliases">Aliases</span>
                     <span className="help-text">
-                        A tag can have multiple aliases that yield the same result. This is to
+                        A tag can have multiple aliases that point to the same result. This is to
                         facilitate better searching for synonyms like "has audio" and "with audio". Unlike tags, aliases can include non-ASCII characters 
-                        so it is possible to add an alias in Japanese in order to enable Japanese searching. You can also alias an existing tag to another tag,
-                        but this is an action that needs to be approved by the site staff.
+                        so it is possible to add an alias in Japanese in order to enable Japanese searching. Existing tags can also be aliased to another tag,
+                        but this is a destructive action so it will need approval first.
                     </span>
                     <span className="help-heading" id="commenting">Commenting</span>
                     <span className="help-text">
-                        Comments are for sharing your thoughts of the work. These are the rules for the comment section: <br/>
+                        Comments are for sharing your thoughts on the work. Do not behave badly in the comments. These are some general guidelines for the 
+                        comments section: <br/>
                         <span className="help-alt">
-                        ⇾ No spam, jibberish, or otherwise off-topic comments. <br/>
-                        ⇾ No fights with each other. <br/>
-                        ⇾ No distasteful comments. <br/>
+                        ⇾ No spam, jibberish, or extremely off-topic comments. <br/>
+                        ⇾ No flaming at each other. <br/>
+                        ⇾ No otherwise distasteful comments. <br/>
                         </span>
 
                         Quotes are supported and we have a syntax that makes it easy to do quotes. <br/>
@@ -266,24 +267,24 @@ const HelpPage: React.FunctionComponent = (props) => {
                         &gt;&gt;&gt; User said:<br/>
                         &gt; Comment <br/>
                         </span>
-                        Nested quotes are not supported. If you see a comment that is breaking the rules, please report it.
+                        Nested quoting is not supported yet. If you see a comment that is breaking the rules, please report it.
                     </span>
                     <span className="help-heading" id="bans">Bans</span>
                     <span className="help-text">
                         If you break the rules severely or consistently, you might get banned. If you get banned, you 
-                        are not allowed to register another account. Depending on the severity, we might delete all of your comments 
-                        and edit history.
+                        will still be able to browse the site but most user interaction will get disabled for you. 
                     </span>
                     <span className="help-heading" id="captcha">Captcha</span>
                     <span className="help-text">
-                        You will need to solve a captcha after viewing X posts. The amount for X is subject to change at anytime.
+                        You will need to solve a captcha after viewing X posts. The amount for X is subject to change at anytime. Automated 
+                        bot activity is not allowed on the site.
                     </span>
                     <span className="help-heading" id="deleting-account">Deleting Your Account</span>
                     <span className="help-text">
-                        Because Moebooru is a site that is focused on community contributions, when you delete your account we will not 
-                        remove any of your public contributions like submitted posts. Your uploads will remain but the account that uploaded them will 
-                        show up as "deleted". All the rest of your account data and comments will be deleted. If someone quoted you 
-                        in the comments section, some of your comments might still remain.
+                        Since Moebooru is heavily focused on user contributions, when you delete your account we won't  
+                        remove your public contributions like submitted posts. Your uploads will remain but the account that uploaded them will 
+                        show up as "deleted". The rest of your account data and comments will get deleted, however if someone quoted you 
+                        in the comments section some of your comments could still remain.
                     </span>
                 </div>
                 <Footer/>

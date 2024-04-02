@@ -48,9 +48,9 @@ const Carousel: React.FunctionComponent<Props> = (props) => {
     const {pixelate, setPixelate} = useContext(PixelateContext)
     const [lastPos, setLastPos] = useState(null) as any
     const [dragging, setDragging] = useState(false) as any
-    const [imagesRef, setImagesRef] = useState(props.images.map(() => React.createRef())) as any
-    const [lastActive, setLastActive] = useState(imagesRef[props.index ? props.index : 0])
-    const [active, setActive] = useState(imagesRef[props.index ? props.index : 0])
+    const [imagesRef, setImagesRef] = useState([]) as any
+    const [lastActive, setLastActive] = useState(null) as any
+    const [active, setActive] = useState(null) as any
     const [showLeftArrow, setShowLeftArrow] = useState(false)
     const [showRightArrow, setShowRightArrow] = useState(false)
     const [images, setImages] = useState(props.images)

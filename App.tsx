@@ -41,6 +41,7 @@ import functions from "./structures/Functions"
 import ModQueuePage from "./pages/ModQueuePage"
 import EditUnverifiedPostPage from "./pages/EditUnverifiedPostPage"
 import SetAvatarPage from "./pages/SetAvatarPage"
+import TranslationHistoryPage from "./pages/TranslationHistoryPage"
 import ForumPage from "./pages/ForumPage"
 import axios from "axios"
 import "./index.less"
@@ -252,6 +253,8 @@ const App: React.FunctionComponent = (props) => {
                         <Route exact path="/tag/history/:tag" render={(props) => <TagHistoryPage {...props}/>}></Route>
                         <Route exact path="/tag/history" render={(props) => <TagHistoryPage all={true} {...props}/>}></Route>
                         <Route exact path="/tag/:tag" render={(props) => <TagPage {...props}/>}></Route>
+                        <Route exact path="/translation/history/:id/:order" render={(props) => <TranslationHistoryPage {...props}/>}></Route>
+                        <Route exact path="/translation/history" render={(props) => <TranslationHistoryPage all={true} {...props}/>}></Route>
                         <Route exact path="/post/history/:id" render={(props) => <PostHistoryPage {...props}/>}></Route>
                         <Route exact path="/post/history" render={(props) => <PostHistoryPage all={true} {...props}/>}></Route>
                         <Route exact path="/post/:id" render={(props) => <PostPage {...props}/>}></Route>

@@ -112,6 +112,10 @@ export const TranslationDrawingEnabledContext = React.createContext<any>(null)
 export const ShowSaveTranslationDialogContext = React.createContext<any>(null)
 export const SaveTranslationDataContext = React.createContext<any>(null)
 export const SaveTranslationOrderContext = React.createContext<any>(null)
+export const DeleteTranslationHistoryIDContext = React.createContext<any>(null)
+export const DeleteTranslationHistoryFlagContext = React.createContext<any>(null)
+export const RevertTranslationHistoryIDContext = React.createContext<any>(null)
+export const RevertTranslationHistoryFlagContext = React.createContext<any>(null)
 
 const Context: React.FunctionComponent = (props) => {
     const [brightness, setBrightness] = useState(100)
@@ -212,9 +216,18 @@ const Context: React.FunctionComponent = (props) => {
     const [showSaveTranslationDialog, setShowSaveTranslationDialog] = useState(false)
     const [saveTranslationData, setSaveTranslationData] = useState(null)
     const [saveTranslationOrder, setSaveTranslationOrder] = useState(1)
+    const [deleteTranslationHistoryID, setDeleteTranslationHistoryID] = useState(null)
+    const [revertTranslationHistoryID, setRevertTranslationHistoryID] = useState(null)
+    const [deleteTranslationHistoryFlag, setDeleteTranslationHistoryFlag] = useState(false)
+    const [revertTranslationHistoryFlag, setRevertTranslationHistoryFlag] = useState(false)
+    
 
 return (
     <>
+        <RevertTranslationHistoryFlagContext.Provider value={{revertTranslationHistoryFlag, setRevertTranslationHistoryFlag}}>
+        <DeleteTranslationHistoryFlagContext.Provider value={{deleteTranslationHistoryFlag, setDeleteTranslationHistoryFlag}}>
+        <RevertTranslationHistoryIDContext.Provider value={{revertTranslationHistoryID, setRevertTranslationHistoryID}}>
+        <DeleteTranslationHistoryIDContext.Provider value={{deleteTranslationHistoryID, setDeleteTranslationHistoryID}}>
         <EditTagPixivTagsContext.Provider value={{editTagPixivTags, setEditTagPixivTags}}>
         <SaveTranslationOrderContext.Provider value={{saveTranslationOrder, setSaveTranslationOrder}}>
         <SaveTranslationDataContext.Provider value={{saveTranslationData, setSaveTranslationData}}>
@@ -412,6 +425,10 @@ return (
         </SaveTranslationDataContext.Provider>
         </SaveTranslationOrderContext.Provider>
         </EditTagPixivTagsContext.Provider>
+        </DeleteTranslationHistoryIDContext.Provider>
+        </RevertTranslationHistoryIDContext.Provider>
+        </DeleteTranslationHistoryFlagContext.Provider>
+        </RevertTranslationHistoryFlagContext.Provider>
     </>
     )
 }

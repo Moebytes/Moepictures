@@ -353,11 +353,15 @@ const TranslationEditor: React.FunctionComponent<Props> = (props) => {
         return showTranscript ? bubbleData.transcript : bubbleData.translation
     }
 
+    const showHistory = () => {
+        history.push(`/translation/history/${props.post.postID}/${props.order || 1}`)
+    }
+
     return (
         <div className="translation-editor" style={{display: translationMode ? "flex" : "none"}}>
             <div className="translation-editor-filters" ref={filtersRef} onMouseOver={() => {if (enableDrag) setEnableDrag(false)}}>
                 <div className={`translation-editor-buttons ${buttonHover ? "show-translation-buttons" : ""}`} onMouseEnter={() => setButtonHover(true)} onMouseLeave={() => setButtonHover(false)}>
-                    <img draggable={false} className="translation-editor-button" src={getTranslationHistoryIcon()}/>
+                    <img draggable={false} className="translation-editor-button" src={getTranslationHistoryIcon()} onClick={() => showHistory()}/>
                     <img draggable={false} className="translation-editor-button" src={getTranslationSaveIcon()} onClick={() => saveTextDialog()}/>
                     <img draggable={false} className="translation-editor-button" src={getTranslationShowTranscriptIcon()} onClick={() => setShowTranscript((prev: boolean) => !prev)}/>
                     <img draggable={false} className="translation-editor-button" src={getTranslationTextIcon()} onClick={() => editTextDialog()}/>

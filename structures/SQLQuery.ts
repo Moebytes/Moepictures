@@ -2297,4 +2297,62 @@ export default class SQLQuery {
     const result = await SQLQuery.run(query)
     return result
   }
+
+  public static insertTranslationHistory = async (postID: number, order: number, updater: string, data: any, reason?: string) => {
+    const now = new Date().toISOString()
+    const query: QueryConfig = {
+      text: `INSERT INTO "translation history" ("postID", "order", "updater", "updatedDate", "data", "reason") VALUES ($1, $2, $3, $4, $5, $6)`,
+      values: [postID, order, updater, now, data, reason]
+    }
+    const result = await SQLQuery.run(query)
+    return result
+  }
+
+  public static deleteTranslationHistory = async (historyID: number) => {
+    const query: QueryConfig = {
+      text: functions.multiTrim(`DELETE FROM "translation history" WHERE "translation history"."historyID" = $1`),
+      values: [historyID]
+    }
+    const result = await SQLQuery.run(query)
+    return result
+  }
+
+  public static translationHistory = async (postID?: number, order?: number, offset?: string) => {
+    let offsetAmt = 1
+    if (postID) offsetAmt += 1
+    if (order) offsetAmt += 1
+    let whereArr = [] as string[]
+    let i = 1
+    if (postID) whereArr.push(`"translation history"."postID" = $${i++}`)
+    if (order) whereArr.push(`"translation history"."order" = $${i++}`)
+    const whereQueries = whereArr.length ? `WHERE ${whereArr.join(" AND ")}` : ""
+    const query: QueryConfig = {
+      text: functions.multiTrim(`
+            WITH post_json AS (
+              SELECT posts.*, json_agg(DISTINCT images.*) AS images
+              FROM posts
+              JOIN images ON images."postID" = posts."postID"
+              GROUP BY posts."postID"
+            )
+            SELECT "translation history".*, json_build_object(
+              'type', post_json."type",
+              'restrict', post_json."restrict",
+              'style', post_json."style",
+              'images', (array_agg(post_json."images"))[1]
+            ) AS post
+            FROM "translation history"
+            JOIN post_json ON post_json."postID" = "translation history"."postID"
+            ${whereQueries}
+            GROUP BY "translation history"."historyID", post_json."type", post_json."restrict", post_json."style"
+            ORDER BY "translation history"."updatedDate" DESC
+            ${offset ? `OFFSET $${offsetAmt}` : ""}
+      `),
+      values: []
+    }
+    if (postID) query.values?.push(postID)
+    if (order) query.values?.push(order)
+    if (offset) query.values?.push(offset)
+    const result = await SQLQuery.run(query)
+    return result
+  }
 }

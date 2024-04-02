@@ -43,8 +43,8 @@ const SaveTranslationDialog: React.FunctionComponent<Props> = (props) => {
     }, [showSaveTranslationDialog])
 
     const saveTranslation = async () => {
-        if (permissions.isStaff(session)) {
-            await axios.post("/api/translation/save", {postID: props.post.postID, data: saveTranslationData, order: saveTranslationOrder}, {headers: {"x-csrf-token": functions.getCSRFToken()}, withCredentials: true})
+        if (session.username) {
+            await axios.post("/api/translation/save", {postID: props.post.postID, data: saveTranslationData, order: saveTranslationOrder, reason}, {headers: {"x-csrf-token": functions.getCSRFToken()}, withCredentials: true})
             setSubmitted(true)
         } else {
             const badReason = functions.validateReason(reason)
@@ -67,6 +67,7 @@ const SaveTranslationDialog: React.FunctionComponent<Props> = (props) => {
         if (!keep) {
             setShowSaveTranslationDialog(false)
             setSaveTranslationData(null)
+            setReason("")
         }
     }
 
@@ -78,7 +79,7 @@ const SaveTranslationDialog: React.FunctionComponent<Props> = (props) => {
     }
 
     if (showSaveTranslationDialog) {
-        if (permissions.isStaff(session)) {
+        if (session.username) {
             return (
                 <div className="save-translation-dialog">
                     <Draggable handle=".save-translation-dialog-title-container">
@@ -89,6 +90,10 @@ const SaveTranslationDialog: React.FunctionComponent<Props> = (props) => {
                             </div>
                             <div className="save-translation-dialog-row">
                                 <span className="save-translation-dialog-text">Do you want to save the translation changes made to this post?</span>
+                            </div>
+                            <div className="save-translation-dialog-row">
+                                <span className="save-translation-dialog-text">Reason: </span>
+                                <input className="save-translation-dialog-input" type="text" spellCheck={false} value={reason} onChange={(event) => setReason(event.target.value)}/>
                             </div>
                             <div className="save-translation-dialog-row">
                                 <button onClick={() => click("reject")} className="download-button">{"No"}</button>
