@@ -40,45 +40,45 @@ let isAnimatedWebP = false
 const RectHandle = ({active, cursor, onMouseDown, scale, x, y}) => {
     const {translationDrawingEnabled, setTranslationDrawingEnabled} = useContext(TranslationDrawingEnabledContext)
     const {theme, setTheme} = useContext(ThemeContext)
+    const {siteHue, setSiteHue} = useContext(SiteHueContext)
+    const {siteSaturation, setSiteSaturation} = useContext(SiteSaturationContext)
+    const {siteLightness, setSiteLightness} = useContext(SiteLightnessContext)
+    const getFilter = () => {
+        return `hue-rotate(${siteHue - 180}deg) saturate(${siteSaturation}%) brightness(${siteLightness + 70}%)`
+    }
     const getBGColor = () => {
-        if (theme === "purple") return "rgba(89, 43, 255, 0.9)"
-        if (theme === "purple-light") return "rgba(202, 171, 255, 0.9)"
-        if (theme === "magenta") return "rgba(255, 43, 202, 0.9)"
-        if (theme === "magenta-light") return "rgba(255, 189, 244, 0.9)"
+        return "rgba(89, 43, 255, 0.9)"
     }
     const getBGColorInactive = () => {
-        if (theme === "purple") return "rgba(89, 43, 255, 0.3)"
-        if (theme === "purple-light") return "rgba(202, 171, 255, 0.3)"
-        if (theme === "magenta") return "rgba(255, 43, 202, 0.3)"
-        if (theme === "magenta-light") return "rgba(255, 189, 244, 0.3)"
+        return "rgba(89, 43, 255, 0.3)"
     }
     const size = Math.ceil(7/scale)
     return (
-        <rect fill={active ? getBGColor() : getBGColorInactive()} 
+        <rect fill={active ? getBGColor() : getBGColorInactive()}
         width={size} height={size} x={x - size / 2} y={y - size / 2}
         stroke={active ? "rgba(53, 33, 140, 1)" : "rgba(53, 33, 140, 0.3)"} strokeWidth={1 / scale}
-        style={{cursor, opacity: active && translationDrawingEnabled ? "1" : "0"}} onMouseDown={onMouseDown}/>
+        style={{cursor, opacity: active && translationDrawingEnabled ? "1" : "0", filter: getFilter()}} onMouseDown={onMouseDown}/>
     )
 }
 
 const RectShape = wrapShape(({width, height, extraShapeProps, scale}) => {
     const {theme, setTheme} = useContext(ThemeContext)
+    const {siteHue, setSiteHue} = useContext(SiteHueContext)
+    const {siteSaturation, setSiteSaturation} = useContext(SiteSaturationContext)
+    const {siteLightness, setSiteLightness} = useContext(SiteLightnessContext)
+    const getFilter = () => {
+        return `hue-rotate(${siteHue - 180}deg) saturate(${siteSaturation}%) brightness(${siteLightness + 70}%)`
+    }
     const getBGColor = () => {
-        if (theme === "purple") return "rgba(89, 43, 255, 0.1)"
-        if (theme === "purple-light") return "rgba(202, 171, 255, 0.1)"
-        if (theme === "magenta") return "rgba(255, 43, 202, 0.1)"
-        if (theme === "magenta-light") return "rgba(255, 189, 244, 0.1)"
+        return "rgba(89, 43, 255, 0.1)"
     }
     const getStrokeColor = () => {
-        if (theme === "purple") return "rgba(89, 43, 255, 0.9)"
-        if (theme === "purple-light") return "rgba(202, 171, 255, 0.9)"
-        if (theme === "magenta") return "rgba(255, 43, 202, 0.9)"
-        if (theme === "magenta-light") return "rgba(255, 189, 244, 0.9)"
+        return "rgba(89, 43, 255, 0.9)"
     }
     const strokeWidth = Math.ceil(1/scale)
-    const strokeArray = `${Math.ceil(4/scale)},${Math.ceil(4/scale)}`
+    const strokeArray = `${Math.ceil(4/scale)},${Math.ceil(4/scale)}` 
     return (<rect width={width} height={height} fill={getBGColor()}  stroke={getStrokeColor()} stroke-width={strokeWidth} 
-    stroke-dasharray={strokeArray} onMouseEnter={extraShapeProps.onMouseEnter} onMouseLeave={extraShapeProps.onMouseLeave}
+    stroke-dasharray={strokeArray} onMouseEnter={extraShapeProps.onMouseEnter} onMouseMove={extraShapeProps.onMouseMove} onMouseLeave={extraShapeProps.onMouseLeave} style={{filter: getFilter()}}
     onContextMenu={extraShapeProps.onContextMenu} onDoubleClick={extraShapeProps.onDoubleClick} onMouseDown={extraShapeProps.onMouseDown}/>)
 })
 
@@ -399,6 +399,17 @@ const TranslationEditor: React.FunctionComponent<Props> = (props) => {
                             setBubbleToggle(true)
                         }
 
+                        const onMouseMove = (event: any) => {
+                            if (!item.transcript && !item.translation) return setBubbleToggle(false)
+                            const bounds = event.target.getBoundingClientRect()
+                            let width = Math.floor(bounds.width * 2)
+                            if (width > bounds.width) width = bounds.width
+                            if (width < 125) width = 125
+                            let height = Math.floor(bounds.height / 2)
+                            if (height < 25) height = 25
+                            setBubbleData({x: bounds.left, y: bounds.bottom+5, width, height, transcript: item.transcript, translation: item.translation})
+                        }
+
                         const onMouseLeave = () => {
                             setBubbleToggle(false)
                         }
@@ -417,7 +428,7 @@ const TranslationEditor: React.FunctionComponent<Props> = (props) => {
                         return (
                             <RectShape key={id} shapeId={id} x={x} y={y} width={width} height={height} onFocus={() => setActiveIndex(index)}
                             keyboardTransformMultiplier={30} onChange={insertItem} onDelete={deleteItem} ResizeHandleComponent={RectHandle}
-                            extraShapeProps={{onContextMenu, onDoubleClick, onMouseEnter, onMouseLeave, onMouseDown}}/>
+                            extraShapeProps={{onContextMenu, onDoubleClick, onMouseEnter, onMouseMove, onMouseLeave, onMouseDown}}/>
                         )
                     })}
                 </ShapeEditor>

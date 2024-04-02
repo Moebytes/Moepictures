@@ -103,47 +103,11 @@ const NavBar: React.FunctionComponent<Props> = (props) => {
     }, [hideTitlebar])
 
     const colorChange = () => {
-        /*
-        let newTheme = ""
-        if (!theme || theme === "purple") {
-            newTheme = "magenta"
-            setTheme("magenta")
-        }
-        if (theme === "magenta") {
-            newTheme = "purple"
-            setTheme("purple")
-        }
-        if (theme === "purple-light") {
-            newTheme = "magenta-light"
-            setTheme("magenta-light")
-        }
-        if (theme === "magenta-light") {
-            newTheme = "purple-light"
-            setTheme("purple-light")
-        }
-        localStorage.setItem("theme", newTheme)*/
         setActiveDropdown((prev: boolean) => !prev)
     }
 
     const lightChange = () => {
         let newTheme = ""
-        /*
-        if (!theme || theme === "purple") {
-            newTheme = "purple-light"
-            setTheme("purple-light")
-        }
-        if (theme === "magenta") {
-            newTheme = "magenta-light"
-            setTheme("magenta-light")
-        }
-        if (theme === "purple-light") {
-            newTheme = "purple"
-            setTheme("purple")
-        }
-        if (theme === "magenta-light") {
-            newTheme = "magenta"
-            setTheme("magenta")
-        }*/
         if (theme.includes("light")) {
             newTheme = "dark"
         } else {

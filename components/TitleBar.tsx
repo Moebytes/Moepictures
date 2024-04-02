@@ -125,15 +125,6 @@ const TitleBar: React.FunctionComponent<Props> = (props) => {
         localStorage.setItem("siteLightness", siteLightness)
     }, [theme, siteHue, siteSaturation, siteLightness])
 
-    /*
-    useEffect(() => {
-        if (theme.includes("magenta")) {
-            setSiteHue(250)
-        } else {
-            setSiteHue(180)
-        }
-    }, [theme])*/
-
     useEffect(() => {
         if (headerFlag) {
             setHeaderFlag(false)
