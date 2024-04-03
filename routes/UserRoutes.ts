@@ -187,6 +187,7 @@ const UserRoutes = (app: Express) => {
                     let oldImagePath = functions.getTagPath("pfp", req.session.image)
                     await serverFunctions.deleteFile(oldImagePath).catch(() => null)
                 }
+                if (jpg) result.extension = "jpg"
                 const filename = `${req.session.username}.${result.extension}`
                 let imagePath = functions.getTagPath("pfp", filename)
                 const buffer = Buffer.from(Object.values(bytes) as any)
@@ -221,9 +222,10 @@ const UserRoutes = (app: Express) => {
 
     app.post("/api/user/changeusername", userLimiter, async (req: Request, res: Response) => {
         try {
-            let {newUsername} = req.body
+            let {newUsername, captchaResponse} = req.body
             if (!serverFunctions.validateCSRF(req)) return res.status(400).send("Bad request")
             if (!req.session.username) return res.status(400).send("Bad request")
+            if (req.session.captchaAnswer !== captchaResponse?.trim()) return res.status(400).send("Bad request")
             newUsername = newUsername.trim().toLowerCase()
             const badUsername = functions.validateUsername(newUsername)
             if (badUsername) return res.status(400).send("Bad request")
@@ -293,9 +295,10 @@ const UserRoutes = (app: Express) => {
 
     app.post("/api/user/changeemail", userLimiter, async (req: Request, res: Response) => {
         try {
-            let {newEmail} = req.body
+            let {newEmail, captchaResponse} = req.body
             if (!serverFunctions.validateCSRF(req)) return res.status(400).send("Bad request")
             if (!req.session.username) return res.status(400).send("Bad request")
+            if (req.session.captchaAnswer !== captchaResponse?.trim()) return res.status(400).send("Bad request")
             const badEmail = functions.validateEmail(newEmail)
             if (badEmail) return res.status(400).send("Bad request")
             const user = await sql.user(req.session.username)
@@ -319,9 +322,10 @@ const UserRoutes = (app: Express) => {
 
     app.post("/api/user/verifyemail", userLimiter, async (req: Request, res: Response) => {
         try {
-            let {email} = req.body
+            let {email, captchaResponse} = req.body
             if (!serverFunctions.validateCSRF(req)) return res.status(400).send("Bad request")
             if (!req.session.username) return res.status(400).send("Bad request")
+            if (req.session.captchaAnswer !== captchaResponse?.trim()) return res.status(400).send("Bad request")
             const badEmail = functions.validateEmail(email)
             if (badEmail) return res.status(400).send("Bad request")
             const user = await sql.user(req.session.username)

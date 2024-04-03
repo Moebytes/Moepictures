@@ -32,13 +32,23 @@ const PostHistoryRow: React.FunctionComponent<Props> = (props) => {
     const {deletePostHistoryFlag, setDeletePostHistoryFlag} = useContext(DeletePostHistoryFlagContext)
     const {revertPostHistoryFlag, setRevertPostHistoryFlag} = useContext(RevertPostHistoryFlagContext)
     const history = useHistory()
-    const initialImg = functions.getImageLink(props.postHistory.images[0]?.type, props.postHistory.postID, 1, props.postHistory.images[0]?.filename ? props.postHistory.images[0].filename : props.postHistory.images[0])
-    const currentImg = functions.getImageLink(props.currentHistory.images[0]?.type, props.currentHistory.postID, 1, props.currentHistory.images[0]?.filename ? props.currentHistory.images[0].filename : props.currentHistory.images[0])
-    const [img, setImg] = useState(initialImg)
+    const [img, setImg] = useState("")
+    const [currentImg, setCurrentImg] = useState("")
     const [imageIndex, setImageIndex] = useState(0)
     const [userRole, setUserRole] = useState("")
     const ref = useRef(null) as any
     const postID = props.postHistory.postID
+
+    const updateImages = async () => {
+        const filename = props.postHistory.images[0]?.filename ? props.postHistory.images[0].filename : props.postHistory.images[0]
+        const initialImg = functions.getImageLink(props.postHistory.images[0]?.type, props.postHistory.postID, 1, filename)
+        const currentFilename = props.currentHistory.images[0]?.filename ? props.currentHistory.images[0].filename : props.currentHistory.images[0]
+        const currentImg = functions.getImageLink(props.currentHistory.images[0]?.type, props.currentHistory.postID, 1, currentFilename)
+        const decrypted = await cryptoFunctions.decryptedLink(initialImg)
+        const decryptedCurrent = await cryptoFunctions.decryptedLink(currentImg)
+        setImg(decrypted)
+        setCurrentImg(decryptedCurrent)
+    }
 
     const updateUserRole = async () => {
         const user = await axios.get("/api/user", {params: {username: props.postHistory.user}, withCredentials: true}).then((r) => r.data)
@@ -47,6 +57,7 @@ const PostHistoryRow: React.FunctionComponent<Props> = (props) => {
 
     useEffect(() => {
         updateUserRole()
+        updateImages()
     }, [])
 
     const imagesChanged = async () => {
@@ -168,7 +179,7 @@ const PostHistoryRow: React.FunctionComponent<Props> = (props) => {
                 setRevertPostHistoryID({failed: error ? error : true, historyID: props.postHistory.historyID})
             })
         }
-    }, [revertPostHistoryFlag, revertPostHistoryID, props.current])
+    }, [revertPostHistoryFlag, revertPostHistoryID, props.current, currentImg])
 
     const deletePostHistory = async () => {
         if (props.current) return Promise.reject()
@@ -300,14 +311,15 @@ const PostHistoryRow: React.FunctionComponent<Props> = (props) => {
         loadImage()
     }, [img])
 
-    const updateImg = (event: React.MouseEvent) => {
+    const updateImg = async (event: React.MouseEvent) => {
         event.preventDefault()
         if (props.postHistory.images.length > 1) {
             let newImageIndex = imageIndex + 1 
             if (newImageIndex > props.postHistory.images.length - 1) newImageIndex = 0
             const newImg = functions.getImageLink(props.postHistory.images[newImageIndex]?.type, props.postHistory.postID, 1, props.postHistory.images[newImageIndex]?.filename ? props.postHistory.images[newImageIndex].filename : props.postHistory.images[newImageIndex])
+            const decrypted = await cryptoFunctions.decryptedLink(newImg)
+            setImg(decrypted)
             setImageIndex(newImageIndex)
-            setImg(newImg)
         }
     }
 

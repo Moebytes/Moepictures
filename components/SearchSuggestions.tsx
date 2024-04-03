@@ -5,7 +5,7 @@ import "./styles/searchsuggestions.less"
 import axios from "axios"
 import functions from "../structures/Functions"
 import permissions from "../structures/Permissions"
-import matureTags from "../json/mature-tags.json"
+import matureTags from "../assets/json/mature-tags.json"
 
 interface Props {
     active: boolean

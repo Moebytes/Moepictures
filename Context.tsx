@@ -15,6 +15,13 @@ export const FilterDropActiveContext = React.createContext<any>(null)
 export const SquareContext = React.createContext<any>(null)
 export const ScrollContext = React.createContext<any>(null)
 export const PageContext = React.createContext<any>(null)
+export const CommentsPageContext = React.createContext<any>(null)
+export const ArtistsPageContext = React.createContext<any>(null)
+export const CharactersPageContext = React.createContext<any>(null)
+export const SeriesPageContext = React.createContext<any>(null)
+export const TagsPageContext = React.createContext<any>(null)
+export const ForumPageContext = React.createContext<any>(null)
+export const ThreadPageContext = React.createContext<any>(null)
 export const BrightnessContext = React.createContext<any>(null)
 export const ContrastContext = React.createContext<any>(null)
 export const HueContext = React.createContext<any>(null)
@@ -137,6 +144,13 @@ const Context: React.FunctionComponent = (props) => {
     const [square, setSquare] = useState(false)
     const [scroll, setScroll] = useState(false)
     const [page, setPage] = useState(1)
+    const [commentsPage, setCommentsPage] = useState(1)
+    const [artistsPage, setArtistsPage] = useState(1)
+    const [charactersPage, setCharactersPage] = useState(1)
+    const [seriesPage, setSeriesPage] = useState(1)
+    const [tagsPage, setTagsPage] = useState(1)
+    const [forumPage, setForumPage] = useState(1)
+    const [threadPage, setThreadPage] = useState(1)
     const [showDownloadDialog, setShowDownloadDialog] = useState(false)
     const [postAmount, setPostAmount] = useState(0)
     const [downloadURLs, setDownloadURLs] = useState([])
@@ -233,6 +247,13 @@ const Context: React.FunctionComponent = (props) => {
 
 return (
     <>
+        <ThreadPageContext.Provider value={{threadPage, setThreadPage}}>
+        <ForumPageContext.Provider value={{forumPage, setForumPage}}>
+        <TagsPageContext.Provider value={{tagsPage, setTagsPage}}>
+        <SeriesPageContext.Provider value={{seriesPage, setSeriesPage}}>
+        <CharactersPageContext.Provider value={{charactersPage, setCharactersPage}}>
+        <ArtistsPageContext.Provider value={{artistsPage, setArtistsPage}}>
+        <CommentsPageContext.Provider value={{commentsPage, setCommentsPage}}>
         <ShowNewThreadDialogContext.Provider value={{showNewThreadDialog, setShowNewThreadDialog}}>
         <RevertTranslationHistoryFlagContext.Provider value={{revertTranslationHistoryFlag, setRevertTranslationHistoryFlag}}>
         <DeleteTranslationHistoryFlagContext.Provider value={{deleteTranslationHistoryFlag, setDeleteTranslationHistoryFlag}}>
@@ -446,6 +467,13 @@ return (
         </DeleteTranslationHistoryFlagContext.Provider>
         </RevertTranslationHistoryFlagContext.Provider>
         </ShowNewThreadDialogContext.Provider>
+        </CommentsPageContext.Provider>
+        </ArtistsPageContext.Provider>
+        </CharactersPageContext.Provider>
+        </SeriesPageContext.Provider>
+        </TagsPageContext.Provider>
+        </ForumPageContext.Provider>
+        </ThreadPageContext.Provider>
     </>
     )
 }

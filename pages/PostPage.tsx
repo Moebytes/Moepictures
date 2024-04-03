@@ -200,7 +200,7 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
                 if (images[order-1]) {
                     setImage(images[order-1])
                 } else {
-                    setImages(images[0])
+                    setImage(images[0])
                     setOrder(1)
                 }
                 const tags = await functions.parseTags([post])
@@ -241,7 +241,7 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
                 if (images[order-1]) {
                     setImage(images[order-1])
                 } else {
-                    setImages(images[0])
+                    setImage(images[0])
                     setOrder(1)
                 }
                 const tags = await functions.parseTags([post])

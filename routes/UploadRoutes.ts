@@ -536,7 +536,8 @@ const CreateRoutes = (app: Express) => {
         series = series.map((s: any) => s.tag)
 
         const postHistory = await sql.postHistory(postID)
-        if (!postHistory.length) {
+        const nextKey = await serverFunctions.getNextKey("post", String(postID))
+        if (!postHistory.length || (imgChanged && nextKey === 1)) {
             const vanilla = JSON.parse(JSON.stringify(post))
             vanilla.date = vanilla.uploadDate 
             vanilla.user = vanilla.uploader
@@ -547,9 +548,13 @@ const CreateRoutes = (app: Express) => {
             vanilla.tags = categories.tags.map((t: any) => t.tag)
             let vanillaImages = [] as any
             for (let i = 0; i < vanilla.images.length; i++) {
-                const newImagePath = functions.getImageHistoryPath(postID, 1, vanilla.images[i].filename)
-                await serverFunctions.uploadFile(newImagePath, vanillaBuffers[i])
-                vanillaImages.push(newImagePath)
+                if (imgChanged) {
+                  const newImagePath = functions.getImageHistoryPath(postID, 1, vanilla.images[i].filename)
+                  await serverFunctions.uploadFile(newImagePath, vanillaBuffers[i])
+                  vanillaImages.push(newImagePath)
+                } else {
+                  vanillaImages.push(functions.getImagePath(vanilla.images[i].type, postID, vanilla.images[i].order, vanilla.images[i].filename))
+                }
             }
             await sql.insertPostHistory(vanilla.user, postID, vanillaImages, vanilla.uploader, vanilla.updater, vanilla.uploadDate, vanilla.updatedDate,
                 vanilla.type, vanilla.restrict, vanilla.style, vanilla.thirdParty, vanilla.title, vanilla.translatedTitle, vanilla.drawn, vanilla.artist,
@@ -557,22 +562,29 @@ const CreateRoutes = (app: Express) => {
 
             let newImages = [] as any
             for (let i = 0; i < images.length; i++) {
-                const buffer = Buffer.from(Object.values(images[i].bytes) as any)
-                const newImagePath = functions.getImageHistoryPath(postID, 2, imageFilenames[i])
-                await serverFunctions.uploadFile(newImagePath, buffer)
-                newImages.push(newImagePath)
+                if (imgChanged) {
+                  const buffer = Buffer.from(Object.values(images[i].bytes) as any)
+                  const newImagePath = functions.getImageHistoryPath(postID, 2, imageFilenames[i])
+                  await serverFunctions.uploadFile(newImagePath, buffer)
+                  newImages.push(newImagePath)
+                } else {
+                  newImages.push(functions.getImagePath(post.images[i].type, postID, post.images[i].order, post.images[i].filename))
+                }
             }
             await sql.insertPostHistory(req.session.username, postID, newImages, post.uploader, post.updater, post.uploadDate, post.updatedDate,
             post.type, post.restrict, post.style, post.thirdParty, post.title, post.translatedTitle, post.drawn, post.artist,
             post.link, post.commentary, post.translatedCommentary, post.bookmarks, post.mirrors, artists, characters, series, tags, reason)
         } else {
             let newImages = [] as any
-            const nextKey = await serverFunctions.getNextKey("post", String(postID))
             for (let i = 0; i < images.length; i++) {
+              if (imgChanged) {
                 const buffer = Buffer.from(Object.values(images[i].bytes) as any)
                 const newImagePath = functions.getImageHistoryPath(postID, nextKey, imageFilenames[i])
                 await serverFunctions.uploadFile(newImagePath, buffer)
                 newImages.push(newImagePath)
+              } else {
+                newImages.push(functions.getImagePath(post.images[i].type, postID, post.images[i].order, post.images[i].filename))
+              }
             }
             await sql.insertPostHistory(req.session.username, postID, newImages, post.uploader, post.updater, post.uploadDate, post.updatedDate,
             post.type, post.restrict, post.style, post.thirdParty, post.title, post.translatedTitle, post.drawn, post.artist,

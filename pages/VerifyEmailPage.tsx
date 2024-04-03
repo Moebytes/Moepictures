@@ -10,12 +10,15 @@ import functions from "../structures/Functions"
 import axios from "axios"
 import {HideNavbarContext, HideSidebarContext, ThemeContext, EnableDragContext, RedirectContext,
 RelativeContext, HideTitlebarContext, HeaderTextContext, SidebarTextContext, SessionContext, MobileContext,
-SessionFlagContext} from "../Context"
+SessionFlagContext, SiteHueContext, SiteLightnessContext, SiteSaturationContext} from "../Context"
 import "./styles/verifyemailpage.less"
 import session from "express-session"
 
 const VerifyEmailPage: React.FunctionComponent = (props) => {
     const {theme, setTheme} = useContext(ThemeContext)
+    const {siteHue, setSiteHue} = useContext(SiteHueContext)
+    const {siteSaturation, setSiteSaturation} = useContext(SiteSaturationContext)
+    const {siteLightness, setSiteLightness} = useContext(SiteLightnessContext)
     const {hideNavbar, setHideNavbar} = useContext(HideNavbarContext)
     const {hideTitlebar, setHideTitlebar} = useContext(HideTitlebarContext)
     const {hideSidebar, setHideSidebar} = useContext(HideSidebarContext)
@@ -29,9 +32,30 @@ const VerifyEmailPage: React.FunctionComponent = (props) => {
     const {mobile, setMobile} = useContext(MobileContext)
     const [submitted, setSubmitted] = useState(false)
     const [newEmail, setNewEmail] = useState("")
+    const [captchaResponse, setCaptchaResponse] = useState("")
+    const [captcha, setCaptcha] = useState("")
     const [error, setError] = useState(false)
     const errorRef = useRef<any>(null)
     const history = useHistory()
+
+    const getFilter = () => {
+        return `hue-rotate(${siteHue - 180}deg) saturate(${siteSaturation}%) brightness(${siteLightness + 70}%)`
+    }
+
+    const getCaptchaColor = () => {
+        if (theme.includes("light")) return "#ffffff"
+        return "#09071c"
+    }
+
+    const updateCaptcha = async () => {
+        const captcha = await axios.get("/api/misc/captcha/create", {params: {color: getCaptchaColor()}, withCredentials: true}).then((r) => r.data)
+        setCaptcha(captcha)
+        setCaptchaResponse("")
+    }
+
+    useEffect(() => {
+        updateCaptcha()
+    }, [theme])
 
     useEffect(() => {
         setHideNavbar(false)
@@ -79,12 +103,12 @@ const VerifyEmailPage: React.FunctionComponent = (props) => {
         if (!errorRef.current) await functions.timeout(20)
         errorRef.current!.innerText = "Submitting..."
         try {
-            await axios.post("/api/user/verifyemail", {email}, {headers: {"x-csrf-token": functions.getCSRFToken()}, withCredentials: true})
+            await axios.post("/api/user/verifyemail", {email, captchaResponse}, {headers: {"x-csrf-token": functions.getCSRFToken()}, withCredentials: true})
             setSubmitted(true)
             setSessionFlag(true)
             setError(false)
         } catch {
-            errorRef.current!.innerText = "Bad email."
+            errorRef.current!.innerText = "Bad email or captcha."
             await functions.timeout(2000)
             setError(false)
         }
@@ -117,6 +141,10 @@ const VerifyEmailPage: React.FunctionComponent = (props) => {
                     <div className="verify-email-row">
                         <span className="verify-email-text">Optional Address Change: </span>
                         <input className="verify-email-input" type="text" spellCheck={false} value={newEmail} onChange={(event) => setNewEmail(event.target.value)} onKeyDown={(event) => event.key === "Enter" ? submit() : null}/>
+                    </div>
+                    <div className="verify-email-row" style={{justifyContent: "center"}}>
+                        <img src={`data:image/svg+xml;utf8,${encodeURIComponent(captcha)}`} style={{filter: getFilter()}}/>
+                        <input className="verify-email-input" type="text" spellCheck={false} value={captchaResponse} onChange={(event) => setCaptchaResponse(event.target.value)} onKeyDown={(event) => event.key === "Enter" ? submit() : null}/>
                     </div>
                     {error ? <div className="verify-email-validation-container"><span className="verify-email-validation" ref={errorRef}></span></div> : null}
                     <div className="verify-email-button-container">

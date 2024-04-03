@@ -1,4 +1,5 @@
 import React, {useEffect, useContext, useState, useRef} from "react"
+import {useHistory} from "react-router-dom"
 import TitleBar from "../components/TitleBar"
 import NavBar from "../components/NavBar"
 import SideBar from "../components/SideBar"
@@ -18,8 +19,10 @@ import matureTags from "../assets/json/mature-tags.json"
 import scrollIcon from "../assets/icons/scroll.png"
 import pageIcon from "../assets/icons/page.png"
 import permissions from "../structures/Permissions"
-import {ThemeContext, EnableDragContext, HideNavbarContext, HideSidebarContext, RelativeContext, HideTitlebarContext, MobileContext,
-ActiveDropdownContext, HeaderTextContext, SidebarTextContext, SessionContext, SiteHueContext, SiteLightnessContext, SiteSaturationContext} from "../Context"
+import PageDialog from "../dialogs/PageDialog"
+import {ThemeContext, EnableDragContext, HideNavbarContext, HideSidebarContext, RelativeContext, HideTitlebarContext, MobileContext, ScrollContext,
+ActiveDropdownContext, HeaderTextContext, SidebarTextContext, SessionContext, SiteHueContext, SiteLightnessContext, SiteSaturationContext, TagsPageContext,
+ShowPageDialogContext, PageFlagContext} from "../Context"
 import "./styles/tagspage.less"
 
 const TagsPage: React.FunctionComponent = (props) => {
@@ -35,8 +38,12 @@ const TagsPage: React.FunctionComponent = (props) => {
     const {activeDropdown, setActiveDropdown} = useContext(ActiveDropdownContext)
     const {headerText, setHeaderText} = useContext(HeaderTextContext)
     const {sidebarText, setSidebarText} = useContext(SidebarTextContext)
+    const {tagsPage, setTagsPage} = useContext(TagsPageContext)
+    const {showPageDialog, setShowPageDialog} = useContext(ShowPageDialogContext)
+    const {pageFlag, setPageFlag} = useContext(PageFlagContext)
     const {session, setSession} = useContext(SessionContext)
     const {mobile, setMobile} = useContext(MobileContext)
+    const {scroll, setScroll} = useContext(ScrollContext)
     const [sortType, setSortType] = useState("posts")
     const [typeType, setTypeType] = useState("all")
     const [tags, setTags] = useState([]) as any
@@ -46,8 +53,26 @@ const TagsPage: React.FunctionComponent = (props) => {
     const [offset, setOffset] = useState(0)
     const [ended, setEnded] = useState(false)
     const [getSearchIconHover, setSearchIconHover] = useState(false)
+    const [queryPage, setQueryPage] = useState(1)
     const sortRef = useRef(null) as any
     const typeRef = useRef(null) as any
+    const history = useHistory()
+
+    useEffect(() => {
+        const savedScroll = localStorage.getItem("scroll")
+        if (savedScroll) setScroll(savedScroll === "true")
+        const savedPage = localStorage.getItem("tagsPage")
+        if (savedPage) setTimeout(() => {setTagsPage(Number(savedPage))}, 100)
+        const queryParam = new URLSearchParams(window.location.search).get("query")
+        const pageParam = new URLSearchParams(window.location.search).get("page")
+        setTimeout(() => {
+            if (queryParam) updateTags(queryParam)
+            if (pageParam) {
+                setQueryPage(Number(pageParam))
+                setTagsPage(Number(pageParam))
+            }
+        }, 500)
+    }, [])
 
     const getFilter = () => {
         return `hue-rotate(${siteHue - 180}deg) saturate(${siteSaturation}%) brightness(${siteLightness + 70}%)`
@@ -58,8 +83,9 @@ const TagsPage: React.FunctionComponent = (props) => {
         return `hue-rotate(${siteHue - 180}deg) saturate(${siteSaturation}%) brightness(${siteLightness + 70}%)`
     }
 
-    const updateTags = async () => {
-        const result = await axios.get("/api/search/tags", {params: {sort: sortType, type: typeType, query: searchQuery}, withCredentials: true}).then((r) => r.data)
+    const updateTags = async (queryOverride?: string) => {
+        let query = queryOverride ? queryOverride : searchQuery
+        const result = await axios.get("/api/search/tags", {params: {sort: sortType, type: typeType, query}, withCredentials: true}).then((r) => r.data)
         setEnded(false)
         setIndex(0)
         setVisibleTags([])
@@ -92,27 +118,63 @@ const TagsPage: React.FunctionComponent = (props) => {
         updateTags()
     }, [sortType, typeType])
 
+    const getPageAmount = () => {
+        return scroll ? 15 : 50
+    }
+
     useEffect(() => {
-        let currentIndex = index
-        const newVisibleTags = visibleTags as any
-        for (let i = 0; i < 15; i++) {
-            if (!tags[currentIndex]) break
-            newVisibleTags.push(tags[currentIndex])
-            currentIndex++
+        const updateTags = () => {
+            let currentIndex = index
+            const newVisibleTags = visibleTags as any
+            for (let i = 0; i < getPageAmount(); i++) {
+                if (!tags[currentIndex]) break
+                newVisibleTags.push(tags[currentIndex])
+                currentIndex++
+            }
+            setIndex(currentIndex)
+            setVisibleTags(functions.removeDuplicates(newVisibleTags))
         }
-        setIndex(currentIndex)
-        setVisibleTags(functions.removeDuplicates(newVisibleTags))
-    }, [tags])
+        if (scroll) updateTags()
+    }, [scroll, tags])
 
     const updateOffset = async () => {
         if (ended) return
-        const newOffset = offset + 100
-        const result = await axios.get("/api/search/tags", {params: {sort: sortType, type: typeType, query: searchQuery, offset: newOffset}, withCredentials: true}).then((r) => r.data)
-        if (result?.length >= 100) {
+        let newOffset = offset + 100
+        let padded = false
+        if (!scroll) {
+            newOffset = (tagsPage - 1) * getPageAmount()
+            if (newOffset === 0) {
+                if (tags[newOffset]?.fake) {
+                    padded = true
+                } else {
+                    return
+                }
+            }
+        }
+        let result = await axios.get("/api/search/tags", {params: {sort: sortType, type: typeType, query: searchQuery, offset: newOffset}, withCredentials: true}).then((r) => r.data)
+        let hasMore = result?.length >= 100
+        const cleanTags = tags.filter((t: any) => !t.fake)
+        if (!scroll) {
+            if (cleanTags.length <= newOffset) {
+                result = [...new Array(newOffset).fill({fake: true, tagCount: cleanTags[0]?.tagCount}), ...result]
+                padded = true
+            }
+        }
+        if (hasMore) {
             setOffset(newOffset)
-            setTags((prev: any) => functions.removeDuplicates([...prev, ...result]))
+            if (padded) {
+                setTags(result)
+            } else {
+                setTags((prev: any) => functions.removeDuplicates([...prev, ...result]))
+            }
         } else {
-            if (result?.length) setTags((prev: any) => functions.removeDuplicates([...prev, ...result]))
+            if (result?.length) {
+                if (padded) {
+                    setTags(result)
+                } else {
+                    setTags((prev: any) => functions.removeDuplicates([...prev, ...result]))
+                }
+            }
             setEnded(true)
         }
     }
@@ -132,11 +194,137 @@ const TagsPage: React.FunctionComponent = (props) => {
                 setVisibleTags(functions.removeDuplicates(newVisibleTags))
             }
         }
-        window.addEventListener("scroll", scrollHandler)
+        if (scroll) window.addEventListener("scroll", scrollHandler)
         return () => {
             window.removeEventListener("scroll", scrollHandler)
         }
-    })
+    }, [scroll, visibleTags, index])
+
+    useEffect(() => {
+        window.scrollTo(0, 0)
+        if (scroll) {
+            setEnded(false)
+            setIndex(0)
+            setVisibleTags([])
+            setTagsPage(1)
+            updateTags()
+        }
+    }, [scroll])
+
+    useEffect(() => {
+        if (!scroll) updateOffset()
+    }, [])
+
+    useEffect(() => {
+        const updatePageOffset = () => {
+            const tagOffset = (tagsPage - 1) * getPageAmount()
+            if (tags[tagOffset]?.fake) {
+                setEnded(false)
+                return updateOffset()
+            }
+            const tagAmount = Number(tags[0]?.tagCount)
+            let maximum = tagOffset + getPageAmount()
+            if (maximum > tagAmount) maximum = tagAmount
+            const maxTag = tags[maximum - 1]
+            if (!maxTag) {
+                setEnded(false)
+                updateOffset()
+            }
+        }
+        if (!scroll) updatePageOffset()
+    }, [scroll, tags, tagsPage, ended])
+
+    useEffect(() => {
+        if (searchQuery) {
+            scroll ? history.replace(`${location.pathname}?query=${searchQuery}`) : history.replace(`${location.pathname}?query=${searchQuery}&page=${tagsPage}`)
+        } else {
+            if (!scroll) history.replace(`${location.pathname}?page=${tagsPage}`)
+        }
+    }, [scroll, search, tagsPage])
+
+    useEffect(() => {
+        if (tags?.length) {
+            const maxTagPage = maxPage()
+            if (maxTagPage === 1) return
+            if (queryPage > maxTagPage) {
+                setQueryPage(maxTagPage)
+                setTagsPage(maxTagPage)
+            }
+        }
+    }, [tags, tagsPage, queryPage])
+
+    useEffect(() => {
+        if (pageFlag) {
+            goToPage(pageFlag)
+            setPageFlag(null)
+        }
+    }, [pageFlag])
+
+    useEffect(() => {
+        localStorage.setItem("tagsPage", String(tagsPage))
+    }, [tagsPage])
+
+    const maxPage = () => {
+        if (!tags?.length) return 1
+        if (Number.isNaN(Number(tags[0]?.tagCount))) return 10000
+        return Math.ceil(Number(tags[0]?.tagCount) / getPageAmount())
+    }
+
+    const firstPage = () => {
+        setTagsPage(1)
+        window.scrollTo(0, 0)
+    }
+
+    const previousPage = () => {
+        let newPage = tagsPage - 1 
+        if (newPage < 1) newPage = 1 
+        setTagsPage(newPage)
+        window.scrollTo(0, 0)
+    }
+
+    const nextPage = () => {
+        let newPage = tagsPage + 1 
+        if (newPage > maxPage()) newPage = maxPage()
+        setTagsPage(newPage)
+        window.scrollTo(0, 0)
+    }
+
+    const lastPage = () => {
+        setTagsPage(maxPage())
+        window.scrollTo(0, 0)
+    }
+
+    const goToPage = (newPage: number) => {
+        setTagsPage(newPage)
+        window.scrollTo(0, 0)
+    }
+
+    const generatePageButtonsJSX = () => {
+        const jsx = [] as any
+        let buttonAmount = 7
+        if (mobile) buttonAmount = 5
+        if (maxPage() < buttonAmount) buttonAmount = maxPage()
+        let counter = 0
+        let increment = -3
+        if (tagsPage > maxPage() - 3) increment = -4
+        if (tagsPage > maxPage() - 2) increment = -5
+        if (tagsPage > maxPage() - 1) increment = -6
+        if (mobile) {
+            increment = -2
+            if (tagsPage > maxPage() - 2) increment = -3
+            if (tagsPage > maxPage() - 1) increment = -4
+        }
+        while (counter < buttonAmount) {
+            const pageNumber = tagsPage + increment
+            if (pageNumber > maxPage()) break
+            if (pageNumber >= 1) {
+                jsx.push(<button key={pageNumber} className={`page-button ${increment === 0 ? "page-button-active" : ""}`} onClick={() => goToPage(pageNumber)}>{pageNumber}</button>)
+                counter++
+            }
+            increment++
+        }
+        return jsx
+    }
 
     const getSearchIcon = () => {
         return getSearchIconHover ? searchIconHover : search
@@ -191,13 +379,40 @@ const TagsPage: React.FunctionComponent = (props) => {
 
     const generateTagsJSX = () => {
         const jsx = [] as any
-        const tags = functions.removeDuplicates(visibleTags) as any
-        for (let i = 0; i < tags.length; i++) {
+        let visible = [] as any
+        if (scroll) {
+            visible = functions.removeDuplicates(visibleTags) as any
+        } else {
+            const postOffset = (tagsPage - 1) * getPageAmount()
+            visible = tags.slice(postOffset, postOffset + getPageAmount())
+        }
+        for (let i = 0; i < visible.length; i++) {
+            if (visible[i].fake) continue
             if (!session.username) if (functions.arrayIncludes(tags[i].tag, matureTags)) continue
-            if (!permissions.isStaff(session)) if (functions.arrayIncludes(tags[i].tag, matureTags)) continue
-            jsx.push(<TagRow tag={tags[i]} onDelete={updateTags} onEdit={updateTags}/>)
+            if (!permissions.isStaff(session)) if (functions.arrayIncludes(visible[i].tag, matureTags)) continue
+            jsx.push(<TagRow tag={visible[i]} onDelete={updateTags} onEdit={updateTags}/>)
+        }
+        if (!scroll) {
+            jsx.push(
+                <div className="page-container">
+                    {tagsPage <= 1 ? null : <button className="page-button" onClick={firstPage}>{"<<"}</button>}
+                    {tagsPage <= 1 ? null : <button className="page-button" onClick={previousPage}>{"<"}</button>}
+                    {generatePageButtonsJSX()}
+                    {tagsPage >= maxPage() ? null : <button className="page-button" onClick={nextPage}>{">"}</button>}
+                    {tagsPage >= maxPage() ? null : <button className="page-button" onClick={lastPage}>{">>"}</button>}
+                    {<button className="page-button" onClick={() => setShowPageDialog(true)}>{"?"}</button>}
+                </div>
+            )
         }
         return jsx
+    }
+
+    const toggleScroll = () => {
+        setScroll((prev: boolean) => {
+            const newValue = !prev
+            localStorage.setItem("scroll", `${newValue}`)
+            return newValue
+        })
     }
 
     return (
@@ -206,6 +421,7 @@ const TagsPage: React.FunctionComponent = (props) => {
         <AliasTagDialog/>
         <EditTagDialog/>
         <DeleteTagDialog/>
+        <PageDialog/>
         <TitleBar/>
         <NavBar/>
         <div className="body">
@@ -216,9 +432,13 @@ const TagsPage: React.FunctionComponent = (props) => {
                     <div className="tags-row">
                         <div className="tag-search-container" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                             <input className="tag-search" type="search" spellCheck="false" value={searchQuery} onChange={(event) => setSearchQuery(event.target.value)} onKeyDown={(event) => event.key === "Enter" ? updateTags() : null}/>
-                            <img className="tag-search-icon" src={getSearchIcon()} style={{filter: getFilterSearch()}} onClick={updateTags} onMouseEnter={() => setSearchIconHover(true)} onMouseLeave={() => setSearchIconHover(false)}/>
+                            <img className="tag-search-icon" src={getSearchIcon()} style={{filter: getFilterSearch()}} onClick={() => updateTags()} onMouseEnter={() => setSearchIconHover(true)} onMouseLeave={() => setSearchIconHover(false)}/>
                         </div>
                         {getSortJSX()}
+                        <div className="tagsort-item" onClick={() => toggleScroll()}>
+                            <img className="tagsort-img" src={scroll ? scrollIcon : pageIcon} style={{filter: getFilter()}}/>
+                            <span className="tagsort-text">{scroll ? "Scrolling" : "Pages"}</span>
+                        </div>
                         <div className={`tag-dropdown ${activeDropdown === "sort" ? "" : "hide-tag-dropdown"}`} 
                         style={{marginRight: getSortMargin(), top: mobile ? "229px" : "209px"}} onClick={() => setActiveDropdown("none")}>
                             <div className="tag-dropdown-row" onClick={() => setSortType("alphabetic")}>

@@ -889,7 +889,7 @@ export default class SQLQuery {
     return result
   }
 
-  public static tagCategory = async (category: string, sort: string, search?: string, offset?: string, withTags?: boolean) => {
+  public static tagCategory = async (category: string, sort: string, search?: string, offset?: string) => {
     let whereQueries = [] as string[]
     if (category === "artists") whereQueries.push(`tags.type = 'artist'`)
     if (category === "characters") whereQueries.push(`tags.type = 'character'`)
@@ -918,7 +918,8 @@ export default class SQLQuery {
                     FULL JOIN "cuteness" ON posts."postID" = "cuteness"."postID"
                     GROUP BY posts."postID"
                   )
-                  SELECT tags.*, json_agg(post_json.*) AS posts, 
+                  SELECT tags.*, json_agg(post_json.*) AS posts,
+                  COUNT(*) OVER() AS "tagCount",
                   COUNT(DISTINCT post_json."postID") AS "postCount",
                   ROUND(AVG(DISTINCT post_json."cutenessAvg")) AS "cutenessAvg"
                   FROM tags
@@ -968,6 +969,7 @@ export default class SQLQuery {
     const query: QueryConfig = {
           text: functions.multiTrim(`
                   SELECT tags.*, json_agg(DISTINCT aliases.*) AS aliases, json_agg(DISTINCT "implication map".*) AS implications,
+                  COUNT(*) OVER() AS "tagCount",
                   COUNT(DISTINCT posts."postID") AS "postCount", 
                   COUNT(DISTINCT tags."image") AS "imageCount", 
                   COUNT(DISTINCT aliases."alias") AS "aliasCount"
@@ -1247,7 +1249,9 @@ export default class SQLQuery {
               JOIN images ON images."postID" = posts."postID"
               GROUP BY posts."postID"
             )
-            SELECT comments.*, users."image", users."imagePost", users."role", json_build_object(
+            SELECT comments.*,
+            COUNT(*) OVER() AS "commentCount",
+            users."image", users."imagePost", users."role", json_build_object(
               'type', post_json."type",
               'restrict', post_json."restrict",
               'style', post_json."style",
@@ -1288,7 +1292,9 @@ export default class SQLQuery {
               JOIN images ON images."postID" = posts."postID"
               GROUP BY posts."postID"
             )
-            SELECT comments.*, users."image", users."imagePost", users."role", json_build_object(
+            SELECT comments.*, 
+            COUNT(*) OVER() AS "commentCount",
+            users."image", users."imagePost", users."role", json_build_object(
               'type', post_json."type",
               'restrict', post_json."restrict",
               'style', post_json."style",
@@ -2395,7 +2401,8 @@ export default class SQLQuery {
     if (sort === "reverse date") sortQuery = `ORDER BY "forum threads"."updatedDate" ASC`
     const query: QueryConfig = {
           text: functions.multiTrim(`
-            SELECT "forum threads".* 
+            SELECT "forum threads".*,
+            COUNT(*) OVER() AS "threadCount"
             FROM "forum threads"
             ${whereQuery}
             GROUP BY "forum threads"."threadID"

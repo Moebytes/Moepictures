@@ -104,7 +104,7 @@ const PostsPage: React.FunctionComponent = (props) => {
                 <SortBar/>
                 <TagBanner/>
                 <ImageGrid/>
-                <Footer/>
+                <Footer noPadding={true}/>
             </div>
         </div>
         </>

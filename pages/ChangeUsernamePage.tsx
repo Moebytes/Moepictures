@@ -9,11 +9,15 @@ import DragAndDrop from "../components/DragAndDrop"
 import functions from "../structures/Functions"
 import axios from "axios"
 import {HideNavbarContext, HideSidebarContext, ThemeContext, EnableDragContext, SessionFlagContext, RedirectContext, MobileContext,
-RelativeContext, HideTitlebarContext, HeaderTextContext, SidebarTextContext, SessionContext} from "../Context"
+RelativeContext, HideTitlebarContext, HeaderTextContext, SidebarTextContext, SessionContext, SiteHueContext, SiteLightnessContext,
+SiteSaturationContext} from "../Context"
 import "./styles/changeusernamepage.less"
 
 const ChangeUsernamePage: React.FunctionComponent = (props) => {
     const {theme, setTheme} = useContext(ThemeContext)
+    const {siteHue, setSiteHue} = useContext(SiteHueContext)
+    const {siteSaturation, setSiteSaturation} = useContext(SiteSaturationContext)
+    const {siteLightness, setSiteLightness} = useContext(SiteLightnessContext)
     const {hideNavbar, setHideNavbar} = useContext(HideNavbarContext)
     const {hideTitlebar, setHideTitlebar} = useContext(HideTitlebarContext)
     const {hideSidebar, setHideSidebar} = useContext(HideSidebarContext)
@@ -27,9 +31,30 @@ const ChangeUsernamePage: React.FunctionComponent = (props) => {
     const {mobile, setMobile} = useContext(MobileContext)
     const [submitted, setSubmitted] = useState(false)
     const [newUsername, setNewUsername] = useState("")
+    const [captchaResponse, setCaptchaResponse] = useState("")
+    const [captcha, setCaptcha] = useState("")
     const [error, setError] = useState(false)
     const errorRef = useRef<any>(null)
     const history = useHistory()
+
+    const getFilter = () => {
+        return `hue-rotate(${siteHue - 180}deg) saturate(${siteSaturation}%) brightness(${siteLightness + 70}%)`
+    }
+
+    const getCaptchaColor = () => {
+        if (theme.includes("light")) return "#ffffff"
+        return "#09071c"
+    }
+
+    const updateCaptcha = async () => {
+        const captcha = await axios.get("/api/misc/captcha/create", {params: {color: getCaptchaColor()}, withCredentials: true}).then((r) => r.data)
+        setCaptcha(captcha)
+        setCaptchaResponse("")
+    }
+
+    useEffect(() => {
+        updateCaptcha()
+    }, [theme])
 
     useEffect(() => {
         setHideNavbar(false)
@@ -73,12 +98,12 @@ const ChangeUsernamePage: React.FunctionComponent = (props) => {
         if (!errorRef.current) await functions.timeout(20)
         errorRef.current!.innerText = "Submitting..."
         try {
-            await axios.post("/api/user/changeusername", {newUsername}, {headers: {"x-csrf-token": functions.getCSRFToken()}, withCredentials: true})
+            await axios.post("/api/user/changeusername", {newUsername, captchaResponse}, {headers: {"x-csrf-token": functions.getCSRFToken()}, withCredentials: true})
             setSubmitted(true)
             setSessionFlag(true)
             setError(false)
         } catch {
-            errorRef.current!.innerText = "Bad username."
+            errorRef.current!.innerText = "Bad username or captcha."
             await functions.timeout(2000)
             setError(false)
         }
@@ -109,6 +134,10 @@ const ChangeUsernamePage: React.FunctionComponent = (props) => {
                     <div className="change-username-row">
                         <span className="change-username-text">New Username: </span>
                         <input className="change-username-input" type="text" spellCheck={false} value={newUsername} onChange={(event) => setNewUsername(event.target.value)} onKeyDown={(event) => event.key === "Enter" ? submit() : null}/>
+                    </div>
+                    <div className="change-username-row" style={{justifyContent: "center"}}>
+                        <img src={`data:image/svg+xml;utf8,${encodeURIComponent(captcha)}`} style={{filter: getFilter()}}/>
+                        <input className="change-username-input" type="text" spellCheck={false} value={captchaResponse} onChange={(event) => setCaptchaResponse(event.target.value)} onKeyDown={(event) => event.key === "Enter" ? submit() : null}/>
                     </div>
                     {error ? <div className="change-username-validation-container"><span className="change-username-validation" ref={errorRef}></span></div> : null}
                     <div className="change-username-button-container">

@@ -1,4 +1,5 @@
 import React, {useEffect, useContext, useState, useRef} from "react"
+import {useHistory} from "react-router-dom"
 import TitleBar from "../components/TitleBar"
 import NavBar from "../components/NavBar"
 import SideBar from "../components/SideBar"
@@ -9,10 +10,12 @@ import search from "../assets/icons/search.png"
 import searchIconHover from "../assets/icons/search-hover.png"
 import sort from "../assets/icons/sort.png"
 import CharacterRow from "../components/CharacterRow"
+import scrollIcon from "../assets/icons/scroll.png"
+import pageIcon from "../assets/icons/page.png"
 import axios from "axios"
 import {ThemeContext, EnableDragContext, HideNavbarContext, HideSidebarContext, RelativeContext, MobileContext,
 HideTitlebarContext, ActiveDropdownContext, HeaderTextContext, SidebarTextContext, SiteHueContext, SiteLightnessContext,
-SiteSaturationContext} from "../Context"
+SiteSaturationContext, ScrollContext, CharactersPageContext, ShowPageDialogContext, PageFlagContext} from "../Context"
 import "./styles/characterspage.less"
 
 const CharactersPage: React.FunctionComponent = (props) => {
@@ -28,6 +31,10 @@ const CharactersPage: React.FunctionComponent = (props) => {
     const {activeDropdown, setActiveDropdown} = useContext(ActiveDropdownContext)
     const {headerText, setHeaderText} = useContext(HeaderTextContext)
     const {sidebarText, setSidebarText} = useContext(SidebarTextContext)
+    const {charactersPage, setCharactersPage} = useContext(CharactersPageContext)
+    const {showPageDialog, setShowPageDialog} = useContext(ShowPageDialogContext)
+    const {pageFlag, setPageFlag} = useContext(PageFlagContext)
+    const {scroll, setScroll} = useContext(ScrollContext)
     const {mobile, setMobile} = useContext(MobileContext)
     const [sortType, setSortType] = useState("posts")
     const [characters, setCharacters] = useState([]) as any
@@ -37,7 +44,25 @@ const CharactersPage: React.FunctionComponent = (props) => {
     const [offset, setOffset] = useState(0)
     const [ended, setEnded] = useState(false)
     const [getSearchIconHover, setSearchIconHover] = useState(false)
+    const [queryPage, setQueryPage] = useState(1)
     const sortRef = useRef(null) as any
+    const history = useHistory()
+
+    useEffect(() => {
+        const savedScroll = localStorage.getItem("scroll")
+        if (savedScroll) setScroll(savedScroll === "true")
+        const savedPage = localStorage.getItem("charactersPage")
+        if (savedPage) setTimeout(() => {setCharactersPage(Number(savedPage))}, 100)
+        const queryParam = new URLSearchParams(window.location.search).get("query")
+        const pageParam = new URLSearchParams(window.location.search).get("page")
+        setTimeout(() => {
+            if (queryParam) updateCharacters(queryParam)
+            if (pageParam) {
+                setQueryPage(Number(pageParam))
+                setCharactersPage(Number(pageParam))
+            }
+        }, 500)
+    }, [])
 
     const getFilter = () => {
         return `hue-rotate(${siteHue - 180}deg) saturate(${siteSaturation}%) brightness(${siteLightness + 70}%)`
@@ -48,8 +73,9 @@ const CharactersPage: React.FunctionComponent = (props) => {
         return `hue-rotate(${siteHue - 180}deg) saturate(${siteSaturation}%) brightness(${siteLightness + 70}%)`
     }
 
-    const updateCharacters = async () => {
-        const result = await axios.get("/api/search/characters", {params: {sort: sortType, query: searchQuery}, withCredentials: true}).then((r) => r.data)
+    const updateCharacters = async (queryOverride?: string) => {
+        let query = queryOverride ? queryOverride : searchQuery
+        const result = await axios.get("/api/search/characters", {params: {sort: sortType, query}, withCredentials: true}).then((r) => r.data)
         setEnded(false)
         setIndex(0)
         setVisibleCharacters([])
@@ -82,27 +108,64 @@ const CharactersPage: React.FunctionComponent = (props) => {
         updateCharacters()
     }, [sortType])
 
+
+    const getPageAmount = () => {
+        return 15
+    }
+
     useEffect(() => {
-        let currentIndex = index
-        const newVisibleCharacters = visibleCharacters as any
-        for (let i = 0; i < 10; i++) {
-            if (!characters[currentIndex]) break
-            newVisibleCharacters.push(characters[currentIndex])
-            currentIndex++
+        const updateCharacters = () => {
+            let currentIndex = index
+            const newVisibleCharacters = visibleCharacters as any
+            for (let i = 0; i < getPageAmount(); i++) {
+                if (!characters[currentIndex]) break
+                newVisibleCharacters.push(characters[currentIndex])
+                currentIndex++
+            }
+            setIndex(currentIndex)
+            setVisibleCharacters(functions.removeDuplicates(newVisibleCharacters))
         }
-        setIndex(currentIndex)
-        setVisibleCharacters(functions.removeDuplicates(newVisibleCharacters))
-    }, [characters])
+        if (scroll) updateCharacters()
+    }, [scroll, characters])
 
     const updateOffset = async () => {
         if (ended) return
-        const newOffset = offset + 10
-        const result = await axios.get("/api/search/characters", {params: {sort: sortType, query: searchQuery, offset: newOffset}, withCredentials: true}).then((r) => r.data)
-        if (result?.length >= 10) {
+        let newOffset = offset + 100
+        let padded = false
+        if (!scroll) {
+            newOffset = (charactersPage - 1) * getPageAmount()
+            if (newOffset === 0) {
+                if (characters[newOffset]?.fake) {
+                    padded = true
+                } else {
+                    return
+                }
+            }
+        }
+        let result = await axios.get("/api/search/characters", {params: {sort: sortType, query: searchQuery, offset: newOffset}, withCredentials: true}).then((r) => r.data)
+        let hasMore = result?.length >= 100
+        const cleanCharacters = characters.filter((t: any) => !t.fake)
+        if (!scroll) {
+            if (cleanCharacters.length <= newOffset) {
+                result = [...new Array(newOffset).fill({fake: true, tagCount: cleanCharacters[0]?.tagCount}), ...result]
+                padded = true
+            }
+        }
+        if (hasMore) {
             setOffset(newOffset)
-            setCharacters((prev: any) => functions.removeDuplicates([...prev, ...result]))
+            if (padded) {
+                setCharacters(result)
+            } else {
+                setCharacters((prev: any) => functions.removeDuplicates([...prev, ...result]))
+            }
         } else {
-            if (result?.length) setCharacters((prev: any) => functions.removeDuplicates([...prev, ...result]))
+            if (result?.length) {
+                if (padded) {
+                    setCharacters(result)
+                } else {
+                    setCharacters((prev: any) => functions.removeDuplicates([...prev, ...result]))
+                }
+            }
             setEnded(true)
         }
     }
@@ -113,7 +176,7 @@ const CharactersPage: React.FunctionComponent = (props) => {
                 let currentIndex = index
                 if (!characters[currentIndex]) return updateOffset()
                 const newVisibleCharacters = visibleCharacters as any
-                for (let i = 0; i < 10; i++) {
+                for (let i = 0; i < 15; i++) {
                     if (!characters[currentIndex]) return updateOffset()
                     newVisibleCharacters.push(characters[currentIndex])
                     currentIndex++
@@ -122,11 +185,137 @@ const CharactersPage: React.FunctionComponent = (props) => {
                 setVisibleCharacters(functions.removeDuplicates(newVisibleCharacters))
             }
         }
-        window.addEventListener("scroll", scrollHandler)
+        if (scroll) window.addEventListener("scroll", scrollHandler)
         return () => {
             window.removeEventListener("scroll", scrollHandler)
         }
-    })
+    }, [scroll, visibleCharacters, index])
+
+    useEffect(() => {
+        window.scrollTo(0, 0)
+        if (scroll) {
+            setEnded(false)
+            setIndex(0)
+            setVisibleCharacters([])
+            setCharactersPage(1)
+            updateCharacters()
+        }
+    }, [scroll])
+
+    useEffect(() => {
+        if (!scroll) updateOffset()
+    }, [])
+
+    useEffect(() => {
+        const updatePageOffset = () => {
+            const artistOffset = (charactersPage - 1) * getPageAmount()
+            if (characters[artistOffset]?.fake) {
+                setEnded(false)
+                return updateOffset()
+            }
+            const artistAmount = Number(characters[0]?.tagCount)
+            let maximum = artistOffset + getPageAmount()
+            if (maximum > artistAmount) maximum = artistAmount
+            const maxTag = characters[maximum - 1]
+            if (!maxTag) {
+                setEnded(false)
+                updateOffset()
+            }
+        }
+        if (!scroll) updatePageOffset()
+    }, [scroll, characters, charactersPage, ended])
+
+    useEffect(() => {
+        if (searchQuery) {
+            scroll ? history.replace(`${location.pathname}?query=${searchQuery}`) : history.replace(`${location.pathname}?query=${searchQuery}&page=${charactersPage}`)
+        } else {
+            if (!scroll) history.replace(`${location.pathname}?page=${charactersPage}`)
+        }
+    }, [scroll, search, charactersPage])
+
+    useEffect(() => {
+        if (characters?.length) {
+            const maxTagPage = maxPage()
+            if (maxTagPage === 1) return
+            if (queryPage > maxTagPage) {
+                setQueryPage(maxTagPage)
+                setCharactersPage(maxTagPage)
+            }
+        }
+    }, [characters, charactersPage, queryPage])
+
+    useEffect(() => {
+        if (pageFlag) {
+            goToPage(pageFlag)
+            setPageFlag(null)
+        }
+    }, [pageFlag])
+
+    useEffect(() => {
+        localStorage.setItem("charactersPage", String(charactersPage))
+    }, [charactersPage])
+
+    const maxPage = () => {
+        if (!characters?.length) return 1
+        if (Number.isNaN(Number(characters[0]?.tagCount))) return 10000
+        return Math.ceil(Number(characters[0]?.tagCount) / getPageAmount())
+    }
+
+    const firstPage = () => {
+        setCharactersPage(1)
+        window.scrollTo(0, 0)
+    }
+
+    const previousPage = () => {
+        let newPage = charactersPage - 1 
+        if (newPage < 1) newPage = 1 
+        setCharactersPage(newPage)
+        window.scrollTo(0, 0)
+    }
+
+    const nextPage = () => {
+        let newPage = charactersPage + 1 
+        if (newPage > maxPage()) newPage = maxPage()
+        setCharactersPage(newPage)
+        window.scrollTo(0, 0)
+    }
+
+    const lastPage = () => {
+        setCharactersPage(maxPage())
+        window.scrollTo(0, 0)
+    }
+
+    const goToPage = (newPage: number) => {
+        setCharactersPage(newPage)
+        window.scrollTo(0, 0)
+    }
+
+    const generatePageButtonsJSX = () => {
+        const jsx = [] as any
+        let buttonAmount = 7
+        if (mobile) buttonAmount = 5
+        if (maxPage() < buttonAmount) buttonAmount = maxPage()
+        let counter = 0
+        let increment = -3
+        if (charactersPage > maxPage() - 3) increment = -4
+        if (charactersPage > maxPage() - 2) increment = -5
+        if (charactersPage > maxPage() - 1) increment = -6
+        if (mobile) {
+            increment = -2
+            if (charactersPage > maxPage() - 2) increment = -3
+            if (charactersPage > maxPage() - 1) increment = -4
+        }
+        while (counter < buttonAmount) {
+            const pageNumber = charactersPage + increment
+            if (pageNumber > maxPage()) break
+            if (pageNumber >= 1) {
+                jsx.push(<button key={pageNumber} className={`page-button ${increment === 0 ? "page-button-active" : ""}`} onClick={() => goToPage(pageNumber)}>{pageNumber}</button>)
+                counter++
+            }
+            increment++
+        }
+        return jsx
+    }
 
     const getSearchIcon = () => {
         return getSearchIconHover ? searchIconHover : search
@@ -157,13 +346,40 @@ const CharactersPage: React.FunctionComponent = (props) => {
 
     const generateCharactersJSX = () => {
         const jsx = [] as any
-        const characters = functions.removeDuplicates(visibleCharacters) as any
-        for (let i = 0; i < characters.length; i++) {
-            if (characters[i].tag === "original") continue
-            if (characters[i].tag === "unknown-character") continue
-            jsx.push(<CharacterRow character={characters[i]}/>)
+        let visible = [] as any
+        if (scroll) {
+            visible = functions.removeDuplicates(visibleCharacters) as any
+        } else {
+            const postOffset = (charactersPage - 1) * getPageAmount()
+            visible = characters.slice(postOffset, postOffset + getPageAmount())
+        }
+        for (let i = 0; i < visible.length; i++) {
+            if (visible[i].fake) continue
+            if (visible[i].tag === "original") continue
+            if (visible[i].tag === "unknown-character") continue
+            jsx.push(<CharacterRow character={visible[i]}/>)
+        }
+        if (!scroll) {
+            jsx.push(
+                <div className="page-container">
+                    {charactersPage <= 1 ? null : <button className="page-button" onClick={firstPage}>{"<<"}</button>}
+                    {charactersPage <= 1 ? null : <button className="page-button" onClick={previousPage}>{"<"}</button>}
+                    {generatePageButtonsJSX()}
+                    {charactersPage >= maxPage() ? null : <button className="page-button" onClick={nextPage}>{">"}</button>}
+                    {charactersPage >= maxPage() ? null : <button className="page-button" onClick={lastPage}>{">>"}</button>}
+                    {<button className="page-button" onClick={() => setShowPageDialog(true)}>{"?"}</button>}
+                </div>
+            )
         }
         return jsx
+    }
+
+    const toggleScroll = () => {
+        setScroll((prev: boolean) => {
+            const newValue = !prev
+            localStorage.setItem("scroll", `${newValue}`)
+            return newValue
+        })
     }
 
     return (
@@ -179,9 +395,13 @@ const CharactersPage: React.FunctionComponent = (props) => {
                     <div className="characters-row">
                         <div className="character-search-container" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                             <input className="character-search" type="search" spellCheck="false" value={searchQuery} onChange={(event) => setSearchQuery(event.target.value)} onKeyDown={(event) => event.key === "Enter" ? updateCharacters() : null}/>
-                            <img className="character-search-icon" src={getSearchIcon()} style={{filter: getFilterSearch()}} onClick={updateCharacters} onMouseEnter={() => setSearchIconHover(true)} onMouseLeave={() => setSearchIconHover(false)}/>
+                            <img className="character-search-icon" src={getSearchIcon()} style={{filter: getFilterSearch()}} onClick={() => updateCharacters()} onMouseEnter={() => setSearchIconHover(true)} onMouseLeave={() => setSearchIconHover(false)}/>
                         </div>
                         {getSortJSX()}
+                        <div className="charactersort-item" onClick={() => toggleScroll()}>
+                            <img className="charactersort-img" src={scroll ? scrollIcon : pageIcon} style={{filter: getFilter()}}/>
+                            <span className="charactersort-text">{scroll ? "Scrolling" : "Pages"}</span>
+                        </div>
                         <div className={`character-dropdown ${activeDropdown === "sort" ? "" : "hide-character-dropdown"}`} 
                         style={{marginRight: getSortMargin(), top: mobile ? "229px" : "209px"}} onClick={() => setActiveDropdown("none")}>
                             <div className="character-dropdown-row" onClick={() => setSortType("alphabetic")}>

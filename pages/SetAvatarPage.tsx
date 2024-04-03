@@ -234,11 +234,10 @@ const SetAvatarPage: React.FunctionComponent<Props> = (props) => {
         setImageLoaded(false)
         loadImage()
     }, [image])
-      
 
-    const setAvatar = async () => {
+    const getCroppedURL = async () => {
         if (!previewRef.current) return
-        const url = previewRef.current.toDataURL()
+        const url = previewRef.current.toDataURL("image/jpeg")
         let croppedURL = ""
         if (functions.isGIF(image)) {
             const gifData = await functions.extractGIFFrames(image)
@@ -254,8 +253,8 @@ const SetAvatarPage: React.FunctionComponent<Props> = (props) => {
                     image.onload = () => resolve()
                 })
                 drawCanvas(image, canvas, pixelCrop)
-                const cropped = await functions.crop(canvas.toDataURL(), 1, true)
-                if (!firstURL) firstURL = await functions.crop(canvas.toDataURL(), 1)
+                const cropped = await functions.crop(canvas.toDataURL("image/jpeg"), 1, true)
+                if (!firstURL) firstURL = await functions.crop(canvas.toDataURL("image/jpeg"), 1)
                 frameArray.push(cropped)
                 delayArray.push(gifData[i].delay)
             }
@@ -266,12 +265,25 @@ const SetAvatarPage: React.FunctionComponent<Props> = (props) => {
         } else {
             croppedURL = await functions.crop(url, 1)
         }
+        return croppedURL
+    }
+      
+
+    const setAvatar = async () => {
+        const croppedURL = await getCroppedURL()
+        if (!croppedURL) return
         const arrayBuffer = await fetch(croppedURL).then((r) => r.arrayBuffer())
         const bytes = Object.values(new Uint8Array(arrayBuffer))
         await axios.post("/api/user/updatepfp", {postID, bytes}, {headers: {"x-csrf-token": functions.getCSRFToken()}, withCredentials: true})
         setUserImg("")
         setSessionFlag(true)
         history.push(`/post/${postID}`)
+    }
+
+    const download = async () => {
+        const croppedURL = await getCroppedURL()
+        if (!croppedURL) return
+        functions.download(`${postID}-crop.jpg`, croppedURL)
     }
 
     const toggleScroll = (on: boolean) => {
@@ -306,6 +318,9 @@ const SetAvatarPage: React.FunctionComponent<Props> = (props) => {
                                 <div className="set-avatar-button-container">
                                     <button className="set-avatar-button" onClick={() => history.push(`/post/${postID}`)}>Cancel</button>
                                     <button className="set-avatar-button" onClick={() => setAvatar()}>Set Avatar</button>
+                                </div>
+                                <div className="set-avatar-button-container">
+                                    <button className="set-avatar-button" onClick={() => download()}>Download</button>
                                 </div>
                             </div>
                         </div>

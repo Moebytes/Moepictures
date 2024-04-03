@@ -121,11 +121,6 @@ const $2FAEnablePage: React.FunctionComponent = (props) => {
                         <span className="f2a-enable-text">Status: </span>
                         <span className="f2a-enable-text" style={{cursor: "pointer", marginLeft: "10px"}} onClick={toggle}>{session.$2fa ? "Enabled" : "Disabled"}</span>
                     </div>
-                    {!qr ? 
-                    <div className="f2a-enable-row">
-                        <button className="change-username-button" onClick={() => history.push("/profile")}>←Back</button>
-                    </div>
-                    : null}
                     {qr ? <>
                     <div className="f2a-enable-row">
                         <span className="f2a-enable-link">Scan the following QR Code in a 2FA authentication app (eg. Authy). </span>
@@ -134,6 +129,11 @@ const $2FAEnablePage: React.FunctionComponent = (props) => {
                         <img className="f2a-qr" src={qr}/>
                     </div>
                     </> : null}
+                    {!showValidation ? 
+                    <div className="f2a-enable-row">
+                        <button className="change-username-button" onClick={() => history.push("/profile")}>←Back</button>
+                    </div>
+                    : null}
                     {showValidation ? <>
                     <div className="f2a-enable-row">
                         <span className="f2a-enable-link">To finish enabling 2FA, you must enter a valid 2fa token.</span>

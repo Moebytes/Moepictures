@@ -478,7 +478,7 @@ const ImageGrid: React.FunctionComponent<Props> = (props) => {
             const pageNumber = page + increment
             if (pageNumber > maxPage()) break
             if (pageNumber >= 1) {
-                jsx.push(<button key={pageNumber} className={`imagegrid-page-button ${increment === 0 ? "imagegrid-page-button-active" : ""}`} onClick={() => goToPage(pageNumber)}>{pageNumber}</button>)
+                jsx.push(<button key={pageNumber} className={`page-button ${increment === 0 ? "page-button-active" : ""}`} onClick={() => goToPage(pageNumber)}>{pageNumber}</button>)
                 counter++
             }
             increment++
@@ -521,13 +521,13 @@ const ImageGrid: React.FunctionComponent<Props> = (props) => {
             )
         } else if (!scroll) {
             jsx.push(
-                <div className="imagegrid-page-container">
-                    {page <= 1 ? null : <button className="imagegrid-page-button" onClick={firstPage}>{"<<"}</button>}
-                    {page <= 1 ? null : <button className="imagegrid-page-button" onClick={previousPage}>{"<"}</button>}
+                <div className="page-container">
+                    {page <= 1 ? null : <button className="page-button" onClick={firstPage}>{"<<"}</button>}
+                    {page <= 1 ? null : <button className="page-button" onClick={previousPage}>{"<"}</button>}
                     {generatePageButtonsJSX()}
-                    {page >= maxPage() ? null : <button className="imagegrid-page-button" onClick={nextPage}>{">"}</button>}
-                    {page >= maxPage() ? null : <button className="imagegrid-page-button" onClick={lastPage}>{">>"}</button>}
-                    {<button className="imagegrid-page-button" onClick={() => setShowPageDialog(true)}>{"?"}</button>}
+                    {page >= maxPage() ? null : <button className="page-button" onClick={nextPage}>{">"}</button>}
+                    {page >= maxPage() ? null : <button className="page-button" onClick={lastPage}>{">>"}</button>}
+                    {<button className="page-button" onClick={() => setShowPageDialog(true)}>{"?"}</button>}
                 </div>
             )
         }

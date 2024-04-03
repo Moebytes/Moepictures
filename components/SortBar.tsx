@@ -86,7 +86,7 @@ const SortBar: React.FunctionComponent = (props) => {
     const {session, setSession} = useContext(SessionContext)
     const {scroll, setScroll} = useContext(ScrollContext)
     const [dropLeft, setDropLeft] = useState(0)
-    const [dropTop, setDropTop] = useState(0)
+    const [dropTop, setDropTop] = useState(-1)
     const [lastImageType, setLastImageType] = useState(null) as any
     const [lastRestrictType, setLastRestrictType] = useState(null) as any
     const [lastStyleType, setLastStyleType] = useState(null) as any
@@ -142,15 +142,15 @@ const SortBar: React.FunctionComponent = (props) => {
             if (activeDropdown !== "filters") {
                 if (filterDropActive) setFilterDropActive(false)
             }
-            if (window.scrollY === 0) setDropTop(-functions.tagbannerHeight())
+            if (window.scrollY === 0) setDropTop(-1)
             if (activeDropdown === "none") return
         }
         const scrollHandler = () => {
-            if (window.scrollY === 0) return setDropTop(-functions.tagbannerHeight())
+            if (window.scrollY === 0) return setDropTop(-1)
             let newDropTop = hideTitlebar ? -Number(document.querySelector(".titlebar")?.clientHeight) - 2 : 0
             if (mobile) newDropTop = 32
             if (dropTop === newDropTop) return
-            setDropTop(newDropTop - functions.tagbannerHeight())
+            setDropTop(newDropTop - 1)
         }
         window.addEventListener("click", clickHandler)
         window.addEventListener("scroll", scrollHandler)
@@ -172,9 +172,9 @@ const SortBar: React.FunctionComponent = (props) => {
     useEffect(() => {
         setActiveDropdown("none")
         if (hideTitlebar) {
-            setDropTop(-Number(document.querySelector(".titlebar")?.clientHeight) - 2 - functions.tagbannerHeight())
+            setDropTop(-Number(document.querySelector(".titlebar")?.clientHeight) - 3)
         } else {
-            setDropTop(-functions.tagbannerHeight())
+            setDropTop(-1)
         }
     }, [hideTitlebar])
 

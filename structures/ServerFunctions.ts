@@ -134,6 +134,7 @@ export default class ServerFunctions {
     public static getNextKey = async (type: string, name: string) => {
         const key = `history/${type}/${name}`
         if (functions.isLocalHost()) {
+            if (!fs.existsSync(`/Volumes/Files/moebooru/${key}`)) return 1
             const objects = fs.readdirSync(`/Volumes/Files/moebooru/${key}`)
             let nextKey = 0
             for (let i = 0; i < objects.length; i++) {
@@ -253,6 +254,15 @@ export default class ServerFunctions {
             const currentMD5 = crypto.createHash("md5").update(currentBuffer).digest("hex")
             if (imgMD5 !== currentMD5) return true
         }
+        return false
+    }
+
+    public static buffersChanged = (oldBuffer: Buffer, currentBuffer: Buffer) => {
+        if (!oldBuffer && !currentBuffer) return false
+        if (!oldBuffer && currentBuffer) return true
+        const imgMD5 = crypto.createHash("md5").update(oldBuffer).digest("hex")
+        const currentMD5 = crypto.createHash("md5").update(currentBuffer).digest("hex")
+        if (imgMD5 !== currentMD5) return true
         return false
     }
 

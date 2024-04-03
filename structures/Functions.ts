@@ -921,7 +921,7 @@ export default class Functions {
 
     public static getImageLink = (folder: string, postID: number, order: number, filename: string) => {
         if (!filename) return ""
-        if (filename.includes("history/")) return `${window.location.protocol}//${window.location.host}/${filename}`
+        if (!folder || filename.includes("history/")) return `${window.location.protocol}//${window.location.host}/${filename}`
         return `${window.location.protocol}//${window.location.host}/${folder}/${postID}-${order}-${encodeURIComponent(filename)}`
     }
 
@@ -972,7 +972,7 @@ export default class Functions {
     public static getTagLink = (folder: string, filename: string) => {
         if (!filename) return ""
         if (folder === "attribute") folder = "tag"
-        if (filename.includes("history/")) return `${window.location.protocol}//${window.location.host}/${filename}`
+        if (!folder || filename.includes("history/")) return `${window.location.protocol}//${window.location.host}/${filename}`
         return `${window.location.protocol}//${window.location.host}/${folder}/${encodeURIComponent(filename)}`
     }
 
@@ -1442,21 +1442,21 @@ export default class Functions {
                 } else if (inputImageAspectRatio < aspectRatio) {
                     outputHeight = inputWidth / aspectRatio
                 }
-    
+
                 const outputX = (outputWidth - inputWidth) * 0.5
                 const outputY = (outputHeight - inputHeight) * 0.5
+
                 const outputImage = document.createElement("canvas")
-    
-                outputImage.width = outputWidth
-                outputImage.height = outputHeight
+                outputImage.width = 1000
+                outputImage.height = 1000
     
                 const ctx = outputImage.getContext("2d") as any
-                ctx.drawImage(inputImage, outputX, outputY)
+                ctx.drawImage(inputImage, outputX, outputY, outputImage.width, outputImage.height)
                 if (buffer) {
                     const img = ctx.getImageData(0, 0, outputImage.width, outputImage.height)
                     resolve(img.data.buffer)
                 } else {
-                    resolve(outputImage.toDataURL())
+                    resolve(outputImage.toDataURL("image/jpeg"))
                 }
             }
             inputImage.src = url
@@ -1756,7 +1756,7 @@ export default class Functions {
 
     public static tagbannerHeight = () => {
         const tagbanner = document.querySelector(".tagbanner")
-        return tagbanner ? tagbanner.clientHeight + 6 : 40
+        return tagbanner ? tagbanner.clientHeight : 40
     }
 
     public static getFile = async (filepath: string) => {

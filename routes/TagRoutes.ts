@@ -112,6 +112,7 @@ const TagRoutes = (app: Express) => {
                 tagDescription = description
             }
             let vanillaImageBuffer = null as any
+            let imgChange = false
             if (image?.[0]) {
                 if (tagObj.image) {
                     const imagePath = functions.getTagPath(tagObj.type, tagObj.image)
@@ -122,7 +123,9 @@ const TagRoutes = (app: Express) => {
                 if (image[0] !== "delete") {
                     const filename = `${tag}.${functions.fileExtension(image)}`
                     const imagePath = functions.getTagPath(tagObj.type, filename)
-                    await serverFunctions.uploadFile(imagePath, Buffer.from(Object.values(image) as any))
+                    const newBuffer = Buffer.from(Object.values(image) as any)
+                    imgChange = serverFunctions.buffersChanged(vanillaImageBuffer, newBuffer)
+                    await serverFunctions.uploadFile(imagePath, newBuffer)
                     await sql.updateTag(tag, "image", filename)
                     tagObj.image = filename
                     imageFilename = filename
@@ -184,7 +187,8 @@ const TagRoutes = (app: Express) => {
                 }
             }
             const tagHistory = await sql.tagHistory(tag)
-            if (!tagHistory.length) {
+            const nextKey = await serverFunctions.getNextKey("tag", key)
+            if (!tagHistory.length || (imgChange && nextKey === 1)) {
                 let targetTag = tag
                 let vanilla = await sql.tag(targetTag)
                 if (!vanilla) {
@@ -198,25 +202,30 @@ const TagRoutes = (app: Express) => {
                 vanilla.aliases = vanilla.aliases.map((alias: any) => alias?.alias)
                 vanilla.implications = vanilla.implications.map((implication: any) => implication?.implication)
                 if (vanilla.image && vanillaImageBuffer) {
-                    const newImagePath = functions.getTagHistoryPath(targetTag, 1, vanilla.image)
-                    await serverFunctions.uploadFile(newImagePath, vanillaImageBuffer)
-                    vanilla.image = newImagePath
+                    if (imgChange) {
+                        const newImagePath = functions.getTagHistoryPath(targetTag, 1, vanilla.image)
+                        await serverFunctions.uploadFile(newImagePath, vanillaImageBuffer)
+                        vanilla.image = newImagePath
+                    }
                 } else {
                     vanilla.image = null
                 }
                 await sql.insertTagHistory(vanilla.user, vanilla.tag, vanilla.key, vanilla.type, vanilla.image, vanilla.description, vanilla.aliases, vanilla.implications, vanilla.pixivTags, vanilla.website, vanilla.pixiv, vanilla.twitter, vanilla.fandom)
                 if (image?.[0] && imageFilename) {
-                    const imagePath = functions.getTagHistoryPath(key, 2, imageFilename)
-                    await serverFunctions.uploadFile(imagePath, Buffer.from(Object.values(image) as any))
-                    imageFilename = imagePath
+                    if (imgChange) {
+                        const imagePath = functions.getTagHistoryPath(key, 2, imageFilename)
+                        await serverFunctions.uploadFile(imagePath, Buffer.from(Object.values(image) as any))
+                        imageFilename = imagePath
+                    }
                 }
                 await sql.insertTagHistory(req.session.username, tag, key, tagObj.type, imageFilename, tagDescription, aliases, implications, pixivTags, website, pixiv, twitter, fandom, reason)
             } else {
                 if (image?.[0] && imageFilename) {
-                    const nextKey = await serverFunctions.getNextKey("tag", key)
-                    const imagePath = functions.getTagHistoryPath(key, nextKey, imageFilename)
-                    await serverFunctions.uploadFile(imagePath, Buffer.from(Object.values(image) as any))
-                    imageFilename = imagePath
+                    if (imgChange) {
+                        const imagePath = functions.getTagHistoryPath(key, nextKey, imageFilename)
+                        await serverFunctions.uploadFile(imagePath, Buffer.from(Object.values(image) as any))
+                        imageFilename = imagePath
+                    }
                 }
                 await sql.insertTagHistory(req.session.username, tag, key, tagObj.type, imageFilename, tagDescription, aliases, implications, pixivTags, website, pixiv, twitter, fandom, reason)
             }
