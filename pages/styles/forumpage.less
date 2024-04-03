@@ -1,6 +1,6 @@
 @import "../../index.less";
 
-.comments-page {
+.forum {
     display: flex;
     flex-direction: column;
     width: 100%;
@@ -8,7 +8,7 @@
     padding: 10px 30px;
 }
 
-.comments-heading {
+.forum-heading {
     font-family: Tahoma, sans-serif;
     font-size: 35px;
     color: var(--text);
@@ -18,18 +18,18 @@
     }
 }
 
-.comments-row {
+.forum-row {
     display: flex;
     flex-direction: row;
     width: 100%;
 }
 
-.comment-search-container {
+.forum-search-container {
     display: flex;
     border: 1px solid black;
 }
 
-.comment-search {
+.forum-search {
     height: 30px;
     background-color: var(--sidebarSearchBG);
     border: none;
@@ -41,13 +41,37 @@
     transition: width 0.3s;
 }
 
-.comment-search-icon {
+.forum-search-icon {
     width: auto;
     height: 30px;
     cursor: pointer;
 }
 
-.commentsort-item {
+.forum-button-container {
+    display: flex;
+    flex-direction: row;
+    margin-left: 15px;
+    align-items: center;
+    justify-content: center;
+}
+
+.forum-button {
+    border: none;
+    font-family: Tahoma, sans-serif;
+    font-size: 20px;
+    font-weight: bold;
+    padding: 2px 5px;
+    background: var(--buttonBG);
+    color: black;
+    border: 1px solid black;
+    cursor: pointer;
+    &:hover {
+        color: white;
+        border: 1px solid white;
+    }
+}
+
+.forumsort-item {
     display: flex;
     align-items: center;
     cursor: pointer;
@@ -57,7 +81,7 @@
     margin-left: 15px;
 }
 
-.commentsort-text {
+.forumsort-text {
     font-family: Tahoma, sans-serif;
     font-size: 16px;
     margin-left: 5px;
@@ -65,12 +89,12 @@
     //.stroke-black-thin();
 }
 
-.commentsort-img {
+.forumsort-img {
     width: auto;
     height: 20px;
 }
 
-.comment-dropdown {
+.forum-dropdown {
     position: absolute;
     z-index: 850;
     top: 0;
@@ -85,12 +109,12 @@
 }
 
 
-.hide-comment-dropdown {
+.hide-forum-dropdown {
     transform-origin: top;
     transform: scaleY(0);
 }
 
-.comment-dropdown-row {
+.forum-dropdown-row {
     display: flex;
     flex-direction: row;
     justify-content: center;
@@ -104,7 +128,7 @@
     }
 }
 
-.comment-dropdown-text {
+.forum-dropdown-text {
     font-family: Tahoma, sans-serif;
     font-size: 16px;
     margin-left: 5px;
@@ -112,12 +136,12 @@
     //.stroke-black-thin();
 }
 
-.comment-dropdown-img {
+.forum-dropdown-img {
     width: auto;
     height: 20px;
 }
 
-.comments-container {
+.forum-container {
     display: flex;
     flex-direction: column;
     width: 100%;

@@ -1215,11 +1215,11 @@ export default class SQLQuery {
   public static comments = async (postID: number) => {
     const query: QueryConfig = {
       text: functions.multiTrim(`
-            SELECT comments.*, users."image", users."role"
+            SELECT comments.*, users."image", users."imagePost", users."role"
             FROM comments
             JOIN "users" ON "users"."username" = "comments"."username"
             WHERE comments."postID" = $1
-            GROUP BY comments."commentID", users."image", users."role"
+            GROUP BY comments."commentID", users."image", users."imagePost", users."role"
             ORDER BY comments."postDate" ASC
           `),
           values: [postID]
@@ -1247,7 +1247,7 @@ export default class SQLQuery {
               JOIN images ON images."postID" = posts."postID"
               GROUP BY posts."postID"
             )
-            SELECT comments.*, users."image", users."role", json_build_object(
+            SELECT comments.*, users."image", users."imagePost", users."role", json_build_object(
               'type', post_json."type",
               'restrict', post_json."restrict",
               'style', post_json."style",
@@ -1257,7 +1257,7 @@ export default class SQLQuery {
             JOIN "users" ON "users"."username" = "comments"."username"
             JOIN post_json ON post_json."postID" = "comments"."postID"
             ${whereQuery}
-            GROUP BY comments."commentID", users."image", users."role", post_json."type", post_json."restrict", post_json."style"
+            GROUP BY comments."commentID", users."image", users."imagePost", users."role", post_json."type", post_json."restrict", post_json."style"
             ${sortQuery}
             LIMIT 100 ${offset ? `OFFSET $${i}` : ""}
           `),
@@ -1288,7 +1288,7 @@ export default class SQLQuery {
               JOIN images ON images."postID" = posts."postID"
               GROUP BY posts."postID"
             )
-            SELECT comments.*, users."image", users."role", json_build_object(
+            SELECT comments.*, users."image", users."imagePost", users."role", json_build_object(
               'type', post_json."type",
               'restrict', post_json."restrict",
               'style', post_json."style",
@@ -1298,7 +1298,7 @@ export default class SQLQuery {
             JOIN "users" ON "users"."username" = "comments"."username"
             JOIN post_json ON post_json."postID" = "comments"."postID"
             ${whereQuery}
-            GROUP BY comments."commentID", users."image", users."role", post_json."type", post_json."restrict", post_json."style"
+            GROUP BY comments."commentID", users."image", users."imagePost", users."role", post_json."type", post_json."restrict", post_json."style"
             ${sortQuery}
             LIMIT 100 ${offset ? `OFFSET $${i}` : ""}
           `),
@@ -1314,11 +1314,11 @@ export default class SQLQuery {
   public static comment = async (commentID: number) => {
     const query: QueryConfig = {
       text: functions.multiTrim(`
-            SELECT comments.*, users."image", users."role"
+            SELECT comments.*, users."image", users."imagePost", users."role"
             FROM comments
             JOIN "users" ON "users"."username" = "comments"."username"
             WHERE comments."commentID" = $1
-            GROUP BY comments."commentID", users."image", users."role"
+            GROUP BY comments."commentID", users."image", users."imagePost", users."role"
             ORDER BY comments."postDate" ASC
           `),
           values: [commentID]
@@ -2364,6 +2364,47 @@ export default class SQLQuery {
     }
     if (postID) query.values?.push(postID)
     if (order) query.values?.push(order)
+    if (offset) query.values?.push(offset)
+    const result = await SQLQuery.run(query)
+    return result
+  }
+
+  /** Insert forum thread. */
+  public static insertForumThread = async (creator: string, title: string, content: string) => {
+    const now = new Date().toISOString()
+    const sticky = false
+    const locked = false
+    const query: QueryConfig = {
+      text: `INSERT INTO "forum threads" ("creator", "createDate", "updater", "updatedDate", "sticky", "locked", "title", "content") VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`,
+      values: [creator, now, creator, now, sticky, locked, title, content]
+    }
+    const result = await SQLQuery.run(query)
+    return result
+  }
+
+  /** Search threads. */
+  public static searchThreads = async (search: string, sort: string, offset?: string) => {
+    let whereQuery = ""
+    let i = 1
+    if (search) {
+      whereQuery = `WHERE lower("forum threads"."title") LIKE '%' || $${i} || '%'`
+      i++
+    }
+    let sortQuery = ""
+    if (sort === "date") sortQuery = `ORDER BY "forum threads"."updatedDate" DESC`
+    if (sort === "reverse date") sortQuery = `ORDER BY "forum threads"."updatedDate" ASC`
+    const query: QueryConfig = {
+          text: functions.multiTrim(`
+            SELECT "forum threads".* 
+            FROM "forum threads"
+            ${whereQuery}
+            GROUP BY "forum threads"."threadID"
+            ${sortQuery}
+            LIMIT 100 ${offset ? `OFFSET $${i}` : ""}
+          `),
+          values: []
+    }
+    if (search) query.values?.push(search.toLowerCase())
     if (offset) query.values?.push(offset)
     const result = await SQLQuery.run(query)
     return result

@@ -131,10 +131,10 @@ const UserRoutes = (app: Express) => {
                 req.session.emailVerified = user.emailVerified
                 req.session.username = user.username
                 req.session.joinDate = user.joinDate
-                req.session.image = user.image 
+                req.session.image = user.image
+                req.session.imagePost = user.imagePost
                 req.session.bio = user.bio
                 req.session.publicFavorites = user.publicFavorites
-                req.session.image = user.image
                 req.session.role = user.role
                 await sql.updateUser(username, "ip", ip)
                 req.session.ip = ip
@@ -174,32 +174,28 @@ const UserRoutes = (app: Express) => {
     app.post("/api/user/updatepfp", userLimiter, async (req: Request, res: Response) => {
         try {
             if (!serverFunctions.validateCSRF(req)) return res.status(400).send("Bad request")
-            const bytes = req.body 
-            if (req.session.username) {
-                const result = fileType(bytes)?.[0]
-                const jpg = result?.mime === "image/jpeg"
-                const png = result?.mime === "image/png"
-                const webp = result?.mime === "image/webp"
-                const gif = result?.mime === "image/gif"
-                if (jpg || png || webp || gif) {
-                    if (req.session.image) {
-                        let oldImagePath = functions.getTagPath("pfp", req.session.image)
-                        try {
-                            await serverFunctions.deleteFile(oldImagePath)
-                        } catch {
-                            // ignore
-                        }
-                    }
-                    const filename = `${req.session.username}.${result.extension}`
-                    let imagePath = functions.getTagPath("pfp", filename)
-                    const buffer = Buffer.from(Object.values(bytes) as any)
-                    await serverFunctions.uploadFile(imagePath, buffer)
-                    await sql.updateUser(req.session.username, "image", filename)
-                    req.session.image = filename
-                    res.status(200).send("Success")
-                } else {
-                    res.status(400).send("Bad request")
+            const bytes = req.body.bytes
+            const postID = req.body.postID
+            if (!req.session.username) return res.status(400).send("Bad request")
+            const result = fileType(bytes)?.[0]
+            const jpg = result?.mime === "image/jpeg"
+            const png = result?.mime === "image/png"
+            const webp = result?.mime === "image/webp"
+            const gif = result?.mime === "image/gif"
+            if (jpg || png || webp || gif) {
+                if (req.session.image) {
+                    let oldImagePath = functions.getTagPath("pfp", req.session.image)
+                    await serverFunctions.deleteFile(oldImagePath).catch(() => null)
                 }
+                const filename = `${req.session.username}.${result.extension}`
+                let imagePath = functions.getTagPath("pfp", filename)
+                const buffer = Buffer.from(Object.values(bytes) as any)
+                await serverFunctions.uploadFile(imagePath, buffer)
+                await sql.updateUser(req.session.username, "image", filename)
+                if (postID) await sql.updateUser(req.session.username, "imagePost", postID)
+                req.session.image = filename
+                if (postID) req.session.imagePost = postID
+                res.status(200).send("Success")
             } else {
                 res.status(400).send("Bad request")
             }

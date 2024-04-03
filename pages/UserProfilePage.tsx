@@ -9,7 +9,7 @@ import Footer from "../components/Footer"
 import DragAndDrop from "../components/DragAndDrop"
 import {HideNavbarContext, HideSidebarContext, ThemeContext, EnableDragContext, RelativeContext, HideTitlebarContext, MobileContext,
 HeaderTextContext, SidebarTextContext, SessionContext, RedirectContext, SessionFlagContext, UserImgContext, ShowDeleteAccountDialogContext,
-CommentSearchFlagContext, SiteHueContext, SiteLightnessContext, SiteSaturationContext} from "../Context"
+CommentSearchFlagContext, SiteHueContext, SiteLightnessContext, UserImgPostContext, SiteSaturationContext} from "../Context"
 import fileType from "magic-bytes.js"
 import functions from "../structures/Functions"
 import Carousel from "../components/Carousel"
@@ -39,6 +39,7 @@ const UserProfilePage: React.FunctionComponent = (props) => {
     const {redirect, setRedirect} = useContext(RedirectContext)
     const {mobile, setMobile} = useContext(MobileContext)
     const {userImg, setUserImg} = useContext(UserImgContext)
+    const {userImgPost, setUserImgPost} = useContext(UserImgPostContext)
     const {showDeleteAccountDialog, setShowDeleteAccountDialog} = useContext(ShowDeleteAccountDialogContext)
     const {commentSearchFlag, setCommentSearchFlag} = useContext(CommentSearchFlagContext)
     const bioRef = useRef<any>(null)
@@ -153,7 +154,7 @@ const UserProfilePage: React.FunctionComponent = (props) => {
                         }
                         const arrayBuffer = await fetch(croppedURL).then((r) => r.arrayBuffer())
                         const bytes = Object.values(new Uint8Array(arrayBuffer))
-                        await axios.post("/api/user/updatepfp", bytes, {headers: {"x-csrf-token": functions.getCSRFToken()}, withCredentials: true})
+                        await axios.post("/api/user/updatepfp", {bytes}, {headers: {"x-csrf-token": functions.getCSRFToken()}, withCredentials: true})
                         setUserImg("")
                         setSessionFlag(true)
                     }
@@ -223,6 +224,16 @@ const UserProfilePage: React.FunctionComponent = (props) => {
         setCommentSearchFlag(`user:${session.username}`)
     }
 
+    const userImgClick = (event: React.MouseEvent) => {
+        if (!userImgPost) return
+        event.stopPropagation()
+        if (event.ctrlKey || event.metaKey || event.button === 1) {
+            window.open(`/post/${userImgPost}`, "_blank")
+        } else {
+            history.push(`/post/${userImgPost}`)
+        }
+    }
+
     const generateUsernameJSX = () => {
         if (session.role === "admin") {
             return (
@@ -253,7 +264,7 @@ const UserProfilePage: React.FunctionComponent = (props) => {
             <div className="content">
                 <div className="userprofile">
                     <div className="userprofile-top-container">
-                        <img className="userprofile-img" src={userImg}/>
+                        <img className="userprofile-img" src={userImg} onClick={userImgClick} onAuxClick={userImgClick}/>
                         {generateUsernameJSX()}
                         {permissions.isStaff(session) && <>
                         <label htmlFor="upload-pfp" className="uploadpfp-label">

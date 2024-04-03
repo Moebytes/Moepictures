@@ -43,6 +43,16 @@ const Comment: React.FunctionComponent<Props> = (props) => {
         }
     }
 
+    const userImgClick = (event: React.MouseEvent) => {
+        if (!props.comment.imagePost) return
+        event.stopPropagation()
+        if (event.ctrlKey || event.metaKey || event.button === 1) {
+            window.open(`/post/${props.comment.imagePost}`, "_blank")
+        } else {
+            history.push(`/post/${props.comment.imagePost}`)
+        }
+    }
+
     const triggerQuote = () => {
         const cleanComment = functions.parseComment(props.comment.comment).filter((s: any) => !s.includes(">>>")).join("")
         setQuoteText(functions.multiTrim(`
@@ -181,7 +191,7 @@ const Comment: React.FunctionComponent<Props> = (props) => {
         <div className="comment">
             <div className="comment-container">
                 <div className="comment-user-container" onClick={userClick} onAuxClick={userClick}>
-                    <img className="comment-user-img" src={getCommentPFP()}/>
+                    <img className="comment-user-img" src={getCommentPFP()} onClick={userImgClick} onAuxClick={userImgClick}/>
                     {generateUsernameJSX()}
                 </div>
             </div>

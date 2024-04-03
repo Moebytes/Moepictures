@@ -55,10 +55,7 @@ const $2FAEnablePage: React.FunctionComponent = (props) => {
 
     const get2FAQRCode = async () => {
         const qrcode = await axios.post("/api/2fa/qr", null, {headers: {"x-csrf-token": functions.getCSRFToken()}, withCredentials: true}).then((r) => r.data)
-        if (qrcode) {
-            const arrayBuffer = await fetch(qrcode).then((r) => r.arrayBuffer())
-            setQR(functions.arrayBufferToBase64(arrayBuffer))
-        }
+        if (qrcode) setQR(qrcode)
     }
 
     useEffect(() => {
@@ -74,10 +71,9 @@ const $2FAEnablePage: React.FunctionComponent = (props) => {
     }, [session])
 
     const toggle = async () => {
-        const {qr} = await axios.post("/api/2fa/create", null, {headers: {"x-csrf-token": functions.getCSRFToken()}, withCredentials: true}).then((r) => r.data)
+        const qr = await axios.post("/api/2fa/create", null, {headers: {"x-csrf-token": functions.getCSRFToken()}, withCredentials: true}).then((r) => r.data)
         if (qr) {
-            const arrayBuffer = await fetch(qr).then((r) => r.arrayBuffer())
-            setQR(functions.arrayBufferToBase64(arrayBuffer))
+            setQR(qr)
             setShowValidation(true)
         } else {
             setQR(null)

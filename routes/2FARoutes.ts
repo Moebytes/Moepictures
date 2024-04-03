@@ -5,6 +5,7 @@ import sql from "../structures/SQLQuery"
 import functions from "../structures/Functions"
 import serverFunctions from "../structures/ServerFunctions"
 import {generateSecret, verifyToken} from "node-2fa"
+import axios from "axios"
 
 const $2faLimiter = rateLimit({
 	windowMs: 5 * 60 * 1000,
@@ -26,14 +27,17 @@ const $2FARoutes = (app: Express) => {
                 await sql.delete2faToken(req.session.username)
                 const token = generateSecret({name: "Moebooru", account: functions.toProperCase(req.session.username)})
                 await sql.insert2faToken(req.session.username, token.secret, token.qr)
-                res.status(200).json({qr: token.qr})
+                const arrayBuffer = await axios.get(token.qr, {responseType: "arraybuffer"}).then((r) => r.data)
+                const base64 = functions.arrayBufferToBase64(arrayBuffer)
+                res.status(200).json(base64)
             } else {
                 await sql.updateUser(req.session.username, "$2fa", false)
                 req.session.$2fa = false
                 await sql.delete2faToken(req.session.username)
                 res.status(200).send("Success")
             }
-        } catch {
+        } catch (e) {
+            console.log(e)
             res.status(400).send("Bad request")
         }
     })
@@ -44,7 +48,9 @@ const $2FARoutes = (app: Express) => {
             if (!req.session.username) return res.status(400).send("Bad request")
             const $2FAToken = await sql.$2faToken(req.session.username)
             if (!$2FAToken) return res.status(400).send("Bad request")
-            res.status(200).json($2FAToken.qrcode)
+            const arrayBuffer = await axios.get($2FAToken.qrcode, {responseType: "arraybuffer"}).then((r) => r.data)
+            const base64 = functions.arrayBufferToBase64(arrayBuffer)
+            res.status(200).json(base64)
         } catch {
             res.status(400).send("Bad request")
         }

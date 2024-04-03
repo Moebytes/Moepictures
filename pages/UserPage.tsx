@@ -126,6 +126,16 @@ const UserPage: React.FunctionComponent<Props> = (props) => {
         return user.image ? functions.getTagLink("pfp", user.image) : favicon
     }
 
+    const userImgClick = (event: React.MouseEvent) => {
+        if (!user?.imagePost) return
+        event.stopPropagation()
+        if (event.ctrlKey || event.metaKey || event.button === 1) {
+            window.open(`/post/${user.imagePost}`, "_blank")
+        } else {
+            history.push(`/post/${user.imagePost}`)
+        }
+    }
+
     const generateFavoritesJSX = () => {
         if (!user) return null
         if (user.publicFavorites) {
@@ -180,7 +190,7 @@ const UserPage: React.FunctionComponent<Props> = (props) => {
                 {user ?
                 <div className="user">
                     <div className="user-top-container">
-                        <img className="user-img" src={getUserImg()}/>
+                        <img className="user-img" src={getUserImg()} onClick={userImgClick} onAuxClick={userImgClick}/>
                         {generateUsernameJSX()}
                     </div>
                     <div className="user-row">

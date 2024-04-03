@@ -3,10 +3,13 @@ import {ThemeContext, HideSidebarContext, HideNavbarContext, HideTitlebarContext
 SearchContext, SearchFlagContext, ImageTypeContext, RestrictTypeContext, StyleTypeContext, SortTypeContext} from "../Context"
 import {HashLink as Link} from "react-router-hash-link"
 import backToTop from "../assets/icons/backtotop.png"
-import pack from "../package.json"
 import "./styles/footer.less"
 
-const Footer: React.FunctionComponent = (props) => {
+interface Props {
+    noPadding?: boolean
+}
+
+const Footer: React.FunctionComponent<Props> = (props) => {
     const {theme, setTheme} = useContext(ThemeContext)
     const {siteHue, setSiteHue} = useContext(SiteHueContext)
     const {siteSaturation, setSiteSaturation} = useContext(SiteSaturationContext)
@@ -41,7 +44,7 @@ const Footer: React.FunctionComponent = (props) => {
 
     return (
         <>
-        <div style={{height: "100%", pointerEvents: "none"}}></div>
+        {!props.noPadding ? <div style={{height: "100%", pointerEvents: "none"}}></div> : null}
         <div className="footer">
             <div className="footer-title-container" onClick={footerClick}>
                     <span className="footer-title-a">M</span>

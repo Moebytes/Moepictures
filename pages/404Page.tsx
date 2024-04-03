@@ -50,7 +50,7 @@ const $404Page: React.FunctionComponent = (props) => {
                     <span className={`f404-text ${!theme.includes("light") ? "f404-darker" : ""}`}>404 Error</span>
                     <img className="f404" src={$404}/>
                 </div>
-                <Footer/>
+                <Footer noPadding={true}/>
             </div>
         </div>
         </>

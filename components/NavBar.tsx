@@ -280,8 +280,8 @@ const NavBar: React.FunctionComponent<Props> = (props) => {
                     <span style={{marginRight: marginR}} className="nav-text" onClick={() => history.push("/characters")}>Characters</span>
                     <span style={{marginRight: marginR}} className="nav-text" onClick={() => history.push("/series")}>Series</span>
                     <span style={{marginRight: marginR}} className="nav-text" onClick={() => history.push("/tags")}>Tags</span>
-                    <span style={{marginRight: marginR}} className="nav-text" onClick={() => history.push("/help")}>Help</span>
-                    <span style={{marginRight: "0px"}} className="nav-text" onClick={() => history.push("/forum")}>Forum</span>
+                    <span style={{marginRight: marginR}} className="nav-text" onClick={() => history.push("/forum")}>Forum</span>
+                    <span style={{marginRight: "0px"}} className="nav-text" onClick={() => history.push("/help")}>Help</span>
                 </div>
                 <div className="nav-color-container">
                     <div className={`nav-search-container ${!hideSidebar ? "hide-nav-search" : ""}`}>

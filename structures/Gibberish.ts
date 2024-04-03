@@ -1,4 +1,4 @@
-import gibberishModel from "../json/gibberish-model.json"
+import gibberishModel from "../assets/json/gibberish-model.json"
 
 const characterCounter = (str: string) => {
     let count = 0

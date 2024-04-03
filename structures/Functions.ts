@@ -1,9 +1,9 @@
 import GifEncoder from "gif-encoder"
 import pixels from "image-pixels"
 import path from "path"
-import commonPasswords from "../json/common-passwords.json"
-import bannedUsernames from "../json/banned-usernames.json"
-import profaneWords from "../json/profane-words.json"
+import commonPasswords from "../assets/json/common-passwords.json"
+import bannedUsernames from "../assets/json/banned-usernames.json"
+import profaneWords from "../assets/json/profane-words.json"
 import axios from "axios"
 import {hexToRgb} from "./Color"
 import MP4Demuxer from "./MP4Demuxer"
@@ -1125,6 +1125,12 @@ export default class Functions {
     }
 
     public static validCommentSort = (sort: string) => {
+        if (sort === "date" ||
+            sort === "reverse date") return true 
+        return false
+    }
+
+    public static validThreadSort = (sort: string) => {
         if (sort === "date" ||
             sort === "reverse date") return true 
         return false

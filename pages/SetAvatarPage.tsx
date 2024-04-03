@@ -268,7 +268,7 @@ const SetAvatarPage: React.FunctionComponent<Props> = (props) => {
         }
         const arrayBuffer = await fetch(croppedURL).then((r) => r.arrayBuffer())
         const bytes = Object.values(new Uint8Array(arrayBuffer))
-        await axios.post("/api/user/updatepfp", bytes, {headers: {"x-csrf-token": functions.getCSRFToken()}, withCredentials: true})
+        await axios.post("/api/user/updatepfp", {postID, bytes}, {headers: {"x-csrf-token": functions.getCSRFToken()}, withCredentials: true})
         setUserImg("")
         setSessionFlag(true)
         history.push(`/post/${postID}`)

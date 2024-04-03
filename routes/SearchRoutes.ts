@@ -278,6 +278,21 @@ const SearchRoutes = (app: Express) => {
             return res.status(400).send("Bad request")
         }
     })
+
+    app.get("/api/search/threads", searchLimiter, async (req: Request, res: Response, next: NextFunction) => {
+        try {
+            const query = req.query.query as string
+            let sort = req.query.sort as string
+            const offset = req.query.offset as string
+            if (!functions.validThreadSort(sort)) return res.status(400).send("Invalid sort")
+            const search = query?.trim() ?? ""
+            const result = await sql.searchThreads(search, sort, offset)
+            res.status(200).json(result)
+        } catch (e) {
+            console.log(e)
+            return res.status(400).send("Bad request")
+        }
+    })
 }
 
 export default SearchRoutes

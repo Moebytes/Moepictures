@@ -64,6 +64,16 @@ const CommentRow: React.FunctionComponent<Props> = (props) => {
         }
     }
 
+    const userImgClick = (event: React.MouseEvent) => {
+        if (!props.comment.imagePost) return
+        event.stopPropagation()
+        if (event.ctrlKey || event.metaKey || event.button === 1) {
+            window.open(`/post/${props.comment.imagePost}`, "_blank")
+        } else {
+            history.push(`/post/${props.comment.imagePost}`)
+        }
+    }
+
     const parseText = () => {
         const pieces = functions.parseComment(comment)
         let jsx = [] as any
@@ -251,7 +261,7 @@ const CommentRow: React.FunctionComponent<Props> = (props) => {
             <div className="commentrow-container-row">
                 <div className="commentrow-container">
                     <div className="commentrow-user-container" onClick={userClick} onAuxClick={userClick}>
-                        <img className="commentrow-user-img" src={getCommentPFP()}/>
+                        <img className="commentrow-user-img" src={getCommentPFP()} onClick={userImgClick} onAuxClick={userImgClick}/>
                         {generateUsernameJSX()}
                     </div>
                 </div>

@@ -2,7 +2,7 @@ import React, {useEffect, useState, useContext} from "react"
 import {Switch, Route, Redirect, useHistory, useLocation} from "react-router-dom"
 import Context, {ThemeContext, HideNavbarContext, HideSidebarContext, HideSortbarContext,
 HideTitlebarContext, EnableDragContext, ActiveDropdownContext, FilterDropActiveContext, MobileScrollingContext,
-SidebarHoverContext, SessionContext, SessionFlagContext, UserImgContext, MobileContext} from "./Context"
+SidebarHoverContext, SessionContext, SessionFlagContext, UserImgContext, UserImgPostContext, MobileContext} from "./Context"
 import favicon from "./assets/icons/favicon.png"
 import PostsPage from "./pages/PostsPage"
 import CommentsPage from "./pages/CommentsPage"
@@ -63,6 +63,7 @@ const App: React.FunctionComponent = (props) => {
     const [session, setSession] = useState({}) as any
     const [sessionFlag, setSessionFlag] = useState(false)
     const [userImg, setUserImg] = useState("")
+    const [userImgPost, setUserImgPost] = useState("")
     const [mobile, setMobile] = useState(false)
     const [mobileScrolling, setMobileScrolling] = useState(false)
 
@@ -98,6 +99,7 @@ const App: React.FunctionComponent = (props) => {
             // ignore
         }
         setUserImg(getImg())
+        if (session.imagePost) setUserImgPost(session.imagePost)
     }
 
     useEffect(() => {
@@ -218,6 +220,7 @@ const App: React.FunctionComponent = (props) => {
         <div className={`app ${!loaded ? "stop-transitions" : ""}`}>
             <MobileScrollingContext.Provider value={{mobileScrolling, setMobileScrolling}}>
             <MobileContext.Provider value={{mobile, setMobile}}>
+            <UserImgPostContext.Provider value={{userImgPost, setUserImgPost}}>
             <UserImgContext.Provider value={{userImg, setUserImg}}>
             <SessionFlagContext.Provider value={{sessionFlag, setSessionFlag}}>
             <SessionContext.Provider value={{session, setSession}}>
@@ -287,6 +290,7 @@ const App: React.FunctionComponent = (props) => {
             </SessionContext.Provider>
             </SessionFlagContext.Provider>
             </UserImgContext.Provider>
+            </UserImgPostContext.Provider>
             </MobileContext.Provider>
             </MobileScrollingContext.Provider>
         </div>

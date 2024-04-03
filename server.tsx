@@ -33,6 +33,7 @@ import TagRoutes from "./routes/TagRoutes"
 import UploadRoutes from "./routes/UploadRoutes"
 import UserRoutes from "./routes/UserRoutes"
 import TranslationRoutes from "./routes/TranslationRoutes"
+import ThreadRoutes from "./routes/ThreadRoutes"
 const __dirname = path.resolve()
 
 dotenv.config()
@@ -50,6 +51,7 @@ declare module "express-session" {
       email: string
       joinDate: string
       image: string 
+      imagePost: string
       bio: string 
       emailVerified: boolean
       publicFavorites: boolean
@@ -109,6 +111,7 @@ TagRoutes(app)
 UploadRoutes(app)
 UserRoutes(app)
 TranslationRoutes(app)
+ThreadRoutes(app)
 
 if (process.env.TESTING === "yes") {
   app.use(middleware(compiler, {

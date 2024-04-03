@@ -49,6 +49,7 @@ export const SessionContext = React.createContext<any>(null)
 export const SessionFlagContext = React.createContext<any>(null)
 export const RedirectContext = React.createContext<any>(null)
 export const UserImgContext = React.createContext<any>(null)
+export const UserImgPostContext = React.createContext<any>(null)
 export const QuoteTextContext = React.createContext<any>(null)
 export const MobileContext = React.createContext<any>(null)
 export const HideMobileNavbarContext = React.createContext<any>(null)
@@ -119,6 +120,7 @@ export const DeleteTranslationHistoryIDContext = React.createContext<any>(null)
 export const DeleteTranslationHistoryFlagContext = React.createContext<any>(null)
 export const RevertTranslationHistoryIDContext = React.createContext<any>(null)
 export const RevertTranslationHistoryFlagContext = React.createContext<any>(null)
+export const ShowNewThreadDialogContext = React.createContext<any>(null)
 
 const Context: React.FunctionComponent = (props) => {
     const [siteHue, setSiteHue] = useState(180)
@@ -226,13 +228,12 @@ const Context: React.FunctionComponent = (props) => {
     const [revertTranslationHistoryID, setRevertTranslationHistoryID] = useState(null)
     const [deleteTranslationHistoryFlag, setDeleteTranslationHistoryFlag] = useState(false)
     const [revertTranslationHistoryFlag, setRevertTranslationHistoryFlag] = useState(false)
+    const [showNewThreadDialog, setShowNewThreadDialog] = useState(false)
     
 
 return (
     <>
-        <SiteLightnessContext.Provider value={{siteLightness, setSiteLightness}}>
-        <SiteSaturationContext.Provider value={{siteSaturation, setSiteSaturation}}>
-        <SiteHueContext.Provider value={{siteHue, setSiteHue}}>
+        <ShowNewThreadDialogContext.Provider value={{showNewThreadDialog, setShowNewThreadDialog}}>
         <RevertTranslationHistoryFlagContext.Provider value={{revertTranslationHistoryFlag, setRevertTranslationHistoryFlag}}>
         <DeleteTranslationHistoryFlagContext.Provider value={{deleteTranslationHistoryFlag, setDeleteTranslationHistoryFlag}}>
         <RevertTranslationHistoryIDContext.Provider value={{revertTranslationHistoryID, setRevertTranslationHistoryID}}>
@@ -335,7 +336,13 @@ return (
         <BlurContext.Provider value={{blur, setBlur}}>
         <SharpenContext.Provider value={{sharpen, setSharpen}}>
         <SizeTypeContext.Provider value={{sizeType, setSizeType}}>
+        <SiteLightnessContext.Provider value={{siteLightness, setSiteLightness}}>
+        <SiteSaturationContext.Provider value={{siteSaturation, setSiteSaturation}}>
+        <SiteHueContext.Provider value={{siteHue, setSiteHue}}>
             {props.children}
+        </SiteHueContext.Provider>
+        </SiteSaturationContext.Provider>
+        </SiteLightnessContext.Provider>
         </SizeTypeContext.Provider>
         </SharpenContext.Provider>
         </BlurContext.Provider>
@@ -438,9 +445,7 @@ return (
         </RevertTranslationHistoryIDContext.Provider>
         </DeleteTranslationHistoryFlagContext.Provider>
         </RevertTranslationHistoryFlagContext.Provider>
-        </SiteHueContext.Provider>
-        </SiteSaturationContext.Provider>
-        </SiteLightnessContext.Provider>
+        </ShowNewThreadDialogContext.Provider>
     </>
     )
 }
