@@ -5,8 +5,8 @@ import TitleBar from "../components/TitleBar"
 import NavBar from "../components/NavBar"
 import SideBar from "../components/SideBar"
 import Footer from "../components/Footer"
-import show from "../assets/purple/show.png"
-import hide from "../assets/purple/hide.png"
+import show from "../assets/icons/show.png"
+import hide from "../assets/icons/hide.png"
 import DragAndDrop from "../components/DragAndDrop"
 import {HideNavbarContext, HideSidebarContext, ThemeContext, EnableDragContext, RelativeContext, SessionContext, MobileContext,
 HideTitlebarContext, HeaderTextContext, SessionFlagContext, SidebarTextContext, RedirectContext, SiteHueContext, SiteLightnessContext,

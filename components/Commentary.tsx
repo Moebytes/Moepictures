@@ -2,7 +2,7 @@ import React, {useContext, useEffect, useRef, useState} from "react"
 import {ThemeContext, EnableDragContext, SiteHueContext, SiteLightnessContext, SiteSaturationContext} from "../Context"
 import {HashLink as Link} from "react-router-hash-link"
 import functions from "../structures/Functions"
-import commentaryTranslate from "../assets/purple/commentarytranslate.png"
+import commentaryTranslate from "../assets/icons/commentarytranslate.png"
 import axios from "axios"
 import "./styles/commentary.less"
 

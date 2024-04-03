@@ -4,8 +4,8 @@ BlurContext, SharpenContext, PixelateContext, SiteHueContext, SiteLightnessConte
 import {HashLink as Link} from "react-router-hash-link"
 import functions from "../structures/Functions"
 import cryptoFunctions from "../structures/CryptoFunctions"
-import arrowLeft from "../assets/purple/carousel-left.png"
-import arrowRight from "../assets/purple/carousel-right.png"
+import arrowLeft from "../assets/icons/carousel-left.png"
+import arrowRight from "../assets/icons/carousel-right.png"
 import "./styles/carousel.less"
 
 interface Props {

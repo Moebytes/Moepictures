@@ -1,13 +1,13 @@
 import React, {useContext, useEffect, useState} from "react"
 import {useHistory} from "react-router-dom"
 import {HashLink as Link} from "react-router-hash-link"
-import favicon from "../assets/purple/favicon.png"
+import favicon from "../assets/icons/favicon.png"
 import {ThemeContext, HideNavbarContext, EnableDragContext, RelativeContext, HideTitlebarContext, HeaderFlagContext,
 SearchContext, SearchFlagContext, ImageTypeContext, RestrictTypeContext, StyleTypeContext, SortTypeContext,
 HeaderTextContext, HideMobileNavbarContext, MobileContext, VisiblePostsContext, ScrollYContext, MobileScrollingContext, 
 SiteHueContext, SiteLightnessContext, SiteSaturationContext} from "../Context"
 import functions from "../structures/Functions"
-import hamburger from "../assets/purple/hamburger.png"
+import hamburger from "../assets/icons/hamburger.png"
 import "./styles/titlebar.less"
 
 const darkColorList = {
@@ -20,7 +20,6 @@ const darkColorList = {
     "--titlebarText": "#431dff",
     "--navbarBG": "#0b0322",
     "--navbarText": "#3a1cff",
-    "--navbarUserText": "#fe23ae",
     "--sidebarBG": "#0a041e",
     "--sidebarSearchFocus": "#2908e0",
     "--sidebarSearchBG": "#0e0631",
@@ -50,7 +49,6 @@ const lightColorList = {
     "--titlebarText": "#7e66ff",
     "--navbarBG": "#dbddff",
     "--navbarText": "#6c47ff",
-    "--navbarUserText": "#ad3cff",
     "--sidebarBG": "#e8e9ff",
     "--sidebarSearchFocus": "#8581ff",
     "--sidebarSearchBG": "#dbdaff",

@@ -1,6 +1,6 @@
 import React, {useContext, useEffect, useRef, useState, forwardRef, useImperativeHandle} from "react"
 import {useHistory} from "react-router-dom"
-import loading from "../assets/purple/loading.gif"
+import loading from "../assets/icons/loading.gif"
 import {ThemeContext, SizeTypeContext, BrightnessContext, ContrastContext, HueContext, SaturationContext, LightnessContext, MobileContext, ScrollYContext,
 BlurContext, SharpenContext, SquareContext, PixelateContext, DownloadFlagContext, DownloadURLsContext, SpeedContext, ReverseContext, ScrollContext} from "../Context"
 import {HashLink as Link} from "react-router-hash-link"

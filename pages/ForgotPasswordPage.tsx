@@ -5,13 +5,17 @@ import SideBar from "../components/SideBar"
 import Footer from "../components/Footer"
 import DragAndDrop from "../components/DragAndDrop"
 import {HideNavbarContext, HideSidebarContext, ThemeContext, EnableDragContext, MobileContext,
-RelativeContext, HideTitlebarContext, HeaderTextContext, SidebarTextContext} from "../Context"
+RelativeContext, HideTitlebarContext, HeaderTextContext, SidebarTextContext, SiteHueContext,
+SiteLightnessContext, SiteSaturationContext} from "../Context"
 import functions from "../structures/Functions"
 import axios from "axios"
 import "./styles/forgotpasspage.less"
 
 const ForgotPasswordPage: React.FunctionComponent = (props) => {
     const {theme, setTheme} = useContext(ThemeContext)
+    const {siteHue, setSiteHue} = useContext(SiteHueContext)
+    const {siteSaturation, setSiteSaturation} = useContext(SiteSaturationContext)
+    const {siteLightness, setSiteLightness} = useContext(SiteLightnessContext)
     const {hideNavbar, setHideNavbar} = useContext(HideNavbarContext)
     const {hideTitlebar, setHideTitlebar} = useContext(HideTitlebarContext)
     const {hideSidebar, setHideSidebar} = useContext(HideSidebarContext)
@@ -21,9 +25,30 @@ const ForgotPasswordPage: React.FunctionComponent = (props) => {
     const {sidebarText, setSidebarText} = useContext(SidebarTextContext)
     const {mobile, setMobile} = useContext(MobileContext)
     const [submitted, setSubmitted] = useState(false)
+    const [captchaResponse, setCaptchaResponse] = useState("")
+    const [captcha, setCaptcha] = useState("")
     const [error, setError] = useState(false)
     const [email, setEmail] = useState("")
     const errorRef = useRef<any>(null)
+
+    const getFilter = () => {
+        return `hue-rotate(${siteHue - 180}deg) saturate(${siteSaturation}%) brightness(${siteLightness + 70}%)`
+    }
+
+    const getCaptchaColor = () => {
+        if (theme.includes("light")) return "#ffffff"
+        return "#09071c"
+    }
+
+    const updateCaptcha = async () => {
+        const captcha = await axios.get("/api/misc/captcha/create", {params: {color: getCaptchaColor()}, withCredentials: true}).then((r) => r.data)
+        setCaptcha(captcha)
+        setCaptchaResponse("")
+    }
+
+    useEffect(() => {
+        updateCaptcha()
+    }, [theme])
 
     useEffect(() => {
         setHideNavbar(false)
@@ -48,10 +73,18 @@ const ForgotPasswordPage: React.FunctionComponent = (props) => {
         setError(true)
         if (!errorRef.current) await functions.timeout(20)
         errorRef.current!.innerText = "Submitting..."
-        await axios.post("/api/user/forgotpassword", {email}, {headers: {"x-csrf-token": functions.getCSRFToken()}, withCredentials: true})
-        setSubmitted(true)
-        setError(false)
-        setEmail("")
+        try {
+            await axios.post("/api/user/forgotpassword", {email, captchaResponse}, {headers: {"x-csrf-token": functions.getCSRFToken()}, withCredentials: true})
+            setSubmitted(true)
+            setError(false)
+            setEmail("")
+        } catch {
+            errorRef.current!.innerText = "Invalid email or captcha."
+            await functions.timeout(2000)
+            setError(false)
+            setCaptchaResponse("")
+            updateCaptcha()
+        }
     }
 
     return (
@@ -75,6 +108,10 @@ const ForgotPasswordPage: React.FunctionComponent = (props) => {
                     <div className="forgot-pass-row">
                         <span className="forgot-pass-text">Email Address:</span>
                         <input className="forgot-pass-input" type="text" spellCheck={false} value={email} onChange={(event) => setEmail(event.target.value)} onKeyDown={(event) => event.key === "Enter" ? submit() : null}/>
+                    </div>
+                    <div className="forgot-pass-row" style={{justifyContent: "center"}}>
+                        <img src={`data:image/svg+xml;utf8,${encodeURIComponent(captcha)}`} style={{filter: getFilter()}}/>
+                        <input className="forgot-pass-input" type="text" spellCheck={false} value={captchaResponse} onChange={(event) => setCaptchaResponse(event.target.value)} onKeyDown={(event) => event.key === "Enter" ? submit() : null}/>
                     </div>
                     {error ? <div className="forgot-pass-validation-container"><span className="forgot-pass-validation" ref={errorRef}></span></div> : null}
                     <div className="forgot-pass-button-container">

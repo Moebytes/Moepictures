@@ -3,10 +3,9 @@ import {useHistory} from "react-router-dom"
 import {ThemeContext, SearchContext, SearchFlagContext, SessionContext} from "../Context"
 import {HashLink as Link} from "react-router-hash-link"
 import functions from "../structures/Functions"
-import seriesImg from "../assets/images/series.png"
 import Carousel from "./Carousel"
-import website from "../assets/purple/support.png"
-import twitter from "../assets/purple/twitter.png"
+import website from "../assets/icons/support.png"
+import twitter from "../assets/icons/twitter.png"
 import "./styles/seriesrow.less"
 
 interface Props {

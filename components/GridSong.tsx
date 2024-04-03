@@ -1,6 +1,6 @@
 import React, {useContext, useEffect, useRef, useState, forwardRef, useImperativeHandle} from "react"
 import {useHistory} from "react-router-dom"
-import loading from "../assets/purple/loading.gif"
+import loading from "../assets/icons/loading.gif"
 import {ThemeContext, SizeTypeContext, BrightnessContext, ContrastContext, HueContext, SaturationContext, LightnessContext, MobileContext, ScrollYContext,
 BlurContext, SharpenContext, SquareContext, PixelateContext, DownloadFlagContext, DownloadURLsContext, SpeedContext, ReverseContext, ScrollContext, SiteHueContext,
 SiteLightnessContext, SiteSaturationContext} from "../Context"
@@ -9,7 +9,7 @@ import path from "path"
 import functions from "../structures/Functions"
 import cryptoFunctions from "../structures/CryptoFunctions"
 import "./styles/gridimage.less"
-import musicNote from "../assets/purple/music-note.png"
+import musicNote from "../assets/icons/music-note.png"
 import axios from "axios"
 
 interface Props {

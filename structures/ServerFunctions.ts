@@ -9,6 +9,9 @@ import functions from "../structures/Functions"
 import FormData from "form-data"
 import axios from "axios"
 import S3 from "aws-sdk/clients/s3"
+import CSRF from "csrf"
+
+const csrf = new CSRF()
 
 const s3 = new S3({region: "us-east-1", credentials: {
     accessKeyId: process.env.AWS_ACCESS_KEY!,
@@ -16,18 +19,15 @@ const s3 = new S3({region: "us-east-1", credentials: {
 }})
 
 export default class ServerFunctions {
-    public static validateCapthca = async (captchaResponse: string, ip: string) => {
-        const form = new FormData()
-        form.append("response", captchaResponse)
-        form.append("secret", process.env.CAPTCHA_SECRET!)
-        form.append("sitekey", functions.captchaSiteKey())
-        form.append("remoteip", ip)
-        const response = await axios.post("https://hcaptcha.com/siteverify", form, {headers: form.getHeaders()}).then((r) => r.data)
-        if (response.success) {
-            return true
-        } else {
-            return false
-        }
+    public static generateCSRF = () => {
+        const secret = csrf.secretSync()
+        const token = csrf.create(secret)
+        return {secret, token}
+    }
+
+    public static validateCSRF = (req: Request) => {
+        const csrfToken = req.headers["x-csrf-token"] as string
+        return csrf.verify(req.session.csrfSecret!, csrfToken)
     }
 
     public static email = async (email: string, subject: string, payload: any, template: string) => {

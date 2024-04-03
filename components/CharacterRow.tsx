@@ -3,9 +3,8 @@ import {useHistory} from "react-router-dom"
 import {ThemeContext, SearchContext, SearchFlagContext, SessionContext} from "../Context"
 import {HashLink as Link} from "react-router-hash-link"
 import functions from "../structures/Functions"
-import characterImg from "../assets/images/character.png"
 import Carousel from "./Carousel"
-import fandom from "../assets/purple/fandom.png"
+import fandom from "../assets/icons/fandom.png"
 import "./styles/characterrow.less"
 
 interface Props {

@@ -8,9 +8,6 @@ import phash from "sharp-phash"
 import imageSize from "image-size"
 import fs from "fs"
 import path from "path"
-import CSRF from "csrf"
-
-const csrf = new CSRF()
 
 const postLimiter = rateLimit({
 	windowMs: 5 * 60 * 1000,
@@ -89,9 +86,7 @@ const PostRoutes = (app: Express) => {
     app.delete("/api/post/delete", postLimiter, async (req: Request, res: Response) => {
         try {
             const postID = req.query.postID
-            const csrfToken = req.headers["x-csrf-token"] as string
-            const valid = csrf.verify(req.session.csrfSecret!, csrfToken)
-            if (!valid) return res.status(400).send("Bad request")
+            if (!serverFunctions.validateCSRF(req)) return res.status(400).send("Bad request")
             if (Number.isNaN(Number(postID))) return res.status(400).send("Invalid postID")
             if (req.session.role !== "admin") return res.status(403).end()
             if (!req.session.username) return res.status(400).send("Bad request")
@@ -210,9 +205,7 @@ const PostRoutes = (app: Express) => {
     app.post("/api/post/delete/request", postLimiter, async (req: Request, res: Response) => {
         try {
             const {postID, reason} = req.body
-            const csrfToken = req.headers["x-csrf-token"] as string
-            const valid = csrf.verify(req.session.csrfSecret!, csrfToken)
-            if (!valid) return res.status(400).send("Bad request")
+            if (!serverFunctions.validateCSRF(req)) return res.status(400).send("Bad request")
             if (Number.isNaN(Number(postID))) return res.status(400).send("Invalid postID")
             if (!req.session.username) return res.status(400).send("Bad request")
             const post = await sql.post(Number(postID))
@@ -241,9 +234,7 @@ const PostRoutes = (app: Express) => {
     app.post("/api/post/delete/request/fulfill", postLimiter, async (req: Request, res: Response) => {
         try {
             const {username, postID} = req.body
-            const csrfToken = req.headers["x-csrf-token"] as string
-            const valid = csrf.verify(req.session.csrfSecret!, csrfToken)
-            if (!valid) return res.status(400).send("Bad request")
+            if (!serverFunctions.validateCSRF(req)) return res.status(400).send("Bad request")
             if (Number.isNaN(Number(postID))) return res.status(400).send("Invalid postID")
             if (!req.session.username || !username) return res.status(400).send("Bad request")
             if (req.session.role !== "admin" && req.session.role !== "mod") return res.status(403).end()
@@ -257,9 +248,7 @@ const PostRoutes = (app: Express) => {
 
     app.put("/api/post/quickedit", postLimiter, async (req: Request, res: Response, next: NextFunction) => {
         try {
-            const csrfToken = req.headers["x-csrf-token"] as string
-            const valid = csrf.verify(req.session.csrfSecret!, csrfToken)
-            if (!valid) return res.status(400).send("Bad request")
+            if (!serverFunctions.validateCSRF(req)) return res.status(400).send("Bad request")
             const postID = Number(req.body.postID)
             const unverified = String(req.body.unverified) === "true"
             let type = req.body.type 
@@ -415,9 +404,7 @@ const PostRoutes = (app: Express) => {
 
     app.put("/api/post/quickedit/unverified", postLimiter, async (req: Request, res: Response, next: NextFunction) => {
         try {
-            const csrfToken = req.headers["x-csrf-token"] as string
-            const valid = csrf.verify(req.session.csrfSecret!, csrfToken)
-            if (!valid) return res.status(400).send("Bad request")
+            if (!serverFunctions.validateCSRF(req)) return res.status(400).send("Bad request")
             let postID = Number(req.body.postID)
             let type = req.body.type 
             const restrict = req.body.restrict 
@@ -641,9 +628,7 @@ const PostRoutes = (app: Express) => {
     app.delete("/api/post/history/delete", postLimiter, async (req: Request, res: Response) => {
         try {
             const {postID, historyID} = req.query
-            const csrfToken = req.headers["x-csrf-token"] as string
-            const valid = csrf.verify(req.session.csrfSecret!, csrfToken)
-            if (!valid) return res.status(400).send("Bad request")
+            if (!serverFunctions.validateCSRF(req)) return res.status(400).send("Bad request")
             if (Number.isNaN(Number(historyID))) return res.status(400).send("Invalid historyID")
             if (!req.session.username) return res.status(400).send("Bad request")
             if (req.session.role !== "admin" && req.session.role !== "mod") return res.status(403).end()

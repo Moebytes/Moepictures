@@ -4,9 +4,6 @@ import slowDown from "express-slow-down"
 import sql from "../structures/SQLQuery"
 import functions from "../structures/Functions"
 import serverFunctions from "../structures/ServerFunctions"
-import CSRF from "csrf"
-
-const csrf = new CSRF()
 
 const cutenessLimiter = rateLimit({
 	windowMs: 5 * 60 * 1000,
@@ -20,9 +17,7 @@ const CutenessRoutes = (app: Express) => {
     app.post("/api/cuteness/update", cutenessLimiter, async (req: Request, res: Response) => {
         try {
             const {postID, cuteness} = req.body
-            const csrfToken = req.headers["x-csrf-token"] as string
-            const valid = csrf.verify(req.session.csrfSecret!, csrfToken)
-            if (!valid) return res.status(400).send("Bad request")
+            if (!serverFunctions.validateCSRF(req)) return res.status(400).send("Bad request")
             if (Number.isNaN(Number(postID)) || Number.isNaN(Number(cuteness))) return res.status(400).send("Bad request")
             if (!req.session.username) return res.status(400).send("Bad request")
             if (Number(cuteness) < 0 || Number(cuteness) > 1000) return res.status(400).send("Bad request")
@@ -54,9 +49,7 @@ const CutenessRoutes = (app: Express) => {
     app.delete("/api/cuteness/delete", cutenessLimiter, async (req: Request, res: Response) => {
         try {
             const postID = req.query.postID
-            const csrfToken = req.headers["x-csrf-token"] as string
-            const valid = csrf.verify(req.session.csrfSecret!, csrfToken)
-            if (!valid) return res.status(400).send("Bad request")
+            if (!serverFunctions.validateCSRF(req)) return res.status(400).send("Bad request")
             if (Number.isNaN(Number(postID))) return res.status(400).send("Invalid postID")
             if (!req.session.username) return res.status(400).send("Bad request")
             const cuteness = await sql.cuteness(Number(postID), req.session.username)

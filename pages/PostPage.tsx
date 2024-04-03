@@ -24,7 +24,7 @@ import QuickEditDialog from "../dialogs/QuickEditDialog"
 import CaptchaDialog from "../dialogs/CaptchaDialog"
 import ThirdParty from "../components/ThirdParty"
 import Parent from "../components/Parent"
-import MoreFromArtist from "../components/MoreFromArtist"
+import ArtistWorks from "../components/ArtistWorks"
 import Related from "../components/Related"
 import MobileInfo from "../components/MobileInfo"
 import {HideNavbarContext, HideSidebarContext, RelativeContext, DownloadFlagContext, DownloadURLsContext, HideTitlebarContext, MobileContext, ReloadPostFlagContext,
@@ -369,7 +369,7 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
                     {mobile && post && tagCategories ? <MobileInfo post={post} artists={tagCategories.artists} characters={tagCategories.characters} series={tagCategories.series} tags={tagCategories.tags}/> : null}
                     {parentPost ? <Parent post={parentPost}/>: null}
                     {thirdPartyPosts.length ? <ThirdParty posts={thirdPartyPosts}/> : null}
-                    {artistPosts.length ? <MoreFromArtist posts={artistPosts}/> : null}
+                    {artistPosts.length ? <ArtistWorks posts={artistPosts}/> : null}
                     {session.username && post ? <CutenessMeter post={post}/> : null}
                     {post?.commentary ? <Commentary text={post.commentary} translated={post.translatedCommentary}/> : null}
                     {relatedPosts.length ? <Related related={relatedPosts}/> : null}

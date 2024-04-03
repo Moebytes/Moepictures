@@ -2,7 +2,7 @@ import React, {useContext, useEffect, useState} from "react"
 import {ThemeContext, HideSidebarContext, HideNavbarContext, HideTitlebarContext, SiteHueContext, SiteLightnessContext, SiteSaturationContext,
 SearchContext, SearchFlagContext, ImageTypeContext, RestrictTypeContext, StyleTypeContext, SortTypeContext} from "../Context"
 import {HashLink as Link} from "react-router-hash-link"
-import backToTop from "../assets/purple/backtotop.png"
+import backToTop from "../assets/icons/backtotop.png"
 import pack from "../package.json"
 import "./styles/footer.less"
 

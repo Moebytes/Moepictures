@@ -39,15 +39,12 @@ const modelExtensions = [".glb", ".gltf", ".obj", ".fbx"]
 
 export default class Functions {
     public static updateCSRFToken = async () => {
+        await Functions.timeout(500)
         csrfToken = await axios.get("/api/misc/csrf", {withCredentials: true}).then((r) => r.data)
     }
 
     public static getCSRFToken = () => {
         return csrfToken
-    }
-
-    public static captchaSiteKey = () => {
-        return "123c92b0-ebd6-4dd7-b152-46a9c503510c"
     }
     
     public static isSafari = () => {
@@ -400,7 +397,7 @@ export default class Functions {
         if (theme.includes("magenta")) {
             link.href = "/assets/magenta/favicon.png"
         } else {
-            link.href = "/assets/purple/favicon.png"
+            link.href = "/assets/icons/favicon.png"
         }
     }
 
@@ -1786,25 +1783,6 @@ export default class Functions {
             if (mirror.includes("twitter") || mirror.includes("x.com")) json["twitter"] = mirror
         }
         return JSON.stringify(json) as any
-    }
-
-    public static detectTrackPad = (event: any) => {
-        let isTrackPad = false
-        if (eventCount === 0) {
-          eventCountStart = performance.now()
-        }
-        eventCount++
-        console.log(performance.now() - eventCountStart)
-        if (performance.now() - eventCountStart > 66) {
-          if (eventCount > 5) {
-            isTrackPad = true
-          } else {
-            isTrackPad = false
-          }
-        }
-        eventCount = 0
-        eventCountStart = undefined
-        return isTrackPad
     }
 
     public static shuffleArray = <T>(array: T[]) => {

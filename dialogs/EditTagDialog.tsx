@@ -5,12 +5,12 @@ import {HideNavbarContext, HideSidebarContext, ThemeContext, EnableDragContext, 
 EditTagTypeContext, EditTagPixivContext, EditTagTwitterContext, EditTagKeyContext, EditTagAliasesContext, EditTagImageContext, EditTagWebsiteContext, 
 EditTagFandomContext, EditTagDescriptionContext, EditTagReasonContext, HideTitlebarContext, SessionContext, EditTagPixivTagsContext} from "../Context"
 import functions from "../structures/Functions"
-import uploadIcon from "../assets/purple/upload.png"
+import uploadIcon from "../assets/icons/upload.png"
 import "./styles/edittagdialog.less"
 import fileType from "magic-bytes.js"
 import Draggable from "react-draggable"
 import permissions from "../structures/Permissions"
-import xButton from "../assets/purple/x-button-magenta.png"
+import xButton from "../assets/icons/x-button-magenta.png"
 import axios from "axios"
 
 const EditTagDialog: React.FunctionComponent = (props) => {

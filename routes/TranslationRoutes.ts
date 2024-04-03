@@ -4,9 +4,6 @@ import slowDown from "express-slow-down"
 import sql from "../structures/SQLQuery"
 import functions from "../structures/Functions"
 import serverFunctions from "../structures/ServerFunctions"
-import CSRF from "csrf"
-
-const csrf = new CSRF()
 
 const translationLimiter = rateLimit({
 	windowMs: 5 * 60 * 1000,
@@ -20,9 +17,7 @@ const TranslationRoutes = (app: Express) => {
     app.post("/api/translation/save", translationLimiter, async (req: Request, res: Response) => {
         try {
             const {postID, order, data, reason} = req.body
-            const csrfToken = req.headers["x-csrf-token"] as string
-            const valid = csrf.verify(req.session.csrfSecret!, csrfToken)
-            if (!valid) return res.status(400).send("Bad request")
+            if (!serverFunctions.validateCSRF(req)) return res.status(400).send("Bad request")
             if (Number.isNaN(Number(postID))) return res.status(400).send("Invalid postID")
             if (Number.isNaN(Number(order)) || Number(order) < 1) return res.status(400).send("Invalid order")
             if (!data || !req.session.username) return res.status(400).send("Bad request")
@@ -48,9 +43,7 @@ const TranslationRoutes = (app: Express) => {
     app.put("/api/translation/save", translationLimiter, async (req: Request, res: Response) => {
         try {
             const {postID, order, data} = req.body
-            const csrfToken = req.headers["x-csrf-token"] as string
-            const valid = csrf.verify(req.session.csrfSecret!, csrfToken)
-            if (!valid) return res.status(400).send("Bad request")
+            if (!serverFunctions.validateCSRF(req)) return res.status(400).send("Bad request")
             if (Number.isNaN(Number(postID))) return res.status(400).send("Invalid postID")
             if (Number.isNaN(Number(order)) || Number(order) < 1) return res.status(400).send("Invalid order")
             if (!data || !req.session.username) return res.status(400).send("Bad request")
@@ -87,9 +80,7 @@ const TranslationRoutes = (app: Express) => {
     app.post("/api/translation/save/request", translationLimiter, async (req: Request, res: Response) => {
         try {
             const {postID, order, data, reason} = req.body
-            const csrfToken = req.headers["x-csrf-token"] as string
-            const valid = csrf.verify(req.session.csrfSecret!, csrfToken)
-            if (!valid) return res.status(400).send("Bad request")
+            if (!serverFunctions.validateCSRF(req)) return res.status(400).send("Bad request")
             if (Number.isNaN(Number(postID))) return res.status(400).send("Invalid postID")
             if (Number.isNaN(Number(order)) || Number(order) < 1) return res.status(400).send("Invalid order")
             if (!data || !req.session.username) return res.status(400).send("Bad request")
@@ -121,9 +112,7 @@ const TranslationRoutes = (app: Express) => {
 
     app.post("/api/translation/approve", translationLimiter, async (req: Request, res: Response, next: NextFunction) => {
         try {
-          const csrfToken = req.headers["x-csrf-token"] as string
-          const valid = csrf.verify(req.session.csrfSecret!, csrfToken)
-          if (!valid) return res.status(400).send("Bad request")
+            if (!serverFunctions.validateCSRF(req)) return res.status(400).send("Bad request")
           let translationID = Number(req.body.translationID)
           if (Number.isNaN(translationID)) return res.status(400).send("Bad request")
           if (req.session.role !== "admin" && req.session.role !== "mod") return res.status(403).end()
@@ -140,9 +129,7 @@ const TranslationRoutes = (app: Express) => {
 
     app.post("/api/translation/reject", translationLimiter, async (req: Request, res: Response, next: NextFunction) => {
         try {
-            const csrfToken = req.headers["x-csrf-token"] as string
-            const valid = csrf.verify(req.session.csrfSecret!, csrfToken)
-            if (!valid) return res.status(400).send("Bad request")
+            if (!serverFunctions.validateCSRF(req)) return res.status(400).send("Bad request")
             let translationID = Number(req.body.translationID)
             if (Number.isNaN(translationID)) return res.status(400).send("Bad request")
             if (req.session.role !== "admin" && req.session.role !== "mod") return res.status(403).end()
@@ -173,9 +160,7 @@ const TranslationRoutes = (app: Express) => {
     app.delete("/api/translation/history/delete", translationLimiter, async (req: Request, res: Response) => {
         try {
             const {postID, order, historyID} = req.query
-            const csrfToken = req.headers["x-csrf-token"] as string
-            const valid = csrf.verify(req.session.csrfSecret!, csrfToken)
-            if (!valid) return res.status(400).send("Bad request")
+            if (!serverFunctions.validateCSRF(req)) return res.status(400).send("Bad request")
             if (Number.isNaN(Number(historyID))) return res.status(400).send("Invalid historyID")
             if (!req.session.username) return res.status(400).send("Bad request")
             if (req.session.role !== "admin" && req.session.role !== "mod") return res.status(403).end()

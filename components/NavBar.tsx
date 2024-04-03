@@ -1,14 +1,14 @@
 import React, {useContext, useState, useEffect, useReducer} from "react"
 import {HashLink as Link} from "react-router-hash-link"
 import {useHistory} from "react-router-dom"
-import favicon from "../assets/purple/favicon.png"
-import eyedropper from "../assets/purple/eyedropper.png"
-import light from "../assets/purple/light.png"
-import logoutIcon from "../assets/purple/logout.png"
-import logoutModIcon from "../assets/purple/logout-mod.png"
-import logoutAdminIcon from "../assets/purple/logout-admin.png"
-import search2 from "../assets/purple/search2.png"
-import crown from "../assets/purple/crown.png"
+import favicon from "../assets/icons/favicon.png"
+import eyedropper from "../assets/icons/eyedropper.png"
+import light from "../assets/icons/light.png"
+import logoutIcon from "../assets/icons/logout.png"
+import logoutModIcon from "../assets/icons/logout-mod.png"
+import logoutAdminIcon from "../assets/icons/logout-admin.png"
+import search2 from "../assets/icons/search2.png"
+import crown from "../assets/icons/crown.png"
 import axios from "axios"
 import permissions from "../structures/Permissions"
 import functions from "../structures/Functions"
@@ -273,7 +273,7 @@ const NavBar: React.FunctionComponent<Props> = (props) => {
                         {!showMiniTitle || relative ? <img className="nav-user-img" src={userImg}/> : null}
                         {generateUsernameJSX()}
                     </div> :
-                    <span style={{marginRight: marginR}} className="nav-text nav-user-text" onClick={() => functions.serverPush("/login")}>Login</span>}
+                    <span style={{marginRight: marginR}} className="nav-text nav-user-text" onClick={() => history.push("/login")}>Login</span>}
                     <span style={{marginRight: marginR}} className="nav-text" onClick={() => postsClick()}>Posts</span>
                     <span style={{marginRight: marginR}} className="nav-text" onClick={() => history.push("/comments")}>Comments</span>
                     <span style={{marginRight: marginR}} className="nav-text" onClick={() => history.push("/artists")}>Artists</span>

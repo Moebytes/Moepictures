@@ -73,7 +73,7 @@ const DownloadDialog: React.FunctionComponent = (props) => {
             const post = postArray[i]
             const image = post.images[0] 
             if (!image) continue 
-            newDownloadURLs.push(functions.getImageLink(image.type, post.postID, image.order, image.filename))
+            newDownloadURLs.push(functions.getThumbnailLink(image.type, post.postID, image.order, image.filename, sizeType))
         }
         setDownloadURLs(newDownloadURLs)
         setDownloadFlag(true)

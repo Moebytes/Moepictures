@@ -3,7 +3,7 @@ import {Switch, Route, Redirect, useHistory, useLocation} from "react-router-dom
 import Context, {ThemeContext, HideNavbarContext, HideSidebarContext, HideSortbarContext,
 HideTitlebarContext, EnableDragContext, ActiveDropdownContext, FilterDropActiveContext, MobileScrollingContext,
 SidebarHoverContext, SessionContext, SessionFlagContext, UserImgContext, MobileContext} from "./Context"
-import favicon from "./assets/purple/favicon.png"
+import favicon from "./assets/icons/favicon.png"
 import PostsPage from "./pages/PostsPage"
 import CommentsPage from "./pages/CommentsPage"
 import ArtistsPage from "./pages/ArtistsPage"
@@ -45,7 +45,7 @@ import ForumPage from "./pages/ForumPage"
 import axios from "axios"
 import "./index.less"
 
-require.context("./assets/purple", true)
+require.context("./assets/icons", true)
 
 let destroy2FATimeout = null as any
 
@@ -77,10 +77,10 @@ const App: React.FunctionComponent = (props) => {
     useEffect(() => {
         setTimeout(() => {
             setLoaded(true)
+            getSessionCookie()
+            functions.updateCSRFToken()
+            functions.clearCache()
         }, 100)
-        getSessionCookie()
-        functions.updateCSRFToken()
-        functions.clearCache()
     }, [])
 
     const getImg = () => {
@@ -214,7 +214,6 @@ const App: React.FunctionComponent = (props) => {
         document.documentElement.style.visibility = "visible"
     }, [])
 
-    // ${theme} 
     return (
         <div className={`app ${!loaded ? "stop-transitions" : ""}`}>
             <MobileScrollingContext.Provider value={{mobileScrolling, setMobileScrolling}}>

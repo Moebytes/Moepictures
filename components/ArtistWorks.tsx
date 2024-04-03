@@ -9,7 +9,7 @@ interface Props {
     posts: any
 }
 
-const MoreFromArtist: React.FunctionComponent<Props> = (props) => {
+const ArtistWorks: React.FunctionComponent<Props> = (props) => {
     const {theme, setTheme} = useContext(ThemeContext)
     const {enableDrag, setEnableDrag} = useContext(EnableDragContext)
     const {session, setSession} = useContext(SessionContext)
@@ -29,7 +29,7 @@ const MoreFromArtist: React.FunctionComponent<Props> = (props) => {
 
     return (
         <div className="related">
-            <div className="related-title">More From Artist</div>
+            <div className="related-title">Artist Works</div>
             <div className="related-container">
                 <Carousel images={getImages()} set={click} noKey={true} marginLeft={200} height={200}/>
             </div>
@@ -37,4 +37,4 @@ const MoreFromArtist: React.FunctionComponent<Props> = (props) => {
     )
 }
 
-export default MoreFromArtist
+export default ArtistWorks

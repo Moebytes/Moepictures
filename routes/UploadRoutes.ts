@@ -10,9 +10,6 @@ import fileType from "magic-bytes.js"
 import imageSize from "image-size"
 import {performance} from "perf_hooks"
 import axios from "axios"
-import CSRF from "csrf"
-
-const csrf = new CSRF()
 
 const uploadLimiter = rateLimit({
 	windowMs: 5 * 60 * 1000,
@@ -89,9 +86,7 @@ const validImages = (images: any[]) => {
 const CreateRoutes = (app: Express) => {
     app.post("/api/post/upload", modLimiter, async (req: Request, res: Response, next: NextFunction) => {
       try {
-        const csrfToken = req.headers["x-csrf-token"] as string
-        const valid = csrf.verify(req.session.csrfSecret!, csrfToken)
-        if (!valid) return res.status(400).send("Bad request")
+        if (!serverFunctions.validateCSRF(req)) return res.status(400).send("Bad request")
         const images = req.body.images 
         let type = req.body.type 
         const restrict = req.body.restrict 
@@ -592,9 +587,7 @@ const CreateRoutes = (app: Express) => {
 
     app.post("/api/post/upload/unverified", uploadLimiter, async (req: Request, res: Response, next: NextFunction) => {
       try {
-        const csrfToken = req.headers["x-csrf-token"] as string
-        const valid = csrf.verify(req.session.csrfSecret!, csrfToken)
-        if (!valid) return res.status(400).send("Bad request")
+        if (!serverFunctions.validateCSRF(req)) return res.status(400).send("Bad request")
         const images = req.body.images 
         let type = req.body.type 
         const restrict = req.body.restrict 
@@ -804,9 +797,7 @@ const CreateRoutes = (app: Express) => {
 
     app.put("/api/post/edit/unverified", editLimiter, async (req: Request, res: Response, next: NextFunction) => {
       try {
-        const csrfToken = req.headers["x-csrf-token"] as string
-        const valid = csrf.verify(req.session.csrfSecret!, csrfToken)
-        if (!valid) return res.status(400).send("Bad request")
+        if (!serverFunctions.validateCSRF(req)) return res.status(400).send("Bad request")
         let postID = Number(req.body.postID)
         let unverifiedID = Number(req.body.unverifiedID)
         const images = req.body.images 
@@ -1038,9 +1029,7 @@ const CreateRoutes = (app: Express) => {
 
     app.post("/api/post/approve", modLimiter, async (req: Request, res: Response, next: NextFunction) => {
       try {
-        const csrfToken = req.headers["x-csrf-token"] as string
-        const valid = csrf.verify(req.session.csrfSecret!, csrfToken)
-        if (!valid) return res.status(400).send("Bad request")
+        if (!serverFunctions.validateCSRF(req)) return res.status(400).send("Bad request")
         let postID = Number(req.body.postID)
         if (Number.isNaN(postID)) return res.status(400).send("Bad request")
         if (req.session.role !== "admin" && req.session.role !== "mod") return res.status(403).end()
@@ -1215,9 +1204,7 @@ const CreateRoutes = (app: Express) => {
 
     app.post("/api/post/reject", modLimiter, async (req: Request, res: Response, next: NextFunction) => {
       try {
-        const csrfToken = req.headers["x-csrf-token"] as string
-        const valid = csrf.verify(req.session.csrfSecret!, csrfToken)
-        if (!valid) return res.status(400).send("Bad request")
+        if (!serverFunctions.validateCSRF(req)) return res.status(400).send("Bad request")
         let postID = Number(req.body.postID)
         if (Number.isNaN(postID)) return res.status(400).send("Bad request")
         if (req.session.role !== "admin" && req.session.role !== "mod") return res.status(403).end()

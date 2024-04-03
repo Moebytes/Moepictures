@@ -49,7 +49,7 @@ const TranslationHistoryPage: React.FunctionComponent<Props> = (props) => {
         }
         if (!result.length) {
             const post = await axios.get("/api/post", {params: {postID}, withCredentials: true}).then((r) => r.data)
-            result = [{post, postID, order, updater: post.uploader, updatedDate: post.uploadDate, data: [{transcript: "No", translation: "data"}]}]
+            result = [{post, postID, order, updater: post.uploader, updatedDate: post.uploadDate, data: [{transcript: "No data"}]}]
         }
         setEnded(false)
         setIndex(0)

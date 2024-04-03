@@ -7,11 +7,8 @@ import crypto from "crypto"
 import functions from "../structures/Functions"
 import serverFunctions from "../structures/ServerFunctions"
 import fileType from "magic-bytes.js"
-import CSRF from "csrf"
 import fs from "fs"
 import path from "path"
-
-const csrf = new CSRF()
 
 const signupLimiter = rateLimit({
 	windowMs: 30 * 60 * 1000,
@@ -71,9 +68,7 @@ const UserRoutes = (app: Express) => {
     app.post("/api/user/signup", signupLimiter, async (req: Request, res: Response) => {
         try {
             let {username, email, password, captchaResponse} = req.body 
-            const csrfToken = req.headers["x-csrf-token"] as string
-            const valid = csrf.verify(req.session.csrfSecret!, csrfToken)
-            if (!valid) return res.status(400).send("Bad request")
+            if (!serverFunctions.validateCSRF(req)) return res.status(400).send("Bad request")
             if (!username || !email || !password || !captchaResponse) return res.status(400).send("Bad request.")
             username = username.trim().toLowerCase()
             email = email.trim()
@@ -119,9 +114,7 @@ const UserRoutes = (app: Express) => {
     app.post("/api/user/login", loginLimiter, loginSpeedLimiter, async (req: Request, res: Response) => {
         try {
             let {username, password, captchaResponse} = req.body
-            const csrfToken = req.headers["x-csrf-token"] as string
-            const valid = csrf.verify(req.session.csrfSecret!, csrfToken)
-            if (!valid) return res.status(400).send("Bad request")
+            if (!serverFunctions.validateCSRF(req)) return res.status(400).send("Bad request")
             if (!username || !password || !captchaResponse) return res.status(400).send("Bad request")
             username = username.trim().toLowerCase()
             password = password.trim()
@@ -180,9 +173,7 @@ const UserRoutes = (app: Express) => {
 
     app.post("/api/user/updatepfp", userLimiter, async (req: Request, res: Response) => {
         try {
-            const csrfToken = req.headers["x-csrf-token"] as string
-            const valid = csrf.verify(req.session.csrfSecret!, csrfToken)
-            if (!valid) return res.status(400).send("Bad request")
+            if (!serverFunctions.validateCSRF(req)) return res.status(400).send("Bad request")
             const bytes = req.body 
             if (req.session.username) {
                 const result = fileType(bytes)?.[0]
@@ -219,9 +210,7 @@ const UserRoutes = (app: Express) => {
 
     app.post("/api/user/favoritesprivacy", sessionLimiter, async (req: Request, res: Response) => {
         try {
-            const csrfToken = req.headers["x-csrf-token"] as string
-            const valid = csrf.verify(req.session.csrfSecret!, csrfToken)
-            if (!valid) return res.status(400).send("Bad request")
+            if (!serverFunctions.validateCSRF(req)) return res.status(400).send("Bad request")
             if (!req.session.username) return res.status(400).send("Bad request")
             const user = await sql.user(req.session.username)
             if (!user) return res.status(400).send("Bad request")
@@ -237,9 +226,7 @@ const UserRoutes = (app: Express) => {
     app.post("/api/user/changeusername", userLimiter, async (req: Request, res: Response) => {
         try {
             let {newUsername} = req.body
-            const csrfToken = req.headers["x-csrf-token"] as string
-            const valid = csrf.verify(req.session.csrfSecret!, csrfToken)
-            if (!valid) return res.status(400).send("Bad request")
+            if (!serverFunctions.validateCSRF(req)) return res.status(400).send("Bad request")
             if (!req.session.username) return res.status(400).send("Bad request")
             newUsername = newUsername.trim().toLowerCase()
             const badUsername = functions.validateUsername(newUsername)
@@ -265,9 +252,7 @@ const UserRoutes = (app: Express) => {
     app.post("/api/user/changepassword", userLimiter, async (req: Request, res: Response) => {
         try {
             let {oldPassword, newPassword} = req.body
-            const csrfToken = req.headers["x-csrf-token"] as string
-            const valid = csrf.verify(req.session.csrfSecret!, csrfToken)
-            if (!valid) return res.status(400).send("Bad request")
+            if (!serverFunctions.validateCSRF(req)) return res.status(400).send("Bad request")
             if (!oldPassword || !newPassword || !req.session.username) return res.status(400).send("Bad request")
             oldPassword = oldPassword.trim()
             newPassword = newPassword.trim()
@@ -313,9 +298,7 @@ const UserRoutes = (app: Express) => {
     app.post("/api/user/changeemail", userLimiter, async (req: Request, res: Response) => {
         try {
             let {newEmail} = req.body
-            const csrfToken = req.headers["x-csrf-token"] as string
-            const valid = csrf.verify(req.session.csrfSecret!, csrfToken)
-            if (!valid) return res.status(400).send("Bad request")
+            if (!serverFunctions.validateCSRF(req)) return res.status(400).send("Bad request")
             if (!req.session.username) return res.status(400).send("Bad request")
             const badEmail = functions.validateEmail(newEmail)
             if (badEmail) return res.status(400).send("Bad request")
@@ -341,9 +324,7 @@ const UserRoutes = (app: Express) => {
     app.post("/api/user/verifyemail", userLimiter, async (req: Request, res: Response) => {
         try {
             let {email} = req.body
-            const csrfToken = req.headers["x-csrf-token"] as string
-            const valid = csrf.verify(req.session.csrfSecret!, csrfToken)
-            if (!valid) return res.status(400).send("Bad request")
+            if (!serverFunctions.validateCSRF(req)) return res.status(400).send("Bad request")
             if (!req.session.username) return res.status(400).send("Bad request")
             const badEmail = functions.validateEmail(email)
             if (badEmail) return res.status(400).send("Bad request")
@@ -396,9 +377,7 @@ const UserRoutes = (app: Express) => {
     app.post("/api/user/changebio", userLimiter, async (req: Request, res: Response) => {
         try {
             let {bio} = req.body
-            const csrfToken = req.headers["x-csrf-token"] as string
-            const valid = csrf.verify(req.session.csrfSecret!, csrfToken)
-            if (!valid) return res.status(400).send("Bad request")
+            if (!serverFunctions.validateCSRF(req)) return res.status(400).send("Bad request")
             if (!req.session.username || !bio) return res.status(400).send("Bad request")
             bio = bio.trim()
             const user = await sql.user(req.session.username)
@@ -413,10 +392,9 @@ const UserRoutes = (app: Express) => {
 
     app.post("/api/user/forgotpassword", userLimiter, async (req: Request, res: Response) => {
         try {
-            const {email} = req.body
-            const csrfToken = req.headers["x-csrf-token"] as string
-            const valid = csrf.verify(req.session.csrfSecret!, csrfToken)
-            if (!valid) return res.status(400).send("Bad request")
+            const {email, captchaResponse} = req.body
+            if (!serverFunctions.validateCSRF(req)) return res.status(400).send("Bad request")
+            if (req.session.captchaAnswer !== captchaResponse?.trim()) return res.status(400).send("Bad request")
             if (!email) {
                 await functions.timeout(2000) 
                 return res.status(200).send("Success")
@@ -441,9 +419,7 @@ const UserRoutes = (app: Express) => {
     app.post("/api/user/resetpassword", userLimiter, async (req: Request, res: Response) => {
         try {
             const {username, password, token} = req.body
-            const csrfToken = req.headers["x-csrf-token"] as string
-            const valid = csrf.verify(req.session.csrfSecret!, csrfToken)
-            if (!valid) return res.status(400).send("Bad request")
+            if (!serverFunctions.validateCSRF(req)) return res.status(400).send("Bad request")
             if (!username || !token || !password) return res.status(400).send("Bad request")
             const badPassword = functions.validatePassword(username, password)
             if (badPassword) return res.status(400).send("Bad request")
@@ -468,9 +444,7 @@ const UserRoutes = (app: Express) => {
 
     app.delete("/api/user/delete", userLimiter, async (req: Request, res: Response, next: NextFunction) => {
         try {
-            const csrfToken = req.headers["x-csrf-token"] as string
-            const valid = csrf.verify(req.session.csrfSecret!, csrfToken)
-            if (!valid) return res.status(400).send("Bad request")
+            if (!serverFunctions.validateCSRF(req)) return res.status(400).send("Bad request")
             if (!req.session.username) return res.status(400).send("Bad request")
             const user = await sql.user(req.session.username)
             if (!user) return res.status(400).send("Bad request")

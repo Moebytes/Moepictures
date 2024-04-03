@@ -3,10 +3,10 @@ import {useHistory} from "react-router-dom"
 import {ThemeContext, SessionContext, MobileContext, DeleteTranslationHistoryIDContext, RevertTranslationHistoryIDContext,
 DeleteTranslationHistoryFlagContext, RevertTranslationHistoryFlagContext} from "../Context"
 import functions from "../structures/Functions"
-import translationHistoryRevert from "../assets/purple/revert.png"
-import translationHistoryDelete from "../assets/purple/delete.png"
-import adminCrown from "../assets/purple/admin-crown.png"
-import modCrown from "../assets/purple/mod-crown.png"
+import translationHistoryRevert from "../assets/icons/revert.png"
+import translationHistoryDelete from "../assets/icons/delete.png"
+import adminCrown from "../assets/icons/admin-crown.png"
+import modCrown from "../assets/icons/mod-crown.png"
 import permissions from "../structures/Permissions"
 import cryptoFunctions from "../structures/CryptoFunctions"
 import "./styles/translationhistoryrow.less"
@@ -163,7 +163,11 @@ const TranslationHistoryRow: React.FunctionComponent<Props> = (props) => {
         let jsx = [] as any
         for (let i = 0; i < props.translationHistory.data.length; i++) {
             const item = props.translationHistory.data[i]
-            jsx.push(<span className="translationhistoryrow-tag-text">{`${item.transcript} -> ${item.translation}`}</span>)
+            if (item.transcript === "No data") {
+                jsx.push(<span className="translationhistoryrow-tag-text">No data</span>)
+            } else {
+                jsx.push(<span className="translationhistoryrow-tag-text">{`${item.transcript} -> ${item.translation}`}</span>)
+            }
         }
         return jsx
     }

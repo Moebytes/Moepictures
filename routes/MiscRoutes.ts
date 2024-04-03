@@ -12,12 +12,12 @@ import functions from "../structures/Functions"
 import serverFunctions from "../structures/ServerFunctions"
 import rateLimit from "express-rate-limit"
 import fs from "fs"
-import CSRF from "csrf"
 import svgCaptcha from "svg-captcha"
 import child_process from "child_process"
 import util from "util"
+import dotline from "../assets/misc/Dotline.ttf"
 
-const csrf = new CSRF()
+svgCaptcha.loadFont(dotline)
 
 const exec = util.promisify(child_process.exec)
 
@@ -48,9 +48,8 @@ const contactLimiter = rateLimit({
 const MiscRoutes = (app: Express) => {
     app.get("/api/misc/csrf", miscLimiter, async (req: Request, res: Response, next: NextFunction) => {
         try {
-            const secret = await csrf.secret()
+            const {secret, token} = serverFunctions.generateCSRF()
             req.session.csrfSecret = secret
-            const token = csrf.create(secret)
             res.status(200).send(token)
         } catch (e) {
             console.log(e)
@@ -62,11 +61,11 @@ const MiscRoutes = (app: Express) => {
         try {
             const color = req.query.color as string || "#ffffff"
             let captcha = svgCaptcha.create({
-                size: 8,
-                ignoreChars: "0oli",
+                size: 6,
+                ignoreChars: "oli0123456789",
+                fontSize: 45,
                 noise: 2,
                 color: true,
-                fontSize: 80,
                 background: color,
                 width: 230
             })
@@ -81,9 +80,7 @@ const MiscRoutes = (app: Express) => {
     app.post("/api/misc/captcha", captchaLimiter, async (req: Request, res: Response, next: NextFunction) => {
         try {
             const {captchaResponse} = req.body
-            const csrfToken = req.headers["x-csrf-token"] as string
-            const valid = csrf.verify(req.session.csrfSecret!, csrfToken)
-            if (!valid) return res.status(400).send("Bad request")
+            if (!serverFunctions.validateCSRF(req)) return res.status(400).send("Bad request")
             let ip = req.headers["x-forwarded-for"] || req.socket.remoteAddress
             ip = ip?.toString().replace("::ffff:", "") || ""
             if (req.session.captchaAnswer === captchaResponse?.trim()) {
@@ -206,9 +203,7 @@ const MiscRoutes = (app: Express) => {
     app.post("/api/misc/contact", contactLimiter, async (req: Request, res: Response, next: NextFunction) => {
         try {
             const {email, subject, message, files} = req.body 
-            const csrfToken = req.headers["x-csrf-token"] as string
-            const valid = csrf.verify(req.session.csrfSecret!, csrfToken)
-            if (!valid) return res.status(400).send("Bad request")
+            if (!serverFunctions.validateCSRF(req)) return res.status(400).send("Bad request")
             if (!email || !subject || !message || !files) return res.status(400).send("Bad request")
             const badEmail = functions.validateEmail(email)
             if (badEmail) return res.status(400).send("Bad request")
