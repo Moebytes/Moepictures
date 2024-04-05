@@ -408,11 +408,11 @@ const CommentsPage: React.FunctionComponent = (props) => {
             if (visible[i].fake) continue
             if (!session.username) if (visible[i].post.restrict !== "safe") continue
             if (!permissions.isStaff(session)) if (visible[i].post.restrict === "explicit") continue
-            jsx.push(<CommentRow comment={visible[i]} onDelete={updateComments} onEdit={updateComments} onCommentJump={onCommentJump}/>)
+            jsx.push(<CommentRow key={visible[i].commentID} comment={visible[i]} onDelete={updateComments} onEdit={updateComments} onCommentJump={onCommentJump}/>)
         }
         if (!scroll) {
             jsx.push(
-                <div className="page-container">
+                <div key="page-numbers" className="page-container">
                     {commentsPage <= 1 ? null : <button className="page-button" onClick={firstPage}>{"<<"}</button>}
                     {commentsPage <= 1 ? null : <button className="page-button" onClick={previousPage}>{"<"}</button>}
                     {generatePageButtonsJSX()}

@@ -125,7 +125,7 @@ const Comments: React.FunctionComponent<Props> = (props) => {
     const generateCommentsJSX = () => {
         let jsx = [] as any
         for (let i = 0; i < comments.length; i++) {
-            jsx.push(<Comment comment={comments[i]} onDelete={updateComments} onEdit={updateComments} onCommentJump={onCommentJump}/>)
+            jsx.push(<Comment key={comments[i].commentID} comment={comments[i]} onDelete={updateComments} onEdit={updateComments} onCommentJump={onCommentJump}/>)
         }
         return jsx
     }

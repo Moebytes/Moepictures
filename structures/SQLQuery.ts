@@ -2197,19 +2197,20 @@ export default class SQLQuery {
 
   /** Insert comment report. */
   public static inserCommentReport = async (username: string, commentID: number, reason: string) => {
+    const now = new Date().toISOString()
     const query: QueryConfig = {
-      text: `INSERT INTO "reported comments" ("reporter", "commentID", "reason") VALUES ($1, $2, $3)`,
-      values: [username, commentID, reason]
+      text: `INSERT INTO "reported comments" ("type", "reporter", "reportDate", "commentID", "reason") VALUES ($1, $2, $3, $4, $5)`,
+      values: ["comment", username, now, commentID, reason]
     }
     const result = await SQLQuery.run(query)
     return result
   }
 
   /** Delete comment report. */
-  public static deleteCommentReport = async (username: string, commentID: number) => {
+  public static deleteCommentReport = async (reportID: number) => {
     const query: QueryConfig = {
-      text: `DELETE FROM "reported comments" WHERE "reported comments"."reporter" = $1 AND "reported comments"."commentID" = $2`,
-      values: [username, commentID]
+      text: `DELETE FROM "reported comments" WHERE "reported comments"."reportID" = $1`,
+      values: [reportID]
     }
     const result = await SQLQuery.run(query)
     return result
@@ -2225,7 +2226,7 @@ export default class SQLQuery {
         FROM "reported comments"
         JOIN comments ON comments."commentID" = "reported comments"."commentID"
         JOIN users ON users."username" = "comments"."username"
-        GROUP BY "reported comments"."commentReportID", comments."commentID", users.username, users.image
+        GROUP BY "reported comments"."reportID", comments."commentID", users.username, users.image
         LIMIT 100 ${offset ? `OFFSET $1` : ""}
       `),
     }
@@ -2503,10 +2504,11 @@ export default class SQLQuery {
   public static reply = async (replyID: number) => {
     const query: QueryConfig = {
       text: functions.multiTrim(`
-            SELECT replies.*
+            SELECT replies.*, users.role, users.image, users."imagePost"
             FROM replies 
+            JOIN users ON users.username = replies.creator
             WHERE replies."replyID" = $1
-            GROUP BY replies."replyID"
+            GROUP BY replies."replyID", users.role, users.image, users."imagePost"
           `),
       values: [replyID]
     }
@@ -2529,6 +2531,72 @@ export default class SQLQuery {
       text: functions.multiTrim(`DELETE FROM replies WHERE replies."replyID" = $1`),
       values: [replyID]
     }
+    const result = await SQLQuery.run(query)
+    return result
+  }
+
+  /** Insert thread report. */
+  public static insertThreadReport = async (username: string, threadID: number, reason: string) => {
+    const now = new Date().toISOString()
+    const query: QueryConfig = {
+      text: `INSERT INTO "reported threads" ("type", "reporter", "reportDate", "threadID", "reason") VALUES ($1, $2, $3, $4, $5)`,
+      values: ["thread", username, now, threadID, reason]
+    }
+    const result = await SQLQuery.run(query)
+    return result
+  }
+
+  /** Delete comment report. */
+  public static deleteThreadReport = async (reportID: number) => {
+    const query: QueryConfig = {
+      text: `DELETE FROM "reported threads" WHERE "reported threads"."reportID" = $1`,
+      values: [reportID]
+    }
+    const result = await SQLQuery.run(query)
+    return result
+  }
+
+  /** Insert reply report. */
+  public static insertReplyReport = async (username: string, replyID: number, reason: string) => {
+    const now = new Date().toISOString()
+    const query: QueryConfig = {
+      text: `INSERT INTO "reported replies" ("type", "reporter", "reportDate", "replyID", "reason") VALUES ($1, $2, $3, $4, $5)`,
+      values: ["reply", username, now, replyID, reason]
+    }
+    const result = await SQLQuery.run(query)
+    return result
+  }
+
+  /** Delete reply report. */
+  public static deleteReplyReport = async (reportID: number) => {
+    const query: QueryConfig = {
+      text: `DELETE FROM "reported replies" WHERE "reported replies"."reportID" = $1`,
+      values: [reportID]
+    }
+    const result = await SQLQuery.run(query)
+    return result
+  }
+
+  /** Get reports */
+  public static reports = async (offset?: string) => {
+    const query: QueryConfig = {
+      text: functions.multiTrim(`
+        WITH reports AS (
+          SELECT * FROM "reported replies"
+          UNION
+          SELECT * FROM "reported threads"
+          UNION
+          SELECT * FROM "reported comments"
+        )
+        SELECT reports."replyID" AS id, reports.type, reports.reporter,
+        reports."reportDate", reports.reason, users.image, users."imagePost"
+        FROM reports
+        JOIN users ON users.username = reports.reporter
+        ORDER BY reports."reportDate"
+        LIMIT 100 ${offset ? `OFFSET $1` : ""}
+      `),
+    }
+    if (offset) query.values = [offset]
     const result = await SQLQuery.run(query)
     return result
   }

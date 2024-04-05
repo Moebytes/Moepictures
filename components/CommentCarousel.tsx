@@ -85,7 +85,7 @@ const CommentCarousel: React.FunctionComponent<Props> = (props) => {
             }
             const img = images[i] ? images[i] : ""
             jsx.push(
-                <div className="comment-carousel-commentrow">
+                <div key={i} className="comment-carousel-commentrow">
                     <div className="comment-carousel-commentrow-container">
                         {functions.isVideo(img) && !mobile ? 
                         <video className="comment-carousel-commentrow-img" src={img} onClick={imgClick} onAuxClick={imgClick}></video> :

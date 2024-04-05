@@ -17,6 +17,14 @@ const postLimiter = rateLimit({
 	legacyHeaders: false
 })
 
+const postUpdateLimiter = rateLimit({
+	windowMs: 5 * 60 * 1000,
+	max: 300,
+	message: "Too many requests, try again later.",
+	standardHeaders: true,
+	legacyHeaders: false
+})
+
 const PostRoutes = (app: Express) => {
     app.get("/api/post", postLimiter, async (req: Request, res: Response, next: NextFunction) => {
         try {
@@ -86,7 +94,7 @@ const PostRoutes = (app: Express) => {
         }
     })
 
-    app.delete("/api/post/delete", postLimiter, async (req: Request, res: Response) => {
+    app.delete("/api/post/delete", postUpdateLimiter, async (req: Request, res: Response) => {
         try {
             const postID = req.query.postID
             if (!serverFunctions.validateCSRF(req)) return res.status(400).send("Bad CSRF token")
@@ -209,7 +217,7 @@ const PostRoutes = (app: Express) => {
         }
     })
 
-    app.post("/api/post/delete/request", postLimiter, async (req: Request, res: Response) => {
+    app.post("/api/post/delete/request", postUpdateLimiter, async (req: Request, res: Response) => {
         try {
             const {postID, reason} = req.body
             if (!serverFunctions.validateCSRF(req)) return res.status(400).send("Bad CSRF token")
@@ -238,7 +246,7 @@ const PostRoutes = (app: Express) => {
         }
     })
 
-    app.post("/api/post/delete/request/fulfill", postLimiter, async (req: Request, res: Response) => {
+    app.post("/api/post/delete/request/fulfill", postUpdateLimiter, async (req: Request, res: Response) => {
         try {
             const {username, postID} = req.body
             if (!serverFunctions.validateCSRF(req)) return res.status(400).send("Bad CSRF token")
@@ -254,7 +262,7 @@ const PostRoutes = (app: Express) => {
         }
     })
 
-    app.put("/api/post/quickedit", postLimiter, async (req: Request, res: Response, next: NextFunction) => {
+    app.put("/api/post/quickedit", postUpdateLimiter, async (req: Request, res: Response, next: NextFunction) => {
         try {
             if (!serverFunctions.validateCSRF(req)) return res.status(400).send("Bad CSRF token")
             const postID = Number(req.body.postID)
@@ -396,7 +404,7 @@ const PostRoutes = (app: Express) => {
           }
     })
 
-    app.put("/api/post/quickedit/unverified", postLimiter, async (req: Request, res: Response, next: NextFunction) => {
+    app.put("/api/post/quickedit/unverified", postUpdateLimiter, async (req: Request, res: Response, next: NextFunction) => {
         try {
             if (!serverFunctions.validateCSRF(req)) return res.status(400).send("Bad request")
             let postID = Number(req.body.postID)
@@ -619,7 +627,7 @@ const PostRoutes = (app: Express) => {
         }
     })
 
-    app.delete("/api/post/history/delete", postLimiter, async (req: Request, res: Response) => {
+    app.delete("/api/post/history/delete", postUpdateLimiter, async (req: Request, res: Response) => {
         try {
             const {postID, historyID} = req.query
             if (!serverFunctions.validateCSRF(req)) return res.status(400).send("Bad CSRF token")

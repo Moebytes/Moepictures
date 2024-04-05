@@ -77,12 +77,16 @@ const App: React.FunctionComponent = (props) => {
     }
 
     useEffect(() => {
-        setTimeout(() => {
+        const onDOMLoaded = () => {
             setLoaded(true)
             getSessionCookie()
             functions.updateCSRFToken()
             functions.clearCache()
-        }, 100)
+        }
+        window.addEventListener("load", onDOMLoaded)
+        return () => {
+            window.removeEventListener("load", onDOMLoaded)
+        }
     }, [])
 
     const getImg = () => {

@@ -15,7 +15,7 @@ const tagLimiter = rateLimit({
 	legacyHeaders: false
 })
 
-const tagEditLimiter = rateLimit({
+const tagUpdateLimiter = rateLimit({
 	windowMs: 5 * 60 * 1000,
 	max: 100,
 	message: "Too many requests, try again later.",
@@ -84,7 +84,7 @@ const TagRoutes = (app: Express) => {
         }
     })
 
-    app.delete("/api/tag/delete", tagLimiter, async (req: Request, res: Response) => {
+    app.delete("/api/tag/delete", tagUpdateLimiter, async (req: Request, res: Response) => {
         try {
             const tag = req.query.tag as string
             if (!serverFunctions.validateCSRF(req)) return res.status(400).send("Bad CSRF token")
@@ -103,7 +103,7 @@ const TagRoutes = (app: Express) => {
         }
     })
 
-    app.put("/api/tag/edit", tagEditLimiter, async (req: Request, res: Response) => {
+    app.put("/api/tag/edit", tagUpdateLimiter, async (req: Request, res: Response) => {
         try {
             const {tag, key, description, image, aliases, implications, pixivTags, pixiv, twitter, website, fandom, reason} = req.body
             if (!serverFunctions.validateCSRF(req)) return res.status(400).send("Bad CSRF token")
@@ -242,7 +242,7 @@ const TagRoutes = (app: Express) => {
         }
     })
 
-    app.post("/api/tag/aliasto", tagLimiter, async (req: Request, res: Response) => {
+    app.post("/api/tag/aliasto", tagUpdateLimiter, async (req: Request, res: Response) => {
         try {
             const {tag, aliasTo} = req.body
             if (!serverFunctions.validateCSRF(req)) return res.status(400).send("Bad CSRF token")
@@ -274,7 +274,7 @@ const TagRoutes = (app: Express) => {
         }
     })
 
-    app.post("/api/tag/delete/request", tagLimiter, async (req: Request, res: Response) => {
+    app.post("/api/tag/delete/request", tagUpdateLimiter, async (req: Request, res: Response) => {
         try {
             const {tag, reason} = req.body
             if (!serverFunctions.validateCSRF(req)) return res.status(400).send("Bad CSRF token")
@@ -303,7 +303,7 @@ const TagRoutes = (app: Express) => {
         }
     })
 
-    app.post("/api/tag/delete/request/fulfill", tagLimiter, async (req: Request, res: Response) => {
+    app.post("/api/tag/delete/request/fulfill", tagUpdateLimiter, async (req: Request, res: Response) => {
         try {
             const {username, tag} = req.body
             if (!serverFunctions.validateCSRF(req)) return res.status(400).send("Bad CSRF token")
@@ -319,7 +319,7 @@ const TagRoutes = (app: Express) => {
         }
     })
 
-    app.post("/api/tag/aliasto/request", tagLimiter, async (req: Request, res: Response) => {
+    app.post("/api/tag/aliasto/request", tagUpdateLimiter, async (req: Request, res: Response) => {
         try {
             const {tag, aliasTo, reason} = req.body
             if (!serverFunctions.validateCSRF(req)) return res.status(400).send("Bad CSRF token")
@@ -350,7 +350,7 @@ const TagRoutes = (app: Express) => {
         }
     })
 
-    app.post("/api/tag/aliasto/request/fulfill", tagLimiter, async (req: Request, res: Response) => {
+    app.post("/api/tag/aliasto/request/fulfill", tagUpdateLimiter, async (req: Request, res: Response) => {
         try {
             const {username, tag} = req.body
             if (!serverFunctions.validateCSRF(req)) return res.status(400).send("Bad CSRF token")
@@ -366,7 +366,7 @@ const TagRoutes = (app: Express) => {
         }
     })
 
-    app.post("/api/tag/edit/request", tagLimiter, async (req: Request, res: Response) => {
+    app.post("/api/tag/edit/request", tagUpdateLimiter, async (req: Request, res: Response) => {
         try {
             const {tag, key, description, image, aliases, implications, pixivTags, pixiv, twitter, website, fandom, reason} = req.body
             if (!serverFunctions.validateCSRF(req)) return res.status(400).send("Bad CSRF token")
@@ -405,7 +405,7 @@ const TagRoutes = (app: Express) => {
         }
     })
 
-    app.post("/api/tag/edit/request/fulfill", tagLimiter, async (req: Request, res: Response) => {
+    app.post("/api/tag/edit/request/fulfill", tagUpdateLimiter, async (req: Request, res: Response) => {
         try {
             const {username, tag, image} = req.body
             if (!serverFunctions.validateCSRF(req)) return res.status(400).send("Bad CSRF token")
@@ -435,7 +435,7 @@ const TagRoutes = (app: Express) => {
         }
     })
 
-    app.delete("/api/tag/history/delete", tagLimiter, async (req: Request, res: Response) => {
+    app.delete("/api/tag/history/delete", tagUpdateLimiter, async (req: Request, res: Response) => {
         try {
             const {tag, historyID} = req.query
             if (!serverFunctions.validateCSRF(req)) return res.status(400).send("Bad CSRF token")

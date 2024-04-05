@@ -300,6 +300,19 @@ const SearchRoutes = (app: Express) => {
             return res.status(400).send("Bad request")
         }
     })
+
+    app.get("/api/search/reports", searchLimiter, async (req: Request, res: Response) => {
+        try {
+            const offset = req.query.offset as string
+            if (!req.session.username) return res.status(401).send("Unauthorized")
+            if (req.session.role !== "admin" && req.session.role !== "mod") return res.status(403).end()
+            const result = await sql.reports(offset)
+            res.status(200).json(result)
+        } catch (e) {
+            console.log(e)
+            res.status(400).send("Bad request") 
+        }
+    })
 }
 
 export default SearchRoutes

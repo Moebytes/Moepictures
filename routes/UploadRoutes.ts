@@ -8,12 +8,11 @@ import rateLimit from "express-rate-limit"
 import phash from "sharp-phash"
 import fileType from "magic-bytes.js"
 import imageSize from "image-size"
-import {performance} from "perf_hooks"
 import axios from "axios"
 
 const uploadLimiter = rateLimit({
 	windowMs: 5 * 60 * 1000,
-	max: 20,
+	max: 30,
 	message: "Too many requests, try again later.",
 	standardHeaders: true,
 	legacyHeaders: false
@@ -21,7 +20,7 @@ const uploadLimiter = rateLimit({
 
 const editLimiter = rateLimit({
 	windowMs: 5 * 60 * 1000,
-	max: 50,
+	max: 60,
 	message: "Too many requests, try again later.",
 	standardHeaders: true,
 	legacyHeaders: false
@@ -34,16 +33,6 @@ const modLimiter = rateLimit({
 	standardHeaders: true,
 	legacyHeaders: false
 })
-
-const altPath = (imagePath: string) => {
-  let i = 2
-  let newDest = imagePath
-  while (fs.existsSync(newDest)) {
-      newDest = `${path.dirname(imagePath)}/${path.basename(imagePath, path.extname(imagePath))}${i}${path.extname(imagePath)}`
-      i++
-  }
-  return newDest
-}
 
 const validImages = (images: any[], skipMBCheck?: boolean) => {
   if (!images.length) return false
@@ -84,7 +73,7 @@ const validImages = (images: any[], skipMBCheck?: boolean) => {
 
 
 const CreateRoutes = (app: Express) => {
-    app.post("/api/post/upload", modLimiter, async (req: Request, res: Response, next: NextFunction) => {
+    app.post("/api/post/upload", uploadLimiter, async (req: Request, res: Response, next: NextFunction) => {
       try {
         if (!serverFunctions.validateCSRF(req)) return res.status(400).send("Bad CSRF token")
         const images = req.body.images 

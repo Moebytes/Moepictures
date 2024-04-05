@@ -108,7 +108,7 @@ const Reply: React.FunctionComponent<Props> = (props) => {
     }
 
     const deleteReply = async () => {
-        await axios.delete("/api/reply/delete", {params: {replyID: props.reply.replyID}, headers: {"x-csrf-token": functions.getCSRFToken()}, withCredentials: true})
+        await axios.delete("/api/reply/delete", {params: {threadID: props.reply.threadID, replyID: props.reply.replyID}, headers: {"x-csrf-token": functions.getCSRFToken()}, withCredentials: true})
         props.onDelete?.()
     }
 

@@ -140,6 +140,7 @@ export const EditReplyIDContext = React.createContext<any>(null)
 export const EditReplyFlagContext = React.createContext<any>(null)
 export const EditReplyContentContext = React.createContext<any>(null)
 export const ReportReplyIDContext = React.createContext<any>(null)
+export const ReportThreadIDContext = React.createContext<any>(null)
 
 const Context: React.FunctionComponent = (props) => {
     const [siteHue, setSiteHue] = useState(180)
@@ -267,10 +268,12 @@ const Context: React.FunctionComponent = (props) => {
     const [editReplyID, setEditReplyID] = useState(null)
     const [editReplyContent, setEditReplyContent] = useState("")
     const [reportReplyID, setReportReplyID] = useState(null)
+    const [reportThreadID, setReportThreadID] = useState(null)
     
 
 return (
     <>
+        <ReportThreadIDContext.Provider value={{reportThreadID, setReportThreadID}}>
         <EditThreadContentContext.Provider value={{editThreadContent, setEditThreadContent}}>
         <EditThreadTitleContext.Provider value={{editThreadTitle, setEditThreadTitle}}>
         <EditThreadFlagContext.Provider value={{editThreadFlag, setEditThreadFlag}}>
@@ -522,6 +525,7 @@ return (
         </EditThreadFlagContext.Provider>
         </EditThreadTitleContext.Provider>
         </EditThreadContentContext.Provider>
+        </ReportThreadIDContext.Provider>
     </>
     )
 }

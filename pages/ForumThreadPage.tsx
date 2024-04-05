@@ -14,7 +14,7 @@ import {ThemeContext, EnableDragContext, HideNavbarContext, HideSidebarContext, 
 RelativeContext, HideTitlebarContext, ActiveDropdownContext, HeaderTextContext, SidebarTextContext, SiteHueContext, 
 SiteLightnessContext, SiteSaturationContext, ScrollContext, ThreadPageContext, ShowPageDialogContext, PageFlagContext,
 DeleteThreadIDContext, DeleteThreadFlagContext, EditThreadIDContext, EditThreadFlagContext, EditThreadTitleContext,
-EditThreadContentContext, QuoteTextContext} from "../Context"
+EditThreadContentContext, QuoteTextContext, ReportThreadIDContext} from "../Context"
 import permissions from "../structures/Permissions"
 import PageDialog from "../dialogs/PageDialog"
 import adminCrown from "../assets/icons/admin-crown.png"
@@ -31,8 +31,10 @@ import quoteOptIcon from "../assets/icons/quote-opt.png"
 import reportOptIcon from "../assets/icons/report-opt.png"
 import EditThreadDialog from "../dialogs/EditThreadDialog"
 import DeleteThreadDialog from "../dialogs/DeleteThreadDialog"
+import ReportThreadDialog from "../dialogs/ReportThreadDialog"
 import DeleteReplyDialog from "../dialogs/DeleteReplyDialog"
 import EditReplyDialog from "../dialogs/EditReplyDialog"
+import ReportReplyDialog from "../dialogs/ReportReplyDialog"
 import favicon from "../assets/icons/favicon.png"
 import "./styles/forumthreadpage.less"
 import axios from "axios"
@@ -68,6 +70,7 @@ const ForumThreadPage: React.FunctionComponent<Props> = (props) => {
     const {editThreadFlag, setEditThreadFlag} = useContext(EditThreadFlagContext)
     const {editThreadTitle, setEditThreadTitle} = useContext(EditThreadTitleContext)
     const {editThreadContent, setEditThreadContent} = useContext(EditThreadContentContext)
+    const {reportThreadID, setReportThreadID} = useContext(ReportThreadIDContext)
     const [thread, setThread] = useState(null) as any
     const [replies, setReplies] = useState([]) as any
     const [index, setIndex] = useState(0)
@@ -102,6 +105,7 @@ const ForumThreadPage: React.FunctionComponent<Props> = (props) => {
             }
             if (replyParam) {
                 setReplyID(Number(replyParam))
+                setReplyJumpFlag(true)
             }
         }
         window.addEventListener("load", onDOMLoaded)
@@ -323,7 +327,7 @@ const ForumThreadPage: React.FunctionComponent<Props> = (props) => {
         }
         if (!scroll) {
             return (
-                <div className="page-container">
+                <div key="page-numbers" className="page-container">
                     {threadPage <= 1 ? null : <button className="page-button" onClick={firstPage}>{"<<"}</button>}
                     {threadPage <= 1 ? null : <button className="page-button" onClick={previousPage}>{"<"}</button>}
                     {jsx}
@@ -346,7 +350,7 @@ const ForumThreadPage: React.FunctionComponent<Props> = (props) => {
         }
         for (let i = 0; i < visible.length; i++) {
             if (visible[i].fake) continue
-            jsx.push(<Reply reply={visible[i]} onDelete={updateReplies} onEdit={updateReplies} onReplyJump={onReplyJump}/>)
+            jsx.push(<Reply key={visible[i].replyID} reply={visible[i]} onDelete={updateReplies} onEdit={updateReplies} onReplyJump={onReplyJump}/>)
         }
         return jsx
     }
@@ -446,7 +450,7 @@ const ForumThreadPage: React.FunctionComponent<Props> = (props) => {
     }
 
     const reportThreadDialog = () => {
-
+        setReportThreadID(threadID)
     }
 
     const triggerQuote = () => {
@@ -538,9 +542,11 @@ const ForumThreadPage: React.FunctionComponent<Props> = (props) => {
         <>
         <DragAndDrop/> 
         <EditThreadDialog/>
-        <DeleteThreadDialog/>
+        <DeleteThreadDialog/> 
+        <ReportThreadDialog/>
         <EditReplyDialog/>
         <DeleteReplyDialog/>
+        <ReportReplyDialog/>
         <PageDialog/>
         <TitleBar/>
         <NavBar/>

@@ -13,7 +13,7 @@ import path from "path"
 const signupLimiter = rateLimit({
 	windowMs: 30 * 60 * 1000,
 	max: 5,
-	message: "Too many accounts created from this IP, try again later.",
+	message: "Too many accounts created, try again later.",
 	standardHeaders: true,
 	legacyHeaders: false
 })

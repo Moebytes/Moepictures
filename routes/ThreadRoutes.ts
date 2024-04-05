@@ -13,8 +13,16 @@ const threadLimiter = rateLimit({
 	legacyHeaders: false
 })
 
+const threadUpdateLimiter = rateLimit({
+	windowMs: 5 * 60 * 1000,
+	max: 1000,
+	message: "Too many requests, try again later.",
+	standardHeaders: true,
+	legacyHeaders: false
+})
+
 const ThreadRoutes = (app: Express) => {
-    app.post("/api/thread/create", threadLimiter, async (req: Request, res: Response) => {
+    app.post("/api/thread/create", threadUpdateLimiter, async (req: Request, res: Response) => {
         try {
             const {title, content, captchaResponse} = req.body
             if (!serverFunctions.validateCSRF(req)) return res.status(400).send("Bad CSRF token")
@@ -29,7 +37,7 @@ const ThreadRoutes = (app: Express) => {
         }
     })
 
-    app.put("/api/thread/edit", threadLimiter, async (req: Request, res: Response) => {
+    app.put("/api/thread/edit", threadUpdateLimiter, async (req: Request, res: Response) => {
         try {
             const {threadID, title, content} = req.body
             if (!serverFunctions.validateCSRF(req)) return res.status(400).send("Bad CSRF token")
@@ -61,7 +69,7 @@ const ThreadRoutes = (app: Express) => {
         }
     })
 
-    app.delete("/api/thread/delete", threadLimiter, async (req: Request, res: Response) => {
+    app.delete("/api/thread/delete", threadUpdateLimiter, async (req: Request, res: Response) => {
         try {
             const threadID = req.query.threadID
             if (!serverFunctions.validateCSRF(req)) return res.status(400).send("Bad CSRF token")
@@ -79,7 +87,7 @@ const ThreadRoutes = (app: Express) => {
         }
     })
 
-    app.post("/api/thread/sticky", threadLimiter, async (req: Request, res: Response) => {
+    app.post("/api/thread/sticky", threadUpdateLimiter, async (req: Request, res: Response) => {
         try {
             const {threadID} = req.body
             if (!serverFunctions.validateCSRF(req)) return res.status(400).send("Bad CSRF token")
@@ -96,7 +104,7 @@ const ThreadRoutes = (app: Express) => {
         }
     })
 
-    app.post("/api/thread/lock", threadLimiter, async (req: Request, res: Response) => {
+    app.post("/api/thread/lock", threadUpdateLimiter, async (req: Request, res: Response) => {
         try {
             const {threadID} = req.body
             if (!serverFunctions.validateCSRF(req)) return res.status(400).send("Bad CSRF token")
@@ -113,7 +121,7 @@ const ThreadRoutes = (app: Express) => {
         }
     })
 
-    app.post("/api/thread/reply", threadLimiter, async (req: Request, res: Response) => {
+    app.post("/api/thread/reply", threadUpdateLimiter, async (req: Request, res: Response) => {
         try {
             const {threadID, content} = req.body
             if (!serverFunctions.validateCSRF(req)) return res.status(400).send("Bad CSRF token")
@@ -147,7 +155,19 @@ const ThreadRoutes = (app: Express) => {
         }
     })
 
-    app.put("/api/reply/edit", threadLimiter, async (req: Request, res: Response) => {
+    app.get("/api/reply", threadLimiter, async (req: Request, res: Response) => {
+        try {
+            const replyID = req.query.replyID
+            if (!replyID) return res.status(400).send("Bad replyID")
+            const result = await sql.reply(Number(replyID))
+            res.status(200).json(result)
+        } catch (e) {
+            console.log(e)
+            res.status(400).send("Bad request")
+        }
+    })
+
+    app.put("/api/reply/edit", threadUpdateLimiter, async (req: Request, res: Response) => {
         try {
             const {replyID, content} = req.body
             if (!serverFunctions.validateCSRF(req)) return res.status(400).send("Bad CSRF token")
@@ -169,21 +189,97 @@ const ThreadRoutes = (app: Express) => {
         }
     })
 
-    app.delete("/api/reply/delete", threadLimiter, async (req: Request, res: Response) => {
+    app.delete("/api/reply/delete", threadUpdateLimiter, async (req: Request, res: Response) => {
         try {
+            const threadID = req.query.threadID
             const replyID = req.query.replyID
             if (!serverFunctions.validateCSRF(req)) return res.status(400).send("Bad CSRF token")
-            if (!replyID) return res.status(400).send("Bad replyID")
+            if (!threadID || !replyID) return res.status(400).send("Bad threadID or replyID")
             const reply = await sql.reply(Number(replyID))
             if (!reply) return res.status(400).send("Invalid replyID")
             if (reply.creator !== req.session.username) {
                 if (req.session.role !== "admin" && req.session.role !== "mod") return res.status(403).send("No permission to delete")
             }
-            await sql.deleteReply(Number(replyID))
+            const replies = await sql.replies(Number(threadID))
+            const lastReply = replies[replies.length - 1]
+            if (lastReply.replyID === reply.replyID) {
+                await sql.deleteReply(Number(replyID))
+                const penultReply = replies[replies.length - 2]
+                if (penultReply) {
+                    await sql.updateThread(Number(threadID), "updater", penultReply.creator)
+                    await sql.updateThread(Number(threadID), "updatedDate", penultReply.createDate)
+                } else {
+                    const thread = await sql.thread(Number(threadID))
+                    await sql.updateThread(Number(threadID), "updater", thread.creator)
+                    await sql.updateThread(Number(threadID), "updatedDate", thread.createDate)
+                }
+            } else {
+                await sql.deleteReply(Number(replyID))
+            }
             res.status(200).send("Success")
         } catch (e) {
             console.log(e)
             res.status(400).send("Bad request")
+        }
+    })
+
+    app.post("/api/thread/report", threadUpdateLimiter, async (req: Request, res: Response) => {
+        try {
+            const {threadID, reason} = req.body
+            if (!serverFunctions.validateCSRF(req)) return res.status(400).send("Bad CSRF token")
+            if (!req.session.username) return res.status(401).send("Unauthorized")
+            if (!threadID || !reason) return res.status(400).send("Bad threadID or reason")
+            const thread = await sql.thread(threadID)
+            if (!thread) return res.status(400).send("Invalid threadID")
+            await sql.insertThreadReport(req.session.username, Number(threadID), reason)
+            res.status(200).send("Success")
+        } catch (e) {
+            console.log(e)
+            res.status(400).send("Bad request")
+        }
+    })
+
+    app.post("/api/reply/report", threadUpdateLimiter, async (req: Request, res: Response) => {
+        try {
+            const {replyID, reason} = req.body
+            if (!serverFunctions.validateCSRF(req)) return res.status(400).send("Bad CSRF token")
+            if (!req.session.username) return res.status(401).send("Unauthorized")
+            if (!replyID || !reason) return res.status(400).send("Bad replyID or reason")
+            const reply = await sql.reply(replyID)
+            if (!reply) return res.status(400).send("Invalid replyID")
+            await sql.insertReplyReport(req.session.username, Number(replyID), reason)
+            res.status(200).send("Success")
+        } catch (e) {
+            console.log(e)
+            res.status(400).send("Bad request")
+        }
+    })
+
+    app.post("/api/thread/report/fulfill", threadUpdateLimiter, async (req: Request, res: Response) => {
+        try {
+            const {reportID} = req.body
+            if (!serverFunctions.validateCSRF(req)) return res.status(400).send("Bad CSRF token")
+            if (!reportID) return res.status(400).send("Bad reportID")
+            if (req.session.role !== "admin" && req.session.role !== "mod") return res.status(403).end()
+            await sql.deleteThreadReport(Number(reportID))
+            res.status(200).send("Success")
+        } catch (e) {
+            console.log(e)
+            res.status(400).send("Bad request") 
+        }
+    })
+
+    app.post("/api/reply/report/fulfill", threadUpdateLimiter, async (req: Request, res: Response) => {
+        try {
+            const {reportID} = req.body
+            if (!serverFunctions.validateCSRF(req)) return res.status(400).send("Bad CSRF token")
+            if (!reportID) return res.status(400).send("Bad threadID")
+            if (req.session.role !== "admin" && req.session.role !== "mod") return res.status(403).end()
+            await sql.deleteReplyReport(Number(reportID))
+            res.status(200).send("Success")
+        } catch (e) {
+            console.log(e)
+            res.status(400).send("Bad request") 
         }
     })
 }

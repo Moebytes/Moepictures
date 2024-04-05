@@ -360,11 +360,11 @@ const CharactersPage: React.FunctionComponent = (props) => {
             if (visible[i].fake) continue
             if (visible[i].tag === "original") continue
             if (visible[i].tag === "unknown-character") continue
-            jsx.push(<CharacterRow character={visible[i]}/>)
+            jsx.push(<CharacterRow key={visible[i].tag} character={visible[i]}/>)
         }
         if (!scroll) {
             jsx.push(
-                <div className="page-container">
+                <div key="page-numbers" className="page-container">
                     {charactersPage <= 1 ? null : <button className="page-button" onClick={firstPage}>{"<<"}</button>}
                     {charactersPage <= 1 ? null : <button className="page-button" onClick={previousPage}>{"<"}</button>}
                     {generatePageButtonsJSX()}

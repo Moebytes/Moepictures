@@ -360,11 +360,11 @@ const SeriesPage: React.FunctionComponent = (props) => {
             if (visible[i].fake) continue
             if (visible[i].tag === "no-series") continue
             if (visible[i].tag === "unknown-series") continue
-            jsx.push(<SeriesRow series={visible[i]}/>)
+            jsx.push(<SeriesRow key={visible[i].tag} series={visible[i]}/>)
         }
         if (!scroll) {
             jsx.push(
-                <div className="page-container">
+                <div key="page-numbers" className="page-container">
                     {seriesPage <= 1 ? null : <button className="page-button" onClick={firstPage}>{"<<"}</button>}
                     {seriesPage <= 1 ? null : <button className="page-button" onClick={previousPage}>{"<"}</button>}
                     {generatePageButtonsJSX()}

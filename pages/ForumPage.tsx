@@ -374,11 +374,11 @@ const ForumPage: React.FunctionComponent = (props) => {
         }
         for (let i = 0; i < visible.length; i++) {
             if (visible[i].fake) continue
-            jsx.push(<Thread thread={visible[i]} onDelete={updateThreads} onEdit={updateThreads}/>)
+            jsx.push(<Thread key={visible[i].threadID} thread={visible[i]} onDelete={updateThreads} onEdit={updateThreads}/>)
         }
         if (!scroll) {
             jsx.push(
-                <div className="page-container">
+                <div key="page-numbers" className="page-container">
                     {forumPage <= 1 ? null : <button className="page-button" onClick={firstPage}>{"<<"}</button>}
                     {forumPage <= 1 ? null : <button className="page-button" onClick={previousPage}>{"<"}</button>}
                     {generatePageButtonsJSX()}

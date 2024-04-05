@@ -358,11 +358,11 @@ const ArtistsPage: React.FunctionComponent = (props) => {
         for (let i = 0; i < visible.length; i++) {
             if (visible[i].fake) continue
             if (visible[i].tag === "unknown-artist") continue
-            jsx.push(<ArtistRow artist={visible[i]}/>)
+            jsx.push(<ArtistRow key={visible[i].tag} artist={visible[i]}/>)
         }
         if (!scroll) {
             jsx.push(
-                <div className="page-container">
+                <div key="page-numbers" className="page-container">
                     {artistsPage <= 1 ? null : <button className="page-button" onClick={firstPage}>{"<<"}</button>}
                     {artistsPage <= 1 ? null : <button className="page-button" onClick={previousPage}>{"<"}</button>}
                     {generatePageButtonsJSX()}

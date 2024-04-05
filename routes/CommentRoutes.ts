@@ -7,13 +7,25 @@ import serverFunctions from "../structures/ServerFunctions"
 
 const commentLimiter = rateLimit({
 	windowMs: 5 * 60 * 1000,
-	max: 1000,
+	max: 300,
 	message: "Too many requests, try again later.",
 	standardHeaders: true,
 	legacyHeaders: false
 })
 
 const CommentRoutes = (app: Express) => {
+    app.get("/api/comment", commentLimiter, async (req: Request, res: Response) => {
+        try {
+            const commentID = req.query.commentID as string
+            if (!commentID) return res.status(400).send("Bad commentID")
+            const result = await sql.comment(Number(commentID))
+            res.status(200).json(result)
+        } catch (e) {
+            console.log(e)
+            res.status(400).send("Bad request") 
+        }
+    })
+
     app.post("/api/comment/create", commentLimiter, async (req: Request, res: Response) => {
         try {
             const {comment, postID} = req.body
@@ -98,13 +110,13 @@ const CommentRoutes = (app: Express) => {
         }
     })
 
-    app.post("/api/comment/report/request/fulfill", commentLimiter, async (req: Request, res: Response) => {
+    app.post("/api/comment/report/fulfill", commentLimiter, async (req: Request, res: Response) => {
         try {
-            const {username, commentID} = req.body
+            const {reportID} = req.body
             if (!serverFunctions.validateCSRF(req)) return res.status(400).send("Bad CSRF token")
-            if (!username || !commentID) return res.status(400).send("Bad username or comment ID")
+            if (!reportID) return res.status(400).send("Bad reportID")
             if (req.session.role !== "admin" && req.session.role !== "mod") return res.status(403).end()
-            await sql.deleteCommentReport(username, commentID)
+            await sql.deleteCommentReport(Number(reportID))
             res.status(200).send("Success")
         } catch (e) {
             console.log(e)

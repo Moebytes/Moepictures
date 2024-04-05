@@ -489,11 +489,11 @@ const ImageGrid: React.FunctionComponent<Props> = (props) => {
             if (!image) continue
             const images = post.images.map((i: any) => functions.getImageLink(i.type, post.postID, i.order, i.filename))
             if (post.type === "model") {
-                jsx.push(<GridModel ref={postsRef[i]} reupdate={() => setReupdateFlag(true)} key={post.postID} id={post.postID} model={functions.getThumbnailLink(image.type, post.postID, image.order, image.filename, sizeType)} post={post}/>)
+                jsx.push(<GridModel key={post.postID} ref={postsRef[i]} reupdate={() => setReupdateFlag(true)} id={post.postID} model={functions.getThumbnailLink(image.type, post.postID, image.order, image.filename, sizeType)} post={post}/>)
             } else if (post.type === "audio") {
-                jsx.push(<GridSong ref={postsRef[i]} reupdate={() => setReupdateFlag(true)} key={post.postID} id={post.postID} audio={functions.getThumbnailLink(image.type, post.postID, image.order, image.filename, sizeType)} post={post}/>)
+                jsx.push(<GridSong key={post.postID} ref={postsRef[i]} reupdate={() => setReupdateFlag(true)} id={post.postID} audio={functions.getThumbnailLink(image.type, post.postID, image.order, image.filename, sizeType)} post={post}/>)
             } else {
-                jsx.push(<GridImage ref={postsRef[i]} reupdate={() => setReupdateFlag(true)} key={post.postID} id={post.postID} img={functions.getThumbnailLink(image.type, post.postID, image.order, image.filename, sizeType)} comicPages={post.type === "comic" ? images : null} post={post}/>)
+                jsx.push(<GridImage key={post.postID} ref={postsRef[i]} reupdate={() => setReupdateFlag(true)} id={post.postID} img={functions.getThumbnailLink(image.type, post.postID, image.order, image.filename, sizeType)} comicPages={post.type === "comic" ? images : null} post={post}/>)
             }
         }
         if (!jsx.length && noResults) {
@@ -504,7 +504,7 @@ const ImageGrid: React.FunctionComponent<Props> = (props) => {
             )
         } else if (!scroll) {
             jsx.push(
-                <div className="page-container">
+                <div key="page-numbers" className="page-container">
                     {page <= 1 ? null : <button className="page-button" onClick={firstPage}>{"<<"}</button>}
                     {page <= 1 ? null : <button className="page-button" onClick={previousPage}>{"<"}</button>}
                     {generatePageButtonsJSX()}
