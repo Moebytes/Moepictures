@@ -203,17 +203,17 @@ const UploadPage: React.FunctionComponent = (props) => {
                     const zip = result?.mime === "application/zip"
                     if (jpg || png || webp || gif || mp4 || webm || mp3 || wav || glb || fbx || obj || zip) {
                         const MB = files[i].size / (1024*1024)
-                        const maxSize = jpg ? 5 :
-                                        png ? 10 :
+                        const maxSize = jpg ? 10 :
+                                        png ? 25 :
                                         webp ? 10 :
                                         mp3 ? 25 :
-                                        wav ? 25 :
-                                        gif ? 50 :
-                                        glb ? 50 :
-                                        fbx ? 50 :
-                                        obj ? 50 :
-                                        mp4 ? 100 :
-                                        webm ? 100 : 100
+                                        wav ? 50 :
+                                        gif ? 100 :
+                                        glb ? 100 :
+                                        fbx ? 100 :
+                                        obj ? 100 :
+                                        mp4 ? 300 :
+                                        webm ? 300 : 300
                         if (MB <= maxSize) {
                             if (zip) {
                                 const reader = new JSZip()

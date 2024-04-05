@@ -83,7 +83,7 @@ const DeletePostHistoryDialog: React.FunctionComponent = (props) => {
                             <span className="deleteposthistory-dialog-title">Delete Post History</span>
                         </div>
                         <div className="deleteposthistory-dialog-row">
-                            <span className="deleteposthistory-dialog-text">Are you sure that you want to delete this history state?</span>
+                            <span className="deleteposthistory-dialog-text">Do you want to delete this history state?</span>
                         </div>
                         <div className="deleteposthistory-dialog-row">
                             <button onClick={() => click("reject")} className="download-button">{"No"}</button>

@@ -600,23 +600,6 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
         if (newMode) setTranslationDrawingEnabled(true)
     }
 
-    if (mobile) return (
-        <>
-        <SearchSuggestions active={suggestionsActive} sticky={true}/>
-        <div className={`mobile-sidebar ${relative ? "mobile-sidebar-relative" : ""} ${mobileScrolling ? "hide-mobile-sidebar" : ""}`}>
-            <div className="mobile-search-container">
-                <input className="mobile-search" type="search" spellCheck="false" value={search} onChange={(event) => setSearch(event.target.value)} onKeyDown={(event) => event.key === "Enter" ? triggerSearch() : null} onFocus={(event) => setSuggestionsActive(true)} onBlur={() => setSuggestionsActive(false)}/>
-                <img style={{height: "40px", filter: getFilterSearch()}} className="search-icon" src={getSearchIcon()} onClick={() => triggerSearch()}  onMouseEnter={() => setSearchIconHover(true)} onMouseLeave={() => setSearchIconHover(false)}/>
-                <label style={{display: "flex", width: "max-content", height: "max-content"}} htmlFor="image-search">
-                    <img style={{height: "40px", filter: getFilterSearch()}} className="search-image-icon" src={getSearchImageIcon()} onMouseEnter={() => setSearchImageIconHover(true)} onMouseLeave={() => setSearchImageIconHover(false)}/>
-                </label>
-                <input id="image-search" type="file" onChange={(event) => imageSearch(event)}/>
-                <img style={{height: "40px", filter: getFilterRandom()}} className="random-mobile" src={getRandomMobileIcon()} onClick={randomSearch} onMouseEnter={() => setRandomMobileIconHover(true)} onMouseLeave={() => setRandomMobileIconHover(false)}/>
-            </div>
-        </div>
-        </>
-    )
-
     const generateUsernameJSX = (type?: string) => {
         let username = type === "uploader" ? props.post.uploader : props.post.updater 
         const role = type === "uploader" ? uploaderRole : updaterRole
@@ -721,6 +704,23 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
     const toggleAutoSearch = async () => {
         setAutoSearch((prev: boolean) => !prev)
     }
+
+    if (mobile) return (
+        <>
+        <SearchSuggestions active={suggestionsActive} sticky={true}/>
+        <div className={`mobile-sidebar ${relative ? "mobile-sidebar-relative" : ""} ${mobileScrolling ? "hide-mobile-sidebar" : ""}`}>
+            <div className="mobile-search-container">
+                <input className="mobile-search" type="search" spellCheck="false" value={search} onChange={(event) => setSearch(event.target.value)} onKeyDown={(event) => event.key === "Enter" ? triggerSearch() : null} onFocus={(event) => setSuggestionsActive(true)} onBlur={() => setSuggestionsActive(false)}/>
+                <img style={{height: "40px", filter: getFilterSearch()}} className="search-icon" src={getSearchIcon()} onClick={() => triggerSearch()}  onMouseEnter={() => setSearchIconHover(true)} onMouseLeave={() => setSearchIconHover(false)}/>
+                <label style={{display: "flex", width: "max-content", height: "max-content"}} htmlFor="image-search">
+                    <img style={{height: "40px", filter: getFilterSearch()}} className="search-image-icon" src={getSearchImageIcon()} onMouseEnter={() => setSearchImageIconHover(true)} onMouseLeave={() => setSearchImageIconHover(false)}/>
+                </label>
+                <input id="image-search" type="file" onChange={(event) => imageSearch(event)}/>
+                <img style={{height: "40px", filter: getFilterSearch()}} className="random-mobile" src={getRandomMobileIcon()} onClick={randomSearch} onMouseEnter={() => setRandomMobileIconHover(true)} onMouseLeave={() => setRandomMobileIconHover(false)}/>
+            </div>
+        </div>
+        </>
+    )
 
     return (
         <>

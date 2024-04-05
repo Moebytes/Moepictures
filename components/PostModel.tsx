@@ -393,7 +393,7 @@ const PostModel: React.FunctionComponent<Props> = (props) => {
     const handleKeydown = (event: any) => {
         const key = event.keyCode
         const value = String.fromCharCode((96 <= key && key <= 105) ? key - 48 : key).toLowerCase()
-        if (!(event.target instanceof HTMLTextAreaElement) && !(event.target instanceof HTMLInputElement)) {
+        if (!(event.target instanceof HTMLTextAreaElement) && !(event.target instanceof HTMLInputElement) && !(event.target.classList.contains("quickedit-textarea"))) {
             if (value === "f") {
                 if (!props.noKeydown) fullscreen()
             }

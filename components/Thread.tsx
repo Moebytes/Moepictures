@@ -6,7 +6,8 @@ import {HashLink as Link} from "react-router-hash-link"
 import functions from "../structures/Functions"
 import adminCrown from "../assets/icons/admin-crown.png"
 import modCrown from "../assets/icons/mod-crown.png"
-import "./styles/forumthread.less"
+import favicon from "../assets/icons/favicon.png"
+import "./styles/thread.less"
 import sticky from "../assets/icons/sticky.png"
 import lock from "../assets/icons/lock.png"
 import axios from "axios"
@@ -18,7 +19,7 @@ interface Props {
     titlePage?: boolean
 }
 
-const ForumThread: React.FunctionComponent<Props> = (props) => {
+const Thread: React.FunctionComponent<Props> = (props) => {
     const {theme, setTheme} = useContext(ThemeContext)
     const {siteHue, setSiteHue} = useContext(SiteHueContext)
     const {siteSaturation, setSiteSaturation} = useContext(SiteSaturationContext)
@@ -34,6 +35,8 @@ const ForumThread: React.FunctionComponent<Props> = (props) => {
     const [creatorImg, setCreatorImg] = useState("")
     const [updaterImgPost, setUpdaterImgPost] = useState("")
     const [creatorImgPost, setCreatorImgPost] = useState("")
+    const [creatorDefaultIcon, setCreatorDefaultIcon] = useState(false)
+    const [updaterDefaultIcon, setUpdaterDefaultIcon] = useState(false)
     const history = useHistory()
 
     const getFilter = () => {
@@ -45,6 +48,7 @@ const ForumThread: React.FunctionComponent<Props> = (props) => {
         if (user?.role) setUpdaterRole(user.role)
         if (user?.image) setUpdaterImg(functions.getTagLink("pfp", user.image))
         if (user?.imagePost) setUpdaterImgPost(user.imagePost)
+        setUpdaterDefaultIcon(user?.image ? false : true)
     }
 
     const updateCreatorRole = async () => {
@@ -62,10 +66,13 @@ const ForumThread: React.FunctionComponent<Props> = (props) => {
                 setCreatorImgPost(user.imagePost)
                 setUpdaterImgPost(user.imagePost)
             }
+            setCreatorDefaultIcon(user?.image ? false : true)
+            setUpdaterDefaultIcon(user?.image ? false : true)
         } else {
             if (user?.role) setCreatorRole(user.role)
             if (user?.image) setCreatorImg(functions.getTagLink("pfp", user.image))
             if (user?.imagePost) setCreatorImgPost(user.imagePost)
+            setCreatorDefaultIcon(user?.image ? false : true)
             updateUpdaterRole()
         }
     }
@@ -84,6 +91,14 @@ const ForumThread: React.FunctionComponent<Props> = (props) => {
         }
     }
 
+    const getCreatorPFP = () => {
+        if (creatorImg) {
+            return creatorImg
+        } else {
+            return favicon
+        }
+    }
+
     const creatorPage = (event: React.MouseEvent) => {
         if (event.ctrlKey || event.metaKey || event.button === 1) {
             window.open(`/user/${props.thread.creator}`, "_blank")
@@ -99,6 +114,14 @@ const ForumThread: React.FunctionComponent<Props> = (props) => {
             window.open(`/post/${creatorImgPost}`, "_blank")
         } else {
             history.push(`/post/${creatorImgPost}`)
+        }
+    }
+
+    const getUpdaterPFP = () => {
+        if (updaterImg) {
+            return updaterImg
+        } else {
+            return favicon
         }
     }
 
@@ -123,25 +146,25 @@ const ForumThread: React.FunctionComponent<Props> = (props) => {
     const generateCreatorJSX = () => {
         if (creatorRole === "admin") {
             return (
-                <div className="forum-thread-username-container" onClick={creatorPage} onAuxClick={creatorPage}>
-                    {creatorImg ? <img draggable={false} src={creatorImg} className="forum-thread-user-img" onClick={creatorImgClick} onAuxClick={creatorImgClick}/> : null}
-                    <span className="forum-thread-user-text admin-color">{functions.toProperCase(props.thread.creator)}</span>
-                    <img className="forum-thread-user-label" src={adminCrown}/>
+                <div className="thread-username-container" onClick={creatorPage} onAuxClick={creatorPage}>
+                    <img draggable={false} src={getCreatorPFP()} className="thread-user-img" onClick={creatorImgClick} onAuxClick={creatorImgClick} style={{filter: creatorDefaultIcon ? getFilter() : ""}}/>
+                    <span className="thread-user-text admin-color">{functions.toProperCase(props.thread.creator)}</span>
+                    <img className="thread-user-label" src={adminCrown}/>
                 </div>
             )
         } else if (creatorRole === "mod") {
             return (
-                <div className="forum-thread-username-container" onClick={creatorPage} onAuxClick={creatorPage}>
-                    {creatorImg ? <img draggable={false} src={creatorImg} className="forum-thread-user-img" onClick={creatorImgClick} onAuxClick={creatorImgClick}/> : null}
-                    <span className="forum-thread-user-text mod-color">{functions.toProperCase(props.thread.creator)}</span>
-                    <img className="forum-thread-user-label" src={modCrown}/>
+                <div className="thread-username-container" onClick={creatorPage} onAuxClick={creatorPage}>
+                    <img draggable={false} src={getCreatorPFP()} className="thread-user-img" onClick={creatorImgClick} onAuxClick={creatorImgClick} style={{filter: creatorDefaultIcon ? getFilter() : ""}}/>
+                    <span className="thread-user-text mod-color">{functions.toProperCase(props.thread.creator)}</span>
+                    <img className="thread-user-label" src={modCrown}/>
                 </div>
             )
         }
         return (
-            <div className="forum-thread-username-container" onClick={creatorPage} onAuxClick={creatorPage}>
-                {creatorImg ? <img draggable={false} src={creatorImg} className="forum-thread-user-img" onClick={creatorImgClick} onAuxClick={creatorImgClick}/> : null}
-                <span className="forum-thread-user-text" onClick={creatorPage} onAuxClick={creatorPage}>{functions.toProperCase(props.thread.creator)}</span>
+            <div className="thread-username-container" onClick={creatorPage} onAuxClick={creatorPage}>
+                <img draggable={false} src={getCreatorPFP()} className="thread-user-img" onClick={creatorImgClick} onAuxClick={creatorImgClick} style={{filter: creatorDefaultIcon ? getFilter() : ""}}/>
+                <span className="thread-user-text" onClick={creatorPage} onAuxClick={creatorPage}>{functions.toProperCase(props.thread.creator)}</span>
             </div>
         )
     }
@@ -149,50 +172,50 @@ const ForumThread: React.FunctionComponent<Props> = (props) => {
     const generateUpdaterJSX = () => {
         if (updaterRole === "admin") {
             return (
-                <div className="forum-thread-username-container" onClick={(event) => updaterPage(event)} onAuxClick={(event) => updaterPage(event)}>
-                    {updaterImg ? <img draggable={false} src={updaterImg} className="forum-thread-user-img" onClick={updaterImgClick} onAuxClick={updaterImgClick}/> : null}
-                    <span className="forum-thread-user-text admin-color">{functions.toProperCase(props.thread.updater)}</span>
-                    <img className="forum-thread-user-label" src={adminCrown}/>
+                <div className="thread-username-container" onClick={(event) => updaterPage(event)} onAuxClick={(event) => updaterPage(event)}>
+                    <img draggable={false} src={getUpdaterPFP()} className="thread-user-img" onClick={updaterImgClick} onAuxClick={updaterImgClick} style={{filter: updaterDefaultIcon ? getFilter() : ""}}/>
+                    <span className="thread-user-text admin-color">{functions.toProperCase(props.thread.updater)}</span>
+                    <img className="thread-user-label" src={adminCrown}/>
                 </div>
             )
         } else if (updaterRole === "mod") {
             return (
-                <div className="forum-thread-username-container" onClick={(event) => updaterPage(event)} onAuxClick={(event) => updaterPage(event)}>
-                    {updaterImg ? <img draggable={false} src={updaterImg} className="forum-thread-user-img" onClick={updaterImgClick} onAuxClick={updaterImgClick}/> : null}
-                    <span className="forum-thread-user-text mod-color">{functions.toProperCase(props.thread.updater)}</span>
-                    <img className="forum-thread-user-label" src={modCrown}/>
+                <div className="thread-username-container" onClick={(event) => updaterPage(event)} onAuxClick={(event) => updaterPage(event)}>
+                <img draggable={false} src={getUpdaterPFP()} className="thread-user-img" onClick={updaterImgClick} onAuxClick={updaterImgClick} style={{filter: updaterDefaultIcon ? getFilter() : ""}}/>
+                    <span className="thread-user-text mod-color">{functions.toProperCase(props.thread.updater)}</span>
+                    <img className="thread-user-label" src={modCrown}/>
                 </div>
             )
         }
         return (
-            <div className="forum-thread-username-container" onClick={(event) => updaterPage(event)} onAuxClick={(event) => updaterPage(event)}>
-                {updaterImg ? <img draggable={false} src={updaterImg} className="forum-thread-user-img" onClick={updaterImgClick} onAuxClick={updaterImgClick}/> : null}
-                <span className="forum-thread-user-text" onClick={(event) => updaterPage(event)} onAuxClick={(event) => updaterPage(event)}>{functions.toProperCase(props.thread.updater)}</span>
+            <div className="thread-username-container" onClick={(event) => updaterPage(event)} onAuxClick={(event) => updaterPage(event)}>
+                <img draggable={false} src={getUpdaterPFP()} className="thread-user-img" onClick={updaterImgClick} onAuxClick={updaterImgClick} style={{filter: updaterDefaultIcon ? getFilter() : ""}}/>
+                <span className="thread-user-text" onClick={(event) => updaterPage(event)} onAuxClick={(event) => updaterPage(event)}>{functions.toProperCase(props.thread.updater)}</span>
             </div>
         )
     }
 
     const dateTextJSX = () => {
         const targetDate = props.thread.updatedDate
-        return <span className="forum-thread-date-text">{functions.timeAgo(targetDate)}</span>
+        return <span className="thread-date-text">{functions.timeAgo(targetDate)}</span>
     }
 
     if (props.titlePage) {
         return (
-            <tr className="forum-thread-no-hover">
-                <div className="forum-thread-content-container">
-                    <td className="forum-thread-container">
-                        <div className="forum-thread-row" style={{width: "100%"}}>
-                            <span className="forum-thread-heading">Title</span>
+            <tr className="thread-no-hover">
+                <div className="thread-content-container">
+                    <td className="thread-container">
+                        <div className="thread-row" style={{width: "100%"}}>
+                            <span className="thread-heading">Title</span>
                         </div>
-                        <div className="forum-thread-row">
-                            <span className="forum-thread-heading">Created by</span>
-                        </div>
-                        <div className="forum-thread-row">
-                            <span className="forum-thread-heading">Updated by</span>
-                        </div>
-                        <div className="forum-thread-row">
-                            <span className="forum-thread-heading">Updated</span>
+                        {!mobile ? <div className="thread-row">
+                            <span className="thread-heading">Created by</span>
+                        </div> : null}
+                        {!mobile ? <div className="thread-row">
+                            <span className="thread-heading">Updated by</span>
+                        </div> : null}
+                        <div className="thread-row">
+                            <span className="thread-heading">Updated</span>
                         </div>
                     </td>
                 </div>
@@ -201,21 +224,21 @@ const ForumThread: React.FunctionComponent<Props> = (props) => {
     }
 
     return (
-        <tr className="forum-thread">
-            <div className="forum-thread-content-container">
-                <td className="forum-thread-container">
-                    <div className="forum-thread-row" style={{width: "100%"}}>
-                        {props.thread.sticky ? <img draggable={false} className="forum-thread-icon" src={sticky} style={{marginTop: "4px"}}/> : null}
-                        {props.thread.locked ? <img draggable={false} className="forum-thread-icon" src={lock}/> : null}
-                        <span className="forum-thread-title" onClick={threadPage} onAuxClick={threadPage}>{props.thread.title}</span>
+        <tr className="thread">
+            <div className="thread-content-container">
+                <td className="thread-container">
+                    <div className="thread-row" style={{width: "100%"}}>
+                        {props.thread.sticky ? <img draggable={false} className="thread-icon" src={sticky} style={{marginTop: "4px"}}/> : null}
+                        {props.thread.locked ? <img draggable={false} className="thread-icon" src={lock}/> : null}
+                        <span className="thread-title" onClick={threadPage} onAuxClick={threadPage}>{props.thread.title}</span>
                     </div>
-                    <div className="forum-thread-row">
+                    {!mobile ? <div className="thread-row">
                         {generateCreatorJSX()}
-                    </div>
-                    <div className="forum-thread-row">
+                    </div> : null}
+                    {!mobile ? <div className="thread-row">
                         {generateUpdaterJSX()}
-                    </div>
-                    <div className="forum-thread-row">
+                    </div> : null}
+                    <div className="thread-row">
                         {dateTextJSX()}
                     </div>
                 </td>
@@ -224,4 +247,4 @@ const ForumThread: React.FunctionComponent<Props> = (props) => {
     )
 }
 
-export default ForumThread
+export default Thread

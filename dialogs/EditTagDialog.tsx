@@ -125,32 +125,40 @@ const EditTagDialog: React.FunctionComponent = (props) => {
                 const jpg = result?.mime === "image/jpeg"
                 const png = result?.mime === "image/png"
                 const gif = result?.mime === "image/gif"
-                if (jpg || png || gif) {
-                    let url = URL.createObjectURL(file)
-                    let croppedURL = ""
-                    if (gif) {
-                        const gifData = await functions.extractGIFFrames(url)
-                        let frameArray = [] as any 
-                        let delayArray = [] as any
-                        for (let i = 0; i < gifData.length; i++) {
-                            const canvas = gifData[i].frame as HTMLCanvasElement
-                            const cropped = await functions.crop(canvas.toDataURL(), 1, true)
-                            frameArray.push(cropped)
-                            delayArray.push(gifData[i].delay)
+                const webp = result?.mime === "image/webp"
+                if (jpg || png || webp || gif) {
+                    const MB = file.size / (1024*1024)
+                    const maxSize = jpg ? 10 :
+                                    png ? 10 :
+                                    webp ? 10 :
+                                    gif ? 25 : 25
+                    if (MB <= maxSize) {
+                        let url = URL.createObjectURL(file)
+                        let croppedURL = ""
+                        if (gif) {
+                            const gifData = await functions.extractGIFFrames(url)
+                            let frameArray = [] as any 
+                            let delayArray = [] as any
+                            for (let i = 0; i < gifData.length; i++) {
+                                const canvas = gifData[i].frame as HTMLCanvasElement
+                                const cropped = await functions.crop(canvas.toDataURL(), 1, true)
+                                frameArray.push(cropped)
+                                delayArray.push(gifData[i].delay)
+                            }
+                            const firstURL = await functions.crop(gifData[0].frame.toDataURL(), 1)
+                            const {width, height} = await functions.imageDimensions(firstURL)
+                            const buffer = await functions.encodeGIF(frameArray, delayArray, width, height)
+                            const blob = new Blob([buffer])
+                            croppedURL = URL.createObjectURL(blob)
+                        } else {
+                            croppedURL = await functions.crop(url, 1)
                         }
-                        const firstURL = await functions.crop(gifData[0].frame.toDataURL(), 1)
-                        const {width, height} = await functions.imageDimensions(firstURL)
-                        const buffer = await functions.encodeGIF(frameArray, delayArray, width, height)
-                        const blob = new Blob([buffer])
-                        croppedURL = URL.createObjectURL(blob)
-                    } else {
-                        croppedURL = await functions.crop(url, 1)
+                        const arrayBuffer = await fetch(croppedURL).then((r) => r.arrayBuffer())
+                        bytes = new Uint8Array(arrayBuffer)
+                        const blob = new Blob([bytes])
+                        url = URL.createObjectURL(blob)
+                        setEditTagImage(url)
                     }
-                    const arrayBuffer = await fetch(croppedURL).then((r) => r.arrayBuffer())
-                    bytes = new Uint8Array(arrayBuffer)
-                    const blob = new Blob([bytes])
-                    url = URL.createObjectURL(blob)
-                    setEditTagImage(url)
                 }
                 resolve()
             }

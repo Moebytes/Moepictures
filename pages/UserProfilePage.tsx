@@ -127,7 +127,7 @@ const UserProfilePage: React.FunctionComponent = (props) => {
                 const webp = result?.mime === "image/webp"
                 if (jpg || png || gif || webp) {
                     const MB = file.size / (1024*1024)
-                    const maxSize = jpg ? 5 :
+                    const maxSize = jpg ? 10 :
                                     png ? 10 :
                                     webp ? 10 :
                                     gif ? 25 : 25
@@ -264,7 +264,7 @@ const UserProfilePage: React.FunctionComponent = (props) => {
             <div className="content">
                 <div className="userprofile">
                     <div className="userprofile-top-container">
-                        <img className="userprofile-img" src={userImg} onClick={userImgClick} onAuxClick={userImgClick}/>
+                        <img className="userprofile-img" src={userImg} onClick={userImgClick} onAuxClick={userImgClick} style={{filter: session.image ? "" : getFilter()}}/>
                         {generateUsernameJSX()}
                         {permissions.isStaff(session) && <>
                         <label htmlFor="upload-pfp" className="uploadpfp-label">

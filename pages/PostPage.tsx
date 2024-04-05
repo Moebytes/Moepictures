@@ -90,13 +90,19 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
         document.title = "Moebooru: Post"
         const savedPost = localStorage.getItem("savedPost")
         const savedTags = localStorage.getItem("savedTags")
-        const savedOrder = localStorage.getItem("order")
         if (savedPost) setPost(JSON.parse(savedPost))
         if (savedTags) setTagCategories(JSON.parse(savedTags))
-        if (savedOrder) setTimeout(() => {setOrder(Number(savedOrder))}, 500)
         if (!posts?.length) {
             const savedPosts = localStorage.getItem("savedPosts")
             if (savedPosts) setPosts(JSON.parse(savedPosts))
+        }
+        const onDOMLoaded = () => {
+            const savedOrder = localStorage.getItem("order")
+            if (savedOrder) setOrder(Number(savedOrder))
+        }
+        window.addEventListener("load", onDOMLoaded)
+        return () => {
+            window.removeEventListener("load", onDOMLoaded)
         }
     }, [])
 

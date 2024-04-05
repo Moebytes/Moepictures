@@ -42,6 +42,7 @@ import EditUnverifiedPostPage from "./pages/EditUnverifiedPostPage"
 import SetAvatarPage from "./pages/SetAvatarPage"
 import TranslationHistoryPage from "./pages/TranslationHistoryPage"
 import ForumPage from "./pages/ForumPage"
+import ForumThreadPage from "./pages/ForumThreadPage"
 import axios from "axios"
 import "./index.less"
 
@@ -258,6 +259,7 @@ const App: React.FunctionComponent = (props) => {
                         <Route exact path="/set-avatar/:id" render={(props) => <SetAvatarPage {...props}/>}></Route>
                         <Route exact path="/help"><HelpPage/></Route>
                         <Route exact path="/forum"><ForumPage/></Route>
+                        <Route exact path="/thread/:id" render={(props) => <ForumThreadPage {...props}/>}></Route>
                         <Route exact path="/change-username"><ChangeUsernamePage/></Route>
                         <Route exact path="/change-email"><ChangeEmailPage/></Route>
                         <Route exact path="/change-email-success"><ChangeEmailSuccessPage/></Route>

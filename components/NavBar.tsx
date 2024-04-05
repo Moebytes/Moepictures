@@ -13,10 +13,12 @@ import axios from "axios"
 import permissions from "../structures/Permissions"
 import functions from "../structures/Functions"
 import SearchSuggestions from "./SearchSuggestions"
+import scrollIcon from "../assets/icons/scroll.png"
+import pageIcon from "../assets/icons/page.png"
 import Slider from "react-slider"
 import {ThemeContext, HideNavbarContext, HideSortbarContext, HideSidebarContext, EnableDragContext,  HideMobileNavbarContext, MobileContext,
 RelativeContext, HideTitlebarContext, SearchContext, SearchFlagContext, SessionContext, SessionFlagContext, UserImgContext, SiteHueContext,
-SiteSaturationContext, SiteLightnessContext} from "../Context"
+SiteSaturationContext, SiteLightnessContext, ScrollContext} from "../Context"
 import "./styles/navbar.less"
 
 interface Props {
@@ -37,6 +39,7 @@ const NavBar: React.FunctionComponent<Props> = (props) => {
     const {relative, setRelative} = useContext(RelativeContext)
     const {search, setSearch} = useContext(SearchContext)
     const {searchFlag, setSearchFlag} = useContext(SearchFlagContext)
+    const {scroll, setScroll} = useContext(ScrollContext)
     const {session, setSession} = useContext(SessionContext)
     const {sessionFlag, setSessionFlag} = useContext(SessionFlagContext)
     const {userImg, setUserImg} = useContext(UserImgContext)
@@ -196,6 +199,42 @@ const NavBar: React.FunctionComponent<Props> = (props) => {
         if (mobile) setTimeout(() => forceUpdate(), 50)
     }, [mobile])
 
+    const resetFilters = () => {
+        setSiteHue(180)
+        setSiteSaturation(100)
+        setSiteLightness(50)
+    }
+
+    const getDropdownJSX = () => {
+        return (
+            <div className={`title-dropdown ${activeDropdown ? "" : "hide-title-dropdown"}`}>
+                <div className="title-dropdown-row">
+                    <span className="title-dropdown-text">Hue</span>
+                    <Slider className="title-dropdown-slider" trackClassName="title-dropdown-slider-track" thumbClassName="title-dropdown-slider-thumb" onChange={(value) => setSiteHue(value)} min={60} max={300} step={1} value={siteHue}/>
+                </div>
+                <div className="title-dropdown-row">
+                    <span className="title-dropdown-text">Saturation</span>
+                    <Slider className="title-dropdown-slider" trackClassName="title-dropdown-slider-track" thumbClassName="title-dropdown-slider-thumb" onChange={(value) => setSiteSaturation(value)} min={50} max={100} step={1} value={siteSaturation}/>
+                </div>
+                <div className="title-dropdown-row">
+                    <span className="title-dropdown-text">Lightness</span>
+                    <Slider className="title-dropdown-slider" trackClassName="title-dropdown-slider-track" thumbClassName="title-dropdown-slider-thumb" onChange={(value) => setSiteLightness(value)} min={45} max={55} step={1} value={siteLightness}/>
+                </div>
+                <div className="title-dropdown-row">
+                    <button className="title-dropdown-button" onClick={() => resetFilters()}>Reset</button>
+                </div>
+            </div>
+        )
+    }
+
+    const toggleScroll = () => {
+        setScroll((prev: boolean) => {
+            const newValue = !prev
+            localStorage.setItem("scroll", `${newValue}`)
+            return newValue
+        })
+    }
+
     if (mobile) {
         const getMobileMargin = () => {
             return hideMobileNavbar ? `-${document.querySelector(".mobile-navbar")?.clientHeight || 500}px` : "0px"
@@ -205,7 +244,7 @@ const NavBar: React.FunctionComponent<Props> = (props) => {
                 <div className="mobile-nav-text-container">
                     {session.username ? 
                     <div className="mobile-nav-user-container">
-                        <img className="mobile-nav-user-img" src={userImg}/>
+                        <img className="mobile-nav-user-img" src={userImg} style={{filter: session.image ? "" : getFilter()}}/>
                         {generateMobileUsernameJSX()}
                     </div> :
                     <span className="mobile-nav-text mobile-nav-user-text" onClick={() => {history.push("/login"); setHideMobileNavbar(true)}}>Login</span>}
@@ -215,6 +254,7 @@ const NavBar: React.FunctionComponent<Props> = (props) => {
                     <span className="mobile-nav-text" onClick={() => {history.push("/characters"); setHideMobileNavbar(true)}}>Characters</span>
                     <span className="mobile-nav-text" onClick={() => {history.push("/series"); setHideMobileNavbar(true)}}>Series</span>
                     <span className="mobile-nav-text" onClick={() => {history.push("/tags"); setHideMobileNavbar(true)}}>Tags</span>
+                    <span className="mobile-nav-text" onClick={() => {history.push("/forum"); setHideMobileNavbar(true)}}>Forum</span>
                     <span className="mobile-nav-text" onClick={() => {history.push("/help"); setHideMobileNavbar(true)}}>Help</span>
                     <span className="mobile-nav-text" onClick={() => {history.push("/terms"); setHideMobileNavbar(true)}}>Terms</span>
                     <span className="mobile-nav-text" onClick={() => {history.push("/contact"); setHideMobileNavbar(true)}}>Contact</span>
@@ -223,7 +263,9 @@ const NavBar: React.FunctionComponent<Props> = (props) => {
                     <img className="mobile-nav-color" src={eyedropper} onClick={colorChange} style={{filter: getFilter()}}/>
                     <img className="mobile-nav-color" src={light} onClick={lightChange} style={{filter: getFilter()}}/>
                     {permissions.isStaff(session) ? <img className="nav-color" src={crown} onClick={() => history.push("/mod-queue")} style={{filter: getFilter()}}/> : null}
+                    <img className="mobile-nav-color" src={scroll ? scrollIcon : pageIcon} onClick={toggleScroll} style={{filter: getFilter()}}/>
                 </div>
+                {getDropdownJSX()}
             </div>
         )
     } else {
@@ -243,12 +285,6 @@ const NavBar: React.FunctionComponent<Props> = (props) => {
             return rect.bottom + window.scrollY
         }
 
-        const resetFilters = () => {
-            setSiteHue(180)
-            setSiteSaturation(100)
-            setSiteLightness(50)
-        }
-
         return (
             <>
             <SearchSuggestions active={suggestionsActive && hideSidebar} width={200} x={getX()} y={getY()}/>
@@ -264,13 +300,13 @@ const NavBar: React.FunctionComponent<Props> = (props) => {
                         <span className="nav-mini-title-b">o</span>
                         <span className="nav-mini-title-a">r</span>
                         <span className="nav-mini-title-b">u</span>
-                        <img className="nav-mini-img" src={favicon} style={{filter: getFilter()}}/>
+                        {/* <img className="nav-mini-img" src={favicon} style={{filter: getFilter()}}/> */}
                     </Link>
                 : null}
                 <div className="nav-text-container">
                     {session.username ? 
                     <div className="nav-user-container" style={{marginRight: marginR}}>
-                        {!showMiniTitle || relative ? <img className="nav-user-img" src={userImg}/> : null}
+                        <img className="nav-user-img" src={userImg} style={{filter: session.image ? "" : getFilter()}}/>
                         {generateUsernameJSX()}
                     </div> :
                     <span style={{marginRight: marginR}} className="nav-text nav-user-text" onClick={() => history.push("/login")}>Login</span>}
@@ -292,23 +328,7 @@ const NavBar: React.FunctionComponent<Props> = (props) => {
                     <img className="nav-color" src={light} onClick={lightChange} style={{filter: getFilter()}}/>
                     {permissions.isStaff(session) ? <img className="nav-color" src={crown} onClick={() => history.push("/mod-queue")} style={{filter: getFilter()}}/> : null}
                 </div>
-                <div className={`title-dropdown ${activeDropdown ? "" : "hide-title-dropdown"}`}>
-                    <div className="title-dropdown-row">
-                        <span className="title-dropdown-text">Hue</span>
-                        <Slider className="title-dropdown-slider" trackClassName="title-dropdown-slider-track" thumbClassName="title-dropdown-slider-thumb" onChange={(value) => setSiteHue(value)} min={60} max={300} step={1} value={siteHue}/>
-                    </div>
-                    <div className="title-dropdown-row">
-                        <span className="title-dropdown-text">Saturation</span>
-                        <Slider className="title-dropdown-slider" trackClassName="title-dropdown-slider-track" thumbClassName="title-dropdown-slider-thumb" onChange={(value) => setSiteSaturation(value)} min={50} max={100} step={1} value={siteSaturation}/>
-                    </div>
-                    <div className="title-dropdown-row">
-                        <span className="title-dropdown-text">Lightness</span>
-                        <Slider className="title-dropdown-slider" trackClassName="title-dropdown-slider-track" thumbClassName="title-dropdown-slider-thumb" onChange={(value) => setSiteLightness(value)} min={45} max={55} step={1} value={siteLightness}/>
-                    </div>
-                    <div className="title-dropdown-row">
-                        <button className="title-dropdown-button" onClick={() => resetFilters()}>Reset</button>
-                    </div>
-                </div>
+                {getDropdownJSX()}
             </div>
             </>
         )

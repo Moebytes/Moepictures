@@ -100,7 +100,7 @@ const Carousel: React.FunctionComponent<Props> = (props) => {
             newVisibleImages.push(props.images[currentIndex])
             currentIndex++
         }
-        setVisibleImages(newVisibleImages)
+        setVisibleImages(functions.removeDuplicates(newVisibleImages))
         setVisibleIndex(currentIndex)
         const newImagesRef = newVisibleImages.map(() => React.createRef()) as any
         setImagesRef(newImagesRef) as any
@@ -446,8 +446,11 @@ const Carousel: React.FunctionComponent<Props> = (props) => {
         return jsx
     }
 
+    let maxWidth = props.marginLeft ? `calc(100vw - ${functions.sidebarWidth()}px - 120px - ${props.marginLeft}px)` : `calc(100vw - ${functions.sidebarWidth()}px - 120px)`
+    if (mobile) maxWidth = props.marginLeft ? `calc(100vw - 10px - ${props.marginLeft}px)` : `calc(100vw - 10px)`
+
     return (
-        <div className="carousel" ref={carouselRef} style={{maxWidth: props.marginLeft ? `calc(100vw - ${functions.sidebarWidth()}px - 120px - ${props.marginLeft}px)` : `calc(100vw - ${functions.sidebarWidth()}px - 120px)`, overflowX: trackPad ? "auto" : "hidden"}} onScroll={handleScroll}>
+        <div className="carousel" ref={carouselRef} style={{maxWidth, overflowX: trackPad ? "auto" : "hidden"}} onScroll={handleScroll}>
             <img className={`carousel-left ${showLeftArrow ? "arrow-visible" : ""}`} src={arrowLeft} style={{filter: getFilter()}} onMouseEnter={arrowLeftEnter} onMouseLeave={() => setShowLeftArrow(false)} onClick={arrowLeftClick}/>
             <div className="slider" ref={sliderRef} onMouseDown={handleMouseDown} onMouseMove={handleMouseMove} onMouseUp={handleMouseUp} onTouchStart={handleTouchStart} onTouchMove={handleTouchMove} onTouchEnd={handleTouchEnd}>
                 {generateJSX()}

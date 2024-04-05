@@ -1,6 +1,6 @@
 import React, {useContext, useEffect, useState} from "react"
 import {ThemeContext, HideSidebarContext, HideNavbarContext, HideTitlebarContext, SiteHueContext, SiteLightnessContext, SiteSaturationContext,
-SearchContext, SearchFlagContext, ImageTypeContext, RestrictTypeContext, StyleTypeContext, SortTypeContext} from "../Context"
+SearchContext, SearchFlagContext, ImageTypeContext, RestrictTypeContext, StyleTypeContext, SortTypeContext, MobileContext} from "../Context"
 import {HashLink as Link} from "react-router-hash-link"
 import backToTop from "../assets/icons/backtotop.png"
 import "./styles/footer.less"
@@ -10,6 +10,7 @@ interface Props {
 }
 
 const Footer: React.FunctionComponent<Props> = (props) => {
+    const {mobile, setMobile} = useContext(MobileContext)
     const {theme, setTheme} = useContext(ThemeContext)
     const {siteHue, setSiteHue} = useContext(SiteHueContext)
     const {siteSaturation, setSiteSaturation} = useContext(SiteSaturationContext)
@@ -56,9 +57,9 @@ const Footer: React.FunctionComponent<Props> = (props) => {
                     <span className="footer-title-a">r</span>
                     <span className="footer-title-b">u</span>
             </div>
-            <div className="footer-text-container">
+            {!mobile ? <div className="footer-text-container">
                 <span className="footer-text">- This is the bottom of the page -</span>
-            </div>
+            </div> : null}
             <div className="footer-back-to-top" onClick={() => goToTop()}>
                 <img className="footer-img" src={backToTop} style={{filter: getFilter()}}/>
                 <span className="footer-text">Back to top</span>

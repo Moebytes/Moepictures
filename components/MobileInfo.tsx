@@ -3,7 +3,7 @@ import {useHistory} from "react-router-dom"
 import {ThemeContext, HideNavbarContext, HideSortbarContext, EnableDragContext, MobileContext, UnverifiedPostsContext,
 RelativeContext, HideTitlebarContext, SearchContext, SearchFlagContext, PostsContext, ShowDeletePostDialogContext,
 TagsContext, RandomFlagContext, ImageSearchFlagContext, SessionContext, QuickEditIDContext, QuickEditUnverifiedContext,
-SiteHueContext, SiteLightnessContext, SiteSaturationContext} from "../Context"
+SiteHueContext, SiteLightnessContext, SiteSaturationContext, TranslationModeContext, TranslationDrawingEnabledContext} from "../Context"
 import {HashLink as Link} from "react-router-hash-link"
 import favicon from "../assets/icons/favicon.png"
 import setAvatar from "../assets/icons/setavatar.png"
@@ -21,7 +21,14 @@ import tagIcon from "../assets/icons/tag.png"
 import website from "../assets/icons/support.png"
 import pixiv from "../assets/icons/pixiv.png"
 import twitter from "../assets/icons/twitter.png"
+import deviantart from "../assets/icons/deviantart.png"
+import artstation from "../assets/icons/artstation.png"
 import fandom from "../assets/icons/fandom.png"
+import danbooru from "../assets/icons/danbooru.png"
+import gelbooru from "../assets/icons/gelbooru.png"
+import safebooru from "../assets/icons/safebooru.png"
+import yandere from "../assets/icons/yandere.png"
+import konachan from "../assets/icons/konachan.png"
 import functions from "../structures/Functions"
 import axios from "axios"
 import "./styles/mobileinfo.less"
@@ -63,6 +70,8 @@ const MobileInfo: React.FunctionComponent<Props> = (props) => {
     const [suggestionsActive, setSuggestionsActive] = useState(false)
     const {quickEditID, setQuickEditID} = useContext(QuickEditIDContext)
     const {quickEditUnverified, setQuickEditUnverified} = useContext(QuickEditUnverifiedContext)
+    const {translationMode, setTranslationMode} = useContext(TranslationModeContext)
+    const {translationDrawingEnabled, setTranslationDrawingEnabled} = useContext(TranslationDrawingEnabledContext)
     const history = useHistory()
 
     const getFilter = () => {
@@ -305,6 +314,60 @@ const MobileInfo: React.FunctionComponent<Props> = (props) => {
         setQuickEditID(props.post.postID)
     }
 
+    const generateMirrorsJSX = () => {
+        let jsx = [] as any
+        if (props.post.mirrors) {
+            if (props.post.mirrors.pixiv) {
+                jsx.push(<img className="sidebar-social" src={pixiv} onClick={() => window.open(props.post.mirrors.pixiv, "_blank")}/>)
+            }
+            if (props.post.mirrors.twitter) {
+                jsx.push(<img className="sidebar-social" src={twitter} onClick={() => window.open(props.post.mirrors.twitter, "_blank")}/>)
+            }
+            if (props.post.mirrors.deviantart) {
+                jsx.push(<img className="sidebar-social" src={deviantart} onClick={() => window.open(props.post.mirrors.deviantart, "_blank")}/>)
+            }
+            if (props.post.mirrors.artstation) {
+                jsx.push(<img className="sidebar-social" src={artstation} onClick={() => window.open(props.post.mirrors.artstation, "_blank")}/>)
+            }
+            if (props.post.mirrors.danbooru) {
+                jsx.push(<img className="sidebar-social" src={danbooru} onClick={() => window.open(props.post.mirrors.danbooru, "_blank")}/>)
+            }
+            if (props.post.mirrors.gelbooru) {
+                jsx.push(<img className="sidebar-social" src={gelbooru} onClick={() => window.open(props.post.mirrors.gelbooru, "_blank")}/>)
+            }
+            if (props.post.mirrors.safebooru) {
+                jsx.push(<img className="sidebar-social" src={safebooru} onClick={() => window.open(props.post.mirrors.safebooru, "_blank")}/>)
+            }
+            if (props.post.mirrors.yandere) {
+                jsx.push(<img className="sidebar-social" src={yandere} onClick={() => window.open(props.post.mirrors.yandere, "_blank")}/>)
+            }
+            if (props.post.mirrors.konachan) {
+                jsx.push(<img className="sidebar-social" src={konachan} onClick={() => window.open(props.post.mirrors.konachan, "_blank")}/>)
+            }
+        }
+        if (jsx.length) {
+            return (
+                <div className="mobileinfo-row">
+                    <span className="tag">Mirrors:</span>
+                    {jsx}
+                </div>
+            )
+        }
+        return null
+    }
+
+    const triggerAddTranslation = () => {
+        window.scrollTo(0, 0)
+        const newMode = !translationMode
+        setTranslationMode(newMode)
+        if (newMode) setTranslationDrawingEnabled(true)
+    }
+
+    const postHistory = () => {
+        window.scrollTo(0, 0)
+        history.push(`/post/history/${props.post.postID}`)
+    }
+
     const generateUsernameJSX = (type?: string) => {
         let username = type === "uploader" ? props.post.uploader : props.post.updater 
         const role = type === "uploader" ? uploaderRole : updaterRole
@@ -398,6 +461,7 @@ const MobileInfo: React.FunctionComponent<Props> = (props) => {
                             <span className="tag">Bookmarks:</span>
                             <span className="tag-alt">{props.post.bookmarks ? props.post.bookmarks : "?"}</span>
                         </div>
+                        {generateMirrorsJSX()}
                     </div> </>
                 : null}
 
@@ -498,7 +562,7 @@ const MobileInfo: React.FunctionComponent<Props> = (props) => {
                             </span>
                         </div>
                         <div className="mobileinfo-row">
-                            <span className="tag-hover">
+                            <span className="tag-hover" onClick={triggerAddTranslation}>
                                 <img className="mobileinfo-icon" src={addTranslation} style={{filter: getFilter()}}/>
                                 <span className="tag">Add Translation</span>
                             </span>
@@ -531,7 +595,7 @@ const MobileInfo: React.FunctionComponent<Props> = (props) => {
                         </div>
                         </> : null}
                         <div className="mobileinfo-row">
-                            <span className="tag-hover">
+                            <span className="tag-hover" onClick={postHistory}>
                                 <img className="mobileinfo-icon" src={historyIcon}/>
                                 <span className="tag-red">History</span>
                             </span>

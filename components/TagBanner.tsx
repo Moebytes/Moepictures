@@ -7,6 +7,7 @@ import functions from "../structures/Functions"
 import "./styles/tagbanner.less"
 import axios from "axios"
 
+let startX = 0
 let deltaCounter = 0
 let lastDeltaY = 0
 
@@ -73,6 +74,35 @@ const TagBanner: React.FunctionComponent = (props) => {
         if (marginLeft < -maxScrollLeft) marginLeft = -maxScrollLeft
         containerRef.current.style.marginLeft = `${marginLeft}px`
         setMarginLeft(marginLeft)
+    }
+
+    const handleTouchStart = (event: React.TouchEvent) => {
+        if (!event.touches.length) return
+        setDragging(true)
+        startX = event.touches[0].pageX
+    }
+
+    const handleTouchMove = (event: React.TouchEvent) => {
+        if (!containerRef.current) return
+        if (!event.touches.length) return
+        if (!dragging) return
+        let marginLeft = parseInt(containerRef.current.style.marginLeft)
+        if (Number.isNaN(marginLeft)) marginLeft = 0
+        if (event.touches[0].pageX < startX) {
+            marginLeft -= 10
+        } else if (event.touches[0].pageX > startX) {
+            marginLeft += 10
+        }
+        if (marginLeft > 0) marginLeft = 0
+        const maxScrollLeft = containerRef.current.scrollWidth - containerRef.current.clientWidth
+        if (marginLeft < -maxScrollLeft) marginLeft = -maxScrollLeft
+        containerRef.current.style.marginLeft = `${marginLeft}px`
+        setMarginLeft(marginLeft)
+        startX = event.touches[0].pageX
+    }
+
+    const handleTouchEnd = (event: React.TouchEvent) => {
+        setDragging(false)
     }
 
     const getPageAmount = () => {
@@ -149,7 +179,8 @@ const TagBanner: React.FunctionComponent = (props) => {
     }
 
     return (
-        <div className="tagbanner" ref={containerRef} style={{width: getWidth(), overflowX: trackPad ? "auto" : "hidden"}}>
+        <div className="tagbanner" ref={containerRef} style={{width: getWidth(), overflowX: trackPad ? "auto" : "hidden"}}
+        onTouchStart={handleTouchStart} onTouchMove={handleTouchMove} onTouchEnd={handleTouchEnd}>
             {bannerTagJSX()}
         </div>
     )

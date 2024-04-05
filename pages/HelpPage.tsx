@@ -258,13 +258,13 @@ const HelpPage: React.FunctionComponent = (props) => {
                         comments section: <br/>
                         <span className="help-alt">
                         ⇾ No spam, jibberish, or extremely off-topic comments. <br/>
-                        ⇾ No flaming at each other. <br/>
+                        ⇾ No excessive arguments. <br/>
                         ⇾ No otherwise distasteful comments. <br/>
                         </span>
 
                         Quotes are supported and we have a syntax that makes it easy to do quotes. <br/>
                         <span className="help-alt">
-                        &gt;&gt;&gt; User said:<br/>
+                        &gt;&gt;&gt;[id] User said:<br/>
                         &gt; Comment <br/>
                         </span>
                         Nested quoting is not supported yet. If you see a comment that is breaking the rules, please report it.

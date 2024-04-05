@@ -83,7 +83,7 @@ const DeleteTranslationHistoryDialog: React.FunctionComponent = (props) => {
                             <span className="delete-translation-history-dialog-title">Delete Translation History</span>
                         </div>
                         <div className="delete-translation-history-dialog-row">
-                            <span className="delete-translation-history-dialog-text">Are you sure that you want to delete this history state?</span>
+                            <span className="delete-translation-history-dialog-text">Do you want to delete this history state?</span>
                         </div>
                         <div className="delete-translation-history-dialog-row">
                             <button onClick={() => click("reject")} className="download-button">{"No"}</button>

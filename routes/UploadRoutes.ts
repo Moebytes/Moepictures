@@ -45,13 +45,13 @@ const altPath = (imagePath: string) => {
   return newDest
 }
 
-const validImages = (images: any[]) => {
+const validImages = (images: any[], skipMBCheck?: boolean) => {
   if (!images.length) return false
   for (let i = 0; i < images.length; i++) {
     if (functions.isModel(images[i].link)) {
       const MB = images[i].size / (1024*1024)
-      const maxSize = 50
-      if (MB <= maxSize) continue
+      const maxSize = 100
+      if (!skipMBCheck && MB <= maxSize) continue
       return false
     }
     const result = fileType(images[i].bytes)?.[0]
@@ -65,17 +65,17 @@ const validImages = (images: any[]) => {
     const webm = (path.extname(images[i].link) === ".webm" && result?.typename === "mkv")
     if (jpg || png || webp || gif || mp4 || webm || mp3 || wav) {
       const MB = images[i].size / (1024*1024)
-      const maxSize = jpg ? 5 :
+      const maxSize = jpg ? 10 :
                       webp ? 10 :
-                      png ? 10 :
+                      png ? 25 :
                       mp3 ? 25 :
-                      wav ? 25 :
-                      gif ? 50 :
-                      mp4 ? 100 :
-                      webm ? 100 : 100
+                      wav ? 50 :
+                      gif ? 100 :
+                      mp4 ? 300 :
+                      webm ? 300 : 300
       let type = result.typename === "mkv" ? "webm" : result.typename
       if (images[i].ext !== type) return false
-      if (MB <= maxSize) continue
+      if (!skipMBCheck && MB <= maxSize) continue
     }
     return false
   }
@@ -86,7 +86,7 @@ const validImages = (images: any[]) => {
 const CreateRoutes = (app: Express) => {
     app.post("/api/post/upload", modLimiter, async (req: Request, res: Response, next: NextFunction) => {
       try {
-        if (!serverFunctions.validateCSRF(req)) return res.status(400).send("Bad request")
+        if (!serverFunctions.validateCSRF(req)) return res.status(400).send("Bad CSRF token")
         const images = req.body.images 
         let type = req.body.type 
         const restrict = req.body.restrict 
@@ -101,7 +101,7 @@ const CreateRoutes = (app: Express) => {
         let unverifiedID = req.body.unverifiedID
         const noImageUpdate = req.body.noImageUpdate
 
-        if (!req.session.username) return res.status(400).send("Not logged in")
+        if (!req.session.username) return res.status(401).send("Unauthorized")
         if (req.session.role !== "admin" && req.session.role !== "mod") return res.status(403).end()
 
         if (!artists?.[0]?.tag) artists = [{tag: "unknown-artist"}]
@@ -134,9 +134,10 @@ const CreateRoutes = (app: Express) => {
 
         tags = tags.filter(Boolean).map((t: string) => t.toLowerCase().replace(/[\n\r\s]+/g, "-"))
 
-        if (!validImages(images)) return res.status(400).send("Invalid images")
+        let skipMBCheck = req.session.role === "admin" || req.session.role === "mod" ? true : false
+        if (!validImages(images, skipMBCheck)) return res.status(400).send("Invalid images")
         const totalMB = images.reduce((acc: any, obj: any) => acc + obj.size, 0) / (1024*1024)
-        if (totalMB > 200) return res.status(400).send("Invalid size")
+        if (!skipMBCheck && totalMB > 200) return res.status(400).send("Invalid size")
         if (!functions.validType(type)) return res.status(400).send("Invalid type")
         if (!functions.validRestrict(restrict)) return res.status(400).send("Invalid restrict")
         if (!functions.validStyle(style)) return res.status(400).send("Invalid style")
@@ -301,6 +302,7 @@ const CreateRoutes = (app: Express) => {
 
     app.put("/api/post/edit", editLimiter, async (req: Request, res: Response, next: NextFunction) => {
       try {
+        if (!serverFunctions.validateCSRF(req)) return res.status(400).send("Bad CSRF token")
         const postID = Number(req.body.postID)
         const images = req.body.images 
         let type = req.body.type 
@@ -318,8 +320,8 @@ const CreateRoutes = (app: Express) => {
         let noImageUpdate = req.body.noImageUpdate
         let preserveThirdParty = req.body.preserveThirdParty
 
-        if (Number.isNaN(postID)) return res.status(400).send("Bad request")
-        if (!req.session.username) return res.status(400).send("Not logged in")
+        if (Number.isNaN(postID)) return res.status(400).send("Bad postID")
+        if (!req.session.username) return res.status(401).send("Unauthorized")
         if (req.session.role !== "admin" && req.session.role !== "mod") noImageUpdate = true
 
         if (!artists?.[0]?.tag) artists = [{tag: "unknown-artist"}]
@@ -352,9 +354,10 @@ const CreateRoutes = (app: Express) => {
 
         tags = tags.filter(Boolean).map((t: string) => t.toLowerCase().replace(/[\n\r\s]+/g, "-"))
 
-        if (!validImages(images)) return res.status(400).send("Invalid images")
+        let skipMBCheck = req.session.role === "admin" || req.session.role === "mod" ? true : false
+        if (!validImages(images, skipMBCheck)) return res.status(400).send("Invalid images")
         const totalMB = images.reduce((acc: any, obj: any) => acc + obj.size, 0) / (1024*1024)
-        if (totalMB > 200) return res.status(400).send("Invalid size")
+        if (!skipMBCheck && totalMB > 200) return res.status(400).send("Invalid size")
         if (!functions.validType(type)) return res.status(400).send("Invalid type")
         if (!functions.validRestrict(restrict)) return res.status(400).send("Invalid restrict")
         if (!functions.validStyle(style)) return res.status(400).send("Invalid style")
@@ -599,7 +602,7 @@ const CreateRoutes = (app: Express) => {
 
     app.post("/api/post/upload/unverified", uploadLimiter, async (req: Request, res: Response, next: NextFunction) => {
       try {
-        if (!serverFunctions.validateCSRF(req)) return res.status(400).send("Bad request")
+        if (!serverFunctions.validateCSRF(req)) return res.status(400).send("Bad CSRF token")
         const images = req.body.images 
         let type = req.body.type 
         const restrict = req.body.restrict 
@@ -613,7 +616,7 @@ const CreateRoutes = (app: Express) => {
         let newTags = req.body.newTags
         let duplicates = req.body.duplicates
 
-        if (!req.session.username) return res.status(400).send("Not logged in")
+        if (!req.session.username) return res.status(401).send("Unauthorized")
 
         if (!artists?.[0]?.tag) artists = [{tag: "unknown-artist"}]
         if (!series?.[0]?.tag) {
@@ -645,9 +648,10 @@ const CreateRoutes = (app: Express) => {
 
         tags = tags.filter(Boolean).map((t: string) => t.toLowerCase().replace(/[\n\r\s]+/g, "-"))
 
-        if (!validImages(images)) return res.status(400).send("Invalid images")
+        let skipMBCheck = req.session.role === "admin" || req.session.role === "mod" ? true : false
+        if (!validImages(images, skipMBCheck)) return res.status(400).send("Invalid images")
         const totalMB = images.reduce((acc: any, obj: any) => acc + obj.size, 0) / (1024*1024)
-        if (totalMB > 200) return res.status(400).send("Invalid size")
+        if (!skipMBCheck && totalMB > 200) return res.status(400).send("Invalid size")
         if (!functions.validType(type)) return res.status(400).send("Invalid type")
         if (!functions.validRestrict(restrict)) return res.status(400).send("Invalid restrict")
         if (!functions.validStyle(style)) return res.status(400).send("Invalid style")
@@ -809,7 +813,7 @@ const CreateRoutes = (app: Express) => {
 
     app.put("/api/post/edit/unverified", editLimiter, async (req: Request, res: Response, next: NextFunction) => {
       try {
-        if (!serverFunctions.validateCSRF(req)) return res.status(400).send("Bad request")
+        if (!serverFunctions.validateCSRF(req)) return res.status(400).send("Bad CSRF token")
         let postID = Number(req.body.postID)
         let unverifiedID = Number(req.body.unverifiedID)
         const images = req.body.images 
@@ -825,9 +829,9 @@ const CreateRoutes = (app: Express) => {
         let newTags = req.body.newTags
         let reason = req.body.reason
 
-        if (Number.isNaN(postID)) return res.status(400).send("Bad request")
-        if (unverifiedID && Number.isNaN(unverifiedID)) return res.status(400).send("Bad request")
-        if (!req.session.username) return res.status(400).send("Not logged in")
+        if (Number.isNaN(postID)) return res.status(400).send("Bad postID")
+        if (unverifiedID && Number.isNaN(unverifiedID)) return res.status(400).send("Bad unverifiedID")
+        if (!req.session.username) return res.status(401).send("Unauthorized")
 
         if (!artists?.[0]?.tag) artists = [{tag: "unknown-artist"}]
         if (!series?.[0]?.tag) {
@@ -859,16 +863,17 @@ const CreateRoutes = (app: Express) => {
 
         tags = tags.filter(Boolean).map((t: string) => t.toLowerCase().replace(/[\n\r\s]+/g, "-"))
 
-        if (!validImages(images)) return res.status(400).send("Invalid images")
+        let skipMBCheck = req.session.role === "admin" || req.session.role === "mod" ? true : false
+        if (!validImages(images, skipMBCheck)) return res.status(400).send("Invalid images")
         const totalMB = images.reduce((acc: any, obj: any) => acc + obj.size, 0) / (1024*1024)
-        if (totalMB > 200) return res.status(400).send("Invalid size")
+        if (!skipMBCheck && totalMB > 200) return res.status(400).send("Invalid size")
         if (!functions.validType(type)) return res.status(400).send("Invalid type")
         if (!functions.validRestrict(restrict)) return res.status(400).send("Invalid restrict")
         if (!functions.validStyle(style)) return res.status(400).send("Invalid style")
 
         if (unverifiedID) {
           const unverified = await sql.unverifiedPost(unverifiedID)
-          if (!unverified) return res.status(400).send("Bad request")
+          if (!unverified) return res.status(400).send("Bad unverifiedID")
           for (let i = 0; i < unverified.images.length; i++) {
             await sql.deleteUnverifiedImage(unverified.images[i].imageID)
             await serverFunctions.deleteUnverifiedFile(functions.getImagePath(unverified.images[i].type, unverifiedID, unverified.images[i].order, unverified.images[i].filename))
@@ -883,7 +888,7 @@ const CreateRoutes = (app: Express) => {
 
         if (originalPostID) {
           const post = await sql.post(originalPostID)
-          if (!post) return res.status(400).send("Bad request")
+          if (!post) return res.status(400).send("Bad postID")
           await sql.bulkUpdateUnverifiedPost(postID, {
             uploader: post.uploader,
             uploadDate: post.uploadDate
@@ -1041,9 +1046,9 @@ const CreateRoutes = (app: Express) => {
 
     app.post("/api/post/approve", modLimiter, async (req: Request, res: Response, next: NextFunction) => {
       try {
-        if (!serverFunctions.validateCSRF(req)) return res.status(400).send("Bad request")
+        if (!serverFunctions.validateCSRF(req)) return res.status(400).send("Bad CSRF token")
         let postID = Number(req.body.postID)
-        if (Number.isNaN(postID)) return res.status(400).send("Bad request")
+        if (Number.isNaN(postID)) return res.status(400).send("Bad postID")
         if (req.session.role !== "admin" && req.session.role !== "mod") return res.status(403).end()
         const unverified = await sql.unverifiedPost(Number(postID))
         if (!unverified) return res.status(400).send("Bad request")
@@ -1052,7 +1057,7 @@ const CreateRoutes = (app: Express) => {
 
         if (unverified.originalID) {
           const post = await sql.post(unverified.originalID)
-          if (!post) return res.status(400).send("Bad request")
+          if (!post) return res.status(400).send("Bad postID")
           for (let i = 0; i < post.images.length; i++) {
             await sql.deleteImage(post.images[i].imageID)
             await serverFunctions.deleteFile(functions.getImagePath(post.images[i].type, postID, post.images[i].order, post.images[i].filename))
@@ -1216,12 +1221,12 @@ const CreateRoutes = (app: Express) => {
 
     app.post("/api/post/reject", modLimiter, async (req: Request, res: Response, next: NextFunction) => {
       try {
-        if (!serverFunctions.validateCSRF(req)) return res.status(400).send("Bad request")
+        if (!serverFunctions.validateCSRF(req)) return res.status(400).send("Bad CSRF token")
         let postID = Number(req.body.postID)
-        if (Number.isNaN(postID)) return res.status(400).send("Bad request")
+        if (Number.isNaN(postID)) return res.status(400).send("Bad postID")
         if (req.session.role !== "admin" && req.session.role !== "mod") return res.status(403).end()
         const unverified = await sql.unverifiedPost(Number(postID))
-        if (!unverified) return res.status(400).send("Bad request")
+        if (!unverified) return res.status(400).send("Bad postID")
         await sql.deleteUnverifiedPost(Number(postID))
         for (let i = 0; i < unverified.images.length; i++) {
             const file = functions.getImagePath(unverified.images[i].type, unverified.postID, unverified.images[i].order, unverified.images[i].filename)

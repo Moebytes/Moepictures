@@ -325,6 +325,7 @@ const PostHistoryRow: React.FunctionComponent<Props> = (props) => {
 
     return (
         <div className="posthistoryrow">
+            {session.username ? postHistoryOptions() : null}
             <div className="posthistoryrow-container">
                 {functions.isVideo(img) ? <video className="posthistoryrow-img" autoPlay muted loop disablePictureInPicture src={img} onClick={imgClick} onAuxClick={imgClick} onContextMenu={updateImg}></video> :
                 functions.isGIF(img) ? <img className="posthistoryrow-img" src={img} onClick={imgClick} onAuxClick={imgClick} onContextMenu={updateImg}/> : 
@@ -352,7 +353,6 @@ const PostHistoryRow: React.FunctionComponent<Props> = (props) => {
                     </div>
                 </div>
             </div>
-            {session.username ? postHistoryOptions() : null}
         </div>
     )
 }

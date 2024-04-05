@@ -769,10 +769,10 @@ export default class SQLQuery {
     let whereQuery = tags?.[0] ? `WHERE "tags".tag = ANY ($1)` : ""
     const query: QueryConfig = {
           text: functions.multiTrim(`
-                  SELECT tags.*, json_agg(DISTINCT aliases.*) AS aliases, json_agg(DISTINCT "implication map".*) AS implications
+                  SELECT tags.*, json_agg(DISTINCT aliases.*) AS aliases, json_agg(DISTINCT implications.*) AS implications
                   FROM tags
                   FULL JOIN aliases ON aliases."tag" = tags."tag"
-                  FULL JOIN "implication map" ON "implication map"."tag" = tags."tag"
+                  FULL JOIN implications ON implications."tag" = tags."tag"
                   ${whereQuery}
                   GROUP BY "tags".tag
           `)
@@ -786,10 +786,10 @@ export default class SQLQuery {
     let whereQuery = tags?.[0] ? `WHERE "unverified tags".tag = ANY ($1)` : ""
     const query: QueryConfig = {
           text: functions.multiTrim(`
-                  SELECT "unverified tags".*, json_agg(DISTINCT "unverified aliases".*) AS aliases, json_agg(DISTINCT "implication map".*) AS implications
+                  SELECT "unverified tags".*, json_agg(DISTINCT "unverified aliases".*) AS aliases, json_agg(DISTINCT implications.*) AS implications
                   FROM "unverified tags"
                   FULL JOIN "unverified aliases" ON "unverified aliases"."tag" = "unverified tags"."tag"
-                  FULL JOIN "implication map" ON "implication map"."tag" = "unverified tags"."tag"
+                  FULL JOIN implications ON implications."tag" = "unverified tags"."tag"
                   ${whereQuery}
                   GROUP BY "unverified tags".tag
           `)
@@ -802,10 +802,10 @@ export default class SQLQuery {
   public static tag = async (tag: string) => {
     const query: QueryConfig = {
           text: functions.multiTrim(`
-                  SELECT tags.*, json_agg(DISTINCT aliases.*) AS aliases, json_agg(DISTINCT "implication map".*) AS implications
+                  SELECT tags.*, json_agg(DISTINCT aliases.*) AS aliases, json_agg(DISTINCT implications.*) AS implications
                   FROM tags
                   FULL JOIN aliases ON aliases."tag" = tags."tag"
-                  FULL JOIN "implication map" ON "implication map"."tag" = tags."tag"
+                  FULL JOIN implications ON implications."tag" = tags."tag"
                   WHERE "tags".tag = $1
                   GROUP BY "tags".tag
           `),
@@ -835,9 +835,9 @@ export default class SQLQuery {
   public static relatedTags = async (tag: string) => {
     const query: QueryConfig = {
           text: functions.multiTrim(`
-              SELECT json_agg(DISTINCT "implication map".tag) AS related FROM "implication map"
-              WHERE "implication map".implication = $1
-              GROUP BY "implication map"."implication"
+              SELECT json_agg(DISTINCT implications.tag) AS related FROM implications
+              WHERE implications.implication = $1
+              GROUP BY implications."implication"
           `),
           values: [tag]
     }
@@ -968,14 +968,14 @@ export default class SQLQuery {
     if (sort === "reverse aliases") sortQuery = `ORDER BY "aliasCount" ASC`
     const query: QueryConfig = {
           text: functions.multiTrim(`
-                  SELECT tags.*, json_agg(DISTINCT aliases.*) AS aliases, json_agg(DISTINCT "implication map".*) AS implications,
+                  SELECT tags.*, json_agg(DISTINCT aliases.*) AS aliases, json_agg(DISTINCT implications.*) AS implications,
                   COUNT(*) OVER() AS "tagCount",
                   COUNT(DISTINCT posts."postID") AS "postCount", 
                   COUNT(DISTINCT tags."image") AS "imageCount", 
                   COUNT(DISTINCT aliases."alias") AS "aliasCount"
                   FROM tags
                   FULL JOIN aliases ON aliases."tag" = tags."tag"
-                  FULL JOIN "implication map" ON "implication map"."tag" = tags."tag"
+                  FULL JOIN implications ON implications."tag" = tags."tag"
                   JOIN "tag map" ON "tag map"."tag" = tags."tag" ${whereQuery}
                   JOIN posts ON posts."postID" = "tag map"."postID"
                   GROUP BY "tags".tag
@@ -1235,7 +1235,7 @@ export default class SQLQuery {
     let whereQuery = ""
     let i = 1
     if (search) {
-      whereQuery = `WHERE comments."comment" LIKE '%' || $${i} || '%'`
+      whereQuery = `WHERE lower(comments."comment") LIKE '%' || $${i} || '%'`
       i++
     }
     let sortQuery = ""
@@ -1267,7 +1267,7 @@ export default class SQLQuery {
           `),
           values: []
     }
-    if (search) query.values?.push(search)
+    if (search) query.values?.push(search.toLowerCase())
     if (offset) query.values?.push(offset)
     const result = await SQLQuery.run(query)
     return result
@@ -1823,7 +1823,7 @@ export default class SQLQuery {
    /** Insert a new implication. */
    public static insertImplication = async (tag: string, implication: string) => {
     const query: QueryConfig = {
-      text: `INSERT INTO "implication map" ("tag", "implication") VALUES ($1, $2)`,
+      text: `INSERT INTO implications ("tag", "implication") VALUES ($1, $2)`,
       values: [tag, implication]
     }
     try {
@@ -1838,10 +1838,10 @@ export default class SQLQuery {
   public static implications = async (tag: string) => {
     const query: QueryConfig = {
           text: functions.multiTrim(`
-                  SELECT "implication map".*
-                  FROM "implication map"
-                  WHERE "implication map".tag = $1
-                  GROUP BY "implication map"."implicationID"
+                  SELECT implications.*
+                  FROM implications
+                  WHERE implications.tag = $1
+                  GROUP BY implications."implicationID"
           `),
           values: [tag]
     }
@@ -1852,7 +1852,7 @@ export default class SQLQuery {
   /** Purge implications. */
   public static purgeImplications = async (tag: string) => {
     const query: QueryConfig = {
-      text: `DELETE FROM "implication map" WHERE "implication map"."tag" = $1`,
+      text: `DELETE FROM implications WHERE implications."tag" = $1`,
       values: [tag]
     }
     return SQLQuery.run(query)
@@ -2375,14 +2375,30 @@ export default class SQLQuery {
     return result
   }
 
-  /** Insert forum thread. */
-  public static insertForumThread = async (creator: string, title: string, content: string) => {
+  /** Insert thread. */
+  public static insertThread = async (creator: string, title: string, content: string) => {
     const now = new Date().toISOString()
     const sticky = false
     const locked = false
     const query: QueryConfig = {
-      text: `INSERT INTO "forum threads" ("creator", "createDate", "updater", "updatedDate", "sticky", "locked", "title", "content") VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`,
+      text: `INSERT INTO threads ("creator", "createDate", "updater", "updatedDate", "sticky", "locked", "title", "content") VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`,
       values: [creator, now, creator, now, sticky, locked, title, content]
+    }
+    const result = await SQLQuery.run(query)
+    return result
+  }
+
+  public static stickyThreads = async () => {
+    const query: QueryConfig = {
+      text: functions.multiTrim(`
+        SELECT threads.*,
+        COUNT(*) OVER() AS "threadCount"
+        FROM threads
+        WHERE threads.sticky = 'true' 
+        GROUP BY threads."threadID"
+        ORDER BY threads."updatedDate" DESC
+      `),
+      values: []
     }
     const result = await SQLQuery.run(query)
     return result
@@ -2390,22 +2406,22 @@ export default class SQLQuery {
 
   /** Search threads. */
   public static searchThreads = async (search: string, sort: string, offset?: string) => {
-    let whereQuery = ""
+    let whereQuery = `WHERE threads.sticky = 'false'`
     let i = 1
     if (search) {
-      whereQuery = `WHERE lower("forum threads"."title") LIKE '%' || $${i} || '%'`
+      whereQuery += ` AND lower(threads."title") LIKE '%' || $${i} || '%'`
       i++
     }
     let sortQuery = ""
-    if (sort === "date") sortQuery = `ORDER BY "forum threads"."updatedDate" DESC`
-    if (sort === "reverse date") sortQuery = `ORDER BY "forum threads"."updatedDate" ASC`
+    if (sort === "date") sortQuery = `ORDER BY threads."updatedDate" DESC`
+    if (sort === "reverse date") sortQuery = `ORDER BY threads."updatedDate" ASC`
     const query: QueryConfig = {
           text: functions.multiTrim(`
-            SELECT "forum threads".*,
+            SELECT threads.*,
             COUNT(*) OVER() AS "threadCount"
-            FROM "forum threads"
+            FROM threads
             ${whereQuery}
-            GROUP BY "forum threads"."threadID"
+            GROUP BY threads."threadID"
             ${sortQuery}
             LIMIT 100 ${offset ? `OFFSET $${i}` : ""}
           `),
@@ -2413,6 +2429,106 @@ export default class SQLQuery {
     }
     if (search) query.values?.push(search.toLowerCase())
     if (offset) query.values?.push(offset)
+    const result = await SQLQuery.run(query)
+    return result
+  }
+
+  /** Get thread. */
+  public static thread = async (threadID: number) => {
+    const query: QueryConfig = {
+      text: functions.multiTrim(`
+            SELECT threads.*, users.role, users.image, users."imagePost"
+            FROM threads 
+            JOIN users ON users.username = threads.creator
+            WHERE threads."threadID" = $1
+            GROUP BY threads."threadID", users.role, users.image, users."imagePost"
+          `),
+      values: [threadID]
+    }
+    const result = await SQLQuery.run(query)
+    return result[0]
+  }
+
+  /** Update thread */
+  public static updateThread = async (threadID: number, column: string, value: string | number | boolean) => {
+    const query: QueryConfig = {
+        text: `UPDATE "threads" SET "${column}" = $1 WHERE "threadID" = $2`,
+        values: [value, threadID]
+    }
+    return SQLQuery.run(query)
+  }
+
+  /** Delete thread. */
+  public static deleteThread = async (threadID: number) => {
+    const query: QueryConfig = {
+      text: functions.multiTrim(`DELETE FROM threads WHERE threads."threadID" = $1`),
+      values: [threadID]
+    }
+    const result = await SQLQuery.run(query)
+    return result
+  }
+
+  /** Insert reply. */
+  public static insertReply = async (threadID: number, creator: string, content: string) => {
+    const now = new Date().toISOString()
+    const query: QueryConfig = {
+      text: `INSERT INTO replies ("threadID", "creator", "createDate", "updatedDate", "content") VALUES ($1, $2, $3, $4, $5)`,
+      values: [threadID, creator, now, now, content]
+    }
+    const result = await SQLQuery.run(query)
+    return result
+  }
+
+  /** Get replies. */
+  public static replies = async (threadID: number, offset?: string) => {
+    if (offset && Number(offset) < 0) offset = "0"
+    const query: QueryConfig = {
+      text: functions.multiTrim(`
+            SELECT replies.*, users.role, users.image, users."imagePost",
+            COUNT(*) OVER() AS "replyCount"
+            FROM replies 
+            JOIN users ON users.username = replies.creator
+            WHERE replies."threadID" = $1 
+            GROUP BY replies."replyID", users.role, users.image, users."imagePost"
+            ${offset ? "OFFSET $2" : ""}
+          `),
+      values: [threadID]
+    }
+    if (offset) query.values?.push(offset)
+    const result = await SQLQuery.run(query)
+    return result
+  }
+
+  /** Get reply. */
+  public static reply = async (replyID: number) => {
+    const query: QueryConfig = {
+      text: functions.multiTrim(`
+            SELECT replies.*
+            FROM replies 
+            WHERE replies."replyID" = $1
+            GROUP BY replies."replyID"
+          `),
+      values: [replyID]
+    }
+    const result = await SQLQuery.run(query)
+    return result[0]
+  }
+
+  /** Update reply */
+  public static updateReply = async (replyID: number, column: string, value: string | number | boolean) => {
+    const query: QueryConfig = {
+        text: `UPDATE "replies" SET "${column}" = $1 WHERE "replyID" = $2`,
+        values: [value, replyID]
+    }
+    return SQLQuery.run(query)
+  }
+
+  /** Delete reply */
+  public static deleteReply = async (replyID: number) => {
+    const query: QueryConfig = {
+      text: functions.multiTrim(`DELETE FROM replies WHERE replies."replyID" = $1`),
+      values: [replyID]
+    }
     const result = await SQLQuery.run(query)
     return result
   }

@@ -9,7 +9,7 @@ import DragAndDrop from "../components/DragAndDrop"
 import search from "../assets/icons/search.png"
 import searchIconHover from "../assets/icons/search-hover.png"
 import sort from "../assets/icons/sort.png"
-import ForumThread from "../components/ForumThread"
+import Thread from "../components/Thread"
 import NewThreadDialog from "../dialogs/NewThreadDialog"
 import {ThemeContext, EnableDragContext, HideNavbarContext, HideSidebarContext, MobileContext, SessionContext,
 RelativeContext, HideTitlebarContext, ActiveDropdownContext, HeaderTextContext, SidebarTextContext, SiteHueContext, 
@@ -18,6 +18,7 @@ PageFlagContext} from "../Context"
 import permissions from "../structures/Permissions"
 import scrollIcon from "../assets/icons/scroll.png"
 import pageIcon from "../assets/icons/page.png"
+import PageDialog from "../dialogs/PageDialog"
 import "./styles/forumpage.less"
 import axios from "axios"
 
@@ -59,16 +60,20 @@ const ForumPage: React.FunctionComponent = (props) => {
         const savedScroll = localStorage.getItem("scroll")
         if (savedScroll) setScroll(savedScroll === "true")
         const savedPage = localStorage.getItem("forumPage")
-        if (savedPage) setTimeout(() => {setForumPage(Number(savedPage))}, 100)
         const queryParam = new URLSearchParams(window.location.search).get("query")
         const pageParam = new URLSearchParams(window.location.search).get("page")
-        setTimeout(() => {
+        const onDOMLoaded = () => {
+            if (savedPage) setForumPage(Number(savedPage))
             if (queryParam) updateThreads(queryParam)
             if (pageParam) {
                 setQueryPage(Number(pageParam))
                 setForumPage(Number(pageParam))
             }
-        }, 500)
+        }
+        window.addEventListener("load", onDOMLoaded)
+        return () => {
+            window.removeEventListener("load", onDOMLoaded)
+        }
     }, [])
 
     const getFilter = () => {
@@ -107,9 +112,7 @@ const ForumPage: React.FunctionComponent = (props) => {
         setHeaderText("")
         setSidebarText("")
         document.title = "Moebooru: Forum"
-        setTimeout(() => {
-            updateThreads()
-        }, 200)
+        updateThreads()
     }, [])
 
     useEffect(() => {
@@ -246,7 +249,7 @@ const ForumPage: React.FunctionComponent = (props) => {
         } else {
             if (!scroll) history.replace(`${location.pathname}?page=${forumPage}`)
         }
-    }, [scroll, search, forumPage])
+    }, [scroll, searchQuery, forumPage])
 
     useEffect(() => {
         if (threads?.length) {
@@ -308,7 +311,7 @@ const ForumPage: React.FunctionComponent = (props) => {
     const generatePageButtonsJSX = () => {
         const jsx = [] as any
         let buttonAmount = 7
-        if (mobile) buttonAmount = 5
+        if (mobile) buttonAmount = 3
         if (maxPage() < buttonAmount) buttonAmount = maxPage()
         let counter = 0
         let increment = -3
@@ -361,7 +364,7 @@ const ForumPage: React.FunctionComponent = (props) => {
 
     const generateThreadsJSX = () => {
         const jsx = [] as any
-        jsx.push(<ForumThread titlePage={true}/>)
+        jsx.push(<Thread titlePage={true}/>)
         let visible = [] as any
         if (scroll) {
             visible = functions.removeDuplicates(visibleThreads) as any
@@ -371,7 +374,7 @@ const ForumPage: React.FunctionComponent = (props) => {
         }
         for (let i = 0; i < visible.length; i++) {
             if (visible[i].fake) continue
-            jsx.push(<ForumThread thread={visible[i]} onDelete={updateThreads} onEdit={updateThreads}/>)
+            jsx.push(<Thread thread={visible[i]} onDelete={updateThreads} onEdit={updateThreads}/>)
         }
         if (!scroll) {
             jsx.push(
@@ -396,10 +399,22 @@ const ForumPage: React.FunctionComponent = (props) => {
         })
     }
 
+    const getNewThreadButton = () => {
+        const style = {marginLeft: mobile ? "0px" : "15px", marginTop: mobile ? "10px" : "0px"}
+        if (session.username) {
+            return (
+                <div className="forum-button-container" style={style} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
+                    <button className="forum-button" onClick={() => newThreadDialog()}>New</button>
+                </div> 
+            )
+        }
+    }
+
     return (
         <>
         <DragAndDrop/>
         <NewThreadDialog/>
+        <PageDialog/>
         <TitleBar/>
         <NavBar/>
         <div className="body">
@@ -412,15 +427,12 @@ const ForumPage: React.FunctionComponent = (props) => {
                             <input className="forum-search" type="search" spellCheck="false" value={searchQuery} onChange={(event) => setSearchQuery(event.target.value)} onKeyDown={(event) => event.key === "Enter" ? updateThreads() : null}/>
                             <img className="forum-search-icon" src={getSearchIcon()} style={{filter: getFilterSearch()}} onClick={() => updateThreads()} onMouseEnter={() => setSearchIconHover(true)} onMouseLeave={() => setSearchIconHover(false)}/>
                         </div>
-                        {session.username ?
-                        <div className="forum-button-container" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
-                            <button className="forum-button" onClick={() => newThreadDialog()}>New</button>
-                        </div> : null}
+                        {!mobile ? getNewThreadButton() : null}
                         {getSortJSX()}
-                        <div className="forumsort-item" onClick={() => toggleScroll()}>
+                        {!mobile ? <div className="forumsort-item" onClick={() => toggleScroll()}>
                             <img className="forumsort-img" src={scroll ? scrollIcon : pageIcon} style={{filter: getFilter()}}/>
                             <span className="forumsort-text">{scroll ? "Scrolling" : "Pages"}</span>
-                        </div>
+                        </div> : null}
                         <div className={`forum-dropdown ${activeDropdown === "sort" ? "" : "hide-forum-dropdown"}`} 
                         style={{marginRight: getSortMargin(), top: mobile ? "229px" : "209px"}} onClick={() => setActiveDropdown("none")}>
                             <div className="forum-dropdown-row" onClick={() => setSortType("date")}>
@@ -431,6 +443,7 @@ const ForumPage: React.FunctionComponent = (props) => {
                             </div>
                         </div>
                     </div>
+                    {mobile ? <div className="forum-row">{getNewThreadButton()}</div> : null}
                     <table className="forum-container">
                         {generateThreadsJSX()}
                     </table>

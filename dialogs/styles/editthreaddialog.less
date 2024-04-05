@@ -1,0 +1,198 @@
+@import "../../index.less";
+
+.editthread-dialog {
+    position: fixed;
+    z-index: 3000;
+    display: flex;
+    width: 100%;
+    height: 100%;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    background-color: rgba(0, 0, 0, 0.5);
+}
+
+.editthread-dialog-box {
+    pointer-events: all;
+    margin-top: -30px;
+    width: 500px;
+    height: max-content;
+    border-radius: 7px;
+    background-color: var(--titlebarBG);
+    padding: 10px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.editthread-container {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.editthread-dialog-title-container {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    cursor: move;
+}
+
+
+.editthread-dialog-row {
+    display: flex;
+    flex-direction: row;
+    margin-top: 10px;
+    align-items: center;
+    width: 100%;
+    &:last-child {
+        justify-content: space-evenly;
+        margin-bottom: 5px;
+    }
+}
+
+.editthread-dialog-title {
+    color: var(--text);
+    cursor: text;
+    user-select: text;
+    font-size: 20px;
+    font-family: Tahoma, sans-serif;
+    font-weight: bold;
+    .stroke-black();
+    cursor: move;
+}
+
+.editthread-dialog-text {
+    color: var(--text);
+    cursor: text;
+    user-select: text;
+    font-size: 20px;
+    font-family: Tahoma, sans-serif;
+    //.stroke-black();
+}
+
+.editthread-dialog-input {
+    background-color: var(--inputBG);
+    border: 2px solid var(--inputBorder);
+    width: 100%;
+    height: 30px;
+    font-family: Tahoma, sans-serif;
+    font-weight: bold;
+    font-size: 22px;
+    color: var(--text);
+    margin-left: 10px;
+    margin-right: 15px;
+}
+
+.editthread-button {
+    border: none;
+    padding-top: 2px;
+    padding-bottom: 2px;
+    padding-left: 3px;
+    padding-right: 3px;
+    color: black;
+    font-weight: bold;
+    font-size: 17px;
+    font-family: Tahoma, sans-serif;
+    background-color: var(--text);
+    border: 2px solid black;
+    &:hover {
+        filter: brightness(130%);
+        cursor: pointer;
+    }
+}
+
+.editthread-dialog-button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--buttonBG);
+    border: none;
+    padding: 5px;
+    padding-top: 3px;
+    padding-bottom: 3px;
+    cursor: pointer;
+    margin-right: 20px;
+    margin-left: 10px;
+    &:hover {
+        filter: invert(1) hue-rotate(180deg);
+    }
+}
+
+.editthread-textarea {
+    background-color: var(--inputBG);
+    border: 2px solid var(--inputBorder);
+    width: 100%;
+    font-family: Tahoma, sans-serif;
+    color: var(--text);
+    margin-left: 10px;
+    height: 330px;
+    resize: none;
+    font-size: 17px;
+    font-weight: normal;
+}
+
+.editthread-button-img-small {
+    filter: brightness(0);
+    width: auto;
+    height: 15px;
+}
+
+.editthread-button-text-small {
+    color: black;
+    font-family: Tahoma, sans-serif;
+    font-weight: bold;
+    margin-left: 5px;
+    font-size: 15px;
+}
+
+.editthread-img {
+    width: auto;
+    height: 90px;
+    margin-top: 5px;
+    margin-bottom: 5px;
+}
+
+.editthread-dialog-validation-container {
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+}
+
+.editthread-dialog-validation {
+    font-family: Tahoma, sans-serif;
+    color: var(--text-strong);
+    font-size: 16px;
+    margin-top: 10px;
+}
+
+.editthread-x-button {
+    width: auto;
+    height: 14px;
+    margin-left: -9px;
+    cursor: pointer;
+    &:hover {
+        filter: brightness(130%);
+    }
+}
+
+@media screen and (max-width: 500px) {
+    .editthread-dialog-box {
+        width: 350px;
+    }
+
+    .editthread-textarea {
+        height: 45px;
+    }
+
+    .editthread-img {
+        width: auto;
+        height: 50px;
+    }
+}

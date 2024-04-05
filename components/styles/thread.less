@@ -1,6 +1,6 @@
 @import "../../index.less";
 
-.forum-thread {
+.thread {
     position: relative;
     display: flex;
     flex-direction: row;
@@ -13,17 +13,16 @@
     }
 }
 
-.forum-thread-no-hover {
+.thread-no-hover {
     position: relative;
     display: flex;
     flex-direction: row;
     width: 100%;
     padding: 5px;
-    border: 2px solid var(--inputBG);
     margin-top: 5px;
 }
 
-.forum-thread-container {
+.thread-container {
     display: flex;
     flex-direction: row;
     height: 100%;
@@ -32,7 +31,7 @@
     justify-content: space-between;
 }
 
-.forum-thread-row {
+.thread-row {
     flex-wrap: wrap;
     display: flex;
     flex-direction: row;
@@ -45,21 +44,22 @@
     }
 }
 
-.forum-thread-column {
+.thread-column {
     display: flex;
     flex-direction: column;
     width: 100%;
     height: 100%;
 }
 
-.forum-thread-heading {
+.thread-heading {
     font-family: Tahoma, sans-serif;
     font-weight: bold;
     color: var(--tagColor);
     font-size: 17px;
+    white-space: nowrap;
 }
 
-.forum-thread-title {
+.thread-title {
     font-family: Tahoma, sans-serif;
     color: var(--tagColor);
     font-size: 17px;
@@ -69,44 +69,45 @@
     }
 }
 
-.forum-thread-icon {
+.thread-icon {
     width: auto;  
     height: 18px;
     margin-right: 3px;  
     margin-top: 3px;
 }
 
-.forum-thread-img-container {
+.thread-img-container {
     display: flex;
     flex-direction: row;
     justify-content: flex-start;
     margin-right: 10px;
 }
 
-.forum-thread-img {
+.thread-img {
     width: auto;
     height: 70px;
 }
-.forum-thread-content-container {
+.thread-content-container {
     display: flex;
     flex-direction: row;
     width: 100%;
 }
 
-.forum-thread-date-text {
+.thread-date-text {
     font-family: Tahoma, sans-serif;
     font-size: 16px;
     color: var(--text-strong);
     font-style: italic;
+    white-space: nowrap;
 }
 
-.forum-thread-user-img {
+.thread-user-img {
     width: auto;
     height: 23px;
     margin-right: 7px;
 }
 
-.forum-thread-user-text {
+.thread-user-text {
     font-family: Tahoma, sans-serif;
     font-size: 17px;
     color: var(--text-strong);
@@ -114,25 +115,29 @@
     cursor: pointer;
 }
 
-.forum-thread-user-normal-text {
+.thread-user-normal-text {
     color: var(--text);
     margin-right: 7px;
 }
 
-.forum-thread-username-container {
+.thread-username-container {
     display: flex;
     flex-direction: row;
     align-items: center;
 }
 
-.forum-thread-user-label {
+.thread-user-label {
     margin-left: 3px;
     width: auto;
     height: 20px;
 }
 
 @media screen and (max-width: 500px) {
-    .forum-thread-content-container {
+    .thread-content-container {
         flex-direction: column;
+    }
+
+    .thread-row {
+        min-width: 80px;
     }
 }

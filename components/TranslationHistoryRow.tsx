@@ -175,6 +175,7 @@ const TranslationHistoryRow: React.FunctionComponent<Props> = (props) => {
 
     return (
         <div className="translationhistoryrow">
+            {session.username ? translationhistoryOptions() : null}
             <div className="translationhistoryrow-container">
                 <img className="translationhistoryrow-img" src={img} onClick={imgClick}/>
             </div>
@@ -187,7 +188,6 @@ const TranslationHistoryRow: React.FunctionComponent<Props> = (props) => {
                     </div>
                 </div>
             </div>
-            {session.username ? translationhistoryOptions() : null}
         </div>
     )
 }

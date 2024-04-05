@@ -20,6 +20,7 @@ PageFlagContext, ShowPageDialogContext} from "../Context"
 import permissions from "../structures/Permissions"
 import scrollIcon from "../assets/icons/scroll.png"
 import pageIcon from "../assets/icons/page.png"
+import PageDialog from "../dialogs/PageDialog"
 import "./styles/commentspage.less"
 import axios from "axios"
 
@@ -53,24 +54,44 @@ const CommentsPage: React.FunctionComponent = (props) => {
     const [ended, setEnded] = useState(false)
     const [getSearchIconHover, setSearchIconHover] = useState(false)
     const [queryPage, setQueryPage] = useState(1)
+    const [commentID, setCommentID] = useState(0)
+    const [commentJumpFlag, setCommentJumpFlag] = useState(false)
     const sortRef = useRef(null) as any
     const history = useHistory()
 
     useEffect(() => {
         const savedScroll = localStorage.getItem("scroll")
         if (savedScroll) setScroll(savedScroll === "true")
-        const savedPage = localStorage.getItem("commentsPage")
-        if (savedPage) setTimeout(() => {setCommentsPage(Number(savedPage))}, 100)
         const queryParam = new URLSearchParams(window.location.search).get("query")
         const pageParam = new URLSearchParams(window.location.search).get("page")
-        setTimeout(() => {
-            if (queryParam) updateComments(queryParam)
+        const commentParam = new URLSearchParams(window.location.search).get("comment")
+        const onDOMLoaded = () => {
+            const savedPage = localStorage.getItem("commentsPage")
+            if (savedPage) setCommentsPage(Number(savedPage))
+            if (queryParam) setCommentSearchFlag(queryParam)
             if (pageParam) {
                 setQueryPage(Number(pageParam))
                 setCommentsPage(Number(pageParam))
             }
-        }, 500)
+            if (commentParam) {
+                setCommentID(Number(commentParam))
+                setCommentJumpFlag(true)
+            }
+        }
+        window.addEventListener("load", onDOMLoaded)
+        return () => {
+            window.removeEventListener("load", onDOMLoaded)
+        }
     }, [])
+
+    useEffect(() => {
+        if (comments && commentID && commentJumpFlag) {
+            setTimeout(() => {
+                onCommentJump(commentID)
+                setCommentJumpFlag(false)
+            }, 200)
+        }
+    }, [comments, commentJumpFlag, commentID])
 
     const getFilter = () => {
         return `hue-rotate(${siteHue - 180}deg) saturate(${siteSaturation}%) brightness(${siteLightness + 70}%)`
@@ -95,7 +116,7 @@ const CommentsPage: React.FunctionComponent = (props) => {
                 setSearchQuery(commentSearchFlag)
                 updateComments(commentSearchFlag)
                 setCommentSearchFlag(null)
-            }, 500)
+            }, 200)
         }
     }, [commentSearchFlag])
 
@@ -108,9 +129,7 @@ const CommentsPage: React.FunctionComponent = (props) => {
         setHeaderText("")
         setSidebarText("")
         document.title = "Moebooru: Comments"
-        setTimeout(() => {
-            updateComments()
-        }, 200)
+        updateComments()
     }, [])
 
     useEffect(() => {
@@ -243,11 +262,31 @@ const CommentsPage: React.FunctionComponent = (props) => {
 
     useEffect(() => {
         if (searchQuery) {
-            scroll ? history.replace(`${location.pathname}?query=${searchQuery}`) : history.replace(`${location.pathname}?query=${searchQuery}&page=${commentsPage}`)
+            scroll ? history.replace(`${location.pathname}?query=${searchQuery}${commentID ? `&comment=${commentID}` : ""}`) : history.replace(`${location.pathname}?query=${searchQuery}&page=${commentsPage}${commentID ? `&comment=${commentID}` : ""}`)
         } else {
-            if (!scroll) history.replace(`${location.pathname}?page=${commentsPage}`)
+            if (!scroll) history.replace(`${location.pathname}?page=${commentsPage}${commentID ? `&comment=${commentID}` : ""}`)
         }
-    }, [scroll, search, commentsPage])
+    }, [scroll, searchQuery, commentsPage, commentID])
+
+    const onCommentJump = (commentID: number) => {
+        let index = -1
+        for (let i = 0; i < comments.length; i++) {
+            if (comments[i].commentID === String(commentID)) {
+                index = i
+                break
+            }
+        }
+        if (index > -1) {
+            const pageNumber = Math.ceil(index / getPageAmount())
+            goToPage(pageNumber, true)
+            const element = document.querySelector(`[comment-id="${commentID}"]`)
+            if (!element) return
+            const position = element.getBoundingClientRect()
+            const elementTop = position.top + window.scrollY
+            window.scrollTo(0, elementTop - (window.innerHeight / 3))
+            setCommentID(commentID)
+        }
+    }
 
     useEffect(() => {
         if (comments?.length) {
@@ -301,15 +340,15 @@ const CommentsPage: React.FunctionComponent = (props) => {
         window.scrollTo(0, 0)
     }
 
-    const goToPage = (newPage: number) => {
+    const goToPage = (newPage: number, noScroll?: boolean) => {
         setCommentsPage(newPage)
-        window.scrollTo(0, 0)
+        if (!noScroll) window.scrollTo(0, 0)
     }
 
     const generatePageButtonsJSX = () => {
         const jsx = [] as any
         let buttonAmount = 7
-        if (mobile) buttonAmount = 5
+        if (mobile) buttonAmount = 3
         if (maxPage() < buttonAmount) buttonAmount = maxPage()
         let counter = 0
         let increment = -3
@@ -369,7 +408,7 @@ const CommentsPage: React.FunctionComponent = (props) => {
             if (visible[i].fake) continue
             if (!session.username) if (visible[i].post.restrict !== "safe") continue
             if (!permissions.isStaff(session)) if (visible[i].post.restrict === "explicit") continue
-            jsx.push(<CommentRow comment={visible[i]} onDelete={updateComments} onEdit={updateComments}/>)
+            jsx.push(<CommentRow comment={visible[i]} onDelete={updateComments} onEdit={updateComments} onCommentJump={onCommentJump}/>)
         }
         if (!scroll) {
             jsx.push(
@@ -400,6 +439,7 @@ const CommentsPage: React.FunctionComponent = (props) => {
         <EditCommentDialog/>
         <DeleteCommentDialog/>
         <ReportCommentDialog/>
+        <PageDialog/>
         <TitleBar/>
         <NavBar/>
         <div className="body">
@@ -413,10 +453,10 @@ const CommentsPage: React.FunctionComponent = (props) => {
                             <img className="comment-search-icon" src={getSearchIcon()} style={{filter: getFilterSearch()}} onClick={() => updateComments()} onMouseEnter={() => setSearchIconHover(true)} onMouseLeave={() => setSearchIconHover(false)}/>
                         </div>
                         {getSortJSX()}
-                        <div className="commentsort-item" onClick={() => toggleScroll()}>
+                        {!mobile ? <div className="commentsort-item" onClick={() => toggleScroll()}>
                             <img className="commentsort-img" src={scroll ? scrollIcon : pageIcon} style={{filter: getFilter()}}/>
                             <span className="commentsort-text">{scroll ? "Scrolling" : "Pages"}</span>
-                        </div>
+                        </div> : null}
                         <div className={`comment-dropdown ${activeDropdown === "sort" ? "" : "hide-comment-dropdown"}`} 
                         style={{marginRight: getSortMargin(), top: mobile ? "229px" : "209px"}} onClick={() => setActiveDropdown("none")}>
                             <div className="comment-dropdown-row" onClick={() => setSortType("date")}>

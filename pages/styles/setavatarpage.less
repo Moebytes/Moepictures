@@ -37,8 +37,8 @@
     width: max-content;
     height: max-content;
     min-width: 350px;
-    max-width: calc(100vw - 230px - 70px - 300px);
-    max-height: calc(100vh - 35px - 77px);
+    max-width: calc(100vw - @sidebar-width - 370px);
+    max-height: calc(100vh - @nav-bar-height - @title-bar-height);
     -webkit-user-select: none !important;
     -webkit-touch-callout: none !important;
     -webkit-tap-highlight-color: rgba(0, 0, 0, 0) !important;
@@ -52,7 +52,7 @@
     margin-bottom: 0px;
     width: auto;
     height: auto;
-    max-width: calc(100vw - 230px - 70px - 300px);
+    max-width: calc(100vw - @sidebar-width - 370px);
     max-height: calc(100vh - @nav-bar-height - @title-bar-height);
 }
 
@@ -113,5 +113,9 @@
     .set-avatar-preview {
         width: 200px;
         height: 200px;
+    }
+
+    .set-avatar-image {
+        max-width: calc(100vw - 85px);
     }
 }

@@ -80,14 +80,14 @@ const MiscRoutes = (app: Express) => {
     app.post("/api/misc/captcha", captchaLimiter, async (req: Request, res: Response, next: NextFunction) => {
         try {
             const {captchaResponse} = req.body
-            if (!serverFunctions.validateCSRF(req)) return res.status(400).send("Bad request")
+            if (!serverFunctions.validateCSRF(req)) return res.status(400).send("Bad CSRF token")
             let ip = req.headers["x-forwarded-for"] || req.socket.remoteAddress
             ip = ip?.toString().replace("::ffff:", "") || ""
             if (req.session.captchaAnswer === captchaResponse?.trim()) {
                 req.session.captchaAmount = 0
                 res.status(200).send("Success")
             } else {
-                res.status(400).send("Bad request") 
+                res.status(400).send("Bad captchaResponse") 
             }
         } catch (e) {
             console.log(e)
@@ -97,6 +97,7 @@ const MiscRoutes = (app: Express) => {
 
     app.post("/api/misc/saucenao", miscLimiter, async (req: Request, res: Response, next: NextFunction) => {
         try {
+            if (!req.body) return res.status(400).send("Image data must be provided")
             const form = new FormData()
             form.append("db", "999")
             form.append("api_key", process.env.SAUCENAO_KEY)
@@ -110,13 +111,15 @@ const MiscRoutes = (app: Express) => {
             result = result.sort((a: any, b: any) => b.header.similarity - a.header.similarity)
             result = result.filter((r: any) => Number(r.header.similarity) > 70)
             res.status(200).json(result)
-        } catch {
-            res.status(404).end()
+        } catch (e) {
+            console.log(e)
+            res.status(400).end()
         }
     })
 
     app.get("/api/misc/pixiv", miscLimiter, async (req: Request, res: Response, next: NextFunction) => {
         const link = req.query.url as string
+        if (!link) return res.status(400).send("No url")
         if (link.includes("pixiv.net") || link.includes("pximg.net")) {
             const pixiv = await Pixiv.refreshLogin(process.env.PIXIV_TOKEN!)
             let resolvable = link as string | number
@@ -130,47 +133,54 @@ const MiscRoutes = (app: Express) => {
                 const twitter = html.match(/(?<=twitter\.com\/)(.*?)(?=")/)?.[0]
                 illust.user.twitter = twitter
                 res.status(200).json(illust)
-            } catch {
-                res.status(404).end()
+            } catch (e) {
+            console.log(e)
+                res.status(400).end()
             }
         } else {
-            res.status(404).end()
+            res.status(400).end()
         }
     })
 
     app.get("/api/misc/deviantart", miscLimiter, async (req: Request, res: Response, next: NextFunction) => {
         const link = req.query.url as string
+        if (!link) return res.status(400).send("No url")
         if (link.includes("deviantart.com")) {
             try {
                 const deviantart = await DeviantArt.login(process.env.DEVIANTART_CLIENT_ID!, process.env.DEVIANTART_CLIENT_SECRET!)
                 const deviationRSS = await deviantart.rss.get(link)
                 const deviation = await deviantart.extendRSSDeviations([deviationRSS]).then((r) => r[0])
                 res.status(200).json(deviation)
-            } catch {
-                res.status(404).end()
+            } catch (e) {
+            console.log(e)
+                res.status(400).end()
             }
         } else {
-            res.status(404).end()
+            res.status(400).end()
         }
     })
 
     app.get("/api/misc/proxy", miscLimiter, async (req: Request, res: Response, next: NextFunction) => {
         const link = req.query.url as string
+        if (!link) return res.status(400).send("No url")
         try {
             const response = await axios.get(link, {responseType: "arraybuffer", headers: {Referer: "https://www.pixiv.net/"}}).then((r) => r.data)
             res.status(200).send(response)
-        } catch {
-            res.status(404).end()
+        } catch (e) {
+            console.log(e)
+            res.status(400).end()
         }
     })
 
     app.get("/api/misc/redirect", miscLimiter, async (req: Request, res: Response, next: NextFunction) => {
         const link = req.query.url as string
+        if (!link) return res.status(400).send("No url")
         try {
             const response = await axios.head(link).then((r) => r.request.res.responseUrl)
             res.status(200).send(response)
-        } catch {
-            res.status(404).end()
+        } catch (e) {
+            console.log(e)
+            res.status(400).end()
         }
     })
 
@@ -179,11 +189,13 @@ const MiscRoutes = (app: Express) => {
             try {
                 const translated = await googleTranslate(text, {from: "ja", to:"en"})
                 return translated.text
-            } catch {
+            } catch (e) {
+            console.log(e)
                 return text
             }
         }
         const words = req.body as string[]
+        if (!words?.[0]) return res.status(400).send("No words")
         let translated = await Promise.all(words.map((w) => translate(w)))
         res.status(200).send(translated)
     })
@@ -196,6 +208,7 @@ const MiscRoutes = (app: Express) => {
             return result.replace(/<\/?[^>]+(>|$)/g, "")
         }
         const words = req.body as string[]
+        if (!words?.[0]) return res.status(400).send("No words")
         let romajinized = await Promise.all(words.map((w) => romajinize(w)))
         res.status(200).send(romajinized)
     })
@@ -203,12 +216,12 @@ const MiscRoutes = (app: Express) => {
     app.post("/api/misc/contact", contactLimiter, async (req: Request, res: Response, next: NextFunction) => {
         try {
             const {email, subject, message, files} = req.body 
-            if (!serverFunctions.validateCSRF(req)) return res.status(400).send("Bad request")
-            if (!email || !subject || !message || !files) return res.status(400).send("Bad request")
+            if (!serverFunctions.validateCSRF(req)) return res.status(400).send("Bad CSRF token")
+            if (!email || !subject || !message || !files) return res.status(400).send("Bad email, subejct, message, or files")
             const badEmail = functions.validateEmail(email)
-            if (badEmail) return res.status(400).send("Bad request")
+            if (badEmail) return res.status(400).send("Bad email")
             const badMessage = functions.validateMessage(message)
-            if (badMessage) return res.status(400).send("Bad request")
+            if (badMessage) return res.status(400).send("Bad message")
             const attachments = [] as any
             for (let i = 0; i < files.length; i++) {
                 const attachment = {} as any 
@@ -218,13 +231,15 @@ const MiscRoutes = (app: Express) => {
             }
             await serverFunctions.contactEmail(email, subject, message, attachments)
             res.status(200).send("Success")
-        } catch {
+        } catch (e) {
+            console.log(e)
             res.status(400).send("Bad request")
         }
     })
 
     app.post("/api/misc/wdtagger", miscLimiter, async (req: Request, res: Response, next: NextFunction) => {
         try {
+            if (!req.body) return res.status(400).send("Image data must be provided")
             const buffer = Buffer.from(req.body, "binary")
             const folder = path.join(__dirname, "./dump")
             if (!fs.existsSync(folder)) fs.mkdirSync(folder, {recursive: true})

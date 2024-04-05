@@ -197,6 +197,7 @@ const TagHistoryRow: React.FunctionComponent<Props> = (props) => {
 
     return (
         <div className="taghistoryrow">
+            {session.username ? tagHistoryOptions() : null}
             <div className="taghistoryrow-container">
                 <img className="taghistoryrow-img" src={img}/>
                 <span className="taghistoryrow-tag-text" onClick={imgClick} onAuxClick={imgClick}>{functions.toProperCase(props.tagHistory.key.replaceAll("-", " "))}</span>
@@ -213,7 +214,6 @@ const TagHistoryRow: React.FunctionComponent<Props> = (props) => {
                     </div>
                 </div>
             </div>
-            {session.username ? tagHistoryOptions() : null}
         </div>
     )
 }

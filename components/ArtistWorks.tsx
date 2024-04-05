@@ -1,6 +1,6 @@
 import React, {useContext, useEffect, useRef, useState} from "react"
 import {useHistory} from "react-router-dom"
-import {ThemeContext, EnableDragContext, SessionContext} from "../Context"
+import {ThemeContext, EnableDragContext, SessionContext, MobileContext} from "../Context"
 import functions from "../structures/Functions"
 import Carousel from "./Carousel"
 import "./styles/related.less"
@@ -10,6 +10,7 @@ interface Props {
 }
 
 const ArtistWorks: React.FunctionComponent<Props> = (props) => {
+    const {mobile, setMobile} = useContext(MobileContext)
     const {theme, setTheme} = useContext(ThemeContext)
     const {enableDrag, setEnableDrag} = useContext(EnableDragContext)
     const {session, setSession} = useContext(SessionContext)
@@ -25,13 +26,15 @@ const ArtistWorks: React.FunctionComponent<Props> = (props) => {
         window.scrollTo(0, 0)
     }
 
+    let marginLeft = mobile ? 20 : 200
+
     if (!props.posts.length) return null
 
     return (
         <div className="related">
             <div className="related-title">Artist Works</div>
             <div className="related-container">
-                <Carousel images={getImages()} set={click} noKey={true} marginLeft={200} height={200}/>
+                <Carousel images={getImages()} set={click} noKey={true} marginLeft={marginLeft} height={200}/>
             </div>
         </div>
     )

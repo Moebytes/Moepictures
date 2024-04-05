@@ -92,12 +92,12 @@ export default class Functions {
     }
 
     public static removeDuplicates = <T>(array: T[]) => {
-        const set = new Set<T>()
+        const set = new Set<string>()
         return array.filter(item => {
-            if (set.has(item)) {
+            if (set.has(JSON.stringify(item))) {
                 return false
             } else {
-                set.add(item)
+                set.add(JSON.stringify(item))
                 return true
             }
         })
@@ -355,6 +355,16 @@ export default class Functions {
         const words = comment.replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g, "").split(/ +/g)
         for (let i = 0; i < words.length; i++) {
             if (profaneWords.includes(words[i])) return "Comment is profane."
+        }
+        return null
+    }
+
+    public static validateReply = (reply: string) => {
+        if (!reply) return "No reply."
+        if (!/[a-zA-Z\-\u3000-\u303f\u3040-\u309f\u30a0-\u30ff\uff00-\uff9f\u4e00-\u9faf\u3400-\u4dbf]/.test(reply)) return "Reply cannot be gibberish."
+        const words = reply.replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g, "").split(/ +/g)
+        for (let i = 0; i < words.length; i++) {
+            if (profaneWords.includes(words[i])) return "Reply is profane."
         }
         return null
     }
@@ -709,19 +719,7 @@ export default class Functions {
         return result
     }
 
-    public static extractGIFFrames = async (gif: string) => {
-        const frames = await gifFrames({url: gif, frames: "all", outputType: "canvas"})
-        const newGIFData = [] as any
-        for (let i = 0; i < frames.length; i++) {
-            newGIFData.push({
-                frame: frames[i].getImage(),
-                delay: frames[i].frameInfo.delay * 10
-            })
-        }
-        return newGIFData
-    }
-
-    public static extractGIFFrames2 = async (gif: string) => {
+    public static extractGIFFramesNew = async (gif: string) => {
         const data = await fetch(gif).then((r) => r.arrayBuffer())
         let index = 0
         // @ts-ignore
@@ -744,6 +742,24 @@ export default class Functions {
         }
 
         return result
+    }
+
+    public static extractGIFFrames = async (gif: string) => {
+        try {
+            const data = await Functions.extractGIFFramesNew(gif)
+            return data
+        } catch {
+            // fallback to this
+        }
+        const frames = await gifFrames({url: gif, frames: "all", outputType: "canvas"})
+        const newGIFData = [] as any
+        for (let i = 0; i < frames.length; i++) {
+            newGIFData.push({
+                frame: frames[i].getImage(),
+                delay: frames[i].frameInfo.delay * 10
+            })
+        }
+        return newGIFData
     }
 
     public static gifSpeed = (data: any[], speed: number) => {

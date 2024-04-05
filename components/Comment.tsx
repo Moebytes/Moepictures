@@ -1,7 +1,8 @@
 import React, {useContext, useEffect, useRef, useState} from "react"
 import {useHistory} from "react-router-dom"
 import {ThemeContext, QuoteTextContext, SessionContext, DeleteCommentIDContext, DeleteCommentFlagContext,
-EditCommentIDContext, EditCommentFlagContext, EditCommentTextContext, ReportCommentIDContext} from "../Context"
+EditCommentIDContext, EditCommentFlagContext, EditCommentTextContext, ReportCommentIDContext, SiteHueContext,
+SiteLightnessContext, SiteSaturationContext} from "../Context"
 import {HashLink as Link} from "react-router-hash-link"
 import functions from "../structures/Functions"
 import favicon from "../assets/icons/favicon.png"
@@ -20,10 +21,14 @@ interface Props {
     comment: any
     onDelete?: () => void
     onEdit?: () => void
+    onCommentJump?: (commentID: number) => void
 }
 
 const Comment: React.FunctionComponent<Props> = (props) => {
     const {theme, setTheme} = useContext(ThemeContext)
+    const {siteHue, setSiteHue} = useContext(SiteHueContext)
+    const {siteSaturation, setSiteSaturation} = useContext(SiteSaturationContext)
+    const {siteLightness, setSiteLightness} = useContext(SiteLightnessContext)
     const {quoteText, setQuoteText} = useContext(QuoteTextContext)
     const {session, setSession} = useContext(SessionContext)
     const {deleteCommentID, setDeleteCommentID} = useContext(DeleteCommentIDContext)
@@ -34,6 +39,12 @@ const Comment: React.FunctionComponent<Props> = (props) => {
     const {reportCommentID, setReportCommentID} = useContext(ReportCommentIDContext)
     const history = useHistory()
     const comment = props.comment.comment
+
+    const getFilter = () => {
+        return `hue-rotate(${siteHue - 180}deg) saturate(${siteSaturation}%) brightness(${siteLightness + 70}%)`
+    }
+
+    const defaultIcon = props.comment.image ? false : true
 
     const getCommentPFP = () => {
         if (props.comment.image) {
@@ -56,9 +67,14 @@ const Comment: React.FunctionComponent<Props> = (props) => {
     const triggerQuote = () => {
         const cleanComment = functions.parseComment(props.comment.comment).filter((s: any) => !s.includes(">>>")).join("")
         setQuoteText(functions.multiTrim(`
-            >>> ${functions.toProperCase(props.comment.username)} said:
+            >>>[${props.comment.commentID}] ${functions.toProperCase(props.comment.username)} said:
             > ${cleanComment}
         `))
+    }
+
+    const goToComment = (commentID: string) => {
+        if (!commentID) return
+        props.onCommentJump?.(Number(commentID))
     }
 
     const parseText = () => {
@@ -67,17 +83,19 @@ const Comment: React.FunctionComponent<Props> = (props) => {
         for (let i = 0; i < pieces.length; i++) {
             const piece = pieces[i]
             if (piece.includes(">")) {
-                const userPart = piece.match(/(>>>)(.*?)(?=$|>)/gm)?.[0].replace(">>>", "") ?? ""
+                const matchPart = piece.match(/(>>>(\[\d+\])?)(.*?)(?=$|>)/gm)?.[0] ?? ""
+                const userPart = matchPart.replace(/(>>>(\[\d+\])?\s*)/, "")
+                const id = matchPart.match(/(?<=\[)\d+(?=\])/)?.[0] ?? ""
                 let username = ""
                 let said = ""
                 if (userPart) {
                     username = functions.toProperCase(userPart.split(/ +/g)[0])
                     said = userPart.split(/ +/g).slice(1).join(" ")
                 }
-                const text = piece.replace(userPart, "").replaceAll(">", "")
+                const text = piece.replace(matchPart.replace(">>>", ""), "").replaceAll(">", "")
                 jsx.push(
                     <div className="comment-quote-container">
-                        {userPart ? <span className="comment-quote-user">{`${username.trim()} ${said.trim()}`}</span> : null}
+                        {userPart ? <span className="comment-quote-user" onClick={() => goToComment(id)}>{`${username.trim()} ${said.trim()}`}</span> : null}
                         <span className="comment-quote-text">{text.trim()}</span>
                     </div>
                 )
@@ -188,10 +206,10 @@ const Comment: React.FunctionComponent<Props> = (props) => {
     }
 
     return (
-        <div className="comment">
+        <div className="comment" comment-id={props.comment.commentID}>
             <div className="comment-container">
                 <div className="comment-user-container" onClick={userClick} onAuxClick={userClick}>
-                    <img className="comment-user-img" src={getCommentPFP()} onClick={userImgClick} onAuxClick={userImgClick}/>
+                    <img className="comment-user-img" src={getCommentPFP()} onClick={userImgClick} onAuxClick={userImgClick} style={{filter: defaultIcon ? getFilter() : ""}}/>
                     {generateUsernameJSX()}
                 </div>
             </div>

@@ -1,0 +1,153 @@
+@import "../../index.less";
+
+.reply {
+    position: relative;
+    display: flex;
+    flex-direction: row;
+    width: 100%;
+    margin-top: 35px;
+}
+
+.reply-container {
+    display: flex;
+    flex-direction: column;
+}
+
+.reply-text-container {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    width: 70%;
+}
+
+.reply-user-container {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: flex-start;
+    height: 100%;
+    width: 134px;
+    margin-right: 30px;
+}
+
+.reply-img {
+    width: auto;
+    height: 110px;
+}
+
+.reply-user-img {
+    width: auto;
+    height: 120px;
+}
+
+.reply-user-text {
+    font-family: Tahoma, sans-serif;
+    font-size: 23px;
+    color: var(--text-strong);
+}
+
+.reply-date-text {
+    font-family: Tahoma, sans-serif;
+    font-size: 15px;
+    font-style: italic;
+    color: var(--text);
+    margin-bottom: 10px;
+}
+
+.reply-text {
+    font-family: Tahoma, sans-serif;
+    font-size: 20px;
+    color: var(--text);
+    user-select: text;
+    word-wrap: break-word;
+    white-space: preserve;
+}
+
+.reply-options {
+    position: relative;
+    display: flex;
+    flex-direction: row;  
+    justify-content: flex-end;
+    margin-bottom: 10px;
+}
+
+.reply-options-container {
+    cursor: pointer;
+    margin-right: 10px;
+    &:hover {
+        filter: brightness(130%);
+    }
+}
+
+.reply-options-img {
+    width: auto;
+    height: 20px;
+}
+
+.reply-options-text {
+    margin-left: 5px;
+    font-family: Tahoma, sans-serif;
+    font-size: 20px;
+    color: var(--text);
+}
+
+.reply-quote-container {
+    display: flex;
+    flex-direction: column;
+    background-color: var(--inputBG);
+    margin-bottom: 10px;
+}
+
+.reply-quote-user {
+    font-family: Tahoma, sans-serif;
+    font-size: 17px;
+    color: var(--text-strong);
+    cursor: pointer;
+    &:hover {
+        filter: brightness(130%);
+    }
+}
+
+.reply-quote-text {
+    font-family: Tahoma, sans-serif;
+    font-size: 19px;
+    color: var(--text);
+}
+
+.reply-username-container {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    cursor: pointer;
+    &:hover {
+        filter: brightness(130%)
+    }
+}
+
+.reply-user-label {
+    margin-left: 3px;
+    width: auto;
+    height: 20px;
+}
+
+@media  screen and (max-width: 500px) {
+    .reply-user-container {
+        width: 100%;
+    }
+
+    .reply {
+        flex-direction: column;
+    }
+
+    .reply-text-container {
+        width: 100%;
+        margin-top: 10px;
+    }
+
+    .reply-options {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+    }
+}

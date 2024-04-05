@@ -62,16 +62,20 @@ const TagsPage: React.FunctionComponent = (props) => {
         const savedScroll = localStorage.getItem("scroll")
         if (savedScroll) setScroll(savedScroll === "true")
         const savedPage = localStorage.getItem("tagsPage")
-        if (savedPage) setTimeout(() => {setTagsPage(Number(savedPage))}, 100)
         const queryParam = new URLSearchParams(window.location.search).get("query")
         const pageParam = new URLSearchParams(window.location.search).get("page")
-        setTimeout(() => {
+        const onDOMLoaded = () => {
+            if (savedPage) setTagsPage(Number(savedPage))
             if (queryParam) updateTags(queryParam)
             if (pageParam) {
                 setQueryPage(Number(pageParam))
                 setTagsPage(Number(pageParam))
             }
-        }, 500)
+        }
+        window.addEventListener("load", onDOMLoaded)
+        return () => {
+            window.removeEventListener("load", onDOMLoaded)
+        }
     }, [])
 
     const getFilter = () => {
@@ -101,9 +105,7 @@ const TagsPage: React.FunctionComponent = (props) => {
         setHeaderText("")
         setSidebarText("")
         document.title = "Moebooru: Tags"
-        setTimeout(() => {
-            updateTags()
-        }, 200)
+        updateTags()
     }, [])
 
     useEffect(() => {
@@ -240,7 +242,7 @@ const TagsPage: React.FunctionComponent = (props) => {
         } else {
             if (!scroll) history.replace(`${location.pathname}?page=${tagsPage}`)
         }
-    }, [scroll, search, tagsPage])
+    }, [scroll, searchQuery, tagsPage])
 
     useEffect(() => {
         if (tags?.length) {
@@ -302,7 +304,7 @@ const TagsPage: React.FunctionComponent = (props) => {
     const generatePageButtonsJSX = () => {
         const jsx = [] as any
         let buttonAmount = 7
-        if (mobile) buttonAmount = 5
+        if (mobile) buttonAmount = 3
         if (maxPage() < buttonAmount) buttonAmount = maxPage()
         let counter = 0
         let increment = -3
@@ -363,7 +365,7 @@ const TagsPage: React.FunctionComponent = (props) => {
         return (
             <div className="tagsort-item" ref={sortRef} onClick={() => {setActiveDropdown(activeDropdown === "sort" ? "none" : "sort")}}>
                 <img className="tagsort-img" src={sort} style={{filter: getFilter()}}/>
-                <span className="tagsort-text">{functions.toProperCase(sortType)}</span>
+                {!mobile ? <span className="tagsort-text">{functions.toProperCase(sortType)}</span> : null}
             </div>
         )
     }
@@ -372,7 +374,7 @@ const TagsPage: React.FunctionComponent = (props) => {
         return (
             <div className="tagsort-item" ref={typeRef} onClick={() => {setActiveDropdown(activeDropdown === "type" ? "none" : "type")}}>
                 <img className="tagsort-img rotate" src={type} style={{filter: getFilter()}}/>
-                <span className="tagsort-text">{functions.toProperCase(typeType)}</span>
+                {!mobile ? <span className="tagsort-text">{functions.toProperCase(typeType)}</span> : null}
             </div>
         )
     }
@@ -435,10 +437,10 @@ const TagsPage: React.FunctionComponent = (props) => {
                             <img className="tag-search-icon" src={getSearchIcon()} style={{filter: getFilterSearch()}} onClick={() => updateTags()} onMouseEnter={() => setSearchIconHover(true)} onMouseLeave={() => setSearchIconHover(false)}/>
                         </div>
                         {getSortJSX()}
-                        <div className="tagsort-item" onClick={() => toggleScroll()}>
+                        {!mobile ? <div className="tagsort-item" onClick={() => toggleScroll()}>
                             <img className="tagsort-img" src={scroll ? scrollIcon : pageIcon} style={{filter: getFilter()}}/>
                             <span className="tagsort-text">{scroll ? "Scrolling" : "Pages"}</span>
-                        </div>
+                        </div> : null}
                         <div className={`tag-dropdown ${activeDropdown === "sort" ? "" : "hide-tag-dropdown"}`} 
                         style={{marginRight: getSortMargin(), top: mobile ? "229px" : "209px"}} onClick={() => setActiveDropdown("none")}>
                             <div className="tag-dropdown-row" onClick={() => setSortType("alphabetic")}>

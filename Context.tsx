@@ -127,7 +127,19 @@ export const DeleteTranslationHistoryIDContext = React.createContext<any>(null)
 export const DeleteTranslationHistoryFlagContext = React.createContext<any>(null)
 export const RevertTranslationHistoryIDContext = React.createContext<any>(null)
 export const RevertTranslationHistoryFlagContext = React.createContext<any>(null)
+export const EditThreadIDContext = React.createContext<any>(null)
+export const EditThreadFlagContext = React.createContext<any>(null)
+export const EditThreadTitleContext = React.createContext<any>(null)
+export const EditThreadContentContext = React.createContext<any>(null)
 export const ShowNewThreadDialogContext = React.createContext<any>(null)
+export const DeleteThreadIDContext = React.createContext<any>(null)
+export const DeleteThreadFlagContext = React.createContext<any>(null)
+export const DeleteReplyIDContext = React.createContext<any>(null)
+export const DeleteReplyFlagContext = React.createContext<any>(null)
+export const EditReplyIDContext = React.createContext<any>(null)
+export const EditReplyFlagContext = React.createContext<any>(null)
+export const EditReplyContentContext = React.createContext<any>(null)
+export const ReportReplyIDContext = React.createContext<any>(null)
 
 const Context: React.FunctionComponent = (props) => {
     const [siteHue, setSiteHue] = useState(180)
@@ -243,10 +255,34 @@ const Context: React.FunctionComponent = (props) => {
     const [deleteTranslationHistoryFlag, setDeleteTranslationHistoryFlag] = useState(false)
     const [revertTranslationHistoryFlag, setRevertTranslationHistoryFlag] = useState(false)
     const [showNewThreadDialog, setShowNewThreadDialog] = useState(false)
+    const [deleteThreadID, setDeleteThreadID] = useState(null)
+    const [deleteThreadFlag, setDeleteThreadFlag] = useState(null)
+    const [editThreadID, setEditThreadID] = useState(null)
+    const [editThreadFlag, setEditThreadFlag] = useState(null)
+    const [editThreadTitle, setEditThreadTitle] = useState(null)
+    const [editThreadContent, setEditThreadContent] = useState(null)
+    const [deleteReplyID, setDeleteReplyID] = useState(null)
+    const [deleteReplyFlag, setDeleteReplyFlag] = useState(false)
+    const [editReplyFlag, setEditReplyFlag] = useState(false)
+    const [editReplyID, setEditReplyID] = useState(null)
+    const [editReplyContent, setEditReplyContent] = useState("")
+    const [reportReplyID, setReportReplyID] = useState(null)
     
 
 return (
     <>
+        <EditThreadContentContext.Provider value={{editThreadContent, setEditThreadContent}}>
+        <EditThreadTitleContext.Provider value={{editThreadTitle, setEditThreadTitle}}>
+        <EditThreadFlagContext.Provider value={{editThreadFlag, setEditThreadFlag}}>
+        <EditThreadIDContext.Provider value={{editThreadID, setEditThreadID}}>
+        <DeleteThreadFlagContext.Provider value={{deleteThreadFlag, setDeleteThreadFlag}}>
+        <DeleteThreadIDContext.Provider value={{deleteThreadID, setDeleteThreadID}}>
+        <ReportReplyIDContext.Provider value={{reportReplyID, setReportReplyID}}>
+        <EditReplyContentContext.Provider value={{editReplyContent, setEditReplyContent}}>
+        <EditReplyIDContext.Provider value={{editReplyID, setEditReplyID}}>
+        <EditReplyFlagContext.Provider value={{editReplyFlag, setEditReplyFlag}}>
+        <DeleteReplyFlagContext.Provider value={{deleteReplyFlag, setDeleteReplyFlag}}>
+        <DeleteReplyIDContext.Provider value={{deleteReplyID, setDeleteReplyID}}>
         <ThreadPageContext.Provider value={{threadPage, setThreadPage}}>
         <ForumPageContext.Provider value={{forumPage, setForumPage}}>
         <TagsPageContext.Provider value={{tagsPage, setTagsPage}}>
@@ -474,6 +510,18 @@ return (
         </TagsPageContext.Provider>
         </ForumPageContext.Provider>
         </ThreadPageContext.Provider>
+        </DeleteReplyIDContext.Provider>
+        </DeleteReplyFlagContext.Provider>
+        </EditReplyFlagContext.Provider>
+        </EditReplyIDContext.Provider>
+        </EditReplyContentContext.Provider>
+        </ReportReplyIDContext.Provider>
+        </DeleteThreadIDContext.Provider>
+        </DeleteThreadFlagContext.Provider>
+        </EditThreadIDContext.Provider>
+        </EditThreadFlagContext.Provider>
+        </EditThreadTitleContext.Provider>
+        </EditThreadContentContext.Provider>
     </>
     )
 }

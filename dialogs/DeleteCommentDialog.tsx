@@ -50,7 +50,7 @@ const DeleteCommentDialog: React.FunctionComponent = (props) => {
                             <span className="deletecomment-dialog-title">Delete Comment</span>
                         </div>
                         <div className="deletecomment-dialog-row">
-                            <span className="deletecomment-dialog-text">Are you sure that you want to delete this comment?</span>
+                            <span className="deletecomment-dialog-text">Do you want to delete this comment?</span>
                         </div>
                         <div className="deletecomment-dialog-row">
                             <button onClick={() => click("reject")} className="download-button">{"No"}</button>

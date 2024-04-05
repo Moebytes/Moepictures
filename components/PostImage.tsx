@@ -142,6 +142,11 @@ const PostImage: React.FunctionComponent<Props> = (props) => {
     }
 
     useEffect(() => {
+        const savedReverseVideo = localStorage.getItem("reverseVideo")
+        if (savedReverseVideo) {
+            URL.revokeObjectURL(savedReverseVideo)
+            localStorage.removeItem("reverseVideo")
+        }
         setVideoLoaded(false)
         setImageLoaded(false)
         setReverseVideo(null)
@@ -161,13 +166,16 @@ const PostImage: React.FunctionComponent<Props> = (props) => {
         if (mobile) fetchVideo()
         const decryptImg = async () => {
             let url = props.img
+            let isAnimatedWebP = false
             if (functions.isImage(props.img)) {
-                let isAnimatedWebP = false
                 if (functions.isWebP(props.img)) {
                     const arraybuffer = await fetch(props.img).then((r) => r.arrayBuffer())
                     isAnimatedWebP = await functions.isAnimatedWebp(arraybuffer)
                 }
                 if (!isAnimatedWebP) url = await cryptoFunctions.decryptedLink(props.img)
+            }
+            if (functions.isGIF(props.img) || isAnimatedWebP) {
+                setBackFrame(await cryptoFunctions.decryptedLink(props.img))
             }
             const base64 = await functions.linkToBase64(url)
             setImg(base64)
@@ -227,7 +235,7 @@ const PostImage: React.FunctionComponent<Props> = (props) => {
     const handleKeydown = (event: any) => {
         const key = event.keyCode
         const value = String.fromCharCode((96 <= key && key <= 105) ? key - 48 : key).toLowerCase()
-        if (!(event.target instanceof HTMLTextAreaElement) && !(event.target instanceof HTMLInputElement)) {
+        if (!(event.target instanceof HTMLTextAreaElement) && !(event.target instanceof HTMLInputElement) && !(event.target.classList.contains("quickedit-textarea"))) {
             if (value === "f") {
                 if (!props.noKeydown) fullscreen()
             }
@@ -337,19 +345,18 @@ const PostImage: React.FunctionComponent<Props> = (props) => {
                 const blob = new Blob([new DataView(binary.buffer)], {type: mime.lookup(path.extname(props.img)) || "video/mp4"})
                 const url = URL.createObjectURL(blob)
                 setReverseVideo(`${url}#${ext}`)
+                localStorage.setItem("reverseVideo", `${url}#${ext}`)
             }
             ffmpeg.FS("unlink", output)
             // ffmpeg.exit()
         }
 
-        if (!videoData && videoLoaded && functions.isVideo(props.img)) {
-            parseVideo()
-            if (!reverseVideo && functions.isMP4(props.img)) reverseAudioStream()
+        if (!videoData && videoLoaded && functions.isVideo(props.img) && reverse) {
+            parseVideo().then(() => {
+                if (functions.isMP4(props.img)) reverseAudioStream()
+            })
         }
-        return () => {
-            if (reverseVideo) URL.revokeObjectURL(reverseVideo)
-        }
-    }, [videoLoaded])
+    }, [videoLoaded, videoData, reverse])
 
     useEffect(() => {
         let id = 0
@@ -694,6 +701,10 @@ const PostImage: React.FunctionComponent<Props> = (props) => {
         setVolume(value)
         setPreviousVolume(value)
     }
+
+    useEffect(() => {
+        changeVolume(1)
+    }, [])
 
     const mute = () => {
         if (!videoRef.current) return
@@ -1346,6 +1357,7 @@ const PostImage: React.FunctionComponent<Props> = (props) => {
                     <img draggable={false} className="post-lightness-overlay" ref={gifLightnessRef} src={props.img}/>
                     <img draggable={false} className="post-sharpen-overlay" ref={gifOverlayRef} src={props.img}/>
                     <canvas draggable={false} className="post-gif-canvas" ref={gifRef}></canvas> 
+                    {!gifData && backFrame ? <img draggable={false} className="post-image" src={backFrame}/> : null}
                     </>
                     : null}
                     <div className="relative-ref" onMouseMove={dragImgDown} onMouseLeave={dragImgUp}>

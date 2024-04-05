@@ -60,7 +60,8 @@ const UserRoutes = (app: Express) => {
             delete user.email
             delete user.password
             res.status(200).json(user)
-        } catch {
+        } catch (e) {
+            console.log(e)
             return res.status(400).send("Bad request")
         }
     })
@@ -68,8 +69,8 @@ const UserRoutes = (app: Express) => {
     app.post("/api/user/signup", signupLimiter, async (req: Request, res: Response) => {
         try {
             let {username, email, password, captchaResponse} = req.body 
-            if (!serverFunctions.validateCSRF(req)) return res.status(400).send("Bad request")
-            if (!username || !email || !password || !captchaResponse) return res.status(400).send("Bad request.")
+            if (!serverFunctions.validateCSRF(req)) return res.status(400).send("Bad CSRF token")
+            if (!username || !email || !password || !captchaResponse) return res.status(400).send("Bad username, email, password, or captchaResponse.")
             username = username.trim().toLowerCase()
             email = email.trim()
             password = password.trim()
@@ -79,7 +80,7 @@ const UserRoutes = (app: Express) => {
             if (badUsername || badEmail || badPassword) return res.status(400).send("Bad username, password, or email.")
             let ip = req.headers["x-forwarded-for"] || req.socket.remoteAddress
             ip = ip?.toString().replace("::ffff:", "") || ""
-            if (req.session.captchaAnswer !== captchaResponse?.trim()) return res.status(400).send("Bad request")
+            if (req.session.captchaAnswer !== captchaResponse?.trim()) return res.status(400).send("Bad captchaResponse")
             try {
                 await sql.insertUser(username, email)
                 await sql.updateUser(username, "joinDate", new Date().toISOString())
@@ -106,7 +107,8 @@ const UserRoutes = (app: Express) => {
             } catch {
                 return res.status(400).send("Username taken")
             }
-        } catch {
+        } catch (e) {
+            console.log(e)
             res.status(400).send("Bad request")
         }
     })
@@ -114,13 +116,13 @@ const UserRoutes = (app: Express) => {
     app.post("/api/user/login", loginLimiter, loginSpeedLimiter, async (req: Request, res: Response) => {
         try {
             let {username, password, captchaResponse} = req.body
-            if (!serverFunctions.validateCSRF(req)) return res.status(400).send("Bad request")
-            if (!username || !password || !captchaResponse) return res.status(400).send("Bad request")
+            if (!serverFunctions.validateCSRF(req)) return res.status(400).send("Bad CSRF token")
+            if (!username || !password || !captchaResponse) return res.status(400).send("Bad username, password, or captchaResponse")
             username = username.trim().toLowerCase()
             password = password.trim()
             let ip = req.headers["x-forwarded-for"] || req.socket.remoteAddress
             ip = ip?.toString().replace("::ffff:", "") || ""
-            if (req.session.captchaAnswer !== captchaResponse?.trim()) return res.status(400).send("Bad request")
+            if (req.session.captchaAnswer !== captchaResponse?.trim()) return res.status(400).send("Bad captchaResponse")
             const user = await sql.user(username)
             if (!user) return res.status(400).send("Bad request")
             const matches = await bcrypt.compare(password, user.password)
@@ -142,7 +144,8 @@ const UserRoutes = (app: Express) => {
             } else {
                 return res.status(400).send("Bad request")
             }
-        } catch {
+        } catch (e) {
+            console.log(e)
             res.status(400).send("Bad request")
         }
     })
@@ -153,7 +156,8 @@ const UserRoutes = (app: Express) => {
                 if (err) throw err
                 res.status(200).send("Success")
             })
-        } catch {
+        } catch (e) {
+            console.log(e)
             res.status(400).send("Bad request")
         }
     })
@@ -166,17 +170,18 @@ const UserRoutes = (app: Express) => {
             delete session.csrfSecret
             delete session.ip
             res.status(200).json(session)
-        } catch {
+        } catch (e) {
+            console.log(e)
             res.status(400).send("Bad request")
         }
     })
 
     app.post("/api/user/updatepfp", userLimiter, async (req: Request, res: Response) => {
         try {
-            if (!serverFunctions.validateCSRF(req)) return res.status(400).send("Bad request")
+            if (!serverFunctions.validateCSRF(req)) return res.status(400).send("Bad CSRF token")
             const bytes = req.body.bytes
             const postID = req.body.postID
-            if (!req.session.username) return res.status(400).send("Bad request")
+            if (!req.session.username) return res.status(401).send("Unauthorized")
             const result = fileType(bytes)?.[0]
             const jpg = result?.mime === "image/jpeg"
             const png = result?.mime === "image/png"
@@ -200,22 +205,24 @@ const UserRoutes = (app: Express) => {
             } else {
                 res.status(400).send("Bad request")
             }
-        } catch {
+        } catch (e) {
+            console.log(e)
             res.status(400).send("Bad request")
         }
     })
 
     app.post("/api/user/favoritesprivacy", sessionLimiter, async (req: Request, res: Response) => {
         try {
-            if (!serverFunctions.validateCSRF(req)) return res.status(400).send("Bad request")
-            if (!req.session.username) return res.status(400).send("Bad request")
+            if (!serverFunctions.validateCSRF(req)) return res.status(400).send("Bad CSRF token")
+            if (!req.session.username) return res.status(401).send("Unauthorized")
             const user = await sql.user(req.session.username)
-            if (!user) return res.status(400).send("Bad request")
+            if (!user) return res.status(400).send("Bad username")
             const newPrivacy = !Boolean(user.publicFavorites)
             req.session.publicFavorites = newPrivacy 
             await sql.updateUser(req.session.username, "publicFavorites", newPrivacy)
             res.status(200).send("Success")
-        } catch {
+        } catch (e) {
+            console.log(e)
             res.status(400).send("Bad request")
         }
     })
@@ -223,14 +230,14 @@ const UserRoutes = (app: Express) => {
     app.post("/api/user/changeusername", userLimiter, async (req: Request, res: Response) => {
         try {
             let {newUsername, captchaResponse} = req.body
-            if (!serverFunctions.validateCSRF(req)) return res.status(400).send("Bad request")
-            if (!req.session.username) return res.status(400).send("Bad request")
-            if (req.session.captchaAnswer !== captchaResponse?.trim()) return res.status(400).send("Bad request")
+            if (!serverFunctions.validateCSRF(req)) return res.status(400).send("Bad CSRF token")
+            if (!req.session.username) return res.status(401).send("Unauthorized")
+            if (req.session.captchaAnswer !== captchaResponse?.trim()) return res.status(400).send("Bad captchaResponse")
             newUsername = newUsername.trim().toLowerCase()
             const badUsername = functions.validateUsername(newUsername)
-            if (badUsername) return res.status(400).send("Bad request")
+            if (badUsername) return res.status(400).send("Bad username")
             const user = await sql.user(req.session.username)
-            if (!user) return res.status(400).send("Bad request")
+            if (!user) return res.status(400).send("Bad username")
             await sql.updateUser(req.session.username, "username", newUsername)
             req.session.username = newUsername
             if (user.image) {
@@ -242,7 +249,8 @@ const UserRoutes = (app: Express) => {
                 req.session.image = newFilename
             }
             res.status(200).send("Success")
-        } catch {
+        } catch (e) {
+            console.log(e)
             res.status(400).send("Bad request")
         }
     })
@@ -250,23 +258,25 @@ const UserRoutes = (app: Express) => {
     app.post("/api/user/changepassword", userLimiter, async (req: Request, res: Response) => {
         try {
             let {oldPassword, newPassword} = req.body
-            if (!serverFunctions.validateCSRF(req)) return res.status(400).send("Bad request")
-            if (!oldPassword || !newPassword || !req.session.username) return res.status(400).send("Bad request")
+            if (!serverFunctions.validateCSRF(req)) return res.status(400).send("Bad CSRF token")
+            if (!req.session.username) return res.status(401).send("Unauthorized")
+            if (!oldPassword || !newPassword) return res.status(400).send("Bad oldPassword or newPassword")
             oldPassword = oldPassword.trim()
             newPassword = newPassword.trim()
             const badPassword = functions.validatePassword(req.session.username, newPassword)
-            if (badPassword) return res.status(400).send("Bad request")
+            if (badPassword) return res.status(400).send("Bad newPassword")
             const user = await sql.user(req.session.username)
-            if (!user) return res.status(400).send("Bad request")
+            if (!user) return res.status(400).send("Bad username")
             const matches = await bcrypt.compare(oldPassword, user.password)
             if (matches) {
                 const newHash = await bcrypt.hash(newPassword, 13)
                 await sql.updateUser(req.session.username, "password", newHash)
                 return res.status(200).send("Success")
             } else {
-                return res.status(400).send("Bad request")
+                return res.status(400).send("Bad oldPassword")
             }
-        } catch {
+        } catch (e) {
+            console.log(e)
             res.status(400).send("Bad request")
         }
     })
@@ -274,10 +284,11 @@ const UserRoutes = (app: Express) => {
     app.get("/api/user/changeemail", userLimiter, async (req: Request, res: Response) => {
         try {
             let token = req.query.token as string
-            if (!token || !req.session.username) return res.status(400).send("Bad request")
+            if (!req.session.username) return res.status(401).send("Unauthorized")
+            if (!token) return res.status(400).send("Bad token")
             const hashToken = crypto.createHash("sha256").update(token.trim()).digest("hex")
             const tokenData = await sql.emailToken(hashToken)
-            if (!tokenData) return res.status(400).send("Bad request")
+            if (!tokenData) return res.status(400).send("Bad token")
             const expireDate = new Date(tokenData.expires)
             if (new Date() <= expireDate) {
                 await sql.updateUser(req.session.username, "email", tokenData.email)
@@ -286,9 +297,10 @@ const UserRoutes = (app: Express) => {
                 res.status(200).redirect("/change-email-success")
             } else {
                 await sql.deleteEmailToken(tokenData.email)
-                res.status(400).send("Bad request")
+                res.status(400).send("Token expired")
             }
-        } catch {
+        } catch (e) {
+            console.log(e)
             res.status(400).send("Bad request")
         }
     })
@@ -296,13 +308,13 @@ const UserRoutes = (app: Express) => {
     app.post("/api/user/changeemail", userLimiter, async (req: Request, res: Response) => {
         try {
             let {newEmail, captchaResponse} = req.body
-            if (!serverFunctions.validateCSRF(req)) return res.status(400).send("Bad request")
+            if (!serverFunctions.validateCSRF(req)) return res.status(400).send("Bad CSRF token")
             if (!req.session.username) return res.status(400).send("Bad request")
-            if (req.session.captchaAnswer !== captchaResponse?.trim()) return res.status(400).send("Bad request")
+            if (req.session.captchaAnswer !== captchaResponse?.trim()) return res.status(400).send("Bad captchaResponse")
             const badEmail = functions.validateEmail(newEmail)
-            if (badEmail) return res.status(400).send("Bad request")
+            if (badEmail) return res.status(400).send("Bad newEmail")
             const user = await sql.user(req.session.username)
-            if (!user) return res.status(400).send("Bad request")
+            if (!user) return res.status(400).send("Bad username")
             const token = crypto.randomBytes(32).toString("hex")
             const hashToken = crypto.createHash("sha256").update(token).digest("hex")
             try {
@@ -315,7 +327,8 @@ const UserRoutes = (app: Express) => {
             const link = `${req.protocol}://${req.get("host")}/api/user/changeemail?token=${token}`
             await serverFunctions.email(newEmail, "Moebooru Email Address Change", {username, link}, "changeemail.html")
             res.status(200).send("Success")
-        } catch {
+        } catch (e) {
+            console.log(e)
             res.status(400).send("Bad request")
         }
     })
@@ -323,18 +336,19 @@ const UserRoutes = (app: Express) => {
     app.post("/api/user/verifyemail", userLimiter, async (req: Request, res: Response) => {
         try {
             let {email, captchaResponse} = req.body
-            if (!serverFunctions.validateCSRF(req)) return res.status(400).send("Bad request")
+            if (!serverFunctions.validateCSRF(req)) return res.status(400).send("Bad CSRF token")
             if (!req.session.username) return res.status(400).send("Bad request")
-            if (req.session.captchaAnswer !== captchaResponse?.trim()) return res.status(400).send("Bad request")
+            if (req.session.captchaAnswer !== captchaResponse?.trim()) return res.status(400).send("Bad captchaResponse")
             const badEmail = functions.validateEmail(email)
-            if (badEmail) return res.status(400).send("Bad request")
+            if (badEmail) return res.status(400).send("Bad email")
             const user = await sql.user(req.session.username)
-            if (!user) return res.status(400).send("Bad request")
+            if (!user) return res.status(400).send("Bad username")
             const token = crypto.randomBytes(32).toString("hex")
             const hashToken = crypto.createHash("sha256").update(token).digest("hex")
             try {
                 await sql.insertEmailToken(email, hashToken)
-            } catch {
+            } catch (e) {
+            console.log(e)
                 await sql.updateEmailToken(email, hashToken)
             }
             const username = functions.toProperCase(req.session.username)
@@ -343,7 +357,8 @@ const UserRoutes = (app: Express) => {
             await sql.updateUser(req.session.username, "email", email)
             req.session.email = email
             res.status(200).send("Success")
-        } catch {
+        } catch (e) {
+            console.log(e)
             res.status(400).send("Bad request")
         }
     })
@@ -351,10 +366,10 @@ const UserRoutes = (app: Express) => {
     app.get("/api/user/verifyemail", userLimiter, async (req: Request, res: Response) => {
         try {
             let token = req.query.token as string
-            if (!token) return res.status(400).send("Bad request")
+            if (!token) return res.status(400).send("Bad token")
             const hashToken = crypto.createHash("sha256").update(token.trim()).digest("hex")
             const tokenData = await sql.emailToken(hashToken)
-            if (!tokenData) return res.status(400).send("Bad request")
+            if (!tokenData) return res.status(400).send("Bad token")
             const expireDate = new Date(tokenData.expires)
             if (new Date() <= expireDate) {
                 const user = await sql.userByEmail(tokenData.email)
@@ -377,15 +392,17 @@ const UserRoutes = (app: Express) => {
     app.post("/api/user/changebio", userLimiter, async (req: Request, res: Response) => {
         try {
             let {bio} = req.body
-            if (!serverFunctions.validateCSRF(req)) return res.status(400).send("Bad request")
-            if (!req.session.username || !bio) return res.status(400).send("Bad request")
+            if (!serverFunctions.validateCSRF(req)) return res.status(400).send("Bad CSRF token")
+            if (!req.session.username) return res.status(401).send("Unauthorized")
+            if (!bio) return res.status(400).send("Bad bio")
             bio = bio.trim()
             const user = await sql.user(req.session.username)
-            if (!user) return res.status(400).send("Bad request")
+            if (!user) return res.status(400).send("Bad username")
             await sql.updateUser(req.session.username, "bio", bio)
             req.session.bio = bio
             res.status(200).send("Success")
-        } catch {
+        } catch (e) {
+            console.log(e)
             res.status(400).send("Bad request")
         }
     })
@@ -393,8 +410,8 @@ const UserRoutes = (app: Express) => {
     app.post("/api/user/forgotpassword", userLimiter, async (req: Request, res: Response) => {
         try {
             const {email, captchaResponse} = req.body
-            if (!serverFunctions.validateCSRF(req)) return res.status(400).send("Bad request")
-            if (req.session.captchaAnswer !== captchaResponse?.trim()) return res.status(400).send("Bad request")
+            if (!serverFunctions.validateCSRF(req)) return res.status(400).send("Bad CSRF token")
+            if (req.session.captchaAnswer !== captchaResponse?.trim()) return res.status(400).send("Bad captchaResponse")
             if (!email) {
                 await functions.timeout(2000) 
                 return res.status(200).send("Success")
@@ -411,7 +428,8 @@ const UserRoutes = (app: Express) => {
             const link = `${req.protocol}://${req.get("host")}/reset-password?token=${token}&username=${user.username}`
             await serverFunctions.email(user.email, "Moebooru Password Reset", {username, link}, "resetpassword.html")
             res.status(200).send("Success")
-        } catch {
+        } catch (e) {
+            console.log(e)
             res.status(200).send("Success")
         }
     })
@@ -419,14 +437,14 @@ const UserRoutes = (app: Express) => {
     app.post("/api/user/resetpassword", userLimiter, async (req: Request, res: Response) => {
         try {
             const {username, password, token} = req.body
-            if (!serverFunctions.validateCSRF(req)) return res.status(400).send("Bad request")
-            if (!username || !token || !password) return res.status(400).send("Bad request")
+            if (!serverFunctions.validateCSRF(req)) return res.status(400).send("Bad CSRF token")
+            if (!username || !token || !password) return res.status(400).send("Bad username, token, or password")
             const badPassword = functions.validatePassword(username, password)
-            if (badPassword) return res.status(400).send("Bad request")
+            if (badPassword) return res.status(400).send("Bad password")
             const tokenData = await sql.passwordToken(username)
-            if (!tokenData) return res.status(400).send("Bad request")
+            if (!tokenData) return res.status(400).send("Bad token")
             const matches = await bcrypt.compare(token, tokenData.token)
-            if (!matches) return res.status(400).send("Bad request")
+            if (!matches) return res.status(400).send("Bad password")
             const expireDate = new Date(tokenData.expires)
             if (new Date() <= expireDate) {
                 await sql.deletePasswordToken(username)
@@ -435,23 +453,25 @@ const UserRoutes = (app: Express) => {
                 res.status(200).send("Success")
             } else {
                 await sql.deletePasswordToken(username)
-                res.status(400).send("Bad request")
+                res.status(400).send("Token expired")
             }
-        } catch {
+        } catch (e) {
+            console.log(e)
             res.status(400).send("Bad request")
         }
     })
 
     app.delete("/api/user/delete", userLimiter, async (req: Request, res: Response, next: NextFunction) => {
         try {
-            if (!serverFunctions.validateCSRF(req)) return res.status(400).send("Bad request")
-            if (!req.session.username) return res.status(400).send("Bad request")
+            if (!serverFunctions.validateCSRF(req)) return res.status(400).send("Bad CSRF token")
+            if (!req.session.username) return res.status(401).send("Unauthorized")
             const user = await sql.user(req.session.username)
-            if (!user) return res.status(400).send("Bad request")
+            if (!user) return res.status(400).send("Bad username")
             try {
                 await sql.deleteEmailToken(user.email)
                 await serverFunctions.deleteFile(functions.getTagLink("pfp", user.image))
-            } catch {
+            } catch (e) {
+            console.log(e)
                 // ignore
             }
             await sql.deleteUser(req.session.username)
@@ -475,12 +495,13 @@ const UserRoutes = (app: Express) => {
                 favorites = functions.stripTags(favorites)
                 res.status(200).send(favorites)
             } else {
-                if (!req.session.username) return res.status(400).send("Bad request")
+                if (!req.session.username) return res.status(401).send("Unauthorized")
                 let favorites = await sql.favorites(req.session.username)
                 favorites = functions.stripTags(favorites)
                 res.status(200).send(favorites)
             }
-        } catch {
+        } catch (e) {
+            console.log(e)
             res.status(400).send("Bad request") 
         }
     })
@@ -488,18 +509,20 @@ const UserRoutes = (app: Express) => {
     app.get("/api/user/uploads", sessionLimiter, async (req: Request, res: Response) => {
         try {
             const username = req.query.username
-            if (!req.session.username && !username) return res.status(400).send("Bad request")
+            if (!req.session.username) return res.status(401).send("Unauthorized")
+            if (!username) return res.status(400).send("Bad username")
             if (username) {
                 let uploads = await sql.uploads(username as string)
                 uploads = functions.stripTags(uploads)
                 res.status(200).send(uploads)
             } else {
-                if (!req.session.username) return res.status(400).send("Bad request")
+                if (!req.session.username) return res.status(401).send("Unauthorized")
                 let uploads = await sql.uploads(req.session.username)
                 uploads = functions.stripTags(uploads)
                 res.status(200).send(uploads)
             }
-        } catch {
+        } catch (e) {
+            console.log(e)
             res.status(400).send("Bad request") 
         }
     })
@@ -510,7 +533,8 @@ const UserRoutes = (app: Express) => {
             const sort = req.query.sort as string
             const offset = req.query.offset as string
             const username = req.query.username as string
-            if (!req.session.username && !username) return res.status(400).send("Bad request")
+            if (!req.session.username) return res.status(401).send("Unauthorized")
+            if (!username) return res.status(400).send("Bad username")
             if (username) {
                 let comments = await sql.searchCommentsByUsername([username], query, sort, offset)
                 res.status(200).send(comments)
@@ -519,7 +543,8 @@ const UserRoutes = (app: Express) => {
                 let comments = await sql.searchCommentsByUsername([req.session.username], query, sort, offset)
                 res.status(200).send(comments)
             }
-        } catch {
+        } catch (e) {
+            console.log(e)
             res.status(400).send("Bad request") 
         }
     })

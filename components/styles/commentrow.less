@@ -31,10 +31,6 @@
     justify-content: center;
     align-items: center;
     height: 100%;
-    cursor: pointer;
-    &:hover {
-        filter: brightness(130%)
-    }
 }
 
 .commentrow-img {
@@ -45,7 +41,7 @@
 
 .commentrow-user-img {
     width: auto;
-    height: 45px;
+    height: 70px;
 }
 
 .commentrow-user-text {
@@ -53,6 +49,10 @@
     font-family: Tahoma, sans-serif;
     font-size: 20px;
     color: var(--text-strong);
+    cursor: pointer;
+    &:hover {
+        filter: brightness(130%)
+    }
 }
 
 .commentrow-date-text {
@@ -100,18 +100,22 @@
     display: flex;
     flex-direction: column;
     background-color: var(--inputBG);
+    margin-bottom: 5px;
 }
 
 .commentrow-quote-user {
     font-family: Tahoma, sans-serif;
-    font-size: 15px;
+    font-size: 16px;
     color: var(--text-strong);
-
+    cursor: pointer;
+    &:hover {
+        filter: brightness(130%);
+    }
 }
 
 .commentrow-quote-text {
     font-family: Tahoma, sans-serif;
-    font-size: 13px;
+    font-size: 16px;
     color: var(--text);
 }
 

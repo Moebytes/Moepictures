@@ -17,9 +17,10 @@ const FavoriteRoutes = (app: Express) => {
     app.post("/api/favorite/update", favoriteLimiter, async (req: Request, res: Response) => {
         try {
             const {postID, favorited} = req.body
-            if (!serverFunctions.validateCSRF(req)) return res.status(400).send("Bad request")
+            if (!serverFunctions.validateCSRF(req)) return res.status(400).send("Bad CSRF token")
             if (Number.isNaN(Number(postID))) return res.status(400).send("Invalid postID")
-            if (favorited == null || !req.session.username) return res.status(400).send("Bad request")
+            if (!req.session.username) return res.status(401).send("Unauthorized")
+            if (favorited == null) return res.status(400).send("Bad favorited")
             const favorite = await sql.favorite(Number(postID), req.session.username)
             if (favorited) {
                 if (!favorite) await sql.insertFavorite(Number(postID), req.session.username)
@@ -27,7 +28,8 @@ const FavoriteRoutes = (app: Express) => {
                 if (favorite) await sql.deleteFavorite(favorite.favoriteID)
             }
             res.status(200).send("Success")
-        } catch {
+        } catch (e) {
+            console.log(e)
             res.status(400).send("Bad request") 
         }
     })
@@ -36,10 +38,11 @@ const FavoriteRoutes = (app: Express) => {
         try {
             const postID = req.query.postID
             if (Number.isNaN(Number(postID))) return res.status(400).send("Invalid postID")
-            if (!req.session.username) return res.status(400).send("Bad request")
+            if (!req.session.username) return res.status(401).send("Unauthorized")
             const favorite = await sql.favorite(Number(postID), req.session.username)
             res.status(200).send(favorite)
-        } catch {
+        } catch (e) {
+            console.log(e)
             res.status(400).send("Bad request") 
         }
     })

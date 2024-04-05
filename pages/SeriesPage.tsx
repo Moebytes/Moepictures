@@ -12,6 +12,7 @@ import sort from "../assets/icons/sort.png"
 import SeriesRow from "../components/SeriesRow"
 import scrollIcon from "../assets/icons/scroll.png"
 import pageIcon from "../assets/icons/page.png"
+import PageDialog from "../dialogs/PageDialog"
 import axios from "axios"
 import {ThemeContext, EnableDragContext, HideNavbarContext, HideSidebarContext, RelativeContext, HideTitlebarContext, MobileContext,
 ActiveDropdownContext, HeaderTextContext, SidebarTextContext, SiteHueContext, SiteLightnessContext, SiteSaturationContext, ScrollContext,
@@ -52,16 +53,20 @@ const SeriesPage: React.FunctionComponent = (props) => {
         const savedScroll = localStorage.getItem("scroll")
         if (savedScroll) setScroll(savedScroll === "true")
         const savedPage = localStorage.getItem("seriesPage")
-        if (savedPage) setTimeout(() => {setSeriesPage(Number(savedPage))}, 100)
         const queryParam = new URLSearchParams(window.location.search).get("query")
         const pageParam = new URLSearchParams(window.location.search).get("page")
-        setTimeout(() => {
+        const onDOMLoaded = () => {
+            if (savedPage) setSeriesPage(Number(savedPage))
             if (queryParam) updateSeries(queryParam)
             if (pageParam) {
                 setQueryPage(Number(pageParam))
                 setSeriesPage(Number(pageParam))
             }
-        }, 500)
+        }
+        window.addEventListener("load", onDOMLoaded)
+        return () => {
+            window.removeEventListener("load", onDOMLoaded)
+        }
     }, [])
 
     const getFilter = () => {
@@ -91,9 +96,7 @@ const SeriesPage: React.FunctionComponent = (props) => {
         setHeaderText("")
         setSidebarText("")
         document.title = "Moebooru: Series"
-        setTimeout(() => {
-            updateSeries()
-        }, 200)
+        updateSeries()
     }, [])
 
     useEffect(() => {
@@ -231,7 +234,7 @@ const SeriesPage: React.FunctionComponent = (props) => {
         } else {
             if (!scroll) history.replace(`${location.pathname}?page=${seriesPage}`)
         }
-    }, [scroll, search, seriesPage])
+    }, [scroll, searchQuery, seriesPage])
 
     useEffect(() => {
         if (series?.length) {
@@ -293,7 +296,7 @@ const SeriesPage: React.FunctionComponent = (props) => {
     const generatePageButtonsJSX = () => {
         const jsx = [] as any
         let buttonAmount = 7
-        if (mobile) buttonAmount = 5
+        if (mobile) buttonAmount = 3
         if (maxPage() < buttonAmount) buttonAmount = maxPage()
         let counter = 0
         let increment = -3
@@ -385,6 +388,7 @@ const SeriesPage: React.FunctionComponent = (props) => {
     return (
         <>
         <DragAndDrop/>
+        <PageDialog/>
         <TitleBar/>
         <NavBar/>
         <div className="body">
@@ -398,10 +402,10 @@ const SeriesPage: React.FunctionComponent = (props) => {
                             <img className="series-search-icon" src={getSearchIcon()} style={{filter: getFilterSearch()}} onClick={() => updateSeries()} onMouseEnter={() => setSearchIconHover(true)} onMouseLeave={() => setSearchIconHover(false)}/>
                         </div>
                         {getSortJSX()}
-                        <div className="seriesort-item" onClick={() => toggleScroll()}>
+                        {!mobile ? <div className="seriesort-item" onClick={() => toggleScroll()}>
                             <img className="seriesort-img" src={scroll ? scrollIcon : pageIcon} style={{filter: getFilter()}}/>
                             <span className="seriesort-text">{scroll ? "Scrolling" : "Pages"}</span>
-                        </div>
+                        </div> : null}
                         <div className={`series-dropdown ${activeDropdown === "sort" ? "" : "hide-series-dropdown"}`} 
                         style={{marginRight: getSortMargin(), top: mobile ? "229px" : "209px"}} onClick={() => setActiveDropdown("none")}>
                             <div className="series-dropdown-row" onClick={() => setSortType("alphabetic")}>

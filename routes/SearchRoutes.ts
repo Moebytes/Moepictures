@@ -27,7 +27,7 @@ const SearchRoutes = (app: Express) => {
             let withTags = req.query.withTags === "true"
             if (!functions.validType(type, true)) return res.status(400).send("Invalid type")
             if (!functions.validRestrict(restrict, true)) return res.status(400).send("Invalid restrict")
-            if (restrict === "explicit") if (req.session.role !== "admin" && req.session.role !== "mod") return res.status(403).send("No permission")
+            if (restrict === "explicit") if (req.session.role !== "admin" && req.session.role !== "mod") return res.status(403).end()
             if (!functions.validStyle(style, true)) return res.status(400).send("Invalid style")
             if (!functions.validSort(sort)) return res.status(400).send("Invalid sort")
             const tags = query.trim().split(/ +/g).filter(Boolean)
@@ -41,7 +41,7 @@ const SearchRoutes = (app: Express) => {
             let result = null as any
             if (sort === "tagcount" || sort === "reverse tagcount") withTags = true
             if (sort === "favorites" || sort === "reverse favorites") {
-                if (!req.session.username) return res.status(400).send("Bad request")
+                if (!req.session.username) return res.status(401).send("Unauthorized")
                 const favorites = await sql.searchFavorites(req.session.username, tags, type, restrict, style, sort, offset, limit, withTags)
                 result = favorites.map((f: any) => f.post)
                 result[0].postCount = favorites[0].postCount
@@ -78,7 +78,7 @@ const SearchRoutes = (app: Express) => {
             const offset = req.query.offset as string
             if (!functions.validType(type, true)) return res.status(400).send("Invalid type")
             if (!functions.validRestrict(restrict, true)) return res.status(400).send("Invalid restrict")
-            if (restrict === "explicit") if (req.session.role !== "admin" && req.session.role !== "mod") return res.status(403).send("No permission")
+            if (restrict === "explicit") if (req.session.role !== "admin" && req.session.role !== "mod") return res.status(403).end()
             if (!functions.validStyle(style, true)) return res.status(400).send("Invalid style")
             let result = await sql.random(type, restrict, style, offset)
             result = result.map((p: any) => {
@@ -101,6 +101,7 @@ const SearchRoutes = (app: Express) => {
     app.post("/api/search/similar", searchLimiter, async (req: Request, res: Response, next: NextFunction) => {
         try {
             const {type, bytes} = req.body
+            if (!bytes) return res.status(400).send("Image data must be provided as bytes")
             const buffer = Buffer.from(Object.values(bytes) as any)
             let hash = ""
             const useMD5 = type === "mp3" || type === "wav" || type === "glb" || type === "fbx" || type === "obj"
@@ -286,7 +287,13 @@ const SearchRoutes = (app: Express) => {
             const offset = req.query.offset as string
             if (!functions.validThreadSort(sort)) return res.status(400).send("Invalid sort")
             const search = query?.trim() ?? ""
-            const result = await sql.searchThreads(search, sort, offset)
+            const stickyThreads = await sql.stickyThreads()
+            const threadResult = await sql.searchThreads(search, sort, offset)
+            const result = [...stickyThreads, ...threadResult]
+            const newThreadCount = (stickyThreads[0]?.threadCount || 0) + (threadResult[0]?.threadCount || 0)
+            for (let i = 0; i < result.length; i++) {
+                result[i].threadCount = newThreadCount
+            }
             res.status(200).json(result)
         } catch (e) {
             console.log(e)

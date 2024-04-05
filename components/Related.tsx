@@ -1,6 +1,6 @@
 import React, {useContext, useEffect, useRef, useState} from "react"
 import {useHistory} from "react-router-dom"
-import {ThemeContext, EnableDragContext, SessionContext, PostsContext, RestrictTypeContext} from "../Context"
+import {ThemeContext, EnableDragContext, SessionContext, MobileContext, RestrictTypeContext} from "../Context"
 import {HashLink as Link} from "react-router-hash-link"
 import functions from "../structures/Functions"
 import permissions from "../structures/Permissions"
@@ -14,6 +14,7 @@ interface Props {
 }
 
 const Related: React.FunctionComponent<Props> = (props) => {
+    const {mobile, setMobile} = useContext(MobileContext)
     const {theme, setTheme} = useContext(ThemeContext)
     const {enableDrag, setEnableDrag} = useContext(EnableDragContext)
     const {session, setSession} = useContext(SessionContext)
@@ -59,14 +60,16 @@ const Related: React.FunctionComponent<Props> = (props) => {
         window.scrollTo(0, 0)
     }
 
+    let marginLeft = mobile ? 20 : 200
+
     if (!related.length) return null
 
     return (
-        <div className="related" style={{paddingLeft: "200px", marginTop: "0px", marginBottom: "10px"}}>
+        <div className="related" style={{paddingLeft: `${marginLeft}px`, marginTop: "0px", marginBottom: "10px"}}>
             <div className="related-title" style={{marginBottom: "0px"}}>Related</div>
-            <div className="related-container" style={{width: "80%", flexWrap: "wrap", justifyContent: "space-between"}}>
+            <div className="related-container">
                 {/* {generateImagesJSX()} */}
-                <Carousel images={getImages()} set={click} noKey={true} marginLeft={100} height={200}/>
+                <Carousel images={getImages()} set={click} noKey={true} marginLeft={marginLeft} height={200}/>
             </div>
         </div>
     )

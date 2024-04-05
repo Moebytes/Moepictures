@@ -53,16 +53,20 @@ const ArtistsPage: React.FunctionComponent = (props) => {
         const savedScroll = localStorage.getItem("scroll")
         if (savedScroll) setScroll(savedScroll === "true")
         const savedPage = localStorage.getItem("artistsPage")
-        if (savedPage) setTimeout(() => {setArtistsPage(Number(savedPage))}, 100)
         const queryParam = new URLSearchParams(window.location.search).get("query")
         const pageParam = new URLSearchParams(window.location.search).get("page")
-        setTimeout(() => {
+        const onDOMLoaded = () => {
+            if (savedPage) setArtistsPage(Number(savedPage))
             if (queryParam) updateArtists(queryParam)
             if (pageParam) {
                 setQueryPage(Number(pageParam))
                 setArtistsPage(Number(pageParam))
             }
-        }, 500)
+        }
+        window.addEventListener("load", onDOMLoaded)
+        return () => {
+            window.removeEventListener("load", onDOMLoaded)
+        }
     }, [])
 
     const getFilter = () => {
@@ -92,9 +96,7 @@ const ArtistsPage: React.FunctionComponent = (props) => {
         setHeaderText("")
         setSidebarText("")
         document.title = "Moebooru: Artists"
-        setTimeout(() => {
-            updateArtists()
-        }, 200)
+        updateArtists()
     }, [])
 
     useEffect(() => {
@@ -231,7 +233,7 @@ const ArtistsPage: React.FunctionComponent = (props) => {
         } else {
             if (!scroll) history.replace(`${location.pathname}?page=${artistsPage}`)
         }
-    }, [scroll, search, artistsPage])
+    }, [scroll, searchQuery, artistsPage])
 
     useEffect(() => {
         if (artists?.length) {
@@ -293,7 +295,7 @@ const ArtistsPage: React.FunctionComponent = (props) => {
     const generatePageButtonsJSX = () => {
         const jsx = [] as any
         let buttonAmount = 7
-        if (mobile) buttonAmount = 5
+        if (mobile) buttonAmount = 3
         if (maxPage() < buttonAmount) buttonAmount = maxPage()
         let counter = 0
         let increment = -3
@@ -384,6 +386,7 @@ const ArtistsPage: React.FunctionComponent = (props) => {
     return (
         <>
         <DragAndDrop/>
+        <PageDialog/>
         <TitleBar/>
         <NavBar/>
         <div className="body">
@@ -397,10 +400,10 @@ const ArtistsPage: React.FunctionComponent = (props) => {
                             <img className="artist-search-icon" src={getSearchIcon()} style={{filter: getFilterSearch()}} onClick={() => updateArtists()} onMouseEnter={() => setSearchIconHover(true)} onMouseLeave={() => setSearchIconHover(false)}/>
                         </div>
                         {getSortJSX()}
-                        <div className="artistsort-item" onClick={() => toggleScroll()}>
+                        {!mobile ? <div className="artistsort-item" onClick={() => toggleScroll()}>
                             <img className="artistsort-img" src={scroll ? scrollIcon : pageIcon} style={{filter: getFilter()}}/>
                             <span className="artistsort-text">{scroll ? "Scrolling" : "Pages"}</span>
-                        </div>
+                        </div> : null}
                         <div className={`artist-dropdown ${activeDropdown === "sort" ? "" : "hide-artist-dropdown"}`} 
                         style={{marginRight: getSortMargin(), top: mobile ? "229px" : "209px"}} onClick={() => setActiveDropdown("none")}>
                             <div className="artist-dropdown-row" onClick={() => setSortType("alphabetic")}>

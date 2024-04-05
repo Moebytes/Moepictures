@@ -8,7 +8,8 @@ import SideBar from "../components/SideBar"
 import Footer from "../components/Footer"
 import DragAndDrop from "../components/DragAndDrop"
 import {HideNavbarContext, HideSidebarContext, ThemeContext, EnableDragContext, RelativeContext, HideTitlebarContext, MobileContext, CommentSearchFlagContext,
-HeaderTextContext, SidebarTextContext, SessionContext, RedirectContext, SessionFlagContext, UserImgContext, ShowDeleteAccountDialogContext} from "../Context"
+HeaderTextContext, SidebarTextContext, SessionContext, RedirectContext, SessionFlagContext, ShowDeleteAccountDialogContext, SiteHueContext, SiteLightnessContext,
+SiteSaturationContext} from "../Context"
 import functions from "../structures/Functions"
 import permissions from "../structures/Permissions"
 import Carousel from "../components/Carousel"
@@ -25,6 +26,9 @@ interface Props {
 const UserPage: React.FunctionComponent<Props> = (props) => {
     const [ignored, forceUpdate] = useReducer(x => x + 1, 0)
     const {theme, setTheme} = useContext(ThemeContext)
+    const {siteHue, setSiteHue} = useContext(SiteHueContext)
+    const {siteSaturation, setSiteSaturation} = useContext(SiteSaturationContext)
+    const {siteLightness, setSiteLightness} = useContext(SiteLightnessContext)
     const {hideNavbar, setHideNavbar} = useContext(HideNavbarContext)
     const {hideTitlebar, setHideTitlebar} = useContext(HideTitlebarContext)
     const {hideSidebar, setHideSidebar} = useContext(HideSidebarContext)
@@ -46,13 +50,19 @@ const UserPage: React.FunctionComponent<Props> = (props) => {
     const [uploadImages, setUploadImages] = useState([]) as any
     const [favoriteImages, setFavoriteImages] = useState([]) as any
     const [user, setUser] = useState(null) as any
+    const [defaultIcon, setDefaultIcon] = useState(false)
     const history = useHistory()
     const username = props?.match.params.username
+
+    const getFilter = () => {
+        return `hue-rotate(${siteHue - 180}deg) saturate(${siteSaturation}%) brightness(${siteLightness + 70}%)`
+    }
 
     const fetchUser = async () => {
         const user = await axios.get("/api/user", {params: {username}}).then((r) => r.data)
         if (!user) return history.push("/404")
         setUser(user)
+        setDefaultIcon(user.image ? false : true)
     }
 
     useEffect(() => {
@@ -190,7 +200,7 @@ const UserPage: React.FunctionComponent<Props> = (props) => {
                 {user ?
                 <div className="user">
                     <div className="user-top-container">
-                        <img className="user-img" src={getUserImg()} onClick={userImgClick} onAuxClick={userImgClick}/>
+                        <img className="user-img" src={getUserImg()} onClick={userImgClick} onAuxClick={userImgClick} style={{filter: defaultIcon ? getFilter() : ""}}/>
                         {generateUsernameJSX()}
                     </div>
                     <div className="user-row">

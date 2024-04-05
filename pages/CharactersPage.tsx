@@ -12,6 +12,7 @@ import sort from "../assets/icons/sort.png"
 import CharacterRow from "../components/CharacterRow"
 import scrollIcon from "../assets/icons/scroll.png"
 import pageIcon from "../assets/icons/page.png"
+import PageDialog from "../dialogs/PageDialog"
 import axios from "axios"
 import {ThemeContext, EnableDragContext, HideNavbarContext, HideSidebarContext, RelativeContext, MobileContext,
 HideTitlebarContext, ActiveDropdownContext, HeaderTextContext, SidebarTextContext, SiteHueContext, SiteLightnessContext,
@@ -52,16 +53,20 @@ const CharactersPage: React.FunctionComponent = (props) => {
         const savedScroll = localStorage.getItem("scroll")
         if (savedScroll) setScroll(savedScroll === "true")
         const savedPage = localStorage.getItem("charactersPage")
-        if (savedPage) setTimeout(() => {setCharactersPage(Number(savedPage))}, 100)
         const queryParam = new URLSearchParams(window.location.search).get("query")
         const pageParam = new URLSearchParams(window.location.search).get("page")
-        setTimeout(() => {
+        const onDOMLoaded = () => {
+            if (savedPage) setCharactersPage(Number(savedPage))
             if (queryParam) updateCharacters(queryParam)
             if (pageParam) {
                 setQueryPage(Number(pageParam))
                 setCharactersPage(Number(pageParam))
             }
-        }, 500)
+        }
+        window.addEventListener("load", onDOMLoaded)
+        return () => {
+            window.removeEventListener("load", onDOMLoaded)
+        }
     }, [])
 
     const getFilter = () => {
@@ -91,9 +96,7 @@ const CharactersPage: React.FunctionComponent = (props) => {
         setHeaderText("")
         setSidebarText("")
         document.title = "Moebooru: Characters"
-        setTimeout(() => {
-            updateCharacters()
-        }, 200)
+        updateCharacters()
     }, [])
 
     useEffect(() => {
@@ -231,7 +234,7 @@ const CharactersPage: React.FunctionComponent = (props) => {
         } else {
             if (!scroll) history.replace(`${location.pathname}?page=${charactersPage}`)
         }
-    }, [scroll, search, charactersPage])
+    }, [scroll, searchQuery, charactersPage])
 
     useEffect(() => {
         if (characters?.length) {
@@ -293,7 +296,7 @@ const CharactersPage: React.FunctionComponent = (props) => {
     const generatePageButtonsJSX = () => {
         const jsx = [] as any
         let buttonAmount = 7
-        if (mobile) buttonAmount = 5
+        if (mobile) buttonAmount = 3
         if (maxPage() < buttonAmount) buttonAmount = maxPage()
         let counter = 0
         let increment = -3
@@ -385,6 +388,7 @@ const CharactersPage: React.FunctionComponent = (props) => {
     return (
         <>
         <DragAndDrop/>
+        <PageDialog/>
         <TitleBar/>
         <NavBar/>
         <div className="body">
@@ -398,10 +402,10 @@ const CharactersPage: React.FunctionComponent = (props) => {
                             <img className="character-search-icon" src={getSearchIcon()} style={{filter: getFilterSearch()}} onClick={() => updateCharacters()} onMouseEnter={() => setSearchIconHover(true)} onMouseLeave={() => setSearchIconHover(false)}/>
                         </div>
                         {getSortJSX()}
-                        <div className="charactersort-item" onClick={() => toggleScroll()}>
+                        {!mobile ? <div className="charactersort-item" onClick={() => toggleScroll()}>
                             <img className="charactersort-img" src={scroll ? scrollIcon : pageIcon} style={{filter: getFilter()}}/>
                             <span className="charactersort-text">{scroll ? "Scrolling" : "Pages"}</span>
-                        </div>
+                        </div> : null}
                         <div className={`character-dropdown ${activeDropdown === "sort" ? "" : "hide-character-dropdown"}`} 
                         style={{marginRight: getSortMargin(), top: mobile ? "229px" : "209px"}} onClick={() => setActiveDropdown("none")}>
                             <div className="character-dropdown-row" onClick={() => setSortType("alphabetic")}>

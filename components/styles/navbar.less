@@ -253,7 +253,7 @@
     position: absolute;
     z-index: 3000;
     top: @nav-bar-height;
-    right: 0;
+    right: 0px;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -350,5 +350,14 @@
     &:hover {
         border: 1px solid #c9daff;
         color: #c8d7ff;
+    }
+}
+
+
+@media screen and (max-width: 500px) {
+    .title-dropdown {
+        top: 375px;
+        left: 0px;
+        right: unset;
     }
 }
