@@ -2,7 +2,7 @@ import React, {useContext, useEffect, useState, useReducer} from "react"
 import {useHistory} from "react-router-dom"
 import {ThemeContext, HideNavbarContext, HideSortbarContext, EnableDragContext, MobileContext, UnverifiedPostsContext,
 RelativeContext, HideTitlebarContext, SearchContext, SearchFlagContext, PostsContext, ShowDeletePostDialogContext,
-TagsContext, RandomFlagContext, ImageSearchFlagContext, SessionContext, QuickEditIDContext, QuickEditUnverifiedContext,
+TagsContext, RandomFlagContext, ImageSearchFlagContext, SessionContext, QuickEditIDContext,
 SiteHueContext, SiteLightnessContext, SiteSaturationContext, TranslationModeContext, TranslationDrawingEnabledContext} from "../Context"
 import {HashLink as Link} from "react-router-hash-link"
 import favicon from "../assets/icons/favicon.png"
@@ -69,7 +69,6 @@ const MobileInfo: React.FunctionComponent<Props> = (props) => {
     const [updaterRole, setUpdaterRole] = useState("")
     const [suggestionsActive, setSuggestionsActive] = useState(false)
     const {quickEditID, setQuickEditID} = useContext(QuickEditIDContext)
-    const {quickEditUnverified, setQuickEditUnverified} = useContext(QuickEditUnverifiedContext)
     const {translationMode, setTranslationMode} = useContext(TranslationModeContext)
     const {translationDrawingEnabled, setTranslationDrawingEnabled} = useContext(TranslationDrawingEnabledContext)
     const history = useHistory()
@@ -306,12 +305,9 @@ const MobileInfo: React.FunctionComponent<Props> = (props) => {
     }
 
     const triggerQuickEdit = () => {
-        if (props.unverified) {
-            setQuickEditUnverified(true)
-        } else {
-            setQuickEditUnverified(false)
-        }
-        setQuickEditID(props.post.postID)
+        setQuickEditID({post: props.post, artists: props.artists, 
+            characters: props.characters, series: props.series,
+            tags: props.tags, unverified: props.unverified})
     }
 
     const generateMirrorsJSX = () => {

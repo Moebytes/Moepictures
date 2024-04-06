@@ -104,7 +104,6 @@ export const ScrollYContext = React.createContext<any>(null)
 export const PostFlagContext = React.createContext<any>(null)
 export const MobileScrollingContext = React.createContext<any>(null)
 export const QuickEditIDContext = React.createContext<any>(null)
-export const QuickEditUnverifiedContext = React.createContext<any>(null)
 export const AutoSearchContext = React.createContext<any>(null)
 export const ShowPageDialogContext = React.createContext<any>(null)
 export const PageFlagContext = React.createContext<any>(null)
@@ -235,7 +234,6 @@ const Context: React.FunctionComponent = (props) => {
     const [scrollY, setScrollY] = useState(null)
     const [postFlag, setPostFlag] = useState(false)
     const [quickEditID, setQuickEditID] = useState(null)
-    const [quickEditUnverified, setQuickEditUnverified] = useState(false)
     const [autoSearch, setAutoSearch] = useState(false)
     const [showPageDialog, setShowPageDialog] = useState(false)
     const [pageFlag, setPageFlag] = useState(null)
@@ -342,7 +340,6 @@ return (
         <EditTagTwitterContext.Provider value={{editTagTwitter, setEditTagTwitter}}>
         <EditTagPixivContext.Provider value={{editTagPixiv, setEditTagPixiv}}>
         <EditTagTypeContext.Provider value={{editTagType, setEditTagType}}>
-        <QuickEditUnverifiedContext.Provider value={{quickEditUnverified, setQuickEditUnverified}}>
         <QuickEditIDContext.Provider value={{quickEditID, setQuickEditID}}>
         <PostFlagContext.Provider value={{postFlag, setPostFlag}}>
         <ScrollYContext.Provider value={{scrollY, setScrollY}}>
@@ -474,7 +471,6 @@ return (
         </ScrollYContext.Provider>
         </PostFlagContext.Provider>
         </QuickEditIDContext.Provider>
-        </QuickEditUnverifiedContext.Provider>
         </EditTagTypeContext.Provider>
         </EditTagPixivContext.Provider>
         </EditTagTwitterContext.Provider>

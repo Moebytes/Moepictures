@@ -181,13 +181,13 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
         const updateRelatedPosts = async () => {
             if (!tagCategories?.characters?.[0].tag) return
             if (tagCategories.characters[0].tag !== characterTag) {
-                const relatedPosts = await axios.get("/api/search/posts", {params: {query: tagCategories.characters[0].tag, type: post.type, restrict: post.restrict === "explicit" ? "explicit" : "all", style: post.style, sort: Math.random() > 0.5 ? "date" : "reverse date", limit: 200}, withCredentials: true}).then((r) => r.data)
+                const relatedPosts = await axios.get("/api/search/posts", {params: {query: tagCategories.characters[0].tag, type: post.type, restrict: post.restrict === "explicit" ? "explicit" : "all", style: post.style, sort: Math.random() > 0.5 ? "date" : "reverse date", limit: 20}, withCredentials: true}).then((r) => r.data)
                 setRelatedPosts(relatedPosts)
                 characterTag = tagCategories.characters[0].tag
             }
         }
         updateArtistPosts()
-        updateRelatedPosts()
+        //updateRelatedPosts()
     }, [post, tagCategories])
 
     useEffect(() => {

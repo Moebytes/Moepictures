@@ -265,7 +265,6 @@ const PostRoutes = (app: Express) => {
 
     app.put("/api/post/quickedit", postUpdateLimiter, async (req: Request, res: Response, next: NextFunction) => {
         try {
-            if (!serverFunctions.validateCSRF(req)) return res.status(400).send("Bad CSRF token")
             const postID = Number(req.body.postID)
             const unverified = String(req.body.unverified) === "true"
             let type = req.body.type 
@@ -408,7 +407,6 @@ const PostRoutes = (app: Express) => {
 
     app.put("/api/post/quickedit/unverified", postUpdateLimiter, async (req: Request, res: Response, next: NextFunction) => {
         try {
-            if (!serverFunctions.validateCSRF(req)) return res.status(400).send("Bad request")
             let postID = Number(req.body.postID)
             let type = req.body.type 
             const restrict = req.body.restrict 

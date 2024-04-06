@@ -1,7 +1,7 @@
 import React, {useEffect, useContext, useState, useRef} from "react"
 import {useHistory} from "react-router-dom"
 import {HashLink as Link} from "react-router-hash-link"
-import {HideNavbarContext, HideSidebarContext, ThemeContext, EnableDragContext, QuickEditIDContext, QuickEditUnverifiedContext, HideTitlebarContext, SessionContext, MobileContext} from "../Context"
+import {HideNavbarContext, HideSidebarContext, ThemeContext, EnableDragContext, QuickEditIDContext, HideTitlebarContext, SessionContext, MobileContext} from "../Context"
 import functions from "../structures/Functions"
 import Draggable from "react-draggable"
 import permissions from "../structures/Permissions"
@@ -31,7 +31,6 @@ const QuickEditDialog: React.FunctionComponent = (props) => {
     const {enableDrag, setEnableDrag} = useContext(EnableDragContext)
     const {session, setSession} = useContext(SessionContext)
     const {quickEditID, setQuickEditID} = useContext(QuickEditIDContext)
-    const {quickEditUnverified, setQuickEditUnverified} = useContext(QuickEditUnverifiedContext)
     const {mobile, setMobile} = useContext(MobileContext)
     const [type, setType] = useState("image")
     const [restrict, setRestrict] = useState("safe")
@@ -56,23 +55,13 @@ const QuickEditDialog: React.FunctionComponent = (props) => {
     const history = useHistory()
 
     const updateFields = async () => {
-        let post = null as any 
-        if (quickEditUnverified) {
-            post = await axios.get("/api/post/unverified", {params: {postID: quickEditID}, withCredentials: true}).then((r) => r.data)
-        } else {
-            post = await axios.get("/api/post", {params: {postID: quickEditID}, withCredentials: true}).then((r) => r.data)
-        }
-        if (!post) return history.push("/404")
-        setType(post.type)
-        setRestrict(post.restrict)
-        setStyle(post.style)
-
-        const parsedTags = await functions.parseTags([post])
-        const tagCategories = await functions.tagCategories(parsedTags)
-        setArtists(tagCategories.artists.map((t: any) => t.tag).join(" "))
-        setCharacters(tagCategories.characters.map((t: any) => t.tag).join(" "))
-        setSeries(tagCategories.series.map((t: any) => t.tag).join(" "))
-        setTags(tagCategories.tags.map((t: any) => t.tag).join(" "))
+        setType(quickEditID.post.type)
+        setRestrict(quickEditID.post.restrict)
+        setStyle(quickEditID.post.style)
+        setArtists(quickEditID.artists.map((t: any) => t.tag).join(" "))
+        setCharacters(quickEditID.characters.map((t: any) => t.tag).join(" "))
+        setSeries(quickEditID.series.map((t: any) => t.tag).join(" "))
+        setTags(quickEditID.tags.map((t: any) => t.tag).join(" "))
     }
 
     const reset = () => {
@@ -103,11 +92,9 @@ const QuickEditDialog: React.FunctionComponent = (props) => {
 
     useEffect(() => {
         if (quickEditID) {
-            // document.body.style.overflowY = "hidden"
             document.body.style.pointerEvents = "none"
             updateFields()
         } else {
-            // document.body.style.overflowY = "visible"
             document.body.style.pointerEvents = "all"
             setEnableDrag(true)
             reset()
@@ -125,8 +112,8 @@ const QuickEditDialog: React.FunctionComponent = (props) => {
                 return setError(false)
             }
             const data = {
-                postID: quickEditID,
-                unverified: quickEditUnverified,
+                postID: quickEditID.post.postID,
+                unverified: quickEditID.unverified,
                 type,
                 restrict,
                 style,
@@ -136,8 +123,8 @@ const QuickEditDialog: React.FunctionComponent = (props) => {
                 tags: functions.cleanHTML(tags).split(/[\n\r\s]+/g),
                 reason
             }
-            await axios.put("/api/post/quickedit", data, {headers: {"x-csrf-token": functions.getCSRFToken()}, withCredentials: true})
             setQuickEditID(null)
+            await axios.put("/api/post/quickedit", data, {headers: {"x-csrf-token": functions.getCSRFToken()}, withCredentials: true})
             history.go(0)
         } else {
             const tagArr = functions.cleanHTML(tags).split(/[\n\r\s]+/g)
@@ -157,7 +144,7 @@ const QuickEditDialog: React.FunctionComponent = (props) => {
                 return setError(false)
             }
             const data = {
-                postID: quickEditID,
+                postID: quickEditID.post.postID,
                 type,
                 restrict,
                 style,

@@ -2,7 +2,7 @@ import React, {useContext, useEffect, useState, useReducer} from "react"
 import {useHistory} from "react-router-dom"
 import {ThemeContext, HideSidebarContext, HideNavbarContext, HideSortbarContext, EnableDragContext, MobileContext, UnverifiedPostsContext,
 RelativeContext, HideTitlebarContext, SidebarHoverContext, SearchContext, SearchFlagContext, PostsContext, ShowDeletePostDialogContext, AutoSearchContext,
-TagsContext, RandomFlagContext, ImageSearchFlagContext, SidebarTextContext, SessionContext, MobileScrollingContext, QuickEditIDContext, QuickEditUnverifiedContext,
+TagsContext, RandomFlagContext, ImageSearchFlagContext, SidebarTextContext, SessionContext, MobileScrollingContext, QuickEditIDContext,
 TranslationModeContext, TranslationDrawingEnabledContext, SiteHueContext, SiteLightnessContext, SiteSaturationContext} from "../Context"
 import {HashLink as Link} from "react-router-hash-link"
 import favicon from "../assets/icons/favicon.png"
@@ -100,7 +100,6 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
     const [getRandomIconHover, setRandomIconHover] = useState(false)
     const [getRandomMobileIconHover, setRandomMobileIconHover] = useState(false)
     const {quickEditID, setQuickEditID} = useContext(QuickEditIDContext)
-    const {quickEditUnverified, setQuickEditUnverified} = useContext(QuickEditUnverifiedContext)
     const {translationMode, setTranslationMode} = useContext(TranslationModeContext)
     const {translationDrawingEnabled, setTranslationDrawingEnabled} = useContext(TranslationDrawingEnabledContext)
     const {autoSearch, setAutoSearch} = useContext(AutoSearchContext)
@@ -585,12 +584,9 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
     }
     
     const triggerQuickEdit = () => {
-        if (props.unverified) {
-            setQuickEditUnverified(true)
-        } else {
-            setQuickEditUnverified(false)
-        }
-        setQuickEditID(props.post.postID)
+        setQuickEditID({post: props.post, artists: props.artists, 
+            characters: props.characters, series: props.series,
+            tags: props.tags, unverified: props.unverified})
     }
 
     const triggerAddTranslation = () => {

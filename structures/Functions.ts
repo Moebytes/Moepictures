@@ -1179,7 +1179,7 @@ export default class Functions {
     }
 
     public static tagCategories = async (parsedTags: any[], cache?: boolean) => {
-        let result = cache ? Functions.tagsCache() : await axios.get("/api/tag/list", {params: {tags: parsedTags.map((t: any) => t.tag)}, withCredentials: true}).then((r) => r.data)
+        let result = cache ? await Functions.tagsCache() : await axios.get("/api/tag/list", {params: {tags: parsedTags.map((t: any) => t.tag)}, withCredentials: true}).then((r) => r.data)
         let artists = [] as any 
         let characters = [] as any 
         let series = [] as any 

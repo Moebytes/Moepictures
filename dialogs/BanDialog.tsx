@@ -162,7 +162,7 @@ const BanDialog: React.FunctionComponent = (props) => {
                             <img className="dialog-checkbox" src={deleteHistoryChanges ? checkboxChecked : checkbox} onClick={() => setDeleteHistoryChanges((prev: boolean) => !prev)} style={{filter: getFilter()}}/>
                         </div>
                         <div className="dialog-row">
-                            <span className="dialog-text">Delete comments?</span>
+                            <span className="dialog-text">Delete comments/replies?</span>
                             <img className="dialog-checkbox" src={deleteComments ? checkboxChecked : checkbox} onClick={() => setDeleteComments((prev: boolean) => !prev)} style={{filter: getFilter()}}/>
                         </div>
                         <div className="dialog-row">

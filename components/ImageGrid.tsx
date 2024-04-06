@@ -200,7 +200,7 @@ const ImageGrid: React.FunctionComponent<Props> = (props) => {
             setPage(1)
             searchPosts()
         }
-    }, [searchFlag, imageType, restrictType, styleType, sortType, scroll])
+    }, [searchFlag, imageType, sizeType, restrictType, styleType, sortType, scroll])
 
     useEffect(() => {
         if (reloadPostFlag) reloadedPost = true
