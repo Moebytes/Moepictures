@@ -43,24 +43,26 @@ interface Props {
 
 let player: Tone.Player
 let grain: Tone.GrainPlayer
-let downsampleTimer = null as any
-let Downsampler: any
+let audioNode: any
+let bitcrusherNode: any
+let gainNode: any
 
 const initialize = async () => {
-    player = new Tone.Player(silence).sync().toDestination()
+    player = new Tone.Player(silence).sync()
     grain = new Tone.GrainPlayer(silence).sync()
     grain.grainSize = 0.1
     grain.overlap = 0.1
-    /*
     const context = Tone.getContext()
-    let worklet = "" as any
-    try {
-        worklet = new WorkerUrl(new URL("../structures/Downsampler.js", import.meta.url), {name: "downsample"})
-    } catch {
-        worklet = new URL("downsample.js", window.location.href)
-    }
-    await context.addAudioWorkletModule(worklet, "downsampler")
-    Downsampler = context.createAudioWorkletNode("downsampler")*/
+    // @ts-ignore
+    audioNode = new Tone.ToneAudioNode()
+    gainNode = new Tone.Gain(1)
+    await context.addAudioWorkletModule("./bitcrusher.js", "bitcrusher")
+    bitcrusherNode = context.createAudioWorkletNode("bitcrush-processor")
+    audioNode.input = player
+    audioNode.output = gainNode
+    audioNode.workletNode = bitcrusherNode
+    audioNode.input.chain(audioNode.workletNode, audioNode.output)
+    audioNode.toDestination()
 }
 
 if (typeof window !== "undefined") initialize()
@@ -153,41 +155,6 @@ const PostSong: React.FunctionComponent<Props> = (props) => {
         if (ref.current) ref.current.style.opacity = "1"
         updateSongCover()
     }, [props.audio])
-
-    const removeEffect = (type: string) => {
-        const index = effects.findIndex((e: any) => e?.type === type)
-        if (index !== -1) {
-            effects[index] = null as any
-            setEffects(effects.filter(Boolean))
-        }
-    }
-
-    const pushEffect = (type: string, node: any) => {
-        const obj = {type, node}
-        const index = effects.findIndex((e: any) => e?.type === type)
-        if (index !== -1) {
-            effects[index] = obj
-            setEffects(effects)
-        } else {
-            effects.push(obj)
-            setEffects(effects)
-        }
-    }
-    
-    const applyEffects = () => {
-        if (!player || !grain) return
-        player.disconnect()
-        grain.disconnect()
-        const nodes = effects.map((e: any) => e?.node).filter(Boolean)
-        const current = preservesPitch ? grain : player
-        if (nodes[0]) {
-            nodes.forEach((n: any) => n.disconnect())
-            const gain = new Tone.Gain(1).toDestination()
-            current.chain(...[...nodes]).connect(gain.input)
-        } else {
-            current.toDestination()
-        }
-    }
 
     useEffect(() => {
         const id = window.setInterval(() => {
@@ -447,10 +414,12 @@ const PostSong: React.FunctionComponent<Props> = (props) => {
         setPreservesPitch(val)
         if (val) {
             player.disconnect()
-            grain.toDestination()
+            audioNode.input = grain
+            audioNode.input.chain(audioNode.workletNode, audioNode.output)
         } else {
             grain.disconnect()
-            player.toDestination()
+            audioNode.input = player
+            audioNode.input.chain(audioNode.workletNode, audioNode.output)
         }
         // setSeekTo(secondsProgress)
     }
@@ -536,22 +505,14 @@ const PostSong: React.FunctionComponent<Props> = (props) => {
         }
     }
 
-    const downsample = async (noApply?: boolean) => {
-        if (!Downsampler) return
-        if (pixelate === 1) {
-            removeEffect("downsample")
-            return applyEffects()
-        }
-        if (downsampleTimer) return 
-        downsampleTimer = setTimeout(() => {
-            downsampleTimer = null
-        }, 100)
-        // @ts-ignore
-        const downsampleParam = Downsampler.parameters.get("downsample")
-        downsampleParam.value = (pixelate - 1) / 9
-        pushEffect("downsample", Downsampler)
-        applyEffects()
+    const bitcrush = async () => {
+        if (pixelate === 1) return bitcrusherNode.parameters.get("sampleRate").value = 44100
+        bitcrusherNode.parameters.get("sampleRate").value = Math.ceil(22050 / pixelate)
     }
+
+    useEffect(() => {
+        bitcrush()
+    }, [pixelate])
 
     useEffect(() => {
         setTimeout(() => {

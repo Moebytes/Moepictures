@@ -3,6 +3,7 @@ const ForkTsCheckerWebpackPlugin = require("fork-ts-checker-webpack-plugin")
 const MiniCssExtractPlugin = require("mini-css-extract-plugin")
 const TerserJSPlugin = require("terser-webpack-plugin")
 const WebpackObfuscator = require("webpack-obfuscator")
+const CopyPlugin = require("copy-webpack-plugin")
 const MinimizerCSSPlugin = require("css-minimizer-webpack-plugin")
 const nodeExternals = require("webpack-node-externals")
 const webpack = require("webpack")
@@ -48,6 +49,11 @@ module.exports = [
       new webpack.ProvidePlugin({
         process: "process/browser",
         Buffer: ["buffer", "Buffer"],
+      }),
+      new CopyPlugin({
+        patterns: [
+          {from: "structures/bitcrusher.js", to: "[name][ext]"}
+        ]
       })
     ]
   }, 

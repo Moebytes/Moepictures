@@ -1,44 +1,43 @@
-class DownsamplerProcessor extends AudioWorkletProcessor {
-  static get parameterDescriptors() {
-    return [
-      {name: "bitcrush", defaultValue: 16, minValue: 1, maxValue: 16}, 
-      {name: "downsample", defaultValue: 0.5, minValue: 0, maxValue: 1},
-    ]
-  }
+class DownSampleProcessor extends AudioWorkletProcessor {
+	static get parameterDescriptors() {
+		return [{
+			name: "down",
+			defaultValue: 8,
+			minValue: 1,
+			maxValue: 1024
+		}]
+	}
 
-  constructor() {
-    super()
-    this.phase_ = 0
-    this.lastSampleValue_ = 0
-  }
+	constructor(){
+		super()
+		// the frame counter
+		this.count = 0
+		// sample and hold variable array
+		this.sah = []
+	}
 
-  process(inputs, outputs, parameters) {
-    const input = inputs[0]
-    const output = outputs[0]
+	process(inputs, outputs, parameters){
+		const input = inputs[0]
+		const output = outputs[0]
 
-    const bitDepth = parameters.bitcrush
-    const frequencyReduction = parameters.downsample
-    const isBitDepthConstant = bitDepth.length === 1
-
-    for (let channel = 0; channel < input.length; ++channel) {
-      const inputChannel = input[channel]
-      const outputChannel = output[channel]
-      let step = Math.pow(0.5, bitDepth[0])
-      for (let i = 0; i < inputChannel.length; ++i) {
-        if (!isBitDepthConstant) {
-          step = Math.pow(0.5, bitDepth[i])
-        }
-        this.phase_ += frequencyReduction[i]
-        if (this.phase_ >= 1.0) {
-          this.phase_ -= 1.0;
-          this.lastSampleValue_ =
-              step * Math.floor(inputChannel[i] / step + 0.5)
-        }
-        outputChannel[i] = this.lastSampleValue_;
-      }
-    }
-    return true
-  }
+		// if there is anything to process
+		if (input.length > 0){
+			// for the length of the sample array (generally 128)
+			for (let i=0; i<input[0].length; i++){
+				// for every channel
+				for (let channel=0; channel<input.length; ++channel){
+					// if counter equals 0, sample and hold
+					if (this.count % parameters.down === 0){
+						this.sah[channel] = input[channel][i]
+					}
+					// output the currently held sample
+					output[channel][i] = this.sah[channel]
+				}
+				// increment sample counter
+				this.count++
+			}
+		}
+		return true
+	}
 }
-
-registerProcessor("downsampler", DownsamplerProcessor)
+registerProcessor("downsampler-processor", DownSampleProcessor)
