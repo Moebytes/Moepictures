@@ -138,8 +138,8 @@ const CaptchaDialog: React.FunctionComponent<Props> = (props) => {
                             </div>
                             {error ? <div className="captcha-dialog-validation-container"><span className="captcha-dialog-validation" ref={errorRef}></span></div> : null}
                             <div className="captcha-dialog-row">
-                                <button onClick={() => click("reject")} className="download-button">{"No Tags"}</button>
-                                <button onClick={() => click("accept")} className="download-button">{"Solve"}</button>
+                                <button onClick={() => click("reject")} className="dialog-button">{"No Tags"}</button>
+                                <button onClick={() => click("accept")} className="dialog-button">{"Solve"}</button>
                             </div>
                         </div>
                     </div>

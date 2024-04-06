@@ -8,7 +8,7 @@ import axios from "axios"
 interface Props {
     active: boolean
     tag: string
-    x: number 
+    x: number
     y: number
 }
 

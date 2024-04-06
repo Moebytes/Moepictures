@@ -796,7 +796,7 @@ const UploadPage: React.FunctionComponent = (props) => {
         await functions.timeout(20)
         submitErrorRef.current.innerText = "Submitting..."
         try {
-            if (permissions.isStaff(session)) {
+            if (permissions.isElevated(session)) {
                 await axios.post("/api/post/upload", data, {headers: {"x-csrf-token": functions.getCSRFToken()}, withCredentials: true}).then((r) => r.data)
             } else {
                 await axios.post("/api/post/upload/unverified", data, {headers: {"x-csrf-token": functions.getCSRFToken()}, withCredentials: true}).then((r) => r.data)
@@ -1306,6 +1306,320 @@ const UploadPage: React.FunctionComponent = (props) => {
         }
     }, [type, style])
 
+    const getUploadJSX = () => {
+        if (session.banned) {
+            return (
+                <>
+                <span className="upload-ban-text">You are banned. Cannot upload.</span>
+                <button className="upload-button" onClick={() => history.goBack()}
+                style={{width: "max-content", marginTop: "10px", marginLeft: "10px", backgroundColor: "var(--banText)"}}>
+                        <span className="upload-button-submit-text">←Back</span>
+                </button>
+                </>
+            )
+        }
+
+        return (
+            <>
+            <div className="upload">
+                <span className="upload-heading">Upload</span>
+                {submitted ?
+                <div className="upload-container">
+                    <div className="upload-container-row">
+                        {permissions.isElevated(session) ?
+                        <span className="upload-text-alt">Post was uploaded.</span> :
+                        <span className="upload-text-alt">Your post was submitted and will appear on the site if approved.</span>}
+                    </div> 
+                    <div className="upload-container-row" style={{marginTop: "10px"}}>
+                        <button className="upload-button" onClick={resetAll}>
+                                <span className="upload-button-text">←Submit More</span>
+                        </button>
+                    </div>
+                </div> : <>
+                {uploadError ? <div className="upload-row"><span ref={uploadErrorRef} className="upload-text-alt"></span></div> : null}
+                {mobile ? <>
+                <div className="upload-row">
+                    <label htmlFor="file-upload" className="upload-button">
+                        <img className="upload-button-img" src={uploadIcon}/>
+                        <span className="upload-button-text">Select Files</span>
+                    </label>
+                    <input id="file-upload" type="file" multiple onChange={(event) => upload(event)}/>
+                    <button className="upload-button" onClick={() => setShowLinksInput((prev) => !prev)}>
+                            <img className="upload-button-img" src={linkIcon}/>
+                            <span className="upload-button-text">Enter Links</span>
+                    </button>
+                </div>
+                <div className="upload-row">
+                    {acceptedURLs.length > 1 ?
+                    <button className="upload-button" onClick={left}>
+                        <img className="upload-button-img" src={leftIcon}/>
+                    </button> : null}
+                    {currentImg ? 
+                    <button className="upload-button" onClick={clear}>
+                        <img className="upload-button-img" src={xIcon}/>
+                    </button>
+                    : null}
+                    {acceptedURLs.length > 1 ?
+                    <button className="upload-button" onClick={right}>
+                        <img className="upload-button-img" src={rightIcon}/>
+                    </button> : null}
+                </div> </>
+                :
+                <div className="upload-row">
+                    <label htmlFor="file-upload" className="upload-button">
+                        <img className="upload-button-img" src={uploadIcon}/>
+                        <span className="upload-button-text">Select Files</span>
+                    </label>
+                    <input id="file-upload" type="file" multiple onChange={(event) => upload(event)}/>
+                    <button className="upload-button" onClick={() => setShowLinksInput((prev) => !prev)}>
+                            <img className="upload-button-img" src={linkIcon}/>
+                            <span className="upload-button-text">Enter Links</span>
+                    </button>
+                    {acceptedURLs.length > 1 ?
+                    <button className="upload-button" onClick={left}>
+                        <img className="upload-button-img" src={leftIcon}/>
+                    </button> : null}
+                    {currentImg ? 
+                    <button className="upload-button" onClick={clear}>
+                        <img className="upload-button-img" src={xIcon}/>
+                    </button>
+                    : null}
+                    {acceptedURLs.length > 1 ?
+                    <button className="upload-button" onClick={right}>
+                        <img className="upload-button-img" src={rightIcon}/>
+                    </button> : null}
+                </div>}
+                {showLinksInput ?
+                <div className="upload-row">
+                    <textarea ref={enterLinksRef} className="upload-textarea" spellCheck={false} onChange={(event) => linkUpload(event)}
+                    onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}></textarea>
+                </div> : null}
+            {acceptedURLs.length ?
+            <div className="upload-row">
+                {acceptedURLs.length > 1 ? 
+                <div className="upload-container">
+                    <Carousel images={acceptedURLs.map((u: any) => u.link)} set={set} index={currentIndex} noEncryption={true}/>
+                    {getPostJSX()}
+                </div>
+                : getPostJSX()}
+            </div>
+            : null}
+            <span className="upload-heading">Classification</span>
+            <span className="upload-text-alt">If there are multiple images, select the rightmost tag that fits.</span>
+            {mobile ? <>
+            <div className="upload-row">
+                <button className={`upload-button ${type === "image" ? "button-selected" : ""}`} onClick={() => setType("image")}>
+                    <img className="upload-button-img" src={image}/>
+                    <span className="upload-button-text">Image</span>
+                </button>
+                <button className={`upload-button ${type === "animation" ? "button-selected" : ""}`} onClick={() => setType("animation")}>
+                    <img className="upload-button-img" src={animation}/>
+                    <span className="upload-button-text">Animation</span>
+                </button>
+            </div>
+            <div className="upload-row">
+                <button className={`upload-button ${type === "video" ? "button-selected" : ""}`} onClick={() => setType("video")}>
+                    <img className="upload-button-img" src={video}/>
+                    <span className="upload-button-text">Video</span>
+                </button>
+                <button className={`upload-button ${type === "comic" ? "button-selected" : ""}`} onClick={() => setType("comic")}>
+                    <img className="upload-button-img" src={comic}/>
+                    <span className="upload-button-text">Comic</span>
+                </button>
+            </div>
+            <div className="upload-row">
+                <button className={`upload-button ${type === "audio" ? "button-selected" : ""}`} onClick={() => setType("audio")}>
+                    <img className="upload-button-img" src={audio}/>
+                    <span className="upload-button-text">Audio</span>
+                </button>
+                <button className={`upload-button ${type === "model" ? "button-selected" : ""}`} onClick={() => setType("model")}>
+                    <img className="upload-button-img" src={model}/>
+                    <span className="upload-button-text">Model</span>
+                </button>
+            </div> </>
+            :
+            <div className="upload-row">
+                <button className={`upload-button ${type === "image" ? "button-selected" : ""}`} onClick={() => setType("image")}>
+                    <img className="upload-button-img" src={image}/>
+                    <span className="upload-button-text">Image</span>
+                </button>
+                <button className={`upload-button ${type === "animation" ? "button-selected" : ""}`} onClick={() => setType("animation")}>
+                    <img className="upload-button-img" src={animation}/>
+                    <span className="upload-button-text">Animation</span>
+                </button>
+                <button className={`upload-button ${type === "video" ? "button-selected" : ""}`} onClick={() => setType("video")}>
+                    <img className="upload-button-img" src={video}/>
+                    <span className="upload-button-text">Video</span>
+                </button>
+                <button className={`upload-button ${type === "comic" ? "button-selected" : ""}`} onClick={() => setType("comic")}>
+                    <img className="upload-button-img" src={comic}/>
+                    <span className="upload-button-text">Comic</span>
+                </button>
+                <button className={`upload-button ${type === "audio" ? "button-selected" : ""}`} onClick={() => setType("audio")}>
+                    <img className="upload-button-img" src={audio}/>
+                    <span className="upload-button-text">Audio</span>
+                </button>
+                <button className={`upload-button ${type === "model" ? "button-selected" : ""}`} onClick={() => setType("model")}>
+                    <img className="upload-button-img" src={model}/>
+                    <span className="upload-button-text">Model</span>
+                </button>
+            </div>}
+            {mobile ? <>
+            <div className="upload-row">
+                <button className={`upload-button ${restrict === "safe" ? "button-selected" : ""}`} onClick={() => setRestrict("safe")}>
+                    <img className="upload-button-img" src={safe}/>
+                    <span className="upload-button-text">Safe</span>
+                </button>
+                <button className={`upload-button ${restrict === "questionable" ? "button-selected" : ""}`} onClick={() => setRestrict("questionable")}>
+                    <img className="upload-button-img" src={questionable}/>
+                    <span className="upload-button-text">Questionable</span>
+                </button>
+            </div>
+            <div className="upload-row">
+                {permissions.isElevated(session) ?
+                <button className={`upload-button ${restrict === "explicit" ? "button-selected" : ""}`} onClick={() => setRestrict("explicit")}>
+                    <img className="upload-button-img" src={explicit}/>
+                    <span className="upload-button-text">Explicit</span>
+                </button> : null}
+            </div> </>
+            :
+            <div className="upload-row">
+                <button className={`upload-button ${restrict === "safe" ? "button-selected" : ""}`} onClick={() => setRestrict("safe")}>
+                    <img className="upload-button-img" src={safe}/>
+                    <span className="upload-button-text">Safe</span>
+                </button>
+                <button className={`upload-button ${restrict === "questionable" ? "button-selected" : ""}`} onClick={() => setRestrict("questionable")}>
+                    <img className="upload-button-img" src={questionable}/>
+                    <span className="upload-button-text">Questionable</span>
+                </button>
+                {permissions.isElevated(session) ?
+                <button className={`upload-button ${restrict === "explicit" ? "button-selected" : ""}`} onClick={() => setRestrict("explicit")}>
+                    <img className="upload-button-img" src={explicit}/>
+                    <span className="upload-button-text">Explicit</span>
+                </button> : null}
+            </div>}
+            {getStyleJSX()}
+            {dupPosts.length ? <>
+            <span className="upload-heading">Possible Duplicates</span>
+            <div className="upload-row">
+                <Carousel images={dupPosts.map((p: any) => functions.getImageLink(p.images[0].type, p.postID, p.images[0].order, p.images[0].filename))} set={setDup} index={currentDupIndex}/>
+            </div>
+            </> : null}
+            <div className="upload-container">
+                    <div className="upload-container-row">
+                        <span className="upload-text-alt">If this is a third-party edit, enter the original post ID: </span>
+                        <input className="upload-input" type="number" value={thirdPartyID} onChange={(event) => setThirdPartyID(event.target.value)} spellCheck={false} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}/>
+                    </div>
+            </div>
+            <span className="upload-heading">Source</span>
+            <div className="upload-container">
+                {saucenaoError ? <span ref={saucenaoErrorRef} className="submit-error-text"></span> : null}
+                <span className="upload-link" onClick={sourceLookup}>Fetch from Saucenao</span>
+                <div className="upload-container-row">
+                    <span className="upload-text">Title: </span>
+                    <input className="upload-input-wide2" type="text" value={sourceTitle} onChange={(event) => setSourceTitle(event.target.value)} spellCheck={false} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}/>
+                </div>
+                <div className="upload-container-row">
+                    <span className="upload-text">Translated Title: </span>
+                    <input className="upload-input-wide2" type="text" value={sourceTranslatedTitle} onChange={(event) => setSourceTranslatedTitle(event.target.value)} spellCheck={false} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}/>
+                </div>
+                <div className="upload-container-row">
+                    <span className="upload-text">Artist: </span>
+                    <input className="upload-input-wide" type="text" value={sourceArtist} onChange={(event) => setSourceArtist(event.target.value)} spellCheck={false} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}/>
+                </div>
+                <div className="upload-container-row">
+                    <span className="upload-text">Drawn Date: </span>
+                    <input className="upload-input-wide" type="date" value={sourceDate} onChange={(event) => setSourceDate(event.target.value)} spellCheck={false} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}/>
+                </div>
+                <div className="upload-container-row">
+                    <span className="upload-text">Link: </span>
+                    <input className="upload-input-wide2" type="url" value={sourceLink} onChange={(event) => setSourceLink(event.target.value)} spellCheck={false} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}/>
+                </div>
+                <div className="upload-container-row">
+                    <span className="upload-text">Bookmarks: </span>
+                    <input className="upload-input-wide" type="number" value={sourceBookmarks} onChange={(event) => setSourceBookmarks(event.target.value)} spellCheck={false} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}/>
+                </div>
+                <div className="upload-container-row">
+                    <span className="upload-text">Commentary: </span>
+                </div>
+                <div className="upload-container-row">
+                    <textarea className="upload-textarea-small" style={{height: "80px"}} value={sourceCommentary} onChange={(event) => setSourceCommentary(event.target.value)} spellCheck={false} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}></textarea>
+                </div>
+                <div className="upload-container-row">
+                    <span className="upload-text">Translated Commentary: </span>
+                </div>
+                <div className="upload-container-row">
+                    <textarea className="upload-textarea-small" style={{height: "80px"}} value={sourceTranslatedCommentary} onChange={(event) => setSourceTranslatedCommentary(event.target.value)} spellCheck={false} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}></textarea>
+                </div>
+                <div className="upload-container-row">
+                    <span className="upload-text">Mirrors: </span>
+                </div>
+                <div className="upload-container-row">
+                    <textarea className="upload-textarea-small" style={{height: "80px"}} value={sourceMirrors} onChange={(event) => setSourceMirrors(event.target.value)} spellCheck={false} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}></textarea>
+                </div>
+            </div>
+            <span className="upload-heading">Artist</span>
+            <span className="upload-text-alt">If the artist tag does not yet exist, please upload an artist image.</span>
+            <div className="upload-container">
+                {generateArtistsJSX()}
+            </div>
+            <span className="upload-heading">Characters</span>
+            <span className="upload-text-alt">If the character tag does not yet exist, please upload a character image.</span>
+            <div className="upload-container">
+                {generateCharactersJSX()}
+            </div>
+            <span className="upload-heading">Series</span>
+            <span className="upload-text-alt">If the series tag does not yet exist, please upload a series image.</span>
+            <div className="upload-container">
+                {generateSeriesJSX()}
+            </div>
+            {displayImage && acceptedURLs.length ?
+            <div className="upload-row">
+                {functions.isVideo(currentImg) ? 
+                <video autoPlay muted loop disablePictureInPicture className="tag-img-preview" src={currentImg}></video> :
+                <img className="tag-img-preview" src={acceptedURLs[currentIndex]?.thumbnail ? acceptedURLs[currentIndex].thumbnail : currentImg}/>}
+            </div>
+            : null}
+            <div className="upload-row" style={{marginBottom: "5px"}}>
+                <span className="upload-heading">Tags</span>
+                <div className="upload-button-container">
+                    <button className="upload-button" onClick={() => setDisplayImage((prev) => !prev)}>
+                        {displayImage ?
+                            <span className="upload-button-text" style={{paddingLeft: "0px"}}>- Hide Image</span> :
+                            <span className="upload-button-text" style={{paddingLeft: "0px"}}>+ Display Image</span>
+                        }
+                    </button>
+                </div>
+            </div>
+            {danbooruError ? <span ref={danbooruErrorRef} className="submit-error-text"></span> : null}
+            <span className="upload-link" onClick={tagLookup} style={{marginBottom: "5px"}}>Fetch from Danbooru</span>
+            <span className="upload-text-alt">Enter dashed tags separated by spaces. Tags can describe any of the images. If the tag doesn't exist, you will be promted to create it.
+            If you need help with tags, read the <Link className="upload-link" target="_blank" to="/help#tagging">tagging guide.</Link></span>
+            <div className="upload-container">
+                <SearchSuggestions active={tagActive} text={functions.cleanHTML(rawTags)} x={tagX} y={tagY} width={200} click={handleRawTagClick} type="tag"/>
+                <div className="upload-container-row" onMouseOver={() => setEnableDrag(false)}>
+                    <ContentEditable innerRef={rawTagRef} className="upload-textarea" spellCheck={false} html={rawTags} onChange={(event) => setRawTags(event.target.value)} onFocus={() => setTagActive(true)} onBlur={() => setTagActive(false)}/>
+                </div>
+            </div>
+            {newTags.length ? <>
+            <span className="upload-heading">New Tags</span>
+            <div className="upload-container">
+                {generateTagsJSX()}
+            </div>
+            </> : null}
+            <div className="upload-center-row">
+                {submitError ? <span ref={submitErrorRef} className="submit-error-text"></span> : null}
+                <button className="upload-button" onClick={() => submit()}>
+                        <span className="upload-button-submit-text">Submit</span>
+                </button>
+            </div>
+            </>}
+            </div>
+            <Footer/>
+        </>
+        )
+    }
+
     return (
         <>
         <DragAndDrop/>
@@ -1314,301 +1628,7 @@ const UploadPage: React.FunctionComponent = (props) => {
         <div className="body">
             <SideBar/>
             <div className="content">
-                <div className="upload">
-                    <span className="upload-heading">Upload</span>
-                    {submitted ?
-                    <div className="upload-container">
-                        <div className="upload-container-row">
-                            {permissions.isStaff(session) ?
-                            <span className="upload-text-alt">Post was uploaded.</span> :
-                            <span className="upload-text-alt">Your post was submitted and will appear on the site if approved.</span>}
-                        </div> 
-                        <div className="upload-container-row" style={{marginTop: "10px"}}>
-                            <button className="upload-button" onClick={resetAll}>
-                                    <span className="upload-button-text">←Submit More</span>
-                            </button>
-                        </div>
-                    </div> : <>
-                    {uploadError ? <div className="upload-row"><span ref={uploadErrorRef} className="upload-text-alt"></span></div> : null}
-                    {mobile ? <>
-                    <div className="upload-row">
-                        <label htmlFor="file-upload" className="upload-button">
-                            <img className="upload-button-img" src={uploadIcon}/>
-                            <span className="upload-button-text">Select Files</span>
-                        </label>
-                        <input id="file-upload" type="file" multiple onChange={(event) => upload(event)}/>
-                        <button className="upload-button" onClick={() => setShowLinksInput((prev) => !prev)}>
-                                <img className="upload-button-img" src={linkIcon}/>
-                                <span className="upload-button-text">Enter Links</span>
-                        </button>
-                    </div>
-                    <div className="upload-row">
-                        {acceptedURLs.length > 1 ?
-                        <button className="upload-button" onClick={left}>
-                            <img className="upload-button-img" src={leftIcon}/>
-                        </button> : null}
-                        {currentImg ? 
-                        <button className="upload-button" onClick={clear}>
-                            <img className="upload-button-img" src={xIcon}/>
-                        </button>
-                        : null}
-                        {acceptedURLs.length > 1 ?
-                        <button className="upload-button" onClick={right}>
-                            <img className="upload-button-img" src={rightIcon}/>
-                        </button> : null}
-                    </div> </>
-                    :
-                    <div className="upload-row">
-                        <label htmlFor="file-upload" className="upload-button">
-                            <img className="upload-button-img" src={uploadIcon}/>
-                            <span className="upload-button-text">Select Files</span>
-                        </label>
-                        <input id="file-upload" type="file" multiple onChange={(event) => upload(event)}/>
-                        <button className="upload-button" onClick={() => setShowLinksInput((prev) => !prev)}>
-                                <img className="upload-button-img" src={linkIcon}/>
-                                <span className="upload-button-text">Enter Links</span>
-                        </button>
-                        {acceptedURLs.length > 1 ?
-                        <button className="upload-button" onClick={left}>
-                            <img className="upload-button-img" src={leftIcon}/>
-                        </button> : null}
-                        {currentImg ? 
-                        <button className="upload-button" onClick={clear}>
-                            <img className="upload-button-img" src={xIcon}/>
-                        </button>
-                        : null}
-                        {acceptedURLs.length > 1 ?
-                        <button className="upload-button" onClick={right}>
-                            <img className="upload-button-img" src={rightIcon}/>
-                        </button> : null}
-                    </div>}
-                    {showLinksInput ?
-                    <div className="upload-row">
-                        <textarea ref={enterLinksRef} className="upload-textarea" spellCheck={false} onChange={(event) => linkUpload(event)}
-                        onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}></textarea>
-                    </div> : null}
-                {acceptedURLs.length ?
-                <div className="upload-row">
-                    {acceptedURLs.length > 1 ? 
-                    <div className="upload-container">
-                        <Carousel images={acceptedURLs.map((u: any) => u.link)} set={set} index={currentIndex} noEncryption={true}/>
-                        {getPostJSX()}
-                    </div>
-                    : getPostJSX()}
-                </div>
-                : null}
-                <span className="upload-heading">Classification</span>
-                <span className="upload-text-alt">If there are multiple images, select the rightmost tag that fits.</span>
-                {mobile ? <>
-                <div className="upload-row">
-                    <button className={`upload-button ${type === "image" ? "button-selected" : ""}`} onClick={() => setType("image")}>
-                        <img className="upload-button-img" src={image}/>
-                        <span className="upload-button-text">Image</span>
-                    </button>
-                    <button className={`upload-button ${type === "animation" ? "button-selected" : ""}`} onClick={() => setType("animation")}>
-                        <img className="upload-button-img" src={animation}/>
-                        <span className="upload-button-text">Animation</span>
-                    </button>
-                </div>
-                <div className="upload-row">
-                    <button className={`upload-button ${type === "video" ? "button-selected" : ""}`} onClick={() => setType("video")}>
-                        <img className="upload-button-img" src={video}/>
-                        <span className="upload-button-text">Video</span>
-                    </button>
-                    <button className={`upload-button ${type === "comic" ? "button-selected" : ""}`} onClick={() => setType("comic")}>
-                        <img className="upload-button-img" src={comic}/>
-                        <span className="upload-button-text">Comic</span>
-                    </button>
-                </div>
-                <div className="upload-row">
-                    <button className={`upload-button ${type === "audio" ? "button-selected" : ""}`} onClick={() => setType("audio")}>
-                        <img className="upload-button-img" src={audio}/>
-                        <span className="upload-button-text">Audio</span>
-                    </button>
-                    <button className={`upload-button ${type === "model" ? "button-selected" : ""}`} onClick={() => setType("model")}>
-                        <img className="upload-button-img" src={model}/>
-                        <span className="upload-button-text">Model</span>
-                    </button>
-                </div> </>
-                :
-                <div className="upload-row">
-                    <button className={`upload-button ${type === "image" ? "button-selected" : ""}`} onClick={() => setType("image")}>
-                        <img className="upload-button-img" src={image}/>
-                        <span className="upload-button-text">Image</span>
-                    </button>
-                    <button className={`upload-button ${type === "animation" ? "button-selected" : ""}`} onClick={() => setType("animation")}>
-                        <img className="upload-button-img" src={animation}/>
-                        <span className="upload-button-text">Animation</span>
-                    </button>
-                    <button className={`upload-button ${type === "video" ? "button-selected" : ""}`} onClick={() => setType("video")}>
-                        <img className="upload-button-img" src={video}/>
-                        <span className="upload-button-text">Video</span>
-                    </button>
-                    <button className={`upload-button ${type === "comic" ? "button-selected" : ""}`} onClick={() => setType("comic")}>
-                        <img className="upload-button-img" src={comic}/>
-                        <span className="upload-button-text">Comic</span>
-                    </button>
-                    <button className={`upload-button ${type === "audio" ? "button-selected" : ""}`} onClick={() => setType("audio")}>
-                        <img className="upload-button-img" src={audio}/>
-                        <span className="upload-button-text">Audio</span>
-                    </button>
-                    <button className={`upload-button ${type === "model" ? "button-selected" : ""}`} onClick={() => setType("model")}>
-                        <img className="upload-button-img" src={model}/>
-                        <span className="upload-button-text">Model</span>
-                    </button>
-                </div>}
-                {mobile ? <>
-                <div className="upload-row">
-                    <button className={`upload-button ${restrict === "safe" ? "button-selected" : ""}`} onClick={() => setRestrict("safe")}>
-                        <img className="upload-button-img" src={safe}/>
-                        <span className="upload-button-text">Safe</span>
-                    </button>
-                    <button className={`upload-button ${restrict === "questionable" ? "button-selected" : ""}`} onClick={() => setRestrict("questionable")}>
-                        <img className="upload-button-img" src={questionable}/>
-                        <span className="upload-button-text">Questionable</span>
-                    </button>
-                </div>
-                <div className="upload-row">
-                    {permissions.isStaff(session) ?
-                    <button className={`upload-button ${restrict === "explicit" ? "button-selected" : ""}`} onClick={() => setRestrict("explicit")}>
-                        <img className="upload-button-img" src={explicit}/>
-                        <span className="upload-button-text">Explicit</span>
-                    </button> : null}
-                </div> </>
-                :
-                <div className="upload-row">
-                    <button className={`upload-button ${restrict === "safe" ? "button-selected" : ""}`} onClick={() => setRestrict("safe")}>
-                        <img className="upload-button-img" src={safe}/>
-                        <span className="upload-button-text">Safe</span>
-                    </button>
-                    <button className={`upload-button ${restrict === "questionable" ? "button-selected" : ""}`} onClick={() => setRestrict("questionable")}>
-                        <img className="upload-button-img" src={questionable}/>
-                        <span className="upload-button-text">Questionable</span>
-                    </button>
-                    {permissions.isStaff(session) ?
-                    <button className={`upload-button ${restrict === "explicit" ? "button-selected" : ""}`} onClick={() => setRestrict("explicit")}>
-                        <img className="upload-button-img" src={explicit}/>
-                        <span className="upload-button-text">Explicit</span>
-                    </button> : null}
-                </div>}
-                {getStyleJSX()}
-                {dupPosts.length ? <>
-                <span className="upload-heading">Possible Duplicates</span>
-                <div className="upload-row">
-                    <Carousel images={dupPosts.map((p: any) => functions.getImageLink(p.images[0].type, p.postID, p.images[0].order, p.images[0].filename))} set={setDup} index={currentDupIndex}/>
-                </div>
-                </> : null}
-                <div className="upload-container">
-                        <div className="upload-container-row">
-                            <span className="upload-text-alt">If this is a third-party edit, enter the original post ID: </span>
-                            <input className="upload-input" type="number" value={thirdPartyID} onChange={(event) => setThirdPartyID(event.target.value)} spellCheck={false} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}/>
-                        </div>
-                </div>
-                <span className="upload-heading">Source</span>
-                <div className="upload-container">
-                    {saucenaoError ? <span ref={saucenaoErrorRef} className="submit-error-text"></span> : null}
-                    <span className="upload-link" onClick={sourceLookup}>Fetch from Saucenao</span>
-                    <div className="upload-container-row">
-                        <span className="upload-text">Title: </span>
-                        <input className="upload-input-wide2" type="text" value={sourceTitle} onChange={(event) => setSourceTitle(event.target.value)} spellCheck={false} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}/>
-                    </div>
-                    <div className="upload-container-row">
-                        <span className="upload-text">Translated Title: </span>
-                        <input className="upload-input-wide2" type="text" value={sourceTranslatedTitle} onChange={(event) => setSourceTranslatedTitle(event.target.value)} spellCheck={false} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}/>
-                    </div>
-                    <div className="upload-container-row">
-                        <span className="upload-text">Artist: </span>
-                        <input className="upload-input-wide" type="text" value={sourceArtist} onChange={(event) => setSourceArtist(event.target.value)} spellCheck={false} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}/>
-                    </div>
-                    <div className="upload-container-row">
-                        <span className="upload-text">Drawn Date: </span>
-                        <input className="upload-input-wide" type="date" value={sourceDate} onChange={(event) => setSourceDate(event.target.value)} spellCheck={false} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}/>
-                    </div>
-                    <div className="upload-container-row">
-                        <span className="upload-text">Link: </span>
-                        <input className="upload-input-wide2" type="url" value={sourceLink} onChange={(event) => setSourceLink(event.target.value)} spellCheck={false} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}/>
-                    </div>
-                    <div className="upload-container-row">
-                        <span className="upload-text">Bookmarks: </span>
-                        <input className="upload-input-wide" type="number" value={sourceBookmarks} onChange={(event) => setSourceBookmarks(event.target.value)} spellCheck={false} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}/>
-                    </div>
-                    <div className="upload-container-row">
-                        <span className="upload-text">Commentary: </span>
-                    </div>
-                    <div className="upload-container-row">
-                        <textarea className="upload-textarea-small" style={{height: "80px"}} value={sourceCommentary} onChange={(event) => setSourceCommentary(event.target.value)} spellCheck={false} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}></textarea>
-                    </div>
-                    <div className="upload-container-row">
-                        <span className="upload-text">Translated Commentary: </span>
-                    </div>
-                    <div className="upload-container-row">
-                        <textarea className="upload-textarea-small" style={{height: "80px"}} value={sourceTranslatedCommentary} onChange={(event) => setSourceTranslatedCommentary(event.target.value)} spellCheck={false} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}></textarea>
-                    </div>
-                    <div className="upload-container-row">
-                        <span className="upload-text">Mirrors: </span>
-                    </div>
-                    <div className="upload-container-row">
-                        <textarea className="upload-textarea-small" style={{height: "80px"}} value={sourceMirrors} onChange={(event) => setSourceMirrors(event.target.value)} spellCheck={false} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}></textarea>
-                    </div>
-                </div>
-                <span className="upload-heading">Artist</span>
-                <span className="upload-text-alt">If the artist tag does not yet exist, please upload an artist image.</span>
-                <div className="upload-container">
-                    {generateArtistsJSX()}
-                </div>
-                <span className="upload-heading">Characters</span>
-                <span className="upload-text-alt">If the character tag does not yet exist, please upload a character image.</span>
-                <div className="upload-container">
-                    {generateCharactersJSX()}
-                </div>
-                <span className="upload-heading">Series</span>
-                <span className="upload-text-alt">If the series tag does not yet exist, please upload a series image.</span>
-                <div className="upload-container">
-                    {generateSeriesJSX()}
-                </div>
-                {displayImage && acceptedURLs.length ?
-                <div className="upload-row">
-                    {functions.isVideo(currentImg) ? 
-                    <video autoPlay muted loop disablePictureInPicture className="tag-img-preview" src={currentImg}></video> :
-                    <img className="tag-img-preview" src={acceptedURLs[currentIndex]?.thumbnail ? acceptedURLs[currentIndex].thumbnail : currentImg}/>}
-                </div>
-                : null}
-                <div className="upload-row" style={{marginBottom: "5px"}}>
-                    <span className="upload-heading">Tags</span>
-                    <div className="upload-button-container">
-                        <button className="upload-button" onClick={() => setDisplayImage((prev) => !prev)}>
-                            {displayImage ?
-                                <span className="upload-button-text" style={{paddingLeft: "0px"}}>- Hide Image</span> :
-                                <span className="upload-button-text" style={{paddingLeft: "0px"}}>+ Display Image</span>
-                            }
-                        </button>
-                    </div>
-                </div>
-                {danbooruError ? <span ref={danbooruErrorRef} className="submit-error-text"></span> : null}
-                <span className="upload-link" onClick={tagLookup} style={{marginBottom: "5px"}}>Fetch from Danbooru</span>
-                <span className="upload-text-alt">Enter dashed tags separated by spaces. Tags can describe any of the images. If the tag doesn't exist, you will be promted to create it.
-                If you need help with tags, read the <Link className="upload-link" target="_blank" to="/help#tagging">tagging guide.</Link></span>
-                <div className="upload-container">
-                    <SearchSuggestions active={tagActive} text={functions.cleanHTML(rawTags)} x={tagX} y={tagY} width={200} click={handleRawTagClick} type="tag"/>
-                    <div className="upload-container-row" onMouseOver={() => setEnableDrag(false)}>
-                        <ContentEditable innerRef={rawTagRef} className="upload-textarea" spellCheck={false} html={rawTags} onChange={(event) => setRawTags(event.target.value)} onFocus={() => setTagActive(true)} onBlur={() => setTagActive(false)}/>
-                    </div>
-                </div>
-                {newTags.length ? <>
-                <span className="upload-heading">New Tags</span>
-                <div className="upload-container">
-                    {generateTagsJSX()}
-                </div>
-                </> : null}
-                <div className="upload-center-row">
-                    {submitError ? <span ref={submitErrorRef} className="submit-error-text"></span> : null}
-                    <button className="upload-button" onClick={() => submit()}>
-                            <span className="upload-button-submit-text">Submit</span>
-                    </button>
-                </div>
-                </>}
-                </div>
-                <Footer/>
+                {getUploadJSX()}
             </div>
         </div>
         </>

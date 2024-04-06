@@ -4,7 +4,7 @@ import {HashLink as Link} from "react-router-hash-link"
 import {HideNavbarContext, HideSidebarContext, ThemeContext, EnableDragContext, DeleteThreadIDContext, DeleteThreadFlagContext, 
 HideTitlebarContext, SessionContext} from "../Context"
 import functions from "../structures/Functions"
-import "./styles/deletethreaddialog.less"
+import "./styles/dialog.less"
 import Draggable from "react-draggable"
 import permissions from "../structures/Permissions"
 import axios from "axios"
@@ -49,19 +49,19 @@ const DeleteThreadDialog: React.FunctionComponent = (props) => {
 
     if (deleteThreadID) {
         return (
-            <div className="deletethread-dialog">
-                <Draggable handle=".deletethread-dialog-title-container">
-                <div className="deletethread-dialog-box" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
-                    <div className="deletethread-container">
-                        <div className="deletethread-dialog-title-container">
-                            <span className="deletethread-dialog-title">Delete Thread</span>
+            <div className="dialog">
+                <Draggable handle=".dialog-title-container">
+                <div className="dialog-box" style={{width: "250px", height: "190px"}} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
+                    <div className="dialog-container">
+                        <div className="dialog-title-container">
+                            <span className="dialog-title">Delete Thread</span>
                         </div>
-                        <div className="deletethread-dialog-row">
-                            <span className="deletethread-dialog-text">Do you want to delete this thread?</span>
+                        <div className="dialog-row">
+                            <span className="dialog-text">Do you want to delete this thread?</span>
                         </div>
-                        <div className="deletethread-dialog-row">
-                            <button onClick={() => click("reject")} className="download-button">{"No"}</button>
-                            <button onClick={() => click("accept")} className="download-button">{"Yes"}</button>
+                        <div className="dialog-row">
+                            <button onClick={() => click("reject")} className="dialog-button">{"No"}</button>
+                            <button onClick={() => click("accept")} className="dialog-button">{"Yes"}</button>
                         </div>
                     </div>
                 </div>

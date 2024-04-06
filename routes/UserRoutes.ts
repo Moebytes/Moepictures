@@ -138,6 +138,7 @@ const UserRoutes = (app: Express) => {
                 req.session.bio = user.bio
                 req.session.publicFavorites = user.publicFavorites
                 req.session.role = user.role
+                req.session.banned = user.banned
                 await sql.updateUser(username, "ip", ip)
                 req.session.ip = ip
                 return res.status(200).send("Success")
@@ -164,8 +165,20 @@ const UserRoutes = (app: Express) => {
 
     app.get("/api/user/session", sessionLimiter, async (req: Request, res: Response) => {
         try {
+            if (req.session.username) {
+                const user = await sql.user(req.session.username)
+                req.session.$2fa = user.$2fa
+                req.session.banned = user.banned
+                req.session.email = user.email
+                req.session.emailVerified = user.emailVerified
+                req.session.image = user.image
+                req.session.imagePost = user.imagePost
+                req.session.bio = user.bio
+                req.session.joinDate = user.joinDate
+                req.session.publicFavorites = user.publicFavorites
+                req.session.role = user.role
+            }
             const session = structuredClone(req.session)
-            delete session.captchaCache
             delete session.captchaAnswer
             delete session.csrfSecret
             delete session.ip
@@ -546,6 +559,44 @@ const UserRoutes = (app: Express) => {
         } catch (e) {
             console.log(e)
             res.status(400).send("Bad request") 
+        }
+    })
+
+    app.post("/api/user/ban", userLimiter, async (req: Request, res: Response) => {
+        try {
+            const {username} = req.body
+            if (!serverFunctions.validateCSRF(req)) return res.status(400).send("Bad CSRF token")
+            if (!username) return res.status(400).send("Bad username")
+            if (!req.session.username) return res.status(401).send("Unauthorized")
+            if (req.session.role !== "admin" && req.session.role !== "mod") return res.status(403).end()
+            if (req.session.username === username) return res.status(400).send("Cannot perform action on yourself")
+            const user = await sql.user(username)
+            if (!user) return res.status(400).send("Bad username")
+            if (user.role === "admin" || user.role === "mod") return res.status(400).send("Cannot perform action on this user")
+            await sql.updateUser(username, "banned", true)
+            res.status(200).send("Success")
+        } catch (e) {
+            console.log(e)
+            res.status(400).send("Bad request")
+        }
+    })
+
+    app.post("/api/user/unban", userLimiter, async (req: Request, res: Response) => {
+        try {
+            const {username} = req.body
+            if (!serverFunctions.validateCSRF(req)) return res.status(400).send("Bad CSRF token")
+            if (!username) return res.status(400).send("Bad username")
+            if (!req.session.username) return res.status(401).send("Unauthorized")
+            if (req.session.role !== "admin" && req.session.role !== "mod") return res.status(403).end()
+            if (req.session.username === username) return res.status(400).send("Cannot perform action on yourself")
+            const user = await sql.user(username)
+            if (!user) return res.status(400).send("Bad username")
+            if (user.role === "admin" || user.role === "mod") return res.status(400).send("Cannot perform action on this user")
+            await sql.updateUser(username, "banned", false)
+            res.status(200).send("Success")
+        } catch (e) {
+            console.log(e)
+            res.status(400).send("Bad request")
         }
     })
 }

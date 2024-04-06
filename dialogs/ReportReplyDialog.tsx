@@ -3,7 +3,7 @@ import {useHistory} from "react-router-dom"
 import {HashLink as Link} from "react-router-hash-link"
 import {HideNavbarContext, HideSidebarContext, ThemeContext, EnableDragContext, ReportReplyIDContext, HideTitlebarContext} from "../Context"
 import functions from "../structures/Functions"
-import "./styles/reportreplydialog.less"
+import "./styles/dialog.less"
 import Draggable from "react-draggable"
 import axios from "axios"
 
@@ -64,33 +64,33 @@ const ReportReplyDialog: React.FunctionComponent = (props) => {
 
     if (reportReplyID) {
         return (
-            <div className="reportreply-dialog">
-                <Draggable handle=".reportreply-dialog-title-container">
-                <div className="reportreply-dialog-box" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
-                    <div className="reportreply-container">
-                        <div className="reportreply-dialog-title-container">
-                            <span className="reportreply-dialog-title">Report Reply</span>
+            <div className="dialog">
+                <Draggable handle=".dialog-title-container">
+                <div className="dialog-box" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
+                    <div className="dialog-container">
+                        <div className="dialog-title-container">
+                            <span className="dialog-title">Report Reply</span>
                         </div>
                         {submitted ? <>
-                        <div className="reportreply-dialog-row">
-                            <span className="reportreply-dialog-text">Reply report was sent. Thank you!</span>
+                        <div className="dialog-row">
+                            <span className="dialog-text">Reply report was sent. Thank you!</span>
                         </div>
-                        <div className="reportreply-dialog-row">
-                            <button onClick={() => close()} className="download-button">{"Cancel"}</button>
-                            <button onClick={() => close()} className="download-button">{"OK"}</button>
+                        <div className="dialog-row">
+                            <button onClick={() => close()} className="dialog-button">{"Cancel"}</button>
+                            <button onClick={() => close()} className="dialog-button">{"OK"}</button>
                         </div>
                         </> : <>
-                        <div className="reportreply-dialog-row">
-                            <span className="reportreply-dialog-text">Report replies that are spam, offensive, or otherwise breaking the rules.</span>
+                        <div className="dialog-row">
+                            <span className="dialog-text">Report replies that are spam, offensive, or otherwise breaking the rules.</span>
                         </div>
-                        <div className="reportreply-dialog-row">
-                            <span className="reportreply-dialog-text">Reason: </span>
-                            <input style={{width: "100%"}} className="reportreply-dialog-input" type="text" spellCheck={false} value={reason} onChange={(event) => setReason(event.target.value)}/>
+                        <div className="dialog-row">
+                            <span className="dialog-text">Reason: </span>
+                            <input style={{width: "100%"}} className="dialog-input-taller" type="text" spellCheck={false} value={reason} onChange={(event) => setReason(event.target.value)}/>
                         </div> 
-                        {error ? <div className="reportreply-dialog-validation-container"><span className="reportreply-dialog-validation" ref={errorRef}></span></div> : null}
-                        <div className="reportreply-dialog-row">
-                            <button onClick={() => click("reject")} className="download-button">{"Cancel"}</button>
-                            <button onClick={() => click("accept")} className="download-button">{"Report"}</button>
+                        {error ? <div className="dialog-validation-container"><span className="dialog-validation" ref={errorRef}></span></div> : null}
+                        <div className="dialog-row">
+                            <button onClick={() => click("reject")} className="dialog-button">{"Cancel"}</button>
+                            <button onClick={() => click("accept")} className="dialog-button">{"Report"}</button>
                         </div> </>}
                     </div>
                 </div>

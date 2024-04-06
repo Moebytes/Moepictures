@@ -5,7 +5,7 @@ import {HideNavbarContext, HideSidebarContext, ThemeContext, EnableDragContext, 
 SessionContext} from "../Context"
 import functions from "../structures/Functions"
 import Draggable from "react-draggable"
-import "./styles/deletepostdialog.less"
+import "./styles/dialog.less"
 import permissions from "../structures/Permissions"
 import axios from "axios"
 
@@ -43,7 +43,7 @@ const DeletePostDialog: React.FunctionComponent<Props> = (props) => {
     }, [showDeletePostDialog])
 
     const deletePost = async () => {
-        if (permissions.isStaff(session)) {
+        if (permissions.isElevated(session)) {
             await axios.delete("/api/post/delete", {params: {postID: props.post.postID}, headers: {"x-csrf-token": functions.getCSRFToken()}, withCredentials: true})
             history.push("/posts")
         } else {
@@ -75,21 +75,39 @@ const DeletePostDialog: React.FunctionComponent<Props> = (props) => {
     }
 
     if (showDeletePostDialog) {
-        if (permissions.isStaff(session)) {
+        if (session.banned) {
             return (
-                <div className="deletepost-dialog">
-                    <Draggable handle=".deletepost-dialog-title-container">
-                    <div className="deletepost-dialog-box" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
-                        <div className="deletepost-container">
-                            <div className="deletepost-dialog-title-container">
-                                <span className="deletepost-dialog-title">Delete Post</span>
+                <div className="dialog">
+                    <Draggable handle=".dialog-title-container">
+                    <div className="dialog-box" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
+                            <div className="dialog-title-container">
+                                <span className="dialog-title">Delete Post Request</span>
                             </div>
-                            <div className="deletepost-dialog-row">
-                                <span className="deletepost-dialog-text">Are you sure that you want to delete this post?</span>
+                            <span className="dialog-ban-text">You are banned. Cannot submit a request.</span>
+                            <button className="dialog-ban-button" onClick={() => click("reject")}>
+                                <span className="dialog-ban-button-text">←Back</span>
+                            </button>
+                        </div>
+                    </Draggable>
+                </div>
+            )
+        }
+
+        if (permissions.isElevated(session)) {
+            return (
+                <div className="dialog">
+                    <Draggable handle=".dialog-title-container">
+                    <div className="dialog-box" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
+                        <div className="dialog-container">
+                            <div className="dialog-title-container">
+                                <span className="dialog-title">Delete Post</span>
                             </div>
-                            <div className="deletepost-dialog-row">
-                                <button onClick={() => click("reject")} className="download-button">{"No"}</button>
-                                <button onClick={() => click("accept")} className="download-button">{"Yes"}</button>
+                            <div className="dialog-row">
+                                <span className="dialog-text">Are you sure that you want to delete this post?</span>
+                            </div>
+                            <div className="dialog-row">
+                                <button onClick={() => click("reject")} className="dialog-button">{"No"}</button>
+                                <button onClick={() => click("accept")} className="dialog-button">{"Yes"}</button>
                             </div>
                         </div>
                     </div>
@@ -99,33 +117,33 @@ const DeletePostDialog: React.FunctionComponent<Props> = (props) => {
         }
 
         return (
-            <div className="deletepost-dialog">
-                <Draggable handle=".deletepost-dialog-title-container">
-                <div className="deletepost-dialog-box" style={{width: "500px", height: submitted ? "125px" : "250px"}} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
-                    <div className="deletepost-container">
-                        <div className="deletepost-dialog-title-container">
-                            <span className="deletepost-dialog-title">Delete Post Request</span>
+            <div className="dialog">
+                <Draggable handle=".dialog-title-container">
+                <div className="dialog-box" style={{width: "500px", height: submitted ? "125px" : "250px"}} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
+                    <div className="dialog-container">
+                        <div className="dialog-title-container">
+                            <span className="dialog-title">Delete Post Request</span>
                         </div>
                         {submitted ? <>
-                        <div className="deletepost-dialog-row">
-                            <span className="deletepost-dialog-text">Your delete request was submitted.</span>
+                        <div className="dialog-row">
+                            <span className="dialog-text">Your delete request was submitted.</span>
                         </div>
-                        <div className="deletepost-dialog-row">
-                            <button onClick={() => close()} className="download-button">{"Cancel"}</button>
-                            <button onClick={() => close()} className="download-button">{"OK"}</button>
+                        <div className="dialog-row">
+                            <button onClick={() => close()} className="dialog-button">{"Cancel"}</button>
+                            <button onClick={() => close()} className="dialog-button">{"OK"}</button>
                         </div>
                         </> : <>
-                        <div className="deletepost-dialog-row">
-                            <span className="deletepost-dialog-text-small">If you think that a post is low-quality, you may request it's deletion and it will get re-reviewed by staff. If you want to delete a post for a copyright reason, please use the contact form instead. Why do you want to delete this post?</span>
+                        <div className="dialog-row">
+                            <span className="dialog-text-small">If you think that a post is low-quality, you may request it's deletion and it will get re-reviewed by staff. If you want to delete a post for a copyright reason, please use the contact form instead. Why do you want to delete this post?</span>
                         </div>
-                        <div className="deletepost-dialog-row">
-                            <span className="deletepost-dialog-text">Reason: </span>
-                            <input className="deletepost-dialog-input" type="text" spellCheck={false} value={reason} onChange={(event) => setReason(event.target.value)}/>
+                        <div className="dialog-row">
+                            <span className="dialog-text">Reason: </span>
+                            <input className="dialog-input" type="text" spellCheck={false} value={reason} onChange={(event) => setReason(event.target.value)}/>
                         </div>
-                        {error ? <div className="deletepost-dialog-validation-container"><span className="deletepost-dialog-validation" ref={errorRef}></span></div> : null}
-                        <div className="deletepost-dialog-row">
-                            <button onClick={() => click("reject")} className="download-button">{"Cancel"}</button>
-                            <button onClick={() => click("accept", true)} className="download-button">{"Submit Request"}</button>
+                        {error ? <div className="dialog-validation-container"><span className="dialog-validation" ref={errorRef}></span></div> : null}
+                        <div className="dialog-row">
+                            <button onClick={() => click("reject")} className="dialog-button">{"Cancel"}</button>
+                            <button onClick={() => click("accept", true)} className="dialog-button">{"Submit Request"}</button>
                         </div> </> }
                     </div>
                 </div>

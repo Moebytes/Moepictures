@@ -266,7 +266,7 @@ const UserProfilePage: React.FunctionComponent = (props) => {
                     <div className="userprofile-top-container">
                         <img className="userprofile-img" src={userImg} onClick={userImgClick} onAuxClick={userImgClick} style={{filter: session.image ? "" : getFilter()}}/>
                         {generateUsernameJSX()}
-                        {permissions.isStaff(session) && <>
+                        {permissions.isElevated(session) && <>
                         <label htmlFor="upload-pfp" className="uploadpfp-label">
                             <img className="userprofile-uploadimg" src={uploadPfpIcon} style={{filter: getFilter()}}/>
                         </label>

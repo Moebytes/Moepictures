@@ -5,7 +5,7 @@ import {HideNavbarContext, HideSidebarContext, ThemeContext, EnableDragContext, 
 HideTitlebarContext, SessionContext} from "../Context"
 import functions from "../structures/Functions"
 import Draggable from "react-draggable"
-import "./styles/pagedialog.less"
+import "./styles/dialog.less"
 import axios from "axios"
 
 const PageDialog: React.FunctionComponent = (props) => {
@@ -46,20 +46,20 @@ const PageDialog: React.FunctionComponent = (props) => {
 
     if (showPageDialog) {
         return (
-            <div className="page-dialog">
-                <Draggable handle=".page-dialog-title-container">
-                <div className="page-dialog-box" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
-                    <div className="pagedialog-container">
-                        <div className="page-dialog-title-container">
-                            <span className="page-dialog-title">Go To Page</span>
+            <div className="dialog">
+                <Draggable handle=".dialog-title-container">
+                <div className="dialog-box" style={{width: "250px", height: "200px"}} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
+                    <div className="dialog-container">
+                        <div className="dialog-title-container">
+                            <span className="dialog-title">Go To Page</span>
                         </div>
-                        <div className="page-dialog-row">
-                            <span className="page-dialog-text">Page:</span>
-                            <input className="page-dialog-input" type="number" spellCheck={false} value={pageField} onChange={(event) => setPageField(event.target.value)}/>
+                        <div className="dialog-row">
+                            <span className="dialog-text">Page:</span>
+                            <input className="dialog-input-taller" type="number" spellCheck={false} value={pageField} onChange={(event) => setPageField(event.target.value)}/>
                         </div>
-                        <div className="page-dialog-row">
-                            <button onClick={() => click("reject")} className="download-button">{"Cancel"}</button>
-                            <button onClick={() => click("accept")} className="download-button">{"Go"}</button>
+                        <div className="dialog-row">
+                            <button onClick={() => click("reject")} className="dialog-button">{"Cancel"}</button>
+                            <button onClick={() => click("accept")} className="dialog-button">{"Go"}</button>
                         </div>
                     </div>
                 </div>

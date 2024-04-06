@@ -750,7 +750,7 @@ const SortBar: React.FunctionComponent = (props) => {
                     <img className="sortbar-dropdown-img" src={questionable} style={{filter: getFilter()}}/>
                     <span className="sortbar-dropdown-text">Questionable</span>
                 </div>
-                {permissions.isStaff(session) ?
+                {permissions.isElevated(session) ?
                 <div className="sortbar-dropdown-row" onClick={() => setRestrictType("explicit")}>
                     <img className="sortbar-dropdown-img" src={explicit} style={{filter: getFilter()}}/>
                     <span className="sortbar-dropdown-text">Explicit</span>

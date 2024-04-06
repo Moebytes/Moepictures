@@ -66,8 +66,8 @@ const EditTranslationDialog: React.FunctionComponent = (props) => {
                             <textarea className="edit-translation-textarea" spellCheck={false} value={editTranslationText} onChange={(event) => setEditTranslationText(event.target.value)}></textarea>
                         </div>
                         <div className="edit-translation-dialog-row">
-                            <button onClick={() => click("reject")} className="download-button">{"Cancel"}</button>
-                            <button onClick={() => click("accept")} className="download-button">{"Edit"}</button>
+                            <button onClick={() => click("reject")} className="dialog-button">{"Cancel"}</button>
+                            <button onClick={() => click("accept")} className="dialog-button">{"Edit"}</button>
                         </div>
                     </div>
                 </div>

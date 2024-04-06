@@ -5,7 +5,7 @@ import {HideNavbarContext, HideSidebarContext, ThemeContext, EnableDragContext, 
 DeleteTranslationHistoryFlagContext, HideTitlebarContext, SessionContext} from "../Context"
 import functions from "../structures/Functions"
 import Draggable from "react-draggable"
-import "./styles/deletetranslationhistorydialog.less"
+import "./styles/dialog.less"
 import permissions from "../structures/Permissions"
 import axios from "axios"
 
@@ -53,18 +53,18 @@ const DeleteTranslationHistoryDialog: React.FunctionComponent = (props) => {
 
     if (deleteTranslationHistoryID?.failed) {
         return (
-            <div className="delete-translation-history-dialog">
-                <Draggable handle=".delete-translation-history-dialog-title-container">
-                <div className="delete-translation-history-dialog-box" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
-                    <div className="delete-translation-history-container">
-                        <div className="delete-translation-history-dialog-title-container">
-                            <span className="delete-translation-history-dialog-title">Delete Translation History</span>
+            <div className="dialog">
+                <Draggable handle=".dialog-title-container">
+                <div className="dialog-box" style={{width: "250px", height: "190px"}} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
+                    <div className="dialog-container">
+                        <div className="dialog-title-container">
+                            <span className="dialog-title">Delete Translation History</span>
                         </div>
-                        <div className="delete-translation-history-dialog-row">
-                            <span className="delete-translation-history-dialog-text">The current history state cannot be deleted.</span>
+                        <div className="dialog-row">
+                            <span className="dialog-text">The current history state cannot be deleted.</span>
                         </div>
-                        <div className="delete-translation-history-dialog-row">
-                            <button onClick={() => click("reject")} className="download-button">{"Ok"}</button>
+                        <div className="dialog-row">
+                            <button onClick={() => click("reject")} className="dialog-button">{"Ok"}</button>
                         </div>
                     </div>
                 </div>
@@ -75,19 +75,19 @@ const DeleteTranslationHistoryDialog: React.FunctionComponent = (props) => {
 
     if (deleteTranslationHistoryID) {
         return (
-            <div className="delete-translation-history-dialog">
-                <Draggable handle=".delete-translation-history-dialog-title-container">
-                <div className="delete-translation-history-dialog-box" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
-                    <div className="delete-translation-history-container">
-                        <div className="delete-translation-history-dialog-title-container">
-                            <span className="delete-translation-history-dialog-title">Delete Translation History</span>
+            <div className="dialog">
+                <Draggable handle=".dialog-title-container">
+                <div className="dialog-box" style={{width: "250px", height: "190px"}} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
+                    <div className="dialog-container">
+                        <div className="dialog-title-container">
+                            <span className="dialog-title">Delete Translation History</span>
                         </div>
-                        <div className="delete-translation-history-dialog-row">
-                            <span className="delete-translation-history-dialog-text">Do you want to delete this history state?</span>
+                        <div className="dialog-row">
+                            <span className="dialog-text">Do you want to delete this history state?</span>
                         </div>
-                        <div className="delete-translation-history-dialog-row">
-                            <button onClick={() => click("reject")} className="download-button">{"No"}</button>
-                            <button onClick={() => click("accept")} className="download-button">{"Yes"}</button>
+                        <div className="dialog-row">
+                            <button onClick={() => click("reject")} className="dialog-button">{"No"}</button>
+                            <button onClick={() => click("accept")} className="dialog-button">{"Yes"}</button>
                         </div>
                     </div>
                 </div>

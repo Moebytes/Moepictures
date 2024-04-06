@@ -1,19 +1,20 @@
 import React, {useEffect, useContext, useState, useRef} from "react"
 import {useHistory} from "react-router-dom"
 import {HashLink as Link} from "react-router-hash-link"
-import {HideNavbarContext, HideSidebarContext, ThemeContext, EnableDragContext, ReportCommentIDContext, HideTitlebarContext} from "../Context"
+import {HideNavbarContext, HideSidebarContext, ThemeContext, EnableDragContext, BanNameContext, HideTitlebarContext, UpdateUserFlagContext} from "../Context"
 import functions from "../structures/Functions"
 import "./styles/dialog.less"
 import Draggable from "react-draggable"
 import axios from "axios"
 
-const ReportCommentDialog: React.FunctionComponent = (props) => {
+const BanDialog: React.FunctionComponent = (props) => {
     const {theme, setTheme} = useContext(ThemeContext)
     const {hideNavbar, setHideNavbar} = useContext(HideNavbarContext)
     const {hideTitlebar, setHideTitlebar} = useContext(HideTitlebarContext)
     const {hideSidebar, setHideSidebar} = useContext(HideSidebarContext)
     const {enableDrag, setEnableDrag} = useContext(EnableDragContext)
-    const {reportCommentID, setReportCommentID} = useContext(ReportCommentIDContext)
+    const {banName, setBanName} = useContext(BanNameContext)
+    const {updateUserFlag, setUpdateUserFlag} = useContext(UpdateUserFlagContext)
     const [reason, setReason] = useState("")
     const [submitted, setSubmitted] = useState(false)
     const [error, setError] = useState(false)
@@ -21,67 +22,44 @@ const ReportCommentDialog: React.FunctionComponent = (props) => {
     const history = useHistory()
 
     useEffect(() => {
-        document.title = "Moebooru: Report Comment"
+        document.title = "Moebooru: Ban User"
     }, [])
 
     useEffect(() => {
-        if (reportCommentID) {
+        if (banName) {
             document.body.style.pointerEvents = "none"
         } else {
             document.body.style.pointerEvents = "all"
             setEnableDrag(true)
         }
-    }, [reportCommentID])
+    }, [banName])
 
 
-    const reportComment = async () => {
-        const badReason = functions.validateReason(reason)
-        if (badReason) {
-            setError(true)
-            if (!errorRef.current) await functions.timeout(20)
-            errorRef.current!.innerText = badReason
-            await functions.timeout(2000)
-            setError(false)
-            return
-        }
-        await axios.post("/api/comment/report", {commentID: reportCommentID, reason}, {headers: {"x-csrf-token": functions.getCSRFToken()}, withCredentials: true})
-        setSubmitted(true)
+    const ban = async () => {
+        await axios.post("/api/user/ban", {username: banName, reason}, {headers: {"x-csrf-token": functions.getCSRFToken()}, withCredentials: true})
+        setBanName(null)
+        setUpdateUserFlag(true)
     }
 
     const click = (button: "accept" | "reject") => {
         if (button === "accept") {
-            reportComment()
+            ban()
         } else {
-            setReportCommentID(null)
+            setBanName(null)
         }
     }
 
-    const close = () => {
-        setReportCommentID(null)
-        setSubmitted(false)
-        setReason("")
-    }
-
-    if (reportCommentID) {
+    if (banName) {
         return (
             <div className="dialog">
                 <Draggable handle=".dialog-title-container">
                 <div className="dialog-box" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                     <div className="dialog-container">
                         <div className="dialog-title-container">
-                            <span className="dialog-title">Report Comment</span>
-                        </div>
-                        {submitted ? <>
-                        <div className="dialog-row">
-                            <span className="dialog-text">Comment report was sent. Thank you!</span>
+                            <span className="dialog-title">Ban User</span>
                         </div>
                         <div className="dialog-row">
-                            <button onClick={() => close()} className="dialog-button">{"Cancel"}</button>
-                            <button onClick={() => close()} className="dialog-button">{"OK"}</button>
-                        </div>
-                        </> : <>
-                        <div className="dialog-row">
-                            <span className="dialog-text">Report comments that are spam, offensive, or otherwise breaking the rules.</span>
+                            <span className="dialog-text">Ban this user? You can also provide a reason.</span>
                         </div>
                         <div className="dialog-row">
                             <span className="dialog-text">Reason: </span>
@@ -90,8 +68,8 @@ const ReportCommentDialog: React.FunctionComponent = (props) => {
                         {error ? <div className="dialog-validation-container"><span className="dialog-validation" ref={errorRef}></span></div> : null}
                         <div className="dialog-row">
                             <button onClick={() => click("reject")} className="dialog-button">{"Cancel"}</button>
-                            <button onClick={() => click("accept")} className="dialog-button">{"Report"}</button>
-                        </div> </>}
+                            <button onClick={() => click("accept")} className="dialog-button">{"Ban"}</button>
+                        </div>
                     </div>
                 </div>
                 </Draggable>
@@ -101,4 +79,4 @@ const ReportCommentDialog: React.FunctionComponent = (props) => {
     return null
 }
 
-export default ReportCommentDialog
+export default BanDialog

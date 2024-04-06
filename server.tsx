@@ -60,9 +60,9 @@ declare module "express-session" {
       role: string
       captchaAmount: number 
       lastPostID: number
-      captchaCache: string
       csrfSecret: string
       captchaAnswer: string
+      banned: boolean
   }
 }
 

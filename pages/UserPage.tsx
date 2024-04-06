@@ -9,13 +9,17 @@ import Footer from "../components/Footer"
 import DragAndDrop from "../components/DragAndDrop"
 import {HideNavbarContext, HideSidebarContext, ThemeContext, EnableDragContext, RelativeContext, HideTitlebarContext, MobileContext, CommentSearchFlagContext,
 HeaderTextContext, SidebarTextContext, SessionContext, RedirectContext, SessionFlagContext, ShowDeleteAccountDialogContext, SiteHueContext, SiteLightnessContext,
-SiteSaturationContext} from "../Context"
+SiteSaturationContext, BanNameContext, UnbanNameContext, UpdateUserFlagContext} from "../Context"
 import functions from "../structures/Functions"
 import permissions from "../structures/Permissions"
 import Carousel from "../components/Carousel"
 import CommentCarousel from "../components/CommentCarousel"
 import adminLabel from "../assets/icons/admin-label.png"
 import modLabel from "../assets/icons/mod-label.png"
+import banIcon from "../assets/icons/ban.png"
+import unbanIcon from "../assets/icons/unban.png"
+import BanDialog from "../dialogs/BanDialog"
+import UnbanDialog from "../dialogs/UnbanDialog"
 import "./styles/userpage.less"
 import axios from "axios"
 
@@ -38,10 +42,13 @@ const UserPage: React.FunctionComponent<Props> = (props) => {
     const {sidebarText, setSidebarText} = useContext(SidebarTextContext)
     const {session, setSession} = useContext(SessionContext)
     const {sessionFlag, setSessionFlag} = useContext(SessionFlagContext)
+    const {updateUserFlag, setUpdateUserFlag} = useContext(UpdateUserFlagContext)
     const {redirect, setRedirect} = useContext(RedirectContext)
     const {mobile, setMobile} = useContext(MobileContext)
     const {showDeleteAccountDialog, setShowDeleteAccountDialog} = useContext(ShowDeleteAccountDialogContext)
     const {commentSearchFlag, setCommentSearchFlag} = useContext(CommentSearchFlagContext)
+    const {banName, setBanName} = useContext(BanNameContext)
+    const {unbanName, setUnbanName} = useContext(UnbanNameContext)
     const [uploadIndex, setUploadIndex] = useState(0)
     const [favoriteIndex, setFavoriteIndex] = useState(0) as any
     const [uploads, setUploads] = useState([]) as any
@@ -63,6 +70,7 @@ const UserPage: React.FunctionComponent<Props> = (props) => {
         if (!user) return history.push("/404")
         setUser(user)
         setDefaultIcon(user.image ? false : true)
+        forceUpdate()
     }
 
     useEffect(() => {
@@ -186,12 +194,29 @@ const UserPage: React.FunctionComponent<Props> = (props) => {
                 </div>
             )
         }
-        return <span className="user-name">{functions.toProperCase(username)}</span>
+        return <span className={`user-name ${user.banned ? "banned" : ""}`}>{functions.toProperCase(username)}</span>
     }
+
+    const banDialog = () => {
+        if (user.banned) {
+            setUnbanName(username)
+        } else {
+            setBanName(username)
+        }
+    }
+
+    useEffect(() => {
+        if (updateUserFlag) {
+            fetchUser()
+            setUpdateUserFlag(false)
+        }
+    }, [updateUserFlag])
 
     return (
         <>
         <DragAndDrop/>
+        <BanDialog/>
+        <UnbanDialog/>
         <TitleBar/>
         <NavBar/>
         <div className="body">
@@ -202,16 +227,15 @@ const UserPage: React.FunctionComponent<Props> = (props) => {
                     <div className="user-top-container">
                         <img className="user-img" src={getUserImg()} onClick={userImgClick} onAuxClick={userImgClick} style={{filter: defaultIcon ? getFilter() : ""}}/>
                         {generateUsernameJSX()}
+                        {permissions.isElevated(session) && !permissions.isElevated(user)? <img className="user-icon" src={user.banned ? unbanIcon : banIcon} onClick={banDialog}/> : null}
                     </div>
+                    {user.banned ? <span className="user-ban-text">Banned</span> : null}
                     <div className="user-row">
                         <span className="user-text">Bio: {user.bio || "This user has not written anything."}</span>
                     </div>
                     <div className="user-row">
                         <span className="user-text">Join Date: {functions.prettyDate(new Date(user.joinDate || ""))}</span>
                     </div>
-                    {/*<div className="user-row">
-                        <span className="user-link" onClick={viewComments}>View Comments</span>
-                    </div>*/}
                     {generateFavoritesJSX()}
                     {uploads.length ?
                     <div className="user-column">

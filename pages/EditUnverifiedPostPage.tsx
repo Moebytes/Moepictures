@@ -268,7 +268,7 @@ const EditUnverifiedPostPage: React.FunctionComponent<Props> = (props) => {
 
     useEffect(() => {
         if (!session.cookie) return
-        if (!permissions.isStaff(session)) {
+        if (!permissions.isElevated(session)) {
             history.push("/403")
         }
     }, [session])
@@ -1552,7 +1552,7 @@ const EditUnverifiedPostPage: React.FunctionComponent<Props> = (props) => {
                     </button>
                 </div>
                 <div className="editpost-row">
-                    {permissions.isStaff(session) ?
+                    {permissions.isElevated(session) ?
                     <button className={`editpost-button ${restrict === "explicit" ? "button-selected" : ""}`} onClick={() => setRestrict("explicit")}>
                         <img className="editpost-button-img" src={explicit}/>
                         <span className="editpost-button-text">Explicit</span>
@@ -1568,7 +1568,7 @@ const EditUnverifiedPostPage: React.FunctionComponent<Props> = (props) => {
                         <img className="editpost-button-img" src={questionable}/>
                         <span className="editpost-button-text">Questionable</span>
                     </button>
-                    {permissions.isStaff(session) ?
+                    {permissions.isElevated(session) ?
                     <button className={`editpost-button ${restrict === "explicit" ? "button-selected" : ""}`} onClick={() => setRestrict("explicit")}>
                         <img className="editpost-button-img" src={explicit}/>
                         <span className="editpost-button-text">Explicit</span>

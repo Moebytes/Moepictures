@@ -108,6 +108,7 @@ const TagRoutes = (app: Express) => {
             const {tag, key, description, image, aliases, implications, pixivTags, pixiv, twitter, website, fandom, reason} = req.body
             if (!serverFunctions.validateCSRF(req)) return res.status(400).send("Bad CSRF token")
             if (!req.session.username) return res.status(401).send("Unauthorized")
+            if (req.session.banned) return res.status(403).send("You are banned")
             if (!tag) return res.status(400).send("Bad tag")
             const tagObj = await sql.tag(tag)
             if (!tagObj) return res.status(400).send("Bad tag")
@@ -280,6 +281,7 @@ const TagRoutes = (app: Express) => {
             if (!serverFunctions.validateCSRF(req)) return res.status(400).send("Bad CSRF token")
             if (!tag) return res.status(400).send("Invalid postID")
             if (!req.session.username) return res.status(401).send("Unauthorized")
+            if (req.session.banned) return res.status(403).send("You are banned")
             const exists = await sql.tag(tag)
             if (!exists) return res.status(400).send("Bad tag")
             await sql.insertTagDeleteRequest(req.session.username, tag, reason)

@@ -262,7 +262,7 @@ const NavBar: React.FunctionComponent<Props> = (props) => {
                 <div className="mobile-nav-color-container">
                     <img className="mobile-nav-color" src={eyedropper} onClick={colorChange} style={{filter: getFilter()}}/>
                     <img className="mobile-nav-color" src={light} onClick={lightChange} style={{filter: getFilter()}}/>
-                    {permissions.isStaff(session) ? <img className="nav-color" src={crown} onClick={() => history.push("/mod-queue")} style={{filter: getFilter()}}/> : null}
+                    {permissions.isElevated(session) ? <img className="nav-color" src={crown} onClick={() => history.push("/mod-queue")} style={{filter: getFilter()}}/> : null}
                     <img className="mobile-nav-color" src={scroll ? scrollIcon : pageIcon} onClick={toggleScroll} style={{filter: getFilter()}}/>
                 </div>
                 {getDropdownJSX()}
@@ -326,7 +326,7 @@ const NavBar: React.FunctionComponent<Props> = (props) => {
                     </div>
                     <img className="nav-color" src={eyedropper} onClick={colorChange} style={{filter: getFilter()}}/>
                     <img className="nav-color" src={light} onClick={lightChange} style={{filter: getFilter()}}/>
-                    {permissions.isStaff(session) ? <img className="nav-color" src={crown} onClick={() => history.push("/mod-queue")} style={{filter: getFilter()}}/> : null}
+                    {permissions.isElevated(session) ? <img className="nav-color" src={crown} onClick={() => history.push("/mod-queue")} style={{filter: getFilter()}}/> : null}
                 </div>
                 {getDropdownJSX()}
             </div>

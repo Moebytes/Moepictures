@@ -85,7 +85,7 @@ const UnverifiedPostPage: React.FunctionComponent<Props> = (props) => {
 
     useEffect(() => {
         if (!session.cookie) return
-        if (!permissions.isStaff(session)) {
+        if (!permissions.isElevated(session)) {
             history.push("/403")
         }
     }, [session])

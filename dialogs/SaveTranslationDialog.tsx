@@ -5,7 +5,7 @@ import {HideNavbarContext, HideTitlebarContext, HideSidebarContext, ThemeContext
 ShowSaveTranslationDialogContext, SaveTranslationDataContext, SaveTranslationOrderContext, SessionContext} from "../Context"
 import functions from "../structures/Functions"
 import Draggable from "react-draggable"
-import "./styles/savetranslationdialog.less"
+import "./styles/dialog.less"
 import permissions from "../structures/Permissions"
 import axios from "axios"
 
@@ -79,25 +79,43 @@ const SaveTranslationDialog: React.FunctionComponent<Props> = (props) => {
     }
 
     if (showSaveTranslationDialog) {
+        if (session.banned) {
+            return (
+                <div className="dialog">
+                    <Draggable handle=".dialog-title-container">
+                    <div className="dialog-box" style={{width: "340px", height: "170px"}} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
+                            <div className="dialog-title-container">
+                                <span className="dialog-title">Save Translation</span>
+                            </div>
+                            <span className="dialog-ban-text">You are banned. Cannot save translations.</span>
+                            <button className="dialog-ban-button" onClick={() => click("reject")}>
+                                <span className="dialog-ban-button-text">←Back</span>
+                            </button>
+                        </div>
+                    </Draggable>
+                </div>
+            )
+        }
+
         if (session.username) {
             return (
-                <div className="save-translation-dialog">
-                    <Draggable handle=".save-translation-dialog-title-container">
-                    <div className="save-translation-dialog-box" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
-                        <div className="save-translation-container">
-                            <div className="save-translation-dialog-title-container">
-                                <span className="save-translation-dialog-title">Save Translation</span>
+                <div className="dialog">
+                    <Draggable handle=".dialog-title-container">
+                    <div className="dialog-box" style={{width: "340px", height: "200px"}} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
+                        <div className="dialog-container">
+                            <div className="dialog-title-container">
+                                <span className="dialog-title">Save Translation</span>
                             </div>
-                            <div className="save-translation-dialog-row">
-                                <span className="save-translation-dialog-text">Do you want to save the translation changes made to this post?</span>
+                            <div className="dialog-row">
+                                <span className="dialog-text">Do you want to save the translation changes made to this post?</span>
                             </div>
-                            <div className="save-translation-dialog-row">
-                                <span className="save-translation-dialog-text">Reason: </span>
-                                <input className="save-translation-dialog-input" type="text" spellCheck={false} value={reason} onChange={(event) => setReason(event.target.value)}/>
+                            <div className="dialog-row">
+                                <span className="dialog-text">Reason: </span>
+                                <input className="dialog-input" type="text" spellCheck={false} value={reason} onChange={(event) => setReason(event.target.value)}/>
                             </div>
-                            <div className="save-translation-dialog-row">
-                                <button onClick={() => click("reject")} className="download-button">{"No"}</button>
-                                <button onClick={() => click("accept")} className="download-button">{"Yes"}</button>
+                            <div className="dialog-row">
+                                <button onClick={() => click("reject")} className="dialog-button">{"No"}</button>
+                                <button onClick={() => click("accept")} className="dialog-button">{"Yes"}</button>
                             </div>
                         </div>
                     </div>
@@ -107,33 +125,33 @@ const SaveTranslationDialog: React.FunctionComponent<Props> = (props) => {
         }
 
         return (
-            <div className="save-translation-dialog">
-                <Draggable handle=".save-translation-dialog-title-container">
-                <div className="save-translation-dialog-box" style={{width: "350px", height: submitted ? "125px" : "250px"}} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
-                    <div className="save-translation-container">
-                        <div className="save-translation-dialog-title-container">
-                            <span className="save-translation-dialog-title">Save Translation Request</span>
+            <div className="dialog">
+                <Draggable handle=".dialog-title-container">
+                <div className="dialog-box" style={{width: "340px", height: submitted ? "125px" : "250px"}} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
+                    <div className="dialog-container">
+                        <div className="dialog-title-container">
+                            <span className="dialog-title">Save Translation Request</span>
                         </div>
                         {submitted ? <>
-                        <div className="save-translation-dialog-row">
-                            <span className="save-translation-dialog-text">Your translation request was submitted.</span>
+                        <div className="dialog-row">
+                            <span className="dialog-text">Your translation request was submitted.</span>
                         </div>
-                        <div className="save-translation-dialog-row">
-                            <button onClick={() => close()} className="download-button">{"Cancel"}</button>
-                            <button onClick={() => close()} className="download-button">{"OK"}</button>
+                        <div className="dialog-row">
+                            <button onClick={() => close()} className="dialog-button">{"Cancel"}</button>
+                            <button onClick={() => close()} className="dialog-button">{"OK"}</button>
                         </div>
                         </> : <>
-                        <div className="save-translation-dialog-row">
-                            <span className="save-translation-dialog-text-small">Do you want to save the translation changes made to this post?</span>
+                        <div className="dialog-row">
+                            <span className="dialog-text-small">Do you want to save the translation changes made to this post?</span>
                         </div>
-                        <div className="save-translation-dialog-row">
-                            <span className="save-translation-dialog-text">Reason: </span>
-                            <input className="save-translation-dialog-input" type="text" spellCheck={false} value={reason} onChange={(event) => setReason(event.target.value)}/>
+                        <div className="dialog-row">
+                            <span className="dialog-text">Reason: </span>
+                            <input className="dialog-input" type="text" spellCheck={false} value={reason} onChange={(event) => setReason(event.target.value)}/>
                         </div>
-                        {error ? <div className="save-translation-dialog-validation-container"><span className="save-translation-dialog-validation" ref={errorRef}></span></div> : null}
-                        <div className="save-translation-dialog-row">
-                            <button onClick={() => click("reject")} className="download-button">{"Cancel"}</button>
-                            <button onClick={() => click("accept", true)} className="download-button">{"Submit Request"}</button>
+                        {error ? <div className="dialog-validation-container"><span className="dialog-validation" ref={errorRef}></span></div> : null}
+                        <div className="dialog-row">
+                            <button onClick={() => click("reject")} className="dialog-button">{"Cancel"}</button>
+                            <button onClick={() => click("accept", true)} className="dialog-button">{"Submit Request"}</button>
                         </div> </> }
                     </div>
                 </div>

@@ -407,7 +407,7 @@ const CommentsPage: React.FunctionComponent = (props) => {
         for (let i = 0; i < visible.length; i++) {
             if (visible[i].fake) continue
             if (!session.username) if (visible[i].post.restrict !== "safe") continue
-            if (!permissions.isStaff(session)) if (visible[i].post.restrict === "explicit") continue
+            if (!permissions.isElevated(session)) if (visible[i].post.restrict === "explicit") continue
             jsx.push(<CommentRow key={visible[i].commentID} comment={visible[i]} onDelete={updateComments} onEdit={updateComments} onCommentJump={onCommentJump}/>)
         }
         if (!scroll) {

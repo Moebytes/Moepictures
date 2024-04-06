@@ -59,7 +59,7 @@ const ModQueuePage: React.FunctionComponent = (props) => {
 
     useEffect(() => {
         if (!session.cookie) return
-        if (!permissions.isStaff(session)) {
+        if (!permissions.isElevated(session)) {
             history.push("/403")
         }
     }, [session])

@@ -3,7 +3,7 @@ import {HashLink as Link} from "react-router-hash-link"
 import {HideNavbarContext, HideSidebarContext, ThemeContext, EnableDragContext, ShowDownloadDialogContext, PostAmountContext, 
 PostsContext, SizeTypeContext, DownloadURLsContext, DownloadFlagContext, HideTitlebarContext} from "../Context"
 import functions from "../structures/Functions"
-import "./styles/downloaddialog.less"
+import "./styles/dialog.less"
 import Draggable from "react-draggable"
 
 const DownloadDialog: React.FunctionComponent = (props) => {
@@ -88,24 +88,24 @@ const DownloadDialog: React.FunctionComponent = (props) => {
 
     if (showDownloadDialog) {
         return (
-            <div className="download-dialog">
-                <Draggable handle=".download-dialog-title-container">
-                <div className="download-dialog-box" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
-                    <div className="download-container">
-                        <div className="download-dialog-title-container">
-                            <span className="download-dialog-title">Download</span>
+            <div className="dialog">
+                <Draggable handle=".dialog-title-container">
+                <div className="dialog-box" style={{width: "250px", height: "200px"}} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
+                    <div className="dialog-container">
+                        <div className="dialog-title-container">
+                            <span className="dialog-title">Download</span>
                         </div>
-                        <div className="download-dialog-row">
-                            <span className="download-dialog-text">Offset: </span>
-                            <input className="download-dialog-input" type="number" spellCheck={false} value={offsetField} onChange={(event) => setOffsetField(event.target.value)}/>
+                        <div className="dialog-row">
+                            <span className="dialog-text">Offset: </span>
+                            <input className="dialog-input-taller" type="number" spellCheck={false} value={offsetField} onChange={(event) => setOffsetField(event.target.value)}/>
                         </div>
-                        <div className="download-dialog-row">
-                            <span className="download-dialog-text">Amount: </span>
-                            <input className="download-dialog-input" type="number" spellCheck={false} value={amountField} onChange={(event) => setAmountField(event.target.value)}/>
+                        <div className="dialog-row">
+                            <span className="dialog-text">Amount: </span>
+                            <input className="dialog-input-taller" type="number" spellCheck={false} value={amountField} onChange={(event) => setAmountField(event.target.value)}/>
                         </div>
-                        <div className="download-dialog-row">
-                            <button onClick={() => click("reject")} className="download-button">{"Cancel"}</button>
-                            <button onClick={() => click("accept")} className="download-button">{"Download"}</button>
+                        <div className="dialog-row">
+                            <button onClick={() => click("reject")} className="dialog-button">{"Cancel"}</button>
+                            <button onClick={() => click("accept")} className="dialog-button">{"Download"}</button>
                         </div>
                     </div>
                 </div>

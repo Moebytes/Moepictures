@@ -20,7 +20,7 @@ Moebooru supports multiple images per post, which is great for comics and posts 
 ![Image](https://github.com/Tenpi/Moebooru.moe/blob/main/assets/misc/imagefilters.png?raw=true)
 
 You can apply image filters such as brightness, contrast, and hue in realtime. There is also a very fun pixelate filter that 
-can make everything look like a pixel game.
+can make everything look like a pixel game. When playing audio, the pixelate filter will work as a bitcrusher.
 
 ### Custom Players
 
@@ -69,14 +69,13 @@ Images are uploaded to Amazon S3 buckets called "moebooru" and "moebooru-unverif
 
 https://aws.amazon.com/s3/
 
-If you want to use the local filesystem instead you can edit the file `structures/ServerFunctions.ts` and add in your path to folders "moebooru" and
-"moebooru-unverified", each containing the following subfolders:
+If you want to use the local filesystem instead you can edit the file `structures/ServerFunctions.ts` and add in your path to folders "moebooru" and "moebooru-unverified", each containing the following subfolders:
 
 `["animation", "artist", "character", "comic", "image", "pfp", "series", "tag", "video", "audio", "model"]`
 
 Rename the file `.env.example` to `.env` and this is where you should put in your database and aws credentials. `COOKIE_SECRET` should be a string of random characters. `EMAIL_ADDRESS` and `EMAIL_PASSWORD` is the email address used to send people email verification emails, password resets, etc.
 
-In production you should set the `PORT` to 80 (HTTP port) or 443 (HTTPS port). For development omit this and it runs on port 8080 by default.
+In production you should set the `PORT` to 80 (HTTP port) or 443 (HTTPS port). For development omit this and it runs on port 8082 by default.
 
 The other keys in this file are largely optional, for example if you want to fetch data from saucenao in the upload page you should provide a saucenao api key.
 

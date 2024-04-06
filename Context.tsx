@@ -141,6 +141,9 @@ export const EditReplyFlagContext = React.createContext<any>(null)
 export const EditReplyContentContext = React.createContext<any>(null)
 export const ReportReplyIDContext = React.createContext<any>(null)
 export const ReportThreadIDContext = React.createContext<any>(null)
+export const BanNameContext = React.createContext<any>(null)
+export const UnbanNameContext = React.createContext<any>(null)
+export const UpdateUserFlagContext = React.createContext<any>(null)
 
 const Context: React.FunctionComponent = (props) => {
     const [siteHue, setSiteHue] = useState(180)
@@ -269,10 +272,16 @@ const Context: React.FunctionComponent = (props) => {
     const [editReplyContent, setEditReplyContent] = useState("")
     const [reportReplyID, setReportReplyID] = useState(null)
     const [reportThreadID, setReportThreadID] = useState(null)
+    const [banName, setBanName] = useState(null)
+    const [unbanName, setUnbanName] = useState(null)
+    const [updateUserFlag, setUpdateUserFlag] = useState(false)
     
 
 return (
     <>
+        <UpdateUserFlagContext.Provider value={{updateUserFlag, setUpdateUserFlag}}>
+        <UnbanNameContext.Provider value={{unbanName, setUnbanName}}>
+        <BanNameContext.Provider value={{banName, setBanName}}>
         <ReportThreadIDContext.Provider value={{reportThreadID, setReportThreadID}}>
         <EditThreadContentContext.Provider value={{editThreadContent, setEditThreadContent}}>
         <EditThreadTitleContext.Provider value={{editThreadTitle, setEditThreadTitle}}>
@@ -526,6 +535,9 @@ return (
         </EditThreadTitleContext.Provider>
         </EditThreadContentContext.Provider>
         </ReportThreadIDContext.Provider>
+        </BanNameContext.Provider>
+        </UnbanNameContext.Provider>
+        </UpdateUserFlagContext.Provider>
     </>
     )
 }

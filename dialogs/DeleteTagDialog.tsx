@@ -4,7 +4,7 @@ import {HashLink as Link} from "react-router-hash-link"
 import {HideNavbarContext, HideSidebarContext, ThemeContext, EnableDragContext, DeleteTagIDContext, DeleteTagFlagContext, HideTitlebarContext,
 SessionContext} from "../Context"
 import functions from "../structures/Functions"
-import "./styles/deletetagdialog.less"
+import "./styles/dialog.less"
 import Draggable from "react-draggable"
 import permissions from "../structures/Permissions"
 import axios from "axios"
@@ -40,7 +40,7 @@ const DeleteTagDialog: React.FunctionComponent = (props) => {
     }, [deleteTagID])
 
     const deleteTag = async () => {
-        if (permissions.isStaff(session)) {
+        if (permissions.isElevated(session)) {
             setDeleteTagFlag(true)
         } else {
             const badReason = functions.validateReason(reason)
@@ -72,21 +72,39 @@ const DeleteTagDialog: React.FunctionComponent = (props) => {
     }
 
     if (deleteTagID) {
-        if (permissions.isStaff(session)) {
+        if (session.banned) {
             return (
-                <div className="deletetag-dialog">
-                    <Draggable handle=".deletetag-dialog-title-container">
-                    <div className="deletetag-dialog-box" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
-                        <div className="deletetag-container">
-                            <div className="deletetag-dialog-title-container">
-                                <span className="deletetag-dialog-title">Delete Tag</span>
+                <div className="dialog">
+                    <Draggable handle=".dialog-title-container">
+                    <div className="dialog-box" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
+                            <div className="dialog-title-container">
+                                <span className="dialog-title">Delete Tag Request</span>
                             </div>
-                            <div className="deletetag-dialog-row">
-                                <span className="deletetag-dialog-text">Do you want to delete this tag?</span>
+                            <span className="dialog-ban-text">You are banned. Cannot submit a request.</span>
+                            <button className="dialog-ban-button" onClick={() => click("reject")}>
+                                <span className="dialog-ban-button-text">←Back</span>
+                            </button>
+                        </div>
+                    </Draggable>
+                </div>
+            )
+        }
+
+        if (permissions.isElevated(session)) {
+            return (
+                <div className="dialog">
+                    <Draggable handle=".dialog-title-container">
+                    <div className="dialog-box" style={{width: "250px", height: "190px"}} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
+                        <div className="dialog-container">
+                            <div className="dialog-title-container">
+                                <span className="dialog-title">Delete Tag</span>
                             </div>
-                            <div className="deletetag-dialog-row">
-                                <button onClick={() => click("reject")} className="download-button">{"No"}</button>
-                                <button onClick={() => click("accept")} className="download-button">{"Yes"}</button>
+                            <div className="dialog-row">
+                                <span className="dialog-text">Do you want to delete this tag?</span>
+                            </div>
+                            <div className="dialog-row">
+                                <button onClick={() => click("reject")} className="dialog-button">{"No"}</button>
+                                <button onClick={() => click("accept")} className="dialog-button">{"Yes"}</button>
                             </div>
                         </div>
                     </div>
@@ -96,33 +114,33 @@ const DeleteTagDialog: React.FunctionComponent = (props) => {
         }
 
         return (
-            <div className="deletetag-dialog">
-                <Draggable handle=".deletetag-dialog-title-container">
-                <div className="deletetag-dialog-box" style={{width: "500px", height: submitted ? "125px" : "250px"}} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
-                    <div className="deletetag-container">
-                        <div className="deletetag-dialog-title-container">
-                            <span className="deletetag-dialog-title">Delete Tag Request</span>
+            <div className="dialog">
+                <Draggable handle=".dialog-title-container">
+                <div className="dialog-box" style={{width: "500px", height: submitted ? "125px" : "250px"}} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
+                    <div className="dialog-container">
+                        <div className="dialog-title-container">
+                            <span className="dialog-title">Delete Tag Request</span>
                         </div>
                         {submitted ? <>
-                        <div className="deletetag-dialog-row">
-                            <span className="deletetag-dialog-text">Your delete request was submitted.</span>
+                        <div className="dialog-row">
+                            <span className="dialog-text">Your delete request was submitted.</span>
                         </div>
-                        <div className="deletetag-dialog-row">
-                            <button onClick={() => close()} className="download-button">{"Cancel"}</button>
-                            <button onClick={() => close()} className="download-button">{"OK"}</button>
+                        <div className="dialog-row">
+                            <button onClick={() => close()} className="dialog-button">{"Cancel"}</button>
+                            <button onClick={() => close()} className="dialog-button">{"OK"}</button>
                         </div>
                         </> : <>
-                        <div className="deletetag-dialog-row">
-                            <span className="deletetag-dialog-text">If the tag is poor, you may request for it's deletion. Why do you want to delete this tag?</span>
+                        <div className="dialog-row">
+                            <span className="dialog-text">If the tag is poor, you may request for it's deletion. Why do you want to delete this tag?</span>
                         </div>
-                        <div className="deletetag-dialog-row">
-                            <span className="deletetag-dialog-text">Reason: </span>
-                            <input className="deletetag-dialog-input" type="text" spellCheck={false} value={reason} onChange={(event) => setReason(event.target.value)}/>
+                        <div className="dialog-row">
+                            <span className="dialog-text">Reason: </span>
+                            <input className="dialog-input-taller" type="text" spellCheck={false} value={reason} onChange={(event) => setReason(event.target.value)}/>
                         </div>
-                        {error ? <div className="deletetag-dialog-validation-container"><span className="deletetag-dialog-validation" ref={errorRef}></span></div> : null}
-                        <div className="deletetag-dialog-row">
-                            <button onClick={() => click("reject")} className="download-button">{"Cancel"}</button>
-                            <button onClick={() => click("accept", true)} className="download-button">{"Submit Request"}</button>
+                        {error ? <div className="dialog-validation-container"><span className="dialog-validation" ref={errorRef}></span></div> : null}
+                        <div className="dialog-row">
+                            <button onClick={() => click("reject")} className="dialog-button">{"Cancel"}</button>
+                            <button onClick={() => click("accept", true)} className="dialog-button">{"Submit Request"}</button>
                         </div> </>}
                     </div>
                 </div>

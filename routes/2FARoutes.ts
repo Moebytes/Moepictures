@@ -104,6 +104,7 @@ const $2FARoutes = (app: Express) => {
                 req.session.publicFavorites = user.publicFavorites
                 req.session.image = user.image
                 req.session.role = user.role
+                req.session.banned = user.banned
                 const ip = req.headers["x-forwarded-for"] || req.socket.remoteAddress
                 await sql.updateUser(user.username, "ip", ip as string)
                 req.session.ip = ip as string

@@ -7,7 +7,7 @@ export default class Permissions {
         return session.role === "mod" ? true : false
     }
 
-    public static isStaff = (session: any) => {
+    public static isElevated = (session: any) => {
         if (session.role === "admin") return true 
         if (session.role === "mod") return true 
         return false

@@ -92,6 +92,7 @@ const CreateRoutes = (app: Express) => {
 
         if (!req.session.username) return res.status(401).send("Unauthorized")
         if (req.session.role !== "admin" && req.session.role !== "mod") return res.status(403).end()
+        if (req.session.banned) return res.status(403).send("You are banned")
 
         if (!artists?.[0]?.tag) artists = [{tag: "unknown-artist"}]
         if (!series?.[0]?.tag) {
@@ -311,6 +312,7 @@ const CreateRoutes = (app: Express) => {
 
         if (Number.isNaN(postID)) return res.status(400).send("Bad postID")
         if (!req.session.username) return res.status(401).send("Unauthorized")
+        if (req.session.banned) return res.status(403).send("You are banned")
         if (req.session.role !== "admin" && req.session.role !== "mod") noImageUpdate = true
 
         if (!artists?.[0]?.tag) artists = [{tag: "unknown-artist"}]
@@ -606,6 +608,7 @@ const CreateRoutes = (app: Express) => {
         let duplicates = req.body.duplicates
 
         if (!req.session.username) return res.status(401).send("Unauthorized")
+        if (req.session.banned) return res.status(403).send("You are banned")
 
         if (!artists?.[0]?.tag) artists = [{tag: "unknown-artist"}]
         if (!series?.[0]?.tag) {
@@ -821,6 +824,7 @@ const CreateRoutes = (app: Express) => {
         if (Number.isNaN(postID)) return res.status(400).send("Bad postID")
         if (unverifiedID && Number.isNaN(unverifiedID)) return res.status(400).send("Bad unverifiedID")
         if (!req.session.username) return res.status(401).send("Unauthorized")
+        if (req.session.banned) return res.status(403).send("You are banned")
 
         if (!artists?.[0]?.tag) artists = [{tag: "unknown-artist"}]
         if (!series?.[0]?.tag) {

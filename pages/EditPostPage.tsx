@@ -840,7 +840,7 @@ const EditPostPage: React.FunctionComponent<Props> = (props) => {
             await functions.timeout(3000)
             return setSubmitError(false)
         }
-        if (!reason && !permissions.isStaff(session)) {
+        if (!reason && !permissions.isElevated(session)) {
             setSubmitError(true)
             await functions.timeout(20)
             submitErrorRef.current.innerText = "Edit reason is required."
@@ -1387,6 +1387,323 @@ const EditPostPage: React.FunctionComponent<Props> = (props) => {
         }
     }, [type, style])
 
+    const getEditPostJSX = () => {
+        if (session.banned) {
+            return (
+                <>
+                <span className="upload-ban-text">You are banned. Cannot edit.</span>
+                <button className="upload-button" onClick={() => history.goBack()}
+                style={{width: "max-content", marginTop: "10px", marginLeft: "10px", backgroundColor: "var(--banText)"}}>
+                        <span className="upload-button-submit-text">←Back</span>
+                </button>
+                </>
+            )
+        }
+
+        return (
+            <>
+            <div className="editpost">
+                <span className="editpost-heading">Edit Post</span>
+                {submitted ?
+                <div className="editpost-container">
+                    <div className="editpost-container-row">
+                        {needsPermission ?
+                        <span className="editpost-text-alt">The post edit was submitted and will appear on the site if approved.</span> :
+                        <span className="editpost-text-alt">Post was edited.</span>}
+                    </div> 
+                    <div className="editpost-container-row" style={{marginTop: "10px"}}>
+                        <button className="editpost-button" onClick={() => {history.push(`/post/${postID}`); setPostFlag(true)}}>
+                                <span className="editpost-button-text">←Back</span>
+                        </button>
+                    </div>
+                </div> : <>
+                {editPostError ? <div className="editpost-row"><span ref={editPostErrorRef} className="editpost-text-alt"></span></div> : null}
+                {mobile ? <>
+                <div className="editpost-row">
+                    <label htmlFor="file-editpost" className="editpost-button">
+                        <img className="editpost-button-img" src={uploadIcon}/>
+                        <span className="editpost-button-text">Select Files</span>
+                    </label>
+                    <input id="file-editpost" type="file" multiple onChange={(event) => upload(event)}/>
+                    <button className="editpost-button" onClick={() => setShowLinksInput((prev) => !prev)}>
+                            <img className="editpost-button-img" src={linkIcon}/>
+                            <span className="editpost-button-text">Enter Links</span>
+                    </button>
+                </div>
+                <div className="editpost-row">
+                    {acceptedURLs.length > 1 ?
+                    <button className="editpost-button" onClick={left}>
+                        <img className="editpost-button-img" src={leftIcon}/>
+                    </button> : null}
+                    {currentImg ? 
+                    <button className="editpost-button" onClick={clear}>
+                        <img className="editpost-button-img" src={xIcon}/>
+                    </button>
+                    : null}
+                    {acceptedURLs.length > 1 ?
+                    <button className="editpost-button" onClick={right}>
+                        <img className="editpost-button-img" src={rightIcon}/>
+                    </button> : null}
+                </div> </>
+                :
+                <div className="editpost-row">
+                    <label htmlFor="file-editpost" className="editpost-button">
+                        <img className="editpost-button-img" src={uploadIcon}/>
+                        <span className="editpost-button-text">Select Files</span>
+                    </label>
+                    <input id="file-editpost" type="file" multiple onChange={(event) => upload(event)}/>
+                    <button className="editpost-button" onClick={() => setShowLinksInput((prev) => !prev)}>
+                            <img className="editpost-button-img" src={linkIcon}/>
+                            <span className="editpost-button-text">Enter Links</span>
+                    </button>
+                    {acceptedURLs.length > 1 ?
+                    <button className="editpost-button" onClick={left}>
+                        <img className="editpost-button-img" src={leftIcon}/>
+                    </button> : null}
+                    {currentImg ? 
+                    <button className="editpost-button" onClick={clear}>
+                        <img className="editpost-button-img" src={xIcon}/>
+                    </button>
+                    : null}
+                    {acceptedURLs.length > 1 ?
+                    <button className="editpost-button" onClick={right}>
+                        <img className="editpost-button-img" src={rightIcon}/>
+                    </button> : null}
+                </div>}
+                {showLinksInput ?
+                <div className="editpost-row">
+                    <textarea ref={enterLinksRef} className="editpost-textarea" spellCheck={false} onChange={(event) => linkUpload(event)}
+                    onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}></textarea>
+                </div> : null}
+            {acceptedURLs.length ?
+            <div className="editpost-row">
+                {acceptedURLs.length > 1 ? 
+                <div className="editpost-container">
+                    <Carousel images={acceptedURLs.map((u: any) => u.link)} set={set} index={currentIndex} noEncryption={true}/>
+                    {getPostJSX()}
+                </div>
+                : getPostJSX()}
+            </div>
+            : null}
+            <span className="editpost-heading">Classification</span>
+            <span className="editpost-text-alt">If there are multiple images, select the rightmost tag that fits.</span>
+            {mobile ? <>
+            <div className="editpost-row">
+                <button className={`editpost-button ${type === "image" ? "button-selected" : ""}`} onClick={() => setType("image")}>
+                    <img className="editpost-button-img" src={image}/>
+                    <span className="editpost-button-text">Image</span>
+                </button>
+                <button className={`editpost-button ${type === "animation" ? "button-selected" : ""}`} onClick={() => setType("animation")}>
+                    <img className="editpost-button-img" src={animation}/>
+                    <span className="editpost-button-text">Animation</span>
+                </button>
+            </div>
+            <div className="editpost-row">
+                <button className={`editpost-button ${type === "video" ? "button-selected" : ""}`} onClick={() => setType("video")}>
+                    <img className="editpost-button-img" src={video}/>
+                    <span className="editpost-button-text">Video</span>
+                </button>
+                <button className={`editpost-button ${type === "comic" ? "button-selected" : ""}`} onClick={() => setType("comic")}>
+                    <img className="editpost-button-img" src={comic}/>
+                    <span className="editpost-button-text">Comic</span>
+                </button>
+            </div>
+            <div className="editpost-row">
+                <button className={`editpost-button ${type === "audio" ? "button-selected" : ""}`} onClick={() => setType("audio")}>
+                    <img className="editpost-button-img" src={audio}/>
+                    <span className="editpost-button-text">Audio</span>
+                </button>
+                <button className={`editpost-button ${type === "model" ? "button-selected" : ""}`} onClick={() => setType("model")}>
+                    <img className="editpost-button-img" src={model}/>
+                    <span className="editpost-button-text">Model</span>
+                </button>
+            </div> </>
+            :
+            <div className="editpost-row">
+                <button className={`editpost-button ${type === "image" ? "button-selected" : ""}`} onClick={() => setType("image")}>
+                    <img className="editpost-button-img" src={image}/>
+                    <span className="editpost-button-text">Image</span>
+                </button>
+                <button className={`editpost-button ${type === "animation" ? "button-selected" : ""}`} onClick={() => setType("animation")}>
+                    <img className="editpost-button-img" src={animation}/>
+                    <span className="editpost-button-text">Animation</span>
+                </button>
+                <button className={`editpost-button ${type === "video" ? "button-selected" : ""}`} onClick={() => setType("video")}>
+                    <img className="editpost-button-img" src={video}/>
+                    <span className="editpost-button-text">Video</span>
+                </button>
+                <button className={`editpost-button ${type === "comic" ? "button-selected" : ""}`} onClick={() => setType("comic")}>
+                    <img className="editpost-button-img" src={comic}/>
+                    <span className="editpost-button-text">Comic</span>
+                </button>
+                <button className={`editpost-button ${type === "audio" ? "button-selected" : ""}`} onClick={() => setType("audio")}>
+                    <img className="editpost-button-img" src={audio}/>
+                    <span className="editpost-button-text">Audio</span>
+                </button>
+                <button className={`editpost-button ${type === "model" ? "button-selected" : ""}`} onClick={() => setType("model")}>
+                    <img className="editpost-button-img" src={model}/>
+                    <span className="editpost-button-text">Model</span>
+                </button>
+            </div>}
+            {mobile ? <>
+            <div className="editpost-row">
+                <button className={`editpost-button ${restrict === "safe" ? "button-selected" : ""}`} onClick={() => setRestrict("safe")}>
+                    <img className="editpost-button-img" src={safe}/>
+                    <span className="editpost-button-text">Safe</span>
+                </button>
+                <button className={`editpost-button ${restrict === "questionable" ? "button-selected" : ""}`} onClick={() => setRestrict("questionable")}>
+                    <img className="editpost-button-img" src={questionable}/>
+                    <span className="editpost-button-text">Questionable</span>
+                </button>
+            </div>
+            <div className="editpost-row">
+                {permissions.isElevated(session) ?
+                <button className={`editpost-button ${restrict === "explicit" ? "button-selected" : ""}`} onClick={() => setRestrict("explicit")}>
+                    <img className="editpost-button-img" src={explicit}/>
+                    <span className="editpost-button-text">Explicit</span>
+                </button> : null}
+            </div> </>
+            :
+            <div className="editpost-row">
+                <button className={`editpost-button ${restrict === "safe" ? "button-selected" : ""}`} onClick={() => setRestrict("safe")}>
+                    <img className="editpost-button-img" src={safe}/>
+                    <span className="editpost-button-text">Safe</span>
+                </button>
+                <button className={`editpost-button ${restrict === "questionable" ? "button-selected" : ""}`} onClick={() => setRestrict("questionable")}>
+                    <img className="editpost-button-img" src={questionable}/>
+                    <span className="editpost-button-text">Questionable</span>
+                </button>
+                {permissions.isElevated(session) ?
+                <button className={`editpost-button ${restrict === "explicit" ? "button-selected" : ""}`} onClick={() => setRestrict("explicit")}>
+                    <img className="editpost-button-img" src={explicit}/>
+                    <span className="editpost-button-text">Explicit</span>
+                </button> : null}
+            </div>}
+            {getStyleJSX()}
+            <div className="editpost-container">
+                    <div className="editpost-container-row">
+                        <span className="editpost-text-alt">If this is a third-party edit, enter the original post ID: </span>
+                        <input className="editpost-input" type="number" value={thirdPartyID} onChange={(event) => setThirdPartyID(event.target.value)} spellCheck={false} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}/>
+                    </div>
+            </div>
+            <span className="editpost-heading">Source</span>
+            <div className="editpost-container">
+                {saucenaoError ? <span ref={saucenaoErrorRef} className="submit-error-text"></span> : null}
+                <span className="editpost-link" onClick={sourceLookup}>Fetch from Saucenao</span>
+                <div className="editpost-container-row">
+                    <span className="editpost-text">Title: </span>
+                    <input className="editpost-input-wide2" type="text" value={sourceTitle} onChange={(event) => setSourceTitle(event.target.value)} spellCheck={false} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}/>
+                </div>
+                <div className="editpost-container-row">
+                    <span className="editpost-text">Translated Title: </span>
+                    <input className="editpost-input-wide2" type="text" value={sourceTranslatedTitle} onChange={(event) => setSourceTranslatedTitle(event.target.value)} spellCheck={false} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}/>
+                </div>
+                <div className="editpost-container-row">
+                    <span className="editpost-text">Artist: </span>
+                    <input className="editpost-input-wide" type="text" value={sourceArtist} onChange={(event) => setSourceArtist(event.target.value)} spellCheck={false} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}/>
+                </div>
+                <div className="editpost-container-row">
+                    <span className="editpost-text">Drawn Date: </span>
+                    <input className="editpost-input-wide" type="date" value={sourceDate} onChange={(event) => setSourceDate(event.target.value)} spellCheck={false} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}/>
+                </div>
+                <div className="editpost-container-row">
+                    <span className="editpost-text">Link: </span>
+                    <input className="editpost-input-wide2" type="url" value={sourceLink} onChange={(event) => setSourceLink(event.target.value)} spellCheck={false} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}/>
+                </div>
+                <div className="editpost-container-row">
+                    <span className="editpost-text">Bookmarks: </span>
+                    <input className="editpost-input-wide" type="number" value={sourceBookmarks} onChange={(event) => setSourceBookmarks(event.target.value)} spellCheck={false} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}/>
+                </div>
+                <div className="editpost-container-row">
+                    <span className="editpost-text">Commentary: </span>
+                </div>
+                <div className="editpost-container-row">
+                    <textarea className="editpost-textarea-small" style={{height: "80px"}} value={sourceCommentary} onChange={(event) => setSourceCommentary(event.target.value)} spellCheck={false} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}></textarea>
+                </div>
+                <div className="editpost-container-row">
+                    <span className="editpost-text">Translated Commentary: </span>
+                </div>
+                <div className="editpost-container-row">
+                    <textarea className="editpost-textarea-small" style={{height: "80px"}} value={sourceTranslatedCommentary} onChange={(event) => setSourceTranslatedCommentary(event.target.value)} spellCheck={false} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}></textarea>
+                </div>
+                <div className="editpost-container-row">
+                    <span className="editpost-text">Mirrors: </span>
+                </div>
+                <div className="editpost-container-row">
+                    <textarea className="editpost-textarea-small" style={{height: "80px"}} value={sourceMirrors} onChange={(event) => setSourceMirrors(event.target.value)} spellCheck={false} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}></textarea>
+                </div>
+            </div>
+            <span className="editpost-heading">Artist</span>
+            <span className="editpost-text-alt">If the artist tag does not yet exist, please upload an artist image.</span>
+            <div className="editpost-container">
+                {generateArtistsJSX()}
+            </div>
+            <span className="editpost-heading">Characters</span>
+            <span className="editpost-text-alt">If the character tag does not yet exist, please upload a character image.</span>
+            <div className="editpost-container">
+                {generateCharactersJSX()}
+            </div>
+            <span className="editpost-heading">Series</span>
+            <span className="editpost-text-alt">If the series tag does not yet exist, please upload a series image.</span>
+            <div className="editpost-container">
+                {generateSeriesJSX()}
+            </div>
+            {displayImage && acceptedURLs.length ?
+            <div className="editpost-row">
+                {functions.isVideo(currentImg) ? 
+                <video autoPlay muted loop disablePictureInPicture className="tag-img-preview" src={currentImg}></video>:
+                <img className="tag-img-preview" src={acceptedURLs[currentIndex]?.thumbnail ? acceptedURLs[currentIndex].thumbnail : currentImg}/>}
+            </div>
+            : null}
+            <div className="editpost-row" style={{marginBottom: "5px"}}>
+                <span className="editpost-heading">Tags</span>
+                <div className="editpost-button-container">
+                    <button className="editpost-button" onClick={() => setDisplayImage((prev) => !prev)}>
+                        {displayImage ?
+                            <span className="editpost-button-text" style={{paddingLeft: "0px"}}>- Hide Image</span> :
+                            <span className="editpost-button-text" style={{paddingLeft: "0px"}}>+ Display Image</span>
+                        }
+                    </button>
+                </div>
+            </div>
+            {danbooruError ? <span ref={danbooruErrorRef} className="submit-error-text"></span> : null}
+            <span className="editpost-link" onClick={tagLookup} style={{marginBottom: "5px"}}>Fetch from Danbooru</span>
+            <span className="editpost-text-alt">Enter dashed tags separated by spaces. Tags can describe any of the images. If the tag doesn't exist, you will be promted to create it.
+            If you need help with tags, read the <Link className="editpost-link" target="_blank" to="/help#tagging">tagging guide.</Link></span>
+            <div className="editpost-container">
+                <SearchSuggestions active={tagActive} text={functions.cleanHTML(rawTags)} x={tagX} y={tagY} width={200} click={handleRawTagClick} type="tag"/>
+                <div className="editpost-container-row" onMouseOver={() => setEnableDrag(false)}>
+                    <ContentEditable innerRef={rawTagRef} className="editpost-textarea" spellCheck={false} html={rawTags} onChange={(event) => setRawTags(event.target.value)} onFocus={() => setTagActive(true)} onBlur={() => setTagActive(false)}/>
+                </div>
+            </div>
+            <div className="editpost-row">
+                <span className="editpost-text">Edit Reason: </span>
+                <input style={{width: "100%"}} className="editpost-input-wide2" type="text" value={reason} onChange={(event) => setReason(event.target.value)} spellCheck={false} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}/>
+            </div>
+            {newTags.length ? <>
+            <span className="editpost-heading">New Tags</span>
+            <div className="editpost-container">
+                {generateTagsJSX()}
+            </div>
+            </> : null}
+            <div className="editpost-center-row">
+                {submitError ? <span ref={submitErrorRef} className="submit-error-text"></span> : null}
+                <div className="editpost-submit-button-container">
+                    <button className="editpost-button" onClick={() => history.push(`/post/${postID}`)}>
+                            <span className="editpost-button-submit-text">Cancel</span>
+                    </button>
+                    <button className="editpost-button" onClick={() => submit()}>
+                            <span className="editpost-button-submit-text">Edit</span>
+                    </button>
+                </div>
+            </div>
+            </>}
+            </div>
+            <Footer/>
+        </>
+        )
+    }
+
     return (
         <>
         <DragAndDrop/>
@@ -1396,304 +1713,7 @@ const EditPostPage: React.FunctionComponent<Props> = (props) => {
         <div className="body">
             <SideBar/>
             <div className="content" onMouseEnter={() => setEnableDrag(true)}>
-                <div className="editpost">
-                    <span className="editpost-heading">Edit Post</span>
-                    {submitted ?
-                    <div className="editpost-container">
-                        <div className="editpost-container-row">
-                            {needsPermission ?
-                            <span className="editpost-text-alt">The post edit was submitted and will appear on the site if approved.</span> :
-                            <span className="editpost-text-alt">Post was edited.</span>}
-                        </div> 
-                        <div className="editpost-container-row" style={{marginTop: "10px"}}>
-                            <button className="editpost-button" onClick={() => {history.push(`/post/${postID}`); setPostFlag(true)}}>
-                                    <span className="editpost-button-text">←Back</span>
-                            </button>
-                        </div>
-                    </div> : <>
-                    {editPostError ? <div className="editpost-row"><span ref={editPostErrorRef} className="editpost-text-alt"></span></div> : null}
-                    {mobile ? <>
-                    <div className="editpost-row">
-                        <label htmlFor="file-editpost" className="editpost-button">
-                            <img className="editpost-button-img" src={uploadIcon}/>
-                            <span className="editpost-button-text">Select Files</span>
-                        </label>
-                        <input id="file-editpost" type="file" multiple onChange={(event) => upload(event)}/>
-                        <button className="editpost-button" onClick={() => setShowLinksInput((prev) => !prev)}>
-                                <img className="editpost-button-img" src={linkIcon}/>
-                                <span className="editpost-button-text">Enter Links</span>
-                        </button>
-                    </div>
-                    <div className="editpost-row">
-                        {acceptedURLs.length > 1 ?
-                        <button className="editpost-button" onClick={left}>
-                            <img className="editpost-button-img" src={leftIcon}/>
-                        </button> : null}
-                        {currentImg ? 
-                        <button className="editpost-button" onClick={clear}>
-                            <img className="editpost-button-img" src={xIcon}/>
-                        </button>
-                        : null}
-                        {acceptedURLs.length > 1 ?
-                        <button className="editpost-button" onClick={right}>
-                            <img className="editpost-button-img" src={rightIcon}/>
-                        </button> : null}
-                    </div> </>
-                    :
-                    <div className="editpost-row">
-                        <label htmlFor="file-editpost" className="editpost-button">
-                            <img className="editpost-button-img" src={uploadIcon}/>
-                            <span className="editpost-button-text">Select Files</span>
-                        </label>
-                        <input id="file-editpost" type="file" multiple onChange={(event) => upload(event)}/>
-                        <button className="editpost-button" onClick={() => setShowLinksInput((prev) => !prev)}>
-                                <img className="editpost-button-img" src={linkIcon}/>
-                                <span className="editpost-button-text">Enter Links</span>
-                        </button>
-                        {acceptedURLs.length > 1 ?
-                        <button className="editpost-button" onClick={left}>
-                            <img className="editpost-button-img" src={leftIcon}/>
-                        </button> : null}
-                        {currentImg ? 
-                        <button className="editpost-button" onClick={clear}>
-                            <img className="editpost-button-img" src={xIcon}/>
-                        </button>
-                        : null}
-                        {acceptedURLs.length > 1 ?
-                        <button className="editpost-button" onClick={right}>
-                            <img className="editpost-button-img" src={rightIcon}/>
-                        </button> : null}
-                    </div>}
-                    {showLinksInput ?
-                    <div className="editpost-row">
-                        <textarea ref={enterLinksRef} className="editpost-textarea" spellCheck={false} onChange={(event) => linkUpload(event)}
-                        onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}></textarea>
-                    </div> : null}
-                {acceptedURLs.length ?
-                <div className="editpost-row">
-                    {acceptedURLs.length > 1 ? 
-                    <div className="editpost-container">
-                        <Carousel images={acceptedURLs.map((u: any) => u.link)} set={set} index={currentIndex} noEncryption={true}/>
-                        {getPostJSX()}
-                    </div>
-                    : getPostJSX()}
-                </div>
-                : null}
-                <span className="editpost-heading">Classification</span>
-                <span className="editpost-text-alt">If there are multiple images, select the rightmost tag that fits.</span>
-                {mobile ? <>
-                <div className="editpost-row">
-                    <button className={`editpost-button ${type === "image" ? "button-selected" : ""}`} onClick={() => setType("image")}>
-                        <img className="editpost-button-img" src={image}/>
-                        <span className="editpost-button-text">Image</span>
-                    </button>
-                    <button className={`editpost-button ${type === "animation" ? "button-selected" : ""}`} onClick={() => setType("animation")}>
-                        <img className="editpost-button-img" src={animation}/>
-                        <span className="editpost-button-text">Animation</span>
-                    </button>
-                </div>
-                <div className="editpost-row">
-                    <button className={`editpost-button ${type === "video" ? "button-selected" : ""}`} onClick={() => setType("video")}>
-                        <img className="editpost-button-img" src={video}/>
-                        <span className="editpost-button-text">Video</span>
-                    </button>
-                    <button className={`editpost-button ${type === "comic" ? "button-selected" : ""}`} onClick={() => setType("comic")}>
-                        <img className="editpost-button-img" src={comic}/>
-                        <span className="editpost-button-text">Comic</span>
-                    </button>
-                </div>
-                <div className="editpost-row">
-                    <button className={`editpost-button ${type === "audio" ? "button-selected" : ""}`} onClick={() => setType("audio")}>
-                        <img className="editpost-button-img" src={audio}/>
-                        <span className="editpost-button-text">Audio</span>
-                    </button>
-                    <button className={`editpost-button ${type === "model" ? "button-selected" : ""}`} onClick={() => setType("model")}>
-                        <img className="editpost-button-img" src={model}/>
-                        <span className="editpost-button-text">Model</span>
-                    </button>
-                </div> </>
-                :
-                <div className="editpost-row">
-                    <button className={`editpost-button ${type === "image" ? "button-selected" : ""}`} onClick={() => setType("image")}>
-                        <img className="editpost-button-img" src={image}/>
-                        <span className="editpost-button-text">Image</span>
-                    </button>
-                    <button className={`editpost-button ${type === "animation" ? "button-selected" : ""}`} onClick={() => setType("animation")}>
-                        <img className="editpost-button-img" src={animation}/>
-                        <span className="editpost-button-text">Animation</span>
-                    </button>
-                    <button className={`editpost-button ${type === "video" ? "button-selected" : ""}`} onClick={() => setType("video")}>
-                        <img className="editpost-button-img" src={video}/>
-                        <span className="editpost-button-text">Video</span>
-                    </button>
-                    <button className={`editpost-button ${type === "comic" ? "button-selected" : ""}`} onClick={() => setType("comic")}>
-                        <img className="editpost-button-img" src={comic}/>
-                        <span className="editpost-button-text">Comic</span>
-                    </button>
-                    <button className={`editpost-button ${type === "audio" ? "button-selected" : ""}`} onClick={() => setType("audio")}>
-                        <img className="editpost-button-img" src={audio}/>
-                        <span className="editpost-button-text">Audio</span>
-                    </button>
-                    <button className={`editpost-button ${type === "model" ? "button-selected" : ""}`} onClick={() => setType("model")}>
-                        <img className="editpost-button-img" src={model}/>
-                        <span className="editpost-button-text">Model</span>
-                    </button>
-                </div>}
-                {mobile ? <>
-                <div className="editpost-row">
-                    <button className={`editpost-button ${restrict === "safe" ? "button-selected" : ""}`} onClick={() => setRestrict("safe")}>
-                        <img className="editpost-button-img" src={safe}/>
-                        <span className="editpost-button-text">Safe</span>
-                    </button>
-                    <button className={`editpost-button ${restrict === "questionable" ? "button-selected" : ""}`} onClick={() => setRestrict("questionable")}>
-                        <img className="editpost-button-img" src={questionable}/>
-                        <span className="editpost-button-text">Questionable</span>
-                    </button>
-                </div>
-                <div className="editpost-row">
-                    {permissions.isStaff(session) ?
-                    <button className={`editpost-button ${restrict === "explicit" ? "button-selected" : ""}`} onClick={() => setRestrict("explicit")}>
-                        <img className="editpost-button-img" src={explicit}/>
-                        <span className="editpost-button-text">Explicit</span>
-                    </button> : null}
-                </div> </>
-                :
-                <div className="editpost-row">
-                    <button className={`editpost-button ${restrict === "safe" ? "button-selected" : ""}`} onClick={() => setRestrict("safe")}>
-                        <img className="editpost-button-img" src={safe}/>
-                        <span className="editpost-button-text">Safe</span>
-                    </button>
-                    <button className={`editpost-button ${restrict === "questionable" ? "button-selected" : ""}`} onClick={() => setRestrict("questionable")}>
-                        <img className="editpost-button-img" src={questionable}/>
-                        <span className="editpost-button-text">Questionable</span>
-                    </button>
-                    {permissions.isStaff(session) ?
-                    <button className={`editpost-button ${restrict === "explicit" ? "button-selected" : ""}`} onClick={() => setRestrict("explicit")}>
-                        <img className="editpost-button-img" src={explicit}/>
-                        <span className="editpost-button-text">Explicit</span>
-                    </button> : null}
-                </div>}
-                {getStyleJSX()}
-                <div className="editpost-container">
-                        <div className="editpost-container-row">
-                            <span className="editpost-text-alt">If this is a third-party edit, enter the original post ID: </span>
-                            <input className="editpost-input" type="number" value={thirdPartyID} onChange={(event) => setThirdPartyID(event.target.value)} spellCheck={false} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}/>
-                        </div>
-                </div>
-                <span className="editpost-heading">Source</span>
-                <div className="editpost-container">
-                    {saucenaoError ? <span ref={saucenaoErrorRef} className="submit-error-text"></span> : null}
-                    <span className="editpost-link" onClick={sourceLookup}>Fetch from Saucenao</span>
-                    <div className="editpost-container-row">
-                        <span className="editpost-text">Title: </span>
-                        <input className="editpost-input-wide2" type="text" value={sourceTitle} onChange={(event) => setSourceTitle(event.target.value)} spellCheck={false} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}/>
-                    </div>
-                    <div className="editpost-container-row">
-                        <span className="editpost-text">Translated Title: </span>
-                        <input className="editpost-input-wide2" type="text" value={sourceTranslatedTitle} onChange={(event) => setSourceTranslatedTitle(event.target.value)} spellCheck={false} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}/>
-                    </div>
-                    <div className="editpost-container-row">
-                        <span className="editpost-text">Artist: </span>
-                        <input className="editpost-input-wide" type="text" value={sourceArtist} onChange={(event) => setSourceArtist(event.target.value)} spellCheck={false} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}/>
-                    </div>
-                    <div className="editpost-container-row">
-                        <span className="editpost-text">Drawn Date: </span>
-                        <input className="editpost-input-wide" type="date" value={sourceDate} onChange={(event) => setSourceDate(event.target.value)} spellCheck={false} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}/>
-                    </div>
-                    <div className="editpost-container-row">
-                        <span className="editpost-text">Link: </span>
-                        <input className="editpost-input-wide2" type="url" value={sourceLink} onChange={(event) => setSourceLink(event.target.value)} spellCheck={false} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}/>
-                    </div>
-                    <div className="editpost-container-row">
-                        <span className="editpost-text">Bookmarks: </span>
-                        <input className="editpost-input-wide" type="number" value={sourceBookmarks} onChange={(event) => setSourceBookmarks(event.target.value)} spellCheck={false} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}/>
-                    </div>
-                    <div className="editpost-container-row">
-                        <span className="editpost-text">Commentary: </span>
-                    </div>
-                    <div className="editpost-container-row">
-                        <textarea className="editpost-textarea-small" style={{height: "80px"}} value={sourceCommentary} onChange={(event) => setSourceCommentary(event.target.value)} spellCheck={false} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}></textarea>
-                    </div>
-                    <div className="editpost-container-row">
-                        <span className="editpost-text">Translated Commentary: </span>
-                    </div>
-                    <div className="editpost-container-row">
-                        <textarea className="editpost-textarea-small" style={{height: "80px"}} value={sourceTranslatedCommentary} onChange={(event) => setSourceTranslatedCommentary(event.target.value)} spellCheck={false} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}></textarea>
-                    </div>
-                    <div className="editpost-container-row">
-                        <span className="editpost-text">Mirrors: </span>
-                    </div>
-                    <div className="editpost-container-row">
-                        <textarea className="editpost-textarea-small" style={{height: "80px"}} value={sourceMirrors} onChange={(event) => setSourceMirrors(event.target.value)} spellCheck={false} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}></textarea>
-                    </div>
-                </div>
-                <span className="editpost-heading">Artist</span>
-                <span className="editpost-text-alt">If the artist tag does not yet exist, please upload an artist image.</span>
-                <div className="editpost-container">
-                    {generateArtistsJSX()}
-                </div>
-                <span className="editpost-heading">Characters</span>
-                <span className="editpost-text-alt">If the character tag does not yet exist, please upload a character image.</span>
-                <div className="editpost-container">
-                    {generateCharactersJSX()}
-                </div>
-                <span className="editpost-heading">Series</span>
-                <span className="editpost-text-alt">If the series tag does not yet exist, please upload a series image.</span>
-                <div className="editpost-container">
-                    {generateSeriesJSX()}
-                </div>
-                {displayImage && acceptedURLs.length ?
-                <div className="editpost-row">
-                    {functions.isVideo(currentImg) ? 
-                    <video autoPlay muted loop disablePictureInPicture className="tag-img-preview" src={currentImg}></video>:
-                    <img className="tag-img-preview" src={acceptedURLs[currentIndex]?.thumbnail ? acceptedURLs[currentIndex].thumbnail : currentImg}/>}
-                </div>
-                : null}
-                <div className="editpost-row" style={{marginBottom: "5px"}}>
-                    <span className="editpost-heading">Tags</span>
-                    <div className="editpost-button-container">
-                        <button className="editpost-button" onClick={() => setDisplayImage((prev) => !prev)}>
-                            {displayImage ?
-                                <span className="editpost-button-text" style={{paddingLeft: "0px"}}>- Hide Image</span> :
-                                <span className="editpost-button-text" style={{paddingLeft: "0px"}}>+ Display Image</span>
-                            }
-                        </button>
-                    </div>
-                </div>
-                {danbooruError ? <span ref={danbooruErrorRef} className="submit-error-text"></span> : null}
-                <span className="editpost-link" onClick={tagLookup} style={{marginBottom: "5px"}}>Fetch from Danbooru</span>
-                <span className="editpost-text-alt">Enter dashed tags separated by spaces. Tags can describe any of the images. If the tag doesn't exist, you will be promted to create it.
-                If you need help with tags, read the <Link className="editpost-link" target="_blank" to="/help#tagging">tagging guide.</Link></span>
-                <div className="editpost-container">
-                    <SearchSuggestions active={tagActive} text={functions.cleanHTML(rawTags)} x={tagX} y={tagY} width={200} click={handleRawTagClick} type="tag"/>
-                    <div className="editpost-container-row" onMouseOver={() => setEnableDrag(false)}>
-                        <ContentEditable innerRef={rawTagRef} className="editpost-textarea" spellCheck={false} html={rawTags} onChange={(event) => setRawTags(event.target.value)} onFocus={() => setTagActive(true)} onBlur={() => setTagActive(false)}/>
-                    </div>
-                </div>
-                <div className="editpost-row">
-                    <span className="editpost-text">Edit Reason: </span>
-                    <input style={{width: "100%"}} className="editpost-input-wide2" type="text" value={reason} onChange={(event) => setReason(event.target.value)} spellCheck={false} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}/>
-                </div>
-                {newTags.length ? <>
-                <span className="editpost-heading">New Tags</span>
-                <div className="editpost-container">
-                    {generateTagsJSX()}
-                </div>
-                </> : null}
-                <div className="editpost-center-row">
-                    {submitError ? <span ref={submitErrorRef} className="submit-error-text"></span> : null}
-                    <div className="editpost-submit-button-container">
-                        <button className="editpost-button" onClick={() => history.push(`/post/${postID}`)}>
-                                <span className="editpost-button-submit-text">Cancel</span>
-                        </button>
-                        <button className="editpost-button" onClick={() => submit()}>
-                                <span className="editpost-button-submit-text">Edit</span>
-                        </button>
-                    </div>
-                </div>
-                </>}
-                </div>
-                <Footer/>
+                {getEditPostJSX()}
             </div>
         </div>
         </>

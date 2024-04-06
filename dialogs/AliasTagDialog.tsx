@@ -5,7 +5,7 @@ import {HideNavbarContext, HideSidebarContext, ThemeContext, EnableDragContext, 
 AliasTagFlagContext, AliasTagNameContext, HideTitlebarContext, SessionContext} from "../Context"
 import functions from "../structures/Functions"
 import Draggable from "react-draggable"
-import "./styles/aliastagdialog.less"
+import "./styles/dialog.less"
 import permissions from "../structures/Permissions"
 import axios from "axios"
 
@@ -41,7 +41,7 @@ const AliasTagDialog: React.FunctionComponent = (props) => {
     }, [aliasTagID])
 
     const aliasTag = async () => {
-        if (permissions.isStaff(session)){
+        if (permissions.isElevated(session)){
             setAliasTagFlag(true)
         } else {
             const badReason = functions.validateReason(reason)
@@ -82,22 +82,40 @@ const AliasTagDialog: React.FunctionComponent = (props) => {
     }
 
     if (aliasTagID) {
-        if (permissions.isStaff(session)) {
+        if (session.banned) {
             return (
-                <div className="aliastag-dialog">
-                    <Draggable handle=".aliastag-dialog-title-container">
-                    <div className="aliastag-dialog-box" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
-                        <div className="aliastag-container">
-                            <div className="aliastag-dialog-title-container">
-                                <span className="aliastag-dialog-title">Alias Tag</span>
+                <div className="dialog">
+                    <Draggable handle=".dialog-title-container">
+                    <div className="dialog-box" style={{width: "250px", height: "200px"}} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
+                            <div className="dialog-title-container">
+                                <span className="dialog-title">Alias Tag Request</span>
                             </div>
-                            <div className="aliastag-dialog-row">
-                                <span className="aliastag-dialog-text">Alias To:</span>
-                                <input className="aliastag-dialog-input" type="text" spellCheck={false} value={aliasTagName} onChange={(event) => setAliasTagName(event.target.value)}/>
+                            <span className="dialog-ban-text">You are banned. Cannot submit a request.</span>
+                            <button className="dialog-ban-button" onClick={() => click("reject")}>
+                                <span className="dialog-ban-button-text">←Back</span>
+                            </button>
+                        </div>
+                    </Draggable>
+                </div>
+            )
+        }
+
+        if (permissions.isElevated(session)) {
+            return (
+                <div className="dialog">
+                    <Draggable handle=".dialog-title-container">
+                    <div className="dialog-box" style={{width: "250px", height: "200px"}} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
+                        <div className="dialog-container">
+                            <div className="dialog-title-container">
+                                <span className="dialog-title">Alias Tag</span>
                             </div>
-                            <div className="aliastag-dialog-row">
-                                <button onClick={() => click("reject")} className="download-button">{"Cancel"}</button>
-                                <button onClick={() => click("accept")} className="download-button">{"Alias"}</button>
+                            <div className="dialog-center-row">
+                                <span className="dialog-text">Alias To:</span>
+                                <input className="dialog-input-taller" style={{width: "100px"}} type="text" spellCheck={false} value={aliasTagName} onChange={(event) => setAliasTagName(event.target.value)}/>
+                            </div>
+                            <div className="dialog-center-row">
+                                <button onClick={() => click("reject")} className="dialog-button">{"Cancel"}</button>
+                                <button onClick={() => click("accept")} className="dialog-button">{"Alias"}</button>
                             </div>
                         </div>
                     </div>
@@ -107,34 +125,34 @@ const AliasTagDialog: React.FunctionComponent = (props) => {
         }
 
         return (
-            <div className="aliastag-dialog">
-                <Draggable handle=".aliastag-dialog-title-container">
-                <div className="aliastag-dialog-box" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
-                    <div className="aliastag-container">
-                        <div className="aliastag-dialog-title-container">
-                            <span className="aliastag-dialog-title">Alias Tag Request</span>
+            <div className="dialog">
+                <Draggable handle=".dialog-title-container">
+                <div className="dialog-box" style={{width: "250px", height: "200px"}} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
+                    <div className="dialog-container">
+                        <div className="dialog-title-container">
+                            <span className="dialog-title">Alias Tag Request</span>
                         </div>
                         {submitted ? <>
-                        <div className="aliastag-dialog-row">
-                            <span className="aliastag-dialog-text">Your alias request was submitted.</span>
+                        <div className="dialog-center-row">
+                            <span className="dialog-text">Your alias request was submitted.</span>
                         </div>
-                        <div className="aliastag-dialog-row">
-                            <button onClick={() => close()} className="download-button">{"Cancel"}</button>
-                            <button onClick={() => close()} className="download-button">{"OK"}</button>
+                        <div className="dialog-center-row">
+                            <button onClick={() => close()} className="dialog-button">{"Cancel"}</button>
+                            <button onClick={() => close()} className="dialog-button">{"OK"}</button>
                         </div> 
                         </> : <>
-                        <div className="aliastag-dialog-row">
-                            <span className="aliastag-dialog-text">Alias To:</span>
-                            <input className="aliastag-dialog-input" type="text" spellCheck={false} value={aliasTagName} onChange={(event) => setAliasTagName(event.target.value)}/>
+                        <div className="dialog-center-row">
+                            <span className="dialog-text">Alias To:</span>
+                            <input className="dialog-input-taller" style={{width: "100px"}} type="text" spellCheck={false} value={aliasTagName} onChange={(event) => setAliasTagName(event.target.value)}/>
                         </div>
-                        <div className="aliastag-dialog-row">
-                            <span className="aliastag-dialog-text">Reason:</span>
-                            <input className="aliastag-dialog-input" type="text" spellCheck={false} value={reason} onChange={(event) => setReason(event.target.value)}/>
+                        <div className="dialog-center-row">
+                            <span className="dialog-text">Reason:</span>
+                            <input className="dialog-input-taller" style={{width: "100px"}} type="text" spellCheck={false} value={reason} onChange={(event) => setReason(event.target.value)}/>
                         </div>
-                        {error ? <div className="aliastag-dialog-validation-container"><span className="aliastag-dialog-validation" ref={errorRef}></span></div> : null}
-                        <div className="aliastag-dialog-row">
-                            <button onClick={() => click("reject")} className="download-button">{"Cancel"}</button>
-                            <button onClick={() => click("accept")} className="download-button">{"Submit Request"}</button>
+                        {error ? <div className="dialog-validation-container"><span className="dialog-validation" ref={errorRef}></span></div> : null}
+                        <div className="dialog-center-row">
+                            <button onClick={() => click("reject")} className="dialog-button">{"Cancel"}</button>
+                            <button onClick={() => click("accept")} className="dialog-button">{"Submit Request"}</button>
                         </div> </>}
                     </div>
                 </div>

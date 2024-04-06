@@ -223,6 +223,7 @@ const PostRoutes = (app: Express) => {
             if (!serverFunctions.validateCSRF(req)) return res.status(400).send("Bad CSRF token")
             if (Number.isNaN(Number(postID))) return res.status(400).send("Invalid postID")
             if (!req.session.username) return res.status(401).send("Unauthorized")
+            if (req.session.banned) return res.status(403).send("You are banned")
             const post = await sql.post(Number(postID))
             if (!post) return res.status(400).send("Bad postID")
             await sql.insertPostDeleteRequest(req.session.username, Number(postID), reason)
@@ -278,6 +279,7 @@ const PostRoutes = (app: Express) => {
     
             if (Number.isNaN(postID)) return res.status(400).send("Bad postID")
             if (!req.session.username) return res.status(401).send("Unauthorized")
+            if (req.session.banned) return res.status(403).send("You are banned")
 
             if (!artists?.[0]) artists = ["unknown-artist"]
             if (!series?.[0]) series = characters.includes("original") ? ["no-series"] : ["unknown-series"]
@@ -419,6 +421,7 @@ const PostRoutes = (app: Express) => {
     
             if (Number.isNaN(postID)) return res.status(400).send("Bad postID")
             if (!req.session.username) return res.status(401).send("Unauthorized")
+            if (req.session.banned) return res.status(403).send("You are banned")
     
             if (!artists?.[0]) artists = ["unknown-artist"]
             if (!series?.[0]) series = characters.includes("original") ? ["no-series"] : ["unknown-series"]

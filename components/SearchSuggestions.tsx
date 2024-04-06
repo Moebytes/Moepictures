@@ -103,7 +103,7 @@ const SearchSuggestions: React.FunctionComponent<Props> = (props) => {
         let jsx = [] as any
         for (let i = 0; i < suggestions.length; i++) {
             if (!session.username) if (functions.arrayIncludes(suggestions[i].tag, matureTags)) continue
-            if (!permissions.isStaff(session)) if (functions.arrayIncludes(suggestions[i].tag, matureTags)) continue
+            if (!permissions.isElevated(session)) if (functions.arrayIncludes(suggestions[i].tag, matureTags)) continue
             if (!suggestions[i]) break
             const tagClick = () => {
                 if (props.click) return props.click(suggestions[i].tag)

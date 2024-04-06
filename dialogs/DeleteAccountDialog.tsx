@@ -5,7 +5,7 @@ import {HideNavbarContext, HideSidebarContext, ThemeContext, EnableDragContext, 
 ShowDeleteAccountDialogContext, HideTitlebarContext, SessionFlagContext} from "../Context"
 import functions from "../structures/Functions"
 import Draggable from "react-draggable"
-import "./styles/deleteaccountdialog.less"
+import "./styles/dialog.less"
 import axios from "axios"
 
 const DeleteAccountDialog: React.FunctionComponent = (props) => {
@@ -48,23 +48,23 @@ const DeleteAccountDialog: React.FunctionComponent = (props) => {
 
     if (showDeleteAccountDialog) {
         return (
-            <div className="deleteaccount-dialog">
-                <Draggable handle=".deleteaccount-dialog-title-container">
-                <div className="deleteaccount-dialog-box" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
-                    <div className="deleteaccount-container">
-                        <div className="deleteaccount-dialog-title-container">
-                            <span className="deleteaccount-dialog-title">Delete Account</span>
+            <div className="dialog">
+                <Draggable handle=".dialog-title-container">
+                <div className="dialog-box" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
+                    <div className="dialog-container">
+                        <div className="dialog-title-container">
+                            <span className="dialog-title">Delete Account</span>
                         </div>
-                        <div className="deleteaccount-dialog-row">
-                            <span className="deleteaccount-dialog-text">
+                        <div className="dialog-row">
+                            <span className="dialog-text-small">
                                 Are you sure that you want to delete your account? This action is irreversible. You will permanently lose all of your favorites, comments, cuteness ratings, etc.<br/><br/>
                                 Because Moebooru is a site focused on community contributions, we will not remove any of your submitted posts. The account that uploaded these posts will show up as "deleted".<br/><br/>
                                 Are you sure that you want to continue?
                             </span>
                         </div>
-                        <div className="deleteaccount-dialog-row">
-                            <button onClick={() => click("reject")} className="download-button">{"Cancel"}</button>
-                            <button onClick={() => click("accept")} className="download-button">{"Delete Account"}</button>
+                        <div className="dialog-row">
+                            <button onClick={() => click("reject")} className="dialog-button">{"Cancel"}</button>
+                            <button onClick={() => click("accept")} className="dialog-button">{"Delete Account"}</button>
                         </div>
                     </div>
                 </div>

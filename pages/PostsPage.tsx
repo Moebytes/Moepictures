@@ -10,6 +10,7 @@ import PageDialog from "../dialogs/PageDialog"
 import DragAndDrop from "../components/DragAndDrop"
 import ToolTip from "../components/ToolTip"
 import TagBanner from "../components/TagBanner"
+import TagHover from "../components/TagHover"
 import {HideNavbarContext, HideSidebarContext, SquareContext, RelativeContext, HideTitlebarContext, 
 HeaderTextContext, SidebarTextContext, MobileContext, MobileScrollingContext} from "../Context"
 

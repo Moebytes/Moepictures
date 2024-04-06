@@ -171,7 +171,7 @@ const PostSong: React.FunctionComponent<Props> = (props) => {
                 }
             }
             if (Tone.getTransport().seconds > duration) {
-                // Tone.getTransport().seconds = 0
+                Tone.getTransport().seconds = 0
                 stop()
                 updatePlay(true)
             }
