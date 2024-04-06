@@ -17,6 +17,7 @@ import path from "path"
 
 interface Props {
     postHistory: any
+    historyIndex: number
     currentHistory: any
     onDelete?: () => void
     onEdit?: () => void
@@ -63,8 +64,10 @@ const PostHistoryRow: React.FunctionComponent<Props> = (props) => {
     const imagesChanged = async () => {
         if (props.postHistory.images.length !== props.currentHistory.images.length) return true
         for (let i = 0; i < props.postHistory.images.length; i++) {
-            const imgLink = functions.getImageLink(props.postHistory.images[i]?.type, props.postHistory.postID, 1, props.postHistory.images[i]?.filename ? props.postHistory.images[i].filename : props.postHistory.images[i])
-            const currentLink = functions.getImageLink(props.currentHistory.images[i]?.type, props.currentHistory.postID, 1, props.currentHistory.images[i]?.filename ? props.currentHistory.images[i].filename : props.currentHistory.images[i])
+            let filename = props.postHistory.images[i]?.filename ? props.postHistory.images[i].filename : props.postHistory.images[i]
+            const imgLink = functions.getImageLink(props.postHistory.images[i]?.type, props.postHistory.postID, i+1, filename)
+            let currentFilename = props.currentHistory.images[i]?.filename ? props.currentHistory.images[i].filename : props.currentHistory.images[i]
+            const currentLink = functions.getImageLink(props.currentHistory.images[i]?.type, props.currentHistory.postID, i+1, currentFilename)
 
             let img = imgLink
             if (functions.isImage(img)) {
@@ -107,7 +110,8 @@ const PostHistoryRow: React.FunctionComponent<Props> = (props) => {
     const parseImages = async () => {
         let images = [] as any
         for (let i = 0; i < props.postHistory.images.length; i++) {
-            const imgLink = functions.getImageLink(props.postHistory.images[i]?.type, props.postHistory.postID, 1, props.postHistory.images[i]?.filename ? props.postHistory.images[i].filename : props.postHistory.images[i])
+            let filename = props.postHistory.images[i]?.filename ? props.postHistory.images[i].filename : props.postHistory.images[i]
+            const imgLink = functions.getImageLink(props.postHistory.images[i]?.type, props.postHistory.postID, i+1, filename)
             let link = imgLink
             let ext = path.extname(imgLink)
             if (functions.isImage(link)) {
@@ -251,9 +255,9 @@ const PostHistoryRow: React.FunctionComponent<Props> = (props) => {
     }
 
     const dateTextJSX = () => {
-        const historyIndex = typeof props.postHistory.images[0] === "string" ? Number(props.postHistory.images[0].match(/\d+/g)?.[1]) : 0
-        const targetDate = historyIndex === 1 ? props.postHistory.uploadDate : props.postHistory.date
-        const editText = historyIndex === 1 ? "Uploaded" : "Edited"
+        const firstHistory = props.historyIndex === Number(props.postHistory.historyCount)
+        const targetDate = firstHistory ? props.postHistory.uploadDate : props.postHistory.date
+        const editText = firstHistory ? "Uploaded" : "Edited"
         if (userRole === "admin") {
             return (
                 <div className="posthistoryrow-username-container" onClick={userClick} onAuxClick={userClick}>

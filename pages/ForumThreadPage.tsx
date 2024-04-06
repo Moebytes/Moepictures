@@ -473,7 +473,7 @@ const ForumThreadPage: React.FunctionComponent<Props> = (props) => {
                 </>
             )
         }
-        if (session.username) {
+        if (session.username && !session.banned) {
             jsx.push(
                 <>
                 <img draggable={false} className="forum-thread-opt-icon" src={quoteOptIcon} onClick={triggerQuote} style={{filter: getFilter()}}/>
@@ -519,6 +519,11 @@ const ForumThreadPage: React.FunctionComponent<Props> = (props) => {
         if (thread.locked) return (
             <div className="forum-thread-reply-box" style={{justifyContent: "flex-start"}}>
                 <span className="forum-thread-validation" style={{fontSize: "20px", marginLeft: "15px"}}>This thread is locked.</span>
+            </div>
+        )
+        if (session.banned) return (
+            <div className="forum-thread-reply-box" style={{justifyContent: "flex-start"}}>
+                <span className="upload-ban-text" style={{fontSize: "20px", marginLeft: "15px"}}>You are banned. Cannot reply.</span>
             </div>
         )
         if (session.username) {

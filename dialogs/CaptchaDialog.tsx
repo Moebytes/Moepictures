@@ -4,7 +4,7 @@ import {HashLink as Link} from "react-router-hash-link"
 import {HideNavbarContext, HideSidebarContext, ThemeContext, EnableDragContext, HideTitlebarContext, 
 SessionContext, MobileContext, SessionFlagContext, SiteHueContext, SiteLightnessContext, SiteSaturationContext} from "../Context"
 import functions from "../structures/Functions"
-import "./styles/captchadialog.less"
+import "./styles/dialog.less"
 import Draggable from "react-draggable"
 import axios from "axios"
 
@@ -125,19 +125,19 @@ const CaptchaDialog: React.FunctionComponent<Props> = (props) => {
 
     if (needsVerification) {
             return (
-                <div className="captcha-dialog">
-                    <Draggable handle=".captcha-dialog-title-container">
-                    <div className="captcha-dialog-box" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
-                        <div className="captcha-container">
-                            <div className="captcha-dialog-title-container">
-                                <span className="captcha-dialog-title">Human Verification</span>
+                <div className="dialog">
+                    <Draggable handle=".dialog-title-container">
+                    <div className="dialog-box" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
+                        <div className="dialog-container">
+                            <div className="dialog-title-container">
+                                <span className="dialog-title">Human Verification</span>
                             </div>
-                            <div className="captcha-dialog-row" style={{pointerEvents: "all"}}>
+                            <div className="dialog-row" style={{pointerEvents: "all"}}>
                                 <img src={`data:image/svg+xml;utf8,${encodeURIComponent(captcha)}`} style={{filter: getFilter()}}/>
-                                <input className="captcha-dialog-input" type="text" spellCheck={false} value={captchaResponse} onChange={(event) => setCaptchaResponse(event.target.value)}/>
+                                <input className="dialog-input-taller" type="text" spellCheck={false} value={captchaResponse} onChange={(event) => setCaptchaResponse(event.target.value)}/>
                             </div>
-                            {error ? <div className="captcha-dialog-validation-container"><span className="captcha-dialog-validation" ref={errorRef}></span></div> : null}
-                            <div className="captcha-dialog-row">
+                            {error ? <div className="dialog-validation-container"><span className="dialog-validation" ref={errorRef}></span></div> : null}
+                            <div className="dialog-row">
                                 <button onClick={() => click("reject")} className="dialog-button">{"No Tags"}</button>
                                 <button onClick={() => click("accept")} className="dialog-button">{"Solve"}</button>
                             </div>

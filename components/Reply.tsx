@@ -164,6 +164,7 @@ const Reply: React.FunctionComponent<Props> = (props) => {
                 </div>
             )
         } else {
+            if (session.banned) return null
             return (
                 <div className="reply-options">
                     <div className="reply-options-container" onClick={triggerQuote}>

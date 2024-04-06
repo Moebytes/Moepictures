@@ -53,8 +53,19 @@ const UserProfilePage: React.FunctionComponent = (props) => {
     const [comments, setComments] = useState([]) as any
     const [uploadImages, setUploadImages] = useState([]) as any
     const [favoriteImages, setFavoriteImages] = useState([]) as any
+    const [banReason, setBanReason] = useState("")
     const [bio, setBio] = useState("")
     const history = useHistory()
+
+    const updateBanReason = async () => {
+        const ban = await axios.get("/api/user/ban", {params: {username: session.username}, withCredentials: true}).then((r) => r.data)
+        console.log(ban)
+        if (ban?.reason) setBanReason(ban.reason)
+    }
+
+    useEffect(() => {
+        if (session.banned) updateBanReason()
+    }, [session])
 
     const getFilter = () => {
         return `hue-rotate(${siteHue - 180}deg) saturate(${siteSaturation}%) brightness(${siteLightness + 70}%)`
@@ -250,7 +261,12 @@ const UserProfilePage: React.FunctionComponent = (props) => {
                 </div>
             )
         }
-        return <span className="userprofile-name">{functions.toProperCase(session.username)}</span>
+        return <span className={`userprofile-name ${session.banned ? "banned" : ""}`}>{functions.toProperCase(session.username)}</span>
+    }
+
+    const getBanText = () => {
+        if (banReason) return `You are banned for reason: ${banReason}`
+        return "You are banned"
     }
 
     return (
@@ -273,6 +289,7 @@ const UserProfilePage: React.FunctionComponent = (props) => {
                         <input id="upload-pfp" type="file" onChange={(event) => uploadPfp(event)}/>
                         </>}
                     </div>
+                    {session.banned ? <span className="user-ban-text">{getBanText()}</span> : null}
                     <div className="userprofile-row">
                         <span className="userprofile-text">Email: {session.email}</span>
                     </div>

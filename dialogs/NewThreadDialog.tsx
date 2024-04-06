@@ -9,7 +9,7 @@ import fileType from "magic-bytes.js"
 import Draggable from "react-draggable"
 import permissions from "../structures/Permissions"
 import xButton from "../assets/icons/x-button-magenta.png"
-import "./styles/newthreaddialog.less"
+import "./styles/dialog.less"
 import axios from "axios"
 
 const NewThreadDialog: React.FunctionComponent = (props) => {
@@ -89,31 +89,31 @@ const NewThreadDialog: React.FunctionComponent = (props) => {
 
     if (showNewThreadDialog) {
         return (
-            <div className="new-thread-dialog">
-                <Draggable handle=".new-thread-dialog-title-container">
-                <div className="new-thread-dialog-box" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
-                    <div className="new-thread-container">
-                        <div className="new-thread-dialog-title-container">
-                            <span className="new-thread-dialog-title">New Thread</span>
+            <div className="dialog">
+                <Draggable handle=".dialog-title-container">
+                <div className="dialog-box" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
+                    <div className="dialog-container">
+                        <div className="dialog-title-container">
+                            <span className="dialog-title">New Thread</span>
                         </div>
-                        <div className="new-thread-dialog-row">
-                            <span className="new-thread-dialog-text">Title: </span>
-                            <input className="new-thread-dialog-input" type="text" spellCheck={false} value={threadTitle} onChange={(event) => setThreadTitle(event.target.value)}/>
+                        <div className="dialog-row">
+                            <span className="dialog-text">Title: </span>
+                            <input className="dialog-input-taller" type="text" spellCheck={false} value={threadTitle} onChange={(event) => setThreadTitle(event.target.value)}/>
                         </div>
-                        <div className="new-thread-dialog-row">
-                            <span className="new-thread-dialog-text">Content: </span>
+                        <div className="dialog-row">
+                            <span className="dialog-text">Content: </span>
                         </div>
-                        <div className="new-thread-dialog-row">
-                            <textarea className="new-thread-textarea" spellCheck={false} value={threadContent} onChange={(event) => setThreadContent(event.target.value)}></textarea>
+                        <div className="dialog-row">
+                            <textarea className="dialog-textarea" style={{height: "330px"}} spellCheck={false} value={threadContent} onChange={(event) => setThreadContent(event.target.value)}></textarea>
                         </div>
-                            <div className="new-thread-dialog-row" style={{pointerEvents: "all"}}>
+                            <div className="dialog-row" style={{pointerEvents: "all"}}>
                                 <img src={`data:image/svg+xml;utf8,${encodeURIComponent(captcha)}`} style={{filter: getFilter()}}/>
-                                <input className="new-thread-dialog-input" type="text" spellCheck={false} value={captchaResponse} onChange={(event) => setCaptchaResponse(event.target.value)}/>
+                                <input className="dialog-input-taller" type="text" spellCheck={false} value={captchaResponse} onChange={(event) => setCaptchaResponse(event.target.value)}/>
                             </div>
-                        {error ? <div className="new-thread-dialog-validation-container"><span className="new-thread-dialog-validation" ref={errorRef}></span></div> : null}
-                        <div className="new-thread-dialog-row">
-                            <button onClick={() => click("reject")} className="new-thread-button">{"Cancel"}</button>
-                            <button onClick={() => click("accept")} className="new-thread-button">{"Post"}</button>
+                        {error ? <div className="dialog-validation-container"><span className="dialog-validation" ref={errorRef}></span></div> : null}
+                        <div className="dialog-row">
+                            <button onClick={() => click("reject")} className="dialog-button">{"Cancel"}</button>
+                            <button onClick={() => click("accept")} className="dialog-button">{"Post"}</button>
                         </div>
                     </div>
                 </div>

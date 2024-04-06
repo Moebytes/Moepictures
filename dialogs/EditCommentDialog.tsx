@@ -4,7 +4,7 @@ import {HashLink as Link} from "react-router-hash-link"
 import {HideNavbarContext, HideSidebarContext, ThemeContext, EnableDragContext, EditCommentIDContext, EditCommentFlagContext, 
 EditCommentTextContext, HideTitlebarContext} from "../Context"
 import functions from "../structures/Functions"
-import "./styles/editcommentdialog.less"
+import "./styles/dialog.less"
 import Draggable from "react-draggable"
 import axios from "axios"
 
@@ -44,17 +44,17 @@ const EditCommentDialog: React.FunctionComponent = (props) => {
 
     if (editCommentID) {
         return (
-            <div className="editcomment-dialog">
-                <Draggable handle=".editcomment-dialog-title-container">
-                <div className="editcomment-dialog-box" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
-                    <div className="editcomment-container">
-                        <div className="editcomment-dialog-title-container">
-                            <span className="editcomment-dialog-title">Edit Comment</span>
+            <div className="dialog">
+                <Draggable handle=".dialog-title-container">
+                <div className="dialog-box" style={{width: "400px", height: "250px"}} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
+                    <div className="dialog-container">
+                        <div className="dialog-title-container">
+                            <span className="dialog-title">Edit Comment</span>
                         </div>
-                        <div className="editcomment-dialog-row">
-                            <textarea className="editcomment-textarea" spellCheck={false} value={editCommentText} onChange={(event) => setEditCommentText(event.target.value)}></textarea>
+                        <div className="dialog-row">
+                            <textarea className="dialog-textarea" style={{height: "140px"}} spellCheck={false} value={editCommentText} onChange={(event) => setEditCommentText(event.target.value)}></textarea>
                         </div>
-                        <div className="editcomment-dialog-row">
+                        <div className="dialog-row">
                             <button onClick={() => click("reject")} className="dialog-button">{"Cancel"}</button>
                             <button onClick={() => click("accept")} className="dialog-button">{"Edit"}</button>
                         </div>

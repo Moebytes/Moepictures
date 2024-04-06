@@ -134,21 +134,33 @@ const Comments: React.FunctionComponent<Props> = (props) => {
         event.stopPropagation()
     }
 
+    const getCommentBox = () => {
+        if (session.banned) return (
+            <div className="comments-input-container">
+                <span className="upload-ban-text" style={{fontSize: "20px"}}>You are banned. Cannot comment.</span>
+            </div>
+        )
+        if (session.username) {
+            return (
+                <div className="comments-input-container">
+                    <div className="comments-row-start" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
+                        <textarea className="comments-textarea" spellCheck={false} value={text} onChange={(event) => setText(event.target.value)} onKeyDown={keyDown}></textarea>
+                    </div>
+                    {error ? <div className="comments-validation-container"><span className="comments-validation" ref={errorRef}></span></div> : null}
+                    <div className="comments-button-container-left">
+                        <button className="comments-button" onClick={post}>Post</button>
+                    </div>
+                </div>
+            )
+        }
+    }
+
     return (
         <div className="comments">
             <div className="comments-title">Comments</div>
             {comments.length ? generateCommentsJSX() :
             <div className="comments-text">There are no comments.</div>}
-            {session.username ?
-            <div className="comments-input-container">
-                <div className="comments-row-start" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
-                    <textarea className="comments-textarea" spellCheck={false} value={text} onChange={(event) => setText(event.target.value)} onKeyDown={keyDown}></textarea>
-                </div>
-                {error ? <div className="comments-validation-container"><span className="comments-validation" ref={errorRef}></span></div> : null}
-                <div className="comments-button-container-left">
-                    <button className="comments-button" onClick={post}>Post</button>
-                </div>
-            </div> : null}
+            {getCommentBox()}
         </div>
     )
 }

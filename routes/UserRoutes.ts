@@ -564,7 +564,7 @@ const UserRoutes = (app: Express) => {
 
     app.post("/api/user/ban", userLimiter, async (req: Request, res: Response) => {
         try {
-            const {username} = req.body
+            const {username, reason, deleteUnverifiedChanges, deleteHistoryChanges, deleteComments} = req.body
             if (!serverFunctions.validateCSRF(req)) return res.status(400).send("Bad CSRF token")
             if (!username) return res.status(400).send("Bad username")
             if (!req.session.username) return res.status(401).send("Unauthorized")
@@ -573,8 +573,99 @@ const UserRoutes = (app: Express) => {
             const user = await sql.user(username)
             if (!user) return res.status(400).send("Bad username")
             if (user.role === "admin" || user.role === "mod") return res.status(400).send("Cannot perform action on this user")
+            if (deleteUnverifiedChanges) {
+                // Delete unverified posts
+                const unverifiedPosts = await sql.unverifiedUserPosts(username)
+                for (const unverified of unverifiedPosts) {
+                    await sql.deleteUnverifiedPost(unverified.postID)
+                    for (let i = 0; i < unverified.images.length; i++) {
+                        const file = functions.getImagePath(unverified.images[i].type, unverified.postID, unverified.images[i].order, unverified.images[i].filename)
+                        await serverFunctions.deleteUnverifiedFile(file)
+                    }
+                }
+                // Delete unverified post edits
+                const unverifiedPostEdits = await sql.unverifiedUserPostEdits(username)
+                for (const unverified of unverifiedPostEdits) {
+                    await sql.deleteUnverifiedPost(unverified.postID)
+                    for (let i = 0; i < unverified.images.length; i++) {
+                        const file = functions.getImagePath(unverified.images[i].type, unverified.postID, unverified.images[i].order, unverified.images[i].filename)
+                        await serverFunctions.deleteUnverifiedFile(file)
+                    }
+                }
+                // Delete unverified post deletions
+                const postDeleteRequests = await sql.userPostDeleteRequests(username)
+                for (const postDeleteRequest of postDeleteRequests) {
+                    await sql.deletePostDeleteRequest(username, postDeleteRequest.postID)
+                }
+                // Delete unverified tag aliasing
+                const aliasRequests = await sql.userAliasRequests(username)
+                for (const aliasRequest of aliasRequests) {
+                    await sql.deleteAliasRequest(username, aliasRequest.tag)
+                }
+                // Delete unverified tag deletions
+                const tagDeleteRequests = await sql.userTagDeleteRequests(username)
+                for (const tagDeleteRequest of tagDeleteRequests) {
+                    await sql.deleteTagDeleteRequest(username, tagDeleteRequest.tag)
+                }
+                // Delete reports
+                const reports = await sql.userReports(username)
+                for (const report of reports) {
+                    if (report.type === "comment") {
+                        await sql.deleteCommentReport(report.reportID)
+                    } else if (report.type === "thread") {
+                        await sql.deleteThreadReport(report.reportID)
+                    } else if (report.type === "reply") {
+                        await sql.deleteReplyReport(report.reportID)
+                    }
+                }
+            }
+            if (deleteComments) {
+                // Delete comments
+                const comments = await sql.userComments(username)
+                for (const comment of comments) {
+                    await sql.deleteComment(comment.commentID)
+                }
+                // Delete threads
+                const threads = await sql.userThreads(username)
+                for (const thread of threads) {
+                    await sql.deleteThread(thread.threadID)
+                }
+                // Delete replies
+                const replies = await sql.userReplies(username)
+                for (const reply of replies) {
+                    await sql.deleteReply(reply.replyID)
+                }
+            }
+            let revertPostIDs = new Set()
+            let revertTagIDs = new Set()
+            if (deleteHistoryChanges) {
+                // Revert post history
+                const postHistory = await sql.userPostHistory(username)
+                for (const history of postHistory) {
+                    if (history.image?.startsWith("history/")) {
+                        await serverFunctions.deleteFile(history.image)
+                    }
+                    await sql.deletePostHistory(history.historyID)
+                    revertPostIDs.add(history.postID)
+                }
+                // Revert tag history
+                const tagHistory = await sql.userTagHistory(username)
+                for (const history of tagHistory) {
+                    if (history.image?.startsWith("history/")) {
+                        await serverFunctions.deleteFile(history.image)
+                    }
+                    await sql.deleteTagHistory(history.historyID)
+                    revertTagIDs.add(history.tag)
+                }
+                // Revert translation history
+                const translationHistory = await sql.userTranslationHistory(username)
+                for (const history of translationHistory) {
+                    await sql.deleteTranslationHistory(history.historyID)
+                }
+            }
+            await sql.insertBan(username, req.session.username, reason)
             await sql.updateUser(username, "banned", true)
-            res.status(200).send("Success")
+            res.status(200).json({revertPostIDs: Array.from(revertPostIDs), revertTagIDs: Array.from(revertTagIDs)})
         } catch (e) {
             console.log(e)
             res.status(400).send("Bad request")
@@ -592,8 +683,23 @@ const UserRoutes = (app: Express) => {
             const user = await sql.user(username)
             if (!user) return res.status(400).send("Bad username")
             if (user.role === "admin" || user.role === "mod") return res.status(400).send("Cannot perform action on this user")
+            await sql.deleteBan(username)
             await sql.updateUser(username, "banned", false)
             res.status(200).send("Success")
+        } catch (e) {
+            console.log(e)
+            res.status(400).send("Bad request")
+        }
+    })
+
+    app.get("/api/user/ban", userLimiter, async (req: Request, res: Response) => {
+        try {
+            const username = req.query.username as string
+            if (!username) return res.status(400).send("Bad username")
+            if (!req.session.username) return res.status(401).send("Unauthorized")
+            if (req.session.username !== username && req.session.role !== "admin" && req.session.role !== "mod") return res.status(403).send("No permission to view ban")
+            const ban = await sql.ban(username)
+            res.status(200).json(ban)
         } catch (e) {
             console.log(e)
             res.status(400).send("Bad request")

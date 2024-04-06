@@ -134,7 +134,7 @@ const PostHistoryPage: React.FunctionComponent<Props> = (props) => {
     const generateRevisionsJSX = () => {
         const jsx = [] as any
         for (let i = 0; i < visibleRevisions.length; i++) {
-            jsx.push(<PostHistoryRow postHistory={visibleRevisions[i]} currentHistory={visibleRevisions[0]} onDelete={updateHistory} onEdit={updateHistory} current={i === 0}/>)
+            jsx.push(<PostHistoryRow historyIndex={i+1} postHistory={visibleRevisions[i]} currentHistory={visibleRevisions[0]} onDelete={updateHistory} onEdit={updateHistory} current={i === 0}/>)
         }
         return jsx
     }

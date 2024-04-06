@@ -105,7 +105,7 @@ const TagRoutes = (app: Express) => {
 
     app.put("/api/tag/edit", tagUpdateLimiter, async (req: Request, res: Response) => {
         try {
-            const {tag, key, description, image, aliases, implications, pixivTags, pixiv, twitter, website, fandom, reason} = req.body
+            const {tag, key, description, image, aliases, implications, pixivTags, pixiv, twitter, website, fandom, reason, silent} = req.body
             if (!serverFunctions.validateCSRF(req)) return res.status(400).send("Bad CSRF token")
             if (!req.session.username) return res.status(401).send("Unauthorized")
             if (req.session.banned) return res.status(403).send("You are banned")
@@ -141,21 +141,21 @@ const TagRoutes = (app: Express) => {
                     imageFilename = null
                 }
             }
-            if (aliases) {
+            if (aliases !== undefined) {
                 await sql.purgeAliases(tag)
                 for (let i = 0; i < aliases.length; i++) {
-                    if (!aliases[i]) break
+                    if (!aliases[i]?.trim()) break
                     await sql.insertAlias(tag, aliases[i])
                 }
             } 
-            if (implications) {
+            if (implications !== undefined) {
                 await sql.purgeImplications(tag)
                 for (let i = 0; i < implications.length; i++) {
-                    if (!implications[i]) break
+                    if (!implications[i]?.trim()) break
                     await sql.insertImplication(tag, implications[i])
                 }
             }
-            if (pixivTags) {
+            if (pixivTags !== undefined) {
                 await sql.updateTag(tag, "pixivTags", pixivTags)
             }
             if (key.trim() !== tag) {
@@ -193,6 +193,10 @@ const TagRoutes = (app: Express) => {
                     await sql.updateTag(tag, "twitter", twitter)
                 }
             }
+            if (req.session.role === "admin" || req.session.role === "mod") {
+                if (silent) return res.status(200).send("Success")
+            }
+
             const tagHistory = await sql.tagHistory(tag)
             const nextKey = await serverFunctions.getNextKey("tag", key)
             if (!tagHistory.length || (imgChange && nextKey === 1)) {

@@ -31,6 +31,7 @@ const CommentRoutes = (app: Express) => {
             const {comment, postID} = req.body
             if (!serverFunctions.validateCSRF(req)) return res.status(400).send("Bad CSRF token")
             if (!req.session.username) return res.status(401).send("Unauthorized")
+            if (req.session.banned) return res.status(403).send("You are banned")
             if (!comment || !postID) return res.status(400).send("Bad comment or post ID")
             if (Number.isNaN(Number(postID))) return res.status(400).send("Invalid postID")
             const badComment = functions.validateComment(comment)
@@ -85,25 +86,13 @@ const CommentRoutes = (app: Express) => {
             const {commentID, reason} = req.body
             if (!serverFunctions.validateCSRF(req)) return res.status(400).send("Bad CSRF token")
             if (!req.session.username) return res.status(401).send("Unauthorized")
+            if (req.session.banned) return res.status(403).send("You are banned")
             if (!commentID) return res.status(400).send("Bad commentID")
             if (Number.isNaN(Number(commentID))) return res.status(400).send("Invalid commentID")
             const exists = await sql.comment(commentID)
             if (!exists) return res.status(400).send("Comment doesn't exist")
             await sql.inserCommentReport(req.session.username, commentID, reason)
             res.status(200).send("Success")
-        } catch (e) {
-            console.log(e)
-            res.status(400).send("Bad request") 
-        }
-    })
-
-    app.get("/api/comment/report/list", commentLimiter, async (req: Request, res: Response) => {
-        try {
-            const offset = req.query.offset as string
-            if (!req.session.username) return res.status(401).send("Unauthorized")
-            if (req.session.role !== "admin" && req.session.role !== "mod") return res.status(403).end()
-            const result = await sql.reportedComments(offset)
-            res.status(200).json(result)
         } catch (e) {
             console.log(e)
             res.status(400).send("Bad request") 

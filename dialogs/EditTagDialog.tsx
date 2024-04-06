@@ -6,7 +6,7 @@ EditTagTypeContext, EditTagPixivContext, EditTagTwitterContext, EditTagKeyContex
 EditTagFandomContext, EditTagDescriptionContext, EditTagReasonContext, HideTitlebarContext, SessionContext, EditTagPixivTagsContext} from "../Context"
 import functions from "../structures/Functions"
 import uploadIcon from "../assets/icons/upload.png"
-import "./styles/edittagdialog.less"
+import "./styles/dialog.less"
 import fileType from "magic-bytes.js"
 import Draggable from "react-draggable"
 import permissions from "../structures/Permissions"
@@ -172,17 +172,17 @@ const EditTagDialog: React.FunctionComponent = (props) => {
         if (editTagType === "artist") {
             jsx.push(
                 <>
-                <div className="edittag-dialog-row">
-                    <span className="edittag-dialog-text">Website: </span>
-                    <input className="edittag-dialog-input" type="text" spellCheck={false} value={editTagWebsite} onChange={(event) => setEditTagWebsite(event.target.value)}/>
+                <div className="dialog-row">
+                    <span className="dialog-text">Website: </span>
+                    <input className="dialog-input-taller" type="text" spellCheck={false} value={editTagWebsite} onChange={(event) => setEditTagWebsite(event.target.value)}/>
                 </div>
-                <div className="edittag-dialog-row">
-                    <span className="edittag-dialog-text">Pixiv: </span>
-                    <input className="edittag-dialog-input" type="text" spellCheck={false} value={editTagPixiv} onChange={(event) => setEditTagPixiv(event.target.value)}/>
+                <div className="dialog-row">
+                    <span className="dialog-text">Pixiv: </span>
+                    <input className="dialog-input-taller" type="text" spellCheck={false} value={editTagPixiv} onChange={(event) => setEditTagPixiv(event.target.value)}/>
                 </div>
-                <div className="edittag-dialog-row">
-                    <span className="edittag-dialog-text">Twitter: </span>
-                    <input className="edittag-dialog-input" type="text" spellCheck={false} value={editTagTwitter} onChange={(event) => setEditTagTwitter(event.target.value)}/>
+                <div className="dialog-row">
+                    <span className="dialog-text">Twitter: </span>
+                    <input className="dialog-input-taller" type="text" spellCheck={false} value={editTagTwitter} onChange={(event) => setEditTagTwitter(event.target.value)}/>
                 </div>
                 </>
             )
@@ -190,9 +190,9 @@ const EditTagDialog: React.FunctionComponent = (props) => {
         if (editTagType === "character") {
             jsx.push(
                 <>
-                <div className="edittag-dialog-row">
-                    <span className="edittag-dialog-text">Wiki: </span>
-                    <input className="edittag-dialog-input" type="text" spellCheck={false} value={editTagFandom} onChange={(event) => setEditTagFandom(event.target.value)}/>
+                <div className="dialog-row">
+                    <span className="dialog-text">Wiki: </span>
+                    <input className="dialog-input-taller" type="text" spellCheck={false} value={editTagFandom} onChange={(event) => setEditTagFandom(event.target.value)}/>
                 </div>
                 </>
             )
@@ -200,13 +200,13 @@ const EditTagDialog: React.FunctionComponent = (props) => {
         if (editTagType === "series") {
             jsx.push(
                 <>
-                <div className="edittag-dialog-row">
-                    <span className="edittag-dialog-text">Website: </span>
-                    <input className="edittag-dialog-input" type="text" spellCheck={false} value={editTagWebsite} onChange={(event) => setEditTagWebsite(event.target.value)}/>
+                <div className="dialog-row">
+                    <span className="dialog-text">Website: </span>
+                    <input className="dialog-input-taller" type="text" spellCheck={false} value={editTagWebsite} onChange={(event) => setEditTagWebsite(event.target.value)}/>
                 </div>
-                <div className="edittag-dialog-row">
-                    <span className="edittag-dialog-text">Twitter: </span>
-                    <input className="edittag-dialog-input" type="text" spellCheck={false} value={editTagTwitter} onChange={(event) => setEditTagTwitter(event.target.value)}/>
+                <div className="dialog-row">
+                    <span className="dialog-text">Twitter: </span>
+                    <input className="dialog-input-taller" type="text" spellCheck={false} value={editTagTwitter} onChange={(event) => setEditTagTwitter(event.target.value)}/>
                 </div>
                 </>
             )
@@ -215,68 +215,87 @@ const EditTagDialog: React.FunctionComponent = (props) => {
     }
 
     if (editTagID) {
+        if (session.banned) {
+            return (
+                <div className="dialog">
+                    <Draggable handle=".dialog-title-container">
+                    <div className="dialog-box" style={{marginTop: "-30px"}} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
+                            <div className="dialog-title-container">
+                                <span className="dialog-title">Edit Tag</span>
+                            </div>
+                            <span className="dialog-ban-text">You are banned. Cannot edit.</span>
+                            <button className="dialog-ban-button" onClick={() => click("reject")}>
+                                <span className="dialog-ban-button-text">←Back</span>
+                            </button>
+                        </div>
+                    </Draggable>
+                </div>
+            )
+        }
+
         if (session.username) {
             return (
-                <div className="edittag-dialog">
-                    <Draggable handle=".edittag-dialog-title-container">
-                    <div className="edittag-dialog-box" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
-                        <div className="edittag-container">
-                            <div className="edittag-dialog-title-container">
-                                <span className="edittag-dialog-title">Edit Tag</span>
+                <div className="dialog">
+                    <Draggable handle=".dialog-title-container">
+                    <div className="dialog-box" style={{marginTop: "-30px"}} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
+                        <div className="dialog-container">
+                            <div className="dialog-title-container">
+                                <span className="dialog-title">Edit Tag</span>
                             </div>
-                            <div className="edittag-dialog-row">
-                                <span className="edittag-dialog-text">Tag: </span>
-                                <input className="edittag-dialog-input" type="text" spellCheck={false} value={editTagKey} onChange={(event) => setEditTagKey(event.target.value)} style={{width: "max-content"}}/>
+                            <div className="dialog-row">
+                                <span className="dialog-text">Tag: </span>
+                                <input className="dialog-input-taller" type="text" spellCheck={false} value={editTagKey} onChange={(event) => setEditTagKey(event.target.value)} style={{width: "max-content"}}/>
                             </div>
                             {tagSocialJSX()}
-                            <div className="edittag-dialog-row">
-                                <span className="edittag-dialog-text">Image: </span>
-                                <label htmlFor="tag-img" className="edittag-dialog-button">
-                                    <img className="edittag-button-img-small" src={uploadIcon}/>
-                                    <span className="edittag-button-text-small">Upload</span>
+                            <div className="dialog-row">
+                                <span className="dialog-text">Image: </span>
+                                <label htmlFor="tag-img" className="dialog-button" style={{marginLeft: "5px"}}>
+                                    <img className="dialog-button-img-small" src={uploadIcon}/>
+                                    <span className="dialog-button-text-small">Upload</span>
                                 </label>
                                 <input id="tag-img" type="file" onChange={(event) => uploadTagImg(event)}/>
                                 {editTagImage && editTagImage !== "delete" ? 
-                                <img className="edittag-x-button" src={xButton} onClick={() => setEditTagImage("delete")}/>
+                                <img className="dialog-x-button" src={xButton} onClick={() => setEditTagImage("delete")}/>
                                 : null}
                             </div>
                             {editTagImage && editTagImage !== "delete" ? 
-                            <div className="edittag-dialog-row">
-                                <img className="edittag-img" src={editTagImage === "delete" ? "" : editTagImage}/>
+                            <div className="dialog-row">
+                                <img className="dialog-img" src={editTagImage === "delete" ? "" : editTagImage}/>
                             </div>
                             : null}
-                            <div className="edittag-dialog-row">
-                                <span className="edittag-dialog-text">Description: </span>
+                            <div className="dialog-row">
+                                <span className="dialog-text">Description: </span>
                             </div>
-                            <div className="edittag-dialog-row">
-                                <textarea className="edittag-textarea" spellCheck={false} value={editTagDescription} onChange={(event) => setEditTagDescription(event.target.value)}></textarea>
+                            <div className="dialog-row">
+                                <textarea className="dialog-textarea-small" spellCheck={false} value={editTagDescription} onChange={(event) => setEditTagDescription(event.target.value)}></textarea>
                             </div>
-                            <div className="edittag-dialog-row">
-                                <span className="edittag-dialog-text">Aliases: </span>
+                            <div className="dialog-row">
+                                <span className="dialog-text">Aliases: </span>
                             </div>
-                            <div className="edittag-dialog-row">
-                                <textarea className="edittag-textarea" spellCheck={false} value={editTagAliases.join(" ")} onChange={(event) => setEditTagAliases(event.target.value.split(/ +/g))}></textarea>
+                            <div className="dialog-row">
+                                <textarea className="dialog-textarea-small" spellCheck={false} value={editTagAliases.join(" ")} onChange={(event) => setEditTagAliases(event.target.value.split(/ +/g))}></textarea>
                             </div>
-                            <div className="edittag-dialog-row">
-                                <span className="edittag-dialog-text">Implications: </span>
+                            <div className="dialog-row">
+                                <span className="dialog-text">Implications: </span>
                             </div>
-                            <div className="edittag-dialog-row">
-                                <textarea className="edittag-textarea" spellCheck={false} value={editTagImplications.join(" ")} onChange={(event) => setEditTagImplications(event.target.value.split(/ +/g))}></textarea>
+                            <div className="dialog-row">
+                                <textarea className="dialog-textarea-small" spellCheck={false} value={editTagImplications.join(" ")} onChange={(event) => setEditTagImplications(event.target.value.split(/ +/g))}></textarea>
                             </div>
-                            <div className="edittag-dialog-row">
-                                <span className="edittag-dialog-text">Pixiv Tags: </span>
+                            {editTagType !== "artist" ? <>
+                            <div className="dialog-row">
+                                <span className="dialog-text">Pixiv Tags: </span>
                             </div>
-                            <div className="edittag-dialog-row">
-                                <textarea className="edittag-textarea" spellCheck={false} value={editTagPixivTags.join(" ")} onChange={(event) => setEditTagPixivTags(event.target.value.split(/ +/g))}></textarea>
+                            <div className="dialog-row">
+                                <textarea className="dialog-textarea-small" spellCheck={false} value={editTagPixivTags.join(" ")} onChange={(event) => setEditTagPixivTags(event.target.value.split(/ +/g))}></textarea>
+                            </div></> : null}
+                            <div className="dialog-row">
+                                <span className="dialog-text">Reason: </span>
+                                <input style={{width: "100%"}} className="dialog-input-taller" type="text" spellCheck={false} value={editTagReason} onChange={(event) => setEditTagReason(event.target.value)}/>
                             </div>
-                            <div className="edittag-dialog-row">
-                                <span className="edittag-dialog-text">Reason: </span>
-                                <input style={{width: "100%"}} className="edittag-dialog-input" type="text" spellCheck={false} value={editTagReason} onChange={(event) => setEditTagReason(event.target.value)}/>
-                            </div>
-                            {error ? <div className="edittag-dialog-validation-container"><span className="edittag-dialog-validation" ref={errorRef}></span></div> : null}
-                            <div className="edittag-dialog-row">
-                                <button onClick={() => click("reject")} className="edittag-button">{"Cancel"}</button>
-                                <button onClick={() => click("accept")} className="edittag-button">{"Edit"}</button>
+                            {error ? <div className="dialog-validation-container"><span className="dialog-validation" ref={errorRef}></span></div> : null}
+                            <div className="dialog-row">
+                                <button onClick={() => click("reject")} className="dialog-button">{"Cancel"}</button>
+                                <button onClick={() => click("accept")} className="dialog-button">{"Edit"}</button>
                             </div>
                         </div>
                     </div>
@@ -286,75 +305,76 @@ const EditTagDialog: React.FunctionComponent = (props) => {
         }
 
         return (
-            <div className="edittag-dialog">
-                <Draggable handle=".edittag-dialog-title-container">
-                <div className="edittag-dialog-box" style={{height: submitted ? "125px" : "max-content"}} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
-                    <div className="edittag-container">
-                        <div className="edittag-dialog-title-container">
-                            <span className="edittag-dialog-title">Edit Tag Request</span>
+            <div className="dialog">
+                <Draggable handle=".dialog-title-container">
+                <div className="dialog-box" style={{marginTop: "-30px", height: submitted ? "125px" : "max-content"}} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
+                    <div className="dialog-container">
+                        <div className="dialog-title-container">
+                            <span className="dialog-title">Edit Tag Request</span>
                         </div>
                         {submitted ? <>
-                        <div className="edittag-dialog-row">
-                            <span className="edittag-dialog-text">Your tag edit request was submitted.</span>
+                        <div className="dialog-row">
+                            <span className="dialog-text">Your tag edit request was submitted.</span>
                         </div>
-                        <div className="edittag-dialog-row">
-                            <button onClick={() => close()} className="edittag-button">{"Cancel"}</button>
-                            <button onClick={() => close()} className="edittag-button">{"OK"}</button>
+                        <div className="dialog-row">
+                            <button onClick={() => close()} className="dialog-button">{"Cancel"}</button>
+                            <button onClick={() => close()} className="dialog-button">{"OK"}</button>
                         </div> 
                         </> : <>
-                        <div className="edittag-dialog-row">
-                            <span className="edittag-dialog-text">Tag: </span>
-                            <input className="edittag-dialog-input" type="text" spellCheck={false} value={editTagKey} onChange={(event) => setEditTagKey(event.target.value)} style={{width: "max-content"}}/>
+                        <div className="dialog-row">
+                            <span className="dialog-text">Tag: </span>
+                            <input className="dialog-input-taller" type="text" spellCheck={false} value={editTagKey} onChange={(event) => setEditTagKey(event.target.value)} style={{width: "max-content"}}/>
                         </div>
                         {tagSocialJSX()}
-                        <div className="edittag-dialog-row">
-                            <span className="edittag-dialog-text">Image: </span>
-                            <label htmlFor="tag-img" className="edittag-dialog-button">
-                                <img className="edittag-button-img-small" src={uploadIcon}/>
-                                <span className="edittag-button-text-small">Upload</span>
+                        <div className="dialog-row">
+                            <span className="dialog-text">Image: </span>
+                            <label htmlFor="tag-img" className="dialog-button" style={{marginLeft: "5px"}}>
+                                <img className="dialog-button-img-small" src={uploadIcon}/>
+                                <span className="dialog-button-text-small">Upload</span>
                             </label>
                             <input id="tag-img" type="file" onChange={(event) => uploadTagImg(event)}/>
                             {editTagImage && editTagImage !== "delete" ? 
-                            <img className="edittag-x-button" src={xButton} onClick={() => setEditTagImage("delete")}/>
+                            <img className="dialog-x-button" src={xButton} onClick={() => setEditTagImage("delete")}/>
                             : null}
                         </div>
                         {editTagImage && editTagImage !== "delete" ? 
-                        <div className="edittag-dialog-row">
-                            <img className="edittag-img" src={editTagImage === "delete" ? "" : editTagImage}/>
+                        <div className="dialog-row">
+                            <img className="dialog-img" src={editTagImage === "delete" ? "" : editTagImage}/>
                         </div>
                         : null}
-                        <div className="edittag-dialog-row">
-                            <span className="edittag-dialog-text">Description: </span>
+                        <div className="dialog-row">
+                            <span className="dialog-text">Description: </span>
                         </div>
-                        <div className="edittag-dialog-row">
-                            <textarea className="edittag-textarea" spellCheck={false} value={editTagDescription} onChange={(event) => setEditTagDescription(event.target.value)}></textarea>
+                        <div className="dialog-row">
+                            <textarea className="dialog-textarea-small" spellCheck={false} value={editTagDescription} onChange={(event) => setEditTagDescription(event.target.value)}></textarea>
                         </div>
-                        <div className="edittag-dialog-row">
-                            <span className="edittag-dialog-text">Aliases: </span>
+                        <div className="dialog-row">
+                            <span className="dialog-text">Aliases: </span>
                         </div>
-                        <div className="edittag-dialog-row">
-                            <textarea className="edittag-textarea" spellCheck={false} value={editTagAliases.join(" ")} onChange={(event) => setEditTagAliases(event.target.value.split(/ +/g))}></textarea>
+                        <div className="dialog-row">
+                            <textarea className="dialog-textarea-small" spellCheck={false} value={editTagAliases.join(" ")} onChange={(event) => setEditTagAliases(event.target.value.split(/ +/g))}></textarea>
                         </div>
-                        <div className="edittag-dialog-row">
-                            <span className="edittag-dialog-text">Implications: </span>
+                        <div className="dialog-row">
+                            <span className="dialog-text">Implications: </span>
                         </div>
-                        <div className="edittag-dialog-row">
-                            <textarea className="edittag-textarea" spellCheck={false} value={editTagImplications.join(" ")} onChange={(event) => setEditTagImplications(event.target.value.split(/ +/g))}></textarea>
+                        <div className="dialog-row">
+                            <textarea className="dialog-textarea-small" spellCheck={false} value={editTagImplications.join(" ")} onChange={(event) => setEditTagImplications(event.target.value.split(/ +/g))}></textarea>
                         </div>
-                        <div className="edittag-dialog-row">
-                            <span className="edittag-dialog-text">Pixiv Tags: </span>
+                        {editTagType !== "artist" ? <>
+                        <div className="dialog-row">
+                            <span className="dialog-text">Pixiv Tags: </span>
                         </div>
-                        <div className="edittag-dialog-row">
-                            <textarea className="edittag-textarea" spellCheck={false} value={editTagPixivTags.join(" ")} onChange={(event) => setEditTagPixivTags(event.target.value.split(/ +/g))}></textarea>
+                        <div className="dialog-row">
+                            <textarea className="dialog-textarea-small" spellCheck={false} value={editTagPixivTags.join(" ")} onChange={(event) => setEditTagPixivTags(event.target.value.split(/ +/g))}></textarea>
+                        </div></> : null}
+                        <div className="dialog-row">
+                            <span className="dialog-text">Reason: </span>
+                            <input style={{width: "100%"}} className="dialog-input-taller" type="text" spellCheck={false} value={editTagReason} onChange={(event) => setEditTagReason(event.target.value)}/>
                         </div>
-                        <div className="edittag-dialog-row">
-                            <span className="edittag-dialog-text">Reason: </span>
-                            <input style={{width: "100%"}} className="edittag-dialog-input" type="text" spellCheck={false} value={editTagReason} onChange={(event) => setEditTagReason(event.target.value)}/>
-                        </div>
-                        {/*error ? <div className="edittag-dialog-validation-container"><span className="edittag-dialog-validation" ref={errorRef}></span></div> : null*/}
-                        <div className="edittag-dialog-row">
-                            <button onClick={() => click("reject")} className="edittag-button">{"Cancel"}</button>
-                            <button onClick={() => click("accept")} className="edittag-button">{"Submit Request"}</button>
+                        {/*error ? <div className="dialog-validation-container"><span className="dialog-validation" ref={errorRef}></span></div> : null*/}
+                        <div className="dialog-row">
+                            <button onClick={() => click("reject")} className="dialog-button">{"Cancel"}</button>
+                            <button onClick={() => click("accept")} className="dialog-button">{"Submit Request"}</button>
                         </div> </>}
                     </div>
                 </div>

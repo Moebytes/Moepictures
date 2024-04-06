@@ -3,7 +3,7 @@ import {useHistory} from "react-router-dom"
 import {HideNavbarContext, HideSidebarContext, ThemeContext, EnableDragContext, EditReplyIDContext, EditReplyFlagContext,
 EditReplyContentContext, HideTitlebarContext, SessionContext} from "../Context"
 import functions from "../structures/Functions"
-import "./styles/editreplydialog.less"
+import "./styles/dialog.less"
 import Draggable from "react-draggable"
 import permissions from "../structures/Permissions"
 import axios from "axios"
@@ -49,23 +49,23 @@ const EditReplyDialog: React.FunctionComponent = (props) => {
 
     if (editReplyID) {
         return (
-            <div className="editreply-dialog">
-                <Draggable handle=".editreply-dialog-title-container">
-                <div className="editreply-dialog-box" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
-                    <div className="editreply-container">
-                        <div className="editreply-dialog-title-container">
-                            <span className="editreply-dialog-title">Edit Reply</span>
+            <div className="dialog">
+                <Draggable handle=".dialog-title-container">
+                <div className="dialog-box" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
+                    <div className="dialog-container">
+                        <div className="dialog-title-container">
+                            <span className="dialog-title">Edit Reply</span>
                         </div>
-                        <div className="editreply-dialog-row">
-                            <span className="editreply-dialog-text">Content: </span>
+                        <div className="dialog-row">
+                            <span className="dialog-text">Content: </span>
                         </div>
-                        <div className="editreply-dialog-row">
-                            <textarea className="editreply-textarea" spellCheck={false} value={editReplyContent} onChange={(event) => setEditReplyContent(event.target.value)}></textarea>
+                        <div className="dialog-row">
+                            <textarea className="dialog-textarea" style={{height: "330px"}} spellCheck={false} value={editReplyContent} onChange={(event) => setEditReplyContent(event.target.value)}></textarea>
                         </div>
-                        {error ? <div className="editreply-dialog-validation-container"><span className="editreply-dialog-validation" ref={errorRef}></span></div> : null}
-                        <div className="editreply-dialog-row">
-                            <button onClick={() => click("reject")} className="editreply-button">{"Cancel"}</button>
-                            <button onClick={() => click("accept")} className="editreply-button">{"Edit"}</button>
+                        {error ? <div className="dialog-validation-container"><span className="dialog-validation" ref={errorRef}></span></div> : null}
+                        <div className="dialog-row">
+                            <button onClick={() => click("reject")} className="dialog-button">{"Cancel"}</button>
+                            <button onClick={() => click("accept")} className="dialog-button">{"Edit"}</button>
                         </div>
                     </div>
                 </div>

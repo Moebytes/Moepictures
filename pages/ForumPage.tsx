@@ -400,6 +400,7 @@ const ForumPage: React.FunctionComponent = (props) => {
     }
 
     const getNewThreadButton = () => {
+        if (session.banned) return null
         const style = {marginLeft: mobile ? "0px" : "15px", marginTop: mobile ? "10px" : "0px"}
         if (session.username) {
             return (

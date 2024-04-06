@@ -655,6 +655,24 @@ export default class SQLQuery {
     return result
   }
 
+  /** Get posts by user (unverified). */
+  public static unverifiedUserPosts = async (username: string) => {
+    const query: QueryConfig = {
+      text: functions.multiTrim(`
+          SELECT "unverified posts".*, json_agg(DISTINCT "unverified images".*) AS images, json_agg(DISTINCT "unverified tag map".tag) AS tags
+          FROM "unverified posts"
+          JOIN "unverified images" ON "unverified posts"."postID" = "unverified images"."postID"
+          JOIN "unverified tag map" ON "unverified posts"."postID" = "unverified tag map"."postID"
+          WHERE "originalID" IS NULL AND "unverified posts"."uploader" = $1
+          GROUP BY "unverified posts"."postID"
+          ORDER BY "unverified posts"."uploadDate" ASC
+          `),
+        values: [username]
+    }
+    const result = await SQLQuery.run(query)
+    return result
+  }
+
    /** Get post edits (unverified). */
    public static unverifiedPostEdits = async (offset?: string) => {
     const query: QueryConfig = {
@@ -670,6 +688,24 @@ export default class SQLQuery {
           `)
     }
     if (offset) query.values = [offset]
+    const result = await SQLQuery.run(query)
+    return result
+  }
+
+  /** Get post edits by user (unverified). */
+  public static unverifiedUserPostEdits = async (username: string) => {
+    const query: QueryConfig = {
+      text: functions.multiTrim(`
+          SELECT "unverified posts".*, json_agg(DISTINCT "unverified images".*) AS images, json_agg(DISTINCT "unverified tag map".tag) AS tags
+          FROM "unverified posts"
+          JOIN "unverified images" ON "unverified posts"."postID" = "unverified images"."postID"
+          JOIN "unverified tag map" ON "unverified posts"."postID" = "unverified tag map"."postID"
+          WHERE "originalID" IS NOT NULL AND "unverified posts"."updater" = $1
+          GROUP BY "unverified posts"."postID"
+          ORDER BY "unverified posts"."uploadDate" ASC
+          `),
+        values: [username]
+    }
     const result = await SQLQuery.run(query)
     return result
   }
@@ -1225,6 +1261,23 @@ export default class SQLQuery {
             ORDER BY comments."postDate" ASC
           `),
           values: [postID]
+    }
+    const result = await SQLQuery.run(query)
+    return result
+  }
+
+  /** Get user comments. */
+  public static userComments = async (username: string) => {
+    const query: QueryConfig = {
+      text: functions.multiTrim(`
+            SELECT comments.*, users."image", users."imagePost", users."role"
+            FROM comments
+            JOIN "users" ON "users"."username" = "comments"."username"
+            WHERE comments."username" = $1
+            GROUP BY comments."commentID", users."image", users."imagePost", users."role"
+            ORDER BY comments."postDate" ASC
+          `),
+          values: [username]
     }
     const result = await SQLQuery.run(query)
     return result
@@ -2088,6 +2141,32 @@ export default class SQLQuery {
     return result
   }
 
+  public static userPostDeleteRequests = async (username: string) => {
+    const query: QueryConfig = {
+      text: functions.multiTrim(`
+        WITH post_json AS (
+          SELECT posts.*, json_agg(DISTINCT images.*) AS images
+          FROM posts
+          JOIN images ON images."postID" = posts."postID"
+          GROUP BY posts."postID"
+        )
+        SELECT "delete requests".*, json_build_object(
+          'type', post_json."type",
+          'restrict', post_json."restrict",
+          'style', post_json."style",
+          'images', (array_agg(post_json."images"))[1]
+        ) AS post
+        FROM "delete requests"
+        JOIN post_json ON post_json."postID" = "delete requests"."postID"
+        WHERE "delete requests"."postID" IS NOT NULL AND "delete requests".username = $1
+        GROUP BY "delete requests"."deleteRequestID", post_json."type", post_json."restrict", post_json."style"
+      `),
+      values: [username]
+    }
+    const result = await SQLQuery.run(query)
+    return result
+  }
+
   /** Insert pending tag delete. */
   public static insertTagDeleteRequest = async (username: string, tag: string, reason: string) => {
     const query: QueryConfig = {
@@ -2124,6 +2203,21 @@ export default class SQLQuery {
     return result
   }
 
+  public static userTagDeleteRequests = async (username: string) => {
+    const query: QueryConfig = {
+      text: functions.multiTrim(`
+        SELECT "delete requests".*, tags.*
+        FROM "delete requests"
+        JOIN tags ON tags.tag = "delete requests".tag
+        WHERE "delete requests"."tag" IS NOT NULL AND "delete requests".username = $1
+        GROUP BY "delete requests"."deleteRequestID", tags.tag
+      `),
+      values: [username]
+    }
+    const result = await SQLQuery.run(query)
+    return result
+  }
+
   /** Insert alias request. */
   public static insertAliasRequest = async (username: string, tag: string, aliasTo: string, reason: string) => {
     const query: QueryConfig = {
@@ -2156,6 +2250,21 @@ export default class SQLQuery {
       `),
     }
     if (offset) query.values = [offset]
+    const result = await SQLQuery.run(query)
+    return result
+  }
+
+  public static userAliasRequests = async (username: string) => {
+    const query: QueryConfig = {
+      text: functions.multiTrim(`
+        SELECT "alias requests".*, tags.*
+        FROM "alias requests"
+        JOIN tags ON tags.tag = "alias requests".tag
+        WHERE "alias requests"."tag" IS NOT NULL AND "alias requests".username = $1
+        GROUP BY "alias requests"."aliasRequestID", tags.tag
+      `),
+      values: [username]
+    }
     const result = await SQLQuery.run(query)
     return result
   }
@@ -2216,25 +2325,6 @@ export default class SQLQuery {
     return result
   }
 
-  public static reportedComments = async (offset?: string) => {
-    const query: QueryConfig = {
-      text: functions.multiTrim(`
-        SELECT comments.*, "reported comments".*, json_build_object(
-          'username', users.username,
-          'image', users.image
-        ) AS user
-        FROM "reported comments"
-        JOIN comments ON comments."commentID" = "reported comments"."commentID"
-        JOIN users ON users."username" = "comments"."username"
-        GROUP BY "reported comments"."reportID", comments."commentID", users.username, users.image
-        LIMIT 100 ${offset ? `OFFSET $1` : ""}
-      `),
-    }
-    if (offset) query.values = [offset]
-    const result = await SQLQuery.run(query)
-    return result
-  }
-
   public static insertTagHistory = async (username: string, tag: string, key: string, type: string, image?: string, description?: string, 
     aliases?: string[], implications?: string[], pixivTags?: string[], website?: string, pixiv?: string, twitter?: string, fandom?: string, reason?: string) => {
     const now = new Date().toISOString()
@@ -2256,20 +2346,34 @@ export default class SQLQuery {
   }
 
   public static tagHistory = async (tag?: string, offset?: string) => {
-    const offsetAmt = tag ? 2 : 1
     const query: QueryConfig = {
       text: functions.multiTrim(`
-            SELECT "tag history".*
+            SELECT "tag history".*,
+            COUNT(*) OVER() AS "historyCount"
             FROM "tag history"
             ${tag ? `WHERE "tag history"."tag" = $1` : ""}
             GROUP BY "tag history"."historyID"
             ORDER BY "tag history"."date" DESC
-            ${offset ? `OFFSET $${offsetAmt}` : ""}
           `),
           values: []
     }
     if (tag) query.values?.push(tag)
-    if (offset) query.values?.push(offset)
+    const result = await SQLQuery.run(query)
+    return result
+  }
+
+  public static userTagHistory = async (username: string) => {
+    const query: QueryConfig = {
+      text: functions.multiTrim(`
+            SELECT "tag history".*,
+            COUNT(*) OVER() AS "historyCount"
+            FROM "tag history"
+            WHERE "tag history"."user" = $1
+            GROUP BY "tag history"."historyID"
+            ORDER BY "tag history"."date" DESC
+          `),
+          values: [username]
+    }
     const result = await SQLQuery.run(query)
     return result
   }
@@ -2300,20 +2404,33 @@ export default class SQLQuery {
   }
 
   public static postHistory = async (postID?: number, offset?: string) => {
-    const offsetAmt = postID ? 2 : 1
     const query: QueryConfig = {
       text: functions.multiTrim(`
-            SELECT "post history".*
+            SELECT "post history".*,
+            COUNT(*) OVER() AS "historyCount"
             FROM "post history"
             ${postID ? `WHERE "post history"."postID" = $1` : ""}
             GROUP BY "post history"."historyID"
             ORDER BY "post history"."date" DESC
-            ${offset ? `OFFSET $${offsetAmt}` : ""}
           `),
           values: []
     }
     if (postID) query.values?.push(postID)
-    if (offset) query.values?.push(offset)
+    const result = await SQLQuery.run(query)
+    return result
+  }
+
+  public static userPostHistory = async (username: string) => {
+    const query: QueryConfig = {
+      text: functions.multiTrim(`
+            SELECT "post history".*
+            FROM "post history"
+            WHERE "post history"."user" = $1
+            GROUP BY "post history"."historyID"
+            ORDER BY "post history"."date" DESC
+          `),
+          values: [username]
+    }
     const result = await SQLQuery.run(query)
     return result
   }
@@ -2338,9 +2455,6 @@ export default class SQLQuery {
   }
 
   public static translationHistory = async (postID?: number, order?: number, offset?: string) => {
-    let offsetAmt = 1
-    if (postID) offsetAmt += 1
-    if (order) offsetAmt += 1
     let whereArr = [] as string[]
     let i = 1
     if (postID) whereArr.push(`"translation history"."postID" = $${i++}`)
@@ -2354,7 +2468,9 @@ export default class SQLQuery {
               JOIN images ON images."postID" = posts."postID"
               GROUP BY posts."postID"
             )
-            SELECT "translation history".*, json_build_object(
+            SELECT "translation history".*, 
+            COUNT(*) OVER() AS "historyCount",
+            json_build_object(
               'type', post_json."type",
               'restrict', post_json."restrict",
               'style', post_json."style",
@@ -2365,13 +2481,40 @@ export default class SQLQuery {
             ${whereQueries}
             GROUP BY "translation history"."historyID", post_json."type", post_json."restrict", post_json."style"
             ORDER BY "translation history"."updatedDate" DESC
-            ${offset ? `OFFSET $${offsetAmt}` : ""}
       `),
       values: []
     }
     if (postID) query.values?.push(postID)
     if (order) query.values?.push(order)
-    if (offset) query.values?.push(offset)
+    const result = await SQLQuery.run(query)
+    return result
+  }
+
+  public static userTranslationHistory = async (username: string) => {
+    const query: QueryConfig = {
+      text: functions.multiTrim(`
+            WITH post_json AS (
+              SELECT posts.*, json_agg(DISTINCT images.*) AS images
+              FROM posts
+              JOIN images ON images."postID" = posts."postID"
+              GROUP BY posts."postID"
+            )
+            SELECT "translation history".*, 
+            COUNT(*) OVER() AS "historyCount",
+            json_build_object(
+              'type', post_json."type",
+              'restrict', post_json."restrict",
+              'style', post_json."style",
+              'images', (array_agg(post_json."images"))[1]
+            ) AS post
+            FROM "translation history"
+            JOIN post_json ON post_json."postID" = "translation history"."postID"
+              WHERE "translation history"."updater" = $1
+            GROUP BY "translation history"."historyID", post_json."type", post_json."restrict", post_json."style"
+            ORDER BY "translation history"."updatedDate" DESC
+      `),
+      values: [username]
+    }
     const result = await SQLQuery.run(query)
     return result
   }
@@ -2384,6 +2527,22 @@ export default class SQLQuery {
     const query: QueryConfig = {
       text: `INSERT INTO threads ("creator", "createDate", "updater", "updatedDate", "sticky", "locked", "title", "content") VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`,
       values: [creator, now, creator, now, sticky, locked, title, content]
+    }
+    const result = await SQLQuery.run(query)
+    return result
+  }
+
+  public static userThreads = async (username: string) => {
+    const query: QueryConfig = {
+      text: functions.multiTrim(`
+        SELECT threads.*,
+        COUNT(*) OVER() AS "threadCount"
+        FROM threads
+        WHERE threads.creator = $1
+        GROUP BY threads."threadID"
+        ORDER BY threads."updatedDate" DESC
+      `),
+      values: [username]
     }
     const result = await SQLQuery.run(query)
     return result
@@ -2500,6 +2659,23 @@ export default class SQLQuery {
     return result
   }
 
+  /** Get user replies. */
+  public static userReplies = async (username: string) => {
+    const query: QueryConfig = {
+      text: functions.multiTrim(`
+            SELECT replies.*, users.role, users.image, users."imagePost",
+            COUNT(*) OVER() AS "replyCount"
+            FROM replies 
+            JOIN users ON users.username = replies.creator
+            WHERE replies.creator = $1 
+            GROUP BY replies."replyID", users.role, users.image, users."imagePost"
+          `),
+      values: [username]
+    }
+    const result = await SQLQuery.run(query)
+    return result
+  }
+
   /** Get reply. */
   public static reply = async (replyID: number) => {
     const query: QueryConfig = {
@@ -2599,5 +2775,56 @@ export default class SQLQuery {
     if (offset) query.values = [offset]
     const result = await SQLQuery.run(query)
     return result
+  }
+
+  public static userReports = async (username: string) => {
+    const query: QueryConfig = {
+      text: functions.multiTrim(`
+        WITH reports AS (
+          SELECT * FROM "reported replies"
+          UNION
+          SELECT * FROM "reported threads"
+          UNION
+          SELECT * FROM "reported comments"
+        )
+        SELECT reports."replyID" AS id, reports."reportID", reports.type, reports.reporter,
+        reports."reportDate", reports.reason, users.image, users."imagePost"
+        FROM reports
+        JOIN users ON users.username = reports.reporter
+        WHERE reports.reporter = $1
+        ORDER BY reports."reportDate"
+      `),
+      values: [username]
+    }
+    const result = await SQLQuery.run(query)
+    return result
+  }
+
+  public static insertBan = async (username: string, banner: string, reason?: string) => {
+    const now = new Date().toISOString()
+    const query: QueryConfig = {
+      text: `INSERT INTO bans ("username", "banner", "banDate", "reason") VALUES ($1, $2, $3, $4)`,
+      values: [username, banner, now, reason]
+    }
+    const result = await SQLQuery.run(query)
+    return result
+  }
+
+  public static deleteBan = async (username: string) => {
+    const query: QueryConfig = {
+      text: functions.multiTrim(`DELETE FROM bans WHERE bans."username" = $1`),
+      values: [username]
+    }
+    const result = await SQLQuery.run(query)
+    return result
+  }
+
+  public static ban = async (username: string) => {
+    const query: QueryConfig = {
+      text: functions.multiTrim(`SELECT * FROM bans WHERE bans."username" = $1`),
+      values: [username]
+    }
+    const result = await SQLQuery.run(query)
+    return result[0]
   }
 }

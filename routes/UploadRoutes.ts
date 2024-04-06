@@ -40,7 +40,7 @@ const validImages = (images: any[], skipMBCheck?: boolean) => {
     if (functions.isModel(images[i].link)) {
       const MB = images[i].size / (1024*1024)
       const maxSize = 100
-      if (!skipMBCheck && MB <= maxSize) continue
+      if (skipMBCheck || MB <= maxSize) continue
       return false
     }
     const result = fileType(images[i].bytes)?.[0]
@@ -64,7 +64,7 @@ const validImages = (images: any[], skipMBCheck?: boolean) => {
                       webm ? 300 : 300
       let type = result.typename === "mkv" ? "webm" : result.typename
       if (images[i].ext !== type) return false
-      if (!skipMBCheck && MB <= maxSize) continue
+      if (skipMBCheck || MB <= maxSize) continue
     }
     return false
   }
@@ -124,7 +124,7 @@ const CreateRoutes = (app: Express) => {
 
         tags = tags.filter(Boolean).map((t: string) => t.toLowerCase().replace(/[\n\r\s]+/g, "-"))
 
-        let skipMBCheck = req.session.role === "admin" || req.session.role === "mod" ? true : false
+        let skipMBCheck = (req.session.role === "admin" || req.session.role === "mod") ? true : false
         if (!validImages(images, skipMBCheck)) return res.status(400).send("Invalid images")
         const totalMB = images.reduce((acc: any, obj: any) => acc + obj.size, 0) / (1024*1024)
         if (!skipMBCheck && totalMB > 200) return res.status(400).send("Invalid size")
@@ -309,6 +309,7 @@ const CreateRoutes = (app: Express) => {
         let reason = req.body.reason
         let noImageUpdate = req.body.noImageUpdate
         let preserveThirdParty = req.body.preserveThirdParty
+        let silent = req.body.silent
 
         if (Number.isNaN(postID)) return res.status(400).send("Bad postID")
         if (!req.session.username) return res.status(401).send("Unauthorized")
@@ -345,7 +346,7 @@ const CreateRoutes = (app: Express) => {
 
         tags = tags.filter(Boolean).map((t: string) => t.toLowerCase().replace(/[\n\r\s]+/g, "-"))
 
-        let skipMBCheck = req.session.role === "admin" || req.session.role === "mod" ? true : false
+        let skipMBCheck = (req.session.role === "admin" || req.session.role === "mod") ? true : false
         if (!validImages(images, skipMBCheck)) return res.status(400).send("Invalid images")
         const totalMB = images.reduce((acc: any, obj: any) => acc + obj.size, 0) / (1024*1024)
         if (!skipMBCheck && totalMB > 200) return res.status(400).send("Invalid size")
@@ -525,6 +526,10 @@ const CreateRoutes = (app: Express) => {
           await sql.deleteUnverifiedPost(Number(unverifiedID))
         }
 
+        if (req.session.role === "admin" || req.session.role === "mod") {
+          if (silent) return res.status(200).send("Success")
+        }
+
         artists = artists.map((a: any) => a.tag)
         characters = characters.map((c: any) => c.tag)
         series = series.map((s: any) => s.tag)
@@ -640,7 +645,7 @@ const CreateRoutes = (app: Express) => {
 
         tags = tags.filter(Boolean).map((t: string) => t.toLowerCase().replace(/[\n\r\s]+/g, "-"))
 
-        let skipMBCheck = req.session.role === "admin" || req.session.role === "mod" ? true : false
+        let skipMBCheck = (req.session.role === "admin" || req.session.role === "mod") ? true : false
         if (!validImages(images, skipMBCheck)) return res.status(400).send("Invalid images")
         const totalMB = images.reduce((acc: any, obj: any) => acc + obj.size, 0) / (1024*1024)
         if (!skipMBCheck && totalMB > 200) return res.status(400).send("Invalid size")
@@ -856,7 +861,7 @@ const CreateRoutes = (app: Express) => {
 
         tags = tags.filter(Boolean).map((t: string) => t.toLowerCase().replace(/[\n\r\s]+/g, "-"))
 
-        let skipMBCheck = req.session.role === "admin" || req.session.role === "mod" ? true : false
+        let skipMBCheck = (req.session.role === "admin" || req.session.role === "mod") ? true : false
         if (!validImages(images, skipMBCheck)) return res.status(400).send("Invalid images")
         const totalMB = images.reduce((acc: any, obj: any) => acc + obj.size, 0) / (1024*1024)
         if (!skipMBCheck && totalMB > 200) return res.status(400).send("Invalid size")

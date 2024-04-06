@@ -27,6 +27,7 @@ const ThreadRoutes = (app: Express) => {
             const {title, content, captchaResponse} = req.body
             if (!serverFunctions.validateCSRF(req)) return res.status(400).send("Bad CSRF token")
             if (!req.session.username) return res.status(401).send("Unauthorized")
+            if (req.session.banned) return res.status(403).send("You are banned")
             if (!title || !content) return res.status(400).send("Bad title or content")
             if (req.session.captchaAnswer !== captchaResponse?.trim()) return res.status(400).send("Bad captchaResponse")
             await sql.insertThread(req.session.username, title, content)
@@ -126,6 +127,7 @@ const ThreadRoutes = (app: Express) => {
             const {threadID, content} = req.body
             if (!serverFunctions.validateCSRF(req)) return res.status(400).send("Bad CSRF token")
             if (!req.session.username) return res.status(401).send("Unauthorized")
+            if (req.session.banned) return res.status(403).send("You are banned")
             if (!threadID || !content) return res.status(400).send("Bad threadID or content")
             const badReply = functions.validateReply(content)
             if (badReply) return res.status(400).send("Bad reply")
@@ -228,6 +230,7 @@ const ThreadRoutes = (app: Express) => {
             const {threadID, reason} = req.body
             if (!serverFunctions.validateCSRF(req)) return res.status(400).send("Bad CSRF token")
             if (!req.session.username) return res.status(401).send("Unauthorized")
+            if (req.session.banned) return res.status(403).send("You are banned")
             if (!threadID || !reason) return res.status(400).send("Bad threadID or reason")
             const thread = await sql.thread(threadID)
             if (!thread) return res.status(400).send("Invalid threadID")
@@ -244,6 +247,7 @@ const ThreadRoutes = (app: Express) => {
             const {replyID, reason} = req.body
             if (!serverFunctions.validateCSRF(req)) return res.status(400).send("Bad CSRF token")
             if (!req.session.username) return res.status(401).send("Unauthorized")
+            if (req.session.banned) return res.status(403).send("You are banned")
             if (!replyID || !reason) return res.status(400).send("Bad replyID or reason")
             const reply = await sql.reply(replyID)
             if (!reply) return res.status(400).send("Invalid replyID")

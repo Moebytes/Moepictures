@@ -3,7 +3,7 @@ import {useHistory} from "react-router-dom"
 import {HideNavbarContext, HideSidebarContext, ThemeContext, EnableDragContext, EditThreadIDContext, EditThreadFlagContext,
 EditThreadTitleContext, EditThreadContentContext, HideTitlebarContext, SessionContext} from "../Context"
 import functions from "../structures/Functions"
-import "./styles/editthreaddialog.less"
+import "./styles/dialog.less"
 import Draggable from "react-draggable"
 import permissions from "../structures/Permissions"
 import axios from "axios"
@@ -50,27 +50,27 @@ const EditThreadDialog: React.FunctionComponent = (props) => {
 
     if (editThreadID) {
         return (
-            <div className="editthread-dialog">
-                <Draggable handle=".editthread-dialog-title-container">
-                <div className="editthread-dialog-box" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
-                    <div className="editthread-container">
-                        <div className="editthread-dialog-title-container">
-                            <span className="editthread-dialog-title">Edit Thread</span>
+            <div className="dialog">
+                <Draggable handle=".dialog-title-container">
+                <div className="dialog-box" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
+                    <div className="dialog-container">
+                        <div className="dialog-title-container">
+                            <span className="dialog-title">Edit Thread</span>
                         </div>
-                        <div className="editthread-dialog-row">
-                            <span className="editthread-dialog-text">Title: </span>
-                            <input className="editthread-dialog-input" type="text" spellCheck={false} value={editThreadTitle} onChange={(event) => setEditThreadTitle(event.target.value)}/>
+                        <div className="dialog-row">
+                            <span className="dialog-text">Title: </span>
+                            <input className="dialog-input-taller" type="text" spellCheck={false} value={editThreadTitle} onChange={(event) => setEditThreadTitle(event.target.value)}/>
                         </div>
-                        <div className="editthread-dialog-row">
-                            <span className="editthread-dialog-text">Content: </span>
+                        <div className="dialog-row">
+                            <span className="dialog-text">Content: </span>
                         </div>
-                        <div className="editthread-dialog-row">
-                            <textarea className="editthread-textarea" spellCheck={false} value={editThreadContent} onChange={(event) => setEditThreadContent(event.target.value)}></textarea>
+                        <div className="dialog-row">
+                            <textarea className="dialog-textarea" style={{height: "330px"}} spellCheck={false} value={editThreadContent} onChange={(event) => setEditThreadContent(event.target.value)}></textarea>
                         </div>
-                        {error ? <div className="editthread-dialog-validation-container"><span className="editthread-dialog-validation" ref={errorRef}></span></div> : null}
-                        <div className="editthread-dialog-row">
-                            <button onClick={() => click("reject")} className="editthread-button">{"Cancel"}</button>
-                            <button onClick={() => click("accept")} className="editthread-button">{"Edit"}</button>
+                        {error ? <div className="dialog-validation-container"><span className="dialog-validation" ref={errorRef}></span></div> : null}
+                        <div className="dialog-row">
+                            <button onClick={() => click("reject")} className="dialog-button">{"Cancel"}</button>
+                            <button onClick={() => click("accept")} className="dialog-button">{"Edit"}</button>
                         </div>
                     </div>
                 </div>

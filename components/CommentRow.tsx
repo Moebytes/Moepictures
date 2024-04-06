@@ -186,6 +186,7 @@ const CommentRow: React.FunctionComponent<Props> = (props) => {
                 </div>
             )
         } else {
+            if (session.banned) return null
             return (
                 <div className="commentrow-options">
                     <div className="commentrow-options-container" onClick={triggerQuote}>

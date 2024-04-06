@@ -163,6 +163,7 @@ const Comment: React.FunctionComponent<Props> = (props) => {
                 </div>
             )
         } else {
+            if (session.banned) return null
             return (
                 <div className="comment-options">
                     <div className="comment-options-container" onClick={triggerQuote}>
