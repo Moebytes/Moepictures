@@ -55,12 +55,14 @@ declare module "express-session" {
       bio: string 
       emailVerified: boolean
       publicFavorites: boolean
+      showRelated: boolean
       $2fa: boolean
       ip: string
       role: string
       captchaAmount: number 
       lastPostID: number
       csrfSecret: string
+      csrfToken: string
       captchaAnswer: string
       banned: boolean
   }
@@ -171,6 +173,7 @@ for (let i = 0; i < folders.length; i++) {
       res.status(400).end()
     }
   })
+  
   app.get(`/unverified/${folders[i]}/*`, async (req: Request, res: Response, next: NextFunction) => {
     try {
       if (req.session.role !== "admin" && req.session.role !== "mod") return res.status(403).end()
@@ -282,15 +285,20 @@ for (let i = 0; i < folders.length; i++) {
 }
 
 app.get("/*", function(req: Request, res: Response) {
-    if (!req.hostname.includes("moebooru") && !req.hostname.includes("localhost") && !req.hostname.includes("192.168.68")) {
-      res.redirect(301, `https://moebooru.moe${req.path}`)
-    }
-    res.setHeader("Content-Type", mime.getType(req.path) ?? "")
-    res.setHeader("Cross-Origin-Opener-Policy", "same-origin")
-    res.setHeader("Cross-Origin-Embedder-Policy", "require-corp")
-    const document = fs.readFileSync(path.join(__dirname, "./dist/index.html"), {encoding: "utf-8"})
-    const html = renderToString(<Router location={req.url}><App/></Router>)
-    res.status(200).send(document?.replace(`<div id="root"></div>`, `<div id="root">${html}</div>`))
+  if (!req.hostname.includes("moebooru") && !req.hostname.includes("localhost") && !req.hostname.includes("192.168.68")) {
+    res.redirect(301, `https://moebooru.moe${req.path}`)
+  }
+  if (!req.session.csrfToken) {
+    const {secret, token} = serverFunctions.generateCSRF()
+    req.session.csrfSecret = secret
+    req.session.csrfToken = token
+  }
+  res.setHeader("Content-Type", mime.getType(req.path) ?? "")
+  res.setHeader("Cross-Origin-Opener-Policy", "same-origin")
+  res.setHeader("Cross-Origin-Embedder-Policy", "require-corp")
+  const document = fs.readFileSync(path.join(__dirname, "./dist/index.html"), {encoding: "utf-8"})
+  const html = renderToString(<Router location={req.url}><App/></Router>)
+  res.status(200).send(document?.replace(`<div id="root"></div>`, `<div id="root">${html}</div>`))
 })
 
 const run = async () => {
@@ -313,10 +321,14 @@ const run = async () => {
   /* Default character tags */
   exists = await sql.insertTag("unknown-character", "character")
   if (!exists) await sql.updateTag("unknown-character", "description", "The character is unknown.")
+  exists = await sql.insertTag("no-character", "character")
+  if (!exists) await sql.updateTag("no-character", "description", "The character is not applicable.")
 
   /* Default series tags */
   exists = await sql.insertTag("unknown-series", "series")
   if (!exists) await sql.updateTag("unknown-series", "description", "The series is unknown.")
+  exists = await sql.insertTag("no-series", "series")
+  if (!exists) await sql.updateTag("no-series", "description", "The series is not applicable.")
 
   /* Default meta tags */
   exists = await sql.insertTag("needs-tags", "meta")
@@ -337,6 +349,10 @@ const run = async () => {
   if (!exists) await sql.updateTag("partially-translated", "description", "Post is only partially translated.")
   exists = await sql.insertTag("check-translation", "meta")
   if (!exists) await sql.updateTag("check-translation", "description", "Check the translations, because they might be incorrect.")
+  exists = await sql.insertTag("multiple-artists", "meta")
+  if (!exists) await sql.updateTag("multiple-artists", "description", "The post has multiple artists.")
+  exists = await sql.insertTag("bad-pixiv-id", "meta")
+  if (!exists) await sql.updateTag("bad-pixiv-id", "description", "The pixiv id was deleted.")
 
   /* Default software tags */
   exists = await sql.insertTag("photoshop", "tag")

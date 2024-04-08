@@ -141,6 +141,9 @@ const UserRoutes = (app: Express) => {
                 req.session.banned = user.banned
                 await sql.updateUser(username, "ip", ip)
                 req.session.ip = ip
+                const {secret, token} = serverFunctions.generateCSRF()
+                req.session.csrfSecret = secret
+                req.session.csrfToken = token
                 return res.status(200).send("Success")
             } else {
                 return res.status(400).send("Bad request")
@@ -233,6 +236,22 @@ const UserRoutes = (app: Express) => {
             const newPrivacy = !Boolean(user.publicFavorites)
             req.session.publicFavorites = newPrivacy 
             await sql.updateUser(req.session.username, "publicFavorites", newPrivacy)
+            res.status(200).send("Success")
+        } catch (e) {
+            console.log(e)
+            res.status(400).send("Bad request")
+        }
+    })
+
+    app.post("/api/user/showrelated", sessionLimiter, async (req: Request, res: Response) => {
+        try {
+            if (!serverFunctions.validateCSRF(req)) return res.status(400).send("Bad CSRF token")
+            if (!req.session.username) return res.status(401).send("Unauthorized")
+            const user = await sql.user(req.session.username)
+            if (!user) return res.status(400).send("Bad username")
+            const newRelated = !Boolean(user.showRelated)
+            req.session.showRelated = newRelated 
+            await sql.updateUser(req.session.username, "showRelated", newRelated)
             res.status(200).send("Success")
         } catch (e) {
             console.log(e)
@@ -523,7 +542,6 @@ const UserRoutes = (app: Express) => {
         try {
             const username = req.query.username
             if (!req.session.username) return res.status(401).send("Unauthorized")
-            if (!username) return res.status(400).send("Bad username")
             if (username) {
                 let uploads = await sql.uploads(username as string)
                 uploads = functions.stripTags(uploads)
@@ -547,7 +565,6 @@ const UserRoutes = (app: Express) => {
             const offset = req.query.offset as string
             const username = req.query.username as string
             if (!req.session.username) return res.status(401).send("Unauthorized")
-            if (!username) return res.status(400).send("Bad username")
             if (username) {
                 let comments = await sql.searchCommentsByUsername([username], query, sort, offset)
                 res.status(200).send(comments)

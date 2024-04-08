@@ -181,6 +181,11 @@ const UserProfilePage: React.FunctionComponent = (props) => {
         setSessionFlag(true)
     }
 
+    const showRelated = async () => {
+        await axios.post("/api/user/showrelated", null, {headers: {"x-csrf-token": functions.getCSRFToken()}, withCredentials: true})
+        setSessionFlag(true)
+    }
+
     const changeBio = async () => {
         const badBio = functions.validateBio(bio)
         if (badBio) {
@@ -314,6 +319,9 @@ const UserProfilePage: React.FunctionComponent = (props) => {
                     </div>*/}
                     <div className="userprofile-row">
                         <span className="userprofile-text">Favorites Privacy: <span className="userprofile-text-action" onClick={favoritesPrivacy}>{session.publicFavorites ? "Public" : "Private"}</span></span>
+                    </div>
+                    <div className="userprofile-row">
+                        <span className="userprofile-text">Show Related: <span className="userprofile-text-action" onClick={showRelated}>{session.showRelated ? "Yes" : "No"}</span></span>
                     </div>
                     <Link to="/change-username" className="userprofile-row">
                         <span className="userprofile-link">Change Username</span>

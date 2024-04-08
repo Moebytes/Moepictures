@@ -95,12 +95,15 @@ const CreateRoutes = (app: Express) => {
         if (req.session.banned) return res.status(403).send("You are banned")
 
         if (!artists?.[0]?.tag) artists = [{tag: "unknown-artist"}]
-        if (!series?.[0]?.tag) {
-          series = characters?.[0]?.tag ? [{tag: "no-series"}] : [{tag: "unknown-series"}]
-        }
+        if (!series?.[0]?.tag) series = [{tag: "unknown-series"}]
         if (!characters?.[0]?.tag) characters = [{tag: "unknown-character"}]
         if (!tags?.[0]) tags = ["needs-tags"]
         if (!newTags?.[0]) newTags = []
+
+        let rawTags = `${artists.join(" ")} ${characters.join(" ")} ${series.join(" ")} ${tags.join(" ")}`
+        if (rawTags.includes("_") || rawTags.includes("/") || rawTags.includes("\\") || rawTags.includes(",")) {
+            return res.status(400).send("Invalid characters in tags: , _ / \\")
+        }
 
         artists = artists.filter(Boolean).map((a: any) => {
           if (a.tag) a.tag = a.tag.toLowerCase().replace(/[\n\r\s]+/g, "-")
@@ -317,12 +320,15 @@ const CreateRoutes = (app: Express) => {
         if (req.session.role !== "admin" && req.session.role !== "mod") noImageUpdate = true
 
         if (!artists?.[0]?.tag) artists = [{tag: "unknown-artist"}]
-        if (!series?.[0]?.tag) {
-          series = characters?.[0]?.tag ? [{tag: "no-series"}] : [{tag: "unknown-series"}]
-        }
+        if (!series?.[0]?.tag) series = [{tag: "unknown-series"}]
         if (!characters?.[0]?.tag) characters = [{tag: "unknown-character"}]
         if (!tags?.[0]) tags = ["needs-tags"]
         if (!newTags?.[0]) newTags = []
+
+        let rawTags = `${artists.join(" ")} ${characters.join(" ")} ${series.join(" ")} ${tags.join(" ")}`
+        if (rawTags.includes("_") || rawTags.includes("/") || rawTags.includes("\\") || rawTags.includes(",")) {
+            return res.status(400).send("Invalid characters in tags: , _ / \\")
+        }
 
         artists = artists.filter(Boolean).map((a: any) => {
           if (a.tag) a.tag = a.tag.toLowerCase().replace(/[\n\r\s]+/g, "-")
@@ -616,12 +622,15 @@ const CreateRoutes = (app: Express) => {
         if (req.session.banned) return res.status(403).send("You are banned")
 
         if (!artists?.[0]?.tag) artists = [{tag: "unknown-artist"}]
-        if (!series?.[0]?.tag) {
-          series = characters?.[0]?.tag ? [{tag: "no-series"}] : [{tag: "unknown-series"}]
-        }
+        if (!series?.[0]?.tag) series = [{tag: "unknown-series"}]
         if (!characters?.[0]?.tag) characters = [{tag: "unknown-character"}]
         if (!tags?.[0]) tags = ["needs-tags"]
         if (!newTags?.[0]) newTags = []
+
+        let rawTags = `${artists.join(" ")} ${characters.join(" ")} ${series.join(" ")} ${tags.join(" ")}`
+        if (rawTags.includes("_") || rawTags.includes("/") || rawTags.includes("\\") || rawTags.includes(",")) {
+            return res.status(400).send("Invalid characters in tags: , _ / \\")
+        }
 
         artists = artists.filter(Boolean).map((a: any) => {
           if (a.tag) a.tag = a.tag.toLowerCase().replace(/[\n\r\s]+/g, "-")
@@ -832,12 +841,15 @@ const CreateRoutes = (app: Express) => {
         if (req.session.banned) return res.status(403).send("You are banned")
 
         if (!artists?.[0]?.tag) artists = [{tag: "unknown-artist"}]
-        if (!series?.[0]?.tag) {
-          series = characters?.[0]?.tag ? [{tag: "no-series"}] : [{tag: "unknown-series"}]
-        }
+        if (!series?.[0]?.tag) series = [{tag: "unknown-series"}]
         if (!characters?.[0]?.tag) characters = [{tag: "unknown-character"}]
         if (!tags?.[0]) tags = ["needs-tags"]
         if (!newTags?.[0]) newTags = []
+
+        let rawTags = `${artists.join(" ")} ${characters.join(" ")} ${series.join(" ")} ${tags.join(" ")}`
+        if (rawTags.includes("_") || rawTags.includes("/") || rawTags.includes("\\") || rawTags.includes(",")) {
+            return res.status(400).send("Invalid characters in tags: , _ / \\")
+        }
 
         artists = artists.filter(Boolean).map((a: any) => {
           if (a.tag) a.tag = a.tag.toLowerCase().replace(/[\n\r\s]+/g, "-")

@@ -46,17 +46,6 @@ const contactLimiter = rateLimit({
 })
 
 const MiscRoutes = (app: Express) => {
-    app.get("/api/misc/csrf", miscLimiter, async (req: Request, res: Response, next: NextFunction) => {
-        try {
-            const {secret, token} = serverFunctions.generateCSRF()
-            req.session.csrfSecret = secret
-            res.status(200).send(token)
-        } catch (e) {
-            console.log(e)
-            res.status(400).send("Bad request") 
-        }
-    })
-
     app.get("/api/misc/captcha/create", miscLimiter, async (req: Request, res: Response, next: NextFunction) => {
         try {
             const color = req.query.color as string || "#ffffff"

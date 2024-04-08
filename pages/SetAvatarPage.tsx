@@ -253,8 +253,8 @@ const SetAvatarPage: React.FunctionComponent<Props> = (props) => {
                     image.onload = () => resolve()
                 })
                 drawCanvas(image, canvas, pixelCrop)
-                const cropped = await functions.crop(canvas.toDataURL("image/jpeg"), 1, true)
-                if (!firstURL) firstURL = await functions.crop(canvas.toDataURL("image/jpeg"), 1)
+                const cropped = await functions.crop(canvas.toDataURL("image/jpeg"), 1, true, true)
+                if (!firstURL) firstURL = await functions.crop(canvas.toDataURL("image/jpeg"), 1, false, true)
                 frameArray.push(cropped)
                 delayArray.push(gifData[i].delay)
             }
@@ -263,7 +263,7 @@ const SetAvatarPage: React.FunctionComponent<Props> = (props) => {
             const blob = new Blob([buffer])
             croppedURL = URL.createObjectURL(blob)
         } else {
-            croppedURL = await functions.crop(url, 1)
+            croppedURL = await functions.crop(url, 1, false, true)
         }
         return croppedURL
     }

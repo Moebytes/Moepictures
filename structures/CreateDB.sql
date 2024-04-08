@@ -7,6 +7,7 @@ CREATE TABLE IF NOT EXISTS "users" (
     "emailVerified" boolean,
     "$2fa" boolean,
     "publicFavorites" boolean,
+    "showRelated" boolean,
     "image" text,
     "imagePost" bigint REFERENCES posts ("postID") ON UPDATE CASCADE ON DELETE SET NULL,
     "ip" inet,

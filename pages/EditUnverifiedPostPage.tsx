@@ -563,7 +563,7 @@ const EditUnverifiedPostPage: React.FunctionComponent<Props> = (props) => {
                 <SearchSuggestions active={artistActive[i]} x={getX()} y={getY()} width={mobile ? 150 : 200} text={artists[i].tag} click={(tag) => handleTagClick(tag, i)} type="artist"/>
                 <div className="upload-container-row" style={{marginTop: "10px"}}>
                     <span className="upload-text">Romanized Artist Tag: </span>
-                    <input ref={artistInputRefs[i]} className="upload-input-wide" type="text" value={artists[i].tag} onChange={(event) => changeTagInput(event.target.value)} spellCheck={false} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)} onFocus={() => changeActive(true)} onBlur={() => changeActive(false)}/>
+                    <input ref={artistInputRefs[i]} className="upload-input-wide artist-tag-color" type="text" value={artists[i].tag} onChange={(event) => changeTagInput(event.target.value)} spellCheck={false} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)} onFocus={() => changeActive(true)} onBlur={() => changeActive(false)}/>
                 </div>
                 <div className="upload-container-row">
                     <span className="upload-text margin-right">Artist Image: </span>
@@ -646,7 +646,7 @@ const EditUnverifiedPostPage: React.FunctionComponent<Props> = (props) => {
                 <SearchSuggestions active={characterActive[i]} x={getX()} y={getY()} width={mobile ? 110 : 200} text={characters[i].tag} click={(tag) => handleTagClick(tag, i)} type="character"/>
                 <div className="upload-container-row" style={{marginTop: "10px"}}>
                     <span className="upload-text">Romanized Character Tag: </span>
-                    <input ref={characterInputRefs[i]} className="upload-input-wide" type="text" value={characters[i].tag} onChange={(event) => changeTagInput(event.target.value)} spellCheck={false} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)} onFocus={() => changeActive(true)} onBlur={() => changeActive(false)}/>
+                    <input ref={characterInputRefs[i]} className="upload-input-wide character-tag-color" type="text" value={characters[i].tag} onChange={(event) => changeTagInput(event.target.value)} spellCheck={false} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)} onFocus={() => changeActive(true)} onBlur={() => changeActive(false)}/>
                 </div>
                 <div className="upload-container-row">
                     <span className="upload-text margin-right">Character Image: </span>
@@ -729,7 +729,7 @@ const EditUnverifiedPostPage: React.FunctionComponent<Props> = (props) => {
                 <SearchSuggestions active={seriesActive[i]} x={getX()} y={getY()} width={mobile ? 140 : 200} text={series[i].tag} click={(tag) => handleTagClick(tag, i)} type="series"/>
                 <div className="upload-container-row" style={{marginTop: "10px"}}>
                     <span className="upload-text">Romanized Series Tag: </span>
-                    <input ref={seriesInputRefs[i]} className="upload-input-wide" type="text" value={series[i].tag} onChange={(event) => changeTagInput(event.target.value)} spellCheck={false} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)} onFocus={() => changeActive(true)} onBlur={() => changeActive(false)}/>
+                    <input ref={seriesInputRefs[i]} className="upload-input-wide series-tag-color" type="text" value={series[i].tag} onChange={(event) => changeTagInput(event.target.value)} spellCheck={false} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)} onFocus={() => changeActive(true)} onBlur={() => changeActive(false)}/>
                 </div>
                 <div className="upload-container-row">
                     <span className="upload-text margin-right">Series Image: </span>
@@ -834,6 +834,23 @@ const EditUnverifiedPostPage: React.FunctionComponent<Props> = (props) => {
     }
 
     const submit = async () => {
+        if (rawTags.includes("_") || rawTags.includes("/") || rawTags.includes("\\")) {
+            setSubmitError(true)
+            await functions.timeout(20)
+            submitErrorRef.current.innerText = "Invalid characters in tags: _ / \\"
+            setRawTags(rawTags.replaceAll("_", "-").replaceAll("/", "-").replaceAll("\\", "-"))
+            await functions.timeout(3000)
+            return setSubmitError(false)
+        }
+        if (rawTags.includes(",")) {
+            setSubmitError(true)
+            await functions.timeout(20)
+            submitErrorRef.current.innerText = "Tags should be separated with a space."
+            const splitTags = functions.cleanHTML(rawTags).split(",").map((t: string) => t.trim().replaceAll(" ", "-"))
+            setRawTags(splitTags.join(" "))
+            await functions.timeout(3000)
+            return setSubmitError(false)
+        }
         const tags = functions.cleanHTML(rawTags).split(/[\n\r\s]+/g)
         if (tags.length < 5) {
             setSubmitError(true)

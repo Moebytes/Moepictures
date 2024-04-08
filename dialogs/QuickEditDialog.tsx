@@ -39,9 +39,11 @@ const QuickEditDialog: React.FunctionComponent = (props) => {
     const [characters, setCharacters] = useState("") as any
     const [series, setSeries] = useState("") as any
     const [tags, setTags] = useState("")
+    const [metaTags, setMetaTags] = useState("")
     const [artistsActive, setArtistsActive] = useState(false)
     const [charactersActive, setCharactersActive] = useState(false)
     const [seriesActive, setSeriesActive] = useState(false)
+    const [metaActive, setMetaActive] = useState(false)
     const [tagActive, setTagActive] = useState(false)
     const [posX, setPosX] = useState(0)
     const [posY, setPosY] = useState(0)
@@ -61,7 +63,10 @@ const QuickEditDialog: React.FunctionComponent = (props) => {
         setArtists(quickEditID.artists.map((t: any) => t.tag).join(" "))
         setCharacters(quickEditID.characters.map((t: any) => t.tag).join(" "))
         setSeries(quickEditID.series.map((t: any) => t.tag).join(" "))
-        setTags(quickEditID.tags.map((t: any) => t.tag).join(" "))
+        const rawMetaTags = quickEditID.tags.filter((t: any) => t.type === "meta")
+        const rawTags = quickEditID.tags.filter((t: any) => t.type === "tag")
+        setMetaTags(rawMetaTags.map((t: any) => t.tag).join(" "))
+        setTags(rawTags.map((t: any) => t.tag).join(" "))
     }
 
     const reset = () => {
@@ -103,13 +108,33 @@ const QuickEditDialog: React.FunctionComponent = (props) => {
 
     const quickEdit = async () => {
         if (session.username) {
-            const tagArr = functions.cleanHTML(tags).split(/[\n\r\s]+/g)
-            if (tagArr.length < 5) {
+            const joined = `${artists} ${characters} ${series} ${tags} ${metaTags}`
+            if (joined.includes("_") || joined.includes("/") || joined.includes("\\")) {
                 setError(true)
                 await functions.timeout(20)
-                errorRef.current.innerText = "Minimum of 5 tags is required."
+                errorRef.current.innerText = "Invalid characters in tags: _ / \\"
+                setTags(tags.replaceAll("_", "-").replaceAll("/", "-").replaceAll("\\", "-"))
                 await functions.timeout(3000)
                 return setError(false)
+            }
+            if (joined.includes(",")) {
+                setError(true)
+                await functions.timeout(20)
+                errorRef.current.innerText = "Tags should be separated with a space."
+                const splitTags = functions.cleanHTML(tags).split(",").map((t: string) => t.trim().replaceAll(" ", "-"))
+                setTags(splitTags.join(" "))
+                await functions.timeout(3000)
+                return setError(false)
+            }
+            const tagArr = functions.cleanHTML(tags).split(/[\n\r\s]+/g)
+            if (!permissions.isElevated(session)) {
+                if (tagArr.length < 5) {
+                    setError(true)
+                    await functions.timeout(20)
+                    errorRef.current.innerText = "Minimum of 5 tags is required."
+                    await functions.timeout(3000)
+                    return setError(false)
+                }
             }
             const data = {
                 postID: quickEditID.post.postID,
@@ -120,13 +145,31 @@ const QuickEditDialog: React.FunctionComponent = (props) => {
                 artists: functions.cleanHTML(artists).split(/[\n\r\s]+/g),
                 characters: functions.cleanHTML(characters).split(/[\n\r\s]+/g),
                 series: functions.cleanHTML(series).split(/[\n\r\s]+/g),
-                tags: functions.cleanHTML(tags).split(/[\n\r\s]+/g),
+                tags: functions.cleanHTML(`${tags} ${metaTags}`).split(/[\n\r\s]+/g),
                 reason
             }
             setQuickEditID(null)
             await axios.put("/api/post/quickedit", data, {headers: {"x-csrf-token": functions.getCSRFToken()}, withCredentials: true})
             history.go(0)
         } else {
+            const joined = `${artists} ${characters} ${series} ${tags} ${metaTags}`
+            if (joined.includes("_") || joined.includes("/") || joined.includes("\\")) {
+                setError(true)
+                await functions.timeout(20)
+                errorRef.current.innerText = "Invalid characters in tags: _ / \\"
+                setTags(tags.replaceAll("_", "-").replaceAll("/", "-").replaceAll("\\", "-"))
+                await functions.timeout(3000)
+                return setError(false)
+            }
+            if (joined.includes(",")) {
+                setError(true)
+                await functions.timeout(20)
+                errorRef.current.innerText = "Tags should be separated with a space."
+                await functions.timeout(3000)
+                const splitTags = functions.cleanHTML(tags).split(",").map((t: string) => t.trim().replaceAll(" ", "-"))
+                setTags(splitTags.join(" "))
+                return setError(false)
+            }
             const tagArr = functions.cleanHTML(tags).split(/[\n\r\s]+/g)
             if (tagArr.length < 5) {
                 setError(true)
@@ -151,7 +194,7 @@ const QuickEditDialog: React.FunctionComponent = (props) => {
                 artists: functions.cleanHTML(artists).split(/[\n\r\s]+/g),
                 characters: functions.cleanHTML(characters).split(/[\n\r\s]+/g),
                 series: functions.cleanHTML(series).split(/[\n\r\s]+/g),
-                tags: functions.cleanHTML(tags).split(/[\n\r\s]+/g),
+                tags: functions.cleanHTML(`${tags} ${metaTags}`).split(/[\n\r\s]+/g),
                 reason
             }
             await axios.put("/api/post/quickedit/unverified", data, {headers: {"x-csrf-token": functions.getCSRFToken()}, withCredentials: true})
@@ -207,6 +250,14 @@ const QuickEditDialog: React.FunctionComponent = (props) => {
     
     const handleSeriesClick = (tag: string) => {
         setSeries((prev: string) => {
+            const parts = functions.cleanHTML(prev).split(/ +/g)
+            parts[parts.length - 1] = tag
+            return parts.join(" ") + " "
+        })
+    }
+
+    const handleMetaClick = (tag: string) => {
+        setMetaTags((prev: string) => {
             const parts = functions.cleanHTML(prev).split(/ +/g)
             parts[parts.length - 1] = tag
             return parts.join(" ") + " "
@@ -413,20 +464,25 @@ const QuickEditDialog: React.FunctionComponent = (props) => {
                             <div className="dialog-row">
                                 <SearchSuggestions active={artistsActive} x={tagX} y={tagY} width={mobile ? 140 : 200} fontSize={17} text={functions.cleanHTML(artists)} click={(tag) => handleArtistClick(tag)} type="artist"/>
                                 <span className="dialog-text">Artists: </span>
-                                <input className="dialog-input" type="text" spellCheck={false} value={artists} onChange={(event) => setArtists(event.target.value)} onFocus={() => setArtistsActive(true)} onBlur={() => setArtistsActive(false)}/>
+                                <input className="dialog-input artist-tag-color" type="text" spellCheck={false} value={artists} onChange={(event) => setArtists(event.target.value)} onFocus={() => setArtistsActive(true)} onBlur={() => setArtistsActive(false)}/>
                             </div>
                             <div className="dialog-row">
                                 <SearchSuggestions active={charactersActive} x={tagX} y={tagY} width={mobile ? 140 : 200} fontSize={17} text={functions.cleanHTML(characters)} click={(tag) => handleCharacterClick(tag)} type="character"/>
                                 <span className="dialog-text">Characters: </span>
-                                <input className="dialog-input" type="text" spellCheck={false} value={characters} onChange={(event) => setCharacters(event.target.value)} onFocus={() => setCharactersActive(true)} onBlur={() => setCharactersActive(false)}/>
+                                <input className="dialog-input character-tag-color" type="text" spellCheck={false} value={characters} onChange={(event) => setCharacters(event.target.value)} onFocus={() => setCharactersActive(true)} onBlur={() => setCharactersActive(false)}/>
                             </div>
                             <div className="dialog-row">
                                 <SearchSuggestions active={seriesActive} x={tagX} y={tagY} width={mobile ? 140 : 200} fontSize={17} text={functions.cleanHTML(series)} click={(tag) => handleSeriesClick(tag)} type="series"/>
                                 <span className="dialog-text">Series: </span>
-                                <input className="dialog-input" type="text" spellCheck={false} value={series} onChange={(event) => setSeries(event.target.value)} onFocus={() => setSeriesActive(true)} onBlur={() => setSeriesActive(false)}/>
+                                <input className="dialog-input series-tag-color" type="text" spellCheck={false} value={series} onChange={(event) => setSeries(event.target.value)} onFocus={() => setSeriesActive(true)} onBlur={() => setSeriesActive(false)}/>
                             </div>
                             <div className="dialog-row">
-                                <span className="dialog-text">Tags: </span>
+                                <SearchSuggestions active={metaActive} x={tagX} y={tagY} width={mobile ? 140 : 200} fontSize={17} text={functions.cleanHTML(metaTags)} click={(tag) => handleMetaClick(tag)} type="meta"/>
+                                <span className="dialog-text">Meta: </span>
+                                <input className="dialog-input meta-tag-color" type="text" spellCheck={false} value={metaTags} onChange={(event) => setMetaTags(event.target.value)} onFocus={() => setMetaActive(true)} onBlur={() => setMetaActive(false)}/>
+                            </div>
+                            <div className="dialog-row">
+                                <span className="dialog-text tag-color">Tags: </span>
                             </div>
                             <div className="dialog-row">
                                 <SearchSuggestions active={tagActive} text={functions.cleanHTML(tags)} x={tagX} y={tagY} width={mobile ? 140 : 200} fontSize={17} click={handleTagClick} type="tag"/>
@@ -522,20 +578,25 @@ const QuickEditDialog: React.FunctionComponent = (props) => {
                         <div className="dialog-row">
                             <SearchSuggestions active={artistsActive} x={tagX} y={tagY} width={200} text={functions.cleanHTML(artists)} click={(tag) => handleArtistClick(tag)} type="artist"/>
                             <span className="dialog-text">Artists: </span>
-                            <input className="dialog-input" type="text" spellCheck={false} value={artists} onChange={(event) => setArtists(event.target.value)} onFocus={() => setArtistsActive(true)} onBlur={() => setArtistsActive(false)}/>
+                            <input className="dialog-input artist-tag-color" type="text" spellCheck={false} value={artists} onChange={(event) => setArtists(event.target.value)} onFocus={() => setArtistsActive(true)} onBlur={() => setArtistsActive(false)}/>
                         </div>
                         <div className="dialog-row">
                             <SearchSuggestions active={charactersActive} x={tagX} y={tagY} width={200} text={functions.cleanHTML(characters)} click={(tag) => handleCharacterClick(tag)} type="character"/>
                             <span className="dialog-text">Characters: </span>
-                            <input className="dialog-input" type="text" spellCheck={false} value={characters} onChange={(event) => setCharacters(event.target.value)} onFocus={() => setCharactersActive(true)} onBlur={() => setCharactersActive(false)}/>
+                            <input className="dialog-input character-tag-color" type="text" spellCheck={false} value={characters} onChange={(event) => setCharacters(event.target.value)} onFocus={() => setCharactersActive(true)} onBlur={() => setCharactersActive(false)}/>
                         </div>
                         <div className="dialog-row">
                             <SearchSuggestions active={seriesActive} x={tagX} y={tagY} width={200} text={functions.cleanHTML(series)} click={(tag) => handleSeriesClick(tag)} type="series"/>
                             <span className="dialog-text">Series: </span>
-                            <input className="dialog-input" type="text" spellCheck={false} value={series} onChange={(event) => setSeries(event.target.value)} onFocus={() => setSeriesActive(true)} onBlur={() => setSeriesActive(false)}/>
+                            <input className="dialog-input series-tag-color" type="text" spellCheck={false} value={series} onChange={(event) => setSeries(event.target.value)} onFocus={() => setSeriesActive(true)} onBlur={() => setSeriesActive(false)}/>
                         </div>
                         <div className="dialog-row">
-                            <span className="dialog-text">Tags: </span>
+                            <SearchSuggestions active={metaActive} x={tagX} y={tagY} width={mobile ? 140 : 200} fontSize={17} text={functions.cleanHTML(metaTags)} click={(tag) => handleMetaClick(tag)} type="meta"/>
+                            <span className="dialog-text">Meta: </span>
+                            <input className="dialog-input meta-tag-color" type="text" spellCheck={false} value={metaTags} onChange={(event) => setMetaTags(event.target.value)} onFocus={() => setMetaActive(true)} onBlur={() => setMetaActive(false)}/>
+                        </div>
+                        <div className="dialog-row">
+                            <span className="dialog-text tag-color">Tags: </span>
                         </div>
                         <div className="dialog-row">
                             <SearchSuggestions active={tagActive} text={functions.cleanHTML(tags)} x={tagX} y={tagY} width={200} click={handleTagClick} type="tag"/>

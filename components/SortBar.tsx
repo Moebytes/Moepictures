@@ -642,10 +642,10 @@ const SortBar: React.FunctionComponent = (props) => {
             onMouseEnter={() => setMouseOver(true)} onMouseLeave={() => setMouseOver(false)}>
                 <div className="sortbar-left">
                     <div className="sortbar-item">
-                        <img className="sortbar-img" src={leftArrow} style={{filter: getFilter()}} onClick={() => hideTheSidebar()}/>
+                        <img className="sortbar-img" src={hideSidebar ? rightArrow : leftArrow} style={{filter: getFilter()}} onClick={() => hideTheSidebar()}/>
                     </div>
                     <div className="sortbar-item">
-                        <img className="sortbar-img" src={upArrow} style={{filter: getFilter()}} onClick={() => hideTheTitlebar()}/>
+                        <img className="sortbar-img" src={hideTitlebar ? downArrow : upArrow} style={{filter: getFilter()}} onClick={() => hideTheTitlebar()}/>
                     </div>
                     <Link to="/upload" className="sortbar-item">
                         <img className="sortbar-img" src={upload} style={{filter: getFilter()}}/>

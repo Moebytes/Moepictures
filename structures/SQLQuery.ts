@@ -933,7 +933,7 @@ export default class SQLQuery {
     if (category === "tags") whereQueries.push(`tags.type = 'tag'`)
     let i = 1
     if (search) {
-      whereQueries.push(`tags.tag LIKE $${i} || '%'`)
+      whereQueries.push(`lower(tags.tag) LIKE $${i} || '%'`)
       i++
     }
     let whereQuery = whereQueries.length ? `AND ${whereQueries.join(" AND ")}` : ""
@@ -967,7 +967,7 @@ export default class SQLQuery {
           `),
           values: []
     }
-    if (search) query.values?.push(search)
+    if (search) query.values?.push(search.toLowerCase())
     if (offset) query.values?.push(offset)
     const result = await SQLQuery.run(query)
     return result
@@ -978,12 +978,12 @@ export default class SQLQuery {
     let i = 1
     if (search) {
       whereArray.push( 
-    `(tags.tag LIKE '%' || $${i} || '%'
+    `(lower(tags.tag) LIKE '%' || $${i} || '%'
     OR EXISTS (
       SELECT 1 
       FROM aliases
       WHERE aliases.tag = "tags".tag 
-      AND aliases.alias LIKE '%' || $1 || '%'
+      AND lower(aliases.alias) LIKE '%' || $1 || '%'
     ))`)
       i++
     }
@@ -1002,6 +1002,8 @@ export default class SQLQuery {
     if (sort === "reverse image") sortQuery = `ORDER BY "imageCount" ASC`
     if (sort === "aliases") sortQuery = `ORDER BY "aliasCount" DESC`
     if (sort === "reverse aliases") sortQuery = `ORDER BY "aliasCount" ASC`
+    if (sort === "length") sortQuery = `ORDER BY LENGTH(tags.tag) ASC`
+    if (sort === "reverse length") sortQuery = `ORDER BY LENGTH(tags.tag) DESC`
     const query: QueryConfig = {
           text: functions.multiTrim(`
                   SELECT tags.*, json_agg(DISTINCT aliases.*) AS aliases, json_agg(DISTINCT implications.*) AS implications,
@@ -1020,7 +1022,7 @@ export default class SQLQuery {
           `),
           values: []
     }
-    if (search) query.values?.push(search)
+    if (search) query.values?.push(search.toLowerCase())
     if (type) query.values?.push(type)
     if (offset) query.values?.push(offset)
     const result = await SQLQuery.run(query)
@@ -1331,7 +1333,7 @@ export default class SQLQuery {
     let i = 2
     let whereQuery = `WHERE comments."username" = ANY ($1)`
     if (search) {
-      whereQuery += `AND comments."comment" LIKE '%' || $${i} || '%'`
+      whereQuery += `AND lower(comments."comment") LIKE '%' || $${i} || '%'`
       i++
     }
     let sortQuery = ""
@@ -1363,7 +1365,7 @@ export default class SQLQuery {
           `),
           values: [usernames]
     }
-    if (search) query.values?.push(search)
+    if (search) query.values?.push(search.toLowerCase())
     if (offset) query.values?.push(offset)
     const result = await SQLQuery.run(query)
     return result
@@ -1859,7 +1861,7 @@ export default class SQLQuery {
   /** Alias search. */
   public static aliasSearch = async (search: string) => {
     let whereQuery = ""
-    if (search) whereQuery = `WHERE aliases.alias LIKE $1 || '%'`
+    if (search) whereQuery = `WHERE lower(aliases.alias) LIKE $1 || '%'`
     const query: QueryConfig = {
           text: functions.multiTrim(`
                   SELECT aliases.*
@@ -1868,7 +1870,7 @@ export default class SQLQuery {
                   GROUP BY "aliases"."aliasID"
           `)
     }
-    if (search) query.values = [search]
+    if (search) query.values = [search.toLowerCase()]
     const result = await SQLQuery.run(query)
     return result
   }
@@ -2403,7 +2405,7 @@ export default class SQLQuery {
     return result
   }
 
-  public static postHistory = async (postID?: number, offset?: string) => {
+  public static postHistory = async (postID?: string | number, offset?: string) => {
     const query: QueryConfig = {
       text: functions.multiTrim(`
             SELECT "post history".*,
@@ -2454,7 +2456,7 @@ export default class SQLQuery {
     return result
   }
 
-  public static translationHistory = async (postID?: number, order?: number, offset?: string) => {
+  public static translationHistory = async (postID?: string, order?: string, offset?: string) => {
     let whereArr = [] as string[]
     let i = 1
     if (postID) whereArr.push(`"translation history"."postID" = $${i++}`)

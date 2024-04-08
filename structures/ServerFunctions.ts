@@ -67,8 +67,50 @@ export default class ServerFunctions {
         })
     }
 
+    public static getFirstHistoryFile = async (file: string) => {
+        const defaultBuffer = Buffer.from("")
+        if (file.includes("artist") || file.includes("character") || file.includes("series") || file.includes("pfp")) {
+            if (functions.isLocalHost()) {
+                const id = file.split("-")?.[0]?.match(/\d+/)?.[0]
+                if (!id) return defaultBuffer
+                const historyFolder = `/Volumes/Files/moebooru/history/post/${id}`
+                if (!fs.existsSync(historyFolder)) return defaultBuffer
+                let folders = fs.readdirSync(historyFolder)
+                if (!folders.length) return defaultBuffer
+                folders = folders.sort(new Intl.Collator(undefined, {numeric: true, sensitivity: "base"}).compare)
+                const firstHistory = `/Volumes/Files/moebooru/history/tag/${id}/${folders[0]}`
+                let files = fs.readdirSync(firstHistory)
+                if (!files.length) return defaultBuffer
+                files = files.sort(new Intl.Collator(undefined, {numeric: true, sensitivity: "base"}).compare)
+                const firstFile = `/Volumes/Files/moebooru/history/tag/${id}/${folders[0]}/${files[0]}`
+                return fs.readFileSync(firstFile)
+            } else {
+                return defaultBuffer
+            }
+        } else {
+            if (functions.isLocalHost()) {
+                const id = file.split("-")?.[0]?.match(/\d+/)?.[0]
+                if (!id) return defaultBuffer
+                const historyFolder = `/Volumes/Files/moebooru/history/post/${id}`
+                if (!fs.existsSync(historyFolder)) return defaultBuffer
+                let folders = fs.readdirSync(historyFolder)
+                if (!folders.length) return defaultBuffer
+                folders = folders.sort(new Intl.Collator(undefined, {numeric: true, sensitivity: "base"}).compare)
+                const firstHistory = `/Volumes/Files/moebooru/history/post/${id}/${folders[0]}`
+                let files = fs.readdirSync(firstHistory)
+                if (!files.length) return defaultBuffer
+                files = files.sort(new Intl.Collator(undefined, {numeric: true, sensitivity: "base"}).compare)
+                const firstFile = `/Volumes/Files/moebooru/history/post/${id}/${folders[0]}/${files[0]}`
+                return fs.readFileSync(firstFile)
+            } else {
+                return defaultBuffer
+            }
+        }
+    }
+
     public static getFile = async (file: string) => {
         if (functions.isLocalHost()) {
+            if (!fs.existsSync(`/Volumes/Files/moebooru/${decodeURIComponent(file)}`)) return ServerFunctions.getFirstHistoryFile(file)
             return fs.readFileSync(`/Volumes/Files/moebooru/${decodeURIComponent(file)}`)
         }
         return s3.getObject({Key: decodeURIComponent(file), Bucket: "moebooru"}).promise().then((r) => r.Body) as unknown as Buffer

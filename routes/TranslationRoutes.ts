@@ -158,7 +158,7 @@ const TranslationRoutes = (app: Express) => {
             const order = req.query.order as string
             const offset = req.query.offset as string
             if (!req.session.username) return res.status(401).send("Unauthorized")
-            const result = await sql.translationHistory(Number(postID), Number(order), offset)
+            const result = await sql.translationHistory(postID, order, offset)
             res.status(200).json(result)
         } catch (e) {
             console.log(e)
@@ -168,12 +168,14 @@ const TranslationRoutes = (app: Express) => {
 
     app.delete("/api/translation/history/delete", translationLimiter, async (req: Request, res: Response) => {
         try {
-            const {postID, order, historyID} = req.query
+            const postID = req.query.postID as string
+            const order = req.query.order as string
+            const historyID = req.query.historyID as string
             if (!serverFunctions.validateCSRF(req)) return res.status(400).send("Bad CSRF token")
             if (Number.isNaN(Number(historyID))) return res.status(400).send("Invalid historyID")
             if (!req.session.username) return res.status(401).send("Unauthorized")
             if (req.session.role !== "admin" && req.session.role !== "mod") return res.status(403).end()
-            const translationHistory = await sql.translationHistory(Number(postID), Number(order))
+            const translationHistory = await sql.translationHistory(postID, order)
             if (translationHistory[0]?.historyID === Number(historyID)) {
                 return res.status(400).send("Bad historyID")
             } else {

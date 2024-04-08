@@ -28,19 +28,14 @@ let element = null as any
 let inertia = false
 let mouseDown = false
 
-// detect trackpad
-let eventCount = 0
-let eventCountStart = null as any
-
 const imageExtensions = [".jpg", ".jpeg", ".png", ".webp"]
 const videoExtensions = [".mp4", ".mov", ".avi", ".mkv", ".webm"]
 const audioExtensions = [".mp3", ".wav"]
 const modelExtensions = [".glb", ".gltf", ".obj", ".fbx"]
 
 export default class Functions {
-    public static updateCSRFToken = async () => {
-        await Functions.timeout(500)
-        csrfToken = await axios.get("/api/misc/csrf", {withCredentials: true}).then((r) => r.data)
+    public static updateCSRFToken = async (session: any) => {
+        csrfToken = session.csrfToken
     }
 
     public static getCSRFToken = () => {
@@ -1126,7 +1121,9 @@ export default class Functions {
             sort === "posts" ||
             sort === "reverse posts" || 
             sort === "alphabetic" ||
-            sort === "reverse alphabetic") return true 
+            sort === "reverse alphabetic" ||
+            sort === "length" ||
+            sort === "reverse length") return true 
         return false
     }
 
@@ -1444,7 +1441,7 @@ export default class Functions {
         })
     }
 
-    public static crop = async (url: string, aspectRatio: number, buffer?: boolean) => {
+    public static crop = async (url: string, aspectRatio: number, buffer?: boolean, jpeg?: boolean) => {
         return new Promise<any>((resolve) => {
             const inputImage = new Image()
             inputImage.onload = () => {
@@ -1472,7 +1469,7 @@ export default class Functions {
                     const img = ctx.getImageData(0, 0, outputImage.width, outputImage.height)
                     resolve(img.data.buffer)
                 } else {
-                    resolve(outputImage.toDataURL("image/jpeg"))
+                    resolve(outputImage.toDataURL(jpeg ? "image/jpeg" : "image/png"))
                 }
             }
             inputImage.src = url
@@ -1935,7 +1932,7 @@ export default class Functions {
 
     public static tagType = (tag: string) => {
         const metaTags = ["autotags", "upscaled", "needs-tags", "no-audio", "with-audio", "self-post", "text", "transparent", 
-        "commentary", "translated", "partially-translated", "check-translation"]
+        "commentary", "translated", "partially-translated", "check-translation", "multiple-artists", "bad-pixiv-id"]
         if (metaTags.includes(tag)) return "meta"
         return "tag"
     }

@@ -122,6 +122,7 @@ const HelpPage: React.FunctionComponent = (props) => {
                         These are some various tags with special uses. <br/>
                         <span className="help-alt">original</span> - the drawing is original, ie. not fanart. <br/>
                         <span className="help-alt">self post</span> - the post was uploaded by its original creator. <br/>
+                        <span className="help-alt">official art</span> - this is official art without a publicized artist. <br/>
                         <span className="help-alt">unknown artist</span> - the artist is not known. <br/>
                         <span className="help-alt">unknown character</span> - the character is unknown and might not be original. <br/>
                         <span className="help-alt">unknown series</span> - the series is unknown. <br/>

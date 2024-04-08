@@ -122,10 +122,14 @@ const TagRoutes = (app: Express) => {
             let imgChange = false
             if (image?.[0]) {
                 if (tagObj.image) {
-                    const imagePath = functions.getTagPath(tagObj.type, tagObj.image)
-                    vanillaImageBuffer = await serverFunctions.getFile(imagePath)
-                    await serverFunctions.deleteFile(imagePath)
-                    tagObj.image = null
+                    try {
+                        const imagePath = functions.getTagPath(tagObj.type, tagObj.image)
+                        vanillaImageBuffer = await serverFunctions.getFile(imagePath)
+                        await serverFunctions.deleteFile(imagePath)
+                        tagObj.image = null
+                    } catch {
+                        tagObj.image = null
+                    }
                 }
                 if (image[0] !== "delete") {
                     const filename = `${tag}.${functions.fileExtension(image)}`
@@ -158,17 +162,6 @@ const TagRoutes = (app: Express) => {
             if (pixivTags !== undefined) {
                 await sql.updateTag(tag, "pixivTags", pixivTags)
             }
-            if (key.trim() !== tag) {
-                if (tagObj.image) {
-                    const newFilename = image ? `${key.trim()}.${functions.fileExtension(image)}` : `${key.trim()}.${path.extname(tagObj.image).replace(".", "")}`
-                    const oldImagePath = functions.getTagPath(tagObj.type, tagObj.image)
-                    const newImagePath = functions.getTagPath(tagObj.type, newFilename)
-                    await serverFunctions.renameFile(oldImagePath, newImagePath)
-                    await sql.updateTag(tag, "image", newFilename)
-                    imageFilename = newFilename
-                }
-                await sql.updateTag(tag, "tag", key.trim())
-            }
             if (tagObj.type === "artist") {
                 if (website !== undefined) {
                     await sql.updateTag(tag, "website", website)
@@ -193,19 +186,27 @@ const TagRoutes = (app: Express) => {
                     await sql.updateTag(tag, "twitter", twitter)
                 }
             }
+            let targetTag = tag
+            if (key.trim() !== tag) {
+                if (tagObj.image) {
+                    const newFilename = image ? `${key.trim()}.${functions.fileExtension(image)}` : `${key.trim()}.${path.extname(tagObj.image).replace(".", "")}`
+                    const oldImagePath = functions.getTagPath(tagObj.type, tagObj.image)
+                    const newImagePath = functions.getTagPath(tagObj.type, newFilename)
+                    await serverFunctions.renameFile(oldImagePath, newImagePath)
+                    await sql.updateTag(tag, "image", newFilename)
+                    imageFilename = newFilename
+                }
+                await sql.updateTag(tag, "tag", key.trim())
+                targetTag = key.trim()
+            }
             if (req.session.role === "admin" || req.session.role === "mod") {
                 if (silent) return res.status(200).send("Success")
             }
 
-            const tagHistory = await sql.tagHistory(tag)
+            const tagHistory = await sql.tagHistory(targetTag)
             const nextKey = await serverFunctions.getNextKey("tag", key)
             if (!tagHistory.length || (imgChange && nextKey === 1)) {
-                let targetTag = tag
                 let vanilla = await sql.tag(targetTag)
-                if (!vanilla) {
-                    targetTag = key.trim()
-                    vanilla = await sql.tag(targetTag)
-                }
                 let posts = await sql.search([targetTag], "all", "all", "all", "reverse date", undefined, "1")
                 vanilla.date = posts[0].uploadDate 
                 vanilla.user = posts[0].uploader
@@ -229,7 +230,7 @@ const TagRoutes = (app: Express) => {
                         imageFilename = imagePath
                     }
                 }
-                await sql.insertTagHistory(req.session.username, tag, key, tagObj.type, imageFilename, tagDescription, aliases, implications, pixivTags, website, pixiv, twitter, fandom, reason)
+                await sql.insertTagHistory(req.session.username, targetTag, key, tagObj.type, imageFilename, tagDescription, aliases, implications, pixivTags, website, pixiv, twitter, fandom, reason)
             } else {
                 if (image?.[0] && imageFilename) {
                     if (imgChange) {
@@ -238,7 +239,7 @@ const TagRoutes = (app: Express) => {
                         imageFilename = imagePath
                     }
                 }
-                await sql.insertTagHistory(req.session.username, tag, key, tagObj.type, imageFilename, tagDescription, aliases, implications, pixivTags, website, pixiv, twitter, fandom, reason)
+                await sql.insertTagHistory(req.session.username, targetTag, key, tagObj.type, imageFilename, tagDescription, aliases, implications, pixivTags, website, pixiv, twitter, fandom, reason)
             }
             res.status(200).send("Success")
         } catch (e) {

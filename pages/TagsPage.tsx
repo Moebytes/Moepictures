@@ -467,6 +467,12 @@ const TagsPage: React.FunctionComponent = (props) => {
                             <div className="tag-dropdown-row" onClick={() => setSortType("reverse aliases")}>
                                 <span className="tag-dropdown-text">Reverse Aliases</span>
                             </div>
+                            <div className="tag-dropdown-row" onClick={() => setSortType("length")}>
+                                <span className="tag-dropdown-text">Length</span>
+                            </div>
+                            <div className="tag-dropdown-row" onClick={() => setSortType("reverse length")}>
+                                <span className="tag-dropdown-text">Reverse Length</span>
+                            </div>
                         </div>
                         {getTypeJSX()}
                         <div className={`tag-dropdown ${activeDropdown === "type" ? "" : "hide-tag-dropdown"}`} 

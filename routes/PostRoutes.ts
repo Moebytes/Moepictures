@@ -265,6 +265,7 @@ const PostRoutes = (app: Express) => {
 
     app.put("/api/post/quickedit", postUpdateLimiter, async (req: Request, res: Response, next: NextFunction) => {
         try {
+            if (!serverFunctions.validateCSRF(req)) return res.status(400).send("Bad CSRF token")
             const postID = Number(req.body.postID)
             const unverified = String(req.body.unverified) === "true"
             let type = req.body.type 
@@ -284,6 +285,11 @@ const PostRoutes = (app: Express) => {
             if (!series?.[0]) series = characters.includes("original") ? ["no-series"] : ["unknown-series"]
             if (!characters?.[0]) characters = ["unknown-character"]
             if (!tags?.[0]) tags = ["needs-tags"]
+
+            let rawTags = `${artists.join(" ")} ${characters.join(" ")} ${series.join(" ")} ${tags.join(" ")}`
+            if (rawTags.includes("_") || rawTags.includes("/") || rawTags.includes("\\") || rawTags.includes(",")) {
+                return res.status(400).send("Invalid characters in tags: , _ / \\")
+            }
     
             artists = artists.filter(Boolean).map((t: string) => t.toLowerCase().replace(/[\n\r\s]+/g, "-"))
             characters = characters.filter(Boolean).map((t: string) => t.toLowerCase().replace(/[\n\r\s]+/g, "-"))
@@ -407,6 +413,7 @@ const PostRoutes = (app: Express) => {
 
     app.put("/api/post/quickedit/unverified", postUpdateLimiter, async (req: Request, res: Response, next: NextFunction) => {
         try {
+            if (!serverFunctions.validateCSRF(req)) return res.status(400).send("Bad CSRF token")
             let postID = Number(req.body.postID)
             let type = req.body.type 
             const restrict = req.body.restrict 
@@ -425,6 +432,11 @@ const PostRoutes = (app: Express) => {
             if (!series?.[0]) series = characters.includes("original") ? ["no-series"] : ["unknown-series"]
             if (!characters?.[0]) characters = ["unknown-character"]
             if (!tags?.[0]) tags = ["needs-tags"]
+
+            let rawTags = `${artists.join(" ")} ${characters.join(" ")} ${series.join(" ")} ${tags.join(" ")}`
+            if (rawTags.includes("_") || rawTags.includes("/") || rawTags.includes("\\") || rawTags.includes(",")) {
+                return res.status(400).send("Invalid characters in tags: , _ / \\")
+            }
     
             artists = artists.filter(Boolean).map((t: string) => t.toLowerCase().replace(/[\n\r\s]+/g, "-"))
             characters = characters.filter(Boolean).map((t: string) => t.toLowerCase().replace(/[\n\r\s]+/g, "-"))
@@ -618,8 +630,7 @@ const PostRoutes = (app: Express) => {
             if (req.session.role === "admin" || req.session.role === "mod") req.session.captchaAmount = 0
             if (req.session.captchaAmount > 1000) stripTags = true
             if (!req.session.username) return res.status(401).send("Unauthorized")
-            if (Number.isNaN(Number(postID))) return res.status(400).send("Bad postID")
-            const result = await sql.postHistory(Number(postID), offset)
+            const result = await sql.postHistory(postID, offset)
             if (stripTags) delete result.tags
             res.status(200).json(result)
         } catch (e) {

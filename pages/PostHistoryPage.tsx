@@ -57,6 +57,7 @@ const PostHistoryPage: React.FunctionComponent<Props> = (props) => {
                 result = [postObject]
             }
         }
+        console.log(result)
         setEnded(false)
         setIndex(0)
         setVisibleRevisions([])

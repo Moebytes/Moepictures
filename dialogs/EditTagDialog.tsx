@@ -3,18 +3,22 @@ import {useHistory} from "react-router-dom"
 import {HashLink as Link} from "react-router-hash-link"
 import {HideNavbarContext, HideSidebarContext, ThemeContext, EnableDragContext, EditTagIDContext, EditTagFlagContext, EditTagImplicationsContext, 
 EditTagTypeContext, EditTagPixivContext, EditTagTwitterContext, EditTagKeyContext, EditTagAliasesContext, EditTagImageContext, EditTagWebsiteContext, 
-EditTagFandomContext, EditTagDescriptionContext, EditTagReasonContext, HideTitlebarContext, SessionContext, EditTagPixivTagsContext} from "../Context"
+EditTagFandomContext, EditTagDescriptionContext, EditTagReasonContext, HideTitlebarContext, SessionContext, EditTagPixivTagsContext, SiteHueContext,
+SiteLightnessContext, SiteSaturationContext} from "../Context"
 import functions from "../structures/Functions"
 import uploadIcon from "../assets/icons/upload.png"
 import "./styles/dialog.less"
 import fileType from "magic-bytes.js"
 import Draggable from "react-draggable"
 import permissions from "../structures/Permissions"
-import xButton from "../assets/icons/x-button-magenta.png"
+import xButton from "../assets/icons/x-button.png"
 import axios from "axios"
 
 const EditTagDialog: React.FunctionComponent = (props) => {
     const {theme, setTheme} = useContext(ThemeContext)
+    const {siteHue, setSiteHue} = useContext(SiteHueContext)
+    const {siteSaturation, setSiteSaturation} = useContext(SiteSaturationContext)
+    const {siteLightness, setSiteLightness} = useContext(SiteLightnessContext)
     const {hideNavbar, setHideNavbar} = useContext(HideNavbarContext)
     const {hideTitlebar, setHideTitlebar} = useContext(HideTitlebarContext)
     const {hideSidebar, setHideSidebar} = useContext(HideSidebarContext)
@@ -38,6 +42,10 @@ const EditTagDialog: React.FunctionComponent = (props) => {
     const [error, setError] = useState(false)
     const errorRef = useRef<any>(null)
     const history = useHistory()
+
+    const getFilter = () => {
+        return `hue-rotate(${siteHue - 180}deg) saturate(${siteSaturation}%) brightness(${siteLightness + 70}%)`
+    }
 
     useEffect(() => {
         document.title = "Moebooru: Edit Tag"
@@ -255,7 +263,7 @@ const EditTagDialog: React.FunctionComponent = (props) => {
                                 </label>
                                 <input id="tag-img" type="file" onChange={(event) => uploadTagImg(event)}/>
                                 {editTagImage && editTagImage !== "delete" ? 
-                                <img className="dialog-x-button" src={xButton} onClick={() => setEditTagImage("delete")}/>
+                                <img className="dialog-x-button" src={xButton} style={{filter: getFilter()}} onClick={() => setEditTagImage("delete")}/>
                                 : null}
                             </div>
                             {editTagImage && editTagImage !== "delete" ? 
@@ -334,7 +342,7 @@ const EditTagDialog: React.FunctionComponent = (props) => {
                             </label>
                             <input id="tag-img" type="file" onChange={(event) => uploadTagImg(event)}/>
                             {editTagImage && editTagImage !== "delete" ? 
-                            <img className="dialog-x-button" src={xButton} onClick={() => setEditTagImage("delete")}/>
+                            <img className="dialog-x-button" src={xButton} style={{filter: getFilter()}} onClick={() => setEditTagImage("delete")}/>
                             : null}
                         </div>
                         {editTagImage && editTagImage !== "delete" ? 
