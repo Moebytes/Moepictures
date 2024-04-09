@@ -22,7 +22,7 @@ import ThirdParty from "../components/ThirdParty"
 import Parent from "../components/Parent"
 import NewTags from "../components/NewTags"
 import MobileInfo from "../components/MobileInfo"
-import {HideNavbarContext, HideSidebarContext, RelativeContext, DownloadFlagContext, DownloadURLsContext, HideTitlebarContext, MobileContext,
+import {HideNavbarContext, HideSidebarContext, RelativeContext, DownloadFlagContext, DownloadIDsContext, HideTitlebarContext, MobileContext,
 UnverifiedPostsContext, TagsContext, HeaderTextContext, PostFlagContext, SidebarTextContext, SessionContext, EnableDragContext} from "../Context"
 import axios from "axios"
 import permissions from "../structures/Permissions"
@@ -39,7 +39,7 @@ const UnverifiedPostPage: React.FunctionComponent<Props> = (props) => {
     const {enableDrag, setEnableDrag} = useContext(EnableDragContext)
     const {relative, setRelative} = useContext(RelativeContext)
     const {downloadFlag, setDownloadFlag} = useContext(DownloadFlagContext)
-    const {downloadURLs, setDownloadURLs} = useContext(DownloadURLsContext)
+    const {downloadIDs, setDownloadIDs} = useContext(DownloadIDsContext)
     const {unverifiedPosts, setUnverifiedPosts} = useContext(UnverifiedPostsContext)
     const {tags, setTags} = useContext(TagsContext)
     const {headerText, setHeaderText} = useContext(HeaderTextContext)
@@ -167,7 +167,7 @@ const UnverifiedPostPage: React.FunctionComponent<Props> = (props) => {
     }, [postFlag])
 
     const download = () => {
-        setDownloadURLs([image])
+        setDownloadIDs([postID])
         setDownloadFlag(true)
     }
 

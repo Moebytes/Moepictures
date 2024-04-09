@@ -84,6 +84,22 @@ const TagRoutes = (app: Express) => {
         }
     })
 
+    app.get("/api/tag/map", tagLimiter, async (req: Request, res: Response, next: NextFunction) => {
+        try {
+            let tags = req.query.tags as string[]
+            if (!tags) tags = []
+            let result = await sql.tags(tags.filter(Boolean))
+            const tagMap = {} as {[key: string]: any}
+            for (const tag of result) {
+                tagMap[tag.tag] = tag
+            }
+            res.status(200).json(tagMap)
+        } catch (e) {
+            console.log(e)
+            return res.status(400).send("Bad request")
+        }
+    })
+
     app.delete("/api/tag/delete", tagUpdateLimiter, async (req: Request, res: Response) => {
         try {
             const tag = req.query.tag as string

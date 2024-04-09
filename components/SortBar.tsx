@@ -6,7 +6,8 @@ import {ThemeContext, HideSidebarContext, HideNavbarContext, HideSortbarContext,
 SizeTypeContext, BrightnessContext, ContrastContext, HueContext, SaturationContext, LightnessContext, SiteHueContext,
 BlurContext, SharpenContext, EnableDragContext, FilterDropActiveContext, SquareContext, PixelateContext, SiteLightnessContext,
 ShowDownloadDialogContext, HideTitlebarContext, ImageTypeContext, RestrictTypeContext, SortTypeContext, SiteSaturationContext,
-StyleTypeContext, SpeedContext, ReverseContext, MobileContext, RelativeContext, SessionContext, MobileScrollingContext} from "../Context"
+StyleTypeContext, SpeedContext, ReverseContext, MobileContext, RelativeContext, SessionContext, MobileScrollingContext, 
+SelectionModeContext, SelectionItemsContext, SearchFlagContext, DownloadIDsContext, DownloadFlagContext, ShowBulkQuickEditDialogContext} from "../Context"
 import leftArrow from "../assets/icons/leftArrow.png"
 import rightArrow from "../assets/icons/rightArrow.png"
 import upArrow from "../assets/icons/upArrow.png"
@@ -45,9 +46,14 @@ import reverseIcon from "../assets/icons/reverse.png"
 import scrollIcon from "../assets/icons/scroll.png"
 import pageIcon from "../assets/icons/page.png"
 import bulk from "../assets/icons/bulk.png"
+import select from "../assets/icons/select.png"
+import selectOn from "../assets/icons/select-on.png"
+import star from "../assets/icons/star.png"
+import quickEdit from "../assets/icons/quickedit.png"
 import functions from "../structures/Functions"
 import permissions from "../structures/Permissions"
 import "./styles/sortbar.less"
+import axios from "axios"
 
 const SortBar: React.FunctionComponent = (props) => {
     const {theme, setTheme} = useContext(ThemeContext)
@@ -71,6 +77,8 @@ const SortBar: React.FunctionComponent = (props) => {
     const {blur, setBlur} = useContext(BlurContext)
     const {sharpen, setSharpen} = useContext(SharpenContext)
     const {showDownloadDialog, setShowDownloadDialog} = useContext(ShowDownloadDialogContext)
+    const {downloadFlag, setDownloadFlag} = useContext(DownloadFlagContext)
+    const {downloadIDs, setDownloadIDs} = useContext(DownloadIDsContext)
     const [ignored, forceUpdate] = useReducer(x => x + 1, 0)
     const [mouseOver, setMouseOver] = useState(false)
     const {imageType, setImageType} = useContext(ImageTypeContext)
@@ -82,11 +90,15 @@ const SortBar: React.FunctionComponent = (props) => {
     const {reverse, setReverse} = useContext(ReverseContext)
     const {mobile, setMobile} = useContext(MobileContext)
     const {mobileScrolling, setMobileScrolling} = useContext(MobileScrollingContext)
+    const {selectionMode, setSelectionMode} = useContext(SelectionModeContext)
+    const {selectionItems, setSelectionItems} = useContext(SelectionItemsContext) as {selectionItems: Set<string>, setSelectionItems: any}
+    const {showBulkQuickEditDialog, setShowBulkQuickEditDialog} = useContext(ShowBulkQuickEditDialogContext)
+    const {searchFlag, setSearchFlag} = useContext(SearchFlagContext)
     const {relative, setRelative} = useContext(RelativeContext)
     const {session, setSession} = useContext(SessionContext)
     const {scroll, setScroll} = useContext(ScrollContext)
     const [dropLeft, setDropLeft] = useState(0)
-    const [dropTop, setDropTop] = useState(-1)
+    const [dropTop, setDropTop] = useState(-2)
     const [lastImageType, setLastImageType] = useState(null) as any
     const [lastRestrictType, setLastRestrictType] = useState(null) as any
     const [lastStyleType, setLastStyleType] = useState(null) as any
@@ -142,15 +154,15 @@ const SortBar: React.FunctionComponent = (props) => {
             if (activeDropdown !== "filters") {
                 if (filterDropActive) setFilterDropActive(false)
             }
-            if (window.scrollY === 0) setDropTop(-1)
+            if (window.scrollY === 0) setDropTop(-2)
             if (activeDropdown === "none") return
         }
         const scrollHandler = () => {
-            if (window.scrollY === 0) return setDropTop(-1)
+            if (window.scrollY === 0) return setDropTop(-2)
             let newDropTop = hideTitlebar ? -Number(document.querySelector(".titlebar")?.clientHeight) - 2 : 0
             if (mobile) newDropTop = 32
             if (dropTop === newDropTop) return
-            setDropTop(newDropTop - 1)
+            setDropTop(newDropTop - 2)
         }
         window.addEventListener("click", clickHandler)
         window.addEventListener("scroll", scrollHandler)
@@ -172,9 +184,9 @@ const SortBar: React.FunctionComponent = (props) => {
     useEffect(() => {
         setActiveDropdown("none")
         if (hideTitlebar) {
-            setDropTop(-Number(document.querySelector(".titlebar")?.clientHeight) - 3)
+            setDropTop(-Number(document.querySelector(".titlebar")?.clientHeight) - 4)
         } else {
-            setDropTop(-1)
+            setDropTop(-2)
         }
     }, [hideTitlebar])
 
@@ -619,11 +631,45 @@ const SortBar: React.FunctionComponent = (props) => {
         }
     }, [imageType, styleType])
 
+    const bulkFavorite = async () => {
+        if (!selectionItems.size) return
+        for (const postID of selectionItems.values()) {
+            await axios.post("/api/favorite/toggle", {postID}, {headers: {"x-csrf-token": functions.getCSRFToken()}, withCredentials: true})
+        }
+        setSelectionMode(false)
+        if (sortType === "favorites" || sortType === "reverse favorites") setSearchFlag(true)
+        setTimeout(() => {
+            setSelectionMode(true)
+        }, 200)
+    }
+
+    const bulkDownload = async () => {
+        if (selectionMode) {
+            if (!selectionItems.size) return
+            let newDownloadIDs = [] as any
+            for (const postID of selectionItems.values()) {
+                newDownloadIDs.push(postID)
+            }
+            setDownloadIDs(newDownloadIDs)
+            setDownloadFlag(true)
+            setSelectionMode(false)
+            setTimeout(() => {
+                setSelectionMode(true)
+            }, 200)
+        } else {
+            setShowDownloadDialog((prev: boolean) => !prev)
+        }
+    }
+
+    const bulkQuickEdit = () => {
+        setShowBulkQuickEditDialog((prev: boolean) => !prev)
+    }
+ 
     let sortBarJSX = () => {
         if (mobile) return (
             <div className={`mobile-sortbar ${relative ? "mobile-sortbar-relative" : ""} ${mobileScrolling ? "hide-mobile-sortbar" : ""}`}>
                 <img style={{height: "30px", filter: getFilter()}} className="sortbar-img" src={upload} onClick={() => history.push("/upload")}/>
-                <img style={{height: "30px", filter: getFilter()}} className="sortbar-img" src={download} onClick={() => setShowDownloadDialog((prev: boolean) => !prev)}/>
+                <img style={{height: "30px", filter: getFilter()}} className="sortbar-img" src={download} onClick={bulkDownload}/>
                 {getMobileImageJSX()}
                 {getMobileRestrictJSX()}
                 {getMobileStyleJSX()}
@@ -651,7 +697,7 @@ const SortBar: React.FunctionComponent = (props) => {
                         <img className="sortbar-img" src={upload} style={{filter: getFilter()}}/>
                         <span className="sortbar-text">Upload</span>
                     </Link>
-                    <div className="sortbar-item" onClick={() => setShowDownloadDialog((prev: boolean) => !prev)}>
+                    <div className="sortbar-item" onClick={bulkDownload}>
                         <img className="sortbar-img" src={download} style={{filter: getFilter()}}/>
                         <span className="sortbar-text">Download</span>
                     </div>
@@ -669,6 +715,20 @@ const SortBar: React.FunctionComponent = (props) => {
                     {getStyleJSX()}
                 </div>
                 <div className="sortbar-right">
+                    {permissions.isElevated(session) && selectionMode ? 
+                    <div className="sortbar-item" onClick={bulkQuickEdit}>
+                        <img className="sortbar-img" src={quickEdit} style={{filter: getFilter()}}/>
+                        {/* <span className="sortbar-text">Quick Edit</span> */}
+                    </div> : null}
+                    {session.username && selectionMode ? 
+                    <div className="sortbar-item" onClick={bulkFavorite}>
+                        <img className="sortbar-img" src={star} style={{filter: getFilter()}}/>
+                        {/* <span className="sortbar-text">Favorite</span> */}
+                    </div> : null}
+                    {session.username ? 
+                    <div className="sortbar-item" onClick={() => setSelectionMode((prev: boolean) => !prev)}>
+                        <img className="sortbar-img" src={selectionMode ? selectOn : select} style={{filter: getFilter()}}/>
+                    </div> : null}
                     <div className="sortbar-item" onClick={() => toggleScroll()}>
                         <img className="sortbar-img" src={scroll ? scrollIcon : pageIcon} style={{filter: getFilter()}}/>
                         <span className="sortbar-text">{scroll ? "Scrolling" : "Pages"}</span>

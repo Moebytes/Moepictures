@@ -46,6 +46,25 @@ const FavoriteRoutes = (app: Express) => {
             res.status(400).send("Bad request") 
         }
     })
+
+    app.post("/api/favorite/toggle", favoriteLimiter, async (req: Request, res: Response) => {
+        try {
+            const {postID} = req.body
+            if (!serverFunctions.validateCSRF(req)) return res.status(400).send("Bad CSRF token")
+            if (Number.isNaN(Number(postID))) return res.status(400).send("Invalid postID")
+            if (!req.session.username) return res.status(401).send("Unauthorized")
+            const favorite = await sql.favorite(Number(postID), req.session.username)
+            if (favorite) {
+                await sql.deleteFavorite(favorite.favoriteID)
+            } else {
+                await sql.insertFavorite(Number(postID), req.session.username)
+            }
+            res.status(200).send("Success")
+        } catch (e) {
+            console.log(e)
+            res.status(400).send("Bad request") 
+        }
+    })
 }
 
 export default FavoriteRoutes

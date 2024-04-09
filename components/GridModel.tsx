@@ -2,7 +2,8 @@ import React, {useContext, useEffect, useRef, useState, forwardRef, useImperativ
 import {useHistory} from "react-router-dom"
 import loading from "../assets/icons/loading.gif"
 import {ThemeContext, SizeTypeContext, BrightnessContext, ContrastContext, HueContext, SaturationContext, LightnessContext, MobileContext, ScrollYContext,
-BlurContext, SharpenContext, SquareContext, PixelateContext, DownloadFlagContext, DownloadURLsContext, SpeedContext, ReverseContext, ScrollContext} from "../Context"
+BlurContext, SharpenContext, SquareContext, PixelateContext, DownloadFlagContext, DownloadIDsContext, SpeedContext, ReverseContext, ScrollContext,
+SelectionModeContext, SelectionItemsContext, SelectionPostsContext} from "../Context"
 import {HashLink as Link} from "react-router-hash-link"
 import path from "path"
 import functions from "../structures/Functions"
@@ -44,9 +45,12 @@ const GridModel = forwardRef<Ref, Props>((props, componentRef) => {
     const {pixelate, setPixelate} = useContext(PixelateContext)
     const {square, setSquare} = useContext(SquareContext)
     const {downloadFlag, setDownloadFlag} = useContext(DownloadFlagContext)
-    const {downloadURLs, setDownloadURLs} = useContext(DownloadURLsContext)
+    const {downloadIDs, setDownloadIDs} = useContext(DownloadIDsContext)
     const {scrollY, setScrollY} = useContext(ScrollYContext)
     const {mobile, setMobile} = useContext(MobileContext)
+    const {selectionMode, setSelectionMode} = useContext(SelectionModeContext)
+    const {selectionItems, setSelectionItems} = useContext(SelectionItemsContext) as {selectionItems: Set<string>, setSelectionItems: any}
+    const {selectionPosts, setSelectionPosts} = useContext(SelectionPostsContext) as {selectionPosts: Map<string, any>, setSelectionPosts: any}
     const containerRef = useRef<HTMLDivElement>(null)
     const pixelateRef = useRef<HTMLCanvasElement>(null)
     const overlayRef = useRef<HTMLCanvasElement>(null)
@@ -76,6 +80,7 @@ const GridModel = forwardRef<Ref, Props>((props, componentRef) => {
     const [mixer, setMixer] = useState(null as unknown as THREE.AnimationMixer | null)
     const [animations, setAnimations] = useState(null as unknown as THREE.AnimationClip[] | null)
     const [ref, setRef] = useState(null as unknown as HTMLCanvasElement)
+    const [selected, setSelected] = useState(false)
     const history = useHistory()
 
     useImperativeHandle(componentRef, () => ({
@@ -281,14 +286,6 @@ const GridModel = forwardRef<Ref, Props>((props, componentRef) => {
         }
     }, [ref])
 
-    const getBorder = () => {
-        if (sizeType === "tiny" || sizeType === "small") {
-            return "1px solid var(--imageBorder)"
-        } else {
-            return "2px solid var(--imageBorder)"
-        }
-    }
-
     const getSquareOffset = () => {
         if (mobile) {
             if (sizeType === "tiny") return 20
@@ -477,9 +474,9 @@ const GridModel = forwardRef<Ref, Props>((props, componentRef) => {
 
     useEffect(() => {
         if (downloadFlag) {
-            if (downloadURLs.includes(props.model)) {
+            if (downloadIDs.includes(props.post.postID)) {
                 functions.download(path.basename(props.model), props.model)
-                setDownloadURLs(downloadURLs.filter((s: string) => s !== props.model))
+                setDownloadIDs(downloadIDs.filter((s: string) => s !== props.post.postID))
                 setDownloadFlag(false)
             }
         }
@@ -504,21 +501,61 @@ const GridModel = forwardRef<Ref, Props>((props, componentRef) => {
 
     const mouseUp = async (event: React.MouseEvent<HTMLElement>) => {
         setScrollY(window.scrollY)
-        axios.get("/api/post", {params: {postID: props.post.postID}, withCredentials: true}).then(async (r) => {
-            const post = r.data
-            localStorage.setItem("savedPost", JSON.stringify(post))
-            const tagCache = await functions.tagCategories(post.tags, true)
-            localStorage.setItem("savedTags", JSON.stringify(tagCache))
-        }).catch(() => null)
-        if (!drag) {
+        if (selectionMode) {
             if (event.metaKey || event.ctrlKey || event.button == 1) {
                 return
             } else {
-                history.push(`/post/${props.id}`)
-                window.scrollTo(0, 0)
+                const isSelected = !selected
+                if (isSelected) {
+                    selectionItems.add(props.post.postID)
+                    selectionPosts.set(props.post.postID, props.post)
+                } else {
+                    selectionItems.delete(props.post.postID)
+                    selectionPosts.delete(props.post.postID)
+                }
+                setSelected(isSelected)
+            }
+        } else {
+            axios.get("/api/post", {params: {postID: props.post.postID}, withCredentials: true}).then(async (r) => {
+                const post = r.data
+                localStorage.setItem("savedPost", JSON.stringify(post))
+                const tagCategories = await functions.tagCategories(post.tags, true)
+                localStorage.setItem("savedTags", JSON.stringify(tagCategories))
+            }).catch(() => null)
+            if (!drag) {
+                if (event.metaKey || event.ctrlKey || event.button == 1) {
+                    return
+                } else {
+                    history.push(`/post/${props.id}`)
+                    window.scrollTo(0, 0)
+                }
             }
         }
     }
+
+    const getBorder = () => {
+        if (sizeType === "tiny" || sizeType === "small") {
+            if (selected) {
+                return "2px solid var(--selectBorder)"
+            } else {
+                return "1px solid var(--imageBorder)"
+            }
+        } else {
+            if (selected) {
+                return "4px solid var(--selectBorder)"
+            } else {
+                return "2px solid var(--imageBorder)"
+            }
+        }
+    }
+
+    useEffect(() => {
+        if (!selectionMode) {
+            setSelected(false)
+            selectionItems.delete(props.post.postID)
+            selectionPosts.delete(props.post.postID)
+        }
+    }, [selectionMode])
 
     const loadImage = async () => {
         if (!ref || !overlayRef.current || !lightnessRef.current) return

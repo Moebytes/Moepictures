@@ -221,16 +221,16 @@ const QuickEditDialog: React.FunctionComponent = (props) => {
         const tagY = posY
         setTagX(tagX)
         setTagY(tagY)
-    }, [artists, characters, series, tags])
+    }, [artists, characters, series, metaTags, tags])
 
     useEffect(() => {
-        if (artistsActive || charactersActive || seriesActive || tagActive) {
+        if (artistsActive || charactersActive || seriesActive || metaActive || tagActive) {
             const tagX = posX
             const tagY = posY
             setTagX(tagX)
             setTagY(tagY)
         }
-    }, [artistsActive, charactersActive, seriesActive, tagActive])
+    }, [artistsActive, charactersActive, seriesActive, metaActive, tagActive])
 
     const handleArtistClick = (tag: string) => {
         setArtists((prev: string) => {

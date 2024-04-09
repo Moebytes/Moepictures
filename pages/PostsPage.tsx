@@ -10,7 +10,7 @@ import PageDialog from "../dialogs/PageDialog"
 import DragAndDrop from "../components/DragAndDrop"
 import ToolTip from "../components/ToolTip"
 import TagBanner from "../components/TagBanner"
-import TagHover from "../components/TagHover"
+import BulkQuickEditDialog from "../dialogs/BulkQuickEditDialog"
 import {HideNavbarContext, HideSidebarContext, SquareContext, RelativeContext, HideTitlebarContext, 
 HeaderTextContext, SidebarTextContext, MobileContext, MobileScrollingContext} from "../Context"
 
@@ -94,6 +94,7 @@ const PostsPage: React.FunctionComponent = (props) => {
     return (
         <>
         <DragAndDrop/>
+        <BulkQuickEditDialog/>
         <PageDialog/>
         <DownloadDialog/>
         <TitleBar reset={true}/>

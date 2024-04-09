@@ -27,10 +27,10 @@ const NewTags: React.FunctionComponent<Props> = (props) => {
     }, [rawNewTags])
 
     const updateRawNewTags = async () => {
-        const tagList = await functions.tagsCache()
+        const tagMap = await functions.tagsCache()
         let notExists = [] as any
         for (let i = 0; i < props.post.tags.length; i++) {
-            const exists = tagList.find((t: any) => t.tag === props.post.tags[i])
+            const exists = tagMap[props.post.tags[i]]
             if (!exists) notExists.push(props.post.tags[i])
         }
         setRawNewTags(notExists)

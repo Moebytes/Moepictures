@@ -263,7 +263,7 @@ const PostRoutes = (app: Express) => {
         }
     })
 
-    app.put("/api/post/quickedit", postUpdateLimiter, async (req: Request, res: Response, next: NextFunction) => {
+    app.put("/api/post/quickedit", postLimiter, async (req: Request, res: Response, next: NextFunction) => {
         try {
             if (!serverFunctions.validateCSRF(req)) return res.status(400).send("Bad CSRF token")
             const postID = Number(req.body.postID)
@@ -276,6 +276,7 @@ const PostRoutes = (app: Express) => {
             let series = req.body.series
             let tags = req.body.tags
             let reason = req.body.reason
+            let silent = req.body.silent
     
             if (Number.isNaN(postID)) return res.status(400).send("Bad postID")
             if (!req.session.username) return res.status(401).send("Unauthorized")
@@ -369,6 +370,9 @@ const PostRoutes = (app: Express) => {
                 await sql.bulkInsertTags(bulkTagUpdate, true)
                 await sql.insertTagMap(postID, tagMap)
             }
+            if (req.session.role === "admin" || req.session.role === "mod") {
+                if (silent) return res.status(200).send("Success")
+            }
 
             const postHistory = await sql.postHistory(postID)
             if (!postHistory.length) {
@@ -411,7 +415,7 @@ const PostRoutes = (app: Express) => {
           }
     })
 
-    app.put("/api/post/quickedit/unverified", postUpdateLimiter, async (req: Request, res: Response, next: NextFunction) => {
+    app.put("/api/post/quickedit/unverified", postLimiter, async (req: Request, res: Response, next: NextFunction) => {
         try {
             if (!serverFunctions.validateCSRF(req)) return res.status(400).send("Bad CSRF token")
             let postID = Number(req.body.postID)

@@ -37,6 +37,7 @@ const darkColorList = {
     "--drop-color2": "rgba(86, 26, 226, 0.9)",
     "--bubbleBG": "rgba(89, 43, 255, 0.8)",
     "--binary": "#000000",
+    "--selectBorder": "#6710e6"
 }
 
 const lightColorList = {
@@ -66,6 +67,7 @@ const lightColorList = {
     "--drop-color2": "rgba(158, 124, 252, 0.9)",
     "--bubbleBG": "rgba(202, 171, 255, 0.8)",
     "--binary": "#ffffff",
+    "--selectBorder": "#8373ff"
 }
 
 interface Props {

@@ -1,7 +1,7 @@
 import React, {useContext, useEffect, useRef, useState} from "react"
 import {useHistory} from "react-router-dom"
 import {ThemeContext, SessionContext, EnableDragContext, ToolTipXContext, ToolTipYContext, ToolTipEnabledContext, ToolTipPostContext,
-ToolTipImgContext, DownloadFlagContext, DownloadURLsContext} from "../Context"
+ToolTipImgContext, DownloadFlagContext, DownloadIDsContext, SelectionModeContext} from "../Context"
 import {HashLink as Link} from "react-router-hash-link"
 import functions from "../structures/Functions"
 import "./styles/tooltip.less"
@@ -23,12 +23,13 @@ const ToolTip: React.FunctionComponent = (props) => {
     const {enableDrag, setEnableDrag} = useContext(EnableDragContext)
     const {session, setSession} = useContext(SessionContext)
     const {downloadFlag, setDownloadFlag} = useContext(DownloadFlagContext)
-    const {downloadURLs, setDownloadURLs} = useContext(DownloadURLsContext)
+    const {downloadIDs, setDownloadIDs} = useContext(DownloadIDsContext)
     const {tooltipX, setToolTipX} = useContext(ToolTipXContext)
     const {tooltipY, setToolTipY} = useContext(ToolTipYContext)
     const {tooltipEnabled, setToolTipEnabled} = useContext(ToolTipEnabledContext)
     const {tooltipPost, setToolTipPost} = useContext(ToolTipPostContext)
     const {tooltipImg, setToolTipImg} = useContext(ToolTipImgContext)
+    const {selectionMode, setSelectionMode} = useContext(SelectionModeContext)
     const [tags, setTags] = useState(null) as any
     const [artist, setArtist] = useState(null) as any
     const scrollRef = useRef(null) as any
@@ -91,7 +92,7 @@ const ToolTip: React.FunctionComponent = (props) => {
     }
 
     const download = () => {
-        setDownloadURLs([tooltipImg])
+        setDownloadIDs([tooltipPost.postID])
         setDownloadFlag(true)
     }
 
@@ -123,6 +124,7 @@ const ToolTip: React.FunctionComponent = (props) => {
         navigator.clipboard.writeText(noCommas ? tagArr.join(" ") : tagArr.join(", "))
     }
 
+    if (selectionMode) return null
     if (!artist || !tags || !tooltipPost) return null
 
     return (

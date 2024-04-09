@@ -32,7 +32,7 @@ export const SharpenContext = React.createContext<any>(null)
 export const PixelateContext = React.createContext<any>(null)
 export const PostAmountContext = React.createContext<any>(null)
 export const PostsContext = React.createContext<any>(null)
-export const DownloadURLsContext = React.createContext<any>(null)
+export const DownloadIDsContext = React.createContext<any>(null)
 export const DownloadFlagContext = React.createContext<any>(null)
 export const RelativeContext = React.createContext<any>(null)
 export const ShowDownloadDialogContext = React.createContext<any>(null)
@@ -143,6 +143,10 @@ export const ReportThreadIDContext = React.createContext<any>(null)
 export const BanNameContext = React.createContext<any>(null)
 export const UnbanNameContext = React.createContext<any>(null)
 export const UpdateUserFlagContext = React.createContext<any>(null)
+export const SelectionModeContext = React.createContext<any>(null)
+export const SelectionItemsContext = React.createContext<any>(null)
+export const SelectionPostsContext = React.createContext<any>(null)
+export const ShowBulkQuickEditDialogContext = React.createContext<any>(null)
 
 const Context: React.FunctionComponent = (props) => {
     const [siteHue, setSiteHue] = useState(180)
@@ -168,7 +172,7 @@ const Context: React.FunctionComponent = (props) => {
     const [threadPage, setThreadPage] = useState(1)
     const [showDownloadDialog, setShowDownloadDialog] = useState(false)
     const [postAmount, setPostAmount] = useState(0)
-    const [downloadURLs, setDownloadURLs] = useState([])
+    const [downloadIDs, setDownloadIDs] = useState([])
     const [downloadFlag, setDownloadFlag] = useState(false)
     const [relative, setRelative] = useState(false)
     const [posts, setPosts] = useState([]) as any
@@ -273,10 +277,15 @@ const Context: React.FunctionComponent = (props) => {
     const [banName, setBanName] = useState(null)
     const [unbanName, setUnbanName] = useState(null)
     const [updateUserFlag, setUpdateUserFlag] = useState(false)
-    
+    const [selectionItems, setSelectionItems] = useState(new Set())
+    const [selectionPosts, setSelectionPosts] = useState(new Map())
+    const [showBulkQuickEditDialog, setShowBulkQuickEditDialog] = useState(false)
 
 return (
     <>
+        <SelectionPostsContext.Provider value={{selectionPosts, setSelectionPosts}}>
+        <ShowBulkQuickEditDialogContext.Provider value={{showBulkQuickEditDialog, setShowBulkQuickEditDialog}}>
+        <SelectionItemsContext.Provider value={{selectionItems, setSelectionItems}}>
         <UpdateUserFlagContext.Provider value={{updateUserFlag, setUpdateUserFlag}}>
         <UnbanNameContext.Provider value={{unbanName, setUnbanName}}>
         <BanNameContext.Provider value={{banName, setBanName}}>
@@ -387,7 +396,7 @@ return (
         <UploadDropFilesContext.Provider value={{uploadDropFiles, setUploadDropFiles}}>
         <DisableZoomContext.Provider value={{disableZoom, setDisableZoom}}>
         <RelativeContext.Provider value={{relative, setRelative}}>
-        <DownloadURLsContext.Provider value={{downloadURLs, setDownloadURLs}}>
+        <DownloadIDsContext.Provider value={{downloadIDs, setDownloadIDs}}>
         <DownloadFlagContext.Provider value={{downloadFlag, setDownloadFlag}}>
         <PostsContext.Provider value={{posts, setPosts}}>
         <PostAmountContext.Provider value={{postAmount, setPostAmount}}>
@@ -423,7 +432,7 @@ return (
         </PostAmountContext.Provider>
         </PostsContext.Provider>
         </DownloadFlagContext.Provider>
-        </DownloadURLsContext.Provider>
+        </DownloadIDsContext.Provider>
         </RelativeContext.Provider>
         </DisableZoomContext.Provider>
         </UploadDropFilesContext.Provider>
@@ -534,6 +543,9 @@ return (
         </BanNameContext.Provider>
         </UnbanNameContext.Provider>
         </UpdateUserFlagContext.Provider>
+        </SelectionItemsContext.Provider>
+        </ShowBulkQuickEditDialogContext.Provider>
+        </SelectionPostsContext.Provider>
     </>
     )
 }

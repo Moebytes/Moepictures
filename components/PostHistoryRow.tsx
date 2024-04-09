@@ -136,10 +136,10 @@ const PostHistoryRow: React.FunctionComponent<Props> = (props) => {
     const parseNewTags = async () => {
         const tags = props.postHistory.tags
         if (!tags?.[0]) return []
-        const tagList = await functions.tagsCache()
+        const tagMap = await functions.tagsCache()
         let notExists = [] as any
         for (let i = 0; i < tags.length; i++) {
-            const exists = tagList.find((t: any) => t.tag === tags[i])
+            const exists = tagMap[tags[i]]
             if (!exists) notExists.push({tag: tags[i], desc: `${functions.toProperCase(tags[i]).replaceAll("-", " ")}.`})
         }
         return notExists

@@ -2,7 +2,7 @@ import React, {useEffect, useState, useContext} from "react"
 import {Switch, Route, Redirect, useHistory, useLocation} from "react-router-dom"
 import Context, {ThemeContext, HideNavbarContext, HideSidebarContext, HideSortbarContext,
 HideTitlebarContext, EnableDragContext, ActiveDropdownContext, FilterDropActiveContext, MobileScrollingContext,
-SidebarHoverContext, SessionContext, SessionFlagContext, UserImgContext, UserImgPostContext, MobileContext} from "./Context"
+SidebarHoverContext, SessionContext, SessionFlagContext, UserImgContext, UserImgPostContext, MobileContext, SelectionModeContext} from "./Context"
 import favicon from "./assets/icons/favicon.png"
 import PostsPage from "./pages/PostsPage"
 import CommentsPage from "./pages/CommentsPage"
@@ -67,6 +67,7 @@ const App: React.FunctionComponent = (props) => {
     const [userImgPost, setUserImgPost] = useState("")
     const [mobile, setMobile] = useState(false)
     const [mobileScrolling, setMobileScrolling] = useState(false)
+    const [selectionMode, setSelectionMode] = useState(false)
 
     const history = useHistory()
     const location = useLocation()
@@ -151,7 +152,7 @@ const App: React.FunctionComponent = (props) => {
 
     useEffect(() => {
         const handleScroll = () => {
-            if (filterDropActive) {
+            if (filterDropActive || selectionMode) {
                 setMobileScrolling(false)
                 return setHideSortbar(false)
             }
@@ -161,7 +162,7 @@ const App: React.FunctionComponent = (props) => {
             return setHideSortbar(true)
         }
         const handleMouseMove = (event: any) => {
-            if (filterDropActive) {
+            if (filterDropActive || selectionMode) {
                 setMobileScrolling(false)
                 return setHideSortbar(false)
             }
@@ -179,7 +180,7 @@ const App: React.FunctionComponent = (props) => {
             window.removeEventListener("scroll", handleScroll)
             window.removeEventListener("mousemove", handleMouseMove)
         }
-    }, [hideTitlebar, activeDropdown, sidebarHover])
+    }, [selectionMode, filterDropActive, hideTitlebar, activeDropdown, sidebarHover])
 
     useEffect(() => {
         if (mobile) return functions.dragScroll(false)
@@ -223,6 +224,7 @@ const App: React.FunctionComponent = (props) => {
 
     return (
         <div className={`app ${!loaded ? "stop-transitions" : ""}`}>
+            <SelectionModeContext.Provider value={{selectionMode, setSelectionMode}}>
             <MobileScrollingContext.Provider value={{mobileScrolling, setMobileScrolling}}>
             <MobileContext.Provider value={{mobile, setMobile}}>
             <UserImgPostContext.Provider value={{userImgPost, setUserImgPost}}>
@@ -299,6 +301,7 @@ const App: React.FunctionComponent = (props) => {
             </UserImgPostContext.Provider>
             </MobileContext.Provider>
             </MobileScrollingContext.Provider>
+            </SelectionModeContext.Provider>
         </div>
     )
 }

@@ -1158,7 +1158,18 @@ export default class Functions {
         return response !== 404
     }
 
-    public static parseTags = async (posts: any, noDefault?: boolean) => {
+    public static parseTagsSingle = async (post: any) => {
+        if (!post.tags) return Functions.parseTags([post])
+        let tagMap = await Functions.tagsCache()
+        let result = [] as any
+        for (let i = 0; i < post.tags.length; i++) {
+            const tag = post.tags[i]
+            if (tagMap[tag]) result.push(tagMap[tag])
+        }
+        return result
+    }
+
+    public static parseTags = async (posts: any) => {
         let cleanPosts = posts.filter((p: any) => !p.fake)
         const postIDs = cleanPosts.map((post: any) => post.postID)
         let result = await axios.post("/api/search/sidebartags", {postIDs}, {withCredentials: true}).then((r) => r.data).catch(() => null)
@@ -1176,14 +1187,14 @@ export default class Functions {
     }
 
     public static tagCategories = async (parsedTags: any[], cache?: boolean) => {
-        let result = cache ? await Functions.tagsCache() : await axios.get("/api/tag/list", {params: {tags: parsedTags.map((t: any) => t.tag)}, withCredentials: true}).then((r) => r.data)
+        let tagMap = cache ? await Functions.tagsCache() : await axios.get("/api/tag/map", {params: {tags: parsedTags.map((t: any) => t.tag)}, withCredentials: true}).then((r) => r.data)
         let artists = [] as any 
         let characters = [] as any 
         let series = [] as any 
         let tags = [] as any
         for (let i = 0; i < parsedTags.length; i++) {
-            const index = result.findIndex((r: any) => parsedTags[i].tag === r.tag)
-            if (index === -1) {
+            const foundTag = tagMap[parsedTags[i].tag]
+            if (!foundTag) {
                 const unverifiedTag = await axios.get("/api/tag/unverified", {params: {tag: parsedTags[i].tag}, withCredentials: true}).then((r) => r.data)
                 if (unverifiedTag) {
                     const obj = {} as any 
@@ -1211,18 +1222,18 @@ export default class Functions {
             const obj = {} as any 
             obj.tag = parsedTags[i].tag 
             obj.count = parsedTags[i].count
-            obj.type = result[index].type
-            obj.image = result[index].image
-            obj.description = result[index].description 
-            obj.pixiv = result[index].pixiv
-            obj.twitter = result[index].twitter
-            obj.website = result[index].website
-            obj.fandom = result[index].fandom
-            if (result[index].type === "artist") {
+            obj.type = foundTag.type
+            obj.image = foundTag.image
+            obj.description = foundTag.description 
+            obj.pixiv = foundTag.pixiv
+            obj.twitter = foundTag.twitter
+            obj.website = foundTag.website
+            obj.fandom = foundTag.fandom
+            if (foundTag.type === "artist") {
                 artists.push(obj)
-            } else if (result[index].type === "character") {
+            } else if (foundTag.type === "character") {
                 characters.push(obj)
-            } else if (result[index].type === "series") {
+            } else if (foundTag.type === "series") {
                 series.push(obj)
             } else {
                 tags.push(obj)
@@ -1236,15 +1247,14 @@ export default class Functions {
         if (cache) {
             return JSON.parse(cache as any)
         } else {
-            let tagList = await axios.get("/api/tag/list", {withCredentials: true}).then((r) => r.data)
-            localforage.setItem("tags", JSON.stringify(tagList))
-            return tagList
+            let tagMap = await axios.get("/api/tag/map", {withCredentials: true}).then((r) => r.data)
+            localforage.setItem("tags", JSON.stringify(tagMap))
+            return tagMap
         }
     }
 
     public static clearCache = () => {
         localforage.removeItem("tags")
-        localforage.removeItem("unverifiedTags")
     }
 
     public static readableFileSize = (bytes: number) => {
@@ -1560,14 +1570,14 @@ export default class Functions {
                     specialFlagsArray[j] = "-"
                     permutations[i][j] = permutations[i][j].replace("-", "")
                 }
-                const exists = savedTags.find((t: any) => t.tag === permutations[i][j])
+                const exists = savedTags[permutations[i][j]]
                 if (exists) matchesArray[i]++
             }
         }
         for (let i = 0; i < permutations.length; i++) {
             for (let j = 0; j < permutations[i].length; j++) {
-                for (let k = 0; k < savedTags.length; k++) {
-                    const exists = savedTags[k].aliases.find((a: any) => a?.alias === permutations[i][j])
+                for (let savedTag of Object.values(savedTags) as any) {
+                    const exists = savedTag.aliases.find((a: any) => a?.alias === permutations[i][j])
                     if (exists) matchesArray[i]++
                 }
             }

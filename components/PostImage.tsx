@@ -1,6 +1,6 @@
 import React, {useContext, useEffect, useRef, useState, useReducer} from "react"
 import {ThemeContext, EnableDragContext, BrightnessContext, ContrastContext, HueContext, SaturationContext, LightnessContext,
-BlurContext, SharpenContext, PixelateContext, DownloadFlagContext, DownloadURLsContext, DisableZoomContext, SpeedContext,
+BlurContext, SharpenContext, PixelateContext, DownloadFlagContext, DownloadIDsContext, DisableZoomContext, SpeedContext,
 ReverseContext, MobileContext, TranslationModeContext, TranslationDrawingEnabledContext, SessionContext, SiteHueContext,
 SiteLightnessContext, SiteSaturationContext} from "../Context"
 import {HashLink as Link} from "react-router-hash-link"
@@ -76,7 +76,7 @@ const PostImage: React.FunctionComponent<Props> = (props) => {
     const {blur, setBlur} = useContext(BlurContext)
     const {sharpen, setSharpen} = useContext(SharpenContext)
     const {downloadFlag, setDownloadFlag} = useContext(DownloadFlagContext)
-    const {downloadURLs, setDownloadURLs} = useContext(DownloadURLsContext)
+    const {downloadIDs, setDownloadIDs} = useContext(DownloadIDsContext)
     const {disableZoom, setDisableZoom} = useContext(DisableZoomContext)
     const {translationMode, setTranslationMode} = useContext(TranslationModeContext)
     const {translationDrawingEnabled, setTranslationDrawingEnabled} = useContext(TranslationDrawingEnabledContext)
@@ -1054,9 +1054,9 @@ const PostImage: React.FunctionComponent<Props> = (props) => {
 
     useEffect(() => {
         if (downloadFlag) {
-            if (downloadURLs.includes(props.img)) {
+            if (downloadIDs.includes(props.post.postID)) {
                 multiRender()
-                setDownloadURLs(downloadURLs.filter((s: string) => s !== props.img))
+                setDownloadIDs(downloadIDs.filter((s: string) => s !== props.post.postID))
                 setDownloadFlag(false)
             }
         }

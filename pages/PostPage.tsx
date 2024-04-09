@@ -27,7 +27,7 @@ import Parent from "../components/Parent"
 import ArtistWorks from "../components/ArtistWorks"
 import Related from "../components/Related"
 import MobileInfo from "../components/MobileInfo"
-import {HideNavbarContext, HideSidebarContext, RelativeContext, DownloadFlagContext, DownloadURLsContext, HideTitlebarContext, MobileContext, ReloadPostFlagContext,
+import {HideNavbarContext, HideSidebarContext, RelativeContext, DownloadFlagContext, DownloadIDsContext, HideTitlebarContext, MobileContext, ReloadPostFlagContext,
 PostsContext, TagsContext, HeaderTextContext, PostFlagContext, RedirectContext, SidebarTextContext, SessionContext, SessionFlagContext, EnableDragContext, TranslationModeContext} from "../Context"
 import axios from "axios"
 import permissions from "../structures/Permissions"
@@ -47,7 +47,7 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
     const {enableDrag, setEnableDrag} = useContext(EnableDragContext)
     const {relative, setRelative} = useContext(RelativeContext)
     const {downloadFlag, setDownloadFlag} = useContext(DownloadFlagContext)
-    const {downloadURLs, setDownloadURLs} = useContext(DownloadURLsContext)
+    const {downloadIDs, setDownloadIDs} = useContext(DownloadIDsContext)
     const {translationMode, setTranslationMode} = useContext(TranslationModeContext)
     const {posts, setPosts} = useContext(PostsContext)
     const {tags, setTags} = useContext(TagsContext)
@@ -266,7 +266,7 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
     }, [postFlag, order])
 
     const download = () => {
-        setDownloadURLs([image])
+        setDownloadIDs([postID])
         setDownloadFlag(true)
     }
 

@@ -1,7 +1,7 @@
 import React, {useEffect, useContext, useState} from "react"
 import {HashLink as Link} from "react-router-hash-link"
 import {HideNavbarContext, HideSidebarContext, ThemeContext, EnableDragContext, ShowDownloadDialogContext, PostAmountContext, 
-PostsContext, SizeTypeContext, DownloadURLsContext, DownloadFlagContext, HideTitlebarContext} from "../Context"
+PostsContext, SizeTypeContext, DownloadIDsContext, DownloadFlagContext, HideTitlebarContext} from "../Context"
 import functions from "../structures/Functions"
 import "./styles/dialog.less"
 import Draggable from "react-draggable"
@@ -16,7 +16,7 @@ const DownloadDialog: React.FunctionComponent = (props) => {
     const {postAmount, setPostAmount} = useContext(PostAmountContext)
     const {posts, setPosts} = useContext(PostsContext)
     const {sizeType, setSizeType} = useContext(SizeTypeContext)
-    const {downloadURLs, setDownloadURLs} = useContext(DownloadURLsContext)
+    const {downloadIDs, setDownloadIDs} = useContext(DownloadIDsContext)
     const {downloadFlag, setDownloadFlag} = useContext(DownloadFlagContext)
     const [offsetField, setOffsetField] = useState("")
     const [amountField, setAmountField] = useState("")
@@ -68,14 +68,13 @@ const DownloadDialog: React.FunctionComponent = (props) => {
         if (start < 0) start = 0
         if (end < 0) end = 0
         const postArray = posts.slice(start, end)
-        const newDownloadURLs = [] as any
+        const newDownloadIDs = [] as any
         for (let i = 0; i < postArray.length; i++) {
             const post = postArray[i]
-            const image = post.images[0] 
-            if (!image) continue 
-            newDownloadURLs.push(functions.getThumbnailLink(image.type, post.postID, image.order, image.filename, sizeType))
+            if (!post) continue 
+            newDownloadIDs.push(post.postID)
         }
-        setDownloadURLs(newDownloadURLs)
+        setDownloadIDs(newDownloadIDs)
         setDownloadFlag(true)
     }
 
