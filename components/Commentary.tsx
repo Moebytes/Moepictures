@@ -48,6 +48,18 @@ const Commentary: React.FunctionComponent<Props> = (props) => {
         }
     }, [showTranslated])
 
+    const parseText = () => {
+        const parts = text.split(/(https?:\/\/[^\s]+)/g)
+        const elements = parts.map((part, index) => {
+            if (part.match(/(https?:\/\/[^\s]+)/g)) {
+                return (<a key={index} href={part} target="_blank" rel="noopener">{part}</a>)
+            } else {
+                return <span key={index}>{part}</span>
+            }
+        })
+        return elements
+    }
+
     return (
         <div className="commentary">
             <div className="commentary-title-container">
@@ -56,7 +68,7 @@ const Commentary: React.FunctionComponent<Props> = (props) => {
             </div>
             <div className="commentary-container" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                 <span className="commentary-text">
-                    {text}   
+                    {parseText()}   
                 </span>
             </div>
         </div>

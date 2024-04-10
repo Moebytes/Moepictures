@@ -120,7 +120,7 @@ const BulkQuickEditDialog: React.FunctionComponent = (props) => {
         await Promise.all(promiseArray)
         for (let i = 0; i < promiseArray.length; i++) {
             const data = await promiseArray[i]
-            await axios.put("/api/post/quickedit", data, {headers: {"x-csrf-token": functions.getCSRFToken()}, withCredentials: true})
+            axios.put("/api/post/quickedit", data, {headers: {"x-csrf-token": functions.getCSRFToken()}, withCredentials: true})
         }
         setShowBulkQuickEditDialog(false)
         setSelectionMode(false)
@@ -134,10 +134,6 @@ const BulkQuickEditDialog: React.FunctionComponent = (props) => {
             bulkQuickEdit()
         } else {
             setShowBulkQuickEditDialog(false)
-            setSelectionMode(false)
-            setTimeout(() => {
-                setSelectionMode(true)
-            }, 200)
         }
     }
 

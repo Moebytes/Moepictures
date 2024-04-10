@@ -474,9 +474,9 @@ const GridImage = forwardRef<Ref, Props>((props, componentRef) => {
     useEffect(() => {
         if (!containerRef.current) return
         if (imageLoaded) {
-            containerRef.current.style.border = getBorder()
+            containerRef.current.style.boxShadow = getBorder()
         } else {
-            containerRef.current.style.border = "none"
+            containerRef.current.style.boxShadow = "none"
         }
     }, [imageLoaded, sizeType, selected])
 
@@ -794,15 +794,15 @@ const GridImage = forwardRef<Ref, Props>((props, componentRef) => {
     const getBorder = () => {
         if (sizeType === "tiny" || sizeType === "small") {
             if (selected) {
-                return "2px solid var(--selectBorder)"
+                return "0px 0px 0px 2px var(--selectBorder)"
             } else {
-                return "1px solid var(--imageBorder)"
+                return "0px 0px 0px 1px var(--imageBorder)"
             }
         } else {
             if (selected) {
-                return "4px solid var(--selectBorder)"
+                return "0px 0px 0px 4px var(--selectBorder)"
             } else {
-                return "2px solid var(--imageBorder)"
+                return "0px 0px 0px 2px var(--imageBorder)"
             }
         }
     }

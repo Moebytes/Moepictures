@@ -718,12 +718,12 @@ const SortBar: React.FunctionComponent = (props) => {
                     {permissions.isElevated(session) && selectionMode ? 
                     <div className="sortbar-item" onClick={bulkQuickEdit}>
                         <img className="sortbar-img" src={quickEdit} style={{filter: getFilter()}}/>
-                        {/* <span className="sortbar-text">Quick Edit</span> */}
+                        <span className="sortbar-text">Quick Edit</span>
                     </div> : null}
                     {session.username && selectionMode ? 
                     <div className="sortbar-item" onClick={bulkFavorite}>
                         <img className="sortbar-img" src={star} style={{filter: getFilter()}}/>
-                        {/* <span className="sortbar-text">Favorite</span> */}
+                        <span className="sortbar-text">Favorite</span>
                     </div> : null}
                     {session.username ? 
                     <div className="sortbar-item" onClick={() => setSelectionMode((prev: boolean) => !prev)}>
