@@ -400,6 +400,8 @@ const BulkUploadPage: React.FunctionComponent = (props) => {
             const sourceData = await sourceLookup(current, restrict)
             const tagData = await tagLookup(current, type, style, sourceData.danbooruLink)
 
+            let dataArtists = sourceData.artists?.[0]?.tag ? sourceData.artists : tagData.artists
+
             const data = {
                 images: [current],
                 type: tagData.type,
@@ -417,7 +419,7 @@ const BulkUploadPage: React.FunctionComponent = (props) => {
                     bookmarks: sourceData.source.bookmarks,
                     mirrors: sourceData.source.mirrors
                 },
-                artists: sourceData.artists,
+                artists: dataArtists,
                 characters: tagData.characters,
                 series: tagData.series,
                 newTags: tagData.newTags,
@@ -553,6 +555,7 @@ const BulkUploadPage: React.FunctionComponent = (props) => {
                 console.log(e)
             }
             mirrors = await booruLinks(Number(pixivID))
+            mirrors = mirrors?.length ? mirrors.join("\n") : ""
             return {
                 restrict,
                 artists,
@@ -683,6 +686,7 @@ const BulkUploadPage: React.FunctionComponent = (props) => {
                 }
             }
             mirrors = functions.removeItem(mirrors, link)
+            mirrors = mirrors?.length ? mirrors.join("\n") : ""
             return {
                 restrict,
                 artists,
@@ -706,6 +710,7 @@ const BulkUploadPage: React.FunctionComponent = (props) => {
         let tagArr = [] as any
         let blockedTags = functions.blockedTags()
         let tagReplaceMap = functions.tagReplaceMap()
+        let artists = [{}] as any
         let characters = [{}] as any
         let series = [{}] as any
         let tags = [] as any
@@ -716,6 +721,8 @@ const BulkUploadPage: React.FunctionComponent = (props) => {
             const json = await axios.get(danbooruLink).then((r) => r.data)
             tagArr = json.tag_string_general.split(" ").map((tag: string) => tag.replaceAll("_", "-"))
             tagArr.push("autotags")
+            tagArr.push("upscaled")
+            let artistStrArr = json.tag_string_artist.split(" ").map((tag: string) => tag.replaceAll("_", "-"))
             let charStrArr = json.tag_string_character.split(" ").map((tag: string) => tag.replaceAll("_", "-"))
             let seriesStrArr = json.tag_string_copyright.split(" ").map((tag: string) => tag.replaceAll("_", "-"))
             if (seriesStrArr?.includes("original")) {
@@ -741,8 +748,14 @@ const BulkUploadPage: React.FunctionComponent = (props) => {
                 tagArr = tagArr.filter((tag: string) => !tag.includes(blockedTags[i]))
             }
 
+            artistStrArr = artistStrArr.map((tag: string) => functions.cleanTag(tag))
             charStrArr = charStrArr.map((tag: string) => functions.cleanTag(tag))
             seriesStrArr = seriesStrArr.map((tag: string) => functions.cleanTag(tag))
+
+            for (let i = 0; i < artistStrArr.length; i++) {
+                artists[artists.length - 1].tag = artistStrArr[i]
+                artists.push({})
+            }
 
             for (let i = 0; i < charStrArr.length; i++) {
                 characters[characters.length - 1].tag = charStrArr[i]
@@ -799,6 +812,7 @@ const BulkUploadPage: React.FunctionComponent = (props) => {
             let tagMapArr = tagArr.filter((tag: string) => !tag.includes("("))
             tagMapArr.push("autotags")
             tagMapArr.push("needscheck")
+            tagMapArr.push("upscaled")
             let charStrArr = tagArr.filter((tag: string) => tag.includes("("))
 
             let seriesStrArr = [] as string[]
@@ -819,7 +833,7 @@ const BulkUploadPage: React.FunctionComponent = (props) => {
                 series[series.length - 1].tag = seriesStrArr[i]
                 series.push({})
             }
-            tags = functions.cleanHTML(tagArr.join(" ")).split(/[\n\r\s]+/g)
+            tags = functions.cleanHTML(tagMapArr.join(" ")).split(/[\n\r\s]+/g)
             let notExists = [] as any
             for (let i = 0; i < tags.length; i++) {
                 const exists = tagMap[tags[i]]
@@ -834,6 +848,7 @@ const BulkUploadPage: React.FunctionComponent = (props) => {
         return {
             style,
             type,
+            artists,
             characters,
             series,
             tags,
