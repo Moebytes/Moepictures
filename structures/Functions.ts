@@ -1946,4 +1946,8 @@ export default class Functions {
         if (metaTags.includes(tag)) return "meta"
         return "tag"
     }
+
+    public static fixTwitterTag = (tag: string) => {
+        return tag.toLowerCase().replaceAll("_", "-").replace(/^[-]+/, "").replace(/[-]+$/, "")
+    }
 }

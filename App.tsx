@@ -43,6 +43,7 @@ import SetAvatarPage from "./pages/SetAvatarPage"
 import TranslationHistoryPage from "./pages/TranslationHistoryPage"
 import ForumPage from "./pages/ForumPage"
 import ForumThreadPage from "./pages/ForumThreadPage"
+import BulkUploadPage from "./pages/BulkUploadPage"
 import axios from "axios"
 import "./index.less"
 
@@ -245,6 +246,7 @@ const App: React.FunctionComponent = (props) => {
                         <Route exact path={["/", "/posts", "/home"]}><PostsPage/></Route>
                         <Route exact path="/profile"><UserProfilePage/></Route>
                         <Route exact path="/upload"><UploadPage/></Route>
+                        <Route exact path="/bulk-upload"><BulkUploadPage/></Route>
                         <Route exact path="/tags"><TagsPage/></Route>
                         <Route exact path="/series"><SeriesPage/></Route>
                         <Route exact path="/characters"><CharactersPage/></Route>

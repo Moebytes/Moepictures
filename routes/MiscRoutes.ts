@@ -78,8 +78,7 @@ const MiscRoutes = (app: Express) => {
             } else {
                 res.status(400).send("Bad captchaResponse") 
             }
-        } catch (e) {
-            console.log(e)
+        } catch {
             res.status(400).send("Bad request") 
         }
     })
@@ -100,8 +99,7 @@ const MiscRoutes = (app: Express) => {
             result = result.sort((a: any, b: any) => b.header.similarity - a.header.similarity)
             result = result.filter((r: any) => Number(r.header.similarity) > 70)
             res.status(200).json(result)
-        } catch (e) {
-            console.log(e)
+        } catch {
             res.status(400).end()
         }
     })
@@ -123,7 +121,6 @@ const MiscRoutes = (app: Express) => {
                 illust.user.twitter = twitter
                 res.status(200).json(illust)
             } catch (e) {
-            console.log(e)
                 res.status(400).end()
             }
         } else {
@@ -141,7 +138,6 @@ const MiscRoutes = (app: Express) => {
                 const deviation = await deviantart.extendRSSDeviations([deviationRSS]).then((r) => r[0])
                 res.status(200).json(deviation)
             } catch (e) {
-            console.log(e)
                 res.status(400).end()
             }
         } else {
@@ -155,8 +151,7 @@ const MiscRoutes = (app: Express) => {
         try {
             const response = await axios.get(link, {responseType: "arraybuffer", headers: {Referer: "https://www.pixiv.net/"}}).then((r) => r.data)
             res.status(200).send(response)
-        } catch (e) {
-            console.log(e)
+        } catch {
             res.status(400).end()
         }
     })
@@ -167,8 +162,7 @@ const MiscRoutes = (app: Express) => {
         try {
             const response = await axios.head(link).then((r) => r.request.res.responseUrl)
             res.status(200).send(response)
-        } catch (e) {
-            console.log(e)
+        } catch {
             res.status(400).end()
         }
     })
@@ -178,8 +172,7 @@ const MiscRoutes = (app: Express) => {
             try {
                 const translated = await googleTranslate(text, {from: "ja", to:"en"})
                 return translated.text
-            } catch (e) {
-            console.log(e)
+            } catch {
                 return text
             }
         }

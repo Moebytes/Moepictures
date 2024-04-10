@@ -993,7 +993,7 @@ const EditPostPage: React.FunctionComponent<Props> = (props) => {
                             setRestrict("safe")
                         }
                         const pfp = await functions.proxyImage(illust.user.profile_image_urls.medium)
-                        artists[artists.length - 1].tag = illust.user.twitter ? illust.user.twitter.replaceAll("_", "-") : await axios.post("/api/misc/romajinize", [artist], {withCredentials: true}).then((r) => r.data[0])
+                        artists[artists.length - 1].tag = illust.user.twitter ? functions.fixTwitterTag(illust.user.twitter) : await axios.post("/api/misc/romajinize", [artist], {withCredentials: true}).then((r) => r.data[0])
                         await uploadTagImg(pfp, "artist", artists.length - 1)
                         artists.push({})
                         artistInputRefs.push(React.createRef())
