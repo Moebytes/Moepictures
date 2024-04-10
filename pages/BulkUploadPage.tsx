@@ -451,11 +451,9 @@ const BulkUploadPage: React.FunctionComponent = (props) => {
                 data.series = newSeries
             }
             try {
-                console.log(data)
                 setProgress(Math.floor((100/submitData.length) * i))
                 setProgressText(`${i}/${submitData.length}`)
-                await functions.timeout(3000)
-                //await axios.post("/api/post/upload", data, {headers: {"x-csrf-token": functions.getCSRFToken()}, withCredentials: true}).then((r) => r.data)
+                await axios.post("/api/post/upload", data, {headers: {"x-csrf-token": functions.getCSRFToken()}, withCredentials: true}).then((r) => r.data)
             } catch (e) {
                 console.log(e)
                 setSubmitError(true)
