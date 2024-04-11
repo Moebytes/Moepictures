@@ -453,8 +453,8 @@ const BulkUploadPage: React.FunctionComponent = (props) => {
                 data.series = newSeries
             }
             try {
-                setProgress(Math.floor((100/submitData.length) * i))
-                setProgressText(`${i}/${submitData.length}`)
+                setProgress(Math.floor((100/submitData.length) * (i+1)))
+                setProgressText(`${i+1}/${submitData.length}`)
                 await axios.post("/api/post/upload", data, {headers: {"x-csrf-token": functions.getCSRFToken()}, withCredentials: true}).then((r) => r.data)
             } catch (e) {
                 console.log(e)
@@ -468,42 +468,6 @@ const BulkUploadPage: React.FunctionComponent = (props) => {
         setSubmitted(true)
         setProgress(0)
         setProgressText("")
-    }
-
-    const booruLinks = async (pixivID: number) => {
-        const getDanbooruLink = async (pixivID: number) => {
-            const req = await axios.get(`https://danbooru.donmai.us/posts.json?tags=pixiv_id%3A${pixivID}&z=5`).then((r) => r.data)
-            if (!req[0]) return {danbooru: "", url: ""}
-            return {danbooru: `https://danbooru.donmai.us/posts/${req[0].id}`, md5: req[0].md5}
-        }
-        const getGelbooruLink = async (md5: string) => {
-            const req = await axios.get(`https://gelbooru.com/index.php?page=dapi&s=post&q=index&json=1&tags=md5%3a${md5}`).then((r) => r.data)
-            return req.post?.[0] ? `https://gelbooru.com/index.php?page=post&s=view&id=${req.post[0].id}` : ""
-        }
-        const getSafebooruLink = async (md5: string) => {
-            const req = await axios.get(`https://safebooru.org/index.php?page=dapi&s=post&q=index&json=1&tags=md5%3a${md5}`).then((r) => r.data)
-            return req[0] ? `https://safebooru.org/index.php?page=post&s=view&id=${req[0].id}` : ""
-        }
-        const getYandereLink = async (md5: string) => {
-            const req = await axios.get(`https://yande.re/post.json?tags=md5%3A${md5}`).then((r) => r.data)
-            return req[0] ? `https://yande.re/post/show/${req[0].id}` : ""
-        }
-        const getKonachanLink = async (md5: string) => {
-            const req = await axios.get(`https://konachan.net/post.json?tags=md5%3A${md5}`).then((r) => r.data)
-            return req[0] ? `https://konachan.net/post/show/${req[0].id}` : ""
-        }
-        const {danbooru, md5} = await getDanbooruLink(pixivID).catch(() => ({danbooru: "", md5: ""}))
-        const gelbooru = await getGelbooruLink(md5).catch(() => "")
-        const safebooru = await getSafebooruLink(md5).catch(() => "")
-        const yandere = await getYandereLink(md5).catch(() => "")
-        const konachan = await getKonachanLink(md5).catch(() => "")
-        let mirrors = [] as string[]
-        if (danbooru) mirrors.push(danbooru)
-        if (gelbooru) mirrors.push(gelbooru)
-        if (safebooru) mirrors.push(safebooru)
-        if (yandere) mirrors.push(yandere)
-        if (konachan) mirrors.push(konachan)
-        return mirrors
     }
 
     const sourceLookup = async (current: any, restrict: string) => {
@@ -525,9 +489,9 @@ const BulkUploadPage: React.FunctionComponent = (props) => {
         let mirrors = [] as any
         let artists = [{}] as any
 
-        let pixivID = path.basename(current.name, path.extname(current.name)).trim()
-        if (/^\d+$/.test(pixivID)) {
-            // Assume pixiv ID 
+        let basename = path.basename(current.name, path.extname(current.name)).trim()
+        if (/^\d+(?=$|_p)/.test(basename)) {
+            const pixivID = basename.match(/^\d+(?=$|_p)/gm)?.[0] ?? ""
             link = `https://www.pixiv.net/en/artworks/${pixivID}`
             const result = await axios.get(`https://danbooru.donmai.us/posts.json?tags=pixiv_id%3A${pixivID}`).then((r) => r.data)
             if (result.length) danbooruLink = `https://danbooru.donmai.us/posts/${result[0].id}.json`
@@ -554,7 +518,7 @@ const BulkUploadPage: React.FunctionComponent = (props) => {
             } catch (e) {
                 console.log(e)
             }
-            mirrors = await booruLinks(Number(pixivID))
+            mirrors = await axios.post("/api/misc/boorulinks", {pixivID}, {withCredentials: true}).then((r) => r.data)
             mirrors = mirrors?.length ? mirrors.join("\n") : ""
             return {
                 restrict,

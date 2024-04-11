@@ -195,6 +195,48 @@ const MiscRoutes = (app: Express) => {
         res.status(200).send(romajinized)
     })
 
+    app.post("/api/misc/boorulinks", miscLimiter, async (req: Request, res: Response, next: NextFunction) => {
+        const {pixivID} = req.body
+        if (!pixivID) return res.status(400).send("No pixivID")
+        const getDanbooruLink = async (pixivID: number) => {
+            const req = await axios.get(`https://danbooru.donmai.us/posts.json?tags=pixiv_id%3A${pixivID}&z=5`).then((r) => r.data)
+            if (!req[0]) return {danbooru: "", url: ""}
+            return {danbooru: `https://danbooru.donmai.us/posts/${req[0].id}`, md5: req[0].md5}
+        }
+        const getGelbooruLink = async (md5: string) => {
+            const req = await axios.get(`https://gelbooru.com/index.php?page=dapi&s=post&q=index&json=1&tags=md5%3a${md5}`).then((r) => r.data)
+            return req.post?.[0] ? `https://gelbooru.com/index.php?page=post&s=view&id=${req.post[0].id}` : ""
+        }
+        const getSafebooruLink = async (md5: string) => {
+            const req = await axios.get(`https://safebooru.org/index.php?page=dapi&s=post&q=index&json=1&tags=md5%3a${md5}`).then((r) => r.data)
+            return req[0] ? `https://safebooru.org/index.php?page=post&s=view&id=${req[0].id}` : ""
+        }
+        const getYandereLink = async (md5: string) => {
+            const req = await axios.get(`https://yande.re/post.json?tags=md5%3A${md5}`).then((r) => r.data)
+            return req[0] ? `https://yande.re/post/show/${req[0].id}` : ""
+        }
+        const getKonachanLink = async (md5: string) => {
+            const req = await axios.get(`https://konachan.net/post.json?tags=md5%3A${md5}`).then((r) => r.data)
+            return req[0] ? `https://konachan.net/post/show/${req[0].id}` : ""
+        }
+        try {
+            const {danbooru, md5} = await getDanbooruLink(Number(pixivID)).catch(() => ({danbooru: "", md5: ""}))
+            const gelbooru = await getGelbooruLink(md5).catch(() => "")
+            const safebooru = await getSafebooruLink(md5).catch(() => "")
+            const yandere = await getYandereLink(md5).catch(() => "")
+            const konachan = await getKonachanLink(md5).catch(() => "")
+            let mirrors = [] as string[]
+            if (danbooru) mirrors.push(danbooru)
+            if (gelbooru) mirrors.push(gelbooru)
+            if (safebooru) mirrors.push(safebooru)
+            if (yandere) mirrors.push(yandere)
+            if (konachan) mirrors.push(konachan)
+            res.status(200).json(mirrors)
+        } catch {
+            res.status(400).end()
+        }
+    })
+
     app.post("/api/misc/contact", contactLimiter, async (req: Request, res: Response, next: NextFunction) => {
         try {
             const {email, subject, message, files} = req.body 

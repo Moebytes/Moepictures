@@ -186,6 +186,11 @@ const UserProfilePage: React.FunctionComponent = (props) => {
         setSessionFlag(true)
     }
 
+    const showTooltips = async () => {
+        await axios.post("/api/user/showtooltips", null, {headers: {"x-csrf-token": functions.getCSRFToken()}, withCredentials: true})
+        setSessionFlag(true)
+    }
+
     const changeBio = async () => {
         const badBio = functions.validateBio(bio)
         if (badBio) {
@@ -322,6 +327,9 @@ const UserProfilePage: React.FunctionComponent = (props) => {
                     </div>
                     <div className="userprofile-row">
                         <span className="userprofile-text">Show Related: <span className="userprofile-text-action" onClick={showRelated}>{session.showRelated ? "Yes" : "No"}</span></span>
+                    </div>
+                    <div className="userprofile-row">
+                        <span className="userprofile-text">Show Tooltips: <span className="userprofile-text-action" onClick={showTooltips}>{session.showTooltips ? "Yes" : "No"}</span></span>
                     </div>
                     <Link to="/change-username" className="userprofile-row">
                         <span className="userprofile-link">Change Username</span>

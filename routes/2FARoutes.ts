@@ -111,6 +111,8 @@ const $2FARoutes = (app: Express) => {
                 const {secret, token} = serverFunctions.generateCSRF()
                 req.session.csrfSecret = secret
                 req.session.csrfToken = token
+                req.session.showRelated = user.showRelated
+                req.session.showTooltips = user.showTooltips
                 res.status(200).send("Success")
             } else {
                 res.status(400).send("Bad token")

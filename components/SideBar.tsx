@@ -61,9 +61,9 @@ interface Props {
 }
 
 let timeout = null as any
-const maxTags1 = 26
-const maxTags2 = 29
-const maxTags3 = 31
+const maxTags1 = 23
+const maxTags2 = 26
+const maxTags3 = 27
 
 const SideBar: React.FunctionComponent<Props> = (props) => {
     const [ignored, forceUpdate] = useReducer(x => x + 1, 0)

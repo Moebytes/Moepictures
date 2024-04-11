@@ -104,6 +104,10 @@ const ToolTip: React.FunctionComponent = (props) => {
         let jsx = [] as any
         if (tooltipPost.link?.includes("pixiv")) jsx.push(<img className="tooltip-img" style={{cursor: "pointer"}} src={pixiv} onClick={() => window.open(tooltipPost.link, "_blank")}/>)
         if (tooltipPost.link?.includes("twitter") || tooltipPost.link?.includes("x.com")) jsx.push(<img className="tooltip-img" style={{cursor: "pointer"}} src={twitter} onClick={() => window.open(tooltipPost.link, "_blank")}/>)
+        if (tooltipPost.link?.includes("deviantart")) jsx.push(<img className="tooltip-img" style={{cursor: "pointer"}} src={deviantart} onClick={() => window.open(tooltipPost.link, "_blank")}/>)
+        if (tooltipPost.link?.includes("artstation")) jsx.push(<img className="tooltip-img" style={{cursor: "pointer"}} src={artstation} onClick={() => window.open(tooltipPost.link, "_blank")}/>)
+        if (tooltipPost.link?.includes("danbooru")) jsx.push(<img className="tooltip-img" style={{cursor: "pointer"}} src={danbooru} onClick={() => window.open(tooltipPost.link, "_blank")}/>)
+        if (tooltipPost.link?.includes("yande.re")) jsx.push(<img className="tooltip-img" style={{cursor: "pointer"}} src={yandere} onClick={() => window.open(tooltipPost.link, "_blank")}/>)
         if (tooltipPost.mirrors) {
             if (tooltipPost.mirrors.pixiv) jsx.push(<img className="tooltip-img" style={{cursor: "pointer"}} src={pixiv} onClick={() => window.open(tooltipPost.mirrors.pixiv, "_blank")}/>)
             if (tooltipPost.mirrors.twitter) jsx.push(<img className="tooltip-img" style={{cursor: "pointer"}} src={twitter} onClick={() => window.open(tooltipPost.mirrors.twitter, "_blank")}/>)
@@ -126,6 +130,7 @@ const ToolTip: React.FunctionComponent = (props) => {
 
     if (selectionMode) return null
     if (!artist || !tags || !tooltipPost) return null
+    if (session?.username && !session?.showTooltips) return null
 
     return (
         <div className="tooltip" style={getStyle()} onMouseEnter={() => setToolTipEnabled(true)} onMouseLeave={() => setToolTipEnabled(false)}>

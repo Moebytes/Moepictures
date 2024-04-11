@@ -85,6 +85,7 @@ const UserRoutes = (app: Express) => {
                 await sql.insertUser(username, email)
                 await sql.updateUser(username, "joinDate", new Date().toISOString())
                 await sql.updateUser(username, "publicFavorites", true)
+                await sql.updateUser(username, "showTooltips", true)
                 await sql.updateUser(username, "emailVerified", false)
                 await sql.updateUser(username, "$2fa", false)
                 await sql.updateUser(username, "bio", "This user has not written anything.")
@@ -144,6 +145,8 @@ const UserRoutes = (app: Express) => {
                 const {secret, token} = serverFunctions.generateCSRF()
                 req.session.csrfSecret = secret
                 req.session.csrfToken = token
+                req.session.showRelated = user.showRelated
+                req.session.showTooltips = user.showTooltips
                 return res.status(200).send("Success")
             } else {
                 return res.status(400).send("Bad request")
@@ -180,6 +183,8 @@ const UserRoutes = (app: Express) => {
                 req.session.joinDate = user.joinDate
                 req.session.publicFavorites = user.publicFavorites
                 req.session.role = user.role
+                req.session.showRelated = user.showRelated
+                req.session.showTooltips = user.showTooltips
             }
             const session = structuredClone(req.session)
             delete session.captchaAnswer
@@ -252,6 +257,22 @@ const UserRoutes = (app: Express) => {
             const newRelated = !Boolean(user.showRelated)
             req.session.showRelated = newRelated 
             await sql.updateUser(req.session.username, "showRelated", newRelated)
+            res.status(200).send("Success")
+        } catch (e) {
+            console.log(e)
+            res.status(400).send("Bad request")
+        }
+    })
+
+    app.post("/api/user/showtooltips", sessionLimiter, async (req: Request, res: Response) => {
+        try {
+            if (!serverFunctions.validateCSRF(req)) return res.status(400).send("Bad CSRF token")
+            if (!req.session.username) return res.status(401).send("Unauthorized")
+            const user = await sql.user(req.session.username)
+            if (!user) return res.status(400).send("Bad username")
+            const newTooltips = !Boolean(user.showTooltips)
+            req.session.showTooltips = newTooltips 
+            await sql.updateUser(req.session.username, "showTooltips", newTooltips)
             res.status(200).send("Success")
         } catch (e) {
             console.log(e)

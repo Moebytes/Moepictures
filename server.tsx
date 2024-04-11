@@ -56,6 +56,7 @@ declare module "express-session" {
       emailVerified: boolean
       publicFavorites: boolean
       showRelated: boolean
+      showTooltips: boolean
       $2fa: boolean
       ip: string
       role: string
