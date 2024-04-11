@@ -881,7 +881,7 @@ export default class SQLQuery {
     return result[0]
   }
 
-  public static random = async (type: string, restrict: string, style: string, offset?: string, withTags?: boolean) => {
+  public static random = async (tags: string[], type: string, restrict: string, style: string, offset?: string, withTags?: boolean) => {
     let typeQuery = ""
     if (type === "image") typeQuery = `posts.type = 'image'`
     if (type === "animation") typeQuery = `posts.type = 'animation'`
@@ -899,28 +899,62 @@ export default class SQLQuery {
     if (style === "3d") styleQuery = `lower(posts.style) = '3d'`
     if (style === "pixel") styleQuery = `posts.style = 'pixel'`
     if (style === "chibi") styleQuery = `posts.style = 'chibi'`
+    let ANDtags = [] as string[]
+    let ORtags = [] as string[]
+    let NOTtags = [] as string[]
+    tags.forEach((tag) => {
+      if (tag.startsWith("+")) {
+        ORtags.push(tag.replace("+", ""))
+      } else if (tag.startsWith("-")) {
+        NOTtags.push(tag.replace("-", ""))
+      } else {
+        ANDtags.push(tag)
+      }
+    })
+    let i = 1
+    let values = [] as any
+    let tagQueryArray = [] as any
+    if (ANDtags.length) {
+      values.push(ANDtags)
+      tagQueryArray.push(`tags @> $${i}`)
+      i++ 
+    }
+    if (ORtags.length) {
+      values.push(ORtags)
+      tagQueryArray.push(`tags && $${i}`)
+      i++ 
+    }
+    if (NOTtags.length) {
+      values.push(NOTtags)
+      tagQueryArray.push(`NOT tags @> $${i}`)
+      i++
+    }
+    if (offset) values.push(offset)
+    let tagQuery = tagQueryArray.length ? "WHERE " + tagQueryArray.join(" AND ") : ""
     const whereQueries = [typeQuery, restrictQuery, styleQuery].filter(Boolean).join(" AND ")
+    let includeTags = withTags || tagQuery
     const query: QueryConfig = {
       text: functions.multiTrim(`
         SELECT *, 
         COUNT(*) OVER() AS "postCount"
         FROM (
-          SELECT posts.*, json_agg(DISTINCT images.*) AS images, ${withTags ? `array_agg(DISTINCT "tag map".tag) AS tags,` : ""}
+          SELECT posts.*, json_agg(DISTINCT images.*) AS images, ${includeTags ? `array_agg(DISTINCT "tag map".tag) AS tags,` : ""}
           COUNT(DISTINCT favorites."favoriteID") AS "favoriteCount",
           ROUND(AVG(DISTINCT cuteness."cuteness")) AS "cutenessAvg"
           FROM posts
           JOIN images ON posts."postID" = images."postID"
-          ${withTags ? `JOIN "tag map" ON posts."postID" = "tag map"."postID"` : ""}
+          ${includeTags ? `JOIN "tag map" ON posts."postID" = "tag map"."postID"` : ""}
           FULL JOIN "favorites" ON posts."postID" = "favorites"."postID"
           FULL JOIN "cuteness" ON posts."postID" = "cuteness"."postID"
           ${whereQueries ? `WHERE ${whereQueries}` : ""}
           GROUP BY posts."postID"
           ORDER BY random()
         ) AS posts
-        LIMIT 100 ${offset ? `OFFSET $1` : ""}
+        ${tagQuery}
+        LIMIT 100 ${offset ? `OFFSET $${i}` : ""}
       `)
     }
-    if (offset) query.values = [offset]
+    if (values?.[0]) query.values = values
     const result = await SQLQuery.run(query)
     return result
   }

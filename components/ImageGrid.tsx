@@ -95,10 +95,9 @@ const ImageGrid: React.FunctionComponent<Props> = (props) => {
         }
     }
 
-    const randomPosts = async () => {
+    const randomPosts = async (query?: string) => {
         setRandomFlag(false)
-        setSearch("")
-        const result = await axios.get("/api/search/random", {params: {type: imageType, restrict: restrictType, style: styleType, limit: 1000}, withCredentials: true}).then((r) => r.data)
+        const result = await axios.get("/api/search/random", {params: {query, type: imageType, restrict: restrictType, style: styleType, limit: 1000}, withCredentials: true}).then((r) => r.data)
         setEnded(false)
         setIndex(0)
         setVisiblePosts([])
@@ -151,13 +150,13 @@ const ImageGrid: React.FunctionComponent<Props> = (props) => {
         clearTimeout(timeout)
         const searchLoop = async () => {
             if (!autoSearch) return
-            await randomPosts()
+            await randomPosts(search)
             timeout = setTimeout(() => {
                 searchLoop()
             }, 3000)
         }
         searchLoop()
-    }, [autoSearch])
+    }, [autoSearch, search])
 
     useEffect(() => {
         window.scrollTo(0, 0)
@@ -209,9 +208,9 @@ const ImageGrid: React.FunctionComponent<Props> = (props) => {
     useEffect(() => {
         if (randomFlag) {
             setPage(1)
-            randomPosts()
+            randomPosts(search)
         }
-    }, [randomFlag])
+    }, [randomFlag, search])
 
     useEffect(() => {
         if (imageSearchFlag) {

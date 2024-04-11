@@ -72,6 +72,7 @@ const SearchRoutes = (app: Express) => {
 
     app.get("/api/search/random", searchLimiter, async (req: Request, res: Response, next: NextFunction) => {
         try {
+            const query = req.query.query as string
             const type = req.query.type as string
             const restrict = req.query.restrict as string
             const style = req.query.style as string
@@ -80,7 +81,15 @@ const SearchRoutes = (app: Express) => {
             if (!functions.validRestrict(restrict, true)) return res.status(400).send("Invalid restrict")
             if (restrict === "explicit") if (req.session.role !== "admin" && req.session.role !== "mod") return res.status(403).end()
             if (!functions.validStyle(style, true)) return res.status(400).send("Invalid style")
-            let result = await sql.random(type, restrict, style, offset)
+            const tags = query.trim().split(/ +/g).filter(Boolean)
+            for (let i = 0; i < tags.length; i++) {
+                const tag = await sql.tag(tags[i])
+                if (!tag) {
+                    const alias = await sql.alias(tags[i])
+                    if (alias) tags[i] = alias.tag
+                }
+            }
+            let result = await sql.random(tags, type, restrict, style, offset)
             result = result.map((p: any) => {
                 if (p.images.length > 1) {
                     p.images = p.images.sort((a: any, b: any) => a.order - b.order)
