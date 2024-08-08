@@ -1,11 +1,8 @@
 # Moebooru.moe
 
-**Update - 3/8/2023**
-I took down the online website because I can't afford the hosting costs. You can still run it locally using your own database and images. 
-
 Moebooru is an image board site for cute anime art, organized by tags.
 
-![Image](https://github.com/Tenpi/Moebooru.moe/blob/main/assets/misc/readme.png?raw=true)
+![Image](https://github.com/Moebits/Moebooru.moe/blob/main/assets/misc/readme.png?raw=true)
 
 ### Searching With Spaces
 
@@ -17,7 +14,7 @@ Moebooru supports multiple images per post, which is great for comics and posts 
 
 ### Image Filters
 
-![Image](https://github.com/Tenpi/Moebooru.moe/blob/main/assets/misc/imagefilters.png?raw=true)
+![Image](https://github.com/Moebits/Moebooru.moe/blob/main/assets/misc/imagefilters.png?raw=true)
 
 You can apply image filters such as brightness, contrast, and hue in realtime. There is also a very fun pixelate filter that 
 can make everything look like a pixel game. When playing audio, the pixelate filter will work as a bitcrusher.
@@ -29,19 +26,19 @@ gifs, reverse playback, and modification of playback speed.
 
 GIF Player:
 
-![Image](https://github.com/Tenpi/Moebooru.moe/blob/main/assets/misc/gifplayer.png?raw=true)
+![Image](https://github.com/Moebits/Moebooru.moe/blob/main/assets/misc/gifplayer.png?raw=true)
 
 Video Player:
 
-![Image](https://github.com/Tenpi/Moebooru.moe/blob/main/assets/misc/videoplayer.png?raw=true)
+![Image](https://github.com/Moebits/Moebooru.moe/blob/main/assets/misc/videoplayer.png?raw=true)
 
 3D Model Player:
 
-![Image](https://github.com/Tenpi/Moebooru.moe/blob/main/assets/misc/3dplayer.png?raw=true)
+![Image](https://github.com/Moebits/Moebooru.moe/blob/main/assets/misc/3dplayer.png?raw=true)
 
 Music Player:
 
-![Image](https://github.com/Tenpi/Moebooru.moe/blob/main/assets/misc/musicplayer.png?raw=true)
+![Image](https://github.com/Moebits/Moebooru.moe/blob/main/assets/misc/musicplayer.png?raw=true)
 
 The video player has some additional controls over the gif player, such as volume and pitch preservement. The 3d model player has 
 controls for wireframe, matcap, shapekeys, and lighting. The music player can playback audio in reverse.
