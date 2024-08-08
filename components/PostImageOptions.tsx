@@ -156,7 +156,7 @@ const PostImageOptions: React.FunctionComponent<Props> = (props) => {
         const rect = filterRef.current?.getBoundingClientRect()
         if (!rect || !bodyRect) return "0px"
         const raw = bodyRect.bottom - rect.bottom
-        let offset = -225
+        let offset = -250
         if (mobile) offset += 25
         return `${raw + offset}px`
     }
