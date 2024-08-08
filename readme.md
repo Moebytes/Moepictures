@@ -5,7 +5,7 @@ I took down the online website because I can't afford the hosting costs. You can
 
 Moebooru is an image board site for cute anime art, organized by tags.
 
-![Image](https://github.com/Moebits/Moebooru.moe/blob/main/assets/misc/readme.png?raw=true)
+<img src="assets/misc/readme.png">
 
 ### Searching With Spaces
 
@@ -17,7 +17,7 @@ Moebooru supports multiple images per post, which is great for comics and posts 
 
 ### Image Filters
 
-![Image](https://github.com/Moebits/Moebooru.moe/blob/main/assets/misc/imagefilters.png?raw=true)
+<img src="assets/misc/imagefilters.png">
 
 You can apply image filters such as brightness, contrast, and hue in realtime. There is also a very fun pixelate filter that 
 can make everything look like a pixel game. When playing audio, the pixelate filter will work as a bitcrusher.
@@ -29,19 +29,19 @@ gifs, reverse playback, and modification of playback speed.
 
 GIF Player:
 
-![Image](https://github.com/Moebits/Moebooru.moe/blob/main/assets/misc/gifplayer.png?raw=true)
+<img src="assets/misc/gifplayer.png">
 
 Video Player:
 
-![Image](https://github.com/Moebits/Moebooru.moe/blob/main/assets/misc/videoplayer.png?raw=true)
+<img src="assets/misc/videoplayer.png">
 
 3D Model Player:
 
-![Image](https://github.com/Moebits/Moebooru.moe/blob/main/assets/misc/3dplayer.png?raw=true)
+<img src="assets/misc/3dplayer.png">
 
 Music Player:
 
-![Image](https://github.com/Moebits/Moebooru.moe/blob/main/assets/misc/musicplayer.png?raw=true)
+<img src="assets/misc/musicplayer.png">
 
 The video player has some additional controls over the gif player, such as volume and pitch preservement. The 3d model player has 
 controls for wireframe, matcap, shapekeys, and lighting. The music player can playback audio in reverse.
