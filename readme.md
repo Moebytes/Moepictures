@@ -1,5 +1,8 @@
 # Moebooru.moe
 
+**Update - 3/8/2023**
+I took down the online website because I can't afford the hosting costs. You can still run it locally using your own database and images. 
+
 Moebooru is an image board site for cute anime art, organized by tags.
 
 ![Image](https://github.com/Moebits/Moebooru.moe/blob/main/assets/misc/readme.png?raw=true)
