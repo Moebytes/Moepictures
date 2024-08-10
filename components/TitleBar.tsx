@@ -136,7 +136,7 @@ const TitleBar: React.FunctionComponent<Props> = (props) => {
                 if (t.startsWith("-")) return `-${t.replaceAll("-", " ").trim()}`
                 return t.replaceAll("-", " ")
             }).join(", "))
-            document.title = `Moebooru: ${text}`
+            document.title = `Moepictures: ${text}`
             setHeaderText(text)
         }
     }, [headerFlag])
@@ -193,11 +193,14 @@ const TitleBar: React.FunctionComponent<Props> = (props) => {
                             <span className="titlebar-text-a">M</span>
                             <span className="titlebar-text-b">o</span>
                             <span className="titlebar-text-a">e</span>
-                            <span className="titlebar-text-b">b</span>
-                            <span className="titlebar-text-a">o</span>
-                            <span className="titlebar-text-b">o</span>
-                            <span className="titlebar-text-a">r</span>
+                            <span className="titlebar-text-b">p</span>
+                            <span className="titlebar-text-a">i</span>
+                            <span className="titlebar-text-b">c</span>
+                            <span className="titlebar-text-a">t</span>
                             <span className="titlebar-text-b">u</span>
+                            <span className="titlebar-text-a">r</span>
+                            <span className="titlebar-text-b">e</span>
+                            <span className="titlebar-text-a">s</span>
                     </div>
                     <div className="titlebar-image-container">
                         <img className="titlebar-img" src={favicon} style={{filter: getFilter()}}/>

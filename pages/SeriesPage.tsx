@@ -95,7 +95,7 @@ const SeriesPage: React.FunctionComponent = (props) => {
         setActiveDropdown("none")
         setHeaderText("")
         setSidebarText("")
-        document.title = "Moebooru: Series"
+        document.title = "Moepictures: Series"
         updateSeries()
     }, [])
 

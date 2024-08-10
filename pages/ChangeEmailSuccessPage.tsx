@@ -39,7 +39,7 @@ const ChangeEmailSuccessPage: React.FunctionComponent = (props) => {
         setHeaderText("")
         setSidebarText("")
         setEnableDrag(false)
-        document.title = "Moebooru: Change Email Success"
+        document.title = "Moepictures: Change Email Success"
     }, [])
 
     useEffect(() => {

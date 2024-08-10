@@ -38,7 +38,7 @@ const $2FAPage: React.FunctionComponent = (props) => {
         setHeaderText("")
         setSidebarText("")
         setEnableDrag(false)
-        document.title = "Moebooru: 2-Factor Authentication"
+        document.title = "Moepictures: 2-Factor Authentication"
     }, [])
 
     useEffect(() => {

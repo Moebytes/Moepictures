@@ -46,7 +46,7 @@ const ModQueuePage: React.FunctionComponent = (props) => {
         setHideNavbar(false)
         setHeaderText("")
         setSidebarText("")
-        document.title = "Moebooru: Mod Queue"
+        document.title = "Moepictures: Mod Queue"
     }, [])
 
     useEffect(() => {

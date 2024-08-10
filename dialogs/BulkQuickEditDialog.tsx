@@ -47,7 +47,7 @@ const BulkQuickEditDialog: React.FunctionComponent = (props) => {
     }
 
     useEffect(() => {
-        document.title = "Moebooru: Bulk Quick Edit"
+        document.title = "Moepictures: Bulk Quick Edit"
 
         const logPosition = (event: any) => {
             const element = document.querySelector(".dialog-box")

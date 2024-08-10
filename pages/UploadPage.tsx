@@ -122,7 +122,7 @@ const UploadPage: React.FunctionComponent = (props) => {
         setRelative(false)
         setHeaderText("")
         setSidebarText("")
-        document.title = "Moebooru: Upload"
+        document.title = "Moepictures: Upload"
         window.scrollTo(0, 0)
 
         setBrightness(100)

@@ -67,7 +67,7 @@ const LoginPage: React.FunctionComponent = (props) => {
         setHeaderText("")
         setEnableDrag(false)
         if (sidebarText !== "Login required.") setSidebarText("")
-        document.title = "Moebooru: Login"
+        document.title = "Moepictures: Login"
     }, [])
 
     useEffect(() => {

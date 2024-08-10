@@ -79,7 +79,7 @@ const TagHistoryPage: React.FunctionComponent<Props> = (props) => {
         setActiveDropdown("none")
         setHeaderText("")
         setSidebarText("")
-        document.title = "Moebooru: Tag History"
+        document.title = "Moepictures: Tag History"
     }, [])
 
     useEffect(() => {

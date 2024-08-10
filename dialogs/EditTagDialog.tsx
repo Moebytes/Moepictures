@@ -48,7 +48,7 @@ const EditTagDialog: React.FunctionComponent = (props) => {
     }
 
     useEffect(() => {
-        document.title = "Moebooru: Edit Tag"
+        document.title = "Moepictures: Edit Tag"
     }, [])
 
     useEffect(() => {

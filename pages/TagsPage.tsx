@@ -104,7 +104,7 @@ const TagsPage: React.FunctionComponent = (props) => {
         setActiveDropdown("none")
         setHeaderText("")
         setSidebarText("")
-        document.title = "Moebooru: Tags"
+        document.title = "Moepictures: Tags"
         updateTags()
     }, [])
 

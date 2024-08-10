@@ -23,7 +23,7 @@ const DeleteThreadDialog: React.FunctionComponent = (props) => {
     const history = useHistory()
 
     useEffect(() => {
-        document.title = "Moebooru: Delete Thread"
+        document.title = "Moepictures: Delete Thread"
     }, [])
 
     useEffect(() => {

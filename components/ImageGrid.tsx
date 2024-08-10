@@ -91,7 +91,7 @@ const ImageGrid: React.FunctionComponent<Props> = (props) => {
         setUpdatePostFlag(true)
         if (!result.length) setNoResults(true)
         if (!search) {
-            document.title = "Moebooru: Cutest Anime Art ♥"
+            document.title = "Moepictures: Cutest Anime Art ♥"
         }
     }
 
@@ -104,7 +104,7 @@ const ImageGrid: React.FunctionComponent<Props> = (props) => {
         setPosts(result)
         setIsRandomSearch(true)
         setUpdatePostFlag(true)
-        document.title = "Moebooru: Random"
+        document.title = "Moepictures: Random"
     }
 
     useEffect(() => {
@@ -220,7 +220,7 @@ const ImageGrid: React.FunctionComponent<Props> = (props) => {
             setPage(1)
             setPosts(imageSearchFlag)
             setUpdatePostFlag(true)
-            document.title = "Moebooru: Image Search"
+            document.title = "Moepictures: Image Search"
             setImageSearchFlag(null)
         }
     }, [imageSearchFlag])

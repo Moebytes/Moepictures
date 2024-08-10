@@ -25,7 +25,7 @@ const $2FARoutes = (app: Express) => {
             const enabled = !Boolean(user.$2fa)
             if (enabled) {
                 await sql.delete2faToken(req.session.username)
-                const token = generateSecret({name: "Moebooru", account: functions.toProperCase(req.session.username)})
+                const token = generateSecret({name: "Moepictures", account: functions.toProperCase(req.session.username)})
                 await sql.insert2faToken(req.session.username, token.secret, token.qr)
                 const arrayBuffer = await axios.get(token.qr, {responseType: "arraybuffer"}).then((r) => r.data)
                 const base64 = functions.arrayBufferToBase64(arrayBuffer)

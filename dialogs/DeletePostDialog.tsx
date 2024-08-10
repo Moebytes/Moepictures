@@ -28,7 +28,7 @@ const DeletePostDialog: React.FunctionComponent<Props> = (props) => {
     const history = useHistory()
 
     useEffect(() => {
-        document.title = "Moebooru: Delete Post"
+        document.title = "Moepictures: Delete Post"
     }, [])
 
     useEffect(() => {

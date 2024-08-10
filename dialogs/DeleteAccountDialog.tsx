@@ -20,7 +20,7 @@ const DeleteAccountDialog: React.FunctionComponent = (props) => {
     const history = useHistory()
 
     useEffect(() => {
-        document.title = "Moebooru: Delete Account"
+        document.title = "Moepictures: Delete Account"
     }, [])
 
     useEffect(() => {
@@ -58,7 +58,7 @@ const DeleteAccountDialog: React.FunctionComponent = (props) => {
                         <div className="dialog-row">
                             <span className="dialog-text-small">
                                 Are you sure that you want to delete your account? This action is irreversible. You will permanently lose all of your favorites, comments, cuteness ratings, etc.<br/><br/>
-                                Because Moebooru is a site focused on community contributions, we will not remove any of your submitted posts. The account that uploaded these posts will show up as "deleted".<br/><br/>
+                                Because Moepictures is a site focused on community contributions, we will not remove any of your submitted posts. The account that uploaded these posts will show up as "deleted".<br/><br/>
                                 Are you sure that you want to continue?
                             </span>
                         </div>

@@ -33,7 +33,7 @@ const HelpPage: React.FunctionComponent = (props) => {
         setRelative(false)
         setHeaderText("")
         setSidebarText("")
-        document.title = "Moebooru: Help"
+        document.title = "Moepictures: Help"
         window.scrollTo(0, 0)
     }, [])
 
@@ -63,9 +63,9 @@ const HelpPage: React.FunctionComponent = (props) => {
             <div className="content" onMouseEnter={() => setEnableDrag(true)}>
                 <div className="help">
                     <span className="help-heading">Help</span>
-                    <span className="help-text">Welcome to Moebooru!</span>
+                    <span className="help-text">Welcome to Moepictures!</span>
                     <span className="help-text">
-                        Moebooru is a search board organized by tags, dedicated exclusively to showcasing the cutest works made by creatives. While the majority of content is (and will likely be)
+                        Moepictures is a search board organized by tags, dedicated exclusively to showcasing the cutest works made by artists. While the majority of content is (and will likely be)
                         digital art, we are open to any other artforms including animations, music, and 3d models. If you need specific help with 
                         anything, you can navigate by clicking on a specific category!
                         <div className="help-link-container">
@@ -104,7 +104,7 @@ const HelpPage: React.FunctionComponent = (props) => {
                     </span>
                     <span className="help-heading" id="searching">Searching</span>
                     <span className="help-text">
-                        The tags on Moebooru use a dash ("-") as a delimeter, but you can also search with spaces because the search can guess what tags you are searching for.
+                        The tags on Moepictures use a dash ("-") as a delimeter, but you can also search with spaces because the search can guess what tags you are searching for.
                         If you encounter a problem with this, use dashed versions of the tags. These are examples
                         of valid searches: <br/>
                         <span className="help-alt">
@@ -136,7 +136,7 @@ const HelpPage: React.FunctionComponent = (props) => {
                     </span>
                     <span className="help-heading" id="image-searching">Image Searching</span>
                     <span className="help-text">
-                        Every image uploaded to Moebooru is hashed with a perceptual hash algorithm, which means 
+                        Every image uploaded to Moepictures is hashed with a perceptual hash algorithm, which means 
                         that images that look the same should yield similar hashes. This is different from binary hashes which only hash the 
                         binary data of the image, so for example if you were to resize the same image it would yield totally different hashes 
                         with a binary hashing algorithm. <br/><br/>
@@ -155,7 +155,7 @@ const HelpPage: React.FunctionComponent = (props) => {
                     <span className="help-heading" id="gif-player">GIF Player</span>
                     <div className="help-img-container"><img className="help-img" src={gifPlayerImg}/></div>
                     <span className="help-text">
-                        Moebooru has a custom GIF player, which allows additionally functionality which is normally not possible with gifs such as 
+                        Moepictures has a custom GIF player, which allows additionally functionality which is normally not possible with gifs such as 
                         seeking, pausing, playback in reverse, and modification of the playback speed.
                     </span>
                     <span className="help-heading" id="video-player">Video Player</span>
@@ -187,14 +187,14 @@ const HelpPage: React.FunctionComponent = (props) => {
                     <span className="help-heading" id="cuteness-meter">Cuteness Meter</span>
                     <div className="help-img-container"><img className="help-img" src={cutenessMeterImg}/></div>
                     <span className="help-text">
-                        The rating system on Moebooru is called the cuteness meter. When you rate an
+                        The rating system on Moepictures is called the cuteness meter. When you rate an
                         image you are not rating the quality, instead you are rating the amount
                         of cuteness that the image evokes. The scale is from 0 (Not cute) to 500 (Pretty
                         cute) to 1000 (Insanely cute).
                     </span>
                     <span className="help-heading" id="uploading">Uploading</span>
                     <span className="help-text">
-                        Moebooru is a lot stricter with posts than most other image boards. We allow images, gifs, videos, comics, music, and models.<br/><br/>
+                        Moepictures is a lot stricter with posts than most other image boards. We allow images, gifs, videos, comics, music, and models.<br/><br/>
                         Please read carefully through all of the uploading guidelines. <br/>
                         <span className="help-alt">
                         ⇾ Must be drawn in the anime art style. No photographs/art drawn in other styles. <br/>
@@ -282,7 +282,7 @@ const HelpPage: React.FunctionComponent = (props) => {
                     </span>
                     <span className="help-heading" id="deleting-account">Deleting Your Account</span>
                     <span className="help-text">
-                        Since Moebooru is heavily focused on user contributions, when you delete your account we won't  
+                        Since Moepictures is heavily focused on user contributions, when you delete your account we won't  
                         remove your public contributions like submitted posts. Your uploads will remain but the account that uploaded them will 
                         show up as "deleted". The rest of your account data and comments will get deleted, however if someone quoted you 
                         in the comments section some of your comments could still remain.

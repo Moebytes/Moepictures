@@ -109,7 +109,7 @@ const BulkUploadPage: React.FunctionComponent = (props) => {
         setRelative(false)
         setHeaderText("")
         setSidebarText("")
-        document.title = "Moebooru: Bulk Upload"
+        document.title = "Moepictures: Bulk Upload"
         window.scrollTo(0, 0)
         setBrightness(100)
         setContrast(100)

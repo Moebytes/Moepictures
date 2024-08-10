@@ -288,8 +288,8 @@ for (let i = 0; i < folders.length; i++) {
 }
 
 app.get("/*", function(req: Request, res: Response) {
-  if (!req.hostname.includes("moebooru") && !req.hostname.includes("localhost") && !req.hostname.includes("192.168.68")) {
-    res.redirect(301, `https://moebooru.moe${req.path}`)
+  if (!req.hostname.includes("moepictures") && !req.hostname.includes("localhost") && !req.hostname.includes("192.168.68")) {
+    res.redirect(301, `https://moepictures.moe${req.path}`)
   }
   if (!req.session.csrfToken) {
     const {secret, token} = serverFunctions.generateCSRF()

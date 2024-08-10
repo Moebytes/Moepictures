@@ -25,7 +25,7 @@ const RevertTranslationHistoryDialog: React.FunctionComponent = (props) => {
     const history = useHistory()
 
     useEffect(() => {
-        document.title = "Moebooru: Revert Translation History"
+        document.title = "Moepictures: Revert Translation History"
     }, [])
 
     useEffect(() => {

@@ -22,7 +22,7 @@ const UnbanDialog: React.FunctionComponent = (props) => {
     const history = useHistory()
 
     useEffect(() => {
-        document.title = "Moebooru: Unban User"
+        document.title = "Moepictures: Unban User"
     }, [])
 
     useEffect(() => {

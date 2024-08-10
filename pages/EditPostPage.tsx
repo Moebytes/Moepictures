@@ -224,7 +224,7 @@ const EditPostPage: React.FunctionComponent<Props> = (props) => {
         setRelative(false)
         setHeaderText("")
         setSidebarText("")
-        document.title = "Moebooru: Edit Post"
+        document.title = "Moepictures: Edit Post"
         window.scrollTo(0, 0)
 
         setBrightness(100)

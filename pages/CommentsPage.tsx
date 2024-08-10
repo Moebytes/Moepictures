@@ -128,7 +128,7 @@ const CommentsPage: React.FunctionComponent = (props) => {
         setActiveDropdown("none")
         setHeaderText("")
         setSidebarText("")
-        document.title = "Moebooru: Comments"
+        document.title = "Moepictures: Comments"
         updateComments()
     }, [])
 

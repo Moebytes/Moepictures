@@ -99,7 +99,7 @@ const UserProfilePage: React.FunctionComponent = (props) => {
         setRelative(false)
         setHeaderText("")
         setSidebarText("")
-        document.title = "Moebooru: User Profile"
+        document.title = "Moepictures: User Profile"
         updateUploads()
         updateFavorites()
         updateComments()

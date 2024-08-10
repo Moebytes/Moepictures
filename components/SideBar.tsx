@@ -61,9 +61,9 @@ interface Props {
 }
 
 let timeout = null as any
-const maxTags1 = 23
-const maxTags2 = 26
-const maxTags3 = 27
+const maxTags1 = 22
+const maxTags2 = 24
+const maxTags3 = 25
 
 const SideBar: React.FunctionComponent<Props> = (props) => {
     const [ignored, forceUpdate] = useReducer(x => x + 1, 0)
@@ -916,7 +916,7 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
             </div>
 
             <div className="sidebar-footer">
-                    <span className="sidebar-footer-text">©{new Date().getFullYear()} Moebooru</span>
+                    <span className="sidebar-footer-text">©{new Date().getFullYear()} Moepictures</span>
                     <Link to="/terms">
                         <img className="sidebar-footer-icon" src={terms} style={{filter: getFilter()}}/>
                     </Link>

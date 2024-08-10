@@ -25,7 +25,7 @@ const RevertTagHistoryDialog: React.FunctionComponent = (props) => {
     const history = useHistory()
 
     useEffect(() => {
-        document.title = "Moebooru: Revert Tag History"
+        document.title = "Moepictures: Revert Tag History"
     }, [])
 
     useEffect(() => {

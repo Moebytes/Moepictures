@@ -49,7 +49,7 @@ const ResetPasswordPage: React.FunctionComponent = (props) => {
         setHeaderText("")
         setSidebarText("")
         setEnableDrag(false)
-        document.title = "Moebooru: Reset Password"
+        document.title = "Moepictures: Reset Password"
 
         const token = new URLSearchParams(window.location.search).get("token")
         const username = new URLSearchParams(window.location.search).get("username")

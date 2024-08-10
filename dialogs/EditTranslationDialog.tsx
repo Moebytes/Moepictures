@@ -21,7 +21,7 @@ const EditTranslationDialog: React.FunctionComponent = (props) => {
     const history = useHistory()
 
     useEffect(() => {
-        document.title = "Moebooru: Edit Translation"
+        document.title = "Moepictures: Edit Translation"
     }, [])
 
     useEffect(() => {

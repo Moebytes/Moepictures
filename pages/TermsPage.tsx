@@ -50,9 +50,9 @@ const TermsPage: React.FunctionComponent = (props) => {
 
     useEffect(() => {
         if (onPrivacy) {
-            document.title = "Moebooru: Privacy Policy"
+            document.title = "Moepictures: Privacy Policy"
         } else {
-            document.title = "Moebooru: Terms of Service"
+            document.title = "Moepictures: Terms of Service"
         }
     })
     
@@ -74,7 +74,7 @@ const TermsPage: React.FunctionComponent = (props) => {
                             Last Updated: March 31, 2024 <br/><br/>
 
                             This terms of service applies to the website ("site") provided 
-                            by Moebooru (”we”, “us”, “our”). By using our site, you agree to all of these terms. If you don't agree with these 
+                            by Moepictures (”we”, “us”, “our”). By using our site, you agree to all of these terms. If you don't agree with these 
                             terms you should not use our site.<br/><br/>
 
                             Access to the site<br/>
@@ -138,7 +138,7 @@ const TermsPage: React.FunctionComponent = (props) => {
                         <div className="privacy-text">
                             Last Updated: March 31, 2024<br/><br/>
 
-                            This Privacy Policy outlines the information that Moebooru (”we”, “us”, “our”) 
+                            This Privacy Policy outlines the information that Moepictures (”we”, “us”, “our”) 
                             collects when you use our website ("site"). It
                             also describes how we use your information and how your information is shared. <br/><br/>
 

@@ -65,7 +65,7 @@ const VerifyEmailPage: React.FunctionComponent = (props) => {
         setHeaderText("")
         setSidebarText("")
         setEnableDrag(false)
-        document.title = "Moebooru: Verify Email"
+        document.title = "Moepictures: Verify Email"
     }, [])
 
     useEffect(() => {

@@ -108,7 +108,7 @@ const UserPage: React.FunctionComponent<Props> = (props) => {
         setRelative(false)
         setHeaderText("")
         setSidebarText("")
-        document.title = `Moebooru: ${functions.toProperCase(username)}`
+        document.title = `Moepictures: ${functions.toProperCase(username)}`
     }, [])
 
     useEffect(() => {

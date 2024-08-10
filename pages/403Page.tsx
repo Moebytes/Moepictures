@@ -27,7 +27,7 @@ const $403Page: React.FunctionComponent = (props) => {
         setRelative(false)
         setHeaderText("")
         setSidebarText("403 error.")
-        document.title = "Moebooru: 403 Error"
+        document.title = "Moepictures: 403 Error"
     }, [])
 
     useEffect(() => {

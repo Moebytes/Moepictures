@@ -58,7 +58,7 @@ const ForgotPasswordPage: React.FunctionComponent = (props) => {
         setHeaderText("")
         setSidebarText("")
         setEnableDrag(false)
-        document.title = "Moebooru: Forgot Password"
+        document.title = "Moepictures: Forgot Password"
     }, [])
 
     useEffect(() => {

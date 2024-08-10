@@ -1,19 +1,19 @@
-# Moebooru.moe
+# Moepictures.moe
 
 **Update - 3/8/2023**
 I took down the online website because I can't afford the hosting costs. You can still run it locally using your own database and images. 
 
-Moebooru is an image board site for cute anime art, organized by tags.
+Moepictures is an image board site for cute anime art, organized by tags.
 
 <img src="assets/misc/readme.png">
 
 ### Searching With Spaces
 
-Moebooru's tags use the dash ("-") as the delimeter, but the search can guess what tags you are looking for even if you use spaces.
+Moepictures's tags use the dash ("-") as the delimeter, but the search can guess what tags you are looking for even if you use spaces.
 
 ### Multiple Images Per Post
 
-Moebooru supports multiple images per post, which is great for comics and posts with lots of variations. We also have parent/child relationships for third-party posts.
+Moepictures supports multiple images per post, which is great for comics and posts with lots of variations. We also have parent/child relationships for third-party posts.
 
 ### Image Filters
 
@@ -24,7 +24,7 @@ can make everything look like a pixel game. When playing audio, the pixelate fil
 
 ### Custom Players
 
-Moebooru uses custom gif/video/music/3d players, so you can do many things that aren't normally possible like pausing/seeking 
+Moepictures uses custom gif/video/music/3d players, so you can do many things that aren't normally possible like pausing/seeking 
 gifs, reverse playback, and modification of playback speed. 
 
 GIF Player:
@@ -46,6 +46,12 @@ Music Player:
 The video player has some additional controls over the gif player, such as volume and pitch preservement. The 3d model player has 
 controls for wireframe, matcap, shapekeys, and lighting. The music player can playback audio in reverse.
 
+### Translations
+
+<img src="assets/misc/translations.png">
+
+As often images might contain japanese text, adding and viewing translations is also supported!
+
 ### Tech Stack
 
 - Languages: Typescript, LESS, HTML, SQL
@@ -65,11 +71,11 @@ The database used is PostgreSQL v14. You should create a new database but you do
 
 https://www.postgresql.org
 
-Images are uploaded to Amazon S3 buckets called "moebooru" and "moebooru-unverified", you should create two buckets with these names.
+Images are uploaded to Amazon S3 buckets called "moepictures" and "moepictures-unverified", you should create two buckets with these names.
 
 https://aws.amazon.com/s3/
 
-If you want to use the local filesystem instead you can edit the file `structures/ServerFunctions.ts` and add in your path to folders "moebooru" and "moebooru-unverified", each containing the following subfolders:
+If you want to use the local filesystem instead you can edit the file `structures/ServerFunctions.ts` and add in your path to folders "moepictures" and "moepictures-unverified", each containing the following subfolders:
 
 `["animation", "artist", "character", "comic", "image", "pfp", "series", "tag", "video", "audio", "model"]`
 

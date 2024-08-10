@@ -74,7 +74,7 @@ const UnverifiedPostPage: React.FunctionComponent<Props> = (props) => {
         setHideSidebar(false)
         setRelative(true)
         setSidebarText("")
-        document.title = "Moebooru: Unverified Post"
+        document.title = "Moepictures: Unverified Post"
     }, [])
 
     useEffect(() => {
@@ -117,7 +117,7 @@ const UnverifiedPostPage: React.FunctionComponent<Props> = (props) => {
             if (post) {
                 const title = post.translatedTitle ? functions.toProperCase(post.translatedTitle) : 
                               post.title ? post.title : "Post"
-                document.title = `Moebooru: ${title}`
+                document.title = `Moepictures: ${title}`
                 if (title !== "Post") setHeaderText(title.replaceAll("-", " "))
             }
         }

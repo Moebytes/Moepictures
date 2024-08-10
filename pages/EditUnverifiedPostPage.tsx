@@ -244,7 +244,7 @@ const EditUnverifiedPostPage: React.FunctionComponent<Props> = (props) => {
         setRelative(false)
         setHeaderText("")
         setSidebarText("")
-        document.title = "Moebooru: Edit Unverified Post"
+        document.title = "Moepictures: Edit Unverified Post"
         window.scrollTo(0, 0)
 
         setBrightness(100)

@@ -37,7 +37,7 @@ const BanDialog: React.FunctionComponent = (props) => {
     }
 
     useEffect(() => {
-        document.title = "Moebooru: Ban User"
+        document.title = "Moepictures: Ban User"
     }, [])
 
     useEffect(() => {

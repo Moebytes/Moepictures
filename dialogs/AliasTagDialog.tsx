@@ -26,7 +26,7 @@ const AliasTagDialog: React.FunctionComponent = (props) => {
     const history = useHistory()
 
     useEffect(() => {
-        document.title = "Moebooru: Alias Tag"
+        document.title = "Moepictures: Alias Tag"
     }, [])
 
     useEffect(() => {

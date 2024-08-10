@@ -25,7 +25,7 @@ const DeleteTagDialog: React.FunctionComponent = (props) => {
     const history = useHistory()
 
     useEffect(() => {
-        document.title = "Moebooru: Delete Tag"
+        document.title = "Moepictures: Delete Tag"
     }, [])
 
     useEffect(() => {

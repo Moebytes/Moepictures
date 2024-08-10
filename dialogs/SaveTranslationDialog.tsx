@@ -30,7 +30,7 @@ const SaveTranslationDialog: React.FunctionComponent<Props> = (props) => {
     const history = useHistory()
 
     useEffect(() => {
-        document.title = "Moebooru: Save Translation"
+        document.title = "Moepictures: Save Translation"
     }, [])
 
     useEffect(() => {

@@ -21,7 +21,7 @@ const PageDialog: React.FunctionComponent = (props) => {
     const history = useHistory()
 
     useEffect(() => {
-        document.title = "Moebooru: Go To Page"
+        document.title = "Moepictures: Go To Page"
     }, [])
 
     useEffect(() => {

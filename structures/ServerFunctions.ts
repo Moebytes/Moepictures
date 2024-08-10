@@ -42,7 +42,7 @@ export default class ServerFunctions {
         const compiledTemplate = handlebars.compile(source)
         const html = compiledTemplate(payload)
         return transporter.sendMail({
-            from: {name: "Moebooru", address: process.env.EMAIL_ADDRESS},
+            from: {name: "Moepictures", address: process.env.EMAIL_ADDRESS},
             to: email,
             subject: subject,
             html
@@ -58,7 +58,7 @@ export default class ServerFunctions {
             }
         })
         return transporter.sendMail({
-            from: {name: "Moebooru", address: process.env.EMAIL_ADDRESS},
+            from: {name: "Moepictures", address: process.env.EMAIL_ADDRESS},
             to: process.env.EMAIL_ADDRESS,
             replyTo: email,
             subject: subject,
@@ -73,16 +73,16 @@ export default class ServerFunctions {
             if (functions.isLocalHost()) {
                 const id = file.split("-")?.[0]?.match(/\d+/)?.[0]
                 if (!id) return defaultBuffer
-                const historyFolder = `/Volumes/Files/moebooru/history/post/${id}`
+                const historyFolder = `/Volumes/Files/moepictures/history/post/${id}`
                 if (!fs.existsSync(historyFolder)) return defaultBuffer
                 let folders = fs.readdirSync(historyFolder)
                 if (!folders.length) return defaultBuffer
                 folders = folders.sort(new Intl.Collator(undefined, {numeric: true, sensitivity: "base"}).compare)
-                const firstHistory = `/Volumes/Files/moebooru/history/tag/${id}/${folders[0]}`
+                const firstHistory = `/Volumes/Files/moepictures/history/tag/${id}/${folders[0]}`
                 let files = fs.readdirSync(firstHistory)
                 if (!files.length) return defaultBuffer
                 files = files.sort(new Intl.Collator(undefined, {numeric: true, sensitivity: "base"}).compare)
-                const firstFile = `/Volumes/Files/moebooru/history/tag/${id}/${folders[0]}/${files[0]}`
+                const firstFile = `/Volumes/Files/moepictures/history/tag/${id}/${folders[0]}/${files[0]}`
                 return fs.readFileSync(firstFile)
             } else {
                 return defaultBuffer
@@ -91,16 +91,16 @@ export default class ServerFunctions {
             if (functions.isLocalHost()) {
                 const id = file.split("-")?.[0]?.match(/\d+/)?.[0]
                 if (!id) return defaultBuffer
-                const historyFolder = `/Volumes/Files/moebooru/history/post/${id}`
+                const historyFolder = `/Volumes/Files/moepictures/history/post/${id}`
                 if (!fs.existsSync(historyFolder)) return defaultBuffer
                 let folders = fs.readdirSync(historyFolder)
                 if (!folders.length) return defaultBuffer
                 folders = folders.sort(new Intl.Collator(undefined, {numeric: true, sensitivity: "base"}).compare)
-                const firstHistory = `/Volumes/Files/moebooru/history/post/${id}/${folders[0]}`
+                const firstHistory = `/Volumes/Files/moepictures/history/post/${id}/${folders[0]}`
                 let files = fs.readdirSync(firstHistory)
                 if (!files.length) return defaultBuffer
                 files = files.sort(new Intl.Collator(undefined, {numeric: true, sensitivity: "base"}).compare)
-                const firstFile = `/Volumes/Files/moebooru/history/post/${id}/${folders[0]}/${files[0]}`
+                const firstFile = `/Volumes/Files/moepictures/history/post/${id}/${folders[0]}/${files[0]}`
                 return fs.readFileSync(firstFile)
             } else {
                 return defaultBuffer
@@ -110,44 +110,44 @@ export default class ServerFunctions {
 
     public static getFile = async (file: string) => {
         if (functions.isLocalHost()) {
-            if (!fs.existsSync(`/Volumes/Files/moebooru/${decodeURIComponent(file)}`)) return ServerFunctions.getFirstHistoryFile(file)
-            return fs.readFileSync(`/Volumes/Files/moebooru/${decodeURIComponent(file)}`)
+            if (!fs.existsSync(`/Volumes/Files/moepictures/${decodeURIComponent(file)}`)) return ServerFunctions.getFirstHistoryFile(file)
+            return fs.readFileSync(`/Volumes/Files/moepictures/${decodeURIComponent(file)}`)
         }
-        return s3.getObject({Key: decodeURIComponent(file), Bucket: "moebooru"}).promise().then((r) => r.Body) as unknown as Buffer
+        return s3.getObject({Key: decodeURIComponent(file), Bucket: "moepictures"}).promise().then((r) => r.Body) as unknown as Buffer
     }
 
     public static uploadFile = async (file: string, content: any) => {
         if (functions.isLocalHost()) {
-            const dir = path.dirname(`/Volumes/Files/moebooru/${file}`)
+            const dir = path.dirname(`/Volumes/Files/moepictures/${file}`)
             if (!fs.existsSync(dir)) fs.mkdirSync(dir, {recursive: true})
-            fs.writeFileSync(`/Volumes/Files/moebooru/${file}`, content)
-            return `/Volumes/Files/moebooru/${file}`
+            fs.writeFileSync(`/Volumes/Files/moepictures/${file}`, content)
+            return `/Volumes/Files/moepictures/${file}`
         }
-        const upload = await s3.upload({Body: content, Key: file, Bucket: "moebooru"}).promise()
+        const upload = await s3.upload({Body: content, Key: file, Bucket: "moepictures"}).promise()
         return upload.Location
     }
 
     public static deleteFile = async (file: string) => {
         if (functions.isLocalHost()) {
-            const dir = path.dirname(`/Volumes/Files/moebooru/${file}`)
-            fs.unlinkSync(`/Volumes/Files/moebooru/${file}`)
+            const dir = path.dirname(`/Volumes/Files/moepictures/${file}`)
+            fs.unlinkSync(`/Volumes/Files/moepictures/${file}`)
             try {
                 //fs.rmdirSync(dir)
             } catch {}
             return
         }
-        await s3.deleteObject({Key: file, Bucket: "moebooru"}).promise()
+        await s3.deleteObject({Key: file, Bucket: "moepictures"}).promise()
     }
 
     public static deleteFolder = async (folder: string) => {
         if (functions.isLocalHost()) {
-            const dir = `/Volumes/Files/moebooru/${folder}`
+            const dir = `/Volumes/Files/moepictures/${folder}`
             return ServerFunctions.removeLocalDirectory(dir)
         }
-        const listedObjects = await s3.listObjectsV2({Bucket: "moebooru", Prefix: folder}).promise()
+        const listedObjects = await s3.listObjectsV2({Bucket: "moepictures", Prefix: folder}).promise()
         if (listedObjects.Contents?.length === 0) return
     
-        const deleteParams = {Bucket: "moebooru", Delete: {Objects: [] as any}}
+        const deleteParams = {Bucket: "moepictures", Delete: {Objects: [] as any}}
     
         listedObjects.Contents?.forEach(({Key}) => {
             deleteParams.Delete.Objects.push({Key});
@@ -159,25 +159,25 @@ export default class ServerFunctions {
     public static renameFile = async (oldFile: string, newFile: string) => {
         if (functions.isLocalHost()) {
             try {
-                fs.renameSync(`/Volumes/Files/moebooru/${oldFile}`, `/Volumes/Files/moebooru/${newFile}`)
+                fs.renameSync(`/Volumes/Files/moepictures/${oldFile}`, `/Volumes/Files/moepictures/${newFile}`)
             } catch {
-                fs.renameSync(`/Volumes/Files/moebooru/${encodeURI(oldFile)}`, `/Volumes/Files/moebooru/${encodeURI(newFile)}`)
+                fs.renameSync(`/Volumes/Files/moepictures/${encodeURI(oldFile)}`, `/Volumes/Files/moepictures/${encodeURI(newFile)}`)
             }
             return 
         }
         try {
-            await s3.copyObject({CopySource: `moebooru/${oldFile}`, Key: newFile, Bucket: "moebooru"}).promise()
+            await s3.copyObject({CopySource: `moepictures/${oldFile}`, Key: newFile, Bucket: "moepictures"}).promise()
         } catch {
-            await s3.copyObject({CopySource: `moebooru/${encodeURI(oldFile)}`, Key: newFile, Bucket: "moebooru"}).promise()
+            await s3.copyObject({CopySource: `moepictures/${encodeURI(oldFile)}`, Key: newFile, Bucket: "moepictures"}).promise()
         }
-        await s3.deleteObject({Key: oldFile, Bucket: "moebooru"}).promise()
+        await s3.deleteObject({Key: oldFile, Bucket: "moepictures"}).promise()
     }
 
     public static getNextKey = async (type: string, name: string) => {
         const key = `history/${type}/${name}`
         if (functions.isLocalHost()) {
-            if (!fs.existsSync(`/Volumes/Files/moebooru/${key}`)) return 1
-            const objects = fs.readdirSync(`/Volumes/Files/moebooru/${key}`)
+            if (!fs.existsSync(`/Volumes/Files/moepictures/${key}`)) return 1
+            const objects = fs.readdirSync(`/Volumes/Files/moepictures/${key}`)
             let nextKey = 0
             for (let i = 0; i < objects.length; i++) {
                 const object = objects[i]
@@ -188,7 +188,7 @@ export default class ServerFunctions {
             }
             return nextKey + 1
         }
-        const objects = await s3.listObjects({Prefix: key, Bucket: "moebooru"}).promise()
+        const objects = await s3.listObjects({Prefix: key, Bucket: "moepictures"}).promise()
         let nextKey = 0
         for (let i = 0; i < (objects.Contents || []).length; i++) {
             const object = objects.Contents?.[i]
@@ -202,32 +202,32 @@ export default class ServerFunctions {
 
     public static getUnverifiedFile = async (file: string) => {
         if (functions.isLocalHost()) {
-            return fs.readFileSync(`/Volumes/Files/moebooru-unverified/${decodeURIComponent(file)}`)
+            return fs.readFileSync(`/Volumes/Files/moepictures-unverified/${decodeURIComponent(file)}`)
         }
-        return s3.getObject({Key: decodeURIComponent(file), Bucket: "moebooru-unverified"}).promise().then((r) => r.Body) as unknown as Buffer
+        return s3.getObject({Key: decodeURIComponent(file), Bucket: "moepictures-unverified"}).promise().then((r) => r.Body) as unknown as Buffer
     }
 
     public static uploadUnverifiedFile = async (file: string, content: any) => {
         if (functions.isLocalHost()) {
-            const dir = path.dirname(`/Volumes/Files/moebooru-unverified/${file}`)
+            const dir = path.dirname(`/Volumes/Files/moepictures-unverified/${file}`)
             if (!fs.existsSync(dir)) fs.mkdirSync(dir, {recursive: true})
-            fs.writeFileSync(`/Volumes/Files/moebooru-unverified/${file}`, content)
-            return `/Volumes/Files/moebooru-unverified/${file}`
+            fs.writeFileSync(`/Volumes/Files/moepictures-unverified/${file}`, content)
+            return `/Volumes/Files/moepictures-unverified/${file}`
         }
-        const upload = await s3.upload({Body: content, Key: file, Bucket: "moebooru-unverified"}).promise()
+        const upload = await s3.upload({Body: content, Key: file, Bucket: "moepictures-unverified"}).promise()
         return upload.Location
     }
 
     public static deleteUnverifiedFile = async (file: string) => {
         if (functions.isLocalHost()) {
-            const dir = path.dirname(`/Volumes/Files/moebooru-unverified/${file}`)
-            fs.unlinkSync(`/Volumes/Files/moebooru-unverified/${file}`)
+            const dir = path.dirname(`/Volumes/Files/moepictures-unverified/${file}`)
+            fs.unlinkSync(`/Volumes/Files/moepictures-unverified/${file}`)
             try {
                 //fs.rmdirSync(dir)
             } catch {}
             return
         }
-        await s3.deleteObject({Key: file, Bucket: "moebooru-unverified"}).promise()
+        await s3.deleteObject({Key: file, Bucket: "moepictures-unverified"}).promise()
     }
 
     public static tagCategories = async (tags: string[]) => {

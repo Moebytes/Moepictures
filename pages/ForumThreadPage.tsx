@@ -126,7 +126,7 @@ const ForumThreadPage: React.FunctionComponent<Props> = (props) => {
     const updateThread = async () => {
         const thread = await axios.get("/api/thread", {params: {threadID}, withCredentials: true}).then((r) => r.data)
         setThread(thread)
-        document.title = `Moebooru: ${thread.title}`
+        document.title = `Moepictures: ${thread.title}`
         setDefaultIcon(thread.image ? false : true)
     }
 

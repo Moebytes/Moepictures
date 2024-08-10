@@ -103,7 +103,7 @@ const UserRoutes = (app: Express) => {
                 }
                 const user = functions.toProperCase(username)
                 const link = `${req.protocol}://${req.get("host")}/api/user/verifyemail?token=${token}`
-                await serverFunctions.email(email, "Moebooru Email Address Verification", {username: user, link}, "verifyemail.html")
+                await serverFunctions.email(email, "Moepictures Email Address Verification", {username: user, link}, "verifyemail.html")
                 return res.status(200).send("Success")
             } catch {
                 return res.status(400).send("Username taken")
@@ -297,7 +297,7 @@ const UserRoutes = (app: Express) => {
                 const newFilename = `${req.session.username}${path.extname(user.image)}`
                 let oldImagePath = functions.getTagPath("pfp", user.image)
                 let newImagePath = functions.getTagPath("pfp", newFilename)
-                fs.renameSync(oldImagePath, newImagePath)
+                await serverFunctions.renameFile(oldImagePath, newImagePath)
                 await sql.updateUser(newUsername, "image", newFilename)
                 req.session.image = newFilename
             }
@@ -378,7 +378,7 @@ const UserRoutes = (app: Express) => {
             }
             const username = functions.toProperCase(req.session.username)
             const link = `${req.protocol}://${req.get("host")}/api/user/changeemail?token=${token}`
-            await serverFunctions.email(newEmail, "Moebooru Email Address Change", {username, link}, "changeemail.html")
+            await serverFunctions.email(newEmail, "Moepictures Email Address Change", {username, link}, "changeemail.html")
             res.status(200).send("Success")
         } catch (e) {
             console.log(e)
@@ -406,7 +406,7 @@ const UserRoutes = (app: Express) => {
             }
             const username = functions.toProperCase(req.session.username)
             const link = `${req.protocol}://${req.get("host")}/api/user/verifyemail?token=${token}`
-            await serverFunctions.email(email, "Moebooru Email Address Verification", {username, link}, "verifyemail.html")
+            await serverFunctions.email(email, "Moepictures Email Address Verification", {username, link}, "verifyemail.html")
             await sql.updateUser(req.session.username, "email", email)
             req.session.email = email
             res.status(200).send("Success")
@@ -479,7 +479,7 @@ const UserRoutes = (app: Express) => {
             await sql.insertPasswordToken(user.username, hashToken)
             const username = functions.toProperCase(user.username)
             const link = `${req.protocol}://${req.get("host")}/reset-password?token=${token}&username=${user.username}`
-            await serverFunctions.email(user.email, "Moebooru Password Reset", {username, link}, "resetpassword.html")
+            await serverFunctions.email(user.email, "Moepictures Password Reset", {username, link}, "resetpassword.html")
             res.status(200).send("Success")
         } catch (e) {
             console.log(e)

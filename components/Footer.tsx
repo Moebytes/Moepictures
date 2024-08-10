@@ -51,11 +51,14 @@ const Footer: React.FunctionComponent<Props> = (props) => {
                     <span className="footer-title-a">M</span>
                     <span className="footer-title-b">o</span>
                     <span className="footer-title-a">e</span>
-                    <span className="footer-title-b">b</span>
-                    <span className="footer-title-a">o</span>
-                    <span className="footer-title-b">o</span>
-                    <span className="footer-title-a">r</span>
+                    <span className="footer-title-b">p</span>
+                    <span className="footer-title-a">i</span>
+                    <span className="footer-title-b">c</span>
+                    <span className="footer-title-a">t</span>
                     <span className="footer-title-b">u</span>
+                    <span className="footer-title-a">r</span>
+                    <span className="footer-title-b">e</span>
+                    <span className="footer-title-a">s</span>
             </div>
             {!mobile ? <div className="footer-text-container">
                 <span className="footer-text">- This is the bottom of the page -</span>
