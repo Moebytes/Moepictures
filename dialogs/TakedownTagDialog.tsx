@@ -1,0 +1,106 @@
+import React, {useEffect, useContext, useState, useRef} from "react"
+import {useHistory} from "react-router-dom"
+import {HashLink as Link} from "react-router-hash-link"
+import {HideNavbarContext, HideSidebarContext, ThemeContext, EnableDragContext, TakedownTagContext, HideTitlebarContext,
+SessionContext} from "../Context"
+import functions from "../structures/Functions"
+import "./styles/dialog.less"
+import Draggable from "react-draggable"
+import permissions from "../structures/Permissions"
+import axios from "axios"
+
+const TakedownTagDialog: React.FunctionComponent = (props) => {
+    const {theme, setTheme} = useContext(ThemeContext)
+    const {hideNavbar, setHideNavbar} = useContext(HideNavbarContext)
+    const {hideTitlebar, setHideTitlebar} = useContext(HideTitlebarContext)
+    const {hideSidebar, setHideSidebar} = useContext(HideSidebarContext)
+    const {enableDrag, setEnableDrag} = useContext(EnableDragContext)
+    const {takedownTag, setTakedownTag} = useContext(TakedownTagContext)
+    const {session, setSession} = useContext(SessionContext)
+    const [reason, setReason] = useState("")
+    const [submitted, setSubmitted] = useState(false)
+    const [error, setError] = useState(false)
+    const errorRef = useRef<any>(null)
+    const history = useHistory()
+
+    useEffect(() => {
+        document.title = "Moepictures: Takedown Tag"
+    }, [])
+
+    useEffect(() => {
+        if (takedownTag) {
+            // document.body.style.overflowY = "hidden"
+            document.body.style.pointerEvents = "none"
+        } else {
+            // document.body.style.overflowY = "visible"
+            document.body.style.pointerEvents = "all"
+            setEnableDrag(true)
+        }
+    }, [takedownTag])
+
+    const takedown = async () => {
+        if (permissions.isAdmin(session)) {
+            await axios.post("/api/tag/takedown", {tag: takedownTag.tag}, {headers: {"x-csrf-token": functions.getCSRFToken()}, withCredentials: true})
+            history.go(0)
+        }
+    }
+
+    const click = (button: "accept" | "reject", keep?: boolean) => {
+        if (button === "accept") {
+            takedown()
+            setTakedownTag(null)
+        } else {
+            setTakedownTag(null)
+        }
+    }
+
+    const close = () => {
+        setTakedownTag(null)
+        setSubmitted(false)
+        setReason("")
+    }
+
+    const getTitle = () => {
+        if (takedownTag.banned) {
+            return "Restore Tag"
+        } else {
+            return "Takedown Tag"
+        }
+    }
+
+    const getPrompt = () => {
+        if (takedownTag.banned) {
+            return "Do you want to restore this tag and all related posts?"
+        } else {
+            return "Are you sure that you want to takedown this tag and all related posts?"
+        }
+    }
+
+    if (takedownTag) {
+        if (permissions.isAdmin(session)) {
+            return (
+                <div className="dialog">
+                    <Draggable handle=".dialog-title-container">
+                    <div className="dialog-box" style={{width: "280px", height: "200px"}} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
+                        <div className="dialog-container">
+                            <div className="dialog-title-container">
+                                <span className="dialog-title">{getTitle()}</span>
+                            </div>
+                            <div className="dialog-row">
+                                <span className="dialog-text">{getPrompt()}</span>
+                            </div>
+                            <div className="dialog-row">
+                                <button onClick={() => click("reject")} className="dialog-button">{"No"}</button>
+                                <button onClick={() => click("accept")} className="dialog-button">{"Yes"}</button>
+                            </div>
+                        </div>
+                    </div>
+                    </Draggable>
+                </div>
+            )
+        }
+    }
+    return null
+}
+
+export default TakedownTagDialog

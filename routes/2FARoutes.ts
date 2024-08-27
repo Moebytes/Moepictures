@@ -113,6 +113,7 @@ const $2FARoutes = (app: Express) => {
                 req.session.csrfToken = token
                 req.session.showRelated = user.showRelated
                 req.session.showTooltips = user.showTooltips
+                req.session.downloadPixivID = user.downloadPixivID
                 res.status(200).send("Success")
             } else {
                 res.status(400).send("Bad token")

@@ -1086,7 +1086,8 @@ export default class Functions {
     }
 
     public static validSort = (sort: string) => {
-        if (sort === "date" ||
+        if (sort === "random" ||
+            sort === "date" ||
             sort === "reverse date" ||
             sort === "drawn" ||
             sort === "reverse drawn" || 
@@ -1696,6 +1697,10 @@ export default class Functions {
 
     public static cleanTag = (tag: string) => {
         return tag.normalize("NFD").replace(/[^a-z0-9_\-()><&!#@]/gi, "").replaceAll("_", "-")
+    }
+
+    public static cleanTitle = (title: string) => {
+        return title.replace(/[\/\?<>\\:\*\|"]/g, "")
     }
 
     public static render = (image: HTMLImageElement, brightness: number, contrast: number,

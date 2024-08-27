@@ -147,6 +147,7 @@ const UserRoutes = (app: Express) => {
                 req.session.csrfToken = token
                 req.session.showRelated = user.showRelated
                 req.session.showTooltips = user.showTooltips
+                req.session.downloadPixivID = user.downloadPixivID
                 return res.status(200).send("Success")
             } else {
                 return res.status(400).send("Bad request")
@@ -185,6 +186,7 @@ const UserRoutes = (app: Express) => {
                 req.session.role = user.role
                 req.session.showRelated = user.showRelated
                 req.session.showTooltips = user.showTooltips
+                req.session.downloadPixivID = user.downloadPixivID
             }
             const session = structuredClone(req.session)
             delete session.captchaAnswer
@@ -273,6 +275,22 @@ const UserRoutes = (app: Express) => {
             const newTooltips = !Boolean(user.showTooltips)
             req.session.showTooltips = newTooltips 
             await sql.updateUser(req.session.username, "showTooltips", newTooltips)
+            res.status(200).send("Success")
+        } catch (e) {
+            console.log(e)
+            res.status(400).send("Bad request")
+        }
+    })
+
+    app.post("/api/user/downloadpixivid", sessionLimiter, async (req: Request, res: Response) => {
+        try {
+            if (!serverFunctions.validateCSRF(req)) return res.status(400).send("Bad CSRF token")
+            if (!req.session.username) return res.status(401).send("Unauthorized")
+            const user = await sql.user(req.session.username)
+            if (!user) return res.status(400).send("Bad username")
+            const newDownloadPixivID = !Boolean(user.downloadPixivID)
+            req.session.downloadPixivID = newDownloadPixivID 
+            await sql.updateUser(req.session.username, "downloadPixivID", newDownloadPixivID)
             res.status(200).send("Success")
         } catch (e) {
             console.log(e)

@@ -15,6 +15,7 @@ import functions from "../structures/Functions"
 import DragAndDrop from "../components/DragAndDrop"
 import Carousel from "../components/Carousel"
 import DeletePostDialog from "../dialogs/DeletePostDialog"
+import TakedownPostDialog from "../dialogs/TakedownPostDialog"
 import DeleteCommentDialog from "../dialogs/DeleteCommentDialog"
 import EditCommentDialog from "../dialogs/EditCommentDialog"
 import EditTranslationDialog from "../dialogs/EditTranslationDialog"
@@ -198,7 +199,8 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
             let post = posts.find((p: any) => p.postID === postID)
             try {
                 if (!post) post = await axios.get("/api/post", {params: {postID}, withCredentials: true}).then((r) => r.data)
-            } catch {
+            } catch (err) {
+                if (String(err).includes("Error: Request failed with status code 403")) history.push("/403")
                 return
             }
             if (post) {
@@ -220,7 +222,8 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
                     try {
                         post = await axios.get("/api/post", {params: {postID}, withCredentials: true}).then((r) => r.data)
                         setPost(post)
-                    } catch {
+                    } catch (err) {
+                        if (String(err).includes("Error: Request failed with status code 403")) history.push("/403")
                         return
                     }
                 }
@@ -358,9 +361,10 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
         <DeleteCommentDialog/>
         <ReportCommentDialog/>
         {post ? <DeletePostDialog post={post}/> : null}
+        {post ? <TakedownPostDialog post={post}/> : null}
         {post ? <SaveTranslationDialog post={post}/> : null}
         <EditTranslationDialog/>
-        <TitleBar goBack={true}/>
+        {post ? <TitleBar post={post} goBack={true}/> : <TitleBar goBack={true}/>}
         <NavBar goBack={true}/>
         <div className="body">
             {post && tagCategories ? 

@@ -191,6 +191,11 @@ const UserProfilePage: React.FunctionComponent = (props) => {
         setSessionFlag(true)
     }
 
+    const downloadPixivID = async () => {
+        await axios.post("/api/user/downloadpixivid", null, {headers: {"x-csrf-token": functions.getCSRFToken()}, withCredentials: true})
+        setSessionFlag(true)
+    }
+
     const changeBio = async () => {
         const badBio = functions.validateBio(bio)
         if (badBio) {
@@ -330,6 +335,9 @@ const UserProfilePage: React.FunctionComponent = (props) => {
                     </div>
                     <div className="userprofile-row">
                         <span className="userprofile-text">Show Tooltips: <span className="userprofile-text-action" onClick={showTooltips}>{session.showTooltips ? "Yes" : "No"}</span></span>
+                    </div>
+                    <div className="userprofile-row">
+                        <span className="userprofile-text">Download Pixiv ID: <span className="userprofile-text-action" onClick={downloadPixivID}>{session.downloadPixivID ? "Yes" : "No"}</span></span>
                     </div>
                     <Link to="/change-username" className="userprofile-row">
                         <span className="userprofile-link">Change Username</span>

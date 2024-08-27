@@ -3,8 +3,9 @@ import {useHistory} from "react-router-dom"
 import {ThemeContext, HideSidebarContext, HideNavbarContext, HideSortbarContext, EnableDragContext, MobileContext, UnverifiedPostsContext,
 RelativeContext, HideTitlebarContext, SidebarHoverContext, SearchContext, SearchFlagContext, PostsContext, ShowDeletePostDialogContext, AutoSearchContext,
 TagsContext, RandomFlagContext, ImageSearchFlagContext, SidebarTextContext, SessionContext, MobileScrollingContext, QuickEditIDContext,
-TranslationModeContext, TranslationDrawingEnabledContext, SiteHueContext, SiteLightnessContext, SiteSaturationContext} from "../Context"
+TranslationModeContext, TranslationDrawingEnabledContext, SiteHueContext, SiteLightnessContext, SiteSaturationContext, ShowTakedownPostDialogContext} from "../Context"
 import {HashLink as Link} from "react-router-hash-link"
+import permissions from "../structures/Permissions"
 import favicon from "../assets/icons/favicon.png"
 import searchIcon from "../assets/icons/search.png"
 import searchIconHover from "../assets/icons/search-hover.png"
@@ -20,6 +21,8 @@ import code from "../assets/icons/code.png"
 import setAvatar from "../assets/icons/setavatar.png"
 import addTranslation from "../assets/icons/addtranslation.png"
 import report from "../assets/icons/report.png"
+import takedown from "../assets/icons/takedown.png"
+import restore from "../assets/icons/restore.png"
 import quickEdit from "../assets/icons/quickedit.png"
 import edit from "../assets/icons/edit.png"
 import historyIcon from "../assets/icons/history.png"
@@ -87,6 +90,7 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
     const {imageSearchFlag, setImageSearchFlag} = useContext(ImageSearchFlagContext)
     const {sidebarText, setSidebarText} = useContext(SidebarTextContext)
     const {showDeletePostDialog, setShowDeletePostDialog} = useContext(ShowDeletePostDialogContext)
+    const {showTakedownPostDialog, setShowTakedownPostDialog} = useContext(ShowTakedownPostDialogContext)
     const {mobile, setMobile} = useContext(MobileContext)
     const {mobileScrolling, setMobileScrolling} = useContext(MobileScrollingContext)
     const {session, setSession} = useContext(SessionContext)
@@ -596,6 +600,10 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
         if (newMode) setTranslationDrawingEnabled(true)
     }
 
+    const triggerTakedown = () => {
+        setShowTakedownPostDialog((prev: boolean) => !prev)
+    }
+
     const generateUsernameJSX = (type?: string) => {
         let username = type === "uploader" ? props.post.uploader : props.post.updater 
         const role = type === "uploader" ? uploaderRole : updaterRole
@@ -754,25 +762,25 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
                         {noTagsArtist()}
                         <div className="sidebar-row">
                             <span className="tag">Title:</span>
-                            <span className="tag-alt">{props.post.title || "None"}</span>
+                            <span className={`tag-alt ${props.post.hidden ? "strikethrough" : ""}`}>{props.post.title || "None"}</span>
                         </div>
                         {props.post.translatedTitle ? 
                         <div className="sidebar-row">
                             <span className="tag">Translated:</span>
-                            <span className="tag-alt">{functions.toProperCase(props.post.translatedTitle)}</span>
+                            <span className={`tag-alt ${props.post.hidden ? "strikethrough" : ""}`}>{functions.toProperCase(props.post.translatedTitle)}</span>
                         </div>
                         : null}
                         <div className="sidebar-row">
                             <span className="tag">Drawn:</span>
-                            <span className="tag-alt">{props.post.drawn ? functions.formatDate(new Date(props.post.drawn)) : "Unknown"}</span>
+                            <span className={`tag-alt ${props.post.hidden ? "strikethrough" : ""}`}>{props.post.drawn ? functions.formatDate(new Date(props.post.drawn)) : "Unknown"}</span>
                         </div>
                         <div className="sidebar-row">
                             <span className="tag">Source:</span>
-                            <span className="tag-alt-link" onClick={() => window.open(props.post.link, "_blank")}>{getDomain()}</span>
+                            <span className={`tag-alt-link ${props.post.hidden ? "strikethrough" : ""}`} onClick={() => window.open(props.post.link, "_blank")}>{getDomain()}</span>
                         </div>
                         <div className="sidebar-row">
                             <span className="tag">Bookmarks:</span>
-                            <span className="tag-alt">{props.post.bookmarks ? props.post.bookmarks : "?"}</span>
+                            <span className={`tag-alt ${props.post.hidden ? "strikethrough" : ""}`}>{props.post.bookmarks ? props.post.bookmarks : "?"}</span>
                         </div>
                         {generateMirrorsJSX()}
                     </div>
@@ -872,6 +880,12 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
                                 <span className="tag">Add Translation</span>
                             </span>
                         </div> : null}
+                        {permissions.isAdmin(session) ? <div className="sidebar-row">
+                            <span className="tag-hover" onClick={triggerTakedown}>
+                                <img className="sidebar-icon" src={props.post.hidden ? restore : takedown} style={{filter: getFilter()}}/>
+                                <span className="tag">{props.post.hidden ? "Restore" : "Takedown"}</span>
+                            </span>
+                        </div> : null}
                         {/* <div className="sidebar-row">
                             <span className="tag-hover">
                                 <img className="sidebar-icon" src={getReport()}/>
@@ -923,7 +937,7 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
                     <Link to="/contact">
                         <img className="sidebar-footer-icon" src={contact} style={{filter: getFilter()}}/>
                     </Link>
-                    <img className="sidebar-footer-icon" src={code} style={{filter: getFilter()}} onClick={() => window.open(pack.repository.url, "_blank")}/>
+                    {/* <img className="sidebar-footer-icon" src={code} style={{filter: getFilter()}} onClick={() => window.open(pack.repository.url, "_blank")}/> */}
                 </div>
             </div>
         </div>

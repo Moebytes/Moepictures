@@ -125,7 +125,7 @@ const ImageGrid: React.FunctionComponent<Props> = (props) => {
                     let counter = 0
                     for (let i = 0; i < elements.length; i++) {
                         if (elements[i]?.innerText?.toLowerCase() === "all") counter++
-                        if (elements[i]?.innerText?.toLowerCase() === "date") counter++
+                        if (elements[i]?.innerText?.toLowerCase() === "random") counter++
                     }
                     if (!img && counter >= 4) randomPosts()
                 }
@@ -483,6 +483,7 @@ const ImageGrid: React.FunctionComponent<Props> = (props) => {
             //if (post.thirdParty) continue
             if (!session.username) if (post.restrict !== "safe") continue
             if (restrictType !== "explicit") if (post.restrict === "explicit") continue
+            if (!permissions.isElevated(session)) if (post.hidden) continue
             if (!permissions.isElevated(session)) if (post.restrict === "explicit") continue
             const image = post.images[0]
             if (!image) continue

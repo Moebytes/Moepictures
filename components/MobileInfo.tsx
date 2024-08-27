@@ -2,9 +2,10 @@ import React, {useContext, useEffect, useState, useReducer} from "react"
 import {useHistory} from "react-router-dom"
 import {ThemeContext, HideNavbarContext, HideSortbarContext, EnableDragContext, MobileContext, UnverifiedPostsContext,
 RelativeContext, HideTitlebarContext, SearchContext, SearchFlagContext, PostsContext, ShowDeletePostDialogContext,
-TagsContext, RandomFlagContext, ImageSearchFlagContext, SessionContext, QuickEditIDContext,
+TagsContext, RandomFlagContext, ImageSearchFlagContext, SessionContext, QuickEditIDContext, ShowTakedownPostDialogContext,
 SiteHueContext, SiteLightnessContext, SiteSaturationContext, TranslationModeContext, TranslationDrawingEnabledContext} from "../Context"
 import {HashLink as Link} from "react-router-hash-link"
+import permissions from "../structures/Permissions"
 import favicon from "../assets/icons/favicon.png"
 import setAvatar from "../assets/icons/setavatar.png"
 import addTranslation from "../assets/icons/addtranslation.png"
@@ -13,6 +14,8 @@ import edit from "../assets/icons/edit.png"
 import historyIcon from "../assets/icons/history.png"
 import quickEdit from "../assets/icons/quickedit.png"
 import deleteIcon from "../assets/icons/delete.png"
+import takedown from "../assets/icons/takedown.png"
+import restore from "../assets/icons/restore.png"
 import rejectRed from "../assets/icons/reject-red.png"
 import approveGreen from "../assets/icons/approve-green.png"
 import adminCrown from "../assets/icons/admin-crown.png"
@@ -61,6 +64,7 @@ const MobileInfo: React.FunctionComponent<Props> = (props) => {
     const {randomFlag, setRandomFlag} = useContext(RandomFlagContext)
     const {imageSearchFlag, setImageSearchFlag} = useContext(ImageSearchFlagContext)
     const {showDeletePostDialog, setShowDeletePostDialog} = useContext(ShowDeletePostDialogContext)
+    const {showTakedownPostDialog, setShowTakedownPostDialog} = useContext(ShowTakedownPostDialogContext)
     const {mobile, setMobile} = useContext(MobileContext)
     const {session, setSession} = useContext(SessionContext)
     const [maxTags, setMaxTags] = useState(23)
@@ -359,6 +363,10 @@ const MobileInfo: React.FunctionComponent<Props> = (props) => {
         if (newMode) setTranslationDrawingEnabled(true)
     }
 
+    const triggerTakedown = () => {
+        setShowTakedownPostDialog((prev: boolean) => !prev)
+    }
+
     const postHistory = () => {
         window.scrollTo(0, 0)
         history.push(`/post/history/${props.post.postID}`)
@@ -437,25 +445,25 @@ const MobileInfo: React.FunctionComponent<Props> = (props) => {
                         {noTagsArtist()}
                         <div className="mobileinfo-row">
                             <span className="tag">Title:</span>
-                            <span className="tag-alt">{props.post.title || "None"}</span>
+                            <span className={`tag-alt ${props.post.hidden ? "strikethrough" : ""}`}>{props.post.title || "None"}</span>
                         </div>
                         {props.post.translatedTitle ? 
                         <div className="mobileinfo-row">
                             <span className="tag">Translated:</span>
-                            <span className="tag-alt">{functions.toProperCase(props.post.translatedTitle)}</span>
+                            <span className={`tag-alt ${props.post.hidden ? "strikethrough" : ""}`}>{functions.toProperCase(props.post.translatedTitle)}</span>
                         </div>
                         : null}
                         <div className="mobileinfo-row">
                             <span className="tag">Drawn:</span>
-                            <span className="tag-alt">{props.post.drawn ? functions.formatDate(new Date(props.post.drawn)) : "Unknown"}</span>
+                            <span className={`tag-alt ${props.post.hidden ? "strikethrough" : ""}`}>{props.post.drawn ? functions.formatDate(new Date(props.post.drawn)) : "Unknown"}</span>
                         </div>
                         <div className="mobileinfo-row">
                             <span className="tag">Source:</span>
-                            <span className="tag-alt-link" onClick={() => window.open(props.post.link, "_blank")}>{getDomain()}</span>
+                            <span className={`tag-alt-link ${props.post.hidden ? "strikethrough" : ""}`} onClick={() => window.open(props.post.link, "_blank")}>{getDomain()}</span>
                         </div>
                         <div className="mobileinfo-row">
                             <span className="tag">Bookmarks:</span>
-                            <span className="tag-alt">{props.post.bookmarks ? props.post.bookmarks : "?"}</span>
+                            <span className={`tag-alt ${props.post.hidden ? "strikethrough" : ""}`}>{props.post.bookmarks ? props.post.bookmarks : "?"}</span>
                         </div>
                         {generateMirrorsJSX()}
                     </div> </>
@@ -563,6 +571,12 @@ const MobileInfo: React.FunctionComponent<Props> = (props) => {
                                 <span className="tag">Add Translation</span>
                             </span>
                         </div>
+                        {permissions.isAdmin(session) ? <div className="mobileinfo-row">
+                            <span className="tag-hover" onClick={triggerTakedown}>
+                                <img className="mobileinfo-icon" src={props.post.hidden ? restore : takedown} style={{filter: getFilter()}}/>
+                                <span className="tag">{props.post.hidden ? "Restore" : "Takedown"}</span>
+                            </span>
+                        </div> : null}
                         {/* 
                         <div className="mobileinfo-row">
                             <span className="tag-hover">

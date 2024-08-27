@@ -77,6 +77,7 @@ const lightColorList = {
 interface Props {
     reset?: boolean
     goBack?: boolean
+    post?: any
 }
 
 const TitleBar: React.FunctionComponent<Props> = (props) => {
@@ -209,7 +210,7 @@ const TitleBar: React.FunctionComponent<Props> = (props) => {
             </div>
             {!mobile ? 
             <div className="titlebar-search-text-container">
-                <span className="titlebar-search-text">{headerText}</span>
+                <span className={`titlebar-search-text ${props.post?.hidden ? "strikethrough" : ""}`}>{headerText}</span>
             </div> : null}
         </div>
     )

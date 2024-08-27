@@ -119,6 +119,34 @@ const TagRoutes = (app: Express) => {
         }
     })
 
+    app.post("/api/tag/takedown", tagUpdateLimiter, async (req: Request, res: Response) => {
+        try {
+            const {tag} = req.body
+            if (!serverFunctions.validateCSRF(req)) return res.status(400).send("Bad CSRF token")
+            if (!req.session.username) return res.status(401).send("Unauthorized")
+            if (!tag) return res.status(400).send("Bad tag")
+            if (req.session.role !== "admin") return res.status(403).end()
+            const tagObj = await sql.tag(tag)
+            if (!tagObj) return res.status(404).send("Doesn't exist")
+            const allPosts = await sql.search([tag], "all", "all", "all", "date", undefined, "9999")
+            if (tagObj.banned) {
+                await sql.updateTag(tag, "banned", false)
+                for (const post of allPosts) {
+                    await sql.updatePost(post.postID, "hidden", false)
+                }
+            } else {
+                await sql.updateTag(tag, "banned", true)
+                for (const post of allPosts) {
+                    await sql.updatePost(post.postID, "hidden", true)
+                }
+            }
+            res.status(200).send("Success")
+        } catch (e) {
+            console.log(e) 
+            res.status(400).send("Bad request")
+        }
+    })
+
     app.put("/api/tag/edit", tagUpdateLimiter, async (req: Request, res: Response) => {
         try {
             const {tag, key, description, image, aliases, implications, pixivTags, pixiv, twitter, website, fandom, reason, silent} = req.body

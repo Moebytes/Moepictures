@@ -57,6 +57,7 @@ declare module "express-session" {
       publicFavorites: boolean
       showRelated: boolean
       showTooltips: boolean
+      downloadPixivID: boolean
       $2fa: boolean
       ip: string
       role: string

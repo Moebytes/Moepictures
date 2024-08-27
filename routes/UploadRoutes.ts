@@ -144,7 +144,8 @@ const CreateRoutes = (app: Express) => {
           let order = i + 1
           const ext = images[i].ext
           let fileOrder = images.length > 1 ? `${order}` : "1"
-          const filename = source.title ? `${source.title}.${ext}` : 
+          const cleanTitle = functions.cleanTitle(source.title)
+          const filename = cleanTitle ? `${cleanTitle}.${ext}` : 
           characters[0].tag !== "unknown-character" ? `${characters[0].tag}.${ext}` :
           `${postID}.${ext}`
           let kind = "image" as any
@@ -208,7 +209,8 @@ const CreateRoutes = (app: Express) => {
           uploadDate,
           updatedDate: uploadDate,
           uploader: req.session.username,
-          updater: req.session.username
+          updater: req.session.username,
+          hidden: false
         })
 
         let tagMap = tags
@@ -389,7 +391,8 @@ const CreateRoutes = (app: Express) => {
           let order = i + 1
           const ext = images[i].ext
           let fileOrder = images.length > 1 ? `${order}` : "1"
-          const filename = source.title ? `${source.title}.${ext}` : 
+          const cleanTitle = functions.cleanTitle(source.title)
+          const filename = cleanTitle ? `${cleanTitle}.${ext}` : 
           characters[0].tag !== "unknown-character" ? `${characters[0].tag}.${ext}` :
           `${postID}.${ext}`
           imageFilenames.push(filename)
@@ -672,7 +675,8 @@ const CreateRoutes = (app: Express) => {
           let order = i + 1
           const ext = images[i].ext
           let fileOrder = images.length > 1 ? `${order}` : "1"
-          const filename = source.title ? `${source.title}.${ext}` : 
+          const cleanTitle = functions.cleanTitle(source.title)
+          const filename = cleanTitle ? `${source.title}.${ext}` : 
           characters[0].tag !== "unknown-character" ? `${characters[0].tag}.${ext}` :
           `${postID}.${ext}`
           let kind = "image" as any
@@ -911,7 +915,8 @@ const CreateRoutes = (app: Express) => {
           let order = i + 1
           const ext = images[i].ext
           let fileOrder = images.length > 1 ? `${order}` : "1"
-          const filename = source.title ? `${source.title}.${ext}` : 
+          const cleanTitle = functions.cleanTitle(source.title)
+          const filename = cleanTitle ? `${cleanTitle}.${ext}` : 
           characters[0].tag !== "unknown-character" ? `${characters[0].tag}.${ext}` :
           `${postID}.${ext}`
           let kind = "image" as any
@@ -1151,7 +1156,8 @@ const CreateRoutes = (app: Express) => {
           uploadDate: unverified.uploadDate,
           updatedDate: unverified.updatedDate,
           uploader: unverified.uploader,
-          updater: unverified.updater
+          updater: unverified.updater,
+          hidden: false
         })
 
         let tagMap = unverified.tags

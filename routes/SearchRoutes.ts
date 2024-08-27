@@ -60,6 +60,7 @@ const SearchRoutes = (app: Express) => {
                 return p 
             })
             if (req.session.role !== "admin" && req.session.role !== "mod") {
+                result = result.filter((p: any) => !p.hidden)
                 result = result.filter((p: any) => p.restrict !== "explicit")
                 result = functions.stripTags(result)
             }
@@ -97,6 +98,7 @@ const SearchRoutes = (app: Express) => {
                 return p 
             })
             if (req.session.role !== "admin" && req.session.role !== "mod") {
+                result = result.filter((p: any) => !p.hidden)
                 result = result.filter((p: any) => p.restrict !== "explicit")
                 result = functions.stripTags(result)
             }

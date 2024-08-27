@@ -446,11 +446,11 @@ const SortBar: React.FunctionComponent = (props) => {
         if (!rect || mobile) return "45px"
         const raw = window.innerWidth - rect.right
         let offset = 0
-        if (sizeType === "tiny") offset = -23
-        if (sizeType === "small") offset = -18
-        if (sizeType === "medium") offset = -13
-        if (sizeType === "large") offset = -18
-        if (sizeType === "massive") offset = -13
+        if (sizeType === "tiny") offset = -15
+        if (sizeType === "small") offset = -10
+        if (sizeType === "medium") offset = -5
+        if (sizeType === "large") offset = -10
+        if (sizeType === "massive") offset = -5
         return `${raw + offset}px`
     }
 
@@ -458,7 +458,7 @@ const SortBar: React.FunctionComponent = (props) => {
         const rect = speedRef.current?.getBoundingClientRect()
         if (!rect) return "250px"
         const raw = window.innerWidth - rect.right
-        let offset = -8
+        let offset = 2
         return `${raw + offset}px`
     }
 
@@ -467,6 +467,7 @@ const SortBar: React.FunctionComponent = (props) => {
         if (!rect || mobile) return "0px"
         const raw = window.innerWidth - rect.right
         let offset = 0
+        if (sortType === "random") offset = -45
         if (sortType === "date") offset = -30
         if (sortType === "reverse date") offset = -20
         if (sortType === "drawn") offset = -30
@@ -497,7 +498,7 @@ const SortBar: React.FunctionComponent = (props) => {
         const rect = filterRef.current?.getBoundingClientRect()
         if (!rect) return "30px"
         const raw = window.innerWidth - rect.right
-        let offset = -120
+        let offset = -110
         return `${raw + offset}px`
     }
 
@@ -870,6 +871,9 @@ const SortBar: React.FunctionComponent = (props) => {
             </div>
             <div className={`dropdown-right ${activeDropdown === "sort" ? "" : "hide-dropdown"}`} 
             style={{marginRight: getSortMargin(), top: `${dropTop}px`}} onClick={() => setActiveDropdown("none")}>
+                <div className="sortbar-dropdown-row" onClick={() => setSortType("random")}>
+                    <span className="sortbar-dropdown-text">Random</span>
+                </div>
                 <div className="sortbar-dropdown-row" onClick={() => setSortType("date")}>
                     <span className="sortbar-dropdown-text">Date</span>
                 </div>

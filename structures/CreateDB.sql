@@ -9,6 +9,7 @@ CREATE TABLE IF NOT EXISTS "users" (
     "publicFavorites" boolean,
     "showRelated" boolean,
     "showTooltips" boolean,
+    "downloadPixivID" boolean,
     "image" text,
     "imagePost" bigint REFERENCES posts ("postID") ON UPDATE CASCADE ON DELETE SET NULL,
     "ip" inet,
@@ -34,6 +35,7 @@ CREATE TABLE IF NOT EXISTS "posts" (
     "commentary" text,
     "translatedCommentary" text,
     "bookmarks" int,
+    "hidden" boolean,
     "mirrors" jsonb
 );
 
@@ -96,7 +98,8 @@ CREATE TABLE IF NOT EXISTS "tags" (
     "pixiv" text,
     "twitter" text,
     "fandom" text,
-    "pixivTags" text[]
+    "pixivTags" text[],
+    "banned" boolean
 );
 
 CREATE TABLE IF NOT EXISTS "unverified tags" (

@@ -142,17 +142,15 @@ const ContactPage: React.FunctionComponent = (props) => {
                     </div>
                     </> : <>
                     <span className="contact-link">
-                        If you are contacting for copyright reasons, you must provide the following: <br/>
+                        If you want to takedown your work, you must provide the following: <br/>
                         <span className="contact-text-alt">
-                        ⇾ Contact information (eg. social media, email)<br/>
                         ⇾ Your artist tag or links to specific works<br/>
                         ⇾ Proof of your identity<br/>
-                        ⇾ A statement affirming that you are the copyright holder of the content<br/>
                         </span>
                         These are acceptable proofs of identity:<br/>
                         <span className="contact-text-alt">
                         ⇾ Respond to social media contact (say which account you would prefer being contacted at)<br/>
-                        ⇾ Attach a source file to one of your works which is not available publicly<br/>
+                        ⇾ Attach a source file to one of your works which isn't available publicly<br/>
                         </span>
                     </span>
                     <div className="contact-row">

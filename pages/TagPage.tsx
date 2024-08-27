@@ -1,4 +1,6 @@
 import React, {useEffect, useContext, useState, useRef} from "react"
+import {ThemeContext, EnableDragContext, HideNavbarContext, HideSidebarContext, RelativeContext, HideTitlebarContext, MobileContext,
+ActiveDropdownContext, HeaderTextContext, SidebarTextContext, SessionContext, SearchContext, SearchFlagContext, TakedownTagContext} from "../Context"
 import {useHistory} from "react-router-dom"
 import TitleBar from "../components/TitleBar"
 import NavBar from "../components/NavBar"
@@ -6,15 +8,16 @@ import SideBar from "../components/SideBar"
 import Footer from "../components/Footer"
 import functions from "../structures/Functions"
 import DragAndDrop from "../components/DragAndDrop"
-import axios from "axios"
 import permissions from "../structures/Permissions"
-import {ThemeContext, EnableDragContext, HideNavbarContext, HideSidebarContext, RelativeContext, HideTitlebarContext, MobileContext,
-ActiveDropdownContext, HeaderTextContext, SidebarTextContext, SessionContext, SearchContext, SearchFlagContext} from "../Context"
+import TakedownTagDialog from "../dialogs/TakedownTagDialog"
+import takedown from "../assets/icons/takedown.png"
+import restore from "../assets/icons/restore.png"
 import website from "../assets/icons/support.png"
 import fandom from "../assets/icons/fandom.png"
 import pixiv from "../assets/icons/pixiv.png"
 import twitter from "../assets/icons/twitter.png"
 import Carousel from "../components/Carousel"
+import axios from "axios"
 import "./styles/tagpage.less"
 
 
@@ -35,6 +38,7 @@ const TagPage: React.FunctionComponent<Props> = (props) => {
     const {session, setSession} = useContext(SessionContext)
     const {mobile, setMobile} = useContext(MobileContext)
     const {search, setSearch} = useContext(SearchContext)
+    const {takedownTag, setTakedownTag} = useContext(TakedownTagContext)
     const {searchFlag, setSearchFlag} = useContext(SearchFlagContext)
     const [tag, setTag] = useState(null) as any
     const [posts, setPosts] = useState([]) as any
@@ -152,6 +156,12 @@ const TagPage: React.FunctionComponent<Props> = (props) => {
         return jsx
     }
 
+    const tagTakedownJSX = () => {
+        if (permissions.isAdmin(session)) {
+            return <img className="tag-social" src={tag.banned ? restore : takedown} onClick={() => setTakedownTag(tag)}/>
+        }
+    }
+
     const pixivTagsJSX = () => {
         let jsx = [] as any
         if (tag.pixivTags?.[0]) {
@@ -222,9 +232,22 @@ const TagPage: React.FunctionComponent<Props> = (props) => {
         }
     }
 
+    const postsJSX = () => {
+        if (!permissions.isElevated(session) && tag.banned) return null 
+        if (posts.length) {
+            return (
+                <div className="tag-column">
+                    <span><span className="tag-label" onClick={searchTag}>Posts</span> <span className="tag-label-alt">{count}</span></span>
+                    <Carousel images={postImages} noKey={true} set={set} index={postIndex} update={updateOffset} appendImages={appendImages} height={250}/>
+                </div>
+            )
+        }
+    }
+
     return (
         <>
         <DragAndDrop/>
+        <TakedownTagDialog/>
         <TitleBar/>
         <NavBar/>
         <div className="body">
@@ -237,21 +260,21 @@ const TagPage: React.FunctionComponent<Props> = (props) => {
                         <div className="tag-img-container">
                             <img className="tag-img" src={functions.getTagLink(tag.type, tag.image)}/>
                         </div> : null}
-                        <span className="tag-heading">{functions.toProperCase(tag.tag.replaceAll("-", " "))}</span>
+                        <span className={`tag-heading ${tag.banned ? "strikethrough" : ""}`}>{functions.toProperCase(tag.tag.replaceAll("-", " "))}</span>
                         {tagSocialJSX()}
+                        {tagTakedownJSX()}
                     </div>
                     {pixivTagsJSX()}
                     {tagAliasJSX()}
+                    {tag.banned ? <div className="tag-row">
+                        <span className="tag-text strikethrough-color">You may not upload artwork from this artist.</span>
+                    </div> : null}
                     <div className="tag-row">
                         <span className="tag-text">{tag.description}</span>
                     </div>
                     {tagImplicationJSX()}
                     {relatedTagJSX()}
-                    {posts.length ?
-                    <div className="tag-column">
-                        <span><span className="tag-label" onClick={searchTag}>Posts</span> <span className="tag-label-alt">{count}</span></span>
-                        <Carousel images={postImages} noKey={true} set={set} index={postIndex} update={updateOffset} appendImages={appendImages} height={250}/>
-                    </div> : null}
+                    {postsJSX()}
                 </div> : null}
                 <Footer/>
             </div>

@@ -37,6 +37,7 @@ const PostRoutes = (app: Express) => {
             let result = await sql.post(Number(postID))
             if (!result) return res.status(400).send("Invalid postID")
             if (req.session.role !== "admin" && req.session.role !== "mod") {
+                if (result.hidden) return res.status(403).end()
                 if (result.restrict === "explicit") return res.status(403).end()
             }
             if (result?.images.length > 1) {
@@ -65,6 +66,7 @@ const PostRoutes = (app: Express) => {
             let result = await sql.postTags(Number(postID))
             if (!result) return res.status(400).send("Invalid postID")
             if (req.session.role !== "admin" && req.session.role !== "mod") {
+                if (result.hidden) return res.status(403).end()
                 if (result.restrict === "explicit") return res.status(403).end()
             }
             if (Number(postID) !== req.session.lastPostID) {
@@ -85,6 +87,7 @@ const PostRoutes = (app: Express) => {
             if (Number.isNaN(Number(postID))) return res.status(400).send("Invalid postID")
             const result = await sql.comments(Number(postID))
             if (req.session.role !== "admin" && req.session.role !== "mod") {
+                if (result.hidden) return res.status(403).end()
                 if (result.restrict === "explicit") return res.status(403).end()
             }
             res.status(200).json(result)
@@ -99,8 +102,8 @@ const PostRoutes = (app: Express) => {
             const postID = req.query.postID
             if (!serverFunctions.validateCSRF(req)) return res.status(400).send("Bad CSRF token")
             if (Number.isNaN(Number(postID))) return res.status(400).send("Invalid postID")
-            if (req.session.role !== "admin") return res.status(403).end()
             if (!req.session.username) return res.status(401).send("Unauthorized")
+            if (req.session.role !== "admin") return res.status(403).end()
             const post = await sql.post(Number(postID)).catch(() => null)
             if (!post) return res.status(200).send("Doesn't exist")
             await sql.deletePost(Number(postID))
@@ -116,12 +119,34 @@ const PostRoutes = (app: Express) => {
         }
     })
 
+    app.post("/api/post/takedown", postUpdateLimiter, async (req: Request, res: Response) => {
+        try {
+            const {postID} = req.body
+            if (!serverFunctions.validateCSRF(req)) return res.status(400).send("Bad CSRF token")
+            if (Number.isNaN(Number(postID))) return res.status(400).send("Invalid postID")
+            if (!req.session.username) return res.status(401).send("Unauthorized")
+            if (req.session.role !== "admin") return res.status(403).end()
+            const post = await sql.post(Number(postID)).catch(() => null)
+            if (!post) return res.status(404).send("Doesn't exist")
+            if (post.hidden) {
+                await sql.updatePost(Number(postID), "hidden", false)
+            } else {
+                await sql.updatePost(Number(postID), "hidden", true)
+            }
+            res.status(200).send("Success")
+        } catch (e) {
+            console.log(e) 
+            res.status(400).send("Bad request")
+        }
+    })
+
     app.get("/api/post/thirdparty", postLimiter, async (req: Request, res: Response, next: NextFunction) => {
         try {
             const postID = req.query.postID as string
             if (Number.isNaN(Number(postID))) return res.status(400).send("Invalid postID")
             let posts = await sql.thirdParty(Number(postID))
             if (req.session.role !== "admin" && req.session.role !== "mod") {
+                posts = posts.filter((p: any) => !p?.hidden)
                 posts = posts.filter((p: any) => p?.restrict !== "explicit")
             }
             posts = functions.stripTags(posts)
@@ -139,6 +164,7 @@ const PostRoutes = (app: Express) => {
             const post = await sql.parent(Number(postID))
             if (!post) return res.status(200).json()
             if (req.session.role !== "admin" && req.session.role !== "mod") {
+                if (post.hidden) return res.status(403).end()
                 if (post.restrict === "explicit") return res.status(403).end()
             }
             delete post.tags

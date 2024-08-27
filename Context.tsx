@@ -147,6 +147,8 @@ export const SelectionModeContext = React.createContext<any>(null)
 export const SelectionItemsContext = React.createContext<any>(null)
 export const SelectionPostsContext = React.createContext<any>(null)
 export const ShowBulkQuickEditDialogContext = React.createContext<any>(null)
+export const ShowTakedownPostDialogContext = React.createContext<any>(null)
+export const TakedownTagContext = React.createContext<any>(null)
 
 const Context: React.FunctionComponent = (props) => {
     const [siteHue, setSiteHue] = useState(180)
@@ -182,7 +184,7 @@ const Context: React.FunctionComponent = (props) => {
     const [restrictType, setRestrictType] = useState("all")
     const [styleType, setStyleType] = useState("all")
     const [sizeType, setSizeType] = useState("medium")
-    const [sortType, setSortType] = useState("date")
+    const [sortType, setSortType] = useState("random")
     const [search, setSearch] = useState("")
     const [searchFlag, setSearchFlag] = useState(false)
     const [speed, setSpeed] = useState(1)
@@ -196,6 +198,8 @@ const Context: React.FunctionComponent = (props) => {
     const [quoteText, setQuoteText] = useState(null)
     const [hideMobileNavbar, setHideMobileNavbar] = useState(true)
     const [showDeletePostDialog, setShowDeletePostDialog] = useState(false)
+    const [showTakedownPostDialog, setShowTakedownPostDialog] = useState(false)
+    const [takedownTag, setTakedownTag] = useState(null)
     const [deleteTagHistoryID, setDeleteTagHistoryID] = useState(null)
     const [revertTagHistoryID, setRevertTagHistoryID] = useState(null)
     const [deleteTagHistoryFlag, setDeleteTagHistoryFlag] = useState(null)
@@ -283,6 +287,8 @@ const Context: React.FunctionComponent = (props) => {
 
 return (
     <>
+        <TakedownTagContext.Provider value={{takedownTag, setTakedownTag}}>
+        <ShowTakedownPostDialogContext.Provider value={{showTakedownPostDialog, setShowTakedownPostDialog}}>
         <SelectionPostsContext.Provider value={{selectionPosts, setSelectionPosts}}>
         <ShowBulkQuickEditDialogContext.Provider value={{showBulkQuickEditDialog, setShowBulkQuickEditDialog}}>
         <SelectionItemsContext.Provider value={{selectionItems, setSelectionItems}}>
@@ -546,6 +552,8 @@ return (
         </SelectionItemsContext.Provider>
         </ShowBulkQuickEditDialogContext.Provider>
         </SelectionPostsContext.Provider>
+        </ShowTakedownPostDialogContext.Provider>
+        </TakedownTagContext.Provider>
     </>
     )
 }

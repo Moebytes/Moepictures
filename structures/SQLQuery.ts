@@ -66,9 +66,12 @@ export default class SQLQuery {
   }
 
   /** Bulk updates a post */
-  public static bulkUpdatePost = async (postID: number, params: {restrict?: string, style?: string, thirdParty?: boolean, title?: string, translatedTitle?: string,
-    artist?: string, drawn?: string, link?: string, commentary?: string, translatedCommentary?: string, bookmarks?: string, mirrors?: string, type?: string, uploadDate?: string, uploader?: string, updatedDate?: string, updater?: string}) => {
-    const {restrict, style, thirdParty, title, translatedTitle, artist, drawn, link, commentary, translatedCommentary, bookmarks, mirrors, type, uploadDate, uploader, updatedDate, updater} = params
+  public static bulkUpdatePost = async (postID: number, params: {restrict?: string, style?: string, thirdParty?: boolean, 
+    title?: string, translatedTitle?: string, artist?: string, drawn?: string, link?: string, commentary?: string, 
+    translatedCommentary?: string, bookmarks?: string, mirrors?: string, type?: string, uploadDate?: string, uploader?: string, 
+    updatedDate?: string, updater?: string, hidden?: boolean}) => {
+    const {restrict, style, thirdParty, title, translatedTitle, artist, drawn, link, commentary, translatedCommentary, bookmarks, 
+    mirrors, type, uploadDate, uploader, updatedDate, updater, hidden} = params
     let setArray = [] as any
     let values = [] as any
     let i = 1 
@@ -154,6 +157,11 @@ export default class SQLQuery {
     }
     if (updater) {
       setArray.push(`"updater" = $${i}`)
+      values.push(updater)
+      i++
+    }
+    if (hidden) {
+      setArray.push(`"hidden" = $${i}`)
       values.push(updater)
       i++
     }
@@ -436,7 +444,7 @@ export default class SQLQuery {
   }
 
   /** Update a tag. */
-  public static updateTag = async (tag: string, column: string, value: string) => {
+  public static updateTag = async (tag: string, column: string, value: string | boolean) => {
     const query: QueryConfig = {
       text: `UPDATE "tags" SET "${column}" = $1 WHERE "tag" = $2`,
       values: [value, tag]
@@ -509,6 +517,7 @@ export default class SQLQuery {
     if (style === "pixel") styleQuery = `posts.style = 'pixel'`
     if (style === "chibi") styleQuery = `posts.style = 'chibi'`
     let sortQuery = ""
+    if (sort === "random") sortQuery = `ORDER BY RANDOM()`
     if (sort === "date") sortQuery = `ORDER BY posts."uploadDate" DESC`
     if (sort === "reverse date") sortQuery = `ORDER BY posts."uploadDate" ASC`
     if (sort === "drawn") sortQuery = `ORDER BY posts.drawn DESC NULLS LAST`
@@ -1754,6 +1763,7 @@ export default class SQLQuery {
           'commentary', post_json."commentary",
           'translatedCommentary', post_json."translatedCommentary",
           'bookmarks', post_json."bookmarks",
+          'hidden', post_json."hidden",
           'mirrors', post_json."mirrors",
           'images', (array_agg(post_json."images"))[1]${includeTags ? `,
           'tags', post_json."tags"` : ""}
@@ -1762,9 +1772,9 @@ export default class SQLQuery {
         JOIN post_json ON post_json."postID" = favorites."postID"
         ${whereQueries ? `WHERE ${whereQueries}` : ""}
         GROUP BY favorites."favoriteID", post_json."postID", post_json."uploader", post_json."updater", ${includeTags ? `post_json."tags",` : ""}
-        post_json."type", post_json."restrict", post_json."style", post_json."cutenessAvg", post_json."favoriteCount",
-        post_json."thirdParty", post_json."drawn", post_json."uploadDate", post_json."updatedDate", post_json."title",
-        post_json."translatedTitle", post_json."artist", post_json."link", post_json."commentary", post_json."translatedCommentary", post_json."bookmarks", post_json."mirrors"
+        post_json."type", post_json."restrict", post_json."style", post_json."cutenessAvg", post_json."favoriteCount", post_json."thirdParty", 
+        post_json."drawn", post_json."uploadDate", post_json."updatedDate", post_json."title", post_json."hidden", post_json."translatedTitle",
+        post_json."artist", post_json."link", post_json."commentary", post_json."translatedCommentary", post_json."bookmarks", post_json."mirrors"
         ${sortQuery}
         ${limit ? `LIMIT $${limitValue}` : "LIMIT 100"} ${offset ? `OFFSET $${i}` : ""}
       `),

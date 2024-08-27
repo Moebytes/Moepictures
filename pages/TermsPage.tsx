@@ -92,8 +92,8 @@ const TermsPage: React.FunctionComponent = (props) => {
                             ⇾ Vandalize posts, tags, or translations.<br/>
                             ⇾ Create multiple accounts to circumvent bans.<br/>
                             ⇾ Attempt to gain unauthorized access to another user’s account.<br/>
-                            ⇾ Attempt to upload computer viruses or other malicious content.<br/>
-                            ⇾ Attempt to disrupt, overburden, or impair the operation of our servers.<br/><br/>
+                            ⇾ Attempt to upload malware or other malicious content.<br/>
+                            ⇾ Attempt to disrupt or impair the operation of our servers.<br/><br/>
                             </span>
 
                             User-generated content<br/>
@@ -101,7 +101,7 @@ const TermsPage: React.FunctionComponent = (props) => {
                             ⇾ All of the content on our site is user-generated and we take no responsibility
                             for content submitted by users, whether it be images, animations, videos, or text; 
                             the responsibility falls on the user who submitted the content. <br/>
-                            ⇾ We reserve the right to remove content at any time for any or no reason. <br/><br/>
+                            ⇾ We reserve the right to remove content at any time for any reason. <br/><br/>
                             </span>
 
                             Copyright and DMCA takedowns<br/>
@@ -109,7 +109,6 @@ const TermsPage: React.FunctionComponent = (props) => {
                             works removed from the site, you can contact us through the contact form 
                             and provide the following pieces of information:<br/>
                             <span className="terms-text-alt">
-                            ⇾ Contact information (eg. social media, email)<br/>
                             ⇾ Your artist tag or links to specific works<br/>
                             ⇾ A way to prove your identity<br/>
                             </span>
@@ -146,20 +145,13 @@ const TermsPage: React.FunctionComponent = (props) => {
                             We collect information provided directly to us, which includes:<br/><br/>
 
                             <span className="privacy-text-alt">Account information</span> - We need to store your 
-                            username, email, password, bio, and any account preferences. Passwords are hashed and salted with the reliable bcrypt algorithm.<br/><br/>
+                            username, email, password, bio, ip address, and any account preferences. Passwords are hashed.<br/><br/>
 
                             <span className="privacy-text-alt">Content you submit</span> - We collect any content that you submit which may include
                             text, images, gifs, videos, posts and comments. <br/><br/>
 
                             <span className="privacy-text-alt">Actions you take</span> - We collect information on the interactions that you make with the 
                             content, such as favoriting posts or rating them.<br/><br/>
-
-                            We also automatically collect information when you access our service, 
-                            which includes:<br/><br/>
-
-                            <span className="privacy-text-alt">Logs and usage data</span> - We may log information when you access our services 
-                            which may include your IP Address, device information, pages visited, requested URL,
-                            and search terms.<br/><br/>
 
                             <span className="privacy-text-alt">Cookies</span> - Cookies are used to maintain your
                             login session.<br/><br/>
@@ -168,8 +160,7 @@ const TermsPage: React.FunctionComponent = (props) => {
                             We use your information in order to:<br/>
                             <span className="privacy-text-alt">
                             ⇾ Provide our site's functionality.<br/>
-                            ⇾ Protect our site from abuse and spam.<br/>
-                            ⇾ Analyze usage data in connection with our site.<br/><br/>
+                            ⇾ Protect our site from abuse and spam.<br/><br/>
                             </span>
 
                             How information about you is shared<br/>

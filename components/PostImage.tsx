@@ -1016,37 +1016,45 @@ const PostImage: React.FunctionComponent<Props> = (props) => {
     }
 
     const multiRender = async () => {
+        let filename = path.basename(props.img)
+        if (session.downloadPixivID && props.post?.link?.includes("pixiv.net")) {
+            filename = props.post.link.match(/\d+/g)?.[0] + path.extname(props.img)
+        }
         if (functions.isVideo(props.img)) {
             const video = await renderVideo()
             if (!video) return
-            functions.download(path.basename(props.img), video)
+            functions.download(filename, video)
             window.URL.revokeObjectURL(video)
         } else if (functions.isGIF(props.img) || gifData) {
             const gif = await renderGIF()
             if (!gif) return
-            functions.download(path.basename(props.img), gif)
+            functions.download(filename, gif)
             window.URL.revokeObjectURL(gif)
         } else {
             if (props.comicPages) {
                 const zip = new JSZip()
                 for (let i = 0; i < props.comicPages.length; i++) {
                     const page = props.comicPages[i]
+                    let pageName = path.basename(page)
+                    if (session.downloadPixivID && props.post?.link?.includes("pixiv.net")) {
+                        pageName = `${props.post.link.match(/\d+/g)?.[0]}_p${i}${path.extname(page)}`
+                    }
                     const decryptedPage = await cryptoFunctions.decryptedLink(page)
                     const image = await renderImage(decryptedPage)
                     const data = await fetch(image).then((r) => r.arrayBuffer())
-                    zip.file(decodeURIComponent(path.basename(page)), data, {binary: true})
+                    zip.file(decodeURIComponent(pageName), data, {binary: true})
                 }
-                const decoded = decodeURIComponent(path.basename(props.img))
+                const decoded = decodeURIComponent(filename)
                 const id = decoded.split("-")[0]
-                const basename = path.basename(decoded.split("-")[2], path.extname(decoded.split("-")[2]))
-                const filename = `${id}-${basename}.zip`
+                const basename = path.basename(decoded.split("-")[2] ?? "", path.extname(decoded.split("-")[2] ?? ""))
+                const downloadName = basename ? `${id}-${basename}.zip` : `${path.basename(filename, path.extname(filename))}.zip`
                 const blob = await zip.generateAsync({type: "blob"})
                 const url = window.URL.createObjectURL(blob)
-                functions.download(filename , url)
+                functions.download(downloadName , url)
                 window.URL.revokeObjectURL(url)
             } else {
                 const image = await renderImage()
-                functions.download(path.basename(props.img), image)
+                functions.download(filename, image)
                 window.URL.revokeObjectURL(image)
             }
         }
