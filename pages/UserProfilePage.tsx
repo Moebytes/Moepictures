@@ -21,6 +21,8 @@ import permissions from "../structures/Permissions"
 import "./styles/userprofilepage.less"
 import axios from "axios"
 
+let intervalTimer = null as any
+
 const UserProfilePage: React.FunctionComponent = (props) => {
     const [ignored, forceUpdate] = useReducer(x => x + 1, 0)
     const {theme, setTheme} = useContext(ThemeContext)
@@ -55,11 +57,12 @@ const UserProfilePage: React.FunctionComponent = (props) => {
     const [favoriteImages, setFavoriteImages] = useState([]) as any
     const [banReason, setBanReason] = useState("")
     const [bio, setBio] = useState("")
+    const [interval, setInterval] = useState("")
+    const [init, setInit] = useState(true)
     const history = useHistory()
 
     const updateBanReason = async () => {
         const ban = await axios.get("/api/user/ban", {params: {username: session.username}, withCredentials: true}).then((r) => r.data)
-        console.log(ban)
         if (ban?.reason) setBanReason(ban.reason)
     }
 
@@ -114,6 +117,11 @@ const UserProfilePage: React.FunctionComponent = (props) => {
     }, [mobile])
 
     useEffect(() => {
+        if (session) {
+        }
+    }, [])
+
+    useEffect(() => {
         if (!session.cookie) return
         if (!session.username) {
             setRedirect("/profile")
@@ -121,8 +129,12 @@ const UserProfilePage: React.FunctionComponent = (props) => {
             setSidebarText("Login required.")
         } else {
             setBio(session.bio)
+            if (init) {
+                setInterval(Math.floor(Number(session.autosearchInterval || 3000) / 1000).toString())
+                setInit(false)
+            }
         }
-    }, [session])
+    }, [session, init])
 
     const uploadPfp = async (event: any) => {
         const file = event.target.files?.[0]
@@ -195,6 +207,19 @@ const UserProfilePage: React.FunctionComponent = (props) => {
         await axios.post("/api/user/downloadpixivid", null, {headers: {"x-csrf-token": functions.getCSRFToken()}, withCredentials: true})
         setSessionFlag(true)
     }
+
+    useEffect(() => {
+        const autosearchInterval = async () => {
+            clearTimeout(intervalTimer) 
+            intervalTimer = setTimeout(() => {
+                axios.post("/api/user/autosearchinterval", {interval}, {headers: {"x-csrf-token": functions.getCSRFToken()}, withCredentials: true})
+                .then(() => setSessionFlag(true))
+            }, 1000)
+        }
+        autosearchInterval()
+    }, [interval])
+
+    
 
     const changeBio = async () => {
         const badBio = functions.validateBio(bio)
@@ -338,6 +363,11 @@ const UserProfilePage: React.FunctionComponent = (props) => {
                     </div>
                     <div className="userprofile-row">
                         <span className="userprofile-text">Download Pixiv ID: <span className="userprofile-text-action" onClick={downloadPixivID}>{session.downloadPixivID ? "Yes" : "No"}</span></span>
+                    </div>
+                    <div className="userprofile-row">
+                        <span className="userprofile-text">Autosearch Interval: </span>
+                        <input className="userprofile-input" spellCheck={false} value={interval} onChange={(event) => setInterval(event.target.value)}
+                        onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}></input>
                     </div>
                     <Link to="/change-username" className="userprofile-row">
                         <span className="userprofile-link">Change Username</span>

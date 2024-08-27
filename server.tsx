@@ -58,6 +58,7 @@ declare module "express-session" {
       showRelated: boolean
       showTooltips: boolean
       downloadPixivID: boolean
+      autosearchInterval: number
       $2fa: boolean
       ip: string
       role: string
@@ -98,7 +99,7 @@ app.use(session({
     expireColumnName: "expires"
   }),
   secret: process.env.COOKIE_SECRET!,
-  cookie: {maxAge: 1000 * 60 * 60 * 24 * 30},
+  cookie: {maxAge: 1000 * 60 * 60 * 24 * 30, sameSite: "strict"},
   rolling: true,
   resave: false,
   saveUninitialized: false

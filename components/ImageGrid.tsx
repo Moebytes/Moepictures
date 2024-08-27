@@ -153,10 +153,10 @@ const ImageGrid: React.FunctionComponent<Props> = (props) => {
             await randomPosts(search)
             timeout = setTimeout(() => {
                 searchLoop()
-            }, 3000)
+            }, Math.floor(Number(session.autosearchInterval || 3000)))
         }
         searchLoop()
-    }, [autoSearch, search])
+    }, [session, autoSearch, search])
 
     useEffect(() => {
         window.scrollTo(0, 0)

@@ -2,7 +2,7 @@ import React, {useContext, useEffect, useRef, useState} from "react"
 import {useHistory} from "react-router-dom"
 import {ThemeContext, EnableDragContext, SessionContext, BrightnessContext, ContrastContext, HueContext, SaturationContext, LightnessContext,
 BlurContext, SharpenContext, PixelateContext, TranslationModeContext, EditTranslationIDContext, MobileContext, ShowSaveTranslationDialogContext,
-EditTranslationFlagContext, EditTranslationTextContext, EditTranslationTranscriptContext, TranslationDrawingEnabledContext,
+EditTranslationFlagContext, EditTranslationTextContext, EditTranslationTranscriptContext, TranslationDrawingEnabledContext, ImageExpandContext,
 SaveTranslationDataContext, SaveTranslationOrderContext, SiteHueContext, SiteLightnessContext, SiteSaturationContext} from "../Context"
 import functions from "../structures/Functions"
 import cryptoFunctions from "../structures/CryptoFunctions"
@@ -106,6 +106,7 @@ const TranslationEditor: React.FunctionComponent<Props> = (props) => {
     const {showSaveTranslationDialog, setShowSaveTranslationDialog} = useContext(ShowSaveTranslationDialogContext)
     const {saveTranslationData, setSaveTranslationData} = useContext(SaveTranslationDataContext)
     const {saveTranslationOrder, setSaveTranslationOrder} = useContext(SaveTranslationOrderContext)
+    const {imageExpand, setImageExpand} = useContext(ImageExpandContext)
     const [imageWidth, setImageWidth] = useState(0)
     const [imageHeight, setImageHeight] = useState(0)
     const [img, setImg] = useState("")
@@ -241,7 +242,11 @@ const TranslationEditor: React.FunctionComponent<Props> = (props) => {
     }, [brightness, contrast, hue, saturation, lightness, blur, sharpen])
 
     let maxWidth = mobile ? window.innerWidth - 20 : window.innerWidth - functions.sidebarWidth() - 70
-    const maxHeight = 1000
+    let maxHeight = 1000
+
+    if (imageExpand) {
+        maxHeight = 2000
+    }
 
     let scale = imageWidth > imageHeight ? maxWidth / imageWidth : maxHeight / imageHeight
     if (mobile && imageWidth > maxWidth) scale =  maxWidth / imageWidth

@@ -30,7 +30,7 @@ const SearchRoutes = (app: Express) => {
             if (restrict === "explicit") if (req.session.role !== "admin" && req.session.role !== "mod") return res.status(403).end()
             if (!functions.validStyle(style, true)) return res.status(400).send("Invalid style")
             if (!functions.validSort(sort)) return res.status(400).send("Invalid sort")
-            const tags = query.trim().split(/ +/g).filter(Boolean)
+            const tags = query?.trim().split(/ +/g).filter(Boolean)
             for (let i = 0; i < tags.length; i++) {
                 const tag = await sql.tag(tags[i])
                 if (!tag) {
@@ -82,7 +82,7 @@ const SearchRoutes = (app: Express) => {
             if (!functions.validRestrict(restrict, true)) return res.status(400).send("Invalid restrict")
             if (restrict === "explicit") if (req.session.role !== "admin" && req.session.role !== "mod") return res.status(403).end()
             if (!functions.validStyle(style, true)) return res.status(400).send("Invalid style")
-            const tags = query.trim().split(/ +/g).filter(Boolean)
+            const tags = query?.trim().split(/ +/g).filter(Boolean)
             for (let i = 0; i < tags.length; i++) {
                 const tag = await sql.tag(tags[i])
                 if (!tag) {
@@ -151,7 +151,7 @@ const SearchRoutes = (app: Express) => {
             let sort = req.query.sort as string
             const offset = req.query.offset as string
             if (!functions.validCategorySort(sort)) return res.status(400).send("Invalid sort")
-            const search = query.trim().split(/ +/g).filter(Boolean).join("-")
+            const search = query?.trim().split(/ +/g).filter(Boolean).join("-")
             let result = await sql.tagCategory("artists", sort, search, offset)
             result = functions.stripTags(result)
             res.status(200).json(result)
@@ -167,7 +167,7 @@ const SearchRoutes = (app: Express) => {
             let sort = req.query.sort as string
             const offset = req.query.offset as string
             if (!functions.validCategorySort(sort)) return res.status(400).send("Invalid sort")
-            const search = query.trim().split(/ +/g).filter(Boolean).join("-")
+            const search = query?.trim().split(/ +/g).filter(Boolean).join("-")
             let result = await sql.tagCategory("characters", sort, search, offset)
             result = functions.stripTags(result)
             res.status(200).json(result)
@@ -183,7 +183,7 @@ const SearchRoutes = (app: Express) => {
             let sort = req.query.sort as string
             const offset = req.query.offset as string
             if (!functions.validCategorySort(sort)) return res.status(400).send("Invalid sort")
-            const search = query.trim().split(/ +/g).filter(Boolean).join("-")
+            const search = query?.trim().split(/ +/g).filter(Boolean).join("-")
             let result = await sql.tagCategory("series", sort, search, offset)
             result = functions.stripTags(result)
             res.status(200).json(result)

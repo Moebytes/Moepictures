@@ -1,7 +1,11 @@
 import {Pool, QueryArrayConfig, QueryConfig} from "pg"
-import fs from "fs"
+import * as Redis from "redis"
 import CreateDB from "./CreateDB.sql"
 import functions from "./Functions"
+
+const redis = Redis.createClient({
+  url: process.env.REDIS_URL
+})
 
 const pgPool = functions.isLocalHost() ? new Pool({
   user: process.env.PG_LOCAL_USER,
@@ -17,12 +21,24 @@ const pgPool = functions.isLocalHost() ? new Pool({
   port: Number(process.env.PG_PORT)
 })
 
+if (process.env.REDIS === "on") redis.connect()
+
 export default class SQLQuery {
   /** Run an SQL Query */
-  public static run = async (query: QueryConfig | QueryArrayConfig | string) => {
+  public static run = async (query: QueryConfig | QueryArrayConfig | string, cache?: boolean) => {
+      let redisResult = null
+      if (cache) {
+        try {
+          redisResult = await redis.get(JSON.stringify(query)) as any
+          if (redisResult) return (JSON.parse(redisResult))
+        } catch {
+          // ignore
+        }
+      }
       const pgClient = await pgPool.connect()
       try {
             const result = await pgClient.query(query)
+            if (cache) await redis.set(JSON.stringify(query), JSON.stringify(result.rows)).catch(() => null)
             return result.rows as any
         } catch (error) {
             return Promise.reject(error)
@@ -36,12 +52,18 @@ export default class SQLQuery {
     return SQLQuery.run(CreateDB)
   }
 
+  /** Flush redis db */
+  public static flushDB = async (): Promise<void> => {
+    await redis.flushDb().catch(() => null)
+  }
+
   /** Create a new post. */
   public static insertPost = async () => {
     const query: QueryArrayConfig = {
       text: `INSERT INTO "posts" VALUES (default) RETURNING "postID"`,
       rowMode: "array"
     }
+    await SQLQuery.flushDB()
     const result = await SQLQuery.run(query)
     return result.flat(Infinity)[0] as number
   }
@@ -62,6 +84,7 @@ export default class SQLQuery {
         text: `UPDATE "posts" SET "${column}" = $1 WHERE "postID" = $2`,
         values: [value, postID]
     }
+    await SQLQuery.flushDB()
     return SQLQuery.run(query)
   }
 
@@ -170,6 +193,7 @@ export default class SQLQuery {
         text: `UPDATE "posts" ${setQuery} WHERE "postID" = $${i}`,
         values: [...values, postID]
     }
+    await SQLQuery.flushDB()
     return SQLQuery.run(query)
   }
 
@@ -310,6 +334,7 @@ export default class SQLQuery {
       rowMode: "array",
       values: [postID, filename, type, order, hash, width, height, size]
     }
+    await SQLQuery.flushDB()
     const result = await SQLQuery.run(query)
     return result.flat(Infinity)[0] as number
   }
@@ -331,6 +356,7 @@ export default class SQLQuery {
         text: `UPDATE "images" SET "${column}" = $1 WHERE "imageID" = $2`,
         values: [value, imageID]
     }
+    await SQLQuery.flushDB()
     return SQLQuery.run(query)
   }
 
@@ -349,6 +375,7 @@ export default class SQLQuery {
       text: functions.multiTrim(`DELETE FROM images WHERE images."imageID" = $1`),
       values: [imageID]
     }
+    await SQLQuery.flushDB()
     const result = await SQLQuery.run(query)
     return result
   }
@@ -371,6 +398,7 @@ export default class SQLQuery {
     }
     if (type) query.values?.push(type)
     try {
+      await SQLQuery.flushDB()
       await SQLQuery.run(query)
       return false
     } catch {
@@ -400,6 +428,7 @@ export default class SQLQuery {
              ON CONFLICT ("tag") DO UPDATE SET "type" = EXCLUDED."type"${noImageUpdate ? "" : ", \"image\" = EXCLUDED.\"image\""}`,
       values: [...rawValues]
     }
+    await SQLQuery.flushDB()
     return SQLQuery.run(query)
   }
 
@@ -449,6 +478,7 @@ export default class SQLQuery {
       text: `UPDATE "tags" SET "${column}" = $1 WHERE "tag" = $2`,
       values: [value, tag]
     }
+    await SQLQuery.flushDB()
     return SQLQuery.run(query)
   }
 
@@ -475,6 +505,7 @@ export default class SQLQuery {
       rowMode: "array",
       values: [postID, ...tags]
     }
+    await SQLQuery.flushDB()
     const result = await SQLQuery.run(query)
     return result.flat(Infinity)[0] as number
   }
@@ -517,7 +548,7 @@ export default class SQLQuery {
     if (style === "pixel") styleQuery = `posts.style = 'pixel'`
     if (style === "chibi") styleQuery = `posts.style = 'chibi'`
     let sortQuery = ""
-    if (sort === "random") sortQuery = `ORDER BY RANDOM()`
+    if (sort === "random") sortQuery = `ORDER BY random()`
     if (sort === "date") sortQuery = `ORDER BY posts."uploadDate" DESC`
     if (sort === "reverse date") sortQuery = `ORDER BY posts."uploadDate" ASC`
     if (sort === "drawn") sortQuery = `ORDER BY posts.drawn DESC NULLS LAST`
@@ -593,8 +624,11 @@ export default class SQLQuery {
       `)
     }
     if (values?.[0]) query.values = values
-    const result = await SQLQuery.run(query)
-    return result
+    if (sort === "random") {
+      return SQLQuery.run(query)
+    } else {
+      return SQLQuery.run(query, true)
+    }
   }
 
   /** Search pixiv id. */
@@ -620,7 +654,7 @@ export default class SQLQuery {
       `),
       values: [pixivURL]
     }
-    const result = await SQLQuery.run(query)
+    const result = await SQLQuery.run(query, true)
     return result
   }
 
@@ -641,7 +675,7 @@ export default class SQLQuery {
           `)
     }
     if (postIDs) query.values = [postIDs]
-    const result = await SQLQuery.run(query)
+    const result = await SQLQuery.run(query, true)
     return result
   }
 
@@ -736,7 +770,7 @@ export default class SQLQuery {
           `),
           values: [postID]
     }
-    const result = await SQLQuery.run(query)
+    const result = await SQLQuery.run(query, true)
     return result[0]
   }
 
@@ -769,7 +803,7 @@ export default class SQLQuery {
           `),
           values: [postID]
     }
-    const result = await SQLQuery.run(query)
+    const result = await SQLQuery.run(query, true)
     return result[0]
   }
 
@@ -779,6 +813,7 @@ export default class SQLQuery {
       text: functions.multiTrim(`DELETE FROM posts WHERE posts."postID" = $1`),
       values: [postID]
     }
+    await SQLQuery.flushDB()
     const result = await SQLQuery.run(query)
     return result
   }
@@ -806,7 +841,7 @@ export default class SQLQuery {
           `),
           values: [username]
     }
-    const result = await SQLQuery.run(query)
+    const result = await SQLQuery.run(query, true)
     return result
   }
 
@@ -823,7 +858,7 @@ export default class SQLQuery {
           `)
     }
     if (tags?.[0]) query.values = [tags]
-    const result = await SQLQuery.run(query)
+    const result = await SQLQuery.run(query, true)
     return result
   }
 
@@ -856,7 +891,7 @@ export default class SQLQuery {
           `),
           values: [tag]
     }
-    const result = await SQLQuery.run(query)
+    const result = await SQLQuery.run(query, true)
     return result[0]
   }
 
@@ -873,7 +908,7 @@ export default class SQLQuery {
           `)
     }
     if (tags?.[0]) query.values = [tags]
-    const result = await SQLQuery.run(query)
+    const result = await SQLQuery.run(query, true)
     return result
   }
 
@@ -886,7 +921,7 @@ export default class SQLQuery {
           `),
           values: [tag]
     }
-    const result = await SQLQuery.run(query)
+    const result = await SQLQuery.run(query, true)
     return result[0]
   }
 
@@ -1012,7 +1047,7 @@ export default class SQLQuery {
     }
     if (search) query.values?.push(search.toLowerCase())
     if (offset) query.values?.push(offset)
-    const result = await SQLQuery.run(query)
+    const result = await SQLQuery.run(query, true)
     return result
   }
 
@@ -1068,7 +1103,7 @@ export default class SQLQuery {
     if (search) query.values?.push(search.toLowerCase())
     if (type) query.values?.push(type)
     if (offset) query.values?.push(offset)
-    const result = await SQLQuery.run(query)
+    const result = await SQLQuery.run(query, true)
     return result
   }
 
@@ -1078,6 +1113,7 @@ export default class SQLQuery {
       text: functions.multiTrim(`DELETE FROM tags WHERE tags."tag" = $1`),
       values: [tag]
     }
+    await SQLQuery.flushDB()
     const result = await SQLQuery.run(query)
     return result
   }
@@ -1848,6 +1884,7 @@ export default class SQLQuery {
       values: [tag, alias]
     }
     try {
+      await SQLQuery.flushDB()
       await SQLQuery.run(query)
       return false
     } catch {
@@ -1880,7 +1917,7 @@ export default class SQLQuery {
           `),
           values: [alias]
     }
-    const result = await SQLQuery.run(query)
+    const result = await SQLQuery.run(query, true)
     return result[0]
   }
 
@@ -1890,6 +1927,7 @@ export default class SQLQuery {
       text: `DELETE FROM "aliases" WHERE aliases."tag" = $1`,
       values: [tag]
     }
+    await SQLQuery.flushDB()
     return SQLQuery.run(query)
   }
 
@@ -1915,7 +1953,7 @@ export default class SQLQuery {
           `)
     }
     if (search) query.values = [search.toLowerCase()]
-    const result = await SQLQuery.run(query)
+    const result = await SQLQuery.run(query, true)
     return result
   }
 
@@ -1926,6 +1964,7 @@ export default class SQLQuery {
       values: [tag, implication]
     }
     try {
+      await SQLQuery.flushDB()
       await SQLQuery.run(query)
       return false
     } catch {
@@ -1944,7 +1983,7 @@ export default class SQLQuery {
           `),
           values: [tag]
     }
-    const result = await SQLQuery.run(query)
+    const result = await SQLQuery.run(query, true)
     return result
   }
 
@@ -1954,6 +1993,7 @@ export default class SQLQuery {
       text: `DELETE FROM implications WHERE implications."tag" = $1`,
       values: [tag]
     }
+    await SQLQuery.flushDB()
     return SQLQuery.run(query)
   }
 
@@ -1963,6 +2003,7 @@ export default class SQLQuery {
         text: `UPDATE "tag map" SET "tag" = $1 WHERE "tag" = $2`,
         values: [newTag, tag]
     }
+    await SQLQuery.flushDB()
     return SQLQuery.run(query)
   }
 
@@ -1972,6 +2013,7 @@ export default class SQLQuery {
         text: `DELETE FROM "tag map" WHERE "tag map"."postID" = $1`,
         values: [postID]
     }
+    await SQLQuery.flushDB()
     return SQLQuery.run(query)
   }
 
@@ -1990,6 +2032,7 @@ export default class SQLQuery {
       text: `INSERT INTO "third party" ("postID", "parentID") VALUES ($1, $2)`,
       values: [postID, parentID]
     }
+    await SQLQuery.flushDB()
     const result = await SQLQuery.run(query)
     return result
   }
@@ -2010,6 +2053,7 @@ export default class SQLQuery {
       text: `DELETE FROM "third party" WHERE "third party"."postID" = $1`,
       values: [postID]
     }
+    await SQLQuery.flushDB()
     const result = await SQLQuery.run(query)
     return result
   }
@@ -2049,7 +2093,7 @@ export default class SQLQuery {
           `),
       values: [parentID]
     }
-    const result = await SQLQuery.run(query)
+    const result = await SQLQuery.run(query, true)
     return result
   }
 
@@ -2107,7 +2151,7 @@ export default class SQLQuery {
           `),
       values: [postID]
     }
-    const result = await SQLQuery.run(query)
+    const result = await SQLQuery.run(query, true)
     return result[0]
   }
 
@@ -2378,6 +2422,7 @@ export default class SQLQuery {
       text: `INSERT INTO "tag history" ("tag", "user", "date", "key", "type", "image", "description", "aliases", "implications", "pixivTags", "website", "pixiv", "twitter", "fandom", "reason") VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15)`,
       values: [tag, username, now, key, type, image, description, aliases, implications, pixivTags, website, pixiv, twitter, fandom, reason]
     }
+    await SQLQuery.flushDB()
     const result = await SQLQuery.run(query)
     return result
   }
@@ -2387,6 +2432,7 @@ export default class SQLQuery {
       text: functions.multiTrim(`DELETE FROM "tag history" WHERE "tag history"."historyID" = $1`),
       values: [historyID]
     }
+    await SQLQuery.flushDB()
     const result = await SQLQuery.run(query)
     return result
   }
@@ -2404,7 +2450,7 @@ export default class SQLQuery {
           values: []
     }
     if (tag) query.values?.push(tag)
-    const result = await SQLQuery.run(query)
+    const result = await SQLQuery.run(query, true)
     return result
   }
 
@@ -2420,7 +2466,7 @@ export default class SQLQuery {
           `),
           values: [username]
     }
-    const result = await SQLQuery.run(query)
+    const result = await SQLQuery.run(query, true)
     return result
   }
 
@@ -2436,6 +2482,7 @@ export default class SQLQuery {
       values: [postID, username, now, images, uploader, updater, uploadDate, updatedDate, type, restrict, style, thirdParty, 
         title, translatedTitle, drawn, artist, link, commentary, translatedCommentary, bookmarks, mirrors, artists, characters, series, tags, reason]
     }
+    await SQLQuery.flushDB()
     const result = await SQLQuery.run(query)
     return result
   }
@@ -2445,6 +2492,7 @@ export default class SQLQuery {
       text: functions.multiTrim(`DELETE FROM "post history" WHERE "post history"."historyID" = $1`),
       values: [historyID]
     }
+    await SQLQuery.flushDB()
     const result = await SQLQuery.run(query)
     return result
   }
@@ -2462,7 +2510,7 @@ export default class SQLQuery {
           values: []
     }
     if (postID) query.values?.push(postID)
-    const result = await SQLQuery.run(query)
+    const result = await SQLQuery.run(query, true)
     return result
   }
 
@@ -2477,7 +2525,7 @@ export default class SQLQuery {
           `),
           values: [username]
     }
-    const result = await SQLQuery.run(query)
+    const result = await SQLQuery.run(query, true)
     return result
   }
 

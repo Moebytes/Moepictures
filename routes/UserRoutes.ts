@@ -147,7 +147,8 @@ const UserRoutes = (app: Express) => {
                 req.session.csrfToken = token
                 req.session.showRelated = user.showRelated
                 req.session.showTooltips = user.showTooltips
-                req.session.downloadPixivID = user.downloadPixivID
+                req.session.downloadPixivID = user.dowautosearchInterval
+                req.session.autosearchInterval = user.autosearchInterval
                 return res.status(200).send("Success")
             } else {
                 return res.status(400).send("Bad request")
@@ -187,6 +188,7 @@ const UserRoutes = (app: Express) => {
                 req.session.showRelated = user.showRelated
                 req.session.showTooltips = user.showTooltips
                 req.session.downloadPixivID = user.downloadPixivID
+                req.session.autosearchInterval = user.autosearchInterval
             }
             const session = structuredClone(req.session)
             delete session.captchaAnswer
@@ -291,6 +293,25 @@ const UserRoutes = (app: Express) => {
             const newDownloadPixivID = !Boolean(user.downloadPixivID)
             req.session.downloadPixivID = newDownloadPixivID 
             await sql.updateUser(req.session.username, "downloadPixivID", newDownloadPixivID)
+            res.status(200).send("Success")
+        } catch (e) {
+            console.log(e)
+            res.status(400).send("Bad request")
+        }
+    })
+
+    app.post("/api/user/autosearchinterval", sessionLimiter, async (req: Request, res: Response) => {
+        try {
+            const {interval} = req.body
+            if (!serverFunctions.validateCSRF(req)) return res.status(400).send("Bad CSRF token")
+            if (!req.session.username) return res.status(401).send("Unauthorized")
+            if (Number.isNaN(Number(interval))) return res.status(400).send("Bad interval")
+            const user = await sql.user(req.session.username)
+            if (!user) return res.status(400).send("Bad username")
+            let newInterval = Math.floor(Number(interval) * 1000)
+            if (newInterval < 1000) newInterval = 1000
+            req.session.autosearchInterval = newInterval 
+            await sql.updateUser(req.session.username, "autosearchInterval", newInterval)
             res.status(200).send("Success")
         } catch (e) {
             console.log(e)

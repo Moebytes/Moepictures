@@ -2,7 +2,7 @@ import React, {useContext, useEffect, useRef, useState, useReducer} from "react"
 import {ThemeContext, EnableDragContext, BrightnessContext, ContrastContext, HueContext, SaturationContext, LightnessContext,
 BlurContext, SharpenContext, PixelateContext, DownloadFlagContext, DownloadIDsContext, DisableZoomContext, SpeedContext,
 ReverseContext, MobileContext, TranslationModeContext, TranslationDrawingEnabledContext, SessionContext, SiteHueContext,
-SiteLightnessContext, SiteSaturationContext} from "../Context"
+SiteLightnessContext, SiteSaturationContext, ImageExpandContext} from "../Context"
 import {HashLink as Link} from "react-router-hash-link"
 import {createFFmpeg, fetchFile} from "@ffmpeg/ffmpeg"
 import functions from "../structures/Functions"
@@ -36,6 +36,8 @@ import imageZoomOffIcon from "../assets/icons/image-zoom-off.png"
 import imageZoomOffEnabledIcon from "../assets/icons/image-zoom-off-enabled.png"
 import imageFullscreenIcon from "../assets/icons/image-fullscreen.png"
 import translationToggleOn from "../assets/icons/translation-toggle-on.png"
+import expand from "../assets/icons/expand.png"
+import contract from "../assets/icons/contract.png"
 import TranslationEditor from "./TranslationEditor"
 import gifFrames from "gif-frames"
 import JSZip from "jszip"
@@ -81,6 +83,7 @@ const PostImage: React.FunctionComponent<Props> = (props) => {
     const {translationMode, setTranslationMode} = useContext(TranslationModeContext)
     const {translationDrawingEnabled, setTranslationDrawingEnabled} = useContext(TranslationDrawingEnabledContext)
     const {mobile, setMobile} = useContext(MobileContext)
+    const {imageExpand, setImageExpand} = useContext(ImageExpandContext)
     const [showSpeedDropdown, setShowSpeedDropdown] = useState(false)
     const [showVolumeSlider, setShowVolumeSlider] = useState(false)
     const containerRef = useRef<HTMLDivElement>(null)
@@ -1126,8 +1129,8 @@ const PostImage: React.FunctionComponent<Props> = (props) => {
                 // ignore
             }
             if (videoRef.current) {
-                videoRef.current.style.maxWidth = `calc(100vw - ${functions.sidebarWidth()}px - 70px)`
-                videoRef.current.style.maxHeight = `calc(100vh - ${functions.navbarHeight()}px - ${functions.titlebarHeight()}px)`
+                videoRef.current.style.maxWidth = ""
+                videoRef.current.style.maxHeight = ""
                 if (backFrame && backFrameRef.current) {
                     videoRef.current.style.position = "absolute"
                     backFrameRef.current.style.display = "flex"
@@ -1136,8 +1139,8 @@ const PostImage: React.FunctionComponent<Props> = (props) => {
                 videoCanvasRef.current!.style.marginBottom = "0px"
             }
             if (ref.current) {
-                ref.current.style.maxWidth = `calc(100vw - ${functions.sidebarWidth()}px - 70px)`
-                ref.current.style.maxHeight = `calc(100vh - ${functions.navbarHeight()}px - ${functions.titlebarHeight()}px)`
+                ref.current.style.maxWidth = ""
+                ref.current.style.maxHeight = ""
                 if (functions.isGIF(props.img) || gifData) {
                     gifRef.current!.style.marginTop = "0px"
                     gifRef.current!.style.marginBottom = "0px"
@@ -1225,6 +1228,7 @@ const PostImage: React.FunctionComponent<Props> = (props) => {
                 <div className="post-image-filters" ref={fullscreenRef}>
                     <div className={`post-image-top-buttons ${buttonHover ? "show-post-image-top-buttons" : ""}`} onMouseEnter={() => setButtonHover(true)} onMouseLeave={() => setButtonHover(false)}>
                         {!props.noTranslations && session.username ? <img draggable={false} className="post-image-top-button" src={translationToggleOn} style={{filter: getFilter()}} onClick={() => {setTranslationMode(true); setTranslationDrawingEnabled(true)}}/> : null}
+                        <img draggable={false} className="post-image-top-button" src={imageExpand ? contract : expand} style={{filter: getFilter()}} onClick={() => setImageExpand((prev: boolean) => !prev)}/>
                     </div>
                     {functions.isVideo(props.img) ? 
                     <video draggable={false} loop muted disablePictureInPicture playsInline className="dummy-post-video" src={props.img}></video> :
@@ -1301,8 +1305,8 @@ const PostImage: React.FunctionComponent<Props> = (props) => {
                     <img draggable={false} className="video-lightness-overlay" ref={videoLightnessRef} src={backFrame}/>
                     <canvas draggable={false} className="video-sharpen-overlay" ref={videoOverlayRef}></canvas>
                     <canvas draggable={false} className="post-video-canvas" ref={videoCanvasRef}></canvas>
-                    <video draggable={false} autoPlay loop muted disablePictureInPicture playsInline className="post-video" ref={videoRef} src={props.img} onLoadedData={(event) => onLoad(event)}></video>
-                    <img draggable={false} ref={backFrameRef} src={backFrame} className="back-frame"/>
+                    <video draggable={false} autoPlay loop muted disablePictureInPicture playsInline className={`${imageExpand? "post-video-expand" : "post-video"}`} ref={videoRef} src={props.img} onLoadedData={(event) => onLoad(event)}></video>
+                    <img draggable={false} ref={backFrameRef} src={backFrame} className={`${imageExpand? "back-frame-expand" : "back-frame"}`}/>
                     </> : <>
                     {functions.isGIF(props.img) || gifData ? 
                     <>
@@ -1365,7 +1369,7 @@ const PostImage: React.FunctionComponent<Props> = (props) => {
                     <img draggable={false} className="post-lightness-overlay" ref={gifLightnessRef} src={props.img}/>
                     <img draggable={false} className="post-sharpen-overlay" ref={gifOverlayRef} src={props.img}/>
                     <canvas draggable={false} className="post-gif-canvas" ref={gifRef}></canvas> 
-                    {!gifData && backFrame ? <img draggable={false} className="post-image" src={backFrame}/> : null}
+                    {!gifData && backFrame ? <img draggable={false} className={`${imageExpand? "post-image-expand" : "post-image"}`} src={backFrame}/> : null}
                     </>
                     : null}
                     <div className="relative-ref" onMouseMove={dragImgDown} onMouseLeave={dragImgUp}>
@@ -1383,7 +1387,7 @@ const PostImage: React.FunctionComponent<Props> = (props) => {
                         </div>
                         </>
                         : null}
-                        <TransformWrapper disabled={disableZoom} ref={zoomRef} minScale={1} maxScale={4} onZoomStop={(ref) => setZoom(ref.state.scale)} wheel={{step: 0.1, touchPadDisabled: true}}
+                        <TransformWrapper disabled={disableZoom} ref={zoomRef} minScale={1} maxScale={8} onZoomStop={(ref) => setZoom(ref.state.scale)} wheel={{step: 0.1, touchPadDisabled: true}}
                         zoomAnimation={{size: 0, disabled: true}} alignmentAnimation={{disabled: true}} doubleClick={{mode: "reset", animationTime: 0}} panning={{disabled: zoom === 1}}>
                         <TransformComponent wrapperStyle={{pointerEvents: disableZoom ? "none" : "all"}}>
                             {/* <canvas className="post-lightness-overlay" ref={lightnessRef}></canvas> */}
@@ -1392,7 +1396,7 @@ const PostImage: React.FunctionComponent<Props> = (props) => {
                             <img draggable={false} className="post-sharpen-overlay" ref={overlayRef} src={img}/>
                             <canvas draggable={false} className="post-pixelate-canvas" ref={pixelateRef}></canvas>
                             {/* <canvas className="post-image" ref={ref}></canvas> */}
-                            <img draggable={false} className="post-image" ref={ref} src={img} onLoad={(event) => onLoad(event)}/>
+                            <img draggable={false} className={`${imageExpand? "post-image-expand" : "post-image"}`} ref={ref} src={img} onLoad={(event) => onLoad(event)}/>
                         </TransformComponent>
                         </TransformWrapper>
                     </div>

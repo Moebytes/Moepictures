@@ -2,7 +2,7 @@ import React, {useContext, useEffect, useRef, useState, useReducer} from "react"
 import {ThemeContext, EnableDragContext, BrightnessContext, ContrastContext, HueContext, SaturationContext, LightnessContext,
 BlurContext, SharpenContext, PixelateContext, DownloadFlagContext, DownloadIDsContext, DisableZoomContext, SpeedContext,
 ReverseContext, MobileContext, TranslationModeContext, TranslationDrawingEnabledContext, SessionContext, SiteHueContext,
-SiteLightnessContext, SiteSaturationContext} from "../Context"
+SiteLightnessContext, SiteSaturationContext, ImageExpandContext} from "../Context"
 import {HashLink as Link} from "react-router-hash-link"
 import functions from "../structures/Functions"
 import cryptoFunctions from "../structures/CryptoFunctions"
@@ -21,6 +21,8 @@ import audioVolumeIcon from "../assets/icons/audio-volume.png"
 import audioVolumeLowIcon from "../assets/icons/audio-volume-low.png"
 import audioVolumeMuteIcon from "../assets/icons/audio-volume-mute.png"
 import translationToggleOn from "../assets/icons/translation-toggle-on.png"
+import expand from "../assets/icons/expand.png"
+import contract from "../assets/icons/contract.png"
 import TranslationEditor from "./TranslationEditor"
 import path from "path"
 import * as Tone from "tone"
@@ -89,6 +91,7 @@ const PostSong: React.FunctionComponent<Props> = (props) => {
     const {translationMode, setTranslationMode} = useContext(TranslationModeContext)
     const {translationDrawingEnabled, setTranslationDrawingEnabled} = useContext(TranslationDrawingEnabledContext)
     const {mobile, setMobile} = useContext(MobileContext)
+    const {imageExpand, setImageExpand} = useContext(ImageExpandContext)
     const [showSpeedDropdown, setShowSpeedDropdown] = useState(false)
     const [showVolumeSlider, setShowVolumeSlider] = useState(false)
     const containerRef = useRef<HTMLDivElement>(null)
@@ -588,8 +591,8 @@ const PostSong: React.FunctionComponent<Props> = (props) => {
                 // ignore
             }
             if (ref.current) {
-                ref.current.style.maxWidth = `calc(100vw - ${functions.sidebarWidth()}px - 70px)`
-                ref.current.style.maxHeight = `calc(100vh - ${functions.navbarHeight()}px - ${functions.titlebarHeight()}px)`
+                ref.current.style.maxWidth = ""
+                ref.current.style.maxHeight = ""
             }
             setTimeout(() => {
                 if (functions.isImage(coverImg)) {
@@ -654,6 +657,7 @@ const PostSong: React.FunctionComponent<Props> = (props) => {
                 <div className="post-song-filters" ref={fullscreenRef}>
                     <div className={`post-image-top-buttons ${buttonHover ? "show-post-image-top-buttons" : ""}`} onMouseEnter={() => setButtonHover(true)} onMouseLeave={() => setButtonHover(false)}>
                         {!props.noTranslations && session.username ? <img draggable={false} className="post-image-top-button" src={translationToggleOn} style={{filter: getFilter()}} onClick={() => {setTranslationMode(true); setTranslationDrawingEnabled(true)}}/> : null}
+                        <img draggable={false} className="post-image-top-button" src={imageExpand ? contract : expand} style={{filter: getFilter()}} onClick={() => setImageExpand((prev: boolean) => !prev)}/>
                     </div>
                     <canvas draggable={false} className="dummy-post-song" ref={dummyRef}></canvas>
                     <div className="relative-ref">
@@ -725,7 +729,7 @@ const PostSong: React.FunctionComponent<Props> = (props) => {
                         <canvas draggable={false} className="post-lightness-overlay" ref={lightnessRef}></canvas>
                         <canvas draggable={false} className="post-sharpen-overlay" ref={overlayRef}></canvas>
                         <canvas draggable={false} className="post-pixelate-canvas" ref={pixelateRef}></canvas>
-                        <canvas draggable={false} className="post-song" ref={ref}></canvas>
+                        <canvas draggable={false} className="post-song-expand" ref={ref}></canvas>
                     </div>
                 </div>
             </div>

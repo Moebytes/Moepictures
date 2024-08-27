@@ -51,8 +51,21 @@
     width: auto;
     height: auto;
     max-width: calc(100vw - @sidebar-width - 70px);
-    max-height: 1000px; //calc(100vh - @nav-bar-height - @title-bar-height);
-    //display: none;
+    max-height: 1000px;
+    transition: max-height 0.7s ease-out;
+}
+
+.post-model-expand {
+    position: relative;
+    display: flex;
+    margin: auto;
+    margin-top: 0px;
+    margin-bottom: 0px;
+    width: auto;
+    height: auto;
+    max-width: calc(100vw - @sidebar-width - 70px);
+    max-height: 2000px;
+    transition: max-height 0.7s linear;
 }
 
 .post-pixelate-canvas {

@@ -149,6 +149,7 @@ export const SelectionPostsContext = React.createContext<any>(null)
 export const ShowBulkQuickEditDialogContext = React.createContext<any>(null)
 export const ShowTakedownPostDialogContext = React.createContext<any>(null)
 export const TakedownTagContext = React.createContext<any>(null)
+export const ImageExpandContext = React.createContext<any>(null)
 
 const Context: React.FunctionComponent = (props) => {
     const [siteHue, setSiteHue] = useState(180)
@@ -284,9 +285,11 @@ const Context: React.FunctionComponent = (props) => {
     const [selectionItems, setSelectionItems] = useState(new Set())
     const [selectionPosts, setSelectionPosts] = useState(new Map())
     const [showBulkQuickEditDialog, setShowBulkQuickEditDialog] = useState(false)
+    const [imageExpand, setImageExpand] = useState(false)
 
 return (
     <>
+        <ImageExpandContext.Provider value={{imageExpand, setImageExpand}}>
         <TakedownTagContext.Provider value={{takedownTag, setTakedownTag}}>
         <ShowTakedownPostDialogContext.Provider value={{showTakedownPostDialog, setShowTakedownPostDialog}}>
         <SelectionPostsContext.Provider value={{selectionPosts, setSelectionPosts}}>
@@ -554,6 +557,7 @@ return (
         </SelectionPostsContext.Provider>
         </ShowTakedownPostDialogContext.Provider>
         </TakedownTagContext.Provider>
+        </ImageExpandContext.Provider>
     </>
     )
 }

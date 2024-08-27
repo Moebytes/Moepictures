@@ -2,7 +2,7 @@ import React, {useContext, useEffect, useRef, useState, useReducer} from "react"
 import {ThemeContext, EnableDragContext, BrightnessContext, ContrastContext, HueContext, SaturationContext, LightnessContext,
 BlurContext, SharpenContext, PixelateContext, DownloadFlagContext, DownloadIDsContext, DisableZoomContext, SpeedContext,
 ReverseContext, MobileContext, TranslationModeContext, TranslationDrawingEnabledContext, SessionContext, SiteHueContext,
-SiteLightnessContext, SiteSaturationContext} from "../Context"
+SiteLightnessContext, SiteSaturationContext, ImageExpandContext} from "../Context"
 import {HashLink as Link} from "react-router-hash-link"
 import functions from "../structures/Functions"
 import cryptoFunctions from "../structures/CryptoFunctions"
@@ -24,6 +24,8 @@ import modelLightIcon from "../assets/icons/model-light.png"
 import ambientLightIcon from "../assets/icons/ambient.png"
 import directionalLightIcon from "../assets/icons/directional.png"
 import translationToggleOn from "../assets/icons/translation-toggle-on.png"
+import expand from "../assets/icons/expand.png"
+import contract from "../assets/icons/contract.png"
 import TranslationEditor from "./TranslationEditor"
 import path from "path"
 import "./styles/postmodel.less"
@@ -69,6 +71,7 @@ const PostModel: React.FunctionComponent<Props> = (props) => {
     const {translationMode, setTranslationMode} = useContext(TranslationModeContext)
     const {translationDrawingEnabled, setTranslationDrawingEnabled} = useContext(TranslationDrawingEnabledContext)
     const {mobile, setMobile} = useContext(MobileContext)
+    const {imageExpand, setImageExpand} = useContext(ImageExpandContext)
     const [showSpeedDropdown, setShowSpeedDropdown] = useState(false)
     const [showLightDropdown, setShowLightDropdown] = useState(false)
     const [showMorphDropdown, setShowMorphDropdown] = useState(false)
@@ -115,11 +118,16 @@ const PostModel: React.FunctionComponent<Props> = (props) => {
     }
 
     const loadModel = async () => {
+        if (!props.model) return
         const element = rendererRef.current
         window.cancelAnimationFrame(id)
         while (element?.lastChild) element?.removeChild(element.lastChild)
-        const width = window.innerWidth - functions.sidebarWidth() - 400
-        const height = window.innerHeight - functions.titlebarHeight() - functions.navbarHeight() - 150
+        let width = window.innerWidth - functions.sidebarWidth() - 400
+        let height = window.innerHeight - functions.titlebarHeight() - functions.navbarHeight() - 150
+        if (imageExpand) {
+            width = window.innerWidth - functions.sidebarWidth() - 200
+            height = window.innerHeight
+        }
         const scene = new THREE.Scene()
         const camera = new THREE.PerspectiveCamera(75, width / height, 0.1, 1000)
         const light = new THREE.AmbientLight(0xffffff, ambient)
@@ -282,6 +290,10 @@ const PostModel: React.FunctionComponent<Props> = (props) => {
         window.addEventListener("resize", () => {
             let width = window.innerWidth - functions.sidebarWidth() - 400
             let height = window.innerHeight - functions.titlebarHeight() - functions.navbarHeight() - 150
+            if (imageExpand) {
+                width = window.innerWidth - functions.sidebarWidth() - 200
+                height = window.innerHeight
+            }
             // @ts-ignore
             if (document.fullscreenElement || document.webkitIsFullScreen) {
                 width = window.innerWidth
@@ -333,11 +345,12 @@ const PostModel: React.FunctionComponent<Props> = (props) => {
         setDragging(false)
         setSeekTo(null)
         if (ref) ref.style.opacity = "1"
+        loadModel()
     }, [props.model])
 
     useEffect(() => {
         loadModel()
-    }, [wireframe])
+    }, [wireframe, imageExpand])
 
     useEffect(() => {
         updateMaterials()
@@ -621,8 +634,8 @@ const PostModel: React.FunctionComponent<Props> = (props) => {
                 // ignore
             }
             if (ref) {
-                ref.style.maxWidth = `calc(100vw - ${functions.sidebarWidth()}px - 70px)`
-                ref.style.maxHeight = `calc(100vh - ${functions.navbarHeight()}px - ${functions.titlebarHeight()}px)`
+                ref.style.maxWidth = ""
+                ref.style.maxHeight = ""
             }
             setTimeout(() => {
                 resizeImageCanvas()
@@ -724,6 +737,7 @@ const PostModel: React.FunctionComponent<Props> = (props) => {
                 <div className="post-model-filters" ref={fullscreenRef} onMouseOver={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                 <div className={`post-image-top-buttons ${buttonHover ? "show-post-image-top-buttons" : ""}`} onMouseEnter={() => setButtonHover(true)} onMouseLeave={() => setButtonHover(false)}>
                         {!props.noTranslations && session.username ? <img draggable={false} className="post-image-top-button" src={translationToggleOn} style={{filter: getFilter()}} onClick={() => {setTranslationMode(true); setTranslationDrawingEnabled(true)}}/> : null}
+                        <img draggable={false} className="post-image-top-button" src={imageExpand ? contract : expand} style={{filter: getFilter()}} onClick={() => setImageExpand((prev: boolean) => !prev)}/>
                     </div>
                     <div className="relative-ref" style={{alignItems: "center", justifyContent: "center"}}>
                         <div className="model-controls" ref={modelControls} onMouseUp={() => setDragging(false)} onMouseOver={controlMouseEnter} onMouseLeave={controlMouseLeave}>

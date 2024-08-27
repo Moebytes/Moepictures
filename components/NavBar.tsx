@@ -290,19 +290,21 @@ const NavBar: React.FunctionComponent<Props> = (props) => {
             <SearchSuggestions active={suggestionsActive && hideSidebar} width={200} x={getX()} y={getY()}/>
             <div className={`navbar ${hideTitlebar ? "translate-navbar" : ""} ${hideSortbar && hideTitlebar && hideSidebar ? "hide-navbar" : ""} ${hideSortbar && hideNavbar && showMiniTitle ? "hide-navbar" : ""}
             ${relative ? "navbar-relative" : ""}`} onMouseEnter={() => setEnableDrag(false)}>
-                {showMiniTitle && !relative ? 
+                {/*showMiniTitle && !relative ? 
                     <Link to="/" className="nav-mini-title-container">
                         <span className="nav-mini-title-a">M</span>
                         <span className="nav-mini-title-b">o</span>
                         <span className="nav-mini-title-a">e</span>
-                        <span className="nav-mini-title-b">b</span>
-                        <span className="nav-mini-title-a">o</span>
-                        <span className="nav-mini-title-b">o</span>
-                        <span className="nav-mini-title-a">r</span>
+                        <span className="nav-mini-title-b">p</span>
+                        <span className="nav-mini-title-a">i</span>
+                        <span className="nav-mini-title-b">c</span>
+                        <span className="nav-mini-title-a">t</span>
                         <span className="nav-mini-title-b">u</span>
-                        {/* <img className="nav-mini-img" src={favicon} style={{filter: getFilter()}}/> */}
+                        <span className="nav-mini-title-a">r</span>
+                        <span className="nav-mini-title-b">e</span>
+                        <span className="nav-mini-title-a">s</span>
                     </Link>
-                : null}
+                : null*/}
                 <div className="nav-text-container">
                     {session.username ? 
                     <div className="nav-user-container" style={{marginRight: marginR}}>

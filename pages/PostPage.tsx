@@ -329,6 +329,7 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
     const getPostJSX = () => {
         if (!post) return
         if (post.type === "model") {
+            console.log(image)
             return (
                 <>
                 <PostModel post={post} model={image} order={order}/>

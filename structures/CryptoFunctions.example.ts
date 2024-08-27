@@ -20,4 +20,14 @@ export default class Crypto {
       const blob = new Blob([new Uint8Array(decrypted)])
       return URL.createObjectURL(blob)
    }
+
+   public static decryptedBuffer = async (link: string) => {
+      const buffer = axios.get(link, {responseType: "arraybuffer"}).then((r) => r.data) 
+      if (link.includes("/unverified")) return buffer
+      if (functions.isVideo(link) || functions.isGIF(link)) buffer
+      const encrypted = await axios.get(link, {withCredentials: true, responseType: "arraybuffer"}).then((r) => r.data)
+      if (functions.isWebP(link)) if (await functions.isAnimatedWebp(encrypted)) return buffer
+      const decrypted = Crypto.decrypt(encrypted)
+      return decrypted
+   }
 }

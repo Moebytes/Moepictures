@@ -10,6 +10,7 @@ CREATE TABLE IF NOT EXISTS "users" (
     "showRelated" boolean,
     "showTooltips" boolean,
     "downloadPixivID" boolean,
+    "autosearchInterval" int,
     "image" text,
     "imagePost" bigint REFERENCES posts ("postID") ON UPDATE CASCADE ON DELETE SET NULL,
     "ip" inet,
@@ -183,7 +184,7 @@ CREATE TABLE IF NOT EXISTS "session" (
   "expires" timestamp(6) NOT NULL
 ) WITH (OIDS=FALSE);
 
-CREATE INDEX IF NOT EXISTS "IDX_session_expire" ON "session" ("expires");
+CREATE INDEX IF NOT EXISTS "idx_session_expire" ON "session" ("expires");
 
 CREATE TABLE IF NOT EXISTS "email tokens" (
     "email" text PRIMARY KEY,
@@ -373,90 +374,114 @@ CREATE TABLE IF NOT EXISTS "bans" (
     "reason" text
 );
 
-CREATE INDEX IF NOT EXISTS "posts_index"
+CREATE INDEX IF NOT EXISTS "idx_posts"
     ON "posts" USING btree
     ("postID" DESC NULLS LAST);
 
-CREATE INDEX IF NOT EXISTS "images_index"
+CREATE INDEX IF NOT EXISTS "idx_post_type" 
+    ON "posts" USING btree ("type");
+
+CREATE INDEX IF NOT EXISTS "idx_post_restrict" 
+    ON "posts" USING btree ("restrict");
+
+CREATE INDEX IF NOT EXISTS "idx_post_style" 
+    ON "posts" USING btree ("style");
+
+CREATE INDEX IF NOT EXISTS "idx_post_uploadDate" 
+    ON "posts" USING btree ("uploadDate");
+
+CREATE INDEX IF NOT EXISTS "idx_post_drawn" 
+    ON "posts" USING btree ("drawn");
+
+CREATE INDEX IF NOT EXISTS "idx_post_bookmarks" 
+    ON "posts" USING btree ("bookmarks");
+
+CREATE INDEX IF NOT EXISTS "idx_images"
     ON "images" USING btree
     ("imageID" DESC NULLS LAST);
 
-CREATE INDEX IF NOT EXISTS "cuteness_index"
+CREATE INDEX IF NOT EXISTS "idx_images_size"
+    ON "images" USING btree ("size");
+
+CREATE INDEX IF NOT EXISTS "idx_cuteness"
     ON "cuteness" USING btree
     ("cutenessID" DESC NULLS LAST);
 
-CREATE INDEX IF NOT EXISTS "favorites_index"
+CREATE INDEX IF NOT EXISTS "idx_cuteness_cuteness"
+    ON "cuteness" USING btree ("cuteness");
+
+CREATE INDEX IF NOT EXISTS "idx_favorites"
     ON "favorites" USING btree
     ("favoriteID" DESC NULLS LAST);
 
-CREATE INDEX IF NOT EXISTS "comments_index"
+CREATE INDEX IF NOT EXISTS "idx_comments"
     ON "comments" USING btree
     ("commentID" DESC NULLS LAST);
 
-CREATE INDEX IF NOT EXISTS "translations_index"
+CREATE INDEX IF NOT EXISTS "idx_translations"
     ON "translations" USING btree
     ("translationID" DESC NULLS LAST);
 
-CREATE INDEX IF NOT EXISTS "tag_map_index"
+CREATE INDEX IF NOT EXISTS "idx_tag_map"
     ON "tag map" USING btree
     ("tagID" ASC NULLS LAST);
 
-CREATE INDEX IF NOT EXISTS "tags_index"
+CREATE INDEX IF NOT EXISTS "idx_tags"
     ON "tags" USING btree
-    (tag ASC NULLS LAST);
+    ("tag" ASC NULLS LAST);
 
-CREATE INDEX IF NOT EXISTS "aliases_index"
+CREATE INDEX IF NOT EXISTS "idx_aliases"
     ON "aliases" USING btree
     ("aliasID" ASC NULLS LAST);
 
-CREATE INDEX IF NOT EXISTS "implications_index"
+CREATE INDEX IF NOT EXISTS "idx_implications"
     ON "implications" USING btree
     ("implicationID" ASC NULLS LAST);
 
-CREATE INDEX IF NOT EXISTS "users_index"
+CREATE INDEX IF NOT EXISTS "idx_users"
     ON "users" USING btree
     (username ASC NULLS LAST);
 
-CREATE INDEX IF NOT EXISTS "threads_index"
+CREATE INDEX IF NOT EXISTS "idx_threads"
     ON "threads" USING btree
     ("threadID" DESC NULLS LAST);
 
-CREATE INDEX IF NOT EXISTS "replies_index"
+CREATE INDEX IF NOT EXISTS "idx_replies"
     ON "replies" USING btree
     ("replyID" DESC NULLS LAST);
 
-CREATE INDEX IF NOT EXISTS "post_history_index"
+CREATE INDEX IF NOT EXISTS "idx_post_history"
     ON "post history" USING btree
     ("historyID" DESC NULLS LAST);
 
-CREATE INDEX IF NOT EXISTS "tag_history_index"
+CREATE INDEX IF NOT EXISTS "idx_tag_history"
     ON "tag history" USING btree
     ("historyID" DESC NULLS LAST);
 
-CREATE INDEX IF NOT EXISTS "translation_history_index"
+CREATE INDEX IF NOT EXISTS "idx_translation_history"
     ON "translation history" USING btree
     ("historyID" DESC NULLS LAST);
 
-CREATE INDEX IF NOT EXISTS "unverified_images_index"
+CREATE INDEX IF NOT EXISTS "idx_unverified_images"
     ON "unverified images" USING btree
     ("imageID" DESC NULLS LAST);
 
-CREATE INDEX IF NOT EXISTS "unverified_posts_index"
+CREATE INDEX IF NOT EXISTS "idx_unverified_posts"
     ON "unverified posts" USING btree
     ("postID" DESC NULLS LAST);
 
-CREATE INDEX IF NOT EXISTS "unverified_tag_map_index"
+CREATE INDEX IF NOT EXISTS "idx_unverified_tag_map"
     ON "unverified tag map" USING btree
     ("tagID" ASC NULLS LAST);
 
-CREATE INDEX IF NOT EXISTS "unverified_tags_index"
+CREATE INDEX IF NOT EXISTS "idx_unverified_tags"
     ON "unverified tags" USING btree
     (tag ASC NULLS LAST);
 
-CREATE INDEX IF NOT EXISTS "unverified_aliases_index"
+CREATE INDEX IF NOT EXISTS "idx_unverified_aliases"
     ON "unverified aliases" USING btree
     ("aliasID" ASC NULLS LAST);
 
-CREATE INDEX IF NOT EXISTS "unverified_translations_index"
+CREATE INDEX IF NOT EXISTS "idx_unverified_translations"
     ON "unverified translations" USING btree
     ("translationID" ASC NULLS LAST);
