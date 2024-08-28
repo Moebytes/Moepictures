@@ -125,7 +125,7 @@ const BanDialog: React.FunctionComponent = (props) => {
                     image = Object.values(bytes)
                 }
                 await axios.put("/api/tag/edit", {silent: true, tag: currentHistory.tag, key: currentHistory.key, description: currentHistory.description,
-                image, aliases: currentHistory.aliases, implications: currentHistory.implications, pixiv: currentHistory.pixiv, twitter: currentHistory.twitter,
+                image, aliases: currentHistory.aliases, implications: currentHistory.implications, social: currentHistory.social, twitter: currentHistory.twitter,
                 website: currentHistory.website, fandom: currentHistory.fandom}, {headers: {"x-csrf-token": functions.getCSRFToken()}, withCredentials: true})
             }
         }

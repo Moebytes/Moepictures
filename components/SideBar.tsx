@@ -36,6 +36,10 @@ import pixiv from "../assets/icons/pixiv.png"
 import twitter from "../assets/icons/twitter.png"
 import deviantart from "../assets/icons/deviantart.png"
 import artstation from "../assets/icons/artstation.png"
+import soundcloud from "../assets/icons/soundcloud.png"
+import youtube from "../assets/icons/youtube.png"
+import bandcamp from "../assets/icons/bandcamp.png"
+import sketchfab from "../assets/icons/sketchfab.png"
 import SearchSuggestions from "./SearchSuggestions"
 import adminCrown from "../assets/icons/admin-crown.png"
 import modCrown from "../assets/icons/mod-crown.png"
@@ -336,8 +340,12 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
                 if (props.artists[i].website) {
                     jsx.push(<img className="sidebar-social" src={website} onClick={() => window.open(props.artists[i].website, "_blank")}/>)
                 }
-                if (props.artists[i].pixiv) {
-                    jsx.push(<img className="sidebar-social" src={pixiv} onClick={() => window.open(props.artists[i].pixiv, "_blank")}/>)
+                if (props.artists[i].social?.includes("pixiv.net")) {
+                    jsx.push(<img className="sidebar-social" src={pixiv} onClick={() => window.open(props.artists[i].social, "_blank")}/>)
+                } else if (props.artists[i].social?.includes("soundcloud.com")) {
+                    jsx.push(<img className="sidebar-social" src={soundcloud} onClick={() => window.open(props.artists[i].social, "_blank")}/>)
+                } else if (props.artists[i].social?.includes("sketchfab.com")) {
+                    jsx.push(<img className="sidebar-social" src={sketchfab} onClick={() => window.open(props.artists[i].social, "_blank")}/>)
                 }
                 if (props.artists[i].twitter) {
                     jsx.push(<img className="sidebar-social" src={twitter} onClick={() => window.open(props.artists[i].twitter, "_blank")}/>)
@@ -472,6 +480,12 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
             if (props.post.mirrors.pixiv) {
                 jsx.push(<img className="sidebar-social" src={pixiv} onClick={() => window.open(props.post.mirrors.pixiv, "_blank")}/>)
             }
+            if (props.post.mirrors.soundcloud) {
+                jsx.push(<img className="sidebar-social" src={soundcloud} onClick={() => window.open(props.post.mirrors.soundcloud, "_blank")}/>)
+            }
+            if (props.post.mirrors.sketchfab) {
+                jsx.push(<img className="sidebar-social" src={sketchfab} onClick={() => window.open(props.post.mirrors.sketchfab, "_blank")}/>)
+            }
             if (props.post.mirrors.twitter) {
                 jsx.push(<img className="sidebar-social" src={twitter} onClick={() => window.open(props.post.mirrors.twitter, "_blank")}/>)
             }
@@ -495,6 +509,12 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
             }
             if (props.post.mirrors.konachan) {
                 jsx.push(<img className="sidebar-social" src={konachan} onClick={() => window.open(props.post.mirrors.konachan, "_blank")}/>)
+            }
+            if (props.post.mirrors.youtube) {
+                jsx.push(<img className="sidebar-social" src={youtube} onClick={() => window.open(props.post.mirrors.youtube, "_blank")}/>)
+            }
+            if (props.post.mirrors.bandcamp) {
+                jsx.push(<img className="sidebar-social" src={bandcamp} onClick={() => window.open(props.post.mirrors.bandcamp, "_blank")}/>)
             }
         }
         if (jsx.length) {

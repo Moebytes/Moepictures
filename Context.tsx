@@ -84,7 +84,7 @@ export const EditTagDescriptionContext = React.createContext<any>(null)
 export const EditTagAliasesContext = React.createContext<any>(null)
 export const EditTagImplicationsContext = React.createContext<any>(null)
 export const EditTagTypeContext = React.createContext<any>(null)
-export const EditTagPixivContext = React.createContext<any>(null)
+export const EditTagSocialContext = React.createContext<any>(null)
 export const EditTagWebsiteContext = React.createContext<any>(null)
 export const EditTagFandomContext = React.createContext<any>(null)
 export const EditTagTwitterContext = React.createContext<any>(null)
@@ -224,7 +224,7 @@ const Context: React.FunctionComponent = (props) => {
     const [editTagAliases, setEditTagAliases] = useState(false)
     const [editTagImplications, setEditTagImplications] = useState(false)
     const [editTagType, setEditTagType] = useState(false)
-    const [editTagPixiv, setEditTagPixiv] = useState(false)
+    const [editTagSocial, setEditTagSocial] = useState(false)
     const [editTagWebsite, setEditTagWebsite] = useState(false)
     const [editTagFandom, setEditTagFandom] = useState(false)
     const [editTagTwitter, setEditTagTwitter] = useState(false)
@@ -356,7 +356,7 @@ return (
         <EditTagFandomContext.Provider value={{editTagFandom, setEditTagFandom}}>
         <EditTagWebsiteContext.Provider value={{editTagWebsite, setEditTagWebsite}}>
         <EditTagTwitterContext.Provider value={{editTagTwitter, setEditTagTwitter}}>
-        <EditTagPixivContext.Provider value={{editTagPixiv, setEditTagPixiv}}>
+        <EditTagSocialContext.Provider value={{editTagSocial, setEditTagSocial}}>
         <EditTagTypeContext.Provider value={{editTagType, setEditTagType}}>
         <QuickEditIDContext.Provider value={{quickEditID, setQuickEditID}}>
         <PostFlagContext.Provider value={{postFlag, setPostFlag}}>
@@ -490,7 +490,7 @@ return (
         </PostFlagContext.Provider>
         </QuickEditIDContext.Provider>
         </EditTagTypeContext.Provider>
-        </EditTagPixivContext.Provider>
+        </EditTagSocialContext.Provider>
         </EditTagTwitterContext.Provider>
         </EditTagWebsiteContext.Provider>
         </EditTagFandomContext.Provider>

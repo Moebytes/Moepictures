@@ -75,7 +75,6 @@ const App: React.FunctionComponent = (props) => {
 
     const getSessionCookie = async () => {
         const cookie = await axios.get("/api/user/session", {withCredentials: true}).then((r) => r.data)
-        console.log(cookie)
         functions.updateCSRFToken(cookie)
         setSession(cookie)
     }

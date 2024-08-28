@@ -1204,7 +1204,7 @@ export default class Functions {
                     obj.image = unverifiedTag.image
                     obj.type = unverifiedTag.type
                     obj.description = unverifiedTag.description 
-                    obj.pixiv = unverifiedTag.pixiv
+                    obj.social = unverifiedTag.social
                     obj.twitter = unverifiedTag.twitter
                     obj.website = unverifiedTag.website
                     obj.fandom = unverifiedTag.fandom
@@ -1226,7 +1226,7 @@ export default class Functions {
             obj.type = foundTag.type
             obj.image = foundTag.image
             obj.description = foundTag.description 
-            obj.pixiv = foundTag.pixiv
+            obj.social = foundTag.social
             obj.twitter = foundTag.twitter
             obj.website = foundTag.website
             obj.fandom = foundTag.fandom
@@ -1814,6 +1814,10 @@ export default class Functions {
             if (mirror.includes("konachan")) json["konachan"] = mirror
             if (mirror.includes("deviantart")) json["deviantart"] = mirror
             if (mirror.includes("artstation")) json["artstation"] = mirror
+            if (mirror.includes("soundcloud")) json["soundcloud"] = mirror
+            if (mirror.includes("youtube")) json["youtube"] = mirror
+            if (mirror.includes("bandcamp")) json["bandcamp"] = mirror
+            if (mirror.includes("sketchfab")) json["sketchfab"] = mirror
             if (mirror.includes("twitter") || mirror.includes("x.com")) json["twitter"] = mirror
         }
         return JSON.stringify(json) as any

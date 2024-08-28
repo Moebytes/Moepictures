@@ -12,6 +12,8 @@ import permissions from "../structures/Permissions"
 import website from "../assets/icons/support.png"
 import fandom from "../assets/icons/fandom.png"
 import pixiv from "../assets/icons/pixiv.png"
+import soundcloud from "../assets/icons/soundcloud.png"
+import sketchfab from "../assets/icons/sketchfab.png"
 import twitter from "../assets/icons/twitter.png"
 import "./styles/taghistoryrow.less"
 import axios from "axios"
@@ -58,7 +60,7 @@ const TagHistoryRow: React.FunctionComponent<Props> = (props) => {
             image = Object.values(bytes)
         }
         await axios.put("/api/tag/edit", {tag: props.tagHistory.tag, key: props.tagHistory.key, description: props.tagHistory.description,
-        image, aliases: props.tagHistory.aliases, implications: props.tagHistory.implications, pixiv: props.tagHistory.pixiv, twitter: props.tagHistory.twitter,
+        image, aliases: props.tagHistory.aliases, implications: props.tagHistory.implications, social: props.tagHistory.social, twitter: props.tagHistory.twitter,
         website: props.tagHistory.website, fandom: props.tagHistory.fandom}, {headers: {"x-csrf-token": functions.getCSRFToken()}, withCredentials: true})
         props.onEdit?.()
     }
@@ -150,8 +152,12 @@ const TagHistoryRow: React.FunctionComponent<Props> = (props) => {
             if (props.tagHistory.website) {
                 jsx.push(<img className="taghistoryrow-social" src={website} onClick={() => window.open(props.tagHistory.website, "_blank")}/>)
             }
-            if (props.tagHistory.pixiv) {
-                jsx.push(<img className="taghistoryrow-social" src={pixiv} onClick={() => window.open(props.tagHistory.pixiv, "_blank")}/>)
+            if (props.tagHistory.social?.includes("pixiv.net")) {
+                jsx.push(<img className="taghistoryrow-social" src={pixiv} onClick={() => window.open(props.tagHistory.social, "_blank")}/>)
+            } else if (props.tagHistory.social?.includes("soundcloud.com")) {
+                jsx.push(<img className="taghistoryrow-social" src={soundcloud} onClick={() => window.open(props.tagHistory.social, "_blank")}/>)
+            } else if (props.tagHistory.social?.includes("sketchfab.com")) {
+                jsx.push(<img className="taghistoryrow-social" src={sketchfab} onClick={() => window.open(props.tagHistory.social, "_blank")}/>)
             }
             if (props.tagHistory.twitter) {
                 jsx.push(<img className="taghistoryrow-social" src={twitter} onClick={() => window.open(props.tagHistory.twitter, "_blank")}/>)

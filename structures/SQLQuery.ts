@@ -795,7 +795,7 @@ export default class SQLQuery {
   public static postTags = async (postID: number) => {
     const query: QueryConfig = {
       text: functions.multiTrim(`
-          SELECT json_agg(json_build_object('tag', "tags".tag, 'type', "tags".type, 'image', "tags".image, 'pixiv', "tags".pixiv, 'twitter', "tags".twitter)) AS tags
+          SELECT json_agg(json_build_object('tag', "tags".tag, 'type', "tags".type, 'image', "tags".image, 'social', "tags".social, 'twitter', "tags".twitter)) AS tags
           FROM "tag map"
           JOIN tags ON "tag map".tag = "tags".tag
           WHERE "tag map"."postID" = $1
@@ -2360,10 +2360,10 @@ export default class SQLQuery {
   }
 
   /** Insert tag edit request. */
-  public static insertTagEditRequest = async (username: string, tag: string, key: string, description: string, image: string, aliases: string[], implications: string[], pixivTags: string[], pixiv: string, twitter: string, website: string, fandom: string, reason: string) => {
+  public static insertTagEditRequest = async (username: string, tag: string, key: string, description: string, image: string, aliases: string[], implications: string[], pixivTags: string[], social: string, twitter: string, website: string, fandom: string, reason: string) => {
     const query: QueryConfig = {
-      text: `INSERT INTO "tag edit requests" ("username", "tag", "key", "description", "image", "aliases", "implications", "pixivTags", "pixiv", "twitter", "website", "fandom", "reason") VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)`,
-      values: [username, tag, key, description, image, aliases, implications, pixivTags, pixiv, twitter, website, fandom, reason]
+      text: `INSERT INTO "tag edit requests" ("username", "tag", "key", "description", "image", "aliases", "implications", "pixivTags", "social", "twitter", "website", "fandom", "reason") VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)`,
+      values: [username, tag, key, description, image, aliases, implications, pixivTags, social, twitter, website, fandom, reason]
     }
     const result = await SQLQuery.run(query)
     return result
@@ -2416,11 +2416,11 @@ export default class SQLQuery {
   }
 
   public static insertTagHistory = async (username: string, tag: string, key: string, type: string, image?: string, description?: string, 
-    aliases?: string[], implications?: string[], pixivTags?: string[], website?: string, pixiv?: string, twitter?: string, fandom?: string, reason?: string) => {
+    aliases?: string[], implications?: string[], pixivTags?: string[], website?: string, social?: string, twitter?: string, fandom?: string, reason?: string) => {
     const now = new Date().toISOString()
     const query: QueryConfig = {
-      text: `INSERT INTO "tag history" ("tag", "user", "date", "key", "type", "image", "description", "aliases", "implications", "pixivTags", "website", "pixiv", "twitter", "fandom", "reason") VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15)`,
-      values: [tag, username, now, key, type, image, description, aliases, implications, pixivTags, website, pixiv, twitter, fandom, reason]
+      text: `INSERT INTO "tag history" ("tag", "user", "date", "key", "type", "image", "description", "aliases", "implications", "pixivTags", "website", "social", "twitter", "fandom", "reason") VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15)`,
+      values: [tag, username, now, key, type, image, description, aliases, implications, pixivTags, website, social, twitter, fandom, reason]
     }
     await SQLQuery.flushDB()
     const result = await SQLQuery.run(query)

@@ -1,7 +1,7 @@
 import React, {useContext, useEffect, useRef, useState} from "react"
 import {useHistory} from "react-router-dom"
 import {ThemeContext, SearchContext, SearchFlagContext, DeleteTagFlagContext, DeleteTagIDContext, MobileContext, EditTagTypeContext, EditTagReasonContext,
-EditTagPixivContext, EditTagTwitterContext, EditTagWebsiteContext, EditTagFandomContext, EditTagAliasesContext, EditTagImplicationsContext, 
+EditTagSocialContext, EditTagTwitterContext, EditTagWebsiteContext, EditTagFandomContext, EditTagAliasesContext, EditTagImplicationsContext, 
 EditTagDescriptionContext, EditTagIDContext, EditTagFlagContext, EditTagPixivTagsContext, SessionContext, EditTagImageContext, EditTagKeyContext, AliasTagFlagContext, 
 AliasTagIDContext, AliasTagNameContext} from "../Context"
 import {HashLink as Link} from "react-router-hash-link"
@@ -13,6 +13,8 @@ import deleteIcon from "../assets/icons/delete.png"
 import website from "../assets/icons/support.png"
 import fandom from "../assets/icons/fandom.png"
 import pixiv from "../assets/icons/pixiv.png"
+import soundcloud from "../assets/icons/soundcloud.png"
+import sketchfab from "../assets/icons/sketchfab.png"
 import twitter from "../assets/icons/twitter.png"
 import "./styles/tagrow.less"
 import axios from "axios"
@@ -38,7 +40,7 @@ const TagRow: React.FunctionComponent<Props> = (props) => {
     const {editTagImplications, setEditTagImplications} = useContext(EditTagImplicationsContext)
     const {editTagDescription, setEditTagDescription} = useContext(EditTagDescriptionContext)
     const {editTagType, setEditTagType} = useContext(EditTagTypeContext)
-    const {editTagPixiv, setEditTagPixiv} = useContext(EditTagPixivContext)
+    const {editTagSocial, setEditTagSocial} = useContext(EditTagSocialContext)
     const {editTagTwitter, setEditTagTwitter} = useContext(EditTagTwitterContext)
     const {editTagWebsite, setEditTagWebsite} = useContext(EditTagWebsiteContext)
     const {editTagFandom, setEditTagFandom} = useContext(EditTagFandomContext)
@@ -122,7 +124,7 @@ const TagRow: React.FunctionComponent<Props> = (props) => {
             }
         }
         await axios.put("/api/tag/edit", {tag: props.tag.tag, key: editTagKey, description: editTagDescription,
-        image, aliases: editTagAliases, implications: editTagImplications, pixivTags: editTagPixivTags, pixiv: editTagPixiv, twitter: editTagTwitter,
+        image, aliases: editTagAliases, implications: editTagImplications, pixivTags: editTagPixivTags, social: editTagSocial, twitter: editTagTwitter,
         website: editTagWebsite, fandom: editTagFandom, reason: editTagReason}, {headers: {"x-csrf-token": functions.getCSRFToken()}, withCredentials: true})
         if (editTagImage) refreshCache(editTagImage)
         props.onEdit?.()
@@ -145,7 +147,7 @@ const TagRow: React.FunctionComponent<Props> = (props) => {
         setEditTagPixivTags(props.tag.pixivTags?.[0] ? props.tag.pixivTags : [])
         setEditTagID(props.tag.tag)
         setEditTagType(props.tag.type)
-        setEditTagPixiv(props.tag.pixiv)
+        setEditTagSocial(props.tag.social)
         setEditTagTwitter(props.tag.twitter)
         setEditTagWebsite(props.tag.website)
         setEditTagFandom(props.tag.fandom)
@@ -181,8 +183,12 @@ const TagRow: React.FunctionComponent<Props> = (props) => {
             if (props.tag.website) {
                 jsx.push(<img className="tagrow-social" src={website} onClick={() => window.open(props.tag.website, "_blank")}/>)
             }
-            if (props.tag.pixiv) {
-                jsx.push(<img className="tagrow-social" src={pixiv} onClick={() => window.open(props.tag.pixiv, "_blank")}/>)
+            if (props.tag.social?.includes("pixiv.net")) {
+                jsx.push(<img className="tagrow-social" src={pixiv} onClick={() => window.open(props.tag.social, "_blank")}/>)
+            } else if (props.tag.social?.includes("soundcloud.com")) {
+                jsx.push(<img className="tagrow-social" src={soundcloud} onClick={() => window.open(props.tag.social, "_blank")}/>)
+            } else if (props.tag.social?.includes("sketchfab.com")) {
+                jsx.push(<img className="tagrow-social" src={sketchfab} onClick={() => window.open(props.tag.social, "_blank")}/>)
             }
             if (props.tag.twitter) {
                 jsx.push(<img className="tagrow-social" src={twitter} onClick={() => window.open(props.tag.twitter, "_blank")}/>)

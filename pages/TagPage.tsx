@@ -15,6 +15,8 @@ import restore from "../assets/icons/restore.png"
 import website from "../assets/icons/support.png"
 import fandom from "../assets/icons/fandom.png"
 import pixiv from "../assets/icons/pixiv.png"
+import soundcloud from "../assets/icons/soundcloud.png"
+import sketchfab from "../assets/icons/sketchfab.png"
 import twitter from "../assets/icons/twitter.png"
 import Carousel from "../components/Carousel"
 import axios from "axios"
@@ -133,8 +135,12 @@ const TagPage: React.FunctionComponent<Props> = (props) => {
             if (tag.website) {
                 jsx.push(<img className="tag-social" src={website} onClick={() => window.open(tag.website, "_blank")}/>)
             }
-            if (tag.pixiv) {
-                jsx.push(<img className="tag-social" src={pixiv} onClick={() => window.open(tag.pixiv, "_blank")}/>)
+            if (tag.social?.includes("pixiv.net")) {
+                jsx.push(<img className="tag-social" src={pixiv} onClick={() => window.open(tag.social, "_blank")}/>)
+            } else if (tag.social?.includes("soundcloud.com")) {
+                jsx.push(<img className="tag-social" src={soundcloud} onClick={() => window.open(tag.social, "_blank")}/>)
+            } else if (tag.social?.includes("sketchfab.com")) {
+                jsx.push(<img className="tag-social" src={sketchfab} onClick={() => window.open(tag.social, "_blank")}/>)
             }
             if (tag.twitter) {
                 jsx.push(<img className="tag-social" src={twitter} onClick={() => window.open(tag.twitter, "_blank")}/>)

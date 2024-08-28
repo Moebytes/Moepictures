@@ -3,7 +3,8 @@ import {useHistory} from "react-router-dom"
 import loading from "../assets/icons/loading.gif"
 import {ThemeContext, SizeTypeContext, BrightnessContext, ContrastContext, HueContext, SaturationContext, LightnessContext, MobileContext, ScrollYContext,
 BlurContext, SharpenContext, SquareContext, PixelateContext, DownloadFlagContext, DownloadIDsContext, SpeedContext, ReverseContext, ScrollContext,
-SelectionModeContext, SelectionItemsContext, SelectionPostsContext, ActiveDropdownContext} from "../Context"
+ToolTipXContext, ToolTipYContext, ToolTipEnabledContext, ToolTipPostContext, ToolTipImgContext, SelectionModeContext, SelectionItemsContext, 
+SelectionPostsContext, ActiveDropdownContext} from "../Context"
 import {HashLink as Link} from "react-router-hash-link"
 import path from "path"
 import functions from "../structures/Functions"
@@ -13,6 +14,7 @@ import axios from "axios"
 import * as THREE from "three"
 import {OrbitControls, GLTFLoader, OBJLoader, FBXLoader} from "three-stdlib"
 
+let tooltipTimer = null as any
 let imageTimer = null as any
 let id = null as any
 
@@ -48,6 +50,11 @@ const GridModel = forwardRef<Ref, Props>((props, componentRef) => {
     const {downloadIDs, setDownloadIDs} = useContext(DownloadIDsContext)
     const {scrollY, setScrollY} = useContext(ScrollYContext)
     const {mobile, setMobile} = useContext(MobileContext)
+    const {tooltipX, setToolTipX} = useContext(ToolTipXContext)
+    const {tooltipY, setToolTipY} = useContext(ToolTipYContext)
+    const {tooltipEnabled, setToolTipEnabled} = useContext(ToolTipEnabledContext)
+    const {tooltipPost, setToolTipPost} = useContext(ToolTipPostContext)
+    const {tooltipImg, setToolTipImg} = useContext(ToolTipImgContext)
     const {selectionMode, setSelectionMode} = useContext(SelectionModeContext)
     const {activeDropdown, setActiveDropdown} = useContext(ActiveDropdownContext)
     const {selectionItems, setSelectionItems} = useContext(SelectionItemsContext) as {selectionItems: Set<string>, setSelectionItems: any}
@@ -77,6 +84,7 @@ const GridModel = forwardRef<Ref, Props>((props, componentRef) => {
     const [duration, setDuration] = useState(0)
     const [visible, setVisible] = useState(true)
     const {scroll, setScroll} = useContext(ScrollContext)
+    const [pageBuffering, setPageBuffering] = useState(true)
     const [image, setImage] = useState(null) as any
     const [mixer, setMixer] = useState(null as unknown as THREE.AnimationMixer | null)
     const [animations, setAnimations] = useState(null as unknown as THREE.AnimationClip[] | null)
@@ -286,6 +294,20 @@ const GridModel = forwardRef<Ref, Props>((props, componentRef) => {
             observer?.disconnect()
         }
     }, [ref])
+
+    const resizeOverlay = () => {
+        if (!rendererRef.current || !pixelateRef.current) return 
+        pixelateRef.current.width = rendererRef.current.clientWidth
+        pixelateRef.current.height = rendererRef.current.clientHeight
+    }
+
+    useEffect(() => {
+        const element = rendererRef.current!
+        new ResizeObserver(resizeOverlay).observe(element)
+        setTimeout(() => {
+            setPageBuffering(false)
+        }, 500)
+    }, [])
 
     const getSquareOffset = () => {
         if (mobile) {
@@ -534,6 +556,28 @@ const GridModel = forwardRef<Ref, Props>((props, componentRef) => {
                 }
             }
         }
+    }
+
+    const mouseEnter = () => {
+        if (pageBuffering) return
+        tooltipTimer = setTimeout(() => {
+            if (!containerRef.current) return
+            const rect = containerRef.current.getBoundingClientRect()
+            const toolTipWidth = 325
+            const toolTipHeight = 150
+            const midpoint = (rect.left + rect.right) / 2
+            setToolTipX(Math.floor(midpoint - (toolTipWidth / 2)))
+            setToolTipY(Math.floor(rect.y - (toolTipHeight / 1.05)))
+            setToolTipPost(props.post)
+            setToolTipImg(props.model)
+            setToolTipEnabled(true)
+        }, 400)
+    }
+
+    const mouseLeave = () => {
+        if (pageBuffering) return
+        if (tooltipTimer) clearTimeout(tooltipTimer)
+        setToolTipEnabled(false)
     }
 
     const getBorder = () => {

@@ -3,7 +3,8 @@ import {useHistory} from "react-router-dom"
 import loading from "../assets/icons/loading.gif"
 import {ThemeContext, SizeTypeContext, BrightnessContext, ContrastContext, HueContext, SaturationContext, LightnessContext, MobileContext, ScrollYContext,
 BlurContext, SharpenContext, SquareContext, PixelateContext, DownloadFlagContext, DownloadIDsContext, SpeedContext, ReverseContext, ScrollContext, SiteHueContext,
-SiteLightnessContext, SiteSaturationContext, SelectionModeContext, SelectionItemsContext, SelectionPostsContext, ActiveDropdownContext} from "../Context"
+ToolTipXContext, ToolTipYContext, ToolTipEnabledContext, ToolTipPostContext, ToolTipImgContext, SiteLightnessContext, SiteSaturationContext, SelectionModeContext, 
+SelectionItemsContext, SelectionPostsContext, ActiveDropdownContext} from "../Context"
 import {HashLink as Link} from "react-router-hash-link"
 import path from "path"
 import functions from "../structures/Functions"
@@ -11,6 +12,8 @@ import cryptoFunctions from "../structures/CryptoFunctions"
 import "./styles/gridimage.less"
 import musicNote from "../assets/icons/music-note.png"
 import axios from "axios"
+
+let tooltipTimer = null as any
 
 interface Props {
     id: number
@@ -46,6 +49,11 @@ const GridSong = forwardRef<Ref, Props>((props, componentRef) => {
     const {downloadIDs, setDownloadIDs} = useContext(DownloadIDsContext)
     const {scrollY, setScrollY} = useContext(ScrollYContext)
     const {mobile, setMobile} = useContext(MobileContext)
+    const {tooltipX, setToolTipX} = useContext(ToolTipXContext)
+    const {tooltipY, setToolTipY} = useContext(ToolTipYContext)
+    const {tooltipEnabled, setToolTipEnabled} = useContext(ToolTipEnabledContext)
+    const {tooltipPost, setToolTipPost} = useContext(ToolTipPostContext)
+    const {tooltipImg, setToolTipImg} = useContext(ToolTipImgContext)
     const {selectionMode, setSelectionMode} = useContext(SelectionModeContext)
     const {activeDropdown, setActiveDropdown} = useContext(ActiveDropdownContext)
     const {selectionItems, setSelectionItems} = useContext(SelectionItemsContext) as {selectionItems: Set<string>, setSelectionItems: any}
@@ -62,6 +70,7 @@ const GridSong = forwardRef<Ref, Props>((props, componentRef) => {
     const [naturalWidth, setNaturalWidth] = useState(0)
     const [naturalHeight, setNaturalHeight] = useState(0)
     const [imageLoaded, setImageLoaded] = useState(false)
+    const [pageBuffering, setPageBuffering] = useState(true)
     const [drag, setDrag] = useState(false)
     const {speed, setSpeed} = useContext(SpeedContext)
     const {reverse, setReverse} = useContext(ReverseContext)
@@ -149,6 +158,14 @@ const GridSong = forwardRef<Ref, Props>((props, componentRef) => {
     useEffect(() => {
         const element = ref.current!
         new ResizeObserver(resizeOverlay).observe(element)
+    }, [])
+
+    useEffect(() => {
+        const element = ref.current!
+        new ResizeObserver(resizeOverlay).observe(element)
+        setTimeout(() => {
+            setPageBuffering(false)
+        }, 500)
     }, [])
 
     const getSquareOffset = () => {
@@ -463,6 +480,28 @@ const GridSong = forwardRef<Ref, Props>((props, componentRef) => {
         }
     }
 
+    const mouseEnter = () => {
+        if (pageBuffering) return
+        tooltipTimer = setTimeout(() => {
+            if (!containerRef.current) return
+            const rect = containerRef.current.getBoundingClientRect()
+            const toolTipWidth = 325
+            const toolTipHeight = 150
+            const midpoint = (rect.left + rect.right) / 2
+            setToolTipX(Math.floor(midpoint - (toolTipWidth / 2)))
+            setToolTipY(Math.floor(rect.y - (toolTipHeight / 1.05)))
+            setToolTipPost(props.post)
+            setToolTipImg(props.audio)
+            setToolTipEnabled(true)
+        }, 400)
+    }
+
+    const mouseLeave = () => {
+        if (pageBuffering) return
+        if (tooltipTimer) clearTimeout(tooltipTimer)
+        setToolTipEnabled(false)
+    }
+
     const getBorder = () => {
         if (sizeType === "tiny" || sizeType === "small") {
             if (selected) {
@@ -521,7 +560,8 @@ const GridSong = forwardRef<Ref, Props>((props, componentRef) => {
 
 
     return (
-        <div style={{opacity: visible ? "1" : "0", transition: "opacity 0.1s"}} className="image-box" id={String(props.id)} ref={containerRef} onClick={onClick} onAuxClick={onClick} onMouseDown={mouseDown} onMouseUp={mouseUp} onMouseMove={mouseMove}>
+        <div style={{opacity: visible ? "1" : "0", transition: "opacity 0.1s"}} className="image-box" id={String(props.id)} ref={containerRef} onClick={onClick} 
+        onAuxClick={onClick} onMouseDown={mouseDown} onMouseUp={mouseUp} onMouseMove={mouseMove} onMouseEnter={mouseEnter} onMouseLeave={mouseLeave}>
             <div className="image-filters" ref={imageFiltersRef} onMouseMove={(event) => imageAnimation(event)} onMouseLeave={() => cancelImageAnimation()}>
                 <img className="song-icon" src={musicNote} style={{filter: getFilter()}} ref={songIconRef}/>
                 <canvas draggable={false} className="lightness-overlay" ref={lightnessRef}></canvas>

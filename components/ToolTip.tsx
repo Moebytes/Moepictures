@@ -14,6 +14,10 @@ import gelbooru from "../assets/icons/gelbooru.png"
 import safebooru from "../assets/icons/safebooru.png"
 import yandere from "../assets/icons/yandere.png"
 import konachan from "../assets/icons/konachan.png"
+import soundcloud from "../assets/icons/soundcloud.png"
+import youtube from "../assets/icons/youtube.png"
+import bandcamp from "../assets/icons/bandcamp.png"
+import sketchfab from "../assets/icons/sketchfab.png"
 import tagIcon from "../assets/icons/tag.png"
 import axios from "axios"
 
@@ -103,13 +107,19 @@ const ToolTip: React.FunctionComponent = (props) => {
     const getPostLinkJSX = () => {
         let jsx = [] as any
         if (tooltipPost.link?.includes("pixiv")) jsx.push(<img className="tooltip-img" style={{cursor: "pointer"}} src={pixiv} onClick={() => window.open(tooltipPost.link, "_blank")}/>)
+        if (tooltipPost.link?.includes("soundcloud")) jsx.push(<img className="tooltip-img" style={{cursor: "pointer"}} src={soundcloud} onClick={() => window.open(tooltipPost.link, "_blank")}/>)
+        if (tooltipPost.link?.includes("sketchfab")) jsx.push(<img className="tooltip-img" style={{cursor: "pointer"}} src={sketchfab} onClick={() => window.open(tooltipPost.link, "_blank")}/>)
         if (tooltipPost.link?.includes("twitter") || tooltipPost.link?.includes("x.com")) jsx.push(<img className="tooltip-img" style={{cursor: "pointer"}} src={twitter} onClick={() => window.open(tooltipPost.link, "_blank")}/>)
         if (tooltipPost.link?.includes("deviantart")) jsx.push(<img className="tooltip-img" style={{cursor: "pointer"}} src={deviantart} onClick={() => window.open(tooltipPost.link, "_blank")}/>)
         if (tooltipPost.link?.includes("artstation")) jsx.push(<img className="tooltip-img" style={{cursor: "pointer"}} src={artstation} onClick={() => window.open(tooltipPost.link, "_blank")}/>)
         if (tooltipPost.link?.includes("danbooru")) jsx.push(<img className="tooltip-img" style={{cursor: "pointer"}} src={danbooru} onClick={() => window.open(tooltipPost.link, "_blank")}/>)
         if (tooltipPost.link?.includes("yande.re")) jsx.push(<img className="tooltip-img" style={{cursor: "pointer"}} src={yandere} onClick={() => window.open(tooltipPost.link, "_blank")}/>)
+        if (tooltipPost.link?.includes("youtube")) jsx.push(<img className="tooltip-img" style={{cursor: "pointer"}} src={youtube} onClick={() => window.open(tooltipPost.link, "_blank")}/>)
+        if (tooltipPost.link?.includes("bandcamp")) jsx.push(<img className="tooltip-img" style={{cursor: "pointer"}} src={bandcamp} onClick={() => window.open(tooltipPost.link, "_blank")}/>)
         if (tooltipPost.mirrors) {
             if (tooltipPost.mirrors.pixiv) jsx.push(<img className="tooltip-img" style={{cursor: "pointer"}} src={pixiv} onClick={() => window.open(tooltipPost.mirrors.pixiv, "_blank")}/>)
+            if (tooltipPost.mirrors.soundcloud) jsx.push(<img className="tooltip-img" style={{cursor: "pointer"}} src={soundcloud} onClick={() => window.open(tooltipPost.mirrors.soundcloud, "_blank")}/>)
+            if (tooltipPost.mirrors.sketchfab) jsx.push(<img className="tooltip-img" style={{cursor: "pointer"}} src={sketchfab} onClick={() => window.open(tooltipPost.mirrors.sketchfab, "_blank")}/>)
             if (tooltipPost.mirrors.twitter) jsx.push(<img className="tooltip-img" style={{cursor: "pointer"}} src={twitter} onClick={() => window.open(tooltipPost.mirrors.twitter, "_blank")}/>)
             if (tooltipPost.mirrors.deviantart) jsx.push(<img className="tooltip-img" style={{cursor: "pointer"}} src={deviantart} onClick={() => window.open(tooltipPost.mirrors.deviantart, "_blank")}/>)
             if (tooltipPost.mirrors.artstation) jsx.push(<img className="tooltip-img" style={{cursor: "pointer"}} src={artstation} onClick={() => window.open(tooltipPost.mirrors.artstation, "_blank")}/>)
@@ -118,6 +128,8 @@ const ToolTip: React.FunctionComponent = (props) => {
             if (tooltipPost.mirrors.safebooru) jsx.push(<img className="tooltip-img" style={{cursor: "pointer"}} src={safebooru} onClick={() => window.open(tooltipPost.mirrors.safebooru, "_blank")}/>)
             if (tooltipPost.mirrors.yandere) jsx.push(<img className="tooltip-img" style={{cursor: "pointer"}} src={yandere} onClick={() => window.open(tooltipPost.mirrors.yandere, "_blank")}/>)
             if (tooltipPost.mirrors.konachan) jsx.push(<img className="tooltip-img" style={{cursor: "pointer"}} src={konachan} onClick={() => window.open(tooltipPost.mirrors.konachan, "_blank")}/>)
+            if (tooltipPost.mirrors.youtube) jsx.push(<img className="tooltip-img" style={{cursor: "pointer"}} src={youtube} onClick={() => window.open(tooltipPost.mirrors.youtube, "_blank")}/>)
+            if (tooltipPost.mirrors.bandcamp) jsx.push(<img className="tooltip-img" style={{cursor: "pointer"}} src={bandcamp} onClick={() => window.open(tooltipPost.mirrors.bandcamp, "_blank")}/>)
         }
         return jsx
     }
@@ -130,14 +142,21 @@ const ToolTip: React.FunctionComponent = (props) => {
 
     if (selectionMode) return null
     if (!artist || !tags || !tooltipPost) return null
-    if (session?.username && !session?.showTooltips) return null
+    if (!session?.showTooltips) return null
 
+    const openArtist = () => {
+        if (artist.social?.includes("pixiv.net")) return window.open(artist.social, "_blank")
+        if (artist.social?.includes("soundcloud.com")) return window.open(artist.social, "_blank")
+        if (artist.social?.includes("sketchfab.com")) return window.open(artist.social, "_blank")
+        if (artist.twitter) return window.open(artist.twitter, "_blank")
+    }
+ 
     return (
         <div className="tooltip" style={getStyle()} onMouseEnter={() => setToolTipEnabled(true)} onMouseLeave={() => setToolTipEnabled(false)}>
             <div className="tooltip-row">
                 <div className="tooltip-artist-container">
                     <img className="tooltip-img" src={functions.getTagLink(artist.type, artist.image)}/>
-                    <span className="tooltip-artist-tag" style={{marginRight: "5px"}} onClick={() => window.open(artist.pixiv ? artist.pixiv : artist.twitter, "_blank")}>{artist.tag}</span>
+                    <span className="tooltip-artist-tag" style={{marginRight: "5px"}} onClick={openArtist}>{artist.tag}</span>
                     <img className="tooltip-img-small" src={tagIcon} onClick={() => copyTags()} onAuxClick={() => copyTags(false, true)} onContextMenu={(event) => {event.preventDefault(); copyTags(true)}}/>
                 </div>
                 <div className="tooltip-artist-container">

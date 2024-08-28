@@ -149,7 +149,7 @@ const TagRoutes = (app: Express) => {
 
     app.put("/api/tag/edit", tagUpdateLimiter, async (req: Request, res: Response) => {
         try {
-            const {tag, key, description, image, aliases, implications, pixivTags, pixiv, twitter, website, fandom, reason, silent} = req.body
+            const {tag, key, description, image, aliases, implications, pixivTags, social, twitter, website, fandom, reason, silent} = req.body
             if (!serverFunctions.validateCSRF(req)) return res.status(400).send("Bad CSRF token")
             if (!req.session.username) return res.status(401).send("Unauthorized")
             if (req.session.banned) return res.status(403).send("You are banned")
@@ -210,8 +210,8 @@ const TagRoutes = (app: Express) => {
                 if (website !== undefined) {
                     await sql.updateTag(tag, "website", website)
                 }
-                if (pixiv !== undefined) {
-                    await sql.updateTag(tag, "pixiv", pixiv)
+                if (social !== undefined) {
+                    await sql.updateTag(tag, "social", social)
                 }
                 if (twitter !== undefined) {
                     await sql.updateTag(tag, "twitter", twitter)
@@ -266,7 +266,7 @@ const TagRoutes = (app: Express) => {
                 } else {
                     vanilla.image = null
                 }
-                await sql.insertTagHistory(vanilla.user, vanilla.tag, vanilla.key, vanilla.type, vanilla.image, vanilla.description, vanilla.aliases, vanilla.implications, vanilla.pixivTags, vanilla.website, vanilla.pixiv, vanilla.twitter, vanilla.fandom)
+                await sql.insertTagHistory(vanilla.user, vanilla.tag, vanilla.key, vanilla.type, vanilla.image, vanilla.description, vanilla.aliases, vanilla.implications, vanilla.pixivTags, vanilla.website, vanilla.social, vanilla.twitter, vanilla.fandom)
                 if (image?.[0] && imageFilename) {
                     if (imgChange) {
                         const imagePath = functions.getTagHistoryPath(key, 2, imageFilename)
@@ -274,7 +274,7 @@ const TagRoutes = (app: Express) => {
                         imageFilename = imagePath
                     }
                 }
-                await sql.insertTagHistory(req.session.username, targetTag, key, tagObj.type, imageFilename, tagDescription, aliases, implications, pixivTags, website, pixiv, twitter, fandom, reason)
+                await sql.insertTagHistory(req.session.username, targetTag, key, tagObj.type, imageFilename, tagDescription, aliases, implications, pixivTags, website, social, twitter, fandom, reason)
             } else {
                 if (image?.[0] && imageFilename) {
                     if (imgChange) {
@@ -283,7 +283,7 @@ const TagRoutes = (app: Express) => {
                         imageFilename = imagePath
                     }
                 }
-                await sql.insertTagHistory(req.session.username, targetTag, key, tagObj.type, imageFilename, tagDescription, aliases, implications, pixivTags, website, pixiv, twitter, fandom, reason)
+                await sql.insertTagHistory(req.session.username, targetTag, key, tagObj.type, imageFilename, tagDescription, aliases, implications, pixivTags, website, social, twitter, fandom, reason)
             }
             res.status(200).send("Success")
         } catch (e) {
@@ -419,7 +419,7 @@ const TagRoutes = (app: Express) => {
 
     app.post("/api/tag/edit/request", tagUpdateLimiter, async (req: Request, res: Response) => {
         try {
-            const {tag, key, description, image, aliases, implications, pixivTags, pixiv, twitter, website, fandom, reason} = req.body
+            const {tag, key, description, image, aliases, implications, pixivTags, social, twitter, website, fandom, reason} = req.body
             if (!serverFunctions.validateCSRF(req)) return res.status(400).send("Bad CSRF token")
             if (!req.session.username) return res.status(401).send("Unauthorized")
             if (!tag) return res.status(400).send("Bad tag")
@@ -435,7 +435,7 @@ const TagRoutes = (app: Express) => {
                     imagePath = "delete"
                 }
             }
-            await sql.insertTagEditRequest(req.session.username, tag, key, description, imagePath, aliases?.[0] ? aliases : null, implications?.[0] ? implications : null, pixivTags?.[0] ? pixivTags : null, pixiv, twitter, website, fandom, reason)
+            await sql.insertTagEditRequest(req.session.username, tag, key, description, imagePath, aliases?.[0] ? aliases : null, implications?.[0] ? implications : null, pixivTags?.[0] ? pixivTags : null, social, twitter, website, fandom, reason)
             res.status(200).send("Success")
         } catch (e) {
             console.log(e)

@@ -242,7 +242,7 @@ export default class ServerFunctions {
             obj.tag = tags[i]
             obj.image = result[index].image
             obj.description = result[index].description 
-            obj.pixiv = result[index].pixiv
+            obj.social = result[index].social
             obj.twitter = result[index].twitter
             obj.website = result[index].website
             obj.fandom = result[index].fandom

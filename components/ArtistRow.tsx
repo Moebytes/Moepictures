@@ -6,6 +6,8 @@ import functions from "../structures/Functions"
 import Carousel from "./Carousel"
 import website from "../assets/icons/support.png"
 import pixiv from "../assets/icons/pixiv.png"
+import soundcloud from "../assets/icons/soundcloud.png"
+import sketchfab from "../assets/icons/sketchfab.png"
 import twitter from "../assets/icons/twitter.png"
 import "./styles/artistrow.less"
 
@@ -64,8 +66,12 @@ const ArtistRow: React.FunctionComponent<Props> = (props) => {
         if (props.artist.website) {
             jsx.push(<img className="artistrow-social" src={website} onClick={() => window.open(props.artist.website, "_blank")}/>)
         }
-        if (props.artist.pixiv) {
-            jsx.push(<img className="artistrow-social" src={pixiv} onClick={() => window.open(props.artist.pixiv, "_blank")}/>)
+        if (props.artist.social?.includes("pixiv.net")) {
+            jsx.push(<img className="artistrow-social" src={pixiv} onClick={() => window.open(props.artist.social, "_blank")}/>)
+        } else if (props.artist.social?.includes("soundcloud.com")) {
+            jsx.push(<img className="artistrow-social" src={soundcloud} onClick={() => window.open(props.artist.social, "_blank")}/>)
+        } else if (props.artist.social?.includes("sketchfab.com")) {
+            jsx.push(<img className="artistrow-social" src={sketchfab} onClick={() => window.open(props.artist.social, "_blank")}/>)
         }
         if (props.artist.twitter) {
             jsx.push(<img className="artistrow-social" src={twitter} onClick={() => window.open(props.artist.twitter, "_blank")}/>)
