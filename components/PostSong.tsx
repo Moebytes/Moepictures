@@ -3,9 +3,7 @@ import {ThemeContext, EnableDragContext, BrightnessContext, ContrastContext, Hue
 BlurContext, SharpenContext, PixelateContext, DownloadFlagContext, DownloadIDsContext, DisableZoomContext, SpeedContext,
 ReverseContext, MobileContext, TranslationModeContext, TranslationDrawingEnabledContext, SessionContext, SiteHueContext,
 SiteLightnessContext, SiteSaturationContext, ImageExpandContext} from "../Context"
-import {HashLink as Link} from "react-router-hash-link"
 import functions from "../structures/Functions"
-import cryptoFunctions from "../structures/CryptoFunctions"
 import Slider from "react-slider"
 import audioReverseIcon from "../assets/icons/audio-reverse.png"
 import audioSpeedIcon from "../assets/icons/audio-speed.png"
@@ -43,15 +41,14 @@ interface Props {
     unverified?: boolean
 }
 
-let player: Tone.Player
 let grain: Tone.GrainPlayer
 let audioNode: any
 let bitcrusherNode: any
+let soundtouchNode: any
 let gainNode: any
 
 const initialize = async () => {
-    player = new Tone.Player(silence).sync()
-    grain = new Tone.GrainPlayer(silence).sync()
+    grain = new Tone.GrainPlayer(silence).sync().start()
     grain.grainSize = 0.1
     grain.overlap = 0.1
     const context = Tone.getContext()
@@ -60,10 +57,11 @@ const initialize = async () => {
     gainNode = new Tone.Gain(1)
     await context.addAudioWorkletModule("./bitcrusher.js", "bitcrusher")
     bitcrusherNode = context.createAudioWorkletNode("bitcrush-processor")
-    audioNode.input = player
-    audioNode.output = gainNode
-    audioNode.workletNode = bitcrusherNode
-    audioNode.input.chain(audioNode.workletNode, audioNode.output)
+    await context.addAudioWorkletModule("./soundtouch.js", "soundtouch")
+    soundtouchNode = context.createAudioWorkletNode("soundtouch-processor")
+    audioNode.input = grain
+    audioNode.output = gainNode.input
+    audioNode.input.chain(soundtouchNode, bitcrusherNode, audioNode.output)
     audioNode.toDestination()
 }
 
@@ -93,6 +91,7 @@ const PostSong: React.FunctionComponent<Props> = (props) => {
     const {mobile, setMobile} = useContext(MobileContext)
     const {imageExpand, setImageExpand} = useContext(ImageExpandContext)
     const [showSpeedDropdown, setShowSpeedDropdown] = useState(false)
+    const [showPitchDropdown, setShowPitchDropdown] = useState(false)
     const [showVolumeSlider, setShowVolumeSlider] = useState(false)
     const containerRef = useRef<HTMLDivElement>(null)
     const fullscreenRef = useRef<HTMLDivElement>(null)
@@ -104,6 +103,7 @@ const PostSong: React.FunctionComponent<Props> = (props) => {
     const audioControls = useRef<HTMLDivElement>(null)
     const audioSliderRef = useRef<any>(null)
     const audioSpeedRef = useRef(null) as any
+    const audioPitchRef = useRef(null) as any
     const audioVolumeRef = useRef(null) as any
     const audioSpeedSliderRef = useRef<any>(null)
     const audioVolumeSliderRef = useRef<any>(null)
@@ -112,6 +112,7 @@ const PostSong: React.FunctionComponent<Props> = (props) => {
     const [dragProgress, setDragProgress] = useState(0) as any
     const {reverse, setReverse} = useContext(ReverseContext)
     const {speed, setSpeed} = useContext(SpeedContext)
+    const [pitch, setPitch] = useState(0)
     const [volume, setVolume] = useState(0.75)
     const [previousVolume, setPreviousVolume] = useState(0)
     const [paused, setPaused] = useState(true)
@@ -120,7 +121,6 @@ const PostSong: React.FunctionComponent<Props> = (props) => {
     const [dragging, setDragging] = useState(false)
     const [coverImg, setCoverImg] = useState(null) as any
     const [seekTo, setSeekTo] = useState(null) as any
-    const [effects, setEffects] = useState([]) as any
     const [init, setInit] = useState(false)
     const [buttonHover, setButtonHover] = useState(false)
 
@@ -129,11 +129,7 @@ const PostSong: React.FunctionComponent<Props> = (props) => {
     }
     
     const loadAudio = async () => {
-        if (!player || !grain) return
-        player.start()
-        grain.start()
-        grain.buffer.load(props.audio)
-        player.load(props.audio)
+        await grain.buffer.load(props.audio)
         await Tone.loaded()
         updateDuration()
         stop()
@@ -153,7 +149,6 @@ const PostSong: React.FunctionComponent<Props> = (props) => {
         setDuration(0)
         setDragging(false)
         setSeekTo(null)
-        setEffects([])
         setInit(false)
         if (ref.current) ref.current.style.opacity = "1"
         updateSongCover()
@@ -185,25 +180,30 @@ const PostSong: React.FunctionComponent<Props> = (props) => {
     }, [dragging, reverse, duration])
 
     const refreshState = () => {
-        const apply = {grain, player}
-        updateSpeed(speed)
         updateReverse(reverse)
+        updateSpeed()
+        updatePitch()
     }
 
-    const updateDuration = (value?: number) => {
-        const current = preservesPitch ? grain : player
-        setDuration(current.buffer.duration / current.playbackRate)
+    const updateDuration = () => {
+        setDuration(grain.buffer.duration / grain.playbackRate)
     }
 
     const updatePlay = async (alwaysPlay?: boolean) => {
         if (!init) await loadAudio()
         await Tone.start()
+        // Tone.getTransport().loop = true
         if (paused || alwaysPlay) {
             Tone.getTransport().start()
             setPaused(false)
         } else {
             Tone.getTransport().pause()
             setPaused(true)
+        }
+        if (duration > 10) {
+            Tone.getTransport().loopStart = 0
+            Tone.getTransport().loopEnd = duration
+            Tone.getTransport().loop = true
         }
     }
 
@@ -239,19 +239,9 @@ const PostSong: React.FunctionComponent<Props> = (props) => {
         setPreviousVolume(value)
     }
 
-    const updateSpeed = async (value?: number | string, applyState?: any) => {
+    const updateSpeed = async () => {
         if (!duration) return
-        let currentGrain = grain
-        let currentPlayer = player
-        if (applyState) {
-            currentGrain = applyState.grain
-            currentPlayer = applyState.player
-        }
-        if (preservesPitch) {
-            currentGrain.playbackRate = speed
-        } else {
-            currentPlayer.playbackRate = speed
-        }
+        grain.playbackRate = speed
         let percent = Tone.getTransport().seconds / duration
         setDuration(grain.buffer.duration / speed)
         let val = percent * duration
@@ -264,32 +254,42 @@ const PostSong: React.FunctionComponent<Props> = (props) => {
         updateSpeed()
     }, [speed, preservesPitch])
 
-    const updateReverse = async (value?: boolean, applyState?: any) => {
+    const updateReverse = async (value?: boolean) => {
         if (!duration) return
         let percent = Tone.getTransport().seconds / duration
         let val = (1-percent) * duration
         if (val < 0) val = 0
         if (val > duration - 1) val = duration - 1
-        let currentGrain = grain
-        let currentPlayer = player
-        if (applyState) {
-            currentGrain = applyState.grain
-            currentPlayer = applyState.player
-        }
         if (value === false || !reverse) {
-            if (!applyState) Tone.getTransport().seconds = val
-            currentGrain.reverse = false
-            currentPlayer.reverse = false
+            Tone.getTransport().seconds = val
+            grain.reverse = false
         } else {
-            if (!applyState) Tone.getTransport().seconds = val
-            currentGrain.reverse = true
-            currentPlayer.reverse = true
+            Tone.getTransport().seconds = val
+            grain.reverse = true
         }
     }
 
     useEffect(() => {
         updateReverse()
     }, [reverse])
+
+    const updatePitch = async () => {
+        if (pitch === 0) return soundtouchNode.parameters.get("pitch").value = 1
+        soundtouchNode.parameters.get("pitch").value = functions.semitonesToScale(pitch)
+    }
+
+    useEffect(() => {
+        updatePitch()
+    }, [pitch])
+
+    const bitcrush = async () => {
+        if (pixelate === 1) return bitcrusherNode.parameters.get("sampleRate").value = 44100
+        bitcrusherNode.parameters.get("sampleRate").value = Math.ceil(22050 / pixelate)
+    }
+
+    useEffect(() => {
+        bitcrush()
+    }, [pixelate])
 
     useEffect(() => {
         if (audioSliderRef.current) audioSliderRef.current.resize()
@@ -313,15 +313,17 @@ const PostSong: React.FunctionComponent<Props> = (props) => {
     }
 
     const handleKeydown = (event: any) => {
-        const key = event.keyCode
-        const value = String.fromCharCode((96 <= key && key <= 105) ? key - 48 : key).toLowerCase()
+        const key = event.key
         if (!(event.target instanceof HTMLTextAreaElement) && !(event.target instanceof HTMLInputElement) && !(event.target.classList.contains("dialog-textarea"))) {
-            if (value === "f") {
+            if (key === "f") {
                 if (!props.noKeydown) fullscreen()
             }
-            if (value === "t") {
+            if (key === "t") {
                 setTranslationMode((prev: boolean) => !prev)
                 setTranslationDrawingEnabled(true)
+            }
+            if (key === "Space") {
+                updatePlay()
             }
         }
     }
@@ -351,14 +353,18 @@ const PostSong: React.FunctionComponent<Props> = (props) => {
         }
     }, [dragging, dragProgress])
 
-    const getPreversePitchIcon = () => {
-        if (preservesPitch) return audioPreservePitchIcon
-        return audioPreservePitchOnIcon
-    }
-
     const getAudioSpeedMarginRight = () => {
         const controlRect = audioControls.current?.getBoundingClientRect()
         const rect = audioSpeedRef.current?.getBoundingClientRect()
+        if (!rect || !controlRect) return "400px"
+        const raw = controlRect.right - rect.right
+        let offset = -2
+        return `${raw + offset}px`
+    }
+
+    const getAudioPitchMarginRight = () => {
+        const controlRect = audioControls.current?.getBoundingClientRect()
+        const rect = audioPitchRef.current?.getBoundingClientRect()
         if (!rect || !controlRect) return "400px"
         const raw = controlRect.right - rect.right
         let offset = -2
@@ -408,22 +414,6 @@ const PostSong: React.FunctionComponent<Props> = (props) => {
         const val = value !== undefined ? value : !reverse 
         let secondsProgress = val === true ? (duration / 100) * (100 - progress) : (duration / 100) * progress
         setReverse(val)
-        // setSeekTo(secondsProgress)
-    }
-
-    const changePreservesPitch = (value?: boolean) => {
-        const secondsProgress = (progress / 100) * duration
-        const val = value !== undefined ? value : !preservesPitch
-        setPreservesPitch(val)
-        if (val) {
-            player.disconnect()
-            audioNode.input = grain
-            audioNode.input.chain(audioNode.workletNode, audioNode.output)
-        } else {
-            grain.disconnect()
-            audioNode.input = player
-            audioNode.input.chain(audioNode.workletNode, audioNode.output)
-        }
         // setSeekTo(secondsProgress)
     }
 
@@ -508,15 +498,6 @@ const PostSong: React.FunctionComponent<Props> = (props) => {
         }
     }
 
-    const bitcrush = async () => {
-        if (pixelate === 1) return bitcrusherNode.parameters.get("sampleRate").value = 44100
-        bitcrusherNode.parameters.get("sampleRate").value = Math.ceil(22050 / pixelate)
-    }
-
-    useEffect(() => {
-        bitcrush()
-    }, [pixelate])
-
     useEffect(() => {
         setTimeout(() => {
             imagePixelate()
@@ -528,11 +509,6 @@ const PostSong: React.FunctionComponent<Props> = (props) => {
             imagePixelate()
         }, 50)
     }, [pixelate, preservesPitch])
-
-    const rateOn = () => {
-        if ((speed !== 1) || (reverse !== false)) return true 
-        return false
-    }
 
     useEffect(() => {
         if (downloadFlag) {
@@ -550,9 +526,19 @@ const PostSong: React.FunctionComponent<Props> = (props) => {
 
     const controlMouseLeave = () => {
         setShowSpeedDropdown(false)
+        setShowPitchDropdown(false)
         setShowVolumeSlider(false)
         if (audioControls.current) audioControls.current.style.opacity = "0"
     }
+
+    useEffect(() => {
+        if (showPitchDropdown) {
+            setShowSpeedDropdown(false)
+        }
+        if (showSpeedDropdown) {
+            setShowPitchDropdown(false)
+        }
+    }, [showPitchDropdown, showSpeedDropdown])
 
     const getAudioPlayIcon = () => {
         if (paused) return audioPlayIcon
@@ -571,11 +557,11 @@ const PostSong: React.FunctionComponent<Props> = (props) => {
 
     const reset = () => {
         changeReverse(false)
-        changePreservesPitch(false)
         setSpeed(1)
+        setPitch(0)
         setPaused(false)
         setShowSpeedDropdown(false)
-        setEffects([])
+        setShowPitchDropdown(false)
         stop()
         updatePlay(true)
     }
@@ -669,9 +655,9 @@ const PostSong: React.FunctionComponent<Props> = (props) => {
                             </div>
                             <div className="audio-control-row" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                                 <div className="audio-control-row-container">
-                                    <img draggable={false} className="audio-control-img" onClick={() => changeReverse()} src={audioReverseIcon}/>
+                                    <img draggable={false} className="audio-control-img" src={audioReverseIcon} onClick={() => changeReverse()} />
                                     <img draggable={false} className="audio-control-img" ref={audioSpeedRef} src={audioSpeedIcon} onClick={() => setShowSpeedDropdown((prev) => !prev)}/>
-                                    <img draggable={false} className="audio-control-img" onClick={() => changePreservesPitch()} src={getPreversePitchIcon()}/>
+                                    <img draggable={false} className="audio-control-img" ref={audioPitchRef} src={audioPreservePitchIcon} onClick={() => setShowPitchDropdown((prev) => !prev)} />
                                 </div> 
                                 <div className="audio-ontrol-row-container">
                                     <img draggable={false} className="audio-control-img" src={audioRewindIcon} onClick={() => rewind()}/>
@@ -718,6 +704,36 @@ const PostSong: React.FunctionComponent<Props> = (props) => {
                                 </div>
                                 <div className="audio-speed-dropdown-item" onClick={() => {setSpeed(0.25); setShowSpeedDropdown(false)}}>
                                     <span className="audio-speed-dropdown-text">0.25x</span>
+                                </div>
+                            </div>
+                            <div className={`audio-pitch-dropdown ${showPitchDropdown ? "" : "hide-pitch-dropdown"}`} style={{marginRight: getAudioPitchMarginRight(), marginTop: "-240px"}}
+                            onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
+                                <div className="audio-pitch-dropdown-item" onClick={() => {setPitch(24); setShowPitchDropdown(false)}}>
+                                    <span className="audio-pitch-dropdown-text">+24</span>
+                                </div>
+                                <div className="audio-pitch-dropdown-item" onClick={() => {setPitch(19); setShowPitchDropdown(false)}}>
+                                    <span className="audio-pitch-dropdown-text">+19</span>
+                                </div>
+                                <div className="audio-pitch-dropdown-item" onClick={() => {setPitch(12); setShowPitchDropdown(false)}}>
+                                    <span className="audio-pitch-dropdown-text">+12</span>
+                                </div>
+                                <div className="audio-pitch-dropdown-item" onClick={() => {setPitch(7); setShowPitchDropdown(false)}}>
+                                    <span className="audio-pitch-dropdown-text">+7</span>
+                                </div>
+                                <div className="audio-pitch-dropdown-item" onClick={() => {setPitch(0); setShowPitchDropdown(false)}}>
+                                    <span className="audio-pitch-dropdown-text">0</span>
+                                </div>
+                                <div className="audio-pitch-dropdown-item" onClick={() => {setPitch(-7); setShowPitchDropdown(false)}}>
+                                    <span className="audio-pitch-dropdown-text">-7</span>
+                                </div>
+                                <div className="audio-pitch-dropdown-item" onClick={() => {setPitch(-12); setShowPitchDropdown(false)}}>
+                                    <span className="audio-pitch-dropdown-text">-12</span>
+                                </div>
+                                <div className="audio-pitch-dropdown-item" onClick={() => {setPitch(-19); setShowPitchDropdown(false)}}>
+                                    <span className="audio-pitch-dropdown-text">-19</span>
+                                </div>
+                                <div className="audio-pitch-dropdown-item" onClick={() => {setPitch(-24); setShowPitchDropdown(false)}}>
+                                    <span className="audio-pitch-dropdown-text">-24</span>
                                 </div>
                             </div>
                             <div className={`audio-volume-dropdown ${showVolumeSlider ? "" : "hide-volume-dropdown"}`} style={{marginRight: getAudioVolumeMarginRight(), marginTop: "-110px"}}

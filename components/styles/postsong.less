@@ -251,6 +251,31 @@
     transform: scaleY(0);
 }
 
+
+.audio-pitch-dropdown {
+    position: absolute;
+    z-index: 1201;
+    top: 0;
+    right: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 30px;
+    margin-top: 5px;
+    padding-bottom: 15px;
+    transform-origin: bottom;
+    transition: all 0.3s;
+}
+
+
+.hide-pitch-dropdown {
+    transition: all 0s;
+    transform-origin: bottom;
+    transform: scaleY(0);
+}
+
+
 .audio-speed-slider {
     display: flex;
     height: 100px;
@@ -305,7 +330,28 @@
     }
 }
 
-.audio-speed-dropdown-item {
+.audio-speed-dropdown-text {
+    font-family: Tahoma, sans-serif;
+    font-size: 12px;
+    color: #e839ff;
+    .stroke-black-thin();
+}
+
+.audio-pitch-dropdown-item {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    border: 1px solid #e839ff;
+    background-color: rgba(241, 185, 248, 0.5);
+    width: 50px;
+    padding: 5px;
+    cursor: pointer;
+    &:hover {
+        filter: brightness(130%);
+    }
+}
+
+.audio-pitch-dropdown-text {
     font-family: Tahoma, sans-serif;
     font-size: 12px;
     color: #e839ff;

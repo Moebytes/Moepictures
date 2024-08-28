@@ -18,10 +18,8 @@ import mm from "music-metadata"
 import * as THREE from "three"
 import {GLTFLoader, OBJLoader, FBXLoader} from "three-stdlib"
 
-// csrf token
 let csrfToken = ""
 
-// drag scroll
 let newScrollY = 0
 let lastScrollTop = 0
 let element = null as any
@@ -1958,5 +1956,12 @@ export default class Functions {
 
     public static fixTwitterTag = (tag: string) => {
         return tag.toLowerCase().replaceAll("_", "-").replace(/^[-]+/, "").replace(/[-]+$/, "")
+    }
+
+    public static semitonesToScale = (semitones: number) => {
+        var scaleFactor = Math.pow(2, semitones / 12)
+        scaleFactor = Math.max(0.25, scaleFactor)
+        scaleFactor = Math.min(4, scaleFactor)
+        return scaleFactor
     }
 }

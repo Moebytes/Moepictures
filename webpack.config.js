@@ -52,7 +52,8 @@ module.exports = [
       }),
       new CopyPlugin({
         patterns: [
-          {from: "structures/bitcrusher.js", to: "[name][ext]"}
+          {from: "structures/bitcrusher.js", to: "[name][ext]"},
+          {from: "structures/soundtouch.js", to: "[name][ext]"}
         ]
       })
     ]
