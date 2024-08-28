@@ -64,7 +64,7 @@ const ChangeEmailPage: React.FunctionComponent = (props) => {
         setHeaderText("")
         setSidebarText("")
         setEnableDrag(false)
-        document.title = "Moepictures: Change Email"
+        document.title = "Change Email"
     }, [])
 
     useEffect(() => {

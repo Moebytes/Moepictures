@@ -76,7 +76,7 @@ const PostHistoryPage: React.FunctionComponent<Props> = (props) => {
         setActiveDropdown("none")
         setHeaderText("")
         setSidebarText("")
-        document.title = "Moepictures: Post History"
+        document.title = "Post History"
     }, [])
 
     useEffect(() => {

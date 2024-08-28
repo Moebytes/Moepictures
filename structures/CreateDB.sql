@@ -9,6 +9,7 @@ CREATE TABLE IF NOT EXISTS "users" (
     "publicFavorites" boolean,
     "showRelated" boolean,
     "showTooltips" boolean,
+    "showTagBanner" boolean,
     "downloadPixivID" boolean,
     "autosearchInterval" int,
     "image" text,
@@ -62,6 +63,7 @@ CREATE TABLE IF NOT EXISTS "unverified posts" (
     "commentary" text,
     "translatedCommentary" text,
     "bookmarks" int,
+    "hidden" boolean,
     "mirrors" jsonb,
     "thumbnail" text
 );

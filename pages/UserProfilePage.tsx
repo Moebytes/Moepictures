@@ -102,7 +102,7 @@ const UserProfilePage: React.FunctionComponent = (props) => {
         setRelative(false)
         setHeaderText("")
         setSidebarText("")
-        document.title = "Moepictures: User Profile"
+        document.title = "User Profile"
         updateUploads()
         updateFavorites()
         updateComments()
@@ -200,6 +200,11 @@ const UserProfilePage: React.FunctionComponent = (props) => {
 
     const showTooltips = async () => {
         await axios.post("/api/user/showtooltips", null, {headers: {"x-csrf-token": functions.getCSRFToken()}, withCredentials: true})
+        setSessionFlag(true)
+    }
+
+    const showTagBanner = async () => {
+        await axios.post("/api/user/showtagbanner", null, {headers: {"x-csrf-token": functions.getCSRFToken()}, withCredentials: true})
         setSessionFlag(true)
     }
 
@@ -362,6 +367,9 @@ const UserProfilePage: React.FunctionComponent = (props) => {
                         <span className="userprofile-text">Show Tooltips: <span className="userprofile-text-action" onClick={showTooltips}>{session.showTooltips ? "Yes" : "No"}</span></span>
                     </div>
                     <div className="userprofile-row">
+                        <span className="userprofile-text">Show Tag Banner: <span className="userprofile-text-action" onClick={showTagBanner}>{session.showTagBanner ? "Yes" : "No"}</span></span>
+                    </div>
+                    <div className="userprofile-row">
                         <span className="userprofile-text">Download Pixiv ID: <span className="userprofile-text-action" onClick={downloadPixivID}>{session.downloadPixivID ? "Yes" : "No"}</span></span>
                     </div>
                     <div className="userprofile-row">
@@ -383,17 +391,17 @@ const UserProfilePage: React.FunctionComponent = (props) => {
                     </Link>
                     {favorites.length ?
                     <div className="userprofile-column">
-                        <span className="userprofile-text">Favorites <span className="userprofile-text-alt">{favorites.length}</span></span>
+                        <span className="userprofile-title">Favorites <span className="userprofile-text-alt">{favorites.length}</span></span>
                         <Carousel images={favoriteImages} noKey={true} set={setFav} index={favoriteIndex}/>
                     </div> : null}
                     {uploads.length ?
                     <div className="userprofile-column">
-                        <span className="userprofile-text">Uploads <span className="userprofile-text-alt">{uploads.length}</span></span>
+                        <span className="userprofile-title">Uploads <span className="userprofile-text-alt">{uploads.length}</span></span>
                         <Carousel images={uploadImages} noKey={true} set={setUp} index={uploadIndex}/>
                     </div> : null}
                     {comments.length ?
                     <div className="userprofile-column">
-                        <span className="userprofile-text">Comments <span className="userprofile-text-alt">{comments.length}</span></span>
+                        <span className="userprofile-title">Comments <span className="userprofile-title-alt">{comments.length}</span></span>
                         <CommentCarousel comments={comments}/>
                     </div> : null}
                     <div className="userprofile-row">

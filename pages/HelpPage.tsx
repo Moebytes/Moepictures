@@ -33,7 +33,7 @@ const HelpPage: React.FunctionComponent = (props) => {
         setRelative(false)
         setHeaderText("")
         setSidebarText("")
-        document.title = "Moepictures: Help"
+        document.title = "Help"
         window.scrollTo(0, 0)
     }, [])
 

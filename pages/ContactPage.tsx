@@ -49,7 +49,7 @@ const ContactPage: React.FunctionComponent = (props) => {
         setHeaderText("")
         setSidebarText("")
         setEnableDrag(false)
-        document.title = "Moepictures: Contact"
+        document.title = "Contact"
     }, [])
 
     useEffect(() => {

@@ -16,7 +16,6 @@ interface Props {
     index?: number
     update?: () => void
     appendImages?: any[]
-    noEncryption?: boolean
     marginLeft?: number
 }
 
@@ -408,7 +407,7 @@ const Carousel: React.FunctionComponent<Props> = (props) => {
             let src = visibleImages[i]
             if (functions.isVideo(src) || functions.isGIF(src)) continue
             if (functions.isImage(src)) {
-                if (!props.noEncryption) src = await cryptoFunctions.decryptedLink(src)
+                src = await cryptoFunctions.decryptedLink(src)
             } else if (functions.isModel(src)) {
                 src = await functions.modelImage(src)
             } else if (functions.isAudio(src)) {

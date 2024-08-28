@@ -20,7 +20,7 @@ const EditCommentDialog: React.FunctionComponent = (props) => {
     const history = useHistory()
 
     useEffect(() => {
-        document.title = "Moepictures: Edit Comment"
+        document.title = "Edit Comment"
     }, [])
 
     useEffect(() => {

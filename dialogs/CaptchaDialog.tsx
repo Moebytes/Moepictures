@@ -55,7 +55,7 @@ const CaptchaDialog: React.FunctionComponent<Props> = (props) => {
     }, [theme])
 
     useEffect(() => {
-        document.title = "Moepictures: Captcha"
+        document.title = "Captcha"
     }, [])
 
     useEffect(() => {

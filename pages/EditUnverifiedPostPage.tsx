@@ -244,7 +244,7 @@ const EditUnverifiedPostPage: React.FunctionComponent<Props> = (props) => {
         setRelative(false)
         setHeaderText("")
         setSidebarText("")
-        document.title = "Moepictures: Edit Unverified Post"
+        document.title = "Edit Unverified Post"
         window.scrollTo(0, 0)
 
         setBrightness(100)
@@ -1491,7 +1491,7 @@ const EditUnverifiedPostPage: React.FunctionComponent<Props> = (props) => {
                 <div className="editpost-row">
                     {acceptedURLs.length > 1 ? 
                     <div className="editpost-container">
-                        <Carousel images={acceptedURLs.map((u: any) => u.link)} set={set} index={currentIndex} noEncryption={true}/>
+                        <Carousel images={acceptedURLs.map((u: any) => u.link)} set={set} index={currentIndex}/>
                         {getPostJSX()}
                     </div>
                     : getPostJSX()}

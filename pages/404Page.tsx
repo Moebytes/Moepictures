@@ -27,7 +27,7 @@ const $404Page: React.FunctionComponent = (props) => {
         setRelative(false)
         setHeaderText("")
         setSidebarText("404 error.")
-        document.title = "Moepictures: 404 Error"
+        document.title = "404 Error"
     }, [])
 
     useEffect(() => {

@@ -25,7 +25,7 @@ const RevertPostHistoryDialog: React.FunctionComponent = (props) => {
     const history = useHistory()
 
     useEffect(() => {
-        document.title = "Moepictures: Revert Post History"
+        document.title = "Revert Post History"
     }, [])
 
     useEffect(() => {

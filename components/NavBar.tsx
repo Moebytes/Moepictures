@@ -9,6 +9,8 @@ import logoutModIcon from "../assets/icons/logout-mod.png"
 import logoutAdminIcon from "../assets/icons/logout-admin.png"
 import search2 from "../assets/icons/search2.png"
 import crown from "../assets/icons/crown.png"
+import mail from "../assets/icons/mail.png"
+import mailNotif from "../assets/icons/mail-notif.png"
 import axios from "axios"
 import permissions from "../structures/Permissions"
 import functions from "../structures/Functions"
@@ -328,6 +330,7 @@ const NavBar: React.FunctionComponent<Props> = (props) => {
                     </div>
                     <img className="nav-color" src={eyedropper} onClick={colorChange} style={{filter: getFilter()}}/>
                     <img className="nav-color" src={light} onClick={lightChange} style={{filter: getFilter()}}/>
+                    {session.username ? <img className="nav-color" src={mail} onClick={() => history.push("/inbox")} style={{filter: getFilter()}}/> : null}
                     {permissions.isElevated(session) ? <img className="nav-color" src={crown} onClick={() => history.push("/mod-queue")} style={{filter: getFilter()}}/> : null}
                 </div>
                 {getDropdownJSX()}

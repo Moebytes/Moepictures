@@ -22,7 +22,7 @@ const DownloadDialog: React.FunctionComponent = (props) => {
     const [amountField, setAmountField] = useState("")
 
     useEffect(() => {
-        document.title = "Moepictures: Download"
+        document.title = "Download"
     }, [])
 
     useEffect(() => {

@@ -137,7 +137,7 @@ const TitleBar: React.FunctionComponent<Props> = (props) => {
                 if (t.startsWith("-")) return `-${t.replaceAll("-", " ").trim()}`
                 return t.replaceAll("-", " ")
             }).join(", "))
-            document.title = `Moepictures: ${text}`
+            document.title = `${text}`
             setHeaderText(text)
         }
     }, [headerFlag])

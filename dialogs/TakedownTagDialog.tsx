@@ -24,7 +24,7 @@ const TakedownTagDialog: React.FunctionComponent = (props) => {
     const history = useHistory()
 
     useEffect(() => {
-        document.title = "Moepictures: Takedown Tag"
+        document.title = "Takedown Tag"
     }, [])
 
     useEffect(() => {

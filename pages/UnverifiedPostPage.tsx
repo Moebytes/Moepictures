@@ -74,7 +74,7 @@ const UnverifiedPostPage: React.FunctionComponent<Props> = (props) => {
         setHideSidebar(false)
         setRelative(true)
         setSidebarText("")
-        document.title = "Moepictures: Unverified Post"
+        document.title = "Unverified Post"
     }, [])
 
     useEffect(() => {
@@ -117,7 +117,7 @@ const UnverifiedPostPage: React.FunctionComponent<Props> = (props) => {
             if (post) {
                 const title = post.translatedTitle ? functions.toProperCase(post.translatedTitle) : 
                               post.title ? post.title : "Post"
-                document.title = `Moepictures: ${title}`
+                document.title = `${title}`
                 if (title !== "Post") setHeaderText(title.replaceAll("-", " "))
             }
         }
@@ -227,7 +227,7 @@ const UnverifiedPostPage: React.FunctionComponent<Props> = (props) => {
         <>
         <DragAndDrop/>
         <QuickEditDialog/>
-        <TitleBar goBack={true}/>
+        {post ? <TitleBar post={post} goBack={true}/> : <TitleBar goBack={true}/>}
         <NavBar/>
         <div className="body">
             {post && tagCategories ? 

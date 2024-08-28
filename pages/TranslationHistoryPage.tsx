@@ -69,7 +69,7 @@ const TranslationHistoryPage: React.FunctionComponent<Props> = (props) => {
         setActiveDropdown("none")
         setHeaderText("")
         setSidebarText("")
-        document.title = "Moepictures: Translation History"
+        document.title = "Translation History"
     }, [])
 
     useEffect(() => {

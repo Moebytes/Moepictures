@@ -68,7 +68,7 @@ const SignUpPage: React.FunctionComponent = (props) => {
         setHeaderText("")
         setSidebarText("")
         setEnableDrag(false)
-        document.title = "Moepictures: Sign Up"
+        document.title = "Sign Up"
     }, [])
 
     useEffect(() => {

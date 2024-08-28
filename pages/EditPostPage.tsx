@@ -224,7 +224,7 @@ const EditPostPage: React.FunctionComponent<Props> = (props) => {
         setRelative(false)
         setHeaderText("")
         setSidebarText("")
-        document.title = "Moepictures: Edit Post"
+        document.title = "Edit Post"
         window.scrollTo(0, 0)
 
         setBrightness(100)
@@ -1337,7 +1337,7 @@ const EditPostPage: React.FunctionComponent<Props> = (props) => {
         } else if (functions.isAudio(currentImg)) {
             return <PostSong audio={currentImg} noKeydown={true} noTranslations={true}/>
         } else {
-            return <PostImage img={currentImg} noKeydown={true} noEncryption={true} noTranslations={true}/>
+            return <PostImage img={currentImg} noKeydown={true} noEncryption={false} noTranslations={true}/>
         }
     }
 
@@ -1496,7 +1496,7 @@ const EditPostPage: React.FunctionComponent<Props> = (props) => {
             <div className="editpost-row">
                 {acceptedURLs.length > 1 ? 
                 <div className="editpost-container">
-                    <Carousel images={acceptedURLs.map((u: any) => u.link)} set={set} index={currentIndex} noEncryption={true}/>
+                    <Carousel images={acceptedURLs.map((u: any) => u.link)} set={set} index={currentIndex}/>
                     {getPostJSX()}
                 </div>
                 : getPostJSX()}

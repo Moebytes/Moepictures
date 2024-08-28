@@ -57,6 +57,7 @@ declare module "express-session" {
       publicFavorites: boolean
       showRelated: boolean
       showTooltips: boolean
+      showTagBanner: boolean
       downloadPixivID: boolean
       autosearchInterval: number
       $2fa: boolean

@@ -80,7 +80,7 @@ const QuickEditDialog: React.FunctionComponent = (props) => {
     }
 
     useEffect(() => {
-        document.title = "Moepictures: Quick Edit"
+        document.title = "Quick Edit"
 
         const logPosition = (event: any) => {
             const element = document.querySelector(".dialog-box")

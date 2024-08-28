@@ -24,7 +24,7 @@ const EditThreadDialog: React.FunctionComponent = (props) => {
     const history = useHistory()
 
     useEffect(() => {
-        document.title = "Moepictures: Edit Thread"
+        document.title = "Edit Thread"
     }, [])
 
     useEffect(() => {

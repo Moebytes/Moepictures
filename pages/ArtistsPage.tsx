@@ -95,7 +95,7 @@ const ArtistsPage: React.FunctionComponent = (props) => {
         setActiveDropdown("none")
         setHeaderText("")
         setSidebarText("")
-        document.title = "Moepictures: Artists"
+        document.title = "Artists"
         updateArtists()
     }, [])
 

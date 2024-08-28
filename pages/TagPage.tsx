@@ -98,7 +98,7 @@ const TagPage: React.FunctionComponent<Props> = (props) => {
         setActiveDropdown("none")
         setHeaderText("")
         setSidebarText("")
-        document.title = `Moepictures: ${functions.toProperCase(tagName.replaceAll("-", " "))}`
+        document.title = `${functions.toProperCase(tagName.replaceAll("-", " "))}`
     }, [])
 
     useEffect(() => {

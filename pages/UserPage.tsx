@@ -108,7 +108,7 @@ const UserPage: React.FunctionComponent<Props> = (props) => {
         setRelative(false)
         setHeaderText("")
         setSidebarText("")
-        document.title = `Moepictures: ${functions.toProperCase(username)}`
+        document.title = `${functions.toProperCase(username)}`
     }, [])
 
     useEffect(() => {
@@ -160,7 +160,7 @@ const UserPage: React.FunctionComponent<Props> = (props) => {
             if (!favorites.length) return null
             return (
                 <div className="user-column">
-                    <span className="user-text">Favorites <span className="user-text-alt">{favorites.length}</span></span>
+                    <span className="user-title">Favorites <span className="user-text-alt">{favorites.length}</span></span>
                     <Carousel images={favoriteImages} noKey={true} set={setFav} index={favoriteIndex}/>
                 </div> 
             )
@@ -239,12 +239,12 @@ const UserPage: React.FunctionComponent<Props> = (props) => {
                     {generateFavoritesJSX()}
                     {uploads.length ?
                     <div className="user-column">
-                        <span className="user-text">Uploads <span className="user-text-alt">{uploads.length}</span></span>
+                        <span className="user-title">Uploads <span className="user-text-alt">{uploads.length}</span></span>
                         <Carousel images={uploadImages} noKey={true} set={setUp} index={uploadIndex}/>
                     </div> : null}
                     {comments.length ?
                     <div className="userprofile-column">
-                        <span className="userprofile-text">Comments <span className="userprofile-text-alt">{comments.length}</span></span>
+                        <span className="userprofile-title">Comments <span className="userprofile-text-alt">{comments.length}</span></span>
                         <CommentCarousel comments={comments}/>
                     </div> : null}
                 </div> : null}

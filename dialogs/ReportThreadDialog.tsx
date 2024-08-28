@@ -21,7 +21,7 @@ const ReportThreadDialog: React.FunctionComponent = (props) => {
     const history = useHistory()
 
     useEffect(() => {
-        document.title = "Moepictures: Report Thread"
+        document.title = "Report Thread"
     }, [])
 
     useEffect(() => {

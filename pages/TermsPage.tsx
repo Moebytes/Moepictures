@@ -50,9 +50,9 @@ const TermsPage: React.FunctionComponent = (props) => {
 
     useEffect(() => {
         if (onPrivacy) {
-            document.title = "Moepictures: Privacy Policy"
+            document.title = "Privacy Policy"
         } else {
-            document.title = "Moepictures: Terms of Service"
+            document.title = "Terms of Service"
         }
     })
     

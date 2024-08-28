@@ -191,6 +191,13 @@ const CreateRoutes = (app: Express) => {
           await sql.insertImage(postID, filename, kind, order, hash, dimensions.width, dimensions.height, images[i].size)
         }
 
+        let hidden = false 
+        for (let i = 0; i < artists.length; i++) {
+          if (!artists[i].tag) continue
+          const tag = await sql.tag(artists[i].tag)
+          if (tag?.banned) hidden = true
+        }
+
         const uploadDate = new Date().toISOString()
         await sql.bulkUpdatePost(postID, {
           restrict, 
@@ -210,7 +217,7 @@ const CreateRoutes = (app: Express) => {
           updatedDate: uploadDate,
           uploader: req.session.username,
           updater: req.session.username,
-          hidden: false
+          hidden
         })
 
         let tagMap = tags
@@ -722,6 +729,13 @@ const CreateRoutes = (app: Express) => {
           await sql.insertUnverifiedImage(postID, filename, kind, order, hash, dimensions.width, dimensions.height, images[i].size)
         }
 
+        let hidden = false 
+        for (let i = 0; i < artists.length; i++) {
+          if (!artists[i].tag) continue
+          const tag = await sql.tag(artists[i].tag)
+          if (tag?.banned) hidden = true
+        }
+
         const uploadDate = new Date().toISOString()
         await sql.bulkUpdateUnverifiedPost(postID, {
           restrict, 
@@ -742,7 +756,8 @@ const CreateRoutes = (app: Express) => {
           uploader: req.session.username,
           updater: req.session.username,
           duplicates: duplicates ? true : false,
-          newTags: newTags.length
+          newTags: newTags.length,
+          hidden
         })
 
         let tagMap = tags
@@ -1139,6 +1154,13 @@ const CreateRoutes = (app: Express) => {
           await sql.insertImage(newPostID, filename, type, order, hash, dimensions.width, dimensions.height, buffer.byteLength)
         }
 
+        let hidden = false 
+        for (let i = 0; i < artists.length; i++) {
+          if (!artists[i].tag) continue
+          const tag = await sql.tag(artists[i].tag)
+          if (tag?.banned) hidden = true
+        }
+
         await sql.bulkUpdatePost(newPostID, {
           restrict: unverified.restrict,
           style: unverified.style,
@@ -1157,7 +1179,7 @@ const CreateRoutes = (app: Express) => {
           updatedDate: unverified.updatedDate,
           uploader: unverified.uploader,
           updater: unverified.updater,
-          hidden: false
+          hidden
         })
 
         let tagMap = unverified.tags

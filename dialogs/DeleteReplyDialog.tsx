@@ -23,7 +23,7 @@ const DeleteReplyDialog: React.FunctionComponent = (props) => {
     const history = useHistory()
 
     useEffect(() => {
-        document.title = "Moepictures: Delete Reply"
+        document.title = "Delete Reply"
     }, [])
 
     useEffect(() => {

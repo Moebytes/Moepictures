@@ -294,15 +294,6 @@ export default class Functions {
         if (!email) return "No email."
         const regex = /^[a-zA-Z0-9.!#$%&"*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/
         if (!regex.test(email)) return "Email is not valid."
-        if (!email.endsWith("@gmail.com") &&
-            !email.endsWith("@icloud.com") && 
-            !email.endsWith("@yahoo.com") &&
-            !email.endsWith("@hotmail.com") &&
-            !email.endsWith("@outlook.com") && 
-            !email.endsWith("@protonmail.com") &&
-            !email.endsWith("@proton.me") &&
-            !email.endsWith("@aol.com") &&
-            !email.endsWith("@zoho.com")) return "Email provider not accepted. Allowed providers: gmail.com, icloud.com, yahoo.com, hotmail.com, outlook.com, protonmail.com, proton.me, aol.com, zoho.com."
         return null
     }
 
@@ -1963,5 +1954,19 @@ export default class Functions {
         scaleFactor = Math.max(0.25, scaleFactor)
         scaleFactor = Math.min(4, scaleFactor)
         return scaleFactor
+    }
+
+    public static isEncrypted = (buffer: Buffer) => {
+        buffer = Buffer.from(buffer)
+        const signatures = {
+            jpg: Buffer.from([0xFF, 0xD8, 0xFF]),
+            png: Buffer.from([0x89, 0x50, 0x4E, 0x47]),
+            webp: Buffer.from([0x52, 0x49, 0x46, 0x46]),
+            gif: Buffer.from([0x47, 0x49, 0x46, 0x38])
+        }
+        for (const signature of Object.values(signatures)) {
+            if (buffer.subarray(0, signature.length).equals(signature)) return false
+        }
+        return true
     }
 }

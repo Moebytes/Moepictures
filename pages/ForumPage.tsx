@@ -111,7 +111,7 @@ const ForumPage: React.FunctionComponent = (props) => {
         setActiveDropdown("none")
         setHeaderText("")
         setSidebarText("")
-        document.title = "Moepictures: Forum"
+        document.title = "Forum"
         updateThreads()
     }, [])
 

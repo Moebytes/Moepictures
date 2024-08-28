@@ -122,7 +122,7 @@ const UploadPage: React.FunctionComponent = (props) => {
         setRelative(false)
         setHeaderText("")
         setSidebarText("")
-        document.title = "Moepictures: Upload"
+        document.title = "Upload"
         window.scrollTo(0, 0)
 
         setBrightness(100)
@@ -1415,7 +1415,7 @@ const UploadPage: React.FunctionComponent = (props) => {
             <div className="upload-row">
                 {acceptedURLs.length > 1 ? 
                 <div className="upload-container">
-                    <Carousel images={acceptedURLs.map((u: any) => u.link)} set={set} index={currentIndex} noEncryption={true}/>
+                    <Carousel images={acceptedURLs.map((u: any) => u.link)} set={set} index={currentIndex}/>
                     {getPostJSX()}
                 </div>
                 : getPostJSX()}

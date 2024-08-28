@@ -95,7 +95,7 @@ const CharactersPage: React.FunctionComponent = (props) => {
         setActiveDropdown("none")
         setHeaderText("")
         setSidebarText("")
-        document.title = "Moepictures: Characters"
+        document.title = "Characters"
         updateCharacters()
     }, [])
 

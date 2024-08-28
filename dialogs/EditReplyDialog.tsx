@@ -23,7 +23,7 @@ const EditReplyDialog: React.FunctionComponent = (props) => {
     const history = useHistory()
 
     useEffect(() => {
-        document.title = "Moepictures: Edit Reply"
+        document.title = "Edit Reply"
     }, [])
 
     useEffect(() => {

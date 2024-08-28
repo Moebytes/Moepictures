@@ -64,7 +64,7 @@ const ChangeUsernamePage: React.FunctionComponent = (props) => {
         setHeaderText("")
         setSidebarText("")
         setEnableDrag(false)
-        document.title = "Moepictures: Change Username"
+        document.title = "Change Username"
     }, [])
 
     useEffect(() => {

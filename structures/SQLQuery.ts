@@ -198,10 +198,12 @@ export default class SQLQuery {
   }
 
   /** Bulk updates a post (unverified). */
-  public static bulkUpdateUnverifiedPost = async (postID: number, params: {restrict?: string, style?: string, thirdParty?: boolean, title?: string, translatedTitle?: string,
-    artist?: string, drawn?: string, link?: string, commentary?: string, translatedCommentary?: string, bookmarks?: string, mirrors?: string, type?: string, uploadDate?: string, uploader?: string, updatedDate?: string, updater?: string
-  duplicates?: boolean, newTags?: number, originalID?: number, reason?: string}) => {
-    const {restrict, style, thirdParty, title, translatedTitle, artist, drawn, link, commentary, translatedCommentary, bookmarks, mirrors, type, uploadDate, uploader, updatedDate, updater, duplicates, originalID, newTags, reason} = params
+  public static bulkUpdateUnverifiedPost = async (postID: number, params: {restrict?: string, style?: string, thirdParty?: boolean, 
+    title?: string, translatedTitle?: string, artist?: string, drawn?: string, link?: string, commentary?: string, translatedCommentary?: string, 
+    bookmarks?: string, mirrors?: string, type?: string, uploadDate?: string, uploader?: string, updatedDate?: string, updater?: string, 
+    duplicates?: boolean, newTags?: number, originalID?: number, reason?: string, hidden?: boolean}) => {
+    const {restrict, style, thirdParty, title, translatedTitle, artist, drawn, link, commentary, translatedCommentary, bookmarks, mirrors, type, 
+    uploadDate, uploader, updatedDate, updater, duplicates, originalID, newTags, hidden, reason} = params
     let setArray = [] as any
     let values = [] as any
     let i = 1 
@@ -303,6 +305,11 @@ export default class SQLQuery {
     if (originalID) {
       setArray.push(`"originalID" = $${i}`)
       values.push(originalID)
+      i++
+    }
+    if (hidden) {
+      setArray.push(`"hidden" = $${i}`)
+      values.push(updater)
       i++
     }
     if (reason) {

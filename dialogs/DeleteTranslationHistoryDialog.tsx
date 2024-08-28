@@ -25,7 +25,7 @@ const DeleteTranslationHistoryDialog: React.FunctionComponent = (props) => {
     const history = useHistory()
 
     useEffect(() => {
-        document.title = "Moepictures: Delete Translation History"
+        document.title = "Delete Translation History"
     }, [])
 
     useEffect(() => {

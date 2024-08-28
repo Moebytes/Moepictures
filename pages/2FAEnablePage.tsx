@@ -41,7 +41,7 @@ const $2FAEnablePage: React.FunctionComponent = (props) => {
         setHeaderText("")
         setSidebarText("")
         setEnableDrag(false)
-        document.title = "Moepictures: Enable 2-Factor Authentication"
+        document.title = "Enable 2-Factor Authentication"
         if (session?.$2fa) get2FAQRCode()
     }, [])
 

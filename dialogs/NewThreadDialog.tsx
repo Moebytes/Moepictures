@@ -51,7 +51,7 @@ const NewThreadDialog: React.FunctionComponent = (props) => {
     }, [theme])
 
     useEffect(() => {
-        document.title = "Moepictures: New Thread"
+        document.title = "New Thread"
     }, [])
 
     useEffect(() => {

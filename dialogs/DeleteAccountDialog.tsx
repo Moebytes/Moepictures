@@ -20,7 +20,7 @@ const DeleteAccountDialog: React.FunctionComponent = (props) => {
     const history = useHistory()
 
     useEffect(() => {
-        document.title = "Moepictures: Delete Account"
+        document.title = "Delete Account"
     }, [])
 
     useEffect(() => {

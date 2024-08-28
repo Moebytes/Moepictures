@@ -12,7 +12,7 @@ import ToolTip from "../components/ToolTip"
 import TagBanner from "../components/TagBanner"
 import BulkQuickEditDialog from "../dialogs/BulkQuickEditDialog"
 import {HideNavbarContext, HideSidebarContext, SquareContext, RelativeContext, HideTitlebarContext, 
-HeaderTextContext, SidebarTextContext, MobileContext, MobileScrollingContext} from "../Context"
+HeaderTextContext, SidebarTextContext, MobileContext, MobileScrollingContext, SessionContext} from "../Context"
 
 let scrollTimer = null as any
 let lastPos = 0
@@ -27,6 +27,7 @@ const PostsPage: React.FunctionComponent = (props) => {
     const {square, setSquare} = useContext(SquareContext)
     const {relative, setRelative} = useContext(RelativeContext)
     const {mobile, setMobile} = useContext(MobileContext)
+    const {session, setSession} = useContext(SessionContext)
     const {mobileScrolling, setMobileScrolling} = useContext(MobileScrollingContext)
     const [clicked, setClicked] = useState(false)
 
@@ -35,7 +36,7 @@ const PostsPage: React.FunctionComponent = (props) => {
         setHideNavbar(false)
         setHeaderText("")
         setSidebarText("")
-        document.title = "Moepictures: Cutest Anime Art ♡"
+        document.title = "Cutest Anime Art ♡"
         const savedTitlebar = localStorage.getItem("titlebar")
         if (savedTitlebar === "false") {
             setHideTitlebar(true)
@@ -91,6 +92,11 @@ const PostsPage: React.FunctionComponent = (props) => {
         }
     }, [mobile])
 
+    const tagBannerJSX = () => {
+        if (!session?.username) return <TagBanner/>
+        return session.showTagBanner ? <TagBanner/> : null
+    }
+
     return (
         <>
         <DragAndDrop/>
@@ -104,7 +110,7 @@ const PostsPage: React.FunctionComponent = (props) => {
             <div className="content">
                 <ToolTip/>
                 <SortBar/>
-                <TagBanner/>
+                {tagBannerJSX()}
                 <ImageGrid/>
                 <Footer noPadding={true}/>
             </div>

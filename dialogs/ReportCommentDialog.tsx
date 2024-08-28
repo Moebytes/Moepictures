@@ -21,7 +21,7 @@ const ReportCommentDialog: React.FunctionComponent = (props) => {
     const history = useHistory()
 
     useEffect(() => {
-        document.title = "Moepictures: Report Comment"
+        document.title = "Report Comment"
     }, [])
 
     useEffect(() => {

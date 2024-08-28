@@ -54,7 +54,7 @@ const ChangePasswordPage: React.FunctionComponent = (props) => {
         setHeaderText("")
         setSidebarText("")
         setEnableDrag(false)
-        document.title = "Moepictures: Change Password"
+        document.title = "Change Password"
     }, [])
 
     useEffect(() => {

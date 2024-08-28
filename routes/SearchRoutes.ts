@@ -31,7 +31,7 @@ const SearchRoutes = (app: Express) => {
             if (!functions.validStyle(style, true)) return res.status(400).send("Invalid style")
             if (!functions.validSort(sort)) return res.status(400).send("Invalid sort")
             const tags = query?.trim().split(/ +/g).filter(Boolean)
-            for (let i = 0; i < tags.length; i++) {
+            for (let i = 0; i < tags?.length; i++) {
                 const tag = await sql.tag(tags[i])
                 if (!tag) {
                     const alias = await sql.alias(tags[i])
@@ -54,7 +54,7 @@ const SearchRoutes = (app: Express) => {
                 }
             }
             result = result.map((p: any) => {
-                if (p.images.length > 1) {
+                if (p.images?.length > 1) {
                     p.images = p.images.sort((a: any, b: any) => a.order - b.order)
                 }
                 return p 
@@ -83,7 +83,7 @@ const SearchRoutes = (app: Express) => {
             if (restrict === "explicit") if (req.session.role !== "admin" && req.session.role !== "mod") return res.status(403).end()
             if (!functions.validStyle(style, true)) return res.status(400).send("Invalid style")
             const tags = query?.trim().split(/ +/g).filter(Boolean)
-            for (let i = 0; i < tags.length; i++) {
+            for (let i = 0; i < tags?.length; i++) {
                 const tag = await sql.tag(tags[i])
                 if (!tag) {
                     const alias = await sql.alias(tags[i])
@@ -92,7 +92,7 @@ const SearchRoutes = (app: Express) => {
             }
             let result = await sql.random(tags, type, restrict, style, offset)
             result = result.map((p: any) => {
-                if (p.images.length > 1) {
+                if (p.images?.length > 1) {
                     p.images = p.images.sort((a: any, b: any) => a.order - b.order)
                 }
                 return p 

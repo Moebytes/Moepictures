@@ -88,7 +88,7 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
         setRelative(true)
         setSidebarText("")
         setReloadPostFlag(true)
-        document.title = "Moepictures: Post"
+        document.title = "Post"
         const savedPost = localStorage.getItem("savedPost")
         const savedTags = localStorage.getItem("savedTags")
         if (savedPost) setPost(JSON.parse(savedPost))
@@ -163,7 +163,7 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
             if (post) {
                 const title = post.translatedTitle ? functions.toProperCase(post.translatedTitle) : 
                               post.title ? post.title : "Post"
-                document.title = `Moepictures: ${title}`
+                document.title = `${title}`
                 if (title !== "Post") setHeaderText(title.replaceAll("-", " "))
             }
         }

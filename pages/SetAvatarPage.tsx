@@ -51,7 +51,7 @@ const SetAvatarPage: React.FunctionComponent<Props> = (props) => {
         setHideSidebar(false)
         setRelative(true)
         setSidebarText("")
-        document.title = "Moepictures: Set Avatar"
+        document.title = "Set Avatar"
         const savedPost = localStorage.getItem("savedPost")
         const savedTags = localStorage.getItem("savedTags")
         if (savedPost) setPost(JSON.parse(savedPost))

@@ -85,7 +85,11 @@ const UserRoutes = (app: Express) => {
                 await sql.insertUser(username, email)
                 await sql.updateUser(username, "joinDate", new Date().toISOString())
                 await sql.updateUser(username, "publicFavorites", true)
+                await sql.updateUser(username, "showRelated", true)
                 await sql.updateUser(username, "showTooltips", true)
+                await sql.updateUser(username, "showTagBanner", true)
+                await sql.updateUser(username, "downloadPixivID", false)
+                await sql.updateUser(username, "autosearchInterval", 3000)
                 await sql.updateUser(username, "emailVerified", false)
                 await sql.updateUser(username, "$2fa", false)
                 await sql.updateUser(username, "bio", "This user has not written anything.")
@@ -147,6 +151,7 @@ const UserRoutes = (app: Express) => {
                 req.session.csrfToken = token
                 req.session.showRelated = user.showRelated
                 req.session.showTooltips = user.showTooltips
+                req.session.showTagBanner = user.showTagBanner
                 req.session.downloadPixivID = user.dowautosearchInterval
                 req.session.autosearchInterval = user.autosearchInterval
                 return res.status(200).send("Success")
@@ -187,6 +192,7 @@ const UserRoutes = (app: Express) => {
                 req.session.role = user.role
                 req.session.showRelated = user.showRelated
                 req.session.showTooltips = user.showTooltips
+                req.session.showTagBanner = user.showTagBanner
                 req.session.downloadPixivID = user.downloadPixivID
                 req.session.autosearchInterval = user.autosearchInterval
             }
@@ -277,6 +283,22 @@ const UserRoutes = (app: Express) => {
             const newTooltips = !Boolean(user.showTooltips)
             req.session.showTooltips = newTooltips 
             await sql.updateUser(req.session.username, "showTooltips", newTooltips)
+            res.status(200).send("Success")
+        } catch (e) {
+            console.log(e)
+            res.status(400).send("Bad request")
+        }
+    })
+
+    app.post("/api/user/showtagbanner", sessionLimiter, async (req: Request, res: Response) => {
+        try {
+            if (!serverFunctions.validateCSRF(req)) return res.status(400).send("Bad CSRF token")
+            if (!req.session.username) return res.status(401).send("Unauthorized")
+            const user = await sql.user(req.session.username)
+            if (!user) return res.status(400).send("Bad username")
+            const newTagBanner = !Boolean(user.showTagBanner)
+            req.session.showTagBanner = newTagBanner 
+            await sql.updateUser(req.session.username, "showTagBanner", newTagBanner)
             res.status(200).send("Success")
         } catch (e) {
             console.log(e)
