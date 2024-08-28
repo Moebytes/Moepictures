@@ -330,7 +330,7 @@ const NavBar: React.FunctionComponent<Props> = (props) => {
                     </div>
                     <img className="nav-color" src={eyedropper} onClick={colorChange} style={{filter: getFilter()}}/>
                     <img className="nav-color" src={light} onClick={lightChange} style={{filter: getFilter()}}/>
-                    {session.username ? <img className="nav-color" src={mail} onClick={() => history.push("/inbox")} style={{filter: getFilter()}}/> : null}
+                    {session.username ? <img className="nav-color" src={mail} onClick={() => history.push("/mail")} style={{filter: getFilter()}}/> : null}
                     {permissions.isElevated(session) ? <img className="nav-color" src={crown} onClick={() => history.push("/mod-queue")} style={{filter: getFilter()}}/> : null}
                 </div>
                 {getDropdownJSX()}

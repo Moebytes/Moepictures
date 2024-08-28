@@ -402,7 +402,7 @@ const TagsPage: React.FunctionComponent = (props) => {
                     {generatePageButtonsJSX()}
                     {tagsPage >= maxPage() ? null : <button className="page-button" onClick={nextPage}>{">"}</button>}
                     {tagsPage >= maxPage() ? null : <button className="page-button" onClick={lastPage}>{">>"}</button>}
-                    {<button className="page-button" onClick={() => setShowPageDialog(true)}>{"?"}</button>}
+                    {maxPage() > 1 ? <button className="page-button" onClick={() => setShowPageDialog(true)}>{"?"}</button> : null}
                 </div>
             )
         }

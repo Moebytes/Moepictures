@@ -370,7 +370,7 @@ const SeriesPage: React.FunctionComponent = (props) => {
                     {generatePageButtonsJSX()}
                     {seriesPage >= maxPage() ? null : <button className="page-button" onClick={nextPage}>{">"}</button>}
                     {seriesPage >= maxPage() ? null : <button className="page-button" onClick={lastPage}>{">>"}</button>}
-                    {<button className="page-button" onClick={() => setShowPageDialog(true)}>{"?"}</button>}
+                    {maxPage() > 1 ? <button className="page-button" onClick={() => setShowPageDialog(true)}>{"?"}</button> : null}
                 </div>
             )
         }

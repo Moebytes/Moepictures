@@ -418,7 +418,7 @@ const CommentsPage: React.FunctionComponent = (props) => {
                     {generatePageButtonsJSX()}
                     {commentsPage >= maxPage() ? null : <button className="page-button" onClick={nextPage}>{">"}</button>}
                     {commentsPage >= maxPage() ? null : <button className="page-button" onClick={lastPage}>{">>"}</button>}
-                    {<button className="page-button" onClick={() => setShowPageDialog(true)}>{"?"}</button>}
+                    {maxPage() > 1 ? <button className="page-button" onClick={() => setShowPageDialog(true)}>{"?"}</button> : null}
                 </div>
             )
         }

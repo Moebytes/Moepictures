@@ -333,7 +333,7 @@ const ForumThreadPage: React.FunctionComponent<Props> = (props) => {
                     {jsx}
                     {threadPage >= maxPage() ? null : <button className="page-button" onClick={nextPage}>{">"}</button>}
                     {threadPage >= maxPage() ? null : <button className="page-button" onClick={lastPage}>{">>"}</button>}
-                    {<button className="page-button" onClick={() => setShowPageDialog(true)}>{"?"}</button>}
+                    {maxPage() > 1 ? <button className="page-button" onClick={() => setShowPageDialog(true)}>{"?"}</button> : null}
                 </div>
             )
         }
