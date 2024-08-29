@@ -23,7 +23,7 @@ import PageDialog from "../dialogs/PageDialog"
 import {ThemeContext, EnableDragContext, HideNavbarContext, HideSidebarContext, RelativeContext, HideTitlebarContext, MobileContext, ScrollContext,
 ActiveDropdownContext, HeaderTextContext, SidebarTextContext, SessionContext, SiteHueContext, SiteLightnessContext, SiteSaturationContext, TagsPageContext,
 ShowPageDialogContext, PageFlagContext} from "../Context"
-import "./styles/tagspage.less"
+import "./styles/itemspage.less"
 
 const TagsPage: React.FunctionComponent = (props) => {
     const {theme, setTheme} = useContext(ThemeContext)
@@ -337,14 +337,17 @@ const TagsPage: React.FunctionComponent = (props) => {
         if (!rect) return "0px"
         const raw = window.innerWidth - rect.right
         let offset = 0
-        if (sortType === "alphabetic") offset = -25
-        if (sortType === "reverse alphabetic") offset = 0
-        if (sortType === "posts") offset = -45
-        if (sortType === "reverse posts") offset = -15
-        if (sortType === "image") offset = -40
-        if (sortType === "reverse image") offset = -10
-        if (sortType === "aliases") offset = -40
-        if (sortType === "reverse aliases") offset = -10
+        if (sortType === "random") offset = -50
+        if (sortType === "date") offset = -65
+        if (sortType === "reverse date") offset = -35
+        if (sortType === "alphabetic") offset = -45
+        if (sortType === "reverse alphabetic") offset = -20
+        if (sortType === "posts") offset = -65
+        if (sortType === "reverse posts") offset = -35
+        if (sortType === "image") offset = -60
+        if (sortType === "reverse image") offset = -30
+        if (sortType === "aliases") offset = -60
+        if (sortType === "reverse aliases") offset = -30
         return `${raw + offset}px`
     }
 
@@ -363,18 +366,18 @@ const TagsPage: React.FunctionComponent = (props) => {
 
     const getSortJSX = () => {
         return (
-            <div className="tagsort-item" ref={sortRef} onClick={() => {setActiveDropdown(activeDropdown === "sort" ? "none" : "sort")}}>
-                <img className="tagsort-img" src={sort} style={{filter: getFilter()}}/>
-                {!mobile ? <span className="tagsort-text">{functions.toProperCase(sortType)}</span> : null}
+            <div className="itemsort-item" ref={sortRef} onClick={() => {setActiveDropdown(activeDropdown === "sort" ? "none" : "sort")}}>
+                <img className="itemsort-img" src={sort} style={{filter: getFilter()}}/>
+                {!mobile ? <span className="itemsort-text">{functions.toProperCase(sortType)}</span> : null}
             </div>
         )
     }
 
     const getTypeJSX = () => {
         return (
-            <div className="tagsort-item" ref={typeRef} onClick={() => {setActiveDropdown(activeDropdown === "type" ? "none" : "type")}}>
-                <img className="tagsort-img rotate" src={type} style={{filter: getFilter()}}/>
-                {!mobile ? <span className="tagsort-text">{functions.toProperCase(typeType)}</span> : null}
+            <div className="itemsort-item" ref={typeRef} onClick={() => {setActiveDropdown(activeDropdown === "type" ? "none" : "type")}}>
+                <img className="itemsort-img rotate" src={type} style={{filter: getFilter()}}/>
+                {!mobile ? <span className="itemsort-text">{functions.toProperCase(typeType)}</span> : null}
             </div>
         )
     }
@@ -429,75 +432,84 @@ const TagsPage: React.FunctionComponent = (props) => {
         <div className="body">
             <SideBar/>
             <div className="content" onMouseEnter={() => setEnableDrag(true)}>
-                <div className="tags">
-                    <span className="tags-heading">Tags</span>
-                    <div className="tags-row">
-                        <div className="tag-search-container" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
-                            <input className="tag-search" type="search" spellCheck="false" value={searchQuery} onChange={(event) => setSearchQuery(event.target.value)} onKeyDown={(event) => event.key === "Enter" ? updateTags() : null}/>
-                            <img className="tag-search-icon" src={getSearchIcon()} style={{filter: getFilterSearch()}} onClick={() => updateTags()} onMouseEnter={() => setSearchIconHover(true)} onMouseLeave={() => setSearchIconHover(false)}/>
+                <div className="items">
+                    <span className="items-heading">Tags</span>
+                    <div className="items-row">
+                        <div className="item-search-container" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
+                            <input className="item-search" type="search" spellCheck="false" value={searchQuery} onChange={(event) => setSearchQuery(event.target.value)} onKeyDown={(event) => event.key === "Enter" ? updateTags() : null}/>
+                            <img className="item-search-icon" src={getSearchIcon()} style={{filter: getFilterSearch()}} onClick={() => updateTags()} onMouseEnter={() => setSearchIconHover(true)} onMouseLeave={() => setSearchIconHover(false)}/>
                         </div>
                         {getSortJSX()}
-                        {!mobile ? <div className="tagsort-item" onClick={() => toggleScroll()}>
-                            <img className="tagsort-img" src={scroll ? scrollIcon : pageIcon} style={{filter: getFilter()}}/>
-                            <span className="tagsort-text">{scroll ? "Scrolling" : "Pages"}</span>
+                        {!mobile ? <div className="itemsort-item" onClick={() => toggleScroll()}>
+                            <img className="itemsort-img" src={scroll ? scrollIcon : pageIcon} style={{filter: getFilter()}}/>
+                            <span className="itemsort-text">{scroll ? "Scrolling" : "Pages"}</span>
                         </div> : null}
-                        <div className={`tag-dropdown ${activeDropdown === "sort" ? "" : "hide-tag-dropdown"}`} 
+                        <div className={`item-dropdown ${activeDropdown === "sort" ? "" : "hide-item-dropdown"}`} 
                         style={{marginRight: getSortMargin(), top: mobile ? "229px" : "209px"}} onClick={() => setActiveDropdown("none")}>
-                            <div className="tag-dropdown-row" onClick={() => setSortType("alphabetic")}>
-                                <span className="tag-dropdown-text">Alphabetic</span>
+                            <div className="item-dropdown-row" onClick={() => setSortType("random")}>
+                                <span className="item-dropdown-text">Random</span>
                             </div>
-                            <div className="tag-dropdown-row" onClick={() => setSortType("reverse alphabetic")}>
-                                <span className="tag-dropdown-text">Reverse Alphabetic</span>
+                            <div className="item-dropdown-row" onClick={() => setSortType("date")}>
+                                <span className="item-dropdown-text">Date</span>
                             </div>
-                            <div className="tag-dropdown-row" onClick={() => setSortType("posts")}>
-                                <span className="tag-dropdown-text">Posts</span>
+                            <div className="item-dropdown-row" onClick={() => setSortType("reverse date")}>
+                                <span className="item-dropdown-text">Reverse Date</span>
                             </div>
-                            <div className="tag-dropdown-row" onClick={() => setSortType("reverse posts")}>
-                                <span className="tag-dropdown-text">Reverse Posts</span>
+                            <div className="item-dropdown-row" onClick={() => setSortType("alphabetic")}>
+                                <span className="item-dropdown-text">Alphabetic</span>
                             </div>
-                            <div className="tag-dropdown-row" onClick={() => setSortType("image")}>
-                                <span className="tag-dropdown-text">Image</span>
+                            <div className="item-dropdown-row" onClick={() => setSortType("reverse alphabetic")}>
+                                <span className="item-dropdown-text">Reverse Alphabetic</span>
                             </div>
-                            <div className="tag-dropdown-row" onClick={() => setSortType("reverse image")}>
-                                <span className="tag-dropdown-text">Reverse Image</span>
+                            <div className="item-dropdown-row" onClick={() => setSortType("posts")}>
+                                <span className="item-dropdown-text">Posts</span>
                             </div>
-                            <div className="tag-dropdown-row" onClick={() => setSortType("aliases")}>
-                                <span className="tag-dropdown-text">Aliases</span>
+                            <div className="item-dropdown-row" onClick={() => setSortType("reverse posts")}>
+                                <span className="item-dropdown-text">Reverse Posts</span>
                             </div>
-                            <div className="tag-dropdown-row" onClick={() => setSortType("reverse aliases")}>
-                                <span className="tag-dropdown-text">Reverse Aliases</span>
+                            <div className="item-dropdown-row" onClick={() => setSortType("image")}>
+                                <span className="item-dropdown-text">Image</span>
                             </div>
-                            <div className="tag-dropdown-row" onClick={() => setSortType("length")}>
-                                <span className="tag-dropdown-text">Length</span>
+                            <div className="item-dropdown-row" onClick={() => setSortType("reverse image")}>
+                                <span className="item-dropdown-text">Reverse Image</span>
                             </div>
-                            <div className="tag-dropdown-row" onClick={() => setSortType("reverse length")}>
-                                <span className="tag-dropdown-text">Reverse Length</span>
+                            <div className="item-dropdown-row" onClick={() => setSortType("aliases")}>
+                                <span className="item-dropdown-text">Aliases</span>
+                            </div>
+                            <div className="item-dropdown-row" onClick={() => setSortType("reverse aliases")}>
+                                <span className="item-dropdown-text">Reverse Aliases</span>
+                            </div>
+                            <div className="item-dropdown-row" onClick={() => setSortType("length")}>
+                                <span className="item-dropdown-text">Length</span>
+                            </div>
+                            <div className="item-dropdown-row" onClick={() => setSortType("reverse length")}>
+                                <span className="item-dropdown-text">Reverse Length</span>
                             </div>
                         </div>
                         {getTypeJSX()}
-                        <div className={`tag-dropdown ${activeDropdown === "type" ? "" : "hide-tag-dropdown"}`} 
+                        <div className={`item-dropdown ${activeDropdown === "type" ? "" : "hide-item-dropdown"}`} 
                         style={{marginRight: getTypeMargin(), top: mobile ? "229px" : "209px"}} onClick={() => setActiveDropdown("none")}>
-                            <div className="tag-dropdown-row" onClick={() => setTypeType("all")}>
-                                <span className="tag-dropdown-text">All</span>
+                            <div className="item-dropdown-row" onClick={() => setTypeType("all")}>
+                                <span className="item-dropdown-text">All</span>
                             </div>
-                            <div className="tag-dropdown-row" onClick={() => setTypeType("artist")}>
-                                <span className="tag-dropdown-text">Artist</span>
+                            <div className="item-dropdown-row" onClick={() => setTypeType("artist")}>
+                                <span className="item-dropdown-text">Artist</span>
                             </div>
-                            <div className="tag-dropdown-row" onClick={() => setTypeType("character")}>
-                                <span className="tag-dropdown-text">Character</span>
+                            <div className="item-dropdown-row" onClick={() => setTypeType("character")}>
+                                <span className="item-dropdown-text">Character</span>
                             </div>
-                            <div className="tag-dropdown-row" onClick={() => setTypeType("series")}>
-                                <span className="tag-dropdown-text">Series</span>
+                            <div className="item-dropdown-row" onClick={() => setTypeType("series")}>
+                                <span className="item-dropdown-text">Series</span>
                             </div>
-                            <div className="tag-dropdown-row" onClick={() => setTypeType("meta")}>
-                                <span className="tag-dropdown-text">Meta</span>
+                            <div className="item-dropdown-row" onClick={() => setTypeType("meta")}>
+                                <span className="item-dropdown-text">Meta</span>
                             </div>
-                            <div className="tag-dropdown-row" onClick={() => setTypeType("tag")}>
-                                <span className="tag-dropdown-text">Tag</span>
+                            <div className="item-dropdown-row" onClick={() => setTypeType("tag")}>
+                                <span className="item-dropdown-text">Tag</span>
                             </div>
                         </div>
                     </div>
-                    <table className="tags-container">
+                    <table className="items-container" style={{marginTop: "15px"}}>
                         {generateTagsJSX()}
                     </table>
                 </div>

@@ -1094,7 +1094,8 @@ export default class Functions {
     }
 
     public static validCategorySort = (sort: string) => {
-        if (sort === "cuteness" ||
+        if (sort === "random" ||
+            sort === "cuteness" ||
             sort === "reverse cuteness" ||
             sort === "posts" ||
             sort === "reverse posts" || 
@@ -1104,7 +1105,10 @@ export default class Functions {
     }
 
     public static validTagSort = (sort: string) => {
-        if (sort === "image" ||
+        if (sort === "random" ||
+            sort === "date" ||
+            sort === "reverse date" ||
+            sort === "image" ||
             sort === "reverse image" ||
             sort === "aliases" ||
             sort === "reverse aliases" ||
@@ -1128,13 +1132,15 @@ export default class Functions {
     }
 
     public static validCommentSort = (sort: string) => {
-        if (sort === "date" ||
+        if (sort === "random" ||
+            sort === "date" ||
             sort === "reverse date") return true 
         return false
     }
 
     public static validThreadSort = (sort: string) => {
-        if (sort === "date" ||
+        if (sort === "random" ||
+            sort === "date" ||
             sort === "reverse date") return true 
         return false
     }

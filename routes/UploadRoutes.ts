@@ -284,7 +284,7 @@ const CreateRoutes = (app: Express) => {
 
         tagMap = functions.removeDuplicates(tagMap)
 
-        await sql.bulkInsertTags(bulkTagUpdate, noImageUpdate ? true : false)
+        await sql.bulkInsertTags(bulkTagUpdate, req.session.username, noImageUpdate ? true : false)
         await sql.insertTagMap(postID, tagMap)
 
         if (unverifiedID) {
@@ -321,6 +321,7 @@ const CreateRoutes = (app: Express) => {
         let reason = req.body.reason
         let noImageUpdate = req.body.noImageUpdate
         let preserveThirdParty = req.body.preserveThirdParty
+        let updatedDate = req.body.updatedDate
         let silent = req.body.silent
 
         if (Number.isNaN(postID)) return res.status(400).send("Bad postID")
@@ -448,7 +449,7 @@ const CreateRoutes = (app: Express) => {
         }
 
         await sql.updatePost(postID, "type", type)
-        const updatedDate = new Date().toISOString()
+        if (!updatedDate) updatedDate = new Date().toISOString()
         await sql.bulkUpdatePost(postID, {
           restrict, 
           style, 
@@ -530,7 +531,7 @@ const CreateRoutes = (app: Express) => {
 
         tagMap = functions.removeDuplicates(tagMap)
         await sql.purgeTagMap(postID)
-        await sql.bulkInsertTags(bulkTagUpdate, noImageUpdate ? true : false)
+        await sql.bulkInsertTags(bulkTagUpdate, req.session.username, noImageUpdate ? true : false)
         await sql.insertTagMap(postID, tagMap)
 
         if (unverifiedID) {
@@ -1079,6 +1080,7 @@ const CreateRoutes = (app: Express) => {
         if (!serverFunctions.validateCSRF(req)) return res.status(400).send("Bad CSRF token")
         let postID = Number(req.body.postID)
         if (Number.isNaN(postID)) return res.status(400).send("Bad postID")
+        if (!req.session.username) return res.status(401).send("Unauthorized")
         if (req.session.role !== "admin" && req.session.role !== "mod") return res.status(403).end()
         const unverified = await sql.unverifiedPost(Number(postID))
         if (!unverified) return res.status(400).send("Bad request")
@@ -1241,7 +1243,7 @@ const CreateRoutes = (app: Express) => {
 
         tagMap = functions.removeDuplicates(tagMap)
         if (unverified.originalID) await sql.purgeTagMap(unverified.originalID)
-        await sql.bulkInsertTags(bulkTagUpdate)
+        await sql.bulkInsertTags(bulkTagUpdate, unverified.uploader)
         await sql.insertTagMap(newPostID, tagMap)
 
         await sql.deleteUnverifiedPost(Number(postID))

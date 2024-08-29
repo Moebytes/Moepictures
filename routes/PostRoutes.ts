@@ -393,7 +393,7 @@ const PostRoutes = (app: Express) => {
                 await sql.insertUnverifiedTagMap(postID, tagMap)
             } else {
                 await sql.purgeTagMap(postID)
-                await sql.bulkInsertTags(bulkTagUpdate, true)
+                await sql.bulkInsertTags(bulkTagUpdate, req.session.username, true)
                 await sql.insertTagMap(postID, tagMap)
             }
             if (req.session.role === "admin" || req.session.role === "mod") {

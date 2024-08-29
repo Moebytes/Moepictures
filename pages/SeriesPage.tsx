@@ -17,7 +17,7 @@ import axios from "axios"
 import {ThemeContext, EnableDragContext, HideNavbarContext, HideSidebarContext, RelativeContext, HideTitlebarContext, MobileContext,
 ActiveDropdownContext, HeaderTextContext, SidebarTextContext, SiteHueContext, SiteLightnessContext, SiteSaturationContext, ScrollContext,
 ShowPageDialogContext, PageFlagContext, SeriesPageContext} from "../Context"
-import "./styles/seriespage.less"
+import "./styles/itemspage.less"
 
 const SeriesPage: React.FunctionComponent = (props) => {
     const {theme, setTheme} = useContext(ThemeContext)
@@ -329,20 +329,21 @@ const SeriesPage: React.FunctionComponent = (props) => {
         if (!rect) return "0px"
         const raw = window.innerWidth - rect.right
         let offset = 0
-        if (sortType === "cuteness") offset = -40
-        if (sortType === "reverse cuteness") offset = -10
-        if (sortType === "posts") offset = -45
-        if (sortType === "reverse posts") offset = -15
-        if (sortType === "alphabetic") offset = -25
-        if (sortType === "reverse alphabetic") offset = 0
+        if (sortType === "random") offset = -50
+        if (sortType === "cuteness") offset = -50
+        if (sortType === "reverse cuteness") offset = -20
+        if (sortType === "posts") offset = -55
+        if (sortType === "reverse posts") offset = -25
+        if (sortType === "alphabetic") offset = -35
+        if (sortType === "reverse alphabetic") offset = -10
         return `${raw + offset}px`
     }
 
     const getSortJSX = () => {
         return (
-            <div className="seriesort-item" ref={sortRef} onClick={() => {setActiveDropdown(activeDropdown === "sort" ? "none" : "sort")}}>
-                <img className="seriesort-img" src={sort} style={{filter: getFilter()}}/>
-                <span className="seriesort-text">{functions.toProperCase(sortType)}</span>
+            <div className="itemsort-item" ref={sortRef} onClick={() => {setActiveDropdown(activeDropdown === "sort" ? "none" : "sort")}}>
+                <img className="itemsort-img" src={sort} style={{filter: getFilter()}}/>
+                <span className="itemsort-text">{functions.toProperCase(sortType)}</span>
             </div>
         )
     }
@@ -394,41 +395,44 @@ const SeriesPage: React.FunctionComponent = (props) => {
         <div className="body">
             <SideBar/>
             <div className="content" onMouseEnter={() => setEnableDrag(true)}>
-                <div className="series">
-                    <span className="series-heading">Series</span>
-                    <div className="series-row">
-                        <div className="series-search-container" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
-                            <input className="series-search" type="search" spellCheck="false" value={searchQuery} onChange={(event) => setSearchQuery(event.target.value)} onKeyDown={(event) => event.key === "Enter" ? updateSeries() : null}/>
-                            <img className="series-search-icon" src={getSearchIcon()} style={{filter: getFilterSearch()}} onClick={() => updateSeries()} onMouseEnter={() => setSearchIconHover(true)} onMouseLeave={() => setSearchIconHover(false)}/>
+                <div className="items">
+                    <span className="items-heading">Series</span>
+                    <div className="items-row">
+                        <div className="item-search-container" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
+                            <input className="item-search" type="search" spellCheck="false" value={searchQuery} onChange={(event) => setSearchQuery(event.target.value)} onKeyDown={(event) => event.key === "Enter" ? updateSeries() : null}/>
+                            <img className="item-search-icon" src={getSearchIcon()} style={{filter: getFilterSearch()}} onClick={() => updateSeries()} onMouseEnter={() => setSearchIconHover(true)} onMouseLeave={() => setSearchIconHover(false)}/>
                         </div>
                         {getSortJSX()}
-                        {!mobile ? <div className="seriesort-item" onClick={() => toggleScroll()}>
-                            <img className="seriesort-img" src={scroll ? scrollIcon : pageIcon} style={{filter: getFilter()}}/>
-                            <span className="seriesort-text">{scroll ? "Scrolling" : "Pages"}</span>
+                        {!mobile ? <div className="itemsort-item" onClick={() => toggleScroll()}>
+                            <img className="itemsort-img" src={scroll ? scrollIcon : pageIcon} style={{filter: getFilter()}}/>
+                            <span className="itemsort-text">{scroll ? "Scrolling" : "Pages"}</span>
                         </div> : null}
-                        <div className={`series-dropdown ${activeDropdown === "sort" ? "" : "hide-series-dropdown"}`} 
+                        <div className={`item-dropdown ${activeDropdown === "sort" ? "" : "hide-item-dropdown"}`} 
                         style={{marginRight: getSortMargin(), top: mobile ? "229px" : "209px"}} onClick={() => setActiveDropdown("none")}>
-                            <div className="series-dropdown-row" onClick={() => setSortType("alphabetic")}>
-                                <span className="series-dropdown-text">Alphabetic</span>
+                            <div className="item-dropdown-row" onClick={() => setSortType("random")}>
+                                <span className="item-dropdown-text">Random</span>
                             </div>
-                            <div className="series-dropdown-row" onClick={() => setSortType("reverse alphabetic")}>
-                                <span className="series-dropdown-text">Reverse Alphabetic</span>
+                            <div className="item-dropdown-row" onClick={() => setSortType("alphabetic")}>
+                                <span className="item-dropdown-text">Alphabetic</span>
                             </div>
-                            <div className="series-dropdown-row" onClick={() => setSortType("posts")}>
-                                <span className="series-dropdown-text">Posts</span>
+                            <div className="item-dropdown-row" onClick={() => setSortType("reverse alphabetic")}>
+                                <span className="item-dropdown-text">Reverse Alphabetic</span>
                             </div>
-                            <div className="series-dropdown-row" onClick={() => setSortType("reverse posts")}>
-                                <span className="series-dropdown-text">Reverse Posts</span>
+                            <div className="item-dropdown-row" onClick={() => setSortType("posts")}>
+                                <span className="item-dropdown-text">Posts</span>
                             </div>
-                            <div className="series-dropdown-row" onClick={() => setSortType("cuteness")}>
-                                <span className="series-dropdown-text">Cuteness</span>
+                            <div className="item-dropdown-row" onClick={() => setSortType("reverse posts")}>
+                                <span className="item-dropdown-text">Reverse Posts</span>
                             </div>
-                            <div className="series-dropdown-row" onClick={() => setSortType("reverse cuteness")}>
-                                <span className="series-dropdown-text">Reverse Cuteness</span>
+                            <div className="item-dropdown-row" onClick={() => setSortType("cuteness")}>
+                                <span className="item-dropdown-text">Cuteness</span>
+                            </div>
+                            <div className="item-dropdown-row" onClick={() => setSortType("reverse cuteness")}>
+                                <span className="item-dropdown-text">Reverse Cuteness</span>
                             </div>
                         </div>
                     </div>
-                    <table className="series-container">
+                    <table className="items-container">
                         {generateSeriesJSX()}
                     </table>
                 </div>

@@ -40,15 +40,15 @@ const SearchRoutes = (app: Express) => {
             }
             let result = null as any
             if (sort === "tagcount" || sort === "reverse tagcount") withTags = true
-            if (sort === "favorites" || sort === "reverse favorites") {
-                if (!req.session.username) return res.status(401).send("Unauthorized")
-                const favorites = await sql.searchFavorites(req.session.username, tags, type, restrict, style, sort, offset, limit, withTags)
-                result = favorites.map((f: any) => f.post)
-                result[0].postCount = favorites[0].postCount
+            if (query.startsWith("pixiv:")) {
+                const pixivID = Number(query.match(/(?<=pixiv:)(\d+)/g)?.[0])
+                result = await sql.searchPixivID(pixivID, withTags)
             } else {
-                if (query.startsWith("pixiv:")) {
-                    const pixivID = Number(query.match(/(?<=pixiv:)(\d+)/g)?.[0])
-                    result = await sql.searchPixivID(pixivID, withTags)
+                if (sort === "favorites" || sort === "reverse favorites") {
+                    if (!req.session.username) return res.status(401).send("Unauthorized")
+                    const favorites = await sql.searchFavorites(req.session.username, tags, type, restrict, style, sort, offset, limit, withTags)
+                    result = favorites.map((f: any) => f.post)
+                    result[0].postCount = favorites[0].postCount
                 } else {
                     result = await sql.search(tags, type, restrict, style, sort, offset, limit, withTags)
                 }

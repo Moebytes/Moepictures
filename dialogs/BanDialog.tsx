@@ -107,7 +107,7 @@ const BanDialog: React.FunctionComponent = (props) => {
                 }
                 await axios.put("/api/post/edit", {silent: true, postID: currentHistory.postID, images, type: currentHistory.type, restrict: currentHistory.restrict, source,
                 style: currentHistory.style, artists: currentHistory.artists, characters: currentHistory.characters, preserveThirdParty: currentHistory.thirdParty,
-                series: currentHistory.series, tags: currentHistory.tags, newTags, reason: currentHistory.reason}, {headers: {"x-csrf-token": functions.getCSRFToken()}, withCredentials: true})
+                series: currentHistory.series, tags: currentHistory.tags, newTags, updatedDate: currentHistory.date, reason: currentHistory.reason}, {headers: {"x-csrf-token": functions.getCSRFToken()}, withCredentials: true})
             }
         }
         if (revertData.revertTagIDs?.length) {
@@ -126,7 +126,7 @@ const BanDialog: React.FunctionComponent = (props) => {
                 }
                 await axios.put("/api/tag/edit", {silent: true, tag: currentHistory.tag, key: currentHistory.key, description: currentHistory.description,
                 image, aliases: currentHistory.aliases, implications: currentHistory.implications, social: currentHistory.social, twitter: currentHistory.twitter,
-                website: currentHistory.website, fandom: currentHistory.fandom}, {headers: {"x-csrf-token": functions.getCSRFToken()}, withCredentials: true})
+                website: currentHistory.website, fandom: currentHistory.fandom, updatedDate: currentHistory.date}, {headers: {"x-csrf-token": functions.getCSRFToken()}, withCredentials: true})
             }
         }
         setBanName(null)

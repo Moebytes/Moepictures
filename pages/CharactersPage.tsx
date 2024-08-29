@@ -17,7 +17,7 @@ import axios from "axios"
 import {ThemeContext, EnableDragContext, HideNavbarContext, HideSidebarContext, RelativeContext, MobileContext,
 HideTitlebarContext, ActiveDropdownContext, HeaderTextContext, SidebarTextContext, SiteHueContext, SiteLightnessContext,
 SiteSaturationContext, ScrollContext, CharactersPageContext, ShowPageDialogContext, PageFlagContext} from "../Context"
-import "./styles/characterspage.less"
+import "./styles/itemspage.less"
 
 const CharactersPage: React.FunctionComponent = (props) => {
     const {theme, setTheme} = useContext(ThemeContext)
@@ -329,20 +329,21 @@ const CharactersPage: React.FunctionComponent = (props) => {
         if (!rect) return "0px"
         const raw = window.innerWidth - rect.right
         let offset = 0
-        if (sortType === "cuteness") offset = -40
-        if (sortType === "reverse cuteness") offset = -10
-        if (sortType === "posts") offset = -45
-        if (sortType === "reverse posts") offset = -15
-        if (sortType === "alphabetic") offset = -25
-        if (sortType === "reverse alphabetic") offset = 0
+        if (sortType === "random") offset = -50
+        if (sortType === "cuteness") offset = -50
+        if (sortType === "reverse cuteness") offset = -20
+        if (sortType === "posts") offset = -55
+        if (sortType === "reverse posts") offset = -25
+        if (sortType === "alphabetic") offset = -35
+        if (sortType === "reverse alphabetic") offset = -10
         return `${raw + offset}px`
     }
 
     const getSortJSX = () => {
         return (
-            <div className="charactersort-item" ref={sortRef} onClick={() => {setActiveDropdown(activeDropdown === "sort" ? "none" : "sort")}}>
-                <img className="charactersort-img" src={sort} style={{filter: getFilter()}}/>
-                <span className="charactersort-text">{functions.toProperCase(sortType)}</span>
+            <div className="itemsort-item" ref={sortRef} onClick={() => {setActiveDropdown(activeDropdown === "sort" ? "none" : "sort")}}>
+                <img className="itemsort-img" src={sort} style={{filter: getFilter()}}/>
+                <span className="itemsort-text">{functions.toProperCase(sortType)}</span>
             </div>
         )
     }
@@ -394,41 +395,44 @@ const CharactersPage: React.FunctionComponent = (props) => {
         <div className="body">
             <SideBar/>
             <div className="content" onMouseEnter={() => setEnableDrag(true)}>
-                <div className="characters">
-                    <span className="characters-heading">Characters</span>
-                    <div className="characters-row">
-                        <div className="character-search-container" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
-                            <input className="character-search" type="search" spellCheck="false" value={searchQuery} onChange={(event) => setSearchQuery(event.target.value)} onKeyDown={(event) => event.key === "Enter" ? updateCharacters() : null}/>
-                            <img className="character-search-icon" src={getSearchIcon()} style={{filter: getFilterSearch()}} onClick={() => updateCharacters()} onMouseEnter={() => setSearchIconHover(true)} onMouseLeave={() => setSearchIconHover(false)}/>
+                <div className="items">
+                    <span className="items-heading">Characters</span>
+                    <div className="items-row">
+                        <div className="item-search-container" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
+                            <input className="item-search" type="search" spellCheck="false" value={searchQuery} onChange={(event) => setSearchQuery(event.target.value)} onKeyDown={(event) => event.key === "Enter" ? updateCharacters() : null}/>
+                            <img className="item-search-icon" src={getSearchIcon()} style={{filter: getFilterSearch()}} onClick={() => updateCharacters()} onMouseEnter={() => setSearchIconHover(true)} onMouseLeave={() => setSearchIconHover(false)}/>
                         </div>
                         {getSortJSX()}
-                        {!mobile ? <div className="charactersort-item" onClick={() => toggleScroll()}>
-                            <img className="charactersort-img" src={scroll ? scrollIcon : pageIcon} style={{filter: getFilter()}}/>
-                            <span className="charactersort-text">{scroll ? "Scrolling" : "Pages"}</span>
+                        {!mobile ? <div className="itemsort-item" onClick={() => toggleScroll()}>
+                            <img className="itemsort-img" src={scroll ? scrollIcon : pageIcon} style={{filter: getFilter()}}/>
+                            <span className="itemsort-text">{scroll ? "Scrolling" : "Pages"}</span>
                         </div> : null}
-                        <div className={`character-dropdown ${activeDropdown === "sort" ? "" : "hide-character-dropdown"}`} 
+                        <div className={`item-dropdown ${activeDropdown === "sort" ? "" : "hide-item-dropdown"}`} 
                         style={{marginRight: getSortMargin(), top: mobile ? "229px" : "209px"}} onClick={() => setActiveDropdown("none")}>
-                            <div className="character-dropdown-row" onClick={() => setSortType("alphabetic")}>
-                                <span className="character-dropdown-text">Alphabetic</span>
+                            <div className="item-dropdown-row" onClick={() => setSortType("random")}>
+                                <span className="item-dropdown-text">Random</span>
                             </div>
-                            <div className="character-dropdown-row" onClick={() => setSortType("reverse alphabetic")}>
-                                <span className="character-dropdown-text">Reverse Alphabetic</span>
+                            <div className="item-dropdown-row" onClick={() => setSortType("alphabetic")}>
+                                <span className="item-dropdown-text">Alphabetic</span>
                             </div>
-                            <div className="character-dropdown-row" onClick={() => setSortType("posts")}>
-                                <span className="character-dropdown-text">Posts</span>
+                            <div className="item-dropdown-row" onClick={() => setSortType("reverse alphabetic")}>
+                                <span className="item-dropdown-text">Reverse Alphabetic</span>
                             </div>
-                            <div className="character-dropdown-row" onClick={() => setSortType("reverse posts")}>
-                                <span className="character-dropdown-text">Reverse Posts</span>
+                            <div className="item-dropdown-row" onClick={() => setSortType("posts")}>
+                                <span className="item-dropdown-text">Posts</span>
                             </div>
-                            <div className="character-dropdown-row" onClick={() => setSortType("cuteness")}>
-                                <span className="character-dropdown-text">Cuteness</span>
+                            <div className="item-dropdown-row" onClick={() => setSortType("reverse posts")}>
+                                <span className="item-dropdown-text">Reverse Posts</span>
                             </div>
-                            <div className="character-dropdown-row" onClick={() => setSortType("reverse cuteness")}>
-                                <span className="character-dropdown-text">Reverse Cuteness</span>
+                            <div className="item-dropdown-row" onClick={() => setSortType("cuteness")}>
+                                <span className="item-dropdown-text">Cuteness</span>
+                            </div>
+                            <div className="item-dropdown-row" onClick={() => setSortType("reverse cuteness")}>
+                                <span className="item-dropdown-text">Reverse Cuteness</span>
                             </div>
                         </div>
                     </div>
-                    <table className="characters-container">
+                    <table className="items-container">
                         {generateCharactersJSX()}
                     </table>
                 </div>

@@ -398,12 +398,15 @@ export default class SQLQuery {
   }
 
   /** Insert a new tag. */
-  public static insertTag = async (tag: string, type?: string) => {
+  public static insertTag = async (tag: string, type?: string, creator?: string) => {
+    const now = new Date().toISOString()
     const query: QueryConfig = {
-      text: `INSERT INTO "tags" ("tag"${type ? `, "type"` : ""}) VALUES ($1${type ? `, $2` : ""})`,
-      values: [tag]
+      text: `INSERT INTO "tags" ("tag", "createDate"${type ? `, "type"` : ""}${creator ? `, "creator"` : ""}) 
+            VALUES ($1, $2${type ? `, $3` : ""}${creator ? `, $4` : ""})`,
+      values: [tag, now]
     }
     if (type) query.values?.push(type)
+    if (creator) query.values?.push(creator)
     try {
       await SQLQuery.flushDB()
       await SQLQuery.run(query)
@@ -414,7 +417,7 @@ export default class SQLQuery {
   }
 
   /** Bulk insert new tags. */
-  public static bulkInsertTags = async (bulkTags: any[], noImageUpdate?: boolean) => {
+  public static bulkInsertTags = async (bulkTags: any[], creator: string, noImageUpdate?: boolean) => {
     let tagValues = [] as any
     let rawValues = [] as any
     let valueArray = [] as any 
@@ -422,16 +425,20 @@ export default class SQLQuery {
     for (let j = 0; j < bulkTags.length; j++) {
       if (tagValues.includes(bulkTags[j].tag)) continue
       tagValues.push(bulkTags[j].tag)
-      valueArray.push(`($${i}, $${i + 1}, $${i + 2}, $${i + 3})`)
+      valueArray.push(`($${i}, $${i + 1}, $${i + 2}, $${i + 3}, $${i + 4})`)
       rawValues.push(bulkTags[j].tag)
       rawValues.push(bulkTags[j].type)
       rawValues.push(bulkTags[j].description)
       rawValues.push(bulkTags[j].image)
-      i += 4
+      rawValues.push(new Date().toISOString())
+      rawValues.push(creator)
+      rawValues.push(new Date().toISOString())
+      rawValues.push(creator)
+      i += 8
     }
     let valueQuery = `VALUES ${valueArray.join(", ")}`
     const query: QueryConfig = {
-      text: `INSERT INTO "tags" ("tag", "type", "description", "image") ${valueQuery} 
+      text: `INSERT INTO "tags" ("tag", "type", "description", "image", "createDate", "creator", "updatedDate", "updater") ${valueQuery} 
              ON CONFLICT ("tag") DO UPDATE SET "type" = EXCLUDED."type"${noImageUpdate ? "" : ", \"image\" = EXCLUDED.\"image\""}`,
       values: [...rawValues]
     }
@@ -1023,6 +1030,7 @@ export default class SQLQuery {
     }
     let whereQuery = whereQueries.length ? `AND ${whereQueries.join(" AND ")}` : ""
     let sortQuery = ""
+    if (sort === "random") sortQuery = `ORDER BY random()`
     if (sort === "cuteness") sortQuery = `ORDER BY "cutenessAvg" DESC`
     if (sort === "reverse cuteness") sortQuery = `ORDER BY "cutenessAvg" ASC`
     if (sort === "posts") sortQuery = `ORDER BY "postCount" DESC`
@@ -1054,8 +1062,11 @@ export default class SQLQuery {
     }
     if (search) query.values?.push(search.toLowerCase())
     if (offset) query.values?.push(offset)
-    const result = await SQLQuery.run(query, true)
-    return result
+    if (sort === "random") {
+      return SQLQuery.run(query)
+    } else {
+      return SQLQuery.run(query, true)
+    }
   }
 
   public static tagSearch = async (search: string, sort: string, type?: string, offset?: string) => {
@@ -1079,6 +1090,9 @@ export default class SQLQuery {
     }
     let whereQuery = whereArray.length ? `AND ${whereArray.join(" AND ")}` : ""
     let sortQuery = ""
+    if (sort === "random") sortQuery = `ORDER BY random()`
+    if (sort === "date") sortQuery = `ORDER BY tags."updatedDate" DESC`
+    if (sort === "reverse date") sortQuery = `ORDER BY tags."updatedDate" ASC`
     if (sort === "alphabetic") sortQuery = `ORDER BY tags.tag ASC`
     if (sort === "reverse alphabetic") sortQuery = `ORDER BY tags.tag DESC`
     if (sort === "posts") sortQuery = `ORDER BY "postCount" DESC`
@@ -1110,8 +1124,11 @@ export default class SQLQuery {
     if (search) query.values?.push(search.toLowerCase())
     if (type) query.values?.push(type)
     if (offset) query.values?.push(offset)
-    const result = await SQLQuery.run(query, true)
-    return result
+    if (sort === "random") {
+      return SQLQuery.run(query)
+    } else {
+      return SQLQuery.run(query, true)
+    }
   }
 
   /** Delete tag. */
@@ -1380,6 +1397,7 @@ export default class SQLQuery {
       i++
     }
     let sortQuery = ""
+    if (sort === "random") sortQuery = `ORDER BY random()`
     if (sort === "date") sortQuery = `ORDER BY comments."postDate" DESC`
     if (sort === "reverse date") sortQuery = `ORDER BY comments."postDate" ASC`
     const query: QueryConfig = {
@@ -1423,6 +1441,7 @@ export default class SQLQuery {
       i++
     }
     let sortQuery = ""
+    if (sort === "random") sortQuery = `ORDER BY random()`
     if (sort === "date") sortQuery = `ORDER BY comments."postDate" DESC`
     if (sort === "reverse date") sortQuery = `ORDER BY comments."postDate" ASC`
     const query: QueryConfig = {
@@ -2674,6 +2693,7 @@ export default class SQLQuery {
       i++
     }
     let sortQuery = ""
+    if (sort === "random") sortQuery = `ORDER BY random()`
     if (sort === "date") sortQuery = `ORDER BY threads."updatedDate" DESC`
     if (sort === "reverse date") sortQuery = `ORDER BY threads."updatedDate" ASC`
     const query: QueryConfig = {

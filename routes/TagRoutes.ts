@@ -149,7 +149,7 @@ const TagRoutes = (app: Express) => {
 
     app.put("/api/tag/edit", tagUpdateLimiter, async (req: Request, res: Response) => {
         try {
-            const {tag, key, description, image, aliases, implications, pixivTags, social, twitter, website, fandom, reason, silent} = req.body
+            let {tag, key, description, image, aliases, implications, pixivTags, social, twitter, website, fandom, reason, updater, updatedDate, silent} = req.body
             if (!serverFunctions.validateCSRF(req)) return res.status(400).send("Bad CSRF token")
             if (!req.session.username) return res.status(401).send("Unauthorized")
             if (req.session.banned) return res.status(403).send("You are banned")
@@ -230,6 +230,10 @@ const TagRoutes = (app: Express) => {
                     await sql.updateTag(tag, "twitter", twitter)
                 }
             }
+            if (!updater) updater = req.session.username
+            if (!updatedDate) updatedDate = new Date().toISOString()
+            await sql.updateTag(tag, "updater", updater)
+            await sql.updateTag(tag, "updatedDate", updatedDate)
             let targetTag = tag
             if (key.trim() !== tag) {
                 if (tagObj.image) {
@@ -251,9 +255,8 @@ const TagRoutes = (app: Express) => {
             const nextKey = await serverFunctions.getNextKey("tag", key)
             if (!tagHistory.length || (imgChange && nextKey === 1)) {
                 let vanilla = await sql.tag(targetTag)
-                let posts = await sql.search([targetTag], "all", "all", "all", "reverse date", undefined, "1")
-                vanilla.date = posts[0].uploadDate 
-                vanilla.user = posts[0].uploader
+                vanilla.date = vanilla.createDate 
+                vanilla.user = vanilla.creator
                 vanilla.key = targetTag
                 vanilla.aliases = vanilla.aliases.map((alias: any) => alias?.alias)
                 vanilla.implications = vanilla.implications.map((implication: any) => implication?.implication)
@@ -288,7 +291,7 @@ const TagRoutes = (app: Express) => {
             res.status(200).send("Success")
         } catch (e) {
             console.log(e)
-            res.status(400).send("Bad request") 
+            res.status(400).send("Bad request")
         }
     })
 

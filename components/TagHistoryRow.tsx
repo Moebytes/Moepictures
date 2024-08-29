@@ -20,6 +20,7 @@ import axios from "axios"
 
 interface Props {
     tagHistory: any
+    historyIndex: number
     onDelete?: () => void
     onEdit?: () => void
     current?: boolean
@@ -180,25 +181,25 @@ const TagHistoryRow: React.FunctionComponent<Props> = (props) => {
     }
 
     const dateTextJSX = () => {
-        const targetDate = props.tagHistory.date ? props.tagHistory.date : props.tagHistory.uploadDate
-        const targetUser = props.tagHistory.date ? props.tagHistory.user : props.tagHistory.uploader
-        const targetText = props.tagHistory.date ? "Edited" : "Created"
+        const firstHistory = props.historyIndex === Number(props.tagHistory.historyCount)
+        const targetDate = firstHistory ? props.tagHistory.createDate : props.tagHistory.date
+        const editText = firstHistory ? "Uploaded" : "Edited"
         if (userRole === "admin") {
             return (
                 <div className="taghistoryrow-username-container" onClick={userClick} onAuxClick={userClick}>
-                    <span className="taghistoryrow-user-text admin-color">{targetText} {functions.timeAgo(targetDate)} by {functions.toProperCase(targetUser)}</span>
+                    <span className="taghistoryrow-user-text admin-color">{editText} {functions.timeAgo(targetDate)} by {functions.toProperCase(props.tagHistory.user)}</span>
                     <img className="taghistoryrow-user-label" src={adminCrown}/>
                 </div>
             )
         } else if (userRole === "mod") {
             return (
                 <div className="taghistoryrow-username-container" onClick={userClick} onAuxClick={userClick}>
-                    <span className="taghistoryrow-user-text mod-color">{targetText} {functions.timeAgo(targetDate)} by {functions.toProperCase(targetUser)}</span>
+                    <span className="taghistoryrow-user-text mod-color">{editText} {functions.timeAgo(targetDate)} by {functions.toProperCase(props.tagHistory.user)}</span>
                     <img className="taghistoryrow-user-label" src={modCrown}/>
                 </div>
             )
         }
-        return <span className="taghistoryrow-user-text" onClick={userClick} onAuxClick={userClick}>{targetText} {functions.timeAgo(targetDate)} by {functions.toProperCase(targetUser)}</span>
+        return <span className="taghistoryrow-user-text" onClick={userClick} onAuxClick={userClick}>{editText} {functions.timeAgo(targetDate)} by {functions.toProperCase(props.tagHistory.user)}</span>
     }
 
 

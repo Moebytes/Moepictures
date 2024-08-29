@@ -19,7 +19,7 @@ import permissions from "../structures/Permissions"
 import scrollIcon from "../assets/icons/scroll.png"
 import pageIcon from "../assets/icons/page.png"
 import PageDialog from "../dialogs/PageDialog"
-import "./styles/forumpage.less"
+import "./styles/itemspage.less"
 import axios from "axios"
 
 const ForumPage: React.FunctionComponent = (props) => {
@@ -348,16 +348,17 @@ const ForumPage: React.FunctionComponent = (props) => {
         if (!rect) return "0px"
         const raw = window.innerWidth - rect.right
         let offset = 0
-        if (sortType === "date") offset = -35
-        if (sortType === "reverse date") offset = -5
+        if (sortType === "random") offset = -40
+        if (sortType === "date") offset = -45
+        if (sortType === "reverse date") offset = -15
         return `${raw + offset}px`
     }
 
     const getSortJSX = () => {
         return (
-            <div className="forumsort-item" ref={sortRef} onClick={() => {setActiveDropdown(activeDropdown === "sort" ? "none" : "sort")}}>
-                <img className="forumsort-img" src={sort} style={{filter: getFilter()}}/>
-                <span className="forumsort-text">{functions.toProperCase(sortType)}</span>
+            <div className="itemsort-item" ref={sortRef} onClick={() => {setActiveDropdown(activeDropdown === "sort" ? "none" : "sort")}}>
+                <img className="itemsort-img" src={sort} style={{filter: getFilter()}}/>
+                <span className="itemsort-text">{functions.toProperCase(sortType)}</span>
             </div>
         )
     }
@@ -404,8 +405,8 @@ const ForumPage: React.FunctionComponent = (props) => {
         const style = {marginLeft: mobile ? "0px" : "15px", marginTop: mobile ? "10px" : "0px"}
         if (session.username) {
             return (
-                <div className="forum-button-container" style={style} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
-                    <button className="forum-button" onClick={() => newThreadDialog()}>New</button>
+                <div className="item-button-container" style={style} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
+                    <button className="item-button" onClick={() => newThreadDialog()}>New</button>
                 </div> 
             )
         }
@@ -421,31 +422,34 @@ const ForumPage: React.FunctionComponent = (props) => {
         <div className="body">
             <SideBar/>
             <div className="content" onMouseEnter={() => setEnableDrag(true)}>
-                <div className="forum">
-                    <span className="forum-heading">Forum</span>
-                    <div className="forum-row">
-                        <div className="forum-search-container" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
-                            <input className="forum-search" type="search" spellCheck="false" value={searchQuery} onChange={(event) => setSearchQuery(event.target.value)} onKeyDown={(event) => event.key === "Enter" ? updateThreads() : null}/>
-                            <img className="forum-search-icon" src={getSearchIcon()} style={{filter: getFilterSearch()}} onClick={() => updateThreads()} onMouseEnter={() => setSearchIconHover(true)} onMouseLeave={() => setSearchIconHover(false)}/>
+                <div className="items">
+                    <span className="items-heading">Forum</span>
+                    <div className="items-row">
+                        <div className="item-search-container" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
+                            <input className="item-search" type="search" spellCheck="false" value={searchQuery} onChange={(event) => setSearchQuery(event.target.value)} onKeyDown={(event) => event.key === "Enter" ? updateThreads() : null}/>
+                            <img className="item-search-icon" src={getSearchIcon()} style={{filter: getFilterSearch()}} onClick={() => updateThreads()} onMouseEnter={() => setSearchIconHover(true)} onMouseLeave={() => setSearchIconHover(false)}/>
                         </div>
                         {!mobile ? getNewThreadButton() : null}
                         {getSortJSX()}
-                        {!mobile ? <div className="forumsort-item" onClick={() => toggleScroll()}>
-                            <img className="forumsort-img" src={scroll ? scrollIcon : pageIcon} style={{filter: getFilter()}}/>
-                            <span className="forumsort-text">{scroll ? "Scrolling" : "Pages"}</span>
+                        {!mobile ? <div className="itemsort-item" onClick={() => toggleScroll()}>
+                            <img className="itemsort-img" src={scroll ? scrollIcon : pageIcon} style={{filter: getFilter()}}/>
+                            <span className="itemsort-text">{scroll ? "Scrolling" : "Pages"}</span>
                         </div> : null}
-                        <div className={`forum-dropdown ${activeDropdown === "sort" ? "" : "hide-forum-dropdown"}`} 
+                        <div className={`item-dropdown ${activeDropdown === "sort" ? "" : "hide-item-dropdown"}`} 
                         style={{marginRight: getSortMargin(), top: mobile ? "229px" : "209px"}} onClick={() => setActiveDropdown("none")}>
-                            <div className="forum-dropdown-row" onClick={() => setSortType("date")}>
-                                <span className="forum-dropdown-text">Date</span>
+                            <div className="item-dropdown-row" onClick={() => setSortType("random")}>
+                                <span className="item-dropdown-text">Random</span>
                             </div>
-                            <div className="forum-dropdown-row" onClick={() => setSortType("reverse date")}>
-                                <span className="forum-dropdown-text">Reverse Date</span>
+                            <div className="item-dropdown-row" onClick={() => setSortType("date")}>
+                                <span className="item-dropdown-text">Date</span>
+                            </div>
+                            <div className="item-dropdown-row" onClick={() => setSortType("reverse date")}>
+                                <span className="item-dropdown-text">Reverse Date</span>
                             </div>
                         </div>
                     </div>
-                    {mobile ? <div className="forum-row">{getNewThreadButton()}</div> : null}
-                    <table className="forum-container">
+                    {mobile ? <div className="item-row">{getNewThreadButton()}</div> : null}
+                    <table className="items-container">
                         {generateThreadsJSX()}
                     </table>
                 </div>

@@ -21,7 +21,7 @@ import permissions from "../structures/Permissions"
 import scrollIcon from "../assets/icons/scroll.png"
 import pageIcon from "../assets/icons/page.png"
 import PageDialog from "../dialogs/PageDialog"
-import "./styles/commentspage.less"
+import "./styles/itemspage.less"
 import axios from "axios"
 
 const CommentsPage: React.FunctionComponent = (props) => {
@@ -381,16 +381,17 @@ const CommentsPage: React.FunctionComponent = (props) => {
         if (!rect) return "0px"
         const raw = window.innerWidth - rect.right
         let offset = 0
-        if (sortType === "date") offset = -35
-        if (sortType === "reverse date") offset = -5
+        if (sortType === "random") offset = -40
+        if (sortType === "date") offset = -45
+        if (sortType === "reverse date") offset = -15
         return `${raw + offset}px`
     }
 
     const getSortJSX = () => {
         return (
-            <div className="commentsort-item" ref={sortRef} onClick={() => {setActiveDropdown(activeDropdown === "sort" ? "none" : "sort")}}>
-                <img className="commentsort-img" src={sort} style={{filter: getFilter()}}/>
-                <span className="commentsort-text">{functions.toProperCase(sortType)}</span>
+            <div className="itemsort-item" ref={sortRef} onClick={() => {setActiveDropdown(activeDropdown === "sort" ? "none" : "sort")}}>
+                <img className="itemsort-img" src={sort} style={{filter: getFilter()}}/>
+                <span className="itemsort-text">{functions.toProperCase(sortType)}</span>
             </div>
         )
     }
@@ -445,29 +446,32 @@ const CommentsPage: React.FunctionComponent = (props) => {
         <div className="body">
             <SideBar/>
             <div className="content" onMouseEnter={() => setEnableDrag(true)}>
-                <div className="comments-page">
-                    <span className="comments-heading">Comments</span>
-                    <div className="comments-row">
-                        <div className="comment-search-container" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
-                            <input className="comment-search" type="search" spellCheck="false" value={searchQuery} onChange={(event) => setSearchQuery(event.target.value)} onKeyDown={(event) => event.key === "Enter" ? updateComments() : null}/>
-                            <img className="comment-search-icon" src={getSearchIcon()} style={{filter: getFilterSearch()}} onClick={() => updateComments()} onMouseEnter={() => setSearchIconHover(true)} onMouseLeave={() => setSearchIconHover(false)}/>
+                <div className="items">
+                    <span className="items-heading">Comments</span>
+                    <div className="items-row">
+                        <div className="item-search-container" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
+                            <input className="item-search" type="search" spellCheck="false" value={searchQuery} onChange={(event) => setSearchQuery(event.target.value)} onKeyDown={(event) => event.key === "Enter" ? updateComments() : null}/>
+                            <img className="item-search-icon" src={getSearchIcon()} style={{filter: getFilterSearch()}} onClick={() => updateComments()} onMouseEnter={() => setSearchIconHover(true)} onMouseLeave={() => setSearchIconHover(false)}/>
                         </div>
                         {getSortJSX()}
-                        {!mobile ? <div className="commentsort-item" onClick={() => toggleScroll()}>
-                            <img className="commentsort-img" src={scroll ? scrollIcon : pageIcon} style={{filter: getFilter()}}/>
-                            <span className="commentsort-text">{scroll ? "Scrolling" : "Pages"}</span>
+                        {!mobile ? <div className="itemsort-item" onClick={() => toggleScroll()}>
+                            <img className="itemsort-img" src={scroll ? scrollIcon : pageIcon} style={{filter: getFilter()}}/>
+                            <span className="itemsort-text">{scroll ? "Scrolling" : "Pages"}</span>
                         </div> : null}
-                        <div className={`comment-dropdown ${activeDropdown === "sort" ? "" : "hide-comment-dropdown"}`} 
+                        <div className={`item-dropdown ${activeDropdown === "sort" ? "" : "hide-item-dropdown"}`} 
                         style={{marginRight: getSortMargin(), top: mobile ? "229px" : "209px"}} onClick={() => setActiveDropdown("none")}>
-                            <div className="comment-dropdown-row" onClick={() => setSortType("date")}>
-                                <span className="comment-dropdown-text">Date</span>
+                            <div className="item-dropdown-row" onClick={() => setSortType("random")}>
+                                <span className="item-dropdown-text">Random</span>
                             </div>
-                            <div className="comment-dropdown-row" onClick={() => setSortType("reverse date")}>
-                                <span className="comment-dropdown-text">Reverse Date</span>
+                            <div className="item-dropdown-row" onClick={() => setSortType("date")}>
+                                <span className="item-dropdown-text">Date</span>
+                            </div>
+                            <div className="item-dropdown-row" onClick={() => setSortType("reverse date")}>
+                                <span className="item-dropdown-text">Reverse Date</span>
                             </div>
                         </div>
                     </div>
-                    <table className="comments-container">
+                    <table className="items-container">
                         {generateCommentsJSX()}
                     </table>
                 </div>

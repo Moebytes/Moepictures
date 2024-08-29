@@ -1,6 +1,6 @@
 @import "../../index.less";
 
-.series {
+.items {
     display: flex;
     flex-direction: column;
     width: 100%;
@@ -8,9 +8,9 @@
     padding: 10px 30px;
 }
 
-.series-heading {
+.items-heading {
     font-family: Tahoma, sans-serif;
-    font-size: 35px;
+    font-size: 30px;
     color: var(--text);
     margin-bottom: 10px;
     &:hover {
@@ -18,18 +18,18 @@
     }
 }
 
-.series-row {
+.items-row {
     display: flex;
     flex-direction: row;
     width: 100%;
 }
 
-.series-search-container {
+.item-search-container {
     display: flex;
     border: 1px solid black;
 }
 
-.series-search {
+.item-search {
     height: 30px;
     background-color: var(--sidebarSearchBG);
     border: none;
@@ -41,13 +41,37 @@
     transition: width 0.3s;
 }
 
-.series-search-icon {
+.item-search-icon {
     width: auto;
     height: 30px;
     cursor: pointer;
 }
 
-.seriesort-item {
+.item-button-container {
+    display: flex;
+    flex-direction: row;
+    margin-left: 15px;
+    align-items: center;
+    justify-content: center;
+}
+
+.item-button {
+    border: none;
+    font-family: Tahoma, sans-serif;
+    font-size: 20px;
+    font-weight: bold;
+    padding: 0px 5px;
+    background: var(--buttonBG);
+    color: black;
+    border: 1px solid black;
+    cursor: pointer;
+    &:hover {
+        color: white;
+        border: 1px solid white;
+    }
+}
+
+.itemsort-item {
     display: flex;
     align-items: center;
     cursor: pointer;
@@ -57,7 +81,7 @@
     margin-left: 15px;
 }
 
-.seriesort-text {
+.itemsort-text {
     font-family: Tahoma, sans-serif;
     font-size: 16px;
     margin-left: 5px;
@@ -65,12 +89,12 @@
     //.stroke-black-thin();
 }
 
-.seriesort-img {
+.itemsort-img {
     width: auto;
     height: 20px;
 }
 
-.series-dropdown {
+.item-dropdown {
     position: absolute;
     z-index: 850;
     top: 0;
@@ -85,12 +109,12 @@
 }
 
 
-.hide-series-dropdown {
+.hide-item-dropdown {
     transform-origin: top;
     transform: scaleY(0);
 }
 
-.series-dropdown-row {
+.item-dropdown-row {
     display: flex;
     flex-direction: row;
     justify-content: center;
@@ -104,7 +128,7 @@
     }
 }
 
-.series-dropdown-text {
+.item-dropdown-text {
     font-family: Tahoma, sans-serif;
     font-size: 16px;
     margin-left: 5px;
@@ -112,12 +136,12 @@
     //.stroke-black-thin();
 }
 
-.series-dropdown-img {
+.item-dropdown-img {
     width: auto;
     height: 20px;
 }
 
-.series-container {
+.items-container {
     display: flex;
     flex-direction: column;
     width: 100%;
