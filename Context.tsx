@@ -150,6 +150,9 @@ export const ShowBulkQuickEditDialogContext = React.createContext<any>(null)
 export const ShowTakedownPostDialogContext = React.createContext<any>(null)
 export const TakedownTagContext = React.createContext<any>(null)
 export const ImageExpandContext = React.createContext<any>(null)
+export const CommentIDContext = React.createContext<any>(null)
+export const CommentJumpFlagContext = React.createContext<any>(null)
+export const DMTargetContext = React.createContext<any>(null)
 
 const Context: React.FunctionComponent = (props) => {
     const [siteHue, setSiteHue] = useState(180)
@@ -286,9 +289,15 @@ const Context: React.FunctionComponent = (props) => {
     const [selectionPosts, setSelectionPosts] = useState(new Map())
     const [showBulkQuickEditDialog, setShowBulkQuickEditDialog] = useState(false)
     const [imageExpand, setImageExpand] = useState(false)
+    const [dmTarget, setDMTarget] = useState(null)
+    const [commentID, setCommentID] = useState(0)
+    const [commentJumpFlag, setCommentJumpFlag] = useState(false)
 
 return (
     <>
+        <CommentJumpFlagContext.Provider value={{commentJumpFlag, setCommentJumpFlag}}>
+        <CommentIDContext.Provider value={{commentID, setCommentID}}>
+        <DMTargetContext.Provider value={{dmTarget, setDMTarget}}>
         <ImageExpandContext.Provider value={{imageExpand, setImageExpand}}>
         <TakedownTagContext.Provider value={{takedownTag, setTakedownTag}}>
         <ShowTakedownPostDialogContext.Provider value={{showTakedownPostDialog, setShowTakedownPostDialog}}>
@@ -558,6 +567,9 @@ return (
         </ShowTakedownPostDialogContext.Provider>
         </TakedownTagContext.Provider>
         </ImageExpandContext.Provider>
+        </DMTargetContext.Provider>
+        </CommentIDContext.Provider>
+        </CommentJumpFlagContext.Provider>
     </>
     )
 }

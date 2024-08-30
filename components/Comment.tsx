@@ -206,6 +206,10 @@ const Comment: React.FunctionComponent<Props> = (props) => {
         return <span className="comment-user-text">{functions.toProperCase(props.comment.username)}</span>
     }
 
+    const commentJump = () => {
+        props.onCommentJump?.(Number(props.comment.commentID))
+    }
+
     return (
         <div className="comment" comment-id={props.comment.commentID}>
             <div className="comment-container">
@@ -215,7 +219,7 @@ const Comment: React.FunctionComponent<Props> = (props) => {
                 </div>
             </div>
             <div className="comment-container" style={{width: "100%"}}>
-                <span className="comment-date-text">{functions.timeAgo(props.comment.postDate)}:</span>
+                <span className="comment-date-text" onClick={commentJump}>{functions.timeAgo(props.comment.postDate)}:</span>
                 {parseText()}
             </div>
             {session.username ? commentOptions() : null}

@@ -9,7 +9,7 @@ import Footer from "../components/Footer"
 import DragAndDrop from "../components/DragAndDrop"
 import {HideNavbarContext, HideSidebarContext, ThemeContext, EnableDragContext, RelativeContext, HideTitlebarContext, MobileContext, CommentSearchFlagContext,
 HeaderTextContext, SidebarTextContext, SessionContext, RedirectContext, SessionFlagContext, ShowDeleteAccountDialogContext, SiteHueContext, SiteLightnessContext,
-SiteSaturationContext, BanNameContext, UnbanNameContext, UpdateUserFlagContext} from "../Context"
+SiteSaturationContext, BanNameContext, UnbanNameContext, UpdateUserFlagContext, DMTargetContext} from "../Context"
 import functions from "../structures/Functions"
 import permissions from "../structures/Permissions"
 import Carousel from "../components/Carousel"
@@ -18,7 +18,9 @@ import adminLabel from "../assets/icons/admin-label.png"
 import modLabel from "../assets/icons/mod-label.png"
 import banIcon from "../assets/icons/ban.png"
 import unbanIcon from "../assets/icons/unban.png"
+import dmIcon from "../assets/icons/dm.png"
 import BanDialog from "../dialogs/BanDialog"
+import DMDialog from "../dialogs/DMDialog"
 import UnbanDialog from "../dialogs/UnbanDialog"
 import "./styles/userpage.less"
 import axios from "axios"
@@ -49,6 +51,7 @@ const UserPage: React.FunctionComponent<Props> = (props) => {
     const {commentSearchFlag, setCommentSearchFlag} = useContext(CommentSearchFlagContext)
     const {banName, setBanName} = useContext(BanNameContext)
     const {unbanName, setUnbanName} = useContext(UnbanNameContext)
+    const {dmTarget, setDMTarget} = useContext(DMTargetContext)
     const [uploadIndex, setUploadIndex] = useState(0)
     const [favoriteIndex, setFavoriteIndex] = useState(0) as any
     const [uploads, setUploads] = useState([]) as any
@@ -205,6 +208,10 @@ const UserPage: React.FunctionComponent<Props> = (props) => {
         }
     }
 
+    const dmDialog = () => {
+        setDMTarget(username)
+    }
+
     useEffect(() => {
         if (updateUserFlag) {
             fetchUser()
@@ -215,6 +222,7 @@ const UserPage: React.FunctionComponent<Props> = (props) => {
     return (
         <>
         <DragAndDrop/>
+        <DMDialog/>
         <BanDialog/>
         <UnbanDialog/>
         <TitleBar/>
@@ -227,6 +235,7 @@ const UserPage: React.FunctionComponent<Props> = (props) => {
                     <div className="user-top-container">
                         <img className="user-img" src={getUserImg()} onClick={userImgClick} onAuxClick={userImgClick} style={{filter: defaultIcon ? getFilter() : ""}}/>
                         {generateUsernameJSX()}
+                        {session.username ? <img className="user-icon" src={dmIcon} onClick={dmDialog}/> : null}
                         {permissions.isElevated(session) && !permissions.isElevated(user)? <img className="user-icon" src={user.banned ? unbanIcon : banIcon} onClick={banDialog}/> : null}
                     </div>
                     {user.banned ? <span className="user-ban-text">Banned</span> : null}

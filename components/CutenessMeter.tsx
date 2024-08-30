@@ -96,7 +96,6 @@ const CutenessMeter: React.FunctionComponent<Props> = (props) => {
     }
 
     const getCutenessValue = () => {
-        console.log(cuteness)
         if (isAverage) return averageCuteness
         return cuteness
     }

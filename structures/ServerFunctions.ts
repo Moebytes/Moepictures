@@ -13,6 +13,9 @@ import CSRF from "csrf"
 
 const csrf = new CSRF()
 
+let local = process.env.MOEPICTURES_LOCAL
+let localUnverified = process.env.MOEPICTURES_LOCAL_UNVERIFIED
+
 const s3 = new S3({region: "us-east-1", credentials: {
     accessKeyId: process.env.AWS_ACCESS_KEY!,
     secretAccessKey: process.env.AWS_SECRET_KEY!
@@ -73,16 +76,16 @@ export default class ServerFunctions {
             if (functions.isLocalHost()) {
                 const id = file.split("-")?.[0]?.match(/\d+/)?.[0]
                 if (!id) return defaultBuffer
-                const historyFolder = `/Volumes/Files/moepictures/history/post/${id}`
+                const historyFolder = `${local}/history/post/${id}`
                 if (!fs.existsSync(historyFolder)) return defaultBuffer
                 let folders = fs.readdirSync(historyFolder)
                 if (!folders.length) return defaultBuffer
                 folders = folders.sort(new Intl.Collator(undefined, {numeric: true, sensitivity: "base"}).compare)
-                const firstHistory = `/Volumes/Files/moepictures/history/tag/${id}/${folders[0]}`
+                const firstHistory = `${local}/history/tag/${id}/${folders[0]}`
                 let files = fs.readdirSync(firstHistory)
                 if (!files.length) return defaultBuffer
                 files = files.sort(new Intl.Collator(undefined, {numeric: true, sensitivity: "base"}).compare)
-                const firstFile = `/Volumes/Files/moepictures/history/tag/${id}/${folders[0]}/${files[0]}`
+                const firstFile = `${local}/history/tag/${id}/${folders[0]}/${files[0]}`
                 return fs.readFileSync(firstFile)
             } else {
                 return defaultBuffer
@@ -91,16 +94,16 @@ export default class ServerFunctions {
             if (functions.isLocalHost()) {
                 const id = file.split("-")?.[0]?.match(/\d+/)?.[0]
                 if (!id) return defaultBuffer
-                const historyFolder = `/Volumes/Files/moepictures/history/post/${id}`
+                const historyFolder = `${local}/history/post/${id}`
                 if (!fs.existsSync(historyFolder)) return defaultBuffer
                 let folders = fs.readdirSync(historyFolder)
                 if (!folders.length) return defaultBuffer
                 folders = folders.sort(new Intl.Collator(undefined, {numeric: true, sensitivity: "base"}).compare)
-                const firstHistory = `/Volumes/Files/moepictures/history/post/${id}/${folders[0]}`
+                const firstHistory = `${local}/history/post/${id}/${folders[0]}`
                 let files = fs.readdirSync(firstHistory)
                 if (!files.length) return defaultBuffer
                 files = files.sort(new Intl.Collator(undefined, {numeric: true, sensitivity: "base"}).compare)
-                const firstFile = `/Volumes/Files/moepictures/history/post/${id}/${folders[0]}/${files[0]}`
+                const firstFile = `${local}/history/post/${id}/${folders[0]}/${files[0]}`
                 return fs.readFileSync(firstFile)
             } else {
                 return defaultBuffer
@@ -110,18 +113,18 @@ export default class ServerFunctions {
 
     public static getFile = async (file: string) => {
         if (functions.isLocalHost()) {
-            if (!fs.existsSync(`/Volumes/Files/moepictures/${decodeURIComponent(file)}`)) return ServerFunctions.getFirstHistoryFile(file)
-            return fs.readFileSync(`/Volumes/Files/moepictures/${decodeURIComponent(file)}`)
+            if (!fs.existsSync(`${local}/${decodeURIComponent(file)}`)) return ServerFunctions.getFirstHistoryFile(file)
+            return fs.readFileSync(`${local}/${decodeURIComponent(file)}`)
         }
         return s3.getObject({Key: decodeURIComponent(file), Bucket: "moepictures"}).promise().then((r) => r.Body) as unknown as Buffer
     }
 
     public static uploadFile = async (file: string, content: any) => {
         if (functions.isLocalHost()) {
-            const dir = path.dirname(`/Volumes/Files/moepictures/${file}`)
+            const dir = path.dirname(`${local}/${file}`)
             if (!fs.existsSync(dir)) fs.mkdirSync(dir, {recursive: true})
-            fs.writeFileSync(`/Volumes/Files/moepictures/${file}`, content)
-            return `/Volumes/Files/moepictures/${file}`
+            fs.writeFileSync(`${local}/${file}`, content)
+            return `${local}/${file}`
         }
         const upload = await s3.upload({Body: content, Key: file, Bucket: "moepictures"}).promise()
         return upload.Location
@@ -129,8 +132,8 @@ export default class ServerFunctions {
 
     public static deleteFile = async (file: string) => {
         if (functions.isLocalHost()) {
-            const dir = path.dirname(`/Volumes/Files/moepictures/${file}`)
-            fs.unlinkSync(`/Volumes/Files/moepictures/${file}`)
+            const dir = path.dirname(`${local}/${file}`)
+            fs.unlinkSync(`${local}/${file}`)
             try {
                 //fs.rmdirSync(dir)
             } catch {}
@@ -141,7 +144,7 @@ export default class ServerFunctions {
 
     public static deleteFolder = async (folder: string) => {
         if (functions.isLocalHost()) {
-            const dir = `/Volumes/Files/moepictures/${folder}`
+            const dir = `${local}/${folder}`
             return ServerFunctions.removeLocalDirectory(dir)
         }
         const listedObjects = await s3.listObjectsV2({Bucket: "moepictures", Prefix: folder}).promise()
@@ -159,9 +162,9 @@ export default class ServerFunctions {
     public static renameFile = async (oldFile: string, newFile: string) => {
         if (functions.isLocalHost()) {
             try {
-                fs.renameSync(`/Volumes/Files/moepictures/${oldFile}`, `/Volumes/Files/moepictures/${newFile}`)
+                fs.renameSync(`${local}/${oldFile}`, `${local}/${newFile}`)
             } catch {
-                fs.renameSync(`/Volumes/Files/moepictures/${encodeURI(oldFile)}`, `/Volumes/Files/moepictures/${encodeURI(newFile)}`)
+                fs.renameSync(`${local}/${encodeURI(oldFile)}`, `${local}/${encodeURI(newFile)}`)
             }
             return 
         }
@@ -176,8 +179,8 @@ export default class ServerFunctions {
     public static getNextKey = async (type: string, name: string) => {
         const key = `history/${type}/${name}`
         if (functions.isLocalHost()) {
-            if (!fs.existsSync(`/Volumes/Files/moepictures/${key}`)) return 1
-            const objects = fs.readdirSync(`/Volumes/Files/moepictures/${key}`)
+            if (!fs.existsSync(`${local}/${key}`)) return 1
+            const objects = fs.readdirSync(`${local}/${key}`)
             let nextKey = 0
             for (let i = 0; i < objects.length; i++) {
                 const object = objects[i]
@@ -202,17 +205,17 @@ export default class ServerFunctions {
 
     public static getUnverifiedFile = async (file: string) => {
         if (functions.isLocalHost()) {
-            return fs.readFileSync(`/Volumes/Files/moepictures-unverified/${decodeURIComponent(file)}`)
+            return fs.readFileSync(`${localUnverified}/${decodeURIComponent(file)}`)
         }
         return s3.getObject({Key: decodeURIComponent(file), Bucket: "moepictures-unverified"}).promise().then((r) => r.Body) as unknown as Buffer
     }
 
     public static uploadUnverifiedFile = async (file: string, content: any) => {
         if (functions.isLocalHost()) {
-            const dir = path.dirname(`/Volumes/Files/moepictures-unverified/${file}`)
+            const dir = path.dirname(`${localUnverified}/${file}`)
             if (!fs.existsSync(dir)) fs.mkdirSync(dir, {recursive: true})
-            fs.writeFileSync(`/Volumes/Files/moepictures-unverified/${file}`, content)
-            return `/Volumes/Files/moepictures-unverified/${file}`
+            fs.writeFileSync(`${localUnverified}/${file}`, content)
+            return `${localUnverified}/${file}`
         }
         const upload = await s3.upload({Body: content, Key: file, Bucket: "moepictures-unverified"}).promise()
         return upload.Location
@@ -220,8 +223,8 @@ export default class ServerFunctions {
 
     public static deleteUnverifiedFile = async (file: string) => {
         if (functions.isLocalHost()) {
-            const dir = path.dirname(`/Volumes/Files/moepictures-unverified/${file}`)
-            fs.unlinkSync(`/Volumes/Files/moepictures-unverified/${file}`)
+            const dir = path.dirname(`${localUnverified}/${file}`)
+            fs.unlinkSync(`${localUnverified}/${file}`)
             try {
                 //fs.rmdirSync(dir)
             } catch {}

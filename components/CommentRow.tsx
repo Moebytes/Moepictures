@@ -3,7 +3,7 @@ import {useHistory} from "react-router-dom"
 import {ThemeContext, QuoteTextContext, SessionContext, DeleteCommentIDContext, DeleteCommentFlagContext, MobileContext,
 EditCommentFlagContext, EditCommentIDContext, EditCommentTextContext, ReportCommentIDContext, BrightnessContext, ContrastContext, 
 HueContext, SaturationContext, LightnessContext, BlurContext, SharpenContext, PixelateContext, SiteHueContext, SiteLightnessContext,
-SiteSaturationContext} from "../Context"
+SiteSaturationContext, CommentIDContext, CommentJumpFlagContext} from "../Context"
 import {HashLink as Link} from "react-router-hash-link"
 import functions from "../structures/Functions"
 import cryptoFunctions from "../structures/CryptoFunctions"
@@ -46,6 +46,8 @@ const CommentRow: React.FunctionComponent<Props> = (props) => {
     const {editCommentID, setEditCommentID} = useContext(EditCommentIDContext)
     const {editCommentText, setEditCommentText} = useContext(EditCommentTextContext)
     const {reportCommentID, setReportCommentID} = useContext(ReportCommentIDContext)
+    const {commentID, setCommentID} = useContext(CommentIDContext)
+    const {commentJumpFlag, setCommentJumpFlag} = useContext(CommentJumpFlagContext)
     const [hover, setHover] = useState(false)
     const history = useHistory()
     const initialImg = functions.getThumbnailLink(props.comment.post.images[0].type, props.comment.postID, props.comment.post.images[0].order, props.comment.post.images[0].filename, "tiny")
@@ -265,6 +267,12 @@ const CommentRow: React.FunctionComponent<Props> = (props) => {
         }
     }
 
+    const commentJump = () => {
+        setCommentID(Number(props.comment.commentID))
+        setCommentJumpFlag(true)
+        history.push(`/post/${props.comment.postID}?comment=${props.comment.commentID}`)
+    }
+
     useEffect(() => {
         loadImage()
     }, [img, brightness, contrast, hue, saturation, lightness, blur, sharpen, pixelate])
@@ -285,7 +293,7 @@ const CommentRow: React.FunctionComponent<Props> = (props) => {
                     </div>
                 </div>
                 <div className="commentrow-container" style={{width: "100%"}}>
-                    <span className="commentrow-date-text">{functions.timeAgo(props.comment.postDate)}:</span>
+                    <span className="commentrow-date-text" onClick={commentJump}>{functions.timeAgo(props.comment.postDate)}:</span>
                     {parseText()}
                 </div>
             </div>

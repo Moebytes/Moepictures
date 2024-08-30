@@ -16,7 +16,7 @@ import ReportCommentDialog from "../dialogs/ReportCommentDialog"
 import {ThemeContext, EnableDragContext, HideNavbarContext, HideSidebarContext, MobileContext, SessionContext,
 RelativeContext, HideTitlebarContext, ActiveDropdownContext, HeaderTextContext, SidebarTextContext,
 CommentSearchFlagContext, SiteHueContext, SiteLightnessContext, SiteSaturationContext, ScrollContext, CommentsPageContext,
-PageFlagContext, ShowPageDialogContext} from "../Context"
+PageFlagContext, ShowPageDialogContext, CommentIDContext, CommentJumpFlagContext} from "../Context"
 import permissions from "../structures/Permissions"
 import scrollIcon from "../assets/icons/scroll.png"
 import pageIcon from "../assets/icons/page.png"
@@ -54,8 +54,8 @@ const CommentsPage: React.FunctionComponent = (props) => {
     const [ended, setEnded] = useState(false)
     const [getSearchIconHover, setSearchIconHover] = useState(false)
     const [queryPage, setQueryPage] = useState(1)
-    const [commentID, setCommentID] = useState(0)
-    const [commentJumpFlag, setCommentJumpFlag] = useState(false)
+    const {commentID, setCommentID} = useContext(CommentIDContext)
+    const {commentJumpFlag, setCommentJumpFlag} = useContext(CommentJumpFlagContext)
     const sortRef = useRef(null) as any
     const history = useHistory()
 
@@ -268,7 +268,7 @@ const CommentsPage: React.FunctionComponent = (props) => {
         }
     }, [scroll, searchQuery, commentsPage, commentID])
 
-    const onCommentJump = (commentID: number) => {
+    const onCommentJump = async (commentID: number) => {
         let index = -1
         for (let i = 0; i < comments.length; i++) {
             if (comments[i].commentID === String(commentID)) {
@@ -279,7 +279,11 @@ const CommentsPage: React.FunctionComponent = (props) => {
         if (index > -1) {
             const pageNumber = Math.ceil(index / getPageAmount())
             goToPage(pageNumber, true)
-            const element = document.querySelector(`[comment-id="${commentID}"]`)
+            let element = document.querySelector(`[comment-id="${commentID}"]`)
+            if (!element) {
+                await functions.timeout(500)
+                element = document.querySelector(`[comment-id="${commentID}"]`)
+            }
             if (!element) return
             const position = element.getBoundingClientRect()
             const elementTop = position.top + window.scrollY

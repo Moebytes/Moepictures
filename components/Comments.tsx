@@ -1,6 +1,6 @@
 import React, {useContext, useEffect, useRef, useState} from "react"
 import {useHistory} from "react-router-dom"
-import {ThemeContext, EnableDragContext, SessionContext, QuoteTextContext} from "../Context"
+import {ThemeContext, EnableDragContext, SessionContext, QuoteTextContext, CommentIDContext, CommentJumpFlagContext} from "../Context"
 import functions from "../structures/Functions"
 import Comment from "./Comment"
 import axios from "axios"
@@ -19,8 +19,8 @@ const Comments: React.FunctionComponent<Props> = (props) => {
     const [error, setError] = useState(false)
     const [comments, setComments] = useState([]) as any
     const [commentFlag, setCommentFlag] = useState(false)
-    const [commentID, setCommentID] = useState(0)
-    const [commentJumpFlag, setCommentJumpFlag] = useState(false)
+    const {commentID, setCommentID} = useContext(CommentIDContext)
+    const {commentJumpFlag, setCommentJumpFlag} = useContext(CommentJumpFlagContext)
     const errorRef = useRef(null) as any
     const history = useHistory()
 
@@ -28,6 +28,7 @@ const Comments: React.FunctionComponent<Props> = (props) => {
         const commentParam = new URLSearchParams(window.location.search).get("comment")
         const onDOMLoaded = async () => {
             if (commentParam) {
+                await functions.timeout(500)
                 setCommentID(Number(commentParam))
                 setCommentJumpFlag(true)
             }
@@ -45,8 +46,12 @@ const Comments: React.FunctionComponent<Props> = (props) => {
         }
     }, [comments, commentJumpFlag, commentID])
 
-    const onCommentJump = (commentID: number) => {
-        const element = document.querySelector(`[comment-id="${commentID}"]`)
+    const onCommentJump = async (commentID: number) => {
+        let element = document.querySelector(`[comment-id="${commentID}"]`)
+        if (!element) {
+            await functions.timeout(1000)
+            element = document.querySelector(`[comment-id="${commentID}"]`)
+        }
         if (!element) return
         const position = element.getBoundingClientRect()
         const elementTop = position.top + window.scrollY

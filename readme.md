@@ -54,42 +54,32 @@ As often images might contain japanese text, adding and viewing translations is 
 
 ### Tech Stack
 
-- Languages: Typescript, LESS, HTML, SQL
+- Languages: Typescript, LESS, SQL
 - Front-end: React
-- Bundler: Webpack
 - Back-end: Node
 - Database: PostgreSQL
-- Hosting: AWS
 
 ### Self-hosting
 
-If you want to self host this website the first step is to clone the code and install Node.js v20.11.1 (a newer version might have breaking changes and is not guaranteed to work).
+If you want to self host this website the first step is to clone the code and install Node.js (v20.11.1 to follow the same settings in the project).
 
 https://nodejs.org/en/ 
 
-The database used is PostgreSQL v14. You should create a new database but you don't need to create any tables as they are created automatically if they don't exist.
+The database used is PostgreSQL v16. You should create a new database but you don't need to create any tables as they are automatically created if they don't exist.
 
 https://www.postgresql.org
 
-Images are uploaded to Amazon S3 buckets called "moepictures" and "moepictures-unverified", you should create two buckets with these names.
+Rename the file `.env.example` to `.env` and this is where you should put in your credentials. `COOKIE_SECRET` should be any string of random characters. `EMAIL_ADDRESS` and `EMAIL_PASSWORD` is the email address used to send people email verification emails, password resets, etc.
 
-https://aws.amazon.com/s3/
-
-If you want to use the local filesystem instead you can edit the file `structures/ServerFunctions.ts` and add in your path to folders "moepictures" and "moepictures-unverified", each containing the following subfolders:
+To add files locally create folders "moepictures" and "moepictures-unverified" and add the path to `MOEPICTURES_LOCAL` and `MOEPICTURES_LOCAL_UNVERIFIED`, each containing the following subfolders:
 
 `["animation", "artist", "character", "comic", "image", "pfp", "series", "tag", "video", "audio", "model"]`
 
-Rename the file `.env.example` to `.env` and this is where you should put in your database and aws credentials. `COOKIE_SECRET` should be a string of random characters. `EMAIL_ADDRESS` and `EMAIL_PASSWORD` is the email address used to send people email verification emails, password resets, etc.
+The site runs on port 8082 by default but it can be configured by changing `PORT`.
 
-In production you should set the `PORT` to 80 (HTTP port) or 443 (HTTPS port). For development omit this and it runs on port 8082 by default.
-
-The other keys in this file are largely optional, for example if you want to fetch data from saucenao in the upload page you should provide a saucenao api key.
+The other keys in this file are largely optional, and only if you want to enable that functionality.
 
 Install all of the dependencies for this project by running `npm install`. \
-Build the project by running `webpack`. \
-Start the project by running the server `node dist/server.js`.
+Start the project by running the server `npm start`.
 
-The script `npm start` is a shorthand for building and starting the project. \
-In production, you should run this file with pm2 so it automatically restarts if for some reason there was an error: `pm2 start dist/server.js`.
-
-That should be it!
+That's pretty much it!
