@@ -30,8 +30,8 @@ const ThreadRoutes = (app: Express) => {
             if (req.session.banned) return res.status(403).send("You are banned")
             if (!title || !content) return res.status(400).send("Bad title or content")
             if (req.session.captchaAnswer !== captchaResponse?.trim()) return res.status(400).send("Bad captchaResponse")
-            await sql.thread.insertThread(req.session.username, title, content)
-            res.status(200).send("Success")
+            const threadID = await sql.thread.insertThread(req.session.username, title, content)
+            res.status(200).send(threadID)
         } catch (e) {
             console.log(e)
             res.status(400).send("Bad request")

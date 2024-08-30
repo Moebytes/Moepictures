@@ -170,10 +170,15 @@ const Comment: React.FunctionComponent<Props> = (props) => {
                         <img className="comment-options-img" src={commentQuote}/>
                         <span className="comment-options-text">Quote</span>
                     </div>
+                    {permissions.isElevated(session) ? 
+                    <div className="comment-options-container" onClick={deleteCommentDialog}>
+                        <img className="comment-options-img" src={commentDelete}/>
+                        <span className="comment-options-text">Delete</span>
+                    </div> : 
                     <div className="comment-options-container" onClick={reportCommentDialog}>
                         <img className="comment-options-img" src={commentReport}/>
                         <span className="comment-options-text">Report</span>
-                    </div>
+                    </div>}
                 </div>
             )
         }

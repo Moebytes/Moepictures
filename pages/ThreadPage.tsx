@@ -36,14 +36,14 @@ import DeleteReplyDialog from "../dialogs/DeleteReplyDialog"
 import EditReplyDialog from "../dialogs/EditReplyDialog"
 import ReportReplyDialog from "../dialogs/ReportReplyDialog"
 import favicon from "../assets/icons/favicon.png"
-import "./styles/forumthreadpage.less"
+import "./styles/threadpage.less"
 import axios from "axios"
 
 interface Props {
     match?: any
 }
 
-const ForumThreadPage: React.FunctionComponent<Props> = (props) => {
+const ThreadPage: React.FunctionComponent<Props> = (props) => {
     const [ignored, forceUpdate] = useReducer(x => x + 1, 0)
     const {theme, setTheme} = useContext(ThemeContext)
     const {siteHue, setSiteHue} = useContext(SiteHueContext)
@@ -589,4 +589,4 @@ const ForumThreadPage: React.FunctionComponent<Props> = (props) => {
     )
 }
 
-export default ForumThreadPage
+export default ThreadPage

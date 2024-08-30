@@ -312,6 +312,22 @@ const SearchRoutes = (app: Express) => {
         }
     })
 
+    app.get("/api/search/messages", searchLimiter, async (req: Request, res: Response, next: NextFunction) => {
+        try {
+            const query = req.query.query as string
+            let sort = req.query.sort as string
+            const offset = req.query.offset as string
+            if (!functions.validThreadSort(sort)) return res.status(400).send("Invalid sort")
+            if (!req.session.username) return res.status(401).send("Unauthorized")
+            const search = query?.trim() ?? ""
+            const messages = await sql.message.allMessages(req.session.username, search, sort, offset)
+            res.status(200).json(messages)
+        } catch (e) {
+            console.log(e)
+            return res.status(400).send("Bad request")
+        }
+    })
+
     app.get("/api/search/reports", searchLimiter, async (req: Request, res: Response) => {
         try {
             const offset = req.query.offset as string

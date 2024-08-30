@@ -4,13 +4,13 @@ import NavBar from "../components/NavBar"
 import SideBar from "../components/SideBar"
 import SortBar from "../components/SortBar"
 import Footer from "../components/Footer"
-import $403 from "../assets/misc/403.png"
+import $401 from "../assets/misc/401.png"
 import DragAndDrop from "../components/DragAndDrop"
 import {HideNavbarContext, HideSidebarContext, ThemeContext, RelativeContext, HideTitlebarContext, HeaderTextContext, SidebarTextContext,
 MobileContext} from "../Context"
 import "./styles/404page.less"
 
-const $403Page: React.FunctionComponent = (props) => {
+const $401Page: React.FunctionComponent = (props) => {
     const {theme, setTheme} = useContext(ThemeContext)
     const {hideNavbar, setHideNavbar} = useContext(HideNavbarContext)
     const {hideTitlebar, setHideTitlebar} = useContext(HideTitlebarContext)
@@ -26,8 +26,8 @@ const $403Page: React.FunctionComponent = (props) => {
         setHideSidebar(false)
         setRelative(false)
         setHeaderText("")
-        setSidebarText("403 error.")
-        document.title = "403 Error"
+        setSidebarText("401 error.")
+        document.title = "401 Error"
     }, [])
 
     useEffect(() => {
@@ -47,8 +47,8 @@ const $403Page: React.FunctionComponent = (props) => {
             <SideBar/>
             <div className="content">
                 <div className="f404-container">
-                    <span className={`f404-text ${!theme.includes("light") ? "f404-darker" : ""}`}>403 Error</span>
-                    <img className="f404" src={$403}/>
+                    <span className={`f404-text ${!theme.includes("light") ? "f404-darker" : ""}`}>401 Error</span>
+                    <img className="f404" src={$401}/>
                 </div>
                 <Footer noPadding={true}/>
             </div>
@@ -57,4 +57,4 @@ const $403Page: React.FunctionComponent = (props) => {
     )
 }
 
-export default $403Page
+export default $401Page

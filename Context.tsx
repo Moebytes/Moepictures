@@ -22,6 +22,7 @@ export const SeriesPageContext = React.createContext<any>(null)
 export const TagsPageContext = React.createContext<any>(null)
 export const ForumPageContext = React.createContext<any>(null)
 export const ThreadPageContext = React.createContext<any>(null)
+export const MailPageContext = React.createContext<any>(null)
 export const BrightnessContext = React.createContext<any>(null)
 export const ContrastContext = React.createContext<any>(null)
 export const HueContext = React.createContext<any>(null)
@@ -153,6 +154,14 @@ export const ImageExpandContext = React.createContext<any>(null)
 export const CommentIDContext = React.createContext<any>(null)
 export const CommentJumpFlagContext = React.createContext<any>(null)
 export const DMTargetContext = React.createContext<any>(null)
+export const MessagePageContext = React.createContext<any>(null)
+export const DeleteMessageIDContext = React.createContext<any>(null)
+export const DeleteMessageFlagContext = React.createContext<any>(null)
+export const DeleteMsgReplyIDContext = React.createContext<any>(null)
+export const DeleteMsgReplyFlagContext = React.createContext<any>(null)
+export const EditMsgReplyIDContext = React.createContext<any>(null)
+export const EditMsgReplyFlagContext = React.createContext<any>(null)
+export const EditMsgReplyContentContext = React.createContext<any>(null)
 
 const Context: React.FunctionComponent = (props) => {
     const [siteHue, setSiteHue] = useState(180)
@@ -176,6 +185,7 @@ const Context: React.FunctionComponent = (props) => {
     const [tagsPage, setTagsPage] = useState(1)
     const [forumPage, setForumPage] = useState(1)
     const [threadPage, setThreadPage] = useState(1)
+    const [mailPage, setMailPage] = useState(1)
     const [showDownloadDialog, setShowDownloadDialog] = useState(false)
     const [postAmount, setPostAmount] = useState(0)
     const [downloadIDs, setDownloadIDs] = useState([])
@@ -292,9 +302,26 @@ const Context: React.FunctionComponent = (props) => {
     const [dmTarget, setDMTarget] = useState(null)
     const [commentID, setCommentID] = useState(0)
     const [commentJumpFlag, setCommentJumpFlag] = useState(false)
+    const [messagePage, setMessagePage] = useState(1)
+    const [deleteMessageID, setDeleteMessageID] = useState(null)
+    const [deleteMessageFlag, setDeleteMessageFlag] = useState(false)
+    const [deleteMsgReplyID, setDeleteMsgReplyID] = useState(null)
+    const [deleteMsgReplyFlag, setDeleteMsgReplyFlag] = useState(false)
+    const [editMsgReplyFlag, setEditMsgReplyFlag] = useState(false)
+    const [editMsgReplyID, setEditMsgReplyID] = useState(null)
+    const [editMsgReplyContent, setEditMsgReplyContent] = useState("")
 
 return (
     <>
+        <EditMsgReplyContentContext.Provider value={{editMsgReplyContent, setEditMsgReplyContent}}>
+        <EditMsgReplyIDContext.Provider value={{editMsgReplyID, setEditMsgReplyID}}>
+        <EditMsgReplyFlagContext.Provider value={{editMsgReplyFlag, setEditMsgReplyFlag}}>
+        <DeleteMsgReplyFlagContext.Provider value={{deleteMsgReplyFlag, setDeleteMsgReplyFlag}}>
+        <DeleteMsgReplyIDContext.Provider value={{deleteMsgReplyID, setDeleteMsgReplyID}}>
+        <DeleteMessageFlagContext.Provider value={{deleteMessageFlag, setDeleteMessageFlag}}>
+        <DeleteMessageIDContext.Provider value={{deleteMessageID, setDeleteMessageID}}>
+        <MessagePageContext.Provider value={{messagePage, setMessagePage}}>
+        <MailPageContext.Provider value={{mailPage, setMailPage}}>
         <CommentJumpFlagContext.Provider value={{commentJumpFlag, setCommentJumpFlag}}>
         <CommentIDContext.Provider value={{commentID, setCommentID}}>
         <DMTargetContext.Provider value={{dmTarget, setDMTarget}}>
@@ -570,6 +597,15 @@ return (
         </DMTargetContext.Provider>
         </CommentIDContext.Provider>
         </CommentJumpFlagContext.Provider>
+        </MailPageContext.Provider>
+        </MessagePageContext.Provider>
+        </DeleteMessageIDContext.Provider>
+        </DeleteMessageFlagContext.Provider>
+        </DeleteMsgReplyIDContext.Provider>
+        </DeleteMsgReplyFlagContext.Provider>
+        </EditMsgReplyFlagContext.Provider>
+        </EditMsgReplyIDContext.Provider>
+        </EditMsgReplyContentContext.Provider>
     </>
     )
 }

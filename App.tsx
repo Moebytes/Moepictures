@@ -14,6 +14,7 @@ import PostPage from "./pages/PostPage"
 import UploadPage from "./pages/UploadPage"
 import $404Page from "./pages/404Page"
 import $403Page from "./pages/403Page"
+import $401Page from "./pages/401Page"
 import HelpPage from "./pages/HelpPage"
 import TermsPage from "./pages/TermsPage"
 import LoginPage from "./pages/LoginPage"
@@ -42,9 +43,10 @@ import EditUnverifiedPostPage from "./pages/EditUnverifiedPostPage"
 import SetAvatarPage from "./pages/SetAvatarPage"
 import TranslationHistoryPage from "./pages/TranslationHistoryPage"
 import ForumPage from "./pages/ForumPage"
-import ForumThreadPage from "./pages/ForumThreadPage"
+import ThreadPage from "./pages/ThreadPage"
 import BulkUploadPage from "./pages/BulkUploadPage"
 import MailPage from "./pages/MailPage"
+import MessagePage from "./pages/MessagePage"
 import axios from "axios"
 import "./index.less"
 
@@ -268,8 +270,9 @@ const App: React.FunctionComponent = (props) => {
                         <Route exact path="/set-avatar/:id" render={(props) => <SetAvatarPage {...props}/>}></Route>
                         <Route exact path="/help"><HelpPage/></Route>
                         <Route exact path="/forum"><ForumPage/></Route>
-                        <Route exact path="/thread/:id" render={(props) => <ForumThreadPage {...props}/>}></Route>
+                        <Route exact path="/thread/:id" render={(props) => <ThreadPage {...props}/>}></Route>
                         <Route exact path="/mail"><MailPage/></Route>
+                        <Route exact path="/message/:id" render={(props) => <MessagePage {...props}/>}></Route>
                         <Route exact path="/change-username"><ChangeUsernamePage/></Route>
                         <Route exact path="/change-email"><ChangeEmailPage/></Route>
                         <Route exact path="/change-email-success"><ChangeEmailSuccessPage/></Route>
@@ -286,6 +289,7 @@ const App: React.FunctionComponent = (props) => {
                         <Route exact path="/mod-queue"><ModQueuePage/></Route>
                         <Route exact path={["/privacy", "/privacypolicy"]}><Redirect to="/terms#privacy"/></Route>
                         <Route exact path={["/terms", "termsofservice"]}><TermsPage/></Route>
+                        <Route exact path="/401"><$401Page/></Route>
                         <Route exact path="/403"><$403Page/></Route>
                         <Route path="*"><$404Page/></Route>
                     </Switch>

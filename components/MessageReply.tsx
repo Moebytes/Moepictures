@@ -1,13 +1,12 @@
 import React, {useContext, useEffect, useRef, useState} from "react"
 import {useHistory} from "react-router-dom"
-import {ThemeContext, QuoteTextContext, SessionContext, DeleteReplyIDContext, DeleteReplyFlagContext,
-EditReplyIDContext, EditReplyFlagContext, EditReplyContentContext, ReportReplyIDContext, SiteHueContext,
+import {ThemeContext, QuoteTextContext, SessionContext, DeleteMsgReplyIDContext, DeleteMsgReplyFlagContext,
+EditMsgReplyIDContext, EditMsgReplyFlagContext, EditMsgReplyContentContext, SiteHueContext,
 SiteLightnessContext, SiteSaturationContext, EnableDragContext, MobileContext} from "../Context"
 import {HashLink as Link} from "react-router-hash-link"
 import functions from "../structures/Functions"
 import favicon from "../assets/icons/favicon.png"
 import quoteOptIcon from "../assets/icons/quote-opt.png"
-import reportOptIcon from "../assets/icons/report-opt.png"
 import editOptIcon from "../assets/icons/edit-opt.png"
 import deleteOptIcon from "../assets/icons/delete-opt.png"
 import permissions from "../structures/Permissions"
@@ -23,7 +22,7 @@ interface Props {
     onReplyJump?: (replyID: number) => void
 }
 
-const Reply: React.FunctionComponent<Props> = (props) => {
+const MessageReply: React.FunctionComponent<Props> = (props) => {
     const {mobile, setMobile} = useContext(MobileContext)
     const {theme, setTheme} = useContext(ThemeContext)
     const {siteHue, setSiteHue} = useContext(SiteHueContext)
@@ -32,12 +31,11 @@ const Reply: React.FunctionComponent<Props> = (props) => {
     const {enableDrag, setEnableDrag} = useContext(EnableDragContext)
     const {quoteText, setQuoteText} = useContext(QuoteTextContext)
     const {session, setSession} = useContext(SessionContext)
-    const {deleteReplyID, setDeleteReplyID} = useContext(DeleteReplyIDContext)
-    const {deleteReplyFlag, setDeleteReplyFlag} = useContext(DeleteReplyFlagContext)
-    const {editReplyFlag, setEditReplyFlag} = useContext(EditReplyFlagContext)
-    const {editReplyID, setEditReplyID} = useContext(EditReplyIDContext)
-    const {editReplyContent, setEditReplyContent} = useContext(EditReplyContentContext)
-    const {reportReplyID, setReportReplyID} = useContext(ReportReplyIDContext)
+    const {deleteMsgReplyID, setDeleteMsgReplyID} = useContext(DeleteMsgReplyIDContext)
+    const {deleteMsgReplyFlag, setDeleteMsgReplyFlag} = useContext(DeleteMsgReplyFlagContext)
+    const {editMsgReplyFlag, setEditMsgReplyFlag} = useContext(EditMsgReplyFlagContext)
+    const {editMsgReplyID, setEditMsgReplyID} = useContext(EditMsgReplyIDContext)
+    const {editMsgReplyContent, setEditMsgReplyContent} = useContext(EditMsgReplyContentContext)
     const history = useHistory()
     const reply = props.reply.reply
 
@@ -108,45 +106,41 @@ const Reply: React.FunctionComponent<Props> = (props) => {
     }
 
     const deleteReply = async () => {
-        await axios.delete("/api/reply/delete", {params: {threadID: props.reply.threadID, replyID: props.reply.replyID}, headers: {"x-csrf-token": functions.getCSRFToken()}, withCredentials: true})
+        await axios.delete("/api/message/reply/delete", {params: {messageID: props.reply.messageID, replyID: props.reply.replyID}, headers: {"x-csrf-token": functions.getCSRFToken()}, withCredentials: true})
         props.onDelete?.()
     }
 
     useEffect(() => {
-        if (deleteReplyFlag && deleteReplyID === props.reply.replyID) {
+        if (deleteMsgReplyFlag && deleteMsgReplyID === props.reply.replyID) {
             deleteReply()
-            setDeleteReplyFlag(false)
-            setDeleteReplyID(null)
+            setDeleteMsgReplyFlag(false)
+            setDeleteMsgReplyID(null)
         }
-    }, [deleteReplyFlag, deleteReplyID])
+    }, [deleteMsgReplyFlag, deleteMsgReplyID])
 
     const deleteReplyDialog = async () => {
-        setDeleteReplyID(props.reply.replyID)
+        setDeleteMsgReplyID(props.reply.replyID)
     }
 
     const editReply = async () => {
-        if (!editReplyContent) return
-        const badReply = functions.validateReply(editReplyContent)
+        if (!editMsgReplyContent) return
+        const badReply = functions.validateReply(editMsgReplyContent)
         if (badReply) return
-        await axios.put("/api/reply/edit", {replyID: props.reply.replyID, content: editReplyContent}, {headers: {"x-csrf-token": functions.getCSRFToken()}, withCredentials: true})
+        await axios.put("/api/message/reply/edit", {replyID: props.reply.replyID, content: editMsgReplyContent}, {headers: {"x-csrf-token": functions.getCSRFToken()}, withCredentials: true})
         props.onEdit?.()
     }
 
     useEffect(() => {
-        if (editReplyFlag && editReplyID === props.reply.replyID) {
+        if (editMsgReplyFlag && editMsgReplyID === props.reply.replyID) {
             editReply()
-            setEditReplyFlag(false)
-            setEditReplyID(null)
+            setEditMsgReplyFlag(false)
+            setEditMsgReplyID(null)
         }
-    }, [editReplyFlag, editReplyID, editReplyContent])
+    }, [editMsgReplyFlag, editMsgReplyID, editMsgReplyContent])
 
     const editReplyDialog = async () => {
-        setEditReplyContent(props.reply.content)
-        setEditReplyID(props.reply.replyID)
-    }
-
-    const reportReplyDialog = async () => {
-        setReportReplyID(props.reply.replyID)
+        setEditMsgReplyContent(props.reply.content)
+        setEditMsgReplyID(props.reply.replyID)
     }
 
     const replyOptions = () => {
@@ -175,11 +169,7 @@ const Reply: React.FunctionComponent<Props> = (props) => {
                     <div className="reply-options-container" onClick={deleteReplyDialog}>
                         <img className="reply-options-img" src={deleteOptIcon} style={{filter: getFilter()}}/>
                         <span className="reply-options-text">Delete</span>
-                    </div> : 
-                    <div className="reply-options-container" onClick={reportReplyDialog}>
-                        <img className="reply-options-img" src={reportOptIcon} style={{filter: getFilter()}}/>
-                        <span className="reply-options-text">Report</span>
-                    </div>}
+                    </div> : null}
                 </div>
             )
         }
@@ -230,4 +220,4 @@ const Reply: React.FunctionComponent<Props> = (props) => {
     )
 }
 
-export default Reply
+export default MessageReply

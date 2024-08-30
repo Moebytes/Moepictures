@@ -9,11 +9,11 @@ export default class SQLThread {
         const sticky = false
         const locked = false
         const query: QueryConfig = {
-        text: /*sql*/`INSERT INTO threads ("creator", "createDate", "updater", "updatedDate", "sticky", "locked", "title", "content") VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`,
+        text: /*sql*/`INSERT INTO threads ("creator", "createDate", "updater", "updatedDate", "sticky", "locked", "title", "content") VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING "threadID"`,
         values: [creator, now, creator, now, sticky, locked, title, content]
         }
         const result = await SQLQuery.run(query)
-        return result
+        return result.flat(Infinity)[0] as number
     }
 
     /** Get user threads */

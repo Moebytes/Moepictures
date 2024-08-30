@@ -65,9 +65,9 @@ const NewThreadDialog: React.FunctionComponent = (props) => {
 
     const newThread = async () => {
         try {
-            await axios.post("/api/thread/create", {title: threadTitle, content: threadContent, captchaResponse}, {headers: {"x-csrf-token": functions.getCSRFToken()}, withCredentials: true})
+            const thread = await axios.post("/api/thread/create", {title: threadTitle, content: threadContent, captchaResponse}, {headers: {"x-csrf-token": functions.getCSRFToken()}, withCredentials: true}).then((r) => r.data)
             setShowNewThreadDialog(false)
-            history.go(0)
+            if (thread.threadID) history.push(`/thread/${thread.threadID}`)
         } catch {
             setError(true)
             if (!errorRef.current) await functions.timeout(20)

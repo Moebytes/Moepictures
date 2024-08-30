@@ -6,6 +6,7 @@ HueContext, SaturationContext, LightnessContext, BlurContext, SharpenContext, Pi
 SiteSaturationContext, CommentIDContext, CommentJumpFlagContext} from "../Context"
 import {HashLink as Link} from "react-router-hash-link"
 import functions from "../structures/Functions"
+import permissions from "../structures/Permissions"
 import cryptoFunctions from "../structures/CryptoFunctions"
 import favicon from "../assets/icons/favicon.png"
 import commentQuote from "../assets/icons/commentquote.png"
@@ -195,10 +196,15 @@ const CommentRow: React.FunctionComponent<Props> = (props) => {
                         <img className="commentrow-options-img" src={commentQuote}/>
                         <span className="commentrow-options-text">Quote</span>
                     </div>
+                    {permissions.isElevated(session) ? 
+                    <div className="commentrow-options-container" onClick={deleteCommentDialog}>
+                        <img className="commentrow-options-img" src={commentDelete}/>
+                        <span className="commentrow-options-text">Delete</span>
+                    </div> : 
                     <div className="commentrow-options-container" onClick={reportCommentDialog}>
                         <img className="commentrow-options-img" src={commentReport}/>
                         <span className="commentrow-options-text">Report</span>
-                    </div>
+                    </div>}
                 </div>
             )
         }

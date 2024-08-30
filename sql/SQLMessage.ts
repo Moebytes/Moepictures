@@ -13,4 +13,135 @@ export default class SQLMessage {
         const result = await SQLQuery.run(query)
         return result.flat(Infinity)[0] as number
     }
+
+    /** Search all messages. */
+    public static allMessages = async (username: string, search: string, sort: string, offset?: string) => {
+        let i = 2
+        let whereQuery = `WHERE (messages.recipient = $1 OR messages.creator = $1)`
+        if (search) {
+            whereQuery += ` AND lower(messages."title") LIKE '%' || $${i} || '%'`
+            i++
+        }
+        let sortQuery = ""
+        if (sort === "random") sortQuery = `ORDER BY random()`
+        if (sort === "date") sortQuery = `ORDER BY messages."updatedDate" DESC`
+        if (sort === "reverse date") sortQuery = `ORDER BY messages."updatedDate" ASC`
+        const query: QueryConfig = {
+            text: functions.multiTrim(/*sql*/`
+                SELECT messages.*,
+                COUNT(*) OVER() AS "messageCount"
+                FROM messages
+                ${whereQuery}
+                GROUP BY messages."messageID"
+                ${sortQuery}
+                LIMIT 100 ${offset ? `OFFSET $${i}` : ""}
+            `),
+            values: [username]
+        }
+        if (search) query.values?.push(search.toLowerCase())
+        if (offset) query.values?.push(offset)
+        const result = await SQLQuery.run(query)
+        return result
+    }
+
+    /** Get message. */
+    public static message = async (messageID: number) => {
+        const query: QueryConfig = {
+        text: functions.multiTrim(/*sql*/`
+                SELECT messages.*, users.role, users.image, users."imagePost"
+                FROM messages
+                JOIN users ON users.username = messages.creator
+                WHERE messages."messageID" = $1
+                GROUP BY messages."messageID", users.role, users.image, users."imagePost"
+            `),
+        values: [messageID]
+        }
+        const result = await SQLQuery.run(query)
+        return result[0]
+    }
+
+    /** Update message */
+    public static updateMessage = async (messageID: number, column: string, value: string | number | boolean) => {
+        const query: QueryConfig = {
+            text: /*sql*/`UPDATE "messages" SET "${column}" = $1 WHERE "messageID" = $2`,
+            values: [value, messageID]
+        }
+        return SQLQuery.run(query)
+    }
+
+    /** Delete message */
+    public static deleteMessage = async (messageID: number) => {
+        const query: QueryConfig = {
+        text: functions.multiTrim(/*sql*/`DELETE FROM messages WHERE messages."messageID" = $1`),
+        values: [messageID]
+        }
+        const result = await SQLQuery.run(query)
+        return result
+    }
+
+    /** Insert message reply. */
+    public static insertMessageReply = async (messageID: number, creator: string, content: string) => {
+        const now = new Date().toISOString()
+        const query: QueryConfig = {
+        text: /*sql*/`INSERT INTO "message replies" ("messageID", "creator", "createDate", "updatedDate", "content") VALUES ($1, $2, $3, $4, $5)`,
+        values: [messageID, creator, now, now, content]
+        }
+        const result = await SQLQuery.run(query)
+        return result
+    }
+
+    /** Get message replies. */
+    public static messageReplies = async (messageID: number, offset?: string) => {
+        if (offset && Number(offset) < 0) offset = "0"
+        const query: QueryConfig = {
+        text: functions.multiTrim(/*sql*/`
+                SELECT "message replies".*, users.role, users.image, users."imagePost",
+                COUNT(*) OVER() AS "replyCount"
+                FROM "message replies" 
+                JOIN users ON users.username = "message replies".creator
+                WHERE "message replies"."messageID" = $1 
+                GROUP BY "message replies"."replyID", users.role, users.image, users."imagePost"
+                ${offset ? "OFFSET $2" : ""}
+            `),
+        values: [messageID]
+        }
+        if (offset) query.values?.push(offset)
+        const result = await SQLQuery.run(query)
+        return result
+    }
+
+    /** Get message reply. */
+    public static messageReply = async (replyID: number) => {
+        const query: QueryConfig = {
+        text: functions.multiTrim(/*sql*/`
+                SELECT "message replies".*, users.role, users.image, users."imagePost"
+                FROM "message replies" 
+                JOIN users ON users.username = "message replies".creator
+                WHERE "message replies"."replyID" = $1
+                GROUP BY "message replies"."replyID", users.role, users.image, users."imagePost"
+            `),
+        values: [replyID]
+        }
+        const result = await SQLQuery.run(query)
+        return result[0]
+    }
+
+    /** Update message reply */
+    public static updateMessageReply = async (replyID: number, column: string, value: string | number | boolean) => {
+        const query: QueryConfig = {
+            text: /*sql*/`UPDATE "message replies" SET "${column}" = $1 WHERE "replyID" = $2`,
+            values: [value, replyID]
+        }
+        return SQLQuery.run(query)
+    }
+
+    /** Delete message reply */
+    public static deleteMessageReply = async (replyID: number) => {
+        const query: QueryConfig = {
+        text: functions.multiTrim(/*sql*/`DELETE FROM "message replies" WHERE "message replies"."replyID" = $1`),
+        values: [replyID]
+        }
+        const result = await SQLQuery.run(query)
+        return result
+    }
 }

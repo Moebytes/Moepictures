@@ -37,10 +37,9 @@ const DMDialog: React.FunctionComponent = (props) => {
 
     const sendMessage = async () => {
         try {
-            const messageID = await axios.post("/api/message/create", {title, content, recipient: dmTarget}, {headers: {"x-csrf-token": functions.getCSRFToken()}, withCredentials: true})
+            const message = await axios.post("/api/message/create", {title, content, recipient: dmTarget}, {headers: {"x-csrf-token": functions.getCSRFToken()}, withCredentials: true}).then((r) => r.data)
             setDMTarget(null)
-            console.log(messageID)
-            // history.go(0)
+            if (message.messageID) history.push(`/message/${message.messageID}`)
         } catch {
             setError(true)
             if (!errorRef.current) await functions.timeout(20)

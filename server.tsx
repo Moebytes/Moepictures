@@ -34,6 +34,7 @@ import UploadRoutes from "./routes/UploadRoutes"
 import UserRoutes from "./routes/UserRoutes"
 import TranslationRoutes from "./routes/TranslationRoutes"
 import ThreadRoutes from "./routes/ThreadRoutes"
+import MessageRoutes from "./routes/MessageRoutes"
 const __dirname = path.resolve()
 
 dotenv.config()
@@ -118,6 +119,7 @@ UploadRoutes(app)
 UserRoutes(app)
 TranslationRoutes(app)
 ThreadRoutes(app)
+MessageRoutes(app)
 
 if (process.env.TESTING === "yes") {
   app.use(middleware(compiler, {

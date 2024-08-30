@@ -235,7 +235,7 @@ const UserPage: React.FunctionComponent<Props> = (props) => {
                     <div className="user-top-container">
                         <img className="user-img" src={getUserImg()} onClick={userImgClick} onAuxClick={userImgClick} style={{filter: defaultIcon ? getFilter() : ""}}/>
                         {generateUsernameJSX()}
-                        {session.username ? <img className="user-icon" src={dmIcon} onClick={dmDialog}/> : null}
+                        {session.username && (session.username !== username) ? <img className="user-icon" src={dmIcon} onClick={dmDialog}/> : null}
                         {permissions.isElevated(session) && !permissions.isElevated(user)? <img className="user-icon" src={user.banned ? unbanIcon : banIcon} onClick={banDialog}/> : null}
                     </div>
                     {user.banned ? <span className="user-ban-text">Banned</span> : null}

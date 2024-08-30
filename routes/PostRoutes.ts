@@ -457,6 +457,7 @@ const PostRoutes = (app: Express) => {
             if (Number.isNaN(postID)) return res.status(400).send("Bad postID")
             if (!req.session.username) return res.status(401).send("Unauthorized")
             if (req.session.banned) return res.status(403).send("You are banned")
+            if (req.session.role !== "admin" && req.session.role !== "mod") return res.status(403).end()
     
             if (!artists?.[0]) artists = ["unknown-artist"]
             if (!series?.[0]) series = characters.includes("original") ? ["no-series"] : ["unknown-series"]

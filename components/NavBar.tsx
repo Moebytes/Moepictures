@@ -11,6 +11,13 @@ import search2 from "../assets/icons/search2.png"
 import crown from "../assets/icons/crown.png"
 import mail from "../assets/icons/mail.png"
 import mailNotif from "../assets/icons/mail-notif.png"
+import crownLight from "../assets/icons/crown-light.png"
+import mailLight from "../assets/icons/mail-light.png"
+import mailNotifLight from "../assets/icons/mail-notif-light.png"
+import eyedropperLight from "../assets/icons/eyedropper-light.png"
+import lightLight from "../assets/icons/light-light.png"
+import dark from "../assets/icons/dark.png"
+import darkLight from "../assets/icons/dark-light.png"
 import axios from "axios"
 import permissions from "../structures/Permissions"
 import functions from "../structures/Functions"
@@ -29,10 +36,10 @@ interface Props {
 
 const NavBar: React.FunctionComponent<Props> = (props) => {
     const [ignored, forceUpdate] = useReducer(x => x + 1, 0)
+    const {theme, setTheme} = useContext(ThemeContext)
     const {siteHue, setSiteHue} = useContext(SiteHueContext)
     const {siteSaturation, setSiteSaturation} = useContext(SiteSaturationContext)
     const {siteLightness, setSiteLightness} = useContext(SiteLightnessContext)
-    const {theme, setTheme} = useContext(ThemeContext)
     const {hideNavbar, setHideNavbar} = useContext(HideNavbarContext)
     const {hideTitlebar, setHideTitlebar} = useContext(HideTitlebarContext)
     const {hideSidebar, setHideSidebar} = useContext(HideSidebarContext)
@@ -120,6 +127,31 @@ const NavBar: React.FunctionComponent<Props> = (props) => {
         }
         setTheme(newTheme)
         localStorage.setItem("theme", newTheme)
+    }
+
+    const getEyedropperIcon = () => {
+        if (theme.includes("light")) return eyedropperLight
+        return eyedropper
+    }
+
+    const getThemeIcon = () => {
+        if (theme.includes("light")) return darkLight
+        return light
+    }
+
+    const getMailIcon = () => {
+        if (theme.includes("light")) return mailLight
+        return mail
+    }
+
+    const getMailNotif = () => {
+        if (theme.includes("light")) return mailNotifLight
+        return mailNotif
+    }
+
+    const getCrownIcon = () => {
+        if (theme.includes("light")) return crownLight
+        return crown
     }
 
     const logout = async () => {
@@ -262,9 +294,9 @@ const NavBar: React.FunctionComponent<Props> = (props) => {
                     <span className="mobile-nav-text" onClick={() => {history.push("/contact"); setHideMobileNavbar(true)}}>Contact</span>
                 </div>
                 <div className="mobile-nav-color-container">
-                    <img className="mobile-nav-color" src={eyedropper} onClick={colorChange} style={{filter: getFilter()}}/>
-                    <img className="mobile-nav-color" src={light} onClick={lightChange} style={{filter: getFilter()}}/>
-                    {permissions.isElevated(session) ? <img className="nav-color" src={crown} onClick={() => history.push("/mod-queue")} style={{filter: getFilter()}}/> : null}
+                    <img className="mobile-nav-color" src={getEyedropperIcon()} onClick={colorChange} style={{filter: getFilter()}}/>
+                    <img className="mobile-nav-color" src={getThemeIcon()} onClick={lightChange} style={{filter: getFilter()}}/>
+                    {permissions.isElevated(session) ? <img className="nav-color" src={getCrownIcon()} onClick={() => history.push("/mod-queue")} style={{filter: getFilter()}}/> : null}
                     <img className="mobile-nav-color" src={scroll ? scrollIcon : pageIcon} onClick={toggleScroll} style={{filter: getFilter()}}/>
                 </div>
                 {getDropdownJSX()}
@@ -328,10 +360,10 @@ const NavBar: React.FunctionComponent<Props> = (props) => {
                         <img className="nav-search-icon" src={search2} onClick={() => setSearchFlag(true)}/>
                         <input className="nav-search" type="search" spellCheck={false} value={search} onChange={(event) => setSearch(event.target.value)} onKeyDown={(event) => event.key === "Enter" ? setSearchFlag(true) : null} onFocus={() => setSuggestionsActive(true)} onBlur={() => setSuggestionsActive(false)}/>
                     </div>
-                    <img className="nav-color" src={eyedropper} onClick={colorChange} style={{filter: getFilter()}}/>
-                    <img className="nav-color" src={light} onClick={lightChange} style={{filter: getFilter()}}/>
-                    {session.username ? <img className="nav-color" src={mail} onClick={() => history.push("/mail")} style={{filter: getFilter()}}/> : null}
-                    {permissions.isElevated(session) ? <img className="nav-color" src={crown} onClick={() => history.push("/mod-queue")} style={{filter: getFilter()}}/> : null}
+                    <img className="nav-color" src={getEyedropperIcon()} onClick={colorChange} style={{filter: getFilter()}}/>
+                    <img className="nav-color" src={getThemeIcon()} onClick={lightChange} style={{filter: getFilter()}}/>
+                    {session.username ? <img className="nav-color" src={getMailIcon()} onClick={() => history.push("/mail")} style={{filter: getFilter()}}/> : null}
+                    {permissions.isElevated(session) ? <img className="nav-color" src={getCrownIcon()} onClick={() => history.push("/mod-queue")} style={{filter: getFilter()}}/> : null}
                 </div>
                 {getDropdownJSX()}
             </div>

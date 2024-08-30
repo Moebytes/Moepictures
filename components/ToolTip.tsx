@@ -142,7 +142,7 @@ const ToolTip: React.FunctionComponent = (props) => {
 
     if (selectionMode) return null
     if (!artist || !tags || !tooltipPost) return null
-    if (!session?.showTooltips) return null
+    if (session?.username && !session?.showTooltips) return null
 
     const openArtist = () => {
         if (artist.social?.includes("pixiv.net")) return window.open(artist.social, "_blank")
