@@ -1,7 +1,7 @@
 import e, {Express, NextFunction, Request, Response} from "express"
 import rateLimit from "express-rate-limit"
 import slowDown from "express-slow-down"
-import sql from "../structures/SQLQuery"
+import sql from "../sql/SQLQuery"
 import functions from "../structures/Functions"
 import serverFunctions from "../structures/ServerFunctions"
 
@@ -21,11 +21,11 @@ const CutenessRoutes = (app: Express) => {
             if (Number.isNaN(Number(postID)) || Number.isNaN(Number(cuteness))) return res.status(400).send("Bad postID or cuteness")
             if (!req.session.username) return res.status(401).send("Unauthorized")
             if (Number(cuteness) < 0 || Number(cuteness) > 1000) return res.status(400).send("Cuteness range must be between 0 and 1000")
-            const cute = await sql.cuteness(Number(postID), req.session.username)
+            const cute = await sql.cuteness.cuteness(Number(postID), req.session.username)
             if (cute) {
-                await sql.updateCuteness(Number(postID), req.session.username, Number(cuteness))
+                await sql.cuteness.updateCuteness(Number(postID), req.session.username, Number(cuteness))
             } else {
-                await sql.insertCuteness(Number(postID), req.session.username, Number(cuteness))
+                await sql.cuteness.insertCuteness(Number(postID), req.session.username, Number(cuteness))
             }
             res.status(200).send("Success")
         } catch (e) {
@@ -39,7 +39,7 @@ const CutenessRoutes = (app: Express) => {
             const postID = req.query.postID
             if (Number.isNaN(Number(postID))) return res.status(400).send("Invalid postID")
             if (!req.session.username) return res.status(401).send("Unauthorized")
-            const cuteness = await sql.cuteness(Number(postID), req.session.username)
+            const cuteness = await sql.cuteness.cuteness(Number(postID), req.session.username)
             res.status(200).send(cuteness)
         } catch (e) {
             console.log(e)
@@ -53,9 +53,9 @@ const CutenessRoutes = (app: Express) => {
             if (!serverFunctions.validateCSRF(req)) return res.status(400).send("Bad CSRF token")
             if (Number.isNaN(Number(postID))) return res.status(400).send("Invalid postID")
             if (!req.session.username) return res.status(401).send("Unauthorized")
-            const cuteness = await sql.cuteness(Number(postID), req.session.username)
+            const cuteness = await sql.cuteness.cuteness(Number(postID), req.session.username)
             if (!cuteness) return res.status(400).send("Cuteness doesn't exist")
-            await sql.deleteCuteness(cuteness.cutenessID)
+            await sql.cuteness.deleteCuteness(cuteness.cutenessID)
             res.status(200).send(cuteness)
         } catch (e) {
             console.log(e)

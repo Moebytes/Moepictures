@@ -1,7 +1,7 @@
 import {Express, NextFunction, Request, Response} from "express"
 import rateLimit from "express-rate-limit"
 import slowDown from "express-slow-down"
-import sql from "../structures/SQLQuery"
+import sql from "../sql/SQLQuery"
 import functions from "../structures/Functions"
 import serverFunctions from "../structures/ServerFunctions"
 
@@ -28,8 +28,10 @@ const MessageRoutes = (app: Express) => {
             if (!serverFunctions.validateCSRF(req)) return res.status(400).send("Bad CSRF token")
             if (!req.session.username) return res.status(401).send("Unauthorized")
             if (req.session.banned) return res.status(403).send("You are banned")
+            console.log(!title || !content)
             if (!title || !content) return res.status(400).send("Bad title or content")
-            const messageID = await sql.insertMessage(req.session.username, recipient, title, content)
+            console.log({title, content, recipient})
+            const messageID = await sql.message.insertMessage(req.session.username, recipient, title, content)
             res.status(200).send(messageID)
         } catch (e) {
             console.log(e)

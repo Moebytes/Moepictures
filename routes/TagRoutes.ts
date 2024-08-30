@@ -1,7 +1,7 @@
 import e, {Express, NextFunction, Request, Response} from "express"
 import rateLimit from "express-rate-limit"
 import slowDown from "express-slow-down"
-import sql from "../structures/SQLQuery"
+import sql from "../sql/SQLQuery"
 import functions from "../structures/Functions"
 import serverFunctions from "../structures/ServerFunctions"
 import fs from "fs"
@@ -28,7 +28,7 @@ const TagRoutes = (app: Express) => {
         try {
             let tag = req.query.tag as string
             if (!tag) return res.status(400).send("Bad tag")
-            let result = await sql.tag(tag)
+            let result = await sql.tag.tag(tag)
             res.status(200).json(result)
         } catch (e) {
             console.log(e)
@@ -40,7 +40,7 @@ const TagRoutes = (app: Express) => {
         try {
             let tag = req.query.tag as string
             if (!tag) return res.status(400).send("Bad tag")
-            let result = await sql.relatedTags(tag)
+            let result = await sql.tag.relatedTags(tag)
             res.status(200).json(result?.related || [])
         } catch (e) {
             console.log(e)
@@ -52,7 +52,7 @@ const TagRoutes = (app: Express) => {
         try {
             let tag = req.query.tag as string
             if (!tag) return res.status(400).send("Bad tag")
-            let result = await sql.unverifiedTags([tag])
+            let result = await sql.tag.unverifiedTags([tag])
             res.status(200).json(result?.[0])
         } catch (e) {
             console.log(e)
@@ -64,7 +64,7 @@ const TagRoutes = (app: Express) => {
         try {
             let tags = req.query.tags as string[]
             if (!tags) tags = []
-            let result = await sql.tagCounts(tags.filter(Boolean))
+            let result = await sql.tag.tagCounts(tags.filter(Boolean))
             res.status(200).json(result)
         } catch (e) {
             console.log(e)
@@ -76,7 +76,7 @@ const TagRoutes = (app: Express) => {
         try {
             let tags = req.query.tags as string[]
             if (!tags) tags = []
-            let result = await sql.tags(tags.filter(Boolean))
+            let result = await sql.tag.tags(tags.filter(Boolean))
             res.status(200).json(result)
         } catch (e) {
             console.log(e)
@@ -88,7 +88,7 @@ const TagRoutes = (app: Express) => {
         try {
             let tags = req.query.tags as string[]
             if (!tags) tags = []
-            let result = await sql.tags(tags.filter(Boolean))
+            let result = await sql.tag.tags(tags.filter(Boolean))
             const tagMap = {} as {[key: string]: any}
             for (const tag of result) {
                 tagMap[tag.tag] = tag
@@ -105,13 +105,13 @@ const TagRoutes = (app: Express) => {
             const tag = req.query.tag as string
             if (!serverFunctions.validateCSRF(req)) return res.status(400).send("Bad CSRF token")
             if (!tag) return res.status(400).send("Invalid tag")
-            const tagExists = await sql.tag(tag.trim())
+            const tagExists = await sql.tag.tag(tag.trim())
             if (!req.session.username) return res.status(401).send("Unauthorized")
             if (!tagExists) return res.status(400).send("Bad tag")
             if (req.session.role !== "admin" && req.session.role !== "mod") return res.status(403).end()
             await serverFunctions.deleteFolder(`history/tag/${tag.trim()}`).catch(() => null)
             await serverFunctions.deleteFile(functions.getTagPath(tagExists.type, tagExists.image)).catch(() => null)
-            await sql.deleteTag(tag.trim())
+            await sql.tag.deleteTag(tag.trim())
             res.status(200).send("Success")
         } catch (e) {
             console.log(e)
@@ -126,18 +126,18 @@ const TagRoutes = (app: Express) => {
             if (!req.session.username) return res.status(401).send("Unauthorized")
             if (!tag) return res.status(400).send("Bad tag")
             if (req.session.role !== "admin") return res.status(403).end()
-            const tagObj = await sql.tag(tag)
+            const tagObj = await sql.tag.tag(tag)
             if (!tagObj) return res.status(404).send("Doesn't exist")
-            const allPosts = await sql.search([tag], "all", "all", "all", "date", undefined, "9999")
+            const allPosts = await sql.search.search([tag], "all", "all", "all", "date", undefined, "9999")
             if (tagObj.banned) {
-                await sql.updateTag(tag, "banned", false)
+                await sql.tag.updateTag(tag, "banned", false)
                 for (const post of allPosts) {
-                    await sql.updatePost(post.postID, "hidden", false)
+                    await sql.post.updatePost(post.postID, "hidden", false)
                 }
             } else {
-                await sql.updateTag(tag, "banned", true)
+                await sql.tag.updateTag(tag, "banned", true)
                 for (const post of allPosts) {
-                    await sql.updatePost(post.postID, "hidden", true)
+                    await sql.post.updatePost(post.postID, "hidden", true)
                 }
             }
             res.status(200).send("Success")
@@ -154,12 +154,12 @@ const TagRoutes = (app: Express) => {
             if (!req.session.username) return res.status(401).send("Unauthorized")
             if (req.session.banned) return res.status(403).send("You are banned")
             if (!tag) return res.status(400).send("Bad tag")
-            const tagObj = await sql.tag(tag)
+            const tagObj = await sql.tag.tag(tag)
             if (!tagObj) return res.status(400).send("Bad tag")
             let imageFilename = tagObj.image
             let tagDescription = tagObj.description
             if (description !== undefined) {
-                await sql.updateTag(tag, "description", description)
+                await sql.tag.updateTag(tag, "description", description)
                 tagDescription = description
             }
             let vanillaImageBuffer = null as any
@@ -181,59 +181,59 @@ const TagRoutes = (app: Express) => {
                     const newBuffer = Buffer.from(Object.values(image) as any)
                     imgChange = serverFunctions.buffersChanged(vanillaImageBuffer, newBuffer)
                     await serverFunctions.uploadFile(imagePath, newBuffer)
-                    await sql.updateTag(tag, "image", filename)
+                    await sql.tag.updateTag(tag, "image", filename)
                     tagObj.image = filename
                     imageFilename = filename
                 } else {
-                    await sql.updateTag(tag, "image", null as any)
+                    await sql.tag.updateTag(tag, "image", null as any)
                     imageFilename = null
                 }
             }
             if (aliases !== undefined) {
-                await sql.purgeAliases(tag)
+                await sql.tag.purgeAliases(tag)
                 for (let i = 0; i < aliases.length; i++) {
                     if (!aliases[i]?.trim()) break
-                    await sql.insertAlias(tag, aliases[i])
+                    await sql.tag.insertAlias(tag, aliases[i])
                 }
             } 
             if (implications !== undefined) {
-                await sql.purgeImplications(tag)
+                await sql.tag.purgeImplications(tag)
                 for (let i = 0; i < implications.length; i++) {
                     if (!implications[i]?.trim()) break
-                    await sql.insertImplication(tag, implications[i])
+                    await sql.tag.insertImplication(tag, implications[i])
                 }
             }
             if (pixivTags !== undefined) {
-                await sql.updateTag(tag, "pixivTags", pixivTags)
+                await sql.tag.updateTag(tag, "pixivTags", pixivTags)
             }
             if (tagObj.type === "artist") {
                 if (website !== undefined) {
-                    await sql.updateTag(tag, "website", website)
+                    await sql.tag.updateTag(tag, "website", website)
                 }
                 if (social !== undefined) {
-                    await sql.updateTag(tag, "social", social)
+                    await sql.tag.updateTag(tag, "social", social)
                 }
                 if (twitter !== undefined) {
-                    await sql.updateTag(tag, "twitter", twitter)
+                    await sql.tag.updateTag(tag, "twitter", twitter)
                 }
             }
             if (tagObj.type === "character") {
                 if (fandom !== undefined) {
-                    await sql.updateTag(tag, "fandom", fandom)
+                    await sql.tag.updateTag(tag, "fandom", fandom)
                 }
             }
             if (tagObj.type === "series") {
                 if (website !== undefined) {
-                    await sql.updateTag(tag, "website", website)
+                    await sql.tag.updateTag(tag, "website", website)
                 }
                 if (twitter !== undefined) {
-                    await sql.updateTag(tag, "twitter", twitter)
+                    await sql.tag.updateTag(tag, "twitter", twitter)
                 }
             }
             if (!updater) updater = req.session.username
             if (!updatedDate) updatedDate = new Date().toISOString()
-            await sql.updateTag(tag, "updater", updater)
-            await sql.updateTag(tag, "updatedDate", updatedDate)
+            await sql.tag.updateTag(tag, "updater", updater)
+            await sql.tag.updateTag(tag, "updatedDate", updatedDate)
             let targetTag = tag
             if (key.trim() !== tag) {
                 if (tagObj.image) {
@@ -241,20 +241,20 @@ const TagRoutes = (app: Express) => {
                     const oldImagePath = functions.getTagPath(tagObj.type, tagObj.image)
                     const newImagePath = functions.getTagPath(tagObj.type, newFilename)
                     await serverFunctions.renameFile(oldImagePath, newImagePath)
-                    await sql.updateTag(tag, "image", newFilename)
+                    await sql.tag.updateTag(tag, "image", newFilename)
                     imageFilename = newFilename
                 }
-                await sql.updateTag(tag, "tag", key.trim())
+                await sql.tag.updateTag(tag, "tag", key.trim())
                 targetTag = key.trim()
             }
             if (req.session.role === "admin" || req.session.role === "mod") {
                 if (silent) return res.status(200).send("Success")
             }
 
-            const tagHistory = await sql.tagHistory(targetTag)
+            const tagHistory = await sql.history.tagHistory(targetTag)
             const nextKey = await serverFunctions.getNextKey("tag", key)
             if (!tagHistory.length || (imgChange && nextKey === 1)) {
-                let vanilla = await sql.tag(targetTag)
+                let vanilla = await sql.tag.tag(targetTag)
                 vanilla.date = vanilla.createDate 
                 vanilla.user = vanilla.creator
                 vanilla.key = targetTag
@@ -269,7 +269,7 @@ const TagRoutes = (app: Express) => {
                 } else {
                     vanilla.image = null
                 }
-                await sql.insertTagHistory(vanilla.user, vanilla.tag, vanilla.key, vanilla.type, vanilla.image, vanilla.description, vanilla.aliases, vanilla.implications, vanilla.pixivTags, vanilla.website, vanilla.social, vanilla.twitter, vanilla.fandom)
+                await sql.history.insertTagHistory(vanilla.user, vanilla.tag, vanilla.key, vanilla.type, vanilla.image, vanilla.description, vanilla.aliases, vanilla.implications, vanilla.pixivTags, vanilla.website, vanilla.social, vanilla.twitter, vanilla.fandom)
                 if (image?.[0] && imageFilename) {
                     if (imgChange) {
                         const imagePath = functions.getTagHistoryPath(key, 2, imageFilename)
@@ -277,7 +277,7 @@ const TagRoutes = (app: Express) => {
                         imageFilename = imagePath
                     }
                 }
-                await sql.insertTagHistory(req.session.username, targetTag, key, tagObj.type, imageFilename, tagDescription, aliases, implications, pixivTags, website, social, twitter, fandom, reason)
+                await sql.history.insertTagHistory(req.session.username, targetTag, key, tagObj.type, imageFilename, tagDescription, aliases, implications, pixivTags, website, social, twitter, fandom, reason)
             } else {
                 if (image?.[0] && imageFilename) {
                     if (imgChange) {
@@ -286,7 +286,7 @@ const TagRoutes = (app: Express) => {
                         imageFilename = imagePath
                     }
                 }
-                await sql.insertTagHistory(req.session.username, targetTag, key, tagObj.type, imageFilename, tagDescription, aliases, implications, pixivTags, website, social, twitter, fandom, reason)
+                await sql.history.insertTagHistory(req.session.username, targetTag, key, tagObj.type, imageFilename, tagDescription, aliases, implications, pixivTags, website, social, twitter, fandom, reason)
             }
             res.status(200).send("Success")
         } catch (e) {
@@ -302,11 +302,11 @@ const TagRoutes = (app: Express) => {
             if (!req.session.username) return res.status(401).send("Unauthorized")
             if (!tag || !aliasTo) return res.status(400).send("Bad tag or aliasTo")
             if (req.session.role !== "admin" && req.session.role !== "mod") return res.status(403).end()
-            const exists = await sql.tag(aliasTo)
+            const exists = await sql.tag.tag(aliasTo)
             if (!exists) return res.status(400).send("Bad tag")
-            await sql.renameTagMap(tag, aliasTo)
-            await sql.deleteTag(tag)
-            await sql.insertAlias(aliasTo, tag)
+            await sql.tag.renameTagMap(tag, aliasTo)
+            await sql.tag.deleteTag(tag)
+            await sql.tag.insertAlias(aliasTo, tag)
             res.status(200).send("Success")
         } catch (e) {
             console.log(e)
@@ -319,7 +319,7 @@ const TagRoutes = (app: Express) => {
             if (req.session.role !== "admin" && req.session.role !== "mod") return res.status(403).end()
             let tags = req.query.tags as string[]
             if (!tags) tags = []
-            let result = await sql.unverifiedTags(tags.filter(Boolean))
+            let result = await sql.tag.unverifiedTags(tags.filter(Boolean))
             res.status(200).json(result)
         } catch (e) {
             console.log(e)
@@ -334,9 +334,9 @@ const TagRoutes = (app: Express) => {
             if (!tag) return res.status(400).send("Invalid postID")
             if (!req.session.username) return res.status(401).send("Unauthorized")
             if (req.session.banned) return res.status(403).send("You are banned")
-            const exists = await sql.tag(tag)
+            const exists = await sql.tag.tag(tag)
             if (!exists) return res.status(400).send("Bad tag")
-            await sql.insertTagDeleteRequest(req.session.username, tag, reason)
+            await sql.request.insertTagDeleteRequest(req.session.username, tag, reason)
             res.status(200).send("Success")
         } catch (e) {
             console.log(e)
@@ -349,7 +349,7 @@ const TagRoutes = (app: Express) => {
             const offset = req.query.offset as string
             if (!req.session.username) return res.status(401).send("Unauthorized")
             if (req.session.role !== "admin" && req.session.role !== "mod") return res.status(403).end()
-            const result = await sql.tagDeleteRequests(offset)
+            const result = await sql.request.tagDeleteRequests(offset)
             res.status(200).json(result)
         } catch (e) {
             console.log(e)
@@ -365,7 +365,7 @@ const TagRoutes = (app: Express) => {
             if (!req.session.username) return res.status(401).send("Unauthorized")
             if (!username) return res.status(400).send("Bad username")
             if (req.session.role !== "admin" && req.session.role !== "mod") return res.status(403).end()
-            await sql.deleteTagDeleteRequest(username, tag)
+            await sql.request.deleteTagDeleteRequest(username, tag)
             res.status(200).send("Success")
         } catch (e) {
             console.log(e)
@@ -379,11 +379,11 @@ const TagRoutes = (app: Express) => {
             if (!serverFunctions.validateCSRF(req)) return res.status(400).send("Bad CSRF token")
             if (!tag || !aliasTo) return res.status(400).send("Bad tag or aliasTo")
             if (!req.session.username) return res.status(401).send("Unauthorized")
-            const exists = await sql.tag(tag)
+            const exists = await sql.tag.tag(tag)
             if (!exists) return res.status(400).send("Bad tag")
-            const exists2 = await sql.tag(aliasTo)
+            const exists2 = await sql.tag.tag(aliasTo)
             if (!exists2) return res.status(400).send("Bad aliasTo")
-            await sql.insertAliasRequest(req.session.username, tag, aliasTo, reason)
+            await sql.request.insertAliasRequest(req.session.username, tag, aliasTo, reason)
             res.status(200).send("Success")
         } catch (e) {
             console.log(e)
@@ -396,7 +396,7 @@ const TagRoutes = (app: Express) => {
             const offset = req.query.offset as string
             if (!req.session.username) return res.status(401).send("Unauthorized")
             if (req.session.role !== "admin" && req.session.role !== "mod") return res.status(403).end()
-            const result = await sql.aliasRequests(offset)
+            const result = await sql.request.aliasRequests(offset)
             res.status(200).json(result)
         } catch (e) {
             console.log(e)
@@ -412,7 +412,7 @@ const TagRoutes = (app: Express) => {
             if (!req.session.username) return res.status(401).send("Unauthorized")
             if (!username) return res.status(400).send("Bad username")
             if (req.session.role !== "admin" && req.session.role !== "mod") return res.status(403).end()
-            await sql.deleteAliasRequest(username, tag)
+            await sql.request.deleteAliasRequest(username, tag)
             res.status(200).send("Success")
         } catch (e) {
             console.log(e)
@@ -426,7 +426,7 @@ const TagRoutes = (app: Express) => {
             if (!serverFunctions.validateCSRF(req)) return res.status(400).send("Bad CSRF token")
             if (!req.session.username) return res.status(401).send("Unauthorized")
             if (!tag) return res.status(400).send("Bad tag")
-            const tagObj = await sql.tag(tag)
+            const tagObj = await sql.tag.tag(tag)
             if (!tagObj) return res.status(400).send("Bad tag")
             let imagePath = null as any
             if (image?.[0]) {
@@ -438,7 +438,7 @@ const TagRoutes = (app: Express) => {
                     imagePath = "delete"
                 }
             }
-            await sql.insertTagEditRequest(req.session.username, tag, key, description, imagePath, aliases?.[0] ? aliases : null, implications?.[0] ? implications : null, pixivTags?.[0] ? pixivTags : null, social, twitter, website, fandom, reason)
+            await sql.request.insertTagEditRequest(req.session.username, tag, key, description, imagePath, aliases?.[0] ? aliases : null, implications?.[0] ? implications : null, pixivTags?.[0] ? pixivTags : null, social, twitter, website, fandom, reason)
             res.status(200).send("Success")
         } catch (e) {
             console.log(e)
@@ -451,7 +451,7 @@ const TagRoutes = (app: Express) => {
             const offset = req.query.offset as string
             if (!req.session.username) return res.status(401).send("Unauthorized")
             if (req.session.role !== "admin" && req.session.role !== "mod") return res.status(403).end()
-            const result = await sql.tagEditRequests(offset)
+            const result = await sql.request.tagEditRequests(offset)
             res.status(200).json(result)
         } catch (e) {
             console.log(e)
@@ -468,7 +468,7 @@ const TagRoutes = (app: Express) => {
             if (!username) return res.status(400).send("Bad username")
             if (req.session.role !== "admin" && req.session.role !== "mod") return res.status(403).end()
             if (image) await serverFunctions.deleteUnverifiedFile(image)
-            await sql.deleteTagEditRequest(username, tag)
+            await sql.request.deleteTagEditRequest(username, tag)
             res.status(200).send("Success")
         } catch (e) {
             console.log(e)
@@ -481,7 +481,7 @@ const TagRoutes = (app: Express) => {
             const tag = req.query.tag as string
             const offset = req.query.offset as string
             if (!req.session.username) return res.status(401).send("Unauthorized")
-            const result = await sql.tagHistory(tag, offset)
+            const result = await sql.history.tagHistory(tag, offset)
             res.status(200).json(result)
         } catch (e) {
             console.log(e)
@@ -496,7 +496,7 @@ const TagRoutes = (app: Express) => {
             if (Number.isNaN(Number(historyID))) return res.status(400).send("Invalid historyID")
             if (!req.session.username) return res.status(401).send("Unauthorized")
             if (req.session.role !== "admin" && req.session.role !== "mod") return res.status(403).end()
-            const tagHistory = await sql.tagHistory(tag as string)
+            const tagHistory = await sql.history.tagHistory(tag as string)
             if (tagHistory[0]?.historyID === Number(historyID)) {
                 return res.status(400).send("Bad request")
             } else {
@@ -504,7 +504,7 @@ const TagRoutes = (app: Express) => {
                 if (currentHistory.image?.includes("history/")) {
                     await serverFunctions.deleteFile(currentHistory.image)
                 }
-                await sql.deleteTagHistory(Number(historyID))
+                await sql.history.deleteTagHistory(Number(historyID))
             }
             res.status(200).send("Success")
         } catch (e) {

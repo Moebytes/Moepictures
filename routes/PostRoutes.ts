@@ -1,7 +1,7 @@
 import e, {Express, NextFunction, Request, Response} from "express"
 import rateLimit from "express-rate-limit"
 import slowDown from "express-slow-down"
-import sql from "../structures/SQLQuery"
+import sql from "../sql/SQLQuery"
 import functions from "../structures/Functions"
 import serverFunctions from "../structures/ServerFunctions"
 import phash from "sharp-phash"
@@ -34,7 +34,7 @@ const PostRoutes = (app: Express) => {
             if (req.session.captchaAmount > 1000) stripTags = true
             const postID = req.query.postID as string
             if (Number.isNaN(Number(postID))) return res.status(400).send("Invalid postID")
-            let result = await sql.post(Number(postID))
+            let result = await sql.post.post(Number(postID))
             if (!result) return res.status(400).send("Invalid postID")
             if (req.session.role !== "admin" && req.session.role !== "mod") {
                 if (result.hidden) return res.status(403).end()
@@ -63,7 +63,7 @@ const PostRoutes = (app: Express) => {
             if (req.session.captchaAmount > 1000) stripTags = true
             const postID = req.query.postID as string
             if (Number.isNaN(Number(postID))) return res.status(400).send("Invalid postID")
-            let result = await sql.postTags(Number(postID))
+            let result = await sql.post.postTags(Number(postID))
             if (!result) return res.status(400).send("Invalid postID")
             if (req.session.role !== "admin" && req.session.role !== "mod") {
                 if (result.hidden) return res.status(403).end()
@@ -85,7 +85,7 @@ const PostRoutes = (app: Express) => {
         try {
             const postID = req.query.postID
             if (Number.isNaN(Number(postID))) return res.status(400).send("Invalid postID")
-            const result = await sql.comments(Number(postID))
+            const result = await sql.comment.comments(Number(postID))
             if (req.session.role !== "admin" && req.session.role !== "mod") {
                 if (result.hidden) return res.status(403).end()
                 if (result.restrict === "explicit") return res.status(403).end()
@@ -104,9 +104,9 @@ const PostRoutes = (app: Express) => {
             if (Number.isNaN(Number(postID))) return res.status(400).send("Invalid postID")
             if (!req.session.username) return res.status(401).send("Unauthorized")
             if (req.session.role !== "admin") return res.status(403).end()
-            const post = await sql.post(Number(postID)).catch(() => null)
+            const post = await sql.post.post(Number(postID)).catch(() => null)
             if (!post) return res.status(200).send("Doesn't exist")
-            await sql.deletePost(Number(postID))
+            await sql.post.deletePost(Number(postID))
             for (let i = 0; i < post.images.length; i++) {
                 const file = functions.getImagePath(post.images[i].type, post.postID, post.images[i].order, post.images[i].filename)
                 await serverFunctions.deleteFile(file)
@@ -126,12 +126,12 @@ const PostRoutes = (app: Express) => {
             if (Number.isNaN(Number(postID))) return res.status(400).send("Invalid postID")
             if (!req.session.username) return res.status(401).send("Unauthorized")
             if (req.session.role !== "admin") return res.status(403).end()
-            const post = await sql.post(Number(postID)).catch(() => null)
+            const post = await sql.post.post(Number(postID)).catch(() => null)
             if (!post) return res.status(404).send("Doesn't exist")
             if (post.hidden) {
-                await sql.updatePost(Number(postID), "hidden", false)
+                await sql.post.updatePost(Number(postID), "hidden", false)
             } else {
-                await sql.updatePost(Number(postID), "hidden", true)
+                await sql.post.updatePost(Number(postID), "hidden", true)
             }
             res.status(200).send("Success")
         } catch (e) {
@@ -144,7 +144,7 @@ const PostRoutes = (app: Express) => {
         try {
             const postID = req.query.postID as string
             if (Number.isNaN(Number(postID))) return res.status(400).send("Invalid postID")
-            let posts = await sql.thirdParty(Number(postID))
+            let posts = await sql.post.thirdParty(Number(postID))
             if (req.session.role !== "admin" && req.session.role !== "mod") {
                 posts = posts.filter((p: any) => !p?.hidden)
                 posts = posts.filter((p: any) => p?.restrict !== "explicit")
@@ -161,7 +161,7 @@ const PostRoutes = (app: Express) => {
         try {
             const postID = req.query.postID as string
             if (Number.isNaN(Number(postID))) return res.status(400).send("Invalid postID")
-            const post = await sql.parent(Number(postID))
+            const post = await sql.post.parent(Number(postID))
             if (!post) return res.status(200).json()
             if (req.session.role !== "admin" && req.session.role !== "mod") {
                 if (post.hidden) return res.status(403).end()
@@ -180,7 +180,7 @@ const PostRoutes = (app: Express) => {
             const postID = req.query.postID as string
             if (Number.isNaN(Number(postID))) return res.status(400).send("Invalid postID")
             if (req.session.role !== "admin" && req.session.role !== "mod") return res.status(403).end()
-            let result = await sql.unverifiedPost(Number(postID))
+            let result = await sql.post.unverifiedPost(Number(postID))
             if (result.images.length > 1) {
                 result.images = result.images.sort((a: any, b: any) => a.order - b.order)
             }
@@ -196,7 +196,7 @@ const PostRoutes = (app: Express) => {
             const offset = req.query.offset as string
             if (!req.session.username) return res.status(401).send("Unauthorized")
             if (req.session.role !== "admin" && req.session.role !== "mod") return res.status(403).end()
-            const result = await sql.unverifiedPosts(offset)
+            const result = await sql.search.unverifiedPosts(offset)
             res.status(200).json(result)
         } catch (e) {
             console.log(e)
@@ -209,7 +209,7 @@ const PostRoutes = (app: Express) => {
             const offset = req.query.offset as string
             if (!req.session.username) return res.status(401).send("Unauthorized")
             if (req.session.role !== "admin" && req.session.role !== "mod") return res.status(403).end()
-            const result = await sql.unverifiedPostEdits(offset)
+            const result = await sql.search.unverifiedPostEdits(offset)
             res.status(200).json(result)
         } catch (e) {
             console.log(e)
@@ -222,7 +222,7 @@ const PostRoutes = (app: Express) => {
             const postID = req.query.postID as string
             if (Number.isNaN(Number(postID))) return res.status(400).send("Invalid postID")
             if (req.session.role !== "admin" && req.session.role !== "mod") return res.status(403).end()
-            const posts = await sql.unverifiedThirdParty(Number(postID))
+            const posts = await sql.post.unverifiedThirdParty(Number(postID))
             res.status(200).json(posts)
         } catch (e) {
             console.log(e)
@@ -235,7 +235,7 @@ const PostRoutes = (app: Express) => {
             const postID = req.query.postID as string
             if (Number.isNaN(Number(postID))) return res.status(400).send("Invalid postID")
             if (req.session.role !== "admin" && req.session.role !== "mod") return res.status(403).end()
-            const post = await sql.unverifiedParent(Number(postID))
+            const post = await sql.post.unverifiedParent(Number(postID))
             res.status(200).json(post)
         } catch (e) {
             console.log(e)
@@ -250,9 +250,9 @@ const PostRoutes = (app: Express) => {
             if (Number.isNaN(Number(postID))) return res.status(400).send("Invalid postID")
             if (!req.session.username) return res.status(401).send("Unauthorized")
             if (req.session.banned) return res.status(403).send("You are banned")
-            const post = await sql.post(Number(postID))
+            const post = await sql.post.post(Number(postID))
             if (!post) return res.status(400).send("Bad postID")
-            await sql.insertPostDeleteRequest(req.session.username, Number(postID), reason)
+            await sql.request.insertPostDeleteRequest(req.session.username, Number(postID), reason)
             res.status(200).send("Success")
         } catch (e) {
             console.log(e)
@@ -265,7 +265,7 @@ const PostRoutes = (app: Express) => {
             const offset = req.query.offset as string
             if (!req.session.username) return res.status(401).send("Unauthorized")
             if (req.session.role !== "admin" && req.session.role !== "mod") return res.status(403).end()
-            const result = await sql.postDeleteRequests(offset)
+            const result = await sql.request.postDeleteRequests(offset)
             res.status(200).json(result)
         } catch (e) {
             console.log(e)
@@ -281,7 +281,7 @@ const PostRoutes = (app: Express) => {
             if (!req.session.username) return res.status(401).send("Unauthorized")
             if (!username) return res.status(400).send("Bad username")
             if (req.session.role !== "admin" && req.session.role !== "mod") return res.status(403).end()
-            await sql.deletePostDeleteRequest(username, postID)
+            await sql.request.deletePostDeleteRequest(username, postID)
             res.status(200).send("Success")
         } catch (e) {
             console.log(e)
@@ -327,13 +327,13 @@ const PostRoutes = (app: Express) => {
             if (!functions.validRestrict(restrict)) return res.status(400).send("Invalid restrict")
             if (!functions.validStyle(style)) return res.status(400).send("Invalid style")
     
-            const post = await sql.post(postID)
+            const post = await sql.post.post(postID)
             if (!post) return res.status(400).send("Bad request")
     
             const updatedDate = new Date().toISOString()
 
             if (unverified) {
-                await sql.bulkUpdateUnverifiedPost(postID, {
+                await sql.post.bulkUpdateUnverifiedPost(postID, {
                     type,
                     restrict, 
                     style,
@@ -341,7 +341,7 @@ const PostRoutes = (app: Express) => {
                     updater: req.session.username
                 })
             } else {
-                await sql.bulkUpdatePost(postID, {
+                await sql.post.bulkUpdatePost(postID, {
                     type,
                     restrict, 
                     style,
@@ -382,25 +382,25 @@ const PostRoutes = (app: Express) => {
             }
 
             for (let i = 0; i < tagMap.length; i++) {
-                const implications = await sql.implications(tagMap[i])
+                const implications = await sql.tag.implications(tagMap[i])
                 if (implications?.[0]) tagMap.push(...implications.map(((i: any) => i.implication)))
             }
     
             tagMap = functions.removeDuplicates(tagMap)
             if (unverified) {
-                await sql.purgeUnverifiedTagMap(postID)
-                await sql.bulkInsertUnverifiedTags(bulkTagUpdate, true)
-                await sql.insertUnverifiedTagMap(postID, tagMap)
+                await sql.tag.purgeUnverifiedTagMap(postID)
+                await sql.tag.bulkInsertUnverifiedTags(bulkTagUpdate, true)
+                await sql.tag.insertUnverifiedTagMap(postID, tagMap)
             } else {
-                await sql.purgeTagMap(postID)
-                await sql.bulkInsertTags(bulkTagUpdate, req.session.username, true)
-                await sql.insertTagMap(postID, tagMap)
+                await sql.tag.purgeTagMap(postID)
+                await sql.tag.bulkInsertTags(bulkTagUpdate, req.session.username, true)
+                await sql.tag.insertTagMap(postID, tagMap)
             }
             if (req.session.role === "admin" || req.session.role === "mod") {
                 if (silent) return res.status(200).send("Success")
             }
 
-            const postHistory = await sql.postHistory(postID)
+            const postHistory = await sql.history.postHistory(postID)
             if (!postHistory.length) {
                 const vanilla = JSON.parse(JSON.stringify(post))
                 vanilla.date = vanilla.uploadDate 
@@ -414,7 +414,7 @@ const PostRoutes = (app: Express) => {
                 for (let i = 0; i < vanilla.images.length; i++) {
                     vanillaImages.push(functions.getImagePath(vanilla.images[i].type, postID, vanilla.images[i].order, vanilla.images[i].filename))
                 }
-                await sql.insertPostHistory(vanilla.user, postID, vanillaImages, vanilla.uploader, vanilla.updater, vanilla.uploadDate, vanilla.updatedDate,
+                await sql.history.insertPostHistory(vanilla.user, postID, vanillaImages, vanilla.uploader, vanilla.updater, vanilla.uploadDate, vanilla.updatedDate,
                     vanilla.type, vanilla.restrict, vanilla.style, vanilla.thirdParty, vanilla.title, vanilla.translatedTitle, vanilla.drawn, vanilla.artist,
                     vanilla.link, vanilla.commentary, vanilla.translatedCommentary, vanilla.bookmarks, vanilla.mirrors, vanilla.artists, vanilla.characters, vanilla.series, vanilla.tags)
 
@@ -422,7 +422,7 @@ const PostRoutes = (app: Express) => {
                 for (let i = 0; i < post.images.length; i++) {
                     images.push(functions.getImagePath(post.images[i].type, postID, post.images[i].order, post.images[i].filename))
                 }
-                await sql.insertPostHistory(req.session.username, postID, images, post.uploader, post.updater, post.uploadDate, post.updatedDate,
+                await sql.history.insertPostHistory(req.session.username, postID, images, post.uploader, post.updater, post.uploadDate, post.updatedDate,
                 post.type, post.restrict, post.style, post.thirdParty, post.title, post.translatedTitle, post.drawn, post.artist,
                 post.link, post.commentary, post.translatedCommentary, post.bookmarks, post.mirrors, artists, characters, series, tags, reason)
             } else {
@@ -430,7 +430,7 @@ const PostRoutes = (app: Express) => {
                 for (let i = 0; i < post.images.length; i++) {
                     images.push(functions.getImagePath(post.images[i].type, postID, post.images[i].order, post.images[i].filename))
                 }
-                await sql.insertPostHistory(req.session.username, postID, images, post.uploader, post.updater, post.uploadDate, post.updatedDate,
+                await sql.history.insertPostHistory(req.session.username, postID, images, post.uploader, post.updater, post.uploadDate, post.updatedDate,
                 post.type, post.restrict, post.style, post.thirdParty, post.title, post.translatedTitle, post.drawn, post.artist,
                 post.link, post.commentary, post.translatedCommentary, post.bookmarks, post.mirrors, artists, characters, series, tags, reason)
             }
@@ -478,13 +478,13 @@ const PostRoutes = (app: Express) => {
             if (!functions.validStyle(style)) return res.status(400).send("Invalid style")
     
             const originalPostID = postID as any
-            const post = await sql.post(originalPostID)
+            const post = await sql.post.post(originalPostID)
             if (!post) return res.status(400).send("Bad postID")
-            postID = await sql.insertUnverifiedPost()
+            postID = await sql.post.insertUnverifiedPost()
 
             if (post.thirdParty) {
-                const thirdPartyID = await sql.parent(originalPostID).then((r) => r.parentID)
-                await sql.insertUnverifiedThirdParty(postID, Number(thirdPartyID))
+                const thirdPartyID = await sql.post.parent(originalPostID).then((r) => r.parentID)
+                await sql.post.insertUnverifiedThirdParty(postID, Number(thirdPartyID))
             }
             if (type !== "comic") type = "image"
 
@@ -536,11 +536,11 @@ const PostRoutes = (app: Express) => {
                     hash = await phash(buffer).then((hash: string) => functions.binaryToHex(hash))
                     dimensions = imageSize(buffer)
                 }
-                await sql.insertUnverifiedImage(postID, filename, type, order, hash, dimensions.width, dimensions.height, String(buffer.byteLength))
+                await sql.post.insertUnverifiedImage(postID, filename, type, order, hash, dimensions.width, dimensions.height, String(buffer.byteLength))
             }
     
             const updatedDate = new Date().toISOString()
-            await sql.bulkUpdateUnverifiedPost(postID, {
+            await sql.post.bulkUpdateUnverifiedPost(postID, {
                 originalID: originalPostID ? originalPostID : null,
                 reason: reason ? reason : null,
                 type,
@@ -568,7 +568,7 @@ const PostRoutes = (app: Express) => {
             for (let i = 0; i < artists.length; i++) {
                 if (!artists[i]) continue
                 let bulkObj = {tag: artists[i], type: "artist", description: "Artist.", image: null} as any
-                const existingTag = await sql.tag(artists[i])
+                const existingTag = await sql.tag.tag(artists[i])
                 if (existingTag) {
                     if (existingTag.description) bulkObj.description = existingTag.description
                     if (existingTag.image) {
@@ -585,7 +585,7 @@ const PostRoutes = (app: Express) => {
             for (let i = 0; i < characters.length; i++) {
                 if (!characters[i]) continue
                 let bulkObj = {tag: characters[i], type: "character", description: "Character.", image: null} as any
-                const existingTag = await sql.tag(characters[i])
+                const existingTag = await sql.tag.tag(characters[i])
                 if (existingTag) {
                     if (existingTag.description) bulkObj.description = existingTag.description
                     if (existingTag.image) {
@@ -602,7 +602,7 @@ const PostRoutes = (app: Express) => {
             for (let i = 0; i < series.length; i++) {
                 if (!series[i]) continue
                 let bulkObj = {tag: series[i], type: "series", description: "Series.", image: null} as any
-                const existingTag = await sql.tag(series[i])
+                const existingTag = await sql.tag.tag(series[i])
                 if (existingTag) {
                     if (existingTag.description) bulkObj.description = existingTag.description
                     if (existingTag.image) {
@@ -619,7 +619,7 @@ const PostRoutes = (app: Express) => {
             for (let i = 0; i < tags.length; i++) {
                 if (!tags[i]) continue
                 let bulkObj = {tag: tags[i], type: functions.tagType(tags[i]), description: `${functions.toProperCase(tags[i]).replaceAll("-", " ")}.`, image: null} as any
-                const existingTag = await sql.tag(tags[i])
+                const existingTag = await sql.tag.tag(tags[i])
                 if (existingTag) {
                     if (existingTag.description) bulkObj.description = existingTag.description
                     if (existingTag.image) {
@@ -634,14 +634,14 @@ const PostRoutes = (app: Express) => {
             }
 
             for (let i = 0; i < tagMap.length; i++) {
-                const implications = await sql.implications(tagMap[i])
+                const implications = await sql.tag.implications(tagMap[i])
                 if (implications?.[0]) tagMap.push(...implications.map(((i: any) => i.implication)))
             }
     
             tagMap = functions.removeDuplicates(tagMap)
-            await sql.purgeUnverifiedTagMap(postID)
-            await sql.bulkInsertUnverifiedTags(bulkTagUpdate, true)
-            await sql.insertUnverifiedTagMap(postID, tagMap)
+            await sql.tag.purgeUnverifiedTagMap(postID)
+            await sql.tag.bulkInsertUnverifiedTags(bulkTagUpdate, true)
+            await sql.tag.insertUnverifiedTagMap(postID, tagMap)
     
             res.status(200).send("Success")
           } catch (e) {
@@ -660,7 +660,7 @@ const PostRoutes = (app: Express) => {
             if (req.session.role === "admin" || req.session.role === "mod") req.session.captchaAmount = 0
             if (req.session.captchaAmount > 1000) stripTags = true
             if (!req.session.username) return res.status(401).send("Unauthorized")
-            const result = await sql.postHistory(postID, offset)
+            const result = await sql.history.postHistory(postID, offset)
             if (stripTags) delete result.tags
             res.status(200).json(result)
         } catch (e) {
@@ -676,7 +676,7 @@ const PostRoutes = (app: Express) => {
             if (Number.isNaN(Number(historyID))) return res.status(400).send("Invalid historyID")
             if (!req.session.username) return res.status(401).send("Unauthorized")
             if (req.session.role !== "admin" && req.session.role !== "mod") return res.status(403).end()
-            const postHistory = await sql.postHistory(Number(postID))
+            const postHistory = await sql.history.postHistory(Number(postID))
             if (postHistory[0]?.historyID === Number(historyID)) {
                 return res.status(400).send("Bad historyID")
             } else {
@@ -687,7 +687,7 @@ const PostRoutes = (app: Express) => {
                         await serverFunctions.deleteFile(image)
                     }
                 }
-                await sql.deletePostHistory(Number(historyID))
+                await sql.history.deletePostHistory(Number(historyID))
             }
             res.status(200).send("Success")
         } catch (e) {

@@ -1,7 +1,7 @@
 import {Express, NextFunction, Request, Response} from "express"
 import rateLimit from "express-rate-limit"
 import slowDown from "express-slow-down"
-import sql from "../structures/SQLQuery"
+import sql from "../sql/SQLQuery"
 import functions from "../structures/Functions"
 import serverFunctions from "../structures/ServerFunctions"
 import {generateSecret, verifyToken} from "node-2fa"
@@ -20,20 +20,20 @@ const $2FARoutes = (app: Express) => {
         try {
             if (!serverFunctions.validateCSRF(req)) return res.status(400).send("Bad CSRF token")
             if (!req.session.username) return res.status(401).send("Unauthorized")
-            const user = await sql.user(req.session.username)
+            const user = await sql.user.user(req.session.username)
             if (!user) return res.status(400).send("Bad username")
             const enabled = !Boolean(user.$2fa)
             if (enabled) {
-                await sql.delete2faToken(req.session.username)
+                await sql.token.delete2faToken(req.session.username)
                 const token = generateSecret({name: "Moepictures", account: functions.toProperCase(req.session.username)})
-                await sql.insert2faToken(req.session.username, token.secret, token.qr)
+                await sql.token.insert2faToken(req.session.username, token.secret, token.qr)
                 const arrayBuffer = await axios.get(token.qr, {responseType: "arraybuffer"}).then((r) => r.data)
                 const base64 = functions.arrayBufferToBase64(arrayBuffer)
                 res.status(200).json(base64)
             } else {
-                await sql.updateUser(req.session.username, "$2fa", false)
+                await sql.user.updateUser(req.session.username, "$2fa", false)
                 req.session.$2fa = false
-                await sql.delete2faToken(req.session.username)
+                await sql.token.delete2faToken(req.session.username)
                 res.status(200).send("Success")
             }
         } catch (e) {
@@ -46,7 +46,7 @@ const $2FARoutes = (app: Express) => {
         try {
             if (!serverFunctions.validateCSRF(req)) return res.status(400).send("Bad CSRF token")
             if (!req.session.username) return res.status(401).send("Unauthorized")
-            const $2FAToken = await sql.$2faToken(req.session.username)
+            const $2FAToken = await sql.token.$2faToken(req.session.username)
             if (!$2FAToken) return res.status(400).send("User doesn't have 2FA token")
             const arrayBuffer = await axios.get($2FAToken.qrcode, {responseType: "arraybuffer"}).then((r) => r.data)
             const base64 = functions.arrayBufferToBase64(arrayBuffer)
@@ -64,13 +64,13 @@ const $2FARoutes = (app: Express) => {
             if (!req.session.username) return res.status(401).send("Unauthorized")
             if (!token) return res.status(400).send("Bad token")
             token = token.trim()
-            const user = await sql.user(req.session.username)
+            const user = await sql.user.user(req.session.username)
             if (!user) return res.status(400).send("Bad username")
-            const $2FAToken = await sql.$2faToken(user.username)
+            const $2FAToken = await sql.token.$2faToken(user.username)
             if (!$2FAToken) return res.status(400).send("User doesn't have 2FA token")
             const validToken = verifyToken($2FAToken.token, token, 60)
             if (validToken) {
-                await sql.updateUser(req.session.username, "$2fa", true)
+                await sql.user.updateUser(req.session.username, "$2fa", true)
                 req.session.$2fa = true
                 res.status(200).send("Success")
             } else {
@@ -89,9 +89,9 @@ const $2FARoutes = (app: Express) => {
             if (!req.session.$2fa || !req.session.email || !token) return res.status(400).send("2FA isn't enabled")
             if (req.session.username) return res.status(400).send("Already authenticated")
             token = token.trim()
-            const user = await sql.userByEmail(req.session.email)
+            const user = await sql.user.userByEmail(req.session.email)
             if (!user) return res.status(400).send("Bad email")
-            const $2FAToken = await sql.$2faToken(user.username)
+            const $2FAToken = await sql.token.$2faToken(user.username)
             const validToken = verifyToken($2FAToken.token, token, 60)
             if (validToken) {
                 req.session.$2fa = user.$2fa
@@ -106,7 +106,7 @@ const $2FARoutes = (app: Express) => {
                 req.session.role = user.role
                 req.session.banned = user.banned
                 const ip = req.headers["x-forwarded-for"] || req.socket.remoteAddress
-                await sql.updateUser(user.username, "ip", ip as string)
+                await sql.user.updateUser(user.username, "ip", ip as string)
                 req.session.ip = ip as string
                 const {secret, token} = serverFunctions.generateCSRF()
                 req.session.csrfSecret = secret

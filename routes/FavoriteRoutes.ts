@@ -1,7 +1,7 @@
 import e, {Express, NextFunction, Request, Response} from "express"
 import rateLimit from "express-rate-limit"
 import slowDown from "express-slow-down"
-import sql from "../structures/SQLQuery"
+import sql from "../sql/SQLQuery"
 import functions from "../structures/Functions"
 import serverFunctions from "../structures/ServerFunctions"
 
@@ -21,11 +21,11 @@ const FavoriteRoutes = (app: Express) => {
             if (Number.isNaN(Number(postID))) return res.status(400).send("Invalid postID")
             if (!req.session.username) return res.status(401).send("Unauthorized")
             if (favorited == null) return res.status(400).send("Bad favorited")
-            const favorite = await sql.favorite(Number(postID), req.session.username)
+            const favorite = await sql.favorite.favorite(Number(postID), req.session.username)
             if (favorited) {
-                if (!favorite) await sql.insertFavorite(Number(postID), req.session.username)
+                if (!favorite) await sql.favorite.insertFavorite(Number(postID), req.session.username)
             } else {
-                if (favorite) await sql.deleteFavorite(favorite.favoriteID)
+                if (favorite) await sql.favorite.deleteFavorite(favorite.favoriteID)
             }
             res.status(200).send("Success")
         } catch (e) {
@@ -39,7 +39,7 @@ const FavoriteRoutes = (app: Express) => {
             const postID = req.query.postID
             if (Number.isNaN(Number(postID))) return res.status(400).send("Invalid postID")
             if (!req.session.username) return res.status(401).send("Unauthorized")
-            const favorite = await sql.favorite(Number(postID), req.session.username)
+            const favorite = await sql.favorite.favorite(Number(postID), req.session.username)
             res.status(200).send(favorite)
         } catch (e) {
             console.log(e)
@@ -53,11 +53,11 @@ const FavoriteRoutes = (app: Express) => {
             if (!serverFunctions.validateCSRF(req)) return res.status(400).send("Bad CSRF token")
             if (Number.isNaN(Number(postID))) return res.status(400).send("Invalid postID")
             if (!req.session.username) return res.status(401).send("Unauthorized")
-            const favorite = await sql.favorite(Number(postID), req.session.username)
+            const favorite = await sql.favorite.favorite(Number(postID), req.session.username)
             if (favorite) {
-                await sql.deleteFavorite(favorite.favoriteID)
+                await sql.favorite.deleteFavorite(favorite.favoriteID)
             } else {
-                await sql.insertFavorite(Number(postID), req.session.username)
+                await sql.favorite.insertFavorite(Number(postID), req.session.username)
             }
             res.status(200).send("Success")
         } catch (e) {

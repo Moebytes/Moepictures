@@ -1,7 +1,7 @@
 import {Express, NextFunction, Request, Response} from "express"
 import crypto from "crypto"
 import functions from "../structures/Functions"
-import sql from "../structures/SQLQuery"
+import sql from "../sql/SQLQuery"
 import phash from "sharp-phash"
 import dist from "sharp-phash/distance"
 import rateLimit from "express-rate-limit"
@@ -32,9 +32,9 @@ const SearchRoutes = (app: Express) => {
             if (!functions.validSort(sort)) return res.status(400).send("Invalid sort")
             const tags = query?.trim().split(/ +/g).filter(Boolean)
             for (let i = 0; i < tags?.length; i++) {
-                const tag = await sql.tag(tags[i])
+                const tag = await sql.tag.tag(tags[i])
                 if (!tag) {
-                    const alias = await sql.alias(tags[i])
+                    const alias = await sql.tag.alias(tags[i])
                     if (alias) tags[i] = alias.tag
                 }
             }
@@ -42,15 +42,15 @@ const SearchRoutes = (app: Express) => {
             if (sort === "tagcount" || sort === "reverse tagcount") withTags = true
             if (query.startsWith("pixiv:")) {
                 const pixivID = Number(query.match(/(?<=pixiv:)(\d+)/g)?.[0])
-                result = await sql.searchPixivID(pixivID, withTags)
+                result = await sql.search.searchPixivID(pixivID, withTags)
             } else {
                 if (sort === "favorites" || sort === "reverse favorites") {
                     if (!req.session.username) return res.status(401).send("Unauthorized")
-                    const favorites = await sql.searchFavorites(req.session.username, tags, type, restrict, style, sort, offset, limit, withTags)
+                    const favorites = await sql.favorite.searchFavorites(req.session.username, tags, type, restrict, style, sort, offset, limit, withTags)
                     result = favorites.map((f: any) => f.post)
                     result[0].postCount = favorites[0].postCount
                 } else {
-                    result = await sql.search(tags, type, restrict, style, sort, offset, limit, withTags)
+                    result = await sql.search.search(tags, type, restrict, style, sort, offset, limit, withTags)
                 }
             }
             result = result.map((p: any) => {
@@ -84,13 +84,13 @@ const SearchRoutes = (app: Express) => {
             if (!functions.validStyle(style, true)) return res.status(400).send("Invalid style")
             const tags = query?.trim().split(/ +/g).filter(Boolean)
             for (let i = 0; i < tags?.length; i++) {
-                const tag = await sql.tag(tags[i])
+                const tag = await sql.tag.tag(tags[i])
                 if (!tag) {
-                    const alias = await sql.alias(tags[i])
+                    const alias = await sql.tag.alias(tags[i])
                     if (alias) tags[i] = alias.tag
                 }
             }
-            let result = await sql.random(tags, type, restrict, style, offset)
+            let result = await sql.search.random(tags, type, restrict, style, offset)
             result = result.map((p: any) => {
                 if (p.images?.length > 1) {
                     p.images = p.images.sort((a: any, b: any) => a.order - b.order)
@@ -136,7 +136,7 @@ const SearchRoutes = (app: Express) => {
                     if (dist(images[i].hash, hash) < 5) postIDs.add(images[i].postID)
                 }
             }
-            let result = await sql.posts(Array.from(postIDs))
+            let result = await sql.search.posts(Array.from(postIDs))
             result = functions.stripTags(result)
             res.status(200).json(result)
         } catch (e) {
@@ -152,7 +152,7 @@ const SearchRoutes = (app: Express) => {
             const offset = req.query.offset as string
             if (!functions.validCategorySort(sort)) return res.status(400).send("Invalid sort")
             const search = query?.trim().split(/ +/g).filter(Boolean).join("-")
-            let result = await sql.tagCategory("artists", sort, search, offset)
+            let result = await sql.search.tagCategory("artists", sort, search, offset)
             result = functions.stripTags(result)
             res.status(200).json(result)
         } catch (e) {
@@ -168,7 +168,7 @@ const SearchRoutes = (app: Express) => {
             const offset = req.query.offset as string
             if (!functions.validCategorySort(sort)) return res.status(400).send("Invalid sort")
             const search = query?.trim().split(/ +/g).filter(Boolean).join("-")
-            let result = await sql.tagCategory("characters", sort, search, offset)
+            let result = await sql.search.tagCategory("characters", sort, search, offset)
             result = functions.stripTags(result)
             res.status(200).json(result)
         } catch (e) {
@@ -184,7 +184,7 @@ const SearchRoutes = (app: Express) => {
             const offset = req.query.offset as string
             if (!functions.validCategorySort(sort)) return res.status(400).send("Invalid sort")
             const search = query?.trim().split(/ +/g).filter(Boolean).join("-")
-            let result = await sql.tagCategory("series", sort, search, offset)
+            let result = await sql.search.tagCategory("series", sort, search, offset)
             result = functions.stripTags(result)
             res.status(200).json(result)
         } catch (e) {
@@ -202,7 +202,7 @@ const SearchRoutes = (app: Express) => {
             if (!functions.validTagSort(sort)) return res.status(400).send("Invalid sort")
             if (!functions.validTagType(type)) return res.status(400).send("Invalid type")
             let search = query?.trim().split(/ +/g).filter(Boolean).join("-") ?? ""
-            let result = await sql.tagSearch(search, sort, type, offset)
+            let result = await sql.search.tagSearch(search, sort, type, offset)
             res.status(200).json(result)
         } catch (e) {
             console.log(e)
@@ -230,9 +230,9 @@ const SearchRoutes = (app: Express) => {
             }
             let result = [] as any
             if (usernames.length) {
-                result = await sql.searchCommentsByUsername(usernames, parsedSearch.trim(), sort, offset)
+                result = await sql.comment.searchCommentsByUsername(usernames, parsedSearch.trim(), sort, offset)
             } else {
-                result = await sql.searchComments(parsedSearch.trim(), sort, offset)
+                result = await sql.comment.searchComments(parsedSearch.trim(), sort, offset)
             }
             res.status(200).json(result)
         } catch (e) {
@@ -248,9 +248,9 @@ const SearchRoutes = (app: Express) => {
             if (!type) type = "all"
             if (!functions.validTagType(type)) return res.status(400).send("Invalid type")
             let search = query?.trim().toLowerCase().split(/ +/g).filter(Boolean).join("-") ?? ""
-            let result = await sql.tagSearch(search, "posts", type).then((r) => r.slice(0, 10))
+            let result = await sql.search.tagSearch(search, "posts", type).then((r) => r.slice(0, 10))
             if (!result?.[0]) return res.status(200).json([])
-            const tags = await sql.tagCounts(result.map((r: any) => r.tag))
+            const tags = await sql.tag.tagCounts(result.map((r: any) => r.tag))
             res.status(200).json(tags.slice(0, 10))
         } catch (e) {
             console.log(e)
@@ -271,7 +271,7 @@ const SearchRoutes = (app: Express) => {
             }
             let slice = false
             if (!postArray?.length) slice = true
-            let posts = await sql.posts(postArray)
+            let posts = await sql.search.posts(postArray)
             let uniqueTags = new Set()
             for (let i = 0; i < posts.length; i++) {
                 for (let j = 0; j < posts[i].tags.length; j++) {
@@ -279,7 +279,7 @@ const SearchRoutes = (app: Express) => {
                 }
             }
             const uniqueTagArray = Array.from(uniqueTags) as any
-            let result = await sql.tagCounts(uniqueTagArray.filter(Boolean))
+            let result = await sql.tag.tagCounts(uniqueTagArray.filter(Boolean))
             for (let i = 0; i < uniqueTagArray.length; i++) {
                 const found = result.find((r: any) => r.tag === uniqueTagArray[i])
                 if (!found) result.push({tag: uniqueTagArray[i], count: "0", type: "tag", image: ""})
@@ -298,8 +298,8 @@ const SearchRoutes = (app: Express) => {
             const offset = req.query.offset as string
             if (!functions.validThreadSort(sort)) return res.status(400).send("Invalid sort")
             const search = query?.trim() ?? ""
-            const stickyThreads = await sql.stickyThreads()
-            const threadResult = await sql.searchThreads(search, sort, offset)
+            const stickyThreads = await sql.thread.stickyThreads()
+            const threadResult = await sql.thread.searchThreads(search, sort, offset)
             const result = [...stickyThreads, ...threadResult]
             const newThreadCount = (stickyThreads[0]?.threadCount || 0) + (threadResult[0]?.threadCount || 0)
             for (let i = 0; i < result.length; i++) {
@@ -317,7 +317,7 @@ const SearchRoutes = (app: Express) => {
             const offset = req.query.offset as string
             if (!req.session.username) return res.status(401).send("Unauthorized")
             if (req.session.role !== "admin" && req.session.role !== "mod") return res.status(403).end()
-            const result = await sql.reports(offset)
+            const result = await sql.report.reports(offset)
             res.status(200).json(result)
         } catch (e) {
             console.log(e)

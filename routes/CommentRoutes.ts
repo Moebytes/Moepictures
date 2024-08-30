@@ -1,7 +1,7 @@
 import e, {Express, NextFunction, Request, Response} from "express"
 import rateLimit from "express-rate-limit"
 import slowDown from "express-slow-down"
-import sql from "../structures/SQLQuery"
+import sql from "../sql/SQLQuery"
 import functions from "../structures/Functions"
 import serverFunctions from "../structures/ServerFunctions"
 
@@ -18,7 +18,7 @@ const CommentRoutes = (app: Express) => {
         try {
             const commentID = req.query.commentID as string
             if (!commentID) return res.status(400).send("Bad commentID")
-            const result = await sql.comment(Number(commentID))
+            const result = await sql.comment.comment(Number(commentID))
             res.status(200).json(result)
         } catch (e) {
             console.log(e)
@@ -36,7 +36,7 @@ const CommentRoutes = (app: Express) => {
             if (Number.isNaN(Number(postID))) return res.status(400).send("Invalid postID")
             const badComment = functions.validateComment(comment)
             if (badComment) return res.status(400).send("Bad comment")
-            await sql.insertComment(Number(postID), req.session.username, comment)
+            await sql.comment.insertComment(Number(postID), req.session.username, comment)
             res.status(200).send("Success")
         } catch (e) {
             console.log(e)
@@ -50,11 +50,11 @@ const CommentRoutes = (app: Express) => {
             if (!serverFunctions.validateCSRF(req)) return res.status(400).send("Bad CSRD token")
             if (!req.session.username) return res.status(401).send("Unauthorized")
             if (Number.isNaN(Number(commentID))) return res.status(400).send("Invalid commentID")
-            const comment = await sql.comment(Number(commentID))
+            const comment = await sql.comment.comment(Number(commentID))
             if (comment?.username !== req.session.username) {
                 if (req.session.role !== "admin" && req.session.role !== "mod") return res.status(403).end()
             }
-            await sql.deleteComment(Number(commentID))
+            await sql.comment.deleteComment(Number(commentID))
             res.status(200).send("Success")
         } catch (e) {
             console.log(e)
@@ -71,9 +71,9 @@ const CommentRoutes = (app: Express) => {
             if (Number.isNaN(Number(commentID))) return res.status(400).send("Invalid commentID")
             const badComment = functions.validateComment(comment as string)
             if (badComment) return res.status(400).send("Bad comment")
-            const com = await sql.comment(Number(commentID))
+            const com = await sql.comment.comment(Number(commentID))
             if (com?.username !== req.session.username) return res.status(400).send("You can only edit your own comment")
-            await sql.updateComment(Number(commentID), comment as string)
+            await sql.comment.updateComment(Number(commentID), comment as string)
             res.status(200).send("Success")
         } catch (e) {
             console.log(e)
@@ -89,9 +89,9 @@ const CommentRoutes = (app: Express) => {
             if (req.session.banned) return res.status(403).send("You are banned")
             if (!commentID) return res.status(400).send("Bad commentID")
             if (Number.isNaN(Number(commentID))) return res.status(400).send("Invalid commentID")
-            const exists = await sql.comment(commentID)
+            const exists = await sql.comment.comment(commentID)
             if (!exists) return res.status(400).send("Comment doesn't exist")
-            await sql.inserCommentReport(req.session.username, commentID, reason)
+            await sql.report.insertCommentReport(req.session.username, commentID, reason)
             res.status(200).send("Success")
         } catch (e) {
             console.log(e)
@@ -105,7 +105,7 @@ const CommentRoutes = (app: Express) => {
             if (!serverFunctions.validateCSRF(req)) return res.status(400).send("Bad CSRF token")
             if (!reportID) return res.status(400).send("Bad reportID")
             if (req.session.role !== "admin" && req.session.role !== "mod") return res.status(403).end()
-            await sql.deleteCommentReport(Number(reportID))
+            await sql.report.deleteCommentReport(Number(reportID))
             res.status(200).send("Success")
         } catch (e) {
             console.log(e)

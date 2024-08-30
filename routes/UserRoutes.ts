@@ -1,7 +1,7 @@
 import {Express, NextFunction, Request, Response} from "express"
 import rateLimit from "express-rate-limit"
 import slowDown from "express-slow-down"
-import sql from "../structures/SQLQuery"
+import sql from "../sql/SQLQuery"
 import bcrypt from "bcrypt"
 import crypto from "crypto"
 import functions from "../structures/Functions"
@@ -53,7 +53,7 @@ const UserRoutes = (app: Express) => {
         try {
             const username = req.query.username as string
             if (!username) return res.status(200).json(null)
-            let user = await sql.user(username.trim())
+            let user = await sql.user.user(username.trim())
             if (!user) return res.status(200).json(null)
             delete user.ip
             delete user.$2fa
@@ -82,28 +82,28 @@ const UserRoutes = (app: Express) => {
             ip = ip?.toString().replace("::ffff:", "") || ""
             if (req.session.captchaAnswer !== captchaResponse?.trim()) return res.status(400).send("Bad captchaResponse")
             try {
-                await sql.insertUser(username, email)
-                await sql.updateUser(username, "joinDate", new Date().toISOString())
-                await sql.updateUser(username, "publicFavorites", true)
-                await sql.updateUser(username, "showRelated", true)
-                await sql.updateUser(username, "showTooltips", true)
-                await sql.updateUser(username, "showTagBanner", true)
-                await sql.updateUser(username, "downloadPixivID", false)
-                await sql.updateUser(username, "autosearchInterval", 3000)
-                await sql.updateUser(username, "emailVerified", false)
-                await sql.updateUser(username, "$2fa", false)
-                await sql.updateUser(username, "bio", "This user has not written anything.")
-                await sql.updateUser(username, "role", "user")
-                await sql.updateUser(username, "ip", ip)
+                await sql.user.insertUser(username, email)
+                await sql.user.updateUser(username, "joinDate", new Date().toISOString())
+                await sql.user.updateUser(username, "publicFavorites", true)
+                await sql.user.updateUser(username, "showRelated", true)
+                await sql.user.updateUser(username, "showTooltips", true)
+                await sql.user.updateUser(username, "showTagBanner", true)
+                await sql.user.updateUser(username, "downloadPixivID", false)
+                await sql.user.updateUser(username, "autosearchInterval", 3000)
+                await sql.user.updateUser(username, "emailVerified", false)
+                await sql.user.updateUser(username, "$2fa", false)
+                await sql.user.updateUser(username, "bio", "This user has not written anything.")
+                await sql.user.updateUser(username, "role", "user")
+                await sql.user.updateUser(username, "ip", ip)
                 const passwordHash = await bcrypt.hash(password, 13)
-                await sql.updateUser(username, "password", passwordHash)
+                await sql.user.updateUser(username, "password", passwordHash)
 
                 const token = crypto.randomBytes(32).toString("hex")
                 const hashToken = crypto.createHash("sha256").update(token).digest("hex")
                 try {
-                    await sql.insertEmailToken(email, hashToken)
+                    await sql.token.insertEmailToken(email, hashToken)
                 } catch {
-                    await sql.updateEmailToken(email, hashToken)
+                    await sql.token.updateEmailToken(email, hashToken)
                 }
                 const user = functions.toProperCase(username)
                 const link = `${req.protocol}://${req.get("host")}/api/user/verifyemail?token=${token}`
@@ -128,7 +128,7 @@ const UserRoutes = (app: Express) => {
             let ip = req.headers["x-forwarded-for"] || req.socket.remoteAddress
             ip = ip?.toString().replace("::ffff:", "") || ""
             if (req.session.captchaAnswer !== captchaResponse?.trim()) return res.status(400).send("Bad captchaResponse")
-            const user = await sql.user(username)
+            const user = await sql.user.user(username)
             if (!user) return res.status(400).send("Bad request")
             const matches = await bcrypt.compare(password, user.password)
             if (matches) {
@@ -144,7 +144,7 @@ const UserRoutes = (app: Express) => {
                 req.session.publicFavorites = user.publicFavorites
                 req.session.role = user.role
                 req.session.banned = user.banned
-                await sql.updateUser(username, "ip", ip)
+                await sql.user.updateUser(username, "ip", ip)
                 req.session.ip = ip
                 const {secret, token} = serverFunctions.generateCSRF()
                 req.session.csrfSecret = secret
@@ -179,7 +179,7 @@ const UserRoutes = (app: Express) => {
     app.get("/api/user/session", sessionLimiter, async (req: Request, res: Response) => {
         try {
             if (req.session.username) {
-                const user = await sql.user(req.session.username)
+                const user = await sql.user.user(req.session.username)
                 req.session.$2fa = user.$2fa
                 req.session.banned = user.banned
                 req.session.email = user.email
@@ -228,8 +228,8 @@ const UserRoutes = (app: Express) => {
                 let imagePath = functions.getTagPath("pfp", filename)
                 const buffer = Buffer.from(Object.values(bytes) as any)
                 await serverFunctions.uploadFile(imagePath, buffer)
-                await sql.updateUser(req.session.username, "image", filename)
-                if (postID) await sql.updateUser(req.session.username, "imagePost", postID)
+                await sql.user.updateUser(req.session.username, "image", filename)
+                if (postID) await sql.user.updateUser(req.session.username, "imagePost", postID)
                 req.session.image = filename
                 if (postID) req.session.imagePost = postID
                 res.status(200).send("Success")
@@ -246,11 +246,11 @@ const UserRoutes = (app: Express) => {
         try {
             if (!serverFunctions.validateCSRF(req)) return res.status(400).send("Bad CSRF token")
             if (!req.session.username) return res.status(401).send("Unauthorized")
-            const user = await sql.user(req.session.username)
+            const user = await sql.user.user(req.session.username)
             if (!user) return res.status(400).send("Bad username")
             const newPrivacy = !Boolean(user.publicFavorites)
             req.session.publicFavorites = newPrivacy 
-            await sql.updateUser(req.session.username, "publicFavorites", newPrivacy)
+            await sql.user.updateUser(req.session.username, "publicFavorites", newPrivacy)
             res.status(200).send("Success")
         } catch (e) {
             console.log(e)
@@ -262,11 +262,11 @@ const UserRoutes = (app: Express) => {
         try {
             if (!serverFunctions.validateCSRF(req)) return res.status(400).send("Bad CSRF token")
             if (!req.session.username) return res.status(401).send("Unauthorized")
-            const user = await sql.user(req.session.username)
+            const user = await sql.user.user(req.session.username)
             if (!user) return res.status(400).send("Bad username")
             const newRelated = !Boolean(user.showRelated)
             req.session.showRelated = newRelated 
-            await sql.updateUser(req.session.username, "showRelated", newRelated)
+            await sql.user.updateUser(req.session.username, "showRelated", newRelated)
             res.status(200).send("Success")
         } catch (e) {
             console.log(e)
@@ -278,11 +278,11 @@ const UserRoutes = (app: Express) => {
         try {
             if (!serverFunctions.validateCSRF(req)) return res.status(400).send("Bad CSRF token")
             if (!req.session.username) return res.status(401).send("Unauthorized")
-            const user = await sql.user(req.session.username)
+            const user = await sql.user.user(req.session.username)
             if (!user) return res.status(400).send("Bad username")
             const newTooltips = !Boolean(user.showTooltips)
             req.session.showTooltips = newTooltips 
-            await sql.updateUser(req.session.username, "showTooltips", newTooltips)
+            await sql.user.updateUser(req.session.username, "showTooltips", newTooltips)
             res.status(200).send("Success")
         } catch (e) {
             console.log(e)
@@ -294,11 +294,11 @@ const UserRoutes = (app: Express) => {
         try {
             if (!serverFunctions.validateCSRF(req)) return res.status(400).send("Bad CSRF token")
             if (!req.session.username) return res.status(401).send("Unauthorized")
-            const user = await sql.user(req.session.username)
+            const user = await sql.user.user(req.session.username)
             if (!user) return res.status(400).send("Bad username")
             const newTagBanner = !Boolean(user.showTagBanner)
             req.session.showTagBanner = newTagBanner 
-            await sql.updateUser(req.session.username, "showTagBanner", newTagBanner)
+            await sql.user.updateUser(req.session.username, "showTagBanner", newTagBanner)
             res.status(200).send("Success")
         } catch (e) {
             console.log(e)
@@ -310,11 +310,11 @@ const UserRoutes = (app: Express) => {
         try {
             if (!serverFunctions.validateCSRF(req)) return res.status(400).send("Bad CSRF token")
             if (!req.session.username) return res.status(401).send("Unauthorized")
-            const user = await sql.user(req.session.username)
+            const user = await sql.user.user(req.session.username)
             if (!user) return res.status(400).send("Bad username")
             const newDownloadPixivID = !Boolean(user.downloadPixivID)
             req.session.downloadPixivID = newDownloadPixivID 
-            await sql.updateUser(req.session.username, "downloadPixivID", newDownloadPixivID)
+            await sql.user.updateUser(req.session.username, "downloadPixivID", newDownloadPixivID)
             res.status(200).send("Success")
         } catch (e) {
             console.log(e)
@@ -328,12 +328,12 @@ const UserRoutes = (app: Express) => {
             if (!serverFunctions.validateCSRF(req)) return res.status(400).send("Bad CSRF token")
             if (!req.session.username) return res.status(401).send("Unauthorized")
             if (Number.isNaN(Number(interval))) return res.status(400).send("Bad interval")
-            const user = await sql.user(req.session.username)
+            const user = await sql.user.user(req.session.username)
             if (!user) return res.status(400).send("Bad username")
             let newInterval = Math.floor(Number(interval) * 1000)
             if (newInterval < 1000) newInterval = 1000
             req.session.autosearchInterval = newInterval 
-            await sql.updateUser(req.session.username, "autosearchInterval", newInterval)
+            await sql.user.updateUser(req.session.username, "autosearchInterval", newInterval)
             res.status(200).send("Success")
         } catch (e) {
             console.log(e)
@@ -350,16 +350,16 @@ const UserRoutes = (app: Express) => {
             newUsername = newUsername.trim().toLowerCase()
             const badUsername = functions.validateUsername(newUsername)
             if (badUsername) return res.status(400).send("Bad username")
-            const user = await sql.user(req.session.username)
+            const user = await sql.user.user(req.session.username)
             if (!user) return res.status(400).send("Bad username")
-            await sql.updateUser(req.session.username, "username", newUsername)
+            await sql.user.updateUser(req.session.username, "username", newUsername)
             req.session.username = newUsername
             if (user.image) {
                 const newFilename = `${req.session.username}${path.extname(user.image)}`
                 let oldImagePath = functions.getTagPath("pfp", user.image)
                 let newImagePath = functions.getTagPath("pfp", newFilename)
                 await serverFunctions.renameFile(oldImagePath, newImagePath)
-                await sql.updateUser(newUsername, "image", newFilename)
+                await sql.user.updateUser(newUsername, "image", newFilename)
                 req.session.image = newFilename
             }
             res.status(200).send("Success")
@@ -379,12 +379,12 @@ const UserRoutes = (app: Express) => {
             newPassword = newPassword.trim()
             const badPassword = functions.validatePassword(req.session.username, newPassword)
             if (badPassword) return res.status(400).send("Bad newPassword")
-            const user = await sql.user(req.session.username)
+            const user = await sql.user.user(req.session.username)
             if (!user) return res.status(400).send("Bad username")
             const matches = await bcrypt.compare(oldPassword, user.password)
             if (matches) {
                 const newHash = await bcrypt.hash(newPassword, 13)
-                await sql.updateUser(req.session.username, "password", newHash)
+                await sql.user.updateUser(req.session.username, "password", newHash)
                 return res.status(200).send("Success")
             } else {
                 return res.status(400).send("Bad oldPassword")
@@ -401,16 +401,16 @@ const UserRoutes = (app: Express) => {
             if (!req.session.username) return res.status(401).send("Unauthorized")
             if (!token) return res.status(400).send("Bad token")
             const hashToken = crypto.createHash("sha256").update(token.trim()).digest("hex")
-            const tokenData = await sql.emailToken(hashToken)
+            const tokenData = await sql.token.emailToken(hashToken)
             if (!tokenData) return res.status(400).send("Bad token")
             const expireDate = new Date(tokenData.expires)
             if (new Date() <= expireDate) {
-                await sql.updateUser(req.session.username, "email", tokenData.email)
+                await sql.user.updateUser(req.session.username, "email", tokenData.email)
                 req.session.email = tokenData.email
-                await sql.deleteEmailToken(tokenData.email)
+                await sql.token.deleteEmailToken(tokenData.email)
                 res.status(200).redirect("/change-email-success")
             } else {
-                await sql.deleteEmailToken(tokenData.email)
+                await sql.token.deleteEmailToken(tokenData.email)
                 res.status(400).send("Token expired")
             }
         } catch (e) {
@@ -427,15 +427,15 @@ const UserRoutes = (app: Express) => {
             if (req.session.captchaAnswer !== captchaResponse?.trim()) return res.status(400).send("Bad captchaResponse")
             const badEmail = functions.validateEmail(newEmail)
             if (badEmail) return res.status(400).send("Bad newEmail")
-            const user = await sql.user(req.session.username)
+            const user = await sql.user.user(req.session.username)
             if (!user) return res.status(400).send("Bad username")
             const token = crypto.randomBytes(32).toString("hex")
             const hashToken = crypto.createHash("sha256").update(token).digest("hex")
             try {
-                await sql.insertEmailToken(newEmail, hashToken)
+                await sql.token.insertEmailToken(newEmail, hashToken)
             } catch (e) {
                 console.log(e)
-                await sql.updateEmailToken(newEmail, hashToken)
+                await sql.token.updateEmailToken(newEmail, hashToken)
             }
             const username = functions.toProperCase(req.session.username)
             const link = `${req.protocol}://${req.get("host")}/api/user/changeemail?token=${token}`
@@ -455,20 +455,20 @@ const UserRoutes = (app: Express) => {
             if (req.session.captchaAnswer !== captchaResponse?.trim()) return res.status(400).send("Bad captchaResponse")
             const badEmail = functions.validateEmail(email)
             if (badEmail) return res.status(400).send("Bad email")
-            const user = await sql.user(req.session.username)
+            const user = await sql.user.user(req.session.username)
             if (!user) return res.status(400).send("Bad username")
             const token = crypto.randomBytes(32).toString("hex")
             const hashToken = crypto.createHash("sha256").update(token).digest("hex")
             try {
-                await sql.insertEmailToken(email, hashToken)
+                await sql.token.insertEmailToken(email, hashToken)
             } catch (e) {
             console.log(e)
-                await sql.updateEmailToken(email, hashToken)
+                await sql.token.updateEmailToken(email, hashToken)
             }
             const username = functions.toProperCase(req.session.username)
             const link = `${req.protocol}://${req.get("host")}/api/user/verifyemail?token=${token}`
             await serverFunctions.email(email, "Moepictures Email Address Verification", {username, link}, "verifyemail.html")
-            await sql.updateUser(req.session.username, "email", email)
+            await sql.user.updateUser(req.session.username, "email", email)
             req.session.email = email
             res.status(200).send("Success")
         } catch (e) {
@@ -482,19 +482,19 @@ const UserRoutes = (app: Express) => {
             let token = req.query.token as string
             if (!token) return res.status(400).send("Bad token")
             const hashToken = crypto.createHash("sha256").update(token.trim()).digest("hex")
-            const tokenData = await sql.emailToken(hashToken)
+            const tokenData = await sql.token.emailToken(hashToken)
             if (!tokenData) return res.status(400).send("Bad token")
             const expireDate = new Date(tokenData.expires)
             if (new Date() <= expireDate) {
-                const user = await sql.userByEmail(tokenData.email)
-                await sql.updateUser(user.username, "email", tokenData.email)
-                await sql.updateUser(user.username, "emailVerified", true)
+                const user = await sql.user.userByEmail(tokenData.email)
+                await sql.user.updateUser(user.username, "email", tokenData.email)
+                await sql.user.updateUser(user.username, "emailVerified", true)
                 req.session.email = tokenData.email
                 req.session.emailVerified = true
-                await sql.deleteEmailToken(tokenData.email)
+                await sql.token.deleteEmailToken(tokenData.email)
                 res.status(200).redirect("/verify-email-success")
             } else {
-                await sql.deleteEmailToken(tokenData.email)
+                await sql.token.deleteEmailToken(tokenData.email)
                 res.status(400).send("Bad request")
             }
         } catch (e) {
@@ -510,9 +510,9 @@ const UserRoutes = (app: Express) => {
             if (!req.session.username) return res.status(401).send("Unauthorized")
             if (!bio) return res.status(400).send("Bad bio")
             bio = bio.trim()
-            const user = await sql.user(req.session.username)
+            const user = await sql.user.user(req.session.username)
             if (!user) return res.status(400).send("Bad username")
-            await sql.updateUser(req.session.username, "bio", bio)
+            await sql.user.updateUser(req.session.username, "bio", bio)
             req.session.bio = bio
             res.status(200).send("Success")
         } catch (e) {
@@ -530,14 +530,14 @@ const UserRoutes = (app: Express) => {
                 await functions.timeout(2000) 
                 return res.status(200).send("Success")
             }
-            const user = await sql.userByEmail(email.trim())
+            const user = await sql.user.userByEmail(email.trim())
             if (!user) {
                 await functions.timeout(2000) 
                 return res.status(200).send("Success")
             }
             const token = crypto.randomBytes(32).toString("hex")
             const hashToken =  await bcrypt.hash(token, 13)
-            await sql.insertPasswordToken(user.username, hashToken)
+            await sql.token.insertPasswordToken(user.username, hashToken)
             const username = functions.toProperCase(user.username)
             const link = `${req.protocol}://${req.get("host")}/reset-password?token=${token}&username=${user.username}`
             await serverFunctions.email(user.email, "Moepictures Password Reset", {username, link}, "resetpassword.html")
@@ -555,18 +555,18 @@ const UserRoutes = (app: Express) => {
             if (!username || !token || !password) return res.status(400).send("Bad username, token, or password")
             const badPassword = functions.validatePassword(username, password)
             if (badPassword) return res.status(400).send("Bad password")
-            const tokenData = await sql.passwordToken(username)
+            const tokenData = await sql.token.passwordToken(username)
             if (!tokenData) return res.status(400).send("Bad token")
             const matches = await bcrypt.compare(token, tokenData.token)
             if (!matches) return res.status(400).send("Bad password")
             const expireDate = new Date(tokenData.expires)
             if (new Date() <= expireDate) {
-                await sql.deletePasswordToken(username)
+                await sql.token.deletePasswordToken(username)
                 const passwordHash = await bcrypt.hash(password, 13)
-                await sql.updateUser(username, "password", passwordHash)
+                await sql.user.updateUser(username, "password", passwordHash)
                 res.status(200).send("Success")
             } else {
-                await sql.deletePasswordToken(username)
+                await sql.token.deletePasswordToken(username)
                 res.status(400).send("Token expired")
             }
         } catch (e) {
@@ -579,16 +579,16 @@ const UserRoutes = (app: Express) => {
         try {
             if (!serverFunctions.validateCSRF(req)) return res.status(400).send("Bad CSRF token")
             if (!req.session.username) return res.status(401).send("Unauthorized")
-            const user = await sql.user(req.session.username)
+            const user = await sql.user.user(req.session.username)
             if (!user) return res.status(400).send("Bad username")
             try {
-                await sql.deleteEmailToken(user.email)
+                await sql.token.deleteEmailToken(user.email)
                 await serverFunctions.deleteFile(functions.getTagLink("pfp", user.image))
             } catch (e) {
             console.log(e)
                 // ignore
             }
-            await sql.deleteUser(req.session.username)
+            await sql.user.deleteUser(req.session.username)
             req.session.destroy((err) => {
                 if (err) throw err
                 res.status(200).send("Success")
@@ -603,14 +603,14 @@ const UserRoutes = (app: Express) => {
         try {
             const username = req.query.username
             if (username) {
-                const user = await sql.user(username as string)
+                const user = await sql.user.user(username as string)
                 if (!user || !user.publicFavorites) return res.status(200).send([])
-                let favorites = await sql.favorites(username as string)
+                let favorites = await sql.favorite.favorites(username as string)
                 favorites = functions.stripTags(favorites)
                 res.status(200).send(favorites)
             } else {
                 if (!req.session.username) return res.status(401).send("Unauthorized")
-                let favorites = await sql.favorites(req.session.username)
+                let favorites = await sql.favorite.favorites(req.session.username)
                 favorites = functions.stripTags(favorites)
                 res.status(200).send(favorites)
             }
@@ -625,12 +625,12 @@ const UserRoutes = (app: Express) => {
             const username = req.query.username
             if (!req.session.username) return res.status(401).send("Unauthorized")
             if (username) {
-                let uploads = await sql.uploads(username as string)
+                let uploads = await sql.user.uploads(username as string)
                 uploads = functions.stripTags(uploads)
                 res.status(200).send(uploads)
             } else {
                 if (!req.session.username) return res.status(401).send("Unauthorized")
-                let uploads = await sql.uploads(req.session.username)
+                let uploads = await sql.user.uploads(req.session.username)
                 uploads = functions.stripTags(uploads)
                 res.status(200).send(uploads)
             }
@@ -648,11 +648,11 @@ const UserRoutes = (app: Express) => {
             const username = req.query.username as string
             if (!req.session.username) return res.status(401).send("Unauthorized")
             if (username) {
-                let comments = await sql.searchCommentsByUsername([username], query, sort, offset)
+                let comments = await sql.comment.searchCommentsByUsername([username], query, sort, offset)
                 res.status(200).send(comments)
             } else {
                 if (!req.session.username) return res.status(400).send("Bad request")
-                let comments = await sql.searchCommentsByUsername([req.session.username], query, sort, offset)
+                let comments = await sql.comment.searchCommentsByUsername([req.session.username], query, sort, offset)
                 res.status(200).send(comments)
             }
         } catch (e) {
@@ -669,101 +669,101 @@ const UserRoutes = (app: Express) => {
             if (!req.session.username) return res.status(401).send("Unauthorized")
             if (req.session.role !== "admin" && req.session.role !== "mod") return res.status(403).end()
             if (req.session.username === username) return res.status(400).send("Cannot perform action on yourself")
-            const user = await sql.user(username)
+            const user = await sql.user.user(username)
             if (!user) return res.status(400).send("Bad username")
             if (user.role === "admin" || user.role === "mod") return res.status(400).send("Cannot perform action on this user")
             if (deleteUnverifiedChanges) {
                 // Delete unverified posts
-                const unverifiedPosts = await sql.unverifiedUserPosts(username)
+                const unverifiedPosts = await sql.search.unverifiedUserPosts(username)
                 for (const unverified of unverifiedPosts) {
-                    await sql.deleteUnverifiedPost(unverified.postID)
+                    await sql.post.deleteUnverifiedPost(unverified.postID)
                     for (let i = 0; i < unverified.images.length; i++) {
                         const file = functions.getImagePath(unverified.images[i].type, unverified.postID, unverified.images[i].order, unverified.images[i].filename)
                         await serverFunctions.deleteUnverifiedFile(file)
                     }
                 }
                 // Delete unverified post edits
-                const unverifiedPostEdits = await sql.unverifiedUserPostEdits(username)
+                const unverifiedPostEdits = await sql.search.unverifiedUserPostEdits(username)
                 for (const unverified of unverifiedPostEdits) {
-                    await sql.deleteUnverifiedPost(unverified.postID)
+                    await sql.post.deleteUnverifiedPost(unverified.postID)
                     for (let i = 0; i < unverified.images.length; i++) {
                         const file = functions.getImagePath(unverified.images[i].type, unverified.postID, unverified.images[i].order, unverified.images[i].filename)
                         await serverFunctions.deleteUnverifiedFile(file)
                     }
                 }
                 // Delete unverified post deletions
-                const postDeleteRequests = await sql.userPostDeleteRequests(username)
+                const postDeleteRequests = await sql.request.userPostDeleteRequests(username)
                 for (const postDeleteRequest of postDeleteRequests) {
-                    await sql.deletePostDeleteRequest(username, postDeleteRequest.postID)
+                    await sql.request.deletePostDeleteRequest(username, postDeleteRequest.postID)
                 }
                 // Delete unverified tag aliasing
-                const aliasRequests = await sql.userAliasRequests(username)
+                const aliasRequests = await sql.request.userAliasRequests(username)
                 for (const aliasRequest of aliasRequests) {
-                    await sql.deleteAliasRequest(username, aliasRequest.tag)
+                    await sql.request.deleteAliasRequest(username, aliasRequest.tag)
                 }
                 // Delete unverified tag deletions
-                const tagDeleteRequests = await sql.userTagDeleteRequests(username)
+                const tagDeleteRequests = await sql.request.userTagDeleteRequests(username)
                 for (const tagDeleteRequest of tagDeleteRequests) {
-                    await sql.deleteTagDeleteRequest(username, tagDeleteRequest.tag)
+                    await sql.request.deleteTagDeleteRequest(username, tagDeleteRequest.tag)
                 }
                 // Delete reports
-                const reports = await sql.userReports(username)
+                const reports = await sql.report.userReports(username)
                 for (const report of reports) {
                     if (report.type === "comment") {
-                        await sql.deleteCommentReport(report.reportID)
+                        await sql.report.deleteCommentReport(report.reportID)
                     } else if (report.type === "thread") {
-                        await sql.deleteThreadReport(report.reportID)
+                        await sql.report.deleteThreadReport(report.reportID)
                     } else if (report.type === "reply") {
-                        await sql.deleteReplyReport(report.reportID)
+                        await sql.report.deleteReplyReport(report.reportID)
                     }
                 }
             }
             if (deleteComments) {
                 // Delete comments
-                const comments = await sql.userComments(username)
+                const comments = await sql.comment.userComments(username)
                 for (const comment of comments) {
-                    await sql.deleteComment(comment.commentID)
+                    await sql.comment.deleteComment(comment.commentID)
                 }
                 // Delete threads
-                const threads = await sql.userThreads(username)
+                const threads = await sql.thread.userThreads(username)
                 for (const thread of threads) {
-                    await sql.deleteThread(thread.threadID)
+                    await sql.thread.deleteThread(thread.threadID)
                 }
                 // Delete replies
-                const replies = await sql.userReplies(username)
+                const replies = await sql.thread.userReplies(username)
                 for (const reply of replies) {
-                    await sql.deleteReply(reply.replyID)
+                    await sql.thread.deleteReply(reply.replyID)
                 }
             }
             let revertPostIDs = new Set()
             let revertTagIDs = new Set()
             if (deleteHistoryChanges) {
                 // Revert post history
-                const postHistory = await sql.userPostHistory(username)
+                const postHistory = await sql.history.userPostHistory(username)
                 for (const history of postHistory) {
                     if (history.image?.startsWith("history/")) {
                         await serverFunctions.deleteFile(history.image)
                     }
-                    await sql.deletePostHistory(history.historyID)
+                    await sql.history.deletePostHistory(history.historyID)
                     revertPostIDs.add(history.postID)
                 }
                 // Revert tag history
-                const tagHistory = await sql.userTagHistory(username)
+                const tagHistory = await sql.history.userTagHistory(username)
                 for (const history of tagHistory) {
                     if (history.image?.startsWith("history/")) {
                         await serverFunctions.deleteFile(history.image)
                     }
-                    await sql.deleteTagHistory(history.historyID)
+                    await sql.history.deleteTagHistory(history.historyID)
                     revertTagIDs.add(history.tag)
                 }
                 // Revert translation history
-                const translationHistory = await sql.userTranslationHistory(username)
+                const translationHistory = await sql.history.userTranslationHistory(username)
                 for (const history of translationHistory) {
-                    await sql.deleteTranslationHistory(history.historyID)
+                    await sql.history.deleteTranslationHistory(history.historyID)
                 }
             }
-            await sql.insertBan(username, req.session.username, reason)
-            await sql.updateUser(username, "banned", true)
+            await sql.report.insertBan(username, req.session.username, reason)
+            await sql.user.updateUser(username, "banned", true)
             res.status(200).json({revertPostIDs: Array.from(revertPostIDs), revertTagIDs: Array.from(revertTagIDs)})
         } catch (e) {
             console.log(e)
@@ -779,11 +779,11 @@ const UserRoutes = (app: Express) => {
             if (!req.session.username) return res.status(401).send("Unauthorized")
             if (req.session.role !== "admin" && req.session.role !== "mod") return res.status(403).end()
             if (req.session.username === username) return res.status(400).send("Cannot perform action on yourself")
-            const user = await sql.user(username)
+            const user = await sql.user.user(username)
             if (!user) return res.status(400).send("Bad username")
             if (user.role === "admin" || user.role === "mod") return res.status(400).send("Cannot perform action on this user")
-            await sql.deleteBan(username)
-            await sql.updateUser(username, "banned", false)
+            await sql.report.deleteBan(username)
+            await sql.user.updateUser(username, "banned", false)
             res.status(200).send("Success")
         } catch (e) {
             console.log(e)
@@ -797,7 +797,7 @@ const UserRoutes = (app: Express) => {
             if (!username) return res.status(400).send("Bad username")
             if (!req.session.username) return res.status(401).send("Unauthorized")
             if (req.session.username !== username && req.session.role !== "admin" && req.session.role !== "mod") return res.status(403).send("No permission to view ban")
-            const ban = await sql.ban(username)
+            const ban = await sql.report.ban(username)
             res.status(200).json(ban)
         } catch (e) {
             console.log(e)

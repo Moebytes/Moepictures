@@ -4,7 +4,7 @@ import handlebars from "handlebars"
 import path from "path"
 import fs from "fs"
 import crypto from "crypto"
-import sql from "../structures/SQLQuery"
+import sql from "../sql/SQLQuery"
 import functions from "../structures/Functions"
 import FormData from "form-data"
 import axios from "axios"
@@ -234,7 +234,7 @@ export default class ServerFunctions {
     }
 
     public static tagCategories = async (tags: string[]) => {
-        let result = await sql.tags(tags.filter(Boolean))
+        let result = await sql.tag.tags(tags.filter(Boolean))
         let artists = [] as any 
         let characters = [] as any 
         let series = [] as any 
@@ -263,7 +263,7 @@ export default class ServerFunctions {
     }
 
     public static unverifiedTagCategories = async (tags: any[]) => {
-        let result = await sql.unverifiedTags(tags.filter(Boolean))
+        let result = await sql.tag.unverifiedTags(tags.filter(Boolean))
         let artists = [] as any 
         let characters = [] as any 
         let series = [] as any 
@@ -313,25 +313,25 @@ export default class ServerFunctions {
 
     public static batchUpdateImplications = async () => {
         console.log("Updating all tag implications...")
-        const posts = await sql.posts()
+        const posts = await sql.search.posts()
         for (let i = 0; i < posts.length; i++) {
             const postID = posts[i].postID
             let tagMap = posts[i].tags
             for (let i = 0; i < tagMap.length; i++) {
-                const implications = await sql.implications(tagMap[i])
+                const implications = await sql.tag.implications(tagMap[i])
                 if (implications?.[0]) tagMap.push(...implications.map(((i: any) => i.implication)))
             }
             tagMap = functions.removeDuplicates(tagMap)
-            await sql.purgeTagMap(postID)
-            await sql.insertTagMap(postID, tagMap)
+            await sql.tag.purgeTagMap(postID)
+            await sql.tag.insertTagMap(postID, tagMap)
         }
         console.log("Done")
     }
 
     public static updateHashes = async () => {
         console.log("Updating all hashes...")
-        const modelPosts = await sql.search([], "model", "all", "all", "date")
-        const audioPosts = await sql.search([], "audio", "all", "all", "date")
+        const modelPosts = await sql.search.search([], "model", "all", "all", "date")
+        const audioPosts = await sql.search.search([], "audio", "all", "all", "date")
         const posts = [...modelPosts, ...audioPosts]
         for (let i = 0; i < posts.length; i++) {
             const post = posts[i]
@@ -342,7 +342,7 @@ export default class ServerFunctions {
                 const buffer = await ServerFunctions.getFile(imgPath) as Buffer
                 const md5 = crypto.createHash("md5").update(buffer).digest("hex")
                 console.log(md5)
-                await sql.updateImage(image.imageID, "hash", md5)
+                await sql.post.updateImage(image.imageID, "hash", md5)
             }
         }
         console.log("Done")

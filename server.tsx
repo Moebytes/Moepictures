@@ -21,7 +21,7 @@ import {StaticRouter as Router} from "react-router-dom"
 import functions from "./structures/Functions"
 import cryptoFunctions from "./structures/CryptoFunctions"
 import serverFunctions from "./structures/ServerFunctions"
-import sql from "./structures/SQLQuery"
+import sql from "./sql/SQLQuery"
 import $2FARoutes from "./routes/2FARoutes"
 import CommentRoutes from "./routes/CommentRoutes"
 import CutenessRoutes from "./routes/CutenessRoutes"
@@ -148,7 +148,7 @@ for (let i = 0; i < folders.length; i++) {
       if (req.session.role !== "admin" && req.session.role !== "mod") {
         const postID = key.match(/(?<=\/)\d+(?=\/)/)?.[0]
         if (postID) {
-          const post = await sql.post(Number(postID))
+          const post = await sql.post.post(Number(postID))
           if (post.restrict === "explicit") return res.status(403).send("No permission")
         }
       }
@@ -214,7 +214,7 @@ for (let i = 0; i < folders.length; i++) {
       if (req.session.role !== "admin" && req.session.role !== "mod") {
         const postID = key.match(/(?<=\/)\d+(?=\/)/)?.[0]
         if (postID) {
-          const post = await sql.post(Number(postID))
+          const post = await sql.post.post(Number(postID))
           if (post.restrict === "explicit") return res.status(403).send("No permission")
         }
       }
@@ -311,78 +311,78 @@ const run = async () => {
   await sql.createDB()
 
   /** Unverified tags */
-  await sql.insertUnverifiedTag("unknown-artist", "artist")
-  await sql.insertUnverifiedTag("unknown-character", "character")
-  await sql.insertUnverifiedTag("unknown-series", "series")
-  await sql.insertUnverifiedTag("needs-tags", "meta")
+  await sql.tag.insertUnverifiedTag("unknown-artist", "artist")
+  await sql.tag.insertUnverifiedTag("unknown-character", "character")
+  await sql.tag.insertUnverifiedTag("unknown-series", "series")
+  await sql.tag.insertUnverifiedTag("needs-tags", "meta")
 
   /* Default artist tags */
-  let exists = await sql.insertTag("unknown-artist", "artist")
-  if (!exists) await sql.updateTag("unknown-artist", "description", "The artist is unknown.")
-  exists = await sql.insertTag("original", "artist")
-  if (!exists) await sql.updateTag("original", "description", "The character is an original creation, ie. this is not fanart.")
-  exists = await sql.insertTag("official-art", "artist")
-  if (!exists) await sql.updateTag("official-art", "description", "Art made by the official company of the series (where the original artist is unknown).")
+  let exists = await sql.tag.insertTag("unknown-artist", "artist")
+  if (!exists) await sql.tag.updateTag("unknown-artist", "description", "The artist is unknown.")
+  exists = await sql.tag.insertTag("original", "artist")
+  if (!exists) await sql.tag.updateTag("original", "description", "The character is an original creation, ie. this is not fanart.")
+  exists = await sql.tag.insertTag("official-art", "artist")
+  if (!exists) await sql.tag.updateTag("official-art", "description", "Art made by the official company of the series (where the original artist is unknown).")
 
   /* Default character tags */
-  exists = await sql.insertTag("unknown-character", "character")
-  if (!exists) await sql.updateTag("unknown-character", "description", "The character is unknown.")
-  exists = await sql.insertTag("no-character", "character")
-  if (!exists) await sql.updateTag("no-character", "description", "The character is not applicable.")
+  exists = await sql.tag.insertTag("unknown-character", "character")
+  if (!exists) await sql.tag.updateTag("unknown-character", "description", "The character is unknown.")
+  exists = await sql.tag.insertTag("no-character", "character")
+  if (!exists) await sql.tag.updateTag("no-character", "description", "The character is not applicable.")
 
   /* Default series tags */
-  exists = await sql.insertTag("unknown-series", "series")
-  if (!exists) await sql.updateTag("unknown-series", "description", "The series is unknown.")
-  exists = await sql.insertTag("no-series", "series")
-  if (!exists) await sql.updateTag("no-series", "description", "The series is not applicable.")
+  exists = await sql.tag.insertTag("unknown-series", "series")
+  if (!exists) await sql.tag.updateTag("unknown-series", "description", "The series is unknown.")
+  exists = await sql.tag.insertTag("no-series", "series")
+  if (!exists) await sql.tag.updateTag("no-series", "description", "The series is not applicable.")
 
   /* Default meta tags */
-  exists = await sql.insertTag("needs-tags", "meta")
-  if (!exists) await sql.updateTag("needs-tags", "description", "The post needs tags.")
-  exists = await sql.insertTag("no-audio", "meta")
-  if (!exists) await sql.updateTag("no-audio", "description", "The post is a video with no audio.")
-  exists = await sql.insertTag("with-audio", "meta")
-  if (!exists) await sql.updateTag("with-audio", "description", "The post is a video with audio.")
-  exists = await sql.insertTag("self-post", "meta")
-  if (!exists) await sql.updateTag("self-post", "description", "The artwork was posted by the original creator.")
-  exists = await sql.insertTag("transparent", "meta")
-  if (!exists) await sql.updateTag("transparent", "description", "The post has a transparent background.")
-  exists = await sql.insertTag("commentary", "meta")
-  if (!exists) await sql.updateTag("commentary", "description", "The post has artist commentary.")
-  exists = await sql.insertTag("translated", "meta")
-  if (!exists) await sql.updateTag("translated", "description", "The post contains complete translations.")
-  exists = await sql.insertTag("partially-translated", "meta")
-  if (!exists) await sql.updateTag("partially-translated", "description", "Post is only partially translated.")
-  exists = await sql.insertTag("check-translation", "meta")
-  if (!exists) await sql.updateTag("check-translation", "description", "Check the translations, because they might be incorrect.")
-  exists = await sql.insertTag("multiple-artists", "meta")
-  if (!exists) await sql.updateTag("multiple-artists", "description", "The post has multiple artists.")
-  exists = await sql.insertTag("bad-pixiv-id", "meta")
-  if (!exists) await sql.updateTag("bad-pixiv-id", "description", "The pixiv id was deleted.")
+  exists = await sql.tag.insertTag("needs-tags", "meta")
+  if (!exists) await sql.tag.updateTag("needs-tags", "description", "The post needs tags.")
+  exists = await sql.tag.insertTag("no-audio", "meta")
+  if (!exists) await sql.tag.updateTag("no-audio", "description", "The post is a video with no audio.")
+  exists = await sql.tag.insertTag("with-audio", "meta")
+  if (!exists) await sql.tag.updateTag("with-audio", "description", "The post is a video with audio.")
+  exists = await sql.tag.insertTag("self-post", "meta")
+  if (!exists) await sql.tag.updateTag("self-post", "description", "The artwork was posted by the original creator.")
+  exists = await sql.tag.insertTag("transparent", "meta")
+  if (!exists) await sql.tag.updateTag("transparent", "description", "The post has a transparent background.")
+  exists = await sql.tag.insertTag("commentary", "meta")
+  if (!exists) await sql.tag.updateTag("commentary", "description", "The post has artist commentary.")
+  exists = await sql.tag.insertTag("translated", "meta")
+  if (!exists) await sql.tag.updateTag("translated", "description", "The post contains complete translations.")
+  exists = await sql.tag.insertTag("partially-translated", "meta")
+  if (!exists) await sql.tag.updateTag("partially-translated", "description", "Post is only partially translated.")
+  exists = await sql.tag.insertTag("check-translation", "meta")
+  if (!exists) await sql.tag.updateTag("check-translation", "description", "Check the translations, because they might be incorrect.")
+  exists = await sql.tag.insertTag("multiple-artists", "meta")
+  if (!exists) await sql.tag.updateTag("multiple-artists", "description", "The post has multiple artists.")
+  exists = await sql.tag.insertTag("bad-pixiv-id", "meta")
+  if (!exists) await sql.tag.updateTag("bad-pixiv-id", "description", "The pixiv id was deleted.")
 
   /* Default software tags */
-  exists = await sql.insertTag("photoshop", "tag")
-  if (!exists) await sql.updateTag("photoshop", "description", "Photoshop is an image editing software primarily used for image editing, color correction, and drawing. It is developed by Adobe.")
-  exists = await sql.insertTag("premiere-pro", "tag")
-  if (!exists) await sql.updateTag("premiere-pro", "description", "Premiere Pro is a video editing software primarily used for video editing and color correction. It is developed by Adobe.")
-  exists = await sql.insertTag("after-effects", "tag")
-  if (!exists) await sql.updateTag("after-effects", "description", "After Effects is a video compositing software primarily used for video effects, motion graphics, and tween animation. It is developed by Adobe.")
-  exists = await sql.insertTag("clip-studio-paint", "tag")
-  if (!exists) await sql.updateTag("clip-studio-paint", "description", "Clip Studio Paint is a drawing software that allows the creation of illustrations, comics, and frame-by-frame animations. It is developed by CELSYS.")
-  exists = await sql.insertTag("live2d", "tag")
-  if (!exists) await sql.updateTag("live2d", "description", "Live2D is an animation software that allows the creation of 2D animation by using mesh deformations, warp/rotation deformers, and parameter keyframes. It is developed by Live2D.")
-  exists = await sql.insertTag("blender", "tag")
-  if (!exists) await sql.updateTag("blender", "description", "Blender is a 3D software primarily used for 3D modeling, 3D sculpting, 3D animation, and particle simulations. It is developed by the Blender Foundation.")
-  exists = await sql.insertTag("krita", "tag")
-  if (!exists) await sql.updateTag("krita", "description", "Krita is a drawing software primarily used for drawing and 2D animation. It is developed by the Krita Foundation.")
-  exists = await sql.insertTag("sai", "tag")
-  if (!exists) await sql.updateTag("sai", "description", "Sai is a lightweight drawing software developed by Systemax Software.")
-  exists = await sql.insertTag("procreate", "tag")
-  if (!exists) await sql.updateTag("procreate", "description", "Procreate is a drawing software for iPad developed by Savage Interactive.")
-  exists = await sql.insertTag("mspaint", "tag")
-  if (!exists) await sql.updateTag("mspaint", "description", "MS Paint is a basic image editing software included with Windows. It is developed by Microsoft.")
-  exists = await sql.insertTag("gimp", "tag")
-  if (!exists) await sql.updateTag("gimp", "description", "Gimp is a free image editing software developed by GIMP Development Team.")
+  exists = await sql.tag.insertTag("photoshop", "tag")
+  if (!exists) await sql.tag.updateTag("photoshop", "description", "Photoshop is an image editing software primarily used for image editing, color correction, and drawing. It is developed by Adobe.")
+  exists = await sql.tag.insertTag("premiere-pro", "tag")
+  if (!exists) await sql.tag.updateTag("premiere-pro", "description", "Premiere Pro is a video editing software primarily used for video editing and color correction. It is developed by Adobe.")
+  exists = await sql.tag.insertTag("after-effects", "tag")
+  if (!exists) await sql.tag.updateTag("after-effects", "description", "After Effects is a video compositing software primarily used for video effects, motion graphics, and tween animation. It is developed by Adobe.")
+  exists = await sql.tag.insertTag("clip-studio-paint", "tag")
+  if (!exists) await sql.tag.updateTag("clip-studio-paint", "description", "Clip Studio Paint is a drawing software that allows the creation of illustrations, comics, and frame-by-frame animations. It is developed by CELSYS.")
+  exists = await sql.tag.insertTag("live2d", "tag")
+  if (!exists) await sql.tag.updateTag("live2d", "description", "Live2D is an animation software that allows the creation of 2D animation by using mesh deformations, warp/rotation deformers, and parameter keyframes. It is developed by Live2D.")
+  exists = await sql.tag.insertTag("blender", "tag")
+  if (!exists) await sql.tag.updateTag("blender", "description", "Blender is a 3D software primarily used for 3D modeling, 3D sculpting, 3D animation, and particle simulations. It is developed by the Blender Foundation.")
+  exists = await sql.tag.insertTag("krita", "tag")
+  if (!exists) await sql.tag.updateTag("krita", "description", "Krita is a drawing software primarily used for drawing and 2D animation. It is developed by the Krita Foundation.")
+  exists = await sql.tag.insertTag("sai", "tag")
+  if (!exists) await sql.tag.updateTag("sai", "description", "Sai is a lightweight drawing software developed by Systemax Software.")
+  exists = await sql.tag.insertTag("procreate", "tag")
+  if (!exists) await sql.tag.updateTag("procreate", "description", "Procreate is a drawing software for iPad developed by Savage Interactive.")
+  exists = await sql.tag.insertTag("mspaint", "tag")
+  if (!exists) await sql.tag.updateTag("mspaint", "description", "MS Paint is a basic image editing software included with Windows. It is developed by Microsoft.")
+  exists = await sql.tag.insertTag("gimp", "tag")
+  if (!exists) await sql.tag.updateTag("gimp", "description", "Gimp is a free image editing software developed by GIMP Development Team.")
   app.listen(process.env.PORT || 8082, () => console.log("Started the website server!"))
 }
 

@@ -107,7 +107,7 @@ const CutenessMeter: React.FunctionComponent<Props> = (props) => {
                 <img className="cuteness-img" src={deleteStar} style={{filter: getFilter()}} onClick={deleteRating}/>
             </div>
             <div className="cuteness-slider-container" style={{filter: getFilter2()}}>
-                <Rating style={{fontSize: 0}} onClick={setCutenessValue} initialValue={getCutenessValue()} allowFraction={true} fullFraction={true} 
+                <Rating style={{paddingRight: "10px"}} onClick={setCutenessValue} initialValue={getCutenessValue()} allowFraction={true} fullFraction={true} 
                 allowTitleTag={false} multiplier={200} showTooltip={true} tooltipClassName="cuteness-tooltip" tooltipDefaultText={`${averageCuteness}`}
                 iconsCount={5} size={80} snap={2} SVGstrokeColor="black" SVGstorkeWidth={1} fillColor="#4b22f0" emptyColor="black"/>
                 {/* <Slider ref={sliderRef} renderTrack={(props, state) => <div {...props} className={`cuteness-track-${state.index}`}><span className="cuteness-text">{state.value}</span></div>} className="cuteness-slider" thumbClassName="cuteness-thumb" onChange={(value) => setCuteness(value)} min={0} max={1000} step={1} value={cuteness}/> */}

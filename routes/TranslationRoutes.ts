@@ -1,7 +1,7 @@
 import {Express, NextFunction, Request, Response} from "express"
 import rateLimit from "express-rate-limit"
 import slowDown from "express-slow-down"
-import sql from "../structures/SQLQuery"
+import sql from "../sql/SQLQuery"
 import functions from "../structures/Functions"
 import serverFunctions from "../structures/ServerFunctions"
 
@@ -24,18 +24,18 @@ const TranslationRoutes = (app: Express) => {
             if (req.session.banned) return res.status(403).send("You are banned")
             if (!data) return res.status(400).send("Bad data")
 
-            const translation = await sql.translation(postID, order)
+            const translation = await sql.translation.translation(postID, order)
             if (!translation) {
                 if (JSON.stringify(data) === "[]") return res.status(200).send("Success")
-                await sql.insertTranslation(postID, req.session.username, order, JSON.stringify(data))
+                await sql.translation.insertTranslation(postID, req.session.username, order, JSON.stringify(data))
             } else {
                 if (JSON.stringify(data) === "[]") {
-                    await sql.deleteTranslation(translation.translationID)
+                    await sql.translation.deleteTranslation(translation.translationID)
                 } else {
-                    await sql.updateTranslation(translation.translationID, req.session.username, JSON.stringify(data))
+                    await sql.translation.updateTranslation(translation.translationID, req.session.username, JSON.stringify(data))
                 }
             }
-            await sql.insertTranslationHistory(postID, order, req.session.username, JSON.stringify(data), reason)
+            await sql.history.insertTranslationHistory(postID, order, req.session.username, JSON.stringify(data), reason)
             res.status(200).send("Success")
         } catch (e) {
             console.log(e)
@@ -53,18 +53,18 @@ const TranslationRoutes = (app: Express) => {
             if (req.session.banned) return res.status(403).send("You are banned")
             if (!data) return res.status(400).send("Bad data")
 
-            const translation = await sql.translation(postID, order)
+            const translation = await sql.translation.translation(postID, order)
             if (!translation) {
                 if (JSON.stringify(data) === "[]") return res.status(200).send("Success")
-                await sql.insertTranslation(postID, req.session.username, order, JSON.stringify(data))
+                await sql.translation.insertTranslation(postID, req.session.username, order, JSON.stringify(data))
             } else {
                 if (JSON.stringify(data) === "[]") {
-                    await sql.deleteTranslation(translation.translationID)
+                    await sql.translation.deleteTranslation(translation.translationID)
                 } else {
-                    await sql.updateTranslation(translation.translationID, req.session.username, JSON.stringify(data))
+                    await sql.translation.updateTranslation(translation.translationID, req.session.username, JSON.stringify(data))
                 }
             }
-            await sql.insertTranslationHistory(postID, order, req.session.username, JSON.stringify(data), "")
+            await sql.history.insertTranslationHistory(postID, order, req.session.username, JSON.stringify(data), "")
             res.status(200).send("Success")
         } catch (e) {
             console.log(e)
@@ -76,7 +76,7 @@ const TranslationRoutes = (app: Express) => {
         try {
             const postID = req.query.postID
             if (Number.isNaN(Number(postID))) return res.status(400).send("Invalid postID")
-            const translations = await sql.translations(Number(postID))
+            const translations = await sql.translation.translations(Number(postID))
             res.status(200).json(translations)
         } catch (e) {
             console.log(e)
@@ -93,11 +93,11 @@ const TranslationRoutes = (app: Express) => {
             if (!req.session.username) return res.status(401).send("Unauthorized")
             if (!data) return res.status(400).send("Bad data")
 
-            const translation = await sql.unverifiedTranslation(postID, order, req.session.username)
+            const translation = await sql.translation.unverifiedTranslation(postID, order, req.session.username)
             if (!translation) {
-                await sql.insertUnverifiedTranslation(postID, req.session.username, order, JSON.stringify(data), reason)
+                await sql.translation.insertUnverifiedTranslation(postID, req.session.username, order, JSON.stringify(data), reason)
             } else {
-                await sql.updateUnverifiedTranslation(translation.translationID, req.session.username, JSON.stringify(data), reason)
+                await sql.translation.updateUnverifiedTranslation(translation.translationID, req.session.username, JSON.stringify(data), reason)
             }
             res.status(200).send("Success")
         } catch (e) {
@@ -111,7 +111,7 @@ const TranslationRoutes = (app: Express) => {
             const offset = req.query.offset as string
             if (!req.session.username) return res.status(401).send("Unauthorized")
             if (req.session.role !== "admin" && req.session.role !== "mod") return res.status(403).end()
-            const result = await sql.unverifiedTranslations(offset)
+            const result = await sql.translation.unverifiedTranslations(offset)
             res.status(200).json(result)
         } catch (e) {
             console.log(e)
@@ -125,10 +125,10 @@ const TranslationRoutes = (app: Express) => {
           let translationID = Number(req.body.translationID)
           if (Number.isNaN(translationID)) return res.status(400).send("Bad translationID")
           if (req.session.role !== "admin" && req.session.role !== "mod") return res.status(403).end()
-          const unverified = await sql.unverifiedTranslationID(Number(translationID))
+          const unverified = await sql.translation.unverifiedTranslationID(Number(translationID))
           if (!unverified) return res.status(400).send("Bad translationID")
-          await sql.insertTranslation(unverified.postID, unverified.updater, unverified.order, JSON.stringify(unverified.data))
-          await sql.deleteUnverifiedTranslation(Number(translationID))
+          await sql.translation.insertTranslation(unverified.postID, unverified.updater, unverified.order, JSON.stringify(unverified.data))
+          await sql.translation.deleteUnverifiedTranslation(Number(translationID))
           res.status(200).send("Success")
         } catch (e) {
           console.log(e)
@@ -142,9 +142,9 @@ const TranslationRoutes = (app: Express) => {
             let translationID = Number(req.body.translationID)
             if (Number.isNaN(translationID)) return res.status(400).send("Bad translationID")
             if (req.session.role !== "admin" && req.session.role !== "mod") return res.status(403).end()
-            const unverified = await sql.unverifiedTranslationID(Number(translationID))
+            const unverified = await sql.translation.unverifiedTranslationID(Number(translationID))
             if (!unverified) return res.status(400).send("Bad translationID")
-            await sql.deleteUnverifiedTranslation(Number(translationID))
+            await sql.translation.deleteUnverifiedTranslation(Number(translationID))
             res.status(200).send("Success")
         } catch (e) {
             console.log(e)
@@ -158,7 +158,7 @@ const TranslationRoutes = (app: Express) => {
             const order = req.query.order as string
             const offset = req.query.offset as string
             if (!req.session.username) return res.status(401).send("Unauthorized")
-            const result = await sql.translationHistory(postID, order, offset)
+            const result = await sql.history.translationHistory(postID, order, offset)
             res.status(200).json(result)
         } catch (e) {
             console.log(e)
@@ -175,11 +175,11 @@ const TranslationRoutes = (app: Express) => {
             if (Number.isNaN(Number(historyID))) return res.status(400).send("Invalid historyID")
             if (!req.session.username) return res.status(401).send("Unauthorized")
             if (req.session.role !== "admin" && req.session.role !== "mod") return res.status(403).end()
-            const translationHistory = await sql.translationHistory(postID, order)
+            const translationHistory = await sql.history.translationHistory(postID, order)
             if (translationHistory[0]?.historyID === Number(historyID)) {
                 return res.status(400).send("Bad historyID")
             } else {
-                await sql.deleteTranslationHistory(Number(historyID))
+                await sql.history.deleteTranslationHistory(Number(historyID))
             }
             res.status(200).send("Success")
         } catch (e) {
