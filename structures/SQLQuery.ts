@@ -418,14 +418,14 @@ export default class SQLQuery {
 
   /** Bulk insert new tags. */
   public static bulkInsertTags = async (bulkTags: any[], creator: string, noImageUpdate?: boolean) => {
-    let tagValues = [] as any
+    let tagValues = new Set<string>()
     let rawValues = [] as any
     let valueArray = [] as any 
     let i = 1 
     for (let j = 0; j < bulkTags.length; j++) {
-      if (tagValues.includes(bulkTags[j].tag)) continue
-      tagValues.push(bulkTags[j].tag)
-      valueArray.push(`($${i}, $${i + 1}, $${i + 2}, $${i + 3}, $${i + 4})`)
+      if (tagValues.has(bulkTags[j].tag)) continue
+      tagValues.add(bulkTags[j].tag)
+      valueArray.push(`($${i}, $${i + 1}, $${i + 2}, $${i + 3}, $${i + 4}, $${i + 5}, $${i + 6}, $${i + 7})`)
       rawValues.push(bulkTags[j].tag)
       rawValues.push(bulkTags[j].type)
       rawValues.push(bulkTags[j].description)
@@ -567,8 +567,8 @@ export default class SQLQuery {
     if (sort === "reverse date") sortQuery = `ORDER BY posts."uploadDate" ASC`
     if (sort === "drawn") sortQuery = `ORDER BY posts.drawn DESC NULLS LAST`
     if (sort === "reverse drawn") sortQuery = `ORDER BY posts.drawn ASC NULLS LAST`
-    if (sort === "cuteness") sortQuery = `ORDER BY "cutenessAvg" DESC`
-    if (sort === "reverse cuteness") sortQuery = `ORDER BY "cutenessAvg" ASC`
+    if (sort === "cuteness") sortQuery = `ORDER BY "cuteness" DESC`
+    if (sort === "reverse cuteness") sortQuery = `ORDER BY "cuteness" ASC`
     if (sort === "tagcount") sortQuery = `ORDER BY "tagCount" DESC`
     if (sort === "reverse tagcount") sortQuery = `ORDER BY "tagCount" ASC`
     if (sort === "filesize") sortQuery = `ORDER BY "imageSize" DESC`
@@ -578,7 +578,7 @@ export default class SQLQuery {
     let ANDtags = [] as string[]
     let ORtags = [] as string[]
     let NOTtags = [] as string[]
-    tags.forEach((tag) => {
+    tags?.forEach((tag) => {
       if (tag.startsWith("+")) {
         ORtags.push(tag.replace("+", ""))
       } else if (tag.startsWith("-")) {
@@ -623,7 +623,7 @@ export default class SQLQuery {
           COUNT(DISTINCT favorites."favoriteID") AS "favoriteCount",
           ${includeTags ? `COUNT(DISTINCT "tag map"."tagID") AS "tagCount",` : ""}
           MAX(DISTINCT images."size") AS "imageSize",
-          ROUND(AVG(DISTINCT cuteness."cuteness")) AS "cutenessAvg"
+          ROUND(AVG(DISTINCT cuteness."cuteness")) AS "cuteness"
           FROM posts
           JOIN images ON posts."postID" = images."postID"
           ${includeTags ? `JOIN "tag map" ON posts."postID" = "tag map"."postID"` : ""}
@@ -655,7 +655,7 @@ export default class SQLQuery {
         FROM (
           SELECT posts.*, json_agg(DISTINCT images.*) AS images, ${withTags ? `array_agg(DISTINCT "tag map".tag) AS tags,` : ""}
           COUNT(DISTINCT favorites."favoriteID") AS "favoriteCount",
-          ROUND(AVG(DISTINCT cuteness."cuteness")) AS "cutenessAvg"
+          ROUND(AVG(DISTINCT cuteness."cuteness")) AS "cuteness"
           FROM posts
           JOIN images ON posts."postID" = images."postID"
           ${withTags ? `JOIN "tag map" ON posts."postID" = "tag map"."postID"` : ""}
@@ -678,7 +678,7 @@ export default class SQLQuery {
       text: functions.multiTrim(`
           SELECT posts.*, json_agg(DISTINCT images.*) AS images, json_agg(DISTINCT "tag map".tag) AS tags,
           COUNT(DISTINCT favorites."favoriteID") AS "favoriteCount",
-          ROUND(AVG(DISTINCT cuteness."cuteness")) AS "cutenessAvg"
+          ROUND(AVG(DISTINCT cuteness."cuteness")) AS "cuteness"
           FROM posts
           JOIN images ON posts."postID" = images."postID"
           JOIN "tag map" ON posts."postID" = "tag map"."postID"
@@ -773,7 +773,7 @@ export default class SQLQuery {
       text: functions.multiTrim(`
           SELECT posts.*, json_agg(DISTINCT images.*) AS images, json_agg(DISTINCT "tag map".tag) AS tags,
           COUNT(DISTINCT favorites."favoriteID") AS "favoriteCount",
-          ROUND(AVG(DISTINCT cuteness."cuteness")) AS "cutenessAvg"
+          ROUND(AVG(DISTINCT cuteness."cuteness")) AS "cuteness"
           FROM posts
           JOIN images ON posts."postID" = images."postID"
           JOIN "tag map" ON posts."postID" = "tag map"."postID"
@@ -960,7 +960,7 @@ export default class SQLQuery {
     let ANDtags = [] as string[]
     let ORtags = [] as string[]
     let NOTtags = [] as string[]
-    tags.forEach((tag) => {
+    tags?.forEach((tag) => {
       if (tag.startsWith("+")) {
         ORtags.push(tag.replace("+", ""))
       } else if (tag.startsWith("-")) {
@@ -998,7 +998,7 @@ export default class SQLQuery {
         FROM (
           SELECT posts.*, json_agg(DISTINCT images.*) AS images, ${includeTags ? `array_agg(DISTINCT "tag map".tag) AS tags,` : ""}
           COUNT(DISTINCT favorites."favoriteID") AS "favoriteCount",
-          ROUND(AVG(DISTINCT cuteness."cuteness")) AS "cutenessAvg"
+          ROUND(AVG(DISTINCT cuteness."cuteness")) AS "cuteness"
           FROM posts
           JOIN images ON posts."postID" = images."postID"
           ${includeTags ? `JOIN "tag map" ON posts."postID" = "tag map"."postID"` : ""}
@@ -1031,8 +1031,8 @@ export default class SQLQuery {
     let whereQuery = whereQueries.length ? `AND ${whereQueries.join(" AND ")}` : ""
     let sortQuery = ""
     if (sort === "random") sortQuery = `ORDER BY random()`
-    if (sort === "cuteness") sortQuery = `ORDER BY "cutenessAvg" DESC`
-    if (sort === "reverse cuteness") sortQuery = `ORDER BY "cutenessAvg" ASC`
+    if (sort === "cuteness") sortQuery = `ORDER BY "cuteness" DESC`
+    if (sort === "reverse cuteness") sortQuery = `ORDER BY "cuteness" ASC`
     if (sort === "posts") sortQuery = `ORDER BY "postCount" DESC`
     if (sort === "reverse posts") sortQuery = `ORDER BY "postCount" ASC`
     if (sort === "alphabetic") sortQuery = `ORDER BY tags.tag ASC`
@@ -1041,7 +1041,7 @@ export default class SQLQuery {
           text: functions.multiTrim(`
                   WITH post_json AS (
                     SELECT posts.*, json_agg(DISTINCT images.*) AS images,
-                    ROUND(AVG(DISTINCT cuteness."cuteness")) AS "cutenessAvg"
+                    ROUND(AVG(DISTINCT cuteness."cuteness")) AS "cuteness"
                     FROM posts
                     JOIN images ON images."postID" = posts."postID"
                     FULL JOIN "cuteness" ON posts."postID" = "cuteness"."postID"
@@ -1050,7 +1050,7 @@ export default class SQLQuery {
                   SELECT tags.*, json_agg(post_json.*) AS posts,
                   COUNT(*) OVER() AS "tagCount",
                   COUNT(DISTINCT post_json."postID") AS "postCount",
-                  ROUND(AVG(DISTINCT post_json."cutenessAvg")) AS "cutenessAvg"
+                  ROUND(AVG(DISTINCT post_json."cuteness")) AS "cuteness"
                   FROM tags
                   JOIN "tag map" ON "tag map"."tag" = tags."tag" ${whereQuery}
                   JOIN post_json ON post_json."postID" = "tag map"."postID"
@@ -1754,7 +1754,7 @@ export default class SQLQuery {
     let ANDtags = [] as string[]
     let ORtags = [] as string[]
     let NOTtags = [] as string[]
-    tags.forEach((tag) => {
+    tags?.forEach((tag) => {
       if (tag.startsWith("+")) {
         ORtags.push(tag.replace("+", ""))
       } else if (tag.startsWith("-")) {
@@ -1795,7 +1795,7 @@ export default class SQLQuery {
         WITH post_json AS (
           SELECT posts.*, json_agg(DISTINCT images.*) AS images, ${includeTags ? `array_agg(DISTINCT "tag map".tag) AS tags,` : ""}
           COUNT(DISTINCT favorites."favoriteID") AS "favoriteCount",
-          AVG(DISTINCT cuteness."cuteness") AS "cutenessAvg"
+          AVG(DISTINCT cuteness."cuteness") AS "cuteness"
           FROM posts
           JOIN images ON images."postID" = posts."postID"
           ${includeTags ? `JOIN "tag map" ON posts."postID" = "tag map"."postID"` : ""}
@@ -1812,7 +1812,7 @@ export default class SQLQuery {
           'type', post_json."type",
           'restrict', post_json."restrict",
           'style', post_json."style",
-          'cuteness', post_json."cutenessAvg",
+          'cuteness', post_json."cuteness",
           'favorites', post_json."favoriteCount",
           'thirdParty', post_json."thirdParty",
           'drawn', post_json."drawn",
@@ -1834,7 +1834,7 @@ export default class SQLQuery {
         JOIN post_json ON post_json."postID" = favorites."postID"
         ${whereQueries ? `WHERE ${whereQueries}` : ""}
         GROUP BY favorites."favoriteID", post_json."postID", post_json."uploader", post_json."updater", ${includeTags ? `post_json."tags",` : ""}
-        post_json."type", post_json."restrict", post_json."style", post_json."cutenessAvg", post_json."favoriteCount", post_json."thirdParty", 
+        post_json."type", post_json."restrict", post_json."style", post_json."cuteness", post_json."favoriteCount", post_json."thirdParty", 
         post_json."drawn", post_json."uploadDate", post_json."updatedDate", post_json."title", post_json."hidden", post_json."translatedTitle",
         post_json."artist", post_json."link", post_json."commentary", post_json."translatedCommentary", post_json."bookmarks", post_json."mirrors"
         ${sortQuery}
@@ -2100,7 +2100,7 @@ export default class SQLQuery {
       text: functions.multiTrim(`
             WITH post_json AS (
               SELECT posts.*, json_agg(DISTINCT images.*) AS images,
-              ROUND(AVG(DISTINCT cuteness."cuteness")) AS "cutenessAvg"
+              ROUND(AVG(DISTINCT cuteness."cuteness")) AS "cuteness"
               FROM posts
               JOIN images ON images."postID" = posts."postID"
               FULL JOIN "cuteness" ON posts."postID" = "cuteness"."postID"
@@ -2129,7 +2129,7 @@ export default class SQLQuery {
       text: functions.multiTrim(`
             WITH post_json AS (
               SELECT posts.*, json_agg(DISTINCT images.*) AS images,
-              ROUND(AVG(DISTINCT cuteness."cuteness")) AS "cutenessAvg"
+              ROUND(AVG(DISTINCT cuteness."cuteness")) AS "cuteness"
               FROM posts
               JOIN images ON images."postID" = posts."postID"
               FULL JOIN "cuteness" ON posts."postID" = "cuteness"."postID"
@@ -2158,7 +2158,7 @@ export default class SQLQuery {
       text: functions.multiTrim(`
             WITH post_json AS (
               SELECT posts.*, json_agg(DISTINCT images.*) AS images,
-              ROUND(AVG(DISTINCT cuteness."cuteness")) AS "cutenessAvg"
+              ROUND(AVG(DISTINCT cuteness."cuteness")) AS "cuteness"
               FROM posts
               JOIN images ON images."postID" = posts."postID"
               FULL JOIN "cuteness" ON posts."postID" = "cuteness"."postID"
@@ -2187,7 +2187,7 @@ export default class SQLQuery {
       text: functions.multiTrim(`
             WITH post_json AS (
               SELECT posts.*, json_agg(DISTINCT images.*) AS images,
-              ROUND(AVG(DISTINCT cuteness."cuteness")) AS "cutenessAvg"
+              ROUND(AVG(DISTINCT cuteness."cuteness")) AS "cuteness"
               FROM posts
               JOIN images ON images."postID" = posts."postID"
               FULL JOIN "cuteness" ON posts."postID" = "cuteness"."postID"

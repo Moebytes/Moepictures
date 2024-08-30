@@ -65,7 +65,7 @@ const Related: React.FunctionComponent<Props> = (props) => {
     if (!related.length) return null
 
     return (
-        <div className="related" style={{paddingLeft: `${marginLeft}px`, marginTop: "0px", marginBottom: "10px"}}>
+        <div className="related" style={{paddingLeft: `${marginLeft}px`, marginBottom: "10px"}}>
             <div className="related-title" style={{marginBottom: "0px"}}>Related</div>
             <div className="related-container">
                 {/* {generateImagesJSX()} */}

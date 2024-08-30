@@ -2,6 +2,7 @@ node_modules
 dist
 .env
 .vscode
+.idea
 .DS_Store
 assets/images
 files

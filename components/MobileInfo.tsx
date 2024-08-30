@@ -565,7 +565,7 @@ const MobileInfo: React.FunctionComponent<Props> = (props) => {
                             </div>
                             <div className="mobileinfo-row">
                                 <span className="tag">Cuteness:</span>
-                                <span className="tag-alt">{props.post.cutenessAvg || 500}</span>
+                                <span className="tag-alt">{props.post.cuteness || 500}</span>
                             </div>
                         </div>
                     </div> </>

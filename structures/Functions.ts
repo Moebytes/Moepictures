@@ -1975,4 +1975,12 @@ export default class Functions {
         }
         return true
     }
+
+    public static numberArray = (max: number, spacing: number) => {
+        const arr = [] as string[]
+        for (let i = spacing; i <= max; i += spacing) {
+            arr.push(i.toString())
+        }
+        return arr
+    }
 }

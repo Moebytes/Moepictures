@@ -85,8 +85,9 @@ const MailPage: React.FunctionComponent = (props) => {
         if (!rect) return "0px"
         const raw = window.innerWidth - rect.right
         let offset = 0
-        if (sortType === "date") offset = -35
-        if (sortType === "reverse date") offset = -5
+        if (sortType === "random") offset = -45
+        if (sortType === "date") offset = -45
+        if (sortType === "reverse date") offset = -15
         return `${raw + offset}px`
     }
 
@@ -135,6 +136,9 @@ const MailPage: React.FunctionComponent = (props) => {
                         </div> : null}
                         <div className={`item-dropdown ${activeDropdown === "sort" ? "" : "hide-item-dropdown"}`} 
                         style={{marginRight: getSortMargin(), top: mobile ? "229px" : "209px"}} onClick={() => setActiveDropdown("none")}>
+                            <div className="item-dropdown-row" onClick={() => setSortType("random")}>
+                                <span className="item-dropdown-text">Random</span>
+                            </div>
                             <div className="item-dropdown-row" onClick={() => setSortType("date")}>
                                 <span className="item-dropdown-text">Date</span>
                             </div>

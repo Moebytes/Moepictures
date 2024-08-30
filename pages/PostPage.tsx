@@ -74,7 +74,7 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
     const postID = props?.match.params.id
 
     const refreshCache = async () => {
-        axios.post(image, null, {withCredentials: true}).catch(() => null)
+        // axios.post(image, null, {withCredentials: true}).catch(() => null)
     }
 
     useEffect(() => {
@@ -138,7 +138,7 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
 
     const updateThirdParty = async () => {
         if (post) {
-            const thirdPartyPosts = await axios.get("/api/post/thirdparty", {params: {postID: post.postID}, withCredentials: true}).then((r) => r.data)
+            const thirdPartyPosts = await axios.get("/api/post/thirdparty", {params: {postID: post.postID}, withCredentials: true}).then((r) => r.data).catch(() => [])
             if (thirdPartyPosts?.[0]) {
                 setThirdPartyPosts(thirdPartyPosts)
             } else {
@@ -149,7 +149,7 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
 
     const updateParent = async () => {
         if (post) {
-            const parentPost = await axios.get("/api/post/parent", {params: {postID: post.postID}, withCredentials: true}).then((r) => r.data)
+            const parentPost = await axios.get("/api/post/parent", {params: {postID: post.postID}, withCredentials: true}).then((r) => r.data).catch(() => null)
             if (parentPost) {
                 setParentPost(parentPost)
             } else {
@@ -175,16 +175,24 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
     useEffect(() => {
         const updateArtistPosts = async () => {
             if (tagCategories?.artists?.[0]?.tag) {
-                const artistPosts = await axios.get("/api/search/posts", {params: {query: tagCategories.artists[0].tag, type: "all", restrict: "all", style: "all", sort: "drawn", limit: 10000}, withCredentials: true}).then((r) => r.data)
-                setArtistPosts(artistPosts)
+                try {
+                    const artistPosts = await axios.get("/api/search/posts", {params: {query: tagCategories.artists[0].tag, type: "all", restrict: "all", style: "all", sort: "drawn", limit: 10000}, withCredentials: true}).then((r) => r.data)
+                    setArtistPosts(artistPosts)
+                } catch (err) {
+                    console.log(err)
+                }
             }
         }
         const updateRelatedPosts = async () => {
             if (!tagCategories?.characters?.[0].tag) return
             if (tagCategories.characters[0].tag !== characterTag) {
-                const relatedPosts = await axios.get("/api/search/posts", {params: {query: tagCategories.characters[0].tag, type: post.type, restrict: post.restrict === "explicit" ? "explicit" : "all", style: post.style, sort: Math.random() > 0.5 ? "date" : "reverse date", limit: 30}, withCredentials: true}).then((r) => r.data)
-                setRelatedPosts(relatedPosts)
-                characterTag = tagCategories.characters[0].tag
+                try {
+                    const relatedPosts = await axios.get("/api/search/posts", {params: {query: tagCategories.characters[0].tag, type: post.type, restrict: post.restrict === "explicit" ? "explicit" : "all", style: post.style, sort: Math.random() > 0.5 ? "date" : "reverse date", limit: 30}, withCredentials: true}).then((r) => r.data)
+                    setRelatedPosts(relatedPosts)
+                    characterTag = tagCategories.characters[0].tag
+                } catch (err) {
+                    console.log(err)
+                }
             }
         }
         if (session.showRelated) {
@@ -242,7 +250,8 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
             let post = null as any
             try {
                 post = await axios.get("/api/post", {params: {postID}, withCredentials: true}).then((r) => r.data)
-            } catch {
+            } catch (err) {
+                if (String(err).includes("Error: Request failed with status code 403")) history.push("/403")
                 return
             }
             if (post) {
@@ -382,9 +391,9 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
                     {mobile && post && tagCategories ? <MobileInfo post={post} artists={tagCategories.artists} characters={tagCategories.characters} series={tagCategories.series} tags={tagCategories.tags}/> : null}
                     {parentPost ? <Parent post={parentPost}/>: null}
                     {thirdPartyPosts.length ? <ThirdParty posts={thirdPartyPosts}/> : null}
-                    {artistPosts.length ? <ArtistWorks posts={artistPosts}/> : null}
                     {session.username && post ? <CutenessMeter post={post}/> : null}
                     {post?.commentary ? <Commentary text={post.commentary} translated={post.translatedCommentary}/> : null}
+                    {artistPosts.length ? <ArtistWorks posts={artistPosts}/> : null}
                     {relatedPosts.length ? <Related related={relatedPosts}/> : null}
                     {post ? <Comments post={post}/> : null}
                     <Footer/>
