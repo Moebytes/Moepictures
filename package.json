@@ -124,6 +124,7 @@
     "music-metadata": "^7.13.1",
     "node-2fa": "^2.0.3",
     "nodemailer": "^6.7.3",
+    "pace-js": "^1.2.4",
     "pg": "^8.7.3",
     "pixiv.ts": "^0.5.4",
     "react": "^17.0.2",

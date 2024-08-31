@@ -8,5 +8,6 @@ assets/images
 files
 *.pem
 .ssh
+dump.rdb
 dump
 structures/CryptoFunctions.ts

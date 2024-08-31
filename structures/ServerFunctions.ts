@@ -133,8 +133,8 @@ export default class ServerFunctions {
     public static deleteFile = async (file: string) => {
         if (functions.isLocalHost()) {
             const dir = path.dirname(`${local}/${file}`)
-            fs.unlinkSync(`${local}/${file}`)
             try {
+                fs.unlinkSync(`${local}/${file}`)
                 //fs.rmdirSync(dir)
             } catch {}
             return
@@ -224,8 +224,8 @@ export default class ServerFunctions {
     public static deleteUnverifiedFile = async (file: string) => {
         if (functions.isLocalHost()) {
             const dir = path.dirname(`${localUnverified}/${file}`)
-            fs.unlinkSync(`${localUnverified}/${file}`)
             try {
+                fs.unlinkSync(`${localUnverified}/${file}`)
                 //fs.rmdirSync(dir)
             } catch {}
             return

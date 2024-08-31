@@ -474,8 +474,12 @@ export default class Functions {
     }
 
     public static scrolledToBottom = () => {
-        const c = [document.scrollingElement!.scrollHeight, document.body.scrollHeight, document.body.offsetHeight].sort(function(a,b){return b-a})
-        return (window.innerHeight + window.scrollY + 30 >= c[0])
+        const scrollHeight = Math.max(
+            document.documentElement.scrollHeight,
+            document.body.scrollHeight,
+            document.body.offsetHeight
+        )
+        return window.innerHeight + window.scrollY >= scrollHeight - 30
     }
 
     public static trimCanvas = (canvas: any) => {

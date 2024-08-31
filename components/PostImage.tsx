@@ -1368,8 +1368,7 @@ const PostImage: React.FunctionComponent<Props> = (props) => {
                     </div>
                     <img draggable={false} className="post-lightness-overlay" ref={gifLightnessRef} src={props.img}/>
                     <img draggable={false} className="post-sharpen-overlay" ref={gifOverlayRef} src={props.img}/>
-                    <canvas draggable={false} className="post-gif-canvas" ref={gifRef}></canvas> 
-                    {!gifData && backFrame ? <img draggable={false} className={`${imageExpand? "post-image-expand" : "post-image"}`} src={backFrame}/> : null}
+                    <canvas draggable={false} className="post-gif-canvas" ref={gifRef}></canvas>
                     </>
                     : null}
                     <div className="relative-ref" onMouseMove={dragImgDown} onMouseLeave={dragImgUp}>

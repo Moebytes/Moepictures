@@ -91,7 +91,7 @@ const ImageGrid: React.FunctionComponent<Props> = (props) => {
         setUpdatePostFlag(true)
         if (!result.length) setNoResults(true)
         if (!search) {
-            document.title = "Cutest Anime Art ♥"
+            document.title = "Cute Anime Art ♥"
         }
     }
 
@@ -381,7 +381,7 @@ const ImageGrid: React.FunctionComponent<Props> = (props) => {
             }
         }
         loadImages()
-    }, [postsRef])
+    }, [visiblePosts, postsRef])
 
     useEffect(() => {
         if (reupdateFlag) {
