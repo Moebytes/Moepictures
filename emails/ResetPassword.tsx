@@ -1,56 +1,55 @@
 import {Html, Head, Body, Preview, Container, Text, Img, Link, Button} from "@react-email/components"
 
-const logoContainer = {
-    display: "flex",
-    width: "100%",
-    justifyContent: "center"
-}
+const style = /*css*/`
+    .logo-container {
+        display: flex;
+        width: 100%;
+        justify-content: center;
+    }
 
-const logo = {
-    display: "block",
-    width: "auto",
-    height: "110px",
-    marginBottom: "-13px"
-}
+    .logo {
+        display: block;
+        width: auto;
+        height: 110px;
+        margin-bottom: -13px;
+    }
 
-const textContainer = {
-    display: "flex",
-    width: "100%",
-    justifyContent: "center"
-}
+    .text-container {
+        display: flex;
+        width: 100%;
+        justify-content: center;
+    }
 
-const text = {
-    fontFamily: "Tahoma, sans-serif",
-    color: "black",
-    fontSize: "20px"
-}
+    .text {
+        font-family: Tahoma, sans-serif;
+        color: black;
+        font-size: 20px !important;
+    }
 
-const buttonContainer = {
-    display: "flex",
-    width: "100%",
-    justifyContent: "center"
-}
+    .button-container {  
+        display: table;
+        text-align: center;
+    }
 
-const button = {
-    margin: "auto",
-    marginTop: "10px",
-    marginBottom: "10px",
-    backgroundColor: "#7e7aff",
-    border: "2px solid black",
-    padding: "0px 10px",
-    width: "max-content"
-}
+    .button {
+        margin: auto;
+        margin-top: 10px;
+        margin-bottom: 10px;
+        background-color: #7e7aff;
+        border: 2px solid black;
+        padding: 0px 10px !important;
+        width: max-content;
+    }
 
-const buttonText = {
-    fontFamily: "Tahoma, sans-serif",
-    color: "black",
-    fontWeight: "bold",
-    fontSize: "26px"
-}
+    .button-text {
+        font-family: Tahoma, sans-serif;
+        color: black;
+        font-weight: bold;
+        font-size: 26px !important;
+    }
 
-const hoverTags = `
     .button-text:hover {
-        color: white !important;
+        color: white;
     }
 `
 
@@ -64,14 +63,14 @@ const ResetPassword = (props: Props) => {
 
     return (
         <Html lang="en">
-            <Head><style>{hoverTags}</style></Head>
+            <Head><style>{style}</style></Head>
             <Preview>Moepictures Password Reset</Preview>
-            <Body style={{width: "85%"}}>
-                <Container style={logoContainer}>
-                    <Link href="https://moepictures.moe"><Img style={logo} src="https://i.imgur.com/Wv5cKhP.png"/></Link>
+            <Body style={{width: "80%"}}>
+                <Container className="logo-container">
+                    <Link href="https://moepictures.moe"><Img className="logo" src="https://i.imgur.com/Wv5cKhP.png"/></Link>
                 </Container>
-                <Container style={textContainer}>
-                    <Text style={text}>
+                <Container className="text-container">
+                    <Text className="text">
                         Hi {username}, <br/><br/>
             
                         You recently made a request to reset your password. The link 
@@ -79,9 +78,9 @@ const ResetPassword = (props: Props) => {
                         out of the spam folder. <br/>
                     </Text>
                 </Container>
-                <Container style={buttonContainer}>
-                    <Button style={button} href={link}>
-                        <Text style={buttonText} className="button-text">Reset Password</Text>
+                <Container className="button-container">
+                    <Button className="button" href={link}>
+                        <Text className="button-text">Reset Password</Text>
                     </Button>
                 </Container>
             </Body>
