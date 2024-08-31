@@ -7,7 +7,9 @@ import crypto from "crypto"
 import functions from "../structures/Functions"
 import serverFunctions from "../structures/ServerFunctions"
 import fileType from "magic-bytes.js"
-import fs from "fs"
+import VerifyEmail from "../emails/VerifyEmail"
+import ChangeEmail from "../emails/ChangeEmail"
+import ResetPassword from "../emails/ResetPassword"
 import path from "path"
 
 const signupLimiter = rateLimit({
@@ -107,7 +109,7 @@ const UserRoutes = (app: Express) => {
                 }
                 const user = functions.toProperCase(username)
                 const link = `${req.protocol}://${req.get("host")}/api/user/verifyemail?token=${token}`
-                await serverFunctions.email(email, "Moepictures Email Address Verification", {username: user, link}, "verifyemail.html")
+                await serverFunctions.email(email, "Moepictures Email Address Verification", <VerifyEmail username={user} link={link}/>)
                 return res.status(200).send("Success")
             } catch {
                 return res.status(400).send("Username taken")
@@ -433,13 +435,12 @@ const UserRoutes = (app: Express) => {
             const hashToken = crypto.createHash("sha256").update(token).digest("hex")
             try {
                 await sql.token.insertEmailToken(newEmail, hashToken)
-            } catch (e) {
-                console.log(e)
+            } catch {
                 await sql.token.updateEmailToken(newEmail, hashToken)
             }
             const username = functions.toProperCase(req.session.username)
             const link = `${req.protocol}://${req.get("host")}/api/user/changeemail?token=${token}`
-            await serverFunctions.email(newEmail, "Moepictures Email Address Change", {username, link}, "changeemail.html")
+            await serverFunctions.email(newEmail, "Moepictures Email Address Change", <ChangeEmail username={username} link={link}/>)
             res.status(200).send("Success")
         } catch (e) {
             console.log(e)
@@ -461,13 +462,12 @@ const UserRoutes = (app: Express) => {
             const hashToken = crypto.createHash("sha256").update(token).digest("hex")
             try {
                 await sql.token.insertEmailToken(email, hashToken)
-            } catch (e) {
-            console.log(e)
+            } catch {
                 await sql.token.updateEmailToken(email, hashToken)
             }
             const username = functions.toProperCase(req.session.username)
             const link = `${req.protocol}://${req.get("host")}/api/user/verifyemail?token=${token}`
-            await serverFunctions.email(email, "Moepictures Email Address Verification", {username, link}, "verifyemail.html")
+            await serverFunctions.email(email, "Moepictures Email Address Verification", <VerifyEmail username={username} link={link}/>)
             await sql.user.updateUser(req.session.username, "email", email)
             req.session.email = email
             res.status(200).send("Success")
@@ -537,10 +537,15 @@ const UserRoutes = (app: Express) => {
             }
             const token = crypto.randomBytes(32).toString("hex")
             const hashToken =  await bcrypt.hash(token, 13)
-            await sql.token.insertPasswordToken(user.username, hashToken)
+            try {
+                await sql.token.insertPasswordToken(user.username, hashToken)
+            } catch {
+                await sql.token.deletePasswordToken(user.username)
+                await sql.token.insertPasswordToken(user.username, hashToken)
+            }
             const username = functions.toProperCase(user.username)
             const link = `${req.protocol}://${req.get("host")}/reset-password?token=${token}&username=${user.username}`
-            await serverFunctions.email(user.email, "Moepictures Password Reset", {username, link}, "resetpassword.html")
+            await serverFunctions.email(user.email, "Moepictures Password Reset", <ResetPassword username={username} link={link}/>)
             res.status(200).send("Success")
         } catch (e) {
             console.log(e)

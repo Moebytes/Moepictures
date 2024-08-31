@@ -75,7 +75,7 @@ const Carousel: React.FunctionComponent<Props> = (props) => {
         setVisibleImages([])
         setVisibleIndex(0)
         setImages(props.images)
-        if (sliderRef.current) {
+        if (sliderRef?.current) {
             sliderRef.current.style.marginLeft = `0px`
         }
         const base64Images = async () => {
@@ -144,7 +144,7 @@ const Carousel: React.FunctionComponent<Props> = (props) => {
     const handleIntersection = (entries: any) => {
         for (let entry of entries) {
             if (entry.intersectionRatio === 1) {
-                if (!sliderRef.current) return
+                if (!sliderRef?.current) return
                 const margin = parseInt(sliderRef.current.style.marginLeft)
                 if (margin < 0) {
                     if (!scrollTimeout) {
@@ -169,7 +169,7 @@ const Carousel: React.FunctionComponent<Props> = (props) => {
     const handleKeydown = (event: any) => {
         if (props.noKey) return
         if (event.key !== "ArrowLeft" && event.key !== "ArrowRight") return
-        if (!sliderRef.current) return
+        if (!sliderRef?.current) return
         let marginLeft = parseInt(sliderRef.current.style.marginLeft)
         if (Number.isNaN(marginLeft)) marginLeft = 0
         const width = document.querySelector(".carousel-img")?.clientWidth || 0
@@ -192,7 +192,7 @@ const Carousel: React.FunctionComponent<Props> = (props) => {
         sliderRef.current.style.transition = "margin-left 0.75s"
         sliderRef.current.style.marginLeft = `${marginLeft}px`
         setTimeout(() => {
-            if (!sliderRef.current) return
+            if (!sliderRef?.current) return
             sliderRef.current.style.transition = "margin-left 0.05s"
         }, 1000)
     }
@@ -200,7 +200,7 @@ const Carousel: React.FunctionComponent<Props> = (props) => {
     useEffect(() => {
         if (typeof window === "undefined") return
         window.addEventListener("keydown", handleKeydown)
-        sliderRef.current.addEventListener("wheel", handleWheel, {passive: false})
+        if (sliderRef.current) sliderRef.current.addEventListener("wheel", handleWheel, {passive: false})
         const observer = new IntersectionObserver(handleIntersection, {root: null, rootMargin: "20px", threshold: 1})
         const resizeObserver = new ResizeObserver(handleResize)
         const element = imagesRef[imagesRef.length - 1]?.current
@@ -210,7 +210,7 @@ const Carousel: React.FunctionComponent<Props> = (props) => {
         }
         return () => {
             window.removeEventListener("keydown", handleKeydown)
-            sliderRef.current.removeEventListener("wheel", handleWheel, {passive: false})
+            if (sliderRef.current) sliderRef.current.removeEventListener("wheel", handleWheel, {passive: false})
             observer.disconnect()
             resizeObserver.disconnect()
         }

@@ -106,6 +106,7 @@ const ChangeUsernamePage: React.FunctionComponent = (props) => {
             errorRef.current!.innerText = "Bad username or captcha."
             await functions.timeout(2000)
             setError(false)
+            updateCaptcha()
         }
     }
 

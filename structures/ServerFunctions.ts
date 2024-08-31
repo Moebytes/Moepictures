@@ -6,8 +6,7 @@ import fs from "fs"
 import crypto from "crypto"
 import sql from "../sql/SQLQuery"
 import functions from "../structures/Functions"
-import FormData from "form-data"
-import axios from "axios"
+import {render} from "@react-email/components"
 import S3 from "aws-sdk/clients/s3"
 import CSRF from "csrf"
 
@@ -33,7 +32,7 @@ export default class ServerFunctions {
         return csrf.verify(req.session.csrfSecret!, csrfToken)
     }
 
-    public static email = async (email: string, subject: string, payload: any, template: string) => {
+    public static email = async (email: string, subject: string, jsx: React.ReactElement) => {
         const transporter = nodemailer.createTransport({
             service: "gmail",
             auth: {
@@ -41,9 +40,7 @@ export default class ServerFunctions {
               pass: process.env.EMAIL_PASSWORD,
             }
         })
-        const source = fs.readFileSync(path.join(__dirname, `../templates/${template}`), "utf8")
-        const compiledTemplate = handlebars.compile(source)
-        const html = compiledTemplate(payload)
+        const html = await render(jsx)
         return transporter.sendMail({
             from: {name: "Moepictures", address: process.env.EMAIL_ADDRESS},
             to: email,

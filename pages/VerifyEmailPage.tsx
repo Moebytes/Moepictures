@@ -111,6 +111,7 @@ const VerifyEmailPage: React.FunctionComponent = (props) => {
             errorRef.current!.innerText = "Bad email or captcha."
             await functions.timeout(2000)
             setError(false)
+            updateCaptcha()
         }
         setNewEmail("")
     }

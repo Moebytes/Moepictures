@@ -5,6 +5,7 @@
   "main": "dist/server.js",
   "scripts": {
     "start": "npm run clean && webpack && node dist/server.js",
+    "test": "tsc --jsx react test.tsx && node test.js",
     "server": "webpack && npm run pm2",
     "pm2": "pm2 stop all && pm2 start dist/server.js",
     "clean": "del-cli ./dist"
@@ -21,10 +22,6 @@
   "repository": {
     "type": "git",
     "url": "https://github.com/Moebits/Moepictures.moe"
-  },
-  "overrides": {
-    "react": "^17.0.2",
-    "react-dom": "^17.0.2"
   },
   "author": "Moebits",
   "license": "MIT",
@@ -84,6 +81,7 @@
   "dependencies": {
     "@ffmpeg/core": "^0.10.0",
     "@ffmpeg/ffmpeg": "^0.10.1",
+    "@react-email/components": "^0.0.24",
     "@vitalets/google-translate-api": "^8.0.0",
     "audio-encoder": "^1.0.4",
     "aws-sdk": "^2.1120.0",
@@ -127,10 +125,10 @@
     "pace-js": "^1.2.4",
     "pg": "^8.7.3",
     "pixiv.ts": "^0.5.4",
-    "react": "^17.0.2",
+    "react": "^18.3.1",
     "react-bootstrap": "^2.10.4",
     "react-contenteditable": "^3.3.6",
-    "react-dom": "^17.0.2",
+    "react-dom": "^18.3.1",
     "react-draggable": "^4.4.5",
     "react-image-crop": "^10.0.2",
     "react-router-hash-link": "^2.4.3",

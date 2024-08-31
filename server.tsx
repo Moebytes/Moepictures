@@ -14,7 +14,6 @@ import middleware from "webpack-dev-middleware"
 import hot from "webpack-hot-middleware"
 import config from "./webpack.config"
 import dotenv from "dotenv"
-import React from "react"
 import App from "./App"
 import {renderToString} from "react-dom/server"
 import {StaticRouter as Router} from "react-router-dom"
@@ -35,6 +34,8 @@ import UserRoutes from "./routes/UserRoutes"
 import TranslationRoutes from "./routes/TranslationRoutes"
 import ThreadRoutes from "./routes/ThreadRoutes"
 import MessageRoutes from "./routes/MessageRoutes"
+import {render} from "@react-email/components"
+import Email from "./emails/VerifyEmail"
 const __dirname = path.resolve()
 
 dotenv.config()
@@ -292,7 +293,12 @@ for (let i = 0; i < folders.length; i++) {
   })
 }
 
-app.get("/*", function(req: Request, res: Response) {
+app.get("/test", async (req: Request, res: Response) => {
+  const html = await render(<Email username="moepi" link="https://google.com"/>)
+  res.status(200).send(html)
+})
+
+app.get("/*", (req: Request, res: Response) => {
   if (!req.hostname.includes("moepictures") && !req.hostname.includes("localhost") && !req.hostname.includes("192.168.68")) {
     res.redirect(301, `https://moepictures.moe${req.path}`)
   }
