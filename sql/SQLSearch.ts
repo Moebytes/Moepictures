@@ -347,7 +347,7 @@ export default class SQLSearch {
                     JOIN post_json ON post_json."postID" = "tag map"."postID"
                     GROUP BY "tags".tag
                     ${sortQuery}
-                    LIMIT 10 ${offset ? `OFFSET $${i}` : ""}
+                    LIMIT 100 ${offset ? `OFFSET $${i}` : ""}
             `),
             values: []
         }
