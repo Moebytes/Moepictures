@@ -142,11 +142,6 @@ const EditUnverifiedPostPage: React.FunctionComponent<Props> = (props) => {
         let links = [] as any
         for (let i = 0; i < post.images.length; i++) {
             let imageLink = functions.getUnverifiedImageLink(post.images[i].type, postID, post.images[i].order, post.images[i].filename)
-            if (functions.isModel(imageLink)) {
-                imageLink = await functions.modelImage(imageLink)
-            } else if (functions.isAudio(imageLink)) {
-                imageLink = await functions.songCover(imageLink)
-            }
             const response = await fetch(imageLink).then((r) => r.arrayBuffer())
             const blob = new Blob([new Uint8Array(response)])
             const file = new File([blob], path.basename(imageLink))

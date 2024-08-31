@@ -791,7 +791,7 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
                         </div>
                         : null}
                         <div className="sidebar-row">
-                            <span className="tag">Drawn:</span>
+                            <span className="tag">{props.post.type === "model" ? "Modeled:" : props.post.type === "audio" ? "Produced:" : "Drawn:"}</span>
                             <span className={`tag-alt ${props.post.hidden ? "strikethrough" : ""}`}>{props.post.drawn ? functions.formatDate(new Date(props.post.drawn)) : "Unknown"}</span>
                         </div>
                         <div className="sidebar-row">
