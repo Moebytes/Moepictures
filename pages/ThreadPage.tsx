@@ -19,6 +19,7 @@ import permissions from "../structures/Permissions"
 import PageDialog from "../dialogs/PageDialog"
 import adminCrown from "../assets/icons/admin-crown.png"
 import modCrown from "../assets/icons/mod-crown.png"
+import systemCrown from "../assets/icons/system-crown.png"
 import lockIcon from "../assets/icons/lock.png"
 import stickyIcon from "../assets/icons/sticky.png"
 import lockOptIcon from "../assets/icons/lock-opt.png"
@@ -395,6 +396,13 @@ const ThreadPage: React.FunctionComponent<Props> = (props) => {
                 <div className="forum-thread-username-container" onClick={creatorClick} onAuxClick={creatorClick}>
                 <span className="forum-thread-user-text mod-color">{functions.toProperCase(thread.creator)}</span>
                     <img className="forum-thread-user-label" src={modCrown}/>
+                </div>
+            )
+        } else if (thread.role === "system") {
+            return (
+                <div className="forum-thread-username-container" onClick={creatorClick} onAuxClick={creatorClick}>
+                <span className="forum-thread-user-text system-color">{functions.toProperCase(thread.creator)}</span>
+                    <img className="forum-thread-user-label" src={systemCrown}/>
                 </div>
             )
         }

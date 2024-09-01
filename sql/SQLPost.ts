@@ -38,9 +38,9 @@ export default class SQLPost {
     public static bulkUpdatePost = async (postID: number, params: {restrict?: string, style?: string, thirdParty?: boolean, 
         title?: string, translatedTitle?: string, artist?: string, drawn?: string, link?: string, commentary?: string, 
         translatedCommentary?: string, bookmarks?: string, mirrors?: string, type?: string, uploadDate?: string, uploader?: string, 
-        updatedDate?: string, updater?: string, hidden?: boolean}) => {
+        updatedDate?: string, updater?: string, hidden?: boolean, approver?: string}) => {
         const {restrict, style, thirdParty, title, translatedTitle, artist, drawn, link, commentary, translatedCommentary, bookmarks, 
-        mirrors, type, uploadDate, uploader, updatedDate, updater, hidden} = params
+        mirrors, type, uploadDate, uploader, updatedDate, updater, hidden, approver} = params
         let setArray = [] as any
         let values = [] as any
         let i = 1 
@@ -131,7 +131,12 @@ export default class SQLPost {
         }
         if (hidden) {
         setArray.push(`"hidden" = $${i}`)
-        values.push(updater)
+        values.push(hidden)
+        i++
+        }
+        if (approver) {
+        setArray.push(`"approver" = $${i}`)
+        values.push(approver)
         i++
         }
         let setQuery = `SET ${setArray.join(", ")}`

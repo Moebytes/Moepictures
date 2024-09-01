@@ -44,6 +44,23 @@ export default class SQLMessage {
         return result
     }
 
+    /** Get user messages */
+    public static userMessages = async (username: string) => {
+        const query: QueryConfig = {
+        text: functions.multiTrim(/*sql*/`
+            SELECT messages.*,
+            COUNT(*) OVER() AS "messageCount"
+            FROM messages
+            WHERE messages.creator = $1
+            GROUP BY messages."messageID"
+            ORDER BY messages."updatedDate" DESC
+        `),
+        values: [username]
+        }
+        const result = await SQLQuery.run(query)
+        return result
+    }
+
     /** Get message. */
     public static message = async (messageID: number) => {
         const query: QueryConfig = {
@@ -106,6 +123,23 @@ export default class SQLMessage {
         values: [messageID]
         }
         if (offset) query.values?.push(offset)
+        const result = await SQLQuery.run(query)
+        return result
+    }
+
+    /** Get user message replies. */
+    public static userMessageReplies = async (username: string) => {
+        const query: QueryConfig = {
+        text: functions.multiTrim(/*sql*/`
+                SELECT "message replies".*, users.role, users.image, users."imagePost",
+                COUNT(*) OVER() AS "replyCount"
+                FROM "message replies" 
+                JOIN users ON users.username = "message replies".creator
+                WHERE "message replies".creator = $1 
+                GROUP BY "message replies"."replyID", users.role, users.image, users."imagePost"
+            `),
+        values: [username]
+        }
         const result = await SQLQuery.run(query)
         return result
     }

@@ -30,6 +30,7 @@ CREATE TABLE IF NOT EXISTS "posts" (
     "drawn" date,
     "uploadDate" timestamptz,
     "updatedDate" timestamptz,
+    "approver" text REFERENCES "users" ("username") ON UPDATE CASCADE ON DELETE SET NULL,
     "title" text,
     "translatedTitle" text,
     "artist" text,

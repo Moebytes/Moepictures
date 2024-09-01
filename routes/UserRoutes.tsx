@@ -628,7 +628,6 @@ const UserRoutes = (app: Express) => {
     app.get("/api/user/uploads", sessionLimiter, async (req: Request, res: Response) => {
         try {
             const username = req.query.username
-            if (!req.session.username) return res.status(401).send("Unauthorized")
             if (username) {
                 let uploads = await sql.user.uploads(username as string)
                 uploads = functions.stripTags(uploads)
@@ -651,7 +650,6 @@ const UserRoutes = (app: Express) => {
             const sort = req.query.sort as string
             const offset = req.query.offset as string
             const username = req.query.username as string
-            if (!req.session.username) return res.status(401).send("Unauthorized")
             if (username) {
                 let comments = await sql.comment.searchCommentsByUsername([username], query, sort, offset)
                 res.status(200).send(comments)
@@ -668,7 +666,7 @@ const UserRoutes = (app: Express) => {
 
     app.post("/api/user/ban", userLimiter, async (req: Request, res: Response) => {
         try {
-            const {username, reason, deleteUnverifiedChanges, deleteHistoryChanges, deleteComments} = req.body
+            const {username, reason, deleteUnverifiedChanges, deleteHistoryChanges, deleteComments, deleteMessages} = req.body
             if (!serverFunctions.validateCSRF(req)) return res.status(400).send("Bad CSRF token")
             if (!username) return res.status(400).send("Bad username")
             if (!req.session.username) return res.status(401).send("Unauthorized")
@@ -738,6 +736,18 @@ const UserRoutes = (app: Express) => {
                 const replies = await sql.thread.userReplies(username)
                 for (const reply of replies) {
                     await sql.thread.deleteReply(reply.replyID)
+                }
+            }
+            if (deleteMessages) {
+                // Delete messages
+                const messages = await sql.message.userMessages(username)
+                for (const message of messages) {
+                    await sql.message.deleteMessage(message.messageID)
+                }
+                // Delete message replies
+                const messageReplies = await sql.message.messageReplies(username)
+                for (const messageReply of messageReplies) {
+                    await sql.message.deleteMessageReply(messageReply.replyID)
                 }
             }
             let revertPostIDs = new Set()

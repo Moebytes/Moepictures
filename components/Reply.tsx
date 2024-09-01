@@ -13,6 +13,7 @@ import deleteOptIcon from "../assets/icons/delete-opt.png"
 import permissions from "../structures/Permissions"
 import adminCrown from "../assets/icons/admin-crown.png"
 import modCrown from "../assets/icons/mod-crown.png"
+import systemCrown from "../assets/icons/system-crown.png"
 import "./styles/reply.less"
 import axios from "axios"
 
@@ -206,6 +207,13 @@ const Reply: React.FunctionComponent<Props> = (props) => {
                 <div className="reply-username-container" onClick={userClick} onAuxClick={userClick}>
                 <span className="reply-user-text mod-color">{functions.toProperCase(props.reply.creator)}</span>
                     <img className="reply-user-label" src={modCrown}/>
+                </div>
+            )
+        } else if (props.reply.role === "system") {
+            return (
+                <div className="reply-username-container" onClick={userClick} onAuxClick={userClick}>
+                <span className="reply-user-text system-color">{functions.toProperCase(props.reply.creator)}</span>
+                    <img className="reply-user-label" src={systemCrown}/>
                 </div>
             )
         }

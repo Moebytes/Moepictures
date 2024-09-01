@@ -15,6 +15,7 @@ import commentEdit from "../assets/icons/commentedit.png"
 import commentDelete from "../assets/icons/commentdelete.png"
 import adminCrown from "../assets/icons/admin-crown.png"
 import modCrown from "../assets/icons/mod-crown.png"
+import systemCrown from "../assets/icons/system-crown.png"
 import "./styles/commentrow.less"
 import axios from "axios"
 
@@ -231,6 +232,13 @@ const CommentRow: React.FunctionComponent<Props> = (props) => {
                 <div className="commentrow-username-container">
                 <span className="commentrow-user-text mod-color">{functions.toProperCase(props.comment.username)}</span>
                     <img className="commentrow-user-label" src={modCrown}/>
+                </div>
+            )
+        } else if (props.comment.role === "system") {
+            return (
+                <div className="commentrow-username-container">
+                <span className="commentrow-user-text system-color">{functions.toProperCase(props.comment.username)}</span>
+                    <img className="commentrow-user-label" src={systemCrown}/>
                 </div>
             )
         }

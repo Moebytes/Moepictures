@@ -27,8 +27,8 @@ const CutenessMeter: React.FunctionComponent<Props> = (props) => {
     const [cuteness, setCuteness] = useState(0)
     const [averageCuteness, setAverageCuteness] = useState(props.post?.cuteness || 0)
     const [isAverage, setIsAverage] = useState(false)
-    const sliderRef = useRef<any>(null)
-    useEffect(() => sliderRef.current ? sliderRef.current.resize() : null)
+    // const sliderRef = useRef<any>(null)
+    // useEffect(() => sliderRef.current ? sliderRef.current.resize() : null)
 
     const getFilter = () => {
         return `hue-rotate(${siteHue - 180}deg) saturate(${siteSaturation}%) brightness(${siteLightness + 70}%)`
@@ -52,13 +52,13 @@ const CutenessMeter: React.FunctionComponent<Props> = (props) => {
     }
 
     const updateCuteness = async () => {
+        if (!cuteness) return
         await axios.post("/api/cuteness/update", {cuteness, postID: props.post.postID}, {headers: {"x-csrf-token": functions.getCSRFToken()}, withCredentials: true})
         if (cuteness) setIsAverage(false)
     }
 
     const deleteRating = async () => {
         await axios.delete("/api/cuteness/delete", {params: {postID: props.post.postID}, headers: {"x-csrf-token": functions.getCSRFToken()}, withCredentials: true})
-        // setCuteness(0)
         setIsAverage(true)
     }
 

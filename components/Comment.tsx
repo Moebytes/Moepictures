@@ -14,6 +14,7 @@ import DeleteCommentDialog from "../dialogs/DeleteCommentDialog"
 import permissions from "../structures/Permissions"
 import adminCrown from "../assets/icons/admin-crown.png"
 import modCrown from "../assets/icons/mod-crown.png"
+import systemCrown from "../assets/icons/system-crown.png"
 import "./styles/comment.less"
 import axios from "axios"
 
@@ -205,6 +206,13 @@ const Comment: React.FunctionComponent<Props> = (props) => {
                 <div className="comment-username-container">
                 <span className="comment-user-text mod-color">{functions.toProperCase(props.comment.username)}</span>
                     <img className="comment-user-label" src={modCrown}/>
+                </div>
+            )
+        } else if (props.comment.role === "system") {
+            return (
+                <div className="comment-username-container">
+                <span className="comment-user-text system-color">{functions.toProperCase(props.comment.username)}</span>
+                    <img className="comment-user-label" src={systemCrown}/>
                 </div>
             )
         }

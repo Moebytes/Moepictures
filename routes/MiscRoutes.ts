@@ -15,6 +15,7 @@ import fs from "fs"
 import svgCaptcha from "svg-captcha"
 import child_process from "child_process"
 import util from "util"
+import sql from "../sql/SQLQuery"
 import dotline from "../assets/misc/Dotline.ttf"
 
 svgCaptcha.loadFont(dotline)
@@ -31,7 +32,7 @@ const miscLimiter = rateLimit({
 
 const captchaLimiter = rateLimit({
 	windowMs: 5 * 60 * 1000,
-	max: 30,
+	max: 50,
 	message: "Too many requests, try again later.",
 	standardHeaders: true,
 	legacyHeaders: false
@@ -51,7 +52,7 @@ const MiscRoutes = (app: Express) => {
             const color = req.query.color as string || "#ffffff"
             let captcha = svgCaptcha.create({
                 size: 6,
-                ignoreChars: "oli0123456789",
+                ignoreChars: "oli0I123456789",
                 fontSize: 45,
                 noise: 2,
                 color: true,
@@ -69,7 +70,6 @@ const MiscRoutes = (app: Express) => {
     app.post("/api/misc/captcha", captchaLimiter, async (req: Request, res: Response, next: NextFunction) => {
         try {
             const {captchaResponse} = req.body
-            if (!serverFunctions.validateCSRF(req)) return res.status(400).send("Bad CSRF token")
             let ip = req.headers["x-forwarded-for"] || req.socket.remoteAddress
             ip = ip?.toString().replace("::ffff:", "") || ""
             if (req.session.captchaAnswer === captchaResponse?.trim()) {
@@ -254,6 +254,11 @@ const MiscRoutes = (app: Express) => {
                 attachments.push(attachment)
             }
             await serverFunctions.contactEmail(email, subject, message, attachments)
+            const admins = await sql.user.admins()
+            for (const admin of admins) {
+                const modifiedMessage = `You have a new message from ${email}!\n\n${message}`
+                await sql.message.insertMessage("moepictures", admin.username, subject, modifiedMessage)
+            }
             res.status(200).send("Success")
         } catch (e) {
             console.log(e)

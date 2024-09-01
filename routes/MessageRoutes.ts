@@ -38,6 +38,26 @@ const MessageRoutes = (app: Express) => {
         }
     })
 
+    app.put("/api/message/edit", messageUpdateLimiter, async (req: Request, res: Response) => {
+        try {
+            const {messageID, title, content} = req.body
+            if (!serverFunctions.validateCSRF(req)) return res.status(400).send("Bad CSRF token")
+            if (!req.session.username) return res.status(401).send("Unauthorized")
+            if (!title || !content) return res.status(400).send("Bad title or content")
+            const message = await sql.message.message(Number(messageID))
+            if (!message) return res.status(400).send("Invalid messageID")
+            if (message.creator !== req.session.username) {
+                if (req.session.role !== "admin" && req.session.role !== "mod") return res.status(403).send("No permission to edit")
+            }
+            await sql.message.updateMessage(Number(messageID), "title", title)
+            await sql.message.updateMessage(Number(messageID), "content", content)
+            res.status(200).send("Success")
+        } catch (e) {
+            console.log(e)
+            res.status(400).send("Bad request")
+        }
+    })
+
     app.get("/api/message", messageLimiter, async (req: Request, res: Response) => {
         try {
             const messageID = req.query.messageID

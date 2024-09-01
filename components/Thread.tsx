@@ -6,6 +6,7 @@ import {HashLink as Link} from "react-router-hash-link"
 import functions from "../structures/Functions"
 import adminCrown from "../assets/icons/admin-crown.png"
 import modCrown from "../assets/icons/mod-crown.png"
+import systemCrown from "../assets/icons/system-crown.png"
 import favicon from "../assets/icons/favicon.png"
 import "./styles/thread.less"
 import sticky from "../assets/icons/sticky.png"
@@ -160,6 +161,14 @@ const Thread: React.FunctionComponent<Props> = (props) => {
                     <img className="thread-user-label" src={modCrown}/>
                 </div>
             )
+        } else if (creatorRole === "system") {
+            return (
+                <div className="thread-username-container" onClick={creatorPage} onAuxClick={creatorPage}>
+                    <img draggable={false} src={getCreatorPFP()} className="thread-user-img" onClick={creatorImgClick} onAuxClick={creatorImgClick} style={{filter: creatorDefaultIcon ? getFilter() : ""}}/>
+                    <span className="thread-user-text system-color">{functions.toProperCase(props.thread.creator)}</span>
+                    <img className="thread-user-label" src={systemCrown}/>
+                </div>
+            )
         }
         return (
             <div className="thread-username-container" onClick={creatorPage} onAuxClick={creatorPage}>
@@ -184,6 +193,14 @@ const Thread: React.FunctionComponent<Props> = (props) => {
                 <img draggable={false} src={getUpdaterPFP()} className="thread-user-img" onClick={updaterImgClick} onAuxClick={updaterImgClick} style={{filter: updaterDefaultIcon ? getFilter() : ""}}/>
                     <span className="thread-user-text mod-color">{functions.toProperCase(props.thread.updater)}</span>
                     <img className="thread-user-label" src={modCrown}/>
+                </div>
+            )
+        } else if (updaterRole === "system") {
+            return (
+                <div className="thread-username-container" onClick={(event) => updaterPage(event)} onAuxClick={(event) => updaterPage(event)}>
+                <img draggable={false} src={getUpdaterPFP()} className="thread-user-img" onClick={updaterImgClick} onAuxClick={updaterImgClick} style={{filter: updaterDefaultIcon ? getFilter() : ""}}/>
+                    <span className="thread-user-text system-color">{functions.toProperCase(props.thread.updater)}</span>
+                    <img className="thread-user-label" src={systemCrown}/>
                 </div>
             )
         }

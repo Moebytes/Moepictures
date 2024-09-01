@@ -17,6 +17,7 @@ import CommentCarousel from "../components/CommentCarousel"
 import DeleteAccountDialog from "../dialogs/DeleteAccountDialog"
 import adminLabel from "../assets/icons/admin-label.png"
 import modLabel from "../assets/icons/mod-label.png"
+import systemLabel from "../assets/icons/system-label.png"
 import permissions from "../structures/Permissions"
 import "./styles/userprofilepage.less"
 import axios from "axios"
@@ -303,6 +304,13 @@ const UserProfilePage: React.FunctionComponent = (props) => {
                 <div className="userprofile-name-container">
                     <span className="userprofile-name-plain mod-color">{functions.toProperCase(session.username)}</span>
                     <img className="userprofile-name-label" src={modLabel}/>
+                </div>
+            )
+        } else if (session.role === "system") {
+            return (
+                <div className="userprofile-name-container">
+                    <span className="userprofile-name-plain system-color">{functions.toProperCase(session.username)}</span>
+                    <img className="userprofile-name-label" src={systemLabel}/>
                 </div>
             )
         }

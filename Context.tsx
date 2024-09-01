@@ -157,6 +157,10 @@ export const DMTargetContext = React.createContext<any>(null)
 export const MessagePageContext = React.createContext<any>(null)
 export const DeleteMessageIDContext = React.createContext<any>(null)
 export const DeleteMessageFlagContext = React.createContext<any>(null)
+export const EditMessageIDContext = React.createContext<any>(null)
+export const EditMessageFlagContext = React.createContext<any>(null)
+export const EditMessageTitleContext = React.createContext<any>(null)
+export const EditMessageContentContext = React.createContext<any>(null)
 export const DeleteMsgReplyIDContext = React.createContext<any>(null)
 export const DeleteMsgReplyFlagContext = React.createContext<any>(null)
 export const EditMsgReplyIDContext = React.createContext<any>(null)
@@ -305,6 +309,10 @@ const Context: React.FunctionComponent = (props) => {
     const [messagePage, setMessagePage] = useState(1)
     const [deleteMessageID, setDeleteMessageID] = useState(null)
     const [deleteMessageFlag, setDeleteMessageFlag] = useState(false)
+    const [editMessageID, setEditMessageID] = useState(null)
+    const [editMessageFlag, setEditMessageFlag] = useState(null)
+    const [editMessageTitle, setEditMessageTitle] = useState(null)
+    const [editMessageContent, setEditMessageContent] = useState(null)
     const [deleteMsgReplyID, setDeleteMsgReplyID] = useState(null)
     const [deleteMsgReplyFlag, setDeleteMsgReplyFlag] = useState(false)
     const [editMsgReplyFlag, setEditMsgReplyFlag] = useState(false)
@@ -313,6 +321,10 @@ const Context: React.FunctionComponent = (props) => {
 
 return (
     <>
+        <EditMessageContentContext.Provider value={{editMessageContent, setEditMessageContent}}>
+        <EditMessageTitleContext.Provider value={{editMessageTitle, setEditMessageTitle}}>
+        <EditMessageFlagContext.Provider value={{editMessageFlag, setEditMessageFlag}}>
+        <EditMessageIDContext.Provider value={{editMessageID, setEditMessageID}}>
         <EditMsgReplyContentContext.Provider value={{editMsgReplyContent, setEditMsgReplyContent}}>
         <EditMsgReplyIDContext.Provider value={{editMsgReplyID, setEditMsgReplyID}}>
         <EditMsgReplyFlagContext.Provider value={{editMsgReplyFlag, setEditMsgReplyFlag}}>
@@ -606,6 +618,10 @@ return (
         </EditMsgReplyFlagContext.Provider>
         </EditMsgReplyIDContext.Provider>
         </EditMsgReplyContentContext.Provider>
+        </EditMessageIDContext.Provider>
+        </EditMessageFlagContext.Provider>
+        </EditMessageTitleContext.Provider>
+        </EditMessageContentContext.Provider>
     </>
     )
 }

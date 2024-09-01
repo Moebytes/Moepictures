@@ -217,6 +217,7 @@ const CreateRoutes = (app: Express) => {
           updatedDate: uploadDate,
           uploader: req.session.username,
           updater: req.session.username,
+          approver: req.session.username,
           hidden
         })
 
@@ -1181,6 +1182,7 @@ const CreateRoutes = (app: Express) => {
           updatedDate: unverified.updatedDate,
           uploader: unverified.uploader,
           updater: unverified.updater,
+          approver: req.session.username,
           hidden
         })
 

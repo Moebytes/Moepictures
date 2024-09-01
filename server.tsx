@@ -102,7 +102,7 @@ app.use(session({
     expireColumnName: "expires"
   }),
   secret: process.env.COOKIE_SECRET!,
-  cookie: {maxAge: 1000 * 60 * 60 * 24 * 30, sameSite: "strict"},
+  cookie: {maxAge: 1000 * 60 * 60 * 24 * 30, sameSite: "lax"},
   rolling: true,
   resave: false,
   saveUninitialized: false

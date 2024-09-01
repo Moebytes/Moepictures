@@ -16,6 +16,7 @@ import Carousel from "../components/Carousel"
 import CommentCarousel from "../components/CommentCarousel"
 import adminLabel from "../assets/icons/admin-label.png"
 import modLabel from "../assets/icons/mod-label.png"
+import systemLabel from "../assets/icons/system-label.png"
 import banIcon from "../assets/icons/ban.png"
 import unbanIcon from "../assets/icons/unban.png"
 import dmIcon from "../assets/icons/dm.png"
@@ -194,6 +195,13 @@ const UserPage: React.FunctionComponent<Props> = (props) => {
                 <div className="user-name-container">
                     <span className="user-name-plain mod-color">{functions.toProperCase(username)}</span>
                     <img className="user-name-label" src={modLabel}/>
+                </div>
+            )
+        } else if (user?.role === "system") {
+            return (
+                <div className="user-name-container">
+                    <span className="user-name-plain system-color">{functions.toProperCase(username)}</span>
+                    <img className="user-name-label" src={systemLabel}/>
                 </div>
             )
         }

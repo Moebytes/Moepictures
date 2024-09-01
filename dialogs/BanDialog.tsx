@@ -28,6 +28,7 @@ const BanDialog: React.FunctionComponent = (props) => {
     const [deleteUnverifiedChanges, setDeleteUnverifiedChanges] = useState(true)
     const [deleteHistoryChanges, setDeleteHistoryChanges] = useState(true)
     const [deleteComments, setDeleteComments] = useState(true)
+    const [deleteMessages, setDeleteMessages] = useState(true)
     const [error, setError] = useState(false)
     const errorRef = useRef<any>(null)
     const history = useHistory()
@@ -88,7 +89,7 @@ const BanDialog: React.FunctionComponent = (props) => {
     }
 
     const ban = async () => {
-        const revertData = await axios.post("/api/user/ban", {username: banName, deleteUnverifiedChanges, deleteHistoryChanges, deleteComments, reason}, {headers: {"x-csrf-token": functions.getCSRFToken()}, withCredentials: true}).then((r) => r.data)
+        const revertData = await axios.post("/api/user/ban", {username: banName, deleteUnverifiedChanges, deleteHistoryChanges, deleteComments, deleteMessages, reason}, {headers: {"x-csrf-token": functions.getCSRFToken()}, withCredentials: true}).then((r) => r.data)
         if (revertData.revertPostIDs?.length) {
             for (const postID of revertData.revertPostIDs) {
                 const result = await axios.get("/api/post/history", {params: {postID}, withCredentials: true}).then((r) => r.data)
@@ -164,6 +165,10 @@ const BanDialog: React.FunctionComponent = (props) => {
                         <div className="dialog-row">
                             <span className="dialog-text">Delete comments/replies?</span>
                             <img className="dialog-checkbox" src={deleteComments ? checkboxChecked : checkbox} onClick={() => setDeleteComments((prev: boolean) => !prev)} style={{filter: getFilter()}}/>
+                        </div>
+                        <div className="dialog-row">
+                            <span className="dialog-text">Delete messages?</span>
+                            <img className="dialog-checkbox" src={deleteMessages ? checkboxChecked : checkbox} onClick={() => setDeleteMessages((prev: boolean) => !prev)} style={{filter: getFilter()}}/>
                         </div>
                         <div className="dialog-row">
                             <span className="dialog-text">Reason: </span>

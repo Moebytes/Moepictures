@@ -95,7 +95,7 @@ const CaptchaDialog: React.FunctionComponent<Props> = (props) => {
         }
         try {
             await axios.post("/api/misc/captcha", {captchaResponse}, {headers: {"x-csrf-token": functions.getCSRFToken()}, withCredentials: true})
-            captchaRef.current?.resetCaptcha()
+            captchaRef.current?.resetCaptcha?.()
             setSessionFlag(true)
             setNeedsVerification(false)
             history.go(0)

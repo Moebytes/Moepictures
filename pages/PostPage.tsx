@@ -120,8 +120,10 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
     useEffect(() => {
         if (!session.cookie || !post) return
         if (post.postID !== postID) return
-        if (!session.username && post.restrict !== "safe") {
+        if (!session.username) {
             setRedirect(`/post/${postID}`)
+        }
+        if (!session.username && post.restrict !== "safe") {
             history.push("/login")
             setSidebarText("Login required.")
         }
@@ -361,7 +363,7 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
             )
         }
     }
-
+    
     return (
         <>
         <DragAndDrop/>

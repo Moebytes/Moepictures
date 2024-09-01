@@ -13,14 +13,18 @@ import MessageReply from "../components/MessageReply"
 import {ThemeContext, EnableDragContext, HideNavbarContext, HideSidebarContext, MobileContext, SessionContext,
 RelativeContext, HideTitlebarContext, ActiveDropdownContext, HeaderTextContext, SidebarTextContext, SiteHueContext, 
 SiteLightnessContext, SiteSaturationContext, ScrollContext, MessagePageContext, ShowPageDialogContext, PageFlagContext,
-DeleteMessageIDContext, DeleteMessageFlagContext, QuoteTextContext} from "../Context"
+DeleteMessageIDContext, DeleteMessageFlagContext, QuoteTextContext, EditMessageIDContext, EditMessageFlagContext,
+EditMessageTitleContext, EditMessageContentContext} from "../Context"
 import permissions from "../structures/Permissions"
 import PageDialog from "../dialogs/PageDialog"
 import adminCrown from "../assets/icons/admin-crown.png"
 import modCrown from "../assets/icons/mod-crown.png"
+import systemCrown from "../assets/icons/system-crown.png"
+import editOptIcon from "../assets/icons/edit-opt.png"
 import deleteOptIcon from "../assets/icons/delete-opt.png"
 import quoteOptIcon from "../assets/icons/quote-opt.png"
 import DeleteMessageDialog from "../dialogs/DeleteMessageDialog"
+import EditMessageDialog from "../dialogs/EditMessageDialog"
 import DeleteMessageReplyDialog from "../dialogs/DeleteMessageReplyDialog"
 import EditMessageReplyDialog from "../dialogs/EditMessageReplyDialog"
 import favicon from "../assets/icons/favicon.png"
@@ -54,6 +58,10 @@ const MessagePage: React.FunctionComponent<Props> = (props) => {
     const {session, setSession} = useContext(SessionContext)
     const {deleteMessageID, setDeleteMessageID} = useContext(DeleteMessageIDContext)
     const {deleteMessageFlag, setDeleteMessageFlag} = useContext(DeleteMessageFlagContext)
+    const {editMessageID, setEditMessageID} = useContext(EditMessageIDContext)
+    const {editMessageFlag, setEditMessageFlag} = useContext(EditMessageFlagContext)
+    const {editMessageTitle, setEditMessageTitle} = useContext(EditMessageTitleContext)
+    const {editMessageContent, setEditMessageContent} = useContext(EditMessageContentContext)
     const [message, setMessage] = useState(null) as any
     const [replies, setReplies] = useState([]) as any
     const [index, setIndex] = useState(0)
@@ -393,8 +401,35 @@ const MessagePage: React.FunctionComponent<Props> = (props) => {
                     <img className="mail-message-user-label" src={modCrown}/>
                 </div>
             )
+        } else if (message.role === "system") {
+            return (
+                <div className="mail-message-username-container" onClick={creatorClick} onAuxClick={creatorClick}>
+                <span className="mail-message-user-text system-color">{functions.toProperCase(message.creator)}</span>
+                    <img className="mail-message-user-label" src={systemCrown}/>
+                </div>
+            )
         }
         return <span className="mail-message-user-text" onClick={creatorClick} onAuxClick={creatorClick}>{functions.toProperCase(message.creator)}</span>
+    }
+
+    const editMessage = async () => {
+        await axios.put("/api/message/edit", {messageID, title: editMessageTitle, content: editMessageContent}, {headers: {"x-csrf-token": functions.getCSRFToken()}, withCredentials: true})
+        updateMessage()
+    }
+
+    useEffect(() => {
+        if (editMessageFlag && editMessageID === messageID) {
+            editMessage()
+            setEditMessageFlag(false)
+            setEditMessageID(null)
+        }
+    }, [editMessageFlag, editMessageID, editMessageTitle, editMessageContent])
+
+    const editMessageDialog = () => {
+        if (!message) return
+        setEditMessageContent(message.content)
+        setEditMessageTitle(message.title)
+        setEditMessageID(message.messageID)
     }
 
     const deleteMessage = async () => {
@@ -437,6 +472,7 @@ const MessagePage: React.FunctionComponent<Props> = (props) => {
         if (session.username === message.creator || permissions.isElevated(session)) {
             jsx.push(
                 <>
+                <img draggable={false} className="mail-message-opt-icon" src={editOptIcon} onClick={editMessageDialog} style={{filter: getFilter()}}/>
                 <img draggable={false} className="mail-message-opt-icon" src={deleteOptIcon} onClick={deleteMessageDialog} style={{filter: getFilter()}}/>
                 </>
             )
@@ -493,6 +529,7 @@ const MessagePage: React.FunctionComponent<Props> = (props) => {
     return (
         <>
         <DragAndDrop/> 
+        <EditMessageDialog/> 
         <DeleteMessageDialog/> 
         <EditMessageReplyDialog/>
         <DeleteMessageReplyDialog/>

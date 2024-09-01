@@ -133,7 +133,7 @@ const VerifyEmailPage: React.FunctionComponent = (props) => {
                         <button className="verify-email-button" onClick={() => setSubmitted(false)}>Ok</button>
                     </div>
                     </> : <>
-                    <span className="verify-email-link">You must verify your email address in order to complete the signup process. If you need to 
+                    <span className="verify-email-link">You must verify your email address in order to use your account. If you need to 
                     change your email and/or resend the verification link, you can do so below.</span>
                     <div className="verify-email-row">
                         <span className="verify-email-text">Unverified Email: </span>

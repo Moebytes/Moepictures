@@ -7,6 +7,7 @@ import light from "../assets/icons/light.png"
 import logoutIcon from "../assets/icons/logout.png"
 import logoutModIcon from "../assets/icons/logout-mod.png"
 import logoutAdminIcon from "../assets/icons/logout-admin.png"
+import logoutSystemIcon from "../assets/icons/logout-system.png"
 import search2 from "../assets/icons/search2.png"
 import crown from "../assets/icons/crown.png"
 import mail from "../assets/icons/mail.png"
@@ -198,6 +199,12 @@ const NavBar: React.FunctionComponent<Props> = (props) => {
                 <img className="mobile-nav-logout-img" src={logoutModIcon} onClick={() => {logout(); setHideMobileNavbar(true)}}/>
             </>
             )
+        } else if (session.role === "system") {
+            return (<>
+                <span className="mobile-nav-text mobile-nav-user-text system-color" onClick={() => {history.push("/profile"); setHideMobileNavbar(true)}}>{functions.toProperCase(session.username)}</span>
+                <img className="mobile-nav-logout-img" src={logoutSystemIcon} onClick={() => {logout(); setHideMobileNavbar(true)}}/>
+            </>
+            )
         } else {
             return (<>
                     <span className="mobile-nav-text mobile-nav-user-text" onClick={() => {history.push("/profile"); setHideMobileNavbar(true)}}>{functions.toProperCase(session.username)}</span>
@@ -218,6 +225,12 @@ const NavBar: React.FunctionComponent<Props> = (props) => {
             return (<>
                 <span className="nav-text nav-user-text mod-color" onClick={() => history.push("/profile")}>{functions.toProperCase(session.username)}</span>
                 <img className="nav-logout-img" src={logoutModIcon} onClick={logout}/>
+            </>
+            )
+        } else if (session.role === "system") {
+            return (<>
+                <span className="nav-text nav-user-text system-color" onClick={() => history.push("/profile")}>{functions.toProperCase(session.username)}</span>
+                <img className="nav-logout-img" src={logoutSystemIcon} onClick={logout}/>
             </>
             )
         } else {
@@ -281,7 +294,7 @@ const NavBar: React.FunctionComponent<Props> = (props) => {
                         <img className="mobile-nav-user-img" src={userImg} style={{filter: session.image ? "" : getFilter()}}/>
                         {generateMobileUsernameJSX()}
                     </div> :
-                    <span className="mobile-nav-text mobile-nav-user-text" onClick={() => {history.push("/login"); setHideMobileNavbar(true)}}>Login</span>}
+                    <span className="mobile-nav-text mobile-nav-login-text" onClick={() => {history.push("/login"); setHideMobileNavbar(true)}}>Login</span>}
                     <span className="mobile-nav-text" onClick={() => {history.push("/posts"); setHideMobileNavbar(true); setSearchFlag(true)}}>Posts</span>
                     <span className="mobile-nav-text" onClick={() => {history.push("/comments"); setHideMobileNavbar(true)}}>Comments</span>
                     <span className="mobile-nav-text" onClick={() => {history.push("/artists"); setHideMobileNavbar(true)}}>Artists</span>
@@ -345,7 +358,7 @@ const NavBar: React.FunctionComponent<Props> = (props) => {
                         <img className="nav-user-img" src={userImg} style={{filter: session.image ? "" : getFilter()}}/>
                         {generateUsernameJSX()}
                     </div> :
-                    <span style={{marginRight: marginR}} className="nav-text nav-user-text" onClick={() => history.push("/login")}>Login</span>}
+                    <span style={{marginRight: marginR}} className="nav-text nav-login-text" onClick={() => history.push("/login")}>Login</span>}
                     <span style={{marginRight: marginR}} className="nav-text" onClick={() => postsClick()}>Posts</span>
                     <span style={{marginRight: marginR}} className="nav-text" onClick={() => history.push("/comments")}>Comments</span>
                     <span style={{marginRight: marginR}} className="nav-text" onClick={() => history.push("/artists")}>Artists</span>

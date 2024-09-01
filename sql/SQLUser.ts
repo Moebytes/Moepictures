@@ -78,4 +78,13 @@ export default class SQLUser {
         const result = await SQLQuery.run(query)
         return result
     }
+
+    /** Get all admins. */
+    public static admins = async () => {
+        const query: QueryConfig = {
+            text: `SELECT * FROM users WHERE users."role" = 'admin'`
+        }
+        const result = await SQLQuery.run(query)
+        return result
+    }
 }
