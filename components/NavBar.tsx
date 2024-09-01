@@ -28,7 +28,7 @@ import pageIcon from "../assets/icons/page.png"
 import Slider from "react-slider"
 import {ThemeContext, HideNavbarContext, HideSortbarContext, HideSidebarContext, EnableDragContext,  HideMobileNavbarContext, MobileContext,
 RelativeContext, HideTitlebarContext, SearchContext, SearchFlagContext, SessionContext, SessionFlagContext, UserImgContext, SiteHueContext,
-SiteSaturationContext, SiteLightnessContext, ScrollContext} from "../Context"
+SiteSaturationContext, SiteLightnessContext, ScrollContext, HasNotificationContext} from "../Context"
 import "./styles/navbar.less"
 
 interface Props {
@@ -59,6 +59,7 @@ const NavBar: React.FunctionComponent<Props> = (props) => {
     const [suggestionsActive, setSuggestionsActive] = useState(false)
     const [marginR, setMarginR] = useState("70px")
     const [activeDropdown, setActiveDropdown] = useState(false)
+    const {hasNotification, setHasNotification} = useContext(HasNotificationContext)
     const history = useHistory()
 
     const getFilter = () => {
@@ -80,6 +81,15 @@ const NavBar: React.FunctionComponent<Props> = (props) => {
             window.removeEventListener("scroll", handleScroll)
         }
     }, [])
+
+    useEffect(() => {
+        if (!session.username) return 
+        const checkMail = async () => {
+            const result = await axios.get("/api/user/checkmail", {withCredentials: true}).then((r) => r.data)
+            setHasNotification(result)
+        }
+        checkMail()
+    }, [session])
 
     useEffect(() => {
         functions.linkToBase64(userImg).then((userImg) => {
@@ -141,13 +151,8 @@ const NavBar: React.FunctionComponent<Props> = (props) => {
     }
 
     const getMailIcon = () => {
-        if (theme.includes("light")) return mailLight
-        return mail
-    }
-
-    const getMailNotif = () => {
-        if (theme.includes("light")) return mailNotifLight
-        return mailNotif
+        if (theme.includes("light")) return hasNotification ? mailNotifLight : mailLight
+        return hasNotification ? mailNotif : mail
     }
 
     const getCrownIcon = () => {

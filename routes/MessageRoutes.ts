@@ -21,6 +21,15 @@ const messageUpdateLimiter = rateLimit({
 	legacyHeaders: false
 })
 
+let connections = [] as {username: string, response: Response}[]
+
+const pushNotification = (username: string) => {
+    const connection = connections.find((c) => c.username === username)
+    if (!connection) return
+    connection.response.write(`event: message\n`)
+    connection.response.write(`data: new message!\n\n`)
+}
+
 const MessageRoutes = (app: Express) => {
     app.post("/api/message/create", messageUpdateLimiter, async (req: Request, res: Response) => {
         try {
@@ -31,6 +40,7 @@ const MessageRoutes = (app: Express) => {
             if (!title || !content) return res.status(400).send("Bad title or content")
             if (req.session.username === recipient) return res.status(400).send("Cannot send message to yourself")
             const messageID = await sql.message.insertMessage(req.session.username, recipient, title, content)
+            pushNotification(recipient)
             res.status(200).send(messageID)
         } catch (e) {
             console.log(e)
@@ -114,8 +124,10 @@ const MessageRoutes = (app: Express) => {
             await sql.message.updateMessage(Number(messageID), "recipientDelete", false)
             if (req.session.username === message.creator) {
                 await sql.message.updateMessage(Number(messageID), "recipientRead", false)
+                pushNotification(message.recipient)
             } else if (req.session.username === message.recipient) {
                 await sql.message.updateMessage(Number(messageID), "creatorRead", false)
+                pushNotification(message.creator)
             }
             res.status(200).send("Success")
         } catch (e) {
@@ -277,6 +289,28 @@ const MessageRoutes = (app: Express) => {
         } catch (e) {
             console.log(e)
             res.status(400).send("Bad request")
+        }
+    })
+
+    app.get("/api/notifications", messageLimiter, async (req: Request, res: Response) => {
+        try {
+            if (!req.session.username) return res.status(401).send("Unauthorized")
+            res.writeHead(200, {
+                "Content-Type": "text/event-stream",
+                "Connection": "keep-alive",
+                "Cache-Control": "no-cache"
+            })
+            const index = connections.findIndex((c) => c.username === req.session.username)
+            if (index !== -1) {
+                connections[index].response = res
+            } else {
+                connections.push({username: req.session.username, response: res})
+            }
+            req.on("close", () => {
+                connections = connections.filter((c) => c.username !== req.session.username)
+            })
+        } catch (e) {
+            console.log(e)
         }
     })
 }

@@ -779,6 +779,8 @@ const UserRoutes = (app: Express) => {
             }
             await sql.report.insertBan(username, req.session.username, reason)
             await sql.user.updateUser(username, "banned", true)
+            const message = `You have been banned for breaking the site rules. You can still view the site but you won't be able to interact with other users or edit posts.${reason ? `\n\nHere is an additional provided reason: ${reason}` : ""}`
+            await sql.message.insertMessage("moepictures", username, "Notice: You were banned", message)
             res.status(200).json({revertPostIDs: Array.from(revertPostIDs), revertTagIDs: Array.from(revertTagIDs)})
         } catch (e) {
             console.log(e)
@@ -799,6 +801,8 @@ const UserRoutes = (app: Express) => {
             if (user.role === "admin" || user.role === "mod") return res.status(400).send("Cannot perform action on this user")
             await sql.report.deleteBan(username)
             await sql.user.updateUser(username, "banned", false)
+            const message = `You have been unbanned. You may interact on the site again, but don't repeat the behavior that got you banned because you likely won't get another chance.`
+            await sql.message.insertMessage("moepictures", username, "Notice: You were unbanned", message)
             res.status(200).send("Success")
         } catch (e) {
             console.log(e)
@@ -814,6 +818,17 @@ const UserRoutes = (app: Express) => {
             if (req.session.username !== username && req.session.role !== "admin" && req.session.role !== "mod") return res.status(403).send("No permission to view ban")
             const ban = await sql.report.ban(username)
             res.status(200).json(ban)
+        } catch (e) {
+            console.log(e)
+            res.status(400).send("Bad request")
+        }
+    })
+
+    app.get("/api/user/checkmail", userLimiter, async (req: Request, res: Response) => {
+        try {
+            if (!req.session.username) return res.status(401).send("Unauthorized")
+            const unread = await sql.message.grabUnread(req.session.username)
+            res.status(200).send(unread.length ? true : false)
         } catch (e) {
             console.log(e)
             res.status(400).send("Bad request")

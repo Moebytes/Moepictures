@@ -1,7 +1,7 @@
 import React, {useContext, useEffect, useRef, useState} from "react"
 import {useHistory} from "react-router-dom"
 import {ThemeContext, SearchContext, SearchFlagContext, MobileContext, SessionContext, SiteHueContext, SiteLightnessContext,
-SiteSaturationContext, SoftDeleteMessageIDContext} from "../Context"
+SiteSaturationContext, SoftDeleteMessageIDContext, HasNotificationContext} from "../Context"
 import {HashLink as Link} from "react-router-hash-link"
 import functions from "../structures/Functions"
 import adminCrown from "../assets/icons/admin-crown.png"
@@ -33,6 +33,7 @@ const Message: React.FunctionComponent<Props> = (props) => {
     const {mobile, setMobile} = useContext(MobileContext)
     const {session, setSession} = useContext(SessionContext)
     const {softDeleteMessageID, setSoftDeleteMessageID} = useContext(SoftDeleteMessageIDContext)
+    const {hasNotification, setHasNotification} = useContext(HasNotificationContext)
     const [creatorRole, setCreatorRole] = useState("")
     const [recipientRole, setRecipientRole] = useState("")
     const [recipientImg, setRecipientImg] = useState("")
@@ -198,6 +199,11 @@ const Message: React.FunctionComponent<Props> = (props) => {
         )
     }
 
+    const checkMail = async () => {
+        const result = await axios.get("/api/user/checkmail", {withCredentials: true}).then((r) => r.data)
+        setHasNotification(result)
+    }
+
     const readStatus = () => {
         if (props.message.creator === session.username) {
             return props.message.creatorRead
@@ -209,6 +215,7 @@ const Message: React.FunctionComponent<Props> = (props) => {
     const toggleRead = async () => {
         await axios.post("/api/message/read", {messageID: props.message.messageID}, {headers: {"x-csrf-token": functions.getCSRFToken()}, withCredentials: true}).then((r) => r.data)
         props.onEdit?.()
+        checkMail()
     }
 
     const toggleSoftDelete = () => {

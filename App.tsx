@@ -1,6 +1,6 @@
 import React, {useEffect, useState, useContext} from "react"
 import {Switch, Route, Redirect, useHistory, useLocation} from "react-router-dom"
-import Context, {ThemeContext, HideNavbarContext, HideSidebarContext, HideSortbarContext,
+import Context, {ThemeContext, HideNavbarContext, HideSidebarContext, HideSortbarContext, HasNotificationContext,
 HideTitlebarContext, EnableDragContext, ActiveDropdownContext, FilterDropActiveContext, MobileScrollingContext,
 SidebarHoverContext, SessionContext, SessionFlagContext, UserImgContext, UserImgPostContext, MobileContext, SelectionModeContext} from "./Context"
 import favicon from "./assets/icons/favicon.png"
@@ -72,6 +72,7 @@ const App: React.FunctionComponent = (props) => {
     const [mobile, setMobile] = useState(false)
     const [mobileScrolling, setMobileScrolling] = useState(false)
     const [selectionMode, setSelectionMode] = useState(false)
+    const [hasNotification, setHasNotification] = useState(false)
 
     const history = useHistory()
     const location = useLocation()
@@ -111,6 +112,17 @@ const App: React.FunctionComponent = (props) => {
         setUserImg(getImg())
         if (session.imagePost) setUserImgPost(session.imagePost)
     }
+
+    useEffect(() => {
+        if (!session.username) return
+        const events = new EventSource("/api/notifications", {withCredentials: true})
+        events.onmessage = (event: any) => {
+            if (event.data === "new message!") setHasNotification(true)
+        }
+        return () => {
+            events.close()
+        }
+    }, [session])
 
     useEffect(() => {
         if (!session.cookie) return
@@ -228,6 +240,7 @@ const App: React.FunctionComponent = (props) => {
 
     return (
         <div className={`app ${!loaded ? "stop-transitions" : ""}`}>
+            <HasNotificationContext.Provider value={{hasNotification, setHasNotification}}>
             <SelectionModeContext.Provider value={{selectionMode, setSelectionMode}}>
             <MobileScrollingContext.Provider value={{mobileScrolling, setMobileScrolling}}>
             <MobileContext.Provider value={{mobile, setMobile}}>
@@ -310,6 +323,7 @@ const App: React.FunctionComponent = (props) => {
             </MobileContext.Provider>
             </MobileScrollingContext.Provider>
             </SelectionModeContext.Provider>
+            </HasNotificationContext.Provider>
         </div>
     )
 }

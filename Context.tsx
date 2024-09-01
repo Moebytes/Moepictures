@@ -168,6 +168,7 @@ export const EditMsgReplyFlagContext = React.createContext<any>(null)
 export const EditMsgReplyContentContext = React.createContext<any>(null)
 export const SoftDeleteMessageIDContext = React.createContext<any>(null)
 export const SoftDeleteMessageFlagContext = React.createContext<any>(null)
+export const HasNotificationContext = React.createContext<any>(null)
 
 const Context: React.FunctionComponent = (props) => {
     const [siteHue, setSiteHue] = useState(180)

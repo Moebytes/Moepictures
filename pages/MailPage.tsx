@@ -13,7 +13,7 @@ import Message from "../components/Message"
 import {ThemeContext, EnableDragContext, HideNavbarContext, HideSidebarContext, MobileContext, SessionContext,
 RelativeContext, HideTitlebarContext, ActiveDropdownContext, HeaderTextContext, SidebarTextContext, SiteHueContext, 
 SiteLightnessContext, SiteSaturationContext, ScrollContext, MailPageContext, ShowPageDialogContext,
-PageFlagContext, SoftDeleteMessageIDContext, SoftDeleteMessageFlagContext} from "../Context"
+PageFlagContext, SoftDeleteMessageIDContext, SoftDeleteMessageFlagContext, HasNotificationContext} from "../Context"
 import SoftDeleteMessageDialog from "../dialogs/SoftDeleteMessageDialog"
 import permissions from "../structures/Permissions"
 import scrollIcon from "../assets/icons/scroll.png"
@@ -40,6 +40,7 @@ const MailPage: React.FunctionComponent = (props) => {
     const {showPageDialog, setShowPageDialog} = useContext(ShowPageDialogContext)
     const {softDeleteMessageID, setSoftDeleteMessageID} = useContext(SoftDeleteMessageIDContext)
     const {softDeleteMessageFlag, setSoftDeleteMessageFlag} = useContext(SoftDeleteMessageFlagContext)
+    const {hasNotification, setHasNotification} = useContext(HasNotificationContext)
     const {pageFlag, setPageFlag} = useContext(PageFlagContext)
     const {scroll, setScroll} = useContext(ScrollContext)
     const {mobile, setMobile} = useContext(MobileContext)
@@ -76,6 +77,10 @@ const MailPage: React.FunctionComponent = (props) => {
             window.removeEventListener("load", onDOMLoaded)
         }
     }, [])
+
+    useEffect(() => {
+        if (hasNotification) updateMessages()
+    }, [hasNotification])
 
     const getFilter = () => {
         return `hue-rotate(${siteHue - 180}deg) saturate(${siteSaturation}%) brightness(${siteLightness + 70}%)`
@@ -420,11 +425,13 @@ const MailPage: React.FunctionComponent = (props) => {
     const readAll = async () => {
         await axios.post("/api/message/bulkread", {readStatus: true}, {headers: {"x-csrf-token": functions.getCSRFToken()}, withCredentials: true})
         updateMessages()
+        setHasNotification(false)
     }
 
     const unreadAll = async () => {
         await axios.post("/api/message/bulkread", {readStatus: false}, {headers: {"x-csrf-token": functions.getCSRFToken()}, withCredentials: true})
         updateMessages()
+        setHasNotification(true)
     }
 
     const getReadAllButton = () => {

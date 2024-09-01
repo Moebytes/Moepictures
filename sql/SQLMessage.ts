@@ -184,4 +184,20 @@ export default class SQLMessage {
         const result = await SQLQuery.run(query)
         return result
     }
+
+    /** Grab unread message from user (if exists) */
+    public static grabUnread = async (username: string) => {
+        const query: QueryConfig = {
+        text: functions.multiTrim(/*sql*/`
+                SELECT messages.*
+                FROM messages
+                WHERE (messages."creator" = $1 AND (messages."creatorRead" = false OR messages."creatorRead" IS NULL)) OR 
+                (messages."recipient" = $1 AND (messages."recipientRead" = false OR messages."recipientRead" IS NULL))
+                GROUP BY messages."messageID"
+            `),
+        values: [username]
+        }
+        const result = await SQLQuery.run(query)
+        return result
+    }
 }

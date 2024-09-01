@@ -14,7 +14,7 @@ import {ThemeContext, EnableDragContext, HideNavbarContext, HideSidebarContext, 
 RelativeContext, HideTitlebarContext, ActiveDropdownContext, HeaderTextContext, SidebarTextContext, SiteHueContext, 
 SiteLightnessContext, SiteSaturationContext, ScrollContext, MessagePageContext, ShowPageDialogContext, PageFlagContext,
 DeleteMessageIDContext, DeleteMessageFlagContext, QuoteTextContext, EditMessageIDContext, EditMessageFlagContext,
-EditMessageTitleContext, EditMessageContentContext} from "../Context"
+EditMessageTitleContext, EditMessageContentContext, HasNotificationContext} from "../Context"
 import permissions from "../structures/Permissions"
 import PageDialog from "../dialogs/PageDialog"
 import adminCrown from "../assets/icons/admin-crown.png"
@@ -62,6 +62,7 @@ const MessagePage: React.FunctionComponent<Props> = (props) => {
     const {editMessageFlag, setEditMessageFlag} = useContext(EditMessageFlagContext)
     const {editMessageTitle, setEditMessageTitle} = useContext(EditMessageTitleContext)
     const {editMessageContent, setEditMessageContent} = useContext(EditMessageContentContext)
+    const {hasNotification, setHasNotification} = useContext(HasNotificationContext)
     const [message, setMessage] = useState(null) as any
     const [replies, setReplies] = useState([]) as any
     const [index, setIndex] = useState(0)
@@ -115,7 +116,12 @@ const MessagePage: React.FunctionComponent<Props> = (props) => {
     }, [replies, replyID, replyJumpFlag])
 
     useEffect(() => {
-        axios.post("/api/message/read", {messageID, forceRead: true}, {headers: {"x-csrf-token": functions.getCSRFToken()}, withCredentials: true}).then((r) => r.data)
+        const updateRead = async () => {
+            await axios.post("/api/message/read", {messageID, forceRead: true}, {headers: {"x-csrf-token": functions.getCSRFToken()}, withCredentials: true}).then((r) => r.data)
+            const result = await axios.get("/api/user/checkmail", {withCredentials: true}).then((r) => r.data)
+            setHasNotification(result)
+        }
+        updateRead()
     }, [])
 
     const updateMessage = async () => {
