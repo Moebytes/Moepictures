@@ -184,7 +184,6 @@ const PostImage: React.FunctionComponent<Props> = (props) => {
             setImg(base64)
         }
         decryptImg()
-        // loadImage()
     }, [props.img])
 
     useEffect(() => {

@@ -13,7 +13,8 @@ import Message from "../components/Message"
 import {ThemeContext, EnableDragContext, HideNavbarContext, HideSidebarContext, MobileContext, SessionContext,
 RelativeContext, HideTitlebarContext, ActiveDropdownContext, HeaderTextContext, SidebarTextContext, SiteHueContext, 
 SiteLightnessContext, SiteSaturationContext, ScrollContext, MailPageContext, ShowPageDialogContext,
-PageFlagContext} from "../Context"
+PageFlagContext, SoftDeleteMessageIDContext, SoftDeleteMessageFlagContext} from "../Context"
+import SoftDeleteMessageDialog from "../dialogs/SoftDeleteMessageDialog"
 import permissions from "../structures/Permissions"
 import scrollIcon from "../assets/icons/scroll.png"
 import pageIcon from "../assets/icons/page.png"
@@ -37,6 +38,8 @@ const MailPage: React.FunctionComponent = (props) => {
     const {sidebarText, setSidebarText} = useContext(SidebarTextContext)
     const {mailPage, setMailPage} = useContext(MailPageContext)
     const {showPageDialog, setShowPageDialog} = useContext(ShowPageDialogContext)
+    const {softDeleteMessageID, setSoftDeleteMessageID} = useContext(SoftDeleteMessageIDContext)
+    const {softDeleteMessageFlag, setSoftDeleteMessageFlag} = useContext(SoftDeleteMessageFlagContext)
     const {pageFlag, setPageFlag} = useContext(PageFlagContext)
     const {scroll, setScroll} = useContext(ScrollContext)
     const {mobile, setMobile} = useContext(MobileContext)
@@ -90,6 +93,19 @@ const MailPage: React.FunctionComponent = (props) => {
         setVisibleMessages([])
         setMessages(result)
     }
+
+    const softDeleteMessage = async () => {
+        await axios.post("/api/message/softdelete", {messageID: softDeleteMessageID}, {headers: {"x-csrf-token": functions.getCSRFToken()}, withCredentials: true})
+        updateMessages()
+    }
+
+    useEffect(() => {
+        if (softDeleteMessageFlag && softDeleteMessageID) {
+            softDeleteMessage()
+            setSoftDeleteMessageFlag(false)
+            setSoftDeleteMessageID(null)
+        }
+    }, [softDeleteMessageFlag, softDeleteMessageID])
 
     useEffect(() => {
         if (messageSearchFlag) {
@@ -401,9 +417,38 @@ const MailPage: React.FunctionComponent = (props) => {
         })
     }
 
+    const readAll = async () => {
+        await axios.post("/api/message/bulkread", {readStatus: true}, {headers: {"x-csrf-token": functions.getCSRFToken()}, withCredentials: true})
+        updateMessages()
+    }
+
+    const unreadAll = async () => {
+        await axios.post("/api/message/bulkread", {readStatus: false}, {headers: {"x-csrf-token": functions.getCSRFToken()}, withCredentials: true})
+        updateMessages()
+    }
+
+    const getReadAllButton = () => {
+        const style = {marginLeft: mobile ? "0px" : "15px", marginTop: mobile ? "10px" : "0px"}
+        return (
+            <div className="item-button-container" style={style} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
+                <button className="item-button" onClick={() => readAll()}>Read All</button>
+            </div> 
+        )
+    }
+
+    const getUnreadAllButton = () => {
+        const style = {marginLeft: "15px", marginTop: mobile ? "10px" : "0px"}
+        return (
+            <div className="item-button-container" style={style} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
+                <button className="item-button" onClick={() => unreadAll()}>Unread All</button>
+            </div> 
+        )
+    }
+
     return (
         <>
         <DragAndDrop/>
+        <SoftDeleteMessageDialog/>
         <PageDialog/>
         <TitleBar/>
         <NavBar/>
@@ -417,6 +462,7 @@ const MailPage: React.FunctionComponent = (props) => {
                             <input className="item-search" type="search" spellCheck="false" value={searchQuery} onChange={(event) => setSearchQuery(event.target.value)} onKeyDown={(event) => event.key === "Enter" ? updateMessages() : null}/>
                             <img className="item-search-icon" src={getSearchIcon()} style={{filter: getFilterSearch()}} onClick={() => updateMessages()} onMouseEnter={() => setSearchIconHover(true)} onMouseLeave={() => setSearchIconHover(false)}/>
                         </div>
+                        {!mobile ? <>{getReadAllButton()}{getUnreadAllButton()}</> : null}
                         {getSortJSX()}
                         {!mobile ? <div className="itemsort-item" onClick={() => toggleScroll()}>
                             <img className="itemsort-img" src={scroll ? scrollIcon : pageIcon} style={{filter: getFilter()}}/>
@@ -435,6 +481,7 @@ const MailPage: React.FunctionComponent = (props) => {
                             </div>
                         </div>
                     </div>
+                    {mobile ? <>{getReadAllButton()}{getUnreadAllButton()}</> : null}
                     <table className="items-container">
                         {generateMessagesJSX()}
                     </table>

@@ -166,6 +166,8 @@ export const DeleteMsgReplyFlagContext = React.createContext<any>(null)
 export const EditMsgReplyIDContext = React.createContext<any>(null)
 export const EditMsgReplyFlagContext = React.createContext<any>(null)
 export const EditMsgReplyContentContext = React.createContext<any>(null)
+export const SoftDeleteMessageIDContext = React.createContext<any>(null)
+export const SoftDeleteMessageFlagContext = React.createContext<any>(null)
 
 const Context: React.FunctionComponent = (props) => {
     const [siteHue, setSiteHue] = useState(180)
@@ -308,7 +310,9 @@ const Context: React.FunctionComponent = (props) => {
     const [commentJumpFlag, setCommentJumpFlag] = useState(false)
     const [messagePage, setMessagePage] = useState(1)
     const [deleteMessageID, setDeleteMessageID] = useState(null)
+    const [softDeleteMessageID, setSoftDeleteMessageID] = useState(null)
     const [deleteMessageFlag, setDeleteMessageFlag] = useState(false)
+    const [softDeleteMessageFlag, setSoftDeleteMessageFlag] = useState(false)
     const [editMessageID, setEditMessageID] = useState(null)
     const [editMessageFlag, setEditMessageFlag] = useState(null)
     const [editMessageTitle, setEditMessageTitle] = useState(null)
@@ -321,6 +325,8 @@ const Context: React.FunctionComponent = (props) => {
 
 return (
     <>
+        <SoftDeleteMessageFlagContext.Provider value={{softDeleteMessageFlag, setSoftDeleteMessageFlag}}>
+        <SoftDeleteMessageIDContext.Provider value={{softDeleteMessageID, setSoftDeleteMessageID}}>
         <EditMessageContentContext.Provider value={{editMessageContent, setEditMessageContent}}>
         <EditMessageTitleContext.Provider value={{editMessageTitle, setEditMessageTitle}}>
         <EditMessageFlagContext.Provider value={{editMessageFlag, setEditMessageFlag}}>
@@ -622,6 +628,8 @@ return (
         </EditMessageFlagContext.Provider>
         </EditMessageTitleContext.Provider>
         </EditMessageContentContext.Provider>
+        </SoftDeleteMessageIDContext.Provider>
+        </SoftDeleteMessageFlagContext.Provider>
     </>
     )
 }

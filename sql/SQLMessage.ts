@@ -15,7 +15,7 @@ export default class SQLMessage {
     }
 
     /** Search all messages. */
-    public static allMessages = async (username: string, search: string, sort: string, offset?: string) => {
+    public static allMessages = async (username: string, search: string, sort: string, offset?: string, limit?: string) => {
         let i = 2
         let whereQuery = `WHERE (messages.recipient = $1 OR messages.creator = $1)`
         if (search) {
@@ -26,6 +26,11 @@ export default class SQLMessage {
         if (sort === "random") sortQuery = `ORDER BY random()`
         if (sort === "date") sortQuery = `ORDER BY messages."updatedDate" DESC`
         if (sort === "reverse date") sortQuery = `ORDER BY messages."updatedDate" ASC`
+        let limitQuery = "LIMIT 100"
+        if (limit) {
+            limitQuery = `LIMIT $${i}`
+            i++
+        }
         const query: QueryConfig = {
             text: functions.multiTrim(/*sql*/`
                 SELECT messages.*,
@@ -34,11 +39,12 @@ export default class SQLMessage {
                 ${whereQuery}
                 GROUP BY messages."messageID"
                 ${sortQuery}
-                LIMIT 100 ${offset ? `OFFSET $${i}` : ""}
+                ${limitQuery} ${offset ? `OFFSET $${i}` : ""}
             `),
             values: [username]
         }
         if (search) query.values?.push(search.toLowerCase())
+        if (limit) query.values?.push(limit)
         if (offset) query.values?.push(offset)
         const result = await SQLQuery.run(query)
         return result

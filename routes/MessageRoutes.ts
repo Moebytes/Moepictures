@@ -110,6 +110,13 @@ const MessageRoutes = (app: Express) => {
             await sql.message.insertMessageReply(Number(messageID), req.session.username, content)
             await sql.message.updateMessage(Number(messageID), "updater", req.session.username)
             await sql.message.updateMessage(Number(messageID), "updatedDate", new Date().toISOString())
+            await sql.message.updateMessage(Number(messageID), "creatorDelete", false)
+            await sql.message.updateMessage(Number(messageID), "recipientDelete", false)
+            if (req.session.username === message.creator) {
+                await sql.message.updateMessage(Number(messageID), "recipientRead", false)
+            } else if (req.session.username === message.recipient) {
+                await sql.message.updateMessage(Number(messageID), "creatorRead", false)
+            }
             res.status(200).send("Success")
         } catch (e) {
             console.log(e)
@@ -184,6 +191,87 @@ const MessageRoutes = (app: Express) => {
                 }
             } else {
                 await sql.message.deleteMessageReply(Number(replyID))
+            }
+            res.status(200).send("Success")
+        } catch (e) {
+            console.log(e)
+            res.status(400).send("Bad request")
+        }
+    })
+
+    app.post("/api/message/softdelete", messageUpdateLimiter, async (req: Request, res: Response) => {
+        try {
+            const {messageID} = req.body
+            if (!serverFunctions.validateCSRF(req)) return res.status(400).send("Bad CSRF token")
+            if (!req.session.username) return res.status(401).send("Unauthorized")
+            if (!messageID) return res.status(400).send("Bad messageID")
+            const message = await sql.message.message(messageID)
+            if (!message) return res.status(400).send("Invalid messageID")
+            if (req.session.username !== message.creator && req.session.username !== message.recipient) {
+                if (req.session.role !== "admin" && req.session.role !== "mod") return res.status(401).send("No permission to softdelete")
+            }
+            const isCreator = req.session.username === message.creator
+            const isRecipient = req.session.username === message.recipient
+            if (isCreator) {
+                await sql.message.updateMessage(Number(messageID), "creatorDelete", true)
+                if (message.recipientDelete) await sql.message.deleteMessage(Number(messageID))
+            } else if (isRecipient) {
+                await sql.message.updateMessage(Number(messageID), "recipientDelete", true)
+                if (message.creatorDelete) await sql.message.deleteMessage(Number(messageID))
+            }
+            res.status(200).send("Success")
+        } catch (e) {
+            console.log(e)
+            res.status(400).send("Bad request")
+        }
+    })
+
+    app.post("/api/message/read", messageLimiter, async (req: Request, res: Response) => {
+        try {
+            const {messageID, forceRead} = req.body
+            if (!serverFunctions.validateCSRF(req)) return res.status(400).send("Bad CSRF token")
+            if (!req.session.username) return res.status(401).send("Unauthorized")
+            if (!messageID) return res.status(400).send("Bad messageID")
+            const message = await sql.message.message(messageID)
+            if (!message) return res.status(400).send("Invalid messageID")
+            if (req.session.username !== message.creator && req.session.username !== message.recipient) {
+                if (req.session.role !== "admin" && req.session.role !== "mod") return res.status(401).send("No permission to read")
+            }
+            const isCreator = req.session.username === message.creator
+            const isRecipient = req.session.username === message.recipient
+            if (isCreator) {
+                if (!message.creatorRead || forceRead) {
+                    await sql.message.updateMessage(Number(messageID), "creatorRead", true)
+                } else {
+                    await sql.message.updateMessage(Number(messageID), "creatorRead", false)
+                }
+            } else if (isRecipient) {
+                if (!message.recipientRead || forceRead) {
+                    await sql.message.updateMessage(Number(messageID), "recipientRead", true)
+                } else {
+                    await sql.message.updateMessage(Number(messageID), "recipientRead", false)
+                }
+            }
+            res.status(200).send("Success")
+        } catch (e) {
+            console.log(e)
+            res.status(400).send("Bad request")
+        }
+    })
+
+    app.post("/api/message/bulkread", messageLimiter, async (req: Request, res: Response) => {
+        try {
+            const {readStatus} = req.body
+            if (!serverFunctions.validateCSRF(req)) return res.status(400).send("Bad CSRF token")
+            if (!req.session.username) return res.status(401).send("Unauthorized")
+            if (readStatus === undefined) return res.status(400).send("No readStatus specified")
+            const messages = await sql.message.allMessages(req.session.username, "", "date", undefined, "99999")
+            for (const message of messages) {
+                if (message.creator === req.session.username) {
+                    await sql.message.updateMessage(Number(message.messageID), "creatorRead", readStatus)
+                } else if (message.recipient === req.session.username) {
+                    await sql.message.updateMessage(Number(message.messageID), "recipientRead", readStatus)
+                }
             }
             res.status(200).send("Success")
         } catch (e) {

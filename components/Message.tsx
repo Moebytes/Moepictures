@@ -1,12 +1,16 @@
 import React, {useContext, useEffect, useRef, useState} from "react"
 import {useHistory} from "react-router-dom"
 import {ThemeContext, SearchContext, SearchFlagContext, MobileContext, SessionContext, SiteHueContext, SiteLightnessContext,
-SiteSaturationContext} from "../Context"
+SiteSaturationContext, SoftDeleteMessageIDContext} from "../Context"
 import {HashLink as Link} from "react-router-hash-link"
 import functions from "../structures/Functions"
 import adminCrown from "../assets/icons/admin-crown.png"
 import modCrown from "../assets/icons/mod-crown.png"
 import systemCrown from "../assets/icons/system-crown.png"
+import softDelete from "../assets/icons/soft-delete.png"
+import unread from "../assets/icons/unread.png"
+import read from "../assets/icons/read.png"
+import readLight from "../assets/icons/read-light.png"
 import favicon from "../assets/icons/favicon.png"
 import "./styles/message.less"
 import axios from "axios"
@@ -28,6 +32,7 @@ const Message: React.FunctionComponent<Props> = (props) => {
     const {searchFlag, setSearchFlag} = useContext(SearchFlagContext)
     const {mobile, setMobile} = useContext(MobileContext)
     const {session, setSession} = useContext(SessionContext)
+    const {softDeleteMessageID, setSoftDeleteMessageID} = useContext(SoftDeleteMessageIDContext)
     const [creatorRole, setCreatorRole] = useState("")
     const [recipientRole, setRecipientRole] = useState("")
     const [recipientImg, setRecipientImg] = useState("")
@@ -193,6 +198,23 @@ const Message: React.FunctionComponent<Props> = (props) => {
         )
     }
 
+    const readStatus = () => {
+        if (props.message.creator === session.username) {
+            return props.message.creatorRead
+        } else if (props.message.recipient === session.username) {
+            return props.message.recipientRead
+        }
+    }
+
+    const toggleRead = async () => {
+        await axios.post("/api/message/read", {messageID: props.message.messageID}, {headers: {"x-csrf-token": functions.getCSRFToken()}, withCredentials: true}).then((r) => r.data)
+        props.onEdit?.()
+    }
+
+    const toggleSoftDelete = () => {
+        setSoftDeleteMessageID(props.message.messageID)
+    }
+
     const dateTextJSX = () => {
         const targetDate = props.message.updatedDate
         return <span className="message-date-text">{functions.timeAgo(targetDate)}</span>
@@ -221,12 +243,20 @@ const Message: React.FunctionComponent<Props> = (props) => {
         )
     }
 
+    const getReadIcon = () => {
+        if (!readStatus()) return unread
+        if (theme.includes("light")) return readLight
+        return read
+    }
+
     return (
         <tr className="message">
             <div className="message-content-container">
                 <td className="message-container">
                     <div className="message-row" style={{width: "100%"}}>
-                        <span className="message-title" onClick={messagePage} onAuxClick={messagePage}>{props.message.title}</span>
+                        <img draggable={false} className="message-opt-icon" src={getReadIcon()} onClick={toggleRead}/>
+                        <img draggable={false} className="message-opt-icon" src={softDelete} onClick={toggleSoftDelete}/>
+                        <span className={`message-title ${readStatus() ? "message-read" : ""}`} onClick={messagePage} onAuxClick={messagePage}>{props.message.title}</span>
                     </div>
                     {!mobile ? <div className="message-row">
                         {generateCreatorJSX()}

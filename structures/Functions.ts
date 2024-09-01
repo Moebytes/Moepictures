@@ -26,9 +26,9 @@ let element = null as any
 let inertia = false
 let mouseDown = false
 
-const imageExtensions = [".jpg", ".jpeg", ".png", ".webp"]
-const videoExtensions = [".mp4", ".mov", ".avi", ".mkv", ".webm"]
-const audioExtensions = [".mp3", ".wav"]
+const imageExtensions = [".jpg", ".jpeg", ".png", ".webp", ".avif"]
+const videoExtensions = [".mp4", ".webm", ".mov", ".avi", ".mkv"]
+const audioExtensions = [".mp3", ".wav", ".ogg", ".flac", ".aac"]
 const modelExtensions = [".glb", ".gltf", ".obj", ".fbx"]
 
 export default class Functions {
@@ -116,7 +116,7 @@ export default class Functions {
     
     public static arrayIncludes = (str: string, arr: string[]) => {
         for (let i = 0; i < arr.length; i++) {
-            if (str.includes(arr[i])) return true
+            if (arr[i].includes(str)) return true
         }
         return false
     }
@@ -1972,7 +1972,8 @@ export default class Functions {
             jpg: Buffer.from([0xFF, 0xD8, 0xFF]),
             png: Buffer.from([0x89, 0x50, 0x4E, 0x47]),
             webp: Buffer.from([0x52, 0x49, 0x46, 0x46]),
-            gif: Buffer.from([0x47, 0x49, 0x46, 0x38])
+            gif: Buffer.from([0x47, 0x49, 0x46, 0x38]),
+            avif: Buffer.from([0x66, 0x74, 0x79, 0x70, 0x61, 0x76, 0x69, 0x66])
         }
         for (const signature of Object.values(signatures)) {
             if (buffer.subarray(0, signature.length).equals(signature)) return false

@@ -321,7 +321,26 @@ const SearchRoutes = (app: Express) => {
             if (!req.session.username) return res.status(401).send("Unauthorized")
             const search = query?.trim() ?? ""
             const messages = await sql.message.allMessages(req.session.username, search, sort, offset)
-            res.status(200).json(messages)
+            let filtered = [] as any
+            let messageCount = messages[0]?.messageCount || 0
+            for (const message of messages) {
+                if (message.creator === req.session.username) {
+                    if (message.creatorDelete) {
+                        messageCount--
+                        continue
+                    }
+                } else if (message.recipient === req.session.username) {
+                    if (message.recipientDelete) {
+                        messageCount--
+                        continue
+                    }
+                }
+                filtered.push(message)
+            }
+            for (const message of filtered) {
+                message.messageCount = messageCount
+            }
+            res.status(200).json(filtered)
         } catch (e) {
             console.log(e)
             return res.status(400).send("Bad request")

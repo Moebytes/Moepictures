@@ -150,6 +150,10 @@ CREATE TABLE IF NOT EXISTS "messages" (
     "createDate" timestamptz,
     "updater" text REFERENCES "users" ("username") ON UPDATE CASCADE ON DELETE SET NULL,
     "updatedDate" timestamptz,
+    "creatorRead" boolean,
+    "recipientRead" boolean,
+    "creatorDelete" boolean,
+    "recipientDelete" boolean,
     "title" text,
     "content" text
 );

@@ -175,6 +175,7 @@ export default class SQLFavorite {
             'translatedCommentary', post_json."translatedCommentary",
             'bookmarks', post_json."bookmarks",
             'hidden', post_json."hidden",
+            'approver', post_json."approver",
             'mirrors', post_json."mirrors",
             'images', (array_agg(post_json."images"))[1]${includeTags ? `,
             'tags', post_json."tags"` : ""}
@@ -183,7 +184,7 @@ export default class SQLFavorite {
             JOIN post_json ON post_json."postID" = favorites."postID"
             ${whereQueries ? `WHERE ${whereQueries}` : ""}
             GROUP BY favorites."favoriteID", post_json."postID", post_json."uploader", post_json."updater", ${includeTags ? `post_json."tags",` : ""}
-            post_json."type", post_json."restrict", post_json."style", post_json."cuteness", post_json."favoriteCount", post_json."thirdParty", 
+            post_json."type", post_json."restrict", post_json."style", post_json."cuteness", post_json."favoriteCount", post_json."thirdParty", post_json."approver",
             post_json."drawn", post_json."uploadDate", post_json."updatedDate", post_json."title", post_json."hidden", post_json."translatedTitle",
             post_json."artist", post_json."link", post_json."commentary", post_json."translatedCommentary", post_json."bookmarks", post_json."mirrors"
             ${sortQuery}

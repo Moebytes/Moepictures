@@ -34,8 +34,6 @@ import UserRoutes from "./routes/UserRoutes"
 import TranslationRoutes from "./routes/TranslationRoutes"
 import ThreadRoutes from "./routes/ThreadRoutes"
 import MessageRoutes from "./routes/MessageRoutes"
-import {render} from "@react-email/components"
-import Email from "./emails/VerifyEmail"
 const __dirname = path.resolve()
 
 dotenv.config()
@@ -138,15 +136,14 @@ app.use("/assets", express.static(path.join(__dirname, "./assets")))
 let folders = ["animation", "artist", "character", "comic", "image", "pfp", "series", "tag", "video", "audio", "model", "history"]
 
 for (let i = 0; i < folders.length; i++) {
-  //serverFunctions.uploadFile(`${folders[i]}/`, "")
-  //serverFunctions.uploadUnverifiedFile(`${folders[i]}/`, "")
   app.get(`/${folders[i]}/*`, async (req: Request, res: Response, next: NextFunction) => {
+    const mimeType = mime.getType(req.path)
     try {
       if (folders[i] === "tag") {
         if (!req.url.endsWith(".png") && !req.url.endsWith(".jpg") && !req.url.endsWith(".jpeg") &&
         !req.url.endsWith(".webp") && !req.url.endsWith(".gif")) return next()
       }
-      res.setHeader("Content-Type", mime.getType(req.path) ?? "")
+      res.setHeader("Content-Type", mimeType ?? "")
       const key = decodeURIComponent(req.path.slice(1))
       if (req.session.role !== "admin" && req.session.role !== "mod") {
         const postID = key.match(/(?<=\/)\d+(?=\/)/)?.[0]
@@ -155,9 +152,19 @@ for (let i = 0; i < folders.length; i++) {
           if (post.restrict === "explicit") return res.status(403).send("No permission")
         }
       }
-      const body = await serverFunctions.getFile(key)
-      const contentLength = body.length
+      let body = await serverFunctions.getFile(key)
+      let contentLength = body.length
       if (!contentLength) return res.status(200).send(body)
+      if (mimeType?.includes("image")) {
+        const metadata = await sharp(body).metadata()
+        const bigger = metadata.width! > metadata.height! ? metadata.width! : metadata.height!
+        if (bigger < 2000) {
+          body = await sharp(body, {animated: false, limitInputPixels: false})
+          .resize(2000, 2000, {fit: "outside", kernel: "cubic"})
+          .toBuffer()
+          contentLength = body.length
+        }
+      }
       if (req.headers.range) {
         const parts = req.headers.range.replace(/bytes=/, "").split("-")
         const start = parseInt(parts[0])
@@ -292,11 +299,6 @@ for (let i = 0; i < folders.length; i++) {
     }
   })
 }
-
-app.get("/test", async (req: Request, res: Response) => {
-  const html = await render(<Email username="moepi" link="https://google.com"/>)
-  res.status(200).send(html)
-})
 
 app.get("/*", (req: Request, res: Response) => {
   if (!req.hostname.includes("moepictures") && !req.hostname.includes("localhost") && !req.hostname.includes("192.168.68")) {

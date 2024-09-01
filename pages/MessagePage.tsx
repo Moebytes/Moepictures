@@ -114,6 +114,10 @@ const MessagePage: React.FunctionComponent<Props> = (props) => {
         }
     }, [replies, replyID, replyJumpFlag])
 
+    useEffect(() => {
+        axios.post("/api/message/read", {messageID, forceRead: true}, {headers: {"x-csrf-token": functions.getCSRFToken()}, withCredentials: true}).then((r) => r.data)
+    }, [])
+
     const updateMessage = async () => {
         const message = await axios.get("/api/message", {params: {messageID}, withCredentials: true}).then((r) => r.data)
         setMessage(message)
