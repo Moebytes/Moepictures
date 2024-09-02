@@ -16,6 +16,7 @@ SiteLightnessContext, SiteSaturationContext, ScrollContext, MessagePageContext, 
 DeleteMessageIDContext, DeleteMessageFlagContext, QuoteTextContext, EditMessageIDContext, EditMessageFlagContext,
 EditMessageTitleContext, EditMessageContentContext, HasNotificationContext} from "../Context"
 import permissions from "../structures/Permissions"
+import jsxFunctions from "../structures/JSXFunctions"
 import PageDialog from "../dialogs/PageDialog"
 import adminCrown from "../assets/icons/admin-crown.png"
 import modCrown from "../assets/icons/mod-crown.png"
@@ -419,7 +420,7 @@ const MessagePage: React.FunctionComponent<Props> = (props) => {
                 </div>
             )
         }
-        return <span className="mail-message-user-text" onClick={creatorClick} onAuxClick={creatorClick}>{functions.toProperCase(message.creator)}</span>
+        return <span className={`mail-message-user-text ${message.banned ? "banned" : ""}`} onClick={creatorClick} onAuxClick={creatorClick}>{functions.toProperCase(message.creator)}</span>
     }
 
     const editMessage = async () => {
@@ -514,6 +515,11 @@ const MessagePage: React.FunctionComponent<Props> = (props) => {
     }
 
     const getReplyBoxJSX = () => {
+        if (message.role === "system") return (
+            <div className="mail-message-reply-box" style={{justifyContent: "flex-start"}}>
+                <span className="upload-ban-text" style={{fontSize: "20px", marginLeft: "15px"}}>Cannot respond to system messages.</span>
+            </div>
+        )
         if (session.banned) return (
             <div className="mail-message-reply-box" style={{justifyContent: "flex-start"}}>
                 <span className="upload-ban-text" style={{fontSize: "20px", marginLeft: "15px"}}>You are banned. Cannot reply.</span>
@@ -565,7 +571,7 @@ const MessagePage: React.FunctionComponent<Props> = (props) => {
                             <img draggable={false} className="mail-message-user-img" src={getCreatorPFP()} onClick={creatorImgClick} onAuxClick={creatorImgClick} style={{filter: defaultIcon ? getFilter() : ""}}/>
                         </div>
                         <div className="mail-message-text-container">
-                            <p className="mail-message-text">{message.content}</p>
+                            <p className="mail-message-text">{jsxFunctions.parseTextLinks(message.content)}</p>
                         </div>
                     </div>
                     <table className="mail-message-container">

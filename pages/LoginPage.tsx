@@ -35,7 +35,7 @@ const LoginPage: React.FunctionComponent = (props) => {
     const [username, setUsername] = useState("")
     const [password, setPassword] = useState("")
     const [captchaResponse, setCaptchaResponse] = useState("")
-    const [captcha, setCaptcha] = useState("")
+    const [captcha, setCaptcha] = useState(" ")
     const [error, setError] = useState(false)
     const errorRef = useRef<any>(null)
     const history = useHistory()
@@ -57,7 +57,7 @@ const LoginPage: React.FunctionComponent = (props) => {
 
     useEffect(() => {
         updateCaptcha()
-    }, [theme])
+    }, [session, theme])
 
     useEffect(() => {
         setHideNavbar(false)

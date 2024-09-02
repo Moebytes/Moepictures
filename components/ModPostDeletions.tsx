@@ -1,4 +1,4 @@
-import React, {useContext, useEffect, useRef, useState, useReducer} from "react"
+import React, {useContext, useEffect, useRef, useState} from "react"
 import {useHistory} from "react-router-dom"
 import {ThemeContext, SearchContext, SearchFlagContext, SiteHueContext, SiteLightnessContext, SiteSaturationContext} from "../Context"
 import {HashLink as Link} from "react-router-hash-link"
@@ -10,7 +10,6 @@ import "./styles/modposts.less"
 import axios from "axios"
 
 const ModPostDeletions: React.FunctionComponent = (props) => {
-    const [ignored, forceUpdate] = useReducer(x => x + 1, 0)
     const {theme, setTheme} = useContext(ThemeContext)
     const {siteHue, setSiteHue} = useContext(SiteHueContext)
     const {siteSaturation, setSiteSaturation} = useContext(SiteSaturationContext)
@@ -20,6 +19,7 @@ const ModPostDeletions: React.FunctionComponent = (props) => {
     const {searchFlag, setSearchFlag} = useContext(SearchFlagContext)
     const [index, setIndex] = useState(0)
     const [visibleRequests, setVisibleRequests] = useState([]) as any
+    const [updateVisibleRequestFlag, setUpdateVisibleRequestFlag] = useState(false)
     const [requests, setRequests] = useState([]) as any
     const [imagesRef, setImagesRef] = useState([]) as any
     const [offset, setOffset] = useState(0)
@@ -41,17 +41,35 @@ const ModPostDeletions: React.FunctionComponent = (props) => {
         updatePosts()
     }, [])
 
+    const updateVisibleRequests = () => {
+        const newVisibleRequests = [] as any
+        for (let i = 0; i < index; i++) {
+            if (!requests[i]) break
+            newVisibleRequests.push(requests[i])
+        }
+        setVisibleRequests(functions.removeDuplicates(newVisibleRequests))
+        const newImagesRef = newVisibleRequests.map(() => React.createRef()) as any
+        setImagesRef(newImagesRef) as any
+    }
+
+    useEffect(() => {
+        if (updateVisibleRequestFlag) {
+            updateVisibleRequests()
+            setUpdateVisibleRequestFlag(false)
+        }
+    }, [requests, index, updateVisibleRequestFlag])
+
     const deletePost = async (username: string, postID: number) => {
         await axios.delete("/api/post/delete", {params: {postID}, headers: {"x-csrf-token": functions.getCSRFToken()}, withCredentials: true})
-        await axios.post("/api/post/delete/request/fulfill", {username, postID}, {headers: {"x-csrf-token": functions.getCSRFToken()}, withCredentials: true})
+        await axios.post("/api/post/delete/request/fulfill", {username, postID, accepted: true}, {headers: {"x-csrf-token": functions.getCSRFToken()}, withCredentials: true})
         await updatePosts()
-        forceUpdate()
+        setUpdateVisibleRequestFlag(true)
     }
 
     const rejectRequest = async (username: string, postID: number) => {
-        await axios.post("/api/post/delete/request/fulfill", {username, postID}, {headers: {"x-csrf-token": functions.getCSRFToken()}, withCredentials: true})
+        await axios.post("/api/post/delete/request/fulfill", {username, postID, accepted: false}, {headers: {"x-csrf-token": functions.getCSRFToken()}, withCredentials: true})
         await updatePosts()
-        forceUpdate()
+        setUpdateVisibleRequestFlag(true)
     }
 
     useEffect(() => {

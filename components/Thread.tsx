@@ -30,12 +30,8 @@ const Thread: React.FunctionComponent<Props> = (props) => {
     const {searchFlag, setSearchFlag} = useContext(SearchFlagContext)
     const {mobile, setMobile} = useContext(MobileContext)
     const {session, setSession} = useContext(SessionContext)
-    const [creatorRole, setCreatorRole] = useState("")
-    const [updaterRole, setUpdaterRole] = useState("")
-    const [updaterImg, setUpdaterImg] = useState("")
-    const [creatorImg, setCreatorImg] = useState("")
-    const [updaterImgPost, setUpdaterImgPost] = useState("")
-    const [creatorImgPost, setCreatorImgPost] = useState("")
+    const [creatorData, setCreatorData] = useState({}) as any
+    const [updaterData, setUpdaterData] = useState({}) as any
     const [creatorDefaultIcon, setCreatorDefaultIcon] = useState(false)
     const [updaterDefaultIcon, setUpdaterDefaultIcon] = useState(false)
     const history = useHistory()
@@ -44,43 +40,28 @@ const Thread: React.FunctionComponent<Props> = (props) => {
         return `hue-rotate(${siteHue - 180}deg) saturate(${siteSaturation}%) brightness(${siteLightness + 70}%)`
     }
 
-    const updateUpdaterRole = async () => {
-        const user = await axios.get("/api/user", {params: {username: props.thread.updater}, withCredentials: true}).then((r) => r.data)
-        if (user?.role) setUpdaterRole(user.role)
-        if (user?.image) setUpdaterImg(functions.getTagLink("pfp", user.image))
-        if (user?.imagePost) setUpdaterImgPost(user.imagePost)
-        setUpdaterDefaultIcon(user?.image ? false : true)
+    const updateUpdater = async () => {
+        const updater = await axios.get("/api/user", {params: {username: props.thread.updater}, withCredentials: true}).then((r) => r.data)
+        setUpdaterData(updater)
+        setUpdaterDefaultIcon(updater?.image ? false : true)
     }
 
-    const updateCreatorRole = async () => {
-        const user = await axios.get("/api/user", {params: {username: props.thread.creator}, withCredentials: true}).then((r) => r.data)
+    const updateCreator = async () => {
+        const creator = await axios.get("/api/user", {params: {username: props.thread.creator}, withCredentials: true}).then((r) => r.data)
+        setCreatorData(creator)
         if (props.thread.creator === props.thread.updater) {
-            if (user?.role) {
-                setCreatorRole(user.role)
-                setUpdaterRole(user.role)
-            }
-            if (user?.image) {
-                setCreatorImg(functions.getTagLink("pfp", user.image))
-                setUpdaterImg(functions.getTagLink("pfp", user.image))
-            }
-            if (user?.imagePost) {
-                setCreatorImgPost(user.imagePost)
-                setUpdaterImgPost(user.imagePost)
-            }
-            setCreatorDefaultIcon(user?.image ? false : true)
-            setUpdaterDefaultIcon(user?.image ? false : true)
+            setUpdaterData(creator)
+            setCreatorDefaultIcon(creator?.image ? false : true)
+            setUpdaterDefaultIcon(creator?.image ? false : true)
         } else {
-            if (user?.role) setCreatorRole(user.role)
-            if (user?.image) setCreatorImg(functions.getTagLink("pfp", user.image))
-            if (user?.imagePost) setCreatorImgPost(user.imagePost)
-            setCreatorDefaultIcon(user?.image ? false : true)
-            updateUpdaterRole()
+            setCreatorDefaultIcon(creator?.image ? false : true)
+            updateUpdater()
         }
     }
 
     useEffect(() => {
         if (props.thread) {
-            updateCreatorRole()
+            updateCreator()
         }
     }, [])
 
@@ -93,8 +74,8 @@ const Thread: React.FunctionComponent<Props> = (props) => {
     }
 
     const getCreatorPFP = () => {
-        if (creatorImg) {
-            return creatorImg
+        if (creatorData.image) {
+            return functions.getTagLink("pfp", creatorData.image)
         } else {
             return favicon
         }
@@ -109,18 +90,18 @@ const Thread: React.FunctionComponent<Props> = (props) => {
     }
 
     const creatorImgClick = (event: React.MouseEvent) => {
-        if (!creatorImgPost) return
+        if (!creatorData.imagePost) return
         event.stopPropagation()
         if (event.ctrlKey || event.metaKey || event.button === 1) {
-            window.open(`/post/${creatorImgPost}`, "_blank")
+            window.open(`/post/${creatorData.imagePost}`, "_blank")
         } else {
-            history.push(`/post/${creatorImgPost}`)
+            history.push(`/post/${creatorData.imagePost}`)
         }
     }
 
     const getUpdaterPFP = () => {
-        if (updaterImg) {
-            return updaterImg
+        if (updaterData.image) {
+            return functions.getTagLink("pfp", updaterData.image)
         } else {
             return favicon
         }
@@ -135,17 +116,17 @@ const Thread: React.FunctionComponent<Props> = (props) => {
     }
 
     const updaterImgClick = (event: React.MouseEvent) => {
-        if (!updaterImgPost) return
+        if (!updaterData.imagePost) return
         event.stopPropagation()
         if (event.ctrlKey || event.metaKey || event.button === 1) {
-            window.open(`/post/${updaterImgPost}`, "_blank")
+            window.open(`/post/${updaterData.imagePost}`, "_blank")
         } else {
-            history.push(`/post/${updaterImgPost}`)
+            history.push(`/post/${updaterData.imagePost}`)
         }
     }
 
     const generateCreatorJSX = () => {
-        if (creatorRole === "admin") {
+        if (creatorData.role === "admin") {
             return (
                 <div className="thread-username-container" onClick={creatorPage} onAuxClick={creatorPage}>
                     <img draggable={false} src={getCreatorPFP()} className="thread-user-img" onClick={creatorImgClick} onAuxClick={creatorImgClick} style={{filter: creatorDefaultIcon ? getFilter() : ""}}/>
@@ -153,7 +134,7 @@ const Thread: React.FunctionComponent<Props> = (props) => {
                     <img className="thread-user-label" src={adminCrown}/>
                 </div>
             )
-        } else if (creatorRole === "mod") {
+        } else if (creatorData.role === "mod") {
             return (
                 <div className="thread-username-container" onClick={creatorPage} onAuxClick={creatorPage}>
                     <img draggable={false} src={getCreatorPFP()} className="thread-user-img" onClick={creatorImgClick} onAuxClick={creatorImgClick} style={{filter: creatorDefaultIcon ? getFilter() : ""}}/>
@@ -161,7 +142,7 @@ const Thread: React.FunctionComponent<Props> = (props) => {
                     <img className="thread-user-label" src={modCrown}/>
                 </div>
             )
-        } else if (creatorRole === "system") {
+        } else if (creatorData.role === "system") {
             return (
                 <div className="thread-username-container" onClick={creatorPage} onAuxClick={creatorPage}>
                     <img draggable={false} src={getCreatorPFP()} className="thread-user-img" onClick={creatorImgClick} onAuxClick={creatorImgClick} style={{filter: creatorDefaultIcon ? getFilter() : ""}}/>
@@ -173,13 +154,13 @@ const Thread: React.FunctionComponent<Props> = (props) => {
         return (
             <div className="thread-username-container" onClick={creatorPage} onAuxClick={creatorPage}>
                 <img draggable={false} src={getCreatorPFP()} className="thread-user-img" onClick={creatorImgClick} onAuxClick={creatorImgClick} style={{filter: creatorDefaultIcon ? getFilter() : ""}}/>
-                <span className="thread-user-text" onClick={creatorPage} onAuxClick={creatorPage}>{functions.toProperCase(props.thread.creator)}</span>
+                <span className={`thread-user-text ${creatorData.banned ? "banned" : ""}`} onClick={creatorPage} onAuxClick={creatorPage}>{functions.toProperCase(props.thread.creator)}</span>
             </div>
         )
     }
 
     const generateUpdaterJSX = () => {
-        if (updaterRole === "admin") {
+        if (updaterData.role === "admin") {
             return (
                 <div className="thread-username-container" onClick={(event) => updaterPage(event)} onAuxClick={(event) => updaterPage(event)}>
                     <img draggable={false} src={getUpdaterPFP()} className="thread-user-img" onClick={updaterImgClick} onAuxClick={updaterImgClick} style={{filter: updaterDefaultIcon ? getFilter() : ""}}/>
@@ -187,7 +168,7 @@ const Thread: React.FunctionComponent<Props> = (props) => {
                     <img className="thread-user-label" src={adminCrown}/>
                 </div>
             )
-        } else if (updaterRole === "mod") {
+        } else if (updaterData.role === "mod") {
             return (
                 <div className="thread-username-container" onClick={(event) => updaterPage(event)} onAuxClick={(event) => updaterPage(event)}>
                 <img draggable={false} src={getUpdaterPFP()} className="thread-user-img" onClick={updaterImgClick} onAuxClick={updaterImgClick} style={{filter: updaterDefaultIcon ? getFilter() : ""}}/>
@@ -195,7 +176,7 @@ const Thread: React.FunctionComponent<Props> = (props) => {
                     <img className="thread-user-label" src={modCrown}/>
                 </div>
             )
-        } else if (updaterRole === "system") {
+        } else if (updaterData.role === "system") {
             return (
                 <div className="thread-username-container" onClick={(event) => updaterPage(event)} onAuxClick={(event) => updaterPage(event)}>
                 <img draggable={false} src={getUpdaterPFP()} className="thread-user-img" onClick={updaterImgClick} onAuxClick={updaterImgClick} style={{filter: updaterDefaultIcon ? getFilter() : ""}}/>
@@ -207,7 +188,7 @@ const Thread: React.FunctionComponent<Props> = (props) => {
         return (
             <div className="thread-username-container" onClick={(event) => updaterPage(event)} onAuxClick={(event) => updaterPage(event)}>
                 <img draggable={false} src={getUpdaterPFP()} className="thread-user-img" onClick={updaterImgClick} onAuxClick={updaterImgClick} style={{filter: updaterDefaultIcon ? getFilter() : ""}}/>
-                <span className="thread-user-text" onClick={(event) => updaterPage(event)} onAuxClick={(event) => updaterPage(event)}>{functions.toProperCase(props.thread.updater)}</span>
+                <span className={`thread-user-text ${updaterData.banned ? "banned" : ""}`} onClick={(event) => updaterPage(event)} onAuxClick={(event) => updaterPage(event)}>{functions.toProperCase(props.thread.updater)}</span>
             </div>
         )
     }

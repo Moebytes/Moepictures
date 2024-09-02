@@ -275,13 +275,21 @@ const PostRoutes = (app: Express) => {
 
     app.post("/api/post/delete/request/fulfill", postUpdateLimiter, async (req: Request, res: Response) => {
         try {
-            const {username, postID} = req.body
+            const {username, postID, accepted} = req.body
             if (!serverFunctions.validateCSRF(req)) return res.status(400).send("Bad CSRF token")
             if (Number.isNaN(Number(postID))) return res.status(400).send("Invalid postID")
             if (!req.session.username) return res.status(401).send("Unauthorized")
             if (!username) return res.status(400).send("Bad username")
             if (req.session.role !== "admin" && req.session.role !== "mod") return res.status(403).end()
+
             await sql.request.deletePostDeleteRequest(username, postID)
+            if (accepted) {
+                let message = `Post deletion request on ${functions.getDomain()}/post/${postID} has been approved. Thanks!`
+                await sql.message.insertMessage("moepictures", username, "Notice: Post deletion request has been approved", message)
+            } else {
+                let message = `Post deletion request on ${functions.getDomain()}/post/${postID} has been rejected. This post can stay up. Thanks!`
+                await sql.message.insertMessage("moepictures", username, "Notice: Post deletion request has been rejected", message)
+            }
             res.status(200).send("Success")
         } catch (e) {
             console.log(e)

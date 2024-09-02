@@ -173,6 +173,36 @@ export default class ServerFunctions {
         await s3.deleteObject({Key: oldFile, Bucket: "moepictures"}).promise()
     }
 
+    public static renameFolder = async (oldFolder: string, newFolder: string) => {
+        if (functions.isLocalHost()) {
+            try {
+                fs.renameSync(`${local}/${oldFolder}`, `${local}/${newFolder}`)
+            } catch {
+                fs.renameSync(`${local}/${encodeURI(oldFolder)}`, `${local}/${encodeURI(newFolder)}`)
+            }
+            return
+        }
+        try {
+            const listedObjects = await s3.listObjectsV2({Bucket: "moepictures", Prefix: `${oldFolder}/`}).promise()
+    
+            if (listedObjects.Contents?.length === 0) return
+            const renamePromises = listedObjects.Contents!.map(async (obj) => {
+                const oldKey = obj.Key 
+                if (!oldKey) return
+                const newKey = oldKey.replace(`${oldFolder}/`, `${newFolder}/`)
+                try {
+                    await s3.copyObject({CopySource: `moepictures/${oldKey}`, Key: newKey, Bucket: "moepictures"}).promise()
+                } catch {
+                    await s3.copyObject({CopySource: `moepictures/${encodeURI(oldKey)}`, Key: newKey, Bucket: "moepictures"}).promise()
+                }
+                await s3.deleteObject({Key: oldKey, Bucket: "moepictures"}).promise()
+            })
+            await Promise.all(renamePromises)
+        } catch (error) {
+            console.error("Error renaming folder in S3:", error)
+        }
+    }
+
     public static getNextKey = async (type: string, name: string) => {
         const key = `history/${type}/${name}`
         if (functions.isLocalHost()) {
@@ -292,6 +322,22 @@ export default class ServerFunctions {
             const oldBuffer = await ServerFunctions.getFile(oldPath) as Buffer
             const currentImage = currentImages[i]
             const currentBuffer = Buffer.from(currentImage.bytes)
+            const imgMD5 = crypto.createHash("md5").update(oldBuffer).digest("hex")
+            const currentMD5 = crypto.createHash("md5").update(currentBuffer).digest("hex")
+            if (imgMD5 !== currentMD5) return true
+        }
+        return false
+    }
+
+    public static imagesChangedUnverified = async (oldImages: any[], currentImages: any[]) => {
+        if (oldImages.length !== currentImages.length) return true
+        for (let i = 0; i < oldImages.length; i++) {
+            const oldImage = oldImages[i]
+            const oldPath = functions.getImagePath(oldImage.type, oldImage.postID, oldImage.order, oldImage.filename)
+            const oldBuffer = await ServerFunctions.getFile(oldPath) as Buffer
+            const currentImage = currentImages[i]
+            const currentPath = functions.getImagePath(currentImage.type, currentImage.postID, currentImage.order, currentImage.filename)
+            const currentBuffer = await ServerFunctions.getUnverifiedFile(currentPath)
             const imgMD5 = crypto.createHash("md5").update(oldBuffer).digest("hex")
             const currentMD5 = crypto.createHash("md5").update(currentBuffer).digest("hex")
             if (imgMD5 !== currentMD5) return true

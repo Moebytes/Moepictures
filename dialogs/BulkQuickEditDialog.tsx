@@ -157,7 +157,7 @@ const BulkQuickEditDialog: React.FunctionComponent = (props) => {
         setArtists((prev: string) => {
             const parts = functions.cleanHTML(prev).split(/ +/g)
             parts[parts.length - 1] = tag
-            return parts.join(" ") + " "
+            return parts.join(" ")
         })
     }
 
@@ -165,7 +165,7 @@ const BulkQuickEditDialog: React.FunctionComponent = (props) => {
         setCharacters((prev: string) => {
             const parts = functions.cleanHTML(prev).split(/ +/g)
             parts[parts.length - 1] = tag
-            return parts.join(" ") + " "
+            return parts.join(" ")
         })
     }
     
@@ -173,7 +173,7 @@ const BulkQuickEditDialog: React.FunctionComponent = (props) => {
         setSeries((prev: string) => {
             const parts = functions.cleanHTML(prev).split(/ +/g)
             parts[parts.length - 1] = tag
-            return parts.join(" ") + " "
+            return parts.join(" ")
         })
     }
 
@@ -181,7 +181,7 @@ const BulkQuickEditDialog: React.FunctionComponent = (props) => {
         setMetaTags((prev: string) => {
             const parts = functions.cleanHTML(prev).split(/ +/g)
             parts[parts.length - 1] = tag
-            return parts.join(" ") + " "
+            return parts.join(" ")
         })
     }
 

@@ -212,7 +212,7 @@ const NavBar: React.FunctionComponent<Props> = (props) => {
             )
         } else {
             return (<>
-                    <span className="mobile-nav-text mobile-nav-user-text" onClick={() => {history.push("/profile"); setHideMobileNavbar(true)}}>{functions.toProperCase(session.username)}</span>
+                    <span className={`mobile-nav-text mobile-nav-user-text ${session.banned ? "banned" : ""}`} onClick={() => {history.push("/profile"); setHideMobileNavbar(true)}}>{functions.toProperCase(session.username)}</span>
                     <img className="mobile-nav-logout-img" src={logoutIcon} onClick={() => {logout(); setHideMobileNavbar(true)}}/>
                 </>
             )
@@ -240,7 +240,7 @@ const NavBar: React.FunctionComponent<Props> = (props) => {
             )
         } else {
             return (<>
-                <span className="nav-text nav-user-text" onClick={() => history.push("/profile")}>{functions.toProperCase(session.username)}</span>
+                <span className={`nav-text nav-user-text ${session.banned ? "banned" : ""}`} onClick={() => history.push("/profile")}>{functions.toProperCase(session.username)}</span>
                 <img className="nav-logout-img" src={logoutIcon} onClick={logout}/>
             </>
             )

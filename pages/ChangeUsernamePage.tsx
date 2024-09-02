@@ -54,7 +54,7 @@ const ChangeUsernamePage: React.FunctionComponent = (props) => {
 
     useEffect(() => {
         updateCaptcha()
-    }, [theme])
+    }, [session, theme])
 
     useEffect(() => {
         setHideNavbar(false)

@@ -1,4 +1,4 @@
-import React, {useContext, useEffect, useRef, useState, useReducer} from "react"
+import React, {useContext, useEffect, useState} from "react"
 import {useHistory} from "react-router-dom"
 import {ThemeContext, SearchContext, SearchFlagContext, SiteHueContext, SiteLightnessContext, SiteSaturationContext} from "../Context"
 import {HashLink as Link} from "react-router-hash-link"
@@ -11,7 +11,7 @@ import axios from "axios"
 
 interface Props {
     request: any
-    updateReports?: () => Promise<void>
+    updateReports?: () => void
 }
 
 const ReportRow: React.FunctionComponent<Props> = (props) => {
@@ -64,44 +64,48 @@ const ReportRow: React.FunctionComponent<Props> = (props) => {
         }
     }
 
-    const approveRequest = async () => {
+    const approveRequest = async (username: string, id: string) => {
         if (props.request.type === "comment") {
             await axios.delete("/api/comment/delete", {params: {commentID: props.request.id}, headers: {"x-csrf-token": functions.getCSRFToken()}, withCredentials: true})
-            await axios.post("/api/comment/report/fulfill", {reportID: props.request.reportID}, {headers: {"x-csrf-token": functions.getCSRFToken()}, withCredentials: true})
+            await axios.post("/api/comment/report/fulfill", {reportID: props.request.reportID, reporter: props.request.reporter, username, id, accepted: true}, {headers: {"x-csrf-token": functions.getCSRFToken()}, withCredentials: true})
         } else if (props.request.type === "thread") {
             await axios.delete("/api/thread/delete", {params: {threadID: props.request.id}, headers: {"x-csrf-token": functions.getCSRFToken()}, withCredentials: true})
-            await axios.post("/api/thread/report/fulfill", {reportID: props.request.reportID}, {headers: {"x-csrf-token": functions.getCSRFToken()}, withCredentials: true})
+            await axios.post("/api/thread/report/fulfill", {reportID: props.request.reportID, reporter: props.request.reporter, username, id, accepted: true}, {headers: {"x-csrf-token": functions.getCSRFToken()}, withCredentials: true})
         } else if (props.request.type === "reply") {
             if (!asset) return
             await axios.delete("/api/reply/delete", {params: {threadID: asset.threadID, replyID: props.request.id}, headers: {"x-csrf-token": functions.getCSRFToken()}, withCredentials: true})
-            await axios.post("/api/reply/report/fulfill", {reportID: props.request.reportID}, {headers: {"x-csrf-token": functions.getCSRFToken()}, withCredentials: true})
+            await axios.post("/api/reply/report/fulfill", {reportID: props.request.reportID, reporter: props.request.reporter, username, id, accepted: true}, {headers: {"x-csrf-token": functions.getCSRFToken()}, withCredentials: true})
         }
-        await props.updateReports?.()
+        props.updateReports?.()
     }
 
-    const rejectRequest = async () => {
+    const rejectRequest = async (username: string, id: string) => {
         if (props.request.type === "comment") {
-            await axios.post("/api/comment/report/fulfill", {reportID: props.request.reportID}, {headers: {"x-csrf-token": functions.getCSRFToken()}, withCredentials: true})
+            await axios.post("/api/comment/report/fulfill", {reportID: props.request.reportID, reporter: props.request.reporter, username, id, accepted: false}, {headers: {"x-csrf-token": functions.getCSRFToken()}, withCredentials: true})
         } else if (props.request.type === "thread") {
-            await axios.post("/api/thread/report/fulfill", {reportID: props.request.reportID}, {headers: {"x-csrf-token": functions.getCSRFToken()}, withCredentials: true})
+            await axios.post("/api/thread/report/fulfill", {reportID: props.request.reportID, reporter: props.request.reporter, username, id, accepted: false}, {headers: {"x-csrf-token": functions.getCSRFToken()}, withCredentials: true})
         } else if (props.request.type === "reply") {
-            await axios.post("/api/reply/report/fulfill", {reportID: props.request.reportID}, {headers: {"x-csrf-token": functions.getCSRFToken()}, withCredentials: true})
+            await axios.post("/api/reply/report/fulfill", {reportID: props.request.reportID, reporter: props.request.reporter, username, id, accepted: false}, {headers: {"x-csrf-token": functions.getCSRFToken()}, withCredentials: true})
         }
-        await props.updateReports?.()
+        props.updateReports?.()
     }
 
     let img = ""
     let username = ""
     let text = ""
+    let id = ""
     if (asset) {
         img = asset.image ? functions.getTagLink("pfp", asset.image) : favicon
         username = asset.username ? asset.username : asset.creator
         if (props.request.type === "comment") {
             text = `Comment: ${asset.comment}`
+            id = asset.postID
         } else if (props.request.type === "thread") {
             text = `Thread: ${asset.title}`
+            id = asset.threadID
         } else if (props.request.type === "reply") {
             text = `Reply: ${asset.content}`
+            id = asset.threadID
         }
     }
 
@@ -117,11 +121,11 @@ const ReportRow: React.FunctionComponent<Props> = (props) => {
                 <span className="mod-post-text">{text}</span>
             </div>
             <div className="mod-post-options">
-                <div className="mod-post-options-container" onClick={() => rejectRequest()}>
+                <div className="mod-post-options-container" onClick={() => rejectRequest(username, id)}>
                     <img className="mod-post-options-img" src={reject} style={{filter: getFilter()}}/>
                     <span className="mod-post-options-text">Reject</span>
                 </div>
-                <div className="mod-post-options-container" onClick={() => approveRequest()}>
+                <div className="mod-post-options-container" onClick={() => approveRequest(username, id)}>
                     <img className="mod-post-options-img" src={approve} style={{filter: getFilter()}}/>
                     <span className="mod-post-options-text">Approve</span>
                 </div>
@@ -131,11 +135,11 @@ const ReportRow: React.FunctionComponent<Props> = (props) => {
 }
 
 const ModReports: React.FunctionComponent = (props) => {
-    const [ignored, forceUpdate] = useReducer(x => x + 1, 0)
     const {theme, setTheme} = useContext(ThemeContext)
     const [requests, setRequests] = useState([]) as any
     const [index, setIndex] = useState(0)
     const [visibleRequests, setVisibleRequests] = useState([]) as any
+    const [updateVisibleRequestFlag, setUpdateVisibleRequestFlag] = useState(false)
     const [offset, setOffset] = useState(0)
     const [ended, setEnded] = useState(false)
 
@@ -148,6 +152,22 @@ const ModReports: React.FunctionComponent = (props) => {
     useEffect(() => {
         updateReports()
     }, [])
+
+    const updateVisibleRequests = () => {
+        const newVisibleRequests = [] as any
+        for (let i = 0; i < index; i++) {
+            if (!requests[i]) break
+            newVisibleRequests.push(requests[i])
+        }
+        setVisibleRequests(functions.removeDuplicates(newVisibleRequests))
+    }
+
+    useEffect(() => {
+        if (updateVisibleRequestFlag) {
+            updateVisibleRequests()
+            setUpdateVisibleRequestFlag(false)
+        }
+    }, [requests, index, updateVisibleRequestFlag])
 
     useEffect(() => {
         let currentIndex = index
@@ -201,7 +221,7 @@ const ModReports: React.FunctionComponent = (props) => {
         for (let i = 0; i < requests.length; i++) {
             const request = requests[i] as any
             if (!request) break
-            jsx.push(<ReportRow key={request.id} request={request}/>)
+            jsx.push(<ReportRow key={request.id} request={request} updateReports={() => setUpdateVisibleRequestFlag(true)}/>)
         }
         return jsx
     }

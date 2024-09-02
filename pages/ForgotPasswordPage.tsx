@@ -6,7 +6,7 @@ import Footer from "../components/Footer"
 import DragAndDrop from "../components/DragAndDrop"
 import {HideNavbarContext, HideSidebarContext, ThemeContext, EnableDragContext, MobileContext,
 RelativeContext, HideTitlebarContext, HeaderTextContext, SidebarTextContext, SiteHueContext,
-SiteLightnessContext, SiteSaturationContext} from "../Context"
+SiteLightnessContext, SiteSaturationContext, SessionContext} from "../Context"
 import functions from "../structures/Functions"
 import axios from "axios"
 import "./styles/forgotpasspage.less"
@@ -21,6 +21,7 @@ const ForgotPasswordPage: React.FunctionComponent = (props) => {
     const {hideSidebar, setHideSidebar} = useContext(HideSidebarContext)
     const {enableDrag, setEnableDrag} = useContext(EnableDragContext)
     const {relative, setRelative} = useContext(RelativeContext)
+    const {session, setSession} = useContext(SessionContext)
     const {headerText, setHeaderText} = useContext(HeaderTextContext)
     const {sidebarText, setSidebarText} = useContext(SidebarTextContext)
     const {mobile, setMobile} = useContext(MobileContext)
@@ -48,7 +49,7 @@ const ForgotPasswordPage: React.FunctionComponent = (props) => {
 
     useEffect(() => {
         updateCaptcha()
-    }, [theme])
+    }, [session, theme])
 
     useEffect(() => {
         setHideNavbar(false)

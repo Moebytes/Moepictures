@@ -900,7 +900,7 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
                                 <span className="tag">Add Translation</span>
                             </span>
                         </div> : null}
-                        {permissions.isAdmin(session) ? <div className="sidebar-row">
+                        {!props.unverified && permissions.isAdmin(session) ? <div className="sidebar-row">
                             <span className="tag-hover" onClick={triggerTakedown}>
                                 <img className="sidebar-icon" src={props.post.hidden ? restore : takedown} style={{filter: getFilter()}}/>
                                 <span className="tag">{props.post.hidden ? "Restore" : "Takedown"}</span>

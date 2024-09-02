@@ -263,7 +263,6 @@ export default class Functions {
         const alphaNumeric = Functions.alphaNumeric(username)
         if (!alphaNumeric || /[\n\r\s]+/g.test(username)) return "Usernames cannot contain special characters or spaces."
         if (profaneWords.includes(username.toLowerCase())) return "Username is profane."
-        //if (gibberish(username)) return "Username cannot be gibberish."
         if (bannedUsernames.includes(username.toLowerCase())) return "This username isn't allowed to be used."
         return null
     }
@@ -322,7 +321,6 @@ export default class Functions {
     public static validateComment = (comment: string) => {
         if (!comment) return "No comment."
         if (comment.length > 1000) return "Comment cannot exceed 1000 characters."
-        if (!/[a-zA-Z\-\u3000-\u303f\u3040-\u309f\u30a0-\u30ff\uff00-\uff9f\u4e00-\u9faf\u3400-\u4dbf]/.test(comment)) return "Comment cannot be gibberish."
         const pieces = Functions.parseComment(comment)
         for (let i = 0; i < pieces.length; i++) {
             const piece = pieces[i]
@@ -330,10 +328,9 @@ export default class Functions {
                 const username = piece.match(/(>>>)(.*?)(?=$|>)/gm)?.[0].replace(">>>", "") ?? ""
                 const text = piece.replace(username, "").replaceAll(">", "")
                 if (!text && !username) continue
-                if (gibberish(username)) return "Comment cannot be gibberish."
-                if (gibberish(text)) return "Comment cannot be gibberish."
+                if (gibberish(Functions.stripLinks(text))) return "Comment cannot be gibberish."
             } else {
-                if (gibberish(piece)) return "Comment cannot be gibberish."
+                if (gibberish(Functions.stripLinks(piece))) return "Comment cannot be gibberish."
             }
         }
         const words = comment.replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g, "").split(/ +/g)
@@ -345,7 +342,6 @@ export default class Functions {
 
     public static validateReply = (reply: string) => {
         if (!reply) return "No reply."
-        if (!/[a-zA-Z\-\u3000-\u303f\u3040-\u309f\u30a0-\u30ff\uff00-\uff9f\u4e00-\u9faf\u3400-\u4dbf]/.test(reply)) return "Reply cannot be gibberish."
         const words = reply.replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g, "").split(/ +/g)
         for (let i = 0; i < words.length; i++) {
             if (profaneWords.includes(words[i])) return "Reply is profane."
@@ -355,7 +351,10 @@ export default class Functions {
 
     public static validateMessage = (message: string) => {
         if (!message) return "No message."
-        if (gibberish(message)) return "Message cannot be gibberish."
+        const words = message.replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g, "").split(/ +/g)
+        for (let i = 0; i < words.length; i++) {
+            if (profaneWords.includes(words[i].toLowerCase())) return "Message is profane."
+        }
         return null
     }
 
@@ -373,10 +372,10 @@ export default class Functions {
 
     public static validateBio = (bio: string) => {
         if (!bio) return "No bio."
-        if (gibberish(bio)) return "Bio cannot be gibberish."
-        const bioArray = bio.split(/ +/g)
-        for (let i = 0; i < bioArray.length; i++) {
-            if (profaneWords.includes(bioArray[i].toLowerCase())) return "Bio is profane."
+        if (gibberish(Functions.stripLinks(bio))) return "Bio cannot be gibberish."
+        const words = bio.replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g, "").split(/ +/g)
+        for (let i = 0; i < words.length; i++) {
+            if (profaneWords.includes(words[i].toLowerCase())) return "Bio is profane."
         }
         return null
     }
@@ -1625,6 +1624,10 @@ export default class Functions {
         return posts
     }
 
+    public static stripLinks = (text: string) => {
+        return text.replace(/(https?:\/\/[^\s]+)/g, "")
+    }
+
     public static blockedTags = () => {
         return ["rating", "girl", "boy", "chibi", "pixel-art", "comic", "tress-ribbon", "no-hat", "ribbon-trimmed-sleeves",
         "hair-between-eyes", "solo", "looking-at-viewer", "eyebrows-visible-through-hair", "one-side-up", "tareme", "caustics",
@@ -1987,5 +1990,13 @@ export default class Functions {
             arr.push(i.toString())
         }
         return arr
+    }
+
+    public static getDomain = () => {
+        if (Functions.isLocalHost()) {
+            return "https://localhost:8082"
+        } else {
+            return "https://moepictures.moe"
+        }
     }
 }

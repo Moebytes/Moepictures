@@ -1,4 +1,4 @@
-import React, {useContext, useEffect, useRef, useState, useReducer} from "react"
+import React, {useContext, useEffect, useState} from "react"
 import {useHistory} from "react-router-dom"
 import {ThemeContext, SearchContext, SearchFlagContext, SiteHueContext, SiteLightnessContext, SiteSaturationContext} from "../Context"
 import {HashLink as Link} from "react-router-hash-link"
@@ -10,7 +10,6 @@ import "./styles/modposts.less"
 import axios from "axios"
 
 const ModTranslations: React.FunctionComponent = (props) => {
-    const [ignored, forceUpdate] = useReducer(x => x + 1, 0)
     const {theme, setTheme} = useContext(ThemeContext)
     const {siteHue, setSiteHue} = useContext(SiteHueContext)
     const {siteSaturation, setSiteSaturation} = useContext(SiteSaturationContext)
@@ -21,6 +20,7 @@ const ModTranslations: React.FunctionComponent = (props) => {
     const [unverifiedTranslations, setUnverifiedTranslations] = useState([]) as any
     const [index, setIndex] = useState(0)
     const [visibleTranslations, setVisibleTranslations] = useState([]) as any
+    const [updateVisibleTranslationFlag, setUpdateVisibleTranslationFlag] = useState(false)
     const [offset, setOffset] = useState(0)
     const [ended, setEnded] = useState(false)
     const [imagesRef, setImagesRef] = useState([]) as any
@@ -40,16 +40,32 @@ const ModTranslations: React.FunctionComponent = (props) => {
         updateTranslations()
     }, [])
 
-    const approveTranslation = async (translationID: number) => {
-        await axios.post("/api/translation/approve", {translationID}, {headers: {"x-csrf-token": functions.getCSRFToken()}, withCredentials: true})
-        await updateTranslations()
-        forceUpdate()
+    const updateVisibleTranslations = () => {
+        const newVisibleTranslations = [] as any
+        for (let i = 0; i < index; i++) {
+            if (!unverifiedTranslations[i]) break
+            newVisibleTranslations.push(unverifiedTranslations[i])
+        }
+        setVisibleTranslations(functions.removeDuplicates(newVisibleTranslations))
     }
 
-    const rejectTranslation = async (translationID: number) => {
-        await axios.post("/api/translation/reject", {translationID}, {headers: {"x-csrf-token": functions.getCSRFToken()}, withCredentials: true})
+    useEffect(() => {
+        if (updateVisibleTranslationFlag) {
+            updateVisibleTranslations()
+            setUpdateVisibleTranslationFlag(false)
+        }
+    }, [unverifiedTranslations, index, updateVisibleTranslationFlag])
+
+    const approveTranslation = async (translationID: number, username: string, postID: number) => {
+        await axios.post("/api/translation/approve", {translationID, username, postID}, {headers: {"x-csrf-token": functions.getCSRFToken()}, withCredentials: true})
         await updateTranslations()
-        forceUpdate()
+        setUpdateVisibleTranslationFlag(true)
+    }
+
+    const rejectTranslation = async (translationID: number, username: string, postID: number) => {
+        await axios.post("/api/translation/reject", {translationID, username, postID}, {headers: {"x-csrf-token": functions.getCSRFToken()}, withCredentials: true})
+        await updateTranslations()
+        setUpdateVisibleTranslationFlag(true)
     }
 
     useEffect(() => {
@@ -165,11 +181,11 @@ const ModTranslations: React.FunctionComponent = (props) => {
                         {translationDataJSX(translation)}
                     </div>
                     <div className="mod-post-options">
-                        <div className="mod-post-options-container" onClick={() => rejectTranslation(translation.translationID)}>
+                        <div className="mod-post-options-container" onClick={() => rejectTranslation(translation.translationID, translation.updater, translation.postID)}>
                             <img className="mod-post-options-img" src={reject} style={{filter: getFilter()}}/>
                             <span className="mod-post-options-text">Reject</span>
                         </div>
-                        <div className="mod-post-options-container" onClick={() => approveTranslation(translation.translationID)}>
+                        <div className="mod-post-options-container" onClick={() => approveTranslation(translation.translationID, translation.updater, translation.postID)}>
                             <img className="mod-post-options-img" src={approve} style={{filter: getFilter()}}/>
                             <span className="mod-post-options-text">Approve</span>
                         </div>

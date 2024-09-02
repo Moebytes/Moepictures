@@ -52,7 +52,7 @@ const CaptchaDialog: React.FunctionComponent<Props> = (props) => {
 
     useEffect(() => {
         updateCaptcha()
-    }, [theme])
+    }, [session, theme])
 
     useEffect(() => {
         document.title = "Captcha"

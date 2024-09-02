@@ -48,7 +48,7 @@ const NewThreadDialog: React.FunctionComponent = (props) => {
 
     useEffect(() => {
         updateCaptcha()
-    }, [theme])
+    }, [session, theme])
 
     useEffect(() => {
         document.title = "New Thread"

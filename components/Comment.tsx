@@ -15,6 +15,7 @@ import permissions from "../structures/Permissions"
 import adminCrown from "../assets/icons/admin-crown.png"
 import modCrown from "../assets/icons/mod-crown.png"
 import systemCrown from "../assets/icons/system-crown.png"
+import jsxFunctions from "../structures/JSXFunctions"
 import "./styles/comment.less"
 import axios from "axios"
 
@@ -97,11 +98,11 @@ const Comment: React.FunctionComponent<Props> = (props) => {
                 jsx.push(
                     <div className="comment-quote-container">
                         {userPart ? <span className="comment-quote-user" onClick={() => goToComment(id)}>{`${username.trim()} ${said.trim()}`}</span> : null}
-                        <span className="comment-quote-text">{text.trim()}</span>
+                        <span className="comment-quote-text">{jsxFunctions.parseTextLinks(text.trim())}</span>
                     </div>
                 )
             } else {
-                jsx.push(<span className="comment-text">{piece.trim()}</span>)
+                jsx.push(<span className="comment-text">{jsxFunctions.parseTextLinks(piece.trim())}</span>)
             }
         }
         return jsx
@@ -216,7 +217,7 @@ const Comment: React.FunctionComponent<Props> = (props) => {
                 </div>
             )
         }
-        return <span className="comment-user-text">{functions.toProperCase(props.comment.username)}</span>
+        return <span className={`comment-user-text ${props.comment.banned ? "banned" : ""}`}>{functions.toProperCase(props.comment.username)}</span>
     }
 
     const commentJump = () => {

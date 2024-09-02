@@ -5,11 +5,9 @@ import sql from "../sql/SQLQuery"
 import bcrypt from "bcrypt"
 import crypto from "crypto"
 import functions from "../structures/Functions"
+import jsxFunctions from "../structures/JSXFunctions"
 import serverFunctions from "../structures/ServerFunctions"
 import fileType from "magic-bytes.js"
-import VerifyEmail from "../emails/VerifyEmail"
-import ChangeEmail from "../emails/ChangeEmail"
-import ResetPassword from "../emails/ResetPassword"
 import path from "path"
 
 const signupLimiter = rateLimit({
@@ -109,7 +107,7 @@ const UserRoutes = (app: Express) => {
                 }
                 const user = functions.toProperCase(username)
                 const link = `${req.protocol}://${req.get("host")}/api/user/verifyemail?token=${token}`
-                await serverFunctions.email(email, "Moepictures Email Address Verification", <VerifyEmail username={user} link={link}/>)
+                await serverFunctions.email(email, "Moepictures Email Address Verification", jsxFunctions.verifyEmailJSX(user, link))
                 return res.status(200).send("Success")
             } catch {
                 return res.status(400).send("Username taken")
@@ -440,7 +438,7 @@ const UserRoutes = (app: Express) => {
             }
             const username = functions.toProperCase(req.session.username)
             const link = `${req.protocol}://${req.get("host")}/api/user/changeemail?token=${token}`
-            await serverFunctions.email(newEmail, "Moepictures Email Address Change", <ChangeEmail username={username} link={link}/>)
+            await serverFunctions.email(newEmail, "Moepictures Email Address Change", jsxFunctions.changeEmailJSX(username, link))
             res.status(200).send("Success")
         } catch (e) {
             console.log(e)
@@ -467,7 +465,7 @@ const UserRoutes = (app: Express) => {
             }
             const username = functions.toProperCase(req.session.username)
             const link = `${req.protocol}://${req.get("host")}/api/user/verifyemail?token=${token}`
-            await serverFunctions.email(email, "Moepictures Email Address Verification", <VerifyEmail username={username} link={link}/>)
+            await serverFunctions.email(email, "Moepictures Email Address Verification", jsxFunctions.verifyEmailJSX(username, link))
             await sql.user.updateUser(req.session.username, "email", email)
             req.session.email = email
             res.status(200).send("Success")
@@ -545,7 +543,7 @@ const UserRoutes = (app: Express) => {
             }
             const username = functions.toProperCase(user.username)
             const link = `${req.protocol}://${req.get("host")}/reset-password?token=${token}&username=${user.username}`
-            await serverFunctions.email(user.email, "Moepictures Password Reset", <ResetPassword username={username} link={link}/>)
+            await serverFunctions.email(user.email, "Moepictures Password Reset", jsxFunctions.resetPasswordJSX(username, link))
             res.status(200).send("Success")
         } catch (e) {
             console.log(e)
@@ -745,7 +743,7 @@ const UserRoutes = (app: Express) => {
                     await sql.message.deleteMessage(message.messageID)
                 }
                 // Delete message replies
-                const messageReplies = await sql.message.messageReplies(username)
+                const messageReplies = await sql.message.userMessageReplies(username)
                 for (const messageReply of messageReplies) {
                     await sql.message.deleteMessageReply(messageReply.replyID)
                 }

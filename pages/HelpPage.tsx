@@ -142,8 +142,8 @@ const HelpPage: React.FunctionComponent = (props) => {
                         with a binary hashing algorithm. <br/><br/>
 
                         When you do an image search your upload is perceptually hashed and we try to find a matching hash in our database. Usually 
-                        this is very accurate at finding duplicate images. If you upload a video, song, or model, we use a binary hash instead, so only 
-                        perfect matches to these works will be able to be found.
+                        this is accurate at finding duplicate images. If you upload a video, song, or 3d model, we use a binary hash instead, so only 
+                        perfect matches to these works can be found.
                     </span>
                     <span className="help-heading" id="image-filters">Image Filters</span>
                     <div className="help-img-container"><img className="help-img" src={imagefiltersImg}/></div>
@@ -194,38 +194,38 @@ const HelpPage: React.FunctionComponent = (props) => {
                     </span>
                     <span className="help-heading" id="uploading">Uploading</span>
                     <span className="help-text">
-                        Moepictures is a lot stricter with posts than most other image boards. We allow images, gifs, videos, comics, music, and models.<br/><br/>
+                        Moepictures allows uploading images, comics, animations, videos, music, and 3d models.<br/><br/>
                         Please read carefully through all of the uploading guidelines. <br/>
                         <span className="help-alt">
                         ⇾ Must be drawn in the anime art style. No photographs/art drawn in other styles. <br/>
                         ⇾ The main subject should be a girl. Boys are only allowed in minor roles. 
                         Art with any other subjects (animals, food, backgrounds, etc). is not allowed. <br/>
-                        ⇾ (Music only) The song should include elements to make it sound kawaii, such as samples from anime. <br/>
-                        ⇾ It should be cute. That should be pretty self-explanatory. <br/>
-                        ⇾ No duplicates are allowed. Variations of the same image should get added to the original post. <br/>
-                        ⇾ Sketches and unfinished art may only be allowed only if they are very good. <br/>
+                        ⇾ (Music only) The song should include elements that make it sound kawaii. <br/>
+                        ⇾ *It should be moe/cute!* This is the primary focus of the site. <br/>
+                        ⇾ No duplicates are allowed. Variations of the same image should be added to the original post. <br/>
+                        ⇾ Sketches and unfinished art may be allowed only if they are good. <br/>
                         ⇾ Color palette should be pleasant to look at, ie. there are no oversaturated colors that clash too much. <br/>
                         ⇾ The drawing should be clean overall and shouldn't look messy or have obvious mistakes. <br/>
                         ⇾ The perspective, proportions, and anatomy shouldn't look weird. <br/>
-                        ⇾ Animations should play faster than 2fps (shouldn't look stuttery). <br/>
+                        ⇾ Animations shouldn't look too stuttery. <br/>
                         ⇾ Source information is required for all posts. <br/>
                         ⇾ All tags should be romanized. Titles and commentary don't have to be romanized. <br/>
-                        ⇾ No hentai. We allow light nudity but don't allow any sexual acts. <br/>
-                        ⇾ No AI generated works. We only want art with real human love and passion behind it. <br/>
+                        ⇾ No hentai. We only allow light nudity and suggestiveness. <br/>
+                        ⇾ No AI/bot generated works. We only want art with human love and passion. <br/>
                         ⇾ No paid rewards. Please support artists for their hard work.
                         </span>
                     </span>
                     <span className="help-heading" id="variations">Variations</span>
                     <span className="help-text">
-                        All variations of the same image are combined into a single post. You can add a variation to an existing post 
+                        Variations of the same image are combined into a single post. You can add a variation to an existing post 
                         by editing it. All variations of an image should be created by the original artist, otherwise it is considered a third party edit instead.
                         If an image has significantly different tags to the main post, it's probably better to make it it's own post instead of a variation.
                     </span>
                     <span className="help-heading" id="third-party-edits">Third Party Edits</span>
                     <span className="help-text">
-                        Third party edits are modifications to a work not done by the original artist. For
-                        example, a manga with all text translated to English, or animation of an 
-                        artwork not done by the original artist. Third party edits behave like their own separate post,
+                        Third party edits are modifications to a work not done/endorsed by the original artist. For
+                        example, a manga with all text unofficially translated to English, or animation of an 
+                        artwork done by someone else. Third party edits behave like their own separate post,
                         but each third party edit is added to the original post in a separate section and doesn't appear directly in search.
                     </span>
                     <span className="help-heading" id="tagging">Tagging</span>
@@ -243,7 +243,6 @@ const HelpPage: React.FunctionComponent = (props) => {
                         ⇾ Body Parts (small-breasts, long-legs, etc). <br/>
                         ⇾ Objects (coffee, umbrella, flower, etc). <br/>
                         ⇾ Environment (daytime, nighttime, sunrise, sunset, snow, rain, fog, etc). <br/>
-                        ⇾ Software (live2d, clip-studio-paint, blender, etc).
                         </span>
                     </span>
                     <span className="help-heading" id="aliases">Aliases</span>

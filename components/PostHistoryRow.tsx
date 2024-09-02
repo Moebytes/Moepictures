@@ -47,8 +47,8 @@ const PostHistoryRow: React.FunctionComponent<Props> = (props) => {
         const currentImg = functions.getImageLink(props.currentHistory.images[0]?.type, props.currentHistory.postID, 1, currentFilename)
         const decrypted = await cryptoFunctions.decryptedLink(initialImg)
         const decryptedCurrent = await cryptoFunctions.decryptedLink(currentImg)
-        setImg(decrypted)
-        setCurrentImg(decryptedCurrent)
+        setImg(decrypted + `#${path.extname(filename)}`)
+        setCurrentImg(decryptedCurrent + `#${path.extname(currentFilename)}`)
     }
 
     const updateUserRole = async () => {
@@ -321,9 +321,10 @@ const PostHistoryRow: React.FunctionComponent<Props> = (props) => {
         if (props.postHistory.images.length > 1) {
             let newImageIndex = imageIndex + 1 
             if (newImageIndex > props.postHistory.images.length - 1) newImageIndex = 0
-            const newImg = functions.getImageLink(props.postHistory.images[newImageIndex]?.type, props.postHistory.postID, 1, props.postHistory.images[newImageIndex]?.filename ? props.postHistory.images[newImageIndex].filename : props.postHistory.images[newImageIndex])
+            const filename = props.postHistory.images[newImageIndex]?.filename ? props.postHistory.images[newImageIndex].filename : props.postHistory.images[newImageIndex]
+            const newImg = functions.getImageLink(props.postHistory.images[newImageIndex]?.type, props.postHistory.postID, 1, filename)
             const decrypted = await cryptoFunctions.decryptedLink(newImg)
-            setImg(decrypted)
+            setImg(decrypted + `#${path.extname(filename)}`)
             setImageIndex(newImageIndex)
         }
     }

@@ -1,4 +1,4 @@
-import React, {useContext, useEffect, useRef, useState, useReducer} from "react"
+import React, {useContext, useEffect, useState} from "react"
 import {useHistory} from "react-router-dom"
 import {ThemeContext, SearchContext, SearchFlagContext, SiteHueContext, SiteLightnessContext, SiteSaturationContext} from "../Context"
 import {HashLink as Link} from "react-router-hash-link"
@@ -9,7 +9,6 @@ import "./styles/modposts.less"
 import axios from "axios"
 
 const ModPostEdits: React.FunctionComponent = (props) => {
-    const [ignored, forceUpdate] = useReducer(x => x + 1, 0)
     const {theme, setTheme} = useContext(ThemeContext)
     const {siteHue, setSiteHue} = useContext(SiteHueContext)
     const {siteSaturation, setSiteSaturation} = useContext(SiteSaturationContext)
@@ -20,6 +19,7 @@ const ModPostEdits: React.FunctionComponent = (props) => {
     const [unverifiedPosts, setUnverifiedPosts] = useState([]) as any
     const [index, setIndex] = useState(0)
     const [visiblePosts, setVisiblePosts] = useState([]) as any
+    const [updateVisiblePostFlag, setUpdateVisiblePostFlag] = useState(false)
     const [offset, setOffset] = useState(0)
     const [ended, setEnded] = useState(false)
     const [imagesRef, setImagesRef] = useState([]) as any
@@ -39,16 +39,34 @@ const ModPostEdits: React.FunctionComponent = (props) => {
         updatePosts()
     }, [])
 
-    const approvePost = async (postID: number) => {
-        await axios.post("/api/post/approve", {postID}, {headers: {"x-csrf-token": functions.getCSRFToken()}, withCredentials: true})
+    const updateVisiblePosts = () => {
+        const newVisiblePosts = [] as any
+        for (let i = 0; i < index; i++) {
+            if (!unverifiedPosts[i]) break
+            newVisiblePosts.push(unverifiedPosts[i])
+        }
+        setVisiblePosts(functions.removeDuplicates(newVisiblePosts))
+        const newImagesRef = newVisiblePosts.map(() => React.createRef()) as any
+        setImagesRef(newImagesRef) as any
+    }
+
+    useEffect(() => {
+        if (updateVisiblePostFlag) {
+            updateVisiblePosts()
+            setUpdateVisiblePostFlag(false)
+        }
+    }, [unverifiedPosts, index, updateVisiblePostFlag])
+
+    const approvePost = async (postID: number, reason: string) => {
+        await axios.post("/api/post/approve", {postID, reason}, {headers: {"x-csrf-token": functions.getCSRFToken()}, withCredentials: true})
         await updatePosts()
-        forceUpdate()
+        setUpdateVisiblePostFlag(true)
     }
 
     const rejectPost = async (postID: number) => {
         await axios.post("/api/post/reject", {postID}, {headers: {"x-csrf-token": functions.getCSRFToken()}, withCredentials: true})
         await updatePosts()
-        forceUpdate()
+        setUpdateVisiblePostFlag(true)
     }
 
     useEffect(() => {
@@ -158,7 +176,7 @@ const ModPostEdits: React.FunctionComponent = (props) => {
                             <img className="mod-post-options-img" src={reject} style={{filter: getFilter()}}/>
                             <span className="mod-post-options-text">Reject</span>
                         </div>
-                        <div className="mod-post-options-container" onClick={() => approvePost(post.postID)}>
+                        <div className="mod-post-options-container" onClick={() => approvePost(post.postID, post.reason)}>
                             <img className="mod-post-options-img" src={approve} style={{filter: getFilter()}}/>
                             <span className="mod-post-options-text">Approve</span>
                         </div>

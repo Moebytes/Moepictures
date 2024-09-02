@@ -121,30 +121,40 @@ const TranslationRoutes = (app: Express) => {
 
     app.post("/api/translation/approve", translationLimiter, async (req: Request, res: Response, next: NextFunction) => {
         try {
+            let {translationID, username, postID} = req.body
             if (!serverFunctions.validateCSRF(req)) return res.status(400).send("Bad CSRF token")
-          let translationID = Number(req.body.translationID)
-          if (Number.isNaN(translationID)) return res.status(400).send("Bad translationID")
-          if (req.session.role !== "admin" && req.session.role !== "mod") return res.status(403).end()
-          const unverified = await sql.translation.unverifiedTranslationID(Number(translationID))
-          if (!unverified) return res.status(400).send("Bad translationID")
-          await sql.translation.insertTranslation(unverified.postID, unverified.updater, unverified.order, JSON.stringify(unverified.data))
-          await sql.translation.deleteUnverifiedTranslation(Number(translationID))
-          res.status(200).send("Success")
+            translationID = Number(req.body.translationID)
+            if (Number.isNaN(translationID)) return res.status(400).send("Bad translationID")
+            if (req.session.role !== "admin" && req.session.role !== "mod") return res.status(403).end()
+            const unverified = await sql.translation.unverifiedTranslationID(Number(translationID))
+            if (!unverified) return res.status(400).send("Bad translationID")
+            await sql.translation.insertTranslation(unverified.postID, unverified.updater, unverified.order, JSON.stringify(unverified.data))
+            await sql.translation.deleteUnverifiedTranslation(Number(translationID))
+
+            let message = `Translations you added on ${functions.getDomain()}/post/${postID} have been approved. Thanks for the contribution!`
+            await sql.message.insertMessage("moepictures", username, "Notice: Translations have been approved", message)
+
+            res.status(200).send("Success")
         } catch (e) {
-          console.log(e)
-          res.status(400).send("Bad request")
+            console.log(e)
+            res.status(400).send("Bad request")
         }
     })
 
     app.post("/api/translation/reject", translationLimiter, async (req: Request, res: Response, next: NextFunction) => {
         try {
+            let {translationID, username, postID} = req.body
             if (!serverFunctions.validateCSRF(req)) return res.status(400).send("Bad CSRF token")
-            let translationID = Number(req.body.translationID)
+            translationID = Number(req.body.translationID)
             if (Number.isNaN(translationID)) return res.status(400).send("Bad translationID")
             if (req.session.role !== "admin" && req.session.role !== "mod") return res.status(403).end()
             const unverified = await sql.translation.unverifiedTranslationID(Number(translationID))
             if (!unverified) return res.status(400).send("Bad translationID")
             await sql.translation.deleteUnverifiedTranslation(Number(translationID))
+
+            let message = `Translations you added on ${functions.getDomain()}/post/${postID} have been rejected. They might be incorrect.`
+            await sql.message.insertMessage("moepictures", username, "Notice: Translations have been rejected", message)
+            
             res.status(200).send("Success")
         } catch (e) {
             console.log(e)

@@ -1244,9 +1244,9 @@ const UploadPage: React.FunctionComponent = (props) => {
 
     const handleRawTagClick = (tag: string) => {
         setRawTags((prev: string) => {
-            const parts = functions.cleanHTML(prev).split(/ +/g)
+            const parts = functions.cleanHTML(prev).trim().split(/ +/g)
             parts[parts.length - 1] = tag
-            return parts.join(" ") + " "
+            return parts.join(" ")
         })
     }
 

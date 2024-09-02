@@ -16,6 +16,7 @@ SiteLightnessContext, SiteSaturationContext, ScrollContext, ThreadPageContext, S
 DeleteThreadIDContext, DeleteThreadFlagContext, EditThreadIDContext, EditThreadFlagContext, EditThreadTitleContext,
 EditThreadContentContext, QuoteTextContext, ReportThreadIDContext} from "../Context"
 import permissions from "../structures/Permissions"
+import jsxFunctions from "../structures/JSXFunctions"
 import PageDialog from "../dialogs/PageDialog"
 import adminCrown from "../assets/icons/admin-crown.png"
 import modCrown from "../assets/icons/mod-crown.png"
@@ -406,7 +407,7 @@ const ThreadPage: React.FunctionComponent<Props> = (props) => {
                 </div>
             )
         }
-        return <span className="forum-thread-user-text" onClick={creatorClick} onAuxClick={creatorClick}>{functions.toProperCase(thread.creator)}</span>
+        return <span className={`forum-thread-user-text ${thread.banned ? "banned" : ""}`} onClick={creatorClick} onAuxClick={creatorClick}>{functions.toProperCase(thread.creator)}</span>
     }
 
     const updateSticky = async () => {
@@ -581,7 +582,7 @@ const ThreadPage: React.FunctionComponent<Props> = (props) => {
                             <img draggable={false} className="forum-thread-user-img" src={getCreatorPFP()} onClick={creatorImgClick} onAuxClick={creatorImgClick} style={{filter: defaultIcon ? getFilter() : ""}}/>
                         </div>
                         <div className="forum-thread-text-container">
-                            <p className="forum-thread-text">{thread.content}</p>
+                            <p className="forum-thread-text">{jsxFunctions.parseTextLinks(thread.content)}</p>
                         </div>
                     </div>
                     <table className="forum-thread-container">

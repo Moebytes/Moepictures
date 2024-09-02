@@ -54,7 +54,7 @@ const ChangeEmailPage: React.FunctionComponent = (props) => {
 
     useEffect(() => {
         updateCaptcha()
-    }, [theme])
+    }, [session, theme])
 
     useEffect(() => {
         setHideNavbar(false)

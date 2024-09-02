@@ -1,4 +1,4 @@
-import React, {useContext, useEffect, useRef, useState, useReducer} from "react"
+import React, {useContext, useEffect, useState} from "react"
 import {useHistory} from "react-router-dom"
 import {ThemeContext, SearchContext, SearchFlagContext, SiteHueContext, SiteLightnessContext, SiteSaturationContext} from "../Context"
 import {HashLink as Link} from "react-router-hash-link"
@@ -9,7 +9,6 @@ import "./styles/modposts.less"
 import axios from "axios"
 
 const ModTagDeletions: React.FunctionComponent = (props) => {
-    const [ignored, forceUpdate] = useReducer(x => x + 1, 0)
     const {theme, setTheme} = useContext(ThemeContext)
     const {siteHue, setSiteHue} = useContext(SiteHueContext)
     const {siteSaturation, setSiteSaturation} = useContext(SiteSaturationContext)
@@ -20,6 +19,7 @@ const ModTagDeletions: React.FunctionComponent = (props) => {
     const [requests, setRequests] = useState([]) as any
     const [index, setIndex] = useState(0)
     const [visibleRequests, setVisibleRequests] = useState([]) as any
+    const [updateVisibleRequestFlag, setUpdateVisibleRequestFlag] = useState(false)
     const [offset, setOffset] = useState(0)
     const [ended, setEnded] = useState(false)
     const history = useHistory()
@@ -38,17 +38,33 @@ const ModTagDeletions: React.FunctionComponent = (props) => {
         updateTags()
     }, [])
 
+    const updateVisibleRequests = () => {
+        const newVisibleRequests = [] as any
+        for (let i = 0; i < index; i++) {
+            if (!requests[i]) break
+            newVisibleRequests.push(requests[i])
+        }
+        setVisibleRequests(functions.removeDuplicates(newVisibleRequests))
+    }
+
+    useEffect(() => {
+        if (updateVisibleRequestFlag) {
+            updateVisibleRequests()
+            setUpdateVisibleRequestFlag(false)
+        }
+    }, [requests, index, updateVisibleRequestFlag])
+
     const deleteTag = async (username: string, tag: string) => {
         await axios.delete("/api/tag/delete", {params: {tag}, headers: {"x-csrf-token": functions.getCSRFToken()}, withCredentials: true})
-        await axios.post("/api/tag/delete/request/fulfill", {username, tag}, {headers: {"x-csrf-token": functions.getCSRFToken()}, withCredentials: true})
+        await axios.post("/api/tag/delete/request/fulfill", {username, tag, accepted: true}, {headers: {"x-csrf-token": functions.getCSRFToken()}, withCredentials: true})
         await updateTags()
-        forceUpdate()
+        setUpdateVisibleRequestFlag(true)
     }
 
     const rejectRequest = async (username: string, tag: string) => {
-        await axios.post("/api/tag/delete/request/fulfill", {username, tag}, {headers: {"x-csrf-token": functions.getCSRFToken()}, withCredentials: true})
+        await axios.post("/api/tag/delete/request/fulfill", {username, tag, accepted: false}, {headers: {"x-csrf-token": functions.getCSRFToken()}, withCredentials: true})
         await updateTags()
-        forceUpdate()
+        setUpdateVisibleRequestFlag(true)
     }
 
     useEffect(() => {

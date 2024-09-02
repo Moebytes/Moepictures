@@ -14,6 +14,7 @@ import permissions from "../structures/Permissions"
 import adminCrown from "../assets/icons/admin-crown.png"
 import modCrown from "../assets/icons/mod-crown.png"
 import systemCrown from "../assets/icons/system-crown.png"
+import jsxFunctions from "../structures/JSXFunctions"
 import "./styles/reply.less"
 import axios from "axios"
 
@@ -98,11 +99,11 @@ const Reply: React.FunctionComponent<Props> = (props) => {
                 jsx.push(
                     <div className="reply-quote-container">
                         {userPart ? <span className="reply-quote-user" onClick={() => goToReply(id)}>{`${username.trim()} ${said.trim()}`}</span> : null}
-                        <span className="reply-quote-text">{text.trim()}</span>
+                        <span className="reply-quote-text">{jsxFunctions.parseTextLinks(text.trim())}</span>
                     </div>
                 )
             } else {
-                jsx.push(<span className="reply-text">{piece.trim()}</span>)
+                jsx.push(<span className="reply-text">{jsxFunctions.parseTextLinks(piece.trim())}</span>)
             }
         }
         return jsx
@@ -217,7 +218,7 @@ const Reply: React.FunctionComponent<Props> = (props) => {
                 </div>
             )
         }
-        return <span className="reply-user-text" onClick={userClick} onAuxClick={userClick}>{functions.toProperCase(props.reply.creator)}</span>
+        return <span className={`reply-user-text ${props.reply.banned ? "banned" : ""}`} onClick={userClick} onAuxClick={userClick}>{functions.toProperCase(props.reply.creator)}</span>
     }
 
     return (

@@ -117,6 +117,7 @@ const MessageRoutes = (app: Express) => {
             if (req.session.username !== message.creator && req.session.username !== message.recipient) {
                 if (req.session.role !== "admin" && req.session.role !== "mod") return res.status(401).send("No permission to reply")
             }
+            if (message.role === "system") return res.status(403).send("Cannot reply to system messages")
             await sql.message.insertMessageReply(Number(messageID), req.session.username, content)
             await sql.message.updateMessage(Number(messageID), "updater", req.session.username)
             await sql.message.updateMessage(Number(messageID), "updatedDate", new Date().toISOString())

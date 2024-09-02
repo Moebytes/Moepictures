@@ -1,4 +1,4 @@
-import React, {useContext, useEffect, useRef, useState, useReducer} from "react"
+import React, {useContext, useEffect, useState, useReducer} from "react"
 import {useHistory} from "react-router-dom"
 import {ThemeContext, SearchContext, SearchFlagContext, SiteHueContext, SiteLightnessContext, SiteSaturationContext} from "../Context"
 import {HashLink as Link} from "react-router-hash-link"
@@ -23,6 +23,7 @@ const ModTagEdits: React.FunctionComponent = (props) => {
     const [showOldTags, setShowOldTags] = useState([]) as any
     const [index, setIndex] = useState(0)
     const [visibleRequests, setVisibleRequests] = useState([]) as any
+    const [updateVisibleRequestFlag, setUpdateVisibleRequestFlag] = useState(false)
     const [offset, setOffset] = useState(0)
     const [ended, setEnded] = useState(false)
     const history = useHistory()
@@ -43,6 +44,22 @@ const ModTagEdits: React.FunctionComponent = (props) => {
         updateTags()
     }, [])
 
+    const updateVisibleRequests = () => {
+        const newVisibleRequests = [] as any
+        for (let i = 0; i < index; i++) {
+            if (!requests[i]) break
+            newVisibleRequests.push(requests[i])
+        }
+        setVisibleRequests(functions.removeDuplicates(newVisibleRequests))
+    }
+
+    useEffect(() => {
+        if (updateVisibleRequestFlag) {
+            updateVisibleRequests()
+            setUpdateVisibleRequestFlag(false)
+        }
+    }, [requests, index, updateVisibleRequestFlag])
+
     const editTag = async (username: string, tag: string, key: string, description: string, image: string, aliases: string[], implications: string[], social: string, twitter: string, website: string, fandom: string) => {
         let bytes = null as any
         if (image) {
@@ -56,15 +73,15 @@ const ModTagEdits: React.FunctionComponent = (props) => {
             }
         }
         await axios.put("/api/tag/edit", {tag, key, description, image: bytes, aliases, implications, social, twitter, website, fandom}, {headers: {"x-csrf-token": functions.getCSRFToken()}, withCredentials: true})
-        await axios.post("/api/tag/edit/request/fulfill", {username, tag, image}, {headers: {"x-csrf-token": functions.getCSRFToken()}, withCredentials: true})
+        await axios.post("/api/tag/edit/request/fulfill", {username, tag, image, accepted: true}, {headers: {"x-csrf-token": functions.getCSRFToken()}, withCredentials: true})
         await updateTags()
-        forceUpdate()
+        setUpdateVisibleRequestFlag(true)
     }
 
     const rejectRequest = async (username: string, tag: string, image: string) => {
-        await axios.post("/api/tag/edit/request/fulfill", {username, tag, image}, {headers: {"x-csrf-token": functions.getCSRFToken()}, withCredentials: true})
+        await axios.post("/api/tag/edit/request/fulfill", {username, tag, image, accepted: false}, {headers: {"x-csrf-token": functions.getCSRFToken()}, withCredentials: true})
         await updateTags()
-        forceUpdate()
+        setUpdateVisibleRequestFlag(true)
     }
 
     useEffect(() => {

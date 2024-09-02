@@ -236,7 +236,7 @@ const QuickEditDialog: React.FunctionComponent = (props) => {
         setArtists((prev: string) => {
             const parts = functions.cleanHTML(prev).split(/ +/g)
             parts[parts.length - 1] = tag
-            return parts.join(" ") + " "
+            return parts.join(" ")
         })
     }
 
@@ -244,7 +244,7 @@ const QuickEditDialog: React.FunctionComponent = (props) => {
         setCharacters((prev: string) => {
             const parts = functions.cleanHTML(prev).split(/ +/g)
             parts[parts.length - 1] = tag
-            return parts.join(" ") + " "
+            return parts.join(" ")
         })
     }
     
@@ -252,7 +252,7 @@ const QuickEditDialog: React.FunctionComponent = (props) => {
         setSeries((prev: string) => {
             const parts = functions.cleanHTML(prev).split(/ +/g)
             parts[parts.length - 1] = tag
-            return parts.join(" ") + " "
+            return parts.join(" ")
         })
     }
 
@@ -260,7 +260,7 @@ const QuickEditDialog: React.FunctionComponent = (props) => {
         setMetaTags((prev: string) => {
             const parts = functions.cleanHTML(prev).split(/ +/g)
             parts[parts.length - 1] = tag
-            return parts.join(" ") + " "
+            return parts.join(" ")
         })
     }
 
@@ -268,7 +268,7 @@ const QuickEditDialog: React.FunctionComponent = (props) => {
         setTags((prev: string) => {
             const parts = functions.cleanHTML(prev).split(/ +/g)
             parts[parts.length - 1] = tag
-            return parts.join(" ") + " "
+            return parts.join(" ")
         })
     }
 

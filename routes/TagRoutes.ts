@@ -359,13 +359,20 @@ const TagRoutes = (app: Express) => {
 
     app.post("/api/tag/delete/request/fulfill", tagUpdateLimiter, async (req: Request, res: Response) => {
         try {
-            const {username, tag} = req.body
+            const {username, tag, accepted} = req.body
             if (!serverFunctions.validateCSRF(req)) return res.status(400).send("Bad CSRF token")
             if (!tag) return res.status(400).send("Invalid tag")
             if (!req.session.username) return res.status(401).send("Unauthorized")
             if (!username) return res.status(400).send("Bad username")
             if (req.session.role !== "admin" && req.session.role !== "mod") return res.status(403).end()
             await sql.request.deleteTagDeleteRequest(username, tag)
+            if (accepted) {
+                let message = `Tag deletion request on ${functions.getDomain()}/tag/${tag} has been approved. Thanks!`
+                await sql.message.insertMessage("moepictures", username, "Notice: Tag deletion request has been approved", message)
+            } else {
+                let message = `Tag deletion request on ${functions.getDomain()}/tag/${tag} has been rejected. This tag can stay up. Thanks!`
+                await sql.message.insertMessage("moepictures", username, "Notice: Tag deletion request has been rejected", message)
+            }
             res.status(200).send("Success")
         } catch (e) {
             console.log(e)
@@ -406,13 +413,20 @@ const TagRoutes = (app: Express) => {
 
     app.post("/api/tag/aliasto/request/fulfill", tagUpdateLimiter, async (req: Request, res: Response) => {
         try {
-            const {username, tag} = req.body
+            const {username, tag, aliasTo, accepted} = req.body
             if (!serverFunctions.validateCSRF(req)) return res.status(400).send("Bad CSRF token")
             if (!tag) return res.status(400).send("Invalid tag")
             if (!req.session.username) return res.status(401).send("Unauthorized")
             if (!username) return res.status(400).send("Bad username")
             if (req.session.role !== "admin" && req.session.role !== "mod") return res.status(403).end()
             await sql.request.deleteAliasRequest(username, tag)
+            if (accepted) {
+                let message = `Tag alias request on ${tag} -> ${aliasTo} has been approved. Thanks!`
+                await sql.message.insertMessage("moepictures", username, "Notice: Tag alias request has been approved", message)
+            } else {
+                let message = `Tag alias request on ${tag} -> ${aliasTo} has been rejected. This tag can continue to be on its own. Thanks!`
+                await sql.message.insertMessage("moepictures", username, "Notice: Tag alias request has been rejected", message)
+            }
             res.status(200).send("Success")
         } catch (e) {
             console.log(e)
@@ -461,7 +475,7 @@ const TagRoutes = (app: Express) => {
 
     app.post("/api/tag/edit/request/fulfill", tagUpdateLimiter, async (req: Request, res: Response) => {
         try {
-            const {username, tag, image} = req.body
+            const {username, tag, image, accepted} = req.body
             if (!serverFunctions.validateCSRF(req)) return res.status(400).send("Bad CSRF token")
             if (!tag) return res.status(400).send("Invalid tag")
             if (!req.session.username) return res.status(401).send("Unauthorized")
@@ -469,6 +483,13 @@ const TagRoutes = (app: Express) => {
             if (req.session.role !== "admin" && req.session.role !== "mod") return res.status(403).end()
             if (image) await serverFunctions.deleteUnverifiedFile(image)
             await sql.request.deleteTagEditRequest(username, tag)
+            if (accepted) {
+                let message = `Tag edit request on ${functions.getDomain()}/tag/${tag} has been approved. Thanks for the contribution!`
+                await sql.message.insertMessage("moepictures", username, "Notice: Tag edit request has been approved", message)
+            } else {
+                let message = `Tag edit request on ${functions.getDomain()}/tag/${tag} has been rejected. The original tag details can stay. Thanks!`
+                await sql.message.insertMessage("moepictures", username, "Notice: Tag edit request has been rejected", message)
+            }
             res.status(200).send("Success")
         } catch (e) {
             console.log(e)

@@ -16,6 +16,7 @@ import commentDelete from "../assets/icons/commentdelete.png"
 import adminCrown from "../assets/icons/admin-crown.png"
 import modCrown from "../assets/icons/mod-crown.png"
 import systemCrown from "../assets/icons/system-crown.png"
+import jsxFunctions from "../structures/JSXFunctions"
 import "./styles/commentrow.less"
 import axios from "axios"
 
@@ -113,11 +114,11 @@ const CommentRow: React.FunctionComponent<Props> = (props) => {
                 jsx.push(
                     <div className="commentrow-quote-container">
                         {userPart ? <span className="commentrow-quote-user" onClick={() => goToComment(id)}>{`${username.trim()} ${said.trim()}`}</span> : null}
-                        <span className="commentrow-quote-text">{text.trim()}</span>
+                        <span className="commentrow-quote-text">{jsxFunctions.parseTextLinks(text.trim())}</span>
                     </div>
                 )
             } else {
-                jsx.push(<span className="commentrow-text">{piece.trim()}</span>)
+                jsx.push(<span className="commentrow-text">{jsxFunctions.parseTextLinks(piece.trim())}</span>)
             }
         }
         return jsx
@@ -242,7 +243,7 @@ const CommentRow: React.FunctionComponent<Props> = (props) => {
                 </div>
             )
         }
-        return <span className="commentrow-user-text">{functions.toProperCase(props.comment.username)}</span>
+        return <span className={`commentrow-user-text ${props.comment.banned ? "banned" : ""}`}>{functions.toProperCase(props.comment.username)}</span>
     }
 
     useEffect(() => {
