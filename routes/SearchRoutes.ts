@@ -77,6 +77,7 @@ const SearchRoutes = (app: Express) => {
             const type = req.query.type as string
             const restrict = req.query.restrict as string
             const style = req.query.style as string
+            const limit = req.query.limit as string
             const offset = req.query.offset as string
             if (!functions.validType(type, true)) return res.status(400).send("Invalid type")
             if (!functions.validRestrict(restrict, true)) return res.status(400).send("Invalid restrict")
@@ -90,7 +91,7 @@ const SearchRoutes = (app: Express) => {
                     if (alias) tags[i] = alias.tag
                 }
             }
-            let result = await sql.search.random(tags, type, restrict, style, offset)
+            let result = await sql.search.random(tags, type, restrict, style, limit, offset)
             result = result.map((p: any) => {
                 if (p.images?.length > 1) {
                     p.images = p.images.sort((a: any, b: any) => a.order - b.order)

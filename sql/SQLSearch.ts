@@ -52,24 +52,24 @@ export default class SQLSearch {
         let values = [] as any
         let tagQueryArray = [] as any
         if (ANDtags.length) {
-        values.push(ANDtags)
-        tagQueryArray.push(`tags @> $${i}`)
-        i++ 
+            values.push(ANDtags)
+            tagQueryArray.push(`tags @> $${i}`)
+            i++ 
         }
         if (ORtags.length) {
-        values.push(ORtags)
-        tagQueryArray.push(`tags && $${i}`)
-        i++ 
+            values.push(ORtags)
+            tagQueryArray.push(`tags && $${i}`)
+            i++ 
         }
         if (NOTtags.length) {
-        values.push(NOTtags)
-        tagQueryArray.push(`NOT tags @> $${i}`)
-        i++
+            values.push(NOTtags)
+            tagQueryArray.push(`NOT tags @> $${i}`)
+            i++
         }
         let limitValue = i
         if (limit) {
-        values.push(limit)
-        i++
+            values.push(limit)
+            i++
         }
         if (offset) values.push(offset)
         let tagQuery = tagQueryArray.length ? "WHERE " + tagQueryArray.join(" AND ") : ""
@@ -229,7 +229,7 @@ export default class SQLSearch {
     }
 
     /** Random search */
-    public static random = async (tags: string[], type: string, restrict: string, style: string, offset?: string, withTags?: boolean) => {
+    public static random = async (tags: string[], type: string, restrict: string, style: string, limit?: string, offset?: string, withTags?: boolean) => {
         let typeQuery = ""
         if (type === "image") typeQuery = `posts.type = 'image'`
         if (type === "animation") typeQuery = `posts.type = 'animation'`
@@ -263,19 +263,24 @@ export default class SQLSearch {
         let values = [] as any
         let tagQueryArray = [] as any
         if (ANDtags.length) {
-        values.push(ANDtags)
-        tagQueryArray.push(`tags @> $${i}`)
-        i++ 
+            values.push(ANDtags)
+            tagQueryArray.push(`tags @> $${i}`)
+            i++ 
         }
         if (ORtags.length) {
-        values.push(ORtags)
-        tagQueryArray.push(`tags && $${i}`)
-        i++ 
+            values.push(ORtags)
+            tagQueryArray.push(`tags && $${i}`)
+            i++ 
         }
         if (NOTtags.length) {
-        values.push(NOTtags)
-        tagQueryArray.push(`NOT tags @> $${i}`)
-        i++
+            values.push(NOTtags)
+            tagQueryArray.push(`NOT tags @> $${i}`)
+            i++
+        }
+        let limitValue = i
+        if (limit) {
+            values.push(limit)
+            i++
         }
         if (offset) values.push(offset)
         let tagQuery = tagQueryArray.length ? "WHERE " + tagQueryArray.join(" AND ") : ""
@@ -299,7 +304,7 @@ export default class SQLSearch {
             ORDER BY random()
             ) AS posts
             ${tagQuery}
-            LIMIT 100 ${offset ? `OFFSET $${i}` : ""}
+            ${limit ? `LIMIT $${limitValue}` : "LIMIT 100"} ${offset ? `OFFSET $${i}` : ""}
         `)
         }
         if (values?.[0]) query.values = values

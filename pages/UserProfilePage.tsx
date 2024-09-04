@@ -10,7 +10,6 @@ import DragAndDrop from "../components/DragAndDrop"
 import {HideNavbarContext, HideSidebarContext, ThemeContext, EnableDragContext, RelativeContext, HideTitlebarContext, MobileContext,
 HeaderTextContext, SidebarTextContext, SessionContext, RedirectContext, SessionFlagContext, UserImgContext, ShowDeleteAccountDialogContext,
 CommentSearchFlagContext, SiteHueContext, SiteLightnessContext, UserImgPostContext, SiteSaturationContext} from "../Context"
-import fileType from "magic-bytes.js"
 import functions from "../structures/Functions"
 import Carousel from "../components/Carousel"
 import CommentCarousel from "../components/CommentCarousel"
@@ -144,17 +143,19 @@ const UserProfilePage: React.FunctionComponent = (props) => {
         await new Promise<void>((resolve) => {
             fileReader.onloadend = async (f: any) => {
                 const bytes = new Uint8Array(f.target.result)
-                const result = fileType(bytes)?.[0]
+                const result = functions.bufferFileType(bytes)?.[0]
                 const jpg = result?.mime === "image/jpeg"
                 const png = result?.mime === "image/png"
                 const gif = result?.mime === "image/gif"
                 const webp = result?.mime === "image/webp"
-                if (jpg || png || gif || webp) {
+                const avif = result?.mime === "image/avif"
+                if (jpg || png || gif || webp || avif) {
                     const MB = file.size / (1024*1024)
                     const maxSize = jpg ? 10 :
                                     png ? 10 :
-                                    webp ? 10 :
+                                    avif ? 10 :
                                     gif ? 25 : 25
+                                    webp ? 25 : 25
                     if (MB <= maxSize) {
                         const url = URL.createObjectURL(file)
                         let croppedURL = ""

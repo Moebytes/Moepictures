@@ -285,10 +285,10 @@ const PostRoutes = (app: Express) => {
             await sql.request.deletePostDeleteRequest(username, postID)
             if (accepted) {
                 let message = `Post deletion request on ${functions.getDomain()}/post/${postID} has been approved. Thanks!`
-                await sql.message.insertMessage("moepictures", username, "Notice: Post deletion request has been approved", message)
+                await serverFunctions.systemMessage(username, "Notice: Post deletion request has been approved", message)
             } else {
                 let message = `Post deletion request on ${functions.getDomain()}/post/${postID} has been rejected. This post can stay up. Thanks!`
-                await sql.message.insertMessage("moepictures", username, "Notice: Post deletion request has been rejected", message)
+                await serverFunctions.systemMessage(username, "Notice: Post deletion request has been rejected", message)
             }
             res.status(200).send("Success")
         } catch (e) {
@@ -509,7 +509,7 @@ const PostRoutes = (app: Express) => {
                 let kind = "image" as any
                 if (type === "comic") {
                     kind = "comic"
-                } else if (ext === "jpg" || ext === "png") {
+                } else if (ext === "jpg" || ext === "png" || ext === "avif") {
                     kind = "image"
                 } else if (ext === "webp") {
                     const animated = await functions.isAnimatedWebp(buffer)

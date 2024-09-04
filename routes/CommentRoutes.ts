@@ -109,13 +109,13 @@ const CommentRoutes = (app: Express) => {
             await sql.report.deleteCommentReport(Number(reportID))
             if (accepted) {
                 let message = `Comment report on ${functions.getDomain()}/post/${id} was accepted. The comment made by ${username} has been removed.`
-                await sql.message.insertMessage("moepictures", reporter, "Report: Comment report has been accepted", message)
+                await serverFunctions.systemMessage(reporter, "Report: Comment report has been accepted", message)
 
                 let message2 = `A comment you posted on ${functions.getDomain()}/post/${id} was removed for breaking the rules.`
-                await sql.message.insertMessage("moepictures", username, "Notice: Comment has been removed", message2)
+                await serverFunctions.systemMessage(username, "Notice: Comment has been removed", message2)
             } else {
                 let message = `Comment report on ${functions.getDomain()}/post/${id} has been dismissed. The comment made by ${username} is ok.`
-                await sql.message.insertMessage("moepictures", reporter, "Report: Comment report has been dismissed", message)
+                await serverFunctions.systemMessage(reporter, "Report: Comment report has been dismissed", message)
             }
             res.status(200).send("Success")
         } catch (e) {

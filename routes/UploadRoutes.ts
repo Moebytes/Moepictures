@@ -6,7 +6,6 @@ import functions from "../structures/Functions"
 import serverFunctions from "../structures/ServerFunctions"
 import rateLimit from "express-rate-limit"
 import phash from "sharp-phash"
-import fileType from "magic-bytes.js"
 import imageSize from "image-size"
 import axios from "axios"
 
@@ -43,23 +42,25 @@ const validImages = (images: any[], skipMBCheck?: boolean) => {
       if (skipMBCheck || MB <= maxSize) continue
       return false
     }
-    const result = fileType(images[i].bytes)?.[0]
+    const result = functions.bufferFileType(images[i].bytes)?.[0]
     const jpg = result?.mime === "image/jpeg"
     const png = result?.mime === "image/png"
     const webp = result?.mime === "image/webp"
+    const avif = result?.mime === "image/avif"
     const gif = result?.mime === "image/gif"
     const mp4 = result?.mime === "video/mp4"
     const mp3 = result?.mime === "audio/mpeg"
     const wav = result?.mime === "audio/x-wav"
     const webm = (path.extname(images[i].link) === ".webm" && result?.typename === "mkv")
-    if (jpg || png || webp || gif || mp4 || webm || mp3 || wav) {
+    if (jpg || png || webp || avif || gif || mp4 || webm || mp3 || wav) {
       const MB = images[i].size / (1024*1024)
       const maxSize = jpg ? 10 :
-                      webp ? 10 :
+                      avif ? 10 :
                       png ? 25 :
                       mp3 ? 25 :
                       wav ? 50 :
                       gif ? 100 :
+                      webp ? 100 :
                       mp4 ? 300 :
                       webm ? 300 : 300
       let type = result.typename === "mkv" ? "webm" : result.typename
@@ -151,7 +152,7 @@ const CreateRoutes = (app: Express) => {
           let kind = "image" as any
           if (type === "comic") {
             kind = "comic"
-          } else if (ext === "jpg" || ext === "png") {
+          } else if (ext === "jpg" || ext === "png" || ext === "avif") {
             kind = "image"
           } else if (ext === "webp") {
             const animated = await functions.isAnimatedWebp(Buffer.from(images[i].bytes))
@@ -408,7 +409,7 @@ const CreateRoutes = (app: Express) => {
           let kind = "image" as any
           if (type === "comic") {
             kind = "comic"
-          } else if (ext === "jpg" || ext === "png") {
+          } else if (ext === "jpg" || ext === "png" || ext === "avif") {
             kind = "image"
           } else if (ext === "webp") {
             const animated = await functions.isAnimatedWebp(Buffer.from(images[i].bytes))
@@ -691,7 +692,7 @@ const CreateRoutes = (app: Express) => {
           let kind = "image" as any
           if (type === "comic") {
             kind = "comic"
-          } else if (ext === "jpg" || ext === "png") {
+          } else if (ext === "jpg" || ext === "png" || ext === "avif") {
             kind = "image"
           } else if (ext === "webp") {
             const animated = await functions.isAnimatedWebp(Buffer.from(images[i].bytes))
@@ -939,7 +940,7 @@ const CreateRoutes = (app: Express) => {
           let kind = "image" as any
           if (type === "comic") {
             kind = "comic"
-          } else if (ext === "jpg" || ext === "png") {
+          } else if (ext === "jpg" || ext === "png" || ext === "avif") {
             kind = "image"
           } else if (ext === "webp") {
             const animated = await functions.isAnimatedWebp(Buffer.from(images[i].bytes))
@@ -1130,7 +1131,7 @@ const CreateRoutes = (app: Express) => {
           let kind = "image" as any
           if (type === "comic") {
             kind = "comic"
-          } else if (ext === "jpg" || ext === "png") {
+          } else if (ext === "jpg" || ext === "png" || ext === "avif") {
             kind = "image"
           } else if (ext === "webp") {
             const animated = await functions.isAnimatedWebp(buffer)
@@ -1332,7 +1333,7 @@ const CreateRoutes = (app: Express) => {
           subject = "Notice: Post edit request has been approved"
           message = `Post edit request on ${functions.getDomain()}/post/${newPostID} has been approved. Thanks for the contribution!`
         }
-        await sql.message.insertMessage("moepictures", unverified.uploader, subject, message)
+        await serverFunctions.systemMessage(unverified.uploader, subject, message)
         
         res.status(200).send("Success")
       } catch (e) {
@@ -1366,7 +1367,7 @@ const CreateRoutes = (app: Express) => {
           message = `Post edit request on ${functions.getDomain()}/post/${unverified.originalID} has been rejected.\n\nMake sure you go over the submission guidelines on ${functions.getDomain()}/help#uploading`
         }
 
-        await sql.message.insertMessage("moepictures", unverified.uploader, subject, message)
+        await serverFunctions.systemMessage(unverified.uploader, subject, message)
 
         res.status(200).send("Success")
       } catch (e) {

@@ -368,10 +368,10 @@ const TagRoutes = (app: Express) => {
             await sql.request.deleteTagDeleteRequest(username, tag)
             if (accepted) {
                 let message = `Tag deletion request on ${functions.getDomain()}/tag/${tag} has been approved. Thanks!`
-                await sql.message.insertMessage("moepictures", username, "Notice: Tag deletion request has been approved", message)
+                await serverFunctions.systemMessage(username, "Notice: Tag deletion request has been approved", message)
             } else {
                 let message = `Tag deletion request on ${functions.getDomain()}/tag/${tag} has been rejected. This tag can stay up. Thanks!`
-                await sql.message.insertMessage("moepictures", username, "Notice: Tag deletion request has been rejected", message)
+                await serverFunctions.systemMessage(username, "Notice: Tag deletion request has been rejected", message)
             }
             res.status(200).send("Success")
         } catch (e) {
@@ -422,10 +422,10 @@ const TagRoutes = (app: Express) => {
             await sql.request.deleteAliasRequest(username, tag)
             if (accepted) {
                 let message = `Tag alias request on ${tag} -> ${aliasTo} has been approved. Thanks!`
-                await sql.message.insertMessage("moepictures", username, "Notice: Tag alias request has been approved", message)
+                await serverFunctions.systemMessage(username, "Notice: Tag alias request has been approved", message)
             } else {
                 let message = `Tag alias request on ${tag} -> ${aliasTo} has been rejected. This tag can continue to be on its own. Thanks!`
-                await sql.message.insertMessage("moepictures", username, "Notice: Tag alias request has been rejected", message)
+                await serverFunctions.systemMessage(username, "Notice: Tag alias request has been rejected", message)
             }
             res.status(200).send("Success")
         } catch (e) {
@@ -485,10 +485,10 @@ const TagRoutes = (app: Express) => {
             await sql.request.deleteTagEditRequest(username, tag)
             if (accepted) {
                 let message = `Tag edit request on ${functions.getDomain()}/tag/${tag} has been approved. Thanks for the contribution!`
-                await sql.message.insertMessage("moepictures", username, "Notice: Tag edit request has been approved", message)
+                await serverFunctions.systemMessage(username, "Notice: Tag edit request has been approved", message)
             } else {
                 let message = `Tag edit request on ${functions.getDomain()}/tag/${tag} has been rejected. The original tag details can stay. Thanks!`
-                await sql.message.insertMessage("moepictures", username, "Notice: Tag edit request has been rejected", message)
+                await serverFunctions.systemMessage(username, "Notice: Tag edit request has been rejected", message)
             }
             res.status(200).send("Success")
         } catch (e) {

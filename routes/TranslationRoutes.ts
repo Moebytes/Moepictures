@@ -132,7 +132,7 @@ const TranslationRoutes = (app: Express) => {
             await sql.translation.deleteUnverifiedTranslation(Number(translationID))
 
             let message = `Translations you added on ${functions.getDomain()}/post/${postID} have been approved. Thanks for the contribution!`
-            await sql.message.insertMessage("moepictures", username, "Notice: Translations have been approved", message)
+            await serverFunctions.systemMessage(username, "Notice: Translations have been approved", message)
 
             res.status(200).send("Success")
         } catch (e) {
@@ -153,7 +153,7 @@ const TranslationRoutes = (app: Express) => {
             await sql.translation.deleteUnverifiedTranslation(Number(translationID))
 
             let message = `Translations you added on ${functions.getDomain()}/post/${postID} have been rejected. They might be incorrect.`
-            await sql.message.insertMessage("moepictures", username, "Notice: Translations have been rejected", message)
+            await serverFunctions.systemMessage(username, "Notice: Translations have been rejected", message)
             
             res.status(200).send("Success")
         } catch (e) {

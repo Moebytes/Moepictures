@@ -4,11 +4,7 @@ import {HashLink as Link} from "react-router-hash-link"
 import {HideNavbarContext, HideSidebarContext, ThemeContext, EnableDragContext, ShowNewThreadDialogContext, HideTitlebarContext, 
 SessionContext, SiteHueContext, SiteLightnessContext, SiteSaturationContext} from "../Context"
 import functions from "../structures/Functions"
-import uploadIcon from "../assets/icons/upload.png"
-import fileType from "magic-bytes.js"
 import Draggable from "react-draggable"
-import permissions from "../structures/Permissions"
-import xButton from "../assets/icons/x-button-magenta.png"
 import "./styles/dialog.less"
 import axios from "axios"
 

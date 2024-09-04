@@ -8,9 +8,7 @@ SiteLightnessContext, SiteSaturationContext} from "../Context"
 import functions from "../structures/Functions"
 import uploadIcon from "../assets/icons/upload.png"
 import "./styles/dialog.less"
-import fileType from "magic-bytes.js"
 import Draggable from "react-draggable"
-import permissions from "../structures/Permissions"
 import xButton from "../assets/icons/x-button.png"
 import axios from "axios"
 
@@ -129,7 +127,7 @@ const EditTagDialog: React.FunctionComponent = (props) => {
         await new Promise<void>((resolve) => {
             fileReader.onloadend = async (f: any) => {
                 let bytes = new Uint8Array(f.target.result)
-                const result = fileType(bytes)?.[0]
+                const result = functions.bufferFileType(bytes)?.[0]
                 const jpg = result?.mime === "image/jpeg"
                 const png = result?.mime === "image/png"
                 const gif = result?.mime === "image/gif"
@@ -138,8 +136,8 @@ const EditTagDialog: React.FunctionComponent = (props) => {
                     const MB = file.size / (1024*1024)
                     const maxSize = jpg ? 10 :
                                     png ? 10 :
-                                    webp ? 10 :
                                     gif ? 25 : 25
+                                    webp ? 25 : 25
                     if (MB <= maxSize) {
                         let url = URL.createObjectURL(file)
                         let croppedURL = ""

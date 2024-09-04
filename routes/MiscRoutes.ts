@@ -1,7 +1,6 @@
 import {Express, NextFunction, Request, Response} from "express"
 import axios from "axios"
 import FormData from "form-data"
-import fileType from "magic-bytes.js"
 import path from "path"
 import Pixiv from "pixiv.ts"
 import DeviantArt from "deviantart.ts"
@@ -90,7 +89,7 @@ const MiscRoutes = (app: Express) => {
             form.append("db", "999")
             form.append("api_key", process.env.SAUCENAO_KEY)
             form.append("output_type", 2)
-            const inputType = fileType(req.body)?.[0]
+            const inputType = functions.bufferFileType(req.body)?.[0]
             form.append("file", Buffer.from(req.body, "binary"), {
                 filename: `file.${inputType.extension}`,
                 contentType: inputType.mime
@@ -257,7 +256,7 @@ const MiscRoutes = (app: Express) => {
             const admins = await sql.user.admins()
             for (const admin of admins) {
                 const modifiedMessage = `You have a new message from ${email}!\n\n${message}`
-                await sql.message.insertMessage("moepictures", admin.username, subject, modifiedMessage)
+                await serverFunctions.systemMessage(admin.username, subject, modifiedMessage)
             }
             res.status(200).send("Success")
         } catch (e) {

@@ -67,6 +67,15 @@ export default class ServerFunctions {
         })
     }
 
+    public static systemMessage = async (username: string, subject: string, message: string) => {
+        const userMessages = await sql.message.userMessages(username)
+        if (userMessages[0]?.creator === "moepictures" && userMessages[0]?.title === subject && userMessages[0]?.content === message) {
+            const timeDifference = new Date().getTime() - new Date(userMessages[0].createDate).getTime()
+            if (timeDifference < 10000) return
+        }
+        await sql.message.insertMessage("moepictures", username, subject, message)
+    }
+
     public static getFirstHistoryFile = async (file: string) => {
         const defaultBuffer = Buffer.from("")
         if (file.includes("artist") || file.includes("character") || file.includes("series") || file.includes("pfp")) {

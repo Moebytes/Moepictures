@@ -33,7 +33,6 @@ import {HideNavbarContext, HideSidebarContext, RelativeContext, ThemeContext, En
 UploadDropFilesContext, BrightnessContext, ContrastContext, HueContext, SaturationContext, LightnessContext, MobileContext,
 BlurContext, SharpenContext, PixelateContext, HeaderTextContext, SessionContext, SidebarTextContext, RedirectContext,
 SiteHueContext, SiteLightnessContext, SiteSaturationContext} from "../Context"
-import fileType from "magic-bytes.js"
 import JSZip from "jszip"
 import axios from "axios"
 import SearchSuggestions from "../components/SearchSuggestions"
@@ -151,11 +150,12 @@ const BulkUploadPage: React.FunctionComponent = (props) => {
             await new Promise<void>((resolve) => {
                 fileReader.onloadend = async (f: any) => {
                     const bytes = new Uint8Array(f.target.result)
-                    const result = fileType(bytes)?.[0] || {}
+                    const result = functions.bufferFileType(bytes)?.[0] || {}
                     const jpg = result?.mime === "image/jpeg"
                     const png = result?.mime === "image/png"
                     const gif = result?.mime === "image/gif"
                     const webp = result?.mime === "image/webp"
+                    const avif = result?.mime === "image/avif"
                     const mp4 = result?.mime === "video/mp4"
                     const mp3 = result?.mime === "audio/mpeg"
                     const wav = result?.mime === "audio/x-wav"
@@ -167,14 +167,15 @@ const BulkUploadPage: React.FunctionComponent = (props) => {
                     if (obj) result.typename = "obj"
                     const webm = (path.extname(files[i].name) === ".webm" && result?.typename === "mkv")
                     const zip = result?.mime === "application/zip"
-                    if (jpg || png || webp || gif || mp4 || webm || mp3 || wav || glb || fbx || obj || zip) {
+                    if (jpg || png || webp || avif || gif || mp4 || webm || mp3 || wav || glb || fbx || obj || zip) {
                         const MB = files[i].size / (1024*1024)
                         const maxSize = jpg ? 10 :
                                         png ? 25 :
-                                        webp ? 10 :
+                                        avif ? 10 :
                                         mp3 ? 25 :
                                         wav ? 50 :
                                         gif ? 100 :
+                                        webp ? 100 :
                                         glb ? 100 :
                                         fbx ? 100 :
                                         obj ? 100 :
@@ -188,10 +189,11 @@ const BulkUploadPage: React.FunctionComponent = (props) => {
                                     const file = content.files[filename]
                                     if (file.dir || filename.startsWith("__MACOSX/")) continue
                                     const data = await file.async("uint8array")
-                                    const result = fileType(data)?.[0] || {}
+                                    const result = functions.bufferFileType(data)?.[0] || {}
                                     const jpg = result?.mime === "image/jpeg"
                                     const png = result?.mime === "image/png"
                                     let webp = result?.mime === "image/webp"
+                                    let avif = result?.mime === "image/avif"
                                     const gif = result?.mime === "image/gif"
                                     const mp4 = result?.mime === "video/mp4"
                                     const mp3 = result?.mime === "audio/mpeg"
@@ -203,10 +205,10 @@ const BulkUploadPage: React.FunctionComponent = (props) => {
                                     if (fbx) result.typename = "fbx"
                                     if (obj) result.typename = "obj"
                                     const webm = (path.extname(filename) === ".webm" && result?.typename === "mkv")
-                                    if (jpg || png || webp || gif || mp4 || webm || mp3 || wav || glb || fbx || obj) {
+                                    if (jpg || png || webp || avif || gif || mp4 || webm || mp3 || wav || glb || fbx || obj) {
                                         acceptedArray.push({file: new File([data], filename), ext: result.typename === "mkv" ? "webm" : result.typename, originalLink: links ? links[i] : null, bytes: data})
                                     } else {
-                                        error = `Supported types in zip: png, jpg, webp, gif, mp4, webm, mp3, wav, glb, fbx, obj.`
+                                        error = `Supported types in zip: png, jpg, webp, avif, gif, mp4, webm, mp3, wav, glb, fbx, obj.`
                                     }
                                 }
                                 resolve()
@@ -219,7 +221,7 @@ const BulkUploadPage: React.FunctionComponent = (props) => {
                             resolve()
                         }
                     } else {
-                        error = `Supported file types: png, jpg, webp, gif, mp4, webm, mp3, wav, glb, fbx, obj, zip.`
+                        error = `Supported file types: png, jpg, webp, avif, gif, mp4, webm, mp3, wav, glb, fbx, obj, zip.`
                         resolve()
                     }
                 }
@@ -272,13 +274,14 @@ const BulkUploadPage: React.FunctionComponent = (props) => {
         const arrayBuffer = await axios.get(`/api/misc/proxy?url=${image}`, {withCredentials: true, responseType: "arraybuffer"}).then((r) => r.data)
         let bytes = new Uint8Array(arrayBuffer)
         let blob = new Blob([bytes])
-        const result = fileType(bytes)?.[0]
+        const result = functions.bufferFileType(bytes)?.[0]
         const jpg = result?.mime === "image/jpeg"
         const png = result?.mime === "image/png"
         const gif = result?.mime === "image/gif"
         const webp = result?.mime === "image/webp"
-        let ext = jpg ? "jpg" : png ? "png" : gif ? "gif" : webp ? "webp" : null
-        if (jpg || png || gif || webp) {
+        const avif = result?.mime === "image/avif"
+        let ext = jpg ? "jpg" : png ? "png" : gif ? "gif" : webp ? "webp" : avif ? "avif" : null
+        if (jpg || png || gif || webp || avif) {
             let url = URL.createObjectURL(blob)
             let croppedURL = ""
             if (gif) {

@@ -713,17 +713,17 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
         if (autoSearch && history.location.pathname.includes("/post/")) {
             const searchLoop = async () => {
                 if (!autoSearch) return
-                const posts = await axios.get("/api/search/random", {params: {type: "all", restrict: props.post.restrict === "explicit" ? "explicit" : "all", style: "all"}}).then((r) => r.data)
-                history.push(`/post/${posts[0].postID}`)
-                timeout = setTimeout(() => {
-                    searchLoop()
-                }, 3000)
+                timeout = setTimeout(async () => {
+                    const posts = await axios.get("/api/search/random", {params: {type: "all", restrict: props.post.restrict === "explicit" ? "explicit" : "all", style: "all", limit: 1}}).then((r) => r.data)
+                    history.push(`/post/${posts[0].postID}`)
+                    if (autoSearch) searchLoop()
+                }, Math.floor(Number(session.autosearchInterval || 3000)))
             }
             searchLoop()
         } else if (autoSearch && !history.location.pathname.includes("/posts")) {
             history.push("/posts")
         }
-    }, [autoSearch])
+    }, [session, autoSearch])
 
     const toggleAutoSearch = async () => {
         setAutoSearch((prev: boolean) => !prev)

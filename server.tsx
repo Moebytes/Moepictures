@@ -155,6 +155,7 @@ for (let i = 0; i < folders.length; i++) {
       let body = await serverFunctions.getFile(key)
       let contentLength = body.length
       if (!contentLength) return res.status(200).send(body)
+      /*
       if (mimeType?.includes("image")) {
         const metadata = await sharp(body).metadata()
         const bigger = metadata.width! > metadata.height! ? metadata.width! : metadata.height!
@@ -164,7 +165,7 @@ for (let i = 0; i < folders.length; i++) {
           .toBuffer()
           contentLength = body.length
         }
-      }
+      }*/
       if (req.headers.range) {
         const parts = req.headers.range.replace(/bytes=/, "").split("-")
         const start = parseInt(parts[0])

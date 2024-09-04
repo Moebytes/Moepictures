@@ -20,7 +20,7 @@ module.exports = [
     node: {__dirname: false},
     output: {publicPath: "/", globalObject: "this", filename: "script.js", chunkFilename: "[name].js", path: path.resolve(__dirname, "./dist")},
     resolve: {extensions: [".js", ".jsx", ".ts", ".tsx"], alias: {"react-dom$": "react-dom/profiling", "scheduler/tracing": "scheduler/tracing-profiling"}, 
-    fallback: {fs: false, path: require.resolve("path-browserify"), crypto: require.resolve("crypto-browserify"), stream: require.resolve("stream-browserify"), assert: require.resolve("assert/"), zlib: require.resolve("browserify-zlib")}},
+    fallback: {fs: false, "process/browser": require.resolve("process/browser"), path: require.resolve("path-browserify"), crypto: require.resolve("crypto-browserify"), stream: require.resolve("stream-browserify"), assert: require.resolve("assert/"), zlib: require.resolve("browserify-zlib")}},
     performance: {hints: false},
     optimization: {minimize: false, minimizer: [new TerserJSPlugin({extractComments: false}), new WebpackObfuscator(), new MinimizerCSSPlugin()], moduleIds: "named",
     splitChunks: {chunks(chunk) {return false}}},
@@ -53,7 +53,8 @@ module.exports = [
       new CopyPlugin({
         patterns: [
           {from: "structures/bitcrusher.js", to: "[name][ext]"},
-          {from: "structures/soundtouch.js", to: "[name][ext]"}
+          {from: "structures/soundtouch.js", to: "[name][ext]"},
+          {from: "structures/webpxmux.wasm", to: "[name][ext]"}
         ]
       })
     ]

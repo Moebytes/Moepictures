@@ -7,7 +7,6 @@ import crypto from "crypto"
 import functions from "../structures/Functions"
 import jsxFunctions from "../structures/JSXFunctions"
 import serverFunctions from "../structures/ServerFunctions"
-import fileType from "magic-bytes.js"
 import path from "path"
 
 const signupLimiter = rateLimit({
@@ -213,12 +212,13 @@ const UserRoutes = (app: Express) => {
             const bytes = req.body.bytes
             const postID = req.body.postID
             if (!req.session.username) return res.status(401).send("Unauthorized")
-            const result = fileType(bytes)?.[0]
+            const result = functions.bufferFileType(bytes)?.[0]
             const jpg = result?.mime === "image/jpeg"
             const png = result?.mime === "image/png"
             const webp = result?.mime === "image/webp"
+            const avif = result?.mime === "image/avif"
             const gif = result?.mime === "image/gif"
-            if (jpg || png || webp || gif) {
+            if (jpg || png || webp || avif || gif) {
                 if (req.session.image) {
                     let oldImagePath = functions.getTagPath("pfp", req.session.image)
                     await serverFunctions.deleteFile(oldImagePath).catch(() => null)
@@ -778,7 +778,7 @@ const UserRoutes = (app: Express) => {
             await sql.report.insertBan(username, req.session.username, reason)
             await sql.user.updateUser(username, "banned", true)
             const message = `You have been banned for breaking the site rules. You can still view the site but you won't be able to interact with other users or edit posts.${reason ? `\n\nHere is an additional provided reason: ${reason}` : ""}`
-            await sql.message.insertMessage("moepictures", username, "Notice: You were banned", message)
+            await serverFunctions.systemMessage(username, "Notice: You were banned", message)
             res.status(200).json({revertPostIDs: Array.from(revertPostIDs), revertTagIDs: Array.from(revertTagIDs)})
         } catch (e) {
             console.log(e)
@@ -800,7 +800,7 @@ const UserRoutes = (app: Express) => {
             await sql.report.deleteBan(username)
             await sql.user.updateUser(username, "banned", false)
             const message = `You have been unbanned. You may interact on the site again, but don't repeat the behavior that got you banned because you likely won't get another chance.`
-            await sql.message.insertMessage("moepictures", username, "Notice: You were unbanned", message)
+            await serverFunctions.systemMessage(username, "Notice: You were unbanned", message)
             res.status(200).send("Success")
         } catch (e) {
             console.log(e)

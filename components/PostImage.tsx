@@ -907,7 +907,7 @@ const PostImage: React.FunctionComponent<Props> = (props) => {
     }
 
     const renderImage = async (image?: string) => {
-        if ((filtersOn())) {
+        if (filtersOn()) {
             if (image) {
                 const decrypted = await cryptoFunctions.decryptedLink(image)
                 const img = await functions.createImage(decrypted)
@@ -917,6 +917,7 @@ const PostImage: React.FunctionComponent<Props> = (props) => {
             }
         } else {
             if (image) {
+                // @ts-ignore
                 return cryptoFunctions.decryptedLink(image)
             } else {
                 return cryptoFunctions.decryptedLink(props.img)

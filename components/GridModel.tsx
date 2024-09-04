@@ -506,7 +506,7 @@ const GridModel = forwardRef<Ref, Props>((props, componentRef) => {
     }, [downloadFlag])
 
     const onClick = (event: React.MouseEvent<HTMLElement>) => {
-        if (activeDropdown !== "none") return
+        //if (activeDropdown !== "none") return
         if (event.metaKey || event.ctrlKey || event.button === 1) {
             event.preventDefault()
             const newWindow = window.open(`/post/${props.id}`, "_blank")
@@ -524,7 +524,7 @@ const GridModel = forwardRef<Ref, Props>((props, componentRef) => {
     }
 
     const mouseUp = async (event: React.MouseEvent<HTMLElement>) => {
-        if (activeDropdown !== "none") return
+        //if (activeDropdown !== "none") return
         setScrollY(window.scrollY)
         if (selectionMode) {
             if (event.metaKey || event.ctrlKey || event.button == 1) {

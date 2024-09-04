@@ -16,6 +16,7 @@ import cryptoFunctions from "./CryptoFunctions"
 import localforage from "localforage"
 import mm from "music-metadata"
 import * as THREE from "three"
+import WebPXMux from "webpxmux"
 import {GLTFLoader, OBJLoader, FBXLoader} from "three-stdlib"
 
 let csrfToken = ""
@@ -683,14 +684,13 @@ export default class Functions {
         return Promise.all(frames)
   }
 
-    public static extractAnimatedWebpFrames = async (webp: string) => {
+    public static extractAnimatedWebpFramesNative = async (webp: string) => {
         const data = await fetch(webp).then((r) => r.arrayBuffer())
         let index = 0
         // @ts-ignore
         let imageDecoder = new ImageDecoder({data, type: "image/webp", preferAnimation: true})
 
         let result = [] as any
-
         while (true) {
             try {
                 const decoded = await imageDecoder.decode({frameIndex: index++})
@@ -706,7 +706,39 @@ export default class Functions {
         return result
     }
 
-    public static extractGIFFramesNew = async (gif: string) => {
+    public static extractAnimatedWebpFrames = async (webp: string) => {
+        try {
+            const data = await Functions.extractAnimatedWebpFramesNative(webp)
+            return data
+        } catch {
+            // fallback to this
+        }
+        const buffer = await fetch(webp).then((r) => r.arrayBuffer())
+        const xMux = WebPXMux("webpxmux.wasm")
+        await xMux.waitRuntime()
+        const data = await xMux.decodeFrames(new Uint8Array(buffer))
+        const webpData = [] as any
+        for (let i = 0; i < data.frames.length; i++) {
+            const frame = data.frames[i]
+            const canvas = document.createElement("canvas")
+            canvas.width = data.width
+            canvas.height = data.height
+            const ctx = canvas.getContext("2d")!
+            const imageData = ctx.createImageData(canvas.width, canvas.height)
+            for (let i = 0; i < frame.rgba.length; i++) {
+                const rgba = frame.rgba[i]
+                imageData.data[i * 4 + 0] = (rgba >> 24) & 0xFF
+                imageData.data[i * 4 + 1] = (rgba >> 16) & 0xFF
+                imageData.data[i * 4 + 2] = (rgba >> 8) & 0xFF
+                imageData.data[i * 4 + 3] = rgba & 0xFF
+            }
+            ctx.putImageData(imageData, 0, 0)
+            webpData.push({delay: frame.duration, frame: canvas})
+        }
+        return webpData
+    }
+
+    public static extractGIFFramesNative = async (gif: string) => {
         const data = await fetch(gif).then((r) => r.arrayBuffer())
         let index = 0
         // @ts-ignore
@@ -733,7 +765,7 @@ export default class Functions {
 
     public static extractGIFFrames = async (gif: string) => {
         try {
-            const data = await Functions.extractGIFFramesNew(gif)
+            const data = await Functions.extractGIFFramesNative(gif)
             return data
         } catch {
             // fallback to this
@@ -931,7 +963,8 @@ export default class Functions {
     public static linkToBase64 = async (link: string) => {
         const arrayBuffer = await axios.get(link, {responseType: "arraybuffer"}).then((r) => r.data) as ArrayBuffer
         const buffer = Buffer.from(arrayBuffer)
-        return `data:image/jpeg;base64,${buffer.toString("base64")}`
+        const mime = Functions.bufferFileType(buffer)[0]?.mime || "image/jpeg"
+        return `data:${mime};base64,${buffer.toString("base64")}`
     }
 
     public static getUnverifiedImageLink = (folder: string, postID: number, order: number, filename: string) => {
@@ -1261,6 +1294,16 @@ export default class Functions {
         return `${Number((bytes / Math.pow(1024, i)).toFixed(2))} ${["B", "KB", "MB", "GB", "TB"][i]}`
     }
 
+    public static toCanvas = async (image: string) => {
+        const img = await Functions.createImage(image)
+        const canvas = document.createElement("canvas") as HTMLCanvasElement
+        canvas.width = img.naturalWidth
+        canvas.height = img.naturalHeight
+        const ctx = canvas.getContext("2d") as any
+        ctx.drawImage(img, 0, 0, canvas.width, canvas.height)
+        return canvas
+    }
+
     public static imageDimensions = async (image: string) => {
         return new Promise<any>(async (resolve) => {
             if (Functions.isVideo(image)) {
@@ -1278,7 +1321,12 @@ export default class Functions {
                 })
                 video.src = image
             } else {
-                let imageLink = Functions.isImage(image) ? await cryptoFunctions.decryptedLink(image) : image
+                let imageLink = image
+                if (Functions.isImage(image)) {
+                    imageLink = await cryptoFunctions.decryptedLink(image)
+                    //const canvas = await Functions.toCanvas(imageLink)
+                    //imageLink = canvas.toDataURL("image/jpeg")
+                }
                 const img = document.createElement("img")
                 img.addEventListener("load", async () => {
                     let width = img.width
@@ -1486,7 +1534,8 @@ export default class Functions {
     }
 
     public static arrayBufferToBase64 = (arrayBuffer: ArrayBuffer) => {
-        return `data:image/png;base64,${Buffer.from(arrayBuffer).toString("base64")}`
+        const mime = Functions.bufferFileType(Buffer.from(arrayBuffer))[0]?.mime || "image/png"
+        return `data:${mime};base64,${Buffer.from(arrayBuffer).toString("base64")}`
     }
 
     public static timeAgo = (input: string) => {
@@ -1969,17 +2018,20 @@ export default class Functions {
         return scaleFactor
     }
 
-    public static isEncrypted = (buffer: Buffer) => {
+    public static bufferFileType = (buffer: Uint8Array | Buffer) => {
         buffer = Buffer.from(buffer)
-        const signatures = {
-            jpg: Buffer.from([0xFF, 0xD8, 0xFF]),
-            png: Buffer.from([0x89, 0x50, 0x4E, 0x47]),
-            webp: Buffer.from([0x52, 0x49, 0x46, 0x46]),
-            gif: Buffer.from([0x47, 0x49, 0x46, 0x38]),
-            avif: Buffer.from([0x66, 0x74, 0x79, 0x70, 0x61, 0x76, 0x69, 0x66])
+        const majorBrand = buffer.toString("utf8", 8, 12)
+        if (majorBrand === "avif" || majorBrand === "avis") {
+            return [{typename: "avif", mime: "image/avif", extension: "avif"}]
         }
-        for (const signature of Object.values(signatures)) {
-            if (buffer.subarray(0, signature.length).equals(signature)) return false
+        return fileType(buffer)
+    }
+
+    public static isEncrypted = (buffer: Buffer) => {
+        const result = Functions.bufferFileType(buffer)
+        if (result.length) {
+            if (result[0].typename === "mpeg") return true
+            return false
         }
         return true
     }
