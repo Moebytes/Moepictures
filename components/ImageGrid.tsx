@@ -480,7 +480,7 @@ const ImageGrid: React.FunctionComponent<Props> = (props) => {
         for (let i = 0; i < visible.length; i++) {
             const post = visible[i] as any
             if (post.fake) continue
-            //if (post.thirdParty) continue
+            if (post.thirdParty) continue
             if (!session.username) if (post.restrict !== "safe") continue
             if (restrictType !== "explicit") if (post.restrict === "explicit") continue
             if (!permissions.isElevated(session)) if (post.hidden) continue

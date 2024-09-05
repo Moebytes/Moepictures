@@ -609,7 +609,47 @@ export default class Functions {
         return distance
     }
 
-    public static extractMP4Frames = async (videoFile: string) => {
+    public static extractFramesVideoSlow = (videoUrl: string, fps = 25) => {
+        return new Promise<ImageBitmap[]>(async (resolve) => {
+            let videoBlob = await fetch(videoUrl).then((r) => r.blob())
+            let videoObjectUrl = URL.createObjectURL(videoBlob)
+            let video = document.createElement("video")
+        
+            let seekResolve = null as any
+            video.addEventListener("seeked", async function () {
+                if (seekResolve) seekResolve()
+            })
+            video.src = videoObjectUrl
+            while ((video.duration === Infinity || isNaN(video.duration)) && video.readyState < 2) {
+                await new Promise((r) => setTimeout(r, 1000))
+                video.currentTime = 10000000 * Math.random()
+            }
+            let duration = video.duration
+        
+            let canvas = document.createElement("canvas")
+            let context = canvas.getContext("2d")!
+            let [w, h] = [video.videoWidth, video.videoHeight]
+            canvas.width = w
+            canvas.height = h
+        
+            let frames = [] as ImageBitmap[]
+            let interval = 1 / fps
+            let currentTime = 0
+        
+            while (currentTime < duration) {
+                video.currentTime = currentTime
+                await new Promise((r) => (seekResolve = r))
+        
+                context.drawImage(video, 0, 0, w, h)
+                let bitmap = await createImageBitmap(canvas)
+                frames.push(bitmap)
+                currentTime += interval
+            }
+            resolve(frames)
+        })
+    }
+
+    public static extractMP4FramesNative = async (videoFile: string) => {
         let frames = [] as any
         await new Promise<void>(async (resolve) => {
             let demuxer = new MP4Demuxer(videoFile)
@@ -634,7 +674,7 @@ export default class Functions {
         return Promise.all(frames)
     }
 
-    public static extractWebMFrames = async (videoFile: string, vp9?: boolean) => {
+    public static extractWebMFramesNative = async (videoFile: string, vp9?: boolean) => {
         let frames = [] as any
         await new Promise<void>(async (resolve) => {
             let demuxer = new JsWebm()
@@ -682,14 +722,29 @@ export default class Functions {
             }
         })
         return Promise.all(frames)
-  }
+    }
+
+    public static extractMP4Frames = async (mp4: string) => {
+        if ("VideoDecoder" in window) {
+            return Functions.extractMP4FramesNative(mp4)
+        } else {
+            return Functions.extractFramesVideoSlow(mp4)
+        }
+    }
+
+    public static extractWebMFrames = async (webm: string) => {
+        if ("VideoDecoder" in window) {
+            return Functions.extractWebMFramesNative(webm)
+        } else {
+            return Functions.extractFramesVideoSlow(webm)
+        }
+    }
 
     public static extractAnimatedWebpFramesNative = async (webp: string) => {
         const data = await fetch(webp).then((r) => r.arrayBuffer())
         let index = 0
         // @ts-ignore
         let imageDecoder = new ImageDecoder({data, type: "image/webp", preferAnimation: true})
-
         let result = [] as any
         while (true) {
             try {
@@ -707,35 +762,36 @@ export default class Functions {
     }
 
     public static extractAnimatedWebpFrames = async (webp: string) => {
-        try {
-            const data = await Functions.extractAnimatedWebpFramesNative(webp)
-            return data
-        } catch {
-            // fallback to this
+        if ("ImageDecoder" in window) {
+            return Functions.extractAnimatedWebpFramesNative(webp)
+        } else {
+            const buffer = await fetch(webp).then((r) => r.arrayBuffer())
+            const xMux = WebPXMux("webpxmux.wasm")
+            await xMux.waitRuntime()
+            const data = await xMux.decodeFrames(new Uint8Array(buffer))
+            const webpData = [] as any
+            await new Promise<void>((resolve) => {
+                for (let i = 0; i < data.frames.length; i++) {
+                    const frame = data.frames[i]
+                    const canvas = document.createElement("canvas")
+                    canvas.width = data.width
+                    canvas.height = data.height
+                    const ctx = canvas.getContext("2d")!
+                    const imageData = ctx.createImageData(canvas.width, canvas.height)
+                    for (let i = 0; i < frame.rgba.length; i++) {
+                        const rgba = frame.rgba[i]
+                        imageData.data[i * 4 + 0] = (rgba >> 24) & 0xFF
+                        imageData.data[i * 4 + 1] = (rgba >> 16) & 0xFF
+                        imageData.data[i * 4 + 2] = (rgba >> 8) & 0xFF
+                        imageData.data[i * 4 + 3] = rgba & 0xFF
+                    }
+                    ctx.putImageData(imageData, 0, 0)
+                    webpData.push({delay: frame.duration, frame: canvas})
+                }
+                resolve()
+            })
+            return webpData
         }
-        const buffer = await fetch(webp).then((r) => r.arrayBuffer())
-        const xMux = WebPXMux("webpxmux.wasm")
-        await xMux.waitRuntime()
-        const data = await xMux.decodeFrames(new Uint8Array(buffer))
-        const webpData = [] as any
-        for (let i = 0; i < data.frames.length; i++) {
-            const frame = data.frames[i]
-            const canvas = document.createElement("canvas")
-            canvas.width = data.width
-            canvas.height = data.height
-            const ctx = canvas.getContext("2d")!
-            const imageData = ctx.createImageData(canvas.width, canvas.height)
-            for (let i = 0; i < frame.rgba.length; i++) {
-                const rgba = frame.rgba[i]
-                imageData.data[i * 4 + 0] = (rgba >> 24) & 0xFF
-                imageData.data[i * 4 + 1] = (rgba >> 16) & 0xFF
-                imageData.data[i * 4 + 2] = (rgba >> 8) & 0xFF
-                imageData.data[i * 4 + 3] = rgba & 0xFF
-            }
-            ctx.putImageData(imageData, 0, 0)
-            webpData.push({delay: frame.duration, frame: canvas})
-        }
-        return webpData
     }
 
     public static extractGIFFramesNative = async (gif: string) => {
@@ -743,9 +799,7 @@ export default class Functions {
         let index = 0
         // @ts-ignore
         let imageDecoder = new ImageDecoder({data, type: "image/gif", preferAnimation: true})
-
         let result = [] as any
-
         while (true) {
             try {
                 const decoded = await imageDecoder.decode({frameIndex: index++})
@@ -764,21 +818,19 @@ export default class Functions {
     }
 
     public static extractGIFFrames = async (gif: string) => {
-        try {
-            const data = await Functions.extractGIFFramesNative(gif)
-            return data
-        } catch {
-            // fallback to this
+        if ("ImageDecoder" in window) {
+            return Functions.extractGIFFramesNative(gif)
+        } else {
+            const frames = await gifFrames({url: gif, frames: "all", outputType: "canvas"})
+            const newGIFData = [] as any
+            for (let i = 0; i < frames.length; i++) {
+                newGIFData.push({
+                    frame: frames[i].getImage(),
+                    delay: frames[i].frameInfo.delay * 10
+                })
+            }
+            return newGIFData
         }
-        const frames = await gifFrames({url: gif, frames: "all", outputType: "canvas"})
-        const newGIFData = [] as any
-        for (let i = 0; i < frames.length; i++) {
-            newGIFData.push({
-                frame: frames[i].getImage(),
-                delay: frames[i].frameInfo.delay * 10
-            })
-        }
-        return newGIFData
     }
 
     public static gifSpeed = (data: any[], speed: number) => {
@@ -2030,6 +2082,7 @@ export default class Functions {
     public static isEncrypted = (buffer: Buffer) => {
         const result = Functions.bufferFileType(buffer)
         if (result.length) {
+            if (result[0].typename === "pic") return true
             if (result[0].typename === "mpeg") return true
             return false
         }

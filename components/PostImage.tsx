@@ -311,6 +311,7 @@ const PostImage: React.FunctionComponent<Props> = (props) => {
             } else if (functions.isWebM(props.img)) {
                 frames = await functions.extractWebMFrames(props.img)
             }
+            console.log(frames)
             let canvasFrames = [] as any 
             for (let i = 0; i < frames.length; i++) {
                 const canvas = document.createElement("canvas")
@@ -321,6 +322,7 @@ const PostImage: React.FunctionComponent<Props> = (props) => {
                 ctx.transferFromImageBitmap(img)
                 canvasFrames.push(canvas)
             }
+            console.log(canvasFrames)
             setVideoData(canvasFrames)
             setBackFrame(canvasFrames[0].toDataURL())
             if (backFrameRef.current && videoRef.current) {
@@ -353,12 +355,12 @@ const PostImage: React.FunctionComponent<Props> = (props) => {
             // ffmpeg.exit()
         }
 
-        if (!videoData && videoLoaded && functions.isVideo(props.img) && reverse) {
+        if (!videoData && videoLoaded && functions.isVideo(props.img)) {
             parseVideo().then(() => {
                 if (functions.isMP4(props.img)) reverseAudioStream()
             })
         }
-    }, [videoLoaded, videoData, reverse])
+    }, [videoLoaded, videoData])
 
     useEffect(() => {
         let id = 0

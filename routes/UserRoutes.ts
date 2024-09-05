@@ -490,6 +490,8 @@ const UserRoutes = (app: Express) => {
                 req.session.email = tokenData.email
                 req.session.emailVerified = true
                 await sql.token.deleteEmailToken(tokenData.email)
+                let message = `Welcome to Moepictures!\n\nPlease enjoy your stay~`
+                await serverFunctions.systemMessage(user.username, "Welcome to Moepictures!", message)
                 res.status(200).redirect("/verify-email-success")
             } else {
                 await sql.token.deleteEmailToken(tokenData.email)
