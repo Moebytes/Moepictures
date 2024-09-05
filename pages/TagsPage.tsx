@@ -393,8 +393,8 @@ const TagsPage: React.FunctionComponent = (props) => {
         }
         for (let i = 0; i < visible.length; i++) {
             if (visible[i].fake) continue
-            if (!session.username) if (functions.arrayIncludes(tags[i].tag, matureTags)) continue
-            if (!permissions.isElevated(session)) if (functions.arrayIncludes(visible[i].tag, matureTags)) continue
+            // if (!session.username) if (functions.arrayIncludes(tags[i].tag, matureTags, true)) continue
+            if (!permissions.isElevated(session)) if (functions.arrayIncludes(visible[i].tag, matureTags, true)) continue
             jsx.push(<TagRow key={visible[i].tag} tag={visible[i]} onDelete={updateTags} onEdit={updateTags}/>)
         }
         if (!scroll) {

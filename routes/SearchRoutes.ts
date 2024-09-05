@@ -4,6 +4,7 @@ import functions from "../structures/Functions"
 import sql from "../sql/SQLQuery"
 import phash from "sharp-phash"
 import dist from "sharp-phash/distance"
+import matureTags from "../assets/json/mature-tags.json"
 import rateLimit from "express-rate-limit"
 
 const searchLimiter = rateLimit({
@@ -204,6 +205,9 @@ const SearchRoutes = (app: Express) => {
             if (!functions.validTagType(type)) return res.status(400).send("Invalid type")
             let search = query?.trim().split(/ +/g).filter(Boolean).join("-") ?? ""
             let result = await sql.search.tagSearch(search, sort, type, offset)
+            if (req.session.role !== "admin" && req.session.role !== "mod") {
+                result = result.filter((t: any) => !functions.arrayIncludes(t.tag, matureTags, true))
+            }
             res.status(200).json(result)
         } catch (e) {
             console.log(e)
@@ -251,6 +255,9 @@ const SearchRoutes = (app: Express) => {
             let search = query?.trim().toLowerCase().split(/ +/g).filter(Boolean).join("-") ?? ""
             let result = await sql.search.tagSearch(search, "posts", type).then((r) => r.slice(0, 10))
             if (!result?.[0]) return res.status(200).json([])
+            if (req.session.role !== "admin" && req.session.role !== "mod") {
+                result = result.filter((t: any) => !functions.arrayIncludes(t.tag, matureTags, true))
+            }
             const tags = await sql.tag.tagCounts(result.map((r: any) => r.tag))
             res.status(200).json(tags.slice(0, 10))
         } catch (e) {

@@ -5,7 +5,7 @@
   "main": "dist/server.js",
   "scripts": {
     "start": "npm run clean && webpack && node dist/server.js",
-    "test": "tsc --jsx react test.tsx && node test.js",
+    "test": "tsc test.ts && node test.js",
     "server": "webpack && npm run pm2",
     "pm2": "pm2 stop all && pm2 start dist/server.js",
     "clean": "del-cli ./dist"

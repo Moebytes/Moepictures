@@ -115,9 +115,13 @@ export default class Functions {
         return `${hours}${minutes}:${seconds}`
     }
     
-    public static arrayIncludes = (str: string, arr: string[]) => {
+    public static arrayIncludes = (str: string, arr: string[], base64?: boolean) => {
         for (let i = 0; i < arr.length; i++) {
-            if (arr[i].includes(str)) return true
+            if (base64) {
+                if (str.includes(atob(arr[i]))) return true
+            } else {
+                if (str.includes(arr[i])) return true
+            }
         }
         return false
     }
@@ -263,7 +267,7 @@ export default class Functions {
         if (!username) return "No username."
         const alphaNumeric = Functions.alphaNumeric(username)
         if (!alphaNumeric || /[\n\r\s]+/g.test(username)) return "Usernames cannot contain special characters or spaces."
-        if (profaneWords.includes(username.toLowerCase())) return "Username is profane."
+        if (profaneWords.map((w) => atob(w)).includes(username.toLowerCase())) return "Username is profane."
         if (bannedUsernames.includes(username.toLowerCase())) return "This username isn't allowed to be used."
         return null
     }
@@ -336,7 +340,7 @@ export default class Functions {
         }
         const words = comment.replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g, "").split(/ +/g)
         for (let i = 0; i < words.length; i++) {
-            if (profaneWords.includes(words[i])) return "Comment is profane."
+            if (profaneWords.map((w) => atob(w)).includes(words[i])) return "Comment is profane."
         }
         return null
     }
@@ -345,7 +349,7 @@ export default class Functions {
         if (!reply) return "No reply."
         const words = reply.replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g, "").split(/ +/g)
         for (let i = 0; i < words.length; i++) {
-            if (profaneWords.includes(words[i])) return "Reply is profane."
+            if (profaneWords.map((w) => atob(w)).includes(words[i])) return "Reply is profane."
         }
         return null
     }
@@ -354,7 +358,7 @@ export default class Functions {
         if (!message) return "No message."
         const words = message.replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g, "").split(/ +/g)
         for (let i = 0; i < words.length; i++) {
-            if (profaneWords.includes(words[i].toLowerCase())) return "Message is profane."
+            if (profaneWords.map((w) => atob(w)).includes(words[i].toLowerCase())) return "Message is profane."
         }
         return null
     }
@@ -376,7 +380,7 @@ export default class Functions {
         if (gibberish(Functions.stripLinks(bio))) return "Bio cannot be gibberish."
         const words = bio.replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g, "").split(/ +/g)
         for (let i = 0; i < words.length; i++) {
-            if (profaneWords.includes(words[i].toLowerCase())) return "Bio is profane."
+            if (profaneWords.map((w) => atob(w)).includes(words[i].toLowerCase())) return "Bio is profane."
         }
         return null
     }

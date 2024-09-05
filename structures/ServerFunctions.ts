@@ -1,6 +1,5 @@
 import nodemailer from "nodemailer"
 import {Request} from "express"
-import handlebars from "handlebars"
 import path from "path"
 import fs from "fs"
 import crypto from "crypto"

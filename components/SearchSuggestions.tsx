@@ -102,8 +102,8 @@ const SearchSuggestions: React.FunctionComponent<Props> = (props) => {
     const generateSuggestionsJSX = () => {
         let jsx = [] as any
         for (let i = 0; i < suggestions.length; i++) {
-            if (!session.username) if (functions.arrayIncludes(suggestions[i].tag, matureTags)) continue
-            if (!permissions.isElevated(session)) if (functions.arrayIncludes(suggestions[i].tag, matureTags)) continue
+            if (!session.username) if (functions.arrayIncludes(suggestions[i].tag, matureTags, true)) continue
+            if (!permissions.isElevated(session)) if (functions.arrayIncludes(suggestions[i].tag, matureTags, true)) continue
             if (!suggestions[i]) break
             const tagClick = () => {
                 if (props.click) return props.click(suggestions[i].tag)
