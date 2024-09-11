@@ -144,6 +144,7 @@ for (let i = 0; i < folders.length; i++) {
         !req.url.endsWith(".webp") && !req.url.endsWith(".gif")) return next()
       }
       res.setHeader("Content-Type", mimeType ?? "")
+      res.setHeader("Cache-Control", "public, max-age=2592000")
       const key = decodeURIComponent(req.path.slice(1))
       if (req.session.role !== "admin" && req.session.role !== "mod") {
         const postID = key.match(/(?<=\/)\d+(?=\/)/)?.[0]
@@ -194,6 +195,7 @@ for (let i = 0; i < folders.length; i++) {
     try {
       if (req.session.role !== "admin" && req.session.role !== "mod") return res.status(403).end()
       res.setHeader("Content-Type", mime.getType(req.path) ?? "")
+      res.setHeader("Cache-Control", "public, max-age=2592000")
       const key = decodeURIComponent(req.path.replace("/unverified/", ""))
       const body = await serverFunctions.getUnverifiedFile(key)
       const contentLength = body.length
@@ -217,10 +219,12 @@ for (let i = 0; i < folders.length; i++) {
       res.status(400).end()
     }
   })
+
   app.get(`/thumbnail/:size/${folders[i]}/*`, async (req: Request, res: Response, next: NextFunction) => {
     try {
       const mimeType = mime.getType(req.path)
       res.setHeader("Content-Type", mimeType ?? "")
+      res.setHeader("Cache-Control", "public, max-age=2592000")
       const key = decodeURIComponent(req.path.replace(`/thumbnail/${req.params.size}/`, ""))
       if (req.session.role !== "admin" && req.session.role !== "mod") {
         const postID = key.match(/(?<=\/)\d+(?=\/)/)?.[0]
@@ -229,16 +233,18 @@ for (let i = 0; i < folders.length; i++) {
           if (post.restrict === "explicit") return res.status(403).send("No permission")
         }
       }
-      let body = await serverFunctions.getFile(key)
+      let body = await serverFunctions.getFile(key, true)
       let contentLength = body.length
       if (!contentLength) return res.status(200).send(body)
       if (mimeType?.includes("image")) {
         const metadata = await sharp(body).metadata()
-        const ratio = metadata.height! / Number(req.params.size)
-        body = await sharp(body, {animated: false, limitInputPixels: false})
-        .resize(Math.round(metadata.width! / ratio), Number(req.params.size), {fit: "fill", kernel: "cubic"})
-        .toBuffer()
-        contentLength = body.length
+        if (metadata.pages === 1) {
+          const ratio = metadata.height! / Number(req.params.size)
+          body = await sharp(body, {animated: false, limitInputPixels: false})
+          .resize(Math.round(metadata.width! / ratio), Number(req.params.size), {fit: "fill", kernel: "cubic"})
+          .toBuffer()
+          contentLength = body.length
+        }
       }
       if (req.headers.range) {
         const parts = req.headers.range.replace(/bytes=/, "").split("-")
@@ -270,6 +276,7 @@ for (let i = 0; i < folders.length; i++) {
       if (req.session.role !== "admin" && req.session.role !== "mod") return res.status(403).end()
       const mimeType = mime.getType(req.path)
       res.setHeader("Content-Type", mimeType ?? "")
+      res.setHeader("Cache-Control", "public, max-age=2592000")
       const key = decodeURIComponent(req.path.replace(`/thumbnail/${req.params.size}/`, "").replace("unverified/", ""))
       let body = await serverFunctions.getUnverifiedFile(key)
       let contentLength = body.length

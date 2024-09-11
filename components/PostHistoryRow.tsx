@@ -18,6 +18,7 @@ import path from "path"
 interface Props {
     postHistory: any
     historyIndex: number
+    previousHistory: any
     currentHistory: any
     onDelete?: () => void
     onEdit?: () => void
@@ -326,6 +327,103 @@ const PostHistoryRow: React.FunctionComponent<Props> = (props) => {
         }
     }
 
+    const calculateDiff = (prevTags: string[], newTags: string[]) => {
+        const addedTags = newTags.filter((tag: string) => !prevTags.includes(tag)).map((tag: string) => `+${tag}`)
+        const removedTags = prevTags.filter((tag: string) => !newTags.includes(tag)).map((tag: string) =>`-${tag}`)
+        const addedTagsJSX = addedTags.map((tag: string) => <span className="tag-add">{tag}</span>)
+        const removedTagsJSX = removedTags.map((tag: string) => <span className="tag-remove">{tag}</span>)
+        if (![...addedTags, ...removedTags].length) return null
+        return [...addedTagsJSX, ...removedTagsJSX]
+    }
+
+    const artistsDiff = () => {
+        if (!props.previousHistory) return props.postHistory.artists.join(" ")
+        return calculateDiff(props.previousHistory.artists, props.postHistory.artists)
+    }
+
+    const charactersDiff = () => {
+        if (!props.previousHistory) return props.postHistory.characters.join(" ")
+        return calculateDiff(props.previousHistory.characters, props.postHistory.characters)
+    }
+
+    const seriesDiff = () => {
+        if (!props.previousHistory) return props.postHistory.series.join(" ")
+        return calculateDiff(props.previousHistory.series, props.postHistory.series)
+    }
+
+    const tagsDiff = () => {
+        if (!props.previousHistory) return props.postHistory.tags.join(" ")
+        return calculateDiff(props.previousHistory.tags, props.postHistory.tags)
+    }
+
+    const diffJSX = () => {
+        let jsx = [] as React.ReactElement[]
+        if (!props.previousHistory || (props.previousHistory?.images.length !== props.postHistory.images.length)) {
+            if (props.postHistory.images.length > 1) {
+                jsx.push(<span className="posthistoryrow-text"><span className="posthistoryrow-label-text">Images:</span> {props.postHistory.images.length}</span>)
+            }
+        }
+        if (!props.previousHistory || (props.previousHistory?.type !== props.postHistory.type)) {
+            jsx.push(<span className="posthistoryrow-text"><span className="posthistoryrow-label-text">Type:</span> {functions.toProperCase(props.postHistory.type)}</span>)
+        }
+        if (!props.previousHistory || (props.previousHistory?.restrict !== props.postHistory.restrict)) {
+            jsx.push(<span className="posthistoryrow-text"><span className="posthistoryrow-label-text">Restrict:</span> {functions.toProperCase(props.postHistory.restrict)}</span>)
+        }
+        if (!props.previousHistory || (props.previousHistory?.style !== props.postHistory.style)) {
+            jsx.push(<span className="posthistoryrow-text"><span className="posthistoryrow-label-text">Style:</span> {functions.toProperCase(props.postHistory.style)}</span>)
+        }
+        if (!props.previousHistory || (props.previousHistory?.artists !== props.postHistory.artists)) {
+            if (artistsDiff()) {
+                jsx.push(<span className="posthistoryrow-text"><span className="posthistoryrow-label-text">Artists:</span> {artistsDiff()}</span>)
+            }
+        }
+        if (!props.previousHistory || (props.previousHistory?.characters !== props.postHistory.characters)) {
+            if (charactersDiff()) {
+                jsx.push(<span className="posthistoryrow-text"><span className="posthistoryrow-label-text">Characters:</span> {charactersDiff()}</span>)
+            }
+        }
+        if (!props.previousHistory || (props.previousHistory?.series !== props.postHistory.series)) {
+            if (seriesDiff()) {
+                jsx.push(<span className="posthistoryrow-text"><span className="posthistoryrow-label-text">Series:</span> {seriesDiff()}</span>)
+            }
+        }
+        if (!props.previousHistory || (props.previousHistory?.tags !== props.postHistory.tags)) {
+            if (tagsDiff()) {
+                jsx.push(<span className="posthistoryrow-text"><span className="posthistoryrow-label-text">Tags:</span> {tagsDiff()}</span>)
+            }
+        }
+        if (!props.previousHistory || (props.previousHistory?.title !== props.postHistory.title)) {
+            jsx.push(<span className="posthistoryrow-text"><span className="posthistoryrow-label-text">Title:</span> {props.postHistory.title || "None"}</span>)
+        }
+        if (!props.previousHistory || (props.previousHistory?.translatedTitle !== props.postHistory.translatedTitle)) {
+            if (props.postHistory.translatedTitle) {
+                jsx.push(<span className="posthistoryrow-text"><span className="posthistoryrow-label-text">Translated:</span> {props.postHistory.translatedTitle}</span>)
+            }
+        }
+        if (!props.previousHistory || (props.previousHistory?.drawn !== props.postHistory.drawn)) {
+            jsx.push(<span className="posthistoryrow-text"><span className="posthistoryrow-label-text">Drawn:</span> {props.postHistory.drawn ? functions.formatDate(new Date(props.postHistory.drawn)) : "Unknown"}</span>)
+        }
+        if (!props.previousHistory || (props.previousHistory?.link !== props.postHistory.link)) {
+            jsx.push(<span className="posthistoryrow-text"><span className="posthistoryrow-label-text">Link:</span> <span className="posthistoryrow-label-link" onClick={() => window.open(props.postHistory.link, "_blank")}>{getDomain()}</span></span>)
+        }
+        if (!props.previousHistory || (props.previousHistory?.commentary !== props.postHistory.commentary)) {
+            if (props.postHistory.commentary) {
+                jsx.push(<span className="posthistoryrow-text"><span className="posthistoryrow-label-text">Commentary:</span> {props.postHistory.commentary}</span>)
+            }
+        }
+        if (!props.previousHistory || (props.previousHistory?.translatedCommentary !== props.postHistory.translatedCommentary)) {
+            if (props.postHistory.translatedCommentary) {
+                jsx.push(<span className="posthistoryrow-text"><span className="posthistoryrow-label-text">Translated:</span> {props.postHistory.translatedCommentary}</span>)
+            }
+        }
+        if (!props.previousHistory || (props.previousHistory?.reason !== props.postHistory.reason)) {
+            if (props.postHistory.reason) {
+                jsx.push(<span className="posthistoryrow-text"><span className="posthistoryrow-label-text">Reason:</span> {props.postHistory.reason}</span>)
+            }
+        }
+        return jsx
+    }
+
     return (
         <div className="posthistoryrow">
             {session.username ? postHistoryOptions() : null}
@@ -338,21 +436,7 @@ const PostHistoryRow: React.FunctionComponent<Props> = (props) => {
                 <div className="posthistoryrow-container">
                     <div className="posthistoryrow-user-container">
                         {dateTextJSX()}
-                        {props.postHistory.images.length > 1 ? <span className="posthistoryrow-text"><span className="posthistoryrow-label-text">Images:</span> {props.postHistory.images.length}</span> : null}
-                        <span className="posthistoryrow-text"><span className="posthistoryrow-label-text">Type:</span> {functions.toProperCase(props.postHistory.type)}</span>
-                        <span className="posthistoryrow-text"><span className="posthistoryrow-label-text">Restrict:</span> {functions.toProperCase(props.postHistory.restrict)}</span>
-                        <span className="posthistoryrow-text"><span className="posthistoryrow-label-text">Style:</span> {functions.toProperCase(props.postHistory.style)}</span>
-                        <span className="posthistoryrow-text"><span className="posthistoryrow-label-text">Artists:</span> {props.postHistory.artists.join(" ")}</span>
-                        <span className="posthistoryrow-text"><span className="posthistoryrow-label-text">Characters:</span> {props.postHistory.characters.join(" ")}</span>
-                        <span className="posthistoryrow-text"><span className="posthistoryrow-label-text">Series:</span> {props.postHistory.series.join(" ")}</span>
-                        <span className="posthistoryrow-text"><span className="posthistoryrow-label-text">Tags:</span> {props.postHistory.tags.join(" ")}</span>
-                        <span className="posthistoryrow-text"><span className="posthistoryrow-label-text">Title:</span>{props.postHistory.title || "None"}</span>
-                        {props.postHistory.translatedTitle ? <span className="posthistoryrow-text"><span className="posthistoryrow-label-text">Translated:</span> {props.postHistory.translatedTitle}</span> : null}
-                        <span className="posthistoryrow-text"><span className="posthistoryrow-label-text">Drawn:</span> {props.postHistory.drawn ? functions.formatDate(new Date(props.postHistory.drawn)) : "Unknown"}</span>
-                        <span className="posthistoryrow-text"><span className="posthistoryrow-label-text">Link:</span> <span className="posthistoryrow-label-link" onClick={() => window.open(props.postHistory.link, "_blank")}>{getDomain()}</span></span>
-                        {props.postHistory.commentary ? <span className="posthistoryrow-text"><span className="posthistoryrow-label-text">Commentary:</span> {props.postHistory.commentary}</span> : null}
-                        {props.postHistory.translatedCommentary ? <span className="posthistoryrow-text"><span className="posthistoryrow-label-text">Translated:</span> {props.postHistory.translatedCommentary}</span> : null}
-                        {props.postHistory.reason ? <span className="posthistoryrow-text"><span className="posthistoryrow-label-text">Reason:</span> {props.postHistory.reason}</span> : null}
+                        {diffJSX()}
                     </div>
                 </div>
             </div>

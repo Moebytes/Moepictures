@@ -135,7 +135,7 @@ const SearchRoutes = (app: Express) => {
                     const imgHash = images[i].hash
                     if (imgHash === hash) postIDs.add(images[i].postID)
                 } else {
-                    if (dist(images[i].hash, hash) < 5) postIDs.add(images[i].postID)
+                    if (dist(images[i].hash, hash) < 10) postIDs.add(images[i].postID)
                 }
             }
             let result = await sql.search.posts(Array.from(postIDs))

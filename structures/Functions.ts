@@ -728,18 +728,20 @@ export default class Functions {
         return Promise.all(frames)
     }
 
-    public static extractMP4Frames = async (mp4: string) => {
+    public static extractMP4Frames = async (mp4: string, nativeOnly?: boolean) => {
         if ("VideoDecoder" in window) {
             return Functions.extractMP4FramesNative(mp4)
         } else {
+            if (nativeOnly) return null
             return Functions.extractFramesVideoSlow(mp4)
         }
     }
 
-    public static extractWebMFrames = async (webm: string) => {
+    public static extractWebMFrames = async (webm: string, nativeOnly?: boolean) => {
         if ("VideoDecoder" in window) {
             return Functions.extractWebMFramesNative(webm)
         } else {
+            if (nativeOnly) return null
             return Functions.extractFramesVideoSlow(webm)
         }
     }
@@ -765,10 +767,11 @@ export default class Functions {
         return result
     }
 
-    public static extractAnimatedWebpFrames = async (webp: string) => {
+    public static extractAnimatedWebpFrames = async (webp: string, nativeOnly?: boolean) => {
         if ("ImageDecoder" in window) {
             return Functions.extractAnimatedWebpFramesNative(webp)
         } else {
+            if (nativeOnly) return null
             const buffer = await fetch(webp).then((r) => r.arrayBuffer())
             const xMux = WebPXMux("webpxmux.wasm")
             await xMux.waitRuntime()
@@ -821,10 +824,11 @@ export default class Functions {
         return result
     }
 
-    public static extractGIFFrames = async (gif: string) => {
+    public static extractGIFFrames = async (gif: string, nativeOnly?: boolean) => {
         if ("ImageDecoder" in window) {
             return Functions.extractGIFFramesNative(gif)
         } else {
+            if (nativeOnly) return null
             const frames = await gifFrames({url: gif, frames: "all", outputType: "canvas"})
             const newGIFData = [] as any
             for (let i = 0; i < frames.length; i++) {
@@ -1030,7 +1034,7 @@ export default class Functions {
 
     public static getThumbnailLink = (folder: string, postID: number, order: number, filename: string, sizeType: string) => {
         if (!filename) return ""
-        if (folder !== "image" && folder !== "comic") return Functions.getImageLink(folder, postID, order, filename)
+        if (folder !== "image" && folder !== "comic" && folder !== "animation") return Functions.getImageLink(folder, postID, order, filename)
         let size = 265
         if (sizeType === "tiny") size = 350
         if (sizeType === "small") size = 400
@@ -1758,6 +1762,7 @@ export default class Functions {
             "neckerchief": "necktie",
             "hand-on-own": "hand-on",
             "hand-in-own": "hand-on",
+            "transparent": "transparency",
             "x-hair-ornament": "hair-ornament",
             "dodoco-(genshin-impact)": "dodoco",
             "gabriel-tenma-white": "gabriel-(gabriel-dropout)",
@@ -2074,16 +2079,16 @@ export default class Functions {
         return scaleFactor
     }
 
-    public static bufferFileType = (buffer: Uint8Array | Buffer) => {
+    public static bufferFileType = (buffer: Uint8Array | ArrayBuffer | Buffer) => {
         buffer = Buffer.from(buffer)
         const majorBrand = buffer.toString("utf8", 8, 12)
         if (majorBrand === "avif" || majorBrand === "avis") {
             return [{typename: "avif", mime: "image/avif", extension: "avif"}]
         }
-        return fileType(buffer)
+        return fileType(new Uint8Array(buffer))
     }
 
-    public static isEncrypted = (buffer: Buffer) => {
+    public static isEncrypted = (buffer: ArrayBuffer | Buffer) => {
         const result = Functions.bufferFileType(buffer)
         if (result.length) {
             if (result[0].typename === "pic") return true

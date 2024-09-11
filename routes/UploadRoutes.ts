@@ -553,6 +553,9 @@ const CreateRoutes = (app: Express) => {
         characters = characters.map((c: any) => c.tag)
         series = series.map((s: any) => s.tag)
 
+
+        const updated = await sql.post.post(postID)
+
         const postHistory = await sql.history.postHistory(postID)
         const nextKey = await serverFunctions.getNextKey("post", String(postID))
         if (!postHistory.length || (imgChanged && nextKey === 1)) {
@@ -586,12 +589,12 @@ const CreateRoutes = (app: Express) => {
                   await serverFunctions.uploadFile(newImagePath, buffer)
                   newImages.push(newImagePath)
                 } else {
-                  newImages.push(functions.getImagePath(post.images[i].type, postID, post.images[i].order, post.images[i].filename))
+                  newImages.push(functions.getImagePath(updated.images[i].type, postID, updated.images[i].order, updated.images[i].filename))
                 }
             }
-            await sql.history.insertPostHistory(req.session.username, postID, newImages, post.uploader, post.updater, post.uploadDate, post.updatedDate,
-            post.type, post.restrict, post.style, post.thirdParty, post.title, post.translatedTitle, post.drawn, post.artist,
-            post.link, post.commentary, post.translatedCommentary, post.bookmarks, post.mirrors, artists, characters, series, tags, reason)
+            await sql.history.insertPostHistory(req.session.username, postID, newImages, updated.uploader, updated.updater, updated.uploadDate, updated.updatedDate,
+            updated.type, updated.restrict, updated.style, updated.thirdParty, updated.title, updated.translatedTitle, updated.drawn, updated.artist,
+            updated.link, updated.commentary, updated.translatedCommentary, updated.bookmarks, updated.mirrors, artists, characters, series, tags, reason)
         } else {
             let newImages = [] as any
             for (let i = 0; i < images.length; i++) {
@@ -601,12 +604,12 @@ const CreateRoutes = (app: Express) => {
                 await serverFunctions.uploadFile(newImagePath, buffer)
                 newImages.push(newImagePath)
               } else {
-                newImages.push(functions.getImagePath(post.images[i].type, postID, post.images[i].order, post.images[i].filename))
+                newImages.push(functions.getImagePath(updated.images[i].type, postID, updated.images[i].order, updated.images[i].filename))
               }
             }
-            await sql.history.insertPostHistory(req.session.username, postID, newImages, post.uploader, post.updater, post.uploadDate, post.updatedDate,
-            post.type, post.restrict, post.style, post.thirdParty, post.title, post.translatedTitle, post.drawn, post.artist,
-            post.link, post.commentary, post.translatedCommentary, post.bookmarks, post.mirrors, artists, characters, series, tags, reason)
+            await sql.history.insertPostHistory(req.session.username, postID, newImages, updated.uploader, updated.updater, updated.uploadDate, updated.updatedDate,
+            updated.type, updated.restrict, updated.style, updated.thirdParty, updated.title, updated.translatedTitle, updated.drawn, updated.artist,
+            updated.link, updated.commentary, updated.translatedCommentary, updated.bookmarks, updated.mirrors, artists, characters, series, tags, reason)
         }
         res.status(200).send("Success")
       } catch (e) {
@@ -1268,6 +1271,7 @@ const CreateRoutes = (app: Express) => {
         }
 
         if (unverified.originalID) {
+          const updated = await sql.post.post(unverified.originalID)
           const postHistory = await sql.history.postHistory(newPostID)
           const nextKey = await serverFunctions.getNextKey("post", String(newPostID))
           if (!postHistory.length || (imgChanged && nextKey === 1)) {
@@ -1302,12 +1306,12 @@ const CreateRoutes = (app: Express) => {
                     await serverFunctions.uploadFile(newImagePath, buffer)
                     newImages.push(newImagePath)
                   } else {
-                    newImages.push(functions.getImagePath(post.images[i].type, newPostID, post.images[i].order, post.images[i].filename))
+                    newImages.push(functions.getImagePath(updated.images[i].type, newPostID, updated.images[i].order, updated.images[i].filename))
                   }
               }
-              await sql.history.insertPostHistory(req.session.username, newPostID, newImages, post.uploader, post.updater, post.uploadDate, post.updatedDate,
-              post.type, post.restrict, post.style, post.thirdParty, post.title, post.translatedTitle, post.drawn, post.artist,
-              post.link, post.commentary, post.translatedCommentary, post.bookmarks, post.mirrors, artists, characters, series, tags, reason)
+              await sql.history.insertPostHistory(req.session.username, newPostID, newImages, updated.uploader, updated.updater, updated.uploadDate, updated.updatedDate,
+              updated.type, updated.restrict, updated.style, updated.thirdParty, updated.title, updated.translatedTitle, updated.drawn, updated.artist,
+              updated.link, updated.commentary, updated.translatedCommentary, updated.bookmarks, updated.mirrors, artists, characters, series, tags, reason)
           } else {
               let newImages = [] as any
               for (let i = 0; i < unverified.images.length; i++) {
@@ -1318,12 +1322,12 @@ const CreateRoutes = (app: Express) => {
                   await serverFunctions.uploadFile(newImagePath, buffer)
                   newImages.push(newImagePath)
                 } else {
-                  newImages.push(functions.getImagePath(post.images[i].type, newPostID, post.images[i].order, post.images[i].filename))
+                  newImages.push(functions.getImagePath(updated.images[i].type, newPostID, updated.images[i].order, updated.images[i].filename))
                 }
               }
-              await sql.history.insertPostHistory(req.session.username, postID, newImages, post.uploader, post.updater, post.uploadDate, post.updatedDate,
-              post.type, post.restrict, post.style, post.thirdParty, post.title, post.translatedTitle, post.drawn, post.artist,
-              post.link, post.commentary, post.translatedCommentary, post.bookmarks, post.mirrors, artists, characters, series, tags, reason)
+              await sql.history.insertPostHistory(req.session.username, postID, newImages, updated.uploader, updated.updater, updated.uploadDate, updated.updatedDate,
+              updated.type, updated.restrict, updated.style, updated.thirdParty, updated.title, updated.translatedTitle, updated.drawn, updated.artist,
+              updated.link, updated.commentary, updated.translatedCommentary, updated.bookmarks, updated.mirrors, artists, characters, series, tags, reason)
           }
         }
 

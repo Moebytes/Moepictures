@@ -175,6 +175,7 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
     }, [post])
 
     useEffect(() => {
+        if (!session.cookie) return
         const updateArtistPosts = async () => {
             if (tagCategories?.artists?.[0]?.tag) {
                 try {

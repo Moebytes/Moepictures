@@ -4,7 +4,7 @@
     "description": "Moepictures is a kawaii/moe anime image board. Find the most moe art, comics, animations, music, and 3d models!",
     "icons": [
       {
-        "src": "assets/purple/favicon.png",
+        "src": "assets/icons/favicon.png",
         "sizes": "128x128",
         "type": "image/gif"
       }

@@ -208,7 +208,7 @@ const TitleBar: React.FunctionComponent<Props> = (props) => {
                             <span className="titlebar-text-a">s</span>
                     </div>
                     <div className="titlebar-image-container">
-                        <img className="titlebar-img" src={favicon} style={{filter: getFilter()}}/>
+                        <img className="titlebar-img" src={favicon}/>
                     </div>
                 </span>
             </div>

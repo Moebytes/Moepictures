@@ -116,9 +116,11 @@ export default class ServerFunctions {
         }
     }
 
-    public static getFile = async (file: string) => {
+    public static getFile = async (file: string, original?: boolean) => {
         if (functions.isLocalHost()) {
             if (!fs.existsSync(`${local}/${decodeURIComponent(file)}`)) return ServerFunctions.getFirstHistoryFile(file)
+            const originalFile = `${local}/${decodeURIComponent(`${file.split("/")[0]}-original/${file.split("/")[1]}`)}`
+            if (original && fs.existsSync(originalFile)) return fs.readFileSync(originalFile)
             return fs.readFileSync(`${local}/${decodeURIComponent(file)}`)
         }
         return s3.getObject({Key: decodeURIComponent(file), Bucket: "moepictures"}).promise().then((r) => r.Body) as unknown as Buffer
