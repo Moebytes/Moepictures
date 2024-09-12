@@ -245,7 +245,7 @@ const TranslationEditor: React.FunctionComponent<Props> = (props) => {
     let maxHeight = 1000
 
     if (imageExpand) {
-        maxHeight = 2000
+        maxHeight = 1797
     }
 
     let scale = imageWidth > imageHeight ? maxWidth / imageWidth : maxHeight / imageHeight

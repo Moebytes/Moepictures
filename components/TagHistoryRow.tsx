@@ -181,8 +181,9 @@ const TagHistoryRow: React.FunctionComponent<Props> = (props) => {
     }
 
     const dateTextJSX = () => {
-        const firstHistory = props.historyIndex === Number(props.tagHistory.historyCount)
-        const targetDate = firstHistory ? props.tagHistory.createDate : props.tagHistory.date
+        let firstHistory = props.historyIndex === Number(props.tagHistory.historyCount)
+        let targetDate = firstHistory ? props.tagHistory.createDate : props.tagHistory.date
+        if (!targetDate) targetDate = props.tagHistory.date
         const editText = firstHistory ? "Uploaded" : "Edited"
         if (userRole === "admin") {
             return (

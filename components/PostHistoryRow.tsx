@@ -38,6 +38,8 @@ const PostHistoryRow: React.FunctionComponent<Props> = (props) => {
     const [currentImg, setCurrentImg] = useState("")
     const [imageIndex, setImageIndex] = useState(0)
     const [userRole, setUserRole] = useState("")
+    const [hasImageUpdate, setHasImageUpdate] = useState(false)
+    const [hasAnyUpdate, setHasAnyUpdate] = useState(true)
     const ref = useRef(null) as any
     const postID = props.postHistory.postID
 
@@ -327,6 +329,49 @@ const PostHistoryRow: React.FunctionComponent<Props> = (props) => {
         }
     }
 
+    const calculateImageDiff = async () => {
+        if (!props.previousHistory) return false
+        if (props.postHistory.images.length !== props.previousHistory.images.length) return true
+        for (let i = 0; i < props.postHistory.images.length; i++) {
+            let filename = props.postHistory.images[i]?.filename ? props.postHistory.images[i].filename : props.postHistory.images[i]
+            const imgLink = functions.getImageLink(props.postHistory.images[i]?.type, props.postHistory.postID, i+1, filename)
+            let previousFilename = props.previousHistory.images[i]?.filename ? props.previousHistory.images[i].filename : props.previousHistory.images[i]
+            const previousLink = functions.getImageLink(props.previousHistory.images[i]?.type, props.previousHistory.postID, i+1, previousFilename)
+
+            let img = imgLink
+            if (functions.isImage(img)) {
+                img = await cryptoFunctions.decryptedLink(img)
+            } else if (functions.isModel(img)) {
+                img = await functions.modelImage(img)
+            } else if (functions.isAudio(img)) {
+                img = await functions.songCover(img)
+            }
+            let previous = previousLink
+            if (functions.isImage(previous)) {
+                previous = await cryptoFunctions.decryptedLink(previous)
+            } else if (functions.isModel(img)) {
+                previous = await functions.modelImage(previous)
+            } else if (functions.isAudio(img)) {
+                previous = await functions.songCover(previous)
+            }
+            const imgBuffer = await axios.get(img, {responseType: "arraybuffer", withCredentials: true}).then((r) => r.data)
+            const previousBuffer = await axios.get(previous, {responseType: "arraybuffer", withCredentials: true}).then((r) => r.data)
+
+            const imgMD5 = crypto.createHash("md5").update(Buffer.from(imgBuffer)).digest("hex")
+            const previousMD5 = crypto.createHash("md5").update(Buffer.from(previousBuffer)).digest("hex")
+
+            if (imgMD5 !== previousMD5) return true
+        }
+        return false
+    }
+
+    useEffect(() => {
+        calculateImageDiff().then((answer) => {
+            setHasImageUpdate(answer)
+            if (!answer && !diffJSX().length && !props.postHistory.reason) setHasAnyUpdate(false)
+        })
+    }, [props.previousHistory, props.postHistory])
+
     const calculateDiff = (prevTags: string[], newTags: string[]) => {
         const addedTags = newTags.filter((tag: string) => !prevTags.includes(tag)).map((tag: string) => `+${tag}`)
         const removedTags = prevTags.filter((tag: string) => !newTags.includes(tag)).map((tag: string) =>`-${tag}`)
@@ -352,8 +397,12 @@ const PostHistoryRow: React.FunctionComponent<Props> = (props) => {
     }
 
     const tagsDiff = () => {
-        if (!props.previousHistory) return props.postHistory.tags.join(" ")
-        return calculateDiff(props.previousHistory.tags, props.postHistory.tags)
+        const removeArr = [...props.postHistory.artists, ...props.postHistory.characters, ...props.postHistory.series]
+        const filteredTags = props.postHistory.tags.filter((tag: string) => !removeArr.includes(tag))
+        if (!props.previousHistory) return filteredTags.join(" ")
+        const removeArr2 = [...props.previousHistory.artists, ...props.previousHistory.characters, ...props.previousHistory.series]
+        const filteredPast = props.previousHistory.tags.filter((tag: string) => !removeArr2.includes(tag))
+        return calculateDiff(filteredPast, filteredTags)
     }
 
     const diffJSX = () => {
@@ -416,13 +465,10 @@ const PostHistoryRow: React.FunctionComponent<Props> = (props) => {
                 jsx.push(<span className="posthistoryrow-text"><span className="posthistoryrow-label-text">Translated:</span> {props.postHistory.translatedCommentary}</span>)
             }
         }
-        if (!props.previousHistory || (props.previousHistory?.reason !== props.postHistory.reason)) {
-            if (props.postHistory.reason) {
-                jsx.push(<span className="posthistoryrow-text"><span className="posthistoryrow-label-text">Reason:</span> {props.postHistory.reason}</span>)
-            }
-        }
         return jsx
     }
+
+    if (!hasAnyUpdate) return null
 
     return (
         <div className="posthistoryrow">
@@ -436,7 +482,9 @@ const PostHistoryRow: React.FunctionComponent<Props> = (props) => {
                 <div className="posthistoryrow-container">
                     <div className="posthistoryrow-user-container">
                         {dateTextJSX()}
+                        {hasImageUpdate ? <span className="posthistoryrow-text-strong">[Image Updated]</span> : null}
                         {diffJSX()}
+                        {props.postHistory.reason ? <span className="posthistoryrow-text"><span className="posthistoryrow-label-text">Reason:</span> {props.postHistory.reason}</span> : null}
                     </div>
                 </div>
             </div>

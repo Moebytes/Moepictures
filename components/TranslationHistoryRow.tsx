@@ -13,6 +13,7 @@ import "./styles/translationhistoryrow.less"
 import axios from "axios"
 
 interface Props {
+    previousHistory: any
     translationHistory: any
     onDelete?: () => void
     onEdit?: () => void
@@ -160,19 +161,42 @@ const TranslationHistoryRow: React.FunctionComponent<Props> = (props) => {
         return <span className="translationhistoryrow-user-text" onClick={userClick} onAuxClick={userClick}>{targetText} {functions.timeAgo(targetDate)} by {functions.toProperCase(targetUser)}</span>
     }
 
+    const diffText = () => {
+        if (!props.previousHistory) {
+            if (props.translationHistory.data[0].transcript === "No data") return "No data"
+            return props.translationHistory.data.map((item: any) => `${item.transcript} -> ${item.translation}`)
+        }
+        const prevData = props.previousHistory.data
+        const newData = props.translationHistory.data
+        const prevMap = new Map(prevData.map((item: any) => [item.transcript, item.translation]))
+        const newMap = new Map(newData.map((item: any) => [item.transcript, item.translation]))
+
+        const addedEntries = newData
+            .filter((item: any) => !prevMap.has(item.transcript))
+            .map((item: any) => `+${item.transcript} -> ${item.translation}`)
+
+        const removedEntries = prevData
+            .filter((item: any) => !newMap.has(item.transcript))
+            .map((item: any) => `-${item.transcript} -> ${item.translation}`)
+
+        if (![...addedEntries, ...removedEntries].length) return null
+        
+        const addedJSX = addedEntries.map((i: string) => <span className="tag-add">{i}</span>)
+        const removedJSX = removedEntries.map((i: string) => <span className="tag-remove">{i}</span>)
+
+        return [...addedJSX, ...removedJSX]
+    }
+
     const translationJSX = () => {
         let jsx = [] as any
-        for (let i = 0; i < props.translationHistory.data.length; i++) {
-            const item = props.translationHistory.data[i]
-            if (item.transcript === "No data") {
-                jsx.push(<span className="translationhistoryrow-tag-text">No data</span>)
-            } else {
-                jsx.push(<span className="translationhistoryrow-tag-text">{`${item.transcript} -> ${item.translation}`}</span>)
-            }
+        const diffs = diffText()
+        for (let i = 0; i < diffs.length; i++) {
+            jsx.push(<span className="translationhistoryrow-tag-text">{diffs[i]}</span>)
         }
         return jsx
     }
 
+    if (!diffText()) return null
 
     return (
         <div className="translationhistoryrow">

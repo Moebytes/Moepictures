@@ -127,8 +127,19 @@ const TranslationHistoryPage: React.FunctionComponent<Props> = (props) => {
 
     const generateRevisionsJSX = () => {
         const jsx = [] as any
+        let current = visibleRevisions[0]
+        let currentIndex = 0
         for (let i = 0; i < visibleRevisions.length; i++) {
-            jsx.push(<TranslationHistoryRow translationHistory={visibleRevisions[i]} onDelete={updateHistory} onEdit={updateHistory} current={i === 0}/>)
+            let previous = visibleRevisions[i + 1]
+            if (current.postID !== visibleRevisions[i].postID &&
+                current.order !== visibleRevisions[i].order) {
+                current = visibleRevisions[i]
+                currentIndex = i
+            }
+            if (previous?.postID !== current.postID &&
+                previous?.order !== current.order) previous = null
+            jsx.push(<TranslationHistoryRow previousHistory={previous} translationHistory={visibleRevisions[i]} 
+                onDelete={updateHistory} onEdit={updateHistory} current={i === currentIndex}/>)
         }
         return jsx
     }

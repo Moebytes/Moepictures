@@ -1599,6 +1599,7 @@ export default class Functions {
     }
 
     public static timeAgo = (input: string) => {
+        if (!input) return "?"
         const date = new Date(input.replace(/ +/g, "T"))
         const seconds = Math.floor(((new Date().getTime() / 1000) - (date.getTime() / 1000)))
         const years = seconds / 31536000
