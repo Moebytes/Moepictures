@@ -311,7 +311,6 @@ const PostImage: React.FunctionComponent<Props> = (props) => {
             } else if (functions.isWebM(props.img)) {
                 frames = await functions.extractWebMFrames(props.img)
             }
-            console.log(frames)
             let canvasFrames = [] as any 
             for (let i = 0; i < frames.length; i++) {
                 const canvas = document.createElement("canvas")
@@ -322,7 +321,6 @@ const PostImage: React.FunctionComponent<Props> = (props) => {
                 ctx.transferFromImageBitmap(img)
                 canvasFrames.push(canvas)
             }
-            console.log(canvasFrames)
             setVideoData(canvasFrames)
             setBackFrame(canvasFrames[0].toDataURL())
             if (backFrameRef.current && videoRef.current) {
@@ -494,6 +492,7 @@ const PostImage: React.FunctionComponent<Props> = (props) => {
             const ctx = videoCanvas.getContext("2d") as any
             const sharpenCtx = sharpenOverlay.getContext("2d") as any
             let frames = adjustedData ? adjustedData.length - 1 : 1
+            let duration = videoRef.current.duration / speed
             let interval = duration / frames
             let sp = seekTo !== null ? seekTo : secondsProgress
             if (dragging) sp = dragProgress
@@ -503,9 +502,9 @@ const PostImage: React.FunctionComponent<Props> = (props) => {
             seekValue = dragging ? dragProgress * speed : seekValue
             if (seekValue !== null) if (Number.isNaN(seekValue) || !Number.isFinite(seekValue)) seekValue = 0
             if (seekValue) videoRef.current.currentTime = seekValue
-            setDuration(videoRef.current.duration / speed)
             if (reverse && adjustedData) pos = (adjustedData.length - 1) - pos
             let frame = adjustedData ? adjustedData[pos] : videoRef.current as any
+            setDuration(duration)
 
             const update = () => {
                 if (!videoRef.current) return

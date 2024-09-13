@@ -613,47 +613,7 @@ export default class Functions {
         return distance
     }
 
-    public static extractFramesVideoSlow = (videoUrl: string, fps = 25) => {
-        return new Promise<ImageBitmap[]>(async (resolve) => {
-            let videoBlob = await fetch(videoUrl).then((r) => r.blob())
-            let videoObjectUrl = URL.createObjectURL(videoBlob)
-            let video = document.createElement("video")
-        
-            let seekResolve = null as any
-            video.addEventListener("seeked", async function () {
-                if (seekResolve) seekResolve()
-            })
-            video.src = videoObjectUrl
-            while ((video.duration === Infinity || isNaN(video.duration)) && video.readyState < 2) {
-                await new Promise((r) => setTimeout(r, 1000))
-                video.currentTime = 10000000 * Math.random()
-            }
-            let duration = video.duration
-        
-            let canvas = document.createElement("canvas")
-            let context = canvas.getContext("2d")!
-            let [w, h] = [video.videoWidth, video.videoHeight]
-            canvas.width = w
-            canvas.height = h
-        
-            let frames = [] as ImageBitmap[]
-            let interval = 1 / fps
-            let currentTime = 0
-        
-            while (currentTime < duration) {
-                video.currentTime = currentTime
-                await new Promise((r) => (seekResolve = r))
-        
-                context.drawImage(video, 0, 0, w, h)
-                let bitmap = await createImageBitmap(canvas)
-                frames.push(bitmap)
-                currentTime += interval
-            }
-            resolve(frames)
-        })
-    }
-
-    public static extractMP4FramesNative = async (videoFile: string) => {
+    public static extractMP4Frames = async (videoFile: string) => {
         let frames = [] as any
         await new Promise<void>(async (resolve) => {
             let demuxer = new MP4Demuxer(videoFile)
@@ -678,7 +638,7 @@ export default class Functions {
         return Promise.all(frames)
     }
 
-    public static extractWebMFramesNative = async (videoFile: string, vp9?: boolean) => {
+    public static extractWebMFrames = async (videoFile: string, vp9?: boolean) => {
         let frames = [] as any
         await new Promise<void>(async (resolve) => {
             let demuxer = new JsWebm()
@@ -726,24 +686,6 @@ export default class Functions {
             }
         })
         return Promise.all(frames)
-    }
-
-    public static extractMP4Frames = async (mp4: string, nativeOnly?: boolean) => {
-        if ("VideoDecoder" in window) {
-            return Functions.extractMP4FramesNative(mp4)
-        } else {
-            if (nativeOnly) return null
-            return Functions.extractFramesVideoSlow(mp4)
-        }
-    }
-
-    public static extractWebMFrames = async (webm: string, nativeOnly?: boolean) => {
-        if ("VideoDecoder" in window) {
-            return Functions.extractWebMFramesNative(webm)
-        } else {
-            if (nativeOnly) return null
-            return Functions.extractFramesVideoSlow(webm)
-        }
     }
 
     public static extractAnimatedWebpFramesNative = async (webp: string) => {

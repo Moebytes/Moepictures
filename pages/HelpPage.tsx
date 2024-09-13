@@ -163,9 +163,6 @@ const HelpPage: React.FunctionComponent = (props) => {
                     <span className="help-text">
                         The video player allows some additional functionality such as modification of playback speed, reverse 
                         playback, and toggleable pitch preservement (ie, if a video is sped up, then this controls if the audio pitch will also get pitched up). <br/><br/>
-
-                        The reverse playback only works in Chromium-based browsers (Chrome, Opera, Edge) and will not work in Safari or Firefox because they don't yet support the 
-                        API. Also, full-screening videos will not work in iOS Safari.
                     </span>
                     <span className="help-heading" id="3d-model-player">3D Model Player</span>
                     <div className="help-img-container"><img className="help-img" src={$3dPlayerImg}/></div>

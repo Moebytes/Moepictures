@@ -227,10 +227,10 @@ const GridImage = forwardRef<Ref, Props>((props, componentRef) => {
         if (functions.isVideo(props.img) && !mobile) {
             let frames = null as any
             if (functions.isMP4(props.img)) {
-                frames = await functions.extractMP4Frames(props.img, true)
+                frames = await functions.extractMP4Frames(props.img)
                 if (!frames) return
             } else if (functions.isWebM(props.img)) {
-                frames = await functions.extractWebMFrames(props.img, true)
+                frames = await functions.extractWebMFrames(props.img)
                 if (!frames) return
             }
             let canvasFrames = [] as any 
