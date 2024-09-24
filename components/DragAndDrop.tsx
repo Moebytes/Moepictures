@@ -94,7 +94,10 @@ const DragAndDrop: React.FunctionComponent = (props) => {
         setUploadHover(false)
         const files = event.dataTransfer.files 
         if (!files?.[0]) return
-        if (history.location.pathname !== "/upload") history.push("/upload")
+        console.log(history.location.pathname)
+        if (history.location.pathname !== "/upload" &&
+        history.location.pathname !== "/bulk-upload" &&
+        !history.location.pathname.includes("edit-post")) history.push("/upload")
         setUploadDropFiles(Array.from(files))
     }
 

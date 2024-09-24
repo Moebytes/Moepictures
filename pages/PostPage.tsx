@@ -331,7 +331,7 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
         if (!post) return false
         if (post.postID !== postID) return false
         if (post.restrict !== "safe") {
-            if (loaded) return true 
+            if (loaded) return true
             return false
         } else {
             return true
@@ -341,7 +341,6 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
     const getPostJSX = () => {
         if (!post) return
         if (post.type === "model") {
-            console.log(image)
             return (
                 <>
                 <PostModel post={post} model={image} order={order}/>
@@ -356,10 +355,14 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
                 </>
             )
         } else {
+            let img = image
+            if (session.cookie) {
+                img += `?upscaled=${session.upscaledImages}`
+            }
             return (
                 <>
-                <PostImage post={post} img={image} comicPages={post.type === "comic" ? images : null} order={order}/>
-                <PostImageOptions post={post} img={image} comicPages={post.type === "comic" ? images : null} download={download} next={next} previous={previous}/>
+                <PostImage post={post} img={img} comicPages={post.type === "comic" ? images : null} order={order}/>
+                <PostImageOptions post={post} img={img} comicPages={post.type === "comic" ? images : null} download={download} next={next} previous={previous}/>
                 </>
             )
         }

@@ -2,7 +2,7 @@ import React, {useContext, useEffect, useRef, useState, useReducer} from "react"
 import {ThemeContext, EnableDragContext, BrightnessContext, ContrastContext, HueContext, SaturationContext, LightnessContext,
 BlurContext, SharpenContext, PixelateContext, DownloadFlagContext, DownloadIDsContext, DisableZoomContext, SpeedContext,
 ReverseContext, MobileContext, TranslationModeContext, TranslationDrawingEnabledContext, SessionContext, SiteHueContext,
-SiteLightnessContext, SiteSaturationContext, ImageExpandContext} from "../Context"
+SiteLightnessContext, SiteSaturationContext, ImageExpandContext, SessionFlagContext} from "../Context"
 import {HashLink as Link} from "react-router-hash-link"
 import {createFFmpeg, fetchFile} from "@ffmpeg/ffmpeg"
 import functions from "../structures/Functions"
@@ -36,6 +36,7 @@ import imageZoomOffIcon from "../assets/icons/image-zoom-off.png"
 import imageZoomOffEnabledIcon from "../assets/icons/image-zoom-off-enabled.png"
 import imageFullscreenIcon from "../assets/icons/image-fullscreen.png"
 import translationToggleOn from "../assets/icons/translation-toggle-on.png"
+import waifu2xIcon from "../assets/icons/waifu2x.png"
 import expand from "../assets/icons/expand.png"
 import contract from "../assets/icons/contract.png"
 import TranslationEditor from "./TranslationEditor"
@@ -45,6 +46,7 @@ import {TransformWrapper, TransformComponent} from "react-zoom-pan-pinch"
 import path from "path"
 import "./styles/postimage.less"
 import mime from "mime-types"
+import axios from "axios"
 const ffmpeg = createFFmpeg()
 
 interface Props {
@@ -68,6 +70,7 @@ const PostImage: React.FunctionComponent<Props> = (props) => {
     const {siteSaturation, setSiteSaturation} = useContext(SiteSaturationContext)
     const {siteLightness, setSiteLightness} = useContext(SiteLightnessContext)
     const {session, setSessions} = useContext(SessionContext)
+    const {sessionFlag, setSessionFlag} = useContext(SessionFlagContext)
     const {enableDrag, setEnableDrag} = useContext(EnableDragContext)
     const {brightness, setBrightness} = useContext(BrightnessContext)
     const {contrast, setContrast} = useContext(ContrastContext)
@@ -1035,7 +1038,7 @@ const PostImage: React.FunctionComponent<Props> = (props) => {
             functions.download(filename, gif)
             window.URL.revokeObjectURL(gif)
         } else {
-            if (props.comicPages) {
+            if (props.comicPages?.length > 1) {
                 const zip = new JSZip()
                 for (let i = 0; i < props.comicPages.length; i++) {
                     const page = props.comicPages[i]
@@ -1222,12 +1225,18 @@ const PostImage: React.FunctionComponent<Props> = (props) => {
         setEnableDrag(true)
     }
 
+    const toggleUpscale = async () => {
+        await axios.post("/api/user/upscaledimages", null, {headers: {"x-csrf-token": functions.getCSRFToken()}, withCredentials: true})
+        setSessionFlag(true)
+    }
+
     return (
         <div className="post-image-container" style={{zoom: props.scale ? props.scale : 1}}>
             {!props.noTranslations && session.username ? <TranslationEditor post={props.post} img={props.img} order={props.order} unverified={props.unverified}/> : null}
             <div className="post-image-box" ref={containerRef} style={{display: translationMode ? "none" : "flex"}}>
                 <div className="post-image-filters" ref={fullscreenRef}>
                     <div className={`post-image-top-buttons ${buttonHover ? "show-post-image-top-buttons" : ""}`} onMouseEnter={() => setButtonHover(true)} onMouseLeave={() => setButtonHover(false)}>
+                        {!props.noTranslations && session.username ? <img draggable={false} className="post-image-top-button" src={waifu2xIcon} style={{filter: getFilter()}} onClick={() => toggleUpscale()}/> : null}
                         {!props.noTranslations && session.username ? <img draggable={false} className="post-image-top-button" src={translationToggleOn} style={{filter: getFilter()}} onClick={() => {setTranslationMode(true); setTranslationDrawingEnabled(true)}}/> : null}
                         <img draggable={false} className="post-image-top-button" src={imageExpand ? contract : expand} style={{filter: getFilter()}} onClick={() => setImageExpand((prev: boolean) => !prev)}/>
                     </div>

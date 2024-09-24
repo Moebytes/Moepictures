@@ -89,6 +89,7 @@ const UserRoutes = (app: Express) => {
                 await sql.user.updateUser(username, "showTagBanner", true)
                 await sql.user.updateUser(username, "downloadPixivID", false)
                 await sql.user.updateUser(username, "autosearchInterval", 3000)
+                await sql.user.updateUser(username, "upscaledImages", true)
                 await sql.user.updateUser(username, "emailVerified", false)
                 await sql.user.updateUser(username, "$2fa", false)
                 await sql.user.updateUser(username, "bio", "This user has not written anything.")
@@ -153,6 +154,7 @@ const UserRoutes = (app: Express) => {
                 req.session.showTagBanner = user.showTagBanner
                 req.session.downloadPixivID = user.dowautosearchInterval
                 req.session.autosearchInterval = user.autosearchInterval
+                req.session.upscaledImages = user.upscaledImages
                 return res.status(200).send("Success")
             } else {
                 return res.status(400).send("Bad request")
@@ -194,6 +196,7 @@ const UserRoutes = (app: Express) => {
                 req.session.showTagBanner = user.showTagBanner
                 req.session.downloadPixivID = user.downloadPixivID
                 req.session.autosearchInterval = user.autosearchInterval
+                req.session.upscaledImages = user.upscaledImages
             }
             const session = structuredClone(req.session)
             delete session.captchaAnswer
@@ -334,6 +337,22 @@ const UserRoutes = (app: Express) => {
             if (newInterval < 1000) newInterval = 1000
             req.session.autosearchInterval = newInterval 
             await sql.user.updateUser(req.session.username, "autosearchInterval", newInterval)
+            res.status(200).send("Success")
+        } catch (e) {
+            console.log(e)
+            res.status(400).send("Bad request")
+        }
+    })
+
+    app.post("/api/user/upscaledimages", sessionLimiter, async (req: Request, res: Response) => {
+        try {
+            if (!serverFunctions.validateCSRF(req)) return res.status(400).send("Bad CSRF token")
+            if (!req.session.username) return res.status(401).send("Unauthorized")
+            const user = await sql.user.user(req.session.username)
+            if (!user) return res.status(400).send("Bad username")
+            const newUpscaledImages = !Boolean(user.upscaledImages)
+            req.session.upscaledImages = newUpscaledImages 
+            await sql.user.updateUser(req.session.username, "upscaledImages", newUpscaledImages)
             res.status(200).send("Success")
         } catch (e) {
             console.log(e)

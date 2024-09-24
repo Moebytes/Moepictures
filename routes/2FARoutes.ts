@@ -116,6 +116,7 @@ const $2FARoutes = (app: Express) => {
                 req.session.showTagBanner = user.showTagBanner
                 req.session.downloadPixivID = user.downloadPixivID
                 req.session.autosearchInterval = user.autosearchInterval
+                req.session.upscaledImages = user.upscaledImages
                 res.status(200).send("Success")
             } else {
                 res.status(400).send("Bad token")

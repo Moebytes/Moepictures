@@ -215,6 +215,11 @@ const UserProfilePage: React.FunctionComponent = (props) => {
         setSessionFlag(true)
     }
 
+    const upscaledImages = async () => {
+        await axios.post("/api/user/upscaledimages", null, {headers: {"x-csrf-token": functions.getCSRFToken()}, withCredentials: true})
+        setSessionFlag(true)
+    }
+
     useEffect(() => {
         const autosearchInterval = async () => {
             clearTimeout(intervalTimer) 
@@ -380,6 +385,9 @@ const UserProfilePage: React.FunctionComponent = (props) => {
                     </div>
                     <div className="userprofile-row">
                         <span className="userprofile-text">Download Pixiv ID: <span className="userprofile-text-action" onClick={downloadPixivID}>{session.downloadPixivID ? "Yes" : "No"}</span></span>
+                    </div>
+                    <div className="userprofile-row">
+                        <span className="userprofile-text">Upscaled Images: <span className="userprofile-text-action" onClick={upscaledImages}>{session.upscaledImages ? "Yes" : "No"}</span></span>
                     </div>
                     <div className="userprofile-row">
                         <span className="userprofile-text">Autosearch Interval: </span>

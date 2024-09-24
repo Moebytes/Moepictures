@@ -12,6 +12,7 @@ CREATE TABLE IF NOT EXISTS "users" (
     "showTagBanner" boolean,
     "downloadPixivID" boolean,
     "autosearchInterval" int,
+    "upscaledImages" boolean,
     "image" text,
     "imagePost" bigint REFERENCES posts ("postID") ON UPDATE CASCADE ON DELETE SET NULL,
     "ip" inet,

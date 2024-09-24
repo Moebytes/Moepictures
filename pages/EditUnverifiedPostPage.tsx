@@ -29,7 +29,7 @@ import PostImage from "../components/PostImage"
 import PostModel from "../components/PostModel"
 import PostSong from "../components/PostSong"
 import DragAndDrop from "../components/DragAndDrop"
-import {HideNavbarContext, HideSidebarContext, RelativeContext, ThemeContext, EnableDragContext, HideTitlebarContext, BrightnessContext, ContrastContext, HueContext, SaturationContext, LightnessContext, MobileContext,
+import {HideNavbarContext, HideSidebarContext, RelativeContext, UploadDropFilesContext, ThemeContext, EnableDragContext, HideTitlebarContext, BrightnessContext, ContrastContext, HueContext, SaturationContext, LightnessContext, MobileContext,
 BlurContext, SharpenContext, PixelateContext, HeaderTextContext, SessionContext, SidebarTextContext, RedirectContext, PostFlagContext} from "../Context"
 import JSZip from "jszip"
 import axios from "axios"
@@ -69,6 +69,7 @@ const EditUnverifiedPostPage: React.FunctionComponent<Props> = (props) => {
     const {redirect, setRedirect} = useContext(RedirectContext)
     const {mobile, setMobile} = useContext(MobileContext)
     const {postFlag, setPostFlag} = useContext(PostFlagContext)
+    const {uploadDropFiles, setUploadDropFiles} = useContext(UploadDropFilesContext)
     const [displayImage, setDisplayImage] = useState(false)
     const [editPostError, setEditPostError] = useState(false)
     const [submitError, setSubmitError] = useState(false)
@@ -230,6 +231,13 @@ const EditUnverifiedPostPage: React.FunctionComponent<Props> = (props) => {
         if (!edited) setEdited(true)
     }, [type, restrict, style, sourceTitle, sourceArtist, sourceCommentary, sourceTranslatedCommentary, sourceMirrors, sourceTranslatedTitle,
     sourceLink, sourceBookmarks, sourceDate, acceptedURLs, artists, characters, series, rawTags])
+
+    useEffect(() => {
+        if (uploadDropFiles?.length) {
+            validate(uploadDropFiles)
+            setUploadDropFiles([])
+        }
+    }, [uploadDropFiles])
 
     useEffect(() => {
         setHideNavbar(true)

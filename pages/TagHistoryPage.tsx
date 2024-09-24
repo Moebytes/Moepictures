@@ -11,6 +11,7 @@ import DeleteTagHistoryDialog from "../dialogs/DeleteTagHistoryDialog"
 import {ThemeContext, EnableDragContext, HideNavbarContext, HideSidebarContext, MobileContext, SessionContext,
 RelativeContext, HideTitlebarContext, ActiveDropdownContext, HeaderTextContext, SidebarTextContext} from "../Context"
 import permissions from "../structures/Permissions"
+import matureTags from "../assets/json/mature-tags.json"
 import "./styles/taghistorypage.less"
 import axios from "axios"
 
@@ -90,16 +91,21 @@ const TagHistoryPage: React.FunctionComponent<Props> = (props) => {
     }, [mobile])
 
     useEffect(() => {
+        if (!session.cookie) return
         let currentIndex = index
         const newVisibleRevisions = [] as any
         for (let i = 0; i < 10; i++) {
             if (!revisions[currentIndex]) break
+            if (functions.arrayIncludes(revisions[currentIndex].tag, matureTags, true)) if (!permissions.isElevated(session)) {
+                currentIndex++
+                continue
+            }
             newVisibleRevisions.push(revisions[currentIndex])
             currentIndex++
         }
         setIndex(currentIndex)
         setVisibleRevisions(newVisibleRevisions)
-    }, [revisions])
+    }, [revisions, session])
 
     const updateOffset = async () => {
         if (ended) return
@@ -114,6 +120,7 @@ const TagHistoryPage: React.FunctionComponent<Props> = (props) => {
     }
 
     useEffect(() => {
+        if (!session.cookie) return
         const scrollHandler = async () => {
             if (functions.scrolledToBottom()) {
                 let currentIndex = index
@@ -121,6 +128,10 @@ const TagHistoryPage: React.FunctionComponent<Props> = (props) => {
                 const newRevisions = visibleRevisions as any
                 for (let i = 0; i < 10; i++) {
                     if (!revisions[currentIndex]) return updateOffset()
+                    if (functions.arrayIncludes(revisions[currentIndex].tag, matureTags, true)) if (!permissions.isElevated(session)) {
+                        currentIndex++
+                        continue
+                    }
                     newRevisions.push(revisions[currentIndex])
                     currentIndex++
                 }

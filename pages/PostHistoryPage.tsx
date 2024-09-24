@@ -87,16 +87,21 @@ const PostHistoryPage: React.FunctionComponent<Props> = (props) => {
     }, [mobile])
 
     useEffect(() => {
+        if (!session.cookie) return
         let currentIndex = index
         const newVisibleRevisions = [] as any
         for (let i = 0; i < 10; i++) {
             if (!revisions[currentIndex]) break
+            if (revisions[currentIndex].restrict === "explicit") if (!permissions.isElevated(session)) {
+                currentIndex++
+                continue
+            }
             newVisibleRevisions.push(revisions[currentIndex])
             currentIndex++
         }
         setIndex(currentIndex)
         setVisibleRevisions(newVisibleRevisions)
-    }, [revisions])
+    }, [revisions, session])
 
     const updateOffset = async () => {
         if (ended) return
@@ -111,6 +116,7 @@ const PostHistoryPage: React.FunctionComponent<Props> = (props) => {
     }
 
     useEffect(() => {
+        if (!session.cookie) return
         const scrollHandler = async () => {
             if (functions.scrolledToBottom()) {
                 let currentIndex = index
@@ -118,6 +124,10 @@ const PostHistoryPage: React.FunctionComponent<Props> = (props) => {
                 const newRevisions = visibleRevisions as any
                 for (let i = 0; i < 10; i++) {
                     if (!revisions[currentIndex]) return updateOffset()
+                    if (revisions[currentIndex].restrict === "explicit") if (!permissions.isElevated(session)) {
+                        currentIndex++
+                        continue
+                    }
                     newRevisions.push(revisions[currentIndex])
                     currentIndex++
                 }

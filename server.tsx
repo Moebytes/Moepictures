@@ -43,7 +43,6 @@ app.use(express.urlencoded({extended: true, limit: "1gb", parameterLimit: 50000}
 app.use(express.json({limit: "1gb"}))
 app.use(cors({credentials: true, origin: true}))
 app.disable("x-powered-by")
-// app.set("trust proxy", true)
 
 declare module "express-session" {
   interface SessionData {
@@ -60,6 +59,7 @@ declare module "express-session" {
       showTagBanner: boolean
       downloadPixivID: boolean
       autosearchInterval: number
+      upscaledImages: boolean
       $2fa: boolean
       ip: string
       role: string
@@ -137,11 +137,12 @@ let folders = ["animation", "artist", "character", "comic", "image", "pfp", "ser
 
 for (let i = 0; i < folders.length; i++) {
   app.get(`/${folders[i]}/*`, async (req: Request, res: Response, next: NextFunction) => {
+    let url = req.url.replace(/\?.*$/, "")
     const mimeType = mime.getType(req.path)
     try {
       if (folders[i] === "tag") {
-        if (!req.url.endsWith(".png") && !req.url.endsWith(".jpg") && !req.url.endsWith(".jpeg") &&
-        !req.url.endsWith(".webp") && !req.url.endsWith(".gif")) return next()
+        if (!url.endsWith(".png") && !url.endsWith(".jpg") && !url.endsWith(".jpeg") &&
+        !url.endsWith(".webp") && !url.endsWith(".gif")) return next()
       }
       res.setHeader("Content-Type", mimeType ?? "")
       res.setHeader("Cache-Control", "public, max-age=2592000")
@@ -153,20 +154,9 @@ for (let i = 0; i < folders.length; i++) {
           if (post.restrict === "explicit") return res.status(403).send("No permission")
         }
       }
-      let body = await serverFunctions.getFile(key)
+      let body = await serverFunctions.getFile(key, !req.session.upscaledImages)
       let contentLength = body.length
       if (!contentLength) return res.status(200).send(body)
-      /*
-      if (mimeType?.includes("image")) {
-        const metadata = await sharp(body).metadata()
-        const bigger = metadata.width! > metadata.height! ? metadata.width! : metadata.height!
-        if (bigger < 2000) {
-          body = await sharp(body, {animated: false, limitInputPixels: false})
-          .resize(2000, 2000, {fit: "outside", kernel: "cubic"})
-          .toBuffer()
-          contentLength = body.length
-        }
-      }*/
       if (req.headers.range) {
         const parts = req.headers.range.replace(/bytes=/, "").split("-")
         const start = parseInt(parts[0])
@@ -378,29 +368,6 @@ const run = async () => {
   exists = await sql.tag.insertTag("bad-pixiv-id", "meta")
   if (!exists) await sql.tag.updateTag("bad-pixiv-id", "description", "The pixiv id was deleted.")
 
-  /* Default software tags */
-  exists = await sql.tag.insertTag("photoshop", "tag")
-  if (!exists) await sql.tag.updateTag("photoshop", "description", "Photoshop is an image editing software primarily used for image editing, color correction, and drawing. It is developed by Adobe.")
-  exists = await sql.tag.insertTag("premiere-pro", "tag")
-  if (!exists) await sql.tag.updateTag("premiere-pro", "description", "Premiere Pro is a video editing software primarily used for video editing and color correction. It is developed by Adobe.")
-  exists = await sql.tag.insertTag("after-effects", "tag")
-  if (!exists) await sql.tag.updateTag("after-effects", "description", "After Effects is a video compositing software primarily used for video effects, motion graphics, and tween animation. It is developed by Adobe.")
-  exists = await sql.tag.insertTag("clip-studio-paint", "tag")
-  if (!exists) await sql.tag.updateTag("clip-studio-paint", "description", "Clip Studio Paint is a drawing software that allows the creation of illustrations, comics, and frame-by-frame animations. It is developed by CELSYS.")
-  exists = await sql.tag.insertTag("live2d", "tag")
-  if (!exists) await sql.tag.updateTag("live2d", "description", "Live2D is an animation software that allows the creation of 2D animation by using mesh deformations, warp/rotation deformers, and parameter keyframes. It is developed by Live2D.")
-  exists = await sql.tag.insertTag("blender", "tag")
-  if (!exists) await sql.tag.updateTag("blender", "description", "Blender is a 3D software primarily used for 3D modeling, 3D sculpting, 3D animation, and particle simulations. It is developed by the Blender Foundation.")
-  exists = await sql.tag.insertTag("krita", "tag")
-  if (!exists) await sql.tag.updateTag("krita", "description", "Krita is a drawing software primarily used for drawing and 2D animation. It is developed by the Krita Foundation.")
-  exists = await sql.tag.insertTag("sai", "tag")
-  if (!exists) await sql.tag.updateTag("sai", "description", "Sai is a lightweight drawing software developed by Systemax Software.")
-  exists = await sql.tag.insertTag("procreate", "tag")
-  if (!exists) await sql.tag.updateTag("procreate", "description", "Procreate is a drawing software for iPad developed by Savage Interactive.")
-  exists = await sql.tag.insertTag("mspaint", "tag")
-  if (!exists) await sql.tag.updateTag("mspaint", "description", "MS Paint is a basic image editing software included with Windows. It is developed by Microsoft.")
-  exists = await sql.tag.insertTag("gimp", "tag")
-  if (!exists) await sql.tag.updateTag("gimp", "description", "Gimp is a free image editing software developed by GIMP Development Team.")
   app.listen(process.env.PORT || 8082, () => console.log("Started the website server!"))
 }
 

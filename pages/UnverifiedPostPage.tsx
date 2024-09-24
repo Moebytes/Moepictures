@@ -1,4 +1,4 @@
-import React, {useEffect, useContext, useState} from "react"
+import React, {useEffect, useContext, useState, useReducer} from "react"
 import {useHistory} from "react-router-dom"
 import TitleBar from "../components/TitleBar"
 import NavBar from "../components/NavBar"
@@ -33,6 +33,7 @@ interface Props {
 }
 
 const UnverifiedPostPage: React.FunctionComponent<Props> = (props) => {
+    const [ignored, forceUpdate] = useReducer(x => x + 1, 0)
     const {hideNavbar, setHideNavbar} = useContext(HideNavbarContext)
     const {hideTitlebar, setHideTitlebar} = useContext(HideTitlebarContext)
     const {hideSidebar, setHideSidebar} = useContext(HideSidebarContext)
@@ -214,10 +215,14 @@ const UnverifiedPostPage: React.FunctionComponent<Props> = (props) => {
                 </>
             )
         } else {
+            let img = image
+            if (session.cookie) {
+                img += `?upscaled=${session.upscaledImages}`
+            }
             return (
                 <>
-                <PostImage unverified={true} post={post} img={image} comicPages={post.type === "comic" ? images : null}/>
-                <PostImageOptions post={post} noFavorite={true} img={image} comicPages={post.type === "comic" ? images : null} download={download} next={next} previous={previous}/>
+                <PostImage unverified={true} post={post} img={img} comicPages={post.type === "comic" ? images : null}/>
+                <PostImageOptions post={post} noFavorite={true} img={img} comicPages={post.type === "comic" ? images : null} download={download} next={next} previous={previous}/>
                 </>
             )
         }

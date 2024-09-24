@@ -277,18 +277,15 @@ const PostHistoryRow: React.FunctionComponent<Props> = (props) => {
         return <span className="posthistoryrow-user-text" onClick={userClick} onAuxClick={userClick}>{editText} {functions.timeAgo(targetDate)} by {functions.toProperCase(props.postHistory.user)}</span>
     }
 
-    const getDomain = () => {
-        if (props.postHistory.link) {
-            try {
-                const domain = new URL(props.postHistory.link).hostname.replace("www.", "")
-                .split(".")?.[0] || ""
-                if (domain.toLowerCase() === "yande") return "Yandere"
-                return functions.toProperCase(domain)
-            } catch {
-                return "Unknown"
-            }
+    const getDomain = (link: string) => {
+        try {
+            const domain = new URL(link).hostname.replace("www.", "")
+            .split(".")?.[0] || ""
+            if (domain.toLowerCase() === "yande") return "Yandere"
+            return functions.toProperCase(domain)
+        } catch {
+            return "Unknown"
         }
-        return "Unknown"
     }
 
     const loadImage = async () => {
@@ -405,6 +402,14 @@ const PostHistoryRow: React.FunctionComponent<Props> = (props) => {
         return calculateDiff(filteredPast, filteredTags)
     }
 
+    const printMirrors = () => {
+        const mapped = Object.values(props.postHistory.mirrors) as string[]
+        return mapped.map((m, i) => {
+            let append = i !== mapped.length - 1 ? ", " : ""
+            return <span className="posthistoryrow-label-link" onClick={() => window.open(m, "_blank")}>{getDomain(m) + append}</span>
+        })
+    }
+
     const diffJSX = () => {
         let jsx = [] as React.ReactElement[]
         if (!props.previousHistory || (props.previousHistory?.images.length !== props.postHistory.images.length)) {
@@ -453,7 +458,12 @@ const PostHistoryRow: React.FunctionComponent<Props> = (props) => {
             jsx.push(<span className="posthistoryrow-text"><span className="posthistoryrow-label-text">Drawn:</span> {props.postHistory.drawn ? functions.formatDate(new Date(props.postHistory.drawn)) : "Unknown"}</span>)
         }
         if (!props.previousHistory || (props.previousHistory?.link !== props.postHistory.link)) {
-            jsx.push(<span className="posthistoryrow-text"><span className="posthistoryrow-label-text">Link:</span> <span className="posthistoryrow-label-link" onClick={() => window.open(props.postHistory.link, "_blank")}>{getDomain()}</span></span>)
+            jsx.push(<span className="posthistoryrow-text"><span className="posthistoryrow-label-text">Link:</span> <span className="posthistoryrow-label-link" onClick={() => window.open(props.postHistory.link, "_blank")}>{getDomain(props.postHistory.link)}</span></span>)
+        }
+        if (!props.previousHistory || (JSON.stringify(props.previousHistory?.mirrors) !== JSON.stringify(props.postHistory.mirrors))) {
+            if (props.postHistory.mirrors) {
+                jsx.push(<span className="posthistoryrow-text"><span className="posthistoryrow-label-text">Mirrors:</span> {printMirrors()}</span>)
+            }
         }
         if (!props.previousHistory || (props.previousHistory?.commentary !== props.postHistory.commentary)) {
             if (props.postHistory.commentary) {
