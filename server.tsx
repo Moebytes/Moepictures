@@ -154,7 +154,12 @@ for (let i = 0; i < folders.length; i++) {
           if (post.restrict === "explicit") return res.status(403).send("No permission")
         }
       }
-      let body = await serverFunctions.getFile(key, !req.session.upscaledImages)
+      let upscaled = false
+      if (folders[i] === "image" || folders[i] === "comic" || folders[i] === "animation") {
+        upscaled = req.session.upscaledImages as boolean
+        if (req.headers["x-force-upscale"]) upscaled = req.headers["x-force-upscale"] === "true"
+      }
+      let body = await serverFunctions.getFile(key, upscaled)
       let contentLength = body.length
       if (!contentLength) return res.status(200).send(body)
       if (req.headers.range) {
@@ -187,7 +192,12 @@ for (let i = 0; i < folders.length; i++) {
       res.setHeader("Content-Type", mime.getType(req.path) ?? "")
       res.setHeader("Cache-Control", "public, max-age=2592000")
       const key = decodeURIComponent(req.path.replace("/unverified/", ""))
-      const body = await serverFunctions.getUnverifiedFile(key)
+      let upscaled = false
+      if (folders[i] === "image" || folders[i] === "comic" || folders[i] === "animation") {
+        upscaled = req.session.upscaledImages as boolean
+        if (req.headers["x-force-upscale"]) upscaled = req.headers["x-force-upscale"] === "true"
+      }
+      const body = await serverFunctions.getUnverifiedFile(key, upscaled)
       const contentLength = body.length
       if (req.headers.range) {
         const parts = req.headers.range.replace(/bytes=/, "").split("-")
@@ -223,7 +233,7 @@ for (let i = 0; i < folders.length; i++) {
           if (post.restrict === "explicit") return res.status(403).send("No permission")
         }
       }
-      let body = await serverFunctions.getFile(key, true)
+      let body = await serverFunctions.getFile(key, false)
       let contentLength = body.length
       if (!contentLength) return res.status(200).send(body)
       if (mimeType?.includes("image")) {
@@ -268,7 +278,7 @@ for (let i = 0; i < folders.length; i++) {
       res.setHeader("Content-Type", mimeType ?? "")
       res.setHeader("Cache-Control", "public, max-age=2592000")
       const key = decodeURIComponent(req.path.replace(`/thumbnail/${req.params.size}/`, "").replace("unverified/", ""))
-      let body = await serverFunctions.getUnverifiedFile(key)
+      let body = await serverFunctions.getUnverifiedFile(key, false)
       let contentLength = body.length
       if (mimeType?.includes("image")) {
         const metadata = await sharp(body).metadata()

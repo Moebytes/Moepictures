@@ -38,9 +38,9 @@ export default class SQLPost {
     public static bulkUpdatePost = async (postID: number, params: {restrict?: string, style?: string, thirdParty?: boolean, 
         title?: string, translatedTitle?: string, artist?: string, drawn?: string, link?: string, commentary?: string, 
         translatedCommentary?: string, bookmarks?: string, mirrors?: string, type?: string, uploadDate?: string, uploader?: string, 
-        updatedDate?: string, updater?: string, hidden?: boolean, approver?: string}) => {
+        updatedDate?: string, updater?: string, hidden?: boolean, approver?: string, hasOriginal?: boolean, hasUpscaled?: boolean}) => {
         const {restrict, style, thirdParty, title, translatedTitle, artist, drawn, link, commentary, translatedCommentary, bookmarks, 
-        mirrors, type, uploadDate, uploader, updatedDate, updater, hidden, approver} = params
+        mirrors, type, uploadDate, uploader, updatedDate, updater, hidden, approver, hasOriginal, hasUpscaled} = params
         let setArray = [] as any
         let values = [] as any
         let i = 1 
@@ -54,7 +54,7 @@ export default class SQLPost {
         values.push(style)
         i++
         }
-        if (thirdParty) {
+        if (thirdParty !== undefined) {
         setArray.push(`"thirdParty" = $${i}`)
         values.push(thirdParty)
         i++
@@ -134,6 +134,16 @@ export default class SQLPost {
         values.push(hidden)
         i++
         }
+        if (hasOriginal !== undefined) {
+        setArray.push(`"hasOriginal" = $${i}`)
+        values.push(hasOriginal)
+        i++
+        }
+        if (hasUpscaled !== undefined) {
+        setArray.push(`"hasUpscaled" = $${i}`)
+        values.push(hasUpscaled)
+        i++
+        }
         if (approver) {
         setArray.push(`"approver" = $${i}`)
         values.push(approver)
@@ -152,9 +162,9 @@ export default class SQLPost {
     public static bulkUpdateUnverifiedPost = async (postID: number, params: {restrict?: string, style?: string, thirdParty?: boolean, 
         title?: string, translatedTitle?: string, artist?: string, drawn?: string, link?: string, commentary?: string, translatedCommentary?: string, 
         bookmarks?: string, mirrors?: string, type?: string, uploadDate?: string, uploader?: string, updatedDate?: string, updater?: string, 
-        duplicates?: boolean, newTags?: number, originalID?: number, reason?: string, hidden?: boolean}) => {
+        duplicates?: boolean, newTags?: number, originalID?: number, reason?: string, hidden?: boolean, hasOriginal?: boolean, hasUpscaled?: boolean}) => {
         const {restrict, style, thirdParty, title, translatedTitle, artist, drawn, link, commentary, translatedCommentary, bookmarks, mirrors, type, 
-        uploadDate, uploader, updatedDate, updater, duplicates, originalID, newTags, hidden, reason} = params
+        uploadDate, uploader, updatedDate, updater, duplicates, originalID, newTags, hidden, hasOriginal, hasUpscaled, reason} = params
         let setArray = [] as any
         let values = [] as any
         let i = 1 
@@ -168,7 +178,7 @@ export default class SQLPost {
         values.push(style)
         i++
         }
-        if (thirdParty) {
+        if (thirdParty !== undefined) {
         setArray.push(`"thirdParty" = $${i}`)
         values.push(thirdParty)
         i++
@@ -261,6 +271,16 @@ export default class SQLPost {
         if (hidden) {
         setArray.push(`"hidden" = $${i}`)
         values.push(updater)
+        i++
+        }
+        if (hasOriginal !== undefined) {
+        setArray.push(`"hasOriginal" = $${i}`)
+        values.push(hasOriginal)
+        i++
+        }
+        if (hasUpscaled !== undefined) {
+        setArray.push(`"hasUpscaled" = $${i}`)
+        values.push(hasUpscaled)
         i++
         }
         if (reason) {

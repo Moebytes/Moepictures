@@ -63,17 +63,23 @@ export default class SQLHistory {
     }
 
     /** Insert post history */
-    public static insertPostHistory = async (username: string, postID: number, images?: string[], uploader?: string, updater?: string, uploadDate?: string, updatedDate?: string,
-        type?: string, restrict?: string, style?: string, thirdParty?: string, title?: string, translatedTitle?: string, drawn?: string, artist?: string, link?: string,
-        commentary?: string, translatedCommentary?: string, bookmarks?: string, mirrors?: string, artists?: string[], characters?: string[], series?: string[], tags?: string[], reason?: string) => {
+    public static insertPostHistory = async (options: {username: string, postID: number, images: string[], uploader: string, 
+        updater?: string, uploadDate: string, updatedDate: string, type: string, restrict: string, style: string, thirdParty: string, 
+        title: string, translatedTitle: string, drawn: string, artist: string, link: string, hasUpscaled: boolean, hasOriginal: boolean,
+        commentary: string, translatedCommentary: string, bookmarks: string, mirrors: string, artists: string[], characters: string[], 
+        series: string[], tags: string[], reason: string}) => {
+        const {postID, username, images, uploader, updater, uploadDate, updatedDate, type, restrict, style, thirdParty, title, 
+        translatedTitle, drawn, artist, link, commentary, translatedCommentary, bookmarks, mirrors, hasOriginal, hasUpscaled, 
+        artists, characters, series, tags, reason} = options
         const now = new Date().toISOString()
         const query: QueryConfig = {
         text: /*sql*/`INSERT INTO "post history" ("postID", "user", "date", "images", "uploader", "updater", "uploadDate", "updatedDate",
         "type", "restrict", "style", "thirdParty", "title", "translatedTitle", "drawn", "artist", "link", "commentary",
-        "translatedCommentary", "bookmarks", "mirrors", "artists", "characters", "series", "tags", "reason") VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, 
-            $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25, $26)`,
-        values: [postID, username, now, images, uploader, updater, uploadDate, updatedDate, type, restrict, style, thirdParty, 
-            title, translatedTitle, drawn, artist, link, commentary, translatedCommentary, bookmarks, mirrors, artists, characters, series, tags, reason]
+        "translatedCommentary", "bookmarks", "mirrors", "hasOriginal", "hasUpscaled", "artists", "characters", "series", "tags", "reason") VALUES ($1, $2, 
+            $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25, $26, $27, $28)`,
+            values: [postID, username, now, images, uploader, updater, uploadDate, updatedDate, type, restrict, style, thirdParty, 
+            title, translatedTitle, drawn, artist, link, commentary, translatedCommentary, bookmarks, mirrors, hasOriginal, hasUpscaled, 
+            artists, characters, series, tags, reason]
         }
         await SQLQuery.flushDB()
         const result = await SQLQuery.run(query)

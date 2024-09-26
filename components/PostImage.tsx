@@ -1023,9 +1023,9 @@ const PostImage: React.FunctionComponent<Props> = (props) => {
     }
 
     const multiRender = async () => {
-        let filename = path.basename(props.img)
+        let filename = path.basename(props.img).replace(/\?.*$/, "")
         if (session.downloadPixivID && props.post?.link?.includes("pixiv.net")) {
-            filename = props.post.link.match(/\d+/g)?.[0] + path.extname(props.img)
+            filename = props.post.link.match(/\d+/g)?.[0] + path.extname(props.img).replace(/\?.*$/, "")
         }
         if (functions.isVideo(props.img)) {
             const video = await renderVideo()
@@ -1042,7 +1042,7 @@ const PostImage: React.FunctionComponent<Props> = (props) => {
                 const zip = new JSZip()
                 for (let i = 0; i < props.comicPages.length; i++) {
                     const page = props.comicPages[i]
-                    let pageName = path.basename(page)
+                    let pageName = path.basename(page).replace(/\?.*$/, "")
                     if (session.downloadPixivID && props.post?.link?.includes("pixiv.net")) {
                         pageName = `${props.post.link.match(/\d+/g)?.[0]}_p${i}${path.extname(page)}`
                     }

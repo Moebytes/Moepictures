@@ -952,8 +952,16 @@ export default class Functions {
         return `${folder}/${postID}-${order}-${filename}`
     }
 
+    public static getUpscaledImagePath = (folder: string, postID: number, order: number, filename: string) => {
+        return `${folder}-upscaled/${postID}-${order}-${filename}`
+    }
+
     public static getImageHistoryPath = (postID: number, key: number, filename: string) => {
-        return `history/post/${postID}/${key}/${filename}`
+        return `history/post/${postID}/original/${key}/${filename}`
+    }
+
+    public static getUpscaledImageHistoryPath = (postID: number, key: number, filename: string) => {
+        return `history/post/${postID}/upscaled/${key}/${filename}`
     }
 
     public static getImageLink = (folder: string, postID: number, order: number, filename: string) => {

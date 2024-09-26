@@ -422,25 +422,36 @@ const PostRoutes = (app: Express) => {
                 for (let i = 0; i < vanilla.images.length; i++) {
                     vanillaImages.push(functions.getImagePath(vanilla.images[i].type, postID, vanilla.images[i].order, vanilla.images[i].filename))
                 }
-                await sql.history.insertPostHistory(vanilla.user, postID, vanillaImages, vanilla.uploader, vanilla.updater, vanilla.uploadDate, vanilla.updatedDate,
-                    vanilla.type, vanilla.restrict, vanilla.style, vanilla.thirdParty, vanilla.title, vanilla.translatedTitle, vanilla.drawn, vanilla.artist,
-                    vanilla.link, vanilla.commentary, vanilla.translatedCommentary, vanilla.bookmarks, vanilla.mirrors, vanilla.artists, vanilla.characters, vanilla.series, vanilla.tags)
-
+                await sql.history.insertPostHistory({
+                    postID, username: vanilla.user, images: vanillaImages, uploader: vanilla.uploader, updater: vanilla.updater, 
+                    uploadDate: vanilla.uploadDate, updatedDate: vanilla.updatedDate, type: vanilla.type, restrict: vanilla.restrict, 
+                    style: vanilla.style, thirdParty: vanilla.thirdParty, title: vanilla.title, translatedTitle: vanilla.translatedTitle, 
+                    drawn: vanilla.drawn, artist: vanilla.artist, link: vanilla.link, commentary: vanilla.commentary, translatedCommentary: vanilla.translatedCommentary, 
+                    bookmarks: vanilla.bookmarks, mirrors: vanilla.mirrors, hasOriginal: vanilla.hasOriginal, hasUpscaled: vanilla.hasUpscaled, 
+                    artists: vanilla.artists, characters: vanilla.characters, series: vanilla.series, tags: vanilla.tags, reason})
                 let images = [] as any
                 for (let i = 0; i < post.images.length; i++) {
                     images.push(functions.getImagePath(post.images[i].type, postID, post.images[i].order, post.images[i].filename))
                 }
-                await sql.history.insertPostHistory(req.session.username, postID, images, post.uploader, post.updater, post.uploadDate, post.updatedDate,
-                post.type, post.restrict, post.style, post.thirdParty, post.title, post.translatedTitle, post.drawn, post.artist,
-                post.link, post.commentary, post.translatedCommentary, post.bookmarks, post.mirrors, artists, characters, series, tags, reason)
+                await sql.history.insertPostHistory({
+                    postID, username: req.session.username, images, uploader: post.uploader, updater: post.updater, 
+                    uploadDate: post.uploadDate, updatedDate: post.updatedDate, type: post.type, restrict: post.restrict, 
+                    style: post.style, thirdParty: post.thirdParty, title: post.title, translatedTitle: post.translatedTitle, 
+                    drawn: post.drawn, artist: post.artist, link: post.link, commentary: post.commentary, 
+                    translatedCommentary: post.translatedCommentary, bookmarks: post.bookmarks, mirrors: post.mirrors, 
+                    hasOriginal: post.hasOriginal, hasUpscaled: post.hasUpscaled, artists, characters, series, tags, reason})
             } else {
                 let images = [] as any
                 for (let i = 0; i < post.images.length; i++) {
                     images.push(functions.getImagePath(post.images[i].type, postID, post.images[i].order, post.images[i].filename))
                 }
-                await sql.history.insertPostHistory(req.session.username, postID, images, post.uploader, post.updater, post.uploadDate, post.updatedDate,
-                post.type, post.restrict, post.style, post.thirdParty, post.title, post.translatedTitle, post.drawn, post.artist,
-                post.link, post.commentary, post.translatedCommentary, post.bookmarks, post.mirrors, artists, characters, series, tags, reason)
+                await sql.history.insertPostHistory({
+                    postID, username: req.session.username, images, uploader: post.uploader, updater: post.updater, 
+                    uploadDate: post.uploadDate, updatedDate: post.updatedDate, type: post.type, restrict: post.restrict, 
+                    style: post.style, thirdParty: post.thirdParty, title: post.title, translatedTitle: post.translatedTitle, 
+                    drawn: post.drawn, artist: post.artist, link: post.link, commentary: post.commentary, 
+                    translatedCommentary: post.translatedCommentary, bookmarks: post.bookmarks, mirrors: post.mirrors, 
+                    hasOriginal: post.hasOriginal, hasUpscaled: post.hasUpscaled, artists, characters, series, tags, reason})
             }
             res.status(200).send("Success")
           } catch (e) {
@@ -497,9 +508,16 @@ const PostRoutes = (app: Express) => {
             }
             if (type !== "comic") type = "image"
 
+            let hasOriginal = false
+            let hasUpscaled = false
+
             for (let i = 0; i < post.images.length; i++) {
                 const imagePath = functions.getImagePath(post.images[i].type, originalPostID, post.images[i].order, post.images[i].filename)
                 const buffer = await serverFunctions.getFile(imagePath) as Buffer
+                const upscaledImagePath = functions.getUpscaledImagePath(post.images[i].type, originalPostID, post.images[i].order, post.images[i].filename)
+                const upscaledBuffer = await serverFunctions.getFile(upscaledImagePath) as Buffer
+
+                let current = buffer ? buffer : upscaledBuffer
                 let order = i + 1
                 const ext = path.extname(post.images[i].filename).replace(".", "")
                 let fileOrder = post.images.length > 1 ? `${order}` : "1"
@@ -512,7 +530,7 @@ const PostRoutes = (app: Express) => {
                 } else if (ext === "jpg" || ext === "png" || ext === "avif") {
                     kind = "image"
                 } else if (ext === "webp") {
-                    const animated = await functions.isAnimatedWebp(buffer)
+                    const animated = await functions.isAnimatedWebp(current)
                     if (animated) {
                         kind = "animation"
                     if (type !== "video") type = "animation"
@@ -532,9 +550,16 @@ const PostRoutes = (app: Express) => {
                     kind = "model"
                     type = "model"
                 }
-
-                let newImagePath = functions.getImagePath(kind, postID, Number(fileOrder), filename)
-                await serverFunctions.uploadUnverifiedFile(newImagePath, buffer)
+                if (buffer) {
+                    let newImagePath = functions.getImagePath(kind, postID, Number(fileOrder), filename)
+                    await serverFunctions.uploadUnverifiedFile(newImagePath, buffer)
+                    hasOriginal = true
+                }
+                if (upscaledBuffer) {
+                    let newImagePath = functions.getUpscaledImagePath(kind, postID, Number(fileOrder), filename)
+                    await serverFunctions.uploadUnverifiedFile(newImagePath, upscaledBuffer)
+                    hasUpscaled = true
+                }
                 let dimensions = null as any
                 let hash = ""
                 if (kind === "video" || kind === "audio" || kind === "model") {
@@ -542,10 +567,10 @@ const PostRoutes = (app: Express) => {
                     hash = await phash(buffer).then((hash: string) => functions.binaryToHex(hash))
                     dimensions = imageSize(buffer)
                 } else {
-                    hash = await phash(buffer).then((hash: string) => functions.binaryToHex(hash))
-                    dimensions = imageSize(buffer)
+                    hash = await phash(current).then((hash: string) => functions.binaryToHex(hash))
+                    dimensions = imageSize(current)
                 }
-                await sql.post.insertUnverifiedImage(postID, filename, type, order, hash, dimensions.width, dimensions.height, String(buffer.byteLength))
+                await sql.post.insertUnverifiedImage(postID, filename, type, order, hash, dimensions.width, dimensions.height, String(current.byteLength))
             }
     
             const updatedDate = new Date().toISOString()
@@ -568,6 +593,8 @@ const PostRoutes = (app: Express) => {
                 uploader: post.uploader,
                 uploadDate: post.uploadDate,
                 updatedDate,
+                hasOriginal,
+                hasUpscaled,
                 updater: req.session.username
             })
 

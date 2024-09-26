@@ -11,6 +11,8 @@ import xIcon from "../assets/icons/x.png"
 import rightIcon from "../assets/icons/right.png"
 import leftIcon from "../assets/icons/left.png"
 import linkIcon from "../assets/icons/link.png"
+import upscaleIcon from "../assets/icons/upscale.png"
+import originalIcon from "../assets/icons/original.png"
 import image from "../assets/icons/image.png"
 import animation from "../assets/icons/animation.png"
 import video from "../assets/icons/video.png"
@@ -30,7 +32,7 @@ import PostModel from "../components/PostModel"
 import PostSong from "../components/PostSong"
 import DragAndDrop from "../components/DragAndDrop"
 import {HideNavbarContext, HideSidebarContext, RelativeContext, UploadDropFilesContext, ThemeContext, EnableDragContext, HideTitlebarContext, BrightnessContext, ContrastContext, HueContext, SaturationContext, LightnessContext, MobileContext,
-BlurContext, SharpenContext, PixelateContext, HeaderTextContext, SessionContext, SidebarTextContext, RedirectContext, PostFlagContext} from "../Context"
+BlurContext, SharpenContext, PixelateContext, HeaderTextContext, SessionContext, SidebarTextContext, RedirectContext, PostFlagContext, ShowUpscaledContext} from "../Context"
 import JSZip from "jszip"
 import axios from "axios"
 import "./styles/editpostpage.less"
@@ -68,6 +70,7 @@ const EditUnverifiedPostPage: React.FunctionComponent<Props> = (props) => {
     const {session, setSession} = useContext(SessionContext)
     const {redirect, setRedirect} = useContext(RedirectContext)
     const {mobile, setMobile} = useContext(MobileContext)
+    const {showUpscaled, setShowUpscaled} = useContext(ShowUpscaledContext)
     const {postFlag, setPostFlag} = useContext(PostFlagContext)
     const {uploadDropFiles, setUploadDropFiles} = useContext(UploadDropFilesContext)
     const [displayImage, setDisplayImage] = useState(false)
@@ -75,7 +78,8 @@ const EditUnverifiedPostPage: React.FunctionComponent<Props> = (props) => {
     const [submitError, setSubmitError] = useState(false)
     const [saucenaoError, setSaucenaoError] = useState(false)
     const [danbooruError, setDanbooruError] = useState(false)
-    const [acceptedURLs, setAcceptedURLs] = useState([]) as any
+    const [originalFiles, setOriginalFiles] = useState([]) as any
+    const [upscaledFiles, setUpscaledFiles] = useState([]) as any
     const editPostErrorRef = useRef<any>(null)
     const submitErrorRef = useRef<any>(null)
     const saucenaoErrorRef = useRef<any>(null)
@@ -83,6 +87,7 @@ const EditUnverifiedPostPage: React.FunctionComponent<Props> = (props) => {
     const enterLinksRef = useRef<any>(null)
     const [currentImg, setCurrentImg] = useState(null) as any
     const [currentIndex, setCurrentIndex] = useState(0) as any
+    const [imgChangeFlag, setImgChangeFlag] = useState(false)
     const [type, setType] = useState("image")
     const [restrict, setRestrict] = useState("safe")
     const [style, setStyle] = useState("2d")
@@ -140,15 +145,27 @@ const EditUnverifiedPostPage: React.FunctionComponent<Props> = (props) => {
 
         let files = [] as any
         let links = [] as any
+        let upscaledFiles = [] as any
+        let upscaledLinks = [] as any
         for (let i = 0; i < post.images.length; i++) {
             let imageLink = functions.getUnverifiedImageLink(post.images[i].type, postID, post.images[i].order, post.images[i].filename)
-            const response = await fetch(imageLink).then((r) => r.arrayBuffer())
-            const blob = new Blob([new Uint8Array(response)])
-            const file = new File([blob], path.basename(imageLink))
-            files.push(file)
-            links.push(imageLink)
+            const response = await fetch(`${imageLink}?upscaled=false`).then((r) => r.arrayBuffer())
+            if (response) {
+                const blob = new Blob([new Uint8Array(response)])
+                const file = new File([blob], path.basename(imageLink))
+                files.push(file)
+                links.push(imageLink)
+            }
+            const upscaledResponse = await fetch(`${imageLink}?upscaled=true`, {headers: {"x-force-upscale": "true"}}).then((r) => r.arrayBuffer())
+            if (upscaledResponse) {
+                const upscaledBlob = new Blob([new Uint8Array(upscaledResponse)])
+                const upscaledFile = new File([upscaledBlob], path.basename(imageLink))
+                upscaledFiles.push(upscaledFile)
+                upscaledLinks.push(imageLink)
+            }
         }
-        validate(files, links)
+        await validate(files, links, false)
+        validate(upscaledFiles, upscaledLinks, true)
 
         const parsedTags = await functions.parseTagsUnverified([post])
         const tagCategories = await functions.tagCategories(parsedTags)
@@ -221,16 +238,14 @@ const EditUnverifiedPostPage: React.FunctionComponent<Props> = (props) => {
             }
         }
         setSeries(series)
-
         setRawTags(tagCategories.tags.map((t: any) => t.tag).join(" "))
-
         setEdited(false)
     }
 
     useEffect(() => {
         if (!edited) setEdited(true)
     }, [type, restrict, style, sourceTitle, sourceArtist, sourceCommentary, sourceTranslatedCommentary, sourceMirrors, sourceTranslatedTitle,
-    sourceLink, sourceBookmarks, sourceDate, acceptedURLs, artists, characters, series, rawTags])
+    sourceLink, sourceBookmarks, sourceDate, originalFiles, upscaledFiles, artists, characters, series, rawTags])
 
     useEffect(() => {
         if (uploadDropFiles?.length) {
@@ -275,7 +290,7 @@ const EditUnverifiedPostPage: React.FunctionComponent<Props> = (props) => {
         }
     }, [session])
 
-    const validate = async (files: File[], links?: string[]) => {
+    const validate = async (files: File[], links?: string[], forceUpscale?: boolean) => {
         let acceptedArray = [] as any 
         let error = ""
         for (let i = 0; i < files.length; i++) {
@@ -379,7 +394,19 @@ const EditUnverifiedPostPage: React.FunctionComponent<Props> = (props) => {
             }
             setCurrentImg(urls[0].link)
             setCurrentIndex(0)
-            setAcceptedURLs((prev: any) => [...prev, ...urls])
+            if (forceUpscale !== undefined) {
+                if (forceUpscale) {
+                    setUpscaledFiles((prev: any) => [...prev, ...urls])
+                } else {
+                    setOriginalFiles((prev: any) => [...prev, ...urls])
+                }
+            } else {
+                if (showUpscaled) {
+                    setUpscaledFiles((prev: any) => [...prev, ...urls])
+                } else {
+                    setOriginalFiles((prev: any) => [...prev, ...urls])
+                }
+            }
         }
         if (error) {
             setEditPostError(true)
@@ -801,9 +828,10 @@ const EditUnverifiedPostPage: React.FunctionComponent<Props> = (props) => {
     }
 
     const clear = () => {
-        const currentIndex = acceptedURLs.findIndex((a: any) => a.link === currentImg)
+        let currentFiles = getCurrentFiles()
+        const currentIndex = currentFiles.findIndex((a: any) => a.link === currentImg)
         if (enterLinksRef.current) {
-            const link = acceptedURLs[currentIndex]?.originalLink
+            const link = currentFiles[currentIndex]?.originalLink
             if (link) {
                 enterLinksRef.current.value = enterLinksRef.current.value.replaceAll(link, "")
             }
@@ -811,30 +839,32 @@ const EditUnverifiedPostPage: React.FunctionComponent<Props> = (props) => {
                 setShowLinksInput(false)
             }
         }
-        acceptedURLs.splice(currentIndex, 1)
-        const newIndex = currentIndex > acceptedURLs.length - 1 ? acceptedURLs.length - 1 : currentIndex
-        const newLink = acceptedURLs[newIndex]?.link || null
-        setAcceptedURLs(acceptedURLs)
+        currentFiles.splice(currentIndex, 1)
+        const newIndex = currentIndex > currentFiles.length - 1 ? currentFiles.length - 1 : currentIndex
+        const newLink = currentFiles[newIndex]?.link || null
+        showUpscaled ? setUpscaledFiles(upscaledFiles) : setOriginalFiles(originalFiles)
         setCurrentImg(newLink)
         forceUpdate()
     }
     
     const left = () => {
-        const currentIndex = acceptedURLs.findIndex((a: any) => a.link === currentImg)
+        let currentFiles = getCurrentFiles()
+        const currentIndex = currentFiles.findIndex((a: any) => a.link === currentImg)
         let newIndex = currentIndex - 1
         if (newIndex < 0) newIndex = 0
-        acceptedURLs.splice(newIndex, 0, acceptedURLs.splice(currentIndex, 1)[0])
-        setAcceptedURLs(acceptedURLs)
+        currentFiles.splice(newIndex, 0, currentFiles.splice(currentIndex, 1)[0])
+        showUpscaled ? setUpscaledFiles(upscaledFiles) : setOriginalFiles(originalFiles)
         setCurrentIndex(newIndex)
         forceUpdate()
     }
 
     const right = () => {
-        const currentIndex = acceptedURLs.findIndex((a: any) => a.link === currentImg)
+        let currentFiles = getCurrentFiles()
+        const currentIndex = currentFiles.findIndex((a: any) => a.link === currentImg)
         let newIndex = currentIndex + 1
-        if (newIndex > acceptedURLs.length - 1) newIndex = acceptedURLs.length - 1
-        acceptedURLs.splice(newIndex, 0, acceptedURLs.splice(currentIndex, 1)[0])
-        setAcceptedURLs(acceptedURLs)
+        if (newIndex > currentFiles.length - 1) newIndex = currentFiles.length - 1
+        currentFiles.splice(newIndex, 0, currentFiles.splice(currentIndex, 1)[0])
+        showUpscaled ? setUpscaledFiles(upscaledFiles) : setOriginalFiles(originalFiles)
         setCurrentIndex(newIndex)
         forceUpdate()
     }
@@ -872,22 +902,29 @@ const EditUnverifiedPostPage: React.FunctionComponent<Props> = (props) => {
             await functions.timeout(3000)
             return setSubmitError(false)
         }
-        const MB = acceptedURLs.reduce((acc: any, obj: any) => acc + obj.size, 0) / (1024*1024)
-        if (MB > 200 && !permissions.isElevated(session)) {
+        const upscaledMB = upscaledFiles.reduce((acc: any, obj: any) => acc + obj.size, 0) / (1024*1024)
+        const originalMB = originalFiles.reduce((acc: any, obj: any) => acc + obj.size, 0) / (1024*1024)
+        const MB = upscaledMB + originalMB
+        if (MB > 300 && !permissions.isElevated(session)) {
             setSubmitError(true)
             await functions.timeout(20)
-            submitErrorRef.current.innerText = "Combined file size shouldn't exceed 200MB."
+            submitErrorRef.current.innerText = "Combined file size shouldn't exceed 300MB."
             await functions.timeout(3000)
             return setSubmitError(false)
         }
-        let newAcceptedURLs = acceptedURLs.map((a: any) => {
+        let newOriginalFiles = originalFiles.map((a: any) => {
+            a.bytes = Object.values(a.bytes)
+            return a
+        })
+        let newUpscaledFiles = upscaledFiles.map((a: any) => {
             a.bytes = Object.values(a.bytes)
             return a
         })
         const data = {
             unverifiedID: postID,
             postID: originalID,
-            images: newAcceptedURLs,
+            images: newOriginalFiles,
+            upscaledImages: newUpscaledFiles,
             type,
             restrict,
             style,
@@ -932,7 +969,7 @@ const EditUnverifiedPostPage: React.FunctionComponent<Props> = (props) => {
             await functions.timeout(3000)
             return setSaucenaoError(false)
         }
-        let current = acceptedURLs[currentIndex]
+        let current = getCurrentFiles()[currentIndex]
         let bytes = "" as any 
         if (current.thumbnail) {
             bytes = await functions.base64toUint8Array(current.thumbnail).then((a) => Object.values(a))
@@ -1151,7 +1188,7 @@ const EditUnverifiedPostPage: React.FunctionComponent<Props> = (props) => {
 
             setRawTags(tagArr.join(" "))
         } else {
-            let current = acceptedURLs[currentIndex]
+            let current = getCurrentFiles()[currentIndex]
             let bytes = "" as any 
             if (functions.isVideo(current.link)) {
                 bytes = await functions.base64toUint8Array(current.thumbnail).then((a) => Object.values(a))
@@ -1218,7 +1255,8 @@ const EditUnverifiedPostPage: React.FunctionComponent<Props> = (props) => {
 
     const resetAll = () => {
         reset()
-        setAcceptedURLs([])
+        setUpscaledFiles([])
+        setOriginalFiles([])
         setCurrentImg(null)
         setCurrentIndex(0)
         setShowLinksInput(false)
@@ -1413,6 +1451,30 @@ const EditUnverifiedPostPage: React.FunctionComponent<Props> = (props) => {
         }
     }, [type, style])
 
+    useEffect(() => {
+        if (imgChangeFlag) {
+            const currentFiles = getCurrentFiles()
+            let index = currentIndex
+            let current = currentFiles[index]
+            if (!current) {
+                current = currentFiles[0]
+                index = 0
+            }
+            setCurrentImg(current?.link || null)
+            setCurrentIndex(index)
+            setImgChangeFlag(false)
+        }
+    }, [imgChangeFlag, showUpscaled, currentIndex, originalFiles, upscaledFiles])
+
+    const getCurrentFiles = () => {
+        return showUpscaled ? upscaledFiles : originalFiles
+    }
+
+    const changeUpscaled = () => {
+        setShowUpscaled((prev) => !prev)
+        setImgChangeFlag(true)
+    }
+
     return (
         <>
         <DragAndDrop/>
@@ -1446,9 +1508,13 @@ const EditUnverifiedPostPage: React.FunctionComponent<Props> = (props) => {
                                 <img className="editpost-button-img" src={linkIcon}/>
                                 <span className="editpost-button-text">Enter Links</span>
                         </button>
+                        <button className="upload-button" onClick={() => changeUpscaled()}>
+                                <img className="upload-button-img" src={showUpscaled ? upscaleIcon : originalIcon}/>
+                                <span className="upload-button-text">{showUpscaled ? "Upscaled" : "Original"}</span>
+                        </button>
                     </div>
                     <div className="editpost-row">
-                        {acceptedURLs.length > 1 ?
+                        {getCurrentFiles().length > 1 ?
                         <button className="editpost-button" onClick={left}>
                             <img className="editpost-button-img" src={leftIcon}/>
                         </button> : null}
@@ -1457,7 +1523,7 @@ const EditUnverifiedPostPage: React.FunctionComponent<Props> = (props) => {
                             <img className="editpost-button-img" src={xIcon}/>
                         </button>
                         : null}
-                        {acceptedURLs.length > 1 ?
+                        {getCurrentFiles().length > 1 ?
                         <button className="editpost-button" onClick={right}>
                             <img className="editpost-button-img" src={rightIcon}/>
                         </button> : null}
@@ -1473,7 +1539,11 @@ const EditUnverifiedPostPage: React.FunctionComponent<Props> = (props) => {
                                 <img className="editpost-button-img" src={linkIcon}/>
                                 <span className="editpost-button-text">Enter Links</span>
                         </button>
-                        {acceptedURLs.length > 1 ?
+                        <button className="upload-button" onClick={() => changeUpscaled()}>
+                                <img className="upload-button-img" src={showUpscaled ? upscaleIcon : originalIcon}/>
+                                <span className="upload-button-text">{showUpscaled ? "Upscaled" : "Original"}</span>
+                        </button>
+                        {getCurrentFiles().length > 1 ?
                         <button className="editpost-button" onClick={left}>
                             <img className="editpost-button-img" src={leftIcon}/>
                         </button> : null}
@@ -1482,7 +1552,7 @@ const EditUnverifiedPostPage: React.FunctionComponent<Props> = (props) => {
                             <img className="editpost-button-img" src={xIcon}/>
                         </button>
                         : null}
-                        {acceptedURLs.length > 1 ?
+                        {getCurrentFiles().length > 1 ?
                         <button className="editpost-button" onClick={right}>
                             <img className="editpost-button-img" src={rightIcon}/>
                         </button> : null}
@@ -1492,11 +1562,11 @@ const EditUnverifiedPostPage: React.FunctionComponent<Props> = (props) => {
                         <textarea ref={enterLinksRef} className="editpost-textarea" spellCheck={false} onChange={(event) => linkUpload(event)}
                         onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}></textarea>
                     </div> : null}
-                {acceptedURLs.length ?
+                {getCurrentFiles().length ?
                 <div className="editpost-row">
-                    {acceptedURLs.length > 1 ? 
+                    {getCurrentFiles().length > 1 ? 
                     <div className="editpost-container">
-                        <Carousel images={acceptedURLs.map((u: any) => u.link)} set={set} index={currentIndex}/>
+                        <Carousel images={getCurrentFiles().map((u: any) => u.link)} set={set} index={currentIndex}/>
                         {getPostJSX()}
                     </div>
                     : getPostJSX()}
@@ -1665,7 +1735,7 @@ const EditUnverifiedPostPage: React.FunctionComponent<Props> = (props) => {
                 <div className="editpost-container">
                     {generateSeriesJSX()}
                 </div>
-                {displayImage && acceptedURLs.length ?
+                {displayImage && getCurrentFiles().length ?
                 <div className="editpost-row">
                     {functions.isVideo(currentImg) ? 
                     <video autoPlay muted loop disablePictureInPicture className="tag-img-preview" src={currentImg}></video>:

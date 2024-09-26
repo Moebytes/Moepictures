@@ -40,6 +40,8 @@ CREATE TABLE IF NOT EXISTS "posts" (
     "translatedCommentary" text,
     "bookmarks" int,
     "hidden" boolean,
+    "hasOriginal" boolean,
+    "hasUpscaled" boolean,
     "mirrors" jsonb
 );
 
@@ -66,6 +68,8 @@ CREATE TABLE IF NOT EXISTS "unverified posts" (
     "translatedCommentary" text,
     "bookmarks" int,
     "hidden" boolean,
+    "hasOriginal" boolean,
+    "hasUpscaled" boolean,
     "mirrors" jsonb,
     "thumbnail" text
 );
@@ -391,6 +395,8 @@ CREATE TABLE IF NOT EXISTS "post history" (
     "translatedCommentary" text,
     "bookmarks" int,
     "mirrors" jsonb,
+    "hasOriginal" boolean,
+    "hasUpscaled" boolean,
     "artists" text[],
     "characters" text[],
     "series" text[],

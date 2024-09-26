@@ -177,6 +177,8 @@ export default class SQLFavorite {
             'hidden', post_json."hidden",
             'approver', post_json."approver",
             'mirrors', post_json."mirrors",
+            'hasOriginal', post_json."hasOriginal",
+            'hasUpscaled', post_json."hasUpscaled",
             'images', (array_agg(post_json."images"))[1]${includeTags ? `,
             'tags', post_json."tags"` : ""}
             ) AS post
@@ -184,9 +186,10 @@ export default class SQLFavorite {
             JOIN post_json ON post_json."postID" = favorites."postID"
             ${whereQueries ? `WHERE ${whereQueries}` : ""}
             GROUP BY favorites."favoriteID", post_json."postID", post_json."uploader", post_json."updater", ${includeTags ? `post_json."tags",` : ""}
-            post_json."type", post_json."restrict", post_json."style", post_json."cuteness", post_json."favoriteCount", post_json."thirdParty", post_json."approver",
-            post_json."drawn", post_json."uploadDate", post_json."updatedDate", post_json."title", post_json."hidden", post_json."translatedTitle",
-            post_json."artist", post_json."link", post_json."commentary", post_json."translatedCommentary", post_json."bookmarks", post_json."mirrors"
+            post_json."type", post_json."restrict", post_json."style", post_json."cuteness", post_json."favoriteCount", post_json."thirdParty", 
+            post_json."approver", post_json."drawn", post_json."uploadDate", post_json."updatedDate", post_json."title", post_json."hidden", 
+            post_json."translatedTitle", post_json."artist", post_json."link", post_json."commentary", post_json."translatedCommentary", 
+            post_json."bookmarks", post_json."mirrors", post_json."hasOriginal", post_json."hasUpscaled"
             ${sortQuery}
             ${limit ? `LIMIT $${limitValue}` : "LIMIT 100"} ${offset ? `OFFSET $${i}` : ""}
         `),

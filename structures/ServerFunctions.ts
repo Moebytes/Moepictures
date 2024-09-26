@@ -7,6 +7,8 @@ import sql from "../sql/SQLQuery"
 import functions from "../structures/Functions"
 import {render} from "@react-email/components"
 import S3 from "aws-sdk/clients/s3"
+import phash from "sharp-phash"
+import dist from "sharp-phash/distance"
 import CSRF from "csrf"
 
 const csrf = new CSRF()
@@ -116,12 +118,13 @@ export default class ServerFunctions {
         }
     }
 
-    public static getFile = async (file: string, original?: boolean) => {
+    public static getFile = async (file: string, upscaled?: boolean) => {
         if (functions.isLocalHost()) {
-            if (!fs.existsSync(`${local}/${decodeURIComponent(file)}`)) return ServerFunctions.getFirstHistoryFile(file)
-            const originalFile = `${local}/${decodeURIComponent(`${file.split("/")[0]}-original/${file.split("/")[1]}`)}`
-            if (original && fs.existsSync(originalFile)) return fs.readFileSync(originalFile)
-            return fs.readFileSync(`${local}/${decodeURIComponent(file)}`)
+            let originalKey = `${local}/${decodeURIComponent(file)}`
+            let upscaledKey = `${local}/${decodeURIComponent(`${file.split("/")[0]}-upscaled/${file.split("/")[1]}`)}`
+            if (!fs.existsSync(upscaled ? upscaledKey : originalKey)) return ServerFunctions.getFirstHistoryFile(file)
+            if (upscaled && fs.existsSync(upscaledKey)) return fs.readFileSync(upscaledKey)
+            return fs.readFileSync(originalKey)
         }
         return s3.getObject({Key: decodeURIComponent(file), Bucket: "moepictures"}).promise().then((r) => r.Body) as unknown as Buffer
     }
@@ -240,9 +243,12 @@ export default class ServerFunctions {
         return nextKey + 1
     }
 
-    public static getUnverifiedFile = async (file: string) => {
+    public static getUnverifiedFile = async (file: string, upscaled?: boolean) => {
         if (functions.isLocalHost()) {
-            return fs.readFileSync(`${localUnverified}/${decodeURIComponent(file)}`)
+            let originalKey = `${localUnverified}/${decodeURIComponent(file)}`
+            let upscaledKey = `${localUnverified}/${decodeURIComponent(`${file.split("/")[0]}-upscaled/${file.split("/")[1]}`)}`
+            if (upscaled && fs.existsSync(upscaledKey)) return fs.readFileSync(upscaledKey)
+            return fs.readFileSync(originalKey)
         }
         return s3.getObject({Key: decodeURIComponent(file), Bucket: "moepictures-unverified"}).promise().then((r) => r.Body) as unknown as Buffer
     }
@@ -324,12 +330,18 @@ export default class ServerFunctions {
         return {artists, characters, series, tags: newTags}
     }
 
-    public static imagesChanged = async (oldImages: any[], currentImages: any[]) => {
+    public static imagesChanged = async (oldImages: any[], currentImages: any[], upscaled?: boolean) => {
         if (oldImages.length !== currentImages.length) return true
         for (let i = 0; i < oldImages.length; i++) {
             const oldImage = oldImages[i]
-            const oldPath = functions.getImagePath(oldImage.type, oldImage.postID, oldImage.order, oldImage.filename)
+            let oldPath = ""
+            if (upscaled) {
+                oldPath = functions.getUpscaledImagePath(oldImage.type, oldImage.postID, oldImage.order, oldImage.filename)
+            } else {
+                oldPath = functions.getImagePath(oldImage.type, oldImage.postID, oldImage.order, oldImage.filename)
+            }
             const oldBuffer = await ServerFunctions.getFile(oldPath) as Buffer
+            if (!oldBuffer) continue
             const currentImage = currentImages[i]
             const currentBuffer = Buffer.from(currentImage.bytes)
             const imgMD5 = crypto.createHash("md5").update(oldBuffer).digest("hex")
@@ -339,15 +351,27 @@ export default class ServerFunctions {
         return false
     }
 
-    public static imagesChangedUnverified = async (oldImages: any[], currentImages: any[]) => {
+    public static imagesChangedUnverified = async (oldImages: any[], currentImages: any[], upscaled?: boolean) => {
         if (oldImages.length !== currentImages.length) return true
         for (let i = 0; i < oldImages.length; i++) {
             const oldImage = oldImages[i]
-            const oldPath = functions.getImagePath(oldImage.type, oldImage.postID, oldImage.order, oldImage.filename)
+            let oldPath = ""
+            if (upscaled) {
+                oldPath = functions.getUpscaledImagePath(oldImage.type, oldImage.postID, oldImage.order, oldImage.filename)
+            } else {
+                oldPath = functions.getImagePath(oldImage.type, oldImage.postID, oldImage.order, oldImage.filename)
+            }
             const oldBuffer = await ServerFunctions.getFile(oldPath) as Buffer
+            if (!oldBuffer) continue
             const currentImage = currentImages[i]
-            const currentPath = functions.getImagePath(currentImage.type, currentImage.postID, currentImage.order, currentImage.filename)
+            let currentPath = ""
+            if (upscaled) {
+                currentPath = functions.getUpscaledImagePath(currentImage.type, currentImage.postID, currentImage.order, currentImage.filename)
+            } else {
+                currentPath = functions.getImagePath(currentImage.type, currentImage.postID, currentImage.order, currentImage.filename)
+            }
             const currentBuffer = await ServerFunctions.getUnverifiedFile(currentPath)
+            if (!currentBuffer) continue
             const imgMD5 = crypto.createHash("md5").update(oldBuffer).digest("hex")
             const currentMD5 = crypto.createHash("md5").update(currentBuffer).digest("hex")
             if (imgMD5 !== currentMD5) return true

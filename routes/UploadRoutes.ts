@@ -78,6 +78,7 @@ const CreateRoutes = (app: Express) => {
       try {
         if (!serverFunctions.validateCSRF(req)) return res.status(400).send("Bad CSRF token")
         const images = req.body.images 
+        const upscaledImages = req.body.upscaledImages
         let type = req.body.type 
         const restrict = req.body.restrict 
         const style = req.body.style
@@ -130,8 +131,11 @@ const CreateRoutes = (app: Express) => {
 
         let skipMBCheck = (req.session.role === "admin" || req.session.role === "mod") ? true : false
         if (!validImages(images, skipMBCheck)) return res.status(400).send("Invalid images")
-        const totalMB = images.reduce((acc: any, obj: any) => acc + obj.size, 0) / (1024*1024)
-        if (!skipMBCheck && totalMB > 200) return res.status(400).send("Invalid size")
+        if (!validImages(upscaledImages, skipMBCheck)) return res.status(400).send("Invalid upscaled images")
+        const originalMB = images.reduce((acc: any, obj: any) => acc + obj.size, 0) / (1024*1024)
+        const upscaledMB = upscaledImages.reduce((acc: any, obj: any) => acc + obj.size, 0) / (1024*1024)
+        const totalMB = originalMB + upscaledMB
+        if (!skipMBCheck && totalMB > 300) return res.status(400).send("Invalid size")
         if (!functions.validType(type)) return res.status(400).send("Invalid type")
         if (!functions.validRestrict(restrict)) return res.status(400).send("Invalid restrict")
         if (!functions.validStyle(style)) return res.status(400).send("Invalid style")
@@ -141,10 +145,24 @@ const CreateRoutes = (app: Express) => {
 
         if (type !== "comic") type = "image"
 
+        if (images.length !== upscaledImages.length) {
+          const maxLength = Math.max(images.length, upscaledImages.length)
+          while (images.length < maxLength) {
+            images.push(null)
+          }
+          while (upscaledImages.length < maxLength) {
+            upscaledImages.push(null)
+          }
+        }
+
+        let hasOriginal = false
+        let hasUpscaled = false
+
         for (let i = 0; i < images.length; i++) {
           let order = i + 1
-          const ext = images[i].ext
-          let fileOrder = images.length > 1 ? `${order}` : "1"
+          let current = images[i] ? images : upscaledImages
+          const ext = current[i].ext
+          let fileOrder = current.length > 1 ? `${order}` : "1"
           const cleanTitle = functions.cleanTitle(source.title)
           const filename = cleanTitle ? `${cleanTitle}.${ext}` : 
           characters[0].tag !== "unknown-character" ? `${characters[0].tag}.${ext}` :
@@ -155,7 +173,7 @@ const CreateRoutes = (app: Express) => {
           } else if (ext === "jpg" || ext === "png" || ext === "avif") {
             kind = "image"
           } else if (ext === "webp") {
-            const animated = await functions.isAnimatedWebp(Buffer.from(images[i].bytes))
+            const animated = await functions.isAnimatedWebp(Buffer.from(current[i].bytes))
             if (animated) {
               kind = "animation"
               if (type !== "video") type = "animation"
@@ -176,20 +194,32 @@ const CreateRoutes = (app: Express) => {
             type = "model"
           }
 
-          let imagePath = functions.getImagePath(kind, postID, Number(fileOrder), filename)
-          const buffer = Buffer.from(Object.values(images[i].bytes) as any)
-          await serverFunctions.uploadFile(imagePath, buffer)
+          if (images[i]) {
+            let imagePath = functions.getImagePath(kind, postID, Number(fileOrder), filename)
+            const buffer = Buffer.from(Object.values(images[i].bytes) as any)
+            await serverFunctions.uploadFile(imagePath, buffer)
+            hasOriginal = true
+          }
+
+          if (upscaledImages[i]) {
+            let imagePath = functions.getUpscaledImagePath(kind, postID, Number(fileOrder), filename)
+            const buffer = Buffer.from(Object.values(upscaledImages[i].bytes) as any)
+            await serverFunctions.uploadFile(imagePath, buffer)
+            hasUpscaled = true
+          }
+
           let dimensions = null as any
           let hash = ""
           if (kind === "video" || kind === "audio" || kind === "model") {
-            const buffer = functions.base64ToBuffer(images[i].thumbnail)
+            const buffer = functions.base64ToBuffer(current[i].thumbnail)
             hash = await phash(buffer).then((hash: string) => functions.binaryToHex(hash))
             dimensions = imageSize(buffer)
           } else {
+              const buffer = Buffer.from(Object.values(current[i].bytes) as any)
               hash = await phash(buffer).then((hash: string) => functions.binaryToHex(hash))
               dimensions = imageSize(buffer)
           }
-          await sql.post.insertImage(postID, filename, kind, order, hash, dimensions.width, dimensions.height, images[i].size)
+          await sql.post.insertImage(postID, filename, kind, order, hash, dimensions.width, dimensions.height, current[i].size)
         }
 
         let hidden = false 
@@ -219,6 +249,8 @@ const CreateRoutes = (app: Express) => {
           uploader: req.session.username,
           updater: req.session.username,
           approver: req.session.username,
+          hasUpscaled,
+          hasOriginal,
           hidden
         })
 
@@ -293,7 +325,9 @@ const CreateRoutes = (app: Express) => {
           const unverifiedPost = await sql.post.unverifiedPost(Number(unverifiedID))
           for (let i = 0; i < unverifiedPost.images.length; i++) {
             const imgPath = functions.getImagePath(unverifiedPost.images[i].type, Number(unverifiedID), unverifiedPost.images[i].order, unverifiedPost.images[i].filename)
+            const upscaledImgPath = functions.getUpscaledImagePath(unverifiedPost.images[i].type, Number(unverifiedID), unverifiedPost.images[i].order, unverifiedPost.images[i].filename)
             await serverFunctions.deleteUnverifiedFile(imgPath)
+            await serverFunctions.deleteUnverifiedFile(upscaledImgPath)
           }
           await sql.post.deleteUnverifiedPost(Number(unverifiedID))
         }
@@ -309,6 +343,7 @@ const CreateRoutes = (app: Express) => {
         if (!serverFunctions.validateCSRF(req)) return res.status(400).send("Bad CSRF token")
         const postID = Number(req.body.postID)
         const images = req.body.images 
+        const upscaledImages = req.body.upscaledImages
         let type = req.body.type 
         const restrict = req.body.restrict 
         const style = req.body.style
@@ -366,8 +401,11 @@ const CreateRoutes = (app: Express) => {
 
         let skipMBCheck = (req.session.role === "admin" || req.session.role === "mod") ? true : false
         if (!validImages(images, skipMBCheck)) return res.status(400).send("Invalid images")
-        const totalMB = images.reduce((acc: any, obj: any) => acc + obj.size, 0) / (1024*1024)
-        if (!skipMBCheck && totalMB > 200) return res.status(400).send("Invalid size")
+        if (!validImages(upscaledImages, skipMBCheck)) return res.status(400).send("Invalid upscaled images")
+        const originalMB = images.reduce((acc: any, obj: any) => acc + obj.size, 0) / (1024*1024)
+        const upscaledMB = upscaledImages.reduce((acc: any, obj: any) => acc + obj.size, 0) / (1024*1024)
+        const totalMB = originalMB + upscaledMB
+        if (!skipMBCheck && totalMB > 300) return res.status(400).send("Invalid size")
         if (!functions.validType(type)) return res.status(400).send("Invalid type")
         if (!functions.validRestrict(restrict)) return res.status(400).send("Invalid restrict")
         if (!functions.validStyle(style)) return res.status(400).send("Invalid style")
@@ -375,17 +413,23 @@ const CreateRoutes = (app: Express) => {
         const post = await sql.post.post(postID)
         if (!post) return res.status(400).send("Bad request")
 
-        const imgChanged = await serverFunctions.imagesChanged(post.images, images)
+        let imgChanged = await serverFunctions.imagesChanged(post.images, images)
+        if (!imgChanged) imgChanged = await serverFunctions.imagesChanged(post.images, upscaledImages, true)
 
         let vanillaBuffers = [] as any
+        let upscaledVanillaBuffers = [] as any
         for (let i = 0; i < post.images.length; i++) {
           const imagePath = functions.getImagePath(post.images[i].type, postID, post.images[i].order, post.images[i].filename)
+          const upscaledImagePath = functions.getUpscaledImagePath(post.images[i].type, postID, post.images[i].order, post.images[i].filename)
           const oldImage = await serverFunctions.getFile(imagePath) as Buffer
+          const oldUpscaledImage = await serverFunctions.getFile(upscaledImagePath) as Buffer
           vanillaBuffers.push(oldImage)
+          upscaledVanillaBuffers.push(oldUpscaledImage)
           if (imgChanged) {
             if (req.session.role !== "admin" && req.session.role !== "mod") return res.status(403).send("No permission to modify images")
             await sql.post.deleteImage(post.images[i].imageID)
             await serverFunctions.deleteFile(imagePath)
+            await serverFunctions.deleteFile(upscaledImagePath)
           }
         }
 
@@ -396,11 +440,15 @@ const CreateRoutes = (app: Express) => {
 
         if (type !== "comic") type = "image"
 
+        let hasOriginal = false
+        let hasUpscaled = false
+
         let imageFilenames = [] as any
         for (let i = 0; i < images.length; i++) {
           let order = i + 1
-          const ext = images[i].ext
-          let fileOrder = images.length > 1 ? `${order}` : "1"
+          let current = images[i] ? images : upscaledImages
+          const ext = current[i].ext
+          let fileOrder = current.length > 1 ? `${order}` : "1"
           const cleanTitle = functions.cleanTitle(source.title)
           const filename = cleanTitle ? `${cleanTitle}.${ext}` : 
           characters[0].tag !== "unknown-character" ? `${characters[0].tag}.${ext}` :
@@ -412,7 +460,7 @@ const CreateRoutes = (app: Express) => {
           } else if (ext === "jpg" || ext === "png" || ext === "avif") {
             kind = "image"
           } else if (ext === "webp") {
-            const animated = await functions.isAnimatedWebp(Buffer.from(images[i].bytes))
+            const animated = await functions.isAnimatedWebp(Buffer.from(current[i].bytes))
             if (animated) {
               kind = "animation"
               if (type !== "video") type = "animation"
@@ -433,20 +481,32 @@ const CreateRoutes = (app: Express) => {
             type = "model"
         }
         if (imgChanged) {
-            let imagePath = functions.getImagePath(kind, postID, Number(fileOrder), filename)
-            const buffer = Buffer.from(Object.values(images[i].bytes) as any)
-            await serverFunctions.uploadFile(imagePath, buffer)
+            if (images[i]) {
+              let imagePath = functions.getImagePath(kind, postID, Number(fileOrder), filename)
+              const buffer = Buffer.from(Object.values(images[i].bytes) as any)
+              await serverFunctions.uploadFile(imagePath, buffer)
+              hasOriginal = true
+            }
+            
+            if (upscaledImages[i]) {
+              let upscaledImagePath = functions.getUpscaledImagePath(kind, postID, Number(fileOrder), filename)
+              const upscaledBuffer = Buffer.from(Object.values(upscaledImages[i].bytes) as any)
+              await serverFunctions.uploadFile(upscaledImagePath, upscaledBuffer)
+              hasUpscaled = true
+            }
+
             let dimensions = null as any
             let hash = ""
             if (kind === "video" || kind === "audio" || kind === "model") {
-              const buffer = functions.base64ToBuffer(images[i].thumbnail)
+              const buffer = functions.base64ToBuffer(current[i].thumbnail)
               hash = await phash(buffer).then((hash: string) => functions.binaryToHex(hash))
               dimensions = imageSize(buffer)
             } else {
+                const buffer = Buffer.from(Object.values(current[i].bytes) as any)
                 hash = await phash(buffer).then((hash: string) => functions.binaryToHex(hash))
                 dimensions = imageSize(buffer)
             }
-            await sql.post.insertImage(postID, filename, kind, order, hash, dimensions.width, dimensions.height, images[i].size)
+            await sql.post.insertImage(postID, filename, kind, order, hash, dimensions.width, dimensions.height, current[i].size)
           }
         }
 
@@ -467,6 +527,8 @@ const CreateRoutes = (app: Express) => {
           mirrors: source.mirrors ? functions.mirrorsJSON(source.mirrors) : null,
           type,
           updatedDate,
+          hasOriginal,
+          hasUpscaled,
           updater: req.session.username
         })
 
@@ -540,7 +602,9 @@ const CreateRoutes = (app: Express) => {
           const unverifiedPost = await sql.post.unverifiedPost(Number(unverifiedID))
           for (let i = 0; i < unverifiedPost.images.length; i++) {
             const imgPath = functions.getImagePath(unverifiedPost.images[i].type, Number(unverifiedID), unverifiedPost.images[i].order, unverifiedPost.images[i].filename)
+            const upscaledImgPath = functions.getUpscaledImagePath(unverifiedPost.images[i].type, Number(unverifiedID), unverifiedPost.images[i].order, unverifiedPost.images[i].filename)
             await serverFunctions.deleteUnverifiedFile(imgPath)
+            await serverFunctions.deleteUnverifiedFile(upscaledImgPath)
           }
           await sql.post.deleteUnverifiedPost(Number(unverifiedID))
         }
@@ -570,46 +634,81 @@ const CreateRoutes = (app: Express) => {
             let vanillaImages = [] as any
             for (let i = 0; i < vanilla.images.length; i++) {
                 if (imgChanged) {
-                  const newImagePath = functions.getImageHistoryPath(postID, 1, vanilla.images[i].filename)
-                  await serverFunctions.uploadFile(newImagePath, vanillaBuffers[i])
+                  let newImagePath = ""
+                  if (upscaledVanillaBuffers[i]) {
+                    newImagePath = functions.getUpscaledImageHistoryPath(postID, 1, vanilla.images[i].filename)
+                    await serverFunctions.uploadFile(newImagePath, upscaledVanillaBuffers[i])
+                  }
+                  if (vanillaBuffers[i]) {
+                    newImagePath = functions.getImageHistoryPath(postID, 1, vanilla.images[i].filename)
+                    await serverFunctions.uploadFile(newImagePath, vanillaBuffers[i])
+                  }
                   vanillaImages.push(newImagePath)
                 } else {
                   vanillaImages.push(functions.getImagePath(vanilla.images[i].type, postID, vanilla.images[i].order, vanilla.images[i].filename))
                 }
             }
-            await sql.history.insertPostHistory(vanilla.user, postID, vanillaImages, vanilla.uploader, vanilla.updater, vanilla.uploadDate, vanilla.updatedDate,
-                vanilla.type, vanilla.restrict, vanilla.style, vanilla.thirdParty, vanilla.title, vanilla.translatedTitle, vanilla.drawn, vanilla.artist,
-                vanilla.link, vanilla.commentary, vanilla.translatedCommentary, vanilla.bookmarks, vanilla.mirrors, vanilla.artists, vanilla.characters, vanilla.series, vanilla.tags)
+            await sql.history.insertPostHistory({
+              postID, username: vanilla.user, images: vanillaImages, uploader: vanilla.uploader, updater: vanilla.updater, 
+              uploadDate: vanilla.uploadDate, updatedDate: vanilla.updatedDate, type: vanilla.type, restrict: vanilla.restrict, 
+              style: vanilla.style, thirdParty: vanilla.thirdParty, title: vanilla.title, translatedTitle: vanilla.translatedTitle, 
+              drawn: vanilla.drawn, artist: vanilla.artist, link: vanilla.link, commentary: vanilla.commentary, translatedCommentary: vanilla.translatedCommentary, 
+              bookmarks: vanilla.bookmarks, mirrors: vanilla.mirrors, hasOriginal: vanilla.hasOriginal, hasUpscaled: vanilla.hasUpscaled, 
+              artists: vanilla.artists, characters: vanilla.characters, series: vanilla.series, tags: vanilla.tags, reason})
 
             let newImages = [] as any
             for (let i = 0; i < images.length; i++) {
                 if (imgChanged) {
-                  const buffer = Buffer.from(Object.values(images[i].bytes) as any)
-                  const newImagePath = functions.getImageHistoryPath(postID, 2, imageFilenames[i])
-                  await serverFunctions.uploadFile(newImagePath, buffer)
+                  let newImagePath = ""
+                  if (upscaledImages[i]) {
+                    const buffer = Buffer.from(Object.values(upscaledImages[i].bytes) as any)
+                    newImagePath = functions.getUpscaledImageHistoryPath(postID, 2, imageFilenames[i])
+                    await serverFunctions.uploadFile(newImagePath, buffer)
+                  }
+                  if (images[i]) {
+                    const buffer = Buffer.from(Object.values(images[i].bytes) as any)
+                    newImagePath = functions.getImageHistoryPath(postID, 2, imageFilenames[i])
+                    await serverFunctions.uploadFile(newImagePath, buffer)
+                  }
                   newImages.push(newImagePath)
                 } else {
                   newImages.push(functions.getImagePath(updated.images[i].type, postID, updated.images[i].order, updated.images[i].filename))
                 }
             }
-            await sql.history.insertPostHistory(req.session.username, postID, newImages, updated.uploader, updated.updater, updated.uploadDate, updated.updatedDate,
-            updated.type, updated.restrict, updated.style, updated.thirdParty, updated.title, updated.translatedTitle, updated.drawn, updated.artist,
-            updated.link, updated.commentary, updated.translatedCommentary, updated.bookmarks, updated.mirrors, artists, characters, series, tags, reason)
+            await sql.history.insertPostHistory({
+              postID, username: req.session.username, images: newImages, uploader: updated.uploader, updater: updated.updater, 
+              uploadDate: updated.uploadDate, updatedDate: updated.updatedDate, type: updated.type, restrict: updated.restrict, 
+              style: updated.style, thirdParty: updated.thirdParty, title: updated.title, translatedTitle: updated.translatedTitle, 
+              drawn: updated.drawn, artist: updated.artist, link: updated.link, commentary: updated.commentary, 
+              translatedCommentary: updated.translatedCommentary, bookmarks: updated.bookmarks, mirrors: updated.mirrors, 
+              hasOriginal: updated.hasOriginal, hasUpscaled: updated.hasUpscaled, artists, characters, series, tags, reason})
         } else {
             let newImages = [] as any
             for (let i = 0; i < images.length; i++) {
               if (imgChanged) {
-                const buffer = Buffer.from(Object.values(images[i].bytes) as any)
-                const newImagePath = functions.getImageHistoryPath(postID, nextKey, imageFilenames[i])
-                await serverFunctions.uploadFile(newImagePath, buffer)
+                let newImagePath = ""
+                if (upscaledImages[i]) {
+                  const buffer = Buffer.from(Object.values(upscaledImages[i].bytes) as any)
+                  newImagePath = functions.getUpscaledImageHistoryPath(postID, nextKey, imageFilenames[i])
+                  await serverFunctions.uploadFile(newImagePath, buffer)
+                }
+                if (images[i]) {
+                  const buffer = Buffer.from(Object.values(images[i].bytes) as any)
+                  newImagePath = functions.getImageHistoryPath(postID, nextKey, imageFilenames[i])
+                  await serverFunctions.uploadFile(newImagePath, buffer)
+                }
                 newImages.push(newImagePath)
               } else {
                 newImages.push(functions.getImagePath(updated.images[i].type, postID, updated.images[i].order, updated.images[i].filename))
               }
             }
-            await sql.history.insertPostHistory(req.session.username, postID, newImages, updated.uploader, updated.updater, updated.uploadDate, updated.updatedDate,
-            updated.type, updated.restrict, updated.style, updated.thirdParty, updated.title, updated.translatedTitle, updated.drawn, updated.artist,
-            updated.link, updated.commentary, updated.translatedCommentary, updated.bookmarks, updated.mirrors, artists, characters, series, tags, reason)
+            await sql.history.insertPostHistory({
+              postID, username: req.session.username, images: newImages, uploader: updated.uploader, updater: updated.updater, 
+              uploadDate: updated.uploadDate, updatedDate: updated.updatedDate, type: updated.type, restrict: updated.restrict, 
+              style: updated.style, thirdParty: updated.thirdParty, title: updated.title, translatedTitle: updated.translatedTitle, 
+              drawn: updated.drawn, artist: updated.artist, link: updated.link, commentary: updated.commentary, 
+              translatedCommentary: updated.translatedCommentary, bookmarks: updated.bookmarks, mirrors: updated.mirrors, 
+              hasOriginal: updated.hasOriginal, hasUpscaled: updated.hasUpscaled, artists, characters, series, tags, reason})
         }
         res.status(200).send("Success")
       } catch (e) {
@@ -622,6 +721,7 @@ const CreateRoutes = (app: Express) => {
       try {
         if (!serverFunctions.validateCSRF(req)) return res.status(400).send("Bad CSRF token")
         const images = req.body.images 
+        const upscaledImages = req.body.upscaledImages 
         let type = req.body.type 
         const restrict = req.body.restrict 
         const style = req.body.style
@@ -672,8 +772,11 @@ const CreateRoutes = (app: Express) => {
 
         let skipMBCheck = (req.session.role === "admin" || req.session.role === "mod") ? true : false
         if (!validImages(images, skipMBCheck)) return res.status(400).send("Invalid images")
-        const totalMB = images.reduce((acc: any, obj: any) => acc + obj.size, 0) / (1024*1024)
-        if (!skipMBCheck && totalMB > 200) return res.status(400).send("Invalid size")
+        if (!validImages(upscaledImages, skipMBCheck)) return res.status(400).send("Invalid upscaled images")
+        const originalMB = images.reduce((acc: any, obj: any) => acc + obj.size, 0) / (1024*1024)
+        const upscaledMB = upscaledImages.reduce((acc: any, obj: any) => acc + obj.size, 0) / (1024*1024)
+        const totalMB = originalMB + upscaledMB
+        if (!skipMBCheck && totalMB > 300) return res.status(400).send("Invalid size")
         if (!functions.validType(type)) return res.status(400).send("Invalid type")
         if (!functions.validRestrict(restrict)) return res.status(400).send("Invalid restrict")
         if (!functions.validStyle(style)) return res.status(400).send("Invalid style")
@@ -681,13 +784,16 @@ const CreateRoutes = (app: Express) => {
         const postID = await sql.post.insertUnverifiedPost()
         if (thirdPartyID && !Number.isNaN(Number(thirdPartyID))) await sql.post.insertUnverifiedThirdParty(postID, Number(thirdPartyID))
 
-
         if (type !== "comic") type = "image"
+
+        let hasOriginal = false
+        let hasUpscaled = false
 
         for (let i = 0; i < images.length; i++) {
           let order = i + 1
-          const ext = images[i].ext
-          let fileOrder = images.length > 1 ? `${order}` : "1"
+          let current = images[i] ? images : upscaledImages
+          const ext = current[i].ext
+          let fileOrder = current.length > 1 ? `${order}` : "1"
           const cleanTitle = functions.cleanTitle(source.title)
           const filename = cleanTitle ? `${source.title}.${ext}` : 
           characters[0].tag !== "unknown-character" ? `${characters[0].tag}.${ext}` :
@@ -698,7 +804,7 @@ const CreateRoutes = (app: Express) => {
           } else if (ext === "jpg" || ext === "png" || ext === "avif") {
             kind = "image"
           } else if (ext === "webp") {
-            const animated = await functions.isAnimatedWebp(Buffer.from(images[i].bytes))
+            const animated = await functions.isAnimatedWebp(Buffer.from(current[i].bytes))
             if (animated) {
               kind = "animation"
               if (type !== "video") type = "animation"
@@ -718,21 +824,31 @@ const CreateRoutes = (app: Express) => {
             kind = "model"
             type = "model"
         }
+          if (images[i]) {
+            let imagePath = functions.getImagePath(kind, postID, Number(fileOrder), filename)
+            const buffer = Buffer.from(Object.values(images[i].bytes) as any)
+            await serverFunctions.uploadUnverifiedFile(imagePath, buffer)
+            hasOriginal = true
+          }
 
-          let imagePath = functions.getImagePath(kind, postID, Number(fileOrder), filename)
-          const buffer = Buffer.from(Object.values(images[i].bytes) as any)
-          await serverFunctions.uploadUnverifiedFile(imagePath, buffer)
+          if (upscaledImages[i]) {
+            let imagePath = functions.getUpscaledImagePath(kind, postID, Number(fileOrder), filename)
+            const buffer = Buffer.from(Object.values(upscaledImages[i].bytes) as any)
+            await serverFunctions.uploadUnverifiedFile(imagePath, buffer)
+            hasUpscaled = true
+          }
           let dimensions = null as any
           let hash = ""
           if (kind === "video" || kind === "audio" || kind === "model") {
-            const buffer = functions.base64ToBuffer(images[i].thumbnail)
+            const buffer = functions.base64ToBuffer(current[i].thumbnail)
             hash = await phash(buffer).then((hash: string) => functions.binaryToHex(hash))
             dimensions = imageSize(buffer)
           } else {
-              hash = await phash(buffer).then((hash: string) => functions.binaryToHex(hash))
-              dimensions = imageSize(buffer)
+            const buffer = Buffer.from(Object.values(current[i].bytes) as any)
+            hash = await phash(buffer).then((hash: string) => functions.binaryToHex(hash))
+            dimensions = imageSize(buffer)
           }
-          await sql.post.insertUnverifiedImage(postID, filename, kind, order, hash, dimensions.width, dimensions.height, images[i].size)
+          await sql.post.insertUnverifiedImage(postID, filename, kind, order, hash, dimensions.width, dimensions.height, current[i].size)
         }
 
         let hidden = false 
@@ -763,6 +879,8 @@ const CreateRoutes = (app: Express) => {
           updater: req.session.username,
           duplicates: duplicates ? true : false,
           newTags: newTags.length,
+          hasOriginal,
+          hasUpscaled,
           hidden
         })
 
@@ -848,6 +966,7 @@ const CreateRoutes = (app: Express) => {
         let postID = Number(req.body.postID)
         let unverifiedID = Number(req.body.unverifiedID)
         const images = req.body.images 
+        const upscaledImages = req.body.upscaledImages 
         let type = req.body.type 
         const restrict = req.body.restrict 
         const style = req.body.style
@@ -900,8 +1019,11 @@ const CreateRoutes = (app: Express) => {
 
         let skipMBCheck = (req.session.role === "admin" || req.session.role === "mod") ? true : false
         if (!validImages(images, skipMBCheck)) return res.status(400).send("Invalid images")
-        const totalMB = images.reduce((acc: any, obj: any) => acc + obj.size, 0) / (1024*1024)
-        if (!skipMBCheck && totalMB > 200) return res.status(400).send("Invalid size")
+        if (!validImages(upscaledImages, skipMBCheck)) return res.status(400).send("Invalid upscaled images")
+        const originalMB = images.reduce((acc: any, obj: any) => acc + obj.size, 0) / (1024*1024)
+        const upscaledMB = upscaledImages.reduce((acc: any, obj: any) => acc + obj.size, 0) / (1024*1024)
+        const totalMB = originalMB + upscaledMB
+        if (!skipMBCheck && totalMB > 300) return res.status(400).send("Invalid size")
         if (!functions.validType(type)) return res.status(400).send("Invalid type")
         if (!functions.validRestrict(restrict)) return res.status(400).send("Invalid restrict")
         if (!functions.validStyle(style)) return res.status(400).send("Invalid style")
@@ -912,6 +1034,7 @@ const CreateRoutes = (app: Express) => {
           for (let i = 0; i < unverified.images.length; i++) {
             await sql.post.deleteUnverifiedImage(unverified.images[i].imageID)
             await serverFunctions.deleteUnverifiedFile(functions.getImagePath(unverified.images[i].type, unverifiedID, unverified.images[i].order, unverified.images[i].filename))
+            await serverFunctions.deleteUnverifiedFile(functions.getUpscaledImagePath(unverified.images[i].type, unverifiedID, unverified.images[i].order, unverified.images[i].filename))
           }
         }
 
@@ -932,10 +1055,14 @@ const CreateRoutes = (app: Express) => {
 
         if (type !== "comic") type = "image"
 
+        let hasOriginal = false
+        let hasUpscaled = false
+
         for (let i = 0; i < images.length; i++) {
           let order = i + 1
-          const ext = images[i].ext
-          let fileOrder = images.length > 1 ? `${order}` : "1"
+          let current = images[i] ? images : upscaledImages
+          const ext = current[i].ext
+          let fileOrder = current.length > 1 ? `${order}` : "1"
           const cleanTitle = functions.cleanTitle(source.title)
           const filename = cleanTitle ? `${cleanTitle}.${ext}` : 
           characters[0].tag !== "unknown-character" ? `${characters[0].tag}.${ext}` :
@@ -946,7 +1073,7 @@ const CreateRoutes = (app: Express) => {
           } else if (ext === "jpg" || ext === "png" || ext === "avif") {
             kind = "image"
           } else if (ext === "webp") {
-            const animated = await functions.isAnimatedWebp(Buffer.from(images[i].bytes))
+            const animated = await functions.isAnimatedWebp(Buffer.from(current[i].bytes))
             if (animated) {
               kind = "animation"
               if (type !== "video") type = "animation"
@@ -966,21 +1093,30 @@ const CreateRoutes = (app: Express) => {
             kind = "model"
             type = "model"
         }
-
-          let imagePath = functions.getImagePath(kind, postID, Number(fileOrder), filename)
-          const buffer = Buffer.from(Object.values(images[i].bytes) as any)
-          await serverFunctions.uploadUnverifiedFile(imagePath, buffer)
+          if (images[i]) {
+            let imagePath = functions.getImagePath(kind, postID, Number(fileOrder), filename)
+            const buffer = Buffer.from(Object.values(images[i].bytes) as any)
+            await serverFunctions.uploadUnverifiedFile(imagePath, buffer)
+            hasOriginal = true
+          }
+          if (upscaledImages[i]) {
+            let imagePath = functions.getUpscaledImagePath(kind, postID, Number(fileOrder), filename)
+            const buffer = Buffer.from(Object.values(upscaledImages[i].bytes) as any)
+            await serverFunctions.uploadUnverifiedFile(imagePath, buffer)
+            hasUpscaled = true
+          }
           let dimensions = null as any
           let hash = ""
           if (kind === "video" || kind === "audio" || kind === "model") {
-            const buffer = functions.base64ToBuffer(images[i].thumbnail)
+            const buffer = functions.base64ToBuffer(current[i].thumbnail)
             hash = await phash(buffer).then((hash: string) => functions.binaryToHex(hash))
             dimensions = imageSize(buffer)
           } else {
-              hash = await phash(buffer).then((hash: string) => functions.binaryToHex(hash))
-              dimensions = imageSize(buffer)
+            const buffer = Buffer.from(Object.values(current[i].bytes) as any)
+            hash = await phash(buffer).then((hash: string) => functions.binaryToHex(hash))
+            dimensions = imageSize(buffer)
           }
-          await sql.post.insertUnverifiedImage(postID, filename, kind, order, hash, dimensions.width, dimensions.height, images[i].size)
+          await sql.post.insertUnverifiedImage(postID, filename, kind, order, hash, dimensions.width, dimensions.height, current[i].size)
         }
 
         const updatedDate = new Date().toISOString()
@@ -1001,6 +1137,8 @@ const CreateRoutes = (app: Express) => {
           mirrors: source.mirrors ? functions.mirrorsJSON(source.mirrors) : null,
           type,
           updatedDate,
+          hasOriginal,
+          hasUpscaled,
           updater: req.session.username
         })
 
@@ -1095,18 +1233,24 @@ const CreateRoutes = (app: Express) => {
 
         let post = null as any
 
-        const imgChanged = await serverFunctions.imagesChangedUnverified(post.images, unverified.images)
+        let imgChanged = await serverFunctions.imagesChangedUnverified(post.images, unverified.images)
+        if (!imgChanged) imgChanged = await serverFunctions.imagesChangedUnverified(post.images, unverified.images, true)
 
         let vanillaBuffers = [] as any
+        let upscaledVanillaBuffers = [] as any
         if (unverified.originalID) {
           post = await sql.post.post(unverified.originalID)
           if (!post) return res.status(400).send("Bad postID")
           for (let i = 0; i < post.images.length; i++) {
             const imagePath = functions.getImagePath(post.images[i].type, newPostID, post.images[i].order, post.images[i].filename)
+            const upscaledImagePath = functions.getUpscaledImagePath(post.images[i].type, newPostID, post.images[i].order, post.images[i].filename)
             const buffer = await serverFunctions.getFile(imagePath) as Buffer
+            const upscaledBuffer = await serverFunctions.getFile(upscaledImagePath) as Buffer
             vanillaBuffers.push(buffer)
-            await sql.post.deleteImage(post.images[i].imageID)
+            upscaledVanillaBuffers.push(upscaledBuffer)
             await serverFunctions.deleteFile(functions.getImagePath(post.images[i].type, postID, post.images[i].order, post.images[i].filename))
+            await serverFunctions.deleteFile(functions.getUpscaledImagePath(post.images[i].type, postID, post.images[i].order, post.images[i].filename))
+            await sql.post.deleteImage(post.images[i].imageID)
           }
         }
 
@@ -1120,10 +1264,17 @@ const CreateRoutes = (app: Express) => {
         let type = unverified.type
         if (type !== "comic") type = "image"
 
+        let hasOriginal = false
+        let hasUpscaled = false
+
         let imageFilenames = [] as any
         for (let i = 0; i < unverified.images.length; i++) {
           const imagePath = functions.getImagePath(unverified.images[i].type, postID, unverified.images[i].order, unverified.images[i].filename)
-          const buffer = await serverFunctions.getUnverifiedFile(imagePath) as Buffer
+          let buffer = await serverFunctions.getUnverifiedFile(imagePath) as Buffer
+          const upscaledImagePath = functions.getUpscaledImagePath(unverified.images[i].type, postID, unverified.images[i].order, unverified.images[i].filename)
+          const upscaledBuffer = await serverFunctions.getUnverifiedFile(upscaledImagePath) as Buffer
+
+          let current = buffer ? buffer : upscaledBuffer
           let order = i + 1
           const ext = path.extname(unverified.images[i].filename).replace(".", "")
           let fileOrder = unverified.images.length > 1 ? `${order}` : "1"
@@ -1137,7 +1288,7 @@ const CreateRoutes = (app: Express) => {
           } else if (ext === "jpg" || ext === "png" || ext === "avif") {
             kind = "image"
           } else if (ext === "webp") {
-            const animated = await functions.isAnimatedWebp(buffer)
+            const animated = await functions.isAnimatedWebp(current)
             if (animated) {
               kind = "animation"
               if (type !== "video") type = "animation"
@@ -1157,9 +1308,17 @@ const CreateRoutes = (app: Express) => {
             kind = "model"
             type = "model"
         }
+          if (buffer) {
+            let newImagePath = functions.getImagePath(kind, newPostID, Number(fileOrder), filename)
+            await serverFunctions.uploadFile(newImagePath, buffer)
+            hasOriginal = true
+          }
+          if (upscaledBuffer) {
+            let newImagePath = functions.getUpscaledImagePath(kind, newPostID, Number(fileOrder), filename)
+            await serverFunctions.uploadFile(newImagePath, upscaledBuffer)
+            hasUpscaled = true
+          }
 
-          let newImagePath = functions.getImagePath(kind, newPostID, Number(fileOrder), filename)
-          await serverFunctions.uploadFile(newImagePath, buffer)
           let dimensions = null as any
           let hash = ""
           if (kind === "video" || kind === "audio" || kind === "model") {
@@ -1167,10 +1326,10 @@ const CreateRoutes = (app: Express) => {
             hash = await phash(buffer).then((hash: string) => functions.binaryToHex(hash))
             dimensions = imageSize(buffer)
           } else {
-              hash = await phash(buffer).then((hash: string) => functions.binaryToHex(hash))
-              dimensions = imageSize(buffer)
+            hash = await phash(current).then((hash: string) => functions.binaryToHex(hash))
+            dimensions = imageSize(current)
           }
-          await sql.post.insertImage(newPostID, filename, type, order, hash, dimensions.width, dimensions.height, buffer.byteLength)
+          await sql.post.insertImage(newPostID, filename, type, order, hash, dimensions.width, dimensions.height, current.byteLength)
         }
 
         let hidden = false 
@@ -1199,6 +1358,8 @@ const CreateRoutes = (app: Express) => {
           uploader: unverified.uploader,
           updater: unverified.updater,
           approver: req.session.username,
+          hasOriginal,
+          hasUpscaled,
           hidden
         })
 
@@ -1267,7 +1428,9 @@ const CreateRoutes = (app: Express) => {
         await sql.post.deleteUnverifiedPost(Number(postID))
         for (let i = 0; i < unverified.images.length; i++) {
             const file = functions.getImagePath(unverified.images[i].type, unverified.postID, unverified.images[i].order, unverified.images[i].filename)
+            const upscaledFile = functions.getUpscaledImagePath(unverified.images[i].type, unverified.postID, unverified.images[i].order, unverified.images[i].filename)
             await serverFunctions.deleteUnverifiedFile(file)
+            await serverFunctions.deleteUnverifiedFile(upscaledFile)
         }
 
         if (unverified.originalID) {
@@ -1286,48 +1449,85 @@ const CreateRoutes = (app: Express) => {
               let vanillaImages = [] as any
               for (let i = 0; i < vanilla.images.length; i++) {
                   if (imgChanged) {
-                    const newImagePath = functions.getImageHistoryPath(newPostID, 1, vanilla.images[i].filename)
-                    await serverFunctions.uploadFile(newImagePath, vanillaBuffers[i])
+                    let newImagePath = ""
+                    if (upscaledVanillaBuffers[i]) {
+                      newImagePath = functions.getUpscaledImageHistoryPath(newPostID, 1, vanilla.images[i].filename)
+                      await serverFunctions.uploadFile(newImagePath, upscaledVanillaBuffers[i])
+                    }
+                    if (vanillaBuffers[i]) {
+                      newImagePath = functions.getImageHistoryPath(newPostID, 1, vanilla.images[i].filename)
+                      await serverFunctions.uploadFile(newImagePath, vanillaBuffers[i])
+                    }
                     vanillaImages.push(newImagePath)
                   } else {
                     vanillaImages.push(functions.getImagePath(vanilla.images[i].type, newPostID, vanilla.images[i].order, vanilla.images[i].filename))
                   }
               }
-              await sql.history.insertPostHistory(vanilla.user, newPostID, vanillaImages, vanilla.uploader, vanilla.updater, vanilla.uploadDate, vanilla.updatedDate,
-                  vanilla.type, vanilla.restrict, vanilla.style, vanilla.thirdParty, vanilla.title, vanilla.translatedTitle, vanilla.drawn, vanilla.artist,
-                  vanilla.link, vanilla.commentary, vanilla.translatedCommentary, vanilla.bookmarks, vanilla.mirrors, vanilla.artists, vanilla.characters, vanilla.series, vanilla.tags)
+              await sql.history.insertPostHistory({
+                postID: newPostID, username: vanilla.user, images: vanillaImages, uploader: vanilla.uploader, updater: vanilla.updater, 
+                uploadDate: vanilla.uploadDate, updatedDate: vanilla.updatedDate, type: vanilla.type, restrict: vanilla.restrict, 
+                style: vanilla.style, thirdParty: vanilla.thirdParty, title: vanilla.title, translatedTitle: vanilla.translatedTitle, 
+                drawn: vanilla.drawn, artist: vanilla.artist, link: vanilla.link, commentary: vanilla.commentary, translatedCommentary: vanilla.translatedCommentary, 
+                bookmarks: vanilla.bookmarks, mirrors: vanilla.mirrors, hasOriginal: vanilla.hasOriginal, hasUpscaled: vanilla.hasUpscaled, 
+                artists: vanilla.artists, characters: vanilla.characters, series: vanilla.series, tags: vanilla.tags, reason})
 
               let newImages = [] as any
               for (let i = 0; i < unverified.images.length; i++) {
-                  if (imgChanged) {
-                    const unverifiedPath = functions.getImagePath(unverified.images[i].type, unverified.images[i].postID, unverified.images[i].order, unverified.images[i].filename)
-                    const buffer = await serverFunctions.getUnverifiedFile(unverifiedPath)
-                    const newImagePath = functions.getImageHistoryPath(newPostID, 2, imageFilenames[i])
-                    await serverFunctions.uploadFile(newImagePath, buffer)
-                    newImages.push(newImagePath)
-                  } else {
-                    newImages.push(functions.getImagePath(updated.images[i].type, newPostID, updated.images[i].order, updated.images[i].filename))
-                  }
-              }
-              await sql.history.insertPostHistory(req.session.username, newPostID, newImages, updated.uploader, updated.updater, updated.uploadDate, updated.updatedDate,
-              updated.type, updated.restrict, updated.style, updated.thirdParty, updated.title, updated.translatedTitle, updated.drawn, updated.artist,
-              updated.link, updated.commentary, updated.translatedCommentary, updated.bookmarks, updated.mirrors, artists, characters, series, tags, reason)
-          } else {
-              let newImages = [] as any
-              for (let i = 0; i < unverified.images.length; i++) {
                 if (imgChanged) {
+                  let newImagePath = ""
+                  const upscaledUnverifiedPath = functions.getUpscaledImagePath(unverified.images[i].type, unverified.images[i].postID, unverified.images[i].order, unverified.images[i].filename)
+                  const upscaledBuffer = await serverFunctions.getUnverifiedFile(upscaledUnverifiedPath)
+                  if (upscaledBuffer) {
+                    newImagePath = functions.getUpscaledImageHistoryPath(newPostID, 2, imageFilenames[i])
+                    await serverFunctions.uploadFile(newImagePath, upscaledBuffer)
+                  }
                   const unverifiedPath = functions.getImagePath(unverified.images[i].type, unverified.images[i].postID, unverified.images[i].order, unverified.images[i].filename)
                   const buffer = await serverFunctions.getUnverifiedFile(unverifiedPath)
-                  const newImagePath = functions.getImageHistoryPath(newPostID, nextKey, imageFilenames[i])
-                  await serverFunctions.uploadFile(newImagePath, buffer)
+                  if (buffer) {
+                    newImagePath = functions.getImageHistoryPath(newPostID, 2, imageFilenames[i])
+                    await serverFunctions.uploadFile(newImagePath, buffer)
+                  }
                   newImages.push(newImagePath)
                 } else {
                   newImages.push(functions.getImagePath(updated.images[i].type, newPostID, updated.images[i].order, updated.images[i].filename))
                 }
               }
-              await sql.history.insertPostHistory(req.session.username, postID, newImages, updated.uploader, updated.updater, updated.uploadDate, updated.updatedDate,
-              updated.type, updated.restrict, updated.style, updated.thirdParty, updated.title, updated.translatedTitle, updated.drawn, updated.artist,
-              updated.link, updated.commentary, updated.translatedCommentary, updated.bookmarks, updated.mirrors, artists, characters, series, tags, reason)
+              await sql.history.insertPostHistory({
+                postID: newPostID, username: req.session.username, images: newImages, uploader: updated.uploader, updater: updated.updater, 
+                uploadDate: updated.uploadDate, updatedDate: updated.updatedDate, type: updated.type, restrict: updated.restrict, 
+                style: updated.style, thirdParty: updated.thirdParty, title: updated.title, translatedTitle: updated.translatedTitle, 
+                drawn: updated.drawn, artist: updated.artist, link: updated.link, commentary: updated.commentary, 
+                translatedCommentary: updated.translatedCommentary, bookmarks: updated.bookmarks, mirrors: updated.mirrors, 
+                hasOriginal: updated.hasOriginal, hasUpscaled: updated.hasUpscaled, artists, characters, series, tags, reason})
+          } else {
+              let newImages = [] as any
+              for (let i = 0; i < unverified.images.length; i++) {
+                if (imgChanged) {
+                  let newImagePath = ""
+                  const upscaledUnverifiedPath = functions.getUpscaledImagePath(unverified.images[i].type, unverified.images[i].postID, unverified.images[i].order, unverified.images[i].filename)
+                  const upscaledBuffer = await serverFunctions.getUnverifiedFile(upscaledUnverifiedPath)
+                  if (upscaledBuffer) {
+                    newImagePath = functions.getUpscaledImageHistoryPath(newPostID, nextKey, imageFilenames[i])
+                    await serverFunctions.uploadFile(newImagePath, upscaledBuffer)
+                  }
+                  const unverifiedPath = functions.getImagePath(unverified.images[i].type, unverified.images[i].postID, unverified.images[i].order, unverified.images[i].filename)
+                  const buffer = await serverFunctions.getUnverifiedFile(unverifiedPath)
+                  if (buffer) {
+                    newImagePath = functions.getImageHistoryPath(newPostID, nextKey, imageFilenames[i])
+                    await serverFunctions.uploadFile(newImagePath, buffer)
+                  }
+                  newImages.push(newImagePath)
+                } else {
+                  newImages.push(functions.getImagePath(updated.images[i].type, newPostID, updated.images[i].order, updated.images[i].filename))
+                }
+              }
+              await sql.history.insertPostHistory({
+                postID, username: req.session.username, images: newImages, uploader: updated.uploader, updater: updated.updater, 
+                uploadDate: updated.uploadDate, updatedDate: updated.updatedDate, type: updated.type, restrict: updated.restrict, 
+                style: updated.style, thirdParty: updated.thirdParty, title: updated.title, translatedTitle: updated.translatedTitle, 
+                drawn: updated.drawn, artist: updated.artist, link: updated.link, commentary: updated.commentary, 
+                translatedCommentary: updated.translatedCommentary, bookmarks: updated.bookmarks, mirrors: updated.mirrors, 
+                hasOriginal: updated.hasOriginal, hasUpscaled: updated.hasUpscaled, artists, characters, series, tags, reason})
           }
         }
 

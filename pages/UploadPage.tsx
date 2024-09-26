@@ -11,6 +11,8 @@ import xIcon from "../assets/icons/x.png"
 import rightIcon from "../assets/icons/right.png"
 import leftIcon from "../assets/icons/left.png"
 import linkIcon from "../assets/icons/link.png"
+import upscaleIcon from "../assets/icons/upscale.png"
+import originalIcon from "../assets/icons/original.png"
 import image from "../assets/icons/image.png"
 import animation from "../assets/icons/animation.png"
 import video from "../assets/icons/video.png"
@@ -31,7 +33,7 @@ import PostSong from "../components/PostSong"
 import DragAndDrop from "../components/DragAndDrop"
 import {HideNavbarContext, HideSidebarContext, RelativeContext, ThemeContext, EnableDragContext, HideTitlebarContext, 
 UploadDropFilesContext, BrightnessContext, ContrastContext, HueContext, SaturationContext, LightnessContext, MobileContext,
-BlurContext, SharpenContext, PixelateContext, HeaderTextContext, SessionContext, SidebarTextContext, RedirectContext} from "../Context"
+BlurContext, SharpenContext, PixelateContext, HeaderTextContext, SessionContext, SidebarTextContext, RedirectContext, ShowUpscaledContext} from "../Context"
 import JSZip from "jszip"
 import axios from "axios"
 import SearchSuggestions from "../components/SearchSuggestions"
@@ -66,12 +68,14 @@ const UploadPage: React.FunctionComponent = (props) => {
     const {redirect, setRedirect} = useContext(RedirectContext)
     const {uploadDropFiles, setUploadDropFiles} = useContext(UploadDropFilesContext)
     const {mobile, setMobile} = useContext(MobileContext)
+    const {showUpscaled, setShowUpscaled} = useContext(ShowUpscaledContext)
     const [displayImage, setDisplayImage] = useState(false)
     const [uploadError, setUploadError] = useState(false)
     const [submitError, setSubmitError] = useState(false)
     const [saucenaoError, setSaucenaoError] = useState(false)
     const [danbooruError, setDanbooruError] = useState(false)
-    const [acceptedURLs, setAcceptedURLs] = useState([]) as any
+    const [originalFiles, setOriginalFiles] = useState([]) as any
+    const [upscaledFiles, setUpscaledFiles] = useState([]) as any
     const [dupPosts, setDupPosts] = useState([]) as any
     const uploadErrorRef = useRef<any>(null)
     const submitErrorRef = useRef<any>(null)
@@ -80,6 +84,7 @@ const UploadPage: React.FunctionComponent = (props) => {
     const enterLinksRef = useRef<any>(null)
     const [currentImg, setCurrentImg] = useState(null) as any
     const [currentIndex, setCurrentIndex] = useState(0) as any
+    const [imgChangeFlag, setImgChangeFlag] = useState(false)
     const [currentDupIndex, setCurrentDupIndex] = useState(0) as any
     const [type, setType] = useState("image")
     const [restrict, setRestrict] = useState("safe")
@@ -152,8 +157,9 @@ const UploadPage: React.FunctionComponent = (props) => {
     }, [session])
 
     const getSimilar = async () => {
-        if (acceptedURLs[currentIndex]) {
-            const img = acceptedURLs[currentIndex]
+        let currentFiles = getCurrentFiles()
+        if (currentFiles[currentIndex]) {
+            const img = currentFiles[currentIndex]
             let dupes = null as any
             if (img.thumbnail) {
                 const bytes = await functions.base64toUint8Array(img.thumbnail)
@@ -167,7 +173,7 @@ const UploadPage: React.FunctionComponent = (props) => {
 
     useEffect(() => {
         getSimilar()
-    }, [acceptedURLs, currentIndex])
+    }, [originalFiles, upscaledFiles, showUpscaled, currentIndex])
 
     useEffect(() => {
         if (uploadDropFiles?.length) {
@@ -280,7 +286,11 @@ const UploadPage: React.FunctionComponent = (props) => {
             }
             setCurrentImg(urls[0].link)
             setCurrentIndex(0)
-            setAcceptedURLs((prev: any) => [...prev, ...urls])
+            if (showUpscaled) {
+                setUpscaledFiles((prev: any) => [...prev, ...urls])
+            } else {
+                setOriginalFiles((prev: any) => [...prev, ...urls])
+            }
         }
         if (error) {
             setUploadError(true)
@@ -712,9 +722,10 @@ const UploadPage: React.FunctionComponent = (props) => {
     }
 
     const clear = () => {
-        const currentIndex = acceptedURLs.findIndex((a: any) => a.link === currentImg)
+        const currentFiles = getCurrentFiles()
+        const currentIndex = currentFiles.findIndex((a: any) => a.link === currentImg)
         if (enterLinksRef.current) {
-            const link = acceptedURLs[currentIndex]?.originalLink
+            const link = currentFiles[currentIndex]?.originalLink
             if (link) {
                 enterLinksRef.current.value = enterLinksRef.current.value.replaceAll(link, "")
             }
@@ -722,30 +733,32 @@ const UploadPage: React.FunctionComponent = (props) => {
                 setShowLinksInput(false)
             }
         }
-        acceptedURLs.splice(currentIndex, 1)
-        const newIndex = currentIndex > acceptedURLs.length - 1 ? acceptedURLs.length - 1 : currentIndex
-        const newLink = acceptedURLs[newIndex]?.link || null
-        setAcceptedURLs(acceptedURLs)
+        currentFiles.splice(currentIndex, 1)
+        const newIndex = currentIndex > currentFiles.length - 1 ? currentFiles.length - 1 : currentIndex
+        const newLink = currentFiles[newIndex]?.link || null
+        showUpscaled ? setUpscaledFiles(upscaledFiles) : setOriginalFiles(originalFiles)
         setCurrentImg(newLink)
         forceUpdate()
     }
     
     const left = () => {
-        const currentIndex = acceptedURLs.findIndex((a: any) => a.link === currentImg)
+        const currentFiles = showUpscaled ? upscaledFiles : originalFiles
+        const currentIndex = currentFiles.findIndex((a: any) => a.link === currentImg)
         let newIndex = currentIndex - 1
         if (newIndex < 0) newIndex = 0
-        acceptedURLs.splice(newIndex, 0, acceptedURLs.splice(currentIndex, 1)[0])
-        setAcceptedURLs(acceptedURLs)
+        currentFiles.splice(newIndex, 0, currentFiles.splice(currentIndex, 1)[0])
+        showUpscaled ? setUpscaledFiles(upscaledFiles) : setOriginalFiles(originalFiles)
         setCurrentIndex(newIndex)
         forceUpdate()
     }
 
     const right = () => {
-        const currentIndex = acceptedURLs.findIndex((a: any) => a.link === currentImg)
+        const currentFiles = getCurrentFiles()
+        const currentIndex = currentFiles.findIndex((a: any) => a.link === currentImg)
         let newIndex = currentIndex + 1
-        if (newIndex > acceptedURLs.length - 1) newIndex = acceptedURLs.length - 1
-        acceptedURLs.splice(newIndex, 0, acceptedURLs.splice(currentIndex, 1)[0])
-        setAcceptedURLs(acceptedURLs)
+        if (newIndex > currentFiles.length - 1) newIndex = currentFiles.length - 1
+        currentFiles.splice(newIndex, 0, currentFiles.splice(currentIndex, 1)[0])
+        showUpscaled ? setUpscaledFiles(upscaledFiles) : setOriginalFiles(originalFiles)
         setCurrentIndex(newIndex)
         forceUpdate()
     }
@@ -776,20 +789,27 @@ const UploadPage: React.FunctionComponent = (props) => {
             await functions.timeout(3000)
             return setSubmitError(false)
         }
-        const MB = acceptedURLs.reduce((acc: any, obj: any) => acc + obj.size, 0) / (1024*1024)
-        if (MB > 200 && !permissions.isElevated(session)) {
+        const upscaledMB = upscaledFiles.reduce((acc: any, obj: any) => acc + obj.size, 0) / (1024*1024)
+        const originalMB = originalFiles.reduce((acc: any, obj: any) => acc + obj.size, 0) / (1024*1024)
+        const MB = upscaledMB + originalMB
+        if (MB > 300 && !permissions.isElevated(session)) {
             setSubmitError(true)
             await functions.timeout(20)
-            submitErrorRef.current.innerText = "Combined file size shouldn't exceed 200MB."
+            submitErrorRef.current.innerText = "Combined file size shouldn't exceed 300MB."
             await functions.timeout(3000)
             return setSubmitError(false)
         }
-        let newAcceptedURLs = acceptedURLs.map((a: any) => {
+        let newOriginalFiles = originalFiles.map((a: any) => {
+            a.bytes = Object.values(a.bytes)
+            return a
+        })
+        let newUpscaledFiles = upscaledFiles.map((a: any) => {
             a.bytes = Object.values(a.bytes)
             return a
         })
         const data = {
-            images: newAcceptedURLs,
+            images: newOriginalFiles,
+            upscaledImages: newUpscaledFiles,
             type,
             restrict,
             style,
@@ -839,7 +859,8 @@ const UploadPage: React.FunctionComponent = (props) => {
             await functions.timeout(3000)
             return setSaucenaoError(false)
         }
-        let current = acceptedURLs[currentIndex]
+        const currentFiles = getCurrentFiles()
+        let current = currentFiles[currentIndex]
         let bytes = "" as any 
         if (current.thumbnail) {
             bytes = await functions.base64toUint8Array(current.thumbnail).then((a) => Object.values(a))
@@ -1062,7 +1083,8 @@ const UploadPage: React.FunctionComponent = (props) => {
 
             setRawTags(tagArr.join(" "))
         } else {
-            let current = acceptedURLs[currentIndex]
+            const currentFiles = getCurrentFiles()
+            let current = currentFiles[currentIndex]
             let bytes = "" as any 
             if (current.thumbnail) {
                 bytes = await functions.base64toUint8Array(current.thumbnail).then((a) => Object.values(a))
@@ -1130,7 +1152,8 @@ const UploadPage: React.FunctionComponent = (props) => {
 
     const resetAll = () => {
         reset()
-        setAcceptedURLs([])
+        setOriginalFiles([])
+        setUpscaledFiles([])
         setCurrentImg(null)
         setCurrentIndex(0)
         setCurrentDupIndex(0)
@@ -1326,6 +1349,30 @@ const UploadPage: React.FunctionComponent = (props) => {
         }
     }, [type, style])
 
+    useEffect(() => {
+        if (imgChangeFlag) {
+            const currentFiles = getCurrentFiles()
+            let index = currentIndex
+            let current = currentFiles[index]
+            if (!current) {
+                current = currentFiles[0]
+                index = 0
+            }
+            setCurrentImg(current?.link || null)
+            setCurrentIndex(index)
+            setImgChangeFlag(false)
+        }
+    }, [imgChangeFlag, showUpscaled, currentIndex, originalFiles, upscaledFiles])
+
+    const getCurrentFiles = () => {
+        return showUpscaled ? upscaledFiles : originalFiles
+    }
+
+    const changeUpscaled = () => {
+        setShowUpscaled((prev) => !prev)
+        setImgChangeFlag(true)
+    }
+
     const getUploadJSX = () => {
         if (session.banned) {
             return (
@@ -1368,9 +1415,13 @@ const UploadPage: React.FunctionComponent = (props) => {
                             <img className="upload-button-img" src={linkIcon}/>
                             <span className="upload-button-text">Enter Links</span>
                     </button>
+                    <button className="upload-button" onClick={() => changeUpscaled()}>
+                            <img className="upload-button-img" src={showUpscaled ? upscaleIcon : originalIcon}/>
+                            <span className="upload-button-text">{showUpscaled ? "Upscaled" : "Original"}</span>
+                    </button>
                 </div>
                 <div className="upload-row">
-                    {acceptedURLs.length > 1 ?
+                    {getCurrentFiles().length > 1 ?
                     <button className="upload-button" onClick={left}>
                         <img className="upload-button-img" src={leftIcon}/>
                     </button> : null}
@@ -1379,7 +1430,7 @@ const UploadPage: React.FunctionComponent = (props) => {
                         <img className="upload-button-img" src={xIcon}/>
                     </button>
                     : null}
-                    {acceptedURLs.length > 1 ?
+                    {getCurrentFiles().length > 1 ?
                     <button className="upload-button" onClick={right}>
                         <img className="upload-button-img" src={rightIcon}/>
                     </button> : null}
@@ -1395,7 +1446,11 @@ const UploadPage: React.FunctionComponent = (props) => {
                             <img className="upload-button-img" src={linkIcon}/>
                             <span className="upload-button-text">Enter Links</span>
                     </button>
-                    {acceptedURLs.length > 1 ?
+                    <button className="upload-button" onClick={() => changeUpscaled()}>
+                            <img className="upload-button-img" src={showUpscaled ? upscaleIcon : originalIcon}/>
+                            <span className="upload-button-text">{showUpscaled ? "Upscaled" : "Original"}</span>
+                    </button>
+                    {getCurrentFiles().length > 1 ?
                     <button className="upload-button" onClick={left}>
                         <img className="upload-button-img" src={leftIcon}/>
                     </button> : null}
@@ -1404,7 +1459,7 @@ const UploadPage: React.FunctionComponent = (props) => {
                         <img className="upload-button-img" src={xIcon}/>
                     </button>
                     : null}
-                    {acceptedURLs.length > 1 ?
+                    {getCurrentFiles().length > 1 ?
                     <button className="upload-button" onClick={right}>
                         <img className="upload-button-img" src={rightIcon}/>
                     </button> : null}
@@ -1414,11 +1469,11 @@ const UploadPage: React.FunctionComponent = (props) => {
                     <textarea ref={enterLinksRef} className="upload-textarea" spellCheck={false} onChange={(event) => linkUpload(event)}
                     onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}></textarea>
                 </div> : null}
-            {acceptedURLs.length ?
+            {getCurrentFiles().length ?
             <div className="upload-row">
-                {acceptedURLs.length > 1 ? 
+                {getCurrentFiles().length > 1 ? 
                 <div className="upload-container">
-                    <Carousel images={acceptedURLs.map((u: any) => u.link)} set={set} index={currentIndex}/>
+                    <Carousel images={getCurrentFiles().map((u: any) => u.link)} set={set} index={currentIndex}/>
                     {getPostJSX()}
                 </div>
                 : getPostJSX()}
@@ -1593,11 +1648,11 @@ const UploadPage: React.FunctionComponent = (props) => {
             <div className="upload-container">
                 {generateSeriesJSX()}
             </div>
-            {displayImage && acceptedURLs.length ?
+            {displayImage && getCurrentFiles().length ?
             <div className="upload-row">
                 {functions.isVideo(currentImg) ? 
                 <video autoPlay muted loop disablePictureInPicture className="tag-img-preview" src={currentImg}></video> :
-                <img className="tag-img-preview" src={acceptedURLs[currentIndex]?.thumbnail ? acceptedURLs[currentIndex].thumbnail : currentImg}/>}
+                <img className="tag-img-preview" src={getCurrentFiles()[currentIndex]?.thumbnail ? getCurrentFiles()[currentIndex].thumbnail : currentImg}/>}
             </div>
             : null}
             <div className="upload-row" style={{marginBottom: "5px"}}>

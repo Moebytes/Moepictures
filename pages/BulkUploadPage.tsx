@@ -11,6 +11,8 @@ import xIcon from "../assets/icons/x.png"
 import rightIcon from "../assets/icons/right.png"
 import leftIcon from "../assets/icons/left.png"
 import linkIcon from "../assets/icons/link.png"
+import upscaleIcon from "../assets/icons/upscale.png"
+import originalIcon from "../assets/icons/original.png"
 import image from "../assets/icons/image.png"
 import animation from "../assets/icons/animation.png"
 import video from "../assets/icons/video.png"
@@ -32,7 +34,7 @@ import DragAndDrop from "../components/DragAndDrop"
 import {HideNavbarContext, HideSidebarContext, RelativeContext, ThemeContext, EnableDragContext, HideTitlebarContext, 
 UploadDropFilesContext, BrightnessContext, ContrastContext, HueContext, SaturationContext, LightnessContext, MobileContext,
 BlurContext, SharpenContext, PixelateContext, HeaderTextContext, SessionContext, SidebarTextContext, RedirectContext,
-SiteHueContext, SiteLightnessContext, SiteSaturationContext} from "../Context"
+SiteHueContext, SiteLightnessContext, SiteSaturationContext, ShowUpscaledContext} from "../Context"
 import JSZip from "jszip"
 import axios from "axios"
 import SearchSuggestions from "../components/SearchSuggestions"
@@ -70,18 +72,21 @@ const BulkUploadPage: React.FunctionComponent = (props) => {
     const {redirect, setRedirect} = useContext(RedirectContext)
     const {uploadDropFiles, setUploadDropFiles} = useContext(UploadDropFilesContext)
     const {mobile, setMobile} = useContext(MobileContext)
+    const {showUpscaled, setShowUpscaled} = useContext(ShowUpscaledContext)
     const [displayImage, setDisplayImage] = useState(false)
     const [uploadError, setUploadError] = useState(false)
     const [submitError, setSubmitError] = useState(false)
     const [saucenaoError, setSaucenaoError] = useState(false)
     const [danbooruError, setDanbooruError] = useState(false)
-    const [acceptedURLs, setAcceptedURLs] = useState([]) as any
+    const [originalFiles, setOriginalFiles] = useState([]) as any
+    const [upscaledFiles, setUpscaledFiles] = useState([]) as any
     const [dupPosts, setDupPosts] = useState([]) as any
     const uploadErrorRef = useRef<any>(null)
     const submitErrorRef = useRef<any>(null)
     const enterLinksRef = useRef<any>(null)
     const [currentImg, setCurrentImg] = useState(null) as any
     const [currentIndex, setCurrentIndex] = useState(0) as any
+    const [imgChangeFlag, setImgChangeFlag] = useState(false)
     const [type, setType] = useState("image")
     const [restrict, setRestrict] = useState("safe")
     const [style, setStyle] = useState("2d")
@@ -246,7 +251,11 @@ const BulkUploadPage: React.FunctionComponent = (props) => {
             }
             setCurrentImg(urls[0].link)
             setCurrentIndex(0)
-            setAcceptedURLs((prev: any) => [...prev, ...urls])
+            if (showUpscaled) {
+                setUpscaledFiles((prev: any) => [...prev, ...urls])
+            } else {
+                setOriginalFiles((prev: any) => [...prev, ...urls])
+            }
         }
         if (error) {
             setUploadError(true)
@@ -335,9 +344,10 @@ const BulkUploadPage: React.FunctionComponent = (props) => {
     }
 
     const clear = () => {
-        const currentIndex = acceptedURLs.findIndex((a: any) => a.link === currentImg)
+        const currentFiles = getCurrentFiles()
+        const currentIndex = currentFiles.findIndex((a: any) => a.link === currentImg)
         if (enterLinksRef.current) {
-            const link = acceptedURLs[currentIndex]?.originalLink
+            const link = currentFiles[currentIndex]?.originalLink
             if (link) {
                 enterLinksRef.current.value = enterLinksRef.current.value.replaceAll(link, "")
             }
@@ -345,38 +355,42 @@ const BulkUploadPage: React.FunctionComponent = (props) => {
                 setShowLinksInput(false)
             }
         }
-        acceptedURLs.splice(currentIndex, 1)
-        const newIndex = currentIndex > acceptedURLs.length - 1 ? acceptedURLs.length - 1 : currentIndex
-        const newLink = acceptedURLs[newIndex]?.link || null
-        setAcceptedURLs(acceptedURLs)
+        currentFiles.splice(currentIndex, 1)
+        const newIndex = currentIndex > currentFiles.length - 1 ? currentFiles.length - 1 : currentIndex
+        const newLink = currentFiles[newIndex]?.link || null
+        showUpscaled ? setUpscaledFiles(upscaledFiles) : setOriginalFiles(originalFiles)
         setCurrentImg(newLink)
         forceUpdate()
     }
     
     const left = () => {
-        const currentIndex = acceptedURLs.findIndex((a: any) => a.link === currentImg)
+        const currentFiles = getCurrentFiles()
+        const currentIndex = currentFiles.findIndex((a: any) => a.link === currentImg)
         let newIndex = currentIndex - 1
         if (newIndex < 0) newIndex = 0
-        acceptedURLs.splice(newIndex, 0, acceptedURLs.splice(currentIndex, 1)[0])
-        setAcceptedURLs(acceptedURLs)
+        currentFiles.splice(newIndex, 0, currentFiles.splice(currentIndex, 1)[0])
+        showUpscaled ? setUpscaledFiles(upscaledFiles) : setOriginalFiles(originalFiles)
         setCurrentIndex(newIndex)
         forceUpdate()
     }
 
     const right = () => {
-        const currentIndex = acceptedURLs.findIndex((a: any) => a.link === currentImg)
+        const currentFiles = getCurrentFiles()
+        const currentIndex = currentFiles.findIndex((a: any) => a.link === currentImg)
         let newIndex = currentIndex + 1
-        if (newIndex > acceptedURLs.length - 1) newIndex = acceptedURLs.length - 1
-        acceptedURLs.splice(newIndex, 0, acceptedURLs.splice(currentIndex, 1)[0])
-        setAcceptedURLs(acceptedURLs)
+        if (newIndex > currentFiles.length - 1) newIndex = currentFiles.length - 1
+        currentFiles.splice(newIndex, 0, currentFiles.splice(currentIndex, 1)[0])
+        showUpscaled ? setUpscaledFiles(upscaledFiles) : setOriginalFiles(originalFiles)
         setCurrentIndex(newIndex)
         forceUpdate()
     }
 
     const submit = async () => {
         let submitData = [] as any
-        for (let i = 0; i < acceptedURLs.length; i++) {
-            const current = acceptedURLs[i]
+        let upscaledSubmitData = [] as any
+        for (let i = 0; i < originalFiles.length; i++) {
+            const current = originalFiles[i]
+            const upscaledCurrent = upscaledFiles[i]
             current.bytes = Object.values(current.bytes)
             let dupes = [] as any
             if (current.thumbnail) {
@@ -387,6 +401,7 @@ const BulkUploadPage: React.FunctionComponent = (props) => {
             }
             if (dupes.length) continue
             submitData.push(current)
+            upscaledSubmitData.push(upscaledCurrent)
         }
         if (!submitData.length) {
             setSubmitError(true)
@@ -400,6 +415,7 @@ const BulkUploadPage: React.FunctionComponent = (props) => {
         setProgressText(`0/${submitData.length}`)
         for (let i = 0; i < submitData.length; i++) {
             const current = submitData[i]
+            const upscaledCurrent = upscaledSubmitData[i]
             const sourceData = await sourceLookup(current, restrict)
             const tagData = await tagLookup(current, type, style, sourceData.danbooruLink)
 
@@ -407,6 +423,7 @@ const BulkUploadPage: React.FunctionComponent = (props) => {
 
             const data = {
                 images: [current],
+                upscaledImages: [upscaledCurrent],
                 type: tagData.type,
                 restrict: sourceData.restrict,
                 style: tagData.style,
@@ -825,7 +842,8 @@ const BulkUploadPage: React.FunctionComponent = (props) => {
 
     const resetAll = () => {
         reset()
-        setAcceptedURLs([])
+        setOriginalFiles([])
+        setUpscaledFiles([])
         setCurrentImg(null)
         setCurrentIndex(0)
         setShowLinksInput(false)
@@ -1085,6 +1103,30 @@ const BulkUploadPage: React.FunctionComponent = (props) => {
         updateProgressColor()
     }, [progressText, siteHue, siteSaturation, siteLightness])
 
+    useEffect(() => {
+        if (imgChangeFlag) {
+            const currentFiles = getCurrentFiles()
+            let index = currentIndex
+            let current = currentFiles[index]
+            if (!current) {
+                current = currentFiles[0]
+                index = 0
+            }
+            setCurrentImg(current?.link || null)
+            setCurrentIndex(index)
+            setImgChangeFlag(false)
+        }
+    }, [imgChangeFlag, showUpscaled, currentIndex, originalFiles, upscaledFiles])
+
+    const getCurrentFiles = () => {
+        return showUpscaled ? upscaledFiles : originalFiles
+    }
+
+    const changeUpscaled = () => {
+        setShowUpscaled((prev) => !prev)
+        setImgChangeFlag(true)
+    }
+
     const getUploadJSX = () => {
         if (session.banned) {
             return (
@@ -1124,9 +1166,13 @@ const BulkUploadPage: React.FunctionComponent = (props) => {
                             <img className="upload-button-img" src={linkIcon}/>
                             <span className="upload-button-text">Enter Links</span>
                     </button>
+                    <button className="upload-button" onClick={() => changeUpscaled()}>
+                            <img className="upload-button-img" src={showUpscaled ? upscaleIcon : originalIcon}/>
+                            <span className="upload-button-text">{showUpscaled ? "Upscaled" : "Original"}</span>
+                    </button>
                 </div>
                 <div className="upload-row">
-                    {acceptedURLs.length > 1 ?
+                    {getCurrentFiles().length > 1 ?
                     <button className="upload-button" onClick={left}>
                         <img className="upload-button-img" src={leftIcon}/>
                     </button> : null}
@@ -1135,7 +1181,7 @@ const BulkUploadPage: React.FunctionComponent = (props) => {
                         <img className="upload-button-img" src={xIcon}/>
                     </button>
                     : null}
-                    {acceptedURLs.length > 1 ?
+                    {getCurrentFiles().length > 1 ?
                     <button className="upload-button" onClick={right}>
                         <img className="upload-button-img" src={rightIcon}/>
                     </button> : null}
@@ -1151,7 +1197,11 @@ const BulkUploadPage: React.FunctionComponent = (props) => {
                             <img className="upload-button-img" src={linkIcon}/>
                             <span className="upload-button-text">Enter Links</span>
                     </button>
-                    {acceptedURLs.length > 1 ?
+                    <button className="upload-button" onClick={() => changeUpscaled()}>
+                            <img className="upload-button-img" src={showUpscaled ? upscaleIcon : originalIcon}/>
+                            <span className="upload-button-text">{showUpscaled ? "Upscaled" : "Original"}</span>
+                    </button>
+                    {getCurrentFiles().length > 1 ?
                     <button className="upload-button" onClick={left}>
                         <img className="upload-button-img" src={leftIcon}/>
                     </button> : null}
@@ -1160,7 +1210,7 @@ const BulkUploadPage: React.FunctionComponent = (props) => {
                         <img className="upload-button-img" src={xIcon}/>
                     </button>
                     : null}
-                    {acceptedURLs.length > 1 ?
+                    {getCurrentFiles().length > 1 ?
                     <button className="upload-button" onClick={right}>
                         <img className="upload-button-img" src={rightIcon}/>
                     </button> : null}
@@ -1170,11 +1220,11 @@ const BulkUploadPage: React.FunctionComponent = (props) => {
                     <textarea ref={enterLinksRef} className="upload-textarea" spellCheck={false} onChange={(event) => linkUpload(event)}
                     onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}></textarea>
                 </div> : null}
-            {acceptedURLs.length ?
+            {getCurrentFiles().length ?
             <div className="upload-row">
-                {acceptedURLs.length > 1 ? 
+                {getCurrentFiles().length > 1 ? 
                 <div className="upload-container">
-                    <Carousel images={acceptedURLs.map((u: any) => u.link)} set={set} index={currentIndex}/>
+                    <Carousel images={getCurrentFiles().map((u: any) => u.link)} set={set} index={currentIndex}/>
                     {getPostJSX()}
                 </div>
                 : getPostJSX()}
