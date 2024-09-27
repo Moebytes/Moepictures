@@ -1308,12 +1308,12 @@ const CreateRoutes = (app: Express) => {
             kind = "model"
             type = "model"
         }
-          if (buffer) {
+          if (buffer.byteLength) {
             let newImagePath = functions.getImagePath(kind, newPostID, Number(fileOrder), filename)
             await serverFunctions.uploadFile(newImagePath, buffer)
             hasOriginal = true
           }
-          if (upscaledBuffer) {
+          if (upscaledBuffer.byteLength) {
             let newImagePath = functions.getUpscaledImagePath(kind, newPostID, Number(fileOrder), filename)
             await serverFunctions.uploadFile(newImagePath, upscaledBuffer)
             hasUpscaled = true
@@ -1483,7 +1483,7 @@ const CreateRoutes = (app: Express) => {
                   }
                   const unverifiedPath = functions.getImagePath(unverified.images[i].type, unverified.images[i].postID, unverified.images[i].order, unverified.images[i].filename)
                   const buffer = await serverFunctions.getUnverifiedFile(unverifiedPath)
-                  if (buffer) {
+                  if (buffer.byteLength) {
                     newImagePath = functions.getImageHistoryPath(newPostID, 2, imageFilenames[i])
                     await serverFunctions.uploadFile(newImagePath, buffer)
                   }
@@ -1512,7 +1512,7 @@ const CreateRoutes = (app: Express) => {
                   }
                   const unverifiedPath = functions.getImagePath(unverified.images[i].type, unverified.images[i].postID, unverified.images[i].order, unverified.images[i].filename)
                   const buffer = await serverFunctions.getUnverifiedFile(unverifiedPath)
-                  if (buffer) {
+                  if (buffer.byteLength) {
                     newImagePath = functions.getImageHistoryPath(newPostID, nextKey, imageFilenames[i])
                     await serverFunctions.uploadFile(newImagePath, buffer)
                   }

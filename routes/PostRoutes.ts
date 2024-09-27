@@ -550,12 +550,12 @@ const PostRoutes = (app: Express) => {
                     kind = "model"
                     type = "model"
                 }
-                if (buffer) {
+                if (buffer.byteLength) {
                     let newImagePath = functions.getImagePath(kind, postID, Number(fileOrder), filename)
                     await serverFunctions.uploadUnverifiedFile(newImagePath, buffer)
                     hasOriginal = true
                 }
-                if (upscaledBuffer) {
+                if (upscaledBuffer.byteLength) {
                     let newImagePath = functions.getUpscaledImagePath(kind, postID, Number(fileOrder), filename)
                     await serverFunctions.uploadUnverifiedFile(newImagePath, upscaledBuffer)
                     hasUpscaled = true

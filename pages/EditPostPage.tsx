@@ -157,20 +157,20 @@ const EditPostPage: React.FunctionComponent<Props> = (props) => {
         for (let i = 0; i < post.images.length; i++) {
             let imageLink = functions.getImageLink(post.images[i].type, postID, post.images[i].order, post.images[i].filename)
             let response = await fetch(`${imageLink}?upscaled=false`).then((r) => r.arrayBuffer())
-            if (functions.isImage(imageLink)) {
+            if (response.byteLength && functions.isImage(imageLink)) {
                 response = cryptoFunctions.decrypt(response)
             }
-            if (response) {
+            if (response.byteLength) {
                 const blob = new Blob([new Uint8Array(response)])
                 const file = new File([blob], path.basename(imageLink))
                 files.push(file)
                 links.push(imageLink)
             }
             let upscaledResponse = await fetch(`${imageLink}?upscaled=true`, {headers: {"x-force-upscale": "true"}}).then((r) => r.arrayBuffer())
-            if (functions.isImage(imageLink)) {
+            if (upscaledResponse.byteLength && functions.isImage(imageLink)) {
                 upscaledResponse = cryptoFunctions.decrypt(upscaledResponse)
             }
-            if (upscaledResponse) {
+            if (upscaledResponse.byteLength) {
                 const upscaledBlob = new Blob([new Uint8Array(upscaledResponse)])
                 const upscaledFile = new File([upscaledBlob], path.basename(imageLink))
                 upscaledFiles.push(upscaledFile)
@@ -1468,6 +1468,12 @@ const EditPostPage: React.FunctionComponent<Props> = (props) => {
         }
     }, [imgChangeFlag, showUpscaled, currentIndex, originalFiles, upscaledFiles])
 
+    useEffect(() => {
+        setTimeout(() => {
+            setImgChangeFlag(true)
+        }, 200)
+    }, [])
+
     const getCurrentFiles = () => {
         return showUpscaled ? upscaledFiles : originalFiles
     }
@@ -1577,7 +1583,7 @@ const EditPostPage: React.FunctionComponent<Props> = (props) => {
             <div className="editpost-row">
                 {getCurrentFiles().length > 1 ? 
                 <div className="editpost-container">
-                    <Carousel images={getCurrentFiles().map((u: any) => u.link)} set={set} index={currentIndex}/>
+                    <Carousel images={getCurrentFiles().map((u: any) => `${u.link}?upscaled=${showUpscaled}`)} set={set} index={currentIndex}/>
                     {getPostJSX()}
                 </div>
                 : getPostJSX()}

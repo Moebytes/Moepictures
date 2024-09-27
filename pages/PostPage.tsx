@@ -324,7 +324,6 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
     const set = (image: string, index: number) => {
         setImage(image)
         setOrder(index + 1)
-        forceUpdate()
     }
 
     const nsfwChecker = () => {
@@ -389,11 +388,11 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
             }
             <div className="content" onMouseEnter={() => setEnableDrag(true)}>
                 <div className="post-container">
-                    {nsfwChecker() && images.length > 1 ?
+                    {/*nsfwChecker() &&*/ images.length > 1 ?
                     <div className="carousel-container">
                         <Carousel images={images} set={set} index={order-1}/>
                     </div> : null}
-                    {nsfwChecker() && post ? getPostJSX() : null}
+                    {/*nsfwChecker() &&*/ post ? getPostJSX() : null}
                     {mobile && post && tagCategories ? <MobileInfo post={post} artists={tagCategories.artists} characters={tagCategories.characters} series={tagCategories.series} tags={tagCategories.tags}/> : null}
                     {parentPost ? <Parent post={parentPost}/>: null}
                     {thirdPartyPosts.length ? <ThirdParty posts={thirdPartyPosts}/> : null}

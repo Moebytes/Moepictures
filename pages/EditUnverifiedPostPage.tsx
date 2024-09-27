@@ -150,14 +150,14 @@ const EditUnverifiedPostPage: React.FunctionComponent<Props> = (props) => {
         for (let i = 0; i < post.images.length; i++) {
             let imageLink = functions.getUnverifiedImageLink(post.images[i].type, postID, post.images[i].order, post.images[i].filename)
             const response = await fetch(`${imageLink}?upscaled=false`).then((r) => r.arrayBuffer())
-            if (response) {
+            if (response.byteLength) {
                 const blob = new Blob([new Uint8Array(response)])
                 const file = new File([blob], path.basename(imageLink))
                 files.push(file)
                 links.push(imageLink)
             }
             const upscaledResponse = await fetch(`${imageLink}?upscaled=true`, {headers: {"x-force-upscale": "true"}}).then((r) => r.arrayBuffer())
-            if (upscaledResponse) {
+            if (upscaledResponse.byteLength) {
                 const upscaledBlob = new Blob([new Uint8Array(upscaledResponse)])
                 const upscaledFile = new File([upscaledBlob], path.basename(imageLink))
                 upscaledFiles.push(upscaledFile)
@@ -1465,6 +1465,12 @@ const EditUnverifiedPostPage: React.FunctionComponent<Props> = (props) => {
             setImgChangeFlag(false)
         }
     }, [imgChangeFlag, showUpscaled, currentIndex, originalFiles, upscaledFiles])
+
+    useEffect(() => {
+        setTimeout(() => {
+            setImgChangeFlag(true)
+        }, 200)
+    }, [])
 
     const getCurrentFiles = () => {
         return showUpscaled ? upscaledFiles : originalFiles
