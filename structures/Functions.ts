@@ -363,6 +363,24 @@ export default class Functions {
         return null
     }
 
+    public static validateTitle = (title: string) => {
+        if (!title) return "No title."
+        const words = title.replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g, "").split(/ +/g)
+        for (let i = 0; i < words.length; i++) {
+            if (profaneWords.map((w) => atob(w)).includes(words[i])) return "Title is profane."
+        }
+        return null
+    }
+
+    public static validateThread = (thread: string) => {
+        if (!thread) return "No thread content."
+        const words = thread.replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g, "").split(/ +/g)
+        for (let i = 0; i < words.length; i++) {
+            if (profaneWords.map((w) => atob(w)).includes(words[i])) return "Thread content is profane."
+        }
+        return null
+    }
+
     public static validateReason = (reason: string) => {
         if (!reason) return "Reason is required."
         if (gibberish(reason)) return "Reason cannot be gibberish."

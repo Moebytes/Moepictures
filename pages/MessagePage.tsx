@@ -424,6 +424,10 @@ const MessagePage: React.FunctionComponent<Props> = (props) => {
     }
 
     const editMessage = async () => {
+        const badTitle = functions.validateTitle(editMessageTitle)
+        if (badTitle) return
+        const badContent = functions.validateThread(editMessageContent)
+        if (badContent) return
         await axios.put("/api/message/edit", {messageID, title: editMessageTitle, content: editMessageContent}, {headers: {"x-csrf-token": functions.getCSRFToken()}, withCredentials: true})
         updateMessage()
     }

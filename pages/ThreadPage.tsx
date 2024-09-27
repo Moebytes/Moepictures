@@ -421,6 +421,10 @@ const ThreadPage: React.FunctionComponent<Props> = (props) => {
     }
 
     const editThread = async () => {
+        const badTitle = functions.validateTitle(editThreadTitle)
+        if (badTitle) return
+        const badContent = functions.validateThread(editThreadContent)
+        if (badContent) return
         await axios.put("/api/thread/edit", {threadID, title: editThreadTitle, content: editThreadContent}, {headers: {"x-csrf-token": functions.getCSRFToken()}, withCredentials: true})
         updateThread()
     }

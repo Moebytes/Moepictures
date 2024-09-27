@@ -870,6 +870,7 @@ const UploadPage: React.FunctionComponent = (props) => {
         saucenaoTimeout = true
         try {
             let results = await axios.post(`/api/misc/saucenao`, bytes, {withCredentials: true}).then((r) => r.data)
+            console.log(results)
             let link = ""
             let artist = ""
             let title = ""

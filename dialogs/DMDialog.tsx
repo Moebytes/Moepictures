@@ -36,6 +36,22 @@ const DMDialog: React.FunctionComponent = (props) => {
     }, [dmTarget])
 
     const sendMessage = async () => {
+        const badTitle = functions.validateTitle(title)
+        if (badTitle) {
+            setError(true)
+            if (!errorRef.current) await functions.timeout(20)
+            errorRef.current!.innerText = badTitle
+            await functions.timeout(2000)
+            return setError(false)
+        }
+        const badContent = functions.validateThread(content)
+        if (badContent) {
+            setError(true)
+            if (!errorRef.current) await functions.timeout(20)
+            errorRef.current!.innerText = badContent
+            await functions.timeout(2000)
+            return setError(false)
+        }
         try {
             const message = await axios.post("/api/message/create", {title, content, recipient: dmTarget}, {headers: {"x-csrf-token": functions.getCSRFToken()}, withCredentials: true}).then((r) => r.data)
             setDMTarget(null)

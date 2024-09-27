@@ -231,8 +231,6 @@ const UserProfilePage: React.FunctionComponent = (props) => {
         autosearchInterval()
     }, [interval])
 
-    
-
     const changeBio = async () => {
         const badBio = functions.validateBio(bio)
         if (badBio) {
