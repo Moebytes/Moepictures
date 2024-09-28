@@ -843,8 +843,10 @@ const UploadPage: React.FunctionComponent = (props) => {
             }
             setSubmitted(true)
             return setSubmitError(false)
-        } catch {
-            submitErrorRef.current.innerText = "Failed to submit. You might be missing required fields."
+        } catch (err: any) {
+            let errMsg = "Failed to submit. You might be missing required fields."
+            if (String(err.response?.data).includes("Invalid images")) errMsg = "Original image is required."
+            submitErrorRef.current.innerText = errMsg
             await functions.timeout(3000)
             return setSubmitError(false)
         }

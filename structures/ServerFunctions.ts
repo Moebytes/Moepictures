@@ -123,8 +123,8 @@ export default class ServerFunctions {
             let originalKey = `${local}/${decodeURIComponent(file)}`
             let upscaledKey = `${local}/${decodeURIComponent(`${file.split("/")[0]}-upscaled/${file.split("/")[1]}`)}`
             if (!fs.existsSync(upscaled ? upscaledKey : originalKey)) return ServerFunctions.getFirstHistoryFile(file)
-            if (upscaled && fs.existsSync(upscaledKey)) return fs.readFileSync(upscaledKey)
-            return fs.readFileSync(originalKey)
+            if (upscaled) return fs.existsSync(upscaledKey) ? fs.readFileSync(upscaledKey) : Buffer.from("")
+            return fs.existsSync(originalKey) ? fs.readFileSync(originalKey) : Buffer.from("")
         }
         return s3.getObject({Key: decodeURIComponent(file), Bucket: "moepictures"}).promise().then((r) => r.Body) as unknown as Buffer
     }
@@ -142,10 +142,8 @@ export default class ServerFunctions {
 
     public static deleteFile = async (file: string) => {
         if (functions.isLocalHost()) {
-            const dir = path.dirname(`${local}/${file}`)
             try {
                 fs.unlinkSync(`${local}/${file}`)
-                //fs.rmdirSync(dir)
             } catch {}
             return
         }
@@ -247,8 +245,8 @@ export default class ServerFunctions {
         if (functions.isLocalHost()) {
             let originalKey = `${localUnverified}/${decodeURIComponent(file)}`
             let upscaledKey = `${localUnverified}/${decodeURIComponent(`${file.split("/")[0]}-upscaled/${file.split("/")[1]}`)}`
-            if (upscaled && fs.existsSync(upscaledKey)) return fs.readFileSync(upscaledKey)
-            return fs.readFileSync(originalKey)
+            if (upscaled) return fs.existsSync(upscaledKey) ? fs.readFileSync(upscaledKey) : Buffer.from("")
+            return fs.existsSync(originalKey) ? fs.readFileSync(originalKey) : Buffer.from("")
         }
         return s3.getObject({Key: decodeURIComponent(file), Bucket: "moepictures-unverified"}).promise().then((r) => r.Body) as unknown as Buffer
     }
@@ -331,7 +329,7 @@ export default class ServerFunctions {
     }
 
     public static imagesChanged = async (oldImages: any[], currentImages: any[], upscaled?: boolean) => {
-        if (oldImages.length !== currentImages.length) return true
+        if (oldImages?.length !== currentImages?.length) return true
         for (let i = 0; i < oldImages.length; i++) {
             const oldImage = oldImages[i]
             let oldPath = ""
@@ -352,7 +350,7 @@ export default class ServerFunctions {
     }
 
     public static imagesChangedUnverified = async (oldImages: any[], currentImages: any[], upscaled?: boolean) => {
-        if (oldImages.length !== currentImages.length) return true
+        if (oldImages?.length !== currentImages?.length) return true
         for (let i = 0; i < oldImages.length; i++) {
             const oldImage = oldImages[i]
             let oldPath = ""

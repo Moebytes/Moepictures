@@ -131,7 +131,7 @@ const CreateRoutes = (app: Express) => {
 
         let skipMBCheck = (req.session.role === "admin" || req.session.role === "mod") ? true : false
         if (!validImages(images, skipMBCheck)) return res.status(400).send("Invalid images")
-        if (!validImages(upscaledImages, skipMBCheck)) return res.status(400).send("Invalid upscaled images")
+        if (upscaledImages?.length) if (!validImages(upscaledImages, skipMBCheck)) return res.status(400).send("Invalid upscaled images")
         const originalMB = images.reduce((acc: any, obj: any) => acc + obj.size, 0) / (1024*1024)
         const upscaledMB = upscaledImages.reduce((acc: any, obj: any) => acc + obj.size, 0) / (1024*1024)
         const totalMB = originalMB + upscaledMB
@@ -221,6 +221,9 @@ const CreateRoutes = (app: Express) => {
           }
           await sql.post.insertImage(postID, filename, kind, order, hash, dimensions.width, dimensions.height, current[i].size)
         }
+
+        if (upscaledImages?.length > images?.length) hasOriginal = false
+        if (images?.length > upscaledImages?.length) hasUpscaled = false
 
         let hidden = false 
         for (let i = 0; i < artists.length; i++) {
@@ -313,7 +316,13 @@ const CreateRoutes = (app: Express) => {
 
         for (let i = 0; i < tagMap.length; i++) {
           const implications = await sql.tag.implications(tagMap[i])
-          if (implications?.[0]) tagMap.push(...implications.map(((i: any) => i.implication)))
+          if (implications?.[0]) {
+            for (const i of implications) {
+              tagMap.push(i.implication)
+              const tag = await sql.tag.tag(i.implication)
+              bulkTagUpdate.push({tag: i.implication, type: functions.tagType(i.implication), description: tag?.description || null, image: tag?.image || null})
+            }
+          }
         }
 
         tagMap = functions.removeDuplicates(tagMap)
@@ -401,7 +410,7 @@ const CreateRoutes = (app: Express) => {
 
         let skipMBCheck = (req.session.role === "admin" || req.session.role === "mod") ? true : false
         if (!validImages(images, skipMBCheck)) return res.status(400).send("Invalid images")
-        if (!validImages(upscaledImages, skipMBCheck)) return res.status(400).send("Invalid upscaled images")
+        if (upscaledImages?.length) if (!validImages(upscaledImages, skipMBCheck)) return res.status(400).send("Invalid upscaled images")
         const originalMB = images.reduce((acc: any, obj: any) => acc + obj.size, 0) / (1024*1024)
         const upscaledMB = upscaledImages.reduce((acc: any, obj: any) => acc + obj.size, 0) / (1024*1024)
         const totalMB = originalMB + upscaledMB
@@ -509,6 +518,8 @@ const CreateRoutes = (app: Express) => {
             await sql.post.insertImage(postID, filename, kind, order, hash, dimensions.width, dimensions.height, current[i].size)
           }
         }
+        if (upscaledImages?.length > images?.length) hasOriginal = false
+        if (images?.length > upscaledImages?.length) hasUpscaled = false
 
         await sql.post.updatePost(postID, "type", type)
         if (!updatedDate) updatedDate = new Date().toISOString()
@@ -590,7 +601,13 @@ const CreateRoutes = (app: Express) => {
 
         for (let i = 0; i < tagMap.length; i++) {
           const implications = await sql.tag.implications(tagMap[i])
-          if (implications?.[0]) tagMap.push(...implications.map(((i: any) => i.implication)))
+          if (implications?.[0]) {
+            for (const i of implications) {
+              tagMap.push(i.implication)
+              const tag = await sql.tag.tag(i.implication)
+              bulkTagUpdate.push({tag: i.implication, type: functions.tagType(i.implication), description: tag?.description || null, image: tag?.image || null})
+            }
+          }
         }
 
         tagMap = functions.removeDuplicates(tagMap)
@@ -772,7 +789,7 @@ const CreateRoutes = (app: Express) => {
 
         let skipMBCheck = (req.session.role === "admin" || req.session.role === "mod") ? true : false
         if (!validImages(images, skipMBCheck)) return res.status(400).send("Invalid images")
-        if (!validImages(upscaledImages, skipMBCheck)) return res.status(400).send("Invalid upscaled images")
+        if (upscaledImages?.length) if (!validImages(upscaledImages, skipMBCheck)) return res.status(400).send("Invalid upscaled images")
         const originalMB = images.reduce((acc: any, obj: any) => acc + obj.size, 0) / (1024*1024)
         const upscaledMB = upscaledImages.reduce((acc: any, obj: any) => acc + obj.size, 0) / (1024*1024)
         const totalMB = originalMB + upscaledMB
@@ -850,6 +867,8 @@ const CreateRoutes = (app: Express) => {
           }
           await sql.post.insertUnverifiedImage(postID, filename, kind, order, hash, dimensions.width, dimensions.height, current[i].size)
         }
+        if (upscaledImages?.length > images?.length) hasOriginal = false
+        if (images?.length > upscaledImages?.length) hasUpscaled = false
 
         let hidden = false 
         for (let i = 0; i < artists.length; i++) {
@@ -945,7 +964,13 @@ const CreateRoutes = (app: Express) => {
 
         for (let i = 0; i < tagMap.length; i++) {
           const implications = await sql.tag.implications(tagMap[i])
-          if (implications?.[0]) tagMap.push(...implications.map(((i: any) => i.implication)))
+          if (implications?.[0]) {
+            for (const i of implications) {
+              tagMap.push(i.implication)
+              const tag = await sql.tag.tag(i.implication)
+              bulkTagUpdate.push({tag: i.implication, type: functions.tagType(i.implication), description: tag?.description || null, image: tag?.image || null})
+            }
+          }
         }
 
         tagMap = functions.removeDuplicates(tagMap)
@@ -1019,7 +1044,7 @@ const CreateRoutes = (app: Express) => {
 
         let skipMBCheck = (req.session.role === "admin" || req.session.role === "mod") ? true : false
         if (!validImages(images, skipMBCheck)) return res.status(400).send("Invalid images")
-        if (!validImages(upscaledImages, skipMBCheck)) return res.status(400).send("Invalid upscaled images")
+        if (upscaledImages?.length) if (!validImages(upscaledImages, skipMBCheck)) return res.status(400).send("Invalid upscaled images")
         const originalMB = images.reduce((acc: any, obj: any) => acc + obj.size, 0) / (1024*1024)
         const upscaledMB = upscaledImages.reduce((acc: any, obj: any) => acc + obj.size, 0) / (1024*1024)
         const totalMB = originalMB + upscaledMB
@@ -1118,6 +1143,8 @@ const CreateRoutes = (app: Express) => {
           }
           await sql.post.insertUnverifiedImage(postID, filename, kind, order, hash, dimensions.width, dimensions.height, current[i].size)
         }
+        if (upscaledImages?.length > images?.length) hasOriginal = false
+        if (images?.length > upscaledImages?.length) hasUpscaled = false
 
         const updatedDate = new Date().toISOString()
         await sql.post.bulkUpdateUnverifiedPost(postID, {
@@ -1203,7 +1230,13 @@ const CreateRoutes = (app: Express) => {
 
         for (let i = 0; i < tagMap.length; i++) {
           const implications = await sql.tag.implications(tagMap[i])
-          if (implications?.[0]) tagMap.push(...implications.map(((i: any) => i.implication)))
+          if (implications?.[0]) {
+            for (const i of implications) {
+              tagMap.push(i.implication)
+              const tag = await sql.tag.tag(i.implication)
+              bulkTagUpdate.push({tag: i.implication, type: functions.tagType(i.implication), description: tag?.description || null, image: tag?.image || null})
+            }
+          }
         }
 
         tagMap = functions.removeDuplicates(tagMap)
@@ -1231,15 +1264,14 @@ const CreateRoutes = (app: Express) => {
 
         const newPostID = unverified.originalID ? Number(unverified.originalID) : await sql.post.insertPost()
 
-        let post = null as any
+        let post = unverified.originalID ? await sql.post.post(unverified.originalID) : null
 
-        let imgChanged = await serverFunctions.imagesChangedUnverified(post.images, unverified.images)
-        if (!imgChanged) imgChanged = await serverFunctions.imagesChangedUnverified(post.images, unverified.images, true)
+        let imgChanged = await serverFunctions.imagesChangedUnverified(post?.images, unverified.images)
+        if (!imgChanged) imgChanged = await serverFunctions.imagesChangedUnverified(post?.images, unverified.images, true)
 
         let vanillaBuffers = [] as any
         let upscaledVanillaBuffers = [] as any
         if (unverified.originalID) {
-          post = await sql.post.post(unverified.originalID)
           if (!post) return res.status(400).send("Bad postID")
           for (let i = 0; i < post.images.length; i++) {
             const imagePath = functions.getImagePath(post.images[i].type, newPostID, post.images[i].order, post.images[i].filename)
@@ -1266,6 +1298,8 @@ const CreateRoutes = (app: Express) => {
 
         let hasOriginal = false
         let hasUpscaled = false
+        let originalCheck = [] as string[]
+        let upscaledCheck = [] as string[]
 
         let imageFilenames = [] as any
         for (let i = 0; i < unverified.images.length; i++) {
@@ -1312,11 +1346,13 @@ const CreateRoutes = (app: Express) => {
             let newImagePath = functions.getImagePath(kind, newPostID, Number(fileOrder), filename)
             await serverFunctions.uploadFile(newImagePath, buffer)
             hasOriginal = true
+            originalCheck.push(newImagePath)
           }
           if (upscaledBuffer.byteLength) {
             let newImagePath = functions.getUpscaledImagePath(kind, newPostID, Number(fileOrder), filename)
             await serverFunctions.uploadFile(newImagePath, upscaledBuffer)
             hasUpscaled = true
+            upscaledCheck.push(newImagePath)
           }
 
           let dimensions = null as any
@@ -1331,6 +1367,8 @@ const CreateRoutes = (app: Express) => {
           }
           await sql.post.insertImage(newPostID, filename, type, order, hash, dimensions.width, dimensions.height, current.byteLength)
         }
+        if (upscaledCheck?.length > originalCheck?.length) hasOriginal = false
+        if (originalCheck?.length > upscaledCheck?.length) hasUpscaled = false
 
         let hidden = false 
         for (let i = 0; i < artists.length; i++) {
@@ -1417,7 +1455,13 @@ const CreateRoutes = (app: Express) => {
 
         for (let i = 0; i < tagMap.length; i++) {
           const implications = await sql.tag.implications(tagMap[i])
-          if (implications?.[0]) tagMap.push(...implications.map(((i: any) => i.implication)))
+          if (implications?.[0]) {
+            for (const i of implications) {
+              tagMap.push(i.implication)
+              const tag = await sql.tag.tag(i.implication)
+              bulkTagUpdate.push({tag: i.implication, type: functions.tagType(i.implication), description: tag?.description || null, image: tag?.image || null})
+            }
+          }
         }
 
         tagMap = functions.removeDuplicates(tagMap)
@@ -1532,7 +1576,7 @@ const CreateRoutes = (app: Express) => {
         }
 
         let subject = "Notice: Post has been approved"
-        let message = `Post ${functions.getDomain()}/post/${newPostID} has been approved. Thanks for the submission!`
+        let message = `${functions.getDomain()}/post/${newPostID} has been approved. Thanks for the submission!`
         if (unverified.originalID) {
           subject = "Notice: Post edit request has been approved"
           message = `Post edit request on ${functions.getDomain()}/post/${newPostID} has been approved. Thanks for the contribution!`

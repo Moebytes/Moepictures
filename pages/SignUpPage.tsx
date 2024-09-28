@@ -144,8 +144,10 @@ const SignUpPage: React.FunctionComponent = (props) => {
             await axios.post("/api/user/signup", {username, email, password, captchaResponse}, {headers: {"x-csrf-token": functions.getCSRFToken()}, withCredentials: true})
             setSubmitted(true)
             setError(false)
-        } catch {
-            errorRef.current!.innerText = "Bad username, password, email, or captcha."
+        } catch (err) {
+            let errMsg = "Bad username, password, email, or captcha."
+            if (String(err).includes("Too many accounts created")) errMsg = "Too many accounts created, try again later."
+            errorRef.current!.innerText = errMsg
             await functions.timeout(2000)
             setError(false)
             updateCaptcha()

@@ -948,13 +948,23 @@ const EditPostPage: React.FunctionComponent<Props> = (props) => {
             await axios.put("/api/post/edit", data, {headers: {"x-csrf-token": functions.getCSRFToken()}, withCredentials: true}).then((r) => r.data)
             setSubmitted(true)
             return setSubmitError(false)
-        } catch (error: any) {
-            if (String(error)?.includes("403")) {
-                await axios.put("/api/post/edit/unverified", data, {headers: {"x-csrf-token": functions.getCSRFToken()}, withCredentials: true}).then((r) => r.data)
-                setNeedsPermission(true)
-                setSubmitted(true)
+        } catch (err: any) {
+            if (String(err)?.includes("403")) {
+                try {
+                    await axios.put("/api/post/edit/unverified", data, {headers: {"x-csrf-token": functions.getCSRFToken()}, withCredentials: true}).then((r) => r.data)
+                    setNeedsPermission(true)
+                    setSubmitted(true)
+                } catch (err: any) {
+                    let errMsg = "Failed to submit. You might be missing required fields."
+                    if (String(err.response?.data).includes("Invalid images")) errMsg = "Original image is required."
+                    submitErrorRef.current.innerText = errMsg
+                    await functions.timeout(3000)
+                    return setSubmitError(false)
+                }
             } else {
-                submitErrorRef.current.innerText = "Failed to submit. You might be missing required fields."
+                let errMsg = "Failed to submit. You might be missing required fields."
+                if (String(err.response?.data).includes("Invalid images")) errMsg = "Original image is required."
+                submitErrorRef.current.innerText = errMsg
                 await functions.timeout(3000)
                 return setSubmitError(false)
             }

@@ -113,11 +113,10 @@ const SearchRoutes = (app: Express) => {
 
     app.post("/api/search/similar", searchLimiter, async (req: Request, res: Response, next: NextFunction) => {
         try {
-            const {type, bytes} = req.body
+            const {bytes, useMD5} = req.body
             if (!bytes) return res.status(400).send("Image data must be provided as bytes")
             const buffer = Buffer.from(Object.values(bytes) as any)
             let hash = ""
-            const useMD5 = type === "mp3" || type === "wav" || type === "glb" || type === "fbx" || type === "obj"
             if (useMD5) {
                 hash = crypto.createHash("md5").update(buffer).digest("hex")
             } else {

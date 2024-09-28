@@ -953,8 +953,9 @@ const EditUnverifiedPostPage: React.FunctionComponent<Props> = (props) => {
             await axios.put("/api/post/edit/unverified", data, {headers: {"x-csrf-token": functions.getCSRFToken()}, withCredentials: true}).then((r) => r.data)
             setSubmitted(true)
             return setSubmitError(false)
-        } catch {
-            submitErrorRef.current.innerText = "Failed to submit. You might be missing required fields."
+        } catch (err: any) {
+            let errMsg = "Failed to submit. You might be missing required fields."
+            if (String(err.response?.data).includes("Invalid images")) errMsg = "Original image is required."
             await functions.timeout(3000)
             return setSubmitError(false)
         }

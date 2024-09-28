@@ -109,7 +109,9 @@ const PostRoutes = (app: Express) => {
             await sql.post.deletePost(Number(postID))
             for (let i = 0; i < post.images.length; i++) {
                 const file = functions.getImagePath(post.images[i].type, post.postID, post.images[i].order, post.images[i].filename)
+                const upscaledFile = functions.getUpscaledImagePath(post.images[i].type, post.postID, post.images[i].order, post.images[i].filename)
                 await serverFunctions.deleteFile(file)
+                await serverFunctions.deleteFile(upscaledFile)
             }
             await serverFunctions.deleteFolder(`history/post/${postID}`).catch(() => null)
             res.status(200).send("Success")
@@ -391,7 +393,13 @@ const PostRoutes = (app: Express) => {
 
             for (let i = 0; i < tagMap.length; i++) {
                 const implications = await sql.tag.implications(tagMap[i])
-                if (implications?.[0]) tagMap.push(...implications.map(((i: any) => i.implication)))
+                if (implications?.[0]) {
+                    for (const i of implications) {
+                      tagMap.push(i.implication)
+                      const tag = await sql.tag.tag(i.implication)
+                      bulkTagUpdate.push({tag: i.implication, type: functions.tagType(i.implication), description: tag?.description || null, image: tag?.image || null})
+                    }
+                }
             }
     
             tagMap = functions.removeDuplicates(tagMap)
@@ -510,6 +518,8 @@ const PostRoutes = (app: Express) => {
 
             let hasOriginal = false
             let hasUpscaled = false
+            let originalCheck = [] as string[]
+            let upscaledCheck = [] as string[]
 
             for (let i = 0; i < post.images.length; i++) {
                 const imagePath = functions.getImagePath(post.images[i].type, originalPostID, post.images[i].order, post.images[i].filename)
@@ -554,11 +564,13 @@ const PostRoutes = (app: Express) => {
                     let newImagePath = functions.getImagePath(kind, postID, Number(fileOrder), filename)
                     await serverFunctions.uploadUnverifiedFile(newImagePath, buffer)
                     hasOriginal = true
+                    originalCheck.push(newImagePath)
                 }
                 if (upscaledBuffer.byteLength) {
                     let newImagePath = functions.getUpscaledImagePath(kind, postID, Number(fileOrder), filename)
                     await serverFunctions.uploadUnverifiedFile(newImagePath, upscaledBuffer)
                     hasUpscaled = true
+                    upscaledCheck.push(newImagePath)
                 }
                 let dimensions = null as any
                 let hash = ""
@@ -572,6 +584,8 @@ const PostRoutes = (app: Express) => {
                 }
                 await sql.post.insertUnverifiedImage(postID, filename, type, order, hash, dimensions.width, dimensions.height, String(current.byteLength))
             }
+            if (upscaledCheck?.length > originalCheck?.length) hasOriginal = false
+            if (originalCheck?.length > upscaledCheck?.length) hasUpscaled = false
     
             const updatedDate = new Date().toISOString()
             await sql.post.bulkUpdateUnverifiedPost(postID, {
@@ -671,7 +685,13 @@ const PostRoutes = (app: Express) => {
 
             for (let i = 0; i < tagMap.length; i++) {
                 const implications = await sql.tag.implications(tagMap[i])
-                if (implications?.[0]) tagMap.push(...implications.map(((i: any) => i.implication)))
+                if (implications?.[0]) {
+                    for (const i of implications) {
+                      tagMap.push(i.implication)
+                      const tag = await sql.tag.tag(i.implication)
+                      bulkTagUpdate.push({tag: i.implication, type: functions.tagType(i.implication), description: tag?.description || null, image: tag?.image || null})
+                    }
+                }
             }
     
             tagMap = functions.removeDuplicates(tagMap)

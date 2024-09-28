@@ -178,10 +178,10 @@ const ModPosts: React.FunctionComponent = (props) => {
                         <span className="mod-post-text">Size: {post.images.length}→{functions.readableFileSize(post.images.reduce((acc: any, obj: any) => acc + obj.size, 0))}</span>
                     </div>
                     <div className="mod-post-text-column">
+                        <span className="mod-post-text">Upscaled: {post.hasUpscaled ? "yes" : "no"}</span>
                         <span className="mod-post-text">Type: {post.type}</span>
                         <span className="mod-post-text">Restrict: {post.restrict}</span>
                         <span className="mod-post-text">Style: {post.style}</span>
-                        <span className="mod-post-text">Upload Date: {functions.prettyDate(new Date(post.uploadDate))}</span>
                     </div>
                     <div className="mod-post-options">
                         <div className="mod-post-options-container" onClick={() => rejectPost(post.postID)}>

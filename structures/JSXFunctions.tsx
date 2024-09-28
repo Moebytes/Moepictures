@@ -21,11 +21,11 @@ export default class JSXFunctions {
         const elements = parts.map((part, index) => {
             if (part.match(/(https?:\/\/[^\s]+)/g)) {
                 let name = part
-                if (name.includes(`${functions.getDomain()}/post`)) name = `Post #${name.match(/\d+/)?.[0] || ""}`
-                if (name.includes(`${functions.getDomain()}/thread`)) name = `Thread #${name.match(/\d+/)?.[0] || ""}`
-                if (name.includes(`${functions.getDomain()}/message`)) name = `Message #${name.match(/\d+/)?.[0] || ""}`
-                if (name.includes(`${functions.getDomain()}/user`)) name = `User ${name.match(/(?<=\/user\/)(.+)/)?.[0] || ""}`
-                if (name.includes(`${functions.getDomain()}/tag`)) name = `Tag ${name.match(/(?<=\/tag\/)(.+)/)?.[0] || ""}`
+                if (name.includes(`${functions.getDomain()}/post`)) name = `Post #${name.replace(functions.getDomain(), "").match(/\d+/)?.[0] || ""}`
+                if (name.includes(`${functions.getDomain()}/thread`)) name = `Thread #${name.replace(functions.getDomain(), "").match(/\d+/)?.[0] || ""}`
+                if (name.includes(`${functions.getDomain()}/message`)) name = `Message #${name.replace(functions.getDomain(), "").match(/\d+/)?.[0] || ""}`
+                if (name.includes(`${functions.getDomain()}/user`)) name = `User ${name.replace(functions.getDomain(), "").match(/(?<=\/user\/)(.+)/)?.[0] || ""}`
+                if (name.includes(`${functions.getDomain()}/tag`)) name = `Tag ${name.replace(functions.getDomain(), "").match(/(?<=\/tag\/)(.+)/)?.[0] || ""}`
                 return (<a key={index} href={part} target="_blank" rel="noopener">{name}</a>)
             } else {
                 return <span key={index}>{part}</span>

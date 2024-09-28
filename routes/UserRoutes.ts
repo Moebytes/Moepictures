@@ -19,7 +19,7 @@ const signupLimiter = rateLimit({
 
 const loginLimiter = rateLimit({
 	windowMs: 5 * 60 * 1000,
-	max: 30,
+	max: 10,
 	message: "Too many login attempts, try again later.",
 	standardHeaders: true,
 	legacyHeaders: false

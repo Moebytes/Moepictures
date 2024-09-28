@@ -169,7 +169,7 @@ const ModPostEdits: React.FunctionComponent = (props) => {
                         <span className="mod-post-link" onClick={() => history.push(`/user/${post.updater}`)}>Edited By: {functions.toProperCase(post.updater || "Deleted")}</span>
                         <span className="mod-post-text">Reason: {post.reason || "None provided."}</span>
                         <span className="mod-post-text">Tags: {post.tags?.length}</span>
-                        <span className="mod-post-text">Updated Date: {functions.prettyDate(new Date(post.updatedDate))}</span>
+                        <span className="mod-post-text">Upscaled: {post.hasUpscaled ? "yes" : "no"}</span>
                     </div>
                     <div className="mod-post-options">
                         <div className="mod-post-options-container" onClick={() => rejectPost(post.postID)}>
