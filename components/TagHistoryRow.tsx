@@ -15,12 +15,15 @@ import pixiv from "../assets/icons/pixiv.png"
 import soundcloud from "../assets/icons/soundcloud.png"
 import sketchfab from "../assets/icons/sketchfab.png"
 import twitter from "../assets/icons/twitter.png"
+import crypto from "crypto"
 import "./styles/taghistoryrow.less"
 import axios from "axios"
 
 interface Props {
     tagHistory: any
     historyIndex: number
+    previousHistory: any
+    currentHistory: any
     onDelete?: () => void
     onEdit?: () => void
     current?: boolean
@@ -38,6 +41,8 @@ const TagHistoryRow: React.FunctionComponent<Props> = (props) => {
     const initialImg = functions.getTagLink(props.tagHistory.type, props.tagHistory.image)
     const [img, setImg] = useState(initialImg)
     const [userRole, setUserRole] = useState("")
+    const [hasImageUpdate, setHasImageUpdate] = useState(false)
+    const [hasAnyUpdate, setHasAnyUpdate] = useState(true)
     const tag = props.tagHistory.tag
 
     const updateUserRole = async () => {
@@ -203,6 +208,47 @@ const TagHistoryRow: React.FunctionComponent<Props> = (props) => {
         return <span className="taghistoryrow-user-text" onClick={userClick} onAuxClick={userClick}>{editText} {functions.timeAgo(targetDate)} by {functions.toProperCase(props.tagHistory.user)}</span>
     }
 
+    const calculateImageDiff = async () => {
+        if (!props.previousHistory) return false
+        const img = functions.getTagLink(props.tagHistory.type, props.tagHistory.image)
+        const previous = functions.getTagLink(props.previousHistory.type, props.previousHistory.image)
+
+        const imgBuffer = await axios.get(img, {responseType: "arraybuffer", withCredentials: true}).then((r) => r.data)
+        const previousBuffer = await axios.get(previous, {responseType: "arraybuffer", withCredentials: true}).then((r) => r.data)
+
+        const imgMD5 = crypto.createHash("md5").update(Buffer.from(imgBuffer)).digest("hex")
+        const previousMD5 = crypto.createHash("md5").update(Buffer.from(previousBuffer)).digest("hex")
+
+        if (imgMD5 !== previousMD5) return true
+        return false
+    }
+
+    useEffect(() => {
+        calculateImageDiff().then((answer) => {
+            setHasImageUpdate(answer)
+            if (!answer && !diffJSX().length && !props.tagHistory.reason) setHasAnyUpdate(false)
+        })
+    }, [props.previousHistory, props.tagHistory])
+
+    const diffJSX = () => {
+        let jsx = [] as React.ReactElement[]
+        if (!props.previousHistory || (props.previousHistory?.description !== props.tagHistory.description)) {
+            jsx.push(<span className="taghistoryrow-text">{props.tagHistory.description || "None"}</span>)
+        }
+        if (!props.previousHistory || (props.previousHistory?.aliases !== props.tagHistory.aliases)) {
+            if (props.tagHistory.aliases?.[0]) {
+                jsx.push(<span className="taghistoryrow-text"><span className="taghistoryrow-label-text">Aliases:</span> {props.tagHistory.aliases.map((alias: string) => alias.replaceAll("-", " ")).join(", ")}</span>)
+            }
+        }
+        if (!props.previousHistory || (props.previousHistory?.implications !== props.tagHistory.implications)) {
+            if (props.tagHistory.implications?.[0]) {
+                jsx.push(<span className="taghistoryrow-text"><span className="taghistoryrow-label-text">Implications:</span> {props.tagHistory.implications.map((implication: string) => implication.replaceAll("-", " ")).join(", ")}</span>)
+            }
+        }
+        return jsx
+    }
+
+    if (!hasAnyUpdate) return null
 
     return (
         <div className="taghistoryrow">
@@ -216,9 +262,8 @@ const TagHistoryRow: React.FunctionComponent<Props> = (props) => {
                 <div className="taghistoryrow-container">
                     <div className="taghistoryrow-user-container">
                         {dateTextJSX()}
-                        <span className="taghistoryrow-text">{props.tagHistory.description || "None"}</span>
-                        {props.tagHistory.aliases?.[0] ? <span className="taghistoryrow-text"><span className="taghistoryrow-label-text">Aliases:</span> {props.tagHistory.aliases.map((alias) => alias.replaceAll("-", " ")).join(", ")}</span> : null}
-                        {props.tagHistory.implications?.[0] ? <span className="taghistoryrow-text"><span className="taghistoryrow-label-text">Implications:</span> {props.tagHistory.implications.map((implication) => implication.replaceAll("-", " ")).join(", ")}</span> : null}
+                        {hasImageUpdate ? <span className="taghistoryrow-text-strong">[Image Updated]</span> : null}
+                        {diffJSX()}
                         {props.tagHistory.reason ? <span className="taghistoryrow-text"><span className="taghistoryrow-label-text">Reason:</span> {props.tagHistory.reason}</span> : null}
                     </div>
                 </div>

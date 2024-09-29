@@ -518,12 +518,13 @@ const TagRoutes = (app: Express) => {
             if (!req.session.username) return res.status(401).send("Unauthorized")
             if (req.session.role !== "admin" && req.session.role !== "mod") return res.status(403).end()
             const tagHistory = await sql.history.tagHistory(tag as string)
-            if (tagHistory[0]?.historyID === Number(historyID)) {
+            if (tagHistory[0]?.historyID === historyID) {
                 return res.status(400).send("Bad request")
             } else {
-                const currentHistory = tagHistory.find((history) => history.historyID === Number(historyID))
+                const currentHistory = tagHistory.find((history: any) => history.historyID === historyID)
                 if (currentHistory.image?.includes("history/")) {
                     await serverFunctions.deleteFile(currentHistory.image)
+                    await serverFunctions.deleteIfEmpty(path.dirname(currentHistory.image))
                 }
                 await sql.history.deleteTagHistory(Number(historyID))
             }

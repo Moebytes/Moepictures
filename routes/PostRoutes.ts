@@ -733,15 +733,20 @@ const PostRoutes = (app: Express) => {
             if (!req.session.username) return res.status(401).send("Unauthorized")
             if (req.session.role !== "admin" && req.session.role !== "mod") return res.status(403).end()
             const postHistory = await sql.history.postHistory(Number(postID))
-            if (postHistory[0]?.historyID === Number(historyID)) {
+            if (postHistory[0]?.historyID === historyID) {
                 return res.status(400).send("Bad historyID")
             } else {
-                const currentHistory = postHistory.find((history) => history.historyID === Number(historyID))
+                const currentHistory = postHistory.find((history) => history.historyID === historyID)
                 for (let i = 0; i < currentHistory.images?.length; i++) {
                     const image = currentHistory.images[i]
                     if (image?.includes("history/")) {
                         await serverFunctions.deleteFile(image)
+                        await serverFunctions.deleteFile(image.replace("original/", "upscaled/"))
                     }
+                }
+                if (currentHistory.images?.[0]) {
+                    await serverFunctions.deleteIfEmpty(path.dirname(currentHistory.images[0]))
+                    await serverFunctions.deleteIfEmpty(path.dirname(currentHistory.images[0].replace("original/", "upscaled/")))
                 }
                 await sql.history.deletePostHistory(Number(historyID))
             }

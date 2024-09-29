@@ -156,7 +156,7 @@ const EditPostPage: React.FunctionComponent<Props> = (props) => {
         let upscaledLinks = [] as any
         for (let i = 0; i < post.images.length; i++) {
             let imageLink = functions.getImageLink(post.images[i].type, postID, post.images[i].order, post.images[i].filename)
-            let response = await fetch(`${imageLink}?upscaled=false`).then((r) => r.arrayBuffer())
+            let response = await fetch(`${imageLink}?upscaled=false`, {headers: {"x-force-upscale": "false"}}).then((r) => r.arrayBuffer())
             if (response.byteLength && functions.isImage(imageLink)) {
                 response = cryptoFunctions.decrypt(response)
             }

@@ -186,7 +186,7 @@ const TranslationRoutes = (app: Express) => {
             if (!req.session.username) return res.status(401).send("Unauthorized")
             if (req.session.role !== "admin" && req.session.role !== "mod") return res.status(403).end()
             const translationHistory = await sql.history.translationHistory(postID, order)
-            if (translationHistory[0]?.historyID === Number(historyID)) {
+            if (translationHistory[0]?.historyID === historyID) {
                 return res.status(400).send("Bad historyID")
             } else {
                 await sql.history.deleteTranslationHistory(Number(historyID))

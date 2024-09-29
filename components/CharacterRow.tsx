@@ -60,7 +60,7 @@ const CharacterRow: React.FunctionComponent<Props> = (props) => {
     const characterSocialJSX = () => {
         let jsx = [] as any
         if (props.character.fandom) {
-            jsx.push(<img className="characterrow-social" src={fandom} onClick={() => window.open(props.character.fandom, "_blank")}/>)
+            jsx.push(<img className="characterrow-social" src={fandom} onClick={() => window.open(props.character.fandom, "_blank", "noreferrer")}/>)
         }
         return jsx
     }

@@ -150,12 +150,15 @@ const TagHistoryPage: React.FunctionComponent<Props> = (props) => {
         let current = visibleRevisions[0]
         let currentIndex = 0
         for (let i = 0; i < visibleRevisions.length; i++) {
+            let previous = visibleRevisions[i + 1]
             if (current.tag !== visibleRevisions[i].tag) {
                 current = visibleRevisions[i]
                 currentIndex = i
             }
+            if (previous?.tag !== current.tag) previous = null
             jsx.push(<TagHistoryRow historyIndex={i+1} tagHistory={visibleRevisions[i]} 
-                onDelete={updateHistory} onEdit={updateHistory} current={i === currentIndex}/>)
+                previousHistory={previous} currentHistory={current} current={i === currentIndex}
+                onDelete={updateHistory} onEdit={updateHistory}/>)
         }
         return jsx
     }

@@ -52,16 +52,15 @@ const BanDialog: React.FunctionComponent = (props) => {
 
     const parseImages = async (postHistory: any) => {
         let images = [] as any
+        let upscaledImages = [] as any
         for (let i = 0; i < postHistory.images.length; i++) {
-            const filename = postHistory.images[i]?.filename ? postHistory.images[0].filename : postHistory.images[0]
+            let filename = postHistory.images[i]?.filename ? postHistory.images[i].filename : postHistory.images[i]
             const imgLink = functions.getImageLink(postHistory.images[i]?.type, postHistory.postID, i+1, filename)
-            let link = imgLink
+            let link = await cryptoFunctions.decryptedLink(imgLink)
             let ext = path.extname(imgLink)
-            if (functions.isImage(link)) {
-                link = await cryptoFunctions.decryptedLink(link)
-                link += `#${ext}`
-            }
-            const buffer = await axios.get(link, {responseType: "arraybuffer", withCredentials: true}).then((r) => r.data) as Buffer
+            if (!link.includes(ext)) link += `#${ext}`
+            const buffer = await axios.get(link, {responseType: "arraybuffer", withCredentials: true, headers: {"x-force-upscale": "false"}}).then((r) => r.data) as Buffer
+            const upscaledBuffer = await axios.get(link, {responseType: "arraybuffer", withCredentials: true, headers: {"x-force-upscale": "true"}}).then((r) => r.data) as Buffer
             let thumbnail = ""
             if (ext === ".mp4" || ext === ".webm") {
                 thumbnail = await functions.videoThumbnail(link)
@@ -70,10 +69,16 @@ const BanDialog: React.FunctionComponent = (props) => {
             } else if (ext === ".mp3" || ext === ".wav") {
                 thumbnail = await functions.songCover(link)
             }
-            images.push({link, ext: ext.replace(".", ""), size: buffer.byteLength, thumbnail,
-            originalLink: imgLink, bytes: Object.values(new Uint8Array(buffer)), name: path.basename(imgLink)})
+            if (buffer.byteLength) {
+                images.push({link, ext: ext.replace(".", ""), size: buffer.byteLength, thumbnail,
+                originalLink: imgLink, bytes: Object.values(new Uint8Array(buffer)), name: path.basename(imgLink)})
+            }
+            if (upscaledBuffer.byteLength) {
+                upscaledImages.push({link, ext: ext.replace(".", ""), size: upscaledBuffer.byteLength, thumbnail,
+                originalLink: imgLink, bytes: Object.values(new Uint8Array(upscaledBuffer)), name: path.basename(imgLink)})
+            }
         }
-        return images
+        return {images, upscaledImages}
     }
 
     const parseNewTags = async (postHistory: any) => {
@@ -95,7 +100,7 @@ const BanDialog: React.FunctionComponent = (props) => {
                 const result = await axios.get("/api/post/history", {params: {postID}, withCredentials: true}).then((r) => r.data)
                 if (!result?.[0]) continue
                 const currentHistory = result[0]
-                const images = await parseImages(currentHistory)
+                const {images, upscaledImages} = await parseImages(currentHistory)
                 const newTags = await parseNewTags(currentHistory)
                 const source = {
                     title: currentHistory.title,
@@ -106,7 +111,7 @@ const BanDialog: React.FunctionComponent = (props) => {
                     commentary: currentHistory.commentary,
                     translatedCommentary: currentHistory.translatedCommentary
                 }
-                await axios.put("/api/post/edit", {silent: true, postID: currentHistory.postID, images, type: currentHistory.type, restrict: currentHistory.restrict, source,
+                await axios.put("/api/post/edit", {silent: true, postID: currentHistory.postID, images, upscaledImages, type: currentHistory.type, restrict: currentHistory.restrict, source,
                 style: currentHistory.style, artists: currentHistory.artists, characters: currentHistory.characters, preserveThirdParty: currentHistory.thirdParty,
                 series: currentHistory.series, tags: currentHistory.tags, newTags, updatedDate: currentHistory.date, reason: currentHistory.reason}, {headers: {"x-csrf-token": functions.getCSRFToken()}, withCredentials: true})
             }

@@ -70,29 +70,34 @@ const PostHistoryRow: React.FunctionComponent<Props> = (props) => {
             let currentFilename = props.currentHistory.images[i]?.filename ? props.currentHistory.images[i].filename : props.currentHistory.images[i]
             const currentLink = functions.getImageLink(props.currentHistory.images[i]?.type, props.currentHistory.postID, i+1, currentFilename)
 
-            let img = imgLink
-            if (functions.isImage(img)) {
-                img = await cryptoFunctions.decryptedLink(img)
-            } else if (functions.isModel(img)) {
+            let img = await cryptoFunctions.decryptedLink(imgLink)
+            if (functions.isModel(img)) {
                 img = await functions.modelImage(img)
             } else if (functions.isAudio(img)) {
                 img = await functions.songCover(img)
             }
-            let current = currentLink
-            if (functions.isImage(current)) {
-                current = await cryptoFunctions.decryptedLink(current)
-            } else if (functions.isModel(img)) {
+
+            let current = await cryptoFunctions.decryptedLink(currentLink)
+            if (functions.isModel(img)) {
                 current = await functions.modelImage(current)
             } else if (functions.isAudio(img)) {
                 current = await functions.songCover(current)
             }
-            const imgBuffer = await axios.get(img, {responseType: "arraybuffer", withCredentials: true}).then((r) => r.data)
-            const currentBuffer = await axios.get(currentImg, {responseType: "arraybuffer", withCredentials: true}).then((r) => r.data)
+            const imgBuffer = await axios.get(img, {responseType: "arraybuffer", withCredentials: true, headers: {"x-force-upscale": "false"}}).then((r) => r.data) as Buffer
+            const currentBuffer = await axios.get(currentImg, {responseType: "arraybuffer", withCredentials: true, headers: {"x-force-upscale": "false"}}).then((r) => r.data) as Buffer
+            const upscaledImgBuffer = await axios.get(img, {responseType: "arraybuffer", withCredentials: true, headers: {"x-force-upscale": "true"}}).then((r) => r.data) as Buffer
+            const upscaledCurrentBuffer = await axios.get(currentImg, {responseType: "arraybuffer", withCredentials: true, headers: {"x-force-upscale": "true"}}).then((r) => r.data) as Buffer
 
-            const imgMD5 = crypto.createHash("md5").update(Buffer.from(imgBuffer)).digest("hex")
-            const currentMD5 = crypto.createHash("md5").update(Buffer.from(currentBuffer)).digest("hex")
-
-            if (imgMD5 !== currentMD5) return true
+            if (imgBuffer.byteLength) {
+                const imgMD5 = crypto.createHash("md5").update(Buffer.from(imgBuffer)).digest("hex")
+                const currentMD5 = crypto.createHash("md5").update(Buffer.from(currentBuffer)).digest("hex")
+                if (imgMD5 !== currentMD5) return true
+            }
+            if (upscaledImgBuffer.byteLength) {
+                const imgMD5 = crypto.createHash("md5").update(Buffer.from(upscaledImgBuffer)).digest("hex")
+                const currentMD5 = crypto.createHash("md5").update(Buffer.from(upscaledCurrentBuffer)).digest("hex")
+                if (imgMD5 !== currentMD5) return true
+            }
         }
         return false
     }
@@ -110,16 +115,15 @@ const PostHistoryRow: React.FunctionComponent<Props> = (props) => {
 
     const parseImages = async () => {
         let images = [] as any
+        let upscaledImages = [] as any
         for (let i = 0; i < props.postHistory.images.length; i++) {
             let filename = props.postHistory.images[i]?.filename ? props.postHistory.images[i].filename : props.postHistory.images[i]
             const imgLink = functions.getImageLink(props.postHistory.images[i]?.type, props.postHistory.postID, i+1, filename)
-            let link = imgLink
+            let link = await cryptoFunctions.decryptedLink(imgLink)
             let ext = path.extname(imgLink)
-            if (functions.isImage(link)) {
-                link = await cryptoFunctions.decryptedLink(link)
-                link += `#${ext}`
-            }
-            const buffer = await axios.get(link, {responseType: "arraybuffer", withCredentials: true}).then((r) => r.data) as Buffer
+            if (!link.includes(ext)) link += `#${ext}`
+            const buffer = await axios.get(link, {responseType: "arraybuffer", withCredentials: true, headers: {"x-force-upscale": "false"}}).then((r) => r.data) as Buffer
+            const upscaledBuffer = await axios.get(link, {responseType: "arraybuffer", withCredentials: true, headers: {"x-force-upscale": "true"}}).then((r) => r.data) as Buffer
             let thumbnail = ""
             if (ext === ".mp4" || ext === ".webm") {
                 thumbnail = await functions.videoThumbnail(link)
@@ -128,10 +132,16 @@ const PostHistoryRow: React.FunctionComponent<Props> = (props) => {
             } else if (ext === ".mp3" || ext === ".wav") {
                 thumbnail = await functions.songCover(link)
             }
-            images.push({link, ext: ext.replace(".", ""), size: buffer.byteLength, thumbnail,
-            originalLink: imgLink, bytes: Object.values(new Uint8Array(buffer)), name: path.basename(imgLink)})
+            if (buffer.byteLength) {
+                images.push({link, ext: ext.replace(".", ""), size: buffer.byteLength, thumbnail,
+                originalLink: imgLink, bytes: Object.values(new Uint8Array(buffer)), name: path.basename(imgLink)})
+            }
+            if (upscaledBuffer.byteLength) {
+                upscaledImages.push({link, ext: ext.replace(".", ""), size: upscaledBuffer.byteLength, thumbnail,
+                originalLink: imgLink, bytes: Object.values(new Uint8Array(upscaledBuffer)), name: path.basename(imgLink)})
+            }
         }
-        return images
+        return {images, upscaledImages}
     }
 
     const parseNewTags = async () => {
@@ -152,7 +162,7 @@ const PostHistoryRow: React.FunctionComponent<Props> = (props) => {
         const srcChanged = sourceChanged()
         if (imgChanged || srcChanged) {
             if (imgChanged && !permissions.isElevated(session)) return Promise.reject("img")
-            const images = await parseImages()
+            const {images, upscaledImages} = await parseImages()
             const newTags = await parseNewTags()
             const source = {
                 title: props.postHistory.title,
@@ -163,7 +173,7 @@ const PostHistoryRow: React.FunctionComponent<Props> = (props) => {
                 commentary: props.postHistory.commentary,
                 translatedCommentary: props.postHistory.translatedCommentary
             }
-            await axios.put("/api/post/edit", {postID: props.postHistory.postID, images, type: props.postHistory.type, restrict: props.postHistory.restrict, source,
+            await axios.put("/api/post/edit", {postID: props.postHistory.postID, images, upscaledImages, type: props.postHistory.type, restrict: props.postHistory.restrict, source,
             style: props.postHistory.style, artists: props.postHistory.artists, characters: props.postHistory.characters, preserveThirdParty: props.postHistory.thirdParty,
             series: props.postHistory.series, tags: props.postHistory.tags, newTags, reason: props.postHistory.reason}, {headers: {"x-csrf-token": functions.getCSRFToken()}, withCredentials: true})
         } else {
@@ -291,10 +301,8 @@ const PostHistoryRow: React.FunctionComponent<Props> = (props) => {
     const loadImage = async () => {
         if (functions.isGIF(img)) return
         if (!ref.current) return
-        let src = img
-        if (functions.isImage(src)) {
-            src = await cryptoFunctions.decryptedLink(src)
-        } else if (functions.isModel(src)) {
+        let src = await cryptoFunctions.decryptedLink(img)
+        if (functions.isModel(src)) {
             src = await functions.modelImage(src)
         } else if (functions.isAudio(src)) {
             src = await functions.songCover(src)
@@ -335,18 +343,14 @@ const PostHistoryRow: React.FunctionComponent<Props> = (props) => {
             let previousFilename = props.previousHistory.images[i]?.filename ? props.previousHistory.images[i].filename : props.previousHistory.images[i]
             const previousLink = functions.getImageLink(props.previousHistory.images[i]?.type, props.previousHistory.postID, i+1, previousFilename)
 
-            let img = imgLink
-            if (functions.isImage(img)) {
-                img = await cryptoFunctions.decryptedLink(img)
-            } else if (functions.isModel(img)) {
+            let img = await cryptoFunctions.decryptedLink(imgLink)
+            if (functions.isModel(img)) {
                 img = await functions.modelImage(img)
             } else if (functions.isAudio(img)) {
                 img = await functions.songCover(img)
             }
-            let previous = previousLink
-            if (functions.isImage(previous)) {
-                previous = await cryptoFunctions.decryptedLink(previous)
-            } else if (functions.isModel(img)) {
+            let previous = await cryptoFunctions.decryptedLink(previousLink)
+            if (functions.isModel(img)) {
                 previous = await functions.modelImage(previous)
             } else if (functions.isAudio(img)) {
                 previous = await functions.songCover(previous)

@@ -133,30 +133,30 @@ const TagPage: React.FunctionComponent<Props> = (props) => {
         let jsx = [] as any
         if (tag.type === "artist") {
             if (tag.website) {
-                jsx.push(<img className="tag-social" src={website} onClick={() => window.open(tag.website, "_blank")}/>)
+                jsx.push(<img className="tag-social" src={website} onClick={() => window.open(tag.website, "_blank", "noreferrer")}/>)
             }
             if (tag.social?.includes("pixiv.net")) {
-                jsx.push(<img className="tag-social" src={pixiv} onClick={() => window.open(tag.social, "_blank")}/>)
+                jsx.push(<img className="tag-social" src={pixiv} onClick={() => window.open(tag.social, "_blank", "noreferrer")}/>)
             } else if (tag.social?.includes("soundcloud.com")) {
-                jsx.push(<img className="tag-social" src={soundcloud} onClick={() => window.open(tag.social, "_blank")}/>)
+                jsx.push(<img className="tag-social" src={soundcloud} onClick={() => window.open(tag.social, "_blank", "noreferrer")}/>)
             } else if (tag.social?.includes("sketchfab.com")) {
-                jsx.push(<img className="tag-social" src={sketchfab} onClick={() => window.open(tag.social, "_blank")}/>)
+                jsx.push(<img className="tag-social" src={sketchfab} onClick={() => window.open(tag.social, "_blank", "noreferrer")}/>)
             }
             if (tag.twitter) {
-                jsx.push(<img className="tag-social" src={twitter} onClick={() => window.open(tag.twitter, "_blank")}/>)
+                jsx.push(<img className="tag-social" src={twitter} onClick={() => window.open(tag.twitter, "_blank", "noreferrer")}/>)
             }
         }
         if (tag.type === "character") {
             if (tag.fandom) {
-                jsx.push(<img className="tag-social" src={fandom} onClick={() => window.open(tag.fandom, "_blank")}/>)
+                jsx.push(<img className="tag-social" src={fandom} onClick={() => window.open(tag.fandom, "_blank", "noreferrer")}/>)
             }
         }
         if (tag.type === "series") {
             if (tag.website) {
-                jsx.push(<img className="tag-social" src={website} onClick={() => window.open(tag.website, "_blank")}/>)
+                jsx.push(<img className="tag-social" src={website} onClick={() => window.open(tag.website, "_blank", "noreferrer")}/>)
             }
             if (tag.twitter) {
-                jsx.push(<img className="tag-social" src={twitter} onClick={() => window.open(tag.twitter, "_blank")}/>)
+                jsx.push(<img className="tag-social" src={twitter} onClick={() => window.open(tag.twitter, "_blank", "noreferrer")}/>)
             }
         }
         return jsx
@@ -172,7 +172,7 @@ const TagPage: React.FunctionComponent<Props> = (props) => {
         let jsx = [] as any
         if (tag.pixivTags?.[0]) {
             for (let i = 0; i < tag.pixivTags.length; i++) {
-                jsx.push(<button className="tag-pixtag-button" onClick={() => window.open(`https://www.pixiv.net/en/tags/${tag.pixivTags[i]}/artworks`, "_blank")}>{tag.pixivTags[i]}</button>)
+                jsx.push(<button className="tag-pixtag-button" onClick={() => window.open(`https://www.pixiv.net/en/tags/${tag.pixivTags[i]}/artworks`, "_blank", "noreferrer")}>{tag.pixivTags[i]}</button>)
             }
         }
         if (jsx.length) {

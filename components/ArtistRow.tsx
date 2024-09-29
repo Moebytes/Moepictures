@@ -64,17 +64,17 @@ const ArtistRow: React.FunctionComponent<Props> = (props) => {
     const artistSocialJSX = () => {
         let jsx = [] as any
         if (props.artist.website) {
-            jsx.push(<img className="artistrow-social" src={website} onClick={() => window.open(props.artist.website, "_blank")}/>)
+            jsx.push(<img className="artistrow-social" src={website} onClick={() => window.open(props.artist.website, "_blank", "noreferrer")}/>)
         }
         if (props.artist.social?.includes("pixiv.net")) {
-            jsx.push(<img className="artistrow-social" src={pixiv} onClick={() => window.open(props.artist.social, "_blank")}/>)
+            jsx.push(<img className="artistrow-social" src={pixiv} onClick={() => window.open(props.artist.social, "_blank", "noreferrer")}/>)
         } else if (props.artist.social?.includes("soundcloud.com")) {
-            jsx.push(<img className="artistrow-social" src={soundcloud} onClick={() => window.open(props.artist.social, "_blank")}/>)
+            jsx.push(<img className="artistrow-social" src={soundcloud} onClick={() => window.open(props.artist.social, "_blank", "noreferrer")}/>)
         } else if (props.artist.social?.includes("sketchfab.com")) {
-            jsx.push(<img className="artistrow-social" src={sketchfab} onClick={() => window.open(props.artist.social, "_blank")}/>)
+            jsx.push(<img className="artistrow-social" src={sketchfab} onClick={() => window.open(props.artist.social, "_blank", "noreferrer")}/>)
         }
         if (props.artist.twitter) {
-            jsx.push(<img className="artistrow-social" src={twitter} onClick={() => window.open(props.artist.twitter, "_blank")}/>)
+            jsx.push(<img className="artistrow-social" src={twitter} onClick={() => window.open(props.artist.twitter, "_blank", "noreferrer")}/>)
         }
         return jsx
     }

@@ -81,10 +81,6 @@ export default class Functions {
         }
     }
 
-    public static twitterLink = () => {
-        window.open("https://twitter.com/i/user/754445878501466112", "__blank")
-    }
-
     public static removeDuplicates = <T>(array: T[]) => {
         const set = new Set<string>()
         return array.filter(item => {

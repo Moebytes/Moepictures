@@ -150,6 +150,15 @@ export default class ServerFunctions {
         await s3.deleteObject({Key: file, Bucket: "moepictures"}).promise()
     }
 
+    public static deleteIfEmpty = async (folder: string) => {
+        if (functions.isLocalHost()) {
+            try {
+                fs.rmdirSync(`${local}/${folder}`)
+            } catch {}
+            return
+        }
+    }
+
     public static deleteFolder = async (folder: string) => {
         if (functions.isLocalHost()) {
             const dir = `${local}/${folder}`

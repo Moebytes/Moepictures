@@ -100,7 +100,7 @@ app.use(session({
     expireColumnName: "expires"
   }),
   secret: process.env.COOKIE_SECRET!,
-  cookie: {maxAge: 1000 * 60 * 60 * 24 * 30, sameSite: "lax"},
+  cookie: {maxAge: 1000 * 60 * 60 * 24 * 30, sameSite: "strict", secure: "auto"},
   rolling: true,
   resave: false,
   saveUninitialized: false
@@ -134,6 +134,8 @@ app.use(express.static(path.join(__dirname, "./dist"), {index: false}))
 app.use("/assets", express.static(path.join(__dirname, "./assets")))
 
 let folders = ["animation", "artist", "character", "comic", "image", "pfp", "series", "tag", "video", "audio", "model", "history"]
+let noCache = ["artist", "character", "series", "pfp", "tag"]
+let encrypted = ["image", "comic"]
 
 for (let i = 0; i < folders.length; i++) {
   app.get(`/${folders[i]}/*`, async (req: Request, res: Response, next: NextFunction) => {
@@ -145,7 +147,7 @@ for (let i = 0; i < folders.length; i++) {
         !url.endsWith(".webp") && !url.endsWith(".gif")) return next()
       }
       res.setHeader("Content-Type", mimeType ?? "")
-      res.setHeader("Cache-Control", "public, max-age=2592000")
+      if (!noCache.includes(folders[i])) res.setHeader("Cache-Control", "public, max-age=2592000")
       const key = decodeURIComponent(req.path.slice(1))
       if (req.session.role !== "admin" && req.session.role !== "mod") {
         const postID = key.match(/(?<=\/)\d+(?=\/)/)?.[0]
@@ -174,7 +176,7 @@ for (let i = 0; i < folders.length; i++) {
         const stream = Readable.from(body.slice(start, end + 1))
         return stream.pipe(res)
       }
-      if (folders[i] === "image" || folders[i] === "comic" || req.path.includes("history/post")) {
+      if (encrypted.includes(folders[i]) || req.path.includes("history/post")) {
         const encrypted = cryptoFunctions.encrypt(body)
         res.setHeader("Content-Length", encrypted.length)
         return res.status(200).end(encrypted)
@@ -190,7 +192,7 @@ for (let i = 0; i < folders.length; i++) {
     try {
       if (req.session.role !== "admin" && req.session.role !== "mod") return res.status(403).end()
       res.setHeader("Content-Type", mime.getType(req.path) ?? "")
-      res.setHeader("Cache-Control", "public, max-age=2592000")
+      if (!noCache.includes(folders[i])) res.setHeader("Cache-Control", "public, max-age=2592000")
       const key = decodeURIComponent(req.path.replace("/unverified/", ""))
       let upscaled = false
       if (folders[i] === "image" || folders[i] === "comic" || folders[i] === "animation") {
@@ -224,7 +226,7 @@ for (let i = 0; i < folders.length; i++) {
     try {
       const mimeType = mime.getType(req.path)
       res.setHeader("Content-Type", mimeType ?? "")
-      res.setHeader("Cache-Control", "public, max-age=2592000")
+      if (!noCache.includes(folders[i])) res.setHeader("Cache-Control", "public, max-age=2592000")
       const key = decodeURIComponent(req.path.replace(`/thumbnail/${req.params.size}/`, ""))
       if (req.session.role !== "admin" && req.session.role !== "mod") {
         const postID = key.match(/(?<=\/)\d+(?=\/)/)?.[0]
@@ -258,7 +260,7 @@ for (let i = 0; i < folders.length; i++) {
         const stream = Readable.from(body.slice(start, end + 1))
         return stream.pipe(res)
       }
-      if (folders[i] === "image" || folders[i] === "comic" || req.path.includes("history/post")) {
+      if (encrypted.includes(folders[i]) || req.path.includes("history/post")) {
         const encrypted = cryptoFunctions.encrypt(body)
         res.setHeader("Content-Length", encrypted.length)
         return res.status(200).end(encrypted)
@@ -276,7 +278,7 @@ for (let i = 0; i < folders.length; i++) {
       if (req.session.role !== "admin" && req.session.role !== "mod") return res.status(403).end()
       const mimeType = mime.getType(req.path)
       res.setHeader("Content-Type", mimeType ?? "")
-      res.setHeader("Cache-Control", "public, max-age=2592000")
+      if (!noCache.includes(folders[i])) res.setHeader("Cache-Control", "public, max-age=2592000")
       const key = decodeURIComponent(req.path.replace(`/thumbnail/${req.params.size}/`, "").replace("unverified/", ""))
       let body = await serverFunctions.getUnverifiedFile(key, false)
       let contentLength = body.length
