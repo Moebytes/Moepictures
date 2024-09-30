@@ -41,16 +41,15 @@ const Reply: React.FunctionComponent<Props> = (props) => {
     const {editReplyContent, setEditReplyContent} = useContext(EditReplyContentContext)
     const {reportReplyID, setReportReplyID} = useContext(ReportReplyIDContext)
     const history = useHistory()
-    const reply = props.reply.reply
 
-    const defaultIcon = props.reply.image ? false : true
+    const defaultIcon = props.reply?.image ? false : true
 
     const getFilter = () => {
         return `hue-rotate(${siteHue - 180}deg) saturate(${siteSaturation}%) brightness(${siteLightness + 70}%)`
     }
 
     const getReplyPFP = () => {
-        if (props.reply.image) {
+        if (props.reply?.image) {
             return functions.getTagLink("pfp", props.reply.image)
         } else {
             return favicon
@@ -58,7 +57,7 @@ const Reply: React.FunctionComponent<Props> = (props) => {
     }
 
     const userImgClick = (event: React.MouseEvent) => {
-        if (!props.reply.imagePost) return
+        if (!props.reply?.imagePost) return
         event.stopPropagation()
         if (event.ctrlKey || event.metaKey || event.button === 1) {
             window.open(`/post/${props.reply.imagePost}`, "_blank")
@@ -68,9 +67,9 @@ const Reply: React.FunctionComponent<Props> = (props) => {
     }
 
     const triggerQuote = () => {
-        const cleanReply = functions.parseComment(props.reply.content).filter((s: any) => !s.includes(">>>")).join("")
+        const cleanReply = functions.parseComment(props.reply?.content).filter((s: any) => !s.includes(">>>")).join("")
         setQuoteText(functions.multiTrim(`
-            >>>[${props.reply.replyID}] ${functions.toProperCase(props.reply.creator)} said:
+            >>>[${props.reply?.replyID}] ${functions.toProperCase(props.reply?.creator)} said:
             > ${cleanReply}
         `))
     }
@@ -110,12 +109,12 @@ const Reply: React.FunctionComponent<Props> = (props) => {
     }
 
     const deleteReply = async () => {
-        await axios.delete("/api/reply/delete", {params: {threadID: props.reply.threadID, replyID: props.reply.replyID}, headers: {"x-csrf-token": functions.getCSRFToken()}, withCredentials: true})
+        await axios.delete("/api/reply/delete", {params: {threadID: props.reply?.threadID, replyID: props.reply?.replyID}, headers: {"x-csrf-token": functions.getCSRFToken()}, withCredentials: true})
         props.onDelete?.()
     }
 
     useEffect(() => {
-        if (deleteReplyFlag && deleteReplyID === props.reply.replyID) {
+        if (deleteReplyFlag && deleteReplyID === props.reply?.replyID) {
             deleteReply()
             setDeleteReplyFlag(false)
             setDeleteReplyID(null)
@@ -123,19 +122,19 @@ const Reply: React.FunctionComponent<Props> = (props) => {
     }, [deleteReplyFlag, deleteReplyID])
 
     const deleteReplyDialog = async () => {
-        setDeleteReplyID(props.reply.replyID)
+        setDeleteReplyID(props.reply?.replyID)
     }
 
     const editReply = async () => {
         if (!editReplyContent) return
         const badReply = functions.validateReply(editReplyContent)
         if (badReply) return
-        await axios.put("/api/reply/edit", {replyID: props.reply.replyID, content: editReplyContent}, {headers: {"x-csrf-token": functions.getCSRFToken()}, withCredentials: true})
+        await axios.put("/api/reply/edit", {replyID: props.reply?.replyID, content: editReplyContent}, {headers: {"x-csrf-token": functions.getCSRFToken()}, withCredentials: true})
         props.onEdit?.()
     }
 
     useEffect(() => {
-        if (editReplyFlag && editReplyID === props.reply.replyID) {
+        if (editReplyFlag && editReplyID === props.reply?.replyID) {
             editReply()
             setEditReplyFlag(false)
             setEditReplyID(null)
@@ -143,16 +142,16 @@ const Reply: React.FunctionComponent<Props> = (props) => {
     }, [editReplyFlag, editReplyID, editReplyContent])
 
     const editReplyDialog = async () => {
-        setEditReplyContent(props.reply.content)
-        setEditReplyID(props.reply.replyID)
+        setEditReplyContent(props.reply?.content)
+        setEditReplyID(props.reply?.replyID)
     }
 
     const reportReplyDialog = async () => {
-        setReportReplyID(props.reply.replyID)
+        setReportReplyID(props.reply?.replyID)
     }
 
     const replyOptions = () => {
-        if (session.username === props.reply.creator) {
+        if (session.username === props.reply?.creator) {
             return (
                 <div className="reply-options">
                     <div className="reply-options-container" onClick={editReplyDialog}>
@@ -189,28 +188,28 @@ const Reply: React.FunctionComponent<Props> = (props) => {
 
     const userClick = (event: React.MouseEvent) => {
         if (event.ctrlKey || event.metaKey || event.button === 1) {
-            window.open(`/user/${props.reply.creator}`, "_blank")
+            window.open(`/user/${props.reply?.creator}`, "_blank")
         } else {
-            history.push(`/user/${props.reply.creator}`)
+            history.push(`/user/${props.reply?.creator}`)
         }
     }
 
     const generateUsernameJSX = () => {
-        if (props.reply.role === "admin") {
+        if (props.reply?.role === "admin") {
             return (
                 <div className="reply-username-container" onClick={userClick} onAuxClick={userClick}>
                     <span className="reply-user-text admin-color">{functions.toProperCase(props.reply.creator)}</span>
                     <img className="reply-user-label" src={adminCrown}/>
                 </div>
             )
-        } else if (props.reply.role === "mod") {
+        } else if (props.reply?.role === "mod") {
             return (
                 <div className="reply-username-container" onClick={userClick} onAuxClick={userClick}>
                 <span className="reply-user-text mod-color">{functions.toProperCase(props.reply.creator)}</span>
                     <img className="reply-user-label" src={modCrown}/>
                 </div>
             )
-        } else if (props.reply.role === "system") {
+        } else if (props.reply?.role === "system") {
             return (
                 <div className="reply-username-container" onClick={userClick} onAuxClick={userClick}>
                 <span className="reply-user-text system-color">{functions.toProperCase(props.reply.creator)}</span>
@@ -218,15 +217,15 @@ const Reply: React.FunctionComponent<Props> = (props) => {
                 </div>
             )
         }
-        return <span className={`reply-user-text ${props.reply.banned ? "banned" : ""}`} onClick={userClick} onAuxClick={userClick}>{functions.toProperCase(props.reply.creator)}</span>
+        return <span className={`reply-user-text ${props.reply?.banned ? "banned" : ""}`} onClick={userClick} onAuxClick={userClick}>{functions.toProperCase(props.reply.creator) || "deleted"}</span>
     }
 
     return (
-        <div className="reply" reply-id={props.reply.replyID}>
+        <div className="reply" reply-id={props.reply?.replyID}>
             <div className="reply-container">
                 <div className="reply-user-container">
                     {generateUsernameJSX()}
-                    <span className="reply-date-text">{functions.timeAgo(props.reply.createDate)}</span>
+                    <span className="reply-date-text">{functions.timeAgo(props.reply?.createDate)}</span>
                     <img className="reply-user-img" src={getReplyPFP()} onClick={userImgClick} onAuxClick={userImgClick} style={{filter: defaultIcon ? getFilter() : ""}}/>
                 </div>
             </div>

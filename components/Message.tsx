@@ -72,7 +72,7 @@ const Message: React.FunctionComponent<Props> = (props) => {
     }
 
     const getCreatorPFP = () => {
-        if (creatorData.image) {
+        if (creatorData?.image) {
             return functions.getTagLink("pfp", creatorData.image)
         } else {
             return favicon
@@ -88,7 +88,7 @@ const Message: React.FunctionComponent<Props> = (props) => {
     }
 
     const creatorImgClick = (event: React.MouseEvent) => {
-        if (!creatorData.imagePost) return
+        if (!creatorData?.imagePost) return
         event.stopPropagation()
         if (event.ctrlKey || event.metaKey || event.button === 1) {
             window.open(`/post/${creatorData.imagePost}`, "_blank")
@@ -98,7 +98,7 @@ const Message: React.FunctionComponent<Props> = (props) => {
     }
 
     const getRecipientPFP = () => {
-        if (recipientData.image) {
+        if (recipientData?.image) {
             return functions.getTagLink("pfp", recipientData.image)
         } else {
             return favicon
@@ -114,7 +114,7 @@ const Message: React.FunctionComponent<Props> = (props) => {
     }
 
     const recipientImgClick = (event: React.MouseEvent) => {
-        if (!recipientData.imagePost) return
+        if (!recipientData?.imagePost) return
         event.stopPropagation()
         if (event.ctrlKey || event.metaKey || event.button === 1) {
             window.open(`/post/${recipientData.imagePost}`, "_blank")
@@ -124,7 +124,7 @@ const Message: React.FunctionComponent<Props> = (props) => {
     }
 
     const generateCreatorJSX = () => {
-        if (creatorData.role === "admin") {
+        if (creatorData?.role === "admin") {
             return (
                 <div className="message-username-container" onClick={creatorPage} onAuxClick={creatorPage}>
                     <img draggable={false} src={getCreatorPFP()} className="message-user-img" onClick={creatorImgClick} onAuxClick={creatorImgClick} style={{filter: creatorDefaultIcon ? getFilter() : ""}}/>
@@ -132,7 +132,7 @@ const Message: React.FunctionComponent<Props> = (props) => {
                     <img className="message-user-label" src={adminCrown}/>
                 </div>
             )
-        } else if (creatorData.role === "mod") {
+        } else if (creatorData?.role === "mod") {
             return (
                 <div className="message-username-container" onClick={creatorPage} onAuxClick={creatorPage}>
                     <img draggable={false} src={getCreatorPFP()} className="message-user-img" onClick={creatorImgClick} onAuxClick={creatorImgClick} style={{filter: creatorDefaultIcon ? getFilter() : ""}}/>
@@ -140,7 +140,7 @@ const Message: React.FunctionComponent<Props> = (props) => {
                     <img className="message-user-label" src={modCrown}/>
                 </div>
             )
-        } else if (creatorData.role === "system") {
+        } else if (creatorData?.role === "system") {
             return (
                 <div className="message-username-container" onClick={creatorPage} onAuxClick={creatorPage}>
                     <img draggable={false} src={getCreatorPFP()} className="message-user-img" onClick={creatorImgClick} onAuxClick={creatorImgClick} style={{filter: creatorDefaultIcon ? getFilter() : ""}}/>
@@ -152,13 +152,13 @@ const Message: React.FunctionComponent<Props> = (props) => {
         return (
             <div className="message-username-container" onClick={creatorPage} onAuxClick={creatorPage}>
                 <img draggable={false} src={getCreatorPFP()} className="message-user-img" onClick={creatorImgClick} onAuxClick={creatorImgClick} style={{filter: creatorDefaultIcon ? getFilter() : ""}}/>
-                <span className={`message-user-text ${creatorData.banned ? "banned" : ""}`} onClick={creatorPage} onAuxClick={creatorPage}>{functions.toProperCase(props.message.creator)}</span>
+                <span className={`message-user-text ${creatorData?.banned ? "banned" : ""}`} onClick={creatorPage} onAuxClick={creatorPage}>{functions.toProperCase(props.message.creator) || "deleted"}</span>
             </div>
         )
     }
 
     const generateRecipientJSX = () => {
-        if (recipientData.role === "admin") {
+        if (recipientData?.role === "admin") {
             return (
                 <div className="message-username-container" onClick={(event) => recipientPage(event)} onAuxClick={(event) => recipientPage(event)}>
                     <img draggable={false} src={getRecipientPFP()} className="message-user-img" onClick={recipientImgClick} onAuxClick={recipientImgClick} style={{filter: recipientDefaultIcon ? getFilter() : ""}}/>
@@ -166,7 +166,7 @@ const Message: React.FunctionComponent<Props> = (props) => {
                     <img className="message-user-label" src={adminCrown}/>
                 </div>
             )
-        } else if (recipientData.role === "mod") {
+        } else if (recipientData?.role === "mod") {
             return (
                 <div className="message-username-container" onClick={(event) => recipientPage(event)} onAuxClick={(event) => recipientPage(event)}>
                 <img draggable={false} src={getRecipientPFP()} className="message-user-img" onClick={recipientImgClick} onAuxClick={recipientImgClick} style={{filter: recipientDefaultIcon ? getFilter() : ""}}/>
@@ -174,7 +174,7 @@ const Message: React.FunctionComponent<Props> = (props) => {
                     <img className="message-user-label" src={modCrown}/>
                 </div>
             )
-        } else if (recipientData.role === "system") {
+        } else if (recipientData?.role === "system") {
             return (
                 <div className="message-username-container" onClick={(event) => recipientPage(event)} onAuxClick={(event) => recipientPage(event)}>
                 <img draggable={false} src={getRecipientPFP()} className="message-user-img" onClick={recipientImgClick} onAuxClick={recipientImgClick} style={{filter: recipientDefaultIcon ? getFilter() : ""}}/>
@@ -186,7 +186,7 @@ const Message: React.FunctionComponent<Props> = (props) => {
         return (
             <div className="message-username-container" onClick={(event) => recipientPage(event)} onAuxClick={(event) => recipientPage(event)}>
                 <img draggable={false} src={getRecipientPFP()} className="message-user-img" onClick={recipientImgClick} onAuxClick={recipientImgClick} style={{filter: recipientDefaultIcon ? getFilter() : ""}}/>
-                <span className={`message-user-text ${recipientData.banned ? "banned" : ""}`} onClick={(event) => recipientPage(event)} onAuxClick={(event) => recipientPage(event)}>{functions.toProperCase(props.message.recipient)}</span>
+                <span className={`message-user-text ${recipientData?.banned ? "banned" : ""}`} onClick={(event) => recipientPage(event)} onAuxClick={(event) => recipientPage(event)}>{functions.toProperCase(props.message.recipient || "deleted")}</span>
             </div>
         )
     }

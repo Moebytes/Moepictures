@@ -41,14 +41,14 @@ const MessageReply: React.FunctionComponent<Props> = (props) => {
     const history = useHistory()
     const reply = props.reply.reply
 
-    const defaultIcon = props.reply.image ? false : true
+    const defaultIcon = props.reply?.image ? false : true
 
     const getFilter = () => {
         return `hue-rotate(${siteHue - 180}deg) saturate(${siteSaturation}%) brightness(${siteLightness + 70}%)`
     }
 
     const getReplyPFP = () => {
-        if (props.reply.image) {
+        if (props.reply?.image) {
             return functions.getTagLink("pfp", props.reply.image)
         } else {
             return favicon
@@ -56,7 +56,7 @@ const MessageReply: React.FunctionComponent<Props> = (props) => {
     }
 
     const userImgClick = (event: React.MouseEvent) => {
-        if (!props.reply.imagePost) return
+        if (!props.reply?.imagePost) return
         event.stopPropagation()
         if (event.ctrlKey || event.metaKey || event.button === 1) {
             window.open(`/post/${props.reply.imagePost}`, "_blank")
@@ -66,9 +66,9 @@ const MessageReply: React.FunctionComponent<Props> = (props) => {
     }
 
     const triggerQuote = () => {
-        const cleanReply = functions.parseComment(props.reply.content).filter((s: any) => !s.includes(">>>")).join("")
+        const cleanReply = functions.parseComment(props.reply?.content).filter((s: any) => !s.includes(">>>")).join("")
         setQuoteText(functions.multiTrim(`
-            >>>[${props.reply.replyID}] ${functions.toProperCase(props.reply.creator)} said:
+            >>>[${props.reply?.replyID}] ${functions.toProperCase(props.reply?.creator)} said:
             > ${cleanReply}
         `))
     }
@@ -79,7 +79,7 @@ const MessageReply: React.FunctionComponent<Props> = (props) => {
     }
 
     const parseText = () => {
-        const pieces = functions.parseComment(props.reply.content)
+        const pieces = functions.parseComment(props.reply?.content)
         let jsx = [] as any
         for (let i = 0; i < pieces.length; i++) {
             const piece = pieces[i]
@@ -108,12 +108,12 @@ const MessageReply: React.FunctionComponent<Props> = (props) => {
     }
 
     const deleteReply = async () => {
-        await axios.delete("/api/message/reply/delete", {params: {messageID: props.reply.messageID, replyID: props.reply.replyID}, headers: {"x-csrf-token": functions.getCSRFToken()}, withCredentials: true})
+        await axios.delete("/api/message/reply/delete", {params: {messageID: props.reply?.messageID, replyID: props.reply?.replyID}, headers: {"x-csrf-token": functions.getCSRFToken()}, withCredentials: true})
         props.onDelete?.()
     }
 
     useEffect(() => {
-        if (deleteMsgReplyFlag && deleteMsgReplyID === props.reply.replyID) {
+        if (deleteMsgReplyFlag && deleteMsgReplyID === props.reply?.replyID) {
             deleteReply()
             setDeleteMsgReplyFlag(false)
             setDeleteMsgReplyID(null)
@@ -121,19 +121,19 @@ const MessageReply: React.FunctionComponent<Props> = (props) => {
     }, [deleteMsgReplyFlag, deleteMsgReplyID])
 
     const deleteReplyDialog = async () => {
-        setDeleteMsgReplyID(props.reply.replyID)
+        setDeleteMsgReplyID(props.reply?.replyID)
     }
 
     const editReply = async () => {
         if (!editMsgReplyContent) return
         const badReply = functions.validateReply(editMsgReplyContent)
         if (badReply) return
-        await axios.put("/api/message/reply/edit", {replyID: props.reply.replyID, content: editMsgReplyContent}, {headers: {"x-csrf-token": functions.getCSRFToken()}, withCredentials: true})
+        await axios.put("/api/message/reply/edit", {replyID: props.reply?.replyID, content: editMsgReplyContent}, {headers: {"x-csrf-token": functions.getCSRFToken()}, withCredentials: true})
         props.onEdit?.()
     }
 
     useEffect(() => {
-        if (editMsgReplyFlag && editMsgReplyID === props.reply.replyID) {
+        if (editMsgReplyFlag && editMsgReplyID === props.reply?.replyID) {
             editReply()
             setEditMsgReplyFlag(false)
             setEditMsgReplyID(null)
@@ -141,12 +141,12 @@ const MessageReply: React.FunctionComponent<Props> = (props) => {
     }, [editMsgReplyFlag, editMsgReplyID, editMsgReplyContent])
 
     const editReplyDialog = async () => {
-        setEditMsgReplyContent(props.reply.content)
-        setEditMsgReplyID(props.reply.replyID)
+        setEditMsgReplyContent(props.reply?.content)
+        setEditMsgReplyID(props.reply?.replyID)
     }
 
     const replyOptions = () => {
-        if (session.username === props.reply.creator) {
+        if (session.username === props.reply?.creator) {
             return (
                 <div className="reply-options">
                     <div className="reply-options-container" onClick={editReplyDialog}>
@@ -186,37 +186,37 @@ const MessageReply: React.FunctionComponent<Props> = (props) => {
     }
 
     const generateUsernameJSX = () => {
-        if (props.reply.role === "admin") {
+        if (props.reply?.role === "admin") {
             return (
                 <div className="reply-username-container" onClick={userClick} onAuxClick={userClick}>
                     <span className="reply-user-text admin-color">{functions.toProperCase(props.reply.creator)}</span>
                     <img className="reply-user-label" src={adminCrown}/>
                 </div>
             )
-        } else if (props.reply.role === "mod") {
+        } else if (props.reply?.role === "mod") {
             return (
                 <div className="reply-username-container" onClick={userClick} onAuxClick={userClick}>
                 <span className="reply-user-text mod-color">{functions.toProperCase(props.reply.creator)}</span>
                     <img className="reply-user-label" src={modCrown}/>
                 </div>
             )
-        } else if (props.reply.role === "system") {
+        } else if (props.reply?.role === "system") {
             return (
                 <div className="reply-username-container" onClick={userClick} onAuxClick={userClick}>
-                <span className="reply-user-text system-color">{functions.toProperCase(props.reply.creator)}</span>
+                <span className="reply-user-text system-color">{functions.toProperCase(props.reply?.creator)}</span>
                     <img className="reply-user-label" src={systemCrown}/>
                 </div>
             )
         }
-        return <span className={`reply-user-text ${props.reply.banned ? "banned" : ""}`} onClick={userClick} onAuxClick={userClick}>{functions.toProperCase(props.reply.creator)}</span>
+        return <span className={`reply-user-text ${props.reply?.banned ? "banned" : ""}`} onClick={userClick} onAuxClick={userClick}>{functions.toProperCase(props.reply?.creator) || "deleted"}</span>
     }
 
     return (
-        <div className="reply" reply-id={props.reply.replyID}>
+        <div className="reply" reply-id={props.reply?.replyID}>
             <div className="reply-container">
                 <div className="reply-user-container">
                     {generateUsernameJSX()}
-                    <span className="reply-date-text">{functions.timeAgo(props.reply.createDate)}</span>
+                    <span className="reply-date-text">{functions.timeAgo(props.reply?.createDate)}</span>
                     <img className="reply-user-img" src={getReplyPFP()} onClick={userImgClick} onAuxClick={userImgClick} style={{filter: defaultIcon ? getFilter() : ""}}/>
                 </div>
             </div>

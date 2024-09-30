@@ -40,16 +40,15 @@ const Comment: React.FunctionComponent<Props> = (props) => {
     const {editCommentText, setEditCommentText} = useContext(EditCommentTextContext)
     const {reportCommentID, setReportCommentID} = useContext(ReportCommentIDContext)
     const history = useHistory()
-    const comment = props.comment.comment
 
     const getFilter = () => {
         return `hue-rotate(${siteHue - 180}deg) saturate(${siteSaturation}%) brightness(${siteLightness + 70}%)`
     }
 
-    const defaultIcon = props.comment.image ? false : true
+    const defaultIcon = props.comment?.image ? false : true
 
     const getCommentPFP = () => {
-        if (props.comment.image) {
+        if (props.comment?.image) {
             return functions.getTagLink("pfp", props.comment.image)
         } else {
             return favicon
@@ -57,7 +56,7 @@ const Comment: React.FunctionComponent<Props> = (props) => {
     }
 
     const userImgClick = (event: React.MouseEvent) => {
-        if (!props.comment.imagePost) return
+        if (!props.comment?.imagePost) return
         event.stopPropagation()
         if (event.ctrlKey || event.metaKey || event.button === 1) {
             window.open(`/post/${props.comment.imagePost}`, "_blank")
@@ -67,9 +66,9 @@ const Comment: React.FunctionComponent<Props> = (props) => {
     }
 
     const triggerQuote = () => {
-        const cleanComment = functions.parseComment(props.comment.comment).filter((s: any) => !s.includes(">>>")).join("")
+        const cleanComment = functions.parseComment(props.comment?.comment).filter((s: any) => !s.includes(">>>")).join("")
         setQuoteText(functions.multiTrim(`
-            >>>[${props.comment.commentID}] ${functions.toProperCase(props.comment.username)} said:
+            >>>[${props.comment?.commentID}] ${functions.toProperCase(props.comment?.username)} said:
             > ${cleanComment}
         `))
     }
@@ -80,7 +79,7 @@ const Comment: React.FunctionComponent<Props> = (props) => {
     }
 
     const parseText = () => {
-        const pieces = functions.parseComment(comment)
+        const pieces = functions.parseComment(props.comment?.comment)
         let jsx = [] as any
         for (let i = 0; i < pieces.length; i++) {
             const piece = pieces[i]
@@ -109,12 +108,12 @@ const Comment: React.FunctionComponent<Props> = (props) => {
     }
 
     const deleteComment = async () => {
-        await axios.delete("/api/comment/delete", {params: {commentID: props.comment.commentID}, headers: {"x-csrf-token": functions.getCSRFToken()}, withCredentials: true})
+        await axios.delete("/api/comment/delete", {params: {commentID: props.comment?.commentID}, headers: {"x-csrf-token": functions.getCSRFToken()}, withCredentials: true})
         props.onDelete?.()
     }
 
     useEffect(() => {
-        if (deleteCommentFlag && deleteCommentID === props.comment.commentID) {
+        if (deleteCommentFlag && deleteCommentID === props.comment?.commentID) {
             deleteComment()
             setDeleteCommentFlag(false)
             setDeleteCommentID(null)
@@ -122,19 +121,19 @@ const Comment: React.FunctionComponent<Props> = (props) => {
     }, [deleteCommentFlag])
 
     const deleteCommentDialog = async () => {
-        setDeleteCommentID(props.comment.commentID)
+        setDeleteCommentID(props.comment?.commentID)
     }
 
     const editComment = async () => {
         if (!editCommentText) return
         const badComment = functions.validateComment(editCommentText)
         if (badComment) return
-        await axios.put("/api/comment/edit", {commentID: props.comment.commentID, comment: editCommentText}, {headers: {"x-csrf-token": functions.getCSRFToken()}, withCredentials: true})
+        await axios.put("/api/comment/edit", {commentID: props.comment?.commentID, comment: editCommentText}, {headers: {"x-csrf-token": functions.getCSRFToken()}, withCredentials: true})
         props.onEdit?.()
     }
 
     useEffect(() => {
-        if (editCommentFlag && editCommentID === props.comment.commentID) {
+        if (editCommentFlag && editCommentID === props.comment?.commentID) {
             editComment()
             setEditCommentFlag(false)
             setEditCommentID(null)
@@ -142,16 +141,16 @@ const Comment: React.FunctionComponent<Props> = (props) => {
     }, [editCommentFlag])
 
     const editCommentDialog = async () => {
-        setEditCommentText(comment)
-        setEditCommentID(props.comment.commentID)
+        setEditCommentText(props.comment?.comment)
+        setEditCommentID(props.comment?.commentID)
     }
 
     const reportCommentDialog = async () => {
-        setReportCommentID(props.comment.commentID)
+        setReportCommentID(props.comment?.commentID)
     }
 
     const commentOptions = () => {
-        if (session.username === props.comment.username) {
+        if (session.username === props.comment?.username) {
             return (
                 <div className="comment-options">
                     <div className="comment-options-container" onClick={editCommentDialog}>
@@ -195,21 +194,21 @@ const Comment: React.FunctionComponent<Props> = (props) => {
     }
 
     const generateUsernameJSX = () => {
-        if (props.comment.role === "admin") {
+        if (props.comment?.role === "admin") {
             return (
                 <div className="comment-username-container">
                     <span className="comment-user-text admin-color">{functions.toProperCase(props.comment.username)}</span>
                     <img className="comment-user-label" src={adminCrown}/>
                 </div>
             )
-        } else if (props.comment.role === "mod") {
+        } else if (props.comment?.role === "mod") {
             return (
                 <div className="comment-username-container">
                 <span className="comment-user-text mod-color">{functions.toProperCase(props.comment.username)}</span>
                     <img className="comment-user-label" src={modCrown}/>
                 </div>
             )
-        } else if (props.comment.role === "system") {
+        } else if (props.comment?.role === "system") {
             return (
                 <div className="comment-username-container">
                 <span className="comment-user-text system-color">{functions.toProperCase(props.comment.username)}</span>
@@ -217,15 +216,15 @@ const Comment: React.FunctionComponent<Props> = (props) => {
                 </div>
             )
         }
-        return <span className={`comment-user-text ${props.comment.banned ? "banned" : ""}`}>{functions.toProperCase(props.comment.username)}</span>
+        return <span className={`comment-user-text ${props.comment?.banned ? "banned" : ""}`}>{functions.toProperCase(props.comment?.username) || "deleted"}</span>
     }
 
     const commentJump = () => {
-        props.onCommentJump?.(Number(props.comment.commentID))
+        props.onCommentJump?.(Number(props.comment?.commentID))
     }
 
     return (
-        <div className="comment" comment-id={props.comment.commentID}>
+        <div className="comment" comment-id={props.comment?.commentID}>
             <div className="comment-container">
                 <div className="comment-user-container" onClick={userClick} onAuxClick={userClick}>
                     <img className="comment-user-img" src={getCommentPFP()} onClick={userImgClick} onAuxClick={userImgClick} style={{filter: defaultIcon ? getFilter() : ""}}/>
@@ -233,7 +232,7 @@ const Comment: React.FunctionComponent<Props> = (props) => {
                 </div>
             </div>
             <div className="comment-container" style={{width: "100%"}}>
-                <span className="comment-date-text" onClick={commentJump}>{functions.timeAgo(props.comment.postDate)}:</span>
+                <span className="comment-date-text" onClick={commentJump}>{functions.timeAgo(props.comment?.postDate)}:</span>
                 {parseText()}
             </div>
             {session.username ? commentOptions() : null}
