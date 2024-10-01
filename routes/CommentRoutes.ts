@@ -115,7 +115,7 @@ const CommentRoutes = (app: Express) => {
                 await serverFunctions.systemMessage(username, "Notice: Comment has been removed", message2)
             } else {
                 let message = `Comment report on ${functions.getDomain()}/post/${id} has been dismissed. The comment made by ${username} is ok.`
-                await serverFunctions.systemMessage(reporter, "Report: Comment report has been dismissed", message)
+                // await serverFunctions.systemMessage(reporter, "Report: Comment report has been dismissed", message)
             }
             res.status(200).send("Success")
         } catch (e) {

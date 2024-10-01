@@ -282,7 +282,7 @@ const ThreadRoutes = (app: Express) => {
                 await serverFunctions.systemMessage(username, "Notice: Thread has been removed", message2)
             } else {
                 let message = `Thread report on ${functions.getDomain()}/thread/${id} has been dismissed. The thread posted by ${username} is ok.`
-                await serverFunctions.systemMessage(reporter, "Report: Thread report has been dismissed", message)
+                // await serverFunctions.systemMessage(reporter, "Report: Thread report has been dismissed", message)
             }
             res.status(200).send("Success")
         } catch (e) {
@@ -306,7 +306,7 @@ const ThreadRoutes = (app: Express) => {
                 await serverFunctions.systemMessage(username, "Notice: Reply has been removed", message2)
             } else {
                 let message = `Reply report on ${functions.getDomain()}/thread/${id} has been dismissed. The reply posted by ${username} is ok.`
-                await serverFunctions.systemMessage(reporter, "Report: Reply report has been dismissed", message)
+                // await serverFunctions.systemMessage(reporter, "Report: Reply report has been dismissed", message)
             }
             res.status(200).send("Success")
         } catch (e) {

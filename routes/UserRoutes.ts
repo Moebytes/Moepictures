@@ -509,7 +509,7 @@ const UserRoutes = (app: Express) => {
                 req.session.email = tokenData.email
                 req.session.emailVerified = true
                 await sql.token.deleteEmailToken(tokenData.email)
-                let message = `Welcome to Moepictures ${user.username}!\n\nEnjoy your stay (ﾉ^_^)ﾉ*:･ﾟ✧`
+                let message = `Welcome to Moepictures ${user.username}!\n\nHope you enjoy your stay (ﾉ^_^)ﾉ*:･ﾟ✧`
                 await serverFunctions.systemMessage(user.username, "Welcome to Moepictures!", message)
                 res.status(200).redirect("/verify-email-success")
             } else {
@@ -798,7 +798,7 @@ const UserRoutes = (app: Express) => {
             }
             await sql.report.insertBan(username, req.session.username, reason)
             await sql.user.updateUser(username, "banned", true)
-            const message = `You have been banned for breaking the site rules. You can still view the site but you won't be able to interact with other users or edit posts.${reason ? `\n\nHere is an additional provided reason: ${reason}` : ""}`
+            const message = `You have been banned for breaking the site rules. You can still view the site but you won't be able to interact with other users or edit content.${reason ? `\n\nHere is an additional provided reason: ${reason}` : ""}`
             await serverFunctions.systemMessage(username, "Notice: You were banned", message)
             res.status(200).json({revertPostIDs: Array.from(revertPostIDs), revertTagIDs: Array.from(revertTagIDs)})
         } catch (e) {

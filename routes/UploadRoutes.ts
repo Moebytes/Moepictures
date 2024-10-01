@@ -1614,8 +1614,7 @@ const CreateRoutes = (app: Express) => {
           subject = "Notice: Post edit request has been rejected"
           message = `Post edit request on ${functions.getDomain()}/post/${unverified.originalID} has been rejected.\n\nMake sure you go over the submission guidelines on ${functions.getDomain()}/help#uploading`
         }
-
-        await serverFunctions.systemMessage(unverified.uploader, subject, message)
+        // await serverFunctions.systemMessage(unverified.uploader, subject, message)
 
         res.status(200).send("Success")
       } catch (e) {

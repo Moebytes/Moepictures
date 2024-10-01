@@ -290,7 +290,7 @@ const PostRoutes = (app: Express) => {
                 await serverFunctions.systemMessage(username, "Notice: Post deletion request has been approved", message)
             } else {
                 let message = `Post deletion request on ${functions.getDomain()}/post/${postID} has been rejected. This post can stay up. Thanks!`
-                await serverFunctions.systemMessage(username, "Notice: Post deletion request has been rejected", message)
+                // await serverFunctions.systemMessage(username, "Notice: Post deletion request has been rejected", message)
             }
             res.status(200).send("Success")
         } catch (e) {

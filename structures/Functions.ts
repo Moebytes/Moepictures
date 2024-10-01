@@ -2028,7 +2028,7 @@ export default class Functions {
 
     public static tagType = (tag: string) => {
         const metaTags = ["autotags", "upscaled", "needs-tags", "no-audio", "with-audio", "self-post", "text", "transparent", 
-        "commentary", "translated", "partially-translated", "check-translation", "multiple-artists", "bad-pixiv-id"]
+        "commentary", "translated", "untranslated", "partially-translated", "check-translation", "multiple-artists", "bad-pixiv-id"]
         if (metaTags.includes(tag)) return "meta"
         return "tag"
     }

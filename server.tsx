@@ -371,6 +371,8 @@ const run = async () => {
   if (!exists) await sql.tag.updateTag("commentary", "description", "The post has artist commentary.")
   exists = await sql.tag.insertTag("translated", "meta")
   if (!exists) await sql.tag.updateTag("translated", "description", "The post contains complete translations.")
+  exists = await sql.tag.insertTag("untranslated", "meta")
+  if (!exists) await sql.tag.updateTag("untranslated", "description", "The post is untranslated.")
   exists = await sql.tag.insertTag("partially-translated", "meta")
   if (!exists) await sql.tag.updateTag("partially-translated", "description", "Post is only partially translated.")
   exists = await sql.tag.insertTag("check-translation", "meta")

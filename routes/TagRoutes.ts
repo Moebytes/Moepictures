@@ -198,10 +198,14 @@ const TagRoutes = (app: Express) => {
             } 
             if (implications !== undefined) {
                 await sql.tag.purgeImplications(tag)
+                let promises = [] as Promise<void>[]
                 for (let i = 0; i < implications.length; i++) {
                     if (!implications[i]?.trim()) break
                     await sql.tag.insertImplication(tag, implications[i])
+                    const promise = serverFunctions.updateImplication(tag, implications[i])
+                    promises.push(promise)
                 }
+                if (key.trim() !== tag) await Promise.all(promises)
             }
             if (pixivTags !== undefined) {
                 await sql.tag.updateTag(tag, "pixivTags", pixivTags)
@@ -371,7 +375,7 @@ const TagRoutes = (app: Express) => {
                 await serverFunctions.systemMessage(username, "Notice: Tag deletion request has been approved", message)
             } else {
                 let message = `Tag deletion request on ${functions.getDomain()}/tag/${tag} has been rejected. This tag can stay up. Thanks!`
-                await serverFunctions.systemMessage(username, "Notice: Tag deletion request has been rejected", message)
+                // await serverFunctions.systemMessage(username, "Notice: Tag deletion request has been rejected", message)
             }
             res.status(200).send("Success")
         } catch (e) {
@@ -425,7 +429,7 @@ const TagRoutes = (app: Express) => {
                 await serverFunctions.systemMessage(username, "Notice: Tag alias request has been approved", message)
             } else {
                 let message = `Tag alias request on ${tag} -> ${aliasTo} has been rejected. This tag can continue to be on its own. Thanks!`
-                await serverFunctions.systemMessage(username, "Notice: Tag alias request has been rejected", message)
+                // await serverFunctions.systemMessage(username, "Notice: Tag alias request has been rejected", message)
             }
             res.status(200).send("Success")
         } catch (e) {
@@ -488,7 +492,7 @@ const TagRoutes = (app: Express) => {
                 await serverFunctions.systemMessage(username, "Notice: Tag edit request has been approved", message)
             } else {
                 let message = `Tag edit request on ${functions.getDomain()}/tag/${tag} has been rejected. The original tag details can stay. Thanks!`
-                await serverFunctions.systemMessage(username, "Notice: Tag edit request has been rejected", message)
+                // await serverFunctions.systemMessage(username, "Notice: Tag edit request has been rejected", message)
             }
             res.status(200).send("Success")
         } catch (e) {

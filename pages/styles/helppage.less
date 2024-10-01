@@ -2,10 +2,25 @@
 
 .help {
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
     width: 100%;
     height: max-content; // calc(100vh - @nav-bar-height - @title-bar-height);
-    padding: 10px 30px;
+    padding: 10px 10px;
+}
+
+.help-nav {
+    display: flex;
+    flex-direction: column;
+    width: max-content;
+    height: max-content;
+}
+
+.help-container {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    height: max-content; 
+    padding: 10px 20px;
 }
 
 .help-heading {
@@ -15,6 +30,19 @@
     margin-bottom: 10px;
     &:hover {
         filter: brightness(130%);
+    }
+}
+
+.help-nav-text {
+    font-family: Tahoma, sans-serif;
+    font-size: 17px;
+    color: var(--text);
+    font-weight: bold;
+    margin-bottom: 10px;  
+    margin-bottom: 5px;
+    cursor: pointer;
+    &:hover {
+        filter: brightness(120%);
     }
 }
 
@@ -49,6 +77,7 @@
     font-weight: bold;
     font-size: 21px;
     color: var(--text-alt);
+    cursor: pointer;
 }
 
 .help-img-container {

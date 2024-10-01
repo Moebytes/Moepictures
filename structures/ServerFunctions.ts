@@ -395,6 +395,15 @@ export default class ServerFunctions {
         return false
     }
 
+    public static updateImplication = async (tag: string, implication: string) => {
+        const posts = await sql.search.search([tag], "all", "all", "all", "date", "0", "9999999", true)
+        for (const post of posts) {
+            if (!post.tags.includes(implication)) {
+                await sql.tag.insertTagMap(post.postID, [implication])
+            }
+        }
+    }
+
     public static batchUpdateImplications = async () => {
         console.log("Updating all tag implications...")
         const posts = await sql.search.posts()

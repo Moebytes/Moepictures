@@ -170,6 +170,7 @@ export const SoftDeleteMessageIDContext = React.createContext<any>(null)
 export const SoftDeleteMessageFlagContext = React.createContext<any>(null)
 export const HasNotificationContext = React.createContext<any>(null)
 export const ShowUpscaledContext = React.createContext<any>(null)
+export const HelpTabContext = React.createContext<any>(null)
 
 const Context: React.FunctionComponent = (props) => {
     const [siteHue, setSiteHue] = useState(180)
@@ -325,9 +326,11 @@ const Context: React.FunctionComponent = (props) => {
     const [editMsgReplyID, setEditMsgReplyID] = useState(null)
     const [editMsgReplyContent, setEditMsgReplyContent] = useState("")
     const [showUpscaled, setShowUpscaled] = useState(false)
+    const [helpTab, setHelpTab] = useState("help")
 
 return (
     <>
+        <HelpTabContext.Provider value={{helpTab, setHelpTab}}>
         <ShowUpscaledContext.Provider value={{showUpscaled, setShowUpscaled}}>
         <SoftDeleteMessageFlagContext.Provider value={{softDeleteMessageFlag, setSoftDeleteMessageFlag}}>
         <SoftDeleteMessageIDContext.Provider value={{softDeleteMessageID, setSoftDeleteMessageID}}>
@@ -635,6 +638,7 @@ return (
         </SoftDeleteMessageIDContext.Provider>
         </SoftDeleteMessageFlagContext.Provider>
         </ShowUpscaledContext.Provider>
+        </HelpTabContext.Provider>
     </>
     )
 }
