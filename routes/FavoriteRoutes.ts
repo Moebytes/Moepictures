@@ -7,7 +7,7 @@ import serverFunctions, {authenticate, keyGenerator, handler} from "../structure
 
 const favoriteLimiter = rateLimit({
 	windowMs: 60 * 1000,
-	max: 200,
+	max: 300,
 	standardHeaders: true,
 	legacyHeaders: false,
     keyGenerator,

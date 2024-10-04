@@ -426,7 +426,7 @@ const MobileInfo: React.FunctionComponent<Props> = (props) => {
                     <div className="mobileinfo-row">
                         <span className="tag-hover" onClick={toggleCaptcha}>
                             <img className="mobileinfo-icon" src={tagIcon}/>
-                            <span className="tag-red">Solve Captcha</span>
+                            <span className="tag-red">Unlock Post</span>
                         </span>
                     </div>
                 </div>

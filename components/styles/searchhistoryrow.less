@@ -1,6 +1,6 @@
 @import "../../index.less";
 
-.posthistoryrow {
+.searchhistoryrow {
     position: relative;
     display: flex;
     flex-direction: row;
@@ -13,7 +13,7 @@
     }
 }
 
-.posthistoryrow-container {
+.searchhistoryrow-container {
     display: flex;
     flex-direction: row;
     padding: 10px;
@@ -25,7 +25,7 @@
 
 }
 
-.posthistoryrow-user-container {
+.searchhistoryrow-user-container {
     display: flex;
     flex-direction: column;
     justify-content: flex-start;
@@ -33,18 +33,18 @@
     height: 100%;
 }
 
-.posthistoryrow-img {
+.searchhistoryrow-img {
     width: auto;
-    height: 300px;
+    height: 250px;
     cursor: pointer;
 }
 
-.posthistoryrow-user-img {
+.searchhistoryrow-user-img {
     width: auto;
     height: 45px;
 }
 
-.posthistoryrow-user-text {
+.searchhistoryrow-user-text {
     font-family: Tahoma, sans-serif;
     font-size: 17px;
     color: var(--text);
@@ -55,52 +55,28 @@
     }
 }
 
-.posthistoryrow-tag-text {
-    margin-left: 10px;
-    font-family: Tahoma, sans-serif;
-    font-size: 21px;
-    color: var(--text-alt);
-    cursor: pointer;
-    &:hover {
-        filter: brightness(130%)
-    }
-}
-
-.posthistoryrow-text {
+.searchhistoryrow-tag-text {
     font-family: Tahoma, sans-serif;
     font-size: 17px;
-    color: var(--text);
+    color: var(--text-alt);
+}
+
+.searchhistoryrow-text {
+    font-family: Tahoma, sans-serif;
+    font-size: 17px;
+    color: var(--text-alt);
     word-wrap: break-word;
     margin-top: 2px;
 }
 
-.posthistoryrow-text-strong {
+.searchhistoryrow-label-text {
     font-family: Tahoma, sans-serif;
     font-size: 17px;
     color: var(--text-strong);
     word-wrap: break-word;
-    margin-top: 2px;
 }
 
-.posthistoryrow-label-text {
-    font-family: Tahoma, sans-serif;
-    font-size: 17px;
-    color: var(--text-alt);
-    word-wrap: break-word;
-}
-
-.posthistoryrow-label-link {
-    font-family: Tahoma, sans-serif;
-    font-size: 17px;
-    color: var(--text);
-    word-wrap: break-word;
-    cursor: pointer;
-    &:hover {
-        filter: brightness(130%);
-    }
-}
-
-.posthistoryrow-options {
+.searchhistoryrow-options {
     position: absolute;
     display: flex;
     flex-direction: row;
@@ -108,7 +84,7 @@
     right: 10px;
 }
 
-.posthistoryrow-options-container {
+.searchhistoryrow-options-container {
     cursor: pointer;
     margin-right: 10px;
     align-items: center;
@@ -118,56 +94,56 @@
     }
 }
 
-.posthistoryrow-options-img {
+.searchhistoryrow-options-img {
     width: auto;
     height: 16px;
 }
 
-.posthistoryrow-options-text {
+.searchhistoryrow-options-text {
     margin-left: 5px;
     font-family: Tahoma, sans-serif;
     font-size: 16px;
     color: var(--text-strong);
 }
 
-.posthistoryrow-quote-container {
+.searchhistoryrow-quote-container {
     display: flex;
     flex-direction: column;
     background-color: var(--inputBG);
 }
 
-.posthistoryrow-quote-user {
+.searchhistoryrow-quote-user {
     font-family: Tahoma, sans-serif;
     font-size: 15px;
     color: var(--text-strong);
 
 }
 
-.posthistoryrow-quote-text {
+.searchhistoryrow-quote-text {
     font-family: Tahoma, sans-serif;
     font-size: 13px;
     color: var(--text);
 }
 
-.posthistoryrow-username-container {
+.searchhistoryrow-username-container {
     display: flex;
     flex-direction: row;
     align-items: center;
 }
 
-.posthistoryrow-user-label {
+.searchhistoryrow-user-label {
     margin-left: 5px;
     width: auto;
     height: 20px;
 }
 
-.posthistoryrow-container-row {
+.searchhistoryrow-container-row {
     display: flex;
     flex-direction: row;
     width: 100%;
 }
 
-.posthistoryrow-social {
+.searchhistoryrow-social {
     width: auto;
     height: 25px;
     margin-left: 5px;
@@ -178,17 +154,17 @@
 }
 
 @media screen and (max-width: 500px) {
-    .posthistoryrow {
+    .searchhistoryrow {
         flex-direction: column;
     }
 
-    .posthistoryrow-img {
+    .searchhistoryrow-img {
         width: auto;
         height: auto;
         max-width: calc(100vw - 85px);
     }
 
-    .posthistoryrow-options {  
+    .searchhistoryrow-options {  
         position: relative;
         display: flex;
         justify-content: flex-end;

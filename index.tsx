@@ -5,7 +5,7 @@ import App from "./App"
 import pace from "pace-js"
 import * as serviceWorker from "./service-worker"
 
-pace.start({document: true, eventLag: false, restartOnRequestAfter: false})
+pace.start({document: false, eventLag: false, restartOnRequestAfter: false})
 ReactDOM.hydrate(<Router><App/></Router>, document.getElementById("root"))
 
 if (process.env.TESTING === "yes") {

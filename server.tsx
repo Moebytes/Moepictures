@@ -36,7 +36,7 @@ import TranslationRoutes from "./routes/TranslationRoutes"
 import ThreadRoutes from "./routes/ThreadRoutes"
 import MessageRoutes from "./routes/MessageRoutes"
 import ipBans from "./assets/json/ip-bans.json"
-import rgbsplit from "./structures/RGBSplit"
+import imageLock from "./structures/ImageLock"
 import jwt from "jsonwebtoken"
 const __dirname = path.resolve()
 
@@ -146,7 +146,7 @@ app.use((req: Request, res: Response, next: NextFunction) => {
 
 const imageLimiter = rateLimit({
 	windowMs: 60 * 1000,
-	max: 1000,
+	max: 1500,
 	standardHeaders: true,
 	legacyHeaders: false,
     keyGenerator,
@@ -194,6 +194,11 @@ for (let i = 0; i < folders.length; i++) {
       let body = await serverFunctions.getFile(key, upscaled)
       let contentLength = body.length
       if (!contentLength) return res.status(200).send(body)
+      if (!noCache.includes(folders[i]) && req.session.captchaNeeded) {
+        res.setHeader("Cache-Control", "no-store, no-cache, must-revalidate, proxy-revalidate")
+        body = await imageLock(body, false)
+        return res.status(200).end(body)
+      }
       if (req.headers.range) {
         const parts = req.headers.range.replace(/bytes=/, "").split("-")
         const start = parseInt(parts[0])
@@ -207,10 +212,6 @@ for (let i = 0; i < folders.length; i++) {
         return stream.pipe(res)
       }
       if (encrypted.includes(folders[i]) || req.path.includes("history/post")) {
-        if (req.session.captchaNeeded) {
-          res.setHeader("Cache-Control", "no-store, no-cache, must-revalidate, proxy-revalidate")
-          body = await rgbsplit(body, false)
-        }
         const encrypted = cryptoFunctions.encrypt(body)
         res.setHeader("Content-Length", encrypted.length)
         return res.status(200).end(encrypted)
@@ -233,7 +234,6 @@ for (let i = 0; i < folders.length; i++) {
         upscaled = req.session.upscaledImages as boolean
         if (req.headers["x-force-upscale"]) upscaled = req.headers["x-force-upscale"] === "true"
       }
-      if (req.session.captchaNeeded) upscaled = false
       const body = await serverFunctions.getUnverifiedFile(key, upscaled)
       const contentLength = body.length
       if (req.headers.range) {
@@ -273,6 +273,11 @@ for (let i = 0; i < folders.length; i++) {
       let body = await serverFunctions.getFile(key, false)
       let contentLength = body.length
       if (!contentLength) return res.status(200).send(body)
+      if (!noCache.includes(folders[i]) && req.session.captchaNeeded) {
+        res.setHeader("Cache-Control", "no-store, no-cache, must-revalidate, proxy-revalidate")
+        body = await imageLock(body)
+        return res.status(200).end(body)
+      }
       if (mimeType?.includes("image")) {
         const metadata = await sharp(body).metadata()
         if (metadata.pages === 1) {
@@ -296,10 +301,6 @@ for (let i = 0; i < folders.length; i++) {
         return stream.pipe(res)
       }
       if (encrypted.includes(folders[i]) || req.path.includes("history/post")) {
-        if (req.session.captchaNeeded) {
-          res.setHeader("Cache-Control", "no-store, no-cache, must-revalidate, proxy-revalidate")
-          body = await rgbsplit(body)
-        }
         const encrypted = cryptoFunctions.encrypt(body)
         res.setHeader("Content-Length", encrypted.length)
         return res.status(200).end(encrypted)

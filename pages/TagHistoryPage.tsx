@@ -12,7 +12,7 @@ import {ThemeContext, EnableDragContext, HideNavbarContext, HideSidebarContext, 
 RelativeContext, HideTitlebarContext, ActiveDropdownContext, HeaderTextContext, SidebarTextContext, SessionFlagContext} from "../Context"
 import permissions from "../structures/Permissions"
 import matureTags from "../assets/json/mature-tags.json"
-import "./styles/taghistorypage.less"
+import "./styles/historypage.less"
 
 interface Props {
     match?: any
@@ -173,9 +173,9 @@ const TagHistoryPage: React.FunctionComponent<Props> = (props) => {
         <div className="body">
             <SideBar/>
             <div className="content" onMouseEnter={() => setEnableDrag(true)}>
-                <div className="tag-history-page">
-                    <span className="tag-history-heading">Tag History</span>
-                    <table className="tag-history-container">
+                <div className="history-page">
+                    <span className="history-heading">Tag History</span>
+                    <table className="history-container">
                         {generateRevisionsJSX()}
                     </table>
                 </div>

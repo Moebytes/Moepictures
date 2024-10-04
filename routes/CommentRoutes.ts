@@ -7,7 +7,7 @@ import serverFunctions, {authenticate, keyGenerator, handler} from "../structure
 
 const commentLimiter = rateLimit({
 	windowMs: 60 * 1000,
-	max: 100,
+	max: 200,
 	standardHeaders: true,
 	legacyHeaders: false,
     keyGenerator,

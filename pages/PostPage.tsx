@@ -159,6 +159,12 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
         }
     }
 
+    const saveHistory = async () => {
+        if (post && session.username) {
+            await functions.post("/api/post/view", {postID: post.postID}, session, setSessionFlag)
+        }
+    }
+
     useEffect(() => {
         const updatePost = async () => {
             if (post) {
@@ -171,6 +177,7 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
         updatePost()
         updateParent()
         updateThirdParty()
+        saveHistory()
     }, [post, session])
 
     useEffect(() => {
@@ -187,7 +194,7 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
         }
         const updateRelatedPosts = async () => {
             if (!tagCategories?.characters?.[0].tag) return
-            if (tagCategories.characters[0].tag !== characterTag) {
+            if (tagCategories.characters?.[0].tag !== characterTag) {
                 try {
                     const relatedPosts = await functions.get("/api/search/posts", {query: tagCategories.characters[0].tag, type: post.type, restrict: post.restrict === "explicit" ? "explicit" : "all", style: post.style, sort: Math.random() > 0.5 ? "date" : "reverse date", limit: 30}, session, setSessionFlag)
                     if (relatedPosts?.length) setRelatedPosts(relatedPosts)

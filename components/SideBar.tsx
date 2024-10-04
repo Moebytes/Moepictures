@@ -674,7 +674,7 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
                     <div className="sidebar-row">
                         <span className="tag-hover" onClick={toggleCaptcha}>
                             <img className="sidebar-icon" src={tagIcon}/>
-                            <span className="tag-red">Solve Captcha</span>
+                            <span className="tag-red">Unlock Post</span>
                         </span>
                     </div>
                 </div>

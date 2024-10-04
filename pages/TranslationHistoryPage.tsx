@@ -11,7 +11,7 @@ import DeleteTranslationHistoryDialog from "../dialogs/DeleteTranslationHistoryD
 import {ThemeContext, EnableDragContext, HideNavbarContext, HideSidebarContext, MobileContext, SessionContext,
 RelativeContext, HideTitlebarContext, ActiveDropdownContext, HeaderTextContext, SidebarTextContext, SessionFlagContext} from "../Context"
 import permissions from "../structures/Permissions"
-import "./styles/translationhistorypage.less"
+import "./styles/historypage.less"
 
 interface Props {
     match?: any
@@ -154,9 +154,9 @@ const TranslationHistoryPage: React.FunctionComponent<Props> = (props) => {
         <div className="body">
             <SideBar/>
             <div className="content" onMouseEnter={() => setEnableDrag(true)}>
-                <div className="translation-history-page">
-                    <span className="translation-history-heading">Translation History</span>
-                    <table className="translation-history-container">
+                <div className="history-page">
+                    <span className="history-heading">Translation History</span>
+                    <table className="history-container">
                         {generateRevisionsJSX()}
                     </table>
                 </div>

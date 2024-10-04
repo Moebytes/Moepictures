@@ -10,7 +10,7 @@ import serverFunctions, {authenticate, keyGenerator, handler} from "../structure
 import path from "path"
 
 const signupLimiter = rateLimit({
-	windowMs: 30 * 60 * 1000,
+	windowMs: 10 * 60 * 1000,
 	max: 5,
 	message: "Too many accounts created, try again later.",
 	standardHeaders: true,
@@ -47,7 +47,7 @@ const sessionLimiter = rateLimit({
 
 const userLimiter = rateLimit({
 	windowMs: 60 * 1000,
-	max: 100,
+	max: 200,
 	message: "Too many requests, try again later.",
 	standardHeaders: true,
 	legacyHeaders: false,
@@ -852,6 +852,39 @@ const UserRoutes = (app: Express) => {
             if (!req.session.username) return res.status(403).send("Unauthorized")
             const unread = await sql.message.grabUnread(req.session.username)
             res.status(200).send(unread.length ? true : false)
+        } catch (e) {
+            console.log(e)
+            res.status(400).send("Bad request")
+        }
+    })
+
+    app.get("/api/user/history", userLimiter, async (req: Request, res: Response) => {
+        try {
+            const offset = req.query.offset as string
+            if (!req.session.username) return res.status(403).send("Unauthorized")
+            const result = await sql.history.userSearchHistory(req.session.username, offset)
+            res.status(200).json(result)
+        } catch (e) {
+            console.log(e)
+            res.status(400).send("Bad request")
+        }
+    })
+
+    app.delete("/api/user/history/delete", authenticate, userLimiter, async (req: Request, res: Response) => {
+        try {
+            const {historyID, duplicates, all} = req.query
+            if (!req.session.username) return res.status(403).send("Unauthorized")
+            if (duplicates) {
+                await sql.history.deleteDuplicateSearchHistory(req.session.username)
+                return res.status(200).send("Success")
+            }
+            if (all) {
+                await sql.history.deleteAllSearchHistory(req.session.username)
+                return res.status(200).send("Success")
+            }
+            if (Number.isNaN(Number(historyID))) return res.status(400).send("Bad historyID")
+            await sql.history.deleteSearchHistory(Number(historyID), req.session.username)
+            res.status(200).send("Success")
         } catch (e) {
             console.log(e)
             res.status(400).send("Bad request")

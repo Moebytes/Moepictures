@@ -11,7 +11,7 @@ import path from "path"
 
 const postLimiter = rateLimit({
 	windowMs: 60 * 1000,
-	max: 200,
+	max: 300,
 	standardHeaders: true,
 	legacyHeaders: false,
     keyGenerator,
@@ -20,7 +20,7 @@ const postLimiter = rateLimit({
 
 const postUpdateLimiter = rateLimit({
 	windowMs: 60 * 1000,
-	max: 60,
+	max: 100,
 	standardHeaders: true,
 	legacyHeaders: false,
     keyGenerator,
@@ -729,6 +729,26 @@ const PostRoutes = (app: Express) => {
         } catch (e) {
             console.log(e)
             res.status(400).send("Bad request")
+        }
+    })
+
+    app.post("/api/post/view", authenticate, postLimiter, async (req: Request, res: Response, next: NextFunction) => {
+        try {
+            const {postID} = req.body
+            if (Number.isNaN(Number(postID))) return res.status(400).send("Invalid postID")
+            if (!req.session.username) return res.status(403).send("Unauthorized")
+            let result = await sql.post.post(Number(postID))
+            if (!result) return res.status(400).send("Invalid postID")
+            const history = await sql.history.searchHistory(req.session.username, postID)
+            if (history) {
+                await sql.history.updateSearchHistory(history.historyID)
+            } else {
+                await sql.history.insertSearchHistory(req.session.username, postID)
+            }
+            res.status(200).send("Success")
+        } catch (e) {
+            console.log(e)
+            return res.status(400).send("Bad request")
         }
     })
 }

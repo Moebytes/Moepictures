@@ -9,7 +9,7 @@ import path from "path"
 
 const tagLimiter = rateLimit({
 	windowMs: 60 * 1000,
-	max: 100,
+	max: 200,
 	message: "Too many requests, try again later.",
 	standardHeaders: true,
 	legacyHeaders: false,
@@ -19,7 +19,7 @@ const tagLimiter = rateLimit({
 
 const tagUpdateLimiter = rateLimit({
 	windowMs: 60 * 1000,
-	max: 50,
+	max: 100,
 	message: "Too many requests, try again later.",
 	standardHeaders: true,
 	legacyHeaders: false,

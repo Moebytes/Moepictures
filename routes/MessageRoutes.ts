@@ -7,7 +7,7 @@ import serverFunctions, {authenticate, keyGenerator, handler} from "../structure
 
 const messageLimiter = rateLimit({
 	windowMs: 60 * 1000,
-	max: 200,
+	max: 300,
 	standardHeaders: true,
 	legacyHeaders: false,
     keyGenerator,
@@ -16,7 +16,7 @@ const messageLimiter = rateLimit({
 
 const messageUpdateLimiter = rateLimit({
 	windowMs: 60 * 1000,
-	max: 60,
+	max: 100,
 	standardHeaders: true,
 	legacyHeaders: false,
     keyGenerator,

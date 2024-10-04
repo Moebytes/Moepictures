@@ -18,6 +18,8 @@ import mailNotifLight from "../assets/icons/mail-notif-light.png"
 import eyedropperLight from "../assets/icons/eyedropper-light.png"
 import lightLight from "../assets/icons/light-light.png"
 import dark from "../assets/icons/dark.png"
+import userHistory from "../assets/icons/user-history.png"
+import userHistoryLight from "../assets/icons/user-history-light.png"
 import darkLight from "../assets/icons/dark-light.png"
 import permissions from "../structures/Permissions"
 import functions from "../structures/Functions"
@@ -152,6 +154,11 @@ const NavBar: React.FunctionComponent<Props> = (props) => {
     const getMailIcon = () => {
         if (theme.includes("light")) return hasNotification ? mailNotifLight : mailLight
         return hasNotification ? mailNotif : mail
+    }
+
+    const getHistoryIcon = () => {
+        if (theme.includes("light")) return userHistoryLight
+        return userHistory
     }
 
     const getCrownIcon = () => {
@@ -311,8 +318,10 @@ const NavBar: React.FunctionComponent<Props> = (props) => {
                     <span className="mobile-nav-text" onClick={() => {history.push("/contact"); setHideMobileNavbar(true)}}>Contact</span>
                 </div>
                 <div className="mobile-nav-color-container">
+                    {session.username ? <img className="nav-color" src={getHistoryIcon()} onClick={() => history.push("/history")} style={{filter: getFilter()}}/> : null}
                     <img className="mobile-nav-color" src={getEyedropperIcon()} onClick={colorChange} style={{filter: getFilter()}}/>
                     <img className="mobile-nav-color" src={getThemeIcon()} onClick={lightChange} style={{filter: getFilter()}}/>
+                    {session.username ? <img className="nav-color" src={getMailIcon()} onClick={() => history.push("/mail")} style={{filter: getFilter()}}/> : null}
                     {permissions.isElevated(session) ? <img className="nav-color" src={getCrownIcon()} onClick={() => history.push("/mod-queue")} style={{filter: getFilter()}}/> : null}
                     <img className="mobile-nav-color" src={scroll ? scrollIcon : pageIcon} onClick={toggleScroll} style={{filter: getFilter()}}/>
                 </div>
@@ -377,6 +386,7 @@ const NavBar: React.FunctionComponent<Props> = (props) => {
                         <img className="nav-search-icon" src={search2} onClick={() => setSearchFlag(true)}/>
                         <input className="nav-search" type="search" spellCheck={false} value={search} onChange={(event) => setSearch(event.target.value)} onKeyDown={(event) => event.key === "Enter" ? setSearchFlag(true) : null} onFocus={() => setSuggestionsActive(true)} onBlur={() => setSuggestionsActive(false)}/>
                     </div>
+                    {session.username ? <img className="nav-color" src={getHistoryIcon()} onClick={() => history.push("/history")} style={{filter: getFilter()}}/> : null}
                     <img className="nav-color" src={getEyedropperIcon()} onClick={colorChange} style={{filter: getFilter()}}/>
                     <img className="nav-color" src={getThemeIcon()} onClick={lightChange} style={{filter: getFilter()}}/>
                     {session.username ? <img className="nav-color" src={getMailIcon()} onClick={() => history.push("/mail")} style={{filter: getFilter()}}/> : null}

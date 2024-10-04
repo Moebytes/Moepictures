@@ -36,6 +36,7 @@ import UserPage from "./pages/UserPage"
 import TagPage from "./pages/TagPage"
 import TagHistoryPage from "./pages/TagHistoryPage"
 import PostHistoryPage from "./pages/PostHistoryPage"
+import SearchHistoryPage from "./pages/SearchHistoryPage"
 import UnverifiedPostPage from "./pages/UnverifiedPostPage"
 import functions from "./structures/Functions"
 import ModQueuePage from "./pages/ModQueuePage"
@@ -263,6 +264,7 @@ const App: React.FunctionComponent = (props) => {
                         <Route exact path="/characters"><CharactersPage/></Route>
                         <Route exact path="/artists"><ArtistsPage/></Route>
                         <Route exact path="/comments"><CommentsPage/></Route>
+                        <Route exact path="/history"><SearchHistoryPage/></Route>
                         <Route exact path="/user/:username" render={(props) => <UserPage {...props}/>}></Route>
                         <Route exact path="/tag/history/:tag" render={(props) => <TagHistoryPage {...props}/>}></Route>
                         <Route exact path="/tag/history" render={(props) => <TagHistoryPage all={true} {...props}/>}></Route>

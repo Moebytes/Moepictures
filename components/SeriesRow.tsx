@@ -22,12 +22,14 @@ const SeriesRow: React.FunctionComponent<Props> = (props) => {
 
     const searchTag = (event: React.MouseEvent) => {
         if (event.ctrlKey || event.metaKey || event.button === 1) {
-            window.open("/posts", "_blank")
+            //window.open("/posts", "_blank")
+            window.open(`/tag/${props.series.tag}`, "_blank")
         } else {
-            history.push("/posts")
+            //history.push("/posts")
+            history.push(`/tag/${props.series.tag}`)
         }
-        setSearch(props.series.tag)
-        setSearchFlag(true)
+        //setSearch(props.artist.tag)
+        //setSearchFlag(true)
     }
 
     const set = (image: string, index: number, newTab: boolean) => {

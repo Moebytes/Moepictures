@@ -11,7 +11,7 @@ import DeletePostHistoryDialog from "../dialogs/DeletePostHistoryDialog"
 import {ThemeContext, EnableDragContext, HideNavbarContext, HideSidebarContext, MobileContext, SessionContext,
 RelativeContext, HideTitlebarContext, ActiveDropdownContext, HeaderTextContext, SidebarTextContext, SessionFlagContext} from "../Context"
 import permissions from "../structures/Permissions"
-import "./styles/posthistorypage.less"
+import "./styles/historypage.less"
 
 interface Props {
     match?: any
@@ -169,9 +169,9 @@ const PostHistoryPage: React.FunctionComponent<Props> = (props) => {
         <div className="body">
             <SideBar/>
             <div className="content" onMouseEnter={() => setEnableDrag(true)}>
-                <div className="post-history-page">
-                    <span className="post-history-heading">Post History</span>
-                    <table className="post-history-container">
+                <div className="history-page">
+                    <span className="history-heading">Post History</span>
+                    <table className="history-container">
                         {generateRevisionsJSX()}
                     </table>
                 </div>

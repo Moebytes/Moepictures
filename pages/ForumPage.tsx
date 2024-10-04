@@ -372,9 +372,9 @@ const ForumPage: React.FunctionComponent = (props) => {
             visible = functions.removeDuplicates(visibleThreads) as any
         } else {
             const postOffset = (forumPage - 1) * getPageAmount()
-            visible = threads.slice(postOffset, postOffset + getPageAmount())
+            visible = threads?.slice(postOffset, postOffset + getPageAmount())
         }
-        for (let i = 0; i < visible.length; i++) {
+        for (let i = 0; i < visible?.length; i++) {
             if (visible[i].fake) continue
             jsx.push(<Thread key={visible[i].threadID} thread={visible[i]} onDelete={updateThreads} onEdit={updateThreads}/>)
         }

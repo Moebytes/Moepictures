@@ -9,7 +9,7 @@ import axios from "axios"
 
 const $2faLimiter = rateLimit({
 	windowMs: 60 * 1000,
-	max: 10,
+	max: 20,
 	standardHeaders: true,
 	legacyHeaders: false,
     keyGenerator,

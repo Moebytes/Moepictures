@@ -29,7 +29,7 @@ const editLimiter = rateLimit({
 
 const modLimiter = rateLimit({
 	windowMs: 60 * 1000,
-	max: 200,
+	max: 300,
 	message: "Too many requests, try again later.",
 	standardHeaders: true,
 	legacyHeaders: false

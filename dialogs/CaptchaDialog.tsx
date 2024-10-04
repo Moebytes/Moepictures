@@ -131,7 +131,7 @@ const CaptchaDialog: React.FunctionComponent<Props> = (props) => {
                                 <span className="dialog-title">Rate Limit Exceeded</span>
                             </div>
                             <div className="dialog-row">
-                                <span className="dialog-text">Please verify that you are a human. You may ignore this, but content will be protected.</span>
+                                <span className="dialog-text">Please verify that you are a human. You may ignore this, but content will be locked.</span>
                             </div>
                             <div className="dialog-row" style={{pointerEvents: "all"}}>
                                 <img src={`data:image/svg+xml;utf8,${encodeURIComponent(captcha)}`} style={{filter: getFilter()}}/>

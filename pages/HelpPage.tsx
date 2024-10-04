@@ -292,7 +292,7 @@ const HelpPage: React.FunctionComponent = (props) => {
             return (
                 <><span className="help-heading">Compressing</span>
                 <span className="help-text">
-                    Compressing / re-encoding posts is advised for faster loading and better space efficieny. All compressions should be 
+                    Compressing / re-encoding posts is advised for faster loading and better space efficiency. All compressions should be 
                     high quality and should not leave behind any artifacts. <br/><br/>
 
                     You can download the app that we use for compressing here: <br/>
@@ -331,8 +331,8 @@ const HelpPage: React.FunctionComponent = (props) => {
                 <><span className="help-heading">Third Party Edits</span>
                 <span className="help-text">
                     Third party edits are modifications to a work not done/endorsed by the original artist. For
-                    example, an animation of an artwork done by someone else. Third party edits behave like their own separate post,
-                    but each third party edit is added to the original post in a separate section and doesn't appear directly in search.
+                    example, an animation of an artwork done by someone else. Third party edits behave like their own post,
+                    and are also added to the original post in a separate section.
                 </span>
                 <div className="help-img-container"><img className="help-img" src={thirdPartyImg}/></div></>
             )
@@ -402,7 +402,7 @@ const HelpPage: React.FunctionComponent = (props) => {
                 <><span className="help-heading">Captcha</span>
                 <span className="help-text">
                     Automated scraping of our website is prohibited. If you hit one of our rate limits you will 
-                    have to solve a captcha to view tags, and images will have an rgb filter applied. Hopefully 
+                    have to solve a captcha to view tags, and posts will be locked. Hopefully 
                     this shouldn't be triggered by regular browsing.
                 </span>
                 <div className="help-img-container"><img className="help-img" src={captchaImg}/></div></>

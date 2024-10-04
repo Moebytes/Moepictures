@@ -7,7 +7,7 @@ import serverFunctions, {authenticate, keyGenerator, handler} from "../structure
 
 const threadLimiter = rateLimit({
 	windowMs: 60 * 1000,
-	max: 200,
+	max: 300,
 	message: "Too many requests, try again later.",
 	standardHeaders: true,
 	legacyHeaders: false,
@@ -17,7 +17,7 @@ const threadLimiter = rateLimit({
 
 const threadUpdateLimiter = rateLimit({
 	windowMs: 60 * 1000,
-	max: 60,
+	max: 100,
 	message: "Too many requests, try again later.",
 	standardHeaders: true,
 	legacyHeaders: false,

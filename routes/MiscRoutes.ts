@@ -23,7 +23,7 @@ const exec = util.promisify(child_process.exec)
 
 const miscLimiter = rateLimit({
 	windowMs: 60 * 1000,
-	max: 200,
+	max: 300,
 	standardHeaders: true,
 	legacyHeaders: false,
     keyGenerator,
@@ -32,7 +32,7 @@ const miscLimiter = rateLimit({
 
 const captchaLimiter = rateLimit({
 	windowMs: 60 * 1000,
-	max: 30,
+	max: 100,
 	standardHeaders: true,
 	legacyHeaders: false,
     keyGenerator,

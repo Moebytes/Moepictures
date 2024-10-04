@@ -171,6 +171,10 @@ export const SoftDeleteMessageFlagContext = React.createContext<any>(null)
 export const HasNotificationContext = React.createContext<any>(null)
 export const ShowUpscaledContext = React.createContext<any>(null)
 export const HelpTabContext = React.createContext<any>(null)
+export const DeleteSearchHistoryIDContext = React.createContext<any>(null)
+export const DeleteSearchHistoryFlagContext = React.createContext<any>(null)
+export const HistoryPageContext = React.createContext<any>(null)
+export const ShowDeleteAllHistoryDialogContext = React.createContext<any>(null)
 
 const Context: React.FunctionComponent = (props) => {
     const [siteHue, setSiteHue] = useState(180)
@@ -195,6 +199,7 @@ const Context: React.FunctionComponent = (props) => {
     const [forumPage, setForumPage] = useState(1)
     const [threadPage, setThreadPage] = useState(1)
     const [mailPage, setMailPage] = useState(1)
+    const [historyPage, setHistoryPage] = useState(1)
     const [showDownloadDialog, setShowDownloadDialog] = useState(false)
     const [postAmount, setPostAmount] = useState(0)
     const [downloadIDs, setDownloadIDs] = useState([])
@@ -327,9 +332,16 @@ const Context: React.FunctionComponent = (props) => {
     const [editMsgReplyContent, setEditMsgReplyContent] = useState("")
     const [showUpscaled, setShowUpscaled] = useState(false)
     const [helpTab, setHelpTab] = useState("help")
+    const [deleteSearchHistoryID, setDeleteSearchHistoryID] = useState(null)
+    const [deleteSearchHistoryFlag, setDeleteSearchHistoryFlag] = useState(null)
+    const [showDeleteAllHistoryDialog, setShowDeleteAllHistoryDialog] = useState(false)
 
 return (
     <>
+        <ShowDeleteAllHistoryDialogContext.Provider value={{showDeleteAllHistoryDialog, setShowDeleteAllHistoryDialog}}>
+        <HistoryPageContext.Provider value={{historyPage, setHistoryPage}}>
+        <DeleteSearchHistoryFlagContext.Provider value={{deleteSearchHistoryFlag, setDeleteSearchHistoryFlag}}>
+        <DeleteSearchHistoryIDContext.Provider value={{deleteSearchHistoryID, setDeleteSearchHistoryID}}>
         <HelpTabContext.Provider value={{helpTab, setHelpTab}}>
         <ShowUpscaledContext.Provider value={{showUpscaled, setShowUpscaled}}>
         <SoftDeleteMessageFlagContext.Provider value={{softDeleteMessageFlag, setSoftDeleteMessageFlag}}>
@@ -639,6 +651,10 @@ return (
         </SoftDeleteMessageFlagContext.Provider>
         </ShowUpscaledContext.Provider>
         </HelpTabContext.Provider>
+        </DeleteSearchHistoryIDContext.Provider>
+        </DeleteSearchHistoryFlagContext.Provider>
+        </HistoryPageContext.Provider>
+        </ShowDeleteAllHistoryDialogContext.Provider>
     </>
     )
 }
