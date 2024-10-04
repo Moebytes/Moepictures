@@ -1,7 +1,7 @@
 import React, {useContext, useEffect, useRef, useState} from "react"
 import {useHistory} from "react-router-dom"
 import {ThemeContext, SearchContext, SearchFlagContext, MobileContext, SessionContext, SiteHueContext, SiteLightnessContext,
-SiteSaturationContext, SoftDeleteMessageIDContext, HasNotificationContext} from "../Context"
+SiteSaturationContext, SoftDeleteMessageIDContext, HasNotificationContext, SessionFlagContext} from "../Context"
 import {HashLink as Link} from "react-router-hash-link"
 import functions from "../structures/Functions"
 import adminCrown from "../assets/icons/admin-crown.png"
@@ -13,7 +13,6 @@ import read from "../assets/icons/read.png"
 import readLight from "../assets/icons/read-light.png"
 import favicon from "../assets/icons/favicon.png"
 import "./styles/message.less"
-import axios from "axios"
 
 interface Props {
     message?: any
@@ -32,6 +31,7 @@ const Message: React.FunctionComponent<Props> = (props) => {
     const {searchFlag, setSearchFlag} = useContext(SearchFlagContext)
     const {mobile, setMobile} = useContext(MobileContext)
     const {session, setSession} = useContext(SessionContext)
+    const {sessionFlag, setSessionFlag} = useContext(SessionFlagContext)
     const {softDeleteMessageID, setSoftDeleteMessageID} = useContext(SoftDeleteMessageIDContext)
     const {hasNotification, setHasNotification} = useContext(HasNotificationContext)
     const [creatorData, setCreatorData] = useState({}) as any
@@ -45,13 +45,13 @@ const Message: React.FunctionComponent<Props> = (props) => {
     }
 
     const updateRecipient = async () => {
-        const recipient = await axios.get("/api/user", {params: {username: props.message.recipient}, withCredentials: true}).then((r) => r.data)
+        const recipient = await functions.get("/api/user", {username: props.message.recipient}, session, setSessionFlag)
         setRecipientData(recipient)
         setRecipientDefaultIcon(recipient?.image ? false : true)
     }
 
     const updateCreator = async () => {
-        const creator = await axios.get("/api/user", {params: {username: props.message.creator}, withCredentials: true}).then((r) => r.data)
+        const creator = await functions.get("/api/user", {username: props.message.creator}, session, setSessionFlag)
         setCreatorData(creator)
         setCreatorDefaultIcon(creator?.image ? false : true)
     }
@@ -61,7 +61,7 @@ const Message: React.FunctionComponent<Props> = (props) => {
             updateCreator()
             updateRecipient()
         }
-    }, [])
+    }, [session])
 
     const messagePage = (event: React.MouseEvent) => {
         if (event.ctrlKey || event.metaKey || event.button === 1) {
@@ -192,7 +192,7 @@ const Message: React.FunctionComponent<Props> = (props) => {
     }
 
     const checkMail = async () => {
-        const result = await axios.get("/api/user/checkmail", {withCredentials: true}).then((r) => r.data)
+        const result = await functions.get("/api/user/checkmail", null, session, setSessionFlag)
         setHasNotification(result)
     }
 
@@ -205,7 +205,7 @@ const Message: React.FunctionComponent<Props> = (props) => {
     }
 
     const toggleRead = async () => {
-        await axios.post("/api/message/read", {messageID: props.message.messageID}, {headers: {"x-csrf-token": functions.getCSRFToken()}, withCredentials: true}).then((r) => r.data)
+        await functions.post("/api/message/read", {messageID: props.message.messageID}, session, setSessionFlag)
         props.onEdit?.()
         checkMail()
     }

@@ -1,13 +1,12 @@
 import React, {useEffect, useContext, useState, useRef} from "react"
 import {useHistory} from "react-router-dom"
 import {HashLink as Link} from "react-router-hash-link"
-import {HideNavbarContext, HideSidebarContext, ThemeContext, EnableDragContext, ShowDeletePostDialogContext, HideTitlebarContext,
+import {HideNavbarContext, HideSidebarContext, SessionFlagContext, ThemeContext, EnableDragContext, ShowDeletePostDialogContext, HideTitlebarContext,
 SessionContext} from "../Context"
 import functions from "../structures/Functions"
 import Draggable from "react-draggable"
 import "./styles/dialog.less"
 import permissions from "../structures/Permissions"
-import axios from "axios"
 
 interface Props {
     post: any
@@ -19,8 +18,9 @@ const DeletePostDialog: React.FunctionComponent<Props> = (props) => {
     const {hideTitlebar, setHideTitlebar} = useContext(HideTitlebarContext)
     const {hideSidebar, setHideSidebar} = useContext(HideSidebarContext)
     const {enableDrag, setEnableDrag} = useContext(EnableDragContext)
-    const {showDeletePostDialog, setShowDeletePostDialog} = useContext(ShowDeletePostDialogContext)
     const {session, setSession} = useContext(SessionContext)
+    const {sessionFlag, setSessionFlag} = useContext(SessionFlagContext)
+    const {showDeletePostDialog, setShowDeletePostDialog} = useContext(ShowDeletePostDialogContext)
     const [reason, setReason] = useState("")
     const [submitted, setSubmitted] = useState(false)
     const [error, setError] = useState(false)
@@ -44,7 +44,7 @@ const DeletePostDialog: React.FunctionComponent<Props> = (props) => {
 
     const deletePost = async () => {
         if (permissions.isElevated(session)) {
-            await axios.delete("/api/post/delete", {params: {postID: props.post.postID}, headers: {"x-csrf-token": functions.getCSRFToken()}, withCredentials: true})
+            await functions.delete("/api/post/delete", {postID: props.post.postID}, session, setSessionFlag)
             history.push("/posts")
         } else {
             const badReason = functions.validateReason(reason)
@@ -56,7 +56,7 @@ const DeletePostDialog: React.FunctionComponent<Props> = (props) => {
                 setError(false)
                 return
             }
-            await axios.post("/api/post/delete/request", {postID: props.post.postID, reason}, {headers: {"x-csrf-token": functions.getCSRFToken()}, withCredentials: true})
+            await functions.post("/api/post/delete/request", {postID: props.post.postID, reason}, session, setSessionFlag)
             setSubmitted(true)
         }
     }

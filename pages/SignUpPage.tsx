@@ -10,9 +10,8 @@ import hide from "../assets/icons/hide.png"
 import DragAndDrop from "../components/DragAndDrop"
 import functions from "../structures/Functions"
 import {HideNavbarContext, HideSidebarContext, ThemeContext, EnableDragContext, RelativeContext, HideTitlebarContext, MobileContext,
-HeaderTextContext, SidebarTextContext, SessionContext, SiteHueContext, SiteLightnessContext, SiteSaturationContext} from "../Context"
+HeaderTextContext, SidebarTextContext, SessionContext, SiteHueContext, SiteLightnessContext, SiteSaturationContext, SessionFlagContext} from "../Context"
 import "./styles/signuppage.less"
-import axios from "axios"
 
 const SignUpPage: React.FunctionComponent = (props) => {
     const {theme, setTheme} = useContext(ThemeContext)
@@ -27,6 +26,7 @@ const SignUpPage: React.FunctionComponent = (props) => {
     const {headerText, setHeaderText} = useContext(HeaderTextContext)
     const {sidebarText, setSidebarText} = useContext(SidebarTextContext)
     const {session, setSession} = useContext(SessionContext)
+    const {sessionFlag, setSessionFlag} = useContext(SessionFlagContext)
     const {mobile, setMobile} = useContext(MobileContext)
     const [showPassword, setShowPassword] = useState(false)
     const [showPassword2, setShowPassword2] = useState(false)
@@ -51,7 +51,7 @@ const SignUpPage: React.FunctionComponent = (props) => {
     }
 
     const updateCaptcha = async () => {
-        const captcha = await axios.get("/api/misc/captcha/create", {params: {color: getCaptchaColor()}, withCredentials: true}).then((r) => r.data)
+        const captcha = await functions.get("/api/misc/captcha/create", {color: getCaptchaColor()}, session, setSessionFlag)
         setCaptcha(captcha)
         setCaptchaResponse("")
     }
@@ -141,7 +141,7 @@ const SignUpPage: React.FunctionComponent = (props) => {
         if (!errorRef.current) await functions.timeout(20)
         errorRef.current!.innerText = "Submitting..."
         try {
-            await axios.post("/api/user/signup", {username, email, password, captchaResponse}, {headers: {"x-csrf-token": functions.getCSRFToken()}, withCredentials: true})
+            await functions.post("/api/user/signup", {username, email, password, captchaResponse}, session, setSessionFlag)
             setSubmitted(true)
             setError(false)
         } catch (err) {

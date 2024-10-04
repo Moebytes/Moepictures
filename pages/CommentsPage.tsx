@@ -16,13 +16,12 @@ import ReportCommentDialog from "../dialogs/ReportCommentDialog"
 import {ThemeContext, EnableDragContext, HideNavbarContext, HideSidebarContext, MobileContext, SessionContext,
 RelativeContext, HideTitlebarContext, ActiveDropdownContext, HeaderTextContext, SidebarTextContext,
 CommentSearchFlagContext, SiteHueContext, SiteLightnessContext, SiteSaturationContext, ScrollContext, CommentsPageContext,
-PageFlagContext, ShowPageDialogContext, CommentIDContext, CommentJumpFlagContext} from "../Context"
+PageFlagContext, ShowPageDialogContext, CommentIDContext, CommentJumpFlagContext, SessionFlagContext} from "../Context"
 import permissions from "../structures/Permissions"
 import scrollIcon from "../assets/icons/scroll.png"
 import pageIcon from "../assets/icons/page.png"
 import PageDialog from "../dialogs/PageDialog"
 import "./styles/itemspage.less"
-import axios from "axios"
 
 const CommentsPage: React.FunctionComponent = (props) => {
     const [ignored, forceUpdate] = useReducer(x => x + 1, 0)
@@ -45,6 +44,7 @@ const CommentsPage: React.FunctionComponent = (props) => {
     const {mobile, setMobile} = useContext(MobileContext)
     const {commentSearchFlag, setCommentSearchFlag} = useContext(CommentSearchFlagContext)
     const {session, setSession} = useContext(SessionContext)
+    const {sessionFlag, setSessionFlag} = useContext(SessionFlagContext)
     const [sortType, setSortType] = useState("date")
     const [comments, setComments] = useState([]) as any
     const [searchQuery, setSearchQuery] = useState("")
@@ -103,7 +103,7 @@ const CommentsPage: React.FunctionComponent = (props) => {
     }
 
     const updateComments = async (query?: string) => {
-        const result = await axios.get("/api/search/comments", {params: {sort: sortType, query: query ? query : searchQuery}, withCredentials: true}).then((r) => r.data)
+        const result = await functions.get("/api/search/comments", {sort: sortType, query: query ? query : searchQuery}, session, setSessionFlag)
         setEnded(false)
         setIndex(0)
         setVisibleComments([])
@@ -142,7 +142,7 @@ const CommentsPage: React.FunctionComponent = (props) => {
 
     useEffect(() => {
         updateComments()
-    }, [sortType])
+    }, [sortType, session])
 
     const getPageAmount = () => {
         return scroll ? 15 : 50
@@ -161,7 +161,7 @@ const CommentsPage: React.FunctionComponent = (props) => {
             setVisibleComments(functions.removeDuplicates(newVisibleComments))
         }
         if (scroll) updateComments()
-    }, [scroll, comments])
+    }, [scroll, comments, session])
 
     const updateOffset = async () => {
         if (ended) return
@@ -177,7 +177,7 @@ const CommentsPage: React.FunctionComponent = (props) => {
                 }
             }
         }
-        let result = await axios.get("/api/search/comments", {params: {sort: sortType, query: searchQuery, offset: newOffset}, withCredentials: true}).then((r) => r.data)
+        let result = await functions.get("/api/search/comments", {sort: sortType, query: searchQuery, offset: newOffset}, session, setSessionFlag)
         let hasMore = result?.length >= 100
         const cleanComments = comments.filter((t: any) => !t.fake)
         if (!scroll) {
@@ -235,7 +235,7 @@ const CommentsPage: React.FunctionComponent = (props) => {
             setCommentsPage(1)
             updateComments()
         }
-    }, [scroll])
+    }, [scroll, session])
 
     useEffect(() => {
         if (!scroll) updateOffset()

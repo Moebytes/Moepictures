@@ -1,7 +1,7 @@
 import React, {useContext, useEffect, useRef, useState} from "react"
 import {useHistory} from "react-router-dom"
 import {ThemeContext, SessionContext, EnableDragContext, ToolTipXContext, ToolTipYContext, ToolTipEnabledContext, ToolTipPostContext,
-ToolTipImgContext, DownloadFlagContext, DownloadIDsContext, SelectionModeContext} from "../Context"
+ToolTipImgContext, DownloadFlagContext, DownloadIDsContext, SelectionModeContext, SessionFlagContext} from "../Context"
 import {HashLink as Link} from "react-router-hash-link"
 import functions from "../structures/Functions"
 import "./styles/tooltip.less"
@@ -19,13 +19,13 @@ import youtube from "../assets/icons/youtube.png"
 import bandcamp from "../assets/icons/bandcamp.png"
 import sketchfab from "../assets/icons/sketchfab.png"
 import tagIcon from "../assets/icons/tag.png"
-import axios from "axios"
 
 const ToolTip: React.FunctionComponent = (props) => {
     const {theme, setTheme} = useContext(ThemeContext)
     const [hover, setHover] = useState(false)
     const {enableDrag, setEnableDrag} = useContext(EnableDragContext)
     const {session, setSession} = useContext(SessionContext)
+    const {sessionFlag, setSessionFlag} = useContext(SessionFlagContext)
     const {downloadFlag, setDownloadFlag} = useContext(DownloadFlagContext)
     const {downloadIDs, setDownloadIDs} = useContext(DownloadIDsContext)
     const {tooltipX, setToolTipX} = useContext(ToolTipXContext)
@@ -40,7 +40,7 @@ const ToolTip: React.FunctionComponent = (props) => {
     const history = useHistory()
 
     const updateTags = async () => {
-        const result = await axios.get("/api/post/tags", {params: {postID: tooltipPost.postID}, withCredentials: true}).then((r) => r.data)
+        const result = await functions.get("/api/post/tags", {postID: tooltipPost.postID}, session, setSessionFlag)
         const artists = result.tags.filter((t: any) => t.type === "artist")
         const characters = result.tags.filter((t: any) => t.type === "character")
         const series = result.tags.filter((t: any) => t.type === "series")
@@ -52,7 +52,7 @@ const ToolTip: React.FunctionComponent = (props) => {
 
     useEffect(() => {
         if (tooltipPost) updateTags()
-    }, [tooltipPost])
+    }, [tooltipPost, session])
 
     useEffect(() => {
         if (scrollRef.current) scrollRef.current.scrollTop = 0

@@ -10,7 +10,6 @@ import {HideNavbarContext, HideSidebarContext, ThemeContext, EnableDragContext, 
 HeaderTextContext, SidebarTextContext, SessionContext, SessionFlagContext, RedirectContext, MobileContext} from "../Context"
 import "./styles/2faenablepage.less"
 import functions from "../structures/Functions"
-import axios from "axios"
 
 const $2FAEnablePage: React.FunctionComponent = (props) => {
     const {theme, setTheme} = useContext(ThemeContext)
@@ -54,7 +53,7 @@ const $2FAEnablePage: React.FunctionComponent = (props) => {
     }, [mobile])
 
     const get2FAQRCode = async () => {
-        const qrcode = await axios.post("/api/2fa/qr", null, {headers: {"x-csrf-token": functions.getCSRFToken()}, withCredentials: true}).then((r) => r.data)
+        const qrcode = await functions.post("/api/2fa/qr", null, session, setSessionFlag)
         if (qrcode) setQR(qrcode)
     }
 
@@ -71,7 +70,7 @@ const $2FAEnablePage: React.FunctionComponent = (props) => {
     }, [session])
 
     const toggle = async () => {
-        const qr = await axios.post("/api/2fa/create", null, {headers: {"x-csrf-token": functions.getCSRFToken()}, withCredentials: true}).then((r) => r.data)
+        const qr = await functions.post("/api/2fa/create", null, session, setSessionFlag)
         if (qr) {
             setQR(qr)
             setShowValidation(true)
@@ -95,7 +94,7 @@ const $2FAEnablePage: React.FunctionComponent = (props) => {
         if (!errorRef.current) await functions.timeout(20)
         errorRef.current!.innerText = "Submitting..."
         try {
-            await axios.post("/api/2fa/enable", {token}, {headers: {"x-csrf-token": functions.getCSRFToken()}, withCredentials: true})
+            await functions.post("/api/2fa/enable", {token}, session, setSessionFlag)
             setSessionFlag(true)
             setShowValidation(false)
             setError(false)

@@ -9,11 +9,10 @@ import TagHistoryRow from "../components/TagHistoryRow"
 import RevertTagHistoryDialog from "../dialogs/RevertTagHistoryDialog"
 import DeleteTagHistoryDialog from "../dialogs/DeleteTagHistoryDialog"
 import {ThemeContext, EnableDragContext, HideNavbarContext, HideSidebarContext, MobileContext, SessionContext,
-RelativeContext, HideTitlebarContext, ActiveDropdownContext, HeaderTextContext, SidebarTextContext} from "../Context"
+RelativeContext, HideTitlebarContext, ActiveDropdownContext, HeaderTextContext, SidebarTextContext, SessionFlagContext} from "../Context"
 import permissions from "../structures/Permissions"
 import matureTags from "../assets/json/mature-tags.json"
 import "./styles/taghistorypage.less"
-import axios from "axios"
 
 interface Props {
     match?: any
@@ -33,6 +32,7 @@ const TagHistoryPage: React.FunctionComponent<Props> = (props) => {
     const {sidebarText, setSidebarText} = useContext(SidebarTextContext)
     const {mobile, setMobile} = useContext(MobileContext)
     const {session, setSession} = useContext(SessionContext)
+    const {sessionFlag, setSessionFlag} = useContext(SessionFlagContext)
     const [revisions, setRevisions] = useState([]) as any
     const [index, setIndex] = useState(0)
     const [visibleRevisions, setVisibleRevisions] = useState([]) as any
@@ -43,13 +43,13 @@ const TagHistoryPage: React.FunctionComponent<Props> = (props) => {
     const updateHistory = async () => {
         let result = [] as any
         if (props.all) {
-            result = await axios.get("/api/tag/history", {withCredentials: true}).then((r) => r.data)
+            result = await functions.get("/api/tag/history", null, session, setSessionFlag)
         } else {
-            result = await axios.get("/api/tag/history", {params: {tag}, withCredentials: true}).then((r) => r.data)
+            result = await functions.get("/api/tag/history", {tag}, session, setSessionFlag)
             if (!result.length) {
-                const tagObject = await axios.get("/api/tag", {params: {tag}, withCredentials: true}).then((r) => r.data)
+                const tagObject = await functions.get("/api/tag", {tag}, session, setSessionFlag)
                 if (!tagObject.createDate && !tagObject.creator) {
-                    const oldestPost = await axios.get("/api/search/posts", {params: {query: tag, type: "all", restrict: "all", style: "all", sort: "reverse date", limit: 1}}).then((r) => r.data)
+                    const oldestPost = await functions.get("/api/search/posts", {query: tag, type: "all", restrict: "all", style: "all", sort: "reverse date", limit: 1}, session, setSessionFlag)
                     tagObject.createDate = oldestPost[0].uploadDate
                     tagObject.creator = oldestPost[0].uploader
                 }
@@ -69,7 +69,7 @@ const TagHistoryPage: React.FunctionComponent<Props> = (props) => {
 
     useEffect(() => {
         updateHistory()
-    }, [tag])
+    }, [tag, session])
 
     useEffect(() => {
         setHideNavbar(true)
@@ -110,7 +110,7 @@ const TagHistoryPage: React.FunctionComponent<Props> = (props) => {
     const updateOffset = async () => {
         if (ended) return
         const newOffset = offset + 100
-        const result = await axios.get("/api/tag/history", {params: {tag, offset: newOffset}, withCredentials: true}).then((r) => r.data)
+        const result = await functions.get("/api/tag/history", {tag, offset: newOffset}, session, setSessionFlag)
         if (result?.length) {
             setOffset(newOffset)
             setRevisions((prev: any) => [...prev, ...result])

@@ -3,7 +3,7 @@ import rateLimit from "express-rate-limit"
 import slowDown from "express-slow-down"
 import sql from "../sql/SQLQuery"
 import functions from "../structures/Functions"
-import serverFunctions from "../structures/ServerFunctions"
+import serverFunctions, {authenticate} from "../structures/ServerFunctions"
 
 const favoriteLimiter = rateLimit({
 	windowMs: 5 * 60 * 1000,
@@ -14,12 +14,11 @@ const favoriteLimiter = rateLimit({
 })
 
 const FavoriteRoutes = (app: Express) => {
-    app.post("/api/favorite/update", favoriteLimiter, async (req: Request, res: Response) => {
+    app.post("/api/favorite/update", authenticate, favoriteLimiter, async (req: Request, res: Response) => {
         try {
             const {postID, favorited} = req.body
-            if (!serverFunctions.validateCSRF(req)) return res.status(400).send("Bad CSRF token")
             if (Number.isNaN(Number(postID))) return res.status(400).send("Invalid postID")
-            if (!req.session.username) return res.status(401).send("Unauthorized")
+            if (!req.session.username) return res.status(403).send("Unauthorized")
             if (favorited == null) return res.status(400).send("Bad favorited")
             const favorite = await sql.favorite.favorite(Number(postID), req.session.username)
             if (favorited) {
@@ -38,7 +37,7 @@ const FavoriteRoutes = (app: Express) => {
         try {
             const postID = req.query.postID
             if (Number.isNaN(Number(postID))) return res.status(400).send("Invalid postID")
-            if (!req.session.username) return res.status(401).send("Unauthorized")
+            if (!req.session.username) return res.status(403).send("Unauthorized")
             const favorite = await sql.favorite.favorite(Number(postID), req.session.username)
             res.status(200).send(favorite)
         } catch (e) {
@@ -47,12 +46,11 @@ const FavoriteRoutes = (app: Express) => {
         }
     })
 
-    app.post("/api/favorite/toggle", favoriteLimiter, async (req: Request, res: Response) => {
+    app.post("/api/favorite/toggle", authenticate, favoriteLimiter, async (req: Request, res: Response) => {
         try {
             const {postID} = req.body
-            if (!serverFunctions.validateCSRF(req)) return res.status(400).send("Bad CSRF token")
             if (Number.isNaN(Number(postID))) return res.status(400).send("Invalid postID")
-            if (!req.session.username) return res.status(401).send("Unauthorized")
+            if (!req.session.username) return res.status(403).send("Unauthorized")
             const favorite = await sql.favorite.favorite(Number(postID), req.session.username)
             if (favorite) {
                 await sql.favorite.deleteFavorite(favorite.favoriteID)

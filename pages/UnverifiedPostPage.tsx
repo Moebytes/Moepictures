@@ -23,8 +23,7 @@ import Parent from "../components/Parent"
 import NewTags from "../components/NewTags"
 import MobileInfo from "../components/MobileInfo"
 import {HideNavbarContext, HideSidebarContext, RelativeContext, DownloadFlagContext, DownloadIDsContext, HideTitlebarContext, MobileContext,
-UnverifiedPostsContext, TagsContext, HeaderTextContext, PostFlagContext, SidebarTextContext, SessionContext, EnableDragContext} from "../Context"
-import axios from "axios"
+UnverifiedPostsContext, TagsContext, HeaderTextContext, PostFlagContext, SidebarTextContext, SessionContext, EnableDragContext, SessionFlagContext} from "../Context"
 import permissions from "../structures/Permissions"
 import "./styles/postpage.less"
 
@@ -46,6 +45,7 @@ const UnverifiedPostPage: React.FunctionComponent<Props> = (props) => {
     const {headerText, setHeaderText} = useContext(HeaderTextContext)
     const {sidebarText, setSidebarText} = useContext(SidebarTextContext)
     const {session, setSession} = useContext(SessionContext)
+    const {sessionFlag, setSessionFlag} = useContext(SessionFlagContext)
     const {mobile, setMobile} = useContext(MobileContext)
     const {postFlag, setPostFlag} = useContext(PostFlagContext)
     const [images, setImages] = useState([]) as any
@@ -57,16 +57,8 @@ const UnverifiedPostPage: React.FunctionComponent<Props> = (props) => {
     const history = useHistory()
     const postID = props?.match.params.id
 
-    const refreshCache = async () => {
-        try {
-            await axios.post(image, null, {withCredentials: true})
-        } catch {
-            // ignore
-        }
-    }
-
     useEffect(() => {
-        if (image) refreshCache()
+        if (image) functions.refreshCache(image)
     }, [image])
 
     useEffect(() => {
@@ -93,7 +85,7 @@ const UnverifiedPostPage: React.FunctionComponent<Props> = (props) => {
 
     const updateThirdParty = async () => {
         if (post) {
-            const thirdPartyPosts = await axios.get("/api/post/thirdparty/unverified", {params: {postID: post.postID}, withCredentials: true}).then((r) => r.data)
+            const thirdPartyPosts = await functions.get("/api/post/thirdparty/unverified", {postID: post.postID}, session, setSessionFlag)
             if (thirdPartyPosts?.[0]) {
                 setThirdPartyPosts(thirdPartyPosts)
             } else {
@@ -104,7 +96,7 @@ const UnverifiedPostPage: React.FunctionComponent<Props> = (props) => {
 
     const updateParent = async () => {
         if (post) {
-            const parentPost = await axios.get("/api/post/parent/unverified", {params: {postID: post.postID}, withCredentials: true}).then((r) => r.data)
+            const parentPost = await functions.get("/api/post/parent/unverified", {postID: post.postID}, session, setSessionFlag)
             if (parentPost) {
                 setParentPost(parentPost)
             } else {
@@ -125,18 +117,18 @@ const UnverifiedPostPage: React.FunctionComponent<Props> = (props) => {
         updatePost()
         updateThirdParty()
         updateParent()
-    }, [post])
+    }, [post, session])
 
     useEffect(() => {
         const updatePost = async () => {
             let post = unverifiedPosts.find((p: any) => p.postID === postID)
-            if (!post?.tags) post = await axios.get("/api/post/unverified", {params: {postID}, withCredentials: true}).then((r) => r.data)
+            if (!post?.tags) post = await functions.get("/api/post/unverified", {postID}, session, setSessionFlag)
             if (post) {
                 const images = post.images.map((i: any) => functions.getUnverifiedImageLink(i.type, post.postID, i.order, i.filename))
                 setImages(images)
                 setImage(images[0])
                 const tags = await functions.parseTagsUnverified([post])
-                const categories = await functions.tagCategories(tags)
+                const categories = await functions.tagCategories(tags, session, setSessionFlag)
                 setTagCategories(categories)
                 setTags(tags)
                 setPost(post)
@@ -145,18 +137,18 @@ const UnverifiedPostPage: React.FunctionComponent<Props> = (props) => {
             }
         }
         updatePost()
-    }, [postID, unverifiedPosts])
+    }, [postID, unverifiedPosts, session])
 
     useEffect(() => {
         const updatePost = async () => {
             setPostFlag(false)
-            let post = await axios.get("/api/post/unverified", {params: {postID}, withCredentials: true}).then((r) => r.data)
+            let post = await functions.get("/api/post/unverified", {postID}, session, setSessionFlag)
             if (post) {
                 const images = post.images.map((i: any) => functions.getUnverifiedImageLink(i.type, post.postID, i.order, i.filename))
                 setImages(images)
                 setImage(images[0])
                 const tags = await functions.parseTagsUnverified([post])
-                const categories = await functions.tagCategories(tags)
+                const categories = await functions.tagCategories(tags, session, setSessionFlag)
                 setTagCategories(categories)
                 setTags(tags)
                 setPost(post)
@@ -165,7 +157,7 @@ const UnverifiedPostPage: React.FunctionComponent<Props> = (props) => {
             }
         }
         if (postFlag) updatePost()
-    }, [postFlag])
+    }, [postFlag, session])
 
     const download = () => {
         setDownloadIDs([postID])

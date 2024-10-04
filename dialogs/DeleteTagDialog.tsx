@@ -2,12 +2,11 @@ import React, {useEffect, useContext, useState, useRef} from "react"
 import {useHistory} from "react-router-dom"
 import {HashLink as Link} from "react-router-hash-link"
 import {HideNavbarContext, HideSidebarContext, ThemeContext, EnableDragContext, DeleteTagIDContext, DeleteTagFlagContext, HideTitlebarContext,
-SessionContext} from "../Context"
+SessionContext, SessionFlagContext} from "../Context"
 import functions from "../structures/Functions"
 import "./styles/dialog.less"
 import Draggable from "react-draggable"
 import permissions from "../structures/Permissions"
-import axios from "axios"
 
 const DeleteTagDialog: React.FunctionComponent = (props) => {
     const {theme, setTheme} = useContext(ThemeContext)
@@ -18,6 +17,7 @@ const DeleteTagDialog: React.FunctionComponent = (props) => {
     const {deleteTagID, setDeleteTagID} = useContext(DeleteTagIDContext)
     const {deleteTagFlag, setDeleteTagFlag} = useContext(DeleteTagFlagContext)
     const {session, setSession} = useContext(SessionContext)
+    const {sessionFlag, setSessionFlag} = useContext(SessionFlagContext)
     const [reason, setReason] = useState("")
     const [submitted, setSubmitted] = useState(false)
     const [error, setError] = useState(false)
@@ -52,7 +52,7 @@ const DeleteTagDialog: React.FunctionComponent = (props) => {
                 setError(false)
                 return
             }
-            await axios.post("/api/tag/delete/request", {tag: deleteTagID, reason}, {headers: {"x-csrf-token": functions.getCSRFToken()}, withCredentials: true})
+            await functions.post("/api/tag/delete/request", {tag: deleteTagID, reason}, session, setSessionFlag)
             setSubmitted(true)
         }
     }

@@ -40,6 +40,106 @@ export default class Functions {
     public static getCSRFToken = () => {
         return csrfToken
     }
+
+    public static fetch = async (link: string, headers?: any) => {
+        return axios.get(link, {headers}).then((r) => r.data) as Promise<any>
+    }
+
+    public static getBuffer = async (link: string, headers?: any) => {
+        return axios.get(link, {responseType: "arraybuffer", withCredentials: true, headers}).then((r) => r.data) as Promise<Buffer>
+    }
+
+    public static refreshCache = async (image: any) => {
+        try {
+           await axios.post(image, null, {withCredentials: true})
+        } catch {
+            // ignore
+        }
+    }
+
+    public static get = async (endpoint: string, params: any, session: any, setSessionFlag: (value: boolean) => void) => {
+        const headers = {"x-csrf-token": csrfToken} as any
+        if (session?.accessToken) headers.Authorization = `Bearer ${session.accessToken}`
+        try {
+            const response = await axios.get(endpoint, {params, headers, withCredentials: true}).then((r) => r.data)
+            return response
+        } catch (err: any) {
+            if (err.response?.status === 401) {
+                try {
+                    const accessToken = axios.get("/refresh-token", {headers, withCredentials: true}).then((r) => r.data.accessToken)
+                    headers.Authorization = `Bearer ${accessToken}`
+                    setSessionFlag(true)
+                    return axios.get(endpoint, {params, headers, withCredentials: true}).then((r) => r.data)
+                } catch {
+                    await axios.post("/api/user/logout", null, {withCredentials: true})
+                    setSessionFlag(true)
+                }
+            }
+        }
+    }
+
+    public static post = async (endpoint: string, data: any, session: any, setSessionFlag: (value: boolean) => void) => {
+        const headers = {"x-csrf-token": csrfToken} as any
+        if (session?.accessToken) headers.Authorization = `Bearer ${session.accessToken}`
+        try {
+            const response = await axios.post(endpoint, data, {headers, withCredentials: true}).then((r) => r.data)
+            return response
+        } catch (err: any) {
+            if (err.response?.status === 401) {
+                try {
+                    const accessToken = axios.get("/refresh-token", {headers, withCredentials: true}).then((r) => r.data.accessToken)
+                    headers.Authorization = `Bearer ${accessToken}`
+                    setSessionFlag(true)
+                    return axios.post(endpoint, data, {headers, withCredentials: true}).then((r) => r.data)
+                } catch {
+                    await axios.post("/api/user/logout", null, {withCredentials: true})
+                    setSessionFlag(true)
+                }
+            }
+        }
+    }
+
+    public static put = async (endpoint: string, data: any, session: any, setSessionFlag: (value: boolean) => void) => {
+        const headers = {"x-csrf-token": csrfToken} as any
+        if (session?.accessToken) headers.Authorization = `Bearer ${session.accessToken}`
+        try {
+            const response = await axios.put(endpoint, data, {headers, withCredentials: true}).then((r) => r.data)
+            return response
+        } catch (err: any) {
+            if (err.response?.status === 401) {
+                try {
+                    const accessToken = axios.get("/refresh-token", {headers, withCredentials: true}).then((r) => r.data.accessToken)
+                    headers.Authorization = `Bearer ${accessToken}`
+                    setSessionFlag(true)
+                    return axios.put(endpoint, data, {headers, withCredentials: true}).then((r) => r.data)
+                } catch {
+                    await axios.post("/api/user/logout", null, {withCredentials: true})
+                    setSessionFlag(true)
+                }
+            }
+        }
+    }
+
+    public static delete = async (endpoint: string, params: any, session: any, setSessionFlag: (value: boolean) => void) => {
+        const headers = {"x-csrf-token": csrfToken} as any
+        if (session?.accessToken) headers.Authorization = `Bearer ${session.accessToken}`
+        try {
+            const response = await axios.delete(endpoint, {params, headers, withCredentials: true}).then((r) => r.data)
+            return response
+        } catch (err: any) {
+            if (err.response?.status === 401) {
+                try {
+                    const accessToken = axios.get("/refresh-token", {headers, withCredentials: true}).then((r) => r.data.accessToken)
+                    headers.Authorization = `Bearer ${accessToken}`
+                    setSessionFlag(true)
+                    return axios.delete(endpoint, {params, headers, withCredentials: true}).then((r) => r.data)
+                } catch {
+                    await axios.post("/api/user/logout", null, {withCredentials: true})
+                    setSessionFlag(true)
+                }
+            }
+        }
+    }
     
     public static isSafari = () => {
         // @ts-ignore
@@ -67,9 +167,9 @@ export default class Functions {
         return Functions.decodeEntities(str).replace(/<\/?[^>]+(>|$)/g, "")
     }
     
-    public static proxyImage = async (link: string) => {
+    public static proxyImage = async (link: string, session: any, setSessionFlag: (value: boolean) => void) => {
         try {
-            const response = await axios.get(`/api/misc/proxy?url=${link}`, {withCredentials: true, responseType: "arraybuffer"}).then((r) => r.data)
+            const response = await Functions.get(`/api/misc/proxy?url=${link}`, null, session, setSessionFlag)
             const blob = new Blob([new Uint8Array(response)])
             const file = new File([blob], path.basename(link))
             return file
@@ -1214,9 +1314,9 @@ export default class Functions {
         return response !== 404
     }
 
-    public static parseTagsSingle = async (post: any) => {
-        if (!post.tags) return Functions.parseTags([post])
-        let tagMap = await Functions.tagsCache()
+    public static parseTagsSingle = async (post: any, session: any, setSessionFlag: (value: boolean) => void) => {
+        if (!post.tags) return Functions.parseTags([post], session, setSessionFlag)
+        let tagMap = await Functions.tagsCache(session, setSessionFlag)
         let result = [] as any
         for (let i = 0; i < post.tags.length; i++) {
             const tag = post.tags[i]
@@ -1225,10 +1325,10 @@ export default class Functions {
         return result
     }
 
-    public static parseTags = async (posts: any) => {
+    public static parseTags = async (posts: any, session: any, setSessionFlag: (value: boolean) => void) => {
         let cleanPosts = posts.filter((p: any) => !p.fake)
         const postIDs = cleanPosts.map((post: any) => post.postID)
-        let result = await axios.post("/api/search/sidebartags", {postIDs}, {withCredentials: true}).then((r) => r.data).catch(() => null)
+        let result = await Functions.post("/api/search/sidebartags", {postIDs}, session, setSessionFlag).catch(() => null)
         return result ? result : []
     }
 
@@ -1242,8 +1342,8 @@ export default class Functions {
         return result
     }
 
-    public static tagCategories = async (parsedTags: any[], cache?: boolean) => {
-        let tagMap = cache ? await Functions.tagsCache() : await axios.get("/api/tag/map", {params: {tags: parsedTags.map((t: any) => t.tag)}, withCredentials: true}).then((r) => r.data)
+    public static tagCategories = async (parsedTags: any[], session: any, setSessionFlag: (value: boolean) => void, cache?: boolean) => {
+        let tagMap = cache ? await Functions.tagsCache(session, setSessionFlag) : await Functions.get("/api/tag/map", {tags: parsedTags.map((t: any) => t.tag)}, session, setSessionFlag)
         let artists = [] as any 
         let characters = [] as any 
         let series = [] as any 
@@ -1251,7 +1351,7 @@ export default class Functions {
         for (let i = 0; i < parsedTags.length; i++) {
             const foundTag = tagMap[parsedTags[i].tag]
             if (!foundTag) {
-                const unverifiedTag = await axios.get("/api/tag/unverified", {params: {tag: parsedTags[i].tag}, withCredentials: true}).then((r) => r.data)
+                const unverifiedTag = await Functions.get("/api/tag/unverified", {tag: parsedTags[i].tag}, session, setSessionFlag)
                 if (unverifiedTag) {
                     const obj = {} as any 
                     obj.tag = parsedTags[i].tag 
@@ -1298,12 +1398,12 @@ export default class Functions {
         return {artists, characters, series, tags}
     }
 
-    public static tagsCache = async () => {
+    public static tagsCache = async (session: any, setSessionFlag: (value: boolean) => void) => {
         const cache = await localforage.getItem("tags")
         if (cache) {
             return JSON.parse(cache as any)
         } else {
-            let tagMap = await axios.get("/api/tag/map", {withCredentials: true}).then((r) => r.data)
+            let tagMap = await Functions.get("/api/tag/map", null, session, setSessionFlag)
             localforage.setItem("tags", JSON.stringify(tagMap))
             return tagMap
         }
@@ -1480,7 +1580,7 @@ export default class Functions {
         }
     }
 
-    public static imageSearch = async (file: File) => {
+    public static imageSearch = async (file: File, session: any, setSessionFlag: (value: boolean) => void) => {
         const fileReader = new FileReader()
         return new Promise<any>((resolve) => {
             fileReader.onloadend = async (f: any) => {
@@ -1506,7 +1606,7 @@ export default class Functions {
                         const thumbnail = await Functions.videoThumbnail(url)
                         bytes = await Functions.base64toUint8Array(thumbnail)
                     }
-                    const similar = await axios.post("/api/search/similar", {bytes: Object.values(bytes), type: result.typename}, {withCredentials: true}).then((r) => r.data)
+                    const similar = await Functions.post("/api/search/similar", {bytes: Object.values(bytes), type: result.typename}, session, setSessionFlag)
                     resolve(similar)
                 }
             }
@@ -1626,10 +1726,10 @@ export default class Functions {
         return maxIndex
     }
 
-    public static parseSpaceEnabledSearch = async (query: string) => {
+    public static parseSpaceEnabledSearch = async (query: string, session: any, setSessionFlag: (value: boolean) => void) => {
         if (!query) return query
         if (query.split(/ +/g).length > 10) return query
-        let savedTags = await Functions.tagsCache()
+        let savedTags = await Functions.tagsCache(session, setSessionFlag)
         let permutations = Functions.permutations(query)
         let matchesArray = new Array(permutations.length).fill(0)
         let specialFlagsArray = new Array(permutations.length).fill("")

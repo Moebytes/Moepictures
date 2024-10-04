@@ -7,7 +7,6 @@ import NavBar from "../components/NavBar"
 import SideBar from "../components/SideBar"
 import DragAndDrop from "../components/DragAndDrop"
 import functions from "../structures/Functions"
-import axios from "axios"
 import {HideNavbarContext, HideSidebarContext, ThemeContext, EnableDragContext, RedirectContext,
 RelativeContext, HideTitlebarContext, HeaderTextContext, SidebarTextContext, SessionContext, MobileContext,
 SessionFlagContext, SiteHueContext, SiteLightnessContext, SiteSaturationContext} from "../Context"
@@ -48,7 +47,7 @@ const VerifyEmailPage: React.FunctionComponent = (props) => {
     }
 
     const updateCaptcha = async () => {
-        const captcha = await axios.get("/api/misc/captcha/create", {params: {color: getCaptchaColor()}, withCredentials: true}).then((r) => r.data)
+        const captcha = await functions.get("/api/misc/captcha/create", {color: getCaptchaColor()}, session, setSessionFlag)
         setCaptcha(captcha)
         setCaptchaResponse("")
     }
@@ -103,7 +102,7 @@ const VerifyEmailPage: React.FunctionComponent = (props) => {
         if (!errorRef.current) await functions.timeout(20)
         errorRef.current!.innerText = "Submitting..."
         try {
-            await axios.post("/api/user/verifyemail", {email, captchaResponse}, {headers: {"x-csrf-token": functions.getCSRFToken()}, withCredentials: true})
+            await functions.post("/api/user/verifyemail", {email, captchaResponse}, session, setSessionFlag)
             setSubmitted(true)
             setSessionFlag(true)
             setError(false)

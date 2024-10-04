@@ -1,4 +1,4 @@
-import React, {useContext, useEffect, useState} from "react"
+import React, {useContext, useState} from "react"
 import {ThemeContext, HideSidebarContext, HideNavbarContext, HideTitlebarContext, SiteHueContext, SiteLightnessContext, SiteSaturationContext,
 SearchContext, SearchFlagContext, ImageTypeContext, RestrictTypeContext, StyleTypeContext, SortTypeContext, MobileContext} from "../Context"
 import {HashLink as Link} from "react-router-hash-link"

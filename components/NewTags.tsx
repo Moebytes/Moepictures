@@ -1,9 +1,8 @@
 import React, {useContext, useEffect, useRef, useState, useReducer} from "react"
 import {useHistory} from "react-router-dom"
-import {ThemeContext, SessionContext} from "../Context"
+import {ThemeContext, SessionContext, SessionFlagContext} from "../Context"
 import functions from "../structures/Functions"
 import "./styles/newtags.less"
-import axios from "axios"
 
 interface Props {
     post: any
@@ -12,13 +11,14 @@ interface Props {
 const NewTags: React.FunctionComponent<Props> = (props) => {
     const {theme, setTheme} = useContext(ThemeContext)
     const {session, setSession} = useContext(SessionContext)
+    const {sessionFlag, setSessionFlag} = useContext(SessionFlagContext)
     const [rawNewTags, setRawNewTags] = useState([]) as any
     const [newTags, setNewTags] = useState([]) as any
     const history = useHistory()
 
     const updateNewTags = async () => {
         if (!rawNewTags.length) return setNewTags([])
-        const tags = await axios.get("/api/tag/list/unverified", {params: {tags: rawNewTags}, withCredentials: true}).then((r) => r.data)
+        const tags = await functions.get("/api/tag/list/unverified", {tags: rawNewTags}, session, setSessionFlag)
         setNewTags(tags)
     }
 
@@ -27,7 +27,7 @@ const NewTags: React.FunctionComponent<Props> = (props) => {
     }, [rawNewTags])
 
     const updateRawNewTags = async () => {
-        const tagMap = await functions.tagsCache()
+        const tagMap = await functions.tagsCache(session, setSessionFlag)
         let notExists = [] as any
         for (let i = 0; i < props.post.tags.length; i++) {
             const exists = tagMap[props.post.tags[i]]
@@ -42,7 +42,7 @@ const NewTags: React.FunctionComponent<Props> = (props) => {
 
     useEffect(() => {
         updateRawNewTags()
-    }, [props.post])
+    }, [props.post, session])
 
     const generateTagsJSX = () => {
         let jsx = [] as any

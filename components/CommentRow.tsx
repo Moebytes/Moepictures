@@ -3,7 +3,7 @@ import {useHistory} from "react-router-dom"
 import {ThemeContext, QuoteTextContext, SessionContext, DeleteCommentIDContext, DeleteCommentFlagContext, MobileContext,
 EditCommentFlagContext, EditCommentIDContext, EditCommentTextContext, ReportCommentIDContext, BrightnessContext, ContrastContext, 
 HueContext, SaturationContext, LightnessContext, BlurContext, SharpenContext, PixelateContext, SiteHueContext, SiteLightnessContext,
-SiteSaturationContext, CommentIDContext, CommentJumpFlagContext} from "../Context"
+SiteSaturationContext, CommentIDContext, CommentJumpFlagContext, SessionFlagContext} from "../Context"
 import {HashLink as Link} from "react-router-hash-link"
 import functions from "../structures/Functions"
 import permissions from "../structures/Permissions"
@@ -18,7 +18,6 @@ import modCrown from "../assets/icons/mod-crown.png"
 import systemCrown from "../assets/icons/system-crown.png"
 import jsxFunctions from "../structures/JSXFunctions"
 import "./styles/commentrow.less"
-import axios from "axios"
 
 interface Props {
     comment: any
@@ -35,6 +34,7 @@ const CommentRow: React.FunctionComponent<Props> = (props) => {
     const {quoteText, setQuoteText} = useContext(QuoteTextContext)
     const {mobile, setMobile} = useContext(MobileContext)
     const {session, setSession} = useContext(SessionContext)
+    const {sessionFlag, setSessionFlag} = useContext(SessionFlagContext)
     const {brightness, setBrightness} = useContext(BrightnessContext)
     const {contrast, setContrast} = useContext(ContrastContext)
     const {hue, setHue} = useContext(HueContext)
@@ -133,7 +133,7 @@ const CommentRow: React.FunctionComponent<Props> = (props) => {
     }
 
     const deleteComment = async () => {
-        await axios.delete("/api/comment/delete", {params: {commentID: props.comment?.commentID}, headers: {"x-csrf-token": functions.getCSRFToken()}, withCredentials: true})
+        await functions.delete("/api/comment/delete", {commentID: props.comment?.commentID}, session, setSessionFlag)
         props.onDelete?.()
     }
 
@@ -143,7 +143,7 @@ const CommentRow: React.FunctionComponent<Props> = (props) => {
             setDeleteCommentFlag(false)
             setDeleteCommentID(null)
         }
-    }, [deleteCommentFlag])
+    }, [deleteCommentFlag, session])
 
     const deleteCommentDialog = async () => {
         setDeleteCommentID(props.comment?.commentID)
@@ -153,7 +153,7 @@ const CommentRow: React.FunctionComponent<Props> = (props) => {
         if (!editCommentText) return
         const badComment = functions.validateComment(editCommentText)
         if (badComment) return
-        await axios.put("/api/comment/edit", {commentID: props.comment?.commentID, comment: editCommentText}, {headers: {"x-csrf-token": functions.getCSRFToken()}, withCredentials: true})
+        await functions.put("/api/comment/edit", {commentID: props.comment?.commentID, comment: editCommentText}, session, setSessionFlag)
         props.onEdit?.()
     }
 
@@ -163,7 +163,7 @@ const CommentRow: React.FunctionComponent<Props> = (props) => {
             setEditCommentFlag(false)
             setEditCommentID(null)
         }
-    }, [editCommentFlag])
+    }, [editCommentFlag, session])
 
     const editCommentDialog = async () => {
         setEditCommentText(props.comment?.comment)

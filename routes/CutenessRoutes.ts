@@ -3,7 +3,7 @@ import rateLimit from "express-rate-limit"
 import slowDown from "express-slow-down"
 import sql from "../sql/SQLQuery"
 import functions from "../structures/Functions"
-import serverFunctions from "../structures/ServerFunctions"
+import serverFunctions, {authenticate} from "../structures/ServerFunctions"
 
 const cutenessLimiter = rateLimit({
 	windowMs: 5 * 60 * 1000,
@@ -14,12 +14,11 @@ const cutenessLimiter = rateLimit({
 })
 
 const CutenessRoutes = (app: Express) => {
-    app.post("/api/cuteness/update", cutenessLimiter, async (req: Request, res: Response) => {
+    app.post("/api/cuteness/update", authenticate, cutenessLimiter, async (req: Request, res: Response) => {
         try {
             const {postID, cuteness} = req.body
-            if (!serverFunctions.validateCSRF(req)) return res.status(400).send("Bad CSRF token")
             if (Number.isNaN(Number(postID)) || Number.isNaN(Number(cuteness))) return res.status(400).send("Bad postID or cuteness")
-            if (!req.session.username) return res.status(401).send("Unauthorized")
+            if (!req.session.username) return res.status(403).send("Unauthorized")
             if (Number(cuteness) < 0 || Number(cuteness) > 1000) return res.status(400).send("Cuteness range must be between 0 and 1000")
             const cute = await sql.cuteness.cuteness(Number(postID), req.session.username)
             if (cute) {
@@ -38,7 +37,7 @@ const CutenessRoutes = (app: Express) => {
         try {
             const postID = req.query.postID
             if (Number.isNaN(Number(postID))) return res.status(400).send("Invalid postID")
-            if (!req.session.username) return res.status(401).send("Unauthorized")
+            if (!req.session.username) return res.status(403).send("Unauthorized")
             const cuteness = await sql.cuteness.cuteness(Number(postID), req.session.username)
             res.status(200).send(cuteness)
         } catch (e) {
@@ -47,12 +46,11 @@ const CutenessRoutes = (app: Express) => {
         }
     })
 
-    app.delete("/api/cuteness/delete", cutenessLimiter, async (req: Request, res: Response) => {
+    app.delete("/api/cuteness/delete", authenticate, cutenessLimiter, async (req: Request, res: Response) => {
         try {
             const postID = req.query.postID
-            if (!serverFunctions.validateCSRF(req)) return res.status(400).send("Bad CSRF token")
             if (Number.isNaN(Number(postID))) return res.status(400).send("Invalid postID")
-            if (!req.session.username) return res.status(401).send("Unauthorized")
+            if (!req.session.username) return res.status(403).send("Unauthorized")
             const cuteness = await sql.cuteness.cuteness(Number(postID), req.session.username)
             if (!cuteness) return res.status(400).send("Cuteness doesn't exist")
             await sql.cuteness.deleteCuteness(cuteness.cutenessID)

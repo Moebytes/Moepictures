@@ -3,7 +3,7 @@ import {useHistory} from "react-router-dom"
 import {ThemeContext, SearchContext, SearchFlagContext, DeleteTagFlagContext, DeleteTagIDContext, MobileContext, EditTagTypeContext, EditTagReasonContext,
 EditTagSocialContext, EditTagTwitterContext, EditTagWebsiteContext, EditTagFandomContext, EditTagAliasesContext, EditTagImplicationsContext, 
 EditTagDescriptionContext, EditTagIDContext, EditTagFlagContext, EditTagPixivTagsContext, SessionContext, EditTagImageContext, EditTagKeyContext, AliasTagFlagContext, 
-AliasTagIDContext, AliasTagNameContext} from "../Context"
+AliasTagIDContext, AliasTagNameContext, SessionFlagContext} from "../Context"
 import {HashLink as Link} from "react-router-hash-link"
 import functions from "../structures/Functions"
 import alias from "../assets/icons/alias.png"
@@ -17,7 +17,6 @@ import soundcloud from "../assets/icons/soundcloud.png"
 import sketchfab from "../assets/icons/sketchfab.png"
 import twitter from "../assets/icons/twitter.png"
 import "./styles/tagrow.less"
-import axios from "axios"
 
 interface Props {
     tag: any
@@ -51,6 +50,7 @@ const TagRow: React.FunctionComponent<Props> = (props) => {
     const {aliasTagFlag, setAliasTagFlag} = useContext(AliasTagFlagContext)
     const {aliasTagName, setAliasTagName} = useContext(AliasTagNameContext)
     const {session, setSession} = useContext(SessionContext)
+    const {sessionFlag, setSessionFlag} = useContext(SessionFlagContext)
     const history = useHistory()
 
     const searchTag = (event: React.MouseEvent) => {
@@ -88,7 +88,7 @@ const TagRow: React.FunctionComponent<Props> = (props) => {
     }
 
     const deleteTag = async () => {
-        await axios.delete("/api/tag/delete", {params: {tag: props.tag.tag}, headers: {"x-csrf-token": functions.getCSRFToken()}, withCredentials: true})
+        await functions.delete("/api/tag/delete", {tag: props.tag.tag}, session, setSessionFlag)
         props.onDelete?.()
     }
 
@@ -98,18 +98,10 @@ const TagRow: React.FunctionComponent<Props> = (props) => {
             setDeleteTagFlag(false)
             setDeleteTagID(null)
         }
-    }, [deleteTagFlag])
+    }, [deleteTagFlag, session])
 
     const deleteTagDialog = async () => {
         setDeleteTagID(props.tag.tag)
-    }
-
-    const refreshCache = async (image: any) => {
-        try {
-           await axios.post(image, null, {withCredentials: true})
-        } catch {
-            // ignore
-        }
     }
 
     const editTag = async () => {
@@ -123,10 +115,10 @@ const TagRow: React.FunctionComponent<Props> = (props) => {
                 image = Object.values(bytes)
             }
         }
-        await axios.put("/api/tag/edit", {tag: props.tag.tag, key: editTagKey, description: editTagDescription,
+        await functions.put("/api/tag/edit", {tag: props.tag.tag, key: editTagKey, description: editTagDescription,
         image, aliases: editTagAliases, implications: editTagImplications, pixivTags: editTagPixivTags, social: editTagSocial, twitter: editTagTwitter,
-        website: editTagWebsite, fandom: editTagFandom, reason: editTagReason}, {headers: {"x-csrf-token": functions.getCSRFToken()}, withCredentials: true})
-        if (editTagImage) refreshCache(editTagImage)
+        website: editTagWebsite, fandom: editTagFandom, reason: editTagReason}, session, setSessionFlag)
+        if (editTagImage) functions.refreshCache(editTagImage)
         props.onEdit?.()
     }
 
@@ -136,7 +128,7 @@ const TagRow: React.FunctionComponent<Props> = (props) => {
             setEditTagFlag(false)
             setEditTagID(null)
         }
-    }, [editTagFlag])
+    }, [editTagFlag, session])
 
     const editTagDialog = async () => {
         setEditTagKey(props.tag.tag)
@@ -155,7 +147,7 @@ const TagRow: React.FunctionComponent<Props> = (props) => {
     }
 
     const aliasTag = async () => {
-        await axios.post("/api/tag/aliasto", {tag: props.tag.tag, aliasTo: aliasTagName}, {headers: {"x-csrf-token": functions.getCSRFToken()}, withCredentials: true})
+        await functions.post("/api/tag/aliasto", {tag: props.tag.tag, aliasTo: aliasTagName}, session, setSessionFlag)
         props.onEdit?.()
     }
 
@@ -165,7 +157,7 @@ const TagRow: React.FunctionComponent<Props> = (props) => {
             setAliasTagFlag(false)
             setAliasTagID(null)
         }
-    }, [aliasTagFlag])
+    }, [aliasTagFlag, session])
 
     const aliasTagDialog = async () => {
         setAliasTagName("")

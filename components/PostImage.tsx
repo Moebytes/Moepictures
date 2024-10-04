@@ -46,7 +46,6 @@ import {TransformWrapper, TransformComponent} from "react-zoom-pan-pinch"
 import path from "path"
 import "./styles/postimage.less"
 import mime from "mime-types"
-import axios from "axios"
 const ffmpeg = createFFmpeg()
 
 interface Props {
@@ -1226,7 +1225,7 @@ const PostImage: React.FunctionComponent<Props> = (props) => {
     }
 
     const toggleUpscale = async () => {
-        await axios.post("/api/user/upscaledimages", null, {headers: {"x-csrf-token": functions.getCSRFToken()}, withCredentials: true})
+        await functions.post("/api/user/upscaledimages", null, session, setSessionFlag)
         setSessionFlag(true)
     }
 

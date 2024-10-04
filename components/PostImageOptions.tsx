@@ -1,7 +1,7 @@
 import React, {useContext, useEffect, useRef, useState} from "react"
 import {ThemeContext, EnableDragContext, BrightnessContext, ContrastContext, HueContext, SaturationContext, LightnessContext,
 BlurContext, SharpenContext, PixelateContext, SessionContext, MobileContext, TranslationModeContext, SiteHueContext,
-SiteLightnessContext, SiteSaturationContext} from "../Context"
+SiteLightnessContext, SiteSaturationContext, SessionFlagContext} from "../Context"
 import {HashLink as Link} from "react-router-hash-link"
 import functions from "../structures/Functions"
 import Slider from "react-slider"
@@ -20,7 +20,6 @@ import pixelateIcon from "../assets/icons/pixelate.png"
 import nextIcon from "../assets/icons/next.png"
 import prevIcon from "../assets/icons/prev.png"
 import "./styles/postimageoptions.less"
-import axios from "axios"
 
 interface Props {
     img?: string
@@ -50,6 +49,7 @@ const PostImageOptions: React.FunctionComponent<Props> = (props) => {
     const {sharpen, setSharpen} = useContext(SharpenContext)
     const {translationMode, setTranslationMode} = useContext(TranslationModeContext)
     const {session, setSession} = useContext(SessionContext)
+    const {sessionFlag, setSessionFlag} = useContext(SessionFlagContext)
     const {mobile, setMobile} = useContext(MobileContext)
     const [favorited, setFavorited] = useState(false)
     const [showFilterDropdown, setShowFilterDropdown] = useState(false)
@@ -97,13 +97,13 @@ const PostImageOptions: React.FunctionComponent<Props> = (props) => {
 
     const getFavorite = async () => {
         if (!props.post || !session.username) return
-        const favorite = await axios.get("/api/favorite", {params: {postID: props.post.postID}, withCredentials: true}).then((r) => r.data)
+        const favorite = await functions.get("/api/favorite", {postID: props.post.postID}, session, setSessionFlag)
         setFavorited(favorite ? true : false)
     }
 
     useEffect(() => {
         getFavorite()
-    }, [props.post])
+    }, [props.post, session])
 
     useEffect(() => {
         localStorage.setItem("brightness", brightness)
@@ -163,7 +163,7 @@ const PostImageOptions: React.FunctionComponent<Props> = (props) => {
 
     const updateFavorite = async (value: boolean) => {
         if (!props.post || !session.username) return
-        await axios.post("/api/favorite/update", {postID: props.post.postID, favorited: value}, {headers: {"x-csrf-token": functions.getCSRFToken()}, withCredentials: true})
+        await functions.post("/api/favorite/update", {postID: props.post.postID, favorited: value}, session, setSessionFlag)
         setFavorited(value)
     }
 

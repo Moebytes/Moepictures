@@ -2,13 +2,12 @@ import React, {useContext, useEffect, useRef, useState, useReducer} from "react"
 import {useHistory, useLocation} from "react-router-dom"
 import {ThemeContext, SizeTypeContext, PostAmountContext, PostsContext, ImageTypeContext, EnableDragContext,
 RestrictTypeContext, StyleTypeContext, SortTypeContext, SearchContext, SearchFlagContext, HeaderFlagContext,
-RandomFlagContext, ImageSearchFlagContext, SidebarTextContext, MobileContext, SessionContext, VisiblePostsContext,
+RandomFlagContext, ImageSearchFlagContext, SidebarTextContext, MobileContext, SessionContext, SessionFlagContext, VisiblePostsContext,
 ScrollYContext, ScrollContext, PageContext, AutoSearchContext, ShowPageDialogContext, PageFlagContext, ReloadPostFlagContext} from "../Context"
 import GridImage from "./GridImage"
 import GridModel from "./GridModel"
 import GridSong from "./GridSong"
 import noresults from "../assets/misc/noresults.png"
-import axios from "axios"
 import functions from "../structures/Functions"
 import permissions from "../structures/Permissions"
 import path from "path"
@@ -44,6 +43,7 @@ const ImageGrid: React.FunctionComponent<Props> = (props) => {
     const {headerFlag, setHeaderFlag} = useContext(HeaderFlagContext)
     const {mobile, setMobile} = useContext(MobileContext)
     const {session, setSession} = useContext(SessionContext)
+    const {sessionFlag, setSessionFlag} = useContext(SessionFlagContext)
     const [loaded, setLoaded] = useState(false)
     const [noResults, setNoResults] = useState(false)
     const [isRandomSearch, setIsRandomSearch] = useState(false)
@@ -82,9 +82,9 @@ const ImageGrid: React.FunctionComponent<Props> = (props) => {
         setEnded(false)
         setIndex(0)
         setVisiblePosts([])
-        if (!query) query = await functions.parseSpaceEnabledSearch(search)
+        if (!query) query = await functions.parseSpaceEnabledSearch(search, session, setSessionFlag)
         setSearch(query)
-        const result = await axios.get("/api/search/posts", {params: {query, type: imageType, restrict: restrictType, style: styleType, sort: sortType, limit: 1000}, withCredentials: true}).then((r) => r.data)
+        const result = await functions.get("/api/search/posts", {query, type: imageType, restrict: restrictType, style: styleType, sort: sortType, limit: 1000}, session, setSessionFlag)
         setHeaderFlag(true)
         setPosts(result)
         setIsRandomSearch(false)
@@ -97,7 +97,7 @@ const ImageGrid: React.FunctionComponent<Props> = (props) => {
 
     const randomPosts = async (query?: string) => {
         setRandomFlag(false)
-        const result = await axios.get("/api/search/random", {params: {query, type: imageType, restrict: restrictType, style: styleType, limit: 1000}, withCredentials: true}).then((r) => r.data)
+        const result = await functions.get("/api/search/random", {query, type: imageType, restrict: restrictType, style: styleType, limit: 1000}, session, setSessionFlag)
         setEnded(false)
         setIndex(0)
         setVisiblePosts([])
@@ -186,7 +186,7 @@ const ImageGrid: React.FunctionComponent<Props> = (props) => {
             }
         }
         if (!scroll) updatePageOffset()
-    }, [scroll, page, ended, noResults, sizeType, imageType, restrictType, styleType])
+    }, [session, scroll, page, ended, noResults, sizeType, imageType, restrictType, styleType])
 
     useEffect(() => {
         if (reloadedPost) {
@@ -196,8 +196,8 @@ const ImageGrid: React.FunctionComponent<Props> = (props) => {
             return
         }
         if (loaded) {
-            setPage(1)
-            searchPosts()
+            //setPage(1)
+            //searchPosts()
         }
     }, [searchFlag, imageType, sizeType, restrictType, styleType, sortType, scroll])
 
@@ -210,7 +210,7 @@ const ImageGrid: React.FunctionComponent<Props> = (props) => {
             setPage(1)
             randomPosts(search)
         }
-    }, [randomFlag, search])
+    }, [session, randomFlag, search])
 
     useEffect(() => {
         if (imageSearchFlag) {
@@ -266,10 +266,10 @@ const ImageGrid: React.FunctionComponent<Props> = (props) => {
         }
         let result = null as any
         if (isRandomSearch) {
-            result = await axios.get("/api/search/random", {params: {type: imageType, restrict: restrictType, style: styleType, limit: 1000, offset: newOffset}, withCredentials: true}).then((r) => r.data)
+            result = await functions.get("/api/search/random", {type: imageType, restrict: restrictType, style: styleType, limit: 1000, offset: newOffset}, session, setSessionFlag)
         } else {
-            const query = await functions.parseSpaceEnabledSearch(search)
-            result = await axios.get("/api/search/posts", {params: {query, type: imageType, restrict: restrictType, style: styleType, sort: sortType, limit: 1000, offset: newOffset}, withCredentials: true}).then((r) => r.data)
+            const query = await functions.parseSpaceEnabledSearch(search, session, setSessionFlag)
+            result = await functions.get("/api/search/posts", {query, type: imageType, restrict: restrictType, style: styleType, sort: sortType, limit: 1000, offset: newOffset}, session, setSessionFlag)
         }
         let hasMore = result?.length >= 1000
         const cleanPosts = posts.filter((p: any) => !p.fake)
@@ -316,7 +316,7 @@ const ImageGrid: React.FunctionComponent<Props> = (props) => {
             }
         }
         if (scroll) updatePosts()
-    }, [sizeType, scroll, sizeType, imageType, restrictType, styleType])
+    }, [session, sizeType, scroll, sizeType, imageType, restrictType, styleType])
 
     useEffect(() => {
         const scrollHandler = async () => {
@@ -339,7 +339,7 @@ const ImageGrid: React.FunctionComponent<Props> = (props) => {
         return () => {
             window.removeEventListener("scroll", scrollHandler)
         }
-    }, [posts, visiblePosts, ended, noResults, offset, scroll, sizeType, imageType, restrictType, styleType])
+    }, [session, posts, visiblePosts, ended, noResults, offset, scroll, sizeType, imageType, restrictType, styleType])
 
     useEffect(() => {
         if (search) {

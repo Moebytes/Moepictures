@@ -9,10 +9,9 @@ import TranslationHistoryRow from "../components/TranslationHistoryRow"
 import RevertTranslationHistoryDialog from "../dialogs/RevertTranslationHistoryDialog"
 import DeleteTranslationHistoryDialog from "../dialogs/DeleteTranslationHistoryDialog"
 import {ThemeContext, EnableDragContext, HideNavbarContext, HideSidebarContext, MobileContext, SessionContext,
-RelativeContext, HideTitlebarContext, ActiveDropdownContext, HeaderTextContext, SidebarTextContext} from "../Context"
+RelativeContext, HideTitlebarContext, ActiveDropdownContext, HeaderTextContext, SidebarTextContext, SessionFlagContext} from "../Context"
 import permissions from "../structures/Permissions"
 import "./styles/translationhistorypage.less"
-import axios from "axios"
 
 interface Props {
     match?: any
@@ -32,6 +31,7 @@ const TranslationHistoryPage: React.FunctionComponent<Props> = (props) => {
     const {sidebarText, setSidebarText} = useContext(SidebarTextContext)
     const {mobile, setMobile} = useContext(MobileContext)
     const {session, setSession} = useContext(SessionContext)
+    const {sessionFlag, setSessionFlag} = useContext(SessionFlagContext)
     const [revisions, setRevisions] = useState([]) as any
     const [index, setIndex] = useState(0)
     const [visibleRevisions, setVisibleRevisions] = useState([]) as any
@@ -43,12 +43,12 @@ const TranslationHistoryPage: React.FunctionComponent<Props> = (props) => {
     const updateHistory = async () => {
         let result = [] as any
         if (props.all) {
-            result = await axios.get("/api/translation/history", {withCredentials: true}).then((r) => r.data)
+            result = await functions.get("/api/translation/history", null, session, setSessionFlag)
         } else {
-            result = await axios.get("/api/translation/history", {params: {postID, order}, withCredentials: true}).then((r) => r.data)
+            result = await functions.get("/api/translation/history", {postID, order}, session, setSessionFlag)
         }
         if (!result.length) {
-            const post = await axios.get("/api/post", {params: {postID}, withCredentials: true}).then((r) => r.data)
+            const post = await functions.get("/api/post", {postID}, session, setSessionFlag)
             result = [{post, postID, order, updater: post.uploader, updatedDate: post.uploadDate, data: [{transcript: "No data"}]}]
         }
         setEnded(false)
@@ -59,7 +59,7 @@ const TranslationHistoryPage: React.FunctionComponent<Props> = (props) => {
 
     useEffect(() => {
         updateHistory()
-    }, [postID])
+    }, [postID, session])
 
     useEffect(() => {
         setHideNavbar(true)
@@ -95,7 +95,7 @@ const TranslationHistoryPage: React.FunctionComponent<Props> = (props) => {
     const updateOffset = async () => {
         if (ended) return
         const newOffset = offset + 100
-        const result = await axios.get("/api/translation/history", {params: {postID, order, offset: newOffset}, withCredentials: true}).then((r) => r.data)
+        const result = await functions.get("/api/translation/history", {postID, order, offset: newOffset}, session, setSessionFlag)
         if (result?.length) {
             setOffset(newOffset)
             setRevisions((prev: any) => [...prev, ...result])

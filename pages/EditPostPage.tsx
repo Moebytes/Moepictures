@@ -33,9 +33,8 @@ import PostSong from "../components/PostSong"
 import DragAndDrop from "../components/DragAndDrop"
 import CaptchaDialog from "../dialogs/CaptchaDialog"
 import {HideNavbarContext, HideSidebarContext, RelativeContext, UploadDropFilesContext, ThemeContext, EnableDragContext, HideTitlebarContext, BrightnessContext, ContrastContext, HueContext, SaturationContext, LightnessContext, MobileContext,
-BlurContext, SharpenContext, PixelateContext, HeaderTextContext, SessionContext, SidebarTextContext, RedirectContext, PostFlagContext, ShowUpscaledContext} from "../Context"
+BlurContext, SharpenContext, PixelateContext, HeaderTextContext, SessionContext, SidebarTextContext, RedirectContext, PostFlagContext, ShowUpscaledContext, SessionFlagContext} from "../Context"
 import JSZip from "jszip"
-import axios from "axios"
 import cryptoFunctions from "../structures/CryptoFunctions"
 import "./styles/editpostpage.less"
 import ContentEditable from "react-contenteditable"
@@ -70,6 +69,7 @@ const EditPostPage: React.FunctionComponent<Props> = (props) => {
     const {headerText, setHeaderText} = useContext(HeaderTextContext)
     const {sidebarText, setSidebarText} = useContext(SidebarTextContext)
     const {session, setSession} = useContext(SessionContext)
+    const {sessionFlag, setSessionFlag} = useContext(SessionFlagContext)
     const {redirect, setRedirect} = useContext(RedirectContext)
     const {mobile, setMobile} = useContext(MobileContext)
     const {showUpscaled, setShowUpscaled} = useContext(ShowUpscaledContext)
@@ -130,7 +130,7 @@ const EditPostPage: React.FunctionComponent<Props> = (props) => {
     const updateFields = async () => {
         let post = null as any 
         try {
-            post = await axios.get("/api/post", {params: {postID}, withCredentials: true}).then((r) => r.data)
+            post = await functions.get("/api/post", {postID}, session, setSessionFlag)
         } catch (e: any) {
             if (String(e).includes("401")) return
         }
@@ -147,7 +147,7 @@ const EditPostPage: React.FunctionComponent<Props> = (props) => {
         if (post.drawn) setSourceDate(functions.formatDate(new Date(post.drawn), true))
         setSourceLink(post.link || "")
         setSourceBookmarks(post.bookmarks || "")
-        const parentPost = await axios.get("/api/post/parent", {params: {postID}, withCredentials: true}).then((r) => r.data)
+        const parentPost = await functions.get("/api/post/parent", {postID}, session, setSessionFlag)
         if (parentPost) setThirdPartyID(parentPost.parentID)
 
         let files = [] as any
@@ -180,8 +180,8 @@ const EditPostPage: React.FunctionComponent<Props> = (props) => {
         await validate(files, links, false)
         validate(upscaledFiles, upscaledLinks, true)
 
-        const parsedTags = await functions.parseTags([post])
-        const tagCategories = await functions.tagCategories(parsedTags)
+        const parsedTags = await functions.parseTags([post], session, setSessionFlag)
+        const tagCategories = await functions.tagCategories(parsedTags, session, setSessionFlag)
 
         let artists = [{}] as any
         for (let i = 0; i < tagCategories.artists.length; i++) {
@@ -503,7 +503,7 @@ const EditPostPage: React.FunctionComponent<Props> = (props) => {
     }
 
     const handleTagClick = async (tag: string, index: number) => {
-        const tagDetail = await axios.get("/api/tag", {params: {tag}, withCredentials: true}).then((r) => r.data)
+        const tagDetail = await functions.get("/api/tag", {tag}, session, setSessionFlag)
         if (tagDetail.image) {
             const tagLink = functions.getTagLink(tagDetail.type, tagDetail.image)
             const arrayBuffer = await fetch(tagLink).then((r) => r.arrayBuffer())
@@ -802,7 +802,7 @@ const EditPostPage: React.FunctionComponent<Props> = (props) => {
         enterLinksTimer = setTimeout(async () => {
             let files = [] as any
             for (let i = 0; i < links.length; i++) {
-                const file = await functions.proxyImage(links[i])
+                const file = await functions.proxyImage(links[i], session, setSessionFlag)
                 files.push(file)
             }
             await validate(files, links)
@@ -945,13 +945,13 @@ const EditPostPage: React.FunctionComponent<Props> = (props) => {
         await functions.timeout(20)
         submitErrorRef.current.innerText = "Submitting..."
         try {
-            await axios.put("/api/post/edit", data, {headers: {"x-csrf-token": functions.getCSRFToken()}, withCredentials: true}).then((r) => r.data)
+            await functions.put("/api/post/edit", data, session, setSessionFlag)
             setSubmitted(true)
             return setSubmitError(false)
         } catch (err: any) {
             if (String(err)?.includes("403")) {
                 try {
-                    await axios.put("/api/post/edit/unverified", data, {headers: {"x-csrf-token": functions.getCSRFToken()}, withCredentials: true}).then((r) => r.data)
+                    await functions.put("/api/post/edit/unverified", data, session, setSessionFlag)
                     setNeedsPermission(true)
                     setSubmitted(true)
                 } catch (err: any) {
@@ -989,7 +989,7 @@ const EditPostPage: React.FunctionComponent<Props> = (props) => {
         }
         saucenaoTimeout = true
         try {
-            let results = await axios.post(`/api/misc/saucenao`, bytes, {withCredentials: true}).then((r) => r.data)
+            let results = await functions.post(`/api/misc/saucenao`, bytes, session, setSessionFlag)
             let link = ""
             let artist = ""
             let title = ""
@@ -1014,7 +1014,7 @@ const EditPostPage: React.FunctionComponent<Props> = (props) => {
                 if (deviantart.length) {
                     let redirectedLink = ""
                     try {
-                        redirectedLink = await axios.get(`/api/misc/redirect?url=${deviantart[0].data.ext_urls[0]}`, {withCredentials: true}).then((r) => r.data)
+                        redirectedLink = await functions.get(`/api/misc/redirect?url=${deviantart[0].data.ext_urls[0]}`, null, session, setSessionFlag)
                     } catch {
                         // ignore
                     }
@@ -1029,20 +1029,20 @@ const EditPostPage: React.FunctionComponent<Props> = (props) => {
                 if (pixiv.length) {
                     link = `https://www.pixiv.net/en/artworks/${pixiv[0].data.pixiv_id}`
                     if (!danbooru.length) {
-                        const result = await axios.get(`https://danbooru.donmai.us/posts.json?tags=pixiv_id%3A${pixiv[0].data.pixiv_id}`).then((r) => r.data)
+                        const result = await functions.fetch(`https://danbooru.donmai.us/posts.json?tags=pixiv_id%3A${pixiv[0].data.pixiv_id}`)
                         if (result.length) setDanbooruLink(`https://danbooru.donmai.us/posts/${result[0].id}.json`)
                     }
                     artist = pixiv[0].data.author_name
                     title = pixiv[0].data.title
                     try {
-                        const illust = await axios.get(`/api/misc/pixiv?url=${link}`, {withCredentials: true}).then((r: any) => r.data)
+                        const illust = await functions.get(`/api/misc/pixiv?url=${link}`, null, session, setSessionFlag)
                         commentary = `${functions.decodeEntities(illust.caption.replace(/<\/?[^>]+(>|$)/g, ""))}` 
                         date = functions.formatDate(new Date(illust.create_date), true)
                         link = illust.url 
                         title = illust.title
                         artist = illust.user.name
                         bookmarks = illust.total_bookmarks
-                        const translated = await axios.post("/api/misc/translate", [title, commentary], {withCredentials: true}).then((r) => r.data)
+                        const translated = await functions.post("/api/misc/translate", [title, commentary], session, setSessionFlag)
                         translatedTitle = translated[0]
                         translatedCommentary = translated[1]
                         if (illust.x_restrict !== 0) {
@@ -1050,8 +1050,8 @@ const EditPostPage: React.FunctionComponent<Props> = (props) => {
                         } else {
                             setRestrict("safe")
                         }
-                        const pfp = await functions.proxyImage(illust.user.profile_image_urls.medium)
-                        artists[artists.length - 1].tag = illust.user.twitter ? functions.fixTwitterTag(illust.user.twitter) : await axios.post("/api/misc/romajinize", [artist], {withCredentials: true}).then((r) => r.data[0])
+                        const pfp = await functions.proxyImage(illust.user.profile_image_urls.medium, session, setSessionFlag)
+                        artists[artists.length - 1].tag = illust.user.twitter ? functions.fixTwitterTag(illust.user.twitter) : await functions.post("/api/misc/romajinize", [artist], session, setSessionFlag).then((r) => r[0])
                         await uploadTagImg(pfp, "artist", artists.length - 1)
                         artists.push({})
                         artistInputRefs.push(React.createRef())
@@ -1065,7 +1065,7 @@ const EditPostPage: React.FunctionComponent<Props> = (props) => {
                 } else if (deviantart.length) {
                     let redirectedLink = ""
                     try {
-                        redirectedLink = await axios.get(`/api/misc/redirect?url=${deviantart[0].data.ext_urls[0]}`, {withCredentials: true}).then((r) => r.data)
+                        redirectedLink = await functions.get(`/api/misc/redirect?url=${deviantart[0].data.ext_urls[0]}`, null, session, setSessionFlag)
                     } catch {
                         // ignore
                     }
@@ -1073,7 +1073,7 @@ const EditPostPage: React.FunctionComponent<Props> = (props) => {
                     artist = deviantart[0].data.member_name 
                     title = deviantart[0].data.title
                     try {
-                        const deviation = await axios.get(`/api/misc/deviantart?url=${link}`, {withCredentials: true}).then((r: any) => r.data)
+                        const deviation = await functions.get(`/api/misc/deviantart?url=${link}`, null, session, setSessionFlag)
                         title = deviation.title
                         artist = deviation.author.user.username
                         link = deviation.url
@@ -1084,7 +1084,7 @@ const EditPostPage: React.FunctionComponent<Props> = (props) => {
                         } else {
                             setRestrict("safe")
                         }
-                        const pfp = await functions.proxyImage(deviation.author.user.usericon)
+                        const pfp = await functions.proxyImage(deviation.author.user.usericon, session, setSessionFlag)
                         artists[artists.length - 1].tag = artist
                         await uploadTagImg(pfp, "artist", artists.length - 1)
                         artists.push({})
@@ -1156,7 +1156,7 @@ const EditPostPage: React.FunctionComponent<Props> = (props) => {
 
         try {
         if (danbooruLink) {
-            const json = await axios.get(danbooruLink).then((r) => r.data)
+            const json = await functions.fetch(danbooruLink).then((r) => r.data)
             tagArr = json.tag_string_general.split(" ").map((tag: string) => tag.replaceAll("_", "-"))
             tagArr.push("autotags")
             let charStrArr = json.tag_string_character.split(" ").map((tag: string) => tag.replaceAll("_", "-"))
@@ -1206,7 +1206,7 @@ const EditPostPage: React.FunctionComponent<Props> = (props) => {
             } else {
                 bytes = Object.values(current.bytes) as any
             }
-            let tagArr = await axios.post(`/api/misc/wdtagger`, bytes, {withCredentials: true}).then((r) => r.data).catch(() => null)
+            let tagArr = await functions.post(`/api/misc/wdtagger`, bytes, session, setSessionFlag).catch(() => null)
             if (!tagArr) return
 
             if (tagArr.includes("chibi")) setStyle("chibi")
@@ -1277,14 +1277,14 @@ const EditPostPage: React.FunctionComponent<Props> = (props) => {
 
     useEffect(() => {
         updateTags()
-    }, [rawTags])
+    }, [rawTags, session])
 
     const updateTags = async () => {
         const tags = functions.removeDuplicates(functions.cleanHTML(rawTags).trim().split(/[\n\r\s]+/g).map((t) => t.trim().toLowerCase())) as string[]
         clearTimeout(tagsTimer)
         tagsTimer = setTimeout(async () => {
             if (!tags?.[0]) return setNewTags([])
-            const tagMap = await functions.tagsCache()
+            const tagMap = await functions.tagsCache(session, setSessionFlag)
             let notExists = [] as any
             for (let i = 0; i < tags.length; i++) {
                 const exists = tagMap[tags[i]]

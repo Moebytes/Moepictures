@@ -1,13 +1,12 @@
 import React, {useContext, useEffect, useState, useReducer} from "react"
 import {useHistory} from "react-router-dom"
-import {ThemeContext, SearchContext, SearchFlagContext, SiteHueContext, SiteLightnessContext, SiteSaturationContext} from "../Context"
+import {ThemeContext, SearchContext, SearchFlagContext, SessionContext, SessionFlagContext, SiteHueContext, SiteLightnessContext, SiteSaturationContext} from "../Context"
 import {HashLink as Link} from "react-router-hash-link"
 import approve from "../assets/icons/approve.png"
 import reject from "../assets/icons/reject.png"
 import tagDiff from "../assets/icons/tagdiff.png"
 import functions from "../structures/Functions"
 import "./styles/modposts.less"
-import axios from "axios"
 
 const ModTagEdits: React.FunctionComponent = (props) => {
     const [ignored, forceUpdate] = useReducer(x => x + 1, 0)
@@ -18,6 +17,8 @@ const ModTagEdits: React.FunctionComponent = (props) => {
     const [hover, setHover] = useState(false)
     const {search, setSearch} = useContext(SearchContext)
     const {searchFlag, setSearchFlag} = useContext(SearchFlagContext)
+    const {session, setSession} = useContext(SessionContext)
+    const {sessionFlag, setSessionFlag} = useContext(SessionFlagContext)
     const [requests, setRequests] = useState([]) as any
     const [oldTags, setOldTags] = useState([]) as any
     const [showOldTags, setShowOldTags] = useState([]) as any
@@ -33,8 +34,8 @@ const ModTagEdits: React.FunctionComponent = (props) => {
     }
 
     const updateTags = async () => {
-        const requests = await axios.get("/api/tag/edit/request/list", {withCredentials: true}).then((r) => r.data)
-        const oldTags = await axios.get("/api/tag/list", {params: {tags: requests.map((r: any) => r.tag)}, withCredentials: true}).then((r) => r.data)
+        const requests = await functions.get("/api/tag/edit/request/list", null, session, setSessionFlag)
+        const oldTags = await functions.get("/api/tag/list", {tags: requests.map((r: any) => r.tag)}, session, setSessionFlag)
         setEnded(false)
         setRequests(requests)
         setOldTags(oldTags)
@@ -42,7 +43,7 @@ const ModTagEdits: React.FunctionComponent = (props) => {
 
     useEffect(() => {
         updateTags()
-    }, [])
+    }, [session])
 
     const updateVisibleRequests = () => {
         const newVisibleRequests = [] as any
@@ -72,14 +73,14 @@ const ModTagEdits: React.FunctionComponent = (props) => {
                 bytes = Object.values(new Uint8Array(arrayBuffer))
             }
         }
-        await axios.put("/api/tag/edit", {tag, key, description, image: bytes, aliases, implications, social, twitter, website, fandom}, {headers: {"x-csrf-token": functions.getCSRFToken()}, withCredentials: true})
-        await axios.post("/api/tag/edit/request/fulfill", {username, tag, image, accepted: true}, {headers: {"x-csrf-token": functions.getCSRFToken()}, withCredentials: true})
+        await functions.put("/api/tag/edit", {tag, key, description, image: bytes, aliases, implications, social, twitter, website, fandom}, session, setSessionFlag)
+        await functions.post("/api/tag/edit/request/fulfill", {username, tag, image, accepted: true}, session, setSessionFlag)
         await updateTags()
         setUpdateVisibleRequestFlag(true)
     }
 
     const rejectRequest = async (username: string, tag: string, image: string) => {
-        await axios.post("/api/tag/edit/request/fulfill", {username, tag, image, accepted: false}, {headers: {"x-csrf-token": functions.getCSRFToken()}, withCredentials: true})
+        await functions.post("/api/tag/edit/request/fulfill", {username, tag, image, accepted: false}, session, setSessionFlag)
         await updateTags()
         setUpdateVisibleRequestFlag(true)
     }
@@ -99,9 +100,9 @@ const ModTagEdits: React.FunctionComponent = (props) => {
     const updateOffset = async () => {
         if (ended) return
         const newOffset = offset + 100
-        const result = await axios.get("/api/tag/edit/request/list", {params: {offset: newOffset}, withCredentials: true}).then((r) => r.data)
+        const result = await functions.get("/api/tag/edit/request/list", {offset: newOffset}, session, setSessionFlag)
         if (result?.length >= 100) {
-            const oldTags = await axios.get("/api/tag/list", {params: {tags: requests.map((r: any) => r.tag)}, withCredentials: true}).then((r) => r.data)
+            const oldTags = await functions.get("/api/tag/list", {tags: requests.map((r: any) => r.tag)}, session, setSessionFlag)
             setOffset(newOffset)
             setRequests((prev: any) => functions.removeDuplicates([...prev, ...result]))
             setOldTags((prev: any) => functions.removeDuplicates([...prev, ...oldTags]))

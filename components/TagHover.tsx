@@ -1,9 +1,8 @@
 import React, {useContext, useEffect, useRef, useState} from "react"
 import {useHistory} from "react-router-dom"
-import {ThemeContext, EnableDragContext, SessionContext, MobileContext, SearchContext, SearchFlagContext} from "../Context"
+import {ThemeContext, EnableDragContext, SessionContext, MobileContext, SessionFlagContext, SearchContext, SearchFlagContext} from "../Context"
 import "./styles/taghover.less"
 import functions from "../structures/Functions"
-import axios from "axios"
 
 interface Props {
     active: boolean
@@ -18,6 +17,7 @@ const TagHover: React.FunctionComponent<Props> = (props) => {
     const {theme, setTheme} = useContext(ThemeContext)
     const {enableDrag, setEnableDrag} = useContext(EnableDragContext)
     const {session, setSession} = useContext(SessionContext)
+    const {sessionFlag, setSessionFlag} = useContext(SessionFlagContext)
     const {mobile, setMobile} = useContext(MobileContext)
     const [active, setActive] = useState(props.active)
     const [img, setImg] = useState("")
@@ -36,7 +36,7 @@ const TagHover: React.FunctionComponent<Props> = (props) => {
     }, [props.active])
 
     const updateMetadata = async () => {
-        const tag = await axios.get("/api/tag", {params: {tag: props.tag}, withCredentials: true}).then((r) => r.data)
+        const tag = await functions.get("/api/tag", {tag: props.tag}, session, setSessionFlag)
         setDescription(tag.description)
         if (tag.image) setImg(functions.getTagLink(tag.type, tag.image))
     }
@@ -47,7 +47,7 @@ const TagHover: React.FunctionComponent<Props> = (props) => {
 
     useEffect(() => {
         updateMetadata()
-    }, [props.tag])
+    }, [props.tag, session])
 
     if (active && description) return (
         <div className="taghover" style={{left: `100px`}}>

@@ -1,11 +1,10 @@
 import React, {useContext, useEffect, useRef, useState} from "react"
 import {useHistory} from "react-router-dom"
 import {ThemeContext, SessionContext, EnableDragContext, PostsContext, VisiblePostsContext, SizeTypeContext, PageContext, ScrollContext,
-SearchContext, SearchFlagContext, MobileContext} from "../Context"
+SearchContext, SearchFlagContext, MobileContext, SessionFlagContext} from "../Context"
 import {HashLink as Link} from "react-router-hash-link"
 import functions from "../structures/Functions"
 import "./styles/tagbanner.less"
-import axios from "axios"
 
 let startX = 0
 let deltaCounter = 0
@@ -17,6 +16,7 @@ const TagBanner: React.FunctionComponent = (props) => {
     const {enableDrag, setEnableDrag} = useContext(EnableDragContext)
     const {mobile, setMobile} = useContext(MobileContext)
     const {session, setSession} = useContext(SessionContext)
+    const {sessionFlag, setSessionFlag} = useContext(SessionFlagContext)
     const {search, setSearch} = useContext(SearchContext)
     const {searchFlag, setSearchFlag} = useContext(SearchFlagContext)
     const {posts, setPosts} = useContext(PostsContext) as any
@@ -128,7 +128,7 @@ const TagBanner: React.FunctionComponent = (props) => {
 
     const updateBannerTags = async () => {
         const visibleSlice = getVisibleSlice()
-        const visibleTags = await axios.post("/api/search/sidebartags", {postIDs: visibleSlice.map((p: any) => p.postID)}).then((r) => r.data)
+        const visibleTags = await functions.post("/api/search/sidebartags", {postIDs: visibleSlice.map((p: any) => p.postID)}, session, setSessionFlag)
         const characterTags = [] as any
         const characterTagsImg = [] as any
         const seriesTags = [] as any
@@ -146,7 +146,7 @@ const TagBanner: React.FunctionComponent = (props) => {
 
     useEffect(() => {
         updateBannerTags()
-    }, [scroll, visiblePosts, posts, page, sizeType])
+    }, [scroll, visiblePosts, posts, page, sizeType, session])
 
     const bannerTagJSX = () => {
         let jsx = [] as any

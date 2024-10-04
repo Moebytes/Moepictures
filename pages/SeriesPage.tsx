@@ -13,10 +13,9 @@ import SeriesRow from "../components/SeriesRow"
 import scrollIcon from "../assets/icons/scroll.png"
 import pageIcon from "../assets/icons/page.png"
 import PageDialog from "../dialogs/PageDialog"
-import axios from "axios"
 import {ThemeContext, EnableDragContext, HideNavbarContext, HideSidebarContext, RelativeContext, HideTitlebarContext, MobileContext,
 ActiveDropdownContext, HeaderTextContext, SidebarTextContext, SiteHueContext, SiteLightnessContext, SiteSaturationContext, ScrollContext,
-ShowPageDialogContext, PageFlagContext, SeriesPageContext} from "../Context"
+ShowPageDialogContext, PageFlagContext, SeriesPageContext, SessionContext, SessionFlagContext} from "../Context"
 import "./styles/itemspage.less"
 
 const SeriesPage: React.FunctionComponent = (props) => {
@@ -37,6 +36,8 @@ const SeriesPage: React.FunctionComponent = (props) => {
     const {pageFlag, setPageFlag} = useContext(PageFlagContext)
     const {scroll, setScroll} = useContext(ScrollContext)
     const {mobile, setMobile} = useContext(MobileContext)
+    const {session, setSession} = useContext(SessionContext)
+    const {sessionFlag, setSessionFlag} = useContext(SessionFlagContext)
     const [sortType, setSortType] = useState("posts")
     const [series, setSeries] = useState([]) as any
     const [index, setIndex] = useState(0)
@@ -80,7 +81,7 @@ const SeriesPage: React.FunctionComponent = (props) => {
 
     const updateSeries = async (queryOverride?: string) => {
         let query = queryOverride ? queryOverride : searchQuery
-        const result = await axios.get("/api/search/series", {params: {sort: sortType, query}, withCredentials: true}).then((r) => r.data)
+        const result = await functions.get("/api/search/series", {sort: sortType, query}, session, setSessionFlag)
         setEnded(false)
         setIndex(0)
         setVisibleSeries([])
@@ -109,7 +110,7 @@ const SeriesPage: React.FunctionComponent = (props) => {
 
     useEffect(() => {
         updateSeries()
-    }, [sortType])
+    }, [sortType, session])
 
 
     const getPageAmount = () => {
@@ -129,7 +130,7 @@ const SeriesPage: React.FunctionComponent = (props) => {
             setVisibleSeries(functions.removeDuplicates(newVisibleSeries))
         }
         if (scroll) updateSeries()
-    }, [scroll, series])
+    }, [scroll, series, session])
 
     const updateOffset = async () => {
         if (ended) return
@@ -145,7 +146,7 @@ const SeriesPage: React.FunctionComponent = (props) => {
                 }
             }
         }
-        let result = await axios.get("/api/search/series", {params: {sort: sortType, query: searchQuery, offset: newOffset}, withCredentials: true}).then((r) => r.data)
+        let result = await functions.get("/api/search/series", {sort: sortType, query: searchQuery, offset: newOffset}, session, setSessionFlag)
         let hasMore = result?.length >= 100
         const cleanSeries = series.filter((t: any) => !t.fake)
         if (!scroll) {
@@ -192,7 +193,7 @@ const SeriesPage: React.FunctionComponent = (props) => {
         return () => {
             window.removeEventListener("scroll", scrollHandler)
         }
-    }, [scroll, visibleSeries, index])
+    }, [scroll, visibleSeries, index, session])
 
     useEffect(() => {
         window.scrollTo(0, 0)
@@ -203,7 +204,7 @@ const SeriesPage: React.FunctionComponent = (props) => {
             setSeriesPage(1)
             updateSeries()
         }
-    }, [scroll])
+    }, [scroll, session])
 
     useEffect(() => {
         if (!scroll) updateOffset()
@@ -226,7 +227,7 @@ const SeriesPage: React.FunctionComponent = (props) => {
             }
         }
         if (!scroll) updatePageOffset()
-    }, [scroll, series, seriesPage, ended])
+    }, [scroll, series, seriesPage, ended, session])
 
     useEffect(() => {
         if (searchQuery) {

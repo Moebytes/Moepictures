@@ -9,10 +9,9 @@ import PostHistoryRow from "../components/PostHistoryRow"
 import RevertPostHistoryDialog from "../dialogs/RevertPostHistoryDialog"
 import DeletePostHistoryDialog from "../dialogs/DeletePostHistoryDialog"
 import {ThemeContext, EnableDragContext, HideNavbarContext, HideSidebarContext, MobileContext, SessionContext,
-RelativeContext, HideTitlebarContext, ActiveDropdownContext, HeaderTextContext, SidebarTextContext} from "../Context"
+RelativeContext, HideTitlebarContext, ActiveDropdownContext, HeaderTextContext, SidebarTextContext, SessionFlagContext} from "../Context"
 import permissions from "../structures/Permissions"
 import "./styles/posthistorypage.less"
-import axios from "axios"
 
 interface Props {
     match?: any
@@ -32,6 +31,7 @@ const PostHistoryPage: React.FunctionComponent<Props> = (props) => {
     const {sidebarText, setSidebarText} = useContext(SidebarTextContext)
     const {mobile, setMobile} = useContext(MobileContext)
     const {session, setSession} = useContext(SessionContext)
+    const {sessionFlag, setSessionFlag} = useContext(SessionFlagContext)
     const [revisions, setRevisions] = useState([]) as any
     const [index, setIndex] = useState(0)
     const [visibleRevisions, setVisibleRevisions] = useState([]) as any
@@ -42,14 +42,14 @@ const PostHistoryPage: React.FunctionComponent<Props> = (props) => {
     const updateHistory = async () => {
         let result = [] as any
         if (props.all) {
-            result = await axios.get("/api/post/history", {withCredentials: true}).then((r) => r.data)
+            result = await functions.get("/api/post/history", null, session, setSessionFlag)
         } else {
-            result = await axios.get("/api/post/history", {params: {postID}, withCredentials: true}).then((r) => r.data)
+            result = await functions.get("/api/post/history", {postID}, session, setSessionFlag)
             if (!result.length) {
-                const postObject = await axios.get("/api/post", {params: {postID}, withCredentials: true}).then((r) => r.data)
+                const postObject = await functions.get("/api/post", {postID}, session, setSessionFlag)
                 postObject.date = postObject.uploadDate 
                 postObject.user = postObject.uploader
-                let categories = await functions.tagCategories(postObject.tags.map((tag: string) => ({tag})))
+                let categories = await functions.tagCategories(postObject.tags.map((tag: string) => ({tag})), session, setSessionFlag)
                 postObject.artists = categories.artists.map((a: any) => a.tag)
                 postObject.characters = categories.characters.map((c: any) => c.tag)
                 postObject.series = categories.series.map((s: any) => s.tag)
@@ -65,7 +65,7 @@ const PostHistoryPage: React.FunctionComponent<Props> = (props) => {
 
     useEffect(() => {
         updateHistory()
-    }, [postID])
+    }, [postID, session])
 
     useEffect(() => {
         setHideNavbar(true)
@@ -106,7 +106,7 @@ const PostHistoryPage: React.FunctionComponent<Props> = (props) => {
     const updateOffset = async () => {
         if (ended) return
         const newOffset = offset + 100
-        const result = await axios.get("/api/post/history", {params: {postID, offset: newOffset}, withCredentials: true}).then((r) => r.data)
+        const result = await functions.get("/api/post/history", {postID, offset: newOffset}, session, setSessionFlag)
         if (result?.length) {
             setOffset(newOffset)
             setRevisions((prev: any) => [...prev, ...result])

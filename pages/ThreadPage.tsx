@@ -14,7 +14,7 @@ import {ThemeContext, EnableDragContext, HideNavbarContext, HideSidebarContext, 
 RelativeContext, HideTitlebarContext, ActiveDropdownContext, HeaderTextContext, SidebarTextContext, SiteHueContext, 
 SiteLightnessContext, SiteSaturationContext, ScrollContext, ThreadPageContext, ShowPageDialogContext, PageFlagContext,
 DeleteThreadIDContext, DeleteThreadFlagContext, EditThreadIDContext, EditThreadFlagContext, EditThreadTitleContext,
-EditThreadContentContext, QuoteTextContext, ReportThreadIDContext} from "../Context"
+EditThreadContentContext, QuoteTextContext, ReportThreadIDContext, SessionFlagContext} from "../Context"
 import permissions from "../structures/Permissions"
 import jsxFunctions from "../structures/JSXFunctions"
 import PageDialog from "../dialogs/PageDialog"
@@ -39,7 +39,6 @@ import EditReplyDialog from "../dialogs/EditReplyDialog"
 import ReportReplyDialog from "../dialogs/ReportReplyDialog"
 import favicon from "../assets/icons/favicon.png"
 import "./styles/threadpage.less"
-import axios from "axios"
 
 interface Props {
     match?: any
@@ -66,6 +65,7 @@ const ThreadPage: React.FunctionComponent<Props> = (props) => {
     const {scroll, setScroll} = useContext(ScrollContext)
     const {mobile, setMobile} = useContext(MobileContext)
     const {session, setSession} = useContext(SessionContext)
+    const {sessionFlag, setSessionFlag} = useContext(SessionFlagContext)
     const {deleteThreadID, setDeleteThreadID} = useContext(DeleteThreadIDContext)
     const {deleteThreadFlag, setDeleteThreadFlag} = useContext(DeleteThreadFlagContext)
     const {editThreadID, setEditThreadID} = useContext(EditThreadIDContext)
@@ -126,14 +126,14 @@ const ThreadPage: React.FunctionComponent<Props> = (props) => {
     }, [replies, replyID, replyJumpFlag])
 
     const updateThread = async () => {
-        const thread = await axios.get("/api/thread", {params: {threadID}, withCredentials: true}).then((r) => r.data)
+        const thread = await functions.get("/api/thread", {threadID}, session, setSessionFlag)
         setThread(thread)
         document.title = `${thread.title}`
         setDefaultIcon(thread.image ? false : true)
     }
 
     const updateReplies = async () => {
-        const result = await axios.get("/api/thread/replies", {params: {threadID}, withCredentials: true}).then((r) => r.data)
+        const result = await functions.get("/api/thread/replies", {threadID}, session, setSessionFlag)
         setEnded(false)
         setIndex(0)
         setVisibleReplies([])
@@ -143,7 +143,7 @@ const ThreadPage: React.FunctionComponent<Props> = (props) => {
     useEffect(() => {
         updateThread()
         updateReplies()
-    }, [threadID])
+    }, [threadID, session])
 
     useEffect(() => {
         setHideNavbar(true)
@@ -212,7 +212,7 @@ const ThreadPage: React.FunctionComponent<Props> = (props) => {
             setThreadPage(1)
             updateReplies()
         }
-    }, [scroll])
+    }, [scroll, session])
 
     useEffect(() => {
         if (!scroll) {
@@ -411,12 +411,12 @@ const ThreadPage: React.FunctionComponent<Props> = (props) => {
     }
 
     const updateSticky = async () => {
-        await axios.post("/api/thread/sticky", {threadID}, {headers: {"x-csrf-token": functions.getCSRFToken()}, withCredentials: true}).then((r) => r.data)
+        await functions.post("/api/thread/sticky", {threadID}, session, setSessionFlag)
         updateThread()
     }
 
     const updateLocked = async () => {
-        await axios.post("/api/thread/lock", {threadID}, {headers: {"x-csrf-token": functions.getCSRFToken()}, withCredentials: true}).then((r) => r.data)
+        await functions.post("/api/thread/lock", {threadID}, session, setSessionFlag)
         updateThread()
     }
 
@@ -425,7 +425,7 @@ const ThreadPage: React.FunctionComponent<Props> = (props) => {
         if (badTitle) return
         const badContent = functions.validateThread(editThreadContent)
         if (badContent) return
-        await axios.put("/api/thread/edit", {threadID, title: editThreadTitle, content: editThreadContent}, {headers: {"x-csrf-token": functions.getCSRFToken()}, withCredentials: true})
+        await functions.put("/api/thread/edit", {threadID, title: editThreadTitle, content: editThreadContent}, session, setSessionFlag)
         updateThread()
     }
 
@@ -445,7 +445,7 @@ const ThreadPage: React.FunctionComponent<Props> = (props) => {
     }
 
     const deleteThread = async () => {
-        await axios.delete("/api/thread/delete", {params: {threadID}, headers: {"x-csrf-token": functions.getCSRFToken()}, withCredentials: true})
+        await functions.delete("/api/thread/delete", {threadID}, session, setSessionFlag)
         history.push("/forum")
     }
 
@@ -523,7 +523,7 @@ const ThreadPage: React.FunctionComponent<Props> = (props) => {
             await functions.timeout(2000)
             return setError(false)
         }
-        await axios.post("/api/thread/reply", {threadID, content: text}, {headers: {"x-csrf-token": functions.getCSRFToken()}, withCredentials: true}).then((r) => r.data)
+        await functions.post("/api/thread/reply", {threadID, content: text}, session, setSessionFlag)
         updateReplies()
         setText("")
     }

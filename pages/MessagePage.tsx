@@ -14,7 +14,7 @@ import {ThemeContext, EnableDragContext, HideNavbarContext, HideSidebarContext, 
 RelativeContext, HideTitlebarContext, ActiveDropdownContext, HeaderTextContext, SidebarTextContext, SiteHueContext, 
 SiteLightnessContext, SiteSaturationContext, ScrollContext, MessagePageContext, ShowPageDialogContext, PageFlagContext,
 DeleteMessageIDContext, DeleteMessageFlagContext, QuoteTextContext, EditMessageIDContext, EditMessageFlagContext,
-EditMessageTitleContext, EditMessageContentContext, HasNotificationContext} from "../Context"
+EditMessageTitleContext, EditMessageContentContext, HasNotificationContext, SessionFlagContext} from "../Context"
 import permissions from "../structures/Permissions"
 import jsxFunctions from "../structures/JSXFunctions"
 import PageDialog from "../dialogs/PageDialog"
@@ -30,7 +30,6 @@ import DeleteMessageReplyDialog from "../dialogs/DeleteMessageReplyDialog"
 import EditMessageReplyDialog from "../dialogs/EditMessageReplyDialog"
 import favicon from "../assets/icons/favicon.png"
 import "./styles/messagepage.less"
-import axios from "axios"
 
 interface Props {
     match?: any
@@ -57,6 +56,7 @@ const MessagePage: React.FunctionComponent<Props> = (props) => {
     const {scroll, setScroll} = useContext(ScrollContext)
     const {mobile, setMobile} = useContext(MobileContext)
     const {session, setSession} = useContext(SessionContext)
+    const {sessionFlag, setSessionFlag} = useContext(SessionFlagContext)
     const {deleteMessageID, setDeleteMessageID} = useContext(DeleteMessageIDContext)
     const {deleteMessageFlag, setDeleteMessageFlag} = useContext(DeleteMessageFlagContext)
     const {editMessageID, setEditMessageID} = useContext(EditMessageIDContext)
@@ -118,22 +118,22 @@ const MessagePage: React.FunctionComponent<Props> = (props) => {
 
     useEffect(() => {
         const updateRead = async () => {
-            await axios.post("/api/message/read", {messageID, forceRead: true}, {headers: {"x-csrf-token": functions.getCSRFToken()}, withCredentials: true}).then((r) => r.data)
-            const result = await axios.get("/api/user/checkmail", {withCredentials: true}).then((r) => r.data)
+            await functions.post("/api/message/read", {messageID, forceRead: true}, session, setSessionFlag)
+            const result = await functions.get("/api/user/checkmail", null, session, setSessionFlag)
             setHasNotification(result)
         }
         updateRead()
-    }, [])
+    }, [session])
 
     const updateMessage = async () => {
-        const message = await axios.get("/api/message", {params: {messageID}, withCredentials: true}).then((r) => r.data)
+        const message = await functions.get("/api/message", {messageID}, session, setSessionFlag)
         setMessage(message)
         document.title = `${message.title}`
         setDefaultIcon(message.image ? false : true)
     }
 
     const updateReplies = async () => {
-        const result = await axios.get("/api/message/replies", {params: {messageID}, withCredentials: true}).then((r) => r.data)
+        const result = await functions.get("/api/message/replies", {messageID}, session, setSessionFlag)
         setEnded(false)
         setIndex(0)
         setVisibleReplies([])
@@ -143,7 +143,7 @@ const MessagePage: React.FunctionComponent<Props> = (props) => {
     useEffect(() => {
         updateMessage()
         updateReplies()
-    }, [messageID])
+    }, [messageID, session])
 
     useEffect(() => {
         setHideNavbar(true)
@@ -225,7 +225,7 @@ const MessagePage: React.FunctionComponent<Props> = (props) => {
             setMessagePage(1)
             updateReplies()
         }
-    }, [scroll])
+    }, [scroll, session])
 
     useEffect(() => {
         if (!scroll) {
@@ -428,7 +428,7 @@ const MessagePage: React.FunctionComponent<Props> = (props) => {
         if (badTitle) return
         const badContent = functions.validateThread(editMessageContent)
         if (badContent) return
-        await axios.put("/api/message/edit", {messageID, title: editMessageTitle, content: editMessageContent}, {headers: {"x-csrf-token": functions.getCSRFToken()}, withCredentials: true})
+        await functions.put("/api/message/edit", {messageID, title: editMessageTitle, content: editMessageContent}, session, setSessionFlag)
         updateMessage()
     }
 
@@ -448,7 +448,7 @@ const MessagePage: React.FunctionComponent<Props> = (props) => {
     }
 
     const deleteMessage = async () => {
-        await axios.delete("/api/message/delete", {params: {messageID}, headers: {"x-csrf-token": functions.getCSRFToken()}, withCredentials: true})
+        await functions.delete("/api/message/delete", {messageID}, session, setSessionFlag)
         history.push("/mail")
     }
 
@@ -513,7 +513,7 @@ const MessagePage: React.FunctionComponent<Props> = (props) => {
             await functions.timeout(2000)
             return setError(false)
         }
-        await axios.post("/api/message/reply", {messageID, content: text}, {headers: {"x-csrf-token": functions.getCSRFToken()}, withCredentials: true}).then((r) => r.data)
+        await functions.post("/api/message/reply", {messageID, content: text}, session, setSessionFlag)
         updateReplies()
         setText("")
     }

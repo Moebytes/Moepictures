@@ -3,7 +3,7 @@ import rateLimit from "express-rate-limit"
 import slowDown from "express-slow-down"
 import sql from "../sql/SQLQuery"
 import functions from "../structures/Functions"
-import serverFunctions from "../structures/ServerFunctions"
+import serverFunctions, {authenticate} from "../structures/ServerFunctions"
 import fs from "fs"
 import path from "path"
 
@@ -100,13 +100,12 @@ const TagRoutes = (app: Express) => {
         }
     })
 
-    app.delete("/api/tag/delete", tagUpdateLimiter, async (req: Request, res: Response) => {
+    app.delete("/api/tag/delete", authenticate, tagUpdateLimiter, async (req: Request, res: Response) => {
         try {
             const tag = req.query.tag as string
-            if (!serverFunctions.validateCSRF(req)) return res.status(400).send("Bad CSRF token")
             if (!tag) return res.status(400).send("Invalid tag")
             const tagExists = await sql.tag.tag(tag.trim())
-            if (!req.session.username) return res.status(401).send("Unauthorized")
+            if (!req.session.username) return res.status(403).send("Unauthorized")
             if (!tagExists) return res.status(400).send("Bad tag")
             if (req.session.role !== "admin" && req.session.role !== "mod") return res.status(403).end()
             await serverFunctions.deleteFolder(`history/tag/${tag.trim()}`).catch(() => null)
@@ -119,11 +118,10 @@ const TagRoutes = (app: Express) => {
         }
     })
 
-    app.post("/api/tag/takedown", tagUpdateLimiter, async (req: Request, res: Response) => {
+    app.post("/api/tag/takedown", authenticate, tagUpdateLimiter, async (req: Request, res: Response) => {
         try {
             const {tag} = req.body
-            if (!serverFunctions.validateCSRF(req)) return res.status(400).send("Bad CSRF token")
-            if (!req.session.username) return res.status(401).send("Unauthorized")
+            if (!req.session.username) return res.status(403).send("Unauthorized")
             if (!tag) return res.status(400).send("Bad tag")
             if (req.session.role !== "admin") return res.status(403).end()
             const tagObj = await sql.tag.tag(tag)
@@ -147,11 +145,10 @@ const TagRoutes = (app: Express) => {
         }
     })
 
-    app.put("/api/tag/edit", tagUpdateLimiter, async (req: Request, res: Response) => {
+    app.put("/api/tag/edit", authenticate, tagUpdateLimiter, async (req: Request, res: Response) => {
         try {
             let {tag, key, description, image, aliases, implications, pixivTags, social, twitter, website, fandom, reason, updater, updatedDate, silent} = req.body
-            if (!serverFunctions.validateCSRF(req)) return res.status(400).send("Bad CSRF token")
-            if (!req.session.username) return res.status(401).send("Unauthorized")
+            if (!req.session.username) return res.status(403).send("Unauthorized")
             if (req.session.banned) return res.status(403).send("You are banned")
             if (!tag) return res.status(400).send("Bad tag")
             const tagObj = await sql.tag.tag(tag)
@@ -299,11 +296,10 @@ const TagRoutes = (app: Express) => {
         }
     })
 
-    app.post("/api/tag/aliasto", tagUpdateLimiter, async (req: Request, res: Response) => {
+    app.post("/api/tag/aliasto", authenticate, tagUpdateLimiter, async (req: Request, res: Response) => {
         try {
             const {tag, aliasTo} = req.body
-            if (!serverFunctions.validateCSRF(req)) return res.status(400).send("Bad CSRF token")
-            if (!req.session.username) return res.status(401).send("Unauthorized")
+            if (!req.session.username) return res.status(403).send("Unauthorized")
             if (!tag || !aliasTo) return res.status(400).send("Bad tag or aliasTo")
             if (req.session.role !== "admin" && req.session.role !== "mod") return res.status(403).end()
             const exists = await sql.tag.tag(aliasTo)
@@ -331,12 +327,11 @@ const TagRoutes = (app: Express) => {
         }
     })
 
-    app.post("/api/tag/delete/request", tagUpdateLimiter, async (req: Request, res: Response) => {
+    app.post("/api/tag/delete/request", authenticate, tagUpdateLimiter, async (req: Request, res: Response) => {
         try {
             const {tag, reason} = req.body
-            if (!serverFunctions.validateCSRF(req)) return res.status(400).send("Bad CSRF token")
             if (!tag) return res.status(400).send("Invalid postID")
-            if (!req.session.username) return res.status(401).send("Unauthorized")
+            if (!req.session.username) return res.status(403).send("Unauthorized")
             if (req.session.banned) return res.status(403).send("You are banned")
             const exists = await sql.tag.tag(tag)
             if (!exists) return res.status(400).send("Bad tag")
@@ -351,7 +346,7 @@ const TagRoutes = (app: Express) => {
     app.get("/api/tag/delete/request/list", tagLimiter, async (req: Request, res: Response) => {
         try {
             const offset = req.query.offset as string
-            if (!req.session.username) return res.status(401).send("Unauthorized")
+            if (!req.session.username) return res.status(403).send("Unauthorized")
             if (req.session.role !== "admin" && req.session.role !== "mod") return res.status(403).end()
             const result = await sql.request.tagDeleteRequests(offset)
             res.status(200).json(result)
@@ -361,12 +356,11 @@ const TagRoutes = (app: Express) => {
         }
     })
 
-    app.post("/api/tag/delete/request/fulfill", tagUpdateLimiter, async (req: Request, res: Response) => {
+    app.post("/api/tag/delete/request/fulfill", authenticate, tagUpdateLimiter, async (req: Request, res: Response) => {
         try {
             const {username, tag, accepted} = req.body
-            if (!serverFunctions.validateCSRF(req)) return res.status(400).send("Bad CSRF token")
             if (!tag) return res.status(400).send("Invalid tag")
-            if (!req.session.username) return res.status(401).send("Unauthorized")
+            if (!req.session.username) return res.status(403).send("Unauthorized")
             if (!username) return res.status(400).send("Bad username")
             if (req.session.role !== "admin" && req.session.role !== "mod") return res.status(403).end()
             await sql.request.deleteTagDeleteRequest(username, tag)
@@ -384,12 +378,11 @@ const TagRoutes = (app: Express) => {
         }
     })
 
-    app.post("/api/tag/aliasto/request", tagUpdateLimiter, async (req: Request, res: Response) => {
+    app.post("/api/tag/aliasto/request", authenticate, tagUpdateLimiter, async (req: Request, res: Response) => {
         try {
             const {tag, aliasTo, reason} = req.body
-            if (!serverFunctions.validateCSRF(req)) return res.status(400).send("Bad CSRF token")
             if (!tag || !aliasTo) return res.status(400).send("Bad tag or aliasTo")
-            if (!req.session.username) return res.status(401).send("Unauthorized")
+            if (!req.session.username) return res.status(403).send("Unauthorized")
             const exists = await sql.tag.tag(tag)
             if (!exists) return res.status(400).send("Bad tag")
             const exists2 = await sql.tag.tag(aliasTo)
@@ -405,7 +398,7 @@ const TagRoutes = (app: Express) => {
     app.get("/api/tag/aliasto/request/list", tagLimiter, async (req: Request, res: Response) => {
         try {
             const offset = req.query.offset as string
-            if (!req.session.username) return res.status(401).send("Unauthorized")
+            if (!req.session.username) return res.status(403).send("Unauthorized")
             if (req.session.role !== "admin" && req.session.role !== "mod") return res.status(403).end()
             const result = await sql.request.aliasRequests(offset)
             res.status(200).json(result)
@@ -415,12 +408,11 @@ const TagRoutes = (app: Express) => {
         }
     })
 
-    app.post("/api/tag/aliasto/request/fulfill", tagUpdateLimiter, async (req: Request, res: Response) => {
+    app.post("/api/tag/aliasto/request/fulfill", authenticate, tagUpdateLimiter, async (req: Request, res: Response) => {
         try {
             const {username, tag, aliasTo, accepted} = req.body
-            if (!serverFunctions.validateCSRF(req)) return res.status(400).send("Bad CSRF token")
             if (!tag) return res.status(400).send("Invalid tag")
-            if (!req.session.username) return res.status(401).send("Unauthorized")
+            if (!req.session.username) return res.status(403).send("Unauthorized")
             if (!username) return res.status(400).send("Bad username")
             if (req.session.role !== "admin" && req.session.role !== "mod") return res.status(403).end()
             await sql.request.deleteAliasRequest(username, tag)
@@ -438,11 +430,10 @@ const TagRoutes = (app: Express) => {
         }
     })
 
-    app.post("/api/tag/edit/request", tagUpdateLimiter, async (req: Request, res: Response) => {
+    app.post("/api/tag/edit/request", authenticate, tagUpdateLimiter, async (req: Request, res: Response) => {
         try {
             const {tag, key, description, image, aliases, implications, pixivTags, social, twitter, website, fandom, reason} = req.body
-            if (!serverFunctions.validateCSRF(req)) return res.status(400).send("Bad CSRF token")
-            if (!req.session.username) return res.status(401).send("Unauthorized")
+            if (!req.session.username) return res.status(403).send("Unauthorized")
             if (!tag) return res.status(400).send("Bad tag")
             const tagObj = await sql.tag.tag(tag)
             if (!tagObj) return res.status(400).send("Bad tag")
@@ -467,7 +458,7 @@ const TagRoutes = (app: Express) => {
     app.get("/api/tag/edit/request/list", tagLimiter, async (req: Request, res: Response) => {
         try {
             const offset = req.query.offset as string
-            if (!req.session.username) return res.status(401).send("Unauthorized")
+            if (!req.session.username) return res.status(403).send("Unauthorized")
             if (req.session.role !== "admin" && req.session.role !== "mod") return res.status(403).end()
             const result = await sql.request.tagEditRequests(offset)
             res.status(200).json(result)
@@ -477,12 +468,11 @@ const TagRoutes = (app: Express) => {
         }
     })
 
-    app.post("/api/tag/edit/request/fulfill", tagUpdateLimiter, async (req: Request, res: Response) => {
+    app.post("/api/tag/edit/request/fulfill", authenticate, tagUpdateLimiter, async (req: Request, res: Response) => {
         try {
             const {username, tag, image, accepted} = req.body
-            if (!serverFunctions.validateCSRF(req)) return res.status(400).send("Bad CSRF token")
             if (!tag) return res.status(400).send("Invalid tag")
-            if (!req.session.username) return res.status(401).send("Unauthorized")
+            if (!req.session.username) return res.status(403).send("Unauthorized")
             if (!username) return res.status(400).send("Bad username")
             if (req.session.role !== "admin" && req.session.role !== "mod") return res.status(403).end()
             if (image) await serverFunctions.deleteUnverifiedFile(image)
@@ -505,7 +495,7 @@ const TagRoutes = (app: Express) => {
         try {
             const tag = req.query.tag as string
             const offset = req.query.offset as string
-            if (!req.session.username) return res.status(401).send("Unauthorized")
+            if (!req.session.username) return res.status(403).send("Unauthorized")
             const result = await sql.history.tagHistory(tag, offset)
             res.status(200).json(result)
         } catch (e) {
@@ -514,12 +504,11 @@ const TagRoutes = (app: Express) => {
         }
     })
 
-    app.delete("/api/tag/history/delete", tagUpdateLimiter, async (req: Request, res: Response) => {
+    app.delete("/api/tag/history/delete", authenticate, tagUpdateLimiter, async (req: Request, res: Response) => {
         try {
             const {tag, historyID} = req.query
-            if (!serverFunctions.validateCSRF(req)) return res.status(400).send("Bad CSRF token")
             if (Number.isNaN(Number(historyID))) return res.status(400).send("Invalid historyID")
-            if (!req.session.username) return res.status(401).send("Unauthorized")
+            if (!req.session.username) return res.status(403).send("Unauthorized")
             if (req.session.role !== "admin" && req.session.role !== "mod") return res.status(403).end()
             const tagHistory = await sql.history.tagHistory(tag as string)
             if (tagHistory[0]?.historyID === historyID) {

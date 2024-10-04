@@ -1,12 +1,11 @@
 import React, {useContext, useEffect, useState} from "react"
 import {useHistory} from "react-router-dom"
-import {ThemeContext, SearchContext, SearchFlagContext, SiteHueContext, SiteLightnessContext, SiteSaturationContext} from "../Context"
+import {ThemeContext, SearchContext, SearchFlagContext, SessionContext, SessionFlagContext, SiteHueContext, SiteLightnessContext, SiteSaturationContext} from "../Context"
 import {HashLink as Link} from "react-router-hash-link"
 import approve from "../assets/icons/approve.png"
 import reject from "../assets/icons/reject.png"
 import functions from "../structures/Functions"
 import "./styles/modposts.less"
-import axios from "axios"
 
 const ModTagDeletions: React.FunctionComponent = (props) => {
     const {theme, setTheme} = useContext(ThemeContext)
@@ -16,6 +15,8 @@ const ModTagDeletions: React.FunctionComponent = (props) => {
     const [hover, setHover] = useState(false)
     const {search, setSearch} = useContext(SearchContext)
     const {searchFlag, setSearchFlag} = useContext(SearchFlagContext)
+    const {session, setSession} = useContext(SessionContext)
+    const {sessionFlag, setSessionFlag} = useContext(SessionFlagContext)
     const [requests, setRequests] = useState([]) as any
     const [index, setIndex] = useState(0)
     const [visibleRequests, setVisibleRequests] = useState([]) as any
@@ -29,14 +30,14 @@ const ModTagDeletions: React.FunctionComponent = (props) => {
     }
 
     const updateTags = async () => {
-        const requests = await axios.get("/api/tag/delete/request/list", {withCredentials: true}).then((r) => r.data)
+        const requests = await functions.get("/api/tag/delete/request/list", null, session, setSessionFlag)
         setEnded(false)
         setRequests(requests)
     }
 
     useEffect(() => {
         updateTags()
-    }, [])
+    }, [session])
 
     const updateVisibleRequests = () => {
         const newVisibleRequests = [] as any
@@ -55,14 +56,14 @@ const ModTagDeletions: React.FunctionComponent = (props) => {
     }, [requests, index, updateVisibleRequestFlag])
 
     const deleteTag = async (username: string, tag: string) => {
-        await axios.delete("/api/tag/delete", {params: {tag}, headers: {"x-csrf-token": functions.getCSRFToken()}, withCredentials: true})
-        await axios.post("/api/tag/delete/request/fulfill", {username, tag, accepted: true}, {headers: {"x-csrf-token": functions.getCSRFToken()}, withCredentials: true})
+        await functions.delete("/api/tag/delete", {tag}, session, setSessionFlag)
+        await functions.post("/api/tag/delete/request/fulfill", {username, tag, accepted: true}, session, setSessionFlag)
         await updateTags()
         setUpdateVisibleRequestFlag(true)
     }
 
     const rejectRequest = async (username: string, tag: string) => {
-        await axios.post("/api/tag/delete/request/fulfill", {username, tag, accepted: false}, {headers: {"x-csrf-token": functions.getCSRFToken()}, withCredentials: true})
+        await functions.post("/api/tag/delete/request/fulfill", {username, tag, accepted: false}, session, setSessionFlag)
         await updateTags()
         setUpdateVisibleRequestFlag(true)
     }
@@ -82,7 +83,7 @@ const ModTagDeletions: React.FunctionComponent = (props) => {
     const updateOffset = async () => {
         if (ended) return
         const newOffset = offset + 100
-        const result = await axios.get("/api/tag/delete/request/list", {params: {offset: newOffset}, withCredentials: true}).then((r) => r.data)
+        const result = await functions.get("/api/tag/delete/request/list", {offset: newOffset}, session, setSessionFlag)
         if (result?.length >= 100) {
             setOffset(newOffset)
             setRequests((prev: any) => functions.removeDuplicates([...prev, ...result]))

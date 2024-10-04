@@ -1,9 +1,9 @@
 import React, {useContext, useEffect, useRef, useState} from "react"
-import {ThemeContext, EnableDragContext, SiteHueContext, SiteLightnessContext, SiteSaturationContext} from "../Context"
+import {ThemeContext, EnableDragContext, SiteHueContext, SiteLightnessContext, SiteSaturationContext, SessionContext, SessionFlagContext} from "../Context"
 import {HashLink as Link} from "react-router-hash-link"
 import jsxFunctions from "../structures/JSXFunctions"
 import commentaryTranslate from "../assets/icons/commentarytranslate.png"
-import axios from "axios"
+import functions from "../structures/Functions"
 import "./styles/commentary.less"
 
 interface Props {
@@ -17,6 +17,8 @@ const Commentary: React.FunctionComponent<Props> = (props) => {
     const {siteSaturation, setSiteSaturation} = useContext(SiteSaturationContext)
     const {siteLightness, setSiteLightness} = useContext(SiteLightnessContext)
     const {enableDrag, setEnableDrag} = useContext(EnableDragContext)
+    const {session, setSession} = useContext(SessionContext)
+    const {sessionFlag, setSessionFlag} = useContext(SessionFlagContext)
     const [showTranslated, setShowTranslated] = useState(false)
     const [text, setText] = useState(props.text)
     const [translatedText, setTranslatedText] = useState(null)
@@ -35,9 +37,9 @@ const Commentary: React.FunctionComponent<Props> = (props) => {
                 setText(props.translated)
             } else {
                 if (!translatedText) {
-                    axios.post("/api/misc/translate", [props.text], {withCredentials: true}).then((r) => {
-                        setTranslatedText(r.data[0])
-                        setText(r.data[0])
+                    functions.post("/api/misc/translate", [props.text], session, setSessionFlag).then((r) => {
+                        setTranslatedText(r[0])
+                        setText(r[0])
                     })
                 } else {
                     setText(translatedText)
@@ -46,7 +48,7 @@ const Commentary: React.FunctionComponent<Props> = (props) => {
         } else {
             setText(props.text)
         }
-    }, [showTranslated])
+    }, [showTranslated, session])
 
     return (
         <div className="commentary">

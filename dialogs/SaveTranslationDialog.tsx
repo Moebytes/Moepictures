@@ -2,12 +2,11 @@ import React, {useEffect, useContext, useState, useRef} from "react"
 import {useHistory} from "react-router-dom"
 import {HashLink as Link} from "react-router-hash-link"
 import {HideNavbarContext, HideTitlebarContext, HideSidebarContext, ThemeContext, EnableDragContext, 
-ShowSaveTranslationDialogContext, SaveTranslationDataContext, SaveTranslationOrderContext, SessionContext} from "../Context"
+ShowSaveTranslationDialogContext, SaveTranslationDataContext, SaveTranslationOrderContext, SessionContext, SessionFlagContext} from "../Context"
 import functions from "../structures/Functions"
 import Draggable from "react-draggable"
 import "./styles/dialog.less"
 import permissions from "../structures/Permissions"
-import axios from "axios"
 
 interface Props {
     post: any
@@ -23,6 +22,7 @@ const SaveTranslationDialog: React.FunctionComponent<Props> = (props) => {
     const {saveTranslationData, setSaveTranslationData} = useContext(SaveTranslationDataContext)
     const {saveTranslationOrder, setSaveTranslationOrder} = useContext(SaveTranslationOrderContext)
     const {session, setSession} = useContext(SessionContext)
+    const {sessionFlag, setSessionFlag} = useContext(SessionFlagContext)
     const [reason, setReason] = useState("")
     const [submitted, setSubmitted] = useState(false)
     const [error, setError] = useState(false)
@@ -44,7 +44,7 @@ const SaveTranslationDialog: React.FunctionComponent<Props> = (props) => {
 
     const saveTranslation = async () => {
         if (session.username) {
-            await axios.post("/api/translation/save", {postID: props.post.postID, data: saveTranslationData, order: saveTranslationOrder, reason}, {headers: {"x-csrf-token": functions.getCSRFToken()}, withCredentials: true})
+            await functions.post("/api/translation/save", {postID: props.post.postID, data: saveTranslationData, order: saveTranslationOrder, reason}, session, setSessionFlag)
             setSubmitted(true)
         } else {
             const badReason = functions.validateReason(reason)
@@ -55,7 +55,7 @@ const SaveTranslationDialog: React.FunctionComponent<Props> = (props) => {
                 await functions.timeout(2000)
                 setError(false)
             }
-            await axios.post("/api/translation/save/request", {postID: props.post.postID, data: saveTranslationData, order: saveTranslationOrder, reason}, {headers: {"x-csrf-token": functions.getCSRFToken()}, withCredentials: true})
+            await functions.post("/api/translation/save/request", {postID: props.post.postID, data: saveTranslationData, order: saveTranslationOrder, reason}, session, setSessionFlag)
             setSubmitted(true)
         }
     }

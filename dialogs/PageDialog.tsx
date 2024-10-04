@@ -6,7 +6,6 @@ HideTitlebarContext, SessionContext} from "../Context"
 import functions from "../structures/Functions"
 import Draggable from "react-draggable"
 import "./styles/dialog.less"
-import axios from "axios"
 
 const PageDialog: React.FunctionComponent = (props) => {
     const {theme, setTheme} = useContext(ThemeContext)

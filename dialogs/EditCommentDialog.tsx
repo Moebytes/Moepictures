@@ -6,7 +6,6 @@ EditCommentTextContext, HideTitlebarContext} from "../Context"
 import functions from "../structures/Functions"
 import "./styles/dialog.less"
 import Draggable from "react-draggable"
-import axios from "axios"
 
 const EditCommentDialog: React.FunctionComponent = (props) => {
     const {theme, setTheme} = useContext(ThemeContext)

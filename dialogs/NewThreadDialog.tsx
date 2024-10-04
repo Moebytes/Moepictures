@@ -2,11 +2,10 @@ import React, {useEffect, useContext, useState, useRef} from "react"
 import {useHistory} from "react-router-dom"
 import {HashLink as Link} from "react-router-hash-link"
 import {HideNavbarContext, HideSidebarContext, ThemeContext, EnableDragContext, ShowNewThreadDialogContext, HideTitlebarContext, 
-SessionContext, SiteHueContext, SiteLightnessContext, SiteSaturationContext} from "../Context"
+SessionContext, SiteHueContext, SiteLightnessContext, SiteSaturationContext, SessionFlagContext} from "../Context"
 import functions from "../structures/Functions"
 import Draggable from "react-draggable"
 import "./styles/dialog.less"
-import axios from "axios"
 
 const NewThreadDialog: React.FunctionComponent = (props) => {
     const {theme, setTheme} = useContext(ThemeContext)
@@ -19,6 +18,7 @@ const NewThreadDialog: React.FunctionComponent = (props) => {
     const {enableDrag, setEnableDrag} = useContext(EnableDragContext)
     const {showNewThreadDialog, setShowNewThreadDialog} = useContext(ShowNewThreadDialogContext)
     const {session, setSession} = useContext(SessionContext)
+    const {sessionFlag, setSessionFlag} = useContext(SessionFlagContext)
     const [threadTitle, setThreadTitle] = useState("")
     const [threadContent, setThreadContent] = useState("")
     const [captchaResponse, setCaptchaResponse] = useState("")
@@ -37,7 +37,7 @@ const NewThreadDialog: React.FunctionComponent = (props) => {
     }
 
     const updateCaptcha = async () => {
-        const captcha = await axios.get("/api/misc/captcha/create", {params: {color: getCaptchaColor()}, withCredentials: true}).then((r) => r.data)
+        const captcha = await functions.get("/api/misc/captcha/create", {color: getCaptchaColor()}, session, setSessionFlag)
         setCaptcha(captcha)
         setCaptchaResponse("")
     }
@@ -77,7 +77,7 @@ const NewThreadDialog: React.FunctionComponent = (props) => {
             return setError(false)
         }
         try {
-            const thread = await axios.post("/api/thread/create", {title: threadTitle, content: threadContent, captchaResponse}, {headers: {"x-csrf-token": functions.getCSRFToken()}, withCredentials: true}).then((r) => r.data)
+            const thread = await functions.post("/api/thread/create", {title: threadTitle, content: threadContent, captchaResponse}, session, setSessionFlag)
             setShowNewThreadDialog(false)
             if (thread.threadID) history.push(`/thread/${thread.threadID}`)
         } catch {

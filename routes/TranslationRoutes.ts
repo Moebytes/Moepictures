@@ -3,7 +3,7 @@ import rateLimit from "express-rate-limit"
 import slowDown from "express-slow-down"
 import sql from "../sql/SQLQuery"
 import functions from "../structures/Functions"
-import serverFunctions from "../structures/ServerFunctions"
+import serverFunctions, {authenticate} from "../structures/ServerFunctions"
 
 const translationLimiter = rateLimit({
 	windowMs: 5 * 60 * 1000,
@@ -14,13 +14,12 @@ const translationLimiter = rateLimit({
 })
 
 const TranslationRoutes = (app: Express) => {
-    app.post("/api/translation/save", translationLimiter, async (req: Request, res: Response) => {
+    app.post("/api/translation/save", authenticate, translationLimiter, async (req: Request, res: Response) => {
         try {
             const {postID, order, data, reason} = req.body
-            if (!serverFunctions.validateCSRF(req)) return res.status(400).send("Bad CSRF token")
             if (Number.isNaN(Number(postID))) return res.status(400).send("Invalid postID")
             if (Number.isNaN(Number(order)) || Number(order) < 1) return res.status(400).send("Invalid order")
-            if (!req.session.username) return res.status(401).send("Unauthorized")
+            if (!req.session.username) return res.status(403).send("Unauthorized")
             if (req.session.banned) return res.status(403).send("You are banned")
             if (!data) return res.status(400).send("Bad data")
 
@@ -43,13 +42,12 @@ const TranslationRoutes = (app: Express) => {
         }
     })
 
-    app.put("/api/translation/save", translationLimiter, async (req: Request, res: Response) => {
+    app.put("/api/translation/save", authenticate, translationLimiter, async (req: Request, res: Response) => {
         try {
             const {postID, order, data} = req.body
-            if (!serverFunctions.validateCSRF(req)) return res.status(400).send("Bad CSRF token")
             if (Number.isNaN(Number(postID))) return res.status(400).send("Invalid postID")
             if (Number.isNaN(Number(order)) || Number(order) < 1) return res.status(400).send("Invalid order")
-            if (!req.session.username) return res.status(401).send("Unauthorized")
+            if (!req.session.username) return res.status(403).send("Unauthorized")
             if (req.session.banned) return res.status(403).send("You are banned")
             if (!data) return res.status(400).send("Bad data")
 
@@ -84,13 +82,12 @@ const TranslationRoutes = (app: Express) => {
         }
     })
 
-    app.post("/api/translation/save/request", translationLimiter, async (req: Request, res: Response) => {
+    app.post("/api/translation/save/request", authenticate, translationLimiter, async (req: Request, res: Response) => {
         try {
             const {postID, order, data, reason} = req.body
-            if (!serverFunctions.validateCSRF(req)) return res.status(400).send("Bad CSRF token")
             if (Number.isNaN(Number(postID))) return res.status(400).send("Invalid postID")
             if (Number.isNaN(Number(order)) || Number(order) < 1) return res.status(400).send("Invalid order")
-            if (!req.session.username) return res.status(401).send("Unauthorized")
+            if (!req.session.username) return res.status(403).send("Unauthorized")
             if (!data) return res.status(400).send("Bad data")
 
             const translation = await sql.translation.unverifiedTranslation(postID, order, req.session.username)
@@ -109,7 +106,7 @@ const TranslationRoutes = (app: Express) => {
     app.get("/api/translation/list/unverified", translationLimiter, async (req: Request, res: Response, next: NextFunction) => {
         try {
             const offset = req.query.offset as string
-            if (!req.session.username) return res.status(401).send("Unauthorized")
+            if (!req.session.username) return res.status(403).send("Unauthorized")
             if (req.session.role !== "admin" && req.session.role !== "mod") return res.status(403).end()
             const result = await sql.translation.unverifiedTranslations(offset)
             res.status(200).json(result)
@@ -119,10 +116,10 @@ const TranslationRoutes = (app: Express) => {
         }
     })
 
-    app.post("/api/translation/approve", translationLimiter, async (req: Request, res: Response, next: NextFunction) => {
+    app.post("/api/translation/approve", authenticate, translationLimiter, async (req: Request, res: Response, next: NextFunction) => {
         try {
             let {translationID, username, postID} = req.body
-            if (!serverFunctions.validateCSRF(req)) return res.status(400).send("Bad CSRF token")
+            if (!req.session.username) return res.status(403).send("Unauthorized")
             translationID = Number(req.body.translationID)
             if (Number.isNaN(translationID)) return res.status(400).send("Bad translationID")
             if (req.session.role !== "admin" && req.session.role !== "mod") return res.status(403).end()
@@ -141,10 +138,10 @@ const TranslationRoutes = (app: Express) => {
         }
     })
 
-    app.post("/api/translation/reject", translationLimiter, async (req: Request, res: Response, next: NextFunction) => {
+    app.post("/api/translation/reject", authenticate, translationLimiter, async (req: Request, res: Response, next: NextFunction) => {
         try {
             let {translationID, username, postID} = req.body
-            if (!serverFunctions.validateCSRF(req)) return res.status(400).send("Bad CSRF token")
+            if (!req.session.username) return res.status(403).send("Unauthorized")
             translationID = Number(req.body.translationID)
             if (Number.isNaN(translationID)) return res.status(400).send("Bad translationID")
             if (req.session.role !== "admin" && req.session.role !== "mod") return res.status(403).end()
@@ -167,7 +164,7 @@ const TranslationRoutes = (app: Express) => {
             const postID = req.query.postID as string
             const order = req.query.order as string
             const offset = req.query.offset as string
-            if (!req.session.username) return res.status(401).send("Unauthorized")
+            if (!req.session.username) return res.status(403).send("Unauthorized")
             const result = await sql.history.translationHistory(postID, order, offset)
             res.status(200).json(result)
         } catch (e) {
@@ -176,14 +173,13 @@ const TranslationRoutes = (app: Express) => {
         }
     })
 
-    app.delete("/api/translation/history/delete", translationLimiter, async (req: Request, res: Response) => {
+    app.delete("/api/translation/history/delete", authenticate, translationLimiter, async (req: Request, res: Response) => {
         try {
             const postID = req.query.postID as string
             const order = req.query.order as string
             const historyID = req.query.historyID as string
-            if (!serverFunctions.validateCSRF(req)) return res.status(400).send("Bad CSRF token")
             if (Number.isNaN(Number(historyID))) return res.status(400).send("Invalid historyID")
-            if (!req.session.username) return res.status(401).send("Unauthorized")
+            if (!req.session.username) return res.status(403).send("Unauthorized")
             if (req.session.role !== "admin" && req.session.role !== "mod") return res.status(403).end()
             const translationHistory = await sql.history.translationHistory(postID, order)
             if (translationHistory[0]?.historyID === historyID) {

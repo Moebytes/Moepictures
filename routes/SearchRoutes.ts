@@ -46,7 +46,7 @@ const SearchRoutes = (app: Express) => {
                 result = await sql.search.searchPixivID(pixivID, withTags)
             } else {
                 if (sort === "favorites" || sort === "reverse favorites") {
-                    if (!req.session.username) return res.status(401).send("Unauthorized")
+                    if (!req.session.username) return res.status(403).send("Unauthorized")
                     const favorites = await sql.favorite.searchFavorites(req.session.username, tags, type, restrict, style, sort, offset, limit, withTags)
                     result = favorites.map((f: any) => f.post)
                     result[0].postCount = favorites[0].postCount
@@ -325,7 +325,7 @@ const SearchRoutes = (app: Express) => {
             let sort = req.query.sort as string
             const offset = req.query.offset as string
             if (!functions.validThreadSort(sort)) return res.status(400).send("Invalid sort")
-            if (!req.session.username) return res.status(401).send("Unauthorized")
+            if (!req.session.username) return res.status(403).send("Unauthorized")
             const search = query?.trim() ?? ""
             const messages = await sql.message.allMessages(req.session.username, search, sort, offset)
             let filtered = [] as any
@@ -357,7 +357,7 @@ const SearchRoutes = (app: Express) => {
     app.get("/api/search/reports", searchLimiter, async (req: Request, res: Response) => {
         try {
             const offset = req.query.offset as string
-            if (!req.session.username) return res.status(401).send("Unauthorized")
+            if (!req.session.username) return res.status(403).send("Unauthorized")
             if (req.session.role !== "admin" && req.session.role !== "mod") return res.status(403).end()
             const result = await sql.report.reports(offset)
             res.status(200).json(result)

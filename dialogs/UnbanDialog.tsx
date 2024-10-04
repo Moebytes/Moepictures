@@ -1,11 +1,11 @@
 import React, {useEffect, useContext, useState, useRef} from "react"
 import {useHistory} from "react-router-dom"
 import {HashLink as Link} from "react-router-hash-link"
-import {HideNavbarContext, HideSidebarContext, ThemeContext, EnableDragContext, UnbanNameContext, HideTitlebarContext, UpdateUserFlagContext} from "../Context"
+import {HideNavbarContext, HideSidebarContext, ThemeContext, EnableDragContext, UnbanNameContext, HideTitlebarContext, UpdateUserFlagContext,
+SessionContext, SessionFlagContext} from "../Context"
 import functions from "../structures/Functions"
 import "./styles/dialog.less"
 import Draggable from "react-draggable"
-import axios from "axios"
 
 const UnbanDialog: React.FunctionComponent = (props) => {
     const {theme, setTheme} = useContext(ThemeContext)
@@ -15,6 +15,8 @@ const UnbanDialog: React.FunctionComponent = (props) => {
     const {enableDrag, setEnableDrag} = useContext(EnableDragContext)
     const {unbanName, setUnbanName} = useContext(UnbanNameContext)
     const {updateUserFlag, setUpdateUserFlag} = useContext(UpdateUserFlagContext)
+    const {session, setSession} = useContext(SessionContext)
+    const {sessionFlag, setSessionFlag} = useContext(SessionFlagContext)
     const [reason, setReason] = useState("")
     const [submitted, setSubmitted] = useState(false)
     const [error, setError] = useState(false)
@@ -36,7 +38,7 @@ const UnbanDialog: React.FunctionComponent = (props) => {
 
 
     const unban = async () => {
-        await axios.post("/api/user/unban", {username: unbanName, reason}, {headers: {"x-csrf-token": functions.getCSRFToken()}, withCredentials: true})
+        await functions.post("/api/user/unban", {username: unbanName, reason}, session, setSessionFlag)
         setUnbanName(null)
         setUpdateUserFlag(true)
     }

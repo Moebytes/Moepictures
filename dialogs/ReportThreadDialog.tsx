@@ -1,11 +1,11 @@
 import React, {useEffect, useContext, useState, useRef} from "react"
 import {useHistory} from "react-router-dom"
 import {HashLink as Link} from "react-router-hash-link"
-import {HideNavbarContext, HideSidebarContext, ThemeContext, EnableDragContext, ReportThreadIDContext, HideTitlebarContext} from "../Context"
+import {HideNavbarContext, HideSidebarContext, ThemeContext, EnableDragContext, ReportThreadIDContext, HideTitlebarContext,
+SessionContext, SessionFlagContext} from "../Context"
 import functions from "../structures/Functions"
 import "./styles/dialog.less"
 import Draggable from "react-draggable"
-import axios from "axios"
 
 const ReportThreadDialog: React.FunctionComponent = (props) => {
     const {theme, setTheme} = useContext(ThemeContext)
@@ -14,6 +14,8 @@ const ReportThreadDialog: React.FunctionComponent = (props) => {
     const {hideSidebar, setHideSidebar} = useContext(HideSidebarContext)
     const {enableDrag, setEnableDrag} = useContext(EnableDragContext)
     const {reportThreadID, setReportThreadID} = useContext(ReportThreadIDContext)
+    const {session, setSession} = useContext(SessionContext)
+    const {sessionFlag, setSessionFlag} = useContext(SessionFlagContext)
     const [reason, setReason] = useState("")
     const [submitted, setSubmitted] = useState(false)
     const [error, setError] = useState(false)
@@ -44,7 +46,7 @@ const ReportThreadDialog: React.FunctionComponent = (props) => {
             setError(false)
             return
         }
-        await axios.post("/api/thread/report", {threadID: reportThreadID, reason}, {headers: {"x-csrf-token": functions.getCSRFToken()}, withCredentials: true})
+        await functions.post("/api/thread/report", {threadID: reportThreadID, reason}, session, setSessionFlag)
         setSubmitted(true)
     }
 

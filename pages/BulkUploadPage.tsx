@@ -34,9 +34,8 @@ import DragAndDrop from "../components/DragAndDrop"
 import {HideNavbarContext, HideSidebarContext, RelativeContext, ThemeContext, EnableDragContext, HideTitlebarContext, 
 UploadDropFilesContext, BrightnessContext, ContrastContext, HueContext, SaturationContext, LightnessContext, MobileContext,
 BlurContext, SharpenContext, PixelateContext, HeaderTextContext, SessionContext, SidebarTextContext, RedirectContext,
-SiteHueContext, SiteLightnessContext, SiteSaturationContext, ShowUpscaledContext} from "../Context"
+SiteHueContext, SiteLightnessContext, SiteSaturationContext, ShowUpscaledContext, SessionFlagContext} from "../Context"
 import JSZip from "jszip"
-import axios from "axios"
 import SearchSuggestions from "../components/SearchSuggestions"
 import {ProgressBar} from "react-bootstrap"
 import permissions from "../structures/Permissions"
@@ -69,6 +68,7 @@ const BulkUploadPage: React.FunctionComponent = (props) => {
     const {headerText, setHeaderText} = useContext(HeaderTextContext)
     const {sidebarText, setSidebarText} = useContext(SidebarTextContext)
     const {session, setSession} = useContext(SessionContext)
+    const {sessionFlag, setSessionFlag} = useContext(SessionFlagContext)
     const {redirect, setRedirect} = useContext(RedirectContext)
     const {uploadDropFiles, setUploadDropFiles} = useContext(UploadDropFilesContext)
     const {mobile, setMobile} = useContext(MobileContext)
@@ -280,7 +280,7 @@ const BulkUploadPage: React.FunctionComponent = (props) => {
     }
 
     const readImage = async (image: string) => {
-        const arrayBuffer = await axios.get(`/api/misc/proxy?url=${image}`, {withCredentials: true, responseType: "arraybuffer"}).then((r) => r.data)
+        const arrayBuffer = await functions.get(`/api/misc/proxy?url=${image}`, null, session, setSessionFlag)
         let bytes = new Uint8Array(arrayBuffer)
         let blob = new Blob([bytes])
         const result = functions.bufferFileType(bytes)?.[0]
@@ -330,7 +330,7 @@ const BulkUploadPage: React.FunctionComponent = (props) => {
         enterLinksTimer = setTimeout(async () => {
             let files = [] as any
             for (let i = 0; i < links.length; i++) {
-                const file = await functions.proxyImage(links[i])
+                const file = await functions.proxyImage(links[i], session, setSessionFlag)
                 files.push(file)
             }
             await validate(files, links)
@@ -395,9 +395,9 @@ const BulkUploadPage: React.FunctionComponent = (props) => {
             let dupes = [] as any
             if (current.thumbnail) {
                 const bytes = await functions.base64toUint8Array(current.thumbnail)
-                dupes = await axios.post("/api/search/similar", {bytes: Object.values(bytes), type: current.ext}).then((r) => r.data)
+                dupes = await functions.post("/api/search/similar", {bytes: Object.values(bytes), type: current.ext}, session, setSessionFlag)
             } else {
-                dupes = await axios.post("/api/search/similar", {bytes: Object.values(current.bytes), type: current.ext}).then((r) => r.data)
+                dupes = await functions.post("/api/search/similar", {bytes: Object.values(current.bytes), type: current.ext}, session, setSessionFlag)
             }
             if (dupes.length) continue
             submitData.push(current)
@@ -475,7 +475,7 @@ const BulkUploadPage: React.FunctionComponent = (props) => {
             try {
                 setProgress(Math.floor((100/submitData.length) * (i+1)))
                 setProgressText(`${i+1}/${submitData.length}`)
-                await axios.post("/api/post/upload", data, {headers: {"x-csrf-token": functions.getCSRFToken()}, withCredentials: true}).then((r) => r.data)
+                await functions.post("/api/post/upload", data, session, setSessionFlag)
             } catch (e) {
                 console.log(e)
                 setSubmitError(true)
@@ -513,23 +513,23 @@ const BulkUploadPage: React.FunctionComponent = (props) => {
         if (/^\d+(?=$|_p)/.test(basename)) {
             const pixivID = basename.match(/^\d+(?=$|_p)/gm)?.[0] ?? ""
             link = `https://www.pixiv.net/en/artworks/${pixivID}`
-            const result = await axios.get(`https://danbooru.donmai.us/posts.json?tags=pixiv_id%3A${pixivID}`).then((r) => r.data)
+            const result = await functions.fetch(`https://danbooru.donmai.us/posts.json?tags=pixiv_id%3A${pixivID}`)
             if (result.length) danbooruLink = `https://danbooru.donmai.us/posts/${result[0].id}.json`
             try {
-                const illust = await axios.get(`/api/misc/pixiv?url=${link}`, {withCredentials: true}).then((r: any) => r.data)
+                const illust = await functions.get(`/api/misc/pixiv?url=${link}`, null, session, setSessionFlag)
                 commentary = `${functions.decodeEntities(illust.caption.replace(/<\/?[^>]+(>|$)/g, ""))}` 
                 date = functions.formatDate(new Date(illust.create_date), true)
                 link = illust.url 
                 title = illust.title
                 artist = illust.user.name
                 bookmarks = illust.total_bookmarks
-                const translated = await axios.post("/api/misc/translate", [title, commentary], {withCredentials: true}).then((r) => r.data)
+                const translated = await functions.post("/api/misc/translate", [title, commentary], session, setSessionFlag)
                 translatedTitle = translated[0]
                 translatedCommentary = translated[1]
                 if (illust.x_restrict !== 0) {
                     if (restrict === "safe") restrict = "questionable"
                 }
-                artists[artists.length - 1].tag = illust.user.twitter ? functions.fixTwitterTag(illust.user.twitter) : await axios.post("/api/misc/romajinize", [artist], {withCredentials: true}).then((r) => r.data[0])
+                artists[artists.length - 1].tag = illust.user.twitter ? functions.fixTwitterTag(illust.user.twitter) : await functions.post("/api/misc/romajinize", [artist], session, setSessionFlag).then((r) => r[0])
                 const imageData = await readImage(illust.user.profile_image_urls.medium)
                 artists[artists.length - 1].image = imageData?.image
                 artists[artists.length - 1].ext = imageData?.ext
@@ -538,7 +538,7 @@ const BulkUploadPage: React.FunctionComponent = (props) => {
             } catch (e) {
                 console.log(e)
             }
-            mirrors = await axios.post("/api/misc/boorulinks", {pixivID}, {withCredentials: true}).then((r) => r.data)
+            mirrors = await functions.post("/api/misc/boorulinks", {pixivID}, session, setSessionFlag)
             mirrors = mirrors?.length ? mirrors.join("\n") : ""
             return {
                 restrict,
@@ -557,7 +557,7 @@ const BulkUploadPage: React.FunctionComponent = (props) => {
                 }
             }
         } else {
-            let results = await axios.post(`/api/misc/saucenao`, bytes, {withCredentials: true}).then((r) => r.data)
+            let results = await functions.post(`/api/misc/saucenao`, bytes, session, setSessionFlag)
             if (results.length) {
                 const pixiv = results.filter((r: any) => r.header.index_id === 5)
                 const twitter = results.filter((r: any) => r.header.index_id === 41)
@@ -573,7 +573,7 @@ const BulkUploadPage: React.FunctionComponent = (props) => {
                 if (deviantart.length) {
                     let redirectedLink = ""
                     try {
-                        redirectedLink = await axios.get(`/api/misc/redirect?url=${deviantart[0].data.ext_urls[0]}`, {withCredentials: true}).then((r) => r.data)
+                        redirectedLink = await functions.get(`/api/misc/redirect?url=${deviantart[0].data.ext_urls[0]}`, null, session, setSessionFlag)
                     } catch {
                         // ignore
                     }
@@ -588,26 +588,26 @@ const BulkUploadPage: React.FunctionComponent = (props) => {
                 if (pixiv.length) {
                     link = `https://www.pixiv.net/en/artworks/${pixiv[0].data.pixiv_id}`
                     if (!danbooru.length) {
-                        const result = await axios.get(`https://danbooru.donmai.us/posts.json?tags=pixiv_id%3A${pixiv[0].data.pixiv_id}`).then((r) => r.data)
+                        const result = await functions.fetch(`https://danbooru.donmai.us/posts.json?tags=pixiv_id%3A${pixiv[0].data.pixiv_id}`)
                         if (result.length) danbooruLink = `https://danbooru.donmai.us/posts/${result[0].id}.json`
                     }
                     artist = pixiv[0].data.author_name
                     title = pixiv[0].data.title
                     try {
-                        const illust = await axios.get(`/api/misc/pixiv?url=${link}`, {withCredentials: true}).then((r: any) => r.data)
+                        const illust = await functions.get(`/api/misc/pixiv?url=${link}`, null, session, setSessionFlag)
                         commentary = `${functions.decodeEntities(illust.caption.replace(/<\/?[^>]+(>|$)/g, ""))}` 
                         date = functions.formatDate(new Date(illust.create_date), true)
                         link = illust.url 
                         title = illust.title
                         artist = illust.user.name
                         bookmarks = illust.total_bookmarks
-                        const translated = await axios.post("/api/misc/translate", [title, commentary], {withCredentials: true}).then((r) => r.data)
+                        const translated = await functions.post("/api/misc/translate", [title, commentary], session, setSessionFlag)
                         translatedTitle = translated[0]
                         translatedCommentary = translated[1]
                         if (illust.x_restrict !== 0) {
                             if (restrict === "safe") restrict = "questionable"
                         }
-                        artists[artists.length - 1].tag = illust.user.twitter ? functions.fixTwitterTag(illust.user.twitter) : await axios.post("/api/misc/romajinize", [artist], {withCredentials: true}).then((r) => r.data[0])
+                        artists[artists.length - 1].tag = illust.user.twitter ? functions.fixTwitterTag(illust.user.twitter) : await functions.post("/api/misc/romajinize", [artist], session, setSessionFlag).then((r) => r[0])
                         const imageData = await readImage(illust.user.profile_image_urls.medium)
                         artists[artists.length - 1].image = imageData?.image
                         artists[artists.length - 1].ext = imageData?.ext
@@ -619,7 +619,7 @@ const BulkUploadPage: React.FunctionComponent = (props) => {
                 } else if (deviantart.length) {
                     let redirectedLink = ""
                     try {
-                        redirectedLink = await axios.get(`/api/misc/redirect?url=${deviantart[0].data.ext_urls[0]}`, {withCredentials: true}).then((r) => r.data)
+                        redirectedLink = await functions.get(`/api/misc/redirect?url=${deviantart[0].data.ext_urls[0]}`, null, session, setSessionFlag)
                     } catch {
                         // ignore
                     }
@@ -627,7 +627,7 @@ const BulkUploadPage: React.FunctionComponent = (props) => {
                     artist = deviantart[0].data.member_name 
                     title = deviantart[0].data.title
                     try {
-                        const deviation = await axios.get(`/api/misc/deviantart?url=${link}`, {withCredentials: true}).then((r: any) => r.data)
+                        const deviation = await functions.get(`/api/misc/deviantart?url=${link}`, null, session, setSessionFlag)
                         title = deviation.title
                         artist = deviation.author.user.username
                         link = deviation.url
@@ -699,10 +699,10 @@ const BulkUploadPage: React.FunctionComponent = (props) => {
         let series = [{}] as any
         let tags = [] as any
         let newTags = [] as any
-        const tagMap = await functions.tagsCache()
+        const tagMap = await functions.tagsCache(session, setSessionFlag)
 
         if (danbooruLink) {
-            const json = await axios.get(danbooruLink).then((r) => r.data)
+            const json = await functions.fetch(danbooruLink)
             tagArr = json.tag_string_general.split(" ").map((tag: string) => tag.replaceAll("_", "-"))
             tagArr.push("autotags")
             tagArr.push("upscaled")
@@ -774,7 +774,7 @@ const BulkUploadPage: React.FunctionComponent = (props) => {
             } else {
                 bytes = Object.values(current.bytes) as any
             }
-            let tagArr = await axios.post(`/api/misc/wdtagger`, bytes, {withCredentials: true}).then((r) => r.data).catch(() => null)
+            let tagArr = await functions.post(`/api/misc/wdtagger`, bytes, session, setSessionFlag).catch(() => null)
             if (tagArr.includes("chibi")) style = "chibi"
             if (tagArr.includes("pixel-art")) style = "pixel"
             if (tagArr.includes("comic")) {

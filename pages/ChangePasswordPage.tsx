@@ -11,8 +11,7 @@ import DragAndDrop from "../components/DragAndDrop"
 import functions from "../structures/Functions"
 import {HideNavbarContext, HideSidebarContext, ThemeContext, EnableDragContext, RedirectContext, MobileContext,
 RelativeContext, HideTitlebarContext, HeaderTextContext, SidebarTextContext, SessionContext, SiteHueContext, SiteLightnessContext,
-SiteSaturationContext} from "../Context"
-import axios from "axios"
+SiteSaturationContext, SessionFlagContext} from "../Context"
 import "./styles/changepasspage.less"
 
 const ChangePasswordPage: React.FunctionComponent = (props) => {
@@ -28,9 +27,9 @@ const ChangePasswordPage: React.FunctionComponent = (props) => {
     const {sidebarText, setSidebarText} = useContext(SidebarTextContext)
     const {relative, setRelative} = useContext(RelativeContext)
     const {session, setSession} = useContext(SessionContext)
+    const {sessionFlag, setSessionFlag} = useContext(SessionFlagContext)
     const {redirect, setRedirect} = useContext(RedirectContext)
     const {mobile, setMobile} = useContext(MobileContext)
-
     const [submitted, setSubmitted] = useState(false)
     const [showPassword, setShowPassword] = useState(false)
     const [showPassword2, setShowPassword2] = useState(false)
@@ -108,7 +107,7 @@ const ChangePasswordPage: React.FunctionComponent = (props) => {
         if (!errorRef.current) await functions.timeout(20)
         errorRef.current!.innerText = "Submitting..."
         try {
-            await axios.post("/api/user/changepassword", {oldPassword, newPassword}, {headers: {"x-csrf-token": functions.getCSRFToken()}, withCredentials: true})
+            await functions.post("/api/user/changepassword", {oldPassword, newPassword}, session, setSessionFlag)
             setSubmitted(true)
             setError(false)
         } catch {

@@ -9,7 +9,6 @@ import DragAndDrop from "../components/DragAndDrop"
 import {HideNavbarContext, HideSidebarContext, ThemeContext, EnableDragContext, RelativeContext, HideTitlebarContext, MobileContext,
 HeaderTextContext, SidebarTextContext, SessionContext, SessionFlagContext} from "../Context"
 import functions from "../structures/Functions"
-import axios from "axios"
 import "./styles/2fapage.less"
 
 const $2FAPage: React.FunctionComponent = (props) => {
@@ -69,7 +68,7 @@ const $2FAPage: React.FunctionComponent = (props) => {
         if (!errorRef.current) await functions.timeout(20)
         errorRef.current!.innerText = "Submitting..."
         try {
-            await axios.post("/api/2fa", {token}, {headers: {"x-csrf-token": functions.getCSRFToken()}, withCredentials: true})
+            await functions.post("/api/2fa", {token}, session, setSessionFlag)
             setSessionFlag(true)
             history.push("/posts")
             setError(false)

@@ -1,5 +1,5 @@
 import nodemailer from "nodemailer"
-import {Request} from "express"
+import {Request, Response, NextFunction} from "express"
 import path from "path"
 import fs from "fs"
 import crypto from "crypto"
@@ -10,6 +10,7 @@ import S3 from "aws-sdk/clients/s3"
 import phash from "sharp-phash"
 import dist from "sharp-phash/distance"
 import CSRF from "csrf"
+import jwt from "jsonwebtoken"
 
 const csrf = new CSRF()
 
@@ -21,6 +22,20 @@ const s3 = new S3({region: "us-east-1", credentials: {
     secretAccessKey: process.env.AWS_SECRET_KEY!
 }})
 
+export const authenticate = (req: Request, res: Response, next: NextFunction) => {
+    if (!req.session.username) return res.status(403).send("Unauthorized")
+    if (!ServerFunctions.validateCSRF(req)) return res.status(400).send("Bad CSRF token")
+    const token = req.headers["authorization"]?.split(" ")[1]
+    if (!token) return res.status(401).send("Invalid token")
+
+    jwt.verify(token, process.env.ACCESS_SECRET!, (err, session: any) => {
+        if (err) return res.status(401).send("Invalid token")
+        if (req.session.username !== session.username) return res.status(403).send("Bad request")
+        if (req.session.role !== session.role) return res.status(403).send("Bad request")
+        next()
+    })
+}
+
 export default class ServerFunctions {
     public static generateCSRF = () => {
         const secret = csrf.secretSync()
@@ -31,6 +46,16 @@ export default class ServerFunctions {
     public static validateCSRF = (req: Request) => {
         const csrfToken = req.headers["x-csrf-token"] as string
         return csrf.verify(req.session.csrfSecret!, csrfToken)
+    }
+
+    public static generateAccessToken = (req: Request) => {
+        const session = {username: req.session.username, role: req.session.role}
+        return jwt.sign(session, process.env.ACCESS_SECRET!, {expiresIn: "24h"})
+    }
+
+    public static generateRefreshToken = (req: Request) => {
+        const session = {username: req.session.username, role: req.session.role}
+        return jwt.sign(session, process.env.REFRESH_SECRET!, {expiresIn: "30d"})
     }
 
     public static email = async (email: string, subject: string, jsx: React.ReactElement) => {

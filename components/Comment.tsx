@@ -2,7 +2,7 @@ import React, {useContext, useEffect, useRef, useState} from "react"
 import {useHistory} from "react-router-dom"
 import {ThemeContext, QuoteTextContext, SessionContext, DeleteCommentIDContext, DeleteCommentFlagContext,
 EditCommentIDContext, EditCommentFlagContext, EditCommentTextContext, ReportCommentIDContext, SiteHueContext,
-SiteLightnessContext, SiteSaturationContext} from "../Context"
+SiteLightnessContext, SiteSaturationContext, SessionFlagContext} from "../Context"
 import {HashLink as Link} from "react-router-hash-link"
 import functions from "../structures/Functions"
 import favicon from "../assets/icons/favicon.png"
@@ -17,7 +17,6 @@ import modCrown from "../assets/icons/mod-crown.png"
 import systemCrown from "../assets/icons/system-crown.png"
 import jsxFunctions from "../structures/JSXFunctions"
 import "./styles/comment.less"
-import axios from "axios"
 
 interface Props {
     comment: any
@@ -33,6 +32,7 @@ const Comment: React.FunctionComponent<Props> = (props) => {
     const {siteLightness, setSiteLightness} = useContext(SiteLightnessContext)
     const {quoteText, setQuoteText} = useContext(QuoteTextContext)
     const {session, setSession} = useContext(SessionContext)
+    const {sessionFlag, setSessionFlag} = useContext(SessionFlagContext)
     const {deleteCommentID, setDeleteCommentID} = useContext(DeleteCommentIDContext)
     const {deleteCommentFlag, setDeleteCommentFlag} = useContext(DeleteCommentFlagContext)
     const {editCommentFlag, setEditCommentFlag} = useContext(EditCommentFlagContext)
@@ -108,7 +108,7 @@ const Comment: React.FunctionComponent<Props> = (props) => {
     }
 
     const deleteComment = async () => {
-        await axios.delete("/api/comment/delete", {params: {commentID: props.comment?.commentID}, headers: {"x-csrf-token": functions.getCSRFToken()}, withCredentials: true})
+        await functions.delete("/api/comment/delete", {commentID: props.comment?.commentID}, session, setSessionFlag)
         props.onDelete?.()
     }
 
@@ -118,7 +118,7 @@ const Comment: React.FunctionComponent<Props> = (props) => {
             setDeleteCommentFlag(false)
             setDeleteCommentID(null)
         }
-    }, [deleteCommentFlag])
+    }, [deleteCommentFlag, session])
 
     const deleteCommentDialog = async () => {
         setDeleteCommentID(props.comment?.commentID)
@@ -128,7 +128,7 @@ const Comment: React.FunctionComponent<Props> = (props) => {
         if (!editCommentText) return
         const badComment = functions.validateComment(editCommentText)
         if (badComment) return
-        await axios.put("/api/comment/edit", {commentID: props.comment?.commentID, comment: editCommentText}, {headers: {"x-csrf-token": functions.getCSRFToken()}, withCredentials: true})
+        await functions.put("/api/comment/edit", {commentID: props.comment?.commentID, comment: editCommentText}, session, setSessionFlag)
         props.onEdit?.()
     }
 
@@ -138,7 +138,7 @@ const Comment: React.FunctionComponent<Props> = (props) => {
             setEditCommentFlag(false)
             setEditCommentID(null)
         }
-    }, [editCommentFlag])
+    }, [editCommentFlag, session])
 
     const editCommentDialog = async () => {
         setEditCommentText(props.comment?.comment)

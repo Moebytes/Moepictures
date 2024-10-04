@@ -1,6 +1,6 @@
 import React, {useContext, useEffect, useRef, useState} from "react"
 import {useHistory} from "react-router-dom"
-import {ThemeContext, QuoteTextContext, SessionContext, MobileContext, DeletePostHistoryIDContext, 
+import {ThemeContext, QuoteTextContext, SessionContext, SessionFlagContext, MobileContext, DeletePostHistoryIDContext, 
 RevertPostHistoryIDContext, DeletePostHistoryFlagContext, RevertPostHistoryFlagContext} from "../Context"
 import {HashLink as Link} from "react-router-hash-link"
 import functions from "../structures/Functions"
@@ -12,7 +12,6 @@ import modCrown from "../assets/icons/mod-crown.png"
 import permissions from "../structures/Permissions"
 import "./styles/posthistoryrow.less"
 import crypto from "crypto"
-import axios from "axios"
 import path from "path"
 
 interface Props {
@@ -29,6 +28,7 @@ const PostHistoryRow: React.FunctionComponent<Props> = (props) => {
     const {theme, setTheme} = useContext(ThemeContext)
     const {mobile, setMobile} = useContext(MobileContext)
     const {session, setSession} = useContext(SessionContext)
+    const {sessionFlag, setSessionFlag} = useContext(SessionFlagContext)
     const {deletePostHistoryID, setDeletePostHistoryID} = useContext(DeletePostHistoryIDContext)
     const {revertPostHistoryID, setRevertPostHistoryID} = useContext(RevertPostHistoryIDContext)
     const {deletePostHistoryFlag, setDeletePostHistoryFlag} = useContext(DeletePostHistoryFlagContext)
@@ -53,14 +53,14 @@ const PostHistoryRow: React.FunctionComponent<Props> = (props) => {
     }
 
     const updateUserRole = async () => {
-        const user = await axios.get("/api/user", {params: {username: props.postHistory.user}, withCredentials: true}).then((r) => r.data)
+        const user = await functions.get("/api/user", {username: props.postHistory.user}, session, setSessionFlag)
         if (user?.role) setUserRole(user.role)
     }
 
     useEffect(() => {
         updateUserRole()
         updateImages()
-    }, [])
+    }, [session])
 
     const imagesChanged = async () => {
         if (props.postHistory.images.length !== props.currentHistory.images.length) return true
@@ -83,10 +83,10 @@ const PostHistoryRow: React.FunctionComponent<Props> = (props) => {
             } else if (functions.isAudio(img)) {
                 current = await functions.songCover(current)
             }
-            const imgBuffer = await axios.get(img, {responseType: "arraybuffer", withCredentials: true, headers: {"x-force-upscale": "false"}}).then((r) => r.data) as Buffer
-            const currentBuffer = await axios.get(currentImg, {responseType: "arraybuffer", withCredentials: true, headers: {"x-force-upscale": "false"}}).then((r) => r.data) as Buffer
-            const upscaledImgBuffer = await axios.get(img, {responseType: "arraybuffer", withCredentials: true, headers: {"x-force-upscale": "true"}}).then((r) => r.data) as Buffer
-            const upscaledCurrentBuffer = await axios.get(currentImg, {responseType: "arraybuffer", withCredentials: true, headers: {"x-force-upscale": "true"}}).then((r) => r.data) as Buffer
+            const imgBuffer = await functions.getBuffer(img, {"x-force-upscale": "false"})
+            const currentBuffer = await functions.getBuffer(currentImg, {"x-force-upscale": "false"})
+            const upscaledImgBuffer = await functions.getBuffer(img, {"x-force-upscale": "true"})
+            const upscaledCurrentBuffer = await functions.getBuffer(currentImg, {"x-force-upscale": "true"})
 
             if (imgBuffer.byteLength) {
                 const imgMD5 = crypto.createHash("md5").update(Buffer.from(imgBuffer)).digest("hex")
@@ -122,8 +122,8 @@ const PostHistoryRow: React.FunctionComponent<Props> = (props) => {
             let link = await cryptoFunctions.decryptedLink(imgLink)
             let ext = path.extname(imgLink)
             if (!link.includes(ext)) link += `#${ext}`
-            const buffer = await axios.get(link, {responseType: "arraybuffer", withCredentials: true, headers: {"x-force-upscale": "false"}}).then((r) => r.data) as Buffer
-            const upscaledBuffer = await axios.get(link, {responseType: "arraybuffer", withCredentials: true, headers: {"x-force-upscale": "true"}}).then((r) => r.data) as Buffer
+            const buffer = await functions.getBuffer(link, {"x-force-upscale": "false"})
+            const upscaledBuffer = await functions.getBuffer(link, {"x-force-upscale": "true"})
             let thumbnail = ""
             if (ext === ".mp4" || ext === ".webm") {
                 thumbnail = await functions.videoThumbnail(link)
@@ -147,7 +147,7 @@ const PostHistoryRow: React.FunctionComponent<Props> = (props) => {
     const parseNewTags = async () => {
         const tags = props.postHistory.tags
         if (!tags?.[0]) return []
-        const tagMap = await functions.tagsCache()
+        const tagMap = await functions.tagsCache(session, setSessionFlag)
         let notExists = [] as any
         for (let i = 0; i < tags.length; i++) {
             const exists = tagMap[tags[i]]
@@ -173,13 +173,13 @@ const PostHistoryRow: React.FunctionComponent<Props> = (props) => {
                 commentary: props.postHistory.commentary,
                 translatedCommentary: props.postHistory.translatedCommentary
             }
-            await axios.put("/api/post/edit", {postID: props.postHistory.postID, images, upscaledImages, type: props.postHistory.type, restrict: props.postHistory.restrict, source,
+            await functions.put("/api/post/edit", {postID: props.postHistory.postID, images, upscaledImages, type: props.postHistory.type, restrict: props.postHistory.restrict, source,
             style: props.postHistory.style, artists: props.postHistory.artists, characters: props.postHistory.characters, preserveThirdParty: props.postHistory.thirdParty,
-            series: props.postHistory.series, tags: props.postHistory.tags, newTags, reason: props.postHistory.reason}, {headers: {"x-csrf-token": functions.getCSRFToken()}, withCredentials: true})
+            series: props.postHistory.series, tags: props.postHistory.tags, newTags, reason: props.postHistory.reason}, session, setSessionFlag)
         } else {
-            await axios.put("/api/post/quickedit", {postID: props.postHistory.postID, type: props.postHistory.type, restrict: props.postHistory.restrict,
+            await functions.put("/api/post/quickedit", {postID: props.postHistory.postID, type: props.postHistory.type, restrict: props.postHistory.restrict,
             style: props.postHistory.style, artists: props.postHistory.artists, characters: props.postHistory.characters, preserveThirdParty: props.postHistory.thirdParty,
-            series: props.postHistory.series, tags: props.postHistory.tags, reason: props.postHistory.reason}, {headers: {"x-csrf-token": functions.getCSRFToken()}, withCredentials: true})
+            series: props.postHistory.series, tags: props.postHistory.tags, reason: props.postHistory.reason}, session, setSessionFlag)
         }
         props.onEdit?.()
     }
@@ -194,11 +194,11 @@ const PostHistoryRow: React.FunctionComponent<Props> = (props) => {
                 setRevertPostHistoryID({failed: error ? error : true, historyID: props.postHistory.historyID})
             })
         }
-    }, [revertPostHistoryFlag, revertPostHistoryID, props.current, currentImg])
+    }, [revertPostHistoryFlag, revertPostHistoryID, props.current, currentImg, session])
 
     const deletePostHistory = async () => {
         if (props.current) return Promise.reject()
-        await axios.delete("/api/post/history/delete", {params: {postID, historyID: props.postHistory.historyID}, headers: {"x-csrf-token": functions.getCSRFToken()}, withCredentials: true})
+        await functions.delete("/api/post/history/delete", {postID, historyID: props.postHistory.historyID}, session, setSessionFlag)
         props.onDelete?.()
     }
 
@@ -212,7 +212,7 @@ const PostHistoryRow: React.FunctionComponent<Props> = (props) => {
                 setDeletePostHistoryID({failed: true, historyID: props.postHistory.historyID})
             })
         }
-    }, [deletePostHistoryFlag, deletePostHistoryID, props.current])
+    }, [deletePostHistoryFlag, deletePostHistoryID, session, props.current])
 
     const revertPostHistoryDialog = async () => {
         setRevertPostHistoryID({failed: false, historyID: props.postHistory.historyID})
@@ -355,8 +355,8 @@ const PostHistoryRow: React.FunctionComponent<Props> = (props) => {
             } else if (functions.isAudio(img)) {
                 previous = await functions.songCover(previous)
             }
-            const imgBuffer = await axios.get(img, {responseType: "arraybuffer", withCredentials: true}).then((r) => r.data)
-            const previousBuffer = await axios.get(previous, {responseType: "arraybuffer", withCredentials: true}).then((r) => r.data)
+            const imgBuffer = await functions.getBuffer(img)
+            const previousBuffer = await functions.getBuffer(previous)
 
             const imgMD5 = crypto.createHash("md5").update(Buffer.from(imgBuffer)).digest("hex")
             const previousMD5 = crypto.createHash("md5").update(Buffer.from(previousBuffer)).digest("hex")

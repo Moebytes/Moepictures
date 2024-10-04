@@ -34,6 +34,7 @@ import UserRoutes from "./routes/UserRoutes"
 import TranslationRoutes from "./routes/TranslationRoutes"
 import ThreadRoutes from "./routes/ThreadRoutes"
 import MessageRoutes from "./routes/MessageRoutes"
+import jwt from "jsonwebtoken"
 const __dirname = path.resolve()
 
 dotenv.config()
@@ -46,6 +47,8 @@ app.disable("x-powered-by")
 
 declare module "express-session" {
   interface SessionData {
+      accessToken: string
+      refreshToken: string
       username: string
       email: string
       joinDate: string
@@ -309,6 +312,18 @@ for (let i = 0; i < folders.length; i++) {
     }
   })
 }
+
+app.get("/refresh-token", (req: Request, res: Response) => {
+  if (!req.session.username) return res.status(403).send("Unauthorized")
+  if (!req.session.refreshToken) return res.status(400).send("No refresh token")
+
+  jwt.verify(req.session.refreshToken, process.env.REFRESH_SECRET!, (err, session: any) => {
+      if (err) return res.status(403).send("Invalid token")
+      const accessToken = serverFunctions.generateAccessToken(req)
+      req.session.accessToken = accessToken
+      res.json({accessToken})
+  })
+})
 
 app.get("/*", (req: Request, res: Response) => {
   if (!req.hostname.includes("moepictures") && !req.hostname.includes("localhost") && !req.hostname.includes("192.168.68")) {

@@ -6,9 +6,8 @@ import Footer from "../components/Footer"
 import DragAndDrop from "../components/DragAndDrop"
 import {HideNavbarContext, HideSidebarContext, ThemeContext, EnableDragContext, MobileContext,
 RelativeContext, HideTitlebarContext, HeaderTextContext, SidebarTextContext, SiteHueContext,
-SiteLightnessContext, SiteSaturationContext, SessionContext} from "../Context"
+SiteLightnessContext, SiteSaturationContext, SessionContext, SessionFlagContext} from "../Context"
 import functions from "../structures/Functions"
-import axios from "axios"
 import "./styles/forgotpasspage.less"
 
 const ForgotPasswordPage: React.FunctionComponent = (props) => {
@@ -22,6 +21,7 @@ const ForgotPasswordPage: React.FunctionComponent = (props) => {
     const {enableDrag, setEnableDrag} = useContext(EnableDragContext)
     const {relative, setRelative} = useContext(RelativeContext)
     const {session, setSession} = useContext(SessionContext)
+    const {sessionFlag, setSessionFlag} = useContext(SessionFlagContext)
     const {headerText, setHeaderText} = useContext(HeaderTextContext)
     const {sidebarText, setSidebarText} = useContext(SidebarTextContext)
     const {mobile, setMobile} = useContext(MobileContext)
@@ -42,7 +42,7 @@ const ForgotPasswordPage: React.FunctionComponent = (props) => {
     }
 
     const updateCaptcha = async () => {
-        const captcha = await axios.get("/api/misc/captcha/create", {params: {color: getCaptchaColor()}, withCredentials: true}).then((r) => r.data)
+        const captcha = await functions.get("/api/misc/captcha/create", {color: getCaptchaColor()}, session, setSessionFlag)
         setCaptcha(captcha)
         setCaptchaResponse("")
     }
@@ -75,7 +75,7 @@ const ForgotPasswordPage: React.FunctionComponent = (props) => {
         if (!errorRef.current) await functions.timeout(20)
         errorRef.current!.innerText = "Submitting..."
         try {
-            await axios.post("/api/user/forgotpassword", {email, captchaResponse}, {headers: {"x-csrf-token": functions.getCSRFToken()}, withCredentials: true})
+            await functions.post("/api/user/forgotpassword", {email, captchaResponse}, session, setSessionFlag)
             setSubmitted(true)
             setError(false)
             setEmail("")

@@ -1,6 +1,6 @@
 import React, {useEffect, useContext, useState, useRef} from "react"
 import {ThemeContext, EnableDragContext, HideNavbarContext, HideSidebarContext, RelativeContext, HideTitlebarContext, MobileContext,
-ActiveDropdownContext, HeaderTextContext, SidebarTextContext, SessionContext, SearchContext, SearchFlagContext, TakedownTagContext} from "../Context"
+ActiveDropdownContext, HeaderTextContext, SidebarTextContext, SessionContext, SessionFlagContext, SearchContext, SearchFlagContext, TakedownTagContext} from "../Context"
 import {useHistory} from "react-router-dom"
 import TitleBar from "../components/TitleBar"
 import NavBar from "../components/NavBar"
@@ -19,7 +19,6 @@ import soundcloud from "../assets/icons/soundcloud.png"
 import sketchfab from "../assets/icons/sketchfab.png"
 import twitter from "../assets/icons/twitter.png"
 import Carousel from "../components/Carousel"
-import axios from "axios"
 import "./styles/tagpage.less"
 
 
@@ -38,6 +37,7 @@ const TagPage: React.FunctionComponent<Props> = (props) => {
     const {headerText, setHeaderText} = useContext(HeaderTextContext)
     const {sidebarText, setSidebarText} = useContext(SidebarTextContext)
     const {session, setSession} = useContext(SessionContext)
+    const {sessionFlag, setSessionFlag} = useContext(SessionFlagContext)
     const {mobile, setMobile} = useContext(MobileContext)
     const {search, setSearch} = useContext(SearchContext)
     const {takedownTag, setTakedownTag} = useContext(TakedownTagContext)
@@ -53,20 +53,20 @@ const TagPage: React.FunctionComponent<Props> = (props) => {
     const tagName = props?.match.params.tag
 
     const tagInfo = async () => {
-        const tag = await axios.get("/api/tag", {params: {tag: tagName}}).then((r) => r.data)
+        const tag = await functions.get("/api/tag", {tag: tagName}, session, setSessionFlag)
         if (!tag) return history.push("/404")
-        const tagCount = await axios.get("/api/tag/counts", {params: {tags: [tagName]}}).then((r) => Number(r.data?.[0]?.count || 0))
+        const tagCount = await functions.get("/api/tag/counts", {tags: [tagName]}, session, setSessionFlag).then((r) => Number(r?.[0]?.count || 0))
         setTag(tag)
         setCount(tagCount)
     }
 
     const updateRelatedTags = async () => {
-        const related = await axios.get("/api/tag/related", {params: {tag: tagName}}).then((r) => r.data)
+        const related = await functions.get("/api/tag/related", {tag: tagName}, session, setSessionFlag)
         setRelatedTags(related)
     }
 
     const updatePosts = async () => {
-        let uploads = await axios.get("/api/search/posts", {params: {query: tagName, type: "all", restrict: "all", style: "all", sort: "date"}, withCredentials: true}).then((r) => r.data)
+        let uploads = await functions.get("/api/search/posts", {query: tagName, type: "all", restrict: "all", style: "all", sort: "date"}, session, setSessionFlag)
         const filtered = uploads.filter((u: any) => u.post?.restrict !== "explicit")
         const images = filtered.map((p: any) => functions.getThumbnailLink(p.images[0].type, p.postID, p.images[0].order, p.images[0].filename, "large"))
         setPosts(filtered)
@@ -76,7 +76,7 @@ const TagPage: React.FunctionComponent<Props> = (props) => {
     const updateOffset = async () => {
         let uploads = posts
         let offset = posts.length
-        const result = await axios.get("/api/search/posts", {params: {query: tag.tag, type: "all", restrict: "all", style: "all", sort: "date", offset}, withCredentials: true}).then((r) => r.data)
+        const result = await functions.get("/api/search/posts", {query: tag.tag, type: "all", restrict: "all", style: "all", sort: "date", offset}, session, setSessionFlag)
         uploads.push(...result)
         const filtered = uploads.filter((u: any) => u.post?.restrict !== "explicit")
         const images = filtered.map((p: any) => functions.getThumbnailLink(p.images[0].type, p.postID, p.images[0].order, p.images[0].filename, "large"))
@@ -88,7 +88,7 @@ const TagPage: React.FunctionComponent<Props> = (props) => {
         tagInfo()
         updateRelatedTags()
         updatePosts()
-    }, [tagName])
+    }, [tagName, session])
 
     useEffect(() => {
         setHideNavbar(true)

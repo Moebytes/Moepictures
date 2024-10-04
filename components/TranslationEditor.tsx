@@ -3,11 +3,10 @@ import {useHistory} from "react-router-dom"
 import {ThemeContext, EnableDragContext, SessionContext, BrightnessContext, ContrastContext, HueContext, SaturationContext, LightnessContext,
 BlurContext, SharpenContext, PixelateContext, TranslationModeContext, EditTranslationIDContext, MobileContext, ShowSaveTranslationDialogContext,
 EditTranslationFlagContext, EditTranslationTextContext, EditTranslationTranscriptContext, TranslationDrawingEnabledContext, ImageExpandContext,
-SaveTranslationDataContext, SaveTranslationOrderContext, SiteHueContext, SiteLightnessContext, SiteSaturationContext} from "../Context"
+SaveTranslationDataContext, SaveTranslationOrderContext, SiteHueContext, SiteLightnessContext, SiteSaturationContext, SessionFlagContext} from "../Context"
 import functions from "../structures/Functions"
 import cryptoFunctions from "../structures/CryptoFunctions"
 import {ShapeEditor, ImageLayer, DrawLayer, wrapShape} from "react-shape-editor"
-import axios from "axios"
 import translationDelete from "../assets/icons/translation-delete.png"
 import translationEdit from "../assets/icons/translation-edit.png"
 import translationHistory from "../assets/icons/translation-history.png"
@@ -90,6 +89,7 @@ const TranslationEditor: React.FunctionComponent<Props> = (props) => {
     const {siteLightness, setSiteLightness} = useContext(SiteLightnessContext)
     const {enableDrag, setEnableDrag} = useContext(EnableDragContext)
     const {session, setSession} = useContext(SessionContext)
+    const {sessionFlag, setSessionFlag} = useContext(SessionFlagContext)
     const {brightness, setBrightness} = useContext(BrightnessContext)
     const {contrast, setContrast} = useContext(ContrastContext)
     const {hue, setHue} = useContext(HueContext)
@@ -131,7 +131,7 @@ const TranslationEditor: React.FunctionComponent<Props> = (props) => {
 
     const updateTranslations = async () => {
         if (!props.post || props.unverified) return
-        const translations = await axios.get("/api/translations", {params: {postID: props.post.postID}, withCredentials: true}).then((r) => r.data)
+        const translations = await functions.get("/api/translations", {postID: props.post.postID}, session, setSessionFlag)
         if (translations?.length) {
             const translation = translations.find((t: any) => t.order === (props.order || 1))
             if (translation?.data?.length) {
@@ -148,7 +148,7 @@ const TranslationEditor: React.FunctionComponent<Props> = (props) => {
 
     useEffect(() => {
         updateTranslations()
-    }, [props.img, props.order])
+    }, [props.img, props.order, session])
 
     useEffect(() => {
         const keyDownListener = (event: KeyboardEvent) => {

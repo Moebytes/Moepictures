@@ -3,7 +3,7 @@ import rateLimit from "express-rate-limit"
 import slowDown from "express-slow-down"
 import sql from "../sql/SQLQuery"
 import functions from "../structures/Functions"
-import serverFunctions from "../structures/ServerFunctions"
+import serverFunctions, {authenticate} from "../structures/ServerFunctions"
 
 const messageLimiter = rateLimit({
 	windowMs: 5 * 60 * 1000,
@@ -31,11 +31,10 @@ const pushNotification = (username: string) => {
 }
 
 const MessageRoutes = (app: Express) => {
-    app.post("/api/message/create", messageUpdateLimiter, async (req: Request, res: Response) => {
+    app.post("/api/message/create", authenticate, messageUpdateLimiter, async (req: Request, res: Response) => {
         try {
             const {title, content, recipient} = req.body
-            if (!serverFunctions.validateCSRF(req)) return res.status(400).send("Bad CSRF token")
-            if (!req.session.username) return res.status(401).send("Unauthorized")
+            if (!req.session.username) return res.status(403).send("Unauthorized")
             if (req.session.banned) return res.status(403).send("You are banned")
             if (!title || !content) return res.status(400).send("Bad title or content")
             const badTitle = functions.validateTitle(title)
@@ -52,11 +51,10 @@ const MessageRoutes = (app: Express) => {
         }
     })
 
-    app.put("/api/message/edit", messageUpdateLimiter, async (req: Request, res: Response) => {
+    app.put("/api/message/edit", authenticate, messageUpdateLimiter, async (req: Request, res: Response) => {
         try {
             const {messageID, title, content} = req.body
-            if (!serverFunctions.validateCSRF(req)) return res.status(400).send("Bad CSRF token")
-            if (!req.session.username) return res.status(401).send("Unauthorized")
+            if (!req.session.username) return res.status(403).send("Unauthorized")
             if (!title || !content) return res.status(400).send("Bad title or content")
             const badTitle = functions.validateTitle(title)
             if (badTitle) return res.status(400).send("Bad title")
@@ -80,10 +78,10 @@ const MessageRoutes = (app: Express) => {
         try {
             const messageID = req.query.messageID
             if (!messageID) return res.status(400).send("Bad messageID")
-            if (!req.session.username) return res.status(401).send("Unauthorized")
+            if (!req.session.username) return res.status(403).send("Unauthorized")
             const message = await sql.message.message(Number(messageID))
             if (req.session.username !== message.creator && req.session.username !== message.recipient) {
-                if (req.session.role !== "admin" && req.session.role !== "mod") return res.status(401).send("No permission to view")
+                if (req.session.role !== "admin" && req.session.role !== "mod") return res.status(403).send("No permission to view")
             }
             res.status(200).json(message)
         } catch (e) {
@@ -92,12 +90,11 @@ const MessageRoutes = (app: Express) => {
         }
     })
 
-    app.delete("/api/message/delete", messageUpdateLimiter, async (req: Request, res: Response) => {
+    app.delete("/api/message/delete", authenticate, messageUpdateLimiter, async (req: Request, res: Response) => {
         try {
             const messageID = req.query.messageID
-            if (!serverFunctions.validateCSRF(req)) return res.status(400).send("Bad CSRF token")
             if (!messageID) return res.status(400).send("Bad messageID")
-            if (!req.session.username) return res.status(401).send("Unauthorized")
+            if (!req.session.username) return res.status(403).send("Unauthorized")
             const message = await sql.message.message(Number(messageID))
             if (!message) return res.status(400).send("Invalid messageID")
             if (message.creator !== req.session.username) {
@@ -111,11 +108,10 @@ const MessageRoutes = (app: Express) => {
         }
     })
 
-    app.post("/api/message/reply", messageUpdateLimiter, async (req: Request, res: Response) => {
+    app.post("/api/message/reply", authenticate, messageUpdateLimiter, async (req: Request, res: Response) => {
         try {
             const {messageID, content} = req.body
-            if (!serverFunctions.validateCSRF(req)) return res.status(400).send("Bad CSRF token")
-            if (!req.session.username) return res.status(401).send("Unauthorized")
+            if (!req.session.username) return res.status(403).send("Unauthorized")
             if (req.session.banned) return res.status(403).send("You are banned")
             if (!messageID || !content) return res.status(400).send("Bad messageID or content")
             const badReply = functions.validateReply(content)
@@ -123,7 +119,7 @@ const MessageRoutes = (app: Express) => {
             const message = await sql.message.message(messageID)
             if (!message) return res.status(400).send("Invalid messageID")
             if (req.session.username !== message.creator && req.session.username !== message.recipient) {
-                if (req.session.role !== "admin" && req.session.role !== "mod") return res.status(401).send("No permission to reply")
+                if (req.session.role !== "admin" && req.session.role !== "mod") return res.status(403).send("No permission to reply")
             }
             if (message.role === "system") return res.status(403).send("Cannot reply to system messages")
             await sql.message.insertMessageReply(Number(messageID), req.session.username, content)
@@ -153,7 +149,7 @@ const MessageRoutes = (app: Express) => {
             const message = await sql.message.message(Number(messageID))
             if (!message) return res.status(400).send("Invalid messageID")
             if (req.session.username !== message.creator && req.session.username !== message.recipient) {
-                if (req.session.role !== "admin" && req.session.role !== "mod") return res.status(401).send("No permission to view replies")
+                if (req.session.role !== "admin" && req.session.role !== "mod") return res.status(403).send("No permission to view replies")
             }
             const result = await sql.message.messageReplies(Number(messageID), offset)
             res.status(200).json(result)
@@ -163,11 +159,10 @@ const MessageRoutes = (app: Express) => {
         }
     })
 
-    app.put("/api/message/reply/edit", messageUpdateLimiter, async (req: Request, res: Response) => {
+    app.put("/api/message/reply/edit", authenticate, messageUpdateLimiter, async (req: Request, res: Response) => {
         try {
             const {replyID, content} = req.body
-            if (!serverFunctions.validateCSRF(req)) return res.status(400).send("Bad CSRF token")
-            if (!req.session.username) return res.status(401).send("Unauthorized")
+            if (!req.session.username) return res.status(403).send("Unauthorized")
             if (!replyID || !content) return res.status(400).send("Bad replyID or content")
             const badReply = functions.validateReply(content)
             if (badReply) return res.status(400).send("Bad reply")
@@ -185,13 +180,12 @@ const MessageRoutes = (app: Express) => {
         }
     })
 
-    app.delete("/api/message/reply/delete", messageUpdateLimiter, async (req: Request, res: Response) => {
+    app.delete("/api/message/reply/delete", authenticate, messageUpdateLimiter, async (req: Request, res: Response) => {
         try {
             const messageID = req.query.messageID
             const replyID = req.query.replyID
-            if (!serverFunctions.validateCSRF(req)) return res.status(400).send("Bad CSRF token")
             if (!messageID || !replyID) return res.status(400).send("Bad messageID or replyID")
-            if (!req.session.username) return res.status(401).send("Unauthorized")
+            if (!req.session.username) return res.status(403).send("Unauthorized")
             const reply = await sql.message.messageReply(Number(replyID))
             if (!reply) return res.status(400).send("Invalid replyID")
             if (reply.creator !== req.session.username) {
@@ -220,16 +214,15 @@ const MessageRoutes = (app: Express) => {
         }
     })
 
-    app.post("/api/message/softdelete", messageUpdateLimiter, async (req: Request, res: Response) => {
+    app.post("/api/message/softdelete", authenticate, messageUpdateLimiter, async (req: Request, res: Response) => {
         try {
             const {messageID} = req.body
-            if (!serverFunctions.validateCSRF(req)) return res.status(400).send("Bad CSRF token")
-            if (!req.session.username) return res.status(401).send("Unauthorized")
+            if (!req.session.username) return res.status(403).send("Unauthorized")
             if (!messageID) return res.status(400).send("Bad messageID")
             const message = await sql.message.message(messageID)
             if (!message) return res.status(400).send("Invalid messageID")
             if (req.session.username !== message.creator && req.session.username !== message.recipient) {
-                if (req.session.role !== "admin" && req.session.role !== "mod") return res.status(401).send("No permission to softdelete")
+                if (req.session.role !== "admin" && req.session.role !== "mod") return res.status(403).send("No permission to softdelete")
             }
             const isCreator = req.session.username === message.creator
             const isRecipient = req.session.username === message.recipient
@@ -247,16 +240,15 @@ const MessageRoutes = (app: Express) => {
         }
     })
 
-    app.post("/api/message/read", messageLimiter, async (req: Request, res: Response) => {
+    app.post("/api/message/read", authenticate, messageLimiter, async (req: Request, res: Response) => {
         try {
             const {messageID, forceRead} = req.body
-            if (!serverFunctions.validateCSRF(req)) return res.status(400).send("Bad CSRF token")
-            if (!req.session.username) return res.status(401).send("Unauthorized")
+            if (!req.session.username) return res.status(403).send("Unauthorized")
             if (!messageID) return res.status(400).send("Bad messageID")
             const message = await sql.message.message(messageID)
             if (!message) return res.status(400).send("Invalid messageID")
             if (req.session.username !== message.creator && req.session.username !== message.recipient) {
-                if (req.session.role !== "admin" && req.session.role !== "mod") return res.status(401).send("No permission to read")
+                if (req.session.role !== "admin" && req.session.role !== "mod") return res.status(403).send("No permission to read")
             }
             const isCreator = req.session.username === message.creator
             const isRecipient = req.session.username === message.recipient
@@ -280,11 +272,10 @@ const MessageRoutes = (app: Express) => {
         }
     })
 
-    app.post("/api/message/bulkread", messageLimiter, async (req: Request, res: Response) => {
+    app.post("/api/message/bulkread", authenticate, messageLimiter, async (req: Request, res: Response) => {
         try {
             const {readStatus} = req.body
-            if (!serverFunctions.validateCSRF(req)) return res.status(400).send("Bad CSRF token")
-            if (!req.session.username) return res.status(401).send("Unauthorized")
+            if (!req.session.username) return res.status(403).send("Unauthorized")
             if (readStatus === undefined) return res.status(400).send("No readStatus specified")
             const messages = await sql.message.allMessages(req.session.username, "", "date", undefined, "99999")
             for (const message of messages) {
@@ -303,7 +294,7 @@ const MessageRoutes = (app: Express) => {
 
     app.get("/api/notifications", messageLimiter, async (req: Request, res: Response) => {
         try {
-            if (!req.session.username) return res.status(401).send("Unauthorized")
+            if (!req.session.username) return res.status(403).send("Unauthorized")
             res.writeHead(200, {
                 "Content-Type": "text/event-stream",
                 "Connection": "keep-alive",

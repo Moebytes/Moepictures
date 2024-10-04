@@ -3,7 +3,7 @@ import rateLimit from "express-rate-limit"
 import slowDown from "express-slow-down"
 import sql from "../sql/SQLQuery"
 import functions from "../structures/Functions"
-import serverFunctions from "../structures/ServerFunctions"
+import serverFunctions, {authenticate} from "../structures/ServerFunctions"
 import phash from "sharp-phash"
 import imageSize from "image-size"
 import fs from "fs"
@@ -97,12 +97,11 @@ const PostRoutes = (app: Express) => {
         }
     })
 
-    app.delete("/api/post/delete", postUpdateLimiter, async (req: Request, res: Response) => {
+    app.delete("/api/post/delete", authenticate, postUpdateLimiter, async (req: Request, res: Response) => {
         try {
             const postID = req.query.postID
-            if (!serverFunctions.validateCSRF(req)) return res.status(400).send("Bad CSRF token")
             if (Number.isNaN(Number(postID))) return res.status(400).send("Invalid postID")
-            if (!req.session.username) return res.status(401).send("Unauthorized")
+            if (!req.session.username) return res.status(403).send("Unauthorized")
             if (req.session.role !== "admin") return res.status(403).end()
             const post = await sql.post.post(Number(postID)).catch(() => null)
             if (!post) return res.status(200).send("Doesn't exist")
@@ -121,12 +120,11 @@ const PostRoutes = (app: Express) => {
         }
     })
 
-    app.post("/api/post/takedown", postUpdateLimiter, async (req: Request, res: Response) => {
+    app.post("/api/post/takedown", authenticate, postUpdateLimiter, async (req: Request, res: Response) => {
         try {
             const {postID} = req.body
-            if (!serverFunctions.validateCSRF(req)) return res.status(400).send("Bad CSRF token")
             if (Number.isNaN(Number(postID))) return res.status(400).send("Invalid postID")
-            if (!req.session.username) return res.status(401).send("Unauthorized")
+            if (!req.session.username) return res.status(403).send("Unauthorized")
             if (req.session.role !== "admin") return res.status(403).end()
             const post = await sql.post.post(Number(postID)).catch(() => null)
             if (!post) return res.status(404).send("Doesn't exist")
@@ -196,7 +194,7 @@ const PostRoutes = (app: Express) => {
     app.get("/api/post/list/unverified", postLimiter, async (req: Request, res: Response, next: NextFunction) => {
         try {
             const offset = req.query.offset as string
-            if (!req.session.username) return res.status(401).send("Unauthorized")
+            if (!req.session.username) return res.status(403).send("Unauthorized")
             if (req.session.role !== "admin" && req.session.role !== "mod") return res.status(403).end()
             const result = await sql.search.unverifiedPosts(offset)
             res.status(200).json(result)
@@ -209,7 +207,7 @@ const PostRoutes = (app: Express) => {
     app.get("/api/post-edits/list/unverified", postLimiter, async (req: Request, res: Response, next: NextFunction) => {
         try {
             const offset = req.query.offset as string
-            if (!req.session.username) return res.status(401).send("Unauthorized")
+            if (!req.session.username) return res.status(403).send("Unauthorized")
             if (req.session.role !== "admin" && req.session.role !== "mod") return res.status(403).end()
             const result = await sql.search.unverifiedPostEdits(offset)
             res.status(200).json(result)
@@ -245,12 +243,11 @@ const PostRoutes = (app: Express) => {
         }
     })
 
-    app.post("/api/post/delete/request", postUpdateLimiter, async (req: Request, res: Response) => {
+    app.post("/api/post/delete/request", authenticate, postUpdateLimiter, async (req: Request, res: Response) => {
         try {
             const {postID, reason} = req.body
-            if (!serverFunctions.validateCSRF(req)) return res.status(400).send("Bad CSRF token")
             if (Number.isNaN(Number(postID))) return res.status(400).send("Invalid postID")
-            if (!req.session.username) return res.status(401).send("Unauthorized")
+            if (!req.session.username) return res.status(403).send("Unauthorized")
             if (req.session.banned) return res.status(403).send("You are banned")
             const post = await sql.post.post(Number(postID))
             if (!post) return res.status(400).send("Bad postID")
@@ -265,7 +262,7 @@ const PostRoutes = (app: Express) => {
     app.get("/api/post/delete/request/list", postLimiter, async (req: Request, res: Response) => {
         try {
             const offset = req.query.offset as string
-            if (!req.session.username) return res.status(401).send("Unauthorized")
+            if (!req.session.username) return res.status(403).send("Unauthorized")
             if (req.session.role !== "admin" && req.session.role !== "mod") return res.status(403).end()
             const result = await sql.request.postDeleteRequests(offset)
             res.status(200).json(result)
@@ -275,12 +272,11 @@ const PostRoutes = (app: Express) => {
         }
     })
 
-    app.post("/api/post/delete/request/fulfill", postUpdateLimiter, async (req: Request, res: Response) => {
+    app.post("/api/post/delete/request/fulfill", authenticate, postUpdateLimiter, async (req: Request, res: Response) => {
         try {
             const {username, postID, accepted} = req.body
-            if (!serverFunctions.validateCSRF(req)) return res.status(400).send("Bad CSRF token")
             if (Number.isNaN(Number(postID))) return res.status(400).send("Invalid postID")
-            if (!req.session.username) return res.status(401).send("Unauthorized")
+            if (!req.session.username) return res.status(403).send("Unauthorized")
             if (!username) return res.status(400).send("Bad username")
             if (req.session.role !== "admin" && req.session.role !== "mod") return res.status(403).end()
 
@@ -299,9 +295,8 @@ const PostRoutes = (app: Express) => {
         }
     })
 
-    app.put("/api/post/quickedit", postLimiter, async (req: Request, res: Response, next: NextFunction) => {
+    app.put("/api/post/quickedit", authenticate, postLimiter, async (req: Request, res: Response, next: NextFunction) => {
         try {
-            if (!serverFunctions.validateCSRF(req)) return res.status(400).send("Bad CSRF token")
             const postID = Number(req.body.postID)
             const unverified = String(req.body.unverified) === "true"
             let type = req.body.type 
@@ -315,7 +310,7 @@ const PostRoutes = (app: Express) => {
             let silent = req.body.silent
     
             if (Number.isNaN(postID)) return res.status(400).send("Bad postID")
-            if (!req.session.username) return res.status(401).send("Unauthorized")
+            if (!req.session.username) return res.status(403).send("Unauthorized")
             if (req.session.banned) return res.status(403).send("You are banned")
 
             if (!artists?.[0]) artists = ["unknown-artist"]
@@ -468,9 +463,8 @@ const PostRoutes = (app: Express) => {
           }
     })
 
-    app.put("/api/post/quickedit/unverified", postLimiter, async (req: Request, res: Response, next: NextFunction) => {
+    app.put("/api/post/quickedit/unverified", authenticate, postLimiter, async (req: Request, res: Response, next: NextFunction) => {
         try {
-            if (!serverFunctions.validateCSRF(req)) return res.status(400).send("Bad CSRF token")
             let postID = Number(req.body.postID)
             let type = req.body.type 
             const restrict = req.body.restrict 
@@ -482,7 +476,7 @@ const PostRoutes = (app: Express) => {
             let reason = req.body.reason
     
             if (Number.isNaN(postID)) return res.status(400).send("Bad postID")
-            if (!req.session.username) return res.status(401).send("Unauthorized")
+            if (!req.session.username) return res.status(403).send("Unauthorized")
             if (req.session.banned) return res.status(403).send("You are banned")
             if (req.session.role !== "admin" && req.session.role !== "mod") return res.status(403).end()
     
@@ -715,7 +709,7 @@ const PostRoutes = (app: Express) => {
             if (req.session.captchaAmount === undefined) req.session.captchaAmount = 0
             if (req.session.role === "admin" || req.session.role === "mod") req.session.captchaAmount = 0
             if (req.session.captchaAmount > 1000) stripTags = true
-            if (!req.session.username) return res.status(401).send("Unauthorized")
+            if (!req.session.username) return res.status(403).send("Unauthorized")
             const result = await sql.history.postHistory(postID, offset)
             if (stripTags) delete result.tags
             res.status(200).json(result)
@@ -725,12 +719,11 @@ const PostRoutes = (app: Express) => {
         }
     })
 
-    app.delete("/api/post/history/delete", postUpdateLimiter, async (req: Request, res: Response) => {
+    app.delete("/api/post/history/delete", authenticate, postUpdateLimiter, async (req: Request, res: Response) => {
         try {
             const {postID, historyID} = req.query
-            if (!serverFunctions.validateCSRF(req)) return res.status(400).send("Bad CSRF token")
             if (Number.isNaN(Number(historyID))) return res.status(400).send("Invalid historyID")
-            if (!req.session.username) return res.status(401).send("Unauthorized")
+            if (!req.session.username) return res.status(403).send("Unauthorized")
             if (req.session.role !== "admin" && req.session.role !== "mod") return res.status(403).end()
             const postHistory = await sql.history.postHistory(Number(postID))
             if (postHistory[0]?.historyID === historyID) {

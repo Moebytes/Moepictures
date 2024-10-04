@@ -19,7 +19,6 @@ import eyedropperLight from "../assets/icons/eyedropper-light.png"
 import lightLight from "../assets/icons/light-light.png"
 import dark from "../assets/icons/dark.png"
 import darkLight from "../assets/icons/dark-light.png"
-import axios from "axios"
 import permissions from "../structures/Permissions"
 import functions from "../structures/Functions"
 import SearchSuggestions from "./SearchSuggestions"
@@ -85,7 +84,7 @@ const NavBar: React.FunctionComponent<Props> = (props) => {
     useEffect(() => {
         if (!session.username) return 
         const checkMail = async () => {
-            const result = await axios.get("/api/user/checkmail", {withCredentials: true}).then((r) => r.data)
+            const result = await functions.get("/api/user/checkmail", null, session, setSessionFlag)
             setHasNotification(result)
         }
         checkMail()
@@ -161,7 +160,7 @@ const NavBar: React.FunctionComponent<Props> = (props) => {
     }
 
     const logout = async () => {
-        await axios.post("/api/user/logout", null, {withCredentials: true})
+        await functions.post("/api/user/logout", null, session, setSessionFlag)
         setSessionFlag(true)
         history.go(0)
     }

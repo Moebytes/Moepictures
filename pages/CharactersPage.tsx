@@ -13,10 +13,9 @@ import CharacterRow from "../components/CharacterRow"
 import scrollIcon from "../assets/icons/scroll.png"
 import pageIcon from "../assets/icons/page.png"
 import PageDialog from "../dialogs/PageDialog"
-import axios from "axios"
 import {ThemeContext, EnableDragContext, HideNavbarContext, HideSidebarContext, RelativeContext, MobileContext,
 HideTitlebarContext, ActiveDropdownContext, HeaderTextContext, SidebarTextContext, SiteHueContext, SiteLightnessContext,
-SiteSaturationContext, ScrollContext, CharactersPageContext, ShowPageDialogContext, PageFlagContext} from "../Context"
+SiteSaturationContext, ScrollContext, CharactersPageContext, ShowPageDialogContext, PageFlagContext, SessionContext, SessionFlagContext} from "../Context"
 import "./styles/itemspage.less"
 
 const CharactersPage: React.FunctionComponent = (props) => {
@@ -37,6 +36,8 @@ const CharactersPage: React.FunctionComponent = (props) => {
     const {pageFlag, setPageFlag} = useContext(PageFlagContext)
     const {scroll, setScroll} = useContext(ScrollContext)
     const {mobile, setMobile} = useContext(MobileContext)
+    const {session, setSession} = useContext(SessionContext)
+    const {sessionFlag, setSessionFlag} = useContext(SessionFlagContext)
     const [sortType, setSortType] = useState("posts")
     const [characters, setCharacters] = useState([]) as any
     const [index, setIndex] = useState(0)
@@ -80,7 +81,7 @@ const CharactersPage: React.FunctionComponent = (props) => {
 
     const updateCharacters = async (queryOverride?: string) => {
         let query = queryOverride ? queryOverride : searchQuery
-        const result = await axios.get("/api/search/characters", {params: {sort: sortType, query}, withCredentials: true}).then((r) => r.data)
+        const result = await functions.get("/api/search/characters", {sort: sortType, query}, session, setSessionFlag)
         setEnded(false)
         setIndex(0)
         setVisibleCharacters([])
@@ -109,7 +110,7 @@ const CharactersPage: React.FunctionComponent = (props) => {
 
     useEffect(() => {
         updateCharacters()
-    }, [sortType])
+    }, [sortType, session])
 
 
     const getPageAmount = () => {
@@ -129,7 +130,7 @@ const CharactersPage: React.FunctionComponent = (props) => {
             setVisibleCharacters(functions.removeDuplicates(newVisibleCharacters))
         }
         if (scroll) updateCharacters()
-    }, [scroll, characters])
+    }, [scroll, characters, session])
 
     const updateOffset = async () => {
         if (ended) return
@@ -145,7 +146,7 @@ const CharactersPage: React.FunctionComponent = (props) => {
                 }
             }
         }
-        let result = await axios.get("/api/search/characters", {params: {sort: sortType, query: searchQuery, offset: newOffset}, withCredentials: true}).then((r) => r.data)
+        let result = await functions.get("/api/search/characters", {sort: sortType, query: searchQuery, offset: newOffset}, session, setSessionFlag)
         let hasMore = result?.length >= 100
         const cleanCharacters = characters.filter((t: any) => !t.fake)
         if (!scroll) {
@@ -203,7 +204,7 @@ const CharactersPage: React.FunctionComponent = (props) => {
             setCharactersPage(1)
             updateCharacters()
         }
-    }, [scroll])
+    }, [scroll, session])
 
     useEffect(() => {
         if (!scroll) updateOffset()

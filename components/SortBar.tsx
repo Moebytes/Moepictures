@@ -6,7 +6,7 @@ import {ThemeContext, HideSidebarContext, HideNavbarContext, HideSortbarContext,
 SizeTypeContext, BrightnessContext, ContrastContext, HueContext, SaturationContext, LightnessContext, SiteHueContext,
 BlurContext, SharpenContext, EnableDragContext, FilterDropActiveContext, SquareContext, PixelateContext, SiteLightnessContext,
 ShowDownloadDialogContext, HideTitlebarContext, ImageTypeContext, RestrictTypeContext, SortTypeContext, SiteSaturationContext,
-StyleTypeContext, SpeedContext, ReverseContext, MobileContext, RelativeContext, SessionContext, MobileScrollingContext, 
+StyleTypeContext, SpeedContext, ReverseContext, MobileContext, RelativeContext, SessionContext, MobileScrollingContext, SessionFlagContext,
 SelectionModeContext, SelectionItemsContext, SearchFlagContext, DownloadIDsContext, DownloadFlagContext, ShowBulkQuickEditDialogContext} from "../Context"
 import leftArrow from "../assets/icons/leftArrow.png"
 import rightArrow from "../assets/icons/rightArrow.png"
@@ -53,7 +53,6 @@ import quickEdit from "../assets/icons/quickedit.png"
 import functions from "../structures/Functions"
 import permissions from "../structures/Permissions"
 import "./styles/sortbar.less"
-import axios from "axios"
 
 const SortBar: React.FunctionComponent = (props) => {
     const {theme, setTheme} = useContext(ThemeContext)
@@ -96,6 +95,7 @@ const SortBar: React.FunctionComponent = (props) => {
     const {searchFlag, setSearchFlag} = useContext(SearchFlagContext)
     const {relative, setRelative} = useContext(RelativeContext)
     const {session, setSession} = useContext(SessionContext)
+    const {sessionFlag, setSessionFlag} = useContext(SessionFlagContext)
     const {scroll, setScroll} = useContext(ScrollContext)
     const [dropLeft, setDropLeft] = useState(0)
     const [dropTop, setDropTop] = useState(-2)
@@ -635,7 +635,7 @@ const SortBar: React.FunctionComponent = (props) => {
     const bulkFavorite = async () => {
         if (!selectionItems.size) return
         for (const postID of selectionItems.values()) {
-            await axios.post("/api/favorite/toggle", {postID}, {headers: {"x-csrf-token": functions.getCSRFToken()}, withCredentials: true})
+            await functions.post("/api/favorite/toggle", {postID}, session, setSessionFlag)
         }
         setSelectionMode(false)
         if (sortType === "favorites" || sortType === "reverse favorites") setSearchFlag(true)

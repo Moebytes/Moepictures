@@ -1,12 +1,11 @@
 import React, {useContext, useEffect, useState} from "react"
 import {useHistory} from "react-router-dom"
-import {ThemeContext, SearchContext, SearchFlagContext, SiteHueContext, SiteLightnessContext, SiteSaturationContext} from "../Context"
+import {ThemeContext, SearchContext, SearchFlagContext, SessionContext, SessionFlagContext, SiteHueContext, SiteLightnessContext, SiteSaturationContext} from "../Context"
 import {HashLink as Link} from "react-router-hash-link"
 import approve from "../assets/icons/approve.png"
 import reject from "../assets/icons/reject.png"
 import functions from "../structures/Functions"
 import "./styles/modposts.less"
-import axios from "axios"
 
 const ModPosts: React.FunctionComponent = (props) => {
     const {theme, setTheme} = useContext(ThemeContext)
@@ -16,6 +15,8 @@ const ModPosts: React.FunctionComponent = (props) => {
     const [hover, setHover] = useState(false)
     const {search, setSearch} = useContext(SearchContext)
     const {searchFlag, setSearchFlag} = useContext(SearchFlagContext)
+    const {session, setSession} = useContext(SessionContext)
+    const {sessionFlag, setSessionFlag} = useContext(SessionFlagContext)
     const [unverifiedPosts, setUnverifiedPosts] = useState([]) as any
     const [index, setIndex] = useState(0)
     const [visiblePosts, setVisiblePosts] = useState([]) as any
@@ -30,14 +31,14 @@ const ModPosts: React.FunctionComponent = (props) => {
     }
 
     const updatePosts = async () => {
-        const posts = await axios.get("/api/post/list/unverified", {withCredentials: true}).then((r) => r.data)
+        const posts = await functions.get("/api/post/list/unverified", null, session, setSessionFlag)
         setEnded(false)
         setUnverifiedPosts(posts)
     }
 
     useEffect(() => {
         updatePosts()
-    }, [])
+    }, [session])
 
     const updateVisiblePosts = () => {
         const newVisiblePosts = [] as any
@@ -58,13 +59,13 @@ const ModPosts: React.FunctionComponent = (props) => {
     }, [unverifiedPosts, index, updateVisiblePostFlag])
 
     const approvePost = async (postID: number) => {
-        await axios.post("/api/post/approve", {postID}, {headers: {"x-csrf-token": functions.getCSRFToken()}, withCredentials: true})
+        await functions.post("/api/post/approve", {postID}, session, setSessionFlag)
         await updatePosts()
         setUpdateVisiblePostFlag(true)
     }
 
     const rejectPost = async (postID: number) => {
-        await axios.post("/api/post/reject", {postID}, {headers: {"x-csrf-token": functions.getCSRFToken()}, withCredentials: true})
+        await functions.post("/api/post/reject", {postID}, session, setSessionFlag)
         await updatePosts()
         setUpdateVisiblePostFlag(true)
     }
@@ -86,7 +87,7 @@ const ModPosts: React.FunctionComponent = (props) => {
     const updateOffset = async () => {
         if (ended) return
         const newOffset = offset + 100
-        const result = await axios.get("/api/post/list/unverified", {params: {offset: newOffset}, withCredentials: true}).then((r) => r.data)
+        const result = await functions.get("/api/post/list/unverified", {offset: newOffset}, session, setSessionFlag)
         if (result?.length >= 100) {
             setOffset(newOffset)
             setUnverifiedPosts((prev: any) => functions.removeDuplicates([...prev, ...result]))

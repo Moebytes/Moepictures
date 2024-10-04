@@ -2,12 +2,11 @@ import React, {useEffect, useContext, useState, useRef} from "react"
 import {useHistory} from "react-router-dom"
 import {HashLink as Link} from "react-router-hash-link"
 import {HideNavbarContext, HideSidebarContext, ThemeContext, EnableDragContext, ShowTakedownPostDialogContext, HideTitlebarContext,
-SessionContext} from "../Context"
+SessionContext, SessionFlagContext} from "../Context"
 import functions from "../structures/Functions"
 import Draggable from "react-draggable"
 import "./styles/dialog.less"
 import permissions from "../structures/Permissions"
-import axios from "axios"
 
 interface Props {
     post: any
@@ -21,6 +20,7 @@ const TakedownPostDialog: React.FunctionComponent<Props> = (props) => {
     const {enableDrag, setEnableDrag} = useContext(EnableDragContext)
     const {showTakedownPostDialog, setShowTakedownPostDialog} = useContext(ShowTakedownPostDialogContext)
     const {session, setSession} = useContext(SessionContext)
+    const {sessionFlag, setSessionFlag} = useContext(SessionFlagContext)
     const [reason, setReason] = useState("")
     const [submitted, setSubmitted] = useState(false)
     const [error, setError] = useState(false)
@@ -44,7 +44,7 @@ const TakedownPostDialog: React.FunctionComponent<Props> = (props) => {
 
     const takedownPost = async () => {
         if (permissions.isAdmin(session)) {
-            await axios.post("/api/post/takedown",  {postID: props.post.postID}, {headers: {"x-csrf-token": functions.getCSRFToken()}, withCredentials: true})
+            await functions.post("/api/post/takedown",  {postID: props.post.postID}, session, setSessionFlag)
             history.go(0)
         }
     }

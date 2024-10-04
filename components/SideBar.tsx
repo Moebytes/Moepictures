@@ -3,7 +3,7 @@ import {useHistory} from "react-router-dom"
 import {ThemeContext, HideSidebarContext, HideNavbarContext, HideSortbarContext, EnableDragContext, MobileContext, UnverifiedPostsContext,
 RelativeContext, HideTitlebarContext, SidebarHoverContext, SearchContext, SearchFlagContext, PostsContext, ShowDeletePostDialogContext, AutoSearchContext,
 TagsContext, RandomFlagContext, ImageSearchFlagContext, SidebarTextContext, SessionContext, MobileScrollingContext, QuickEditIDContext,
-TranslationModeContext, TranslationDrawingEnabledContext, SiteHueContext, SiteLightnessContext, SiteSaturationContext, ShowTakedownPostDialogContext} from "../Context"
+TranslationModeContext, TranslationDrawingEnabledContext, SiteHueContext, SessionFlagContext, SiteLightnessContext, SiteSaturationContext, ShowTakedownPostDialogContext} from "../Context"
 import {HashLink as Link} from "react-router-hash-link"
 import permissions from "../structures/Permissions"
 import favicon from "../assets/icons/favicon.png"
@@ -53,7 +53,6 @@ import yandere from "../assets/icons/yandere.png"
 import konachan from "../assets/icons/konachan.png"
 import pack from "../package.json"
 import functions from "../structures/Functions"
-import axios from "axios"
 import TagHover from "./TagHover"
 import "./styles/sidebar.less"
 
@@ -98,6 +97,7 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
     const {mobile, setMobile} = useContext(MobileContext)
     const {mobileScrolling, setMobileScrolling} = useContext(MobileScrollingContext)
     const {session, setSession} = useContext(SessionContext)
+    const {sessionFlag, setSessionFlag} = useContext(SessionFlagContext)
     const [maxTags, setMaxTags] = useState(maxTags1)
     const [uploaderImage, setUploaderImage] = useState("")
     const [uploaderRole, setUploaderRole] = useState("")
@@ -128,16 +128,16 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
     }
 
     const updateTags = async () => {
-        const tags = await functions.parseTags(posts)
+        const tags = await functions.parseTags(posts, session, setSessionFlag)
         setTags(tags)
     }
 
     const updateUserImg = async () => {
         if (props.post) {
-            const uploader = await axios.get("/api/user", {params: {username: props.post.uploader}, withCredentials: true}).then((r) => r.data)
+            const uploader = await functions.get("/api/user", {username: props.post.uploader}, session, setSessionFlag)
             setUploaderImage(uploader?.image ? functions.getTagLink("pfp", uploader.image) : favicon)
             if (uploader?.role) setUploaderRole(uploader.role)
-            const updater = await axios.get("/api/user", {params: {username: props.post.updater}, withCredentials: true}).then((r) => r.data)
+            const updater = await functions.get("/api/user", {username: props.post.updater}, session, setSessionFlag)
             if (updater?.role) setUpdaterRole(updater.role)
         }
     }
@@ -145,10 +145,9 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
     useEffect(() => {
         updateTags()
         updateUserImg()
-
         const savedUploaderImage = localStorage.getItem("uploaderImage")
         if (savedUploaderImage) setUploaderImage(savedUploaderImage)
-    }, [])
+    }, [session])
 
     useEffect(() => {
         functions.linkToBase64(uploaderImage).then((uploaderImage) => {
@@ -549,7 +548,7 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
 
     const randomSearch = async () => {
         if (history.location.pathname.includes("/post/")) {
-            const posts = await axios.get("/api/search/random", {params: {type: "all", restrict: props.post.restrict === "explicit" ? "explicit" : "all", style: "all"}}).then((r) => r.data)
+            const posts = await functions.get("/api/search/random", {type: "all", restrict: props.post.restrict === "explicit" ? "explicit" : "all", style: "all"}, session, setSessionFlag)
             history.push(`/post/${posts[0].postID}`)
         } else {
             history.push(`/posts`)
@@ -560,7 +559,7 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
     const imageSearch = async (event: any) => {
         const file = event.target.files?.[0]
         if (!file) return
-        const result = await functions.imageSearch(file)
+        const result = await functions.imageSearch(file, session, setSessionFlag)
         setImageSearchFlag(result)
         history.push("/posts")
         event.target.value = ""
@@ -588,12 +587,12 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
     }
 
     const approvePost = async () => {
-        await axios.post("/api/post/approve", {postID: props.post.postID}, {headers: {"x-csrf-token": functions.getCSRFToken()}, withCredentials: true})
+        await functions.post("/api/post/approve", {postID: props.post.postID}, session, setSessionFlag)
         modNext()
     }
 
     const rejectPost = async () => {
-        await axios.post("/api/post/reject", {postID: props.post.postID}, {headers: {"x-csrf-token": functions.getCSRFToken()}, withCredentials: true})
+        await functions.post("/api/post/reject", {postID: props.post.postID}, session, setSessionFlag)
         modNext()
     }
 
@@ -714,7 +713,7 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
             const searchLoop = async () => {
                 if (!autoSearch) return
                 timeout = setTimeout(async () => {
-                    const posts = await axios.get("/api/search/random", {params: {type: "all", restrict: props.post.restrict === "explicit" ? "explicit" : "all", style: "all", limit: 1}}).then((r) => r.data)
+                    const posts = await functions.get("/api/search/random", {type: "all", restrict: props.post.restrict === "explicit" ? "explicit" : "all", style: "all", limit: 1}, session, setSessionFlag)
                     history.push(`/post/${posts[0].postID}`)
                     if (autoSearch) searchLoop()
                 }, Math.floor(Number(session.autosearchInterval || 3000)))

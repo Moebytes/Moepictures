@@ -1,7 +1,7 @@
 import React, {useContext, useEffect, useRef, useState, forwardRef, useImperativeHandle} from "react"
 import {useHistory} from "react-router-dom"
 import loading from "../assets/icons/loading.gif"
-import {ThemeContext, SizeTypeContext, BrightnessContext, ContrastContext, HueContext, SaturationContext, LightnessContext, MobileContext, ScrollYContext,
+import {ThemeContext, SizeTypeContext, BrightnessContext, SessionContext, SessionFlagContext, ContrastContext, HueContext, SaturationContext, LightnessContext, MobileContext, ScrollYContext,
 BlurContext, SharpenContext, SquareContext, PixelateContext, DownloadFlagContext, DownloadIDsContext, SpeedContext, ReverseContext, ScrollContext, ActiveDropdownContext,
 ToolTipXContext, ToolTipYContext, ToolTipEnabledContext, ToolTipPostContext, ToolTipImgContext, SelectionModeContext, SelectionItemsContext, SelectionPostsContext} from "../Context"
 import {HashLink as Link} from "react-router-hash-link"
@@ -11,7 +11,6 @@ import path from "path"
 import functions from "../structures/Functions"
 import cryptoFunctions from "../structures/CryptoFunctions"
 import "./styles/gridimage.less"
-import axios from "axios"
 
 let tooltipTimer = null as any
 
@@ -59,6 +58,8 @@ const GridImage = forwardRef<Ref, Props>((props, componentRef) => {
     const {activeDropdown, setActiveDropdown} = useContext(ActiveDropdownContext)
     const {selectionItems, setSelectionItems} = useContext(SelectionItemsContext) as {selectionItems: Set<string>, setSelectionItems: any}
     const {selectionPosts, setSelectionPosts} = useContext(SelectionPostsContext) as {selectionPosts: Map<string, any>, setSelectionPosts: any}
+    const {session, setSession} = useContext(SessionContext)
+    const {sessionFlag, setSessionFlag} = useContext(SessionFlagContext)
     const containerRef = useRef<HTMLDivElement>(null)
     const pixelateRef = useRef<HTMLCanvasElement>(null)
     const overlayRef = useRef<HTMLImageElement>(null)
@@ -762,10 +763,9 @@ const GridImage = forwardRef<Ref, Props>((props, componentRef) => {
                 setSelected(isSelected)
             }
         } else {
-            axios.get("/api/post", {params: {postID: props.post.postID}, withCredentials: true}).then(async (r) => {
-                const post = r.data
+            functions.get("/api/post", {postID: props.post.postID}, session, setSessionFlag).then(async (post) => {
                 localStorage.setItem("savedPost", JSON.stringify(post))
-                const tagCategories = await functions.tagCategories(post.tags, true)
+                const tagCategories = await functions.tagCategories(post.tags, session, setSessionFlag, true)
                 localStorage.setItem("savedTags", JSON.stringify(tagCategories))
             }).catch(() => null)
             if (!drag) {

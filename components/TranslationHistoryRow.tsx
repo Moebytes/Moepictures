@@ -1,7 +1,7 @@
 import React, {useContext, useEffect, useRef, useState} from "react"
 import {useHistory} from "react-router-dom"
 import {ThemeContext, SessionContext, MobileContext, DeleteTranslationHistoryIDContext, RevertTranslationHistoryIDContext,
-DeleteTranslationHistoryFlagContext, RevertTranslationHistoryFlagContext} from "../Context"
+DeleteTranslationHistoryFlagContext, RevertTranslationHistoryFlagContext, SessionFlagContext} from "../Context"
 import functions from "../structures/Functions"
 import translationHistoryRevert from "../assets/icons/revert.png"
 import translationHistoryDelete from "../assets/icons/delete.png"
@@ -10,7 +10,6 @@ import modCrown from "../assets/icons/mod-crown.png"
 import permissions from "../structures/Permissions"
 import cryptoFunctions from "../structures/CryptoFunctions"
 import "./styles/translationhistoryrow.less"
-import axios from "axios"
 
 interface Props {
     previousHistory: any
@@ -24,6 +23,7 @@ const TranslationHistoryRow: React.FunctionComponent<Props> = (props) => {
     const {theme, setTheme} = useContext(ThemeContext)
     const {mobile, setMobile} = useContext(MobileContext)
     const {session, setSession} = useContext(SessionContext)
+    const {sessionFlag, setSessionFlag} = useContext(SessionFlagContext)
     const {deleteTranslationHistoryID, setDeleteTranslationHistoryID} = useContext(DeleteTranslationHistoryIDContext)
     const {revertTranslationHistoryID, setRevertTranslationHistoryID} = useContext(RevertTranslationHistoryIDContext)
     const {deleteTranslationHistoryFlag, setDeleteTranslationHistoryFlag} = useContext(DeleteTranslationHistoryFlagContext)
@@ -35,7 +35,7 @@ const TranslationHistoryRow: React.FunctionComponent<Props> = (props) => {
     const order = props.translationHistory.order
 
     const updateUserRole = async () => {
-        const user = await axios.get("/api/user", {params: {username: props.translationHistory.updater}, withCredentials: true}).then((r) => r.data)
+        const user = await functions.get("/api/user", {username: props.translationHistory.updater}, session, setSessionFlag)
         if (user?.role) setUserRole(user.role)
     }
 
@@ -48,12 +48,12 @@ const TranslationHistoryRow: React.FunctionComponent<Props> = (props) => {
     useEffect(() => {
         updateUserRole()
         updateImage()
-    }, [])
+    }, [session])
 
     const revertTranslationHistory = async () => {
         if (props.current) return Promise.reject()
-        await axios.put("/api/translation/save", {postID: props.translationHistory.postID, order: props.translationHistory.order,
-        data: props.translationHistory.data}, {headers: {"x-csrf-token": functions.getCSRFToken()}, withCredentials: true})
+        await functions.put("/api/translation/save", {postID: props.translationHistory.postID, order: props.translationHistory.order,
+        data: props.translationHistory.data}, session, setSessionFlag)
         props.onEdit?.()
     }
 
@@ -67,11 +67,11 @@ const TranslationHistoryRow: React.FunctionComponent<Props> = (props) => {
                 setRevertTranslationHistoryID({failed: true, historyID: props.translationHistory.historyID})
             })
         }
-    }, [revertTranslationHistoryFlag, revertTranslationHistoryID, props.current])
+    }, [revertTranslationHistoryFlag, revertTranslationHistoryID, session, props.current])
 
     const deleteTranslationHistory = async () => {
         if (props.current) return Promise.reject()
-        await axios.delete("/api/translation/history/delete", {params: {postID, order, historyID: props.translationHistory.historyID}, headers: {"x-csrf-token": functions.getCSRFToken()}, withCredentials: true})
+        await functions.delete("/api/translation/history/delete", {postID, order, historyID: props.translationHistory.historyID}, session, setSessionFlag)
         props.onDelete?.()
     }
 
@@ -85,7 +85,7 @@ const TranslationHistoryRow: React.FunctionComponent<Props> = (props) => {
                 setDeleteTranslationHistoryID({failed: true, historyID: props.translationHistory.historyID})
             })
         }
-    }, [deleteTranslationHistoryFlag, deleteTranslationHistoryID, props.current])
+    }, [deleteTranslationHistoryFlag, deleteTranslationHistoryID, session, props.current])
 
     const revertTranslationHistoryDialog = async () => {
         setRevertTranslationHistoryID({failed: false, historyID: props.translationHistory.historyID})

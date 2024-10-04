@@ -2,12 +2,11 @@ import React, {useEffect, useContext, useState, useRef} from "react"
 import {useHistory} from "react-router-dom"
 import {HashLink as Link} from "react-router-hash-link"
 import {HideNavbarContext, HideSidebarContext, ThemeContext, EnableDragContext, AliasTagIDContext, 
-AliasTagFlagContext, AliasTagNameContext, HideTitlebarContext, SessionContext} from "../Context"
+AliasTagFlagContext, AliasTagNameContext, HideTitlebarContext, SessionContext, SessionFlagContext} from "../Context"
 import functions from "../structures/Functions"
 import Draggable from "react-draggable"
 import "./styles/dialog.less"
 import permissions from "../structures/Permissions"
-import axios from "axios"
 
 const AliasTagDialog: React.FunctionComponent = (props) => {
     const {theme, setTheme} = useContext(ThemeContext)
@@ -19,6 +18,7 @@ const AliasTagDialog: React.FunctionComponent = (props) => {
     const {aliasTagFlag, setAliasTagFlag} = useContext(AliasTagFlagContext)
     const {aliasTagName, setAliasTagName} = useContext(AliasTagNameContext)
     const {session, setSession} = useContext(SessionContext)
+    const {sessionFlag, setSessionFlag} = useContext(SessionFlagContext)
     const [reason, setReason] = useState("")
     const [submitted, setSubmitted] = useState(false)
     const [error, setError] = useState(false)
@@ -54,7 +54,7 @@ const AliasTagDialog: React.FunctionComponent = (props) => {
                 return
             }
             try {
-                await axios.post("/api/tag/aliasto/request", {tag: aliasTagID, aliasTo: aliasTagName, reason}, {headers: {"x-csrf-token": functions.getCSRFToken()}, withCredentials: true})
+                await functions.post("/api/tag/aliasto/request", {tag: aliasTagID, aliasTo: aliasTagName, reason}, session, setSessionFlag)
                 setSubmitted(true)
             } catch {
                 setError(true)

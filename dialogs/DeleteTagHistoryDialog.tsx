@@ -7,7 +7,6 @@ import functions from "../structures/Functions"
 import Draggable from "react-draggable"
 import "./styles/dialog.less"
 import permissions from "../structures/Permissions"
-import axios from "axios"
 
 const DeleteTagHistoryDialog: React.FunctionComponent = (props) => {
     const {theme, setTheme} = useContext(ThemeContext)

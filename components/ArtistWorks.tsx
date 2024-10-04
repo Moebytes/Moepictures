@@ -1,4 +1,4 @@
-import React, {useContext, useEffect, useRef, useState} from "react"
+import React, {useContext, useRef, useState} from "react"
 import {useHistory} from "react-router-dom"
 import {ThemeContext, EnableDragContext, SessionContext, MobileContext} from "../Context"
 import functions from "../structures/Functions"

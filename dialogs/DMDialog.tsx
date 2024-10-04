@@ -1,11 +1,11 @@
 import React, {useEffect, useContext, useState, useRef} from "react"
 import {useHistory} from "react-router-dom"
 import {HashLink as Link} from "react-router-hash-link"
-import {HideNavbarContext, HideSidebarContext, ThemeContext, EnableDragContext, DMTargetContext, HideTitlebarContext} from "../Context"
+import {HideNavbarContext, HideSidebarContext, ThemeContext, EnableDragContext, DMTargetContext, HideTitlebarContext,
+SessionContext, SessionFlagContext} from "../Context"
 import functions from "../structures/Functions"
 import "./styles/dialog.less"
 import Draggable from "react-draggable"
-import axios from "axios"
 
 const DMDialog: React.FunctionComponent = (props) => {
     const {theme, setTheme} = useContext(ThemeContext)
@@ -14,6 +14,8 @@ const DMDialog: React.FunctionComponent = (props) => {
     const {hideSidebar, setHideSidebar} = useContext(HideSidebarContext)
     const {enableDrag, setEnableDrag} = useContext(EnableDragContext)
     const {dmTarget, setDMTarget} = useContext(DMTargetContext)
+    const {session, setSession} = useContext(SessionContext)
+    const {sessionFlag, setSessionFlag} = useContext(SessionFlagContext)
     const [title, setTitle] = useState("")
     const [content, setContent] = useState("")
     const [error, setError] = useState(false)
@@ -53,7 +55,7 @@ const DMDialog: React.FunctionComponent = (props) => {
             return setError(false)
         }
         try {
-            const message = await axios.post("/api/message/create", {title, content, recipient: dmTarget}, {headers: {"x-csrf-token": functions.getCSRFToken()}, withCredentials: true}).then((r) => r.data)
+            const message = await functions.post("/api/message/create", {title, content, recipient: dmTarget}, session, setSessionFlag)
             setDMTarget(null)
             if (message.messageID) history.push(`/message/${message.messageID}`)
         } catch {

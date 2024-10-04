@@ -2,11 +2,10 @@ import React, {useEffect, useContext, useState} from "react"
 import {useHistory} from "react-router-dom"
 import {HashLink as Link} from "react-router-hash-link"
 import {HideNavbarContext, HideSidebarContext, ThemeContext, EnableDragContext, SidebarTextContext,
-ShowDeleteAccountDialogContext, HideTitlebarContext, SessionFlagContext} from "../Context"
+ShowDeleteAccountDialogContext, HideTitlebarContext, SessionContext, SessionFlagContext} from "../Context"
 import functions from "../structures/Functions"
 import Draggable from "react-draggable"
 import "./styles/dialog.less"
-import axios from "axios"
 
 const DeleteAccountDialog: React.FunctionComponent = (props) => {
     const {theme, setTheme} = useContext(ThemeContext)
@@ -14,9 +13,10 @@ const DeleteAccountDialog: React.FunctionComponent = (props) => {
     const {hideTitlebar, setHideTitlebar} = useContext(HideTitlebarContext)
     const {hideSidebar, setHideSidebar} = useContext(HideSidebarContext)
     const {enableDrag, setEnableDrag} = useContext(EnableDragContext)
-    const {sessionFlag, setSessionFlag} = useContext(SessionFlagContext)
     const {sidebarText, setSidebarText} = useContext(SidebarTextContext)
     const {showDeleteAccountDialog, setShowDeleteAccountDialog} = useContext(ShowDeleteAccountDialogContext)
+    const {session, setSession} = useContext(SessionContext)
+    const {sessionFlag, setSessionFlag} = useContext(SessionFlagContext)
     const history = useHistory()
 
     useEffect(() => {
@@ -33,7 +33,7 @@ const DeleteAccountDialog: React.FunctionComponent = (props) => {
     }, [showDeleteAccountDialog])
 
     const deleteAccount = async () => {
-        await axios.delete("/api/user/delete", {headers: {"x-csrf-token": functions.getCSRFToken()}, withCredentials: true})
+        await functions.delete("/api/user/delete", null, session, setSessionFlag)
         setSessionFlag(true)
         history.push("/posts")
         setSidebarText("Account Deleted.")

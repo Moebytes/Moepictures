@@ -19,7 +19,6 @@ import modLabel from "../assets/icons/mod-label.png"
 import systemLabel from "../assets/icons/system-label.png"
 import permissions from "../structures/Permissions"
 import "./styles/userprofilepage.less"
-import axios from "axios"
 
 let intervalTimer = null as any
 
@@ -62,7 +61,7 @@ const UserProfilePage: React.FunctionComponent = (props) => {
     const history = useHistory()
 
     const updateBanReason = async () => {
-        const ban = await axios.get("/api/user/ban", {params: {username: session.username}, withCredentials: true}).then((r) => r.data)
+        const ban = await functions.get("/api/user/ban", {username: session.username}, session, setSessionFlag)
         if (ban?.reason) setBanReason(ban.reason)
     }
 
@@ -75,7 +74,7 @@ const UserProfilePage: React.FunctionComponent = (props) => {
     }
 
     const updateUploads = async () => {
-        const uploads = await axios.get("/api/user/uploads", {withCredentials: true}).then((r) => r.data)
+        const uploads = await functions.get("/api/user/uploads", null, session, setSessionFlag)
         const filtered = uploads.filter((u: any) => u.post?.restrict !== "explicit")
         const images = filtered.map((p: any) => functions.getThumbnailLink(p.images[0].type, p.postID, p.images[0].order, p.images[0].filename, "tiny"))
         setUploads(filtered)
@@ -83,7 +82,7 @@ const UserProfilePage: React.FunctionComponent = (props) => {
     }
 
     const updateFavorites = async () => {
-        const favorites = await axios.get("/api/user/favorites", {withCredentials: true}).then((r) => r.data)
+        const favorites = await functions.get("/api/user/favorites", null, session, setSessionFlag)
         const filtered = favorites.filter((f: any) => f.post?.restrict !== "explicit")
         const images = filtered.map((f: any) => functions.getThumbnailLink(f.post.images[0].type, f.postID, f.post.images[0].order, f.post.images[0].filename, "tiny"))
         setFavorites(filtered)
@@ -91,7 +90,7 @@ const UserProfilePage: React.FunctionComponent = (props) => {
     }
 
     const updateComments = async () => {
-        const comments = await axios.get("/api/user/comments", {params: {sort: "date"}, withCredentials: true}).then((r) => r.data)
+        const comments = await functions.get("/api/user/comments", {sort: "date"}, session, setSessionFlag)
         setComments(comments)
     }
 
@@ -103,10 +102,13 @@ const UserProfilePage: React.FunctionComponent = (props) => {
         setHeaderText("")
         setSidebarText("")
         document.title = "User Profile"
+    }, [])
+
+    useEffect(() => {
         updateUploads()
         updateFavorites()
         updateComments()
-    }, [])
+    }, [session])
 
     useEffect(() => {
         if (mobile) {
@@ -179,7 +181,7 @@ const UserProfilePage: React.FunctionComponent = (props) => {
                         }
                         const arrayBuffer = await fetch(croppedURL).then((r) => r.arrayBuffer())
                         const bytes = Object.values(new Uint8Array(arrayBuffer))
-                        await axios.post("/api/user/updatepfp", {bytes}, {headers: {"x-csrf-token": functions.getCSRFToken()}, withCredentials: true})
+                        await functions.post("/api/user/updatepfp", {bytes}, session, setSessionFlag)
                         setUserImg("")
                         setSessionFlag(true)
                     }
@@ -191,32 +193,32 @@ const UserProfilePage: React.FunctionComponent = (props) => {
     }
 
     const favoritesPrivacy = async () => {
-        await axios.post("/api/user/favoritesprivacy", null, {headers: {"x-csrf-token": functions.getCSRFToken()}, withCredentials: true})
+        await functions.post("/api/user/favoritesprivacy", null, session, setSessionFlag)
         setSessionFlag(true)
     }
 
     const showRelated = async () => {
-        await axios.post("/api/user/showrelated", null, {headers: {"x-csrf-token": functions.getCSRFToken()}, withCredentials: true})
+        await functions.post("/api/user/showrelated", null, session, setSessionFlag)
         setSessionFlag(true)
     }
 
     const showTooltips = async () => {
-        await axios.post("/api/user/showtooltips", null, {headers: {"x-csrf-token": functions.getCSRFToken()}, withCredentials: true})
+        await functions.post("/api/user/showtooltips", null, session, setSessionFlag)
         setSessionFlag(true)
     }
 
     const showTagBanner = async () => {
-        await axios.post("/api/user/showtagbanner", null, {headers: {"x-csrf-token": functions.getCSRFToken()}, withCredentials: true})
+        await functions.post("/api/user/showtagbanner", null, session, setSessionFlag)
         setSessionFlag(true)
     }
 
     const downloadPixivID = async () => {
-        await axios.post("/api/user/downloadpixivid", null, {headers: {"x-csrf-token": functions.getCSRFToken()}, withCredentials: true})
+        await functions.post("/api/user/downloadpixivid", null, session, setSessionFlag)
         setSessionFlag(true)
     }
 
     const upscaledImages = async () => {
-        await axios.post("/api/user/upscaledimages", null, {headers: {"x-csrf-token": functions.getCSRFToken()}, withCredentials: true})
+        await functions.post("/api/user/upscaledimages", null, session, setSessionFlag)
         setSessionFlag(true)
     }
 
@@ -224,7 +226,7 @@ const UserProfilePage: React.FunctionComponent = (props) => {
         const autosearchInterval = async () => {
             clearTimeout(intervalTimer) 
             intervalTimer = setTimeout(() => {
-                axios.post("/api/user/autosearchinterval", {interval}, {headers: {"x-csrf-token": functions.getCSRFToken()}, withCredentials: true})
+                functions.post("/api/user/autosearchinterval", {interval}, session, setSessionFlag)
                 .then(() => setSessionFlag(true))
             }, 1000)
         }
@@ -245,7 +247,7 @@ const UserProfilePage: React.FunctionComponent = (props) => {
         if (!errorRef.current) await functions.timeout(20)
         errorRef.current!.innerText = "Submitting..."
         try {
-            await axios.post("/api/user/changebio", {bio}, {headers: {"x-csrf-token": functions.getCSRFToken()}, withCredentials: true})
+            await functions.post("/api/user/changebio", {bio}, session, setSessionFlag)
             setSessionFlag(true)
             setError(false)
             setShowBioInput(false)

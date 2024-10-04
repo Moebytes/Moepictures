@@ -2,7 +2,7 @@ import React, {useContext, useEffect, useRef, useState} from "react"
 import {useHistory} from "react-router-dom"
 import {ThemeContext, QuoteTextContext, SessionContext, DeleteReplyIDContext, DeleteReplyFlagContext,
 EditReplyIDContext, EditReplyFlagContext, EditReplyContentContext, ReportReplyIDContext, SiteHueContext,
-SiteLightnessContext, SiteSaturationContext, EnableDragContext, MobileContext} from "../Context"
+SiteLightnessContext, SiteSaturationContext, EnableDragContext, MobileContext, SessionFlagContext} from "../Context"
 import {HashLink as Link} from "react-router-hash-link"
 import functions from "../structures/Functions"
 import favicon from "../assets/icons/favicon.png"
@@ -16,7 +16,6 @@ import modCrown from "../assets/icons/mod-crown.png"
 import systemCrown from "../assets/icons/system-crown.png"
 import jsxFunctions from "../structures/JSXFunctions"
 import "./styles/reply.less"
-import axios from "axios"
 
 interface Props {
     reply: any
@@ -34,6 +33,7 @@ const Reply: React.FunctionComponent<Props> = (props) => {
     const {enableDrag, setEnableDrag} = useContext(EnableDragContext)
     const {quoteText, setQuoteText} = useContext(QuoteTextContext)
     const {session, setSession} = useContext(SessionContext)
+    const {sessionFlag, setSessionFlag} = useContext(SessionFlagContext)
     const {deleteReplyID, setDeleteReplyID} = useContext(DeleteReplyIDContext)
     const {deleteReplyFlag, setDeleteReplyFlag} = useContext(DeleteReplyFlagContext)
     const {editReplyFlag, setEditReplyFlag} = useContext(EditReplyFlagContext)
@@ -109,7 +109,7 @@ const Reply: React.FunctionComponent<Props> = (props) => {
     }
 
     const deleteReply = async () => {
-        await axios.delete("/api/reply/delete", {params: {threadID: props.reply?.threadID, replyID: props.reply?.replyID}, headers: {"x-csrf-token": functions.getCSRFToken()}, withCredentials: true})
+        await functions.delete("/api/reply/delete", {threadID: props.reply?.threadID, replyID: props.reply?.replyID}, session, setSessionFlag)
         props.onDelete?.()
     }
 
@@ -119,7 +119,7 @@ const Reply: React.FunctionComponent<Props> = (props) => {
             setDeleteReplyFlag(false)
             setDeleteReplyID(null)
         }
-    }, [deleteReplyFlag, deleteReplyID])
+    }, [deleteReplyFlag, deleteReplyID, session])
 
     const deleteReplyDialog = async () => {
         setDeleteReplyID(props.reply?.replyID)
@@ -129,7 +129,7 @@ const Reply: React.FunctionComponent<Props> = (props) => {
         if (!editReplyContent) return
         const badReply = functions.validateReply(editReplyContent)
         if (badReply) return
-        await axios.put("/api/reply/edit", {replyID: props.reply?.replyID, content: editReplyContent}, {headers: {"x-csrf-token": functions.getCSRFToken()}, withCredentials: true})
+        await functions.put("/api/reply/edit", {replyID: props.reply?.replyID, content: editReplyContent}, session, setSessionFlag)
         props.onEdit?.()
     }
 
@@ -139,7 +139,7 @@ const Reply: React.FunctionComponent<Props> = (props) => {
             setEditReplyFlag(false)
             setEditReplyID(null)
         }
-    }, [editReplyFlag, editReplyID, editReplyContent])
+    }, [editReplyFlag, editReplyID, editReplyContent, session])
 
     const editReplyDialog = async () => {
         setEditReplyContent(props.reply?.content)

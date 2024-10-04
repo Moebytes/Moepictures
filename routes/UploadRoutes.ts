@@ -3,7 +3,7 @@ import sql from "../sql/SQLQuery"
 import fs from "fs"
 import path from "path"
 import functions from "../structures/Functions"
-import serverFunctions from "../structures/ServerFunctions"
+import serverFunctions, {authenticate} from "../structures/ServerFunctions"
 import rateLimit from "express-rate-limit"
 import phash from "sharp-phash"
 import imageSize from "image-size"
@@ -74,9 +74,8 @@ const validImages = (images: any[], skipMBCheck?: boolean) => {
 
 
 const CreateRoutes = (app: Express) => {
-    app.post("/api/post/upload", uploadLimiter, async (req: Request, res: Response, next: NextFunction) => {
+    app.post("/api/post/upload", authenticate, uploadLimiter, async (req: Request, res: Response, next: NextFunction) => {
       try {
-        if (!serverFunctions.validateCSRF(req)) return res.status(400).send("Bad CSRF token")
         const images = req.body.images 
         const upscaledImages = req.body.upscaledImages
         let type = req.body.type 
@@ -92,7 +91,7 @@ const CreateRoutes = (app: Express) => {
         let unverifiedID = req.body.unverifiedID
         const noImageUpdate = req.body.noImageUpdate
 
-        if (!req.session.username) return res.status(401).send("Unauthorized")
+        if (!req.session.username) return res.status(403).send("Unauthorized")
         if (req.session.role !== "admin" && req.session.role !== "mod") return res.status(403).end()
         if (req.session.banned) return res.status(403).send("You are banned")
 
@@ -347,9 +346,8 @@ const CreateRoutes = (app: Express) => {
       }
     })
 
-    app.put("/api/post/edit", editLimiter, async (req: Request, res: Response, next: NextFunction) => {
+    app.put("/api/post/edit", authenticate, editLimiter, async (req: Request, res: Response, next: NextFunction) => {
       try {
-        if (!serverFunctions.validateCSRF(req)) return res.status(400).send("Bad CSRF token")
         const postID = Number(req.body.postID)
         const images = req.body.images 
         const upscaledImages = req.body.upscaledImages
@@ -371,7 +369,7 @@ const CreateRoutes = (app: Express) => {
         let silent = req.body.silent
 
         if (Number.isNaN(postID)) return res.status(400).send("Bad postID")
-        if (!req.session.username) return res.status(401).send("Unauthorized")
+        if (!req.session.username) return res.status(403).send("Unauthorized")
         if (req.session.banned) return res.status(403).send("You are banned")
         if (req.session.role !== "admin" && req.session.role !== "mod") noImageUpdate = true
 
@@ -734,9 +732,8 @@ const CreateRoutes = (app: Express) => {
       }
     })
 
-    app.post("/api/post/upload/unverified", uploadLimiter, async (req: Request, res: Response, next: NextFunction) => {
+    app.post("/api/post/upload/unverified", authenticate, uploadLimiter, async (req: Request, res: Response, next: NextFunction) => {
       try {
-        if (!serverFunctions.validateCSRF(req)) return res.status(400).send("Bad CSRF token")
         const images = req.body.images 
         const upscaledImages = req.body.upscaledImages 
         let type = req.body.type 
@@ -751,7 +748,7 @@ const CreateRoutes = (app: Express) => {
         let newTags = req.body.newTags
         let duplicates = req.body.duplicates
 
-        if (!req.session.username) return res.status(401).send("Unauthorized")
+        if (!req.session.username) return res.status(403).send("Unauthorized")
         if (req.session.banned) return res.status(403).send("You are banned")
 
         if (!artists?.[0]?.tag) artists = [{tag: "unknown-artist"}]
@@ -985,9 +982,8 @@ const CreateRoutes = (app: Express) => {
       }
     })
 
-    app.put("/api/post/edit/unverified", editLimiter, async (req: Request, res: Response, next: NextFunction) => {
+    app.put("/api/post/edit/unverified", authenticate, editLimiter, async (req: Request, res: Response, next: NextFunction) => {
       try {
-        if (!serverFunctions.validateCSRF(req)) return res.status(400).send("Bad CSRF token")
         let postID = Number(req.body.postID)
         let unverifiedID = Number(req.body.unverifiedID)
         const images = req.body.images 
@@ -1006,7 +1002,7 @@ const CreateRoutes = (app: Express) => {
 
         if (Number.isNaN(postID)) return res.status(400).send("Bad postID")
         if (unverifiedID && Number.isNaN(unverifiedID)) return res.status(400).send("Bad unverifiedID")
-        if (!req.session.username) return res.status(401).send("Unauthorized")
+        if (!req.session.username) return res.status(403).send("Unauthorized")
         if (req.session.banned) return res.status(403).send("You are banned")
 
         if (!artists?.[0]?.tag) artists = [{tag: "unknown-artist"}]
@@ -1251,13 +1247,12 @@ const CreateRoutes = (app: Express) => {
       }
     })
 
-    app.post("/api/post/approve", modLimiter, async (req: Request, res: Response, next: NextFunction) => {
+    app.post("/api/post/approve", authenticate, modLimiter, async (req: Request, res: Response, next: NextFunction) => {
       try {
         let reason = req.body.reason
         let postID = Number(req.body.postID)
-        if (!serverFunctions.validateCSRF(req)) return res.status(400).send("Bad CSRF token")
         if (Number.isNaN(postID)) return res.status(400).send("Bad postID")
-        if (!req.session.username) return res.status(401).send("Unauthorized")
+        if (!req.session.username) return res.status(403).send("Unauthorized")
         if (req.session.role !== "admin" && req.session.role !== "mod") return res.status(403).end()
         const unverified = await sql.post.unverifiedPost(Number(postID))
         if (!unverified) return res.status(400).send("Bad request")
@@ -1592,7 +1587,6 @@ const CreateRoutes = (app: Express) => {
 
     app.post("/api/post/reject", modLimiter, async (req: Request, res: Response, next: NextFunction) => {
       try {
-        if (!serverFunctions.validateCSRF(req)) return res.status(400).send("Bad CSRF token")
         let postID = Number(req.body.postID)
         if (Number.isNaN(postID)) return res.status(400).send("Bad postID")
         if (req.session.role !== "admin" && req.session.role !== "mod") return res.status(403).end()

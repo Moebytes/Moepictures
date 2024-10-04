@@ -14,13 +14,12 @@ import NewThreadDialog from "../dialogs/NewThreadDialog"
 import {ThemeContext, EnableDragContext, HideNavbarContext, HideSidebarContext, MobileContext, SessionContext,
 RelativeContext, HideTitlebarContext, ActiveDropdownContext, HeaderTextContext, SidebarTextContext, SiteHueContext, 
 SiteLightnessContext, SiteSaturationContext, ShowNewThreadDialogContext, ScrollContext, ForumPageContext, ShowPageDialogContext,
-PageFlagContext} from "../Context"
+PageFlagContext, SessionFlagContext} from "../Context"
 import permissions from "../structures/Permissions"
 import scrollIcon from "../assets/icons/scroll.png"
 import pageIcon from "../assets/icons/page.png"
 import PageDialog from "../dialogs/PageDialog"
 import "./styles/itemspage.less"
-import axios from "axios"
 
 const ForumPage: React.FunctionComponent = (props) => {
     const [ignored, forceUpdate] = useReducer(x => x + 1, 0)
@@ -44,6 +43,7 @@ const ForumPage: React.FunctionComponent = (props) => {
     const {showNewThreadDialog, setShowNewThreadDialog} = useContext(ShowNewThreadDialogContext)
     const [threadSearchFlag, setThreadSearchFlag] = useState(null) as any
     const {session, setSession} = useContext(SessionContext)
+    const {sessionFlag, setSessionFlag} = useContext(SessionFlagContext)
     const [sortType, setSortType] = useState("date")
     const [threads, setThreads] = useState([]) as any
     const [searchQuery, setSearchQuery] = useState("")
@@ -86,7 +86,7 @@ const ForumPage: React.FunctionComponent = (props) => {
     }
 
     const updateThreads = async (query?: string) => {
-        const result = await axios.get("/api/search/threads", {params: {sort: sortType, query: query ? query : searchQuery}, withCredentials: true}).then((r) => r.data)
+        const result = await functions.get("/api/search/threads", {sort: sortType, query: query ? query : searchQuery}, session, setSessionFlag)
         setEnded(false)
         setIndex(0)
         setVisibleThreads([])
@@ -125,7 +125,7 @@ const ForumPage: React.FunctionComponent = (props) => {
 
     useEffect(() => {
         updateThreads()
-    }, [sortType])
+    }, [sortType, session])
 
     const getPageAmount = () => {
         return scroll ? 15 : 50
@@ -160,7 +160,7 @@ const ForumPage: React.FunctionComponent = (props) => {
                 }
             }
         }
-        let result = await axios.get("/api/search/threads", {params: {sort: sortType, query: searchQuery, offset: newOffset}, withCredentials: true}).then((r) => r.data)
+        let result = await functions.get("/api/search/threads", {sort: sortType, query: searchQuery, offset: newOffset}, session, setSessionFlag)
         let hasMore = result?.length >= 100
         const cleanThreads = threads.filter((t: any) => !t.fake)
         if (!scroll) {
@@ -207,7 +207,7 @@ const ForumPage: React.FunctionComponent = (props) => {
         return () => {
             window.removeEventListener("scroll", scrollHandler)
         }
-    }, [scroll, visibleThreads, index])
+    }, [scroll, visibleThreads, index, session])
 
     useEffect(() => {
         window.scrollTo(0, 0)
@@ -218,7 +218,7 @@ const ForumPage: React.FunctionComponent = (props) => {
             setForumPage(1)
             updateThreads()
         }
-    }, [scroll])
+    }, [scroll, session])
 
     useEffect(() => {
         if (!scroll) updateOffset()
@@ -241,7 +241,7 @@ const ForumPage: React.FunctionComponent = (props) => {
             }
         }
         if (!scroll) updatePageOffset()
-    }, [scroll, threads, forumPage, ended])
+    }, [scroll, threads, forumPage, ended, session])
 
     useEffect(() => {
         if (searchQuery) {

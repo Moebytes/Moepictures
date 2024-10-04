@@ -1,13 +1,12 @@
 import React, {useContext, useEffect, useState} from "react"
 import {useHistory} from "react-router-dom"
-import {ThemeContext, SearchContext, SearchFlagContext, SiteHueContext, SiteLightnessContext, SiteSaturationContext} from "../Context"
+import {ThemeContext, SearchContext, SearchFlagContext, SessionContext, SessionFlagContext, SiteHueContext, SiteLightnessContext, SiteSaturationContext} from "../Context"
 import {HashLink as Link} from "react-router-hash-link"
 import approve from "../assets/icons/approve.png"
 import reject from "../assets/icons/reject.png"
 import functions from "../structures/Functions"
 import cryptoFunctions from "../structures/CryptoFunctions"
 import "./styles/modposts.less"
-import axios from "axios"
 
 const ModTranslations: React.FunctionComponent = (props) => {
     const {theme, setTheme} = useContext(ThemeContext)
@@ -17,6 +16,8 @@ const ModTranslations: React.FunctionComponent = (props) => {
     const [hover, setHover] = useState(false)
     const {search, setSearch} = useContext(SearchContext)
     const {searchFlag, setSearchFlag} = useContext(SearchFlagContext)
+    const {session, setSession} = useContext(SessionContext)
+    const {sessionFlag, setSessionFlag} = useContext(SessionFlagContext)
     const [unverifiedTranslations, setUnverifiedTranslations] = useState([]) as any
     const [index, setIndex] = useState(0)
     const [visibleTranslations, setVisibleTranslations] = useState([]) as any
@@ -31,14 +32,14 @@ const ModTranslations: React.FunctionComponent = (props) => {
     }
 
     const updateTranslations = async () => {
-        const translations = await axios.get("/api/translation/list/unverified", {withCredentials: true}).then((r) => r.data)
+        const translations = await functions.get("/api/translation/list/unverified", null, session, setSessionFlag)
         setEnded(false)
         setUnverifiedTranslations(translations)
     }
 
     useEffect(() => {
         updateTranslations()
-    }, [])
+    }, [session])
 
     const updateVisibleTranslations = () => {
         const newVisibleTranslations = [] as any
@@ -57,13 +58,13 @@ const ModTranslations: React.FunctionComponent = (props) => {
     }, [unverifiedTranslations, index, updateVisibleTranslationFlag])
 
     const approveTranslation = async (translationID: number, username: string, postID: number) => {
-        await axios.post("/api/translation/approve", {translationID, username, postID}, {headers: {"x-csrf-token": functions.getCSRFToken()}, withCredentials: true})
+        await functions.post("/api/translation/approve", {translationID, username, postID}, session, setSessionFlag)
         await updateTranslations()
         setUpdateVisibleTranslationFlag(true)
     }
 
     const rejectTranslation = async (translationID: number, username: string, postID: number) => {
-        await axios.post("/api/translation/reject", {translationID, username, postID}, {headers: {"x-csrf-token": functions.getCSRFToken()}, withCredentials: true})
+        await functions.post("/api/translation/reject", {translationID, username, postID}, session, setSessionFlag)
         await updateTranslations()
         setUpdateVisibleTranslationFlag(true)
     }
@@ -85,7 +86,7 @@ const ModTranslations: React.FunctionComponent = (props) => {
     const updateOffset = async () => {
         if (ended) return
         const newOffset = offset + 100
-        const result = await axios.get("/api/translation/list/unverified", {params: {offset: newOffset}, withCredentials: true}).then((r) => r.data)
+        const result = await functions.get("/api/translation/list/unverified", {offset: newOffset}, session, setSessionFlag)
         if (result?.length >= 100) {
             setOffset(newOffset)
             setUnverifiedTranslations((prev: any) => functions.removeDuplicates([...prev, ...result]))

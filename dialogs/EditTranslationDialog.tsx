@@ -6,7 +6,6 @@ EditTranslationTextContext, EditTranslationTranscriptContext, HideTitlebarContex
 import functions from "../structures/Functions"
 import "./styles/edittranslationdialog.less"
 import Draggable from "react-draggable"
-import axios from "axios"
 
 const EditTranslationDialog: React.FunctionComponent = (props) => {
     const {theme, setTheme} = useContext(ThemeContext)

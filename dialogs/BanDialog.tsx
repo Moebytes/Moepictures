@@ -2,14 +2,13 @@ import React, {useEffect, useContext, useState, useRef} from "react"
 import {useHistory} from "react-router-dom"
 import {HashLink as Link} from "react-router-hash-link"
 import {HideNavbarContext, HideSidebarContext, ThemeContext, EnableDragContext, BanNameContext, HideTitlebarContext, UpdateUserFlagContext,
-SiteHueContext, SiteLightnessContext, SiteSaturationContext} from "../Context"
+SiteHueContext, SiteLightnessContext, SiteSaturationContext, SessionContext, SessionFlagContext} from "../Context"
 import functions from "../structures/Functions"
 import "./styles/dialog.less"
 import Draggable from "react-draggable"
 import checkbox from "../assets/icons/checkbox.png"
 import checkboxChecked from "../assets/icons/checkbox-checked.png"
 import cryptoFunctions from "../structures/CryptoFunctions"
-import axios from "axios"
 import path from "path"
 
 const BanDialog: React.FunctionComponent = (props) => {
@@ -23,6 +22,8 @@ const BanDialog: React.FunctionComponent = (props) => {
     const {enableDrag, setEnableDrag} = useContext(EnableDragContext)
     const {banName, setBanName} = useContext(BanNameContext)
     const {updateUserFlag, setUpdateUserFlag} = useContext(UpdateUserFlagContext)
+    const {session, setSession} = useContext(SessionContext)
+    const {sessionFlag, setSessionFlag} = useContext(SessionFlagContext)
     const [reason, setReason] = useState("")
     const [submitted, setSubmitted] = useState(false)
     const [deleteUnverifiedChanges, setDeleteUnverifiedChanges] = useState(true)
@@ -59,8 +60,8 @@ const BanDialog: React.FunctionComponent = (props) => {
             let link = await cryptoFunctions.decryptedLink(imgLink)
             let ext = path.extname(imgLink)
             if (!link.includes(ext)) link += `#${ext}`
-            const buffer = await axios.get(link, {responseType: "arraybuffer", withCredentials: true, headers: {"x-force-upscale": "false"}}).then((r) => r.data) as Buffer
-            const upscaledBuffer = await axios.get(link, {responseType: "arraybuffer", withCredentials: true, headers: {"x-force-upscale": "true"}}).then((r) => r.data) as Buffer
+            const buffer = await functions.getBuffer(link, {"x-force-upscale": "false"})
+            const upscaledBuffer = await functions.getBuffer(link, {"x-force-upscale": "true"})
             let thumbnail = ""
             if (ext === ".mp4" || ext === ".webm") {
                 thumbnail = await functions.videoThumbnail(link)
@@ -84,7 +85,7 @@ const BanDialog: React.FunctionComponent = (props) => {
     const parseNewTags = async (postHistory: any) => {
         const tags = postHistory.tags
         if (!tags?.[0]) return []
-        const tagMap = await functions.tagsCache()
+        const tagMap = await functions.tagsCache(session, setSessionFlag)
         let notExists = [] as any
         for (let i = 0; i < tags.length; i++) {
             const exists = tagMap[tags[i]]
@@ -94,10 +95,10 @@ const BanDialog: React.FunctionComponent = (props) => {
     }
 
     const ban = async () => {
-        const revertData = await axios.post("/api/user/ban", {username: banName, deleteUnverifiedChanges, deleteHistoryChanges, deleteComments, deleteMessages, reason}, {headers: {"x-csrf-token": functions.getCSRFToken()}, withCredentials: true}).then((r) => r.data)
+        const revertData = await functions.post("/api/user/ban", {username: banName, deleteUnverifiedChanges, deleteHistoryChanges, deleteComments, deleteMessages, reason}, session, setSessionFlag)
         if (revertData.revertPostIDs?.length) {
             for (const postID of revertData.revertPostIDs) {
-                const result = await axios.get("/api/post/history", {params: {postID}, withCredentials: true}).then((r) => r.data)
+                const result = await functions.get("/api/post/history", {postID}, session, setSessionFlag)
                 if (!result?.[0]) continue
                 const currentHistory = result[0]
                 const {images, upscaledImages} = await parseImages(currentHistory)
@@ -111,14 +112,14 @@ const BanDialog: React.FunctionComponent = (props) => {
                     commentary: currentHistory.commentary,
                     translatedCommentary: currentHistory.translatedCommentary
                 }
-                await axios.put("/api/post/edit", {silent: true, postID: currentHistory.postID, images, upscaledImages, type: currentHistory.type, restrict: currentHistory.restrict, source,
+                await functions.put("/api/post/edit", {silent: true, postID: currentHistory.postID, images, upscaledImages, type: currentHistory.type, restrict: currentHistory.restrict, source,
                 style: currentHistory.style, artists: currentHistory.artists, characters: currentHistory.characters, preserveThirdParty: currentHistory.thirdParty,
-                series: currentHistory.series, tags: currentHistory.tags, newTags, updatedDate: currentHistory.date, reason: currentHistory.reason}, {headers: {"x-csrf-token": functions.getCSRFToken()}, withCredentials: true})
+                series: currentHistory.series, tags: currentHistory.tags, newTags, updatedDate: currentHistory.date, reason: currentHistory.reason}, session, setSessionFlag)
             }
         }
         if (revertData.revertTagIDs?.length) {
             for (const tag of revertData.revertTagIDs) {
-                const result = await axios.get("/api/tag/history", {params: {tag}, withCredentials: true}).then((r) => r.data)
+                const result = await functions.get("/api/tag/history", {tag}, session, setSessionFlag)
                 if (!result?.[0]) continue
                 const currentHistory = result[0]
                 let image = null as any
@@ -130,9 +131,9 @@ const BanDialog: React.FunctionComponent = (props) => {
                     const bytes = new Uint8Array(arrayBuffer)
                     image = Object.values(bytes)
                 }
-                await axios.put("/api/tag/edit", {silent: true, tag: currentHistory.tag, key: currentHistory.key, description: currentHistory.description,
+                await functions.put("/api/tag/edit", {silent: true, tag: currentHistory.tag, key: currentHistory.key, description: currentHistory.description,
                 image, aliases: currentHistory.aliases, implications: currentHistory.implications, social: currentHistory.social, twitter: currentHistory.twitter,
-                website: currentHistory.website, fandom: currentHistory.fandom, updatedDate: currentHistory.date}, {headers: {"x-csrf-token": functions.getCSRFToken()}, withCredentials: true})
+                website: currentHistory.website, fandom: currentHistory.fandom, updatedDate: currentHistory.date}, session, setSessionFlag)
             }
         }
         setBanName(null)

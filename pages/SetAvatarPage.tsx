@@ -9,7 +9,6 @@ import cryptoFunctions from "../structures/CryptoFunctions"
 import DragAndDrop from "../components/DragAndDrop"
 import {HideNavbarContext, HideSidebarContext, RelativeContext, HideTitlebarContext, MobileContext, UserImgContext, SessionFlagContext,
 PostsContext, TagsContext, PostFlagContext, RedirectContext, SidebarTextContext, SessionContext, EnableDragContext} from "../Context"
-import axios from "axios"
 import permissions from "../structures/Permissions"
 import ReactCrop, {makeAspectCrop, centerCrop} from "react-image-crop"
 import "./styles/setavatarpage.less"
@@ -83,12 +82,11 @@ const SetAvatarPage: React.FunctionComponent<Props> = (props) => {
     }, [session, post])
 
     useEffect(() => {
-        const source = axios.CancelToken.source()
         const updatePost = async () => {
             let post = posts.find((p: any) => p.postID === postID)
             let $401Error = false
             try {
-                if (!post) post = await axios.get("/api/post", {params: {postID}, withCredentials: true}).then((r) => r.data)
+                if (!post) post = await functions.get("/api/post", {postID}, session, setSessionFlag)
             } catch (e) {
                 if (String(e).includes("401")) $401Error = true
             }
@@ -102,8 +100,8 @@ const SetAvatarPage: React.FunctionComponent<Props> = (props) => {
                 } else {
                     setImage(images[0])
                 }
-                const tags = await functions.parseTags([post])
-                const categories = await functions.tagCategories(tags)
+                const tags = await functions.parseTags([post], session, setSessionFlag)
+                const categories = await functions.tagCategories(tags, session, setSessionFlag)
                 setTagCategories(categories)
                 setTags(tags)
                 setPost(post)
@@ -112,17 +110,15 @@ const SetAvatarPage: React.FunctionComponent<Props> = (props) => {
             }
         }
         updatePost()
-        return () => source.cancel()
-    }, [postID, posts])
+    }, [postID, posts, session])
 
     useEffect(() => {
-        const source = axios.CancelToken.source()
         const updatePost = async () => {
             setPostFlag(false)
             let post = null as any
             let $401Error = false
             try {
-                post = await axios.get("/api/post", {params: {postID}, withCredentials: true, cancelToken: source.token}).then((r) => r.data)
+                post = await functions.get("/api/post", {postID}, session, setSessionFlag)
             } catch (e) {
                 if (String(e).includes("401")) $401Error = true
             }
@@ -136,8 +132,8 @@ const SetAvatarPage: React.FunctionComponent<Props> = (props) => {
                 } else {
                     setImage(images[0])
                 }
-                const tags = await functions.parseTags([post])
-                const categories = await functions.tagCategories(tags)
+                const tags = await functions.parseTags([post], session, setSessionFlag)
+                const categories = await functions.tagCategories(tags, session, setSessionFlag)
                 setTagCategories(categories)
                 setTags(tags)
                 setPost(post)
@@ -146,8 +142,7 @@ const SetAvatarPage: React.FunctionComponent<Props> = (props) => {
             }
         }
         if (postFlag) updatePost()
-        return () => source.cancel()
-    }, [postFlag])
+    }, [postFlag, session])
 
     useEffect(() => {
         if (!previewRef.current || !ref.current) return
@@ -274,7 +269,7 @@ const SetAvatarPage: React.FunctionComponent<Props> = (props) => {
         if (!croppedURL) return
         const arrayBuffer = await fetch(croppedURL).then((r) => r.arrayBuffer())
         const bytes = Object.values(new Uint8Array(arrayBuffer))
-        await axios.post("/api/user/updatepfp", {postID, bytes}, {headers: {"x-csrf-token": functions.getCSRFToken()}, withCredentials: true})
+        await functions.post("/api/user/updatepfp", {postID, bytes}, session, setSessionFlag)
         setUserImg("")
         setSessionFlag(true)
         history.push(`/post/${postID}`)

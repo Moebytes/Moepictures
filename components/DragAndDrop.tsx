@@ -1,6 +1,6 @@
 import React, {useContext, useEffect, useRef, useState, useReducer} from "react"
 import {useHistory} from "react-router-dom"
-import {ThemeContext, UploadDropFilesContext, ImageSearchFlagContext} from "../Context"
+import {ThemeContext, UploadDropFilesContext, ImageSearchFlagContext, SessionContext, SessionFlagContext} from "../Context"
 import {HashLink as Link} from "react-router-hash-link"
 import functions from "../structures/Functions"
 import "./styles/draganddrop.less"
@@ -12,6 +12,8 @@ const DragAndDrop: React.FunctionComponent = (props) => {
     const {theme, setTheme} = useContext(ThemeContext)
     const {uploadDropFiles, setUploadDropFiles} = useContext(UploadDropFilesContext)
     const {imageSearchFlag, setImageSearchFlag} = useContext(ImageSearchFlagContext)
+    const {session, setSession} = useContext(SessionContext)
+    const {sessionFlag, setSessionFlag} = useContext(SessionFlagContext)
     const [ignored, forceUpdate] = useReducer(x => x + 1, 0)
     const [visible, setVisible] = useState(false)
     const [searchHover, setSearchHover] = useState(false)
@@ -82,7 +84,7 @@ const DragAndDrop: React.FunctionComponent = (props) => {
         if (!files?.[0]) return 
         let result = [] as any
         for (let i = 0; i < files.length; i++) {
-            result.push(...await functions.imageSearch(files[i]))
+            result.push(...await functions.imageSearch(files[i], session, setSessionFlag))
         }
         setImageSearchFlag(result)
         history.push("/posts")

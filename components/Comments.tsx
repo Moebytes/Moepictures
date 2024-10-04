@@ -1,9 +1,8 @@
 import React, {useContext, useEffect, useRef, useState} from "react"
 import {useHistory} from "react-router-dom"
-import {ThemeContext, EnableDragContext, SessionContext, QuoteTextContext, CommentIDContext, CommentJumpFlagContext} from "../Context"
+import {ThemeContext, EnableDragContext, SessionContext, SessionFlagContext, QuoteTextContext, CommentIDContext, CommentJumpFlagContext} from "../Context"
 import functions from "../structures/Functions"
 import Comment from "./Comment"
-import axios from "axios"
 import "./styles/comments.less"
 
 interface Props {
@@ -14,6 +13,7 @@ const Comments: React.FunctionComponent<Props> = (props) => {
     const {theme, setTheme} = useContext(ThemeContext)
     const {enableDrag, setEnableDrag} = useContext(EnableDragContext)
     const {session, setSession} = useContext(SessionContext)
+    const {sessionFlag, setSessionFlag} = useContext(SessionFlagContext)
     const {quoteText, setQuoteText} = useContext(QuoteTextContext)
     const [text, setText] = useState("")
     const [error, setError] = useState(false)
@@ -64,13 +64,13 @@ const Comments: React.FunctionComponent<Props> = (props) => {
     }, [commentID])
 
     const updateComments = async () => {
-        const comments = await axios.get("/api/post/comments", {params: {postID: props.post.postID}, withCredentials: true}).then((r) => r.data)
+        const comments = await functions.get("/api/post/comments", {postID: props.post.postID}, session, setSessionFlag)
         setComments(comments)
     }
 
     useEffect(() => {
         updateComments()
-    }, [])
+    }, [session])
 
     useEffect(() => {
         updateComments()
@@ -81,7 +81,7 @@ const Comments: React.FunctionComponent<Props> = (props) => {
             setCommentFlag(false)
             updateComments()
         }
-    }, [commentFlag])
+    }, [commentFlag, session])
 
     useEffect(() => {
         if (quoteText) {
@@ -114,7 +114,7 @@ const Comments: React.FunctionComponent<Props> = (props) => {
         if (!errorRef.current) await functions.timeout(20)
         errorRef.current!.innerText = "Submitting..."
         try {
-            await axios.post("/api/comment/create", {postID: props.post.postID, comment: text}, {headers: {"x-csrf-token": functions.getCSRFToken()}, withCredentials: true})
+            await functions.post("/api/comment/create", {postID: props.post.postID, comment: text}, session, setSessionFlag)
             errorRef.current!.innerText = "Comment added."
             setCommentFlag(true)
             setText("")

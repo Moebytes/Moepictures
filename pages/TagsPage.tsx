@@ -11,7 +11,6 @@ import searchIconHover from "../assets/icons/search-hover.png"
 import sort from "../assets/icons/sort.png"
 import type from "../assets/icons/all.png"
 import TagRow from "../components/TagRow"
-import axios from "axios"
 import AliasTagDialog from "../dialogs/AliasTagDialog"
 import EditTagDialog from "../dialogs/EditTagDialog"
 import DeleteTagDialog from "../dialogs/DeleteTagDialog"
@@ -22,7 +21,7 @@ import permissions from "../structures/Permissions"
 import PageDialog from "../dialogs/PageDialog"
 import {ThemeContext, EnableDragContext, HideNavbarContext, HideSidebarContext, RelativeContext, HideTitlebarContext, MobileContext, ScrollContext,
 ActiveDropdownContext, HeaderTextContext, SidebarTextContext, SessionContext, SiteHueContext, SiteLightnessContext, SiteSaturationContext, TagsPageContext,
-ShowPageDialogContext, PageFlagContext} from "../Context"
+ShowPageDialogContext, PageFlagContext, SessionFlagContext} from "../Context"
 import "./styles/itemspage.less"
 
 const TagsPage: React.FunctionComponent = (props) => {
@@ -42,6 +41,7 @@ const TagsPage: React.FunctionComponent = (props) => {
     const {showPageDialog, setShowPageDialog} = useContext(ShowPageDialogContext)
     const {pageFlag, setPageFlag} = useContext(PageFlagContext)
     const {session, setSession} = useContext(SessionContext)
+    const {sessionFlag, setSessionFlag} = useContext(SessionFlagContext)
     const {mobile, setMobile} = useContext(MobileContext)
     const {scroll, setScroll} = useContext(ScrollContext)
     const [sortType, setSortType] = useState("posts")
@@ -89,7 +89,7 @@ const TagsPage: React.FunctionComponent = (props) => {
 
     const updateTags = async (queryOverride?: string) => {
         let query = queryOverride ? queryOverride : searchQuery
-        const result = await axios.get("/api/search/tags", {params: {sort: sortType, type: typeType, query}, withCredentials: true}).then((r) => r.data)
+        const result = await functions.get("/api/search/tags", {sort: sortType, type: typeType, query}, session, setSessionFlag)
         setEnded(false)
         setIndex(0)
         setVisibleTags([])
@@ -118,7 +118,7 @@ const TagsPage: React.FunctionComponent = (props) => {
 
     useEffect(() => {
         updateTags()
-    }, [sortType, typeType])
+    }, [sortType, typeType, session])
 
     const getPageAmount = () => {
         return scroll ? 15 : 50
@@ -153,7 +153,7 @@ const TagsPage: React.FunctionComponent = (props) => {
                 }
             }
         }
-        let result = await axios.get("/api/search/tags", {params: {sort: sortType, type: typeType, query: searchQuery, offset: newOffset}, withCredentials: true}).then((r) => r.data)
+        let result = await functions.get("/api/search/tags", {sort: sortType, type: typeType, query: searchQuery, offset: newOffset}, session, setSessionFlag)
         let hasMore = result?.length >= 100
         const cleanTags = tags.filter((t: any) => !t.fake)
         if (!scroll) {
@@ -200,7 +200,7 @@ const TagsPage: React.FunctionComponent = (props) => {
         return () => {
             window.removeEventListener("scroll", scrollHandler)
         }
-    }, [scroll, visibleTags, index])
+    }, [scroll, visibleTags, index, session])
 
     useEffect(() => {
         window.scrollTo(0, 0)
@@ -211,7 +211,7 @@ const TagsPage: React.FunctionComponent = (props) => {
             setTagsPage(1)
             updateTags()
         }
-    }, [scroll])
+    }, [scroll, session])
 
     useEffect(() => {
         if (!scroll) updateOffset()
@@ -234,7 +234,7 @@ const TagsPage: React.FunctionComponent = (props) => {
             }
         }
         if (!scroll) updatePageOffset()
-    }, [scroll, tags, tagsPage, ended])
+    }, [scroll, tags, tagsPage, ended, session])
 
     useEffect(() => {
         if (searchQuery) {

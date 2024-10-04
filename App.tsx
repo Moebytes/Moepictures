@@ -47,7 +47,6 @@ import ThreadPage from "./pages/ThreadPage"
 import BulkUploadPage from "./pages/BulkUploadPage"
 import MailPage from "./pages/MailPage"
 import MessagePage from "./pages/MessagePage"
-import axios from "axios"
 import "./index.less"
 
 require.context("./assets/icons", true)
@@ -78,7 +77,7 @@ const App: React.FunctionComponent = (props) => {
     const location = useLocation()
 
     const getSessionCookie = async () => {
-        const cookie = await axios.get("/api/user/session", {withCredentials: true}).then((r) => r.data)
+        const cookie = await functions.get("/api/user/session", null, session, setSessionFlag)
         functions.updateCSRFToken(cookie)
         setSession(cookie)
     }
@@ -104,11 +103,7 @@ const App: React.FunctionComponent = (props) => {
     }
 
     const updatePfp = async () => {
-        try {
-            await axios.post(getImg(), null, {withCredentials: true})
-        } catch {
-            // ignore
-        }
+        await functions.refreshCache(getImg())
         setUserImg(getImg())
         if (session.imagePost) setUserImgPost(session.imagePost)
     }
@@ -131,7 +126,7 @@ const App: React.FunctionComponent = (props) => {
 
     const destroy2FA = async () => {
         try {
-            await axios.post("/api/2fa/delete", null, {withCredentials: true})
+            await functions.post("/api/2fa/delete", null, session, setSessionFlag)
             setSessionFlag(true)
         } catch {
             // ignore

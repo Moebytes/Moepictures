@@ -10,8 +10,7 @@ import DragAndDrop from "../components/DragAndDrop"
 import functions from "../structures/Functions"
 import {HideNavbarContext, HideSidebarContext, ThemeContext, EnableDragContext, MobileContext,
 RelativeContext, HideTitlebarContext, HeaderTextContext, SidebarTextContext, SiteHueContext, SiteLightnessContext,
-SiteSaturationContext} from "../Context"
-import axios from "axios"
+SiteSaturationContext, SessionContext, SessionFlagContext} from "../Context"
 import "./styles/contactpage.less"
 
 const ContactPage: React.FunctionComponent = (props) => {
@@ -28,6 +27,8 @@ const ContactPage: React.FunctionComponent = (props) => {
     const {headerText, setHeaderText} = useContext(HeaderTextContext)
     const {sidebarText, setSidebarText} = useContext(SidebarTextContext)
     const {mobile, setMobile} = useContext(MobileContext)
+    const {session, setSession} = useContext(SessionContext)
+    const {sessionFlag, setSessionFlag} = useContext(SessionFlagContext)
     const [submitted, setSubmitted] = useState(false)
     const [error, setError] = useState(false)
     const [files, setFiles] = useState([]) as any
@@ -98,7 +99,7 @@ const ContactPage: React.FunctionComponent = (props) => {
         if (!errorRef.current) await functions.timeout(20)
         errorRef.current!.innerText = "Submitting..."
         try {
-            await axios.post("/api/misc/contact", {email, subject, message, files}, {headers: {"x-csrf-token": functions.getCSRFToken()}, withCredentials: true})
+            await functions.post("/api/misc/contact", {email, subject, message, files}, session, setSessionFlag)
             setSubmitted(true)
             setError(false)
         } catch {

@@ -7,7 +7,6 @@ import functions from "../structures/Functions"
 import "./styles/dialog.less"
 import Draggable from "react-draggable"
 import permissions from "../structures/Permissions"
-import axios from "axios"
 
 const DeleteMessageReplyDialog: React.FunctionComponent = (props) => {
     const {theme, setTheme} = useContext(ThemeContext)

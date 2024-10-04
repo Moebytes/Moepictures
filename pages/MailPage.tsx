@@ -13,14 +13,13 @@ import Message from "../components/Message"
 import {ThemeContext, EnableDragContext, HideNavbarContext, HideSidebarContext, MobileContext, SessionContext,
 RelativeContext, HideTitlebarContext, ActiveDropdownContext, HeaderTextContext, SidebarTextContext, SiteHueContext, 
 SiteLightnessContext, SiteSaturationContext, ScrollContext, MailPageContext, ShowPageDialogContext,
-PageFlagContext, SoftDeleteMessageIDContext, SoftDeleteMessageFlagContext, HasNotificationContext} from "../Context"
+PageFlagContext, SoftDeleteMessageIDContext, SoftDeleteMessageFlagContext, HasNotificationContext, SessionFlagContext} from "../Context"
 import SoftDeleteMessageDialog from "../dialogs/SoftDeleteMessageDialog"
 import permissions from "../structures/Permissions"
 import scrollIcon from "../assets/icons/scroll.png"
 import pageIcon from "../assets/icons/page.png"
 import PageDialog from "../dialogs/PageDialog"
 import "./styles/itemspage.less"
-import axios from "axios"
 
 const MailPage: React.FunctionComponent = (props) => {
     const [ignored, forceUpdate] = useReducer(x => x + 1, 0)
@@ -46,6 +45,7 @@ const MailPage: React.FunctionComponent = (props) => {
     const {mobile, setMobile} = useContext(MobileContext)
     const [messageSearchFlag, setMessageSearchFlag] = useState(null) as any
     const {session, setSession} = useContext(SessionContext)
+    const {sessionFlag, setSessionFlag} = useContext(SessionFlagContext)
     const [sortType, setSortType] = useState("date")
     const [messages, setMessages] = useState([]) as any
     const [searchQuery, setSearchQuery] = useState("")
@@ -92,7 +92,7 @@ const MailPage: React.FunctionComponent = (props) => {
     }
 
     const updateMessages = async (query?: string) => {
-        const result = await axios.get("/api/search/messages", {params: {sort: sortType, query: query ? query : searchQuery}, withCredentials: true}).then((r) => r.data)
+        const result = await functions.get("/api/search/messages", {sort: sortType, query: query ? query : searchQuery}, session, setSessionFlag)
         setEnded(false)
         setIndex(0)
         setVisibleMessages([])
@@ -100,7 +100,7 @@ const MailPage: React.FunctionComponent = (props) => {
     }
 
     const softDeleteMessage = async () => {
-        await axios.post("/api/message/softdelete", {messageID: softDeleteMessageID}, {headers: {"x-csrf-token": functions.getCSRFToken()}, withCredentials: true})
+        await functions.post("/api/message/softdelete", {messageID: softDeleteMessageID}, session, setSessionFlag)
         updateMessages()
     }
 
@@ -110,7 +110,7 @@ const MailPage: React.FunctionComponent = (props) => {
             setSoftDeleteMessageFlag(false)
             setSoftDeleteMessageID(null)
         }
-    }, [softDeleteMessageFlag, softDeleteMessageID])
+    }, [softDeleteMessageFlag, softDeleteMessageID, session])
 
     useEffect(() => {
         if (messageSearchFlag) {
@@ -170,7 +170,7 @@ const MailPage: React.FunctionComponent = (props) => {
             setVisibleMessages(functions.removeDuplicates(newVisibleMessages))
         }
         if (scroll) updateMessages()
-    }, [scroll, messages])
+    }, [scroll, messages, session])
 
     const updateOffset = async () => {
         if (ended) return
@@ -186,7 +186,7 @@ const MailPage: React.FunctionComponent = (props) => {
                 }
             }
         }
-        let result = await axios.get("/api/search/messages", {params: {sort: sortType, query: searchQuery, offset: newOffset}, withCredentials: true}).then((r) => r.data)
+        let result = await functions.get("/api/search/messages", {sort: sortType, query: searchQuery, offset: newOffset}, session, setSessionFlag)
         let hasMore = result?.length >= 100
         const cleanMessages = messages.filter((t: any) => !t.fake)
         if (!scroll) {
@@ -233,7 +233,7 @@ const MailPage: React.FunctionComponent = (props) => {
         return () => {
             window.removeEventListener("scroll", scrollHandler)
         }
-    }, [scroll, visibleMessages, index])
+    }, [scroll, visibleMessages, index, session])
 
     useEffect(() => {
         window.scrollTo(0, 0)
@@ -244,7 +244,7 @@ const MailPage: React.FunctionComponent = (props) => {
             setMailPage(1)
             updateMessages()
         }
-    }, [scroll])
+    }, [scroll, session])
 
     useEffect(() => {
         if (!scroll) updateOffset()
@@ -267,7 +267,7 @@ const MailPage: React.FunctionComponent = (props) => {
             }
         }
         if (!scroll) updatePageOffset()
-    }, [scroll, messages, mailPage, ended])
+    }, [scroll, messages, mailPage, ended, session])
 
     useEffect(() => {
         if (searchQuery) {
@@ -423,13 +423,13 @@ const MailPage: React.FunctionComponent = (props) => {
     }
 
     const readAll = async () => {
-        await axios.post("/api/message/bulkread", {readStatus: true}, {headers: {"x-csrf-token": functions.getCSRFToken()}, withCredentials: true})
+        await functions.post("/api/message/bulkread", {readStatus: true}, session, setSessionFlag)
         updateMessages()
         setHasNotification(false)
     }
 
     const unreadAll = async () => {
-        await axios.post("/api/message/bulkread", {readStatus: false}, {headers: {"x-csrf-token": functions.getCSRFToken()}, withCredentials: true})
+        await functions.post("/api/message/bulkread", {readStatus: false}, session, setSessionFlag)
         updateMessages()
         setHasNotification(true)
     }

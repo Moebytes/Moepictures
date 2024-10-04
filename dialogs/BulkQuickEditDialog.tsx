@@ -1,13 +1,12 @@
 import React, {useEffect, useContext, useState, useRef} from "react"
 import {useHistory} from "react-router-dom"
 import {HideNavbarContext, HideSidebarContext, ThemeContext, EnableDragContext, 
-ShowBulkQuickEditDialogContext, HideTitlebarContext, SessionContext, MobileContext, SelectionModeContext, 
+ShowBulkQuickEditDialogContext, HideTitlebarContext, SessionContext, SessionFlagContext, MobileContext, SelectionModeContext, 
 SelectionItemsContext, SelectionPostsContext} from "../Context"
 import functions from "../structures/Functions"
 import Draggable from "react-draggable"
 import permissions from "../structures/Permissions"
 import SearchSuggestions from "../components/SearchSuggestions"
-import axios from "axios"
 import "./styles/dialog.less"
 
 const BulkQuickEditDialog: React.FunctionComponent = (props) => {
@@ -17,6 +16,7 @@ const BulkQuickEditDialog: React.FunctionComponent = (props) => {
     const {hideSidebar, setHideSidebar} = useContext(HideSidebarContext)
     const {enableDrag, setEnableDrag} = useContext(EnableDragContext)
     const {session, setSession} = useContext(SessionContext)
+    const {sessionFlag, setSessionFlag} = useContext(SessionFlagContext)
     const {showBulkQuickEditDialog, setShowBulkQuickEditDialog} = useContext(ShowBulkQuickEditDialogContext)
     const {selectionMode, setSelectionMode} = useContext(SelectionModeContext)
     const {selectionItems, setSelectionItems} = useContext(SelectionItemsContext) as {selectionItems: Set<string>, setSelectionItems: any}
@@ -80,8 +80,8 @@ const BulkQuickEditDialog: React.FunctionComponent = (props) => {
         for (const postID of selectionItems.values()) {
             const promise = new Promise(async (resolve) => {
                 const post = selectionPosts.get(postID)
-                const parsedTags = await functions.parseTagsSingle(post)
-                const tagCategories = await functions.tagCategories(parsedTags, true)
+                const parsedTags = await functions.parseTagsSingle(post, session, setSessionFlag)
+                const tagCategories = await functions.tagCategories(parsedTags, session, setSessionFlag, true)
 
                 let artistData = tagCategories.artists.map((a: any) => a.tag)
                 let characterData = tagCategories.characters.map((c: any) => c.tag)
@@ -120,7 +120,7 @@ const BulkQuickEditDialog: React.FunctionComponent = (props) => {
         await Promise.all(promiseArray)
         for (let i = 0; i < promiseArray.length; i++) {
             const data = await promiseArray[i]
-            axios.put("/api/post/quickedit", data, {headers: {"x-csrf-token": functions.getCSRFToken()}, withCredentials: true})
+            functions.put("/api/post/quickedit", data, session, setSessionFlag)
         }
         setShowBulkQuickEditDialog(false)
         setSelectionMode(false)

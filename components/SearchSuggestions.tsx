@@ -1,8 +1,7 @@
 import React, {useContext, useEffect, useRef, useState, useReducer} from "react"
 import {useHistory} from "react-router-dom"
-import {ThemeContext, EnableDragContext, SessionContext, MobileContext, SearchContext, SearchFlagContext} from "../Context"
+import {ThemeContext, EnableDragContext, SessionContext, SessionFlagContext, MobileContext, SearchContext, SearchFlagContext} from "../Context"
 import "./styles/searchsuggestions.less"
-import axios from "axios"
 import functions from "../structures/Functions"
 import permissions from "../structures/Permissions"
 import matureTags from "../assets/json/mature-tags.json"
@@ -24,6 +23,7 @@ const SearchSuggestions: React.FunctionComponent<Props> = (props) => {
     const {theme, setTheme} = useContext(ThemeContext)
     const {enableDrag, setEnableDrag} = useContext(EnableDragContext)
     const {session, setSession} = useContext(SessionContext)
+    const {sessionFlag, setSessionFlag} = useContext(SessionFlagContext)
     const {mobile, setMobile} = useContext(MobileContext)
     const {search, setSearch} = useContext(SearchContext)
     const {searchFlag, setSearchFlag} = useContext(SearchFlagContext)
@@ -82,11 +82,11 @@ const SearchSuggestions: React.FunctionComponent<Props> = (props) => {
     const updateSearchSuggestions = async () => {
         const query = props.text ? props.text : search
         if (!query) return setSuggestions([])
-        let suggestions = await axios.get("/api/search/suggestions", {params: {query, type: props.type}, withCredentials: true}).then((r) => r.data)
+        let suggestions = await functions.get("/api/search/suggestions", {query, type: props.type}, session, setSessionFlag)
         if (!suggestions?.length) {
             const newQuery = query.split(/ +/g).slice(-1).join("")
             if (!newQuery) return setSuggestions([])
-            suggestions = await axios.get("/api/search/suggestions", {params: {query: newQuery, type: props.type}, withCredentials: true}).then((r) => r.data)
+            suggestions = await functions.get("/api/search/suggestions", {query: newQuery, type: props.type}, session, setSessionFlag)
         }
         setSuggestions(suggestions)
     }
@@ -97,7 +97,7 @@ const SearchSuggestions: React.FunctionComponent<Props> = (props) => {
 
     useEffect(() => {
         updateSearchSuggestions()
-    }, [props.text, search])
+    }, [props.text, search, session])
 
     const generateSuggestionsJSX = () => {
         let jsx = [] as any

@@ -6,7 +6,6 @@ import functions from "../structures/Functions"
 import permissions from "../structures/Permissions"
 import GridImage from "./GridImage"
 import Carousel from "./Carousel"
-import axios from "axios"
 import "./styles/related.less"
 
 interface Props {

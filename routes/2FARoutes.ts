@@ -3,7 +3,7 @@ import rateLimit from "express-rate-limit"
 import slowDown from "express-slow-down"
 import sql from "../sql/SQLQuery"
 import functions from "../structures/Functions"
-import serverFunctions from "../structures/ServerFunctions"
+import serverFunctions, {authenticate} from "../structures/ServerFunctions"
 import {generateSecret, verifyToken} from "node-2fa"
 import axios from "axios"
 
@@ -16,10 +16,9 @@ const $2faLimiter = rateLimit({
 })
 
 const $2FARoutes = (app: Express) => {
-    app.post("/api/2fa/create", $2faLimiter, async (req: Request, res: Response) => {
+    app.post("/api/2fa/create", authenticate, $2faLimiter, async (req: Request, res: Response) => {
         try {
-            if (!serverFunctions.validateCSRF(req)) return res.status(400).send("Bad CSRF token")
-            if (!req.session.username) return res.status(401).send("Unauthorized")
+            if (!req.session.username) return res.status(403).send("Unauthorized")
             const user = await sql.user.user(req.session.username)
             if (!user) return res.status(400).send("Bad username")
             const enabled = !Boolean(user.$2fa)
@@ -42,10 +41,9 @@ const $2FARoutes = (app: Express) => {
         }
     })
 
-    app.post("/api/2fa/qr", $2faLimiter, async (req: Request, res: Response) => {
+    app.post("/api/2fa/qr", authenticate, $2faLimiter, async (req: Request, res: Response) => {
         try {
-            if (!serverFunctions.validateCSRF(req)) return res.status(400).send("Bad CSRF token")
-            if (!req.session.username) return res.status(401).send("Unauthorized")
+            if (!req.session.username) return res.status(403).send("Unauthorized")
             const $2FAToken = await sql.token.$2faToken(req.session.username)
             if (!$2FAToken) return res.status(400).send("User doesn't have 2FA token")
             const arrayBuffer = await axios.get($2FAToken.qrcode, {responseType: "arraybuffer"}).then((r) => r.data)
@@ -57,11 +55,10 @@ const $2FARoutes = (app: Express) => {
         }
     })
 
-    app.post("/api/2fa/enable", $2faLimiter, async (req: Request, res: Response) => {
+    app.post("/api/2fa/enable", authenticate, $2faLimiter, async (req: Request, res: Response) => {
         try {
             let {token} = req.body 
-            if (!serverFunctions.validateCSRF(req)) return res.status(400).send("Bad CSRF token")
-            if (!req.session.username) return res.status(401).send("Unauthorized")
+            if (!req.session.username) return res.status(403).send("Unauthorized")
             if (!token) return res.status(400).send("Bad token")
             token = token.trim()
             const user = await sql.user.user(req.session.username)
@@ -117,6 +114,8 @@ const $2FARoutes = (app: Express) => {
                 req.session.downloadPixivID = user.downloadPixivID
                 req.session.autosearchInterval = user.autosearchInterval
                 req.session.upscaledImages = user.upscaledImages
+                req.session.accessToken = serverFunctions.generateAccessToken(req)
+                req.session.refreshToken = serverFunctions.generateRefreshToken(req)
                 res.status(200).send("Success")
             } else {
                 res.status(400).send("Bad token")
@@ -129,7 +128,7 @@ const $2FARoutes = (app: Express) => {
 
     app.delete("/api/2fa/delete", $2faLimiter, async (req: Request, res: Response) => {
         try {
-            if (req.session.username) return res.status(401).send("Unauthorized")
+            if (req.session.username) return res.status(400).send("Bad request")
             req.session.destroy((err) => {
                 if (err) throw err
                 res.status(200).send("Success")

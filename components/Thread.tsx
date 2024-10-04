@@ -1,6 +1,6 @@
 import React, {useContext, useEffect, useRef, useState} from "react"
 import {useHistory} from "react-router-dom"
-import {ThemeContext, SearchContext, SearchFlagContext, MobileContext, SessionContext, SiteHueContext, SiteLightnessContext,
+import {ThemeContext, SearchContext, SearchFlagContext, SessionFlagContext, MobileContext, SessionContext, SiteHueContext, SiteLightnessContext,
 SiteSaturationContext} from "../Context"
 import {HashLink as Link} from "react-router-hash-link"
 import functions from "../structures/Functions"
@@ -11,7 +11,6 @@ import favicon from "../assets/icons/favicon.png"
 import "./styles/thread.less"
 import sticky from "../assets/icons/sticky.png"
 import lock from "../assets/icons/lock.png"
-import axios from "axios"
 
 interface Props {
     thread?: any
@@ -30,6 +29,7 @@ const Thread: React.FunctionComponent<Props> = (props) => {
     const {searchFlag, setSearchFlag} = useContext(SearchFlagContext)
     const {mobile, setMobile} = useContext(MobileContext)
     const {session, setSession} = useContext(SessionContext)
+    const {sessionFlag, setSessionFlag} = useContext(SessionFlagContext)
     const [creatorData, setCreatorData] = useState({}) as any
     const [updaterData, setUpdaterData] = useState({}) as any
     const [creatorDefaultIcon, setCreatorDefaultIcon] = useState(false)
@@ -41,13 +41,13 @@ const Thread: React.FunctionComponent<Props> = (props) => {
     }
 
     const updateUpdater = async () => {
-        const updater = await axios.get("/api/user", {params: {username: props.thread.updater}, withCredentials: true}).then((r) => r.data)
+        const updater = await functions.get("/api/user", {username: props.thread.updater}, session, setSessionFlag)
         setUpdaterData(updater)
         setUpdaterDefaultIcon(updater?.image ? false : true)
     }
 
     const updateCreator = async () => {
-        const creator = await axios.get("/api/user", {params: {username: props.thread.creator}, withCredentials: true}).then((r) => r.data)
+        const creator = await functions.get("/api/user", {username: props.thread.creator}, session, setSessionFlag)
         setCreatorData(creator)
         if (props.thread.creator === props.thread.updater) {
             setUpdaterData(creator)
@@ -63,7 +63,7 @@ const Thread: React.FunctionComponent<Props> = (props) => {
         if (props.thread) {
             updateCreator()
         }
-    }, [])
+    }, [session])
 
     const threadPage = (event: React.MouseEvent) => {
         if (event.ctrlKey || event.metaKey || event.button === 1) {

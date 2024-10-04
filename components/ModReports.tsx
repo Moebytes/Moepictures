@@ -1,13 +1,12 @@
 import React, {useContext, useEffect, useState} from "react"
 import {useHistory} from "react-router-dom"
-import {ThemeContext, SearchContext, SearchFlagContext, SiteHueContext, SiteLightnessContext, SiteSaturationContext} from "../Context"
+import {ThemeContext, SearchContext, SearchFlagContext, SessionContext, SessionFlagContext, SiteHueContext, SiteLightnessContext, SiteSaturationContext} from "../Context"
 import {HashLink as Link} from "react-router-hash-link"
 import favicon from "../assets/icons/favicon.png"
 import approve from "../assets/icons/approve.png"
 import reject from "../assets/icons/reject.png"
 import functions from "../structures/Functions"
 import "./styles/modposts.less"
-import axios from "axios"
 
 interface Props {
     request: any
@@ -18,6 +17,8 @@ const ReportRow: React.FunctionComponent<Props> = (props) => {
     const {siteHue, setSiteHue} = useContext(SiteHueContext)
     const {siteSaturation, setSiteSaturation} = useContext(SiteSaturationContext)
     const {siteLightness, setSiteLightness} = useContext(SiteLightnessContext)
+    const {session, setSession} = useContext(SessionContext)
+    const {sessionFlag, setSessionFlag} = useContext(SessionFlagContext)
     const [hover, setHover] = useState(false)
     const [asset, setAsset] = useState(null) as any
     const history = useHistory()
@@ -28,20 +29,20 @@ const ReportRow: React.FunctionComponent<Props> = (props) => {
 
     const updateAsset = async () => {
         if (props.request.type === "comment") {
-            const asset = await axios.get("/api/comment", {params: {commentID: props.request.id}, withCredentials: true}).then((r) => r.data)
+            const asset = await functions.get("/api/comment", {commentID: props.request.id}, session, setSessionFlag)
             setAsset(asset)
         } else if (props.request.type === "thread") {
-            const asset = await axios.get("/api/thread", {params: {threadID: props.request.id}, withCredentials: true}).then((r) => r.data)
+            const asset = await functions.get("/api/thread", {threadID: props.request.id}, session, setSessionFlag)
             setAsset(asset)
         } else if (props.request.type === "reply") {
-            const asset = await axios.get("/api/reply", {params: {replyID: props.request.id}, withCredentials: true}).then((r) => r.data)
+            const asset = await functions.get("/api/reply", {replyID: props.request.id}, session, setSessionFlag)
             setAsset(asset)
         }
     }
 
     useEffect(() => {
         updateAsset()
-    }, [])
+    }, [session])
 
     const imgClick = (event: React.MouseEvent) => {
         if (!asset) return
@@ -66,26 +67,26 @@ const ReportRow: React.FunctionComponent<Props> = (props) => {
 
     const approveRequest = async (username: string, id: string) => {
         if (props.request.type === "comment") {
-            await axios.delete("/api/comment/delete", {params: {commentID: props.request.id}, headers: {"x-csrf-token": functions.getCSRFToken()}, withCredentials: true})
-            await axios.post("/api/comment/report/fulfill", {reportID: props.request.reportID, reporter: props.request.reporter, username, id, accepted: true}, {headers: {"x-csrf-token": functions.getCSRFToken()}, withCredentials: true})
+            await functions.delete("/api/comment/delete", {commentID: props.request.id}, session, setSessionFlag)
+            await functions.post("/api/comment/report/fulfill", {reportID: props.request.reportID, reporter: props.request.reporter, username, id, accepted: true}, session, setSessionFlag)
         } else if (props.request.type === "thread") {
-            await axios.delete("/api/thread/delete", {params: {threadID: props.request.id}, headers: {"x-csrf-token": functions.getCSRFToken()}, withCredentials: true})
-            await axios.post("/api/thread/report/fulfill", {reportID: props.request.reportID, reporter: props.request.reporter, username, id, accepted: true}, {headers: {"x-csrf-token": functions.getCSRFToken()}, withCredentials: true})
+            await functions.delete("/api/thread/delete", {threadID: props.request.id}, session, setSessionFlag)
+            await functions.post("/api/thread/report/fulfill", {reportID: props.request.reportID, reporter: props.request.reporter, username, id, accepted: true}, session, setSessionFlag)
         } else if (props.request.type === "reply") {
             if (!asset) return
-            await axios.delete("/api/reply/delete", {params: {threadID: asset.threadID, replyID: props.request.id}, headers: {"x-csrf-token": functions.getCSRFToken()}, withCredentials: true})
-            await axios.post("/api/reply/report/fulfill", {reportID: props.request.reportID, reporter: props.request.reporter, username, id, accepted: true}, {headers: {"x-csrf-token": functions.getCSRFToken()}, withCredentials: true})
+            await functions.delete("/api/reply/delete", {threadID: asset.threadID, replyID: props.request.id}, session, setSessionFlag)
+            await functions.post("/api/reply/report/fulfill", {reportID: props.request.reportID, reporter: props.request.reporter, username, id, accepted: true}, session, setSessionFlag)
         }
         props.updateReports?.()
     }
 
     const rejectRequest = async (username: string, id: string) => {
         if (props.request.type === "comment") {
-            await axios.post("/api/comment/report/fulfill", {reportID: props.request.reportID, reporter: props.request.reporter, username, id, accepted: false}, {headers: {"x-csrf-token": functions.getCSRFToken()}, withCredentials: true})
+            await functions.post("/api/comment/report/fulfill", {reportID: props.request.reportID, reporter: props.request.reporter, username, id, accepted: false}, session, setSessionFlag)
         } else if (props.request.type === "thread") {
-            await axios.post("/api/thread/report/fulfill", {reportID: props.request.reportID, reporter: props.request.reporter, username, id, accepted: false}, {headers: {"x-csrf-token": functions.getCSRFToken()}, withCredentials: true})
+            await functions.post("/api/thread/report/fulfill", {reportID: props.request.reportID, reporter: props.request.reporter, username, id, accepted: false}, session, setSessionFlag)
         } else if (props.request.type === "reply") {
-            await axios.post("/api/reply/report/fulfill", {reportID: props.request.reportID, reporter: props.request.reporter, username, id, accepted: false}, {headers: {"x-csrf-token": functions.getCSRFToken()}, withCredentials: true})
+            await functions.post("/api/reply/report/fulfill", {reportID: props.request.reportID, reporter: props.request.reporter, username, id, accepted: false}, session, setSessionFlag)
         }
         props.updateReports?.()
     }
@@ -140,18 +141,20 @@ const ModReports: React.FunctionComponent = (props) => {
     const [index, setIndex] = useState(0)
     const [visibleRequests, setVisibleRequests] = useState([]) as any
     const [updateVisibleRequestFlag, setUpdateVisibleRequestFlag] = useState(false)
+    const {session, setSession} = useContext(SessionContext)
+    const {sessionFlag, setSessionFlag} = useContext(SessionFlagContext)
     const [offset, setOffset] = useState(0)
     const [ended, setEnded] = useState(false)
 
     const updateReports = async () => {
-        const requests = await axios.get("/api/search/reports", {withCredentials: true}).then((r) => r.data)
+        const requests = await functions.get("/api/search/reports", null, session, setSessionFlag)
         setEnded(false)
         setRequests(requests)
     }
 
     useEffect(() => {
         updateReports()
-    }, [])
+    }, [session])
 
     const updateVisibleRequests = () => {
         const newVisibleRequests = [] as any
@@ -184,7 +187,7 @@ const ModReports: React.FunctionComponent = (props) => {
     const updateOffset = async () => {
         if (ended) return
         const newOffset = offset + 100
-        const result = await axios.get("/api/search/reports", {params: {offset: newOffset}, withCredentials: true}).then((r) => r.data)
+        const result = await functions.get("/api/search/reports", {offset: newOffset}, session, setSessionFlag)
         if (result?.length >= 100) {
             setOffset(newOffset)
             setRequests((prev: any) => functions.removeDuplicates([...prev, ...result]))

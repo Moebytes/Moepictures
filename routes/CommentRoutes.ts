@@ -3,7 +3,7 @@ import rateLimit from "express-rate-limit"
 import slowDown from "express-slow-down"
 import sql from "../sql/SQLQuery"
 import functions from "../structures/Functions"
-import serverFunctions from "../structures/ServerFunctions"
+import serverFunctions, {authenticate} from "../structures/ServerFunctions"
 
 const commentLimiter = rateLimit({
 	windowMs: 5 * 60 * 1000,
@@ -26,11 +26,10 @@ const CommentRoutes = (app: Express) => {
         }
     })
 
-    app.post("/api/comment/create", commentLimiter, async (req: Request, res: Response) => {
+    app.post("/api/comment/create", authenticate, commentLimiter, async (req: Request, res: Response) => {
         try {
             const {comment, postID} = req.body
-            if (!serverFunctions.validateCSRF(req)) return res.status(400).send("Bad CSRF token")
-            if (!req.session.username) return res.status(401).send("Unauthorized")
+            if (!req.session.username) return res.status(403).send("Unauthorized")
             if (req.session.banned) return res.status(403).send("You are banned")
             if (!comment || !postID) return res.status(400).send("Bad comment or post ID")
             if (Number.isNaN(Number(postID))) return res.status(400).send("Invalid postID")
@@ -44,11 +43,10 @@ const CommentRoutes = (app: Express) => {
         }
     })
 
-    app.delete("/api/comment/delete", commentLimiter, async (req: Request, res: Response) => {
+    app.delete("/api/comment/delete", authenticate, commentLimiter, async (req: Request, res: Response) => {
         try {
             const commentID = req.query.commentID
-            if (!serverFunctions.validateCSRF(req)) return res.status(400).send("Bad CSRD token")
-            if (!req.session.username) return res.status(401).send("Unauthorized")
+            if (!req.session.username) return res.status(403).send("Unauthorized")
             if (Number.isNaN(Number(commentID))) return res.status(400).send("Invalid commentID")
             const comment = await sql.comment.comment(Number(commentID))
             if (comment?.username !== req.session.username) {
@@ -62,11 +60,10 @@ const CommentRoutes = (app: Express) => {
         }
     })
 
-    app.put("/api/comment/edit", commentLimiter, async (req: Request, res: Response) => {
+    app.put("/api/comment/edit", authenticate, commentLimiter, async (req: Request, res: Response) => {
         try {
             const {comment, commentID} = req.body
-            if (!serverFunctions.validateCSRF(req)) return res.status(400).send("Bad CSRF token")
-            if (!req.session.username) return res.status(401).send("Unauthorized")
+            if (!req.session.username) return res.status(403).send("Unauthorized")
             if (!comment || !commentID) return res.status(400).send("Bad comment or comment ID")
             if (Number.isNaN(Number(commentID))) return res.status(400).send("Invalid commentID")
             const badComment = functions.validateComment(comment as string)
@@ -81,11 +78,10 @@ const CommentRoutes = (app: Express) => {
         }
     })
 
-    app.post("/api/comment/report", commentLimiter, async (req: Request, res: Response) => {
+    app.post("/api/comment/report", authenticate, commentLimiter, async (req: Request, res: Response) => {
         try {
             const {commentID, reason} = req.body
-            if (!serverFunctions.validateCSRF(req)) return res.status(400).send("Bad CSRF token")
-            if (!req.session.username) return res.status(401).send("Unauthorized")
+            if (!req.session.username) return res.status(403).send("Unauthorized")
             if (req.session.banned) return res.status(403).send("You are banned")
             if (!commentID) return res.status(400).send("Bad commentID")
             if (Number.isNaN(Number(commentID))) return res.status(400).send("Invalid commentID")
@@ -99,10 +95,10 @@ const CommentRoutes = (app: Express) => {
         }
     })
 
-    app.post("/api/comment/report/fulfill", commentLimiter, async (req: Request, res: Response) => {
+    app.post("/api/comment/report/fulfill", authenticate, commentLimiter, async (req: Request, res: Response) => {
         try {
             const {reportID, reporter, username, id, accepted} = req.body
-            if (!serverFunctions.validateCSRF(req)) return res.status(400).send("Bad CSRF token")
+            if (!req.session.username) return res.status(403).send("Unauthorized")
             if (!reportID) return res.status(400).send("Bad reportID")
             if (req.session.role !== "admin" && req.session.role !== "mod") return res.status(403).end()
 

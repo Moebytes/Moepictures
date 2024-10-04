@@ -24,7 +24,6 @@ import BanDialog from "../dialogs/BanDialog"
 import DMDialog from "../dialogs/DMDialog"
 import UnbanDialog from "../dialogs/UnbanDialog"
 import "./styles/userpage.less"
-import axios from "axios"
 
 interface Props {
     match?: any
@@ -70,7 +69,7 @@ const UserPage: React.FunctionComponent<Props> = (props) => {
     }
 
     const fetchUser = async () => {
-        const user = await axios.get("/api/user", {params: {username}}).then((r) => r.data)
+        const user = await functions.get("/api/user", {username}, session, setSessionFlag)
         if (!user) return history.push("/404")
         setUser(user)
         setDefaultIcon(user.image ? false : true)
@@ -82,10 +81,10 @@ const UserPage: React.FunctionComponent<Props> = (props) => {
         updateUploads()
         updateFavorites()
         updateComments()
-    }, [username])
+    }, [username, session])
 
     const updateUploads = async () => {
-        const uploads = await axios.get("/api/user/uploads", {params: {username}, withCredentials: true}).then((r) => r.data)
+        const uploads = await functions.get("/api/user/uploads", {username}, session, setSessionFlag)
         const filtered = uploads.filter((u: any) => u.post?.restrict !== "explicit")
         const images = filtered.map((p: any) => functions.getThumbnailLink(p.images[0].type, p.postID, p.images[0].order, p.images[0].filename, "tiny"))
         setUploads(filtered)
@@ -93,7 +92,7 @@ const UserPage: React.FunctionComponent<Props> = (props) => {
     }
 
     const updateFavorites = async () => {
-        const favorites = await axios.get("/api/user/favorites", {params: {username}, withCredentials: true}).then((r) => r.data)
+        const favorites = await functions.get("/api/user/favorites", {username}, session, setSessionFlag)
         const filtered = favorites.filter((f: any) => f.post?.restrict !== "explicit")
         const images = filtered.map((f: any) => functions.getThumbnailLink(f.post.images[0].type, f.postID, f.post.images[0].order, f.post.images[0].filename, "tiny"))
         setFavorites(filtered)
@@ -101,7 +100,7 @@ const UserPage: React.FunctionComponent<Props> = (props) => {
     }
 
     const updateComments = async () => {
-        const comments = await axios.get("/api/user/comments", {params: {username, sort: "date"}, withCredentials: true}).then((r) => r.data)
+        const comments = await functions.get("/api/user/comments", {username, sort: "date"}, session, setSessionFlag)
         setComments(comments)
     }
 

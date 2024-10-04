@@ -7,10 +7,9 @@ import NavBar from "../components/NavBar"
 import SideBar from "../components/SideBar"
 import DragAndDrop from "../components/DragAndDrop"
 import functions from "../structures/Functions"
-import axios from "axios"
 import {HideNavbarContext, HideSidebarContext, ThemeContext, EnableDragContext, RedirectContext, MobileContext,
 RelativeContext, HideTitlebarContext, HeaderTextContext, SidebarTextContext, SessionContext, SiteHueContext, SiteLightnessContext,
-SiteSaturationContext} from "../Context"
+SiteSaturationContext, SessionFlagContext} from "../Context"
 import "./styles/changeemailpage.less"
 import session from "express-session"
 
@@ -28,6 +27,7 @@ const ChangeEmailPage: React.FunctionComponent = (props) => {
     const {sidebarText, setSidebarText} = useContext(SidebarTextContext)
     const {mobile, setMobile} = useContext(MobileContext)
     const {session, setSession} = useContext(SessionContext)
+    const {sessionFlag, setSessionFlag} = useContext(SessionFlagContext)
     const {redirect, setRedirect} = useContext(RedirectContext)
     const [submitted, setSubmitted] = useState(false)
     const [newEmail, setNewEmail] = useState("")
@@ -47,7 +47,7 @@ const ChangeEmailPage: React.FunctionComponent = (props) => {
     }
 
     const updateCaptcha = async () => {
-        const captcha = await axios.get("/api/misc/captcha/create", {params: {color: getCaptchaColor()}, withCredentials: true}).then((r) => r.data)
+        const captcha = await functions.get("/api/misc/captcha/create", {color: getCaptchaColor()}, session, setSessionFlag)
         setCaptcha(captcha)
         setCaptchaResponse("")
     }
@@ -98,7 +98,7 @@ const ChangeEmailPage: React.FunctionComponent = (props) => {
         if (!errorRef.current) await functions.timeout(20)
         errorRef.current!.innerText = "Submitting..."
         try {
-            await axios.post("/api/user/changeemail", {newEmail, captchaResponse}, {headers: {"x-csrf-token": functions.getCSRFToken()}, withCredentials: true})
+            await functions.post("/api/user/changeemail", {newEmail, captchaResponse}, session, setSessionFlag)
             setSubmitted(true)
             setError(false)
         } catch {

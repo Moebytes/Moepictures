@@ -6,7 +6,6 @@ SessionContext, MobileContext, SessionFlagContext, SiteHueContext, SiteLightness
 import functions from "../structures/Functions"
 import "./styles/dialog.less"
 import Draggable from "react-draggable"
-import axios from "axios"
 
 interface Props {
     forceCaptcha?: boolean
@@ -45,7 +44,7 @@ const CaptchaDialog: React.FunctionComponent<Props> = (props) => {
     }
 
     const updateCaptcha = async () => {
-        const captcha = await axios.get("/api/misc/captcha/create", {params: {color: getCaptchaColor()}, withCredentials: true}).then((r) => r.data)
+        const captcha = await functions.get("/api/misc/captcha/create", {color: getCaptchaColor()}, session, setSessionFlag)
         setCaptcha(captcha)
         setCaptchaResponse("")
     }
@@ -94,7 +93,7 @@ const CaptchaDialog: React.FunctionComponent<Props> = (props) => {
             return setError(false)
         }
         try {
-            await axios.post("/api/misc/captcha", {captchaResponse}, {headers: {"x-csrf-token": functions.getCSRFToken()}, withCredentials: true})
+            await functions.post("/api/misc/captcha", {captchaResponse}, session, setSessionFlag)
             captchaRef.current?.resetCaptcha?.()
             setSessionFlag(true)
             setNeedsVerification(false)

@@ -12,7 +12,6 @@ import {HideNavbarContext, HideSidebarContext, ThemeContext, EnableDragContext, 
 HideTitlebarContext, HeaderTextContext, SessionFlagContext, SidebarTextContext, RedirectContext, SiteHueContext, SiteLightnessContext,
 SiteSaturationContext} from "../Context"
 import "./styles/loginpage.less"
-import axios from "axios"
 import functions from "../structures/Functions"
 
 const LoginPage: React.FunctionComponent = (props) => {
@@ -50,7 +49,7 @@ const LoginPage: React.FunctionComponent = (props) => {
     }
 
     const updateCaptcha = async () => {
-        const captcha = await axios.get("/api/misc/captcha/create", {params: {color: getCaptchaColor()}, withCredentials: true}).then((r) => r.data)
+        const captcha = await functions.get("/api/misc/captcha/create", {color: getCaptchaColor()}, session, setSessionFlag)
         setCaptcha(captcha)
         setCaptchaResponse("")
     }
@@ -101,7 +100,7 @@ const LoginPage: React.FunctionComponent = (props) => {
         if (!errorRef.current) await functions.timeout(20)
         errorRef.current!.innerText = "Submitting..."
         try {
-            const result = await axios.post("/api/user/login", {username, password, captchaResponse}, {headers: {"x-csrf-token": functions.getCSRFToken()}, withCredentials: true}).then((r) => r.data)
+            const result = await functions.post("/api/user/login", {username, password, captchaResponse}, session, setSessionFlag)
             setSessionFlag(true)
             if (redirect) {
                 await functions.timeout(20)

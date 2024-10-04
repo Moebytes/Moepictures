@@ -1,7 +1,8 @@
 import React, {useEffect, useContext, useState, useRef} from "react"
 import {useHistory} from "react-router-dom"
 import {HashLink as Link} from "react-router-hash-link"
-import {HideNavbarContext, HideSidebarContext, ThemeContext, EnableDragContext, QuickEditIDContext, HideTitlebarContext, SessionContext, MobileContext} from "../Context"
+import {HideNavbarContext, HideSidebarContext, ThemeContext, EnableDragContext, QuickEditIDContext, HideTitlebarContext, 
+SessionContext, SessionFlagContext, MobileContext} from "../Context"
 import functions from "../structures/Functions"
 import Draggable from "react-draggable"
 import permissions from "../structures/Permissions"
@@ -20,7 +21,6 @@ import audio from "../assets/icons/audio.png"
 import model from "../assets/icons/model.png"
 import SearchSuggestions from "../components/SearchSuggestions"
 import ContentEditable from "react-contenteditable"
-import axios from "axios"
 import "./styles/dialog.less"
 
 const QuickEditDialog: React.FunctionComponent = (props) => {
@@ -30,6 +30,7 @@ const QuickEditDialog: React.FunctionComponent = (props) => {
     const {hideSidebar, setHideSidebar} = useContext(HideSidebarContext)
     const {enableDrag, setEnableDrag} = useContext(EnableDragContext)
     const {session, setSession} = useContext(SessionContext)
+    const {sessionFlag, setSessionFlag} = useContext(SessionFlagContext)
     const {quickEditID, setQuickEditID} = useContext(QuickEditIDContext)
     const {mobile, setMobile} = useContext(MobileContext)
     const [type, setType] = useState("image")
@@ -149,7 +150,7 @@ const QuickEditDialog: React.FunctionComponent = (props) => {
                 reason
             }
             setQuickEditID(null)
-            await axios.put("/api/post/quickedit", data, {headers: {"x-csrf-token": functions.getCSRFToken()}, withCredentials: true})
+            await functions.put("/api/post/quickedit", data, session, setSessionFlag)
             history.go(0)
         } else {
             const joined = `${artists} ${characters} ${series} ${tags} ${metaTags}`
@@ -197,7 +198,7 @@ const QuickEditDialog: React.FunctionComponent = (props) => {
                 tags: functions.cleanHTML(`${tags} ${metaTags}`).split(/[\n\r\s]+/g),
                 reason
             }
-            await axios.put("/api/post/quickedit/unverified", data, {headers: {"x-csrf-token": functions.getCSRFToken()}, withCredentials: true})
+            await functions.put("/api/post/quickedit/unverified", data, session, setSessionFlag)
             setSubmitted(true)
         }
     }

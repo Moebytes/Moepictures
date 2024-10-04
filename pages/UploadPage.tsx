@@ -31,11 +31,10 @@ import PostImage from "../components/PostImage"
 import PostModel from "../components/PostModel"
 import PostSong from "../components/PostSong"
 import DragAndDrop from "../components/DragAndDrop"
-import {HideNavbarContext, HideSidebarContext, RelativeContext, ThemeContext, EnableDragContext, HideTitlebarContext, 
+import {HideNavbarContext, HideSidebarContext, RelativeContext, ThemeContext, EnableDragContext, HideTitlebarContext, SessionFlagContext,
 UploadDropFilesContext, BrightnessContext, ContrastContext, HueContext, SaturationContext, LightnessContext, MobileContext,
 BlurContext, SharpenContext, PixelateContext, HeaderTextContext, SessionContext, SidebarTextContext, RedirectContext, ShowUpscaledContext} from "../Context"
 import JSZip from "jszip"
-import axios from "axios"
 import SearchSuggestions from "../components/SearchSuggestions"
 import ContentEditable from "react-contenteditable"
 import permissions from "../structures/Permissions"
@@ -65,6 +64,7 @@ const UploadPage: React.FunctionComponent = (props) => {
     const {headerText, setHeaderText} = useContext(HeaderTextContext)
     const {sidebarText, setSidebarText} = useContext(SidebarTextContext)
     const {session, setSession} = useContext(SessionContext)
+    const {sessionFlag, setSessionFlag} = useContext(SessionFlagContext)
     const {redirect, setRedirect} = useContext(RedirectContext)
     const {uploadDropFiles, setUploadDropFiles} = useContext(UploadDropFilesContext)
     const {mobile, setMobile} = useContext(MobileContext)
@@ -163,9 +163,9 @@ const UploadPage: React.FunctionComponent = (props) => {
             let dupes = null as any
             if (img.thumbnail) {
                 const bytes = await functions.base64toUint8Array(img.thumbnail)
-                dupes = await axios.post("/api/search/similar", {bytes: Object.values(bytes), type: img.ext}).then((r) => r.data)
+                dupes = await functions.post("/api/search/similar", {bytes: Object.values(bytes), type: img.ext}, session, setSessionFlag)
             } else {
-                dupes = await axios.post("/api/search/similar", {bytes: Object.values(img.bytes), type: img.ext}).then((r) => r.data)
+                dupes = await functions.post("/api/search/similar", {bytes: Object.values(img.bytes), type: img.ext}, session, setSessionFlag)
             }
             setDupPosts(dupes)
         }
@@ -399,7 +399,7 @@ const UploadPage: React.FunctionComponent = (props) => {
     }
 
     const handleTagClick = async (tag: string, index: number) => {
-        const tagDetail = await axios.get("/api/tag", {params: {tag}, withCredentials: true}).then((r) => r.data)
+        const tagDetail = await functions.get("/api/tag", {tag}, session, setSessionFlag)
         if (tagDetail.image) {
             const tagLink = functions.getTagLink(tagDetail.type, tagDetail.image)
             const arrayBuffer = await fetch(tagLink).then((r) => r.arrayBuffer())
@@ -698,7 +698,7 @@ const UploadPage: React.FunctionComponent = (props) => {
         enterLinksTimer = setTimeout(async () => {
             let files = [] as any
             for (let i = 0; i < links.length; i++) {
-                const file = await functions.proxyImage(links[i])
+                const file = await functions.proxyImage(links[i], session, setSessionFlag)
                 files.push(file)
             }
             await validate(files, links)
@@ -837,9 +837,9 @@ const UploadPage: React.FunctionComponent = (props) => {
         submitErrorRef.current.innerText = "Submitting..."
         try {
             if (permissions.isElevated(session)) {
-                await axios.post("/api/post/upload", data, {headers: {"x-csrf-token": functions.getCSRFToken()}, withCredentials: true}).then((r) => r.data)
+                await functions.post("/api/post/upload", data, session, setSessionFlag)
             } else {
-                await axios.post("/api/post/upload/unverified", data, {headers: {"x-csrf-token": functions.getCSRFToken()}, withCredentials: true}).then((r) => r.data)
+                await functions.post("/api/post/upload/unverified", data, session, setSessionFlag)
             }
             setSubmitted(true)
             return setSubmitError(false)
@@ -871,7 +871,7 @@ const UploadPage: React.FunctionComponent = (props) => {
         }
         saucenaoTimeout = true
         try {
-            let results = await axios.post(`/api/misc/saucenao`, bytes, {withCredentials: true}).then((r) => r.data)
+            let results = await functions.post(`/api/misc/saucenao`, bytes, session, setSessionFlag)
             console.log(results)
             let link = ""
             let artist = ""
@@ -897,7 +897,7 @@ const UploadPage: React.FunctionComponent = (props) => {
                 if (deviantart.length) {
                     let redirectedLink = ""
                     try {
-                        redirectedLink = await axios.get(`/api/misc/redirect?url=${deviantart[0].data.ext_urls[0]}`, {withCredentials: true}).then((r) => r.data)
+                        redirectedLink = await functions.get(`/api/misc/redirect?url=${deviantart[0].data.ext_urls[0]}`, null, session, setSessionFlag)
                     } catch {
                         // ignore
                     }
@@ -912,20 +912,20 @@ const UploadPage: React.FunctionComponent = (props) => {
                 if (pixiv.length) {
                     link = `https://www.pixiv.net/en/artworks/${pixiv[0].data.pixiv_id}`
                     if (!danbooru.length) {
-                        const result = await axios.get(`https://danbooru.donmai.us/posts.json?tags=pixiv_id%3A${pixiv[0].data.pixiv_id}`).then((r) => r.data)
+                        const result = await functions.fetch(`https://danbooru.donmai.us/posts.json?tags=pixiv_id%3A${pixiv[0].data.pixiv_id}`)
                         if (result.length) setDanbooruLink(`https://danbooru.donmai.us/posts/${result[0].id}.json`)
                     }
                     artist = pixiv[0].data.author_name
                     title = pixiv[0].data.title
                     try {
-                        const illust = await axios.get(`/api/misc/pixiv?url=${link}`, {withCredentials: true}).then((r: any) => r.data)
+                        const illust = await functions.get(`/api/misc/pixiv?url=${link}`, null, session, setSessionFlag)
                         commentary = `${functions.decodeEntities(illust.caption.replace(/<\/?[^>]+(>|$)/g, ""))}` 
                         date = functions.formatDate(new Date(illust.create_date), true)
                         link = illust.url 
                         title = illust.title
                         artist = illust.user.name
                         bookmarks = illust.total_bookmarks
-                        const translated = await axios.post("/api/misc/translate", [title, commentary], {withCredentials: true}).then((r) => r.data)
+                        const translated = await functions.post("/api/misc/translate", [title, commentary], session, setSessionFlag)
                         translatedTitle = translated[0]
                         translatedCommentary = translated[1]
                         if (illust.x_restrict !== 0) {
@@ -933,8 +933,8 @@ const UploadPage: React.FunctionComponent = (props) => {
                         } else {
                             setRestrict("safe")
                         }
-                        const pfp = await functions.proxyImage(illust.user.profile_image_urls.medium)
-                        artists[artists.length - 1].tag = illust.user.twitter ? functions.fixTwitterTag(illust.user.twitter) : await axios.post("/api/misc/romajinize", [artist], {withCredentials: true}).then((r) => r.data[0])
+                        const pfp = await functions.proxyImage(illust.user.profile_image_urls.medium, session, setSessionFlag)
+                        artists[artists.length - 1].tag = illust.user.twitter ? functions.fixTwitterTag(illust.user.twitter) : await functions.post("/api/misc/romajinize", [artist], session, setSessionFlag).then((r) => r[0])
                         await uploadTagImg(pfp, "artist", artists.length - 1)
                         artists.push({})
                         artistInputRefs.push(React.createRef())
@@ -948,7 +948,7 @@ const UploadPage: React.FunctionComponent = (props) => {
                 } else if (deviantart.length) {
                     let redirectedLink = ""
                     try {
-                        redirectedLink = await axios.get(`/api/misc/redirect?url=${deviantart[0].data.ext_urls[0]}`, {withCredentials: true}).then((r) => r.data)
+                        redirectedLink = await functions.get(`/api/misc/redirect?url=${deviantart[0].data.ext_urls[0]}`, null, session, setSessionFlag)
                     } catch {
                         // ignore
                     }
@@ -956,7 +956,7 @@ const UploadPage: React.FunctionComponent = (props) => {
                     artist = deviantart[0].data.member_name 
                     title = deviantart[0].data.title
                     try {
-                        const deviation = await axios.get(`/api/misc/deviantart?url=${link}`, {withCredentials: true}).then((r: any) => r.data)
+                        const deviation = await functions.get(`/api/misc/deviantart?url=${link}`, null, session, setSessionFlag)
                         title = deviation.title
                         artist = deviation.author.user.username
                         link = deviation.url
@@ -967,7 +967,7 @@ const UploadPage: React.FunctionComponent = (props) => {
                         } else {
                             setRestrict("safe")
                         }
-                        const pfp = await functions.proxyImage(deviation.author.user.usericon)
+                        const pfp = await functions.proxyImage(deviation.author.user.usericon, session, setSessionFlag)
                         artists[artists.length - 1].tag = artist
                         await uploadTagImg(pfp, "artist", artists.length - 1)
                         artists.push({})
@@ -1039,7 +1039,7 @@ const UploadPage: React.FunctionComponent = (props) => {
 
         try {
         if (danbooruLink) {
-            const json = await axios.get(danbooruLink).then((r) => r.data)
+            const json = await functions.fetch(danbooruLink).then((r) => r.data)
             tagArr = json.tag_string_general.split(" ").map((tag: string) => tag.replaceAll("_", "-"))
             tagArr.push("autotags")
             let charStrArr = json.tag_string_character.split(" ").map((tag: string) => tag.replaceAll("_", "-"))
@@ -1094,7 +1094,7 @@ const UploadPage: React.FunctionComponent = (props) => {
             } else {
                 bytes = Object.values(current.bytes) as any
             }
-            let tagArr = await axios.post(`/api/misc/wdtagger`, bytes, {withCredentials: true}).then((r) => r.data).catch(() => null)
+            let tagArr = await functions.post(`/api/misc/wdtagger`, bytes, session, setSessionFlag).catch(() => null)
             if (!tagArr) return
 
             if (tagArr.includes("chibi")) setStyle("chibi")
@@ -1166,14 +1166,14 @@ const UploadPage: React.FunctionComponent = (props) => {
 
     useEffect(() => {
         updateTags()
-    }, [rawTags])
+    }, [rawTags, session])
 
     const updateTags = async () => {
         const tags = functions.removeDuplicates(functions.cleanHTML(rawTags).trim().split(/[\n\r\s]+/g).map((t) => t.trim().toLowerCase())) as string[]
         clearTimeout(tagsTimer)
         tagsTimer = setTimeout(async () => {
             if (!tags?.[0]) return setNewTags([])
-            const tagMap = await functions.tagsCache()
+            const tagMap = await functions.tagsCache(session, setSessionFlag)
             let notExists = [] as any
             for (let i = 0; i < tags.length; i++) {
                 const exists = tagMap[tags[i]]

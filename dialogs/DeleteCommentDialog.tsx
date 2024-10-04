@@ -5,7 +5,6 @@ import {HideNavbarContext, HideSidebarContext, ThemeContext, EnableDragContext, 
 import functions from "../structures/Functions"
 import "./styles/dialog.less"
 import Draggable from "react-draggable"
-import axios from "axios"
 
 const DeleteCommentDialog: React.FunctionComponent = (props) => {
     const {theme, setTheme} = useContext(ThemeContext)

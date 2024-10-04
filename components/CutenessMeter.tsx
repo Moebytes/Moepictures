@@ -1,5 +1,5 @@
 import React, {useContext, useEffect, useRef, useState, useReducer} from "react"
-import {ThemeContext, SessionContext, SiteHueContext, SiteLightnessContext, SiteSaturationContext} from "../Context"
+import {ThemeContext, SessionContext, SessionFlagContext, SiteHueContext, SiteLightnessContext, SiteSaturationContext} from "../Context"
 import Slider from "react-slider"
 import {Rating} from "react-simple-star-rating"
 import functions from "../structures/Functions"
@@ -10,7 +10,6 @@ import cuteness4 from "../assets/misc/cuteness4.png"
 import cuteness5 from "../assets/misc/cuteness5.png"
 import deleteStar from "../assets/icons/deletestar.png"
 import "./styles/cutenessmeter.less"
-import axios from "axios"
 
 interface Props {
     post: any
@@ -24,6 +23,7 @@ const CutenessMeter: React.FunctionComponent<Props> = (props) => {
     const {siteSaturation, setSiteSaturation} = useContext(SiteSaturationContext)
     const {siteLightness, setSiteLightness} = useContext(SiteLightnessContext)
     const {session, setSession} = useContext(SessionContext)
+    const {sessionFlag, setSessionFlag} = useContext(SessionFlagContext)
     const [cuteness, setCuteness] = useState(0)
     const [averageCuteness, setAverageCuteness] = useState(props.post?.cuteness || 0)
     const [isAverage, setIsAverage] = useState(false)
@@ -41,7 +41,7 @@ const CutenessMeter: React.FunctionComponent<Props> = (props) => {
     }
 
     const getCuteness = async () => {
-        const cuteness = await axios.get("/api/cuteness", {params: {postID: props.post.postID}, withCredentials: true}).then((r) => r.data)
+        const cuteness = await functions.get("/api/cuteness", {postID: props.post.postID}, session, setSessionFlag)
         if (props.post?.cuteness) setAverageCuteness(props.post.cuteness)
         if (cuteness?.cuteness) {
             setCuteness(Number(cuteness.cuteness))
@@ -53,18 +53,18 @@ const CutenessMeter: React.FunctionComponent<Props> = (props) => {
 
     const updateCuteness = async () => {
         if (!cuteness) return
-        await axios.post("/api/cuteness/update", {cuteness, postID: props.post.postID}, {headers: {"x-csrf-token": functions.getCSRFToken()}, withCredentials: true})
+        await functions.post("/api/cuteness/update", {cuteness, postID: props.post.postID}, session, setSessionFlag)
         if (cuteness) setIsAverage(false)
     }
 
     const deleteRating = async () => {
-        await axios.delete("/api/cuteness/delete", {params: {postID: props.post.postID}, headers: {"x-csrf-token": functions.getCSRFToken()}, withCredentials: true})
+        await functions.delete("/api/cuteness/delete", {postID: props.post.postID}, session, setSessionFlag)
         setIsAverage(true)
     }
 
     useEffect(() => {
         getCuteness()
-    }, [props.post])
+    }, [props.post, session])
 
     const getImg = () => {
         if (cuteness < 200) {
@@ -88,7 +88,7 @@ const CutenessMeter: React.FunctionComponent<Props> = (props) => {
         cutenessTimer = setTimeout(() => {
             updateCuteness()
         }, 500)
-    }, [cuteness])
+    }, [cuteness, session])
 
     const setCutenessValue = (value: number) => {
         if (isAverage) return setCuteness(averageCuteness)

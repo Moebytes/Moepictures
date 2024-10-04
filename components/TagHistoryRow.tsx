@@ -1,6 +1,6 @@
 import React, {useContext, useEffect, useRef, useState} from "react"
 import {useHistory} from "react-router-dom"
-import {ThemeContext, QuoteTextContext, SessionContext, MobileContext, DeleteTagHistoryIDContext, 
+import {ThemeContext, QuoteTextContext, SessionContext, SessionFlagContext, MobileContext, DeleteTagHistoryIDContext, 
 RevertTagHistoryIDContext, DeleteTagHistoryFlagContext, RevertTagHistoryFlagContext} from "../Context"
 import {HashLink as Link} from "react-router-hash-link"
 import functions from "../structures/Functions"
@@ -17,7 +17,6 @@ import sketchfab from "../assets/icons/sketchfab.png"
 import twitter from "../assets/icons/twitter.png"
 import crypto from "crypto"
 import "./styles/taghistoryrow.less"
-import axios from "axios"
 
 interface Props {
     tagHistory: any
@@ -33,6 +32,7 @@ const TagHistoryRow: React.FunctionComponent<Props> = (props) => {
     const {theme, setTheme} = useContext(ThemeContext)
     const {mobile, setMobile} = useContext(MobileContext)
     const {session, setSession} = useContext(SessionContext)
+    const {sessionFlag, setSessionFlag} = useContext(SessionFlagContext)
     const {deleteTagHistoryID, setDeleteTagHistoryID} = useContext(DeleteTagHistoryIDContext)
     const {revertTagHistoryID, setRevertTagHistoryID} = useContext(RevertTagHistoryIDContext)
     const {deleteTagHistoryFlag, setDeleteTagHistoryFlag} = useContext(DeleteTagHistoryFlagContext)
@@ -46,13 +46,13 @@ const TagHistoryRow: React.FunctionComponent<Props> = (props) => {
     const tag = props.tagHistory.tag
 
     const updateUserRole = async () => {
-        const user = await axios.get("/api/user", {params: {username: props.tagHistory.user}, withCredentials: true}).then((r) => r.data)
+        const user = await functions.get("/api/user", {username: props.tagHistory.user}, session, setSessionFlag)
         if (user?.role) setUserRole(user.role)
     }
 
     useEffect(() => {
         updateUserRole()
-    }, [])
+    }, [session])
 
     const revertTagHistory = async () => {
         if (props.current) return Promise.reject()
@@ -65,9 +65,9 @@ const TagHistoryRow: React.FunctionComponent<Props> = (props) => {
             const bytes = new Uint8Array(arrayBuffer)
             image = Object.values(bytes)
         }
-        await axios.put("/api/tag/edit", {tag: props.tagHistory.tag, key: props.tagHistory.key, description: props.tagHistory.description,
+        await functions.put("/api/tag/edit", {tag: props.tagHistory.tag, key: props.tagHistory.key, description: props.tagHistory.description,
         image, aliases: props.tagHistory.aliases, implications: props.tagHistory.implications, social: props.tagHistory.social, twitter: props.tagHistory.twitter,
-        website: props.tagHistory.website, fandom: props.tagHistory.fandom}, {headers: {"x-csrf-token": functions.getCSRFToken()}, withCredentials: true})
+        website: props.tagHistory.website, fandom: props.tagHistory.fandom}, session, setSessionFlag)
         props.onEdit?.()
     }
 
@@ -81,11 +81,11 @@ const TagHistoryRow: React.FunctionComponent<Props> = (props) => {
                 setRevertTagHistoryID({failed: true, historyID: props.tagHistory.historyID})
             })
         }
-    }, [revertTagHistoryFlag, revertTagHistoryID, props.current])
+    }, [revertTagHistoryFlag, revertTagHistoryID, session, props.current])
 
     const deleteTagHistory = async () => {
         if (props.current) return Promise.reject()
-        await axios.delete("/api/tag/history/delete", {params: {tag: props.tagHistory.tag, historyID: props.tagHistory.historyID}, headers: {"x-csrf-token": functions.getCSRFToken()}, withCredentials: true})
+        await functions.delete("/api/tag/history/delete", {tag: props.tagHistory.tag, historyID: props.tagHistory.historyID}, session, setSessionFlag)
         props.onDelete?.()
     }
 
@@ -99,7 +99,7 @@ const TagHistoryRow: React.FunctionComponent<Props> = (props) => {
                 setDeleteTagHistoryID({failed: true, historyID: props.tagHistory.historyID})
             })
         }
-    }, [deleteTagHistoryFlag, deleteTagHistoryID, props.current])
+    }, [deleteTagHistoryFlag, deleteTagHistoryID, session, props.current])
 
     const revertTagHistoryDialog = async () => {
         setRevertTagHistoryID({failed: false, historyID: props.tagHistory.historyID})
@@ -213,8 +213,8 @@ const TagHistoryRow: React.FunctionComponent<Props> = (props) => {
         const img = functions.getTagLink(props.tagHistory.type, props.tagHistory.image)
         const previous = functions.getTagLink(props.previousHistory.type, props.previousHistory.image)
 
-        const imgBuffer = await axios.get(img, {responseType: "arraybuffer", withCredentials: true}).then((r) => r.data)
-        const previousBuffer = await axios.get(previous, {responseType: "arraybuffer", withCredentials: true}).then((r) => r.data)
+        const imgBuffer = await functions.getBuffer(img)
+        const previousBuffer = await functions.getBuffer(previous)
 
         const imgMD5 = crypto.createHash("md5").update(Buffer.from(imgBuffer)).digest("hex")
         const previousMD5 = crypto.createHash("md5").update(Buffer.from(previousBuffer)).digest("hex")

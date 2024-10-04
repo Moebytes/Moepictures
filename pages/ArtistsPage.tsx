@@ -13,8 +13,7 @@ import ArtistRow from "../components/ArtistRow"
 import scrollIcon from "../assets/icons/scroll.png"
 import pageIcon from "../assets/icons/page.png"
 import PageDialog from "../dialogs/PageDialog"
-import axios from "axios"
-import {ThemeContext, EnableDragContext, HideNavbarContext, HideSidebarContext, RelativeContext, MobileContext,
+import {ThemeContext, EnableDragContext, HideNavbarContext, HideSidebarContext, RelativeContext, MobileContext, SessionContext, SessionFlagContext,
 HideTitlebarContext, ActiveDropdownContext, HeaderTextContext, SidebarTextContext, SiteHueContext, SiteLightnessContext,
 SiteSaturationContext, ScrollContext, ArtistsPageContext, ShowPageDialogContext, PageFlagContext} from "../Context"
 import "./styles/itemspage.less"
@@ -37,6 +36,8 @@ const ArtistsPage: React.FunctionComponent = (props) => {
     const {artistsPage, setArtistsPage} = useContext(ArtistsPageContext)
     const {showPageDialog, setShowPageDialog} = useContext(ShowPageDialogContext)
     const {pageFlag, setPageFlag} = useContext(PageFlagContext)
+    const {session, setSession} = useContext(SessionContext)
+    const {sessionFlag, setSessionFlag} = useContext(SessionFlagContext)
     const [sortType, setSortType] = useState("posts")
     const [artists, setArtists] = useState([]) as any
     const [index, setIndex] = useState(0)
@@ -80,7 +81,7 @@ const ArtistsPage: React.FunctionComponent = (props) => {
 
     const updateArtists = async (queryOverride?: string) => {
         let query = queryOverride ? queryOverride : searchQuery
-        const result = await axios.get("/api/search/artists", {params: {sort: sortType, query}, withCredentials: true}).then((r) => r.data)
+        const result = await functions.get("/api/search/artists", {sort: sortType, query}, session, setSessionFlag)
         setEnded(false)
         setIndex(0)
         setVisibleArtists([])
@@ -109,7 +110,7 @@ const ArtistsPage: React.FunctionComponent = (props) => {
 
     useEffect(() => {
         updateArtists()
-    }, [sortType])
+    }, [sortType, session])
 
     const getPageAmount = () => {
         return 15
@@ -128,7 +129,7 @@ const ArtistsPage: React.FunctionComponent = (props) => {
             setVisibleArtists(functions.removeDuplicates(newVisibleArtists))
         }
         if (scroll) updateArtists()
-    }, [scroll, artists])
+    }, [scroll, artists, session])
 
     const updateOffset = async () => {
         if (ended) return
@@ -144,7 +145,7 @@ const ArtistsPage: React.FunctionComponent = (props) => {
                 }
             }
         }
-        let result = await axios.get("/api/search/artists", {params: {sort: sortType, query: searchQuery, offset: newOffset}, withCredentials: true}).then((r) => r.data)
+        let result = await functions.get("/api/search/artists", {sort: sortType, query: searchQuery, offset: newOffset}, session, setSessionFlag)
         let hasMore = result?.length >= 100
         const cleanArtists = artists.filter((t: any) => !t.fake)
         if (!scroll) {
@@ -202,7 +203,7 @@ const ArtistsPage: React.FunctionComponent = (props) => {
             setArtistsPage(1)
             updateArtists()
         }
-    }, [scroll])
+    }, [scroll, session])
 
     useEffect(() => {
         if (!scroll) updateOffset()
