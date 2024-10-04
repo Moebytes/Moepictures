@@ -146,7 +146,7 @@ app.use((req: Request, res: Response, next: NextFunction) => {
 
 const imageLimiter = rateLimit({
 	windowMs: 60 * 1000,
-	max: 500,
+	max: 1000,
 	standardHeaders: true,
 	legacyHeaders: false,
     keyGenerator,
@@ -207,7 +207,10 @@ for (let i = 0; i < folders.length; i++) {
         return stream.pipe(res)
       }
       if (encrypted.includes(folders[i]) || req.path.includes("history/post")) {
-        if (req.session.captchaNeeded) body = await rgbsplit(body, false)
+        if (req.session.captchaNeeded) {
+          res.setHeader("Cache-Control", "no-store, no-cache, must-revalidate, proxy-revalidate")
+          body = await rgbsplit(body, false)
+        }
         const encrypted = cryptoFunctions.encrypt(body)
         res.setHeader("Content-Length", encrypted.length)
         return res.status(200).end(encrypted)
@@ -293,7 +296,10 @@ for (let i = 0; i < folders.length; i++) {
         return stream.pipe(res)
       }
       if (encrypted.includes(folders[i]) || req.path.includes("history/post")) {
-        if (req.session.captchaNeeded) body = await rgbsplit(body)
+        if (req.session.captchaNeeded) {
+          res.setHeader("Cache-Control", "no-store, no-cache, must-revalidate, proxy-revalidate")
+          body = await rgbsplit(body)
+        }
         const encrypted = cryptoFunctions.encrypt(body)
         res.setHeader("Content-Length", encrypted.length)
         return res.status(200).end(encrypted)

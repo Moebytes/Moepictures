@@ -24,6 +24,7 @@ import variationsImg from "../assets/misc/variations.png"
 import thirdPartyImg from "../assets/misc/thirdparty.png"
 import aliasesImg from "../assets/misc/aliases.png"
 import implicationsImg from "../assets/misc/implications.png"
+import captchaImg from "../assets/misc/captcha.png"
 import CaptchaDialog from "../dialogs/CaptchaDialog"
 import "./styles/helppage.less"
 
@@ -396,6 +397,17 @@ const HelpPage: React.FunctionComponent = (props) => {
                 </span></>
             )
         }
+        if (helpTab === "captcha") {
+            return (
+                <><span className="help-heading">Captcha</span>
+                <span className="help-text">
+                    Automated scraping of our website is prohibited. If you hit one of our rate limits you will 
+                    have to solve a captcha to view tags, and images will have an rgb filter applied. Hopefully 
+                    this shouldn't be triggered by regular browsing.
+                </span>
+                <div className="help-img-container"><img className="help-img" src={captchaImg}/></div></>
+            )
+        }
         if (helpTab === "account-deletion") {
             return (
                 <><span className="help-heading">Account Deletion</span>
@@ -438,6 +450,7 @@ const HelpPage: React.FunctionComponent = (props) => {
                         <span className="help-nav-text" onClick={() => setHelpTab("implications")}>Implications</span>
                         <span className="help-nav-text" onClick={() => setHelpTab("commenting")}>Commenting</span>
                         <span className="help-nav-text" onClick={() => setHelpTab("bans")}>Bans</span>
+                        <span className="help-nav-text" onClick={() => setHelpTab("captcha")}>Captcha</span>
                         <span className="help-nav-text" onClick={() => setHelpTab("account-deletion")}>Account Deletion</span>
                     </div>
                     <div className="help-container">

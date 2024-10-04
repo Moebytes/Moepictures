@@ -1358,7 +1358,7 @@ export default class Functions {
         for (let i = 0; i < parsedTags.length; i++) {
             const foundTag = tagMap[parsedTags[i].tag]
             if (!foundTag) {
-                const unverifiedTag = await Functions.get("/api/tag/unverified", {tag: parsedTags[i].tag}, session, setSessionFlag)
+                const unverifiedTag = await Functions.get("/api/tag/unverified", {tag: parsedTags[i].tag}, session, setSessionFlag).catch(() => null)
                 if (unverifiedTag) {
                     const obj = {} as any 
                     obj.tag = parsedTags[i].tag 
