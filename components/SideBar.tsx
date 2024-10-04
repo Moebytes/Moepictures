@@ -646,8 +646,7 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
 
     const copyTagsJSX = () => {
         if (!session) return
-        if (session.captchaAmount === undefined) session.captchaAmount = 0
-        if (session.captchaAmount > 1000) return null
+        if (session.captchaNeeded) return null
         if (props.artists && props.characters && props.series && props.tags) {
             return (
                 <div className="sidebar-subcontainer">
@@ -664,8 +663,7 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
 
     const tagCaptchaJSX = () => {
         if (!session) return
-        if (session.captchaAmount === undefined) session.captchaAmount = 0
-        if (session.captchaAmount > 1000) {
+        if (session.captchaNeeded) {
             if (!history.location.pathname.includes("/post/") && !history.location.pathname.includes("/edit-post")) return
             const toggleCaptcha = () => {
                 sessionStorage.setItem("ignoreCaptcha", "false")
@@ -676,7 +674,7 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
                     <div className="sidebar-row">
                         <span className="tag-hover" onClick={toggleCaptcha}>
                             <img className="sidebar-icon" src={tagIcon}/>
-                            <span className="tag-red">Show Tags</span>
+                            <span className="tag-red">Solve Captcha</span>
                         </span>
                     </div>
                 </div>
@@ -686,8 +684,7 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
 
     const noTagsArtist = () => {
         if (!session) return
-        if (session.captchaAmount === undefined) session.captchaAmount = 0
-        if (session.captchaAmount > 1000) {
+        if (session.captchaNeeded) {
             return (
                 <div className="sidebar-row">
                     <span className="tag">Artist:</span>

@@ -19,6 +19,7 @@ import scrollIcon from "../assets/icons/scroll.png"
 import pageIcon from "../assets/icons/page.png"
 import permissions from "../structures/Permissions"
 import PageDialog from "../dialogs/PageDialog"
+import CaptchaDialog from "../dialogs/CaptchaDialog"
 import {ThemeContext, EnableDragContext, HideNavbarContext, HideSidebarContext, RelativeContext, HideTitlebarContext, MobileContext, ScrollContext,
 ActiveDropdownContext, HeaderTextContext, SidebarTextContext, SessionContext, SiteHueContext, SiteLightnessContext, SiteSaturationContext, TagsPageContext,
 ShowPageDialogContext, PageFlagContext, SessionFlagContext} from "../Context"
@@ -423,6 +424,7 @@ const TagsPage: React.FunctionComponent = (props) => {
     return (
         <>
         <DragAndDrop/>
+        <CaptchaDialog/>
         <AliasTagDialog/>
         <EditTagDialog/>
         <DeleteTagDialog/>

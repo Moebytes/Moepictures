@@ -11,6 +11,7 @@ import DragAndDrop from "../components/DragAndDrop"
 import ToolTip from "../components/ToolTip"
 import TagBanner from "../components/TagBanner"
 import BulkQuickEditDialog from "../dialogs/BulkQuickEditDialog"
+import CaptchaDialog from "../dialogs/CaptchaDialog"
 import {HideNavbarContext, HideSidebarContext, SquareContext, RelativeContext, HideTitlebarContext, 
 HeaderTextContext, SidebarTextContext, MobileContext, MobileScrollingContext, SessionContext} from "../Context"
 
@@ -100,6 +101,7 @@ const PostsPage: React.FunctionComponent = (props) => {
     return (
         <>
         <DragAndDrop/>
+        <CaptchaDialog/>
         <BulkQuickEditDialog/>
         <PageDialog/>
         <DownloadDialog/>

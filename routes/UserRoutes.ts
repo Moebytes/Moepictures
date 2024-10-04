@@ -6,7 +6,7 @@ import bcrypt from "bcrypt"
 import crypto from "crypto"
 import functions from "../structures/Functions"
 import jsxFunctions from "../structures/JSXFunctions"
-import serverFunctions, {authenticate} from "../structures/ServerFunctions"
+import serverFunctions, {authenticate, keyGenerator, handler} from "../structures/ServerFunctions"
 import path from "path"
 
 const signupLimiter = rateLimit({
@@ -14,7 +14,9 @@ const signupLimiter = rateLimit({
 	max: 5,
 	message: "Too many accounts created, try again later.",
 	standardHeaders: true,
-	legacyHeaders: false
+	legacyHeaders: false,
+    keyGenerator,
+    handler
 })
 
 const loginLimiter = rateLimit({
@@ -22,29 +24,35 @@ const loginLimiter = rateLimit({
 	max: 10,
 	message: "Too many login attempts, try again later.",
 	standardHeaders: true,
-	legacyHeaders: false
+	legacyHeaders: false,
+    keyGenerator,
+    handler
 })
 
 const loginSpeedLimiter = slowDown({
-    windowMs: 15 * 60 * 1000,
+    windowMs: 60 * 1000,
     delayAfter: 1,
     delayMs: 200
 })
 
 const sessionLimiter = rateLimit({
-	windowMs: 5 * 60 * 1000,
+	windowMs: 60 * 1000,
 	max: 1000,
 	message: "Too many requests, try again later.",
 	standardHeaders: true,
-	legacyHeaders: false
+	legacyHeaders: false,
+    keyGenerator,
+    handler
 })
 
 const userLimiter = rateLimit({
-	windowMs: 5 * 60 * 1000,
-	max: 50,
+	windowMs: 60 * 1000,
+	max: 100,
 	message: "Too many requests, try again later.",
 	standardHeaders: true,
-	legacyHeaders: false
+	legacyHeaders: false,
+    keyGenerator,
+    handler
 })
 
 const UserRoutes = (app: Express) => {
@@ -57,7 +65,14 @@ const UserRoutes = (app: Express) => {
             delete user.ip
             delete user.$2fa
             delete user.email
+            delete user.emailVerified
             delete user.password
+            delete user.showRelated
+            delete user.showTooltips
+            delete user.downloadPixivID
+            delete user.autosearchInterval
+            delete user.showTagBanner
+            delete user.upscaledImages
             res.status(200).json(user)
         } catch (e) {
             console.log(e)

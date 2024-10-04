@@ -13,6 +13,7 @@ import ArtistRow from "../components/ArtistRow"
 import scrollIcon from "../assets/icons/scroll.png"
 import pageIcon from "../assets/icons/page.png"
 import PageDialog from "../dialogs/PageDialog"
+import CaptchaDialog from "../dialogs/CaptchaDialog"
 import {ThemeContext, EnableDragContext, HideNavbarContext, HideSidebarContext, RelativeContext, MobileContext, SessionContext, SessionFlagContext,
 HideTitlebarContext, ActiveDropdownContext, HeaderTextContext, SidebarTextContext, SiteHueContext, SiteLightnessContext,
 SiteSaturationContext, ScrollContext, ArtistsPageContext, ShowPageDialogContext, PageFlagContext} from "../Context"
@@ -388,6 +389,7 @@ const ArtistsPage: React.FunctionComponent = (props) => {
     return (
         <>
         <DragAndDrop/>
+        <CaptchaDialog/>
         <PageDialog/>
         <TitleBar/>
         <NavBar/>

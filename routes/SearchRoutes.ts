@@ -5,14 +5,17 @@ import sql from "../sql/SQLQuery"
 import phash from "sharp-phash"
 import dist from "sharp-phash/distance"
 import matureTags from "../assets/json/mature-tags.json"
+import serverFunctions, {keyGenerator, handler} from "../structures/ServerFunctions"
 import rateLimit from "express-rate-limit"
 
 const searchLimiter = rateLimit({
-	windowMs: 5 * 60 * 1000,
-	max: 1000,
+	windowMs: 60 * 1000,
+	max: 100,
 	message: "Too many requests, try again later.",
 	standardHeaders: true,
-	legacyHeaders: false
+	legacyHeaders: false,
+    keyGenerator,
+    handler
 })
 
 const SearchRoutes = (app: Express) => {
@@ -269,10 +272,7 @@ const SearchRoutes = (app: Express) => {
         try {
             const {postIDs} = req.body
             let postArray = Array.from(postIDs) as any
-            if (req.session.captchaAmount === undefined) req.session.captchaAmount = 0
-            req.session.captchaAmount = req.session.captchaAmount + 1
-            if (req.session.role === "admin" || req.session.role === "mod") req.session.captchaAmount = 0
-            if (req.session.captchaAmount! > 1000) {
+            if (req.session.captchaNeeded) {
                 if (postArray.length === 1) return res.status(200).json([])
                 postArray = []
             }

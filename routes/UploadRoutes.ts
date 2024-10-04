@@ -3,31 +3,33 @@ import sql from "../sql/SQLQuery"
 import fs from "fs"
 import path from "path"
 import functions from "../structures/Functions"
-import serverFunctions, {authenticate} from "../structures/ServerFunctions"
+import serverFunctions, {authenticate, keyGenerator, handler} from "../structures/ServerFunctions"
 import rateLimit from "express-rate-limit"
 import phash from "sharp-phash"
 import imageSize from "image-size"
 import axios from "axios"
 
 const uploadLimiter = rateLimit({
-	windowMs: 5 * 60 * 1000,
-	max: 30,
+	windowMs: 60 * 1000,
+	max: 10,
 	message: "Too many requests, try again later.",
 	standardHeaders: true,
-	legacyHeaders: false
+	legacyHeaders: false,
+  keyGenerator,
+  handler
 })
 
 const editLimiter = rateLimit({
-	windowMs: 5 * 60 * 1000,
-	max: 60,
+	windowMs: 60 * 1000,
+	max: 20,
 	message: "Too many requests, try again later.",
 	standardHeaders: true,
 	legacyHeaders: false
 })
 
 const modLimiter = rateLimit({
-	windowMs: 5 * 60 * 1000,
-	max: 500,
+	windowMs: 60 * 1000,
+	max: 200,
 	message: "Too many requests, try again later.",
 	standardHeaders: true,
 	legacyHeaders: false

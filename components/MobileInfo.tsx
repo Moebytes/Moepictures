@@ -415,8 +415,7 @@ const MobileInfo: React.FunctionComponent<Props> = (props) => {
 
     const tagCaptchaJSX = () => {
         if (!session) return
-        if (session.captchaAmount === undefined) session.captchaAmount = 0
-        if (session.captchaAmount > 1000) {
+        if (session.captchaNeeded) {
             if (!history.location.pathname.includes("/post/") && !history.location.pathname.includes("/edit-post")) return
             const toggleCaptcha = () => {
                 sessionStorage.setItem("ignoreCaptcha", "false")
@@ -427,7 +426,7 @@ const MobileInfo: React.FunctionComponent<Props> = (props) => {
                     <div className="mobileinfo-row">
                         <span className="tag-hover" onClick={toggleCaptcha}>
                             <img className="mobileinfo-icon" src={tagIcon}/>
-                            <span className="tag-red">Show Tags</span>
+                            <span className="tag-red">Solve Captcha</span>
                         </span>
                     </div>
                 </div>
@@ -437,8 +436,7 @@ const MobileInfo: React.FunctionComponent<Props> = (props) => {
 
     const noTagsArtist = () => {
         if (!session) return
-        if (session.captchaAmount === undefined) session.captchaAmount = 0
-        if (session.captchaAmount > 1000) {
+        if (session.captchaNeeded) {
             return (
             <div className="mobileinfo-row">
                 <span className="tag">Artist:</span>

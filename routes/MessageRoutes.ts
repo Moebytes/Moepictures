@@ -3,22 +3,24 @@ import rateLimit from "express-rate-limit"
 import slowDown from "express-slow-down"
 import sql from "../sql/SQLQuery"
 import functions from "../structures/Functions"
-import serverFunctions, {authenticate} from "../structures/ServerFunctions"
+import serverFunctions, {authenticate, keyGenerator, handler} from "../structures/ServerFunctions"
 
 const messageLimiter = rateLimit({
-	windowMs: 5 * 60 * 1000,
-	max: 1000,
-	message: "Too many requests, try again later.",
+	windowMs: 60 * 1000,
+	max: 200,
 	standardHeaders: true,
-	legacyHeaders: false
+	legacyHeaders: false,
+    keyGenerator,
+    handler
 })
 
 const messageUpdateLimiter = rateLimit({
-	windowMs: 5 * 60 * 1000,
-	max: 1000,
-	message: "Too many requests, try again later.",
+	windowMs: 60 * 1000,
+	max: 60,
 	standardHeaders: true,
-	legacyHeaders: false
+	legacyHeaders: false,
+    keyGenerator,
+    handler
 })
 
 let connections = [] as {username: string, response: Response}[]

@@ -487,7 +487,7 @@ const GridImage = forwardRef<Ref, Props>((props, componentRef) => {
         } else {
             containerRef.current.style.boxShadow = "none"
         }
-    }, [imageLoaded, sizeType, selected])
+    }, [imageLoaded, sizeType, selected, session])
 
     useEffect(() => {
         if (mobile) {
@@ -802,7 +802,7 @@ const GridImage = forwardRef<Ref, Props>((props, componentRef) => {
     }
 
     const getBorder = () => {
-        if (sizeType === "tiny" || sizeType === "small") {
+        if (sizeType === "tiny" || sizeType === "small" || session.captchaNeeded) {
             if (selected) {
                 return "0px 0px 0px 2px var(--selectBorder)"
             } else {

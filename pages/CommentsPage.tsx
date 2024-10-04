@@ -21,6 +21,7 @@ import permissions from "../structures/Permissions"
 import scrollIcon from "../assets/icons/scroll.png"
 import pageIcon from "../assets/icons/page.png"
 import PageDialog from "../dialogs/PageDialog"
+import CaptchaDialog from "../dialogs/CaptchaDialog"
 import "./styles/itemspage.less"
 
 const CommentsPage: React.FunctionComponent = (props) => {
@@ -441,6 +442,7 @@ const CommentsPage: React.FunctionComponent = (props) => {
     return (
         <>
         <DragAndDrop/>
+        <CaptchaDialog/>
         <EditCommentDialog/>
         <DeleteCommentDialog/>
         <ReportCommentDialog/>

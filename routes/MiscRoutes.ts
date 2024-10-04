@@ -8,7 +8,7 @@ import googleTranslate from "@vitalets/google-translate-api"
 import Kuroshiro from "kuroshiro"
 import KuromojiAnalyzer from "kuroshiro-analyzer-kuromoji"
 import functions from "../structures/Functions"
-import serverFunctions from "../structures/ServerFunctions"
+import serverFunctions, {keyGenerator, handler} from "../structures/ServerFunctions"
 import rateLimit from "express-rate-limit"
 import fs from "fs"
 import svgCaptcha from "svg-captcha"
@@ -22,27 +22,30 @@ svgCaptcha.loadFont(dotline)
 const exec = util.promisify(child_process.exec)
 
 const miscLimiter = rateLimit({
-	windowMs: 5 * 60 * 1000,
-	max: 1000,
-	message: "Too many requests, try again later.",
+	windowMs: 60 * 1000,
+	max: 200,
 	standardHeaders: true,
-	legacyHeaders: false
+	legacyHeaders: false,
+    keyGenerator,
+    handler
 })
 
 const captchaLimiter = rateLimit({
-	windowMs: 5 * 60 * 1000,
-	max: 50,
-	message: "Too many requests, try again later.",
+	windowMs: 60 * 1000,
+	max: 30,
 	standardHeaders: true,
-	legacyHeaders: false
+	legacyHeaders: false,
+    keyGenerator,
+    handler
 })
 
 const contactLimiter = rateLimit({
-	windowMs: 5 * 60 * 1000,
-	max: 10,
-	message: "Too many requests, try again later.",
+	windowMs: 60 * 1000,
+	max: 5,
 	standardHeaders: true,
-	legacyHeaders: false
+	legacyHeaders: false,
+    keyGenerator,
+    handler
 })
 
 const MiscRoutes = (app: Express) => {
@@ -69,10 +72,8 @@ const MiscRoutes = (app: Express) => {
     app.post("/api/misc/captcha", captchaLimiter, async (req: Request, res: Response, next: NextFunction) => {
         try {
             const {captchaResponse} = req.body
-            let ip = req.headers["x-forwarded-for"] || req.socket.remoteAddress
-            ip = ip?.toString().replace("::ffff:", "") || ""
             if (req.session.captchaAnswer === captchaResponse?.trim()) {
-                req.session.captchaAmount = 0
+                req.session.captchaNeeded = false
                 res.status(200).send("Success")
             } else {
                 res.status(400).send("Bad captchaResponse") 

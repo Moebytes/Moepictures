@@ -3,35 +3,33 @@ import rateLimit from "express-rate-limit"
 import slowDown from "express-slow-down"
 import sql from "../sql/SQLQuery"
 import functions from "../structures/Functions"
-import serverFunctions, {authenticate} from "../structures/ServerFunctions"
+import serverFunctions, {authenticate, keyGenerator, handler} from "../structures/ServerFunctions"
 import phash from "sharp-phash"
 import imageSize from "image-size"
 import fs from "fs"
 import path from "path"
 
 const postLimiter = rateLimit({
-	windowMs: 5 * 60 * 1000,
-	max: 1000,
-	message: "Too many requests, try again later.",
+	windowMs: 60 * 1000,
+	max: 200,
 	standardHeaders: true,
-	legacyHeaders: false
+	legacyHeaders: false,
+    keyGenerator,
+    handler
 })
 
 const postUpdateLimiter = rateLimit({
-	windowMs: 5 * 60 * 1000,
-	max: 300,
-	message: "Too many requests, try again later.",
+	windowMs: 60 * 1000,
+	max: 60,
 	standardHeaders: true,
-	legacyHeaders: false
+	legacyHeaders: false,
+    keyGenerator,
+    handler
 })
 
 const PostRoutes = (app: Express) => {
     app.get("/api/post", postLimiter, async (req: Request, res: Response, next: NextFunction) => {
         try {
-            let stripTags = false
-            if (req.session.captchaAmount === undefined) req.session.captchaAmount = 0
-            if (req.session.role === "admin" || req.session.role === "mod") req.session.captchaAmount = 0
-            if (req.session.captchaAmount > 1000) stripTags = true
             const postID = req.query.postID as string
             if (Number.isNaN(Number(postID))) return res.status(400).send("Invalid postID")
             let result = await sql.post.post(Number(postID))
@@ -43,11 +41,7 @@ const PostRoutes = (app: Express) => {
             if (result?.images.length > 1) {
                 result.images = result.images.sort((a: any, b: any) => a.order - b.order)
             }
-            if (Number(postID) !== req.session.lastPostID) {
-                req.session.captchaAmount = req.session.captchaAmount + 1
-            }
-            req.session.lastPostID = Number(postID)
-            if (stripTags) delete result.tags
+            if (req.session.captchaNeeded) delete result.tags
             res.status(200).json(result)
         } catch (e) {
             console.log(e)
@@ -57,10 +51,6 @@ const PostRoutes = (app: Express) => {
 
     app.get("/api/post/tags", postLimiter, async (req: Request, res: Response, next: NextFunction) => {
         try {
-            let stripTags = false
-            if (req.session.captchaAmount === undefined) req.session.captchaAmount = 0
-            if (req.session.role === "admin" || req.session.role === "mod") req.session.captchaAmount = 0
-            if (req.session.captchaAmount > 1000) stripTags = true
             const postID = req.query.postID as string
             if (Number.isNaN(Number(postID))) return res.status(400).send("Invalid postID")
             let result = await sql.post.postTags(Number(postID))
@@ -69,11 +59,7 @@ const PostRoutes = (app: Express) => {
                 if (result.hidden) return res.status(403).end()
                 if (result.restrict === "explicit") return res.status(403).end()
             }
-            if (Number(postID) !== req.session.lastPostID) {
-                req.session.captchaAmount = req.session.captchaAmount + 1
-            }
-            req.session.lastPostID = Number(postID)
-            if (stripTags) delete result.tags
+            if (req.session.captchaNeeded) delete result.tags
             res.status(200).json(result)
         } catch (e) {
             console.log(e)
@@ -703,15 +689,11 @@ const PostRoutes = (app: Express) => {
 
     app.get("/api/post/history", postLimiter, async (req: Request, res: Response) => {
         try {
-            let stripTags = false
             const postID = req.query.postID as string
             const offset = req.query.offset as string
-            if (req.session.captchaAmount === undefined) req.session.captchaAmount = 0
-            if (req.session.role === "admin" || req.session.role === "mod") req.session.captchaAmount = 0
-            if (req.session.captchaAmount > 1000) stripTags = true
             if (!req.session.username) return res.status(403).send("Unauthorized")
             const result = await sql.history.postHistory(postID, offset)
-            if (stripTags) delete result.tags
+            if (req.session.captchaNeeded) delete result.tags
             res.status(200).json(result)
         } catch (e) {
             console.log(e)

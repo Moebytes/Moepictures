@@ -19,6 +19,7 @@ import permissions from "../structures/Permissions"
 import scrollIcon from "../assets/icons/scroll.png"
 import pageIcon from "../assets/icons/page.png"
 import PageDialog from "../dialogs/PageDialog"
+import CaptchaDialog from "../dialogs/CaptchaDialog"
 import "./styles/itemspage.less"
 
 const ForumPage: React.FunctionComponent = (props) => {
@@ -415,6 +416,7 @@ const ForumPage: React.FunctionComponent = (props) => {
     return (
         <>
         <DragAndDrop/>
+        <CaptchaDialog/>
         <NewThreadDialog/>
         <PageDialog/>
         <TitleBar/>

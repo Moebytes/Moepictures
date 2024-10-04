@@ -14,12 +14,13 @@ import middleware from "webpack-dev-middleware"
 import hot from "webpack-hot-middleware"
 import config from "./webpack.config"
 import dotenv from "dotenv"
+import rateLimit from "express-rate-limit"
 import App from "./App"
 import {renderToString} from "react-dom/server"
 import {StaticRouter as Router} from "react-router-dom"
 import functions from "./structures/Functions"
 import cryptoFunctions from "./structures/CryptoFunctions"
-import serverFunctions from "./structures/ServerFunctions"
+import serverFunctions, {keyGenerator, handler} from "./structures/ServerFunctions"
 import sql from "./sql/SQLQuery"
 import $2FARoutes from "./routes/2FARoutes"
 import CommentRoutes from "./routes/CommentRoutes"
@@ -34,6 +35,8 @@ import UserRoutes from "./routes/UserRoutes"
 import TranslationRoutes from "./routes/TranslationRoutes"
 import ThreadRoutes from "./routes/ThreadRoutes"
 import MessageRoutes from "./routes/MessageRoutes"
+import ipBans from "./assets/json/ip-bans.json"
+import rgbsplit from "./structures/RGBSplit"
 import jwt from "jsonwebtoken"
 const __dirname = path.resolve()
 
@@ -47,6 +50,7 @@ app.disable("x-powered-by")
 
 declare module "express-session" {
   interface SessionData {
+      visitorId: string
       accessToken: string
       refreshToken: string
       username: string
@@ -66,8 +70,7 @@ declare module "express-session" {
       $2fa: boolean
       ip: string
       role: string
-      captchaAmount: number 
-      lastPostID: number
+      captchaNeeded: boolean
       csrfSecret: string
       csrfToken: string
       captchaAnswer: string
@@ -136,12 +139,35 @@ app.use(express.static(path.join(__dirname, "./public")))
 app.use(express.static(path.join(__dirname, "./dist"), {index: false}))
 app.use("/assets", express.static(path.join(__dirname, "./assets")))
 
+app.use((req: Request, res: Response, next: NextFunction) => {
+  if (ipBans.banndIPs.includes(req.ip)) return res.status(403).send("This IP address has been blocked.")
+  next()
+})
+
+const imageLimiter = rateLimit({
+	windowMs: 60 * 1000,
+	max: 500,
+	standardHeaders: true,
+	legacyHeaders: false,
+    keyGenerator,
+    handler
+})
+
+const tokenLimiter = rateLimit({
+	windowMs: 60 * 1000,
+	max: 10,
+	standardHeaders: true,
+	legacyHeaders: false,
+    keyGenerator,
+    handler
+})
+
 let folders = ["animation", "artist", "character", "comic", "image", "pfp", "series", "tag", "video", "audio", "model", "history"]
 let noCache = ["artist", "character", "series", "pfp", "tag"]
 let encrypted = ["image", "comic"]
 
 for (let i = 0; i < folders.length; i++) {
-  app.get(`/${folders[i]}/*`, async (req: Request, res: Response, next: NextFunction) => {
+  app.get(`/${folders[i]}/*`, imageLimiter, async (req: Request, res: Response, next: NextFunction) => {
     let url = req.url.replace(/\?.*$/, "")
     const mimeType = mime.getType(req.path)
     try {
@@ -164,6 +190,7 @@ for (let i = 0; i < folders.length; i++) {
         upscaled = req.session.upscaledImages as boolean
         if (req.headers["x-force-upscale"]) upscaled = req.headers["x-force-upscale"] === "true"
       }
+      if (req.session.captchaNeeded) upscaled = false
       let body = await serverFunctions.getFile(key, upscaled)
       let contentLength = body.length
       if (!contentLength) return res.status(200).send(body)
@@ -180,6 +207,7 @@ for (let i = 0; i < folders.length; i++) {
         return stream.pipe(res)
       }
       if (encrypted.includes(folders[i]) || req.path.includes("history/post")) {
+        if (req.session.captchaNeeded) body = await rgbsplit(body, false)
         const encrypted = cryptoFunctions.encrypt(body)
         res.setHeader("Content-Length", encrypted.length)
         return res.status(200).end(encrypted)
@@ -191,7 +219,7 @@ for (let i = 0; i < folders.length; i++) {
     }
   })
   
-  app.get(`/unverified/${folders[i]}/*`, async (req: Request, res: Response, next: NextFunction) => {
+  app.get(`/unverified/${folders[i]}/*`, imageLimiter, async (req: Request, res: Response, next: NextFunction) => {
     try {
       if (req.session.role !== "admin" && req.session.role !== "mod") return res.status(403).end()
       res.setHeader("Content-Type", mime.getType(req.path) ?? "")
@@ -202,6 +230,7 @@ for (let i = 0; i < folders.length; i++) {
         upscaled = req.session.upscaledImages as boolean
         if (req.headers["x-force-upscale"]) upscaled = req.headers["x-force-upscale"] === "true"
       }
+      if (req.session.captchaNeeded) upscaled = false
       const body = await serverFunctions.getUnverifiedFile(key, upscaled)
       const contentLength = body.length
       if (req.headers.range) {
@@ -225,7 +254,7 @@ for (let i = 0; i < folders.length; i++) {
     }
   })
 
-  app.get(`/thumbnail/:size/${folders[i]}/*`, async (req: Request, res: Response, next: NextFunction) => {
+  app.get(`/thumbnail/:size/${folders[i]}/*`, imageLimiter, async (req: Request, res: Response, next: NextFunction) => {
     try {
       const mimeType = mime.getType(req.path)
       res.setHeader("Content-Type", mimeType ?? "")
@@ -264,6 +293,7 @@ for (let i = 0; i < folders.length; i++) {
         return stream.pipe(res)
       }
       if (encrypted.includes(folders[i]) || req.path.includes("history/post")) {
+        if (req.session.captchaNeeded) body = await rgbsplit(body)
         const encrypted = cryptoFunctions.encrypt(body)
         res.setHeader("Content-Length", encrypted.length)
         return res.status(200).end(encrypted)
@@ -276,7 +306,7 @@ for (let i = 0; i < folders.length; i++) {
     }
   })
 
-  app.get(`/thumbnail/:size/unverified/${folders[i]}/*`, async (req: Request, res: Response, next: NextFunction) => {
+  app.get(`/thumbnail/:size/unverified/${folders[i]}/*`, imageLimiter, async (req: Request, res: Response, next: NextFunction) => {
     try {
       if (req.session.role !== "admin" && req.session.role !== "mod") return res.status(403).end()
       const mimeType = mime.getType(req.path)
@@ -313,7 +343,7 @@ for (let i = 0; i < folders.length; i++) {
   })
 }
 
-app.get("/refresh-token", (req: Request, res: Response) => {
+app.get("/refresh-token", tokenLimiter, (req: Request, res: Response) => {
   if (!req.session.username) return res.status(403).send("Unauthorized")
   if (!req.session.refreshToken) return res.status(400).send("No refresh token")
 
@@ -397,7 +427,7 @@ const run = async () => {
   exists = await sql.tag.insertTag("bad-pixiv-id", "meta")
   if (!exists) await sql.tag.updateTag("bad-pixiv-id", "description", "The pixiv id was deleted.")
 
-  app.listen(process.env.PORT || 8082, () => console.log("Started the website server!"))
+  app.listen(process.env.PORT || 8082, "0.0.0.0", () => console.log("Started the website server!"))
 }
 
 run()

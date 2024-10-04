@@ -22,6 +22,15 @@ const s3 = new S3({region: "us-east-1", credentials: {
     secretAccessKey: process.env.AWS_SECRET_KEY!
 }})
 
+export const keyGenerator = (req: Request, res: Response) => {
+    return req.session.username || req.ip
+}
+
+export const handler = (req: Request, res: Response) => {
+    req.session.captchaNeeded = true
+    return res.status(429).send("Too many requests, try again later.")
+}
+
 export const authenticate = (req: Request, res: Response, next: NextFunction) => {
     if (!req.session.username) return res.status(403).send("Unauthorized")
     if (!ServerFunctions.validateCSRF(req)) return res.status(400).send("Bad CSRF token")

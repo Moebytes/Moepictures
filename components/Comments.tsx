@@ -65,7 +65,7 @@ const Comments: React.FunctionComponent<Props> = (props) => {
 
     const updateComments = async () => {
         const comments = await functions.get("/api/post/comments", {postID: props.post.postID}, session, setSessionFlag)
-        setComments(comments)
+        if (comments?.length) setComments(comments)
     }
 
     useEffect(() => {

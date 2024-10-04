@@ -18,6 +18,7 @@ import mm from "music-metadata"
 import * as THREE from "three"
 import WebPXMux from "webpxmux"
 import {GLTFLoader, OBJLoader, FBXLoader} from "three-stdlib"
+import FingerprintJS from "@fingerprintjs/fingerprintjs"
 
 let csrfToken = ""
 
@@ -33,6 +34,12 @@ const audioExtensions = [".mp3", ".wav", ".ogg", ".flac", ".aac"]
 const modelExtensions = [".glb", ".gltf", ".obj", ".fbx"]
 
 export default class Functions {
+    public static updateVisitorId = async (session: any) => {
+        const fp = await FingerprintJS.load()
+        const result = await fp.get()
+        await axios.post("/visitor-id", {visitorId: result.visitorId}, {withCredentials: true})
+    }
+
     public static updateCSRFToken = async (session: any) => {
         csrfToken = session.csrfToken
     }

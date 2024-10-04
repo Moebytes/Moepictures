@@ -24,6 +24,7 @@ import variationsImg from "../assets/misc/variations.png"
 import thirdPartyImg from "../assets/misc/thirdparty.png"
 import aliasesImg from "../assets/misc/aliases.png"
 import implicationsImg from "../assets/misc/implications.png"
+import CaptchaDialog from "../dialogs/CaptchaDialog"
 import "./styles/helppage.less"
 
 const HelpPage: React.FunctionComponent = (props) => {
@@ -411,6 +412,7 @@ const HelpPage: React.FunctionComponent = (props) => {
     return (
         <>
         <DragAndDrop/>
+        <CaptchaDialog/>
         <TitleBar/>
         <NavBar/>
         <div className="body">

@@ -13,6 +13,7 @@ import CharacterRow from "../components/CharacterRow"
 import scrollIcon from "../assets/icons/scroll.png"
 import pageIcon from "../assets/icons/page.png"
 import PageDialog from "../dialogs/PageDialog"
+import CaptchaDialog from "../dialogs/CaptchaDialog"
 import {ThemeContext, EnableDragContext, HideNavbarContext, HideSidebarContext, RelativeContext, MobileContext,
 HideTitlebarContext, ActiveDropdownContext, HeaderTextContext, SidebarTextContext, SiteHueContext, SiteLightnessContext,
 SiteSaturationContext, ScrollContext, CharactersPageContext, ShowPageDialogContext, PageFlagContext, SessionContext, SessionFlagContext} from "../Context"
@@ -390,6 +391,7 @@ const CharactersPage: React.FunctionComponent = (props) => {
     return (
         <>
         <DragAndDrop/>
+        <CaptchaDialog/>
         <PageDialog/>
         <TitleBar/>
         <NavBar/>

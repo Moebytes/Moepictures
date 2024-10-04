@@ -59,13 +59,12 @@ const CaptchaDialog: React.FunctionComponent<Props> = (props) => {
 
     useEffect(() => {
         if (!session.cookie) return
-        if (session.captchaAmount === undefined) session.captchaAmount = 0
         if (!props.forceCaptcha) {
             let ignoreCaptcha = sessionStorage.getItem("ignoreCaptcha") as any
             ignoreCaptcha = ignoreCaptcha ? ignoreCaptcha === "true" : false
             if (ignoreCaptcha) return setNeedsVerification(false)
         }
-        if (session.captchaAmount > 1000) {
+        if (session.captchaNeeded) {
             if (!needsVerification) setNeedsVerification(true)
         } else {
             if (needsVerification) setNeedsVerification(false)
@@ -129,7 +128,10 @@ const CaptchaDialog: React.FunctionComponent<Props> = (props) => {
                     <div className="dialog-box" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                         <div className="dialog-container">
                             <div className="dialog-title-container">
-                                <span className="dialog-title">Human Verification</span>
+                                <span className="dialog-title">Rate Limit Exceeded</span>
+                            </div>
+                            <div className="dialog-row">
+                                <span className="dialog-text">Please verify that you are a human. You may ignore this, but content will be protected.</span>
                             </div>
                             <div className="dialog-row" style={{pointerEvents: "all"}}>
                                 <img src={`data:image/svg+xml;utf8,${encodeURIComponent(captcha)}`} style={{filter: getFilter()}}/>
@@ -137,7 +139,7 @@ const CaptchaDialog: React.FunctionComponent<Props> = (props) => {
                             </div>
                             {error ? <div className="dialog-validation-container"><span className="dialog-validation" ref={errorRef}></span></div> : null}
                             <div className="dialog-row">
-                                <button onClick={() => click("reject")} className="dialog-button">{"No Tags"}</button>
+                                <button onClick={() => click("reject")} className="dialog-button">{"Ignore"}</button>
                                 <button onClick={() => click("accept")} className="dialog-button">{"Solve"}</button>
                             </div>
                         </div>

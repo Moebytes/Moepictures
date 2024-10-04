@@ -3,16 +3,17 @@ import rateLimit from "express-rate-limit"
 import slowDown from "express-slow-down"
 import sql from "../sql/SQLQuery"
 import functions from "../structures/Functions"
-import serverFunctions, {authenticate} from "../structures/ServerFunctions"
+import serverFunctions, {authenticate, keyGenerator, handler} from "../structures/ServerFunctions"
 import {generateSecret, verifyToken} from "node-2fa"
 import axios from "axios"
 
 const $2faLimiter = rateLimit({
-	windowMs: 5 * 60 * 1000,
-	max: 30,
-	message: "Too many requests, try again later.",
+	windowMs: 60 * 1000,
+	max: 10,
 	standardHeaders: true,
-	legacyHeaders: false
+	legacyHeaders: false,
+    keyGenerator,
+    handler
 })
 
 const $2FARoutes = (app: Express) => {

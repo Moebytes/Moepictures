@@ -3,14 +3,15 @@ import rateLimit from "express-rate-limit"
 import slowDown from "express-slow-down"
 import sql from "../sql/SQLQuery"
 import functions from "../structures/Functions"
-import serverFunctions, {authenticate} from "../structures/ServerFunctions"
+import serverFunctions, {authenticate, keyGenerator, handler} from "../structures/ServerFunctions"
 
 const favoriteLimiter = rateLimit({
-	windowMs: 5 * 60 * 1000,
-	max: 2000,
-	message: "Too many requests, try again later.",
+	windowMs: 60 * 1000,
+	max: 200,
 	standardHeaders: true,
-	legacyHeaders: false
+	legacyHeaders: false,
+    keyGenerator,
+    handler
 })
 
 const FavoriteRoutes = (app: Express) => {
