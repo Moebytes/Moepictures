@@ -21,6 +21,7 @@ import PageDialog from "../dialogs/PageDialog"
 import adminCrown from "../assets/icons/admin-crown.png"
 import modCrown from "../assets/icons/mod-crown.png"
 import systemCrown from "../assets/icons/system-crown.png"
+import premiumStar from "../assets/icons/premiumStar.png"
 import lockIcon from "../assets/icons/lock.png"
 import stickyIcon from "../assets/icons/sticky.png"
 import lockOptIcon from "../assets/icons/lock-opt.png"
@@ -404,6 +405,13 @@ const ThreadPage: React.FunctionComponent<Props> = (props) => {
                 <div className="forum-thread-username-container" onClick={creatorClick} onAuxClick={creatorClick}>
                 <span className="forum-thread-user-text system-color">{functions.toProperCase(thread.creator)}</span>
                     <img className="forum-thread-user-label" src={systemCrown}/>
+                </div>
+            )
+        } else if (thread.role === "premium") {
+            return (
+                <div className="forum-thread-username-container" onClick={creatorClick} onAuxClick={creatorClick}>
+                <span className="forum-thread-user-text premium-color">{functions.toProperCase(thread.creator)}</span>
+                    <img className="forum-thread-user-label" src={premiumStar}/>
                 </div>
             )
         }

@@ -6,6 +6,7 @@ import phash from "sharp-phash"
 import dist from "sharp-phash/distance"
 import matureTags from "../assets/json/mature-tags.json"
 import serverFunctions, {keyGenerator, handler} from "../structures/ServerFunctions"
+import permissions from "../structures/Permissions"
 import rateLimit from "express-rate-limit"
 
 const searchLimiter = rateLimit({
@@ -43,6 +44,9 @@ const SearchRoutes = (app: Express) => {
                 }
             }
             let result = null as any
+            if (tags.length > 2 || sort === "bookmarks" || sort === "reverse bookmarks") {
+                if (!permissions.isPremium(req.session)) return res.status(402).send("Premium only")
+            }
             if (sort === "tagcount" || sort === "reverse tagcount") withTags = true
             if (query.startsWith("pixiv:")) {
                 const pixivID = Number(query.match(/(?<=pixiv:)(\d+)/g)?.[0])

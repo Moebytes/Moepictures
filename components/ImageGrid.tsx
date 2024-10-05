@@ -1,7 +1,7 @@
 import React, {useContext, useEffect, useRef, useState, useReducer} from "react"
 import {useHistory, useLocation} from "react-router-dom"
-import {ThemeContext, SizeTypeContext, PostAmountContext, PostsContext, ImageTypeContext, EnableDragContext,
-RestrictTypeContext, StyleTypeContext, SortTypeContext, SearchContext, SearchFlagContext, HeaderFlagContext,
+import {ThemeContext, SizeTypeContext, PostAmountContext, PostsContext, ImageTypeContext, EnableDragContext, PremiumRequiredContext,
+RestrictTypeContext, StyleTypeContext, SortTypeContext, SortReverseContext, SearchContext, SearchFlagContext, HeaderFlagContext,
 RandomFlagContext, ImageSearchFlagContext, SidebarTextContext, MobileContext, SessionContext, SessionFlagContext, VisiblePostsContext,
 ScrollYContext, ScrollContext, PageContext, AutoSearchContext, ShowPageDialogContext, PageFlagContext, ReloadPostFlagContext} from "../Context"
 import GridImage from "./GridImage"
@@ -13,7 +13,7 @@ import permissions from "../structures/Permissions"
 import path from "path"
 import "./styles/imagegrid.less"
 
-let timeout = null as any
+let interval = null as any
 let reloadedPost = false
 
 interface Props {
@@ -35,11 +35,13 @@ const ImageGrid: React.FunctionComponent<Props> = (props) => {
     const {restrictType, setRestrictType} = useContext(RestrictTypeContext)
     const {styleType, setStyleType} = useContext(StyleTypeContext)
     const {sortType, setSortType} = useContext(SortTypeContext)
+    const {sortReverse, setSortReverse} = useContext(SortReverseContext)
     const {search, setSearch} = useContext(SearchContext)
     const {searchFlag, setSearchFlag} = useContext(SearchFlagContext)
     const {randomFlag, setRandomFlag} = useContext(RandomFlagContext)
     const {sidebarText, setSidebarText} = useContext(SidebarTextContext)
     const {imageSearchFlag, setImageSearchFlag} = useContext(ImageSearchFlagContext)
+    const {premiumRequired, setPremiumRequired} = useContext(PremiumRequiredContext)
     const {headerFlag, setHeaderFlag} = useContext(HeaderFlagContext)
     const {mobile, setMobile} = useContext(MobileContext)
     const {session, setSession} = useContext(SessionContext)
@@ -78,13 +80,22 @@ const ImageGrid: React.FunctionComponent<Props> = (props) => {
 
     const searchPosts = async (query?: string) => {
         if (searchFlag) setSearchFlag(false)
+        if (!query) query = await functions.parseSpaceEnabledSearch(search, session, setSessionFlag)
+        let tags = query?.trim().split(/ +/g).filter(Boolean) || []
+        if (tags.length > 2) {
+            if (!session.username) {
+                setSearch("")
+                setSidebarText("Login required.")
+                return history.push("/login")
+            }
+            if (!permissions.isPremium(session)) return setPremiumRequired("tags")
+        }
         setNoResults(false)
         setEnded(false)
         setIndex(0)
         setVisiblePosts([])
-        if (!query) query = await functions.parseSpaceEnabledSearch(search, session, setSessionFlag)
         setSearch(query)
-        const result = await functions.get("/api/search/posts", {query, type: imageType, restrict: restrictType, style: styleType, sort: sortType, limit: 1000}, session, setSessionFlag)
+        const result = await functions.get("/api/search/posts", {query, type: imageType, restrict: restrictType, style: styleType, sort: functions.parseSort(sortType, sortReverse), limit: 1000}, session, setSessionFlag)
         setHeaderFlag(true)
         setPosts(result)
         setIsRandomSearch(false)
@@ -147,15 +158,17 @@ const ImageGrid: React.FunctionComponent<Props> = (props) => {
     }, [])
 
     useEffect(() => {
-        clearTimeout(timeout)
+        window.clearInterval(interval)
         const searchLoop = async () => {
             if (!autoSearch) return
             await randomPosts(search)
-            timeout = setTimeout(() => {
-                if (autoSearch) searchLoop()
-            }, Math.floor(Number(session.autosearchInterval || 3000)))
         }
-        searchLoop()
+        if (autoSearch) {
+            interval = window.setInterval(searchLoop, Math.floor(Number(session.autosearchInterval || 3000)))
+        }
+        return () => {
+            window.clearInterval(interval)
+        }
     }, [session, autoSearch, search])
 
     useEffect(() => {
@@ -186,7 +199,7 @@ const ImageGrid: React.FunctionComponent<Props> = (props) => {
             }
         }
         if (!scroll) updatePageOffset()
-    }, [session, scroll, page, ended, noResults, sizeType, imageType, restrictType, styleType])
+    }, [session, scroll, page, ended, noResults, sizeType, imageType, restrictType, styleType, sortType, sortReverse])
 
     useEffect(() => {
         if (reloadedPost) {
@@ -199,7 +212,7 @@ const ImageGrid: React.FunctionComponent<Props> = (props) => {
             setPage(1)
             searchPosts()
         }
-    }, [searchFlag, imageType, sizeType, restrictType, styleType, sortType, scroll])
+    }, [searchFlag, imageType, sizeType, restrictType, styleType, sortType, sortReverse, scroll])
 
     useEffect(() => {
         if (reloadPostFlag) reloadedPost = true
@@ -269,7 +282,7 @@ const ImageGrid: React.FunctionComponent<Props> = (props) => {
             result = await functions.get("/api/search/random", {type: imageType, restrict: restrictType, style: styleType, limit: 1000, offset: newOffset}, session, setSessionFlag)
         } else {
             const query = await functions.parseSpaceEnabledSearch(search, session, setSessionFlag)
-            result = await functions.get("/api/search/posts", {query, type: imageType, restrict: restrictType, style: styleType, sort: sortType, limit: 1000, offset: newOffset}, session, setSessionFlag)
+            result = await functions.get("/api/search/posts", {query, type: imageType, restrict: restrictType, style: styleType, sort: functions.parseSort(sortType, sortReverse), limit: 1000, offset: newOffset}, session, setSessionFlag)
         }
         let hasMore = result?.length >= 1000
         const cleanPosts = posts.filter((p: any) => !p.fake)
@@ -316,7 +329,7 @@ const ImageGrid: React.FunctionComponent<Props> = (props) => {
             }
         }
         if (scroll) updatePosts()
-    }, [session, sizeType, scroll, sizeType, imageType, restrictType, styleType])
+    }, [session, sizeType, scroll, sizeType, imageType, restrictType, styleType, sortType, sortReverse])
 
     useEffect(() => {
         const scrollHandler = async () => {
@@ -339,7 +352,7 @@ const ImageGrid: React.FunctionComponent<Props> = (props) => {
         return () => {
             window.removeEventListener("scroll", scrollHandler)
         }
-    }, [session, posts, visiblePosts, ended, noResults, offset, scroll, sizeType, imageType, restrictType, styleType])
+    }, [session, posts, visiblePosts, ended, noResults, offset, scroll, sizeType, imageType, restrictType, styleType, sortType, sortReverse])
 
     useEffect(() => {
         if (search) {

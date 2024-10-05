@@ -39,6 +39,7 @@ const SetAvatarPage: React.FunctionComponent<Props> = (props) => {
     const [crop, setCrop] = useState({unit: "%", x: 25, y: 25, width: 50, height: 50, aspect: 1})
     const [pixelCrop, setPixelCrop] = useState({unit: "px", x: 0, y: 0, width: 100, height: 100, aspect: 1})
     const [imageLoaded, setImageLoaded] = useState(false)
+    const [isAnimated, setIsAnimated] = useState(false)
     const ref = useRef<any>(null)
     const previewRef = useRef<HTMLCanvasElement>(null)
     const history = useHistory()
@@ -148,8 +149,8 @@ const SetAvatarPage: React.FunctionComponent<Props> = (props) => {
         if (!previewRef.current || !ref.current) return
         const image = ref.current
         const canvas = previewRef.current
-        drawCanvas(image, canvas, pixelCrop)
-    }, [pixelCrop])
+        drawCanvas(image, canvas, crop)
+    }, [crop])
 
     const onImageLoad = (event?: React.SyntheticEvent<HTMLImageElement>) => {
         if (!ref.current) return
@@ -177,34 +178,29 @@ const SetAvatarPage: React.FunctionComponent<Props> = (props) => {
     const drawCanvas = (image: any, canvas: HTMLCanvasElement, crop: any)  => {
         const ctx = canvas.getContext("2d")
         if (!ctx) return
-        let naturalWidth = image.naturalWidth 
-        let naturalHeight = image.naturalHeight
-        let imageWidth = image.width 
-        let imageHeight = image.height
-        if (image instanceof HTMLCanvasElement) {
-            naturalWidth = image.width 
-            naturalHeight = image.height
-            imageWidth = image.clientWidth 
-            imageHeight = image.clientHeight
-        }
-        const scaleX = naturalWidth / imageWidth
-        const scaleY = naturalHeight / imageHeight
+
+        const naturalWidth = image.naturalWidth || image.width
+        const naturalHeight = image.naturalHeight || image.height
+    
+        const cropX = (crop.x / 100) * naturalWidth
+        const cropY = (crop.y / 100) * naturalHeight
+        const cropWidth = (crop.width / 100) * naturalWidth
+        const cropHeight = (crop.height / 100) * naturalHeight
+    
         const pixelRatio = window.devicePixelRatio
-        canvas.width = Math.floor(crop.width * scaleX * pixelRatio)
-        canvas.height = Math.floor(crop.height * scaleY * pixelRatio)
-        ctx.scale(pixelRatio, pixelRatio)
+        canvas.width = Math.floor(cropWidth * pixelRatio)
+        canvas.height = Math.floor(cropHeight * pixelRatio)
+    
         ctx.imageSmoothingQuality = "high"
-        const cropX = crop.x * scaleX
-        const cropY = crop.y * scaleY
-        ctx.save()
-        ctx.translate(-cropX, -cropY)
-        ctx.drawImage(image, 0, 0, naturalWidth, naturalHeight, 0, 0, naturalWidth, naturalHeight)
-        ctx.restore()
+        ctx.scale(pixelRatio, pixelRatio)
+    
+        ctx.clearRect(0, 0, canvas.width, canvas.height)
+        ctx.drawImage(image, cropX, cropY, cropWidth, cropHeight, 0, 0, cropWidth, cropHeight)
     }
 
     const loadImage = async () => {
         if (!ref.current) return
-        if (functions.isGIF(image)) return
+        if (isAnimated) return
         let src = image
         if (functions.isImage(src)) {
             src = await cryptoFunctions.decryptedLink(src)
@@ -234,8 +230,13 @@ const SetAvatarPage: React.FunctionComponent<Props> = (props) => {
         if (!previewRef.current) return
         const url = previewRef.current.toDataURL("image/jpeg")
         let croppedURL = ""
-        if (functions.isGIF(image)) {
-            const gifData = await functions.extractGIFFrames(image)
+        if (isAnimated && permissions.isPremium(session)) {
+            let gifData = null as any
+            if (functions.isGIF(image)) {
+                gifData = await functions.extractGIFFrames(image)
+            } else if (functions.isWebP(image)) {
+                gifData = await functions.extractAnimatedWebpFrames(image)
+            }
             let frameArray = [] as any 
             let delayArray = [] as any
             let firstURL = null as any
@@ -247,9 +248,9 @@ const SetAvatarPage: React.FunctionComponent<Props> = (props) => {
                 await new Promise<void>((resolve) => {
                     image.onload = () => resolve()
                 })
-                drawCanvas(image, canvas, pixelCrop)
-                const cropped = await functions.crop(canvas.toDataURL("image/jpeg"), 1, true, true)
-                if (!firstURL) firstURL = await functions.crop(canvas.toDataURL("image/jpeg"), 1, false, true)
+                drawCanvas(image, canvas, crop)
+                const cropped = await functions.crop(canvas.toDataURL("image/png"), 1, true, false)
+                if (!firstURL) firstURL = await functions.crop(canvas.toDataURL("image/png"), 1, false, false)
                 frameArray.push(cropped)
                 delayArray.push(gifData[i].delay)
             }
@@ -269,7 +270,7 @@ const SetAvatarPage: React.FunctionComponent<Props> = (props) => {
         if (!croppedURL) return
         const arrayBuffer = await fetch(croppedURL).then((r) => r.arrayBuffer())
         const bytes = Object.values(new Uint8Array(arrayBuffer))
-        await functions.post("/api/user/updatepfp", {postID, bytes}, session, setSessionFlag)
+        await functions.post("/api/user/pfp", {postID, bytes}, session, setSessionFlag)
         setUserImg("")
         setSessionFlag(true)
         history.push(`/post/${postID}`)
@@ -278,7 +279,8 @@ const SetAvatarPage: React.FunctionComponent<Props> = (props) => {
     const download = async () => {
         const croppedURL = await getCroppedURL()
         if (!croppedURL) return
-        functions.download(`${postID}-crop.jpg`, croppedURL)
+        let ext = isAnimated && permissions.isPremium(session) ? "gif" : "jpg"
+        functions.download(`${postID}-crop.${ext}`, croppedURL)
     }
 
     const toggleScroll = (on: boolean) => {
@@ -288,6 +290,19 @@ const SetAvatarPage: React.FunctionComponent<Props> = (props) => {
             document.body.style.overflowY = "hidden"
         }
     }
+
+    useEffect(() => {
+        const checkImage = async () => {
+            if (functions.isGIF(image)) return setIsAnimated(true)
+            if (functions.isWebP(image)) {
+                const buffer = await fetch(image).then((r) => r.arrayBuffer())
+                const animatedWebp = await functions.isAnimatedWebp(buffer)
+                if (animatedWebp) return setIsAnimated(true)
+            }
+            setIsAnimated(false)
+        }
+        checkImage()
+    }, [image])
 
     return (
         <>
@@ -305,7 +320,7 @@ const SetAvatarPage: React.FunctionComponent<Props> = (props) => {
                         <span className="set-avatar-title">Set Avatar</span>
                         <div className="set-avatar-container">
                             <ReactCrop className="set-avatar-crop" crop={crop as any} onChange={(crop, percentCrop) => {setCrop(percentCrop as any); setPixelCrop(crop as any); toggleScroll(false)}} keepSelection={true} minWidth={25} minHeight={25} aspect={1} onComplete={() => toggleScroll(true)}>
-                                {functions.isGIF(image) ? <img className="set-avatar-image" src={image} onLoad={onImageLoad} ref={ref}/> : 
+                                {isAnimated ? <img className="set-avatar-image" src={image} onLoad={onImageLoad} ref={ref}/> : 
                                 <canvas className="set-avatar-image" ref={ref}></canvas>}
                             </ReactCrop>
                             <div className="set-avatar-preview-container">

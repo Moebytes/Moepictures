@@ -204,7 +204,7 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
                 }
             }
         }
-        if (!session.username || session.showRelated) {
+        if (session.showRelated) {
             updateArtistPosts()
             updateRelatedPosts()
         }

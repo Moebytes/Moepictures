@@ -2,7 +2,7 @@ import React, {useContext, useEffect, useState, useReducer} from "react"
 import {useHistory} from "react-router-dom"
 import {ThemeContext, HideSidebarContext, HideNavbarContext, HideSortbarContext, EnableDragContext, MobileContext, UnverifiedPostsContext,
 RelativeContext, HideTitlebarContext, SidebarHoverContext, SearchContext, SearchFlagContext, PostsContext, ShowDeletePostDialogContext, AutoSearchContext,
-TagsContext, RandomFlagContext, ImageSearchFlagContext, SidebarTextContext, SessionContext, MobileScrollingContext, QuickEditIDContext,
+TagsContext, RandomFlagContext, ImageSearchFlagContext, SidebarTextContext, SessionContext, MobileScrollingContext, QuickEditIDContext, PremiumRequiredContext,
 TranslationModeContext, TranslationDrawingEnabledContext, SiteHueContext, SessionFlagContext, SiteLightnessContext, SiteSaturationContext, ShowTakedownPostDialogContext} from "../Context"
 import {HashLink as Link} from "react-router-hash-link"
 import permissions from "../structures/Permissions"
@@ -66,7 +66,7 @@ interface Props {
     noActions?: boolean
 }
 
-let timeout = null as any
+let interval = null as any
 const maxTags1 = 22
 const maxTags2 = 24
 const maxTags3 = 25
@@ -96,6 +96,7 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
     const {showTakedownPostDialog, setShowTakedownPostDialog} = useContext(ShowTakedownPostDialogContext)
     const {mobile, setMobile} = useContext(MobileContext)
     const {mobileScrolling, setMobileScrolling} = useContext(MobileScrollingContext)
+    const {premiumRequired, setPremiumRequired} = useContext(PremiumRequiredContext)
     const {session, setSession} = useContext(SessionContext)
     const {sessionFlag, setSessionFlag} = useContext(SessionFlagContext)
     const [maxTags, setMaxTags] = useState(maxTags1)
@@ -705,24 +706,30 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
     }
 
     useEffect(() => {
-        clearTimeout(timeout)
+        window.clearInterval(interval)
         if (autoSearch && history.location.pathname.includes("/post/")) {
             const searchLoop = async () => {
                 if (!autoSearch) return
-                timeout = setTimeout(async () => {
-                    const posts = await functions.get("/api/search/random", {type: "all", restrict: props.post.restrict === "explicit" ? "explicit" : "all", style: "all", limit: 1}, session, setSessionFlag)
-                    history.push(`/post/${posts[0].postID}`)
-                    if (autoSearch) searchLoop()
-                }, Math.floor(Number(session.autosearchInterval || 3000)))
+                const posts = await functions.get("/api/search/random", {type: "all", restrict: props.post.restrict === "explicit" ? "explicit" : "all", style: "all", limit: 1}, session, setSessionFlag)
+                history.push(`/post/${posts[0].postID}`)
             }
-            searchLoop()
+            if (autoSearch) {
+                interval = window.setInterval(searchLoop, Math.floor(Number(session.autosearchInterval || 3000)))
+            }
         } else if (autoSearch && !history.location.pathname.includes("/posts")) {
             history.push("/posts")
+        }
+        return () => {
+            window.clearInterval(interval)
         }
     }, [session, autoSearch])
 
     const toggleAutoSearch = async () => {
-        setAutoSearch((prev: boolean) => !prev)
+        if (permissions.isPremium(session)) {
+            setAutoSearch((prev: boolean) => !prev)
+        } else {
+            setPremiumRequired(true)
+        }
     }
 
     if (mobile) return (
@@ -763,7 +770,7 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
                 </div>
                 <div className="random-container">
                     <img className="random" src={getRandomIcon()} style={{filter: getFilterRandom()}} onClick={randomSearch} onMouseEnter={() => setRandomIconHover(true)} onMouseLeave={() => setRandomIconHover(false)}/>
-                    <img className="autosearch" style={{filter: getFilter()}} src={getAutoSearch()} onClick={toggleAutoSearch}/>
+                    {session.username ? <img className="autosearch" style={{filter: getFilter()}} src={getAutoSearch()} onClick={toggleAutoSearch}/> : null}
                 </div>
 
                 {copyTagsJSX()}

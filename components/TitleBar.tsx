@@ -5,7 +5,7 @@ import favicon from "../assets/icons/favicon.png"
 import {ThemeContext, HideNavbarContext, EnableDragContext, RelativeContext, HideTitlebarContext, HeaderFlagContext,
 SearchContext, SearchFlagContext, ImageTypeContext, RestrictTypeContext, StyleTypeContext, SortTypeContext,
 HeaderTextContext, HideMobileNavbarContext, MobileContext, VisiblePostsContext, ScrollYContext, MobileScrollingContext, 
-SiteHueContext, SiteLightnessContext, SiteSaturationContext} from "../Context"
+SiteHueContext, SiteLightnessContext, SiteSaturationContext, AutoSearchContext} from "../Context"
 import functions from "../structures/Functions"
 import hamburger from "../assets/icons/hamburger.png"
 import "./styles/titlebar.less"
@@ -97,6 +97,7 @@ const TitleBar: React.FunctionComponent<Props> = (props) => {
     const {searchFlag, setSearchFlag} = useContext(SearchFlagContext)
     const {imageType, setImageType} = useContext(ImageTypeContext)
     const {restrictType, setRestrictType} = useContext(RestrictTypeContext)
+    const {autoSearch, setAutoSearch} = useContext(AutoSearchContext)
     const {styleType, setStyleType} = useContext(StyleTypeContext)
     const {sortType, setSortType} = useContext(SortTypeContext)
     const {headerText, setHeaderText} = useContext(HeaderTextContext)
@@ -214,7 +215,7 @@ const TitleBar: React.FunctionComponent<Props> = (props) => {
             </div>
             {!mobile ? 
             <div className="titlebar-search-text-container">
-                <span className={`titlebar-search-text ${props.post?.hidden ? "strikethrough" : ""}`}>{headerText}</span>
+                <span className={`titlebar-search-text ${props.post?.hidden ? "strikethrough" : ""}`}>{autoSearch ? <span style={{color: "var(--premiumColor)", marginRight: "10px"}}>[Auto Search]</span> : null}{headerText}</span>
             </div> : null}
         </div>
     )

@@ -56,8 +56,8 @@ declare module "express-session" {
       username: string
       email: string
       joinDate: string
-      image: string 
-      imagePost: string
+      image: string | null
+      imagePost: string | null
       bio: string 
       emailVerified: boolean
       publicFavorites: boolean

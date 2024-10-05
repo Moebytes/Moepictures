@@ -16,6 +16,7 @@ import commentDelete from "../assets/icons/commentdelete.png"
 import adminCrown from "../assets/icons/admin-crown.png"
 import modCrown from "../assets/icons/mod-crown.png"
 import systemCrown from "../assets/icons/system-crown.png"
+import premiumStar from "../assets/icons/premiumStar.png"
 import jsxFunctions from "../structures/JSXFunctions"
 import "./styles/commentrow.less"
 
@@ -239,6 +240,13 @@ const CommentRow: React.FunctionComponent<Props> = (props) => {
                 <div className="commentrow-username-container">
                 <span className="commentrow-user-text system-color">{functions.toProperCase(props.comment.username)}</span>
                     <img className="commentrow-user-label" src={systemCrown}/>
+                </div>
+            )
+        } else if (props.comment?.role === "premium") {
+            return (
+                <div className="commentrow-username-container">
+                <span className="commentrow-user-text premium-color">{functions.toProperCase(props.comment.username)}</span>
+                    <img className="commentrow-user-label" src={premiumStar}/>
                 </div>
             )
         }

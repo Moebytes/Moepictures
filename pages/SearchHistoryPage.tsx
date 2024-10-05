@@ -13,9 +13,10 @@ import scrollIcon from "../assets/icons/scroll.png"
 import pageIcon from "../assets/icons/page.png"
 import PageDialog from "../dialogs/PageDialog"
 import searchHistoryDelete from "../assets/icons/delete.png"
+import permissions from "../structures/Permissions"
 import {ThemeContext, EnableDragContext, HideNavbarContext, HideSidebarContext, MobileContext, SessionContext, ScrollContext, ShowPageDialogContext,
 RelativeContext, HideTitlebarContext, ActiveDropdownContext, HeaderTextContext, SidebarTextContext, SessionFlagContext, HistoryPageContext, PageFlagContext,
-SiteHueContext, SiteSaturationContext, SiteLightnessContext, ShowDeleteAllHistoryDialogContext} from "../Context"
+SiteHueContext, SiteSaturationContext, SiteLightnessContext, ShowDeleteAllHistoryDialogContext, RedirectContext} from "../Context"
 import "./styles/historypage.less"
 
 const SearchHistoryPage: React.FunctionComponent = () => {
@@ -38,6 +39,7 @@ const SearchHistoryPage: React.FunctionComponent = () => {
     const {sessionFlag, setSessionFlag} = useContext(SessionFlagContext)
     const {historyPage, setHistoryPage} = useContext(HistoryPageContext)
     const {showPageDialog, setShowPageDialog} = useContext(ShowPageDialogContext)
+    const {redirect, setRedirect} = useContext(RedirectContext)
     const {showDeleteAllHistoryDialog, setShowDeleteAllHistoryDialog} = useContext(ShowDeleteAllHistoryDialogContext)
     const {pageFlag, setPageFlag} = useContext(PageFlagContext)
     const [history, setHistory] = useState([]) as any
@@ -73,6 +75,11 @@ const SearchHistoryPage: React.FunctionComponent = () => {
     useEffect(() => {
         if (!session.cookie) return
         if (!session.username) {
+            setRedirect("/history")
+            history.push("/login")
+            setSidebarText("Login required.")
+        }
+        if (!permissions.isPremium(session)) {
             historyState.push("/401")
         }
     }, [session])

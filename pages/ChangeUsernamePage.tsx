@@ -7,6 +7,7 @@ import SideBar from "../components/SideBar"
 import Footer from "../components/Footer"
 import DragAndDrop from "../components/DragAndDrop"
 import functions from "../structures/Functions"
+import permissions from "../structures/Permissions"
 import {HideNavbarContext, HideSidebarContext, ThemeContext, EnableDragContext, SessionFlagContext, RedirectContext, MobileContext,
 RelativeContext, HideTitlebarContext, HeaderTextContext, SidebarTextContext, SessionContext, SiteHueContext, SiteLightnessContext,
 SiteSaturationContext} from "../Context"
@@ -80,6 +81,9 @@ const ChangeUsernamePage: React.FunctionComponent = (props) => {
             setRedirect("/change-username")
             history.push("/login")
             setSidebarText("Login required.")
+        }
+        if (!permissions.isPremium(session)) {
+            history.push("/401")
         }
     }, [session])
 

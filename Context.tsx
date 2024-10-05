@@ -44,6 +44,7 @@ export const ImageTypeContext = React.createContext<any>(null)
 export const RestrictTypeContext = React.createContext<any>(null)
 export const StyleTypeContext = React.createContext<any>(null)
 export const SortTypeContext = React.createContext<any>(null)
+export const SortReverseContext = React.createContext<any>(null)
 export const SearchContext = React.createContext<any>(null)
 export const SearchFlagContext = React.createContext<any>(null)
 export const RandomFlagContext = React.createContext<any>(null)
@@ -143,6 +144,7 @@ export const ReportReplyIDContext = React.createContext<any>(null)
 export const ReportThreadIDContext = React.createContext<any>(null)
 export const BanNameContext = React.createContext<any>(null)
 export const UnbanNameContext = React.createContext<any>(null)
+export const PromoteNameContext = React.createContext<any>(null)
 export const UpdateUserFlagContext = React.createContext<any>(null)
 export const SelectionModeContext = React.createContext<any>(null)
 export const SelectionItemsContext = React.createContext<any>(null)
@@ -176,6 +178,7 @@ export const DeleteSearchHistoryFlagContext = React.createContext<any>(null)
 export const HistoryPageContext = React.createContext<any>(null)
 export const ShowDeleteAllHistoryDialogContext = React.createContext<any>(null)
 export const FormatContext = React.createContext<any>(null)
+export const PremiumRequiredContext = React.createContext<any>(null)
 
 const Context: React.FunctionComponent = (props) => {
     const [siteHue, setSiteHue] = useState(180)
@@ -214,6 +217,7 @@ const Context: React.FunctionComponent = (props) => {
     const [styleType, setStyleType] = useState("all")
     const [sizeType, setSizeType] = useState("medium")
     const [sortType, setSortType] = useState("random")
+    const [sortReverse, setSortReverse] = useState(false)
     const [search, setSearch] = useState("")
     const [searchFlag, setSearchFlag] = useState(false)
     const [speed, setSpeed] = useState(1)
@@ -309,6 +313,7 @@ const Context: React.FunctionComponent = (props) => {
     const [reportThreadID, setReportThreadID] = useState(null)
     const [banName, setBanName] = useState(null)
     const [unbanName, setUnbanName] = useState(null)
+    const [promoteName, setPromoteName] = useState(null)
     const [updateUserFlag, setUpdateUserFlag] = useState(false)
     const [selectionItems, setSelectionItems] = useState(new Set())
     const [selectionPosts, setSelectionPosts] = useState(new Map())
@@ -337,9 +342,13 @@ const Context: React.FunctionComponent = (props) => {
     const [deleteSearchHistoryFlag, setDeleteSearchHistoryFlag] = useState(null)
     const [showDeleteAllHistoryDialog, setShowDeleteAllHistoryDialog] = useState(false)
     const [format, setFormat] = useState("jpg")
+    const [premiumRequired, setPremiumRequired] = useState(false)
 
 return (
     <>
+        <PromoteNameContext.Provider value={{promoteName, setPromoteName}}>
+        <PremiumRequiredContext.Provider value={{premiumRequired, setPremiumRequired}}>
+        <SortReverseContext.Provider value={{sortReverse, setSortReverse}}>
         <FormatContext.Provider value={{format, setFormat}}>
         <ShowDeleteAllHistoryDialogContext.Provider value={{showDeleteAllHistoryDialog, setShowDeleteAllHistoryDialog}}>
         <HistoryPageContext.Provider value={{historyPage, setHistoryPage}}>
@@ -659,6 +668,9 @@ return (
         </HistoryPageContext.Provider>
         </ShowDeleteAllHistoryDialogContext.Provider>
         </FormatContext.Provider>
+        </SortReverseContext.Provider>
+        </PremiumRequiredContext.Provider>
+        </PromoteNameContext.Provider>
     </>
     )
 }

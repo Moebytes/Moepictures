@@ -4,6 +4,7 @@ import Context, {ThemeContext, HideNavbarContext, HideSidebarContext, HideSortba
 HideTitlebarContext, EnableDragContext, ActiveDropdownContext, FilterDropActiveContext, MobileScrollingContext,
 SidebarHoverContext, SessionContext, SessionFlagContext, UserImgContext, UserImgPostContext, MobileContext, SelectionModeContext} from "./Context"
 import favicon from "./assets/icons/favicon.png"
+import permissions from "./structures/Permissions"
 import PostsPage from "./pages/PostsPage"
 import CommentsPage from "./pages/CommentsPage"
 import ArtistsPage from "./pages/ArtistsPage"
@@ -48,6 +49,8 @@ import ThreadPage from "./pages/ThreadPage"
 import BulkUploadPage from "./pages/BulkUploadPage"
 import MailPage from "./pages/MailPage"
 import MessagePage from "./pages/MessagePage"
+import PremiumPage from "./pages/PremiumPage"
+import PremiumRequiredDialog from "./dialogs/PremiumRequiredDialog"
 import "./index.less"
 
 require.context("./assets/icons", true)
@@ -81,6 +84,9 @@ const App: React.FunctionComponent = (props) => {
         const cookie = await functions.get("/api/user/session", null, session, setSessionFlag)
         functions.updateCSRFToken(cookie)
         setSession(cookie)
+        if (cookie.username && !permissions.isPremium(cookie)) {
+            await functions.post("/api/user/upscaledimages", {reset: true}, session, setSessionFlag)
+        }
     }
 
     useEffect(() => {
@@ -254,6 +260,7 @@ const App: React.FunctionComponent = (props) => {
             <HideSidebarContext.Provider value={{hideSidebar, setHideSidebar}}>
             <ThemeContext.Provider value={{theme, setTheme}}>
                 <Context>
+                    <PremiumRequiredDialog/>
                     <Switch>
                         <Route exact path={["/", "/posts", "/home"]}><PostsPage/></Route>
                         <Route exact path="/profile"><UserProfilePage/></Route>
@@ -265,6 +272,7 @@ const App: React.FunctionComponent = (props) => {
                         <Route exact path="/artists"><ArtistsPage/></Route>
                         <Route exact path="/comments"><CommentsPage/></Route>
                         <Route exact path="/history"><SearchHistoryPage/></Route>
+                        <Route exact path="/premium"><PremiumPage/></Route>
                         <Route exact path="/user/:username" render={(props) => <UserPage {...props}/>}></Route>
                         <Route exact path="/tag/history/:tag" render={(props) => <TagHistoryPage {...props}/>}></Route>
                         <Route exact path="/tag/history" render={(props) => <TagHistoryPage all={true} {...props}/>}></Route>

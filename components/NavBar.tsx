@@ -8,6 +8,7 @@ import logoutIcon from "../assets/icons/logout.png"
 import logoutModIcon from "../assets/icons/logout-mod.png"
 import logoutAdminIcon from "../assets/icons/logout-admin.png"
 import logoutSystemIcon from "../assets/icons/logout-system.png"
+import logoutPremiumIcon from "../assets/icons/logout-premium.png"
 import search2 from "../assets/icons/search2.png"
 import crown from "../assets/icons/crown.png"
 import mail from "../assets/icons/mail.png"
@@ -30,7 +31,7 @@ import premiumStar from "../assets/icons/premiumStar.png"
 import Slider from "react-slider"
 import {ThemeContext, HideNavbarContext, HideSortbarContext, HideSidebarContext, EnableDragContext,  HideMobileNavbarContext, MobileContext,
 RelativeContext, HideTitlebarContext, SearchContext, SearchFlagContext, SessionContext, SessionFlagContext, UserImgContext, SiteHueContext,
-SiteSaturationContext, SiteLightnessContext, ScrollContext, HasNotificationContext} from "../Context"
+SiteSaturationContext, SiteLightnessContext, ScrollContext, HasNotificationContext, PremiumRequiredContext} from "../Context"
 import "./styles/navbar.less"
 
 interface Props {
@@ -48,6 +49,7 @@ const NavBar: React.FunctionComponent<Props> = (props) => {
     const {hideSidebar, setHideSidebar} = useContext(HideSidebarContext)
     const {hideSortbar, setHideSortbar} = useContext(HideSortbarContext)
     const {enableDrag, setEnableDrag} = useContext(EnableDragContext)
+    const {premiumRequired, setPremiumRequired} = useContext(PremiumRequiredContext)
     const {relative, setRelative} = useContext(RelativeContext)
     const {search, setSearch} = useContext(SearchContext)
     const {searchFlag, setSearchFlag} = useContext(SearchFlagContext)
@@ -217,6 +219,12 @@ const NavBar: React.FunctionComponent<Props> = (props) => {
                 <img className="mobile-nav-logout-img" src={logoutSystemIcon} onClick={() => {logout(); setHideMobileNavbar(true)}}/>
             </>
             )
+        } else if (session.role === "premium") {
+            return (<>
+                <span className="mobile-nav-text mobile-nav-user-text premium-color" onClick={() => {history.push("/profile"); setHideMobileNavbar(true)}}>{functions.toProperCase(session.username)}</span>
+                <img className="mobile-nav-logout-img" src={logoutPremiumIcon} onClick={() => {logout(); setHideMobileNavbar(true)}}/>
+            </>
+            )
         } else {
             return (<>
                     <span className={`mobile-nav-text mobile-nav-user-text ${session.banned ? "banned" : ""}`} onClick={() => {history.push("/profile"); setHideMobileNavbar(true)}}>{functions.toProperCase(session.username)}</span>
@@ -243,6 +251,12 @@ const NavBar: React.FunctionComponent<Props> = (props) => {
             return (<>
                 <span className="nav-text nav-user-text system-color" onClick={() => history.push("/profile")}>{functions.toProperCase(session.username)}</span>
                 <img className="nav-logout-img" src={logoutSystemIcon} onClick={logout}/>
+            </>
+            )
+        } else if (session.role === "premium") {
+            return (<>
+                <span className="nav-text nav-user-text premium-color" onClick={() => history.push("/profile")}>{functions.toProperCase(session.username)}</span>
+                <img className="nav-logout-img" src={logoutPremiumIcon} onClick={logout}/>
             </>
             )
         } else {
@@ -294,6 +308,14 @@ const NavBar: React.FunctionComponent<Props> = (props) => {
         })
     }
 
+    const historyClick = () => {
+        if (permissions.isPremium(session)) {
+            history.push("/history")
+        } else {
+            setPremiumRequired(true)
+        }
+    }
+
     if (mobile) {
         const getMobileMargin = () => {
             return hideMobileNavbar ? `-${document.querySelector(".mobile-navbar")?.clientHeight || 500}px` : "0px"
@@ -317,10 +339,10 @@ const NavBar: React.FunctionComponent<Props> = (props) => {
                     <span className="mobile-nav-text" onClick={() => {history.push("/help"); setHideMobileNavbar(true)}}>Help</span>
                     <span className="mobile-nav-text" onClick={() => {history.push("/terms"); setHideMobileNavbar(true)}}>Terms</span>
                     <span className="mobile-nav-text" onClick={() => {history.push("/contact"); setHideMobileNavbar(true)}}>Contact</span>
-                    <img className="mobile-nav-img" onClick={() => {history.push("/premium"); setHideMobileNavbar(true)}} src={premiumStar}/>
+                    {session.username ? <img style={{marginTop: "10px"}} className="mobile-nav-img" onClick={() => {history.push("/premium"); setHideMobileNavbar(true)}} src={premiumStar}/> : null}
                 </div>
                 <div className="mobile-nav-color-container">
-                    {session.username ? <img className="nav-color" src={getHistoryIcon()} onClick={() => history.push("/history")} style={{filter: getFilter()}}/> : null}
+                    {session.username ? <img className="nav-color" src={getHistoryIcon()} onClick={historyClick} style={{filter: getFilter()}}/> : null}
                     <img className="mobile-nav-color" src={getEyedropperIcon()} onClick={colorChange} style={{filter: getFilter()}}/>
                     <img className="mobile-nav-color" src={getThemeIcon()} onClick={lightChange} style={{filter: getFilter()}}/>
                     {session.username ? <img className="nav-color" src={getMailIcon()} onClick={() => history.push("/mail")} style={{filter: getFilter()}}/> : null}
@@ -382,14 +404,14 @@ const NavBar: React.FunctionComponent<Props> = (props) => {
                     <span style={{marginRight: marginR}} className="nav-text" onClick={() => history.push("/tags")}>Tags</span>
                     <span style={{marginRight: marginR}} className="nav-text" onClick={() => history.push("/forum")}>Forum</span>
                     <span style={{marginRight: marginR}} className="nav-text" onClick={() => history.push("/help")}>Help</span>
-                    <img style={{marginRight: "0px", marginTop: "2px"}} className="nav-img" onClick={() => history.push("/premium")} src={premiumStar}/>
+                    {session.username ? <img style={{marginRight: "0px", marginTop: "2px"}} className="nav-img" onClick={() => history.push("/premium")} src={premiumStar}/> : null}
                 </div>
                 <div className="nav-color-container">
                     <div className={`nav-search-container ${!hideSidebar ? "hide-nav-search" : ""}`}>
                         <img className="nav-search-icon" src={search2} onClick={() => setSearchFlag(true)}/>
                         <input className="nav-search" type="search" spellCheck={false} value={search} onChange={(event) => setSearch(event.target.value)} onKeyDown={(event) => event.key === "Enter" ? setSearchFlag(true) : null} onFocus={() => setSuggestionsActive(true)} onBlur={() => setSuggestionsActive(false)}/>
                     </div>
-                    {session.username ? <img className="nav-color" src={getHistoryIcon()} onClick={() => history.push("/history")} style={{filter: getFilter()}}/> : null}
+                    {session.username ? <img className="nav-color" src={getHistoryIcon()} onClick={historyClick} style={{filter: getFilter()}}/> : null}
                     <img className="nav-color" src={getEyedropperIcon()} onClick={colorChange} style={{filter: getFilter()}}/>
                     <img className="nav-color" src={getThemeIcon()} onClick={lightChange} style={{filter: getFilter()}}/>
                     {session.username ? <img className="nav-color" src={getMailIcon()} onClick={() => history.push("/mail")} style={{filter: getFilter()}}/> : null}

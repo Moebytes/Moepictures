@@ -1242,6 +1242,15 @@ export default class Functions {
         return false
     }
 
+    public static parseSort = (sortType: string, sortReverse: boolean) => {
+        if (sortType === "random") return "random"
+        if (sortReverse) {
+            return `reverse ${sortType}`
+        } else {
+            return sortType
+        }
+    }
+
     public static validSort = (sort: string) => {
         if (sort === "random" ||
             sort === "date" ||

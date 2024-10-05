@@ -12,4 +12,12 @@ export default class Permissions {
         if (session.role === "mod") return true 
         return false
     }
+
+    public static isPremium = (session: any) => {
+        if (session.role === "admin") return true 
+        if (session.role === "mod") return true
+        if (session.role === "system") return true
+        if (session.role === "premium") return true
+        return false
+    }
 }

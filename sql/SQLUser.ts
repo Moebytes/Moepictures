@@ -31,7 +31,7 @@ export default class SQLUser {
     }
 
     /** Updates a user */
-    public static updateUser = async (username: string, column: string, value: string | number | boolean) => {
+    public static updateUser = async (username: string, column: string, value: string | number | boolean | null) => {
         const query: QueryConfig = {
             text: /*sql*/`UPDATE "users" SET "${column}" = $1 WHERE "username" = $2`,
             values: [value, username]

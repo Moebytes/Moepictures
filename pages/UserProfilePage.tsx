@@ -9,7 +9,7 @@ import Footer from "../components/Footer"
 import DragAndDrop from "../components/DragAndDrop"
 import {HideNavbarContext, HideSidebarContext, ThemeContext, EnableDragContext, RelativeContext, HideTitlebarContext, MobileContext,
 HeaderTextContext, SidebarTextContext, SessionContext, RedirectContext, SessionFlagContext, UserImgContext, ShowDeleteAccountDialogContext,
-CommentSearchFlagContext, SiteHueContext, SiteLightnessContext, UserImgPostContext, SiteSaturationContext} from "../Context"
+CommentSearchFlagContext, SiteHueContext, SiteLightnessContext, UserImgPostContext, SiteSaturationContext, PremiumRequiredContext} from "../Context"
 import functions from "../structures/Functions"
 import Carousel from "../components/Carousel"
 import CommentCarousel from "../components/CommentCarousel"
@@ -17,7 +17,10 @@ import DeleteAccountDialog from "../dialogs/DeleteAccountDialog"
 import adminLabel from "../assets/icons/admin-label.png"
 import modLabel from "../assets/icons/mod-label.png"
 import systemLabel from "../assets/icons/system-label.png"
+import premiumLabel from "../assets/icons/premium-label.png"
 import permissions from "../structures/Permissions"
+import premiumStar from "../assets/icons/premiumStar.png"
+import danger from "../assets/icons/danger.png"
 import "./styles/userprofilepage.less"
 
 let intervalTimer = null as any
@@ -41,6 +44,7 @@ const UserProfilePage: React.FunctionComponent = (props) => {
     const {mobile, setMobile} = useContext(MobileContext)
     const {userImg, setUserImg} = useContext(UserImgContext)
     const {userImgPost, setUserImgPost} = useContext(UserImgPostContext)
+    const {premiumRequired, setPremiumRequired} = useContext(PremiumRequiredContext)
     const {showDeleteAccountDialog, setShowDeleteAccountDialog} = useContext(ShowDeleteAccountDialogContext)
     const {commentSearchFlag, setCommentSearchFlag} = useContext(CommentSearchFlagContext)
     const bioRef = useRef<any>(null)
@@ -181,7 +185,7 @@ const UserProfilePage: React.FunctionComponent = (props) => {
                         }
                         const arrayBuffer = await fetch(croppedURL).then((r) => r.arrayBuffer())
                         const bytes = Object.values(new Uint8Array(arrayBuffer))
-                        await functions.post("/api/user/updatepfp", {bytes}, session, setSessionFlag)
+                        await functions.post("/api/user/pfp", {bytes}, session, setSessionFlag)
                         setUserImg("")
                         setSessionFlag(true)
                     }
@@ -218,8 +222,12 @@ const UserProfilePage: React.FunctionComponent = (props) => {
     }
 
     const upscaledImages = async () => {
-        await functions.post("/api/user/upscaledimages", null, session, setSessionFlag)
-        setSessionFlag(true)
+        if (permissions.isPremium(session)) {
+            await functions.post("/api/user/upscaledimages", null, session, setSessionFlag)
+            setSessionFlag(true)
+        } else {
+            setPremiumRequired(true)
+        }
     }
 
     useEffect(() => {
@@ -319,6 +327,13 @@ const UserProfilePage: React.FunctionComponent = (props) => {
                     <img className="userprofile-name-label" src={systemLabel}/>
                 </div>
             )
+        } else if (session.role === "premium") {
+            return (
+                <div className="userprofile-name-container">
+                    <span className="userprofile-name-plain premium-color">{functions.toProperCase(session.username)}</span>
+                    <img className="userprofile-name-label" src={premiumLabel}/>
+                </div>
+            )
         }
         return <span className={`userprofile-name ${session.banned ? "banned" : ""}`}>{functions.toProperCase(session.username)}</span>
     }
@@ -326,6 +341,20 @@ const UserProfilePage: React.FunctionComponent = (props) => {
     const getBanText = () => {
         if (banReason) return `You are banned for reason: ${banReason}`
         return "You are banned"
+    }
+
+    const changeUsername = () => {
+        if (permissions.isPremium(session)) {
+            history.push("/change-username")
+        } else {
+            setPremiumRequired(true)
+        }
+    }
+
+    const clearPfp = async () => {
+        await functions.delete("/api/user/pfp", null, session, setSessionFlag)
+        setUserImg("")
+        setSessionFlag(true)
     }
 
     return (
@@ -341,7 +370,7 @@ const UserProfilePage: React.FunctionComponent = (props) => {
                     <div className="userprofile-top-container">
                         <img className="userprofile-img" src={userImg} onClick={userImgClick} onAuxClick={userImgClick} style={{filter: session.image ? "" : getFilter()}}/>
                         {generateUsernameJSX()}
-                        {permissions.isElevated(session) && <>
+                        {permissions.isPremium(session) && <>
                         <label htmlFor="upload-pfp" className="uploadpfp-label">
                             <img className="userprofile-uploadimg" src={uploadPfpIcon} style={{filter: getFilter()}}/>
                         </label>
@@ -387,16 +416,22 @@ const UserProfilePage: React.FunctionComponent = (props) => {
                         <span className="userprofile-text">Download Pixiv ID: <span className="userprofile-text-action" onClick={downloadPixivID}>{session.downloadPixivID ? "Yes" : "No"}</span></span>
                     </div>
                     <div className="userprofile-row">
-                        <span className="userprofile-text">Upscaled Images: <span className="userprofile-text-action" onClick={upscaledImages}>{session.upscaledImages ? "Yes" : "No"}</span></span>
+                        <img className="userprofile-icon" src={premiumStar}/>
+                        <span style={{color: "var(--premiumColor)"}} className="userprofile-text">Upscaled Images: <span style={{color: "var(--premiumColor)"}} className="userprofile-text-action" onClick={upscaledImages}>{session.upscaledImages ? "Yes" : "No"}</span></span>
                     </div>
                     <div className="userprofile-row">
-                        <span className="userprofile-text">Autosearch Interval: </span>
-                        <input className="userprofile-input" spellCheck={false} value={interval} onChange={(event) => setInterval(event.target.value)}
+                        <img className="userprofile-icon" src={premiumStar}/>
+                        <span style={{color: "var(--premiumColor)"}} className="userprofile-text">Autosearch Interval: </span>
+                        <input style={{color: "var(--premiumColor)"}} className="userprofile-input" spellCheck={false} value={interval} onChange={(event) => setInterval(event.target.value)}
                         onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}></input>
                     </div>
-                    <Link to="/change-username" className="userprofile-row">
-                        <span className="userprofile-link">Change Username</span>
-                    </Link>
+                    <div onClick={clearPfp} className="userprofile-row">
+                        <span className="userprofile-link">Clear Pfp</span>
+                    </div>
+                    <div onClick={changeUsername} className="userprofile-row">
+                        <img className="userprofile-icon" src={premiumStar} style={{height: "14px", marginRight: "5px"}}/>
+                        <span style={{color: "var(--premiumColor)"}} className="userprofile-link">Change Username</span>
+                    </div>
                     <Link to="/change-email" className="userprofile-row">
                         <span className="userprofile-link">Change Email</span>
                     </Link>
@@ -422,6 +457,7 @@ const UserProfilePage: React.FunctionComponent = (props) => {
                         <CommentCarousel comments={comments}/>
                     </div> : null}
                     <div className="userprofile-row">
+                        <img className="userprofile-icon" src={danger}/>
                         <span className="userprofile-link" onClick={deleteAccountDialog}>Delete Account</span>
                     </div>
                 </div>

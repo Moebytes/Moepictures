@@ -21,6 +21,7 @@ import PageDialog from "../dialogs/PageDialog"
 import adminCrown from "../assets/icons/admin-crown.png"
 import modCrown from "../assets/icons/mod-crown.png"
 import systemCrown from "../assets/icons/system-crown.png"
+import premiumStar from "../assets/icons/premiumStar.png"
 import editOptIcon from "../assets/icons/edit-opt.png"
 import deleteOptIcon from "../assets/icons/delete-opt.png"
 import quoteOptIcon from "../assets/icons/quote-opt.png"
@@ -417,6 +418,13 @@ const MessagePage: React.FunctionComponent<Props> = (props) => {
                 <div className="mail-message-username-container" onClick={creatorClick} onAuxClick={creatorClick}>
                 <span className="mail-message-user-text system-color">{functions.toProperCase(message.creator)}</span>
                     <img className="mail-message-user-label" src={systemCrown}/>
+                </div>
+            )
+        } else if (message.role === "premium") {
+            return (
+                <div className="mail-message-username-container" onClick={creatorClick} onAuxClick={creatorClick}>
+                <span className="mail-message-user-text premium-color">{functions.toProperCase(message.creator)}</span>
+                    <img className="mail-message-user-label" src={premiumStar}/>
                 </div>
             )
         }

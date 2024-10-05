@@ -3,9 +3,9 @@ import {useHistory} from "react-router-dom"
 import {HashLink as Link} from "react-router-hash-link"
 import Slider from "react-slider"
 import {ThemeContext, HideSidebarContext, HideNavbarContext, HideSortbarContext, ActiveDropdownContext, ScrollContext,
-SizeTypeContext, BrightnessContext, ContrastContext, HueContext, SaturationContext, LightnessContext, SiteHueContext,
+SizeTypeContext, BrightnessContext, ContrastContext, HueContext, SaturationContext, LightnessContext, SiteHueContext, PremiumRequiredContext,
 BlurContext, SharpenContext, EnableDragContext, FilterDropActiveContext, SquareContext, PixelateContext, SiteLightnessContext,
-ShowDownloadDialogContext, HideTitlebarContext, ImageTypeContext, RestrictTypeContext, SortTypeContext, SiteSaturationContext,
+ShowDownloadDialogContext, HideTitlebarContext, ImageTypeContext, RestrictTypeContext, SortTypeContext, SortReverseContext, SiteSaturationContext,
 StyleTypeContext, SpeedContext, ReverseContext, MobileContext, RelativeContext, SessionContext, MobileScrollingContext, SessionFlagContext,
 SelectionModeContext, SelectionItemsContext, SearchFlagContext, DownloadIDsContext, DownloadFlagContext, ShowBulkQuickEditDialogContext} from "../Context"
 import leftArrow from "../assets/icons/leftArrow.png"
@@ -32,6 +32,7 @@ import chibi from "../assets/icons/chibi.png"
 import filters from "../assets/icons/filters.png"
 import size from "../assets/icons/size.png"
 import sort from "../assets/icons/sort.png"
+import sortRev from "../assets/icons/sort-reverse.png"
 import brightnessIcon from "../assets/icons/brightness.png"
 import contrastIcon from "../assets/icons/contrast.png"
 import hueIcon from "../assets/icons/hue.png"
@@ -66,6 +67,7 @@ const SortBar: React.FunctionComponent = (props) => {
     const {enableDrag, setEnableDrag} = useContext(EnableDragContext)
     const {activeDropdown, setActiveDropdown} = useContext(ActiveDropdownContext)
     const {filterDropActive, setFilterDropActive} = useContext(FilterDropActiveContext)
+    const {premiumRequired, setPremiumRequired} = useContext(PremiumRequiredContext)
     const {square, setSquare} = useContext(SquareContext)
     const {brightness, setBrightness} = useContext(BrightnessContext)
     const {contrast, setContrast} = useContext(ContrastContext)
@@ -85,6 +87,7 @@ const SortBar: React.FunctionComponent = (props) => {
     const {styleType, setStyleType} = useContext(StyleTypeContext)
     const {sizeType, setSizeType} = useContext(SizeTypeContext)
     const {sortType, setSortType} = useContext(SortTypeContext)
+    const {sortReverse, setSortReverse} = useContext(SortReverseContext)
     const {speed, setSpeed} = useContext(SpeedContext)
     const {reverse, setReverse} = useContext(ReverseContext)
     const {mobile, setMobile} = useContext(MobileContext)
@@ -121,6 +124,7 @@ const SortBar: React.FunctionComponent = (props) => {
         const savedStyle = localStorage.getItem("style")
         const savedSize = localStorage.getItem("size")
         const savedSort = localStorage.getItem("sort")
+        const savedSortReverse = localStorage.getItem("sortReverse")
         const savedSquare = localStorage.getItem("square")
         const savedScroll = localStorage.getItem("scroll")
         if (savedType) setImageType(savedType)
@@ -128,6 +132,7 @@ const SortBar: React.FunctionComponent = (props) => {
         if (savedStyle) setStyleType(savedStyle)
         if (savedSize) setSizeType(savedSize)
         if (savedSort) setSortType(savedSort)
+        if (savedSortReverse) setSortReverse(savedSortReverse === "true")
         if (savedSquare) setSquare(savedSquare === "true")
         if (savedScroll) setScroll(savedScroll === "true")
 
@@ -196,7 +201,8 @@ const SortBar: React.FunctionComponent = (props) => {
         localStorage.setItem("style", styleType)
         localStorage.setItem("size", sizeType)
         localStorage.setItem("sort", sortType)
-    }, [imageType, restrictType, styleType, sizeType, sortType])
+        localStorage.setItem("sortReverse", sortReverse)
+    }, [imageType, restrictType, styleType, sizeType, sortType, sortReverse])
 
     const hideTheSidebar = () => {
         setHideSidebar((prev: boolean) => {
@@ -355,6 +361,7 @@ const SortBar: React.FunctionComponent = (props) => {
         if (restrictType === "safe") offset = -30
         if (restrictType === "questionable") offset = 0
         if (restrictType === "explicit") offset = -20
+        if (!session.username) offset += 23
         return `${raw + offset}px`
     }
 
@@ -467,29 +474,28 @@ const SortBar: React.FunctionComponent = (props) => {
         if (!rect || mobile) return "0px"
         const raw = window.innerWidth - rect.right
         let offset = 0
-        if (sortType === "random") offset = -45
+        if (sortType === "random") offset = -30
         if (sortType === "date") offset = -30
-        if (sortType === "reverse date") offset = -20
         if (sortType === "drawn") offset = -30
-        if (sortType === "reverse drawn") offset = -20
-        if (sortType === "cuteness") offset = -45
-        if (sortType === "reverse cuteness") offset = -10
-        if (sortType === "favorites") offset = -45
-        if (sortType === "reverse favorites") offset = -10
-        if (sortType === "tagcount") offset = -45
-        if (sortType === "reverse tagcount") offset = -10
-        if (sortType === "filesize") offset = -45
-        if (sortType === "reverse filesize") offset = -10
-        if (sortType === "bookmarks") offset = -45
-        if (sortType === "reverse bookmarks") offset = -10
+        if (sortType === "cuteness") offset = -25
+        if (sortType === "favorites") offset = -20
+        if (sortType === "bookmarks") offset = -10
+        if (sortType === "tagcount") offset = -30
+        if (sortType === "filesize") offset = -30
+        if (!session.username) offset += 10
         return `${raw + offset}px`
     }
 
     const getSortJSX = () => {
+        const getSort = () => {
+            if (sortType === "bookmarks") return "Bookmarks ★"
+            if (sortType === "favorites") return "Favorites ✧"
+            return functions.toProperCase(sortType)
+        }
         return (
-            <div className="sortbar-item" ref={sortRef} onClick={() => {setActiveDropdown(activeDropdown === "sort" ? "none" : "sort"); setFilterDropActive(false)}}>
-                <img className="sortbar-img" src={sort} style={{filter: getFilter()}}/>
-                <span className="sortbar-text">{functions.toProperCase(sortType)}</span>
+            <div className="sortbar-item" ref={sortRef}>
+                <img className="sortbar-img" src={sortReverse ? sortRev : sort} style={{filter: getFilter()}} onClick={() => setSortReverse((prev: boolean) => !prev)}/>
+                <span className="sortbar-text" onClick={() => {setActiveDropdown(activeDropdown === "sort" ? "none" : "sort"); setFilterDropActive(false)}}>{getSort()}</span>
             </div>
         )
     }
@@ -638,7 +644,7 @@ const SortBar: React.FunctionComponent = (props) => {
             await functions.post("/api/favorite/toggle", {postID}, session, setSessionFlag)
         }
         setSelectionMode(false)
-        if (sortType === "favorites" || sortType === "reverse favorites") setSearchFlag(true)
+        if (sortType === "favorites") setSearchFlag(true)
         setTimeout(() => {
             setSelectionMode(true)
         }, 200)
@@ -665,6 +671,13 @@ const SortBar: React.FunctionComponent = (props) => {
     const bulkQuickEdit = () => {
         setShowBulkQuickEditDialog((prev: boolean) => !prev)
     }
+
+    const changeSortType = (sortType: string) => {
+        if (sortType === "bookmarks") {
+            if (!permissions.isPremium(session)) return setPremiumRequired(true)
+        }
+        setSortType(sortType)
+    }
  
     let sortBarJSX = () => {
         if (mobile) return (
@@ -680,7 +693,7 @@ const SortBar: React.FunctionComponent = (props) => {
                 <img className="sortbar-img" src={getSpeed()}/> */}
                 <img style={{height: "30px", filter: getFilter()}} className="sortbar-img" src={filters} onClick={() => toggleFilterDrop()}/>
                 <img style={{height: "30px", filter: getFilter()}} className="sortbar-img" src={size} onClick={() => {setActiveDropdown(activeDropdown === "size" ? "none" : "size"); setFilterDropActive(false)}}/>
-                <img style={{height: "30px", filter: getFilter()}} className="sortbar-img" src={sort} onClick={() => {setActiveDropdown(activeDropdown === "sort" ? "none" : "sort"); setFilterDropActive(false)}}/>
+                <img style={{height: "30px", filter: getFilter()}} className="sortbar-img" src={sortReverse ? sortRev : sort} onClick={() => {setActiveDropdown(activeDropdown === "sort" ? "none" : "sort"); setFilterDropActive(false)}}/>
             </div>
         )
         return (
@@ -807,10 +820,10 @@ const SortBar: React.FunctionComponent = (props) => {
                     <img className="sortbar-dropdown-img" src={safe} style={{filter: getFilter()}}/>
                     <span className="sortbar-dropdown-text">Safe</span>
                 </div>
-                <div className="sortbar-dropdown-row" onClick={() => setRestrictType("questionable")}>
+                {session.username ? <div className="sortbar-dropdown-row" onClick={() => setRestrictType("questionable")}>
                     <img className="sortbar-dropdown-img" src={questionable} style={{filter: getFilter()}}/>
                     <span className="sortbar-dropdown-text">Questionable</span>
-                </div>
+                </div> : null}
                 {permissions.isElevated(session) ?
                 <div className="sortbar-dropdown-row" onClick={() => setRestrictType("explicit")}>
                     <img className="sortbar-dropdown-img" src={explicit} style={{filter: getFilter()}}/>
@@ -871,52 +884,31 @@ const SortBar: React.FunctionComponent = (props) => {
             </div>
             <div className={`dropdown-right ${activeDropdown === "sort" ? "" : "hide-dropdown"}`} 
             style={{marginRight: getSortMargin(), top: `${dropTop}px`}} onClick={() => setActiveDropdown("none")}>
-                <div className="sortbar-dropdown-row" onClick={() => setSortType("random")}>
+                <div className="sortbar-dropdown-row" onClick={() => changeSortType("random")}>
                     <span className="sortbar-dropdown-text">Random</span>
                 </div>
-                <div className="sortbar-dropdown-row" onClick={() => setSortType("date")}>
+                <div className="sortbar-dropdown-row" onClick={() => changeSortType("date")}>
                     <span className="sortbar-dropdown-text">Date</span>
                 </div>
-                <div className="sortbar-dropdown-row" onClick={() => setSortType("reverse date")}>
-                    <span className="sortbar-dropdown-text">Reverse Date</span>
-                </div>
-                <div className="sortbar-dropdown-row" onClick={() => setSortType("drawn")}>
+                <div className="sortbar-dropdown-row" onClick={() => changeSortType("drawn")}>
                     <span className="sortbar-dropdown-text">Drawn</span>
                 </div>
-                <div className="sortbar-dropdown-row" onClick={() => setSortType("reverse drawn")}>
-                    <span className="sortbar-dropdown-text">Reverse Drawn</span>
-                </div>
-                <div className="sortbar-dropdown-row" onClick={() => setSortType("bookmarks")}>
-                    <span className="sortbar-dropdown-text">Bookmarks</span>
-                </div>
-                <div className="sortbar-dropdown-row" onClick={() => setSortType("reverse bookmarks")}>
-                    <span className="sortbar-dropdown-text">Reverse Bookmarks</span>
-                </div>
+                {session.username ? <div className="sortbar-dropdown-row" onClick={() => changeSortType("bookmarks")}>
+                    <span className="sortbar-dropdown-text">Bookmarks ★</span>
+                </div> : null}
                 {session.username ? <>
-                <div className="sortbar-dropdown-row" onClick={() => setSortType("favorites")}>
-                    <span className="sortbar-dropdown-text">Favorites</span>
-                </div> 
-                <div className="sortbar-dropdown-row" onClick={() => setSortType("reverse favorites")}>
-                    <span className="sortbar-dropdown-text">Reverse Favorites</span>
-                </div> 
+                <div className="sortbar-dropdown-row" onClick={() => changeSortType("favorites")}>
+                    <span className="sortbar-dropdown-text">Favorites ✧</span>
+                </div>
                 </> : null}
-                <div className="sortbar-dropdown-row" onClick={() => setSortType("cuteness")}>
+                <div className="sortbar-dropdown-row" onClick={() => changeSortType("cuteness")}>
                     <span className="sortbar-dropdown-text">Cuteness</span>
                 </div>
-                <div className="sortbar-dropdown-row" onClick={() => setSortType("reverse cuteness")}>
-                    <span className="sortbar-dropdown-text">Reverse Cuteness</span>
-                </div>
-                <div className="sortbar-dropdown-row" onClick={() => setSortType("tagcount")}>
+                <div className="sortbar-dropdown-row" onClick={() => changeSortType("tagcount")}>
                     <span className="sortbar-dropdown-text">Tagcount</span>
                 </div>
-                <div className="sortbar-dropdown-row" onClick={() => setSortType("reverse tagcount")}>
-                    <span className="sortbar-dropdown-text">Reverse Tagcount</span>
-                </div>
-                <div className="sortbar-dropdown-row" onClick={() => setSortType("filesize")}>
+                <div className="sortbar-dropdown-row" onClick={() => changeSortType("filesize")}>
                     <span className="sortbar-dropdown-text">Filesize</span>
-                </div>
-                <div className="sortbar-dropdown-row" onClick={() => setSortType("reverse filesize")}>
-                    <span className="sortbar-dropdown-text">Reverse Filesize</span>
                 </div>
             </div>
             <div className={`dropdown-right ${activeDropdown === "filters" ? "" : "hide-dropdown"}`} 

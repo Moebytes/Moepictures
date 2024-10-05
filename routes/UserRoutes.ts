@@ -7,6 +7,7 @@ import crypto from "crypto"
 import functions from "../structures/Functions"
 import jsxFunctions from "../structures/JSXFunctions"
 import serverFunctions, {authenticate, keyGenerator, handler} from "../structures/ServerFunctions"
+import permissions from "../structures/Permissions"
 import path from "path"
 
 const signupLimiter = rateLimit({
@@ -227,7 +228,7 @@ const UserRoutes = (app: Express) => {
         }
     })
 
-    app.post("/api/user/updatepfp", authenticate, userLimiter, async (req: Request, res: Response) => {
+    app.post("/api/user/pfp", authenticate, userLimiter, async (req: Request, res: Response) => {
         try {
             const bytes = req.body.bytes
             const postID = req.body.postID
@@ -238,7 +239,10 @@ const UserRoutes = (app: Express) => {
             const webp = result?.mime === "image/webp"
             const avif = result?.mime === "image/avif"
             const gif = result?.mime === "image/gif"
-            if (jpg || png || webp || avif || gif) {
+            if (gif || webp || avif) {
+                if (!permissions.isPremium(req.session)) return res.status(402).send("Premium only")
+            }
+            if (jpg || png || gif || webp || avif) {
                 if (req.session.image) {
                     let oldImagePath = functions.getTagPath("pfp", req.session.image)
                     await serverFunctions.deleteFile(oldImagePath).catch(() => null)
@@ -252,10 +256,28 @@ const UserRoutes = (app: Express) => {
                 if (postID) await sql.user.updateUser(req.session.username, "imagePost", postID)
                 req.session.image = filename
                 if (postID) req.session.imagePost = postID
-                res.status(200).send("Success")
+                res.status(201).send("Success")
             } else {
                 res.status(400).send("Bad request")
             }
+        } catch (e) {
+            console.log(e)
+            res.status(400).send("Bad request")
+        }
+    })
+
+    app.delete("/api/user/pfp", authenticate, userLimiter, async (req: Request, res: Response) => {
+        try {
+            if (!req.session.username) return res.status(403).send("Unauthorized")
+            if (req.session.image) {
+                let oldImagePath = functions.getTagPath("pfp", req.session.image)
+                await serverFunctions.deleteFile(oldImagePath).catch(() => null)
+            }
+            await sql.user.updateUser(req.session.username, "image", null)
+            await sql.user.updateUser(req.session.username, "imagePost", null)
+            req.session.image = null
+            req.session.imagePost = null
+            res.status(200).send("Success")
         } catch (e) {
             console.log(e)
             res.status(400).send("Bad request")
@@ -357,9 +379,15 @@ const UserRoutes = (app: Express) => {
 
     app.post("/api/user/upscaledimages", authenticate, sessionLimiter, async (req: Request, res: Response) => {
         try {
+            const {reset} = req.body
             if (!req.session.username) return res.status(403).send("Unauthorized")
             const user = await sql.user.user(req.session.username)
             if (!user) return res.status(400).send("Bad username")
+            if (reset) {
+                await sql.user.updateUser(req.session.username, "upscaledImages", false)
+                return res.status(200).send("Success")
+            }
+            if (!permissions.isPremium(req.session)) return res.status(402).send("Premium only")
             const newUpscaledImages = !Boolean(user.upscaledImages)
             req.session.upscaledImages = newUpscaledImages 
             await sql.user.updateUser(req.session.username, "upscaledImages", newUpscaledImages)
@@ -375,6 +403,7 @@ const UserRoutes = (app: Express) => {
             let {newUsername, captchaResponse} = req.body
             if (!req.session.username) return res.status(403).send("Unauthorized")
             if (req.session.captchaAnswer !== captchaResponse?.trim()) return res.status(400).send("Bad captchaResponse")
+            if (!permissions.isPremium(req.session)) return res.status(402).send("Premium only")
             newUsername = newUsername.trim().toLowerCase()
             const badUsername = functions.validateUsername(newUsername)
             if (badUsername) return res.status(400).send("Bad username")
@@ -847,6 +876,34 @@ const UserRoutes = (app: Express) => {
         }
     })
 
+    app.post("/api/user/promote", authenticate, userLimiter, async (req: Request, res: Response) => {
+        try {
+            const {username, role} = req.body
+            if (!username) return res.status(400).send("Bad username")
+            if (role !== "admin" && role !== "mod" && role !== "premium" && role !== "user") return res.status(400).send("Bad role")
+            if (!req.session.username) return res.status(403).send("Unauthorized")
+            if (req.session.role !== "admin") return res.status(403).end()
+            const user = await sql.user.user(username)
+            if (!user) return res.status(400).send("Bad username")
+            
+            await sql.user.updateUser(username, "role", role)
+            if (role === "admin") {
+                const message = `You have been promoted to the role of admin. You now have access to all special privileges, including deleting posts and promoting others.`
+                await serverFunctions.systemMessage(username, "Notice: Your account was promoted to admin", message)
+            } else if (role === "mod") {
+                const message = `You have been promoted to the role of moderator. You now have access to the mod queue where you approve posts and can take moderation actions such as banning users.`
+                await serverFunctions.systemMessage(username, "Notice: Your account was promoted to mod", message)
+            } else if (role === "premium") {
+                const message = `Your account has been promoted to premium. You can now access all the premium features. Thank you for supporting us!`
+                await serverFunctions.systemMessage(username, "Notice: Your account was promoted to premium", message)
+            }
+            res.status(200).send("Success")
+        } catch (e) {
+            console.log(e)
+            res.status(400).send("Bad request")
+        }
+    })
+
     app.get("/api/user/checkmail", authenticate, userLimiter, async (req: Request, res: Response) => {
         try {
             if (!req.session.username) return res.status(403).send("Unauthorized")
@@ -862,6 +919,7 @@ const UserRoutes = (app: Express) => {
         try {
             const offset = req.query.offset as string
             if (!req.session.username) return res.status(403).send("Unauthorized")
+            if (!permissions.isPremium(req.session)) return res.status(402).send("Premium only")
             const result = await sql.history.userSearchHistory(req.session.username, offset)
             res.status(200).json(result)
         } catch (e) {

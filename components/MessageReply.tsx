@@ -13,6 +13,7 @@ import permissions from "../structures/Permissions"
 import adminCrown from "../assets/icons/admin-crown.png"
 import modCrown from "../assets/icons/mod-crown.png"
 import systemCrown from "../assets/icons/system-crown.png"
+import premiumStar from "../assets/icons/premiumStar.png"
 import jsxFunctions from "../structures/JSXFunctions"
 import "./styles/reply.less"
 
@@ -205,6 +206,13 @@ const MessageReply: React.FunctionComponent<Props> = (props) => {
                 <div className="reply-username-container" onClick={userClick} onAuxClick={userClick}>
                 <span className="reply-user-text system-color">{functions.toProperCase(props.reply?.creator)}</span>
                     <img className="reply-user-label" src={systemCrown}/>
+                </div>
+            )
+        } else if (props.reply?.role === "premium") {
+            return (
+                <div className="reply-username-container" onClick={userClick} onAuxClick={userClick}>
+                <span className="reply-user-text premium-color">{functions.toProperCase(props.reply?.creator)}</span>
+                    <img className="reply-user-label" src={premiumStar}/>
                 </div>
             )
         }

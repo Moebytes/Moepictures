@@ -7,6 +7,7 @@ import functions from "../structures/Functions"
 import adminCrown from "../assets/icons/admin-crown.png"
 import modCrown from "../assets/icons/mod-crown.png"
 import systemCrown from "../assets/icons/system-crown.png"
+import premiumStar from "../assets/icons/premiumStar.png"
 import softDelete from "../assets/icons/soft-delete.png"
 import unread from "../assets/icons/unread.png"
 import read from "../assets/icons/read.png"
@@ -148,6 +149,14 @@ const Message: React.FunctionComponent<Props> = (props) => {
                     <img className="message-user-label" src={systemCrown}/>
                 </div>
             )
+        } else if (creatorData?.role === "premium") {
+            return (
+                <div className="message-username-container" onClick={creatorPage} onAuxClick={creatorPage}>
+                    <img draggable={false} src={getCreatorPFP()} className="message-user-img" onClick={creatorImgClick} onAuxClick={creatorImgClick} style={{filter: creatorDefaultIcon ? getFilter() : ""}}/>
+                    <span className="message-user-text premium-color">{functions.toProperCase(props.message.creator)}</span>
+                    <img className="message-user-label" src={premiumStar}/>
+                </div>
+            )
         }
         return (
             <div className="message-username-container" onClick={creatorPage} onAuxClick={creatorPage}>
@@ -180,6 +189,14 @@ const Message: React.FunctionComponent<Props> = (props) => {
                 <img draggable={false} src={getRecipientPFP()} className="message-user-img" onClick={recipientImgClick} onAuxClick={recipientImgClick} style={{filter: recipientDefaultIcon ? getFilter() : ""}}/>
                     <span className="message-user-text system-color">{functions.toProperCase(props.message.recipient)}</span>
                     <img className="message-user-label" src={systemCrown}/>
+                </div>
+            )
+        } else if (recipientData?.role === "premium") {
+            return (
+                <div className="message-username-container" onClick={(event) => recipientPage(event)} onAuxClick={(event) => recipientPage(event)}>
+                <img draggable={false} src={getRecipientPFP()} className="message-user-img" onClick={recipientImgClick} onAuxClick={recipientImgClick} style={{filter: recipientDefaultIcon ? getFilter() : ""}}/>
+                    <span className="message-user-text premium-color">{functions.toProperCase(props.message.recipient)}</span>
+                    <img className="message-user-label" src={premiumStar}/>
                 </div>
             )
         }

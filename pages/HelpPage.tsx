@@ -16,6 +16,8 @@ import $3dPlayerImg from "../assets/misc/3dplayer.png"
 import favoritesImg from "../assets/misc/favorites.png"
 import cutenessMeterImg from "../assets/misc/cutenessmeter.png"
 import translationsImg from "../assets/misc/translations.png"
+import uploadImg from "../assets/misc/upload.png"
+import taggingImg from "../assets/misc/tagging.png"
 import searchingImg from "../assets/misc/searching.png"
 import imageSearchingImg from "../assets/misc/imagesearching.png"
 import upscalingImg from "../assets/misc/upscaling.png"
@@ -247,7 +249,8 @@ const HelpPage: React.FunctionComponent = (props) => {
                     ⇾ No AI/bot generated works. We only want art with human love and passion. <br/>
                     ⇾ No paid rewards. Please support artists for their hard work.
                     </span>
-                </span></>
+                </span>
+                <div className="help-img-container"><img className="help-img" src={uploadImg}/></div></>
             )
         }
         if (helpTab === "tagging") {
@@ -269,7 +272,8 @@ const HelpPage: React.FunctionComponent = (props) => {
                     ⇾ Environment (daytime, nighttime, sunrise, sunset, snow, rain, fog, etc). <br/>
                     ⇾ Special Tags (text, transparent, translated, no-audio, with-audio, etc). <br/>
                     </span>
-                </span></>
+                </span>
+                <div className="help-img-container"><img className="help-img" src={taggingImg}/></div></>
             )
         }
         if (helpTab === "upscaling") {
@@ -297,9 +301,6 @@ const HelpPage: React.FunctionComponent = (props) => {
 
                     You can download the app that we use for compressing here: <br/>
                     <a className="help-link" onClick={() => openLink("https://github.com/Moebits/Image-Compressor/releases")}>https://github.com/Moebits/Image-Compressor/releases</a><br/><br/>
-
-                    For re-encoding videos, you can use handbrake: <br/>
-                    <a className="help-link" onClick={() => openLink("https://handbrake.fr/")}>https://handbrake.fr/</a><br/><br/>
 
                     These are the recommended formats for each type of post: <br/>
                     <span className="help-alt">

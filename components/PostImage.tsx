@@ -2,10 +2,11 @@ import React, {useContext, useEffect, useRef, useState, useReducer} from "react"
 import {ThemeContext, EnableDragContext, BrightnessContext, ContrastContext, HueContext, SaturationContext, LightnessContext,
 BlurContext, SharpenContext, PixelateContext, DownloadFlagContext, DownloadIDsContext, DisableZoomContext, SpeedContext,
 ReverseContext, MobileContext, TranslationModeContext, TranslationDrawingEnabledContext, SessionContext, SiteHueContext,
-SiteLightnessContext, SiteSaturationContext, ImageExpandContext, SessionFlagContext, FormatContext} from "../Context"
+SiteLightnessContext, SiteSaturationContext, ImageExpandContext, SessionFlagContext, FormatContext, PremiumRequiredContext} from "../Context"
 import {HashLink as Link} from "react-router-hash-link"
 import {createFFmpeg, fetchFile} from "@ffmpeg/ffmpeg"
 import functions from "../structures/Functions"
+import permissions from "../structures/Permissions"
 import cryptoFunctions from "../structures/CryptoFunctions"
 import loading from "../assets/icons/loading.gif"
 import Slider from "react-slider"
@@ -84,6 +85,7 @@ const PostImage: React.FunctionComponent<Props> = (props) => {
     const {disableZoom, setDisableZoom} = useContext(DisableZoomContext)
     const {translationMode, setTranslationMode} = useContext(TranslationModeContext)
     const {translationDrawingEnabled, setTranslationDrawingEnabled} = useContext(TranslationDrawingEnabledContext)
+    const {premiumRequired, setPremiumRequired} = useContext(PremiumRequiredContext)
     const {mobile, setMobile} = useContext(MobileContext)
     const {imageExpand, setImageExpand} = useContext(ImageExpandContext)
     const {format, setFormat} = useContext(FormatContext)
@@ -1234,8 +1236,12 @@ const PostImage: React.FunctionComponent<Props> = (props) => {
     }
 
     const toggleUpscale = async () => {
-        await functions.post("/api/user/upscaledimages", null, session, setSessionFlag)
-        setSessionFlag(true)
+        if (permissions.isPremium(session)) {
+            await functions.post("/api/user/upscaledimages", null, session, setSessionFlag)
+            setSessionFlag(true)
+        } else {
+            setPremiumRequired(true)
+        }
     }
 
     return (
