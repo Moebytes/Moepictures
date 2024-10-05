@@ -1,7 +1,7 @@
 import React, {useContext, useEffect, useRef, useState} from "react"
 import {ThemeContext, EnableDragContext, BrightnessContext, ContrastContext, HueContext, SaturationContext, LightnessContext,
 BlurContext, SharpenContext, PixelateContext, SessionContext, MobileContext, TranslationModeContext, SiteHueContext,
-SiteLightnessContext, SiteSaturationContext, SessionFlagContext} from "../Context"
+SiteLightnessContext, SiteSaturationContext, SessionFlagContext, FormatContext} from "../Context"
 import {HashLink as Link} from "react-router-hash-link"
 import functions from "../structures/Functions"
 import Slider from "react-slider"
@@ -19,6 +19,7 @@ import sharpenIcon from "../assets/icons/sharpen.png"
 import pixelateIcon from "../assets/icons/pixelate.png"
 import nextIcon from "../assets/icons/next.png"
 import prevIcon from "../assets/icons/prev.png"
+import cryptoFunctions from "../structures/CryptoFunctions"
 import "./styles/postimageoptions.less"
 
 interface Props {
@@ -53,8 +54,11 @@ const PostImageOptions: React.FunctionComponent<Props> = (props) => {
     const {mobile, setMobile} = useContext(MobileContext)
     const [favorited, setFavorited] = useState(false)
     const [showFilterDropdown, setShowFilterDropdown] = useState(false)
+    const [showFormatDropdown, setShowFormatDropdown] = useState(false)
     const [downloadText, setDownloadText] = useState("")
+    const {format, setFormat} = useContext(FormatContext)
     const filterRef = useRef(null) as any
+    const formatRef = useRef(null) as any
 
     const getFilter = () => {
         return `hue-rotate(${siteHue - 180}deg) saturate(${siteSaturation}%) brightness(${siteLightness + 70}%)`
@@ -64,11 +68,14 @@ const PostImageOptions: React.FunctionComponent<Props> = (props) => {
         getFavorite()
         const savedDownloadText = localStorage.getItem("downloadText")
         if (savedDownloadText) setDownloadText(savedDownloadText)
+        const savedFormat = localStorage.getItem("format")
+        if (savedFormat) setFormat(savedFormat)
     }, [])
 
     useEffect(() => {
         localStorage.setItem("downloadText", downloadText)
-    }, [downloadText])
+        localStorage.setItem("format", format)
+    }, [downloadText, format])
 
     useEffect(() => {
         const getDLText = async () => {
@@ -161,11 +168,69 @@ const PostImageOptions: React.FunctionComponent<Props> = (props) => {
         return `${raw + offset}px`
     }
 
+    const getFormatMarginRight = () => {
+        if (typeof document === "undefined") return "0px"
+        const rect = formatRef.current?.getBoundingClientRect()
+        if (!rect) return "0px"
+        const raw = window.innerWidth - rect.right
+        let offset = -20
+        if (format === "png") offset += 2
+        if (format === "webp") offset += 8
+        if (format === "avif") offset += 4
+        if (format === "svg") offset += 1
+        if (mobile) offset += 0
+        return `${raw + offset}px`
+    }
+
+    const getFormatMarginTop = () => {
+        if (typeof document === "undefined") return "0px"
+        let elementName = ".post-image-box"
+        if (props.model) elementName = ".post-model-box"
+        if (props.audio) elementName = ".post-song-box"
+        if (translationMode) elementName = ".translation-editor"
+        const bodyRect = document.querySelector(elementName)?.getBoundingClientRect()
+        const rect = formatRef.current?.getBoundingClientRect()
+        if (!rect || !bodyRect) return "0px"
+        const raw = bodyRect.bottom - rect.bottom
+        let offset = -150
+        if (mobile) offset += 0
+        return `${raw + offset}px`
+    }
+
     const updateFavorite = async (value: boolean) => {
         if (!props.post || !session.username) return
         await functions.post("/api/favorite/update", {postID: props.post.postID, favorited: value}, session, setSessionFlag)
         setFavorited(value)
     }
+
+    const closeDropdowns = () => {
+        setShowFilterDropdown(false)
+        setShowFormatDropdown(false)
+    }
+
+    const toggleDropdown = (dropdown: string) => {
+        if (dropdown === "format") {
+            if (showFormatDropdown) {
+                setShowFormatDropdown(false)
+            } else {
+                closeDropdowns()
+                setShowFormatDropdown(true)
+            }
+        }
+        if (dropdown === "filter") {
+            if (showFilterDropdown) {
+                setShowFilterDropdown(false)
+            } else {
+                closeDropdowns()
+                setShowFilterDropdown(true)
+            }
+        }
+    }
+
+    useEffect(() => {
+        if (showFormatDropdown) setShowFilterDropdown(false)
+        if (showFilterDropdown) setShowFormatDropdown(false)
+    }, [showFormatDropdown, showFilterDropdown])
 
     return (
         <div className="post-image-options-container">
@@ -190,7 +255,8 @@ const PostImageOptions: React.FunctionComponent<Props> = (props) => {
                     <img className="post-image-icon" src={download} style={{filter: getFilter()}}/>
                     <div className="post-image-text">Download</div>
                 </div>
-                <div className="post-image-options-box" ref={filterRef} onClick={() => setShowFilterDropdown((prev) => !prev)} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
+                {props.post.type === "image" ? <button className="post-image-button" ref={formatRef} onClick={() => toggleDropdown("format")}>{String(format).toUpperCase()}</button> : null}
+                <div className="post-image-options-box" ref={filterRef} onClick={() => toggleDropdown("filter")} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                     <img className="post-image-icon" src={filters} style={{filter: getFilter()}}/>
                     <div className="post-image-text">Filters</div>
                 </div>
@@ -216,7 +282,8 @@ const PostImageOptions: React.FunctionComponent<Props> = (props) => {
                         <img className="post-image-icon" src={download} style={{filter: getFilter()}}/>
                         <div className="post-image-text">Download</div>
                     </div>
-                    <div className="post-image-options-box" ref={filterRef} onClick={() => setShowFilterDropdown((prev) => !prev)} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
+                {props.post.type === "image" ? <button className="post-image-button" ref={formatRef} onClick={() => toggleDropdown("format")}>{String(format).toUpperCase()}</button> : null}
+                    <div className="post-image-options-box" ref={filterRef} onClick={() => toggleDropdown("filter")} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                         <img className="post-image-icon" src={filters} style={{filter: getFilter()}}/>
                         <div className="post-image-text">Filters</div>
                     </div>
@@ -226,6 +293,15 @@ const PostImageOptions: React.FunctionComponent<Props> = (props) => {
                     </div>
                 </div>
             </div>}
+            <div className={`format-dropdown ${showFormatDropdown ? "" : "hide-format-dropdown"}`} style={{marginRight: getFormatMarginRight(), marginTop: getFormatMarginTop()}}
+            onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
+                <button className="format-dropdown-button" onClick={() => {setFormat("jpg"); setShowFormatDropdown(false)}}>JPG</button>
+                <button className="format-dropdown-button" onClick={() => {setFormat("png"); setShowFormatDropdown(false)}}>PNG</button>
+                <button className="format-dropdown-button" onClick={() => {setFormat("webp"); setShowFormatDropdown(false)}}>WEBP</button>
+                <button className="format-dropdown-button" onClick={() => {setFormat("avif"); setShowFormatDropdown(false)}}>AVIF</button>
+                <button className="format-dropdown-button" onClick={() => {setFormat("jxl"); setShowFormatDropdown(false)}}>JXL</button>
+                <button className="format-dropdown-button" onClick={() => {setFormat("svg"); setShowFormatDropdown(false)}}>SVG</button>
+            </div>
             <div className={`post-dropdown ${showFilterDropdown ? "" : "hide-post-dropdown"}`}
             style={{marginRight: getFilterMarginRight(), marginTop: getFilterMarginTop()}}>
                 <div className="post-dropdown-row filters-row">

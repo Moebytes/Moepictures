@@ -2,7 +2,7 @@ import React, {useContext, useEffect, useRef, useState, useReducer} from "react"
 import {ThemeContext, EnableDragContext, BrightnessContext, ContrastContext, HueContext, SaturationContext, LightnessContext,
 BlurContext, SharpenContext, PixelateContext, DownloadFlagContext, DownloadIDsContext, DisableZoomContext, SpeedContext,
 ReverseContext, MobileContext, TranslationModeContext, TranslationDrawingEnabledContext, SessionContext, SiteHueContext,
-SiteLightnessContext, SiteSaturationContext, ImageExpandContext, SessionFlagContext} from "../Context"
+SiteLightnessContext, SiteSaturationContext, ImageExpandContext, SessionFlagContext, FormatContext} from "../Context"
 import {HashLink as Link} from "react-router-hash-link"
 import {createFFmpeg, fetchFile} from "@ffmpeg/ffmpeg"
 import functions from "../structures/Functions"
@@ -86,6 +86,7 @@ const PostImage: React.FunctionComponent<Props> = (props) => {
     const {translationDrawingEnabled, setTranslationDrawingEnabled} = useContext(TranslationDrawingEnabledContext)
     const {mobile, setMobile} = useContext(MobileContext)
     const {imageExpand, setImageExpand} = useContext(ImageExpandContext)
+    const {format, setFormat} = useContext(FormatContext)
     const [showSpeedDropdown, setShowSpeedDropdown] = useState(false)
     const [showVolumeSlider, setShowVolumeSlider] = useState(false)
     const containerRef = useRef<HTMLDivElement>(null)
@@ -886,7 +887,7 @@ const PostImage: React.FunctionComponent<Props> = (props) => {
             const img = ctx.getImageData(0, 0, canvas.width, canvas.height)
             return img.data.buffer
         }
-        return canvas.toDataURL("image/jpeg")
+        return canvas.toDataURL("image/png")
     }
 
     const filtersOn = () => {
@@ -920,11 +921,11 @@ const PostImage: React.FunctionComponent<Props> = (props) => {
             }
         } else {
             if (image) {
-                // @ts-ignore
                 return cryptoFunctions.decryptedLink(image)
             } else {
                 return cryptoFunctions.decryptedLink(props.img)
             }
+
         }
     }
 
@@ -1046,7 +1047,11 @@ const PostImage: React.FunctionComponent<Props> = (props) => {
                         pageName = `${props.post.link.match(/\d+/g)?.[0]}_p${i}${path.extname(page)}`
                     }
                     const decryptedPage = await cryptoFunctions.decryptedLink(page)
-                    const image = await renderImage(decryptedPage)
+                    let image = await renderImage(decryptedPage)
+                    if (filtersOn() || path.extname(pageName) !== `.${format}`) {
+                        image = await functions.convertToFormat(image, format)
+                    }
+                    pageName = path.basename(pageName, path.extname(pageName)) + `.${format}`
                     const data = await fetch(image).then((r) => r.arrayBuffer())
                     zip.file(decodeURIComponent(pageName), data, {binary: true})
                 }
@@ -1059,7 +1064,11 @@ const PostImage: React.FunctionComponent<Props> = (props) => {
                 functions.download(downloadName , url)
                 window.URL.revokeObjectURL(url)
             } else {
-                const image = await renderImage()
+                let image = await renderImage()
+                if (filtersOn() || path.extname(filename) !== `.${format}`) {
+                    image = await functions.convertToFormat(image, format)
+                }
+                filename = path.basename(filename, path.extname(filename)) + `.${format}`
                 functions.download(filename, image)
                 window.URL.revokeObjectURL(image)
             }
@@ -1074,7 +1083,7 @@ const PostImage: React.FunctionComponent<Props> = (props) => {
                 setDownloadFlag(false)
             }
         }
-    }, [downloadFlag])
+    }, [downloadFlag, session, format])
 
     const controlMouseEnter = () => {
         if (imageControls.current) imageControls.current.style.opacity = "1"

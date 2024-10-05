@@ -2,7 +2,7 @@ import React, {useContext, useEffect, useRef, useState, forwardRef, useImperativ
 import {useHistory} from "react-router-dom"
 import loading from "../assets/icons/loading.gif"
 import {ThemeContext, SizeTypeContext, BrightnessContext, SessionContext, SessionFlagContext, ContrastContext, HueContext, SaturationContext, LightnessContext, MobileContext, ScrollYContext,
-BlurContext, SharpenContext, SquareContext, PixelateContext, DownloadFlagContext, DownloadIDsContext, SpeedContext, ReverseContext, ScrollContext, ActiveDropdownContext,
+BlurContext, SharpenContext, SquareContext, PixelateContext, DownloadFlagContext, DownloadIDsContext, SpeedContext, ReverseContext, ScrollContext, ActiveDropdownContext, FormatContext,
 ToolTipXContext, ToolTipYContext, ToolTipEnabledContext, ToolTipPostContext, ToolTipImgContext, SelectionModeContext, SelectionItemsContext, SelectionPostsContext} from "../Context"
 import {HashLink as Link} from "react-router-hash-link"
 import gifFrames from "gif-frames"
@@ -60,6 +60,7 @@ const GridImage = forwardRef<Ref, Props>((props, componentRef) => {
     const {selectionPosts, setSelectionPosts} = useContext(SelectionPostsContext) as {selectionPosts: Map<string, any>, setSelectionPosts: any}
     const {session, setSession} = useContext(SessionContext)
     const {sessionFlag, setSessionFlag} = useContext(SessionFlagContext)
+    const {format, setFormat} = useContext(FormatContext)
     const containerRef = useRef<HTMLDivElement>(null)
     const pixelateRef = useRef<HTMLCanvasElement>(null)
     const overlayRef = useRef<HTMLImageElement>(null)
@@ -687,32 +688,81 @@ const GridImage = forwardRef<Ref, Props>((props, componentRef) => {
         return canvas.toDataURL("image/jpeg")
     }
 
-    const multiRender = async () => {
-        if (gifData || functions.isGIF(props.img) || functions.isVideo(props.img)) {
-            functions.download(path.basename(props.img), props.img)
+    const filtersOn = () => {
+        if ((brightness !== 100) ||
+            (contrast !== 100) ||
+            (hue !== 180) ||
+            (saturation !== 100) ||
+            (lightness !== 100) ||
+            (blur !== 0) ||
+            (sharpen !== 0) ||
+            (pixelate !== 1)) {
+                return true 
+            } else {
+                return false
+            }
+    }
+
+    const renderImage = async (image?: string) => {
+        if (filtersOn()) {
+            if (image) {
+                const decrypted = await cryptoFunctions.decryptedLink(image)
+                const img = await functions.createImage(decrypted)
+                return render(img)
+            } else {
+                return render(ref.current)
+            }
         } else {
-            if (props.comicPages) {
+            if (image) {
+                return cryptoFunctions.decryptedLink(image)
+            } else {
+                return cryptoFunctions.decryptedLink(props.img.replace(/thumbnail\/\d+\//, ""))
+            }
+
+        }
+    }
+
+    const multiRender = async () => {
+        let filename = path.basename(props.img).replace(/\?.*$/, "")
+        if (session.downloadPixivID && props.post?.link?.includes("pixiv.net")) {
+            filename = props.post.link.match(/\d+/g)?.[0] + path.extname(props.img).replace(/\?.*$/, "")
+        }
+        if (gifData || functions.isGIF(props.img) || functions.isVideo(props.img)) {
+            functions.download(filename, props.img)
+        } else {
+            if (props.comicPages?.length > 1) {
                 const zip = new JSZip()
                 for (let i = 0; i < props.comicPages.length; i++) {
                     const page = props.comicPages[i]
+                    let pageName = path.basename(page).replace(/\?.*$/, "")
+                    if (session.downloadPixivID && props.post?.link?.includes("pixiv.net")) {
+                        pageName = `${props.post.link.match(/\d+/g)?.[0]}_p${i}${path.extname(page)}`
+                    }
                     const decryptedPage = await cryptoFunctions.decryptedLink(page)
-                    const img = await functions.createImage(decryptedPage)
-                    const image = await render(img)
+                    let image = await renderImage(decryptedPage)
+                    if (filtersOn() || path.extname(pageName) !== `.${format}`) {
+                        image = await functions.convertToFormat(image, format)
+                    }
+                    pageName = path.basename(pageName, path.extname(pageName)) + `.${format}`
                     const data = await fetch(image).then((r) => r.arrayBuffer())
-                    zip.file(decodeURIComponent(path.basename(page)), data, {binary: true})
+                    zip.file(decodeURIComponent(pageName), data, {binary: true})
                 }
-                const decoded = decodeURIComponent(path.basename(props.img))
+                const decoded = decodeURIComponent(filename)
                 const id = decoded.split("-")[0]
-                const basename = path.basename(decoded.split("-")[2], path.extname(decoded.split("-")[2]))
-                const filename = `${id}-${basename}.zip`
+                const basename = path.basename(decoded.split("-")[2] ?? "", path.extname(decoded.split("-")[2] ?? ""))
+                const downloadName = basename ? `${id}-${basename}.zip` : `${path.basename(filename, path.extname(filename))}.zip`
                 const blob = await zip.generateAsync({type: "blob"})
                 const url = window.URL.createObjectURL(blob)
-                functions.download(filename , url)
+                functions.download(downloadName , url)
                 window.URL.revokeObjectURL(url)
             } else {
-                const url = await cryptoFunctions.decryptedLink(props.img.replace(/thumbnail\/\d+\//, ""))
-                const img = await functions.createImage(url)
-                functions.download(path.basename(props.img), render(img))
+                let image = await renderImage(props.img.replace(/thumbnail\/\d+\//, ""))
+                if (filtersOn() || path.extname(filename) !== `.${format}`) {
+                    image = await functions.convertToFormat(image, format)
+                }
+                filename = path.basename(filename, path.extname(filename)) + `.${format}`
+                functions.download(filename, image)
+                window.URL.revokeObjectURL(image)
             }
         }
     }
@@ -725,7 +775,7 @@ const GridImage = forwardRef<Ref, Props>((props, componentRef) => {
                 setDownloadFlag(false)
             }
         }
-    }, [downloadFlag])
+    }, [downloadFlag, session, format])
 
     const onClick = (event: React.MouseEvent<HTMLElement>) => {
         //if (activeDropdown !== "none") return

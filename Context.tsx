@@ -175,6 +175,7 @@ export const DeleteSearchHistoryIDContext = React.createContext<any>(null)
 export const DeleteSearchHistoryFlagContext = React.createContext<any>(null)
 export const HistoryPageContext = React.createContext<any>(null)
 export const ShowDeleteAllHistoryDialogContext = React.createContext<any>(null)
+export const FormatContext = React.createContext<any>(null)
 
 const Context: React.FunctionComponent = (props) => {
     const [siteHue, setSiteHue] = useState(180)
@@ -335,9 +336,11 @@ const Context: React.FunctionComponent = (props) => {
     const [deleteSearchHistoryID, setDeleteSearchHistoryID] = useState(null)
     const [deleteSearchHistoryFlag, setDeleteSearchHistoryFlag] = useState(null)
     const [showDeleteAllHistoryDialog, setShowDeleteAllHistoryDialog] = useState(false)
+    const [format, setFormat] = useState("jpg")
 
 return (
     <>
+        <FormatContext.Provider value={{format, setFormat}}>
         <ShowDeleteAllHistoryDialogContext.Provider value={{showDeleteAllHistoryDialog, setShowDeleteAllHistoryDialog}}>
         <HistoryPageContext.Provider value={{historyPage, setHistoryPage}}>
         <DeleteSearchHistoryFlagContext.Provider value={{deleteSearchHistoryFlag, setDeleteSearchHistoryFlag}}>
@@ -655,6 +658,7 @@ return (
         </DeleteSearchHistoryFlagContext.Provider>
         </HistoryPageContext.Provider>
         </ShowDeleteAllHistoryDialogContext.Provider>
+        </FormatContext.Provider>
     </>
     )
 }

@@ -11,6 +11,7 @@ const path = require("path")
 const Dotenv = require("dotenv-webpack")
 let exclude = [/node_modules/, /dist/]
 let webExclude = [...exclude, /server.tsx/, /routes/]
+let nodeExclude = [...exclude, /structures\/BrowserFunctions.tsx/]
 
 module.exports = [
   {
@@ -20,7 +21,9 @@ module.exports = [
     node: {__dirname: false},
     output: {publicPath: "/", globalObject: "this", filename: "script.js", chunkFilename: "[name].js", path: path.resolve(__dirname, "./dist")},
     resolve: {extensions: [".js", ".jsx", ".ts", ".tsx"], alias: {"react-dom$": "react-dom/profiling", "scheduler/tracing": "scheduler/tracing-profiling"}, 
-    fallback: {fs: false, "process/browser": require.resolve("process/browser"), path: require.resolve("path-browserify"), crypto: require.resolve("crypto-browserify"), stream: require.resolve("stream-browserify"), assert: require.resolve("assert/"), zlib: require.resolve("browserify-zlib")}},
+    fallback: {fs: false, "process/browser": require.resolve("process/browser"), path: require.resolve("path-browserify"), 
+    crypto: require.resolve("crypto-browserify"), stream: require.resolve("stream-browserify"), assert: require.resolve("assert/"), 
+    zlib: require.resolve("browserify-zlib"), url: require.resolve("url/"), os: require.resolve("os/")}},
     performance: {hints: false},
     optimization: {minimize: false, minimizer: [new TerserJSPlugin({extractComments: false}), new WebpackObfuscator(), new MinimizerCSSPlugin()], moduleIds: "named",
     splitChunks: {chunks(chunk) {return false}}},
@@ -54,7 +57,9 @@ module.exports = [
         patterns: [
           {from: "structures/bitcrusher.js", to: "[name][ext]"},
           {from: "structures/soundtouch.js", to: "[name][ext]"},
-          {from: "structures/webpxmux.wasm", to: "[name][ext]"}
+          {from: "structures/webpxmux.wasm", to: "[name][ext]"},
+          {from: "structures/avif_enc.wasm", to: "[name][ext]"},
+          {from: "structures/jxl_enc.wasm", to: "[name][ext]"}
         ]
       })
     ]
@@ -72,12 +77,12 @@ module.exports = [
     optimization: {minimize: false, minimizer: [new TerserJSPlugin({extractComments: false}), new WebpackObfuscator()], moduleIds: "named"},
     module: {
       rules: [
-        {test: /\.(jpe?g|png|webp|gif|svg|mp3|wav|mp4|webm|glb|obj|fbx|ttf|otf)$/, exclude, use: [{loader: "file-loader", options: {name: "[path][name].[ext]"}}]},
-        {test: /\.(txt|sql)$/, exclude, use: ["raw-loader"]},
-        {test: /\.html$/, exclude, use: [{loader: "html-loader", options: {minimize: false}}]},
-        {test: /\.css$/, exclude, use: [{loader: MiniCssExtractPlugin.loader}, "css-loader"]},
-        {test: /\.less$/, exclude, use: [{loader: MiniCssExtractPlugin.loader}, "css-loader", {loader: "less-loader"}]},
-        {test: /\.(tsx?|jsx?)$/, exclude, use: [{loader: "ts-loader", options: {transpileOnly: true}}]}
+        {test: /\.(jpe?g|png|webp|gif|svg|mp3|wav|mp4|webm|glb|obj|fbx|ttf|otf)$/, exclude: nodeExclude, use: [{loader: "file-loader", options: {name: "[path][name].[ext]"}}]},
+        {test: /\.(txt|sql)$/, exclude: nodeExclude, use: ["raw-loader"]},
+        {test: /\.html$/, exclude: nodeExclude, use: [{loader: "html-loader", options: {minimize: false}}]},
+        {test: /\.css$/, exclude: nodeExclude, use: [{loader: MiniCssExtractPlugin.loader}, "css-loader"]},
+        {test: /\.less$/, exclude: nodeExclude, use: [{loader: MiniCssExtractPlugin.loader}, "css-loader", {loader: "less-loader"}]},
+        {test: /\.(tsx?|jsx?)$/, exclude: nodeExclude, use: [{loader: "ts-loader", options: {transpileOnly: true}}]}
       ]
     },
     plugins: [

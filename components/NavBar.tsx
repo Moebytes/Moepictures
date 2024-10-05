@@ -26,6 +26,7 @@ import functions from "../structures/Functions"
 import SearchSuggestions from "./SearchSuggestions"
 import scrollIcon from "../assets/icons/scroll.png"
 import pageIcon from "../assets/icons/page.png"
+import premiumStar from "../assets/icons/premiumStar.png"
 import Slider from "react-slider"
 import {ThemeContext, HideNavbarContext, HideSortbarContext, HideSidebarContext, EnableDragContext,  HideMobileNavbarContext, MobileContext,
 RelativeContext, HideTitlebarContext, SearchContext, SearchFlagContext, SessionContext, SessionFlagContext, UserImgContext, SiteHueContext,
@@ -316,6 +317,7 @@ const NavBar: React.FunctionComponent<Props> = (props) => {
                     <span className="mobile-nav-text" onClick={() => {history.push("/help"); setHideMobileNavbar(true)}}>Help</span>
                     <span className="mobile-nav-text" onClick={() => {history.push("/terms"); setHideMobileNavbar(true)}}>Terms</span>
                     <span className="mobile-nav-text" onClick={() => {history.push("/contact"); setHideMobileNavbar(true)}}>Contact</span>
+                    <img className="mobile-nav-img" onClick={() => {history.push("/premium"); setHideMobileNavbar(true)}} src={premiumStar}/>
                 </div>
                 <div className="mobile-nav-color-container">
                     {session.username ? <img className="nav-color" src={getHistoryIcon()} onClick={() => history.push("/history")} style={{filter: getFilter()}}/> : null}
@@ -379,7 +381,8 @@ const NavBar: React.FunctionComponent<Props> = (props) => {
                     <span style={{marginRight: marginR}} className="nav-text" onClick={() => history.push("/series")}>Series</span>
                     <span style={{marginRight: marginR}} className="nav-text" onClick={() => history.push("/tags")}>Tags</span>
                     <span style={{marginRight: marginR}} className="nav-text" onClick={() => history.push("/forum")}>Forum</span>
-                    <span style={{marginRight: "0px"}} className="nav-text" onClick={() => history.push("/help")}>Help</span>
+                    <span style={{marginRight: marginR}} className="nav-text" onClick={() => history.push("/help")}>Help</span>
+                    <img style={{marginRight: "0px", marginTop: "2px"}} className="nav-img" onClick={() => history.push("/premium")} src={premiumStar}/>
                 </div>
                 <div className="nav-color-container">
                     <div className={`nav-search-container ${!hideSidebar ? "hide-nav-search" : ""}`}>
