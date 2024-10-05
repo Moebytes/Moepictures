@@ -10,6 +10,7 @@ import {HideNavbarContext, HideSidebarContext, RelativeContext, HideTitlebarCont
 MobileContext, EnableDragContext, SessionContext} from "../Context"
 import CaptchaDialog from "../dialogs/CaptchaDialog"
 import premiumStar from "../assets/icons/premiumStar.png"
+import premiumImg from "../assets/misc/premiumupgrade.png"
 import upscaledImg from "../assets/misc/upscaled.png"
 import bookmarksImg from "../assets/misc/bookmarks.png"
 import historyImg from "../assets/misc/history.png"
@@ -101,7 +102,8 @@ const HelpPage: React.FunctionComponent = (props) => {
                     our hosting and storage costs. <br/><br/>
 
                     All of the premium features are listed on the left.
-                </span></>
+                </span>
+                <div className="premium-img-container"><img className="premium-img" src={premiumImg}/></div></>
             )
         }
         if (premiumFeature === "upscaled-images") {

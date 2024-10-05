@@ -336,13 +336,10 @@ const SeriesPage: React.FunctionComponent = (props) => {
         if (!rect) return "0px"
         const raw = window.innerWidth - rect.right
         let offset = 0
-        if (sortType === "random") offset = -50
-        if (sortType === "cuteness") offset = -50
-        if (sortType === "reverse cuteness") offset = -20
-        if (sortType === "posts") offset = -55
-        if (sortType === "reverse posts") offset = -25
-        if (sortType === "alphabetic") offset = -35
-        if (sortType === "reverse alphabetic") offset = -10
+        if (sortType === "random") offset = -25
+        if (sortType === "cuteness") offset = -25
+        if (sortType === "posts") offset = -30
+        if (sortType === "alphabetic") offset = -10
         return `${raw + offset}px`
     }
 

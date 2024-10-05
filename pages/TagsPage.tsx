@@ -342,17 +342,12 @@ const TagsPage: React.FunctionComponent = (props) => {
         if (!rect) return "0px"
         const raw = window.innerWidth - rect.right
         let offset = 0
-        if (sortType === "random") offset = -50
-        if (sortType === "date") offset = -65
-        if (sortType === "reverse date") offset = -35
-        if (sortType === "alphabetic") offset = -45
-        if (sortType === "reverse alphabetic") offset = -20
-        if (sortType === "posts") offset = -65
-        if (sortType === "reverse posts") offset = -35
-        if (sortType === "image") offset = -60
-        if (sortType === "reverse image") offset = -30
-        if (sortType === "aliases") offset = -60
-        if (sortType === "reverse aliases") offset = -30
+        if (sortType === "random") offset = -15
+        if (sortType === "date") offset = -30
+        if (sortType === "alphabetic") offset = -10
+        if (sortType === "posts") offset = -30
+        if (sortType === "image") offset = -25
+        if (sortType === "aliases") offset = -25
         return `${raw + offset}px`
     }
 

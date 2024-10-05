@@ -372,9 +372,8 @@ const MailPage: React.FunctionComponent = (props) => {
         if (!rect) return "0px"
         const raw = window.innerWidth - rect.right
         let offset = 0
-        if (sortType === "random") offset = -40
-        if (sortType === "date") offset = -45
-        if (sortType === "reverse date") offset = -15
+        if (sortType === "random") offset = -15
+        if (sortType === "date") offset = -20
         return `${raw + offset}px`
     }
 
