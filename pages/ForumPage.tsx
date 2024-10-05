@@ -9,6 +9,7 @@ import DragAndDrop from "../components/DragAndDrop"
 import search from "../assets/icons/search.png"
 import searchIconHover from "../assets/icons/search-hover.png"
 import sort from "../assets/icons/sort.png"
+import sortRev from "../assets/icons/sort-reverse.png"
 import Thread from "../components/Thread"
 import NewThreadDialog from "../dialogs/NewThreadDialog"
 import {ThemeContext, EnableDragContext, HideNavbarContext, HideSidebarContext, MobileContext, SessionContext,
@@ -46,6 +47,7 @@ const ForumPage: React.FunctionComponent = (props) => {
     const {session, setSession} = useContext(SessionContext)
     const {sessionFlag, setSessionFlag} = useContext(SessionFlagContext)
     const [sortType, setSortType] = useState("date")
+    const [sortReverse, setSortReverse] = useState(false)
     const [threads, setThreads] = useState([]) as any
     const [searchQuery, setSearchQuery] = useState("")
     const [index, setIndex] = useState(0)
@@ -87,7 +89,7 @@ const ForumPage: React.FunctionComponent = (props) => {
     }
 
     const updateThreads = async (query?: string) => {
-        const result = await functions.get("/api/search/threads", {sort: sortType, query: query ? query : searchQuery}, session, setSessionFlag)
+        const result = await functions.get("/api/search/threads", {sort: functions.parseSort(sortType, sortReverse), query: query ? query : searchQuery}, session, setSessionFlag)
         setEnded(false)
         setIndex(0)
         setVisibleThreads([])
@@ -126,7 +128,7 @@ const ForumPage: React.FunctionComponent = (props) => {
 
     useEffect(() => {
         updateThreads()
-    }, [sortType, session])
+    }, [sortType, sortReverse, session])
 
     const getPageAmount = () => {
         return scroll ? 15 : 50
@@ -161,7 +163,7 @@ const ForumPage: React.FunctionComponent = (props) => {
                 }
             }
         }
-        let result = await functions.get("/api/search/threads", {sort: sortType, query: searchQuery, offset: newOffset}, session, setSessionFlag)
+        let result = await functions.get("/api/search/threads", {sort: functions.parseSort(sortType, sortReverse), query: searchQuery, offset: newOffset}, session, setSessionFlag)
         let hasMore = result?.length >= 100
         const cleanThreads = threads.filter((t: any) => !t.fake)
         if (!scroll) {
@@ -208,7 +210,7 @@ const ForumPage: React.FunctionComponent = (props) => {
         return () => {
             window.removeEventListener("scroll", scrollHandler)
         }
-    }, [scroll, visibleThreads, index, session])
+    }, [scroll, visibleThreads, index, session, sortType, sortReverse])
 
     useEffect(() => {
         window.scrollTo(0, 0)
@@ -242,7 +244,7 @@ const ForumPage: React.FunctionComponent = (props) => {
             }
         }
         if (!scroll) updatePageOffset()
-    }, [scroll, threads, forumPage, ended, session])
+    }, [scroll, threads, forumPage, ended, session, sortType, sortReverse])
 
     useEffect(() => {
         if (searchQuery) {
@@ -357,9 +359,9 @@ const ForumPage: React.FunctionComponent = (props) => {
 
     const getSortJSX = () => {
         return (
-            <div className="itemsort-item" ref={sortRef} onClick={() => {setActiveDropdown(activeDropdown === "sort" ? "none" : "sort")}}>
-                <img className="itemsort-img" src={sort} style={{filter: getFilter()}}/>
-                <span className="itemsort-text">{functions.toProperCase(sortType)}</span>
+            <div className="itemsort-item" ref={sortRef}>
+                <img className="itemsort-img" src={sortReverse ? sortRev : sort} style={{filter: getFilter()}} onClick={() => setSortReverse((prev: boolean) => !prev)}/>
+                <span className="itemsort-text" onClick={() => {setActiveDropdown(activeDropdown === "sort" ? "none" : "sort")}}>{functions.toProperCase(sortType)}</span>
             </div>
         )
     }
@@ -444,9 +446,6 @@ const ForumPage: React.FunctionComponent = (props) => {
                             </div>
                             <div className="item-dropdown-row" onClick={() => setSortType("date")}>
                                 <span className="item-dropdown-text">Date</span>
-                            </div>
-                            <div className="item-dropdown-row" onClick={() => setSortType("reverse date")}>
-                                <span className="item-dropdown-text">Reverse Date</span>
                             </div>
                         </div>
                     </div>

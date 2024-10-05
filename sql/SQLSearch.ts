@@ -68,6 +68,7 @@ export default class SQLSearch {
         }
         let limitValue = i
         if (limit) {
+            if (Number(limit) > 100) limit = "100"
             values.push(limit)
             i++
         }
@@ -279,6 +280,7 @@ export default class SQLSearch {
         }
         let limitValue = i
         if (limit) {
+            if (Number(limit) > 100) limit = "100"
             values.push(limit)
             i++
         }
@@ -313,16 +315,24 @@ export default class SQLSearch {
     }
 
     /** Tag category search */
-    public static tagCategory = async (category: string, sort: string, search?: string, offset?: string) => {
+    public static tagCategory = async (category: string, sort: string, search?: string, limit?: string, offset?: string) => {
         let whereQueries = [] as string[]
+        let values = [] as any
         if (category === "artists") whereQueries.push(`tags.type = 'artist'`)
         if (category === "characters") whereQueries.push(`tags.type = 'character'`)
         if (category === "series") whereQueries.push(`tags.type = 'series'`)
         if (category === "tags") whereQueries.push(`tags.type = 'tag'`)
         let i = 1
         if (search) {
-        whereQueries.push(`lower(tags.tag) LIKE $${i} || '%'`)
-        i++
+            whereQueries.push(`lower(tags.tag) LIKE $${i} || '%'`)
+            values.push(search.toLowerCase())
+            i++
+        }
+        let limitValue = i
+        if (limit) {
+            if (Number(limit) > 25) limit = "25"
+            values.push(limit)
+            i++
         }
         let whereQuery = whereQueries.length ? `AND ${whereQueries.join(" AND ")}` : ""
         let sortQuery = ""
@@ -352,38 +362,46 @@ export default class SQLSearch {
                     JOIN post_json ON post_json."postID" = "tag map"."postID"
                     GROUP BY "tags".tag
                     ${sortQuery}
-                    LIMIT 100 ${offset ? `OFFSET $${i}` : ""}
-            `),
-            values: []
+                    ${limit ? `LIMIT $${limitValue}` : "LIMIT 25"} ${offset ? `OFFSET $${i}` : ""}
+            `)
         }
-        if (search) query.values?.push(search.toLowerCase())
-        if (offset) query.values?.push(offset)
+        if (offset) values.push(offset)
+        if (values?.[0]) query.values = values
         if (sort === "random") {
-        return SQLQuery.run(query)
+            return SQLQuery.run(query)
         } else {
-        return SQLQuery.run(query, true)
+            return SQLQuery.run(query, true)
         }
     }
 
     /** Tag search */
-    public static tagSearch = async (search: string, sort: string, type?: string, offset?: string) => {
+    public static tagSearch = async (search: string, sort: string, type?: string, limit?: string, offset?: string) => {
         let whereArray = [] as string[]
+        let values = [] as any
         let i = 1
         if (search) {
-        whereArray.push( 
-        `(lower(tags.tag) LIKE '%' || $${i} || '%'
-        OR EXISTS (
-        SELECT 1 
-        FROM aliases
-        WHERE aliases.tag = "tags".tag 
-        AND lower(aliases.alias) LIKE '%' || $1 || '%'
-        ))`)
-        i++
+            whereArray.push( 
+            `(lower(tags.tag) LIKE '%' || $${i} || '%'
+            OR EXISTS (
+            SELECT 1 
+            FROM aliases
+            WHERE aliases.tag = "tags".tag 
+            AND lower(aliases.alias) LIKE '%' || $1 || '%'
+            ))`)
+            values.push(search.toLowerCase())
+            i++
         }
         if (type === "all") type = undefined
         if (type) {
-        whereArray.push(`tags.type = $${i}`)
-        i++
+            whereArray.push(`tags.type = $${i}`)
+            values.push(type)
+            i++
+        }
+        let limitValue = i
+        if (limit) {
+            if (Number(limit) > 200) limit = "200"
+            values.push(limit)
+            i++
         }
         let whereQuery = whereArray.length ? `AND ${whereArray.join(" AND ")}` : ""
         let sortQuery = ""
@@ -414,17 +432,15 @@ export default class SQLSearch {
                     JOIN posts ON posts."postID" = "tag map"."postID"
                     GROUP BY "tags".tag
                     ${sortQuery}
-                    LIMIT 100 ${offset ? `OFFSET $${i}` : ""}
-            `),
-            values: []
+                    ${limit ? `LIMIT $${limitValue}` : "LIMIT 100"} ${offset ? `OFFSET $${i}` : ""}
+            `)
         }
-        if (search) query.values?.push(search.toLowerCase())
-        if (type) query.values?.push(type)
-        if (offset) query.values?.push(offset)
+        if (offset) values.push(offset)
+        if (values?.[0]) query.values = values
         if (sort === "random") {
-        return SQLQuery.run(query)
+            return SQLQuery.run(query)
         } else {
-        return SQLQuery.run(query, true)
+            return SQLQuery.run(query, true)
         }
     }
 }

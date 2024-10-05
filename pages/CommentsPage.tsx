@@ -9,6 +9,7 @@ import DragAndDrop from "../components/DragAndDrop"
 import search from "../assets/icons/search.png"
 import searchIconHover from "../assets/icons/search-hover.png"
 import sort from "../assets/icons/sort.png"
+import sortRev from "../assets/icons/sort-reverse.png"
 import CommentRow from "../components/CommentRow"
 import DeleteCommentDialog from "../dialogs/DeleteCommentDialog"
 import EditCommentDialog from "../dialogs/EditCommentDialog"
@@ -47,6 +48,7 @@ const CommentsPage: React.FunctionComponent = (props) => {
     const {session, setSession} = useContext(SessionContext)
     const {sessionFlag, setSessionFlag} = useContext(SessionFlagContext)
     const [sortType, setSortType] = useState("date")
+    const [sortReverse, setSortReverse] = useState(false)
     const [comments, setComments] = useState([]) as any
     const [searchQuery, setSearchQuery] = useState("")
     const [index, setIndex] = useState(0)
@@ -104,7 +106,7 @@ const CommentsPage: React.FunctionComponent = (props) => {
     }
 
     const updateComments = async (query?: string) => {
-        const result = await functions.get("/api/search/comments", {sort: sortType, query: query ? query : searchQuery}, session, setSessionFlag)
+        const result = await functions.get("/api/search/comments", {sort: functions.parseSort(sortType, sortReverse), query: query ? query : searchQuery}, session, setSessionFlag)
         setEnded(false)
         setIndex(0)
         setVisibleComments([])
@@ -143,7 +145,7 @@ const CommentsPage: React.FunctionComponent = (props) => {
 
     useEffect(() => {
         updateComments()
-    }, [sortType, session])
+    }, [sortType, sortReverse, session])
 
     const getPageAmount = () => {
         return scroll ? 15 : 50
@@ -178,7 +180,7 @@ const CommentsPage: React.FunctionComponent = (props) => {
                 }
             }
         }
-        let result = await functions.get("/api/search/comments", {sort: sortType, query: searchQuery, offset: newOffset}, session, setSessionFlag)
+        let result = await functions.get("/api/search/comments", {sort: functions.parseSort(sortType, sortReverse), query: searchQuery, offset: newOffset}, session, setSessionFlag)
         let hasMore = result?.length >= 100
         const cleanComments = comments.filter((t: any) => !t.fake)
         if (!scroll) {
@@ -225,7 +227,7 @@ const CommentsPage: React.FunctionComponent = (props) => {
         return () => {
             window.removeEventListener("scroll", scrollHandler)
         }
-    }, [scroll, visibleComments, index])
+    }, [scroll, visibleComments, index, sortType, sortReverse])
 
     useEffect(() => {
         window.scrollTo(0, 0)
@@ -259,7 +261,7 @@ const CommentsPage: React.FunctionComponent = (props) => {
             }
         }
         if (!scroll) updatePageOffset()
-    }, [scroll, comments, commentsPage, ended])
+    }, [scroll, comments, commentsPage, ended, sortType, sortReverse])
 
     useEffect(() => {
         if (searchQuery) {
@@ -394,9 +396,9 @@ const CommentsPage: React.FunctionComponent = (props) => {
 
     const getSortJSX = () => {
         return (
-            <div className="itemsort-item" ref={sortRef} onClick={() => {setActiveDropdown(activeDropdown === "sort" ? "none" : "sort")}}>
-                <img className="itemsort-img" src={sort} style={{filter: getFilter()}}/>
-                <span className="itemsort-text">{functions.toProperCase(sortType)}</span>
+            <div className="itemsort-item" ref={sortRef}>
+                <img className="itemsort-img" src={sortReverse ? sortRev : sort} style={{filter: getFilter()}} onClick={() => setSortReverse((prev: boolean) => !prev)}/>
+                <span className="itemsort-text" onClick={() => {setActiveDropdown(activeDropdown === "sort" ? "none" : "sort")}}>{functions.toProperCase(sortType)}</span>
             </div>
         )
     }
@@ -471,9 +473,6 @@ const CommentsPage: React.FunctionComponent = (props) => {
                             </div>
                             <div className="item-dropdown-row" onClick={() => setSortType("date")}>
                                 <span className="item-dropdown-text">Date</span>
-                            </div>
-                            <div className="item-dropdown-row" onClick={() => setSortType("reverse date")}>
-                                <span className="item-dropdown-text">Reverse Date</span>
                             </div>
                         </div>
                     </div>

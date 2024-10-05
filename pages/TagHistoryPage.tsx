@@ -1,4 +1,5 @@
 import React, {useEffect, useContext, useState, useRef, useReducer} from "react"
+import {useHistory} from "react-router-dom"
 import TitleBar from "../components/TitleBar"
 import NavBar from "../components/NavBar"
 import SideBar from "../components/SideBar"
@@ -8,7 +9,7 @@ import DragAndDrop from "../components/DragAndDrop"
 import TagHistoryRow from "../components/TagHistoryRow"
 import RevertTagHistoryDialog from "../dialogs/RevertTagHistoryDialog"
 import DeleteTagHistoryDialog from "../dialogs/DeleteTagHistoryDialog"
-import {ThemeContext, EnableDragContext, HideNavbarContext, HideSidebarContext, MobileContext, SessionContext,
+import {ThemeContext, EnableDragContext, HideNavbarContext, HideSidebarContext, MobileContext, SessionContext, RedirectContext,
 RelativeContext, HideTitlebarContext, ActiveDropdownContext, HeaderTextContext, SidebarTextContext, SessionFlagContext} from "../Context"
 import permissions from "../structures/Permissions"
 import matureTags from "../assets/json/mature-tags.json"
@@ -33,12 +34,23 @@ const TagHistoryPage: React.FunctionComponent<Props> = (props) => {
     const {mobile, setMobile} = useContext(MobileContext)
     const {session, setSession} = useContext(SessionContext)
     const {sessionFlag, setSessionFlag} = useContext(SessionFlagContext)
+    const {redirect, setRedirect} = useContext(RedirectContext)
     const [revisions, setRevisions] = useState([]) as any
     const [index, setIndex] = useState(0)
     const [visibleRevisions, setVisibleRevisions] = useState([]) as any
     const [offset, setOffset] = useState(0)
     const [ended, setEnded] = useState(false)
     const tag = props.match?.params.tag
+    const history = useHistory()
+
+    useEffect(() => {
+        if (!session.cookie) return
+        if (!session.username) {
+            setRedirect(tag ? `/tag/history/${tag}` : "/tag/history")
+            history.push("/login")
+            setSidebarText("Login required.")
+        }
+    }, [session])
 
     const updateHistory = async () => {
         let result = [] as any

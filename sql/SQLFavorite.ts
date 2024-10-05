@@ -132,8 +132,9 @@ export default class SQLFavorite {
         }
         let limitValue = i
         if (limit) {
-        values.push(limit)
-        i++
+            if (Number(limit) > 100) limit = "100"
+            values.push(limit)
+            i++
         }
         if (offset) values.push(offset)
         let tagQuery = tagQueryArray.length ? tagQueryArray.join(" AND ") : ""

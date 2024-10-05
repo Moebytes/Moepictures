@@ -89,13 +89,13 @@ const PostHistoryRow: React.FunctionComponent<Props> = (props) => {
             const upscaledCurrentBuffer = await functions.getBuffer(currentImg, {"x-force-upscale": "true"})
 
             if (imgBuffer.byteLength) {
-                const imgMD5 = crypto.createHash("md5").update(Buffer.from(imgBuffer)).digest("hex")
-                const currentMD5 = crypto.createHash("md5").update(Buffer.from(currentBuffer)).digest("hex")
+                const imgMD5 = crypto.createHash("md5").update(Buffer.from(imgBuffer) as any).digest("hex")
+                const currentMD5 = crypto.createHash("md5").update(Buffer.from(currentBuffer) as any).digest("hex")
                 if (imgMD5 !== currentMD5) return true
             }
             if (upscaledImgBuffer.byteLength) {
-                const imgMD5 = crypto.createHash("md5").update(Buffer.from(upscaledImgBuffer)).digest("hex")
-                const currentMD5 = crypto.createHash("md5").update(Buffer.from(upscaledCurrentBuffer)).digest("hex")
+                const imgMD5 = crypto.createHash("md5").update(Buffer.from(upscaledImgBuffer) as any).digest("hex")
+                const currentMD5 = crypto.createHash("md5").update(Buffer.from(upscaledCurrentBuffer) as any).digest("hex")
                 if (imgMD5 !== currentMD5) return true
             }
         }
@@ -358,8 +358,8 @@ const PostHistoryRow: React.FunctionComponent<Props> = (props) => {
             const imgBuffer = await functions.getBuffer(img)
             const previousBuffer = await functions.getBuffer(previous)
 
-            const imgMD5 = crypto.createHash("md5").update(Buffer.from(imgBuffer)).digest("hex")
-            const previousMD5 = crypto.createHash("md5").update(Buffer.from(previousBuffer)).digest("hex")
+            const imgMD5 = crypto.createHash("md5").update(Buffer.from(imgBuffer) as any).digest("hex")
+            const previousMD5 = crypto.createHash("md5").update(Buffer.from(previousBuffer) as any).digest("hex")
 
             if (imgMD5 !== previousMD5) return true
         }

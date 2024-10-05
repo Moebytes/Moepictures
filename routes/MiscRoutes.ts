@@ -269,7 +269,7 @@ const MiscRoutes = (app: Express) => {
     app.post("/api/misc/wdtagger", miscLimiter, async (req: Request, res: Response, next: NextFunction) => {
         try {
             if (!req.body) return res.status(400).send("Image data must be provided")
-            const buffer = Buffer.from(req.body, "binary")
+            const buffer = Buffer.from(req.body, "binary") as any
             const folder = path.join(__dirname, "./dump")
             if (!fs.existsSync(folder)) fs.mkdirSync(folder, {recursive: true})
 

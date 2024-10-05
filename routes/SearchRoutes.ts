@@ -122,7 +122,7 @@ const SearchRoutes = (app: Express) => {
         try {
             const {bytes, useMD5} = req.body
             if (!bytes) return res.status(400).send("Image data must be provided as bytes")
-            const buffer = Buffer.from(Object.values(bytes) as any)
+            const buffer = Buffer.from(Object.values(bytes) as any) as any
             let hash = ""
             if (useMD5) {
                 hash = crypto.createHash("md5").update(buffer).digest("hex")
@@ -157,10 +157,11 @@ const SearchRoutes = (app: Express) => {
         try {
             const query = req.query.query as string
             let sort = req.query.sort as string
+            const limit = req.query.limit as string
             const offset = req.query.offset as string
             if (!functions.validCategorySort(sort)) return res.status(400).send("Invalid sort")
             const search = query?.trim().split(/ +/g).filter(Boolean).join("-")
-            let result = await sql.search.tagCategory("artists", sort, search, offset)
+            let result = await sql.search.tagCategory("artists", sort, search, limit, offset)
             result = functions.stripTags(result)
             res.status(200).json(result)
         } catch (e) {
@@ -173,10 +174,11 @@ const SearchRoutes = (app: Express) => {
         try {
             const query = req.query.query as string
             let sort = req.query.sort as string
+            const limit = req.query.limit as string
             const offset = req.query.offset as string
             if (!functions.validCategorySort(sort)) return res.status(400).send("Invalid sort")
             const search = query?.trim().split(/ +/g).filter(Boolean).join("-")
-            let result = await sql.search.tagCategory("characters", sort, search, offset)
+            let result = await sql.search.tagCategory("characters", sort, search, limit, offset)
             result = functions.stripTags(result)
             res.status(200).json(result)
         } catch (e) {
@@ -189,10 +191,11 @@ const SearchRoutes = (app: Express) => {
         try {
             const query = req.query.query as string
             let sort = req.query.sort as string
+            const limit = req.query.limit as string
             const offset = req.query.offset as string
             if (!functions.validCategorySort(sort)) return res.status(400).send("Invalid sort")
             const search = query?.trim().split(/ +/g).filter(Boolean).join("-")
-            let result = await sql.search.tagCategory("series", sort, search, offset)
+            let result = await sql.search.tagCategory("series", sort, search, limit, offset)
             result = functions.stripTags(result)
             res.status(200).json(result)
         } catch (e) {
@@ -206,11 +209,12 @@ const SearchRoutes = (app: Express) => {
             const query = req.query.query as string
             let sort = req.query.sort as string
             let type = req.query.type as string
+            const limit = req.query.limit as string
             const offset = req.query.offset as string
             if (!functions.validTagSort(sort)) return res.status(400).send("Invalid sort")
             if (!functions.validTagType(type)) return res.status(400).send("Invalid type")
             let search = query?.trim().split(/ +/g).filter(Boolean).join("-") ?? ""
-            let result = await sql.search.tagSearch(search, sort, type, offset)
+            let result = await sql.search.tagSearch(search, sort, type, limit, offset)
             if (req.session.role !== "admin" && req.session.role !== "mod") {
                 result = result.filter((t: any) => !functions.arrayIncludes(t.tag, matureTags, true))
             }
@@ -259,7 +263,7 @@ const SearchRoutes = (app: Express) => {
             if (!type) type = "all"
             if (!functions.validTagType(type)) return res.status(400).send("Invalid type")
             let search = query?.trim().toLowerCase().split(/ +/g).filter(Boolean).join("-") ?? ""
-            let result = await sql.search.tagSearch(search, "posts", type).then((r) => r.slice(0, 10))
+            let result = await sql.search.tagSearch(search, "posts", type, "10").then((r) => r.slice(0, 10))
             if (!result?.[0]) return res.status(200).json([])
             if (req.session.role !== "admin" && req.session.role !== "mod") {
                 result = result.filter((t: any) => !functions.arrayIncludes(t.tag, matureTags, true))
@@ -275,7 +279,7 @@ const SearchRoutes = (app: Express) => {
     app.post("/api/search/sidebartags", searchLimiter, async (req: Request, res: Response, next: NextFunction) => {
         try {
             const {postIDs} = req.body
-            let postArray = Array.from(postIDs) as any
+            let postArray = Array.from(postIDs)?.slice(0, 100) as any
             if (req.session.captchaNeeded) {
                 if (postArray.length === 1) return res.status(200).json([])
                 postArray = []

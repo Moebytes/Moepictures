@@ -20,6 +20,8 @@ interface Props {
     location?: any
 }
 
+let limit = 100
+
 const ImageGrid: React.FunctionComponent<Props> = (props) => {
     const [ignored, forceUpdate] = useReducer(x => x + 1, 0)
     const {theme, setTheme} = useContext(ThemeContext)
@@ -95,7 +97,7 @@ const ImageGrid: React.FunctionComponent<Props> = (props) => {
         setIndex(0)
         setVisiblePosts([])
         setSearch(query)
-        const result = await functions.get("/api/search/posts", {query, type: imageType, restrict: restrictType, style: styleType, sort: functions.parseSort(sortType, sortReverse), limit: 1000}, session, setSessionFlag)
+        const result = await functions.get("/api/search/posts", {query, type: imageType, restrict: restrictType, style: styleType, sort: functions.parseSort(sortType, sortReverse), limit}, session, setSessionFlag)
         setHeaderFlag(true)
         setPosts(result)
         setIsRandomSearch(false)
@@ -108,7 +110,7 @@ const ImageGrid: React.FunctionComponent<Props> = (props) => {
 
     const randomPosts = async (query?: string) => {
         setRandomFlag(false)
-        const result = await functions.get("/api/search/random", {query, type: imageType, restrict: restrictType, style: styleType, limit: 1000}, session, setSessionFlag)
+        const result = await functions.get("/api/search/random", {query, type: imageType, restrict: restrictType, style: styleType, limit}, session, setSessionFlag)
         setEnded(false)
         setIndex(0)
         setVisiblePosts([])
@@ -265,7 +267,7 @@ const ImageGrid: React.FunctionComponent<Props> = (props) => {
     const updateOffset = async () => {
         if (noResults) return
         if (ended) return
-        let newOffset = offset + 1000
+        let newOffset = offset + limit
         let padded = false
         if (!scroll) {
             newOffset = (page - 1) * getPageAmount()
@@ -279,12 +281,12 @@ const ImageGrid: React.FunctionComponent<Props> = (props) => {
         }
         let result = null as any
         if (isRandomSearch) {
-            result = await functions.get("/api/search/random", {type: imageType, restrict: restrictType, style: styleType, limit: 1000, offset: newOffset}, session, setSessionFlag)
+            result = await functions.get("/api/search/random", {type: imageType, restrict: restrictType, style: styleType, limit, offset: newOffset}, session, setSessionFlag)
         } else {
             const query = await functions.parseSpaceEnabledSearch(search, session, setSessionFlag)
-            result = await functions.get("/api/search/posts", {query, type: imageType, restrict: restrictType, style: styleType, sort: functions.parseSort(sortType, sortReverse), limit: 1000, offset: newOffset}, session, setSessionFlag)
+            result = await functions.get("/api/search/posts", {query, type: imageType, restrict: restrictType, style: styleType, sort: functions.parseSort(sortType, sortReverse), limit, offset: newOffset}, session, setSessionFlag)
         }
-        let hasMore = result?.length >= 1000
+        let hasMore = result?.length >= limit
         const cleanPosts = posts.filter((p: any) => !p.fake)
         if (!scroll) {
             if (cleanPosts.length <= newOffset) {

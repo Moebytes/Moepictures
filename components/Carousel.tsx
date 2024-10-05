@@ -24,7 +24,7 @@ let deltaCounter = 0
 let lastDeltaY = 0
 let effectTimer = null as any
 
-const loadAmount = 30
+const loadAmount = 10
 
 const Carousel: React.FunctionComponent<Props> = (props) => {
     const [ignored, forceUpdate] = useReducer(x => x + 1, 0)
@@ -432,8 +432,9 @@ const Carousel: React.FunctionComponent<Props> = (props) => {
 
     const generateJSX = () => {
         const jsx = [] as any
-        for (let i = 0; i < visibleImages.length; i++) {
-            const img = visibleImages[i]
+        let visible = functions.removeDuplicates(visibleImages)
+        for (let i = 0; i < visible.length; i++) {
+            const img = visible[i] as string
             if (functions.isVideo(img)) {
                 jsx.push(<video key={i} autoPlay muted loop disablePictureInPicture ref={imagesRef[i]} className="carousel-img" src={img} onClick={(event) => {props.set?.(img, i, event.ctrlKey || event.metaKey || event.button === 1); setActive(imagesRef[i])}} onAuxClick={(event) => {props.set?.(img, i, event.ctrlKey || event.metaKey || event.button === 1); setActive(imagesRef[i])}} style={props.height ? {height: `${props.height}px`} : {}}></video>)
             } else if (functions.isGIF(img)) {

@@ -38,7 +38,7 @@ const loginSpeedLimiter = slowDown({
 
 const sessionLimiter = rateLimit({
 	windowMs: 60 * 1000,
-	max: 1000,
+	max: 500,
 	message: "Too many requests, try again later.",
 	standardHeaders: true,
 	legacyHeaders: false,
@@ -48,7 +48,7 @@ const sessionLimiter = rateLimit({
 
 const userLimiter = rateLimit({
 	windowMs: 60 * 1000,
-	max: 200,
+	max: 300,
 	message: "Too many requests, try again later.",
 	standardHeaders: true,
 	legacyHeaders: false,

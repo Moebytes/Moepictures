@@ -28,6 +28,7 @@ export default class SQLMessage {
         if (sort === "reverse date") sortQuery = `ORDER BY messages."updatedDate" ASC`
         let limitQuery = "LIMIT 100"
         if (limit) {
+            if (Number(limit) > 100) limit = "100"
             limitQuery = `LIMIT $${i}`
             i++
         }

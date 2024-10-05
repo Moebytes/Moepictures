@@ -192,10 +192,11 @@ export default class Functions {
     public static removeDuplicates = <T>(array: T[]) => {
         const set = new Set<string>()
         return array.filter(item => {
-            if (set.has(JSON.stringify(item))) {
+            const serialized = JSON.stringify(item)
+            if (set.has(serialized)) {
                 return false
             } else {
-                set.add(JSON.stringify(item))
+                set.add(serialized)
                 return true
             }
         })
@@ -1000,7 +1001,7 @@ export default class Functions {
         const buffer = await new Promise<Buffer>((resolve, reject) => {
           stream.on("data", (chunk: Buffer) => chunks.push(Buffer.from(chunk)))
           stream.on("error", (err) => reject(err))
-          stream.on("end", () => resolve(Buffer.concat(chunks)))
+          stream.on("end", () => resolve(Buffer.concat(chunks as any)))
         })
         return buffer
     }
@@ -1587,7 +1588,7 @@ export default class Functions {
         const tagInfo = await mm.parseBuffer(new Uint8Array(buffer))
         const picture = tagInfo.common.picture
         if (picture) {
-            let buffer = new Uint8Array() as Buffer
+            let buffer = new Uint8Array() as any
             for (let i = 0; i < picture.length; i++) {
                 buffer = Buffer.concat([buffer, picture[i].data])
             }

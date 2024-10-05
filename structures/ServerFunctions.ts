@@ -381,10 +381,10 @@ export default class ServerFunctions {
             } else {
                 oldPath = functions.getImagePath(oldImage.type, oldImage.postID, oldImage.order, oldImage.filename)
             }
-            const oldBuffer = await ServerFunctions.getFile(oldPath) as Buffer
+            const oldBuffer = await ServerFunctions.getFile(oldPath) as any
             if (!oldBuffer) continue
             const currentImage = currentImages[i]
-            const currentBuffer = Buffer.from(currentImage.bytes)
+            const currentBuffer = Buffer.from(currentImage.bytes) as any
             const imgMD5 = crypto.createHash("md5").update(oldBuffer).digest("hex")
             const currentMD5 = crypto.createHash("md5").update(currentBuffer).digest("hex")
             if (imgMD5 !== currentMD5) return true
@@ -402,7 +402,7 @@ export default class ServerFunctions {
             } else {
                 oldPath = functions.getImagePath(oldImage.type, oldImage.postID, oldImage.order, oldImage.filename)
             }
-            const oldBuffer = await ServerFunctions.getFile(oldPath) as Buffer
+            const oldBuffer = await ServerFunctions.getFile(oldPath) as any
             if (!oldBuffer) continue
             const currentImage = currentImages[i]
             let currentPath = ""
@@ -411,7 +411,7 @@ export default class ServerFunctions {
             } else {
                 currentPath = functions.getImagePath(currentImage.type, currentImage.postID, currentImage.order, currentImage.filename)
             }
-            const currentBuffer = await ServerFunctions.getUnverifiedFile(currentPath)
+            const currentBuffer = await ServerFunctions.getUnverifiedFile(currentPath) as any
             if (!currentBuffer) continue
             const imgMD5 = crypto.createHash("md5").update(oldBuffer).digest("hex")
             const currentMD5 = crypto.createHash("md5").update(currentBuffer).digest("hex")
@@ -423,8 +423,8 @@ export default class ServerFunctions {
     public static buffersChanged = (oldBuffer: Buffer, currentBuffer: Buffer) => {
         if (!oldBuffer && !currentBuffer) return false
         if (!oldBuffer && currentBuffer) return true
-        const imgMD5 = crypto.createHash("md5").update(oldBuffer).digest("hex")
-        const currentMD5 = crypto.createHash("md5").update(currentBuffer).digest("hex")
+        const imgMD5 = crypto.createHash("md5").update(oldBuffer as any).digest("hex")
+        const currentMD5 = crypto.createHash("md5").update(currentBuffer as any).digest("hex")
         if (imgMD5 !== currentMD5) return true
         return false
     }
@@ -466,7 +466,7 @@ export default class ServerFunctions {
                 const image = post.images[j]
                 const imgPath = functions.getImagePath(image.type, post.postID, image.order, image.filename)
                 console.log(imgPath)
-                const buffer = await ServerFunctions.getFile(imgPath) as Buffer
+                const buffer = await ServerFunctions.getFile(imgPath) as any
                 const md5 = crypto.createHash("md5").update(buffer).digest("hex")
                 console.log(md5)
                 await sql.post.updateImage(image.imageID, "hash", md5)

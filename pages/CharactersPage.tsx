@@ -9,6 +9,7 @@ import DragAndDrop from "../components/DragAndDrop"
 import search from "../assets/icons/search.png"
 import searchIconHover from "../assets/icons/search-hover.png"
 import sort from "../assets/icons/sort.png"
+import sortRev from "../assets/icons/sort-reverse.png"
 import CharacterRow from "../components/CharacterRow"
 import scrollIcon from "../assets/icons/scroll.png"
 import pageIcon from "../assets/icons/page.png"
@@ -18,6 +19,9 @@ import {ThemeContext, EnableDragContext, HideNavbarContext, HideSidebarContext, 
 HideTitlebarContext, ActiveDropdownContext, HeaderTextContext, SidebarTextContext, SiteHueContext, SiteLightnessContext,
 SiteSaturationContext, ScrollContext, CharactersPageContext, ShowPageDialogContext, PageFlagContext, SessionContext, SessionFlagContext} from "../Context"
 import "./styles/itemspage.less"
+
+let limit = 25
+let pageAmount = 7
 
 const CharactersPage: React.FunctionComponent = (props) => {
     const {theme, setTheme} = useContext(ThemeContext)
@@ -40,6 +44,7 @@ const CharactersPage: React.FunctionComponent = (props) => {
     const {session, setSession} = useContext(SessionContext)
     const {sessionFlag, setSessionFlag} = useContext(SessionFlagContext)
     const [sortType, setSortType] = useState("posts")
+    const [sortReverse, setSortReverse] = useState(false)
     const [characters, setCharacters] = useState([]) as any
     const [index, setIndex] = useState(0)
     const [searchQuery, setSearchQuery] = useState("")
@@ -82,7 +87,7 @@ const CharactersPage: React.FunctionComponent = (props) => {
 
     const updateCharacters = async (queryOverride?: string) => {
         let query = queryOverride ? queryOverride : searchQuery
-        const result = await functions.get("/api/search/characters", {sort: sortType, query}, session, setSessionFlag)
+        const result = await functions.get("/api/search/characters", {sort: functions.parseSort(sortType, sortReverse), query, limit}, session, setSessionFlag)
         setEnded(false)
         setIndex(0)
         setVisibleCharacters([])
@@ -111,11 +116,11 @@ const CharactersPage: React.FunctionComponent = (props) => {
 
     useEffect(() => {
         updateCharacters()
-    }, [sortType, session])
+    }, [sortType, sortReverse, session])
 
 
     const getPageAmount = () => {
-        return 15
+        return pageAmount
     }
 
     useEffect(() => {
@@ -135,7 +140,7 @@ const CharactersPage: React.FunctionComponent = (props) => {
 
     const updateOffset = async () => {
         if (ended) return
-        let newOffset = offset + 100
+        let newOffset = offset + limit
         let padded = false
         if (!scroll) {
             newOffset = (charactersPage - 1) * getPageAmount()
@@ -147,8 +152,8 @@ const CharactersPage: React.FunctionComponent = (props) => {
                 }
             }
         }
-        let result = await functions.get("/api/search/characters", {sort: sortType, query: searchQuery, offset: newOffset}, session, setSessionFlag)
-        let hasMore = result?.length >= 100
+        let result = await functions.get("/api/search/characters", {sort: functions.parseSort(sortType, sortReverse), query: searchQuery, limit, offset: newOffset}, session, setSessionFlag)
+        let hasMore = result?.length >= limit
         const cleanCharacters = characters.filter((t: any) => !t.fake)
         if (!scroll) {
             if (cleanCharacters.length <= newOffset) {
@@ -194,7 +199,7 @@ const CharactersPage: React.FunctionComponent = (props) => {
         return () => {
             window.removeEventListener("scroll", scrollHandler)
         }
-    }, [scroll, visibleCharacters, index])
+    }, [scroll, visibleCharacters, index, sortType, sortReverse])
 
     useEffect(() => {
         window.scrollTo(0, 0)
@@ -228,7 +233,7 @@ const CharactersPage: React.FunctionComponent = (props) => {
             }
         }
         if (!scroll) updatePageOffset()
-    }, [scroll, characters, charactersPage, ended])
+    }, [scroll, characters, charactersPage, ended, sortType, sortReverse])
 
     useEffect(() => {
         if (searchQuery) {
@@ -343,9 +348,9 @@ const CharactersPage: React.FunctionComponent = (props) => {
 
     const getSortJSX = () => {
         return (
-            <div className="itemsort-item" ref={sortRef} onClick={() => {setActiveDropdown(activeDropdown === "sort" ? "none" : "sort")}}>
-                <img className="itemsort-img" src={sort} style={{filter: getFilter()}}/>
-                <span className="itemsort-text">{functions.toProperCase(sortType)}</span>
+            <div className="itemsort-item" ref={sortRef}>
+                <img className="itemsort-img" src={sortReverse ? sortRev : sort} style={{filter: getFilter()}} onClick={() => setSortReverse((prev: boolean) => !prev)}/>
+                <span className="itemsort-text" onClick={() => {setActiveDropdown(activeDropdown === "sort" ? "none" : "sort")}}>{functions.toProperCase(sortType)}</span>
             </div>
         )
     }
@@ -418,20 +423,11 @@ const CharactersPage: React.FunctionComponent = (props) => {
                             <div className="item-dropdown-row" onClick={() => setSortType("alphabetic")}>
                                 <span className="item-dropdown-text">Alphabetic</span>
                             </div>
-                            <div className="item-dropdown-row" onClick={() => setSortType("reverse alphabetic")}>
-                                <span className="item-dropdown-text">Reverse Alphabetic</span>
-                            </div>
                             <div className="item-dropdown-row" onClick={() => setSortType("posts")}>
                                 <span className="item-dropdown-text">Posts</span>
                             </div>
-                            <div className="item-dropdown-row" onClick={() => setSortType("reverse posts")}>
-                                <span className="item-dropdown-text">Reverse Posts</span>
-                            </div>
                             <div className="item-dropdown-row" onClick={() => setSortType("cuteness")}>
                                 <span className="item-dropdown-text">Cuteness</span>
-                            </div>
-                            <div className="item-dropdown-row" onClick={() => setSortType("reverse cuteness")}>
-                                <span className="item-dropdown-text">Reverse Cuteness</span>
                             </div>
                         </div>
                     </div>

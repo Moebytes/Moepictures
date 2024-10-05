@@ -216,8 +216,8 @@ const TagHistoryRow: React.FunctionComponent<Props> = (props) => {
         const imgBuffer = await functions.getBuffer(img)
         const previousBuffer = await functions.getBuffer(previous)
 
-        const imgMD5 = crypto.createHash("md5").update(Buffer.from(imgBuffer)).digest("hex")
-        const previousMD5 = crypto.createHash("md5").update(Buffer.from(previousBuffer)).digest("hex")
+        const imgMD5 = crypto.createHash("md5").update(Buffer.from(imgBuffer) as any).digest("hex")
+        const previousMD5 = crypto.createHash("md5").update(Buffer.from(previousBuffer) as any).digest("hex")
 
         if (imgMD5 !== previousMD5) return true
         return false

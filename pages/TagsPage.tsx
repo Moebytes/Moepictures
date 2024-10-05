@@ -9,6 +9,7 @@ import DragAndDrop from "../components/DragAndDrop"
 import search from "../assets/icons/search.png"
 import searchIconHover from "../assets/icons/search-hover.png"
 import sort from "../assets/icons/sort.png"
+import sortRev from "../assets/icons/sort-reverse.png"
 import type from "../assets/icons/all.png"
 import TagRow from "../components/TagRow"
 import AliasTagDialog from "../dialogs/AliasTagDialog"
@@ -24,6 +25,8 @@ import {ThemeContext, EnableDragContext, HideNavbarContext, HideSidebarContext, 
 ActiveDropdownContext, HeaderTextContext, SidebarTextContext, SessionContext, SiteHueContext, SiteLightnessContext, SiteSaturationContext, TagsPageContext,
 ShowPageDialogContext, PageFlagContext, SessionFlagContext} from "../Context"
 import "./styles/itemspage.less"
+
+let limit = 200
 
 const TagsPage: React.FunctionComponent = (props) => {
     const {theme, setTheme} = useContext(ThemeContext)
@@ -46,6 +49,7 @@ const TagsPage: React.FunctionComponent = (props) => {
     const {mobile, setMobile} = useContext(MobileContext)
     const {scroll, setScroll} = useContext(ScrollContext)
     const [sortType, setSortType] = useState("posts")
+    const [sortReverse, setSortReverse] = useState(false)
     const [typeType, setTypeType] = useState("all")
     const [tags, setTags] = useState([]) as any
     const [index, setIndex] = useState(0)
@@ -90,7 +94,7 @@ const TagsPage: React.FunctionComponent = (props) => {
 
     const updateTags = async (queryOverride?: string) => {
         let query = queryOverride ? queryOverride : searchQuery
-        const result = await functions.get("/api/search/tags", {sort: sortType, type: typeType, query}, session, setSessionFlag)
+        const result = await functions.get("/api/search/tags", {sort: functions.parseSort(sortType, sortReverse), type: typeType, query, limit}, session, setSessionFlag)
         setEnded(false)
         setIndex(0)
         setVisibleTags([])
@@ -119,7 +123,7 @@ const TagsPage: React.FunctionComponent = (props) => {
 
     useEffect(() => {
         updateTags()
-    }, [sortType, typeType, session])
+    }, [sortType, sortReverse, typeType, session])
 
     const getPageAmount = () => {
         return scroll ? 15 : 50
@@ -142,7 +146,7 @@ const TagsPage: React.FunctionComponent = (props) => {
 
     const updateOffset = async () => {
         if (ended) return
-        let newOffset = offset + 100
+        let newOffset = offset + limit
         let padded = false
         if (!scroll) {
             newOffset = (tagsPage - 1) * getPageAmount()
@@ -154,8 +158,8 @@ const TagsPage: React.FunctionComponent = (props) => {
                 }
             }
         }
-        let result = await functions.get("/api/search/tags", {sort: sortType, type: typeType, query: searchQuery, offset: newOffset}, session, setSessionFlag)
-        let hasMore = result?.length >= 100
+        let result = await functions.get("/api/search/tags", {sort: functions.parseSort(sortType, sortReverse), type: typeType, query: searchQuery, limit, offset: newOffset}, session, setSessionFlag)
+        let hasMore = result?.length >= limit
         const cleanTags = tags.filter((t: any) => !t.fake)
         if (!scroll) {
             if (cleanTags.length <= newOffset) {
@@ -201,7 +205,7 @@ const TagsPage: React.FunctionComponent = (props) => {
         return () => {
             window.removeEventListener("scroll", scrollHandler)
         }
-    }, [scroll, visibleTags, index, session])
+    }, [scroll, visibleTags, index, session, sortType, sortReverse, typeType])
 
     useEffect(() => {
         window.scrollTo(0, 0)
@@ -235,7 +239,7 @@ const TagsPage: React.FunctionComponent = (props) => {
             }
         }
         if (!scroll) updatePageOffset()
-    }, [scroll, tags, tagsPage, ended, session])
+    }, [scroll, tags, tagsPage, ended, session, sortType, sortReverse, typeType])
 
     useEffect(() => {
         if (searchQuery) {
@@ -367,9 +371,9 @@ const TagsPage: React.FunctionComponent = (props) => {
 
     const getSortJSX = () => {
         return (
-            <div className="itemsort-item" ref={sortRef} onClick={() => {setActiveDropdown(activeDropdown === "sort" ? "none" : "sort")}}>
-                <img className="itemsort-img" src={sort} style={{filter: getFilter()}}/>
-                {!mobile ? <span className="itemsort-text">{functions.toProperCase(sortType)}</span> : null}
+            <div className="itemsort-item" ref={sortRef}>
+                <img className="itemsort-img" src={sortReverse ? sortRev : sort} style={{filter: getFilter()}} onClick={() => setSortReverse((prev: boolean) => !prev)}/>
+                <span className="itemsort-text" onClick={() => {setActiveDropdown(activeDropdown === "sort" ? "none" : "sort")}}>{functions.toProperCase(sortType)}</span>
             </div>
         )
     }
@@ -454,38 +458,20 @@ const TagsPage: React.FunctionComponent = (props) => {
                             <div className="item-dropdown-row" onClick={() => setSortType("date")}>
                                 <span className="item-dropdown-text">Date</span>
                             </div>
-                            <div className="item-dropdown-row" onClick={() => setSortType("reverse date")}>
-                                <span className="item-dropdown-text">Reverse Date</span>
-                            </div>
                             <div className="item-dropdown-row" onClick={() => setSortType("alphabetic")}>
                                 <span className="item-dropdown-text">Alphabetic</span>
-                            </div>
-                            <div className="item-dropdown-row" onClick={() => setSortType("reverse alphabetic")}>
-                                <span className="item-dropdown-text">Reverse Alphabetic</span>
                             </div>
                             <div className="item-dropdown-row" onClick={() => setSortType("posts")}>
                                 <span className="item-dropdown-text">Posts</span>
                             </div>
-                            <div className="item-dropdown-row" onClick={() => setSortType("reverse posts")}>
-                                <span className="item-dropdown-text">Reverse Posts</span>
-                            </div>
                             <div className="item-dropdown-row" onClick={() => setSortType("image")}>
                                 <span className="item-dropdown-text">Image</span>
-                            </div>
-                            <div className="item-dropdown-row" onClick={() => setSortType("reverse image")}>
-                                <span className="item-dropdown-text">Reverse Image</span>
                             </div>
                             <div className="item-dropdown-row" onClick={() => setSortType("aliases")}>
                                 <span className="item-dropdown-text">Aliases</span>
                             </div>
-                            <div className="item-dropdown-row" onClick={() => setSortType("reverse aliases")}>
-                                <span className="item-dropdown-text">Reverse Aliases</span>
-                            </div>
                             <div className="item-dropdown-row" onClick={() => setSortType("length")}>
                                 <span className="item-dropdown-text">Length</span>
-                            </div>
-                            <div className="item-dropdown-row" onClick={() => setSortType("reverse length")}>
-                                <span className="item-dropdown-text">Reverse Length</span>
                             </div>
                         </div>
                         {getTypeJSX()}

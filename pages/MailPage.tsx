@@ -9,6 +9,7 @@ import DragAndDrop from "../components/DragAndDrop"
 import search from "../assets/icons/search.png"
 import searchIconHover from "../assets/icons/search-hover.png"
 import sort from "../assets/icons/sort.png"
+import sortRev from "../assets/icons/sort-reverse.png"
 import Message from "../components/Message"
 import {ThemeContext, EnableDragContext, HideNavbarContext, HideSidebarContext, MobileContext, SessionContext,
 RelativeContext, HideTitlebarContext, ActiveDropdownContext, HeaderTextContext, SidebarTextContext, SiteHueContext, 
@@ -47,6 +48,7 @@ const MailPage: React.FunctionComponent = (props) => {
     const {session, setSession} = useContext(SessionContext)
     const {sessionFlag, setSessionFlag} = useContext(SessionFlagContext)
     const [sortType, setSortType] = useState("date")
+    const [sortReverse, setSortReverse] = useState(false)
     const [messages, setMessages] = useState([]) as any
     const [searchQuery, setSearchQuery] = useState("")
     const [index, setIndex] = useState(0)
@@ -92,7 +94,7 @@ const MailPage: React.FunctionComponent = (props) => {
     }
 
     const updateMessages = async (query?: string) => {
-        const result = await functions.get("/api/search/messages", {sort: sortType, query: query ? query : searchQuery}, session, setSessionFlag)
+        const result = await functions.get("/api/search/messages", {sort: functions.parseSort(sortType, sortReverse), query: query ? query : searchQuery}, session, setSessionFlag)
         setEnded(false)
         setIndex(0)
         setVisibleMessages([])
@@ -151,7 +153,7 @@ const MailPage: React.FunctionComponent = (props) => {
 
     useEffect(() => {
         updateMessages()
-    }, [sortType])
+    }, [sortType, sortReverse])
 
     const getPageAmount = () => {
         return scroll ? 15 : 50
@@ -186,7 +188,7 @@ const MailPage: React.FunctionComponent = (props) => {
                 }
             }
         }
-        let result = await functions.get("/api/search/messages", {sort: sortType, query: searchQuery, offset: newOffset}, session, setSessionFlag)
+        let result = await functions.get("/api/search/messages", {sort: functions.parseSort(sortType, sortReverse), query: searchQuery, offset: newOffset}, session, setSessionFlag)
         let hasMore = result?.length >= 100
         const cleanMessages = messages.filter((t: any) => !t.fake)
         if (!scroll) {
@@ -233,7 +235,7 @@ const MailPage: React.FunctionComponent = (props) => {
         return () => {
             window.removeEventListener("scroll", scrollHandler)
         }
-    }, [scroll, visibleMessages, index, session])
+    }, [scroll, visibleMessages, index, session, sortType, sortReverse])
 
     useEffect(() => {
         window.scrollTo(0, 0)
@@ -267,7 +269,7 @@ const MailPage: React.FunctionComponent = (props) => {
             }
         }
         if (!scroll) updatePageOffset()
-    }, [scroll, messages, mailPage, ended, session])
+    }, [scroll, messages, mailPage, ended, session, sortType, sortReverse])
 
     useEffect(() => {
         if (searchQuery) {
@@ -378,9 +380,9 @@ const MailPage: React.FunctionComponent = (props) => {
 
     const getSortJSX = () => {
         return (
-            <div className="itemsort-item" ref={sortRef} onClick={() => {setActiveDropdown(activeDropdown === "sort" ? "none" : "sort")}}>
-                <img className="itemsort-img" src={sort} style={{filter: getFilter()}}/>
-                <span className="itemsort-text">{functions.toProperCase(sortType)}</span>
+            <div className="itemsort-item" ref={sortRef}>
+                <img className="itemsort-img" src={sortReverse ? sortRev : sort} style={{filter: getFilter()}} onClick={() => setSortReverse((prev: boolean) => !prev)}/>
+                <span className="itemsort-text" onClick={() => {setActiveDropdown(activeDropdown === "sort" ? "none" : "sort")}}>{functions.toProperCase(sortType)}</span>
             </div>
         )
     }
@@ -482,9 +484,6 @@ const MailPage: React.FunctionComponent = (props) => {
                             </div>
                             <div className="item-dropdown-row" onClick={() => setSortType("date")}>
                                 <span className="item-dropdown-text">Date</span>
-                            </div>
-                            <div className="item-dropdown-row" onClick={() => setSortType("reverse date")}>
-                                <span className="item-dropdown-text">Reverse Date</span>
                             </div>
                         </div>
                     </div>
