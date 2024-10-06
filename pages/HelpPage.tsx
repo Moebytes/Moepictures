@@ -21,6 +21,7 @@ import taggingImg from "../assets/misc/tagging.png"
 import searchingImg from "../assets/misc/searching.png"
 import imageSearchingImg from "../assets/misc/imagesearching.png"
 import upscalingImg from "../assets/misc/upscaling.png"
+import emojisImg from "../assets/misc/emojis.png"
 import compressingImg from "../assets/misc/compressing.png"
 import variationsImg from "../assets/misc/variations.png"
 import thirdPartyImg from "../assets/misc/thirdparty.png"
@@ -373,13 +374,18 @@ const HelpPage: React.FunctionComponent = (props) => {
                     ⇾ No otherwise distasteful comments. <br/><br/>
                     </span>
 
-                    Quotes are supported and we have a syntax that makes it easy to do quotes. <br/>
+                    Quotes are supported and we have a syntax that makes it easy to do quotes. Nested quotes are not supported. <br/>
                     <span className="help-alt">
                     &gt;&gt;&gt;[id] User said:<br/>
                     &gt; Comment <br/><br/>
                     </span>
-                    Nested quoting is not supported yet. If you see a comment that is breaking the rules, please report it.
-                </span></>
+
+                    Emojis can also be added to messages using their special identifier. <br/>
+                    <span className="help-alt">
+                    emoji:emojiName <br/><br/>
+                    </span>
+                </span>
+                <div className="help-img-container"><img className="help-img" src={emojisImg}/></div></>
             )
         }
         if (helpTab === "bans") {
