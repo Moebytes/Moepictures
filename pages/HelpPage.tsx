@@ -385,7 +385,7 @@ const HelpPage: React.FunctionComponent = (props) => {
                     emoji:emojiName<br/><br/>
                     </span>
 
-                    Any image or video links posted in the comment are automatically displayed. <br/>
+                    Any image or video links posted in the comment are automatically displayed.
                 </span>
                 <div className="help-img-container"><img className="help-img" src={emojisImg}/></div></>
             )
