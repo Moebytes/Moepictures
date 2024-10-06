@@ -39,6 +39,8 @@ export default class JSXFunctions {
                 if (name.includes(`${functions.getDomain()}/message`)) name = `Message #${name.replace(functions.getDomain(), "").match(/\d+/)?.[0] || ""}`
                 if (name.includes(`${functions.getDomain()}/user`)) name = `User ${name.replace(functions.getDomain(), "").match(/(?<=\/user\/)(.+)/)?.[0] || ""}`
                 if (name.includes(`${functions.getDomain()}/tag`)) name = `Tag ${name.replace(functions.getDomain(), "").match(/(?<=\/tag\/)(.+)/)?.[0] || ""}`
+                if (functions.isImage(part) || functions.isGIF(part)) return (<img className="comment-image" src={part} crossOrigin="anonymous"/>)
+                if (functions.isVideo(part)) return (<video className="comment-image" src={part} crossOrigin="anonymous" autoPlay loop muted disablePictureInPicture playsInline controls></video>)
                 return (<a key={index} href={part} target="_blank" rel="noopener">{name}</a>)
             } else {
                 return emojis ? JSXFunctions.parseEmojis(part, emojis) : <span key={index}>{part}</span>

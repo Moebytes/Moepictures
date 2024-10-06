@@ -382,8 +382,10 @@ const HelpPage: React.FunctionComponent = (props) => {
 
                     Emojis can also be added to messages using their special identifier. <br/>
                     <span className="help-alt">
-                    emoji:emojiName <br/><br/>
+                    emoji:emojiName<br/><br/>
                     </span>
+
+                    Any image or video links posted in the comment are automatically displayed. <br/>
                 </span>
                 <div className="help-img-container"><img className="help-img" src={emojisImg}/></div></>
             )
