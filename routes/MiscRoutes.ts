@@ -8,11 +8,12 @@ import googleTranslate from "@vitalets/google-translate-api"
 import Kuroshiro from "kuroshiro"
 import KuromojiAnalyzer from "kuroshiro-analyzer-kuromoji"
 import functions from "../structures/Functions"
-import serverFunctions, {keyGenerator, handler} from "../structures/ServerFunctions"
+import serverFunctions, {authenticate, keyGenerator, handler} from "../structures/ServerFunctions"
 import rateLimit from "express-rate-limit"
 import fs from "fs"
 import svgCaptcha from "svg-captcha"
 import child_process from "child_process"
+import crypto from "crypto"
 import util from "util"
 import sql from "../sql/SQLQuery"
 import dotline from "../assets/misc/Dotline.ttf"
@@ -302,6 +303,61 @@ const MiscRoutes = (app: Express) => {
                 fileData[name] = data
             }
             res.status(200).json(fileData)
+        } catch (e) {
+            console.log(e)
+            res.status(400).send("Bad request") 
+        }
+    })
+
+    app.post("/api/premium/paymentlink", authenticate, miscLimiter, async (req: Request, res: Response, next: NextFunction) => {
+        try {
+            if (!req.session.username) return res.status(403).send("Unauthorized")
+            const data = {
+                local_price: {
+                    amount: "15.00",
+                    currency: "USD"
+                },
+                pricing_type: "fixed_price",
+                name: "Moepictures Premium",
+                description: "Moepictures premium account upgrade",
+                redirect_url: `${functions.getDomain()}/premium-success`,
+                metadata: {
+                    username: req.session.username,
+                    email: req.session.email
+                },
+            }
+            const headers = {"X-CC-Api-Key": process.env.COINBASE_KEY!}
+            const response = await axios.post("https://api.commerce.coinbase.com/charges", data, {headers, responseType: "json"}).then((r) => r.data)
+            res.status(200).json(response.data)
+        } catch (e) {
+            console.log(e)
+            res.status(400).send("Bad request") 
+        }
+    })
+
+    app.post("/api/premium/payment",  async (req: Request, res: Response, next: NextFunction) => {
+        try {
+            const {event} = req.body
+            const signature = req.headers["x-cc-webhook-signature"]
+
+            const computedSignature = crypto.createHmac("sha256", process.env.COINBASE_WEBHOOK_SECRET!)
+            .update(JSON.stringify(req.body), "utf8").digest("hex")
+            
+            if (signature !== computedSignature) {
+                return res.status(400).send("Invalid signature")
+            }
+        
+            if (event.type === "charge:pending") {
+                const id = event.data.id
+                const metadata = event.data.metadata
+                await sql.token.insertPayment(id, metadata.username, metadata.email)
+
+                await sql.user.updateUser(metadata.username, "role", "premium")
+
+                const message = `Your account has been promoted to premium. You can now access all the premium features. Thank you for supporting us!`
+                await serverFunctions.systemMessage(metadata.username, "Notice: Your account was promoted to premium", message)
+            }
+            res.status(200).send("Success")
         } catch (e) {
             console.log(e)
             res.status(400).send("Bad request") 

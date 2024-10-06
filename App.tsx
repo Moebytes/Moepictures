@@ -51,6 +51,7 @@ import MailPage from "./pages/MailPage"
 import MessagePage from "./pages/MessagePage"
 import PremiumPage from "./pages/PremiumPage"
 import PremiumRequiredDialog from "./dialogs/PremiumRequiredDialog"
+import PremiumSuccessPage from "./pages/PremiumSuccessPage"
 import "./index.less"
 
 require.context("./assets/icons", true)
@@ -303,6 +304,7 @@ const App: React.FunctionComponent = (props) => {
                         <Route exact path="/change-email-success"><ChangeEmailSuccessPage/></Route>
                         <Route exact path="/verify-email"><VerifyEmailPage/></Route>
                         <Route exact path="/verify-email-success"><VerifyEmailSuccessPage/></Route>
+                        <Route exact path="/premium-success"><PremiumSuccessPage/></Route>
                         <Route exact path="/reset-password"><ResetPasswordPage/></Route>
                         <Route exact path="/change-password"><ChangePasswordPage/></Route>
                         <Route exact path="/forgot-password"><ForgotPasswordPage/></Route>

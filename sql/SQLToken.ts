@@ -124,4 +124,14 @@ export default class SQLToken {
         const result = await SQLQuery.run(query)
         return result
     }
+
+    /** Insert payment. */
+    public static insertPayment = async (chargeID: string, username: string, email: string) => {
+        const query: QueryConfig = {
+        text: /*sql*/`INSERT INTO "payments" ("chargeID", "username", "email") VALUES ($1, $2, $3)`,
+        values: [chargeID, username, email]
+        }
+        const result = await SQLQuery.run(query)
+        return result
+    }
 }

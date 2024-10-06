@@ -7,7 +7,7 @@ import SideBar from "../components/SideBar"
 import Footer from "../components/Footer"
 import DragAndDrop from "../components/DragAndDrop"
 import {HideNavbarContext, HideSidebarContext, RelativeContext, HideTitlebarContext, HeaderTextContext, SidebarTextContext,
-MobileContext, EnableDragContext, SessionContext} from "../Context"
+MobileContext, EnableDragContext, SessionContext, SessionFlagContext} from "../Context"
 import CaptchaDialog from "../dialogs/CaptchaDialog"
 import premiumStar from "../assets/icons/premiumStar.png"
 import premiumImg from "../assets/misc/premiumupgrade.png"
@@ -26,9 +26,35 @@ import bookmarkSort from "../assets/misc/premium-bookmark-sort.png"
 import animatedAvatar from "../assets/misc/premium-animated-avatar.png"
 import changeUsername from "../assets/misc/premium-change-username.png"
 import noAds from "../assets/misc/premium-no-ads.png"
+import functions from "../structures/Functions"
+import bitcoin from "../assets/icons/bitcoin.png"
 import "./styles/premiumpage.less"
+import axios from "axios"
 
-const HelpPage: React.FunctionComponent = (props) => {
+const PaymentButton: React.FunctionComponent = (props) => {
+    const {session, setSession} = useContext(SessionContext)
+    const {sessionFlag, setSessionFlag} = useContext(SessionFlagContext)
+    const [paymentLink, setPaymentLink] = useState("")
+
+    const createCharge = async () => {
+        const result = await functions.post("/api/premium/paymentlink", null, session, setSessionFlag)
+        setPaymentLink(result.hosted_url)
+    }
+
+    useEffect(() => {
+        if (!session.username) return
+        createCharge()
+    }, [session])
+
+    return (
+        <button className="premium-button" onClick={() => window.open(paymentLink)}>
+            <img src={bitcoin}/>
+            <span>Pay with Crypto</span>
+        </button>
+    )
+}
+
+const PremiumPage: React.FunctionComponent = (props) => {
     const {hideNavbar, setHideNavbar} = useContext(HideNavbarContext)
     const {hideTitlebar, setHideTitlebar} = useContext(HideTitlebarContext)
     const {hideSidebar, setHideSidebar} = useContext(HideSidebarContext)
@@ -87,6 +113,10 @@ const HelpPage: React.FunctionComponent = (props) => {
             window.location.hash = premiumFeature
         }
     }, [premiumFeature])
+
+    const openLink = (url: string) => {
+        window.open(url, "_blank", "noreferrer")
+    }
 
     const getContainerJSX = () => {
         if (premiumFeature === "premium") {
@@ -189,13 +219,14 @@ const HelpPage: React.FunctionComponent = (props) => {
             return (
                 <><span className="premium-heading">Purchase</span>
                 <span className="premium-text">
-                    If you would like to purchase a premium upgrade you can do so here via CoinGate. <br/><br/>
+                    If you would like to purchase a premium upgrade you can do so here via Coinbase. <br/><br/>
 
                     Currently the price is a one-time payment of $15 USD. <br/><br/>
                     
-                    CoinGate will handle all the conversions to crypto for you so on your end you have the choice
-                    of paying with card, paypal, or crypto.
-                </span></>
+                    Create a <a className="premium-link" onClick={() => openLink("https://www.coinbase.com")}>Coinbase</a> account if you don't already have one. 
+                    You can buy crypto (eg. bitcoin) with paypal or card through them and then use it to purchase.
+                </span>
+                <PaymentButton/></>
             )
         }
         if (premiumFeature === "refund-policy") {
@@ -243,4 +274,4 @@ const HelpPage: React.FunctionComponent = (props) => {
     )
 }
 
-export default HelpPage
+export default PremiumPage
