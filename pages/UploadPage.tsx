@@ -723,7 +723,7 @@ const UploadPage: React.FunctionComponent = (props) => {
 
     const clear = () => {
         const currentFiles = getCurrentFiles()
-        const currentIndex = currentFiles.findIndex((a: any) => a.link === currentImg)
+        const currentIndex = currentFiles.findIndex((a: any) => a.link === currentImg.replace(/\?.*$/, ""))
         if (enterLinksRef.current) {
             const link = currentFiles[currentIndex]?.originalLink
             if (link) {
@@ -743,7 +743,7 @@ const UploadPage: React.FunctionComponent = (props) => {
     
     const left = () => {
         const currentFiles = showUpscaled ? upscaledFiles : originalFiles
-        const currentIndex = currentFiles.findIndex((a: any) => a.link === currentImg)
+        const currentIndex = currentFiles.findIndex((a: any) => a.link === currentImg.replace(/\?.*$/, ""))
         let newIndex = currentIndex - 1
         if (newIndex < 0) newIndex = 0
         currentFiles.splice(newIndex, 0, currentFiles.splice(currentIndex, 1)[0])
@@ -754,7 +754,7 @@ const UploadPage: React.FunctionComponent = (props) => {
 
     const right = () => {
         const currentFiles = getCurrentFiles()
-        const currentIndex = currentFiles.findIndex((a: any) => a.link === currentImg)
+        const currentIndex = currentFiles.findIndex((a: any) => a.link === currentImg.replace(/\?.*$/, ""))
         let newIndex = currentIndex + 1
         if (newIndex > currentFiles.length - 1) newIndex = currentFiles.length - 1
         currentFiles.splice(newIndex, 0, currentFiles.splice(currentIndex, 1)[0])

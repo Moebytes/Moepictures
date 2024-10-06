@@ -3,7 +3,7 @@ import {useHistory} from "react-router-dom"
 import {ThemeContext, QuoteTextContext, SessionContext, DeleteCommentIDContext, DeleteCommentFlagContext, MobileContext,
 EditCommentFlagContext, EditCommentIDContext, EditCommentTextContext, ReportCommentIDContext, BrightnessContext, ContrastContext, 
 HueContext, SaturationContext, LightnessContext, BlurContext, SharpenContext, PixelateContext, SiteHueContext, SiteLightnessContext,
-SiteSaturationContext, CommentIDContext, CommentJumpFlagContext, SessionFlagContext} from "../Context"
+SiteSaturationContext, CommentIDContext, CommentJumpFlagContext, SessionFlagContext, EmojisContext} from "../Context"
 import {HashLink as Link} from "react-router-hash-link"
 import functions from "../structures/Functions"
 import permissions from "../structures/Permissions"
@@ -52,6 +52,7 @@ const CommentRow: React.FunctionComponent<Props> = (props) => {
     const {reportCommentID, setReportCommentID} = useContext(ReportCommentIDContext)
     const {commentID, setCommentID} = useContext(CommentIDContext)
     const {commentJumpFlag, setCommentJumpFlag} = useContext(CommentJumpFlagContext)
+    const {emojis, setEmojis} = useContext(EmojisContext)
     const [hover, setHover] = useState(false)
     const history = useHistory()
     const initialImg = functions.getThumbnailLink(props.comment?.post.images[0].type, props.comment?.postID, props.comment?.post.images[0].order, props.comment?.post.images[0].filename, "tiny")
@@ -114,11 +115,11 @@ const CommentRow: React.FunctionComponent<Props> = (props) => {
                 jsx.push(
                     <div className="commentrow-quote-container">
                         {userPart ? <span className="commentrow-quote-user" onClick={() => goToComment(id)}>{`${username.trim()} ${said.trim()}`}</span> : null}
-                        <span className="commentrow-quote-text">{jsxFunctions.parseTextLinks(text.trim())}</span>
+                        <span className="commentrow-quote-text">{jsxFunctions.parseTextLinks(text.trim(), emojis)}</span>
                     </div>
                 )
             } else {
-                jsx.push(<span className="commentrow-text">{jsxFunctions.parseTextLinks(piece.trim())}</span>)
+                jsx.push(<span className="commentrow-text">{jsxFunctions.parseTextLinks(piece.trim(), emojis)}</span>)
             }
         }
         return jsx

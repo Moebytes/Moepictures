@@ -161,7 +161,7 @@ const CreateRoutes = (app: Express) => {
 
         for (let i = 0; i < images.length; i++) {
           let order = i + 1
-          let current = images[i] ? images : upscaledImages
+          let current = upscaledImages[i] ? upscaledImages : images
           const ext = current[i].ext
           let fileOrder = current.length > 1 ? `${order}` : "1"
           const cleanTitle = functions.cleanTitle(source.title)
@@ -212,9 +212,9 @@ const CreateRoutes = (app: Express) => {
           let dimensions = null as any
           let hash = ""
           if (kind === "video" || kind === "audio" || kind === "model") {
-            const buffer = functions.base64ToBuffer(current[i].thumbnail)
-            hash = await phash(buffer).then((hash: string) => functions.binaryToHex(hash))
-            dimensions = imageSize(buffer)
+              const buffer = functions.base64ToBuffer(current[i].thumbnail)
+              hash = await phash(buffer).then((hash: string) => functions.binaryToHex(hash))
+              dimensions = imageSize(buffer)
           } else {
               const buffer = Buffer.from(Object.values(current[i].bytes) as any)
               hash = await phash(buffer).then((hash: string) => functions.binaryToHex(hash))
@@ -455,7 +455,7 @@ const CreateRoutes = (app: Express) => {
         let imageFilenames = [] as any
         for (let i = 0; i < images.length; i++) {
           let order = i + 1
-          let current = images[i] ? images : upscaledImages
+          let current = upscaledImages[i] ? upscaledImages : images
           const ext = current[i].ext
           let fileOrder = current.length > 1 ? `${order}` : "1"
           const cleanTitle = functions.cleanTitle(source.title)
@@ -807,7 +807,7 @@ const CreateRoutes = (app: Express) => {
 
         for (let i = 0; i < images.length; i++) {
           let order = i + 1
-          let current = images[i] ? images : upscaledImages
+          let current = upscaledImages[i] ? upscaledImages : images
           const ext = current[i].ext
           let fileOrder = current.length > 1 ? `${order}` : "1"
           const cleanTitle = functions.cleanTitle(source.title)
@@ -1083,7 +1083,7 @@ const CreateRoutes = (app: Express) => {
 
         for (let i = 0; i < images.length; i++) {
           let order = i + 1
-          let current = images[i] ? images : upscaledImages
+          let current = upscaledImages[i] ? upscaledImages : images
           const ext = current[i].ext
           let fileOrder = current.length > 1 ? `${order}` : "1"
           const cleanTitle = functions.cleanTitle(source.title)
@@ -1305,7 +1305,7 @@ const CreateRoutes = (app: Express) => {
           const upscaledImagePath = functions.getUpscaledImagePath(unverified.images[i].type, postID, unverified.images[i].order, unverified.images[i].filename)
           const upscaledBuffer = await serverFunctions.getUnverifiedFile(upscaledImagePath) as Buffer
 
-          let current = buffer ? buffer : upscaledBuffer
+          let current = upscaledBuffer ? upscaledBuffer : buffer
           let order = i + 1
           const ext = path.extname(unverified.images[i].filename).replace(".", "")
           let fileOrder = unverified.images.length > 1 ? `${order}` : "1"

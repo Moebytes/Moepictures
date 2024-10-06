@@ -287,6 +287,26 @@ const MiscRoutes = (app: Express) => {
             res.status(400).send("Bad request") 
         }
     })
+
+    app.get("/api/misc/emojis", miscLimiter, async (req: Request, res: Response, next: NextFunction) => {
+        try {
+            const dir = path.join(__dirname, "../assets/emojis")
+            let files = fs.readdirSync(dir)
+            let fileData = {} as any
+            for (const file of files) {
+                if (file === ".DS_Store") continue
+                const filePath = path.join(dir, file)
+                const buffer = fs.readFileSync(filePath)
+                const name = path.basename(file, path.extname(file))
+                const data = `data:image/${path.extname(file).replace(".", "")};base64,${buffer.toString("base64")}`
+                fileData[name] = data
+            }
+            res.status(200).json(fileData)
+        } catch (e) {
+            console.log(e)
+            res.status(400).send("Bad request") 
+        }
+    })
 }
 
 export default MiscRoutes

@@ -2,7 +2,7 @@ import React, {useContext, useEffect, useRef, useState} from "react"
 import {useHistory} from "react-router-dom"
 import {ThemeContext, QuoteTextContext, SessionContext, DeleteCommentIDContext, DeleteCommentFlagContext,
 EditCommentIDContext, EditCommentFlagContext, EditCommentTextContext, ReportCommentIDContext, SiteHueContext,
-SiteLightnessContext, SiteSaturationContext, SessionFlagContext} from "../Context"
+SiteLightnessContext, SiteSaturationContext, SessionFlagContext, EmojisContext} from "../Context"
 import {HashLink as Link} from "react-router-hash-link"
 import functions from "../structures/Functions"
 import favicon from "../assets/icons/favicon.png"
@@ -40,6 +40,7 @@ const Comment: React.FunctionComponent<Props> = (props) => {
     const {editCommentID, setEditCommentID} = useContext(EditCommentIDContext)
     const {editCommentText, setEditCommentText} = useContext(EditCommentTextContext)
     const {reportCommentID, setReportCommentID} = useContext(ReportCommentIDContext)
+    const {emojis, setEmojis} = useContext(EmojisContext)
     const history = useHistory()
 
     const getFilter = () => {
@@ -98,11 +99,11 @@ const Comment: React.FunctionComponent<Props> = (props) => {
                 jsx.push(
                     <div className="comment-quote-container">
                         {userPart ? <span className="comment-quote-user" onClick={() => goToComment(id)}>{`${username.trim()} ${said.trim()}`}</span> : null}
-                        <span className="comment-quote-text">{jsxFunctions.parseTextLinks(text.trim())}</span>
+                        <span className="comment-quote-text">{jsxFunctions.parseTextLinks(text.trim(), emojis)}</span>
                     </div>
                 )
             } else {
-                jsx.push(<span className="comment-text">{jsxFunctions.parseTextLinks(piece.trim())}</span>)
+                jsx.push(<span className="comment-text">{jsxFunctions.parseTextLinks(piece.trim(), emojis)}</span>)
             }
         }
         return jsx

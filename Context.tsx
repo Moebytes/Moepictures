@@ -179,6 +179,7 @@ export const HistoryPageContext = React.createContext<any>(null)
 export const ShowDeleteAllHistoryDialogContext = React.createContext<any>(null)
 export const FormatContext = React.createContext<any>(null)
 export const PremiumRequiredContext = React.createContext<any>(null)
+export const EmojisContext = React.createContext<any>(null)
 
 const Context: React.FunctionComponent = (props) => {
     const [siteHue, setSiteHue] = useState(180)

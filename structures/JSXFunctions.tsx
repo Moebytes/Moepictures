@@ -16,7 +16,20 @@ export default class JSXFunctions {
         return <ResetPassword username={username} link={link}/>
     }
 
-    public static parseTextLinks = (text: string) => {
+    public static parseEmojis = (text: string, emojis: any) => {
+        const parts = text.split(/(emoji:[^\s]+)/g)
+        const elements = parts.map((part, index) => {
+            if (part.match(/(emoji:[^\s]+)/g)) {
+                let key = part.split(":")[1]
+                return (<img src={emojis[key]} className="emoji"/>)
+            } else {
+                return <span key={index}>{part}</span>
+            }
+        })
+        return elements
+    }
+
+    public static parseTextLinks = (text: string, emojis?: any) => {
         const parts = text.split(/(https?:\/\/[^\s]+)/g)
         const elements = parts.map((part, index) => {
             if (part.match(/(https?:\/\/[^\s]+)/g)) {
@@ -28,7 +41,7 @@ export default class JSXFunctions {
                 if (name.includes(`${functions.getDomain()}/tag`)) name = `Tag ${name.replace(functions.getDomain(), "").match(/(?<=\/tag\/)(.+)/)?.[0] || ""}`
                 return (<a key={index} href={part} target="_blank" rel="noopener">{name}</a>)
             } else {
-                return <span key={index}>{part}</span>
+                return emojis ? JSXFunctions.parseEmojis(part, emojis) : <span key={index}>{part}</span>
             }
         })
         return elements

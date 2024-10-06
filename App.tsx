@@ -1,7 +1,7 @@
 import React, {useEffect, useState, useContext} from "react"
 import {Switch, Route, Redirect, useHistory, useLocation} from "react-router-dom"
 import Context, {ThemeContext, HideNavbarContext, HideSidebarContext, HideSortbarContext, HasNotificationContext,
-HideTitlebarContext, EnableDragContext, ActiveDropdownContext, FilterDropActiveContext, MobileScrollingContext,
+HideTitlebarContext, EnableDragContext, ActiveDropdownContext, FilterDropActiveContext, MobileScrollingContext, EmojisContext,
 SidebarHoverContext, SessionContext, SessionFlagContext, UserImgContext, UserImgPostContext, MobileContext, SelectionModeContext} from "./Context"
 import favicon from "./assets/icons/favicon.png"
 import permissions from "./structures/Permissions"
@@ -76,7 +76,7 @@ const App: React.FunctionComponent = (props) => {
     const [mobileScrolling, setMobileScrolling] = useState(false)
     const [selectionMode, setSelectionMode] = useState(false)
     const [hasNotification, setHasNotification] = useState(false)
-
+    const [emojis, setEmojis] = useState([])
     const history = useHistory()
     const location = useLocation()
 
@@ -89,11 +89,17 @@ const App: React.FunctionComponent = (props) => {
         }
     }
 
+    const cacheEmojis = async () => {
+        const emojis = await functions.emojisCache(session, setSessionFlag)
+        setEmojis(emojis)
+    }
+
     useEffect(() => {
         const onDOMLoaded = () => {
             setLoaded(true)
             getSessionCookie()
             functions.clearCache()
+            cacheEmojis()
         }
         window.addEventListener("load", onDOMLoaded)
         return () => {
@@ -242,6 +248,7 @@ const App: React.FunctionComponent = (props) => {
 
     return (
         <div className={`app ${!loaded ? "stop-transitions" : ""}`}>
+            <EmojisContext.Provider value={{emojis, setEmojis}}>
             <HasNotificationContext.Provider value={{hasNotification, setHasNotification}}>
             <SelectionModeContext.Provider value={{selectionMode, setSelectionMode}}>
             <MobileScrollingContext.Provider value={{mobileScrolling, setMobileScrolling}}>
@@ -329,6 +336,7 @@ const App: React.FunctionComponent = (props) => {
             </MobileScrollingContext.Provider>
             </SelectionModeContext.Provider>
             </HasNotificationContext.Provider>
+            </EmojisContext.Provider>
         </div>
     )
 }

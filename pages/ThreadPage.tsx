@@ -14,7 +14,7 @@ import {ThemeContext, EnableDragContext, HideNavbarContext, HideSidebarContext, 
 RelativeContext, HideTitlebarContext, ActiveDropdownContext, HeaderTextContext, SidebarTextContext, SiteHueContext, 
 SiteLightnessContext, SiteSaturationContext, ScrollContext, ThreadPageContext, ShowPageDialogContext, PageFlagContext,
 DeleteThreadIDContext, DeleteThreadFlagContext, EditThreadIDContext, EditThreadFlagContext, EditThreadTitleContext,
-EditThreadContentContext, QuoteTextContext, ReportThreadIDContext, SessionFlagContext} from "../Context"
+EditThreadContentContext, QuoteTextContext, ReportThreadIDContext, SessionFlagContext, EmojisContext} from "../Context"
 import permissions from "../structures/Permissions"
 import jsxFunctions from "../structures/JSXFunctions"
 import PageDialog from "../dialogs/PageDialog"
@@ -38,6 +38,7 @@ import ReportThreadDialog from "../dialogs/ReportThreadDialog"
 import DeleteReplyDialog from "../dialogs/DeleteReplyDialog"
 import EditReplyDialog from "../dialogs/EditReplyDialog"
 import ReportReplyDialog from "../dialogs/ReportReplyDialog"
+import emojiSelect from "../assets/icons/emoji-select.png"
 import favicon from "../assets/icons/favicon.png"
 import "./styles/threadpage.less"
 
@@ -74,6 +75,7 @@ const ThreadPage: React.FunctionComponent<Props> = (props) => {
     const {editThreadTitle, setEditThreadTitle} = useContext(EditThreadTitleContext)
     const {editThreadContent, setEditThreadContent} = useContext(EditThreadContentContext)
     const {reportThreadID, setReportThreadID} = useContext(ReportThreadIDContext)
+    const {emojis, setEmojis} = useContext(EmojisContext)
     const [thread, setThread] = useState(null) as any
     const [replies, setReplies] = useState([]) as any
     const [index, setIndex] = useState(0)
@@ -85,9 +87,11 @@ const ThreadPage: React.FunctionComponent<Props> = (props) => {
     const [replyJumpFlag, setReplyJumpFlag] = useState(false)
     const [text, setText] = useState("")
     const [defaultIcon, setDefaultIcon] = useState(false)
+    const [showEmojiDropdown, setShowEmojiDropdown] = useState(false)
     const [error, setError] = useState(false)
     const history = useHistory()
     const errorRef = useRef(null) as any
+    const emojiRef = useRef(null) as any
     const threadID = props?.match.params.id
 
     const getFilter = () => {
@@ -536,6 +540,65 @@ const ThreadPage: React.FunctionComponent<Props> = (props) => {
         setText("")
     }
 
+    useEffect(() => {
+        const clickListener = () => {
+            if (showEmojiDropdown) setShowEmojiDropdown(false)
+        }
+        window.addEventListener("click", clickListener)
+        return () => {
+            window.removeEventListener("click", clickListener)
+        }
+    }, [showEmojiDropdown])
+
+    const getEmojiMarginRight = () => {
+        if (typeof document === "undefined") return "0px"
+        const rect = emojiRef.current?.getBoundingClientRect()
+        if (!rect) return "0px"
+        const raw = window.innerWidth - rect.right
+        let offset = -145
+        if (mobile) offset += 0
+        return `${raw + offset}px`
+    }
+
+    const getEmojiMarginBottom = () => {
+        if (typeof document === "undefined") return "0px"
+        let elementName = ".forum-thread-textarea"
+        const bodyRect = document.querySelector(elementName)?.getBoundingClientRect()
+        const rect = emojiRef.current?.getBoundingClientRect()
+        if (!rect || !bodyRect) return "0px"
+        const raw = bodyRect.bottom - rect.bottom
+        let offset = 180
+        if (mobile) offset += 0
+        return `${raw + offset}px`
+    }
+
+    const emojiGrid = () => {
+        let rows = [] as any
+        let rowAmount = 7
+        for (let i = 0; i < Object.keys(emojis).length; i++) {
+            let items = [] as any
+            for (let j = 0; j < rowAmount; j++) {
+                const k = (i*rowAmount)+j
+                const key = Object.keys(emojis)[k]
+                if (!key) break
+                const appendText = () => {
+                    setText((prev: string) => prev + ` emoji:${key}`)
+                    setShowEmojiDropdown(false)
+                }
+                items.push(
+                    <img draggable={false} src={emojis[key]} className="emoji-big" onClick={appendText}/>
+                )
+            }
+            if (items.length) rows.push(<div className="emoji-row">{items}</div>)
+        }
+        return (
+            <div className={`emoji-grid ${showEmojiDropdown ? "" : "hide-emoji-grid"}`}
+            style={{marginRight: getEmojiMarginRight(), marginBottom: getEmojiMarginBottom()}}>
+                {rows}
+            </div>
+        )
+    }
+
     const getReplyBoxJSX = () => {
         if (thread.locked) return (
             <div className="forum-thread-reply-box" style={{justifyContent: "flex-start"}}>
@@ -557,6 +620,9 @@ const ThreadPage: React.FunctionComponent<Props> = (props) => {
                         {error ? <div className="forum-thread-validation-container"><span className="forum-thread-validation" ref={errorRef}></span></div> : null}
                         <div className="forum-thread-button-container-left">
                             <button className="forum-thread-button" onClick={reply}>Reply</button>
+                            <button className="comments-emoji-button" ref={emojiRef} onClick={() => setShowEmojiDropdown((prev: boolean) => !prev)}>
+                                <img src={emojiSelect}/>
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -594,13 +660,14 @@ const ThreadPage: React.FunctionComponent<Props> = (props) => {
                             <img draggable={false} className="forum-thread-user-img" src={getCreatorPFP()} onClick={creatorImgClick} onAuxClick={creatorImgClick} style={{filter: defaultIcon ? getFilter() : ""}}/>
                         </div>
                         <div className="forum-thread-text-container">
-                            <p className="forum-thread-text">{jsxFunctions.parseTextLinks(thread.content)}</p>
+                            <p className="forum-thread-text">{jsxFunctions.parseTextLinks(thread.content, emojis)}</p>
                         </div>
                     </div>
                     <table className="forum-thread-container">
                         {generateRepliesJSX()}
                     </table>
                     {getReplyBoxJSX()}
+                    {emojiGrid()}
                     {generatePageButtonsJSX()}
                 </div> : null}
                 <Footer/>

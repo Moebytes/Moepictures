@@ -479,9 +479,14 @@ const SortBar: React.FunctionComponent = (props) => {
         if (sortType === "drawn") offset = -30
         if (sortType === "cuteness") offset = -25
         if (sortType === "favorites") offset = -20
+        if (sortType === "variations") offset = -20
+        if (sortType === "thirdparty") offset = -20
+        if (sortType === "popularity") offset = -20
         if (sortType === "bookmarks") offset = -10
         if (sortType === "tagcount") offset = -30
         if (sortType === "filesize") offset = -30
+        if (sortType === "width") offset = -30
+        if (sortType === "height") offset = -30
         if (!session.username) offset += 10
         return `${raw + offset}px`
     }
@@ -490,6 +495,7 @@ const SortBar: React.FunctionComponent = (props) => {
         const getSort = () => {
             if (sortType === "bookmarks") return "Bookmarks ★"
             if (sortType === "favorites") return "Favorites ✧"
+            if (sortType === "thirdparty") return "Third Party"
             return functions.toProperCase(sortType)
         }
         return (
@@ -901,14 +907,29 @@ const SortBar: React.FunctionComponent = (props) => {
                     <span className="sortbar-dropdown-text">Favorites ✧</span>
                 </div>
                 </> : null}
+                <div className="sortbar-dropdown-row" onClick={() => changeSortType("popularity")}>
+                    <span className="sortbar-dropdown-text">Popularity</span>
+                </div>
                 <div className="sortbar-dropdown-row" onClick={() => changeSortType("cuteness")}>
                     <span className="sortbar-dropdown-text">Cuteness</span>
+                </div>
+                <div className="sortbar-dropdown-row" onClick={() => changeSortType("variations")}>
+                    <span className="sortbar-dropdown-text">Variations</span>
+                </div>
+                <div className="sortbar-dropdown-row" onClick={() => changeSortType("thirdparty")}>
+                    <span className="sortbar-dropdown-text">Third Party</span>
                 </div>
                 <div className="sortbar-dropdown-row" onClick={() => changeSortType("tagcount")}>
                     <span className="sortbar-dropdown-text">Tagcount</span>
                 </div>
                 <div className="sortbar-dropdown-row" onClick={() => changeSortType("filesize")}>
                     <span className="sortbar-dropdown-text">Filesize</span>
+                </div>
+                <div className="sortbar-dropdown-row" onClick={() => changeSortType("width")}>
+                    <span className="sortbar-dropdown-text">Width</span>
+                </div>
+                <div className="sortbar-dropdown-row" onClick={() => changeSortType("height")}>
+                    <span className="sortbar-dropdown-text">Height</span>
                 </div>
             </div>
             <div className={`dropdown-right ${activeDropdown === "filters" ? "" : "hide-dropdown"}`} 

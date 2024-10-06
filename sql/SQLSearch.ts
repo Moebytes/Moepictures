@@ -30,10 +30,20 @@ export default class SQLSearch {
         if (sort === "reverse drawn") sortQuery = `ORDER BY posts.drawn ASC NULLS LAST`
         if (sort === "cuteness") sortQuery = `ORDER BY "cuteness" DESC`
         if (sort === "reverse cuteness") sortQuery = `ORDER BY "cuteness" ASC`
+        if (sort === "popularity") sortQuery = `ORDER BY "favoriteCount" DESC`
+        if (sort === "reverse popularity") sortQuery = `ORDER BY "favoriteCount" ASC`
+        if (sort === "variations") sortQuery = `ORDER BY "imageCount" DESC`
+        if (sort === "reverse variations") sortQuery = `ORDER BY "imageCount" ASC`
+        if (sort === "thirdparty") sortQuery = `ORDER BY posts."thirdParty" DESC NULLS LAST`
+        if (sort === "reverse thirdparty") sortQuery = `ORDER BY posts."thirdParty" ASC NULLS LAST`
         if (sort === "tagcount") sortQuery = `ORDER BY "tagCount" DESC`
         if (sort === "reverse tagcount") sortQuery = `ORDER BY "tagCount" ASC`
         if (sort === "filesize") sortQuery = `ORDER BY "imageSize" DESC`
         if (sort === "reverse filesize") sortQuery = `ORDER BY "imageSize" ASC`
+        if (sort === "width") sortQuery = `ORDER BY "imageWidth" DESC`
+        if (sort === "reverse width") sortQuery = `ORDER BY "imageWidth" ASC`
+        if (sort === "height") sortQuery = `ORDER BY "imageHeight" DESC`
+        if (sort === "reverse height") sortQuery = `ORDER BY "imageHeight" ASC`
         if (sort === "bookmarks") sortQuery = `ORDER BY posts.bookmarks DESC NULLS LAST`
         if (sort === "reverse bookmarks") sortQuery = `ORDER BY posts.bookmarks ASC NULLS LAST`
         let ANDtags = [] as string[]
@@ -81,10 +91,14 @@ export default class SQLSearch {
             SELECT *,
             COUNT(*) OVER() AS "postCount"
             FROM (
-            SELECT posts.*, json_agg(DISTINCT images.*) AS images, ${includeTags ? `array_agg(DISTINCT "tag map".tag) AS tags,` : ""}
-            COUNT(DISTINCT favorites."favoriteID") AS "favoriteCount",
+            SELECT posts.*, json_agg(DISTINCT images.*) AS images, 
+            ${includeTags ? `array_agg(DISTINCT "tag map".tag) AS tags,` : ""}
             ${includeTags ? `COUNT(DISTINCT "tag map"."tagID") AS "tagCount",` : ""}
             MAX(DISTINCT images."size") AS "imageSize",
+            MAX(DISTINCT images."width") AS "imageWidth",
+            MAX(DISTINCT images."height") AS "imageHeight",
+            COUNT(DISTINCT images."imageID") AS "imageCount",
+            COUNT(DISTINCT favorites."favoriteID") AS "favoriteCount",
             ROUND(AVG(DISTINCT cuteness."cuteness")) AS "cuteness"
             FROM posts
             JOIN images ON posts."postID" = images."postID"

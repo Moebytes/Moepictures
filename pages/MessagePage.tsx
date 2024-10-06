@@ -14,7 +14,7 @@ import {ThemeContext, EnableDragContext, HideNavbarContext, HideSidebarContext, 
 RelativeContext, HideTitlebarContext, ActiveDropdownContext, HeaderTextContext, SidebarTextContext, SiteHueContext, 
 SiteLightnessContext, SiteSaturationContext, ScrollContext, MessagePageContext, ShowPageDialogContext, PageFlagContext,
 DeleteMessageIDContext, DeleteMessageFlagContext, QuoteTextContext, EditMessageIDContext, EditMessageFlagContext,
-EditMessageTitleContext, EditMessageContentContext, HasNotificationContext, SessionFlagContext} from "../Context"
+EditMessageTitleContext, EditMessageContentContext, HasNotificationContext, SessionFlagContext, EmojisContext} from "../Context"
 import permissions from "../structures/Permissions"
 import jsxFunctions from "../structures/JSXFunctions"
 import PageDialog from "../dialogs/PageDialog"
@@ -30,6 +30,7 @@ import EditMessageDialog from "../dialogs/EditMessageDialog"
 import DeleteMessageReplyDialog from "../dialogs/DeleteMessageReplyDialog"
 import EditMessageReplyDialog from "../dialogs/EditMessageReplyDialog"
 import favicon from "../assets/icons/favicon.png"
+import emojiSelect from "../assets/icons/emoji-select.png"
 import "./styles/messagepage.less"
 
 interface Props {
@@ -65,6 +66,7 @@ const MessagePage: React.FunctionComponent<Props> = (props) => {
     const {editMessageTitle, setEditMessageTitle} = useContext(EditMessageTitleContext)
     const {editMessageContent, setEditMessageContent} = useContext(EditMessageContentContext)
     const {hasNotification, setHasNotification} = useContext(HasNotificationContext)
+    const {emojis, setEmojis} = useContext(EmojisContext)
     const [message, setMessage] = useState(null) as any
     const [replies, setReplies] = useState([]) as any
     const [index, setIndex] = useState(0)
@@ -76,9 +78,11 @@ const MessagePage: React.FunctionComponent<Props> = (props) => {
     const [replyJumpFlag, setReplyJumpFlag] = useState(false)
     const [text, setText] = useState("")
     const [defaultIcon, setDefaultIcon] = useState(false)
+    const [showEmojiDropdown, setShowEmojiDropdown] = useState(false)
     const [error, setError] = useState(false)
     const history = useHistory()
     const errorRef = useRef(null) as any
+    const emojiRef = useRef(null) as any
     const messageID = props?.match.params.id
 
     const getFilter = () => {
@@ -526,6 +530,65 @@ const MessagePage: React.FunctionComponent<Props> = (props) => {
         setText("")
     }
 
+    useEffect(() => {
+        const clickListener = () => {
+            if (showEmojiDropdown) setShowEmojiDropdown(false)
+        }
+        window.addEventListener("click", clickListener)
+        return () => {
+            window.removeEventListener("click", clickListener)
+        }
+    }, [showEmojiDropdown])
+
+    const getEmojiMarginRight = () => {
+        if (typeof document === "undefined") return "0px"
+        const rect = emojiRef.current?.getBoundingClientRect()
+        if (!rect) return "0px"
+        const raw = window.innerWidth - rect.right
+        let offset = -145
+        if (mobile) offset += 0
+        return `${raw + offset}px`
+    }
+
+    const getEmojiMarginBottom = () => {
+        if (typeof document === "undefined") return "0px"
+        let elementName = ".mail-message-textarea"
+        const bodyRect = document.querySelector(elementName)?.getBoundingClientRect()
+        const rect = emojiRef.current?.getBoundingClientRect()
+        if (!rect || !bodyRect) return "0px"
+        const raw = bodyRect.bottom - rect.bottom
+        let offset = 180
+        if (mobile) offset += 0
+        return `${raw + offset}px`
+    }
+
+    const emojiGrid = () => {
+        let rows = [] as any
+        let rowAmount = 7
+        for (let i = 0; i < Object.keys(emojis).length; i++) {
+            let items = [] as any
+            for (let j = 0; j < rowAmount; j++) {
+                const k = (i*rowAmount)+j
+                const key = Object.keys(emojis)[k]
+                if (!key) break
+                const appendText = () => {
+                    setText((prev: string) => prev + ` emoji:${key}`)
+                    setShowEmojiDropdown(false)
+                }
+                items.push(
+                    <img draggable={false} src={emojis[key]} className="emoji-big" onClick={appendText}/>
+                )
+            }
+            if (items.length) rows.push(<div className="emoji-row">{items}</div>)
+        }
+        return (
+            <div className={`emoji-grid ${showEmojiDropdown ? "" : "hide-emoji-grid"}`}
+            style={{marginRight: getEmojiMarginRight(), marginBottom: getEmojiMarginBottom()}}>
+                {rows}
+            </div>
+        )
+    }
+
     const getReplyBoxJSX = () => {
         if (message.role === "system") return (
             <div className="mail-message-reply-box" style={{justifyContent: "flex-start"}}>
@@ -547,6 +610,9 @@ const MessagePage: React.FunctionComponent<Props> = (props) => {
                         {error ? <div className="mail-message-validation-container"><span className="mail-message-validation" ref={errorRef}></span></div> : null}
                         <div className="mail-message-button-container-left">
                             <button className="mail-message-button" onClick={reply}>Message</button>
+                            <button className="comments-emoji-button" ref={emojiRef} onClick={() => setShowEmojiDropdown((prev: boolean) => !prev)}>
+                                <img src={emojiSelect}/>
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -583,13 +649,14 @@ const MessagePage: React.FunctionComponent<Props> = (props) => {
                             <img draggable={false} className="mail-message-user-img" src={getCreatorPFP()} onClick={creatorImgClick} onAuxClick={creatorImgClick} style={{filter: defaultIcon ? getFilter() : ""}}/>
                         </div>
                         <div className="mail-message-text-container">
-                            <p className="mail-message-text">{jsxFunctions.parseTextLinks(message.content)}</p>
+                            <p className="mail-message-text">{jsxFunctions.parseTextLinks(message.content, emojis)}</p>
                         </div>
                     </div>
                     <table className="mail-message-container">
                         {generateRepliesJSX()}
                     </table>
                     {getReplyBoxJSX()}
+                    {emojiGrid()}
                     {generatePageButtonsJSX()}
                 </div> : null}
                 <Footer/>

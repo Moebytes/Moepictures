@@ -1,7 +1,9 @@
 import React, {useContext, useEffect, useRef, useState} from "react"
 import {useHistory} from "react-router-dom"
-import {ThemeContext, EnableDragContext, SessionContext, SessionFlagContext, QuoteTextContext, CommentIDContext, CommentJumpFlagContext} from "../Context"
+import {ThemeContext, EnableDragContext, SessionContext, SessionFlagContext, EmojisContext,
+QuoteTextContext, CommentIDContext, CommentJumpFlagContext, MobileContext} from "../Context"
 import functions from "../structures/Functions"
+import emojiSelect from "../assets/icons/emoji-select.png"
 import Comment from "./Comment"
 import "./styles/comments.less"
 
@@ -15,13 +17,17 @@ const Comments: React.FunctionComponent<Props> = (props) => {
     const {session, setSession} = useContext(SessionContext)
     const {sessionFlag, setSessionFlag} = useContext(SessionFlagContext)
     const {quoteText, setQuoteText} = useContext(QuoteTextContext)
+    const {mobile, setMobile} = useContext(MobileContext)
     const [text, setText] = useState("")
     const [error, setError] = useState(false)
     const [comments, setComments] = useState([]) as any
     const [commentFlag, setCommentFlag] = useState(false)
     const {commentID, setCommentID} = useContext(CommentIDContext)
     const {commentJumpFlag, setCommentJumpFlag} = useContext(CommentJumpFlagContext)
+    const {emojis, setEmojis} = useContext(EmojisContext)
+    const [showEmojiDropdown, setShowEmojiDropdown] = useState(false)
     const errorRef = useRef(null) as any
+    const emojiRef = useRef(null) as any
     const history = useHistory()
 
     useEffect(() => {
@@ -139,6 +145,65 @@ const Comments: React.FunctionComponent<Props> = (props) => {
         event.stopPropagation()
     }
 
+    useEffect(() => {
+        const clickListener = () => {
+            if (showEmojiDropdown) setShowEmojiDropdown(false)
+        }
+        window.addEventListener("click", clickListener)
+        return () => {
+            window.removeEventListener("click", clickListener)
+        }
+    }, [showEmojiDropdown])
+
+    const getEmojiMarginRight = () => {
+        if (typeof document === "undefined") return "0px"
+        const rect = emojiRef.current?.getBoundingClientRect()
+        if (!rect) return "0px"
+        const raw = window.innerWidth - rect.right
+        let offset = -145
+        if (mobile) offset += 0
+        return `${raw + offset}px`
+    }
+
+    const getEmojiMarginBottom = () => {
+        if (typeof document === "undefined") return "0px"
+        let elementName = ".comments-textarea"
+        const bodyRect = document.querySelector(elementName)?.getBoundingClientRect()
+        const rect = emojiRef.current?.getBoundingClientRect()
+        if (!rect || !bodyRect) return "0px"
+        const raw = bodyRect.bottom - rect.bottom
+        let offset = 100
+        if (mobile) offset += 0
+        return `${raw + offset}px`
+    }
+
+    const emojiGrid = () => {
+        let rows = [] as any
+        let rowAmount = 7
+        for (let i = 0; i < Object.keys(emojis).length; i++) {
+            let items = [] as any
+            for (let j = 0; j < rowAmount; j++) {
+                const k = (i*rowAmount)+j
+                const key = Object.keys(emojis)[k]
+                if (!key) break
+                const appendText = () => {
+                    setText((prev: string) => prev + ` emoji:${key}`)
+                    setShowEmojiDropdown(false)
+                }
+                items.push(
+                    <img draggable={false} src={emojis[key]} className="emoji-big" onClick={appendText}/>
+                )
+            }
+            if (items.length) rows.push(<div className="emoji-row">{items}</div>)
+        }
+        return (
+            <div className={`emoji-grid ${showEmojiDropdown ? "" : "hide-emoji-grid"}`}
+            style={{marginRight: getEmojiMarginRight(), marginBottom: getEmojiMarginBottom()}}>
+                {rows}
+            </div>
+        )
+    }
+
     const getCommentBox = () => {
         if (session.banned) return (
             <div className="comments-input-container">
@@ -153,7 +218,10 @@ const Comments: React.FunctionComponent<Props> = (props) => {
                     </div>
                     {error ? <div className="comments-validation-container"><span className="comments-validation" ref={errorRef}></span></div> : null}
                     <div className="comments-button-container-left">
-                        <button className="comments-button" onClick={post}>Post</button>
+                    <button className="comments-button" onClick={post}>Post</button>
+                    <button className="comments-emoji-button" ref={emojiRef} onClick={() => setShowEmojiDropdown((prev: boolean) => !prev)}>
+                        <img src={emojiSelect}/>
+                    </button>
                     </div>
                 </div>
             )
@@ -166,6 +234,7 @@ const Comments: React.FunctionComponent<Props> = (props) => {
             {comments.length ? generateCommentsJSX() :
             <div className="comments-text">There are no comments.</div>}
             {getCommentBox()}
+            {emojiGrid()}
         </div>
     )
 }

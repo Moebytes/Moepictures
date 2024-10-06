@@ -217,6 +217,7 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
             try {
                 if (!post) post = await functions.get("/api/post", {postID}, session, setSessionFlag)
             } catch (err: any) {
+                if (err.response?.status === 404) history.push("/404")
                 if (err.response?.status === 403) history.push("/403")
                 return
             }
@@ -240,6 +241,7 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
                         post = await functions.get("/api/post", {postID}, session, setSessionFlag)
                         setPost(post)
                     } catch (err: any) {
+                        if (err.response?.status === 404) history.push("/404")
                         if (err.response?.status === 403) history.push("/403")
                         return
                     }
@@ -260,6 +262,7 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
             try {
                 post = await functions.get("/api/post", {postID}, session, setSessionFlag)
             } catch (err: any) {
+                if (err.response?.status === 404) history.push("/404")
                 if (err.response?.status === 403) history.push("/403")
                 return
             }

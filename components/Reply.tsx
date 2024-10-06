@@ -2,7 +2,8 @@ import React, {useContext, useEffect, useRef, useState} from "react"
 import {useHistory} from "react-router-dom"
 import {ThemeContext, QuoteTextContext, SessionContext, DeleteReplyIDContext, DeleteReplyFlagContext,
 EditReplyIDContext, EditReplyFlagContext, EditReplyContentContext, ReportReplyIDContext, SiteHueContext,
-SiteLightnessContext, SiteSaturationContext, EnableDragContext, MobileContext, SessionFlagContext} from "../Context"
+SiteLightnessContext, SiteSaturationContext, EnableDragContext, MobileContext, SessionFlagContext,
+EmojisContext} from "../Context"
 import {HashLink as Link} from "react-router-hash-link"
 import functions from "../structures/Functions"
 import favicon from "../assets/icons/favicon.png"
@@ -41,6 +42,7 @@ const Reply: React.FunctionComponent<Props> = (props) => {
     const {editReplyID, setEditReplyID} = useContext(EditReplyIDContext)
     const {editReplyContent, setEditReplyContent} = useContext(EditReplyContentContext)
     const {reportReplyID, setReportReplyID} = useContext(ReportReplyIDContext)
+    const {emojis, setEmojis} = useContext(EmojisContext)
     const history = useHistory()
 
     const defaultIcon = props.reply?.image ? false : true
@@ -99,11 +101,11 @@ const Reply: React.FunctionComponent<Props> = (props) => {
                 jsx.push(
                     <div className="reply-quote-container">
                         {userPart ? <span className="reply-quote-user" onClick={() => goToReply(id)}>{`${username.trim()} ${said.trim()}`}</span> : null}
-                        <span className="reply-quote-text">{jsxFunctions.parseTextLinks(text.trim())}</span>
+                        <span className="reply-quote-text">{jsxFunctions.parseTextLinks(text.trim(), emojis)}</span>
                     </div>
                 )
             } else {
-                jsx.push(<span className="reply-text">{jsxFunctions.parseTextLinks(piece.trim())}</span>)
+                jsx.push(<span className="reply-text">{jsxFunctions.parseTextLinks(piece.trim(), emojis)}</span>)
             }
         }
         return jsx

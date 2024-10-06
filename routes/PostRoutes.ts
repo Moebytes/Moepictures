@@ -33,7 +33,7 @@ const PostRoutes = (app: Express) => {
             const postID = req.query.postID as string
             if (Number.isNaN(Number(postID))) return res.status(400).send("Invalid postID")
             let result = await sql.post.post(Number(postID))
-            if (!result) return res.status(400).send("Invalid postID")
+            if (!result) return res.status(404).send("Not found")
             if (req.session.role !== "admin" && req.session.role !== "mod") {
                 if (result.hidden) return res.status(403).end()
                 if (result.restrict === "explicit") return res.status(403).end()
@@ -507,7 +507,7 @@ const PostRoutes = (app: Express) => {
                 const upscaledImagePath = functions.getUpscaledImagePath(post.images[i].type, originalPostID, post.images[i].order, post.images[i].filename)
                 const upscaledBuffer = await serverFunctions.getFile(upscaledImagePath) as Buffer
 
-                let current = buffer ? buffer : upscaledBuffer
+                let current = upscaledBuffer ? upscaledBuffer : buffer
                 let order = i + 1
                 const ext = path.extname(post.images[i].filename).replace(".", "")
                 let fileOrder = post.images.length > 1 ? `${order}` : "1"

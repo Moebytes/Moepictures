@@ -233,6 +233,7 @@ export default class Functions {
 
     public static isImage = (file?: string) => {
         if (!file) return false
+        file = file.replace(/\?.*$/, "")
         if (file?.startsWith("blob:")) {
             const ext = file.split("#")?.[1] || ""
             return Functions.arrayIncludes(ext, imageExtensions)
@@ -242,6 +243,7 @@ export default class Functions {
 
     public static isAudio = (file?: string) => {
         if (!file) return false
+        file = file.replace(/\?.*$/, "")
         if (file?.startsWith("blob:")) {
             const ext = file.split("#")?.[1] || ""
             return Functions.arrayIncludes(ext, audioExtensions)
@@ -251,6 +253,7 @@ export default class Functions {
 
     public static isModel = (file?: string) => {
         if (!file) return false
+        file = file.replace(/\?.*$/, "")
         if (file?.startsWith("blob:")) {
             const ext = file.split("#")?.[1] || ""
             return Functions.arrayIncludes(ext, modelExtensions)
@@ -260,6 +263,7 @@ export default class Functions {
 
     public static isGIF = (file?: string) => {
         if (!file) return false
+        file = file.replace(/\?.*$/, "")
         if (file?.startsWith("blob:")) {
             const ext = file.split("#")?.[1] || ""
             return ext === ".gif"
@@ -269,6 +273,7 @@ export default class Functions {
 
     public static isWebP = (file?: string) => {
         if (!file) return false
+        file = file.replace(/\?.*$/, "")
         if (file?.startsWith("blob:")) {
             const ext = file.split("#")?.[1] || ""
             return ext === ".webp"
@@ -278,6 +283,7 @@ export default class Functions {
 
     public static isGLTF = (file?: string) => {
         if (!file) return false
+        file = file.replace(/\?.*$/, "")
         if (file?.startsWith("blob:")) {
             const ext = file.split("#")?.[1] || ""
             return ext === ".glb"
@@ -287,6 +293,7 @@ export default class Functions {
 
     public static isOBJ = (file?: string) => {
         if (!file) return false
+        file = file.replace(/\?.*$/, "")
         if (file?.startsWith("blob:")) {
             const ext = file.split("#")?.[1] || ""
             return ext === ".obj"
@@ -296,6 +303,7 @@ export default class Functions {
 
     public static isFBX = (file?: string) => {
         if (!file) return false
+        file = file.replace(/\?.*$/, "")
         if (file?.startsWith("blob:")) {
             const ext = file.split("#")?.[1] || ""
             return ext === ".fbx"
@@ -319,6 +327,7 @@ export default class Functions {
 
     public static isVideo = (file?: string) => {
         if (!file) return false
+        file = file.replace(/\?.*$/, "")
         if (file?.startsWith("blob:")) {
             const ext = file.split("#")?.[1] || ""
             return Functions.arrayIncludes(ext, videoExtensions)
@@ -328,6 +337,7 @@ export default class Functions {
 
     public static isMP4 = (file?: string) => {
         if (!file) return false
+        file = file.replace(/\?.*$/, "")
         if (file?.startsWith("blob:")) {
             const ext = file.split("#")?.[1] || ""
             return ext === ".mp4"
@@ -337,6 +347,7 @@ export default class Functions {
 
     public static isWebM = (file?: string) => {
         if (!file) return false
+        file = file.replace(/\?.*$/, "")
         if (file?.startsWith("blob:")) {
             const ext = file.split("#")?.[1] || ""
             return ext === ".webm"
@@ -1258,16 +1269,26 @@ export default class Functions {
             sort === "reverse date" ||
             sort === "drawn" ||
             sort === "reverse drawn" || 
-            sort === "cuteness" ||
-            sort === "reverse cuteness" ||
+            sort === "bookmarks" || 
+            sort === "reverse bookmarks" ||
             sort === "favorites" || 
             sort === "reverse favorites" ||
+            sort === "cuteness" ||
+            sort === "reverse cuteness" ||
+            sort === "variations" || 
+            sort === "reverse variations" ||
+            sort === "thirdparty" || 
+            sort === "reverse thirdparty" ||
+            sort === "popularity" || 
+            sort === "reverse popularity" ||
             sort === "tagcount" || 
             sort === "reverse tagcount" ||
             sort === "filesize" || 
             sort === "reverse filesize" ||
-            sort === "bookmarks" || 
-            sort === "reverse bookmarks") return true 
+            sort === "width" || 
+            sort === "reverse width" ||
+            sort === "height" || 
+            sort === "reverse height") return true 
         return false
     }
 
@@ -1427,8 +1448,20 @@ export default class Functions {
         }
     }
 
+    public static emojisCache = async (session: any, setSessionFlag: (value: boolean) => void) => {
+        const cache = await localforage.getItem("emojis")
+        if (cache) {
+            return JSON.parse(cache as any)
+        } else {
+            let emojis = await Functions.get("/api/misc/emojis", null, session, setSessionFlag)
+            localforage.setItem("emojis", JSON.stringify(emojis))
+            return emojis
+        }
+    }
+
     public static clearCache = () => {
         localforage.removeItem("tags")
+        localforage.removeItem("emojis")
     }
 
     public static readableFileSize = (bytes: number) => {
@@ -1817,7 +1850,7 @@ export default class Functions {
     }
 
     public static stripLinks = (text: string) => {
-        return text.replace(/(https?:\/\/[^\s]+)/g, "")
+        return text.replace(/(https?:\/\/[^\s]+)/g, "").replace(/(emoji:[^\s]+)/g, "")
     }
 
     public static blockedTags = () => {

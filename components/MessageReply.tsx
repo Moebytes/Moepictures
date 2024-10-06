@@ -2,7 +2,7 @@ import React, {useContext, useEffect, useRef, useState} from "react"
 import {useHistory} from "react-router-dom"
 import {ThemeContext, QuoteTextContext, SessionContext, SessionFlagContext, DeleteMsgReplyIDContext, DeleteMsgReplyFlagContext,
 EditMsgReplyIDContext, EditMsgReplyFlagContext, EditMsgReplyContentContext, SiteHueContext,
-SiteLightnessContext, SiteSaturationContext, EnableDragContext, MobileContext} from "../Context"
+SiteLightnessContext, SiteSaturationContext, EnableDragContext, MobileContext, EmojisContext} from "../Context"
 import {HashLink as Link} from "react-router-hash-link"
 import functions from "../structures/Functions"
 import favicon from "../assets/icons/favicon.png"
@@ -39,6 +39,7 @@ const MessageReply: React.FunctionComponent<Props> = (props) => {
     const {editMsgReplyFlag, setEditMsgReplyFlag} = useContext(EditMsgReplyFlagContext)
     const {editMsgReplyID, setEditMsgReplyID} = useContext(EditMsgReplyIDContext)
     const {editMsgReplyContent, setEditMsgReplyContent} = useContext(EditMsgReplyContentContext)
+    const {emojis, setEmojis} = useContext(EmojisContext)
     const history = useHistory()
     const reply = props.reply.reply
 
@@ -98,11 +99,11 @@ const MessageReply: React.FunctionComponent<Props> = (props) => {
                 jsx.push(
                     <div className="reply-quote-container">
                         {userPart ? <span className="reply-quote-user" onClick={() => goToReply(id)}>{`${username.trim()} ${said.trim()}`}</span> : null}
-                        <span className="reply-quote-text">{jsxFunctions.parseTextLinks(text.trim())}</span>
+                        <span className="reply-quote-text">{jsxFunctions.parseTextLinks(text.trim(), emojis)}</span>
                     </div>
                 )
             } else {
-                jsx.push(<span className="reply-text">{jsxFunctions.parseTextLinks(piece.trim())}</span>)
+                jsx.push(<span className="reply-text">{jsxFunctions.parseTextLinks(piece.trim(), emojis)}</span>)
             }
         }
         return jsx
