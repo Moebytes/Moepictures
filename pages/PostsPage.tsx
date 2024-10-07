@@ -11,6 +11,7 @@ import DragAndDrop from "../components/DragAndDrop"
 import ToolTip from "../components/ToolTip"
 import TagBanner from "../components/TagBanner"
 import BulkQuickEditDialog from "../dialogs/BulkQuickEditDialog"
+import BulkDeleteDialog from "../dialogs/BulkDeleteDialog"
 import CaptchaDialog from "../dialogs/CaptchaDialog"
 import SaveSearchDialog from "../dialogs/SaveSearchDialog"
 import EditSaveSearchDialog from "../dialogs/EditSaveSearchDialog"
@@ -106,6 +107,7 @@ const PostsPage: React.FunctionComponent = (props) => {
         <DragAndDrop/>
         <CaptchaDialog/>
         <BulkQuickEditDialog/>
+        <BulkDeleteDialog/>
         <SaveSearchDialog/>
         <EditSaveSearchDialog/>
         <DeleteAllSaveSearchDialog/>

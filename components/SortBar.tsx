@@ -7,7 +7,8 @@ SizeTypeContext, BrightnessContext, ContrastContext, HueContext, SaturationConte
 BlurContext, SharpenContext, EnableDragContext, FilterDropActiveContext, SquareContext, PixelateContext, SiteLightnessContext, PostsContext,
 ShowDownloadDialogContext, HideTitlebarContext, ImageTypeContext, RestrictTypeContext, SortTypeContext, SortReverseContext, SiteSaturationContext,
 StyleTypeContext, SpeedContext, ReverseContext, MobileContext, RelativeContext, SessionContext, MobileScrollingContext, SessionFlagContext,
-SelectionModeContext, SelectionItemsContext, SearchFlagContext, DownloadIDsContext, DownloadFlagContext, ShowBulkQuickEditDialogContext} from "../Context"
+SelectionModeContext, SelectionItemsContext, SearchFlagContext, DownloadIDsContext, DownloadFlagContext, ShowBulkQuickEditDialogContext,
+ShowBulkDeleteDialogContext} from "../Context"
 import leftArrow from "../assets/icons/leftArrow.png"
 import rightArrow from "../assets/icons/rightArrow.png"
 import upArrow from "../assets/icons/upArrow.png"
@@ -51,6 +52,7 @@ import select from "../assets/icons/select.png"
 import selectOn from "../assets/icons/select-on.png"
 import star from "../assets/icons/star.png"
 import quickEdit from "../assets/icons/quickedit.png"
+import deleteIcon from "../assets/icons/tag-delete.png"
 import functions from "../structures/Functions"
 import permissions from "../structures/Permissions"
 import "./styles/sortbar.less"
@@ -95,6 +97,7 @@ const SortBar: React.FunctionComponent = (props) => {
     const {selectionMode, setSelectionMode} = useContext(SelectionModeContext)
     const {selectionItems, setSelectionItems} = useContext(SelectionItemsContext) as {selectionItems: Set<string>, setSelectionItems: any}
     const {showBulkQuickEditDialog, setShowBulkQuickEditDialog} = useContext(ShowBulkQuickEditDialogContext)
+    const {showBulkDeleteDialog, setShowBulkDeleteDialog} = useContext(ShowBulkDeleteDialogContext)
     const {searchFlag, setSearchFlag} = useContext(SearchFlagContext)
     const {relative, setRelative} = useContext(RelativeContext)
     const {session, setSession} = useContext(SessionContext)
@@ -684,6 +687,10 @@ const SortBar: React.FunctionComponent = (props) => {
         setShowBulkQuickEditDialog((prev: boolean) => !prev)
     }
 
+    const bulkDelete = () => {
+        setShowBulkDeleteDialog((prev: boolean) => !prev)
+    }
+
     const changeSortType = (sortType: string) => {
         if (sortType === "bookmarks") {
             if (!permissions.isPremium(session)) return setPremiumRequired(true)
@@ -741,6 +748,10 @@ const SortBar: React.FunctionComponent = (props) => {
                     {getStyleJSX()}
                 </div>
                 <div className="sortbar-right">
+                    {permissions.isAdmin(session) && selectionMode ? 
+                    <div className="sortbar-item" style={{filter: "hue-rotate(-5deg)"}} onClick={bulkDelete}>
+                        <img className="sortbar-img" src={deleteIcon} style={{filter: getFilter()}}/>
+                    </div> : null}
                     {permissions.isElevated(session) && selectionMode ? 
                     <div className="sortbar-item" onClick={bulkQuickEdit}>
                         <img className="sortbar-img" src={quickEdit} style={{filter: getFilter()}}/>

@@ -1,11 +1,11 @@
 import React, {useContext, useEffect, useRef, useState, useReducer} from "react"
-import {useLocation} from "react-router-dom"
+import {useLocation, useHistory} from "react-router-dom"
 import {ThemeContext, EnableDragContext, DownloadFlagContext, DownloadIDsContext, SpeedContext,
 ReverseContext, MobileContext, SessionContext, SiteHueContext,SiteLightnessContext, SiteSaturationContext, 
 ImageExpandContext, PixelateContext, AudioContext, PitchContext, VolumeContext, PreviousVolumeContext, DurationContext,
 ProgressContext, SecondsProgressContext, SeekToContext, DragProgressContext, DraggingContext, PausedContext,
 RewindFlagContext, FastforwardFlagContext, PlayFlagContext, VolumeFlagContext, ResetFlagContext, 
-MuteFlagContext, AudioTitleContext} from "../Context"
+MuteFlagContext, AudioPostContext} from "../Context"
 import functions from "../structures/Functions"
 import Slider from "react-slider"
 import musicplaying from "../assets/icons/musicplaying.gif"
@@ -89,7 +89,7 @@ const AudioPlayer: React.FunctionComponent = (props) => {
     const {seekTo, setSeekTo} = useContext(SeekToContext)
     const [init, setInit] = useState(false)
     const {audio, setAudio} = useContext(AudioContext)
-    const {audioTitle, setAudioTitle} = useContext(AudioTitleContext)
+    const {audioPost, setAudioPost} = useContext(AudioPostContext)
     const {rewindFlag, setRewindFlag} = useContext(RewindFlagContext)
     const {fastForwardFlag, setFastForwardFlag} = useContext(FastforwardFlagContext)
     const {playFlag, setPlayFlag} = useContext(PlayFlagContext)
@@ -98,6 +98,7 @@ const AudioPlayer: React.FunctionComponent = (props) => {
     const {resetFlag, setResetFlag} = useContext(ResetFlagContext)
     const [hover, setHover] = useState(false)
     const location = useLocation()
+    const history = useHistory()
 
     useEffect(() => {
         if (location.pathname !== "/post") {
@@ -275,6 +276,7 @@ const AudioPlayer: React.FunctionComponent = (props) => {
     }, [reverse])
 
     const updatePitch = async () => {
+        if (!soundtouchNode) return
         if (pitch === 0) {
             const pitchCorrect = 1 / speed
             return soundtouchNode.parameters.get("pitch").value = 1 * pitchCorrect
@@ -288,6 +290,7 @@ const AudioPlayer: React.FunctionComponent = (props) => {
     }, [pitch, speed])
 
     const bitcrush = async () => {
+        if (!bitcrusherNode) return
         if (pixelate === 1) return bitcrusherNode.parameters.get("sampleRate").value = 44100
         bitcrusherNode.parameters.get("sampleRate").value = Math.ceil(22050 / pixelate)
     }
@@ -387,8 +390,8 @@ const AudioPlayer: React.FunctionComponent = (props) => {
             setSecondsProgress(dragProgress)
             setProgress((dragProgress / duration) * 100)
             setDragProgress(null)
-        }
-    }, [dragging, dragProgress])
+       }
+    }, [dragging, dragProgress, duration])
 
     const getAudioSpeedMarginRight = () => {
         const controlRect = audioControls.current?.getBoundingClientRect()
@@ -513,16 +516,16 @@ const AudioPlayer: React.FunctionComponent = (props) => {
         stop()
         setPaused(true)
         setAudio("")
-        setAudioTitle("")
+        setAudioPost(null)
         setInit(false)
     }
 
     if (audio) {
         return (
-            <div className="audio-player" ref={audioControls} onMouseEnter={() => setHover(true)} onMouseLeave={() => setHover(false)}>
-                <div className="audio-player-row" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
-                    <span className="audio-player-title">{audioTitle || "Unknown"}</span>
-                </div>
+            <div className="audio-player" style={{height: audioPost ? "140px" : "100px"}} ref={audioControls} onMouseEnter={() => setHover(true)} onMouseLeave={() => setHover(false)} onMouseUp={() => setDragging(false)}>
+                {audioPost ? <div className="audio-player-row" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
+                    <span className="audio-player-title" onClick={() => history.push(`/post/${audioPost.postID}`)}>{audioPost.title || "Unknown"}</span>
+                </div> : null}
                 <div className="audio-player-row">
                     <div className="audio-player-container">
                         <img draggable={false} style={{filter: getFilter()}} className="audio-player-img" src={musicplaying}/>
@@ -533,7 +536,7 @@ const AudioPlayer: React.FunctionComponent = (props) => {
                     </div>
                     <div className="audio-player-container" style={{width: "100%"}}>
                         <p className="audio-player-text">{dragging ? functions.formatSeconds(dragProgress) : functions.formatSeconds(secondsProgress)}</p>
-                        <Slider ref={audioSliderRef} className="audio-player-slider" trackClassName="audio-player-slider-track" thumbClassName="audio-player-slider-thumb" min={0} max={100} value={progress} onBeforeChange={() => setDragging(true)} onChange={(value) => updateProgressText(value)} onAfterChange={(value) => seek(value)}/>
+                        <Slider ref={audioSliderRef} className="audio-player-slider" trackClassName="audio-player-slider-track" thumbClassName="audio-player-slider-thumb" min={0} max={100} value={dragging ? (dragProgress / duration) * 100 : progress} onBeforeChange={() => setDragging(true)} onChange={(value) => updateProgressText(value)} onAfterChange={(value) => seek(value)}/>
                         <p className="audio-player-text">{functions.formatSeconds(duration)}</p>
                     </div>
                     <div className="audio-player-container">

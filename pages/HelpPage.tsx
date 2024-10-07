@@ -28,6 +28,7 @@ import thirdPartyImg from "../assets/misc/thirdparty.png"
 import aliasesImg from "../assets/misc/aliases.png"
 import implicationsImg from "../assets/misc/implications.png"
 import captchaImg from "../assets/misc/captcha.png"
+import musicImg from "../assets/misc/music.png"
 import CaptchaDialog from "../dialogs/CaptchaDialog"
 import "./styles/helppage.less"
 
@@ -187,6 +188,17 @@ const HelpPage: React.FunctionComponent = (props) => {
                     wireframe, matcap, and edit shapekeys and lighting.
                 </span>
                 <div className="help-img-container"><img className="help-img" src={videoPlayerImg}/></div></>
+            )
+        }
+        if (helpTab === "global-music") {
+            return (
+                <><span className="help-heading">Global Music</span>
+                <span className="help-text">
+                    The music player is available globally (apart from having the per-post player which is also synced). This means 
+                    that when you play a song you can navigate to any page on the site and it will continue to play. To stop playback,
+                    click the stop button on the left of the player or reload the page on a non-music post.
+                </span>
+                <div className="help-img-container"><img className="help-img" src={musicImg}/></div></>
             )
         }
         if (helpTab === "favorites") {
@@ -451,6 +463,7 @@ const HelpPage: React.FunctionComponent = (props) => {
                         <span className="help-nav-text" onClick={() => setHelpTab("image-searching")}>Image Searching</span>
                         <span className="help-nav-text" onClick={() => setHelpTab("filters")}>Filters</span>
                         <span className="help-nav-text" onClick={() => setHelpTab("custom-players")}>Custom Players</span>
+                        <span className="help-nav-text" onClick={() => setHelpTab("global-music")}>Global Music</span>
                         <span className="help-nav-text" onClick={() => setHelpTab("translations")}>Translations</span>
                         <span className="help-nav-text" onClick={() => setHelpTab("favorites")}>Favorites</span>
                         <span className="help-nav-text" onClick={() => setHelpTab("cuteness")}>Cuteness</span>

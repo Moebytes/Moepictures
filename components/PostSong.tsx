@@ -5,7 +5,7 @@ ReverseContext, MobileContext, TranslationModeContext, TranslationDrawingEnabled
 SiteLightnessContext, SiteSaturationContext, ImageExpandContext, AudioContext, PitchContext, VolumeContext, PreviousVolumeContext, 
 ProgressContext, SecondsProgressContext, SeekToContext, DragProgressContext, DraggingContext, PausedContext, DurationContext,
 RewindFlagContext, FastforwardFlagContext, PlayFlagContext, VolumeFlagContext, ResetFlagContext, 
-MuteFlagContext, AudioTitleContext} from "../Context"
+MuteFlagContext, AudioPostContext} from "../Context"
 import functions from "../structures/Functions"
 import Slider from "react-slider"
 import audioReverseIcon from "../assets/icons/audio-reverse.png"
@@ -104,7 +104,7 @@ const PostSong: React.FunctionComponent<Props> = (props) => {
     const {volumeFlag, setVolumeFlag} = useContext(VolumeFlagContext)
     const {muteFlag, setMuteFlag} = useContext(MuteFlagContext)
     const {resetFlag, setResetFlag} = useContext(ResetFlagContext)
-    const {audioTitle, setAudioTitle} = useContext(AudioTitleContext)
+    const {audioPost, setAudioPost} = useContext(AudioPostContext)
 
     const getFilter = () => {
         return `hue-rotate(${siteHue - 180}deg) saturate(${siteSaturation}%) brightness(${siteLightness + 70}%)`
@@ -116,8 +116,9 @@ const PostSong: React.FunctionComponent<Props> = (props) => {
     }
 
     useEffect(() => {
+        if (!functions.isAudio(props.audio)) return
         setAudio(props.audio)
-        setAudioTitle(props.post.title)
+        setAudioPost(props.post)
         if (ref.current) ref.current.style.opacity = "1"
         updateSongCover()
     }, [props.audio])
@@ -179,7 +180,7 @@ const PostSong: React.FunctionComponent<Props> = (props) => {
             setProgress((dragProgress / duration) * 100)
             setDragProgress(null)
         }
-    }, [dragging, dragProgress])
+    }, [dragging, dragProgress, duration])
 
     const getAudioSpeedMarginRight = () => {
         const controlRect = audioControls.current?.getBoundingClientRect()
@@ -221,7 +222,7 @@ const PostSong: React.FunctionComponent<Props> = (props) => {
 
     const seek = (position: number) => {
         setAudio(props.audio)
-        setAudioTitle(props.post.title)
+        setAudioPost(props.post)
         setPlayFlag("always")
         let secondsProgress = reverse ? ((100 - position) / 100) * duration : (position / 100) * duration
         let progress = reverse ? 100 - position : position
@@ -232,7 +233,7 @@ const PostSong: React.FunctionComponent<Props> = (props) => {
 
     const updatePlay = () => {
         setAudio(props.audio)
-        setAudioTitle(props.post.title)
+        setAudioPost(props.post)
         setPlayFlag("toggle")
     }
 
@@ -453,7 +454,7 @@ const PostSong: React.FunctionComponent<Props> = (props) => {
                         <div className="audio-controls" ref={audioControls} onMouseUp={() => setDragging(false)} onMouseOver={controlMouseEnter} onMouseLeave={controlMouseLeave}>
                             <div className="audio-control-row" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                                 <p className="audio-control-text">{dragging ? functions.formatSeconds(dragProgress) : functions.formatSeconds(secondsProgress)}</p>
-                                <Slider ref={audioSliderRef} className="audio-slider" trackClassName="audio-slider-track" thumbClassName="audio-slider-thumb" min={0} max={100} value={progress} onBeforeChange={() => setDragging(true)} onChange={(value) => updateProgressText(value)} onAfterChange={(value) => seek(value)}/>
+                                <Slider ref={audioSliderRef} className="audio-slider" trackClassName="audio-slider-track" thumbClassName="audio-slider-thumb" min={0} max={100} value={dragging ? (dragProgress / duration) * 100 : progress} onBeforeChange={() => setDragging(true)} onChange={(value) => updateProgressText(value)} onAfterChange={(value) => seek(value)}/>
                                 <p className="audio-control-text">{functions.formatSeconds(duration)}</p>
                             </div>
                             <div className="audio-control-row" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>

@@ -4,7 +4,7 @@ import loading from "../assets/icons/loading.gif"
 import {ThemeContext, SizeTypeContext, BrightnessContext, ContrastContext, HueContext, SaturationContext, LightnessContext, MobileContext, ScrollYContext,
 BlurContext, SharpenContext, SquareContext, PixelateContext, DownloadFlagContext, DownloadIDsContext, SpeedContext, ReverseContext, ScrollContext, SiteHueContext,
 ToolTipXContext, ToolTipYContext, ToolTipEnabledContext, ToolTipPostContext, ToolTipImgContext, SiteLightnessContext, SiteSaturationContext, SelectionModeContext, 
-SelectionItemsContext, SelectionPostsContext, SessionContext, SessionFlagContext, ActiveDropdownContext, AudioContext, PlayFlagContext, AudioTitleContext} from "../Context"
+SelectionItemsContext, SelectionPostsContext, SessionContext, SessionFlagContext, ActiveDropdownContext, AudioContext, PlayFlagContext, AudioPostContext} from "../Context"
 import {HashLink as Link} from "react-router-hash-link"
 import path from "path"
 import functions from "../structures/Functions"
@@ -83,7 +83,7 @@ const GridSong = forwardRef<Ref, Props>((props, componentRef) => {
     const [selected, setSelected] = useState(false)
     const {audio, setAudio} = useContext(AudioContext)
     const {playFlag, setPlayFlag} = useContext(PlayFlagContext)
-    const {audioTitle, setAudioTitle} = useContext(AudioTitleContext)
+    const {audioPost, setAudioPost} = useContext(AudioPostContext)
     const [hover, setHover] = useState(false)
     const history = useHistory()
 
@@ -558,7 +558,7 @@ const GridSong = forwardRef<Ref, Props>((props, componentRef) => {
     const songClick = (event: React.MouseEvent) => {
         event.stopPropagation()
         setAudio(props.audio)
-        setAudioTitle(props.post.title)
+        setAudioPost(props.post)
         setPlayFlag("always")
     }
 

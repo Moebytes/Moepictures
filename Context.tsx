@@ -156,6 +156,7 @@ export const SelectionModeContext = React.createContext<any>(null)
 export const SelectionItemsContext = React.createContext<any>(null)
 export const SelectionPostsContext = React.createContext<any>(null)
 export const ShowBulkQuickEditDialogContext = React.createContext<any>(null)
+export const ShowBulkDeleteDialogContext = React.createContext<any>(null)
 export const ShowTakedownPostDialogContext = React.createContext<any>(null)
 export const TakedownTagContext = React.createContext<any>(null)
 export const ImageExpandContext = React.createContext<any>(null)
@@ -192,7 +193,7 @@ export const EditSaveSearchNameContext = React.createContext<any>(null)
 export const EditSaveSearchKeyContext = React.createContext<any>(null)
 export const EditSaveSearchTagsContext = React.createContext<any>(null)
 export const AudioContext = React.createContext<any>(null)
-export const AudioTitleContext = React.createContext<any>(null)
+export const AudioPostContext = React.createContext<any>(null)
 export const DurationContext = React.createContext<any>(null)
 export const ProgressContext = React.createContext<any>(null)
 export const SecondsProgressContext = React.createContext<any>(null)
@@ -345,6 +346,7 @@ const Context: React.FunctionComponent = (props) => {
     const [selectionItems, setSelectionItems] = useState(new Set())
     const [selectionPosts, setSelectionPosts] = useState(new Map())
     const [showBulkQuickEditDialog, setShowBulkQuickEditDialog] = useState(false)
+    const [showBulkDeleteDialog, setShowBulkDeleteDialog] = useState(false)
     const [imageExpand, setImageExpand] = useState(false)
     const [dmTarget, setDMTarget] = useState(null)
     const [commentID, setCommentID] = useState(0)
@@ -376,7 +378,7 @@ const Context: React.FunctionComponent = (props) => {
     const [editSaveSearchTags, setEditSaveSearchTags] = useState(null)
     const [deleteAllSaveSearchDialog, setDeleteAllSaveSearchDialog] = useState(false)
     const [audio, setAudio] = useState("")
-    const [audioTitle, setAudioTitle] = useState("")
+    const [audioPost, setAudioPost] = useState(null)
     const [pitch, setPitch] = useState(0)
     const [volume, setVolume] = useState(0.75)
     const [previousVolume, setPreviousVolume] = useState(0)
@@ -397,7 +399,7 @@ const Context: React.FunctionComponent = (props) => {
 
 return (
     <>
-        <AudioTitleContext.Provider value={{audioTitle, setAudioTitle}}>
+        <AudioPostContext.Provider value={{audioPost, setAudioPost}}>
         <ResetFlagContext.Provider value={{resetFlag, setResetFlag}}>
         <MuteFlagContext.Provider value={{muteFlag, setMuteFlag}}>
         <VolumeFlagContext.Provider value={{volumeFlag, setVolumeFlag}}>
@@ -454,6 +456,7 @@ return (
         <TakedownTagContext.Provider value={{takedownTag, setTakedownTag}}>
         <ShowTakedownPostDialogContext.Provider value={{showTakedownPostDialog, setShowTakedownPostDialog}}>
         <SelectionPostsContext.Provider value={{selectionPosts, setSelectionPosts}}>
+        <ShowBulkDeleteDialogContext.Provider value={{showBulkDeleteDialog, setShowBulkDeleteDialog}}>
         <ShowBulkQuickEditDialogContext.Provider value={{showBulkQuickEditDialog, setShowBulkQuickEditDialog}}>
         <SelectionItemsContext.Provider value={{selectionItems, setSelectionItems}}>
         <UpdateUserFlagContext.Provider value={{updateUserFlag, setUpdateUserFlag}}>
@@ -715,6 +718,7 @@ return (
         </UpdateUserFlagContext.Provider>
         </SelectionItemsContext.Provider>
         </ShowBulkQuickEditDialogContext.Provider>
+        </ShowBulkDeleteDialogContext.Provider>
         </SelectionPostsContext.Provider>
         </ShowTakedownPostDialogContext.Provider>
         </TakedownTagContext.Provider>
@@ -771,7 +775,7 @@ return (
         </VolumeFlagContext.Provider>
         </MuteFlagContext.Provider>
         </ResetFlagContext.Provider>
-        </AudioTitleContext.Provider>
+        </AudioPostContext.Provider>
     </>
     )
 }
