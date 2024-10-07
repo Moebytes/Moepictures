@@ -9,7 +9,7 @@ import logoutModIcon from "../assets/icons/logout-mod.png"
 import logoutAdminIcon from "../assets/icons/logout-admin.png"
 import logoutSystemIcon from "../assets/icons/logout-system.png"
 import logoutPremiumIcon from "../assets/icons/logout-premium.png"
-import search2 from "../assets/icons/search2.png"
+import search from "../assets/icons/search.png"
 import crown from "../assets/icons/crown.png"
 import mail from "../assets/icons/mail.png"
 import mailNotif from "../assets/icons/mail-notif.png"
@@ -408,7 +408,7 @@ const NavBar: React.FunctionComponent<Props> = (props) => {
                 </div>
                 <div className="nav-color-container">
                     <div className={`nav-search-container ${!hideSidebar ? "hide-nav-search" : ""}`}>
-                        <img className="nav-search-icon" src={search2} onClick={() => setSearchFlag(true)}/>
+                        <img className="nav-search-icon" src={search} onClick={() => setSearchFlag(true)}/>
                         <input className="nav-search" type="search" spellCheck={false} value={search} onChange={(event) => setSearch(event.target.value)} onKeyDown={(event) => event.key === "Enter" ? setSearchFlag(true) : null} onFocus={() => setSuggestionsActive(true)} onBlur={() => setSuggestionsActive(false)}/>
                     </div>
                     {session.username ? <img className="nav-color" src={getHistoryIcon()} onClick={historyClick} style={{filter: getFilter()}}/> : null}

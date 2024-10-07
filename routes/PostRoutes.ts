@@ -111,7 +111,7 @@ const PostRoutes = (app: Express) => {
             const {postID} = req.body
             if (Number.isNaN(Number(postID))) return res.status(400).send("Invalid postID")
             if (!req.session.username) return res.status(403).send("Unauthorized")
-            if (req.session.role !== "admin") return res.status(403).end()
+            if (req.session.role !== "admin" && req.session.role !== "mod") return res.status(403).end()
             const post = await sql.post.post(Number(postID)).catch(() => null)
             if (!post) return res.status(404).send("Doesn't exist")
             if (post.hidden) {

@@ -2268,4 +2268,19 @@ export default class Functions {
         }
         return image
     }
+
+    public static borderColor = (post: any) => {
+        if (post.favorited) return "var(--favoriteBorder)"
+        if (Number(post.imageCount) > 1) return "var(--variationBorder)"
+        if (post.thirdParty) return "var(--thirdPartyBorder)"
+        return "var(--imageBorder)"
+    }
+
+    public static updateLocalFavorite = (postID: string, favorited: boolean, posts: any) => {
+        if (!posts?.length) return
+        const postIndex = posts.findIndex((p: any) => p.postID === postID)
+        if (postIndex === -1) return
+        posts[postIndex].favorited = favorited
+        localStorage.setItem("savedPosts", JSON.stringify(posts))
+    }
 }

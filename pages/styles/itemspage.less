@@ -41,10 +41,30 @@
     transition: width 0.3s;
 }
 
-.item-search-icon {
-    width: auto;
-    height: 30px;
+.item-search-button {
+    background-color: var(--sidebarSearchButtonBG);
+    color: black;
+    font-family: Tahoma, sans-serif;
+    font-weight: bold;
+    font-size: 20px;
+    border: none;  
+    width: max-content;
+    align-items: center;
+    display: flex;
+    align-items: center;
     cursor: pointer;
+    padding: 1px 3px;
+    height: 30px;
+    &:hover {
+        color: white;
+        & > img {
+            filter: invert(1);
+        }
+    }
+    & > img {
+        width: auto;
+        height: 25px;
+    }
 }
 
 .item-button-container {

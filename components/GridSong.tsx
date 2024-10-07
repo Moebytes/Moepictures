@@ -226,7 +226,7 @@ const GridSong = forwardRef<Ref, Props>((props, componentRef) => {
         } else {
             containerRef.current.style.boxShadow = "none"
         }
-    }, [imageLoaded, sizeType, session])
+    }, [imageLoaded, sizeType, session, props.post?.favorited])
 
     useEffect(() => {
         if (mobile) {
@@ -507,13 +507,13 @@ const GridSong = forwardRef<Ref, Props>((props, componentRef) => {
             if (selected) {
                 return "0px 0px 0px 2px var(--selectBorder)"
             } else {
-                return "0px 0px 0px 1px var(--imageBorder)"
+                return `0px 0px 0px 1px ${functions.borderColor(props.post)}`
             }
         } else {
             if (selected) {
                 return "0px 0px 0px 4px var(--selectBorder)"
             } else {
-                return "0px 0px 0px 2px var(--imageBorder)"
+                return `0px 0px 0px 2px ${functions.borderColor(props.post)}`
             }
         }
     }

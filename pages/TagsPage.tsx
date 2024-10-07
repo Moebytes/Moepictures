@@ -7,7 +7,6 @@ import Footer from "../components/Footer"
 import functions from "../structures/Functions"
 import DragAndDrop from "../components/DragAndDrop"
 import search from "../assets/icons/search.png"
-import searchIconHover from "../assets/icons/search-hover.png"
 import sort from "../assets/icons/sort.png"
 import sortRev from "../assets/icons/sort-reverse.png"
 import type from "../assets/icons/all.png"
@@ -57,7 +56,6 @@ const TagsPage: React.FunctionComponent = (props) => {
     const [visibleTags, setVisibleTags] = useState([]) as any
     const [offset, setOffset] = useState(0)
     const [ended, setEnded] = useState(false)
-    const [getSearchIconHover, setSearchIconHover] = useState(false)
     const [queryPage, setQueryPage] = useState(1)
     const sortRef = useRef(null) as any
     const typeRef = useRef(null) as any
@@ -333,10 +331,6 @@ const TagsPage: React.FunctionComponent = (props) => {
         return jsx
     }
 
-    const getSearchIcon = () => {
-        return getSearchIconHover ? searchIconHover : search
-    }
-
     const getSortMargin = () => {
         const rect = sortRef.current?.getBoundingClientRect()
         if (!rect) return "0px"
@@ -438,7 +432,9 @@ const TagsPage: React.FunctionComponent = (props) => {
                     <div className="items-row">
                         <div className="item-search-container" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                             <input className="item-search" type="search" spellCheck="false" value={searchQuery} onChange={(event) => setSearchQuery(event.target.value)} onKeyDown={(event) => event.key === "Enter" ? updateTags() : null}/>
-                            <img className="item-search-icon" src={getSearchIcon()} style={{filter: getFilterSearch()}} onClick={() => updateTags()} onMouseEnter={() => setSearchIconHover(true)} onMouseLeave={() => setSearchIconHover(false)}/>
+                            <button className="item-search-button" style={{filter: getFilterSearch()}} onClick={() => updateTags()}>
+                                <img src={search}/>
+                            </button>
                         </div>
                         {getSortJSX()}
                         {!mobile ? <div className="itemsort-item" onClick={() => toggleScroll()}>

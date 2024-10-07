@@ -1,20 +1,17 @@
 import React, {useContext, useEffect, useState, useReducer} from "react"
 import {useHistory} from "react-router-dom"
-import {ThemeContext, HideSidebarContext, HideNavbarContext, HideSortbarContext, EnableDragContext, MobileContext, UnverifiedPostsContext,
+import {ThemeContext, HideSidebarContext, HideNavbarContext, HideSortbarContext, EnableDragContext, MobileContext, UnverifiedPostsContext, SaveSearchContext,
 RelativeContext, HideTitlebarContext, SidebarHoverContext, SearchContext, SearchFlagContext, PostsContext, ShowDeletePostDialogContext, AutoSearchContext,
 TagsContext, RandomFlagContext, ImageSearchFlagContext, SidebarTextContext, SessionContext, MobileScrollingContext, QuickEditIDContext, PremiumRequiredContext,
-TranslationModeContext, TranslationDrawingEnabledContext, SiteHueContext, SessionFlagContext, SiteLightnessContext, SiteSaturationContext, ShowTakedownPostDialogContext} from "../Context"
+TranslationModeContext, TranslationDrawingEnabledContext, SiteHueContext, SessionFlagContext, SiteLightnessContext, SiteSaturationContext, ShowTakedownPostDialogContext,
+SaveSearchDialogContext, DeleteAllSaveSearchDialogContext, EditSaveSearchNameContext, EditSaveSearchKeyContext, EditSaveSearchTagsContext} from "../Context"
 import {HashLink as Link} from "react-router-hash-link"
 import permissions from "../structures/Permissions"
 import favicon from "../assets/icons/favicon.png"
 import searchIcon from "../assets/icons/search.png"
-import searchIconHover from "../assets/icons/search-hover.png"
 import searchImage from "../assets/icons/search-image.png"
-import searchImageHover from "../assets/icons/search-image-hover.png"
 import random from "../assets/icons/random.png"
-import randomHover from "../assets/icons/random-hover.png"
-import randomMobile from "../assets/icons/random-mobile.png"
-import randomMobileHover from "../assets/icons/random-mobile-hover.png"
+import bookmark from "../assets/icons/bookmark.png"
 import terms from "../assets/icons/terms.png"
 import contact from "../assets/icons/contact.png"
 import code from "../assets/icons/code.png"
@@ -29,6 +26,8 @@ import historyIcon from "../assets/icons/history.png"
 import deleteIcon from "../assets/icons/delete.png"
 import rejectRed from "../assets/icons/reject-red.png"
 import approveGreen from "../assets/icons/approve-green.png"
+import editOptIcon from "../assets/icons/edit-opt.png"
+import deleteOptIcon from "../assets/icons/tag-delete.png"
 import tagIcon from "../assets/icons/tag.png"
 import website from "../assets/icons/support.png"
 import fandom from "../assets/icons/fandom.png"
@@ -46,6 +45,8 @@ import modCrown from "../assets/icons/mod-crown.png"
 import question from "../assets/icons/question.png"
 import autoSearchIcon from "../assets/icons/autosearch.png"
 import autoSearchActiveIcon from "../assets/icons/autosearch-active.gif"
+import saveSearchIcon from "../assets/icons/savesearch.png"
+import saveSearchActiveIcon from "../assets/icons/savesearch-active.png"
 import danbooru from "../assets/icons/danbooru.png"
 import gelbooru from "../assets/icons/gelbooru.png"
 import safebooru from "../assets/icons/safebooru.png"
@@ -67,9 +68,9 @@ interface Props {
 }
 
 let interval = null as any
-const maxTags1 = 22
-const maxTags2 = 24
-const maxTags3 = 25
+let maxHeight1 = 547 // 582
+let maxHeight2 = 625 // 655
+let maxHeight3 = 672 // 698
 
 const SideBar: React.FunctionComponent<Props> = (props) => {
     const [ignored, forceUpdate] = useReducer(x => x + 1, 0)
@@ -99,19 +100,21 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
     const {premiumRequired, setPremiumRequired} = useContext(PremiumRequiredContext)
     const {session, setSession} = useContext(SessionContext)
     const {sessionFlag, setSessionFlag} = useContext(SessionFlagContext)
-    const [maxTags, setMaxTags] = useState(maxTags1)
+    const [maxHeight, setMaxHeight] = useState(maxHeight1)
     const [uploaderImage, setUploaderImage] = useState("")
     const [uploaderRole, setUploaderRole] = useState("")
     const [updaterRole, setUpdaterRole] = useState("")
     const [suggestionsActive, setSuggestionsActive] = useState(false)
-    const [getSearchIconHover, setSearchIconHover] = useState(false)
-    const [getSearchImageIconHover, setSearchImageIconHover] = useState(false)
-    const [getRandomIconHover, setRandomIconHover] = useState(false)
-    const [getRandomMobileIconHover, setRandomMobileIconHover] = useState(false)
     const {quickEditID, setQuickEditID} = useContext(QuickEditIDContext)
     const {translationMode, setTranslationMode} = useContext(TranslationModeContext)
     const {translationDrawingEnabled, setTranslationDrawingEnabled} = useContext(TranslationDrawingEnabledContext)
     const {autoSearch, setAutoSearch} = useContext(AutoSearchContext)
+    const {saveSearch, setSaveSearch} = useContext(SaveSearchContext)
+    const {saveSearchDialog, setSaveSearchDialog} = useContext(SaveSearchDialogContext)
+    const {deleteAllSaveSearchDialog, setDeleteAllSaveSearchDialog} = useContext(DeleteAllSaveSearchDialogContext)
+    const {editSaveSearchName, setEditSaveSearchName} = useContext(EditSaveSearchNameContext)
+    const {editSaveSearchKey, setEditSaveSearchKey} = useContext(EditSaveSearchKeyContext)
+    const {editSaveSearchTags, setEditSaveSearchTags} = useContext(EditSaveSearchTagsContext)
     const history = useHistory()
 
     const getFilter = () => {
@@ -148,13 +151,16 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
         updateUserImg()
         const savedUploaderImage = localStorage.getItem("uploaderImage")
         if (savedUploaderImage) setUploaderImage(savedUploaderImage)
+        const savedSaveSearch = localStorage.getItem("saveSearch")
+        if (savedSaveSearch) setSaveSearch(savedSaveSearch === "true")
     }, [session])
 
     useEffect(() => {
         functions.linkToBase64(uploaderImage).then((uploaderImage) => {
             localStorage.setItem("uploaderImage", uploaderImage)
         })
-    }, [uploaderImage])
+        localStorage.setItem("saveSearch", saveSearch)
+    }, [uploaderImage, saveSearch])
 
     useEffect(() => {
         updateUserImg()
@@ -179,28 +185,28 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
                 if (!hideTitlebar) {
                     sidebar.style.top = `${functions.navbarHeight() + functions.titlebarHeight()}px`
                     sidebar.style.height = `calc(100vh - ${functions.navbarHeight()}px - ${functions.titlebarHeight()}px)`
-                    if (maxTags !== maxTags1) setMaxTags(maxTags1)
+                    if (maxHeight !== maxHeight1) setMaxHeight(maxHeight1)
                 } else {
                     if (window.scrollY !== 0) {
                         if (hideNavbar && window.scrollY > functions.titlebarHeight()) {
                             sidebar.style.top = "0px"
                             sidebar.style.height = "100vh"
-                            if (maxTags !== maxTags3) setMaxTags(maxTags3)
+                            if (maxHeight !== maxHeight3) setMaxHeight(maxHeight3)
                         } else {
                             sidebar.style.top = `${functions.navbarHeight()}px`
                             sidebar.style.height = `calc(100vh - ${functions.navbarHeight()}px)`
-                            if (maxTags !== maxTags2) setMaxTags(maxTags2)
+                            if (maxHeight !== maxHeight2) setMaxHeight(maxHeight2)
                         }
                     } else {
                         sidebar.style.top = `${functions.navbarHeight() + functions.titlebarHeight()}px`
                         sidebar.style.height = `calc(100vh - ${functions.navbarHeight()}px - ${functions.titlebarHeight()}px)`
-                        if (maxTags !== maxTags1) setMaxTags(maxTags1)
+                        if (maxHeight !== maxHeight1) setMaxHeight(maxHeight1)
                     }
                 }
             } else {
                 sidebar.style.top = "0px"
                 sidebar.style.height = "auto"
-                if (maxTags !== maxTags3) setMaxTags(maxTags3)
+                if (maxHeight !== maxHeight3) setMaxHeight(maxHeight3)
             }
         }
         window.addEventListener("scroll", scrollHandler)
@@ -225,28 +231,28 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
             if (!hideTitlebar) {
                 sidebar.style.top = `${functions.navbarHeight() + functions.titlebarHeight()}px`
                 sidebar.style.height = `calc(100vh - ${functions.navbarHeight()}px - ${functions.titlebarHeight()}px)`
-                if (maxTags !== maxTags1) setMaxTags(maxTags1)
+                if (maxHeight !== maxHeight1) setMaxHeight(maxHeight1)
             } else {
                 if (window.scrollY !== 0) {
                     if (hideNavbar && window.scrollY > functions.titlebarHeight()) {
                         sidebar.style.top = "0px"
                         sidebar.style.height = "100vh"
-                        if (maxTags !== maxTags3) setMaxTags(maxTags3)
+                        if (maxHeight !== maxHeight3) setMaxHeight(maxHeight3)
                     } else {
                         sidebar.style.top = `${functions.navbarHeight()}px`
                         sidebar.style.height = `calc(100vh - ${functions.navbarHeight()}px)`
-                        if (maxTags !== maxTags2) setMaxTags(maxTags2)
+                        if (maxHeight !== maxHeight2) setMaxHeight(maxHeight2)
                     }
                 } else {
                     sidebar.style.top = `${functions.navbarHeight() + functions.titlebarHeight()}px`
                     sidebar.style.height = `calc(100vh - ${functions.navbarHeight()}px - ${functions.titlebarHeight()}px)`
-                    if (maxTags !== maxTags1) setMaxTags(maxTags1)
+                    if (maxHeight !== maxHeight1) setMaxHeight(maxHeight1)
                 }
             }
         } else {
             sidebar.style.top = "0px"
             sidebar.style.height = "auto"
-            if (maxTags !== maxTags3) setMaxTags(maxTags3)
+            if (maxHeight !== maxHeight3) setMaxHeight(maxHeight3)
         }
     }, [hideTitlebar, relative, mobile])
 
@@ -265,11 +271,11 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
                 if (!hideTitlebar) {
                     sidebar.style.top = `${functions.navbarHeight() + functions.titlebarHeight()}px`
                     sidebar.style.height = `calc(100vh - ${functions.navbarHeight()}px - ${functions.titlebarHeight()}px)`
-                    if (maxTags !== maxTags1) setMaxTags(maxTags1)
+                    if (maxHeight !== maxHeight1) setMaxHeight(maxHeight1)
                 } else {
                     sidebar.style.top = `${functions.navbarHeight()}px`
                     sidebar.style.height = `calc(100vh - ${functions.navbarHeight()}px)`
-                    if (maxTags !== maxTags2) setMaxTags(maxTags2)
+                    if (maxHeight !== maxHeight2) setMaxHeight(maxHeight2)
                 }
                 return
             }
@@ -277,43 +283,35 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
                 if (sidebar.style.top === "0px") {
                     sidebar.style.top = `${functions.navbarHeight()}px`
                     sidebar.style.height = `calc(100vh - ${functions.navbarHeight()}px)`
-                    if (maxTags !== maxTags2) setMaxTags(maxTags2)
+                    if (maxHeight !== maxHeight2) setMaxHeight(maxHeight2)
                 }
             } else {
                 if (sidebar.style.top === `${functions.navbarHeight()}px`) {
                     sidebar.style.top = "0px"
                     sidebar.style.height = "100vh"
-                    if (maxTags !== maxTags3) setMaxTags(maxTags3)
+                    if (maxHeight !== maxHeight3) setMaxHeight(maxHeight3)
                 }
             }
         } else {
             sidebar.style.top = "0px"
             sidebar.style.height = "auto"
-            if (maxTags !== maxTags3) setMaxTags(maxTags3)
+            if (maxHeight !== maxHeight3) setMaxHeight(maxHeight3)
         }
     }, [hideSortbar, hideNavbar, hideTitlebar, mobile])
-
-    const getSearchIcon = () => {
-        return getSearchIconHover ? searchIconHover : searchIcon
-    }
-
-    const getSearchImageIcon = () => {
-        return getSearchImageIconHover ? searchImageHover : searchImage
-    }
-
-    const getRandomIcon = () => {
-        return getRandomIconHover ? randomHover : random
-    }
-
-    const getRandomMobileIcon = () => {
-        return getRandomMobileIconHover ? randomMobileHover : randomMobile
-    }
 
     const getAutoSearch = () => {
         if (autoSearch) {
             return autoSearchActiveIcon
         } else {
             return autoSearchIcon
+        }
+    }
+
+    const getSaveSearch = () => {
+        if (saveSearch) {
+            return saveSearchActiveIcon
+        } else {
+            return saveSearchIcon
         }
     }
 
@@ -443,10 +441,40 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
         return jsx
     }
 
+    const generateSavedSearchJSX = () => {
+        if (!session.username) return null
+        let jsx = [] as any
+        const savedSearches = session.savedSearches || {}
+        for (let i = 0; i < Object.keys(savedSearches).length; i++) {
+            const name = Object.keys(savedSearches)[i]
+            const savedSearch = Object.values(savedSearches)[i]
+            const editSavedSearch = () => {
+                setEditSaveSearchName(name)
+                setEditSaveSearchKey(name)
+                setEditSaveSearchTags(savedSearch)
+            }
+            const savedSearchClick = () => {
+                setSearch(savedSearch)
+                setSearchFlag(true)
+            }
+            jsx.push(
+                <div className="sidebar-row">
+                    <span className="tag-hover">
+                        <img className="tag-info" src={editOptIcon} onClick={editSavedSearch} style={{filter: "saturate(35%) brightness(200%)"}}/>
+                        <span className="saved-search" onClick={savedSearchClick}>{name}</span>
+                    </span>
+                </div>
+            )
+
+        }
+        return jsx
+    }
+
     const generateTagJSX = () => {
+        if (!props.tags && saveSearch) return generateSavedSearchJSX()
         let jsx = [] as any
         let currentTags = props.tags ? props.tags : tags
-        let max = currentTags.length > maxTags ? maxTags : currentTags.length
+        let max = props.tags ? currentTags.length : Math.min(currentTags.length, 100)
         for (let i = 0; i < max; i++) {
             if (!currentTags[i]) break
             const tagClick = () => {
@@ -732,18 +760,30 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
         }
     }
 
+    const subcontainerHeight = () => {
+        if (props.post) return "max-content"
+        if (saveSearch) return `${maxHeight - 30}px`
+        return `${maxHeight}px`
+    }
+
     if (mobile) return (
         <>
         <SearchSuggestions active={suggestionsActive} sticky={true}/>
         <div className={`mobile-sidebar ${relative ? "mobile-sidebar-relative" : ""} ${mobileScrolling ? "hide-mobile-sidebar" : ""}`}>
             <div className="mobile-search-container">
                 <input className="mobile-search" type="search" spellCheck="false" value={search} onChange={(event) => setSearch(event.target.value)} onKeyDown={(event) => event.key === "Enter" ? triggerSearch() : null} onFocus={(event) => setSuggestionsActive(true)} onBlur={() => setSuggestionsActive(false)}/>
-                <img style={{height: "40px", filter: getFilterSearch()}} className="search-icon" src={getSearchIcon()} onClick={() => triggerSearch()}  onMouseEnter={() => setSearchIconHover(true)} onMouseLeave={() => setSearchIconHover(false)}/>
+                <button className="search-mobile-button" style={{filter: getFilterSearch()}} onClick={triggerSearch}>
+                    <img src={searchIcon}/>
+                </button>
                 <label style={{display: "flex", width: "max-content", height: "max-content"}} htmlFor="image-search">
-                    <img style={{height: "40px", filter: getFilterSearch()}} className="search-image-icon" src={getSearchImageIcon()} onMouseEnter={() => setSearchImageIconHover(true)} onMouseLeave={() => setSearchImageIconHover(false)}/>
+                    <button className="search-mobile-button" style={{filter: getFilterSearch()}} onClick={triggerSearch}>
+                        <img src={searchImage}/>
+                    </button>
                 </label>
                 <input id="image-search" type="file" onChange={(event) => imageSearch(event)}/>
-                <img style={{height: "40px", filter: getFilterSearch()}} className="random-mobile" src={getRandomMobileIcon()} onClick={randomSearch} onMouseEnter={() => setRandomMobileIconHover(true)} onMouseLeave={() => setRandomMobileIconHover(false)}/>
+                <button className="search-mobile-button" style={{filter: getFilterSearch()}} onClick={randomSearch}>
+                    <img src={random}/>
+                </button>
             </div>
         </div>
         </>
@@ -762,16 +802,32 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
                 </div> : null}
                 <div className="search-container" onMouseEnter={() => setEnableDrag(false)}>
                     <input className="search" type="search" spellCheck="false" value={search} onChange={(event) => setSearch(event.target.value)} onKeyDown={(event) => event.key === "Enter" ? triggerSearch() : null} onFocus={() => setSuggestionsActive(true)} onBlur={() => setSuggestionsActive(false)}/>
-                    <img className="search-icon" style={{filter: getFilterSearch()}} src={getSearchIcon()} onClick={() => triggerSearch()} onMouseEnter={() => setSearchIconHover(true)} onMouseLeave={() => setSearchIconHover(false)}/>
+                    <button className="search-button" style={{filter: getFilterSearch()}} onClick={triggerSearch}>
+                        <img src={searchIcon}/>
+                    </button>
                     <label style={{display: "flex", width: "max-content", height: "max-content"}} htmlFor="image-search">
-                        <img className="search-image-icon" style={{filter: getFilterSearch()}} src={getSearchImageIcon()} onMouseEnter={() => setSearchImageIconHover(true)} onMouseLeave={() => setSearchImageIconHover(false)}/>
+                        <button className="search-button" style={{filter: getFilterSearch()}} onClick={triggerSearch}>
+                            <img src={searchImage}/>
+                        </button>
                     </label>
                     <input id="image-search" type="file" onChange={(event) => imageSearch(event)}/>
                 </div>
                 <div className="random-container">
-                    <img className="random" src={getRandomIcon()} style={{filter: getFilterRandom()}} onClick={randomSearch} onMouseEnter={() => setRandomIconHover(true)} onMouseLeave={() => setRandomIconHover(false)}/>
+                    <button className="random-button" style={{filter: getFilterRandom()}} onClick={randomSearch}>
+                        <span>Random</span>
+                        <img src={random}/>
+                    </button>
                     {session.username ? <img className="autosearch" style={{filter: getFilter()}} src={getAutoSearch()} onClick={toggleAutoSearch}/> : null}
+                    {!props.post && session.username ? <img className="autosearch" style={{filter: getFilter()}} src={getSaveSearch()} onClick={() => setSaveSearch((prev: boolean) => !prev)}/> : null}
                 </div>
+                {!props.post && session.username && saveSearch ? 
+                <div className="random-container">
+                    <button className="save-search-button" style={{filter: getFilterSearch()}} onClick={() => setSaveSearchDialog((prev: boolean) => !prev)}>
+                        <img src={bookmark}/>
+                        <span>Save Search</span>
+                    </button>
+                    <img className="autosearch" style={{filter: getFilter()}} src={deleteOptIcon} onClick={() => setDeleteAllSaveSearchDialog((prev: boolean) => !prev)}/>
+                </div> : null}
 
                 {copyTagsJSX()}
                 {tagCaptchaJSX()}
@@ -827,7 +883,7 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
                     </div>
                 : null}
 
-                <div className="sidebar-subcontainer">
+                <div className="sidebar-subcontainer" style={{height: subcontainerHeight()}}>
                     {props.tags ?
                         <div className="sidebar-row">
                             <span className="sidebar-title">Tags</span>
@@ -903,7 +959,7 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
                                 <span className="tag">Add Translation</span>
                             </span>
                         </div> : null}
-                        {!props.unverified && permissions.isAdmin(session) ? <div className="sidebar-row">
+                        {!props.unverified && permissions.isElevated(session) ? <div className="sidebar-row">
                             <span className="tag-hover" onClick={triggerTakedown}>
                                 <img className="sidebar-icon" src={props.post.hidden ? restore : takedown} style={{filter: getFilter()}}/>
                                 <span className="tag">{props.post.hidden ? "Restore" : "Takedown"}</span>

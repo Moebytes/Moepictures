@@ -589,7 +589,7 @@ const MobileInfo: React.FunctionComponent<Props> = (props) => {
                                 <span className="tag">Add Translation</span>
                             </span>
                         </div>
-                        {permissions.isAdmin(session) ? <div className="mobileinfo-row">
+                        {permissions.isElevated(session) ? <div className="mobileinfo-row">
                             <span className="tag-hover" onClick={triggerTakedown}>
                                 <img className="mobileinfo-icon" src={props.post.hidden ? restore : takedown} style={{filter: getFilter()}}/>
                                 <span className="tag">{props.post.hidden ? "Restore" : "Takedown"}</span>

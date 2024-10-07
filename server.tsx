@@ -67,6 +67,7 @@ declare module "express-session" {
       downloadPixivID: boolean
       autosearchInterval: number
       upscaledImages: boolean
+      savedSearches: string
       $2fa: boolean
       ip: string
       role: string

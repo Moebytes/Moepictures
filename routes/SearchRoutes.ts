@@ -47,19 +47,15 @@ const SearchRoutes = (app: Express) => {
             if (tags.length > 2 || sort === "bookmarks" || sort === "reverse bookmarks") {
                 if (!permissions.isPremium(req.session)) return res.status(402).send("Premium only")
             }
+            if (sort === "favorites" || sort === "reverse favorites") {
+                if (!req.session.username) return res.status(403).send("Unauthorized")
+            }
             if (sort === "tagcount" || sort === "reverse tagcount") withTags = true
             if (query.startsWith("pixiv:")) {
                 const pixivID = Number(query.match(/(?<=pixiv:)(\d+)/g)?.[0])
                 result = await sql.search.searchPixivID(pixivID, withTags)
             } else {
-                if (sort === "favorites" || sort === "reverse favorites") {
-                    if (!req.session.username) return res.status(403).send("Unauthorized")
-                    const favorites = await sql.favorite.searchFavorites(req.session.username, tags, type, restrict, style, sort, offset, limit, withTags)
-                    result = favorites.map((f: any) => f.post)
-                    result[0].postCount = favorites[0].postCount
-                } else {
-                    result = await sql.search.search(tags, type, restrict, style, sort, offset, limit, withTags)
-                }
+                result = await sql.search.search(tags, type, restrict, style, sort, offset, limit, withTags, req.session.username)
             }
             result = result.map((p: any) => {
                 if (p.images?.length > 1) {

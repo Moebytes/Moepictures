@@ -127,7 +127,7 @@ const TagRoutes = (app: Express) => {
             const {tag} = req.body
             if (!req.session.username) return res.status(403).send("Unauthorized")
             if (!tag) return res.status(400).send("Bad tag")
-            if (req.session.role !== "admin") return res.status(403).end()
+            if (req.session.role !== "admin" && req.session.role !== "mod") return res.status(403).end()
             const tagObj = await sql.tag.tag(tag)
             if (!tagObj) return res.status(404).send("Doesn't exist")
             const allPosts = await sql.search.search([tag], "all", "all", "all", "date", undefined, "9999")

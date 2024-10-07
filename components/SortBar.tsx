@@ -4,7 +4,7 @@ import {HashLink as Link} from "react-router-hash-link"
 import Slider from "react-slider"
 import {ThemeContext, HideSidebarContext, HideNavbarContext, HideSortbarContext, ActiveDropdownContext, ScrollContext,
 SizeTypeContext, BrightnessContext, ContrastContext, HueContext, SaturationContext, LightnessContext, SiteHueContext, PremiumRequiredContext,
-BlurContext, SharpenContext, EnableDragContext, FilterDropActiveContext, SquareContext, PixelateContext, SiteLightnessContext,
+BlurContext, SharpenContext, EnableDragContext, FilterDropActiveContext, SquareContext, PixelateContext, SiteLightnessContext, PostsContext,
 ShowDownloadDialogContext, HideTitlebarContext, ImageTypeContext, RestrictTypeContext, SortTypeContext, SortReverseContext, SiteSaturationContext,
 StyleTypeContext, SpeedContext, ReverseContext, MobileContext, RelativeContext, SessionContext, MobileScrollingContext, SessionFlagContext,
 SelectionModeContext, SelectionItemsContext, SearchFlagContext, DownloadIDsContext, DownloadFlagContext, ShowBulkQuickEditDialogContext} from "../Context"
@@ -100,6 +100,7 @@ const SortBar: React.FunctionComponent = (props) => {
     const {session, setSession} = useContext(SessionContext)
     const {sessionFlag, setSessionFlag} = useContext(SessionFlagContext)
     const {scroll, setScroll} = useContext(ScrollContext)
+    const {posts, setPosts} = useContext(PostsContext)
     const [dropLeft, setDropLeft] = useState(0)
     const [dropTop, setDropTop] = useState(-2)
     const [lastImageType, setLastImageType] = useState(null) as any
@@ -646,8 +647,13 @@ const SortBar: React.FunctionComponent = (props) => {
 
     const bulkFavorite = async () => {
         if (!selectionItems.size) return
+        console.log(selectionItems.keys())
+        console.log(selectionItems.values())
         for (const postID of selectionItems.values()) {
             await functions.post("/api/favorite/toggle", {postID}, session, setSessionFlag)
+            functions.get("/api/favorite", {postID}, session, setSessionFlag).then((favorite) => {
+                functions.updateLocalFavorite(postID, favorite ? true : false, posts)
+            })
         }
         setSelectionMode(false)
         if (sortType === "favorites") setSearchFlag(true)
@@ -738,12 +744,10 @@ const SortBar: React.FunctionComponent = (props) => {
                     {permissions.isElevated(session) && selectionMode ? 
                     <div className="sortbar-item" onClick={bulkQuickEdit}>
                         <img className="sortbar-img" src={quickEdit} style={{filter: getFilter()}}/>
-                        <span className="sortbar-text">Quick Edit</span>
                     </div> : null}
                     {session.username && selectionMode ? 
                     <div className="sortbar-item" onClick={bulkFavorite}>
                         <img className="sortbar-img" src={star} style={{filter: getFilter()}}/>
-                        <span className="sortbar-text">Favorite</span>
                     </div> : null}
                     {session.username ? 
                     <div className="sortbar-item" onClick={() => setSelectionMode((prev: boolean) => !prev)}>

@@ -1,7 +1,7 @@
 import React, {useContext, useEffect, useRef, useState} from "react"
 import {ThemeContext, EnableDragContext, BrightnessContext, ContrastContext, HueContext, SaturationContext, LightnessContext,
 BlurContext, SharpenContext, PixelateContext, SessionContext, MobileContext, TranslationModeContext, SiteHueContext,
-SiteLightnessContext, SiteSaturationContext, SessionFlagContext, FormatContext} from "../Context"
+SiteLightnessContext, SiteSaturationContext, SessionFlagContext, FormatContext, PostsContext} from "../Context"
 import {HashLink as Link} from "react-router-hash-link"
 import functions from "../structures/Functions"
 import Slider from "react-slider"
@@ -57,6 +57,7 @@ const PostImageOptions: React.FunctionComponent<Props> = (props) => {
     const [showFormatDropdown, setShowFormatDropdown] = useState(false)
     const [downloadText, setDownloadText] = useState("")
     const {format, setFormat} = useContext(FormatContext)
+    const {posts, setPosts} = useContext(PostsContext)
     const filterRef = useRef(null) as any
     const formatRef = useRef(null) as any
 
@@ -200,6 +201,7 @@ const PostImageOptions: React.FunctionComponent<Props> = (props) => {
     const updateFavorite = async (value: boolean) => {
         if (!props.post || !session.username) return
         await functions.post("/api/favorite/update", {postID: props.post.postID, favorited: value}, session, setSessionFlag)
+        functions.updateLocalFavorite(props.post.postID, value, posts)
         setFavorited(value)
     }
 

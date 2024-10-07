@@ -6,9 +6,6 @@ import SideBar from "../components/SideBar"
 import Footer from "../components/Footer"
 import functions from "../structures/Functions"
 import DragAndDrop from "../components/DragAndDrop"
-import search from "../assets/icons/search.png"
-import searchIconHover from "../assets/icons/search-hover.png"
-import sort from "../assets/icons/sort.png"
 import Reply from "../components/Reply"
 import {ThemeContext, EnableDragContext, HideNavbarContext, HideSidebarContext, MobileContext, SessionContext,
 RelativeContext, HideTitlebarContext, ActiveDropdownContext, HeaderTextContext, SidebarTextContext, SiteHueContext, 

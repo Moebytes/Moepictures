@@ -257,7 +257,7 @@ const TagPage: React.FunctionComponent<Props> = (props) => {
             jsx.push(<img className="tag-social" src={tagEdit} onClick={() => showTagEditDialog()}/>)
             jsx.push(<img className="tag-social" src={tagDelete} onClick={() => showTagDeleteDialog()}/>)
         }
-        if (permissions.isAdmin(session)) {
+        if (permissions.isElevated(session)) {
             jsx.push(<img className="tag-social" src={tag.banned ? restore : takedown} onClick={() => setTakedownTag(tag)}/>)
         }
         return jsx

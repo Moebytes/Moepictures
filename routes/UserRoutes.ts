@@ -74,6 +74,7 @@ const UserRoutes = (app: Express) => {
             delete user.autosearchInterval
             delete user.showTagBanner
             delete user.upscaledImages
+            delete user.savedSearches
             res.status(200).json(user)
         } catch (e) {
             console.log(e)
@@ -106,6 +107,7 @@ const UserRoutes = (app: Express) => {
                 await sql.user.updateUser(username, "downloadPixivID", false)
                 await sql.user.updateUser(username, "autosearchInterval", 3000)
                 await sql.user.updateUser(username, "upscaledImages", true)
+                await sql.user.updateUser(username, "savedSearches", "{}")
                 await sql.user.updateUser(username, "emailVerified", false)
                 await sql.user.updateUser(username, "$2fa", false)
                 await sql.user.updateUser(username, "bio", "This user has not written anything.")
@@ -171,6 +173,7 @@ const UserRoutes = (app: Express) => {
                 req.session.downloadPixivID = user.dowautosearchInterval
                 req.session.autosearchInterval = user.autosearchInterval
                 req.session.upscaledImages = user.upscaledImages
+                req.session.savedSearches = user.savedSearches
                 req.session.accessToken = serverFunctions.generateAccessToken(req)
                 req.session.refreshToken = serverFunctions.generateRefreshToken(req)
                 return res.status(200).send("Success")
@@ -215,6 +218,7 @@ const UserRoutes = (app: Express) => {
                 req.session.downloadPixivID = user.downloadPixivID
                 req.session.autosearchInterval = user.autosearchInterval
                 req.session.upscaledImages = user.upscaledImages
+                req.session.savedSearches = user.savedSearches
             }
             const session = structuredClone(req.session)
             delete session.refreshToken
@@ -391,6 +395,62 @@ const UserRoutes = (app: Express) => {
             const newUpscaledImages = !Boolean(user.upscaledImages)
             req.session.upscaledImages = newUpscaledImages 
             await sql.user.updateUser(req.session.username, "upscaledImages", newUpscaledImages)
+            res.status(200).send("Success")
+        } catch (e) {
+            console.log(e)
+            res.status(400).send("Bad request")
+        }
+    })
+
+    app.post("/api/user/savesearch", authenticate, sessionLimiter, async (req: Request, res: Response) => {
+        try {
+            const {name, tags} = req.body
+            if (!req.session.username) return res.status(403).send("Unauthorized")
+            const user = await sql.user.user(req.session.username)
+            if (!user) return res.status(400).send("Bad username")
+            let savedSearches = user.savedSearches || {}
+            savedSearches[name] = tags
+            req.session.upscaledImages = savedSearches 
+            await sql.user.updateUser(req.session.username, "savedSearches", JSON.stringify(savedSearches))
+            res.status(200).send("Success")
+        } catch (e) {
+            console.log(e)
+            res.status(400).send("Bad request")
+        }
+    })
+
+    app.put("/api/user/savesearch", authenticate, sessionLimiter, async (req: Request, res: Response) => {
+        try {
+            const {name, key, tags} = req.body
+            if (!req.session.username) return res.status(403).send("Unauthorized")
+            const user = await sql.user.user(req.session.username)
+            if (!user) return res.status(400).send("Bad username")
+            let savedSearches = user.savedSearches || {}
+            delete savedSearches[name]
+            savedSearches[key] = tags
+            req.session.upscaledImages = savedSearches 
+            await sql.user.updateUser(req.session.username, "savedSearches", JSON.stringify(savedSearches))
+            res.status(200).send("Success")
+        } catch (e) {
+            console.log(e)
+            res.status(400).send("Bad request")
+        }
+    })
+
+    app.delete("/api/user/savesearch/delete", authenticate, sessionLimiter, async (req: Request, res: Response) => {
+        try {
+            const {name, all} = req.query
+            if (!req.session.username) return res.status(403).send("Unauthorized")
+            const user = await sql.user.user(req.session.username)
+            if (!user) return res.status(400).send("Bad username")
+            if (all) {
+                await sql.user.updateUser(req.session.username, "savedSearches", null)
+                return res.status(200).send("Success")
+            }
+            let savedSearches = user.savedSearches || {}
+            delete savedSearches[name as string]
+            req.session.upscaledImages = savedSearches 
+            await sql.user.updateUser(req.session.username, "savedSearches", JSON.stringify(savedSearches))
             res.status(200).send("Success")
         } catch (e) {
             console.log(e)

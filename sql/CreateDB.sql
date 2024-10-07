@@ -13,6 +13,7 @@ CREATE TABLE IF NOT EXISTS "users" (
     "downloadPixivID" boolean,
     "autosearchInterval" int,
     "upscaledImages" boolean,
+    "savedSearches" jsonb,
     "image" text,
     "imagePost" bigint REFERENCES posts ("postID") ON UPDATE CASCADE ON DELETE SET NULL,
     "ip" inet,

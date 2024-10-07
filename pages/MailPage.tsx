@@ -7,7 +7,6 @@ import Footer from "../components/Footer"
 import functions from "../structures/Functions"
 import DragAndDrop from "../components/DragAndDrop"
 import search from "../assets/icons/search.png"
-import searchIconHover from "../assets/icons/search-hover.png"
 import sort from "../assets/icons/sort.png"
 import sortRev from "../assets/icons/sort-reverse.png"
 import Message from "../components/Message"
@@ -55,7 +54,6 @@ const MailPage: React.FunctionComponent = (props) => {
     const [visibleMessages, setVisibleMessages] = useState([]) as any
     const [offset, setOffset] = useState(0)
     const [ended, setEnded] = useState(false)
-    const [getSearchIconHover, setSearchIconHover] = useState(false)
     const [queryPage, setQueryPage] = useState(1)
     const sortRef = useRef(null) as any
     const history = useHistory()
@@ -363,10 +361,6 @@ const MailPage: React.FunctionComponent = (props) => {
         return jsx
     }
 
-    const getSearchIcon = () => {
-        return getSearchIconHover ? searchIconHover : search
-    }
-
     const getSortMargin = () => {
         const rect = sortRef.current?.getBoundingClientRect()
         if (!rect) return "0px"
@@ -468,7 +462,9 @@ const MailPage: React.FunctionComponent = (props) => {
                     <div className="items-row">
                         <div className="item-search-container" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                             <input className="item-search" type="search" spellCheck="false" value={searchQuery} onChange={(event) => setSearchQuery(event.target.value)} onKeyDown={(event) => event.key === "Enter" ? updateMessages() : null}/>
-                            <img className="item-search-icon" src={getSearchIcon()} style={{filter: getFilterSearch()}} onClick={() => updateMessages()} onMouseEnter={() => setSearchIconHover(true)} onMouseLeave={() => setSearchIconHover(false)}/>
+                            <button className="item-search-button" style={{filter: getFilterSearch()}} onClick={() => updateMessages()}>
+                                <img src={search}/>
+                            </button>
                         </div>
                         {!mobile ? <>{getReadAllButton()}{getUnreadAllButton()}</> : null}
                         {getSortJSX()}

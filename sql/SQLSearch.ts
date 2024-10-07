@@ -4,7 +4,7 @@ import functions from "../structures/Functions"
 
 export default class SQLSearch {
     /** Search posts. */
-    public static search = async (tags: string[], type: string, restrict: string, style: string, sort: string, offset?: string, limit?: string, withTags?: boolean) => {
+    public static search = async (tags: string[], type: string, restrict: string, style: string, sort: string, offset?: string, limit?: string, withTags?: boolean, username?: string) => {
         let typeQuery = ""
         if (type === "image") typeQuery = `posts.type = 'image'`
         if (type === "animation") typeQuery = `posts.type = 'animation'`
@@ -46,6 +46,8 @@ export default class SQLSearch {
         if (sort === "reverse height") sortQuery = `ORDER BY "imageHeight" ASC`
         if (sort === "bookmarks") sortQuery = `ORDER BY posts.bookmarks DESC NULLS LAST`
         if (sort === "reverse bookmarks") sortQuery = `ORDER BY posts.bookmarks ASC NULLS LAST`
+        if (sort === "favorites") sortQuery = `ORDER BY favorites."favoriteDate" DESC`
+        if (sort === "reverse favorites") sortQuery = `ORDER BY favorites."favoriteDate" ASC`
         let ANDtags = [] as string[]
         let ORtags = [] as string[]
         let NOTtags = [] as string[]
@@ -76,6 +78,15 @@ export default class SQLSearch {
             tagQueryArray.push(`NOT tags @> $${i}`)
             i++
         }
+        let userValue = i
+        if (username) {
+            values.push(username)
+            i++
+        }
+        let favoriteQuery = ""
+        if (sort === "favorites" || sort=== "reverse favorites") {
+            favoriteQuery = `favorites."username" = $${userValue}`
+        }
         let limitValue = i
         if (limit) {
             if (Number(limit) > 100) limit = "100"
@@ -84,7 +95,7 @@ export default class SQLSearch {
         }
         if (offset) values.push(offset)
         let tagQuery = tagQueryArray.length ? "WHERE " + tagQueryArray.join(" AND ") : ""
-        const whereQueries = [typeQuery, restrictQuery, styleQuery].filter(Boolean).join(" AND ")
+        const whereQueries = [favoriteQuery, typeQuery, restrictQuery, styleQuery].filter(Boolean).join(" AND ")
         let includeTags = withTags || tagQuery
         const query: QueryConfig = {
         text: functions.multiTrim(/*sql*/`
@@ -99,14 +110,19 @@ export default class SQLSearch {
             MAX(DISTINCT images."height") AS "imageHeight",
             COUNT(DISTINCT images."imageID") AS "imageCount",
             COUNT(DISTINCT favorites."favoriteID") AS "favoriteCount",
-            ROUND(AVG(DISTINCT cuteness."cuteness")) AS "cuteness"
+            ROUND(AVG(DISTINCT cuteness."cuteness")) AS "cuteness"${username ? `,
+            CASE 
+                WHEN COUNT(favorites."favoriteID") FILTER (WHERE favorites."username" = $${userValue}) > 0 
+                THEN true
+                ELSE false
+            END AS favorited` : ""}
             FROM posts
             JOIN images ON posts."postID" = images."postID"
             ${includeTags ? `JOIN "tag map" ON posts."postID" = "tag map"."postID"` : ""}
             FULL JOIN "favorites" ON posts."postID" = "favorites"."postID"
             FULL JOIN "cuteness" ON posts."postID" = "cuteness"."postID"
             ${whereQueries ? `WHERE ${whereQueries}` : ""}
-            GROUP BY posts."postID"
+            GROUP BY posts."postID"${favoriteQuery ? `, favorites."favoriteID"` : ""}
             ${sortQuery}
             ) AS posts
             ${tagQuery}
@@ -114,10 +130,10 @@ export default class SQLSearch {
         `)
         }
         if (values?.[0]) query.values = values
-        if (sort === "random") {
-        return SQLQuery.run(query)
+        if (sort === "random" || sort === "favorites" || sort === "reverse favorites") {
+            return SQLQuery.run(query)
         } else {
-        return SQLQuery.run(query, true)
+            return SQLQuery.run(query, true)
         }
     }
 

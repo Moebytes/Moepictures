@@ -43,7 +43,7 @@ const TakedownPostDialog: React.FunctionComponent<Props> = (props) => {
     }, [showTakedownPostDialog])
 
     const takedownPost = async () => {
-        if (permissions.isAdmin(session)) {
+        if (permissions.isElevated(session)) {
             await functions.post("/api/post/takedown",  {postID: props.post.postID}, session, setSessionFlag)
             history.go(0)
         }
@@ -79,7 +79,7 @@ const TakedownPostDialog: React.FunctionComponent<Props> = (props) => {
     }
 
     if (showTakedownPostDialog) {
-        if (permissions.isAdmin(session)) {
+        if (permissions.isElevated(session)) {
             return (
                 <div className="dialog">
                     <Draggable handle=".dialog-title-container">

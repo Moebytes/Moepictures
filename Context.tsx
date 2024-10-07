@@ -107,6 +107,7 @@ export const PostFlagContext = React.createContext<any>(null)
 export const MobileScrollingContext = React.createContext<any>(null)
 export const QuickEditIDContext = React.createContext<any>(null)
 export const AutoSearchContext = React.createContext<any>(null)
+export const SaveSearchContext = React.createContext<any>(null)
 export const ShowPageDialogContext = React.createContext<any>(null)
 export const PageFlagContext = React.createContext<any>(null)
 export const ReloadPostFlagContext = React.createContext<any>(null)
@@ -180,6 +181,11 @@ export const ShowDeleteAllHistoryDialogContext = React.createContext<any>(null)
 export const FormatContext = React.createContext<any>(null)
 export const PremiumRequiredContext = React.createContext<any>(null)
 export const EmojisContext = React.createContext<any>(null)
+export const SaveSearchDialogContext = React.createContext<any>(null)
+export const DeleteAllSaveSearchDialogContext = React.createContext<any>(null)
+export const EditSaveSearchNameContext = React.createContext<any>(null)
+export const EditSaveSearchKeyContext = React.createContext<any>(null)
+export const EditSaveSearchTagsContext = React.createContext<any>(null)
 
 const Context: React.FunctionComponent = (props) => {
     const [siteHue, setSiteHue] = useState(180)
@@ -277,6 +283,7 @@ const Context: React.FunctionComponent = (props) => {
     const [postFlag, setPostFlag] = useState(false)
     const [quickEditID, setQuickEditID] = useState(null)
     const [autoSearch, setAutoSearch] = useState(false)
+    const [saveSearch, setSaveSearch] = useState(false)
     const [showPageDialog, setShowPageDialog] = useState(false)
     const [pageFlag, setPageFlag] = useState(null)
     const [reloadPostFlag, setReloadPostFlag] = useState(false)
@@ -344,9 +351,20 @@ const Context: React.FunctionComponent = (props) => {
     const [showDeleteAllHistoryDialog, setShowDeleteAllHistoryDialog] = useState(false)
     const [format, setFormat] = useState("jpg")
     const [premiumRequired, setPremiumRequired] = useState(false)
+    const [saveSearchDialog, setSaveSearchDialog] = useState(false)
+    const [editSaveSearchName, setEditSaveSearchName] = useState(null)
+    const [editSaveSearchKey, setEditSaveSearchKey] = useState(null)
+    const [editSaveSearchTags, setEditSaveSearchTags] = useState(null)
+    const [deleteAllSaveSearchDialog, setDeleteAllSaveSearchDialog] = useState(false)
 
 return (
     <>
+        <EditSaveSearchTagsContext.Provider value={{editSaveSearchTags, setEditSaveSearchTags}}>
+        <EditSaveSearchKeyContext.Provider value={{editSaveSearchKey, setEditSaveSearchKey}}>
+        <EditSaveSearchNameContext.Provider value={{editSaveSearchName, setEditSaveSearchName}}>
+        <DeleteAllSaveSearchDialogContext.Provider value={{deleteAllSaveSearchDialog, setDeleteAllSaveSearchDialog}}>
+        <SaveSearchDialogContext.Provider value={{saveSearchDialog, setSaveSearchDialog}}>
+        <SaveSearchContext.Provider value={{saveSearch, setSaveSearch}}>
         <PromoteNameContext.Provider value={{promoteName, setPromoteName}}>
         <PremiumRequiredContext.Provider value={{premiumRequired, setPremiumRequired}}>
         <SortReverseContext.Provider value={{sortReverse, setSortReverse}}>
@@ -672,6 +690,12 @@ return (
         </SortReverseContext.Provider>
         </PremiumRequiredContext.Provider>
         </PromoteNameContext.Provider>
+        </SaveSearchContext.Provider>
+        </SaveSearchDialogContext.Provider>
+        </DeleteAllSaveSearchDialogContext.Provider>
+        </EditSaveSearchNameContext.Provider>
+        </EditSaveSearchKeyContext.Provider>
+        </EditSaveSearchTagsContext.Provider>
     </>
     )
 }

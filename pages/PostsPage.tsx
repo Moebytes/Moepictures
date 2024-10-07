@@ -12,6 +12,9 @@ import ToolTip from "../components/ToolTip"
 import TagBanner from "../components/TagBanner"
 import BulkQuickEditDialog from "../dialogs/BulkQuickEditDialog"
 import CaptchaDialog from "../dialogs/CaptchaDialog"
+import SaveSearchDialog from "../dialogs/SaveSearchDialog"
+import EditSaveSearchDialog from "../dialogs/EditSaveSearchDialog"
+import DeleteAllSaveSearchDialog from "../dialogs/DeleteAllSaveSearchDialog"
 import {HideNavbarContext, HideSidebarContext, SquareContext, RelativeContext, HideTitlebarContext, 
 HeaderTextContext, SidebarTextContext, MobileContext, MobileScrollingContext, SessionContext} from "../Context"
 
@@ -103,6 +106,9 @@ const PostsPage: React.FunctionComponent = (props) => {
         <DragAndDrop/>
         <CaptchaDialog/>
         <BulkQuickEditDialog/>
+        <SaveSearchDialog/>
+        <EditSaveSearchDialog/>
+        <DeleteAllSaveSearchDialog/>
         <PageDialog/>
         <DownloadDialog/>
         <TitleBar reset={true}/>

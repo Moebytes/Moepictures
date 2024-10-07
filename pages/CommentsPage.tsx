@@ -7,7 +7,6 @@ import Footer from "../components/Footer"
 import functions from "../structures/Functions"
 import DragAndDrop from "../components/DragAndDrop"
 import search from "../assets/icons/search.png"
-import searchIconHover from "../assets/icons/search-hover.png"
 import sort from "../assets/icons/sort.png"
 import sortRev from "../assets/icons/sort-reverse.png"
 import CommentRow from "../components/CommentRow"
@@ -55,7 +54,6 @@ const CommentsPage: React.FunctionComponent = (props) => {
     const [visibleComments, setVisibleComments] = useState([]) as any
     const [offset, setOffset] = useState(0)
     const [ended, setEnded] = useState(false)
-    const [getSearchIconHover, setSearchIconHover] = useState(false)
     const [queryPage, setQueryPage] = useState(1)
     const {commentID, setCommentID} = useContext(CommentIDContext)
     const {commentJumpFlag, setCommentJumpFlag} = useContext(CommentJumpFlagContext)
@@ -379,10 +377,6 @@ const CommentsPage: React.FunctionComponent = (props) => {
         return jsx
     }
 
-    const getSearchIcon = () => {
-        return getSearchIconHover ? searchIconHover : search
-    }
-
     const getSortMargin = () => {
         const rect = sortRef.current?.getBoundingClientRect()
         if (!rect) return "0px"
@@ -458,7 +452,9 @@ const CommentsPage: React.FunctionComponent = (props) => {
                     <div className="items-row">
                         <div className="item-search-container" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                             <input className="item-search" type="search" spellCheck="false" value={searchQuery} onChange={(event) => setSearchQuery(event.target.value)} onKeyDown={(event) => event.key === "Enter" ? updateComments() : null}/>
-                            <img className="item-search-icon" src={getSearchIcon()} style={{filter: getFilterSearch()}} onClick={() => updateComments()} onMouseEnter={() => setSearchIconHover(true)} onMouseLeave={() => setSearchIconHover(false)}/>
+                            <button className="item-search-button" style={{filter: getFilterSearch()}} onClick={() => updateComments()}>
+                                <img src={search}/>
+                            </button>
                         </div>
                         {getSortJSX()}
                         {!mobile ? <div className="itemsort-item" onClick={() => toggleScroll()}>

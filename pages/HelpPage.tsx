@@ -138,7 +138,12 @@ const HelpPage: React.FunctionComponent = (props) => {
                     <span className="help-alt">no audio</span> - the post is a video with no audio. <br/>
                     <span className="help-alt">with audio</span> - the post is a video that has audio. <br/>
                     <span className="help-alt">multiple artists</span> - the post has multiple artists. <br/>
-                    <span className="help-alt">bad pixiv id</span> - the pixiv post was deleted. <br/>
+                    <span className="help-alt">bad pixiv id</span> - the pixiv post was deleted. <br/><br/>
+
+                    In results, posts may have different border colors which mean the following: <br/>
+                    <span className="help-alt">pink</span> - the post is favorited. <br/>
+                    <span className="help-alt">purple</span> - the post contains multiple variations. <br/>
+                    <span className="help-alt">green</span> - the post is a third party post. <br/>
                 </span>
                 <div className="help-img-container"><img className="help-img" src={searchingImg}/></div></>
             )
