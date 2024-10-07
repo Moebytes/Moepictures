@@ -44,7 +44,7 @@ const SearchRoutes = (app: Express) => {
                 }
             }
             let result = null as any
-            if (tags.length > 2 || sort === "bookmarks" || sort === "reverse bookmarks") {
+            if (tags.length > 3 || sort === "bookmarks" || sort === "reverse bookmarks") {
                 if (!permissions.isPremium(req.session)) return res.status(402).send("Premium only")
             }
             if (sort === "favorites" || sort === "reverse favorites") {

@@ -84,7 +84,7 @@ const ImageGrid: React.FunctionComponent<Props> = (props) => {
         if (searchFlag) setSearchFlag(false)
         if (!query) query = await functions.parseSpaceEnabledSearch(search, session, setSessionFlag)
         let tags = query?.trim().split(/ +/g).filter(Boolean) || []
-        if (tags.length > 2) {
+        if (tags.length > 3) {
             if (!session.username) {
                 setSearch("")
                 setSidebarText("Login required.")

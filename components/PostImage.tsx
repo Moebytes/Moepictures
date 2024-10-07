@@ -1,7 +1,7 @@
 import React, {useContext, useEffect, useRef, useState, useReducer} from "react"
 import {ThemeContext, EnableDragContext, BrightnessContext, ContrastContext, HueContext, SaturationContext, LightnessContext,
 BlurContext, SharpenContext, PixelateContext, DownloadFlagContext, DownloadIDsContext, DisableZoomContext, SpeedContext,
-ReverseContext, MobileContext, TranslationModeContext, TranslationDrawingEnabledContext, SessionContext, SiteHueContext,
+ReverseContext, MobileContext, TranslationModeContext, TranslationDrawingEnabledContext, SessionContext, SiteHueContext, PreservePitchContext,
 SiteLightnessContext, SiteSaturationContext, ImageExpandContext, SessionFlagContext, FormatContext, PremiumRequiredContext} from "../Context"
 import {HashLink as Link} from "react-router-hash-link"
 import {createFFmpeg, fetchFile} from "@ffmpeg/ffmpeg"
@@ -136,7 +136,7 @@ const PostImage: React.FunctionComponent<Props> = (props) => {
     const [volume, setVolume] = useState(0)
     const [previousVolume, setPreviousVolume] = useState(0)
     const [paused, setPaused] = useState(false)
-    const [preservePitch, setPreservePitch] = useState(true)
+    const {preservePitch, setPreservePitch} = useContext(PreservePitchContext)
     const [duration, setDuration] = useState(0)
     const [zoom, setZoom] = useState(1)
     const [dragging, setDragging] = useState(false)

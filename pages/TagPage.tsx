@@ -27,8 +27,8 @@ import soundcloud from "../assets/icons/soundcloud.png"
 import sketchfab from "../assets/icons/sketchfab.png"
 import twitter from "../assets/icons/twitter.png"
 import Carousel from "../components/Carousel"
+import jsxFunctions from "../structures/JSXFunctions"
 import "./styles/tagpage.less"
-
 
 interface Props {
     match?: any
@@ -372,8 +372,8 @@ const TagPage: React.FunctionComponent<Props> = (props) => {
                     {tag.banned ? <div className="tag-row">
                         <span className="tag-text strikethrough-color">You may not upload artwork from this artist.</span>
                     </div> : null}
-                    <div className="tag-row">
-                        <span className="tag-text">{tag.description}</span>
+                    <div className="tag-row" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
+                        <span className="tag-text">{jsxFunctions.parseTextLinks(tag.description)}</span>
                     </div>
                     {tagImplicationJSX()}
                     {relatedTagJSX()}

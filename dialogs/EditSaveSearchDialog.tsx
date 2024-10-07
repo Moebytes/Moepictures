@@ -140,8 +140,8 @@ const EditSaveSearchDialog: React.FunctionComponent = (props) => {
                         </div>
                         {error ? <div className="dialog-validation-container"><span className="dialog-validation" ref={errorRef}></span></div> : null}
                         <div className="dialog-row">
-                            <button style={{backgroundColor: "#ff0eac"}} onClick={() => click("delete")} className="dialog-button">{"Delete"}</button>
                             <button onClick={() => click("reject")} className="dialog-button">{"Cancel"}</button>
+                            <button style={{backgroundColor: "#ff0eac"}} onClick={() => click("delete")} className="dialog-button">{"Delete"}</button>
                             <button onClick={() => click("accept")} className="dialog-button">{"Edit"}</button>
                         </div>
                     </div>

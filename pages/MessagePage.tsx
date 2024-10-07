@@ -486,7 +486,7 @@ const MessagePage: React.FunctionComponent<Props> = (props) => {
     const getOptionsJSX = () => {
         if (!message) return
         let jsx = [] as any
-        if (session.username && !session.banned) {
+        if (message.role !== "system" && session.username && !session.banned) {
             jsx.push(
                 <>
                 <img draggable={false} className="mail-message-opt-icon" src={quoteOptIcon} onClick={triggerQuote} style={{filter: getFilter()}}/>

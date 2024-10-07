@@ -40,7 +40,6 @@ export const authenticate = (req: Request, res: Response, next: NextFunction) =>
     jwt.verify(token, process.env.ACCESS_SECRET!, (err, session: any) => {
         if (err) return res.status(401).send("Invalid token")
         if (req.session.username !== session.username) return res.status(403).send("Bad request")
-        if (req.session.role !== session.role) return res.status(403).send("Bad request")
         next()
     })
 }

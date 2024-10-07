@@ -4,7 +4,7 @@ import loading from "../assets/icons/loading.gif"
 import {ThemeContext, SizeTypeContext, BrightnessContext, ContrastContext, HueContext, SaturationContext, LightnessContext, MobileContext, ScrollYContext,
 BlurContext, SharpenContext, SquareContext, PixelateContext, DownloadFlagContext, DownloadIDsContext, SpeedContext, ReverseContext, ScrollContext, SiteHueContext,
 ToolTipXContext, ToolTipYContext, ToolTipEnabledContext, ToolTipPostContext, ToolTipImgContext, SiteLightnessContext, SiteSaturationContext, SelectionModeContext, 
-SelectionItemsContext, SelectionPostsContext, SessionContext, SessionFlagContext, ActiveDropdownContext} from "../Context"
+SelectionItemsContext, SelectionPostsContext, SessionContext, SessionFlagContext, ActiveDropdownContext, AudioContext, PlayFlagContext, AudioTitleContext} from "../Context"
 import {HashLink as Link} from "react-router-hash-link"
 import path from "path"
 import functions from "../structures/Functions"
@@ -34,7 +34,7 @@ const GridSong = forwardRef<Ref, Props>((props, componentRef) => {
     const {siteSaturation, setSiteSaturation} = useContext(SiteSaturationContext)
     const {siteLightness, setSiteLightness} = useContext(SiteLightnessContext)
     const {sizeType, setSizeType} = useContext(SizeTypeContext)
-    const [imageSize, setImageSize] = useState(270) as any
+    const [imageSize, setImageSize] = useState(240) as any
     const {brightness, setBrightness} = useContext(BrightnessContext)
     const {contrast, setContrast} = useContext(ContrastContext)
     const {hue, setHue} = useContext(HueContext)
@@ -61,8 +61,8 @@ const GridSong = forwardRef<Ref, Props>((props, componentRef) => {
     const {sessionFlag, setSessionFlag} = useContext(SessionFlagContext)
     const containerRef = useRef<HTMLDivElement>(null)
     const pixelateRef = useRef<HTMLCanvasElement>(null)
-    const overlayRef = useRef<HTMLCanvasElement>(null)
-    const lightnessRef = useRef<HTMLCanvasElement>(null)
+    const overlayRef = useRef<HTMLImageElement>(null)
+    const lightnessRef = useRef<HTMLImageElement>(null)
     const ref = useRef<HTMLCanvasElement>(null)
     const imageFiltersRef = useRef<HTMLDivElement>(null)
     const songIconRef = useRef<HTMLImageElement>(null)
@@ -81,6 +81,10 @@ const GridSong = forwardRef<Ref, Props>((props, componentRef) => {
     const {scroll, setScroll} = useContext(ScrollContext)
     const [image, setImage] = useState(null) as any
     const [selected, setSelected] = useState(false)
+    const {audio, setAudio} = useContext(AudioContext)
+    const {playFlag, setPlayFlag} = useContext(PlayFlagContext)
+    const {audioTitle, setAudioTitle} = useContext(AudioTitleContext)
+    const [hover, setHover] = useState(false)
     const history = useHistory()
 
     const getFilter = () => {
@@ -239,7 +243,7 @@ const GridSong = forwardRef<Ref, Props>((props, componentRef) => {
             } else if (sizeType === "large") {
                 setImageSize(230)
             } else if (sizeType === "massive") {
-                setImageSize(500)
+                setImageSize(400)
             }
         } else {
             if (sizeType === "tiny") {
@@ -247,11 +251,11 @@ const GridSong = forwardRef<Ref, Props>((props, componentRef) => {
             } else if (sizeType === "small") {
                 setImageSize(200)
             } else if (sizeType === "medium") {
-                setImageSize(270)
+                setImageSize(240)
             } else if (sizeType === "large") {
-                setImageSize(400)
+                setImageSize(300)
             } else if (sizeType === "massive") {
-                setImageSize(500)
+                setImageSize(400)
             }
         }
     }, [sizeType])
@@ -447,7 +451,6 @@ const GridSong = forwardRef<Ref, Props>((props, componentRef) => {
     }
 
     const mouseUp = async (event: React.MouseEvent<HTMLElement>) => {
-        //if (activeDropdown !== "none") return
         setScrollY(window.scrollY)
         if (selectionMode) {
             if (event.metaKey || event.ctrlKey || event.button == 1) {
@@ -481,6 +484,7 @@ const GridSong = forwardRef<Ref, Props>((props, componentRef) => {
     }
 
     const mouseEnter = () => {
+        setHover(true)
         if (pageBuffering) return
         tooltipTimer = setTimeout(() => {
             if (!containerRef.current) return
@@ -497,6 +501,7 @@ const GridSong = forwardRef<Ref, Props>((props, componentRef) => {
     }
 
     const mouseLeave = () => {
+        setHover(false)
         if (pageBuffering) return
         if (tooltipTimer) clearTimeout(tooltipTimer)
         setToolTipEnabled(false)
@@ -541,14 +546,6 @@ const GridSong = forwardRef<Ref, Props>((props, componentRef) => {
             ref.current.width = img.width
             ref.current.height = img.height
             refCtx?.drawImage(img, 0, 0, img.width, img.height)
-            const overlayCtx = overlayRef.current.getContext("2d")
-            overlayRef.current.width = img.width
-            overlayRef.current.height = img.height
-            overlayCtx?.drawImage(img, 0, 0, img.width, img.height)
-            const lightnessCtx = lightnessRef.current.getContext("2d")
-            lightnessRef.current.width = img.width
-            lightnessRef.current.height = img.height
-            lightnessCtx?.drawImage(img, 0, 0, img.width, img.height)
             setImageLoaded(true)
             ref.current.style.opacity = "1"
         }
@@ -558,17 +555,25 @@ const GridSong = forwardRef<Ref, Props>((props, componentRef) => {
         loadImage()
     }, [image])
 
+    const songClick = (event: React.MouseEvent) => {
+        event.stopPropagation()
+        setAudio(props.audio)
+        setAudioTitle(props.post.title)
+        setPlayFlag("always")
+    }
+
 
     return (
         <div style={{opacity: visible ? "1" : "0", transition: "opacity 0.1s"}} className="image-box" id={String(props.id)} ref={containerRef} onClick={onClick} 
         onAuxClick={onClick} onMouseDown={mouseDown} onMouseUp={mouseUp} onMouseMove={mouseMove} onMouseEnter={mouseEnter} onMouseLeave={mouseLeave}>
             <div className="image-filters" ref={imageFiltersRef} onMouseMove={(event) => imageAnimation(event)} onMouseLeave={() => cancelImageAnimation()}>
-                <img className="song-icon" src={musicNote} style={{filter: getFilter()}} ref={songIconRef}/>
-                <canvas draggable={false} className="lightness-overlay" ref={lightnessRef}></canvas>
-                <canvas draggable={false} className="sharpen-overlay" ref={overlayRef}></canvas>
+                <img style={{opacity: hover ? "1" : "0", transition: "opacity 0.3s", filter: getFilter()}} className="song-icon" src={musicNote} 
+                ref={songIconRef} onClick={songClick} onMouseDown={(event) => {event.stopPropagation()}} onMouseUp={(event) => {event.stopPropagation()}}/>
+                <img draggable={false} className="lightness-overlay" ref={lightnessRef} src={image}/>
+                <img draggable={false} className="sharpen-overlay" ref={overlayRef} src={image}/>
                 <canvas draggable={false} className="pixelate-canvas" ref={pixelateRef}></canvas>
                 <canvas draggable={false} className="image" ref={ref}></canvas>
-                </div>
+            </div>
         </div>
     )
 })

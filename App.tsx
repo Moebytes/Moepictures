@@ -52,6 +52,7 @@ import MessagePage from "./pages/MessagePage"
 import PremiumPage from "./pages/PremiumPage"
 import PremiumRequiredDialog from "./dialogs/PremiumRequiredDialog"
 import PremiumSuccessPage from "./pages/PremiumSuccessPage"
+import AudioPlayer from "./components/AudioPlayer"
 import "./index.less"
 
 require.context("./assets/icons", true)
@@ -320,6 +321,7 @@ const App: React.FunctionComponent = (props) => {
                         <Route exact path="/403"><$403Page/></Route>
                         <Route path="*"><$404Page/></Route>
                     </Switch>
+                    <AudioPlayer/>
                 </Context>
             </ThemeContext.Provider>
             </HideSidebarContext.Provider>

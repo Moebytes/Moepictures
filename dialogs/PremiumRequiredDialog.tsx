@@ -47,7 +47,7 @@ const PremiumRequiredDialog: React.FunctionComponent = (props) => {
 
     const getPremiumText = () => {
         if (premiumRequired === "tags") {
-            return "You need premium to search more than 2 tags. Would you like to visit the premium page?"
+            return "You need premium to search more than 3 tags. Would you like to visit the premium page?"
         }
         return "Premium is required to use this feature. Would you like to visit the premium page?"
     }

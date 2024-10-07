@@ -170,7 +170,7 @@ const PremiumPage: React.FunctionComponent = (props) => {
             return (
                 <><img className="premium-banner" src={unlimitedTags}/>
                 <span className="premium-text" style={{color: "#ff3afd"}}>
-                    Regular accounts can only search for 2 tags. Premium accounts have this restriction removed
+                    Regular accounts can only search for 3 tags. Premium accounts have this restriction removed
                     and you may search an unlimited number of tags.
                 </span>
                 <div className="premium-img-container"><img className="premium-img" src={unlimitedTagsImg}/></div></>

@@ -1,9 +1,10 @@
 import React, {useContext, useEffect, useRef, useState, useReducer, useMemo} from "react"
 import {useHistory} from "react-router-dom"
-import {ThemeContext, EnableDragContext, MobileContext} from "../Context"
+import {ThemeContext, EnableDragContext, MobileContext, EmojisContext} from "../Context"
 import {HashLink as Link} from "react-router-hash-link"
 import functions from "../structures/Functions"
 import cryptoFunctions from "../structures/CryptoFunctions"
+import jsxFunctions from "../structures/JSXFunctions"
 import "./styles/commentcarousel.less"
 
 interface Props {
@@ -16,6 +17,7 @@ const CommentCarousel: React.FunctionComponent<Props> = (props) => {
     const {theme, setTheme} = useContext(ThemeContext)
     const {enableDrag, setEnableDrag} = useContext(EnableDragContext)
     const {mobile, setMobile} = useContext(MobileContext)
+    const {emojis, setEmojis} = useContext(EmojisContext)
     const [images, setImages] = useState([])
     const history = useHistory()
 
@@ -63,11 +65,11 @@ const CommentCarousel: React.FunctionComponent<Props> = (props) => {
                 jsx.push(
                     <div className="comment-carousel-commentrow-quote-container">
                         {userPart ? <span className="comment-carousel-commentrow-quote-user">{`${username.trim()} ${said.trim()}`}</span> : null}
-                        <span className="comment-carousel-commentrow-quote-text">{text.trim()}</span>
+                        <span className="comment-carousel-commentrow-quote-text">{jsxFunctions.parseTextLinks(text.trim(), emojis)}</span>
                     </div>
                 )
             } else {
-                jsx.push(<span className="comment-carousel-commentrow-text">{piece.trim()}</span>)
+                jsx.push(<span className="comment-carousel-commentrow-text">{jsxFunctions.parseTextLinks(piece.trim(), emojis)}</span>)
             }
         }
         return jsx

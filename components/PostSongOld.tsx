@@ -2,10 +2,7 @@ import React, {useContext, useEffect, useRef, useState, useReducer} from "react"
 import {ThemeContext, EnableDragContext, BrightnessContext, ContrastContext, HueContext, SaturationContext, LightnessContext,
 BlurContext, SharpenContext, PixelateContext, DownloadFlagContext, DownloadIDsContext, DisableZoomContext, SpeedContext,
 ReverseContext, MobileContext, TranslationModeContext, TranslationDrawingEnabledContext, SessionContext, SiteHueContext,
-SiteLightnessContext, SiteSaturationContext, ImageExpandContext, AudioContext, PitchContext, VolumeContext, PreviousVolumeContext, 
-ProgressContext, SecondsProgressContext, SeekToContext, DragProgressContext, DraggingContext, PausedContext, DurationContext,
-RewindFlagContext, FastforwardFlagContext, PlayFlagContext, VolumeFlagContext, ResetFlagContext, 
-MuteFlagContext, AudioTitleContext} from "../Context"
+SiteLightnessContext, SiteSaturationContext, ImageExpandContext} from "../Context"
 import functions from "../structures/Functions"
 import Slider from "react-slider"
 import audioReverseIcon from "../assets/icons/audio-reverse.png"
@@ -26,7 +23,9 @@ import expand from "../assets/icons/expand.png"
 import contract from "../assets/icons/contract.png"
 import TranslationEditor from "./TranslationEditor"
 import path from "path"
+import * as Tone from "tone"
 import "./styles/postsong.less"
+import silence from "../assets/misc/silence.mp3"
 
 interface Props {
     post?: any
@@ -41,6 +40,32 @@ interface Props {
     noTranslations?: boolean
     unverified?: boolean
 }
+
+let grain: Tone.GrainPlayer
+let audioNode: any
+let bitcrusherNode: any
+let soundtouchNode: any
+let gainNode: any
+
+const initialize = async () => {
+    grain = new Tone.GrainPlayer(silence).sync().start()
+    grain.grainSize = 0.1
+    grain.overlap = 0.1
+    const context = Tone.getContext()
+    // @ts-ignore
+    audioNode = new Tone.ToneAudioNode()
+    gainNode = new Tone.Gain(1)
+    await context.addAudioWorkletModule("./bitcrusher.js", "bitcrusher")
+    bitcrusherNode = context.createAudioWorkletNode("bitcrush-processor")
+    await context.addAudioWorkletModule("./soundtouch.js", "soundtouch")
+    soundtouchNode = context.createAudioWorkletNode("soundtouch-processor")
+    audioNode.input = grain
+    audioNode.output = gainNode.input
+    audioNode.input.chain(soundtouchNode, bitcrusherNode, audioNode.output)
+    audioNode.toDestination()
+}
+
+if (typeof window !== "undefined") initialize()
 
 const PostSong: React.FunctionComponent<Props> = (props) => {
     const [ignored, forceUpdate] = useReducer(x => x + 1, 0)
@@ -82,32 +107,34 @@ const PostSong: React.FunctionComponent<Props> = (props) => {
     const audioVolumeRef = useRef(null) as any
     const audioSpeedSliderRef = useRef<any>(null)
     const audioVolumeSliderRef = useRef<any>(null)
-    const {secondsProgress, setSecondsProgress} = useContext(SecondsProgressContext)
-    const {progress, setProgress} = useContext(ProgressContext)
-    const {dragProgress, setDragProgress} = useContext(DragProgressContext)
+    const [secondsProgress, setSecondsProgress] = useState(0)
+    const [progress, setProgress] = useState(0)
+    const [dragProgress, setDragProgress] = useState(0) as any
     const {reverse, setReverse} = useContext(ReverseContext)
     const {speed, setSpeed} = useContext(SpeedContext)
-    const {pitch, setPitch} = useContext(PitchContext)
-    const {volume, setVolume} = useContext(VolumeContext)
-    const {previousVolume, setPreviousVolume} = useContext(PreviousVolumeContext)
-    const {paused, setPaused} = useContext(PausedContext)
-    const {duration, setDuration} = useContext(DurationContext)
-    const {dragging, setDragging} = useContext(DraggingContext)
-    const {seekTo, setSeekTo} = useContext(SeekToContext)
+    const [pitch, setPitch] = useState(0)
+    const [volume, setVolume] = useState(0.75)
+    const [previousVolume, setPreviousVolume] = useState(0)
+    const [paused, setPaused] = useState(true)
+    const [preservesPitch, setPreservesPitch] = useState(false)
+    const [duration, setDuration] = useState(0)
+    const [dragging, setDragging] = useState(false)
+    const [coverImg, setCoverImg] = useState(null) as any
+    const [seekTo, setSeekTo] = useState(null) as any
     const [init, setInit] = useState(false)
     const [buttonHover, setButtonHover] = useState(false)
-    const [coverImg, setCoverImg] = useState("")
-    const {audio, setAudio} = useContext(AudioContext)
-    const {rewindFlag, setRewindFlag} = useContext(RewindFlagContext)
-    const {fastForwardFlag, setFastForwardFlag} = useContext(FastforwardFlagContext)
-    const {playFlag, setPlayFlag} = useContext(PlayFlagContext)
-    const {volumeFlag, setVolumeFlag} = useContext(VolumeFlagContext)
-    const {muteFlag, setMuteFlag} = useContext(MuteFlagContext)
-    const {resetFlag, setResetFlag} = useContext(ResetFlagContext)
-    const {audioTitle, setAudioTitle} = useContext(AudioTitleContext)
 
     const getFilter = () => {
         return `hue-rotate(${siteHue - 180}deg) saturate(${siteSaturation}%) brightness(${siteLightness + 70}%)`
+    }
+    
+    const loadAudio = async () => {
+        await grain.buffer.load(props.audio)
+        await Tone.loaded()
+        updateDuration()
+        stop()
+        refreshState()
+        setInit(true)
     }
 
     const updateSongCover = async () => {
@@ -116,11 +143,153 @@ const PostSong: React.FunctionComponent<Props> = (props) => {
     }
 
     useEffect(() => {
-        setAudio(props.audio)
-        setAudioTitle(props.post.title)
+        setSecondsProgress(0)
+        setProgress(0)
+        setDragProgress(0)
+        setDuration(0)
+        setDragging(false)
+        setSeekTo(null)
+        setInit(false)
         if (ref.current) ref.current.style.opacity = "1"
         updateSongCover()
     }, [props.audio])
+
+    useEffect(() => {
+        const id = window.setInterval(() => {
+            if (!duration) return
+            let percent = (Tone.getTransport().seconds / duration)
+            if (!Number.isFinite(percent)) return
+            if (!dragging) {
+                if (reverse) {
+                    setProgress((1-percent) * 100)
+                    setSecondsProgress(duration - Tone.getTransport().seconds)
+                } else {
+                    setProgress(percent * 100)
+                    setSecondsProgress(Tone.getTransport().seconds)
+                }
+            }
+            if (Tone.getTransport().seconds > duration) {
+                Tone.getTransport().seconds = 0
+                stop()
+                updatePlay(true)
+            }
+        }, 1000)
+        return () => {
+            window.clearInterval(id)
+        }
+    }, [dragging, reverse, duration])
+
+    const refreshState = () => {
+        updateReverse(reverse)
+        updateSpeed()
+        updatePitch()
+    }
+
+    const updateDuration = () => {
+        setDuration(grain.buffer.duration / grain.playbackRate)
+    }
+
+    const updatePlay = async (alwaysPlay?: boolean) => {
+        if (!init) await loadAudio()
+        await Tone.start()
+        // Tone.getTransport().loop = true
+        if (paused || alwaysPlay) {
+            Tone.getTransport().start()
+            setPaused(false)
+        } else {
+            Tone.getTransport().pause()
+            setPaused(true)
+        }
+        if (duration > 10) {
+            Tone.getTransport().loopStart = 0
+            Tone.getTransport().loopEnd = duration
+            Tone.getTransport().loop = true
+        }
+    }
+
+    const stop = () => {
+        Tone.getTransport().stop()
+    }
+
+    const updateMute = () => {
+        if (Tone.getDestination().volume.value > 0) {
+            Tone.getDestination().mute = true
+            Tone.getDestination().volume.value = functions.linearToDecibels(0)
+            setVolume(0)
+        } else {
+            const newVol = previousVolume ? previousVolume : 1
+            Tone.getDestination().mute = false
+            Tone.getDestination().volume.value = functions.linearToDecibels(functions.logSlider(newVol))
+            setVolume(newVol)
+        }
+        setShowVolumeSlider((prev) => !prev)
+    }
+
+    const updateVolume = (value: number) => {
+        if (value > 1) value = 1
+        if (value < 0) value = 0
+        if (Number.isNaN(value)) value = 0
+        Tone.getDestination().volume.value = functions.linearToDecibels(functions.logSlider(value))
+        if (value > 0) {
+            Tone.getDestination().mute = false
+        } else {
+            Tone.getDestination().mute = true
+        }
+        setVolume(value)
+        setPreviousVolume(value)
+    }
+
+    const updateSpeed = async () => {
+        if (!duration) return
+        grain.playbackRate = speed
+        let percent = Tone.getTransport().seconds / duration
+        setDuration(grain.buffer.duration / speed)
+        let val = percent * duration
+        if (val < 0) val = 0
+        if (val > duration - 1) val = duration - 1
+        Tone.getTransport().seconds = val
+    }
+
+    useEffect(() => {
+        updateSpeed()
+    }, [speed, preservesPitch])
+
+    const updateReverse = async (value?: boolean) => {
+        if (!duration) return
+        let percent = Tone.getTransport().seconds / duration
+        let val = (1-percent) * duration
+        if (val < 0) val = 0
+        if (val > duration - 1) val = duration - 1
+        if (value === false || !reverse) {
+            Tone.getTransport().seconds = val
+            grain.reverse = false
+        } else {
+            Tone.getTransport().seconds = val
+            grain.reverse = true
+        }
+    }
+
+    useEffect(() => {
+        updateReverse()
+    }, [reverse])
+
+    const updatePitch = async () => {
+        if (pitch === 0) return soundtouchNode.parameters.get("pitch").value = 1
+        soundtouchNode.parameters.get("pitch").value = functions.semitonesToScale(pitch)
+    }
+
+    useEffect(() => {
+        updatePitch()
+    }, [pitch])
+
+    const bitcrush = async () => {
+        if (pixelate === 1) return bitcrusherNode.parameters.get("sampleRate").value = 44100
+        bitcrusherNode.parameters.get("sampleRate").value = Math.ceil(22050 / pixelate)
+    }
+
+    useEffect(() => {
+        bitcrush()
+    }, [pixelate])
 
     useEffect(() => {
         if (audioSliderRef.current) audioSliderRef.current.resize()
@@ -152,6 +321,9 @@ const PostSong: React.FunctionComponent<Props> = (props) => {
             if (key === "t") {
                 setTranslationMode((prev: boolean) => !prev)
                 setTranslationDrawingEnabled(true)
+            }
+            if (key === "Space") {
+                updatePlay()
             }
         }
     }
@@ -219,10 +391,18 @@ const PostSong: React.FunctionComponent<Props> = (props) => {
         }
     }
 
+    useEffect(() => {
+        if (seekTo) {
+            let progress = (100 / duration) * seekTo
+            if (reverse) progress = 100 - progress
+            Tone.getTransport().seconds = seekTo
+            setProgress(progress)
+            setSecondsProgress(seekTo)
+            setSeekTo(null)
+        }
+    }, [seekTo, reverse])
+
     const seek = (position: number) => {
-        setAudio(props.audio)
-        setAudioTitle(props.post.title)
-        setPlayFlag("always")
         let secondsProgress = reverse ? ((100 - position) / 100) * duration : (position / 100) * duration
         let progress = reverse ? 100 - position : position
         setProgress(progress)
@@ -230,25 +410,31 @@ const PostSong: React.FunctionComponent<Props> = (props) => {
         setSeekTo(secondsProgress)
     }
 
-    const updatePlay = () => {
-        setAudio(props.audio)
-        setAudioTitle(props.post.title)
-        setPlayFlag("toggle")
-    }
-
     const changeReverse = (value?: boolean) => {
         const val = value !== undefined ? value : !reverse 
         let secondsProgress = val === true ? (duration / 100) * (100 - progress) : (duration / 100) * progress
         setReverse(val)
+        // setSeekTo(secondsProgress)
     }
 
-    const updateMute = () => {
-        setMuteFlag(true)
-        setShowVolumeSlider((prev) => !prev)
+    const rewind = (value?: number) => {
+        if (!value) value = Math.floor(duration / 10)
+        const current = Tone.getTransport().seconds
+        let seconds = current - value
+        if (reverse) seconds = current + value
+        if (seconds < 0) seconds = 0
+        if (seconds > duration) seconds = duration
+        setSeekTo(seconds)
     }
 
-    const updateVolume = (value: number) => {
-        setVolumeFlag(value)
+    const fastforward = (value?: number) => {
+        if (!value) value = Math.floor(duration / 10)
+        const current = Tone.getTransport().seconds
+        let seconds = current + value
+        if (reverse) seconds = current - value
+        if (seconds < 0) seconds = 0
+        if (seconds > duration) seconds = duration
+        setSeekTo(seconds)
     }
 
     useEffect(() => {
@@ -322,7 +508,7 @@ const PostSong: React.FunctionComponent<Props> = (props) => {
         setTimeout(() => {
             imagePixelate()
         }, 50)
-    }, [pixelate])
+    }, [pixelate, preservesPitch])
 
     useEffect(() => {
         if (downloadFlag) {
@@ -367,6 +553,17 @@ const PostSong: React.FunctionComponent<Props> = (props) => {
         } else {
             return audioVolumeMuteIcon
         }
+    }
+
+    const reset = () => {
+        changeReverse(false)
+        setSpeed(1)
+        setPitch(0)
+        setPaused(false)
+        setShowSpeedDropdown(false)
+        setShowPitchDropdown(false)
+        stop()
+        updatePlay(true)
     }
 
     const fullscreen = async (exit?: boolean) => {
@@ -458,17 +655,17 @@ const PostSong: React.FunctionComponent<Props> = (props) => {
                             </div>
                             <div className="audio-control-row" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                                 <div className="audio-control-row-container">
-                                    <img draggable={false} className="audio-control-img" src={audioReverseIcon} onClick={() => changeReverse()}/>
+                                    <img draggable={false} className="audio-control-img" src={audioReverseIcon} onClick={() => changeReverse()} />
                                     <img draggable={false} className="audio-control-img" ref={audioSpeedRef} src={audioSpeedIcon} onClick={() => setShowSpeedDropdown((prev) => !prev)}/>
-                                    <img draggable={false} className="audio-control-img" ref={audioPitchRef} src={audioPreservePitchIcon} onClick={() => setShowPitchDropdown((prev) => !prev)}/>
+                                    <img draggable={false} className="audio-control-img" ref={audioPitchRef} src={audioPreservePitchIcon} onClick={() => setShowPitchDropdown((prev) => !prev)} />
                                 </div> 
                                 <div className="audio-ontrol-row-container">
-                                    <img draggable={false} className="audio-control-img" src={audioRewindIcon} onClick={() => setRewindFlag(true)}/>
+                                    <img draggable={false} className="audio-control-img" src={audioRewindIcon} onClick={() => rewind()}/>
                                     <img draggable={false} className="audio-control-img" onClick={() => updatePlay()} src={getAudioPlayIcon()}/>
-                                    <img draggable={false} className="audio-control-img" src={audioFastforwardIcon} onClick={() => setFastForwardFlag(true)}/>
+                                    <img draggable={false} className="audio-control-img" src={audioFastforwardIcon} onClick={() => fastforward()}/>
                                 </div>    
                                 <div className="audio-control-row-container">
-                                    <img draggable={false} className="audio-control-img" src={audioClearIcon} onClick={() => setResetFlag(true)}/>
+                                    <img draggable={false} className="audio-control-img" src={audioClearIcon} onClick={reset}/>
                                 </div>  
                                 <div className="audio-control-row-container">
                                     <img draggable={false} className="audio-control-img" src={audioFullscreenIcon} onClick={() => fullscreen()}/>

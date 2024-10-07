@@ -41,7 +41,8 @@ const darkColorList = {
     "--binary": "#000000",
     "--selectBorder": "#6710e6",
     "--progressText": "#ffffff",
-    "--progressBG": "#000000"
+    "--progressBG": "#000000",
+    "--audioPlayerColor": "#130737"
 }
 
 const lightColorList = {
@@ -75,7 +76,8 @@ const lightColorList = {
     "--binary": "#ffffff",
     "--selectBorder": "#8373ff",
     "--progressText": "#000000",
-    "--progressBG": "#ffffff"
+    "--progressBG": "#ffffff",
+    "--audioPlayerColor": "#fbfaff"
 }
 
 interface Props {

@@ -52,6 +52,11 @@ export const ImageSearchFlagContext = React.createContext<any>(null)
 export const TagsContext = React.createContext<any>(null)
 export const SpeedContext = React.createContext<any>(null)
 export const ReverseContext = React.createContext<any>(null)
+export const PitchContext = React.createContext<any>(null)
+export const PreservePitchContext = React.createContext<any>(null)
+export const VolumeContext = React.createContext<any>(null)
+export const PreviousVolumeContext = React.createContext<any>(null)
+export const PausedContext = React.createContext<any>(null)
 export const HeaderTextContext = React.createContext<any>(null)
 export const SidebarTextContext = React.createContext<any>(null)
 export const SessionContext = React.createContext<any>(null)
@@ -186,6 +191,20 @@ export const DeleteAllSaveSearchDialogContext = React.createContext<any>(null)
 export const EditSaveSearchNameContext = React.createContext<any>(null)
 export const EditSaveSearchKeyContext = React.createContext<any>(null)
 export const EditSaveSearchTagsContext = React.createContext<any>(null)
+export const AudioContext = React.createContext<any>(null)
+export const AudioTitleContext = React.createContext<any>(null)
+export const DurationContext = React.createContext<any>(null)
+export const ProgressContext = React.createContext<any>(null)
+export const SecondsProgressContext = React.createContext<any>(null)
+export const SeekToContext = React.createContext<any>(null)
+export const DragProgressContext = React.createContext<any>(null)
+export const DraggingContext = React.createContext<any>(null)
+export const RewindFlagContext = React.createContext<any>(null)
+export const FastforwardFlagContext = React.createContext<any>(null)
+export const PlayFlagContext = React.createContext<any>(null)
+export const VolumeFlagContext = React.createContext<any>(null)
+export const ResetFlagContext = React.createContext<any>(null)
+export const MuteFlagContext = React.createContext<any>(null)
 
 const Context: React.FunctionComponent = (props) => {
     const [siteHue, setSiteHue] = useState(180)
@@ -356,9 +375,47 @@ const Context: React.FunctionComponent = (props) => {
     const [editSaveSearchKey, setEditSaveSearchKey] = useState(null)
     const [editSaveSearchTags, setEditSaveSearchTags] = useState(null)
     const [deleteAllSaveSearchDialog, setDeleteAllSaveSearchDialog] = useState(false)
+    const [audio, setAudio] = useState("")
+    const [audioTitle, setAudioTitle] = useState("")
+    const [pitch, setPitch] = useState(0)
+    const [volume, setVolume] = useState(0.75)
+    const [previousVolume, setPreviousVolume] = useState(0)
+    const [paused, setPaused] = useState(true)
+    const [preservePitch, setPreservePitch] = useState(true)
+    const [duration, setDuration] = useState(0)
+    const [seekTo, setSeekTo] = useState(null) as any
+    const [secondsProgress, setSecondsProgress] = useState(0)
+    const [progress, setProgress] = useState(0)
+    const [dragProgress, setDragProgress] = useState(0) as any
+    const [dragging, setDragging] = useState(false)
+    const [rewindFlag, setRewindFlag] = useState(false)
+    const [fastForwardFlag, setFastForwardFlag] = useState(false)
+    const [playFlag, setPlayFlag] = useState(null)
+    const [volumeFlag, setVolumeFlag] = useState(null)
+    const [muteFlag, setMuteFlag] = useState(false)
+    const [resetFlag, setResetFlag] = useState(false)
 
 return (
     <>
+        <AudioTitleContext.Provider value={{audioTitle, setAudioTitle}}>
+        <ResetFlagContext.Provider value={{resetFlag, setResetFlag}}>
+        <MuteFlagContext.Provider value={{muteFlag, setMuteFlag}}>
+        <VolumeFlagContext.Provider value={{volumeFlag, setVolumeFlag}}>
+        <PlayFlagContext.Provider value={{playFlag, setPlayFlag}}>
+        <FastforwardFlagContext.Provider value={{fastForwardFlag, setFastForwardFlag}}>
+        <RewindFlagContext.Provider value={{rewindFlag, setRewindFlag}}>
+        <AudioContext.Provider value={{audio, setAudio}}>
+        <DraggingContext.Provider value={{dragging, setDragging}}>
+        <DragProgressContext.Provider value={{dragProgress, setDragProgress}}>
+        <ProgressContext.Provider value={{progress, setProgress}}>
+        <SecondsProgressContext.Provider value={{secondsProgress, setSecondsProgress}}>
+        <SeekToContext.Provider value={{seekTo, setSeekTo}}>
+        <DurationContext.Provider value={{duration, setDuration}}>
+        <PausedContext.Provider value={{paused, setPaused}}>
+        <PreservePitchContext.Provider value={{preservePitch, setPreservePitch}}>
+        <PreviousVolumeContext.Provider value={{previousVolume, setPreviousVolume}}>
+        <VolumeContext.Provider value={{volume, setVolume}}>
+        <PitchContext.Provider value={{pitch, setPitch}}>
         <EditSaveSearchTagsContext.Provider value={{editSaveSearchTags, setEditSaveSearchTags}}>
         <EditSaveSearchKeyContext.Provider value={{editSaveSearchKey, setEditSaveSearchKey}}>
         <EditSaveSearchNameContext.Provider value={{editSaveSearchName, setEditSaveSearchName}}>
@@ -696,6 +753,25 @@ return (
         </EditSaveSearchNameContext.Provider>
         </EditSaveSearchKeyContext.Provider>
         </EditSaveSearchTagsContext.Provider>
+        </PitchContext.Provider>
+        </VolumeContext.Provider>
+        </PreviousVolumeContext.Provider>
+        </PreservePitchContext.Provider>
+        </PausedContext.Provider>
+        </DurationContext.Provider>
+        </SeekToContext.Provider>
+        </SecondsProgressContext.Provider>
+        </ProgressContext.Provider>
+        </DragProgressContext.Provider>
+        </DraggingContext.Provider>
+        </AudioContext.Provider>
+        </RewindFlagContext.Provider>
+        </FastforwardFlagContext.Provider>
+        </PlayFlagContext.Provider>
+        </VolumeFlagContext.Provider>
+        </MuteFlagContext.Provider>
+        </ResetFlagContext.Provider>
+        </AudioTitleContext.Provider>
     </>
     )
 }
