@@ -1,6 +1,6 @@
 import React, {useContext, useRef, useState} from "react"
 import {useHistory} from "react-router-dom"
-import {ThemeContext, SearchContext, SearchFlagContext, SessionContext, RestrictTypeContext} from "../Context"
+import {ThemeContext, SearchContext, SearchFlagContext, SessionContext, RestrictTypeContext, MobileContext} from "../Context"
 import {HashLink as Link} from "react-router-hash-link"
 import functions from "../structures/Functions"
 import Carousel from "./Carousel"
@@ -20,6 +20,7 @@ const ArtistRow: React.FunctionComponent<Props> = (props) => {
     const {theme, setTheme} = useContext(ThemeContext)
     const [hover, setHover] = useState(false)
     const {search, setSearch} = useContext(SearchContext)
+    const {mobile, setMobile} = useContext(MobileContext)
     const {searchFlag, setSearchFlag} = useContext(SearchFlagContext)
     const {session, setSession} = useContext(SessionContext)
     const {restrictType, setRestrictType} = useContext(RestrictTypeContext)
@@ -61,11 +62,11 @@ const ArtistRow: React.FunctionComponent<Props> = (props) => {
         if (!session.username) {
             let filtered = props.artist.posts.filter((p: any) => p.restrict === "safe")
             if (!permissions.isElevated(session)) filtered = filtered.filter((p: any) => !p.hidden)
-            return filtered.map((p: any) => functions.getThumbnailLink(p.images[0].type, p.postID, p.images[0].order, p.images[0].filename, "tiny"))
+            return filtered.map((p: any) => functions.getThumbnailLink(p.images[0].type, p.postID, p.images[0].order, p.images[0].filename, "tiny", mobile))
         }
         let filtered = props.artist.posts.filter((p: any) => restrictType === "explicit" ? p.restrict === "explicit" : p.restrict !== "explicit")
         if (!permissions.isElevated(session)) filtered = filtered.filter((p: any) => !p.hidden)
-        return filtered.map((p: any) => functions.getThumbnailLink(p.images[0].type, p.postID, p.images[0].order, p.images[0].filename, "tiny"))
+        return filtered.map((p: any) => functions.getThumbnailLink(p.images[0].type, p.postID, p.images[0].order, p.images[0].filename, "tiny", mobile))
     }
 
     const artistSocialJSX = () => {

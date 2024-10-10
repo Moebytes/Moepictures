@@ -157,7 +157,7 @@ const Comments: React.FunctionComponent<Props> = (props) => {
         if (!rect) return "0px"
         const raw = window.innerWidth - rect.right
         let offset = -145
-        if (mobile) offset += 0
+        if (mobile) offset -= 20
         return `${raw + offset}px`
     }
 
@@ -203,7 +203,7 @@ const Comments: React.FunctionComponent<Props> = (props) => {
     const getCommentBox = () => {
         if (session.banned) return (
             <div className="comments-input-container">
-                <span className="upload-ban-text" style={{fontSize: "20px"}}>You are banned. Cannot comment.</span>
+                <span className="upload-ban-text" style={{fontSize: "20px", marginLeft: mobile ? "2px" : "10px"}}>You are banned. Cannot comment.</span>
             </div>
         )
         if (session.username) {

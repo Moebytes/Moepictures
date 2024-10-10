@@ -1515,12 +1515,12 @@ const EditUnverifiedPostPage: React.FunctionComponent<Props> = (props) => {
                                 <img className="editpost-button-img" src={linkIcon}/>
                                 <span className="editpost-button-text">Enter Links</span>
                         </button>
+                    </div>
+                    <div className="editpost-row">
                         <button className="upload-button" onClick={() => changeUpscaled()}>
                                 <img className="upload-button-img" src={showUpscaled ? upscaleIcon : originalIcon}/>
                                 <span className="upload-button-text">{showUpscaled ? "Upscaled" : "Original"}</span>
                         </button>
-                    </div>
-                    <div className="editpost-row">
                         {getCurrentFiles().length > 1 ?
                         <button className="editpost-button" onClick={left}>
                             <img className="editpost-button-img" src={leftIcon}/>

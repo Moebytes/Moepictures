@@ -4,18 +4,30 @@ import functions from "../structures/Functions"
 
 export default class SQLUser {
     /** Get uploads. */
-    public static uploads = async (username: string) => {
+    public static uploads = async (username: string, limit?: string, offset?: string) => {
+        let i = 2
+        let values = [] as any
+        let limitValue = i
+        if (limit) {
+            if (Number(limit) > 100) limit = "100"
+            values.push(limit)
+            i++
+        }
+        if (offset) values.push(offset)
         const query: QueryConfig = {
         text: functions.multiTrim(/*sql*/`
-            SELECT posts.*, json_agg(DISTINCT images.*) AS images, json_agg(DISTINCT "tag map".tag) AS tags
-            FROM posts
-            JOIN images ON posts."postID" = images."postID"
-            JOIN "tag map" ON posts."postID" = "tag map"."postID"
-            WHERE posts."uploader" = $1
-            GROUP BY posts."postID"
+                SELECT posts.*, json_agg(DISTINCT images.*) AS images, json_agg(DISTINCT "tag map".tag) AS tags,
+                COUNT(*) OVER() AS "uploadCount"
+                FROM posts
+                JOIN images ON posts."postID" = images."postID"
+                JOIN "tag map" ON posts."postID" = "tag map"."postID"
+                WHERE posts."uploader" = $1
+                GROUP BY posts."postID"
+                ${limit ? `LIMIT $${limitValue}` : "LIMIT 100"} ${offset ? `OFFSET $${i}` : ""}
             `),
             values: [username]
         }
+        if (values?.[0]) query.values?.push(...values)
         const result = await SQLQuery.run(query, true)
         return result
     }

@@ -343,6 +343,7 @@ const TagsPage: React.FunctionComponent = (props) => {
         if (sortType === "posts") offset = -30
         if (sortType === "image") offset = -25
         if (sortType === "aliases") offset = -25
+        if (mobile) offset += 12
         return `${raw + offset}px`
     }
 
@@ -356,6 +357,7 @@ const TagsPage: React.FunctionComponent = (props) => {
         if (typeType === "character") offset = -5
         if (typeType === "series") offset = -25
         if (typeType === "tag") offset = -33
+        if (mobile) offset += 7
         return `${raw + offset}px`
     }
 
@@ -432,7 +434,8 @@ const TagsPage: React.FunctionComponent = (props) => {
                     <span className="items-heading">Tags</span>
                     <div className="items-row">
                         <div className="item-search-container" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
-                            <input className="item-search" type="search" spellCheck="false" value={searchQuery} onChange={(event) => setSearchQuery(event.target.value)} onKeyDown={(event) => event.key === "Enter" ? updateTags() : null}/>
+                            <input className="item-search" type="search" spellCheck="false" value={searchQuery} style={{width: mobile ? "170px" : "230px"}}
+                            onChange={(event) => setSearchQuery(event.target.value)} onKeyDown={(event) => event.key === "Enter" ? updateTags() : null}/>
                             <button className="item-search-button" style={{filter: getFilterSearch()}} onClick={() => updateTags()}>
                                 <img src={search}/>
                             </button>

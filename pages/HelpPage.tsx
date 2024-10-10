@@ -237,7 +237,7 @@ const HelpPage: React.FunctionComponent = (props) => {
 
                     If you want to translate a post, I recommend using an OCR app to obtain text more easily. For japanese, 
                     KanjiTomo is a good option: <br/>
-                    <a className="help-link" onClick={() => openLink("https://www.kanjitomo.net/")}>https://www.kanjitomo.net/</a>
+                    <a className="help-link" onClick={() => openLink("https://www.kanjitomo.net/")}>{mobile ? "KanjiTomo" : "https://www.kanjitomo.net/"}</a>
                 </span>
                 <div className="help-img-container"><img className="help-img" src={translationsImg}/></div></>
             )
@@ -302,7 +302,7 @@ const HelpPage: React.FunctionComponent = (props) => {
                     Images, animations, and videos may have an upscaled version. For images, providing one is required. <br/><br/>
 
                     You can download the app that we use for upscaling here: <br/>
-                    <a className="help-link" onClick={() => openLink("https://github.com/Moebits/Waifu2x-GUI/releases")}>https://github.com/Moebits/Waifu2x-GUI/releases</a><br/><br/>
+                    <a className="help-link" onClick={() => openLink("https://github.com/Moebits/Waifu2x-GUI/releases")}>{mobile ? "Waifu2x GUI" : "https://github.com/Moebits/Waifu2x-GUI/releases"}</a><br/><br/>
 
                     Although the original upscaler is Waifu2x, better upscalers have come out since. Currently the best upscaler and the 
                     one that we use is REAL-CUGAN with a scale factor of 4x. If the image doesn't have transparency, also turn on "compress to jpg" 
@@ -319,7 +319,7 @@ const HelpPage: React.FunctionComponent = (props) => {
                     high quality and should not leave behind any artifacts. <br/><br/>
 
                     You can download the app that we use for compressing here: <br/>
-                    <a className="help-link" onClick={() => openLink("https://github.com/Moebits/Image-Compressor/releases")}>https://github.com/Moebits/Image-Compressor/releases</a><br/><br/>
+                    <a className="help-link" onClick={() => openLink("https://github.com/Moebits/Image-Compressor/releases")}>{mobile ? "Image Compressor" : "https://github.com/Moebits/Image-Compressor/releases"}</a><br/><br/>
 
                     These are the recommended formats for each type of post: <br/>
                     <span className="help-alt">

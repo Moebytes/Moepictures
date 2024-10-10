@@ -52,6 +52,35 @@ const TagRow: React.FunctionComponent<Props> = (props) => {
     const {session, setSession} = useContext(SessionContext)
     const {sessionFlag, setSessionFlag} = useContext(SessionFlagContext)
     const history = useHistory()
+    const scrollRef = useRef(null) as any
+
+    useEffect(() => {
+        if (!scrollRef.current) return
+        let startY = 0
+        let scrollTopStart = 0
+    
+        const touchStart = (event: React.TouchEvent) => {
+            if (!scrollRef.current) return
+            startY = event.touches[0].pageY
+            scrollTopStart = scrollRef.current.scrollTop
+        }
+    
+        const touchMove = (event: React.TouchEvent) => {
+            if (!scrollRef.current) return
+            const touchY = event.touches[0].pageY
+            const deltaY = startY - touchY
+            scrollRef.current.scrollTop = scrollTopStart + deltaY
+            event.preventDefault()
+        }
+    
+        scrollRef.current.addEventListener("touchstart", touchStart)
+        scrollRef.current.addEventListener("touchmove", touchMove)
+        return () => {
+            if (!scrollRef.current) return
+            scrollRef.current.removeEventListener("touchstart", touchStart)
+            scrollRef.current.removeEventListener("touchmove", touchMove)
+        }
+      }, [])
 
     const searchTag = (event: React.MouseEvent) => {
         if (event.ctrlKey || event.metaKey || event.button === 1) {
@@ -235,7 +264,7 @@ const TagRow: React.FunctionComponent<Props> = (props) => {
                     </div> : null}
                 </td>
                 <td className="tagrow-description">
-                    <span className="tagrow-desc-text">{props.tag.description || "No description."}</span>
+                    <span className="tagrow-desc-text" ref={scrollRef}>{props.tag.description || "No description."}</span>
                 </td>
             </div>
             {session.username ?

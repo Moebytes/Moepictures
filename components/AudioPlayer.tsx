@@ -400,6 +400,7 @@ const AudioPlayer: React.FunctionComponent = (props) => {
         if (!rect || !controlRect) return "400px"
         const raw = controlRect.right - rect.right
         let offset = -2
+        if (mobile) offset -= 10
         return `${raw + offset}px`
     }
 
@@ -409,6 +410,7 @@ const AudioPlayer: React.FunctionComponent = (props) => {
         if (!rect || !controlRect) return "400px"
         const raw = controlRect.right - rect.right
         let offset = -2
+        if (mobile) offset -= 10
         return `${raw + offset}px`
     }
 
@@ -418,6 +420,7 @@ const AudioPlayer: React.FunctionComponent = (props) => {
         if (!rect || !controlRect) return "400px"
         const raw = controlRect.right - rect.right
         let offset = 7
+        if (mobile) offset -= 10
         return `${raw + offset}px`
     }
 
@@ -521,20 +524,10 @@ const AudioPlayer: React.FunctionComponent = (props) => {
         setInit(false)
     }
 
-    if (audio) {
-        return (
-            <div className="audio-player" style={{height: audioPost ? "140px" : "100px"}} ref={audioControls} onMouseEnter={() => setHover(true)} onMouseLeave={() => setHover(false)} onMouseUp={() => setDragging(false)}>
-                {audioPost ? <div className="audio-player-row" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
-                    <span className="audio-player-title" onClick={() => history.push(`/post/${audioPost.postID}`)}>{audioPost.title || "Unknown"}</span>
-                </div> : null}
+    const playerJSX = () => {
+        if (mobile) {
+            return (
                 <div className="audio-player-row">
-                    <div className="audio-player-container">
-                        <img draggable={false} style={{filter: getFilter()}} className="audio-player-img" src={musicplaying}/>
-                        <img draggable={false} style={{filter: getFilter(), marginLeft: "0px"}} className="audio-player-icon-small" src={playerStop} onClick={() => quit()}/>
-                        <img draggable={false} style={{filter: getFilter()}} className="audio-player-icon-small" src={playerRewind} onClick={() => rewind()}/>
-                        <img draggable={false} style={{filter: getFilter()}} className="audio-player-play-icon" src={getAudioPlayIcon()} onClick={() => updatePlay()}/>
-                        <img draggable={false} style={{filter: getFilter(), marginRight: "10px"}} className="audio-player-icon-small" src={playerFastforward} onClick={() => fastforward()}/>
-                    </div>
                     <div className="audio-player-container" style={{width: "100%"}}>
                         <p className="audio-player-text">{dragging ? functions.formatSeconds(dragProgress) : functions.formatSeconds(secondsProgress)}</p>
                         <Slider ref={audioSliderRef} className="audio-player-slider" trackClassName="audio-player-slider-track" thumbClassName="audio-player-slider-thumb" min={0} max={100} value={dragging ? (dragProgress / duration) * 100 : progress} onBeforeChange={() => setDragging(true)} onChange={(value) => updateProgressText(value)} onAfterChange={(value) => seek(value)}/>
@@ -544,10 +537,53 @@ const AudioPlayer: React.FunctionComponent = (props) => {
                         <img draggable={false} style={{filter: getFilter(), marginLeft: "10px"}} className="audio-player-icon" src={playerClear} onClick={() => reset()}/>
                         <img draggable={false} style={{filter: getFilter()}} className="audio-player-icon" src={getAudioReverseIcon()} onClick={() => changeReverse()}/>
                         <img draggable={false} style={{filter: getFilter()}} className="audio-player-icon" ref={audioSpeedRef} src={getAudioSpeedIcon()} onClick={() => toggleDropdown("speed")}/>
+                        <img draggable={false} style={{filter: getFilter()}} className="audio-player-icon-small" src={playerRewind} onClick={() => rewind()}/>
+                        <img draggable={false} style={{filter: getFilter()}} className="audio-player-play-icon" src={getAudioPlayIcon()} onClick={() => updatePlay()}/>
+                        <img draggable={false} style={{filter: getFilter()}} className="audio-player-icon-small" src={playerFastforward} onClick={() => fastforward()}/>
+                        <img draggable={false} style={{filter: getFilter()}} className="audio-player-icon-small" src={playerStop} onClick={() => quit()}/>
                         <img draggable={false} style={{filter: getFilter()}} className="audio-player-icon" ref={audioPitchRef} src={getAudioPitchIcon()} onClick={() => toggleDropdown("pitch")}/>
                         <img draggable={false} style={{filter: getFilter(), marginRight: "20px"}} ref={audioVolumeRef} className="audio-player-icon" src={getAudioVolumeIcon()} onMouseEnter={() => setShowVolumeSlider(true)} onMouseLeave={() => setShowVolumeSlider(false)} onClick={updateMute}/>
                     </div>
                 </div>
+            )
+        }
+        return (
+            <div className="audio-player-row">
+                <div className="audio-player-container">
+                    <img draggable={false} style={{filter: getFilter()}} className="audio-player-img" src={musicplaying}/>
+                    <img draggable={false} style={{filter: getFilter(), marginLeft: "0px"}} className="audio-player-icon-small" src={playerStop} onClick={() => quit()}/>
+                    <img draggable={false} style={{filter: getFilter()}} className="audio-player-icon-small" src={playerRewind} onClick={() => rewind()}/>
+                    <img draggable={false} style={{filter: getFilter()}} className="audio-player-play-icon" src={getAudioPlayIcon()} onClick={() => updatePlay()}/>
+                    <img draggable={false} style={{filter: getFilter(), marginRight: "10px"}} className="audio-player-icon-small" src={playerFastforward} onClick={() => fastforward()}/>
+                </div>
+                <div className="audio-player-container" style={{width: "100%"}}>
+                    <p className="audio-player-text">{dragging ? functions.formatSeconds(dragProgress) : functions.formatSeconds(secondsProgress)}</p>
+                    <Slider ref={audioSliderRef} className="audio-player-slider" trackClassName="audio-player-slider-track" thumbClassName="audio-player-slider-thumb" min={0} max={100} value={dragging ? (dragProgress / duration) * 100 : progress} onBeforeChange={() => setDragging(true)} onChange={(value) => updateProgressText(value)} onAfterChange={(value) => seek(value)}/>
+                    <p className="audio-player-text">{functions.formatSeconds(duration)}</p>
+                </div>
+                <div className="audio-player-container">
+                    <img draggable={false} style={{filter: getFilter(), marginLeft: "10px"}} className="audio-player-icon" src={playerClear} onClick={() => reset()}/>
+                    <img draggable={false} style={{filter: getFilter()}} className="audio-player-icon" src={getAudioReverseIcon()} onClick={() => changeReverse()}/>
+                    <img draggable={false} style={{filter: getFilter()}} className="audio-player-icon" ref={audioSpeedRef} src={getAudioSpeedIcon()} onClick={() => toggleDropdown("speed")}/>
+                    <img draggable={false} style={{filter: getFilter()}} className="audio-player-icon" ref={audioPitchRef} src={getAudioPitchIcon()} onClick={() => toggleDropdown("pitch")}/>
+                    <img draggable={false} style={{filter: getFilter(), marginRight: "20px"}} ref={audioVolumeRef} className="audio-player-icon" src={getAudioVolumeIcon()} onMouseEnter={() => setShowVolumeSlider(true)} onMouseLeave={() => setShowVolumeSlider(false)} onClick={updateMute}/>
+                </div>
+            </div>
+        )
+    }
+
+    const getHeight = () => {
+        if (mobile) return audioPost ? "160px" : "120px"
+        return audioPost ? "140px" : "100px"
+    }
+
+    if (audio) {
+        return (
+            <div className="audio-player" style={{height: getHeight()}} ref={audioControls} onMouseEnter={() => setHover(true)} onMouseLeave={() => setHover(false)} onMouseUp={() => setDragging(false)}>
+                {audioPost ? <div className="audio-player-row" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
+                    <span className="audio-player-title" onClick={() => history.push(`/post/${audioPost.postID}`)}>{audioPost.title || "Unknown"}</span>
+                </div> : null}
+                {playerJSX()}
                 <div className={`audio-player-speed-dropdown ${showSpeedDropdown ? "" : "hide-player-speed-dropdown"}`} style={{marginRight: getAudioSpeedMarginRight(), marginTop: "-370px"}}
                 onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                     <div className="audio-player-speed-dropdown-item" onClick={() => {setSpeed(4); setShowSpeedDropdown(false)}}>

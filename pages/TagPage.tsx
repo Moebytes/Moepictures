@@ -34,6 +34,8 @@ interface Props {
     match?: any
 }
 
+let limit = 25
+
 const TagPage: React.FunctionComponent<Props> = (props) => {
     const {theme, setTheme} = useContext(ThemeContext)
     const {enableDrag, setEnableDrag} = useContext(EnableDragContext)
@@ -77,6 +79,10 @@ const TagPage: React.FunctionComponent<Props> = (props) => {
     const history = useHistory()
     const tagName = props?.match.params.tag
 
+    useEffect(() => {
+        limit = mobile ? 5 : 25
+    }, [mobile])
+
     const tagInfo = async () => {
         const tag = await functions.get("/api/tag", {tag: tagName}, session, setSessionFlag)
         if (!tag) return history.push("/404")
@@ -91,7 +97,7 @@ const TagPage: React.FunctionComponent<Props> = (props) => {
     }
 
     const updatePosts = async () => {
-        let uploads = await functions.get("/api/search/posts", {query: tagName, type: "all", restrict: "all", style: "all", sort: "date"}, session, setSessionFlag)
+        let uploads = await functions.get("/api/search/posts", {query: tagName, type: "all", restrict: "all", style: "all", sort: "date", limit}, session, setSessionFlag)
         let filtered = uploads.filter((u: any) => restrictType === "explicit" ? u.post?.restrict === "explicit" : u.post?.restrict !== "explicit")
         if (!permissions.isElevated(session)) filtered = filtered.filter((u: any) => !u.hidden)
         const images = filtered.map((p: any) => functions.getThumbnailLink(p.images[0].type, p.postID, p.images[0].order, p.images[0].filename, "large"))
@@ -102,7 +108,7 @@ const TagPage: React.FunctionComponent<Props> = (props) => {
     const updateOffset = async () => {
         let uploads = posts
         let offset = posts.length
-        const result = await functions.get("/api/search/posts", {query: tag.tag, type: "all", restrict: "all", style: "all", sort: "date", offset}, session, setSessionFlag)
+        const result = await functions.get("/api/search/posts", {query: tag.tag, type: "all", restrict: "all", style: "all", sort: "date", limit, offset}, session, setSessionFlag)
         uploads.push(...result)
         let filtered = uploads.filter((u: any) => restrictType === "explicit" ? u.post?.restrict === "explicit" : u.post?.restrict !== "explicit")
         if (!permissions.isElevated(session)) filtered = filtered.filter((u: any) => !u.hidden)

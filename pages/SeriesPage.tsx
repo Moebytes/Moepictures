@@ -55,6 +55,10 @@ const SeriesPage: React.FunctionComponent = (props) => {
     const history = useHistory()
 
     useEffect(() => {
+        limit = mobile ? 5 : 25
+    }, [mobile])
+
+    useEffect(() => {
         const savedScroll = localStorage.getItem("scroll")
         if (savedScroll) setScroll(savedScroll === "true")
         const savedPage = localStorage.getItem("seriesPage")

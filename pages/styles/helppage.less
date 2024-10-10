@@ -20,7 +20,8 @@
     flex-direction: column;
     width: 100%;
     height: max-content; 
-    padding: 10px 20px;
+    padding: 10px 20px;  
+    overflow-x: hidden;
 }
 
 .help-heading {
@@ -51,6 +52,7 @@
     font-size: 21px;
     color: var(--text);
     margin-bottom: 10px;
+    word-break: break-word;
 }
 
 
@@ -78,6 +80,7 @@
     font-size: 21px;
     color: var(--text-alt);
     cursor: pointer;
+    word-break: break-all;
 }
 
 .help-img-container {
@@ -96,8 +99,28 @@
     max-height: 600px;
 }
 
-@media  screen and (max-width: 500px) {
+@media screen and (max-width: 500px) {
+    .help {
+        flex-direction: column;
+    }
+
+    .help-nav {
+        flex-direction: row;
+        width: 100%;
+        flex-wrap: wrap;    
+        justify-content: flex-start;
+        margin-left: 10px;
+    }
+
+    .help-nav-text {
+        margin-right: 20px;
+    }
+
     .help-img {
         max-width: 100%;
+    }
+
+    .help-container {
+        padding: 10px 10px;
     }
 }

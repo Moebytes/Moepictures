@@ -777,7 +777,6 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
 
     if (mobile) return (
         <>
-        <SearchSuggestions active={suggestionsActive} sticky={true}/>
         <div className={`mobile-sidebar ${relative ? "mobile-sidebar-relative" : ""} ${mobileScrolling ? "hide-mobile-sidebar" : ""}`}>
             <div className="mobile-search-container">
                 <input className="mobile-search" type="search" spellCheck="false" value={search} onChange={(event) => setSearch(event.target.value)} onKeyDown={(event) => event.key === "Enter" ? triggerSearch() : null} onFocus={(event) => setSuggestionsActive(true)} onBlur={() => setSuggestionsActive(false)}/>
@@ -795,6 +794,7 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
                 </button>
             </div>
         </div>
+        <SearchSuggestions active={suggestionsActive} sticky={true}/>
         </>
     )
 

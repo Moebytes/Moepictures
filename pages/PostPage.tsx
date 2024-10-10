@@ -186,7 +186,8 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
         const updateArtistPosts = async () => {
             if (tagCategories?.artists?.[0]?.tag) {
                 try {
-                    const artistPosts = await functions.get("/api/search/posts", {query: tagCategories.artists[0].tag, type: "all", restrict: "all", style: "all", sort: "drawn", limit: 10000}, session, setSessionFlag)
+                    if (tagCategories.artists[0].tag === "unknown-artist") return
+                    const artistPosts = await functions.get("/api/search/posts", {query: tagCategories.artists[0].tag, type: "all", restrict: "all", style: "all", sort: "drawn", limit: mobile ? 10 : 100}, session, setSessionFlag)
                     if (artistPosts?.length) setArtistPosts(artistPosts)
                 } catch (err) {
                     console.log(err)
@@ -197,7 +198,7 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
             if (!tagCategories?.characters?.[0]?.tag) return
             if (tagCategories?.characters?.[0]?.tag !== characterTag) {
                 try {
-                    const relatedPosts = await functions.get("/api/search/posts", {query: tagCategories.characters[0].tag, type: post.type, restrict: post.restrict === "explicit" ? "explicit" : "all", style: post.style, sort: Math.random() > 0.5 ? "date" : "reverse date", limit: 30}, session, setSessionFlag)
+                    const relatedPosts = await functions.get("/api/search/posts", {query: tagCategories.characters[0].tag, type: post.type, restrict: post.restrict === "explicit" ? "explicit" : "all", style: post.style, sort: Math.random() > 0.5 ? "date" : "reverse date", limit: mobile ? 10 : 30}, session, setSessionFlag)
                     if (relatedPosts?.length) setRelatedPosts(relatedPosts)
                     characterTag = tagCategories.characters[0].tag
                 } catch (err) {

@@ -182,7 +182,7 @@ const App: React.FunctionComponent = (props) => {
                 setMobileScrolling(false)
                 return setHideSortbar(false)
             }
-            if (window.scrollY === 0) return setHideSortbar(false)
+            if (functions.scrolledToTop()) return setHideSortbar(false)
             if (sidebarHover) return setHideSortbar(true)
             setActiveDropdown("none")
             return setHideSortbar(true)
@@ -193,7 +193,7 @@ const App: React.FunctionComponent = (props) => {
                 return setHideSortbar(false)
             }
             if (activeDropdown !== "none") return setHideSortbar(false)
-            if (window.scrollY === 0) return setHideSortbar(false)
+            if (functions.scrolledToTop()) return setHideSortbar(false)
             if (sidebarHover) return setHideSortbar(true)
             const sortbar = document.querySelector(".sortbar")
             const amt = hideTitlebar ? (sortbar ? (functions.navbarHeight() + functions.sortbarHeight()) : functions.navbarHeight()) : (functions.titlebarHeight() + functions.navbarHeight() + functions.sortbarHeight())

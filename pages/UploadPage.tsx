@@ -1418,12 +1418,12 @@ const UploadPage: React.FunctionComponent = (props) => {
                             <img className="upload-button-img" src={linkIcon}/>
                             <span className="upload-button-text">Enter Links</span>
                     </button>
+                </div>
+                <div className="upload-row">
                     <button className="upload-button" onClick={() => changeUpscaled()}>
                             <img className="upload-button-img" src={showUpscaled ? upscaleIcon : originalIcon}/>
                             <span className="upload-button-text">{showUpscaled ? "Upscaled" : "Original"}</span>
                     </button>
-                </div>
-                <div className="upload-row">
                     {getCurrentFiles().length > 1 ?
                     <button className="upload-button" onClick={left}>
                         <img className="upload-button-img" src={leftIcon}/>

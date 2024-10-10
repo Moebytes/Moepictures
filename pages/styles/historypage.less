@@ -21,6 +21,7 @@
     font-size: 35px;
     color: var(--text);
     margin-bottom: 10px;
+    white-space: nowrap;
     &:hover {
         filter: brightness(130%);
     }
@@ -59,7 +60,8 @@
     font-family: Tahoma, sans-serif;
     font-size: 16px;
     margin-left: 5px;
-    color: var(--text-strong);
+    color: var(--text-strong);  
+    white-space: nowrap;
 }
 
 .history-icons {
@@ -77,5 +79,11 @@
     height: 30px;
     &:hover {
         filter: brightness(130%);
+    }
+}
+
+@media screen and (max-width: 500px) {
+    .history-heading {
+        font-size: 30px;
     }
 }

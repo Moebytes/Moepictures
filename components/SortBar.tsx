@@ -163,13 +163,14 @@ const SortBar: React.FunctionComponent = (props) => {
             if (activeDropdown !== "filters") {
                 if (filterDropActive) setFilterDropActive(false)
             }
+            if (mobile) setDropTop(21)
             if (functions.scrolledToTop()) setDropTop(-2)
             if (activeDropdown === "none") return
         }
         const scrollHandler = () => {
             if (functions.scrolledToTop()) return setDropTop(-2)
             let newDropTop = hideTitlebar ? -Number(document.querySelector(".titlebar")?.clientHeight) - 2 : 0
-            if (mobile) newDropTop = 32
+            if (mobile) newDropTop = 23
             if (dropTop === newDropTop) return
             setDropTop(newDropTop - 2)
         }
@@ -297,7 +298,7 @@ const SortBar: React.FunctionComponent = (props) => {
     }
 
     const getImageMargin = () => {
-        if (mobile) return "62px"
+        if (mobile) return "72px"
         const rect = imageRef.current?.getBoundingClientRect()
         if (!rect) return "290px"
         const raw = rect.x
@@ -357,7 +358,9 @@ const SortBar: React.FunctionComponent = (props) => {
     }
 
     const getRestrictMargin = () => {
-        if (mobile) return "95px"
+        if (mobile) {
+            return "130px"
+        }
         const rect = restrictRef.current?.getBoundingClientRect()
         if (!rect) return "325px"
         const raw = rect.x
@@ -424,7 +427,7 @@ const SortBar: React.FunctionComponent = (props) => {
     }
 
     const getStyleMargin = () => {
-        if (mobile) return "165px"
+        if (mobile) return "170px"
         const rect = styleRef.current?.getBoundingClientRect()
         if (!rect) return "395px"
         const raw = rect.x
@@ -906,6 +909,10 @@ const SortBar: React.FunctionComponent = (props) => {
             </div>
             <div className={`dropdown-right ${activeDropdown === "sort" ? "" : "hide-dropdown"}`} 
             style={{marginRight: getSortMargin(), top: `${dropTop}px`}} onClick={() => setActiveDropdown("none")}>
+                {mobile ? 
+                <div className="sortbar-dropdown-row" onClick={() => setSortReverse((prev: boolean) => !prev)}>
+                    <span className="sortbar-dropdown-text">Reverse</span>
+                </div> : null}
                 <div className="sortbar-dropdown-row" onClick={() => changeSortType("random")}>
                     <span className="sortbar-dropdown-text">Random</span>
                 </div>

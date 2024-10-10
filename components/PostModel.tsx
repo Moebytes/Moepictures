@@ -123,6 +123,7 @@ const PostModel: React.FunctionComponent<Props> = (props) => {
         window.cancelAnimationFrame(id)
         while (element?.lastChild) element?.removeChild(element.lastChild)
         let width = window.innerWidth - functions.sidebarWidth() - 400
+        if (mobile) width = window.innerWidth - 10
         let height = window.innerHeight - functions.titlebarHeight() - functions.navbarHeight() - 150
         if (imageExpand) {
             width = window.innerWidth - functions.sidebarWidth() - 200
@@ -350,7 +351,7 @@ const PostModel: React.FunctionComponent<Props> = (props) => {
 
     useEffect(() => {
         loadModel()
-    }, [wireframe, imageExpand])
+    }, [wireframe, imageExpand, mobile])
 
     useEffect(() => {
         updateMaterials()

@@ -68,16 +68,11 @@ export default class Functions {
             const response = await axios.get(endpoint, {params, headers, withCredentials: true}).then((r) => r.data)
             return response
         } catch (err: any) {
-            if (err.response?.status === 401) {
-                try {
-                    const accessToken = axios.get("/refresh-token", {headers, withCredentials: true}).then((r) => r.data.accessToken)
-                    headers.Authorization = `Bearer ${accessToken}`
-                    setSessionFlag(true)
-                    return axios.get(endpoint, {params, headers, withCredentials: true}).then((r) => r.data)
-                } catch {
-                    await axios.post("/api/user/logout", null, {withCredentials: true})
-                    setSessionFlag(true)
-                }
+            if (err.response?.status === 401) {/*
+                const accessToken = axios.get("/refresh-token", {headers, withCredentials: true}).then((r) => r.data.accessToken)
+                headers.Authorization = `Bearer ${accessToken}`
+                setSessionFlag(true)
+                return axios.get(endpoint, {params, headers, withCredentials: true}).then((r) => r.data)*/
             }
             return Promise.reject(err)
         }
@@ -90,16 +85,11 @@ export default class Functions {
             const response = await axios.post(endpoint, data, {headers, withCredentials: true}).then((r) => r.data)
             return response
         } catch (err: any) {
-            if (err.response?.status === 401) {
-                try {
-                    const accessToken = axios.get("/refresh-token", {headers, withCredentials: true}).then((r) => r.data.accessToken)
-                    headers.Authorization = `Bearer ${accessToken}`
-                    setSessionFlag(true)
-                    return axios.post(endpoint, data, {headers, withCredentials: true}).then((r) => r.data)
-                } catch {
-                    await axios.post("/api/user/logout", null, {withCredentials: true})
-                    setSessionFlag(true)
-                }
+            if (err.response?.status === 401) {/*
+                const accessToken = axios.get("/refresh-token", {headers, withCredentials: true}).then((r) => r.data.accessToken)
+                headers.Authorization = `Bearer ${accessToken}`
+                setSessionFlag(true)
+                return axios.post(endpoint, data, {headers, withCredentials: true}).then((r) => r.data)*/
             }
             return Promise.reject(err)
         }
@@ -112,16 +102,11 @@ export default class Functions {
             const response = await axios.put(endpoint, data, {headers, withCredentials: true}).then((r) => r.data)
             return response
         } catch (err: any) {
-            if (err.response?.status === 401) {
-                try {
-                    const accessToken = axios.get("/refresh-token", {headers, withCredentials: true}).then((r) => r.data.accessToken)
-                    headers.Authorization = `Bearer ${accessToken}`
-                    setSessionFlag(true)
-                    return axios.put(endpoint, data, {headers, withCredentials: true}).then((r) => r.data)
-                } catch {
-                    await axios.post("/api/user/logout", null, {withCredentials: true})
-                    setSessionFlag(true)
-                }
+            if (err.response?.status === 401) {/*
+                const accessToken = axios.get("/refresh-token", {headers, withCredentials: true}).then((r) => r.data.accessToken)
+                headers.Authorization = `Bearer ${accessToken}`
+                setSessionFlag(true)
+                return axios.put(endpoint, data, {headers, withCredentials: true}).then((r) => r.data)*/
             }
             return Promise.reject(err)
         }
@@ -134,16 +119,11 @@ export default class Functions {
             const response = await axios.delete(endpoint, {params, headers, withCredentials: true}).then((r) => r.data)
             return response
         } catch (err: any) {
-            if (err.response?.status === 401) {
-                try {
-                    const accessToken = axios.get("/refresh-token", {headers, withCredentials: true}).then((r) => r.data.accessToken)
-                    headers.Authorization = `Bearer ${accessToken}`
-                    setSessionFlag(true)
-                    return axios.delete(endpoint, {params, headers, withCredentials: true}).then((r) => r.data)
-                } catch {
-                    await axios.post("/api/user/logout", null, {withCredentials: true})
-                    setSessionFlag(true)
-                }
+            if (err.response?.status === 401) {/*
+                const accessToken = axios.get("/refresh-token", {headers, withCredentials: true}).then((r) => r.data.accessToken)
+                headers.Authorization = `Bearer ${accessToken}`
+                setSessionFlag(true)
+                return axios.delete(endpoint, {params, headers, withCredentials: true}).then((r) => r.data)*/
             }
             return Promise.reject(err)
         }
@@ -688,10 +668,10 @@ export default class Functions {
     }
 
     public static getImagesPerRowMobile = (sizeType: string) => {
-        if (sizeType === "tiny") return 5
-        if (sizeType === "small") return 4
-        if (sizeType === "medium") return 3
-        if (sizeType === "large") return 2
+        if (sizeType === "tiny") return 4
+        if (sizeType === "small") return 3
+        if (sizeType === "medium") return 2
+        if (sizeType === "large") return 1
         if (sizeType === "massive") return 1
         return 5
     }
@@ -1120,7 +1100,7 @@ export default class Functions {
         return `${window.location.protocol}//${window.location.host}/unverified/${folder}/${postID}-${order}-${encodeURIComponent(filename)}`
     }
 
-    public static getThumbnailLink = (folder: string, postID: number, order: number, filename: string, sizeType: string) => {
+    public static getThumbnailLink = (folder: string, postID: number, order: number, filename: string, sizeType: string, mobile?: boolean) => {
         if (!filename) return ""
         if (folder !== "image" && folder !== "comic" && folder !== "animation") return Functions.getImageLink(folder, postID, order, filename)
         let size = 265
@@ -1129,6 +1109,7 @@ export default class Functions {
         if (sizeType === "medium") size = 600
         if (sizeType === "large") size = 800
         if (sizeType === "massive") size = 1000
+        if (mobile) size = Math.floor(size / 2)
         return `${window.location.protocol}//${window.location.host}/thumbnail/${size}/${folder}/${postID}-${order}-${encodeURIComponent(filename)}`
     }
 
@@ -1553,7 +1534,7 @@ export default class Functions {
     }
 
     public static modelImage = async (model: string, imageSize?: number) => {
-        if (!imageSize) imageSize = 350
+        if (!imageSize) imageSize = 100
         const width = imageSize
         const height = imageSize
         const scene = new THREE.Scene()
@@ -1561,7 +1542,7 @@ export default class Functions {
         const light = new THREE.AmbientLight(0xffffff, 1)
         scene.add(light)
         
-        const renderer = new THREE.WebGLRenderer({alpha: true, preserveDrawingBuffer: true})
+        const renderer = new THREE.WebGLRenderer({alpha: true, preserveDrawingBuffer: true, powerPreference: "low-power"})
         renderer.setClearColor(0x000000, 0)
         renderer.setSize(width, height)
         renderer.setPixelRatio(window.devicePixelRatio)
@@ -1591,24 +1572,13 @@ export default class Functions {
         camera.far = size * 100
         camera.updateProjectionMatrix()
 
-        camera.position.copy(center)
-        camera.position.x += size / 2.0
-        camera.position.y += size / 3.0
-        camera.position.z += size / 2.0
+        const zoomedDistance = size / 5
+        camera.position.set(center.x + zoomedDistance, center.y + zoomedDistance / 3, center.z + zoomedDistance)
         camera.lookAt(center)
 
+        await Functions.timeout(100)
         renderer.render(scene, camera)
-
-        const animate = async () => {
-            let id = window.requestAnimationFrame(animate)
-            await Functions.timeout(500)
-            renderer.setClearColor(0x000000, 1)
-            renderer.render(scene, camera)
-            window.cancelAnimationFrame(id)
-            return renderer.domElement.toDataURL()
-        }
-
-        return animate()
+        return renderer.domElement.toDataURL()
     }
 
     
@@ -2288,5 +2258,11 @@ export default class Functions {
         if (postIndex === -1) return
         posts[postIndex].favorited = favorited
         localStorage.setItem("savedPosts", JSON.stringify(posts))
+    }
+
+    public static jumpToTop = () => {
+        setTimeout(() => {
+            window.scrollTo(0, 0)
+        }, 300)
     }
 }

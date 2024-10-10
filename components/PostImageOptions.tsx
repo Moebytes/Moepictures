@@ -165,7 +165,7 @@ const PostImageOptions: React.FunctionComponent<Props> = (props) => {
         if (!rect || !bodyRect) return "0px"
         const raw = bodyRect.bottom - rect.bottom
         let offset = -250
-        if (mobile) offset += 25
+        if (mobile) offset += 20
         return `${raw + offset}px`
     }
 
@@ -179,7 +179,7 @@ const PostImageOptions: React.FunctionComponent<Props> = (props) => {
         if (format === "webp") offset += 8
         if (format === "avif") offset += 4
         if (format === "svg") offset += 1
-        if (mobile) offset += 0
+        if (mobile) offset += 15
         return `${raw + offset}px`
     }
 
@@ -194,7 +194,7 @@ const PostImageOptions: React.FunctionComponent<Props> = (props) => {
         if (!rect || !bodyRect) return "0px"
         const raw = bodyRect.bottom - rect.bottom
         let offset = -150
-        if (mobile) offset += 0
+        if (mobile) offset += 25
         return `${raw + offset}px`
     }
 
@@ -238,12 +238,13 @@ const PostImageOptions: React.FunctionComponent<Props> = (props) => {
         <div className="post-image-options-container">
             {mobile ? <>
             <div className="post-image-options">
-                <div className="post-image-options-box" onClick={() => props.previous?.()} style={{marginRight: "15px"}} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
+                <div className="post-image-options-box" onClick={() => props.previous?.()} style={{marginRight: "25px"}} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                     <img className="post-image-icon-small" src={prevIcon} style={{filter: getFilter()}}/>
                     <div className="post-image-text-small">Prev</div>
                 </div>
                 {session.username ?
-                <div className="post-image-options-box" onClick={() => updateFavorite(!favorited)} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
+                <div className="post-image-options-box" onClick={() => updateFavorite(!favorited)} style={{marginLeft: "-10px"}}
+                onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                     <img className="post-image-icon" src={getStar()} style={{filter: getFilter()}}/>
                     <div className={`post-image-text ${favorited ? "favorited" : ""}`}>{favorited ? "Favorited" : "Favorite"}</div>
                 </div> : null}
@@ -253,12 +254,16 @@ const PostImageOptions: React.FunctionComponent<Props> = (props) => {
                 </div>
             </div>
             <div className="post-image-options">
-                <div className="post-image-options-box" onClick={() => props.download?.()} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
+                <div className="post-image-options-box" onClick={() => props.download?.()} style={{marginRight: "25px"}}
+                onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                     <img className="post-image-icon" src={download} style={{filter: getFilter()}}/>
                     <div className="post-image-text">Download</div>
                 </div>
-                {props.post.type === "image" ? <button className="post-image-button" ref={formatRef} onClick={() => toggleDropdown("format")}>{String(format).toUpperCase()}</button> : null}
-                <div className="post-image-options-box" ref={filterRef} onClick={() => toggleDropdown("filter")} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
+                {props.post.type === "image" ? 
+                <button className="post-image-button" ref={formatRef} onClick={() => toggleDropdown("format")}>
+                {String(format).toUpperCase()}</button> : null}
+                <div className="post-image-options-box" ref={filterRef} onClick={() => toggleDropdown("filter")} style={{marginLeft: "25px"}}
+                onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                     <img className="post-image-icon" src={filters} style={{filter: getFilter()}}/>
                     <div className="post-image-text">Filters</div>
                 </div>
@@ -284,7 +289,9 @@ const PostImageOptions: React.FunctionComponent<Props> = (props) => {
                         <img className="post-image-icon" src={download} style={{filter: getFilter()}}/>
                         <div className="post-image-text">Download</div>
                     </div>
-                {props.post.type === "image" ? <button className="post-image-button" ref={formatRef} onClick={() => toggleDropdown("format")}>{String(format).toUpperCase()}</button> : null}
+                    {props.post.type === "image" ? 
+                    <button className="post-image-button" ref={formatRef} onClick={() => toggleDropdown("format")}>
+                    {String(format).toUpperCase()}</button> : null}
                     <div className="post-image-options-box" ref={filterRef} onClick={() => toggleDropdown("filter")} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                         <img className="post-image-icon" src={filters} style={{filter: getFilter()}}/>
                         <div className="post-image-text">Filters</div>

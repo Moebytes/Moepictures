@@ -27,6 +27,7 @@ import danger from "../assets/icons/danger.png"
 import "./styles/userprofilepage.less"
 
 let intervalTimer = null as any
+let limit = 25
 
 const UserProfilePage: React.FunctionComponent = (props) => {
     const [ignored, forceUpdate] = useReducer(x => x + 1, 0)
@@ -62,12 +63,18 @@ const UserProfilePage: React.FunctionComponent = (props) => {
     const [favorites, setFavorites] = useState([]) as any
     const [comments, setComments] = useState([]) as any
     const [uploadImages, setUploadImages] = useState([]) as any
+    const [appendUploadImages, setAppendUploadImages] = useState([]) as any
     const [favoriteImages, setFavoriteImages] = useState([]) as any
+    const [appendFavoriteImages, setAppendFavoriteImages] = useState([]) as any
     const [banReason, setBanReason] = useState("")
     const [bio, setBio] = useState("")
     const [interval, setInterval] = useState("")
     const [init, setInit] = useState(true)
     const history = useHistory()
+
+    useEffect(() => {
+        limit = mobile ? 5 : 25
+    }, [mobile])
 
     const updateBanReason = async () => {
         const ban = await functions.get("/api/user/ban", {username: session.username}, session, setSessionFlag)
@@ -83,7 +90,7 @@ const UserProfilePage: React.FunctionComponent = (props) => {
     }
 
     const updateUploads = async () => {
-        const uploads = await functions.get("/api/user/uploads", null, session, setSessionFlag)
+        const uploads = await functions.get("/api/user/uploads", {limit}, session, setSessionFlag)
         let filtered = uploads.filter((u: any) => restrictType === "explicit" ? u.restrict === "explicit" : u.restrict !== "explicit")
         if (!permissions.isElevated(session)) filtered = filtered.filter((u: any) => !u.hidden)
         const images = filtered.map((p: any) => functions.getThumbnailLink(p.images[0].type, p.postID, p.images[0].order, p.images[0].filename, "tiny"))
@@ -91,8 +98,20 @@ const UserProfilePage: React.FunctionComponent = (props) => {
         setUploadImages(images)
     }
 
+    const updateUploadOffset = async () => {
+        const newUploads = uploads
+        let offset = newUploads.length
+        const result = await functions.get("/api/user/uploads", {limit, offset}, session, setSessionFlag)
+        newUploads.push(...result)
+        let filtered = newUploads.filter((u: any) => restrictType === "explicit" ? u.post?.restrict === "explicit" : u.post?.restrict !== "explicit")
+        if (!permissions.isElevated(session)) filtered = filtered.filter((u: any) => !u.hidden)
+        const images = filtered.map((p: any) => functions.getThumbnailLink(p.images[0].type, p.postID, p.images[0].order, p.images[0].filename, "large"))
+        setUploads(filtered)
+        setAppendUploadImages(images)
+    }
+
     const updateFavorites = async () => {
-        const favorites = await functions.get("/api/user/favorites", null, session, setSessionFlag)
+        const favorites = await functions.get("/api/user/favorites", {limit}, session, setSessionFlag)
         let filtered = favorites.filter((f: any) => restrictType === "explicit" ? f.post?.restrict === "explicit" : f.post?.restrict !== "explicit")
         if (!permissions.isElevated(session)) filtered = filtered.filter((f: any) => !f.post?.hidden)
         const images = filtered.map((f: any) => functions.getThumbnailLink(f.post.images[0].type, f.postID, f.post.images[0].order, f.post.images[0].filename, "tiny"))
@@ -100,9 +119,23 @@ const UserProfilePage: React.FunctionComponent = (props) => {
         setFavoriteImages(images)
     }
 
+    const updateFavoriteOffset = async () => {
+        const newFavorites = favorites
+        let offset = newFavorites.length
+        const result = await functions.get("/api/user/favorites", {limit, offset}, session, setSessionFlag)
+        newFavorites.push(...result)
+        let filtered = favorites.filter((f: any) => restrictType === "explicit" ? f.post?.restrict === "explicit" : f.post?.restrict !== "explicit")
+        if (!permissions.isElevated(session)) filtered = filtered.filter((f: any) => !f.post?.hidden)
+        const images = filtered.map((f: any) => functions.getThumbnailLink(f.post.images[0].type, f.postID, f.post.images[0].order, f.post.images[0].filename, "tiny"))
+        setFavorites(filtered)
+        setAppendFavoriteImages(images)
+    }
+
     const updateComments = async () => {
         const comments = await functions.get("/api/user/comments", {sort: "date"}, session, setSessionFlag)
-        setComments(comments)
+        let filtered = comments.filter((c: any) => restrictType === "explicit" ? c.post?.restrict === "explicit" : c.post?.restrict !== "explicit")
+        if (!permissions.isElevated(session)) filtered = filtered.filter((c: any) => !c.post?.hidden)
+        setComments(filtered)
     }
 
     useEffect(() => {
@@ -482,13 +515,13 @@ const UserProfilePage: React.FunctionComponent = (props) => {
                     </Link>
                     {favorites.length ?
                     <div className="userprofile-column">
-                        <span className="userprofile-title">Favorites <span className="userprofile-text-alt">{favorites.length}</span></span>
-                        <Carousel images={favoriteImages} noKey={true} set={setFav} index={favoriteIndex}/>
+                        <span className="userprofile-title">Favorites <span className="userprofile-text-alt">{favorites[0].favoriteCount}</span></span>
+                        <Carousel images={favoriteImages} noKey={true} set={setFav} index={favoriteIndex} update={updateFavoriteOffset} appendImages={appendFavoriteImages}/>
                     </div> : null}
                     {uploads.length ?
                     <div className="userprofile-column">
-                        <span className="userprofile-title">Uploads <span className="userprofile-text-alt">{uploads.length}</span></span>
-                        <Carousel images={uploadImages} noKey={true} set={setUp} index={uploadIndex}/>
+                        <span className="userprofile-title">Uploads <span className="userprofile-text-alt">{uploads[0].uploadCount}</span></span>
+                        <Carousel images={uploadImages} noKey={true} set={setUp} index={uploadIndex} update={updateUploadOffset} appendImages={appendUploadImages}/>
                     </div> : null}
                     {comments.length ?
                     <div className="userprofile-column">

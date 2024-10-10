@@ -553,7 +553,7 @@ const ThreadPage: React.FunctionComponent<Props> = (props) => {
         if (!rect) return "0px"
         const raw = window.innerWidth - rect.right
         let offset = -145
-        if (mobile) offset += 0
+        if (mobile) offset -= 20
         return `${raw + offset}px`
     }
 
@@ -599,12 +599,12 @@ const ThreadPage: React.FunctionComponent<Props> = (props) => {
     const getReplyBoxJSX = () => {
         if (thread.locked) return (
             <div className="forum-thread-reply-box" style={{justifyContent: "flex-start"}}>
-                <span className="forum-thread-validation" style={{fontSize: "20px", marginLeft: "15px"}}>This thread is locked.</span>
+                <span className="forum-thread-validation" style={{fontSize: "20px", marginLeft: mobile ? "0px" : "15px"}}>This thread is locked.</span>
             </div>
         )
         if (session.banned) return (
             <div className="forum-thread-reply-box" style={{justifyContent: "flex-start"}}>
-                <span className="upload-ban-text" style={{fontSize: "20px", marginLeft: "15px"}}>You are banned. Cannot reply.</span>
+                <span className="upload-ban-text" style={{fontSize: "20px", marginLeft: mobile ? "0px" : "15px"}}>You are banned. Cannot reply.</span>
             </div>
         )
         if (session.username) {

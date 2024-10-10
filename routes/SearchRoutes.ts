@@ -11,7 +11,7 @@ import rateLimit from "express-rate-limit"
 
 const searchLimiter = rateLimit({
 	windowMs: 60 * 1000,
-	max: 200,
+	max: 400,
 	message: "Too many requests, try again later.",
 	standardHeaders: true,
 	legacyHeaders: false,

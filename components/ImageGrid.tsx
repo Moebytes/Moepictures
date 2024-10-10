@@ -1,7 +1,7 @@
 import React, {useContext, useEffect, useRef, useState, useReducer} from "react"
 import {useHistory, useLocation} from "react-router-dom"
 import {ThemeContext, SizeTypeContext, PostAmountContext, PostsContext, ImageTypeContext, EnableDragContext, PremiumRequiredContext,
-RestrictTypeContext, StyleTypeContext, SortTypeContext, SortReverseContext, SearchContext, SearchFlagContext, HeaderFlagContext,
+RestrictTypeContext, StyleTypeContext, SortTypeContext, SortReverseContext, SearchContext, SearchFlagContext, HeaderFlagContext, MobileScrollingContext,
 RandomFlagContext, ImageSearchFlagContext, SidebarTextContext, MobileContext, SessionContext, SessionFlagContext, VisiblePostsContext,
 ScrollYContext, ScrollContext, PageContext, AutoSearchContext, ShowPageDialogContext, PageFlagContext, ReloadPostFlagContext} from "../Context"
 import GridImage from "./GridImage"
@@ -46,6 +46,7 @@ const ImageGrid: React.FunctionComponent<Props> = (props) => {
     const {premiumRequired, setPremiumRequired} = useContext(PremiumRequiredContext)
     const {headerFlag, setHeaderFlag} = useContext(HeaderFlagContext)
     const {mobile, setMobile} = useContext(MobileContext)
+    const {mobileScrolling, setMobileScrolling} = useContext(MobileScrollingContext)
     const {session, setSession} = useContext(SessionContext)
     const {sessionFlag, setSessionFlag} = useContext(SessionFlagContext)
     const [loaded, setLoaded] = useState(false)
@@ -64,6 +65,10 @@ const ImageGrid: React.FunctionComponent<Props> = (props) => {
     const [queryPage, setQueryPage] = useState(1)
     const history = useHistory()
     const location = useLocation()
+
+    useEffect(() => {
+        limit = mobile ? 20 : 100
+    }, [mobile])
 
     const getPageAmount = () => {
         let loadAmount = 60
@@ -175,6 +180,10 @@ const ImageGrid: React.FunctionComponent<Props> = (props) => {
 
     useEffect(() => {
         window.scrollTo(0, 0)
+        setTimeout(() => {
+            setMobileScrolling(false)
+            functions.jumpToTop()
+        }, 100)
         if (scroll) {
             setEnded(false)
             setIndex(0)
@@ -419,6 +428,10 @@ const ImageGrid: React.FunctionComponent<Props> = (props) => {
     const firstPage = () => {
         setPage(1)
         window.scrollTo(0, 0)
+        setTimeout(() => {
+            setMobileScrolling(false)
+            functions.jumpToTop()
+        }, 100)
     }
 
     const previousPage = () => {
@@ -426,6 +439,10 @@ const ImageGrid: React.FunctionComponent<Props> = (props) => {
         if (newPage < 1) newPage = 1 
         setPage(newPage)
         window.scrollTo(0, 0)
+        setTimeout(() => {
+            setMobileScrolling(false)
+            functions.jumpToTop()
+        }, 100)
     }
 
     const nextPage = () => {
@@ -433,16 +450,28 @@ const ImageGrid: React.FunctionComponent<Props> = (props) => {
         if (newPage > maxPage()) newPage = maxPage()
         setPage(newPage)
         window.scrollTo(0, 0)
+        setTimeout(() => {
+            setMobileScrolling(false)
+            functions.jumpToTop()
+        }, 100)
     }
 
     const lastPage = () => {
         setPage(maxPage())
         window.scrollTo(0, 0)
+        setTimeout(() => {
+            setMobileScrolling(false)
+            functions.jumpToTop()
+        }, 100)
     }
 
     const goToPage = (newPage: number) => {
         setPage(newPage)
         window.scrollTo(0, 0)
+        setTimeout(() => {
+            setMobileScrolling(false)
+            functions.jumpToTop()
+        }, 100)
     }
 
     useEffect(() => {
@@ -503,11 +532,11 @@ const ImageGrid: React.FunctionComponent<Props> = (props) => {
             if (!image) continue
             const images = post.images.map((i: any) => functions.getImageLink(i.type, post.postID, i.order, i.filename))
             if (post.type === "model") {
-                jsx.push(<GridModel key={post.postID} ref={postsRef[i]} reupdate={() => setReupdateFlag(true)} id={post.postID} model={functions.getThumbnailLink(image.type, post.postID, image.order, image.filename, sizeType)} post={post}/>)
+                jsx.push(<GridModel key={post.postID} ref={postsRef[i]} reupdate={() => setReupdateFlag(true)} id={post.postID} model={functions.getThumbnailLink(image.type, post.postID, image.order, image.filename, sizeType, mobile)} post={post}/>)
             } else if (post.type === "audio") {
-                jsx.push(<GridSong key={post.postID} ref={postsRef[i]} reupdate={() => setReupdateFlag(true)} id={post.postID} audio={functions.getThumbnailLink(image.type, post.postID, image.order, image.filename, sizeType)} post={post}/>)
+                jsx.push(<GridSong key={post.postID} ref={postsRef[i]} reupdate={() => setReupdateFlag(true)} id={post.postID} audio={functions.getThumbnailLink(image.type, post.postID, image.order, image.filename, sizeType, mobile)} post={post}/>)
             } else {
-                jsx.push(<GridImage key={post.postID} ref={postsRef[i]} reupdate={() => setReupdateFlag(true)} id={post.postID} img={functions.getThumbnailLink(image.type, post.postID, image.order, image.filename, sizeType)} comicPages={post.type === "comic" ? images : null} post={post}/>)
+                jsx.push(<GridImage key={post.postID} ref={postsRef[i]} reupdate={() => setReupdateFlag(true)} id={post.postID} img={functions.getThumbnailLink(image.type, post.postID, image.order, image.filename, sizeType, mobile)} comicPages={post.type === "comic" ? images : null} post={post}/>)
             }
         }
         if (!jsx.length && noResults) {

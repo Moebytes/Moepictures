@@ -198,6 +198,7 @@
 
 .hide-mobile-navbar {
     transform: scaleY(0);
+    display: none;
 }
 
 .mobile-nav-text-container {
@@ -218,6 +219,12 @@
         filter: brightness(150%);
     }
     //.stroke-black-thin();
+}
+
+.mobile-nav-img-container {
+    margin-top: 5px;
+    display: flex;
+    align-items: center;
 }
 
 .mobile-nav-img {
@@ -265,7 +272,8 @@
     flex-direction: row;
     justify-content: flex-start;
     align-items: center;
-    padding: 7px;
+    padding: 7px;  
+    padding-top: 0px;
 }
 
 .mobile-nav-color {
@@ -384,8 +392,12 @@
 
 
 @media screen and (max-width: 500px) {
+    .mobile-nav-text-container {
+        padding-left: 10px;
+        padding-bottom: 10px;
+    }
+
     .title-dropdown {
-        top: 375px;
         left: 0px;
         right: unset;
     }

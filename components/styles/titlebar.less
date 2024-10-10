@@ -99,7 +99,8 @@
 
 .titlebar-hamburger {
     width: auto;
-    height: 30px;
+    height: 30px;  
+    margin-left: 20px;
     &:hover {
         filter: brightness(150%);
     }
@@ -113,15 +114,21 @@
 
 @media screen and (max-width: 500px) {
     .titlebar {
-        justify-content: center;
+        justify-content: center;    
+        align-items: center;
+    }
+
+    .titlebar-text-container {
+        margin-left: 10px;
+        margin-right: 5px;
     }
 
     .titlebar-text-a {
-        font-size: 50px;
+        font-size: 45px;
     }
     
     .titlebar-text-b {
-        font-size: 50px;
+        font-size: 45px;
     }
 
     .titlebar-image-container {
@@ -129,8 +136,8 @@
     }
     
     .titlebar-img {
-        margin-top: 7px;
-        height: 90%;
-        width: 90%;
+        //margin-top: 7px;
+        height: 65px;
+        width: auto;
     }
 }

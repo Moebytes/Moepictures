@@ -179,8 +179,8 @@ const UserRoutes = (app: Express) => {
                 req.session.savedSearches = user.savedSearches
                 req.session.showR18 = user.showR18
                 req.session.premiumExpiration = user.premiumExpiration
-                req.session.accessToken = serverFunctions.generateAccessToken(req)
-                req.session.refreshToken = serverFunctions.generateRefreshToken(req)
+                //req.session.accessToken = serverFunctions.generateAccessToken(req)
+                //req.session.refreshToken = serverFunctions.generateRefreshToken(req)
                 return res.status(200).send("Success")
             } else {
                 return res.status(400).send("Bad request")
@@ -503,8 +503,8 @@ const UserRoutes = (app: Express) => {
             if (!user) return res.status(400).send("Bad username")
             await sql.user.updateUser(req.session.username, "username", newUsername)
             req.session.username = newUsername
-            req.session.accessToken = serverFunctions.generateAccessToken(req)
-            req.session.refreshToken = serverFunctions.generateRefreshToken(req)
+            //req.session.accessToken = serverFunctions.generateAccessToken(req)
+            //req.session.refreshToken = serverFunctions.generateRefreshToken(req)
             if (user.image) {
                 const newFilename = `${req.session.username}${path.extname(user.image)}`
                 let oldImagePath = functions.getTagPath("pfp", user.image)
@@ -752,16 +752,18 @@ const UserRoutes = (app: Express) => {
 
     app.get("/api/user/favorites", sessionLimiter, async (req: Request, res: Response) => {
         try {
-            const username = req.query.username
+            const username = req.query.username as string
+            const offset = req.query.offset as string
+            const limit = req.query.limit as string
             if (username) {
                 const user = await sql.user.user(username as string)
                 if (!user || !user.publicFavorites) return res.status(200).send([])
-                let favorites = await sql.favorite.favorites(username as string)
+                let favorites = await sql.favorite.favorites(username, limit, offset)
                 favorites = functions.stripTags(favorites)
                 res.status(200).send(favorites)
             } else {
                 if (!req.session.username) return res.status(403).send("Unauthorized")
-                let favorites = await sql.favorite.favorites(req.session.username)
+                let favorites = await sql.favorite.favorites(req.session.username, limit, offset)
                 favorites = functions.stripTags(favorites)
                 res.status(200).send(favorites)
             }
@@ -773,14 +775,16 @@ const UserRoutes = (app: Express) => {
 
     app.get("/api/user/uploads", sessionLimiter, async (req: Request, res: Response) => {
         try {
-            const username = req.query.username
+            const username = req.query.username as string
+            const offset = req.query.offset as string
+            const limit = req.query.limit as string
             if (username) {
-                let uploads = await sql.user.uploads(username as string)
+                let uploads = await sql.user.uploads(username, limit, offset)
                 uploads = functions.stripTags(uploads)
                 res.status(200).send(uploads)
             } else {
                 if (!req.session.username) return res.status(403).send("Unauthorized")
-                let uploads = await sql.user.uploads(req.session.username)
+                let uploads = await sql.user.uploads(req.session.username, limit, offset)
                 uploads = functions.stripTags(uploads)
                 res.status(200).send(uploads)
             }

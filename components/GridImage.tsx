@@ -448,8 +448,8 @@ const GridImage = forwardRef<Ref, Props>((props, componentRef) => {
     const getSquareOffset = () => {
         if (mobile) {
             if (sizeType === "tiny") return 20
-            if (sizeType === "small") return 20
-            if (sizeType === "medium") return 25
+            if (sizeType === "small") return 25
+            if (sizeType === "medium") return 30
             if (sizeType === "large") return 30
             if (sizeType === "massive") return 30
         }
@@ -507,15 +507,15 @@ const GridImage = forwardRef<Ref, Props>((props, componentRef) => {
     useEffect(() => {
         if (mobile) {
             if (sizeType === "tiny") {
-                setImageSize(80)
-            } else if (sizeType === "small") {
                 setImageSize(100)
-            } else if (sizeType === "medium") {
+            } else if (sizeType === "small") {
                 setImageSize(150)
-            } else if (sizeType === "large") {
+            } else if (sizeType === "medium") {
                 setImageSize(230)
+            } else if (sizeType === "large") {
+                setImageSize(350)
             } else if (sizeType === "massive") {
-                setImageSize(500)
+                setImageSize(510)
             }
         } else {
             if (sizeType === "tiny") {

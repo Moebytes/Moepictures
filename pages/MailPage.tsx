@@ -429,20 +429,12 @@ const MailPage: React.FunctionComponent = (props) => {
         setHasNotification(true)
     }
 
-    const getReadAllButton = () => {
-        const style = {marginLeft: mobile ? "0px" : "15px", marginTop: mobile ? "10px" : "0px"}
+    const getReadButtons = () => {
+        const style = {marginLeft: mobile ? "0px" : "15px", marginRight: mobile ? "15px" : "0px", marginTop: mobile ? "10px" : "0px"}
         return (
-            <div className="item-button-container" style={style} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
-                <button className="item-button" onClick={() => readAll()}>Read All</button>
-            </div> 
-        )
-    }
-
-    const getUnreadAllButton = () => {
-        const style = {marginLeft: "15px", marginTop: mobile ? "10px" : "0px"}
-        return (
-            <div className="item-button-container" style={style} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
-                <button className="item-button" onClick={() => unreadAll()}>Unread All</button>
+            <div className="item-button-container" style={{marginLeft: "0px", justifyContent: "flex-start"}} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
+                <button className="item-button" style={style} onClick={() => readAll()}>Read All</button>
+                <button className="item-button" style={style} onClick={() => unreadAll()}>Unread All</button>
             </div> 
         )
     }
@@ -466,7 +458,7 @@ const MailPage: React.FunctionComponent = (props) => {
                                 <img src={search}/>
                             </button>
                         </div>
-                        {!mobile ? <>{getReadAllButton()}{getUnreadAllButton()}</> : null}
+                        {!mobile ? <>{getReadButtons()}</> : null}
                         {getSortJSX()}
                         {!mobile ? <div className="itemsort-item" onClick={() => toggleScroll()}>
                             <img className="itemsort-img" src={scroll ? scrollIcon : pageIcon} style={{filter: getFilter()}}/>
@@ -482,7 +474,7 @@ const MailPage: React.FunctionComponent = (props) => {
                             </div>
                         </div>
                     </div>
-                    {mobile ? <>{getReadAllButton()}{getUnreadAllButton()}</> : null}
+                    {mobile ? <>{getReadButtons()}</> : null}
                     <table className="items-container">
                         {generateMessagesJSX()}
                     </table>

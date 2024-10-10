@@ -121,9 +121,7 @@ const MobileInfo: React.FunctionComponent<Props> = (props) => {
             const link = functions.getTagLink("artist", props.artists[i].image)
             if (!props.artists[i]) break
             const tagClick = () => {
-                history.push(`/posts`)
-                setSearch(props.artists[i].tag)
-                setSearchFlag(true)
+                history.push(`/tag/${props.artists[i].tag}`)
             }
             const artistSocials = () => {
                 let jsx = [] as any 
@@ -149,7 +147,7 @@ const MobileInfo: React.FunctionComponent<Props> = (props) => {
                     </div> : null}
                     <div className="mobileinfo-row">
                         <span className="tag-hover">
-                            <span className="tag" onClick={() => tagClick()}>{props.artists[i].tag.replaceAll("-", " ")}</span>
+                            <span className="artist-tag" onClick={() => tagClick()}>{props.artists[i].tag.replaceAll("-", " ")}</span>
                             {artistSocials()}
                             <span className="tag-count">{props.artists[i].count}</span>
                         </span>
@@ -165,9 +163,7 @@ const MobileInfo: React.FunctionComponent<Props> = (props) => {
             const link = functions.getTagLink("character", props.characters[i].image)
             if (!props.characters[i]) break
             const tagClick = () => {
-                history.push(`/posts`)
-                setSearch(props.characters[i].tag)
-                setSearchFlag(true)
+                history.push(`/tag/${props.characters[i].tag}`)
             }
             const characterSocials = () => {
                 let jsx = [] as any 
@@ -183,7 +179,7 @@ const MobileInfo: React.FunctionComponent<Props> = (props) => {
                 </div> : null}
                 <div className="mobileinfo-row">
                     <span className="tag-hover">
-                        <span className="tag" onClick={() => tagClick()}>{props.characters[i].tag.replaceAll("-", " ")}</span>
+                        <span className="character-tag" onClick={() => tagClick()}>{props.characters[i].tag.replaceAll("-", " ")}</span>
                         {characterSocials()}
                         <span className="tag-count">{props.characters[i].count}</span>
                     </span>
@@ -199,9 +195,7 @@ const MobileInfo: React.FunctionComponent<Props> = (props) => {
             const link = functions.getTagLink("series", props.series[i].image)
             if (!props.series[i]) break
             const tagClick = () => {
-                history.push(`/posts`)
-                setSearch(props.series[i].tag)
-                setSearchFlag(true)
+                history.push(`/tag/${props.series[i].tag}`)
             }
             const seriesSocials = () => {
                 let jsx = [] as any 
@@ -220,7 +214,7 @@ const MobileInfo: React.FunctionComponent<Props> = (props) => {
                 </div> : null}
                 <div className="mobileinfo-row">
                     <span className="tag-hover">
-                        <span className="tag" onClick={() => tagClick()}>{props.series[i].tag.replaceAll("-", " ")}</span>
+                        <span className="series-tag" onClick={() => tagClick()}>{props.series[i].tag.replaceAll("-", " ")}</span>
                         {seriesSocials()}
                         <span className="tag-count">{props.series[i].count}</span>
                     </span>
@@ -237,14 +231,19 @@ const MobileInfo: React.FunctionComponent<Props> = (props) => {
         for (let i = 0; i < max; i++) {
             if (!currentTags[i]) break
             const tagClick = () => {
-                history.push(`/posts`)
-                setSearch(currentTags[i].tag)
-                setSearchFlag(true)
+                history.push(`/tag/${currentTags[i].tag}`)
+            }
+            const tagClass = () => {
+                if (currentTags[i].type === "artist") return "artist-tag"
+                if (currentTags[i].type === "character") return "character-tag"
+                if (currentTags[i].type === "series") return "series-tag"
+                if (currentTags[i].type === "meta") return "meta-tag"
+                return "tag"
             }
             jsx.push(
                 <div className="mobileinfo-row">
                     <span className="tag-hover" onClick={() => tagClick()}>
-                        <span className="tag">{currentTags[i].tag.replaceAll("-", " ")}</span>
+                        <span className={tagClass()}>{currentTags[i].tag.replaceAll("-", " ")}</span>
                         <span className="tag-count">{currentTags[i].count}</span>
                     </span>
                 </div>

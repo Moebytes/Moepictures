@@ -69,6 +69,10 @@ const NavBar: React.FunctionComponent<Props> = (props) => {
         return `hue-rotate(${siteHue - 180}deg) saturate(${siteSaturation}%) brightness(${siteLightness + 70}%)`
     }
 
+    const getFilter2 = () => {
+        return `hue-rotate(${siteHue - 180}deg) saturate(${siteSaturation}%) brightness(${siteLightness + 40}%)`
+    }
+
     useEffect(() => {
         setShowMiniTitle(false)
 
@@ -278,8 +282,9 @@ const NavBar: React.FunctionComponent<Props> = (props) => {
     }
 
     const getDropdownJSX = () => {
+        let style = mobile ? {top: session.username ? "460px" : "430px"} : {top: "40px"}
         return (
-            <div className={`title-dropdown ${activeDropdown ? "" : "hide-title-dropdown"}`}>
+            <div className={`title-dropdown ${activeDropdown ? "" : "hide-title-dropdown"}`} style={style}>
                 <div className="title-dropdown-row">
                     <span className="title-dropdown-text">Hue</span>
                     <Slider className="title-dropdown-slider" trackClassName="title-dropdown-slider-track" thumbClassName="title-dropdown-slider-thumb" onChange={(value) => setSiteHue(value)} min={60} max={300} step={1} value={siteHue}/>
@@ -330,7 +335,10 @@ const NavBar: React.FunctionComponent<Props> = (props) => {
                     <span className="mobile-nav-text" onClick={() => {history.push("/help"); setHideMobileNavbar(true)}}>Help</span>
                     <span className="mobile-nav-text" onClick={() => {history.push("/terms"); setHideMobileNavbar(true)}}>Terms</span>
                     <span className="mobile-nav-text" onClick={() => {history.push("/contact"); setHideMobileNavbar(true)}}>Contact</span>
-                    {session.username ? <img style={{marginTop: "10px"}} className="mobile-nav-img" onClick={() => {history.push("/premium"); setHideMobileNavbar(true)}} src={premiumStar}/> : null}
+                    {session.username ? <div className="mobile-nav-img-container" onClick={() => {history.push("/premium"); setHideMobileNavbar(true)}}>
+                        <img className="mobile-nav-img" src={premiumStar} style={{marginRight: "10px"}}/>
+                        <span className="mobile-nav-text" style={{margin: "0px", color: "var(--premiumColor)"}}>Premium</span>
+                    </div> : null}
                 </div>
                 <div className="mobile-nav-color-container">
                     {session.username ? <img className="nav-color" src={getHistoryIcon()} onClick={() => history.push("/history")} style={{filter: getFilter()}}/> : null}
@@ -338,7 +346,7 @@ const NavBar: React.FunctionComponent<Props> = (props) => {
                     <img className="mobile-nav-color" src={getThemeIcon()} onClick={lightChange} style={{filter: getFilter()}}/>
                     {session.username ? <img className="nav-color" src={getMailIcon()} onClick={() => history.push("/mail")} style={{filter: getFilter()}}/> : null}
                     {permissions.isElevated(session) ? <img className="nav-color" src={getCrownIcon()} onClick={() => history.push("/mod-queue")} style={{filter: getFilter()}}/> : null}
-                    <img className="mobile-nav-color" src={scroll ? scrollIcon : pageIcon} onClick={toggleScroll} style={{filter: getFilter()}}/>
+                    <img className="mobile-nav-color" src={scroll ? scrollIcon : pageIcon} onClick={toggleScroll} style={{filter: getFilter2()}}/>
                 </div>
                 {getDropdownJSX()}
             </div>

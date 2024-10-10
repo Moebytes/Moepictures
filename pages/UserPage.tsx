@@ -32,6 +32,8 @@ interface Props {
     match?: any
 }
 
+let limit = 25
+
 const UserPage: React.FunctionComponent<Props> = (props) => {
     const [ignored, forceUpdate] = useReducer(x => x + 1, 0)
     const {theme, setTheme} = useContext(ThemeContext)
@@ -60,7 +62,9 @@ const UserPage: React.FunctionComponent<Props> = (props) => {
     const [uploadIndex, setUploadIndex] = useState(0)
     const [favoriteIndex, setFavoriteIndex] = useState(0) as any
     const [uploads, setUploads] = useState([]) as any
+    const [appendUploadImages, setAppendUploadImages] = useState([]) as any
     const [favorites, setFavorites] = useState([]) as any
+    const [appendFavoriteImages, setAppendFavoriteImages] = useState([]) as any
     const [comments, setComments] = useState([]) as any
     const [uploadImages, setUploadImages] = useState([]) as any
     const [favoriteImages, setFavoriteImages] = useState([]) as any
@@ -68,6 +72,10 @@ const UserPage: React.FunctionComponent<Props> = (props) => {
     const [defaultIcon, setDefaultIcon] = useState(false)
     const history = useHistory()
     const username = props?.match.params.username
+
+    useEffect(() => {
+        limit = mobile ? 5 : 25
+    }, [mobile])
 
     const getFilter = () => {
         return `hue-rotate(${siteHue - 180}deg) saturate(${siteSaturation}%) brightness(${siteLightness + 70}%)`
@@ -97,6 +105,18 @@ const UserPage: React.FunctionComponent<Props> = (props) => {
         setUploadImages(images)
     }
 
+    const updateUploadOffset = async () => {
+        const newUploads = uploads
+        let offset = newUploads.length
+        const result = await functions.get("/api/user/uploads", {limit, offset}, session, setSessionFlag)
+        newUploads.push(...result)
+        let filtered = newUploads.filter((u: any) => restrictType === "explicit" ? u.post?.restrict === "explicit" : u.post?.restrict !== "explicit")
+        if (!permissions.isElevated(session)) filtered = filtered.filter((u: any) => !u.hidden)
+        const images = filtered.map((p: any) => functions.getThumbnailLink(p.images[0].type, p.postID, p.images[0].order, p.images[0].filename, "large"))
+        setUploads(filtered)
+        setAppendUploadImages(images)
+    }
+
     const updateFavorites = async () => {
         const favorites = await functions.get("/api/user/favorites", {username}, session, setSessionFlag)
         let filtered = favorites.filter((f: any) => restrictType === "explicit" ? f.post?.restrict === "explicit" : f.post?.restrict !== "explicit")
@@ -106,9 +126,23 @@ const UserPage: React.FunctionComponent<Props> = (props) => {
         setFavoriteImages(images)
     }
 
+    const updateFavoriteOffset = async () => {
+        const newFavorites = favorites
+        let offset = newFavorites.length
+        const result = await functions.get("/api/user/favorites", {limit, offset}, session, setSessionFlag)
+        newFavorites.push(...result)
+        let filtered = favorites.filter((f: any) => restrictType === "explicit" ? f.post?.restrict === "explicit" : f.post?.restrict !== "explicit")
+        if (!permissions.isElevated(session)) filtered = filtered.filter((f: any) => !f.post?.hidden)
+        const images = filtered.map((f: any) => functions.getThumbnailLink(f.post.images[0].type, f.postID, f.post.images[0].order, f.post.images[0].filename, "tiny"))
+        setFavorites(filtered)
+        setAppendFavoriteImages(images)
+    }
+
     const updateComments = async () => {
         const comments = await functions.get("/api/user/comments", {username, sort: "date"}, session, setSessionFlag)
-        setComments(comments)
+        let filtered = comments.filter((c: any) => restrictType === "explicit" ? c.post?.restrict === "explicit" : c.post?.restrict !== "explicit")
+        if (!permissions.isElevated(session)) filtered = filtered.filter((c: any) => !c.post?.hidden)
+        setComments(filtered)
     }
 
     useEffect(() => {
@@ -170,8 +204,8 @@ const UserPage: React.FunctionComponent<Props> = (props) => {
             if (!favorites.length) return null
             return (
                 <div className="user-column">
-                    <span className="user-title">Favorites <span className="user-text-alt">{favorites.length}</span></span>
-                    <Carousel images={favoriteImages} noKey={true} set={setFav} index={favoriteIndex}/>
+                    <span className="user-title">Favorites <span className="user-text-alt">{favorites[0].favoriteCount}</span></span>
+                    <Carousel images={favoriteImages} noKey={true} set={setFav} index={favoriteIndex} update={updateFavoriteOffset} appendImages={appendFavoriteImages}/>
                 </div> 
             )
         } else {
@@ -181,11 +215,6 @@ const UserPage: React.FunctionComponent<Props> = (props) => {
                 </div>
             )
         }
-    }
-
-    const viewComments = () => {
-        history.push("/comments")
-        setCommentSearchFlag(`user:${username}`)
     }
 
     const generateUsernameJSX = () => {
@@ -275,8 +304,8 @@ const UserPage: React.FunctionComponent<Props> = (props) => {
                     {generateFavoritesJSX()}
                     {uploads.length ?
                     <div className="user-column">
-                        <span className="user-title">Uploads <span className="user-text-alt">{uploads.length}</span></span>
-                        <Carousel images={uploadImages} noKey={true} set={setUp} index={uploadIndex}/>
+                        <span className="user-title">Uploads <span className="user-text-alt">{uploads[0].uploadCount}</span></span>
+                        <Carousel images={uploadImages} noKey={true} set={setUp} index={uploadIndex} update={updateUploadOffset} appendImages={appendUploadImages}/>
                     </div> : null}
                     {comments.length ?
                     <div className="userprofile-column">

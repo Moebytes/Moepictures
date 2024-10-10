@@ -1,7 +1,7 @@
 import React, {useContext, useEffect, useRef, useState, useReducer} from "react"
 import {useHistory} from "react-router-dom"
 import {ThemeContext, EnableDragContext, SessionContext, SessionFlagContext, MobileContext, SearchContext, SearchFlagContext,
-RestrictTypeContext} from "../Context"
+RestrictTypeContext, HideMobileNavbarContext} from "../Context"
 import "./styles/searchsuggestions.less"
 import functions from "../structures/Functions"
 import permissions from "../structures/Permissions"
@@ -26,6 +26,7 @@ const SearchSuggestions: React.FunctionComponent<Props> = (props) => {
     const {session, setSession} = useContext(SessionContext)
     const {sessionFlag, setSessionFlag} = useContext(SessionFlagContext)
     const {mobile, setMobile} = useContext(MobileContext)
+    const {hideMobileNavbar, setHideMobileNavbar} = useContext(HideMobileNavbarContext)
     const {search, setSearch} = useContext(SearchContext)
     const {searchFlag, setSearchFlag} = useContext(SearchFlagContext)
     const {restrictType, setRestrictType} = useContext(RestrictTypeContext)
@@ -143,7 +144,7 @@ const SearchSuggestions: React.FunctionComponent<Props> = (props) => {
     const getY = () => {
         if (props.y) return `${props.y}px`
         if (mobile) {
-            return "132px"
+            return hideMobileNavbar ? "132px" : `${document.querySelector(".mobile-navbar")?.clientHeight || 500 + 432}px`
         } else {
             if (typeof document === "undefined") return "177px"
             const element = document.querySelector(".search")

@@ -589,12 +589,12 @@ const MessagePage: React.FunctionComponent<Props> = (props) => {
     const getReplyBoxJSX = () => {
         if (message.role === "system") return (
             <div className="mail-message-reply-box" style={{justifyContent: "flex-start"}}>
-                <span className="upload-ban-text" style={{fontSize: "20px", marginLeft: "15px"}}>Cannot respond to system messages.</span>
+                <span className="upload-ban-text" style={{fontSize: "20px", marginLeft: mobile ? "0px" : "15px"}}>Cannot respond to system messages.</span>
             </div>
         )
         if (session.banned) return (
             <div className="mail-message-reply-box" style={{justifyContent: "flex-start"}}>
-                <span className="upload-ban-text" style={{fontSize: "20px", marginLeft: "15px"}}>You are banned. Cannot reply.</span>
+                <span className="upload-ban-text" style={{fontSize: "20px", marginLeft: mobile ? "0px" : "15px"}}>You are banned. Cannot reply.</span>
             </div>
         )
         if (session.username) {

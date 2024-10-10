@@ -363,6 +363,7 @@ for (let i = 0; i < folders.length; i++) {
   })
 }
 
+/*
 app.get("/refresh-token", tokenLimiter, (req: Request, res: Response) => {
   if (!req.session.username) return res.status(403).send("Unauthorized")
   if (!req.session.refreshToken) return res.status(400).send("No refresh token")
@@ -373,7 +374,7 @@ app.get("/refresh-token", tokenLimiter, (req: Request, res: Response) => {
       req.session.accessToken = accessToken
       res.json({accessToken})
   })
-})
+})*/
 
 app.get("/*", (req: Request, res: Response) => {
   if (!req.hostname.includes("moepictures") && !req.hostname.includes("localhost") && !req.hostname.includes("192.168.68")) {

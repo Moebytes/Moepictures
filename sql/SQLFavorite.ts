@@ -41,7 +41,16 @@ export default class SQLFavorite {
     }
 
     /** Get favorites. */
-    public static favorites = async (username: string) => {
+    public static favorites = async (username: string, limit?: string, offset?: string) => {
+        let i = 2
+        let values = [] as any
+        let limitValue = i
+        if (limit) {
+            if (Number(limit) > 100) limit = "100"
+            values.push(limit)
+            i++
+        }
+        if (offset) values.push(offset)
         const query: QueryConfig = {
         text: functions.multiTrim(/*sql*/`
                 WITH post_json AS (
@@ -50,7 +59,9 @@ export default class SQLFavorite {
                 JOIN images ON images."postID" = posts."postID"
                 GROUP BY posts."postID"
                 )
-                SELECT favorites.*, json_build_object(
+                SELECT favorites.*, 
+                COUNT(*) OVER() AS "favoriteCount",
+                json_build_object(
                 'type', post_json."type",
                 'restrict', post_json."restrict",
                 'style', post_json."style",
@@ -60,9 +71,11 @@ export default class SQLFavorite {
                 JOIN post_json ON post_json."postID" = favorites."postID"
                 WHERE favorites."username" = $1
                 GROUP BY favorites."favoriteID", post_json."type", post_json."restrict", post_json."style"
+                ${limit ? `LIMIT $${limitValue}` : "LIMIT 100"} ${offset ? `OFFSET $${i}` : ""}
             `),
             values: [username]
         }
+        if (values?.[0]) query.values?.push(...values)
         const result = await SQLQuery.run(query)
         return result
     }

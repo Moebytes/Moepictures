@@ -91,18 +91,19 @@ const GridModel = forwardRef<Ref, Props>((props, componentRef) => {
     const [animations, setAnimations] = useState(null as unknown as THREE.AnimationClip[] | null)
     const [ref, setRef] = useState(null as unknown as HTMLCanvasElement)
     const [selected, setSelected] = useState(false)
+    const imageRef = useRef(null) as any
     const history = useHistory()
 
     useImperativeHandle(componentRef, () => ({
         shouldWait: async () => {
-            return false
+            return true
         },
         load: async () => {
             if (ref) return
-            return loadModel()
+            return mobile ? loadImage() : loadModel()
         },
         update: async () => {
-            return loadModel()
+            return mobile ? loadImage() : loadModel()
         }
     }))
 
@@ -133,6 +134,11 @@ const GridModel = forwardRef<Ref, Props>((props, componentRef) => {
         }
     })
 
+    const loadImage = async () => {
+        const img = await functions.modelImage(props.model, 100)
+        setImage(img)
+    }
+
     const loadModel = async () => {
         const element = rendererRef.current
         window.cancelAnimationFrame(id)
@@ -150,7 +156,7 @@ const GridModel = forwardRef<Ref, Props>((props, componentRef) => {
         light3.position.set(-30, 100, -100)
         scene.add(light3)
         
-        const renderer = new THREE.WebGLRenderer({alpha: true, antialias: true, preserveDrawingBuffer: true})
+        const renderer = new THREE.WebGLRenderer({alpha: true, antialias: true, preserveDrawingBuffer: true, powerPreference: "low-power"})
         renderer.outputEncoding = THREE.sRGBEncoding
         renderer.setClearColor(0x000000, 0)
         renderer.setSize(width, height)
@@ -161,7 +167,6 @@ const GridModel = forwardRef<Ref, Props>((props, componentRef) => {
         if (functions.isGLTF(props.model)) {
             const loader = new GLTFLoader()
             const gltf = await loader.loadAsync(props.model)
-            console.log(gltf)
             model = gltf.scene
             model.animations = gltf.animations
         } else if (functions.isOBJ(props.model)) {
@@ -281,16 +286,18 @@ const GridModel = forwardRef<Ref, Props>((props, componentRef) => {
     }, [mixer, speed, reverse, duration])
 
     const resizePixelateCanvas = () => {
-        if (!pixelateRef.current || !ref) return
-        pixelateRef.current.width = ref.clientWidth
-        pixelateRef.current.height = ref.clientHeight
+        const currentRef = ref ? ref : imageRef.current
+        if (!pixelateRef.current || !currentRef) return
+        pixelateRef.current.width = currentRef.clientWidth
+        pixelateRef.current.height = currentRef.clientHeight
     }
 
     useEffect(() => {
-        if (!ref) return
+        const currentRef = ref ? ref : imageRef.current
+        if (!currentRef) return
         let observer = null as any
         observer = new ResizeObserver(resizePixelateCanvas)
-        observer.observe(ref)
+        observer.observe(currentRef)
         return () => {
             observer?.disconnect()
         }
@@ -327,10 +334,10 @@ const GridModel = forwardRef<Ref, Props>((props, componentRef) => {
     }
 
     const updateSquare = () => {
-        if (!containerRef.current || !ref) return
-        const currentRef = ref
-        const refWidth = ref.clientWidth
-        const refHeight = ref.clientHeight
+        const currentRef = ref ? ref : imageRef.current
+        if (!containerRef.current || !currentRef) return
+        const refWidth = currentRef.clientWidth
+        const refHeight = currentRef.clientHeight
         if (square) {
             const sidebarWidth = functions.sidebarWidth()
             const width = window.innerWidth - sidebarWidth
@@ -429,11 +436,12 @@ const GridModel = forwardRef<Ref, Props>((props, componentRef) => {
     }, [image, brightness, contrast, hue, saturation, lightness, blur, sharpen])
 
     const imagePixelate = () => {
-        if (!pixelateRef.current || !ref) return
+        const currentRef = ref ? ref : imageRef.current
+        if (!pixelateRef.current || !currentRef) return
         const pixelateCanvas = pixelateRef.current
         const ctx = pixelateCanvas.getContext("2d") as any
-        const imageWidth = ref.clientWidth 
-        const imageHeight = ref.clientHeight
+        const imageWidth = currentRef.clientWidth 
+        const imageHeight = currentRef.clientHeight
         const landscape = imageWidth >= imageHeight
         ctx.clearRect(0, 0, pixelateCanvas.width, pixelateCanvas.height)
         pixelateCanvas.width = imageWidth
@@ -441,7 +449,7 @@ const GridModel = forwardRef<Ref, Props>((props, componentRef) => {
         const pixelWidth = imageWidth / pixelate 
         const pixelHeight = imageHeight / pixelate
         if (pixelate !== 1) {
-            ctx.drawImage(ref, 0, 0, pixelWidth, pixelHeight)
+            ctx.drawImage(currentRef, 0, 0, pixelWidth, pixelHeight)
             if (landscape) {
                 pixelateCanvas.style.width = `${imageWidth * pixelate}px`
                 pixelateCanvas.style.height = "auto"
@@ -470,8 +478,8 @@ const GridModel = forwardRef<Ref, Props>((props, componentRef) => {
     }, [pixelate, square, imageSize, image, ref])
 
     const imageAnimation = (event: React.MouseEvent<HTMLDivElement>) => {
-        if (!overlayRef.current || !pixelateRef.current || !lightnessRef.current || !ref) return
-        const currentRef = ref
+        const currentRef = ref ? ref : imageRef.current
+        if (!overlayRef.current || !pixelateRef.current || !lightnessRef.current || !currentRef) return
         const rect = currentRef.getBoundingClientRect()
         const width = rect?.width
         const height = rect?.height
@@ -487,8 +495,8 @@ const GridModel = forwardRef<Ref, Props>((props, componentRef) => {
     }
 
     const cancelImageAnimation = () => {
-        if (!overlayRef.current || !pixelateRef.current || !lightnessRef.current || !ref) return
-        const currentRef = ref
+        const currentRef = ref ? ref : imageRef.current
+        if (!overlayRef.current || !pixelateRef.current || !lightnessRef.current || !currentRef) return
         currentRef.style.transform = "scale(1)"
         overlayRef.current.style.transform = "scale(1)"
         lightnessRef.current.style.transform = "scale(1)"
@@ -604,8 +612,9 @@ const GridModel = forwardRef<Ref, Props>((props, componentRef) => {
         }
     }, [selectionMode])
 
-    const loadImage = async () => {
-        if (!ref || !overlayRef.current || !lightnessRef.current) return
+    const drawImage = async () => {
+        const currentRef = ref ? ref : imageRef.current
+        if (!currentRef || !overlayRef.current || !lightnessRef.current) return
         let src = image
         if (functions.isImage(src)) {
             src = await cryptoFunctions.decryptedLink(src)
@@ -613,14 +622,14 @@ const GridModel = forwardRef<Ref, Props>((props, componentRef) => {
         const img = document.createElement("img")
         img.src = src 
         img.onload = () => {
-            if (!ref || !overlayRef.current || !lightnessRef.current) return
+            if (!currentRef || !overlayRef.current || !lightnessRef.current) return
             setImageWidth(img.width)
             setImageHeight(img.height)
             setNaturalWidth(img.naturalWidth)
             setNaturalHeight(img.naturalHeight)
-            const refCtx = ref.getContext("2d")
-            ref.width = img.width
-            ref.height = img.height
+            const refCtx = currentRef.getContext("2d")
+            currentRef.width = img.width
+            currentRef.height = img.height
             refCtx?.drawImage(img, 0, 0, img.width, img.height)
             const overlayCtx = overlayRef.current.getContext("2d")
             overlayRef.current.width = img.width
@@ -631,14 +640,13 @@ const GridModel = forwardRef<Ref, Props>((props, componentRef) => {
             lightnessRef.current.height = img.height
             lightnessCtx?.drawImage(img, 0, 0, img.width, img.height)
             setImageLoaded(true)
-            ref.style.opacity = "1"
+            currentRef.style.opacity = "1"
         }
     }
 
     useEffect(() => {
-        loadImage()
+        drawImage()
     }, [image])
-
 
     return (
         <div style={{opacity: visible ? "1" : "0", transition: "opacity 0.1s", width: "max-content", height: "max-content"}} className="image-box" id={String(props.id)} ref={containerRef} onClick={onClick} onAuxClick={onClick} onMouseDown={mouseDown} onMouseUp={mouseUp} onMouseMove={mouseMove}>
@@ -646,7 +654,8 @@ const GridModel = forwardRef<Ref, Props>((props, componentRef) => {
                 <canvas draggable={false} className="lightness-overlay" ref={lightnessRef}></canvas>
                 <canvas draggable={false} className="sharpen-overlay" ref={overlayRef}></canvas>
                 <canvas draggable={false} className="pixelate-canvas" ref={pixelateRef}></canvas>
-                <div className="grid-model-renderer" ref={rendererRef}></div>
+                {mobile ? <canvas className="image" ref={imageRef}></canvas> : null}
+                <div className="grid-model-renderer" ref={rendererRef} style={mobile ? {display: "none"} : {}}></div>
             </div>
         </div>
     )
