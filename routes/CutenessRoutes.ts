@@ -3,7 +3,7 @@ import rateLimit from "express-rate-limit"
 import slowDown from "express-slow-down"
 import sql from "../sql/SQLQuery"
 import functions from "../structures/Functions"
-import serverFunctions, {authenticate, keyGenerator, handler} from "../structures/ServerFunctions"
+import serverFunctions, {csrfProtection, keyGenerator, handler} from "../structures/ServerFunctions"
 
 const cutenessLimiter = rateLimit({
 	windowMs: 60 * 1000,
@@ -15,7 +15,7 @@ const cutenessLimiter = rateLimit({
 })
 
 const CutenessRoutes = (app: Express) => {
-    app.post("/api/cuteness/update", authenticate, cutenessLimiter, async (req: Request, res: Response) => {
+    app.post("/api/cuteness/update", csrfProtection, cutenessLimiter, async (req: Request, res: Response) => {
         try {
             const {postID, cuteness} = req.body
             if (Number.isNaN(Number(postID)) || Number.isNaN(Number(cuteness))) return res.status(400).send("Bad postID or cuteness")
@@ -47,7 +47,7 @@ const CutenessRoutes = (app: Express) => {
         }
     })
 
-    app.delete("/api/cuteness/delete", authenticate, cutenessLimiter, async (req: Request, res: Response) => {
+    app.delete("/api/cuteness/delete", csrfProtection, cutenessLimiter, async (req: Request, res: Response) => {
         try {
             const postID = req.query.postID
             if (Number.isNaN(Number(postID))) return res.status(400).send("Invalid postID")

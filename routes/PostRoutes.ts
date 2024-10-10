@@ -3,7 +3,7 @@ import rateLimit from "express-rate-limit"
 import slowDown from "express-slow-down"
 import sql from "../sql/SQLQuery"
 import functions from "../structures/Functions"
-import serverFunctions, {authenticate, keyGenerator, handler} from "../structures/ServerFunctions"
+import serverFunctions, {csrfProtection, keyGenerator, handler} from "../structures/ServerFunctions"
 import phash from "sharp-phash"
 import imageSize from "image-size"
 import fs from "fs"
@@ -89,7 +89,7 @@ const PostRoutes = (app: Express) => {
         }
     })
 
-    app.delete("/api/post/delete", authenticate, postUpdateLimiter, async (req: Request, res: Response) => {
+    app.delete("/api/post/delete", csrfProtection, postUpdateLimiter, async (req: Request, res: Response) => {
         try {
             const postID = req.query.postID
             if (Number.isNaN(Number(postID))) return res.status(400).send("Invalid postID")
@@ -113,7 +113,7 @@ const PostRoutes = (app: Express) => {
         }
     })
 
-    app.post("/api/post/takedown", authenticate, postUpdateLimiter, async (req: Request, res: Response) => {
+    app.post("/api/post/takedown", csrfProtection, postUpdateLimiter, async (req: Request, res: Response) => {
         try {
             const {postID} = req.body
             if (Number.isNaN(Number(postID))) return res.status(400).send("Invalid postID")
@@ -240,7 +240,7 @@ const PostRoutes = (app: Express) => {
         }
     })
 
-    app.post("/api/post/delete/request", authenticate, postUpdateLimiter, async (req: Request, res: Response) => {
+    app.post("/api/post/delete/request", csrfProtection, postUpdateLimiter, async (req: Request, res: Response) => {
         try {
             const {postID, reason} = req.body
             if (Number.isNaN(Number(postID))) return res.status(400).send("Invalid postID")
@@ -269,7 +269,7 @@ const PostRoutes = (app: Express) => {
         }
     })
 
-    app.post("/api/post/delete/request/fulfill", authenticate, postUpdateLimiter, async (req: Request, res: Response) => {
+    app.post("/api/post/delete/request/fulfill", csrfProtection, postUpdateLimiter, async (req: Request, res: Response) => {
         try {
             const {username, postID, accepted} = req.body
             if (Number.isNaN(Number(postID))) return res.status(400).send("Invalid postID")
@@ -292,7 +292,7 @@ const PostRoutes = (app: Express) => {
         }
     })
 
-    app.put("/api/post/quickedit", authenticate, postLimiter, async (req: Request, res: Response, next: NextFunction) => {
+    app.put("/api/post/quickedit", csrfProtection, postLimiter, async (req: Request, res: Response, next: NextFunction) => {
         try {
             const postID = Number(req.body.postID)
             const unverified = String(req.body.unverified) === "true"
@@ -465,7 +465,7 @@ const PostRoutes = (app: Express) => {
           }
     })
 
-    app.put("/api/post/quickedit/unverified", authenticate, postLimiter, async (req: Request, res: Response, next: NextFunction) => {
+    app.put("/api/post/quickedit/unverified", csrfProtection, postLimiter, async (req: Request, res: Response, next: NextFunction) => {
         try {
             let postID = Number(req.body.postID)
             let type = req.body.type 
@@ -718,7 +718,7 @@ const PostRoutes = (app: Express) => {
         }
     })
 
-    app.delete("/api/post/history/delete", authenticate, postUpdateLimiter, async (req: Request, res: Response) => {
+    app.delete("/api/post/history/delete", csrfProtection, postUpdateLimiter, async (req: Request, res: Response) => {
         try {
             const {postID, historyID} = req.query
             if (Number.isNaN(Number(historyID))) return res.status(400).send("Invalid historyID")
@@ -750,7 +750,7 @@ const PostRoutes = (app: Express) => {
         }
     })
 
-    app.post("/api/post/view", authenticate, postLimiter, async (req: Request, res: Response, next: NextFunction) => {
+    app.post("/api/post/view", csrfProtection, postLimiter, async (req: Request, res: Response, next: NextFunction) => {
         try {
             const {postID} = req.body
             if (Number.isNaN(Number(postID))) return res.status(400).send("Invalid postID")

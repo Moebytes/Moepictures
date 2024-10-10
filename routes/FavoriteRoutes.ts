@@ -3,7 +3,7 @@ import rateLimit from "express-rate-limit"
 import slowDown from "express-slow-down"
 import sql from "../sql/SQLQuery"
 import functions from "../structures/Functions"
-import serverFunctions, {authenticate, keyGenerator, handler} from "../structures/ServerFunctions"
+import serverFunctions, {csrfProtection, keyGenerator, handler} from "../structures/ServerFunctions"
 
 const favoriteLimiter = rateLimit({
 	windowMs: 60 * 1000,
@@ -15,7 +15,7 @@ const favoriteLimiter = rateLimit({
 })
 
 const FavoriteRoutes = (app: Express) => {
-    app.post("/api/favorite/update", authenticate, favoriteLimiter, async (req: Request, res: Response) => {
+    app.post("/api/favorite/update", csrfProtection, favoriteLimiter, async (req: Request, res: Response) => {
         try {
             const {postID, favorited} = req.body
             if (Number.isNaN(Number(postID))) return res.status(400).send("Invalid postID")
@@ -47,7 +47,7 @@ const FavoriteRoutes = (app: Express) => {
         }
     })
 
-    app.post("/api/favorite/toggle", authenticate, favoriteLimiter, async (req: Request, res: Response) => {
+    app.post("/api/favorite/toggle", csrfProtection, favoriteLimiter, async (req: Request, res: Response) => {
         try {
             const {postID} = req.body
             if (Number.isNaN(Number(postID))) return res.status(400).send("Invalid postID")

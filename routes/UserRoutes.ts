@@ -6,7 +6,7 @@ import bcrypt from "bcrypt"
 import crypto from "crypto"
 import functions from "../structures/Functions"
 import jsxFunctions from "../structures/JSXFunctions"
-import serverFunctions, {authenticate, keyGenerator, handler} from "../structures/ServerFunctions"
+import serverFunctions, {csrfProtection, keyGenerator, handler} from "../structures/ServerFunctions"
 import permissions from "../structures/Permissions"
 import path from "path"
 
@@ -84,10 +84,9 @@ const UserRoutes = (app: Express) => {
         }
     })
     
-    app.post("/api/user/signup", signupLimiter, async (req: Request, res: Response) => {
+    app.post("/api/user/signup", csrfProtection, signupLimiter, async (req: Request, res: Response) => {
         try {
             let {username, email, password, captchaResponse} = req.body 
-            if (!serverFunctions.validateCSRF(req)) return res.status(400).send("Bad CSRF token")
             if (!username || !email || !password || !captchaResponse) return res.status(400).send("Bad username, email, password, or captchaResponse.")
             username = username.trim().toLowerCase()
             email = email.trim()
@@ -139,10 +138,9 @@ const UserRoutes = (app: Express) => {
         }
     })
 
-    app.post("/api/user/login", loginLimiter, loginSpeedLimiter, async (req: Request, res: Response) => {
+    app.post("/api/user/login", csrfProtection, loginLimiter, loginSpeedLimiter, async (req: Request, res: Response) => {
         try {
             let {username, password, captchaResponse} = req.body
-            if (!serverFunctions.validateCSRF(req)) return res.status(400).send("Bad CSRF token")
             if (!username || !password || !captchaResponse) return res.status(400).send("Bad username, password, or captchaResponse")
             username = username.trim().toLowerCase()
             password = password.trim()
@@ -240,6 +238,7 @@ const UserRoutes = (app: Express) => {
             delete session.captchaAnswer
             delete session.csrfSecret
             delete session.ip
+            
             res.status(200).json(session)
         } catch (e) {
             console.log(e)
@@ -247,7 +246,7 @@ const UserRoutes = (app: Express) => {
         }
     })
 
-    app.post("/api/user/pfp", authenticate, userLimiter, async (req: Request, res: Response) => {
+    app.post("/api/user/pfp", csrfProtection, userLimiter, async (req: Request, res: Response) => {
         try {
             const bytes = req.body.bytes
             const postID = req.body.postID
@@ -285,7 +284,7 @@ const UserRoutes = (app: Express) => {
         }
     })
 
-    app.delete("/api/user/pfp", authenticate, userLimiter, async (req: Request, res: Response) => {
+    app.delete("/api/user/pfp", csrfProtection, userLimiter, async (req: Request, res: Response) => {
         try {
             if (!req.session.username) return res.status(403).send("Unauthorized")
             if (req.session.image) {
@@ -303,7 +302,7 @@ const UserRoutes = (app: Express) => {
         }
     })
 
-    app.post("/api/user/favoritesprivacy", authenticate, sessionLimiter, async (req: Request, res: Response) => {
+    app.post("/api/user/favoritesprivacy", csrfProtection, sessionLimiter, async (req: Request, res: Response) => {
         try {
             if (!req.session.username) return res.status(403).send("Unauthorized")
             const user = await sql.user.user(req.session.username)
@@ -318,7 +317,7 @@ const UserRoutes = (app: Express) => {
         }
     })
 
-    app.post("/api/user/showrelated", authenticate, sessionLimiter, async (req: Request, res: Response) => {
+    app.post("/api/user/showrelated", csrfProtection, sessionLimiter, async (req: Request, res: Response) => {
         try {
             if (!req.session.username) return res.status(403).send("Unauthorized")
             const user = await sql.user.user(req.session.username)
@@ -333,7 +332,7 @@ const UserRoutes = (app: Express) => {
         }
     })
 
-    app.post("/api/user/showtooltips", authenticate, sessionLimiter, async (req: Request, res: Response) => {
+    app.post("/api/user/showtooltips", csrfProtection, sessionLimiter, async (req: Request, res: Response) => {
         try {
             if (!req.session.username) return res.status(403).send("Unauthorized")
             const user = await sql.user.user(req.session.username)
@@ -348,7 +347,7 @@ const UserRoutes = (app: Express) => {
         }
     })
 
-    app.post("/api/user/showtagbanner", authenticate, sessionLimiter, async (req: Request, res: Response) => {
+    app.post("/api/user/showtagbanner", csrfProtection, sessionLimiter, async (req: Request, res: Response) => {
         try {
             if (!req.session.username) return res.status(403).send("Unauthorized")
             const user = await sql.user.user(req.session.username)
@@ -363,7 +362,7 @@ const UserRoutes = (app: Express) => {
         }
     })
 
-    app.post("/api/user/downloadpixivid", authenticate, sessionLimiter, async (req: Request, res: Response) => {
+    app.post("/api/user/downloadpixivid", csrfProtection, sessionLimiter, async (req: Request, res: Response) => {
         try {
             if (!req.session.username) return res.status(403).send("Unauthorized")
             const user = await sql.user.user(req.session.username)
@@ -378,7 +377,7 @@ const UserRoutes = (app: Express) => {
         }
     })
 
-    app.post("/api/user/autosearchinterval", authenticate, sessionLimiter, async (req: Request, res: Response) => {
+    app.post("/api/user/autosearchinterval", csrfProtection, sessionLimiter, async (req: Request, res: Response) => {
         try {
             const {interval} = req.body
             if (!req.session.username) return res.status(403).send("Unauthorized")
@@ -396,7 +395,7 @@ const UserRoutes = (app: Express) => {
         }
     })
 
-    app.post("/api/user/upscaledimages", authenticate, sessionLimiter, async (req: Request, res: Response) => {
+    app.post("/api/user/upscaledimages", csrfProtection, sessionLimiter, async (req: Request, res: Response) => {
         try {
             const {reset} = req.body
             if (!req.session.username) return res.status(403).send("Unauthorized")
@@ -417,7 +416,7 @@ const UserRoutes = (app: Express) => {
         }
     })
 
-    app.post("/api/user/savesearch", authenticate, sessionLimiter, async (req: Request, res: Response) => {
+    app.post("/api/user/savesearch", csrfProtection, sessionLimiter, async (req: Request, res: Response) => {
         try {
             const {name, tags} = req.body
             if (!req.session.username) return res.status(403).send("Unauthorized")
@@ -434,7 +433,7 @@ const UserRoutes = (app: Express) => {
         }
     })
 
-    app.put("/api/user/savesearch", authenticate, sessionLimiter, async (req: Request, res: Response) => {
+    app.put("/api/user/savesearch", csrfProtection, sessionLimiter, async (req: Request, res: Response) => {
         try {
             const {name, key, tags} = req.body
             if (!req.session.username) return res.status(403).send("Unauthorized")
@@ -452,7 +451,7 @@ const UserRoutes = (app: Express) => {
         }
     })
 
-    app.delete("/api/user/savesearch/delete", authenticate, sessionLimiter, async (req: Request, res: Response) => {
+    app.delete("/api/user/savesearch/delete", csrfProtection, sessionLimiter, async (req: Request, res: Response) => {
         try {
             const {name, all} = req.query
             if (!req.session.username) return res.status(403).send("Unauthorized")
@@ -473,7 +472,7 @@ const UserRoutes = (app: Express) => {
         }
     })
 
-    app.post("/api/user/r18", authenticate, sessionLimiter, async (req: Request, res: Response) => {
+    app.post("/api/user/r18", csrfProtection, sessionLimiter, async (req: Request, res: Response) => {
         try {
             const {r18} = req.body
             if (!req.session.username) return res.status(403).send("Unauthorized")
@@ -490,7 +489,7 @@ const UserRoutes = (app: Express) => {
         }
     })
 
-    app.post("/api/user/changeusername", authenticate, userLimiter, async (req: Request, res: Response) => {
+    app.post("/api/user/changeusername", csrfProtection, userLimiter, async (req: Request, res: Response) => {
         try {
             let {newUsername, captchaResponse} = req.body
             if (!req.session.username) return res.status(403).send("Unauthorized")
@@ -520,7 +519,7 @@ const UserRoutes = (app: Express) => {
         }
     })
 
-    app.post("/api/user/changepassword", authenticate, userLimiter, async (req: Request, res: Response) => {
+    app.post("/api/user/changepassword", csrfProtection, userLimiter, async (req: Request, res: Response) => {
         try {
             let {oldPassword, newPassword} = req.body
             if (!req.session.username) return res.status(403).send("Unauthorized")
@@ -569,7 +568,7 @@ const UserRoutes = (app: Express) => {
         }
     })
 
-    app.post("/api/user/changeemail", authenticate, userLimiter, async (req: Request, res: Response) => {
+    app.post("/api/user/changeemail", csrfProtection, userLimiter, async (req: Request, res: Response) => {
         try {
             let {newEmail, captchaResponse} = req.body
             if (!req.session.username) return res.status(403).send("Unauthorized")
@@ -595,7 +594,7 @@ const UserRoutes = (app: Express) => {
         }
     })
 
-    app.post("/api/user/verifyemail", authenticate, userLimiter, async (req: Request, res: Response) => {
+    app.post("/api/user/verifyemail", csrfProtection, userLimiter, async (req: Request, res: Response) => {
         try {
             let {email, captchaResponse} = req.body
             if (!req.session.username) return res.status(403).send("Unauthorized")
@@ -651,7 +650,7 @@ const UserRoutes = (app: Express) => {
         }
     })
 
-    app.post("/api/user/changebio", authenticate, userLimiter, async (req: Request, res: Response) => {
+    app.post("/api/user/changebio", csrfProtection, userLimiter, async (req: Request, res: Response) => {
         try {
             let {bio} = req.body
             if (!req.session.username) return res.status(403).send("Unauthorized")
@@ -668,10 +667,9 @@ const UserRoutes = (app: Express) => {
         }
     })
 
-    app.post("/api/user/forgotpassword", userLimiter, async (req: Request, res: Response) => {
+    app.post("/api/user/forgotpassword", csrfProtection, userLimiter, async (req: Request, res: Response) => {
         try {
             const {email, captchaResponse} = req.body
-            if (!serverFunctions.validateCSRF(req)) return res.status(400).send("Bad CSRF token")
             if (req.session.captchaAnswer !== captchaResponse?.trim()) return res.status(400).send("Bad captchaResponse")
             if (!email) {
                 await functions.timeout(2000) 
@@ -700,7 +698,7 @@ const UserRoutes = (app: Express) => {
         }
     })
 
-    app.post("/api/user/resetpassword", authenticate, userLimiter, async (req: Request, res: Response) => {
+    app.post("/api/user/resetpassword", csrfProtection, userLimiter, async (req: Request, res: Response) => {
         try {
             const {username, password, token} = req.body
             if (!req.session.username) return res.status(403).send("Unauthorized")
@@ -727,7 +725,7 @@ const UserRoutes = (app: Express) => {
         }
     })
 
-    app.delete("/api/user/delete", authenticate, userLimiter, async (req: Request, res: Response, next: NextFunction) => {
+    app.delete("/api/user/delete", csrfProtection, userLimiter, async (req: Request, res: Response, next: NextFunction) => {
         try {
             if (!req.session.username) return res.status(403).send("Unauthorized")
             const user = await sql.user.user(req.session.username)
@@ -814,7 +812,7 @@ const UserRoutes = (app: Express) => {
         }
     })
 
-    app.post("/api/user/ban", authenticate, userLimiter, async (req: Request, res: Response) => {
+    app.post("/api/user/ban", csrfProtection, userLimiter, async (req: Request, res: Response) => {
         try {
             const {username, reason, deleteUnverifiedChanges, deleteHistoryChanges, deleteComments, deleteMessages} = req.body
             if (!username) return res.status(400).send("Bad username")
@@ -938,7 +936,7 @@ const UserRoutes = (app: Express) => {
         }
     })
 
-    app.post("/api/user/unban", authenticate, userLimiter, async (req: Request, res: Response) => {
+    app.post("/api/user/unban", csrfProtection, userLimiter, async (req: Request, res: Response) => {
         try {
             const {username} = req.body
             if (!username) return res.status(400).send("Bad username")
@@ -959,7 +957,7 @@ const UserRoutes = (app: Express) => {
         }
     })
 
-    app.get("/api/user/ban", authenticate, userLimiter, async (req: Request, res: Response) => {
+    app.get("/api/user/ban", csrfProtection, userLimiter, async (req: Request, res: Response) => {
         try {
             const username = req.query.username as string
             if (!username) return res.status(400).send("Bad username")
@@ -973,7 +971,7 @@ const UserRoutes = (app: Express) => {
         }
     })
 
-    app.post("/api/user/promote", authenticate, userLimiter, async (req: Request, res: Response) => {
+    app.post("/api/user/promote", csrfProtection, userLimiter, async (req: Request, res: Response) => {
         try {
             const {username, role} = req.body
             if (!username) return res.status(400).send("Bad username")
@@ -1010,7 +1008,7 @@ const UserRoutes = (app: Express) => {
         }
     })
 
-    app.get("/api/user/checkmail", authenticate, userLimiter, async (req: Request, res: Response) => {
+    app.get("/api/user/checkmail", csrfProtection, userLimiter, async (req: Request, res: Response) => {
         try {
             if (!req.session.username) return res.status(403).send("Unauthorized")
             const unread = await sql.message.grabUnread(req.session.username)
@@ -1034,7 +1032,7 @@ const UserRoutes = (app: Express) => {
         }
     })
 
-    app.delete("/api/user/history/delete", authenticate, userLimiter, async (req: Request, res: Response) => {
+    app.delete("/api/user/history/delete", csrfProtection, userLimiter, async (req: Request, res: Response) => {
         try {
             const {historyID, duplicates, all} = req.query
             if (!req.session.username) return res.status(403).send("Unauthorized")

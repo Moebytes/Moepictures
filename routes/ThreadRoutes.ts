@@ -3,7 +3,7 @@ import rateLimit from "express-rate-limit"
 import slowDown from "express-slow-down"
 import sql from "../sql/SQLQuery"
 import functions from "../structures/Functions"
-import serverFunctions, {authenticate, keyGenerator, handler} from "../structures/ServerFunctions"
+import serverFunctions, {csrfProtection, keyGenerator, handler} from "../structures/ServerFunctions"
 
 const threadLimiter = rateLimit({
 	windowMs: 60 * 1000,
@@ -26,7 +26,7 @@ const threadUpdateLimiter = rateLimit({
 })
 
 const ThreadRoutes = (app: Express) => {
-    app.post("/api/thread/create", authenticate, threadUpdateLimiter, async (req: Request, res: Response) => {
+    app.post("/api/thread/create", csrfProtection, threadUpdateLimiter, async (req: Request, res: Response) => {
         try {
             const {title, content, captchaResponse} = req.body
             if (!req.session.username) return res.status(403).send("Unauthorized")
@@ -45,7 +45,7 @@ const ThreadRoutes = (app: Express) => {
         }
     })
 
-    app.put("/api/thread/edit", authenticate, threadUpdateLimiter, async (req: Request, res: Response) => {
+    app.put("/api/thread/edit", csrfProtection, threadUpdateLimiter, async (req: Request, res: Response) => {
         try {
             const {threadID, title, content} = req.body
             if (!req.session.username) return res.status(403).send("Unauthorized")
@@ -80,7 +80,7 @@ const ThreadRoutes = (app: Express) => {
         }
     })
 
-    app.delete("/api/thread/delete", authenticate, threadUpdateLimiter, async (req: Request, res: Response) => {
+    app.delete("/api/thread/delete", csrfProtection, threadUpdateLimiter, async (req: Request, res: Response) => {
         try {
             const threadID = req.query.threadID
             if (!req.session.username) return res.status(403).send("Unauthorized")
@@ -98,7 +98,7 @@ const ThreadRoutes = (app: Express) => {
         }
     })
 
-    app.post("/api/thread/sticky", authenticate, threadUpdateLimiter, async (req: Request, res: Response) => {
+    app.post("/api/thread/sticky", csrfProtection, threadUpdateLimiter, async (req: Request, res: Response) => {
         try {
             const {threadID} = req.body
             if (!req.session.username) return res.status(403).send("Unauthorized")
@@ -114,7 +114,7 @@ const ThreadRoutes = (app: Express) => {
         }
     })
 
-    app.post("/api/thread/lock", authenticate, threadUpdateLimiter, async (req: Request, res: Response) => {
+    app.post("/api/thread/lock", csrfProtection, threadUpdateLimiter, async (req: Request, res: Response) => {
         try {
             const {threadID} = req.body
             if (!req.session.username) return res.status(403).send("Unauthorized")
@@ -130,7 +130,7 @@ const ThreadRoutes = (app: Express) => {
         }
     })
 
-    app.post("/api/thread/reply", authenticate, threadUpdateLimiter, async (req: Request, res: Response) => {
+    app.post("/api/thread/reply", csrfProtection, threadUpdateLimiter, async (req: Request, res: Response) => {
         try {
             const {threadID, content} = req.body
             if (!req.session.username) return res.status(403).send("Unauthorized")
@@ -176,7 +176,7 @@ const ThreadRoutes = (app: Express) => {
         }
     })
 
-    app.put("/api/reply/edit", authenticate, threadUpdateLimiter, async (req: Request, res: Response) => {
+    app.put("/api/reply/edit", csrfProtection, threadUpdateLimiter, async (req: Request, res: Response) => {
         try {
             const {replyID, content} = req.body
             if (!req.session.username) return res.status(403).send("Unauthorized")
@@ -197,7 +197,7 @@ const ThreadRoutes = (app: Express) => {
         }
     })
 
-    app.delete("/api/reply/delete", authenticate, threadUpdateLimiter, async (req: Request, res: Response) => {
+    app.delete("/api/reply/delete", csrfProtection, threadUpdateLimiter, async (req: Request, res: Response) => {
         try {
             const threadID = req.query.threadID
             const replyID = req.query.replyID
@@ -231,7 +231,7 @@ const ThreadRoutes = (app: Express) => {
         }
     })
 
-    app.post("/api/thread/report", authenticate, threadUpdateLimiter, async (req: Request, res: Response) => {
+    app.post("/api/thread/report", csrfProtection, threadUpdateLimiter, async (req: Request, res: Response) => {
         try {
             const {threadID, reason} = req.body
             if (!req.session.username) return res.status(403).send("Unauthorized")
@@ -247,7 +247,7 @@ const ThreadRoutes = (app: Express) => {
         }
     })
 
-    app.post("/api/reply/report", authenticate, threadUpdateLimiter, async (req: Request, res: Response) => {
+    app.post("/api/reply/report", csrfProtection, threadUpdateLimiter, async (req: Request, res: Response) => {
         try {
             const {replyID, reason} = req.body
             if (!req.session.username) return res.status(403).send("Unauthorized")
@@ -263,7 +263,7 @@ const ThreadRoutes = (app: Express) => {
         }
     })
 
-    app.post("/api/thread/report/fulfill", authenticate, threadUpdateLimiter, async (req: Request, res: Response) => {
+    app.post("/api/thread/report/fulfill", csrfProtection, threadUpdateLimiter, async (req: Request, res: Response) => {
         try {
             const {reportID, reporter, username, id, accepted} = req.body
             if (!req.session.username) return res.status(403).send("Unauthorized")
@@ -287,7 +287,7 @@ const ThreadRoutes = (app: Express) => {
         }
     })
 
-    app.post("/api/reply/report/fulfill", authenticate, threadUpdateLimiter, async (req: Request, res: Response) => {
+    app.post("/api/reply/report/fulfill", csrfProtection, threadUpdateLimiter, async (req: Request, res: Response) => {
         try {
             const {reportID, reporter, username, id, accepted} = req.body
             if (!req.session.username) return res.status(403).send("Unauthorized")

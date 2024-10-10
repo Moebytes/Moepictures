@@ -3,7 +3,7 @@ import rateLimit from "express-rate-limit"
 import slowDown from "express-slow-down"
 import sql from "../sql/SQLQuery"
 import functions from "../structures/Functions"
-import serverFunctions, {authenticate, keyGenerator, handler} from "../structures/ServerFunctions"
+import serverFunctions, {csrfProtection, keyGenerator, handler} from "../structures/ServerFunctions"
 import {generateSecret, verifyToken} from "node-2fa"
 import axios from "axios"
 
@@ -17,7 +17,7 @@ const $2faLimiter = rateLimit({
 })
 
 const $2FARoutes = (app: Express) => {
-    app.post("/api/2fa/create", authenticate, $2faLimiter, async (req: Request, res: Response) => {
+    app.post("/api/2fa/create", csrfProtection, $2faLimiter, async (req: Request, res: Response) => {
         try {
             if (!req.session.username) return res.status(403).send("Unauthorized")
             const user = await sql.user.user(req.session.username)
@@ -42,7 +42,7 @@ const $2FARoutes = (app: Express) => {
         }
     })
 
-    app.post("/api/2fa/qr", authenticate, $2faLimiter, async (req: Request, res: Response) => {
+    app.post("/api/2fa/qr", csrfProtection, $2faLimiter, async (req: Request, res: Response) => {
         try {
             if (!req.session.username) return res.status(403).send("Unauthorized")
             const $2FAToken = await sql.token.$2faToken(req.session.username)
@@ -56,7 +56,7 @@ const $2FARoutes = (app: Express) => {
         }
     })
 
-    app.post("/api/2fa/enable", authenticate, $2faLimiter, async (req: Request, res: Response) => {
+    app.post("/api/2fa/enable", csrfProtection, $2faLimiter, async (req: Request, res: Response) => {
         try {
             let {token} = req.body 
             if (!req.session.username) return res.status(403).send("Unauthorized")
@@ -80,10 +80,9 @@ const $2FARoutes = (app: Express) => {
         }
     })
 
-    app.post("/api/2fa", $2faLimiter, async (req: Request, res: Response) => {
+    app.post("/api/2fa", csrfProtection, $2faLimiter, async (req: Request, res: Response) => {
         try {
-            let {token} = req.body 
-            if (!serverFunctions.validateCSRF(req)) return res.status(400).send("Bad CSRF token")
+            let {token} = req.body
             if (!req.session.$2fa || !req.session.email || !token) return res.status(400).send("2FA isn't enabled")
             if (req.session.username) return res.status(400).send("Already authenticated")
             token = token.trim()

@@ -117,7 +117,6 @@
     "image-pixels": "^2.2.2",
     "image-size": "^1.0.1",
     "imagetracerjs": "^1.2.6",
-    "jsonwebtoken": "^9.0.2",
     "jswebm": "github:Moebits/jswebm",
     "jszip": "^3.7.1",
     "kuroshiro": "^1.2.0",

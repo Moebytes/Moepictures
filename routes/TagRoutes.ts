@@ -3,7 +3,7 @@ import rateLimit from "express-rate-limit"
 import slowDown from "express-slow-down"
 import sql from "../sql/SQLQuery"
 import functions from "../structures/Functions"
-import serverFunctions, {authenticate, keyGenerator, handler} from "../structures/ServerFunctions"
+import serverFunctions, {csrfProtection, keyGenerator, handler} from "../structures/ServerFunctions"
 import fs from "fs"
 import path from "path"
 
@@ -104,7 +104,7 @@ const TagRoutes = (app: Express) => {
         }
     })
 
-    app.delete("/api/tag/delete", authenticate, tagUpdateLimiter, async (req: Request, res: Response) => {
+    app.delete("/api/tag/delete", csrfProtection, tagUpdateLimiter, async (req: Request, res: Response) => {
         try {
             const tag = req.query.tag as string
             if (!tag) return res.status(400).send("Invalid tag")
@@ -122,7 +122,7 @@ const TagRoutes = (app: Express) => {
         }
     })
 
-    app.post("/api/tag/takedown", authenticate, tagUpdateLimiter, async (req: Request, res: Response) => {
+    app.post("/api/tag/takedown", csrfProtection, tagUpdateLimiter, async (req: Request, res: Response) => {
         try {
             const {tag} = req.body
             if (!req.session.username) return res.status(403).send("Unauthorized")
@@ -149,7 +149,7 @@ const TagRoutes = (app: Express) => {
         }
     })
 
-    app.put("/api/tag/edit", authenticate, tagUpdateLimiter, async (req: Request, res: Response) => {
+    app.put("/api/tag/edit", csrfProtection, tagUpdateLimiter, async (req: Request, res: Response) => {
         try {
             let {tag, key, description, image, aliases, implications, pixivTags, social, twitter, website, fandom, reason, updater, updatedDate, silent} = req.body
             if (!req.session.username) return res.status(403).send("Unauthorized")
@@ -300,7 +300,7 @@ const TagRoutes = (app: Express) => {
         }
     })
 
-    app.post("/api/tag/aliasto", authenticate, tagUpdateLimiter, async (req: Request, res: Response) => {
+    app.post("/api/tag/aliasto", csrfProtection, tagUpdateLimiter, async (req: Request, res: Response) => {
         try {
             const {tag, aliasTo} = req.body
             if (!req.session.username) return res.status(403).send("Unauthorized")
@@ -331,7 +331,7 @@ const TagRoutes = (app: Express) => {
         }
     })
 
-    app.post("/api/tag/delete/request", authenticate, tagUpdateLimiter, async (req: Request, res: Response) => {
+    app.post("/api/tag/delete/request", csrfProtection, tagUpdateLimiter, async (req: Request, res: Response) => {
         try {
             const {tag, reason} = req.body
             if (!tag) return res.status(400).send("Invalid postID")
@@ -360,7 +360,7 @@ const TagRoutes = (app: Express) => {
         }
     })
 
-    app.post("/api/tag/delete/request/fulfill", authenticate, tagUpdateLimiter, async (req: Request, res: Response) => {
+    app.post("/api/tag/delete/request/fulfill", csrfProtection, tagUpdateLimiter, async (req: Request, res: Response) => {
         try {
             const {username, tag, accepted} = req.body
             if (!tag) return res.status(400).send("Invalid tag")
@@ -382,7 +382,7 @@ const TagRoutes = (app: Express) => {
         }
     })
 
-    app.post("/api/tag/aliasto/request", authenticate, tagUpdateLimiter, async (req: Request, res: Response) => {
+    app.post("/api/tag/aliasto/request", csrfProtection, tagUpdateLimiter, async (req: Request, res: Response) => {
         try {
             const {tag, aliasTo, reason} = req.body
             if (!tag || !aliasTo) return res.status(400).send("Bad tag or aliasTo")
@@ -412,7 +412,7 @@ const TagRoutes = (app: Express) => {
         }
     })
 
-    app.post("/api/tag/aliasto/request/fulfill", authenticate, tagUpdateLimiter, async (req: Request, res: Response) => {
+    app.post("/api/tag/aliasto/request/fulfill", csrfProtection, tagUpdateLimiter, async (req: Request, res: Response) => {
         try {
             const {username, tag, aliasTo, accepted} = req.body
             if (!tag) return res.status(400).send("Invalid tag")
@@ -434,7 +434,7 @@ const TagRoutes = (app: Express) => {
         }
     })
 
-    app.post("/api/tag/edit/request", authenticate, tagUpdateLimiter, async (req: Request, res: Response) => {
+    app.post("/api/tag/edit/request", csrfProtection, tagUpdateLimiter, async (req: Request, res: Response) => {
         try {
             const {tag, key, description, image, aliases, implications, pixivTags, social, twitter, website, fandom, reason} = req.body
             if (!req.session.username) return res.status(403).send("Unauthorized")
@@ -472,7 +472,7 @@ const TagRoutes = (app: Express) => {
         }
     })
 
-    app.post("/api/tag/edit/request/fulfill", authenticate, tagUpdateLimiter, async (req: Request, res: Response) => {
+    app.post("/api/tag/edit/request/fulfill", csrfProtection, tagUpdateLimiter, async (req: Request, res: Response) => {
         try {
             const {username, tag, image, accepted} = req.body
             if (!tag) return res.status(400).send("Invalid tag")
@@ -508,7 +508,7 @@ const TagRoutes = (app: Express) => {
         }
     })
 
-    app.delete("/api/tag/history/delete", authenticate, tagUpdateLimiter, async (req: Request, res: Response) => {
+    app.delete("/api/tag/history/delete", csrfProtection, tagUpdateLimiter, async (req: Request, res: Response) => {
         try {
             const {tag, historyID} = req.query
             if (Number.isNaN(Number(historyID))) return res.status(400).send("Invalid historyID")

@@ -37,7 +37,6 @@ import ThreadRoutes from "./routes/ThreadRoutes"
 import MessageRoutes from "./routes/MessageRoutes"
 import ipBans from "./assets/json/ip-bans.json"
 import imageLock from "./structures/ImageLock"
-import jwt from "jsonwebtoken"
 const __dirname = path.resolve()
 
 dotenv.config()
@@ -362,19 +361,6 @@ for (let i = 0; i < folders.length; i++) {
     }
   })
 }
-
-/*
-app.get("/refresh-token", tokenLimiter, (req: Request, res: Response) => {
-  if (!req.session.username) return res.status(403).send("Unauthorized")
-  if (!req.session.refreshToken) return res.status(400).send("No refresh token")
-
-  jwt.verify(req.session.refreshToken, process.env.REFRESH_SECRET!, (err, session: any) => {
-      if (err) return res.status(403).send("Invalid token")
-      const accessToken = serverFunctions.generateAccessToken(req)
-      req.session.accessToken = accessToken
-      res.json({accessToken})
-  })
-})*/
 
 app.get("/*", (req: Request, res: Response) => {
   if (!req.hostname.includes("moepictures") && !req.hostname.includes("localhost") && !req.hostname.includes("192.168.68")) {

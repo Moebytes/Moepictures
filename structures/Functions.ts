@@ -23,8 +23,6 @@ import avifJS from "../structures/avif_enc"
 import jxlJS from "../structures/jxl_enc"
 import {GLTFLoader, OBJLoader, FBXLoader} from "three-stdlib"
 
-let csrfToken = ""
-
 let newScrollY = 0
 let lastScrollTop = 0
 let element = null as any
@@ -37,14 +35,6 @@ const audioExtensions = [".mp3", ".wav", ".ogg", ".flac", ".aac"]
 const modelExtensions = [".glb", ".gltf", ".obj", ".fbx"]
 
 export default class Functions {
-    public static updateCSRFToken = async (session: any) => {
-        csrfToken = session.csrfToken
-    }
-
-    public static getCSRFToken = () => {
-        return csrfToken
-    }
-
     public static fetch = async (link: string, headers?: any) => {
         return axios.get(link, {headers}).then((r) => r.data) as Promise<any>
     }
@@ -62,69 +52,41 @@ export default class Functions {
     }
 
     public static get = async (endpoint: string, params: any, session: any, setSessionFlag: (value: boolean) => void) => {
-        const headers = {"x-csrf-token": csrfToken} as any
-        if (session?.accessToken) headers.Authorization = `Bearer ${session.accessToken}`
+        const headers = {"x-csrf-token": session.csrfToken} as any
         try {
             const response = await axios.get(endpoint, {params, headers, withCredentials: true}).then((r) => r.data)
             return response
         } catch (err: any) {
-            if (err.response?.status === 401) {/*
-                const accessToken = axios.get("/refresh-token", {headers, withCredentials: true}).then((r) => r.data.accessToken)
-                headers.Authorization = `Bearer ${accessToken}`
-                setSessionFlag(true)
-                return axios.get(endpoint, {params, headers, withCredentials: true}).then((r) => r.data)*/
-            }
             return Promise.reject(err)
         }
     }
 
     public static post = async (endpoint: string, data: any, session: any, setSessionFlag: (value: boolean) => void) => {
-        const headers = {"x-csrf-token": csrfToken} as any
-        if (session?.accessToken) headers.Authorization = `Bearer ${session.accessToken}`
+        const headers = {"x-csrf-token": session.csrfToken} as any
         try {
             const response = await axios.post(endpoint, data, {headers, withCredentials: true}).then((r) => r.data)
             return response
         } catch (err: any) {
-            if (err.response?.status === 401) {/*
-                const accessToken = axios.get("/refresh-token", {headers, withCredentials: true}).then((r) => r.data.accessToken)
-                headers.Authorization = `Bearer ${accessToken}`
-                setSessionFlag(true)
-                return axios.post(endpoint, data, {headers, withCredentials: true}).then((r) => r.data)*/
-            }
             return Promise.reject(err)
         }
     }
 
     public static put = async (endpoint: string, data: any, session: any, setSessionFlag: (value: boolean) => void) => {
-        const headers = {"x-csrf-token": csrfToken} as any
-        if (session?.accessToken) headers.Authorization = `Bearer ${session.accessToken}`
+        const headers = {"x-csrf-token": session.csrfToken} as any
         try {
             const response = await axios.put(endpoint, data, {headers, withCredentials: true}).then((r) => r.data)
             return response
         } catch (err: any) {
-            if (err.response?.status === 401) {/*
-                const accessToken = axios.get("/refresh-token", {headers, withCredentials: true}).then((r) => r.data.accessToken)
-                headers.Authorization = `Bearer ${accessToken}`
-                setSessionFlag(true)
-                return axios.put(endpoint, data, {headers, withCredentials: true}).then((r) => r.data)*/
-            }
             return Promise.reject(err)
         }
     }
 
     public static delete = async (endpoint: string, params: any, session: any, setSessionFlag: (value: boolean) => void) => {
-        const headers = {"x-csrf-token": csrfToken} as any
-        if (session?.accessToken) headers.Authorization = `Bearer ${session.accessToken}`
+        const headers = {"x-csrf-token": session.csrfToken} as any
         try {
             const response = await axios.delete(endpoint, {params, headers, withCredentials: true}).then((r) => r.data)
             return response
         } catch (err: any) {
-            if (err.response?.status === 401) {/*
-                const accessToken = axios.get("/refresh-token", {headers, withCredentials: true}).then((r) => r.data.accessToken)
-                headers.Authorization = `Bearer ${accessToken}`
-                setSessionFlag(true)
-                return axios.delete(endpoint, {params, headers, withCredentials: true}).then((r) => r.data)*/
-            }
             return Promise.reject(err)
         }
     }

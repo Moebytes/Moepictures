@@ -3,7 +3,7 @@ import sql from "../sql/SQLQuery"
 import fs from "fs"
 import path from "path"
 import functions from "../structures/Functions"
-import serverFunctions, {authenticate, keyGenerator, handler} from "../structures/ServerFunctions"
+import serverFunctions, {csrfProtection, keyGenerator, handler} from "../structures/ServerFunctions"
 import rateLimit from "express-rate-limit"
 import phash from "sharp-phash"
 import imageSize from "image-size"
@@ -76,7 +76,7 @@ const validImages = (images: any[], skipMBCheck?: boolean) => {
 
 
 const CreateRoutes = (app: Express) => {
-    app.post("/api/post/upload", authenticate, uploadLimiter, async (req: Request, res: Response, next: NextFunction) => {
+    app.post("/api/post/upload", csrfProtection, uploadLimiter, async (req: Request, res: Response, next: NextFunction) => {
       try {
         const images = req.body.images 
         const upscaledImages = req.body.upscaledImages
@@ -349,7 +349,7 @@ const CreateRoutes = (app: Express) => {
       }
     })
 
-    app.put("/api/post/edit", authenticate, editLimiter, async (req: Request, res: Response, next: NextFunction) => {
+    app.put("/api/post/edit", csrfProtection, editLimiter, async (req: Request, res: Response, next: NextFunction) => {
       try {
         const postID = Number(req.body.postID)
         const images = req.body.images 
@@ -739,7 +739,7 @@ const CreateRoutes = (app: Express) => {
       }
     })
 
-    app.post("/api/post/upload/unverified", authenticate, uploadLimiter, async (req: Request, res: Response, next: NextFunction) => {
+    app.post("/api/post/upload/unverified", csrfProtection, uploadLimiter, async (req: Request, res: Response, next: NextFunction) => {
       try {
         const images = req.body.images 
         const upscaledImages = req.body.upscaledImages 
@@ -989,7 +989,7 @@ const CreateRoutes = (app: Express) => {
       }
     })
 
-    app.put("/api/post/edit/unverified", authenticate, editLimiter, async (req: Request, res: Response, next: NextFunction) => {
+    app.put("/api/post/edit/unverified", csrfProtection, editLimiter, async (req: Request, res: Response, next: NextFunction) => {
       try {
         let postID = Number(req.body.postID)
         let unverifiedID = Number(req.body.unverifiedID)
@@ -1254,7 +1254,7 @@ const CreateRoutes = (app: Express) => {
       }
     })
 
-    app.post("/api/post/approve", authenticate, modLimiter, async (req: Request, res: Response, next: NextFunction) => {
+    app.post("/api/post/approve", csrfProtection, modLimiter, async (req: Request, res: Response, next: NextFunction) => {
       try {
         let reason = req.body.reason
         let postID = Number(req.body.postID)

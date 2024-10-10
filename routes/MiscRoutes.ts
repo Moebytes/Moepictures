@@ -8,7 +8,7 @@ import googleTranslate from "@vitalets/google-translate-api"
 import Kuroshiro from "kuroshiro"
 import KuromojiAnalyzer from "kuroshiro-analyzer-kuromoji"
 import functions from "../structures/Functions"
-import serverFunctions, {authenticate, keyGenerator, handler} from "../structures/ServerFunctions"
+import serverFunctions, {csrfProtection, keyGenerator, handler} from "../structures/ServerFunctions"
 import rateLimit from "express-rate-limit"
 import fs from "fs"
 import svgCaptcha from "svg-captcha"
@@ -238,10 +238,9 @@ const MiscRoutes = (app: Express) => {
         }
     })
 
-    app.post("/api/misc/contact", contactLimiter, async (req: Request, res: Response, next: NextFunction) => {
+    app.post("/api/misc/contact", csrfProtection, contactLimiter, async (req: Request, res: Response, next: NextFunction) => {
         try {
             const {email, subject, message, files} = req.body 
-            if (!serverFunctions.validateCSRF(req)) return res.status(400).send("Bad CSRF token")
             if (!email || !subject || !message || !files) return res.status(400).send("Bad email, subejct, message, or files")
             const badEmail = functions.validateEmail(email)
             if (badEmail) return res.status(400).send("Bad email")
@@ -309,7 +308,7 @@ const MiscRoutes = (app: Express) => {
         }
     })
 
-    app.post("/api/premium/paymentlink", authenticate, miscLimiter, async (req: Request, res: Response, next: NextFunction) => {
+    app.post("/api/premium/paymentlink", csrfProtection, miscLimiter, async (req: Request, res: Response, next: NextFunction) => {
         try {
             if (!req.session.username) return res.status(403).send("Unauthorized")
             const data = {

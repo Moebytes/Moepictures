@@ -3,7 +3,7 @@ import rateLimit from "express-rate-limit"
 import slowDown from "express-slow-down"
 import sql from "../sql/SQLQuery"
 import functions from "../structures/Functions"
-import serverFunctions, {authenticate, keyGenerator, handler} from "../structures/ServerFunctions"
+import serverFunctions, {csrfProtection, keyGenerator, handler} from "../structures/ServerFunctions"
 
 const translationLimiter = rateLimit({
 	windowMs: 60 * 1000,
@@ -16,7 +16,7 @@ const translationLimiter = rateLimit({
 })
 
 const TranslationRoutes = (app: Express) => {
-    app.post("/api/translation/save", authenticate, translationLimiter, async (req: Request, res: Response) => {
+    app.post("/api/translation/save", csrfProtection, translationLimiter, async (req: Request, res: Response) => {
         try {
             const {postID, order, data, reason} = req.body
             if (Number.isNaN(Number(postID))) return res.status(400).send("Invalid postID")
@@ -44,7 +44,7 @@ const TranslationRoutes = (app: Express) => {
         }
     })
 
-    app.put("/api/translation/save", authenticate, translationLimiter, async (req: Request, res: Response) => {
+    app.put("/api/translation/save", csrfProtection, translationLimiter, async (req: Request, res: Response) => {
         try {
             const {postID, order, data} = req.body
             if (Number.isNaN(Number(postID))) return res.status(400).send("Invalid postID")
@@ -84,7 +84,7 @@ const TranslationRoutes = (app: Express) => {
         }
     })
 
-    app.post("/api/translation/save/request", authenticate, translationLimiter, async (req: Request, res: Response) => {
+    app.post("/api/translation/save/request", csrfProtection, translationLimiter, async (req: Request, res: Response) => {
         try {
             const {postID, order, data, reason} = req.body
             if (Number.isNaN(Number(postID))) return res.status(400).send("Invalid postID")
@@ -118,7 +118,7 @@ const TranslationRoutes = (app: Express) => {
         }
     })
 
-    app.post("/api/translation/approve", authenticate, translationLimiter, async (req: Request, res: Response, next: NextFunction) => {
+    app.post("/api/translation/approve", csrfProtection, translationLimiter, async (req: Request, res: Response, next: NextFunction) => {
         try {
             let {translationID, username, postID} = req.body
             if (!req.session.username) return res.status(403).send("Unauthorized")
@@ -140,7 +140,7 @@ const TranslationRoutes = (app: Express) => {
         }
     })
 
-    app.post("/api/translation/reject", authenticate, translationLimiter, async (req: Request, res: Response, next: NextFunction) => {
+    app.post("/api/translation/reject", csrfProtection, translationLimiter, async (req: Request, res: Response, next: NextFunction) => {
         try {
             let {translationID, username, postID} = req.body
             if (!req.session.username) return res.status(403).send("Unauthorized")
@@ -175,7 +175,7 @@ const TranslationRoutes = (app: Express) => {
         }
     })
 
-    app.delete("/api/translation/history/delete", authenticate, translationLimiter, async (req: Request, res: Response) => {
+    app.delete("/api/translation/history/delete", csrfProtection, translationLimiter, async (req: Request, res: Response) => {
         try {
             const postID = req.query.postID as string
             const order = req.query.order as string

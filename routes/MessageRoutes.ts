@@ -3,7 +3,7 @@ import rateLimit from "express-rate-limit"
 import slowDown from "express-slow-down"
 import sql from "../sql/SQLQuery"
 import functions from "../structures/Functions"
-import serverFunctions, {authenticate, keyGenerator, handler} from "../structures/ServerFunctions"
+import serverFunctions, {csrfProtection, keyGenerator, handler} from "../structures/ServerFunctions"
 
 const messageLimiter = rateLimit({
 	windowMs: 60 * 1000,
@@ -33,7 +33,7 @@ const pushNotification = (username: string) => {
 }
 
 const MessageRoutes = (app: Express) => {
-    app.post("/api/message/create", authenticate, messageUpdateLimiter, async (req: Request, res: Response) => {
+    app.post("/api/message/create", csrfProtection, messageUpdateLimiter, async (req: Request, res: Response) => {
         try {
             const {title, content, recipient} = req.body
             if (!req.session.username) return res.status(403).send("Unauthorized")
@@ -53,7 +53,7 @@ const MessageRoutes = (app: Express) => {
         }
     })
 
-    app.put("/api/message/edit", authenticate, messageUpdateLimiter, async (req: Request, res: Response) => {
+    app.put("/api/message/edit", csrfProtection, messageUpdateLimiter, async (req: Request, res: Response) => {
         try {
             const {messageID, title, content} = req.body
             if (!req.session.username) return res.status(403).send("Unauthorized")
@@ -92,7 +92,7 @@ const MessageRoutes = (app: Express) => {
         }
     })
 
-    app.delete("/api/message/delete", authenticate, messageUpdateLimiter, async (req: Request, res: Response) => {
+    app.delete("/api/message/delete", csrfProtection, messageUpdateLimiter, async (req: Request, res: Response) => {
         try {
             const messageID = req.query.messageID
             if (!messageID) return res.status(400).send("Bad messageID")
@@ -110,7 +110,7 @@ const MessageRoutes = (app: Express) => {
         }
     })
 
-    app.post("/api/message/reply", authenticate, messageUpdateLimiter, async (req: Request, res: Response) => {
+    app.post("/api/message/reply", csrfProtection, messageUpdateLimiter, async (req: Request, res: Response) => {
         try {
             const {messageID, content} = req.body
             if (!req.session.username) return res.status(403).send("Unauthorized")
@@ -161,7 +161,7 @@ const MessageRoutes = (app: Express) => {
         }
     })
 
-    app.put("/api/message/reply/edit", authenticate, messageUpdateLimiter, async (req: Request, res: Response) => {
+    app.put("/api/message/reply/edit", csrfProtection, messageUpdateLimiter, async (req: Request, res: Response) => {
         try {
             const {replyID, content} = req.body
             if (!req.session.username) return res.status(403).send("Unauthorized")
@@ -182,7 +182,7 @@ const MessageRoutes = (app: Express) => {
         }
     })
 
-    app.delete("/api/message/reply/delete", authenticate, messageUpdateLimiter, async (req: Request, res: Response) => {
+    app.delete("/api/message/reply/delete", csrfProtection, messageUpdateLimiter, async (req: Request, res: Response) => {
         try {
             const messageID = req.query.messageID
             const replyID = req.query.replyID
@@ -216,7 +216,7 @@ const MessageRoutes = (app: Express) => {
         }
     })
 
-    app.post("/api/message/softdelete", authenticate, messageUpdateLimiter, async (req: Request, res: Response) => {
+    app.post("/api/message/softdelete", csrfProtection, messageUpdateLimiter, async (req: Request, res: Response) => {
         try {
             const {messageID} = req.body
             if (!req.session.username) return res.status(403).send("Unauthorized")
@@ -242,7 +242,7 @@ const MessageRoutes = (app: Express) => {
         }
     })
 
-    app.post("/api/message/read", authenticate, messageLimiter, async (req: Request, res: Response) => {
+    app.post("/api/message/read", csrfProtection, messageLimiter, async (req: Request, res: Response) => {
         try {
             const {messageID, forceRead} = req.body
             if (!req.session.username) return res.status(403).send("Unauthorized")
@@ -274,7 +274,7 @@ const MessageRoutes = (app: Express) => {
         }
     })
 
-    app.post("/api/message/bulkread", authenticate, messageLimiter, async (req: Request, res: Response) => {
+    app.post("/api/message/bulkread", csrfProtection, messageLimiter, async (req: Request, res: Response) => {
         try {
             const {readStatus} = req.body
             if (!req.session.username) return res.status(403).send("Unauthorized")

@@ -84,7 +84,6 @@ const App: React.FunctionComponent = (props) => {
 
     const getSessionCookie = async () => {
         const cookie = await functions.get("/api/user/session", null, session, setSessionFlag)
-        functions.updateCSRFToken(cookie)
         setSession(cookie)
         if (cookie.username && !permissions.isPremium(cookie)) {
             await functions.post("/api/user/upscaledimages", {reset: true}, session, setSessionFlag)

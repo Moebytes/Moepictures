@@ -10,7 +10,6 @@ import S3 from "aws-sdk/clients/s3"
 import phash from "sharp-phash"
 import dist from "sharp-phash/distance"
 import CSRF from "csrf"
-import jwt from "jsonwebtoken"
 
 const csrf = new CSRF()
 
@@ -32,19 +31,9 @@ export const handler = (req: Request, res: Response) => {
     return res.status(429).send("Too many requests, try again later.")
 }
 
-export const authenticate = (req: Request, res: Response, next: NextFunction) => {
-    if (!req.session.username) return res.status(403).send("Unauthorized")
+export const csrfProtection = (req: Request, res: Response, next: NextFunction) => {
     if (!ServerFunctions.validateCSRF(req)) return res.status(400).send("Bad CSRF token")
     next()
-    /*
-    const token = req.headers["authorization"]?.split(" ")[1]
-    if (!token) return res.status(401).send("Invalid token")
-
-    jwt.verify(token, process.env.ACCESS_SECRET!, (err, session: any) => {
-        if (err) return res.status(401).send("Invalid token")
-        if (req.session.username !== session.username) return res.status(403).send("Bad request")
-        next()
-    })*/
 }
 
 export default class ServerFunctions {
@@ -57,16 +46,6 @@ export default class ServerFunctions {
     public static validateCSRF = (req: Request) => {
         const csrfToken = req.headers["x-csrf-token"] as string
         return csrf.verify(req.session.csrfSecret!, csrfToken)
-    }
-
-    public static generateAccessToken = (req: Request) => {
-        const session = {username: req.session.username, role: req.session.role}
-        return jwt.sign(session, process.env.ACCESS_SECRET!, {expiresIn: "24h"})
-    }
-
-    public static generateRefreshToken = (req: Request) => {
-        const session = {username: req.session.username, role: req.session.role}
-        return jwt.sign(session, process.env.REFRESH_SECRET!, {expiresIn: "30d"})
     }
 
     public static email = async (email: string, subject: string, jsx: React.ReactElement) => {

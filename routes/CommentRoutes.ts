@@ -3,7 +3,7 @@ import rateLimit from "express-rate-limit"
 import slowDown from "express-slow-down"
 import sql from "../sql/SQLQuery"
 import functions from "../structures/Functions"
-import serverFunctions, {authenticate, keyGenerator, handler} from "../structures/ServerFunctions"
+import serverFunctions, {csrfProtection, keyGenerator, handler} from "../structures/ServerFunctions"
 
 const commentLimiter = rateLimit({
 	windowMs: 60 * 1000,
@@ -27,7 +27,7 @@ const CommentRoutes = (app: Express) => {
         }
     })
 
-    app.post("/api/comment/create", authenticate, commentLimiter, async (req: Request, res: Response) => {
+    app.post("/api/comment/create", csrfProtection, commentLimiter, async (req: Request, res: Response) => {
         try {
             const {comment, postID} = req.body
             if (!req.session.username) return res.status(403).send("Unauthorized")
@@ -44,7 +44,7 @@ const CommentRoutes = (app: Express) => {
         }
     })
 
-    app.delete("/api/comment/delete", authenticate, commentLimiter, async (req: Request, res: Response) => {
+    app.delete("/api/comment/delete", csrfProtection, commentLimiter, async (req: Request, res: Response) => {
         try {
             const commentID = req.query.commentID
             if (!req.session.username) return res.status(403).send("Unauthorized")
@@ -61,7 +61,7 @@ const CommentRoutes = (app: Express) => {
         }
     })
 
-    app.put("/api/comment/edit", authenticate, commentLimiter, async (req: Request, res: Response) => {
+    app.put("/api/comment/edit", csrfProtection, commentLimiter, async (req: Request, res: Response) => {
         try {
             const {comment, commentID} = req.body
             if (!req.session.username) return res.status(403).send("Unauthorized")
@@ -79,7 +79,7 @@ const CommentRoutes = (app: Express) => {
         }
     })
 
-    app.post("/api/comment/report", authenticate, commentLimiter, async (req: Request, res: Response) => {
+    app.post("/api/comment/report", csrfProtection, commentLimiter, async (req: Request, res: Response) => {
         try {
             const {commentID, reason} = req.body
             if (!req.session.username) return res.status(403).send("Unauthorized")
@@ -96,7 +96,7 @@ const CommentRoutes = (app: Express) => {
         }
     })
 
-    app.post("/api/comment/report/fulfill", authenticate, commentLimiter, async (req: Request, res: Response) => {
+    app.post("/api/comment/report/fulfill", csrfProtection, commentLimiter, async (req: Request, res: Response) => {
         try {
             const {reportID, reporter, username, id, accepted} = req.body
             if (!req.session.username) return res.status(403).send("Unauthorized")
