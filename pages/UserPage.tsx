@@ -9,7 +9,7 @@ import Footer from "../components/Footer"
 import DragAndDrop from "../components/DragAndDrop"
 import {HideNavbarContext, HideSidebarContext, ThemeContext, EnableDragContext, RelativeContext, HideTitlebarContext, MobileContext, CommentSearchFlagContext,
 HeaderTextContext, SidebarTextContext, SessionContext, RedirectContext, SessionFlagContext, ShowDeleteAccountDialogContext, SiteHueContext, SiteLightnessContext,
-SiteSaturationContext, BanNameContext, UnbanNameContext, PromoteNameContext, UpdateUserFlagContext, DMTargetContext} from "../Context"
+SiteSaturationContext, BanNameContext, UnbanNameContext, PromoteNameContext, UpdateUserFlagContext, DMTargetContext, RestrictTypeContext} from "../Context"
 import functions from "../structures/Functions"
 import permissions from "../structures/Permissions"
 import Carousel from "../components/Carousel"
@@ -23,7 +23,7 @@ import unbanIcon from "../assets/icons/unban.png"
 import promoteIcon from "../assets/icons/promote.png"
 import dmIcon from "../assets/icons/dm.png"
 import BanDialog from "../dialogs/BanDialog"
-import DMDialog from "../dialogs/DMDialog"
+import SendMessageDialog from "../dialogs/SendMessageDialog"
 import UnbanDialog from "../dialogs/UnbanDialog"
 import PromoteDialog from "../dialogs/PromoteDialog"
 import "./styles/userpage.less"
@@ -56,6 +56,7 @@ const UserPage: React.FunctionComponent<Props> = (props) => {
     const {unbanName, setUnbanName} = useContext(UnbanNameContext)
     const {promoteName, setPromoteName} = useContext(PromoteNameContext)
     const {dmTarget, setDMTarget} = useContext(DMTargetContext)
+    const {restrictType, setRestrictType} = useContext(RestrictTypeContext)
     const [uploadIndex, setUploadIndex] = useState(0)
     const [favoriteIndex, setFavoriteIndex] = useState(0) as any
     const [uploads, setUploads] = useState([]) as any
@@ -89,7 +90,7 @@ const UserPage: React.FunctionComponent<Props> = (props) => {
 
     const updateUploads = async () => {
         const uploads = await functions.get("/api/user/uploads", {username}, session, setSessionFlag)
-        const filtered = uploads.filter((u: any) => u.post?.restrict !== "explicit")
+        const filtered = uploads.filter((u: any) => restrictType === "explicit" ? u.post?.restrict === "explicit" : u.post?.restrict !== "explicit")
         const images = filtered.map((p: any) => functions.getThumbnailLink(p.images[0].type, p.postID, p.images[0].order, p.images[0].filename, "tiny"))
         setUploads(filtered)
         setUploadImages(images)
@@ -97,7 +98,7 @@ const UserPage: React.FunctionComponent<Props> = (props) => {
 
     const updateFavorites = async () => {
         const favorites = await functions.get("/api/user/favorites", {username}, session, setSessionFlag)
-        const filtered = favorites.filter((f: any) => f.post?.restrict !== "explicit")
+        const filtered = favorites.filter((f: any) => restrictType === "explicit" ? f.post?.restrict === "explicit" : f.post?.restrict !== "explicit")
         const images = filtered.map((f: any) => functions.getThumbnailLink(f.post.images[0].type, f.postID, f.post.images[0].order, f.post.images[0].filename, "tiny"))
         setFavorites(filtered)
         setFavoriteImages(images)
@@ -244,7 +245,7 @@ const UserPage: React.FunctionComponent<Props> = (props) => {
     return (
         <>
         <DragAndDrop/>
-        <DMDialog/>
+        <SendMessageDialog/>
         <BanDialog/>
         <UnbanDialog/>
         <PromoteDialog/>
@@ -260,7 +261,7 @@ const UserPage: React.FunctionComponent<Props> = (props) => {
                         {generateUsernameJSX()}
                         {session.username && (session.username !== username) && user.role !== "system" ? <img className="user-icon" src={dmIcon} onClick={dmDialog}/> : null}
                         {permissions.isElevated(session) && !permissions.isElevated(user) ? <img className="user-icon" src={user.banned ? unbanIcon : banIcon} onClick={banDialog}/> : null}
-                        {permissions.isAdmin(session)? <img className="user-icon" src={promoteIcon} onClick={promoteDialog}/> : null}
+                        {permissions.isAdmin(session) && (session.username !== username) ? <img className="user-icon" src={promoteIcon} onClick={promoteDialog}/> : null}
                     </div>
                     {user.banned ? <span className="user-ban-text">Banned</span> : null}
                     <div className="user-row">

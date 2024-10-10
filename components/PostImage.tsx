@@ -63,6 +63,9 @@ interface Props {
     unverified?: boolean
 }
 
+let timeout = null as any
+let id = 0
+
 const PostImage: React.FunctionComponent<Props> = (props) => {
     const [ignored, forceUpdate] = useReducer(x => x + 1, 0)
     const {theme, setTheme} = useContext(ThemeContext)
@@ -149,6 +152,14 @@ const PostImage: React.FunctionComponent<Props> = (props) => {
         return `hue-rotate(${siteHue - 180}deg) saturate(${siteSaturation}%) brightness(${siteLightness + 70}%)`
     }
 
+    const cancelAnimation = () => {
+        clearTimeout(timeout)
+        window.cancelAnimationFrame(id)
+        if (videoRef.current?.cancelVideoFrameCallback) {
+            videoRef.current?.cancelVideoFrameCallback(id)
+        }
+    }
+
     useEffect(() => {
         const savedReverseVideo = localStorage.getItem("reverseVideo")
         if (savedReverseVideo) {
@@ -169,6 +180,7 @@ const PostImage: React.FunctionComponent<Props> = (props) => {
         setZoom(1)
         setDragging(false)
         setSeekTo(null)
+        cancelAnimation()
         if (ref.current) ref.current.style.opacity = "1"
         if (videoRef.current) videoRef.current.style.opacity = "1"
         if (mobile) fetchVideo()
@@ -358,16 +370,14 @@ const PostImage: React.FunctionComponent<Props> = (props) => {
             // ffmpeg.exit()
         }
 
-        if (!videoData && videoLoaded && functions.isVideo(props.img)) {
+        if (!videoData && videoLoaded && reverse && functions.isVideo(props.img)) {
             parseVideo().then(() => {
                 if (functions.isMP4(props.img)) reverseAudioStream()
             })
         }
-    }, [videoLoaded, videoData])
+    }, [videoLoaded, reverse, videoData])
 
     useEffect(() => {
-        let id = 0
-        let timeout = null as any
         if (!ref.current || !gifRef.current) return
         if (gifData) {
             if (paused && !dragging) return clearTimeout(timeout)
@@ -379,7 +389,7 @@ const PostImage: React.FunctionComponent<Props> = (props) => {
             gifCanvas.height = ref.current.clientHeight
             const ctx = gifCanvas.getContext("2d") as any
             const frames = adjustedData.length - 1
-            const duration = adjustedData.map((d: any) => d.delay).reduce((p: any, c: any) => p + c) / 1000
+            let duration = adjustedData.map((d: any) => d.delay).reduce((p: any, c: any) => p + c) / 1000
             let interval = duration / frames
             let sp = seekTo !== null ? seekTo : secondsProgress
             if (dragging) sp = dragProgress
@@ -458,7 +468,6 @@ const PostImage: React.FunctionComponent<Props> = (props) => {
     }, [dragging, dragProgress])
 
     useEffect(() => {
-        let id = 0
         if (!videoRef.current || !videoCanvasRef.current || !videoOverlayRef.current) return
         if (videoLoaded && functions.isVideo(props.img)) {
             if (paused) {
@@ -1262,11 +1271,12 @@ const PostImage: React.FunctionComponent<Props> = (props) => {
                     </div>
                     {functions.isVideo(props.img) ? <>
                         <div className="video-controls" ref={videoControls} onMouseUp={() => setDragging(false)} onMouseOver={controlMouseEnter} onMouseLeave={controlMouseLeave}>
+                        {duration >= 1 ?
                         <div className="video-control-row" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                             <p className="video-control-text">{dragging ? functions.formatSeconds(dragProgress) : functions.formatSeconds(secondsProgress)}</p>
                             <Slider ref={videoSliderRef} className="video-slider" trackClassName="video-slider-track" thumbClassName="video-slider-thumb" min={0} max={100} value={progress} onBeforeChange={() => setDragging(true)} onChange={(value) => updateProgressText(value)} onAfterChange={(value) => seek(reverse ? 100 - value : value)}/>
                             <p className="video-control-text">{functions.formatSeconds(duration)}</p>
-                        </div>
+                        </div> : null}
                         <div className="video-control-row" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                             <div className="video-control-row-container">
                                 <img draggable={false} className="video-control-img" onClick={() => changeReverse()} src={videoReverseIcon}/>
@@ -1335,11 +1345,12 @@ const PostImage: React.FunctionComponent<Props> = (props) => {
                     {functions.isGIF(props.img) || gifData ? 
                     <>
                     <div className="gif-controls" ref={gifControls} onMouseUp={() => setDragging(false)} onMouseOver={controlMouseEnter} onMouseLeave={controlMouseLeave}>
+                        {duration >= 1 ?
                         <div className="gif-control-row" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                             <p className="gif-control-text">{dragging ? functions.formatSeconds(dragProgress) : functions.formatSeconds(secondsProgress)}</p>
                             <Slider ref={gifSliderRef} className="gif-slider" trackClassName="gif-slider-track" thumbClassName="gif-slider-thumb" min={0} max={100} value={progress} onBeforeChange={() => setDragging(true)} onChange={(value) => updateProgressText(value)} onAfterChange={(value) => seek(reverse ? 100 - value : value)}/>
                             <p className="gif-control-text">{functions.formatSeconds(duration)}</p>
-                        </div>
+                        </div> : null}
                         <div className="gif-control-row" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                             <div className="gif-control-row-container">
                                 <img draggable={false} className="gif-control-img" onClick={() => changeReverse()} src={gifReverseIcon}/>

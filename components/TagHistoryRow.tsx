@@ -38,12 +38,16 @@ const TagHistoryRow: React.FunctionComponent<Props> = (props) => {
     const {deleteTagHistoryFlag, setDeleteTagHistoryFlag} = useContext(DeleteTagHistoryFlagContext)
     const {revertTagHistoryFlag, setRevertTagHistoryFlag} = useContext(RevertTagHistoryFlagContext)
     const history = useHistory()
-    const initialImg = functions.getTagLink(props.tagHistory.type, props.tagHistory.image)
-    const [img, setImg] = useState(initialImg)
+    const [img, setImg] = useState("")
     const [userRole, setUserRole] = useState("")
     const [hasImageUpdate, setHasImageUpdate] = useState(false)
     const [hasAnyUpdate, setHasAnyUpdate] = useState(true)
     const tag = props.tagHistory.tag
+
+    const updateImage = () => {
+        const img = functions.getTagLink(props.tagHistory.type, props.tagHistory.image)
+        setImg(img)
+    }
 
     const updateUserRole = async () => {
         const user = await functions.get("/api/user", {username: props.tagHistory.user}, session, setSessionFlag)
@@ -51,8 +55,9 @@ const TagHistoryRow: React.FunctionComponent<Props> = (props) => {
     }
 
     useEffect(() => {
+        updateImage()
         updateUserRole()
-    }, [session])
+    }, [props.tagHistory, session])
 
     const revertTagHistory = async () => {
         if (props.current) return Promise.reject()

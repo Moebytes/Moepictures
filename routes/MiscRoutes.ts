@@ -352,10 +352,17 @@ const MiscRoutes = (app: Express) => {
                 const metadata = event.data.metadata
                 await sql.token.insertPayment(id, metadata.username, metadata.email)
 
-                await sql.user.updateUser(metadata.username, "role", "premium")
+                const user = await sql.user.user(metadata.username)
+                if (!user) return res.status(400).send("Invalid username")
 
-                const message = `Your account has been promoted to premium. You can now access all the premium features. Thank you for supporting us!`
-                await serverFunctions.systemMessage(metadata.username, "Notice: Your account was promoted to premium", message)
+                let premiumExpiration = user.premiumExpiration ? new Date(user.premiumExpiration) : new Date()
+                premiumExpiration.setFullYear(premiumExpiration.getFullYear() + 1)
+
+                await sql.user.updateUser(metadata.username, "role", "premium")
+                await sql.user.updateUser(metadata.username, "premiumExpiration", premiumExpiration.toISOString())
+
+                const message = `Your account has been upgraded to premium. You can now access all the premium features. Thank you for supporting us!\n\nYour membership will last until ${functions.prettyDate(premiumExpiration)}.`
+                await serverFunctions.systemMessage(metadata.username, "Notice: Your account was upgraded to premium", message)
             }
             res.status(200).send("Success")
         } catch (e) {

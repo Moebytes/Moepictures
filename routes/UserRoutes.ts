@@ -75,6 +75,8 @@ const UserRoutes = (app: Express) => {
             delete user.showTagBanner
             delete user.upscaledImages
             delete user.savedSearches
+            delete user.premiumExpiration
+            delete user.showR18
             res.status(200).json(user)
         } catch (e) {
             console.log(e)
@@ -106,7 +108,8 @@ const UserRoutes = (app: Express) => {
                 await sql.user.updateUser(username, "showTagBanner", true)
                 await sql.user.updateUser(username, "downloadPixivID", false)
                 await sql.user.updateUser(username, "autosearchInterval", 3000)
-                await sql.user.updateUser(username, "upscaledImages", true)
+                await sql.user.updateUser(username, "upscaledImages", false)
+                await sql.user.updateUser(username, "showR18", false)
                 await sql.user.updateUser(username, "savedSearches", "{}")
                 await sql.user.updateUser(username, "emailVerified", false)
                 await sql.user.updateUser(username, "$2fa", false)
@@ -174,6 +177,8 @@ const UserRoutes = (app: Express) => {
                 req.session.autosearchInterval = user.autosearchInterval
                 req.session.upscaledImages = user.upscaledImages
                 req.session.savedSearches = user.savedSearches
+                req.session.showR18 = user.showR18
+                req.session.premiumExpiration = user.premiumExpiration
                 req.session.accessToken = serverFunctions.generateAccessToken(req)
                 req.session.refreshToken = serverFunctions.generateRefreshToken(req)
                 return res.status(200).send("Success")
@@ -219,6 +224,16 @@ const UserRoutes = (app: Express) => {
                 req.session.autosearchInterval = user.autosearchInterval
                 req.session.upscaledImages = user.upscaledImages
                 req.session.savedSearches = user.savedSearches
+                req.session.showR18 = user.showR18
+                req.session.premiumExpiration = user.premiumExpiration
+
+                if (user.role === "premium" && user.premiumExpiration) {
+                    if (new Date(user.premiumExpiration) < new Date()) {
+                        await sql.user.updateUser(req.session.username, "role", "user")
+                        const message = `Unfortunately, it seems like your premium membership has expired. Thank you for supporting us! We greatly appreciate your time spent as a premium member and we hope that you are interested in renewing it again.\n\n${functions.getDomain()}/premium#purchase`
+                        await serverFunctions.systemMessage(req.session.username, "Notice: Your premium membership expired", message)
+                    }
+                }
             }
             const session = structuredClone(req.session)
             delete session.refreshToken
@@ -249,13 +264,13 @@ const UserRoutes = (app: Express) => {
             if (jpg || png || gif || webp || avif) {
                 if (req.session.image) {
                     let oldImagePath = functions.getTagPath("pfp", req.session.image)
-                    await serverFunctions.deleteFile(oldImagePath).catch(() => null)
+                    await serverFunctions.deleteFile(oldImagePath, false).catch(() => null)
                 }
                 if (jpg) result.extension = "jpg"
                 const filename = `${req.session.username}.${result.extension}`
                 let imagePath = functions.getTagPath("pfp", filename)
                 const buffer = Buffer.from(Object.values(bytes) as any)
-                await serverFunctions.uploadFile(imagePath, buffer)
+                await serverFunctions.uploadFile(imagePath, buffer, false)
                 await sql.user.updateUser(req.session.username, "image", filename)
                 if (postID) await sql.user.updateUser(req.session.username, "imagePost", postID)
                 req.session.image = filename
@@ -275,7 +290,7 @@ const UserRoutes = (app: Express) => {
             if (!req.session.username) return res.status(403).send("Unauthorized")
             if (req.session.image) {
                 let oldImagePath = functions.getTagPath("pfp", req.session.image)
-                await serverFunctions.deleteFile(oldImagePath).catch(() => null)
+                await serverFunctions.deleteFile(oldImagePath, false).catch(() => null)
             }
             await sql.user.updateUser(req.session.username, "image", null)
             await sql.user.updateUser(req.session.username, "imagePost", null)
@@ -410,7 +425,7 @@ const UserRoutes = (app: Express) => {
             if (!user) return res.status(400).send("Bad username")
             let savedSearches = user.savedSearches || {}
             savedSearches[name] = tags
-            req.session.upscaledImages = savedSearches 
+            req.session.savedSearches = savedSearches 
             await sql.user.updateUser(req.session.username, "savedSearches", JSON.stringify(savedSearches))
             res.status(200).send("Success")
         } catch (e) {
@@ -428,7 +443,7 @@ const UserRoutes = (app: Express) => {
             let savedSearches = user.savedSearches || {}
             delete savedSearches[name]
             savedSearches[key] = tags
-            req.session.upscaledImages = savedSearches 
+            req.session.savedSearches = savedSearches 
             await sql.user.updateUser(req.session.username, "savedSearches", JSON.stringify(savedSearches))
             res.status(200).send("Success")
         } catch (e) {
@@ -449,8 +464,25 @@ const UserRoutes = (app: Express) => {
             }
             let savedSearches = user.savedSearches || {}
             delete savedSearches[name as string]
-            req.session.upscaledImages = savedSearches 
+            req.session.savedSearches = savedSearches 
             await sql.user.updateUser(req.session.username, "savedSearches", JSON.stringify(savedSearches))
+            res.status(200).send("Success")
+        } catch (e) {
+            console.log(e)
+            res.status(400).send("Bad request")
+        }
+    })
+
+    app.post("/api/user/r18", authenticate, sessionLimiter, async (req: Request, res: Response) => {
+        try {
+            const {r18} = req.body
+            if (!req.session.username) return res.status(403).send("Unauthorized")
+            const user = await sql.user.user(req.session.username)
+            if (!user) return res.status(400).send("Bad username")
+            if (req.session.role !== "admin") return res.status(403).end()
+            const newR18 = r18 !== undefined ? r18 : !Boolean(user.showR18)
+            req.session.showR18 = newR18
+            await sql.user.updateUser(req.session.username, "showR18", newR18)
             res.status(200).send("Success")
         } catch (e) {
             console.log(e)
@@ -477,7 +509,7 @@ const UserRoutes = (app: Express) => {
                 const newFilename = `${req.session.username}${path.extname(user.image)}`
                 let oldImagePath = functions.getTagPath("pfp", user.image)
                 let newImagePath = functions.getTagPath("pfp", newFilename)
-                await serverFunctions.renameFile(oldImagePath, newImagePath)
+                await serverFunctions.renameFile(oldImagePath, newImagePath, false, false)
                 await sql.user.updateUser(newUsername, "image", newFilename)
                 req.session.image = newFilename
             }
@@ -702,7 +734,7 @@ const UserRoutes = (app: Express) => {
             if (!user) return res.status(400).send("Bad username")
             try {
                 await sql.token.deleteEmailToken(user.email)
-                await serverFunctions.deleteFile(functions.getTagLink("pfp", user.image))
+                await serverFunctions.deleteFile(functions.getTagLink("pfp", user.image), false)
             } catch (e) {
             console.log(e)
                 // ignore
@@ -870,7 +902,8 @@ const UserRoutes = (app: Express) => {
                 const postHistory = await sql.history.userPostHistory(username)
                 for (const history of postHistory) {
                     if (history.image?.startsWith("history/")) {
-                        await serverFunctions.deleteFile(history.image)
+                        let r18 = history.restrict === "explicit"
+                        await serverFunctions.deleteFile(history.image, r18)
                     }
                     await sql.history.deletePostHistory(history.historyID)
                     revertPostIDs.add(history.postID)
@@ -879,7 +912,7 @@ const UserRoutes = (app: Express) => {
                 const tagHistory = await sql.history.userTagHistory(username)
                 for (const history of tagHistory) {
                     if (history.image?.startsWith("history/")) {
-                        await serverFunctions.deleteFile(history.image)
+                        await serverFunctions.deleteFile(history.image, false)
                     }
                     await sql.history.deleteTagHistory(history.historyID)
                     revertTagIDs.add(history.tag)
@@ -945,7 +978,16 @@ const UserRoutes = (app: Express) => {
             if (req.session.role !== "admin") return res.status(403).end()
             const user = await sql.user.user(username)
             if (!user) return res.status(400).send("Bad username")
+
+            if (username === process.env.OWNER_NAME || username === "moepictures") {
+                return res.status(403).end()
+            }
             
+            let premiumExpiration = user.premiumExpiration ? new Date(user.premiumExpiration) : new Date()
+            if (role === "premium") {
+                premiumExpiration.setFullYear(premiumExpiration.getFullYear() + 1)
+                await sql.user.updateUser(req.session.username, "premiumExpiration", premiumExpiration.toISOString())
+            }
             await sql.user.updateUser(username, "role", role)
             if (role === "admin") {
                 const message = `You have been promoted to the role of admin. You now have access to all special privileges, including deleting posts and promoting others.`
@@ -954,8 +996,8 @@ const UserRoutes = (app: Express) => {
                 const message = `You have been promoted to the role of moderator. You now have access to the mod queue where you approve posts and can take moderation actions such as banning users.`
                 await serverFunctions.systemMessage(username, "Notice: Your account was promoted to mod", message)
             } else if (role === "premium") {
-                const message = `Your account has been promoted to premium. You can now access all the premium features. Thank you for supporting us!`
-                await serverFunctions.systemMessage(username, "Notice: Your account was promoted to premium", message)
+                const message = `Your account has been upgraded to premium. You can now access all the premium features. Thank you for supporting us!\n\nYour membership will last until ${functions.prettyDate(premiumExpiration)}.`
+                await serverFunctions.systemMessage(username, "Notice: Your account was upgraded to premium", message)
             }
             res.status(200).send("Success")
         } catch (e) {

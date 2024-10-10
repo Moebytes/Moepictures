@@ -14,6 +14,8 @@ CREATE TABLE IF NOT EXISTS "users" (
     "autosearchInterval" int,
     "upscaledImages" boolean,
     "savedSearches" jsonb,
+    "showR18" boolean,
+    "premiumExpiration" timestamptz,
     "image" text,
     "imagePost" bigint REFERENCES posts ("postID") ON UPDATE CASCADE ON DELETE SET NULL,
     "ip" inet,

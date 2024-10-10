@@ -31,7 +31,6 @@ const Related: React.FunctionComponent<Props> = (props) => {
             if (post.thirdParty) continue
             if (!session.username) if (post.restrict !== "safe") continue
             if (restrictType !== "explicit") if (post.restrict === "explicit") continue
-            if (!permissions.isElevated(session)) if (post.restrict === "explicit") continue
             const image = post.images[0]
             if (!image) continue
             const images = post.images.map((i: any) => functions.getImageLink(i.type, post.postID, i.order, i.filename))

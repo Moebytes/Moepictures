@@ -116,7 +116,7 @@ const NewThreadDialog: React.FunctionComponent = (props) => {
                             <span className="dialog-text">Content: </span>
                         </div>
                         <div className="dialog-row">
-                            <textarea className="dialog-textarea" style={{height: "330px"}} spellCheck={false} value={threadContent} onChange={(event) => setThreadContent(event.target.value)}></textarea>
+                            <textarea className="dialog-textarea" style={{resize: "vertical", height: "330px"}} spellCheck={false} value={threadContent} onChange={(event) => setThreadContent(event.target.value)}></textarea>
                         </div>
                             <div className="dialog-row" style={{pointerEvents: "all"}}>
                                 <img src={`data:image/svg+xml;utf8,${encodeURIComponent(captcha)}`} style={{filter: getFilter()}}/>

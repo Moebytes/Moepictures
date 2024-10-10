@@ -35,6 +35,7 @@ const PaymentButton: React.FunctionComponent = (props) => {
     const {session, setSession} = useContext(SessionContext)
     const {sessionFlag, setSessionFlag} = useContext(SessionFlagContext)
     const [paymentLink, setPaymentLink] = useState("")
+    const history = useHistory()
 
     const createCharge = async () => {
         const result = await functions.post("/api/premium/paymentlink", null, session, setSessionFlag)
@@ -46,8 +47,12 @@ const PaymentButton: React.FunctionComponent = (props) => {
         createCharge()
     }, [session])
 
+    const openPaymentLink = () => {
+        window.open(paymentLink)
+    }
+
     return (
-        <button className="premium-button" onClick={() => window.open(paymentLink)}>
+        <button className="premium-button" onClick={openPaymentLink}>
             <img src={bitcoin}/>
             <span>Pay with Crypto</span>
         </button>
@@ -221,7 +226,8 @@ const PremiumPage: React.FunctionComponent = (props) => {
                 <span className="premium-text">
                     If you would like to purchase a premium upgrade you can do so here via Coinbase. <br/><br/>
 
-                    Currently the price is a one-time payment of $15 USD. <br/><br/>
+                    Currently the price is $15 USD/yr. Your upgrade will last for one year from the date of purchase. 
+                    To extend your term, you may purchase it multiple times. <br/><br/>
                     
                     Create a <a className="premium-link" onClick={() => openLink("https://www.coinbase.com")}>Coinbase</a> account if you don't already have one. 
                     You can buy crypto (eg. bitcoin) with paypal or card through them and then use it to purchase.

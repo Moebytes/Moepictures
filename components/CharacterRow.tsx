@@ -1,6 +1,6 @@
 import React, {useContext, useRef, useState} from "react"
 import {useHistory} from "react-router-dom"
-import {ThemeContext, SearchContext, SearchFlagContext, SessionContext} from "../Context"
+import {ThemeContext, SearchContext, SearchFlagContext, SessionContext, RestrictTypeContext} from "../Context"
 import {HashLink as Link} from "react-router-hash-link"
 import functions from "../structures/Functions"
 import Carousel from "./Carousel"
@@ -17,6 +17,7 @@ const CharacterRow: React.FunctionComponent<Props> = (props) => {
     const {search, setSearch} = useContext(SearchContext)
     const {searchFlag, setSearchFlag} = useContext(SearchFlagContext)
     const {session, setSession} = useContext(SessionContext)
+    const {restrictType, setRestrictType} = useContext(RestrictTypeContext)
     const history = useHistory()
 
     const searchTag = (event: React.MouseEvent) => {
@@ -41,7 +42,7 @@ const CharacterRow: React.FunctionComponent<Props> = (props) => {
                 return history.push(`/post/${post.postID}`)
             }
         }
-        const filtered = props.character.posts.filter((p: any) => p.restrict !== "explicit")
+        const filtered = props.character.posts.filter((p: any) => restrictType === "explicit" ? p.restrict === "explicit" : p.restrict !== "explicit")
         const post = filtered[index] 
         if (newTab) {
             window.open(`/post/${post.postID}`, "_blank")
@@ -55,7 +56,7 @@ const CharacterRow: React.FunctionComponent<Props> = (props) => {
             const filtered = props.character.posts.filter((p: any) => p.restrict === "safe")
             return filtered.map((p: any) => functions.getThumbnailLink(p.images[0].type, p.postID, p.images[0].order, p.images[0].filename, "tiny"))
         }
-        const filtered = props.character.posts.filter((p: any) => p.restrict !== "explicit")
+        const filtered = props.character.posts.filter((p: any) => restrictType === "explicit" ? p.restrict === "explicit" : p.restrict !== "explicit")
         return filtered.map((p: any) => functions.getThumbnailLink(p.images[0].type, p.postID, p.images[0].order, p.images[0].filename, "tiny"))
     }
 

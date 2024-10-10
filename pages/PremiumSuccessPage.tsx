@@ -7,8 +7,9 @@ import NavBar from "../components/NavBar"
 import SideBar from "../components/SideBar"
 import DragAndDrop from "../components/DragAndDrop"
 import functions from "../structures/Functions"
+import permissions from "../structures/Permissions"
 import {HideNavbarContext, HideSidebarContext, ThemeContext, EnableDragContext, RedirectContext, MobileContext,
-RelativeContext, HideTitlebarContext, HeaderTextContext, SidebarTextContext, SessionContext} from "../Context"
+RelativeContext, HideTitlebarContext, HeaderTextContext, SidebarTextContext, SessionContext, SessionFlagContext} from "../Context"
 import premiumStar from "../assets/icons/premiumStar.png"
 import "./styles/verifyemailsuccesspage.less"
 
@@ -22,6 +23,7 @@ const PremiumSuccessPage: React.FunctionComponent = (props) => {
     const {headerText, setHeaderText} = useContext(HeaderTextContext)
     const {sidebarText, setSidebarText} = useContext(SidebarTextContext)
     const {session, setSession} = useContext(SessionContext)
+    const {sessionFlag, setSessionFlag} = useContext(SessionFlagContext)
     const {redirect, setRedirect} = useContext(RedirectContext)
     const {mobile, setMobile} = useContext(MobileContext)
     const [submitted, setSubmitted] = useState(false)
@@ -30,12 +32,17 @@ const PremiumSuccessPage: React.FunctionComponent = (props) => {
     const errorRef = useRef<any>(null)
     const history = useHistory()
 
-    useEffect(() => {
-        if (!session.cookie) return
-        if (!session.username) {
+    const getSessionCookie = async () => {
+        const cookie = await functions.get("/api/user/session", null, session, setSessionFlag)
+        setSession(cookie)
+        if (!permissions.isPremium(cookie)) {
             history.push("/401")
         }
-    }, [session])
+    }
+
+    useEffect(() => {
+        getSessionCookie()
+    }, [])
 
     useEffect(() => {
         setHideNavbar(false)
@@ -65,19 +72,21 @@ const PremiumSuccessPage: React.FunctionComponent = (props) => {
             <SideBar/>
             <div className="content">
                 <div className="verify-email-success">
-                    <div className="premium-row">
+                    {permissions.isPremium(session) ? <><div className="premium-row">
                         <span className="premium-heading">Account Upgraded!</span>
                         <img className="premium-star" src={premiumStar}/>
                     </div>
                     <div className="verify-email-success-row">
                         <span className="verify-email-success-text" style={{color: "var(--premiumColor)"}}>
-                            Thank you for purchasing premium! Your account has been upgraded. You can now 
-                            access all the premium features.
+                            Thank you for purchasing premium! Your account has been upgraded and you can now 
+                            access all of the premium features. <br/><br/>
+
+                            Your premium membership will last until {functions.prettyDate(new Date(session.premiumExpiration))}.
                         </span>
                     </div>
                     <div className="verify-email-success-button-container">
                         <button className="verify-email-success-button" onClick={() => history.push("/posts")}>Ok</button>
-                    </div>
+                    </div></> : null}
                 </div>
                 <Footer/>
             </div>

@@ -29,18 +29,27 @@ export default class SQLHistory {
 
     /** Get tag history */
     public static tagHistory = async (tag?: string, offset?: string) => {
+        let i = 1
+        let values = [] as any
+        let tagValue = i
+        if (tag) {
+            values.push(tag)
+            i++
+        }
+        if (offset) values.push(offset)
         const query: QueryConfig = {
         text: functions.multiTrim(/*sql*/`
                 SELECT "tag history".*,
                 COUNT(*) OVER() AS "historyCount"
                 FROM "tag history"
-                ${tag ? `WHERE "tag history"."tag" = $1` : ""}
+                ${tag ? `WHERE "tag history"."tag" = $${tagValue}` : ""}
                 GROUP BY "tag history"."historyID"
                 ORDER BY "tag history"."date" DESC
+                LIMIT 100 ${offset ? `OFFSET $${i}` : ""}
             `),
             values: []
         }
-        if (tag) query.values?.push(tag)
+        if (values?.[0]) query.values = values
         const result = await SQLQuery.run(query, true)
         return result
     }
@@ -99,18 +108,27 @@ export default class SQLHistory {
 
     /** Get post history */
     public static postHistory = async (postID?: string | number, offset?: string) => {
+        let i = 1
+        let values = [] as any
+        let postValue = i
+        if (postID) {
+            values.push(postID)
+            i++
+        }
+        if (offset) values.push(offset)
         const query: QueryConfig = {
         text: functions.multiTrim(/*sql*/`
                 SELECT "post history".*,
                 COUNT(*) OVER() AS "historyCount"
                 FROM "post history"
-                ${postID ? `WHERE "post history"."postID" = $1` : ""}
+                ${postID ? `WHERE "post history"."postID" = $${postValue}` : ""}
                 GROUP BY "post history"."historyID"
                 ORDER BY "post history"."date" DESC
+                LIMIT 100 ${offset ? `OFFSET $${i}` : ""}
             `),
             values: []
         }
-        if (postID) query.values?.push(postID)
+        if (values?.[0]) query.values = values
         const result = await SQLQuery.run(query, true)
         return result
     }
@@ -154,10 +172,22 @@ export default class SQLHistory {
 
     /** Get translation history */
     public static translationHistory = async (postID?: string, order?: string, offset?: string) => {
-        let whereArr = [] as string[]
         let i = 1
-        if (postID) whereArr.push(`"translation history"."postID" = $${i++}`)
-        if (order) whereArr.push(`"translation history"."order" = $${i++}`)
+        let values = [] as any
+        let postValue = i
+        if (postID) {
+            values.push(postID)
+            i++
+        }
+        let orderValue = i
+        if (order) {
+            values.push(order)
+            i++
+        }
+        if (offset) values.push(offset)
+        let whereArr = [] as string[]
+        if (postID) whereArr.push(`"translation history"."postID" = $${postValue}`)
+        if (order) whereArr.push(`"translation history"."order" = $${orderValue}`)
         const whereQueries = whereArr.length ? `WHERE ${whereArr.join(" AND ")}` : ""
         const query: QueryConfig = {
         text: functions.multiTrim(/*sql*/`
@@ -180,11 +210,11 @@ export default class SQLHistory {
                 ${whereQueries}
                 GROUP BY "translation history"."historyID", post_json."type", post_json."restrict", post_json."style"
                 ORDER BY "translation history"."updatedDate" DESC
+                LIMIT 100 ${offset ? `OFFSET $${i}` : ""}
         `),
         values: []
         }
-        if (postID) query.values?.push(postID)
-        if (order) query.values?.push(order)
+        if (values?.[0]) query.values = values
         const result = await SQLQuery.run(query)
         return result
     }

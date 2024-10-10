@@ -112,8 +112,8 @@ const TagRoutes = (app: Express) => {
             if (!req.session.username) return res.status(403).send("Unauthorized")
             if (!tagExists) return res.status(400).send("Bad tag")
             if (req.session.role !== "admin" && req.session.role !== "mod") return res.status(403).end()
-            await serverFunctions.deleteFolder(`history/tag/${tag.trim()}`).catch(() => null)
-            await serverFunctions.deleteFile(functions.getTagPath(tagExists.type, tagExists.image)).catch(() => null)
+            await serverFunctions.deleteFolder(`history/tag/${tag.trim()}`, false).catch(() => null)
+            await serverFunctions.deleteFile(functions.getTagPath(tagExists.type, tagExists.image), false).catch(() => null)
             await sql.tag.deleteTag(tag.trim())
             res.status(200).send("Success")
         } catch (e) {
@@ -169,8 +169,8 @@ const TagRoutes = (app: Express) => {
                 if (tagObj.image) {
                     try {
                         const imagePath = functions.getTagPath(tagObj.type, tagObj.image)
-                        vanillaImageBuffer = await serverFunctions.getFile(imagePath)
-                        await serverFunctions.deleteFile(imagePath)
+                        vanillaImageBuffer = await serverFunctions.getFile(imagePath, false, false)
+                        await serverFunctions.deleteFile(imagePath, false)
                         tagObj.image = null
                     } catch {
                         tagObj.image = null
@@ -181,7 +181,7 @@ const TagRoutes = (app: Express) => {
                     const imagePath = functions.getTagPath(tagObj.type, filename)
                     const newBuffer = Buffer.from(Object.values(image) as any)
                     imgChange = serverFunctions.buffersChanged(vanillaImageBuffer, newBuffer)
-                    await serverFunctions.uploadFile(imagePath, newBuffer)
+                    await serverFunctions.uploadFile(imagePath, newBuffer, false)
                     await sql.tag.updateTag(tag, "image", filename)
                     tagObj.image = filename
                     imageFilename = filename
@@ -245,7 +245,7 @@ const TagRoutes = (app: Express) => {
                     const newFilename = image ? `${key.trim()}.${functions.fileExtension(image)}` : `${key.trim()}.${path.extname(tagObj.image).replace(".", "")}`
                     const oldImagePath = functions.getTagPath(tagObj.type, tagObj.image)
                     const newImagePath = functions.getTagPath(tagObj.type, newFilename)
-                    await serverFunctions.renameFile(oldImagePath, newImagePath)
+                    await serverFunctions.renameFile(oldImagePath, newImagePath, false, false)
                     await sql.tag.updateTag(tag, "image", newFilename)
                     imageFilename = newFilename
                 }
@@ -257,7 +257,7 @@ const TagRoutes = (app: Express) => {
             }
 
             const tagHistory = await sql.history.tagHistory(targetTag)
-            const nextKey = await serverFunctions.getNextKey("tag", key)
+            const nextKey = await serverFunctions.getNextKey("tag", key, false)
             if (!tagHistory.length || (imgChange && nextKey === 1)) {
                 let vanilla = await sql.tag.tag(targetTag)
                 vanilla.date = vanilla.createDate 
@@ -268,7 +268,7 @@ const TagRoutes = (app: Express) => {
                 if (vanilla.image && vanillaImageBuffer) {
                     if (imgChange) {
                         const newImagePath = functions.getTagHistoryPath(targetTag, 1, vanilla.image)
-                        await serverFunctions.uploadFile(newImagePath, vanillaImageBuffer)
+                        await serverFunctions.uploadFile(newImagePath, vanillaImageBuffer, false)
                         vanilla.image = newImagePath
                     }
                 } else {
@@ -278,7 +278,7 @@ const TagRoutes = (app: Express) => {
                 if (image?.[0] && imageFilename) {
                     if (imgChange) {
                         const imagePath = functions.getTagHistoryPath(key, 2, imageFilename)
-                        await serverFunctions.uploadFile(imagePath, Buffer.from(Object.values(image) as any))
+                        await serverFunctions.uploadFile(imagePath, Buffer.from(Object.values(image) as any), false)
                         imageFilename = imagePath
                     }
                 }
@@ -287,7 +287,7 @@ const TagRoutes = (app: Express) => {
                 if (image?.[0] && imageFilename) {
                     if (imgChange) {
                         const imagePath = functions.getTagHistoryPath(key, nextKey, imageFilename)
-                        await serverFunctions.uploadFile(imagePath, Buffer.from(Object.values(image) as any))
+                        await serverFunctions.uploadFile(imagePath, Buffer.from(Object.values(image) as any), false)
                         imageFilename = imagePath
                     }
                 }
@@ -520,8 +520,8 @@ const TagRoutes = (app: Express) => {
             } else {
                 const currentHistory = tagHistory.find((history: any) => history.historyID === historyID)
                 if (currentHistory.image?.includes("history/")) {
-                    await serverFunctions.deleteFile(currentHistory.image)
-                    await serverFunctions.deleteIfEmpty(path.dirname(currentHistory.image))
+                    await serverFunctions.deleteFile(currentHistory.image, false)
+                    await serverFunctions.deleteIfEmpty(path.dirname(currentHistory.image), false)
                 }
                 await sql.history.deleteTagHistory(Number(historyID))
             }

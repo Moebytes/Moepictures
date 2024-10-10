@@ -32,7 +32,7 @@ const SearchRoutes = (app: Express) => {
             let withTags = req.query.withTags === "true"
             if (!functions.validType(type, true)) return res.status(400).send("Invalid type")
             if (!functions.validRestrict(restrict, true)) return res.status(400).send("Invalid restrict")
-            if (restrict === "explicit") if (req.session.role !== "admin" && req.session.role !== "mod") return res.status(403).end()
+            if (restrict === "explicit") if (!req.session.showR18) return res.status(403).end()
             if (!functions.validStyle(style, true)) return res.status(400).send("Invalid style")
             if (!functions.validSort(sort)) return res.status(400).send("Invalid sort")
             const tags = query?.trim().split(/ +/g).filter(Boolean)
@@ -65,8 +65,10 @@ const SearchRoutes = (app: Express) => {
             })
             if (req.session.role !== "admin" && req.session.role !== "mod") {
                 result = result.filter((p: any) => !p.hidden)
-                result = result.filter((p: any) => p.restrict !== "explicit")
                 result = functions.stripTags(result)
+            }
+            if (!req.session.showR18) {
+                result = result.filter((p: any) => p.restrict !== "explicit")
             }
             res.status(200).json(result)
         } catch (e) {
@@ -85,7 +87,7 @@ const SearchRoutes = (app: Express) => {
             const offset = req.query.offset as string
             if (!functions.validType(type, true)) return res.status(400).send("Invalid type")
             if (!functions.validRestrict(restrict, true)) return res.status(400).send("Invalid restrict")
-            if (restrict === "explicit") if (req.session.role !== "admin" && req.session.role !== "mod") return res.status(403).end()
+            if (restrict === "explicit") if (!req.session.showR18) return res.status(403).end()
             if (!functions.validStyle(style, true)) return res.status(400).send("Invalid style")
             const tags = query?.trim().split(/ +/g).filter(Boolean)
             for (let i = 0; i < tags?.length; i++) {
@@ -104,8 +106,10 @@ const SearchRoutes = (app: Express) => {
             })
             if (req.session.role !== "admin" && req.session.role !== "mod") {
                 result = result.filter((p: any) => !p.hidden)
-                result = result.filter((p: any) => p.restrict !== "explicit")
                 result = functions.stripTags(result)
+            }
+            if (!req.session.showR18) {
+                result = result.filter((p: any) => p.restrict !== "explicit")
             }
             res.status(200).json(result)
         } catch (e) {

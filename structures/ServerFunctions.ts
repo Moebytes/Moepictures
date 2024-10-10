@@ -15,6 +15,7 @@ import jwt from "jsonwebtoken"
 const csrf = new CSRF()
 
 let local = process.env.MOEPICTURES_LOCAL
+let localR18 = process.env.MOEPICTURES_LOCAL_R18
 let localUnverified = process.env.MOEPICTURES_LOCAL_UNVERIFIED
 
 const s3 = new S3({region: "us-east-1", credentials: {
@@ -110,40 +111,42 @@ export default class ServerFunctions {
         await sql.message.insertMessage("moepictures", username, subject, message)
     }
 
-    public static getFirstHistoryFile = async (file: string) => {
+    public static getFirstHistoryFile = async (file: string, r18: boolean) => {
         const defaultBuffer = Buffer.from("")
         if (file.includes("artist") || file.includes("character") || file.includes("series") || file.includes("pfp")) {
             if (functions.isLocalHost()) {
+                let folder = r18 ? localR18 : local
                 const id = file.split("-")?.[0]?.match(/\d+/)?.[0]
                 if (!id) return defaultBuffer
-                const historyFolder = `${local}/history/post/${id}`
+                const historyFolder = `${folder}/history/post/${id}`
                 if (!fs.existsSync(historyFolder)) return defaultBuffer
                 let folders = fs.readdirSync(historyFolder)
                 if (!folders.length) return defaultBuffer
                 folders = folders.sort(new Intl.Collator(undefined, {numeric: true, sensitivity: "base"}).compare)
-                const firstHistory = `${local}/history/tag/${id}/${folders[0]}`
+                const firstHistory = `${folder}/history/tag/${id}/${folders[0]}`
                 let files = fs.readdirSync(firstHistory)
                 if (!files.length) return defaultBuffer
                 files = files.sort(new Intl.Collator(undefined, {numeric: true, sensitivity: "base"}).compare)
-                const firstFile = `${local}/history/tag/${id}/${folders[0]}/${files[0]}`
+                const firstFile = `${folder}/history/tag/${id}/${folders[0]}/${files[0]}`
                 return fs.readFileSync(firstFile)
             } else {
                 return defaultBuffer
             }
         } else {
             if (functions.isLocalHost()) {
+                let folder = r18 ? localR18 : local
                 const id = file.split("-")?.[0]?.match(/\d+/)?.[0]
                 if (!id) return defaultBuffer
-                const historyFolder = `${local}/history/post/${id}`
+                const historyFolder = `${folder}/history/post/${id}`
                 if (!fs.existsSync(historyFolder)) return defaultBuffer
                 let folders = fs.readdirSync(historyFolder)
                 if (!folders.length) return defaultBuffer
                 folders = folders.sort(new Intl.Collator(undefined, {numeric: true, sensitivity: "base"}).compare)
-                const firstHistory = `${local}/history/post/${id}/${folders[0]}`
+                const firstHistory = `${folder}/history/post/${id}/${folders[0]}`
                 let files = fs.readdirSync(firstHistory)
                 if (!files.length) return defaultBuffer
                 files = files.sort(new Intl.Collator(undefined, {numeric: true, sensitivity: "base"}).compare)
-                const firstFile = `${local}/history/post/${id}/${folders[0]}/${files[0]}`
+                const firstFile = `${folder}/history/post/${id}/${folders[0]}/${files[0]}`
                 return fs.readFileSync(firstFile)
             } else {
                 return defaultBuffer
@@ -151,53 +154,58 @@ export default class ServerFunctions {
         }
     }
 
-    public static getFile = async (file: string, upscaled?: boolean) => {
+    public static getFile = async (file: string, upscaled: boolean, r18: boolean) => {
         if (functions.isLocalHost()) {
-            let originalKey = `${local}/${decodeURIComponent(file)}`
-            let upscaledKey = `${local}/${decodeURIComponent(`${file.split("/")[0]}-upscaled/${file.split("/")[1]}`)}`
-            if (!fs.existsSync(upscaled ? upscaledKey : originalKey)) return ServerFunctions.getFirstHistoryFile(file)
+            let folder = r18 ? localR18 : local
+            let originalKey = `${folder}/${decodeURIComponent(file)}`
+            let upscaledKey = `${folder}/${decodeURIComponent(`${file.split("/")[0]}-upscaled/${file.split("/")[1]}`)}`
+            if (!fs.existsSync(upscaled ? upscaledKey : originalKey)) return ServerFunctions.getFirstHistoryFile(file, r18)
             if (upscaled) return fs.existsSync(upscaledKey) ? fs.readFileSync(upscaledKey) : Buffer.from("")
             return fs.existsSync(originalKey) ? fs.readFileSync(originalKey) : Buffer.from("")
         }
         return s3.getObject({Key: decodeURIComponent(file), Bucket: "moepictures"}).promise().then((r) => r.Body) as unknown as Buffer
     }
 
-    public static uploadFile = async (file: string, content: any) => {
+    public static uploadFile = async (file: string, content: any, r18: boolean) => {
         if (functions.isLocalHost()) {
-            const dir = path.dirname(`${local}/${file}`)
+            let folder = r18 ? localR18 : local
+            const dir = path.dirname(`${folder}/${file}`)
             if (!fs.existsSync(dir)) fs.mkdirSync(dir, {recursive: true})
-            fs.writeFileSync(`${local}/${file}`, content)
-            return `${local}/${file}`
+            fs.writeFileSync(`${folder}/${file}`, content)
+            return `${folder}/${file}`
         }
         const upload = await s3.upload({Body: content, Key: file, Bucket: "moepictures"}).promise()
         return upload.Location
     }
 
-    public static deleteFile = async (file: string) => {
+    public static deleteFile = async (file: string, r18: boolean) => {
         if (functions.isLocalHost()) {
             try {
-                fs.unlinkSync(`${local}/${file}`)
+                let folder = r18 ? localR18 : local
+                fs.unlinkSync(`${folder}/${file}`)
             } catch {}
             return
         }
         await s3.deleteObject({Key: file, Bucket: "moepictures"}).promise()
     }
 
-    public static deleteIfEmpty = async (folder: string) => {
+    public static deleteIfEmpty = async (folderPath: string, r18: boolean) => {
         if (functions.isLocalHost()) {
             try {
-                fs.rmdirSync(`${local}/${folder}`)
+                let folder = r18 ? localR18 : local
+                fs.rmdirSync(`${folder}/${folderPath}`)
             } catch {}
             return
         }
     }
 
-    public static deleteFolder = async (folder: string) => {
+    public static deleteFolder = async (folderPath: string, r18: boolean) => {
         if (functions.isLocalHost()) {
-            const dir = `${local}/${folder}`
+            let folder = r18 ? localR18 : local
+            const dir = `${folder}/${folderPath}`
             return ServerFunctions.removeLocalDirectory(dir)
         }
-        const listedObjects = await s3.listObjectsV2({Bucket: "moepictures", Prefix: folder}).promise()
+        const listedObjects = await s3.listObjectsV2({Bucket: "moepictures", Prefix: folderPath}).promise()
         if (listedObjects.Contents?.length === 0) return
     
         const deleteParams = {Bucket: "moepictures", Delete: {Objects: [] as any}}
@@ -206,17 +214,17 @@ export default class ServerFunctions {
             deleteParams.Delete.Objects.push({Key});
         })
         await s3.deleteObjects(deleteParams).promise()
-        if (listedObjects.IsTruncated) await ServerFunctions.deleteFolder(folder)
+        if (listedObjects.IsTruncated) await ServerFunctions.deleteFolder(folderPath, r18)
     }
 
-    public static renameFile = async (oldFile: string, newFile: string) => {
+    public static renameFile = async (oldFile: string, newFile: string, oldR18: boolean, newR18: boolean) => {
         if (functions.isLocalHost()) {
+            let oldFolder = oldR18 ? localR18 : local
+            let newFolder = newR18 ? localR18 : local
             try {
-                fs.renameSync(`${local}/${oldFile}`, `${local}/${newFile}`)
-            } catch {
-                fs.renameSync(`${local}/${encodeURI(oldFile)}`, `${local}/${encodeURI(newFile)}`)
-            }
-            return 
+                fs.renameSync(`${oldFolder}/${oldFile}`, `${newFolder}/${newFile}`)
+            } catch {}
+            return
         }
         try {
             await s3.copyObject({CopySource: `moepictures/${oldFile}`, Key: newFile, Bucket: "moepictures"}).promise()
@@ -226,12 +234,13 @@ export default class ServerFunctions {
         await s3.deleteObject({Key: oldFile, Bucket: "moepictures"}).promise()
     }
 
-    public static renameFolder = async (oldFolder: string, newFolder: string) => {
+    public static renameFolder = async (oldFolder: string, newFolder: string, r18: boolean) => {
         if (functions.isLocalHost()) {
+            let folder = r18 ? localR18 : local
             try {
-                fs.renameSync(`${local}/${oldFolder}`, `${local}/${newFolder}`)
+                fs.renameSync(`${folder}/${oldFolder}`, `${folder}/${newFolder}`)
             } catch {
-                fs.renameSync(`${local}/${encodeURI(oldFolder)}`, `${local}/${encodeURI(newFolder)}`)
+                fs.renameSync(`${folder}/${encodeURI(oldFolder)}`, `${folder}/${encodeURI(newFolder)}`)
             }
             return
         }
@@ -256,11 +265,12 @@ export default class ServerFunctions {
         }
     }
 
-    public static getNextKey = async (type: string, name: string) => {
+    public static getNextKey = async (type: string, name: string, r18: boolean) => {
         const key = `history/${type}/${name}`
         if (functions.isLocalHost()) {
-            if (!fs.existsSync(`${local}/${key}`)) return 1
-            const objects = fs.readdirSync(`${local}/${key}`)
+            let folder = r18 ? localR18 : local
+            if (!fs.existsSync(`${folder}/${key}`)) return 1
+            const objects = fs.readdirSync(`${folder}/${key}`)
             let nextKey = 0
             for (let i = 0; i < objects.length; i++) {
                 const object = objects[i]
@@ -370,7 +380,7 @@ export default class ServerFunctions {
         return {artists, characters, series, tags: newTags}
     }
 
-    public static imagesChanged = async (oldImages: any[], currentImages: any[], upscaled?: boolean) => {
+    public static imagesChanged = async (oldImages: any[], currentImages: any[], upscaled: boolean, r18: boolean) => {
         if (oldImages?.length !== currentImages?.length) return true
         for (let i = 0; i < oldImages.length; i++) {
             const oldImage = oldImages[i]
@@ -380,7 +390,7 @@ export default class ServerFunctions {
             } else {
                 oldPath = functions.getImagePath(oldImage.type, oldImage.postID, oldImage.order, oldImage.filename)
             }
-            const oldBuffer = await ServerFunctions.getFile(oldPath) as any
+            const oldBuffer = await ServerFunctions.getFile(oldPath, false, r18) as any
             if (!oldBuffer) continue
             const currentImage = currentImages[i]
             const currentBuffer = Buffer.from(currentImage.bytes) as any
@@ -391,7 +401,7 @@ export default class ServerFunctions {
         return false
     }
 
-    public static imagesChangedUnverified = async (oldImages: any[], currentImages: any[], upscaled?: boolean) => {
+    public static imagesChangedUnverified = async (oldImages: any[], currentImages: any[], upscaled: boolean, r18: boolean) => {
         if (oldImages?.length !== currentImages?.length) return true
         for (let i = 0; i < oldImages.length; i++) {
             const oldImage = oldImages[i]
@@ -401,7 +411,7 @@ export default class ServerFunctions {
             } else {
                 oldPath = functions.getImagePath(oldImage.type, oldImage.postID, oldImage.order, oldImage.filename)
             }
-            const oldBuffer = await ServerFunctions.getFile(oldPath) as any
+            const oldBuffer = await ServerFunctions.getFile(oldPath, false, r18) as any
             if (!oldBuffer) continue
             const currentImage = currentImages[i]
             let currentPath = ""
@@ -410,7 +420,7 @@ export default class ServerFunctions {
             } else {
                 currentPath = functions.getImagePath(currentImage.type, currentImage.postID, currentImage.order, currentImage.filename)
             }
-            const currentBuffer = await ServerFunctions.getUnverifiedFile(currentPath) as any
+            const currentBuffer = await ServerFunctions.getUnverifiedFile(currentPath, false) as any
             if (!currentBuffer) continue
             const imgMD5 = crypto.createHash("md5").update(oldBuffer).digest("hex")
             const currentMD5 = crypto.createHash("md5").update(currentBuffer).digest("hex")
@@ -426,6 +436,17 @@ export default class ServerFunctions {
         const currentMD5 = crypto.createHash("md5").update(currentBuffer as any).digest("hex")
         if (imgMD5 !== currentMD5) return true
         return false
+    }
+
+    public static migratePost = async (post: any, oldR18: boolean, newR18: boolean) => {
+        if (oldR18 === newR18) return
+        for (let i = 0; i < post.images.length; i++) {
+            const imagePath = functions.getImagePath(post.images[i].type, post.postID, post.images[i].order, post.images[i].filename)
+            const upscaledImagePath = functions.getUpscaledImagePath(post.images[i].type, post.postID, post.images[i].order, post.images[i].filename) 
+            ServerFunctions.renameFile(imagePath, imagePath, oldR18, newR18)
+            ServerFunctions.renameFile(upscaledImagePath, upscaledImagePath, oldR18, newR18)
+        }
+        ServerFunctions.renameFile(`history/post/${post.postID}`, `history/post/${post.postID}`, oldR18, newR18)
     }
 
     public static updateImplication = async (tag: string, implication: string) => {
@@ -465,7 +486,7 @@ export default class ServerFunctions {
                 const image = post.images[j]
                 const imgPath = functions.getImagePath(image.type, post.postID, image.order, image.filename)
                 console.log(imgPath)
-                const buffer = await ServerFunctions.getFile(imgPath) as any
+                const buffer = await ServerFunctions.getFile(imgPath, false, false) as any
                 const md5 = crypto.createHash("md5").update(buffer).digest("hex")
                 console.log(md5)
                 await sql.post.updateImage(image.imageID, "hash", md5)

@@ -14,7 +14,7 @@ import DeleteCommentDialog from "../dialogs/DeleteCommentDialog"
 import EditCommentDialog from "../dialogs/EditCommentDialog"
 import ReportCommentDialog from "../dialogs/ReportCommentDialog"
 import {ThemeContext, EnableDragContext, HideNavbarContext, HideSidebarContext, MobileContext, SessionContext,
-RelativeContext, HideTitlebarContext, ActiveDropdownContext, HeaderTextContext, SidebarTextContext,
+RelativeContext, HideTitlebarContext, ActiveDropdownContext, HeaderTextContext, SidebarTextContext, RestrictTypeContext,
 CommentSearchFlagContext, SiteHueContext, SiteLightnessContext, SiteSaturationContext, ScrollContext, CommentsPageContext,
 PageFlagContext, ShowPageDialogContext, CommentIDContext, CommentJumpFlagContext, SessionFlagContext} from "../Context"
 import permissions from "../structures/Permissions"
@@ -57,6 +57,7 @@ const CommentsPage: React.FunctionComponent = (props) => {
     const [queryPage, setQueryPage] = useState(1)
     const {commentID, setCommentID} = useContext(CommentIDContext)
     const {commentJumpFlag, setCommentJumpFlag} = useContext(CommentJumpFlagContext)
+    const {restrictType, setRestrictType} = useContext(RestrictTypeContext)
     const sortRef = useRef(null) as any
     const history = useHistory()
 
@@ -408,7 +409,7 @@ const CommentsPage: React.FunctionComponent = (props) => {
         for (let i = 0; i < visible.length; i++) {
             if (visible[i].fake) continue
             if (!session.username) if (visible[i].post.restrict !== "safe") continue
-            if (!permissions.isElevated(session)) if (visible[i].post.restrict === "explicit") continue
+            if (restrictType !== "explicit") if (visible[i].post.restrict === "explicit") continue
             jsx.push(<CommentRow key={visible[i].commentID} comment={visible[i]} onDelete={updateComments} onEdit={updateComments} onCommentJump={onCommentJump}/>)
         }
         if (!scroll) {

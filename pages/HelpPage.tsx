@@ -143,7 +143,7 @@ const HelpPage: React.FunctionComponent = (props) => {
 
                     In results, posts may have different border colors which mean the following: <br/>
                     <span className="help-alt">pink</span> - the post is favorited. <br/>
-                    <span className="help-alt">purple</span> - the post contains multiple variations. <br/>
+                    <span className="help-alt">blue</span> - the post contains multiple variations. <br/>
                     <span className="help-alt">green</span> - the post is a third party post. <br/>
                 </span>
                 <div className="help-img-container"><img className="help-img" src={searchingImg}/></div></>
@@ -190,9 +190,9 @@ const HelpPage: React.FunctionComponent = (props) => {
                 <div className="help-img-container"><img className="help-img" src={videoPlayerImg}/></div></>
             )
         }
-        if (helpTab === "global-music") {
+        if (helpTab === "music") {
             return (
-                <><span className="help-heading">Global Music</span>
+                <><span className="help-heading">Music</span>
                 <span className="help-text">
                     The music player is available globally (apart from having the per-post player which is also synced). This means 
                     that when you play a song you can navigate to any page on the site and it will continue to play. To stop playback,
@@ -259,13 +259,13 @@ const HelpPage: React.FunctionComponent = (props) => {
                     ⇾ The drawing should be clean overall and shouldn't look messy or have obvious mistakes. <br/>
                     ⇾ The perspective, proportions, and anatomy shouldn't look weird. <br/>
                     ⇾ Animations shouldn't look stuttery. <br/>
-                    ⇾ Source information is required for all posts. <br/>
+                    ⇾ Source link is required for all posts. <br/>
                     ⇾ For images, adding an upscaled post is required. <br/>
                     ⇾ Compress / re-encode files (maintaining high quality) to be storage efficient. <br/>
                     ⇾ All tags should be romanized. Titles and commentary don't have to be romanized. <br/>
-                    ⇾ No hentai. We only allow light nudity and suggestiveness. <br/>
-                    ⇾ No AI/bot generated works. We only want art with human love and passion. <br/>
-                    ⇾ No paid rewards. Please support artists for their hard work.
+                    ⇾ No hentai. We allow questionable posts with light nudity and suggestiveness. <br/>
+                    ⇾ No AI-generated works. We only want art made by humans and their passion. <br/>
+                    ⇾ No paid rewards. You can mention when one is available, please support artists for their hard work.
                     </span>
                 </span>
                 <div className="help-img-container"><img className="help-img" src={uploadImg}/></div></>
@@ -387,6 +387,7 @@ const HelpPage: React.FunctionComponent = (props) => {
                     These are some general guidelines for all the comment sections: <br/>
                     <span className="help-alt">
                     ⇾ No spam, jibberish, or extremely off-topic comments. <br/>
+                    ⇾ No foul language (if you somehow bypassed the filter). <br/>
                     ⇾ No excessive rudeness in arguments. <br/>
                     ⇾ No otherwise distasteful comments. <br/><br/>
                     </span>
@@ -463,7 +464,7 @@ const HelpPage: React.FunctionComponent = (props) => {
                         <span className="help-nav-text" onClick={() => setHelpTab("image-searching")}>Image Searching</span>
                         <span className="help-nav-text" onClick={() => setHelpTab("filters")}>Filters</span>
                         <span className="help-nav-text" onClick={() => setHelpTab("custom-players")}>Custom Players</span>
-                        <span className="help-nav-text" onClick={() => setHelpTab("global-music")}>Global Music</span>
+                        <span className="help-nav-text" onClick={() => setHelpTab("music")}>Music</span>
                         <span className="help-nav-text" onClick={() => setHelpTab("translations")}>Translations</span>
                         <span className="help-nav-text" onClick={() => setHelpTab("favorites")}>Favorites</span>
                         <span className="help-nav-text" onClick={() => setHelpTab("cuteness")}>Cuteness</span>

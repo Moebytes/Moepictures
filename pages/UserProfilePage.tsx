@@ -7,19 +7,22 @@ import NavBar from "../components/NavBar"
 import SideBar from "../components/SideBar"
 import Footer from "../components/Footer"
 import DragAndDrop from "../components/DragAndDrop"
-import {HideNavbarContext, HideSidebarContext, ThemeContext, EnableDragContext, RelativeContext, HideTitlebarContext, MobileContext,
+import {HideNavbarContext, HideSidebarContext, ThemeContext, EnableDragContext, RelativeContext, HideTitlebarContext, MobileContext, RestrictTypeContext,
 HeaderTextContext, SidebarTextContext, SessionContext, RedirectContext, SessionFlagContext, UserImgContext, ShowDeleteAccountDialogContext,
-CommentSearchFlagContext, SiteHueContext, SiteLightnessContext, UserImgPostContext, SiteSaturationContext, PremiumRequiredContext} from "../Context"
+CommentSearchFlagContext, SiteHueContext, SiteLightnessContext, UserImgPostContext, SiteSaturationContext, R18ConfirmationContext, 
+PremiumRequiredContext} from "../Context"
 import functions from "../structures/Functions"
 import Carousel from "../components/Carousel"
 import CommentCarousel from "../components/CommentCarousel"
 import DeleteAccountDialog from "../dialogs/DeleteAccountDialog"
+import R18Dialog from "../dialogs/R18Dialog"
 import adminLabel from "../assets/icons/admin-label.png"
 import modLabel from "../assets/icons/mod-label.png"
 import systemLabel from "../assets/icons/system-label.png"
 import premiumLabel from "../assets/icons/premium-label.png"
 import permissions from "../structures/Permissions"
 import premiumStar from "../assets/icons/premiumStar.png"
+import r18 from "../assets/icons/r18.png"
 import danger from "../assets/icons/danger.png"
 import "./styles/userprofilepage.less"
 
@@ -45,8 +48,10 @@ const UserProfilePage: React.FunctionComponent = (props) => {
     const {userImg, setUserImg} = useContext(UserImgContext)
     const {userImgPost, setUserImgPost} = useContext(UserImgPostContext)
     const {premiumRequired, setPremiumRequired} = useContext(PremiumRequiredContext)
+    const {r18Confirmation, setR18Confirmation} = useContext(R18ConfirmationContext)
     const {showDeleteAccountDialog, setShowDeleteAccountDialog} = useContext(ShowDeleteAccountDialogContext)
     const {commentSearchFlag, setCommentSearchFlag} = useContext(CommentSearchFlagContext)
+    const {restrictType, setRestrictType} = useContext(RestrictTypeContext)
     const bioRef = useRef<any>(null)
     const errorRef = useRef<any>(null)
     const [error, setError] = useState(false)
@@ -79,7 +84,7 @@ const UserProfilePage: React.FunctionComponent = (props) => {
 
     const updateUploads = async () => {
         const uploads = await functions.get("/api/user/uploads", null, session, setSessionFlag)
-        const filtered = uploads.filter((u: any) => u.post?.restrict !== "explicit")
+        const filtered = uploads.filter((u: any) => restrictType === "explicit" ? u.post?.restrict === "explicit" : u.post?.restrict !== "explicit")
         const images = filtered.map((p: any) => functions.getThumbnailLink(p.images[0].type, p.postID, p.images[0].order, p.images[0].filename, "tiny"))
         setUploads(filtered)
         setUploadImages(images)
@@ -87,7 +92,7 @@ const UserProfilePage: React.FunctionComponent = (props) => {
 
     const updateFavorites = async () => {
         const favorites = await functions.get("/api/user/favorites", null, session, setSessionFlag)
-        const filtered = favorites.filter((f: any) => f.post?.restrict !== "explicit")
+        const filtered = favorites.filter((f: any) => restrictType === "explicit" ? f.post?.restrict === "explicit" : f.post?.restrict !== "explicit")
         const images = filtered.map((f: any) => functions.getThumbnailLink(f.post.images[0].type, f.postID, f.post.images[0].order, f.post.images[0].filename, "tiny"))
         setFavorites(filtered)
         setFavoriteImages(images)
@@ -219,6 +224,15 @@ const UserProfilePage: React.FunctionComponent = (props) => {
     const downloadPixivID = async () => {
         await functions.post("/api/user/downloadpixivid", null, session, setSessionFlag)
         setSessionFlag(true)
+    }
+
+    const showR18 = async () => {
+        if (session.showR18) {
+            await functions.post("/api/user/r18", {r18: false}, session, setSessionFlag)
+            setSessionFlag(true)
+        } else {
+            setR18Confirmation(true)
+        }
     }
 
     const upscaledImages = async () => {
@@ -357,10 +371,28 @@ const UserProfilePage: React.FunctionComponent = (props) => {
         setSessionFlag(true)
     }
 
+    const premiumExpirationJSX = () => {
+        if (!session.premiumExpiration) return null
+        if (new Date(session.premiumExpiration) > new Date()) {
+            return (
+                <div className="userprofile-row">
+                    <span className="userprofile-text" style={{color: "var(--premiumColor)"}}>Premium until {functions.prettyDate(new Date(session.premiumExpiration))}</span>
+                </div>
+            )
+        } else {
+            return (
+                <div className="userprofile-row">
+                    <span className="userprofile-text">Premium expired on {functions.prettyDate(new Date(session.premiumExpiration))}</span>
+                </div>
+            )
+        }
+    }
+
     return (
         <>
         <DragAndDrop/>
         <DeleteAccountDialog/>
+        <R18Dialog/>
         <TitleBar/>
         <NavBar/>
         <div className="body">
@@ -378,6 +410,7 @@ const UserProfilePage: React.FunctionComponent = (props) => {
                         </>}
                     </div>
                     {session.banned ? <span className="user-ban-text">{getBanText()}</span> : null}
+                    {premiumExpirationJSX()}
                     <div className="userprofile-row">
                         <span className="userprofile-text">Email: {session.email}</span>
                     </div>
@@ -425,6 +458,10 @@ const UserProfilePage: React.FunctionComponent = (props) => {
                         <input style={{color: "var(--premiumColor)"}} className="userprofile-input" spellCheck={false} value={interval} onChange={(event) => setInterval(event.target.value)}
                         onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}></input>
                     </div>
+                    {permissions.isAdmin(session) ? <div className="userprofile-row">
+                        <img className="userprofile-icon" src={r18}/>
+                        <span style={{color: "var(--r18Color)"}} className="userprofile-text">Show R18: <span style={{color: "var(--r18Color)"}} className="userprofile-text-action" onClick={showR18}>{session.showR18 ? "Yes" : "No"}</span></span>
+                    </div> : null}
                     <div onClick={clearPfp} className="userprofile-row">
                         <span className="userprofile-link">Clear Pfp</span>
                     </div>

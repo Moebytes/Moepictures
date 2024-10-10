@@ -329,7 +329,7 @@ const EditUnverifiedPostPage: React.FunctionComponent<Props> = (props) => {
                                         obj ? 100 :
                                         mp4 ? 300 :
                                         webm ? 300 : 300
-                        if (MB <= maxSize) {
+                        if (MB <= maxSize || permissions.isElevated(session)) {
                             if (zip) {
                                 const reader = new JSZip()
                                 const content = await reader.loadAsync(bytes)
@@ -1651,7 +1651,7 @@ const EditUnverifiedPostPage: React.FunctionComponent<Props> = (props) => {
                     </button>
                 </div>
                 <div className="editpost-row">
-                    {permissions.isElevated(session) ?
+                    {session.showR18 ?
                     <button className={`editpost-button ${restrict === "explicit" ? "button-selected" : ""}`} onClick={() => setRestrict("explicit")}>
                         <img className="editpost-button-img" src={explicit}/>
                         <span className="editpost-button-text">Explicit</span>
@@ -1667,7 +1667,7 @@ const EditUnverifiedPostPage: React.FunctionComponent<Props> = (props) => {
                         <img className="editpost-button-img" src={questionable}/>
                         <span className="editpost-button-text">Questionable</span>
                     </button>
-                    {permissions.isElevated(session) ?
+                    {session.showR18 ?
                     <button className={`editpost-button ${restrict === "explicit" ? "button-selected" : ""}`} onClick={() => setRestrict("explicit")}>
                         <img className="editpost-button-img" src={explicit}/>
                         <span className="editpost-button-text">Explicit</span>

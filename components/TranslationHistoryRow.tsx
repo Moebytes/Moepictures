@@ -48,7 +48,7 @@ const TranslationHistoryRow: React.FunctionComponent<Props> = (props) => {
     useEffect(() => {
         updateUserRole()
         updateImage()
-    }, [session])
+    }, [props.translationHistory, session])
 
     const revertTranslationHistory = async () => {
         if (props.current) return Promise.reject()

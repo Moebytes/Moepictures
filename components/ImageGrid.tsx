@@ -214,7 +214,7 @@ const ImageGrid: React.FunctionComponent<Props> = (props) => {
             setPage(1)
             searchPosts()
         }
-    }, [searchFlag, imageType, sizeType, restrictType, styleType, sortType, sortReverse, scroll])
+    }, [searchFlag, imageType, sizeType, restrictType, styleType, sortType, sortReverse, scroll, loaded])
 
     useEffect(() => {
         if (reloadPostFlag) reloadedPost = true
@@ -496,10 +496,9 @@ const ImageGrid: React.FunctionComponent<Props> = (props) => {
             const post = visible[i] as any
             if (post.fake) continue
             // if (post.thirdParty) continue
-            if (!session.username) if (post.restrict !== "safe") continue
+            // if (!session.username) if (post.restrict !== "safe") continue
             if (restrictType !== "explicit") if (post.restrict === "explicit") continue
             if (!permissions.isElevated(session)) if (post.hidden) continue
-            if (!permissions.isElevated(session)) if (post.restrict === "explicit") continue
             const image = post.images[0]
             if (!image) continue
             const images = post.images.map((i: any) => functions.getImageLink(i.type, post.postID, i.order, i.filename))

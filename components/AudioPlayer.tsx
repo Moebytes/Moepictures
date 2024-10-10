@@ -112,6 +112,7 @@ const AudioPlayer: React.FunctionComponent = (props) => {
     }
     
     const loadAudio = async () => {
+        if (!functions.isAudio(audio)) return
         stop()
         await player.load(audio)
         await Tone.loaded()

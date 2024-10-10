@@ -186,7 +186,7 @@ const BulkUploadPage: React.FunctionComponent = (props) => {
                                         obj ? 100 :
                                         mp4 ? 300 :
                                         webm ? 300 : 300
-                        if (MB <= maxSize) {
+                        if (MB <= maxSize || permissions.isElevated(session)) {
                             if (zip) {
                                 const reader = new JSZip()
                                 const content = await reader.loadAsync(bytes)
@@ -945,7 +945,7 @@ const BulkUploadPage: React.FunctionComponent = (props) => {
                     </button>
                 </div>
                 <div className="upload-row">
-                    {permissions.isElevated(session) ?
+                    {session.showR18 ?
                     <button className={`upload-button ${restrict === "explicit" ? "button-selected" : ""}`} onClick={() => setRestrict("explicit")}>
                         <img className="upload-button-img" src={explicit}/>
                         <span className="upload-button-text">Explicit</span>
@@ -964,7 +964,7 @@ const BulkUploadPage: React.FunctionComponent = (props) => {
                         <img className="upload-button-img" src={questionable}/>
                         <span className="upload-button-text">Questionable</span>
                     </button>
-                    {permissions.isElevated(session) ?
+                    {session.showR18 ?
                     <button className={`upload-button ${restrict === "explicit" ? "button-selected" : ""}`} onClick={() => setRestrict("explicit")}>
                         <img className="upload-button-img" src={explicit}/>
                         <span className="upload-button-text">Explicit</span>

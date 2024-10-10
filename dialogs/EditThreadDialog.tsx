@@ -64,7 +64,7 @@ const EditThreadDialog: React.FunctionComponent = (props) => {
                             <span className="dialog-text">Content: </span>
                         </div>
                         <div className="dialog-row">
-                            <textarea className="dialog-textarea" style={{height: "330px"}} spellCheck={false} value={editThreadContent} onChange={(event) => setEditThreadContent(event.target.value)}></textarea>
+                            <textarea className="dialog-textarea" style={{resize: "vertical", height: "330px"}} spellCheck={false} value={editThreadContent} onChange={(event) => setEditThreadContent(event.target.value)}></textarea>
                         </div>
                         {error ? <div className="dialog-validation-container"><span className="dialog-validation" ref={errorRef}></span></div> : null}
                         <div className="dialog-row">

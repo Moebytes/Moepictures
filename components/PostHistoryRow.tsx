@@ -60,7 +60,7 @@ const PostHistoryRow: React.FunctionComponent<Props> = (props) => {
     useEffect(() => {
         updateUserRole()
         updateImages()
-    }, [session])
+    }, [props.postHistory, session])
 
     const imagesChanged = async () => {
         if (props.postHistory.images.length !== props.currentHistory.images.length) return true

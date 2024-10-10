@@ -1,5 +1,4 @@
 import React, {useEffect, useContext, useState, useRef, useReducer} from "react"
-import {useHistory} from "react-router-dom"
 import TitleBar from "../components/TitleBar"
 import NavBar from "../components/NavBar"
 import SideBar from "../components/SideBar"
@@ -9,7 +8,7 @@ import DragAndDrop from "../components/DragAndDrop"
 import PostHistoryRow from "../components/PostHistoryRow"
 import RevertPostHistoryDialog from "../dialogs/RevertPostHistoryDialog"
 import DeletePostHistoryDialog from "../dialogs/DeletePostHistoryDialog"
-import {ThemeContext, EnableDragContext, HideNavbarContext, HideSidebarContext, MobileContext, SessionContext, RedirectContext,
+import {ThemeContext, EnableDragContext, HideNavbarContext, HideSidebarContext, MobileContext, SessionContext,
 RelativeContext, HideTitlebarContext, ActiveDropdownContext, HeaderTextContext, SidebarTextContext, SessionFlagContext} from "../Context"
 import permissions from "../structures/Permissions"
 import "./styles/historypage.less"
@@ -33,23 +32,12 @@ const PostHistoryPage: React.FunctionComponent<Props> = (props) => {
     const {mobile, setMobile} = useContext(MobileContext)
     const {session, setSession} = useContext(SessionContext)
     const {sessionFlag, setSessionFlag} = useContext(SessionFlagContext)
-    const {redirect, setRedirect} = useContext(RedirectContext)
     const [revisions, setRevisions] = useState([]) as any
     const [index, setIndex] = useState(0)
     const [visibleRevisions, setVisibleRevisions] = useState([]) as any
     const [offset, setOffset] = useState(0)
     const [ended, setEnded] = useState(false)
     const postID = props.match?.params.id
-    const history = useHistory()
-
-    useEffect(() => {
-        if (!session.cookie) return
-        if (!session.username) {
-            setRedirect(postID ? `/post/history/${postID}` : "/post/history")
-            history.push("/login")
-            setSidebarText("Login required.")
-        }
-    }, [session])
 
     const updateHistory = async () => {
         let result = [] as any

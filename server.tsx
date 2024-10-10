@@ -68,6 +68,8 @@ declare module "express-session" {
       autosearchInterval: number
       upscaledImages: boolean
       savedSearches: string
+      showR18: boolean
+      premiumExpiration: string
       $2fa: boolean
       ip: string
       role: string
@@ -179,20 +181,22 @@ for (let i = 0; i < folders.length; i++) {
       res.setHeader("Content-Type", mimeType ?? "")
       if (!noCache.includes(folders[i])) res.setHeader("Cache-Control", "public, max-age=2592000")
       const key = decodeURIComponent(req.path.slice(1))
-      if (req.session.role !== "admin" && req.session.role !== "mod") {
-        const postID = key.match(/(?<=\/)\d+(?=\/)/)?.[0]
-        if (postID) {
-          const post = await sql.post.post(Number(postID))
-          if (post.restrict === "explicit") return res.status(403).send("No permission")
-        }
-      }
       let upscaled = false
       if (folders[i] === "image" || folders[i] === "comic" || folders[i] === "animation") {
         upscaled = req.session.upscaledImages as boolean
         if (req.headers["x-force-upscale"]) upscaled = req.headers["x-force-upscale"] === "true"
       }
       if (req.session.captchaNeeded) upscaled = false
-      let body = await serverFunctions.getFile(key, upscaled)
+      let r18 = false
+      const postID = key.match(/(?<=\/)\d+(?=-)/)?.[0]
+      if (postID) {
+        const post = await sql.post.post(Number(postID))
+        if (post.restrict === "explicit") {
+          if (!req.session.showR18) return res.status(403).end()
+          r18 = true
+        }
+      }
+      let body = await serverFunctions.getFile(key, upscaled, r18)
       let contentLength = body.length
       if (!contentLength) return res.status(200).send(body)
       if (!noCache.includes(folders[i]) && req.session.captchaNeeded) {
@@ -264,14 +268,16 @@ for (let i = 0; i < folders.length; i++) {
       res.setHeader("Content-Type", mimeType ?? "")
       if (!noCache.includes(folders[i])) res.setHeader("Cache-Control", "public, max-age=2592000")
       const key = decodeURIComponent(req.path.replace(`/thumbnail/${req.params.size}/`, ""))
-      if (req.session.role !== "admin" && req.session.role !== "mod") {
-        const postID = key.match(/(?<=\/)\d+(?=\/)/)?.[0]
-        if (postID) {
-          const post = await sql.post.post(Number(postID))
-          if (post.restrict === "explicit") return res.status(403).send("No permission")
+      let r18 = false
+      const postID = key.match(/(?<=\/)\d+(?=-)/)?.[0]
+      if (postID) {
+        const post = await sql.post.post(Number(postID))
+        if (post.restrict === "explicit") {
+          if (!req.session.showR18) return res.status(403).end()
+          r18 = true
         }
       }
-      let body = await serverFunctions.getFile(key, false)
+      let body = await serverFunctions.getFile(key, false, r18)
       let contentLength = body.length
       if (!contentLength) return res.status(200).send(body)
       if (!noCache.includes(folders[i]) && req.session.captchaNeeded) {
@@ -420,6 +426,8 @@ const run = async () => {
   if (!exists) await sql.tag.updateTag("self-post", "description", "The artwork was posted by the original creator.")
   exists = await sql.tag.insertTag("transparent", "meta")
   if (!exists) await sql.tag.updateTag("transparent", "description", "The post has a transparent background.")
+  exists = await sql.tag.insertTag("text", "meta")
+  if (!exists) await sql.tag.updateTag("text", "description", "The post has contains text.")
   exists = await sql.tag.insertTag("commentary", "meta")
   if (!exists) await sql.tag.updateTag("commentary", "description", "The post has artist commentary.")
   exists = await sql.tag.insertTag("translated", "meta")
@@ -434,6 +442,8 @@ const run = async () => {
   if (!exists) await sql.tag.updateTag("multiple-artists", "description", "The post has multiple artists.")
   exists = await sql.tag.insertTag("bad-pixiv-id", "meta")
   if (!exists) await sql.tag.updateTag("bad-pixiv-id", "description", "The pixiv id was deleted.")
+  exists = await sql.tag.insertTag("paid-reward-available", "meta")
+  if (!exists) await sql.tag.updateTag("paid-reward-available", "description", "The artist offers a paid reward for this post.")
 
   app.listen(process.env.PORT || 8082, "0.0.0.0", () => console.log("Started the website server!"))
 }

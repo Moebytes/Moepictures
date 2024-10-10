@@ -217,7 +217,10 @@ const TitleBar: React.FunctionComponent<Props> = (props) => {
             </div>
             {!mobile ? 
             <div className="titlebar-search-text-container">
-                <span className={`titlebar-search-text ${props.post?.hidden ? "strikethrough" : ""}`}>{autoSearch ? <span style={{color: "var(--premiumColor)", marginRight: "10px"}}>[Auto Search]</span> : null}{headerText}</span>
+                <span className={`titlebar-search-text ${props.post?.hidden ? "strikethrough" : ""}`}>
+                    {restrictType === "explicit" ? <span style={{color: "var(--r18Color)", marginRight: "10px"}}>[R18]</span> : null}
+                    {autoSearch ? <span style={{color: "var(--premiumColor)", marginRight: "10px"}}>[Auto Search]</span> : null}
+                    {headerText}</span>
             </div> : null}
         </div>
     )

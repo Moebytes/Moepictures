@@ -186,6 +186,7 @@ export const HistoryPageContext = React.createContext<any>(null)
 export const ShowDeleteAllHistoryDialogContext = React.createContext<any>(null)
 export const FormatContext = React.createContext<any>(null)
 export const PremiumRequiredContext = React.createContext<any>(null)
+export const R18ConfirmationContext = React.createContext<any>(null)
 export const EmojisContext = React.createContext<any>(null)
 export const SaveSearchDialogContext = React.createContext<any>(null)
 export const DeleteAllSaveSearchDialogContext = React.createContext<any>(null)
@@ -372,6 +373,7 @@ const Context: React.FunctionComponent = (props) => {
     const [showDeleteAllHistoryDialog, setShowDeleteAllHistoryDialog] = useState(false)
     const [format, setFormat] = useState("jpg")
     const [premiumRequired, setPremiumRequired] = useState(false)
+    const [r18Confirmation, setR18Confirmation] = useState(false)
     const [saveSearchDialog, setSaveSearchDialog] = useState(false)
     const [editSaveSearchName, setEditSaveSearchName] = useState(null)
     const [editSaveSearchKey, setEditSaveSearchKey] = useState(null)
@@ -425,6 +427,7 @@ return (
         <SaveSearchDialogContext.Provider value={{saveSearchDialog, setSaveSearchDialog}}>
         <SaveSearchContext.Provider value={{saveSearch, setSaveSearch}}>
         <PromoteNameContext.Provider value={{promoteName, setPromoteName}}>
+        <R18ConfirmationContext.Provider value={{r18Confirmation, setR18Confirmation}}>
         <PremiumRequiredContext.Provider value={{premiumRequired, setPremiumRequired}}>
         <SortReverseContext.Provider value={{sortReverse, setSortReverse}}>
         <FormatContext.Provider value={{format, setFormat}}>
@@ -750,6 +753,7 @@ return (
         </FormatContext.Provider>
         </SortReverseContext.Provider>
         </PremiumRequiredContext.Provider>
+        </R18ConfirmationContext.Provider>
         </PromoteNameContext.Provider>
         </SaveSearchContext.Provider>
         </SaveSearchDialogContext.Provider>

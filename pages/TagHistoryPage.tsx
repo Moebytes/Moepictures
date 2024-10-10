@@ -9,7 +9,7 @@ import DragAndDrop from "../components/DragAndDrop"
 import TagHistoryRow from "../components/TagHistoryRow"
 import RevertTagHistoryDialog from "../dialogs/RevertTagHistoryDialog"
 import DeleteTagHistoryDialog from "../dialogs/DeleteTagHistoryDialog"
-import {ThemeContext, EnableDragContext, HideNavbarContext, HideSidebarContext, MobileContext, SessionContext, RedirectContext,
+import {ThemeContext, EnableDragContext, HideNavbarContext, HideSidebarContext, MobileContext, SessionContext, RedirectContext, RestrictTypeContext,
 RelativeContext, HideTitlebarContext, ActiveDropdownContext, HeaderTextContext, SidebarTextContext, SessionFlagContext} from "../Context"
 import permissions from "../structures/Permissions"
 import matureTags from "../assets/json/mature-tags.json"
@@ -35,6 +35,7 @@ const TagHistoryPage: React.FunctionComponent<Props> = (props) => {
     const {session, setSession} = useContext(SessionContext)
     const {sessionFlag, setSessionFlag} = useContext(SessionFlagContext)
     const {redirect, setRedirect} = useContext(RedirectContext)
+    const {restrictType, setRestrictType} = useContext(RestrictTypeContext)
     const [revisions, setRevisions] = useState([]) as any
     const [index, setIndex] = useState(0)
     const [visibleRevisions, setVisibleRevisions] = useState([]) as any
@@ -108,7 +109,7 @@ const TagHistoryPage: React.FunctionComponent<Props> = (props) => {
         const newVisibleRevisions = [] as any
         for (let i = 0; i < 10; i++) {
             if (!revisions[currentIndex]) break
-            if (functions.arrayIncludes(revisions[currentIndex].tag, matureTags, true)) if (!permissions.isElevated(session)) {
+            if (functions.arrayIncludes(revisions[currentIndex].tag, matureTags, true)) if (restrictType !== "explicit") {
                 currentIndex++
                 continue
             }
@@ -140,7 +141,7 @@ const TagHistoryPage: React.FunctionComponent<Props> = (props) => {
                 const newRevisions = visibleRevisions as any
                 for (let i = 0; i < 10; i++) {
                     if (!revisions[currentIndex]) return updateOffset()
-                    if (functions.arrayIncludes(revisions[currentIndex].tag, matureTags, true)) if (!permissions.isElevated(session)) {
+                    if (functions.arrayIncludes(revisions[currentIndex].tag, matureTags, true)) if (restrictType !== "explicit") {
                         currentIndex++
                         continue
                     }

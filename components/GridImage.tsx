@@ -13,6 +13,8 @@ import cryptoFunctions from "../structures/CryptoFunctions"
 import "./styles/gridimage.less"
 
 let tooltipTimer = null as any
+let id = 0
+let timeout = null as any
 
 interface Props {
     id: number
@@ -119,8 +121,13 @@ const GridImage = forwardRef<Ref, Props>((props, componentRef) => {
     }))
 
     useEffect(() => {
-        if (reverse !== false || speed !== 1 || sharpen !== 0 || pixelate !== 1) props.reupdate?.()
-    }, [imageLoaded, reverse, speed, sharpen, pixelate])
+        if (functions.isVideo(props.img)) {
+            if (reverse !== false) props.reupdate?.()
+        }
+        if (functions.isGIF(props.img) || functions.isWebP(props.img)) {
+            if (reverse !== false || speed !== 1 || pixelate !== 1) props.reupdate?.()
+        }
+    }, [imageLoaded, reverse, speed, pixelate])
 
     const handleIntersection = (entries: any) => {
         const entry = entries[0]
@@ -166,6 +173,14 @@ const GridImage = forwardRef<Ref, Props>((props, componentRef) => {
         }
     }
 
+    const cancelAnimation = () => {
+        clearTimeout(timeout)
+        window.cancelAnimationFrame(id)
+        if (videoRef.current?.cancelVideoFrameCallback) {
+            videoRef.current?.cancelVideoFrameCallback(id)
+        }
+    }
+
     useEffect(() => {
         setImageLoaded(false)
         setReverse(false)
@@ -174,6 +189,7 @@ const GridImage = forwardRef<Ref, Props>((props, componentRef) => {
         setBackFrame("")
         setSecondsProgress(0)
         setSeekTo(null)
+        cancelAnimation()
         if (ref.current) ref.current.style.opacity = "1"
         if (videoRef.current) videoRef.current.style.opacity = "1"
     }, [props.img])
@@ -260,8 +276,6 @@ const GridImage = forwardRef<Ref, Props>((props, componentRef) => {
 
     useEffect(() => {
         if (!functions.isVideo(props.img) && !gifData) return
-        let id = 0
-        let timeout = null as any
         const animationLoop = async () => {
             if (imageLoaded) {
                 if (reverse && functions.isVideo(props.img) && !videoData) return

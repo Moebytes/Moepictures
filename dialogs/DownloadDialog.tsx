@@ -62,7 +62,7 @@ const DownloadDialog: React.FunctionComponent = (props) => {
     const downloadImages = () => {
         if (!showDownloadDialog) return
         let start = Number(offsetField)
-        let end = start + Number(amountField) 
+        let end = start + Math.min(Number(amountField), 50)
         if (Number.isNaN(start)) start = 0
         if (Number.isNaN(end)) end = 0
         if (start < 0) start = 0

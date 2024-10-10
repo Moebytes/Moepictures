@@ -37,7 +37,7 @@ import UserPage from "./pages/UserPage"
 import TagPage from "./pages/TagPage"
 import TagHistoryPage from "./pages/TagHistoryPage"
 import PostHistoryPage from "./pages/PostHistoryPage"
-import SearchHistoryPage from "./pages/SearchHistoryPage"
+import HistoryPage from "./pages/HistoryPage"
 import UnverifiedPostPage from "./pages/UnverifiedPostPage"
 import functions from "./structures/Functions"
 import ModQueuePage from "./pages/ModQueuePage"
@@ -280,16 +280,13 @@ const App: React.FunctionComponent = (props) => {
                         <Route exact path="/characters"><CharactersPage/></Route>
                         <Route exact path="/artists"><ArtistsPage/></Route>
                         <Route exact path="/comments"><CommentsPage/></Route>
-                        <Route exact path="/history"><SearchHistoryPage/></Route>
+                        <Route exact path="/history"><HistoryPage/></Route>
                         <Route exact path="/premium"><PremiumPage/></Route>
                         <Route exact path="/user/:username" render={(props) => <UserPage {...props}/>}></Route>
                         <Route exact path="/tag/history/:tag" render={(props) => <TagHistoryPage {...props}/>}></Route>
-                        <Route exact path="/tag/history" render={(props) => <TagHistoryPage all={true} {...props}/>}></Route>
                         <Route exact path="/tag/:tag" render={(props) => <TagPage {...props}/>}></Route>
                         <Route exact path="/translation/history/:id/:order" render={(props) => <TranslationHistoryPage {...props}/>}></Route>
-                        <Route exact path="/translation/history" render={(props) => <TranslationHistoryPage all={true} {...props}/>}></Route>
                         <Route exact path="/post/history/:id" render={(props) => <PostHistoryPage {...props}/>}></Route>
-                        <Route exact path="/post/history" render={(props) => <PostHistoryPage all={true} {...props}/>}></Route>
                         <Route exact path="/post/:id" render={(props) => <PostPage {...props}/>}></Route>
                         <Route exact path="/unverified/post/:id" render={(props) => <UnverifiedPostPage {...props}/>}></Route>
                         <Route exact path="/edit-post/:id" render={(props) => <EditPostPage {...props}/>}></Route>

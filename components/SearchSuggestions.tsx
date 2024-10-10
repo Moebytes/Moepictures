@@ -1,6 +1,7 @@
 import React, {useContext, useEffect, useRef, useState, useReducer} from "react"
 import {useHistory} from "react-router-dom"
-import {ThemeContext, EnableDragContext, SessionContext, SessionFlagContext, MobileContext, SearchContext, SearchFlagContext} from "../Context"
+import {ThemeContext, EnableDragContext, SessionContext, SessionFlagContext, MobileContext, SearchContext, SearchFlagContext,
+RestrictTypeContext} from "../Context"
 import "./styles/searchsuggestions.less"
 import functions from "../structures/Functions"
 import permissions from "../structures/Permissions"
@@ -27,6 +28,7 @@ const SearchSuggestions: React.FunctionComponent<Props> = (props) => {
     const {mobile, setMobile} = useContext(MobileContext)
     const {search, setSearch} = useContext(SearchContext)
     const {searchFlag, setSearchFlag} = useContext(SearchFlagContext)
+    const {restrictType, setRestrictType} = useContext(RestrictTypeContext)
     const [suggestions, setSuggestions] = useState([]) as any
     const [activeIndex, setActiveIndex] = useState(-1)
     const [active, setActive] = useState(props.active)
@@ -103,7 +105,7 @@ const SearchSuggestions: React.FunctionComponent<Props> = (props) => {
         let jsx = [] as any
         for (let i = 0; i < suggestions.length; i++) {
             if (!session.username) if (functions.arrayIncludes(suggestions[i].tag, matureTags, true)) continue
-            if (!permissions.isElevated(session)) if (functions.arrayIncludes(suggestions[i].tag, matureTags, true)) continue
+            if (restrictType !== "explicit") if (functions.arrayIncludes(suggestions[i].tag, matureTags, true)) continue
             if (!suggestions[i]) break
             const tagClick = () => {
                 if (props.click) return props.click(suggestions[i].tag)

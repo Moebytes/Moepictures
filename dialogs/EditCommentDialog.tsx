@@ -51,7 +51,7 @@ const EditCommentDialog: React.FunctionComponent = (props) => {
                             <span className="dialog-title">Edit Comment</span>
                         </div>
                         <div className="dialog-row">
-                            <textarea className="dialog-textarea" style={{height: "140px"}} spellCheck={false} value={editCommentText} onChange={(event) => setEditCommentText(event.target.value)}></textarea>
+                            <textarea className="dialog-textarea" style={{resize: "vertical", height: "140px"}} spellCheck={false} value={editCommentText} onChange={(event) => setEditCommentText(event.target.value)}></textarea>
                         </div>
                         <div className="dialog-row">
                             <button onClick={() => click("reject")} className="dialog-button">{"Cancel"}</button>

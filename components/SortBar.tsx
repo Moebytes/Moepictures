@@ -163,20 +163,20 @@ const SortBar: React.FunctionComponent = (props) => {
             if (activeDropdown !== "filters") {
                 if (filterDropActive) setFilterDropActive(false)
             }
-            if (window.scrollY === 0) setDropTop(-2)
+            if (functions.scrolledToTop()) setDropTop(-2)
             if (activeDropdown === "none") return
         }
         const scrollHandler = () => {
-            if (window.scrollY === 0) return setDropTop(-2)
+            if (functions.scrolledToTop()) return setDropTop(-2)
             let newDropTop = hideTitlebar ? -Number(document.querySelector(".titlebar")?.clientHeight) - 2 : 0
             if (mobile) newDropTop = 32
             if (dropTop === newDropTop) return
             setDropTop(newDropTop - 2)
         }
-        window.addEventListener("click", clickHandler)
+        window.addEventListener("mousedown", clickHandler)
         window.addEventListener("scroll", scrollHandler)
         return () => {
-            window.removeEventListener("click", clickHandler)
+            window.removeEventListener("mousedown", clickHandler)
             window.removeEventListener("scroll", scrollHandler)
         }
     })
@@ -193,6 +193,7 @@ const SortBar: React.FunctionComponent = (props) => {
     useEffect(() => {
         setActiveDropdown("none")
         if (hideTitlebar) {
+            if (functions.scrolledToTop()) return setDropTop(-2)
             setDropTop(-Number(document.querySelector(".titlebar")?.clientHeight) - 4)
         } else {
             setDropTop(-2)
@@ -329,8 +330,8 @@ const SortBar: React.FunctionComponent = (props) => {
         } else if (restrictType === "explicit") {
             return (
                 <div className="sortbar-item" ref={restrictRef} onClick={() => {setActiveDropdown(activeDropdown === "restrict" ? "none" : "restrict"); setFilterDropActive(false)}}>
-                    <img className="sortbar-img" src={explicit} style={{filter: getFilter()}}/>
-                    <span className="sortbar-text">Explicit</span>
+                    <img className="sortbar-img" src={explicit}/>
+                    <span style={{color: "var(--r18Color)"}} className="sortbar-text">Explicit</span>
                 </div>
             )
         } else {
@@ -349,7 +350,7 @@ const SortBar: React.FunctionComponent = (props) => {
         } else if (restrictType === "questionable") {
             return <img style={{height: "30px", filter: getFilter()}} className="sortbar-img" src={questionable} onClick={() => {setActiveDropdown(activeDropdown === "restrict" ? "none" : "restrict"); setFilterDropActive(false)}}/>
         } else if (restrictType === "explicit") {
-            return <img style={{height: "30px", filter: getFilter()}} className="sortbar-img" src={explicit} onClick={() => {setActiveDropdown(activeDropdown === "restrict" ? "none" : "restrict"); setFilterDropActive(false)}}/>
+            return <img style={{height: "30px"}} className="sortbar-img" src={explicit} onClick={() => {setActiveDropdown(activeDropdown === "restrict" ? "none" : "restrict"); setFilterDropActive(false)}}/>
         } else {
             return <img style={{height: "30px", filter: getFilter()}} className="sortbar-img rotate" src={all} onClick={() => {setActiveDropdown(activeDropdown === "restrict" ? "none" : "restrict"); setFilterDropActive(false)}}/>
         }
@@ -845,10 +846,10 @@ const SortBar: React.FunctionComponent = (props) => {
                     <img className="sortbar-dropdown-img" src={questionable} style={{filter: getFilter()}}/>
                     <span className="sortbar-dropdown-text">Questionable</span>
                 </div> : null}
-                {permissions.isElevated(session) ?
+                {session.showR18 ?
                 <div className="sortbar-dropdown-row" onClick={() => setRestrictType("explicit")}>
-                    <img className="sortbar-dropdown-img" src={explicit} style={{filter: getFilter()}}/>
-                    <span className="sortbar-dropdown-text">Explicit</span>
+                    <img className="sortbar-dropdown-img" src={explicit}/>
+                    <span style={{color: "var(--r18Color)"}} className="sortbar-dropdown-text">Explicit</span>
                 </div> : null}
             </div>
             <div className={`dropdown ${activeDropdown === "style" ? "" : "hide-dropdown"}`} 

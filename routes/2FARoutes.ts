@@ -116,6 +116,8 @@ const $2FARoutes = (app: Express) => {
                 req.session.autosearchInterval = user.autosearchInterval
                 req.session.upscaledImages = user.upscaledImages
                 req.session.savedSearches = user.savedSearches
+                req.session.showR18 = user.showR18
+                req.session.premiumExpiration = user.premiumExpiration
                 req.session.accessToken = serverFunctions.generateAccessToken(req)
                 req.session.refreshToken = serverFunctions.generateRefreshToken(req)
                 res.status(200).send("Success")

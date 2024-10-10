@@ -3,7 +3,7 @@ import {ThemeContext, EnableDragContext, HideNavbarContext, HideSidebarContext, 
 ActiveDropdownContext, HeaderTextContext, SidebarTextContext, SessionContext, SessionFlagContext, SearchContext, SearchFlagContext, TakedownTagContext,
 DeleteTagFlagContext, DeleteTagIDContext, EditTagTypeContext, EditTagReasonContext, EditTagImageContext, EditTagKeyContext, EditTagSocialContext,
 EditTagTwitterContext, EditTagWebsiteContext, EditTagFandomContext, EditTagAliasesContext, EditTagImplicationsContext, 
-EditTagDescriptionContext, EditTagIDContext, EditTagFlagContext, EditTagPixivTagsContext} from "../Context"
+EditTagDescriptionContext, EditTagIDContext, EditTagFlagContext, EditTagPixivTagsContext, RestrictTypeContext} from "../Context"
 import {useHistory} from "react-router-dom"
 import TitleBar from "../components/TitleBar"
 import NavBar from "../components/NavBar"
@@ -66,6 +66,7 @@ const TagPage: React.FunctionComponent<Props> = (props) => {
     const {editTagPixivTags, setEditTagPixivTags} = useContext(EditTagPixivTagsContext)
     const {editTagImage, setEditTagImage} = useContext(EditTagImageContext)
     const {editTagKey, setEditTagKey} = useContext(EditTagKeyContext)
+    const {restrictType, setRestrictType} = useContext(RestrictTypeContext)
     const [tag, setTag] = useState(null) as any
     const [posts, setPosts] = useState([]) as any
     const [postImages, setPostImages] = useState([]) as any
@@ -91,7 +92,7 @@ const TagPage: React.FunctionComponent<Props> = (props) => {
 
     const updatePosts = async () => {
         let uploads = await functions.get("/api/search/posts", {query: tagName, type: "all", restrict: "all", style: "all", sort: "date"}, session, setSessionFlag)
-        const filtered = uploads.filter((u: any) => u.post?.restrict !== "explicit")
+        const filtered = uploads.filter((u: any) => restrictType === "explicit" ? u.post?.restrict === "explicit" : u.post?.restrict !== "explicit")
         const images = filtered.map((p: any) => functions.getThumbnailLink(p.images[0].type, p.postID, p.images[0].order, p.images[0].filename, "large"))
         setPosts(filtered)
         setPostImages(images)
@@ -102,7 +103,7 @@ const TagPage: React.FunctionComponent<Props> = (props) => {
         let offset = posts.length
         const result = await functions.get("/api/search/posts", {query: tag.tag, type: "all", restrict: "all", style: "all", sort: "date", offset}, session, setSessionFlag)
         uploads.push(...result)
-        const filtered = uploads.filter((u: any) => u.post?.restrict !== "explicit")
+        const filtered = uploads.filter((u: any) => restrictType === "explicit" ? u.post?.restrict === "explicit" : u.post?.restrict !== "explicit")
         const images = filtered.map((p: any) => functions.getThumbnailLink(p.images[0].type, p.postID, p.images[0].order, p.images[0].filename, "large"))
         setPosts(filtered)
         setAppendImages(images)

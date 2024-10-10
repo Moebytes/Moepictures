@@ -22,7 +22,7 @@ import PageDialog from "../dialogs/PageDialog"
 import CaptchaDialog from "../dialogs/CaptchaDialog"
 import {ThemeContext, EnableDragContext, HideNavbarContext, HideSidebarContext, RelativeContext, HideTitlebarContext, MobileContext, ScrollContext,
 ActiveDropdownContext, HeaderTextContext, SidebarTextContext, SessionContext, SiteHueContext, SiteLightnessContext, SiteSaturationContext, TagsPageContext,
-ShowPageDialogContext, PageFlagContext, SessionFlagContext} from "../Context"
+ShowPageDialogContext, PageFlagContext, SessionFlagContext, RestrictTypeContext} from "../Context"
 import "./styles/itemspage.less"
 
 let limit = 200
@@ -45,6 +45,7 @@ const TagsPage: React.FunctionComponent = (props) => {
     const {pageFlag, setPageFlag} = useContext(PageFlagContext)
     const {session, setSession} = useContext(SessionContext)
     const {sessionFlag, setSessionFlag} = useContext(SessionFlagContext)
+    const {restrictType, setRestrictType} = useContext(RestrictTypeContext)
     const {mobile, setMobile} = useContext(MobileContext)
     const {scroll, setScroll} = useContext(ScrollContext)
     const [sortType, setSortType] = useState("posts")
@@ -387,8 +388,8 @@ const TagsPage: React.FunctionComponent = (props) => {
         }
         for (let i = 0; i < visible.length; i++) {
             if (visible[i].fake) continue
-            // if (!session.username) if (functions.arrayIncludes(tags[i].tag, matureTags, true)) continue
-            if (!permissions.isElevated(session)) if (functions.arrayIncludes(visible[i].tag, matureTags, true)) continue
+            if (!session.username) if (functions.arrayIncludes(visible[i].tag, matureTags, true)) continue
+            if (restrictType !== "explicit") if (functions.arrayIncludes(visible[i].tag, matureTags, true)) continue
             jsx.push(<TagRow key={visible[i].tag} tag={visible[i]} onDelete={updateTags} onEdit={updateTags}/>)
         }
         if (!scroll) {

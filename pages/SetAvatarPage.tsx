@@ -76,7 +76,7 @@ const SetAvatarPage: React.FunctionComponent<Props> = (props) => {
             setSidebarText("Login required.")
         }
         if (post.restrict === "explicit") {
-            if (!permissions.isElevated(session)) {
+            if (!session.showR18) {
                 history.push("/403")
             }
         }

@@ -36,6 +36,8 @@ const PostRoutes = (app: Express) => {
             if (!result) return res.status(404).send("Not found")
             if (req.session.role !== "admin" && req.session.role !== "mod") {
                 if (result.hidden) return res.status(403).end()
+            }
+            if (!req.session.showR18) {
                 if (result.restrict === "explicit") return res.status(403).end()
             }
             if (result?.images.length > 1) {
@@ -57,6 +59,8 @@ const PostRoutes = (app: Express) => {
             if (!result) return res.status(400).send("Invalid postID")
             if (req.session.role !== "admin" && req.session.role !== "mod") {
                 if (result.hidden) return res.status(403).end()
+            }
+            if (!req.session.showR18) {
                 if (result.restrict === "explicit") return res.status(403).end()
             }
             if (req.session.captchaNeeded) delete result.tags
@@ -74,6 +78,8 @@ const PostRoutes = (app: Express) => {
             const result = await sql.comment.comments(Number(postID))
             if (req.session.role !== "admin" && req.session.role !== "mod") {
                 if (result.hidden) return res.status(403).end()
+            }
+            if (!req.session.showR18) {
                 if (result.restrict === "explicit") return res.status(403).end()
             }
             res.status(200).json(result)
@@ -91,14 +97,15 @@ const PostRoutes = (app: Express) => {
             if (req.session.role !== "admin") return res.status(403).end()
             const post = await sql.post.post(Number(postID)).catch(() => null)
             if (!post) return res.status(200).send("Doesn't exist")
+            let r18 = post.restrict === "explicit"
             await sql.post.deletePost(Number(postID))
             for (let i = 0; i < post.images.length; i++) {
                 const file = functions.getImagePath(post.images[i].type, post.postID, post.images[i].order, post.images[i].filename)
                 const upscaledFile = functions.getUpscaledImagePath(post.images[i].type, post.postID, post.images[i].order, post.images[i].filename)
-                await serverFunctions.deleteFile(file)
-                await serverFunctions.deleteFile(upscaledFile)
+                await serverFunctions.deleteFile(file, r18)
+                await serverFunctions.deleteFile(upscaledFile, r18)
             }
-            await serverFunctions.deleteFolder(`history/post/${postID}`).catch(() => null)
+            await serverFunctions.deleteFolder(`history/post/${postID}`, r18).catch(() => null)
             res.status(200).send("Success")
         } catch (e) {
             console.log(e) 
@@ -133,6 +140,8 @@ const PostRoutes = (app: Express) => {
             let posts = await sql.post.thirdParty(Number(postID))
             if (req.session.role !== "admin" && req.session.role !== "mod") {
                 posts = posts.filter((p: any) => !p?.hidden)
+            }
+            if (!req.session.showR18) {
                 posts = posts.filter((p: any) => p?.restrict !== "explicit")
             }
             posts = functions.stripTags(posts)
@@ -151,6 +160,8 @@ const PostRoutes = (app: Express) => {
             if (!post) return res.status(200).json()
             if (req.session.role !== "admin" && req.session.role !== "mod") {
                 if (post.hidden) return res.status(403).end()
+            }
+            if (!req.session.showR18) {
                 if (post.restrict === "explicit") return res.status(403).end()
             }
             delete post.tags
@@ -320,6 +331,8 @@ const PostRoutes = (app: Express) => {
     
             const post = await sql.post.post(postID)
             if (!post) return res.status(400).send("Bad request")
+            let oldR18 = post.restrict === "explicit"
+            let newR18 = restrict === "explicit"
     
             const updatedDate = new Date().toISOString()
 
@@ -393,6 +406,9 @@ const PostRoutes = (app: Express) => {
                 await sql.tag.bulkInsertTags(bulkTagUpdate, req.session.username, true)
                 await sql.tag.insertTagMap(postID, tagMap)
             }
+
+            await serverFunctions.migratePost(post, oldR18, newR18)
+
             if (req.session.role === "admin" || req.session.role === "mod") {
                 if (silent) return res.status(200).send("Success")
             }
@@ -500,12 +516,13 @@ const PostRoutes = (app: Express) => {
             let hasUpscaled = false
             let originalCheck = [] as string[]
             let upscaledCheck = [] as string[]
+            let r18 = post.restrict === "explicit"
 
             for (let i = 0; i < post.images.length; i++) {
                 const imagePath = functions.getImagePath(post.images[i].type, originalPostID, post.images[i].order, post.images[i].filename)
-                const buffer = await serverFunctions.getFile(imagePath) as Buffer
+                const buffer = await serverFunctions.getFile(imagePath, false, r18) as Buffer
                 const upscaledImagePath = functions.getUpscaledImagePath(post.images[i].type, originalPostID, post.images[i].order, post.images[i].filename)
-                const upscaledBuffer = await serverFunctions.getFile(upscaledImagePath) as Buffer
+                const upscaledBuffer = await serverFunctions.getFile(upscaledImagePath, false, r18) as Buffer
 
                 let current = upscaledBuffer ? upscaledBuffer : buffer
                 let order = i + 1
@@ -603,7 +620,7 @@ const PostRoutes = (app: Express) => {
                     if (existingTag.description) bulkObj.description = existingTag.description
                     if (existingTag.image) {
                         const imagePath = functions.getTagPath("artist", existingTag.image)
-                        const buffer = await serverFunctions.getFile(imagePath)
+                        const buffer = await serverFunctions.getFile(imagePath, false, false)
                         await serverFunctions.uploadUnverifiedFile(imagePath, buffer)
                         bulkObj.image = existingTag.image
                     }
@@ -620,7 +637,7 @@ const PostRoutes = (app: Express) => {
                     if (existingTag.description) bulkObj.description = existingTag.description
                     if (existingTag.image) {
                         const imagePath = functions.getTagPath("character", existingTag.image)
-                        const buffer = await serverFunctions.getFile(imagePath)
+                        const buffer = await serverFunctions.getFile(imagePath, false, false)
                         await serverFunctions.uploadUnverifiedFile(imagePath, buffer)
                         bulkObj.image = existingTag.image
                     }
@@ -637,7 +654,7 @@ const PostRoutes = (app: Express) => {
                     if (existingTag.description) bulkObj.description = existingTag.description
                     if (existingTag.image) {
                         const imagePath = functions.getTagPath("series", existingTag.image)
-                        const buffer = await serverFunctions.getFile(imagePath)
+                        const buffer = await serverFunctions.getFile(imagePath, false, false)
                         await serverFunctions.uploadUnverifiedFile(imagePath, buffer)
                         bulkObj.image = existingTag.image
                     }
@@ -654,7 +671,7 @@ const PostRoutes = (app: Express) => {
                     if (existingTag.description) bulkObj.description = existingTag.description
                     if (existingTag.image) {
                         const imagePath = functions.getTagPath("tag", existingTag.image)
-                        const buffer = await serverFunctions.getFile(imagePath)
+                        const buffer = await serverFunctions.getFile(imagePath, false, false)
                         await serverFunctions.uploadUnverifiedFile(imagePath, buffer)
                         bulkObj.image = existingTag.image
                     }
@@ -711,17 +728,18 @@ const PostRoutes = (app: Express) => {
             if (postHistory[0]?.historyID === historyID) {
                 return res.status(400).send("Bad historyID")
             } else {
-                const currentHistory = postHistory.find((history) => history.historyID === historyID)
+                const currentHistory = postHistory.find((history: any) => history.historyID === historyID)
+                let r18 = currentHistory.restrict === "explicit"
                 for (let i = 0; i < currentHistory.images?.length; i++) {
                     const image = currentHistory.images[i]
                     if (image?.includes("history/")) {
-                        await serverFunctions.deleteFile(image)
-                        await serverFunctions.deleteFile(image.replace("original/", "upscaled/"))
+                        await serverFunctions.deleteFile(image, r18)
+                        await serverFunctions.deleteFile(image.replace("original/", "upscaled/"), r18)
                     }
                 }
                 if (currentHistory.images?.[0]) {
-                    await serverFunctions.deleteIfEmpty(path.dirname(currentHistory.images[0]))
-                    await serverFunctions.deleteIfEmpty(path.dirname(currentHistory.images[0].replace("original/", "upscaled/")))
+                    await serverFunctions.deleteIfEmpty(path.dirname(currentHistory.images[0]), r18)
+                    await serverFunctions.deleteIfEmpty(path.dirname(currentHistory.images[0].replace("original/", "upscaled/")), r18)
                 }
                 await sql.history.deletePostHistory(Number(historyID))
             }

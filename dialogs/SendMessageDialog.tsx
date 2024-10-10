@@ -7,7 +7,7 @@ import functions from "../structures/Functions"
 import "./styles/dialog.less"
 import Draggable from "react-draggable"
 
-const DMDialog: React.FunctionComponent = (props) => {
+const SendMessageDialog: React.FunctionComponent = (props) => {
     const {theme, setTheme} = useContext(ThemeContext)
     const {hideNavbar, setHideNavbar} = useContext(HideNavbarContext)
     const {hideTitlebar, setHideTitlebar} = useContext(HideTitlebarContext)
@@ -92,7 +92,7 @@ const DMDialog: React.FunctionComponent = (props) => {
                             <span className="dialog-text">Content: </span>
                         </div>
                         <div className="dialog-row">
-                            <textarea className="dialog-textarea" style={{height: "200px"}} spellCheck={false} value={content} onChange={(event) => setContent(event.target.value)}></textarea>
+                            <textarea className="dialog-textarea" style={{resize: "vertical", height: "200px"}} spellCheck={false} value={content} onChange={(event) => setContent(event.target.value)}></textarea>
                         </div>
                         {error ? <div className="dialog-validation-container"><span className="dialog-validation" ref={errorRef}></span></div> : null}
                         <div className="dialog-row">
@@ -108,4 +108,4 @@ const DMDialog: React.FunctionComponent = (props) => {
     return null
 }
 
-export default DMDialog
+export default SendMessageDialog
