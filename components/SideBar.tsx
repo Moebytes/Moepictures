@@ -4,7 +4,7 @@ import {ThemeContext, HideSidebarContext, HideNavbarContext, HideSortbarContext,
 RelativeContext, HideTitlebarContext, SidebarHoverContext, SearchContext, SearchFlagContext, PostsContext, ShowDeletePostDialogContext, AutoSearchContext,
 TagsContext, RandomFlagContext, ImageSearchFlagContext, SidebarTextContext, SessionContext, MobileScrollingContext, QuickEditIDContext, PremiumRequiredContext,
 TranslationModeContext, TranslationDrawingEnabledContext, SiteHueContext, SessionFlagContext, SiteLightnessContext, SiteSaturationContext, ShowTakedownPostDialogContext,
-SaveSearchDialogContext, DeleteAllSaveSearchDialogContext, EditSaveSearchNameContext, EditSaveSearchKeyContext, EditSaveSearchTagsContext} from "../Context"
+SaveSearchDialogContext, DeleteAllSaveSearchDialogContext, EditSaveSearchNameContext, EditSaveSearchKeyContext, EditSaveSearchTagsContext, OrderContext} from "../Context"
 import {HashLink as Link} from "react-router-hash-link"
 import permissions from "../structures/Permissions"
 import favicon from "../assets/icons/favicon.png"
@@ -29,6 +29,7 @@ import approveGreen from "../assets/icons/approve-green.png"
 import editOptIcon from "../assets/icons/edit-opt.png"
 import deleteOptIcon from "../assets/icons/tag-delete.png"
 import tagIcon from "../assets/icons/tag.png"
+import hashIcon from "../assets/icons/hash.png"
 import website from "../assets/icons/support.png"
 import fandom from "../assets/icons/fandom.png"
 import pixiv from "../assets/icons/pixiv.png"
@@ -115,6 +116,7 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
     const {editSaveSearchName, setEditSaveSearchName} = useContext(EditSaveSearchNameContext)
     const {editSaveSearchKey, setEditSaveSearchKey} = useContext(EditSaveSearchKeyContext)
     const {editSaveSearchTags, setEditSaveSearchTags} = useContext(EditSaveSearchTagsContext)
+    const {order, setOrder} = useContext(OrderContext)
     const history = useHistory()
 
     const getFilter = () => {
@@ -673,6 +675,23 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
         return <span className="tag-alt-link" onClick={() => username ? history.push(`/user/${username}`) : null}>{functions.toProperCase(username) || "deleted"}</span>
     }
 
+
+
+    const copyTags = (replaceDash?: boolean, noCommas?: boolean) => {
+        const artists = props.artists.map((a: any) => a.tag)
+        const characters = props.characters.map((c: any) => c.tag)
+        const series = props.series.map((s: any) => s.tag)
+        const tags = props.tags.map((t: any) => t.tag)
+        let combined = [...artists, ...characters, ...series, ...tags]
+        if (replaceDash) combined = combined.map((c: string) => c.replaceAll("-", " "))
+        navigator.clipboard.writeText(noCommas ? combined.join(" ") : combined.join(", "))
+    }
+
+    const copyHash = () => {
+        const hash = props.post.images[order-1]?.hash
+        navigator.clipboard.writeText(hash)
+    }
+
     const copyTagsJSX = () => {
         if (!session) return
         if (session.captchaNeeded) return null
@@ -721,16 +740,6 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
                 </div>
             )
         }
-    }
-
-    const copyTags = (replaceDash?: boolean, noCommas?: boolean) => {
-        const artists = props.artists.map((a: any) => a.tag)
-        const characters = props.characters.map((c: any) => c.tag)
-        const series = props.series.map((s: any) => s.tag)
-        const tags = props.tags.map((t: any) => t.tag)
-        let combined = [...artists, ...characters, ...series, ...tags]
-        if (replaceDash) combined = combined.map((c: string) => c.replaceAll("-", " "))
-        navigator.clipboard.writeText(noCommas ? combined.join(" ") : combined.join(", "))
     }
 
     useEffect(() => {
@@ -935,6 +944,12 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
                         <div className="sidebar-row">
                             <span className="tag">Cuteness:</span>
                             <span className="tag-alt">{props.post.cuteness || 500}</span>
+                        </div>
+                        <div className="sidebar-row">
+                            <span className="tag-hover" onClick={() => copyHash()} onAuxClick={() => copyHash()} onContextMenu={(event) => {event.preventDefault(); copyHash()}}>
+                                <img className="sidebar-icon" src={hashIcon} style={{filter: getFilter()}}/>
+                                <span className="tag">Copy Hash</span>
+                            </span>
                         </div>
                     </div>
                 : null}  

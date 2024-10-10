@@ -195,6 +195,9 @@ for (let i = 0; i < folders.length; i++) {
           if (!req.session.showR18) return res.status(403).end()
           r18 = true
         }
+        if (post.hidden) {
+          if (req.session.role !== "admin" && req.session.role !== "mod") return res.status(403).end()
+        }
       }
       let body = await serverFunctions.getFile(key, upscaled, r18)
       let contentLength = body.length
@@ -275,6 +278,9 @@ for (let i = 0; i < folders.length; i++) {
         if (post.restrict === "explicit") {
           if (!req.session.showR18) return res.status(403).end()
           r18 = true
+        }
+        if (post.hidden) {
+          if (req.session.role !== "admin" && req.session.role !== "mod") return res.status(403).end()
         }
       }
       let body = await serverFunctions.getFile(key, false, r18)

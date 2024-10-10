@@ -2276,6 +2276,7 @@ export default class Functions {
 
     public static borderColor = (post: any) => {
         if (post.favorited) return "var(--favoriteBorder)"
+        if (post.hidden) return "var(--takendownBorder)"
         if (Number(post.imageCount) > 1) return "var(--variationBorder)"
         if (post.thirdParty) return "var(--thirdPartyBorder)"
         return "var(--imageBorder)"

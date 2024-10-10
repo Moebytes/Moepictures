@@ -29,7 +29,8 @@ import ArtistWorks from "../components/ArtistWorks"
 import Related from "../components/Related"
 import MobileInfo from "../components/MobileInfo"
 import {HideNavbarContext, HideSidebarContext, RelativeContext, DownloadFlagContext, DownloadIDsContext, HideTitlebarContext, MobileContext, ReloadPostFlagContext,
-PostsContext, TagsContext, HeaderTextContext, PostFlagContext, RedirectContext, SidebarTextContext, SessionContext, SessionFlagContext, EnableDragContext, TranslationModeContext} from "../Context"
+PostsContext, TagsContext, HeaderTextContext, PostFlagContext, RedirectContext, SidebarTextContext, SessionContext, SessionFlagContext, EnableDragContext, TranslationModeContext,
+OrderContext} from "../Context"
 import permissions from "../structures/Permissions"
 import "./styles/postpage.less"
 
@@ -68,7 +69,7 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
     const [post, setPost] = useState(null) as any
     const [loaded, setLoaded] = useState(false)
     const [tagCategories, setTagCategories] = useState(null) as any
-    const [order, setOrder] = useState(1)
+    const {order, setOrder} = useContext(OrderContext)
     const history = useHistory()
     const postID = props?.match.params.id
 

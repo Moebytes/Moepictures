@@ -6,6 +6,7 @@ import functions from "../structures/Functions"
 import Carousel from "./Carousel"
 import website from "../assets/icons/support.png"
 import twitter from "../assets/icons/twitter.png"
+import permissions from "../structures/Permissions"
 import "./styles/seriesrow.less"
 
 interface Props {
@@ -35,7 +36,8 @@ const SeriesRow: React.FunctionComponent<Props> = (props) => {
 
     const set = (image: string, index: number, newTab: boolean) => {
         if (!session.username) {
-            const filtered = props.series.posts.filter((p: any) => p.restrict === "safe")
+            let filtered = props.series.posts.filter((p: any) => p.restrict === "safe")
+            if (!permissions.isElevated(session)) filtered = filtered.filter((p: any) => !p.hidden)
             const post = filtered[index] 
             if (newTab) {
                 return window.open(`/post/${post.postID}`, "_blank")
@@ -43,7 +45,8 @@ const SeriesRow: React.FunctionComponent<Props> = (props) => {
                 return history.push(`/post/${post.postID}`)
             }
         }
-        const filtered = props.series.posts.filter((p: any) => restrictType === "explicit" ? p.restrict === "explicit" : p.restrict !== "explicit")
+        let filtered = props.series.posts.filter((p: any) => restrictType === "explicit" ? p.restrict === "explicit" : p.restrict !== "explicit")
+        if (!permissions.isElevated(session)) filtered = filtered.filter((p: any) => !p.hidden)
         const post = filtered[index] 
         if (newTab) {
             window.open(`/post/${post.postID}`, "_blank")
@@ -54,10 +57,12 @@ const SeriesRow: React.FunctionComponent<Props> = (props) => {
 
     const getImages = () => {
         if (!session.username) {
-            const filtered = props.series.posts.filter((p: any) => p.restrict === "safe")
+            let filtered = props.series.posts.filter((p: any) => p.restrict === "safe")
+            if (!permissions.isElevated(session)) filtered = filtered.filter((p: any) => !p.hidden)
             return filtered.map((p: any) => functions.getThumbnailLink(p.images[0].type, p.postID, p.images[0].order, p.images[0].filename, "tiny"))
         }
-        const filtered = props.series.posts.filter((p: any) => restrictType === "explicit" ? p.restrict === "explicit" : p.restrict !== "explicit")
+        let filtered = props.series.posts.filter((p: any) => restrictType === "explicit" ? p.restrict === "explicit" : p.restrict !== "explicit")
+        if (!permissions.isElevated(session)) filtered = filtered.filter((p: any) => !p.hidden)
         return filtered.map((p: any) => functions.getThumbnailLink(p.images[0].type, p.postID, p.images[0].order, p.images[0].filename, "tiny"))
     }
 

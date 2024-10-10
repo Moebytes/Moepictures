@@ -9,6 +9,7 @@ import pixiv from "../assets/icons/pixiv.png"
 import soundcloud from "../assets/icons/soundcloud.png"
 import sketchfab from "../assets/icons/sketchfab.png"
 import twitter from "../assets/icons/twitter.png"
+import permissions from "../structures/Permissions"
 import "./styles/artistrow.less"
 
 interface Props {
@@ -46,7 +47,8 @@ const ArtistRow: React.FunctionComponent<Props> = (props) => {
                 return history.push(`/post/${post.postID}`)
             }
         }
-        const filtered = props.artist.posts.filter((p: any) => restrictType === "explicit" ? p.restrict === "explicit" : p.restrict !== "explicit")
+        let filtered = props.artist.posts.filter((p: any) => restrictType === "explicit" ? p.restrict === "explicit" : p.restrict !== "explicit")
+        if (!permissions.isElevated(session)) filtered = filtered.filter((p: any) => !p.hidden)
         const post = filtered[index] 
         if (newTab) {
             window.open(`/post/${post.postID}`, "_blank")
@@ -57,10 +59,12 @@ const ArtistRow: React.FunctionComponent<Props> = (props) => {
 
     const getImages = () => {
         if (!session.username) {
-            const filtered = props.artist.posts.filter((p: any) => p.restrict === "safe")
+            let filtered = props.artist.posts.filter((p: any) => p.restrict === "safe")
+            if (!permissions.isElevated(session)) filtered = filtered.filter((p: any) => !p.hidden)
             return filtered.map((p: any) => functions.getThumbnailLink(p.images[0].type, p.postID, p.images[0].order, p.images[0].filename, "tiny"))
         }
-        const filtered = props.artist.posts.filter((p: any) => restrictType === "explicit" ? p.restrict === "explicit" : p.restrict !== "explicit")
+        let filtered = props.artist.posts.filter((p: any) => restrictType === "explicit" ? p.restrict === "explicit" : p.restrict !== "explicit")
+        if (!permissions.isElevated(session)) filtered = filtered.filter((p: any) => !p.hidden)
         return filtered.map((p: any) => functions.getThumbnailLink(p.images[0].type, p.postID, p.images[0].order, p.images[0].filename, "tiny"))
     }
 

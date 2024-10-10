@@ -156,18 +156,18 @@ const ToolTip: React.FunctionComponent = (props) => {
             <div className="tooltip-row">
                 <div className="tooltip-artist-container">
                     <img className="tooltip-img" src={functions.getTagLink(artist.type, artist.image)}/>
-                    <span className="tooltip-artist-tag" style={{marginRight: "5px"}} onClick={openArtist}>{artist.tag}</span>
+                    <span className={`tooltip-artist-tag ${tooltipPost?.hidden ? "strikethrough" : ""}`} style={{marginRight: "5px"}} onClick={openArtist}>{artist.tag}</span>
                     <img className="tooltip-img-small" src={tagIcon} onClick={() => copyTags()} onAuxClick={() => copyTags(false, true)} onContextMenu={(event) => {event.preventDefault(); copyTags(true)}}/>
                 </div>
                 <div className="tooltip-artist-container">
-                    <span className="tooltip-artist-tag" onClick={download}>{getImageDimensions()}</span>
+                    <span className={`tooltip-artist-tag ${tooltipPost?.hidden ? "strikethrough" : ""}`} onClick={download}>{getImageDimensions()}</span>
                     {getPostLinkJSX()}
                 </div>
             </div>
             <div className="tooltip-column" ref={scrollRef} style={{overflowY: "auto"}}>
                 <div className="tooltip-tag-container">
-                    <span className="tooltip-artist-tag">{tooltipPost.translatedTitle}</span>
-                    <span className="tooltip-artist-tag">{functions.formatDate(new Date(tooltipPost.drawn))}</span>
+                    <span className={`tooltip-artist-tag ${tooltipPost?.hidden ? "strikethrough" : ""}`}>{tooltipPost.translatedTitle}</span>
+                    <span className={`tooltip-artist-tag ${tooltipPost?.hidden ? "strikethrough" : ""}`}>{functions.formatDate(new Date(tooltipPost.drawn))}</span>
                 </div>
                 <div className="tooltip-tag-container">
                     {getTagsJSX()}

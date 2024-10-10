@@ -92,7 +92,8 @@ const TagPage: React.FunctionComponent<Props> = (props) => {
 
     const updatePosts = async () => {
         let uploads = await functions.get("/api/search/posts", {query: tagName, type: "all", restrict: "all", style: "all", sort: "date"}, session, setSessionFlag)
-        const filtered = uploads.filter((u: any) => restrictType === "explicit" ? u.post?.restrict === "explicit" : u.post?.restrict !== "explicit")
+        let filtered = uploads.filter((u: any) => restrictType === "explicit" ? u.post?.restrict === "explicit" : u.post?.restrict !== "explicit")
+        if (!permissions.isElevated(session)) filtered = filtered.filter((u: any) => !u.hidden)
         const images = filtered.map((p: any) => functions.getThumbnailLink(p.images[0].type, p.postID, p.images[0].order, p.images[0].filename, "large"))
         setPosts(filtered)
         setPostImages(images)
@@ -103,7 +104,8 @@ const TagPage: React.FunctionComponent<Props> = (props) => {
         let offset = posts.length
         const result = await functions.get("/api/search/posts", {query: tag.tag, type: "all", restrict: "all", style: "all", sort: "date", offset}, session, setSessionFlag)
         uploads.push(...result)
-        const filtered = uploads.filter((u: any) => restrictType === "explicit" ? u.post?.restrict === "explicit" : u.post?.restrict !== "explicit")
+        let filtered = uploads.filter((u: any) => restrictType === "explicit" ? u.post?.restrict === "explicit" : u.post?.restrict !== "explicit")
+        if (!permissions.isElevated(session)) filtered = filtered.filter((u: any) => !u.hidden)
         const images = filtered.map((p: any) => functions.getThumbnailLink(p.images[0].type, p.postID, p.images[0].order, p.images[0].filename, "large"))
         setPosts(filtered)
         setAppendImages(images)

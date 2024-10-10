@@ -3,7 +3,7 @@ import {useHistory} from "react-router-dom"
 import {ThemeContext, HideNavbarContext, HideSortbarContext, EnableDragContext, MobileContext, UnverifiedPostsContext,
 RelativeContext, HideTitlebarContext, SearchContext, SearchFlagContext, PostsContext, ShowDeletePostDialogContext,
 TagsContext, RandomFlagContext, ImageSearchFlagContext, SessionContext, SessionFlagContext, QuickEditIDContext, ShowTakedownPostDialogContext,
-SiteHueContext, SiteLightnessContext, SiteSaturationContext, TranslationModeContext, TranslationDrawingEnabledContext} from "../Context"
+SiteHueContext, SiteLightnessContext, SiteSaturationContext, TranslationModeContext, TranslationDrawingEnabledContext, OrderContext} from "../Context"
 import {HashLink as Link} from "react-router-hash-link"
 import permissions from "../structures/Permissions"
 import favicon from "../assets/icons/favicon.png"
@@ -21,6 +21,7 @@ import approveGreen from "../assets/icons/approve-green.png"
 import adminCrown from "../assets/icons/admin-crown.png"
 import modCrown from "../assets/icons/mod-crown.png"
 import tagIcon from "../assets/icons/tag.png"
+import hashIcon from "../assets/icons/hash.png"
 import website from "../assets/icons/support.png"
 import pixiv from "../assets/icons/pixiv.png"
 import twitter from "../assets/icons/twitter.png"
@@ -79,6 +80,7 @@ const MobileInfo: React.FunctionComponent<Props> = (props) => {
     const {quickEditID, setQuickEditID} = useContext(QuickEditIDContext)
     const {translationMode, setTranslationMode} = useContext(TranslationModeContext)
     const {translationDrawingEnabled, setTranslationDrawingEnabled} = useContext(TranslationDrawingEnabledContext)
+    const {order, setOrder} = useContext(OrderContext)
     const history = useHistory()
 
     const getFilter = () => {
@@ -249,6 +251,11 @@ const MobileInfo: React.FunctionComponent<Props> = (props) => {
             )
         }
         return jsx
+    }
+
+    const copyHash = () => {
+        const hash = props.post.images[order-1]?.hash
+        navigator.clipboard.writeText(hash)
     }
 
     const getDomain = () => {
@@ -566,7 +573,15 @@ const MobileInfo: React.FunctionComponent<Props> = (props) => {
                                 <span className="tag-alt">{props.post.cuteness || 500}</span>
                             </div>
                         </div>
-                    </div> </>
+                        <div className="mobileinfo-sub-row">
+                            <div className="mobileinfo-row">
+                                <span className="tag-hover" onClick={() => copyHash()} onAuxClick={() => copyHash()} onContextMenu={(event) => {event.preventDefault(); copyHash()}}>
+                                    <img className="mobileinfo-icon" src={hashIcon} style={{filter: getFilter()}}/>
+                                    <span className="tag">Copy Hash</span>
+                                </span>
+                            </div>
+                        </div>
+                    </div></>
                 : null}
 
                 {props.post && session.username ? 

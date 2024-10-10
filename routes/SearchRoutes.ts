@@ -43,7 +43,7 @@ const SearchRoutes = (app: Express) => {
                     if (alias) tags[i] = alias.tag
                 }
             }
-            let result = null as any
+            let result = [] as any
             if (tags.length > 3 || sort === "bookmarks" || sort === "reverse bookmarks") {
                 if (!permissions.isPremium(req.session)) return res.status(402).send("Premium only")
             }
@@ -54,6 +54,13 @@ const SearchRoutes = (app: Express) => {
             if (query.startsWith("pixiv:")) {
                 const pixivID = Number(query.match(/(?<=pixiv:)(\d+)/g)?.[0])
                 result = await sql.search.searchPixivID(pixivID, withTags)
+            } else if (query.startsWith("hash:")) {
+                const sqlQuery = {
+                    text: `SELECT * FROM "images" WHERE "images".hash = $1`,
+                    values: [query.replace("hash:", "").trim()]
+                }
+                let images = await sql.run(sqlQuery)
+                if (images.length) result = await sql.search.posts(images.map((i: any) => i.postID))
             } else {
                 result = await sql.search.search(tags, type, restrict, style, sort, offset, limit, withTags, req.session.username)
             }

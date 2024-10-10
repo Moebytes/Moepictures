@@ -54,6 +54,7 @@ const UnverifiedPostPage: React.FunctionComponent<Props> = (props) => {
     const [image, setImage] = useState("") as any
     const [post, setPost] = useState(null) as any
     const [tagCategories, setTagCategories] = useState(null) as any
+    const [order, setOrder] = useState(1)
     const history = useHistory()
     const postID = props?.match.params.id
 
@@ -126,7 +127,12 @@ const UnverifiedPostPage: React.FunctionComponent<Props> = (props) => {
             if (post) {
                 const images = post.images.map((i: any) => functions.getUnverifiedImageLink(i.type, post.postID, i.order, i.filename))
                 setImages(images)
-                setImage(images[0])
+                if (images[order-1]) {
+                    setImage(images[order-1])
+                } else {
+                    setImage(images[0])
+                    setOrder(1)
+                }
                 const tags = await functions.parseTagsUnverified([post])
                 const categories = await functions.tagCategories(tags, session, setSessionFlag)
                 setTagCategories(categories)
@@ -137,7 +143,7 @@ const UnverifiedPostPage: React.FunctionComponent<Props> = (props) => {
             }
         }
         updatePost()
-    }, [postID, unverifiedPosts, session])
+    }, [postID, unverifiedPosts, order, session])
 
     useEffect(() => {
         const updatePost = async () => {
@@ -146,7 +152,12 @@ const UnverifiedPostPage: React.FunctionComponent<Props> = (props) => {
             if (post) {
                 const images = post.images.map((i: any) => functions.getUnverifiedImageLink(i.type, post.postID, i.order, i.filename))
                 setImages(images)
-                setImage(images[0])
+                if (images[order-1]) {
+                    setImage(images[order-1])
+                } else {
+                    setImage(images[0])
+                    setOrder(1)
+                }
                 const tags = await functions.parseTagsUnverified([post])
                 const categories = await functions.tagCategories(tags, session, setSessionFlag)
                 setTagCategories(categories)
@@ -157,7 +168,7 @@ const UnverifiedPostPage: React.FunctionComponent<Props> = (props) => {
             }
         }
         if (postFlag) updatePost()
-    }, [postFlag, session])
+    }, [postFlag, order, session])
 
     const download = () => {
         setDownloadIDs([postID])
@@ -186,8 +197,9 @@ const UnverifiedPostPage: React.FunctionComponent<Props> = (props) => {
         }
     }
 
-    const set = (image: string) => {
+    const set = (image: string, index: number) => {
         setImage(image)
+        setOrder(index + 1)
     }
 
     const getPostJSX = () => {
@@ -195,14 +207,14 @@ const UnverifiedPostPage: React.FunctionComponent<Props> = (props) => {
         if (post.type === "model") {
             return (
                 <>
-                <PostModel unverified={true} post={post} model={image}/>
+                <PostModel unverified={true} post={post} model={image} order={order}/>
                 <PostImageOptions post={post} noFavorite={true} model={image} download={download} next={next} previous={previous}/>
                 </>
             )
         } else if (post.type === "audio") {
             return (
                 <>
-                <PostSong unverified={true} post={post} audio={image}/>
+                <PostSong unverified={true} post={post} audio={image} order={order}/>
                 <PostImageOptions noFavorite={true} audio={image} post={post} download={download} next={next} previous={previous}/>
                 </>
             )
@@ -213,7 +225,7 @@ const UnverifiedPostPage: React.FunctionComponent<Props> = (props) => {
             }
             return (
                 <>
-                <PostImage unverified={true} post={post} img={img} comicPages={post.type === "comic" ? images : null}/>
+                <PostImage unverified={true} post={post} img={img} comicPages={post.type === "comic" ? images : null} order={order}/>
                 <PostImageOptions post={post} noFavorite={true} img={img} comicPages={post.type === "comic" ? images : null} download={download} next={next} previous={previous}/>
                 </>
             )
@@ -235,7 +247,7 @@ const UnverifiedPostPage: React.FunctionComponent<Props> = (props) => {
                 <div className="post-container">
                     {images.length > 1 ?
                     <div className="carousel-container">
-                        <Carousel images={images} set={set}/>
+                        <Carousel images={images} set={set} index={order-1}/>
                     </div> : null}
                     {post ? getPostJSX() : null}
                     {mobile && post && tagCategories ? <MobileInfo post={post} artists={tagCategories.artists} characters={tagCategories.characters} series={tagCategories.series} tags={tagCategories.tags}/> : null}

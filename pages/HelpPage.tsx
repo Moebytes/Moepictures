@@ -118,7 +118,8 @@ const HelpPage: React.FunctionComponent = (props) => {
                     <span className="help-alt">+Tag 1 +Tag 2</span> - Include posts containing either Tag 1 or Tag 2. <br/><br/>
 
                     Special searches: <br/>
-                    <span className="help-alt">pixiv:id</span> - Search for post matching the pixiv id (if it exists). <br/><br/>
+                    <span className="help-alt">pixiv:id</span> - Search for post matching the pixiv id (if it exists). <br/>
+                    <span className="help-alt">hash:hash</span> - Search for post matching the post hash. <br/><br/>
 
                     These are some tags with special uses: <br/>
                     <span className="help-alt">original</span> - the drawing is original, ie. not fanart. <br/>
@@ -263,7 +264,7 @@ const HelpPage: React.FunctionComponent = (props) => {
                     ⇾ For images, adding an upscaled post is required. <br/>
                     ⇾ Compress / re-encode files (maintaining high quality) to be storage efficient. <br/>
                     ⇾ All tags should be romanized. Titles and commentary don't have to be romanized. <br/>
-                    ⇾ No hentai. We allow questionable posts with light nudity and suggestiveness. <br/>
+                    ⇾ No hentai. We only allow questionable posts with light nudity and suggestiveness. <br/>
                     ⇾ No AI-generated works. We only want art made by humans and their passion. <br/>
                     ⇾ No paid rewards. You can mention when one is available, please support artists for their hard work.
                     </span>
