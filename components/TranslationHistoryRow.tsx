@@ -123,10 +123,11 @@ const TranslationHistoryRow: React.FunctionComponent<Props> = (props) => {
     }
 
     const imgClick = (event: React.MouseEvent) => {
+        let historyIndex = props.current ? "" : `?order=${props.translationHistory.order}&translation=${props.translationHistory.historyID}`
         if (event.ctrlKey || event.metaKey || event.button === 1) {
-            window.open(`/post/${props.translationHistory.postID}`, "_blank")
+            window.open(`/post/${props.translationHistory.postID}${historyIndex}`, "_blank")
         } else {
-            history.push(`/post/${props.translationHistory.postID}`)
+            history.push(`/post/${props.translationHistory.postID}${historyIndex}`)
         }
     }
 

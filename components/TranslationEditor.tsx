@@ -32,6 +32,7 @@ interface Props {
     img: string
     order?: number
     unverified?: boolean
+    translationID?: string
 }
 
 let isAnimatedWebP = false
@@ -131,7 +132,12 @@ const TranslationEditor: React.FunctionComponent<Props> = (props) => {
 
     const updateTranslations = async () => {
         if (!props.post || props.unverified) return
-        const translations = await functions.get("/api/translations", {postID: props.post.postID}, session, setSessionFlag)
+        let translations = [] as any
+        if (props.translationID) {
+            translations = await functions.get("/api/translation/history", {postID: props.post.postID, historyID: props.translationID}, session, setSessionFlag)
+        } else {
+            translations = await functions.get("/api/translations", {postID: props.post.postID}, session, setSessionFlag)
+        }
         if (translations?.length) {
             const translation = translations.find((t: any) => t.order === (props.order || 1))
             if (translation?.data?.length) {
@@ -148,7 +154,7 @@ const TranslationEditor: React.FunctionComponent<Props> = (props) => {
 
     useEffect(() => {
         updateTranslations()
-    }, [props.img, props.order, session])
+    }, [props.img, props.order, props.translationID, session])
 
     useEffect(() => {
         const keyDownListener = (event: KeyboardEvent) => {
@@ -366,7 +372,9 @@ const TranslationEditor: React.FunctionComponent<Props> = (props) => {
                         })
                     }} DrawPreviewComponent={RectShape}/>
                     {items.map((item: any, index: number) => {
-                        const {id, height, width, x, y, imageWidth, imageHeight} = item
+                        let {id, height, width, x, y, imageWidth, imageHeight} = item
+                        if (!imageWidth) imageWidth = targetWidth
+                        if (!imageHeight) imageHeight = targetHeight
 
                         const newWidth = (width / imageWidth) * targetWidth
                         const newHeight = (height / imageHeight ) * targetHeight

@@ -253,22 +253,24 @@ const HelpPage: React.FunctionComponent = (props) => {
                     <span className="help-alt">
                     ⇾ Must be drawn in the anime art style. No photographs/art drawn in other styles. <br/>
                     ⇾ The main subject should be a girl. Boys are only allowed in minor roles. 
-                    Art with any other subjects (animals, food, backgrounds, etc). is not allowed. <br/>
-                    ⇾ (Music only) The song should include elements that make it sound kawaii. <br/>
-                    ⇾ *It should be moe/cute!* This is the primary focus of the site. <br/>
+                    Art with other subjects (animals, food, backgrounds, etc). is not allowed. <br/>
+                    ⇾ It should be moe/cute! This is the primary focus of the site. <br/>
                     ⇾ No duplicates are allowed. Variations of the same image should be added to the original post. <br/>
                     ⇾ Sketches and unfinished art may be allowed only if they are good. <br/>
                     ⇾ Color palette should be pleasant to look at, ie. there are no oversaturated colors that clash too much. <br/>
                     ⇾ The drawing should be clean overall and shouldn't look messy or have obvious mistakes. <br/>
                     ⇾ The perspective, proportions, and anatomy shouldn't look weird. <br/>
-                    ⇾ Animations shouldn't look stuttery. <br/>
-                    ⇾ Source link is required for all posts. <br/>
-                    ⇾ For images, adding an upscaled post is required. <br/>
+                    ⇾ Animations shouldn't look too stuttery. <br/>
+                    ⇾ All posts require the source link from where it was obtained from. <br/>
+                    ⇾ All tags should be romanized. Titles and commentary don't have to be romanized but may be translated. <br/>
+                    ⇾ For images, adding an upscaled version is required. <br/>
+                    ⇾ (Music only) The audio file must have a song cover in its metadata. <br/>
                     ⇾ Compress / re-encode files (maintaining high quality) to be storage efficient. <br/>
-                    ⇾ All tags should be romanized. Titles and commentary don't have to be romanized. <br/>
-                    ⇾ No hentai. We only allow questionable posts with light nudity and suggestiveness. <br/>
+                    ⇾ No hentai. We only allow light nudity and suggestiveness. <br/>
                     ⇾ No AI-generated works. We only want art made by humans and their passion. <br/>
-                    ⇾ No paid rewards. You can mention when one is available, please support artists for their hard work.
+                    ⇾ No paid content. This includes anime clips, manga and doujinshi scans, and paid artist rewards. Support artists for their work*<br/><br/>
+
+                    *This may be allowed only if the content is no longer available for purchase for the sake of art preservation.<br/>
                     </span>
                 </span>
                 <div className="help-img-container"><img className="help-img" src={uploadImg}/></div></>

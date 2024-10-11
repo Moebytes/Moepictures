@@ -165,10 +165,16 @@ const TranslationRoutes = (app: Express) => {
         try {
             const postID = req.query.postID as string
             const order = req.query.order as string
+            const historyID = req.query.historyID as string
             const offset = req.query.offset as string
             if (!req.session.username) return res.status(403).send("Unauthorized")
-            const result = await sql.history.translationHistory(postID, order, offset)
-            res.status(200).json(result)
+            if (historyID) {
+                const result = await sql.history.translationHistoryID(postID, historyID)
+                res.status(200).json(result)
+            } else {
+                const result = await sql.history.translationHistory(postID, order, offset)
+                res.status(200).json(result)
+            }
         } catch (e) {
             console.log(e)
             res.status(400).send("Bad request")

@@ -44,6 +44,7 @@ interface Props {
     unverified?: boolean
     previous?: () => void
     next?: () => void
+    translationID?: string
 }
 
 const PostSong: React.FunctionComponent<Props> = (props) => {
@@ -448,7 +449,7 @@ const PostSong: React.FunctionComponent<Props> = (props) => {
 
     return (
         <div className="post-song-container" style={{zoom: props.scale ? props.scale : 1}}>
-            {!props.noTranslations && session.username ? <TranslationEditor post={props.post} img={props.audio} order={props.order} unverified={props.unverified}/> : null}
+            {!props.noTranslations && session.username ? <TranslationEditor post={props.post} img={props.audio} order={props.order} unverified={props.unverified} translationID={props.translationID}/> : null}
             <div className="post-song-box" ref={containerRef} style={{display: translationMode ? "none" : "flex"}}>
                 <div className="post-song-filters" ref={fullscreenRef}>
                     <div className={`post-image-top-buttons ${buttonHover ? "show-post-image-top-buttons" : ""}`} onMouseEnter={() => setButtonHover(true)} onMouseLeave={() => setButtonHover(false)}>

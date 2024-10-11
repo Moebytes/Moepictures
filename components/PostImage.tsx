@@ -64,6 +64,7 @@ interface Props {
     unverified?: boolean
     previous?: () => void
     next?: () => void
+    translationID?: string
 }
 
 let timeout = null as any
@@ -1264,7 +1265,7 @@ const PostImage: React.FunctionComponent<Props> = (props) => {
 
     return (
         <div className="post-image-container" style={{zoom: props.scale ? props.scale : 1}}>
-            {!props.noTranslations && session.username ? <TranslationEditor post={props.post} img={props.img} order={props.order} unverified={props.unverified}/> : null}
+            {!props.noTranslations && session.username ? <TranslationEditor post={props.post} img={props.img} order={props.order} unverified={props.unverified} translationID={props.translationID}/> : null}
             <div className="post-image-box" ref={containerRef} style={{display: translationMode && !props.noTranslations ? "none" : "flex"}}>
                 <div className="post-image-filters" ref={fullscreenRef}>
                     <div className={`post-image-top-buttons ${buttonHover ? "show-post-image-top-buttons" : ""}`} onMouseEnter={() => setButtonHover(true)} onMouseLeave={() => setButtonHover(false)}>

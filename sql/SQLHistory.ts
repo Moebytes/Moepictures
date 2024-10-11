@@ -247,6 +247,35 @@ export default class SQLHistory {
         return result
     }
 
+    /** Get translation history id */
+    public static translationHistoryID = async (postID?: string, historyID?: string) => {
+        const query: QueryConfig = {
+            text: functions.multiTrim(/*sql*/`
+                    WITH post_json AS (
+                    SELECT posts.*, json_agg(DISTINCT images.*) AS images
+                    FROM posts
+                    JOIN images ON images."postID" = posts."postID"
+                    GROUP BY posts."postID"
+                    )
+                    SELECT "translation history".*, 
+                    COUNT(*) OVER() AS "historyCount",
+                    json_build_object(
+                    'type', post_json."type",
+                    'restrict', post_json."restrict",
+                    'style', post_json."style",
+                    'images', (array_agg(post_json."images"))[1]
+                    ) AS post
+                    FROM "translation history"
+                    JOIN post_json ON post_json."postID" = "translation history"."postID"
+                    WHERE "translation history"."postID" = $1 AND "translation history"."historyID" = $2
+                    GROUP BY "translation history"."historyID", post_json."type", post_json."restrict", post_json."style"
+            `),
+            values: [postID, historyID]
+        }
+        const result = await SQLQuery.run(query)
+        return result
+    }
+
     /** Get user translation history */
     public static userTranslationHistory = async (username: string) => {
         const query: QueryConfig = {

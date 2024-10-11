@@ -23,6 +23,7 @@ import SaveTranslationDialog from "../dialogs/SaveTranslationDialog"
 import ReportCommentDialog from "../dialogs/ReportCommentDialog"
 import QuickEditDialog from "../dialogs/QuickEditDialog"
 import RevertPostHistoryDialog from "../dialogs/RevertPostHistoryDialog"
+import RevertTranslationHistoryDialog from "../dialogs/RevertTranslationHistoryDialog"
 import CaptchaDialog from "../dialogs/CaptchaDialog"
 import ThirdParty from "../components/ThirdParty"
 import Parent from "../components/Parent"
@@ -33,7 +34,7 @@ import historyIcon from "../assets/icons/history-state.png"
 import currentIcon from "../assets/icons/current.png"
 import {HideNavbarContext, HideSidebarContext, RelativeContext, DownloadFlagContext, DownloadIDsContext, HideTitlebarContext, MobileContext, ReloadPostFlagContext,
 PostsContext, TagsContext, HeaderTextContext, PostFlagContext, RedirectContext, SidebarTextContext, SessionContext, SessionFlagContext, EnableDragContext, TranslationModeContext,
-OrderContext, RevertPostHistoryIDContext, RevertPostHistoryFlagContext} from "../Context"
+OrderContext, RevertPostHistoryIDContext, RevertPostHistoryFlagContext, RevertTranslationHistoryIDContext, RevertTranslationHistoryFlagContext} from "../Context"
 import permissions from "../structures/Permissions"
 import "./styles/postpage.less"
 
@@ -65,6 +66,8 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
     const {reloadPostFlag, setReloadPostFlag} = useContext(ReloadPostFlagContext)
     const {revertPostHistoryID, setRevertPostHistoryID} = useContext(RevertPostHistoryIDContext)
     const {revertPostHistoryFlag, setRevertPostHistoryFlag} = useContext(RevertPostHistoryFlagContext)
+    const {revertTranslationHistoryID, setRevertTranslationHistoryID} = useContext(RevertTranslationHistoryIDContext)
+    const {revertTranslationHistoryFlag, setRevertTranslationHistoryFlag} = useContext(RevertTranslationHistoryFlagContext)
     const [images, setImages] = useState([]) as any
     const [thirdPartyPosts, setThirdPartyPosts] = useState([]) as any
     const [artistPosts, setArtistPosts] = useState([]) as any
@@ -76,6 +79,7 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
     const [tagCategories, setTagCategories] = useState(null) as any
     const {order, setOrder} = useContext(OrderContext)
     const [historyID, setHistoryID] = useState(null as any)
+    const [translationID, setTranslationID] = useState(null as any)
     const history = useHistory()
     const location = useLocation()
     const postID = props?.match.params.id
@@ -90,6 +94,8 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
         document.title = "Post"
         const historyParam = new URLSearchParams(window.location.search).get("history")
         setHistoryID(historyParam)
+        const translationParam = new URLSearchParams(window.location.search).get("translation")
+        setTranslationID(translationParam)
         if (!historyParam) {
             const savedPost = localStorage.getItem("savedPost")
             const savedTags = localStorage.getItem("savedTags")
@@ -103,6 +109,8 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
         const onDOMLoaded = () => {
             const savedOrder = localStorage.getItem("order")
             if (savedOrder) setOrder(Number(savedOrder))
+            const orderParam = new URLSearchParams(window.location.search).get("order")
+            if (orderParam) setOrder(Number(orderParam))
         }
         window.addEventListener("load", onDOMLoaded)
         return () => {
@@ -235,10 +243,6 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
         }
         if (historyID) updateHistory()
     }, [postID, historyID, order, session])
-
-    useEffect(() => {
-        console.log(images)
-    }, [images])
 
     useEffect(() => {
         const historyParam = new URLSearchParams(window.location.search).get("history")
@@ -382,6 +386,27 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
         }
     }
 
+    const revertTranslationHistory = async () => {
+        const translation = await functions.get("/api/translation/history", {postID: post.postID, historyID: translationID}, session, setSessionFlag).then((r) => r[0])
+        await functions.put("/api/translation/save", {postID: translation.postID, order: translation.order, data: translation.data}, session, setSessionFlag)
+    }
+
+    useEffect(() => {
+        if (revertTranslationHistoryFlag && translationID === revertTranslationHistoryID?.historyID) {
+            revertTranslationHistory().then(() => {
+                setRevertTranslationHistoryFlag(false)
+                setRevertTranslationHistoryID(null)
+            }).catch(() => {
+                setRevertTranslationHistoryFlag(false)
+                setRevertTranslationHistoryID({failed: true, historyID: translationID})
+            })
+        }
+    }, [revertTranslationHistoryFlag, revertTranslationHistoryID, translationID, post, session])
+
+    const revertTranslationHistoryDialog = async () => {
+        setRevertTranslationHistoryID({failed: false, historyID: translationID})
+    }
+
     const revertPostHistory = async () => {
         const currentPost = await functions.get("/api/post", {postID}, session, setSessionFlag)
         const imgChanged = await functions.imagesChanged(post, currentPost)
@@ -428,11 +453,26 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
 
     const currentHistory = () => {
         setHistoryID(null)
+        setTranslationID(null)
         setPostFlag(true)
         history.push(`/post/${postID}`)
     }
 
     const getHistoryButtons = () => {
+        if (translationID) {
+            return (
+                <div className="translation-button-container">
+                    {session.username ? <button className="translation-button" onClick={revertTranslationHistoryDialog}>
+                        <img src={historyIcon}/>
+                        <span>Revert</span>
+                    </button> : null}
+                    <button className="translation-button" onClick={currentHistory}>
+                        <img src={currentIcon}/>
+                        <span>Current</span>
+                    </button>
+                </div>
+            )
+        }
         return (
             <div className="history-button-container">
                 {session.username ? <button className="history-button" onClick={revertPostHistoryDialog}>
@@ -452,14 +492,14 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
         if (post.type === "model") {
             return (
                 <>
-                <PostModel post={post} model={image} order={order} next={next} previous={previous}/>
+                <PostModel post={post} model={image} order={order} next={next} previous={previous} translationID={translationID}/>
                 <PostImageOptions post={post} model={image} download={download} next={next} previous={previous}/>
                 </>
             )
         } else if (post.type === "audio") {
             return (
                 <>
-                <PostSong post={post} audio={image} order={order} next={next} previous={previous}/>
+                <PostSong post={post} audio={image} order={order} next={next} previous={previous} translationID={translationID}/>
                 <PostImageOptions post={post} audio={image} download={download} next={next} previous={previous}/>
                 </>
             )
@@ -470,7 +510,7 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
             }
             return (
                 <>
-                <PostImage post={post} img={img} comicPages={post.type === "comic" ? images : null} order={order} next={next} previous={previous}/>
+                <PostImage post={post} img={img} comicPages={post.type === "comic" ? images : null} order={order} next={next} previous={previous} translationID={translationID}/>
                 <PostImageOptions post={post} img={img} comicPages={post.type === "comic" ? images : null} download={download} next={next} previous={previous}/>
                 </>
             )
@@ -486,20 +526,20 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
         <DeleteCommentDialog/>
         <ReportCommentDialog/>
         <RevertPostHistoryDialog/>
+        <RevertTranslationHistoryDialog/>
         {post ? <DeletePostDialog post={post}/> : null}
         {post ? <TakedownPostDialog post={post}/> : null}
         {post ? <SaveTranslationDialog post={post}/> : null}
         <EditTranslationDialog/>
-        {post ? <TitleBar post={post} goBack={true} historyID={historyID}/> : <TitleBar goBack={true} historyID={historyID}/>}
+        <TitleBar post={post} goBack={true} historyID={historyID} translationID={translationID}/>
         <NavBar goBack={true}/>
         <div className="body">
             {post && tagCategories ? 
             <SideBar post={post} artists={tagCategories.artists} characters={tagCategories.characters} series={tagCategories.series} tags={tagCategories.tags}/> : 
-            <SideBar/>
-            }
+            <SideBar/>}
             <div className="content" onMouseEnter={() => setEnableDrag(true)}>
                 <div className="post-container">
-                    {historyID ? getHistoryButtons() : null}
+                    {historyID || translationID ? getHistoryButtons() : null}
                     {/*nsfwChecker() &&*/ images.length > 1 ?
                     <div className="carousel-container">
                         <Carousel images={images} set={set} index={order-1}/>

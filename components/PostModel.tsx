@@ -51,6 +51,7 @@ interface Props {
     unverified?: boolean
     previous?: () => void
     next?: () => void
+    translationID?: string
 }
 
 const PostModel: React.FunctionComponent<Props> = (props) => {
@@ -739,7 +740,7 @@ const PostModel: React.FunctionComponent<Props> = (props) => {
 
     return (
         <div className="post-model-container" style={{zoom: props.scale ? props.scale : 1}}>
-            {!props.noTranslations && session.username ? <TranslationEditor post={props.post} img={props.model} order={props.order} unverified={props.unverified}/> : null}
+            {!props.noTranslations && session.username ? <TranslationEditor post={props.post} img={props.model} order={props.order} unverified={props.unverified} translationID={props.translationID}/> : null}
             <div className="post-model-box" ref={containerRef} style={{display: translationMode ? "none" : "flex"}}>
                 <div className="post-model-filters" ref={fullscreenRef} onMouseOver={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                     <div className={`post-image-top-buttons ${buttonHover ? "show-post-image-top-buttons" : ""}`} onMouseEnter={() => setButtonHover(true)} onMouseLeave={() => setButtonHover(false)}>
