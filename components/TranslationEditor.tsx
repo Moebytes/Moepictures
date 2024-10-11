@@ -107,8 +107,8 @@ const TranslationEditor: React.FunctionComponent<Props> = (props) => {
     const {saveTranslationData, setSaveTranslationData} = useContext(SaveTranslationDataContext)
     const {saveTranslationOrder, setSaveTranslationOrder} = useContext(SaveTranslationOrderContext)
     const {imageExpand, setImageExpand} = useContext(ImageExpandContext)
-    const [imageWidth, setImageWidth] = useState(0)
-    const [imageHeight, setImageHeight] = useState(0)
+    const [targetWidth, setTargetWidth] = useState(0)
+    const [targetHeight, setTargetHeight] = useState(0)
     const [img, setImg] = useState("")
     const [id, setID] = useState(0)
     const [items, setItems] = useState([]) as any
@@ -198,12 +198,12 @@ const TranslationEditor: React.FunctionComponent<Props> = (props) => {
             const img = await functions.createImage(base64)
             if (functions.isGIF(props.img) || isAnimatedWebP) {
                 setImg(props.img)
-                setImageWidth(img.width)
-                setImageHeight(img.height)
+                setTargetWidth(img.width)
+                setTargetHeight(img.height)
             } else {
                 setImg(base64)
-                setImageWidth(img.width)
-                setImageHeight(img.height)
+                setTargetWidth(img.width)
+                setTargetHeight(img.height)
             }
         }
         decryptImg()
@@ -248,29 +248,29 @@ const TranslationEditor: React.FunctionComponent<Props> = (props) => {
         maxHeight = 1797
     }
 
-    let scale = imageWidth > imageHeight ? maxWidth / imageWidth : maxHeight / imageHeight
-    if (mobile && imageWidth > maxWidth) scale =  maxWidth / imageWidth
+    let scale = targetWidth > targetHeight ? maxWidth / targetWidth : maxHeight / targetHeight
+    if (mobile && targetWidth > maxWidth) scale =  maxWidth / targetWidth
 
     const imagePixelate = () => {
         if (!pixelateRef.current || !overlayRef.current) return
         const pixelateCanvas = pixelateRef.current
         const ctx = pixelateCanvas.getContext("2d") as any
-        const imgWidth = Math.floor(imageWidth*scale)
-        const imgHeight = Math.floor(imageHeight*scale)
-        const landscape = imgWidth >= imgHeight
+        const width = Math.floor(targetWidth*scale)
+        const height = Math.floor(targetHeight*scale)
+        const landscape = width >= height
         ctx.clearRect(0, 0, pixelateCanvas.width, pixelateCanvas.height)
-        pixelateCanvas.width = imgWidth
-        pixelateCanvas.height = imgHeight
-        const pixelWidth = imgWidth / pixelate 
-        const pixelHeight = imgHeight / pixelate
+        pixelateCanvas.width = width
+        pixelateCanvas.height = height
+        const pixelWidth = width / pixelate 
+        const pixelHeight = height / pixelate
         if (pixelate !== 1) {
             ctx.drawImage(overlayRef.current, 0, 0, pixelWidth, pixelHeight)
             if (landscape) {
-                pixelateCanvas.style.width = `${imgWidth * pixelate}px`
+                pixelateCanvas.style.width = `${width * pixelate}px`
                 pixelateCanvas.style.height = "auto"
             } else {
                 pixelateCanvas.style.width = "auto"
-                pixelateCanvas.style.height = `${imgHeight * pixelate}px`
+                pixelateCanvas.style.height = `${height * pixelate}px`
             }
             pixelateCanvas.style.opacity = "1"
         } else {
@@ -309,6 +309,8 @@ const TranslationEditor: React.FunctionComponent<Props> = (props) => {
             const item = prev[index]
             item.transcript = transcript
             item.translation = translation
+            item.imageWidth = targetWidth
+            item.imageHeight = targetHeight
             return prev
         })
     }
@@ -351,20 +353,25 @@ const TranslationEditor: React.FunctionComponent<Props> = (props) => {
                     <img draggable={false} className="translation-editor-button" src={translationToggleOff} style={{filter: getFilter()}} onClick={() => setTranslationMode(false)}/>
                 </div>
                 {bubbleToggle ? <div className="translation-bubble" style={{width: `${bubbleData.width}px`, minHeight: "25px", left: `${bubbleData.x}px`, top: `${bubbleData.y}px`}}>{getBubbleText()}</div> : null}
-                <img draggable={false} className="post-lightness-overlay" ref={lightnessRef} src={img} style={{pointerEvents: "none", width: `${Math.floor(imageWidth*scale)}px`, height: `${Math.floor(imageHeight*scale)}px`}}/>
-                <img draggable={false} className="post-sharpen-overlay" ref={overlayRef} src={img} style={{pointerEvents: "none", width: `${Math.floor(imageWidth*scale)}px`, height: `${Math.floor(imageHeight*scale)}px`}}/>
-                <canvas draggable={false} className="post-pixelate-canvas" ref={pixelateRef} style={{pointerEvents: "none", width: `${Math.floor(imageWidth*scale)}px`, height: `${Math.floor(imageHeight*scale)}px`}}></canvas>
-                <ShapeEditor vectorWidth={imageWidth} vectorHeight={imageHeight} scale={scale}>
+                <img draggable={false} className="post-lightness-overlay" ref={lightnessRef} src={img} style={{pointerEvents: "none", width: `${Math.floor(targetWidth*scale)}px`, height: `${Math.floor(targetHeight*scale)}px`}}/>
+                <img draggable={false} className="post-sharpen-overlay" ref={overlayRef} src={img} style={{pointerEvents: "none", width: `${Math.floor(targetWidth*scale)}px`, height: `${Math.floor(targetHeight*scale)}px`}}/>
+                <canvas draggable={false} className="post-pixelate-canvas" ref={pixelateRef} style={{pointerEvents: "none", width: `${Math.floor(targetWidth*scale)}px`, height: `${Math.floor(targetHeight*scale)}px`}}></canvas>
+                <ShapeEditor vectorWidth={targetWidth} vectorHeight={targetHeight} scale={scale}>
                     <ImageLayer src={img}/>
                     <DrawLayer onAddShape={({x, y, width, height}) => {
                         if (!translationDrawingEnabled) return
                         setItems((prev: any) => {
                             setID(id + 1)
-                            return [...prev, {id: id + 1, x, y, width, height, transcript: "", translation: ""}]
+                            return [...prev, {id: id + 1, x, y, width, height, imageWidth: targetWidth, imageHeight: targetHeight, transcript: "", translation: ""}]
                         })
                     }} DrawPreviewComponent={RectShape}/>
                     {items.map((item: any, index: number) => {
-                        const {id, height, width, x, y} = item
+                        const {id, height, width, x, y, imageWidth, imageHeight} = item
+
+                        const newWidth = (width / imageWidth) * targetWidth
+                        const newHeight = (height / imageHeight ) * targetHeight
+                        const newX = (x / imageWidth) * targetWidth
+                        const newY = (y / imageHeight ) * targetHeight
 
                         const insertItem = (newRect: any) => {
                             if (!translationDrawingEnabled) return
@@ -431,7 +438,7 @@ const TranslationEditor: React.FunctionComponent<Props> = (props) => {
                         }
 
                         return (
-                            <RectShape key={id} shapeId={id} x={x} y={y} width={width} height={height} onFocus={() => setActiveIndex(index)}
+                            <RectShape key={id} shapeId={id} x={newX} y={newY} width={newWidth} height={newHeight} onFocus={() => setActiveIndex(index)}
                             keyboardTransformMultiplier={30} onChange={insertItem} onDelete={deleteItem} ResizeHandleComponent={RectHandle}
                             extraShapeProps={{onContextMenu, onDoubleClick, onMouseEnter, onMouseMove, onMouseLeave, onMouseDown}}/>
                         )

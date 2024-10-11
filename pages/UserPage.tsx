@@ -9,7 +9,7 @@ import Footer from "../components/Footer"
 import DragAndDrop from "../components/DragAndDrop"
 import {HideNavbarContext, HideSidebarContext, ThemeContext, EnableDragContext, RelativeContext, HideTitlebarContext, MobileContext, CommentSearchFlagContext,
 HeaderTextContext, SidebarTextContext, SessionContext, RedirectContext, SessionFlagContext, ShowDeleteAccountDialogContext, SiteHueContext, SiteLightnessContext,
-SiteSaturationContext, BanNameContext, UnbanNameContext, PromoteNameContext, UpdateUserFlagContext, DMTargetContext, RestrictTypeContext} from "../Context"
+SiteSaturationContext, BanNameContext, UnbanNameContext, PromoteNameContext, UpdateUserFlagContext, DMTargetContext, RestrictTypeContext, SearchContext, SearchFlagContext} from "../Context"
 import functions from "../structures/Functions"
 import permissions from "../structures/Permissions"
 import Carousel from "../components/Carousel"
@@ -59,6 +59,8 @@ const UserPage: React.FunctionComponent<Props> = (props) => {
     const {promoteName, setPromoteName} = useContext(PromoteNameContext)
     const {dmTarget, setDMTarget} = useContext(DMTargetContext)
     const {restrictType, setRestrictType} = useContext(RestrictTypeContext)
+    const {search, setSearch} = useContext(SearchContext)
+    const {searchFlag, setSearchFlag} = useContext(SearchFlagContext)
     const [uploadIndex, setUploadIndex] = useState(0)
     const [favoriteIndex, setFavoriteIndex] = useState(0) as any
     const [uploads, setUploads] = useState([]) as any
@@ -119,9 +121,9 @@ const UserPage: React.FunctionComponent<Props> = (props) => {
 
     const updateFavorites = async () => {
         const favorites = await functions.get("/api/user/favorites", {username}, session, setSessionFlag)
-        let filtered = favorites.filter((f: any) => restrictType === "explicit" ? f.post?.restrict === "explicit" : f.post?.restrict !== "explicit")
-        if (!permissions.isElevated(session)) filtered = filtered.filter((f: any) => !f.post?.hidden)
-        const images = filtered.map((f: any) => functions.getThumbnailLink(f.post.images[0].type, f.postID, f.post.images[0].order, f.post.images[0].filename, "tiny"))
+        let filtered = favorites.filter((f: any) => restrictType === "explicit" ? f.restrict === "explicit" : f.restrict !== "explicit")
+        if (!permissions.isElevated(session)) filtered = filtered.filter((f: any) => !f.hidden)
+        const images = filtered.map((f: any) => functions.getThumbnailLink(f.images[0].type, f.postID, f.images[0].order, f.images[0].filename, "tiny"))
         setFavorites(filtered)
         setFavoriteImages(images)
     }
@@ -131,9 +133,9 @@ const UserPage: React.FunctionComponent<Props> = (props) => {
         let offset = newFavorites.length
         const result = await functions.get("/api/user/favorites", {limit, offset}, session, setSessionFlag)
         newFavorites.push(...result)
-        let filtered = favorites.filter((f: any) => restrictType === "explicit" ? f.post?.restrict === "explicit" : f.post?.restrict !== "explicit")
-        if (!permissions.isElevated(session)) filtered = filtered.filter((f: any) => !f.post?.hidden)
-        const images = filtered.map((f: any) => functions.getThumbnailLink(f.post.images[0].type, f.postID, f.post.images[0].order, f.post.images[0].filename, "tiny"))
+        let filtered = favorites.filter((f: any) => restrictType === "explicit" ? f.restrict === "explicit" : f.restrict !== "explicit")
+        if (!permissions.isElevated(session)) filtered = filtered.filter((f: any) => !f.hidden)
+        const images = filtered.map((f: any) => functions.getThumbnailLink(f.images[0].type, f.postID, f.images[0].order, f.images[0].filename, "tiny"))
         setFavorites(filtered)
         setAppendFavoriteImages(images)
     }
@@ -198,13 +200,30 @@ const UserPage: React.FunctionComponent<Props> = (props) => {
         }
     }
 
+    const viewFavorites = () => {
+        history.push("/posts")
+        setSearch(`favorites:${user.username}`)
+        setSearchFlag(true)
+    }
+
+    const viewUploads = () => {
+        history.push("/posts")
+        setSearch(`uploads:${user.username}`)
+        setSearchFlag(true)
+    }
+
+    const viewComments = () => {
+        history.push("/comments")
+        setCommentSearchFlag(`user:${user.username}`)
+    }
+
     const generateFavoritesJSX = () => {
         if (!user) return null
         if (user.publicFavorites) {
             if (!favorites.length) return null
             return (
                 <div className="user-column">
-                    <span className="user-title">Favorites <span className="user-text-alt">{favorites[0].favoriteCount}</span></span>
+                    <span className="user-title" onClick={viewFavorites}>Favorites <span className="user-text-alt">{favorites[0].postCount}</span></span>
                     <Carousel images={favoriteImages} noKey={true} set={setFav} index={favoriteIndex} update={updateFavoriteOffset} appendImages={appendFavoriteImages}/>
                 </div> 
             )
@@ -304,12 +323,12 @@ const UserPage: React.FunctionComponent<Props> = (props) => {
                     {generateFavoritesJSX()}
                     {uploads.length ?
                     <div className="user-column">
-                        <span className="user-title">Uploads <span className="user-text-alt">{uploads[0].uploadCount}</span></span>
+                        <span className="user-title" onClick={viewUploads}>Uploads <span className="user-text-alt">{uploads[0].postCount}</span></span>
                         <Carousel images={uploadImages} noKey={true} set={setUp} index={uploadIndex} update={updateUploadOffset} appendImages={appendUploadImages}/>
                     </div> : null}
                     {comments.length ?
-                    <div className="userprofile-column">
-                        <span className="userprofile-title">Comments <span className="userprofile-text-alt">{comments.length}</span></span>
+                    <div className="user-column">
+                        <span className="user-title" onClick={viewComments}>Comments <span className="user-text-alt">{comments.length}</span></span>
                         <CommentCarousel comments={comments}/>
                     </div> : null}
                 </div> : null}

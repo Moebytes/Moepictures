@@ -61,6 +61,16 @@ const SearchRoutes = (app: Express) => {
                 }
                 let images = await sql.run(sqlQuery)
                 if (images.length) result = await sql.search.posts(images.map((i: any) => i.postID))
+            } else if (query.startsWith("favorites:")) {
+                const username = query.replace("favorites:", "").trim()
+                const user = await sql.user.user(username as string)
+                if (!user?.publicFavorites) return res.status(403).send("Unauthorized")
+                result = await sql.favorite.favorites(username, limit, offset, type, restrict, style, sort)
+            } else if (query.startsWith("uploads:")) {
+                const username = query.replace("uploads:", "").trim()
+                const user = await sql.user.user(username as string)
+                if (!user) return res.status(400).send("Bad username")
+                result = await sql.user.uploads(username, limit, offset, type, restrict, style, sort)
             } else {
                 result = await sql.search.search(tags, type, restrict, style, sort, offset, limit, withTags, req.session.username)
             }

@@ -119,7 +119,9 @@ const HelpPage: React.FunctionComponent = (props) => {
 
                     Special searches: <br/>
                     <span className="help-alt">pixiv:id</span> - Search for post matching the pixiv id (if it exists). <br/>
-                    <span className="help-alt">hash:hash</span> - Search for post matching the post hash. <br/><br/>
+                    <span className="help-alt">hash:hash</span> - Search for post matching the post hash. <br/>
+                    <span className="help-alt">favorites:user</span> - Search for favorites of the user (if public). <br/>
+                    <span className="help-alt">uploads:user</span> - Search for uploads of the user. <br/><br/>
 
                     These are some tags with special uses: <br/>
                     <span className="help-alt">original</span> - the drawing is original, ie. not fanart. <br/>

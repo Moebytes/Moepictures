@@ -265,7 +265,8 @@ const ImageGrid: React.FunctionComponent<Props> = (props) => {
             }
             setIndex(currentIndex)
             setVisiblePosts(functions.removeDuplicates(newVisiblePosts))
-            const resultCount = Number(posts[0]?.postCount)
+            let resultCount = Number(posts[0]?.postCount)
+            if (Number.isNaN(resultCount)) resultCount = posts.length
             setSidebarText(`${resultCount === 1 ? `1 result.` : `${resultCount || 0} results.`}`)
             localStorage.setItem("savedPosts", JSON.stringify(posts))
             setUpdatePostFlag(false)

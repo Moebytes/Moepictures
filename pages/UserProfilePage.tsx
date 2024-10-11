@@ -9,7 +9,7 @@ import Footer from "../components/Footer"
 import DragAndDrop from "../components/DragAndDrop"
 import {HideNavbarContext, HideSidebarContext, ThemeContext, EnableDragContext, RelativeContext, HideTitlebarContext, MobileContext, RestrictTypeContext,
 HeaderTextContext, SidebarTextContext, SessionContext, RedirectContext, SessionFlagContext, UserImgContext, ShowDeleteAccountDialogContext,
-CommentSearchFlagContext, SiteHueContext, SiteLightnessContext, UserImgPostContext, SiteSaturationContext, R18ConfirmationContext, 
+CommentSearchFlagContext, SiteHueContext, SiteLightnessContext, UserImgPostContext, SiteSaturationContext, R18ConfirmationContext, SearchContext, SearchFlagContext,
 PremiumRequiredContext} from "../Context"
 import functions from "../structures/Functions"
 import Carousel from "../components/Carousel"
@@ -53,6 +53,8 @@ const UserProfilePage: React.FunctionComponent = (props) => {
     const {showDeleteAccountDialog, setShowDeleteAccountDialog} = useContext(ShowDeleteAccountDialogContext)
     const {commentSearchFlag, setCommentSearchFlag} = useContext(CommentSearchFlagContext)
     const {restrictType, setRestrictType} = useContext(RestrictTypeContext)
+    const {search, setSearch} = useContext(SearchContext)
+    const {searchFlag, setSearchFlag} = useContext(SearchFlagContext)
     const bioRef = useRef<any>(null)
     const errorRef = useRef<any>(null)
     const [error, setError] = useState(false)
@@ -112,9 +114,9 @@ const UserProfilePage: React.FunctionComponent = (props) => {
 
     const updateFavorites = async () => {
         const favorites = await functions.get("/api/user/favorites", {limit}, session, setSessionFlag)
-        let filtered = favorites.filter((f: any) => restrictType === "explicit" ? f.post?.restrict === "explicit" : f.post?.restrict !== "explicit")
-        if (!permissions.isElevated(session)) filtered = filtered.filter((f: any) => !f.post?.hidden)
-        const images = filtered.map((f: any) => functions.getThumbnailLink(f.post.images[0].type, f.postID, f.post.images[0].order, f.post.images[0].filename, "tiny"))
+        let filtered = favorites.filter((f: any) => restrictType === "explicit" ? f.restrict === "explicit" : f.restrict !== "explicit")
+        if (!permissions.isElevated(session)) filtered = filtered.filter((f: any) => !f.hidden)
+        const images = filtered.map((f: any) => functions.getThumbnailLink(f.images[0].type, f.postID, f.images[0].order, f.images[0].filename, "tiny"))
         setFavorites(filtered)
         setFavoriteImages(images)
     }
@@ -124,9 +126,9 @@ const UserProfilePage: React.FunctionComponent = (props) => {
         let offset = newFavorites.length
         const result = await functions.get("/api/user/favorites", {limit, offset}, session, setSessionFlag)
         newFavorites.push(...result)
-        let filtered = favorites.filter((f: any) => restrictType === "explicit" ? f.post?.restrict === "explicit" : f.post?.restrict !== "explicit")
-        if (!permissions.isElevated(session)) filtered = filtered.filter((f: any) => !f.post?.hidden)
-        const images = filtered.map((f: any) => functions.getThumbnailLink(f.post.images[0].type, f.postID, f.post.images[0].order, f.post.images[0].filename, "tiny"))
+        let filtered = favorites.filter((f: any) => restrictType === "explicit" ? f.restrict === "explicit" : f.restrict !== "explicit")
+        if (!permissions.isElevated(session)) filtered = filtered.filter((f: any) => !f.hidden)
+        const images = filtered.map((f: any) => functions.getThumbnailLink(f.images[0].type, f.postID, f.images[0].order, f.images[0].filename, "tiny"))
         setFavorites(filtered)
         setAppendFavoriteImages(images)
     }
@@ -339,6 +341,18 @@ const UserProfilePage: React.FunctionComponent = (props) => {
         setShowDeleteAccountDialog((prev: boolean) => !prev)
     }
 
+    const viewFavorites = () => {
+        history.push("/posts")
+        setSearch(`favorites:${session.username}`)
+        setSearchFlag(true)
+    }
+
+    const viewUploads = () => {
+        history.push("/posts")
+        setSearch(`uploads:${session.username}`)
+        setSearchFlag(true)
+    }
+
     const viewComments = () => {
         history.push("/comments")
         setCommentSearchFlag(`user:${session.username}`)
@@ -515,17 +529,17 @@ const UserProfilePage: React.FunctionComponent = (props) => {
                     </Link>
                     {favorites.length ?
                     <div className="userprofile-column">
-                        <span className="userprofile-title">Favorites <span className="userprofile-text-alt">{favorites[0].favoriteCount}</span></span>
+                        <span className="userprofile-title" onClick={viewFavorites}>Favorites <span className="userprofile-text-alt">{favorites[0].postCount}</span></span>
                         <Carousel images={favoriteImages} noKey={true} set={setFav} index={favoriteIndex} update={updateFavoriteOffset} appendImages={appendFavoriteImages}/>
                     </div> : null}
                     {uploads.length ?
                     <div className="userprofile-column">
-                        <span className="userprofile-title">Uploads <span className="userprofile-text-alt">{uploads[0].uploadCount}</span></span>
+                        <span className="userprofile-title" onClick={viewUploads}>Uploads <span className="userprofile-text-alt">{uploads[0].postCount}</span></span>
                         <Carousel images={uploadImages} noKey={true} set={setUp} index={uploadIndex} update={updateUploadOffset} appendImages={appendUploadImages}/>
                     </div> : null}
                     {comments.length ?
                     <div className="userprofile-column">
-                        <span className="userprofile-title">Comments <span className="userprofile-title-alt">{comments.length}</span></span>
+                        <span className="userprofile-title" onClick={viewComments}>Comments <span className="userprofile-title-alt">{comments.length}</span></span>
                         <CommentCarousel comments={comments}/>
                     </div> : null}
                     <div className="userprofile-row">
