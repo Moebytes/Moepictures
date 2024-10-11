@@ -136,7 +136,7 @@ const BulkUploadPage: React.FunctionComponent = (props) => {
     useEffect(() => {
         if (!session.cookie) return
         if (!permissions.isElevated(session)) {
-            history.push("/403")
+            functions.replaceLocation("/403")
         }
     }, [session])
 

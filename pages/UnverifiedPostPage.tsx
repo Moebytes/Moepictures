@@ -80,7 +80,7 @@ const UnverifiedPostPage: React.FunctionComponent<Props> = (props) => {
     useEffect(() => {
         if (!session.cookie) return
         if (!permissions.isElevated(session)) {
-            history.push("/403")
+            functions.replaceLocation("/403")
         }
     }, [session])
 
@@ -139,7 +139,7 @@ const UnverifiedPostPage: React.FunctionComponent<Props> = (props) => {
                 setTags(tags)
                 setPost(post)
             } else {
-                history.push("/404")
+                functions.replaceLocation("/404")
             }
         }
         updatePost()
@@ -164,7 +164,7 @@ const UnverifiedPostPage: React.FunctionComponent<Props> = (props) => {
                 setTags(tags)
                 setPost(post)
             } else {
-                history.push("/404")
+                functions.replaceLocation("/404")
             }
         }
         if (postFlag) updatePost()

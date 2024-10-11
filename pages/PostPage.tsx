@@ -132,7 +132,7 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
         }
         if (post.restrict === "explicit") {
             if (!session.showR18) {
-                history.push("/403")
+                functions.replaceLocation("/403")
             } else {
                 setLoaded(true)
             }
@@ -217,7 +217,7 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
     useEffect(() => {
         const updateHistory = async () => {
             const historyPost = await functions.get("/api/post/history", {postID, historyID}, session, setSessionFlag)
-            if (!historyPost) return history.push("/404")
+            if (!historyPost) return functions.replaceLocation("/404")
             let images = historyPost.images.map((i: any) => functions.getHistoryImageLink(i))
             setImages(images)
             if (images[order-1]) {
@@ -249,8 +249,8 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
             try {
                 if (!post) post = await functions.get("/api/post", {postID}, session, setSessionFlag)
             } catch (err: any) {
-                if (err.response?.status === 404) history.push("/404")
-                if (err.response?.status === 403) history.push("/403")
+                if (err.response?.status === 404) functions.replaceLocation("/404")
+                if (err.response?.status === 403) functions.replaceLocation("/403")
                 return
             }
             if (post) {
@@ -273,14 +273,14 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
                         post = await functions.get("/api/post", {postID}, session, setSessionFlag)
                         setPost(post)
                     } catch (err: any) {
-                        if (err.response?.status === 404) history.push("/404")
-                        if (err.response?.status === 403) history.push("/403")
+                        if (err.response?.status === 404) functions.replaceLocation("/404")
+                        if (err.response?.status === 403) functions.replaceLocation("/403")
                         return
                     }
                 }
                 setSessionFlag(true)
             } else {
-                history.push("/404")
+                functions.replaceLocation("/404")
             }
         }
         updatePost()
@@ -296,8 +296,8 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
             try {
                 post = await functions.get("/api/post", {postID}, session, setSessionFlag)
             } catch (err: any) {
-                if (err.response?.status === 404) history.push("/404")
-                if (err.response?.status === 403) history.push("/403")
+                if (err.response?.status === 404) functions.replaceLocation("/404")
+                if (err.response?.status === 403) functions.replaceLocation("/403")
                 return
             }
             if (post) {
@@ -317,7 +317,7 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
                 setPost(post)
                 setSessionFlag(true)
             } else {
-                history.push("/404")
+                functions.replaceLocation("/404")
             }
         }
         if (postFlag) updatePost()
@@ -418,7 +418,7 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
                 setRevertPostHistoryID({failed: error ? error : true, historyID})
             })
         }
-    }, [revertPostHistoryFlag, revertPostHistoryID, session])
+    }, [revertPostHistoryFlag, revertPostHistoryID, historyID, post, session])
 
     const revertPostHistoryDialog = async () => {
         setRevertPostHistoryID({failed: false, historyID})
@@ -433,10 +433,10 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
     const getHistoryButtons = () => {
         return (
             <div className="history-button-container">
-                <button className="history-button" onClick={revertPostHistoryDialog}>
+                {session.username ? <button className="history-button" onClick={revertPostHistoryDialog}>
                     <img src={historyIcon}/>
                     <span>Revert</span>
-                </button>
+                </button> : null}
                 <button className="history-button" onClick={currentHistory}>
                     <img src={currentIcon}/>
                     <span>Current</span>

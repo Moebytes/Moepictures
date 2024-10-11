@@ -77,7 +77,7 @@ const SetAvatarPage: React.FunctionComponent<Props> = (props) => {
         }
         if (post.restrict === "explicit") {
             if (!session.showR18) {
-                history.push("/403")
+                functions.replaceLocation("/403")
             }
         }
     }, [session, post])
@@ -107,7 +107,7 @@ const SetAvatarPage: React.FunctionComponent<Props> = (props) => {
                 setTags(tags)
                 setPost(post)
             } else {
-                if (!$401Error) history.push("/404")
+                if (!$401Error) functions.replaceLocation("/404")
             }
         }
         updatePost()
@@ -139,7 +139,7 @@ const SetAvatarPage: React.FunctionComponent<Props> = (props) => {
                 setTags(tags)
                 setPost(post)
             } else {
-                if (!$401Error) history.push("/404")
+                if (!$401Error) functions.replaceLocation("/404")
             }
         }
         if (postFlag) updatePost()

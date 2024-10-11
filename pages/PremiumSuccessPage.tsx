@@ -36,7 +36,7 @@ const PremiumSuccessPage: React.FunctionComponent = (props) => {
         const cookie = await functions.get("/api/user/session", null, session, setSessionFlag)
         setSession(cookie)
         if (!permissions.isPremium(cookie)) {
-            history.push("/401")
+            functions.replaceLocation("/401")
         }
     }
 

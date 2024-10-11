@@ -126,7 +126,7 @@ const EditUnverifiedPostPage: React.FunctionComponent<Props> = (props) => {
 
     const updateFields = async () => {
         const post = await functions.get("/api/post/unverified", {postID}, session, setSessionFlag)
-        if (!post) return history.push("/404")
+        if (!post) return functions.replaceLocation("/404")
         setOriginalID(post.originalID)
         setType(post.type)
         setRestrict(post.restrict)
@@ -286,7 +286,7 @@ const EditUnverifiedPostPage: React.FunctionComponent<Props> = (props) => {
     useEffect(() => {
         if (!session.cookie) return
         if (!permissions.isElevated(session)) {
-            history.push("/403")
+            functions.replaceLocation("/403")
         }
     }, [session])
 

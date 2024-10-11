@@ -2166,7 +2166,7 @@ export default class Functions {
 
     public static getDomain = () => {
         if (Functions.isLocalHost()) {
-            return "https://localhost:8082"
+            return "http://localhost:8082"
         } else {
             return "https://moepictures.moe"
         }
@@ -2325,5 +2325,9 @@ export default class Functions {
             if (!exists) notExists.push({tag: tags[i], desc: `${Functions.toProperCase(tags[i]).replaceAll("-", " ")}.`})
         }
         return notExists
+    }
+
+    public static replaceLocation = (location: string) => {
+        window.location = `${Functions.getDomain()}${location}` as any
     }
 }

@@ -142,10 +142,11 @@ const TagHistoryRow: React.FunctionComponent<Props> = (props) => {
     }
 
     const imgClick = (event: React.MouseEvent) => {
+        let historyIndex = props.current ? "" : `?history=${props.tagHistory.historyID}`
         if (event.ctrlKey || event.metaKey || event.button === 1) {
-            window.open(`/tag/${props.tagHistory.tag}`, "_blank")
+            window.open(`/tag/${props.tagHistory.tag}${historyIndex}`, "_blank")
         } else {
-            history.push(`/tag/${props.tagHistory.tag}`)
+            history.push(`/tag/${props.tagHistory.tag}${historyIndex}`)
         }
     }
 
@@ -259,7 +260,7 @@ const TagHistoryRow: React.FunctionComponent<Props> = (props) => {
         <div className="taghistoryrow">
             {session.username ? tagHistoryOptions() : null}
             <div className="taghistoryrow-container">
-                <img className="taghistoryrow-img" src={img}/>
+                <img className="taghistoryrow-img" src={img} onClick={imgClick} onAuxClick={imgClick}/>
                 <span className="taghistoryrow-tag-text" onClick={imgClick} onAuxClick={imgClick}>{functions.toProperCase(props.tagHistory.key.replaceAll("-", " "))}</span>
                 {socialJSX()}
             </div>

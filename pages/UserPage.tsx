@@ -83,7 +83,7 @@ const UserPage: React.FunctionComponent<Props> = (props) => {
 
     const fetchUser = async () => {
         const user = await functions.get("/api/user", {username}, session, setSessionFlag)
-        if (!user) return history.push("/404")
+        if (!user) return functions.replaceLocation("/404")
         setUser(user)
         setDefaultIcon(user.image ? false : true)
         forceUpdate()

@@ -75,7 +75,7 @@ const PremiumPage: React.FunctionComponent = (props) => {
     useEffect(() => {
         if (!session.cookie) return
         if (!session.username) {
-            history.push("/401")
+            functions.replaceLocation("/401")
         }
     }, [session])
 

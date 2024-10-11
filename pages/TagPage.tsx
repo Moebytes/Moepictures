@@ -3,8 +3,9 @@ import {ThemeContext, EnableDragContext, HideNavbarContext, HideSidebarContext, 
 ActiveDropdownContext, HeaderTextContext, SidebarTextContext, SessionContext, SessionFlagContext, SearchContext, SearchFlagContext, TakedownTagContext,
 DeleteTagFlagContext, DeleteTagIDContext, EditTagTypeContext, EditTagReasonContext, EditTagImageContext, EditTagKeyContext, EditTagSocialContext,
 EditTagTwitterContext, EditTagWebsiteContext, EditTagFandomContext, EditTagAliasesContext, EditTagImplicationsContext, 
-EditTagDescriptionContext, EditTagIDContext, EditTagFlagContext, EditTagPixivTagsContext, RestrictTypeContext} from "../Context"
-import {useHistory} from "react-router-dom"
+EditTagDescriptionContext, EditTagIDContext, EditTagFlagContext, EditTagPixivTagsContext, RestrictTypeContext, RevertTagHistoryIDContext, 
+RevertTagHistoryFlagContext} from "../Context"
+import {useHistory, useLocation} from "react-router-dom"
 import TitleBar from "../components/TitleBar"
 import NavBar from "../components/NavBar"
 import SideBar from "../components/SideBar"
@@ -27,6 +28,9 @@ import soundcloud from "../assets/icons/soundcloud.png"
 import sketchfab from "../assets/icons/sketchfab.png"
 import twitter from "../assets/icons/twitter.png"
 import Carousel from "../components/Carousel"
+import RevertTagHistoryDialog from "../dialogs/RevertTagHistoryDialog"
+import historyIcon from "../assets/icons/history-state.png"
+import currentIcon from "../assets/icons/current.png"
 import jsxFunctions from "../structures/JSXFunctions"
 import "./styles/tagpage.less"
 
@@ -68,24 +72,47 @@ const TagPage: React.FunctionComponent<Props> = (props) => {
     const {editTagPixivTags, setEditTagPixivTags} = useContext(EditTagPixivTagsContext)
     const {editTagImage, setEditTagImage} = useContext(EditTagImageContext)
     const {editTagKey, setEditTagKey} = useContext(EditTagKeyContext)
+    const {revertTagHistoryID, setRevertTagHistoryID} = useContext(RevertTagHistoryIDContext)
+    const {revertTagHistoryFlag, setRevertTagHistoryFlag} = useContext(RevertTagHistoryFlagContext)
     const {restrictType, setRestrictType} = useContext(RestrictTypeContext)
     const [tag, setTag] = useState(null) as any
+    const [tagFlag, setTagFlag] = useState(false)
     const [posts, setPosts] = useState([]) as any
     const [postImages, setPostImages] = useState([]) as any
     const [appendImages, setAppendImages] = useState([]) as any
     const [postIndex, setPostIndex] = useState(0)
     const [relatedTags, setRelatedTags] = useState([]) as any
+    const [historyID, setHistoryID] = useState(null as any)
     const [count, setCount] = useState(0)
     const history = useHistory()
+    const location = useLocation()
     const tagName = props?.match.params.tag
+
+    useEffect(() => {
+        setHideNavbar(true)
+        setHideTitlebar(true)
+        setHideSidebar(false)
+        setRelative(false)
+        setActiveDropdown("none")
+        setSidebarText("")
+        document.title = `${functions.toProperCase(tagName.replaceAll("-", " "))}`
+        setHeaderText(`${functions.toProperCase(tagName.replaceAll("-", " "))}`)
+        const historyParam = new URLSearchParams(window.location.search).get("history")
+        setHistoryID(historyParam)
+    }, [location])
 
     useEffect(() => {
         limit = mobile ? 5 : 25
     }, [mobile])
 
     const tagInfo = async () => {
-        const tag = await functions.get("/api/tag", {tag: tagName}, session, setSessionFlag)
-        if (!tag) return history.push("/404")
+        let tag = null as any
+        if (historyID) {
+            tag = await functions.get("/api/tag/history", {tag: tagName, historyID}, session, setSessionFlag)
+        } else {
+            tag = await functions.get("/api/tag", {tag: tagName}, session, setSessionFlag)
+        }
+        if (!tag) return functions.replaceLocation("/404")
         const tagCount = await functions.get("/api/tag/counts", {tags: [tagName]}, session, setSessionFlag).then((r) => Number(r?.[0]?.count || 0))
         setTag(tag)
         setCount(tagCount)
@@ -121,18 +148,14 @@ const TagPage: React.FunctionComponent<Props> = (props) => {
         tagInfo()
         updateRelatedTags()
         updatePosts()
-    }, [tagName, session])
+    }, [tagName, historyID, session])
 
     useEffect(() => {
-        setHideNavbar(true)
-        setHideTitlebar(true)
-        setHideSidebar(false)
-        setRelative(false)
-        setActiveDropdown("none")
-        setHeaderText("")
-        setSidebarText("")
-        document.title = `${functions.toProperCase(tagName.replaceAll("-", " "))}`
-    }, [])
+        if (tagFlag) {
+            tagInfo()
+            setTagFlag(false)
+        }
+    }, [tagFlag, historyID, session])
 
     useEffect(() => {
         if (mobile) {
@@ -230,8 +253,8 @@ const TagPage: React.FunctionComponent<Props> = (props) => {
         setEditTagKey(tag.tag)
         setEditTagDescription(tag.description)
         setEditTagImage(tag.image ? functions.getTagLink(tag.type, tag.image) : null)
-        setEditTagAliases(tag.aliases?.[0] ? tag.aliases.map((a: any) => a.alias) : [])
-        setEditTagImplications(tag.implications?.[0] ? tag.implications.map((i: any) => i.implication) : [])
+        setEditTagAliases(tag.aliases?.[0] ? tag.aliases.map((a: any) => a.alias ? a.alias : a) : [])
+        setEditTagImplications(tag.implications?.[0] ? tag.implications.map((i: any) => i.implication ? i.implication : i) : [])
         setEditTagPixivTags(tag.pixivTags?.[0] ? tag.pixivTags : [])
         setEditTagID(tag.tag)
         setEditTagType(tag.type)
@@ -290,7 +313,8 @@ const TagPage: React.FunctionComponent<Props> = (props) => {
         let jsx = [] as any
         if (tag.aliases?.[0]) {
             for (let i = 0; i < tag.aliases.length; i++) {
-                jsx.push(<button className="tag-alias-button" onClick={(event) => searchTag(event, tag.aliases[i].alias)}>{tag.aliases[i].alias.replaceAll("-", " ")}</button>)
+                let alias = tag.aliases[i]?.alias ? tag.aliases[i].alias : tag.aliases[i]
+                jsx.push(<button className="tag-alias-button" onClick={(event) => searchTag(event, alias)}>{alias.replaceAll("-", " ")}</button>)
             }
         }
         if (jsx.length) {
@@ -304,9 +328,10 @@ const TagPage: React.FunctionComponent<Props> = (props) => {
         let jsx = [] as any
         if (tag.implications?.[0]) {
             for (let i = 0; i < tag.implications.length; i++) {
-                let implication = tag.implications[i].implication.replaceAll("-", " ")
+                let implication = tag.implications[i]?.implication ? tag.implications[i].implication : tag.implications[i]
+                let implicationSpace = implication.replaceAll("-", " ")
                 if (i !== tag.implications.length - 1) implication += ", "
-                jsx.push(<span className="tag-text-alt" onClick={() => history.push(`/tag/${tag.implications[i].implication}`)}>{implication}</span>)
+                jsx.push(<span className="tag-text-alt" onClick={() => history.push(`/tag/${implication}`)}>{implicationSpace}</span>)
             }
         }
         if (jsx.length) {
@@ -354,19 +379,74 @@ const TagPage: React.FunctionComponent<Props> = (props) => {
         }
     }
 
+    const revertTagHistory = async () => {
+        let image = null as any
+        if (!tag.image) {
+            image = ["delete"]
+        } else {
+            const imageLink = functions.getTagLink(tag.type, tag.image)
+            const arrayBuffer = await fetch(imageLink).then((r) => r.arrayBuffer())
+            const bytes = new Uint8Array(arrayBuffer)
+            image = Object.values(bytes)
+        }
+        await functions.put("/api/tag/edit", {tag: tag.tag, key: tag.key, description: tag.description,
+        image, aliases: tag.aliases, implications: tag.implications, social: tag.social, twitter: tag.twitter,
+        website: tag.website, fandom: tag.fandom}, session, setSessionFlag)
+        currentHistory()
+    }
+
+    useEffect(() => {
+        if (revertTagHistoryFlag && historyID === revertTagHistoryID?.historyID) {
+            revertTagHistory().then(() => {
+                setRevertTagHistoryFlag(false)
+                setRevertTagHistoryID(null)
+            }).catch(() => {
+                setRevertTagHistoryFlag(false)
+                setRevertTagHistoryID({failed: true, historyID})
+            })
+        }
+    }, [revertTagHistoryFlag, revertTagHistoryID, historyID, tag, session])
+
+    const revertTagHistoryDialog = async () => {
+        setRevertTagHistoryID({failed: false, historyID})
+    }
+
+    const currentHistory = () => {
+        setHistoryID(null)
+        setTagFlag(true)
+        history.push(`/tag/${tagName}`)
+    }
+
+    const getHistoryButtons = () => {
+        return (
+            <div className="history-button-container">
+                {session.username ? <button className="history-button" onClick={revertTagHistoryDialog}>
+                    <img src={historyIcon}/>
+                    <span>Revert</span>
+                </button> : null}
+                <button className="history-button" onClick={currentHistory}>
+                    <img src={currentIcon}/>
+                    <span>Current</span>
+                </button>
+            </div>
+        )
+    }
+
     return (
         <>
         <DragAndDrop/>
         <EditTagDialog/>
         <DeleteTagDialog/>
         <TakedownTagDialog/>
-        <TitleBar/>
+        <RevertTagHistoryDialog/>
+        <TitleBar historyID={historyID}/>
         <NavBar/>
         <div className="body">
             <SideBar/>
             <div className="content" onMouseEnter={() => setEnableDrag(true)}>
                 {tag ? 
                 <div className="tag-page">
+                    {historyID ? getHistoryButtons() : null}
                     <div className="tag-row">
                         {tag.image ?
                         <div className="tag-img-container">

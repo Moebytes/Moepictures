@@ -54,6 +54,20 @@ export default class SQLHistory {
         return result
     }
 
+    /** Get tag history ID */
+    public static tagHistoryID = async (tag: string, historyID: string) => {
+        const query: QueryConfig = {
+        text: functions.multiTrim(/*sql*/`
+                SELECT "tag history".*
+                FROM "tag history"
+                WHERE "tag history"."tag" = $1 AND "tag history"."historyID" = $2
+            `),
+            values: [tag, historyID]
+        }
+        const result = await SQLQuery.run(query, true)
+        return result[0]
+    }
+
     /** Get user tag history */
     public static userTagHistory = async (username: string) => {
         const query: QueryConfig = {

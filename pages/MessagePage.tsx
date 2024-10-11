@@ -168,12 +168,12 @@ const MessagePage: React.FunctionComponent<Props> = (props) => {
     useEffect(() => {
         if (!session.cookie) return
         if (!session.username) {
-            history.push("/401")
+            functions.replaceLocation("/401")
         }
         if (message) {
             if (message.creator !== session.username &&
                 message.recipient !== session.username) {
-                    history.push("/401")
+                    functions.replaceLocation("/401")
                 }
         }
     }, [session, message])

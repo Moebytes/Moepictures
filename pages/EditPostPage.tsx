@@ -134,7 +134,7 @@ const EditPostPage: React.FunctionComponent<Props> = (props) => {
         } catch (e: any) {
             if (String(e).includes("401")) return
         }
-        if (!post) return history.push("/404")
+        if (!post) return functions.replaceLocation("/404")
         setType(post.type)
         setRestrict(post.restrict)
         setStyle(post.style)

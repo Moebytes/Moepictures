@@ -16,6 +16,7 @@ import ModTagAliases from "../components/ModTagAliases"
 import ModTagEdits from "../components/ModTagEdits"
 import ModTranslations from "../components/ModTranslations"
 import ModReports from "../components/ModReports"
+import functions from "../structures/Functions"
 import "./styles/modqueuepage.less"
 
 const ModQueuePage: React.FunctionComponent = (props) => {
@@ -60,7 +61,7 @@ const ModQueuePage: React.FunctionComponent = (props) => {
     useEffect(() => {
         if (!session.cookie) return
         if (!permissions.isElevated(session)) {
-            history.push("/401")
+            functions.replaceLocation("/401")
         }
     }, [session])
 

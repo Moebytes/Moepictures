@@ -1,4 +1,5 @@
 import React, {useEffect, useContext} from "react"
+import {useHistory} from "react-router-dom"
 import TitleBar from "../components/TitleBar"
 import NavBar from "../components/NavBar"
 import SideBar from "../components/SideBar"
@@ -19,6 +20,7 @@ const $403Page: React.FunctionComponent = (props) => {
     const {headerText, setHeaderText} = useContext(HeaderTextContext)
     const {sidebarText, setSidebarText} = useContext(SidebarTextContext)
     const {mobile, setMobile} = useContext(MobileContext)
+    const history = useHistory()
 
     useEffect(() => {
         setHideNavbar(false)

@@ -83,7 +83,7 @@ const ChangeUsernamePage: React.FunctionComponent = (props) => {
             setSidebarText("Login required.")
         }
         if (!permissions.isPremium(session)) {
-            history.push("/401")
+            functions.replaceLocation("/401")
         }
     }, [session])
 

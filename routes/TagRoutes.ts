@@ -498,10 +498,16 @@ const TagRoutes = (app: Express) => {
     app.get("/api/tag/history", tagLimiter, async (req: Request, res: Response) => {
         try {
             const tag = req.query.tag as string
+            const historyID = req.query.historyID as string
             const offset = req.query.offset as string
             if (!req.session.username) return res.status(403).send("Unauthorized")
-            const result = await sql.history.tagHistory(tag, offset)
-            res.status(200).json(result)
+            if (historyID) {
+                const result = await sql.history.tagHistoryID(tag, historyID)
+                res.status(200).json(result)
+            } else {
+                const result = await sql.history.tagHistory(tag, offset)
+                res.status(200).json(result)
+            }
         } catch (e) {
             console.log(e)
             res.status(400).send("Bad request")
