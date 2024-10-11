@@ -25,6 +25,8 @@ import translationToggleOn from "../assets/icons/translation-toggle-on.png"
 import expand from "../assets/icons/expand.png"
 import contract from "../assets/icons/contract.png"
 import TranslationEditor from "./TranslationEditor"
+import nextIcon from "../assets/icons/next.png"
+import prevIcon from "../assets/icons/prev.png"
 import path from "path"
 import "./styles/postsong.less"
 
@@ -40,6 +42,8 @@ interface Props {
     order?: number
     noTranslations?: boolean
     unverified?: boolean
+    previous?: () => void
+    next?: () => void
 }
 
 const PostSong: React.FunctionComponent<Props> = (props) => {
@@ -105,6 +109,8 @@ const PostSong: React.FunctionComponent<Props> = (props) => {
     const {muteFlag, setMuteFlag} = useContext(MuteFlagContext)
     const {resetFlag, setResetFlag} = useContext(ResetFlagContext)
     const {audioPost, setAudioPost} = useContext(AudioPostContext)
+    const [previousButtonHover, setPreviousButtonHover] = useState(false)
+    const [nextButtonHover, setNextButtonHover] = useState(false)
 
     const getFilter = () => {
         return `hue-rotate(${siteHue - 180}deg) saturate(${siteSaturation}%) brightness(${siteLightness + 70}%)`
@@ -448,6 +454,12 @@ const PostSong: React.FunctionComponent<Props> = (props) => {
                     <div className={`post-image-top-buttons ${buttonHover ? "show-post-image-top-buttons" : ""}`} onMouseEnter={() => setButtonHover(true)} onMouseLeave={() => setButtonHover(false)}>
                         {!props.noTranslations && session.username ? <img draggable={false} className="post-image-top-button" src={translationToggleOn} style={{filter: getFilter()}} onClick={() => {setTranslationMode(true); setTranslationDrawingEnabled(true)}}/> : null}
                         <img draggable={false} className="post-image-top-button" src={imageExpand ? contract : expand} style={{filter: getFilter()}} onClick={() => setImageExpand((prev: boolean) => !prev)}/>
+                    </div>
+                    <div className={`post-image-previous-button ${previousButtonHover ? "show-post-image-mid-buttons" : ""}`} onMouseEnter={() => setPreviousButtonHover(true)} onMouseLeave={() => setPreviousButtonHover(false)}>
+                        <img draggable={false} className="post-image-mid-button" src={prevIcon} style={{filter: getFilter()}} onClick={() => props.previous?.()}/>
+                    </div>
+                    <div className={`post-image-next-button ${nextButtonHover ? "show-post-image-mid-buttons" : ""}`} onMouseEnter={() => setNextButtonHover(true)} onMouseLeave={() => setNextButtonHover(false)}>
+                        <img draggable={false} className="post-image-mid-button" src={nextIcon} style={{filter: getFilter()}} onClick={() => props.next?.()}/>
                     </div>
                     <canvas draggable={false} className="dummy-post-song" ref={dummyRef}></canvas>
                     <div className="relative-ref">

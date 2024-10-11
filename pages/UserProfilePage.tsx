@@ -8,7 +8,7 @@ import SideBar from "../components/SideBar"
 import Footer from "../components/Footer"
 import DragAndDrop from "../components/DragAndDrop"
 import {HideNavbarContext, HideSidebarContext, ThemeContext, EnableDragContext, RelativeContext, HideTitlebarContext, MobileContext, RestrictTypeContext,
-HeaderTextContext, SidebarTextContext, SessionContext, RedirectContext, SessionFlagContext, UserImgContext, ShowDeleteAccountDialogContext,
+HeaderTextContext, SidebarTextContext, SessionContext, RedirectContext, SessionFlagContext, UserImgContext, ShowDeleteAccountDialogContext, PostsContext,
 CommentSearchFlagContext, SiteHueContext, SiteLightnessContext, UserImgPostContext, SiteSaturationContext, R18ConfirmationContext, SearchContext, SearchFlagContext,
 PremiumRequiredContext} from "../Context"
 import functions from "../structures/Functions"
@@ -55,6 +55,7 @@ const UserProfilePage: React.FunctionComponent = (props) => {
     const {restrictType, setRestrictType} = useContext(RestrictTypeContext)
     const {search, setSearch} = useContext(SearchContext)
     const {searchFlag, setSearchFlag} = useContext(SearchFlagContext)
+    const {posts, setPosts} = useContext(PostsContext)
     const bioRef = useRef<any>(null)
     const errorRef = useRef<any>(null)
     const [error, setError] = useState(false)
@@ -325,6 +326,8 @@ const UserProfilePage: React.FunctionComponent = (props) => {
         } else {
             history.push(`/post/${postID}`)
         }
+        window.scrollTo(0, functions.navbarHeight() + functions.titlebarHeight())
+        setPosts(uploads)
     }
 
     const setFav = (img: string, index: number, newTab: boolean) => {
@@ -335,6 +338,8 @@ const UserProfilePage: React.FunctionComponent = (props) => {
         } else {
             history.push(`/post/${postID}`)
         }
+        window.scrollTo(0, functions.navbarHeight() + functions.titlebarHeight())
+        setPosts(favorites)
     }
 
     const deleteAccountDialog = () => {

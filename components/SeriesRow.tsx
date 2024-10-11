@@ -1,6 +1,6 @@
 import React, {useContext, useRef, useState} from "react"
 import {useHistory} from "react-router-dom"
-import {ThemeContext, SearchContext, SearchFlagContext, SessionContext, MobileContext, RestrictTypeContext} from "../Context"
+import {ThemeContext, SearchContext, SearchFlagContext, SessionContext, MobileContext, RestrictTypeContext, PostsContext} from "../Context"
 import {HashLink as Link} from "react-router-hash-link"
 import functions from "../structures/Functions"
 import Carousel from "./Carousel"
@@ -21,6 +21,7 @@ const SeriesRow: React.FunctionComponent<Props> = (props) => {
     const {mobile, setMobile} = useContext(MobileContext)
     const {session, setSession} = useContext(SessionContext)
     const {restrictType, setRestrictType} = useContext(RestrictTypeContext)
+    const {posts, setPosts} = useContext(PostsContext)
     const history = useHistory()
 
     const searchTag = (event: React.MouseEvent) => {
@@ -54,6 +55,8 @@ const SeriesRow: React.FunctionComponent<Props> = (props) => {
         } else {
             history.push(`/post/${post.postID}`)
         }
+        window.scrollTo(0, functions.navbarHeight() + functions.titlebarHeight())
+        setPosts(props.series.posts)
     }
 
     const getImages = () => {

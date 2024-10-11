@@ -1,6 +1,6 @@
 import React, {useContext, useRef, useState} from "react"
 import {useHistory} from "react-router-dom"
-import {ThemeContext, EnableDragContext, SessionContext, MobileContext} from "../Context"
+import {ThemeContext, EnableDragContext, SessionContext, MobileContext, PostsContext} from "../Context"
 import functions from "../structures/Functions"
 import Carousel from "./Carousel"
 import "./styles/related.less"
@@ -14,6 +14,7 @@ const ArtistWorks: React.FunctionComponent<Props> = (props) => {
     const {theme, setTheme} = useContext(ThemeContext)
     const {enableDrag, setEnableDrag} = useContext(EnableDragContext)
     const {session, setSession} = useContext(SessionContext)
+    const {posts, setPosts} = useContext(PostsContext)
     const history = useHistory()
 
     const getImages = () => {
@@ -23,7 +24,8 @@ const ArtistWorks: React.FunctionComponent<Props> = (props) => {
     const click = (img: string, index: number) => {
         const postID = props.posts[index].postID
         history.push(`/post/${postID}`)
-        window.scrollTo(0, 0)
+        window.scrollTo(0, functions.navbarHeight() + functions.titlebarHeight())
+        setPosts(props.posts)
     }
 
     let marginLeft = mobile ? 20 : 200

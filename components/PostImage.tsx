@@ -41,7 +41,8 @@ import waifu2xIcon from "../assets/icons/waifu2x.png"
 import expand from "../assets/icons/expand.png"
 import contract from "../assets/icons/contract.png"
 import TranslationEditor from "./TranslationEditor"
-import gifFrames from "gif-frames"
+import nextIcon from "../assets/icons/next.png"
+import prevIcon from "../assets/icons/prev.png"
 import JSZip from "jszip"
 import {TransformWrapper, TransformComponent} from "react-zoom-pan-pinch"
 import path from "path"
@@ -61,6 +62,8 @@ interface Props {
     noEncryption?: boolean
     noTranslations?: boolean
     unverified?: boolean
+    previous?: () => void
+    next?: () => void
 }
 
 let timeout = null as any
@@ -146,6 +149,8 @@ const PostImage: React.FunctionComponent<Props> = (props) => {
     const [encodingOverlay, setEncodingOverlay] = useState(false)
     const [seekTo, setSeekTo] = useState(null) as any
     const [buttonHover, setButtonHover] = useState(false)
+    const [previousButtonHover, setPreviousButtonHover] = useState(false)
+    const [nextButtonHover, setNextButtonHover] = useState(false)
     const [img, setImg] = useState("")
 
     const getFilter = () => {
@@ -1266,6 +1271,12 @@ const PostImage: React.FunctionComponent<Props> = (props) => {
                         {!props.noTranslations && session.username ? <img draggable={false} className="post-image-top-button" src={waifu2xIcon} style={{filter: getFilter()}} onClick={() => toggleUpscale()}/> : null}
                         {!props.noTranslations && session.username ? <img draggable={false} className="post-image-top-button" src={translationToggleOn} style={{filter: getFilter()}} onClick={() => {setTranslationMode(true); setTranslationDrawingEnabled(true)}}/> : null}
                         {!mobile ? <img draggable={false} className="post-image-top-button" src={imageExpand ? contract : expand} style={{filter: getFilter()}} onClick={() => setImageExpand((prev: boolean) => !prev)}/> : null}
+                    </div>
+                    <div className={`post-image-previous-button ${previousButtonHover ? "show-post-image-mid-buttons" : ""}`} onMouseEnter={() => setPreviousButtonHover(true)} onMouseLeave={() => setPreviousButtonHover(false)}>
+                        <img draggable={false} className="post-image-mid-button" src={prevIcon} style={{filter: getFilter()}} onClick={() => props.previous?.()}/>
+                    </div>
+                    <div className={`post-image-next-button ${nextButtonHover ? "show-post-image-mid-buttons" : ""}`} onMouseEnter={() => setNextButtonHover(true)} onMouseLeave={() => setNextButtonHover(false)}>
+                        <img draggable={false} className="post-image-mid-button" src={nextIcon} style={{filter: getFilter()}} onClick={() => props.next?.()}/>
                     </div>
                     {functions.isVideo(props.img) ? 
                     <video draggable={false} loop muted disablePictureInPicture playsInline className="dummy-post-video" src={props.img}></video> :

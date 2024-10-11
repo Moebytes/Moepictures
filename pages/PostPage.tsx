@@ -342,6 +342,7 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
                 const post = posts[currentIndex]
                 if (post.fake) return
                 history.push(`/post/${post.postID}`)
+                window.scrollTo(0, functions.navbarHeight() + functions.titlebarHeight())
             }
         }
     }
@@ -360,6 +361,7 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
                 const post = posts[currentIndex]
                 if (post.fake) return
                 history.push(`/post/${post.postID}`)
+                window.scrollTo(0, functions.navbarHeight() + functions.titlebarHeight())
             }
         }
     }
@@ -450,14 +452,14 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
         if (post.type === "model") {
             return (
                 <>
-                <PostModel post={post} model={image} order={order}/>
+                <PostModel post={post} model={image} order={order} next={next} previous={previous}/>
                 <PostImageOptions post={post} model={image} download={download} next={next} previous={previous}/>
                 </>
             )
         } else if (post.type === "audio") {
             return (
                 <>
-                <PostSong post={post} audio={image} order={order}/>
+                <PostSong post={post} audio={image} order={order} next={next} previous={previous}/>
                 <PostImageOptions post={post} audio={image} download={download} next={next} previous={previous}/>
                 </>
             )
@@ -468,7 +470,7 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
             }
             return (
                 <>
-                <PostImage post={post} img={img} comicPages={post.type === "comic" ? images : null} order={order}/>
+                <PostImage post={post} img={img} comicPages={post.type === "comic" ? images : null} order={order} next={next} previous={previous}/>
                 <PostImageOptions post={post} img={img} comicPages={post.type === "comic" ? images : null} download={download} next={next} previous={previous}/>
                 </>
             )

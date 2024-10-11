@@ -28,6 +28,8 @@ import expand from "../assets/icons/expand.png"
 import contract from "../assets/icons/contract.png"
 import TranslationEditor from "./TranslationEditor"
 import path from "path"
+import nextIcon from "../assets/icons/next.png"
+import prevIcon from "../assets/icons/prev.png"
 import "./styles/postmodel.less"
 import mime from "mime-types"
 import * as THREE from "three"
@@ -47,6 +49,8 @@ interface Props {
     order?: number
     noTranslations?: boolean
     unverified?: boolean
+    previous?: () => void
+    next?: () => void
 }
 
 const PostModel: React.FunctionComponent<Props> = (props) => {
@@ -110,6 +114,8 @@ const PostModel: React.FunctionComponent<Props> = (props) => {
     const [morphTargets, setMorphTargets] = useState([]) as any
     const [model, setModel] = useState(null) as any
     const [scene, setScene] = useState(null) as any
+    const [previousButtonHover, setPreviousButtonHover] = useState(false)
+    const [nextButtonHover, setNextButtonHover] = useState(false)
     const [objMaterials, setObjMaterials] = useState([]) as any
     const [buttonHover, setButtonHover] = useState(false)
 
@@ -736,9 +742,15 @@ const PostModel: React.FunctionComponent<Props> = (props) => {
             {!props.noTranslations && session.username ? <TranslationEditor post={props.post} img={props.model} order={props.order} unverified={props.unverified}/> : null}
             <div className="post-model-box" ref={containerRef} style={{display: translationMode ? "none" : "flex"}}>
                 <div className="post-model-filters" ref={fullscreenRef} onMouseOver={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
-                <div className={`post-image-top-buttons ${buttonHover ? "show-post-image-top-buttons" : ""}`} onMouseEnter={() => setButtonHover(true)} onMouseLeave={() => setButtonHover(false)}>
+                    <div className={`post-image-top-buttons ${buttonHover ? "show-post-image-top-buttons" : ""}`} onMouseEnter={() => setButtonHover(true)} onMouseLeave={() => setButtonHover(false)}>
                         {!props.noTranslations && session.username ? <img draggable={false} className="post-image-top-button" src={translationToggleOn} style={{filter: getFilter()}} onClick={() => {setTranslationMode(true); setTranslationDrawingEnabled(true)}}/> : null}
                         <img draggable={false} className="post-image-top-button" src={imageExpand ? contract : expand} style={{filter: getFilter()}} onClick={() => setImageExpand((prev: boolean) => !prev)}/>
+                    </div>
+                    <div className={`post-image-previous-button ${previousButtonHover ? "show-post-image-mid-buttons" : ""}`} onMouseEnter={() => setPreviousButtonHover(true)} onMouseLeave={() => setPreviousButtonHover(false)}>
+                        <img draggable={false} className="post-image-mid-button" src={prevIcon} style={{filter: getFilter()}} onClick={() => props.previous?.()}/>
+                    </div>
+                    <div className={`post-image-next-button ${nextButtonHover ? "show-post-image-mid-buttons" : ""}`} onMouseEnter={() => setNextButtonHover(true)} onMouseLeave={() => setNextButtonHover(false)}>
+                        <img draggable={false} className="post-image-mid-button" src={nextIcon} style={{filter: getFilter()}} onClick={() => props.next?.()}/>
                     </div>
                     <div className="relative-ref" style={{alignItems: "center", justifyContent: "center"}}>
                         <div className="model-controls" ref={modelControls} onMouseUp={() => setDragging(false)} onMouseOver={controlMouseEnter} onMouseLeave={controlMouseLeave}>

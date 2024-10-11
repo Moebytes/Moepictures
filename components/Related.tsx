@@ -1,6 +1,6 @@
 import React, {useContext, useEffect, useRef, useState} from "react"
 import {useHistory} from "react-router-dom"
-import {ThemeContext, EnableDragContext, SessionContext, MobileContext, RestrictTypeContext} from "../Context"
+import {ThemeContext, EnableDragContext, SessionContext, MobileContext, RestrictTypeContext, PostsContext} from "../Context"
 import {HashLink as Link} from "react-router-hash-link"
 import functions from "../structures/Functions"
 import permissions from "../structures/Permissions"
@@ -18,6 +18,7 @@ const Related: React.FunctionComponent<Props> = (props) => {
     const {enableDrag, setEnableDrag} = useContext(EnableDragContext)
     const {session, setSession} = useContext(SessionContext)
     const {restrictType, setRestrictType} = useContext(RestrictTypeContext)
+    const {posts, setPosts} = useContext(PostsContext)
     const [related, setRelated] = useState([]) as any
     const history = useHistory()
 
@@ -55,7 +56,8 @@ const Related: React.FunctionComponent<Props> = (props) => {
     const click = (img: string, index: number) => {
         const postID = related[index].postID
         history.push(`/post/${postID}`)
-        window.scrollTo(0, 0)
+        window.scrollTo(0, functions.navbarHeight() + functions.titlebarHeight())
+        setPosts(props.related)
     }
 
     let marginLeft = mobile ? 20 : 200

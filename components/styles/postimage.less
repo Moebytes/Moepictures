@@ -748,3 +748,43 @@
         margin-right: 0px;
     }
 }
+
+.post-image-previous-button {
+    opacity: 0;
+    transition: opacity 0.6s;
+    position: absolute;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    left: 0;
+    top: 40%;
+    padding: 10px;
+    z-index: 1500;
+}
+
+.post-image-next-button {
+    opacity: 0;
+    transition: opacity 0.6s;
+    position: absolute;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    right: 0;
+    top: 40%;
+    padding: 10px;
+    z-index: 1500;
+}
+
+.show-post-image-mid-buttons {
+    opacity: 1;
+    transition: opacity 0.6s;
+}
+
+.post-image-mid-button {
+    width: auto;
+    height: 25px;
+    cursor: pointer;
+    &:hover {
+        filter: brightness(130%);
+    }
+}

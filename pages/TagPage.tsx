@@ -4,7 +4,7 @@ ActiveDropdownContext, HeaderTextContext, SidebarTextContext, SessionContext, Se
 DeleteTagFlagContext, DeleteTagIDContext, EditTagTypeContext, EditTagReasonContext, EditTagImageContext, EditTagKeyContext, EditTagSocialContext,
 EditTagTwitterContext, EditTagWebsiteContext, EditTagFandomContext, EditTagAliasesContext, EditTagImplicationsContext, 
 EditTagDescriptionContext, EditTagIDContext, EditTagFlagContext, EditTagPixivTagsContext, RestrictTypeContext, RevertTagHistoryIDContext, 
-RevertTagHistoryFlagContext} from "../Context"
+RevertTagHistoryFlagContext, PostsContext} from "../Context"
 import {useHistory, useLocation} from "react-router-dom"
 import TitleBar from "../components/TitleBar"
 import NavBar from "../components/NavBar"
@@ -75,9 +75,10 @@ const TagPage: React.FunctionComponent<Props> = (props) => {
     const {revertTagHistoryID, setRevertTagHistoryID} = useContext(RevertTagHistoryIDContext)
     const {revertTagHistoryFlag, setRevertTagHistoryFlag} = useContext(RevertTagHistoryFlagContext)
     const {restrictType, setRestrictType} = useContext(RestrictTypeContext)
+    const {posts, setPosts} = useContext(PostsContext)
     const [tag, setTag] = useState(null) as any
     const [tagFlag, setTagFlag] = useState(false)
-    const [posts, setPosts] = useState([]) as any
+    const [tagPosts, setTagPosts] = useState([]) as any
     const [postImages, setPostImages] = useState([]) as any
     const [appendImages, setAppendImages] = useState([]) as any
     const [postIndex, setPostIndex] = useState(0)
@@ -128,19 +129,19 @@ const TagPage: React.FunctionComponent<Props> = (props) => {
         let filtered = uploads.filter((u: any) => restrictType === "explicit" ? u.post?.restrict === "explicit" : u.post?.restrict !== "explicit")
         if (!permissions.isElevated(session)) filtered = filtered.filter((u: any) => !u.hidden)
         const images = filtered.map((p: any) => functions.getThumbnailLink(p.images[0].type, p.postID, p.images[0].order, p.images[0].filename, "large"))
-        setPosts(filtered)
+        setTagPosts(filtered)
         setPostImages(images)
     }
 
     const updateOffset = async () => {
-        let uploads = posts
-        let offset = posts.length
+        let uploads = tagPosts
+        let offset = tagPosts.length
         const result = await functions.get("/api/search/posts", {query: tag.tag, type: "all", restrict: "all", style: "all", sort: "date", limit, offset}, session, setSessionFlag)
         uploads.push(...result)
         let filtered = uploads.filter((u: any) => restrictType === "explicit" ? u.post?.restrict === "explicit" : u.post?.restrict !== "explicit")
         if (!permissions.isElevated(session)) filtered = filtered.filter((u: any) => !u.hidden)
         const images = filtered.map((p: any) => functions.getThumbnailLink(p.images[0].type, p.postID, p.images[0].order, p.images[0].filename, "large"))
-        setPosts(filtered)
+        setTagPosts(filtered)
         setAppendImages(images)
     }
 
@@ -167,12 +168,14 @@ const TagPage: React.FunctionComponent<Props> = (props) => {
 
     const set = (img: string, index: number, newTab: boolean) => {
         setPostIndex(index)
-        const postID = posts[index].postID
+        const postID = tagPosts[index].postID
         if (newTab) {
             window.open(`/post/${postID}`, "_blank")
         } else {
             history.push(`/post/${postID}`)
         }
+        window.scrollTo(0, functions.navbarHeight() + functions.titlebarHeight())
+        setPosts(tagPosts)
     }
 
     const searchTag = (event: React.MouseEvent, alias?: string) => {
@@ -369,7 +372,7 @@ const TagPage: React.FunctionComponent<Props> = (props) => {
 
     const postsJSX = () => {
         if (!permissions.isElevated(session) && tag.banned) return null 
-        if (posts.length) {
+        if (tagPosts.length) {
             return (
                 <div className="tag-column">
                     <span><span className="tag-label" onClick={searchTag}>Posts</span> <span className="tag-label-alt">{count}</span></span>

@@ -7,7 +7,7 @@ import NavBar from "../components/NavBar"
 import SideBar from "../components/SideBar"
 import Footer from "../components/Footer"
 import DragAndDrop from "../components/DragAndDrop"
-import {HideNavbarContext, HideSidebarContext, ThemeContext, EnableDragContext, RelativeContext, HideTitlebarContext, MobileContext, CommentSearchFlagContext,
+import {HideNavbarContext, HideSidebarContext, ThemeContext, EnableDragContext, RelativeContext, HideTitlebarContext, MobileContext, CommentSearchFlagContext, PostsContext,
 HeaderTextContext, SidebarTextContext, SessionContext, RedirectContext, SessionFlagContext, ShowDeleteAccountDialogContext, SiteHueContext, SiteLightnessContext,
 SiteSaturationContext, BanNameContext, UnbanNameContext, PromoteNameContext, UpdateUserFlagContext, DMTargetContext, RestrictTypeContext, SearchContext, SearchFlagContext} from "../Context"
 import functions from "../structures/Functions"
@@ -72,6 +72,7 @@ const UserPage: React.FunctionComponent<Props> = (props) => {
     const [favoriteImages, setFavoriteImages] = useState([]) as any
     const [user, setUser] = useState(null) as any
     const [defaultIcon, setDefaultIcon] = useState(false)
+    const {posts, setPosts} = useContext(PostsContext)
     const history = useHistory()
     const username = props?.match.params.username
 
@@ -173,6 +174,8 @@ const UserPage: React.FunctionComponent<Props> = (props) => {
         } else {
             history.push(`/post/${postID}`)
         }
+        window.scrollTo(0, functions.navbarHeight() + functions.titlebarHeight())
+        setPosts(uploads)
     }
 
     const setFav = (img: string, index: number, newTab: boolean) => {
@@ -183,6 +186,8 @@ const UserPage: React.FunctionComponent<Props> = (props) => {
         } else {
             history.push(`/post/${postID}`)
         }
+        window.scrollTo(0, functions.navbarHeight() + functions.titlebarHeight())
+        setPosts(favorites)
     }
 
     const getUserImg = () => {
