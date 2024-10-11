@@ -133,6 +133,20 @@ export default class SQLHistory {
         return result
     }
 
+    /** Get post history */
+    public static postHistoryID = async (postID: string | number, historyID: string) => {
+        const query: QueryConfig = {
+        text: functions.multiTrim(/*sql*/`
+                SELECT "post history".*
+                FROM "post history"
+                WHERE "post history"."postID" = $1 AND "post history"."historyID" = $2
+            `),
+            values: [postID, historyID]
+        }
+        const result = await SQLQuery.run(query, true)
+        return result[0]
+    }
+
     /** Get user post history */
     public static userPostHistory = async (username: string) => {
         const query: QueryConfig = {

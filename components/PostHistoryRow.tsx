@@ -62,108 +62,14 @@ const PostHistoryRow: React.FunctionComponent<Props> = (props) => {
         updateImages()
     }, [props.postHistory, session])
 
-    const imagesChanged = async () => {
-        if (props.postHistory.images.length !== props.currentHistory.images.length) return true
-        for (let i = 0; i < props.postHistory.images.length; i++) {
-            let filename = props.postHistory.images[i]?.filename ? props.postHistory.images[i].filename : props.postHistory.images[i]
-            const imgLink = functions.getImageLink(props.postHistory.images[i]?.type, props.postHistory.postID, i+1, filename)
-            let currentFilename = props.currentHistory.images[i]?.filename ? props.currentHistory.images[i].filename : props.currentHistory.images[i]
-            const currentLink = functions.getImageLink(props.currentHistory.images[i]?.type, props.currentHistory.postID, i+1, currentFilename)
-
-            let img = await cryptoFunctions.decryptedLink(imgLink)
-            if (functions.isModel(img)) {
-                img = await functions.modelImage(img)
-            } else if (functions.isAudio(img)) {
-                img = await functions.songCover(img)
-            }
-
-            let current = await cryptoFunctions.decryptedLink(currentLink)
-            if (functions.isModel(img)) {
-                current = await functions.modelImage(current)
-            } else if (functions.isAudio(img)) {
-                current = await functions.songCover(current)
-            }
-            const imgBuffer = await functions.getBuffer(img, {"x-force-upscale": "false"})
-            const currentBuffer = await functions.getBuffer(currentImg, {"x-force-upscale": "false"})
-            const upscaledImgBuffer = await functions.getBuffer(img, {"x-force-upscale": "true"})
-            const upscaledCurrentBuffer = await functions.getBuffer(currentImg, {"x-force-upscale": "true"})
-
-            if (imgBuffer.byteLength) {
-                const imgMD5 = crypto.createHash("md5").update(Buffer.from(imgBuffer) as any).digest("hex")
-                const currentMD5 = crypto.createHash("md5").update(Buffer.from(currentBuffer) as any).digest("hex")
-                if (imgMD5 !== currentMD5) return true
-            }
-            if (upscaledImgBuffer.byteLength) {
-                const imgMD5 = crypto.createHash("md5").update(Buffer.from(upscaledImgBuffer) as any).digest("hex")
-                const currentMD5 = crypto.createHash("md5").update(Buffer.from(upscaledCurrentBuffer) as any).digest("hex")
-                if (imgMD5 !== currentMD5) return true
-            }
-        }
-        return false
-    }
-
-    const sourceChanged = () => {
-        if (props.postHistory.title !== props.currentHistory.title) return true
-        if (props.postHistory.translatedTitle !== props.currentHistory.translatedTitle) return true
-        if (props.postHistory.drawn !== props.currentHistory.drawn) return true
-        if (props.postHistory.link !== props.currentHistory.link) return true
-        if (props.postHistory.artist !== props.currentHistory.artist) return true
-        if (props.postHistory.commentary !== props.currentHistory.commentary) return true
-        if (props.postHistory.translatedCommentary !== props.currentHistory.translatedCommentary) return true
-        return false
-    }
-
-    const parseImages = async () => {
-        let images = [] as any
-        let upscaledImages = [] as any
-        for (let i = 0; i < props.postHistory.images.length; i++) {
-            let filename = props.postHistory.images[i]?.filename ? props.postHistory.images[i].filename : props.postHistory.images[i]
-            const imgLink = functions.getImageLink(props.postHistory.images[i]?.type, props.postHistory.postID, i+1, filename)
-            let link = await cryptoFunctions.decryptedLink(imgLink)
-            let ext = path.extname(imgLink)
-            if (!link.includes(ext)) link += `#${ext}`
-            const buffer = await functions.getBuffer(link, {"x-force-upscale": "false"})
-            const upscaledBuffer = await functions.getBuffer(link, {"x-force-upscale": "true"})
-            let thumbnail = ""
-            if (ext === ".mp4" || ext === ".webm") {
-                thumbnail = await functions.videoThumbnail(link)
-            } else if (ext === ".glb" || ext === ".fbx" || ext === ".obj") {
-                thumbnail = await functions.modelImage(link)
-            } else if (ext === ".mp3" || ext === ".wav") {
-                thumbnail = await functions.songCover(link)
-            }
-            if (buffer.byteLength) {
-                images.push({link, ext: ext.replace(".", ""), size: buffer.byteLength, thumbnail,
-                originalLink: imgLink, bytes: Object.values(new Uint8Array(buffer)), name: path.basename(imgLink)})
-            }
-            if (upscaledBuffer.byteLength) {
-                upscaledImages.push({link, ext: ext.replace(".", ""), size: upscaledBuffer.byteLength, thumbnail,
-                originalLink: imgLink, bytes: Object.values(new Uint8Array(upscaledBuffer)), name: path.basename(imgLink)})
-            }
-        }
-        return {images, upscaledImages}
-    }
-
-    const parseNewTags = async () => {
-        const tags = props.postHistory.tags
-        if (!tags?.[0]) return []
-        const tagMap = await functions.tagsCache(session, setSessionFlag)
-        let notExists = [] as any
-        for (let i = 0; i < tags.length; i++) {
-            const exists = tagMap[tags[i]]
-            if (!exists) notExists.push({tag: tags[i], desc: `${functions.toProperCase(tags[i]).replaceAll("-", " ")}.`})
-        }
-        return notExists
-    }
-
     const revertPostHistory = async () => {
         if (props.current) return Promise.reject()
-        const imgChanged = await imagesChanged()
-        const srcChanged = sourceChanged()
+        const imgChanged = await functions.imagesChanged(props.postHistory, props.currentHistory)
+        const srcChanged = functions.sourceChanged(props.postHistory, props.currentHistory)
         if (imgChanged || srcChanged) {
             if (imgChanged && !permissions.isElevated(session)) return Promise.reject("img")
-            const {images, upscaledImages} = await parseImages()
-            const newTags = await parseNewTags()
+            const {images, upscaledImages} = await functions.parseImages(props.postHistory)
+            const newTags = await functions.parseNewTags(props.postHistory, session, setSessionFlag)
             const source = {
                 title: props.postHistory.title,
                 translatedTitle: props.postHistory.translatedTitle,
@@ -250,10 +156,11 @@ const PostHistoryRow: React.FunctionComponent<Props> = (props) => {
     }
 
     const imgClick = (event: React.MouseEvent) => {
+        let historyIndex = props.current ? "" : `?history=${props.postHistory.historyID}`
         if (event.ctrlKey || event.metaKey || event.button === 1) {
-            window.open(`/post/${props.postHistory.postID}`, "_blank")
+            window.open(`/post/${props.postHistory.postID}${historyIndex}`, "_blank")
         } else {
-            history.push(`/post/${props.postHistory.postID}`)
+            history.push(`/post/${props.postHistory.postID}${historyIndex}`)
         }
     }
 

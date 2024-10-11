@@ -84,6 +84,7 @@ interface Props {
     reset?: boolean
     goBack?: boolean
     post?: any
+    historyID?: string
 }
 
 const TitleBar: React.FunctionComponent<Props> = (props) => {
@@ -218,6 +219,7 @@ const TitleBar: React.FunctionComponent<Props> = (props) => {
             {!mobile ? 
             <div className="titlebar-search-text-container">
                 <span className={`titlebar-search-text ${props.post?.hidden ? "strikethrough" : ""}`}>
+                    {props.historyID ? <span style={{color: "var(--historyColor)", marginRight: "10px"}}>{`[History: ${props.historyID}]`}</span> : null}
                     {restrictType === "explicit" ? <span style={{color: "var(--r18Color)", marginRight: "10px"}}>[R18]</span> : null}
                     {autoSearch ? <span style={{color: "var(--premiumColor)", marginRight: "10px"}}>[Auto Search]</span> : null}
                     {headerText}</span>

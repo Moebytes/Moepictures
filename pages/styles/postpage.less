@@ -18,6 +18,45 @@
     min-height: 500px;
 }
 
+.history-button-container {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: flex-start;  
+    margin-top: 10px;
+    margin-left: 10px;
+}
+
+.history-button {
+    background-color: var(--historyColor);
+    color: black;
+    font-family: Tahoma, sans-serif;
+    font-weight: bold;
+    font-size: 18px;
+    border: none;
+    padding: 3px 5px;
+    cursor: pointer;
+    transition: all 0.1s;
+    width: max-content;
+    margin-top: 17px;
+    margin-right: 10px;
+    border: 2px solid black;  align-items: center;
+    display: flex;
+    align-items: center;
+    &:hover {
+        border: 2px solid #ffc9f6;
+        color: #ffc8f6;
+        & > img {
+            filter: invert(1);
+        }
+    }
+    & > img {
+        width: auto;
+        height: 20px;  
+        margin-right: 2px;
+    }
+}
+
 @media screen and (max-width: 500px) {
     .carousel-container {
         margin-left: 10px;

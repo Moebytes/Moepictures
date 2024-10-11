@@ -1,5 +1,5 @@
 import React, {useEffect, useContext, useState, useReducer} from "react"
-import {useHistory} from "react-router-dom"
+import {useHistory, useLocation} from "react-router-dom"
 import TitleBar from "../components/TitleBar"
 import NavBar from "../components/NavBar"
 import SideBar from "../components/SideBar"
@@ -22,15 +22,18 @@ import EditTranslationDialog from "../dialogs/EditTranslationDialog"
 import SaveTranslationDialog from "../dialogs/SaveTranslationDialog"
 import ReportCommentDialog from "../dialogs/ReportCommentDialog"
 import QuickEditDialog from "../dialogs/QuickEditDialog"
+import RevertPostHistoryDialog from "../dialogs/RevertPostHistoryDialog"
 import CaptchaDialog from "../dialogs/CaptchaDialog"
 import ThirdParty from "../components/ThirdParty"
 import Parent from "../components/Parent"
 import ArtistWorks from "../components/ArtistWorks"
 import Related from "../components/Related"
 import MobileInfo from "../components/MobileInfo"
+import historyIcon from "../assets/icons/history-state.png"
+import currentIcon from "../assets/icons/current.png"
 import {HideNavbarContext, HideSidebarContext, RelativeContext, DownloadFlagContext, DownloadIDsContext, HideTitlebarContext, MobileContext, ReloadPostFlagContext,
 PostsContext, TagsContext, HeaderTextContext, PostFlagContext, RedirectContext, SidebarTextContext, SessionContext, SessionFlagContext, EnableDragContext, TranslationModeContext,
-OrderContext} from "../Context"
+OrderContext, RevertPostHistoryIDContext, RevertPostHistoryFlagContext} from "../Context"
 import permissions from "../structures/Permissions"
 import "./styles/postpage.less"
 
@@ -60,6 +63,8 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
     const {mobile, setMobile} = useContext(MobileContext)
     const {postFlag, setPostFlag} = useContext(PostFlagContext)
     const {reloadPostFlag, setReloadPostFlag} = useContext(ReloadPostFlagContext)
+    const {revertPostHistoryID, setRevertPostHistoryID} = useContext(RevertPostHistoryIDContext)
+    const {revertPostHistoryFlag, setRevertPostHistoryFlag} = useContext(RevertPostHistoryFlagContext)
     const [images, setImages] = useState([]) as any
     const [thirdPartyPosts, setThirdPartyPosts] = useState([]) as any
     const [artistPosts, setArtistPosts] = useState([]) as any
@@ -70,16 +75,10 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
     const [loaded, setLoaded] = useState(false)
     const [tagCategories, setTagCategories] = useState(null) as any
     const {order, setOrder} = useContext(OrderContext)
+    const [historyID, setHistoryID] = useState(null as any)
     const history = useHistory()
+    const location = useLocation()
     const postID = props?.match.params.id
-
-    const refreshCache = async () => {
-        // axios.post(image, null, {withCredentials: true}).catch(() => null)
-    }
-
-    useEffect(() => {
-        if (image) refreshCache()
-    }, [image])
 
     useEffect(() => {
         setHideNavbar(false)
@@ -89,13 +88,17 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
         setSidebarText("")
         setReloadPostFlag(true)
         document.title = "Post"
-        const savedPost = localStorage.getItem("savedPost")
-        const savedTags = localStorage.getItem("savedTags")
-        if (savedPost) setPost(JSON.parse(savedPost))
-        if (savedTags) setTagCategories(JSON.parse(savedTags))
-        if (!posts?.length) {
-            const savedPosts = localStorage.getItem("savedPosts")
-            if (savedPosts) setPosts(JSON.parse(savedPosts))
+        const historyParam = new URLSearchParams(window.location.search).get("history")
+        setHistoryID(historyParam)
+        if (!historyParam) {
+            const savedPost = localStorage.getItem("savedPost")
+            const savedTags = localStorage.getItem("savedTags")
+            if (savedPost) setPost(JSON.parse(savedPost))
+            if (savedTags) setTagCategories(JSON.parse(savedTags))
+            if (!posts?.length) {
+                const savedPosts = localStorage.getItem("savedPosts")
+                if (savedPosts) setPosts(JSON.parse(savedPosts))
+            }
         }
         const onDOMLoaded = () => {
             const savedOrder = localStorage.getItem("order")
@@ -105,7 +108,7 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
         return () => {
             window.removeEventListener("load", onDOMLoaded)
         }
-    }, [])
+    }, [location])
 
     useEffect(() => {
         localStorage.setItem("order", String(order))
@@ -184,18 +187,17 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
     useEffect(() => {
         if (!session.cookie) return
         const updateArtistPosts = async () => {
-            if (tagCategories?.artists?.[0]?.tag) {
-                try {
-                    if (tagCategories.artists[0].tag === "unknown-artist") return
-                    const artistPosts = await functions.get("/api/search/posts", {query: tagCategories.artists[0].tag, type: "all", restrict: "all", style: "all", sort: "drawn", limit: mobile ? 10 : 100}, session, setSessionFlag)
-                    if (artistPosts?.length) setArtistPosts(artistPosts)
-                } catch (err) {
-                    console.log(err)
-                }
+            if (!tagCategories?.artists?.[0]?.tag || !post) return
+            try {
+                if (tagCategories.artists[0].tag === "unknown-artist") return
+                const artistPosts = await functions.get("/api/search/posts", {query: tagCategories.artists[0].tag, type: "all", restrict: "all", style: "all", sort: "drawn", limit: mobile ? 10 : 100}, session, setSessionFlag)
+                if (artistPosts?.length) setArtistPosts(artistPosts)
+            } catch (err) {
+                console.log(err)
             }
         }
         const updateRelatedPosts = async () => {
-            if (!tagCategories?.characters?.[0]?.tag) return
+            if (!tagCategories?.characters?.[0]?.tag || !post) return
             if (tagCategories?.characters?.[0]?.tag !== characterTag) {
                 try {
                     const relatedPosts = await functions.get("/api/search/posts", {query: tagCategories.characters[0].tag, type: post.type, restrict: post.restrict === "explicit" ? "explicit" : "all", style: post.style, sort: Math.random() > 0.5 ? "date" : "reverse date", limit: mobile ? 10 : 30}, session, setSessionFlag)
@@ -213,6 +215,34 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
     }, [session, post, tagCategories])
 
     useEffect(() => {
+        const updateHistory = async () => {
+            const historyPost = await functions.get("/api/post/history", {postID, historyID}, session, setSessionFlag)
+            if (!historyPost) return history.push("/404")
+            let images = historyPost.images.map((i: any) => functions.getHistoryImageLink(i))
+            setImages(images)
+            if (images[order-1]) {
+                setImage(images[order-1])
+            } else {
+                setImage(images[0])
+                setOrder(1)
+            }
+            const allTags = [...historyPost.artists, ...historyPost.characters, ...historyPost.series, ...historyPost.tags]
+            const tags = await functions.get("/api/tag/counts", {tags: allTags}, session, setSessionFlag)
+            const categories = await functions.tagCategories(tags, session, setSessionFlag)
+            setTagCategories(categories)
+            setTags(tags)
+            setPost(historyPost)
+        }
+        if (historyID) updateHistory()
+    }, [postID, historyID, order, session])
+
+    useEffect(() => {
+        console.log(images)
+    }, [images])
+
+    useEffect(() => {
+        const historyParam = new URLSearchParams(window.location.search).get("history")
+        if (historyParam) return
         const updatePost = async () => {
             setLoaded(false)
             let post = posts.find((p: any) => p.postID === postID)
@@ -257,6 +287,8 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
     }, [postID, posts, order])
 
     useEffect(() => {
+        const historyParam = new URLSearchParams(window.location.search).get("history")
+        if (historyParam) return
         const updatePost = async () => {
             setLoaded(false)
             setPostFlag(false)
@@ -348,6 +380,71 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
         }
     }
 
+    const revertPostHistory = async () => {
+        const currentPost = await functions.get("/api/post", {postID}, session, setSessionFlag)
+        const imgChanged = await functions.imagesChanged(post, currentPost)
+        const srcChanged = functions.sourceChanged(post, currentPost)
+        if (imgChanged || srcChanged) {
+            if (imgChanged && !permissions.isElevated(session)) return Promise.reject("img")
+            const {images, upscaledImages} = await functions.parseImages(post)
+            const newTags = await functions.parseNewTags(post, session, setSessionFlag)
+            const source = {
+                title: post.title,
+                translatedTitle: post.translatedTitle,
+                artist: post.artist,
+                drawn: post.drawn,
+                link: post.link,
+                commentary: post.commentary,
+                translatedCommentary: post.translatedCommentary
+            }
+            await functions.put("/api/post/edit", {postID: post.postID, images, upscaledImages, type: post.type, restrict: post.restrict, source,
+            style: post.style, artists: post.artists, characters: post.characters, preserveThirdParty: post.thirdParty,
+            series: post.series, tags: post.tags, newTags, reason: post.reason}, session, setSessionFlag)
+        } else {
+            await functions.put("/api/post/quickedit", {postID: post.postID, type: post.type, restrict: post.restrict,
+            style: post.style, artists: post.artists, characters: post.characters, preserveThirdParty: post.thirdParty,
+            series: post.series, tags: post.tags, reason: post.reason}, session, setSessionFlag)
+        }
+        currentHistory()
+    }
+
+    useEffect(() => {
+        if (revertPostHistoryFlag && historyID === revertPostHistoryID?.historyID) {
+            revertPostHistory().then(() => {
+                setRevertPostHistoryFlag(false)
+                setRevertPostHistoryID(null)
+            }).catch((error) => {
+                setRevertPostHistoryFlag(false)
+                setRevertPostHistoryID({failed: error ? error : true, historyID})
+            })
+        }
+    }, [revertPostHistoryFlag, revertPostHistoryID, session])
+
+    const revertPostHistoryDialog = async () => {
+        setRevertPostHistoryID({failed: false, historyID})
+    }
+
+    const currentHistory = () => {
+        setHistoryID(null)
+        setPostFlag(true)
+        history.push(`/post/${postID}`)
+    }
+
+    const getHistoryButtons = () => {
+        return (
+            <div className="history-button-container">
+                <button className="history-button" onClick={revertPostHistoryDialog}>
+                    <img src={historyIcon}/>
+                    <span>Revert</span>
+                </button>
+                <button className="history-button" onClick={currentHistory}>
+                    <img src={currentIcon}/>
+                    <span>Current</span>
+                </button>
+            </div>
+        )
+    }
+
     const getPostJSX = () => {
         if (!post) return
         if (post.type === "model") {
@@ -386,11 +483,12 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
         <EditCommentDialog/>
         <DeleteCommentDialog/>
         <ReportCommentDialog/>
+        <RevertPostHistoryDialog/>
         {post ? <DeletePostDialog post={post}/> : null}
         {post ? <TakedownPostDialog post={post}/> : null}
         {post ? <SaveTranslationDialog post={post}/> : null}
         <EditTranslationDialog/>
-        {post ? <TitleBar post={post} goBack={true}/> : <TitleBar goBack={true}/>}
+        {post ? <TitleBar post={post} goBack={true} historyID={historyID}/> : <TitleBar goBack={true} historyID={historyID}/>}
         <NavBar goBack={true}/>
         <div className="body">
             {post && tagCategories ? 
@@ -399,6 +497,7 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
             }
             <div className="content" onMouseEnter={() => setEnableDrag(true)}>
                 <div className="post-container">
+                    {historyID ? getHistoryButtons() : null}
                     {/*nsfwChecker() &&*/ images.length > 1 ?
                     <div className="carousel-container">
                         <Carousel images={images} set={set} index={order-1}/>

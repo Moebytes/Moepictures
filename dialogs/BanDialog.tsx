@@ -51,49 +51,6 @@ const BanDialog: React.FunctionComponent = (props) => {
         }
     }, [banName])
 
-    const parseImages = async (postHistory: any) => {
-        let images = [] as any
-        let upscaledImages = [] as any
-        for (let i = 0; i < postHistory.images.length; i++) {
-            let filename = postHistory.images[i]?.filename ? postHistory.images[i].filename : postHistory.images[i]
-            const imgLink = functions.getImageLink(postHistory.images[i]?.type, postHistory.postID, i+1, filename)
-            let link = await cryptoFunctions.decryptedLink(imgLink)
-            let ext = path.extname(imgLink)
-            if (!link.includes(ext)) link += `#${ext}`
-            const buffer = await functions.getBuffer(link, {"x-force-upscale": "false"})
-            const upscaledBuffer = await functions.getBuffer(link, {"x-force-upscale": "true"})
-            let thumbnail = ""
-            if (ext === ".mp4" || ext === ".webm") {
-                thumbnail = await functions.videoThumbnail(link)
-            } else if (ext === ".glb" || ext === ".fbx" || ext === ".obj") {
-                thumbnail = await functions.modelImage(link)
-            } else if (ext === ".mp3" || ext === ".wav") {
-                thumbnail = await functions.songCover(link)
-            }
-            if (buffer.byteLength) {
-                images.push({link, ext: ext.replace(".", ""), size: buffer.byteLength, thumbnail,
-                originalLink: imgLink, bytes: Object.values(new Uint8Array(buffer)), name: path.basename(imgLink)})
-            }
-            if (upscaledBuffer.byteLength) {
-                upscaledImages.push({link, ext: ext.replace(".", ""), size: upscaledBuffer.byteLength, thumbnail,
-                originalLink: imgLink, bytes: Object.values(new Uint8Array(upscaledBuffer)), name: path.basename(imgLink)})
-            }
-        }
-        return {images, upscaledImages}
-    }
-
-    const parseNewTags = async (postHistory: any) => {
-        const tags = postHistory.tags
-        if (!tags?.[0]) return []
-        const tagMap = await functions.tagsCache(session, setSessionFlag)
-        let notExists = [] as any
-        for (let i = 0; i < tags.length; i++) {
-            const exists = tagMap[tags[i]]
-            if (!exists) notExists.push({tag: tags[i], desc: `${functions.toProperCase(tags[i]).replaceAll("-", " ")}.`})
-        }
-        return notExists
-    }
-
     const ban = async () => {
         const revertData = await functions.post("/api/user/ban", {username: banName, deleteUnverifiedChanges, deleteHistoryChanges, deleteComments, deleteMessages, reason}, session, setSessionFlag)
         if (revertData.revertPostIDs?.length) {
@@ -101,8 +58,8 @@ const BanDialog: React.FunctionComponent = (props) => {
                 const result = await functions.get("/api/post/history", {postID}, session, setSessionFlag)
                 if (!result?.[0]) continue
                 const currentHistory = result[0]
-                const {images, upscaledImages} = await parseImages(currentHistory)
-                const newTags = await parseNewTags(currentHistory)
+                const {images, upscaledImages} = await functions.parseImages(currentHistory)
+                const newTags = await functions.parseNewTags(currentHistory, session, setSessionFlag)
                 const source = {
                     title: currentHistory.title,
                     translatedTitle: currentHistory.translatedTitle,

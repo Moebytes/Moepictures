@@ -21,6 +21,7 @@ import ImageTracer from "imagetracerjs"
 import {optimize} from "svgo"
 import avifJS from "../structures/avif_enc"
 import jxlJS from "../structures/jxl_enc"
+import crypto from "crypto"
 import {GLTFLoader, OBJLoader, FBXLoader} from "three-stdlib"
 
 let newScrollY = 0
@@ -1036,12 +1037,16 @@ export default class Functions {
         return `${folder}-upscaled/${postID}-${order}-${filename}`
     }
 
-    public static getImageHistoryPath = (postID: number, key: number, filename: string) => {
-        return `history/post/${postID}/original/${key}/${filename}`
+    public static getImageHistoryPath = (postID: number, key: number, order: number, filename: string) => {
+        return `history/post/${postID}/original/${key}/${postID}-${order}-${filename}`
     }
 
-    public static getUpscaledImageHistoryPath = (postID: number, key: number, filename: string) => {
-        return `history/post/${postID}/upscaled/${key}/${filename}`
+    public static getUpscaledImageHistoryPath = (postID: number, key: number, order: number, filename: string) => {
+        return `history/post/${postID}/upscaled/${key}/${postID}-${order}-${filename}`
+    }
+
+    public static getHistoryImageLink = (historyFile: string) => {
+        return `${window.location.protocol}//${window.location.host}/${historyFile}`
     }
 
     public static getImageLink = (folder: string, postID: number, order: number, filename: string) => {
@@ -2226,5 +2231,99 @@ export default class Functions {
         setTimeout(() => {
             window.scrollTo(0, 0)
         }, 300)
+    }
+
+    public static imagesChanged = async (revertPost: any, currentPost: any) => {
+        if (revertPost.images.length !== currentPost.images.length) return true
+        for (let i = 0; i < revertPost.images.length; i++) {
+            let filename = revertPost.images[i]?.filename ? revertPost.images[i].filename : revertPost.images[i]
+            const imgLink = Functions.getImageLink(revertPost.images[i]?.type, revertPost.postID, i+1, filename)
+            let currentFilename = currentPost.images[i]?.filename ? currentPost.images[i].filename : currentPost.images[i]
+            const currentLink = Functions.getImageLink(currentPost.images[i]?.type, currentPost.postID, i+1, currentFilename)
+
+            let img = await cryptoFunctions.decryptedLink(imgLink)
+            if (Functions.isModel(img)) {
+                img = await Functions.modelImage(img)
+            } else if (Functions.isAudio(img)) {
+                img = await Functions.songCover(img)
+            }
+
+            let current = await cryptoFunctions.decryptedLink(currentLink)
+            if (Functions.isModel(img)) {
+                current = await Functions.modelImage(current)
+            } else if (Functions.isAudio(img)) {
+                current = await Functions.songCover(current)
+            }
+            const imgBuffer = await Functions.getBuffer(img, {"x-force-upscale": "false"})
+            const currentBuffer = await Functions.getBuffer(current, {"x-force-upscale": "false"})
+            const upscaledImgBuffer = await Functions.getBuffer(img, {"x-force-upscale": "true"})
+            const upscaledCurrentBuffer = await Functions.getBuffer(current, {"x-force-upscale": "true"})
+
+            if (imgBuffer.byteLength) {
+                const imgMD5 = crypto.createHash("md5").update(Buffer.from(imgBuffer) as any).digest("hex")
+                const currentMD5 = crypto.createHash("md5").update(Buffer.from(currentBuffer) as any).digest("hex")
+                if (imgMD5 !== currentMD5) return true
+            }
+            if (upscaledImgBuffer.byteLength) {
+                const imgMD5 = crypto.createHash("md5").update(Buffer.from(upscaledImgBuffer) as any).digest("hex")
+                const currentMD5 = crypto.createHash("md5").update(Buffer.from(upscaledCurrentBuffer) as any).digest("hex")
+                if (imgMD5 !== currentMD5) return true
+            }
+        }
+        return false
+    }
+
+    public static sourceChanged = (revertPost: any, currentPost: any) => {
+        if (revertPost.title !== currentPost.title) return true
+        if (revertPost.translatedTitle !== currentPost.translatedTitle) return true
+        if (revertPost.drawn !== currentPost.drawn) return true
+        if (revertPost.link !== currentPost.link) return true
+        if (revertPost.artist !== currentPost.artist) return true
+        if (revertPost.commentary !== currentPost.commentary) return true
+        if (revertPost.translatedCommentary !== currentPost.translatedCommentary) return true
+        return false
+    }
+
+    public static parseImages = async (post: any) => {
+        let images = [] as any
+        let upscaledImages = [] as any
+        for (let i = 0; i < post.images.length; i++) {
+            let filename = post.images[i]?.filename ? post.images[i].filename : post.images[i]
+            const imgLink = Functions.getImageLink(post.images[i]?.type, post.postID, i+1, filename)
+            let link = await cryptoFunctions.decryptedLink(imgLink)
+            let ext = path.extname(imgLink)
+            if (!link.includes(ext)) link += `#${ext}`
+            const buffer = await Functions.getBuffer(link, {"x-force-upscale": "false"})
+            const upscaledBuffer = await Functions.getBuffer(link, {"x-force-upscale": "true"})
+            let thumbnail = ""
+            if (ext === ".mp4" || ext === ".webm") {
+                thumbnail = await Functions.videoThumbnail(link)
+            } else if (ext === ".glb" || ext === ".fbx" || ext === ".obj") {
+                thumbnail = await Functions.modelImage(link)
+            } else if (ext === ".mp3" || ext === ".wav") {
+                thumbnail = await Functions.songCover(link)
+            }
+            if (buffer.byteLength) {
+                images.push({link, ext: ext.replace(".", ""), size: buffer.byteLength, thumbnail,
+                originalLink: imgLink, bytes: Object.values(new Uint8Array(buffer)), name: path.basename(imgLink)})
+            }
+            if (upscaledBuffer.byteLength) {
+                upscaledImages.push({link, ext: ext.replace(".", ""), size: upscaledBuffer.byteLength, thumbnail,
+                originalLink: imgLink, bytes: Object.values(new Uint8Array(upscaledBuffer)), name: path.basename(imgLink)})
+            }
+        }
+        return {images, upscaledImages}
+    }
+
+    public static parseNewTags = async (post: any, session: any, setSessionFlag: any) => {
+        const tags = post.tags
+        if (!tags?.[0]) return []
+        const tagMap = await Functions.tagsCache(session, setSessionFlag)
+        let notExists = [] as any
+        for (let i = 0; i < tags.length; i++) {
+            const exists = tagMap[tags[i]]
+            if (!exists) notExists.push({tag: tags[i], desc: `${Functions.toProperCase(tags[i]).replaceAll("-", " ")}.`})
+        }
+        return notExists
     }
 }

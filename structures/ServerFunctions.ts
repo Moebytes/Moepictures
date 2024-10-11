@@ -136,6 +136,7 @@ export default class ServerFunctions {
     }
 
     public static getFile = async (file: string, upscaled: boolean, r18: boolean) => {
+        if (file.includes("history/post")) upscaled = false
         if (functions.isLocalHost()) {
             let folder = r18 ? localR18 : local
             let originalKey = `${folder}/${decodeURIComponent(file)}`

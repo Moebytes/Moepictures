@@ -707,11 +707,18 @@ const PostRoutes = (app: Express) => {
     app.get("/api/post/history", postLimiter, async (req: Request, res: Response) => {
         try {
             const postID = req.query.postID as string
+            const historyID = req.query.historyID as string
             const offset = req.query.offset as string
             if (!req.session.username) return res.status(403).send("Unauthorized")
-            const result = await sql.history.postHistory(postID, offset)
-            if (req.session.captchaNeeded) delete result.tags
-            res.status(200).json(result)
+            if (historyID) {
+                const result = await sql.history.postHistoryID(postID, historyID)
+                if (req.session.captchaNeeded) delete result.tags
+                res.status(200).json(result)
+            } else {
+                const result = await sql.history.postHistory(postID, offset)
+                if (req.session.captchaNeeded) functions.stripTags(result)
+                res.status(200).json(result)
+            }
         } catch (e) {
             console.log(e)
             res.status(400).send("Bad request")
