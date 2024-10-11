@@ -145,10 +145,14 @@ const TranslationEditor: React.FunctionComponent<Props> = (props) => {
                 setItems(translation.data)
                 setID(largestID)
                 setTranslationMode(true)
+                return
             } else {
                 setItems([])
                 setID(0)
             }
+        } else {
+            setItems([])
+            setID(0)
         }
     }
 

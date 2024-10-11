@@ -118,8 +118,23 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
         }
     }, [location])
 
+    
     useEffect(() => {
         localStorage.setItem("order", String(order))
+        let orderParam = new URLSearchParams(window.location.search).get("order")
+        if (!orderParam) orderParam = "1"
+        setTimeout(() => {
+            const savedOrder = localStorage.getItem("order")
+            if (Number(orderParam) !== Number(savedOrder)) {
+                const searchParams = new URLSearchParams(window.location.search)
+                if (Number(savedOrder) > 1) {
+                    searchParams.set("order", savedOrder!)
+                } else {
+                    searchParams.delete("order")
+                }
+                history.replace(`${location.pathname}?${searchParams.toString()}`)
+            }
+        }, 300)
     }, [order])
 
     useEffect(() => {
