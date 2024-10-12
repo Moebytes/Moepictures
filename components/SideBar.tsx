@@ -782,9 +782,9 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
                     <img src={searchIcon}/>
                 </button>
                 <label style={{display: "flex", width: "max-content", height: "max-content"}} htmlFor="image-search">
-                    <button className="search-mobile-button" style={{filter: getFilterSearch()}} onClick={triggerSearch}>
+                    <div className="search-mobile-button" style={{filter: getFilterSearch()}}>
                         <img src={searchImage}/>
-                    </button>
+                    </div>
                 </label>
                 <input id="image-search" type="file" onChange={(event) => imageSearch(event)}/>
                 <button className="search-mobile-button" style={{filter: getFilterSearch()}} onClick={randomSearch}>
@@ -813,9 +813,9 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
                         <img src={searchIcon}/>
                     </button>
                     <label style={{display: "flex", width: "max-content", height: "max-content"}} htmlFor="image-search">
-                        <button className="search-button" style={{filter: getFilterSearch()}} onClick={triggerSearch}>
+                        <div className="search-button" style={{filter: getFilterSearch()}}>
                             <img src={searchImage}/>
-                        </button>
+                        </div>
                     </label>
                     <input id="image-search" type="file" onChange={(event) => imageSearch(event)}/>
                 </div>
