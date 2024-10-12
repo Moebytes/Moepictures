@@ -74,12 +74,12 @@ const TermsPage: React.FunctionComponent = (props) => {
                             Last Updated: March 31, 2024 <br/><br/>
 
                             This terms of service applies to the website ("site") provided 
-                            by Moepictures (”we”, “us”, “our”). By using our site, you agree to all of these terms. If you don't agree with these 
+                            by Moepictures ("we", "us", "our"). By using our site, you agree to all of these terms. If you don't agree with these 
                             terms you should not use our site.<br/><br/>
 
                             Access to the site<br/>
                             <span className="terms-text-alt">
-                            ⇾ You must be 18 or older to create an account on our site. <br/>
+                            ⇾ You must be 18 or older or otherwise above the age of majority in your country of residence to create an account on our site.<br/>
                             ⇾ Your account could be terminated at any time for any or no reason, including but not limited to 
                             a violation of the terms of service.<br/><br/>
                             </span>
@@ -87,36 +87,45 @@ const TermsPage: React.FunctionComponent = (props) => {
                             Prohibited actions<br/>
                             When you are using our site, you may not do any of the following: <br/>
                             <span className="terms-text-alt">
-                            ⇾ Robotically scrape artworks, tags, or any other site content.<br/>
-                            ⇾ Send spam in the comments or through unsolicited private messages.<br/>
-                            ⇾ Vandalize posts, tags, or translations.<br/>
-                            ⇾ Create multiple accounts to circumvent bans.<br/>
-                            ⇾ Attempt to gain unauthorized access to another user’s account.<br/>
-                            ⇾ Attempt to upload malware or other malicious content.<br/>
-                            ⇾ Attempt to disrupt or impair the operation of our servers.<br/><br/>
+                            ⇾ Vandalize posts, tags, or translations. <br/>
+                            ⇾ Send spam in the comments or through unsolicited private messages. <br/>
+                            ⇾ Robotically scrape artworks, tags, or any other site content. <br/>
+                            ⇾ Attempt to gain unauthorized access to another user’s account. <br/>
+                            ⇾ Sell access to your user account to someone else. <br/>
+                            ⇾ Create multiple accounts to circumvent bans. <br/>
+                            ⇾ Attempt to upload malware or other malicious content. <br/>
+                            ⇾ Attempt to disrupt the operation of our servers. <br/><br/>
                             </span>
 
                             User-generated content<br/>
                             <span className="terms-text-alt">
                             ⇾ All of the content on our site is user-generated and we take no responsibility
-                            for content submitted by users, whether it be images, animations, videos, or text; 
+                            for content submitted by users, whether it be images, animations, videos, or text, 
                             the responsibility falls on the user who submitted the content. <br/>
-                            ⇾ We reserve the right to remove content at any time for any reason. <br/><br/>
+                            ⇾ We reserve the right to remove content at any time and for any reason. <br/><br/>
                             </span>
 
                             Copyright and DMCA takedowns<br/>
                             We respect the intellectual property of others. If you are an artist and want your 
-                            works removed from the site, you can contact us through the contact form 
+                            works removed from the site, you can contact us through the copyright removal form 
                             and provide the following pieces of information:<br/>
                             <span className="terms-text-alt">
-                            ⇾ Your artist tag or links to specific works<br/>
-                            ⇾ A way to prove your identity<br/>
+                            ⇾ Your name, artist tag, and links to specific works or your artist tag page.<br/>
+                            ⇾ A way to prove that you are the artist in question.<br/>
                             </span>
-                            These are some acceptable proofs of identity:<br/>
+                            These are some acceptable forms of proof:<br/>
                             <span className="terms-text-alt">
-                            ⇾ Respond to social media contact (say which account you would prefer being contacted at)<br/>
-                            ⇾ Attach a source file to one of your works which is not available publicly<br/>
+                            ⇾ If your email is publicly listed on your accounts, contact us using that email. Post the link of where your email is listed. <br/>
+                            ⇾ Post somewhere on your profile or in one of your posts "Remove me from Moepictures" and post the link to it. <br/>
+                            ⇾ Attach a source file (.psd, .clip) to one of your works which isn't released publicly. <br/>
                             </span><br/>
+
+                            Account Upgrades<br/>
+                            <span className="terms-text-alt">
+                            ⇾ You may submit payment information to purchase an account upgrade on our site. All of your payment information 
+                            is handled solely by the third-party payment processor. We reserve the right to change the price or benefits of the 
+                            upgrade at any point with advanced notice. <br/><br/>
+                            </span>
 
                             Liability<br/>
                             The site is provided "as is", without warranty of any kind, express or implied. 
@@ -137,7 +146,7 @@ const TermsPage: React.FunctionComponent = (props) => {
                         <div className="privacy-text">
                             Last Updated: March 31, 2024<br/><br/>
 
-                            This Privacy Policy outlines the information that Moepictures (”we”, “us”, “our”) 
+                            This Privacy Policy outlines the information that Moepictures ("we", "us", "our") 
                             collects when you use our website ("site"). It
                             also describes how we use your information and how your information is shared. <br/><br/>
 
@@ -145,7 +154,7 @@ const TermsPage: React.FunctionComponent = (props) => {
                             We collect information provided directly to us, which includes:<br/><br/>
 
                             <span className="privacy-text-alt">Account information</span> - We need to store your 
-                            username, email, password, bio, ip address, and any account preferences. Passwords are hashed.<br/><br/>
+                            username, email, password, bio, ip address, and any account preferences.<br/><br/>
 
                             <span className="privacy-text-alt">Content you submit</span> - We collect any content that you submit which may include
                             text, images, gifs, videos, posts and comments. <br/><br/>
@@ -181,7 +190,7 @@ const TermsPage: React.FunctionComponent = (props) => {
 
                             Controlling your information<br/>
                             <span className="privacy-text-alt">Changing your information</span> - You can update your information, 
-                            such as username, email, and password anytime in your account settings.<br/><br/>
+                            such as your email and password anytime in your account settings.<br/><br/>
 
                             <span className="privacy-text-alt">Deleting your account</span> - You can delete your account in your account
                             settings. When you delete your account all of your personal information is deleted. Your public contributions, 

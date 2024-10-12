@@ -254,18 +254,13 @@ export default class Functions {
         return path.extname(file) === ".fbx"
     }
 
-    public static isAnimatedWebp = async (buffer: ArrayBuffer) => {
-        let str: any
-        if (typeof window === "undefined") {
-            str = buffer
-        } else {
-            str = await new Blob([buffer]).text()
+    public static isAnimatedWebp = (buffer: ArrayBuffer) => {
+        let str = ""
+        const byteArray = new Uint8Array(buffer)
+        for (let i = 0; i < byteArray.length; i++) {
+            str += String.fromCharCode(byteArray[i])
         }
-        if (str.indexOf("ANMF") != -1) {
-            return true
-        } else {
-            return false
-        }
+        return str.indexOf("ANMF") !== -1
     }
 
     public static isVideo = (file?: string) => {
@@ -2139,6 +2134,7 @@ export default class Functions {
 
     public static bufferFileType = (buffer: Uint8Array | ArrayBuffer | Buffer) => {
         buffer = Buffer.from(buffer)
+
         const majorBrand = buffer.toString("utf8", 8, 12)
         if (majorBrand === "avif" || majorBrand === "avis") {
             return [{typename: "avif", mime: "image/avif", extension: "avif"}]

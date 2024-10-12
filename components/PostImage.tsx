@@ -196,7 +196,7 @@ const PostImage: React.FunctionComponent<Props> = (props) => {
             if (functions.isImage(props.img)) {
                 if (functions.isWebP(props.img)) {
                     const arraybuffer = await fetch(props.img).then((r) => r.arrayBuffer())
-                    isAnimatedWebP = await functions.isAnimatedWebp(arraybuffer)
+                    isAnimatedWebP = functions.isAnimatedWebp(arraybuffer)
                 }
                 if (!isAnimatedWebP) url = await cryptoFunctions.decryptedLink(props.img)
             }
@@ -309,7 +309,7 @@ const PostImage: React.FunctionComponent<Props> = (props) => {
         const parseAnimatedWebP = async () => {
             const start = new Date()
             const arraybuffer = await fetch(props.img).then((r) => r.arrayBuffer())
-            const animated = await functions.isAnimatedWebp(arraybuffer)
+            const animated = functions.isAnimatedWebp(arraybuffer)
             if (!animated) return 
             const frames = await functions.extractAnimatedWebpFrames(props.img)
             setGIFData(frames)

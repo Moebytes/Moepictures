@@ -17,6 +17,7 @@ import crypto from "crypto"
 import util from "util"
 import sql from "../sql/SQLQuery"
 import dotline from "../assets/misc/Dotline.ttf"
+import {stripIndents} from "common-tags"
 
 svgCaptcha.loadFont(dotline)
 
@@ -241,7 +242,7 @@ const MiscRoutes = (app: Express) => {
     app.post("/api/misc/contact", csrfProtection, contactLimiter, async (req: Request, res: Response, next: NextFunction) => {
         try {
             const {email, subject, message, files} = req.body 
-            if (!email || !subject || !message || !files) return res.status(400).send("Bad email, subejct, message, or files")
+            if (!email || !subject || !message) return res.status(400).send("Bad email, subejct, or message.")
             const badEmail = functions.validateEmail(email)
             if (badEmail) return res.status(400).send("Bad email")
             const badMessage = functions.validateMessage(message)
@@ -258,6 +259,59 @@ const MiscRoutes = (app: Express) => {
             for (const admin of admins) {
                 const modifiedMessage = `You have a new message from ${email}!\n\n${message}`
                 await serverFunctions.systemMessage(admin.username, subject, modifiedMessage)
+            }
+            res.status(200).send("Success")
+        } catch (e) {
+            console.log(e)
+            res.status(400).send("Bad request")
+        }
+    })
+
+    app.post("/api/misc/copyright", csrfProtection, contactLimiter, async (req: Request, res: Response, next: NextFunction) => {
+        try {
+            const {name, email, artistTag, socialMediaLinks, postLinks, removeAllRequest, proofLinks, signature, files} = req.body 
+            if (!name || !email || !artistTag || !socialMediaLinks || !postLinks || !signature) return res.status(400).send("Bad fields.")
+            if (!files.length && !proofLinks) return res.status(400).send("Bad proof links.")
+            const badEmail = functions.validateEmail(email)
+            if (badEmail) return res.status(400).send("Bad email")
+            const attachments = [] as any
+            for (let i = 0; i < files.length; i++) {
+                const attachment = {} as any 
+                attachment.filename = files[i].name 
+                attachment.content = Buffer.from(files[i].bytes)
+                attachments.push(attachment)
+            }
+            let removalType = removeAllRequest ? "I would like all of my associated content to be removed." : "I would like all of the provided links to be removed." 
+            let message = stripIndents`
+                This is a copyright removal request from ${artistTag}.
+
+                Name: ${name}
+                Email: ${email}
+                Artist Tag: ${artistTag}
+
+                Social Media Links:
+                ${socialMediaLinks}
+
+                ${removeAllRequest ? "Artist Tag Link:" : "Post Links:"}
+                ${postLinks}
+
+                Proof Links:
+                ${proofLinks ? proofLinks : "N/A"}
+
+                ${removalType}
+
+                I sincerely believe that the use of the copyrighted materials mentioned above is not 
+                permitted by the copyright owner, their representative, or by law.
+
+                I swear under penalty of perjury that the information in this notice is accurate and that I am the 
+                copyright owner of the rights being infringed or authorized to act on behalf of the copyright owner.
+
+                Signature: ${signature}
+            `
+            await serverFunctions.contactEmail(email, `Copyright Removal Request from ${artistTag}`, message, attachments)
+            const admins = await sql.user.admins()
+            for (const admin of admins) {
+                await serverFunctions.systemMessage(admin.username, `Copyright Removal Request from ${artistTag}`, message)
             }
             res.status(200).send("Success")
         } catch (e) {

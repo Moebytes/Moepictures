@@ -30,10 +30,19 @@
     }
 }
 
-
 .contact-text-alt {
     color: var(--text-alt);
 }
+
+.contact-text-alt-link {
+    color: var(--text-alt);
+    font-weight: bold;
+    cursor: pointer;
+    &:hover {
+        filter: brightness(130%);
+    }
+}
+
 
 .contact-row {
     .form-row();
@@ -57,12 +66,18 @@
     .form-input();
 }
 
+.contact-input-small {
+    .form-input();
+    width: 30%;
+}
+
 .contact-file-input {
     .form-file-input();
 }
 
 .contact-textarea {
     .form-textarea();
+    resize: vertical;
 }
 
 .contact-button-container {
@@ -91,6 +106,14 @@
 
 .contact-validation-container {
     .form-validation-container();
+}
+
+.contact-checkbox {
+    width: auto;
+    height: 20px;
+    cursor: pointer;
+    margin-right: 10px;
+    margin-top: 4px;
 }
 
 @media screen and (max-width: 500px) {

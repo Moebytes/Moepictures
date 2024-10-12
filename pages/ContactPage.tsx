@@ -1,6 +1,5 @@
 import React, {useEffect, useContext, useState, useRef, useReducer} from "react"
-import {useHistory} from "react-router-dom"
-import {HashLink as Link} from "react-router-hash-link"
+import {useHistory, Link} from "react-router-dom"
 import TitleBar from "../components/TitleBar"
 import NavBar from "../components/NavBar"
 import SideBar from "../components/SideBar"
@@ -143,16 +142,8 @@ const ContactPage: React.FunctionComponent = (props) => {
                     </div>
                     </> : <>
                     <span className="contact-link">
-                        If you want to takedown your work, you must provide the following: <br/>
-                        <span className="contact-text-alt">
-                        ⇾ Your artist tag or links to specific works<br/>
-                        ⇾ Proof of your identity<br/>
-                        </span>
-                        These are acceptable proofs of identity:<br/>
-                        <span className="contact-text-alt">
-                        ⇾ Respond to social media contact (say which account you would prefer being contacted at)<br/>
-                        ⇾ Attach a source file to one of your works which isn't available publicly<br/>
-                        </span>
+                        This is a contact form for any general inquiries. If you would like to remove your work, 
+                        please fill out our <Link className="contact-text-alt-link" to="/copyright-removal">Copyright Removal Form</Link>.
                     </span>
                     <div className="contact-row">
                         <span className="contact-text">Email:</span>

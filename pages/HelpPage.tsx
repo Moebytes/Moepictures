@@ -71,14 +71,6 @@ const HelpPage: React.FunctionComponent = (props) => {
     }, [mobile])
 
     useEffect(() => {
-        if (mobile) {
-            setRelative(true)
-        } else {
-            setRelative(false)
-        }
-    }, [mobile])
-
-    useEffect(() => {
         if (helpTab === "help") {
             window.history.pushState(null, document.title, window.location.pathname + window.location.search)
         } else {
@@ -459,11 +451,11 @@ const HelpPage: React.FunctionComponent = (props) => {
                 <><span className="help-heading">Copyright Removal</span>
                 <span className="help-text">
                     We respect the intellectual property rights of others. If you find your work on the site and don't wish it to be 
-                    here anymore, you may submit a copyright form at <a className="help-link" onClick={() => history.push("/copyright")}>{mobile ? "Copyright Form" : `${functions.getDomain()}/copyright`}</a> or email us at moepictures.moe@gmail.com.<br/><br/>
+                    here anymore, you may submit a copyright form at <a className="help-link" onClick={() => history.push("/copyright-removal")}>{mobile ? "Copyright Form" : `${functions.getDomain()}/copyright-removal`}</a> or email us at moepictures.moe@gmail.com.<br/><br/>
 
                     After verifying that you are the artist, your works will be promptly removed, and if requested we will also prevent any of your future works from being uploaded.<br/><br/>
 
-                    We will be very sad to see you go!<br/>
+                    We are sad to see you go!<br/>
                 </span></>
             )
         }

@@ -158,7 +158,8 @@ const EditPostPage: React.FunctionComponent<Props> = (props) => {
             let imageLink = functions.getImageLink(post.images[i].type, postID, post.images[i].order, post.images[i].filename)
             let response = await fetch(`${imageLink}?upscaled=false`, {headers: {"x-force-upscale": "false"}}).then((r) => r.arrayBuffer())
             if (response.byteLength && functions.isImage(imageLink)) {
-                response = cryptoFunctions.decrypt(response)
+                const isAnimated = functions.isAnimatedWebp(response)
+                if (!isAnimated) response = cryptoFunctions.decrypt(response)
             }
             if (response.byteLength) {
                 const blob = new Blob([new Uint8Array(response)])
@@ -168,7 +169,8 @@ const EditPostPage: React.FunctionComponent<Props> = (props) => {
             }
             let upscaledResponse = await fetch(`${imageLink}?upscaled=true`, {headers: {"x-force-upscale": "true"}}).then((r) => r.arrayBuffer())
             if (upscaledResponse.byteLength && functions.isImage(imageLink)) {
-                upscaledResponse = cryptoFunctions.decrypt(upscaledResponse)
+                const isAnimated = functions.isAnimatedWebp(response)
+                if (!isAnimated) upscaledResponse = cryptoFunctions.decrypt(upscaledResponse)
             }
             if (upscaledResponse.byteLength) {
                 const upscaledBlob = new Blob([new Uint8Array(upscaledResponse)])

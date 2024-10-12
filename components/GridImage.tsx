@@ -212,32 +212,23 @@ const GridImage = forwardRef<Ref, Props>((props, componentRef) => {
     }, [])
 
     const parseGIF = async () => {
-        if (loadingFrames) return
-        setLoadingFrames(true)
         const start = new Date()
-        const frames = await functions.extractGIFFrames(props.img, true)
-        if (!frames) return
+        const frames = await functions.extractGIFFrames(props.img)
         setGIFData(frames)
         const end = new Date()
         const seconds = (end.getTime() - start.getTime()) / 1000
         setSeekTo(seconds)
-        setLoadingFrames(false)
     }
-
     const parseAnimatedWebP = async () => {
-        if (loadingFrames) return
-        setLoadingFrames(true)
         const start = new Date()
         const arraybuffer = await fetch(props.img).then((r) => r.arrayBuffer())
-        const animated = await functions.isAnimatedWebp(arraybuffer)
+        const animated = functions.isAnimatedWebp(arraybuffer)
         if (!animated) return 
-        const frames = await functions.extractAnimatedWebpFrames(props.img, true)
-        if (!frames) return
+        const frames = await functions.extractAnimatedWebpFrames(props.img)
         setGIFData(frames)
         const end = new Date()
         const seconds = (end.getTime() - start.getTime()) / 1000
         setSeekTo(seconds)
-        setLoadingFrames(false)
     }
 
     const getVideoData = async () => {

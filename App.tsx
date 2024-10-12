@@ -23,6 +23,7 @@ import SignUpPage from "./pages/SignUpPage"
 import $2FAPage from "./pages/2FAPage"
 import $2FAEnablePage from "./pages/2FAEnablePage"
 import ContactPage from "./pages/ContactPage"
+import CopyrightRemovalPage from "./pages/CopyrightRemovalPage"
 import UserProfilePage from "./pages/UserProfilePage"
 import ChangeUsernamePage from "./pages/ChangeUsernamePage"
 import ChangeEmailPage from "./pages/ChangeEmailPage"
@@ -310,6 +311,7 @@ const App: React.FunctionComponent = (props) => {
                         <Route exact path="/2fa"><$2FAPage/></Route>
                         <Route exact path="/enable-2fa"><$2FAEnablePage/></Route>
                         <Route exact path="/contact"><ContactPage/></Route>
+                        <Route exact path="/copyright-removal"><CopyrightRemovalPage/></Route>
                         <Route exact path="/mod-queue"><ModQueuePage/></Route>
                         <Route exact path={["/privacy", "/privacypolicy"]}><Redirect to="/terms#privacy"/></Route>
                         <Route exact path={["/terms", "termsofservice"]}><TermsPage/></Route>
