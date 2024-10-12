@@ -24,6 +24,8 @@ import PageDialog from "../dialogs/PageDialog"
 import CaptchaDialog from "../dialogs/CaptchaDialog"
 import "./styles/itemspage.less"
 
+let replace = false
+
 const CommentsPage: React.FunctionComponent = (props) => {
     const [ignored, forceUpdate] = useReducer(x => x + 1, 0)
     const {theme, setTheme} = useContext(ThemeContext)
@@ -80,9 +82,18 @@ const CommentsPage: React.FunctionComponent = (props) => {
                 setCommentJumpFlag(true)
             }
         }
+        const updateStateChange = () => {
+            replace = true
+            const pageParam = new URLSearchParams(window.location.search).get("page")
+            if (pageParam) setCommentsPage(Number(pageParam))
+        }
         window.addEventListener("load", onDOMLoaded)
+        window.addEventListener("popstate", updateStateChange)
+        window.addEventListener("pushstate", updateStateChange)
         return () => {
             window.removeEventListener("load", onDOMLoaded)
+            window.removeEventListener("popstate", updateStateChange)
+            window.removeEventListener("pushstate", updateStateChange)
         }
     }, [])
 
@@ -263,10 +274,15 @@ const CommentsPage: React.FunctionComponent = (props) => {
     }, [scroll, comments, commentsPage, ended, sortType, sortReverse])
 
     useEffect(() => {
-        if (searchQuery) {
-            scroll ? history.replace(`${location.pathname}?query=${searchQuery}${commentID ? `&comment=${commentID}` : ""}`) : history.replace(`${location.pathname}?query=${searchQuery}&page=${commentsPage}${commentID ? `&comment=${commentID}` : ""}`)
+        const searchParams = new URLSearchParams(window.location.search)
+        if (searchQuery) searchParams.set("query", searchQuery)
+        if (!scroll) searchParams.set("page", commentsPage)
+        if (commentID) searchParams.set("comment", commentID)
+        if (replace) {
+            if (!scroll) history.replace(`${location.pathname}?${searchParams.toString()}`)
+            replace = false
         } else {
-            if (!scroll) history.replace(`${location.pathname}?page=${commentsPage}${commentID ? `&comment=${commentID}` : ""}`)
+            if (!scroll) history.push(`${location.pathname}?${searchParams.toString()}`)
         }
     }, [scroll, searchQuery, commentsPage, commentID])
 
@@ -407,10 +423,12 @@ const CommentsPage: React.FunctionComponent = (props) => {
             visible = comments.slice(postOffset, postOffset + getPageAmount())
         }
         for (let i = 0; i < visible.length; i++) {
-            if (visible[i].fake) continue
-            if (!session.username) if (visible[i].post.restrict !== "safe") continue
-            if (restrictType !== "explicit") if (visible[i].post.restrict === "explicit") continue
-            jsx.push(<CommentRow key={visible[i].commentID} comment={visible[i]} onDelete={updateComments} onEdit={updateComments} onCommentJump={onCommentJump}/>)
+            const comment = visible[i]
+            if (comment.fake) continue
+            if (!session.username) if (comment.post.restrict !== "safe") continue
+            if (restrictType !== "explicit") if (comment.post.restrict === "explicit") continue
+            if (!permissions.isElevated(session)) if (comment.post.hidden) continue
+            jsx.push(<CommentRow key={comment.commentID} comment={comment} onDelete={updateComments} onEdit={updateComments} onCommentJump={onCommentJump}/>)
         }
         if (!scroll) {
             jsx.push(

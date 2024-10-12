@@ -8,7 +8,7 @@ BlurContext, SharpenContext, EnableDragContext, FilterDropActiveContext, SquareC
 ShowDownloadDialogContext, HideTitlebarContext, ImageTypeContext, RestrictTypeContext, SortTypeContext, SortReverseContext, SiteSaturationContext,
 StyleTypeContext, SpeedContext, ReverseContext, MobileContext, RelativeContext, SessionContext, MobileScrollingContext, SessionFlagContext,
 SelectionModeContext, SelectionItemsContext, SearchFlagContext, DownloadIDsContext, DownloadFlagContext, ShowBulkQuickEditDialogContext,
-ShowBulkDeleteDialogContext} from "../Context"
+ShowBulkDeleteDialogContext, PageContext, PageFlagContext, PageMultiplierContext, ScrollYContext} from "../Context"
 import leftArrow from "../assets/icons/leftArrow.png"
 import rightArrow from "../assets/icons/rightArrow.png"
 import upArrow from "../assets/icons/upArrow.png"
@@ -53,6 +53,11 @@ import selectOn from "../assets/icons/select-on.png"
 import star from "../assets/icons/star.png"
 import quickEdit from "../assets/icons/quickedit.png"
 import deleteIcon from "../assets/icons/tag-delete.png"
+import leftIcon from "../assets/icons/go-left.png"
+import rightIcon from "../assets/icons/go-right.png"
+import multiplier1xIcon from "../assets/icons/1x.png"
+import multiplier2xIcon from "../assets/icons/2x.png"
+import multiplier3xIcon from "../assets/icons/3x.png"
 import functions from "../structures/Functions"
 import permissions from "../structures/Permissions"
 import "./styles/sortbar.less"
@@ -82,6 +87,7 @@ const SortBar: React.FunctionComponent = (props) => {
     const {showDownloadDialog, setShowDownloadDialog} = useContext(ShowDownloadDialogContext)
     const {downloadFlag, setDownloadFlag} = useContext(DownloadFlagContext)
     const {downloadIDs, setDownloadIDs} = useContext(DownloadIDsContext)
+    const {scrollY, setScrollY} = useContext(ScrollYContext)
     const [ignored, forceUpdate] = useReducer(x => x + 1, 0)
     const [mouseOver, setMouseOver] = useState(false)
     const {imageType, setImageType} = useContext(ImageTypeContext)
@@ -102,6 +108,9 @@ const SortBar: React.FunctionComponent = (props) => {
     const {relative, setRelative} = useContext(RelativeContext)
     const {session, setSession} = useContext(SessionContext)
     const {sessionFlag, setSessionFlag} = useContext(SessionFlagContext)
+    const {page, setPage} = useContext(PageContext)
+    const {pageFlag, setPageFlag} = useContext(PageFlagContext)
+    const {pageMultiplier, setPageMultiplier} = useContext(PageMultiplierContext)
     const {scroll, setScroll} = useContext(ScrollContext)
     const {posts, setPosts} = useContext(PostsContext)
     const [dropLeft, setDropLeft] = useState(0)
@@ -131,6 +140,7 @@ const SortBar: React.FunctionComponent = (props) => {
         const savedSortReverse = localStorage.getItem("sortReverse")
         const savedSquare = localStorage.getItem("square")
         const savedScroll = localStorage.getItem("scroll")
+        const savedMultiplier = localStorage.getItem("pageMultiplier")
         if (savedType) setImageType(savedType)
         if (savedRestrict) setRestrictType(savedRestrict)
         if (savedStyle) setStyleType(savedStyle)
@@ -139,6 +149,7 @@ const SortBar: React.FunctionComponent = (props) => {
         if (savedSortReverse) setSortReverse(savedSortReverse === "true")
         if (savedSquare) setSquare(savedSquare === "true")
         if (savedScroll) setScroll(savedScroll === "true")
+        if (savedMultiplier) setPageMultiplier(Number(savedMultiplier))
 
         const savedBrightness = localStorage.getItem("brightness")
         const savedContrast = localStorage.getItem("contrast")
@@ -208,7 +219,8 @@ const SortBar: React.FunctionComponent = (props) => {
         localStorage.setItem("size", sizeType)
         localStorage.setItem("sort", sortType)
         localStorage.setItem("sortReverse", sortReverse)
-    }, [imageType, restrictType, styleType, sizeType, sortType, sortReverse])
+        localStorage.setItem("pageMultiplier", pageMultiplier)
+    }, [imageType, restrictType, styleType, sizeType, sortType, sortReverse, pageMultiplier])
 
     const hideTheSidebar = () => {
         setHideSidebar((prev: boolean) => {
@@ -701,6 +713,34 @@ const SortBar: React.FunctionComponent = (props) => {
         }
         setSortType(sortType)
     }
+
+    const getPageMultiplierIcon = () => {
+        if (pageMultiplier === 1) return multiplier1xIcon
+        if (pageMultiplier === 2) return multiplier2xIcon
+        if (pageMultiplier === 3) return multiplier3xIcon
+        return multiplier1xIcon
+    }
+
+    const previousPage = () => {
+        setPageFlag(page - 1)
+        setTimeout(() => {
+            setHideSortbar(false)
+        }, 100)
+    }
+
+    const nextPage = () => {
+        setPageFlag(page + 1)
+        setTimeout(() => {
+            setHideSortbar(false)
+        }, 100)
+    }
+
+    const changePageMultiplier = () => {
+        if (pageMultiplier === 1) return setPageMultiplier(2)
+        if (pageMultiplier === 2) return setPageMultiplier(3)
+        if (pageMultiplier === 3) return setPageMultiplier(1)
+        return setPageMultiplier(1)
+    }
  
     let sortBarJSX = () => {
         if (mobile) return (
@@ -768,6 +808,17 @@ const SortBar: React.FunctionComponent = (props) => {
                     <div className="sortbar-item" onClick={() => setSelectionMode((prev: boolean) => !prev)}>
                         <img className="sortbar-img" src={selectionMode ? selectOn : select} style={{filter: getFilter()}}/>
                     </div> : null}
+                    {!scroll ? <>
+                    <div className="sortbar-item" style={{marginRight: "5px"}} onClick={previousPage}>
+                        <img className="sortbar-img" src={leftIcon} style={{filter: getFilter()}}/>
+                    </div>
+                    <div className="sortbar-item" onClick={nextPage}>
+                        <img className="sortbar-img" src={rightIcon} style={{filter: getFilter()}}/>
+                    </div>
+                    <div className="sortbar-item" onClick={changePageMultiplier}>
+                        <img className="sortbar-img" src={getPageMultiplierIcon()} style={{filter: getFilter()}}/>
+                    </div>
+                    </> : null}
                     <div className="sortbar-item" onClick={() => toggleScroll()}>
                         <img className="sortbar-img" src={scroll ? scrollIcon : pageIcon} style={{filter: getFilter()}}/>
                         <span className="sortbar-text">{scroll ? "Scrolling" : "Pages"}</span>

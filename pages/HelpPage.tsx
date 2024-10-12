@@ -1,4 +1,5 @@
 import React, {useContext, useEffect, useState} from "react"
+import {useHistory} from "react-router-dom"
 import {HashLink as Link} from "react-router-hash-link"
 import TitleBar from "../components/TitleBar"
 import NavBar from "../components/NavBar"
@@ -30,6 +31,7 @@ import implicationsImg from "../assets/misc/implications.png"
 import captchaImg from "../assets/misc/captcha.png"
 import musicImg from "../assets/misc/music.png"
 import CaptchaDialog from "../dialogs/CaptchaDialog"
+import functions from "../structures/Functions"
 import "./styles/helppage.less"
 
 const HelpPage: React.FunctionComponent = (props) => {
@@ -42,6 +44,7 @@ const HelpPage: React.FunctionComponent = (props) => {
     const {sidebarText, setSidebarText} = useContext(SidebarTextContext)
     const {mobile, setMobile} = useContext(MobileContext)
     const {helpTab, setHelpTab} = useContext(HelpTabContext)
+    const history = useHistory()
 
     const urlState = () => {
         if (window.location.hash) setHelpTab(window.location.hash.replace("#", ""))
@@ -451,6 +454,19 @@ const HelpPage: React.FunctionComponent = (props) => {
                 </span></>
             )
         }
+        if (helpTab === "copyright-removal") {
+            return (
+                <><span className="help-heading">Copyright Removal</span>
+                <span className="help-text">
+                    We respect the intellectual property rights of others. If you find your work on the site and don't wish it to be 
+                    here anymore, you may submit a copyright form at <a className="help-link" onClick={() => history.push("/copyright")}>{mobile ? "Copyright Form" : `${functions.getDomain()}/copyright`}</a> or email us at moepictures.moe@gmail.com.<br/><br/>
+
+                    After verifying that you are the artist, your works will be promptly removed, and if requested we will also prevent any of your future works from being uploaded.<br/><br/>
+
+                    We will be very sad to see you go!<br/>
+                </span></>
+            )
+        }
     }
     
     return (
@@ -485,6 +501,7 @@ const HelpPage: React.FunctionComponent = (props) => {
                         <span className="help-nav-text" onClick={() => setHelpTab("bans")}>Bans</span>
                         <span className="help-nav-text" onClick={() => setHelpTab("captcha")}>Captcha</span>
                         <span className="help-nav-text" onClick={() => setHelpTab("account-deletion")}>Account Deletion</span>
+                        <span className="help-nav-text" onClick={() => setHelpTab("copyright-removal")}>Copyright Removal</span>
                     </div>
                     <div className="help-container">
                         {getContainerJSX()}

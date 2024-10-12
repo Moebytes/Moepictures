@@ -20,6 +20,7 @@ SiteSaturationContext, ScrollContext, CharactersPageContext, ShowPageDialogConte
 import "./styles/itemspage.less"
 
 let limit = 25
+let replace = false
 let pageAmount = 7
 
 const CharactersPage: React.FunctionComponent = (props) => {
@@ -72,9 +73,18 @@ const CharactersPage: React.FunctionComponent = (props) => {
                 setCharactersPage(Number(pageParam))
             }
         }
+        const updateStateChange = () => {
+            replace = true
+            const pageParam = new URLSearchParams(window.location.search).get("page")
+            if (pageParam) setCharactersPage(Number(pageParam))
+        }
         window.addEventListener("load", onDOMLoaded)
+        window.addEventListener("popstate", updateStateChange)
+        window.addEventListener("pushstate", updateStateChange)
         return () => {
             window.removeEventListener("load", onDOMLoaded)
+            window.removeEventListener("popstate", updateStateChange)
+            window.removeEventListener("pushstate", updateStateChange)
         }
     }, [])
 
@@ -238,10 +248,14 @@ const CharactersPage: React.FunctionComponent = (props) => {
     }, [scroll, characters, charactersPage, ended, sortType, sortReverse])
 
     useEffect(() => {
-        if (searchQuery) {
-            scroll ? history.replace(`${location.pathname}?query=${searchQuery}`) : history.replace(`${location.pathname}?query=${searchQuery}&page=${charactersPage}`)
+        const searchParams = new URLSearchParams(window.location.search)
+        if (searchQuery) searchParams.set("query", searchQuery)
+        if (!scroll) searchParams.set("page", charactersPage)
+        if (replace) {
+            if (!scroll) history.replace(`${location.pathname}?${searchParams.toString()}`)
+            replace = false
         } else {
-            if (!scroll) history.replace(`${location.pathname}?page=${charactersPage}`)
+            if (!scroll) history.push(`${location.pathname}?${searchParams.toString()}`)
         }
     }, [scroll, searchQuery, charactersPage])
 

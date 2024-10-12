@@ -115,6 +115,7 @@ export const AutoSearchContext = React.createContext<any>(null)
 export const SaveSearchContext = React.createContext<any>(null)
 export const ShowPageDialogContext = React.createContext<any>(null)
 export const PageFlagContext = React.createContext<any>(null)
+export const PageMultiplierContext = React.createContext<any>(null)
 export const ReloadPostFlagContext = React.createContext<any>(null)
 export const ToolTipXContext = React.createContext<any>(null)
 export const ToolTipYContext = React.createContext<any>(null)
@@ -400,9 +401,11 @@ const Context: React.FunctionComponent = (props) => {
     const [muteFlag, setMuteFlag] = useState(false)
     const [resetFlag, setResetFlag] = useState(false)
     const [order, setOrder] = useState(1)
+    const [pageMultiplier, setPageMultiplier] = useState(1)
 
 return (
     <>
+        <PageMultiplierContext.Provider value={{pageMultiplier, setPageMultiplier}}>
         <OrderContext.Provider value={{order, setOrder}}>
         <AudioPostContext.Provider value={{audioPost, setAudioPost}}>
         <ResetFlagContext.Provider value={{resetFlag, setResetFlag}}>
@@ -784,6 +787,7 @@ return (
         </ResetFlagContext.Provider>
         </AudioPostContext.Provider>
         </OrderContext.Provider>
+        </PageMultiplierContext.Provider>
     </>
     )
 }

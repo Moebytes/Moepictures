@@ -1540,7 +1540,7 @@ export default class Functions {
         camera.updateProjectionMatrix()
 
         const zoomedDistance = size / 5
-        camera.position.set(center.x + zoomedDistance, center.y + zoomedDistance / 3, center.z + zoomedDistance)
+        camera.position.set(center.x + zoomedDistance, center.y + zoomedDistance / 2, center.z + zoomedDistance)
         camera.lookAt(center)
 
         await Functions.timeout(100)

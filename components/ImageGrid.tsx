@@ -2,7 +2,7 @@ import React, {useContext, useEffect, useRef, useState, useReducer} from "react"
 import {useHistory, useLocation} from "react-router-dom"
 import {ThemeContext, SizeTypeContext, PostAmountContext, PostsContext, ImageTypeContext, EnableDragContext, PremiumRequiredContext,
 RestrictTypeContext, StyleTypeContext, SortTypeContext, SortReverseContext, SearchContext, SearchFlagContext, HeaderFlagContext, MobileScrollingContext,
-RandomFlagContext, ImageSearchFlagContext, SidebarTextContext, MobileContext, SessionContext, SessionFlagContext, VisiblePostsContext,
+RandomFlagContext, ImageSearchFlagContext, SidebarTextContext, MobileContext, SessionContext, SessionFlagContext, VisiblePostsContext, PageMultiplierContext,
 ScrollYContext, ScrollContext, PageContext, AutoSearchContext, ShowPageDialogContext, PageFlagContext, ReloadPostFlagContext} from "../Context"
 import GridImage from "./GridImage"
 import GridModel from "./GridModel"
@@ -15,14 +15,11 @@ import "./styles/imagegrid.less"
 
 let interval = null as any
 let reloadedPost = false
-
-interface Props {
-    location?: any
-}
+let replace = false
 
 let limit = 100
 
-const ImageGrid: React.FunctionComponent<Props> = (props) => {
+const ImageGrid: React.FunctionComponent = (props) => {
     const [ignored, forceUpdate] = useReducer(x => x + 1, 0)
     const {theme, setTheme} = useContext(ThemeContext)
     const {sizeType, setSizeType} = useContext(SizeTypeContext)
@@ -56,9 +53,10 @@ const ImageGrid: React.FunctionComponent<Props> = (props) => {
     const [ended, setEnded] = useState(false)
     const [updatePostFlag, setUpdatePostFlag] = useState(false)
     const {page, setPage} = useContext(PageContext)
+    const {pageFlag, setPageFlag} = useContext(PageFlagContext)
+    const {pageMultiplier, setPageMultiplier} = useContext(PageMultiplierContext)
     const {autoSearch, setAutoSearch} = useContext(AutoSearchContext)
     const {showPageDialog, setShowPageDialog} = useContext(ShowPageDialogContext)
-    const {pageFlag, setPageFlag} = useContext(PageFlagContext)
     const {reloadPostFlag, setReloadPostFlag} = useContext(ReloadPostFlagContext)
     const [postsRef, setPostsRef] = useState([]) as any
     const [reupdateFlag, setReupdateFlag] = useState(false)
@@ -71,18 +69,18 @@ const ImageGrid: React.FunctionComponent<Props> = (props) => {
     }, [mobile])
 
     const getPageAmount = () => {
-        let loadAmount = 60
-        if (sizeType === "tiny") loadAmount = 60
-        if (sizeType === "small") loadAmount = 40
-        if (sizeType === "medium") loadAmount = 25
-        if (sizeType === "large") loadAmount = 20
-        if (sizeType === "massive") loadAmount = 15
-        return loadAmount * 2
+        let loadAmount = 36
+        if (sizeType === "tiny") loadAmount = 36
+        if (sizeType === "small") loadAmount = 21
+        if (sizeType === "medium") loadAmount = 15
+        if (sizeType === "large") loadAmount = 12
+        if (sizeType === "massive") loadAmount = 6
+        return loadAmount * pageMultiplier
     }
 
     const getLoadAmount = () => {
         const loadAmount = mobile ? functions.getImagesPerRowMobile(sizeType) : functions.getImagesPerRow(sizeType)
-        return loadAmount * 10
+        return loadAmount * 5
     }
 
     const searchPosts = async (query?: string) => {
@@ -109,7 +107,7 @@ const ImageGrid: React.FunctionComponent<Props> = (props) => {
         setUpdatePostFlag(true)
         if (!result.length) setNoResults(true)
         if (!search) {
-            document.title = "Cute Anime Art ♥"
+            document.title = "Moepictures: Moe Image Board ♥"
         }
     }
 
@@ -129,11 +127,11 @@ const ImageGrid: React.FunctionComponent<Props> = (props) => {
         if (!loaded) setLoaded(true)
         if (searchFlag) searchPosts()
         if (!scroll) updateOffset()
-        const savedPosts = localStorage.getItem("savedPosts")
-        if (savedPosts) setPosts(JSON.parse(savedPosts))
         const queryParam = new URLSearchParams(window.location.search).get("query")
         const pageParam = new URLSearchParams(window.location.search).get("page")
         const onDOMLoaded = () => {
+            const savedPosts = localStorage.getItem("savedPosts")
+            if (savedPosts) setPosts(JSON.parse(savedPosts))
             if (!scrollY) {
                 const elements = document.querySelectorAll(".sortbar-text") as any
                 const img = document.querySelector(".image")
@@ -158,9 +156,18 @@ const ImageGrid: React.FunctionComponent<Props> = (props) => {
                 setPage(Number(pageParam))
             }
         }
+        const updateStateChange = () => {
+            replace = true
+            const pageParam = new URLSearchParams(window.location.search).get("page")
+            if (pageParam) setPageFlag(Number(pageParam))
+        }
         window.addEventListener("load", onDOMLoaded)
+        window.addEventListener("popstate", updateStateChange)
+        window.addEventListener("pushstate", updateStateChange)
         return () => {
             window.removeEventListener("load", onDOMLoaded)
+            window.removeEventListener("popstate", updateStateChange)
+            window.removeEventListener("pushstate", updateStateChange)
         }
     }, [])
 
@@ -210,7 +217,7 @@ const ImageGrid: React.FunctionComponent<Props> = (props) => {
             }
         }
         if (!scroll) updatePageOffset()
-    }, [session, scroll, page, ended, noResults, sizeType, imageType, restrictType, styleType, sortType, sortReverse])
+    }, [session, scroll, page, pageMultiplier, ended, noResults, sizeType, imageType, restrictType, styleType, sortType, sortReverse])
 
     useEffect(() => {
         if (reloadedPost) {
@@ -272,7 +279,7 @@ const ImageGrid: React.FunctionComponent<Props> = (props) => {
             setUpdatePostFlag(false)
         }
         if (updatePostFlag) updatePosts()
-    }, [updatePostFlag])
+    }, [updatePostFlag, pageMultiplier])
 
     const updateOffset = async () => {
         if (noResults) return
@@ -341,7 +348,7 @@ const ImageGrid: React.FunctionComponent<Props> = (props) => {
             }
         }
         if (scroll) updatePosts()
-    }, [session, sizeType, scroll, sizeType, imageType, restrictType, styleType, sortType, sortReverse])
+    }, [session, sizeType, scroll, pageMultiplier, sizeType, imageType, restrictType, styleType, sortType, sortReverse])
 
     useEffect(() => {
         const scrollHandler = async () => {
@@ -367,10 +374,14 @@ const ImageGrid: React.FunctionComponent<Props> = (props) => {
     }, [session, posts, visiblePosts, ended, noResults, offset, scroll, sizeType, imageType, restrictType, styleType, sortType, sortReverse])
 
     useEffect(() => {
-        if (search) {
-            scroll ? history.replace(`${location.pathname}?query=${search}`) : history.replace(`${location.pathname}?query=${search}&page=${page}`)
+        const searchParams = new URLSearchParams(window.location.search)
+        if (search) searchParams.set("search", search)
+        if (!scroll) searchParams.set("page", page)
+        if (replace) {
+            if (!scroll) history.replace(`${location.pathname}?${searchParams.toString()}`)
+            replace = false
         } else {
-            if (!scroll) history.replace(`${location.pathname}?page=${page}`)
+            if (!scroll) history.push(`${location.pathname}?${searchParams.toString()}`)
         }
     }, [scroll, search, page])
 
@@ -428,7 +439,7 @@ const ImageGrid: React.FunctionComponent<Props> = (props) => {
 
     const firstPage = () => {
         setPage(1)
-        window.scrollTo(0, 0)
+        window.scroll(0, 0)
         setTimeout(() => {
             setMobileScrolling(false)
             functions.jumpToTop()
@@ -439,7 +450,7 @@ const ImageGrid: React.FunctionComponent<Props> = (props) => {
         let newPage = page - 1 
         if (newPage < 1) newPage = 1 
         setPage(newPage)
-        window.scrollTo(0, 0)
+        window.scroll(0, 0)
         setTimeout(() => {
             setMobileScrolling(false)
             functions.jumpToTop()
@@ -450,7 +461,7 @@ const ImageGrid: React.FunctionComponent<Props> = (props) => {
         let newPage = page + 1 
         if (newPage > maxPage()) newPage = maxPage()
         setPage(newPage)
-        window.scrollTo(0, 0)
+        window.scroll(0, 0)
         setTimeout(() => {
             setMobileScrolling(false)
             functions.jumpToTop()
@@ -459,7 +470,7 @@ const ImageGrid: React.FunctionComponent<Props> = (props) => {
 
     const lastPage = () => {
         setPage(maxPage())
-        window.scrollTo(0, 0)
+        window.scroll(0, 0)
         setTimeout(() => {
             setMobileScrolling(false)
             functions.jumpToTop()
@@ -467,12 +478,9 @@ const ImageGrid: React.FunctionComponent<Props> = (props) => {
     }
 
     const goToPage = (newPage: number) => {
+        if (newPage < 1) newPage = 1
+        if (newPage > maxPage()) newPage = maxPage()
         setPage(newPage)
-        window.scrollTo(0, 0)
-        setTimeout(() => {
-            setMobileScrolling(false)
-            functions.jumpToTop()
-        }, 100)
     }
 
     useEffect(() => {
@@ -546,7 +554,8 @@ const ImageGrid: React.FunctionComponent<Props> = (props) => {
                     <img className="noresults" src={noresults}/>
                 </div>
             )
-        } else if (!scroll) {
+        }
+        if (!scroll) {
             jsx.push(
                 <div key="page-numbers" className="page-container">
                     {page <= 1 ? null : <button className="page-button" onClick={firstPage}>{"<<"}</button>}

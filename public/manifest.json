@@ -1,7 +1,7 @@
 {
     "short_name": "moepictures.moe",
     "name": "Moepictures.moe",
-    "description": "Moepictures is a moe/kawaii anime image board. Find the most moe art, comics, animations, music, and 3d models!",
+    "description": "Moepictures is a moe anime image board. Search for the most moe art, comics, animations, music, and 3d models! Everything is tagged and categorized to faciliate an easy searching experience.",
     "icons": [
       {
         "src": "assets/icons/favicon.png",

@@ -26,6 +26,7 @@ ShowPageDialogContext, PageFlagContext, SessionFlagContext, RestrictTypeContext}
 import "./styles/itemspage.less"
 
 let limit = 200
+let replace = false
 
 const TagsPage: React.FunctionComponent = (props) => {
     const {theme, setTheme} = useContext(ThemeContext)
@@ -76,9 +77,18 @@ const TagsPage: React.FunctionComponent = (props) => {
                 setTagsPage(Number(pageParam))
             }
         }
+        const updateStateChange = () => {
+            replace = true
+            const pageParam = new URLSearchParams(window.location.search).get("page")
+            if (pageParam) setTagsPage(Number(pageParam))
+        }
         window.addEventListener("load", onDOMLoaded)
+        window.addEventListener("popstate", updateStateChange)
+        window.addEventListener("pushstate", updateStateChange)
         return () => {
             window.removeEventListener("load", onDOMLoaded)
+            window.removeEventListener("popstate", updateStateChange)
+            window.removeEventListener("pushstate", updateStateChange)
         }
     }, [])
 
@@ -241,10 +251,14 @@ const TagsPage: React.FunctionComponent = (props) => {
     }, [scroll, tags, tagsPage, ended, session, sortType, sortReverse, typeType])
 
     useEffect(() => {
-        if (searchQuery) {
-            scroll ? history.replace(`${location.pathname}?query=${searchQuery}`) : history.replace(`${location.pathname}?query=${searchQuery}&page=${tagsPage}`)
+        const searchParams = new URLSearchParams(window.location.search)
+        if (searchQuery) searchParams.set("query", searchQuery)
+        if (!scroll) searchParams.set("page", tagsPage)
+        if (replace) {
+            if (!scroll) history.replace(`${location.pathname}?${searchParams.toString()}`)
+            replace = false
         } else {
-            if (!scroll) history.replace(`${location.pathname}?page=${tagsPage}`)
+            if (!scroll) history.push(`${location.pathname}?${searchParams.toString()}`)
         }
     }, [scroll, searchQuery, tagsPage])
 

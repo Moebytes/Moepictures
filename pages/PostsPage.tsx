@@ -41,7 +41,7 @@ const PostsPage: React.FunctionComponent = (props) => {
         setHideNavbar(false)
         setHeaderText("")
         setSidebarText("")
-        document.title = "Cute Anime Art ♥"
+        document.title = "Moepictures: Moe Image Board ♥"
         const savedTitlebar = localStorage.getItem("titlebar")
         if (savedTitlebar === "false") {
             setHideTitlebar(true)

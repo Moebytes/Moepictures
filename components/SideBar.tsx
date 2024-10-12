@@ -675,16 +675,14 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
         return <span className="tag-alt-link" onClick={() => username ? history.push(`/user/${username}`) : null}>{functions.toProperCase(username) || "deleted"}</span>
     }
 
-
-
-    const copyTags = (replaceDash?: boolean, noCommas?: boolean) => {
+    const copyTags = (replaceDash?: boolean, commas?: boolean) => {
         const artists = props.artists.map((a: any) => a.tag)
         const characters = props.characters.map((c: any) => c.tag)
         const series = props.series.map((s: any) => s.tag)
         const tags = props.tags.map((t: any) => t.tag)
         let combined = [...artists, ...characters, ...series, ...tags]
         if (replaceDash) combined = combined.map((c: string) => c.replaceAll("-", " "))
-        navigator.clipboard.writeText(noCommas ? combined.join(" ") : combined.join(", "))
+        navigator.clipboard.writeText(commas ? combined.join(", ") : combined.join(" "))
     }
 
     const copyHash = () => {
@@ -699,7 +697,7 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
             return (
                 <div className="sidebar-subcontainer">
                     <div className="sidebar-row">
-                        <span className="tag-hover" onClick={() => copyTags()} onAuxClick={() => copyTags(false, true)} onContextMenu={(event) => {event.preventDefault(); copyTags(true)}}>
+                        <span className="tag-hover" onClick={() => copyTags()} onContextMenu={(event) => {event.preventDefault(); copyTags(true, true)}}>
                             <img className="sidebar-icon" src={tagIcon}/>
                             <span className="tag-red">Copy Tags</span>
                         </span>

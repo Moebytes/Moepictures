@@ -134,10 +134,10 @@ const ToolTip: React.FunctionComponent = (props) => {
         return jsx
     }
 
-    const copyTags = (removeDashes?: boolean, noCommas?: boolean) => {
+    const copyTags = (removeDashes?: boolean, commas?: boolean) => {
         let tagArr = [artist.tag, ...tags.map((t: any) => t.tag)]
         if (removeDashes) tagArr = tagArr.map((t: any) => t.replaceAll("-", " "))
-        navigator.clipboard.writeText(noCommas ? tagArr.join(" ") : tagArr.join(", "))
+        navigator.clipboard.writeText(commas ? tagArr.join(", ") : tagArr.join(" "))
     }
 
     if (selectionMode) return null
@@ -157,7 +157,7 @@ const ToolTip: React.FunctionComponent = (props) => {
                 <div className="tooltip-artist-container">
                     <img className="tooltip-img" src={functions.getTagLink(artist.type, artist.image)}/>
                     <span className={`tooltip-artist-tag ${tooltipPost?.hidden ? "strikethrough" : ""}`} style={{marginRight: "5px"}} onClick={openArtist}>{artist.tag}</span>
-                    <img className="tooltip-img-small" src={tagIcon} onClick={() => copyTags()} onAuxClick={() => copyTags(false, true)} onContextMenu={(event) => {event.preventDefault(); copyTags(true)}}/>
+                    <img className="tooltip-img-small" src={tagIcon} onClick={() => copyTags()} onContextMenu={(event) => {event.preventDefault(); copyTags(true, true)}}/>
                 </div>
                 <div className="tooltip-artist-container">
                     <span className={`tooltip-artist-tag ${tooltipPost?.hidden ? "strikethrough" : ""}`} onClick={download}>{getImageDimensions()}</span>

@@ -22,6 +22,8 @@ import PageDialog from "../dialogs/PageDialog"
 import CaptchaDialog from "../dialogs/CaptchaDialog"
 import "./styles/itemspage.less"
 
+let replace = false
+
 const ForumPage: React.FunctionComponent = (props) => {
     const [ignored, forceUpdate] = useReducer(x => x + 1, 0)
     const {theme, setTheme} = useContext(ThemeContext)
@@ -71,9 +73,18 @@ const ForumPage: React.FunctionComponent = (props) => {
                 setForumPage(Number(pageParam))
             }
         }
+        const updateStateChange = () => {
+            replace = true
+            const pageParam = new URLSearchParams(window.location.search).get("page")
+            if (pageParam) setForumPage(Number(pageParam))
+        }
         window.addEventListener("load", onDOMLoaded)
+        window.addEventListener("popstate", updateStateChange)
+        window.addEventListener("pushstate", updateStateChange)
         return () => {
             window.removeEventListener("load", onDOMLoaded)
+            window.removeEventListener("popstate", updateStateChange)
+            window.removeEventListener("pushstate", updateStateChange)
         }
     }, [])
 
@@ -245,10 +256,14 @@ const ForumPage: React.FunctionComponent = (props) => {
     }, [scroll, threads, forumPage, ended, session, sortType, sortReverse])
 
     useEffect(() => {
-        if (searchQuery) {
-            scroll ? history.replace(`${location.pathname}?query=${searchQuery}`) : history.replace(`${location.pathname}?query=${searchQuery}&page=${forumPage}`)
+        const searchParams = new URLSearchParams(window.location.search)
+        if (searchQuery) searchParams.set("query", searchQuery)
+        if (!scroll) searchParams.set("page", forumPage)
+        if (replace) {
+            if (!scroll) history.replace(`${location.pathname}?${searchParams.toString()}`)
+            replace = false
         } else {
-            if (!scroll) history.replace(`${location.pathname}?page=${forumPage}`)
+            if (!scroll) history.push(`${location.pathname}?${searchParams.toString()}`)
         }
     }, [scroll, searchQuery, forumPage])
 

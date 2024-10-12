@@ -96,17 +96,17 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
         setHistoryID(historyParam)
         const translationParam = new URLSearchParams(window.location.search).get("translation")
         setTranslationID(translationParam)
-        if (!historyParam) {
-            const savedPost = localStorage.getItem("savedPost")
-            const savedTags = localStorage.getItem("savedTags")
-            if (savedPost) setPost(JSON.parse(savedPost))
-            if (savedTags) setTagCategories(JSON.parse(savedTags))
-            if (!posts?.length) {
-                const savedPosts = localStorage.getItem("savedPosts")
-                if (savedPosts) setPosts(JSON.parse(savedPosts))
-            }
-        }
         const onDOMLoaded = () => {
+            if (!historyParam) {
+                const savedPost = localStorage.getItem("savedPost")
+                const savedTags = localStorage.getItem("savedTags")
+                if (savedPost) setPost(JSON.parse(savedPost))
+                if (savedTags) setTagCategories(JSON.parse(savedTags))
+                if (!posts?.length) {
+                    const savedPosts = localStorage.getItem("savedPosts")
+                    if (savedPosts) setPosts(JSON.parse(savedPosts))
+                }
+            }
             const savedOrder = localStorage.getItem("order")
             if (savedOrder) setOrder(Number(savedOrder))
             const orderParam = new URLSearchParams(window.location.search).get("order")
@@ -213,7 +213,8 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
             if (!tagCategories?.artists?.[0]?.tag || !post) return
             try {
                 if (tagCategories.artists[0].tag === "unknown-artist") return
-                const artistPosts = await functions.get("/api/search/posts", {query: tagCategories.artists[0].tag, type: "all", restrict: "all", style: "all", sort: "drawn", limit: mobile ? 10 : 100}, session, setSessionFlag)
+                let artistPosts = await functions.get("/api/search/posts", {query: tagCategories.artists[0].tag, type: "all", restrict: "all", style: "all", sort: "drawn", limit: mobile ? 10 : 100}, session, setSessionFlag)
+                artistPosts = artistPosts.filter((p: any) => p.postID !== postID)
                 if (artistPosts?.length) setArtistPosts(artistPosts)
             } catch (err) {
                 console.log(err)
@@ -223,7 +224,8 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
             if (!tagCategories?.characters?.[0]?.tag || !post) return
             if (tagCategories?.characters?.[0]?.tag !== characterTag) {
                 try {
-                    const relatedPosts = await functions.get("/api/search/posts", {query: tagCategories.characters[0].tag, type: post.type, restrict: post.restrict === "explicit" ? "explicit" : "all", style: post.style, sort: Math.random() > 0.5 ? "date" : "reverse date", limit: mobile ? 10 : 30}, session, setSessionFlag)
+                    let relatedPosts = await functions.get("/api/search/posts", {query: tagCategories.characters[0].tag, type: post.type, restrict: post.restrict === "explicit" ? "explicit" : "all", style: post.style, sort: Math.random() > 0.5 ? "date" : "reverse date", limit: mobile ? 10 : 30}, session, setSessionFlag)
+                    relatedPosts = relatedPosts.filter((p: any) => p.postID !== postID)
                     if (relatedPosts?.length) setRelatedPosts(relatedPosts)
                     characterTag = tagCategories.characters[0].tag
                 } catch (err) {
@@ -361,7 +363,7 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
                 const post = posts[currentIndex]
                 if (post.fake) return
                 history.push(`/post/${post.postID}`)
-                window.scrollTo(0, functions.navbarHeight() + functions.titlebarHeight())
+                window.scrollTo(0, functions.navbarHeight() + functions.titlebarHeight() + 20)
             }
         }
     }
@@ -380,7 +382,7 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
                 const post = posts[currentIndex]
                 if (post.fake) return
                 history.push(`/post/${post.postID}`)
-                window.scrollTo(0, functions.navbarHeight() + functions.titlebarHeight())
+                window.scrollTo(0, functions.navbarHeight() + functions.titlebarHeight() + 20)
             }
         }
     }

@@ -2,7 +2,7 @@ import React, {useEffect, useContext, useState, useRef} from "react"
 import {useHistory} from "react-router-dom"
 import {HashLink as Link} from "react-router-hash-link"
 import {HideNavbarContext, HideSidebarContext, ThemeContext, EnableDragContext, ShowPageDialogContext, PageFlagContext,
-HideTitlebarContext, SessionContext} from "../Context"
+HideTitlebarContext, MobileScrollingContext, SessionContext} from "../Context"
 import functions from "../structures/Functions"
 import Draggable from "react-draggable"
 import "./styles/dialog.less"
@@ -13,6 +13,7 @@ const PageDialog: React.FunctionComponent = (props) => {
     const {hideTitlebar, setHideTitlebar} = useContext(HideTitlebarContext)
     const {hideSidebar, setHideSidebar} = useContext(HideSidebarContext)
     const {enableDrag, setEnableDrag} = useContext(EnableDragContext)
+    const {mobileScrolling, setMobileScrolling} = useContext(MobileScrollingContext)
     const {session, setSession} = useContext(SessionContext)
     const {showPageDialog, setShowPageDialog} = useContext(ShowPageDialogContext)
     const {pageFlag, setPageFlag} = useContext(PageFlagContext)
@@ -38,6 +39,10 @@ const PageDialog: React.FunctionComponent = (props) => {
     const click = (button: "accept" | "reject") => {
         if (button === "accept") {
             setPageFlag(Number(pageField))
+            setTimeout(() => {
+                setMobileScrolling(false)
+                functions.jumpToTop()
+            }, 100)
         }
         setShowPageDialog(false)
     }

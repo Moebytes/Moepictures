@@ -84,13 +84,15 @@ export default class SQLComment {
                 'type', post_json."type",
                 'restrict', post_json."restrict",
                 'style', post_json."style",
+                'hidden', post_json."hidden",
                 'images', (array_agg(post_json."images"))[1]
                 ) AS post
                 FROM comments
                 JOIN "users" ON "users"."username" = "comments"."username"
                 JOIN post_json ON post_json."postID" = "comments"."postID"
                 ${whereQuery}
-                GROUP BY comments."commentID", users."image", users."imagePost", users."role", users."banned", post_json."type", post_json."restrict", post_json."style"
+                GROUP BY comments."commentID", users."image", users."imagePost", users."role", users."banned", 
+                post_json."type", post_json."restrict", post_json."style", post_json."hidden"
                 ${sortQuery}
                 LIMIT 100 ${offset ? `OFFSET $${i}` : ""}
             `),
@@ -128,13 +130,15 @@ export default class SQLComment {
                 'type', post_json."type",
                 'restrict', post_json."restrict",
                 'style', post_json."style",
+                'hidden', post_json."hidden",
                 'images', (array_agg(post_json."images"))[1]
                 ) AS post
                 FROM comments
                 JOIN "users" ON "users"."username" = "comments"."username"
                 JOIN post_json ON post_json."postID" = "comments"."postID"
                 ${whereQuery}
-                GROUP BY comments."commentID", users."image", users."imagePost", users."role", post_json."type", post_json."restrict", post_json."style"
+                GROUP BY comments."commentID", users."image", users."imagePost", users."role", 
+                post_json."type", post_json."restrict", post_json."style", post_json."hidden"
                 ${sortQuery}
                 LIMIT 100 ${offset ? `OFFSET $${i}` : ""}
             `),

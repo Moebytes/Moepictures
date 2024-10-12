@@ -45,7 +45,7 @@ const EditCommentDialog: React.FunctionComponent = (props) => {
         return (
             <div className="dialog">
                 <Draggable handle=".dialog-title-container">
-                <div className="dialog-box" style={{width: "400px", height: "250px"}} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
+                <div className="dialog-box" style={{width: "400px"}} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                     <div className="dialog-container">
                         <div className="dialog-title-container">
                             <span className="dialog-title">Edit Comment</span>
