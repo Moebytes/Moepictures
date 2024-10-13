@@ -373,7 +373,7 @@ export default class SQLPost {
         const query: QueryConfig = {
         text: functions.multiTrim(/*sql*/`
             SELECT posts.*, json_agg(DISTINCT images.*) AS images, json_agg(DISTINCT "tag map".tag) AS tags,
-            COUNT(DISTINCT favorites."favoriteID") AS "favoriteCount",
+            COUNT(DISTINCT favorites."username") AS "favoriteCount",
             ROUND(AVG(DISTINCT cuteness."cuteness")) AS "cuteness"
             FROM posts
             JOIN images ON posts."postID" = images."postID"
@@ -490,23 +490,19 @@ export default class SQLPost {
         const query: QueryConfig = {
         text: functions.multiTrim(/*sql*/`
                 WITH post_json AS (
-                SELECT posts.*, json_agg(DISTINCT images.*) AS images,
-                ROUND(AVG(DISTINCT cuteness."cuteness")) AS "cuteness"
-                FROM posts
-                JOIN images ON images."postID" = posts."postID"
-                FULL JOIN "cuteness" ON posts."postID" = "cuteness"."postID"
-                GROUP BY posts."postID"
+                    SELECT posts.*, json_agg(DISTINCT images.*) AS images,
+                    ROUND(AVG(DISTINCT cuteness."cuteness")) AS "cuteness"
+                    FROM posts
+                    JOIN images ON images."postID" = posts."postID"
+                    FULL JOIN "cuteness" ON posts."postID" = "cuteness"."postID"
+                    GROUP BY posts."postID"
                 )
-                SELECT "third party".*, json_build_object(
-                'type', post_json."type",
-                'restrict', post_json."restrict",
-                'style', post_json."style",
-                'images', (array_agg(post_json."images"))[1]
-                ) AS post
+                SELECT "third party".*, 
+                to_json((array_agg(post_json.*))[1]) AS post
                 FROM "third party"
                 JOIN post_json ON post_json."postID" = "third party"."postID"
                 WHERE "third party"."parentID" = $1
-                GROUP BY "third party"."thirdPartyID", post_json."type", post_json."restrict", post_json."style"
+                GROUP BY "third party"."thirdPartyID"
             `),
         values: [parentID]
         }
@@ -519,23 +515,19 @@ export default class SQLPost {
         const query: QueryConfig = {
         text: functions.multiTrim(/*sql*/`
                 WITH post_json AS (
-                SELECT posts.*, json_agg(DISTINCT images.*) AS images,
-                ROUND(AVG(DISTINCT cuteness."cuteness")) AS "cuteness"
-                FROM posts
-                JOIN images ON images."postID" = posts."postID"
-                FULL JOIN "cuteness" ON posts."postID" = "cuteness"."postID"
-                GROUP BY posts."postID"
+                    SELECT posts.*, json_agg(DISTINCT images.*) AS images,
+                    ROUND(AVG(DISTINCT cuteness."cuteness")) AS "cuteness"
+                    FROM posts
+                    JOIN images ON images."postID" = posts."postID"
+                    FULL JOIN "cuteness" ON posts."postID" = "cuteness"."postID"
+                    GROUP BY posts."postID"
                 )
-                SELECT "unverified third party".*, json_build_object(
-                'type', post_json."type",
-                'restrict', post_json."restrict",
-                'style', post_json."style",
-                'images', (array_agg(post_json."images"))[1]
-                ) AS post
+                SELECT "unverified third party".*, 
+                to_json((array_agg(post_json.*))[1]) AS post
                 FROM "unverified third party"
                 JOIN post_json ON post_json."postID" = "unverified third party"."postID"
                 WHERE "unverified third party"."parentID" = $1
-                GROUP BY "unverified third party"."thirdPartyID", post_json."type", post_json."restrict", post_json."style"
+                GROUP BY "unverified third party"."thirdPartyID"
             `),
         values: [parentID]
         }
@@ -548,23 +540,19 @@ export default class SQLPost {
         const query: QueryConfig = {
         text: functions.multiTrim(/*sql*/`
                 WITH post_json AS (
-                SELECT posts.*, json_agg(DISTINCT images.*) AS images,
-                ROUND(AVG(DISTINCT cuteness."cuteness")) AS "cuteness"
-                FROM posts
-                JOIN images ON images."postID" = posts."postID"
-                FULL JOIN "cuteness" ON posts."postID" = "cuteness"."postID"
-                GROUP BY posts."postID"
+                    SELECT posts.*, json_agg(DISTINCT images.*) AS images,
+                    ROUND(AVG(DISTINCT cuteness."cuteness")) AS "cuteness"
+                    FROM posts
+                    JOIN images ON images."postID" = posts."postID"
+                    FULL JOIN "cuteness" ON posts."postID" = "cuteness"."postID"
+                    GROUP BY posts."postID"
                 )
-                SELECT "third party".*, json_build_object(
-                'type', post_json."type",
-                'restrict', post_json."restrict",
-                'style', post_json."style",
-                'images', (array_agg(post_json."images"))[1]
-                ) AS post
+                SELECT "third party".*, 
+                to_json((array_agg(post_json.*))[1]) AS post
                 FROM "third party"
                 JOIN post_json ON post_json."postID" = "third party"."parentID"
                 WHERE "third party"."postID" = $1
-                GROUP BY "third party"."thirdPartyID", post_json."type", post_json."restrict", post_json."style"
+                GROUP BY "third party"."thirdPartyID"
             `),
         values: [postID]
         }
@@ -577,23 +565,19 @@ export default class SQLPost {
         const query: QueryConfig = {
         text: functions.multiTrim(/*sql*/`
                 WITH post_json AS (
-                SELECT posts.*, json_agg(DISTINCT images.*) AS images,
-                ROUND(AVG(DISTINCT cuteness."cuteness")) AS "cuteness"
-                FROM posts
-                JOIN images ON images."postID" = posts."postID"
-                FULL JOIN "cuteness" ON posts."postID" = "cuteness"."postID"
-                GROUP BY posts."postID"
+                    SELECT posts.*, json_agg(DISTINCT images.*) AS images,
+                    ROUND(AVG(DISTINCT cuteness."cuteness")) AS "cuteness"
+                    FROM posts
+                    JOIN images ON images."postID" = posts."postID"
+                    FULL JOIN "cuteness" ON posts."postID" = "cuteness"."postID"
+                    GROUP BY posts."postID"
                 )
-                SELECT "unverified third party".*, json_build_object(
-                'type', post_json."type",
-                'restrict', post_json."restrict",
-                'style', post_json."style",
-                'images', (array_agg(post_json."images"))[1]
-                ) AS post
+                SELECT "unverified third party".*, 
+                to_json((array_agg(post_json.*))[1]) AS post
                 FROM "unverified third party"
                 JOIN post_json ON post_json."postID" = "unverified third party"."parentID"
                 WHERE "unverified third party"."postID" = $1
-                GROUP BY "unverified third party"."thirdPartyID", post_json."type", post_json."restrict", post_json."style"
+                GROUP BY "unverified third party"."thirdPartyID"
             `),
         values: [postID]
         }

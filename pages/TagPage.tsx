@@ -11,7 +11,6 @@ import NavBar from "../components/NavBar"
 import SideBar from "../components/SideBar"
 import Footer from "../components/Footer"
 import functions from "../structures/Functions"
-import DragAndDrop from "../components/DragAndDrop"
 import permissions from "../structures/Permissions"
 import EditTagDialog from "../dialogs/EditTagDialog"
 import DeleteTagDialog from "../dialogs/DeleteTagDialog"
@@ -437,7 +436,6 @@ const TagPage: React.FunctionComponent<Props> = (props) => {
 
     return (
         <>
-        <DragAndDrop/>
         <EditTagDialog/>
         <DeleteTagDialog/>
         <TakedownTagDialog/>

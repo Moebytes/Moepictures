@@ -5,7 +5,6 @@ import NavBar from "../components/NavBar"
 import SideBar from "../components/SideBar"
 import Footer from "../components/Footer"
 import XButton from "../assets/icons/x-button.png"
-import DragAndDrop from "../components/DragAndDrop"
 import functions from "../structures/Functions"
 import {HideNavbarContext, HideSidebarContext, ThemeContext, EnableDragContext, MobileContext,
 RelativeContext, HideTitlebarContext, HeaderTextContext, SidebarTextContext, SiteHueContext, SiteLightnessContext,
@@ -127,7 +126,6 @@ const ContactPage: React.FunctionComponent = (props) => {
 
     return (
         <>
-        <DragAndDrop/>
         <TitleBar/>
         <NavBar/>
         <div className="body">

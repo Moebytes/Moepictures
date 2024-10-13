@@ -6,7 +6,6 @@ import SideBar from "../components/SideBar"
 import SortBar from "../components/SortBar"
 import Footer from "../components/Footer"
 import $403 from "../assets/misc/403.png"
-import DragAndDrop from "../components/DragAndDrop"
 import {HideNavbarContext, HideSidebarContext, ThemeContext, RelativeContext, HideTitlebarContext, HeaderTextContext, SidebarTextContext,
 MobileContext} from "../Context"
 import "./styles/404page.less"
@@ -42,7 +41,6 @@ const $403Page: React.FunctionComponent = (props) => {
 
     return (
         <>
-        <DragAndDrop/>
         <TitleBar/>
         <NavBar/>
         <div className="body">

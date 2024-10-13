@@ -34,12 +34,12 @@ const SearchHistoryRow: React.FunctionComponent<Props> = (props) => {
     }, [session, props.history])
 
     const deleteSearchHistory = async () => {
-        await functions.delete("/api/user/history/delete", {historyID: props.history.historyID}, session, setSessionFlag)
+        await functions.delete("/api/user/history/delete", {postID: props.history.postID}, session, setSessionFlag)
         props.onDelete?.()
     }
 
     useEffect(() => {
-        if (deleteSearchHistoryFlag && props.history.historyID === deleteSearchHistoryID) {
+        if (deleteSearchHistoryFlag && props.history.postID === deleteSearchHistoryID) {
             deleteSearchHistory()
             setDeleteSearchHistoryFlag(false)
             setDeleteSearchHistoryID(null)
@@ -47,7 +47,7 @@ const SearchHistoryRow: React.FunctionComponent<Props> = (props) => {
     }, [deleteSearchHistoryFlag, deleteSearchHistoryID, session])
 
     const deleteSearchHistoryDialog = async () => {
-        setDeleteSearchHistoryID(props.history.historyID)
+        setDeleteSearchHistoryID(props.history.postID)
     }
 
     const searchHistoryOptions = () => {
@@ -105,7 +105,7 @@ const SearchHistoryRow: React.FunctionComponent<Props> = (props) => {
     }
 
     const printMirrors = () => {
-        const mapped = Object.values(props.history.mirrors) as string[]
+        const mapped = Object.values(props.history.post.mirrors) as string[]
         return mapped.map((m, i) => {
             let append = i !== mapped.length - 1 ? ", " : ""
             return <span className="searchhistoryrow-label-link" onClick={() => window.open(m, "_blank")}>{getDomain(m) + append}</span>
@@ -124,12 +124,12 @@ const SearchHistoryRow: React.FunctionComponent<Props> = (props) => {
                 <div className="searchhistoryrow-container">
                     <div className="searchhistoryrow-user-container">
                         <span className="searchhistoryrow-user-text">Viewed on {functions.prettyDate(new Date(props.history.viewDate))}</span>
-                        <span className="searchhistoryrow-text"><span className="searchhistoryrow-label-text">Title:</span> {props.history.title || "None"}</span>
-                        {props.history.translatedTitle ? <span className="searchhistoryrow-text"><span className="searchhistoryrow-label-text">Translated:</span> {props.history.translatedTitle}</span> : null}
-                        <span className="searchhistoryrow-text"><span className="searchhistoryrow-label-text">Drawn:</span> {props.history.drawn ? functions.formatDate(new Date(props.history.drawn)) : "Unknown"}</span>
-                        <span className="searchhistoryrow-text"><span className="searchhistoryrow-label-text">Artist:</span> {props.history.artist ? props.history.artist : "Unknown"}</span>
-                        <span className="searchhistoryrow-text"><span className="searchhistoryrow-label-text">Link:</span> <span className="searchhistoryrow-label-link" onClick={() => window.open(props.history.link, "_blank")}>{getDomain(props.history.link)}</span></span>
-                        {props.history.mirrors ? <span className="searchhistoryrow-text"><span className="searchhistoryrow-label-text">Mirrors:</span> {printMirrors()}</span> : null}
+                        <span className="searchhistoryrow-text"><span className="searchhistoryrow-label-text">Title:</span> {props.history.post.title || "None"}</span>
+                        {props.history.post.translatedTitle ? <span className="searchhistoryrow-text"><span className="searchhistoryrow-label-text">Translated:</span> {props.history.post.translatedTitle}</span> : null}
+                        <span className="searchhistoryrow-text"><span className="searchhistoryrow-label-text">Drawn:</span> {props.history.post.drawn ? functions.formatDate(new Date(props.history.post.drawn)) : "Unknown"}</span>
+                        <span className="searchhistoryrow-text"><span className="searchhistoryrow-label-text">Artist:</span> {props.history.post.artist ? props.history.post.artist : "Unknown"}</span>
+                        <span className="searchhistoryrow-text"><span className="searchhistoryrow-label-text">Link:</span> <span className="searchhistoryrow-label-link" onClick={() => window.open(props.history.post.link, "_blank")}>{getDomain(props.history.post.link)}</span></span>
+                        {props.history.post.mirrors ? <span className="searchhistoryrow-text"><span className="searchhistoryrow-label-text">Mirrors:</span> {printMirrors()}</span> : null}
                     </div>
                 </div>
             </div>

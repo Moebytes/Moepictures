@@ -1,12 +1,14 @@
 import React, {useContext, useEffect, useRef, useState} from "react"
 import {ThemeContext, EnableDragContext, BrightnessContext, ContrastContext, HueContext, SaturationContext, LightnessContext,
 BlurContext, SharpenContext, PixelateContext, SessionContext, MobileContext, TranslationModeContext, SiteHueContext,
-SiteLightnessContext, SiteSaturationContext, SessionFlagContext, FormatContext, PostsContext} from "../Context"
+SiteLightnessContext, SiteSaturationContext, SessionFlagContext, FormatContext, PostsContext, FavGroupDialogContext} from "../Context"
 import {HashLink as Link} from "react-router-hash-link"
 import functions from "../structures/Functions"
 import Slider from "react-slider"
 import star from "../assets/icons/star.png"
 import starFavorited from "../assets/icons/starFavorited.png"
+import starGroup from "../assets/icons/stargroup.png"
+import starGroupFavorited from "../assets/icons/stargroup-favorited.png"
 import download from "../assets/icons/download.png"
 import filters from "../assets/icons/filters.png"
 import brightnessIcon from "../assets/icons/brightness.png"
@@ -53,11 +55,13 @@ const PostImageOptions: React.FunctionComponent<Props> = (props) => {
     const {sessionFlag, setSessionFlag} = useContext(SessionFlagContext)
     const {mobile, setMobile} = useContext(MobileContext)
     const [favorited, setFavorited] = useState(false)
+    const [favGrouped, setFavGrouped] = useState(false)
     const [showFilterDropdown, setShowFilterDropdown] = useState(false)
     const [showFormatDropdown, setShowFormatDropdown] = useState(false)
     const [downloadText, setDownloadText] = useState("")
     const {format, setFormat} = useContext(FormatContext)
     const {posts, setPosts} = useContext(PostsContext)
+    const {favGroupDialog, setFavGroupDialog} = useContext(FavGroupDialogContext)
     const filterRef = useRef(null) as any
     const formatRef = useRef(null) as any
 
@@ -129,6 +133,14 @@ const PostImageOptions: React.FunctionComponent<Props> = (props) => {
             return starFavorited
         } else {
             return star
+        }
+    }
+
+    const getStarGroup = () => {
+        if (favGrouped) {
+            return starGroupFavorited
+        } else {
+            return starGroup
         }
     }
 
@@ -248,6 +260,12 @@ const PostImageOptions: React.FunctionComponent<Props> = (props) => {
                     <img className="post-image-icon" src={getStar()} style={{filter: getFilter()}}/>
                     <div className={`post-image-text ${favorited ? "favorited" : ""}`}>{favorited ? "Favorited" : "Favorite"}</div>
                 </div> : null}
+                {session.username ?
+                <div className="post-image-options-box" onClick={() => setFavGroupDialog((prev: boolean) => !prev)} style={{marginLeft: "-10px"}}
+                onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
+                    <img className="post-image-icon" src={getStarGroup()} style={{filter: getFilter()}}/>
+                    <div className={`post-image-text ${favGrouped ? "favorited" : ""}`}>Favgroup</div>
+                </div> : null}
                 <div className="post-image-options-box" onClick={() => props.next?.()} style={{marginLeft: "25px"}} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                     <div className="post-image-text-small">Next</div>
                     <img className="post-image-icon-small" src={nextIcon} style={{filter: getFilter()}}/>
@@ -279,6 +297,11 @@ const PostImageOptions: React.FunctionComponent<Props> = (props) => {
                     <div className="post-image-options-box" onClick={() => updateFavorite(!favorited)} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                         <img className="post-image-icon" src={getStar()} style={{filter: getFilter()}}/>
                         <div className={`post-image-text ${favorited ? "favorited" : ""}`}>{favorited ? "Favorited" : "Favorite"}</div>
+                    </div> : null}
+                    {session.username && !props.noFavorite ?
+                    <div className="post-image-options-box" onClick={() => setFavGroupDialog((prev: boolean) => !prev)} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
+                        <img className="post-image-icon" src={getStarGroup()} style={{filter: getFilter()}}/>
+                        <div className={`post-image-text ${favGrouped ? "favorited" : ""}`}>Favgroup</div>
                     </div> : null}
                 </div>
                 <div className="post-image-options-right">

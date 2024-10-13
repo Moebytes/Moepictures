@@ -99,32 +99,33 @@ export default class SQLSearch {
         let includeTags = withTags || tagQuery
         const query: QueryConfig = {
         text: functions.multiTrim(/*sql*/`
-            SELECT *,
+            WITH post_json AS (
+                SELECT posts.*, json_agg(DISTINCT images.*) AS images, 
+                ${includeTags ? `array_agg(DISTINCT "tag map".tag) AS tags,` : ""}
+                ${includeTags ? `COUNT(DISTINCT "tag map"."tag") AS "tagCount",` : ""}
+                MAX(DISTINCT images."size") AS "imageSize",
+                MAX(DISTINCT images."width") AS "imageWidth",
+                MAX(DISTINCT images."height") AS "imageHeight",
+                COUNT(DISTINCT images."imageID") AS "imageCount",
+                COUNT(DISTINCT favorites."username") AS "favoriteCount",
+                ROUND(AVG(DISTINCT cuteness."cuteness")) AS "cuteness"${username ? `,
+                CASE 
+                    WHEN COUNT(favorites."username") FILTER (WHERE favorites."username" = $${userValue}) > 0 
+                    THEN true
+                    ELSE false
+                END AS favorited` : ""}
+                FROM posts
+                JOIN images ON posts."postID" = images."postID"
+                ${includeTags ? `JOIN "tag map" ON posts."postID" = "tag map"."postID"` : ""}
+                FULL JOIN "favorites" ON posts."postID" = "favorites"."postID"
+                FULL JOIN "cuteness" ON posts."postID" = "cuteness"."postID"
+                ${whereQueries ? `WHERE ${whereQueries}` : ""}
+                GROUP BY posts."postID"${favoriteQuery ? `, favorites."postID", favorites."username"` : ""}
+                ${sortQuery}
+            )
+            SELECT post_json.*,
             COUNT(*) OVER() AS "postCount"
-            FROM (
-            SELECT posts.*, json_agg(DISTINCT images.*) AS images, 
-            ${includeTags ? `array_agg(DISTINCT "tag map".tag) AS tags,` : ""}
-            ${includeTags ? `COUNT(DISTINCT "tag map"."tagID") AS "tagCount",` : ""}
-            MAX(DISTINCT images."size") AS "imageSize",
-            MAX(DISTINCT images."width") AS "imageWidth",
-            MAX(DISTINCT images."height") AS "imageHeight",
-            COUNT(DISTINCT images."imageID") AS "imageCount",
-            COUNT(DISTINCT favorites."favoriteID") AS "favoriteCount",
-            ROUND(AVG(DISTINCT cuteness."cuteness")) AS "cuteness"${username ? `,
-            CASE 
-                WHEN COUNT(favorites."favoriteID") FILTER (WHERE favorites."username" = $${userValue}) > 0 
-                THEN true
-                ELSE false
-            END AS favorited` : ""}
-            FROM posts
-            JOIN images ON posts."postID" = images."postID"
-            ${includeTags ? `JOIN "tag map" ON posts."postID" = "tag map"."postID"` : ""}
-            FULL JOIN "favorites" ON posts."postID" = "favorites"."postID"
-            FULL JOIN "cuteness" ON posts."postID" = "cuteness"."postID"
-            ${whereQueries ? `WHERE ${whereQueries}` : ""}
-            GROUP BY posts."postID"${favoriteQuery ? `, favorites."favoriteID"` : ""}
-            ${sortQuery}
-            ) AS posts
+            FROM post_json
             ${tagQuery}
             ${limit ? `LIMIT $${limitValue}` : "LIMIT 100"} ${offset ? `OFFSET $${i}` : ""}
         `)
@@ -138,24 +139,31 @@ export default class SQLSearch {
     }
 
     /** Search pixiv id. */
-    public static searchPixivID = async (pixivID: number, withTags?: boolean) => {
+    public static searchPixivID = async (pixivID: number, includeTags?: boolean) => {
         const pixivURL = `https://www.pixiv.net/en/artworks/${pixivID}`
         const query: QueryConfig = {
         text: functions.multiTrim(/*sql*/`
-            SELECT *,
+            WITH post_json AS (
+                SELECT posts.*, json_agg(DISTINCT images.*) AS images, 
+                ${includeTags ? `array_agg(DISTINCT "tag map".tag) AS tags,` : ""}
+                ${includeTags ? `COUNT(DISTINCT "tag map"."tag") AS "tagCount",` : ""}
+                MAX(DISTINCT images."size") AS "imageSize",
+                MAX(DISTINCT images."width") AS "imageWidth",
+                MAX(DISTINCT images."height") AS "imageHeight",
+                COUNT(DISTINCT images."imageID") AS "imageCount",
+                COUNT(DISTINCT favorites."username") AS "favoriteCount",
+                ROUND(AVG(DISTINCT cuteness."cuteness")) AS "cuteness"
+                FROM posts
+                JOIN images ON posts."postID" = images."postID"
+                ${includeTags ? `JOIN "tag map" ON posts."postID" = "tag map"."postID"` : ""}
+                FULL JOIN "favorites" ON posts."postID" = "favorites"."postID"
+                FULL JOIN "cuteness" ON posts."postID" = "cuteness"."postID"
+                WHERE posts."link" = $1
+                GROUP BY posts."postID"
+            )
+            SELECT post_json.*,
             COUNT(*) OVER() AS "postCount"
-            FROM (
-            SELECT posts.*, json_agg(DISTINCT images.*) AS images, ${withTags ? `array_agg(DISTINCT "tag map".tag) AS tags,` : ""}
-            COUNT(DISTINCT favorites."favoriteID") AS "favoriteCount",
-            ROUND(AVG(DISTINCT cuteness."cuteness")) AS "cuteness"
-            FROM posts
-            JOIN images ON posts."postID" = images."postID"
-            ${withTags ? `JOIN "tag map" ON posts."postID" = "tag map"."postID"` : ""}
-            FULL JOIN "favorites" ON posts."postID" = "favorites"."postID"
-            FULL JOIN "cuteness" ON posts."postID" = "cuteness"."postID"
-            WHERE posts."link" = $1
-            GROUP BY posts."postID"
-            ) AS posts
+            FROM post_json
             LIMIT 1
         `),
         values: [pixivURL]
@@ -169,7 +177,7 @@ export default class SQLSearch {
         const query: QueryConfig = {
         text: functions.multiTrim(/*sql*/`
             SELECT posts.*, json_agg(DISTINCT images.*) AS images, json_agg(DISTINCT "tag map".tag) AS tags,
-            COUNT(DISTINCT favorites."favoriteID") AS "favoriteCount",
+            COUNT(DISTINCT favorites."username") AS "favoriteCount",
             ROUND(AVG(DISTINCT cuteness."cuteness")) AS "cuteness"
             FROM posts
             JOIN images ON posts."postID" = images."postID"
@@ -255,91 +263,6 @@ export default class SQLSearch {
             `),
             values: [username]
         }
-        const result = await SQLQuery.run(query)
-        return result
-    }
-
-    /** Random search */
-    public static random = async (tags: string[], type: string, restrict: string, style: string, limit?: string, offset?: string, withTags?: boolean) => {
-        let typeQuery = ""
-        if (type === "image") typeQuery = `posts.type = 'image'`
-        if (type === "animation") typeQuery = `posts.type = 'animation'`
-        if (type === "video") typeQuery = `posts.type = 'video'`
-        if (type === "comic") typeQuery = `posts.type = 'comic'`
-        if (type === "audio") typeQuery = `posts.type = 'audio'`
-        if (type === "model") typeQuery = `posts.type = 'model'`
-        let restrictQuery = ""
-        if (restrict === "safe") restrictQuery = `posts.restrict = 'safe'`
-        if (restrict === "questionable") restrictQuery = `posts.restrict = 'questionable'`
-        if (restrict === "explicit") restrictQuery = `posts.restrict = 'explicit'`
-        if (restrict === "all") restrictQuery = `(posts.restrict = 'safe' OR posts.restrict = 'questionable')`
-        let styleQuery = ""
-        if (style === "2d") styleQuery = `lower(posts.style) = '2d'`
-        if (style === "3d") styleQuery = `lower(posts.style) = '3d'`
-        if (style === "pixel") styleQuery = `posts.style = 'pixel'`
-        if (style === "chibi") styleQuery = `posts.style = 'chibi'`
-        let ANDtags = [] as string[]
-        let ORtags = [] as string[]
-        let NOTtags = [] as string[]
-        tags?.forEach((tag) => {
-        if (tag.startsWith("+")) {
-            ORtags.push(tag.replace("+", ""))
-        } else if (tag.startsWith("-")) {
-            NOTtags.push(tag.replace("-", ""))
-        } else {
-            ANDtags.push(tag)
-        }
-        })
-        let i = 1
-        let values = [] as any
-        let tagQueryArray = [] as any
-        if (ANDtags.length) {
-            values.push(ANDtags)
-            tagQueryArray.push(`tags @> $${i}`)
-            i++ 
-        }
-        if (ORtags.length) {
-            values.push(ORtags)
-            tagQueryArray.push(`tags && $${i}`)
-            i++ 
-        }
-        if (NOTtags.length) {
-            values.push(NOTtags)
-            tagQueryArray.push(`NOT tags @> $${i}`)
-            i++
-        }
-        let limitValue = i
-        if (limit) {
-            if (Number(limit) > 100) limit = "100"
-            values.push(limit)
-            i++
-        }
-        if (offset) values.push(offset)
-        let tagQuery = tagQueryArray.length ? "WHERE " + tagQueryArray.join(" AND ") : ""
-        const whereQueries = [typeQuery, restrictQuery, styleQuery].filter(Boolean).join(" AND ")
-        let includeTags = withTags || tagQuery
-        const query: QueryConfig = {
-        text: functions.multiTrim(/*sql*/`
-            SELECT *, 
-            COUNT(*) OVER() AS "postCount"
-            FROM (
-            SELECT posts.*, json_agg(DISTINCT images.*) AS images, ${includeTags ? `array_agg(DISTINCT "tag map".tag) AS tags,` : ""}
-            COUNT(DISTINCT favorites."favoriteID") AS "favoriteCount",
-            ROUND(AVG(DISTINCT cuteness."cuteness")) AS "cuteness"
-            FROM posts
-            JOIN images ON posts."postID" = images."postID"
-            ${includeTags ? `JOIN "tag map" ON posts."postID" = "tag map"."postID"` : ""}
-            FULL JOIN "favorites" ON posts."postID" = "favorites"."postID"
-            FULL JOIN "cuteness" ON posts."postID" = "cuteness"."postID"
-            ${whereQueries ? `WHERE ${whereQueries}` : ""}
-            GROUP BY posts."postID"
-            ORDER BY random()
-            ) AS posts
-            ${tagQuery}
-            ${limit ? `LIMIT $${limitValue}` : "LIMIT 100"} ${offset ? `OFFSET $${i}` : ""}
-        `)
-        }
-        if (values?.[0]) query.values = values
         const result = await SQLQuery.run(query)
         return result
     }

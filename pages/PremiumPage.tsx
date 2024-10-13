@@ -5,7 +5,6 @@ import TitleBar from "../components/TitleBar"
 import NavBar from "../components/NavBar"
 import SideBar from "../components/SideBar"
 import Footer from "../components/Footer"
-import DragAndDrop from "../components/DragAndDrop"
 import {HideNavbarContext, HideSidebarContext, RelativeContext, HideTitlebarContext, HeaderTextContext, SidebarTextContext,
 MobileContext, EnableDragContext, SessionContext, SessionFlagContext} from "../Context"
 import CaptchaDialog from "../dialogs/CaptchaDialog"
@@ -248,7 +247,6 @@ const PremiumPage: React.FunctionComponent = (props) => {
 
     return (
         <>
-        <DragAndDrop/>
         <CaptchaDialog/>
         <TitleBar/>
         <NavBar/>

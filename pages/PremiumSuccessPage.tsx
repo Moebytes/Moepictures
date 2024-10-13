@@ -5,7 +5,6 @@ import TitleBar from "../components/TitleBar"
 import Footer from "../components/Footer"
 import NavBar from "../components/NavBar"
 import SideBar from "../components/SideBar"
-import DragAndDrop from "../components/DragAndDrop"
 import functions from "../structures/Functions"
 import permissions from "../structures/Permissions"
 import {HideNavbarContext, HideSidebarContext, ThemeContext, EnableDragContext, RedirectContext, MobileContext,
@@ -65,7 +64,6 @@ const PremiumSuccessPage: React.FunctionComponent = (props) => {
 
     return (
         <>
-        <DragAndDrop/>
         <TitleBar/>
         <NavBar/>
         <div className="body">

@@ -7,7 +7,6 @@ import SideBar from "../components/SideBar"
 import Footer from "../components/Footer"
 import show from "../assets/icons/show.png"
 import hide from "../assets/icons/hide.png"
-import DragAndDrop from "../components/DragAndDrop"
 import functions from "../structures/Functions"
 import {HideNavbarContext, HideSidebarContext, ThemeContext, EnableDragContext, RedirectContext, MobileContext,
 RelativeContext, HideTitlebarContext, HeaderTextContext, SidebarTextContext, SessionContext, SiteHueContext, SiteLightnessContext,
@@ -119,7 +118,6 @@ const ChangePasswordPage: React.FunctionComponent = (props) => {
 
     return (
         <>
-        <DragAndDrop/>
         <TitleBar/>
         <NavBar/>
         <div className="body">

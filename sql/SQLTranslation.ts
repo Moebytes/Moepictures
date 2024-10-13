@@ -131,20 +131,16 @@ export default class SQLTranslation {
         const query: QueryConfig = {
         text: functions.multiTrim(/*sql*/`
                 WITH post_json AS (
-                SELECT posts.*, json_agg(DISTINCT images.*) AS images
-                FROM posts
-                JOIN images ON images."postID" = posts."postID"
-                GROUP BY posts."postID"
+                    SELECT posts.*, json_agg(DISTINCT images.*) AS images
+                    FROM posts
+                    JOIN images ON images."postID" = posts."postID"
+                    GROUP BY posts."postID"
                 )
-                SELECT "unverified translations".*, json_build_object(
-                'type', post_json."type",
-                'restrict', post_json."restrict",
-                'style', post_json."style",
-                'images', (array_agg(post_json."images"))[1]
-                ) AS post
+                SELECT "unverified translations".*, 
+                to_json((array_agg(post_json.*))[1]) AS post
                 FROM "unverified translations"
                 JOIN post_json ON post_json."postID" = "unverified translations"."postID"
-                GROUP BY "unverified translations"."translationID", post_json."type", post_json."restrict", post_json."style"
+                GROUP BY "unverified translations"."translationID"
                 ORDER BY "unverified translations"."updatedDate" ASC
                 LIMIT 100 ${offset ? `OFFSET $1` : ""}
             `)

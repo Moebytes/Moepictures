@@ -12,7 +12,6 @@ import CutenessMeter from "../components/CutenessMeter"
 import Comments from "../components/Comments"
 import Commentary from "../components/Commentary"
 import functions from "../structures/Functions"
-import DragAndDrop from "../components/DragAndDrop"
 import Carousel from "../components/Carousel"
 import DeletePostDialog from "../dialogs/DeletePostDialog"
 import TakedownPostDialog from "../dialogs/TakedownPostDialog"
@@ -32,9 +31,10 @@ import Related from "../components/Related"
 import MobileInfo from "../components/MobileInfo"
 import historyIcon from "../assets/icons/history-state.png"
 import currentIcon from "../assets/icons/current.png"
+import FavGroupDialog from "../dialogs/FavGroupDialog"
 import {HideNavbarContext, HideSidebarContext, RelativeContext, DownloadFlagContext, DownloadIDsContext, HideTitlebarContext, MobileContext, ReloadPostFlagContext,
 PostsContext, TagsContext, HeaderTextContext, PostFlagContext, RedirectContext, SidebarTextContext, SessionContext, SessionFlagContext, EnableDragContext, TranslationModeContext,
-OrderContext, RevertPostHistoryIDContext, RevertPostHistoryFlagContext, RevertTranslationHistoryIDContext, RevertTranslationHistoryFlagContext} from "../Context"
+RevertPostHistoryIDContext, RevertPostHistoryFlagContext, RevertTranslationHistoryIDContext, RevertTranslationHistoryFlagContext} from "../Context"
 import permissions from "../structures/Permissions"
 import "./styles/postpage.less"
 
@@ -77,7 +77,7 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
     const [post, setPost] = useState(null) as any
     const [loaded, setLoaded] = useState(false)
     const [tagCategories, setTagCategories] = useState(null) as any
-    const {order, setOrder} = useContext(OrderContext)
+    const [order, setOrder] = useState(1)
     const [historyID, setHistoryID] = useState(null as any)
     const [translationID, setTranslationID] = useState(null as any)
     const history = useHistory()
@@ -536,9 +536,9 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
     
     return (
         <>
-        <DragAndDrop/>
         <CaptchaDialog/>
         <QuickEditDialog/>
+        <FavGroupDialog/>
         <EditCommentDialog/>
         <DeleteCommentDialog/>
         <ReportCommentDialog/>
@@ -552,7 +552,7 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
         <NavBar goBack={true}/>
         <div className="body">
             {post && tagCategories ? 
-            <SideBar post={post} artists={tagCategories.artists} characters={tagCategories.characters} series={tagCategories.series} tags={tagCategories.tags}/> : 
+            <SideBar post={post} order={order} artists={tagCategories.artists} characters={tagCategories.characters} series={tagCategories.series} tags={tagCategories.tags}/> : 
             <SideBar/>}
             <div className="content" onMouseEnter={() => setEnableDrag(true)}>
                 <div className="post-container">
@@ -562,7 +562,7 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
                         <Carousel images={images} set={set} index={order-1}/>
                     </div> : null}
                     {/*nsfwChecker() &&*/ post ? getPostJSX() : null}
-                    {mobile && post && tagCategories ? <MobileInfo post={post} artists={tagCategories.artists} characters={tagCategories.characters} series={tagCategories.series} tags={tagCategories.tags}/> : null}
+                    {mobile && post && tagCategories ? <MobileInfo post={post} order={order} artists={tagCategories.artists} characters={tagCategories.characters} series={tagCategories.series} tags={tagCategories.tags}/> : null}
                     {parentPost ? <Parent post={parentPost}/>: null}
                     {thirdPartyPosts.length ? <ThirdParty posts={thirdPartyPosts}/> : null}
                     {session.username && !session.banned && post ? <CutenessMeter post={post}/> : null}

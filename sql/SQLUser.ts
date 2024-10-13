@@ -62,7 +62,7 @@ export default class SQLUser {
                 WITH post_json AS (
                     SELECT posts.*, json_agg(DISTINCT images.*) AS images,
                     ${includeTags ? `array_agg(DISTINCT "tag map".tag) AS tags,` : ""}
-                    ${includeTags ? `COUNT(DISTINCT "tag map"."tagID") AS "tagCount",` : ""}
+                    ${includeTags ? `COUNT(DISTINCT "tag map"."tag") AS "tagCount",` : ""}
                     MAX(DISTINCT images."size") AS "imageSize",
                     MAX(DISTINCT images."width") AS "imageWidth",
                     MAX(DISTINCT images."height") AS "imageHeight",

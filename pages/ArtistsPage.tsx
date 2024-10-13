@@ -5,7 +5,6 @@ import NavBar from "../components/NavBar"
 import SideBar from "../components/SideBar"
 import Footer from "../components/Footer"
 import functions from "../structures/Functions"
-import DragAndDrop from "../components/DragAndDrop"
 import search from "../assets/icons/search.png"
 import sort from "../assets/icons/sort.png"
 import sortRev from "../assets/icons/sort-reverse.png"
@@ -402,7 +401,6 @@ const ArtistsPage: React.FunctionComponent = (props) => {
 
     return (
         <>
-        <DragAndDrop/>
         <CaptchaDialog/>
         <PageDialog/>
         <TitleBar/>

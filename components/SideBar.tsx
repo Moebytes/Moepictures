@@ -4,7 +4,8 @@ import {ThemeContext, HideSidebarContext, HideNavbarContext, HideSortbarContext,
 RelativeContext, HideTitlebarContext, SidebarHoverContext, SearchContext, SearchFlagContext, PostsContext, ShowDeletePostDialogContext, AutoSearchContext,
 TagsContext, RandomFlagContext, ImageSearchFlagContext, SidebarTextContext, SessionContext, MobileScrollingContext, QuickEditIDContext, PremiumRequiredContext,
 TranslationModeContext, TranslationDrawingEnabledContext, SiteHueContext, SessionFlagContext, SiteLightnessContext, SiteSaturationContext, ShowTakedownPostDialogContext,
-SaveSearchDialogContext, DeleteAllSaveSearchDialogContext, EditSaveSearchNameContext, EditSaveSearchKeyContext, EditSaveSearchTagsContext, OrderContext} from "../Context"
+SaveSearchDialogContext, DeleteAllSaveSearchDialogContext, EditSaveSearchNameContext, EditSaveSearchKeyContext, EditSaveSearchTagsContext,
+ActionBannerContext} from "../Context"
 import {HashLink as Link} from "react-router-hash-link"
 import permissions from "../structures/Permissions"
 import favicon from "../assets/icons/favicon.png"
@@ -66,6 +67,7 @@ interface Props {
     tags?: any
     unverified?: boolean
     noActions?: boolean
+    order?: number
 }
 
 let interval = null as any
@@ -116,7 +118,7 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
     const {editSaveSearchName, setEditSaveSearchName} = useContext(EditSaveSearchNameContext)
     const {editSaveSearchKey, setEditSaveSearchKey} = useContext(EditSaveSearchKeyContext)
     const {editSaveSearchTags, setEditSaveSearchTags} = useContext(EditSaveSearchTagsContext)
-    const {order, setOrder} = useContext(OrderContext)
+    const {actionBanner, setActionBanner} = useContext(ActionBannerContext)
     const history = useHistory()
 
     const getFilter = () => {
@@ -579,7 +581,7 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
 
     const randomSearch = async () => {
         if (history.location.pathname.includes("/post/")) {
-            const posts = await functions.get("/api/search/random", {type: "all", restrict: props.post.restrict === "explicit" ? "explicit" : "all", style: "all"}, session, setSessionFlag)
+            const posts = await functions.get("/api/search/posts", {type: "all", restrict: props.post.restrict === "explicit" ? "explicit" : "all", style: "all", sort: "random"}, session, setSessionFlag)
             history.push(`/post/${posts[0].postID}`)
         } else {
             history.push(`/posts`)
@@ -683,11 +685,14 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
         let combined = [...artists, ...characters, ...series, ...tags]
         if (replaceDash) combined = combined.map((c: string) => c.replaceAll("-", " "))
         navigator.clipboard.writeText(commas ? combined.join(", ") : combined.join(" "))
+        setActionBanner("copy-tags")
     }
 
     const copyHash = () => {
-        const hash = props.post.images[order-1]?.hash
+        if (!props.order) return
+        const hash = props.post.images[props.order-1]?.hash
         navigator.clipboard.writeText(hash)
+        setActionBanner("copy-hash")
     }
 
     const copyTagsJSX = () => {
@@ -745,7 +750,7 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
         if (autoSearch && history.location.pathname.includes("/post/")) {
             const searchLoop = async () => {
                 if (!autoSearch) return
-                const posts = await functions.get("/api/search/random", {type: "all", restrict: props.post.restrict === "explicit" ? "explicit" : "all", style: "all", limit: 1}, session, setSessionFlag)
+                const posts = await functions.get("/api/search/posts", {type: "all", restrict: props.post.restrict === "explicit" ? "explicit" : "all", style: "all", sort: "random", limit: 1}, session, setSessionFlag)
                 history.push(`/post/${posts[0].postID}`)
             }
             if (autoSearch) {

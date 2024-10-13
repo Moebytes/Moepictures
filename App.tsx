@@ -53,7 +53,9 @@ import MessagePage from "./pages/MessagePage"
 import PremiumPage from "./pages/PremiumPage"
 import PremiumRequiredDialog from "./dialogs/PremiumRequiredDialog"
 import PremiumSuccessPage from "./pages/PremiumSuccessPage"
+import DragAndDrop from "./components/DragAndDrop"
 import AudioPlayer from "./components/AudioPlayer"
+import ActionBanner from "./components/ActionBanner"
 import "./index.less"
 
 require.context("./assets/icons", true)
@@ -269,6 +271,8 @@ const App: React.FunctionComponent = (props) => {
             <HideSidebarContext.Provider value={{hideSidebar, setHideSidebar}}>
             <ThemeContext.Provider value={{theme, setTheme}}>
                 <Context>
+                    <DragAndDrop/>
+                    <ActionBanner/>
                     <PremiumRequiredDialog/>
                     <Switch>
                         <Route exact path={["/", "/posts", "/home"]}><PostsPage/></Route>

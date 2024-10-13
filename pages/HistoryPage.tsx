@@ -1,11 +1,10 @@
 import React, {useEffect, useContext, useState, useRef, useReducer} from "react"
-import {useHistory} from "react-router-dom"
+import {useHistory, useLocation} from "react-router-dom"
 import TitleBar from "../components/TitleBar"
 import NavBar from "../components/NavBar"
 import SideBar from "../components/SideBar"
 import Footer from "../components/Footer"
 import functions from "../structures/Functions"
-import DragAndDrop from "../components/DragAndDrop"
 import PostHistoryRow from "../components/PostHistoryRow"
 import RevertPostHistoryDialog from "../dialogs/RevertPostHistoryDialog"
 import DeletePostHistoryDialog from "../dialogs/DeletePostHistoryDialog"
@@ -36,6 +35,8 @@ import {ThemeContext, EnableDragContext, HideNavbarContext, HideSidebarContext, 
 RelativeContext, HideTitlebarContext, ActiveDropdownContext, HeaderTextContext, SidebarTextContext, SessionFlagContext, HistoryPageContext, PageFlagContext,
 SiteHueContext, SiteSaturationContext, SiteLightnessContext, ShowDeleteAllHistoryDialogContext, RedirectContext, RestrictTypeContext, PremiumRequiredContext} from "../Context"
 import "./styles/historypage.less"
+
+let replace = false
 
 const HistoryPage: React.FunctionComponent = () => {
     const [ignored, forceUpdate] = useReducer(x => x + 1, 0)
@@ -76,28 +77,36 @@ const HistoryPage: React.FunctionComponent = () => {
     const [queryPage, setQueryPage] = useState(1)
     const [historyTab, setHistoryTab] = useState("")
     const history = useHistory()
+    const location = useLocation()
 
     useEffect(() => {
-        const savedScroll = localStorage.getItem("scroll")
-        if (savedScroll) setScroll(savedScroll === "true")
-        const savedPage = localStorage.getItem("historyPage")
-        const savedTab = localStorage.getItem("historyTab")
-        const pageParam = new URLSearchParams(window.location.search).get("page")
         const typeParam = new URLSearchParams(window.location.search).get("type")
+        if (typeParam) setHistoryTab(typeParam)
+        const pageParam = new URLSearchParams(window.location.search).get("page")
+        if (pageParam) setQueryPage(Number(pageParam))
         const onDOMLoaded = () => {
+            const savedScroll = localStorage.getItem("scroll")
+            if (savedScroll) setScroll(savedScroll === "true")
+            const savedPage = localStorage.getItem("historyPage")
+            const savedTab = localStorage.getItem("historyTab")
             if (savedPage) setHistoryPage(Number(savedPage))
             if (savedTab) setHistoryTab(savedTab)
-            if (typeParam) setHistoryTab(typeParam)
-            if (pageParam) {
-                setQueryPage(Number(pageParam))
-                setHistoryPage(Number(pageParam))
-            }
+            if (pageParam) setHistoryPage(Number(pageParam))
+        }
+        const updateStateChange = () => {
+            replace = true
+            const pageParam = new URLSearchParams(window.location.search).get("page")
+            if (pageParam) setHistoryPage(Number(pageParam))
         }
         window.addEventListener("load", onDOMLoaded)
+        window.addEventListener("popstate", updateStateChange)
+        window.addEventListener("pushstate", updateStateChange)
         return () => {
             window.removeEventListener("load", onDOMLoaded)
+            window.removeEventListener("popstate", updateStateChange)
+            window.removeEventListener("pushstate", updateStateChange)
         }
-    }, [])
+    }, [location])
 
     const getFilter = () => {
         return `hue-rotate(${siteHue - 180}deg) saturate(${siteSaturation}%) brightness(${siteLightness + 70}%)`
@@ -180,6 +189,12 @@ const HistoryPage: React.FunctionComponent = () => {
         }
     }
 
+    const resetState = () => {
+        setHistoryPage(1)
+        setQueryPage(1)
+        setOffset(0)
+    }
+
     const updateHistory = async () => {
         let result = []
         if (historyTab === "post") {
@@ -192,19 +207,16 @@ const HistoryPage: React.FunctionComponent = () => {
             result = await functions.get("/api/translation/history", null, session, setSessionFlag)
         }
         if (historyTab === "search") {
-            await functions.delete("/api/user/history/delete", {duplicates: true}, session, setSessionFlag)
             result = await functions.get("/api/user/history", null, session, setSessionFlag).catch(() => [])
         }
         setEnded(false)
         setIndex(0)
         setVisibleHistory([])
         setHistoryStates(result)
-        setHistoryPage(1)
-        setQueryPage(1)
-        setOffset(0)
     }
 
     useEffect(() => {
+        resetState()
         updateHistory()
         document.title = `${functions.toProperCase(historyTab)} History`
     }, [session, historyTab])
@@ -380,12 +392,16 @@ const HistoryPage: React.FunctionComponent = () => {
     }, [scroll, historyStates, historyPage, ended])
 
     useEffect(() => {
-        if (scroll) {
-            history.replace(`${location.pathname}?type=${historyTab}`)
+        const searchParams = new URLSearchParams(window.location.search)
+        if (historyTab) searchParams.set("type", historyTab)
+        if (!scroll) searchParams.set("page", historyPage)
+        if (replace) {
+            if (!scroll) history.replace(`${location.pathname}?${searchParams.toString()}`)
+            replace = false
         } else {
-            history.replace(`${location.pathname}?type=${historyTab}&page=${historyPage}`)
+            if (!scroll) history.push(`${location.pathname}?${searchParams.toString()}`)
         }
-    }, [scroll, historyPage, historyTab])
+    }, [scroll, historyTab, historyPage])
 
     useEffect(() => {
         if (historyStates?.length) {
@@ -606,7 +622,6 @@ const HistoryPage: React.FunctionComponent = () => {
 
     return (
         <>
-        <DragAndDrop/>
         <RevertPostHistoryDialog/>
         <DeletePostHistoryDialog/>
         <RevertTagHistoryDialog/>

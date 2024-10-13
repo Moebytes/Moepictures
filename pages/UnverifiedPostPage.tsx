@@ -12,7 +12,6 @@ import CutenessMeter from "../components/CutenessMeter"
 import Comments from "../components/Comments"
 import Commentary from "../components/Commentary"
 import functions from "../structures/Functions"
-import DragAndDrop from "../components/DragAndDrop"
 import Carousel from "../components/Carousel"
 import DeletePostDialog from "../dialogs/DeletePostDialog"
 import DeleteCommentDialog from "../dialogs/DeleteCommentDialog"
@@ -234,13 +233,12 @@ const UnverifiedPostPage: React.FunctionComponent<Props> = (props) => {
 
     return (
         <>
-        <DragAndDrop/>
         <QuickEditDialog/>
         {post ? <TitleBar post={post} goBack={true}/> : <TitleBar goBack={true}/>}
         <NavBar/>
         <div className="body">
             {post && tagCategories ? 
-            <SideBar unverified={true} post={post} artists={tagCategories.artists} characters={tagCategories.characters} series={tagCategories.series} tags={tagCategories.tags}/> : 
+            <SideBar unverified={true} post={post} order={order} artists={tagCategories.artists} characters={tagCategories.characters} series={tagCategories.series} tags={tagCategories.tags}/> : 
             <SideBar unverified={true}/>
             }
             <div className="content" onMouseEnter={() => setEnableDrag(true)}>
@@ -250,7 +248,7 @@ const UnverifiedPostPage: React.FunctionComponent<Props> = (props) => {
                         <Carousel images={images} set={set} index={order-1}/>
                     </div> : null}
                     {post ? getPostJSX() : null}
-                    {mobile && post && tagCategories ? <MobileInfo post={post} artists={tagCategories.artists} characters={tagCategories.characters} series={tagCategories.series} tags={tagCategories.tags}/> : null}
+                    {mobile && post && tagCategories ? <MobileInfo post={post} order={order} artists={tagCategories.artists} characters={tagCategories.characters} series={tagCategories.series} tags={tagCategories.tags}/> : null}
                     {post ? <NewTags post={post}/> : null}
                     {parentPost ? <Parent post={parentPost}/>: null}
                     {thirdPartyPosts.length ? <ThirdParty posts={thirdPartyPosts}/>: null}

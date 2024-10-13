@@ -5,7 +5,6 @@ import NavBar from "../components/NavBar"
 import SideBar from "../components/SideBar"
 import Footer from "../components/Footer"
 import functions from "../structures/Functions"
-import DragAndDrop from "../components/DragAndDrop"
 import TagHistoryRow from "../components/TagHistoryRow"
 import RevertTagHistoryDialog from "../dialogs/RevertTagHistoryDialog"
 import DeleteTagHistoryDialog from "../dialogs/DeleteTagHistoryDialog"
@@ -178,7 +177,6 @@ const TagHistoryPage: React.FunctionComponent<Props> = (props) => {
 
     return (
         <>
-        <DragAndDrop/>
         <RevertTagHistoryDialog/>
         <DeleteTagHistoryDialog/>
         <TitleBar/>

@@ -113,7 +113,7 @@ const ImageGrid: React.FunctionComponent = (props) => {
 
     const randomPosts = async (query?: string) => {
         setRandomFlag(false)
-        const result = await functions.get("/api/search/random", {query, type: imageType, restrict: restrictType, style: styleType, limit}, session, setSessionFlag)
+        const result = await functions.get("/api/search/posts", {query, type: imageType, restrict: restrictType, style: styleType, sort: "random", limit}, session, setSessionFlag)
         setEnded(false)
         setIndex(0)
         setVisiblePosts([])
@@ -298,7 +298,7 @@ const ImageGrid: React.FunctionComponent = (props) => {
         }
         let result = null as any
         if (isRandomSearch) {
-            result = await functions.get("/api/search/random", {type: imageType, restrict: restrictType, style: styleType, limit, offset: newOffset}, session, setSessionFlag)
+            result = await functions.get("/api/search/posts", {type: imageType, restrict: restrictType, style: styleType, sort: "random", limit, offset: newOffset}, session, setSessionFlag)
         } else {
             const query = await functions.parseSpaceEnabledSearch(search, session, setSessionFlag)
             result = await functions.get("/api/search/posts", {query, type: imageType, restrict: restrictType, style: styleType, sort: functions.parseSort(sortType, sortReverse), limit, offset: newOffset}, session, setSessionFlag)

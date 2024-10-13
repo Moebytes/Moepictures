@@ -4,7 +4,6 @@ import NavBar from "../components/NavBar"
 import SideBar from "../components/SideBar"
 import Footer from "../components/Footer"
 import functions from "../structures/Functions"
-import DragAndDrop from "../components/DragAndDrop"
 import PostHistoryRow from "../components/PostHistoryRow"
 import RevertPostHistoryDialog from "../dialogs/RevertPostHistoryDialog"
 import DeletePostHistoryDialog from "../dialogs/DeletePostHistoryDialog"
@@ -161,7 +160,6 @@ const PostHistoryPage: React.FunctionComponent<Props> = (props) => {
 
     return (
         <>
-        <DragAndDrop/>
         <RevertPostHistoryDialog/>
         <DeletePostHistoryDialog/>
         <TitleBar/>

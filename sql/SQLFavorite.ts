@@ -18,34 +18,23 @@ export default class SQLFavorite {
         const query: QueryConfig = {
         text: functions.multiTrim(/*sql*/`
                 WITH post_json AS (
-                SELECT posts.*, json_agg(DISTINCT images.*) AS images
-                FROM posts
-                JOIN images ON images."postID" = posts."postID"
-                GROUP BY posts."postID"
+                    SELECT posts.*, json_agg(DISTINCT images.*) AS images
+                    FROM posts
+                    JOIN images ON images."postID" = posts."postID"
+                    GROUP BY posts."postID"
                 )
-                SELECT favorites.*, json_build_object(
-                'type', post_json."type",
-                'restrict', post_json."restrict",
-                'style', post_json."style",
-                'images', (array_agg(post_json."images"))[1]
-                ) AS post
+                SELECT favorites.*, 
+                to_json((array_agg(post_json.*))[1]) AS post
                 FROM favorites
                 JOIN post_json ON post_json."postID" = favorites."postID"
                 WHERE favorites."postID" = $1 AND favorites."username" = $2
-                GROUP BY favorites."favoriteID", post_json."type", post_json."restrict", post_json."style"
+                GROUP BY favorites."postID", favorites."username"
             `),
             values: [postID, username]
         }
         const result = await SQLQuery.run(query)
         return result[0]
     }
-
-    /*json_build_object(
-                'type', post_json."type",
-                'restrict', post_json."restrict",
-                'style', post_json."style",
-                'images', (array_agg(post_json."images"))[1]
-                ) AS post*/
 
     /** Get favorites. */
     public static favorites = async (username: string, limit?: string, offset?: string, type?: string, restrict?: string, style?: string, sort?: string) => {
@@ -106,12 +95,12 @@ export default class SQLFavorite {
                 WITH post_json AS (
                     SELECT posts.*, json_agg(DISTINCT images.*) AS images,
                     ${includeTags ? `array_agg(DISTINCT "tag map".tag) AS tags,` : ""}
-                    ${includeTags ? `COUNT(DISTINCT "tag map"."tagID") AS "tagCount",` : ""}
+                    ${includeTags ? `COUNT(DISTINCT "tag map"."tag") AS "tagCount",` : ""}
                     MAX(DISTINCT images."size") AS "imageSize",
                     MAX(DISTINCT images."width") AS "imageWidth",
                     MAX(DISTINCT images."height") AS "imageHeight",
                     COUNT(DISTINCT images."imageID") AS "imageCount",
-                    COUNT(DISTINCT favorites."favoriteID") AS "favoriteCount",
+                    COUNT(DISTINCT favorites."username") AS "favoriteCount",
                     ROUND(AVG(DISTINCT cuteness."cuteness")) AS "cuteness"
                     FROM posts
                     JOIN images ON images."postID" = posts."postID"
@@ -138,10 +127,10 @@ export default class SQLFavorite {
     }
 
     /** Delete favorite. */
-    public static deleteFavorite = async (favoriteID: number) => {
+    public static deleteFavorite = async (postID: number, username: string) => {
         const query: QueryConfig = {
-        text: functions.multiTrim(/*sql*/`DELETE FROM favorites WHERE favorites."favoriteID" = $1`),
-        values: [favoriteID]
+        text: functions.multiTrim(/*sql*/`DELETE FROM favorites WHERE favorites."postID" = $1 AND favorites."username" = $2`),
+        values: [postID, username]
         }
         const result = await SQLQuery.run(query)
         return result

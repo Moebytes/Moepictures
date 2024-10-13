@@ -764,12 +764,7 @@ const PostRoutes = (app: Express) => {
             if (!req.session.username) return res.status(403).send("Unauthorized")
             let result = await sql.post.post(Number(postID))
             if (!result) return res.status(400).send("Invalid postID")
-            const history = await sql.history.searchHistory(req.session.username, postID)
-            if (history) {
-                await sql.history.updateSearchHistory(history.historyID)
-            } else {
-                await sql.history.insertSearchHistory(req.session.username, postID)
-            }
+            await sql.history.updateSearchHistory(req.session.username, postID)
             res.status(200).send("Success")
         } catch (e) {
             console.log(e)

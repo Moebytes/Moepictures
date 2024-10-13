@@ -1,0 +1,40 @@
+@import "../../index.less";
+
+.action-banner {    
+    position: fixed;
+    top: -200px;
+    left: 45%;
+    z-index: 9999;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border: 2px solid var(--progressBG);
+    background-color: var(--actionBannerColor);
+    padding: 5px 10px;
+    border-radius: 5px;
+    opacity: 0;
+    transition: opacity 0.5s linear, top 0.5s linear; 
+}
+
+.action-banner-visible {
+    transition: opacity 0.3s linear, top 0.3s linear; 
+    opacity: 1;
+    top: 20px;
+}
+
+.action-banner-text {
+    font-family: Tahoma, sans-serif;
+    color: var(--progressBG);
+    font-size: 17px;
+    font-weight: bold;
+}
+
+.action-banner-x {
+    font-family: Tahoma, sans-serif;
+    color: var(--progressBG);
+    font-size: 20px;
+    margin-left: 10px;
+    margin-top: -2px;
+    cursor: pointer;
+    user-select: none;
+}

@@ -30,7 +30,6 @@ import Carousel from "../components/Carousel"
 import PostImage from "../components/PostImage"
 import PostModel from "../components/PostModel"
 import PostSong from "../components/PostSong"
-import DragAndDrop from "../components/DragAndDrop"
 import {HideNavbarContext, HideSidebarContext, RelativeContext, ThemeContext, EnableDragContext, HideTitlebarContext, 
 UploadDropFilesContext, BrightnessContext, ContrastContext, HueContext, SaturationContext, LightnessContext, MobileContext,
 BlurContext, SharpenContext, PixelateContext, HeaderTextContext, SessionContext, SidebarTextContext, RedirectContext,
@@ -1275,7 +1274,6 @@ const BulkUploadPage: React.FunctionComponent = (props) => {
 
     return (
         <>
-        <DragAndDrop/>
         <TitleBar/>
         <NavBar/>
         <div className="body">

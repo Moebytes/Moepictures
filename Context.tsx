@@ -208,7 +208,8 @@ export const PlayFlagContext = React.createContext<any>(null)
 export const VolumeFlagContext = React.createContext<any>(null)
 export const ResetFlagContext = React.createContext<any>(null)
 export const MuteFlagContext = React.createContext<any>(null)
-export const OrderContext = React.createContext<any>(null)
+export const ActionBannerContext = React.createContext<any>(null)
+export const FavGroupDialogContext = React.createContext<any>(null)
 
 const Context: React.FunctionComponent = (props) => {
     const [siteHue, setSiteHue] = useState(180)
@@ -400,13 +401,15 @@ const Context: React.FunctionComponent = (props) => {
     const [volumeFlag, setVolumeFlag] = useState(null)
     const [muteFlag, setMuteFlag] = useState(false)
     const [resetFlag, setResetFlag] = useState(false)
-    const [order, setOrder] = useState(1)
     const [pageMultiplier, setPageMultiplier] = useState(1)
+    const [actionBanner, setActionBanner] = useState(null)
+    const [favGroupDialog, setFavGroupDialog] = useState(false)
 
 return (
     <>
+        <FavGroupDialogContext.Provider value={{favGroupDialog, setFavGroupDialog}}>
+        <ActionBannerContext.Provider value={{actionBanner, setActionBanner}}>
         <PageMultiplierContext.Provider value={{pageMultiplier, setPageMultiplier}}>
-        <OrderContext.Provider value={{order, setOrder}}>
         <AudioPostContext.Provider value={{audioPost, setAudioPost}}>
         <ResetFlagContext.Provider value={{resetFlag, setResetFlag}}>
         <MuteFlagContext.Provider value={{muteFlag, setMuteFlag}}>
@@ -786,8 +789,9 @@ return (
         </MuteFlagContext.Provider>
         </ResetFlagContext.Provider>
         </AudioPostContext.Provider>
-        </OrderContext.Provider>
         </PageMultiplierContext.Provider>
+        </ActionBannerContext.Provider>
+        </FavGroupDialogContext.Provider>
     </>
     )
 }

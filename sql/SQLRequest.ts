@@ -28,21 +28,17 @@ export default class SQLRequest {
         const query: QueryConfig = {
         text: functions.multiTrim(/*sql*/`
             WITH post_json AS (
-            SELECT posts.*, json_agg(DISTINCT images.*) AS images
-            FROM posts
-            JOIN images ON images."postID" = posts."postID"
-            GROUP BY posts."postID"
+                SELECT posts.*, json_agg(DISTINCT images.*) AS images
+                FROM posts
+                JOIN images ON images."postID" = posts."postID"
+                GROUP BY posts."postID"
             )
-            SELECT "delete requests".*, json_build_object(
-            'type', post_json."type",
-            'restrict', post_json."restrict",
-            'style', post_json."style",
-            'images', (array_agg(post_json."images"))[1]
-            ) AS post
+            SELECT "delete requests".*, 
+            to_json((array_agg(post_json.*))[1]) AS post
             FROM "delete requests"
             JOIN post_json ON post_json."postID" = "delete requests"."postID"
             WHERE "delete requests"."postID" IS NOT NULL
-            GROUP BY "delete requests"."deleteRequestID", post_json."type", post_json."restrict", post_json."style"
+            GROUP BY "delete requests"."deleteRequestID"
             LIMIT 100 ${offset ? `OFFSET $1` : ""}
         `),
         }
@@ -56,21 +52,17 @@ export default class SQLRequest {
         const query: QueryConfig = {
         text: functions.multiTrim(/*sql*/`
             WITH post_json AS (
-            SELECT posts.*, json_agg(DISTINCT images.*) AS images
-            FROM posts
-            JOIN images ON images."postID" = posts."postID"
-            GROUP BY posts."postID"
+                SELECT posts.*, json_agg(DISTINCT images.*) AS images
+                FROM posts
+                JOIN images ON images."postID" = posts."postID"
+                GROUP BY posts."postID"
             )
-            SELECT "delete requests".*, json_build_object(
-            'type', post_json."type",
-            'restrict', post_json."restrict",
-            'style', post_json."style",
-            'images', (array_agg(post_json."images"))[1]
-            ) AS post
+            SELECT "delete requests".*, 
+            to_json((array_agg(post_json.*))[1]) AS post
             FROM "delete requests"
             JOIN post_json ON post_json."postID" = "delete requests"."postID"
             WHERE "delete requests"."postID" IS NOT NULL AND "delete requests".username = $1
-            GROUP BY "delete requests"."deleteRequestID", post_json."type", post_json."restrict", post_json."style"
+            GROUP BY "delete requests"."deleteRequestID"
         `),
         values: [username]
         }

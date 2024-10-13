@@ -1034,18 +1034,14 @@ const UserRoutes = (app: Express) => {
 
     app.delete("/api/user/history/delete", csrfProtection, userLimiter, async (req: Request, res: Response) => {
         try {
-            const {historyID, duplicates, all} = req.query
+            const {postID, all} = req.query
             if (!req.session.username) return res.status(403).send("Unauthorized")
-            if (duplicates) {
-                await sql.history.deleteDuplicateSearchHistory(req.session.username)
-                return res.status(200).send("Success")
-            }
             if (all) {
                 await sql.history.deleteAllSearchHistory(req.session.username)
                 return res.status(200).send("Success")
             }
-            if (Number.isNaN(Number(historyID))) return res.status(400).send("Bad historyID")
-            await sql.history.deleteSearchHistory(Number(historyID), req.session.username)
+            if (Number.isNaN(Number(postID))) return res.status(400).send("Bad postID")
+            await sql.history.deleteSearchHistory(Number(postID), req.session.username)
             res.status(200).send("Success")
         } catch (e) {
             console.log(e)

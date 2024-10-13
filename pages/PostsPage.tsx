@@ -7,7 +7,6 @@ import ImageGrid from "../components/ImageGrid"
 import Footer from "../components/Footer"
 import DownloadDialog from "../dialogs/DownloadDialog"
 import PageDialog from "../dialogs/PageDialog"
-import DragAndDrop from "../components/DragAndDrop"
 import ToolTip from "../components/ToolTip"
 import TagBanner from "../components/TagBanner"
 import BulkQuickEditDialog from "../dialogs/BulkQuickEditDialog"
@@ -104,7 +103,6 @@ const PostsPage: React.FunctionComponent = (props) => {
 
     return (
         <>
-        <DragAndDrop/>
         <CaptchaDialog/>
         <BulkQuickEditDialog/>
         <BulkDeleteDialog/>

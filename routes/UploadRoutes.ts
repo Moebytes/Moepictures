@@ -314,7 +314,7 @@ const CreateRoutes = (app: Express) => {
           bulkTagUpdate.push(bulkObj)
           tagMap.push(series[i].tag)
         }
-        await sql.cuteness.insertCuteness(postID, req.session.username, 500)
+        await sql.cuteness.updateCuteness(postID, req.session.username, 500)
 
         for (let i = 0; i < tagMap.length; i++) {
           const implications = await sql.tag.implications(tagMap[i])

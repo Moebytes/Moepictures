@@ -5,7 +5,6 @@ import NavBar from "../components/NavBar"
 import SideBar from "../components/SideBar"
 import Footer from "../components/Footer"
 import functions from "../structures/Functions"
-import DragAndDrop from "../components/DragAndDrop"
 import MessageReply from "../components/MessageReply"
 import {ThemeContext, EnableDragContext, HideNavbarContext, HideSidebarContext, MobileContext, SessionContext,
 RelativeContext, HideTitlebarContext, ActiveDropdownContext, HeaderTextContext, SidebarTextContext, SiteHueContext, 
@@ -619,7 +618,6 @@ const MessagePage: React.FunctionComponent<Props> = (props) => {
 
     return (
         <>
-        <DragAndDrop/> 
         <EditMessageDialog/> 
         <DeleteMessageDialog/> 
         <EditMessageReplyDialog/>

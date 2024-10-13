@@ -5,7 +5,6 @@ import SideBar from "../components/SideBar"
 import Footer from "../components/Footer"
 import tos from "../assets/icons/tos.png"
 import privacy from "../assets/icons/privacy.png"
-import DragAndDrop from "../components/DragAndDrop"
 import functions from "../structures/Functions"
 import {HideNavbarContext, HideSidebarContext, ThemeContext, RelativeContext, HideTitlebarContext, HeaderTextContext, 
 SidebarTextContext, MobileContext, EnableDragContext, SiteHueContext, SiteLightnessContext, SiteSaturationContext} from "../Context"
@@ -58,7 +57,6 @@ const TermsPage: React.FunctionComponent = (props) => {
     
     return (
         <>
-        <DragAndDrop/>
         <TitleBar/>
         <NavBar/>
         <div className="body">

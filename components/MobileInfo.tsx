@@ -3,7 +3,8 @@ import {useHistory} from "react-router-dom"
 import {ThemeContext, HideNavbarContext, HideSortbarContext, EnableDragContext, MobileContext, UnverifiedPostsContext,
 RelativeContext, HideTitlebarContext, SearchContext, SearchFlagContext, PostsContext, ShowDeletePostDialogContext,
 TagsContext, RandomFlagContext, ImageSearchFlagContext, SessionContext, SessionFlagContext, QuickEditIDContext, ShowTakedownPostDialogContext,
-SiteHueContext, SiteLightnessContext, SiteSaturationContext, TranslationModeContext, TranslationDrawingEnabledContext, OrderContext} from "../Context"
+SiteHueContext, SiteLightnessContext, SiteSaturationContext, TranslationModeContext, TranslationDrawingEnabledContext,
+ActionBannerContext} from "../Context"
 import {HashLink as Link} from "react-router-hash-link"
 import permissions from "../structures/Permissions"
 import favicon from "../assets/icons/favicon.png"
@@ -47,6 +48,7 @@ interface Props {
     series?: any
     tags?: any
     unverified?: boolean
+    order?: number
 }
 
 const MobileInfo: React.FunctionComponent<Props> = (props) => {
@@ -80,7 +82,7 @@ const MobileInfo: React.FunctionComponent<Props> = (props) => {
     const {quickEditID, setQuickEditID} = useContext(QuickEditIDContext)
     const {translationMode, setTranslationMode} = useContext(TranslationModeContext)
     const {translationDrawingEnabled, setTranslationDrawingEnabled} = useContext(TranslationDrawingEnabledContext)
-    const {order, setOrder} = useContext(OrderContext)
+    const {actionBanner, setActionBanner} = useContext(ActionBannerContext)
     const history = useHistory()
 
     const getFilter = () => {
@@ -252,9 +254,22 @@ const MobileInfo: React.FunctionComponent<Props> = (props) => {
         return jsx
     }
 
+    const copyTags = (replaceDash?: boolean, commas?: boolean) => {
+        const artists = props.artists.map((a: any) => a.tag)
+        const characters = props.characters.map((c: any) => c.tag)
+        const series = props.series.map((s: any) => s.tag)
+        const tags = props.tags.map((t: any) => t.tag)
+        let combined = [...artists, ...characters, ...series, ...tags]
+        if (replaceDash) combined = combined.map((c: string) => c.replaceAll("-", " "))
+        navigator.clipboard.writeText(commas ? combined.join(", ") : combined.join(" "))
+        setActionBanner("copy-tags")
+    }
+
     const copyHash = () => {
-        const hash = props.post.images[order-1]?.hash
+        if (!props.order) return
+        const hash = props.post.images[props.order-1]?.hash
         navigator.clipboard.writeText(hash)
+        setActionBanner("copy-hash")
     }
 
     const getDomain = () => {
@@ -419,6 +434,23 @@ const MobileInfo: React.FunctionComponent<Props> = (props) => {
         return <span className="tag-alt-link" onClick={() => username ? history.push(`/user/${username}`) : null}>{functions.toProperCase(username) || "deleted"}</span>
     }
 
+    const copyTagsJSX = () => {
+        if (!session) return
+        if (session.captchaNeeded) return null
+        if (props.artists && props.characters && props.series && props.tags) {
+            return (
+                <div className="mobileinfo-subcontainer-column">
+                    <div className="mobileinfo-row">
+                        <span className="tag-hover" onClick={() => copyTags()} onContextMenu={(event) => {event.preventDefault(); copyTags(true, true)}}>
+                            <img className="mobileinfo-icon" src={tagIcon}/>
+                            <span className="tag-red">Copy Tags</span>
+                        </span>
+                    </div>
+                </div>
+            )
+        }
+    }
+
     const tagCaptchaJSX = () => {
         if (!session) return
         if (session.captchaNeeded) {
@@ -458,6 +490,7 @@ const MobileInfo: React.FunctionComponent<Props> = (props) => {
             <div className="mobileinfo-container">
             <div className="mobileinfo-content">
 
+                {copyTagsJSX()}
                 {tagCaptchaJSX()}
 
                 {props.artists ? <>

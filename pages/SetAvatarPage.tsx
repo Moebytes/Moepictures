@@ -6,7 +6,6 @@ import SideBar from "../components/SideBar"
 import Footer from "../components/Footer"
 import functions from "../structures/Functions"
 import cryptoFunctions from "../structures/CryptoFunctions"
-import DragAndDrop from "../components/DragAndDrop"
 import {HideNavbarContext, HideSidebarContext, RelativeContext, HideTitlebarContext, MobileContext, UserImgContext, SessionFlagContext,
 PostsContext, TagsContext, PostFlagContext, RedirectContext, SidebarTextContext, SessionContext, EnableDragContext} from "../Context"
 import permissions from "../structures/Permissions"
@@ -306,7 +305,6 @@ const SetAvatarPage: React.FunctionComponent<Props> = (props) => {
 
     return (
         <>
-        <DragAndDrop/>
         <TitleBar goBack={true}/>
         <NavBar/>
         <div className="body">

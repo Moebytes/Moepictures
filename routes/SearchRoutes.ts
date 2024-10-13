@@ -94,47 +94,6 @@ const SearchRoutes = (app: Express) => {
         }
     })
 
-    app.get("/api/search/random", searchLimiter, async (req: Request, res: Response, next: NextFunction) => {
-        try {
-            const query = req.query.query as string
-            const type = req.query.type as string
-            const restrict = req.query.restrict as string
-            const style = req.query.style as string
-            const limit = req.query.limit as string
-            const offset = req.query.offset as string
-            if (!functions.validType(type, true)) return res.status(400).send("Invalid type")
-            if (!functions.validRestrict(restrict, true)) return res.status(400).send("Invalid restrict")
-            if (restrict === "explicit") if (!req.session.showR18) return res.status(403).end()
-            if (!functions.validStyle(style, true)) return res.status(400).send("Invalid style")
-            const tags = query?.trim().split(/ +/g).filter(Boolean)
-            for (let i = 0; i < tags?.length; i++) {
-                const tag = await sql.tag.tag(tags[i])
-                if (!tag) {
-                    const alias = await sql.tag.alias(tags[i])
-                    if (alias) tags[i] = alias.tag
-                }
-            }
-            let result = await sql.search.random(tags, type, restrict, style, limit, offset)
-            result = result.map((p: any) => {
-                if (p.images?.length > 1) {
-                    p.images = p.images.sort((a: any, b: any) => a.order - b.order)
-                }
-                return p 
-            })
-            if (req.session.role !== "admin" && req.session.role !== "mod") {
-                result = result.filter((p: any) => !p.hidden)
-                result = functions.stripTags(result)
-            }
-            if (!req.session.showR18) {
-                result = result.filter((p: any) => p.restrict !== "explicit")
-            }
-            res.status(200).json(result)
-        } catch (e) {
-            console.log(e)
-            return res.status(400).send("Bad request")
-        }
-    })
-
     app.post("/api/search/similar", searchLimiter, async (req: Request, res: Response, next: NextFunction) => {
         try {
             const {bytes, useMD5} = req.body

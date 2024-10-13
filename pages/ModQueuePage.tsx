@@ -4,7 +4,6 @@ import TitleBar from "../components/TitleBar"
 import NavBar from "../components/NavBar"
 import SideBar from "../components/SideBar"
 import Footer from "../components/Footer"
-import DragAndDrop from "../components/DragAndDrop"
 import {HideNavbarContext, HideSidebarContext, SquareContext, RelativeContext, HideTitlebarContext, HeaderTextContext, SidebarTextContext, 
 MobileContext, SessionContext, ModStateContext} from "../Context"
 import permissions from "../structures/Permissions"
@@ -79,7 +78,6 @@ const ModQueuePage: React.FunctionComponent = (props) => {
     if (!session.cookie) return null
     return (
         <>
-        <DragAndDrop/>
         <TitleBar/>
         <NavBar/>
         <div className="body">

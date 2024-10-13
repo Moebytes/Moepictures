@@ -193,8 +193,9 @@ const TagRoutes = (app: Express) => {
             if (aliases !== undefined) {
                 await sql.tag.purgeAliases(tag)
                 for (let i = 0; i < aliases.length; i++) {
-                    if (!aliases[i]?.trim()) break
-                    await sql.tag.insertAlias(tag, aliases[i])
+                    const alias = aliases[i]?.trim()
+                    if (!alias) break
+                    await sql.tag.insertAlias(tag, alias)
                 }
             } 
             if (implications !== undefined) {
@@ -302,7 +303,8 @@ const TagRoutes = (app: Express) => {
 
     app.post("/api/tag/aliasto", csrfProtection, tagUpdateLimiter, async (req: Request, res: Response) => {
         try {
-            const {tag, aliasTo} = req.body
+            let {tag, aliasTo} = req.body
+            tag = tag?.trim()
             if (!req.session.username) return res.status(403).send("Unauthorized")
             if (!tag || !aliasTo) return res.status(400).send("Bad tag or aliasTo")
             if (req.session.role !== "admin" && req.session.role !== "mod") return res.status(403).end()

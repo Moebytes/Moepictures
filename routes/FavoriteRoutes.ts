@@ -25,7 +25,7 @@ const FavoriteRoutes = (app: Express) => {
             if (favorited) {
                 if (!favorite) await sql.favorite.insertFavorite(Number(postID), req.session.username)
             } else {
-                if (favorite) await sql.favorite.deleteFavorite(favorite.favoriteID)
+                if (favorite) await sql.favorite.deleteFavorite(Number(postID), req.session.username)
             }
             res.status(200).send("Success")
         } catch (e) {
@@ -54,7 +54,7 @@ const FavoriteRoutes = (app: Express) => {
             if (!req.session.username) return res.status(403).send("Unauthorized")
             const favorite = await sql.favorite.favorite(Number(postID), req.session.username)
             if (favorite) {
-                await sql.favorite.deleteFavorite(favorite.favoriteID)
+                await sql.favorite.deleteFavorite(Number(postID), req.session.username)
             } else {
                 await sql.favorite.insertFavorite(Number(postID), req.session.username)
             }

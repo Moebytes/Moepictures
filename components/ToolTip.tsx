@@ -1,7 +1,7 @@
 import React, {useContext, useEffect, useRef, useState} from "react"
 import {useHistory} from "react-router-dom"
 import {ThemeContext, SessionContext, EnableDragContext, ToolTipXContext, ToolTipYContext, ToolTipEnabledContext, ToolTipPostContext,
-ToolTipImgContext, DownloadFlagContext, DownloadIDsContext, SelectionModeContext, SessionFlagContext} from "../Context"
+ToolTipImgContext, DownloadFlagContext, DownloadIDsContext, SelectionModeContext, SessionFlagContext, ActionBannerContext} from "../Context"
 import {HashLink as Link} from "react-router-hash-link"
 import functions from "../structures/Functions"
 import "./styles/tooltip.less"
@@ -34,6 +34,7 @@ const ToolTip: React.FunctionComponent = (props) => {
     const {tooltipPost, setToolTipPost} = useContext(ToolTipPostContext)
     const {tooltipImg, setToolTipImg} = useContext(ToolTipImgContext)
     const {selectionMode, setSelectionMode} = useContext(SelectionModeContext)
+    const {actionBanner, setActionBanner} = useContext(ActionBannerContext)
     const [tags, setTags] = useState(null) as any
     const [artist, setArtist] = useState(null) as any
     const scrollRef = useRef(null) as any
@@ -138,6 +139,7 @@ const ToolTip: React.FunctionComponent = (props) => {
         let tagArr = [artist.tag, ...tags.map((t: any) => t.tag)]
         if (removeDashes) tagArr = tagArr.map((t: any) => t.replaceAll("-", " "))
         navigator.clipboard.writeText(commas ? tagArr.join(", ") : tagArr.join(" "))
+        setActionBanner("copy-tags")
     }
 
     if (selectionMode) return null

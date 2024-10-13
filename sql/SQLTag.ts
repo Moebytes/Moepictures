@@ -290,7 +290,6 @@ export default class SQLTag {
                     SELECT aliases.*
                     FROM aliases
                     WHERE "aliases".alias = $1
-                    GROUP BY "aliases"."aliasID"
             `),
             values: [alias]
         }
@@ -326,7 +325,6 @@ export default class SQLTag {
                     SELECT aliases.*
                     FROM aliases
                     ${whereQuery}
-                    GROUP BY "aliases"."aliasID"
             `)
         }
         if (search) query.values = [search.toLowerCase()]
@@ -356,7 +354,6 @@ export default class SQLTag {
                     SELECT implications.*
                     FROM implications
                     WHERE implications.tag = $1
-                    GROUP BY implications."implicationID"
             `),
             values: [tag]
         }

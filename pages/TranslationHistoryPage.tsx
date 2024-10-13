@@ -5,7 +5,6 @@ import NavBar from "../components/NavBar"
 import SideBar from "../components/SideBar"
 import Footer from "../components/Footer"
 import functions from "../structures/Functions"
-import DragAndDrop from "../components/DragAndDrop"
 import TranslationHistoryRow from "../components/TranslationHistoryRow"
 import RevertTranslationHistoryDialog from "../dialogs/RevertTranslationHistoryDialog"
 import DeleteTranslationHistoryDialog from "../dialogs/DeleteTranslationHistoryDialog"
@@ -158,7 +157,6 @@ const TranslationHistoryPage: React.FunctionComponent<Props> = (props) => {
 
     return (
         <>
-        <DragAndDrop/>
         <RevertTranslationHistoryDialog/>
         <DeleteTranslationHistoryDialog/>
         <TitleBar/>

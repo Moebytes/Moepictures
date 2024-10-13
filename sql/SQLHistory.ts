@@ -220,23 +220,18 @@ export default class SQLHistory {
         const query: QueryConfig = {
         text: functions.multiTrim(/*sql*/`
                 WITH post_json AS (
-                SELECT posts.*, json_agg(DISTINCT images.*) AS images
-                FROM posts
-                JOIN images ON images."postID" = posts."postID"
-                GROUP BY posts."postID"
+                    SELECT posts.*, json_agg(DISTINCT images.*) AS images
+                    FROM posts
+                    JOIN images ON images."postID" = posts."postID"
+                    GROUP BY posts."postID"
                 )
                 SELECT "translation history".*, 
                 COUNT(*) OVER() AS "historyCount",
-                json_build_object(
-                'type', post_json."type",
-                'restrict', post_json."restrict",
-                'style', post_json."style",
-                'images', (array_agg(post_json."images"))[1]
-                ) AS post
+                to_json((array_agg(post_json.*))[1]) AS post
                 FROM "translation history"
                 JOIN post_json ON post_json."postID" = "translation history"."postID"
                 ${whereQueries}
-                GROUP BY "translation history"."historyID", post_json."type", post_json."restrict", post_json."style"
+                GROUP BY "translation history"."historyID"
                 ORDER BY "translation history"."updatedDate" DESC
                 LIMIT 100 ${offset ? `OFFSET $${i}` : ""}
         `),
@@ -252,23 +247,18 @@ export default class SQLHistory {
         const query: QueryConfig = {
             text: functions.multiTrim(/*sql*/`
                     WITH post_json AS (
-                    SELECT posts.*, json_agg(DISTINCT images.*) AS images
-                    FROM posts
-                    JOIN images ON images."postID" = posts."postID"
-                    GROUP BY posts."postID"
+                        SELECT posts.*, json_agg(DISTINCT images.*) AS images
+                        FROM posts
+                        JOIN images ON images."postID" = posts."postID"
+                        GROUP BY posts."postID"
                     )
                     SELECT "translation history".*, 
                     COUNT(*) OVER() AS "historyCount",
-                    json_build_object(
-                    'type', post_json."type",
-                    'restrict', post_json."restrict",
-                    'style', post_json."style",
-                    'images', (array_agg(post_json."images"))[1]
-                    ) AS post
+                    to_json((array_agg(post_json.*))[1]) AS post
                     FROM "translation history"
                     JOIN post_json ON post_json."postID" = "translation history"."postID"
                     WHERE "translation history"."postID" = $1 AND "translation history"."historyID" = $2
-                    GROUP BY "translation history"."historyID", post_json."type", post_json."restrict", post_json."style"
+                    GROUP BY "translation history"."historyID"
             `),
             values: [postID, historyID]
         }
@@ -281,23 +271,18 @@ export default class SQLHistory {
         const query: QueryConfig = {
         text: functions.multiTrim(/*sql*/`
                 WITH post_json AS (
-                SELECT posts.*, json_agg(DISTINCT images.*) AS images
-                FROM posts
-                JOIN images ON images."postID" = posts."postID"
-                GROUP BY posts."postID"
+                    SELECT posts.*, json_agg(DISTINCT images.*) AS images
+                    FROM posts
+                    JOIN images ON images."postID" = posts."postID"
+                    GROUP BY posts."postID"
                 )
                 SELECT "translation history".*, 
                 COUNT(*) OVER() AS "historyCount",
-                json_build_object(
-                'type', post_json."type",
-                'restrict', post_json."restrict",
-                'style', post_json."style",
-                'images', (array_agg(post_json."images"))[1]
-                ) AS post
+                to_json((array_agg(post_json.*))[1]) AS post
                 FROM "translation history"
                 JOIN post_json ON post_json."postID" = "translation history"."postID"
                 WHERE "translation history"."updater" = $1
-                GROUP BY "translation history"."historyID", post_json."type", post_json."restrict", post_json."style"
+                GROUP BY "translation history"."historyID"
                 ORDER BY "translation history"."updatedDate" DESC
         `),
         values: [username]
@@ -306,70 +291,27 @@ export default class SQLHistory {
         return result
     }
 
-    /** Get single search history */
-    public static searchHistory = async (username: string, postID: string) => {
-        const query: QueryConfig = {
-        text: functions.multiTrim(/*sql*/`
-                SELECT * 
-                FROM "history"
-                WHERE "history"."username" = $1 AND "history"."postID" = $2
-                LIMIT 1
-        `),
-        values: [username, postID]
-        }
-        const result = await SQLQuery.run(query)
-        return result[0]
-    }
-
-    /** Insert search history */
-    public static insertSearchHistory = async (username: string, postID: string) => {
-        const now = new Date().toISOString()
-        const query: QueryConfig = {
-        text: /*sql*/`INSERT INTO "history" ("username", "postID", "viewDate") VALUES ($1, $2, $3) RETURNING "historyID"`,
-        values: [username, postID, now]
-        }
-        const result = await SQLQuery.run(query)
-        return result
-    }
-
     /** Update search history view date */
-    public static updateSearchHistory = async (historyID: number) => {
+    public static updateSearchHistory = async (username: string, postID: number) => {
         const now = new Date().toISOString()
         const query: QueryConfig = {
             text: /*sql*/`
-                UPDATE "history"
-                SET "viewDate" = $2
-                WHERE "historyID" = $1
+                INSERT INTO "history" ("username", "postID", "viewDate") 
+                VALUES ($1, $2, $3)
+                ON CONFLICT ("username", "postID") 
+                DO UPDATE SET "viewDate" = $3
             `,
-            values: [historyID, now]
+            values: [username, postID, now]
         }
         const result = await SQLQuery.run(query)
         return result
     }
 
     /** Delete search history */
-    public static deleteSearchHistory = async (historyID: number, username: string) => {
+    public static deleteSearchHistory = async (postID: number, username: string) => {
         const query: QueryConfig = {
-        text: functions.multiTrim(/*sql*/`DELETE FROM "history" WHERE "history"."historyID" = $1 AND "history"."username" = $2`),
-        values: [historyID, username]
-        }
-        const result = await SQLQuery.run(query)
-        return result
-    }
-
-    /** Delete duplicate search history */
-    public static deleteDuplicateSearchHistory = async (username: string) => {
-        const query: QueryConfig = {
-            text: functions.multiTrim(/*sql*/`
-                DELETE FROM "history"
-                WHERE "history"."historyID" NOT IN (
-                    SELECT MIN("historyID")
-                    FROM "history"
-                    WHERE "history"."username" = $1
-                    GROUP BY "history"."postID", "history"."username"
-                ) AND "history"."username" = $1
-            `),
-            values: [username],
+        text: functions.multiTrim(/*sql*/`DELETE FROM "history" WHERE "history"."postID" = $1 AND "history"."username" = $2`),
+        values: [postID, username]
         }
         const result = await SQLQuery.run(query)
         return result
@@ -390,26 +332,18 @@ export default class SQLHistory {
         const query: QueryConfig = {
         text: functions.multiTrim(/*sql*/`
                 WITH post_json AS (
-                SELECT posts.*, json_agg(DISTINCT images.*) AS images
-                FROM posts
-                JOIN images ON images."postID" = posts."postID"
-                GROUP BY posts."postID"
+                    SELECT posts.*, json_agg(DISTINCT images.*) AS images
+                    FROM posts
+                    JOIN images ON images."postID" = posts."postID"
+                    GROUP BY posts."postID"
                 )
-                SELECT "history".*, post_json."title", post_json."translatedTitle",
-                post_json."artist", post_json."drawn", post_json."link", post_json."mirrors",
+                SELECT "history".*,
                 COUNT(*) OVER() AS "historyCount",
-                json_build_object(
-                'type', post_json."type",
-                'restrict', post_json."restrict",
-                'style', post_json."style",
-                'images', (array_agg(post_json."images"))[1]
-                ) AS post
+                to_json((array_agg(post_json.*))[1]) AS post
                 FROM "history"
                 JOIN post_json ON post_json."postID" = "history"."postID"
                 WHERE "history"."username" = $1
-                GROUP BY "history"."historyID", post_json."type", post_json."restrict", post_json."style",
-                post_json."title", post_json."translatedTitle", post_json."artist", post_json."drawn",
-                post_json."link", post_json."mirrors"
+                GROUP BY "history"."username", "history"."postID"
                 ORDER BY "history"."viewDate" DESC
                 LIMIT 100 ${offset ? `OFFSET $2` : ""}
         `),

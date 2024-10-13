@@ -5,7 +5,6 @@ import TitleBar from "../components/TitleBar"
 import NavBar from "../components/NavBar"
 import SideBar from "../components/SideBar"
 import Footer from "../components/Footer"
-import DragAndDrop from "../components/DragAndDrop"
 import {HideNavbarContext, HideSidebarContext, RelativeContext, HideTitlebarContext, HeaderTextContext, SidebarTextContext,
 MobileContext, EnableDragContext, HelpTabContext} from "../Context"
 import mainImg from "../assets/misc/mainimg.png"
@@ -463,7 +462,6 @@ const HelpPage: React.FunctionComponent = (props) => {
     
     return (
         <>
-        <DragAndDrop/>
         <CaptchaDialog/>
         <TitleBar/>
         <NavBar/>

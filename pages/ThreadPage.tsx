@@ -5,7 +5,6 @@ import NavBar from "../components/NavBar"
 import SideBar from "../components/SideBar"
 import Footer from "../components/Footer"
 import functions from "../structures/Functions"
-import DragAndDrop from "../components/DragAndDrop"
 import Reply from "../components/Reply"
 import {ThemeContext, EnableDragContext, HideNavbarContext, HideSidebarContext, MobileContext, SessionContext,
 RelativeContext, HideTitlebarContext, ActiveDropdownContext, HeaderTextContext, SidebarTextContext, SiteHueContext, 
@@ -629,7 +628,6 @@ const ThreadPage: React.FunctionComponent<Props> = (props) => {
 
     return (
         <>
-        <DragAndDrop/> 
         <EditThreadDialog/>
         <DeleteThreadDialog/> 
         <ReportThreadDialog/>
