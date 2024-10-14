@@ -67,7 +67,7 @@ const PostHistoryRow: React.FunctionComponent<Props> = (props) => {
         const imgChanged = await functions.imagesChanged(props.postHistory, props.currentHistory)
         const srcChanged = functions.sourceChanged(props.postHistory, props.currentHistory)
         if (imgChanged || srcChanged) {
-            if (imgChanged && !permissions.isElevated(session)) return Promise.reject("img")
+            if (imgChanged && !permissions.isMod(session)) return Promise.reject("img")
             const {images, upscaledImages} = await functions.parseImages(props.postHistory)
             const newTags = await functions.parseNewTags(props.postHistory, session, setSessionFlag)
             const source = {
@@ -130,7 +130,7 @@ const PostHistoryRow: React.FunctionComponent<Props> = (props) => {
 
     const postHistoryOptions = () => {
         if (session.banned) return null
-        if (permissions.isElevated(session)) {
+        if (permissions.isMod(session)) {
             return (
                 <div className="posthistoryrow-options">
                     <div className="posthistoryrow-options-container" onClick={revertPostHistoryDialog}>

@@ -492,7 +492,7 @@ const MessagePage: React.FunctionComponent<Props> = (props) => {
                 </>
             )
         }
-        if (session.username === message.creator || permissions.isElevated(session)) {
+        if (session.username === message.creator || permissions.isMod(session)) {
             jsx.push(
                 <>
                 <img draggable={false} className="mail-message-opt-icon" src={editOptIcon} onClick={editMessageDialog} style={{filter: getFilter()}}/>

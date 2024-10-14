@@ -40,7 +40,7 @@ const DeleteTagDialog: React.FunctionComponent = (props) => {
     }, [deleteTagID])
 
     const deleteTag = async () => {
-        if (permissions.isElevated(session)) {
+        if (permissions.isMod(session)) {
             setDeleteTagFlag(true)
         } else {
             const badReason = functions.validateReason(reason)
@@ -90,7 +90,7 @@ const DeleteTagDialog: React.FunctionComponent = (props) => {
             )
         }
 
-        if (permissions.isElevated(session)) {
+        if (permissions.isMod(session)) {
             return (
                 <div className="dialog">
                     <Draggable handle=".dialog-title-container">

@@ -486,7 +486,7 @@ const ThreadPage: React.FunctionComponent<Props> = (props) => {
     const getOptionsJSX = () => {
         if (!thread) return
         let jsx = [] as any
-        if (permissions.isElevated(session)) {
+        if (permissions.isMod(session)) {
             jsx.push(
                 <>
                 <img draggable={false} className="forum-thread-opt-icon" src={thread.sticky ? unstickyOptIcon : stickyOptIcon} onClick={updateSticky} style={{marginTop: "3px", filter: getFilter()}}/>
@@ -502,7 +502,7 @@ const ThreadPage: React.FunctionComponent<Props> = (props) => {
                 </>
             )
         }
-        if (session.username === thread.creator || permissions.isElevated(session)) {
+        if (session.username === thread.creator || permissions.isMod(session)) {
             jsx.push(
                 <>
                 <img draggable={false} className="forum-thread-opt-icon" src={editOptIcon} onClick={editThreadDialog} style={{filter: getFilter()}}/>

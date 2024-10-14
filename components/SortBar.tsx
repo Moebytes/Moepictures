@@ -2,13 +2,13 @@ import React, {useContext, useEffect, useState, useRef, useReducer} from "react"
 import {useHistory} from "react-router-dom"
 import {HashLink as Link} from "react-router-hash-link"
 import Slider from "react-slider"
-import {ThemeContext, HideSidebarContext, HideNavbarContext, HideSortbarContext, ActiveDropdownContext, ScrollContext,
+import {ThemeContext, HideSidebarContext, HideNavbarContext, HideSortbarContext, ActiveDropdownContext, ScrollContext, TabletContext,
 SizeTypeContext, BrightnessContext, ContrastContext, HueContext, SaturationContext, LightnessContext, SiteHueContext, PremiumRequiredContext,
 BlurContext, SharpenContext, EnableDragContext, FilterDropActiveContext, SquareContext, PixelateContext, SiteLightnessContext, PostsContext,
 ShowDownloadDialogContext, HideTitlebarContext, ImageTypeContext, RestrictTypeContext, SortTypeContext, SortReverseContext, SiteSaturationContext,
 StyleTypeContext, SpeedContext, ReverseContext, MobileContext, RelativeContext, SessionContext, MobileScrollingContext, SessionFlagContext,
 SelectionModeContext, SelectionItemsContext, SearchFlagContext, DownloadIDsContext, DownloadFlagContext, ShowBulkQuickEditDialogContext,
-ShowBulkDeleteDialogContext, PageContext, PageFlagContext, PageMultiplierContext, ScrollYContext} from "../Context"
+ShowBulkDeleteDialogContext, PageContext, PageFlagContext, PageMultiplierContext, ScrollYContext, BulkFavGroupDialogContext} from "../Context"
 import leftArrow from "../assets/icons/leftArrow.png"
 import rightArrow from "../assets/icons/rightArrow.png"
 import upArrow from "../assets/icons/upArrow.png"
@@ -51,6 +51,7 @@ import bulk from "../assets/icons/bulk.png"
 import select from "../assets/icons/select.png"
 import selectOn from "../assets/icons/select-on.png"
 import star from "../assets/icons/star.png"
+import starGroup from "../assets/icons/stargroup.png"
 import quickEdit from "../assets/icons/quickedit.png"
 import deleteIcon from "../assets/icons/tag-delete.png"
 import leftIcon from "../assets/icons/go-left.png"
@@ -99,11 +100,13 @@ const SortBar: React.FunctionComponent = (props) => {
     const {speed, setSpeed} = useContext(SpeedContext)
     const {reverse, setReverse} = useContext(ReverseContext)
     const {mobile, setMobile} = useContext(MobileContext)
+    const {tablet, setTablet} = useContext(TabletContext)
     const {mobileScrolling, setMobileScrolling} = useContext(MobileScrollingContext)
     const {selectionMode, setSelectionMode} = useContext(SelectionModeContext)
     const {selectionItems, setSelectionItems} = useContext(SelectionItemsContext) as {selectionItems: Set<string>, setSelectionItems: any}
     const {showBulkQuickEditDialog, setShowBulkQuickEditDialog} = useContext(ShowBulkQuickEditDialogContext)
     const {showBulkDeleteDialog, setShowBulkDeleteDialog} = useContext(ShowBulkDeleteDialogContext)
+    const {bulkFavGroupDialog, setBulkFavGroupDialog} = useContext(BulkFavGroupDialogContext)
     const {searchFlag, setSearchFlag} = useContext(SearchFlagContext)
     const {relative, setRelative} = useContext(RelativeContext)
     const {session, setSession} = useContext(SessionContext)
@@ -486,6 +489,7 @@ const SortBar: React.FunctionComponent = (props) => {
         if (!rect) return "250px"
         const raw = window.innerWidth - rect.right
         let offset = 2
+        if (tablet) offset -= 20
         return `${raw + offset}px`
     }
 
@@ -699,6 +703,10 @@ const SortBar: React.FunctionComponent = (props) => {
         }
     }
 
+    const bulkFavgroup = () => {
+        setBulkFavGroupDialog((prev: boolean) => !prev)
+    }
+
     const bulkQuickEdit = () => {
         setShowBulkQuickEditDialog((prev: boolean) => !prev)
     }
@@ -778,7 +786,7 @@ const SortBar: React.FunctionComponent = (props) => {
                         <img className="sortbar-img" src={download} style={{filter: getFilter()}}/>
                         <span className="sortbar-text">Download</span>
                     </div>
-                    {session.role === "admin" || session.role === "mod" ?
+                    {!tablet && permissions.isMod(session) ?
                     <Link to="/bulk-upload" className="sortbar-item">
                         <img className="sortbar-img" src={bulk} style={{filter: getFilter()}}/>
                         <span className="sortbar-text">Bulk</span>
@@ -796,9 +804,13 @@ const SortBar: React.FunctionComponent = (props) => {
                     <div className="sortbar-item" style={{filter: "hue-rotate(-5deg)"}} onClick={bulkDelete}>
                         <img className="sortbar-img" src={deleteIcon} style={{filter: getFilter()}}/>
                     </div> : null}
-                    {permissions.isElevated(session) && selectionMode ? 
+                    {permissions.isMod(session) && selectionMode ? 
                     <div className="sortbar-item" onClick={bulkQuickEdit}>
                         <img className="sortbar-img" src={quickEdit} style={{filter: getFilter()}}/>
+                    </div> : null}
+                    {session.username && selectionMode ? 
+                    <div className="sortbar-item" onClick={bulkFavgroup}>
+                        <img className="sortbar-img" src={starGroup} style={{filter: getFilter()}}/>
                     </div> : null}
                     {session.username && selectionMode ? 
                     <div className="sortbar-item" onClick={bulkFavorite}>
@@ -821,7 +833,7 @@ const SortBar: React.FunctionComponent = (props) => {
                     </> : null}
                     <div className="sortbar-item" onClick={() => toggleScroll()}>
                         <img className="sortbar-img" src={scroll ? scrollIcon : pageIcon} style={{filter: getFilter()}}/>
-                        <span className="sortbar-text">{scroll ? "Scrolling" : "Pages"}</span>
+                        {!tablet ? <span className="sortbar-text">{scroll ? "Scrolling" : "Pages"}</span> : null}
                     </div>
                     <div className="sortbar-item" onClick={() => toggleSquare()}>
                         <img className="sortbar-img" src={squareIcon} style={{filter: getFilter()}}/>
@@ -829,15 +841,15 @@ const SortBar: React.FunctionComponent = (props) => {
                     <div className="sortbar-item" onClick={() => setReverse((prev: boolean) => !prev)}>
                         {reverse ? <>
                         <img className="sortbar-img" src={reverseIcon} style={{transform: "scaleX(-1)", filter: getFilter()}}/>
-                        <span className="sortbar-text">Forward</span>
+                        {!tablet ? <span className="sortbar-text">Forward</span> : null}
                         </> : <>
                         <img className="sortbar-img" src={reverseIcon} style={{filter: getFilter()}}/>
-                        <span className="sortbar-text">Reverse</span>
+                        {!tablet ? <span className="sortbar-text">Reverse</span> : null}
                         </>}
                     </div>
                     <div className="sortbar-item" ref={speedRef} onClick={() => toggleSpeedDrop()}>
                         <img className="sortbar-img" src={speedIcon} style={{filter: getFilter()}}/>
-                        <span className="sortbar-text">Speed</span>
+                        {!tablet ? <span className="sortbar-text">Speed</span> : null}
                     </div>
                     <div className="sortbar-item" ref={filterRef} onClick={() => toggleFilterDrop()}>
                         <img className="sortbar-img" src={filters} style={{filter: getFilter()}}/>

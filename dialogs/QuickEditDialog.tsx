@@ -128,7 +128,7 @@ const QuickEditDialog: React.FunctionComponent = (props) => {
                 return setError(false)
             }
             const tagArr = functions.cleanHTML(tags).split(/[\n\r\s]+/g)
-            if (!permissions.isElevated(session)) {
+            if (!permissions.isMod(session)) {
                 if (tagArr.length < 5) {
                     setError(true)
                     await functions.timeout(20)

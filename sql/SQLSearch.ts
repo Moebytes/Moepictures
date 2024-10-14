@@ -111,14 +111,18 @@ export default class SQLSearch {
                 ROUND(AVG(DISTINCT cuteness."cuteness")) AS "cuteness"${username ? `,
                 CASE 
                     WHEN COUNT(favorites."username") FILTER (WHERE favorites."username" = $${userValue}) > 0 
-                    THEN true
-                    ELSE false
-                END AS favorited` : ""}
+                    THEN true ELSE false
+                END AS favorited,
+                CASE
+                    WHEN COUNT("favgroup map"."username") FILTER (WHERE "favgroup map"."username" = $${userValue}) > 0 
+                    THEN true ELSE false
+                END AS favgrouped` : ""}
                 FROM posts
                 JOIN images ON posts."postID" = images."postID"
                 ${includeTags ? `JOIN "tag map" ON posts."postID" = "tag map"."postID"` : ""}
                 FULL JOIN "favorites" ON posts."postID" = "favorites"."postID"
                 FULL JOIN "cuteness" ON posts."postID" = "cuteness"."postID"
+                ${username ? `LEFT JOIN "favgroup map" ON posts."postID" = "favgroup map"."postID"` : ""}
                 ${whereQueries ? `WHERE ${whereQueries}` : ""}
                 GROUP BY posts."postID"${favoriteQuery ? `, favorites."postID", favorites."username"` : ""}
                 ${sortQuery}

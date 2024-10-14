@@ -1,6 +1,6 @@
 import React, {useEffect, useState, useContext} from "react"
 import {Switch, Route, Redirect, useHistory, useLocation} from "react-router-dom"
-import Context, {ThemeContext, HideNavbarContext, HideSidebarContext, HideSortbarContext, HasNotificationContext,
+import Context, {ThemeContext, HideNavbarContext, HideSidebarContext, HideSortbarContext, HasNotificationContext, TabletContext,
 HideTitlebarContext, EnableDragContext, ActiveDropdownContext, FilterDropActiveContext, MobileScrollingContext, EmojisContext,
 SidebarHoverContext, SessionContext, SessionFlagContext, UserImgContext, UserImgPostContext, MobileContext, SelectionModeContext} from "./Context"
 import favicon from "./assets/icons/favicon.png"
@@ -78,6 +78,7 @@ const App: React.FunctionComponent = (props) => {
     const [userImg, setUserImg] = useState("")
     const [userImgPost, setUserImgPost] = useState("")
     const [mobile, setMobile] = useState(false)
+    const [tablet, setTablet] = useState(false)
     const [mobileScrolling, setMobileScrolling] = useState(false)
     const [selectionMode, setSelectionMode] = useState(false)
     const [hasNotification, setHasNotification] = useState(false)
@@ -244,9 +245,19 @@ const App: React.FunctionComponent = (props) => {
                 setMobile(false)
             }
         }
+        const tabletQuery = (query: any) => {
+            if (query.matches) {
+                setTablet(true)
+            } else {
+                setTablet(false)
+            }
+        }
         const media = window.matchMedia("(max-width: 500px)")
-        media.addEventListener("change", mobileQuery)
+        const media2 = window.matchMedia("(max-width: 1200px)")
+        media.addEventListener("change", tabletQuery)
+        media2.addEventListener("change", mobileQuery)
         mobileQuery(media)
+        tabletQuery(media2)
         document.documentElement.style.visibility = "visible"
     }, [])
 
@@ -256,6 +267,7 @@ const App: React.FunctionComponent = (props) => {
             <HasNotificationContext.Provider value={{hasNotification, setHasNotification}}>
             <SelectionModeContext.Provider value={{selectionMode, setSelectionMode}}>
             <MobileScrollingContext.Provider value={{mobileScrolling, setMobileScrolling}}>
+            <TabletContext.Provider value={{tablet, setTablet}}>
             <MobileContext.Provider value={{mobile, setMobile}}>
             <UserImgPostContext.Provider value={{userImgPost, setUserImgPost}}>
             <UserImgContext.Provider value={{userImg, setUserImg}}>
@@ -339,6 +351,7 @@ const App: React.FunctionComponent = (props) => {
             </UserImgContext.Provider>
             </UserImgPostContext.Provider>
             </MobileContext.Provider>
+            </TabletContext.Provider>
             </MobileScrollingContext.Provider>
             </SelectionModeContext.Provider>
             </HasNotificationContext.Provider>

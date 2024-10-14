@@ -22,24 +22,6 @@ const Related: React.FunctionComponent<Props> = (props) => {
     const [related, setRelated] = useState([]) as any
     const history = useHistory()
 
-    const generateImagesJSX = () => {
-        let jsx = [] as any
-        // props.related.length
-        for (let i = 0; i < 12; i++) {
-            const post = props.related[i] as any
-            if (!post) break
-            if (post.fake) continue
-            if (post.thirdParty) continue
-            if (!session.username) if (post.restrict !== "safe") continue
-            if (restrictType !== "explicit") if (post.restrict === "explicit") continue
-            const image = post.images[0]
-            if (!image) continue
-            const images = post.images.map((i: any) => functions.getImageLink(i.type, post.postID, i.order, i.filename))
-            jsx.push(<GridImage square={true} marginBottom={30} key={post.postID} id={post.postID} img={functions.getThumbnailLink(image.type, post.postID, image.order, image.filename, "medium")} comicPages={post.type === "comic" ? images : null} post={post}/>)
-        }
-        return jsx
-    }
-
     const updateRelated = () => {
         setRelated(functions.shuffleArray(props.related).slice(0, 30))
     }
@@ -68,7 +50,6 @@ const Related: React.FunctionComponent<Props> = (props) => {
         <div className="related" style={{paddingLeft: `${marginLeft}px`, marginBottom: "10px"}}>
             <div className="related-title" style={{marginBottom: "0px"}}>Related</div>
             <div className="related-container">
-                {/* {generateImagesJSX()} */}
                 <Carousel images={getImages()} set={click} noKey={true} marginLeft={marginLeft} height={200}/>
             </div>
         </div>

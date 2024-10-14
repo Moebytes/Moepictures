@@ -16,6 +16,12 @@
     align-items: center;
 }
 
+.userprofile-title-container {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+}
+
 .userprofile-img {
     width: auto;
     height: 70px;
@@ -25,6 +31,18 @@
     width: auto;  
     height: 16px;
     margin-right: 7px;
+}
+
+.userprofile-clickable-icon {
+    width: auto;  
+    height: 18px;
+    //margin-left: 20px;
+    margin-right: 7px;
+    cursor: pointer;
+    margin-top: 3px;
+    &:hover {
+        filter: brightness(130%);
+    }
 }
 
 .userprofile-uploadimg {

@@ -97,7 +97,7 @@ const TranslationHistoryRow: React.FunctionComponent<Props> = (props) => {
 
     const translationhistoryOptions = () => {
         if (session.banned) return null
-        if (permissions.isElevated(session)) {
+        if (permissions.isMod(session)) {
             return (
                 <div className="translationhistoryrow-options">
                     <div className="translationhistoryrow-options-container" onClick={revertTranslationHistoryDialog}>

@@ -3,6 +3,7 @@ import rateLimit from "express-rate-limit"
 import slowDown from "express-slow-down"
 import sql from "../sql/SQLQuery"
 import functions from "../structures/Functions"
+import permissions from "../structures/Permissions"
 import serverFunctions, {csrfProtection, keyGenerator, handler} from "../structures/ServerFunctions"
 
 const threadLimiter = rateLimit({
@@ -57,7 +58,7 @@ const ThreadRoutes = (app: Express) => {
             const thread = await sql.thread.thread(Number(threadID))
             if (!thread) return res.status(400).send("Invalid threadID")
             if (thread.creator !== req.session.username) {
-                if (req.session.role !== "admin" && req.session.role !== "mod") return res.status(403).send("No permission to edit")
+                if (!permissions.isMod(req.session)) return res.status(403).send("No permission to edit")
             }
             await sql.thread.updateThread(Number(threadID), "title", title)
             await sql.thread.updateThread(Number(threadID), "content", content)
@@ -88,7 +89,7 @@ const ThreadRoutes = (app: Express) => {
             const thread = await sql.thread.thread(Number(threadID))
             if (!thread) return res.status(400).send("Invalid threadID")
             if (thread.creator !== req.session.username) {
-                if (req.session.role !== "admin" && req.session.role !== "mod") return res.status(403).send("No permission to delete")
+                if (!permissions.isMod(req.session)) return res.status(403).send("No permission to delete")
             }
             await sql.thread.deleteThread(Number(threadID))
             res.status(200).send("Success")
@@ -103,7 +104,7 @@ const ThreadRoutes = (app: Express) => {
             const {threadID} = req.body
             if (!req.session.username) return res.status(403).send("Unauthorized")
             if (!threadID) return res.status(400).send("Bad threadID")
-            if (req.session.role !== "admin" && req.session.role !== "mod") return res.status(403).end()
+            if (!permissions.isMod(req.session)) return res.status(403).end()
             const thread = await sql.thread.thread(threadID)
             if (!thread) return res.status(400).send("Invalid threadID")
             await sql.thread.updateThread(thread.threadID, "sticky", !thread.sticky)
@@ -119,7 +120,7 @@ const ThreadRoutes = (app: Express) => {
             const {threadID} = req.body
             if (!req.session.username) return res.status(403).send("Unauthorized")
             if (!threadID) return res.status(400).send("Bad threadID")
-            if (req.session.role !== "admin" && req.session.role !== "mod") return res.status(403).end()
+            if (!permissions.isMod(req.session)) return res.status(403).end()
             const thread = await sql.thread.thread(threadID)
             if (!thread) return res.status(400).send("Invalid threadID")
             await sql.thread.updateThread(thread.threadID, "locked", !thread.locked)
@@ -186,7 +187,7 @@ const ThreadRoutes = (app: Express) => {
             const reply = await sql.thread.reply(replyID)
             if (!reply) return res.status(400).send("Invalid replyID")
             if (reply.creator !== req.session.username) {
-                if (req.session.role !== "admin" && req.session.role !== "mod") return res.status(403).send("No permission to edit")
+                if (!permissions.isMod(req.session)) return res.status(403).send("No permission to edit")
             }
             await sql.thread.updateReply(Number(replyID), "content", content)
             await sql.thread.updateReply(Number(replyID), "updatedDate", new Date().toISOString())
@@ -206,7 +207,7 @@ const ThreadRoutes = (app: Express) => {
             const reply = await sql.thread.reply(Number(replyID))
             if (!reply) return res.status(400).send("Invalid replyID")
             if (reply.creator !== req.session.username) {
-                if (req.session.role !== "admin" && req.session.role !== "mod") return res.status(403).send("No permission to delete")
+                if (!permissions.isMod(req.session)) return res.status(403).send("No permission to delete")
             }
             const replies = await sql.thread.replies(Number(threadID))
             const lastReply = replies[replies.length - 1]
@@ -268,7 +269,7 @@ const ThreadRoutes = (app: Express) => {
             const {reportID, reporter, username, id, accepted} = req.body
             if (!req.session.username) return res.status(403).send("Unauthorized")
             if (!reportID) return res.status(400).send("Bad reportID")
-            if (req.session.role !== "admin" && req.session.role !== "mod") return res.status(403).end()
+            if (!permissions.isMod(req.session)) return res.status(403).end()
             await sql.report.deleteThreadReport(Number(reportID))
             if (accepted) {
                 let message = `Thread report on ${functions.getDomain()}/thread/${id} was accepted. The thread posted by ${username} was removed.`
@@ -292,7 +293,7 @@ const ThreadRoutes = (app: Express) => {
             const {reportID, reporter, username, id, accepted} = req.body
             if (!req.session.username) return res.status(403).send("Unauthorized")
             if (!reportID) return res.status(400).send("Bad threadID")
-            if (req.session.role !== "admin" && req.session.role !== "mod") return res.status(403).end()
+            if (!permissions.isMod(req.session)) return res.status(403).end()
             await sql.report.deleteReplyReport(Number(reportID))
             if (accepted) {
                 let message = `Reply report on ${functions.getDomain()}/thread/${id} was accepted. The reply posted by ${username} was removed.`

@@ -3,6 +3,7 @@ import rateLimit from "express-rate-limit"
 import slowDown from "express-slow-down"
 import sql from "../sql/SQLQuery"
 import functions from "../structures/Functions"
+import permissions from "../structures/Permissions"
 import serverFunctions, {csrfProtection, keyGenerator, handler} from "../structures/ServerFunctions"
 import phash from "sharp-phash"
 import imageSize from "image-size"
@@ -34,7 +35,7 @@ const PostRoutes = (app: Express) => {
             if (Number.isNaN(Number(postID))) return res.status(400).send("Invalid postID")
             let result = await sql.post.post(Number(postID))
             if (!result) return res.status(404).send("Not found")
-            if (req.session.role !== "admin" && req.session.role !== "mod") {
+            if (!permissions.isMod(req.session)) {
                 if (result.hidden) return res.status(403).end()
             }
             if (!req.session.showR18) {
@@ -57,7 +58,7 @@ const PostRoutes = (app: Express) => {
             if (Number.isNaN(Number(postID))) return res.status(400).send("Invalid postID")
             let result = await sql.post.postTags(Number(postID))
             if (!result) return res.status(400).send("Invalid postID")
-            if (req.session.role !== "admin" && req.session.role !== "mod") {
+            if (!permissions.isMod(req.session)) {
                 if (result.hidden) return res.status(403).end()
             }
             if (!req.session.showR18) {
@@ -76,7 +77,7 @@ const PostRoutes = (app: Express) => {
             const postID = req.query.postID
             if (Number.isNaN(Number(postID))) return res.status(400).send("Invalid postID")
             const result = await sql.comment.comments(Number(postID))
-            if (req.session.role !== "admin" && req.session.role !== "mod") {
+            if (!permissions.isMod(req.session)) {
                 if (result.hidden) return res.status(403).end()
             }
             if (!req.session.showR18) {
@@ -94,7 +95,7 @@ const PostRoutes = (app: Express) => {
             const postID = req.query.postID
             if (Number.isNaN(Number(postID))) return res.status(400).send("Invalid postID")
             if (!req.session.username) return res.status(403).send("Unauthorized")
-            if (req.session.role !== "admin") return res.status(403).end()
+            if (!permissions.isAdmin(req.session)) return res.status(403).end()
             const post = await sql.post.post(Number(postID)).catch(() => null)
             if (!post) return res.status(200).send("Doesn't exist")
             let r18 = post.restrict === "explicit"
@@ -118,7 +119,7 @@ const PostRoutes = (app: Express) => {
             const {postID} = req.body
             if (Number.isNaN(Number(postID))) return res.status(400).send("Invalid postID")
             if (!req.session.username) return res.status(403).send("Unauthorized")
-            if (req.session.role !== "admin" && req.session.role !== "mod") return res.status(403).end()
+            if (!permissions.isMod(req.session)) return res.status(403).end()
             const post = await sql.post.post(Number(postID)).catch(() => null)
             if (!post) return res.status(404).send("Doesn't exist")
             if (post.hidden) {
@@ -138,7 +139,7 @@ const PostRoutes = (app: Express) => {
             const postID = req.query.postID as string
             if (Number.isNaN(Number(postID))) return res.status(400).send("Invalid postID")
             let posts = await sql.post.thirdParty(Number(postID))
-            if (req.session.role !== "admin" && req.session.role !== "mod") {
+            if (!permissions.isMod(req.session)) {
                 posts = posts.filter((p: any) => !p?.hidden)
             }
             if (!req.session.showR18) {
@@ -158,7 +159,7 @@ const PostRoutes = (app: Express) => {
             if (Number.isNaN(Number(postID))) return res.status(400).send("Invalid postID")
             const post = await sql.post.parent(Number(postID))
             if (!post) return res.status(200).json()
-            if (req.session.role !== "admin" && req.session.role !== "mod") {
+            if (!permissions.isMod(req.session)) {
                 if (post.hidden) return res.status(403).end()
             }
             if (!req.session.showR18) {
@@ -176,7 +177,7 @@ const PostRoutes = (app: Express) => {
         try {
             const postID = req.query.postID as string
             if (Number.isNaN(Number(postID))) return res.status(400).send("Invalid postID")
-            if (req.session.role !== "admin" && req.session.role !== "mod") return res.status(403).end()
+            if (!permissions.isMod(req.session)) return res.status(403).end()
             let result = await sql.post.unverifiedPost(Number(postID))
             if (result.images.length > 1) {
                 result.images = result.images.sort((a: any, b: any) => a.order - b.order)
@@ -192,7 +193,7 @@ const PostRoutes = (app: Express) => {
         try {
             const offset = req.query.offset as string
             if (!req.session.username) return res.status(403).send("Unauthorized")
-            if (req.session.role !== "admin" && req.session.role !== "mod") return res.status(403).end()
+            if (!permissions.isMod(req.session)) return res.status(403).end()
             const result = await sql.search.unverifiedPosts(offset)
             res.status(200).json(result)
         } catch (e) {
@@ -205,7 +206,7 @@ const PostRoutes = (app: Express) => {
         try {
             const offset = req.query.offset as string
             if (!req.session.username) return res.status(403).send("Unauthorized")
-            if (req.session.role !== "admin" && req.session.role !== "mod") return res.status(403).end()
+            if (!permissions.isMod(req.session)) return res.status(403).end()
             const result = await sql.search.unverifiedPostEdits(offset)
             res.status(200).json(result)
         } catch (e) {
@@ -218,7 +219,7 @@ const PostRoutes = (app: Express) => {
         try {
             const postID = req.query.postID as string
             if (Number.isNaN(Number(postID))) return res.status(400).send("Invalid postID")
-            if (req.session.role !== "admin" && req.session.role !== "mod") return res.status(403).end()
+            if (!permissions.isMod(req.session)) return res.status(403).end()
             const posts = await sql.post.unverifiedThirdParty(Number(postID))
             res.status(200).json(posts)
         } catch (e) {
@@ -231,7 +232,7 @@ const PostRoutes = (app: Express) => {
         try {
             const postID = req.query.postID as string
             if (Number.isNaN(Number(postID))) return res.status(400).send("Invalid postID")
-            if (req.session.role !== "admin" && req.session.role !== "mod") return res.status(403).end()
+            if (!permissions.isMod(req.session)) return res.status(403).end()
             const post = await sql.post.unverifiedParent(Number(postID))
             res.status(200).json(post)
         } catch (e) {
@@ -260,7 +261,7 @@ const PostRoutes = (app: Express) => {
         try {
             const offset = req.query.offset as string
             if (!req.session.username) return res.status(403).send("Unauthorized")
-            if (req.session.role !== "admin" && req.session.role !== "mod") return res.status(403).end()
+            if (!permissions.isMod(req.session)) return res.status(403).end()
             const result = await sql.request.postDeleteRequests(offset)
             res.status(200).json(result)
         } catch (e) {
@@ -275,7 +276,7 @@ const PostRoutes = (app: Express) => {
             if (Number.isNaN(Number(postID))) return res.status(400).send("Invalid postID")
             if (!req.session.username) return res.status(403).send("Unauthorized")
             if (!username) return res.status(400).send("Bad username")
-            if (req.session.role !== "admin" && req.session.role !== "mod") return res.status(403).end()
+            if (!permissions.isMod(req.session)) return res.status(403).end()
 
             await sql.request.deletePostDeleteRequest(username, postID)
             if (accepted) {
@@ -480,7 +481,7 @@ const PostRoutes = (app: Express) => {
             if (Number.isNaN(postID)) return res.status(400).send("Bad postID")
             if (!req.session.username) return res.status(403).send("Unauthorized")
             if (req.session.banned) return res.status(403).send("You are banned")
-            if (req.session.role !== "admin" && req.session.role !== "mod") return res.status(403).end()
+            if (!permissions.isMod(req.session)) return res.status(403).end()
     
             if (!artists?.[0]) artists = ["unknown-artist"]
             if (!series?.[0]) series = characters.includes("original") ? ["no-series"] : ["unknown-series"]
@@ -730,7 +731,7 @@ const PostRoutes = (app: Express) => {
             const {postID, historyID} = req.query
             if (Number.isNaN(Number(historyID))) return res.status(400).send("Invalid historyID")
             if (!req.session.username) return res.status(403).send("Unauthorized")
-            if (req.session.role !== "admin" && req.session.role !== "mod") return res.status(403).end()
+            if (!permissions.isMod(req.session)) return res.status(403).end()
             const postHistory = await sql.history.postHistory(Number(postID))
             if (postHistory[0]?.historyID === historyID) {
                 return res.status(400).send("Bad historyID")

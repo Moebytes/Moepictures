@@ -116,7 +116,7 @@ const TagHistoryRow: React.FunctionComponent<Props> = (props) => {
 
     const tagHistoryOptions = () => {
         if (session.banned) return null
-        if (permissions.isElevated(session)) {
+        if (permissions.isMod(session)) {
             return (
                 <div className="taghistoryrow-options">
                     <div className="taghistoryrow-options-container" onClick={revertTagHistoryDialog}>

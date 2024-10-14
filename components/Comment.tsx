@@ -173,7 +173,7 @@ const Comment: React.FunctionComponent<Props> = (props) => {
                         <img className="comment-options-img" src={commentQuote}/>
                         <span className="comment-options-text">Quote</span>
                     </div>
-                    {permissions.isElevated(session) ? 
+                    {permissions.isMod(session) ? 
                     <div className="comment-options-container" onClick={deleteCommentDialog}>
                         <img className="comment-options-img" src={commentDelete}/>
                         <span className="comment-options-text">Delete</span>

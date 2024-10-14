@@ -3,6 +3,7 @@ import rateLimit from "express-rate-limit"
 import slowDown from "express-slow-down"
 import sql from "../sql/SQLQuery"
 import functions from "../structures/Functions"
+import permissions from "../structures/Permissions"
 import serverFunctions, {csrfProtection, keyGenerator, handler} from "../structures/ServerFunctions"
 
 const messageLimiter = rateLimit({
@@ -65,7 +66,7 @@ const MessageRoutes = (app: Express) => {
             const message = await sql.message.message(Number(messageID))
             if (!message) return res.status(400).send("Invalid messageID")
             if (message.creator !== req.session.username) {
-                if (req.session.role !== "admin" && req.session.role !== "mod") return res.status(403).send("No permission to edit")
+                if (!permissions.isMod(req.session)) return res.status(403).send("No permission to edit")
             }
             await sql.message.updateMessage(Number(messageID), "title", title)
             await sql.message.updateMessage(Number(messageID), "content", content)
@@ -83,7 +84,7 @@ const MessageRoutes = (app: Express) => {
             if (!req.session.username) return res.status(403).send("Unauthorized")
             const message = await sql.message.message(Number(messageID))
             if (req.session.username !== message.creator && req.session.username !== message.recipient) {
-                if (req.session.role !== "admin" && req.session.role !== "mod") return res.status(403).send("No permission to view")
+                if (!permissions.isMod(req.session)) return res.status(403).send("No permission to view")
             }
             res.status(200).json(message)
         } catch (e) {
@@ -100,7 +101,7 @@ const MessageRoutes = (app: Express) => {
             const message = await sql.message.message(Number(messageID))
             if (!message) return res.status(400).send("Invalid messageID")
             if (message.creator !== req.session.username) {
-                if (req.session.role !== "admin" && req.session.role !== "mod") return res.status(403).send("No permission to delete")
+                if (!permissions.isMod(req.session)) return res.status(403).send("No permission to delete")
             }
             await sql.message.deleteMessage(Number(messageID))
             res.status(200).send("Success")
@@ -121,7 +122,7 @@ const MessageRoutes = (app: Express) => {
             const message = await sql.message.message(messageID)
             if (!message) return res.status(400).send("Invalid messageID")
             if (req.session.username !== message.creator && req.session.username !== message.recipient) {
-                if (req.session.role !== "admin" && req.session.role !== "mod") return res.status(403).send("No permission to reply")
+                if (!permissions.isMod(req.session)) return res.status(403).send("No permission to reply")
             }
             if (message.role === "system") return res.status(403).send("Cannot reply to system messages")
             await sql.message.insertMessageReply(Number(messageID), req.session.username, content)
@@ -151,7 +152,7 @@ const MessageRoutes = (app: Express) => {
             const message = await sql.message.message(Number(messageID))
             if (!message) return res.status(400).send("Invalid messageID")
             if (req.session.username !== message.creator && req.session.username !== message.recipient) {
-                if (req.session.role !== "admin" && req.session.role !== "mod") return res.status(403).send("No permission to view replies")
+                if (!permissions.isMod(req.session)) return res.status(403).send("No permission to view replies")
             }
             const result = await sql.message.messageReplies(Number(messageID), offset)
             res.status(200).json(result)
@@ -171,7 +172,7 @@ const MessageRoutes = (app: Express) => {
             const reply = await sql.message.messageReply(replyID)
             if (!reply) return res.status(400).send("Invalid replyID")
             if (reply.creator !== req.session.username) {
-                if (req.session.role !== "admin" && req.session.role !== "mod") return res.status(403).send("No permission to edit")
+                if (!permissions.isMod(req.session)) return res.status(403).send("No permission to edit")
             }
             await sql.message.updateMessageReply(Number(replyID), "content", content)
             await sql.message.updateMessageReply(Number(replyID), "updatedDate", new Date().toISOString())
@@ -191,7 +192,7 @@ const MessageRoutes = (app: Express) => {
             const reply = await sql.message.messageReply(Number(replyID))
             if (!reply) return res.status(400).send("Invalid replyID")
             if (reply.creator !== req.session.username) {
-                if (req.session.role !== "admin" && req.session.role !== "mod") return res.status(403).send("No permission to delete")
+                if (!permissions.isMod(req.session)) return res.status(403).send("No permission to delete")
             }
             const replies = await sql.message.messageReplies(Number(messageID))
             const lastReply = replies[replies.length - 1]
@@ -224,7 +225,7 @@ const MessageRoutes = (app: Express) => {
             const message = await sql.message.message(messageID)
             if (!message) return res.status(400).send("Invalid messageID")
             if (req.session.username !== message.creator && req.session.username !== message.recipient) {
-                if (req.session.role !== "admin" && req.session.role !== "mod") return res.status(403).send("No permission to softdelete")
+                if (!permissions.isMod(req.session)) return res.status(403).send("No permission to softdelete")
             }
             const isCreator = req.session.username === message.creator
             const isRecipient = req.session.username === message.recipient
@@ -250,7 +251,7 @@ const MessageRoutes = (app: Express) => {
             const message = await sql.message.message(messageID)
             if (!message) return res.status(400).send("Invalid messageID")
             if (req.session.username !== message.creator && req.session.username !== message.recipient) {
-                if (req.session.role !== "admin" && req.session.role !== "mod") return res.status(403).send("No permission to read")
+                if (!permissions.isMod(req.session)) return res.status(403).send("No permission to read")
             }
             const isCreator = req.session.username === message.creator
             const isRecipient = req.session.username === message.recipient

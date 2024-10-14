@@ -3,6 +3,7 @@ import rateLimit from "express-rate-limit"
 import slowDown from "express-slow-down"
 import sql from "../sql/SQLQuery"
 import functions from "../structures/Functions"
+import permissions from "../structures/Permissions"
 import serverFunctions, {csrfProtection, keyGenerator, handler} from "../structures/ServerFunctions"
 import fs from "fs"
 import path from "path"
@@ -111,7 +112,7 @@ const TagRoutes = (app: Express) => {
             const tagExists = await sql.tag.tag(tag.trim())
             if (!req.session.username) return res.status(403).send("Unauthorized")
             if (!tagExists) return res.status(400).send("Bad tag")
-            if (req.session.role !== "admin" && req.session.role !== "mod") return res.status(403).end()
+            if (!permissions.isMod(req.session)) return res.status(403).end()
             await serverFunctions.deleteFolder(`history/tag/${tag.trim()}`, false).catch(() => null)
             await serverFunctions.deleteFile(functions.getTagPath(tagExists.type, tagExists.image), false).catch(() => null)
             await sql.tag.deleteTag(tag.trim())
@@ -127,7 +128,7 @@ const TagRoutes = (app: Express) => {
             const {tag} = req.body
             if (!req.session.username) return res.status(403).send("Unauthorized")
             if (!tag) return res.status(400).send("Bad tag")
-            if (req.session.role !== "admin" && req.session.role !== "mod") return res.status(403).end()
+            if (!permissions.isMod(req.session)) return res.status(403).end()
             const tagObj = await sql.tag.tag(tag)
             if (!tagObj) return res.status(404).send("Doesn't exist")
             const allPosts = await sql.search.search([tag], "all", "all", "all", "date", undefined, "9999")
@@ -307,7 +308,7 @@ const TagRoutes = (app: Express) => {
             tag = tag?.trim()
             if (!req.session.username) return res.status(403).send("Unauthorized")
             if (!tag || !aliasTo) return res.status(400).send("Bad tag or aliasTo")
-            if (req.session.role !== "admin" && req.session.role !== "mod") return res.status(403).end()
+            if (!permissions.isMod(req.session)) return res.status(403).end()
             const exists = await sql.tag.tag(aliasTo)
             if (!exists) return res.status(400).send("Bad tag")
             await sql.tag.renameTagMap(tag, aliasTo)
@@ -322,7 +323,7 @@ const TagRoutes = (app: Express) => {
 
     app.get("/api/tag/list/unverified", tagLimiter, async (req: Request, res: Response, next: NextFunction) => {
         try {
-            if (req.session.role !== "admin" && req.session.role !== "mod") return res.status(403).end()
+            if (!permissions.isMod(req.session)) return res.status(403).end()
             let tags = req.query.tags as string[]
             if (!tags) tags = []
             let result = await sql.tag.unverifiedTags(tags.filter(Boolean))
@@ -353,7 +354,7 @@ const TagRoutes = (app: Express) => {
         try {
             const offset = req.query.offset as string
             if (!req.session.username) return res.status(403).send("Unauthorized")
-            if (req.session.role !== "admin" && req.session.role !== "mod") return res.status(403).end()
+            if (!permissions.isMod(req.session)) return res.status(403).end()
             const result = await sql.request.tagDeleteRequests(offset)
             res.status(200).json(result)
         } catch (e) {
@@ -368,7 +369,7 @@ const TagRoutes = (app: Express) => {
             if (!tag) return res.status(400).send("Invalid tag")
             if (!req.session.username) return res.status(403).send("Unauthorized")
             if (!username) return res.status(400).send("Bad username")
-            if (req.session.role !== "admin" && req.session.role !== "mod") return res.status(403).end()
+            if (!permissions.isMod(req.session)) return res.status(403).end()
             await sql.request.deleteTagDeleteRequest(username, tag)
             if (accepted) {
                 let message = `Tag deletion request on ${functions.getDomain()}/tag/${tag} has been approved. Thanks!`
@@ -405,7 +406,7 @@ const TagRoutes = (app: Express) => {
         try {
             const offset = req.query.offset as string
             if (!req.session.username) return res.status(403).send("Unauthorized")
-            if (req.session.role !== "admin" && req.session.role !== "mod") return res.status(403).end()
+            if (!permissions.isMod(req.session)) return res.status(403).end()
             const result = await sql.request.aliasRequests(offset)
             res.status(200).json(result)
         } catch (e) {
@@ -420,7 +421,7 @@ const TagRoutes = (app: Express) => {
             if (!tag) return res.status(400).send("Invalid tag")
             if (!req.session.username) return res.status(403).send("Unauthorized")
             if (!username) return res.status(400).send("Bad username")
-            if (req.session.role !== "admin" && req.session.role !== "mod") return res.status(403).end()
+            if (!permissions.isMod(req.session)) return res.status(403).end()
             await sql.request.deleteAliasRequest(username, tag)
             if (accepted) {
                 let message = `Tag alias request on ${tag} -> ${aliasTo} has been approved. Thanks!`
@@ -465,7 +466,7 @@ const TagRoutes = (app: Express) => {
         try {
             const offset = req.query.offset as string
             if (!req.session.username) return res.status(403).send("Unauthorized")
-            if (req.session.role !== "admin" && req.session.role !== "mod") return res.status(403).end()
+            if (!permissions.isMod(req.session)) return res.status(403).end()
             const result = await sql.request.tagEditRequests(offset)
             res.status(200).json(result)
         } catch (e) {
@@ -480,7 +481,7 @@ const TagRoutes = (app: Express) => {
             if (!tag) return res.status(400).send("Invalid tag")
             if (!req.session.username) return res.status(403).send("Unauthorized")
             if (!username) return res.status(400).send("Bad username")
-            if (req.session.role !== "admin" && req.session.role !== "mod") return res.status(403).end()
+            if (!permissions.isMod(req.session)) return res.status(403).end()
             if (image) await serverFunctions.deleteUnverifiedFile(image)
             await sql.request.deleteTagEditRequest(username, tag)
             if (accepted) {
@@ -521,7 +522,7 @@ const TagRoutes = (app: Express) => {
             const {tag, historyID} = req.query
             if (Number.isNaN(Number(historyID))) return res.status(400).send("Invalid historyID")
             if (!req.session.username) return res.status(403).send("Unauthorized")
-            if (req.session.role !== "admin" && req.session.role !== "mod") return res.status(403).end()
+            if (!permissions.isMod(req.session)) return res.status(403).end()
             const tagHistory = await sql.history.tagHistory(tag as string)
             if (tagHistory[0]?.historyID === historyID) {
                 return res.status(400).send("Bad request")

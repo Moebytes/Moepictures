@@ -3,6 +3,7 @@ import rateLimit from "express-rate-limit"
 import slowDown from "express-slow-down"
 import sql from "../sql/SQLQuery"
 import functions from "../structures/Functions"
+import permissions from "../structures/Permissions"
 import serverFunctions, {csrfProtection, keyGenerator, handler} from "../structures/ServerFunctions"
 
 const commentLimiter = rateLimit({
@@ -51,7 +52,7 @@ const CommentRoutes = (app: Express) => {
             if (Number.isNaN(Number(commentID))) return res.status(400).send("Invalid commentID")
             const comment = await sql.comment.comment(Number(commentID))
             if (comment?.username !== req.session.username) {
-                if (req.session.role !== "admin" && req.session.role !== "mod") return res.status(403).end()
+                if (!permissions.isMod(req.session)) return res.status(403).end()
             }
             await sql.comment.deleteComment(Number(commentID))
             res.status(200).send("Success")
@@ -101,7 +102,7 @@ const CommentRoutes = (app: Express) => {
             const {reportID, reporter, username, id, accepted} = req.body
             if (!req.session.username) return res.status(403).send("Unauthorized")
             if (!reportID) return res.status(400).send("Bad reportID")
-            if (req.session.role !== "admin" && req.session.role !== "mod") return res.status(403).end()
+            if (!permissions.isMod(req.session)) return res.status(403).end()
 
             await sql.report.deleteCommentReport(Number(reportID))
             if (accepted) {

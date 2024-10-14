@@ -9,6 +9,7 @@ import jsxFunctions from "../structures/JSXFunctions"
 import serverFunctions, {csrfProtection, keyGenerator, handler} from "../structures/ServerFunctions"
 import permissions from "../structures/Permissions"
 import path from "path"
+import { String } from "aws-sdk/clients/batch"
 
 const signupLimiter = rateLimit({
 	windowMs: 10 * 60 * 1000,
@@ -478,7 +479,7 @@ const UserRoutes = (app: Express) => {
             if (!req.session.username) return res.status(403).send("Unauthorized")
             const user = await sql.user.user(req.session.username)
             if (!user) return res.status(400).send("Bad username")
-            if (req.session.role !== "admin") return res.status(403).end()
+            if (!permissions.isAdmin(req.session)) return res.status(403).end()
             const newR18 = r18 !== undefined ? r18 : !Boolean(user.showR18)
             req.session.showR18 = newR18
             await sql.user.updateUser(req.session.username, "showR18", newR18)
@@ -792,6 +793,26 @@ const UserRoutes = (app: Express) => {
         }
     })
 
+    app.get("/api/user/favgroups", sessionLimiter, async (req: Request, res: Response) => {
+        try {
+            const username = req.query.username as String
+            if (username) {
+                const user = await sql.user.user(username as string)
+                if (!user) return res.status(200).send([])
+                let favgroups = await sql.favorite.favgroups(username)
+                favgroups = favgroups.filter((f: any) => !f.private)
+                res.status(200).send(favgroups)
+            } else {
+                if (!req.session.username) return res.status(403).send("Unauthorized")
+                let favgroups = await sql.favorite.favgroups(req.session.username)
+                res.status(200).send(favgroups)
+            }
+        } catch (e) {
+            console.log(e)
+            res.status(400).send("Bad request") 
+        }
+    })
+
     app.get("/api/user/comments", sessionLimiter, async (req: Request, res: Response) => {
         try {
             const query = req.query.query as string
@@ -817,7 +838,7 @@ const UserRoutes = (app: Express) => {
             const {username, reason, deleteUnverifiedChanges, deleteHistoryChanges, deleteComments, deleteMessages} = req.body
             if (!username) return res.status(400).send("Bad username")
             if (!req.session.username) return res.status(403).send("Unauthorized")
-            if (req.session.role !== "admin" && req.session.role !== "mod") return res.status(403).end()
+            if (!permissions.isMod(req.session)) return res.status(403).end()
             if (req.session.username === username) return res.status(400).send("Cannot perform action on yourself")
             const user = await sql.user.user(username)
             if (!user) return res.status(400).send("Bad username")
@@ -941,7 +962,7 @@ const UserRoutes = (app: Express) => {
             const {username} = req.body
             if (!username) return res.status(400).send("Bad username")
             if (!req.session.username) return res.status(403).send("Unauthorized")
-            if (req.session.role !== "admin" && req.session.role !== "mod") return res.status(403).end()
+            if (!permissions.isMod(req.session)) return res.status(403).end()
             if (req.session.username === username) return res.status(400).send("Cannot perform action on yourself")
             const user = await sql.user.user(username)
             if (!user) return res.status(400).send("Bad username")
@@ -962,7 +983,7 @@ const UserRoutes = (app: Express) => {
             const username = req.query.username as string
             if (!username) return res.status(400).send("Bad username")
             if (!req.session.username) return res.status(403).send("Unauthorized")
-            if (req.session.username !== username && req.session.role !== "admin" && req.session.role !== "mod") return res.status(403).send("No permission to view ban")
+            if (req.session.username !== username && !permissions.isMod(req.session)) return res.status(403).send("No permission to view ban")
             const ban = await sql.report.ban(username)
             res.status(200).json(ban)
         } catch (e) {
@@ -977,7 +998,7 @@ const UserRoutes = (app: Express) => {
             if (!username) return res.status(400).send("Bad username")
             if (role !== "admin" && role !== "mod" && role !== "premium" && role !== "user") return res.status(400).send("Bad role")
             if (!req.session.username) return res.status(403).send("Unauthorized")
-            if (req.session.role !== "admin") return res.status(403).end()
+            if (!permissions.isAdmin(req.session)) return res.status(403).end()
             const user = await sql.user.user(username)
             if (!user) return res.status(400).send("Bad username")
 

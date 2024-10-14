@@ -94,10 +94,27 @@
     margin-left: 10px;
 }
 
+.dialog-icon-container {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+}
+
 .dialog-icon {
     height: 20px;
     width: auto;
     margin-right: 10px;
+}
+
+.dialog-clickable-icon {
+    height: 15px;  
+    margin-top: 1px;
+    width: auto;
+    margin-left: 10px;
+    cursor: pointer;
+    &:hover {
+        filter: brightness(120%);
+    }
 }
 
 .dialog-text {

@@ -35,7 +35,21 @@ const videoExtensions = [".mp4", ".webm", ".mov", ".avi", ".mkv"]
 const audioExtensions = [".mp3", ".wav", ".ogg", ".flac", ".aac"]
 const modelExtensions = [".glb", ".gltf", ".obj", ".fbx"]
 
+let cachedImages = new Map<string, string>()
+
 export default class Functions {
+    public static getImageCache = (img: string) => {
+        return cachedImages.get(img) || ""
+    }
+
+    public static setImageCache = (img: string, decrypted: string) => {
+        cachedImages.set(img, decrypted)
+    }
+
+    public static clearImageCache = () => {
+        cachedImages.clear()
+    }
+
     public static fetch = async (link: string, headers?: any) => {
         return axios.get(link, {headers}).then((r) => r.data) as Promise<any>
     }
@@ -2209,9 +2223,10 @@ export default class Functions {
 
     public static borderColor = (post: any) => {
         if (post.favorited) return "var(--favoriteBorder)"
+        if (post.favgrouped) return "var(--favgroupBorder)"
         if (post.hidden) return "var(--takendownBorder)"
-        if (Number(post.imageCount) > 1) return "var(--variationBorder)"
         if (post.thirdParty) return "var(--thirdPartyBorder)"
+        if (Number(post.imageCount) > 1) return "var(--variationBorder)"
         return "var(--imageBorder)"
     }
 
@@ -2325,5 +2340,39 @@ export default class Functions {
 
     public static replaceLocation = (location: string) => {
         window.location = `${Functions.getDomain()}${location}` as any
+    }
+
+    public static decryptImg = async (img: string, cacheKey: string) => {
+        const cached = Functions.getImageCache(cacheKey)
+        if (cached) return cached
+        if (Functions.isModel(img)) {
+            const url = await Functions.modelImage(img)
+            Functions.setImageCache(cacheKey, url)
+            return url
+        }
+        if (Functions.isAudio(img)) {
+            const url = await Functions.songCover(img)
+            Functions.setImageCache(cacheKey, url)
+            return url
+        }
+        let isAnimatedWebP = false
+        let arrayBuffer = null as any
+        if (Functions.isImage(img)) {
+            if (Functions.isWebP(img)) {
+                arrayBuffer = await fetch(img).then((r) => r.arrayBuffer())
+                isAnimatedWebP = Functions.isAnimatedWebp(arrayBuffer)
+            }
+            if (!isAnimatedWebP) img = await cryptoFunctions.decryptedLink(img)
+        }
+        const base64 = await Functions.linkToBase64(img)
+        if (Functions.isVideo(img) || Functions.isGIF(img) || isAnimatedWebP) {
+            if (!arrayBuffer) arrayBuffer = await fetch(img).then((r) => r.arrayBuffer())
+            const url = URL.createObjectURL(new Blob([arrayBuffer]))
+            Functions.setImageCache(cacheKey, url)
+            return url
+        } else {
+            Functions.setImageCache(cacheKey, base64)
+            return base64
+        }
     }
 }

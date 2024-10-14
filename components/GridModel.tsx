@@ -135,7 +135,7 @@ const GridModel = forwardRef<Ref, Props>((props, componentRef) => {
     })
 
     const loadImage = async () => {
-        const img = await functions.modelImage(props.model, 100)
+        const img = await functions.decryptImg(props.model, `${props.model}`)
         setImage(img)
     }
 
@@ -267,11 +267,6 @@ const GridModel = forwardRef<Ref, Props>((props, componentRef) => {
         setDuration(0)
         setSeekTo(null)
     }, [props.model])
-
-    /*
-    useEffect(() => {
-        loadModel()
-    }, [imageSize])*/
 
     useEffect(() => {
         if (mixer) {
@@ -579,7 +574,7 @@ const GridModel = forwardRef<Ref, Props>((props, componentRef) => {
             setToolTipPost(props.post)
             setToolTipImg(props.model)
             setToolTipEnabled(true)
-        }, 400)
+        }, 200)
     }
 
     const mouseLeave = () => {

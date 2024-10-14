@@ -3,6 +3,7 @@ import sql from "../sql/SQLQuery"
 import fs from "fs"
 import path from "path"
 import functions from "../structures/Functions"
+import permissions from "../structures/Permissions"
 import serverFunctions, {csrfProtection, keyGenerator, handler} from "../structures/ServerFunctions"
 import rateLimit from "express-rate-limit"
 import phash from "sharp-phash"
@@ -94,7 +95,7 @@ const CreateRoutes = (app: Express) => {
         const noImageUpdate = req.body.noImageUpdate
 
         if (!req.session.username) return res.status(403).send("Unauthorized")
-        if (req.session.role !== "admin" && req.session.role !== "mod") return res.status(403).end()
+        if (!permissions.isMod(req.session)) return res.status(403).end()
         if (req.session.banned) return res.status(403).send("You are banned")
 
         if (!artists?.[0]?.tag) artists = [{tag: "unknown-artist"}]
@@ -374,7 +375,7 @@ const CreateRoutes = (app: Express) => {
         if (Number.isNaN(postID)) return res.status(400).send("Bad postID")
         if (!req.session.username) return res.status(403).send("Unauthorized")
         if (req.session.banned) return res.status(403).send("You are banned")
-        if (req.session.role !== "admin" && req.session.role !== "mod") noImageUpdate = true
+        if (!permissions.isMod(req.session)) noImageUpdate = true
 
         if (!artists?.[0]?.tag) artists = [{tag: "unknown-artist"}]
         if (!series?.[0]?.tag) series = [{tag: "unknown-series"}]
@@ -438,7 +439,7 @@ const CreateRoutes = (app: Express) => {
           vanillaBuffers.push(oldImage)
           upscaledVanillaBuffers.push(oldUpscaledImage)
           if (imgChanged) {
-            if (req.session.role !== "admin" && req.session.role !== "mod") return res.status(403).send("No permission to modify images")
+            if (!permissions.isMod(req.session)) return res.status(403).send("No permission to modify images")
             await sql.post.deleteImage(post.images[i].imageID)
             await serverFunctions.deleteFile(imagePath, oldR18)
             await serverFunctions.deleteFile(upscaledImagePath, oldR18)
@@ -1262,7 +1263,7 @@ const CreateRoutes = (app: Express) => {
         let postID = Number(req.body.postID)
         if (Number.isNaN(postID)) return res.status(400).send("Bad postID")
         if (!req.session.username) return res.status(403).send("Unauthorized")
-        if (req.session.role !== "admin" && req.session.role !== "mod") return res.status(403).end()
+        if (!permissions.isMod(req.session)) return res.status(403).end()
         const unverified = await sql.post.unverifiedPost(Number(postID))
         if (!unverified) return res.status(400).send("Bad request")
 
@@ -1607,7 +1608,7 @@ const CreateRoutes = (app: Express) => {
       try {
         let postID = Number(req.body.postID)
         if (Number.isNaN(postID)) return res.status(400).send("Bad postID")
-        if (req.session.role !== "admin" && req.session.role !== "mod") return res.status(403).end()
+        if (!permissions.isMod(req.session)) return res.status(403).end()
         const unverified = await sql.post.unverifiedPost(Number(postID))
         if (!unverified) return res.status(400).send("Bad postID")
         await sql.post.deleteUnverifiedPost(Number(postID))

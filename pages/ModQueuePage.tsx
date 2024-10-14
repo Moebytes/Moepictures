@@ -59,7 +59,7 @@ const ModQueuePage: React.FunctionComponent = (props) => {
 
     useEffect(() => {
         if (!session.cookie) return
-        if (!permissions.isElevated(session)) {
+        if (!permissions.isMod(session)) {
             functions.replaceLocation("/401")
         }
     }, [session])

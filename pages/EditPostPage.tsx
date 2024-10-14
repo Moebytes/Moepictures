@@ -318,7 +318,7 @@ const EditPostPage: React.FunctionComponent<Props> = (props) => {
                                         obj ? 100 :
                                         mp4 ? 300 :
                                         webm ? 300 : 300
-                        if (MB <= maxSize || permissions.isElevated(session)) {
+                        if (MB <= maxSize || permissions.isMod(session)) {
                             if (zip) {
                                 const reader = new JSZip()
                                 const content = await reader.loadAsync(bytes)
@@ -877,14 +877,14 @@ const EditPostPage: React.FunctionComponent<Props> = (props) => {
             return setSubmitError(false)
         }
         const tags = functions.cleanHTML(rawTags).split(/[\n\r\s]+/g)
-        if (tags.length < 5 && !permissions.isElevated(session)) {
+        if (tags.length < 5 && !permissions.isMod(session)) {
             setSubmitError(true)
             await functions.timeout(20)
             submitErrorRef.current.innerText = "Minimum of 5 tags is required."
             await functions.timeout(3000)
             return setSubmitError(false)
         }
-        if (!edited && !permissions.isElevated(session)) {
+        if (!edited && !permissions.isMod(session)) {
             setSubmitError(true)
             await functions.timeout(20)
             submitErrorRef.current.innerText = "No post edits were made."
@@ -894,14 +894,14 @@ const EditPostPage: React.FunctionComponent<Props> = (props) => {
         const upscaledMB = upscaledFiles.reduce((acc: any, obj: any) => acc + obj.size, 0) / (1024*1024)
         const originalMB = originalFiles.reduce((acc: any, obj: any) => acc + obj.size, 0) / (1024*1024)
         const MB = upscaledMB + originalMB
-        if (MB > 300 && !permissions.isElevated(session)) {
+        if (MB > 300 && !permissions.isMod(session)) {
             setSubmitError(true)
             await functions.timeout(20)
             submitErrorRef.current.innerText = "Combined file size shouldn't exceed 300MB."
             await functions.timeout(3000)
             return setSubmitError(false)
         }
-        if (!reason && !permissions.isElevated(session)) {
+        if (!reason && !permissions.isMod(session)) {
             setSubmitError(true)
             await functions.timeout(20)
             submitErrorRef.current.innerText = "Edit reason is required."

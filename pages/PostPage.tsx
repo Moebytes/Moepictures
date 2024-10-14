@@ -31,7 +31,7 @@ import Related from "../components/Related"
 import MobileInfo from "../components/MobileInfo"
 import historyIcon from "../assets/icons/history-state.png"
 import currentIcon from "../assets/icons/current.png"
-import FavGroupDialog from "../dialogs/FavGroupDialog"
+import FavgroupDialog from "../dialogs/FavgroupDialog"
 import {HideNavbarContext, HideSidebarContext, RelativeContext, DownloadFlagContext, DownloadIDsContext, HideTitlebarContext, MobileContext, ReloadPostFlagContext,
 PostsContext, TagsContext, HeaderTextContext, PostFlagContext, RedirectContext, SidebarTextContext, SessionContext, SessionFlagContext, EnableDragContext, TranslationModeContext,
 RevertPostHistoryIDContext, RevertPostHistoryFlagContext, RevertTranslationHistoryIDContext, RevertTranslationHistoryFlagContext} from "../Context"
@@ -429,7 +429,7 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
         const imgChanged = await functions.imagesChanged(post, currentPost)
         const srcChanged = functions.sourceChanged(post, currentPost)
         if (imgChanged || srcChanged) {
-            if (imgChanged && !permissions.isElevated(session)) return Promise.reject("img")
+            if (imgChanged && !permissions.isMod(session)) return Promise.reject("img")
             const {images, upscaledImages} = await functions.parseImages(post)
             const newTags = await functions.parseNewTags(post, session, setSessionFlag)
             const source = {
@@ -538,7 +538,7 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
         <>
         <CaptchaDialog/>
         <QuickEditDialog/>
-        <FavGroupDialog/>
+        <FavgroupDialog/>
         <EditCommentDialog/>
         <DeleteCommentDialog/>
         <ReportCommentDialog/>

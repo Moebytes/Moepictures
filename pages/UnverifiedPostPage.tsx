@@ -78,7 +78,7 @@ const UnverifiedPostPage: React.FunctionComponent<Props> = (props) => {
 
     useEffect(() => {
         if (!session.cookie) return
-        if (!permissions.isElevated(session)) {
+        if (!permissions.isMod(session)) {
             functions.replaceLocation("/403")
         }
     }, [session])

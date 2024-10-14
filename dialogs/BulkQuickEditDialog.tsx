@@ -73,7 +73,7 @@ const BulkQuickEditDialog: React.FunctionComponent = (props) => {
     }, [showBulkQuickEditDialog])
 
     const bulkQuickEdit = async () => {
-        if (!permissions.isElevated(session)) return setShowBulkQuickEditDialog(false)
+        if (!permissions.isMod(session)) return setShowBulkQuickEditDialog(false)
         if (!selectionMode) return setShowBulkQuickEditDialog(false)
         if (!artists?.trim() && !characters?.trim() && !series?.trim() && !metaTags?.trim()) return setShowBulkQuickEditDialog(false)
         let promiseArray = [] as Promise<any>[]

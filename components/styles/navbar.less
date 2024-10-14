@@ -49,8 +49,8 @@
 }
 
 .nav-img {
-    width: 20px;
-    height: auto;
+    width: auto;
+    height: 20px;
     cursor: pointer;
     &:hover {
         filter: brightness(150%);
@@ -387,6 +387,21 @@
     &:hover {
         border: 1px solid #c9daff;
         color: #c8d7ff;
+    }
+}
+
+@media screen and (max-width: 1200px) {
+    .nav-text {
+        font-size: 18px;
+    }
+
+    .nav-img {
+        height: 18px;
+    }
+
+    .nav-color {
+        height: 23px;
+        margin-right: 10px;
     }
 }
 

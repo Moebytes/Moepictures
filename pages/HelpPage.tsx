@@ -115,6 +115,7 @@ const HelpPage: React.FunctionComponent = (props) => {
                     <span className="help-alt">pixiv:id</span> - Search for post matching the pixiv id (if it exists). <br/>
                     <span className="help-alt">hash:hash</span> - Search for post matching the post hash. <br/>
                     <span className="help-alt">favorites:user</span> - Search for favorites of the user (if public). <br/>
+                    <span className="help-alt">favgroup:user:name</span> - Search for favgroup of the user (if public). <br/>
                     <span className="help-alt">uploads:user</span> - Search for uploads of the user. <br/><br/>
 
                     These are some tags with special uses: <br/>
@@ -140,8 +141,9 @@ const HelpPage: React.FunctionComponent = (props) => {
 
                     In results, posts may have different border colors which mean the following: <br/>
                     <span className="help-alt">pink</span> - the post is favorited. <br/>
-                    <span className="help-alt">blue</span> - the post contains multiple variations. <br/>
+                    <span className="help-alt">purple</span> - the post is favgrouped. <br/>
                     <span className="help-alt">green</span> - the post is a third party post. <br/>
+                    <span className="help-alt">blue</span> - the post contains multiple variations. <br/>
                 </span>
                 <div className="help-img-container"><img className="help-img" src={searchingImg}/></div></>
             )

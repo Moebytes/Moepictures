@@ -43,7 +43,7 @@ const DeletePostDialog: React.FunctionComponent<Props> = (props) => {
     }, [showDeletePostDialog])
 
     const deletePost = async () => {
-        if (permissions.isElevated(session)) {
+        if (permissions.isMod(session)) {
             await functions.delete("/api/post/delete", {postID: props.post.postID}, session, setSessionFlag)
             history.push("/posts")
         } else {
@@ -93,7 +93,7 @@ const DeletePostDialog: React.FunctionComponent<Props> = (props) => {
             )
         }
 
-        if (permissions.isElevated(session)) {
+        if (permissions.isMod(session)) {
             return (
                 <div className="dialog">
                     <Draggable handle=".dialog-title-container">

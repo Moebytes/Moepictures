@@ -190,23 +190,19 @@ const PostImage: React.FunctionComponent<Props> = (props) => {
         if (ref.current) ref.current.style.opacity = "1"
         if (videoRef.current) videoRef.current.style.opacity = "1"
         if (mobile) fetchVideo()
-        const decryptImg = async () => {
-            let url = props.img
-            let isAnimatedWebP = false
-            if (functions.isImage(props.img)) {
-                if (functions.isWebP(props.img)) {
-                    const arraybuffer = await fetch(props.img).then((r) => r.arrayBuffer())
-                    isAnimatedWebP = functions.isAnimatedWebp(arraybuffer)
-                }
-                if (!isAnimatedWebP) url = await cryptoFunctions.decryptedLink(props.img)
+        const updateImg = async () => {
+            const decryptedImage = await functions.decryptImg(props.img, props.img)
+            let isAnimatedWebp = false
+            if (functions.isWebP(props.img)) {
+                const arrayBuffer = await fetch(props.img).then((r) => r.arrayBuffer())
+                isAnimatedWebp = functions.isAnimatedWebp(arrayBuffer)
             }
-            if (functions.isGIF(props.img) || isAnimatedWebP) {
-                setBackFrame(await cryptoFunctions.decryptedLink(props.img))
+            if (functions.isGIF(props.img) || isAnimatedWebp) {
+                setBackFrame(decryptedImage)
             }
-            const base64 = await functions.linkToBase64(url)
-            setImg(base64)
+            setImg(decryptedImage)
         }
-        decryptImg()
+        updateImg()
     }, [props.img])
 
     useEffect(() => {

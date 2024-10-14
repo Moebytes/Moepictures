@@ -65,12 +65,20 @@ const SearchRoutes = (app: Express) => {
                 const username = query.replace("favorites:", "").trim()
                 const user = await sql.user.user(username as string)
                 if (!user?.publicFavorites) return res.status(403).send("Unauthorized")
-                result = await sql.favorite.favorites(username, limit, offset, type, restrict, style, sort)
+                result = await sql.favorite.favorites(username, limit, offset, type, restrict, style, sort, req.session.username)
             } else if (query.startsWith("uploads:")) {
                 const username = query.replace("uploads:", "").trim()
                 const user = await sql.user.user(username as string)
                 if (!user) return res.status(400).send("Bad username")
-                result = await sql.user.uploads(username, limit, offset, type, restrict, style, sort)
+                result = await sql.user.uploads(username, limit, offset, type, restrict, style, sort, req.session.username)
+            } else if (query.startsWith("favgroup:")) {
+                const [f, username, name] = query.split(":")
+                let favgroup = await sql.favorite.favgroup(username, name, type, restrict, style, sort, req.session.username)
+                if (!favgroup) return res.status(400).send("Bad favgroup")
+                if (favgroup.private) {
+                    if (!permissions.isMod(req.session) && username !== req.session.username) return res.status(403).send("Unauthorized")
+                }
+                result = favgroup.posts.map((p: any) => ({postCount: favgroup.postCount, ...p}))
             } else {
                 result = await sql.search.search(tags, type, restrict, style, sort, offset, limit, withTags, req.session.username)
             }
@@ -80,7 +88,7 @@ const SearchRoutes = (app: Express) => {
                 }
                 return p 
             })
-            if (req.session.role !== "admin" && req.session.role !== "mod") {
+            if (!permissions.isMod(req.session)) {
                 result = result.filter((p: any) => !p.hidden)
                 result = functions.stripTags(result)
             }
@@ -191,7 +199,7 @@ const SearchRoutes = (app: Express) => {
             if (!functions.validTagType(type)) return res.status(400).send("Invalid type")
             let search = query?.trim().split(/ +/g).filter(Boolean).join("-") ?? ""
             let result = await sql.search.tagSearch(search, sort, type, limit, offset)
-            if (req.session.role !== "admin" && req.session.role !== "mod") {
+            if (!permissions.isMod(req.session)) {
                 result = result.filter((t: any) => !functions.arrayIncludes(t.tag, matureTags, true))
             }
             res.status(200).json(result)
@@ -241,7 +249,7 @@ const SearchRoutes = (app: Express) => {
             let search = query?.trim().toLowerCase().split(/ +/g).filter(Boolean).join("-") ?? ""
             let result = await sql.search.tagSearch(search, "posts", type, "10").then((r) => r.slice(0, 10))
             if (!result?.[0]) return res.status(200).json([])
-            if (req.session.role !== "admin" && req.session.role !== "mod") {
+            if (!permissions.isMod(req.session)) {
                 result = result.filter((t: any) => !functions.arrayIncludes(t.tag, matureTags, true))
             }
             const tags = await sql.tag.tagCounts(result.map((r: any) => r.tag))
@@ -342,7 +350,7 @@ const SearchRoutes = (app: Express) => {
         try {
             const offset = req.query.offset as string
             if (!req.session.username) return res.status(403).send("Unauthorized")
-            if (req.session.role !== "admin" && req.session.role !== "mod") return res.status(403).end()
+            if (!permissions.isMod(req.session)) return res.status(403).end()
             const result = await sql.report.reports(offset)
             res.status(200).json(result)
         } catch (e) {

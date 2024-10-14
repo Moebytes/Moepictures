@@ -66,6 +66,7 @@ export const UserImgContext = React.createContext<any>(null)
 export const UserImgPostContext = React.createContext<any>(null)
 export const QuoteTextContext = React.createContext<any>(null)
 export const MobileContext = React.createContext<any>(null)
+export const TabletContext = React.createContext<any>(null)
 export const HideMobileNavbarContext = React.createContext<any>(null)
 export const ShowDeletePostDialogContext = React.createContext<any>(null)
 export const DeleteTagHistoryIDContext = React.createContext<any>(null)
@@ -209,7 +210,9 @@ export const VolumeFlagContext = React.createContext<any>(null)
 export const ResetFlagContext = React.createContext<any>(null)
 export const MuteFlagContext = React.createContext<any>(null)
 export const ActionBannerContext = React.createContext<any>(null)
-export const FavGroupDialogContext = React.createContext<any>(null)
+export const FavGroupIDContext = React.createContext<any>(null)
+export const DeleteFavGroupNameContext = React.createContext<any>(null)
+export const BulkFavGroupDialogContext = React.createContext<any>(null)
 
 const Context: React.FunctionComponent = (props) => {
     const [siteHue, setSiteHue] = useState(180)
@@ -403,11 +406,15 @@ const Context: React.FunctionComponent = (props) => {
     const [resetFlag, setResetFlag] = useState(false)
     const [pageMultiplier, setPageMultiplier] = useState(1)
     const [actionBanner, setActionBanner] = useState(null)
-    const [favGroupDialog, setFavGroupDialog] = useState(false)
+    const [favGroupID, setFavGroupID] = useState(null)
+    const [deleteFavGroupName, setDeleteFavGroupName] = useState(null)
+    const [bulkFavGroupDialog, setBulkFavGroupDialog] = useState(false)
 
 return (
     <>
-        <FavGroupDialogContext.Provider value={{favGroupDialog, setFavGroupDialog}}>
+        <BulkFavGroupDialogContext.Provider value={{bulkFavGroupDialog, setBulkFavGroupDialog}}>
+        <DeleteFavGroupNameContext.Provider value={{deleteFavGroupName, setDeleteFavGroupName}}>
+        <FavGroupIDContext.Provider value={{favGroupID, setFavGroupID}}>
         <ActionBannerContext.Provider value={{actionBanner, setActionBanner}}>
         <PageMultiplierContext.Provider value={{pageMultiplier, setPageMultiplier}}>
         <AudioPostContext.Provider value={{audioPost, setAudioPost}}>
@@ -791,7 +798,9 @@ return (
         </AudioPostContext.Provider>
         </PageMultiplierContext.Provider>
         </ActionBannerContext.Provider>
-        </FavGroupDialogContext.Provider>
+        </FavGroupIDContext.Provider>
+        </DeleteFavGroupNameContext.Provider>
+        </BulkFavGroupDialogContext.Provider>
     </>
     )
 }

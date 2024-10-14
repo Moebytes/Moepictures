@@ -31,7 +31,7 @@ import premiumStar from "../assets/icons/premiumStar.png"
 import Slider from "react-slider"
 import {ThemeContext, HideNavbarContext, HideSortbarContext, HideSidebarContext, EnableDragContext,  HideMobileNavbarContext, MobileContext,
 RelativeContext, HideTitlebarContext, SearchContext, SearchFlagContext, SessionContext, SessionFlagContext, UserImgContext, SiteHueContext,
-SiteSaturationContext, SiteLightnessContext, ScrollContext, HasNotificationContext} from "../Context"
+SiteSaturationContext, SiteLightnessContext, ScrollContext, HasNotificationContext, TabletContext} from "../Context"
 import "./styles/navbar.less"
 
 interface Props {
@@ -58,9 +58,10 @@ const NavBar: React.FunctionComponent<Props> = (props) => {
     const {userImg, setUserImg} = useContext(UserImgContext)
     const {hideMobileNavbar, setHideMobileNavbar} = useContext(HideMobileNavbarContext)
     const {mobile, setMobile} = useContext(MobileContext)
+    const {tablet, setTablet} = useContext(TabletContext)
     const [showMiniTitle, setShowMiniTitle] = useState(false)
     const [suggestionsActive, setSuggestionsActive] = useState(false)
-    const [marginR, setMarginR] = useState("70px")
+    const [marginR, setMarginR] = useState("60px")
     const [activeDropdown, setActiveDropdown] = useState(false)
     const {hasNotification, setHasNotification} = useContext(HasNotificationContext)
     const history = useHistory()
@@ -187,21 +188,15 @@ const NavBar: React.FunctionComponent<Props> = (props) => {
         }
     }
 
-    /* JS Media Queries */
     useEffect(() => {
-        const query1 = (query: any) => {
-            if (query.matches) {
-                let marginR = showMiniTitle ? "20px" : "50px"
-                setMarginR(marginR)
-            } else {
-                let marginR = showMiniTitle ? "45px" : "60px"
-                setMarginR(marginR)
-            }
+        if (tablet) {
+            let marginR = "40px"
+            setMarginR(marginR)
+        } else {
+            let marginR = "60px"
+            setMarginR(marginR)
         }
-        const media = window.matchMedia("(max-width: 1200px)")
-        media.addEventListener("change", query1)
-        query1(media)
-    }, [])
+    }, [session, tablet])
 
     const generateMobileUsernameJSX = () => {
         if (session.role === "admin") {
@@ -345,7 +340,7 @@ const NavBar: React.FunctionComponent<Props> = (props) => {
                     <img className="mobile-nav-color" src={getEyedropperIcon()} onClick={colorChange} style={{filter: getFilter()}}/>
                     <img className="mobile-nav-color" src={getThemeIcon()} onClick={lightChange} style={{filter: getFilter()}}/>
                     {session.username ? <img className="nav-color" src={getMailIcon()} onClick={() => history.push("/mail")} style={{filter: getFilter()}}/> : null}
-                    {permissions.isElevated(session) ? <img className="nav-color" src={getCrownIcon()} onClick={() => history.push("/mod-queue")} style={{filter: getFilter()}}/> : null}
+                    {permissions.isMod(session) ? <img className="nav-color" src={getCrownIcon()} onClick={() => history.push("/mod-queue")} style={{filter: getFilter()}}/> : null}
                     <img className="mobile-nav-color" src={scroll ? scrollIcon : pageIcon} onClick={toggleScroll} style={{filter: getFilter2()}}/>
                 </div>
                 {getDropdownJSX()}
@@ -406,7 +401,7 @@ const NavBar: React.FunctionComponent<Props> = (props) => {
                     {session.username ? <img style={{marginRight: "0px", marginTop: "2px"}} className="nav-img" onClick={() => history.push("/premium")} src={premiumStar}/> : null}
                 </div>
                 <div className="nav-color-container">
-                    <div className={`nav-search-container ${!hideSidebar ? "hide-nav-search" : ""}`}>
+                    <div className={`nav-search-container ${!hideSidebar || tablet ? "hide-nav-search" : ""}`}>
                         <img className="nav-search-icon" src={search} onClick={() => setSearchFlag(true)}/>
                         <input className="nav-search" type="search" spellCheck={false} value={search} onChange={(event) => setSearch(event.target.value)} onKeyDown={(event) => event.key === "Enter" ? setSearchFlag(true) : null} onFocus={() => setSuggestionsActive(true)} onBlur={() => setSuggestionsActive(false)}/>
                     </div>
@@ -414,7 +409,7 @@ const NavBar: React.FunctionComponent<Props> = (props) => {
                     <img className="nav-color" src={getEyedropperIcon()} onClick={colorChange} style={{filter: getFilter()}}/>
                     <img className="nav-color" src={getThemeIcon()} onClick={lightChange} style={{filter: getFilter()}}/>
                     {session.username ? <img className="nav-color" src={getMailIcon()} onClick={() => history.push("/mail")} style={{filter: getFilter()}}/> : null}
-                    {permissions.isElevated(session) ? <img className="nav-color" src={getCrownIcon()} onClick={() => history.push("/mod-queue")} style={{filter: getFilter()}}/> : null}
+                    {permissions.isMod(session) ? <img className="nav-color" src={getCrownIcon()} onClick={() => history.push("/mod-queue")} style={{filter: getFilter()}}/> : null}
                 </div>
                 {getDropdownJSX()}
             </div>

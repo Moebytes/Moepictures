@@ -3,6 +3,7 @@ import rateLimit from "express-rate-limit"
 import slowDown from "express-slow-down"
 import sql from "../sql/SQLQuery"
 import functions from "../structures/Functions"
+import permissions from "../structures/Permissions"
 import serverFunctions, {csrfProtection, keyGenerator, handler} from "../structures/ServerFunctions"
 
 const translationLimiter = rateLimit({
@@ -109,7 +110,7 @@ const TranslationRoutes = (app: Express) => {
         try {
             const offset = req.query.offset as string
             if (!req.session.username) return res.status(403).send("Unauthorized")
-            if (req.session.role !== "admin" && req.session.role !== "mod") return res.status(403).end()
+            if (!permissions.isMod(req.session)) return res.status(403).end()
             const result = await sql.translation.unverifiedTranslations(offset)
             res.status(200).json(result)
         } catch (e) {
@@ -124,7 +125,7 @@ const TranslationRoutes = (app: Express) => {
             if (!req.session.username) return res.status(403).send("Unauthorized")
             translationID = Number(req.body.translationID)
             if (Number.isNaN(translationID)) return res.status(400).send("Bad translationID")
-            if (req.session.role !== "admin" && req.session.role !== "mod") return res.status(403).end()
+            if (!permissions.isMod(req.session)) return res.status(403).end()
             const unverified = await sql.translation.unverifiedTranslationID(Number(translationID))
             if (!unverified) return res.status(400).send("Bad translationID")
             await sql.translation.insertTranslation(unverified.postID, unverified.updater, unverified.order, JSON.stringify(unverified.data))
@@ -146,7 +147,7 @@ const TranslationRoutes = (app: Express) => {
             if (!req.session.username) return res.status(403).send("Unauthorized")
             translationID = Number(req.body.translationID)
             if (Number.isNaN(translationID)) return res.status(400).send("Bad translationID")
-            if (req.session.role !== "admin" && req.session.role !== "mod") return res.status(403).end()
+            if (!permissions.isMod(req.session)) return res.status(403).end()
             const unverified = await sql.translation.unverifiedTranslationID(Number(translationID))
             if (!unverified) return res.status(400).send("Bad translationID")
             await sql.translation.deleteUnverifiedTranslation(Number(translationID))
@@ -188,7 +189,7 @@ const TranslationRoutes = (app: Express) => {
             const historyID = req.query.historyID as string
             if (Number.isNaN(Number(historyID))) return res.status(400).send("Invalid historyID")
             if (!req.session.username) return res.status(403).send("Unauthorized")
-            if (req.session.role !== "admin" && req.session.role !== "mod") return res.status(403).end()
+            if (!permissions.isMod(req.session)) return res.status(403).end()
             const translationHistory = await sql.history.translationHistory(postID, order)
             if (translationHistory[0]?.historyID === historyID) {
                 return res.status(400).send("Bad historyID")

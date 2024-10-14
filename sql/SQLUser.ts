@@ -4,7 +4,7 @@ import functions from "../structures/Functions"
 
 export default class SQLUser {
     /** Get uploads. */
-    public static uploads = async (username: string, limit?: string, offset?: string, type?: string, restrict?: string, style?: string, sort?: string) => {
+    public static uploads = async (username: string, limit?: string, offset?: string, type?: string, restrict?: string, style?: string, sort?: string, sessionUsername?: string) => {
         let typeQuery = ""
         if (type === "image") typeQuery = `posts.type = 'image'`
         if (type === "animation") typeQuery = `posts.type = 'animation'`
@@ -49,6 +49,11 @@ export default class SQLUser {
         let includeTags = sort === "tagcount" || sort === "reverse tagcount"
         let i = 2
         let values = [] as any
+        let userValue = i
+        if (sessionUsername) {
+            values.push(sessionUsername)
+            i++
+        }
         let limitValue = i
         if (limit) {
             if (Number(limit) > 100) limit = "100"
@@ -67,13 +72,22 @@ export default class SQLUser {
                     MAX(DISTINCT images."width") AS "imageWidth",
                     MAX(DISTINCT images."height") AS "imageHeight",
                     COUNT(DISTINCT images."imageID") AS "imageCount",
-                    COUNT(DISTINCT favorites."favoriteID") AS "favoriteCount",
-                    ROUND(AVG(DISTINCT cuteness."cuteness")) AS "cuteness"
+                    COUNT(DISTINCT favorites."username") AS "favoriteCount",
+                    ROUND(AVG(DISTINCT cuteness."cuteness")) AS "cuteness"${sessionUsername ? `,
+                    CASE 
+                        WHEN COUNT(favorites."username") FILTER (WHERE favorites."username" = $${userValue}) > 0 
+                        THEN true ELSE false
+                    END AS favorited,
+                    CASE
+                        WHEN COUNT("favgroup map"."username") FILTER (WHERE "favgroup map"."username" = $${userValue}) > 0 
+                        THEN true ELSE false
+                    END AS favgrouped` : ""}
                     FROM posts
                     JOIN images ON images."postID" = posts."postID"
                     ${includeTags ? `JOIN "tag map" ON posts."postID" = "tag map"."postID"` : ""}
                     FULL JOIN "favorites" ON posts."postID" = "favorites"."postID"
                     FULL JOIN "cuteness" ON posts."postID" = "cuteness"."postID"
+                    ${sessionUsername ? `LEFT JOIN "favgroup map" ON posts."postID" = "favgroup map"."postID"` : ""}
                     ${whereQueries ? `WHERE ${whereQueries}` : ""}
                     GROUP BY posts."postID"
                     ${sortQuery}

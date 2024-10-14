@@ -1,4 +1,4 @@
-import React, {useContext, useEffect, useRef, useState, forwardRef, useImperativeHandle} from "react"
+import React, {useContext, useEffect, useLayoutEffect, useRef, useState, forwardRef, useImperativeHandle} from "react"
 import {useHistory} from "react-router-dom"
 import loading from "../assets/icons/loading.gif"
 import {ThemeContext, SizeTypeContext, BrightnessContext, SessionContext, SessionFlagContext, ContrastContext, HueContext, SaturationContext, LightnessContext, MobileContext, ScrollYContext,
@@ -19,6 +19,7 @@ let timeout = null as any
 interface Props {
     id: number
     img: string
+    cached: boolean
     width?: number
     height?: number
     comicPages?: any
@@ -86,7 +87,8 @@ const GridImage = forwardRef<Ref, Props>((props, componentRef) => {
     const [secondsProgress, setSecondsProgress] = useState(0)
     const [visible, setVisible] = useState(true)
     const {scroll, setScroll} = useContext(ScrollContext)
-    const [img, setImg] = useState("")
+    const [img, setImg] = useState(props.cached ? props.img : "")
+    const [decrypted, setDecrypted] = useState(props.cached)
     const [loadingFrames, setLoadingFrames] = useState(false)
     const [pageBuffering, setPageBuffering] = useState(true)
     const [selected, setSelected] = useState(false)
@@ -97,7 +99,7 @@ const GridImage = forwardRef<Ref, Props>((props, componentRef) => {
             let isAnimatedWebP = false
             if (functions.isWebP(props.img)) {
                 const arraybuffer = await fetch(props.img).then((r) => r.arrayBuffer())
-                isAnimatedWebP = await functions.isAnimatedWebp(arraybuffer)
+                isAnimatedWebP = functions.isAnimatedWebp(arraybuffer)
             }
             if (functions.isVideo(props.img) || functions.isGIF(props.img) || isAnimatedWebP) {
                 return true
@@ -106,8 +108,10 @@ const GridImage = forwardRef<Ref, Props>((props, componentRef) => {
             }
         },
         load: async () => {
-            if (img) return
-            return decryptImg()
+            if (decrypted) return
+            const decryptedImg = await functions.decryptImg(props.img, `${props.img}-${sizeType}`)
+            setImg(decryptedImg)
+            setDecrypted(true)
         },
         update: async () => {
             if (!gifData) {
@@ -151,27 +155,6 @@ const GridImage = forwardRef<Ref, Props>((props, componentRef) => {
             observer.disconnect()
         }
     })
-
-    const decryptImg = async () => {
-        let url = props.img
-        let isAnimatedWebP = false
-        let arrayBuffer = null as any
-        if (functions.isImage(props.img)) {
-            if (functions.isWebP(props.img)) {
-                arrayBuffer = await fetch(props.img).then((r) => r.arrayBuffer())
-                isAnimatedWebP = await functions.isAnimatedWebp(arrayBuffer)
-            }
-            if (!isAnimatedWebP) url = await cryptoFunctions.decryptedLink(props.img)
-        }
-        const base64 = await functions.linkToBase64(url)
-        if (functions.isVideo(props.img) || functions.isGIF(props.img) || isAnimatedWebP) {
-            if (!arrayBuffer) arrayBuffer = await fetch(props.img).then((r) => r.arrayBuffer())
-            const url = URL.createObjectURL(new Blob([arrayBuffer]))
-            setImg(url)
-        } else {
-            setImg(base64)
-        }
-    }
 
     const cancelAnimation = () => {
         clearTimeout(timeout)
@@ -847,7 +830,7 @@ const GridImage = forwardRef<Ref, Props>((props, componentRef) => {
             setToolTipPost(props.post)
             setToolTipImg(props.img)
             setToolTipEnabled(true)
-        }, 400)
+        }, 200)
     }
 
     const mouseLeave = () => {
@@ -885,16 +868,13 @@ const GridImage = forwardRef<Ref, Props>((props, componentRef) => {
         onClick={onClick} onAuxClick={onClick} onMouseDown={mouseDown} onMouseUp={mouseUp} onMouseMove={mouseMove} onMouseEnter={mouseEnter} onMouseLeave={mouseLeave}>
             <div className="image-filters" ref={imageFiltersRef} onMouseMove={(event) => imageAnimation(event)} onMouseLeave={() => cancelImageAnimation()}>
                 {functions.isVideo(props.img) && !mobile ? <video draggable={false} autoPlay loop muted disablePictureInPicture playsInline className="dummy-video" ref={videoRef} src={img}></video> : null}   
-                {/* <canvas className="lightness-overlay" ref={lightnessRef}></canvas> */}
-                {/* <canvas className="sharpen-overlay" ref={overlayRef}></canvas> */}
                 <img draggable={false} className="lightness-overlay" ref={lightnessRef} src={functions.isVideo(props.img) ? backFrame : img}/>
                 <img draggable={false} className="sharpen-overlay" ref={overlayRef} src={functions.isVideo(props.img) ? backFrame : img}/>
                 {functions.isVideo(props.img) && !mobile ? <canvas draggable={false} className="sharpen-overlay" ref={videoOverlayRef}></canvas> : null}
                 <canvas draggable={false} className="pixelate-canvas" ref={pixelateRef}></canvas>
                 {functions.isVideo(props.img) && !mobile ? <>
                 <video draggable={false} autoPlay loop muted disablePictureInPicture playsInline className="video" ref={videoRef} src={img} onLoadedData={(event) => onLoad(event)}></video></> :
-                <img draggable={false} className="image" ref={ref} src={functions.isVideo(props.img) ? backFrame : img} onLoad={(event) => onLoad(event)}/>
-                /*<canvas className="image" ref={ref}></canvas>*/}
+                <img draggable={false} className="image" ref={ref} src={functions.isVideo(props.img) ? backFrame : img} onLoad={(event) => onLoad(event)}/>}
                 </div>
         </div>
     )

@@ -38,7 +38,7 @@ export default class SQLRequest {
             FROM "delete requests"
             JOIN post_json ON post_json."postID" = "delete requests"."postID"
             WHERE "delete requests"."postID" IS NOT NULL
-            GROUP BY "delete requests"."deleteRequestID"
+            GROUP BY "delete requests"."requestID"
             LIMIT 100 ${offset ? `OFFSET $1` : ""}
         `),
         }
@@ -62,7 +62,7 @@ export default class SQLRequest {
             FROM "delete requests"
             JOIN post_json ON post_json."postID" = "delete requests"."postID"
             WHERE "delete requests"."postID" IS NOT NULL AND "delete requests".username = $1
-            GROUP BY "delete requests"."deleteRequestID"
+            GROUP BY "delete requests"."requestID"
         `),
         values: [username]
         }
@@ -98,7 +98,7 @@ export default class SQLRequest {
             FROM "delete requests"
             JOIN tags ON tags.tag = "delete requests".tag
             WHERE "delete requests"."tag" IS NOT NULL
-            GROUP BY "delete requests"."deleteRequestID", tags.tag
+            GROUP BY "delete requests"."requestID", tags.tag
             LIMIT 100 ${offset ? `OFFSET $1` : ""}
         `),
         }
@@ -115,7 +115,7 @@ export default class SQLRequest {
             FROM "delete requests"
             JOIN tags ON tags.tag = "delete requests".tag
             WHERE "delete requests"."tag" IS NOT NULL AND "delete requests".username = $1
-            GROUP BY "delete requests"."deleteRequestID", tags.tag
+            GROUP BY "delete requests"."requestID", tags.tag
         `),
         values: [username]
         }
@@ -151,7 +151,7 @@ export default class SQLRequest {
             FROM "alias requests"
             JOIN tags ON tags.tag = "alias requests".tag
             WHERE "alias requests"."tag" IS NOT NULL
-            GROUP BY "alias requests"."aliasRequestID", tags.tag
+            GROUP BY "alias requests"."requestID", tags.tag
             LIMIT 100 ${offset ? `OFFSET $1` : ""}
         `),
         }
@@ -168,7 +168,7 @@ export default class SQLRequest {
             FROM "alias requests"
             JOIN tags ON tags.tag = "alias requests".tag
             WHERE "alias requests"."tag" IS NOT NULL AND "alias requests".username = $1
-            GROUP BY "alias requests"."aliasRequestID", tags.tag
+            GROUP BY "alias requests"."requestID", tags.tag
         `),
         values: [username]
         }
@@ -203,7 +203,7 @@ export default class SQLRequest {
             SELECT tags.type, "tag edit requests".*
             FROM "tag edit requests"
             JOIN tags ON tags.tag = "tag edit requests".tag
-            GROUP BY "tag edit requests"."tagEditRequestID", tags.type
+            GROUP BY "tag edit requests"."requestID", tags.type
             LIMIT 100 ${offset ? `OFFSET $1` : ""}
         `),
         }

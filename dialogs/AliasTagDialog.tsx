@@ -41,7 +41,7 @@ const AliasTagDialog: React.FunctionComponent = (props) => {
     }, [aliasTagID])
 
     const aliasTag = async () => {
-        if (permissions.isElevated(session)){
+        if (permissions.isMod(session)){
             setAliasTagFlag(true)
         } else {
             const badReason = functions.validateReason(reason)
@@ -100,7 +100,7 @@ const AliasTagDialog: React.FunctionComponent = (props) => {
             )
         }
 
-        if (permissions.isElevated(session)) {
+        if (permissions.isMod(session)) {
             return (
                 <div className="dialog">
                     <Draggable handle=".dialog-title-container">

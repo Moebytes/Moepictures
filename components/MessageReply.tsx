@@ -169,7 +169,7 @@ const MessageReply: React.FunctionComponent<Props> = (props) => {
                         <img className="reply-options-img" src={quoteOptIcon} style={{filter: getFilter()}}/>
                         <span className="reply-options-text">Quote</span>
                     </div>
-                    {permissions.isElevated(session) ? 
+                    {permissions.isMod(session) ? 
                     <div className="reply-options-container" onClick={deleteReplyDialog}>
                         <img className="reply-options-img" src={deleteOptIcon} style={{filter: getFilter()}}/>
                         <span className="reply-options-text">Delete</span>

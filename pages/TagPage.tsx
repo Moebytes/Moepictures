@@ -126,7 +126,7 @@ const TagPage: React.FunctionComponent<Props> = (props) => {
     const updatePosts = async () => {
         let uploads = await functions.get("/api/search/posts", {query: tagName, type: "all", restrict: "all", style: "all", sort: "date", limit}, session, setSessionFlag)
         let filtered = uploads.filter((u: any) => restrictType === "explicit" ? u.post?.restrict === "explicit" : u.post?.restrict !== "explicit")
-        if (!permissions.isElevated(session)) filtered = filtered.filter((u: any) => !u.hidden)
+        if (!permissions.isMod(session)) filtered = filtered.filter((u: any) => !u.hidden)
         const images = filtered.map((p: any) => functions.getThumbnailLink(p.images[0].type, p.postID, p.images[0].order, p.images[0].filename, "large"))
         setTagPosts(filtered)
         setPostImages(images)
@@ -138,7 +138,7 @@ const TagPage: React.FunctionComponent<Props> = (props) => {
         const result = await functions.get("/api/search/posts", {query: tag.tag, type: "all", restrict: "all", style: "all", sort: "date", limit, offset}, session, setSessionFlag)
         uploads.push(...result)
         let filtered = uploads.filter((u: any) => restrictType === "explicit" ? u.post?.restrict === "explicit" : u.post?.restrict !== "explicit")
-        if (!permissions.isElevated(session)) filtered = filtered.filter((u: any) => !u.hidden)
+        if (!permissions.isMod(session)) filtered = filtered.filter((u: any) => !u.hidden)
         const images = filtered.map((p: any) => functions.getThumbnailLink(p.images[0].type, p.postID, p.images[0].order, p.images[0].filename, "large"))
         setTagPosts(filtered)
         setAppendImages(images)
@@ -291,7 +291,7 @@ const TagPage: React.FunctionComponent<Props> = (props) => {
             jsx.push(<img className="tag-social" src={tagEdit} onClick={() => showTagEditDialog()}/>)
             jsx.push(<img className="tag-social" src={tagDelete} onClick={() => showTagDeleteDialog()}/>)
         }
-        if (permissions.isElevated(session)) {
+        if (permissions.isMod(session)) {
             jsx.push(<img className="tag-social" src={tag.banned ? restore : takedown} onClick={() => setTakedownTag(tag)}/>)
         }
         return jsx
@@ -370,7 +370,7 @@ const TagPage: React.FunctionComponent<Props> = (props) => {
     }
 
     const postsJSX = () => {
-        if (!permissions.isElevated(session) && tag.banned) return null 
+        if (!permissions.isMod(session) && tag.banned) return null 
         if (tagPosts.length) {
             return (
                 <div className="tag-column">

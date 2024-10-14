@@ -39,7 +39,7 @@ const TakedownTagDialog: React.FunctionComponent = (props) => {
     }, [takedownTag])
 
     const takedown = async () => {
-        if (permissions.isElevated(session)) {
+        if (permissions.isMod(session)) {
             await functions.post("/api/tag/takedown", {tag: takedownTag.tag}, session, setSessionFlag)
             history.go(0)
         }
@@ -77,7 +77,7 @@ const TakedownTagDialog: React.FunctionComponent = (props) => {
     }
 
     if (takedownTag) {
-        if (permissions.isElevated(session)) {
+        if (permissions.isMod(session)) {
             return (
                 <div className="dialog">
                     <Draggable handle=".dialog-title-container">

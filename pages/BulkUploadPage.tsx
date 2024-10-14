@@ -134,7 +134,7 @@ const BulkUploadPage: React.FunctionComponent = (props) => {
 
     useEffect(() => {
         if (!session.cookie) return
-        if (!permissions.isElevated(session)) {
+        if (!permissions.isMod(session)) {
             functions.replaceLocation("/403")
         }
     }, [session])
@@ -185,7 +185,7 @@ const BulkUploadPage: React.FunctionComponent = (props) => {
                                         obj ? 100 :
                                         mp4 ? 300 :
                                         webm ? 300 : 300
-                        if (MB <= maxSize || permissions.isElevated(session)) {
+                        if (MB <= maxSize || permissions.isMod(session)) {
                             if (zip) {
                                 const reader = new JSZip()
                                 const content = await reader.loadAsync(bytes)

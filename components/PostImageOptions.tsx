@@ -1,7 +1,7 @@
 import React, {useContext, useEffect, useRef, useState} from "react"
 import {ThemeContext, EnableDragContext, BrightnessContext, ContrastContext, HueContext, SaturationContext, LightnessContext,
 BlurContext, SharpenContext, PixelateContext, SessionContext, MobileContext, TranslationModeContext, SiteHueContext,
-SiteLightnessContext, SiteSaturationContext, SessionFlagContext, FormatContext, PostsContext, FavGroupDialogContext} from "../Context"
+SiteLightnessContext, SiteSaturationContext, SessionFlagContext, FormatContext, PostsContext, FavGroupIDContext} from "../Context"
 import {HashLink as Link} from "react-router-hash-link"
 import functions from "../structures/Functions"
 import Slider from "react-slider"
@@ -61,7 +61,7 @@ const PostImageOptions: React.FunctionComponent<Props> = (props) => {
     const [downloadText, setDownloadText] = useState("")
     const {format, setFormat} = useContext(FormatContext)
     const {posts, setPosts} = useContext(PostsContext)
-    const {favGroupDialog, setFavGroupDialog} = useContext(FavGroupDialogContext)
+    const {favGroupID, setFavGroupID} = useContext(FavGroupIDContext)
     const filterRef = useRef(null) as any
     const formatRef = useRef(null) as any
 
@@ -113,8 +113,15 @@ const PostImageOptions: React.FunctionComponent<Props> = (props) => {
         setFavorited(favorite ? true : false)
     }
 
+    const getFavgroup = async () => {
+        if (!props.post || !session.username) return
+        const favgroups = await functions.get("/api/favgroups", {postID: props.post.postID}, session, setSessionFlag)
+        setFavGrouped(favgroups?.length ? true : false)
+    }
+
     useEffect(() => {
         getFavorite()
+        getFavgroup()
     }, [props.post, session])
 
     useEffect(() => {
@@ -261,10 +268,10 @@ const PostImageOptions: React.FunctionComponent<Props> = (props) => {
                     <div className={`post-image-text ${favorited ? "favorited" : ""}`}>{favorited ? "Favorited" : "Favorite"}</div>
                 </div> : null}
                 {session.username ?
-                <div className="post-image-options-box" onClick={() => setFavGroupDialog((prev: boolean) => !prev)} style={{marginLeft: "-10px"}}
+                <div className="post-image-options-box" onClick={() => setFavGroupID(props.post.postID)}
                 onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                     <img className="post-image-icon" src={getStarGroup()} style={{filter: getFilter()}}/>
-                    <div className={`post-image-text ${favGrouped ? "favorited" : ""}`}>Favgroup</div>
+                    <div className={`post-image-text ${favGrouped ? "favgrouped" : ""}`}>Favgroup</div>
                 </div> : null}
                 <div className="post-image-options-box" onClick={() => props.next?.()} style={{marginLeft: "25px"}} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                     <div className="post-image-text-small">Next</div>
@@ -299,9 +306,9 @@ const PostImageOptions: React.FunctionComponent<Props> = (props) => {
                         <div className={`post-image-text ${favorited ? "favorited" : ""}`}>{favorited ? "Favorited" : "Favorite"}</div>
                     </div> : null}
                     {session.username && !props.noFavorite ?
-                    <div className="post-image-options-box" onClick={() => setFavGroupDialog((prev: boolean) => !prev)} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
+                    <div className="post-image-options-box" onClick={() => setFavGroupID(props.post.postID)} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                         <img className="post-image-icon" src={getStarGroup()} style={{filter: getFilter()}}/>
-                        <div className={`post-image-text ${favGrouped ? "favorited" : ""}`}>Favgroup</div>
+                        <div className={`post-image-text ${favGrouped ? "favgrouped" : ""}`}>Favgroup</div>
                     </div> : null}
                 </div>
                 <div className="post-image-options-right">

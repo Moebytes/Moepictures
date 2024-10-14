@@ -67,6 +67,7 @@ const UserPage: React.FunctionComponent<Props> = (props) => {
     const [favorites, setFavorites] = useState([]) as any
     const [appendFavoriteImages, setAppendFavoriteImages] = useState([]) as any
     const [comments, setComments] = useState([]) as any
+    const [favgroups, setFavgroups] = useState([]) as any
     const [uploadImages, setUploadImages] = useState([]) as any
     const [favoriteImages, setFavoriteImages] = useState([]) as any
     const [user, setUser] = useState(null) as any
@@ -91,17 +92,10 @@ const UserPage: React.FunctionComponent<Props> = (props) => {
         forceUpdate()
     }
 
-    useEffect(() => {
-        fetchUser()
-        updateUploads()
-        updateFavorites()
-        updateComments()
-    }, [username, session])
-
     const updateUploads = async () => {
         const uploads = await functions.get("/api/user/uploads", {username}, session, setSessionFlag)
         let filtered = uploads.filter((u: any) => restrictType === "explicit" ? u.restrict === "explicit" : u.restrict !== "explicit")
-        if (!permissions.isElevated(session)) filtered = filtered.filter((u: any) => !u.hidden)
+        if (!permissions.isMod(session)) filtered = filtered.filter((u: any) => !u.hidden)
         const images = filtered.map((p: any) => functions.getThumbnailLink(p.images[0].type, p.postID, p.images[0].order, p.images[0].filename, "tiny"))
         setUploads(filtered)
         setUploadImages(images)
@@ -113,7 +107,7 @@ const UserPage: React.FunctionComponent<Props> = (props) => {
         const result = await functions.get("/api/user/uploads", {limit, offset}, session, setSessionFlag)
         newUploads.push(...result)
         let filtered = newUploads.filter((u: any) => restrictType === "explicit" ? u.post?.restrict === "explicit" : u.post?.restrict !== "explicit")
-        if (!permissions.isElevated(session)) filtered = filtered.filter((u: any) => !u.hidden)
+        if (!permissions.isMod(session)) filtered = filtered.filter((u: any) => !u.hidden)
         const images = filtered.map((p: any) => functions.getThumbnailLink(p.images[0].type, p.postID, p.images[0].order, p.images[0].filename, "large"))
         setUploads(filtered)
         setAppendUploadImages(images)
@@ -122,7 +116,7 @@ const UserPage: React.FunctionComponent<Props> = (props) => {
     const updateFavorites = async () => {
         const favorites = await functions.get("/api/user/favorites", {username}, session, setSessionFlag)
         let filtered = favorites.filter((f: any) => restrictType === "explicit" ? f.restrict === "explicit" : f.restrict !== "explicit")
-        if (!permissions.isElevated(session)) filtered = filtered.filter((f: any) => !f.hidden)
+        if (!permissions.isMod(session)) filtered = filtered.filter((f: any) => !f.hidden)
         const images = filtered.map((f: any) => functions.getThumbnailLink(f.images[0].type, f.postID, f.images[0].order, f.images[0].filename, "tiny"))
         setFavorites(filtered)
         setFavoriteImages(images)
@@ -134,16 +128,21 @@ const UserPage: React.FunctionComponent<Props> = (props) => {
         const result = await functions.get("/api/user/favorites", {limit, offset}, session, setSessionFlag)
         newFavorites.push(...result)
         let filtered = favorites.filter((f: any) => restrictType === "explicit" ? f.restrict === "explicit" : f.restrict !== "explicit")
-        if (!permissions.isElevated(session)) filtered = filtered.filter((f: any) => !f.hidden)
+        if (!permissions.isMod(session)) filtered = filtered.filter((f: any) => !f.hidden)
         const images = filtered.map((f: any) => functions.getThumbnailLink(f.images[0].type, f.postID, f.images[0].order, f.images[0].filename, "tiny"))
         setFavorites(filtered)
         setAppendFavoriteImages(images)
     }
 
+    const updateFavgroups = async () => {
+        const favgroups = await functions.get("/api/user/favgroups", null, session, setSessionFlag)
+        setFavgroups(favgroups)
+    }
+
     const updateComments = async () => {
         const comments = await functions.get("/api/user/comments", {username, sort: "date"}, session, setSessionFlag)
         let filtered = comments.filter((c: any) => restrictType === "explicit" ? c.post?.restrict === "explicit" : c.post?.restrict !== "explicit")
-        if (!permissions.isElevated(session)) filtered = filtered.filter((c: any) => !c.post?.hidden)
+        if (!permissions.isMod(session)) filtered = filtered.filter((c: any) => !c.post?.hidden)
         setComments(filtered)
     }
 
@@ -156,6 +155,14 @@ const UserPage: React.FunctionComponent<Props> = (props) => {
         setSidebarText("")
         document.title = `${functions.toProperCase(username)}`
     }, [])
+
+    useEffect(() => {
+        fetchUser()
+        updateUploads()
+        updateFavorites()
+        updateFavgroups()
+        updateComments()
+    }, [username, session])
 
     useEffect(() => {
         if (mobile) {
@@ -296,6 +303,41 @@ const UserPage: React.FunctionComponent<Props> = (props) => {
         }
     }, [updateUserFlag])
 
+    const generateFavgroupsJSX = () => {
+        let jsx = [] as any
+        for (let i = 0; i < favgroups.length; i++) {
+            let favgroup = favgroups[i]
+            if (favgroup.private) continue
+            let filtered = favgroup.posts.filter((p: any) => restrictType === "explicit" ? p.restrict === "explicit" : p.restrict !== "explicit")
+            if (!permissions.isMod(session)) filtered = filtered.filter((f: any) => !f.hidden)
+            const images = filtered.map((f: any) => functions.getThumbnailLink(f.images[0].type, f.postID, f.images[0].order, f.images[0].filename, "tiny"))
+            const viewFavgroup = () => {
+                history.push("/posts")
+                setSearch(`favgroup:${session.username}:${favgroup.name}`)
+                setSearchFlag(true)
+            }
+            const setFavgroup = (img: string, index: number, newTab: boolean) => {
+                const postID = favgroup.posts[index].postID
+                if (newTab) {
+                    window.open(`/post/${postID}`, "_blank")
+                } else {
+                    history.push(`/post/${postID}`)
+                }
+                window.scrollTo(0, functions.navbarHeight() + functions.titlebarHeight())
+                setPosts(favgroup.posts)
+            }
+            jsx.push(
+                <div className="user-column">
+                    <div className="user-title-container">
+                        <span className="user-title" onClick={viewFavgroup}>{favgroup.name} <span className="user-text-alt">{favgroup.postCount}</span></span>
+                    </div>
+                    <Carousel images={images} noKey={true} set={setFavgroup} index={0}/>
+                </div>
+            )
+        }
+        return jsx
+    }
+
     return (
         <>
         <SendMessageDialog/>
@@ -313,7 +355,7 @@ const UserPage: React.FunctionComponent<Props> = (props) => {
                         <img className="user-img" src={getUserImg()} onClick={userImgClick} onAuxClick={userImgClick} style={{filter: defaultIcon ? getFilter() : ""}}/>
                         {generateUsernameJSX()}
                         {session.username && (session.username !== username) && user.role !== "system" ? <img className="user-icon" src={dmIcon} onClick={dmDialog}/> : null}
-                        {permissions.isElevated(session) && !permissions.isElevated(user) ? <img className="user-icon" src={user.banned ? unbanIcon : banIcon} onClick={banDialog}/> : null}
+                        {permissions.isMod(session) && !permissions.isMod(user) ? <img className="user-icon" src={user.banned ? unbanIcon : banIcon} onClick={banDialog}/> : null}
                         {permissions.isAdmin(session) && (session.username !== username) ? <img className="user-icon" src={promoteIcon} onClick={promoteDialog}/> : null}
                     </div>
                     {user.banned ? <span className="user-ban-text">Banned</span> : null}
@@ -323,6 +365,7 @@ const UserPage: React.FunctionComponent<Props> = (props) => {
                     <div className="user-row">
                         <span className="user-text">Join Date: {functions.prettyDate(new Date(user.joinDate || ""))}</span>
                     </div>
+                    {generateFavgroupsJSX()}
                     {generateFavoritesJSX()}
                     {uploads.length ?
                     <div className="user-column">

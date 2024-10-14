@@ -91,7 +91,7 @@ const PostHistoryPage: React.FunctionComponent<Props> = (props) => {
         const newVisibleRevisions = [] as any
         for (let i = 0; i < 10; i++) {
             if (!revisions[currentIndex]) break
-            if (revisions[currentIndex].restrict === "explicit") if (!permissions.isElevated(session)) {
+            if (revisions[currentIndex].restrict === "explicit") if (!permissions.isMod(session)) {
                 currentIndex++
                 continue
             }
@@ -123,7 +123,7 @@ const PostHistoryPage: React.FunctionComponent<Props> = (props) => {
                 const newRevisions = visibleRevisions as any
                 for (let i = 0; i < 10; i++) {
                     if (!revisions[currentIndex]) return updateOffset()
-                    if (revisions[currentIndex].restrict === "explicit") if (!permissions.isElevated(session)) {
+                    if (revisions[currentIndex].restrict === "explicit") if (!permissions.isMod(session)) {
                         currentIndex++
                         continue
                     }

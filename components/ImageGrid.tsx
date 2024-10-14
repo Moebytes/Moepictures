@@ -217,7 +217,8 @@ const ImageGrid: React.FunctionComponent = (props) => {
             }
         }
         if (!scroll) updatePageOffset()
-    }, [session, scroll, page, pageMultiplier, ended, noResults, sizeType, imageType, restrictType, styleType, sortType, sortReverse])
+    }, [session, scroll, page, pageMultiplier, ended, noResults, sizeType, 
+        imageType, restrictType, styleType, sortType, sortReverse])
 
     useEffect(() => {
         if (reloadedPost) {
@@ -231,6 +232,12 @@ const ImageGrid: React.FunctionComponent = (props) => {
             searchPosts()
         }
     }, [searchFlag, imageType, sizeType, restrictType, styleType, sortType, sortReverse, scroll, loaded])
+
+    useEffect(() => {
+        if (loaded) {
+            searchPosts()
+        }
+    }, [pageMultiplier, loaded])
 
     useEffect(() => {
         if (reloadPostFlag) reloadedPost = true
@@ -371,7 +378,8 @@ const ImageGrid: React.FunctionComponent = (props) => {
         return () => {
             window.removeEventListener("scroll", scrollHandler)
         }
-    }, [session, posts, visiblePosts, ended, noResults, offset, scroll, sizeType, imageType, restrictType, styleType, sortType, sortReverse])
+    }, [session, posts, visiblePosts, ended, noResults, offset, scroll, sizeType,
+        imageType, restrictType, styleType, sortType, sortReverse, pageMultiplier])
 
     useEffect(() => {
         const searchParams = new URLSearchParams(window.location.search)
@@ -402,7 +410,7 @@ const ImageGrid: React.FunctionComponent = (props) => {
                 setPage(maxPostPage)
             }
         }
-    }, [posts, page, queryPage])
+    }, [posts, page, queryPage, pageMultiplier])
 
     useEffect(() => {
         const loadImages = async () => {
@@ -436,6 +444,18 @@ const ImageGrid: React.FunctionComponent = (props) => {
             setReupdateFlag(false)
         }
     }, [reupdateFlag])
+
+    useEffect(() => {
+        const populateCache = () => {
+            for (const post of posts) {
+                const image = post.images?.[0]
+                if (!image) continue
+                const thumbnail = functions.getThumbnailLink(image.type, post.postID, image.order, image.filename, sizeType, mobile)
+                functions.decryptImg(thumbnail, `${thumbnail}-${sizeType}`)
+            }
+        }
+        populateCache()
+    }, [posts, sizeType, pageMultiplier])
 
     const firstPage = () => {
         setPage(1)
@@ -536,16 +556,20 @@ const ImageGrid: React.FunctionComponent = (props) => {
             // if (post.thirdParty) continue
             // if (!session.username) if (post.restrict !== "safe") continue
             if (restrictType !== "explicit") if (post.restrict === "explicit") continue
-            if (!permissions.isElevated(session)) if (post.hidden) continue
+            if (!permissions.isMod(session)) if (post.hidden) continue
             const image = post.images[0]
             if (!image) continue
-            const images = post.images.map((i: any) => functions.getImageLink(i.type, post.postID, i.order, i.filename))
+            const thumbnail = functions.getThumbnailLink(image.type, post.postID, image.order, image.filename, sizeType, mobile)
+            let img = functions.getImageCache(`${thumbnail}-${sizeType}`)
+            let cached = img ? true : false
+            if (!img) img = thumbnail
             if (post.type === "model") {
-                jsx.push(<GridModel key={post.postID} ref={postsRef[i]} reupdate={() => setReupdateFlag(true)} id={post.postID} model={functions.getThumbnailLink(image.type, post.postID, image.order, image.filename, sizeType, mobile)} post={post}/>)
+                jsx.push(<GridModel key={post.postID} id={post.postID} model={img} post={post} ref={postsRef[i]} reupdate={() => setReupdateFlag(true)}/>)
             } else if (post.type === "audio") {
-                jsx.push(<GridSong key={post.postID} ref={postsRef[i]} reupdate={() => setReupdateFlag(true)} id={post.postID} audio={functions.getThumbnailLink(image.type, post.postID, image.order, image.filename, sizeType, mobile)} post={post}/>)
+                jsx.push(<GridSong key={post.postID} id={post.postID} img={img} cached={cached} audio={thumbnail} post={post} ref={postsRef[i]} reupdate={() => setReupdateFlag(true)}/>)
             } else {
-                jsx.push(<GridImage key={post.postID} ref={postsRef[i]} reupdate={() => setReupdateFlag(true)} id={post.postID} img={functions.getThumbnailLink(image.type, post.postID, image.order, image.filename, sizeType, mobile)} comicPages={post.type === "comic" ? images : null} post={post}/>)
+                const comicPages = post.type === "comic" ? post.images.map((i: any) => functions.getImageLink(i.type, post.postID, i.order, i.filename)) : null
+                jsx.push(<GridImage key={post.postID} id={post.postID} img={img} cached={cached} comicPages={comicPages} post={post} ref={postsRef[i]} reupdate={() => setReupdateFlag(true)}/>)
             }
         }
         if (!jsx.length && noResults) {

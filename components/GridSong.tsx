@@ -16,7 +16,9 @@ let tooltipTimer = null as any
 
 interface Props {
     id: number
+    img: string
     audio: string
+    cached: boolean
     width?: number
     height?: number
     post: any
@@ -79,7 +81,8 @@ const GridSong = forwardRef<Ref, Props>((props, componentRef) => {
     const [secondsProgress, setSecondsProgress] = useState(0)
     const [visible, setVisible] = useState(true)
     const {scroll, setScroll} = useContext(ScrollContext)
-    const [image, setImage] = useState(null) as any
+    const [image, setImage] = useState(props.cached ? props.img : "") as any
+    const [decrypted, setDecrypted] = useState(props.cached)
     const [selected, setSelected] = useState(false)
     const {audio, setAudio} = useContext(AudioContext)
     const {playFlag, setPlayFlag} = useContext(PlayFlagContext)
@@ -96,8 +99,10 @@ const GridSong = forwardRef<Ref, Props>((props, componentRef) => {
             return false
         },
         load: async () => {
-            if (image) return
-            return loadAudio()
+            if (decrypted) return
+            const decryptedImage = await functions.decryptImg(props.audio, `${props.audio}-${sizeType}`)
+            setImage(decryptedImage)
+            setDecrypted(true)
         }
     }))
 
@@ -123,11 +128,6 @@ const GridSong = forwardRef<Ref, Props>((props, componentRef) => {
             observer.disconnect()
         }
     })
-
-    const loadAudio = async () => {
-        const songCover = await functions.songCover(props.audio)
-        setImage(songCover)
-    }
 
     useEffect(() => {
         setImageLoaded(false)
@@ -497,7 +497,7 @@ const GridSong = forwardRef<Ref, Props>((props, componentRef) => {
             setToolTipPost(props.post)
             setToolTipImg(props.audio)
             setToolTipEnabled(true)
-        }, 400)
+        }, 200)
     }
 
     const mouseLeave = () => {

@@ -9,11 +9,12 @@ import Footer from "../components/Footer"
 import {HideNavbarContext, HideSidebarContext, ThemeContext, EnableDragContext, RelativeContext, HideTitlebarContext, MobileContext, RestrictTypeContext,
 HeaderTextContext, SidebarTextContext, SessionContext, RedirectContext, SessionFlagContext, UserImgContext, ShowDeleteAccountDialogContext, PostsContext,
 CommentSearchFlagContext, SiteHueContext, SiteLightnessContext, UserImgPostContext, SiteSaturationContext, R18ConfirmationContext, SearchContext, SearchFlagContext,
-PremiumRequiredContext} from "../Context"
+PremiumRequiredContext, DeleteFavGroupNameContext} from "../Context"
 import functions from "../structures/Functions"
 import Carousel from "../components/Carousel"
 import CommentCarousel from "../components/CommentCarousel"
 import DeleteAccountDialog from "../dialogs/DeleteAccountDialog"
+import DeleteFavgroupDialog from "../dialogs/DeleteFavgroupDialog"
 import R18Dialog from "../dialogs/R18Dialog"
 import adminLabel from "../assets/icons/admin-label.png"
 import modLabel from "../assets/icons/mod-label.png"
@@ -23,6 +24,8 @@ import permissions from "../structures/Permissions"
 import premiumStar from "../assets/icons/premiumStar.png"
 import r18 from "../assets/icons/r18.png"
 import danger from "../assets/icons/danger.png"
+import lockIcon from "../assets/icons/private-lock.png"
+import deleteIcon from "../assets/icons/delete.png"
 import "./styles/userprofilepage.less"
 
 let intervalTimer = null as any
@@ -50,6 +53,7 @@ const UserProfilePage: React.FunctionComponent = (props) => {
     const {premiumRequired, setPremiumRequired} = useContext(PremiumRequiredContext)
     const {r18Confirmation, setR18Confirmation} = useContext(R18ConfirmationContext)
     const {showDeleteAccountDialog, setShowDeleteAccountDialog} = useContext(ShowDeleteAccountDialogContext)
+    const {deleteFavGroupName, setDeleteFavGroupName} = useContext(DeleteFavGroupNameContext)
     const {commentSearchFlag, setCommentSearchFlag} = useContext(CommentSearchFlagContext)
     const {restrictType, setRestrictType} = useContext(RestrictTypeContext)
     const {search, setSearch} = useContext(SearchContext)
@@ -64,6 +68,7 @@ const UserProfilePage: React.FunctionComponent = (props) => {
     const [uploads, setUploads] = useState([]) as any
     const [favorites, setFavorites] = useState([]) as any
     const [comments, setComments] = useState([]) as any
+    const [favgroups, setFavgroups] = useState([]) as any
     const [uploadImages, setUploadImages] = useState([]) as any
     const [appendUploadImages, setAppendUploadImages] = useState([]) as any
     const [favoriteImages, setFavoriteImages] = useState([]) as any
@@ -83,10 +88,6 @@ const UserProfilePage: React.FunctionComponent = (props) => {
         if (ban?.reason) setBanReason(ban.reason)
     }
 
-    useEffect(() => {
-        if (session.banned) updateBanReason()
-    }, [session])
-
     const getFilter = () => {
         return `hue-rotate(${siteHue - 180}deg) saturate(${siteSaturation}%) brightness(${siteLightness + 70}%)`
     }
@@ -94,7 +95,7 @@ const UserProfilePage: React.FunctionComponent = (props) => {
     const updateUploads = async () => {
         const uploads = await functions.get("/api/user/uploads", {limit}, session, setSessionFlag)
         let filtered = uploads.filter((u: any) => restrictType === "explicit" ? u.restrict === "explicit" : u.restrict !== "explicit")
-        if (!permissions.isElevated(session)) filtered = filtered.filter((u: any) => !u.hidden)
+        if (!permissions.isMod(session)) filtered = filtered.filter((u: any) => !u.hidden)
         const images = filtered.map((p: any) => functions.getThumbnailLink(p.images[0].type, p.postID, p.images[0].order, p.images[0].filename, "tiny"))
         setUploads(filtered)
         setUploadImages(images)
@@ -106,7 +107,7 @@ const UserProfilePage: React.FunctionComponent = (props) => {
         const result = await functions.get("/api/user/uploads", {limit, offset}, session, setSessionFlag)
         newUploads.push(...result)
         let filtered = newUploads.filter((u: any) => restrictType === "explicit" ? u.post?.restrict === "explicit" : u.post?.restrict !== "explicit")
-        if (!permissions.isElevated(session)) filtered = filtered.filter((u: any) => !u.hidden)
+        if (!permissions.isMod(session)) filtered = filtered.filter((u: any) => !u.hidden)
         const images = filtered.map((p: any) => functions.getThumbnailLink(p.images[0].type, p.postID, p.images[0].order, p.images[0].filename, "large"))
         setUploads(filtered)
         setAppendUploadImages(images)
@@ -115,7 +116,7 @@ const UserProfilePage: React.FunctionComponent = (props) => {
     const updateFavorites = async () => {
         const favorites = await functions.get("/api/user/favorites", {limit}, session, setSessionFlag)
         let filtered = favorites.filter((f: any) => restrictType === "explicit" ? f.restrict === "explicit" : f.restrict !== "explicit")
-        if (!permissions.isElevated(session)) filtered = filtered.filter((f: any) => !f.hidden)
+        if (!permissions.isMod(session)) filtered = filtered.filter((f: any) => !f.hidden)
         const images = filtered.map((f: any) => functions.getThumbnailLink(f.images[0].type, f.postID, f.images[0].order, f.images[0].filename, "tiny"))
         setFavorites(filtered)
         setFavoriteImages(images)
@@ -127,18 +128,24 @@ const UserProfilePage: React.FunctionComponent = (props) => {
         const result = await functions.get("/api/user/favorites", {limit, offset}, session, setSessionFlag)
         newFavorites.push(...result)
         let filtered = favorites.filter((f: any) => restrictType === "explicit" ? f.restrict === "explicit" : f.restrict !== "explicit")
-        if (!permissions.isElevated(session)) filtered = filtered.filter((f: any) => !f.hidden)
+        if (!permissions.isMod(session)) filtered = filtered.filter((f: any) => !f.hidden)
         const images = filtered.map((f: any) => functions.getThumbnailLink(f.images[0].type, f.postID, f.images[0].order, f.images[0].filename, "tiny"))
         setFavorites(filtered)
         setAppendFavoriteImages(images)
     }
 
+    const updateFavgroups = async () => {
+        const favgroups = await functions.get("/api/user/favgroups", null, session, setSessionFlag)
+        setFavgroups(favgroups)
+    }
+
     const updateComments = async () => {
         const comments = await functions.get("/api/user/comments", {sort: "date"}, session, setSessionFlag)
         let filtered = comments.filter((c: any) => restrictType === "explicit" ? c.post?.restrict === "explicit" : c.post?.restrict !== "explicit")
-        if (!permissions.isElevated(session)) filtered = filtered.filter((c: any) => !c.post?.hidden)
+        if (!permissions.isMod(session)) filtered = filtered.filter((c: any) => !c.post?.hidden)
         setComments(filtered)
     }
+
 
     useEffect(() => {
         setHideNavbar(false)
@@ -153,7 +160,9 @@ const UserProfilePage: React.FunctionComponent = (props) => {
     useEffect(() => {
         updateUploads()
         updateFavorites()
+        updateFavgroups()
         updateComments()
+        if (session.banned) updateBanReason()
     }, [session])
 
     useEffect(() => {
@@ -441,8 +450,45 @@ const UserProfilePage: React.FunctionComponent = (props) => {
         }
     }
 
+    const generateFavgroupsJSX = () => {
+        let jsx = [] as any
+        for (let i = 0; i < favgroups.length; i++) {
+            let favgroup = favgroups[i]
+            let filtered = favgroup.posts.filter((p: any) => restrictType === "explicit" ? p.restrict === "explicit" : p.restrict !== "explicit")
+            if (!permissions.isMod(session)) filtered = filtered.filter((f: any) => !f.hidden)
+            const images = filtered.map((f: any) => functions.getThumbnailLink(f.images[0].type, f.postID, f.images[0].order, f.images[0].filename, "tiny"))
+            const viewFavgroup = () => {
+                history.push("/posts")
+                setSearch(`favgroup:${session.username}:${favgroup.name}`)
+                setSearchFlag(true)
+            }
+            const setFavgroup = (img: string, index: number, newTab: boolean) => {
+                const postID = favgroup.posts[index].postID
+                if (newTab) {
+                    window.open(`/post/${postID}`, "_blank")
+                } else {
+                    history.push(`/post/${postID}`)
+                }
+                window.scrollTo(0, functions.navbarHeight() + functions.titlebarHeight())
+                setPosts(favgroup.posts)
+            }
+            jsx.push(
+                <div className="userprofile-column">
+                    <div className="userprofile-title-container">
+                        <img className="userprofile-clickable-icon" src={deleteIcon} onClick={() => setDeleteFavGroupName(favgroup.name)}/>
+                        {favgroup.private ? <img className="userprofile-icon" src={lockIcon} style={{height: "20px", marginTop: "3px", filter: getFilter()}}/> : null}
+                        <span className="userprofile-title" onClick={viewFavgroup}>{favgroup.name} <span className="userprofile-text-alt">{favgroup.postCount}</span></span>
+                    </div>
+                    <Carousel images={images} noKey={true} set={setFavgroup} index={0}/>
+                </div>
+            )
+        }
+        return jsx
+    }
+
     return (
         <>
+        <DeleteFavgroupDialog/>
         <DeleteAccountDialog/>
         <R18Dialog/>
         <TitleBar/>
@@ -530,6 +576,7 @@ const UserProfilePage: React.FunctionComponent = (props) => {
                     <Link to="/enable-2fa" className="userprofile-row">
                         <span className="userprofile-link">{session.$2fa ? "Disable" : "Enable"} 2-Factor Authentication</span>
                     </Link>
+                    {generateFavgroupsJSX()}
                     {favorites.length ?
                     <div className="userprofile-column">
                         <span className="userprofile-title" onClick={viewFavorites}>Favorites <span className="userprofile-text-alt">{favorites[0].postCount}</span></span>
