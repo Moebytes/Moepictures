@@ -52,24 +52,19 @@ controls for wireframe, matcap, shapekeys, and lighting. The music player can pl
 
 As often images might contain japanese text, adding and viewing translations is also supported!
 
-### Tech Stack
-
-- Languages: Typescript, LESS, SQL
-- Front-end: React
-- Back-end: Node
-- Database: PostgreSQL
-
 ### Self-hosting
 
-If you want to self host this website the first step is to clone the code and install Node.js (v20.11.1 to follow the same settings in the project).
+First install Node.js >v20 and PostgreSQL >v16 which will run the server and database.
 
-https://nodejs.org/en/ 
-
-The database used is PostgreSQL v16. You should create a new database but you don't need to create any tables as they are automatically created if they don't exist.
-
+https://nodejs.org/en/
 https://www.postgresql.org
 
-Rename the file `.env.example` to `.env` and this is where you should put in your credentials. `COOKIE_SECRET` should be any string of random characters. `EMAIL_ADDRESS` and `EMAIL_PASSWORD` is the email address used to send people email verification emails, password resets, etc.
+Clone the project:
+```
+git clone https://github.com/Moebits/Moepictures.moe.git
+```
+
+Rename the file `.env.example` to `.env` and put in your credentials. `COOKIE_SECRET` should be any string of random characters. `EMAIL_ADDRESS` and `EMAIL_PASSWORD` is the email address used to send people email verification emails, password resets, etc.
 
 To add files locally create folders "moepictures" and "moepictures-unverified" and add the path to `MOEPICTURES_LOCAL` and `MOEPICTURES_LOCAL_UNVERIFIED`, each containing the following subfolders:
 
@@ -77,9 +72,7 @@ To add files locally create folders "moepictures" and "moepictures-unverified" a
 
 The site runs on port 8082 by default but it can be configured by changing `PORT`.
 
-The other keys in this file are largely optional, and only if you want to enable that functionality.
-
 Install all of the dependencies for this project by running `npm install`. \
 Start the project by running the server `npm start`.
 
-That's pretty much it!
+That's pretty much it.
