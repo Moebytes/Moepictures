@@ -75,4 +75,4 @@ The site runs on port 8082 by default but it can be configured by changing `PORT
 Install all of the dependencies for this project by running `npm install`. \
 Start the project by running the server `npm start`.
 
-That's pretty much it.
+That's pretty much it. Following our license (CC BY-NC 4.0) you may not commercialize self-hosted instances.
