@@ -9,7 +9,7 @@ import logoutModIcon from "../assets/icons/logout-mod.png"
 import logoutAdminIcon from "../assets/icons/logout-admin.png"
 import logoutSystemIcon from "../assets/icons/logout-system.png"
 import logoutPremiumIcon from "../assets/icons/logout-premium.png"
-import search from "../assets/icons/search.png"
+import searchIcon from "../assets/icons/search.png"
 import crown from "../assets/icons/crown.png"
 import mail from "../assets/icons/mail.png"
 import mailNotif from "../assets/icons/mail-notif.png"
@@ -193,10 +193,10 @@ const NavBar: React.FunctionComponent<Props> = (props) => {
             let marginR = "40px"
             setMarginR(marginR)
         } else {
-            let marginR = "60px"
+            let marginR = hideSidebar ? "50px" : "60px"
             setMarginR(marginR)
         }
-    }, [session, tablet])
+    }, [session, hideSidebar, tablet])
 
     const generateMobileUsernameJSX = () => {
         if (session.role === "admin") {
@@ -365,7 +365,7 @@ const NavBar: React.FunctionComponent<Props> = (props) => {
 
         return (
             <>
-            <SearchSuggestions active={suggestionsActive && hideSidebar} width={200} x={getX()} y={getY()}/>
+            <SearchSuggestions active={suggestionsActive && hideSidebar} width={180} x={getX()} y={getY()}/>
             <div className={`navbar ${hideTitlebar ? "translate-navbar" : ""} ${hideSortbar && hideTitlebar && hideSidebar ? "hide-navbar" : ""} ${hideSortbar && hideNavbar && showMiniTitle ? "hide-navbar" : ""}
             ${relative ? "navbar-relative" : ""}`} onMouseEnter={() => setEnableDrag(false)}>
                 {/*showMiniTitle && !relative ? 
@@ -402,7 +402,7 @@ const NavBar: React.FunctionComponent<Props> = (props) => {
                 </div>
                 <div className="nav-color-container">
                     <div className={`nav-search-container ${!hideSidebar || tablet ? "hide-nav-search" : ""}`}>
-                        <img className="nav-search-icon" src={search} onClick={() => setSearchFlag(true)}/>
+                        <img className="nav-search-icon" src={searchIcon} onClick={() => setSearchFlag(true)}/>
                         <input className="nav-search" type="search" spellCheck={false} value={search} onChange={(event) => setSearch(event.target.value)} onKeyDown={(event) => event.key === "Enter" ? setSearchFlag(true) : null} onFocus={() => setSuggestionsActive(true)} onBlur={() => setSuggestionsActive(false)}/>
                     </div>
                     {session.username ? <img className="nav-color" src={getHistoryIcon()} onClick={() => history.push("/history")} style={{filter: getFilter()}}/> : null}
