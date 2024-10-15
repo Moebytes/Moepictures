@@ -7,7 +7,7 @@ SizeTypeContext, BrightnessContext, ContrastContext, HueContext, SaturationConte
 BlurContext, SharpenContext, EnableDragContext, FilterDropActiveContext, SquareContext, PixelateContext, SiteLightnessContext, PostsContext,
 ShowDownloadDialogContext, HideTitlebarContext, ImageTypeContext, RestrictTypeContext, SortTypeContext, SortReverseContext, SiteSaturationContext,
 StyleTypeContext, SpeedContext, ReverseContext, MobileContext, RelativeContext, SessionContext, MobileScrollingContext, SessionFlagContext,
-SelectionModeContext, SelectionItemsContext, SearchFlagContext, DownloadIDsContext, DownloadFlagContext, ShowBulkQuickEditDialogContext,
+SelectionModeContext, SelectionItemsContext, SearchFlagContext, DownloadIDsContext, DownloadFlagContext, ShowBulkTagEditDialogContext,
 ShowBulkDeleteDialogContext, PageContext, PageFlagContext, PageMultiplierContext, ScrollYContext, BulkFavGroupDialogContext} from "../Context"
 import leftArrow from "../assets/icons/leftArrow.png"
 import rightArrow from "../assets/icons/rightArrow.png"
@@ -52,7 +52,7 @@ import select from "../assets/icons/select.png"
 import selectOn from "../assets/icons/select-on.png"
 import star from "../assets/icons/star.png"
 import starGroup from "../assets/icons/stargroup.png"
-import quickEdit from "../assets/icons/quickedit.png"
+import tagEdit from "../assets/icons/tag-outline.png"
 import deleteIcon from "../assets/icons/tag-delete.png"
 import leftIcon from "../assets/icons/go-left.png"
 import rightIcon from "../assets/icons/go-right.png"
@@ -104,7 +104,7 @@ const SortBar: React.FunctionComponent = (props) => {
     const {mobileScrolling, setMobileScrolling} = useContext(MobileScrollingContext)
     const {selectionMode, setSelectionMode} = useContext(SelectionModeContext)
     const {selectionItems, setSelectionItems} = useContext(SelectionItemsContext) as {selectionItems: Set<string>, setSelectionItems: any}
-    const {showBulkQuickEditDialog, setShowBulkQuickEditDialog} = useContext(ShowBulkQuickEditDialogContext)
+    const {showBulkTagEditDialog, setShowBulkTagEditDialog} = useContext(ShowBulkTagEditDialogContext)
     const {showBulkDeleteDialog, setShowBulkDeleteDialog} = useContext(ShowBulkDeleteDialogContext)
     const {bulkFavGroupDialog, setBulkFavGroupDialog} = useContext(BulkFavGroupDialogContext)
     const {searchFlag, setSearchFlag} = useContext(SearchFlagContext)
@@ -707,8 +707,8 @@ const SortBar: React.FunctionComponent = (props) => {
         setBulkFavGroupDialog((prev: boolean) => !prev)
     }
 
-    const bulkQuickEdit = () => {
-        setShowBulkQuickEditDialog((prev: boolean) => !prev)
+    const bulkTagEdit = () => {
+        setShowBulkTagEditDialog((prev: boolean) => !prev)
     }
 
     const bulkDelete = () => {
@@ -805,8 +805,8 @@ const SortBar: React.FunctionComponent = (props) => {
                         <img className="sortbar-img" src={deleteIcon} style={{filter: getFilter()}}/>
                     </div> : null}
                     {permissions.isMod(session) && selectionMode ? 
-                    <div className="sortbar-item" onClick={bulkQuickEdit}>
-                        <img className="sortbar-img" src={quickEdit} style={{filter: getFilter()}}/>
+                    <div className="sortbar-item" onClick={bulkTagEdit}>
+                        <img className="sortbar-img" src={tagEdit} style={{filter: getFilter()}}/>
                     </div> : null}
                     {session.username && selectionMode ? 
                     <div className="sortbar-item" onClick={bulkFavgroup}>

@@ -44,12 +44,12 @@ export default class SQLPost {
         let setArray = [] as any
         let values = [] as any
         let i = 1 
-        if (restrict) {
+        if (restrict !== undefined) {
         setArray.push(`"restrict" = $${i}`)
         values.push(restrict)
         i++
         }
-        if (style) {
+        if (style !== undefined) {
         setArray.push(`"style" = $${i}`)
         values.push(style)
         i++
@@ -59,77 +59,77 @@ export default class SQLPost {
         values.push(thirdParty)
         i++
         }
-        if (title) {
+        if (title !== undefined) {
         setArray.push(`"title" = $${i}`)
         values.push(title)
         i++
         }
-        if (translatedTitle) {
+        if (translatedTitle !== undefined) {
         setArray.push(`"translatedTitle" = $${i}`)
         values.push(translatedTitle)
         i++
         }
-        if (artist) {
+        if (artist !== undefined) {
         setArray.push(`"artist" = $${i}`)
         values.push(artist)
         i++
         }
-        if (drawn) {
+        if (drawn !== undefined) {
         setArray.push(`"drawn" = $${i}`)
         values.push(drawn)
         i++
         }
-        if (link) {
+        if (link !== undefined) {
         setArray.push(`"link" = $${i}`)
         values.push(link)
         i++
         }
-        if (commentary) {
+        if (commentary !== undefined) {
         setArray.push(`"commentary" = $${i}`)
         values.push(commentary)
         i++
         }
-        if (translatedCommentary) {
+        if (translatedCommentary !== undefined) {
         setArray.push(`"translatedCommentary" = $${i}`)
         values.push(translatedCommentary)
         i++
         }
-        if (bookmarks) {
+        if (bookmarks !== undefined) {
         setArray.push(`"bookmarks" = $${i}`)
         values.push(bookmarks)
         i++
         }
-        if (mirrors) {
+        if (mirrors !== undefined) {
         setArray.push(`"mirrors" = $${i}`)
         values.push(mirrors)
         i++
         }
-        if (type) {
+        if (type !== undefined) {
         setArray.push(`"type" = $${i}`)
         values.push(type)
         i++
         }
-        if (uploadDate) {
+        if (uploadDate !== undefined) {
         setArray.push(`"uploadDate" = $${i}`)
         values.push(uploadDate)
         i++
         }
-        if (uploader) {
+        if (uploader !== undefined) {
         setArray.push(`"uploader" = $${i}`)
         values.push(uploader)
         i++
         }
-        if (updatedDate) {
+        if (updatedDate !== undefined) {
         setArray.push(`"updatedDate" = $${i}`)
         values.push(updatedDate)
         i++
         }
-        if (updater) {
+        if (updater !== undefined) {
         setArray.push(`"updater" = $${i}`)
         values.push(updater)
         i++
         }
-        if (hidden) {
+        if (hidden !== undefined) {
         setArray.push(`"hidden" = $${i}`)
         values.push(hidden)
         i++
@@ -144,7 +144,7 @@ export default class SQLPost {
         values.push(hasUpscaled)
         i++
         }
-        if (approver) {
+        if (approver !== undefined) {
         setArray.push(`"approver" = $${i}`)
         values.push(approver)
         i++
@@ -168,12 +168,12 @@ export default class SQLPost {
         let setArray = [] as any
         let values = [] as any
         let i = 1 
-        if (restrict) {
+        if (restrict !== undefined) {
         setArray.push(`"restrict" = $${i}`)
         values.push(restrict)
         i++
         }
-        if (style) {
+        if (style !== undefined) {
         setArray.push(`"style" = $${i}`)
         values.push(style)
         i++
@@ -183,92 +183,92 @@ export default class SQLPost {
         values.push(thirdParty)
         i++
         }
-        if (title) {
+        if (title !== undefined) {
         setArray.push(`"title" = $${i}`)
         values.push(title)
         i++
         }
-        if (translatedTitle) {
+        if (translatedTitle !== undefined) {
         setArray.push(`"translatedTitle" = $${i}`)
         values.push(translatedTitle)
         i++
         }
-        if (artist) {
+        if (artist !== undefined) {
         setArray.push(`"artist" = $${i}`)
         values.push(artist)
         i++
         }
-        if (drawn) {
+        if (drawn !== undefined) {
         setArray.push(`"drawn" = $${i}`)
         values.push(drawn)
         i++
         }
-        if (link) {
+        if (link !== undefined) {
         setArray.push(`"link" = $${i}`)
         values.push(link)
         i++
         }
-        if (commentary) {
+        if (commentary !== undefined) {
         setArray.push(`"commentary" = $${i}`)
         values.push(commentary)
         i++
         }
-        if (translatedCommentary) {
+        if (translatedCommentary !== undefined) {
         setArray.push(`"translatedCommentary" = $${i}`)
         values.push(translatedCommentary)
         i++
         }
-        if (bookmarks) {
+        if (bookmarks !== undefined) {
         setArray.push(`"bookmarks" = $${i}`)
         values.push(bookmarks)
         i++
         }
-        if (mirrors) {
+        if (mirrors !== undefined) {
         setArray.push(`"mirrors" = $${i}`)
         values.push(mirrors)
         i++
         }
-        if (type) {
+        if (type !== undefined) {
         setArray.push(`"type" = $${i}`)
         values.push(type)
         i++
         }
-        if (uploadDate) {
+        if (uploadDate !== undefined) {
         setArray.push(`"uploadDate" = $${i}`)
         values.push(uploadDate)
         i++
         }
-        if (uploader) {
+        if (uploader !== undefined) {
         setArray.push(`"uploader" = $${i}`)
         values.push(uploader)
         i++
         }
-        if (updatedDate) {
+        if (updatedDate !== undefined) {
         setArray.push(`"updatedDate" = $${i}`)
         values.push(updatedDate)
         i++
         }
-        if (updater) {
+        if (updater !== undefined) {
         setArray.push(`"updater" = $${i}`)
         values.push(updater)
         i++
         }
-        if (duplicates) {
+        if (duplicates !== undefined) {
         setArray.push(`"duplicates" = $${i}`)
         values.push(duplicates)
         i++
         }
-        if (newTags) {
+        if (newTags !== undefined) {
         setArray.push(`"newTags" = $${i}`)
         values.push(newTags)
         i++
         }
-        if (originalID) {
+        if (originalID !== undefined) {
         setArray.push(`"originalID" = $${i}`)
         values.push(originalID)
         i++
         }
-        if (hidden) {
+        if (hidden !== undefined) {
         setArray.push(`"hidden" = $${i}`)
         values.push(updater)
         i++
@@ -283,7 +283,7 @@ export default class SQLPost {
         values.push(hasUpscaled)
         i++
         }
-        if (reason) {
+        if (reason !== undefined) {
         setArray.push(`"reason" = $${i}`)
         values.push(reason)
         i++

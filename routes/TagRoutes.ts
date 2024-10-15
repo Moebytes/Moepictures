@@ -200,15 +200,25 @@ const TagRoutes = (app: Express) => {
                 }
             } 
             if (implications !== undefined) {
-                await sql.tag.purgeImplications(tag)
-                let promises = [] as Promise<void>[]
+                let verifiedImplications = [] as string[]
                 for (let i = 0; i < implications.length; i++) {
-                    if (!implications[i]?.trim()) break
-                    await sql.tag.insertImplication(tag, implications[i])
-                    const promise = serverFunctions.updateImplication(tag, implications[i])
-                    promises.push(promise)
+                    const implication = implications[i]?.trim()
+                    if (!implication) continue
+                    const tag = await sql.tag.tag(implication)
+                    if (tag) verifiedImplications.push(implication)
                 }
-                if (key.trim() !== tag) await Promise.all(promises)
+                implications = verifiedImplications
+                if (implications.length) {
+                    await sql.tag.purgeImplications(tag)
+                    //let promises = [] as Promise<void>[]
+                    for (let i = 0; i < implications.length; i++) {
+                        const implication = implications[i]
+                        await sql.tag.insertImplication(tag, implication)
+                        //const promise = serverFunctions.updateImplication(tag, implication)
+                        //promises.push(promise)
+                    }
+                    //if (key.trim() !== tag) await Promise.all(promises)
+                }
             }
             if (pixivTags !== undefined) {
                 await sql.tag.updateTag(tag, "pixivTags", pixivTags)

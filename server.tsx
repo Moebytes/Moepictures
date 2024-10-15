@@ -18,6 +18,7 @@ import rateLimit from "express-rate-limit"
 import App from "./App"
 import {renderToString} from "react-dom/server"
 import {StaticRouter as Router} from "react-router-dom"
+import permissions from "./structures/Permissions"
 import functions from "./structures/Functions"
 import cryptoFunctions from "./structures/CryptoFunctions"
 import serverFunctions, {keyGenerator, handler} from "./structures/ServerFunctions"
@@ -195,7 +196,7 @@ for (let i = 0; i < folders.length; i++) {
           r18 = true
         }
         if (post.hidden) {
-          if (req.session.role !== "admin" && req.session.role !== "mod") return res.status(403).end()
+          if (!permissions.isMod(req.session)) return res.status(403).end()
         }
       }
       let body = await serverFunctions.getFile(key, upscaled, r18)
@@ -232,7 +233,7 @@ for (let i = 0; i < folders.length; i++) {
   
   app.get(`/unverified/${folders[i]}/*`, imageLimiter, async (req: Request, res: Response, next: NextFunction) => {
     try {
-      if (req.session.role !== "admin" && req.session.role !== "mod") return res.status(403).end()
+      if (!permissions.isMod(req.session)) return res.status(403).end()
       res.setHeader("Content-Type", mime.getType(req.path) ?? "")
       if (!noCache.includes(folders[i])) res.setHeader("Cache-Control", "public, max-age=2592000")
       const key = decodeURIComponent(req.path.replace("/unverified/", ""))
@@ -279,7 +280,7 @@ for (let i = 0; i < folders.length; i++) {
           r18 = true
         }
         if (post.hidden) {
-          if (req.session.role !== "admin" && req.session.role !== "mod") return res.status(403).end()
+          if (!permissions.isMod(req.session)) return res.status(403).end()
         }
       }
       let body = await serverFunctions.getFile(key, false, r18)
@@ -327,7 +328,7 @@ for (let i = 0; i < folders.length; i++) {
 
   app.get(`/thumbnail/:size/unverified/${folders[i]}/*`, imageLimiter, async (req: Request, res: Response, next: NextFunction) => {
     try {
-      if (req.session.role !== "admin" && req.session.role !== "mod") return res.status(403).end()
+      if (!permissions.isMod(req.session)) return res.status(403).end()
       const mimeType = mime.getType(req.path)
       res.setHeader("Content-Type", mimeType ?? "")
       if (!noCache.includes(folders[i])) res.setHeader("Cache-Control", "public, max-age=2592000")

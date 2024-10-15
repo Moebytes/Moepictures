@@ -21,6 +21,7 @@ import EditTranslationDialog from "../dialogs/EditTranslationDialog"
 import SaveTranslationDialog from "../dialogs/SaveTranslationDialog"
 import ReportCommentDialog from "../dialogs/ReportCommentDialog"
 import QuickEditDialog from "../dialogs/QuickEditDialog"
+import SourceEditDialog from "../dialogs/SourceEditDialog"
 import RevertPostHistoryDialog from "../dialogs/RevertPostHistoryDialog"
 import RevertTranslationHistoryDialog from "../dialogs/RevertTranslationHistoryDialog"
 import CaptchaDialog from "../dialogs/CaptchaDialog"
@@ -96,6 +97,8 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
         setHistoryID(historyParam)
         const translationParam = new URLSearchParams(window.location.search).get("translation")
         setTranslationID(translationParam)
+        const orderParam = new URLSearchParams(window.location.search).get("order")
+        if (orderParam) setOrder(Number(orderParam))
         const onDOMLoaded = () => {
             if (!historyParam) {
                 const savedPost = localStorage.getItem("savedPost")
@@ -109,8 +112,6 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
             }
             const savedOrder = localStorage.getItem("order")
             if (savedOrder) setOrder(Number(savedOrder))
-            const orderParam = new URLSearchParams(window.location.search).get("order")
-            if (orderParam) setOrder(Number(orderParam))
         }
         window.addEventListener("load", onDOMLoaded)
         return () => {
@@ -406,6 +407,7 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
     const revertTranslationHistory = async () => {
         const translation = await functions.get("/api/translation/history", {postID: post.postID, historyID: translationID}, session, setSessionFlag).then((r) => r[0])
         await functions.put("/api/translation/save", {postID: translation.postID, order: translation.order, data: translation.data}, session, setSessionFlag)
+        currentHistory()
     }
 
     useEffect(() => {
@@ -425,27 +427,40 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
     }
 
     const revertPostHistory = async () => {
-        const currentPost = await functions.get("/api/post", {postID}, session, setSessionFlag)
+        let currentPost = await functions.get("/api/post", {postID}, session, setSessionFlag)
+        if (post.artists) {
+            let categories = await functions.tagCategories(currentPost.tags, session, setSessionFlag)
+            currentPost.artists = categories.artists.map((a: any) => a.tag)
+            currentPost.characters = categories.characters.map((c: any) => c.tag)
+            currentPost.series = categories.series.map((s: any) => s.tag)
+            currentPost.tags = categories.tags.map((t: any) => t.tag)
+        }
         const imgChanged = await functions.imagesChanged(post, currentPost)
+        const tagsChanged = functions.tagsChanged(post, currentPost)
         const srcChanged = functions.sourceChanged(post, currentPost)
+        let source = undefined as any
         if (imgChanged || srcChanged) {
-            if (imgChanged && !permissions.isMod(session)) return Promise.reject("img")
-            const {images, upscaledImages} = await functions.parseImages(post)
-            const newTags = await functions.parseNewTags(post, session, setSessionFlag)
-            const source = {
+            source = {
                 title: post.title,
                 translatedTitle: post.translatedTitle,
                 artist: post.artist,
-                drawn: post.drawn,
+                date: post.drawn ? functions.formatDate(new Date(post.drawn), true) : "",
                 link: post.link,
                 commentary: post.commentary,
-                translatedCommentary: post.translatedCommentary
+                translatedCommentary: post.translatedCommentary,
+                bookmarks: post.bookmarks,
+                mirrors: post.mirrors ? Object.values(post.mirrors).join("\n") : ""
             }
+        }
+        if (imgChanged || (srcChanged && tagsChanged)) {
+            if (imgChanged && !permissions.isMod(session)) return Promise.reject("img")
+            const {images, upscaledImages} = await functions.parseImages(post)
+            const newTags = await functions.parseNewTags(post, session, setSessionFlag)
             await functions.put("/api/post/edit", {postID: post.postID, images, upscaledImages, type: post.type, restrict: post.restrict, source,
             style: post.style, artists: post.artists, characters: post.characters, preserveThirdParty: post.thirdParty,
             series: post.series, tags: post.tags, newTags, reason: post.reason}, session, setSessionFlag)
         } else {
-            await functions.put("/api/post/quickedit", {postID: post.postID, type: post.type, restrict: post.restrict,
+            await functions.put("/api/post/quickedit", {postID: post.postID, type: post.type, restrict: post.restrict, source,
             style: post.style, artists: post.artists, characters: post.characters, preserveThirdParty: post.thirdParty,
             series: post.series, tags: post.tags, reason: post.reason}, session, setSessionFlag)
         }
@@ -479,9 +494,12 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
         if (translationID) {
             return (
                 <div className="translation-button-container">
-                    {session.username ? <button className="translation-button" onClick={revertTranslationHistoryDialog}>
+                    <button className="translation-button" onClick={() => history.push(`/translation/history/${postID}/${order}`)}>
                         <img src={historyIcon}/>
-                        <span>Revert</span>
+                        <span>History</span>
+                    </button>
+                    {session.username ? <button className="translation-button" onClick={revertTranslationHistoryDialog}>
+                        <span>⌫Revert</span>
                     </button> : null}
                     <button className="translation-button" onClick={currentHistory}>
                         <img src={currentIcon}/>
@@ -492,9 +510,12 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
         }
         return (
             <div className="history-button-container">
-                {session.username ? <button className="history-button" onClick={revertPostHistoryDialog}>
+                <button className="history-button" onClick={() => history.push(`/post/history/${postID}`)}>
                     <img src={historyIcon}/>
-                    <span>Revert</span>
+                    <span>History</span>
+                </button>
+                {session.username ? <button className="history-button" onClick={revertPostHistoryDialog}>
+                    <span>⌫Revert</span>
                 </button> : null}
                 <button className="history-button" onClick={currentHistory}>
                     <img src={currentIcon}/>
@@ -538,6 +559,7 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
         <>
         <CaptchaDialog/>
         <QuickEditDialog/>
+        <SourceEditDialog/>
         <FavgroupDialog/>
         <EditCommentDialog/>
         <DeleteCommentDialog/>

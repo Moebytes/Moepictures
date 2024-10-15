@@ -300,119 +300,166 @@ const PostRoutes = (app: Express) => {
             let type = req.body.type 
             const restrict = req.body.restrict 
             const style = req.body.style
+            const source = req.body.source
             let artists = req.body.artists
             let characters = req.body.characters
             let series = req.body.series
             let tags = req.body.tags
             let reason = req.body.reason
             let silent = req.body.silent
+
+            let sourceEdit = source ? true : false
     
             if (Number.isNaN(postID)) return res.status(400).send("Bad postID")
             if (!req.session.username) return res.status(403).send("Unauthorized")
             if (req.session.banned) return res.status(403).send("You are banned")
 
-            if (!artists?.[0]) artists = ["unknown-artist"]
-            if (!series?.[0]) series = characters.includes("original") ? ["no-series"] : ["unknown-series"]
-            if (!characters?.[0]) characters = ["unknown-character"]
-            if (!tags?.[0]) tags = ["needs-tags"]
-
-            let rawTags = `${artists.join(" ")} ${characters.join(" ")} ${series.join(" ")} ${tags.join(" ")}`
-            if (rawTags.includes("_") || rawTags.includes("/") || rawTags.includes("\\") || rawTags.includes(",")) {
-                return res.status(400).send("Invalid characters in tags: , _ / \\")
-            }
-    
-            artists = artists.filter(Boolean).map((t: string) => t.toLowerCase().replace(/[\n\r\s]+/g, "-"))
-            characters = characters.filter(Boolean).map((t: string) => t.toLowerCase().replace(/[\n\r\s]+/g, "-"))
-            series = series.filter(Boolean).map((t: string) => t.toLowerCase().replace(/[\n\r\s]+/g, "-"))
-            tags = tags.filter(Boolean).map((t: string) => t.toLowerCase().replace(/[\n\r\s]+/g, "-"))
-    
-            if (!functions.validType(type)) return res.status(400).send("Invalid type")
-            if (!functions.validRestrict(restrict)) return res.status(400).send("Invalid restrict")
-            if (!functions.validStyle(style)) return res.status(400).send("Invalid style")
-    
-            const post = await sql.post.post(postID)
+            const post = unverified ? await sql.post.unverifiedPost(postID) :  await sql.post.post(postID)
             if (!post) return res.status(400).send("Bad request")
-            let oldR18 = post.restrict === "explicit"
-            let newR18 = restrict === "explicit"
-    
-            const updatedDate = new Date().toISOString()
 
-            if (unverified) {
-                await sql.post.bulkUpdateUnverifiedPost(postID, {
-                    type,
-                    restrict, 
-                    style,
-                    updatedDate,
-                    updater: req.session.username
-                })
+            if (sourceEdit) {
+                const updatedDate = new Date().toISOString()
+
+                if (unverified) {
+                    await sql.post.bulkUpdateUnverifiedPost(postID, {
+                        title: source.title ? source.title : null,
+                        translatedTitle: source.translatedTitle ? source.translatedTitle : null,
+                        artist: source.artist ? source.artist : null,
+                        drawn: source.date ? source.date : null,
+                        link: source.link ? source.link : null,
+                        commentary: source.commentary ? source.commentary : null,
+                        translatedCommentary: source.translatedCommentary ? source.translatedCommentary : null,
+                        bookmarks: source.bookmarks ? source.bookmarks : null,
+                        mirrors: source.mirrors ? functions.mirrorsJSON(source.mirrors) : null,
+                        updatedDate,
+                        updater: req.session.username
+                    })
+                } else {
+                    await sql.post.bulkUpdatePost(postID, {
+                        title: source.title ? source.title : null,
+                        translatedTitle: source.translatedTitle ? source.translatedTitle : null,
+                        artist: source.artist ? source.artist : null,
+                        drawn: source.date ? source.date : null,
+                        link: source.link ? source.link : null,
+                        commentary: source.commentary ? source.commentary : null,
+                        translatedCommentary: source.translatedCommentary ? source.translatedCommentary : null,
+                        bookmarks: source.bookmarks ? source.bookmarks : null,
+                        mirrors: source.mirrors ? functions.mirrorsJSON(source.mirrors) : null,
+                        updatedDate,
+                        updater: req.session.username
+                    })
+                }
             } else {
-                await sql.post.bulkUpdatePost(postID, {
-                    type,
-                    restrict, 
-                    style,
-                    updatedDate,
-                    updater: req.session.username
-                })
-            }
-    
-            let tagMap = [] as any
-            let bulkTagUpdate = [] as any
-    
-            for (let i = 0; i < artists.length; i++) {
-              if (!artists[i]) continue
-              let bulkObj = {tag: artists[i], type: "artist", description: "Artist.", image: null} as any
-              bulkTagUpdate.push(bulkObj)
-              tagMap.push(artists[i])
-            }
-            
-            for (let i = 0; i < characters.length; i++) {
-                if (!characters[i]) continue
-                let bulkObj = {tag: characters[i], type: "character", description: "Character.", image: null} as any
-                bulkTagUpdate.push(bulkObj)
-                tagMap.push(characters[i])
-            }
+                if (!artists?.[0]) artists = ["unknown-artist"]
+                if (!series?.[0]) series = characters.includes("original") ? ["no-series"] : ["unknown-series"]
+                if (!characters?.[0]) characters = ["unknown-character"]
+                if (!tags?.[0]) tags = ["needs-tags"]
 
-            for (let i = 0; i < series.length; i++) {
-                if (!series[i]) continue
-                let bulkObj = {tag: series[i], type: "series", description: "Series.", image: null} as any
-                bulkTagUpdate.push(bulkObj)
-                tagMap.push(series[i])
-            }
+                let rawTags = `${artists.join(" ")} ${characters.join(" ")} ${series.join(" ")} ${tags.join(" ")}`
+                if (rawTags.includes("_") || rawTags.includes("/") || rawTags.includes("\\") || rawTags.includes(",")) {
+                    return res.status(400).send("Invalid characters in tags: , _ / \\")
+                }
+        
+                artists = artists.filter(Boolean).map((t: string) => t.toLowerCase().replace(/[\n\r\s]+/g, "-"))
+                characters = characters.filter(Boolean).map((t: string) => t.toLowerCase().replace(/[\n\r\s]+/g, "-"))
+                series = series.filter(Boolean).map((t: string) => t.toLowerCase().replace(/[\n\r\s]+/g, "-"))
+                tags = tags.filter(Boolean).map((t: string) => t.toLowerCase().replace(/[\n\r\s]+/g, "-"))
+        
+                if (!functions.validType(type)) return res.status(400).send("Invalid type")
+                if (!functions.validRestrict(restrict)) return res.status(400).send("Invalid restrict")
+                if (!functions.validStyle(style)) return res.status(400).send("Invalid style")
+        
+                let oldR18 = post.restrict === "explicit"
+                let newR18 = restrict === "explicit"
+        
+                const updatedDate = new Date().toISOString()
 
-            for (let i = 0; i < tags.length; i++) {
-                if (!tags[i]) continue
-                let bulkObj = {tag: tags[i], type: functions.tagType(tags[i]), description: `${functions.toProperCase(tags[i]).replaceAll("-", " ")}.`, image: null} as any
+                if (unverified) {
+                    await sql.post.bulkUpdateUnverifiedPost(postID, {
+                        type,
+                        restrict, 
+                        style,
+                        updatedDate,
+                        updater: req.session.username
+                    })
+                } else {
+                    await sql.post.bulkUpdatePost(postID, {
+                        type,
+                        restrict, 
+                        style,
+                        updatedDate,
+                        updater: req.session.username
+                    })
+                }
+        
+                let tagMap = [] as any
+                let bulkTagUpdate = [] as any
+        
+                for (let i = 0; i < artists.length; i++) {
+                if (!artists[i]) continue
+                let bulkObj = {tag: artists[i], type: "artist", description: "Artist.", image: null} as any
                 bulkTagUpdate.push(bulkObj)
-                tagMap.push(tags[i])
-            }
+                tagMap.push(artists[i])
+                }
+                
+                for (let i = 0; i < characters.length; i++) {
+                    if (!characters[i]) continue
+                    let bulkObj = {tag: characters[i], type: "character", description: "Character.", image: null} as any
+                    bulkTagUpdate.push(bulkObj)
+                    tagMap.push(characters[i])
+                }
 
-            for (let i = 0; i < tagMap.length; i++) {
-                const implications = await sql.tag.implications(tagMap[i])
-                if (implications?.[0]) {
-                    for (const i of implications) {
-                      tagMap.push(i.implication)
-                      const tag = await sql.tag.tag(i.implication)
-                      bulkTagUpdate.push({tag: i.implication, type: functions.tagType(i.implication), description: tag?.description || null, image: tag?.image || null})
+                for (let i = 0; i < series.length; i++) {
+                    if (!series[i]) continue
+                    let bulkObj = {tag: series[i], type: "series", description: "Series.", image: null} as any
+                    bulkTagUpdate.push(bulkObj)
+                    tagMap.push(series[i])
+                }
+
+                for (let i = 0; i < tags.length; i++) {
+                    if (!tags[i]) continue
+                    let bulkObj = {tag: tags[i], type: functions.tagType(tags[i]), description: `${functions.toProperCase(tags[i]).replaceAll("-", " ")}.`, image: null} as any
+                    bulkTagUpdate.push(bulkObj)
+                    tagMap.push(tags[i])
+                }
+
+                for (let i = 0; i < tagMap.length; i++) {
+                    const implications = await sql.tag.implications(tagMap[i])
+                    if (implications?.[0]) {
+                        for (const i of implications) {
+                        tagMap.push(i.implication)
+                        const tag = await sql.tag.tag(i.implication)
+                        bulkTagUpdate.push({tag: i.implication, type: functions.tagType(i.implication), description: tag?.description || null, image: tag?.image || null})
+                        }
                     }
                 }
-            }
-    
-            tagMap = functions.removeDuplicates(tagMap)
-            if (unverified) {
-                await sql.tag.purgeUnverifiedTagMap(postID)
-                await sql.tag.bulkInsertUnverifiedTags(bulkTagUpdate, true)
-                await sql.tag.insertUnverifiedTagMap(postID, tagMap)
-            } else {
-                await sql.tag.purgeTagMap(postID)
-                await sql.tag.bulkInsertTags(bulkTagUpdate, req.session.username, true)
-                await sql.tag.insertTagMap(postID, tagMap)
+        
+                tagMap = functions.removeDuplicates(tagMap)
+                if (unverified) {
+                    await sql.tag.purgeUnverifiedTagMap(postID)
+                    await sql.tag.bulkInsertUnverifiedTags(bulkTagUpdate, true)
+                    await sql.tag.insertUnverifiedTagMap(postID, tagMap)
+                } else {
+                    await sql.tag.purgeTagMap(postID)
+                    await sql.tag.bulkInsertTags(bulkTagUpdate, req.session.username, true)
+                    await sql.tag.insertTagMap(postID, tagMap)
+                    
+                    await serverFunctions.migratePost(post, oldR18, newR18)
+                }
             }
 
-            await serverFunctions.migratePost(post, oldR18, newR18)
-
-            if (req.session.role === "admin" || req.session.role === "mod") {
+            if (unverified) return res.status(200).send("Success")
+            
+            if (permissions.isMod(req.session)) {
                 if (silent) return res.status(200).send("Success")
             }
+
+            const updated = await sql.post.post(postID)
+            const updatedCategories = await serverFunctions.tagCategories(updated.tags)
+            updated.artists = updatedCategories.artists.map((a: any) => a.tag)
+            updated.characters = updatedCategories.characters.map((c: any) => c.tag)
+            updated.series = updatedCategories.series.map((s: any) => s.tag)
+            updated.tags = updatedCategories.tags.map((t: any) => t.tag)
 
             const postHistory = await sql.history.postHistory(postID)
             if (!postHistory.length) {
@@ -440,24 +487,26 @@ const PostRoutes = (app: Express) => {
                     images.push(functions.getImagePath(post.images[i].type, postID, post.images[i].order, post.images[i].filename))
                 }
                 await sql.history.insertPostHistory({
-                    postID, username: req.session.username, images, uploader: post.uploader, updater: post.updater, 
-                    uploadDate: post.uploadDate, updatedDate: post.updatedDate, type: post.type, restrict: post.restrict, 
-                    style: post.style, thirdParty: post.thirdParty, title: post.title, translatedTitle: post.translatedTitle, 
-                    drawn: post.drawn, artist: post.artist, link: post.link, commentary: post.commentary, 
-                    translatedCommentary: post.translatedCommentary, bookmarks: post.bookmarks, mirrors: post.mirrors, 
-                    hasOriginal: post.hasOriginal, hasUpscaled: post.hasUpscaled, artists, characters, series, tags, reason})
+                    postID, username: req.session.username, images, uploader: updated.uploader, updater: updated.updater, 
+                    uploadDate: updated.uploadDate, updatedDate: updated.updatedDate, type: updated.type, restrict: updated.restrict, 
+                    style: updated.style, thirdParty: updated.thirdParty, title: updated.title, translatedTitle: updated.translatedTitle, 
+                    drawn: updated.drawn, artist: updated.artist, link: updated.link, commentary: updated.commentary, 
+                    translatedCommentary: updated.translatedCommentary, bookmarks: updated.bookmarks, mirrors: updated.mirrors, 
+                    hasOriginal: updated.hasOriginal, hasUpscaled: updated.hasUpscaled, artists: updated.artists, 
+                    characters: updated.characters, series: updated.series, tags: updated.tags, reason})
             } else {
                 let images = [] as any
                 for (let i = 0; i < post.images.length; i++) {
                     images.push(functions.getImagePath(post.images[i].type, postID, post.images[i].order, post.images[i].filename))
                 }
                 await sql.history.insertPostHistory({
-                    postID, username: req.session.username, images, uploader: post.uploader, updater: post.updater, 
-                    uploadDate: post.uploadDate, updatedDate: post.updatedDate, type: post.type, restrict: post.restrict, 
-                    style: post.style, thirdParty: post.thirdParty, title: post.title, translatedTitle: post.translatedTitle, 
-                    drawn: post.drawn, artist: post.artist, link: post.link, commentary: post.commentary, 
-                    translatedCommentary: post.translatedCommentary, bookmarks: post.bookmarks, mirrors: post.mirrors, 
-                    hasOriginal: post.hasOriginal, hasUpscaled: post.hasUpscaled, artists, characters, series, tags, reason})
+                    postID, username: req.session.username, images, uploader: updated.uploader, updater: updated.updater, 
+                    uploadDate: updated.uploadDate, updatedDate: updated.updatedDate, type: updated.type, restrict: updated.restrict, 
+                    style: updated.style, thirdParty: updated.thirdParty, title: updated.title, translatedTitle: updated.translatedTitle, 
+                    drawn: updated.drawn, artist: updated.artist, link: updated.link, commentary: updated.commentary, 
+                    translatedCommentary: updated.translatedCommentary, bookmarks: updated.bookmarks, mirrors: updated.mirrors, 
+                    hasOriginal: updated.hasOriginal, hasUpscaled: updated.hasUpscaled, artists: updated.artists, 
+                    characters: updated.characters, series: updated.series, tags: updated.tags, reason})
             }
             res.status(200).send("Success")
           } catch (e) {
@@ -470,18 +519,48 @@ const PostRoutes = (app: Express) => {
         try {
             let postID = Number(req.body.postID)
             let type = req.body.type 
-            const restrict = req.body.restrict 
-            const style = req.body.style
+            let restrict = req.body.restrict 
+            let style = req.body.style
+            let source = req.body.source
             let artists = req.body.artists
             let characters = req.body.characters
             let series = req.body.series
             let tags = req.body.tags
             let reason = req.body.reason
+
+            let sourceEdit = source ? true : false
     
             if (Number.isNaN(postID)) return res.status(400).send("Bad postID")
             if (!req.session.username) return res.status(403).send("Unauthorized")
             if (req.session.banned) return res.status(403).send("You are banned")
-            if (!permissions.isMod(req.session)) return res.status(403).end()
+
+            const originalPostID = postID as any
+            const post = await sql.post.post(originalPostID)
+            if (!post) return res.status(400).send("Bad postID")
+            postID = await sql.post.insertUnverifiedPost()
+
+            if (sourceEdit) {
+                const categories = await serverFunctions.tagCategories(post.tags)
+                artists = categories.artists.map((a: any) => a.tag)
+                characters = categories.characters.map((c: any) => c.tag)
+                series = categories.series.map((s: any) => s.tag)
+                tags = categories.tags.map((t: any) => t.tag)
+                type = post.type
+                restrict = post.restrict
+                style = post.style
+            } else {
+                source = {
+                    title: post.title,
+                    translatedTitle: post.translatedTitle,
+                    artist: post.artist,
+                    drawn: post.drawn ? functions.formatDate(new Date(post.drawn), true) : null,
+                    link: post.link,
+                    commentary: post.commentary,
+                    translatedCommentary: post.translatedCommentary,
+                    bookmarks: post.bookmarks,
+                    mirrors: post.mirrors ? Object.values(post.mirrors).join("\n") : null
+                }
+            }
     
             if (!artists?.[0]) artists = ["unknown-artist"]
             if (!series?.[0]) series = characters.includes("original") ? ["no-series"] : ["unknown-series"]
@@ -502,11 +581,6 @@ const PostRoutes = (app: Express) => {
             if (!functions.validRestrict(restrict)) return res.status(400).send("Invalid restrict")
             if (!functions.validStyle(style)) return res.status(400).send("Invalid style")
     
-            const originalPostID = postID as any
-            const post = await sql.post.post(originalPostID)
-            if (!post) return res.status(400).send("Bad postID")
-            postID = await sql.post.insertUnverifiedPost()
-
             if (post.thirdParty) {
                 const thirdPartyID = await sql.post.parent(originalPostID).then((r) => r.parentID)
                 await sql.post.insertUnverifiedThirdParty(postID, Number(thirdPartyID))
@@ -538,7 +612,7 @@ const PostRoutes = (app: Express) => {
                 } else if (ext === "jpg" || ext === "png" || ext === "avif") {
                     kind = "image"
                 } else if (ext === "webp") {
-                    const animated = await functions.isAnimatedWebp(current)
+                    const animated = functions.isAnimatedWebp(current)
                     if (animated) {
                         kind = "animation"
                     if (type !== "video") type = "animation"
@@ -593,15 +667,15 @@ const PostRoutes = (app: Express) => {
                 restrict, 
                 style, 
                 thirdParty: post.thirdParty,
-                title: post.title ? post.title : null,
-                translatedTitle: post.translatedTitle ? post.translatedTitle : null,
-                artist: post.artist ? post.artist : null,
-                drawn: post.date ? post.date : null,
-                link: post.link ? post.link : null,
-                commentary: post.commentary ? post.commentary : null,
-                translatedCommentary: post.translatedCommentary ? post.translatedCommentary : null,
-                bookmarks: post.bookmarks ? post.bookmarks : null,
-                mirrors: post.mirrors ? functions.mirrorsJSON(post.mirrors) : null,
+                title: source.title ? source.title : null,
+                translatedTitle: source.translatedTitle ? source.translatedTitle : null,
+                artist: source.artist ? source.artist : null,
+                drawn: source.date ? source.date : null,
+                link: source.link ? source.link : null,
+                commentary: source.commentary ? source.commentary : null,
+                translatedCommentary: source.translatedCommentary ? source.translatedCommentary : null,
+                bookmarks: source.bookmarks ? source.bookmarks : null,
+                mirrors: source.mirrors ? functions.mirrorsJSON(source.mirrors) : null,
                 uploader: post.uploader,
                 uploadDate: post.uploadDate,
                 updatedDate,

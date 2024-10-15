@@ -530,6 +530,7 @@ const CreateRoutes = (app: Express) => {
         await sql.post.updatePost(postID, "type", type)
         if (!updatedDate) updatedDate = new Date().toISOString()
         await sql.post.bulkUpdatePost(postID, {
+          type,
           restrict, 
           style, 
           thirdParty: thirdPartyID ? true : false,
@@ -542,7 +543,6 @@ const CreateRoutes = (app: Express) => {
           translatedCommentary: source.translatedCommentary ? source.translatedCommentary : null,
           bookmarks: source.bookmarks ? source.bookmarks : null,
           mirrors: source.mirrors ? functions.mirrorsJSON(source.mirrors) : null,
-          type,
           updatedDate,
           hasOriginal,
           hasUpscaled,

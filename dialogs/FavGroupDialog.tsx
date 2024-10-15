@@ -55,12 +55,12 @@ const FavgroupDialog: React.FunctionComponent = (props) => {
         if (favGroupID) {
             // document.body.style.overflowY = "hidden"
             document.body.style.pointerEvents = "none"
+            updateFavGroups()
         } else {
             // document.body.style.overflowY = "visible"
             document.body.style.pointerEvents = "all"
             setEnableDrag(true)
         }
-        updateFavGroups()
     }, [favGroupID])
 
     const addFavGroup = async () => {

@@ -111,7 +111,8 @@ export const VisiblePostsContext = React.createContext<any>(null)
 export const ScrollYContext = React.createContext<any>(null)
 export const PostFlagContext = React.createContext<any>(null)
 export const MobileScrollingContext = React.createContext<any>(null)
-export const QuickEditIDContext = React.createContext<any>(null)
+export const TagEditIDContext = React.createContext<any>(null)
+export const SourceEditIDContext = React.createContext<any>(null)
 export const AutoSearchContext = React.createContext<any>(null)
 export const SaveSearchContext = React.createContext<any>(null)
 export const ShowPageDialogContext = React.createContext<any>(null)
@@ -157,7 +158,7 @@ export const UpdateUserFlagContext = React.createContext<any>(null)
 export const SelectionModeContext = React.createContext<any>(null)
 export const SelectionItemsContext = React.createContext<any>(null)
 export const SelectionPostsContext = React.createContext<any>(null)
-export const ShowBulkQuickEditDialogContext = React.createContext<any>(null)
+export const ShowBulkTagEditDialogContext = React.createContext<any>(null)
 export const ShowBulkDeleteDialogContext = React.createContext<any>(null)
 export const ShowTakedownPostDialogContext = React.createContext<any>(null)
 export const TakedownTagContext = React.createContext<any>(null)
@@ -308,7 +309,8 @@ const Context: React.FunctionComponent = (props) => {
     const [visiblePosts, setVisiblePosts] = useState([])
     const [scrollY, setScrollY] = useState(null)
     const [postFlag, setPostFlag] = useState(false)
-    const [quickEditID, setQuickEditID] = useState(null)
+    const [tagEditID, setTagEditID] = useState(null)
+    const [sourceEditID, setSourceEditID] = useState(null)
     const [autoSearch, setAutoSearch] = useState(false)
     const [saveSearch, setSaveSearch] = useState(false)
     const [showPageDialog, setShowPageDialog] = useState(false)
@@ -352,7 +354,7 @@ const Context: React.FunctionComponent = (props) => {
     const [updateUserFlag, setUpdateUserFlag] = useState(false)
     const [selectionItems, setSelectionItems] = useState(new Set())
     const [selectionPosts, setSelectionPosts] = useState(new Map())
-    const [showBulkQuickEditDialog, setShowBulkQuickEditDialog] = useState(false)
+    const [showBulkTagEditDialog, setShowBulkTagEditDialog] = useState(false)
     const [showBulkDeleteDialog, setShowBulkDeleteDialog] = useState(false)
     const [imageExpand, setImageExpand] = useState(false)
     const [dmTarget, setDMTarget] = useState(null)
@@ -476,7 +478,7 @@ return (
         <ShowTakedownPostDialogContext.Provider value={{showTakedownPostDialog, setShowTakedownPostDialog}}>
         <SelectionPostsContext.Provider value={{selectionPosts, setSelectionPosts}}>
         <ShowBulkDeleteDialogContext.Provider value={{showBulkDeleteDialog, setShowBulkDeleteDialog}}>
-        <ShowBulkQuickEditDialogContext.Provider value={{showBulkQuickEditDialog, setShowBulkQuickEditDialog}}>
+        <ShowBulkTagEditDialogContext.Provider value={{showBulkTagEditDialog, setShowBulkTagEditDialog}}>
         <SelectionItemsContext.Provider value={{selectionItems, setSelectionItems}}>
         <UpdateUserFlagContext.Provider value={{updateUserFlag, setUpdateUserFlag}}>
         <UnbanNameContext.Provider value={{unbanName, setUnbanName}}>
@@ -541,7 +543,8 @@ return (
         <EditTagTwitterContext.Provider value={{editTagTwitter, setEditTagTwitter}}>
         <EditTagSocialContext.Provider value={{editTagSocial, setEditTagSocial}}>
         <EditTagTypeContext.Provider value={{editTagType, setEditTagType}}>
-        <QuickEditIDContext.Provider value={{quickEditID, setQuickEditID}}>
+        <SourceEditIDContext.Provider value={{sourceEditID, setSourceEditID}}>
+        <TagEditIDContext.Provider value={{tagEditID, setTagEditID}}>
         <PostFlagContext.Provider value={{postFlag, setPostFlag}}>
         <ScrollYContext.Provider value={{scrollY, setScrollY}}>
         <VisiblePostsContext.Provider value={{visiblePosts, setVisiblePosts}}>
@@ -671,7 +674,8 @@ return (
         </VisiblePostsContext.Provider>
         </ScrollYContext.Provider>
         </PostFlagContext.Provider>
-        </QuickEditIDContext.Provider>
+        </TagEditIDContext.Provider>
+        </SourceEditIDContext.Provider>
         </EditTagTypeContext.Provider>
         </EditTagSocialContext.Provider>
         </EditTagTwitterContext.Provider>
@@ -736,7 +740,7 @@ return (
         </UnbanNameContext.Provider>
         </UpdateUserFlagContext.Provider>
         </SelectionItemsContext.Provider>
-        </ShowBulkQuickEditDialogContext.Provider>
+        </ShowBulkTagEditDialogContext.Provider>
         </ShowBulkDeleteDialogContext.Provider>
         </SelectionPostsContext.Provider>
         </ShowTakedownPostDialogContext.Provider>

@@ -240,7 +240,7 @@ const TagPage: React.FunctionComponent<Props> = (props) => {
         image, aliases: editTagAliases, implications: editTagImplications, pixivTags: editTagPixivTags, social: editTagSocial, twitter: editTagTwitter,
         website: editTagWebsite, fandom: editTagFandom, reason: editTagReason}, session, setSessionFlag)
         if (editTagImage) functions.refreshCache(editTagImage)
-        history.go(0)
+        history.push(`/tag/${editTagKey}`)
     }
 
     useEffect(() => {
@@ -391,10 +391,10 @@ const TagPage: React.FunctionComponent<Props> = (props) => {
             const bytes = new Uint8Array(arrayBuffer)
             image = Object.values(bytes)
         }
-        await functions.put("/api/tag/edit", {tag: tag.tag, key: tag.key, description: tag.description,
-        image, aliases: tag.aliases, implications: tag.implications, social: tag.social, twitter: tag.twitter,
-        website: tag.website, fandom: tag.fandom}, session, setSessionFlag)
-        currentHistory()
+        await functions.put("/api/tag/edit", {tag: tag.tag, key: tag.key, description: tag.description, image,
+        aliases: tag.aliases, implications: tag.implications, pixivTags: tag.pixivTags, social: tag.social,
+        twitter: tag.twitter, website: tag.website, fandom: tag.fandom}, session, setSessionFlag)
+        currentHistory(tag.key)
     }
 
     useEffect(() => {
@@ -413,25 +413,33 @@ const TagPage: React.FunctionComponent<Props> = (props) => {
         setRevertTagHistoryID({failed: false, historyID})
     }
 
-    const currentHistory = () => {
+    const currentHistory = (key?: string) => {
+        history.push(`/tag/${key ? key : tagName}`)
         setHistoryID(null)
         setTagFlag(true)
-        history.push(`/tag/${tagName}`)
     }
 
     const getHistoryButtons = () => {
         return (
             <div className="history-button-container">
-                {session.username ? <button className="history-button" onClick={revertTagHistoryDialog}>
+                <button className="history-button" onClick={() => history.push(`/tag/history/${tagName}`)}>
                     <img src={historyIcon}/>
-                    <span>Revert</span>
+                    <span>History</span>
+                </button>
+                {session.username ? <button className="history-button" onClick={revertTagHistoryDialog}>
+                    <span>⌫Revert</span>
                 </button> : null}
-                <button className="history-button" onClick={currentHistory}>
+                <button className="history-button" onClick={() => currentHistory()}>
                     <img src={currentIcon}/>
                     <span>Current</span>
                 </button>
             </div>
         )
+    }
+
+    const getTagName = () => {
+        if (historyID && tag.key) return functions.toProperCase(tag.key.replaceAll("-", " "))
+        return functions.toProperCase(tag.tag.replaceAll("-", " "))
     }
 
     return (
@@ -453,7 +461,7 @@ const TagPage: React.FunctionComponent<Props> = (props) => {
                         <div className="tag-img-container">
                             <img className="tag-img" src={functions.getTagLink(tag.type, tag.image)}/>
                         </div> : null}
-                        <span className={`tag-heading ${tag.banned ? "strikethrough" : ""}`}>{functions.toProperCase(tag.tag.replaceAll("-", " "))}</span>
+                        <span className={`tag-heading ${tag.banned ? "strikethrough" : ""}`}>{getTagName()}</span>
                         {tagSocialJSX()}
                         {tagOptionsJSX()}
                     </div>

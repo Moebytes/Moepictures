@@ -70,10 +70,14 @@ const TagHistoryRow: React.FunctionComponent<Props> = (props) => {
             const bytes = new Uint8Array(arrayBuffer)
             image = Object.values(bytes)
         }
-        await functions.put("/api/tag/edit", {tag: props.tagHistory.tag, key: props.tagHistory.key, description: props.tagHistory.description,
-        image, aliases: props.tagHistory.aliases, implications: props.tagHistory.implications, social: props.tagHistory.social, twitter: props.tagHistory.twitter,
-        website: props.tagHistory.website, fandom: props.tagHistory.fandom}, session, setSessionFlag)
-        props.onEdit?.()
+        await functions.put("/api/tag/edit", {tag: props.tagHistory.tag, key: props.tagHistory.key, description: props.tagHistory.description, image, 
+        aliases: props.tagHistory.aliases, implications: props.tagHistory.implications, pixivTags: props.tagHistory.pixivTags, social: props.tagHistory.social, 
+        twitter: props.tagHistory.twitter, website: props.tagHistory.website, fandom: props.tagHistory.fandom}, session, setSessionFlag)
+        if (props.tagHistory.key !== props.tagHistory.tag) {
+            history.push(`/tag/history/${props.tagHistory.key}`)
+        } else {
+            props.onEdit?.()
+        }
     }
 
     useEffect(() => {
@@ -254,7 +258,7 @@ const TagHistoryRow: React.FunctionComponent<Props> = (props) => {
         return jsx
     }
 
-    if (!hasAnyUpdate) return null
+    //if (!hasAnyUpdate) return null
 
     return (
         <div className="taghistoryrow">

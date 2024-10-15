@@ -65,25 +65,31 @@ const PostHistoryRow: React.FunctionComponent<Props> = (props) => {
     const revertPostHistory = async () => {
         if (props.current) return Promise.reject()
         const imgChanged = await functions.imagesChanged(props.postHistory, props.currentHistory)
+        const tagsChanged = functions.tagsChanged(props.postHistory, props.currentHistory)
         const srcChanged = functions.sourceChanged(props.postHistory, props.currentHistory)
+        let source = undefined as any
         if (imgChanged || srcChanged) {
-            if (imgChanged && !permissions.isMod(session)) return Promise.reject("img")
-            const {images, upscaledImages} = await functions.parseImages(props.postHistory)
-            const newTags = await functions.parseNewTags(props.postHistory, session, setSessionFlag)
-            const source = {
+            source = {
                 title: props.postHistory.title,
                 translatedTitle: props.postHistory.translatedTitle,
                 artist: props.postHistory.artist,
-                drawn: props.postHistory.drawn,
+                date: props.postHistory.drawn ? functions.formatDate(new Date(props.postHistory.drawn), true) : "",
                 link: props.postHistory.link,
                 commentary: props.postHistory.commentary,
-                translatedCommentary: props.postHistory.translatedCommentary
+                translatedCommentary: props.postHistory.translatedCommentary,
+                bookmarks: props.postHistory.bookmarks,
+                mirrors: props.postHistory.mirrors ? Object.values(props.postHistory.mirrors).join("\n") : ""
             }
+        }
+        if (imgChanged || (srcChanged && tagsChanged)) {
+            if (imgChanged && !permissions.isMod(session)) return Promise.reject("img")
+            const {images, upscaledImages} = await functions.parseImages(props.postHistory)
+            const newTags = await functions.parseNewTags(props.postHistory, session, setSessionFlag)
             await functions.put("/api/post/edit", {postID: props.postHistory.postID, images, upscaledImages, type: props.postHistory.type, restrict: props.postHistory.restrict, source,
             style: props.postHistory.style, artists: props.postHistory.artists, characters: props.postHistory.characters, preserveThirdParty: props.postHistory.thirdParty,
             series: props.postHistory.series, tags: props.postHistory.tags, newTags, reason: props.postHistory.reason}, session, setSessionFlag)
         } else {
-            await functions.put("/api/post/quickedit", {postID: props.postHistory.postID, type: props.postHistory.type, restrict: props.postHistory.restrict,
+            await functions.put("/api/post/quickedit", {postID: props.postHistory.postID, type: props.postHistory.type, restrict: props.postHistory.restrict, source,
             style: props.postHistory.style, artists: props.postHistory.artists, characters: props.postHistory.characters, preserveThirdParty: props.postHistory.thirdParty,
             series: props.postHistory.series, tags: props.postHistory.tags, reason: props.postHistory.reason}, session, setSessionFlag)
         }
@@ -314,6 +320,7 @@ const PostHistoryRow: React.FunctionComponent<Props> = (props) => {
     }
 
     const printMirrors = () => {
+        if (!props.postHistory.mirrors) return "None"
         const mapped = Object.values(props.postHistory.mirrors) as string[]
         return mapped.map((m, i) => {
             let append = i !== mapped.length - 1 ? ", " : ""
@@ -324,7 +331,9 @@ const PostHistoryRow: React.FunctionComponent<Props> = (props) => {
     const diffJSX = () => {
         let jsx = [] as React.ReactElement[]
         if (!props.previousHistory || (props.previousHistory?.images.length !== props.postHistory.images.length)) {
-            if (props.postHistory.images.length > 1) {
+            if (!props.previousHistory && props.postHistory.images.length <= 1) {
+                // ignore condition
+            } else {
                 jsx.push(<span className="posthistoryrow-text"><span className="posthistoryrow-label-text">Images:</span> {props.postHistory.images.length}</span>)
             }
         }
@@ -361,9 +370,7 @@ const PostHistoryRow: React.FunctionComponent<Props> = (props) => {
             jsx.push(<span className="posthistoryrow-text"><span className="posthistoryrow-label-text">Title:</span> {props.postHistory.title || "None"}</span>)
         }
         if (!props.previousHistory || (props.previousHistory?.translatedTitle !== props.postHistory.translatedTitle)) {
-            if (props.postHistory.translatedTitle) {
-                jsx.push(<span className="posthistoryrow-text"><span className="posthistoryrow-label-text">Translated:</span> {props.postHistory.translatedTitle}</span>)
-            }
+            jsx.push(<span className="posthistoryrow-text"><span className="posthistoryrow-label-text">Translated Title:</span> {props.postHistory.translatedTitle || "None"}</span>)
         }
         if (!props.previousHistory || (props.previousHistory?.drawn !== props.postHistory.drawn)) {
             jsx.push(<span className="posthistoryrow-text"><span className="posthistoryrow-label-text">Drawn:</span> {props.postHistory.drawn ? functions.formatDate(new Date(props.postHistory.drawn)) : "Unknown"}</span>)
@@ -372,24 +379,18 @@ const PostHistoryRow: React.FunctionComponent<Props> = (props) => {
             jsx.push(<span className="posthistoryrow-text"><span className="posthistoryrow-label-text">Link:</span> <span className="posthistoryrow-label-link" onClick={() => window.open(props.postHistory.link, "_blank")}>{getDomain(props.postHistory.link)}</span></span>)
         }
         if (!props.previousHistory || (JSON.stringify(props.previousHistory?.mirrors) !== JSON.stringify(props.postHistory.mirrors))) {
-            if (props.postHistory.mirrors) {
-                jsx.push(<span className="posthistoryrow-text"><span className="posthistoryrow-label-text">Mirrors:</span> {printMirrors()}</span>)
-            }
+            jsx.push(<span className="posthistoryrow-text"><span className="posthistoryrow-label-text">Mirrors:</span> {printMirrors()}</span>)
         }
         if (!props.previousHistory || (props.previousHistory?.commentary !== props.postHistory.commentary)) {
-            if (props.postHistory.commentary) {
-                jsx.push(<span className="posthistoryrow-text"><span className="posthistoryrow-label-text">Commentary:</span> {props.postHistory.commentary}</span>)
-            }
+            jsx.push(<span className="posthistoryrow-text"><span className="posthistoryrow-label-text">Commentary:</span> {props.postHistory.commentary || "None"}</span>)
         }
         if (!props.previousHistory || (props.previousHistory?.translatedCommentary !== props.postHistory.translatedCommentary)) {
-            if (props.postHistory.translatedCommentary) {
-                jsx.push(<span className="posthistoryrow-text"><span className="posthistoryrow-label-text">Translated:</span> {props.postHistory.translatedCommentary}</span>)
-            }
+            jsx.push(<span className="posthistoryrow-text"><span className="posthistoryrow-label-text">Translated Commentary:</span> {props.postHistory.translatedCommentary || "None"}</span>)
         }
         return jsx
     }
 
-    if (!hasAnyUpdate) return null
+    //if (!hasAnyUpdate) return null
 
     return (
         <div className="posthistoryrow">

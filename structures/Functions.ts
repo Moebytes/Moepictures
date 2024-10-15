@@ -1343,19 +1343,21 @@ export default class Functions {
     }
 
     public static tagCategories = async (parsedTags: any[], session: any, setSessionFlag: (value: boolean) => void, cache?: boolean) => {
-        let tagMap = cache ? await Functions.tagsCache(session, setSessionFlag) : await Functions.get("/api/tag/map", {tags: parsedTags.map((t: any) => t.tag)}, session, setSessionFlag)
+        let tagMap = cache ? await Functions.tagsCache(session, setSessionFlag) : await Functions.get("/api/tag/map", {tags: parsedTags.map((t: any) => t.tag ? t.tag : t)}, session, setSessionFlag)
         let artists = [] as any 
         let characters = [] as any 
         let series = [] as any 
         let tags = [] as any
         for (let i = 0; i < parsedTags.length; i++) {
-            const foundTag = tagMap[parsedTags[i].tag]
+            let tag = parsedTags[i].tag ? parsedTags[i].tag : parsedTags[i]
+            let count = parsedTags[i].count ? parsedTags[i].count : 0
+            const foundTag = tagMap[tag]
             if (!foundTag) {
-                const unverifiedTag = await Functions.get("/api/tag/unverified", {tag: parsedTags[i].tag}, session, setSessionFlag)
+                const unverifiedTag = await Functions.get("/api/tag/unverified", {tag}, session, setSessionFlag)
                 if (unverifiedTag) {
                     const obj = {} as any 
-                    obj.tag = parsedTags[i].tag 
-                    obj.count = parsedTags[i].count 
+                    obj.tag = tag
+                    obj.count = count
                     obj.image = unverifiedTag.image
                     obj.type = unverifiedTag.type
                     obj.description = unverifiedTag.description 
@@ -1376,8 +1378,8 @@ export default class Functions {
                 continue
             }
             const obj = {} as any 
-            obj.tag = parsedTags[i].tag 
-            obj.count = parsedTags[i].count
+            obj.tag = tag
+            obj.count = count
             obj.type = foundTag.type
             obj.image = foundTag.image
             obj.description = foundTag.description 
@@ -2251,24 +2253,28 @@ export default class Functions {
             const imgLink = Functions.getImageLink(revertPost.images[i]?.type, revertPost.postID, i+1, filename)
             let currentFilename = currentPost.images[i]?.filename ? currentPost.images[i].filename : currentPost.images[i]
             const currentLink = Functions.getImageLink(currentPost.images[i]?.type, currentPost.postID, i+1, currentFilename)
+            
+            let imgBuffer = await Functions.getBuffer(`${imgLink}?upscaled=false`, {"x-force-upscale": "false"})
+            let currentBuffer = await Functions.getBuffer(`${currentLink}?upscaled=false`, {"x-force-upscale": "false"})
+            let upscaledImgBuffer = await Functions.getBuffer(`${imgLink}?upscaled=true`, {"x-force-upscale": "true"})
+            let upscaledCurrentBuffer = await Functions.getBuffer(`${currentLink}?upscaled=true`, {"x-force-upscale": "true"})
 
-            let img = await cryptoFunctions.decryptedLink(imgLink)
-            if (Functions.isModel(img)) {
-                img = await Functions.modelImage(img)
-            } else if (Functions.isAudio(img)) {
-                img = await Functions.songCover(img)
+            if (imgBuffer.byteLength && Functions.isImage(imgLink)) {
+                const isAnimated = Functions.isAnimatedWebp(imgBuffer)
+                if (!isAnimated) imgBuffer = cryptoFunctions.decrypt(imgBuffer)
             }
-
-            let current = await cryptoFunctions.decryptedLink(currentLink)
-            if (Functions.isModel(img)) {
-                current = await Functions.modelImage(current)
-            } else if (Functions.isAudio(img)) {
-                current = await Functions.songCover(current)
+            if (currentBuffer.byteLength && Functions.isImage(currentLink)) {
+                const isAnimated = Functions.isAnimatedWebp(currentBuffer)
+                if (!isAnimated) currentBuffer = cryptoFunctions.decrypt(currentBuffer)
             }
-            const imgBuffer = await Functions.getBuffer(img, {"x-force-upscale": "false"})
-            const currentBuffer = await Functions.getBuffer(current, {"x-force-upscale": "false"})
-            const upscaledImgBuffer = await Functions.getBuffer(img, {"x-force-upscale": "true"})
-            const upscaledCurrentBuffer = await Functions.getBuffer(current, {"x-force-upscale": "true"})
+            if (upscaledImgBuffer.byteLength && Functions.isImage(imgLink)) {
+                const isAnimated = Functions.isAnimatedWebp(upscaledImgBuffer)
+                if (!isAnimated) upscaledImgBuffer = cryptoFunctions.decrypt(upscaledImgBuffer)
+            }
+            if (upscaledCurrentBuffer.byteLength && Functions.isImage(currentLink)) {
+                const isAnimated = Functions.isAnimatedWebp(upscaledCurrentBuffer)
+                if (!isAnimated) upscaledCurrentBuffer = cryptoFunctions.decrypt(upscaledCurrentBuffer)
+            }
 
             if (imgBuffer.byteLength) {
                 const imgMD5 = crypto.createHash("md5").update(Buffer.from(imgBuffer) as any).digest("hex")
@@ -2281,6 +2287,14 @@ export default class Functions {
                 if (imgMD5 !== currentMD5) return true
             }
         }
+        return false
+    }
+
+    public static tagsChanged = (revertPost: any, currentPost: any) => {
+        if (JSON.stringify(revertPost.artists) !== JSON.stringify(currentPost.artists)) return true
+        if (JSON.stringify(revertPost.characters) !== JSON.stringify(currentPost.characters)) return true
+        if (JSON.stringify(revertPost.series) !== JSON.stringify(currentPost.series)) return true
+        if (JSON.stringify(revertPost.tags) !== JSON.stringify(currentPost.tags)) return true
         return false
     }
 
@@ -2301,11 +2315,20 @@ export default class Functions {
         for (let i = 0; i < post.images.length; i++) {
             let filename = post.images[i]?.filename ? post.images[i].filename : post.images[i]
             const imgLink = Functions.getImageLink(post.images[i]?.type, post.postID, i+1, filename)
-            let link = await cryptoFunctions.decryptedLink(imgLink)
             let ext = path.extname(imgLink)
+            console.log(imgLink)
+            let buffer = await Functions.getBuffer(`${imgLink}?upscaled=false`, {"x-force-upscale": "false"})
+            let upscaledBuffer = await Functions.getBuffer(`${imgLink}?upscaled=true`, {"x-force-upscale": "true"})
+            if (buffer.byteLength && Functions.isImage(imgLink)) {
+                const isAnimated = Functions.isAnimatedWebp(buffer)
+                if (!isAnimated) buffer = cryptoFunctions.decrypt(buffer)
+            }
+            if (upscaledBuffer.byteLength && Functions.isImage(imgLink)) {
+                const isAnimated = Functions.isAnimatedWebp(upscaledBuffer)
+                if (!isAnimated) upscaledBuffer = cryptoFunctions.decrypt(upscaledBuffer)
+            }
+            let link = await cryptoFunctions.decryptedLink(imgLink)
             if (!link.includes(ext)) link += `#${ext}`
-            const buffer = await Functions.getBuffer(link, {"x-force-upscale": "false"})
-            const upscaledBuffer = await Functions.getBuffer(link, {"x-force-upscale": "true"})
             let thumbnail = ""
             if (ext === ".mp4" || ext === ".webm") {
                 thumbnail = await Functions.videoThumbnail(link)

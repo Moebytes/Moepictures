@@ -261,11 +261,11 @@ export default class SQLTag {
         values: [tag, alias]
         }
         try {
-        await SQLQuery.flushDB()
-        await SQLQuery.run(query)
-        return false
+            await SQLQuery.flushDB()
+            await SQLQuery.run(query)
+            return false
         } catch {
-        return true
+            return true
         }
     }
 
@@ -339,11 +339,11 @@ export default class SQLTag {
         values: [tag, implication]
         }
         try {
-        await SQLQuery.flushDB()
-        await SQLQuery.run(query)
+            await SQLQuery.flushDB()
+            await SQLQuery.run(query)
         return false
         } catch {
-        return true
+            return true
         }
     }
 

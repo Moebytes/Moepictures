@@ -238,27 +238,26 @@ const App: React.FunctionComponent = (props) => {
     }, [theme])
 
     useEffect(() => {
-        const mobileQuery = (query: any) => {
-            if (query.matches) {
+        const resize = () => {
+            const isMobile = window.matchMedia("(max-width: 500px)").matches
+            const isTablet = window.matchMedia("(min-width: 501px) and (max-width: 1200px)").matches
+    
+            if (isMobile) {
                 setMobile(true)
+                setTablet(false)
+            } else if (isTablet) {
+                setTablet(true)
+                setMobile(false)
             } else {
                 setMobile(false)
-            }
-        }
-        const tabletQuery = (query: any) => {
-            if (query.matches) {
-                setTablet(true)
-            } else {
                 setTablet(false)
             }
         }
-        const media = window.matchMedia("(max-width: 500px)")
-        const media2 = window.matchMedia("(max-width: 1200px)")
-        media.addEventListener("change", tabletQuery)
-        media2.addEventListener("change", mobileQuery)
-        mobileQuery(media)
-        tabletQuery(media2)
+        window.addEventListener("resize", resize)
         document.documentElement.style.visibility = "visible"
+        return () => {
+            window.removeEventListener("resize", resize)
+        }
     }, [])
 
     return (

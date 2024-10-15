@@ -2,7 +2,7 @@ import React, {useContext, useEffect, useState, useReducer} from "react"
 import {useHistory} from "react-router-dom"
 import {ThemeContext, HideSidebarContext, HideNavbarContext, HideSortbarContext, EnableDragContext, MobileContext, UnverifiedPostsContext, SaveSearchContext,
 RelativeContext, HideTitlebarContext, SidebarHoverContext, SearchContext, SearchFlagContext, PostsContext, ShowDeletePostDialogContext, AutoSearchContext,
-TagsContext, RandomFlagContext, ImageSearchFlagContext, SidebarTextContext, SessionContext, MobileScrollingContext, QuickEditIDContext, PremiumRequiredContext,
+TagsContext, RandomFlagContext, ImageSearchFlagContext, SidebarTextContext, SessionContext, MobileScrollingContext, TagEditIDContext, SourceEditIDContext, PremiumRequiredContext,
 TranslationModeContext, TranslationDrawingEnabledContext, SiteHueContext, SessionFlagContext, SiteLightnessContext, SiteSaturationContext, ShowTakedownPostDialogContext,
 SaveSearchDialogContext, DeleteAllSaveSearchDialogContext, EditSaveSearchNameContext, EditSaveSearchKeyContext, EditSaveSearchTagsContext,
 ActionBannerContext} from "../Context"
@@ -21,7 +21,8 @@ import addTranslation from "../assets/icons/addtranslation.png"
 import report from "../assets/icons/report.png"
 import takedown from "../assets/icons/takedown.png"
 import restore from "../assets/icons/restore.png"
-import quickEdit from "../assets/icons/quickedit.png"
+import tagEdit from "../assets/icons/tag-outline.png"
+import sourceEdit from "../assets/icons/history-search.png"
 import edit from "../assets/icons/edit.png"
 import historyIcon from "../assets/icons/history.png"
 import deleteIcon from "../assets/icons/delete.png"
@@ -108,7 +109,8 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
     const [uploaderRole, setUploaderRole] = useState("")
     const [updaterRole, setUpdaterRole] = useState("")
     const [suggestionsActive, setSuggestionsActive] = useState(false)
-    const {quickEditID, setQuickEditID} = useContext(QuickEditIDContext)
+    const {tagEditID, setTagEditID} = useContext(TagEditIDContext)
+    const {sourceEditID, setSourceEditID} = useContext(SourceEditIDContext)
     const {translationMode, setTranslationMode} = useContext(TranslationModeContext)
     const {translationDrawingEnabled, setTranslationDrawingEnabled} = useContext(TranslationDrawingEnabledContext)
     const {autoSearch, setAutoSearch} = useContext(AutoSearchContext)
@@ -639,8 +641,14 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
         history.push(`/post/history/${props.post.postID}`)
     }
     
-    const triggerQuickEdit = () => {
-        setQuickEditID({post: props.post, artists: props.artists, 
+    const triggerTagEdit = () => {
+        setTagEditID({post: props.post, artists: props.artists, 
+            characters: props.characters, series: props.series,
+            tags: props.tags, unverified: props.unverified})
+    }
+
+    const triggerSourceEdit = () => {
+        setSourceEditID({post: props.post, artists: props.artists, 
             characters: props.characters, series: props.series,
             tags: props.tags, unverified: props.unverified})
     }
@@ -959,12 +967,18 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
 
                 {props.post && session.username && !props.noActions ? 
                     <div className="sidebar-subcontainer">
-                        {!props.unverified ? <div className="sidebar-row">
-                            <span className="tag-hover" onClick={triggerQuickEdit}>
-                                <img className="sidebar-icon" src={quickEdit} style={{filter: getFilter()}}/>
-                                <span className="tag">Quick Edit</span>
+                        <div className="sidebar-row">
+                            <span className="tag-hover" onClick={triggerTagEdit}>
+                                <img className="sidebar-icon" src={tagEdit} style={{filter: getFilter()}}/>
+                                <span className="tag">Tag Edit</span>
                             </span>
-                        </div> : null}
+                        </div>
+                        <div className="sidebar-row">
+                            <span className="tag-hover" onClick={triggerSourceEdit}>
+                                <img className="sidebar-icon" src={sourceEdit} style={{filter: getFilter()}}/>
+                                <span className="tag">Source Edit</span>
+                            </span>
+                        </div>
                         {!props.unverified ? <div className="sidebar-row">
                             <span className="tag-hover" onClick={triggerSetAvatar}>
                                 <img className="sidebar-icon" src={setAvatar} style={{filter: getFilter()}}/>

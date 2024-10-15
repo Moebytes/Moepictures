@@ -1,7 +1,7 @@
 import React, {useEffect, useContext, useState, useRef} from "react"
 import {useHistory} from "react-router-dom"
 import {HideNavbarContext, HideSidebarContext, ThemeContext, EnableDragContext, 
-ShowBulkQuickEditDialogContext, HideTitlebarContext, SessionContext, SessionFlagContext, MobileContext, SelectionModeContext, 
+ShowBulkTagEditDialogContext, HideTitlebarContext, SessionContext, SessionFlagContext, MobileContext, SelectionModeContext, 
 SelectionItemsContext, SelectionPostsContext} from "../Context"
 import functions from "../structures/Functions"
 import Draggable from "react-draggable"
@@ -17,7 +17,7 @@ const BulkQuickEditDialog: React.FunctionComponent = (props) => {
     const {enableDrag, setEnableDrag} = useContext(EnableDragContext)
     const {session, setSession} = useContext(SessionContext)
     const {sessionFlag, setSessionFlag} = useContext(SessionFlagContext)
-    const {showBulkQuickEditDialog, setShowBulkQuickEditDialog} = useContext(ShowBulkQuickEditDialogContext)
+    const {showBulkTagEditDialog, setShowBulkTagEditDialog} = useContext(ShowBulkTagEditDialogContext)
     const {selectionMode, setSelectionMode} = useContext(SelectionModeContext)
     const {selectionItems, setSelectionItems} = useContext(SelectionItemsContext) as {selectionItems: Set<string>, setSelectionItems: any}
     const {selectionPosts, setSelectionPosts} = useContext(SelectionPostsContext) as {selectionPosts: Map<string, any>, setSelectionPosts: any}
@@ -47,7 +47,7 @@ const BulkQuickEditDialog: React.FunctionComponent = (props) => {
     }
 
     useEffect(() => {
-        document.title = "Bulk Quick Edit"
+        document.title = "Bulk Tag Edit"
 
         const logPosition = (event: any) => {
             const element = document.querySelector(".dialog-box")
@@ -63,19 +63,19 @@ const BulkQuickEditDialog: React.FunctionComponent = (props) => {
     }, [])
 
     useEffect(() => {
-        if (showBulkQuickEditDialog) {
+        if (showBulkTagEditDialog) {
             document.body.style.pointerEvents = "none"
         } else {
             document.body.style.pointerEvents = "all"
             setEnableDrag(true)
             reset()
         }
-    }, [showBulkQuickEditDialog])
+    }, [showBulkTagEditDialog])
 
     const bulkQuickEdit = async () => {
-        if (!permissions.isMod(session)) return setShowBulkQuickEditDialog(false)
-        if (!selectionMode) return setShowBulkQuickEditDialog(false)
-        if (!artists?.trim() && !characters?.trim() && !series?.trim() && !metaTags?.trim()) return setShowBulkQuickEditDialog(false)
+        if (!permissions.isMod(session)) return setShowBulkTagEditDialog(false)
+        if (!selectionMode) return setShowBulkTagEditDialog(false)
+        if (!artists?.trim() && !characters?.trim() && !series?.trim() && !metaTags?.trim()) return setShowBulkTagEditDialog(false)
         let promiseArray = [] as Promise<any>[]
         for (const postID of selectionItems.values()) {
             const promise = new Promise(async (resolve) => {
@@ -122,7 +122,7 @@ const BulkQuickEditDialog: React.FunctionComponent = (props) => {
             const data = await promiseArray[i]
             functions.put("/api/post/quickedit", data, session, setSessionFlag)
         }
-        setShowBulkQuickEditDialog(false)
+        setShowBulkTagEditDialog(false)
         setSelectionMode(false)
         setTimeout(() => {
             setSelectionMode(true)
@@ -133,7 +133,7 @@ const BulkQuickEditDialog: React.FunctionComponent = (props) => {
         if (button === "accept") {
             bulkQuickEdit()
         } else {
-            setShowBulkQuickEditDialog(false)
+            setShowBulkTagEditDialog(false)
         }
     }
 
@@ -185,14 +185,14 @@ const BulkQuickEditDialog: React.FunctionComponent = (props) => {
         })
     }
 
-    if (showBulkQuickEditDialog) {
+    if (showBulkTagEditDialog) {
         return (
             <div className="dialog">
                 <Draggable handle=".dialog-title-container">
                 <div className="dialog-box" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                     <div className="dialog-container">
                         <div className="dialog-title-container">
-                            <span className="dialog-title">Bulk Quick Edit</span>
+                            <span className="dialog-title">Bulk Tag Edit</span>
                         </div>
                         <div className="dialog-row">
                             <SearchSuggestions active={artistsActive} x={tagX} y={tagY} width={mobile ? 140 : 200} fontSize={17} text={functions.cleanHTML(artists)} click={(tag) => handleArtistClick(tag)} type="artist"/>

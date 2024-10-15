@@ -123,7 +123,7 @@ const TranslationHistoryRow: React.FunctionComponent<Props> = (props) => {
     }
 
     const imgClick = (event: React.MouseEvent) => {
-        let historyIndex = props.current ? "" : `?order=${props.translationHistory.order}&translation=${props.translationHistory.historyID}`
+        let historyIndex = props.current ? "" : `?translation=${props.translationHistory.historyID}&order=${props.translationHistory.order}`
         if (event.ctrlKey || event.metaKey || event.button === 1) {
             window.open(`/post/${props.translationHistory.postID}${historyIndex}`, "_blank")
         } else {
@@ -191,13 +191,13 @@ const TranslationHistoryRow: React.FunctionComponent<Props> = (props) => {
     const translationJSX = () => {
         let jsx = [] as any
         const diffs = diffText()
-        for (let i = 0; i < diffs.length; i++) {
+        for (let i = 0; i < diffs?.length; i++) {
             jsx.push(<span className="translationhistoryrow-tag-text">{diffs[i]}</span>)
         }
         return jsx
     }
 
-    if (!diffText()) return null
+    //if (!diffText()) return null
 
     return (
         <div className="translationhistoryrow">

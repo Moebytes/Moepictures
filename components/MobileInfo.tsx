@@ -2,7 +2,7 @@ import React, {useContext, useEffect, useState, useReducer} from "react"
 import {useHistory} from "react-router-dom"
 import {ThemeContext, HideNavbarContext, HideSortbarContext, EnableDragContext, MobileContext, UnverifiedPostsContext,
 RelativeContext, HideTitlebarContext, SearchContext, SearchFlagContext, PostsContext, ShowDeletePostDialogContext,
-TagsContext, RandomFlagContext, ImageSearchFlagContext, SessionContext, SessionFlagContext, QuickEditIDContext, ShowTakedownPostDialogContext,
+TagsContext, RandomFlagContext, ImageSearchFlagContext, SessionContext, SessionFlagContext, TagEditIDContext, SourceEditIDContext, ShowTakedownPostDialogContext,
 SiteHueContext, SiteLightnessContext, SiteSaturationContext, TranslationModeContext, TranslationDrawingEnabledContext,
 ActionBannerContext} from "../Context"
 import {HashLink as Link} from "react-router-hash-link"
@@ -13,7 +13,8 @@ import addTranslation from "../assets/icons/addtranslation.png"
 import report from "../assets/icons/report.png"
 import edit from "../assets/icons/edit.png"
 import historyIcon from "../assets/icons/history.png"
-import quickEdit from "../assets/icons/quickedit.png"
+import tagEdit from "../assets/icons/tag-outline.png"
+import sourceEdit from "../assets/icons/history-search.png"
 import deleteIcon from "../assets/icons/delete.png"
 import takedown from "../assets/icons/takedown.png"
 import restore from "../assets/icons/restore.png"
@@ -79,7 +80,8 @@ const MobileInfo: React.FunctionComponent<Props> = (props) => {
     const [uploaderRole, setUploaderRole] = useState("")
     const [updaterRole, setUpdaterRole] = useState("")
     const [suggestionsActive, setSuggestionsActive] = useState(false)
-    const {quickEditID, setQuickEditID} = useContext(QuickEditIDContext)
+    const {tagEditID, setTagEditID} = useContext(TagEditIDContext)
+    const {sourceEditID, setSourceEditID} = useContext(SourceEditIDContext)
     const {translationMode, setTranslationMode} = useContext(TranslationModeContext)
     const {translationDrawingEnabled, setTranslationDrawingEnabled} = useContext(TranslationDrawingEnabledContext)
     const {actionBanner, setActionBanner} = useContext(ActionBannerContext)
@@ -337,10 +339,14 @@ const MobileInfo: React.FunctionComponent<Props> = (props) => {
         history.push(`/set-avatar/${props.post.postID}`)
     }
 
-    const triggerQuickEdit = () => {
-        setQuickEditID({post: props.post, artists: props.artists, 
+    const triggerTagEdit = () => {
+        setTagEditID({post: props.post, artists: props.artists, 
             characters: props.characters, series: props.series,
             tags: props.tags, unverified: props.unverified})
+    }
+
+    const triggerSourceEdit = () => {
+        setSourceEditID({post: props.post, unverified: props.unverified})
     }
 
     const generateMirrorsJSX = () => {
@@ -619,9 +625,15 @@ const MobileInfo: React.FunctionComponent<Props> = (props) => {
                 {props.post && session.username ? 
                     <div className="mobileinfo-subcontainer-column">
                         <div className="mobileinfo-row">
-                            <span className="tag-hover" onClick={triggerQuickEdit}>
-                                <img className="mobileinfo-icon" src={quickEdit} style={{filter: getFilter()}}/>
-                                <span className="tag">Quick Edit</span>
+                            <span className="tag-hover" onClick={triggerTagEdit}>
+                                <img className="mobileinfo-icon" src={tagEdit} style={{filter: getFilter()}}/>
+                                <span className="tag">Tag Edit</span>
+                            </span>
+                        </div>
+                        <div className="mobileinfo-row">
+                            <span className="tag-hover" onClick={triggerSourceEdit}>
+                                <img className="mobileinfo-icon" src={sourceEdit} style={{filter: getFilter()}}/>
+                                <span className="tag">Source Edit</span>
                             </span>
                         </div>
                         <div className="mobileinfo-row">

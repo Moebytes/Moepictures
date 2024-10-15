@@ -1,7 +1,7 @@
 import React, {useEffect, useContext, useState, useRef} from "react"
 import {useHistory} from "react-router-dom"
 import {HashLink as Link} from "react-router-hash-link"
-import {HideNavbarContext, HideSidebarContext, ThemeContext, EnableDragContext, QuickEditIDContext, HideTitlebarContext, 
+import {HideNavbarContext, HideSidebarContext, ThemeContext, EnableDragContext, TagEditIDContext, HideTitlebarContext, 
 SessionContext, SessionFlagContext, MobileContext} from "../Context"
 import functions from "../structures/Functions"
 import Draggable from "react-draggable"
@@ -31,7 +31,7 @@ const QuickEditDialog: React.FunctionComponent = (props) => {
     const {enableDrag, setEnableDrag} = useContext(EnableDragContext)
     const {session, setSession} = useContext(SessionContext)
     const {sessionFlag, setSessionFlag} = useContext(SessionFlagContext)
-    const {quickEditID, setQuickEditID} = useContext(QuickEditIDContext)
+    const {tagEditID, setTagEditID} = useContext(TagEditIDContext)
     const {mobile, setMobile} = useContext(MobileContext)
     const [type, setType] = useState("image")
     const [restrict, setRestrict] = useState("safe")
@@ -58,14 +58,14 @@ const QuickEditDialog: React.FunctionComponent = (props) => {
     const history = useHistory()
 
     const updateFields = async () => {
-        setType(quickEditID.post.type)
-        setRestrict(quickEditID.post.restrict)
-        setStyle(quickEditID.post.style)
-        setArtists(quickEditID.artists.map((t: any) => t.tag).join(" "))
-        setCharacters(quickEditID.characters.map((t: any) => t.tag).join(" "))
-        setSeries(quickEditID.series.map((t: any) => t.tag).join(" "))
-        const rawMetaTags = quickEditID.tags.filter((t: any) => t.type === "meta")
-        const rawTags = quickEditID.tags.filter((t: any) => t.type === "tag")
+        setType(tagEditID.post.type)
+        setRestrict(tagEditID.post.restrict)
+        setStyle(tagEditID.post.style)
+        setArtists(tagEditID.artists.map((t: any) => t.tag).join(" "))
+        setCharacters(tagEditID.characters.map((t: any) => t.tag).join(" "))
+        setSeries(tagEditID.series.map((t: any) => t.tag).join(" "))
+        const rawMetaTags = tagEditID.tags.filter((t: any) => t.type === "meta")
+        const rawTags = tagEditID.tags.filter((t: any) => t.type === "tag")
         setMetaTags(rawMetaTags.map((t: any) => t.tag).join(" "))
         setTags(rawTags.map((t: any) => t.tag).join(" "))
     }
@@ -81,7 +81,7 @@ const QuickEditDialog: React.FunctionComponent = (props) => {
     }
 
     useEffect(() => {
-        document.title = "Quick Edit"
+        document.title = "Tag Edit"
 
         const logPosition = (event: any) => {
             const element = document.querySelector(".dialog-box")
@@ -97,7 +97,7 @@ const QuickEditDialog: React.FunctionComponent = (props) => {
     }, [])
 
     useEffect(() => {
-        if (quickEditID) {
+        if (tagEditID) {
             document.body.style.pointerEvents = "none"
             updateFields()
         } else {
@@ -105,9 +105,9 @@ const QuickEditDialog: React.FunctionComponent = (props) => {
             setEnableDrag(true)
             reset()
         }
-    }, [quickEditID])
+    }, [tagEditID])
 
-    const quickEdit = async () => {
+    const tagEdit = async () => {
         if (session.username) {
             const joined = `${artists} ${characters} ${series} ${tags} ${metaTags}`
             if (joined.includes("_") || joined.includes("/") || joined.includes("\\")) {
@@ -138,8 +138,8 @@ const QuickEditDialog: React.FunctionComponent = (props) => {
                 }
             }
             const data = {
-                postID: quickEditID.post.postID,
-                unverified: quickEditID.unverified,
+                postID: tagEditID.post.postID,
+                unverified: tagEditID.unverified,
                 type,
                 restrict,
                 style,
@@ -149,7 +149,7 @@ const QuickEditDialog: React.FunctionComponent = (props) => {
                 tags: functions.cleanHTML(`${tags} ${metaTags}`).split(/[\n\r\s]+/g),
                 reason
             }
-            setQuickEditID(null)
+            setTagEditID(null)
             await functions.put("/api/post/quickedit", data, session, setSessionFlag)
             history.go(0)
         } else {
@@ -188,7 +188,7 @@ const QuickEditDialog: React.FunctionComponent = (props) => {
                 return setError(false)
             }
             const data = {
-                postID: quickEditID.post.postID,
+                postID: tagEditID.post.postID,
                 type,
                 restrict,
                 style,
@@ -205,14 +205,14 @@ const QuickEditDialog: React.FunctionComponent = (props) => {
 
     const click = (button: "accept" | "reject") => {
         if (button === "accept") {
-            quickEdit()
+            tagEdit()
         } else {
-            setQuickEditID(null)
+            setTagEditID(null)
         }
     }
 
     const close = () => {
-        setQuickEditID(null)
+        setTagEditID(null)
         setSubmitted(false)
         setReason("")
     }
@@ -336,14 +336,14 @@ const QuickEditDialog: React.FunctionComponent = (props) => {
         }
     }, [type, style])
 
-    if (quickEditID) {
+    if (tagEditID) {
         if (session.banned) {
             return (
                 <div className="dialog">
                     <Draggable handle=".dialog-title-container">
                     <div className="dialog-box" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                             <div className="dialog-title-container">
-                                <span className="dialog-title">Quick Edit</span>
+                                <span className="dialog-title">Tag Edit</span>
                             </div>
                             <span className="dialog-ban-text">You are banned. Cannot edit.</span>
                             <button className="dialog-ban-button" onClick={() => click("reject")}>
@@ -361,7 +361,7 @@ const QuickEditDialog: React.FunctionComponent = (props) => {
                     <div className="dialog-box" style={{marginTop: "-50px"}} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                         <div className="dialog-container">
                             <div className="dialog-title-container">
-                                <span className="dialog-title">Quick Edit</span>
+                                <span className="dialog-title">Tag Edit</span>
                             </div>
                             <div className="dialog-row">
                                 <span className="dialog-text">Classification: </span>
@@ -511,7 +511,7 @@ const QuickEditDialog: React.FunctionComponent = (props) => {
                 <div className="dialog-box" style={{marginTop: "-50px"}} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                     <div className="dialog-container">
                         <div className="dialog-title-container">
-                            <span className="dialog-title">Quick Edit Request</span>
+                            <span className="dialog-title">Tag Edit Request</span>
                         </div>
                         {submitted ? <>
                         <div className="dialog-row">
