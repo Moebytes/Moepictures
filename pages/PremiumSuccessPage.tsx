@@ -9,7 +9,7 @@ import functions from "../structures/Functions"
 import permissions from "../structures/Permissions"
 import {HideNavbarContext, HideSidebarContext, ThemeContext, EnableDragContext, RedirectContext, MobileContext,
 RelativeContext, HideTitlebarContext, HeaderTextContext, SidebarTextContext, SessionContext, SessionFlagContext} from "../Context"
-import premiumStar from "../assets/icons/premiumStar.png"
+import premiumStar from "../assets/icons/premium-star.png"
 import "./styles/verifyemailsuccesspage.less"
 
 const PremiumSuccessPage: React.FunctionComponent = (props) => {

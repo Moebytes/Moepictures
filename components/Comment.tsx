@@ -15,7 +15,11 @@ import permissions from "../structures/Permissions"
 import adminCrown from "../assets/icons/admin-crown.png"
 import modCrown from "../assets/icons/mod-crown.png"
 import systemCrown from "../assets/icons/system-crown.png"
-import premiumStar from "../assets/icons/premiumStar.png"
+import premiumCuratorStar from "../assets/icons/premium-curator-star.png"
+import curatorStar from "../assets/icons/curator-star.png"
+import premiumContributorPencil from "../assets/icons/premium-contributor-pencil.png"
+import contributorPencil from "../assets/icons/contributor-pencil.png"
+import premiumStar from "../assets/icons/premium-star.png"
 import jsxFunctions from "../structures/JSXFunctions"
 import "./styles/comment.less"
 
@@ -215,6 +219,34 @@ const Comment: React.FunctionComponent<Props> = (props) => {
                 <div className="comment-username-container">
                 <span className="comment-user-text system-color">{functions.toProperCase(props.comment.username)}</span>
                     <img className="comment-user-label" src={systemCrown}/>
+                </div>
+            )
+        } else if (props.comment?.role === "premium-curator") {
+            return (
+                <div className="comment-username-container">
+                <span className="comment-user-text curator-color">{functions.toProperCase(props.comment.username)}</span>
+                    <img className="comment-user-label" src={premiumCuratorStar}/>
+                </div>
+            )
+        } else if (props.comment?.role === "curator") {
+            return (
+                <div className="comment-username-container">
+                <span className="comment-user-text curator-color">{functions.toProperCase(props.comment.username)}</span>
+                    <img className="comment-user-label" src={curatorStar}/>
+                </div>
+            )
+        } else if (props.comment?.role === "premium-contributor") {
+            return (
+                <div className="comment-username-container">
+                <span className="comment-user-text premium-color">{functions.toProperCase(props.comment.username)}</span>
+                    <img className="comment-user-label" src={premiumContributorPencil}/>
+                </div>
+            )
+        } else if (props.comment?.role === "contributor") {
+            return (
+                <div className="comment-username-container">
+                <span className="comment-user-text contributor-color">{functions.toProperCase(props.comment.username)}</span>
+                    <img className="comment-user-label" src={contributorPencil}/>
                 </div>
             )
         } else if (props.comment?.role === "premium") {

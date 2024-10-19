@@ -99,6 +99,8 @@ const UserRoutes = (app: Express) => {
             let ip = req.headers["x-forwarded-for"] || req.socket.remoteAddress
             ip = ip?.toString().replace("::ffff:", "") || ""
             if (req.session.captchaAnswer !== captchaResponse?.trim()) return res.status(400).send("Bad captchaResponse")
+            let bannedIp = await sql.report.bannedIP(ip)
+            if (bannedIp) return res.status(400).send("IP banned")
             try {
                 await sql.user.insertUser(username, email)
                 await sql.user.updateUser(username, "joinDate", new Date().toISOString())
@@ -226,9 +228,15 @@ const UserRoutes = (app: Express) => {
                 req.session.showR18 = user.showR18
                 req.session.premiumExpiration = user.premiumExpiration
 
-                if (user.role === "premium" && user.premiumExpiration) {
+                if (user.role.includes("premium") && user.premiumExpiration) {
                     if (new Date(user.premiumExpiration) < new Date()) {
-                        await sql.user.updateUser(req.session.username, "role", "user")
+                        if (user.role.includes("curator")) {
+                            await sql.user.updateUser(req.session.username, "role", "curator")
+                        } else if (user.role.includes("contributor")) {
+                            await sql.user.updateUser(req.session.username, "role", "contributor")
+                        } else {
+                            await sql.user.updateUser(req.session.username, "role", "user")
+                        }
                         const message = `Unfortunately, it seems like your premium membership has expired. Thank you for supporting us! We greatly appreciate your time spent as a premium member and we hope that you are interested in renewing it again.\n\n${functions.getDomain()}/premium#purchase`
                         await serverFunctions.systemMessage(req.session.username, "Notice: Your premium membership expired", message)
                     }
@@ -946,7 +954,7 @@ const UserRoutes = (app: Express) => {
                     await sql.history.deleteTranslationHistory(history.historyID)
                 }
             }
-            await sql.report.insertBan(username, req.session.username, reason)
+            await sql.report.insertBan(username, user.ip, req.session.username, reason)
             await sql.user.updateUser(username, "banned", true)
             const message = `You have been banned for breaking the site rules. You can still view the site but you won't be able to interact with other users or edit content.${reason ? `\n\nHere is an additional provided reason: ${reason}` : ""}`
             await serverFunctions.systemMessage(username, "Notice: You were banned", message)
@@ -996,31 +1004,49 @@ const UserRoutes = (app: Express) => {
         try {
             const {username, role} = req.body
             if (!username) return res.status(400).send("Bad username")
-            if (role !== "admin" && role !== "mod" && role !== "premium" && role !== "user") return res.status(400).send("Bad role")
+            if (!functions.validRole(role)) return res.status(400).send("Bad role")
             if (!req.session.username) return res.status(403).send("Unauthorized")
             if (!permissions.isAdmin(req.session)) return res.status(403).end()
             const user = await sql.user.user(username)
             if (!user) return res.status(400).send("Bad username")
+            if (user.role === role) return res.status(200).send("Success")
 
             if (username === process.env.OWNER_NAME || username === "moepictures") {
                 return res.status(403).end()
             }
+
+            let curatorPromotion = false
+            let contributorPromotion = false
+            let premiumPromotion = false
+            if ((!user.role.includes("premium") && role.includes("curator")) || (user.role.includes("premium") && role === "premium-curator")) curatorPromotion = true
+            if ((!user.role.includes("premium") && role.includes("contributor")) || (user.role.includes("premium") && role === "premium-contributor")) contributorPromotion = true
+            if (role.includes("premium") && !user.role.includes("premium")) premiumPromotion = true
             
             let premiumExpiration = user.premiumExpiration ? new Date(user.premiumExpiration) : new Date()
-            if (role === "premium") {
+            if (premiumPromotion && premiumExpiration <= new Date()) {
                 premiumExpiration.setFullYear(premiumExpiration.getFullYear() + 1)
-                await sql.user.updateUser(req.session.username, "premiumExpiration", premiumExpiration.toISOString())
+                await sql.user.updateUser(username, "premiumExpiration", premiumExpiration.toISOString())
             }
             await sql.user.updateUser(username, "role", role)
             if (role === "admin") {
-                const message = `You have been promoted to the role of admin. You now have access to all special privileges, including deleting posts and promoting others.`
+                const message = `You have been promoted to the role of admin. You now have access to all special privileges, including deleting posts and promoting others. Thanks for being one of our highest trusted members!\n\nPlease enable 2FA if you don't have it already.`
                 await serverFunctions.systemMessage(username, "Notice: Your account was promoted to admin", message)
-            } else if (role === "mod") {
-                const message = `You have been promoted to the role of moderator. You now have access to the mod queue where you approve posts and can take moderation actions such as banning users.`
+            } 
+            if (role === "mod") {
+                const message = `You have been promoted to the role of mod. You now have access to the mod queue where you approve posts and can take moderation actions such as banning users. Thanks for being a trusted member!\n\nPlease enable 2FA if you don't have it already.`
                 await serverFunctions.systemMessage(username, "Notice: Your account was promoted to mod", message)
-            } else if (role === "premium") {
+            } 
+            if (premiumPromotion) {
                 const message = `Your account has been upgraded to premium. You can now access all the premium features. Thank you for supporting us!\n\nYour membership will last until ${functions.prettyDate(premiumExpiration)}.`
                 await serverFunctions.systemMessage(username, "Notice: Your account was upgraded to premium", message)
+            } 
+            if (curatorPromotion) {
+                const message = `Your account has been upgraded to curator. You can now upload directly without passing through the mod queue. Thanks for your great contributions!`
+                await serverFunctions.systemMessage(username, "Notice: Your account was upgraded to curator", message)
+            } 
+            if (contributorPromotion) {
+                const message = `Your account has been upgraded to contributor. You can now edit posts and tags without passing through the mod queue. Thanks for your edits!`
+                await serverFunctions.systemMessage(username, "Notice: Your account was upgraded to contributor", message)
             }
             res.status(200).send("Success")
         } catch (e) {

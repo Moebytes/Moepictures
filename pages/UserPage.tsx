@@ -17,6 +17,10 @@ import adminLabel from "../assets/icons/admin-label.png"
 import modLabel from "../assets/icons/mod-label.png"
 import systemLabel from "../assets/icons/system-label.png"
 import premiumLabel from "../assets/icons/premium-label.png"
+import contributorLabel from "../assets/icons/contributor-label.png"
+import premiumContributorLabel from "../assets/icons/premium-contributor-label.png"
+import curatorLabel from "../assets/icons/curator-label.png"
+import premiumCuratorLabel from "../assets/icons/premium-curator-label.png"
 import banIcon from "../assets/icons/ban.png"
 import unbanIcon from "../assets/icons/unban.png"
 import promoteIcon from "../assets/icons/promote.png"
@@ -267,6 +271,34 @@ const UserPage: React.FunctionComponent<Props> = (props) => {
                 <div className="user-name-container">
                     <span className="user-name-plain system-color">{functions.toProperCase(username)}</span>
                     <img className="user-name-label" src={systemLabel}/>
+                </div>
+            )
+        } else if (user?.role === "premium-curator") {
+            return (
+                <div className="user-name-container">
+                    <span className="user-name-plain curator-color">{functions.toProperCase(username)}</span>
+                    <img className="user-name-label" src={premiumCuratorLabel}/>
+                </div>
+            )
+        } else if (user?.role === "curator") {
+            return (
+                <div className="user-name-container">
+                    <span className="user-name-plain curator-color">{functions.toProperCase(username)}</span>
+                    <img className="user-name-label" src={curatorLabel}/>
+                </div>
+            )
+        } else if (user?.role === "premium-contributor") {
+            return (
+                <div className="user-name-container">
+                    <span className="user-name-plain premium-color">{functions.toProperCase(username)}</span>
+                    <img className="user-name-label" src={premiumContributorLabel}/>
+                </div>
+            )
+        } else if (user?.role === "contributor") {
+            return (
+                <div className="user-name-container">
+                    <span className="user-name-plain contributor-color">{functions.toProperCase(username)}</span>
+                    <img className="user-name-label" src={contributorLabel}/>
                 </div>
             )
         } else if (user?.role === "premium") {

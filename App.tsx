@@ -1,7 +1,7 @@
 import React, {useEffect, useState, useContext} from "react"
 import {Switch, Route, Redirect, useHistory, useLocation} from "react-router-dom"
-import Context, {ThemeContext, HideNavbarContext, HideSidebarContext, HideSortbarContext, HasNotificationContext, TabletContext,
-HideTitlebarContext, EnableDragContext, ActiveDropdownContext, FilterDropActiveContext, MobileScrollingContext, EmojisContext,
+import Context, {ThemeContext, HideNavbarContext, HideSidebarContext, HideSortbarContext, HasNotificationContext, TabletContext, ActiveGroupContext,
+HideTitlebarContext, EnableDragContext, ActiveDropdownContext, FilterDropActiveContext, MobileScrollingContext, EmojisContext, PostsContext,
 SidebarHoverContext, SessionContext, SessionFlagContext, UserImgContext, UserImgPostContext, MobileContext, SelectionModeContext} from "./Context"
 import favicon from "./assets/icons/favicon.png"
 import permissions from "./structures/Permissions"
@@ -36,6 +36,7 @@ import ForgotPasswordPage from "./pages/ForgotPasswordPage"
 import EditPostPage from "./pages/EditPostPage"
 import UserPage from "./pages/UserPage"
 import TagPage from "./pages/TagPage"
+import GroupPage from "./pages/GroupPage"
 import TagHistoryPage from "./pages/TagHistoryPage"
 import PostHistoryPage from "./pages/PostHistoryPage"
 import HistoryPage from "./pages/HistoryPage"
@@ -47,6 +48,7 @@ import SetAvatarPage from "./pages/SetAvatarPage"
 import TranslationHistoryPage from "./pages/TranslationHistoryPage"
 import ForumPage from "./pages/ForumPage"
 import ThreadPage from "./pages/ThreadPage"
+import GroupsPage from "./pages/GroupsPage"
 import BulkUploadPage from "./pages/BulkUploadPage"
 import MailPage from "./pages/MailPage"
 import MessagePage from "./pages/MessagePage"
@@ -83,6 +85,8 @@ const App: React.FunctionComponent = (props) => {
     const [selectionMode, setSelectionMode] = useState(false)
     const [hasNotification, setHasNotification] = useState(false)
     const [emojis, setEmojis] = useState([])
+    const [posts, setPosts] = useState([]) as any
+    const [activeGroup, setActiveGroup] = useState(null) as any
     const history = useHistory()
     const location = useLocation()
 
@@ -100,17 +104,28 @@ const App: React.FunctionComponent = (props) => {
     }
 
     useEffect(() => {
+        const savedActiveGroup = localStorage.getItem("activeGroup")
         const onDOMLoaded = () => {
             setLoaded(true)
             getSessionCookie()
             functions.clearCache()
             cacheEmojis()
+            if (savedActiveGroup) setActiveGroup(savedActiveGroup)
         }
         window.addEventListener("load", onDOMLoaded)
         return () => {
             window.removeEventListener("load", onDOMLoaded)
         }
     }, [])
+
+    useEffect(() => {
+        console.log(activeGroup)
+        if (activeGroup) {
+            localStorage.setItem("activeGroup", activeGroup)
+        } else {
+            localStorage.removeItem("activeGroup")
+        }
+    }, [activeGroup])
 
     const getImg = () => {
         if (session.username) {
@@ -152,6 +167,9 @@ const App: React.FunctionComponent = (props) => {
     }
 
     useEffect(() => {
+        if (!location.pathname.includes("/post")) {
+            setActiveGroup(null)
+        }
         if (session.username && !session.emailVerified) {
             if (location.pathname !== "/verify-email") {
                 history.push("/verify-email")
@@ -178,6 +196,10 @@ const App: React.FunctionComponent = (props) => {
     useEffect(() => {
         functions.preventDragging()
     })
+
+    useEffect(() => {
+        setActiveGroup(null)
+    }, [posts])
 
     useEffect(() => {
         const handleScroll = () => {
@@ -262,6 +284,8 @@ const App: React.FunctionComponent = (props) => {
 
     return (
         <div className={`app ${!loaded ? "stop-transitions" : ""}`}>
+            <ActiveGroupContext.Provider value={{activeGroup, setActiveGroup}}>
+            <PostsContext.Provider value={{posts, setPosts}}>
             <EmojisContext.Provider value={{emojis, setEmojis}}>
             <HasNotificationContext.Provider value={{hasNotification, setHasNotification}}>
             <SelectionModeContext.Provider value={{selectionMode, setSelectionMode}}>
@@ -295,11 +319,13 @@ const App: React.FunctionComponent = (props) => {
                         <Route exact path="/characters"><CharactersPage/></Route>
                         <Route exact path="/artists"><ArtistsPage/></Route>
                         <Route exact path="/comments"><CommentsPage/></Route>
+                        <Route exact path="/groups"><GroupsPage/></Route>
                         <Route exact path="/history"><HistoryPage/></Route>
                         <Route exact path="/premium"><PremiumPage/></Route>
                         <Route exact path="/user/:username" render={(props) => <UserPage {...props}/>}></Route>
                         <Route exact path="/tag/history/:tag" render={(props) => <TagHistoryPage {...props}/>}></Route>
                         <Route exact path="/tag/:tag" render={(props) => <TagPage {...props}/>}></Route>
+                        <Route exact path="/group/:group" render={(props) => <GroupPage {...props}/>}></Route>
                         <Route exact path="/translation/history/:id/:order" render={(props) => <TranslationHistoryPage {...props}/>}></Route>
                         <Route exact path="/post/history/:id" render={(props) => <PostHistoryPage {...props}/>}></Route>
                         <Route exact path="/post/:id" render={(props) => <PostPage {...props}/>}></Route>
@@ -355,6 +381,8 @@ const App: React.FunctionComponent = (props) => {
             </SelectionModeContext.Provider>
             </HasNotificationContext.Provider>
             </EmojisContext.Provider>
+            </PostsContext.Provider>
+            </ActiveGroupContext.Provider>
         </div>
     )
 }

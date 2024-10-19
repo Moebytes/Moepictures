@@ -73,7 +73,7 @@ const SourceEditDialog: React.FunctionComponent = (props) => {
     }, [sourceEditID])
 
     const sourceEdit = async () => {
-        if (session.username) {
+        if (permissions.isContributor(session)) {
             const data = {
                 postID: sourceEditID.post.postID,
                 unverified: sourceEditID.unverified,
@@ -155,7 +155,7 @@ const SourceEditDialog: React.FunctionComponent = (props) => {
                 </div>
             )
         }
-        if (session.username) {
+        if (permissions.isContributor(session)) {
             return (
                 <div className="dialog">
                     <Draggable handle=".dialog-title-container">

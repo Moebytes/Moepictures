@@ -154,6 +154,7 @@ const TagRoutes = (app: Express) => {
         try {
             let {tag, key, description, image, aliases, implications, pixivTags, social, twitter, website, fandom, reason, updater, updatedDate, silent} = req.body
             if (!req.session.username) return res.status(403).send("Unauthorized")
+            if (!permissions.isContributor(req.session)) return res.status(403).send("Unauthorized")
             if (req.session.banned) return res.status(403).send("You are banned")
             if (!tag) return res.status(400).send("Bad tag")
             const tagObj = await sql.tag.tag(tag)
@@ -544,6 +545,24 @@ const TagRoutes = (app: Express) => {
                 }
                 await sql.history.deleteTagHistory(Number(historyID))
             }
+            res.status(200).send("Success")
+        } catch (e) {
+            console.log(e)
+            res.status(400).send("Bad request")
+        }
+    })
+
+    app.post("/api/tag/categorize", csrfProtection, tagUpdateLimiter, async (req: Request, res: Response) => {
+        try {
+            const {tag, category} = req.body
+            if (category !== "artist" && category !== "character" && category !== "series" 
+            && category !== "meta" && category !== "tag") return res.status(400).send("Bad category")
+            if (!req.session.username) return res.status(403).send("Unauthorized")
+            if (!permissions.isMod(req.session)) return res.status(403).end()
+            const tagObj = await sql.tag.tag(tag)
+            if (!tagObj) return res.status(400).send("Bad tag")
+
+            await sql.tag.updateTag(tag, "type", category)
             res.status(200).send("Success")
         } catch (e) {
             console.log(e)

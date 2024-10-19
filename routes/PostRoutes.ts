@@ -312,6 +312,7 @@ const PostRoutes = (app: Express) => {
     
             if (Number.isNaN(postID)) return res.status(400).send("Bad postID")
             if (!req.session.username) return res.status(403).send("Unauthorized")
+            if (!permissions.isContributor(req.session)) return res.status(403).send("Unauthorized")
             if (req.session.banned) return res.status(403).send("You are banned")
 
             const post = unverified ? await sql.post.unverifiedPost(postID) :  await sql.post.post(postID)

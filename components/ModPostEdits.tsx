@@ -167,7 +167,7 @@ const ModPostEdits: React.FunctionComponent = (props) => {
                         <canvas className="mod-post-img" ref={imagesRef[i]} onClick={imgClick} onAuxClick={(event) => imgClick(event, true)}></canvas>}
                     </div>
                     <div className="mod-post-text-column">
-                        <span className="mod-post-link" onClick={() => history.push(`/user/${post.updater}`)}>Edited By: {functions.toProperCase(post.updater || "Deleted")}</span>
+                        <span className="mod-post-link" onClick={() => history.push(`/user/${post.updater}`)}>Edited By: {functions.toProperCase(post?.updater) || "deleted"}</span>
                         <span className="mod-post-text">Reason: {post.reason || "None provided."}</span>
                         <span className="mod-post-text">Tags: {post.tags?.length}</span>
                         <span className="mod-post-text">Upscaled: {post.hasUpscaled ? "yes" : "no"}</span>

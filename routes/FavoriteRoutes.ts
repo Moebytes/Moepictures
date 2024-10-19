@@ -86,15 +86,15 @@ const FavoriteRoutes = (app: Express) => {
             const postID = req.query.postID
             if (Number.isNaN(Number(postID))) return res.status(400).send("Invalid postID")
             if (!req.session.username) return res.status(403).send("Unauthorized")
-            const favgroup = await sql.favorite.postFavgroups(Number(postID), req.session.username)
-            res.status(200).send(favgroup)
+            const favgroups = await sql.favorite.postFavgroups(Number(postID), req.session.username)
+            res.status(200).send(favgroups)
         } catch (e) {
             console.log(e)
             res.status(400).send("Bad request") 
         }
     })
 
-    app.delete("/api/favgroup/post/delete", favoriteLimiter, async (req: Request, res: Response) => {
+    app.delete("/api/favgroup/post/delete", csrfProtection, favoriteLimiter, async (req: Request, res: Response) => {
         try {
             const postID = req.query.postID
             const name = req.query.name as string
@@ -113,7 +113,7 @@ const FavoriteRoutes = (app: Express) => {
         }
     })
 
-    app.delete("/api/favgroup", favoriteLimiter, async (req: Request, res: Response) => {
+    app.delete("/api/favgroup", csrfProtection, favoriteLimiter, async (req: Request, res: Response) => {
         try {
             const name = req.query.name as string
             if (!req.session.username) return res.status(403).send("Unauthorized")

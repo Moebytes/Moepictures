@@ -4,12 +4,12 @@ import {ThemeContext, HideNavbarContext, HideSortbarContext, EnableDragContext, 
 RelativeContext, HideTitlebarContext, SearchContext, SearchFlagContext, PostsContext, ShowDeletePostDialogContext,
 TagsContext, RandomFlagContext, ImageSearchFlagContext, SessionContext, SessionFlagContext, TagEditIDContext, SourceEditIDContext, ShowTakedownPostDialogContext,
 SiteHueContext, SiteLightnessContext, SiteSaturationContext, TranslationModeContext, TranslationDrawingEnabledContext,
-ActionBannerContext} from "../Context"
+ActionBannerContext, GroupPostIDContext} from "../Context"
 import {HashLink as Link} from "react-router-hash-link"
 import permissions from "../structures/Permissions"
 import favicon from "../assets/icons/favicon.png"
 import setAvatar from "../assets/icons/setavatar.png"
-import addTranslation from "../assets/icons/addtranslation.png"
+import addTranslation from "../assets/icons/translation-toggle-on.png"
 import report from "../assets/icons/report.png"
 import edit from "../assets/icons/edit.png"
 import historyIcon from "../assets/icons/history.png"
@@ -39,6 +39,7 @@ import gelbooru from "../assets/icons/gelbooru.png"
 import safebooru from "../assets/icons/safebooru.png"
 import yandere from "../assets/icons/yandere.png"
 import konachan from "../assets/icons/konachan.png"
+import group from "../assets/icons/group.png"
 import functions from "../structures/Functions"
 import "./styles/mobileinfo.less"
 
@@ -85,6 +86,7 @@ const MobileInfo: React.FunctionComponent<Props> = (props) => {
     const {translationMode, setTranslationMode} = useContext(TranslationModeContext)
     const {translationDrawingEnabled, setTranslationDrawingEnabled} = useContext(TranslationDrawingEnabledContext)
     const {actionBanner, setActionBanner} = useContext(ActionBannerContext)
+    const {groupPostID, setGroupPostID} = useContext(GroupPostIDContext)
     const history = useHistory()
 
     const getFilter = () => {
@@ -410,6 +412,10 @@ const MobileInfo: React.FunctionComponent<Props> = (props) => {
         if (newMode) setTranslationDrawingEnabled(true)
     }
 
+    const triggerGroup = () => {
+        setGroupPostID(props.post.postID)
+    }
+
     const triggerTakedown = () => {
         setShowTakedownPostDialog((prev: boolean) => !prev)
     }
@@ -636,19 +642,25 @@ const MobileInfo: React.FunctionComponent<Props> = (props) => {
                                 <span className="tag">Source Edit</span>
                             </span>
                         </div>
-                        <div className="mobileinfo-row">
+                        {!props.unverified ? <div className="mobileinfo-row">
                             <span className="tag-hover" onClick={triggerSetAvatar}>
                                 <img className="mobileinfo-icon" src={setAvatar} style={{filter: getFilter()}}/>
                                 <span className="tag">Set Avatar</span>
                             </span>
-                        </div>
-                        <div className="mobileinfo-row">
+                        </div> : null}
+                        {!props.unverified ? <div className="sidebar-row">
+                            <span className="tag-hover" onClick={triggerGroup}>
+                                <img className="sidebar-icon" src={group} style={{filter: getFilter()}}/>
+                                <span className="tag">Add to Group</span>
+                            </span>
+                        </div> : null}
+                        {!props.unverified ? <div className="mobileinfo-row">
                             <span className="tag-hover" onClick={triggerAddTranslation}>
                                 <img className="mobileinfo-icon" src={addTranslation} style={{filter: getFilter()}}/>
                                 <span className="tag">Add Translation</span>
                             </span>
-                        </div>
-                        {permissions.isMod(session) ? <div className="mobileinfo-row">
+                        </div> : null}
+                        {!props.unverified && permissions.isMod(session) ? <div className="mobileinfo-row">
                             <span className="tag-hover" onClick={triggerTakedown}>
                                 <img className="mobileinfo-icon" src={props.post.hidden ? restore : takedown} style={{filter: getFilter()}}/>
                                 <span className="tag">{props.post.hidden ? "Restore" : "Takedown"}</span>
@@ -681,12 +693,12 @@ const MobileInfo: React.FunctionComponent<Props> = (props) => {
                             </span>
                         </div>
                         </> : null}
-                        <div className="mobileinfo-row">
+                        {!props.unverified ? <div className="mobileinfo-row">
                             <span className="tag-hover" onClick={postHistory}>
                                 <img className="mobileinfo-icon" src={historyIcon}/>
                                 <span className="tag-red">History</span>
                             </span>
-                        </div>
+                        </div> : null}
                         {!props.unverified ?
                         <div className="mobileinfo-row">
                             <span className="tag-hover" onClick={deletePost}>

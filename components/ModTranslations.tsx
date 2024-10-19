@@ -178,7 +178,7 @@ const ModTranslations: React.FunctionComponent = (props) => {
                         <canvas className="mod-post-img" ref={imagesRef[i]} onClick={imgClick} onAuxClick={(event) => imgClick(event, true)}></canvas>}
                     </div>
                     <div className="mod-post-text-column">
-                        <span className="mod-post-link" onClick={() => history.push(`/user/${translation.updater}`)}>Updater: {functions.toProperCase(translation.updater || "Deleted")}</span>
+                        <span className="mod-post-link" onClick={() => history.push(`/user/${translation.updater}`)}>Updater: {functions.toProperCase(translation?.updater) || "deleted"}</span>
                         {translationDataJSX(translation)}
                     </div>
                     <div className="mod-post-options">

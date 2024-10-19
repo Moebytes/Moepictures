@@ -1,8 +1,8 @@
 import React, {useEffect, useContext, useState, useRef} from "react"
-import {ThemeContext, EnableDragContext, HideNavbarContext, HideSidebarContext, RelativeContext, HideTitlebarContext, MobileContext,
-ActiveDropdownContext, HeaderTextContext, SidebarTextContext, SessionContext, SessionFlagContext, SearchContext, SearchFlagContext, TakedownTagContext,
-DeleteTagFlagContext, DeleteTagIDContext, EditTagTypeContext, EditTagReasonContext, EditTagImageContext, EditTagKeyContext, EditTagSocialContext,
-EditTagTwitterContext, EditTagWebsiteContext, EditTagFandomContext, EditTagAliasesContext, EditTagImplicationsContext, 
+import {ThemeContext, SiteHueContext, SiteSaturationContext, SiteLightnessContext, EnableDragContext, HideNavbarContext, HideSidebarContext, RelativeContext, 
+HideTitlebarContext, MobileContext, ActiveDropdownContext, HeaderTextContext, SidebarTextContext, SessionContext, SessionFlagContext, SearchContext, 
+SearchFlagContext, TakedownTagContext, DeleteTagFlagContext, DeleteTagIDContext, EditTagTypeContext, EditTagReasonContext, EditTagImageContext, 
+EditTagKeyContext, EditTagSocialContext, EditTagTwitterContext, EditTagWebsiteContext, EditTagFandomContext, EditTagAliasesContext, EditTagImplicationsContext, 
 EditTagDescriptionContext, EditTagIDContext, EditTagFlagContext, EditTagPixivTagsContext, RestrictTypeContext, RevertTagHistoryIDContext, 
 RevertTagHistoryFlagContext, PostsContext} from "../Context"
 import {useHistory, useLocation} from "react-router-dom"
@@ -41,6 +41,9 @@ let limit = 25
 
 const TagPage: React.FunctionComponent<Props> = (props) => {
     const {theme, setTheme} = useContext(ThemeContext)
+    const {siteHue, setSiteHue} = useContext(SiteHueContext)
+    const {siteSaturation, setSiteSaturation} = useContext(SiteSaturationContext)
+    const {siteLightness, setSiteLightness} = useContext(SiteLightnessContext)
     const {enableDrag, setEnableDrag} = useContext(EnableDragContext)
     const {hideNavbar, setHideNavbar} = useContext(HideNavbarContext)
     const {hideTitlebar, setHideTitlebar} = useContext(HideTitlebarContext)
@@ -87,6 +90,10 @@ const TagPage: React.FunctionComponent<Props> = (props) => {
     const history = useHistory()
     const location = useLocation()
     const tagName = props?.match.params.tag
+
+    const getFilter = () => {
+        return `hue-rotate(${siteHue - 180}deg) saturate(${siteSaturation}%) brightness(${siteLightness + 70}%)`
+    }
 
     useEffect(() => {
         setHideNavbar(true)
@@ -287,12 +294,12 @@ const TagPage: React.FunctionComponent<Props> = (props) => {
     const tagOptionsJSX = () => {
         let jsx = [] as any
         if (session.username) {
-            jsx.push(<img className="tag-social" src={tagHistory} onClick={() => showTagHistory()}/>)
-            jsx.push(<img className="tag-social" src={tagEdit} onClick={() => showTagEditDialog()}/>)
-            jsx.push(<img className="tag-social" src={tagDelete} onClick={() => showTagDeleteDialog()}/>)
+            jsx.push(<img className="tag-social" src={tagHistory} onClick={() => showTagHistory()} style={{filter: getFilter()}}/>)
+            jsx.push(<img className="tag-social" src={tagEdit} onClick={() => showTagEditDialog()} style={{filter: getFilter()}}/>)
+            jsx.push(<img className="tag-social" src={tagDelete} onClick={() => showTagDeleteDialog()} style={{filter: getFilter()}}/>)
         }
         if (permissions.isMod(session)) {
-            jsx.push(<img className="tag-social" src={tag.banned ? restore : takedown} onClick={() => setTakedownTag(tag)}/>)
+            jsx.push(<img className="tag-social" src={tag.banned ? restore : takedown} onClick={() => setTakedownTag(tag)} style={{filter: getFilter()}}/>)
         }
         return jsx
     }

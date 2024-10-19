@@ -133,13 +133,13 @@ const TagHistoryRow: React.FunctionComponent<Props> = (props) => {
                     </div>
                 </div>
             )
-        } else {
+        } else if (permissions.isContributor(session)) {
             return (
                 <div className="taghistoryrow-options">
                     <div className="taghistoryrow-options-container" onClick={revertTagHistoryDialog}>
-                    <img className="taghistoryrow-options-img" src={tagHistoryRevert}/>
-                    <span className="taghistoryrow-options-text">Revert</span>
-                </div>
+                        <img className="taghistoryrow-options-img" src={tagHistoryRevert}/>
+                        <span className="taghistoryrow-options-text">Revert</span>
+                    </div>
                 </div>
             )
         }

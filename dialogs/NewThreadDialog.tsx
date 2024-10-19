@@ -21,8 +21,6 @@ const NewThreadDialog: React.FunctionComponent = (props) => {
     const {sessionFlag, setSessionFlag} = useContext(SessionFlagContext)
     const [threadTitle, setThreadTitle] = useState("")
     const [threadContent, setThreadContent] = useState("")
-    const [captchaResponse, setCaptchaResponse] = useState("")
-    const [captcha, setCaptcha] = useState("")
     const [error, setError] = useState(false)
     const errorRef = useRef<any>(null)
     const history = useHistory()
@@ -30,21 +28,6 @@ const NewThreadDialog: React.FunctionComponent = (props) => {
     const getFilter = () => {
         return `hue-rotate(${siteHue - 180}deg) saturate(${siteSaturation}%) brightness(${siteLightness + 70}%)`
     }
-
-    const getCaptchaColor = () => {
-        if (theme.includes("light")) return "#ffffff"
-        return "#09071c"
-    }
-
-    const updateCaptcha = async () => {
-        const captcha = await functions.get("/api/misc/captcha/create", {color: getCaptchaColor()}, session, setSessionFlag)
-        setCaptcha(captcha)
-        setCaptchaResponse("")
-    }
-
-    useEffect(() => {
-        updateCaptcha()
-    }, [session, theme])
 
     useEffect(() => {
         document.title = "New Thread"
@@ -77,7 +60,7 @@ const NewThreadDialog: React.FunctionComponent = (props) => {
             return setError(false)
         }
         try {
-            const thread = await functions.post("/api/thread/create", {title: threadTitle, content: threadContent, captchaResponse}, session, setSessionFlag)
+            const thread = await functions.post("/api/thread/create", {title: threadTitle, content: threadContent}, session, setSessionFlag)
             setShowNewThreadDialog(false)
             if (thread.threadID) history.push(`/thread/${thread.threadID}`)
         } catch {
@@ -85,9 +68,7 @@ const NewThreadDialog: React.FunctionComponent = (props) => {
             if (!errorRef.current) await functions.timeout(20)
             errorRef.current!.innerText = "Bad content or captcha."
             await functions.timeout(2000)
-            setError(false)
-            updateCaptcha()
-            setCaptchaResponse("")
+            return setError(false)
         }
     }
 
@@ -118,10 +99,6 @@ const NewThreadDialog: React.FunctionComponent = (props) => {
                         <div className="dialog-row">
                             <textarea className="dialog-textarea" style={{resize: "vertical", height: "330px"}} spellCheck={false} value={threadContent} onChange={(event) => setThreadContent(event.target.value)}></textarea>
                         </div>
-                            <div className="dialog-row" style={{pointerEvents: "all"}}>
-                                <img src={`data:image/svg+xml;utf8,${encodeURIComponent(captcha)}`} style={{filter: getFilter()}}/>
-                                <input className="dialog-input-taller" type="text" spellCheck={false} value={captchaResponse} onChange={(event) => setCaptchaResponse(event.target.value)}/>
-                            </div>
                         {error ? <div className="dialog-validation-container"><span className="dialog-validation" ref={errorRef}></span></div> : null}
                         <div className="dialog-row">
                             <button onClick={() => click("reject")} className="dialog-button">{"Cancel"}</button>

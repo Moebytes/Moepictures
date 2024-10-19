@@ -16,6 +16,7 @@ import SQLRequest from "./SQLRequest"
 import SQLReport from "./SQLReport"
 import SQLThread from "./SQLThread"
 import SQLMessage from "./SQLMessage"
+import SQLGroup from "./SQLGroup"
 
 const redis = Redis.createClient({
   url: process.env.REDIS_URL
@@ -52,6 +53,7 @@ export default class SQLQuery {
   public static request = SQLRequest
   public static thread = SQLThread
   public static message = SQLMessage
+  public static group = SQLGroup
 
   /** Run an SQL Query */
   public static run = async (query: QueryConfig | QueryArrayConfig | string, cache?: boolean) => {

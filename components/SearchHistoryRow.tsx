@@ -25,7 +25,7 @@ const SearchHistoryRow: React.FunctionComponent<Props> = (props) => {
     const history = useHistory()
 
     const updateImage = async () => {
-        const thumb = functions.getThumbnailLink(props.history.post.images[0].type, props.history.postID, 1, props.history.post.images[0].filename, "medium")
+        const thumb = functions.getThumbnailLink(props.history.post.images[0].type, props.history.postID, 1, props.history.post.images[0].filename, "medium", mobile)
         setImg(thumb + `#${path.extname(thumb)}`)
     }
 

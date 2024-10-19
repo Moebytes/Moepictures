@@ -17,7 +17,11 @@ import PageDialog from "../dialogs/PageDialog"
 import adminCrown from "../assets/icons/admin-crown.png"
 import modCrown from "../assets/icons/mod-crown.png"
 import systemCrown from "../assets/icons/system-crown.png"
-import premiumStar from "../assets/icons/premiumStar.png"
+import premiumCuratorStar from "../assets/icons/premium-curator-star.png"
+import curatorStar from "../assets/icons/curator-star.png"
+import premiumContributorPencil from "../assets/icons/premium-contributor-pencil.png"
+import contributorPencil from "../assets/icons/contributor-pencil.png"
+import premiumStar from "../assets/icons/premium-star.png"
 import lockIcon from "../assets/icons/lock.png"
 import stickyIcon from "../assets/icons/sticky.png"
 import lockOptIcon from "../assets/icons/lock-opt.png"
@@ -128,6 +132,7 @@ const ThreadPage: React.FunctionComponent<Props> = (props) => {
 
     const updateThread = async () => {
         const thread = await functions.get("/api/thread", {threadID}, session, setSessionFlag)
+        if (!thread) return functions.replaceLocation("/404")
         setThread(thread)
         document.title = `${thread.title}`
         setDefaultIcon(thread.image ? false : true)
@@ -407,6 +412,34 @@ const ThreadPage: React.FunctionComponent<Props> = (props) => {
                     <img className="forum-thread-user-label" src={systemCrown}/>
                 </div>
             )
+        } else if (thread.role === "premium-curator") {
+            return (
+                <div className="forum-thread-username-container" onClick={creatorClick} onAuxClick={creatorClick}>
+                <span className="forum-thread-user-text curator-color">{functions.toProperCase(thread.creator)}</span>
+                    <img className="forum-thread-user-label" src={premiumCuratorStar}/>
+                </div>
+            )
+        } else if (thread.role === "curator") {
+            return (
+                <div className="forum-thread-username-container" onClick={creatorClick} onAuxClick={creatorClick}>
+                <span className="forum-thread-user-text curator-color">{functions.toProperCase(thread.creator)}</span>
+                    <img className="forum-thread-user-label" src={curatorStar}/>
+                </div>
+            )
+        } else if (thread.role === "premium-contributor") {
+            return (
+                <div className="forum-thread-username-container" onClick={creatorClick} onAuxClick={creatorClick}>
+                <span className="forum-thread-user-text premium-color">{functions.toProperCase(thread.creator)}</span>
+                    <img className="forum-thread-user-label" src={premiumContributorPencil}/>
+                </div>
+            )
+        } else if (thread.role === "contributor") {
+            return (
+                <div className="forum-thread-username-container" onClick={creatorClick} onAuxClick={creatorClick}>
+                <span className="forum-thread-user-text contributor-color">{functions.toProperCase(thread.creator)}</span>
+                    <img className="forum-thread-user-label" src={contributorPencil}/>
+                </div>
+            )
         } else if (thread.role === "premium") {
             return (
                 <div className="forum-thread-username-container" onClick={creatorClick} onAuxClick={creatorClick}>
@@ -415,7 +448,7 @@ const ThreadPage: React.FunctionComponent<Props> = (props) => {
                 </div>
             )
         }
-        return <span className={`forum-thread-user-text ${thread.banned ? "banned" : ""}`} onClick={creatorClick} onAuxClick={creatorClick}>{functions.toProperCase(thread.creator)}</span>
+        return <span className={`forum-thread-user-text ${thread.banned ? "banned" : ""}`} onClick={creatorClick} onAuxClick={creatorClick}>{functions.toProperCase(thread?.creator) || "deleted"}</span>
     }
 
     const updateSticky = async () => {

@@ -4,6 +4,7 @@ import {HashLink as Link} from "react-router-hash-link"
 import {HideNavbarContext, HideSidebarContext, ThemeContext, EnableDragContext, UnbanNameContext, HideTitlebarContext, UpdateUserFlagContext,
 SessionContext, SessionFlagContext} from "../Context"
 import functions from "../structures/Functions"
+import permissions from "../structures/Permissions"
 import "./styles/dialog.less"
 import Draggable from "react-draggable"
 
@@ -38,6 +39,7 @@ const UnbanDialog: React.FunctionComponent = (props) => {
 
 
     const unban = async () => {
+        if (!permissions.isMod(session)) return setUnbanName(null)
         await functions.post("/api/user/unban", {username: unbanName, reason}, session, setSessionFlag)
         setUnbanName(null)
         setUpdateUserFlag(true)

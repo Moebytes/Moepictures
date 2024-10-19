@@ -400,4 +400,55 @@ export default class SQLSearch {
             return SQLQuery.run(query, true)
         }
     }
+
+    /** Group search. */
+    public static groupSearch = async (search: string, sort: string, limit?: string, offset?: string) => {
+        let whereQuery = ""
+        let values = [] as any
+        let i = 1
+        let searchValue = i
+        if (search) {
+            whereQuery = `WHERE lower(groups."name") LIKE '%' || $${searchValue} || '%'`
+            values.push(search.toLowerCase())
+            i++
+        }
+        let limitValue = i
+        if (limit) {
+            if (Number(limit) > 100) limit = "100"
+            values.push(limit)
+            i++
+        }
+        if (offset) values.push(offset)
+        let sortQuery = ""
+        if (sort === "random") sortQuery = `ORDER BY random()`
+        if (sort === "date") sortQuery = `ORDER BY groups."createDate" DESC`
+        if (sort === "reverse date") sortQuery = `ORDER BY groups."createDate" ASC`
+        if (sort === "posts") sortQuery = `ORDER BY "postCount" DESC`
+        if (sort === "reverse posts") sortQuery = `ORDER BY "postCount" ASC`
+        const query: QueryConfig = {
+            text: functions.multiTrim(/*sql*/`
+                WITH post_json AS (
+                    SELECT posts.*, "group map"."order", json_agg(DISTINCT images.*) AS images
+                    FROM posts
+                    JOIN images ON images."postID" = posts."postID"
+                    JOIN "group map" ON "group map"."postID" = posts."postID"
+                    GROUP BY posts."postID", "group map"."order"
+                )
+                SELECT groups.*, json_agg(post_json.* ORDER BY post_json."order" ASC) AS posts,
+                COUNT(*) OVER() AS "groupCount",
+                COUNT(DISTINCT post_json."postID") AS "postCount"
+                FROM "group map"
+                JOIN groups ON groups."groupID" = "group map"."groupID"
+                JOIN post_json ON post_json."postID" = "group map"."postID"
+                ${whereQuery}
+                GROUP BY groups."groupID"
+                ${sortQuery}
+                ${limit ? `LIMIT $${limitValue}` : "LIMIT 100"} ${offset ? `OFFSET $${i}` : ""}
+            `),
+            values: []
+        }
+        if (values?.[0]) query.values = values
+        const result = await SQLQuery.run(query)
+        return result
+    }
 }

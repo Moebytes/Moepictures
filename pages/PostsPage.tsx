@@ -10,7 +10,7 @@ import PageDialog from "../dialogs/PageDialog"
 import ToolTip from "../components/ToolTip"
 import TagBanner from "../components/TagBanner"
 import BulkFavgroupDialog from "../dialogs/BulkFavgroupDialog"
-import BulkQuickEditDialog from "../dialogs/BulkQuickEditDialog"
+import BulkTagEditDialog from "../dialogs/BulkTagEditDialog"
 import BulkDeleteDialog from "../dialogs/BulkDeleteDialog"
 import CaptchaDialog from "../dialogs/CaptchaDialog"
 import SaveSearchDialog from "../dialogs/SaveSearchDialog"
@@ -105,7 +105,7 @@ const PostsPage: React.FunctionComponent = (props) => {
     return (
         <>
         <CaptchaDialog/>
-        <BulkQuickEditDialog/>
+        <BulkTagEditDialog/>
         <BulkDeleteDialog/>
         <BulkFavgroupDialog/>
         <SaveSearchDialog/>

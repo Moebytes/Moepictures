@@ -5,7 +5,7 @@ RelativeContext, HideTitlebarContext, SidebarHoverContext, SearchContext, Search
 TagsContext, RandomFlagContext, ImageSearchFlagContext, SidebarTextContext, SessionContext, MobileScrollingContext, TagEditIDContext, SourceEditIDContext, PremiumRequiredContext,
 TranslationModeContext, TranslationDrawingEnabledContext, SiteHueContext, SessionFlagContext, SiteLightnessContext, SiteSaturationContext, ShowTakedownPostDialogContext,
 SaveSearchDialogContext, DeleteAllSaveSearchDialogContext, EditSaveSearchNameContext, EditSaveSearchKeyContext, EditSaveSearchTagsContext,
-ActionBannerContext} from "../Context"
+ActionBannerContext, GroupPostIDContext} from "../Context"
 import {HashLink as Link} from "react-router-hash-link"
 import permissions from "../structures/Permissions"
 import favicon from "../assets/icons/favicon.png"
@@ -17,7 +17,7 @@ import terms from "../assets/icons/terms.png"
 import contact from "../assets/icons/contact.png"
 import code from "../assets/icons/code.png"
 import setAvatar from "../assets/icons/setavatar.png"
-import addTranslation from "../assets/icons/addtranslation.png"
+import addTranslation from "../assets/icons/translation-toggle-on.png"
 import report from "../assets/icons/report.png"
 import takedown from "../assets/icons/takedown.png"
 import restore from "../assets/icons/restore.png"
@@ -55,6 +55,7 @@ import gelbooru from "../assets/icons/gelbooru.png"
 import safebooru from "../assets/icons/safebooru.png"
 import yandere from "../assets/icons/yandere.png"
 import konachan from "../assets/icons/konachan.png"
+import group from "../assets/icons/group.png"
 import pack from "../package.json"
 import functions from "../structures/Functions"
 import TagHover from "./TagHover"
@@ -121,6 +122,7 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
     const {editSaveSearchKey, setEditSaveSearchKey} = useContext(EditSaveSearchKeyContext)
     const {editSaveSearchTags, setEditSaveSearchTags} = useContext(EditSaveSearchTagsContext)
     const {actionBanner, setActionBanner} = useContext(ActionBannerContext)
+    const {groupPostID, setGroupPostID} = useContext(GroupPostIDContext)
     const history = useHistory()
 
     const getFilter = () => {
@@ -660,6 +662,10 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
         if (newMode) setTranslationDrawingEnabled(true)
     }
 
+    const triggerGroup = () => {
+        setGroupPostID(props.post.postID)
+    }
+
     const triggerTakedown = () => {
         setShowTakedownPostDialog((prev: boolean) => !prev)
     }
@@ -983,6 +989,12 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
                             <span className="tag-hover" onClick={triggerSetAvatar}>
                                 <img className="sidebar-icon" src={setAvatar} style={{filter: getFilter()}}/>
                                 <span className="tag">Set Avatar</span>
+                            </span>
+                        </div> : null}
+                        {!props.unverified ? <div className="sidebar-row">
+                            <span className="tag-hover" onClick={triggerGroup}>
+                                <img className="sidebar-icon" src={group} style={{filter: getFilter()}}/>
+                                <span className="tag">Add to Group</span>
                             </span>
                         </div> : null}
                         {!props.unverified ? <div className="sidebar-row">

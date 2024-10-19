@@ -9,6 +9,8 @@ import logoutModIcon from "../assets/icons/logout-mod.png"
 import logoutAdminIcon from "../assets/icons/logout-admin.png"
 import logoutSystemIcon from "../assets/icons/logout-system.png"
 import logoutPremiumIcon from "../assets/icons/logout-premium.png"
+import logoutCuratorIcon from "../assets/icons/logout-curator.png"
+import logoutContributorIcon from "../assets/icons/logout-contributor.png"
 import searchIcon from "../assets/icons/search.png"
 import crown from "../assets/icons/crown.png"
 import mail from "../assets/icons/mail.png"
@@ -27,7 +29,7 @@ import functions from "../structures/Functions"
 import SearchSuggestions from "./SearchSuggestions"
 import scrollIcon from "../assets/icons/scroll.png"
 import pageIcon from "../assets/icons/page.png"
-import premiumStar from "../assets/icons/premiumStar.png"
+import premiumStar from "../assets/icons/premium-star.png"
 import Slider from "react-slider"
 import {ThemeContext, HideNavbarContext, HideSortbarContext, HideSidebarContext, EnableDragContext,  HideMobileNavbarContext, MobileContext,
 RelativeContext, HideTitlebarContext, SearchContext, SearchFlagContext, SessionContext, SessionFlagContext, UserImgContext, SiteHueContext,
@@ -190,10 +192,11 @@ const NavBar: React.FunctionComponent<Props> = (props) => {
 
     useEffect(() => {
         if (tablet) {
-            let marginR = "40px"
+            let marginR = "30px"
             setMarginR(marginR)
         } else {
-            let marginR = hideSidebar ? "50px" : "60px"
+            // 50, 60
+            let marginR = hideSidebar ? "40px" : "50px"
             setMarginR(marginR)
         }
     }, [session, hideSidebar, tablet])
@@ -215,6 +218,30 @@ const NavBar: React.FunctionComponent<Props> = (props) => {
             return (<>
                 <span className="mobile-nav-text mobile-nav-user-text system-color" onClick={() => {history.push("/profile"); setHideMobileNavbar(true)}}>{functions.toProperCase(session.username)}</span>
                 <img className="mobile-nav-logout-img" src={logoutSystemIcon} onClick={() => {logout(); setHideMobileNavbar(true)}}/>
+            </>
+            )
+        } else if (session.role === "premium-curator") {
+            return (<>
+                <span className="mobile-nav-text mobile-nav-user-text curator-color" onClick={() => {history.push("/profile"); setHideMobileNavbar(true)}}>{functions.toProperCase(session.username)}</span>
+                <img className="mobile-nav-logout-img" src={logoutCuratorIcon} onClick={() => {logout(); setHideMobileNavbar(true)}}/>
+            </>
+            )
+        } else if (session.role === "curator") {
+            return (<>
+                <span className="mobile-nav-text mobile-nav-user-text curator-color" onClick={() => {history.push("/profile"); setHideMobileNavbar(true)}}>{functions.toProperCase(session.username)}</span>
+                <img className="mobile-nav-logout-img" src={logoutCuratorIcon} onClick={() => {logout(); setHideMobileNavbar(true)}}/>
+            </>
+            )
+        } else if (session.role === "premium-contributor") {
+            return (<>
+                <span className="mobile-nav-text mobile-nav-user-text premium-color" onClick={() => {history.push("/profile"); setHideMobileNavbar(true)}}>{functions.toProperCase(session.username)}</span>
+                <img className="mobile-nav-logout-img" src={logoutPremiumIcon} onClick={() => {logout(); setHideMobileNavbar(true)}}/>
+            </>
+            )
+        } else if (session.role === "contributor") {
+            return (<>
+                <span className="mobile-nav-text mobile-nav-user-text contributor-color" onClick={() => {history.push("/profile"); setHideMobileNavbar(true)}}>{functions.toProperCase(session.username)}</span>
+                <img className="mobile-nav-logout-img" src={logoutContributorIcon} onClick={() => {logout(); setHideMobileNavbar(true)}}/>
             </>
             )
         } else if (session.role === "premium") {
@@ -251,6 +278,30 @@ const NavBar: React.FunctionComponent<Props> = (props) => {
                 <img className="nav-logout-img" src={logoutSystemIcon} onClick={logout}/>
             </>
             )
+        } else if (session.role === "premium-curator") {
+            return (<>
+                <span className="nav-text nav-user-text curator-color" onClick={() => history.push("/profile")}>{functions.toProperCase(session.username)}</span>
+                <img className="nav-logout-img" src={logoutCuratorIcon} onClick={logout}/>
+            </>
+            )
+        } else if (session.role === "curator") {
+            return (<>
+                <span className="nav-text nav-user-text curator-color" onClick={() => history.push("/profile")}>{functions.toProperCase(session.username)}</span>
+                <img className="nav-logout-img" src={logoutCuratorIcon} onClick={logout}/>
+            </>
+            )
+        } else if (session.role === "premium-contributor") {
+            return (<>
+                <span className="nav-text nav-user-text premium-color" onClick={() => history.push("/profile")}>{functions.toProperCase(session.username)}</span>
+                <img className="nav-logout-img" src={logoutPremiumIcon} onClick={logout}/>
+            </>
+            )
+        } else if (session.role === "contributor") {
+            return (<>
+                <span className="nav-text nav-user-text contributor-color" onClick={() => history.push("/profile")}>{functions.toProperCase(session.username)}</span>
+                <img className="nav-logout-img" src={logoutContributorIcon} onClick={logout}/>
+            </>
+            )
         } else if (session.role === "premium") {
             return (<>
                 <span className="nav-text nav-user-text premium-color" onClick={() => history.push("/profile")}>{functions.toProperCase(session.username)}</span>
@@ -277,7 +328,7 @@ const NavBar: React.FunctionComponent<Props> = (props) => {
     }
 
     const getDropdownJSX = () => {
-        let style = mobile ? {top: session.username ? "460px" : "430px"} : {top: "40px"}
+        let style = mobile ? {top: session.username ? "498px" : "468px"} : {top: "40px"}
         return (
             <div className={`title-dropdown ${activeDropdown ? "" : "hide-title-dropdown"}`} style={style}>
                 <div className="title-dropdown-row">
@@ -326,6 +377,7 @@ const NavBar: React.FunctionComponent<Props> = (props) => {
                     <span className="mobile-nav-text" onClick={() => {history.push("/characters"); setHideMobileNavbar(true)}}>Characters</span>
                     <span className="mobile-nav-text" onClick={() => {history.push("/series"); setHideMobileNavbar(true)}}>Series</span>
                     <span className="mobile-nav-text" onClick={() => {history.push("/tags"); setHideMobileNavbar(true)}}>Tags</span>
+                    <span className="mobile-nav-text" onClick={() => {history.push("/groups"); setHideMobileNavbar(true)}}>Groups</span>
                     <span className="mobile-nav-text" onClick={() => {history.push("/forum"); setHideMobileNavbar(true)}}>Forum</span>
                     <span className="mobile-nav-text" onClick={() => {history.push("/help"); setHideMobileNavbar(true)}}>Help</span>
                     <span className="mobile-nav-text" onClick={() => {history.push("/terms"); setHideMobileNavbar(true)}}>Terms</span>
@@ -396,6 +448,7 @@ const NavBar: React.FunctionComponent<Props> = (props) => {
                     <span style={{marginRight: marginR}} className="nav-text" onClick={() => history.push("/characters")}>Characters</span>
                     <span style={{marginRight: marginR}} className="nav-text" onClick={() => history.push("/series")}>Series</span>
                     <span style={{marginRight: marginR}} className="nav-text" onClick={() => history.push("/tags")}>Tags</span>
+                    <span style={{marginRight: marginR}} className="nav-text" onClick={() => history.push("/groups")}>Groups</span>
                     <span style={{marginRight: marginR}} className="nav-text" onClick={() => history.push("/forum")}>Forum</span>
                     <span style={{marginRight: marginR}} className="nav-text" onClick={() => history.push("/help")}>Help</span>
                     {session.username ? <img style={{marginRight: "0px", marginTop: "2px"}} className="nav-img" onClick={() => history.push("/premium")} src={premiumStar}/> : null}

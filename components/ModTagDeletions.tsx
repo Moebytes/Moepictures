@@ -133,7 +133,7 @@ const ModTagDeletions: React.FunctionComponent = (props) => {
                         <img className="mod-post-tag-img" src={img}/>
                     </div> : null}
                     <div className="mod-post-text-column">
-                        <span className="mod-post-link" onClick={() => history.push(`/user/${request.username}`)}>Requester: {functions.toProperCase(request.username || "Deleted")}</span>
+                        <span className="mod-post-link" onClick={() => history.push(`/user/${request.username}`)}>Requester: {functions.toProperCase(request?.username) || "deleted"}</span>
                         <span className="mod-post-text">Reason: {request.reason}</span>
                         <span className="mod-post-link" onClick={searchTag}>Tag: {request.tag}</span>
                         <span className="mod-post-text">Description: {request.description || "No description."}</span>

@@ -13,6 +13,7 @@ import TagRow from "../components/TagRow"
 import AliasTagDialog from "../dialogs/AliasTagDialog"
 import EditTagDialog from "../dialogs/EditTagDialog"
 import DeleteTagDialog from "../dialogs/DeleteTagDialog"
+import CategorizeTagDialog from "../dialogs/CategorizeTagDialog"
 import matureTags from "../assets/json/mature-tags.json"
 import scrollIcon from "../assets/icons/scroll.png"
 import pageIcon from "../assets/icons/page.png"
@@ -434,6 +435,7 @@ const TagsPage: React.FunctionComponent = (props) => {
         <>
         <CaptchaDialog/>
         <AliasTagDialog/>
+        <CategorizeTagDialog/>
         <EditTagDialog/>
         <DeleteTagDialog/>
         <PageDialog/>

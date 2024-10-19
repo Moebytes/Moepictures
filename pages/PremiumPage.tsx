@@ -8,7 +8,7 @@ import Footer from "../components/Footer"
 import {HideNavbarContext, HideSidebarContext, RelativeContext, HideTitlebarContext, HeaderTextContext, SidebarTextContext,
 MobileContext, EnableDragContext, SessionContext, SessionFlagContext} from "../Context"
 import CaptchaDialog from "../dialogs/CaptchaDialog"
-import premiumStar from "../assets/icons/premiumStar.png"
+import premiumStar from "../assets/icons/premium-star.png"
 import premiumImg from "../assets/misc/premiumupgrade.png"
 import upscaledImg from "../assets/misc/upscaled.png"
 import bookmarksImg from "../assets/misc/bookmarks.png"

@@ -1298,10 +1298,31 @@ export default class Functions {
         return false
     }
 
+    public static validGroupSort = (sort: string) => {
+        if (sort === "random" ||
+            sort === "date" ||
+            sort === "reverse date" ||
+            sort === "posts" ||
+            sort === "reverse posts") return true 
+        return false
+    }
+
     public static validThreadSort = (sort: string) => {
         if (sort === "random" ||
             sort === "date" ||
             sort === "reverse date") return true 
+        return false
+    }
+
+    public static validRole = (role: string) => {
+        if (role === "admin" ||
+            role === "mod" ||
+            role === "premium-curator" ||
+            role === "curator" ||
+            role === "premium-contributor" ||
+            role === "contributor" ||
+            role === "premium" ||
+            role === "user") return true 
         return false
     }
 

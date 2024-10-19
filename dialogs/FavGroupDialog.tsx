@@ -5,7 +5,7 @@ import {ThemeContext, EnableDragContext, FavGroupIDContext, SessionContext, Site
 SiteLightnessContext, SiteSaturationContext, SessionFlagContext} from "../Context"
 import functions from "../structures/Functions"
 import radioButton from "../assets/icons/radiobutton.png"
-import radiobuttonChecked from "../assets/icons/radiobutton-checked.png"
+import radioButtonChecked from "../assets/icons/radiobutton-checked.png"
 import deleteIcon from "../assets/icons/delete.png"
 import lockIcon from "../assets/icons/private-lock.png"
 import "./styles/dialog.less"
@@ -105,18 +105,18 @@ const FavgroupDialog: React.FunctionComponent = (props) => {
                         <div className="dialog-title-container">
                             <span className="dialog-title">Add to Favorite Group</span>
                         </div>
-                        {favgroupJSX()}
                         <div className="dialog-row">
                             <span className="dialog-text">Favorite Group: </span>
                             <input className="dialog-input-taller" type="text" spellCheck={false} value={name} onChange={(event) => setName(event.target.value)} style={{width: "50%"}}/>
                         </div>
                         <div className="dialog-row" style={{justifyContent: "center", paddingRight: "20px"}}>
                             <span className="dialog-text" style={{marginTop: "-4px"}}>Privacy: </span>
-                            <img className="dialog-checkbox" src={isPrivate ? radioButton : radiobuttonChecked} onClick={() => setIsPrivate(false)} style={{marginRight: "10px", filter: getFilter()}}/>
+                            <img className="dialog-checkbox" src={isPrivate ? radioButton : radioButtonChecked} onClick={() => setIsPrivate(false)} style={{marginRight: "10px", filter: getFilter()}}/>
                             <span className="dialog-text">Public</span>
-                            <img className="dialog-checkbox" src={isPrivate ? radiobuttonChecked : radioButton} onClick={() => setIsPrivate(true)} style={{marginRight: "10px", filter: getFilter()}}/>
+                            <img className="dialog-checkbox" src={isPrivate ? radioButtonChecked : radioButton} onClick={() => setIsPrivate(true)} style={{marginRight: "10px", filter: getFilter()}}/>
                             <span className="dialog-text">Private</span>
                         </div>
+                        {favgroupJSX()}
                         {error ? <div className="dialog-validation-container"><span className="dialog-validation" ref={errorRef}></span></div> : null}
                         <div className="dialog-row">
                             <button onClick={() => click("reject")} className="dialog-button">{"Cancel"}</button>

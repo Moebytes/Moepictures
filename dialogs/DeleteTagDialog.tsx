@@ -131,7 +131,7 @@ const DeleteTagDialog: React.FunctionComponent = (props) => {
                         </div>
                         </> : <>
                         <div className="dialog-row">
-                            <span className="dialog-text">If the tag is poor, you may request for it's deletion. Why do you want to delete this tag?</span>
+                            <span className="dialog-text">If the tag is pointless/redundant, you may request it's deletion. Why do you want to delete this tag?</span>
                         </div>
                         <div className="dialog-row">
                             <span className="dialog-text">Reason: </span>

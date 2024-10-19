@@ -9,7 +9,7 @@ import permissions from "../structures/Permissions"
 import SearchSuggestions from "../components/SearchSuggestions"
 import "./styles/dialog.less"
 
-const BulkQuickEditDialog: React.FunctionComponent = (props) => {
+const BulkTagEditDialog: React.FunctionComponent = (props) => {
     const {theme, setTheme} = useContext(ThemeContext)
     const {hideNavbar, setHideNavbar} = useContext(HideNavbarContext)
     const {hideTitlebar, setHideTitlebar} = useContext(HideTitlebarContext)
@@ -73,7 +73,7 @@ const BulkQuickEditDialog: React.FunctionComponent = (props) => {
     }, [showBulkTagEditDialog])
 
     const bulkQuickEdit = async () => {
-        if (!permissions.isMod(session)) return setShowBulkTagEditDialog(false)
+        if (!permissions.isAdmin(session)) return setShowBulkTagEditDialog(false)
         if (!selectionMode) return setShowBulkTagEditDialog(false)
         if (!artists?.trim() && !characters?.trim() && !series?.trim() && !metaTags?.trim()) return setShowBulkTagEditDialog(false)
         let promiseArray = [] as Promise<any>[]
@@ -228,4 +228,4 @@ const BulkQuickEditDialog: React.FunctionComponent = (props) => {
     return null
 }
 
-export default BulkQuickEditDialog
+export default BulkTagEditDialog

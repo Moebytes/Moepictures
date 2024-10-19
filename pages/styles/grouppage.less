@@ -1,0 +1,64 @@
+@import "../../index.less";
+
+.group-page {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    height: 100%;
+    padding: 0px 20px;
+}
+
+.group-heading {
+    font-family: Tahoma, sans-serif;
+    font-size: 35px;
+    font-weight: bold;
+    color: var(--tagColor);
+}
+
+.group-row {
+    display: flex;
+    flex-direction: row;
+    width: 100%;
+    margin-top: 15px;
+    align-items: center;
+}
+
+.group-text {
+    font-family: Tahoma, sans-serif;
+    font-size: 20px;
+    color: var(--text);  
+    white-space: preserve;
+}
+
+.group-image-container {
+    display: flex;
+    flex-direction: row;
+    width: 100%;
+    flex-wrap: wrap;
+    padding: 0px;
+}
+
+.group-image {  
+    width: auto;
+    height: 300px;
+    cursor: pointer;
+    border: 2px solid var(--inputBG);
+    &:hover {
+        border: 2px solid var(--navbarText);
+    }
+}
+
+.group-opt {
+    width: auto;
+    height: 32px;
+    margin-left: 15px;
+    margin-top: 5px;
+    cursor: pointer;
+    &:hover {
+        filter: brightness(130%);
+    }
+}
+
+.placeholder {
+    visibility: hidden;
+}

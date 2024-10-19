@@ -6,6 +6,7 @@ EditTagTypeContext, EditTagSocialContext, EditTagTwitterContext, EditTagKeyConte
 EditTagFandomContext, EditTagDescriptionContext, EditTagReasonContext, HideTitlebarContext, SessionContext, EditTagPixivTagsContext, SiteHueContext,
 SiteLightnessContext, SiteSaturationContext, SessionFlagContext} from "../Context"
 import functions from "../structures/Functions"
+import permissions from "../structures/Permissions"
 import uploadIcon from "../assets/icons/upload.png"
 import "./styles/dialog.less"
 import Draggable from "react-draggable"
@@ -61,7 +62,7 @@ const EditTagDialog: React.FunctionComponent = (props) => {
     }, [editTagID])
 
     const editTag = async () => {
-        if (session.username) {
+        if (permissions.isContributor(session)) {
             const badDesc = functions.validateDescription(editTagDescription)
             if (badDesc) {
                 setError(true)
@@ -239,7 +240,7 @@ const EditTagDialog: React.FunctionComponent = (props) => {
             )
         }
 
-        if (session.username) {
+        if (permissions.isContributor(session)) {
             return (
                 <div className="dialog">
                     <Draggable handle=".dialog-title-container">

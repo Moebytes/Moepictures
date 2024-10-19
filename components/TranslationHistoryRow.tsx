@@ -40,7 +40,7 @@ const TranslationHistoryRow: React.FunctionComponent<Props> = (props) => {
     }
 
     const updateImage = async () => {
-        const thumb = functions.getThumbnailLink(props.translationHistory.post.images[0].type, props.translationHistory.postID, props.translationHistory.order, props.translationHistory.post.images[0].filename, "medium")
+        const thumb = functions.getThumbnailLink(props.translationHistory.post.images[0].type, props.translationHistory.postID, props.translationHistory.order, props.translationHistory.post.images[0].filename, "medium", mobile)
         const decrypted = await cryptoFunctions.decryptedLink(thumb)
         setImg(decrypted)
     }
@@ -110,7 +110,7 @@ const TranslationHistoryRow: React.FunctionComponent<Props> = (props) => {
                     </div>
                 </div>
             )
-        } else {
+        } else if (permissions.isContributor(session)) {
             return (
                 <div className="translationhistoryrow-options">
                     <div className="translationhistoryrow-options-container" onClick={revertTranslationHistoryDialog}>

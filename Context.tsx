@@ -214,6 +214,14 @@ export const ActionBannerContext = React.createContext<any>(null)
 export const FavGroupIDContext = React.createContext<any>(null)
 export const DeleteFavGroupNameContext = React.createContext<any>(null)
 export const BulkFavGroupDialogContext = React.createContext<any>(null)
+export const CategorizeTagContext = React.createContext<any>(null)
+export const GroupPostIDContext = React.createContext<any>(null)
+export const GroupSearchFlagContext = React.createContext<any>(null)
+export const GroupsPageContext = React.createContext<any>(null)
+export const ActiveGroupContext = React.createContext<any>(null)
+export const EditGroupObjContext = React.createContext<any>(null)
+export const DeleteGroupObjContext = React.createContext<any>(null)
+export const GroupFlagContext = React.createContext<any>(null)
 
 const Context: React.FunctionComponent = (props) => {
     const [siteHue, setSiteHue] = useState(180)
@@ -239,12 +247,12 @@ const Context: React.FunctionComponent = (props) => {
     const [threadPage, setThreadPage] = useState(1)
     const [mailPage, setMailPage] = useState(1)
     const [historyPage, setHistoryPage] = useState(1)
+    const [groupsPage, setGroupsPage] = useState(1)
     const [showDownloadDialog, setShowDownloadDialog] = useState(false)
     const [postAmount, setPostAmount] = useState(0)
     const [downloadIDs, setDownloadIDs] = useState([])
     const [downloadFlag, setDownloadFlag] = useState(false)
     const [relative, setRelative] = useState(false)
-    const [posts, setPosts] = useState([]) as any
     const [disableZoom, setDisableZoom] = useState(true)
     const [uploadDropFiles, setUploadDropFiles] = useState([])
     const [imageType, setImageType] = useState("all")
@@ -411,9 +419,22 @@ const Context: React.FunctionComponent = (props) => {
     const [favGroupID, setFavGroupID] = useState(null)
     const [deleteFavGroupName, setDeleteFavGroupName] = useState(null)
     const [bulkFavGroupDialog, setBulkFavGroupDialog] = useState(false)
+    const [categorizeTag, setCategorizeTag] = useState(null)
+    const [groupPostID, setGroupPostID] = useState(null)
+    const [groupSearchFlag, setGroupSearchFlag] = useState(null)
+    const [editGroupObj, setEditGroupObj] = useState(null)
+    const [deleteGroupObj, setDeleteGroupObj] = useState(null)
+    const [groupFlag, setGroupFlag] = useState(false)
 
 return (
     <>
+        <DeleteGroupObjContext.Provider value={{deleteGroupObj, setDeleteGroupObj}}>
+        <GroupFlagContext.Provider value={{groupFlag, setGroupFlag}}>
+        <EditGroupObjContext.Provider value={{editGroupObj, setEditGroupObj}}>
+        <GroupSearchFlagContext.Provider value={{groupSearchFlag, setGroupSearchFlag}}>
+        <GroupsPageContext.Provider value={{groupsPage, setGroupsPage}}>
+        <GroupPostIDContext.Provider value={{groupPostID, setGroupPostID}}>
+        <CategorizeTagContext.Provider value={{categorizeTag, setCategorizeTag}}>
         <BulkFavGroupDialogContext.Provider value={{bulkFavGroupDialog, setBulkFavGroupDialog}}>
         <DeleteFavGroupNameContext.Provider value={{deleteFavGroupName, setDeleteFavGroupName}}>
         <FavGroupIDContext.Provider value={{favGroupID, setFavGroupID}}>
@@ -593,7 +614,6 @@ return (
         <RelativeContext.Provider value={{relative, setRelative}}>
         <DownloadIDsContext.Provider value={{downloadIDs, setDownloadIDs}}>
         <DownloadFlagContext.Provider value={{downloadFlag, setDownloadFlag}}>
-        <PostsContext.Provider value={{posts, setPosts}}>
         <PostAmountContext.Provider value={{postAmount, setPostAmount}}>
         <ShowDownloadDialogContext.Provider value={{showDownloadDialog, setShowDownloadDialog}}>
         <PixelateContext.Provider value={{pixelate, setPixelate}}>
@@ -625,7 +645,6 @@ return (
         </PixelateContext.Provider>
         </ShowDownloadDialogContext.Provider>
         </PostAmountContext.Provider>
-        </PostsContext.Provider>
         </DownloadFlagContext.Provider>
         </DownloadIDsContext.Provider>
         </RelativeContext.Provider>
@@ -805,6 +824,13 @@ return (
         </FavGroupIDContext.Provider>
         </DeleteFavGroupNameContext.Provider>
         </BulkFavGroupDialogContext.Provider>
+        </CategorizeTagContext.Provider>
+        </GroupPostIDContext.Provider>
+        </GroupsPageContext.Provider>
+        </GroupSearchFlagContext.Provider>
+        </EditGroupObjContext.Provider>
+        </GroupFlagContext.Provider>
+        </DeleteGroupObjContext.Provider>
     </>
     )
 }

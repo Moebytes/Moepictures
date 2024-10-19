@@ -15,7 +15,11 @@ import permissions from "../structures/Permissions"
 import adminCrown from "../assets/icons/admin-crown.png"
 import modCrown from "../assets/icons/mod-crown.png"
 import systemCrown from "../assets/icons/system-crown.png"
-import premiumStar from "../assets/icons/premiumStar.png"
+import premiumCuratorStar from "../assets/icons/premium-curator-star.png"
+import curatorStar from "../assets/icons/curator-star.png"
+import premiumContributorPencil from "../assets/icons/premium-contributor-pencil.png"
+import contributorPencil from "../assets/icons/contributor-pencil.png"
+import premiumStar from "../assets/icons/premium-star.png"
 import jsxFunctions from "../structures/JSXFunctions"
 import "./styles/reply.less"
 
@@ -219,6 +223,34 @@ const Reply: React.FunctionComponent<Props> = (props) => {
                     <img className="reply-user-label" src={systemCrown}/>
                 </div>
             )
+        } else if (props.reply?.role === "premium-curator") {
+            return (
+                <div className="reply-username-container" onClick={userClick} onAuxClick={userClick}>
+                <span className="reply-user-text curator-color">{functions.toProperCase(props.reply.creator)}</span>
+                    <img className="reply-user-label" src={premiumCuratorStar}/>
+                </div>
+            )
+        } else if (props.reply?.role === "curator") {
+            return (
+                <div className="reply-username-container" onClick={userClick} onAuxClick={userClick}>
+                <span className="reply-user-text curator-color">{functions.toProperCase(props.reply.creator)}</span>
+                    <img className="reply-user-label" src={curatorStar}/>
+                </div>
+            )
+        } else if (props.reply?.role === "premium-contributor") {
+            return (
+                <div className="reply-username-container" onClick={userClick} onAuxClick={userClick}>
+                <span className="reply-user-text premium-color">{functions.toProperCase(props.reply.creator)}</span>
+                    <img className="reply-user-label" src={premiumContributorPencil}/>
+                </div>
+            )
+        } else if (props.reply?.role === "contributor") {
+            return (
+                <div className="reply-username-container" onClick={userClick} onAuxClick={userClick}>
+                <span className="reply-user-text contributor-color">{functions.toProperCase(props.reply.creator)}</span>
+                    <img className="reply-user-label" src={contributorPencil}/>
+                </div>
+            )
         } else if (props.reply?.role === "premium") {
             return (
                 <div className="reply-username-container" onClick={userClick} onAuxClick={userClick}>
@@ -227,7 +259,7 @@ const Reply: React.FunctionComponent<Props> = (props) => {
                 </div>
             )
         }
-        return <span className={`reply-user-text ${props.reply?.banned ? "banned" : ""}`} onClick={userClick} onAuxClick={userClick}>{functions.toProperCase(props.reply.creator) || "deleted"}</span>
+        return <span className={`reply-user-text ${props.reply?.banned ? "banned" : ""}`} onClick={userClick} onAuxClick={userClick}>{functions.toProperCase(props.reply?.creator) || "deleted"}</span>
     }
 
     return (

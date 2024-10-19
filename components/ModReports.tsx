@@ -116,7 +116,7 @@ const ReportRow: React.FunctionComponent<Props> = (props) => {
                 <img className="mod-post-img" src={img} onClick={imgClick} onAuxClick={imgClick}/>
             </div>
             <div className="mod-post-text-column">
-                <span className="mod-post-link" onClick={() => history.push(`/user/${props.request.reporter}`)}>Requester: {functions.toProperCase(props.request.reporter || "Deleted")}</span>
+                <span className="mod-post-link" onClick={() => history.push(`/user/${props.request.reporter}`)}>Requester: {functions.toProperCase(props.request?.reporter) || "deleted"}</span>
                 <span className="mod-post-text">Reason: {props.request.reason}</span>
                 <span className="mod-post-link" onClick={() => history.push(`/user/${username}`)}>User: {username}</span>
                 <span className="mod-post-text">{text}</span>

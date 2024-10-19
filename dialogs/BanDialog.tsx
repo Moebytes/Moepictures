@@ -4,6 +4,7 @@ import {HashLink as Link} from "react-router-hash-link"
 import {HideNavbarContext, HideSidebarContext, ThemeContext, EnableDragContext, BanNameContext, HideTitlebarContext, UpdateUserFlagContext,
 SiteHueContext, SiteLightnessContext, SiteSaturationContext, SessionContext, SessionFlagContext} from "../Context"
 import functions from "../structures/Functions"
+import permissions from "../structures/Permissions"
 import "./styles/dialog.less"
 import Draggable from "react-draggable"
 import checkbox from "../assets/icons/checkbox.png"
@@ -52,6 +53,7 @@ const BanDialog: React.FunctionComponent = (props) => {
     }, [banName])
 
     const ban = async () => {
+        if (!permissions.isMod(session)) return setBanName(null)
         const revertData = await functions.post("/api/user/ban", {username: banName, deleteUnverifiedChanges, deleteHistoryChanges, deleteComments, deleteMessages, reason}, session, setSessionFlag)
         if (revertData.revertPostIDs?.length) {
             for (const postID of revertData.revertPostIDs) {

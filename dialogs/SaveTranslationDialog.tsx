@@ -43,7 +43,7 @@ const SaveTranslationDialog: React.FunctionComponent<Props> = (props) => {
     }, [showSaveTranslationDialog])
 
     const saveTranslation = async () => {
-        if (session.username) {
+        if (permissions.isContributor(session)) {
             await functions.post("/api/translation/save", {postID: props.post.postID, data: saveTranslationData, order: saveTranslationOrder, reason}, session, setSessionFlag)
             setSubmitted(true)
         } else {
@@ -97,7 +97,7 @@ const SaveTranslationDialog: React.FunctionComponent<Props> = (props) => {
             )
         }
 
-        if (session.username) {
+        if (permissions.isContributor(session)) {
             return (
                 <div className="dialog">
                     <Draggable handle=".dialog-title-container">

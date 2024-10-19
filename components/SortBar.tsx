@@ -786,7 +786,7 @@ const SortBar: React.FunctionComponent = (props) => {
                         <img className="sortbar-img" src={download} style={{filter: getFilter()}}/>
                         <span className="sortbar-text">Download</span>
                     </div>
-                    {!tablet && permissions.isMod(session) ?
+                    {!tablet && permissions.isAdmin(session) ?
                     <Link to="/bulk-upload" className="sortbar-item">
                         <img className="sortbar-img" src={bulk} style={{filter: getFilter()}}/>
                         <span className="sortbar-text">Bulk</span>
@@ -804,7 +804,7 @@ const SortBar: React.FunctionComponent = (props) => {
                     <div className="sortbar-item" style={{filter: "hue-rotate(-5deg)"}} onClick={bulkDelete}>
                         <img className="sortbar-img" src={deleteIcon} style={{filter: getFilter()}}/>
                     </div> : null}
-                    {permissions.isMod(session) && selectionMode ? 
+                    {permissions.isAdmin(session) && selectionMode ? 
                     <div className="sortbar-item" onClick={bulkTagEdit}>
                         <img className="sortbar-img" src={tagEdit} style={{filter: getFilter()}}/>
                     </div> : null}

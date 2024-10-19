@@ -17,7 +17,11 @@ import PageDialog from "../dialogs/PageDialog"
 import adminCrown from "../assets/icons/admin-crown.png"
 import modCrown from "../assets/icons/mod-crown.png"
 import systemCrown from "../assets/icons/system-crown.png"
-import premiumStar from "../assets/icons/premiumStar.png"
+import premiumCuratorStar from "../assets/icons/premium-curator-star.png"
+import curatorStar from "../assets/icons/curator-star.png"
+import premiumContributorPencil from "../assets/icons/premium-contributor-pencil.png"
+import contributorPencil from "../assets/icons/contributor-pencil.png"
+import premiumStar from "../assets/icons/premium-star.png"
 import editOptIcon from "../assets/icons/edit-opt.png"
 import deleteOptIcon from "../assets/icons/delete-opt.png"
 import quoteOptIcon from "../assets/icons/quote-opt.png"
@@ -128,6 +132,7 @@ const MessagePage: React.FunctionComponent<Props> = (props) => {
 
     const updateMessage = async () => {
         const message = await functions.get("/api/message", {messageID}, session, setSessionFlag)
+        if (!message) return functions.replaceLocation("/404")
         setMessage(message)
         document.title = `${message.title}`
         setDefaultIcon(message.image ? false : true)
@@ -420,6 +425,34 @@ const MessagePage: React.FunctionComponent<Props> = (props) => {
                     <img className="mail-message-user-label" src={systemCrown}/>
                 </div>
             )
+        } else if (message.role === "premium-curator") {
+            return (
+                <div className="mail-message-username-container" onClick={creatorClick} onAuxClick={creatorClick}>
+                <span className="mail-message-user-text curator-color">{functions.toProperCase(message.creator)}</span>
+                    <img className="mail-message-user-label" src={premiumCuratorStar}/>
+                </div>
+            )
+        } else if (message.role === "curator") {
+            return (
+                <div className="mail-message-username-container" onClick={creatorClick} onAuxClick={creatorClick}>
+                <span className="mail-message-user-text curator-color">{functions.toProperCase(message.creator)}</span>
+                    <img className="mail-message-user-label" src={curatorStar}/>
+                </div>
+            )
+        } else if (message.role === "premium-contributor") {
+            return (
+                <div className="mail-message-username-container" onClick={creatorClick} onAuxClick={creatorClick}>
+                <span className="mail-message-user-text premium-color">{functions.toProperCase(message.creator)}</span>
+                    <img className="mail-message-user-label" src={premiumContributorPencil}/>
+                </div>
+            )
+        } else if (message.role === "contributor") {
+            return (
+                <div className="mail-message-username-container" onClick={creatorClick} onAuxClick={creatorClick}>
+                <span className="mail-message-user-text contributor-color">{functions.toProperCase(message.creator)}</span>
+                    <img className="mail-message-user-label" src={contributorPencil}/>
+                </div>
+            )
         } else if (message.role === "premium") {
             return (
                 <div className="mail-message-username-container" onClick={creatorClick} onAuxClick={creatorClick}>
@@ -428,7 +461,7 @@ const MessagePage: React.FunctionComponent<Props> = (props) => {
                 </div>
             )
         }
-        return <span className={`mail-message-user-text ${message.banned ? "banned" : ""}`} onClick={creatorClick} onAuxClick={creatorClick}>{functions.toProperCase(message.creator)}</span>
+        return <span className={`mail-message-user-text ${message.banned ? "banned" : ""}`} onClick={creatorClick} onAuxClick={creatorClick}>{functions.toProperCase(message?.creator) || "deleted"}</span>
     }
 
     const editMessage = async () => {

@@ -134,7 +134,7 @@ const BulkUploadPage: React.FunctionComponent = (props) => {
 
     useEffect(() => {
         if (!session.cookie) return
-        if (!permissions.isMod(session)) {
+        if (!permissions.isAdmin(session)) {
             functions.replaceLocation("/403")
         }
     }, [session])
@@ -420,9 +420,18 @@ const BulkUploadPage: React.FunctionComponent = (props) => {
 
             let dataArtists = sourceData.artists?.[0]?.tag ? sourceData.artists : tagData.artists
 
+            let newOriginalFiles = [current].map((a: any) => {
+                a.bytes = Object.values(a.bytes)
+                return a
+            })
+            let newUpscaledFiles = [upscaledCurrent].map((a: any) => {
+                a.bytes = Object.values(a.bytes)
+                return a
+            })
+
             const data = {
-                images: [current],
-                upscaledImages: [upscaledCurrent],
+                images: newOriginalFiles,
+                upscaledImages: newUpscaledFiles,
                 type: tagData.type,
                 restrict: sourceData.restrict,
                 style: tagData.style,
@@ -461,7 +470,12 @@ const BulkUploadPage: React.FunctionComponent = (props) => {
                 for (let i = 0; i < characterArr.length; i++) {
                     newCharacters.push({tag: characterArr[i]})
                 }
-                data.characters = newCharacters
+                if (data.characters.map((s: any) => s.tag).filter(Boolean).length === 1) {
+                    data.characters = newCharacters
+                } else {
+                    data.characters.push(...newCharacters)
+                }
+                data.characters = functions.removeDuplicates(data.characters)
             }
             if (rawSeries?.trim()) {
                 const seriesArr = functions.cleanHTML(rawSeries).split(/[\n\r\s]+/g)
@@ -469,11 +483,17 @@ const BulkUploadPage: React.FunctionComponent = (props) => {
                 for (let i = 0; i < seriesArr.length; i++) {
                     newSeries.push({tag: seriesArr[i]})
                 }
-                data.series = newSeries
+                if (data.series.map((s: any) => s.tag).filter(Boolean).length === 1) {
+                    data.series = newSeries
+                } else {
+                    data.series.push(...newSeries)
+                }
+                data.series = functions.removeDuplicates(data.series)
             }
             try {
                 setProgress(Math.floor((100/submitData.length) * (i+1)))
                 setProgressText(`${i+1}/${submitData.length}`)
+                console.log(data)
                 await functions.post("/api/post/upload", data, session, setSessionFlag)
             } catch (e) {
                 console.log(e)
@@ -700,6 +720,15 @@ const BulkUploadPage: React.FunctionComponent = (props) => {
         let newTags = [] as any
         const tagMap = await functions.tagsCache(session, setSessionFlag)
 
+        let bytes = "" as any 
+        if (current.thumbnail) {
+            bytes = await functions.base64toUint8Array(current.thumbnail).then((a) => Object.values(a))
+        } else {
+            bytes = Object.values(current.bytes) as any
+        }
+
+        if (!danbooruLink) danbooruLink = await functions.post(`/api/misc/revdanbooru`, bytes, session, setSessionFlag)
+
         if (danbooruLink) {
             const json = await functions.fetch(danbooruLink)
             tagArr = json.tag_string_general.split(" ").map((tag: string) => tag.replaceAll("_", "-"))
@@ -767,12 +796,6 @@ const BulkUploadPage: React.FunctionComponent = (props) => {
             }
             newTags = notExists
         } else {
-            let bytes = "" as any 
-            if (current.thumbnail) {
-                bytes = await functions.base64toUint8Array(current.thumbnail).then((a) => Object.values(a))
-            } else {
-                bytes = Object.values(current.bytes) as any
-            }
             let tagArr = await functions.post(`/api/misc/wdtagger`, bytes, session, setSessionFlag).catch(() => null)
             if (tagArr.includes("chibi")) style = "chibi"
             if (tagArr.includes("pixel-art")) style = "pixel"

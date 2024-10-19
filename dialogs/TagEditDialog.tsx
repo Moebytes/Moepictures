@@ -23,7 +23,7 @@ import SearchSuggestions from "../components/SearchSuggestions"
 import ContentEditable from "react-contenteditable"
 import "./styles/dialog.less"
 
-const QuickEditDialog: React.FunctionComponent = (props) => {
+const TagEditDialog: React.FunctionComponent = (props) => {
     const {theme, setTheme} = useContext(ThemeContext)
     const {hideNavbar, setHideNavbar} = useContext(HideNavbarContext)
     const {hideTitlebar, setHideTitlebar} = useContext(HideTitlebarContext)
@@ -108,7 +108,7 @@ const QuickEditDialog: React.FunctionComponent = (props) => {
     }, [tagEditID])
 
     const tagEdit = async () => {
-        if (session.username) {
+        if (permissions.isContributor(session)) {
             const joined = `${artists} ${characters} ${series} ${tags} ${metaTags}`
             if (joined.includes("_") || joined.includes("/") || joined.includes("\\")) {
                 setError(true)
@@ -354,7 +354,7 @@ const QuickEditDialog: React.FunctionComponent = (props) => {
                 </div>
             )
         }
-        if (session.username) {
+        if (permissions.isContributor(session)) {
             return (
                 <div className="dialog">
                     <Draggable handle=".dialog-title-container">
@@ -487,7 +487,7 @@ const QuickEditDialog: React.FunctionComponent = (props) => {
                             </div>
                             <div className="dialog-row">
                                 <SearchSuggestions active={tagActive} text={functions.cleanHTML(tags)} x={tagX} y={tagY} width={mobile ? 140 : 200} fontSize={17} click={handleTagClick} type="tag"/>
-                                <ContentEditable innerRef={tagRef} className="dialog-textarea" spellCheck={false} html={tags} onChange={(event) => setTags(event.target.value)} onFocus={() => setTagActive(true)} onBlur={() => setTagActive(false)}/>
+                                <ContentEditable innerRef={tagRef} className="dialog-textarea" style={{height: "140px"}} spellCheck={false} html={tags} onChange={(event) => setTags(event.target.value)} onFocus={() => setTagActive(true)} onBlur={() => setTagActive(false)}/>
                             </div>
                             <div className="dialog-row">
                                 <span className="dialog-text">Reason: </span>
@@ -601,7 +601,7 @@ const QuickEditDialog: React.FunctionComponent = (props) => {
                         </div>
                         <div className="dialog-row">
                             <SearchSuggestions active={tagActive} text={functions.cleanHTML(tags)} x={tagX} y={tagY} width={200} click={handleTagClick} type="tag"/>
-                            <ContentEditable innerRef={tagRef} className="dialog-textarea" spellCheck={false} html={tags} onChange={(event) => setTags(event.target.value)} onFocus={() => setTagActive(true)} onBlur={() => setTagActive(false)}/>
+                            <ContentEditable innerRef={tagRef} className="dialog-textarea" style={{height: "140px"}} spellCheck={false} html={tags} onChange={(event) => setTags(event.target.value)} onFocus={() => setTagActive(true)} onBlur={() => setTagActive(false)}/>
                         </div>
                         <div className="dialog-row">
                             <span className="dialog-text">Reason: </span>
@@ -622,4 +622,4 @@ const QuickEditDialog: React.FunctionComponent = (props) => {
     return null
 }
 
-export default QuickEditDialog
+export default TagEditDialog

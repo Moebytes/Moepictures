@@ -20,8 +20,12 @@ import adminLabel from "../assets/icons/admin-label.png"
 import modLabel from "../assets/icons/mod-label.png"
 import systemLabel from "../assets/icons/system-label.png"
 import premiumLabel from "../assets/icons/premium-label.png"
+import contributorLabel from "../assets/icons/contributor-label.png"
+import premiumContributorLabel from "../assets/icons/premium-contributor-label.png"
+import curatorLabel from "../assets/icons/curator-label.png"
+import premiumCuratorLabel from "../assets/icons/premium-curator-label.png"
 import permissions from "../structures/Permissions"
-import premiumStar from "../assets/icons/premiumStar.png"
+import premiumStar from "../assets/icons/premium-star.png"
 import r18 from "../assets/icons/r18.png"
 import danger from "../assets/icons/danger.png"
 import lockIcon from "../assets/icons/private-lock.png"
@@ -403,6 +407,34 @@ const UserProfilePage: React.FunctionComponent = (props) => {
                     <img className="userprofile-name-label" src={systemLabel}/>
                 </div>
             )
+        } else if (session.role === "premium-curator") {
+            return (
+                <div className="userprofile-name-container">
+                    <span className="userprofile-name-plain curator-color">{functions.toProperCase(session.username)}</span>
+                    <img className="userprofile-name-label" src={premiumCuratorLabel}/>
+                </div>
+            )
+        } else if (session.role === "curator") {
+            return (
+                <div className="userprofile-name-container">
+                    <span className="userprofile-name-plain curator-color">{functions.toProperCase(session.username)}</span>
+                    <img className="userprofile-name-label" src={curatorLabel}/>
+                </div>
+            )
+        } else if (session.role === "premium-contributor") {
+            return (
+                <div className="userprofile-name-container">
+                    <span className="userprofile-name-plain premium-color">{functions.toProperCase(session.username)}</span>
+                    <img className="userprofile-name-label" src={premiumContributorLabel}/>
+                </div>
+            )
+        } else if (session.role === "contributor") {
+            return (
+                <div className="userprofile-name-container">
+                    <span className="userprofile-name-plain contributor-color">{functions.toProperCase(session.username)}</span>
+                    <img className="userprofile-name-label" src={contributorLabel}/>
+                </div>
+            )
         } else if (session.role === "premium") {
             return (
                 <div className="userprofile-name-container">
@@ -410,7 +442,7 @@ const UserProfilePage: React.FunctionComponent = (props) => {
                     <img className="userprofile-name-label" src={premiumLabel}/>
                 </div>
             )
-        }
+        } 
         return <span className={`userprofile-name ${session.banned ? "banned" : ""}`}>{functions.toProperCase(session.username)}</span>
     }
 

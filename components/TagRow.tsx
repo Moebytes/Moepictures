@@ -3,13 +3,15 @@ import {useHistory} from "react-router-dom"
 import {ThemeContext, SearchContext, SearchFlagContext, DeleteTagFlagContext, DeleteTagIDContext, MobileContext, EditTagTypeContext, EditTagReasonContext,
 EditTagSocialContext, EditTagTwitterContext, EditTagWebsiteContext, EditTagFandomContext, EditTagAliasesContext, EditTagImplicationsContext, 
 EditTagDescriptionContext, EditTagIDContext, EditTagFlagContext, EditTagPixivTagsContext, SessionContext, EditTagImageContext, EditTagKeyContext, AliasTagFlagContext, 
-AliasTagIDContext, AliasTagNameContext, SessionFlagContext} from "../Context"
+AliasTagIDContext, AliasTagNameContext, SessionFlagContext, CategorizeTagContext} from "../Context"
 import {HashLink as Link} from "react-router-hash-link"
 import functions from "../structures/Functions"
+import permissions from "../structures/Permissions"
 import alias from "../assets/icons/alias.png"
 import edit from "../assets/icons/edit.png"
 import historyIcon from "../assets/icons/history.png"
 import deleteIcon from "../assets/icons/delete.png"
+import categoryIcon from "../assets/icons/category.png"
 import website from "../assets/icons/support.png"
 import fandom from "../assets/icons/fandom.png"
 import pixiv from "../assets/icons/pixiv.png"
@@ -49,6 +51,7 @@ const TagRow: React.FunctionComponent<Props> = (props) => {
     const {aliasTagID, setAliasTagID} = useContext(AliasTagIDContext)
     const {aliasTagFlag, setAliasTagFlag} = useContext(AliasTagFlagContext)
     const {aliasTagName, setAliasTagName} = useContext(AliasTagNameContext)
+    const {categorizeTag, setCategorizeTag} = useContext(CategorizeTagContext)
     const {session, setSession} = useContext(SessionContext)
     const {sessionFlag, setSessionFlag} = useContext(SessionFlagContext)
     const history = useHistory()
@@ -193,6 +196,10 @@ const TagRow: React.FunctionComponent<Props> = (props) => {
         setAliasTagID(props.tag.tag)
     }
 
+    const categorizeTagDialog = async () => {
+        setCategorizeTag(props.tag)
+    }
+
     const tagHistory = async () => {
         window.scrollTo(0, 0)
         history.push(`/tag/history/${props.tag.tag}`)
@@ -269,6 +276,7 @@ const TagRow: React.FunctionComponent<Props> = (props) => {
             </div>
             {session.username ?
             <div className="tag-buttons">
+                {permissions.isMod(session) ? <img className="tag-button" src={categoryIcon} onClick={categorizeTagDialog}/> : null}
                 <img className="tag-button" src={historyIcon} onClick={tagHistory}/>
                 <img className="tag-button" src={alias} onClick={aliasTagDialog}/>
                 <img className="tag-button" src={edit} onClick={editTagDialog}/>

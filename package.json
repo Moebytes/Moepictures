@@ -140,6 +140,7 @@
     "react-dom": "^18.3.1",
     "react-draggable": "^4.4.5",
     "react-image-crop": "^10.0.2",
+    "react-reorder": "^3.0.0-alpha.7",
     "react-router-hash-link": "^2.4.3",
     "react-shape-editor": "^4.1.1",
     "react-simple-star-rating": "github:Moebits/react-simple-star-rating#full-fraction-dist",

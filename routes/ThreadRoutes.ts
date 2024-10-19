@@ -29,7 +29,7 @@ const threadUpdateLimiter = rateLimit({
 const ThreadRoutes = (app: Express) => {
     app.post("/api/thread/create", csrfProtection, threadUpdateLimiter, async (req: Request, res: Response) => {
         try {
-            const {title, content, captchaResponse} = req.body
+            const {title, content} = req.body
             if (!req.session.username) return res.status(403).send("Unauthorized")
             if (req.session.banned) return res.status(403).send("You are banned")
             if (!title || !content) return res.status(400).send("Bad title or content")
@@ -37,7 +37,6 @@ const ThreadRoutes = (app: Express) => {
             if (badTitle) return res.status(400).send("Bad title")
             const badContent = functions.validateThread(content)
             if (badContent) return res.status(400).send("Bad content")
-            if (req.session.captchaAnswer !== captchaResponse?.trim()) return res.status(400).send("Bad captchaResponse")
             const threadID = await sql.thread.insertThread(req.session.username, title, content)
             res.status(200).send(threadID)
         } catch (e) {

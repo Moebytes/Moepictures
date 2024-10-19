@@ -240,6 +240,22 @@ const SearchRoutes = (app: Express) => {
         }
     })
 
+    app.get("/api/search/groups", searchLimiter, async (req: Request, res: Response, next: NextFunction) => {
+        try {
+            const query = req.query.query as string
+            let sort = req.query.sort as string
+            const limit = req.query.limit as string
+            const offset = req.query.offset as string
+            if (!functions.validGroupSort(sort)) return res.status(400).send("Invalid sort")
+            const search = query?.trim() ?? ""
+            let  result = await sql.search.groupSearch(search, sort, limit, offset)
+            res.status(200).json(result)
+        } catch (e) {
+            console.log(e)
+            return res.status(400).send("Bad request")
+        }
+    })
+
     app.get("/api/search/suggestions", searchLimiter, async (req: Request, res: Response, next: NextFunction) => {
         try {
             const query = req.query.query as string

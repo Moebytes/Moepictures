@@ -36,6 +36,7 @@ import UserRoutes from "./routes/UserRoutes"
 import TranslationRoutes from "./routes/TranslationRoutes"
 import ThreadRoutes from "./routes/ThreadRoutes"
 import MessageRoutes from "./routes/MessageRoutes"
+import GroupRoutes from "./routes/GroupRoutes"
 import ipBans from "./assets/json/ip-bans.json"
 import imageLock from "./structures/ImageLock"
 const __dirname = path.resolve()
@@ -128,6 +129,7 @@ UserRoutes(app)
 TranslationRoutes(app)
 ThreadRoutes(app)
 MessageRoutes(app)
+GroupRoutes(app)
 
 if (process.env.TESTING === "yes") {
   app.use(middleware(compiler, {

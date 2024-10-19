@@ -43,7 +43,7 @@ const DeletePostDialog: React.FunctionComponent<Props> = (props) => {
     }, [showDeletePostDialog])
 
     const deletePost = async () => {
-        if (permissions.isMod(session)) {
+        if (permissions.isAdmin(session)) {
             await functions.delete("/api/post/delete", {postID: props.post.postID}, session, setSessionFlag)
             history.push("/posts")
         } else {
@@ -93,7 +93,7 @@ const DeletePostDialog: React.FunctionComponent<Props> = (props) => {
             )
         }
 
-        if (permissions.isMod(session)) {
+        if (permissions.isAdmin(session)) {
             return (
                 <div className="dialog">
                     <Draggable handle=".dialog-title-container">
@@ -134,7 +134,7 @@ const DeletePostDialog: React.FunctionComponent<Props> = (props) => {
                         </div>
                         </> : <>
                         <div className="dialog-row">
-                            <span className="dialog-text-small">If you think that a post is low-quality, you may request it's deletion and it will get re-reviewed by staff. If you want to delete a post for a copyright reason, please use the contact form instead. Why do you want to delete this post?</span>
+                            <span className="dialog-text-small">If you think that a post is low-quality, you may request it's deletion and it will get re-reviewed. Why do you want to delete this post?</span>
                         </div>
                         <div className="dialog-row">
                             <span className="dialog-text">Reason: </span>

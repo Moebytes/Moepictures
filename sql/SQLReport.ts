@@ -115,11 +115,11 @@ export default class SQLReport {
     }
     
     /** Insert ban */
-    public static insertBan = async (username: string, banner: string, reason?: string) => {
+    public static insertBan = async (username: string, ip: string, banner: string, reason: string) => {
         const now = new Date().toISOString()
         const query: QueryConfig = {
-        text: /*sql*/`INSERT INTO bans ("username", "banner", "banDate", "reason") VALUES ($1, $2, $3, $4)`,
-        values: [username, banner, now, reason]
+        text: /*sql*/`INSERT INTO bans ("username", "ip", "banner", "banDate", "reason") VALUES ($1, $2, $3, $4, $5)`,
+        values: [username, ip, banner, now, reason]
         }
         const result = await SQLQuery.run(query)
         return result
@@ -140,6 +140,16 @@ export default class SQLReport {
         const query: QueryConfig = {
         text: functions.multiTrim(/*sql*/`SELECT * FROM bans WHERE bans."username" = $1`),
         values: [username]
+        }
+        const result = await SQLQuery.run(query)
+        return result[0]
+    }
+
+    /** Get banned IP */
+    public static bannedIP = async (ip: string) => {
+        const query: QueryConfig = {
+        text: functions.multiTrim(/*sql*/`SELECT * FROM bans WHERE bans."ip" = $1`),
+        values: [ip]
         }
         const result = await SQLQuery.run(query)
         return result[0]

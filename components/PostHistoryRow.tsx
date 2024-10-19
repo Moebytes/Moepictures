@@ -45,9 +45,9 @@ const PostHistoryRow: React.FunctionComponent<Props> = (props) => {
 
     const updateImages = async () => {
         const filename = props.postHistory.images[0]?.filename ? props.postHistory.images[0].filename : props.postHistory.images[0]
-        const initialImg = functions.getImageLink(props.postHistory.images[0]?.type, props.postHistory.postID, 1, filename)
+        const initialImg = functions.getThumbnailLink(props.postHistory.images[0]?.type, props.postHistory.postID, 1, filename, "medium", mobile)
         const currentFilename = props.currentHistory.images[0]?.filename ? props.currentHistory.images[0].filename : props.currentHistory.images[0]
-        const currentImg = functions.getImageLink(props.currentHistory.images[0]?.type, props.currentHistory.postID, 1, currentFilename)
+        const currentImg = functions.getThumbnailLink(props.currentHistory.images[0]?.type, props.currentHistory.postID, 1, currentFilename, "medium", mobile)
         setImg(initialImg + `#${path.extname(filename)}`)
         setCurrentImg(currentImg + `#${path.extname(currentFilename)}`)
     }
@@ -149,13 +149,13 @@ const PostHistoryRow: React.FunctionComponent<Props> = (props) => {
                     </div>
                 </div>
             )
-        } else {
+        } else if (permissions.isContributor(session)) {
             return (
                 <div className="posthistoryrow-options">
                     <div className="posthistoryrow-options-container" onClick={revertPostHistoryDialog}>
-                    <img className="posthistoryrow-options-img" src={postHistoryRevert}/>
-                    <span className="posthistoryrow-options-text">Revert</span>
-                </div>
+                        <img className="posthistoryrow-options-img" src={postHistoryRevert}/>
+                        <span className="posthistoryrow-options-text">Revert</span>
+                    </div>
                 </div>
             )
         }
@@ -241,7 +241,7 @@ const PostHistoryRow: React.FunctionComponent<Props> = (props) => {
             let newImageIndex = imageIndex + 1 
             if (newImageIndex > props.postHistory.images.length - 1) newImageIndex = 0
             const filename = props.postHistory.images[newImageIndex]?.filename ? props.postHistory.images[newImageIndex].filename : props.postHistory.images[newImageIndex]
-            const newImg = functions.getImageLink(props.postHistory.images[newImageIndex]?.type, props.postHistory.postID, 1, filename)
+            const newImg = functions.getThumbnailLink(props.postHistory.images[newImageIndex]?.type, props.postHistory.postID, 1, filename, "medium", mobile)
             setImg(newImg + `#${path.extname(filename)}`)
             setImageIndex(newImageIndex)
         }

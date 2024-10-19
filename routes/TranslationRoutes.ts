@@ -23,6 +23,7 @@ const TranslationRoutes = (app: Express) => {
             if (Number.isNaN(Number(postID))) return res.status(400).send("Invalid postID")
             if (Number.isNaN(Number(order)) || Number(order) < 1) return res.status(400).send("Invalid order")
             if (!req.session.username) return res.status(403).send("Unauthorized")
+            if (!permissions.isContributor(req.session)) return res.status(403).send("Unauthorized")
             if (req.session.banned) return res.status(403).send("You are banned")
             if (!data) return res.status(400).send("Bad data")
 

@@ -211,4 +211,77 @@ export default class SQLRequest {
         const result = await SQLQuery.run(query)
         return result
     }
+
+    /** Insert pending group delete. */
+    public static insertGroupDeleteRequest = async (username: string, slug: string, reason: string) => {
+        const query: QueryConfig = {
+        text: /*sql*/`INSERT INTO "delete requests" ("username", "group", "reason") VALUES ($1, $2, $3)`,
+        values: [username, slug, reason]
+        }
+        const result = await SQLQuery.run(query)
+        return result
+    }
+
+    /** Delete pending group delete. */
+    public static deleteGroupDeleteRequest = async (username: string, slug: string) => {
+        const query: QueryConfig = {
+        text: /*sql*/`DELETE FROM "delete requests" WHERE "delete requests"."username" = $1 AND "delete requests"."group" = $2`,
+        values: [username, slug]
+        }
+        const result = await SQLQuery.run(query)
+        return result
+    }
+
+    /** Get group delete requests */
+    public static groupDeleteRequests = async (offset?: string) => {
+        const query: QueryConfig = {
+        text: functions.multiTrim(/*sql*/`
+            SELECT "delete requests".*, groups.*
+            FROM "delete requests"
+            JOIN groups ON groups.slug = "delete requests".group
+            WHERE "delete requests"."group" IS NOT NULL
+            GROUP BY "delete requests"."requestID", groups.slug
+            LIMIT 100 ${offset ? `OFFSET $1` : ""}
+        `),
+        }
+        if (offset) query.values = [offset]
+        const result = await SQLQuery.run(query)
+        return result
+    }
+
+    /** Insert group edit request. */
+    public static insertGroupEditRequest = async (username: string, slug: string, name: string, description: string, reason: string) => {
+        const query: QueryConfig = {
+        text: /*sql*/`INSERT INTO "group edit requests" ("username", "group", "name", "description", "reason") VALUES ($1, $2, $3, $4, $5)`,
+        values: [username, slug, name, description, reason]
+        }
+        const result = await SQLQuery.run(query)
+        return result
+    }
+
+    /** Delete group edit request. */
+    public static deleteGroupEditRequest = async (username: string, slug: string) => {
+        const query: QueryConfig = {
+        text: /*sql*/`DELETE FROM "group edit requests" WHERE "group edit requests"."username" = $1 AND "group edit requests"."group" = $2`,
+        values: [username, slug]
+        }
+        const result = await SQLQuery.run(query)
+        return result
+    }
+
+    /** Get group edit requests */
+    public static groupEditRequests = async (offset?: string) => {
+        const query: QueryConfig = {
+        text: functions.multiTrim(/*sql*/`
+            SELECT "group edit requests".*
+            FROM "group edit requests"
+            JOIN groups ON groups.slug = "group edit requests".group
+            GROUP BY "group edit requests"."requestID"
+            LIMIT 100 ${offset ? `OFFSET $1` : ""}
+        `),
+        }
+        if (offset) query.values = [offset]
+        const result = await SQLQuery.run(query)
+        return result
+    }
 }

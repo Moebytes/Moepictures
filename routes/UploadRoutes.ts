@@ -95,7 +95,7 @@ const CreateRoutes = (app: Express) => {
         const noImageUpdate = req.body.noImageUpdate
 
         if (!req.session.username) return res.status(403).send("Unauthorized")
-        if (!permissions.isMod(req.session)) return res.status(403).end()
+        if (!permissions.isCurator(req.session)) return res.status(403).send("Unauthorized")
         if (req.session.banned) return res.status(403).send("You are banned")
 
         if (!artists?.[0]?.tag) artists = [{tag: "unknown-artist"}]
@@ -374,6 +374,7 @@ const CreateRoutes = (app: Express) => {
 
         if (Number.isNaN(postID)) return res.status(400).send("Bad postID")
         if (!req.session.username) return res.status(403).send("Unauthorized")
+        if (!permissions.isContributor(req.session)) return res.status(403).send("Unauthorized")
         if (req.session.banned) return res.status(403).send("You are banned")
         if (!permissions.isMod(req.session)) noImageUpdate = true
 

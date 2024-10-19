@@ -5,7 +5,7 @@ import {HideNavbarContext, HideSidebarContext, ThemeContext, EnableDragContext, 
 HideTitlebarContext, SessionContext, SessionFlagContext} from "../Context"
 import functions from "../structures/Functions"
 import Draggable from "react-draggable"
-import premiumStar from "../assets/icons/premiumStar.png"
+import premiumStar from "../assets/icons/premium-star.png"
 import "./styles/dialog.less"
 
 const PremiumRequiredDialog: React.FunctionComponent = (props) => {

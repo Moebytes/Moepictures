@@ -264,9 +264,7 @@ const HelpPage: React.FunctionComponent = (props) => {
                     ⇾ Compress / re-encode files (maintaining high quality) to be storage efficient. <br/>
                     ⇾ No hentai. We only allow light nudity and suggestiveness. <br/>
                     ⇾ No AI-generated works. We only want art made by humans and their passion. <br/>
-                    ⇾ No paid content. This includes anime clips, manga and doujinshi scans, and paid artist rewards. Support artists for their work*<br/><br/>
-
-                    *This may be allowed only if the content is no longer available for purchase for the sake of art preservation.<br/>
+                    ⇾ No paid content. This includes anime clips, manga and doujinshi scans, and paid artist rewards. Support artists for their work.<br/>
                     </span>
                 </span>
                 <div className="help-img-container"><img className="help-img" src={uploadImg}/></div></>
@@ -387,9 +385,9 @@ const HelpPage: React.FunctionComponent = (props) => {
                     Do not behave badly participating in comments, forum threads, or sending messages. 
                     These are some general guidelines for all the comment sections: <br/>
                     <span className="help-alt">
-                    ⇾ No spam, jibberish, or extremely off-topic comments. <br/>
+                    ⇾ No spam, gibberish, or extremely off-topic comments. <br/>
                     ⇾ No foul language (if you somehow bypassed the filter). <br/>
-                    ⇾ No excessive rudeness in arguments. <br/>
+                    ⇾ No unnecessary rudeness or impoliteness. <br/>
                     ⇾ No otherwise distasteful comments. <br/><br/>
                     </span>
 
@@ -441,9 +439,8 @@ const HelpPage: React.FunctionComponent = (props) => {
                 <><span className="help-heading">Account Deletion</span>
                 <span className="help-text">
                     Because Moepictures is heavily focused on user contributions, when you delete your account we won't  
-                    remove your contributions like submitted posts. The account that uploaded them will be anonymized and 
-                    show up as "deleted". The rest of your account data and comments will be deleted, however if someone quoted you 
-                    in the comments some of your comments might still be remain.
+                    remove your public contributions like submitted posts and edits. The account that uploaded them will be 
+                    anonymized and show up as "deleted". The rest of your account data will be deleted.
                 </span></>
             )
         }

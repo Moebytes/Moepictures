@@ -20,8 +20,10 @@ import EditCommentDialog from "../dialogs/EditCommentDialog"
 import EditTranslationDialog from "../dialogs/EditTranslationDialog"
 import SaveTranslationDialog from "../dialogs/SaveTranslationDialog"
 import ReportCommentDialog from "../dialogs/ReportCommentDialog"
-import QuickEditDialog from "../dialogs/QuickEditDialog"
+import TagEditDialog from "../dialogs/TagEditDialog"
 import SourceEditDialog from "../dialogs/SourceEditDialog"
+import FavgroupDialog from "../dialogs/FavgroupDialog"
+import GroupDialog from "../dialogs/GroupDialog"
 import RevertPostHistoryDialog from "../dialogs/RevertPostHistoryDialog"
 import RevertTranslationHistoryDialog from "../dialogs/RevertTranslationHistoryDialog"
 import CaptchaDialog from "../dialogs/CaptchaDialog"
@@ -32,10 +34,9 @@ import Related from "../components/Related"
 import MobileInfo from "../components/MobileInfo"
 import historyIcon from "../assets/icons/history-state.png"
 import currentIcon from "../assets/icons/current.png"
-import FavgroupDialog from "../dialogs/FavgroupDialog"
 import {HideNavbarContext, HideSidebarContext, RelativeContext, DownloadFlagContext, DownloadIDsContext, HideTitlebarContext, MobileContext, ReloadPostFlagContext,
 PostsContext, TagsContext, HeaderTextContext, PostFlagContext, RedirectContext, SidebarTextContext, SessionContext, SessionFlagContext, EnableDragContext, TranslationModeContext,
-RevertPostHistoryIDContext, RevertPostHistoryFlagContext, RevertTranslationHistoryIDContext, RevertTranslationHistoryFlagContext} from "../Context"
+RevertPostHistoryIDContext, RevertPostHistoryFlagContext, RevertTranslationHistoryIDContext, RevertTranslationHistoryFlagContext, RestrictTypeContext, ActiveGroupContext} from "../Context"
 import permissions from "../structures/Permissions"
 import "./styles/postpage.less"
 
@@ -69,6 +70,8 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
     const {revertPostHistoryFlag, setRevertPostHistoryFlag} = useContext(RevertPostHistoryFlagContext)
     const {revertTranslationHistoryID, setRevertTranslationHistoryID} = useContext(RevertTranslationHistoryIDContext)
     const {revertTranslationHistoryFlag, setRevertTranslationHistoryFlag} = useContext(RevertTranslationHistoryFlagContext)
+    const {restrictType, setRestrictType} = useContext(RestrictTypeContext)
+    const {activeGroup, setActiveGroup} = useContext(ActiveGroupContext)
     const [images, setImages] = useState([]) as any
     const [thirdPartyPosts, setThirdPartyPosts] = useState([]) as any
     const [artistPosts, setArtistPosts] = useState([]) as any
@@ -81,6 +84,7 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
     const [order, setOrder] = useState(1)
     const [historyID, setHistoryID] = useState(null as any)
     const [translationID, setTranslationID] = useState(null as any)
+    const [groups, setGroups] = useState([]) as any
     const history = useHistory()
     const location = useLocation()
     const postID = props?.match.params.id
@@ -119,7 +123,6 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
         }
     }, [location])
 
-    
     useEffect(() => {
         localStorage.setItem("order", String(order))
         let orderParam = new URLSearchParams(window.location.search).get("order")
@@ -187,6 +190,17 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
         }
     }
 
+    const updateGroups = async () => {
+        if (post) {
+            const groups = await functions.get("/api/groups", {postID: post.postID}, session, setSessionFlag).catch(() => [])
+            if (groups?.length) {
+                setGroups(groups)
+            } else {
+                setGroups([])
+            }
+        }
+    }
+
     const saveHistory = async () => {
         if (post && session.username) {
             await functions.post("/api/post/view", {postID: post.postID}, session, setSessionFlag)
@@ -205,6 +219,7 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
         updatePost()
         updateParent()
         updateThirdParty()
+        updateGroups()
         saveHistory()
     }, [post, session])
 
@@ -351,11 +366,17 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
     }
 
     const next = async () => {
-        let currentIndex = posts.findIndex((p: any) => p.postID === postID)
+        let currentIndex = posts.findIndex((p: any) => String(p.postID) === String(postID))
         if (currentIndex !== -1) {
             currentIndex++
             if (!session.username) {
                 while (posts[currentIndex]?.restrict !== "safe") {
+                    currentIndex++
+                    if (currentIndex >= posts.length) break
+                }
+            }
+            if (restrictType !== "explicit") {
+                while (posts[currentIndex]?.restrict === "explicit") {
                     currentIndex++
                     if (currentIndex >= posts.length) break
                 }
@@ -370,11 +391,17 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
     }
 
     const previous = async () => {
-        let currentIndex = posts.findIndex((p: any) => p.postID === postID)
+        let currentIndex = posts.findIndex((p: any) => String(p.postID) === String(postID))
         if (currentIndex !== -1) {
             currentIndex--
             if (!session.username) {
                 while (posts[currentIndex]?.restrict !== "safe") {
+                    currentIndex--
+                    if (currentIndex <= -1) break
+                }
+            }
+            if (restrictType !== "explicit") {
+                while (posts[currentIndex]?.restrict === "explicit") {
                     currentIndex--
                     if (currentIndex <= -1) break
                 }
@@ -525,6 +552,34 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
         )
     }
 
+    const generateGroupsJSX = () => {
+        let jsx = [] as any
+        for (let i = 0; i < groups.length; i++) {
+            let group = groups[i]
+            let filtered = group.posts.filter((p: any) => restrictType === "explicit" ? p.restrict === "explicit" : p.restrict !== "explicit")
+            if (!permissions.isMod(session)) filtered = filtered.filter((f: any) => !f.hidden)
+            const images = filtered.map((f: any) => functions.getThumbnailLink(f.images[0].type, f.postID, f.images[0].order, f.images[0].filename, "tiny"))
+            const setGroup = (img: string, index: number) => {
+                const postID = group.posts[index].postID
+                history.push(`/post/${postID}`)
+                window.scrollTo(0, functions.navbarHeight() + functions.titlebarHeight())
+                setPosts(group.posts)
+                setTimeout(() => {
+                    setActiveGroup(group.name)
+                }, 200)
+            }
+            jsx.push(
+                <div className="post-item">
+                    <div className="post-item-title-clickable" onClick={() => history.push(`/group/${group.slug}`)}>{group.name}</div>
+                    <div className="post-item-container">
+                        <Carousel images={images} set={setGroup} noKey={true}/>
+                    </div>
+                </div>
+            )
+        }
+        return jsx
+    }
+
     const getPostJSX = () => {
         if (!post) return
         if (post.type === "model") {
@@ -558,9 +613,10 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
     return (
         <>
         <CaptchaDialog/>
-        <QuickEditDialog/>
+        <TagEditDialog/>
         <SourceEditDialog/>
         <FavgroupDialog/>
+        <GroupDialog/>
         <EditCommentDialog/>
         <DeleteCommentDialog/>
         <ReportCommentDialog/>
@@ -585,6 +641,7 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
                     </div> : null}
                     {/*nsfwChecker() &&*/ post ? getPostJSX() : null}
                     {mobile && post && tagCategories ? <MobileInfo post={post} order={order} artists={tagCategories.artists} characters={tagCategories.characters} series={tagCategories.series} tags={tagCategories.tags}/> : null}
+                    {generateGroupsJSX()}
                     {parentPost ? <Parent post={parentPost}/>: null}
                     {thirdPartyPosts.length ? <ThirdParty posts={thirdPartyPosts}/> : null}
                     {session.username && !session.banned && post ? <CutenessMeter post={post}/> : null}

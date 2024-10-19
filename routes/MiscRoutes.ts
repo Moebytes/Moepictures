@@ -11,6 +11,8 @@ import functions from "../structures/Functions"
 import serverFunctions, {csrfProtection, keyGenerator, handler} from "../structures/ServerFunctions"
 import rateLimit from "express-rate-limit"
 import fs from "fs"
+import phash from "sharp-phash"
+import dist from "sharp-phash/distance"
 import svgCaptcha from "svg-captcha"
 import child_process from "child_process"
 import crypto from "crypto"
@@ -106,6 +108,34 @@ const MiscRoutes = (app: Express) => {
         }
     })
 
+    app.post("/api/misc/revdanbooru", miscLimiter, async (req: Request, res: Response, next: NextFunction) => {
+        try {
+            if (!req.body) return res.status(400).send("Image data must be provided")
+            const html = await axios.get("https://danbooru.donmai.us/iqdb_queries")
+            const csrfToken = html.data.match(/(?<=csrf-token" content=")(.*?)(?=")/)[0]
+            const cookie = html.headers["set-cookie"]?.[0] || ""
+            const oldBuffer = Buffer.from(req.body, "binary")
+            const oldHash = await phash(oldBuffer).then((hash: any) => functions.binaryToHex(hash))
+            const form = new FormData()
+            form.append("authenticity_token", csrfToken)
+            form.append("search[file]", oldBuffer, {filename: "image.png"})
+            const result = await axios.post("https://danbooru.donmai.us/iqdb_queries.json", form, {headers: {cookie, ...form.getHeaders()}}).then((r) => r.data)
+            if (result[0]?.score < 70) return res.status(200).send("")
+            const original = result[0].post.file_url
+            if (!original || path.extname(original) === ".zip" || path.extname(original) === ".mp4") return res.status(200).send("")
+            const buffer = await fetch(original).then((r) => r.arrayBuffer())
+            const hash = await phash(Buffer.from(buffer)).then((hash: any) => functions.binaryToHex(hash))
+            if (dist(hash, oldHash) < 7) {
+                res.status(200).send(`https://danbooru.donmai.us/posts/${result[0].post.id}.json`)
+            } else {
+                res.status(200).send("")
+            }
+        } catch (e) {
+            console.log(e)
+            res.status(400).end()
+        }
+    })
+
     app.get("/api/misc/pixiv", miscLimiter, async (req: Request, res: Response, next: NextFunction) => {
         const link = req.query.url as string
         if (!link) return res.status(400).send("No url")
@@ -119,7 +149,7 @@ const MiscRoutes = (app: Express) => {
             try {
                 const illust = await pixiv.illust.get(resolvable) as any
                 const html = await axios.get(`https://www.pixiv.net/en/users/${illust.user.id}`).then((r) => r.data)
-                const twitter = html.match(/(?<=twitter\.com\/)(.*?)(?=")/)?.[0]
+                const twitter = html.match(/(?<=twitter\.com\/|x\.com\/)(.*?)(?=[\\"&])/)?.[0]
                 illust.user.twitter = twitter
                 res.status(200).json(illust)
             } catch (e) {
@@ -411,7 +441,14 @@ const MiscRoutes = (app: Express) => {
                 let premiumExpiration = user.premiumExpiration ? new Date(user.premiumExpiration) : new Date()
                 premiumExpiration.setFullYear(premiumExpiration.getFullYear() + 1)
 
-                await sql.user.updateUser(metadata.username, "role", "premium")
+                if (user.role === "curator") {
+                    await sql.user.updateUser(metadata.username, "role", "premium-curator")
+                } else if (user.role === "contributor") {
+                    await sql.user.updateUser(metadata.username, "role", "premium-contributor")
+                } else if (user.role === "user") {
+                    await sql.user.updateUser(metadata.username, "role", "premium")
+                }
+
                 await sql.user.updateUser(metadata.username, "premiumExpiration", premiumExpiration.toISOString())
 
                 const message = `Your account has been upgraded to premium. You can now access all the premium features. Thank you for supporting us!\n\nYour membership will last until ${functions.prettyDate(premiumExpiration)}.`
