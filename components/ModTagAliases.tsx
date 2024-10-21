@@ -130,10 +130,12 @@ const ModTagAliases: React.FunctionComponent = (props) => {
         for (let i = 0; i < requests.length; i++) {
             const request = requests[i] as any
             if (!request) break
-            const searchTag = () => {
-                history.push(`/posts`)
-                setSearch(request.tag)
-                setSearchFlag(true)
+            const openTag = (event: React.MouseEvent) => {
+                if (event.ctrlKey || event.metaKey || event.button === 1) {
+                    window.open(`/tag/${request.tag}`, "_blank")
+                } else {
+                    history.push(`/tag/${request.tag}`)
+                }
             }
             const img = functions.getTagLink(request.type, request.image)
             jsx.push(
@@ -145,7 +147,7 @@ const ModTagAliases: React.FunctionComponent = (props) => {
                     <div className="mod-post-text-column">
                         <span className="mod-post-link" onClick={() => history.push(`/user/${request.username}`)}>Requester: {functions.toProperCase(request?.username) || "deleted"}</span>
                         <span className="mod-post-text">Reason: {request.reason}</span>
-                        <span className="mod-post-link" onClick={searchTag}>Tag: {request.tag}</span>
+                        <span className="mod-post-link" onClick={openTag} onAuxClick={openTag}>Tag: {request.tag}</span>
                         <span className="mod-post-text">Alias To: {request.aliasTo}</span>
                     </div>
                     <div className="mod-post-options">

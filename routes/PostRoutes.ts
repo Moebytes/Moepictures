@@ -53,6 +53,27 @@ const PostRoutes = (app: Express) => {
         }
     })
 
+    app.get("/api/posts", postLimiter, async (req: Request, res: Response, next: NextFunction) => {
+        try {
+            const postIDs = req.query.postIDs as string[]
+            if (!postIDs?.length) return res.status(200).json([])
+            if (!permissions.isMod(req.session)) return res.status(403).end()
+            let numberIDs = postIDs.map((id: string) => Number(id))
+            let result = await sql.search.posts(numberIDs)
+            if (!permissions.isMod(req.session)) {
+                result = result.filter((p: any) => !p.hidden)
+            }
+            if (!req.session.showR18) {
+                result = result.filter((p: any) => p.restrict !== "explicit")
+            }
+            if (req.session.captchaNeeded) result = functions.stripTags(result)
+            res.status(200).json(result)
+        } catch (e) {
+            console.log(e)
+            return res.status(400).send("Bad request")
+        }
+    })
+
     app.get("/api/post/tags", postLimiter, async (req: Request, res: Response, next: NextFunction) => {
         try {
             const postID = req.query.postID as string
@@ -348,11 +369,12 @@ const PostRoutes = (app: Express) => {
                         title: source.title ? source.title : null,
                         translatedTitle: source.translatedTitle ? source.translatedTitle : null,
                         artist: source.artist ? source.artist : null,
-                        drawn: source.date ? source.date : null,
+                        drawn: source.drawn ? source.drawn : null,
                         link: source.link ? source.link : null,
                         commentary: source.commentary ? source.commentary : null,
                         translatedCommentary: source.translatedCommentary ? source.translatedCommentary : null,
                         bookmarks: source.bookmarks ? source.bookmarks : null,
+                        purchaseLink: source.purchaseLink ? source.purchaseLink : null,
                         mirrors: source.mirrors ? functions.mirrorsJSON(source.mirrors) : null,
                         updatedDate,
                         updater: req.session.username
@@ -362,11 +384,12 @@ const PostRoutes = (app: Express) => {
                         title: source.title ? source.title : null,
                         translatedTitle: source.translatedTitle ? source.translatedTitle : null,
                         artist: source.artist ? source.artist : null,
-                        drawn: source.date ? source.date : null,
+                        drawn: source.drawn ? source.drawn : null,
                         link: source.link ? source.link : null,
                         commentary: source.commentary ? source.commentary : null,
                         translatedCommentary: source.translatedCommentary ? source.translatedCommentary : null,
                         bookmarks: source.bookmarks ? source.bookmarks : null,
+                        purchaseLink: source.purchaseLink ? source.purchaseLink : null,
                         mirrors: source.mirrors ? functions.mirrorsJSON(source.mirrors) : null,
                         updatedDate,
                         updater: req.session.username
@@ -503,7 +526,7 @@ const PostRoutes = (app: Express) => {
                     uploadDate: vanilla.uploadDate, updatedDate: vanilla.updatedDate, type: vanilla.type, restrict: vanilla.restrict, 
                     style: vanilla.style, thirdParty: vanilla.thirdParty, title: vanilla.title, translatedTitle: vanilla.translatedTitle, 
                     drawn: vanilla.drawn, artist: vanilla.artist, link: vanilla.link, commentary: vanilla.commentary, translatedCommentary: vanilla.translatedCommentary, 
-                    bookmarks: vanilla.bookmarks, mirrors: vanilla.mirrors, hasOriginal: vanilla.hasOriginal, hasUpscaled: vanilla.hasUpscaled, 
+                    bookmarks: vanilla.bookmarks, purchaseLink: vanilla.purchaseLink, mirrors: vanilla.mirrors, hasOriginal: vanilla.hasOriginal, hasUpscaled: vanilla.hasUpscaled, 
                     artists: vanilla.artists, characters: vanilla.characters, series: vanilla.series, tags: vanilla.tags, reason})
                 let images = [] as any
                 for (let i = 0; i < post.images.length; i++) {
@@ -514,7 +537,7 @@ const PostRoutes = (app: Express) => {
                     uploadDate: updated.uploadDate, updatedDate: updated.updatedDate, type: updated.type, restrict: updated.restrict, 
                     style: updated.style, thirdParty: updated.thirdParty, title: updated.title, translatedTitle: updated.translatedTitle, 
                     drawn: updated.drawn, artist: updated.artist, link: updated.link, commentary: updated.commentary, 
-                    translatedCommentary: updated.translatedCommentary, bookmarks: updated.bookmarks, mirrors: updated.mirrors, 
+                    translatedCommentary: updated.translatedCommentary, bookmarks: updated.bookmarks, purchaseLink: updated.purchaseLink, mirrors: updated.mirrors, 
                     hasOriginal: updated.hasOriginal, hasUpscaled: updated.hasUpscaled, artists: updated.artists, 
                     characters: updated.characters, series: updated.series, tags: updated.tags, reason})
             } else {
@@ -527,7 +550,7 @@ const PostRoutes = (app: Express) => {
                     uploadDate: updated.uploadDate, updatedDate: updated.updatedDate, type: updated.type, restrict: updated.restrict, 
                     style: updated.style, thirdParty: updated.thirdParty, title: updated.title, translatedTitle: updated.translatedTitle, 
                     drawn: updated.drawn, artist: updated.artist, link: updated.link, commentary: updated.commentary, 
-                    translatedCommentary: updated.translatedCommentary, bookmarks: updated.bookmarks, mirrors: updated.mirrors, 
+                    translatedCommentary: updated.translatedCommentary, bookmarks: updated.bookmarks, purchaseLink: updated.purchaseLink, mirrors: updated.mirrors, 
                     hasOriginal: updated.hasOriginal, hasUpscaled: updated.hasUpscaled, artists: updated.artists, 
                     characters: updated.characters, series: updated.series, tags: updated.tags, reason})
             }
@@ -577,11 +600,12 @@ const PostRoutes = (app: Express) => {
                     title: post.title,
                     translatedTitle: post.translatedTitle,
                     artist: post.artist,
-                    drawn: post.drawn ? functions.formatDate(new Date(post.drawn), true) : null,
+                    date: post.drawn ? functions.formatDate(new Date(post.drawn), true) : null,
                     link: post.link,
                     commentary: post.commentary,
                     translatedCommentary: post.translatedCommentary,
                     bookmarks: post.bookmarks,
+                    purchaseLink: post.purchaseLink,
                     mirrors: post.mirrors ? Object.values(post.mirrors).join("\n") : null
                 }
             }
@@ -694,11 +718,12 @@ const PostRoutes = (app: Express) => {
                 title: source.title ? source.title : null,
                 translatedTitle: source.translatedTitle ? source.translatedTitle : null,
                 artist: source.artist ? source.artist : null,
-                drawn: source.date ? source.date : null,
+                drawn: source.drawn ? source.drawn : null,
                 link: source.link ? source.link : null,
                 commentary: source.commentary ? source.commentary : null,
                 translatedCommentary: source.translatedCommentary ? source.translatedCommentary : null,
                 bookmarks: source.bookmarks ? source.bookmarks : null,
+                purchaseLink: source.purchaseLink ? source.purchaseLink : null,
                 mirrors: source.mirrors ? functions.mirrorsJSON(source.mirrors) : null,
                 uploader: post.uploader,
                 uploadDate: post.uploadDate,
@@ -814,8 +839,8 @@ const PostRoutes = (app: Express) => {
                 if (req.session.captchaNeeded) delete result.tags
                 res.status(200).json(result)
             } else {
-                const result = await sql.history.postHistory(postID, offset)
-                if (req.session.captchaNeeded) functions.stripTags(result)
+                let result = await sql.history.postHistory(postID, offset)
+                if (req.session.captchaNeeded) result = functions.stripTags(result)
                 res.status(200).json(result)
             }
         } catch (e) {

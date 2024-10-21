@@ -152,7 +152,7 @@ const AliasTagDialog: React.FunctionComponent = (props) => {
                         {error ? <div className="dialog-validation-container"><span className="dialog-validation" ref={errorRef}></span></div> : null}
                         <div className="dialog-center-row">
                             <button onClick={() => click("reject")} className="dialog-button">{"Cancel"}</button>
-                            <button onClick={() => click("accept")} className="dialog-button">{"Submit Request"}</button>
+                            <button onClick={() => click("accept")} className="dialog-button">{"Submit"}</button>
                         </div> </>}
                     </div>
                 </div>

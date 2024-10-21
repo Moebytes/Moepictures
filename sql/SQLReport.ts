@@ -71,17 +71,17 @@ export default class SQLReport {
         const query: QueryConfig = {
         text: functions.multiTrim(/*sql*/`
             WITH reports AS (
-            SELECT * FROM "reported replies"
-            UNION
-            SELECT * FROM "reported threads"
-            UNION
-            SELECT * FROM "reported comments"
+                SELECT * FROM "reported replies"
+                UNION
+                SELECT * FROM "reported threads"
+                UNION
+                SELECT * FROM "reported comments"
             )
-            SELECT reports."replyID" AS id, reports.type, reports.reporter,
+            SELECT reports."replyID" AS id, reports."reportID", reports.type, reports.reporter,
             reports."reportDate", reports.reason, users.image, users."imagePost"
             FROM reports
             JOIN users ON users.username = reports.reporter
-            ORDER BY reports."reportDate"
+            ORDER BY reports."reportDate" DESC
             LIMIT 100 ${offset ? `OFFSET $1` : ""}
         `),
         }
@@ -106,7 +106,7 @@ export default class SQLReport {
             FROM reports
             JOIN users ON users.username = reports.reporter
             WHERE reports.reporter = $1
-            ORDER BY reports."reportDate"
+            ORDER BY reports."reportDate" DESC
         `),
         values: [username]
         }

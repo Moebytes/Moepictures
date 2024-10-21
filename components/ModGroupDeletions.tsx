@@ -130,15 +130,20 @@ const ModGroupDeletions: React.FunctionComponent = (props) => {
         for (let i = 0; i < requests.length; i++) {
             const request = requests[i] as any
             if (!request) break
-            const openGroup = () => {
-                history.push(`/group/${request.group}`)
+            const openGroup = (event: React.MouseEvent) => {
+                event.preventDefault()
+                if (event.ctrlKey || event.metaKey || event.button === 1) {
+                    window.open(`/group/${request.group}`, "_blank")
+                } else {
+                    history.push(`/group/${request.group}`)
+                }
             }
             jsx.push(
                 <div className="mod-post" onMouseEnter={() => setHover(true)} onMouseLeave={() => setHover(false)}>
                     <div className="mod-post-text-column">
                         <span className="mod-post-link" onClick={() => history.push(`/user/${request.username}`)}>Requester: {functions.toProperCase(request?.username) || "deleted"}</span>
                         <span className="mod-post-text">Reason: {request.reason}</span>
-                        <span className="mod-post-link" onClick={openGroup}>Name: {request.name}</span>
+                        <span className="mod-post-link" onClick={openGroup} onAuxClick={openGroup}>Name: {request.name}</span>
                         <span className="mod-post-text">Description: {request.description || "No description."}</span>
                     </div>
                     <div className="mod-post-options">

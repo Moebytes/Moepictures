@@ -256,7 +256,7 @@ const EditTagDialog: React.FunctionComponent = (props) => {
                             {tagSocialJSX()}
                             <div className="dialog-row">
                                 <span className="dialog-text">Image: </span>
-                                <label htmlFor="tag-img" className="dialog-button" style={{marginLeft: "5px"}}>
+                                <label htmlFor="tag-img" className="dialog-button" style={{marginLeft: "5px", paddingTop: "0px", paddingBottom: "0px"}}>
                                     <img className="dialog-button-img-small" src={uploadIcon}/>
                                     <span className="dialog-button-text-small">Upload</span>
                                 </label>
@@ -335,7 +335,7 @@ const EditTagDialog: React.FunctionComponent = (props) => {
                         {tagSocialJSX()}
                         <div className="dialog-row">
                             <span className="dialog-text">Image: </span>
-                            <label htmlFor="tag-img" className="dialog-button" style={{marginLeft: "5px"}}>
+                            <label htmlFor="tag-img" className="dialog-button" style={{marginLeft: "5px", paddingTop: "0px", paddingBottom: "0px"}}>
                                 <img className="dialog-button-img-small" src={uploadIcon}/>
                                 <span className="dialog-button-text-small">Upload</span>
                             </label>
@@ -353,26 +353,26 @@ const EditTagDialog: React.FunctionComponent = (props) => {
                             <span className="dialog-text">Description: </span>
                         </div>
                         <div className="dialog-row">
-                            <textarea className="dialog-textarea-small" spellCheck={false} value={editTagDescription} onChange={(event) => setEditTagDescription(event.target.value)}></textarea>
+                            <textarea className="dialog-textarea-small" style={{resize: "vertical", height: "30px"}} spellCheck={false} value={editTagDescription} onChange={(event) => setEditTagDescription(event.target.value)}></textarea>
                         </div>
                         <div className="dialog-row">
                             <span className="dialog-text">Aliases: </span>
                         </div>
                         <div className="dialog-row">
-                            <textarea className="dialog-textarea-small" spellCheck={false} value={editTagAliases.join(" ")} onChange={(event) => setEditTagAliases(event.target.value.split(/ +/g))}></textarea>
+                            <textarea className="dialog-textarea-small" style={{resize: "vertical", height: "30px"}} spellCheck={false} value={editTagAliases.join(" ")} onChange={(event) => setEditTagAliases(event.target.value.split(/ +/g))}></textarea>
                         </div>
                         <div className="dialog-row">
                             <span className="dialog-text">Implications: </span>
                         </div>
                         <div className="dialog-row">
-                            <textarea className="dialog-textarea-small" spellCheck={false} value={editTagImplications.join(" ")} onChange={(event) => setEditTagImplications(event.target.value.split(/ +/g))}></textarea>
+                            <textarea className="dialog-textarea-small" style={{resize: "vertical", height: "30px"}} spellCheck={false} value={editTagImplications.join(" ")} onChange={(event) => setEditTagImplications(event.target.value.split(/ +/g))}></textarea>
                         </div>
                         {editTagType !== "artist" ? <>
                         <div className="dialog-row">
                             <span className="dialog-text">Pixiv Tags: </span>
                         </div>
                         <div className="dialog-row">
-                            <textarea className="dialog-textarea-small" spellCheck={false} value={editTagPixivTags.join(" ")} onChange={(event) => setEditTagPixivTags(event.target.value.split(/ +/g))}></textarea>
+                            <textarea className="dialog-textarea-small" style={{resize: "vertical", height: "30px"}} spellCheck={false} value={editTagPixivTags.join(" ")} onChange={(event) => setEditTagPixivTags(event.target.value.split(/ +/g))}></textarea>
                         </div></> : null}
                         <div className="dialog-row">
                             <span className="dialog-text">Reason: </span>

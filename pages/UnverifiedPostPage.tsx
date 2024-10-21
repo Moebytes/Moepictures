@@ -11,6 +11,7 @@ import PostImageOptions from "../components/PostImageOptions"
 import CutenessMeter from "../components/CutenessMeter"
 import Comments from "../components/Comments"
 import Commentary from "../components/Commentary"
+import BuyLink from "../components/BuyLink"
 import functions from "../structures/Functions"
 import Carousel from "../components/Carousel"
 import DeletePostDialog from "../dialogs/DeletePostDialog"
@@ -20,6 +21,8 @@ import TagEditDialog from "../dialogs/TagEditDialog"
 import SourceEditDialog from "../dialogs/SourceEditDialog"
 import UpscalePostDialog from "../dialogs/UpscalePostDialog"
 import CompressPostDialog from "../dialogs/CompressPostDialog"
+import SaveTranslationDialog from "../dialogs/SaveTranslationDialog"
+import EditTranslationDialog from "../dialogs/EditTranslationDialog"
 import ThirdParty from "../components/ThirdParty"
 import Parent from "../components/Parent"
 import NewTags from "../components/NewTags"
@@ -204,6 +207,22 @@ const UnverifiedPostPage: React.FunctionComponent<Props> = (props) => {
         setOrder(index + 1)
     }
 
+    const originalPostJSX = () => {
+        if (post?.originalID) {
+            const click = (img: string, index: number) => {
+                history.push(`/post/${post.originalID}`)
+            }
+            return (
+                <div className="parent">
+                    <div className="parent-title">Original Post</div>
+                    <div className="parent-container">
+                        <Carousel images={[image]} set={click} noKey={true}/>
+                    </div>
+                </div>
+            )
+        }
+    }
+
     const getPostJSX = () => {
         if (!post) return
         if (post.type === "model") {
@@ -240,6 +259,8 @@ const UnverifiedPostPage: React.FunctionComponent<Props> = (props) => {
         <SourceEditDialog/>
         {post ? <UpscalePostDialog post={post}/> : null}
         {post ? <CompressPostDialog post={post}/> : null}
+        {post ? <SaveTranslationDialog post={post} unverified={true}/> : null}
+        <EditTranslationDialog/>
         {post ? <TitleBar post={post} goBack={true}/> : <TitleBar goBack={true}/>}
         <NavBar/>
         <div className="body">
@@ -255,9 +276,11 @@ const UnverifiedPostPage: React.FunctionComponent<Props> = (props) => {
                     </div> : null}
                     {post ? getPostJSX() : null}
                     {mobile && post && tagCategories ? <MobileInfo post={post} order={order} artists={tagCategories.artists} characters={tagCategories.characters} series={tagCategories.series} tags={tagCategories.tags}/> : null}
+                    {originalPostJSX()}
                     {post ? <NewTags post={post}/> : null}
                     {parentPost ? <Parent post={parentPost}/>: null}
                     {thirdPartyPosts.length ? <ThirdParty posts={thirdPartyPosts}/>: null}
+                    {post?.purchaseLink ? <BuyLink link={post.purchaseLink}/> : null}
                     {post?.commentary ? <Commentary text={post.commentary} translated={post.translatedCommentary}/> : null}
                     <Footer/>
                 </div>

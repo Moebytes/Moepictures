@@ -10,6 +10,7 @@ import permissions from "../structures/Permissions"
 
 interface Props {
     post: any
+    unverified?: boolean
 }
 
 const SaveTranslationDialog: React.FunctionComponent<Props> = (props) => {
@@ -43,20 +44,25 @@ const SaveTranslationDialog: React.FunctionComponent<Props> = (props) => {
     }, [showSaveTranslationDialog])
 
     const saveTranslation = async () => {
-        if (permissions.isContributor(session)) {
-            await functions.post("/api/translation/save", {postID: props.post.postID, data: saveTranslationData, order: saveTranslationOrder, reason}, session, setSessionFlag)
-            setSubmitted(true)
+        if (props.unverified) {
+            await functions.put("/api/translation/save/unverified", {postID: props.post.postID, data: saveTranslationData, order: saveTranslationOrder, reason}, session, setSessionFlag)
+            return setSubmitted(true)
         } else {
-            const badReason = functions.validateReason(reason)
-            if (badReason) {
-                setError(true)
-                if (!errorRef.current) await functions.timeout(20)
-                errorRef.current!.innerText = badReason
-                await functions.timeout(2000)
-                setError(false)
+            if (permissions.isContributor(session)) {
+                await functions.post("/api/translation/save", {postID: props.post.postID, data: saveTranslationData, order: saveTranslationOrder, reason}, session, setSessionFlag)
+                setSubmitted(true)
+            } else {
+                const badReason = functions.validateReason(reason)
+                if (badReason) {
+                    setError(true)
+                    if (!errorRef.current) await functions.timeout(20)
+                    errorRef.current!.innerText = badReason
+                    await functions.timeout(2000)
+                    setError(false)
+                }
+                await functions.post("/api/translation/save/request", {postID: props.post.postID, data: saveTranslationData, order: saveTranslationOrder, reason}, session, setSessionFlag)
+                setSubmitted(true)
             }
-            await functions.post("/api/translation/save/request", {postID: props.post.postID, data: saveTranslationData, order: saveTranslationOrder, reason}, session, setSessionFlag)
-            setSubmitted(true)
         }
     }
 
@@ -145,7 +151,7 @@ const SaveTranslationDialog: React.FunctionComponent<Props> = (props) => {
         return (
             <div className="dialog">
                 <Draggable handle=".dialog-title-container">
-                <div className="dialog-box" style={{width: "340px", height: submitted ? "125px" : "250px"}} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
+                <div className="dialog-box" style={{width: "340px", height: submitted ? "155px" : "250px"}} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                     <div className="dialog-container">
                         <div className="dialog-title-container">
                             <span className="dialog-title">Save Translation Request</span>

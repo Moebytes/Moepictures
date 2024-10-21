@@ -55,6 +55,22 @@ export default class SQLGroup {
         return result
     }
 
+    /** Get groups. */
+    public static groups = async (groups: string[]) => {
+        let whereQuery = groups?.[0] ? `WHERE groups."name" = ANY ($1)` : ""
+        const query: QueryConfig = {
+            text: functions.multiTrim(/*sql*/`
+                    SELECT groups.*
+                    FROM groups
+                    ${whereQuery}
+                    GROUP BY groups."groupID"
+            `)
+        }
+        if (groups?.[0]) query.values = [groups]
+        const result = await SQLQuery.run(query, true)
+        return result
+    }
+
     /** Insert group. */
     public static insertGroup = async (creator: string, name: string, slug: string, restrict: string) => {
         const now = new Date().toISOString()

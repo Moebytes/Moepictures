@@ -117,38 +117,6 @@ const ModTranslations: React.FunctionComponent = (props) => {
         }
     })
 
-    const loadImages = async () => {
-        for (let i = 0; i < visibleTranslations.length; i++) {
-            const translation = visibleTranslations[i]
-            const ref = imagesRef[i]
-            const img = functions.getThumbnailLink(translation.post.images[0].type, translation.postID, translation.post.images[0].order, translation.post.images[0].filename, "tiny")
-            if (functions.isGIF(img)) continue
-            if (!ref.current) continue
-            let src = img
-            const type = translation.post.images[0].type
-            if (type === "image" || type === "comic") {
-                src = await cryptoFunctions.decryptedLink(img)
-            } else if (functions.isModel(img)) {
-                src = await functions.modelImage(img)
-            } else if (functions.isAudio(img)) {
-                src = await functions.songCover(img)
-            }
-            const imgElement = document.createElement("img")
-            imgElement.src = src 
-            imgElement.onload = () => {
-                if (!ref.current) return
-                const refCtx = ref.current.getContext("2d")
-                ref.current.width = imgElement.width
-                ref.current.height = imgElement.height
-                refCtx?.drawImage(imgElement, 0, 0, imgElement.width, imgElement.height)
-            }
-        }
-    }
-
-    useEffect(() => {
-        loadImages()
-    }, [visibleTranslations])
-
     const translationDataJSX = (translation: any) => {
         let jsx = [] as any
         for (let i = 0; i < translation.data.length; i++) {
@@ -175,17 +143,16 @@ const ModTranslations: React.FunctionComponent = (props) => {
             const translation = translations[i] as any
             if (!translation) break
             const imgClick = (event?: any, middle?: boolean) => {
-                if (middle) return window.open(`/post/${translation.postID}`, "_blank")
-                history.push(`/post/${translation.postID}`)
+                if (middle) return window.open(`/unverified/post/${translation.postID}`, "_blank")
+                history.push(`/unverified/post/${translation.postID}`)
             }
-            const img = functions.getThumbnailLink(translation.post.images[0].type, translation.postID, translation.post.images[0].order, translation.post.images[0].filename, "tiny")
+            const img = functions.getUnverifiedThumbnailLink(translation.post.images[0].type, translation.postID, translation.post.images[0].order, translation.post.images[0].filename, "tiny")
             jsx.push(
                 <div className="mod-post" onMouseEnter={() =>setHover(true)} onMouseLeave={() => setHover(false)}>
                     <div className="mod-post-img-container">
                         {functions.isVideo(img) ? 
                         <video className="mod-post-img" src={img} onClick={imgClick} onAuxClick={(event) => imgClick(event, true)}></video> :
-                        functions.isGIF(img) ? <img className="mod-post-img" src={img} onClick={imgClick} onAuxClick={(event) => imgClick(event, true)}/> :
-                        <canvas className="mod-post-img" ref={imagesRef[i]} onClick={imgClick} onAuxClick={(event) => imgClick(event, true)}></canvas>}
+                        <img className="mod-post-img" src={img} onClick={imgClick} onAuxClick={(event) => imgClick(event, true)}/>}
                     </div>
                     <div className="mod-post-text-column">
                         <span className="mod-post-link" onClick={() => history.push(`/user/${translation.updater}`)}>Updater: {functions.toProperCase(translation?.updater) || "deleted"}</span>

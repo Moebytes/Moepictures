@@ -66,39 +66,55 @@ export default class SQLTranslation {
     }
 
     /** Insert translation (unverified). */
-    public static insertUnverifiedTranslation = async (postID: number, updater: string, order: number, data: any, reason: string) => {
+    public static insertUnverifiedTranslation = async (postID: number, originalID: number, updater: string, order: number, data: any, reason: string) => {
         const now = new Date().toISOString()
         const query: QueryConfig = {
-        text: /*sql*/`INSERT INTO "unverified translations" ("postID", "updater", "updatedDate", "order", "data", "reason") VALUES ($1, $2, $3, $4, $5, $6)`,
-        values: [postID, updater, now, order, data, reason]
+        text: /*sql*/`INSERT INTO "unverified translations" ("postID", "originalID", "updater", "updatedDate", "order", "data", "reason") VALUES ($1, $2, $3, $4, $5, $6, $7)`,
+        values: [postID, originalID, updater, now, order, data, reason]
         }
         const result = await SQLQuery.run(query)
         return result
     }
 
     /** Updates a translation (unverified). */
-    public static updateUnverifiedTranslation = async (translationID: number, updater: string, data: any, reason: string) => {
+    public static updateUnverifiedTranslation = async (translationID: number, data: any, reason: string) => {
         const now = new Date().toISOString()
         const query: QueryConfig = {
-            text: /*sql*/`UPDATE "unverified translations" SET "updater" = $1, "updatedDate" = $2, "data" = $3, "reason" = $4 WHERE "translationID" = $5`,
-            values: [updater, now, data, reason, translationID]
+            text: /*sql*/`UPDATE "unverified translations" SET "updatedDate" = $1, "data" = $2, "reason" = $3 WHERE "translationID" = $4`,
+            values: [now, data, reason, translationID]
         }
         return SQLQuery.run(query)
     }
 
     /** Get translation (unverified). */
-    public static unverifiedTranslation = async (postID: number, order: number, updater: string) => {
+    public static unverifiedTranslation = async (postID: number, order: number) => {
         const query: QueryConfig = {
         text: functions.multiTrim(/*sql*/`
                 SELECT "unverified translations".*
                 FROM "unverified translations"
-                WHERE "unverified translations"."postID" = $1 AND "unverified translations"."order" = $2 AND "unverified translations"."updater" = $3
+                WHERE "unverified translations"."postID" = $1 AND "unverified translations"."order" = $2
                 GROUP BY "unverified translations"."translationID"
             `),
-            values: [postID, order, updater]
+            values: [postID, order]
         }
         const result = await SQLQuery.run(query)
         return result[0]
+    }
+
+    /** Get unverified post translations. */
+    public static unverifiedPostTranslations = async (postID: number) => {
+        const query: QueryConfig = {
+        text: functions.multiTrim(/*sql*/`
+                SELECT "unverified translations".*
+                FROM "unverified translations"
+                WHERE "unverified translations"."postID" = $1
+                GROUP BY "unverified translations"."translationID"
+                ORDER BY "unverified translations"."updatedDate" DESC
+            `),
+            values: [postID]
+        }
+        const result = await SQLQuery.run(query)
+        return result
     }
 
     /** Get translation (unverified by id). */
@@ -131,10 +147,10 @@ export default class SQLTranslation {
         const query: QueryConfig = {
         text: functions.multiTrim(/*sql*/`
                 WITH post_json AS (
-                    SELECT posts.*, json_agg(DISTINCT images.*) AS images
-                    FROM posts
-                    JOIN images ON images."postID" = posts."postID"
-                    GROUP BY posts."postID"
+                    SELECT "unverified posts".*, json_agg(DISTINCT "unverified images".*) AS images
+                    FROM "unverified posts"
+                    JOIN "unverified images" ON "unverified images"."postID" = "unverified posts"."postID"
+                    GROUP BY "unverified posts"."postID"
                 )
                 SELECT "unverified translations".*, 
                 to_json((array_agg(post_json.*))[1]) AS post

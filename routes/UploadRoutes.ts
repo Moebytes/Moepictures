@@ -243,11 +243,12 @@ const CreateRoutes = (app: Express) => {
           title: source.title ? source.title : null,
           translatedTitle: source.translatedTitle ? source.translatedTitle : null,
           artist: source.artist ? source.artist : null,
-          drawn: source.date ? source.date : null,
+          drawn: source.drawn ? source.drawn : null,
           link: source.link ? source.link : null,
           commentary: source.commentary ? source.commentary : null,
           translatedCommentary: source.translatedCommentary ? source.translatedCommentary : null,
           bookmarks: source.bookmarks ? source.bookmarks : null,
+          purchaseLink: source.purchaseLink ? source.purchaseLink : null,
           mirrors: source.mirrors ? functions.mirrorsJSON(source.mirrors) : null,
           type,
           uploadDate,
@@ -539,11 +540,12 @@ const CreateRoutes = (app: Express) => {
           title: source.title ? source.title : null,
           translatedTitle: source.translatedTitle ? source.translatedTitle : null,
           artist: source.artist ? source.artist : null,
-          drawn: source.date ? source.date : null,
+          drawn: source.drawn ? source.drawn : null,
           link: source.link ? source.link : null,
           commentary: source.commentary ? source.commentary : null,
           translatedCommentary: source.translatedCommentary ? source.translatedCommentary : null,
           bookmarks: source.bookmarks ? source.bookmarks : null,
+          purchaseLink: source.purchaseLink ? source.purchaseLink : null,
           mirrors: source.mirrors ? functions.mirrorsJSON(source.mirrors) : null,
           updatedDate,
           hasOriginal,
@@ -680,7 +682,7 @@ const CreateRoutes = (app: Express) => {
               uploadDate: vanilla.uploadDate, updatedDate: vanilla.updatedDate, type: vanilla.type, restrict: vanilla.restrict, 
               style: vanilla.style, thirdParty: vanilla.thirdParty, title: vanilla.title, translatedTitle: vanilla.translatedTitle, 
               drawn: vanilla.drawn, artist: vanilla.artist, link: vanilla.link, commentary: vanilla.commentary, translatedCommentary: vanilla.translatedCommentary, 
-              bookmarks: vanilla.bookmarks, mirrors: vanilla.mirrors, hasOriginal: vanilla.hasOriginal, hasUpscaled: vanilla.hasUpscaled, 
+              bookmarks: vanilla.bookmarks, purchaseLink: vanilla.purchaseLink, mirrors: vanilla.mirrors, hasOriginal: vanilla.hasOriginal, hasUpscaled: vanilla.hasUpscaled, 
               artists: vanilla.artists, characters: vanilla.characters, series: vanilla.series, tags: vanilla.tags, reason})
 
             let newImages = [] as any
@@ -707,7 +709,7 @@ const CreateRoutes = (app: Express) => {
               uploadDate: updated.uploadDate, updatedDate: updated.updatedDate, type: updated.type, restrict: updated.restrict, 
               style: updated.style, thirdParty: updated.thirdParty, title: updated.title, translatedTitle: updated.translatedTitle, 
               drawn: updated.drawn, artist: updated.artist, link: updated.link, commentary: updated.commentary, 
-              translatedCommentary: updated.translatedCommentary, bookmarks: updated.bookmarks, mirrors: updated.mirrors, 
+              translatedCommentary: updated.translatedCommentary, bookmarks: updated.bookmarks, purchaseLink: updated.purchaseLink, mirrors: updated.mirrors, 
               hasOriginal: updated.hasOriginal, hasUpscaled: updated.hasUpscaled, artists, characters, series, tags, reason})
         } else {
             let newImages = [] as any
@@ -734,7 +736,7 @@ const CreateRoutes = (app: Express) => {
               uploadDate: updated.uploadDate, updatedDate: updated.updatedDate, type: updated.type, restrict: updated.restrict, 
               style: updated.style, thirdParty: updated.thirdParty, title: updated.title, translatedTitle: updated.translatedTitle, 
               drawn: updated.drawn, artist: updated.artist, link: updated.link, commentary: updated.commentary, 
-              translatedCommentary: updated.translatedCommentary, bookmarks: updated.bookmarks, mirrors: updated.mirrors, 
+              translatedCommentary: updated.translatedCommentary, bookmarks: updated.bookmarks, purchaseLink: updated.purchaseLink, mirrors: updated.mirrors, 
               hasOriginal: updated.hasOriginal, hasUpscaled: updated.hasUpscaled, artists, characters, series, tags, reason})
         }
         res.status(200).send("Success")
@@ -894,11 +896,12 @@ const CreateRoutes = (app: Express) => {
           title: source.title ? source.title : null,
           translatedTitle: source.translatedTitle ? source.translatedTitle : null,
           artist: source.artist ? source.artist : null,
-          drawn: source.date ? source.date : null,
+          drawn: source.drawn ? source.drawn : null,
           link: source.link ? source.link : null,
           commentary: source.commentary ? source.commentary : null,
           translatedCommentary: source.translatedCommentary ? source.translatedCommentary : null,
           bookmarks: source.bookmarks ? source.bookmarks : null,
+          purchaseLink: source.purchaseLink ? source.purchaseLink : null,
           mirrors: source.mirrors ? functions.mirrorsJSON(source.mirrors) : null,
           type,
           uploadDate,
@@ -1166,11 +1169,12 @@ const CreateRoutes = (app: Express) => {
           title: source.title ? source.title : null,
           translatedTitle: source.translatedTitle ? source.translatedTitle : null,
           artist: source.artist ? source.artist : null,
-          drawn: source.date ? source.date : null,
+          drawn: source.drawn ? source.drawn : null,
           link: source.link ? source.link : null,
           commentary: source.commentary ? source.commentary : null,
           translatedCommentary: source.translatedCommentary ? source.translatedCommentary : null,
           bookmarks: source.bookmarks ? source.bookmarks : null,
+          purchaseLink: source.purchaseLink ? source.purchaseLink : null,
           mirrors: source.mirrors ? functions.mirrorsJSON(source.mirrors) : null,
           type,
           updatedDate,
@@ -1397,11 +1401,12 @@ const CreateRoutes = (app: Express) => {
           title: unverified.title ? unverified.title : null,
           translatedTitle: unverified.translatedTitle ? unverified.translatedTitle : null,
           artist: unverified.artist ? unverified.artist : null,
-          drawn: unverified.date ? unverified.date : null,
+          drawn: unverified.drawn ? unverified.drawn : null,
           link: unverified.link ? unverified.link : null,
           commentary: unverified.commentary ? unverified.commentary : null,
           translatedCommentary: unverified.translatedCommentary ? unverified.translatedCommentary : null,
           bookmarks: unverified.bookmarks ? unverified.bookmarks : null,
+          purchaseLink: unverified.purchaseLink ? unverified.purchaseLink : null,
           mirrors: unverified.mirrors ? functions.mirrorsJSON(unverified.mirrors) : null,
           type,
           uploadDate: unverified.uploadDate,
@@ -1530,7 +1535,7 @@ const CreateRoutes = (app: Express) => {
                 uploadDate: vanilla.uploadDate, updatedDate: vanilla.updatedDate, type: vanilla.type, restrict: vanilla.restrict, 
                 style: vanilla.style, thirdParty: vanilla.thirdParty, title: vanilla.title, translatedTitle: vanilla.translatedTitle, 
                 drawn: vanilla.drawn, artist: vanilla.artist, link: vanilla.link, commentary: vanilla.commentary, translatedCommentary: vanilla.translatedCommentary, 
-                bookmarks: vanilla.bookmarks, mirrors: vanilla.mirrors, hasOriginal: vanilla.hasOriginal, hasUpscaled: vanilla.hasUpscaled, 
+                bookmarks: vanilla.bookmarks, purchaseLink: vanilla.purchaseLink, mirrors: vanilla.mirrors, hasOriginal: vanilla.hasOriginal, hasUpscaled: vanilla.hasUpscaled, 
                 artists: vanilla.artists, characters: vanilla.characters, series: vanilla.series, tags: vanilla.tags, reason})
 
               let newImages = [] as any
@@ -1559,7 +1564,7 @@ const CreateRoutes = (app: Express) => {
                 uploadDate: updated.uploadDate, updatedDate: updated.updatedDate, type: updated.type, restrict: updated.restrict, 
                 style: updated.style, thirdParty: updated.thirdParty, title: updated.title, translatedTitle: updated.translatedTitle, 
                 drawn: updated.drawn, artist: updated.artist, link: updated.link, commentary: updated.commentary, 
-                translatedCommentary: updated.translatedCommentary, bookmarks: updated.bookmarks, mirrors: updated.mirrors, 
+                translatedCommentary: updated.translatedCommentary, bookmarks: updated.bookmarks, purchaseLink: updated.purchaseLink, mirrors: updated.mirrors, 
                 hasOriginal: updated.hasOriginal, hasUpscaled: updated.hasUpscaled, artists, characters, series, tags, reason})
           } else {
               let newImages = [] as any
@@ -1588,7 +1593,7 @@ const CreateRoutes = (app: Express) => {
                 uploadDate: updated.uploadDate, updatedDate: updated.updatedDate, type: updated.type, restrict: updated.restrict, 
                 style: updated.style, thirdParty: updated.thirdParty, title: updated.title, translatedTitle: updated.translatedTitle, 
                 drawn: updated.drawn, artist: updated.artist, link: updated.link, commentary: updated.commentary, 
-                translatedCommentary: updated.translatedCommentary, bookmarks: updated.bookmarks, mirrors: updated.mirrors, 
+                translatedCommentary: updated.translatedCommentary, bookmarks: updated.bookmarks, purchaseLink: updated.purchaseLink, mirrors: updated.mirrors, 
                 hasOriginal: updated.hasOriginal, hasUpscaled: updated.hasUpscaled, artists, characters, series, tags, reason})
           }
         }

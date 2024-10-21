@@ -565,7 +565,7 @@ export default class Functions {
     }
 
     public static scrolledToTop = () => {
-        return window.scrollY <= 10
+        return window.scrollY <= 140
     }
 
     public static scrolledToBottom = () => {
@@ -2225,6 +2225,16 @@ export default class Functions {
             arr.push(i.toString())
         }
         return arr
+    }
+
+    public static getSiteName = (link: string) => {
+        try {
+            const domain = new URL(link).hostname.replace("www.", "").split(".")?.[0] || ""
+            if (domain.toLowerCase() === "yande") return "Yandere"
+            return Functions.toProperCase(domain)
+        } catch {
+            return "Unknown"
+        }
     }
 
     public static getDomain = () => {

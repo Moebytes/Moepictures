@@ -11,6 +11,7 @@ import PostImageOptions from "../components/PostImageOptions"
 import CutenessMeter from "../components/CutenessMeter"
 import Comments from "../components/Comments"
 import Commentary from "../components/Commentary"
+import BuyLink from "../components/BuyLink"
 import functions from "../structures/Functions"
 import Carousel from "../components/Carousel"
 import DeletePostDialog from "../dialogs/DeletePostDialog"
@@ -473,11 +474,12 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
                 title: post.title,
                 translatedTitle: post.translatedTitle,
                 artist: post.artist,
-                date: post.drawn ? functions.formatDate(new Date(post.drawn), true) : "",
+                drawn: post.drawn ? functions.formatDate(new Date(post.drawn), true) : "",
                 link: post.link,
                 commentary: post.commentary,
                 translatedCommentary: post.translatedCommentary,
                 bookmarks: post.bookmarks,
+                purchaseLink: post.purchaseLink,
                 mirrors: post.mirrors ? Object.values(post.mirrors).join("\n") : ""
             }
         }
@@ -649,6 +651,7 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
                     {parentPost ? <Parent post={parentPost}/>: null}
                     {thirdPartyPosts.length ? <ThirdParty posts={thirdPartyPosts}/> : null}
                     {session.username && !session.banned && post ? <CutenessMeter post={post}/> : null}
+                    {post?.purchaseLink ? <BuyLink link={post.purchaseLink}/> : null}
                     {post?.commentary ? <Commentary text={post.commentary} translated={post.translatedCommentary}/> : null}
                     {artistPosts.length ? <ArtistWorks posts={artistPosts}/> : null}
                     {relatedPosts.length ? <Related related={relatedPosts}/> : null}

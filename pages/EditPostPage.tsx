@@ -100,6 +100,7 @@ const EditPostPage: React.FunctionComponent<Props> = (props) => {
     const [sourceDate, setSourceDate] = useState("")
     const [sourceLink, setSourceLink] = useState("")
     const [sourceBookmarks, setSourceBookmarks] = useState("")
+    const [sourcePurchaseLink, setSourcePurchaseLink] = useState("")
     const [sourceCommentary, setSourceCommentary] = useState("")
     const [sourceTranslatedCommentary, setSourceTranslatedCommentary] = useState("")
     const [sourceMirrors, setSourceMirrors] = useState("")
@@ -148,6 +149,7 @@ const EditPostPage: React.FunctionComponent<Props> = (props) => {
         if (post.drawn) setSourceDate(functions.formatDate(new Date(post.drawn), true))
         setSourceLink(post.link || "")
         setSourceBookmarks(post.bookmarks || "")
+        setSourcePurchaseLink(post.purchaseLink || "")
         const parentPost = await functions.get("/api/post/parent", {postID}, session, setSessionFlag)
         if (parentPost) setThirdPartyID(parentPost.parentID)
 
@@ -234,7 +236,7 @@ const EditPostPage: React.FunctionComponent<Props> = (props) => {
     useEffect(() => {
         if (!edited) setEdited(true)
     }, [type, restrict, style, sourceTitle, sourceArtist, sourceCommentary, sourceTranslatedCommentary, sourceMirrors, sourceTranslatedTitle,
-    sourceLink, sourceBookmarks, sourceDate, originalFiles, upscaledFiles, artists, characters, series, rawTags])
+    sourceLink, sourceBookmarks, sourcePurchaseLink, sourceDate, originalFiles, upscaledFiles, artists, characters, series, rawTags])
 
     useEffect(() => {
         if (uploadDropFiles?.length) {
@@ -419,6 +421,7 @@ const EditPostPage: React.FunctionComponent<Props> = (props) => {
         setSourceDate("")
         setSourceLink("")
         setSourceBookmarks("")
+        setSourcePurchaseLink("")
         setRawTags("")
         setArtists([{}])
         setCharacters([{}])
@@ -930,11 +933,12 @@ const EditPostPage: React.FunctionComponent<Props> = (props) => {
                 title: sourceTitle,
                 translatedTitle: sourceTranslatedTitle,
                 artist: sourceArtist,
-                date: sourceDate,
+                drawn: sourceDate,
                 link: sourceLink,
                 commentary: sourceCommentary,
                 translatedCommentary: sourceTranslatedCommentary,
                 bookmarks: sourceBookmarks,
+                purchaseLink: sourcePurchaseLink,
                 mirrors: sourceMirrors
             },
             artists,
@@ -1793,6 +1797,10 @@ const EditPostPage: React.FunctionComponent<Props> = (props) => {
                 <div className="editpost-container-row">
                     <span className="editpost-text">Bookmarks: </span>
                     <input className="editpost-input-wide" type="number" value={sourceBookmarks} onChange={(event) => setSourceBookmarks(event.target.value)} spellCheck={false} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}/>
+                </div>
+                <div className="editpost-container-row">
+                    <span className="editpost-text">Buy Link: </span>
+                    <input className="editpost-input-wide2" type="url" value={sourcePurchaseLink} onChange={(event) => setSourcePurchaseLink(event.target.value)} spellCheck={false} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}/>
                 </div>
                 <div className="editpost-container-row">
                     <span className="editpost-text">Commentary: </span>

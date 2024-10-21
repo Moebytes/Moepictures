@@ -2,7 +2,7 @@ import React, {useEffect, useContext, useState, useRef} from "react"
 import {useHistory} from "react-router-dom"
 import {HashLink as Link} from "react-router-hash-link"
 import {HideNavbarContext, HideSidebarContext, ThemeContext, EnableDragContext, SourceEditIDContext, HideTitlebarContext, 
-SessionContext, SessionFlagContext, MobileContext} from "../Context"
+SessionContext, SessionFlagContext, MobileContext, PostFlagContext} from "../Context"
 import functions from "../structures/Functions"
 import Draggable from "react-draggable"
 import permissions from "../structures/Permissions"
@@ -18,6 +18,7 @@ const SourceEditDialog: React.FunctionComponent = (props) => {
     const {sessionFlag, setSessionFlag} = useContext(SessionFlagContext)
     const {sourceEditID, setSourceEditID} = useContext(SourceEditIDContext)
     const {mobile, setMobile} = useContext(MobileContext)
+    const {postFlag, setPostFlag} = useContext(PostFlagContext)
     const [title, setTitle] = useState("")
     const [translatedTitle, setTranslatedTitle] = useState("")
     const [commentary, setCommentary] = useState("")
@@ -27,6 +28,7 @@ const SourceEditDialog: React.FunctionComponent = (props) => {
     const [link, setLink] = useState("")
     const [mirrors, setMirrors] = useState("")
     const [bookmarks, setBookmarks] = useState("")
+    const [purchaseLink, setPurchaseLink] = useState("")
     const [submitted, setSubmitted] = useState(false)
     const [reason, setReason] = useState("")
     const [error, setError] = useState(false)
@@ -44,6 +46,7 @@ const SourceEditDialog: React.FunctionComponent = (props) => {
         if (sourceEditID.post.drawn) setDrawn(functions.formatDate(new Date(sourceEditID.post.drawn), true))
         setLink(sourceEditID.post.link || "")
         setBookmarks(sourceEditID.post.bookmarks || "")
+        setPurchaseLink(sourceEditID.post.purchaseLink || "")
     }
 
     const reset = () => {
@@ -81,18 +84,19 @@ const SourceEditDialog: React.FunctionComponent = (props) => {
                     title,
                     translatedTitle,
                     artist,
-                    date: drawn,
+                    drawn,
                     link,
                     commentary,
                     translatedCommentary,
                     bookmarks,
+                    purchaseLink,
                     mirrors
                 },
                 reason
             }
             setSourceEditID(null)
             await functions.put("/api/post/quickedit", data, session, setSessionFlag)
-            history.go(0)
+            setPostFlag(true)
         } else {
             const badReason = functions.validateReason(reason)
             if (badReason) {
@@ -109,11 +113,12 @@ const SourceEditDialog: React.FunctionComponent = (props) => {
                     title,
                     translatedTitle,
                     artist,
-                    date: drawn,
+                    drawn,
                     link,
                     commentary,
                     translatedCommentary,
                     bookmarks,
+                    purchaseLink,
                     mirrors
                 },
                 reason
@@ -197,7 +202,7 @@ const SourceEditDialog: React.FunctionComponent = (props) => {
                             </div>
                             <div className="dialog-row">
                                 <span className="dialog-text">Drawn: </span>
-                                <input className="dialog-input-small" style={{width: "28%"}} type="date" spellCheck={false} value={drawn} onChange={(event) => setDrawn(event.target.value)}/>
+                                <input className="dialog-input-small" style={{width: "30%"}} type="date" spellCheck={false} value={drawn} onChange={(event) => setDrawn(event.target.value)}/>
                             </div>
                             <div className="dialog-row">
                                 <span className="dialog-text">Link: </span>
@@ -224,6 +229,10 @@ const SourceEditDialog: React.FunctionComponent = (props) => {
                             </div>
                             <div className="dialog-row">
                                 <textarea className="dialog-textarea-small" style={{resize: "vertical"}} spellCheck={false} value={mirrors} onChange={(event) => setMirrors(event.target.value)}></textarea>
+                            </div>
+                            <div className="dialog-row">
+                                <span className="dialog-text">Buy Link: </span>
+                                <input className="dialog-input" style={{width: "75%"}} type="text" spellCheck={false} value={purchaseLink} onChange={(event) => setPurchaseLink(event.target.value)}/>
                             </div>
                             <div className="dialog-row">
                                 <span className="dialog-text">Reason: </span>
@@ -272,7 +281,7 @@ const SourceEditDialog: React.FunctionComponent = (props) => {
                         </div>
                         <div className="dialog-row">
                             <span className="dialog-text">Drawn: </span>
-                            <input className="dialog-input-small" style={{width: "28%"}} type="date" spellCheck={false} value={drawn} onChange={(event) => setDrawn(event.target.value)}/>
+                            <input className="dialog-input-small" style={{width: "30%"}} type="date" spellCheck={false} value={drawn} onChange={(event) => setDrawn(event.target.value)}/>
                         </div>
                         <div className="dialog-row">
                             <span className="dialog-text">Link: </span>
@@ -299,6 +308,10 @@ const SourceEditDialog: React.FunctionComponent = (props) => {
                         </div>
                         <div className="dialog-row">
                             <textarea className="dialog-textarea-small" style={{resize: "vertical"}} spellCheck={false} value={mirrors} onChange={(event) => setMirrors(event.target.value)}></textarea>
+                        </div>
+                        <div className="dialog-row">
+                            <span className="dialog-text">Buy Link: </span>
+                            <input className="dialog-input" style={{width: "75%"}} type="text" spellCheck={false} value={purchaseLink} onChange={(event) => setPurchaseLink(event.target.value)}/>
                         </div>
                         <div className="dialog-row">
                             <span className="dialog-text">Reason: </span>

@@ -440,7 +440,7 @@ const BulkUploadPage: React.FunctionComponent = (props) => {
                     title: sourceData.source.title,
                     translatedTitle: sourceData.source.translatedTitle,
                     artist: sourceData.source.artist,
-                    date: sourceData.source.date,
+                    drawn: sourceData.source.date,
                     link: sourceData.source.link,
                     commentary: sourceData.source.commentary,
                     translatedCommentary: sourceData.source.translatedCommentary,

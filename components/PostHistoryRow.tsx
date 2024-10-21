@@ -73,11 +73,12 @@ const PostHistoryRow: React.FunctionComponent<Props> = (props) => {
                 title: props.postHistory.title,
                 translatedTitle: props.postHistory.translatedTitle,
                 artist: props.postHistory.artist,
-                date: props.postHistory.drawn ? functions.formatDate(new Date(props.postHistory.drawn), true) : "",
+                drawn: props.postHistory.drawn ? functions.formatDate(new Date(props.postHistory.drawn), true) : "",
                 link: props.postHistory.link,
                 commentary: props.postHistory.commentary,
                 translatedCommentary: props.postHistory.translatedCommentary,
                 bookmarks: props.postHistory.bookmarks,
+                purchaseLink: props.postHistory.purchaseLink,
                 mirrors: props.postHistory.mirrors ? Object.values(props.postHistory.mirrors).join("\n") : ""
             }
         }
@@ -202,17 +203,6 @@ const PostHistoryRow: React.FunctionComponent<Props> = (props) => {
         return <span className="posthistoryrow-user-text" onClick={userClick} onAuxClick={userClick}>{editText} {functions.timeAgo(targetDate)} by {functions.toProperCase(props.postHistory.user)}</span>
     }
 
-    const getDomain = (link: string) => {
-        try {
-            const domain = new URL(link).hostname.replace("www.", "")
-            .split(".")?.[0] || ""
-            if (domain.toLowerCase() === "yande") return "Yandere"
-            return functions.toProperCase(domain)
-        } catch {
-            return "Unknown"
-        }
-    }
-
     const loadImage = async () => {
         if (functions.isGIF(img)) return
         if (!ref.current) return
@@ -326,7 +316,7 @@ const PostHistoryRow: React.FunctionComponent<Props> = (props) => {
         const mapped = Object.values(props.postHistory.mirrors) as string[]
         return mapped.map((m, i) => {
             let append = i !== mapped.length - 1 ? ", " : ""
-            return <span className="posthistoryrow-label-link" onClick={() => window.open(m, "_blank")}>{getDomain(m) + append}</span>
+            return <span className="posthistoryrow-label-link" onClick={() => window.open(m, "_blank")}>{functions.getSiteName(m) + append}</span>
         })
     }
 
@@ -374,14 +364,31 @@ const PostHistoryRow: React.FunctionComponent<Props> = (props) => {
         if (!props.previousHistory || (props.previousHistory?.translatedTitle !== props.postHistory.translatedTitle)) {
             jsx.push(<span className="posthistoryrow-text"><span className="posthistoryrow-label-text">Translated Title:</span> {props.postHistory.translatedTitle || "None"}</span>)
         }
+        if (!props.previousHistory || (props.previousHistory?.artist !== props.postHistory.artist)) {
+            jsx.push(<span className="posthistoryrow-text"><span className="posthistoryrow-label-text">Artist:</span> {props.postHistory.artist || "Unknown"}</span>)
+        }
         if (!props.previousHistory || (props.previousHistory?.drawn !== props.postHistory.drawn)) {
             jsx.push(<span className="posthistoryrow-text"><span className="posthistoryrow-label-text">Drawn:</span> {props.postHistory.drawn ? functions.formatDate(new Date(props.postHistory.drawn)) : "Unknown"}</span>)
         }
         if (!props.previousHistory || (props.previousHistory?.link !== props.postHistory.link)) {
-            jsx.push(<span className="posthistoryrow-text"><span className="posthistoryrow-label-text">Link:</span> <span className="posthistoryrow-label-link" onClick={() => window.open(props.postHistory.link, "_blank")}>{getDomain(props.postHistory.link)}</span></span>)
+            jsx.push(<span className="posthistoryrow-text"><span className="posthistoryrow-label-text">Link:</span> <span className="posthistoryrow-label-link" onClick={() => window.open(props.postHistory.link, "_blank")}>{functions.getSiteName(props.postHistory.link)}</span></span>)
         }
         if (!props.previousHistory || (JSON.stringify(props.previousHistory?.mirrors) !== JSON.stringify(props.postHistory.mirrors))) {
             jsx.push(<span className="posthistoryrow-text"><span className="posthistoryrow-label-text">Mirrors:</span> {printMirrors()}</span>)
+        }
+        if (!props.previousHistory || (props.previousHistory?.bookmarks !== props.postHistory.bookmarks)) {
+            if (!props.previousHistory && !props.postHistory.bookmarks) {
+                // ignore condition
+            } else {
+                jsx.push(<span className="posthistoryrow-text"><span className="posthistoryrow-label-text">Bookmarks:</span> {props.postHistory.bookmarks || "?"}</span>)
+            }
+        }
+        if (!props.previousHistory || (props.previousHistory?.purchaseLink !== props.postHistory.purchaseLink)) {
+            if (!props.previousHistory && !props.postHistory.purchaseLink) {
+                // ignore condition
+            } else {
+                jsx.push(<span className="posthistoryrow-text"><span className="posthistoryrow-label-text">Buy Link:</span> {props.postHistory.purchaseLink || "None"}</span>)
+            }
         }
         if (!props.previousHistory || (props.previousHistory?.commentary !== props.postHistory.commentary)) {
             jsx.push(<span className="posthistoryrow-text"><span className="posthistoryrow-label-text">Commentary:</span> {props.postHistory.commentary || "None"}</span>)

@@ -14,17 +14,8 @@ import translationSave from "../assets/icons/translation-save.png"
 import translationText from "../assets/icons/translation-text.png"
 import translationToggleOn from "../assets/icons/translation-toggle-on.png"
 import translationToggleOff from "../assets/icons/translation-toggle-off.png"
-import translationDeleteMagenta from "../assets/magenta/translation-delete.png"
-import translationEditMagenta from "../assets/magenta/translation-edit.png"
-import translationHistoryMagenta from "../assets/magenta/translation-history.png"
-import translationSaveMagenta from "../assets/magenta/translation-save.png"
-import translationTextMagenta from "../assets/magenta/translation-text.png"
-import translationToggleOnMagenta from "../assets/magenta/translation-toggle-on.png"
-import translationToggleOffMagenta from "../assets/magenta/translation-toggle-off.png"
 import translationEN from "../assets/icons/translation-en.png"
 import translationJA from "../assets/icons/translation-ja.png"
-import translationENMagenta from "../assets/magenta/translation-en.png"
-import translationJAMagenta from "../assets/magenta/translation-ja.png"
 import "./styles/translationeditor.less"
 
 interface Props {
@@ -131,9 +122,11 @@ const TranslationEditor: React.FunctionComponent<Props> = (props) => {
     }
 
     const updateTranslations = async () => {
-        if (!props.post || props.unverified) return
+        if (!props.post) return
         let translations = [] as any
-        if (props.translationID) {
+        if (props.unverified) {
+            translations = await functions.get("/api/translations/unverified", {postID: props.post.postID}, session, setSessionFlag)
+        } else if (props.translationID) {
             translations = await functions.get("/api/translation/history", {postID: props.post.postID, historyID: props.translationID}, session, setSessionFlag)
         } else {
             translations = await functions.get("/api/translations", {postID: props.post.postID}, session, setSessionFlag)
@@ -354,7 +347,7 @@ const TranslationEditor: React.FunctionComponent<Props> = (props) => {
         <div className="translation-editor" style={{display: translationMode ? "flex" : "none"}}>
             <div className="translation-editor-filters" ref={filtersRef} onMouseOver={() => {if (enableDrag) setEnableDrag(false)}}>
                 <div className={`translation-editor-buttons ${buttonHover ? "show-translation-buttons" : ""}`} onMouseEnter={() => setButtonHover(true)} onMouseLeave={() => setButtonHover(false)}>
-                    <img draggable={false} className="translation-editor-button" src={translationHistory} style={{filter: getFilter()}} onClick={() => showHistory()}/>
+                    {!props.unverified ? <img draggable={false} className="translation-editor-button" src={translationHistory} style={{filter: getFilter()}} onClick={() => showHistory()}/> : null}
                     <img draggable={false} className="translation-editor-button" src={translationSave} style={{filter: getFilter()}} onClick={() => saveTextDialog()}/>
                     <img draggable={false} className="translation-editor-button" src={getTranslationShowTranscriptIcon()} style={{filter: getFilter()}} onClick={() => setShowTranscript((prev: boolean) => !prev)}/>
                     <img draggable={false} className="translation-editor-button" src={translationText} style={{filter: getFilter()}} onClick={() => editTextDialog()}/>

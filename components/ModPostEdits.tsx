@@ -1,4 +1,4 @@
-import React, {useContext, useEffect, useState} from "react"
+import React, {useContext, useEffect, useState, useReducer} from "react"
 import {useHistory} from "react-router-dom"
 import {ThemeContext, SearchContext, SessionContext, SessionFlagContext, SearchFlagContext, SiteHueContext, SiteLightnessContext, SiteSaturationContext} from "../Context"
 import {HashLink as Link} from "react-router-hash-link"
@@ -8,6 +8,7 @@ import functions from "../structures/Functions"
 import "./styles/modposts.less"
 
 const ModPostEdits: React.FunctionComponent = (props) => {
+    const [ignored, forceUpdate] = useReducer(x => x + 1, 0)
     const {theme, setTheme} = useContext(ThemeContext)
     const {siteHue, setSiteHue} = useContext(SiteHueContext)
     const {siteSaturation, setSiteSaturation} = useContext(SiteSaturationContext)
@@ -18,6 +19,7 @@ const ModPostEdits: React.FunctionComponent = (props) => {
     const {session, setSession} = useContext(SessionContext)
     const {sessionFlag, setSessionFlag} = useContext(SessionFlagContext)
     const [unverifiedPosts, setUnverifiedPosts] = useState([]) as any
+    const [originalPosts, setOriginalPosts] = useState(new Map())
     const [index, setIndex] = useState(0)
     const [visiblePosts, setVisiblePosts] = useState([]) as any
     const [updateVisiblePostFlag, setUpdateVisiblePostFlag] = useState(false)
@@ -34,6 +36,11 @@ const ModPostEdits: React.FunctionComponent = (props) => {
         const posts = await functions.get("/api/post-edits/list/unverified", null, session, setSessionFlag)
         setEnded(false)
         setUnverifiedPosts(posts)
+        const originals = await functions.get("/api/posts", {postIDs: posts.map((p: any) => p.originalID)}, session, setSessionFlag)
+        for (const original of originals) {
+            originalPosts.set(original.postID, original)
+        }
+        forceUpdate()
     }
 
     useEffect(() => {
@@ -91,8 +98,20 @@ const ModPostEdits: React.FunctionComponent = (props) => {
         if (result?.length >= 100) {
             setOffset(newOffset)
             setUnverifiedPosts((prev: any) => functions.removeDuplicates([...prev, ...result]))
+            const originals = await functions.get("/api/posts", {postIDs: result.map((p: any) => p.originalID)}, session, setSessionFlag)
+            for (const original of originals) {
+                originalPosts.set(original.postID, original)
+            }
+            forceUpdate()
         } else {
-            if (result?.length) setUnverifiedPosts((prev: any) => functions.removeDuplicates([...prev, ...result]))
+            if (result?.length) {
+                setUnverifiedPosts((prev: any) => functions.removeDuplicates([...prev, ...result]))
+                const originals = await functions.get("/api/posts", {postIDs: result.map((p: any) => p.originalID)}, session, setSessionFlag)
+                for (const original of originals) {
+                    originalPosts.set(original.postID, original)
+                }
+                forceUpdate()
+            }
             setEnded(true)
         }
     }
@@ -147,6 +166,86 @@ const ModPostEdits: React.FunctionComponent = (props) => {
         loadImages()
     }, [visiblePosts])
 
+    const calculateDiff = (prevTags: string[], newTags: string[]) => {
+        const addedTags = newTags.filter((tag: string) => !prevTags.includes(tag)).map((tag: string) => `+${tag}`)
+        const removedTags = prevTags.filter((tag: string) => !newTags.includes(tag)).map((tag: string) =>`-${tag}`)
+        const addedTagsJSX = addedTags.map((tag: string) => <span className="tag-add">{tag}</span>)
+        const removedTagsJSX = removedTags.map((tag: string) => <span className="tag-remove">{tag}</span>)
+        if (![...addedTags, ...removedTags].length) return null
+        return [...addedTagsJSX, ...removedTagsJSX]
+    }
+
+    const tagsDiff = (originalPost: any, newPost: any) => {
+        if (!originalPost) return newPost.tags.join(" ")
+        return calculateDiff(originalPost.tags, newPost.tags)
+    }
+
+    const printMirrors = (newPost: any) => {
+        if (!newPost.mirrors) return "None"
+        const mapped = Object.values(newPost.mirrors) as string[]
+        return mapped.map((m, i) => {
+            let append = i !== mapped.length - 1 ? ", " : ""
+            return <span className="mod-post-link" onClick={() => window.open(m, "_blank")}>{functions.getSiteName(m) + append}</span>
+        })
+    }
+
+    const diffJSX = (originalPost: any, newPost: any) => {
+        let jsx = [] as React.ReactElement[]
+        if (!originalPost) return []
+        if (!originalPost || (originalPost?.images.length !== newPost.images.length)) {
+            if (!originalPost && newPost.images.length <= 1) {
+                // ignore condition
+            } else {
+                jsx.push(<span className="mod-post-text"><span className="mod-post-label">Images:</span> {newPost.images.length}</span>)
+            }
+        }
+        if (!originalPost || (originalPost?.type !== newPost.type)) {
+            jsx.push(<span className="mod-post-text"><span className="mod-post-label">Type:</span> {functions.toProperCase(newPost.type)}</span>)
+        }
+        if (!originalPost || (originalPost?.restrict !== newPost.restrict)) {
+            jsx.push(<span className="mod-post-text"><span className="mod-post-label">Restrict:</span> {functions.toProperCase(newPost.restrict)}</span>)
+        }
+        if (!originalPost || (originalPost?.style !== newPost.style)) {
+            jsx.push(<span className="mod-post-text"><span className="mod-post-label">Style:</span> {functions.toProperCase(newPost.style)}</span>)
+        }
+        if (!originalPost || (originalPost?.tags !== newPost.tags)) {
+            if (tagsDiff(originalPost, newPost)) {
+                jsx.push(<span className="mod-post-text"><span className="mod-post-label">Tags:</span> {tagsDiff(originalPost, newPost)}</span>)
+            }
+        }
+        if (!originalPost || (originalPost?.title !== newPost.title)) {
+            jsx.push(<span className="mod-post-text"><span className="mod-post-label">Title:</span> {newPost.title || "None"}</span>)
+        }
+        if (!originalPost || (originalPost?.translatedTitle !== newPost.translatedTitle)) {
+            jsx.push(<span className="mod-post-text"><span className="mod-post-label">Translated Title:</span> {newPost.translatedTitle || "None"}</span>)
+        }
+        if (!originalPost || (originalPost?.artist !== newPost.artist)) {
+            jsx.push(<span className="mod-post-text"><span className="mod-post-label">Artist:</span> {newPost.artist || "Unknown"}</span>)
+        }
+        if (!originalPost || (originalPost?.drawn !== newPost.drawn)) {
+            jsx.push(<span className="mod-post-text"><span className="mod-post-label">Drawn:</span> {newPost.drawn ? functions.formatDate(new Date(newPost.drawn)) : "Unknown"}</span>)
+        }
+        if (!originalPost || (originalPost?.link !== newPost.link)) {
+            jsx.push(<span className="mod-post-text"><span className="mod-post-label">Link:</span> <span className="mod-post-link" onClick={() => window.open(newPost.link, "_blank")}>{functions.getSiteName(newPost.link)}</span></span>)
+        }
+        if (!originalPost || (JSON.stringify(originalPost?.mirrors) !== JSON.stringify(newPost.mirrors))) {
+            jsx.push(<span className="mod-post-text"><span className="mod-post-label">Mirrors:</span> {printMirrors(newPost)}</span>)
+        }
+        if (!originalPost || (originalPost?.bookmarks !== newPost.bookmarks)) {
+            jsx.push(<span className="mod-post-text"><span className="mod-post-label">Bookmarks:</span> {newPost.bookmarks || "?"}</span>)
+        }
+        if (!originalPost || (originalPost?.purchaseLink !== newPost.purchaseLink)) {
+            jsx.push(<span className="mod-post-text"><span className="mod-post-label">Buy Link:</span> {newPost.purchaseLink || "None"}</span>)
+        }
+        if (!originalPost || (originalPost?.commentary !== newPost.commentary)) {
+            jsx.push(<span className="mod-post-text"><span className="mod-post-label">Commentary:</span> {newPost.commentary || "None"}</span>)
+        }
+        if (!originalPost || (originalPost?.translatedCommentary !== newPost.translatedCommentary)) {
+            jsx.push(<span className="mod-post-text"><span className="mod-post-label">Translated Commentary:</span> {newPost.translatedCommentary || "None"}</span>)
+        }
+        return jsx
+    }
+
     const generatePostsJSX = () => {
         let jsx = [] as any
         const posts = functions.removeDuplicates(visiblePosts)
@@ -163,6 +262,7 @@ const ModPostEdits: React.FunctionComponent = (props) => {
         for (let i = 0; i < posts.length; i++) {
             const post = posts[i] as any
             if (!post) break
+            const originalPost = originalPosts.get(post.originalID)
             const imgClick = (event?: any, middle?: boolean) => {
                 if (middle) return window.open(`/unverified/post/${post.postID}`, "_blank")
                 history.push(`/unverified/post/${post.postID}`)
@@ -179,8 +279,7 @@ const ModPostEdits: React.FunctionComponent = (props) => {
                     <div className="mod-post-text-column">
                         <span className="mod-post-link" onClick={() => history.push(`/user/${post.updater}`)}>Edited By: {functions.toProperCase(post?.updater) || "deleted"}</span>
                         <span className="mod-post-text">Reason: {post.reason || "None provided."}</span>
-                        <span className="mod-post-text">Tags: {post.tags?.length}</span>
-                        <span className="mod-post-text">Upscaled: {post.hasUpscaled ? "yes" : "no"}</span>
+                        {diffJSX(originalPost, post)}
                     </div>
                     <div className="mod-post-options">
                         <div className="mod-post-options-container" onClick={() => rejectPost(post.postID)}>

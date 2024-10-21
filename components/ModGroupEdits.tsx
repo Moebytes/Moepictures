@@ -20,7 +20,8 @@ const ModGroupEdits: React.FunctionComponent = (props) => {
     const {session, setSession} = useContext(SessionContext)
     const {sessionFlag, setSessionFlag} = useContext(SessionFlagContext)
     const [requests, setRequests] = useState([]) as any
-    const [oldTags, setOldTags] = useState([]) as any
+    const [oldGroups, setOldGroups] = useState(new Map())
+    const [showOldGroups, setShowOldGroups] = useState([]) as any
     const [index, setIndex] = useState(0)
     const [visibleRequests, setVisibleRequests] = useState([]) as any
     const [updateVisibleRequestFlag, setUpdateVisibleRequestFlag] = useState(false)
@@ -36,6 +37,11 @@ const ModGroupEdits: React.FunctionComponent = (props) => {
         const requests = await functions.get("/api/group/edit/request/list", null, session, setSessionFlag)
         setEnded(false)
         setRequests(requests)
+        const groups = await functions.get("/api/groups/list", {groups: requests.map((r: any) => r.name)}, session, setSessionFlag)
+        for (const group of groups) {
+            oldGroups.set(group.name, group)
+        }
+        forceUpdate()
     }
 
     useEffect(() => {
@@ -90,9 +96,19 @@ const ModGroupEdits: React.FunctionComponent = (props) => {
         if (result?.length >= 100) {
             setOffset(newOffset)
             setRequests((prev: any) => functions.removeDuplicates([...prev, ...result]))
+            const groups = await functions.get("/api/groups/list", {groups: result.map((r: any) => r.name)}, session, setSessionFlag)
+            for (const group of groups) {
+                oldGroups.set(group.name, group)
+            }
+            forceUpdate()
         } else {
             if (result?.length) {
                 setRequests((prev: any) => functions.removeDuplicates([...prev, ...result]))
+                const groups = await functions.get("/api/groups/list", {groups: result.map((r: any) => r.name)}, session, setSessionFlag)
+                for (const group of groups) {
+                    oldGroups.set(group.name, group)
+                }
+                forceUpdate()
             }
             setEnded(true)
         }
@@ -136,18 +152,40 @@ const ModGroupEdits: React.FunctionComponent = (props) => {
         for (let i = 0; i < requests.length; i++) {
             const request = requests[i] as any
             if (!request) break
-            const openGroup = () => {
-                history.push(`/group/${request.group}`)
+            const oldGroup = oldGroups.get(request.name)
+            const openGroup = (event: React.MouseEvent) => {
+                if (event.ctrlKey || event.metaKey || event.button === 1) {
+                    window.open(`/group/${request.group}`, "_blank")
+                } else {
+                    history.push(`/group/${request.group}`)
+                }
+            }
+            const changeOldGroup = () => {
+                const value = showOldGroups[i] || false 
+                showOldGroups[i] = !value 
+                setShowOldGroups(showOldGroups)
+                forceUpdate()
             }
             jsx.push(
                 <div className="mod-post" onMouseEnter={() =>setHover(true)} onMouseLeave={() => setHover(false)}>
+                    {showOldGroups[i] && oldGroup ?
                     <div className="mod-post-text-column">
                         <span className="mod-post-link" onClick={() => history.push(`/user/${request.username}`)}>Requester: {functions.toProperCase(request?.username) || "deleted"}</span>
                         <span className="mod-post-text">Reason: {request.reason}</span>
-                        <span className="mod-post-link" onClick={openGroup}>New Name: {request.name}</span>
+                        <span className="mod-post-link" onClick={openGroup} onAuxClick={openGroup}>Old Name: {oldGroup.name}</span>
+                        <span className="mod-post-text">Old Description: {oldGroup.description || "No description."}</span>
+                    </div> :
+                    <div className="mod-post-text-column">
+                        <span className="mod-post-link" onClick={() => history.push(`/user/${request.username}`)}>Requester: {functions.toProperCase(request?.username) || "deleted"}</span>
+                        <span className="mod-post-text">Reason: {request.reason}</span>
+                        <span className="mod-post-link" onClick={openGroup} onAuxClick={openGroup}>New Name: {request.name}</span>
                         <span className="mod-post-text">New Description: {request.description || "No description."}</span>
-                    </div>
+                    </div>}
                     <div className="mod-post-options">
+                        <div className="mod-post-options-container" onClick={() => changeOldGroup()}>
+                            <img className="mod-post-options-img" src={tagDiff} style={{filter: getFilter()}}/>
+                            <span className="mod-post-options-text">{showOldGroups[i] ? "New" : "Old"}</span>
+                        </div>
                         <div className="mod-post-options-container" onClick={() => rejectRequest(request.username, request.group)}>
                             <img className="mod-post-options-img" src={reject} style={{filter: getFilter()}}/>
                             <span className="mod-post-options-text">Reject</span>

@@ -4,7 +4,7 @@ import TitleBar from "../components/TitleBar"
 import NavBar from "../components/NavBar"
 import SideBar from "../components/SideBar"
 import Footer from "../components/Footer"
-import {HideNavbarContext, HideSidebarContext, SquareContext, RelativeContext, HideTitlebarContext, HeaderTextContext, SidebarTextContext, 
+import {EnableDragContext, HideNavbarContext, HideSidebarContext, SquareContext, RelativeContext, HideTitlebarContext, HeaderTextContext, SidebarTextContext, 
 MobileContext, SessionContext, ModStateContext, SiteHueContext, SiteSaturationContext, SiteLightnessContext} from "../Context"
 import permissions from "../structures/Permissions"
 import ModPosts from "../components/ModPosts"
@@ -14,8 +14,9 @@ import ModTagDeletions from "../components/ModTagDeletions"
 import ModTagAliases from "../components/ModTagAliases"
 import ModTagEdits from "../components/ModTagEdits"
 import ModTranslations from "../components/ModTranslations"
-import ModGroupDeletions from "../components/ModGroupDeletions"
+import ModGroups from "../components/ModGroups"
 import ModGroupEdits from "../components/ModGroupEdits"
+import ModGroupDeletions from "../components/ModGroupDeletions"
 import ModReports from "../components/ModReports"
 import functions from "../structures/Functions"
 import modPostUploadIcon from "../assets/icons/mod-post-upload.png"
@@ -24,11 +25,13 @@ import modPostDeleteIcon from "../assets/icons/mod-post-delete.png"
 import modTagEditIcon from "../assets/icons/mod-tag-edit.png"
 import modTagAliasIcon from "../assets/icons/mod-tag-alias.png"
 import modTagDeleteIcon from "../assets/icons/mod-tag-delete.png"
+import modGroupAddIcon from "../assets/icons/mod-group-add.png"
 import modGroupEditIcon from "../assets/icons/mod-group-edit.png"
 import modGroupDeleteIcon from "../assets/icons/mod-group-delete.png"
 import modTranslationIcon from "../assets/icons/history-translate.png"
 import modReportIcon from "../assets/icons/mod-report.png"
 import modPostUploadActiveIcon from "../assets/icons/mod-post-upload-active.png"
+import modGroupAddActiveIcon from "../assets/icons/mod-group-add-active.png"
 import modPostEditActiveIcon from "../assets/icons/mod-post-edit-active.png"
 import modPostDeleteActiveIcon from "../assets/icons/mod-post-delete-active.png"
 import modTagEditActiveIcon from "../assets/icons/mod-tag-edit-active.png"
@@ -43,6 +46,7 @@ import "./styles/modqueuepage.less"
 const ModQueuePage: React.FunctionComponent = (props) => {
     const [ignored, forceUpdate] = useReducer(x => x + 1, 0)
     const {siteHue, setSiteHue} = useContext(SiteHueContext)
+    const {enableDrag, setEnableDrag} = useContext(EnableDragContext)
     const {siteSaturation, setSiteSaturation} = useContext(SiteSaturationContext)
     const {siteLightness, setSiteLightness} = useContext(SiteLightnessContext)
     const {hideNavbar, setHideNavbar} = useContext(HideNavbarContext)
@@ -100,6 +104,7 @@ const ModQueuePage: React.FunctionComponent = (props) => {
         if (modState === "tag-edits") return <ModTagEdits/>
         if (modState === "tag-aliases") return <ModTagAliases/>
         if (modState === "tag-deletions") return <ModTagDeletions/>
+        if (modState === "groups") return <ModGroups/>
         if (modState === "group-edits") return <ModGroupEdits/>
         if (modState === "group-deletions") return <ModGroupDeletions/>
         if (modState === "translations") return <ModTranslations/>
@@ -114,6 +119,7 @@ const ModQueuePage: React.FunctionComponent = (props) => {
         if (modState === "tag-edits") return "Tag Edits"
         if (modState === "tag-aliases") return "Tag Aliases"
         if (modState === "tag-deletions") return "Tag Deletions"
+        if (modState === "groups") return "Groups"
         if (modState === "group-edits") return "Group Edits"
         if (modState === "group-deletions") return "Group Deletions"
         if (modState === "translations") return "Translations"
@@ -130,7 +136,7 @@ const ModQueuePage: React.FunctionComponent = (props) => {
         <div className="body">
             <SideBar/>
             <div className="content">
-                <div className="modqueue">
+                <div className="modqueue" onMouseEnter={() => setEnableDrag(true)} onMouseLeave={() => setEnableDrag(false)}>
                     {mobile ? <>
                     <div className="modqueue-icons">
                         <img className="modqueue-icon" src={modState === "posts" ? modPostUploadActiveIcon : modPostUploadIcon} 
@@ -151,6 +157,8 @@ const ModQueuePage: React.FunctionComponent = (props) => {
                         style={{filter: modState === "tag-deletions" ? "" : getFilter()}} onClick={() => setModState("tag-deletions")}/>
                     </div>
                     <div className="modqueue-icons">
+                        <img className="modqueue-icon" src={modState === "groups" ? modGroupAddActiveIcon : modGroupAddIcon} 
+                        style={{filter: modState === "groups" ? "" : getFilter()}} onClick={() => setModState("groups")}/>
                         <img className="modqueue-icon" src={modState === "group-edits" ? modGroupEditActiveIcon : modGroupEditIcon} 
                         style={{filter: modState === "group-edits" ? "" : getFilter()}} onClick={() => setModState("group-edits")}/>
                         <img className="modqueue-icon" src={modState === "group-deletions" ? modGroupDeleteActiveIcon : modGroupDeleteIcon} 
@@ -178,6 +186,8 @@ const ModQueuePage: React.FunctionComponent = (props) => {
                         style={{filter: modState === "tag-aliases" ? "" : getFilter()}} onClick={() => setModState("tag-aliases")}/>
                         <img className="modqueue-icon" src={modState === "tag-deletions" ? modTagDeleteActiveIcon : modTagDeleteIcon} 
                         style={{filter: modState === "tag-deletions" ? "" : getFilter()}} onClick={() => setModState("tag-deletions")}/>
+                        <img className="modqueue-icon" src={modState === "groups" ? modGroupAddActiveIcon : modGroupAddIcon} 
+                        style={{filter: modState === "groups" ? "" : getFilter()}} onClick={() => setModState("groups")}/>
                         <img className="modqueue-icon" src={modState === "group-edits" ? modGroupEditActiveIcon : modGroupEditIcon} 
                         style={{filter: modState === "group-edits" ? "" : getFilter()}} onClick={() => setModState("group-edits")}/>
                         <img className="modqueue-icon" src={modState === "group-deletions" ? modGroupDeleteActiveIcon : modGroupDeleteIcon} 

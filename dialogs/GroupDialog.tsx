@@ -4,6 +4,7 @@ import {HashLink as Link} from "react-router-hash-link"
 import {ThemeContext, EnableDragContext, GroupPostIDContext, SessionContext, SiteHueContext,
 SiteLightnessContext, SiteSaturationContext, SessionFlagContext, PostFlagContext} from "../Context"
 import functions from "../structures/Functions"
+import permissions from "../structures/Permissions"
 import radioButton from "../assets/icons/radiobutton.png"
 import radioButtonChecked from "../assets/icons/radiobutton-checked.png"
 import deleteIcon from "../assets/icons/delete.png"
@@ -21,9 +22,10 @@ const GroupDialog: React.FunctionComponent = (props) => {
     const {sessionFlag, setSessionFlag} = useContext(SessionFlagContext)
     const {groupPostID, setGroupPostID} = useContext(GroupPostIDContext)
     const {postFlag, setPostFlag} = useContext(PostFlagContext)
-    const [submitted, setSubmitted] = useState(false)
     const [name, setName] = useState("")
     const [groups, setGroups] = useState([])
+    const [reason, setReason] = useState("")
+    const [submitted, setSubmitted] = useState(false)
     const [error, setError] = useState(false)
     const errorRef = useRef<any>(null)
     const history = useHistory()
@@ -60,9 +62,37 @@ const GroupDialog: React.FunctionComponent = (props) => {
     }, [groupPostID])
 
     const group = async () => {
-        await functions.post("/api/group", {postID: groupPostID, name}, session, setSessionFlag)
-        setGroupPostID(null)
-        setPostFlag(true)
+        if (permissions.isContributor(session)) {
+            if (!name) {
+                setError(true)
+                if (!errorRef.current) await functions.timeout(20)
+                errorRef.current!.innerText = "No name."
+                await functions.timeout(2000)
+                return setError(false)
+            }
+            await functions.post("/api/group", {postID: groupPostID, name}, session, setSessionFlag)
+            setGroupPostID(null)
+            setPostFlag(true)
+        } else {
+            if (!name) {
+                setError(true)
+                if (!errorRef.current) await functions.timeout(20)
+                errorRef.current!.innerText = "No name."
+                await functions.timeout(2000)
+                return setError(false)
+            }
+            const badReason = functions.validateReason(reason)
+            if (badReason) {
+                setError(true)
+                if (!errorRef.current) await functions.timeout(20)
+                errorRef.current!.innerText = badReason
+                await functions.timeout(2000)
+                setError(false)
+                return
+            }
+            await functions.post("/api/group/request", {postID: groupPostID, name, reason}, session, setSessionFlag)
+            setSubmitted(true)
+        }
     }
 
     const click = (button: "accept" | "reject") => {
@@ -73,7 +103,13 @@ const GroupDialog: React.FunctionComponent = (props) => {
         }
     }
 
-    const favgroupJSX = () => {
+    const close = () => {
+        setGroupPostID(null)
+        setSubmitted(false)
+        setReason("")
+    }
+
+    const groupJSX = () => {
         let jsx = [] as any
         for (let i = 0; i < groups.length; i++) {
             const group = groups[i] as any
@@ -92,27 +128,87 @@ const GroupDialog: React.FunctionComponent = (props) => {
     }
 
     if (groupPostID) {
+        if (session.banned) {
+            return (
+                <div className="dialog">
+                    <Draggable handle=".dialog-title-container">
+                    <div className="dialog-box" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
+                            <div className="dialog-title-container">
+                                <span className="dialog-title">Add to Group</span>
+                            </div>
+                            <span className="dialog-ban-text">You are banned. Cannot group.</span>
+                            <button className="dialog-ban-button" onClick={() => click("reject")}>
+                                <span className="dialog-ban-button-text">←Back</span>
+                            </button>
+                        </div>
+                    </Draggable>
+                </div>
+            )
+        }
+
+        if (permissions.isContributor(session)) {
+            return (
+                <div className="dialog">
+                    <Draggable handle=".dialog-title-container">
+                    <div className="dialog-box" style={{width: "350px", marginTop: "-150px"}} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
+                        <div className="dialog-container">
+                            <div className="dialog-title-container">
+                                <span className="dialog-title">Add to Group</span>
+                            </div>
+                            {<div className="dialog-row">
+                                <span className="dialog-text">Enter the group name. A group will be created if it doesn't exist.</span>
+                            </div>}
+                            <div className="dialog-row">
+                                <span className="dialog-text">Group Name: </span>
+                                <input className="dialog-input-taller" type="text" spellCheck={false} value={name} onChange={(event) => setName(event.target.value)} style={{width: "50%"}}/>
+                            </div>
+                            {groupJSX()}
+                            {error ? <div className="dialog-validation-container"><span className="dialog-validation" ref={errorRef}></span></div> : null}
+                            <div className="dialog-row">
+                                <button onClick={() => click("reject")} className="dialog-button">{"Cancel"}</button>
+                                <button onClick={() => click("accept")} className="dialog-button">{"Add"}</button>
+                            </div>
+                        </div>
+                    </div>
+                    </Draggable>
+                </div>
+            )
+        }
+
         return (
             <div className="dialog">
                 <Draggable handle=".dialog-title-container">
                 <div className="dialog-box" style={{width: "350px", marginTop: "-150px"}} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                     <div className="dialog-container">
                         <div className="dialog-title-container">
-                            <span className="dialog-title">Add to Group</span>
+                            <span className="dialog-title">Add to Group Request</span>
                         </div>
-                        {<div className="dialog-row">
+                        {submitted ? <>
+                        <div className="dialog-row">
+                            <span className="dialog-text">Your group request was submitted.</span>
+                        </div>
+                        <div className="dialog-row">
+                            <button onClick={() => close()} className="dialog-button">{"Cancel"}</button>
+                            <button onClick={() => close()} className="dialog-button">{"OK"}</button>
+                        </div>
+                        </> : <>
+                        <div className="dialog-row">
                             <span className="dialog-text">Enter the group name. A group will be created if it doesn't exist.</span>
-                        </div>}
+                        </div>
                         <div className="dialog-row">
                             <span className="dialog-text">Group Name: </span>
                             <input className="dialog-input-taller" type="text" spellCheck={false} value={name} onChange={(event) => setName(event.target.value)} style={{width: "50%"}}/>
                         </div>
-                        {favgroupJSX()}
+                        {groupJSX()}
+                        <div className="dialog-row">
+                            <span className="dialog-text">Reason: </span>
+                            <input className="dialog-input-taller" type="text" spellCheck={false} value={reason} onChange={(event) => setReason(event.target.value)}/>
+                        </div>
                         {error ? <div className="dialog-validation-container"><span className="dialog-validation" ref={errorRef}></span></div> : null}
                         <div className="dialog-row">
                             <button onClick={() => click("reject")} className="dialog-button">{"Cancel"}</button>
-                            <button onClick={() => click("accept")} className="dialog-button">{"Add"}</button>
-                        </div>
+                            <button onClick={() => click("accept")} className="dialog-button">{"Submit Request"}</button>
+                        </div> </>}
                     </div>
                 </div>
                 </Draggable>

@@ -37,10 +37,10 @@ export default class SQLPost {
     /** Bulk updates a post */
     public static bulkUpdatePost = async (postID: number, params: {restrict?: string, style?: string, thirdParty?: boolean, 
         title?: string, translatedTitle?: string, artist?: string, drawn?: string, link?: string, commentary?: string, 
-        translatedCommentary?: string, bookmarks?: string, mirrors?: string, type?: string, uploadDate?: string, uploader?: string, 
+        translatedCommentary?: string, bookmarks?: string, purchaseLink?: string, mirrors?: string, type?: string, uploadDate?: string, uploader?: string, 
         updatedDate?: string, updater?: string, hidden?: boolean, approver?: string, hasOriginal?: boolean, hasUpscaled?: boolean}) => {
         const {restrict, style, thirdParty, title, translatedTitle, artist, drawn, link, commentary, translatedCommentary, bookmarks, 
-        mirrors, type, uploadDate, uploader, updatedDate, updater, hidden, approver, hasOriginal, hasUpscaled} = params
+        purchaseLink, mirrors, type, uploadDate, uploader, updatedDate, updater, hidden, approver, hasOriginal, hasUpscaled} = params
         let setArray = [] as any
         let values = [] as any
         let i = 1 
@@ -97,6 +97,11 @@ export default class SQLPost {
         if (bookmarks !== undefined) {
             setArray.push(`"bookmarks" = $${i}`)
             values.push(bookmarks)
+            i++
+        }
+        if (purchaseLink !== undefined) {
+            setArray.push(`"purchaseLink" = $${i}`)
+            values.push(purchaseLink)
             i++
         }
         if (mirrors !== undefined) {
@@ -161,10 +166,10 @@ export default class SQLPost {
     /** Bulk updates a post (unverified). */
     public static bulkUpdateUnverifiedPost = async (postID: number, params: {restrict?: string, style?: string, thirdParty?: boolean, 
         title?: string, translatedTitle?: string, artist?: string, drawn?: string, link?: string, commentary?: string, translatedCommentary?: string, 
-        bookmarks?: string, mirrors?: string, type?: string, uploadDate?: string, uploader?: string, updatedDate?: string, updater?: string, 
+        bookmarks?: string, purchaseLink?: string, mirrors?: string, type?: string, uploadDate?: string, uploader?: string, updatedDate?: string, updater?: string, 
         duplicates?: boolean, newTags?: number, originalID?: number, reason?: string, hidden?: boolean, hasOriginal?: boolean, hasUpscaled?: boolean}) => {
-        const {restrict, style, thirdParty, title, translatedTitle, artist, drawn, link, commentary, translatedCommentary, bookmarks, mirrors, type, 
-        uploadDate, uploader, updatedDate, updater, duplicates, originalID, newTags, hidden, hasOriginal, hasUpscaled, reason} = params
+        const {restrict, style, thirdParty, title, translatedTitle, artist, drawn, link, commentary, translatedCommentary, bookmarks, purchaseLink, 
+        mirrors, type, uploadDate, uploader, updatedDate, updater, duplicates, originalID, newTags, hidden, hasOriginal, hasUpscaled, reason} = params
         let setArray = [] as any
         let values = [] as any
         let i = 1 
@@ -221,6 +226,11 @@ export default class SQLPost {
         if (bookmarks !== undefined) {
             setArray.push(`"bookmarks" = $${i}`)
             values.push(bookmarks)
+            i++
+        }
+        if (purchaseLink !== undefined) {
+            setArray.push(`"purchaseLink" = $${i}`)
+            values.push(purchaseLink)
             i++
         }
         if (mirrors !== undefined) {

@@ -39,6 +39,7 @@ export default class SQLRequest {
             JOIN post_json ON post_json."postID" = "delete requests"."postID"
             WHERE "delete requests"."postID" IS NOT NULL
             GROUP BY "delete requests"."requestID"
+            ORDER BY "delete requests"."requestID" DESC
             LIMIT 100 ${offset ? `OFFSET $1` : ""}
         `),
         }
@@ -63,6 +64,7 @@ export default class SQLRequest {
             JOIN post_json ON post_json."postID" = "delete requests"."postID"
             WHERE "delete requests"."postID" IS NOT NULL AND "delete requests".username = $1
             GROUP BY "delete requests"."requestID"
+            ORDER BY "delete requests"."requestID" DESC
         `),
         values: [username]
         }
@@ -99,6 +101,7 @@ export default class SQLRequest {
             JOIN tags ON tags.tag = "delete requests".tag
             WHERE "delete requests"."tag" IS NOT NULL
             GROUP BY "delete requests"."requestID", tags.tag
+            ORDER BY "delete requests"."requestID" DESC
             LIMIT 100 ${offset ? `OFFSET $1` : ""}
         `),
         }
@@ -116,6 +119,7 @@ export default class SQLRequest {
             JOIN tags ON tags.tag = "delete requests".tag
             WHERE "delete requests"."tag" IS NOT NULL AND "delete requests".username = $1
             GROUP BY "delete requests"."requestID", tags.tag
+            ORDER BY "delete requests"."requestID" DESC
         `),
         values: [username]
         }
@@ -152,6 +156,7 @@ export default class SQLRequest {
             JOIN tags ON tags.tag = "alias requests".tag
             WHERE "alias requests"."tag" IS NOT NULL
             GROUP BY "alias requests"."requestID", tags.tag
+            ORDER BY "alias requests"."requestID" DESC
             LIMIT 100 ${offset ? `OFFSET $1` : ""}
         `),
         }
@@ -169,6 +174,7 @@ export default class SQLRequest {
             JOIN tags ON tags.tag = "alias requests".tag
             WHERE "alias requests"."tag" IS NOT NULL AND "alias requests".username = $1
             GROUP BY "alias requests"."requestID", tags.tag
+            ORDER BY "alias requests"."requestID" DESC
         `),
         values: [username]
         }
@@ -204,6 +210,53 @@ export default class SQLRequest {
             FROM "tag edit requests"
             JOIN tags ON tags.tag = "tag edit requests".tag
             GROUP BY "tag edit requests"."requestID", tags.type
+            ORDER BY "tag edit requests"."requestID" DESC
+            LIMIT 100 ${offset ? `OFFSET $1` : ""}
+        `),
+        }
+        if (offset) query.values = [offset]
+        const result = await SQLQuery.run(query)
+        return result
+    }
+
+    /** Insert group request. */
+    public static insertGroupRequest = async (username: string, slug: string, name: string, postID: string, reason: string) => {
+        const query: QueryConfig = {
+            text: /*sql*/`INSERT INTO "group requests" ("username", "slug", "name", "postID", "reason") VALUES ($1, $2, $3, $4, $5)`,
+            values: [username, slug, name, postID, reason]
+        }
+        const result = await SQLQuery.run(query)
+        return result
+    }
+
+    /** Delete group request. */
+    public static deleteGroupRequest = async (username: string, slug: string, postID: string) => {
+        const query: QueryConfig = {
+            text: /*sql*/`DELETE FROM "group requests" WHERE "group requests"."username" = $1 AND "group requests"."slug" = $2 AND "group requests"."postID" = $3`,
+            values: [username, slug, postID]
+        }
+        const result = await SQLQuery.run(query)
+        return result
+    }
+
+    /** Get group requests */
+    public static groupRequests = async (offset?: string) => {
+        const query: QueryConfig = {
+        text: functions.multiTrim(/*sql*/`
+            WITH post_json AS (
+                SELECT posts.*, json_agg(DISTINCT images.*) AS images
+                FROM posts
+                JOIN images ON images."postID" = posts."postID"
+                GROUP BY posts."postID"
+            )
+            SELECT "group requests".*, 
+            to_json((array_agg(post_json.*))[1]) AS post,
+            CASE WHEN groups."groupID" IS NOT NULL THEN true ELSE false END AS "exists"
+            FROM "group requests"
+            JOIN post_json ON post_json."postID" = "group requests"."postID"
+            LEFT JOIN groups ON groups.slug = "group requests".slug
+            GROUP BY "group requests"."requestID", groups."groupID"
+            ORDER BY "group requests"."requestID" DESC
             LIMIT 100 ${offset ? `OFFSET $1` : ""}
         `),
         }
@@ -241,6 +294,7 @@ export default class SQLRequest {
             JOIN groups ON groups.slug = "delete requests".group
             WHERE "delete requests"."group" IS NOT NULL
             GROUP BY "delete requests"."requestID", groups."groupID"
+            ORDER BY "delete requests"."requestID" DESC
             LIMIT 100 ${offset ? `OFFSET $1` : ""}
         `),
         }
@@ -277,6 +331,7 @@ export default class SQLRequest {
             FROM "group edit requests"
             JOIN groups ON groups.slug = "group edit requests".group
             GROUP BY "group edit requests"."requestID"
+            ORDER BY "group edit requests"."requestID" DESC
             LIMIT 100 ${offset ? `OFFSET $1` : ""}
         `),
         }

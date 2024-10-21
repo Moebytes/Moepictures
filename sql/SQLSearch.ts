@@ -207,7 +207,7 @@ export default class SQLSearch {
             JOIN "unverified tag map" ON "unverified posts"."postID" = "unverified tag map"."postID"
             WHERE "originalID" IS NULL
             GROUP BY "unverified posts"."postID"
-            ORDER BY "unverified posts"."uploadDate" ASC
+            ORDER BY "unverified posts"."uploadDate" DESC
             LIMIT 100 ${offset ? `OFFSET $1` : ""}
             `)
         }
@@ -226,7 +226,7 @@ export default class SQLSearch {
             JOIN "unverified tag map" ON "unverified posts"."postID" = "unverified tag map"."postID"
             WHERE "originalID" IS NULL AND "unverified posts"."uploader" = $1
             GROUP BY "unverified posts"."postID"
-            ORDER BY "unverified posts"."uploadDate" ASC
+            ORDER BY "unverified posts"."uploadDate" DESC
             `),
             values: [username]
         }
@@ -244,7 +244,7 @@ export default class SQLSearch {
             JOIN "unverified tag map" ON "unverified posts"."postID" = "unverified tag map"."postID"
             WHERE "originalID" IS NOT NULL
             GROUP BY "unverified posts"."postID"
-            ORDER BY "unverified posts"."uploadDate" ASC
+            ORDER BY "unverified posts"."uploadDate" DESC
             LIMIT 100 ${offset ? `OFFSET $1` : ""}
             `)
         }
@@ -263,7 +263,7 @@ export default class SQLSearch {
             JOIN "unverified tag map" ON "unverified posts"."postID" = "unverified tag map"."postID"
             WHERE "originalID" IS NOT NULL AND "unverified posts"."updater" = $1
             GROUP BY "unverified posts"."postID"
-            ORDER BY "unverified posts"."uploadDate" ASC
+            ORDER BY "unverified posts"."uploadDate" DESC
             `),
             values: [username]
         }

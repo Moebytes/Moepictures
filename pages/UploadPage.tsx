@@ -98,6 +98,7 @@ const UploadPage: React.FunctionComponent = (props) => {
     const [sourceCommentary, setSourceCommentary] = useState("")
     const [sourceTranslatedCommentary, setSourceTranslatedCommentary] = useState("")
     const [sourceBookmarks, setSourceBookmarks] = useState("")
+    const [sourcePurchaseLink, setSourcePurchaseLink] = useState("")
     const [sourceMirrors, setSourceMirrors] = useState("")
     const [artists, setArtists] = useState([{}]) as any
     const [characters, setCharacters] = useState([{}]) as any
@@ -323,6 +324,7 @@ const UploadPage: React.FunctionComponent = (props) => {
         setSourceDate("")
         setSourceLink("")
         setSourceBookmarks("")
+        setSourcePurchaseLink("")
         setRawTags("")
         setArtists([{}])
         setCharacters([{}])
@@ -829,11 +831,12 @@ const UploadPage: React.FunctionComponent = (props) => {
                 title: sourceTitle,
                 translatedTitle: sourceTranslatedTitle,
                 artist: sourceArtist,
-                date: sourceDate,
+                drawn: sourceDate,
                 link: sourceLink,
                 commentary: sourceCommentary,
                 translatedCommentary: sourceTranslatedCommentary,
                 bookmarks: sourceBookmarks,
+                purchaseLink: sourcePurchaseLink,
                 mirrors: sourceMirrors
             },
             artists,
@@ -1682,6 +1685,10 @@ const UploadPage: React.FunctionComponent = (props) => {
                 </div>
                 <div className="upload-container-row">
                     <textarea className="upload-textarea-small" style={{height: "80px"}} value={sourceMirrors} onChange={(event) => setSourceMirrors(event.target.value)} spellCheck={false} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}></textarea>
+                </div>
+                <div className="upload-container-row">
+                    <span className="upload-text">Buy Link: </span>
+                    <input className="upload-input-wide2" type="url" value={sourcePurchaseLink} onChange={(event) => setSourcePurchaseLink(event.target.value)} spellCheck={false} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}/>
                 </div>
             </div>
             <span className="upload-heading">Artist</span>

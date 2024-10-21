@@ -107,7 +107,7 @@ const ImageGrid: React.FunctionComponent = (props) => {
         setUpdatePostFlag(true)
         if (!result.length) setNoResults(true)
         if (!search) {
-            document.title = "Moepictures: Moe Anime Art ♥"
+            document.title = "Moepictures: Moe Anime Pictures ♥"
         }
     }
 
