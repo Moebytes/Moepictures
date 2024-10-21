@@ -18,6 +18,8 @@ import DeleteCommentDialog from "../dialogs/DeleteCommentDialog"
 import EditCommentDialog from "../dialogs/EditCommentDialog"
 import TagEditDialog from "../dialogs/TagEditDialog"
 import SourceEditDialog from "../dialogs/SourceEditDialog"
+import UpscalePostDialog from "../dialogs/UpscalePostDialog"
+import CompressPostDialog from "../dialogs/CompressPostDialog"
 import ThirdParty from "../components/ThirdParty"
 import Parent from "../components/Parent"
 import NewTags from "../components/NewTags"
@@ -236,6 +238,8 @@ const UnverifiedPostPage: React.FunctionComponent<Props> = (props) => {
         <>
         <TagEditDialog/>
         <SourceEditDialog/>
+        {post ? <UpscalePostDialog post={post}/> : null}
+        {post ? <CompressPostDialog post={post}/> : null}
         {post ? <TitleBar post={post} goBack={true}/> : <TitleBar goBack={true}/>}
         <NavBar/>
         <div className="body">

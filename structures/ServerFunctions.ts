@@ -7,8 +7,6 @@ import sql from "../sql/SQLQuery"
 import functions from "../structures/Functions"
 import {render} from "@react-email/components"
 import S3 from "aws-sdk/clients/s3"
-import phash from "sharp-phash"
-import dist from "sharp-phash/distance"
 import CSRF from "csrf"
 
 const csrf = new CSRF()

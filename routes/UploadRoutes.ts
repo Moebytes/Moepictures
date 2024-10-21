@@ -6,8 +6,8 @@ import functions from "../structures/Functions"
 import permissions from "../structures/Permissions"
 import serverFunctions, {csrfProtection, keyGenerator, handler} from "../structures/ServerFunctions"
 import rateLimit from "express-rate-limit"
+import sharp from "sharp"
 import phash from "sharp-phash"
-import imageSize from "image-size"
 import axios from "axios"
 
 const uploadLimiter = rateLimit({
@@ -216,11 +216,11 @@ const CreateRoutes = (app: Express) => {
           if (kind === "video" || kind === "audio" || kind === "model") {
               const buffer = functions.base64ToBuffer(current[i].thumbnail)
               hash = await phash(buffer).then((hash: string) => functions.binaryToHex(hash))
-              dimensions = imageSize(buffer)
+              dimensions = await sharp(buffer).metadata()
           } else {
               const buffer = Buffer.from(Object.values(current[i].bytes) as any)
               hash = await phash(buffer).then((hash: string) => functions.binaryToHex(hash))
-              dimensions = imageSize(buffer)
+              dimensions = await sharp(buffer).metadata()
           }
           await sql.post.insertImage(postID, filename, kind, order, hash, dimensions.width, dimensions.height, current[i].size)
         }
@@ -517,11 +517,11 @@ const CreateRoutes = (app: Express) => {
             if (kind === "video" || kind === "audio" || kind === "model") {
               const buffer = functions.base64ToBuffer(current[i].thumbnail)
               hash = await phash(buffer).then((hash: string) => functions.binaryToHex(hash))
-              dimensions = imageSize(buffer)
+              dimensions = await sharp(buffer).metadata()
             } else {
                 const buffer = Buffer.from(Object.values(current[i].bytes) as any)
                 hash = await phash(buffer).then((hash: string) => functions.binaryToHex(hash))
-                dimensions = imageSize(buffer)
+                dimensions = await sharp(buffer).metadata()
             }
             await sql.post.insertImage(postID, filename, kind, order, hash, dimensions.width, dimensions.height, current[i].size)
           }
@@ -868,11 +868,11 @@ const CreateRoutes = (app: Express) => {
           if (kind === "video" || kind === "audio" || kind === "model") {
             const buffer = functions.base64ToBuffer(current[i].thumbnail)
             hash = await phash(buffer).then((hash: string) => functions.binaryToHex(hash))
-            dimensions = imageSize(buffer)
+            dimensions = await sharp(buffer).metadata()
           } else {
             const buffer = Buffer.from(Object.values(current[i].bytes) as any)
             hash = await phash(buffer).then((hash: string) => functions.binaryToHex(hash))
-            dimensions = imageSize(buffer)
+            dimensions = await sharp(buffer).metadata()
           }
           await sql.post.insertUnverifiedImage(postID, filename, kind, order, hash, dimensions.width, dimensions.height, current[i].size)
         }
@@ -1145,11 +1145,11 @@ const CreateRoutes = (app: Express) => {
           if (kind === "video" || kind === "audio" || kind === "model") {
             const buffer = functions.base64ToBuffer(current[i].thumbnail)
             hash = await phash(buffer).then((hash: string) => functions.binaryToHex(hash))
-            dimensions = imageSize(buffer)
+            dimensions = await sharp(buffer).metadata()
           } else {
             const buffer = Buffer.from(Object.values(current[i].bytes) as any)
             hash = await phash(buffer).then((hash: string) => functions.binaryToHex(hash))
-            dimensions = imageSize(buffer)
+            dimensions = await sharp(buffer).metadata()
           }
           await sql.post.insertUnverifiedImage(postID, filename, kind, order, hash, dimensions.width, dimensions.height, current[i].size)
         }
@@ -1373,10 +1373,10 @@ const CreateRoutes = (app: Express) => {
           if (kind === "video" || kind === "audio" || kind === "model") {
             const buffer = functions.base64ToBuffer(unverified.thumbnail)
             hash = await phash(buffer).then((hash: string) => functions.binaryToHex(hash))
-            dimensions = imageSize(buffer)
+            dimensions = await sharp(buffer).metadata()
           } else {
             hash = await phash(current).then((hash: string) => functions.binaryToHex(hash))
-            dimensions = imageSize(current)
+            dimensions = await sharp(buffer).metadata()
           }
           await sql.post.insertImage(newPostID, filename, type, order, hash, dimensions.width, dimensions.height, current.byteLength)
         }

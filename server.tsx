@@ -308,6 +308,7 @@ for (let i = 0; i < folders.length; i++) {
       const body = await serverFunctions.getUnverifiedFile(key, upscaled)
       const contentLength = body.length
       if (!contentLength) {
+        res.setHeader("Cache-Control", "no-store, no-cache, must-revalidate, proxy-revalidate")
         const noImg = await imageMissing()
         return res.status(200).end(noImg)
       }
@@ -341,6 +342,7 @@ for (let i = 0; i < folders.length; i++) {
       let body = await serverFunctions.getUnverifiedFile(key, false)
       let contentLength = body.length
       if (!contentLength) {
+        res.setHeader("Cache-Control", "no-store, no-cache, must-revalidate, proxy-revalidate")
         const noImg = await imageMissing()
         return res.status(200).end(noImg)
       }

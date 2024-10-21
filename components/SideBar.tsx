@@ -5,7 +5,7 @@ RelativeContext, HideTitlebarContext, SidebarHoverContext, SearchContext, Search
 TagsContext, RandomFlagContext, ImageSearchFlagContext, SidebarTextContext, SessionContext, MobileScrollingContext, TagEditIDContext, SourceEditIDContext, PremiumRequiredContext,
 TranslationModeContext, TranslationDrawingEnabledContext, SiteHueContext, SessionFlagContext, SiteLightnessContext, SiteSaturationContext, ShowTakedownPostDialogContext,
 SaveSearchDialogContext, DeleteAllSaveSearchDialogContext, EditSaveSearchNameContext, EditSaveSearchKeyContext, EditSaveSearchTagsContext,
-ActionBannerContext, GroupPostIDContext, LockPostIDContext} from "../Context"
+ActionBannerContext, GroupPostIDContext, LockPostIDContext, ShowUpscalingDialogContext, ShowCompressingDialogContext} from "../Context"
 import {HashLink as Link} from "react-router-hash-link"
 import permissions from "../structures/Permissions"
 import favicon from "../assets/icons/favicon.png"
@@ -129,6 +129,8 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
     const {actionBanner, setActionBanner} = useContext(ActionBannerContext)
     const {groupPostID, setGroupPostID} = useContext(GroupPostIDContext)
     const {lockPostID, setLockPostID} = useContext(LockPostIDContext)
+    const {showUpscalingDialog, setShowUpscalingDialog} = useContext(ShowUpscalingDialogContext)
+    const {showCompressingDialog, setShowCompressingDialog} = useContext(ShowCompressingDialogContext)
     const history = useHistory()
 
     const getFilter = () => {
@@ -695,6 +697,14 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
         history.push(`/mod-queue`)
     }
 
+    const upscalingDialog = () => {
+        setShowUpscalingDialog((prev: boolean) => !prev)
+    }
+
+    const compressingDialog = () => {
+        setShowCompressingDialog((prev: boolean) => !prev)
+    }
+
     const approvePost = async () => {
         await functions.post("/api/post/approve", {postID: props.post.postID}, session, setSessionFlag)
         modNext()
@@ -1080,13 +1090,13 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
                         </div> : null}
                         {props.unverified ? <>
                         <div className="sidebar-row">
-                            <span className="tag-hover" onClick={() => null}>
+                            <span className="tag-hover" onClick={compressingDialog}>
                                 <img className="sidebar-icon" src={compressIcon}/>
                                 <span className="tag">Compress</span>
                             </span>
                         </div>
                         <div className="sidebar-row">
-                            <span className="tag-hover" onClick={() => null}>
+                            <span className="tag-hover" onClick={upscalingDialog}>
                                 <img className="sidebar-icon" src={upscaleIcon}/>
                                 <span className="tag">Upscale</span>
                             </span>

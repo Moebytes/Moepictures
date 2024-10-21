@@ -5,8 +5,9 @@ import sql from "../sql/SQLQuery"
 import functions from "../structures/Functions"
 import permissions from "../structures/Permissions"
 import serverFunctions, {csrfProtection, keyGenerator, handler} from "../structures/ServerFunctions"
+import sharp from "sharp"
+import waifu2x from "waifu2x"
 import phash from "sharp-phash"
-import imageSize from "image-size"
 import fs from "fs"
 import path from "path"
 
@@ -672,10 +673,10 @@ const PostRoutes = (app: Express) => {
                 if (kind === "video" || kind === "audio" || kind === "model") {
                     const buffer = functions.base64ToBuffer(post.thumbnail)
                     hash = await phash(buffer).then((hash: string) => functions.binaryToHex(hash))
-                    dimensions = imageSize(buffer)
+                    dimensions = await sharp(buffer).metadata()
                 } else {
                     hash = await phash(current).then((hash: string) => functions.binaryToHex(hash))
-                    dimensions = imageSize(current)
+                    dimensions = await sharp(current).metadata()
                 }
                 await sql.post.insertUnverifiedImage(postID, filename, type, order, hash, dimensions.width, dimensions.height, String(current.byteLength))
             }
@@ -863,6 +864,166 @@ const PostRoutes = (app: Express) => {
             let result = await sql.post.post(Number(postID))
             if (!result) return res.status(400).send("Invalid postID")
             await sql.history.updateSearchHistory(req.session.username, postID)
+            res.status(200).send("Success")
+        } catch (e) {
+            console.log(e)
+            return res.status(400).send("Bad request")
+        }
+    })
+
+    app.post("/api/post/compress", csrfProtection, postLimiter, async (req: Request, res: Response, next: NextFunction) => {
+        try {
+            const {postID, quality, format, maxDimension, maxUpscaledDimension, original, upscaled} = req.body
+            if (Number.isNaN(Number(postID))) return res.status(400).send("Invalid postID")
+            if (!req.session.username) return res.status(403).send("Unauthorized")
+            if (!permissions.isMod(req.session)) return res.status(403).end()
+            let post = await sql.post.unverifiedPost(Number(postID))
+            if (!post) return res.status(400).send("Invalid postID")
+
+            if (post.type === "video" || post.type === "audio" || post.type === "model") return res.status(400).send("Bad request")
+            let animated = post.type === "animation"
+
+            for (let i = 0; i < post.images.length; i++) {
+                if (original) {
+                    const file = functions.getImagePath(post.images[i].type, post.postID, post.images[i].order, post.images[i].filename)
+                    const buffer = await serverFunctions.getUnverifiedFile(file, false)
+                    const dirname = path.dirname(file)
+                    const basename = path.basename(file, path.extname(file))
+
+                    if (buffer.byteLength) {
+                        const meta = await sharp(buffer, {limitInputPixels: false}).metadata()
+                        let sharpProcess = null as unknown as sharp.Sharp
+                        if (maxDimension && (meta.width! > Number(maxDimension) || meta.height! > Number(maxDimension))) {
+                            sharpProcess = sharp(buffer, {animated, limitInputPixels: false}).resize(Number(maxDimension), Number(maxDimension), {fit: "inside"})
+                        } else {
+                            sharpProcess = sharp(buffer, {animated, limitInputPixels: false})
+                        }
+                        let newFile = file
+                        let newFilename = post.images[i].filename
+                        if (format === "jpg") {
+                            newFile = path.join(dirname, `${basename}.jpg`)
+                            newFilename = path.basename(newFilename, path.extname(newFilename)) + ".jpg"
+                            sharpProcess = sharpProcess.jpeg({optimiseScans: true, trellisQuantisation: true, quality: Number(quality)})
+                        } else if (format === "png") {
+                            newFile = path.join(dirname, `${basename}.png`)
+                            newFilename = path.basename(newFilename, path.extname(newFilename)) + ".png"
+                            sharpProcess = sharpProcess.png({quality: Number(quality)})
+                        } else if (format === "gif") {
+                            newFile = path.join(dirname, `${basename}.gif`)
+                            newFilename = path.basename(newFilename, path.extname(newFilename)) + ".gif"
+                            sharpProcess = sharpProcess.gif()
+                        } else if (format === "webp") {
+                            newFile = path.join(dirname, `${basename}.webp`)
+                            newFilename = path.basename(newFilename, path.extname(newFilename)) + ".webp"
+                            sharpProcess = sharpProcess.webp({quality: Number(quality)})
+                        } else if (format === "avif") {
+                            newFile = path.join(dirname, `${basename}.avif`)
+                            newFilename = path.basename(newFilename, path.extname(newFilename)) + ".avif"
+                            sharpProcess = sharpProcess.avif({quality: Number(quality)})
+                        }
+                        const newBuffer = await sharpProcess.toBuffer()
+                        await serverFunctions.deleteUnverifiedFile(file)
+                        await serverFunctions.uploadUnverifiedFile(newFile, newBuffer)
+                        await sql.post.updateUnverifiedImage(post.images[i].imageID, "filename", newFilename)
+                    }
+                }
+
+                if (upscaled) {
+                    const file = functions.getUpscaledImagePath(post.images[i].type, post.postID, post.images[i].order, post.images[i].filename)
+                    const buffer = await serverFunctions.getUnverifiedFile(file, false)
+                    const dirname = path.dirname(file)
+                    const basename = path.basename(file, path.extname(file))
+
+                    if (buffer.byteLength) {
+                        const meta = await sharp(buffer, {limitInputPixels: false}).metadata()
+                        let sharpProcess = null as unknown as sharp.Sharp
+                        if (maxUpscaledDimension && (meta.width! > Number(maxUpscaledDimension) || meta.height! > Number(maxUpscaledDimension))) {
+                            sharpProcess = sharp(buffer, {animated, limitInputPixels: false}).resize(Number(maxUpscaledDimension), Number(maxUpscaledDimension), {fit: "inside"})
+                        } else {
+                            sharpProcess = sharp(buffer, {animated, limitInputPixels: false})
+                        }
+                        let newFile = file
+                        let newFilename = post.images[i].filename
+                        if (format === "jpg") {
+                            newFile = path.join(dirname, `${basename}.jpg`)
+                            newFilename = path.basename(newFilename, path.extname(newFilename)) + ".jpg"
+                            sharpProcess = sharpProcess.jpeg({optimiseScans: true, trellisQuantisation: true, quality: Number(quality)})
+                        } else if (format === "png") {
+                            newFile = path.join(dirname, `${basename}.png`)
+                            newFilename = path.basename(newFilename, path.extname(newFilename)) + ".png"
+                            sharpProcess = sharpProcess.png({quality: Number(quality)})
+                        } else if (format === "gif") {
+                            newFile = path.join(dirname, `${basename}.gif`)
+                            newFilename = path.basename(newFilename, path.extname(newFilename)) + ".gif"
+                            sharpProcess = sharpProcess.gif()
+                        } else if (format === "webp") {
+                            newFile = path.join(dirname, `${basename}.webp`)
+                            newFilename = path.basename(newFilename, path.extname(newFilename)) + ".webp"
+                            sharpProcess = sharpProcess.webp({quality: Number(quality)})
+                        } else if (format === "avif") {
+                            newFile = path.join(dirname, `${basename}.avif`)
+                            newFilename = path.basename(newFilename, path.extname(newFilename)) + ".avif"
+                            sharpProcess = sharpProcess.avif({quality: Number(quality)})
+                        }
+                        const newBuffer = await sharpProcess.toBuffer()
+                        await serverFunctions.deleteUnverifiedFile(file)
+                        await serverFunctions.uploadUnverifiedFile(newFile, newBuffer)
+                        await sql.post.updateUnverifiedImage(post.images[i].imageID, "filename", newFilename)
+                    }
+                }
+            }
+            res.status(200).send("Success")
+        } catch (e) {
+            console.log(e)
+            return res.status(400).send("Bad request")
+        }
+    })
+
+    app.post("/api/post/upscale", csrfProtection, postLimiter, async (req: Request, res: Response, next: NextFunction) => {
+        try {
+            const {postID, upscaler, scaleFactor, compressJPG} = req.body
+            if (Number.isNaN(Number(postID))) return res.status(400).send("Invalid postID")
+            if (!req.session.username) return res.status(403).send("Unauthorized")
+            if (!permissions.isMod(req.session)) return res.status(403).end()
+            let post = await sql.post.unverifiedPost(Number(postID))
+            if (!post) return res.status(400).send("Invalid postID")
+
+            if (post.type === "video" || post.type === "audio" || post.type === "model") return res.status(400).send("Bad request")
+
+            for (let i = 0; i < post.images.length; i++) {
+                const file = functions.getImagePath(post.images[i].type, post.postID, post.images[i].order, post.images[i].filename)
+                const newFile = functions.getUpscaledImagePath(post.images[i].type, post.postID, post.images[i].order, post.images[i].filename)
+                const buffer = await serverFunctions.getUnverifiedFile(file, false)
+                const basename = path.basename(file)
+
+                if (buffer.byteLength) {
+                    const tempDir = path.join(__dirname, "assets/temp")
+                    if (!fs.existsSync(tempDir)) fs.mkdirSync(tempDir, {recursive: true})
+                    const tempDest = path.join(tempDir, basename)
+                    fs.writeFileSync(tempDest, new Uint8Array(buffer))
+                    let isAnimatedWebp = false
+                    if (functions.isWebP(basename)) isAnimatedWebp = functions.isAnimatedWebp(buffer)
+
+                    if (post.type === "image" || post.type === "comic") {
+                        await waifu2x.upscaleImage(tempDest, tempDest, {rename: "", upscaler, scale: Number(scaleFactor)})
+                    } else if (functions.isGIF(basename)) {
+                        await waifu2x.upscaleGIF(tempDest, tempDest, {rename: "", upscaler, scale: Number(scaleFactor)})
+                    } else if (isAnimatedWebp) {
+                        await waifu2x.upscaleAnimatedWebp(tempDest, tempDest, {rename: "", upscaler, scale: Number(scaleFactor)})
+                    }
+                    let newBuffer = fs.readFileSync(tempDest)
+                    if (compressJPG) {
+                        if (functions.isGIF(basename) || isAnimatedWebp) {
+                            newBuffer = await sharp(newBuffer, {animated: true, limitInputPixels: false}).webp().toBuffer()
+                        } else {
+                            newBuffer = await sharp(newBuffer, {limitInputPixels: false}).jpeg({optimiseScans: true, trellisQuantisation: true, quality: 95}).toBuffer()
+                        }
+                    }
+                    await serverFunctions.uploadUnverifiedFile(newFile, newBuffer)
+                    await sql.post.updateUnverifiedPost(post.postID, "hasUpscaled", true)
+                    fs.unlinkSync(tempDest)
+                }
+            }
             res.status(200).send("Success")
         } catch (e) {
             console.log(e)

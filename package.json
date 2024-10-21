@@ -116,7 +116,6 @@
     "gif-frames": "github:Moebits/gif-frames#no-cumulative",
     "handlebars": "^4.7.7",
     "image-pixels": "^2.2.2",
-    "image-size": "^1.0.1",
     "imagetracerjs": "^1.2.6",
     "jswebm": "github:Moebits/jswebm",
     "jszip": "^3.7.1",
@@ -157,6 +156,7 @@
     "three": "^0.148.0",
     "three-stdlib": "^2.21.5",
     "tone": "^14.7.39",
+    "waifu2x": "^1.4.6",
     "webpxmux": "^0.0.2"
   }
 }
