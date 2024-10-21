@@ -117,6 +117,7 @@ const HelpPage: React.FunctionComponent = (props) => {
                     <span className="help-alt">favorites:user</span> - Search for favorites of the user (if public). <br/>
                     <span className="help-alt">favgroup:user:name</span> - Search for favgroup of the user (if public). <br/>
                     <span className="help-alt">uploads:user</span> - Search for uploads of the user. <br/><br/>
+                    <span className="help-alt">group:name</span> - Search for the group by its name. <br/><br/>
 
                     These are some tags with special uses: <br/>
                     <span className="help-alt">original</span> - the drawing is original, ie. not fanart. <br/>
@@ -144,6 +145,7 @@ const HelpPage: React.FunctionComponent = (props) => {
                     <span className="help-alt">purple</span> - the post is favgrouped. <br/>
                     <span className="help-alt">green</span> - the post is a third party post. <br/>
                     <span className="help-alt">blue</span> - the post contains multiple variations. <br/>
+                    <span className="help-alt">red</span> - the post is locked. <br/>
                 </span>
                 <div className="help-img-container"><img className="help-img" src={searchingImg}/></div></>
             )
@@ -159,7 +161,9 @@ const HelpPage: React.FunctionComponent = (props) => {
                     this is pretty accurate at finding matching images. If you upload a video, song, or 3d model, the hash is only 
                     computed on the first frame, song cover, or model screenshot. <br/><br/>
 
-                    You can also search for images by dragging and dropping an image into the left portion of the webpage.
+                    You can also search for images by dragging and dropping an image into the left portion of the webpage or by pasting an 
+                    image from your clipboard. Dropping  an image into the right portion of the webpage or pasting in the upload page will 
+                    upload the image instead.
                 </span>
                 <div className="help-img-container"><img className="help-img" src={imageSearchingImg}/></div></>
             )
@@ -263,8 +267,8 @@ const HelpPage: React.FunctionComponent = (props) => {
                     ⇾ (Music only) The audio file must have a song cover in its metadata. <br/>
                     ⇾ Compress / re-encode files (maintaining high quality) to be storage efficient. <br/>
                     ⇾ No hentai. We only allow light nudity and suggestiveness. <br/>
-                    ⇾ No AI-generated works. We only want art made by humans and their passion. <br/>
-                    ⇾ No paid content. This includes anime clips, manga and doujinshi scans, and paid artist rewards. Support artists for their work.<br/>
+                    ⇾ No AI-generated works. We only want art created by passionate humans. <br/>
+                    ⇾ No paid content. This includes anime clips, manga and doujinshi scans, and paid artist rewards. Support artists for their work!<br/>
                     </span>
                 </span>
                 <div className="help-img-container"><img className="help-img" src={uploadImg}/></div></>

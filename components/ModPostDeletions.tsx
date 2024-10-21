@@ -159,6 +159,16 @@ const ModPostDeletions: React.FunctionComponent = (props) => {
     const generatePostsJSX = () => {
         let jsx = [] as any
         const requests = functions.removeDuplicates(visibleRequests)
+        if (!requests.length) {
+            return (
+                <div className="mod-post" style={{justifyContent: "center", alignItems: "center", height: "75px"}} 
+                onMouseEnter={() =>setHover(true)} onMouseLeave={() => setHover(false)} key={0}>
+                    <div className="mod-post-text-column">
+                        <span className="mod-post-text">No data</span>
+                    </div>
+                </div>
+            )
+        }
         for (let i = 0; i < requests.length; i++) {
             const request = requests[i] as any
             if (!request) break

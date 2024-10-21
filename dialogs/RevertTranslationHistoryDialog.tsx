@@ -50,6 +50,24 @@ const RevertTranslationHistoryDialog: React.FunctionComponent = (props) => {
         setRevertTranslationHistoryID(null)
     }
 
+    if (revertTranslationHistoryID?.failed === "locked") {
+        return (
+            <div className="dialog">
+                <Draggable handle=".dialog-title-container">
+                <div className="dialog-box" style={{width: "290px", height: "200px"}} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
+                        <div className="dialog-title-container">
+                            <span className="dialog-title">Revert Translation History</span>
+                        </div>
+                        <span className="dialog-ban-text">This post is locked. Cannot revert history.</span>
+                        <button className="dialog-ban-button" onClick={() => click("reject")}>
+                            <span className="dialog-ban-button-text">←Back</span>
+                        </button>
+                    </div>
+                </Draggable>
+            </div>
+        )
+    }
+
     if (revertTranslationHistoryID?.failed) {
         return (
             <div className="dialog">
@@ -73,6 +91,24 @@ const RevertTranslationHistoryDialog: React.FunctionComponent = (props) => {
     }
 
     if (revertTranslationHistoryID) {
+        if (session.banned) {
+            return (
+                <div className="dialog">
+                    <Draggable handle=".dialog-title-container">
+                    <div className="dialog-box" style={{width: "290px", height: "200px"}} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
+                            <div className="dialog-title-container">
+                                <span className="dialog-title">Revert Translation History</span>
+                            </div>
+                            <span className="dialog-ban-text">You are banned. Cannot revert history.</span>
+                            <button className="dialog-ban-button" onClick={() => click("reject")}>
+                                <span className="dialog-ban-button-text">←Back</span>
+                            </button>
+                        </div>
+                    </Draggable>
+                </div>
+            )
+        }
+
         return (
             <div className="dialog">
                 <Draggable handle=".dialog-title-container">

@@ -134,6 +134,26 @@ const PostRoutes = (app: Express) => {
         }
     })
 
+    app.post("/api/post/lock", csrfProtection, postUpdateLimiter, async (req: Request, res: Response) => {
+        try {
+            const {postID} = req.body
+            if (Number.isNaN(Number(postID))) return res.status(400).send("Invalid postID")
+            if (!req.session.username) return res.status(403).send("Unauthorized")
+            if (!permissions.isMod(req.session)) return res.status(403).end()
+            const post = await sql.post.post(Number(postID)).catch(() => null)
+            if (!post) return res.status(404).send("Doesn't exist")
+            if (post.locked) {
+                await sql.post.updatePost(Number(postID), "locked", false)
+            } else {
+                await sql.post.updatePost(Number(postID), "locked", true)
+            }
+            res.status(200).send("Success")
+        } catch (e) {
+            console.log(e) 
+            res.status(400).send("Bad request")
+        }
+    })
+
     app.get("/api/post/thirdparty", postLimiter, async (req: Request, res: Response, next: NextFunction) => {
         try {
             const postID = req.query.postID as string
@@ -317,6 +337,7 @@ const PostRoutes = (app: Express) => {
 
             const post = unverified ? await sql.post.unverifiedPost(postID) :  await sql.post.post(postID)
             if (!post) return res.status(400).send("Bad request")
+            if (post.locked && !permissions.isMod(req.session)) return res.status(403).send("Unauthorized")
 
             if (sourceEdit) {
                 const updatedDate = new Date().toISOString()
@@ -538,6 +559,7 @@ const PostRoutes = (app: Express) => {
             const originalPostID = postID as any
             const post = await sql.post.post(originalPostID)
             if (!post) return res.status(400).send("Bad postID")
+            if (post.locked && !permissions.isMod(req.session)) return res.status(403).send("Unauthorized")
             postID = await sql.post.insertUnverifiedPost()
 
             if (sourceEdit) {

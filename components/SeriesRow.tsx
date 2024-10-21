@@ -24,16 +24,13 @@ const SeriesRow: React.FunctionComponent<Props> = (props) => {
     const {posts, setPosts} = useContext(PostsContext)
     const history = useHistory()
 
-    const searchTag = (event: React.MouseEvent) => {
+    const tagPage = (event: React.MouseEvent) => {
+        event.preventDefault()
         if (event.ctrlKey || event.metaKey || event.button === 1) {
-            //window.open("/posts", "_blank")
             window.open(`/tag/${props.series.tag}`, "_blank")
         } else {
-            //history.push("/posts")
             history.push(`/tag/${props.series.tag}`)
         }
-        //setSearch(props.artist.tag)
-        //setSearchFlag(true)
     }
 
     const set = (image: string, index: number, newTab: boolean) => {
@@ -86,7 +83,7 @@ const SeriesRow: React.FunctionComponent<Props> = (props) => {
             <div className="seriesrow-row">
                 {props.series.image ? <img className="seriesrow-img" src={functions.getTagLink("series", props.series.image)}/> : null}
                 <span className="seriesrow-text-hover">
-                    <span className="seriesrow-text" onClick={searchTag} onAuxClick={searchTag}>{functions.toProperCase(props.series.tag.replaceAll("-", " "))}</span>
+                    <span className="seriesrow-text" onClick={tagPage} onAuxClick={tagPage} onContextMenu={tagPage}>{functions.toProperCase(props.series.tag.replaceAll("-", " "))}</span>
                     {seriesSocialJSX()}
                     <span className="seriesrow-text-alt">{props.series.postCount}</span>
                 </span>

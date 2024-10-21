@@ -264,13 +264,13 @@ const PostImageOptions: React.FunctionComponent<Props> = (props) => {
                 {session.username ?
                 <div className="post-image-options-box" onClick={() => updateFavorite(!favorited)} style={{marginLeft: "-10px"}}
                 onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
-                    <img className="post-image-icon" src={getStar()} style={{filter: getFilter()}}/>
+                    <img className="post-image-icon" src={getStar()} style={{filter: favorited ? "" : getFilter()}}/>
                     <div className={`post-image-text ${favorited ? "favorited" : ""}`}>{favorited ? "Favorited" : "Favorite"}</div>
                 </div> : null}
                 {session.username ?
                 <div className="post-image-options-box" onClick={() => setFavGroupID(props.post.postID)}
                 onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
-                    <img className="post-image-icon" src={getStarGroup()} style={{filter: getFilter()}}/>
+                    <img className="post-image-icon" src={getStarGroup()} style={{filter: favGrouped ? "" : getFilter()}}/>
                     <div className={`post-image-text ${favGrouped ? "favgrouped" : ""}`}>Favgroup</div>
                 </div> : null}
                 <div className="post-image-options-box" onClick={() => props.next?.()} style={{marginLeft: "25px"}} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
@@ -302,12 +302,12 @@ const PostImageOptions: React.FunctionComponent<Props> = (props) => {
                     </div>
                     {session.username && !props.noFavorite ?
                     <div className="post-image-options-box" onClick={() => updateFavorite(!favorited)} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
-                        <img className="post-image-icon" src={getStar()} style={{filter: getFilter()}}/>
+                        <img className="post-image-icon" src={getStar()} style={{filter: favorited ? "" : getFilter()}}/>
                         <div className={`post-image-text ${favorited ? "favorited" : ""}`}>{favorited ? "Favorited" : "Favorite"}</div>
                     </div> : null}
                     {session.username && !props.noFavorite ?
                     <div className="post-image-options-box" onClick={() => setFavGroupID(props.post.postID)} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
-                        <img className="post-image-icon" src={getStarGroup()} style={{filter: getFilter()}}/>
+                        <img className="post-image-icon" src={getStarGroup()} style={{filter: favGrouped ? "" : getFilter()}}/>
                         <div className={`post-image-text ${favGrouped ? "favgrouped" : ""}`}>Favgroup</div>
                     </div> : null}
                 </div>

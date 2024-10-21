@@ -45,109 +45,109 @@ export default class SQLPost {
         let values = [] as any
         let i = 1 
         if (restrict !== undefined) {
-        setArray.push(`"restrict" = $${i}`)
-        values.push(restrict)
-        i++
+            setArray.push(`"restrict" = $${i}`)
+            values.push(restrict)
+            i++
         }
         if (style !== undefined) {
-        setArray.push(`"style" = $${i}`)
-        values.push(style)
-        i++
+            setArray.push(`"style" = $${i}`)
+            values.push(style)
+            i++
         }
         if (thirdParty !== undefined) {
-        setArray.push(`"thirdParty" = $${i}`)
-        values.push(thirdParty)
-        i++
+            setArray.push(`"thirdParty" = $${i}`)
+            values.push(thirdParty)
+            i++
         }
         if (title !== undefined) {
-        setArray.push(`"title" = $${i}`)
-        values.push(title)
-        i++
+            setArray.push(`"title" = $${i}`)
+            values.push(title)
+            i++
         }
         if (translatedTitle !== undefined) {
-        setArray.push(`"translatedTitle" = $${i}`)
-        values.push(translatedTitle)
-        i++
+            setArray.push(`"translatedTitle" = $${i}`)
+            values.push(translatedTitle)
+            i++
         }
         if (artist !== undefined) {
-        setArray.push(`"artist" = $${i}`)
-        values.push(artist)
-        i++
+            setArray.push(`"artist" = $${i}`)
+            values.push(artist)
+            i++
         }
         if (drawn !== undefined) {
-        setArray.push(`"drawn" = $${i}`)
-        values.push(drawn)
-        i++
+            setArray.push(`"drawn" = $${i}`)
+            values.push(drawn)
+            i++
         }
         if (link !== undefined) {
-        setArray.push(`"link" = $${i}`)
-        values.push(link)
-        i++
+            setArray.push(`"link" = $${i}`)
+            values.push(link)
+            i++
         }
         if (commentary !== undefined) {
-        setArray.push(`"commentary" = $${i}`)
-        values.push(commentary)
-        i++
+            setArray.push(`"commentary" = $${i}`)
+            values.push(commentary)
+            i++
         }
         if (translatedCommentary !== undefined) {
-        setArray.push(`"translatedCommentary" = $${i}`)
-        values.push(translatedCommentary)
-        i++
+            setArray.push(`"translatedCommentary" = $${i}`)
+            values.push(translatedCommentary)
+            i++
         }
         if (bookmarks !== undefined) {
-        setArray.push(`"bookmarks" = $${i}`)
-        values.push(bookmarks)
-        i++
+            setArray.push(`"bookmarks" = $${i}`)
+            values.push(bookmarks)
+            i++
         }
         if (mirrors !== undefined) {
-        setArray.push(`"mirrors" = $${i}`)
-        values.push(mirrors)
-        i++
+            setArray.push(`"mirrors" = $${i}`)
+            values.push(mirrors)
+            i++
         }
         if (type !== undefined) {
-        setArray.push(`"type" = $${i}`)
-        values.push(type)
-        i++
+            setArray.push(`"type" = $${i}`)
+            values.push(type)
+            i++
         }
         if (uploadDate !== undefined) {
-        setArray.push(`"uploadDate" = $${i}`)
-        values.push(uploadDate)
-        i++
+            setArray.push(`"uploadDate" = $${i}`)
+            values.push(uploadDate)
+            i++
         }
         if (uploader !== undefined) {
-        setArray.push(`"uploader" = $${i}`)
-        values.push(uploader)
-        i++
+            setArray.push(`"uploader" = $${i}`)
+            values.push(uploader)
+            i++
         }
         if (updatedDate !== undefined) {
-        setArray.push(`"updatedDate" = $${i}`)
-        values.push(updatedDate)
-        i++
+            setArray.push(`"updatedDate" = $${i}`)
+            values.push(updatedDate)
+            i++
         }
         if (updater !== undefined) {
-        setArray.push(`"updater" = $${i}`)
-        values.push(updater)
-        i++
+            setArray.push(`"updater" = $${i}`)
+            values.push(updater)
+            i++
         }
         if (hidden !== undefined) {
-        setArray.push(`"hidden" = $${i}`)
-        values.push(hidden)
-        i++
+            setArray.push(`"hidden" = $${i}`)
+            values.push(hidden)
+            i++
         }
         if (hasOriginal !== undefined) {
-        setArray.push(`"hasOriginal" = $${i}`)
-        values.push(hasOriginal)
-        i++
+            setArray.push(`"hasOriginal" = $${i}`)
+            values.push(hasOriginal)
+            i++
         }
         if (hasUpscaled !== undefined) {
-        setArray.push(`"hasUpscaled" = $${i}`)
-        values.push(hasUpscaled)
-        i++
+            setArray.push(`"hasUpscaled" = $${i}`)
+            values.push(hasUpscaled)
+            i++
         }
         if (approver !== undefined) {
-        setArray.push(`"approver" = $${i}`)
-        values.push(approver)
-        i++
+            setArray.push(`"approver" = $${i}`)
+            values.push(approver)
+            i++
         }
         let setQuery = `SET ${setArray.join(", ")}`
         const query: QueryConfig = {
@@ -169,124 +169,124 @@ export default class SQLPost {
         let values = [] as any
         let i = 1 
         if (restrict !== undefined) {
-        setArray.push(`"restrict" = $${i}`)
-        values.push(restrict)
-        i++
+            setArray.push(`"restrict" = $${i}`)
+            values.push(restrict)
+            i++
         }
         if (style !== undefined) {
-        setArray.push(`"style" = $${i}`)
-        values.push(style)
-        i++
+            setArray.push(`"style" = $${i}`)
+            values.push(style)
+            i++
         }
         if (thirdParty !== undefined) {
-        setArray.push(`"thirdParty" = $${i}`)
-        values.push(thirdParty)
-        i++
+            setArray.push(`"thirdParty" = $${i}`)
+            values.push(thirdParty)
+            i++
         }
         if (title !== undefined) {
-        setArray.push(`"title" = $${i}`)
-        values.push(title)
-        i++
+            setArray.push(`"title" = $${i}`)
+            values.push(title)
+            i++
         }
         if (translatedTitle !== undefined) {
-        setArray.push(`"translatedTitle" = $${i}`)
-        values.push(translatedTitle)
-        i++
+            setArray.push(`"translatedTitle" = $${i}`)
+            values.push(translatedTitle)
+            i++
         }
         if (artist !== undefined) {
-        setArray.push(`"artist" = $${i}`)
-        values.push(artist)
-        i++
+            setArray.push(`"artist" = $${i}`)
+            values.push(artist)
+            i++
         }
         if (drawn !== undefined) {
-        setArray.push(`"drawn" = $${i}`)
-        values.push(drawn)
-        i++
+            setArray.push(`"drawn" = $${i}`)
+            values.push(drawn)
+            i++
         }
         if (link !== undefined) {
-        setArray.push(`"link" = $${i}`)
-        values.push(link)
-        i++
+            setArray.push(`"link" = $${i}`)
+            values.push(link)
+            i++
         }
         if (commentary !== undefined) {
-        setArray.push(`"commentary" = $${i}`)
-        values.push(commentary)
-        i++
+            setArray.push(`"commentary" = $${i}`)
+            values.push(commentary)
+            i++
         }
         if (translatedCommentary !== undefined) {
-        setArray.push(`"translatedCommentary" = $${i}`)
-        values.push(translatedCommentary)
-        i++
+            setArray.push(`"translatedCommentary" = $${i}`)
+            values.push(translatedCommentary)
+            i++
         }
         if (bookmarks !== undefined) {
-        setArray.push(`"bookmarks" = $${i}`)
-        values.push(bookmarks)
-        i++
+            setArray.push(`"bookmarks" = $${i}`)
+            values.push(bookmarks)
+            i++
         }
         if (mirrors !== undefined) {
-        setArray.push(`"mirrors" = $${i}`)
-        values.push(mirrors)
-        i++
+            setArray.push(`"mirrors" = $${i}`)
+            values.push(mirrors)
+            i++
         }
         if (type !== undefined) {
-        setArray.push(`"type" = $${i}`)
-        values.push(type)
-        i++
+            setArray.push(`"type" = $${i}`)
+            values.push(type)
+            i++
         }
         if (uploadDate !== undefined) {
-        setArray.push(`"uploadDate" = $${i}`)
-        values.push(uploadDate)
-        i++
+            setArray.push(`"uploadDate" = $${i}`)
+            values.push(uploadDate)
+            i++
         }
         if (uploader !== undefined) {
-        setArray.push(`"uploader" = $${i}`)
-        values.push(uploader)
-        i++
+            setArray.push(`"uploader" = $${i}`)
+            values.push(uploader)
+            i++
         }
         if (updatedDate !== undefined) {
-        setArray.push(`"updatedDate" = $${i}`)
-        values.push(updatedDate)
-        i++
+            setArray.push(`"updatedDate" = $${i}`)
+            values.push(updatedDate)
+            i++
         }
         if (updater !== undefined) {
-        setArray.push(`"updater" = $${i}`)
-        values.push(updater)
-        i++
+            setArray.push(`"updater" = $${i}`)
+            values.push(updater)
+            i++
         }
         if (duplicates !== undefined) {
-        setArray.push(`"duplicates" = $${i}`)
-        values.push(duplicates)
-        i++
+            setArray.push(`"duplicates" = $${i}`)
+            values.push(duplicates)
+            i++
         }
         if (newTags !== undefined) {
-        setArray.push(`"newTags" = $${i}`)
-        values.push(newTags)
-        i++
+            setArray.push(`"newTags" = $${i}`)
+            values.push(newTags)
+            i++
         }
         if (originalID !== undefined) {
-        setArray.push(`"originalID" = $${i}`)
-        values.push(originalID)
-        i++
+            setArray.push(`"originalID" = $${i}`)
+            values.push(originalID)
+            i++
         }
         if (hidden !== undefined) {
-        setArray.push(`"hidden" = $${i}`)
-        values.push(updater)
-        i++
+            setArray.push(`"hidden" = $${i}`)
+            values.push(hidden)
+            i++
         }
         if (hasOriginal !== undefined) {
-        setArray.push(`"hasOriginal" = $${i}`)
-        values.push(hasOriginal)
-        i++
+            setArray.push(`"hasOriginal" = $${i}`)
+            values.push(hasOriginal)
+            i++
         }
         if (hasUpscaled !== undefined) {
-        setArray.push(`"hasUpscaled" = $${i}`)
-        values.push(hasUpscaled)
-        i++
+            setArray.push(`"hasUpscaled" = $${i}`)
+            values.push(hasUpscaled)
+            i++
         }
         if (reason !== undefined) {
-        setArray.push(`"reason" = $${i}`)
-        values.push(reason)
-        i++
+            setArray.push(`"reason" = $${i}`)
+            values.push(reason)
+            i++
         }
         let setQuery = `SET ${setArray.join(", ")}`
         const query: QueryConfig = {

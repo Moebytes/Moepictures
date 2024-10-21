@@ -4,6 +4,7 @@ import FormData from "form-data"
 import path from "path"
 import Pixiv from "pixiv.ts"
 import DeviantArt from "deviantart.ts"
+import snoowrap from "snoowrap"
 import googleTranslate from "@vitalets/google-translate-api"
 import Kuroshiro from "kuroshiro"
 import KuromojiAnalyzer from "kuroshiro-analyzer-kuromoji"
@@ -24,6 +25,14 @@ import {stripIndents} from "common-tags"
 svgCaptcha.loadFont(dotline)
 
 const exec = util.promisify(child_process.exec)
+const pixiv = await Pixiv.refreshLogin(process.env.PIXIV_TOKEN!)
+const deviantart = await DeviantArt.login(process.env.DEVIANTART_CLIENT_ID!, process.env.DEVIANTART_CLIENT_SECRET!)
+const reddit = new snoowrap({
+    userAgent: "kisaragi bot v1.0",
+    clientId: process.env.REDDIT_APP_ID,
+    clientSecret: process.env.REDDIT_APP_SECRET,
+    refreshToken: process.env.REDDIT_REFRESH_TOKEN
+})
 
 const miscLimiter = rateLimit({
 	windowMs: 60 * 1000,
@@ -140,7 +149,6 @@ const MiscRoutes = (app: Express) => {
         const link = req.query.url as string
         if (!link) return res.status(400).send("No url")
         if (link.includes("pixiv.net") || link.includes("pximg.net")) {
-            const pixiv = await Pixiv.refreshLogin(process.env.PIXIV_TOKEN!)
             let resolvable = link as string | number
             if (link.includes("pximg.net")) {
                 const id = path.basename(link).match(/(\d+)(?=_)/)?.[0]
@@ -165,7 +173,6 @@ const MiscRoutes = (app: Express) => {
         if (!link) return res.status(400).send("No url")
         if (link.includes("deviantart.com")) {
             try {
-                const deviantart = await DeviantArt.login(process.env.DEVIANTART_CLIENT_ID!, process.env.DEVIANTART_CLIENT_SECRET!)
                 const deviationRSS = await deviantart.rss.get(link)
                 const deviation = await deviantart.extendRSSDeviations([deviationRSS]).then((r) => r[0])
                 res.status(200).json(deviation)
@@ -178,11 +185,85 @@ const MiscRoutes = (app: Express) => {
     })
 
     app.get("/api/misc/proxy", miscLimiter, async (req: Request, res: Response, next: NextFunction) => {
-        const link = req.query.url as string
+        const link = decodeURIComponent(req.query.url as string)
         if (!link) return res.status(400).send("No url")
+        let headers = {"User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:131.0) Gecko/20100101 Firefox/131.0"}
         try {
-            const response = await axios.get(link, {responseType: "arraybuffer", headers: {Referer: "https://www.pixiv.net/"}}).then((r) => r.data)
-            res.status(200).send(response)
+            if (link.includes("pixiv.net") || link.includes("pximg.net")) {
+                let resolvable = link as string | number
+                if (link.includes("pximg.net")) {
+                    const id = path.basename(link).match(/(\d+)(?=_)/)?.[0]
+                    resolvable = Number(id)
+                }
+                const illust = await pixiv.illust.get(resolvable)
+                if (illust.meta_pages.length) {
+                    let images = [] as any[]
+                    for (let i = 0; i < illust.meta_pages.length; i++) {
+                        const link = illust.meta_pages[i].image_urls.original
+                        const response = await axios.get(link, {responseType: "arraybuffer", headers: {Referer: "https://www.pixiv.net/", ...headers}}).then((r) => r.data)
+                        images.push(response)
+                    }
+                    return res.status(200).send(images)
+                } else {
+                    const link = illust.meta_single_page.original_image_url || illust.image_urls.large || illust.image_urls.medium
+                    const response = await axios.get(link, {responseType: "arraybuffer", headers: {Referer: "https://www.pixiv.net/", ...headers}}).then((r) => r.data)
+                    return res.status(200).send([response])
+                }
+            }
+            if (link.includes("deviantart.com")) {
+                const deviationRSS = await deviantart.rss.get(link)
+                const response = await axios.get(deviationRSS.content[0].url, {responseType: "arraybuffer", headers}).then((r) => r.data)
+                return res.status(200).send([response])
+            }
+            if (link.includes("reddit.com")) {
+                const postID = link.match(/(?<=comments\/).*?(?=\/|$)/)?.[0]
+                // @ts-ignore
+                const post = await reddit.getSubmission(postID).fetch() as snoowrap.Submission
+                const response = await axios.get(post.url, {responseType: "arraybuffer"}).then((r) => r.data)
+                return res.status(200).send([response])
+            }
+            if (link.includes("danbooru.donmai.us")) {
+                const image = await axios.get(`${link}.json`).then((r) => r.data.file_url)
+                const response = await axios.get(image, {responseType: "arraybuffer"}).then((r) => r.data)
+                return res.status(200).send([response])
+            }
+            if (link.includes("gelbooru.com")) {
+                const apiLink = `https://gelbooru.com/index.php?page=dapi&s=post&q=index&json=1&id=${link.match(/\d+/g)?.[0]}`
+                const image = await axios.get(apiLink).then((r) => r.data.post[0]?.file_url)
+                const response = await axios.get(image, {responseType: "arraybuffer", headers}).then((r) => r.data)
+                return res.status(200).send([response])
+            }
+            if (link.includes("yande.re")) {
+                const apiLink = `https://yande.re/post.json?tags=id:${link.match(/\d+/)?.[0]}`
+                const image = await axios.get(apiLink).then((r) => r.data[0]?.jpeg_url)
+                const response = await axios.get(image, {responseType: "arraybuffer", headers}).then((r) => r.data)
+                return res.status(200).send([response])
+            }
+            if (link.includes("konachan.com") || link.includes("konachan.net")) {
+                const apiLink = `https://${new URL(link).hostname}/post.json?tags=id:${link.match(/\d+/)?.[0]}`
+                const image = await axios.get(apiLink).then((r) => r.data[0]?.file_url)
+                const response = await axios.get(image, {responseType: "arraybuffer", headers}).then((r) => r.data)
+                return res.status(200).send([response])
+            }
+            if (link.includes("zerochan.net")) {
+                const image = await axios.get(`${link}?json`, {responseType: "json"}).then((r) => r.data.full)
+                const response = await axios.get(image, {responseType: "arraybuffer"}).then((r) => r.data)
+                return res.status(200).send([response])
+            }
+            if (link.includes("pinterest.com")) {
+                const html = await axios.get(link, {headers}).then((r) => r.data)
+                const image = html.match(/(?<=")https:\/\/i\.pinimg\.com\/originals.*?(?=")/gm)?.[0]
+                const response = await axios.get(image, {responseType: "arraybuffer", headers}).then((r) => r.data)
+                return res.status(200).send([response])
+            }
+            if (link.includes("medibang.com")) {
+                const html = await axios.get(link, {headers}).then((r) => r.data)
+                const image = html.match(/(?<=pictureImageUrl = ')(.*?)(?=')/gm)?.[0]
+                const response = await axios.get(image, {responseType: "arraybuffer", headers}).then((r) => r.data)
+                return res.status(200).send([response])
+            }
+            const response = await axios.get(link, {responseType: "arraybuffer"}).then((r) => r.data)
+            res.status(200).send([response])
         } catch {
             res.status(400).end()
         }

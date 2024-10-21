@@ -134,15 +134,19 @@ export default class Functions {
     
     public static proxyImage = async (link: string, session: any, setSessionFlag: (value: boolean) => void) => {
         try {
-            const response = await Functions.get(`/api/misc/proxy?url=${link}`, null, session, setSessionFlag)
-            const blob = new Blob([new Uint8Array(response)])
-            const file = new File([blob], path.basename(link))
-            return file
+            const images = await Functions.get(`/api/misc/proxy?url=${encodeURIComponent(link)}`, null, session, setSessionFlag)
+            let files = [] as File[]
+            for (let i = 0; i < images.length; i++) {
+                const blob = new Blob([new Uint8Array(images[i].data)])
+                const file = new File([blob], path.basename(link) + ".png")
+                files.push(file)
+            }
+            return files
         } catch {
             const response = await fetch(link).then((r) => r.arrayBuffer())
             const blob = new Blob([new Uint8Array(response)])
-            const file = new File([blob], path.basename(link))
-            return file
+            const file = new File([blob], path.basename(link) + ".png")
+            return [file]
         }
     }
 
@@ -471,18 +475,15 @@ export default class Functions {
         return null
     }
 
-    public static changeFavicon = (theme: string) => {
+    public static changeFavicon = (url: string) => {
         let link = document.querySelector(`link[rel~="icon"]`) as any
         if (!link) {
             link = document.createElement("link")
-            link.rel = "icon";
+            link.type = "image/x-icon"
+            link.rel = "icon"
             document.getElementsByTagName("head")[0].appendChild(link)
         }
-        if (theme.includes("magenta")) {
-            link.href = "/assets/magenta/favicon.png"
-        } else {
-            link.href = "/assets/icons/favicon.png"
-        }
+        if (link.href !== url) link.href = url
     }
 
     public static dragScroll = (enabled?: boolean) => {
@@ -1326,6 +1327,34 @@ export default class Functions {
         return false
     }
 
+    public static isDemotion = (oldRole: string, newRole: string) => {
+        if (oldRole === newRole) return false
+        let hierarchy = {
+            "admin": 5,
+            "mod": 4,
+            "curator": 3,
+            "contributor": 2,
+            "user": 1
+        }
+        let premiumHierarchy = {
+            "admin": 5,
+            "mod": 4,
+            "premium-curator": 3,
+            "premium-contributor": 2,
+            "premium": 1
+        }
+        if (oldRole.includes("premium")) {
+            if (!newRole.includes("premium")) return true
+            if (premiumHierarchy[oldRole] && premiumHierarchy[newRole]) {
+                return premiumHierarchy[newRole] < premiumHierarchy[oldRole]
+            }
+        }
+        if (hierarchy[oldRole] && hierarchy[newRole]) {
+            return hierarchy[newRole] < hierarchy[oldRole]
+        }
+        return false
+    }
+
     public static multiTrim = (str: string) => {
         return str.replace(/^\s+/gm, "").replace(/\s+$/gm, "").replace(/newline/g, " ")
     }
@@ -2013,6 +2042,7 @@ export default class Functions {
             if (mirror.includes("safebooru")) json["safebooru"] = mirror
             if (mirror.includes("yande.re")) json["yandere"] = mirror
             if (mirror.includes("konachan")) json["konachan"] = mirror
+            if (mirror.includes("zerochan")) json["zerochan"] = mirror
             if (mirror.includes("deviantart")) json["deviantart"] = mirror
             if (mirror.includes("artstation")) json["artstation"] = mirror
             if (mirror.includes("soundcloud")) json["soundcloud"] = mirror
@@ -2248,6 +2278,7 @@ export default class Functions {
         if (post.favorited) return "var(--favoriteBorder)"
         if (post.favgrouped) return "var(--favgroupBorder)"
         if (post.hidden) return "var(--takendownBorder)"
+        if (post.locked) return "var(--lockedBorder)"
         if (post.thirdParty) return "var(--thirdPartyBorder)"
         if (Number(post.imageCount) > 1) return "var(--variationBorder)"
         return "var(--imageBorder)"
@@ -2418,5 +2449,9 @@ export default class Functions {
             Functions.setImageCache(cacheKey, base64)
             return base64
         }
+    }
+
+    public static generateSlug = (name: string) => {
+        return String(name).trim().toLowerCase().replace(/\s+/g, "-")
     }
 }

@@ -88,6 +88,8 @@ const TranslationHistoryRow: React.FunctionComponent<Props> = (props) => {
     }, [deleteTranslationHistoryFlag, deleteTranslationHistoryID, session, props.current])
 
     const revertTranslationHistoryDialog = async () => {
+        const post = await functions.get("/api/post", {postID: props.translationHistory.postID}, session, setSessionFlag)
+        if (post.locked && !permissions.isMod(session)) return setRevertTranslationHistoryID({failed: "locked", historyID: props.translationHistory.historyID})
         setRevertTranslationHistoryID({failed: false, historyID: props.translationHistory.historyID})
     }
 
@@ -191,6 +193,7 @@ const TranslationHistoryRow: React.FunctionComponent<Props> = (props) => {
     const translationJSX = () => {
         let jsx = [] as any
         const diffs = diffText()
+        if (diffs === "No data") return <span className="translationhistoryrow-tag-text">No data</span>
         for (let i = 0; i < diffs?.length; i++) {
             jsx.push(<span className="translationhistoryrow-tag-text">{diffs[i]}</span>)
         }

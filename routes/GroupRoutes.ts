@@ -25,7 +25,7 @@ const GroupRoutes = (app: Express) => {
             if (req.session.banned) return res.status(403).send("You are banned")
             const post = await sql.post.post(postID)
             if (!post) return res.status(400).send("Invalid post")
-            const slug = String(name).trim().toLowerCase().replace(/\s+/g, "-")
+            const slug = functions.generateSlug(name)
             try {
                 const groupID = await sql.group.insertGroup(req.session.username, name, slug, post.restrict)
                 await sql.group.insertGroupPost(String(groupID), postID, 1)
@@ -61,7 +61,7 @@ const GroupRoutes = (app: Express) => {
             if (!permissions.isContributor(req.session)) return res.status(403).send("Unauthorized")
             const group = await sql.group.group(slug)
             if (!group) return res.status(400).send("Invalid group")
-            const newSlug = String(name).trim().toLowerCase().replace(/\s+/g, "-")
+            const newSlug = functions.generateSlug(name)
             await sql.group.updateGroupName(group.groupID, req.session.username, name, newSlug, description)
             res.status(200).send("Success")
         } catch (e) {
@@ -87,9 +87,9 @@ const GroupRoutes = (app: Express) => {
 
     app.get("/api/group", groupLimiter, async (req: Request, res: Response) => {
         try {
-            const name = req.query.name
+            const name = req.query.name as string
             if (!name) return res.status(400).send("Invalid name")
-            const slug = String(name).trim().toLowerCase().replace(/\s+/g, "-")
+            const slug = functions.generateSlug(name)
             const group = await sql.group.group(slug)
             res.status(200).send(group)
         } catch (e) {
@@ -120,7 +120,7 @@ const GroupRoutes = (app: Express) => {
             if (req.session.banned) return res.status(403).send("You are banned")
             const post = await sql.post.post(Number(postID))
             if (!post) return res.status(400).send("Invalid post")
-            const slug = String(name).trim().toLowerCase().replace(/\s+/g, "-")
+            const slug = functions.generateSlug(name)
             const group = await sql.group.group(slug)
             if (!group) return res.status(400).send("Invalid group")
             let filteredPosts = group.posts.filter((p: any) => p.postID !== post.postID)

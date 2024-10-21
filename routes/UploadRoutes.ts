@@ -424,6 +424,7 @@ const CreateRoutes = (app: Express) => {
 
         const post = await sql.post.post(postID)
         if (!post) return res.status(400).send("Bad request")
+        if (post.locked && !permissions.isMod(req.session)) return res.status(403).send("Unauthorized")
         let oldR18 = post.restrict === "explicit"
         let newR18 = restrict === "explicit"
 
@@ -1060,6 +1061,20 @@ const CreateRoutes = (app: Express) => {
         if (!functions.validRestrict(restrict)) return res.status(400).send("Invalid restrict")
         if (!functions.validStyle(style)) return res.status(400).send("Invalid style")
 
+
+        const originalPostID = postID as any
+        postID = unverifiedID ? unverifiedID : await sql.post.insertUnverifiedPost()
+
+        if (originalPostID) {
+          const post = await sql.post.post(originalPostID)
+          if (!post) return res.status(400).send("Bad postID")
+          if (post.locked && !permissions.isMod(req.session)) return res.status(403).send("Unauthorized")
+          await sql.post.bulkUpdateUnverifiedPost(postID, {
+            uploader: post.uploader,
+            uploadDate: post.uploadDate
+          })
+        }
+        
         if (unverifiedID) {
           const unverified = await sql.post.unverifiedPost(unverifiedID)
           if (!unverified) return res.status(400).send("Bad unverifiedID")
@@ -1070,20 +1085,8 @@ const CreateRoutes = (app: Express) => {
           }
         }
 
-        const originalPostID = postID as any
-        postID = unverifiedID ? unverifiedID : await sql.post.insertUnverifiedPost()
-
         if (unverifiedID) await sql.post.deleteUnverifiedThirdParty(postID)
         if (thirdPartyID && !Number.isNaN(Number(thirdPartyID))) await sql.post.insertUnverifiedThirdParty(postID, Number(thirdPartyID))
-
-        if (originalPostID) {
-          const post = await sql.post.post(originalPostID)
-          if (!post) return res.status(400).send("Bad postID")
-          await sql.post.bulkUpdateUnverifiedPost(postID, {
-            uploader: post.uploader,
-            uploadDate: post.uploadDate
-          })
-        }
 
         if (type !== "comic") type = "image"
 

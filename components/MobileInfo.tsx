@@ -4,7 +4,7 @@ import {ThemeContext, HideNavbarContext, HideSortbarContext, EnableDragContext, 
 RelativeContext, HideTitlebarContext, SearchContext, SearchFlagContext, PostsContext, ShowDeletePostDialogContext,
 TagsContext, RandomFlagContext, ImageSearchFlagContext, SessionContext, SessionFlagContext, TagEditIDContext, SourceEditIDContext, ShowTakedownPostDialogContext,
 SiteHueContext, SiteLightnessContext, SiteSaturationContext, TranslationModeContext, TranslationDrawingEnabledContext,
-ActionBannerContext, GroupPostIDContext} from "../Context"
+ActionBannerContext, GroupPostIDContext, LockPostIDContext} from "../Context"
 import {HashLink as Link} from "react-router-hash-link"
 import permissions from "../structures/Permissions"
 import favicon from "../assets/icons/favicon.png"
@@ -39,7 +39,10 @@ import gelbooru from "../assets/icons/gelbooru.png"
 import safebooru from "../assets/icons/safebooru.png"
 import yandere from "../assets/icons/yandere.png"
 import konachan from "../assets/icons/konachan.png"
+import zerochan from "../assets/icons/zerochan.png"
 import group from "../assets/icons/group.png"
+import lockIcon from "../assets/icons/lock-red.png"
+import unlockIcon from "../assets/icons/unlock-red.png"
 import functions from "../structures/Functions"
 import "./styles/mobileinfo.less"
 
@@ -87,6 +90,7 @@ const MobileInfo: React.FunctionComponent<Props> = (props) => {
     const {translationDrawingEnabled, setTranslationDrawingEnabled} = useContext(TranslationDrawingEnabledContext)
     const {actionBanner, setActionBanner} = useContext(ActionBannerContext)
     const {groupPostID, setGroupPostID} = useContext(GroupPostIDContext)
+    const {lockPostID, setLockPostID} = useContext(LockPostIDContext)
     const history = useHistory()
 
     const getFilter = () => {
@@ -314,6 +318,10 @@ const MobileInfo: React.FunctionComponent<Props> = (props) => {
         history.push(`/edit-post/${props.post.postID}`)
     }
 
+    const lockPost = async () => {
+        setLockPostID(props.post.postID)
+    }
+
     const modNext = () => {
         let currentIndex = unverifiedPosts.findIndex((p: any) => p.postID === props.post.postID)
         if (currentIndex !== -1) {
@@ -351,6 +359,64 @@ const MobileInfo: React.FunctionComponent<Props> = (props) => {
         setSourceEditID({post: props.post, unverified: props.unverified})
     }
 
+    const generateSourceJSX = () => {
+        let jsx = [] as any
+        if (props.post.link) {
+            if (props.post.link.includes("pixiv")) {
+                jsx.push(<img className="sidebar-social" src={pixiv} onClick={() => window.open(props.post.link, "_blank")}/>)
+            }
+            if (props.post.link.includes("soundcloud")) {
+                jsx.push(<img className="sidebar-social" src={soundcloud} onClick={() => window.open(props.post.link, "_blank")}/>)
+            }
+            if (props.post.link.includes("sketchfab")) {
+                jsx.push(<img className="sidebar-social" src={sketchfab} onClick={() => window.open(props.post.link, "_blank")}/>)
+            }
+            if (props.post.link.includes("twitter") || props.post.link.includes("x.com")) {
+                jsx.push(<img className="sidebar-social" src={twitter} onClick={() => window.open(props.post.link, "_blank")}/>)
+            }
+            if (props.post.link.includes("deviantart")) {
+                jsx.push(<img className="sidebar-social" src={deviantart} onClick={() => window.open(props.post.link, "_blank")}/>)
+            }
+            if (props.post.link.includes("artstation")) {
+                jsx.push(<img className="sidebar-social" src={artstation} onClick={() => window.open(props.post.link, "_blank")}/>)
+            }
+            if (props.post.link.includes("danbooru")) {
+                jsx.push(<img className="sidebar-social" src={danbooru} onClick={() => window.open(props.post.link, "_blank")}/>)
+            }
+            if (props.post.link.includes("gelbooru")) {
+                jsx.push(<img className="sidebar-social" src={gelbooru} onClick={() => window.open(props.post.link, "_blank")}/>)
+            }
+            if (props.post.link.includes("safebooru")) {
+                jsx.push(<img className="sidebar-social" src={safebooru} onClick={() => window.open(props.post.link, "_blank")}/>)
+            }
+            if (props.post.link.includes("yande.re")) {
+                jsx.push(<img className="sidebar-social" src={yandere} onClick={() => window.open(props.post.link, "_blank")}/>)
+            }
+            if (props.post.link.includes("konachan")) {
+                jsx.push(<img className="sidebar-social" src={konachan} onClick={() => window.open(props.post.link, "_blank")}/>)
+            }
+            if (props.post.link.includes("zerochan")) {
+                jsx.push(<img className="sidebar-social" src={zerochan} onClick={() => window.open(props.post.link, "_blank")}/>)
+            }
+            if (props.post.link.includes("youtube")) {
+                jsx.push(<img className="sidebar-social" src={youtube} onClick={() => window.open(props.post.link, "_blank")}/>)
+            }
+            if (props.post.link.includes("bandcamp")) {
+                jsx.push(<img className="sidebar-social" src={bandcamp} onClick={() => window.open(props.post.link, "_blank")}/>)
+            }
+        }
+        if (jsx.length) {
+            return (
+                <div className="mobileinfo-row">
+                    <span className="tag">Source:</span>
+                    <span className={`tag-alt-link ${props.post.hidden ? "strikethrough" : ""}`} onClick={() => window.open(props.post.link, "_blank")}>{getDomain()}</span>
+                    {jsx}
+                </div>
+            )
+        }
+        return null
+    }
+
     const generateMirrorsJSX = () => {
         let jsx = [] as any
         if (props.post.mirrors) {
@@ -386,6 +452,9 @@ const MobileInfo: React.FunctionComponent<Props> = (props) => {
             }
             if (props.post.mirrors.konachan) {
                 jsx.push(<img className="sidebar-social" src={konachan} onClick={() => window.open(props.post.mirrors.konachan, "_blank")}/>)
+            }
+            if (props.post.mirrors.zerochan) {
+                jsx.push(<img className="sidebar-social" src={zerochan} onClick={() => window.open(props.post.mirrors.zerochan, "_blank")}/>)
             }
             if (props.post.mirrors.youtube) {
                 jsx.push(<img className="sidebar-social" src={youtube} onClick={() => window.open(props.post.mirrors.youtube, "_blank")}/>)
@@ -526,10 +595,7 @@ const MobileInfo: React.FunctionComponent<Props> = (props) => {
                             <span className="tag">{props.post.type === "model" ? "Modeled:" : props.post.type === "audio" ? "Produced:" : "Drawn:"}</span>
                             <span className={`tag-alt ${props.post.hidden ? "strikethrough" : ""}`}>{props.post.drawn ? functions.formatDate(new Date(props.post.drawn)) : "Unknown"}</span>
                         </div>
-                        <div className="mobileinfo-row">
-                            <span className="tag">Source:</span>
-                            <span className={`tag-alt-link ${props.post.hidden ? "strikethrough" : ""}`} onClick={() => window.open(props.post.link, "_blank")}>{getDomain()}</span>
-                        </div>
+                        {generateSourceJSX()}
                         <div className="mobileinfo-row">
                             <span className="tag">Bookmarks:</span>
                             <span className={`tag-alt ${props.post.hidden ? "strikethrough" : ""}`}>{props.post.bookmarks ? props.post.bookmarks : "?"}</span>
@@ -693,6 +759,12 @@ const MobileInfo: React.FunctionComponent<Props> = (props) => {
                             </span>
                         </div>
                         </> : null}
+                        {!props.unverified && permissions.isMod(session) ? <div className="mobileinfo-row">
+                            <span className="tag-hover" onClick={lockPost}>
+                                <img className="mobileinfo-icon" src={props.post.locked ? unlockIcon : lockIcon}/>
+                                <span className="tag-red">{props.post.locked ? "Unlock" : "Lock"}</span>
+                            </span>
+                        </div> : null}
                         {!props.unverified ? <div className="mobileinfo-row">
                             <span className="tag-hover" onClick={postHistory}>
                                 <img className="mobileinfo-icon" src={historyIcon}/>

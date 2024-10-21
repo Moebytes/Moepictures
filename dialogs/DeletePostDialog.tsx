@@ -134,7 +134,7 @@ const DeletePostDialog: React.FunctionComponent<Props> = (props) => {
                         </div>
                         </> : <>
                         <div className="dialog-row">
-                            <span className="dialog-text-small">If you think that a post is low-quality, you may request it's deletion and it will get re-reviewed. Why do you want to delete this post?</span>
+                            <span className="dialog-text-small">Why do you want to delete this post? (eg. low quality, AI-generated, or breaks other rule).</span>
                         </div>
                         <div className="dialog-row">
                             <span className="dialog-text">Reason: </span>

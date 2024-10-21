@@ -27,6 +27,10 @@ const TranslationRoutes = (app: Express) => {
             if (req.session.banned) return res.status(403).send("You are banned")
             if (!data) return res.status(400).send("Bad data")
 
+            const post = await sql.post.post(postID)
+            if (!post) return res.status(400).send("Invalid post ID")
+            if (post.locked && !permissions.isMod(req.session)) return res.status(403).send("Unauthorized")
+
             const translation = await sql.translation.translation(postID, order)
             if (!translation) {
                 if (JSON.stringify(data) === "[]") return res.status(200).send("Success")
@@ -54,6 +58,10 @@ const TranslationRoutes = (app: Express) => {
             if (!req.session.username) return res.status(403).send("Unauthorized")
             if (req.session.banned) return res.status(403).send("You are banned")
             if (!data) return res.status(400).send("Bad data")
+
+            const post = await sql.post.post(postID)
+            if (!post) return res.status(400).send("Invalid post ID")
+            if (post.locked && !permissions.isMod(req.session)) return res.status(403).send("Unauthorized")
 
             const translation = await sql.translation.translation(postID, order)
             if (!translation) {
@@ -93,6 +101,10 @@ const TranslationRoutes = (app: Express) => {
             if (Number.isNaN(Number(order)) || Number(order) < 1) return res.status(400).send("Invalid order")
             if (!req.session.username) return res.status(403).send("Unauthorized")
             if (!data) return res.status(400).send("Bad data")
+
+            const post = await sql.post.post(postID)
+            if (!post) return res.status(400).send("Invalid post ID")
+            if (post.locked && !permissions.isMod(req.session)) return res.status(403).send("Unauthorized")
 
             const translation = await sql.translation.unverifiedTranslation(postID, order, req.session.username)
             if (!translation) {

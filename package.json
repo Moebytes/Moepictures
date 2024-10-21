@@ -150,6 +150,7 @@
     "redis": "^4.7.0",
     "sharp": "^0.30.7",
     "sharp-phash": "^2.0.0",
+    "snoowrap": "^1.23.0",
     "strtok3": "^7.0.0-alpha.8",
     "svg-captcha": "^1.4.0",
     "svgo": "^3.3.2",

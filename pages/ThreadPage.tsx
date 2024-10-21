@@ -509,7 +509,7 @@ const ThreadPage: React.FunctionComponent<Props> = (props) => {
 
     const triggerQuote = () => {
         if (!thread) return
-        const cleanReply = functions.parseComment(thread.content).filter((s: any) => !s.includes(">>>")).join("")
+        const cleanReply = functions.parseComment(thread.content).filter((s: any) => !s.includes(">>>")).join(" ")
         setQuoteText(functions.multiTrim(`
             >>>[0] ${functions.toProperCase(thread.creator)} said:
             > ${cleanReply}

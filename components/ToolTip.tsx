@@ -14,6 +14,7 @@ import gelbooru from "../assets/icons/gelbooru.png"
 import safebooru from "../assets/icons/safebooru.png"
 import yandere from "../assets/icons/yandere.png"
 import konachan from "../assets/icons/konachan.png"
+import zerochan from "../assets/icons/zerochan.png"
 import soundcloud from "../assets/icons/soundcloud.png"
 import youtube from "../assets/icons/youtube.png"
 import bandcamp from "../assets/icons/bandcamp.png"
@@ -129,6 +130,7 @@ const ToolTip: React.FunctionComponent = (props) => {
             if (tooltipPost.mirrors.safebooru) jsx.push(<img className="tooltip-img" style={{cursor: "pointer"}} src={safebooru} onClick={() => window.open(tooltipPost.mirrors.safebooru, "_blank")}/>)
             if (tooltipPost.mirrors.yandere) jsx.push(<img className="tooltip-img" style={{cursor: "pointer"}} src={yandere} onClick={() => window.open(tooltipPost.mirrors.yandere, "_blank")}/>)
             if (tooltipPost.mirrors.konachan) jsx.push(<img className="tooltip-img" style={{cursor: "pointer"}} src={konachan} onClick={() => window.open(tooltipPost.mirrors.konachan, "_blank")}/>)
+            if (tooltipPost.mirrors.zerochan) jsx.push(<img className="tooltip-img" style={{cursor: "pointer"}} src={zerochan} onClick={() => window.open(tooltipPost.mirrors.zerochan, "_blank")}/>)
             if (tooltipPost.mirrors.youtube) jsx.push(<img className="tooltip-img" style={{cursor: "pointer"}} src={youtube} onClick={() => window.open(tooltipPost.mirrors.youtube, "_blank")}/>)
             if (tooltipPost.mirrors.bandcamp) jsx.push(<img className="tooltip-img" style={{cursor: "pointer"}} src={bandcamp} onClick={() => window.open(tooltipPost.mirrors.bandcamp, "_blank")}/>)
         }
@@ -139,7 +141,7 @@ const ToolTip: React.FunctionComponent = (props) => {
         let tagArr = [artist.tag, ...tags.map((t: any) => t.tag)]
         if (removeDashes) tagArr = tagArr.map((t: any) => t.replaceAll("-", " "))
         navigator.clipboard.writeText(commas ? tagArr.join(", ") : tagArr.join(" "))
-        setActionBanner("copy-tags")
+        //setActionBanner("copy-tags")
     }
 
     if (selectionMode) return null

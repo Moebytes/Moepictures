@@ -30,6 +30,25 @@
     }
 }
 
+.modqueue-icons {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: flex-start;
+    width: 100%;
+    padding: 10px 20px;
+}
+
+.modqueue-icon {
+    margin-right: 30px;
+    cursor: pointer;
+    width: auto;
+    height: 30px;
+    &:hover {
+        filter: brightness(130%);
+    }
+}
+
 .modqueue-button-active {
     background-color: var(--navbarBG);
     filter: brightness(110%)
@@ -39,6 +58,23 @@
     width: 93%;
     height: 4px;
     background-color: var(--titlebarBG);
+}
+
+.modqueue-heading-container {
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-start;
+    width: 100%;
+}
+
+.modqueue-heading {
+    font-family: Tahoma, sans-serif;
+    font-size: 35px;
+    color: var(--text);
+    margin-left: 20px;
+    &:hover {
+        filter: brightness(130%);
+    }
 }
 
 @media screen and (max-width: 500px) {

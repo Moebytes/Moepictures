@@ -38,7 +38,7 @@ import ThreadRoutes from "./routes/ThreadRoutes"
 import MessageRoutes from "./routes/MessageRoutes"
 import GroupRoutes from "./routes/GroupRoutes"
 import ipBans from "./assets/json/ip-bans.json"
-import imageLock from "./structures/ImageLock"
+import {imageLock, imageMissing} from "./structures/ImageLock"
 const __dirname = path.resolve()
 
 dotenv.config()
@@ -232,40 +232,6 @@ for (let i = 0; i < folders.length; i++) {
       res.status(400).end()
     }
   })
-  
-  app.get(`/unverified/${folders[i]}/*`, imageLimiter, async (req: Request, res: Response, next: NextFunction) => {
-    try {
-      if (!permissions.isMod(req.session)) return res.status(403).end()
-      res.setHeader("Content-Type", mime.getType(req.path) ?? "")
-      if (!noCache.includes(folders[i])) res.setHeader("Cache-Control", "public, max-age=2592000")
-      const key = decodeURIComponent(req.path.replace("/unverified/", ""))
-      let upscaled = false
-      if (folders[i] === "image" || folders[i] === "comic" || folders[i] === "animation") {
-        upscaled = req.session.upscaledImages as boolean
-        if (req.headers["x-force-upscale"]) upscaled = req.headers["x-force-upscale"] === "true"
-      }
-      const body = await serverFunctions.getUnverifiedFile(key, upscaled)
-      const contentLength = body.length
-      if (req.headers.range) {
-        const parts = req.headers.range.replace(/bytes=/, "").split("-")
-        const start = parseInt(parts[0])
-        const end = parts[1] ? parseInt(parts[1]) : contentLength - 1
-        res.writeHead(206, {
-          "Content-Range": `bytes ${start}-${end}/${contentLength}`,
-          "Accept-Ranges": "bytes",
-          "Content-Length": end - start + 1
-        })
-        const stream = Readable.from(body.slice(start, end + 1))
-        stream.pipe(res)
-        return
-      }
-      res.setHeader("Content-Length", contentLength)
-      res.status(200).end(body)
-    } catch (e) {
-      console.log(e)
-      res.status(400).end()
-    }
-  })
 
   app.get(`/thumbnail/:size/${folders[i]}/*`, imageLimiter, async (req: Request, res: Response, next: NextFunction) => {
     try {
@@ -327,6 +293,43 @@ for (let i = 0; i < folders.length; i++) {
       res.status(400).end()
     }
   })
+  
+  app.get(`/unverified/${folders[i]}/*`, imageLimiter, async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      if (!permissions.isMod(req.session)) return res.status(403).end()
+      res.setHeader("Content-Type", mime.getType(req.path) ?? "")
+      if (!noCache.includes(folders[i])) res.setHeader("Cache-Control", "public, max-age=2592000")
+      const key = decodeURIComponent(req.path.replace("/unverified/", ""))
+      let upscaled = false
+      if (folders[i] === "image" || folders[i] === "comic" || folders[i] === "animation") {
+        upscaled = req.session.upscaledImages as boolean
+        if (req.headers["x-force-upscale"]) upscaled = req.headers["x-force-upscale"] === "true"
+      }
+      const body = await serverFunctions.getUnverifiedFile(key, upscaled)
+      const contentLength = body.length
+      if (!contentLength) {
+        const noImg = await imageMissing()
+        return res.status(200).end(noImg)
+      }
+      if (req.headers.range) {
+        const parts = req.headers.range.replace(/bytes=/, "").split("-")
+        const start = parseInt(parts[0])
+        const end = parts[1] ? parseInt(parts[1]) : contentLength - 1
+        res.writeHead(206, {
+          "Content-Range": `bytes ${start}-${end}/${contentLength}`,
+          "Accept-Ranges": "bytes",
+          "Content-Length": end - start + 1
+        })
+        const stream = Readable.from(body.slice(start, end + 1))
+        return stream.pipe(res)
+      }
+      res.setHeader("Content-Length", contentLength)
+      res.status(200).end(body)
+    } catch (e) {
+      console.log(e)
+      res.status(400).end()
+    }
+  })
 
   app.get(`/thumbnail/:size/unverified/${folders[i]}/*`, imageLimiter, async (req: Request, res: Response, next: NextFunction) => {
     try {
@@ -337,6 +340,10 @@ for (let i = 0; i < folders.length; i++) {
       const key = decodeURIComponent(req.path.replace(`/thumbnail/${req.params.size}/`, "").replace("unverified/", ""))
       let body = await serverFunctions.getUnverifiedFile(key, false)
       let contentLength = body.length
+      if (!contentLength) {
+        const noImg = await imageMissing()
+        return res.status(200).end(noImg)
+      }
       if (mimeType?.includes("image")) {
         const metadata = await sharp(body).metadata()
         const ratio = metadata.height! / Number(req.params.size)

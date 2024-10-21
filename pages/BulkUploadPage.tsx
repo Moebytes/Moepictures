@@ -327,10 +327,10 @@ const BulkUploadPage: React.FunctionComponent = (props) => {
         if (!links?.[0]) return
         clearTimeout(enterLinksTimer)
         enterLinksTimer = setTimeout(async () => {
-            let files = [] as any
+            let files = [] as File[]
             for (let i = 0; i < links.length; i++) {
-                const file = await functions.proxyImage(links[i], session, setSessionFlag)
-                files.push(file)
+                const fileArr = await functions.proxyImage(links[i], session, setSessionFlag)
+                files.push(...fileArr)
             }
             await validate(files, links)
             reset()

@@ -161,6 +161,16 @@ const ModTranslations: React.FunctionComponent = (props) => {
     const generateTranslationsJSX = () => {
         let jsx = [] as any
         const translations = functions.removeDuplicates(visibleTranslations)
+        if (!translations.length) {
+            return (
+                <div className="mod-post" style={{justifyContent: "center", alignItems: "center", height: "75px"}} 
+                onMouseEnter={() =>setHover(true)} onMouseLeave={() => setHover(false)} key={0}>
+                    <div className="mod-post-text-column">
+                        <span className="mod-post-text">No data</span>
+                    </div>
+                </div>
+            )
+        }
         for (let i = 0; i < translations.length; i++) {
             const translation = translations[i] as any
             if (!translation) break

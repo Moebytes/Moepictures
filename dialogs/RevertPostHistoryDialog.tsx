@@ -72,6 +72,24 @@ const RevertPostHistoryDialog: React.FunctionComponent = (props) => {
         )
     }
 
+    if (revertPostHistoryID?.failed === "locked") {
+        return (
+            <div className="dialog">
+                <Draggable handle=".dialog-title-container">
+                <div className="dialog-box" style={{width: "250px", height: "190px"}} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
+                        <div className="dialog-title-container">
+                            <span className="dialog-title">Revert Post History</span>
+                        </div>
+                        <span className="dialog-ban-text">This post is locked. Cannot revert history.</span>
+                        <button className="dialog-ban-button" onClick={() => click("reject")}>
+                            <span className="dialog-ban-button-text">←Back</span>
+                        </button>
+                    </div>
+                </Draggable>
+            </div>
+        )
+    }
+
     if (revertPostHistoryID?.failed) {
         return (
             <div className="dialog">
@@ -95,6 +113,24 @@ const RevertPostHistoryDialog: React.FunctionComponent = (props) => {
     }
 
     if (revertPostHistoryID) {
+        if (session.banned) {
+            return (
+                <div className="dialog">
+                    <Draggable handle=".dialog-title-container">
+                    <div className="dialog-box" style={{width: "250px", height: "190px"}} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
+                            <div className="dialog-title-container">
+                                <span className="dialog-title">Revert Post History</span>
+                            </div>
+                            <span className="dialog-ban-text">You are banned. Cannot revert history.</span>
+                            <button className="dialog-ban-button" onClick={() => click("reject")}>
+                                <span className="dialog-ban-button-text">←Back</span>
+                            </button>
+                        </div>
+                    </Draggable>
+                </div>
+            )
+        }
+
         return (
             <div className="dialog">
                 <Draggable handle=".dialog-title-container">

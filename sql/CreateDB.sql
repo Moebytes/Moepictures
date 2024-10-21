@@ -43,6 +43,7 @@ CREATE TABLE IF NOT EXISTS "posts" (
     "translatedCommentary" text,
     "bookmarks" int,
     "hidden" boolean,
+    "locked" boolean,
     "hasOriginal" boolean,
     "hasUpscaled" boolean,
     "mirrors" jsonb
@@ -305,18 +306,20 @@ CREATE TABLE IF NOT EXISTS "cuteness" (
 
 CREATE TABLE IF NOT EXISTS "favgroups" (
     "username" text REFERENCES "users" ON UPDATE CASCADE ON DELETE CASCADE,
-    "name" text,
+    "slug" text UNIQUE NOT NULL,
+    "name" text UNIQUE NOT NULL,
     "private" boolean,
     "createDate" timestamptz,
-    PRIMARY KEY ("username", "name")
+    PRIMARY KEY ("username", "slug")
 );
 
 CREATE TABLE IF NOT EXISTS "favgroup map" (
     "username" text,
-    "name" text,
+    "slug" text,
     "postID" bigint REFERENCES "posts" ON UPDATE CASCADE ON DELETE CASCADE,
-    PRIMARY KEY ("username", "name", "postID"),
-    FOREIGN KEY ("username", "name") REFERENCES "favgroups" ("username", "name") ON UPDATE CASCADE ON DELETE CASCADE
+    "order" int,
+    PRIMARY KEY ("username", "slug", "postID"),
+    FOREIGN KEY ("username", "slug") REFERENCES "favgroups" ("username", "slug") ON UPDATE CASCADE ON DELETE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS "history" (

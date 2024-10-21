@@ -354,6 +354,25 @@ const TagEditDialog: React.FunctionComponent = (props) => {
                 </div>
             )
         }
+
+        if (tagEditID.post.locked && !permissions.isMod(session)) {
+            return (
+                <div className="dialog">
+                    <Draggable handle=".dialog-title-container">
+                    <div className="dialog-box" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
+                            <div className="dialog-title-container">
+                                <span className="dialog-title">Tag Edit</span>
+                            </div>
+                            <span className="dialog-ban-text">This post is locked. Cannot edit.</span>
+                            <button className="dialog-ban-button" onClick={() => click("reject")}>
+                                <span className="dialog-ban-button-text">←Back</span>
+                            </button>
+                        </div>
+                    </Draggable>
+                </div>
+            )
+        }
+
         if (permissions.isContributor(session)) {
             return (
                 <div className="dialog">
@@ -607,7 +626,7 @@ const TagEditDialog: React.FunctionComponent = (props) => {
                             <span className="dialog-text">Reason: </span>
                             <input style={{width: "100%"}} className="dialog-input" type="text" spellCheck={false} value={reason} onChange={(event) => setReason(event.target.value)}/>
                         </div>
-                        {/*error ? <div className="dialog-validation-container"><span className="dialog-validation" ref={errorRef}></span></div> : null*/}
+                        {error ? <div className="dialog-validation-container"><span className="dialog-validation" ref={errorRef}></span></div> : null}
                         <div className="dialog-row">
                             <button onClick={() => click("reject")} className="dialog-button">{"Cancel"}</button>
                             <button onClick={() => click("accept")} className="dialog-button">{"Submit Request"}</button>

@@ -1,5 +1,6 @@
 import {createCanvas, loadImage} from "@napi-rs/canvas"
 import locked from "../assets/misc/locked.png"
+import noImage from "../assets/misc/noimage.png"
 
 const imageLock = async (image: Buffer, resize = true) => {
     const img = await loadImage(image)
@@ -32,4 +33,21 @@ const imageLock = async (image: Buffer, resize = true) => {
     return canvas.toBuffer("image/png")
 }
 
-export default imageLock
+const imageMissing = async () => {
+    const noImageImg = await loadImage(noImage)
+    let width = 500
+    let height = 500
+
+    const canvas = createCanvas(width, height)
+    const ctx = canvas.getContext("2d")
+    ctx.fillStyle = "#0d0229"
+    ctx.fillRect(0, 0, canvas.width, canvas.height)
+
+    const lockX = (canvas.width - noImageImg.width) / 2
+    const lockY = (canvas.height - noImageImg.height) / 2
+    ctx.drawImage(noImageImg, lockX, lockY)
+
+    return canvas.toBuffer("image/png")
+}
+
+export {imageLock, imageMissing}

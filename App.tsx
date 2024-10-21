@@ -37,6 +37,7 @@ import EditPostPage from "./pages/EditPostPage"
 import UserPage from "./pages/UserPage"
 import TagPage from "./pages/TagPage"
 import GroupPage from "./pages/GroupPage"
+import FavgroupPage from "./pages/FavgroupPage"
 import TagHistoryPage from "./pages/TagHistoryPage"
 import PostHistoryPage from "./pages/PostHistoryPage"
 import HistoryPage from "./pages/HistoryPage"
@@ -326,6 +327,7 @@ const App: React.FunctionComponent = (props) => {
                         <Route exact path="/tag/history/:tag" render={(props) => <TagHistoryPage {...props}/>}></Route>
                         <Route exact path="/tag/:tag" render={(props) => <TagPage {...props}/>}></Route>
                         <Route exact path="/group/:group" render={(props) => <GroupPage {...props}/>}></Route>
+                        <Route exact path="/favgroup/:username/:favgroup" render={(props) => <FavgroupPage {...props}/>}></Route>
                         <Route exact path="/translation/history/:id/:order" render={(props) => <TranslationHistoryPage {...props}/>}></Route>
                         <Route exact path="/post/history/:id" render={(props) => <PostHistoryPage {...props}/>}></Route>
                         <Route exact path="/post/:id" render={(props) => <PostPage {...props}/>}></Route>

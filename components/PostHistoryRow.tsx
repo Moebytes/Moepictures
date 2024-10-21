@@ -127,6 +127,8 @@ const PostHistoryRow: React.FunctionComponent<Props> = (props) => {
     }, [deletePostHistoryFlag, deletePostHistoryID, session, props.current])
 
     const revertPostHistoryDialog = async () => {
+        const post = await functions.get("/api/post", {postID: props.postHistory.postID}, session, setSessionFlag)
+        if (post.locked && !permissions.isMod(session)) return setRevertPostHistoryID({failed: "locked", historyID: props.postHistory.historyID})
         setRevertPostHistoryID({failed: false, historyID: props.postHistory.historyID})
     }
 

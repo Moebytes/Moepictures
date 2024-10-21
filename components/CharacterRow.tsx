@@ -23,16 +23,13 @@ const CharacterRow: React.FunctionComponent<Props> = (props) => {
     const {posts, setPosts} = useContext(PostsContext)
     const history = useHistory()
 
-    const searchTag = (event: React.MouseEvent) => {
+    const tagPage = (event: React.MouseEvent) => {
+        event.preventDefault()
         if (event.ctrlKey || event.metaKey || event.button === 1) {
-            //window.open("/posts", "_blank")
             window.open(`/tag/${props.character.tag}`, "_blank")
         } else {
-            //history.push("/posts")
             history.push(`/tag/${props.character.tag}`)
         }
-        //setSearch(props.artist.tag)
-        //setSearchFlag(true)
     }
 
     const set = (image: string, index: number, newTab: boolean) => {
@@ -82,7 +79,7 @@ const CharacterRow: React.FunctionComponent<Props> = (props) => {
             <div className="characterrow-row">
                 {props.character.image ? <img className="characterrow-img" src={functions.getTagLink("character", props.character.image)}/> : null}
                 <span className="characterrow-text-hover">
-                    <span className="characterrow-text" onClick={searchTag} onAuxClick={searchTag}>{functions.toProperCase(props.character.tag.replaceAll("-", " "))}</span>
+                    <span className="characterrow-text" onClick={tagPage} onAuxClick={tagPage} onContextMenu={tagPage}>{functions.toProperCase(props.character.tag.replaceAll("-", " "))}</span>
                     {characterSocialJSX()}
                     <span className="characterrow-text-alt">{props.character.postCount}</span>
                 </span>

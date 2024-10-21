@@ -344,9 +344,7 @@ const UserPage: React.FunctionComponent<Props> = (props) => {
             if (!permissions.isMod(session)) filtered = filtered.filter((f: any) => !f.hidden)
             const images = filtered.map((f: any) => functions.getThumbnailLink(f.images[0].type, f.postID, f.images[0].order, f.images[0].filename, "tiny"))
             const viewFavgroup = () => {
-                history.push("/posts")
-                setSearch(`favgroup:${session.username}:${favgroup.name}`)
-                setSearchFlag(true)
+                history.push(`/favgroup/${username}/${favgroup.slug}`)
             }
             const setFavgroup = (img: string, index: number, newTab: boolean) => {
                 const postID = favgroup.posts[index].postID

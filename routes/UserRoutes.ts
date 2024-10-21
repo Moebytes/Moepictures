@@ -1020,33 +1020,43 @@ const UserRoutes = (app: Express) => {
             let premiumPromotion = false
             if ((!user.role.includes("premium") && role.includes("curator")) || (user.role.includes("premium") && role === "premium-curator")) curatorPromotion = true
             if ((!user.role.includes("premium") && role.includes("contributor")) || (user.role.includes("premium") && role === "premium-contributor")) contributorPromotion = true
-            if (role.includes("premium") && !user.role.includes("premium")) premiumPromotion = true
+            if (!user.role.includes("premium") && role.includes("premium")) premiumPromotion = true
             
             let premiumExpiration = user.premiumExpiration ? new Date(user.premiumExpiration) : new Date()
             if (premiumPromotion && premiumExpiration <= new Date()) {
                 premiumExpiration.setFullYear(premiumExpiration.getFullYear() + 1)
                 await sql.user.updateUser(username, "premiumExpiration", premiumExpiration.toISOString())
             }
+            if (!role.includes("premium")) {
+                await sql.user.updateUser(username, "premiumExpiration", null)
+            }
             await sql.user.updateUser(username, "role", role)
-            if (role === "admin") {
-                const message = `You have been promoted to the role of admin. You now have access to all special privileges, including deleting posts and promoting others. Thanks for being one of our highest trusted members!\n\nPlease enable 2FA if you don't have it already.`
-                await serverFunctions.systemMessage(username, "Notice: Your account was promoted to admin", message)
-            } 
-            if (role === "mod") {
-                const message = `You have been promoted to the role of mod. You now have access to the mod queue where you approve posts and can take moderation actions such as banning users. Thanks for being a trusted member!\n\nPlease enable 2FA if you don't have it already.`
-                await serverFunctions.systemMessage(username, "Notice: Your account was promoted to mod", message)
-            } 
-            if (premiumPromotion) {
-                const message = `Your account has been upgraded to premium. You can now access all the premium features. Thank you for supporting us!\n\nYour membership will last until ${functions.prettyDate(premiumExpiration)}.`
-                await serverFunctions.systemMessage(username, "Notice: Your account was upgraded to premium", message)
-            } 
-            if (curatorPromotion) {
-                const message = `Your account has been upgraded to curator. You can now upload directly without passing through the mod queue. Thanks for your great contributions!`
-                await serverFunctions.systemMessage(username, "Notice: Your account was upgraded to curator", message)
-            } 
-            if (contributorPromotion) {
-                const message = `Your account has been upgraded to contributor. You can now edit posts and tags without passing through the mod queue. Thanks for your edits!`
-                await serverFunctions.systemMessage(username, "Notice: Your account was upgraded to contributor", message)
+
+            let isDemotion = functions.isDemotion(user.role, role)
+            if (isDemotion) {
+                const message = `You have been demoted to ${role}.`
+                await serverFunctions.systemMessage(username, `Notice: Your account was demoted to ${role}`, message)
+            } else {
+                if (role === "admin") {
+                    const message = `You have been promoted to the role of admin. You now have access to all special privileges, including deleting posts and promoting others. Thanks for being one of our highest trusted members!\n\nPlease enable 2FA if you don't have it already.`
+                    await serverFunctions.systemMessage(username, "Notice: Your account was promoted to admin", message)
+                }
+                if (role === "mod") {
+                    const message = `You have been promoted to the role of mod. You now have access to the mod queue where you approve posts and can take moderation actions such as banning users. Thanks for being a trusted member!\n\nPlease enable 2FA if you don't have it already.`
+                    await serverFunctions.systemMessage(username, "Notice: Your account was promoted to mod", message)
+                } 
+                if (premiumPromotion) {
+                    const message = `Your account has been upgraded to premium. You can now access all the premium features. Thank you for supporting us!\n\nYour membership will last until ${functions.prettyDate(premiumExpiration)}.`
+                    await serverFunctions.systemMessage(username, "Notice: Your account was upgraded to premium", message)
+                } 
+                if (curatorPromotion) {
+                    const message = `Your account has been upgraded to curator. You can now upload directly without passing through the mod queue. Thanks for your great contributions!`
+                    await serverFunctions.systemMessage(username, "Notice: Your account was upgraded to curator", message)
+                } 
+                if (contributorPromotion) {
+                    const message = `Your account has been upgraded to contributor. You can now edit posts and tags without passing through the mod queue. Thanks for your edits!`
+                    await serverFunctions.systemMessage(username, "Notice: Your account was upgraded to contributor", message)
+                }
             }
             res.status(200).send("Success")
         } catch (e) {

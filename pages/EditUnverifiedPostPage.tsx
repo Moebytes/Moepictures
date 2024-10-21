@@ -594,7 +594,7 @@ const EditUnverifiedPostPage: React.FunctionComponent<Props> = (props) => {
                 <>
                 <SearchSuggestions active={artistActive[i]} x={getX()} y={getY()} width={mobile ? 150 : 200} text={artists[i].tag} click={(tag) => handleTagClick(tag, i)} type="artist"/>
                 <div className="upload-container-row" style={{marginTop: "10px"}}>
-                    <span className="upload-text">Romanized Artist Tag: </span>
+                    <span className="upload-text">Artist Tag: </span>
                     <input ref={artistInputRefs[i]} className="upload-input-wide artist-tag-color" type="text" value={artists[i].tag} onChange={(event) => changeTagInput(event.target.value)} spellCheck={false} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)} onFocus={() => changeActive(true)} onBlur={() => changeActive(false)}/>
                 </div>
                 <div className="upload-container-row">
@@ -677,7 +677,7 @@ const EditUnverifiedPostPage: React.FunctionComponent<Props> = (props) => {
                 <>
                 <SearchSuggestions active={characterActive[i]} x={getX()} y={getY()} width={mobile ? 110 : 200} text={characters[i].tag} click={(tag) => handleTagClick(tag, i)} type="character"/>
                 <div className="upload-container-row" style={{marginTop: "10px"}}>
-                    <span className="upload-text">Romanized Character Tag: </span>
+                    <span className="upload-text">Character Tag: </span>
                     <input ref={characterInputRefs[i]} className="upload-input-wide character-tag-color" type="text" value={characters[i].tag} onChange={(event) => changeTagInput(event.target.value)} spellCheck={false} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)} onFocus={() => changeActive(true)} onBlur={() => changeActive(false)}/>
                 </div>
                 <div className="upload-container-row">
@@ -760,7 +760,7 @@ const EditUnverifiedPostPage: React.FunctionComponent<Props> = (props) => {
                 <>
                 <SearchSuggestions active={seriesActive[i]} x={getX()} y={getY()} width={mobile ? 140 : 200} text={series[i].tag} click={(tag) => handleTagClick(tag, i)} type="series"/>
                 <div className="upload-container-row" style={{marginTop: "10px"}}>
-                    <span className="upload-text">Romanized Series Tag: </span>
+                    <span className="upload-text">Series Tag: </span>
                     <input ref={seriesInputRefs[i]} className="upload-input-wide series-tag-color" type="text" value={series[i].tag} onChange={(event) => changeTagInput(event.target.value)} spellCheck={false} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)} onFocus={() => changeActive(true)} onBlur={() => changeActive(false)}/>
                 </div>
                 <div className="upload-container-row">
@@ -811,10 +811,10 @@ const EditUnverifiedPostPage: React.FunctionComponent<Props> = (props) => {
         if (!links?.[0]) return
         clearTimeout(enterLinksTimer)
         enterLinksTimer = setTimeout(async () => {
-            let files = [] as any
+            let files = [] as File[]
             for (let i = 0; i < links.length; i++) {
-                const file = await functions.proxyImage(links[i], session, setSessionFlag)
-                files.push(file)
+                const fileArr = await functions.proxyImage(links[i], session, setSessionFlag)
+                files.push(...fileArr)
             }
             await validate(files, links)
             reset()
@@ -969,152 +969,186 @@ const EditUnverifiedPostPage: React.FunctionComponent<Props> = (props) => {
             await functions.timeout(3000)
             return setSaucenaoError(false)
         }
-        let current = getCurrentFiles()[currentIndex]
+        const currentFiles = getCurrentFiles()
+        let current = currentFiles[currentIndex]
         let bytes = "" as any 
         if (current.thumbnail) {
             bytes = await functions.base64toUint8Array(current.thumbnail).then((a) => Object.values(a))
         } else {
             bytes = Object.values(current.bytes) as any
         }
+        let link = ""
+        let artist = ""
+        let title = ""
+        let translatedTitle = ""
+        let commentary = ""
+        let translatedCommentary = ""
+        let date = ""
+        let bookmarks = ""
+        let mirrors = [] as any
         saucenaoTimeout = true
         try {
-            let results = await functions.post(`/api/misc/saucenao`, bytes, session, setSessionFlag)
-            let link = ""
-            let artist = ""
-            let title = ""
-            let translatedTitle = ""
-            let commentary = ""
-            let translatedCommentary = ""
-            let date = ""
-            let bookmarks = ""
-            let mirrors = [] as any
-            if (results.length) {
-                const pixiv = results.filter((r: any) => r.header.index_id === 5)
-                const twitter = results.filter((r: any) => r.header.index_id === 41)
-                const artstation = results.filter((r: any) => r.header.index_id === 39)
-                const deviantart = results.filter((r: any) => r.header.index_id === 34)
-                const danbooru = results.filter((r: any) => r.header.index_id === 9)
-                const gelbooru = results.filter((r: any) => r.header.index_id === 25)
-                const konachan = results.filter((r: any) => r.header.index_id === 26)
-                const yandere = results.filter((r: any) => r.header.index_id === 12)
-                const anime = results.filter((r: any) => r.header.index_id === 21)
-                if (pixiv.length) mirrors.push(`https://www.pixiv.net/en/artworks/${pixiv[0].data.pixiv_id}`)
-                if (twitter.length) mirrors.push(twitter[0].data.ext_urls[0])
-                if (deviantart.length) {
-                    let redirectedLink = ""
-                    try {
-                        redirectedLink = await functions.get(`/api/misc/redirect?url=${deviantart[0].data.ext_urls[0]}`, null, session, setSessionFlag)
-                    } catch {
-                        // ignore
+            let basename = path.basename(current.name, path.extname(current.name)).trim()
+            if (/^\d+(?=$|_p)/.test(basename)) {
+                const pixivID = basename.match(/^\d+(?=$|_p)/gm)?.[0] ?? ""
+                link = `https://www.pixiv.net/en/artworks/${pixivID}`
+                const result = await functions.fetch(`https://danbooru.donmai.us/posts.json?tags=pixiv_id%3A${pixivID}`)
+                if (result.length) setDanbooruLink(`https://danbooru.donmai.us/posts/${result[0].id}.json`)
+                try {
+                    const illust = await functions.get(`/api/misc/pixiv?url=${link}`, null, session, setSessionFlag)
+                    commentary = `${functions.decodeEntities(illust.caption.replace(/<\/?[^>]+(>|$)/g, ""))}` 
+                    date = functions.formatDate(new Date(illust.create_date), true)
+                    link = illust.url 
+                    title = illust.title
+                    artist = illust.user.name
+                    bookmarks = illust.total_bookmarks
+                    const translated = await functions.post("/api/misc/translate", [title, commentary], session, setSessionFlag)
+                    translatedTitle = translated[0]
+                    translatedCommentary = translated[1]
+                    if (illust.x_restrict !== 0) {
+                        if (restrict === "safe") setRestrict("questionable")
                     }
-                    mirrors.push(redirectedLink ? redirectedLink : deviantart[0].data.ext_urls[0])
+                    const pfp = await functions.proxyImage(illust.user.profile_image_urls.medium, session, setSessionFlag).then((r) => r[0])
+                    artists[artists.length - 1].tag = illust.user.twitter ? functions.fixTwitterTag(illust.user.twitter) : await functions.post("/api/misc/romajinize", [artist], session, setSessionFlag).then((r) => r[0])
+                    await uploadTagImg(pfp, "artist", artists.length - 1)
+                    artists.push({})
+                    artistInputRefs.push(React.createRef())
+                    setArtists(artists)
+                    forceUpdate()
+                } catch (e) {
+                    console.log(e)
                 }
-                if (artstation.length) mirrors.push(artstation[0].data.ext_urls[0])
-                if (danbooru.length) mirrors.push(danbooru[0].data.ext_urls[0])
-                if (gelbooru.length) mirrors.push(gelbooru[0].data.ext_urls[0])
-                if (yandere.length) mirrors.push(yandere[0].data.ext_urls[0])
-                if (konachan.length) mirrors.push(konachan[0].data.ext_urls[0])
-                if (danbooru.length) setDanbooruLink(`https://danbooru.donmai.us/posts/${danbooru[0].data.danbooru_id}.json`)
-                if (pixiv.length) {
-                    link = `https://www.pixiv.net/en/artworks/${pixiv[0].data.pixiv_id}`
-                    if (!danbooru.length) {
-                        const result = await functions.fetch(`https://danbooru.donmai.us/posts.json?tags=pixiv_id%3A${pixiv[0].data.pixiv_id}`)
-                        if (result.length) setDanbooruLink(`https://danbooru.donmai.us/posts/${result[0].id}.json`)
-                    }
-                    artist = pixiv[0].data.author_name
-                    title = pixiv[0].data.title
-                    try {
-                        const illust = await functions.get(`/api/misc/pixiv?url=${link}`, null, session, setSessionFlag)
-                        commentary = `${functions.decodeEntities(illust.caption.replace(/<\/?[^>]+(>|$)/g, ""))}` 
-                        date = functions.formatDate(new Date(illust.create_date), true)
-                        link = illust.url 
-                        title = illust.title
-                        artist = illust.user.name
-                        bookmarks = illust.total_bookmarks
-                        const translated = await functions.post("/api/misc/translate", [title, commentary], session, setSessionFlag)
-                        translatedTitle = translated[0]
-                        translatedCommentary = translated[1]
-                        if (illust.x_restrict !== 0) {
-                            setRestrict("questionable")
-                        } else {
-                            setRestrict("safe")
+                mirrors = await functions.post("/api/misc/boorulinks", {pixivID}, session, setSessionFlag)
+            } else {
+                let results = await functions.post(`/api/misc/saucenao`, bytes, session, setSessionFlag)
+                if (results.length) {
+                    const pixiv = results.filter((r: any) => r.header.index_id === 5)
+                    const twitter = results.filter((r: any) => r.header.index_id === 41)
+                    const artstation = results.filter((r: any) => r.header.index_id === 39)
+                    const deviantart = results.filter((r: any) => r.header.index_id === 34)
+                    const danbooru = results.filter((r: any) => r.header.index_id === 9)
+                    const gelbooru = results.filter((r: any) => r.header.index_id === 25)
+                    const konachan = results.filter((r: any) => r.header.index_id === 26)
+                    const yandere = results.filter((r: any) => r.header.index_id === 12)
+                    const anime = results.filter((r: any) => r.header.index_id === 21)
+                    if (pixiv.length) mirrors.push(`https://www.pixiv.net/en/artworks/${pixiv[0].data.pixiv_id}`)
+                    if (twitter.length) mirrors.push(twitter[0].data.ext_urls[0])
+                    if (deviantart.length) {
+                        let redirectedLink = ""
+                        try {
+                            redirectedLink = await functions.get(`/api/misc/redirect?url=${deviantart[0].data.ext_urls[0]}`, null, session, setSessionFlag)
+                        } catch {
+                            // ignore
                         }
-                        const pfp = await functions.proxyImage(illust.user.profile_image_urls.medium, session, setSessionFlag)
-                        artists[artists.length - 1].tag = illust.user.twitter ? functions.fixTwitterTag(illust.user.twitter) : await functions.post("/api/misc/romajinize", [artist], session, setSessionFlag).then((r) => r[0])
-                        await uploadTagImg(pfp, "artist", artists.length - 1)
-                        artists.push({})
-                        artistInputRefs.push(React.createRef())
-                        setArtists(artists)
-                        forceUpdate()
-                        // const translatedTags = await axios.post("/api/misc/translate", illust.tags.map((t: any) => t.name), {withCredentials: true}).then((r) => r.data)
-                        // setRawTags(translatedTags.map((t: string) => t.toLowerCase()).join(" "))
-                    } catch (e) {
-                        console.log(e)
+                        mirrors.push(redirectedLink ? redirectedLink : deviantart[0].data.ext_urls[0])
                     }
-                } else if (deviantart.length) {
-                    let redirectedLink = ""
-                    try {
-                        redirectedLink = await functions.get(`/api/misc/redirect?url=${deviantart[0].data.ext_urls[0]}`, null, session, setSessionFlag)
-                    } catch {
-                        // ignore
-                    }
-                    link = redirectedLink ? redirectedLink : deviantart[0].data.ext_urls[0]
-                    artist = deviantart[0].data.member_name 
-                    title = deviantart[0].data.title
-                    try {
-                        const deviation = await functions.get(`/api/misc/deviantart?url=${link}`, null, session, setSessionFlag)
-                        title = deviation.title
-                        artist = deviation.author.user.username
-                        link = deviation.url
-                        commentary = deviation.description
-                        date = functions.formatDate(new Date(deviation.date), true)
-                        if (deviation.rating === "adult") {
-                            setRestrict("questionable")
-                        } else {
-                            setRestrict("safe")
+                    if (artstation.length) mirrors.push(artstation[0].data.ext_urls[0])
+                    if (danbooru.length) mirrors.push(danbooru[0].data.ext_urls[0])
+                    if (gelbooru.length) mirrors.push(gelbooru[0].data.ext_urls[0])
+                    if (yandere.length) mirrors.push(yandere[0].data.ext_urls[0])
+                    if (konachan.length) mirrors.push(konachan[0].data.ext_urls[0])
+                    if (danbooru.length) setDanbooruLink(`https://danbooru.donmai.us/posts/${danbooru[0].data.danbooru_id}.json`)
+                    if (pixiv.length) {
+                        link = `https://www.pixiv.net/en/artworks/${pixiv[0].data.pixiv_id}`
+                        if (!danbooru.length) {
+                            const result = await functions.fetch(`https://danbooru.donmai.us/posts.json?tags=pixiv_id%3A${pixiv[0].data.pixiv_id}`)
+                            if (result.length) setDanbooruLink(`https://danbooru.donmai.us/posts/${result[0].id}.json`)
                         }
-                        const pfp = await functions.proxyImage(deviation.author.user.usericon, session, setSessionFlag)
-                        artists[artists.length - 1].tag = artist
-                        await uploadTagImg(pfp, "artist", artists.length - 1)
-                        artists.push({})
-                        artistInputRefs.push(React.createRef())
-                        setArtists(artists)
-                        forceUpdate()
-                        // setRawTags(deviation.keywords.map((k: string) => k.toLowerCase()).join(" "))
-                    } catch (e) {
-                        console.log(e)
-                    } 
-                } else if (anime.length) {
-                    title = anime[0].data.source 
-                    link = `https://myanimelist.net/anime/${anime[0].data.mal_id}/`
-                } else if (twitter.length) {
-                    link = twitter[0].data.ext_urls[0]
-                    artist = twitter[0].data.twitter_user_handle
-                } else if (danbooru.length) {
-                    link = danbooru[0].data.ext_urls[0]
-                    artist = danbooru[0].data.creator
-                    title = danbooru[0].data.characters
-                } else if (gelbooru.length) {
-                    link = gelbooru[0].data.ext_urls[0]
-                    artist = gelbooru[0].data.creator
-                    title = gelbooru[0].data.characters
-                } else if (yandere.length) {
-                    link = yandere[0].data.ext_urls[0]
-                    artist = yandere[0].data.creator
-                    title = yandere[0].data.characters
-                } else if (konachan.length) {
-                    link = konachan[0].data.ext_urls[0]
-                    artist = konachan[0].data.creator
-                    title = konachan[0].data.characters
+                        artist = pixiv[0].data.author_name
+                        title = pixiv[0].data.title
+                        try {
+                            const illust = await functions.get(`/api/misc/pixiv?url=${link}`, null, session, setSessionFlag)
+                            commentary = `${functions.decodeEntities(illust.caption.replace(/<\/?[^>]+(>|$)/g, ""))}` 
+                            date = functions.formatDate(new Date(illust.create_date), true)
+                            link = illust.url 
+                            title = illust.title
+                            artist = illust.user.name
+                            bookmarks = illust.total_bookmarks
+                            const translated = await functions.post("/api/misc/translate", [title, commentary], session, setSessionFlag)
+                            translatedTitle = translated[0]
+                            translatedCommentary = translated[1]
+                            if (illust.x_restrict !== 0) {
+                                setRestrict("questionable")
+                            } else {
+                                setRestrict("safe")
+                            }
+                            const pfp = await functions.proxyImage(illust.user.profile_image_urls.medium, session, setSessionFlag).then((r) => r[0])
+                            artists[artists.length - 1].tag = illust.user.twitter ? functions.fixTwitterTag(illust.user.twitter) : await functions.post("/api/misc/romajinize", [artist], session, setSessionFlag).then((r) => r[0])
+                            await uploadTagImg(pfp, "artist", artists.length - 1)
+                            artists.push({})
+                            artistInputRefs.push(React.createRef())
+                            setArtists(artists)
+                            forceUpdate()
+                            // const translatedTags = await axios.post("/api/misc/translate", illust.tags.map((t: any) => t.name), {withCredentials: true}).then((r) => r.data)
+                            // setRawTags(translatedTags.map((t: string) => t.toLowerCase()).join(" "))
+                        } catch (e) {
+                            console.log(e)
+                        }
+                    } else if (deviantart.length) {
+                        let redirectedLink = ""
+                        try {
+                            redirectedLink = await functions.get(`/api/misc/redirect?url=${deviantart[0].data.ext_urls[0]}`, null, session, setSessionFlag)
+                        } catch {
+                            // ignore
+                        }
+                        link = redirectedLink ? redirectedLink : deviantart[0].data.ext_urls[0]
+                        artist = deviantart[0].data.member_name 
+                        title = deviantart[0].data.title
+                        try {
+                            const deviation = await functions.get(`/api/misc/deviantart?url=${link}`, null, session, setSessionFlag)
+                            title = deviation.title
+                            artist = deviation.author.user.username
+                            link = deviation.url
+                            commentary = deviation.description
+                            date = functions.formatDate(new Date(deviation.date), true)
+                            if (deviation.rating === "adult") {
+                                setRestrict("questionable")
+                            } else {
+                                setRestrict("safe")
+                            }
+                            const pfp = await functions.proxyImage(deviation.author.user.usericon, session, setSessionFlag).then((r) => r[0])
+                            artists[artists.length - 1].tag = artist
+                            await uploadTagImg(pfp, "artist", artists.length - 1)
+                            artists.push({})
+                            artistInputRefs.push(React.createRef())
+                            setArtists(artists)
+                            forceUpdate()
+                            // setRawTags(deviation.keywords.map((k: string) => k.toLowerCase()).join(" "))
+                        } catch (e) {
+                            console.log(e)
+                        } 
+                    } else if (anime.length) {
+                        title = anime[0].data.source 
+                        link = `https://myanimelist.net/anime/${anime[0].data.mal_id}/`
+                    } else if (twitter.length) {
+                        link = twitter[0].data.ext_urls[0]
+                        artist = twitter[0].data.twitter_user_handle
+                    } else if (danbooru.length) {
+                        link = danbooru[0].data.ext_urls[0]
+                        artist = danbooru[0].data.creator
+                        title = danbooru[0].data.characters
+                    } else if (gelbooru.length) {
+                        link = gelbooru[0].data.ext_urls[0]
+                        artist = gelbooru[0].data.creator
+                        title = gelbooru[0].data.characters
+                    } else if (yandere.length) {
+                        link = yandere[0].data.ext_urls[0]
+                        artist = yandere[0].data.creator
+                        title = yandere[0].data.characters
+                    } else if (konachan.length) {
+                        link = konachan[0].data.ext_urls[0]
+                        artist = konachan[0].data.creator
+                        title = konachan[0].data.characters
+                    }
                 }
             }
             setSourceTitle(title)
             setSourceTranslatedTitle(translatedTitle)
             setSourceArtist(artist)
             setSourceLink(link)
-            setSourceBookmarks(bookmarks)
             setSourceCommentary(commentary)
             setSourceTranslatedCommentary(translatedCommentary)
+            setSourceBookmarks(bookmarks)
             setSourceDate(date)
             mirrors = functions.removeItem(mirrors, link)
             setSourceMirrors(mirrors.join("\n"))
@@ -1692,7 +1726,7 @@ const EditUnverifiedPostPage: React.FunctionComponent<Props> = (props) => {
                 <span className="editpost-heading">Source</span>
                 <div className="editpost-container">
                     {saucenaoError ? <span ref={saucenaoErrorRef} className="submit-error-text"></span> : null}
-                    <span className="editpost-link" onClick={sourceLookup}>Fetch from Saucenao</span>
+                    <span className="editpost-link" onClick={sourceLookup}>Fetch from Pixiv</span>
                     <div className="editpost-container-row">
                         <span className="editpost-text">Title: </span>
                         <input className="editpost-input-wide2" type="text" value={sourceTitle} onChange={(event) => setSourceTitle(event.target.value)} spellCheck={false} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}/>

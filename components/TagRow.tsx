@@ -96,6 +96,7 @@ const TagRow: React.FunctionComponent<Props> = (props) => {
     }
 
     const tagPage = (event: React.MouseEvent) => {
+        event.preventDefault()
         if (event.ctrlKey || event.metaKey || event.button === 1) {
             window.open(`/tag/${props.tag.tag}`, "_blank")
         } else {
@@ -255,7 +256,7 @@ const TagRow: React.FunctionComponent<Props> = (props) => {
             <div className="tagrow-content-container">
                 <td className="tagrow-container" style={{width: props.tag.image ? "16%" : "25%"}}>
                     <div className="tagrow-row">
-                        <span className={getClass()} onClick={tagPage} onAuxClick={tagPage}>{props.tag.tag.replaceAll("-", " ")}</span>
+                        <span className={getClass()} onClick={tagPage} onAuxClick={tagPage} onContextMenu={tagPage}>{props.tag.tag.replaceAll("-", " ")}</span>
                         {socialJSX()}
                         <span className="tagrow-tag-count">{props.tag.postCount}</span>
                     </div>

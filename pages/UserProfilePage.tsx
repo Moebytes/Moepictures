@@ -9,7 +9,7 @@ import Footer from "../components/Footer"
 import {HideNavbarContext, HideSidebarContext, ThemeContext, EnableDragContext, RelativeContext, HideTitlebarContext, MobileContext, RestrictTypeContext,
 HeaderTextContext, SidebarTextContext, SessionContext, RedirectContext, SessionFlagContext, UserImgContext, ShowDeleteAccountDialogContext, PostsContext,
 CommentSearchFlagContext, SiteHueContext, SiteLightnessContext, UserImgPostContext, SiteSaturationContext, R18ConfirmationContext, SearchContext, SearchFlagContext,
-PremiumRequiredContext, DeleteFavGroupNameContext} from "../Context"
+PremiumRequiredContext} from "../Context"
 import functions from "../structures/Functions"
 import Carousel from "../components/Carousel"
 import CommentCarousel from "../components/CommentCarousel"
@@ -57,7 +57,6 @@ const UserProfilePage: React.FunctionComponent = (props) => {
     const {premiumRequired, setPremiumRequired} = useContext(PremiumRequiredContext)
     const {r18Confirmation, setR18Confirmation} = useContext(R18ConfirmationContext)
     const {showDeleteAccountDialog, setShowDeleteAccountDialog} = useContext(ShowDeleteAccountDialogContext)
-    const {deleteFavGroupName, setDeleteFavGroupName} = useContext(DeleteFavGroupNameContext)
     const {commentSearchFlag, setCommentSearchFlag} = useContext(CommentSearchFlagContext)
     const {restrictType, setRestrictType} = useContext(RestrictTypeContext)
     const {search, setSearch} = useContext(SearchContext)
@@ -490,9 +489,7 @@ const UserProfilePage: React.FunctionComponent = (props) => {
             if (!permissions.isMod(session)) filtered = filtered.filter((f: any) => !f.hidden)
             const images = filtered.map((f: any) => functions.getThumbnailLink(f.images[0].type, f.postID, f.images[0].order, f.images[0].filename, "tiny"))
             const viewFavgroup = () => {
-                history.push("/posts")
-                setSearch(`favgroup:${session.username}:${favgroup.name}`)
-                setSearchFlag(true)
+                history.push(`/favgroup/${session.username}/${favgroup.slug}`)
             }
             const setFavgroup = (img: string, index: number, newTab: boolean) => {
                 const postID = favgroup.posts[index].postID
@@ -507,7 +504,6 @@ const UserProfilePage: React.FunctionComponent = (props) => {
             jsx.push(
                 <div className="userprofile-column">
                     <div className="userprofile-title-container">
-                        <img className="userprofile-clickable-icon" src={deleteIcon} onClick={() => setDeleteFavGroupName(favgroup.name)}/>
                         {favgroup.private ? <img className="userprofile-icon" src={lockIcon} style={{height: "20px", marginTop: "3px", filter: getFilter()}}/> : null}
                         <span className="userprofile-title" onClick={viewFavgroup}>{favgroup.name} <span className="userprofile-text-alt">{favgroup.postCount}</span></span>
                     </div>

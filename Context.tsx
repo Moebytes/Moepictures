@@ -212,7 +212,8 @@ export const ResetFlagContext = React.createContext<any>(null)
 export const MuteFlagContext = React.createContext<any>(null)
 export const ActionBannerContext = React.createContext<any>(null)
 export const FavGroupIDContext = React.createContext<any>(null)
-export const DeleteFavGroupNameContext = React.createContext<any>(null)
+export const EditFavGroupObjContext = React.createContext<any>(null)
+export const DeleteFavGroupObjContext = React.createContext<any>(null)
 export const BulkFavGroupDialogContext = React.createContext<any>(null)
 export const CategorizeTagContext = React.createContext<any>(null)
 export const GroupPostIDContext = React.createContext<any>(null)
@@ -222,6 +223,9 @@ export const ActiveGroupContext = React.createContext<any>(null)
 export const EditGroupObjContext = React.createContext<any>(null)
 export const DeleteGroupObjContext = React.createContext<any>(null)
 export const GroupFlagContext = React.createContext<any>(null)
+export const LockPostIDContext = React.createContext<any>(null)
+export const ShowCompressingDialogContext = React.createContext<any>(null)
+export const ShowUpscalingDialogContext = React.createContext<any>(null)
 
 const Context: React.FunctionComponent = (props) => {
     const [siteHue, setSiteHue] = useState(180)
@@ -417,7 +421,8 @@ const Context: React.FunctionComponent = (props) => {
     const [pageMultiplier, setPageMultiplier] = useState(1)
     const [actionBanner, setActionBanner] = useState(null)
     const [favGroupID, setFavGroupID] = useState(null)
-    const [deleteFavGroupName, setDeleteFavGroupName] = useState(null)
+    const [editFavGroupObj, setEditFavGroupObj] = useState(null)
+    const [deleteFavGroupObj, setDeleteFavGroupObj] = useState(null)
     const [bulkFavGroupDialog, setBulkFavGroupDialog] = useState(false)
     const [categorizeTag, setCategorizeTag] = useState(null)
     const [groupPostID, setGroupPostID] = useState(null)
@@ -425,9 +430,16 @@ const Context: React.FunctionComponent = (props) => {
     const [editGroupObj, setEditGroupObj] = useState(null)
     const [deleteGroupObj, setDeleteGroupObj] = useState(null)
     const [groupFlag, setGroupFlag] = useState(false)
+    const [lockPostID, setLockPostID] = useState(null)
+    const [showCompressingDialog, setShowCompressingDialog] = useState(false)
+    const [showUpscalingDialog, setShowUpscalingDialog] = useState(false)
 
 return (
     <>
+        <ShowUpscalingDialogContext.Provider value={{showUpscalingDialog, setShowUpscalingDialog}}>
+        <ShowCompressingDialogContext.Provider value={{showCompressingDialog, setShowCompressingDialog}}>
+        <LockPostIDContext.Provider value={{lockPostID, setLockPostID}}>
+        <EditFavGroupObjContext.Provider value={{editFavGroupObj, setEditFavGroupObj}}>
         <DeleteGroupObjContext.Provider value={{deleteGroupObj, setDeleteGroupObj}}>
         <GroupFlagContext.Provider value={{groupFlag, setGroupFlag}}>
         <EditGroupObjContext.Provider value={{editGroupObj, setEditGroupObj}}>
@@ -436,7 +448,7 @@ return (
         <GroupPostIDContext.Provider value={{groupPostID, setGroupPostID}}>
         <CategorizeTagContext.Provider value={{categorizeTag, setCategorizeTag}}>
         <BulkFavGroupDialogContext.Provider value={{bulkFavGroupDialog, setBulkFavGroupDialog}}>
-        <DeleteFavGroupNameContext.Provider value={{deleteFavGroupName, setDeleteFavGroupName}}>
+        <DeleteFavGroupObjContext.Provider value={{deleteFavGroupObj, setDeleteFavGroupObj}}>
         <FavGroupIDContext.Provider value={{favGroupID, setFavGroupID}}>
         <ActionBannerContext.Provider value={{actionBanner, setActionBanner}}>
         <PageMultiplierContext.Provider value={{pageMultiplier, setPageMultiplier}}>
@@ -822,7 +834,7 @@ return (
         </PageMultiplierContext.Provider>
         </ActionBannerContext.Provider>
         </FavGroupIDContext.Provider>
-        </DeleteFavGroupNameContext.Provider>
+        </DeleteFavGroupObjContext.Provider>
         </BulkFavGroupDialogContext.Provider>
         </CategorizeTagContext.Provider>
         </GroupPostIDContext.Provider>
@@ -831,6 +843,10 @@ return (
         </EditGroupObjContext.Provider>
         </GroupFlagContext.Provider>
         </DeleteGroupObjContext.Provider>
+        </EditFavGroupObjContext.Provider>
+        </LockPostIDContext.Provider>
+        </ShowCompressingDialogContext.Provider>
+        </ShowUpscalingDialogContext.Provider>
     </>
     )
 }

@@ -48,14 +48,6 @@ const DragAndDrop: React.FunctionComponent = (props) => {
         }
     }, [])
 
-    
-    useEffect(() => {
-        if (!searchHover && !uploadHover) {
-            showDrag = false
-            setVisible(false)
-        }
-    }, [searchHover, uploadHover])
-
     const dragEnter = (event: React.DragEvent, type: string) => {
         event.preventDefault()
         // window.focus()
@@ -76,12 +68,42 @@ const DragAndDrop: React.FunctionComponent = (props) => {
         }
     }
 
-    const searchDrop = async (event: React.DragEvent) => {
-        event.preventDefault()
+    const paste = (event: ClipboardEvent) => {
+        const items = event.clipboardData?.items
+        if (!items) return
+        const files = [] as File[]
+        for (let i = 0; i < items.length; i++) {
+            const item = items[i]
+            if (item.type.startsWith("image")) {
+                const file = item.getAsFile()
+                if (file) files.push(file)
+            }
+        }
+
+        if (history.location.pathname === "/upload" ||
+        history.location.pathname === "/bulk-upload" ||
+        history.location.pathname.includes("edit-post")) {
+            uploadFiles(files)
+        } else {
+            searchFiles(files)
+        }
+    }
+
+    useEffect(() => {
+        if (!searchHover && !uploadHover) {
+            showDrag = false
+            setVisible(false)
+        }
+        window.addEventListener("paste", paste)
+        return () => {
+            window.removeEventListener("paste", paste)
+        }
+    }, [searchHover, uploadHover])
+
+    const searchFiles = async (files: File[]) => {
         setSearchHover(false)
         setUploadHover(false)
-        const files = event.dataTransfer.files 
-        if (!files?.[0]) return 
+        if (!files?.length) return
         let result = [] as any
         for (let i = 0; i < files.length; i++) {
             result.push(...await functions.imageSearch(files[i], session, setSessionFlag))
@@ -90,17 +112,26 @@ const DragAndDrop: React.FunctionComponent = (props) => {
         history.push("/posts")
     }
 
-    const uploadDrop = (event: React.DragEvent) => {
-        event.preventDefault()
+    const uploadFiles = (files: File[]) => {
         setSearchHover(false)
         setUploadHover(false)
-        const files = event.dataTransfer.files 
-        if (!files?.[0]) return
-        console.log(history.location.pathname)
+        if (!files?.length) return
         if (history.location.pathname !== "/upload" &&
         history.location.pathname !== "/bulk-upload" &&
         !history.location.pathname.includes("edit-post")) history.push("/upload")
-        setUploadDropFiles(Array.from(files))
+        setUploadDropFiles(files)
+    }
+
+    const searchDrop = async (event: React.DragEvent) => {
+        event.preventDefault()
+        const files = event.dataTransfer.files
+        searchFiles(Array.from(files))
+    }
+
+    const uploadDrop = (event: React.DragEvent) => {
+        event.preventDefault()
+        const files = event.dataTransfer.files
+        uploadFiles(Array.from(files))
     }
 
     return (
@@ -108,14 +139,10 @@ const DragAndDrop: React.FunctionComponent = (props) => {
             <div className="dragdrop-container">
                 <div className={`dragdrop-box ${searchHover ? "dragdrop-hover" : ""}`} onDrop={searchDrop}
                 onDragEnter={(event) => dragEnter(event, "search")} 
-                onDragLeave={(event) => dragLeave(event, "search")}>
-                    Search
-                </div>
+                onDragLeave={(event) => dragLeave(event, "search")}>Search</div>
                 <div className={`dragdrop-box ${uploadHover ? "dragdrop-hover" : ""}`} onDrop={uploadDrop}
                 onDragEnter={(event) => dragEnter(event, "upload")} 
-                onDragLeave={(event) => dragLeave(event, "upload")}>
-                    Upload
-                </div>
+                onDragLeave={(event) => dragLeave(event, "upload")}>Upload</div>
             </div>
         </div>
     )

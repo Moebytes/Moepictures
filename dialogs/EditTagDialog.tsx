@@ -378,7 +378,7 @@ const EditTagDialog: React.FunctionComponent = (props) => {
                             <span className="dialog-text">Reason: </span>
                             <input style={{width: "100%"}} className="dialog-input-taller" type="text" spellCheck={false} value={editTagReason} onChange={(event) => setEditTagReason(event.target.value)}/>
                         </div>
-                        {/*error ? <div className="dialog-validation-container"><span className="dialog-validation" ref={errorRef}></span></div> : null*/}
+                        {error ? <div className="dialog-validation-container"><span className="dialog-validation" ref={errorRef}></span></div> : null}
                         <div className="dialog-row">
                             <button onClick={() => click("reject")} className="dialog-button">{"Cancel"}</button>
                             <button onClick={() => click("accept")} className="dialog-button">{"Submit Request"}</button>

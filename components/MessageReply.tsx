@@ -72,7 +72,7 @@ const MessageReply: React.FunctionComponent<Props> = (props) => {
     }
 
     const triggerQuote = () => {
-        const cleanReply = functions.parseComment(props.reply?.content).filter((s: any) => !s.includes(">>>")).join("")
+        const cleanReply = functions.parseComment(props.reply?.content).filter((s: any) => !s.includes(">>>")).join(" ")
         setQuoteText(functions.multiTrim(`
             >>>[${props.reply?.replyID}] ${functions.toProperCase(props.reply?.creator)} said:
             > ${cleanReply}

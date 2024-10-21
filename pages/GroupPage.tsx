@@ -1,7 +1,7 @@
 import React, {useEffect, useContext, useState, useRef} from "react"
 import {ThemeContext, SiteHueContext, SiteSaturationContext, SiteLightnessContext, EnableDragContext, HideNavbarContext, HideSidebarContext, RelativeContext, 
 HideTitlebarContext, MobileContext, PostsContext, GroupFlagContext, ActiveDropdownContext, HeaderTextContext, SidebarTextContext, SessionContext, SessionFlagContext, 
-RestrictTypeContext, ActiveGroupContext, EditGroupObjContext, DeleteGroupObjContext} from "../Context"
+RestrictTypeContext, ActiveGroupContext, EditGroupObjContext, DeleteGroupObjContext, SearchContext, SearchFlagContext} from "../Context"
 import {useHistory, useLocation} from "react-router-dom"
 import TitleBar from "../components/TitleBar"
 import NavBar from "../components/NavBar"
@@ -39,6 +39,8 @@ const GroupPage: React.FunctionComponent<Props> = (props) => {
     const {hideSidebar, setHideSidebar} = useContext(HideSidebarContext)
     const {relative, setRelative} = useContext(RelativeContext)
     const {activeDropdown, setActiveDropdown} = useContext(ActiveDropdownContext)
+    const {search, setSearch} = useContext(SearchContext)
+    const {searchFlag, setSearchFlag} = useContext(SearchFlagContext)
     const {headerText, setHeaderText} = useContext(HeaderTextContext)
     const {sidebarText, setSidebarText} = useContext(SidebarTextContext)
     const {editGroupObj, setEditGroupObj} = useContext(EditGroupObjContext)
@@ -75,7 +77,7 @@ const GroupPage: React.FunctionComponent<Props> = (props) => {
     }, [mobile])
 
     const groupInfo = async () => {
-        let group = await functions.get("/api/group", {name: groupName}, session, setSessionFlag)
+        let group = await functions.get("/api/group", {name: groupName}, session, setSessionFlag).catch(() => null)
         if (!group) return functions.replaceLocation("/404")
         setGroup(group)
     }
@@ -206,6 +208,16 @@ const GroupPage: React.FunctionComponent<Props> = (props) => {
         return jsx
     }
 
+    const searchGroup = (event: React.MouseEvent, alias?: string) => {
+        if (event.ctrlKey || event.metaKey || event.button === 1) {
+            window.open("/posts", "_blank")
+        } else {
+            history.push("/posts")
+        }
+        setSearch(`group:${group.slug}`)
+        setSearchFlag(true)
+    }
+
     return (
         <>
         <EditGroupDialog/>
@@ -223,6 +235,9 @@ const GroupPage: React.FunctionComponent<Props> = (props) => {
                     </div>
                     <div className="group-row" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                         <span className="group-text">{group.description ? group.description : "No description."}</span>
+                    </div>
+                    <div className="group-row" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
+                        <span><span className="group-label" onClick={searchGroup}>Posts</span> <span className="group-label-alt">{group.postCount}</span></span>
                     </div>
                     {groupImagesJSX()}
                 </div> : null}

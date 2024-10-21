@@ -5,7 +5,7 @@ RelativeContext, HideTitlebarContext, SidebarHoverContext, SearchContext, Search
 TagsContext, RandomFlagContext, ImageSearchFlagContext, SidebarTextContext, SessionContext, MobileScrollingContext, TagEditIDContext, SourceEditIDContext, PremiumRequiredContext,
 TranslationModeContext, TranslationDrawingEnabledContext, SiteHueContext, SessionFlagContext, SiteLightnessContext, SiteSaturationContext, ShowTakedownPostDialogContext,
 SaveSearchDialogContext, DeleteAllSaveSearchDialogContext, EditSaveSearchNameContext, EditSaveSearchKeyContext, EditSaveSearchTagsContext,
-ActionBannerContext, GroupPostIDContext} from "../Context"
+ActionBannerContext, GroupPostIDContext, LockPostIDContext} from "../Context"
 import {HashLink as Link} from "react-router-hash-link"
 import permissions from "../structures/Permissions"
 import favicon from "../assets/icons/favicon.png"
@@ -55,7 +55,12 @@ import gelbooru from "../assets/icons/gelbooru.png"
 import safebooru from "../assets/icons/safebooru.png"
 import yandere from "../assets/icons/yandere.png"
 import konachan from "../assets/icons/konachan.png"
+import zerochan from "../assets/icons/zerochan.png"
 import group from "../assets/icons/group.png"
+import compressIcon from "../assets/icons/compress.png"
+import upscaleIcon from "../assets/icons/waifu2x.png"
+import lockIcon from "../assets/icons/lock-red.png"
+import unlockIcon from "../assets/icons/unlock-red.png"
 import pack from "../package.json"
 import functions from "../structures/Functions"
 import TagHover from "./TagHover"
@@ -123,6 +128,7 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
     const {editSaveSearchTags, setEditSaveSearchTags} = useContext(EditSaveSearchTagsContext)
     const {actionBanner, setActionBanner} = useContext(ActionBannerContext)
     const {groupPostID, setGroupPostID} = useContext(GroupPostIDContext)
+    const {lockPostID, setLockPostID} = useContext(LockPostIDContext)
     const history = useHistory()
 
     const getFilter = () => {
@@ -130,12 +136,12 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
     }
 
     const getFilterSearch = () => {
-        if (theme.includes("light")) return `hue-rotate(${siteHue - 180}deg) saturate(${siteSaturation - 60}%) brightness(${siteLightness + 220}%)`
+        if (theme.includes("light")) return `hue-rotate(${siteHue - 180}deg) saturate(${siteSaturation - 80}%) brightness(${siteLightness + 350}%)`
         return `hue-rotate(${siteHue - 180}deg) saturate(${siteSaturation}%) brightness(${siteLightness + 70}%)`
     }
 
     const getFilterRandom = () => {
-        if (theme.includes("light")) return `hue-rotate(${siteHue - 230}deg) saturate(${siteSaturation - 30}%) brightness(${siteLightness + 170}%)`
+        if (theme.includes("light")) return `hue-rotate(${siteHue - 230}deg) saturate(${siteSaturation - 30}%) brightness(${siteLightness + 200}%)`
         return `hue-rotate(${siteHue - 200}deg) saturate(${siteSaturation}%) brightness(${siteLightness + 70}%)`
     }
 
@@ -223,7 +229,7 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
                 window.removeEventListener("scroll", scrollHandler)
             }, 10)
         }
-    })
+    }, [relative, hideTitlebar, hideNavbar])
 
     useEffect(() => {
         const sidebar = document.querySelector(".sidebar") as HTMLElement
@@ -324,6 +330,7 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
     }
 
     const tagInfo = (event: React.MouseEvent, tag: string) => {
+        event.preventDefault()
         if (event.ctrlKey || event.metaKey || event.button === 1) {
             window.open(`/tag/${tag}`, "_blank")
         } else {
@@ -366,7 +373,7 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
                     <div className="sidebar-row">
                         <span className="tag-hover">
                             <img className="tag-info" src={question} onClick={(event) => tagInfo(event, props.artists[i].tag)} onAuxClick={(event) => tagInfo(event, props.artists[i].tag)}/>
-                            <span className="artist-tag" onClick={() => tagClick()}>{props.artists[i].tag.replaceAll("-", " ")}</span>
+                            <span className="artist-tag" onClick={() => tagClick()} onContextMenu={(event) => tagInfo(event, props.artists[i].tag)}>{props.artists[i].tag.replaceAll("-", " ")}</span>
                             {artistSocials()}
                             <span className="tag-count">{props.artists[i].count}</span>
                         </span>
@@ -401,7 +408,7 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
                 <div className="sidebar-row">
                     <span className="tag-hover">
                         <img className="tag-info" src={question} onClick={(event) => tagInfo(event, props.characters[i].tag)} onAuxClick={(event) => tagInfo(event, props.characters[i].tag)}/>
-                        <span className="character-tag" onClick={() => tagClick()}>{props.characters[i].tag.replaceAll("-", " ")}</span>
+                        <span className="character-tag" onClick={() => tagClick()} onContextMenu={(event) => tagInfo(event, props.characters[i].tag)}>{props.characters[i].tag.replaceAll("-", " ")}</span>
                         {characterSocials()}
                         <span className="tag-count">{props.characters[i].count}</span>
                     </span>
@@ -439,7 +446,7 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
                 <div className="sidebar-row">
                     <span className="tag-hover">
                         <img className="tag-info" src={question} onClick={(event) => tagInfo(event, props.series[i].tag)} onAuxClick={(event) => tagInfo(event, props.series[i].tag)}/>
-                        <span className="series-tag" onClick={() => tagClick()}>{props.series[i].tag.replaceAll("-", " ")}</span>
+                        <span className="series-tag" onClick={() => tagClick()} onContextMenu={(event) => tagInfo(event, props.series[i].tag)}>{props.series[i].tag.replaceAll("-", " ")}</span>
                         {seriesSocials()}
                         <span className="tag-count">{props.series[i].count}</span>
                     </span>
@@ -501,13 +508,71 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
                 <div className="sidebar-row">
                     <span className="tag-hover">
                         <img className="tag-info" src={question} onClick={(event) => tagInfo(event, currentTags[i].tag)} onAuxClick={(event) => tagInfo(event, currentTags[i].tag)}/>
-                        <span className={tagClass()} onClick={() => tagClick()}>{currentTags[i].tag.replaceAll("-", " ")}</span>
+                        <span className={tagClass()} onClick={() => tagClick()} onContextMenu={(event) => tagInfo(event, currentTags[i].tag)}>{currentTags[i].tag.replaceAll("-", " ")}</span>
                         <span className="tag-count">{currentTags[i].count}</span>
                     </span>
                 </div>
             )
         }
         return jsx
+    }
+
+    const generateSourceJSX = () => {
+        let jsx = [] as any
+        if (props.post.link) {
+            if (props.post.link.includes("pixiv")) {
+                jsx.push(<img className="sidebar-social" src={pixiv} onClick={() => window.open(props.post.link, "_blank")}/>)
+            }
+            if (props.post.link.includes("soundcloud")) {
+                jsx.push(<img className="sidebar-social" src={soundcloud} onClick={() => window.open(props.post.link, "_blank")}/>)
+            }
+            if (props.post.link.includes("sketchfab")) {
+                jsx.push(<img className="sidebar-social" src={sketchfab} onClick={() => window.open(props.post.link, "_blank")}/>)
+            }
+            if (props.post.link.includes("twitter") || props.post.link.includes("x.com")) {
+                jsx.push(<img className="sidebar-social" src={twitter} onClick={() => window.open(props.post.link, "_blank")}/>)
+            }
+            if (props.post.link.includes("deviantart")) {
+                jsx.push(<img className="sidebar-social" src={deviantart} onClick={() => window.open(props.post.link, "_blank")}/>)
+            }
+            if (props.post.link.includes("artstation")) {
+                jsx.push(<img className="sidebar-social" src={artstation} onClick={() => window.open(props.post.link, "_blank")}/>)
+            }
+            if (props.post.link.includes("danbooru")) {
+                jsx.push(<img className="sidebar-social" src={danbooru} onClick={() => window.open(props.post.link, "_blank")}/>)
+            }
+            if (props.post.link.includes("gelbooru")) {
+                jsx.push(<img className="sidebar-social" src={gelbooru} onClick={() => window.open(props.post.link, "_blank")}/>)
+            }
+            if (props.post.link.includes("safebooru")) {
+                jsx.push(<img className="sidebar-social" src={safebooru} onClick={() => window.open(props.post.link, "_blank")}/>)
+            }
+            if (props.post.link.includes("yande.re")) {
+                jsx.push(<img className="sidebar-social" src={yandere} onClick={() => window.open(props.post.link, "_blank")}/>)
+            }
+            if (props.post.link.includes("konachan")) {
+                jsx.push(<img className="sidebar-social" src={konachan} onClick={() => window.open(props.post.link, "_blank")}/>)
+            }
+            if (props.post.link.includes("zerochan")) {
+                jsx.push(<img className="sidebar-social" src={zerochan} onClick={() => window.open(props.post.link, "_blank")}/>)
+            }
+            if (props.post.link.includes("youtube")) {
+                jsx.push(<img className="sidebar-social" src={youtube} onClick={() => window.open(props.post.link, "_blank")}/>)
+            }
+            if (props.post.link.includes("bandcamp")) {
+                jsx.push(<img className="sidebar-social" src={bandcamp} onClick={() => window.open(props.post.link, "_blank")}/>)
+            }
+        }
+        if (jsx.length) {
+            return (
+                <div className="sidebar-row">
+                    <span className="tag">Source:</span>
+                    <span className={`tag-alt-link ${props.post.hidden ? "strikethrough" : ""}`} onClick={() => window.open(props.post.link, "_blank")}>{getDomain()}</span>
+                    {jsx}
+                </div>
+            )
+        }
+        return null
     }
 
     const generateMirrorsJSX = () => {
@@ -545,6 +610,9 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
             }
             if (props.post.mirrors.konachan) {
                 jsx.push(<img className="sidebar-social" src={konachan} onClick={() => window.open(props.post.mirrors.konachan, "_blank")}/>)
+            }
+            if (props.post.mirrors.zerochan) {
+                jsx.push(<img className="sidebar-social" src={zerochan} onClick={() => window.open(props.post.mirrors.zerochan, "_blank")}/>)
             }
             if (props.post.mirrors.youtube) {
                 jsx.push(<img className="sidebar-social" src={youtube} onClick={() => window.open(props.post.mirrors.youtube, "_blank")}/>)
@@ -609,6 +677,10 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
     const editPost = async () => {
         if (props.unverified) return history.push(`/unverified/edit-post/${props.post.postID}`)
         history.push(`/edit-post/${props.post.postID}`)
+    }
+
+    const lockPost = async () => {
+        setLockPostID(props.post.postID)
     }
 
     const modNext = () => {
@@ -879,10 +951,7 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
                             <span className="tag">{props.post.type === "model" ? "Modeled:" : props.post.type === "audio" ? "Produced:" : "Drawn:"}</span>
                             <span className={`tag-alt ${props.post.hidden ? "strikethrough" : ""}`}>{props.post.drawn ? functions.formatDate(new Date(props.post.drawn)) : "Unknown"}</span>
                         </div>
-                        <div className="sidebar-row">
-                            <span className="tag">Source:</span>
-                            <span className={`tag-alt-link ${props.post.hidden ? "strikethrough" : ""}`} onClick={() => window.open(props.post.link, "_blank")}>{getDomain()}</span>
-                        </div>
+                        {generateSourceJSX()}
                         <div className="sidebar-row">
                             <span className="tag">Bookmarks:</span>
                             <span className={`tag-alt ${props.post.hidden ? "strikethrough" : ""}`}>{props.post.bookmarks ? props.post.bookmarks : "?"}</span>
@@ -1009,12 +1078,19 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
                                 <span className="tag">{props.post.hidden ? "Restore" : "Takedown"}</span>
                             </span>
                         </div> : null}
-                        {/* <div className="sidebar-row">
-                            <span className="tag-hover">
-                                <img className="sidebar-icon" src={getReport()}/>
-                                <span className="tag">Report</span>
+                        {props.unverified ? <>
+                        <div className="sidebar-row">
+                            <span className="tag-hover" onClick={() => null}>
+                                <img className="sidebar-icon" src={compressIcon}/>
+                                <span className="tag">Compress</span>
                             </span>
-                        </div> */}
+                        </div>
+                        <div className="sidebar-row">
+                            <span className="tag-hover" onClick={() => null}>
+                                <img className="sidebar-icon" src={upscaleIcon}/>
+                                <span className="tag">Upscale</span>
+                            </span>
+                        </div></> : null}
                         <div className="sidebar-row">
                             <span className="tag-hover" onClick={editPost}>
                                 <img className="sidebar-icon" src={edit}/>
@@ -1035,6 +1111,12 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
                             </span>
                         </div>
                         </> : null}
+                        {!props.unverified && permissions.isMod(session) ? <div className="sidebar-row">
+                            <span className="tag-hover" onClick={lockPost}>
+                                <img className="sidebar-icon" src={props.post.locked ? unlockIcon : lockIcon}/>
+                                <span className="tag-red">{props.post.locked ? "Unlock" : "Lock"}</span>
+                            </span>
+                        </div> : null}
                         {!props.unverified ? <div className="sidebar-row">
                             <span className="tag-hover" onClick={postHistory}>
                                 <img className="sidebar-icon" src={historyIcon}/>

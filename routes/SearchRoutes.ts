@@ -71,6 +71,11 @@ const SearchRoutes = (app: Express) => {
                 const user = await sql.user.user(username as string)
                 if (!user) return res.status(400).send("Bad username")
                 result = await sql.user.uploads(username, limit, offset, type, restrict, style, sort, req.session.username)
+            } else if (query.startsWith("group:")) {
+                const [g, name] = query.split(":")
+                let group = await sql.group.group(functions.generateSlug(name))
+                if (!group) return res.status(400).send("Bad group")
+                result = await sql.group.searchGroup(group.groupID, limit, offset, type, restrict, style, sort, req.session.username)
             } else if (query.startsWith("favgroup:")) {
                 const [f, username, name] = query.split(":")
                 let favgroup = await sql.favorite.favgroup(username, name, type, restrict, style, sort, req.session.username)
@@ -278,7 +283,7 @@ const SearchRoutes = (app: Express) => {
 
     app.post("/api/search/sidebartags", searchLimiter, async (req: Request, res: Response, next: NextFunction) => {
         try {
-            const {postIDs} = req.body
+            const {postIDs, isBanner} = req.body
             let postArray = Array.from(postIDs)?.slice(0, 100) as any
             if (req.session.captchaNeeded) {
                 if (postArray.length === 1) return res.status(200).json([])
@@ -299,7 +304,18 @@ const SearchRoutes = (app: Express) => {
                 const found = result.find((r: any) => r.tag === uniqueTagArray[i])
                 if (!found) result.push({tag: uniqueTagArray[i], count: "0", type: "tag", image: ""})
             }
-            res.status(200).json(slice ? result.slice(0, 100) : result)
+            //let artistTags = result.filter((t: any) => t.type === "artist")
+            let characterTags = result.filter((t: any) => t.type === "character")
+            let seriesTags = result.filter((t: any) => t.type === "series")
+            //let metaTags = result.filter((t: any) => t.type === "meta")
+            //let tags = result.filter((t: any) => t.type === "tag")
+            let finalTags = [] as any[]
+            if (isBanner) {
+                finalTags = [...seriesTags, ...characterTags]
+            } else {
+                finalTags = result
+            }
+            res.status(200).json(slice ? finalTags.slice(0, 100) : finalTags)
         } catch (e) {
             console.log(e)
             return res.status(400).send("Bad request")

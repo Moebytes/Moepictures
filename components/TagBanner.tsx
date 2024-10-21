@@ -161,10 +161,14 @@ const TagBanner: React.FunctionComponent = (props) => {
                 setSearch(bannerTag.tag)
                 setSearchFlag(true)
             }
+            const tagPage = (event: React.MouseEvent) => {
+                event.preventDefault()
+                history.push(`/tag/${bannerTag.tag}`)
+            }
             jsx.push(
                 <div className="tagbanner-box">
                     {bannerTag.image ? <img className="tagbanner-img" src={functions.getTagLink(bannerTag.type, bannerTag.image)}/> : null}
-                    <span className="tagbanner-tag" onClick={tagClick}>{bannerTag.tag}</span>
+                    <span className="tagbanner-tag" onClick={tagClick} onContextMenu={tagPage}>{bannerTag.tag}</span>
                 </div>
             )
         }

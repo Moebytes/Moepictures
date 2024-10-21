@@ -97,6 +97,24 @@ const SaveTranslationDialog: React.FunctionComponent<Props> = (props) => {
             )
         }
 
+        if (props.post.locked && !permissions.isMod(session)) {
+            return (
+                <div className="dialog">
+                    <Draggable handle=".dialog-title-container">
+                    <div className="dialog-box" style={{width: "340px", height: "170px"}} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
+                            <div className="dialog-title-container">
+                                <span className="dialog-title">Save Translation</span>
+                            </div>
+                            <span className="dialog-ban-text">This post is locked. Cannot save translations.</span>
+                            <button className="dialog-ban-button" onClick={() => click("reject")}>
+                                <span className="dialog-ban-button-text">←Back</span>
+                            </button>
+                        </div>
+                    </Draggable>
+                </div>
+            )
+        }
+
         if (permissions.isContributor(session)) {
             return (
                 <div className="dialog">

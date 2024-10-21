@@ -240,7 +240,7 @@ export default class SQLRequest {
             FROM "delete requests"
             JOIN groups ON groups.slug = "delete requests".group
             WHERE "delete requests"."group" IS NOT NULL
-            GROUP BY "delete requests"."requestID", groups.slug
+            GROUP BY "delete requests"."requestID", groups."groupID"
             LIMIT 100 ${offset ? `OFFSET $1` : ""}
         `),
         }

@@ -150,55 +150,78 @@ export default class SQLFavorite {
         return result
     }
 
-    /** Update favgroup. */
-    public static updateFavgroup = async (username: string, name: string, isPrivate: boolean) => {
+    /** Insert favgroup. */
+    public static insertFavgroup = async (username: string, slug: string, name: string, isPrivate: boolean) => {
         const query: QueryConfig = {
             text: functions.multiTrim(/*sql*/`
-                INSERT INTO favgroups ("username", "name", "private", "createDate")
-                VALUES ($1, $2, $3, $4)
-                ON CONFLICT ("username", "name") DO UPDATE
-                SET "name" = EXCLUDED."name", "private" = EXCLUDED."private"
+                INSERT INTO favgroups ("username", "slug", "name", "private", "createDate")
+                VALUES ($1, $2, $3, $4, $5)
+                ON CONFLICT ("username", "slug") DO UPDATE
+                SET "private" = EXCLUDED."private"
             `),
-            values: [username, name, isPrivate, new Date().toISOString()]
+            values: [username, slug, name, isPrivate, new Date().toISOString()]
         }
         const result = await SQLQuery.run(query)
         return result
     }
 
+    /** Update favgroup. */
+    public static updateFavGroup = async (username: string, slug: string, column: string, value: string | boolean) => {
+        const query: QueryConfig = {
+            text: /*sql*/`UPDATE favgroups SET "${column}" = $1 WHERE "username" = $2 AND "slug" = $3`,
+            values: [value, username, slug]
+        }
+        return SQLQuery.run(query)
+    }
+
     /** Delete favgroup. */
-    public static deleteFavgroup = async (username: string, name: string) => {
+    public static deleteFavgroup = async (username: string, slug: string) => {
         const query: QueryConfig = {
             text: functions.multiTrim(/*sql*/`
                 DELETE FROM favgroups
-                WHERE favgroups."username" = $1 AND favgroups."name" = $2
+                WHERE favgroups."username" = $1 AND favgroups."slug" = $2
             `),
-            values: [username, name]
+            values: [username, slug]
         }
         const result = await SQLQuery.run(query)
         return result
     }
 
     /** Insert favgroup post. */
-    public static insertFavgroupPost = async (username: string, name: string, postID: number) => {
+    public static insertFavgroupPost = async (username: string, slug: string, postID: number, order: number) => {
         const query: QueryConfig = {
-            text: /*sql*/`INSERT INTO "favgroup map" ("username", "name", "postID") VALUES ($1, $2, $3)`,
-            values: [username, name, postID]
+            text: /*sql*/`INSERT INTO "favgroup map" ("username", "slug", "postID", "order") VALUES ($1, $2, $3, $4)`,
+            values: [username, slug, postID, order]
         }
         const result = await SQLQuery.run(query)
         return result
     }
 
     /** Delete favgroup post. */
-    public static deleteFavgroupPost = async (postID: number, username: string, name: string) => {
-        const query: QueryConfig = {
+    public static deleteFavgroupPost = async (postID: number, username: string, slug: string) => {
+        const orderQuery: QueryArrayConfig = {
+            text: /*sql*/`SELECT "favgroup map"."order" FROM "favgroup map" WHERE "favgroup map"."postID" = $1 AND "favgroup map"."username" = $2 AND "favgroup map"."slug" = $3`,
+            rowMode: "array",
+            values: [postID, username, slug]
+        }
+        const result = await SQLQuery.run(orderQuery)
+        const deleteOrder = result[0]?.[0]
+        if (!deleteOrder) return
+
+        const deleteQuery: QueryConfig = {
             text: functions.multiTrim(/*sql*/`
                 DELETE FROM "favgroup map" 
-                WHERE "favgroup map"."postID" = $1 AND "favgroup map"."username" = $2 AND "favgroup map"."name" = $3
+                WHERE "favgroup map"."postID" = $1 AND "favgroup map"."username" = $2 AND "favgroup map"."slug" = $3
             `),
-            values: [postID, username, name]
+            values: [postID, username, slug]
         }
-        const result = await SQLQuery.run(query)
-        return result
+        await SQLQuery.run(deleteQuery)
+
+        const decrementQuery: QueryConfig = {
+            text: /*sql*/`UPDATE "favgroup map" SET "order" = "order" - 1 WHERE "username" = $1 AND "slug" = $2 AND "order" > $3`,
+            values: [username, slug, deleteOrder]
+        }
+        return SQLQuery.run(decrementQuery)
     }
 
     /** Get post favgroups. */
@@ -206,18 +229,19 @@ export default class SQLFavorite {
         const query: QueryConfig = {
         text: functions.multiTrim(/*sql*/`
                 WITH post_json AS (
-                    SELECT posts.*, json_agg(DISTINCT images.*) AS images
+                    SELECT posts.*, "favgroup map"."order", json_agg(DISTINCT images.*) AS images
                     FROM posts
-                    JOIN images ON images. "postID" = posts."postID"
-                    GROUP BY posts."postID"
+                    JOIN images ON images."postID" = posts."postID"
+                    JOIN "favgroup map" ON "favgroup map"."postID" = posts."postID"
+                    GROUP BY posts."postID", "favgroup map"."order"
                 )
-                SELECT favgroups.*, json_agg(post_json.*) AS posts,
+                SELECT favgroups.*, json_agg(post_json.* ORDER BY post_json."order" ASC) AS posts,
                 COUNT(DISTINCT post_json."postID") AS "postCount"
                 FROM "favgroup map"
-                JOIN favgroups ON favgroups."name" = "favgroup map"."name"
+                JOIN favgroups ON favgroups."slug" = "favgroup map"."slug"
                 JOIN post_json ON post_json."postID" = "favgroup map"."postID"
                 WHERE "favgroup map"."postID" = $1 AND "favgroup map"."username" = $2
-                GROUP BY favgroups."username", favgroups."name"
+                GROUP BY favgroups."username", favgroups."slug"
             `),
             values: [postID, username]
         }
@@ -226,7 +250,7 @@ export default class SQLFavorite {
     }
 
     /** Get favgroup. */
-    public static favgroup = async (username: string, name: string, type?: string, restrict?: string, style?: string, sort?: string, sessionUsername?: string) => {
+    public static favgroup = async (username: string, slug: string, type?: string, restrict?: string, style?: string, sort?: string, sessionUsername?: string) => {
         let typeQuery = ""
         if (type === "image") typeQuery = `posts.type = 'image'`
         if (type === "animation") typeQuery = `posts.type = 'animation'`
@@ -280,7 +304,7 @@ export default class SQLFavorite {
         const query: QueryConfig = {
         text: functions.multiTrim(/*sql*/`
                 WITH post_json AS (
-                    SELECT posts.*, json_agg(DISTINCT images.*) AS images,
+                    SELECT posts.*, "favgroup map"."order", json_agg(DISTINCT images.*) AS images,
                     ${includeTags ? `array_agg(DISTINCT "tag map".tag) AS tags,` : ""}
                     ${includeTags ? `COUNT(DISTINCT "tag map"."tag") AS "tagCount",` : ""}
                     MAX(DISTINCT images."size") AS "imageSize",
@@ -302,20 +326,20 @@ export default class SQLFavorite {
                     ${includeTags ? `JOIN "tag map" ON posts."postID" = "tag map"."postID"` : ""}
                     FULL JOIN "favorites" ON posts."postID" = "favorites"."postID"
                     FULL JOIN "cuteness" ON posts."postID" = "cuteness"."postID"
-                    ${sessionUsername ? `LEFT JOIN "favgroup map" ON posts."postID" = "favgroup map"."postID"` : ""}
+                    JOIN "favgroup map" ON "favgroup map"."postID" = posts."postID"
                     ${whereQueries ? `WHERE ${whereQueries}` : ""}
-                    GROUP BY posts."postID"
+                    GROUP BY posts."postID", "favgroup map"."order"
                     ${sortQuery}
                 )
-                SELECT favgroups.*, json_agg(post_json.*) AS posts,
+                SELECT favgroups.*, json_agg(post_json.* ORDER BY post_json."order" ASC) AS posts,
                 COUNT(DISTINCT post_json."postID") AS "postCount"
                 FROM "favgroup map"
-                JOIN favgroups ON favgroups."name" = "favgroup map"."name"
+                JOIN favgroups ON favgroups."slug" = "favgroup map"."slug"
                 JOIN post_json ON post_json."postID" = "favgroup map"."postID"
-                WHERE "favgroup map"."username" = $1 AND "favgroup map"."name" = $2 
-                GROUP BY favgroups."username", favgroups."name"
+                WHERE "favgroup map"."username" = $1 AND "favgroup map"."slug" = $2 
+                GROUP BY favgroups."username", favgroups."slug"
             `),
-            values: [username, name]
+            values: [username, slug]
         }
         if (values?.[0]) query.values?.push(...values)
         const result = await SQLQuery.run(query)
@@ -327,22 +351,53 @@ export default class SQLFavorite {
         const query: QueryConfig = {
         text: functions.multiTrim(/*sql*/`
                 WITH post_json AS (
-                    SELECT posts.*, json_agg(DISTINCT images.*) AS images
+                    SELECT posts.*, "favgroup map"."order", json_agg(DISTINCT images.*) AS images
                     FROM posts
-                    JOIN images ON images. "postID" = posts."postID"
-                    GROUP BY posts."postID"
+                    JOIN images ON images."postID" = posts."postID"
+                    JOIN "favgroup map" ON "favgroup map"."postID" = posts."postID"
+                    GROUP BY posts."postID", "favgroup map"."order"
                 )
-                SELECT favgroups.*, json_agg(post_json.*) AS posts,
+                SELECT favgroups.*, json_agg(post_json.* ORDER BY post_json."order" ASC) AS posts,
                 COUNT(DISTINCT post_json."postID") AS "postCount"
                 FROM "favgroup map"
-                JOIN favgroups ON favgroups."name" = "favgroup map"."name"
+                JOIN favgroups ON favgroups."slug" = "favgroup map"."slug"
                 JOIN post_json ON post_json."postID" = "favgroup map"."postID"
                 WHERE "favgroup map"."username" = $1
-                GROUP BY favgroups."username", favgroups."name"
+                GROUP BY favgroups."username", favgroups."slug"
             `),
             values: [username]
         }
         const result = await SQLQuery.run(query)
         return result
+    }
+
+    /** Purge favgroup map. */
+    public static purgeFavgroupMap = async (username: string, slug: string) => {
+        const query: QueryConfig = {
+            text: /*sql*/`DELETE FROM "favgroup map" WHERE "favgroup map"."username" = $1 AND "favgroup map"."slug" = $2`,
+            values: [username, slug]
+        }
+        return SQLQuery.run(query)
+    }
+
+    /** Bulk insert favgroup mappings. */
+    public static bulkInsertFavgroupMappings = async (username: string, slug: string, posts: any[]) => {
+        let rawValues = [] as any
+        let valueArray = [] as any 
+        let i = 1 
+        for (let j = 0; j < posts.length; j++) {
+            valueArray.push(`($${i}, $${i + 1}, $${i + 2}, $${i + 3})`)
+            rawValues.push(username)
+            rawValues.push(slug)
+            rawValues.push(posts[j].postID)
+            rawValues.push(posts[j].order)
+            i += 4
+        }
+        let valueQuery = `VALUES ${valueArray.join(", ")}`
+        const query: QueryConfig = {
+            text: /*sql*/`INSERT INTO "favgroup map" ("username", "slug", "postID", "order") ${valueQuery}`,
+            values: [...rawValues]
+        }
+        return SQLQuery.run(query)
     }
 }

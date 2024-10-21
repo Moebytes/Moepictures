@@ -1,7 +1,7 @@
 import React, {useEffect, useContext, useState} from "react"
 import {useHistory} from "react-router-dom"
 import {HashLink as Link} from "react-router-hash-link"
-import {ThemeContext, EnableDragContext, DeleteFavGroupNameContext, SessionContext, SessionFlagContext} from "../Context"
+import {ThemeContext, EnableDragContext, DeleteFavGroupObjContext, SessionContext, SessionFlagContext} from "../Context"
 import functions from "../structures/Functions"
 import "./styles/dialog.less"
 import Draggable from "react-draggable"
@@ -11,7 +11,7 @@ const DeleteFavgroupDialog: React.FunctionComponent = (props) => {
     const {enableDrag, setEnableDrag} = useContext(EnableDragContext)
     const {session, setSession} = useContext(SessionContext)
     const {sessionFlag, setSessionFlag} = useContext(SessionFlagContext)
-    const {deleteFavGroupName, setDeleteFavGroupName} = useContext(DeleteFavGroupNameContext)
+    const {deleteFavGroupObj, setDeleteFavGroupObj} = useContext(DeleteFavGroupObjContext)
     const history = useHistory()
 
     useEffect(() => {
@@ -19,7 +19,7 @@ const DeleteFavgroupDialog: React.FunctionComponent = (props) => {
     }, [])
 
     useEffect(() => {
-        if (deleteFavGroupName) {
+        if (deleteFavGroupObj) {
             // document.body.style.overflowY = "hidden"
             document.body.style.pointerEvents = "none"
         } else {
@@ -27,23 +27,24 @@ const DeleteFavgroupDialog: React.FunctionComponent = (props) => {
             document.body.style.pointerEvents = "all"
             setEnableDrag(true)
         }
-    }, [deleteFavGroupName])
+    }, [deleteFavGroupObj])
 
     const deleteFavgroup = async () => {
-        await functions.delete("/api/favgroup", {name: deleteFavGroupName}, session, setSessionFlag)
-        setDeleteFavGroupName(null)
+        await functions.delete("/api/favgroup/delete", {name: deleteFavGroupObj.name}, session, setSessionFlag)
+        setDeleteFavGroupObj(null)
         setSessionFlag(true)
+        history.push("/profile")
     }
 
     const click = (button: "accept" | "reject") => {
         if (button === "accept") {
             deleteFavgroup()
         } else {
-            setDeleteFavGroupName(null)
+            setDeleteFavGroupObj(null)
         }
     }
 
-    if (deleteFavGroupName) {
+    if (deleteFavGroupObj) {
         return (
             <div className="dialog">
                 <Draggable handle=".dialog-title-container">

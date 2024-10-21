@@ -27,16 +27,13 @@ const ArtistRow: React.FunctionComponent<Props> = (props) => {
     const {posts, setPosts} = useContext(PostsContext)
     const history = useHistory()
 
-    const searchTag = (event: React.MouseEvent) => {
+    const tagPage = (event: React.MouseEvent) => {
+        event.preventDefault()
         if (event.ctrlKey || event.metaKey || event.button === 1) {
-            //window.open("/posts", "_blank")
             window.open(`/tag/${props.artist.tag}`, "_blank")
         } else {
-            //history.push("/posts")
             history.push(`/tag/${props.artist.tag}`)
         }
-        //setSearch(props.artist.tag)
-        //setSearchFlag(true)
     }
 
     const set = (image: string, index: number, newTab: boolean) => {
@@ -95,7 +92,7 @@ const ArtistRow: React.FunctionComponent<Props> = (props) => {
             <div className="artistrow-row">
                 {props.artist.image ? <img className="artistrow-img" src={functions.getTagLink("artist", props.artist.image)}/> : null}
                 <span className="artistrow-text-hover">
-                    <span className="artistrow-text" onClick={searchTag} onAuxClick={searchTag}>{functions.toProperCase(props.artist.tag.replaceAll("-", " "))}</span>
+                    <span className="artistrow-text" onClick={tagPage} onAuxClick={tagPage} onContextMenu={tagPage}>{functions.toProperCase(props.artist.tag.replaceAll("-", " "))}</span>
                     {artistSocialJSX()}
                     <span className="artistrow-text-alt">{props.artist.postCount}</span>
                 </span>

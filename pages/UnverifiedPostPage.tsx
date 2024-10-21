@@ -17,6 +17,7 @@ import DeletePostDialog from "../dialogs/DeletePostDialog"
 import DeleteCommentDialog from "../dialogs/DeleteCommentDialog"
 import EditCommentDialog from "../dialogs/EditCommentDialog"
 import TagEditDialog from "../dialogs/TagEditDialog"
+import SourceEditDialog from "../dialogs/SourceEditDialog"
 import ThirdParty from "../components/ThirdParty"
 import Parent from "../components/Parent"
 import NewTags from "../components/NewTags"
@@ -234,6 +235,7 @@ const UnverifiedPostPage: React.FunctionComponent<Props> = (props) => {
     return (
         <>
         <TagEditDialog/>
+        <SourceEditDialog/>
         {post ? <TitleBar post={post} goBack={true}/> : <TitleBar goBack={true}/>}
         <NavBar/>
         <div className="body">

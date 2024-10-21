@@ -2,12 +2,16 @@ import React, {useContext, useEffect, useState} from "react"
 import {useHistory} from "react-router-dom"
 import {HashLink as Link} from "react-router-hash-link"
 import favicon from "../assets/icons/favicon.png"
+import favicon2 from "../assets/icons/favicon2.png"
+import favicon3 from "../assets/icons/favicon3.png"
+import favicon4 from "../assets/icons/favicon4.png"
 import {ThemeContext, HideNavbarContext, EnableDragContext, RelativeContext, HideTitlebarContext, HeaderFlagContext,
 SearchContext, SearchFlagContext, ImageTypeContext, RestrictTypeContext, StyleTypeContext, SortTypeContext,
 HeaderTextContext, HideMobileNavbarContext, MobileContext, VisiblePostsContext, ScrollYContext, MobileScrollingContext, 
 SiteHueContext, SiteLightnessContext, SiteSaturationContext, AutoSearchContext, ActiveGroupContext} from "../Context"
 import functions from "../structures/Functions"
 import hamburger from "../assets/icons/hamburger.png"
+import lockIcon from "../assets/icons/lock-red.png"
 import "./styles/titlebar.less"
 
 const darkColorList = {
@@ -29,31 +33,31 @@ const darkColorList = {
     "--tooltipBG": "rgba(11, 3, 34, 0.85)",
     "--sortbarText": "#3538fc",
     "--imageBorder": "#0a0f7f",
-    "--inputBorder": "#000000",
+    "--inputBorder": "#0d0325",
     "--text": "#5a56ff",
     "--text-alt": "#8b4dff",
     "--inputBG": "#050020",
     "--footerBG": "#0b0322",
     "--drop-color1": "rgba(59, 13, 165, 0.7)",
     "--drop-color2": "rgba(86, 26, 226, 0.9)",
-    "--buttonBG": "#ff11af",
     "--bubbleBG": "rgba(89, 43, 255, 0.8)",
     "--binary": "#000000",
     "--selectBorder": "#6710e6",
     "--progressText": "#ffffff",
     "--progressBG": "#000000",
-    "--audioPlayerColor": "#130737"
+    "--audioPlayerColor": "#130737",
+    "--buttonBG": "#ff11af",
 }
 
 const lightColorList = {
     "--selection": "#e0e0ff",
     "--background": "#ffffff",
-    "--background2": "#f7f7ff",
-    "--titlebarBG": "#dfdfff",
+    "--background2": "#f9f9ff",
+    "--titlebarBG": "#eeeeff",
     "--titleTextA": "#745dff",
     "--titleTextB": "#5d60ff",
     "--titlebarText": "#7e66ff",
-    "--navbarBG": "#dbddff",
+    "--navbarBG": "#eeeeff",
     "--navbarText": "#6c47ff",
     "--sidebarBG": "#f7f7ff",
     "--sidebarSearchFocus": "#8581ff",
@@ -71,13 +75,13 @@ const lightColorList = {
     "--footerBG": "#ffffff",
     "--drop-color1": "rgba(153, 112, 250, 0.7)",
     "--drop-color2": "rgba(158, 124, 252, 0.9)",
-    "--buttonBG": "#ff92ff",
     "--bubbleBG": "rgba(202, 171, 255, 0.8)",
     "--binary": "#ffffff",
     "--selectBorder": "#8373ff",
     "--progressText": "#000000",
     "--progressBG": "#ffffff",
-    "--audioPlayerColor": "#fbfaff"
+    "--audioPlayerColor": "#fbfaff",
+    "--buttonBG": "#ff92ff",
 }
 
 interface Props {
@@ -130,10 +134,17 @@ const TitleBar: React.FunctionComponent<Props> = (props) => {
         const colorList = theme.includes("light") ? lightColorList : darkColorList
         let targetLightness = siteLightness
         if (theme.includes("light") && siteLightness > 50) targetLightness = 50
+        let noRotation = [
+            "--buttonBG"
+        ]
         for (let i = 0; i < Object.keys(colorList).length; i++) {
             const key = Object.keys(colorList)[i]
             const color = Object.values(colorList)[i]
-            document.documentElement.style.setProperty(key, functions.rotateColor(color, siteHue, siteSaturation, targetLightness))
+            if (noRotation.includes(key)) {
+                document.documentElement.style.setProperty(key, color)
+            } else {
+                document.documentElement.style.setProperty(key, functions.rotateColor(color, siteHue, siteSaturation, targetLightness))
+            }
         }
         localStorage.setItem("siteHue", siteHue)
         localStorage.setItem("siteSaturation", siteSaturation)
@@ -191,6 +202,23 @@ const TitleBar: React.FunctionComponent<Props> = (props) => {
         }
     }, [mobile])
 
+    const getFavicon = () => {
+        if (typeof window === "undefined") return favicon
+        if (siteHue >= 240) {
+            functions.changeFavicon(favicon2)
+            return favicon2
+        } else if (siteHue >= 160) {
+            functions.changeFavicon(favicon)
+            return favicon
+        } else if (siteHue >= 100) {
+            functions.changeFavicon(favicon3)
+            return favicon3
+        } else {
+            functions.changeFavicon(favicon4)
+            return favicon4
+        }
+    }
+
     return (
         <div className={`titlebar ${hideTitlebar ? "hide-titlebar" : ""} ${relative ? "titlebar-relative" : ""} ${mobileScrolling ? "hide-mobile-titlebar" : ""}`} onMouseEnter={() => setEnableDrag(false)}>
             {mobile ?
@@ -214,19 +242,21 @@ const TitleBar: React.FunctionComponent<Props> = (props) => {
                             <span className="titlebar-text-a">s</span>
                     </div>
                     <div className="titlebar-image-container">
-                        <img className="titlebar-img" src={favicon}/>
+                        <img className="titlebar-img" src={getFavicon()}/>
                     </div>
                 </span>
             </div>
             {!mobile ? 
             <div className="titlebar-search-text-container">
+                {props.post?.locked ? <img draggable={false} className="titlebar-search-icon" src={lockIcon}/> : null}
                 <span className={`titlebar-search-text ${props.post?.hidden ? "strikethrough" : ""}`}>
                     {props.historyID ? <span style={{color: "var(--historyColor)", marginRight: "10px"}}>{`[History: ${props.historyID}]`}</span> : null}
                     {props.translationID ? <span style={{color: "var(--translationColor)", marginRight: "10px"}}>{`[Translation: ${props.translationID}]`}</span> : null}
                     {restrictType === "explicit" ? <span style={{color: "var(--r18Color)", marginRight: "10px"}}>[R18]</span> : null}
                     {activeGroup ? <span style={{color: "var(--text-strong)", marginRight: "10px"}}>[{activeGroup}]</span> : null}
                     {autoSearch ? <span style={{color: "var(--premiumColor)", marginRight: "10px"}}>[Auto Search]</span> : null}
-                    {headerText}</span>
+                    {headerText}
+                </span>
             </div> : null}
         </div>
     )

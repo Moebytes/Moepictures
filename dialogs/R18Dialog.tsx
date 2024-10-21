@@ -58,7 +58,7 @@ const R18Dialog: React.FunctionComponent = (props) => {
                         </div>
                         <div className="dialog-row">
                             <span className="dialog-text" style={{color: "var(--r18Color)"}}>
-                                R18 Content is only suitable to be viewed by people over the age of 18. By continuing, you assert that you 
+                                R18 Content is only suitable to be viewed by people over the age of 18. By continuing, you confirm that you 
                                 are 18 years old or older and willing to view such content.
                             </span>
                         </div>

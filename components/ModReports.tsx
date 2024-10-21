@@ -1,11 +1,13 @@
 import React, {useContext, useEffect, useState} from "react"
 import {useHistory} from "react-router-dom"
-import {ThemeContext, SearchContext, SearchFlagContext, SessionContext, SessionFlagContext, SiteHueContext, SiteLightnessContext, SiteSaturationContext} from "../Context"
+import {ThemeContext, SearchContext, SearchFlagContext, SessionContext, SessionFlagContext, EmojisContext,
+SiteHueContext, SiteLightnessContext, SiteSaturationContext} from "../Context"
 import {HashLink as Link} from "react-router-hash-link"
 import favicon from "../assets/icons/favicon.png"
 import approve from "../assets/icons/approve.png"
 import reject from "../assets/icons/reject.png"
 import functions from "../structures/Functions"
+import jsxFunctions from "../structures/JSXFunctions"
 import "./styles/modposts.less"
 
 interface Props {
@@ -19,6 +21,7 @@ const ReportRow: React.FunctionComponent<Props> = (props) => {
     const {siteLightness, setSiteLightness} = useContext(SiteLightnessContext)
     const {session, setSession} = useContext(SessionContext)
     const {sessionFlag, setSessionFlag} = useContext(SessionFlagContext)
+    const {emojis, setEmojis} = useContext(EmojisContext)
     const [hover, setHover] = useState(false)
     const [asset, setAsset] = useState(null) as any
     const history = useHistory()
@@ -93,19 +96,23 @@ const ReportRow: React.FunctionComponent<Props> = (props) => {
 
     let img = ""
     let username = ""
-    let text = ""
+    let textType = ""
+    let text = [] as any
     let id = ""
     if (asset) {
         img = asset.image ? functions.getTagLink("pfp", asset.image) : favicon
         username = asset.username ? asset.username : asset.creator
         if (props.request.type === "comment") {
-            text = `Comment: ${asset.comment}`
+            textType = "Comment: "
+            text = jsxFunctions.parseTextLinks(asset.comment, emojis)
             id = asset.postID
         } else if (props.request.type === "thread") {
-            text = `Thread: ${asset.title}`
+            textType = "Thread: "
+            text = jsxFunctions.parseTextLinks(asset.title, emojis)
             id = asset.threadID
         } else if (props.request.type === "reply") {
-            text = `Reply: ${asset.content}`
+            textType = "Reply: "
+            text = jsxFunctions.parseTextLinks(asset.content, emojis)
             id = asset.threadID
         }
     }
@@ -119,7 +126,7 @@ const ReportRow: React.FunctionComponent<Props> = (props) => {
                 <span className="mod-post-link" onClick={() => history.push(`/user/${props.request.reporter}`)}>Requester: {functions.toProperCase(props.request?.reporter) || "deleted"}</span>
                 <span className="mod-post-text">Reason: {props.request.reason}</span>
                 <span className="mod-post-link" onClick={() => history.push(`/user/${username}`)}>User: {username}</span>
-                <span className="mod-post-text">{text}</span>
+                <span className="mod-post-text">{textType}{text}</span>
             </div>
             <div className="mod-post-options">
                 <div className="mod-post-options-container" onClick={() => rejectRequest(username, id)}>
@@ -221,6 +228,15 @@ const ModReports: React.FunctionComponent = (props) => {
     const generateTagsJSX = () => {
         let jsx = [] as any
         const requests = functions.removeDuplicates(visibleRequests)
+        if (!requests.length) {
+            return (
+                <div className="mod-post" style={{justifyContent: "center", alignItems: "center", height: "75px"}} key={0}>
+                    <div className="mod-post-text-column">
+                        <span className="mod-post-text">No data</span>
+                    </div>
+                </div>
+            )
+        }
         for (let i = 0; i < requests.length; i++) {
             const request = requests[i] as any
             if (!request) break

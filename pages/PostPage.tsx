@@ -15,6 +15,7 @@ import functions from "../structures/Functions"
 import Carousel from "../components/Carousel"
 import DeletePostDialog from "../dialogs/DeletePostDialog"
 import TakedownPostDialog from "../dialogs/TakedownPostDialog"
+import LockPostDialog from "../dialogs/LockPostDialog"
 import DeleteCommentDialog from "../dialogs/DeleteCommentDialog"
 import EditCommentDialog from "../dialogs/EditCommentDialog"
 import EditTranslationDialog from "../dialogs/EditTranslationDialog"
@@ -450,6 +451,7 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
     }, [revertTranslationHistoryFlag, revertTranslationHistoryID, translationID, post, session])
 
     const revertTranslationHistoryDialog = async () => {
+        if (post.locked && !permissions.isMod(session)) return setRevertTranslationHistoryID({failed: "locked", historyID: translationID})
         setRevertTranslationHistoryID({failed: false, historyID: translationID})
     }
 
@@ -507,6 +509,7 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
     }, [revertPostHistoryFlag, revertPostHistoryID, historyID, post, session])
 
     const revertPostHistoryDialog = async () => {
+        if (post.locked && !permissions.isMod(session)) return setRevertPostHistoryID({failed: "locked", historyID})
         setRevertPostHistoryID({failed: false, historyID})
     }
 
@@ -623,6 +626,7 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
         <RevertPostHistoryDialog/>
         <RevertTranslationHistoryDialog/>
         {post ? <DeletePostDialog post={post}/> : null}
+        {post ? <LockPostDialog post={post}/> : null}
         {post ? <TakedownPostDialog post={post}/> : null}
         {post ? <SaveTranslationDialog post={post}/> : null}
         <EditTranslationDialog/>

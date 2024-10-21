@@ -64,7 +64,7 @@ const EditGroupDialog: React.FunctionComponent = (props) => {
                 return
             }
             await functions.put("/api/group/edit", {slug: editGroupObj.slug, name, description}, session, setSessionFlag)
-            const newSlug = String(name).trim().toLowerCase().replace(/\s+/g, "-")
+            const newSlug = functions.generateSlug(name)
             history.push(`/group/${newSlug}`)
             setEditGroupObj(null)
             setGroupFlag(true)
