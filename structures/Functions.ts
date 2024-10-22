@@ -1796,6 +1796,10 @@ export default class Functions {
                     specialFlagsArray[j] = "-"
                     permutations[i][j] = permutations[i][j].replace("-", "")
                 }
+                if (permutations[i][j]?.startsWith("*")) {
+                    specialFlagsArray[j] = "*"
+                    permutations[i][j] = permutations[i][j].replace("*", "")
+                }
                 const exists = savedTags[permutations[i][j]]
                 if (exists) matchesArray[i]++
             }

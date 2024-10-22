@@ -196,7 +196,7 @@ const GroupPage: React.FunctionComponent<Props> = (props) => {
     const groupOptionsJSX = () => {
         let jsx = [] as any
         if (session.username) {
-            jsx.push(<img className="group-opt" src={groupHistory} onClick={() => null} style={{filter: getFilter()}}/>)
+            jsx.push(<img className="group-opt" src={groupHistory} onClick={() => history.push(`/group/history/${group.slug}`)} style={{filter: getFilter()}}/>)
             jsx.push(<img className="group-opt" src={reorderState ? groupReorderActive : groupReorder} onClick={() => changeReorderState()} style={{filter: reorderState ? "" : getFilter()}}/>)
             if (reorderState) {
                 jsx.push(<img className="group-opt" src={groupCancel} onClick={() => cancelReorder()} style={{filter: getFilter()}}/>)

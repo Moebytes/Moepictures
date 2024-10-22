@@ -1081,7 +1081,7 @@ const UserRoutes = (app: Express) => {
             const offset = req.query.offset as string
             if (!req.session.username) return res.status(403).send("Unauthorized")
             if (!permissions.isPremium(req.session)) return res.status(402).send("Premium only")
-            const result = await sql.history.userSearchHistory(req.session.username, offset)
+            const result = await sql.history.userSearchHistory(req.session.username, "100", offset)
             res.status(200).json(result)
         } catch (e) {
             console.log(e)

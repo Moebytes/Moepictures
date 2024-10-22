@@ -65,7 +65,7 @@ const ModGroupEdits: React.FunctionComponent = (props) => {
     }, [requests, index, updateVisibleRequestFlag])
 
     const editGroup = async (username: string, slug: string, name: string, description: string) => {
-        await functions.put("/api/group/edit", {slug, name, description}, session, setSessionFlag)
+        await functions.put("/api/group/edit", {username, slug, name, description}, session, setSessionFlag)
         await functions.post("/api/group/edit/request/fulfill", {username, slug, accepted: true}, session, setSessionFlag)
         await updateGroups()
         setUpdateVisibleRequestFlag(true)

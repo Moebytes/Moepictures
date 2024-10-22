@@ -84,6 +84,12 @@ const SearchRoutes = (app: Express) => {
                     if (!permissions.isMod(req.session) && username !== req.session.username) return res.status(403).send("Unauthorized")
                 }
                 result = favgroup.posts.map((p: any) => ({postCount: favgroup.postCount, ...p}))
+            } else if (query.startsWith("history:")) {
+                const [h, username] = query.split(":")
+                if (!permissions.isPremium(req.session)) return res.status(402).send("Premium only")
+                if (username !== req.session.username && !permissions.isAdmin(req.session)) return res.status(403).send("Unauthorized")
+                let history = await sql.history.userSearchHistory(username, limit, offset, type, restrict, style, sort, req.session.username)
+                result = history.map((h: any) => ({postCount: h.historyCount, ...h.post}))
             } else {
                 result = await sql.search.search(tags, type, restrict, style, sort, offset, limit, withTags, req.session.username)
             }

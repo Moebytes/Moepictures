@@ -62,7 +62,7 @@ const ModGroups: React.FunctionComponent = (props) => {
     }, [requests, index, updateVisibleRequestFlag])
 
     const addGroup = async (username: string, name: string, slug: string, postID: string, ) => {
-        await functions.post("/api/group", {postID, name}, session, setSessionFlag)
+        await functions.post("/api/group", {username, postID, name}, session, setSessionFlag)
         await functions.post("/api/group/request/fulfill", {username, slug, postID, accepted: true}, session, setSessionFlag)
         await updateGroups()
         setUpdateVisibleRequestFlag(true)

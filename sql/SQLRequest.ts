@@ -278,8 +278,28 @@ export default class SQLRequest {
     /** Delete pending group delete. */
     public static deleteGroupDeleteRequest = async (username: string, slug: string) => {
         const query: QueryConfig = {
-        text: /*sql*/`DELETE FROM "delete requests" WHERE "delete requests"."username" = $1 AND "delete requests"."group" = $2`,
+        text: /*sql*/`DELETE FROM "delete requests" WHERE "delete requests"."username" = $1 AND "delete requests"."group" = $2 AND "delete requests"."groupPost" IS NULL`,
         values: [username, slug]
+        }
+        const result = await SQLQuery.run(query)
+        return result
+    }
+
+    /** Insert pending group delete. */
+    public static insertGroupPostDeleteRequest = async (username: string, slug: string, postID: string, reason: string) => {
+        const query: QueryConfig = {
+        text: /*sql*/`INSERT INTO "delete requests" ("username", "group", "groupPost", "reason") VALUES ($1, $2, $3, $4)`,
+        values: [username, slug, postID, reason]
+        }
+        const result = await SQLQuery.run(query)
+        return result
+    }
+
+    /** Delete pending group delete. */
+    public static deleteGroupPostDeleteRequest = async (username: string, slug: string, postID: string) => {
+        const query: QueryConfig = {
+        text: /*sql*/`DELETE FROM "delete requests" WHERE "delete requests"."username" = $1 AND "delete requests"."group" = $2 AND "delete requests"."groupPost" = $3`,
+        values: [username, slug, postID]
         }
         const result = await SQLQuery.run(query)
         return result
@@ -289,9 +309,17 @@ export default class SQLRequest {
     public static groupDeleteRequests = async (offset?: string) => {
         const query: QueryConfig = {
         text: functions.multiTrim(/*sql*/`
-            SELECT "delete requests".*, groups.*
+            WITH post_json AS (
+                SELECT posts.*, json_agg(DISTINCT images.*) AS images
+                FROM posts
+                JOIN images ON images."postID" = posts."postID"
+                GROUP BY posts."postID"
+            )
+            SELECT "delete requests".*, groups.*,
+            to_json((array_agg(post_json.*))[1]) AS post
             FROM "delete requests"
             JOIN groups ON groups.slug = "delete requests".group
+            LEFT JOIN post_json ON post_json."postID" = "delete requests"."groupPost"
             WHERE "delete requests"."group" IS NOT NULL
             GROUP BY "delete requests"."requestID", groups."groupID"
             ORDER BY "delete requests"."requestID" DESC

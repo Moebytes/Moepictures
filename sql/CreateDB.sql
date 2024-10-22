@@ -338,6 +338,7 @@ CREATE TABLE IF NOT EXISTS "delete requests" (
     "postID" bigint REFERENCES "posts" ON UPDATE CASCADE ON DELETE CASCADE,
     "tag" text REFERENCES "tags" ON UPDATE CASCADE ON DELETE CASCADE,
     "group" bigint REFERENCES "groups" ("slug") ON UPDATE CASCADE ON DELETE CASCADE,
+    "groupPost" bigint REFERENCES "posts" ("postID") ON UPDATE CASCADE ON DELETE CASCADE,
     "reason" text
 );
 

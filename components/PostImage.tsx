@@ -1277,7 +1277,7 @@ const PostImage: React.FunctionComponent<Props> = (props) => {
                     </div>
                     {functions.isVideo(props.img) ? 
                     <video draggable={false} loop muted disablePictureInPicture playsInline className="dummy-post-video" src={props.img}></video> :
-                    <img draggable={false} className="dummy-post-image" src={img}/>/*<canvas className="dummy-post-image" ref={dummyRef}></canvas>*/}
+                    <img draggable={false} className="dummy-post-image" src={img}/>}
                     <div className="encoding-overlay" style={{display: encodingOverlay ? "flex" : "none"}}>
                         <span className="encoding-overlay-text">{functions.isVideo(props.img) ? "Rendering Video..." : "Rendering GIF..."}</span>
                     </div>
@@ -1354,8 +1354,7 @@ const PostImage: React.FunctionComponent<Props> = (props) => {
                     <video draggable={false} autoPlay loop muted disablePictureInPicture playsInline className={`${imageExpand? "post-video-expand" : "post-video"}`} ref={videoRef} src={props.img} onLoadedData={(event) => onLoad(event)}></video>
                     <img draggable={false} ref={backFrameRef} src={backFrame} className={`${imageExpand? "back-frame-expand" : "back-frame"}`}/>
                     </> : <>
-                    {functions.isGIF(props.img) || gifData ? 
-                    <>
+                    {functions.isGIF(props.img) || gifData ? <>
                     <div className="gif-controls" ref={gifControls} onMouseUp={() => setDragging(false)} onMouseOver={controlMouseEnter} onMouseLeave={controlMouseLeave}>
                         {duration >= 1 ?
                         <div className="gif-control-row" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
@@ -1436,12 +1435,9 @@ const PostImage: React.FunctionComponent<Props> = (props) => {
                         <TransformWrapper disabled={disableZoom} ref={zoomRef} minScale={1} maxScale={8} onZoomStop={(ref) => setZoom(ref.state.scale)} wheel={{step: 0.1, touchPadDisabled: true}}
                         zoomAnimation={{size: 0, disabled: true}} alignmentAnimation={{disabled: true}} doubleClick={{mode: "reset", animationTime: 0}} panning={{disabled: zoom === 1}}>
                         <TransformComponent wrapperStyle={{pointerEvents: disableZoom ? "none" : "all"}}>
-                            {/* <canvas className="post-lightness-overlay" ref={lightnessRef}></canvas> */}
-                            {/* <canvas className="post-sharpen-overlay" ref={overlayRef}></canvas> */}
                             <img draggable={false} className="post-lightness-overlay" ref={lightnessRef} src={img}/>
                             <img draggable={false} className="post-sharpen-overlay" ref={overlayRef} src={img}/>
                             <canvas draggable={false} className="post-pixelate-canvas" ref={pixelateRef}></canvas>
-                            {/* <canvas className="post-image" ref={ref}></canvas> */}
                             <img draggable={false} className={`${imageExpand? "post-image-expand" : "post-image"}`} ref={ref} src={img} onLoad={(event) => onLoad(event)}/>
                         </TransformComponent>
                         </TransformWrapper>
