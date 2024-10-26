@@ -1,8 +1,5 @@
 # Moepictures.moe
 
-**Update - 3/8/2023**
-I took down the online website because I can't afford the hosting costs. You can still run it locally using your own database and images. 
-
 Moepictures is an image board site for cute anime art, organized by tags.
 
 <img src="assets/misc/readme.png">
@@ -27,28 +24,16 @@ can make everything look like a pixel game. When playing audio, the pixelate fil
 Moepictures uses custom gif/video/music/3d players, so you can do many things that aren't normally possible like pausing/seeking 
 gifs, reverse playback, and modification of playback speed. 
 
-GIF Player:
-
-<img src="assets/misc/gifplayer.png">
-
 Video Player:
 
 <img src="assets/misc/videoplayer.png">
 
-3D Model Player:
-
-<img src="assets/misc/3dplayer.png">
-
-Music Player:
-
-<img src="assets/misc/musicplayer.png">
-
-The video player has some additional controls over the gif player, such as volume and pitch preservement. The 3d model player has 
+The video player has some additional controls for volume and pitch preservement. The 3d model player has 
 controls for wireframe, matcap, shapekeys, and lighting. The music player can playback audio in reverse.
 
 ### Translations
 
-<img src="assets/misc/translations.png">
+<img src="assets/misc/translations.png" height="600">
 
 As often images might contain japanese text, adding and viewing translations is also supported!
 
