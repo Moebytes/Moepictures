@@ -192,6 +192,10 @@ const MiscRoutes = (app: Express) => {
             if (link.includes("pixiv.net") || link.includes("pximg.net")) {
                 let resolvable = link as string | number
                 if (link.includes("pximg.net")) {
+                    if (link.includes("user-profile")) {
+                        const response = await axios.get(link, {responseType: "arraybuffer", headers: {Referer: "https://www.pixiv.net/", ...headers}}).then((r) => r.data)
+                        return res.status(200).send([response])
+                    }
                     const id = path.basename(link).match(/(\d+)(?=_)/)?.[0]
                     resolvable = Number(id)
                 }

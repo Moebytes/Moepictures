@@ -35,7 +35,7 @@
     flex-wrap: wrap;
     display: flex;
     flex-direction: row;
-    align-items: flex-start;
+    align-items: center;
     width: max-content;
     min-width: 200px;
     height: 100%;
@@ -74,6 +74,21 @@
     height: 18px;
     margin-right: 3px;  
     margin-top: 3px;
+}
+
+.thread-opt-icon {
+    width: auto;  
+    height: 10px;
+    margin-left: 10px;
+    margin-right: 10px;
+    cursor: pointer;
+    &:hover {
+        filter: brightness(130%);
+    }
+}
+
+.thread-read {
+    color: var(--tagReadColor);
 }
 
 .thread-img-container {

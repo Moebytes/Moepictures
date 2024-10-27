@@ -51,13 +51,13 @@ const SearchRoutes = (app: Express) => {
                 if (!req.session.username) return res.status(403).send("Unauthorized")
             }
             if (sort === "tagcount" || sort === "reverse tagcount") withTags = true
-            if (query.startsWith("pixiv:")) {
-                const pixivID = Number(query.match(/(?<=pixiv:)(\d+)/g)?.[0])
+            if (query.startsWith("pixiv:") || query.includes("pixiv.net")) {
+                const pixivID = Number(query.match(/(\d+)/g)?.[0])
                 result = await sql.search.searchPixivID(pixivID, withTags)
-            } else if (query.startsWith("twitter:")) {
-                const twitterID = query.replace("twitter:", "").trim()
+            } else if (query.startsWith("twitter:") || query.includes("twitter.com") || query.includes("x.com")) {
+                const twitterID = query.match(/(\d{10,})/g)?.[0] || ""
                 result = await sql.search.searchTwitterID(twitterID, withTags)
-            } else if (query.startsWith("source:")) {
+            } else if (query.startsWith("source:") || query.startsWith("http")) {
                 const source = query.replace("source:", "").trim()
                 result = await sql.search.searchSource(source, withTags)
             } else if (query.startsWith("hash:")) {
@@ -347,10 +347,10 @@ const SearchRoutes = (app: Express) => {
             const offset = req.query.offset as string
             if (!functions.validThreadSort(sort)) return res.status(400).send("Invalid sort")
             const search = query?.trim() ?? ""
-            let stickyThreads = await sql.thread.stickyThreads()
+            let stickyThreads = await sql.thread.stickyThreads(req.session.username)
             const rulesThread = stickyThreads.find((thread: any) => thread.title.toLowerCase().includes("rules"))
             stickyThreads = functions.removeItem(stickyThreads, rulesThread)
-            const threadResult = await sql.thread.searchThreads(search, sort, offset)
+            const threadResult = await sql.thread.searchThreads(search, sort, offset, req.session.username)
             const result = [rulesThread, ...stickyThreads, ...threadResult]
             const newThreadCount = (stickyThreads[0]?.threadCount || 0) + (threadResult[0]?.threadCount || 0)
             for (let i = 0; i < result.length; i++) {

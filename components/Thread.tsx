@@ -12,6 +12,9 @@ import curatorStar from "../assets/icons/curator-star.png"
 import premiumContributorPencil from "../assets/icons/premium-contributor-pencil.png"
 import contributorPencil from "../assets/icons/contributor-pencil.png"
 import premiumStar from "../assets/icons/premium-star.png"
+import unread from "../assets/icons/unread.png"
+import read from "../assets/icons/read.png"
+import readLight from "../assets/icons/read-light.png"
 import favicon from "../assets/icons/favicon.png"
 import "./styles/thread.less"
 import sticky from "../assets/icons/sticky.png"
@@ -278,6 +281,21 @@ const Thread: React.FunctionComponent<Props> = (props) => {
         )
     }
 
+    const readStatus = () => {
+        return props.thread.read
+    }
+
+    const toggleRead = async () => {
+        await functions.post("/api/thread/read", {threadID: props.thread.threadID}, session, setSessionFlag)
+        props.onEdit?.()
+    }
+
+    const getReadIcon = () => {
+        if (!readStatus()) return unread
+        if (theme.includes("light")) return readLight
+        return read
+    }
+
     const dateTextJSX = () => {
         const targetDate = props.thread.updatedDate
         return <span className="thread-date-text">{functions.timeAgo(targetDate)}</span>
@@ -311,9 +329,10 @@ const Thread: React.FunctionComponent<Props> = (props) => {
             <div className="thread-content-container">
                 <td className="thread-container">
                     <div className="thread-row" style={{width: "100%"}}>
+                        {session.username ? <img draggable={false} className="thread-opt-icon" src={getReadIcon()} onClick={toggleRead} style={{filter: getFilter()}}/> : null}
                         {props.thread.sticky ? <img draggable={false} className="thread-icon" src={sticky} style={{marginTop: "4px"}}/> : null}
                         {props.thread.locked ? <img draggable={false} className="thread-icon" src={lock}/> : null}
-                        <span className="thread-title" onClick={threadPage} onAuxClick={threadPage}>{props.thread.title}</span>
+                        <span className={`thread-title ${readStatus() ? "thread-read" : ""}`} onClick={threadPage} onAuxClick={threadPage}>{props.thread.title}</span>
                     </div>
                     {!mobile ? <div className="thread-row">
                         {generateCreatorJSX()}

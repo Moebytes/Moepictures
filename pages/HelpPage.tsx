@@ -567,6 +567,16 @@ const HelpPage: React.FunctionComponent = (props) => {
                     emoji:emojiName<br/><br/>
                     </span>
 
+                    To highlight text wrap it in double asterisks. <br/>
+                    <span className="help-alt">
+                    **Highlighted text**<br/><br/>
+                    </span>
+
+                    You can mention users and they will receive a notification. <br/>
+                    <span className="help-alt">
+                    @username<br/><br/>
+                    </span>
+
                     Any image or video links posted in the comment are automatically displayed.
                 </span>
                 <div className="help-img-container"><img className="help-img" src={emojisImg}/></div></>

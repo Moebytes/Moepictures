@@ -130,6 +130,14 @@ const ThreadPage: React.FunctionComponent<Props> = (props) => {
         }
     }, [replies, replyID, replyJumpFlag])
 
+
+    useEffect(() => {
+        const updateRead = async () => {
+            await functions.post("/api/thread/read", {threadID, forceRead: true}, session, setSessionFlag)
+        }
+        updateRead()
+    }, [session])
+
     const updateThread = async () => {
         const thread = await functions.get("/api/thread", {threadID}, session, setSessionFlag)
         if (!thread) return functions.replaceLocation("/404")
@@ -222,7 +230,7 @@ const ThreadPage: React.FunctionComponent<Props> = (props) => {
 
     useEffect(() => {
         if (!scroll) {
-            history.replace(`${location.pathname}?page=${threadPage}${replyID > -1 ? `&reply=${replyID}` : ""}`)
+            if (threadPage) history.replace(`${location.pathname}?page=${threadPage}${replyID > -1 ? `&reply=${replyID}` : ""}`)
         } else {
             if (replyID > -1) history.replace(`${location.pathname}?reply=${replyID}`) 
         }

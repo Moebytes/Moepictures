@@ -26,6 +26,46 @@ const threadUpdateLimiter = rateLimit({
     handler
 })
 
+const pushMentionNotification = async (content: string, threadID: number, replyID?: number) => {
+    const notified = new Set<string>()
+    const thread = await sql.thread.thread(threadID)
+    const pieces = functions.parseComment(content)
+    for (let i = 0; i < pieces.length; i++) {
+        const piece = pieces[i]
+        if (piece.includes(">")) {
+            const matchPart = piece.match(/(>>>(\[\d+\])?)(.*?)(?=$|>)/gm)?.[0] ?? ""
+            const userPart = matchPart.replace(/(>>>(\[\d+\])?\s*)/, "")
+            let username = userPart?.split(/ +/g)?.[0]?.toLowerCase() || ""
+            if (username) {
+                if (notified.has(username)) return
+                notified.add(username)
+                if (replyID) {
+                    let message = `You were quoted in the thread "${thread.title}".\n\n${functions.getDomain()}/thread/${threadID}?reply=${replyID}`
+                    await serverFunctions.systemMessage(username, `You were quoted in the thread ${thread.title}`, message)
+                } else {
+                    let message = `You were quoted in the thread "${thread.title}".\n\n${functions.getDomain()}/thread/${threadID}`
+                    await serverFunctions.systemMessage(username, `You were quoted in the thread ${thread.title}`, message)
+                }
+            }
+        }
+    }
+    const parts = content.split(/(@\w+)/g)
+    parts.forEach(async (part, index) => {
+        if (part.startsWith("@")) {
+            const username = part.slice(1).toLowerCase()
+            if (notified.has(username)) return
+            notified.add(username)
+            if (replyID) {
+                let message = `You were mentioned in the thread "${thread.title}".\n\n${functions.getDomain()}/thread/${threadID}?reply=${replyID}`
+                await serverFunctions.systemMessage(username, `You were mentioned in the thread ${thread.title}`, message)
+            } else {
+                let message = `You were mentioned in the thread "${thread.title}".\n\n${functions.getDomain()}/thread/${threadID}`
+                await serverFunctions.systemMessage(username, `You were mentioned in the thread ${thread.title}`, message)
+            }
+        }
+    })
+}
+
 const ThreadRoutes = (app: Express) => {
     app.post("/api/thread/create", csrfProtection, threadUpdateLimiter, async (req: Request, res: Response) => {
         try {
@@ -38,6 +78,8 @@ const ThreadRoutes = (app: Express) => {
             const badContent = functions.validateThread(content)
             if (badContent) return res.status(400).send("Bad content")
             const threadID = await sql.thread.insertThread(req.session.username, title, content)
+            pushMentionNotification(content, threadID)
+            await sql.thread.bulkUpdateReads(threadID, false, req.session.username)
             res.status(200).send(threadID)
         } catch (e) {
             console.log(e)
@@ -141,9 +183,11 @@ const ThreadRoutes = (app: Express) => {
             const thread = await sql.thread.thread(threadID)
             if (!thread) return res.status(400).send("Invalid threadID")
             if (thread.locked) return res.status(400).send("Thread is locked")
-            await sql.thread.insertReply(Number(threadID), req.session.username, content)
+            const replyID = await sql.thread.insertReply(Number(threadID), req.session.username, content)
             await sql.thread.updateThread(Number(threadID), "updater", req.session.username)
             await sql.thread.updateThread(Number(threadID), "updatedDate", new Date().toISOString())
+            pushMentionNotification(content, threadID, replyID)
+            await sql.thread.bulkUpdateReads(threadID, false, req.session.username)
             res.status(200).send("Success")
         } catch (e) {
             console.log(e)
@@ -308,6 +352,24 @@ const ThreadRoutes = (app: Express) => {
         } catch (e) {
             console.log(e)
             res.status(400).send("Bad request") 
+        }
+    })
+
+    app.post("/api/thread/read", csrfProtection, threadLimiter, async (req: Request, res: Response) => {
+        try {
+            const {threadID, forceRead} = req.body
+            if (!req.session.username) return res.status(403).send("Unauthorized")
+            if (!threadID) return res.status(400).send("Bad thread ID")
+            const threadRead = await sql.thread.getRead(threadID, req.session.username)
+            if (!threadRead?.read || forceRead) {
+                await sql.thread.updateRead(threadID, req.session.username, true)
+            } else {
+                await sql.thread.updateRead(threadID, req.session.username, false)
+            }
+            res.status(200).send("Success")
+        } catch (e) {
+            console.log(e)
+            res.status(400).send("Bad request")
         }
     })
 }
