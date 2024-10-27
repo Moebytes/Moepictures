@@ -335,6 +335,19 @@ const UserPage: React.FunctionComponent<Props> = (props) => {
         }
     }, [updateUserFlag])
 
+    const banJSX = () => {
+        if (!user.banned) return null
+        if (user.banExpiration && new Date(user.banExpiration) > new Date()) {
+            return (
+                <div className="user-row">
+                    <span className="user-ban-text">Banned for {functions.timeUntil(user.banExpiration)}</span>
+                </div>
+            )
+        } else {
+            return <span className="user-ban-text">Banned</span>
+        }
+    }
+
     const generateFavgroupsJSX = () => {
         let jsx = [] as any
         for (let i = 0; i < favgroups.length; i++) {
@@ -384,11 +397,11 @@ const UserPage: React.FunctionComponent<Props> = (props) => {
                     <div className="user-top-container">
                         <img className="user-img" src={getUserImg()} onClick={userImgClick} onAuxClick={userImgClick} style={{filter: defaultIcon ? getFilter() : ""}}/>
                         {generateUsernameJSX()}
-                        {session.username && (session.username !== username) && user.role !== "system" ? <img className="user-icon" src={dmIcon} onClick={dmDialog}/> : null}
+                        {session.username && (session.username !== username) && user.role !== "system" && !session.banned ? <img className="user-icon" src={dmIcon} onClick={dmDialog}/> : null}
                         {permissions.isMod(session) && !permissions.isMod(user) ? <img className="user-icon" src={user.banned ? unbanIcon : banIcon} onClick={banDialog}/> : null}
                         {permissions.isAdmin(session) && (session.username !== username) ? <img className="user-icon" src={promoteIcon} onClick={promoteDialog}/> : null}
                     </div>
-                    {user.banned ? <span className="user-ban-text">Banned</span> : null}
+                    {banJSX()}
                     <div className="user-row">
                         <span className="user-text">Bio: {user.bio || "This user has not written anything."}</span>
                     </div>

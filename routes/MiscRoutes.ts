@@ -380,8 +380,8 @@ const MiscRoutes = (app: Express) => {
 
     app.post("/api/misc/copyright", csrfProtection, contactLimiter, async (req: Request, res: Response, next: NextFunction) => {
         try {
-            const {name, email, artistTag, socialMediaLinks, postLinks, removeAllRequest, proofLinks, signature, files} = req.body 
-            if (!name || !email || !artistTag || !socialMediaLinks || !postLinks || !signature) return res.status(400).send("Bad fields.")
+            const {name, email, artistTag, socialMediaLinks, postLinks, removeAllRequest, proofLinks, files} = req.body 
+            if (!name || !email || !artistTag || !socialMediaLinks || !postLinks) return res.status(400).send("Bad fields.")
             if (!files.length && !proofLinks) return res.status(400).send("Bad proof links.")
             const badEmail = functions.validateEmail(email)
             if (badEmail) return res.status(400).send("Bad email")
@@ -411,13 +411,8 @@ const MiscRoutes = (app: Express) => {
 
                 ${removalType}
 
-                I sincerely believe that the use of the copyrighted materials mentioned above is not 
-                permitted by the copyright owner, their representative, or by law.
-
-                I swear under penalty of perjury that the information in this notice is accurate and that I am the 
-                copyright owner of the rights being infringed or authorized to act on behalf of the copyright owner.
-
-                Signature: ${signature}
+                I am the copyright owner of the content linked above or am authorized 
+                to act on the behalf of the copyright owner.
             `
             await serverFunctions.contactEmail(email, `Copyright Removal Request from ${artistTag}`, message, attachments)
             const admins = await sql.user.admins()

@@ -87,7 +87,8 @@ export default class ServerFunctions {
             const timeDifference = new Date().getTime() - new Date(userMessages[0].createDate).getTime()
             if (timeDifference < 10000) return
         }
-        await sql.message.insertMessage("moepictures", username, subject, message)
+        const messageID = await sql.message.insertMessage("moepictures", subject, message)
+        await sql.message.bulkInsertRecipients(messageID, [username])
     }
 
     public static getFirstHistoryFile = async (file: string, r18: boolean) => {

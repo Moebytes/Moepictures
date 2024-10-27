@@ -55,6 +55,7 @@ const DeleteGroupDialog: React.FunctionComponent = (props) => {
             await functions.post("/api/group/delete/request", {slug: deleteGroupObj.slug, reason}, session, setSessionFlag)
             setSubmitted(true)
         }
+        setDeleteGroupObj(null)
     }
 
     const click = (button: "accept" | "reject") => {

@@ -71,6 +71,7 @@ declare module "express-session" {
       savedSearches: string
       showR18: boolean
       premiumExpiration: string
+      banExpiration: string
       $2fa: boolean
       ip: string
       role: string
@@ -209,6 +210,10 @@ for (let i = 0; i < folders.length; i++) {
         body = await imageLock(body, false)
         return res.status(200).end(body)
       }
+      if (encrypted.includes(folders[i]) || req.path.includes("history/post")) {
+        body = cryptoFunctions.encrypt(body)
+        contentLength = body.length
+      }
       if (req.headers.range) {
         const parts = req.headers.range.replace(/bytes=/, "").split("-")
         const start = parseInt(parts[0])
@@ -218,13 +223,8 @@ for (let i = 0; i < folders.length; i++) {
           "Accept-Ranges": "bytes",
           "Content-Length": end - start + 1
         })
-        const stream = Readable.from(body.slice(start, end + 1))
+        const stream = Readable.from(body.subarray(start, end + 1))
         return stream.pipe(res)
-      }
-      if (encrypted.includes(folders[i]) || req.path.includes("history/post")) {
-        const encrypted = cryptoFunctions.encrypt(body)
-        res.setHeader("Content-Length", encrypted.length)
-        return res.status(200).end(encrypted)
       }
       res.setHeader("Content-Length", contentLength)
       res.status(200).end(body)
@@ -269,6 +269,10 @@ for (let i = 0; i < folders.length; i++) {
           contentLength = body.length
         }
       }
+      if (encrypted.includes(folders[i]) || req.path.includes("history/post")) {
+        body = cryptoFunctions.encrypt(body)
+        contentLength = body.length
+      }
       if (req.headers.range) {
         const parts = req.headers.range.replace(/bytes=/, "").split("-")
         const start = parseInt(parts[0])
@@ -278,13 +282,8 @@ for (let i = 0; i < folders.length; i++) {
           "Accept-Ranges": "bytes",
           "Content-Length": end - start + 1
         })
-        const stream = Readable.from(body.slice(start, end + 1))
+        const stream = Readable.from(body.subarray(start, end + 1))
         return stream.pipe(res)
-      }
-      if (encrypted.includes(folders[i]) || req.path.includes("history/post")) {
-        const encrypted = cryptoFunctions.encrypt(body)
-        res.setHeader("Content-Length", encrypted.length)
-        return res.status(200).end(encrypted)
       }
       res.setHeader("Content-Length", contentLength)
       res.status(200).end(body)
@@ -321,7 +320,7 @@ for (let i = 0; i < folders.length; i++) {
           "Accept-Ranges": "bytes",
           "Content-Length": end - start + 1
         })
-        const stream = Readable.from(body.slice(start, end + 1))
+        const stream = Readable.from(body.subarray(start, end + 1))
         return stream.pipe(res)
       }
       res.setHeader("Content-Length", contentLength)
@@ -363,7 +362,7 @@ for (let i = 0; i < folders.length; i++) {
           "Accept-Ranges": "bytes",
           "Content-Length": end - start + 1
         })
-        const stream = Readable.from(body.slice(start, end + 1))
+        const stream = Readable.from(body.subarray(start, end + 1))
         return stream.pipe(res)
       }
       res.setHeader("Content-Length", contentLength)
@@ -449,6 +448,10 @@ const run = async () => {
   if (!exists) await sql.tag.updateTag("bad-pixiv-id", "description", "The pixiv id was deleted.")
   exists = await sql.tag.insertTag("paid-reward-available", "meta")
   if (!exists) await sql.tag.updateTag("paid-reward-available", "description", "The artist offers a paid reward for this post.")
+  exists = await sql.tag.insertTag("third-party-edit", "meta")
+  if (!exists) await sql.tag.updateTag("third-party-edit", "description", "The post is a third party edit.")
+  exists = await sql.tag.insertTag("third-party-source", "meta")
+  if (!exists) await sql.tag.updateTag("third-party-source", "description", "The source of the post is a repost (not posted by the original artist).")
 
   app.listen(process.env.PORT || 8082, "0.0.0.0", () => console.log("Started the website server!"))
 }

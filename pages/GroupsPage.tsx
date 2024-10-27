@@ -141,7 +141,6 @@ const GroupsPage: React.FunctionComponent = (props) => {
 
     const updateGroups = async (query?: string) => {
         const result = await functions.get("/api/search/groups", {sort: functions.parseSort(sortType, sortReverse), query: query ? query : searchQuery, limit}, session, setSessionFlag)
-        console.log(result)
         setEnded(false)
         setIndex(0)
         setVisibleGroups([])

@@ -54,6 +54,12 @@ const SearchRoutes = (app: Express) => {
             if (query.startsWith("pixiv:")) {
                 const pixivID = Number(query.match(/(?<=pixiv:)(\d+)/g)?.[0])
                 result = await sql.search.searchPixivID(pixivID, withTags)
+            } else if (query.startsWith("twitter:")) {
+                const twitterID = query.replace("twitter:", "").trim()
+                result = await sql.search.searchTwitterID(twitterID, withTags)
+            } else if (query.startsWith("source:")) {
+                const source = query.replace("source:", "").trim()
+                result = await sql.search.searchSource(source, withTags)
             } else if (query.startsWith("hash:")) {
                 const sqlQuery = {
                     text: `SELECT * FROM "images" WHERE "images".hash = $1`,
@@ -209,7 +215,13 @@ const SearchRoutes = (app: Express) => {
             if (!functions.validTagSort(sort)) return res.status(400).send("Invalid sort")
             if (!functions.validTagType(type)) return res.status(400).send("Invalid type")
             let search = query?.trim().split(/ +/g).filter(Boolean).join("-") ?? ""
-            let result = await sql.search.tagSearch(search, sort, type, limit, offset)
+            let result = []
+            if (search.startsWith("social:")) {
+                const social = search.replace("social:", "").trim()
+                result = await sql.search.tagSocialSearch(social)
+            } else {
+                result = await sql.search.tagSearch(search, sort, type, limit, offset)
+            }
             if (!permissions.isMod(req.session)) {
                 result = result.filter((t: any) => !functions.arrayIncludes(t.tag, matureTags, true))
             }
@@ -231,7 +243,7 @@ const SearchRoutes = (app: Express) => {
             let usernames = [] as any 
             let parsedSearch = ""
             for (let i = 0; i < parts.length; i++) {
-                if (parts[i].includes("user:")) {
+                if (parts[i].includes("comments:")) {
                     const username = parts[i].split(":")[1]
                     usernames.push(username)
                 } else {
@@ -335,9 +347,11 @@ const SearchRoutes = (app: Express) => {
             const offset = req.query.offset as string
             if (!functions.validThreadSort(sort)) return res.status(400).send("Invalid sort")
             const search = query?.trim() ?? ""
-            const stickyThreads = await sql.thread.stickyThreads()
+            let stickyThreads = await sql.thread.stickyThreads()
+            const rulesThread = stickyThreads.find((thread: any) => thread.title.toLowerCase().includes("rules"))
+            stickyThreads = functions.removeItem(stickyThreads, rulesThread)
             const threadResult = await sql.thread.searchThreads(search, sort, offset)
-            const result = [...stickyThreads, ...threadResult]
+            const result = [rulesThread, ...stickyThreads, ...threadResult]
             const newThreadCount = (stickyThreads[0]?.threadCount || 0) + (threadResult[0]?.threadCount || 0)
             for (let i = 0; i < result.length; i++) {
                 result[i].threadCount = newThreadCount
@@ -362,12 +376,12 @@ const SearchRoutes = (app: Express) => {
             let messageCount = messages[0]?.messageCount || 0
             for (const message of messages) {
                 if (message.creator === req.session.username) {
-                    if (message.creatorDelete) {
+                    if (message.delete) {
                         messageCount--
                         continue
                     }
                 } else if (message.recipient === req.session.username) {
-                    if (message.recipientDelete) {
+                    if (message.delete) {
                         messageCount--
                         continue
                     }

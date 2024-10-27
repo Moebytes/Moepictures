@@ -330,10 +330,10 @@ const NavBar: React.FunctionComponent<Props> = (props) => {
     const getDropdownJSX = () => {
         let style = mobile ? {top: session.username ? "498px" : "468px"} : {top: "40px"}
         return (
-            <div className={`title-dropdown ${activeDropdown ? "" : "hide-title-dropdown"}`} style={style}>
+            <div className={`title-dropdown ${activeDropdown ? "" : "hide-title-dropdown"}`} style={style} onMouseEnter={() => setHideNavbar(false)} onMouseLeave={() => setHideNavbar(true)}>
                 <div className="title-dropdown-row">
                     <span className="title-dropdown-text">Hue</span>
-                    <Slider className="title-dropdown-slider" trackClassName="title-dropdown-slider-track" thumbClassName="title-dropdown-slider-thumb" onChange={(value) => setSiteHue(value)} min={60} max={278} step={1} value={siteHue}/>
+                    <Slider className="title-dropdown-slider" trackClassName="title-dropdown-slider-track" thumbClassName="title-dropdown-slider-thumb" onChange={(value) => setSiteHue(value)} min={60} max={272} step={1} value={siteHue}/>
                 </div>
                 <div className="title-dropdown-row">
                     <span className="title-dropdown-text">Saturation</span>

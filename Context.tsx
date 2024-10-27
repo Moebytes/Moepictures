@@ -226,6 +226,12 @@ export const GroupFlagContext = React.createContext<any>(null)
 export const LockPostIDContext = React.createContext<any>(null)
 export const ShowCompressingDialogContext = React.createContext<any>(null)
 export const ShowUpscalingDialogContext = React.createContext<any>(null)
+export const ForwardMessageObjContext = React.createContext<any>(null)
+export const MessageFlagContext = React.createContext<any>(null)
+export const DeleteGroupHistoryIDContext = React.createContext<any>(null)
+export const RevertGroupHistoryIDContext = React.createContext<any>(null)
+export const DeleteGroupHistoryFlagContext = React.createContext<any>(null)
+export const RevertGroupHistoryFlagContext = React.createContext<any>(null)
 
 const Context: React.FunctionComponent = (props) => {
     const [siteHue, setSiteHue] = useState(180)
@@ -433,9 +439,21 @@ const Context: React.FunctionComponent = (props) => {
     const [lockPostID, setLockPostID] = useState(null)
     const [showCompressingDialog, setShowCompressingDialog] = useState(false)
     const [showUpscalingDialog, setShowUpscalingDialog] = useState(false)
+    const [forwardMessageObj, setForwardMessageObj] = useState(null)
+    const [messageFlag, setMessageFlag] = useState(false)
+    const [deleteGroupHistoryID, setDeleteGroupHistoryID] = useState(null)
+    const [revertGroupHistoryID, setRevertGroupHistoryID] = useState(null)
+    const [deleteGroupHistoryFlag, setDeleteGroupHistoryFlag] = useState(null)
+    const [revertGroupHistoryFlag, setRevertGroupHistoryFlag] = useState(null)
 
 return (
     <>
+        <RevertGroupHistoryFlagContext.Provider value={{revertGroupHistoryFlag, setRevertGroupHistoryFlag}}>
+        <DeleteGroupHistoryFlagContext.Provider value={{deleteGroupHistoryFlag, setDeleteGroupHistoryFlag}}>
+        <RevertGroupHistoryIDContext.Provider value={{revertGroupHistoryID, setRevertGroupHistoryID}}>
+        <DeleteGroupHistoryIDContext.Provider value={{deleteGroupHistoryID, setDeleteGroupHistoryID}}>
+        <MessageFlagContext.Provider value={{messageFlag, setMessageFlag}}>
+        <ForwardMessageObjContext.Provider value={{forwardMessageObj, setForwardMessageObj}}>
         <ShowUpscalingDialogContext.Provider value={{showUpscalingDialog, setShowUpscalingDialog}}>
         <ShowCompressingDialogContext.Provider value={{showCompressingDialog, setShowCompressingDialog}}>
         <LockPostIDContext.Provider value={{lockPostID, setLockPostID}}>
@@ -847,6 +865,12 @@ return (
         </LockPostIDContext.Provider>
         </ShowCompressingDialogContext.Provider>
         </ShowUpscalingDialogContext.Provider>
+        </ForwardMessageObjContext.Provider>
+        </MessageFlagContext.Provider>
+        </DeleteGroupHistoryIDContext.Provider>
+        </RevertGroupHistoryIDContext.Provider>
+        </DeleteGroupHistoryFlagContext.Provider>
+        </RevertGroupHistoryFlagContext.Provider>
     </>
     )
 }

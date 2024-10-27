@@ -1,6 +1,6 @@
 @import "../../index.less";
 
-.taghistoryrow {
+.historyrow {
     position: relative;
     display: flex;
     flex-direction: row;
@@ -13,7 +13,7 @@
     }
 }
 
-.taghistoryrow-container {
+.historyrow-container {
     display: flex;
     flex-direction: row;
     padding: 10px;
@@ -25,7 +25,7 @@
 
 }
 
-.taghistoryrow-user-container {
+.historyrow-user-container {
     display: flex;
     flex-direction: column;
     justify-content: flex-start;
@@ -33,18 +33,24 @@
     height: 100%;
 }
 
-.taghistoryrow-img {
+.historyrow-img {
+    width: auto;
+    height: 300px;
+    cursor: pointer;
+}
+
+.historyrow-img-small {
     width: auto;
     height: 110px;
     cursor: pointer;
 }
 
-.taghistoryrow-user-img {
+.historyrow-user-img {
     width: auto;
     height: 45px;
 }
 
-.taghistoryrow-user-text {
+.historyrow-user-text {
     font-family: Tahoma, sans-serif;
     font-size: 17px;
     color: var(--text);
@@ -55,7 +61,7 @@
     }
 }
 
-.taghistoryrow-tag-text {
+.historyrow-tag-text {
     margin-left: 10px;
     font-family: Tahoma, sans-serif;
     font-size: 21px;
@@ -66,30 +72,41 @@
     }
 }
 
-.taghistoryrow-text {
+.historyrow-text {
+    font-family: Tahoma, sans-serif;
+    font-size: 17px;
+    color: var(--text);
+    word-wrap: break-word;
+    margin-top: 2px;
+}
+
+.historyrow-text-strong {
+    font-family: Tahoma, sans-serif;
+    font-size: 17px;
+    color: var(--text-strong);
+    word-wrap: break-word;
+    margin-top: 2px;
+}
+
+.historyrow-label-text {
     font-family: Tahoma, sans-serif;
     font-size: 17px;
     color: var(--text-alt);
     word-wrap: break-word;
-    margin-top: 2px;
 }
 
-.taghistoryrow-text-strong {
+.historyrow-label-link {
     font-family: Tahoma, sans-serif;
     font-size: 17px;
-    color: var(--text-strong);
+    color: var(--text);
     word-wrap: break-word;
-    margin-top: 2px;
+    cursor: pointer;
+    &:hover {
+        filter: brightness(130%);
+    }
 }
 
-.taghistoryrow-label-text {
-    font-family: Tahoma, sans-serif;
-    font-size: 17px;
-    color: var(--text-strong);
-    word-wrap: break-word;
-}
-
-.taghistoryrow-options {
+.historyrow-options {
     position: absolute;
     display: flex;
     flex-direction: row;
@@ -97,7 +114,7 @@
     right: 10px;
 }
 
-.taghistoryrow-options-container {
+.historyrow-options-container {
     cursor: pointer;
     margin-right: 10px;
     align-items: center;
@@ -107,56 +124,56 @@
     }
 }
 
-.taghistoryrow-options-img {
+.historyrow-options-img {
     width: auto;
     height: 16px;
 }
 
-.taghistoryrow-options-text {
+.historyrow-options-text {
     margin-left: 5px;
     font-family: Tahoma, sans-serif;
     font-size: 16px;
     color: var(--text-strong);
 }
 
-.taghistoryrow-quote-container {
+.historyrow-quote-container {
     display: flex;
     flex-direction: column;
     background-color: var(--inputBG);
 }
 
-.taghistoryrow-quote-user {
+.historyrow-quote-user {
     font-family: Tahoma, sans-serif;
     font-size: 15px;
     color: var(--text-strong);
 
 }
 
-.taghistoryrow-quote-text {
+.historyrow-quote-text {
     font-family: Tahoma, sans-serif;
     font-size: 13px;
     color: var(--text);
 }
 
-.taghistoryrow-username-container {
+.historyrow-username-container {
     display: flex;
     flex-direction: row;
     align-items: center;
 }
 
-.taghistoryrow-user-label {
+.historyrow-user-label {
     margin-left: 5px;
     width: auto;
     height: 20px;
 }
 
-.taghistoryrow-container-row {
+.historyrow-container-row {
     display: flex;
     flex-direction: row;
     width: 100%;
 }
 
-.taghistoryrow-social {
+.historyrow-social {
     width: auto;
     height: 25px;
     margin-left: 5px;
@@ -167,24 +184,24 @@
 }
 
 @media screen and (max-width: 500px) {
-    .taghistoryrow {
+    .historyrow {
         flex-direction: column;
     }
 
-    .taghistoryrow-img {
+    .historyrow-img {
         width: auto;
         height: auto;
         max-width: calc(100vw - 100px);
     }
 
-    .taghistoryrow-options {  
+    .historyrow-options {  
         position: relative;
         display: flex;
         justify-content: flex-end;
         margin-bottom: 5px;
     }
 
-    .taghistoryrow-img {
+    .historyrow-img-small {
         width: auto;
         height: 50px;
     }

@@ -259,20 +259,21 @@ const GridImage = forwardRef<Ref, Props>((props, componentRef) => {
                 const pixelateCanvas = pixelateRef.current
                 if (gifData) {
                     if (pixelateCanvas && ref.current) {
-                        pixelateCanvas.style.opacity = "1"
                         pixelateCanvas.width = ref.current.clientWidth
                         pixelateCanvas.height = ref.current.clientHeight
                     }
-                } else if (functions.isVideo(props.img)) {
-                    if (pixelateCanvas) pixelateCanvas.style.opacity = "1"
+                } else if (videoData) {
+                    if (pixelateCanvas && videoRef.current) {
+                        pixelateCanvas.width = videoRef.current.clientWidth
+                        pixelateCanvas.height = videoRef.current.clientHeight
+                    }
                 }
                 const pixelateCtx = pixelateCanvas?.getContext("2d")
                 const sharpenOverlay = videoOverlayRef.current
-                let sharpenCtx = null as any
+                let sharpenCtx = sharpenOverlay?.getContext("2d") as any
                 if (sharpenOverlay && videoRef.current) {
                     sharpenOverlay.width = videoRef.current.clientWidth
                     sharpenOverlay.height = videoRef.current.clientHeight
-                    sharpenCtx = sharpenOverlay.getContext("2d") as any
                 }
                 let frame = videoRef.current ? videoRef.current! : ref.current!
                 let delay = 0
@@ -328,6 +329,7 @@ const GridImage = forwardRef<Ref, Props>((props, componentRef) => {
                             sharpenOverlay.style.opacity = `${sharpenOpacity}`
                             sharpenCtx?.clearRect(0, 0, sharpenOverlay.width, sharpenOverlay.height)
                             sharpenCtx?.drawImage(frame, 0, 0, sharpenOverlay.width, sharpenOverlay.height)
+                            sharpenOverlay.style.opacity = "1"
                         } else {
                             sharpenOverlay.style.filter = "none"
                             sharpenOverlay.style.mixBlendMode = "normal"
@@ -349,12 +351,14 @@ const GridImage = forwardRef<Ref, Props>((props, componentRef) => {
                                 pixelateCanvas.style.height = `${pixelateCanvas.height * pixelate}px`
                             }
                             pixelateCanvas.style.imageRendering = "pixelated"
+                            pixelateCanvas.style.opacity = "1"
                         } else {
                             pixelateCanvas.style.width = `${pixelateCanvas.width}px`
                             pixelateCanvas.style.height = `${pixelateCanvas.height}px`
                             pixelateCanvas.style.imageRendering = "none"
                             pixelateCtx?.clearRect(0, 0, pixelateCanvas.width, pixelateCanvas.height)
                             pixelateCtx?.drawImage(frame, 0, 0, pixelateCanvas.width, pixelateCanvas.height)
+                            pixelateCanvas.style.opacity = "0"
                         }
                     }
                 }

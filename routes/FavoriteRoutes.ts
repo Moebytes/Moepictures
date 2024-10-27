@@ -190,8 +190,14 @@ const FavoriteRoutes = (app: Express) => {
             for (let i = 0; i < posts.length; i++) {
                 if (Number(posts[i].order) !== i + 1) return res.status(400).send("Bad post orders")
             }
-            await sql.favorite.purgeFavgroupMap(req.session.username, favgroup.slug)
-            await sql.favorite.bulkInsertFavgroupMappings(req.session.username, favgroup.slug, posts)
+            let toChange = [] as any
+            for (let i = 0; i < posts.length; i++) {
+                let newPost = posts[i]
+                let oldPost = favgroup.posts.find((p: any) => p.postID === newPost.postID)
+                if (Number(oldPost.order) !== Number(newPost.order)) toChange.push(newPost)
+            }
+            await sql.favorite.bulkDeleteFavgroupMappings(req.session.username, favgroup.slug, toChange)
+            await sql.favorite.bulkInsertFavgroupMappings(req.session.username, favgroup.slug, toChange)
             res.status(200).send("Success")
         } catch (e) {
             console.log(e)

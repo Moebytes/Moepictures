@@ -199,6 +199,9 @@ export default class Functions {
             const ext = file.split("#")?.[1] || ""
             return Functions.arrayIncludes(ext, imageExtensions)
         }
+        if (file.startsWith("data:image")) {
+            return true
+        }
         return Functions.arrayIncludes(path.extname(file), imageExtensions)
     }
 
@@ -229,6 +232,9 @@ export default class Functions {
             const ext = file.split("#")?.[1] || ""
             return ext === ".gif"
         }
+        if (file?.startsWith("data:image/gif")) {
+            return true
+        }
         return path.extname(file) === ".gif"
     }
 
@@ -238,6 +244,9 @@ export default class Functions {
         if (file?.startsWith("blob:")) {
             const ext = file.split("#")?.[1] || ""
             return ext === ".webp"
+        }
+        if (file?.startsWith("data:image/webp")) {
+            return true
         }
         return path.extname(file) === ".webp"
     }
@@ -461,7 +470,7 @@ export default class Functions {
 
     public static validateDescription = (desc: string) => {
         if (!desc) return null
-        if (gibberish(desc)) return "Description cannot be gibberish."
+        if (gibberish(Functions.stripLinks(desc))) return "Description cannot be gibberish."
         return null
     }
 
@@ -1241,6 +1250,8 @@ export default class Functions {
             sort === "reverse variations" ||
             sort === "thirdparty" || 
             sort === "reverse thirdparty" ||
+            sort === "groups" || 
+            sort === "reverse groups" ||
             sort === "popularity" || 
             sort === "reverse popularity" ||
             sort === "tagcount" || 
@@ -1694,8 +1705,8 @@ export default class Functions {
                 const outputY = (outputHeight - inputHeight) * 0.5
 
                 const outputImage = document.createElement("canvas")
-                outputImage.width = 1000
-                outputImage.height = 1000
+                outputImage.width = 300
+                outputImage.height = 300
     
                 const ctx = outputImage.getContext("2d") as any
                 ctx.drawImage(inputImage, outputX, outputY, outputImage.width, outputImage.height)
@@ -1720,33 +1731,67 @@ export default class Functions {
         const date = new Date(input.replace(/ +/g, "T"))
         const seconds = Math.floor(((new Date().getTime() / 1000) - (date.getTime() / 1000)))
         const years = seconds / 31536000
-        if (years > 1) {
+        if (years >= 1) {
             const rounded = Math.floor(years)
             return `${rounded} year${rounded === 1 ? "" : "s"} ago`
         }
         const months = seconds / 2592000
-        if (months > 1) {
+        if (months >= 1) {
             const rounded = Math.floor(months)
             return `${rounded} month${rounded === 1 ? "" : "s"} ago`
         }
         const days = seconds / 86400
-        if (days > 1) {
+        if (days >= 1) {
             const rounded = Math.floor(days)
             return `${rounded} day${rounded === 1 ? "" : "s"} ago`
         }
         const hours = seconds / 3600
-        if (hours > 1) {
+        if (hours >= 1) {
             const rounded = Math.floor(hours)
             return `${rounded} hour${rounded === 1 ? "" : "s"} ago`
         }
         const minutes = seconds / 60
-        if (minutes > 1) {
+        if (minutes >= 1) {
             const rounded = Math.floor(minutes)
             return `${rounded} minute${rounded === 1 ? "" : "s"} ago`
         }
-        const rounded = Math.floor(seconds)
-        return `${rounded} second${rounded === 1 ? "" : "s"} ago`
+        return `${seconds} second${seconds === 1 ? "" : "s"} ago`
     }
+
+    public static timeUntil = (input: string) => {
+        if (!input) return "?"
+        const date = new Date(input.replace(/ +/g, "T"))
+        const now = new Date().getTime()
+        const seconds = Math.floor((date.getTime() - now) / 1000)
+    
+        const years = seconds / 31536000
+        if (years >= 1) {
+            const rounded = Math.floor(years)
+            return `${rounded} year${rounded === 1 ? "" : "s"}`
+        }
+        const months = seconds / 2592000
+        if (months >= 1) {
+            const rounded = Math.floor(months)
+            return `${rounded} month${rounded === 1 ? "" : "s"}`
+        }
+        const days = seconds / 86400
+        if (days >= 1) {
+            const rounded = Math.floor(days)
+            return `${rounded} day${rounded === 1 ? "" : "s"}`
+        }
+        const hours = seconds / 3600
+        if (hours >= 1) {
+            const rounded = Math.floor(hours)
+            return `${rounded} hour${rounded === 1 ? "" : "s"}`
+        }
+        const minutes = seconds / 60
+        if (minutes >= 1) {
+            const rounded = Math.floor(minutes)
+            return `${rounded} minute${rounded === 1 ? "" : "s"}`
+        }
+        return `${seconds} second${seconds === 1 ? "" : "s"}`
+    }
+    
 
     public static fileExtension = (uint8Array: Uint8Array) => {
         const result = fileType(uint8Array)?.[0]
@@ -1877,6 +1922,7 @@ export default class Functions {
             "-(object)": "",
             "-(medium)": "",
             "-(machine)": "",
+            "transparent": "transparency",
             "transparent-background": "transparent",
             "background": "bg",
             "headwear": "hat",
@@ -1884,7 +1930,6 @@ export default class Functions {
             "neckerchief": "necktie",
             "hand-on-own": "hand-on",
             "hand-in-own": "hand-on",
-            "transparent": "transparency",
             "x-hair-ornament": "hair-ornament",
             "dodoco-(genshin-impact)": "dodoco",
             "gabriel-tenma-white": "gabriel-(gabriel-dropout)",
@@ -2187,7 +2232,7 @@ export default class Functions {
     public static tagType = (tag: string) => {
         const metaTags = ["autotags", "upscaled", "needs-tags", "no-audio", "with-audio", "self-post", "text", "transparent", 
         "commentary", "translated", "untranslated", "partially-translated", "check-translation", "multiple-artists", "bad-pixiv-id",
-        "paid-reward", "paid-reward-available"]
+        "paid-reward", "paid-reward-available", "third-party-edit", "third-party-source"]
         if (metaTags.includes(tag)) return "meta"
         return "tag"
     }
@@ -2293,7 +2338,8 @@ export default class Functions {
         if (post.favgrouped) return "var(--favgroupBorder)"
         if (post.hidden) return "var(--takendownBorder)"
         if (post.locked) return "var(--lockedBorder)"
-        if (post.thirdParty) return "var(--thirdPartyBorder)"
+        if (post.hasThirdParty) return "var(--thirdPartyBorder)"
+        if (post.isGrouped) return "var(--groupBorder)"
         if (Number(post.imageCount) > 1) return "var(--variationBorder)"
         return "var(--imageBorder)"
     }
@@ -2436,13 +2482,15 @@ export default class Functions {
         if (cached) return cached
         if (Functions.isModel(img)) {
             const url = await Functions.modelImage(img)
-            Functions.setImageCache(cacheKey, url)
-            return url
+            let cacheUrl = `${url}#${path.extname(img)}`
+            Functions.setImageCache(cacheKey, cacheUrl)
+            return cacheUrl
         }
         if (Functions.isAudio(img)) {
             const url = await Functions.songCover(img)
-            Functions.setImageCache(cacheKey, url)
-            return url
+            let cacheUrl = `${url}#${path.extname(img)}`
+            Functions.setImageCache(cacheKey, cacheUrl)
+            return cacheUrl
         }
         let isAnimatedWebP = false
         let arrayBuffer = null as any
@@ -2457,7 +2505,8 @@ export default class Functions {
         if (Functions.isVideo(img) || Functions.isGIF(img) || isAnimatedWebP) {
             if (!arrayBuffer) arrayBuffer = await fetch(img).then((r) => r.arrayBuffer())
             const url = URL.createObjectURL(new Blob([arrayBuffer]))
-            Functions.setImageCache(cacheKey, url)
+            let cacheUrl = `${url}#${path.extname(img)}`
+            Functions.setImageCache(cacheKey, cacheUrl)
             return url
         } else {
             Functions.setImageCache(cacheKey, base64)

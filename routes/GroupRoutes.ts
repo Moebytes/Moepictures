@@ -46,6 +46,19 @@ const GroupRoutes = (app: Express) => {
                 try {
                     await sql.group.insertGroupPost(group.groupID, postID, maxOrder + 1)
                 } catch {}
+
+                const groupHistory = await sql.history.groupHistory(group.groupID)
+                const updated = await sql.group.group(slug)
+                let posts = updated.posts.map((post: any) => ({postID: post.postID, order: post.order}))
+                if (!groupHistory.length) {
+                    let vanilla = group
+                    vanilla.user = vanilla.creator
+                    let vanillaPosts = vanilla.posts.map((post: any) => ({postID: post.postID, order: post.order}))
+                    await sql.history.insertGroupHistory(vanilla.user, vanilla.groupID, vanilla.slug, vanilla.name, vanilla.restrict, vanilla.description, JSON.stringify(vanillaPosts))
+                    await sql.history.insertGroupHistory(targetUser, updated.groupID, updated.slug, updated.name, updated.restrict, updated.description, JSON.stringify(posts))
+                } else {
+                    await sql.history.insertGroupHistory(targetUser, updated.groupID, updated.slug, updated.name, updated.restrict, updated.description, JSON.stringify(posts))
+                }
             }
             res.status(200).send("Success")
         } catch (e) {
@@ -56,7 +69,7 @@ const GroupRoutes = (app: Express) => {
 
     app.put("/api/group/edit", csrfProtection, groupLimiter, async (req: Request, res: Response) => {
         try {
-            const {slug, name, description, username} = req.body
+            const {slug, name, description, username, reason} = req.body
             if (!name) return res.status(400).send("Invalid name")
             if (!req.session.username) return res.status(403).send("Unauthorized")
             if (req.session.banned) return res.status(403).send("You are banned")
@@ -66,7 +79,20 @@ const GroupRoutes = (app: Express) => {
             const newSlug = functions.generateSlug(name)
             let targetUser = req.session.username
             if (username && permissions.isMod(req.session)) targetUser = username
+            if (group.name === name && group.slug === newSlug 
+            && group.description === description) return res.status(200).send("Success")
             await sql.group.updateGroupName(group.groupID, targetUser, name, newSlug, description)
+
+            const groupHistory = await sql.history.groupHistory(group.groupID)
+            let posts = group.posts.map((post: any) => ({postID: post.postID, order: post.order}))
+            if (!groupHistory.length) {
+                let vanilla = group
+                vanilla.user = vanilla.creator
+                await sql.history.insertGroupHistory(vanilla.user, vanilla.groupID, vanilla.slug, vanilla.name, vanilla.restrict, vanilla.description, JSON.stringify(posts))
+                await sql.history.insertGroupHistory(targetUser, group.groupID, newSlug, name, group.restrict, description, JSON.stringify(posts), reason)
+            } else {
+                await sql.history.insertGroupHistory(targetUser, group.groupID, newSlug, name, group.restrict, description, JSON.stringify(posts), reason)
+            }
             res.status(200).send("Success")
         } catch (e) {
             console.log(e)
@@ -154,7 +180,19 @@ const GroupRoutes = (app: Express) => {
             } else {
                 let targetUser = req.session.username
                 if (username && permissions.isMod(req.session)) targetUser = username
-                // for future reference
+
+                const groupHistory = await sql.history.groupHistory(group.groupID)
+                const updated = await sql.group.group(slug)
+                let posts = updated.posts.map((post: any) => ({postID: post.postID, order: post.order}))
+                if (!groupHistory.length) {
+                    let vanilla = group
+                    vanilla.user = vanilla.creator
+                    let vanillaPosts = vanilla.posts.map((post: any) => ({postID: post.postID, order: post.order}))
+                    await sql.history.insertGroupHistory(vanilla.user, vanilla.groupID, vanilla.slug, vanilla.name, vanilla.restrict, vanilla.description, JSON.stringify(vanillaPosts))
+                    await sql.history.insertGroupHistory(targetUser, updated.groupID, updated.slug, updated.name, updated.restrict, updated.description, JSON.stringify(posts))
+                } else {
+                    await sql.history.insertGroupHistory(targetUser, updated.groupID, updated.slug, updated.name, updated.restrict, updated.description, JSON.stringify(posts))
+                }
             }
             res.status(200).send("Success")
         } catch (e) {
@@ -173,10 +211,33 @@ const GroupRoutes = (app: Express) => {
             for (let i = 0; i < posts.length; i++) {
                 if (Number(posts[i].order) !== i + 1) return res.status(400).send("Bad post orders")
             }
-            await sql.group.purgeGroupMap(group.groupID)
-            await sql.group.bulkInsertGroupMappings(group.groupID, posts)
+            let toChange = [] as any
+            for (let i = 0; i < posts.length; i++) {
+                let newPost = posts[i]
+                let oldPost = group.posts.find((p: any) => String(p.postID) === String(newPost.postID))
+                if (!oldPost) {
+                    toChange.push(newPost)
+                } else {
+                    if (Number(oldPost.order) !== Number(newPost.order)) toChange.push(newPost)
+                }
+            }
+            if (!toChange.length) return res.status(200).send("Success")
+            await sql.group.bulkDeleteGroupMappings(group.groupID, toChange)
+            await sql.group.bulkInsertGroupMappings(group.groupID, toChange)
             await sql.group.updateGroup(group.groupID, "updater", req.session.username)
             await sql.group.updateGroup(group.groupID, "updatedDate", new Date().toISOString())
+
+            const groupHistory = await sql.history.groupHistory(group.groupID)
+            const updated = await sql.group.group(slug)
+            if (!groupHistory.length) {
+                let vanilla = group
+                vanilla.user = vanilla.creator
+                let vanillaPosts = vanilla.posts.map((post: any) => ({postID: post.postID, order: post.order}))
+                await sql.history.insertGroupHistory(vanilla.user, vanilla.groupID, vanilla.slug, vanilla.name, vanilla.restrict, vanilla.description, JSON.stringify(vanillaPosts))
+                await sql.history.insertGroupHistory(req.session.username, updated.groupID, updated.slug, updated.name, updated.restrict, updated.description, JSON.stringify(posts))
+            } else {
+                await sql.history.insertGroupHistory(req.session.username, updated.groupID, updated.slug, updated.name, updated.restrict, updated.description, JSON.stringify(posts))
+            }
             res.status(200).send("Success")
         } catch (e) {
             console.log(e)
@@ -372,6 +433,54 @@ const GroupRoutes = (app: Express) => {
         } catch (e) {
             console.log(e)
             res.status(400).send("Bad request") 
+        }
+    })
+
+    app.get("/api/group/history", groupLimiter, async (req: Request, res: Response) => {
+        try {
+            const slug = req.query.slug as string
+            const historyID = req.query.historyID as string
+            const offset = req.query.offset as string
+            if (!req.session.username) return res.status(403).send("Unauthorized")
+            if (slug) {
+                const group = await sql.group.group(slug)
+                if (!group) return res.status(400).send("Bad group")
+                if (historyID) {
+                    const result = await sql.history.groupHistoryID(group.groupID, historyID)
+                    res.status(200).json(result)
+                } else {
+                    const result = await sql.history.groupHistory(group.groupID, offset)
+                    res.status(200).json(result)
+                }
+            } else {
+                const result = await sql.history.groupHistory(undefined, offset)
+                res.status(200).json(result)
+            }
+        } catch (e) {
+            console.log(e)
+            res.status(400).send("Bad request")
+        }
+    })
+
+    app.delete("/api/group/history/delete", csrfProtection, groupLimiter, async (req: Request, res: Response) => {
+        try {
+            const {slug, historyID} = req.query
+            if (Number.isNaN(Number(historyID))) return res.status(400).send("Invalid historyID")
+            if (!req.session.username) return res.status(403).send("Unauthorized")
+            if (!slug) return res.status(400).send("Bad slug")
+            if (!permissions.isMod(req.session)) return res.status(403).end()
+            const group = await sql.group.group(slug as string)
+            if (!group) return res.status(400).send("Bad group")
+            const groupHistory = await sql.history.groupHistory(group.groupID)
+            if (groupHistory[0]?.historyID === historyID) {
+                return res.status(400).send("Bad request")
+            } else {
+                await sql.history.deleteGroupHistory(Number(historyID))
+            }
+            res.status(200).send("Success")
+        } catch (e) {
+            console.log(e)
+            res.status(400).send("Bad request")
         }
     })
 }

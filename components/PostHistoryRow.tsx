@@ -10,7 +10,7 @@ import postHistoryDelete from "../assets/icons/delete.png"
 import adminCrown from "../assets/icons/admin-crown.png"
 import modCrown from "../assets/icons/mod-crown.png"
 import permissions from "../structures/Permissions"
-import "./styles/posthistoryrow.less"
+import "./styles/historyrow.less"
 import crypto from "crypto"
 import path from "path"
 
@@ -141,23 +141,23 @@ const PostHistoryRow: React.FunctionComponent<Props> = (props) => {
         if (session.banned) return null
         if (permissions.isMod(session)) {
             return (
-                <div className="posthistoryrow-options">
-                    <div className="posthistoryrow-options-container" onClick={revertPostHistoryDialog}>
-                        <img className="posthistoryrow-options-img" src={postHistoryRevert}/>
-                        <span className="posthistoryrow-options-text">Revert</span>
+                <div className="historyrow-options">
+                    <div className="historyrow-options-container" onClick={revertPostHistoryDialog}>
+                        <img className="historyrow-options-img" src={postHistoryRevert}/>
+                        <span className="historyrow-options-text">Revert</span>
                     </div>
-                    <div className="posthistoryrow-options-container" onClick={deletePostHistoryDialog}>
-                        <img className="posthistoryrow-options-img" src={postHistoryDelete}/>
-                        <span className="posthistoryrow-options-text">Delete</span>
+                    <div className="historyrow-options-container" onClick={deletePostHistoryDialog}>
+                        <img className="historyrow-options-img" src={postHistoryDelete}/>
+                        <span className="historyrow-options-text">Delete</span>
                     </div>
                 </div>
             )
         } else if (permissions.isContributor(session)) {
             return (
-                <div className="posthistoryrow-options">
-                    <div className="posthistoryrow-options-container" onClick={revertPostHistoryDialog}>
-                        <img className="posthistoryrow-options-img" src={postHistoryRevert}/>
-                        <span className="posthistoryrow-options-text">Revert</span>
+                <div className="historyrow-options">
+                    <div className="historyrow-options-container" onClick={revertPostHistoryDialog}>
+                        <img className="historyrow-options-img" src={postHistoryRevert}/>
+                        <span className="historyrow-options-text">Revert</span>
                     </div>
                 </div>
             )
@@ -187,20 +187,20 @@ const PostHistoryRow: React.FunctionComponent<Props> = (props) => {
         const editText = firstHistory ? "Uploaded" : "Edited"
         if (userRole === "admin") {
             return (
-                <div className="posthistoryrow-username-container" onClick={userClick} onAuxClick={userClick}>
-                    <span className="posthistoryrow-user-text admin-color">{editText} {functions.timeAgo(targetDate)} by {functions.toProperCase(props.postHistory.user)}</span>
-                    <img className="posthistoryrow-user-label" src={adminCrown}/>
+                <div className="historyrow-username-container" onClick={userClick} onAuxClick={userClick}>
+                    <span className="historyrow-user-text admin-color">{editText} {functions.timeAgo(targetDate)} by {functions.toProperCase(props.postHistory.user)}</span>
+                    <img className="historyrow-user-label" src={adminCrown}/>
                 </div>
             )
         } else if (userRole === "mod") {
             return (
-                <div className="posthistoryrow-username-container" onClick={userClick} onAuxClick={userClick}>
-                    <span className="posthistoryrow-user-text mod-color">{editText} {functions.timeAgo(targetDate)} by {functions.toProperCase(props.postHistory.user)}</span>
-                    <img className="posthistoryrow-user-label" src={modCrown}/>
+                <div className="historyrow-username-container" onClick={userClick} onAuxClick={userClick}>
+                    <span className="historyrow-user-text mod-color">{editText} {functions.timeAgo(targetDate)} by {functions.toProperCase(props.postHistory.user)}</span>
+                    <img className="historyrow-user-label" src={modCrown}/>
                 </div>
             )
         }
-        return <span className="posthistoryrow-user-text" onClick={userClick} onAuxClick={userClick}>{editText} {functions.timeAgo(targetDate)} by {functions.toProperCase(props.postHistory.user)}</span>
+        return <span className="historyrow-user-text" onClick={userClick} onAuxClick={userClick}>{editText} {functions.timeAgo(targetDate)} by {functions.toProperCase(props.postHistory.user)}</span>
     }
 
     const loadImage = async () => {
@@ -316,7 +316,7 @@ const PostHistoryRow: React.FunctionComponent<Props> = (props) => {
         const mapped = Object.values(props.postHistory.mirrors) as string[]
         return mapped.map((m, i) => {
             let append = i !== mapped.length - 1 ? ", " : ""
-            return <span className="posthistoryrow-label-link" onClick={() => window.open(m, "_blank")}>{functions.getSiteName(m) + append}</span>
+            return <span className="historyrow-label-link" onClick={() => window.open(m, "_blank")}>{functions.getSiteName(m) + append}</span>
         })
     }
 
@@ -326,75 +326,75 @@ const PostHistoryRow: React.FunctionComponent<Props> = (props) => {
             if (!props.previousHistory && props.postHistory.images.length <= 1) {
                 // ignore condition
             } else {
-                jsx.push(<span className="posthistoryrow-text"><span className="posthistoryrow-label-text">Images:</span> {props.postHistory.images.length}</span>)
+                jsx.push(<span className="historyrow-text"><span className="historyrow-label-text">Images:</span> {props.postHistory.images.length}</span>)
             }
         }
         if (!props.previousHistory || (props.previousHistory?.type !== props.postHistory.type)) {
-            jsx.push(<span className="posthistoryrow-text"><span className="posthistoryrow-label-text">Type:</span> {functions.toProperCase(props.postHistory.type)}</span>)
+            jsx.push(<span className="historyrow-text"><span className="historyrow-label-text">Type:</span> {functions.toProperCase(props.postHistory.type)}</span>)
         }
         if (!props.previousHistory || (props.previousHistory?.restrict !== props.postHistory.restrict)) {
-            jsx.push(<span className="posthistoryrow-text"><span className="posthistoryrow-label-text">Restrict:</span> {functions.toProperCase(props.postHistory.restrict)}</span>)
+            jsx.push(<span className="historyrow-text"><span className="historyrow-label-text">Restrict:</span> {functions.toProperCase(props.postHistory.restrict)}</span>)
         }
         if (!props.previousHistory || (props.previousHistory?.style !== props.postHistory.style)) {
-            jsx.push(<span className="posthistoryrow-text"><span className="posthistoryrow-label-text">Style:</span> {functions.toProperCase(props.postHistory.style)}</span>)
+            jsx.push(<span className="historyrow-text"><span className="historyrow-label-text">Style:</span> {functions.toProperCase(props.postHistory.style)}</span>)
         }
         if (!props.previousHistory || (props.previousHistory?.artists !== props.postHistory.artists)) {
             if (artistsDiff()) {
-                jsx.push(<span className="posthistoryrow-text"><span className="posthistoryrow-label-text">Artists:</span> {artistsDiff()}</span>)
+                jsx.push(<span className="historyrow-text"><span className="historyrow-label-text">Artists:</span> {artistsDiff()}</span>)
             }
         }
         if (!props.previousHistory || (props.previousHistory?.characters !== props.postHistory.characters)) {
             if (charactersDiff()) {
-                jsx.push(<span className="posthistoryrow-text"><span className="posthistoryrow-label-text">Characters:</span> {charactersDiff()}</span>)
+                jsx.push(<span className="historyrow-text"><span className="historyrow-label-text">Characters:</span> {charactersDiff()}</span>)
             }
         }
         if (!props.previousHistory || (props.previousHistory?.series !== props.postHistory.series)) {
             if (seriesDiff()) {
-                jsx.push(<span className="posthistoryrow-text"><span className="posthistoryrow-label-text">Series:</span> {seriesDiff()}</span>)
+                jsx.push(<span className="historyrow-text"><span className="historyrow-label-text">Series:</span> {seriesDiff()}</span>)
             }
         }
         if (!props.previousHistory || (props.previousHistory?.tags !== props.postHistory.tags)) {
             if (tagsDiff()) {
-                jsx.push(<span className="posthistoryrow-text"><span className="posthistoryrow-label-text">Tags:</span> {tagsDiff()}</span>)
+                jsx.push(<span className="historyrow-text"><span className="historyrow-label-text">Tags:</span> {tagsDiff()}</span>)
             }
         }
         if (!props.previousHistory || (props.previousHistory?.title !== props.postHistory.title)) {
-            jsx.push(<span className="posthistoryrow-text"><span className="posthistoryrow-label-text">Title:</span> {props.postHistory.title || "None"}</span>)
+            jsx.push(<span className="historyrow-text"><span className="historyrow-label-text">Title:</span> {props.postHistory.title || "None"}</span>)
         }
         if (!props.previousHistory || (props.previousHistory?.translatedTitle !== props.postHistory.translatedTitle)) {
-            jsx.push(<span className="posthistoryrow-text"><span className="posthistoryrow-label-text">Translated Title:</span> {props.postHistory.translatedTitle || "None"}</span>)
+            jsx.push(<span className="historyrow-text"><span className="historyrow-label-text">Translated Title:</span> {props.postHistory.translatedTitle || "None"}</span>)
         }
         if (!props.previousHistory || (props.previousHistory?.artist !== props.postHistory.artist)) {
-            jsx.push(<span className="posthistoryrow-text"><span className="posthistoryrow-label-text">Artist:</span> {props.postHistory.artist || "Unknown"}</span>)
+            jsx.push(<span className="historyrow-text"><span className="historyrow-label-text">Artist:</span> {props.postHistory.artist || "Unknown"}</span>)
         }
         if (!props.previousHistory || (props.previousHistory?.drawn !== props.postHistory.drawn)) {
-            jsx.push(<span className="posthistoryrow-text"><span className="posthistoryrow-label-text">Drawn:</span> {props.postHistory.drawn ? functions.formatDate(new Date(props.postHistory.drawn)) : "Unknown"}</span>)
+            jsx.push(<span className="historyrow-text"><span className="historyrow-label-text">Drawn:</span> {props.postHistory.drawn ? functions.formatDate(new Date(props.postHistory.drawn)) : "Unknown"}</span>)
         }
         if (!props.previousHistory || (props.previousHistory?.link !== props.postHistory.link)) {
-            jsx.push(<span className="posthistoryrow-text"><span className="posthistoryrow-label-text">Link:</span> <span className="posthistoryrow-label-link" onClick={() => window.open(props.postHistory.link, "_blank")}>{functions.getSiteName(props.postHistory.link)}</span></span>)
+            jsx.push(<span className="historyrow-text"><span className="historyrow-label-text">Link:</span> <span className="historyrow-label-link" onClick={() => window.open(props.postHistory.link, "_blank")}>{functions.getSiteName(props.postHistory.link)}</span></span>)
         }
         if (!props.previousHistory || (JSON.stringify(props.previousHistory?.mirrors) !== JSON.stringify(props.postHistory.mirrors))) {
-            jsx.push(<span className="posthistoryrow-text"><span className="posthistoryrow-label-text">Mirrors:</span> {printMirrors()}</span>)
+            jsx.push(<span className="historyrow-text"><span className="historyrow-label-text">Mirrors:</span> {printMirrors()}</span>)
         }
         if (!props.previousHistory || (props.previousHistory?.bookmarks !== props.postHistory.bookmarks)) {
             if (!props.previousHistory && !props.postHistory.bookmarks) {
                 // ignore condition
             } else {
-                jsx.push(<span className="posthistoryrow-text"><span className="posthistoryrow-label-text">Bookmarks:</span> {props.postHistory.bookmarks || "?"}</span>)
+                jsx.push(<span className="historyrow-text"><span className="historyrow-label-text">Bookmarks:</span> {props.postHistory.bookmarks || "?"}</span>)
             }
         }
         if (!props.previousHistory || (props.previousHistory?.purchaseLink !== props.postHistory.purchaseLink)) {
             if (!props.previousHistory && !props.postHistory.purchaseLink) {
                 // ignore condition
             } else {
-                jsx.push(<span className="posthistoryrow-text"><span className="posthistoryrow-label-text">Buy Link:</span> {props.postHistory.purchaseLink || "None"}</span>)
+                jsx.push(<span className="historyrow-text"><span className="historyrow-label-text">Buy Link:</span> {props.postHistory.purchaseLink || "None"}</span>)
             }
         }
         if (!props.previousHistory || (props.previousHistory?.commentary !== props.postHistory.commentary)) {
-            jsx.push(<span className="posthistoryrow-text"><span className="posthistoryrow-label-text">Commentary:</span> {props.postHistory.commentary || "None"}</span>)
+            jsx.push(<span className="historyrow-text"><span className="historyrow-label-text">Commentary:</span> {props.postHistory.commentary || "None"}</span>)
         }
         if (!props.previousHistory || (props.previousHistory?.translatedCommentary !== props.postHistory.translatedCommentary)) {
-            jsx.push(<span className="posthistoryrow-text"><span className="posthistoryrow-label-text">Translated Commentary:</span> {props.postHistory.translatedCommentary || "None"}</span>)
+            jsx.push(<span className="historyrow-text"><span className="historyrow-label-text">Translated Commentary:</span> {props.postHistory.translatedCommentary || "None"}</span>)
         }
         return jsx
     }
@@ -402,20 +402,20 @@ const PostHistoryRow: React.FunctionComponent<Props> = (props) => {
     //if (!hasAnyUpdate) return null
 
     return (
-        <div className="posthistoryrow">
+        <div className="historyrow">
             {session.username ? postHistoryOptions() : null}
-            <div className="posthistoryrow-container">
-                {functions.isVideo(img) ? <video className="posthistoryrow-img" autoPlay muted loop disablePictureInPicture src={img} onClick={imgClick} onAuxClick={imgClick} onContextMenu={updateImg}></video> :
-                functions.isGIF(img) ? <img className="posthistoryrow-img" src={img} onClick={imgClick} onAuxClick={imgClick} onContextMenu={updateImg}/> : 
-                <canvas className="posthistoryrow-img" ref={ref} onClick={imgClick} onAuxClick={imgClick} onContextMenu={updateImg}></canvas>}
+            <div className="historyrow-container">
+                {functions.isVideo(img) ? <video className="historyrow-img" autoPlay muted loop disablePictureInPicture src={img} onClick={imgClick} onAuxClick={imgClick} onContextMenu={updateImg}></video> :
+                functions.isGIF(img) ? <img className="historyrow-img" src={img} onClick={imgClick} onAuxClick={imgClick} onContextMenu={updateImg}/> : 
+                <canvas className="historyrow-img" ref={ref} onClick={imgClick} onAuxClick={imgClick} onContextMenu={updateImg}></canvas>}
             </div>
-            <div className="posthistoryrow-container-row">
-                <div className="posthistoryrow-container">
-                    <div className="posthistoryrow-user-container">
+            <div className="historyrow-container-row">
+                <div className="historyrow-container">
+                    <div className="historyrow-user-container">
                         {dateTextJSX()}
-                        {hasImageUpdate ? <span className="posthistoryrow-text-strong">[Image Updated]</span> : null}
+                        {hasImageUpdate ? <span className="historyrow-text-strong">[Image Updated]</span> : null}
                         {diffJSX()}
-                        {props.postHistory.reason ? <span className="posthistoryrow-text"><span className="posthistoryrow-label-text">Reason:</span> {props.postHistory.reason}</span> : null}
+                        {props.postHistory.reason ? <span className="historyrow-text"><span className="historyrow-label-text">Reason:</span> {props.postHistory.reason}</span> : null}
                     </div>
                 </div>
             </div>

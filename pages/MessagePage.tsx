@@ -10,7 +10,8 @@ import {ThemeContext, EnableDragContext, HideNavbarContext, HideSidebarContext, 
 RelativeContext, HideTitlebarContext, ActiveDropdownContext, HeaderTextContext, SidebarTextContext, SiteHueContext, 
 SiteLightnessContext, SiteSaturationContext, ScrollContext, MessagePageContext, ShowPageDialogContext, PageFlagContext,
 DeleteMessageIDContext, DeleteMessageFlagContext, QuoteTextContext, EditMessageIDContext, EditMessageFlagContext,
-EditMessageTitleContext, EditMessageContentContext, HasNotificationContext, SessionFlagContext, EmojisContext} from "../Context"
+EditMessageTitleContext, EditMessageContentContext, HasNotificationContext, SessionFlagContext, EmojisContext,
+ForwardMessageObjContext, MessageFlagContext} from "../Context"
 import permissions from "../structures/Permissions"
 import jsxFunctions from "../structures/JSXFunctions"
 import PageDialog from "../dialogs/PageDialog"
@@ -25,10 +26,12 @@ import premiumStar from "../assets/icons/premium-star.png"
 import editOptIcon from "../assets/icons/edit-opt.png"
 import deleteOptIcon from "../assets/icons/delete-opt.png"
 import quoteOptIcon from "../assets/icons/quote-opt.png"
+import forwardOptIcon from "../assets/icons/forward-opt.png"
 import DeleteMessageDialog from "../dialogs/DeleteMessageDialog"
 import EditMessageDialog from "../dialogs/EditMessageDialog"
 import DeleteMessageReplyDialog from "../dialogs/DeleteMessageReplyDialog"
 import EditMessageReplyDialog from "../dialogs/EditMessageReplyDialog"
+import ForwardMessageDialog from "../dialogs/ForwardMessageDialog"
 import favicon from "../assets/icons/favicon.png"
 import emojiSelect from "../assets/icons/emoji-select.png"
 import "./styles/messagepage.less"
@@ -65,6 +68,8 @@ const MessagePage: React.FunctionComponent<Props> = (props) => {
     const {editMessageFlag, setEditMessageFlag} = useContext(EditMessageFlagContext)
     const {editMessageTitle, setEditMessageTitle} = useContext(EditMessageTitleContext)
     const {editMessageContent, setEditMessageContent} = useContext(EditMessageContentContext)
+    const {forwardMessageObj, setForwardMessageObj} = useContext(ForwardMessageObjContext)
+    const {messageFlag, setMessageFlag} = useContext(MessageFlagContext)
     const {hasNotification, setHasNotification} = useContext(HasNotificationContext)
     const {emojis, setEmojis} = useContext(EmojisContext)
     const [message, setMessage] = useState(null) as any
@@ -151,6 +156,14 @@ const MessagePage: React.FunctionComponent<Props> = (props) => {
         updateReplies()
     }, [messageID, session])
 
+
+    useEffect(() => {
+        if (messageFlag) {
+            updateMessage()
+            setMessageFlag(false)
+        }
+    }, [messageID, session, messageFlag])
+
     useEffect(() => {
         setHideNavbar(true)
         setHideTitlebar(true)
@@ -174,11 +187,15 @@ const MessagePage: React.FunctionComponent<Props> = (props) => {
         if (!session.username) {
             functions.replaceLocation("/401")
         }
-        if (message) {
-            if (message.creator !== session.username &&
-                message.recipient !== session.username) {
-                    functions.replaceLocation("/401")
+        if (message && message.creator !== session.username) {
+            let canRead = false
+            for (const recipient of message.recipients) {
+                if (recipient === session.username) {
+                    canRead = true
                 }
+            }
+
+            if (!canRead) functions.replaceLocation("/401")
         }
     }, [session, message])
 
@@ -506,6 +523,11 @@ const MessagePage: React.FunctionComponent<Props> = (props) => {
         setDeleteMessageID(messageID)
     }
 
+    const forwardMessageDialog = () => {
+        if (!message) return
+        setForwardMessageObj(message)
+    }
+
     const triggerQuote = () => {
         if (!message) return
         const cleanReply = functions.parseComment(message.content).filter((s: any) => !s.includes(">>>")).join("")
@@ -528,6 +550,7 @@ const MessagePage: React.FunctionComponent<Props> = (props) => {
         if (session.username === message.creator || permissions.isMod(session)) {
             jsx.push(
                 <>
+                <img draggable={false} className="mail-message-opt-icon" src={forwardOptIcon} onClick={forwardMessageDialog} style={{filter: getFilter()}}/>
                 <img draggable={false} className="mail-message-opt-icon" src={editOptIcon} onClick={editMessageDialog} style={{filter: getFilter()}}/>
                 <img draggable={false} className="mail-message-opt-icon" src={deleteOptIcon} onClick={deleteMessageDialog} style={{filter: getFilter()}}/>
                 </>
@@ -655,6 +678,7 @@ const MessagePage: React.FunctionComponent<Props> = (props) => {
         <DeleteMessageDialog/> 
         <EditMessageReplyDialog/>
         <DeleteMessageReplyDialog/>
+        <ForwardMessageDialog/>
         <PageDialog/>
         <TitleBar/>
         <NavBar/>
@@ -668,7 +692,7 @@ const MessagePage: React.FunctionComponent<Props> = (props) => {
                         {getOptionsJSX()}
                     </div>
                     <div className="mail-message-title-container">
-                        <span className="mail-message-info">{`${message.creator} -> ${message.recipient}`}</span>
+                        <span className="mail-message-info">{`${message.creator} -> ${message.recipients.map((r: any) => r === null ? "deleted" : r).join(", ")}`}</span>
                     </div>
                     <div className="mail-message-main-post">
                         <div className="mail-message-user-container">

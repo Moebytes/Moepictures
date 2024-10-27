@@ -140,7 +140,7 @@ const ContactPage: React.FunctionComponent = (props) => {
                     </div>
                     </> : <>
                     <span className="contact-link">
-                        This is a contact form for any general inquiries. If you would like to remove your work, 
+                        This is a contact form for general inquiries. If you would like to remove your work, 
                         please fill out our <Link className="contact-text-alt-link" to="/copyright-removal">Copyright Removal Form</Link>.
                     </span>
                     <div className="contact-row">

@@ -245,8 +245,7 @@ const PostSong: React.FunctionComponent<Props> = (props) => {
     }
 
     const changeReverse = (value?: boolean) => {
-        const val = value !== undefined ? value : !reverse 
-        let secondsProgress = val === true ? (duration / 100) * (100 - progress) : (duration / 100) * progress
+        const val = value !== undefined ? value : !reverse
         setReverse(val)
     }
 

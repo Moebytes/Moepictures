@@ -22,6 +22,14 @@ const ActionBanner: React.FunctionComponent = (props) => {
             setStickyText("Copied Hash!")
             document.documentElement.style.setProperty("--actionBannerColor", "#501aceCC")
         }
+        if (actionBanner === "tag-edit") {
+            setStickyText("Edited Tags!")
+            document.documentElement.style.setProperty("--actionBannerColor", "#1a62ceCC")
+        }
+        if (actionBanner === "source-edit") {
+            setStickyText("Edited Source!")
+            document.documentElement.style.setProperty("--actionBannerColor", "#1a62ceCC")
+        }
     }, [actionBanner])
 
     if (actionBanner) {

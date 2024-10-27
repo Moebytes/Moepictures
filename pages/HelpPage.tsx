@@ -14,6 +14,8 @@ import videoPlayerImg from "../assets/misc/videoplayer.png"
 import musicPlayerImg from "../assets/misc/musicplayer.png"
 import $3dPlayerImg from "../assets/misc/3dplayer.png"
 import favoritesImg from "../assets/misc/favorites.png"
+import favgroupsImg from "../assets/misc/favgroups.png"
+import groupsImg from "../assets/misc/groups.png"
 import cutenessMeterImg from "../assets/misc/cutenessmeter.png"
 import translationsImg from "../assets/misc/translations.png"
 import uploadImg from "../assets/misc/upload.png"
@@ -28,6 +30,8 @@ import thirdPartyImg from "../assets/misc/thirdparty.png"
 import aliasesImg from "../assets/misc/aliases.png"
 import implicationsImg from "../assets/misc/implications.png"
 import captchaImg from "../assets/misc/captcha.png"
+import pixivDownloaderImg from "../assets/misc/pixiv-downloader.png"
+import setAvatarImg from "../assets/misc/set-avatar.png"
 import musicImg from "../assets/misc/music.png"
 import CaptchaDialog from "../dialogs/CaptchaDialog"
 import functions from "../structures/Functions"
@@ -87,8 +91,8 @@ const HelpPage: React.FunctionComponent = (props) => {
                 <><span className="help-heading">Help</span>
                 <span className="help-text">Welcome to Moepictures!</span>
                 <span className="help-text">
-                    Moepictures is an image board organized by tags, dedicated exclusively to showcasing the cutest and most moe artworks. While the majority of content is (and will likely be)
-                    2d art, we also have many other artforms including animations, music, and 3d models. <br/><br/>
+                    Moepictures is an image board organized by tags, dedicated exclusively to showcasing the most cute and moe artworks. While the majority of content is (and will likely be)
+                    2d art, we also accept many other artforms including animations, music, and 3d models. <br/><br/>
 
                     Click on a category on the left to view the help for that specific topic.
                 </span>
@@ -109,17 +113,21 @@ const HelpPage: React.FunctionComponent = (props) => {
 
                     Special tag modifiers: <br/>
                     <span className="help-alt">-Tag 1 -Tag 2</span> - Exclude posts containing Tag 1 and Tag 2. <br/>
-                    <span className="help-alt">+Tag 1 +Tag 2</span> - Include posts containing either Tag 1 or Tag 2. <br/><br/>
+                    <span className="help-alt">+Tag 1 +Tag 2</span> - Include posts containing either Tag 1 or Tag 2. <br/>
                     <span className="help-alt">*Tag 1 *Tag 2</span> - Match all tags that contain Tag 1 and Tag 2. <br/><br/>
 
                     Special searches: <br/>
                     <span className="help-alt">pixiv:id</span> - Search for post matching the pixiv id (if it exists). <br/>
+                    <span className="help-alt">twitter:id</span> - Search for post matching the twitter id (if it exists). <br/>
+                    <span className="help-alt">source:link</span> - Search all post links and mirrors for the specified link. <br/>
                     <span className="help-alt">hash:hash</span> - Search for post matching the perceptual hash. <br/>
                     <span className="help-alt">favorites:user</span> - Search for favorites of the user (if public). <br/>
                     <span className="help-alt">favgroup:user:name</span> - Search for favgroup of a user (if public). <br/>
-                    <span className="help-alt">group:name</span> - Search for a group by its name. <br/><br/>
-                    <span className="help-alt">uploads:user</span> - Search for uploads of a user. <br/><br/>
-                    <span className="help-alt">history:user</span> - Get your search history (only works on yourself). <br/><br/>
+                    <span className="help-alt">group:name</span> - Search for a group by its name. <br/>
+                    <span className="help-alt">uploads:user</span> - Search for uploads of a user. <br/>
+                    <span className="help-alt">history:user</span> - Get your search history (only works on yourself!) <br/>
+                    <span className="help-alt">comments:user</span> - (Comments page) get all comments by the user. <br/>
+                    <span className="help-alt">social:link</span> - (Tags page) find an artist by their social link. <br/><br/>
 
                     These are some tags with special uses: <br/>
                     <span className="help-alt">original</span> - the drawing is original, ie. not fanart. <br/>
@@ -140,14 +148,18 @@ const HelpPage: React.FunctionComponent = (props) => {
                     <span className="help-alt">no audio</span> - the post is a video with no audio. <br/>
                     <span className="help-alt">with audio</span> - the post is a video that has audio. <br/>
                     <span className="help-alt">multiple artists</span> - the post has multiple artists. <br/>
-                    <span className="help-alt">bad pixiv id</span> - the pixiv post was deleted. <br/><br/>
+                    <span className="help-alt">bad pixiv id</span> - the pixiv post was deleted. <br/>
+                    <span className="help-alt">paid reward available</span> - the post has a paid reward available. <br/>
+                    <span className="help-alt">third party edit</span> - the post is a third party edit. <br/>
+                    <span className="help-alt">third party source</span> - the source of the post was not posted by the original artist. <br/><br/>
 
                     In results, posts may have different border colors which mean the following: <br/>
                     <span className="help-alt">pink</span> - the post is favorited. <br/>
                     <span className="help-alt">purple</span> - the post is favgrouped. <br/>
-                    <span className="help-alt">green</span> - the post is a third party post. <br/>
+                    <span className="help-alt">red</span> - the post is edit locked. <br/>
+                    <span className="help-alt">green</span> - the post contains third party posts. <br/>
+                    <span className="help-alt">orange</span> - the post is in a group. <br/>
                     <span className="help-alt">blue</span> - the post contains multiple variations. <br/>
-                    <span className="help-alt">red</span> - the post is locked. <br/>
                 </span>
                 <div className="help-img-container"><img className="help-img" src={searchingImg}/></div></>
             )
@@ -220,13 +232,24 @@ const HelpPage: React.FunctionComponent = (props) => {
                 <div className="help-img-container"><img className="help-img" src={favoritesImg}/></div></>
             )
         }
+        if (helpTab === "favgroups") {
+            return (
+                <><span className="help-heading">Favorite Groups</span>
+                <span className="help-text">
+                    Favorite groups are like your own custom category of "favorites" - you can specify a name and 
+                    a privacy for each favorite group. And like groups, these also store the ordering of the posts and 
+                    may be reordered on their page. There isn't a sorting for favorite groups, but you may search them 
+                    with <span className="help-alt">favgroup:user:name</span>.
+                </span>
+                <div className="help-img-container"><img className="help-img" src={favgroupsImg}/></div></>
+            )
+        }
         if (helpTab === "cuteness") {
             return (
                 <><span className="help-heading">Cuteness</span>
                 <span className="help-text">
                     The rating system on Moepictures is called cuteness. When you rate an
-                    image you are not rating the quality, instead you are rating the amount
-                    of cuteness the image evokes. The scale is from 0 (Not cute) to 500 (Pretty
+                    image you should rate the amount of cuteness the image evokes. The scale is from 0 (Not cute) to 500 (Pretty
                     cute) to 1000 (Insanely cute).
                 </span>
                 <div className="help-img-container"><img className="help-img" src={cutenessMeterImg}/></div></>
@@ -236,12 +259,12 @@ const HelpPage: React.FunctionComponent = (props) => {
             return (
                 <><span className="help-heading">Translations</span>
                 <span className="help-text">
-                    Translations can be added to any post containing non-english text. This is useful so that non-speakers of 
-                    the foreign language can understand the post's context and any jokes. <br/><br/>
+                    Translations can be added to any post containing non-english text. This is useful so that non-speakers 
+                    can understand the post's context and any jokes. <br/><br/>
 
                     If you want to translate a post, I recommend using an OCR app to obtain text more easily. For japanese, 
-                    KanjiTomo is a good option: <br/>
-                    <a className="help-link" onClick={() => openLink("https://www.kanjitomo.net/")}>{mobile ? "KanjiTomo" : "https://www.kanjitomo.net/"}</a>
+                    KanjiTomo is a good option: 
+                    <a className="help-link" onClick={() => openLink("https://www.kanjitomo.net/")} style={{marginLeft: "10px"}}>{mobile ? "KanjiTomo" : "https://www.kanjitomo.net"}</a>
                 </span>
                 <div className="help-img-container"><img className="help-img" src={translationsImg}/></div></>
             )
@@ -270,8 +293,45 @@ const HelpPage: React.FunctionComponent = (props) => {
                     ⇾ Compress / re-encode files (maintaining high quality) to be storage efficient. <br/>
                     ⇾ No hentai. We only allow light nudity and suggestiveness. <br/>
                     ⇾ No AI-generated works. We only want art created by passionate humans. <br/>
-                    ⇾ No paid content. This includes anime clips, manga and doujinshi scans, and paid artist rewards. Support artists for their work!<br/>
+                    ⇾ No paid content. This includes anime clips, manga and doujinshi scans, and paid artist rewards. Support artists for their work!<br/><br/>
                     </span>
+
+                    Please classify uploads into the appropriate category. We have three levels of categorization: <br/>
+                    <span className="help-alt">Type</span> - The type of post. This can be <span className="help-alt">image, animation, comic, video, audio, or 3d model.</span><br/>
+                    Most of these are self-explanatory, but the distinction between an image and a comic is that comics contain various panels, 
+                    text, and speech balloons.<br/><br/>
+
+                    <span className="help-alt">Restrict</span> - An image content rating that may be used to broadly restrict content you don't want to see.<br/>
+                    <span className="help-alt">safe</span> - Pretty safe with no content that is too suggestive.<br/>
+                    <span className="help-alt">questionable</span> - Revealing or tight clothing (eg. swimsuits, tights), suggestive poses and ecchi.<br/><br/>
+
+                    <span className="help-alt">Style</span> - These are some very common art styles.<br/>
+                    <span className="help-alt">2d</span> - The vast majority of 2d art, or music that doesn't fit into any other categories.<br/>
+                    <span className="help-alt">3d</span> - 3d models or incorporates 3d models in some way.<br/>
+                    <span className="help-alt">chibi</span> - Art made in chibi or super deformed style.<br/>
+                    <span className="help-alt">pixel</span> - Art made in pixel art style or chiptune music.<br/><br/>
+
+                    Third party ID - Specify a post ID on the site and this post will be added as a child to that post. This is only used for third party edits. 
+                    For post variations, simply include them in the same post as multiple images are supported.<br/><br/>
+
+                    Please provide source information for all posts. You can fill in these fields: <br/>
+                    <span className="help-alt">title</span> - The original title of the work as posted on social media.<br/>
+                    <span className="help-alt">translated title</span> - A title english translation, as titles are very commonly in japanese.<br/>
+                    <span className="help-alt">artist</span> - Name of the artist (doesn't have to be romanized) - not the same as their artist tag, which will have to be romanized.<br/>
+                    <span className="help-alt">drawn date</span> - The original date the work was posted.<br/>
+                    <span className="help-alt">link</span> - The primary link to the work, preferably where the artist posted it themselves.<br/>
+                    <span className="help-alt">bookmarks</span> - The amount of pixiv bookmarks or "likes" if it's a different site.<br/>
+                    <span className="help-alt">commentary</span> - The original description of the work as posted on social media.<br/>
+                    <span className="help-alt">translated commentary</span> - A commentary english translation, as they are very commonly written in japanese.<br/>
+                    <span className="help-alt">mirrors</span> - Reposts of the work posted on different sites. Include the artists own reposts.<br/>
+                    <span className="help-alt">buy link</span> - If a paid reward is available, you may post the link to buy here.<br/><br/>
+
+                    Tags are divided into five categories. <br/>
+                    <span className="help-alt">artist</span> - Preferably the twitter username of the artist, otherwise their romanized name.<br/>
+                    <span className="help-alt">character</span> - The character name with their series in parentheses: character-(series-name). Use "no-character" if not applicable.<br/>
+                    <span className="help-alt">series</span> - The series (anime, manga, video game, etc.) the character belongs to. Use "no-series" if not applicable.<br/>
+                    <span className="help-alt">meta</span> - These are just tags with special uses, like unknown-artist and transparent.<br/>
+                    <span className="help-alt">tag</span> - Every tag is a small description of a feature that appears in the work. Check the tagging tab for more detailed help with tagging.<br/>
                 </span>
                 <div className="help-img-container"><img className="help-img" src={uploadImg}/></div></>
             )
@@ -280,7 +340,10 @@ const HelpPage: React.FunctionComponent = (props) => {
             return (
                 <><span className="help-heading">Tagging</span>
                 <span className="help-text">
-                    You don’t have to be exceedingly thorough but some effort placed on tags is required. <br/><br/>
+                    Every post should be tagged with the features it contains, and although you don’t have to be exceedingly thorough some 
+                    level of effort placed on tags is required. Aim for at least 10-20 tags. Anything below that is insufficient, and above that 
+                    starts getting into excessive territory.<br/><br/>
+
                     These are some guidelines on what features to tag: <br/>
                     <span className="help-alt">
                     ⇾ Clothing (school-uniform, sailor-uniform, coat, skirt, leggings, etc). <br/>
@@ -293,8 +356,31 @@ const HelpPage: React.FunctionComponent = (props) => {
                     ⇾ Body Parts (small-breasts, long-legs, etc). <br/>
                     ⇾ Objects (coffee, umbrella, flower, etc). <br/>
                     ⇾ Environment (daytime, nighttime, sunrise, sunset, snow, rain, fog, etc). <br/>
-                    ⇾ Special Tags (text, transparent, translated, no-audio, with-audio, etc). <br/>
+                    ⇾ Special Tags (text, transparent, translated, no-audio, with-audio, etc). <br/><br/>
                     </span>
+
+                    If the post was already tagged on a different site you may copy over the tags and fix them up. There's no 
+                    need to fully re-invent the wheel. <br/><br/>
+
+                    New tags that don't exist yet are created on post upload, and actually added once the post is approved. Once the 
+                    tag is up, you may edit its more detailed image/description/links in the tags page. Not all of these fields will be available to 
+                    edit, and will depend on the type of tag. <br/><br/>
+
+                    <span className="help-alt">Tag</span> - The name of the tag. Artist tags may be changed whenever they update their twitter name, but 
+                    modify other tags only if necessary.<br/>
+                    <span className="help-alt">Website</span> - A website link, usually of the anime/video game or personal website of an artist.<br/>
+                    <span className="help-alt">Social</span> - The primary social media account of the artist where they upload their works, depending on 
+                    the type of artist this is usually pixiv/soundcloud/sketchfab. <br/>
+                    <span className="help-alt">Twitter</span> - Their twitter/x account, as the majority of people also have one. We also prefer to use their 
+                    twitter username as their tag name.<br/>
+                    <span className="help-alt">Fandom</span> - For character tags, this can be a link to the fandom wiki of the character (or any other wiki).<br/>
+                    <span className="help-alt">Image</span> - A tag image, usually profile picture of the artist or logo of the series. Please provide one for 
+                    artist, characters, and series.<br/>
+                    <span className="help-alt">Description</span> - A longer description of the tag, going into more detail about what its about. Very useful for tags 
+                    that are not very self-explanatory.<br/>
+                    <span className="help-alt">Aliases</span> - Aliases are alternate names that will resolve to this tag. They do not have to be romanized, unlike tags.<br/>
+                    <span className="help-alt">Implications</span> - Implications are "parent" tags automatically added when this tag is added to a post.<br/>
+                    <span className="help-alt">Pixiv Tags</span> - This should correspond to the tags used on pixiv, and there may be multiple of them. Almost always are in japanese.<br/>
                 </span>
                 <div className="help-img-container"><img className="help-img" src={taggingImg}/></div></>
             )
@@ -319,7 +405,7 @@ const HelpPage: React.FunctionComponent = (props) => {
             return (
                 <><span className="help-heading">Compressing</span>
                 <span className="help-text">
-                    Compressing / re-encoding posts is advised for faster loading and better space efficiency. All compressions should be 
+                    Compressing/re-encoding posts is advised for faster loading and better space efficiency. All compressions should be 
                     high quality and should not leave behind any artifacts. <br/><br/>
 
                     You can download the app that we use for compressing here: <br/>
@@ -330,7 +416,7 @@ const HelpPage: React.FunctionComponent = (props) => {
                     Images ⇾ Progressive JPG or WEBP for transparent images. Avoid AVIF for high decoding time and PNG for massive filesizes. <br/>
                     Animations ⇾ Animated WEBP is preferred over GIF. <br/>
                     Videos ⇾ MP4 with H.264 codec, WEBM with VP9 codec, or MP4 with AV1 codec. Avoid H.265 codec for poor browser support. <br/>
-                    Music ⇾ MP3 with cover art. <br/>
+                    Music ⇾ MP3 with cover art. Avoid WAV as it doesn't support cover art.<br/>
                     3D Models ⇾ GLB or FBX. Avoid OBJ, as it needs separate texture loading we don't support. <br/><br/>
                     </span>
 
@@ -339,13 +425,29 @@ const HelpPage: React.FunctionComponent = (props) => {
                 <div className="help-img-container"><img className="help-img" src={compressingImg}/></div></>
             )
         }
+        if (helpTab === "pixiv-downloads") {
+            return (
+                <><span className="help-heading">Pixiv Downloads</span>
+                <span className="help-text">
+                    The vast majority of posts come from the Japanese art website <a className="help-link" onClick={() => openLink("https://www.pixiv.net/")}>Pixiv.</a><br/><br/>
+
+                    However, it can take awhile to manually the download the art that you like, so we also have an app that makes it easy to download lots of posts at once. It 
+                    can download illustrations, manga, ugoira (animations), and novels. (However at this time, we don't support uploading textual content like novels).<br/>
+
+                    <a className="help-link" onClick={() => openLink("https://github.com/Moebits/Pixiv-Downloader/releases")}>{mobile ? "Pixiv Downloader" : "https://github.com/Moebits/Pixiv-Downloader/releases"}</a><br/><br/>
+                </span>
+                <div className="help-img-container"><img className="help-img" src={pixivDownloaderImg}/></div></>
+            )
+        }
         if (helpTab === "variations") {
             return (
                 <><span className="help-heading">Variations</span>
                 <span className="help-text">
-                    Variations of the same image are combined into a single post. You can add a variation to an existing post 
-                    by editing it. All variations of an image should be created by the original artist, otherwise it is considered a third party edit instead.
-                    If an image has significantly different tags to the main post (eg. different characters), it's better to make it it's own post.
+                    Variations of the same image are combined into a single post. You can add a variation to an existing post by editing it (use the full fledged 
+                    edit, not tag/source edit). All variations of an image should be created by the original artist, otherwise it is considered a third party edit instead. <br/><br/>
+
+                    If an image has significantly different tags to the main post (eg. different characters), it's better to make it it's own post and associate the posts by 
+                    creating a group. This doesn't include multiple pages of a sequential manga/comic. Please use variations and not groups for these.
                 </span>
                 <div className="help-img-container"><img className="help-img" src={variationsImg}/></div></>
             )
@@ -356,9 +458,26 @@ const HelpPage: React.FunctionComponent = (props) => {
                 <span className="help-text">
                     Third party edits are modifications to a work not done/endorsed by the original artist. For
                     example, an animation of an artwork done by someone else. Third party edits behave like their own post,
-                    and are also added to the original post in a separate section.
+                    and are also added to the original post in a separate section. Also known as child posts, but third party edits are the 
+                    only thing we use them for.
                 </span>
                 <div className="help-img-container"><img className="help-img" src={thirdPartyImg}/></div></>
+            )
+        }
+        if (helpTab === "groups") {
+            return (
+                <><span className="help-heading">Groups</span>
+                <span className="help-text">
+                    Groups are a way to associate several related posts that have very different tags, so variations are not a great way to 
+                    combine them. This is useful when an artist posts a pixiv post containing multiple artworks of different characters, or for 
+                    a series of posts/comic strips that are related but not sequential. If it's a manga/comic with sequential pages, we still prefer to 
+                    use variations for it. <br/><br/>
+
+                    If all the posts in the group have the same source then name the group like <span className="help-alt">Sitename PostID</span>, eg. 
+                    Pixiv 123456 and make the description a link to it. Otherwise name it a translated name of the post series. You can provide the original 
+                    untranslated name in the group description.
+                </span>
+                <div className="help-img-container"><img className="help-img" src={groupsImg}/></div></>
             )
         }
         if (helpTab === "aliases") {
@@ -368,7 +487,15 @@ const HelpPage: React.FunctionComponent = (props) => {
                     A tag can have multiple aliases that point to the same result. This is to
                     facilitate better searching for synonyms like "with audio" and "has audio". Unlike tags, aliases can include non-ASCII characters 
                     so it's possible to add an alias in Japanese in order to enable Japanese searching. Existing tags can also be aliased to another tag,
-                    but this is an action that will need approval.
+                    but this is an action that will need approval. <br/><br/>
+
+                    <span className="help-alt">Aliasing To</span><br/>
+                    It's supported to take an existing tag, delete it, and then add it as an alias to another tag. This is called 
+                    aliasing to. As aliasing to is a destructive action, they will have to be approved by mods. <br/><br/>
+
+                    To make this more clear, the tag that you start the "alias to" on will be deleted and added as an alias to the other tag. This 
+                    is the aliasor. The tag that you type in the box is the aliasee, and is the tag that will receive this new alias. Every post 
+                    that was under the old tag will be moved to the new tag.<br/>
                 </span>
                 <div className="help-img-container"><img className="help-img" src={aliasesImg}/></div></>
             )
@@ -384,6 +511,38 @@ const HelpPage: React.FunctionComponent = (props) => {
                 <div className="help-img-container"><img className="help-img" src={implicationsImg}/></div></>
             )
         }
+        if (helpTab === "users") {
+            return (
+                <><span className="help-heading">Users</span>
+                <span className="help-text">
+                    Moepictures has various user account levels that progressively give you more 
+                    permissions and removes restrictions. <br/><br/>
+
+                    <span className="help-alt">No account</span> - Can only view the site and the posts rated "safe".<br/>
+                    <span className="help-alt">User</span> - Access to favorites, favorite groups, comments/forum/messages, and can submit uploads/edits/translations for approval. Can also view the "questionable" posts.<br/>
+                    <span className="help-alt">Premium</span> - This is an add-on to your user level that lets you also access the premium features, such as upscaled images and search history.<br/>
+                    <span className="help-alt">Contributor</span> - Can edit posts and tags without passing through the mod queue. Given to members with a great 
+                    track record of contributions that we don't want to inhibit with the queue.<br/>
+                    <span className="help-alt">Curator</span> - Can upload posts without passing through the mod queue. Given to members who consistently submit high quality posts 
+                    that we don't want to inhibit with the queue.<br/>
+                    <span className="help-alt">Mod</span> - Access to the mod queue and can approve uploads/edits/aliasing, can replace images on posts, can change the category of tags, and can ban users.<br/>
+                    <span className="help-alt">Admin</span> - Access to our most powerful tools such as bulk uploading and bulk tagging. Can permanently delete posts and promote users to 
+                    a higher level.<br/>
+                    <span className="help-alt">System</span> - This is only for our bot account that sends out message notifications.<br/><br/>
+
+
+                    Since mods and admins can potentially make very destructive changes to the site, we require them to enable 2FA on their accounts.<br/><br/>
+
+                    <span className="help-alt">Avatars</span><br/>
+                    You can only pick an avatar from the images that are on the site. This is the simplest way to enforce an "anime avatars only" policy! 
+                    If the image you want to use as an avatar doesn't exist yet (but anime of course), try uploading it. <br/><br/>
+
+                    You can change your avatar by clicking on "set avatar" on the sidebar of any post, and you can remove it in your account settings. 
+                    Please do this on PC, as the mobile touch controls are known to be a bit finicky.
+                </span>
+                <div className="help-img-container"><img className="help-img" src={setAvatarImg}/></div></>
+            )
+        }
         if (helpTab === "commenting") {
             return (
                 <><span className="help-heading">Commenting</span>
@@ -393,8 +552,8 @@ const HelpPage: React.FunctionComponent = (props) => {
                     <span className="help-alt">
                     ⇾ No spam, gibberish, or extremely off-topic comments. <br/>
                     ⇾ No foul language (if you somehow bypassed the filter). <br/>
-                    ⇾ No unnecessary rudeness or impoliteness. <br/>
-                    ⇾ No otherwise distasteful comments. <br/><br/>
+                    ⇾ No unnecessary rudeness or impoliteness, please be kind. <br/>
+                    ⇾ No otherwise distasteful/inappropriate comments. <br/><br/>
                     </span>
 
                     Quotes are supported and we have a syntax that makes it easy to do quotes. Nested quotes are not supported. <br/>
@@ -424,8 +583,11 @@ const HelpPage: React.FunctionComponent = (props) => {
                     <span className="help-alt">
                     ⇾ Misconduct in the comments, forum threads, or private messages. <br/>
                     ⇾ Spam uploading meme or very low quality posts. <br/>
-                    ⇾ Vandalizing posts, tags, or translations. <br/>
+                    ⇾ Vandalizing posts, tags, or translations. <br/><br/>
                     </span>
+
+                    We also don't allow profane or inappropriate usernames. We will inquire you to change your 
+                    username to something more appropriate, otherwise you might also get banned if there is no response.
                 </span></>
             )
         }
@@ -433,9 +595,12 @@ const HelpPage: React.FunctionComponent = (props) => {
             return (
                 <><span className="help-heading">Captcha</span>
                 <span className="help-text">
-                    Automated scraping of our website is prohibited. If you hit one of our rate limits you will 
-                    have to solve a captcha to view tags, and posts will be locked. Hopefully 
-                    this shouldn't be triggered by regular browsing.
+                    We don't condone the scraping of our website for purposes of AI-training, and we take 
+                    various measures to make it harder like captchas and encrypting images. Hopefully 
+                    this shouldn't be triggered by regular browsing. <br/><br/>
+                    
+                    Although there is nothing we can to prevent your work being scraped on Pixiv/Twitter etc, on
+                    our website we do what we can to mitigate it.<br/><br/>
                 </span>
                 <div className="help-img-container"><img className="help-img" src={captchaImg}/></div></>
             )
@@ -444,9 +609,9 @@ const HelpPage: React.FunctionComponent = (props) => {
             return (
                 <><span className="help-heading">Account Deletion</span>
                 <span className="help-text">
-                    Because Moepictures is heavily focused on user contributions, when you delete your account we won't  
+                    Since Moepictures is heavily focused on user contributions, when you delete your account we won't  
                     remove your public contributions like submitted posts and edits. The account that uploaded them will be 
-                    anonymized and show up as "deleted". The rest of your account data will be deleted.
+                    anonymized and show up as "deleted". The rest of your account data will be deleted. <br/><br/>
                 </span></>
             )
         }
@@ -454,12 +619,15 @@ const HelpPage: React.FunctionComponent = (props) => {
             return (
                 <><span className="help-heading">Copyright Removal</span>
                 <span className="help-text">
-                    We respect the intellectual property rights of others. If you find your work on the site and don't wish it to be 
-                    here anymore, you may submit a copyright form at <a className="help-link" onClick={() => history.push("/copyright-removal")}>{mobile ? "Copyright Form" : `${functions.getDomain()}/copyright-removal`}</a> or email us at moepictures.moe@gmail.com.<br/><br/>
+                    If your work is up on Moepictures then it means that we love your work and we always make sure to source 
+                    posts back to you.<br/><br/>
 
-                    After verifying that you are the artist, your works will be promptly removed, and if requested we will also prevent any of your future works from being uploaded.<br/><br/>
+                    With that said, we respect your rights and if you don't want your work to be here anymore, 
+                    you may submit a copyright removal form at <a className="help-link" onClick={() => history.push("/copyright-removal")}>{mobile ? "Copyright Form" : `${functions.getDomain()}/copyright-removal`}</a> or email us at moepictures.moe@gmail.com.<br/><br/>
 
-                    We are sad to see you go!<br/>
+                    After verifying that you are the artist, your works will be promptly removed, and if requested we will also prevent your future works from being uploaded.<br/><br/>
+
+                    We are sad to see you go.<br/>
                 </span></>
             )
         }
@@ -483,15 +651,19 @@ const HelpPage: React.FunctionComponent = (props) => {
                         <span className="help-nav-text" onClick={() => setHelpTab("music")}>Music</span>
                         <span className="help-nav-text" onClick={() => setHelpTab("translations")}>Translations</span>
                         <span className="help-nav-text" onClick={() => setHelpTab("favorites")}>Favorites</span>
+                        <span className="help-nav-text" onClick={() => setHelpTab("favgroups")}>Favorite Groups</span>
                         <span className="help-nav-text" onClick={() => setHelpTab("cuteness")}>Cuteness</span>
                         <span className="help-nav-text" onClick={() => setHelpTab("uploading")}>Uploading</span>
                         <span className="help-nav-text" onClick={() => setHelpTab("tagging")}>Tagging</span>
                         <span className="help-nav-text" onClick={() => setHelpTab("upscaling")}>Upscaling</span>
                         <span className="help-nav-text" onClick={() => setHelpTab("compressing")}>Compressing</span>
+                        <span className="help-nav-text" onClick={() => setHelpTab("pixiv-downloads")}>Pixiv Downloads</span>
                         <span className="help-nav-text" onClick={() => setHelpTab("variations")}>Variations</span>
                         <span className="help-nav-text" onClick={() => setHelpTab("third-party-edits")}>Third Party Edits</span>
+                        <span className="help-nav-text" onClick={() => setHelpTab("groups")}>Groups</span>
                         <span className="help-nav-text" onClick={() => setHelpTab("aliases")}>Aliases</span>
                         <span className="help-nav-text" onClick={() => setHelpTab("implications")}>Implications</span>
+                        <span className="help-nav-text" onClick={() => setHelpTab("users")}>Users</span>
                         <span className="help-nav-text" onClick={() => setHelpTab("commenting")}>Commenting</span>
                         <span className="help-nav-text" onClick={() => setHelpTab("bans")}>Bans</span>
                         <span className="help-nav-text" onClick={() => setHelpTab("captcha")}>Captcha</span>

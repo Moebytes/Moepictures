@@ -34,8 +34,10 @@ export default class SQLSearch {
         if (sort === "reverse popularity") sortQuery = `ORDER BY "favoriteCount" ASC`
         if (sort === "variations") sortQuery = `ORDER BY "imageCount" DESC`
         if (sort === "reverse variations") sortQuery = `ORDER BY "imageCount" ASC`
-        if (sort === "thirdparty") sortQuery = `ORDER BY posts."thirdParty" DESC NULLS LAST`
-        if (sort === "reverse thirdparty") sortQuery = `ORDER BY posts."thirdParty" ASC NULLS LAST`
+        if (sort === "thirdparty") sortQuery = `ORDER BY "hasThirdParty" DESC`
+        if (sort === "reverse thirdparty") sortQuery = `ORDER BY "hasThirdParty" ASC`
+        if (sort === "groups") sortQuery = `ORDER BY "isGrouped" DESC`
+        if (sort === "reverse groups") sortQuery = `ORDER BY "isGrouped" ASC`
         if (sort === "tagcount") sortQuery = `ORDER BY "tagCount" DESC`
         if (sort === "reverse tagcount") sortQuery = `ORDER BY "tagCount" ASC`
         if (sort === "filesize") sortQuery = `ORDER BY "imageSize" DESC`
@@ -118,7 +120,16 @@ export default class SQLSearch {
                 MAX(DISTINCT images."height") AS "imageHeight",
                 COUNT(DISTINCT images."imageID") AS "imageCount",
                 COUNT(DISTINCT favorites."username") AS "favoriteCount",
-                ROUND(AVG(DISTINCT cuteness."cuteness")) AS "cuteness"${username ? `,
+                ROUND(AVG(DISTINCT cuteness."cuteness")) AS "cuteness",
+                CASE
+                    WHEN COUNT("third party"."postID") > 0 
+                    THEN true ELSE false
+                END AS "hasThirdParty",
+                CASE 
+                    WHEN COUNT("group map"."groupID") > 0 
+                    THEN true ELSE false 
+                END AS "isGrouped" 
+                ${username ? `,
                 CASE 
                     WHEN COUNT(favorites."username") FILTER (WHERE favorites."username" = $${userValue}) > 0 
                     THEN true ELSE false
@@ -132,6 +143,8 @@ export default class SQLSearch {
                 ${includeTags ? `JOIN "tag map" ON posts."postID" = "tag map"."postID"` : ""}
                 FULL JOIN "favorites" ON posts."postID" = "favorites"."postID"
                 FULL JOIN "cuteness" ON posts."postID" = "cuteness"."postID"
+                LEFT JOIN "third party" ON posts."postID" = "third party"."parentID"
+                LEFT JOIN "group map" ON posts."postID" = "group map"."postID"
                 ${username ? `LEFT JOIN "favgroup map" ON posts."postID" = "favgroup map"."postID"` : ""}
                 ${whereQueries ? `WHERE ${whereQueries}` : ""}
                 GROUP BY posts."postID"${favoriteQuery ? `, favorites."postID", favorites."username"` : ""}
@@ -154,7 +167,6 @@ export default class SQLSearch {
 
     /** Search pixiv id. */
     public static searchPixivID = async (pixivID: number, includeTags?: boolean) => {
-        const pixivURL = `https://www.pixiv.net/en/artworks/${pixivID}`
         const query: QueryConfig = {
         text: functions.multiTrim(/*sql*/`
             WITH post_json AS (
@@ -172,7 +184,7 @@ export default class SQLSearch {
                 ${includeTags ? `JOIN "tag map" ON posts."postID" = "tag map"."postID"` : ""}
                 FULL JOIN "favorites" ON posts."postID" = "favorites"."postID"
                 FULL JOIN "cuteness" ON posts."postID" = "cuteness"."postID"
-                WHERE posts."link" = $1
+                WHERE posts."link" LIKE 'https://%pixiv.net/%/' || $1 OR posts."mirrors"::text LIKE 'https://%pixiv.net/%/' || $1
                 GROUP BY posts."postID"
             )
             SELECT post_json.*,
@@ -180,7 +192,74 @@ export default class SQLSearch {
             FROM post_json
             LIMIT 1
         `),
-        values: [pixivURL]
+        values: [pixivID]
+        }
+        const result = await SQLQuery.run(query, true)
+        return result
+    }
+
+    /** Search twitter id. */
+    public static searchTwitterID = async (twitterID: string, includeTags?: boolean) => {
+        const query: QueryConfig = {
+        text: functions.multiTrim(/*sql*/`
+            WITH post_json AS (
+                SELECT posts.*, json_agg(DISTINCT images.*) AS images, 
+                ${includeTags ? `array_agg(DISTINCT "tag map".tag) AS tags,` : ""}
+                ${includeTags ? `COUNT(DISTINCT "tag map"."tag") AS "tagCount",` : ""}
+                MAX(DISTINCT images."size") AS "imageSize",
+                MAX(DISTINCT images."width") AS "imageWidth",
+                MAX(DISTINCT images."height") AS "imageHeight",
+                COUNT(DISTINCT images."imageID") AS "imageCount",
+                COUNT(DISTINCT favorites."username") AS "favoriteCount",
+                ROUND(AVG(DISTINCT cuteness."cuteness")) AS "cuteness"
+                FROM posts
+                JOIN images ON posts."postID" = images."postID"
+                ${includeTags ? `JOIN "tag map" ON posts."postID" = "tag map"."postID"` : ""}
+                FULL JOIN "favorites" ON posts."postID" = "favorites"."postID"
+                FULL JOIN "cuteness" ON posts."postID" = "cuteness"."postID"
+                WHERE posts."link" LIKE 'https://%x.com/%/status/' || $1 OR posts."link" LIKE 'https://%twitter.com/%/status/' || $1 OR 
+                posts."mirrors"::text LIKE 'https://%x.com/%/status/' || $1 OR posts."mirrors"::text LIKE 'https://%twitter.com/%/status/' || $1 
+                GROUP BY posts."postID"
+            )
+            SELECT post_json.*,
+            COUNT(*) OVER() AS "postCount"
+            FROM post_json
+            LIMIT 1
+        `),
+        values: [twitterID]
+        }
+        const result = await SQLQuery.run(query, true)
+        return result
+    }
+
+    /** Search search. */
+    public static searchSource = async (source: string, includeTags?: boolean) => {
+        const query: QueryConfig = {
+        text: functions.multiTrim(/*sql*/`
+            WITH post_json AS (
+                SELECT posts.*, json_agg(DISTINCT images.*) AS images, 
+                ${includeTags ? `array_agg(DISTINCT "tag map".tag) AS tags,` : ""}
+                ${includeTags ? `COUNT(DISTINCT "tag map"."tag") AS "tagCount",` : ""}
+                MAX(DISTINCT images."size") AS "imageSize",
+                MAX(DISTINCT images."width") AS "imageWidth",
+                MAX(DISTINCT images."height") AS "imageHeight",
+                COUNT(DISTINCT images."imageID") AS "imageCount",
+                COUNT(DISTINCT favorites."username") AS "favoriteCount",
+                ROUND(AVG(DISTINCT cuteness."cuteness")) AS "cuteness"
+                FROM posts
+                JOIN images ON posts."postID" = images."postID"
+                ${includeTags ? `JOIN "tag map" ON posts."postID" = "tag map"."postID"` : ""}
+                FULL JOIN "favorites" ON posts."postID" = "favorites"."postID"
+                FULL JOIN "cuteness" ON posts."postID" = "cuteness"."postID"
+                WHERE posts."link" LIKE '%' || $1 || '%' OR posts."mirrors"::text LIKE '%' || $1 || '%'
+                GROUP BY posts."postID"
+            )
+            SELECT post_json.*,
+            COUNT(*) OVER() AS "postCount"
+            FROM post_json
+            LIMIT 1
+        `),
+        values: [source]
         }
         const result = await SQLQuery.run(query, true)
         return result
@@ -409,6 +488,29 @@ export default class SQLSearch {
         } else {
             return SQLQuery.run(query, true)
         }
+    }
+
+    /** Tag social search */
+    public static tagSocialSearch = async (social: string) => {
+        const query: QueryConfig = {
+            text: functions.multiTrim(/*sql*/`
+                    SELECT tags.*, json_agg(DISTINCT aliases.*) AS aliases, json_agg(DISTINCT implications.*) AS implications,
+                    COUNT(*) OVER() AS "tagCount",
+                    COUNT(DISTINCT posts."postID") AS "postCount", 
+                    COUNT(DISTINCT tags."image") AS "imageCount", 
+                    COUNT(DISTINCT aliases."alias") AS "aliasCount"
+                    FROM tags
+                    FULL JOIN aliases ON aliases."tag" = tags."tag"
+                    FULL JOIN implications ON implications."tag" = tags."tag"
+                    JOIN "tag map" ON "tag map"."tag" = tags."tag"
+                    AND (tags.social LIKE '%' || $1 || '%' OR tags.twitter LIKE '%' || $1 || '%'
+                    OR tags.website LIKE '%' || $1 || '%' OR tags.fandom LIKE '%' || $1 || '%')
+                    JOIN posts ON posts."postID" = "tag map"."postID"
+                    GROUP BY "tags".tag
+            `),
+            values: [social]
+        }
+        return SQLQuery.run(query, true)
     }
 
     /** Group search. */

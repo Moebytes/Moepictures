@@ -118,27 +118,36 @@ export default class SQLReport {
     public static insertBan = async (username: string, ip: string, banner: string, reason: string) => {
         const now = new Date().toISOString()
         const query: QueryConfig = {
-        text: /*sql*/`INSERT INTO bans ("username", "ip", "banner", "banDate", "reason") VALUES ($1, $2, $3, $4, $5)`,
-        values: [username, ip, banner, now, reason]
+        text: /*sql*/`INSERT INTO bans ("username", "ip", "banner", "banDate", "reason", "active") VALUES ($1, $2, $3, $4, $5, $6)`,
+        values: [username, ip, banner, now, reason, true]
         }
         const result = await SQLQuery.run(query)
         return result
     }
 
     /** Delete ban */
-    public static deleteBan = async (username: string) => {
+    public static deleteBan = async (banID: number) => {
         const query: QueryConfig = {
-        text: functions.multiTrim(/*sql*/`DELETE FROM bans WHERE bans."username" = $1`),
-        values: [username]
+        text: functions.multiTrim(/*sql*/`DELETE FROM bans WHERE bans."banID" = $1`),
+        values: [banID]
         }
         const result = await SQLQuery.run(query)
         return result
     }
 
-    /** Get ban */
-    public static ban = async (username: string) => {
+    /** Update ban */
+    public static updateBan = async (banID: number, column: string, value: string | number | boolean | null) => {
         const query: QueryConfig = {
-        text: functions.multiTrim(/*sql*/`SELECT * FROM bans WHERE bans."username" = $1`),
+            text: /*sql*/`UPDATE bans SET "${column}" = $1 WHERE "banID" = $2`,
+            values: [value, banID]
+        }
+        return SQLQuery.run(query)
+    }
+
+    /** Get active ban */
+    public static activeBan = async (username: string) => {
+        const query: QueryConfig = {
+        text: functions.multiTrim(/*sql*/`SELECT * FROM bans WHERE bans."username" = $1 AND bans."active" = true`),
         values: [username]
         }
         const result = await SQLQuery.run(query)
@@ -146,9 +155,9 @@ export default class SQLReport {
     }
 
     /** Get banned IP */
-    public static bannedIP = async (ip: string) => {
+    public static activeBannedIP = async (ip: string) => {
         const query: QueryConfig = {
-        text: functions.multiTrim(/*sql*/`SELECT * FROM bans WHERE bans."ip" = $1`),
+        text: functions.multiTrim(/*sql*/`SELECT * FROM bans WHERE bans."ip" = $1 AND bans."active" = true`),
         values: [ip]
         }
         const result = await SQLQuery.run(query)

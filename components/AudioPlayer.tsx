@@ -270,6 +270,8 @@ const AudioPlayer: React.FunctionComponent = (props) => {
             Tone.getTransport().seconds = val
             player.reverse = true
         }
+        let secondsProgress = player.reverse ? (duration / 100) * (100 - progress) : (duration / 100) * progress
+        setSeekTo(secondsProgress)
     }
 
     useEffect(() => {
@@ -458,9 +460,7 @@ const AudioPlayer: React.FunctionComponent = (props) => {
 
     const changeReverse = (value?: boolean) => {
         const val = value !== undefined ? value : !reverse 
-        let secondsProgress = val === true ? (duration / 100) * (100 - progress) : (duration / 100) * progress
         setReverse(val)
-        setSeekTo(secondsProgress)
     }
 
     const rewind = (value?: number) => {

@@ -16,7 +16,7 @@ import soundcloud from "../assets/icons/soundcloud.png"
 import sketchfab from "../assets/icons/sketchfab.png"
 import twitter from "../assets/icons/twitter.png"
 import crypto from "crypto"
-import "./styles/taghistoryrow.less"
+import "./styles/historyrow.less"
 
 interface Props {
     tagHistory: any
@@ -122,23 +122,23 @@ const TagHistoryRow: React.FunctionComponent<Props> = (props) => {
         if (session.banned) return null
         if (permissions.isMod(session)) {
             return (
-                <div className="taghistoryrow-options">
-                    <div className="taghistoryrow-options-container" onClick={revertTagHistoryDialog}>
-                        <img className="taghistoryrow-options-img" src={tagHistoryRevert}/>
-                        <span className="taghistoryrow-options-text">Revert</span>
+                <div className="historyrow-options">
+                    <div className="historyrow-options-container" onClick={revertTagHistoryDialog}>
+                        <img className="historyrow-options-img" src={tagHistoryRevert}/>
+                        <span className="historyrow-options-text">Revert</span>
                     </div>
-                    <div className="taghistoryrow-options-container" onClick={deleteTagHistoryDialog}>
-                        <img className="taghistoryrow-options-img" src={tagHistoryDelete}/>
-                        <span className="taghistoryrow-options-text">Delete</span>
+                    <div className="historyrow-options-container" onClick={deleteTagHistoryDialog}>
+                        <img className="historyrow-options-img" src={tagHistoryDelete}/>
+                        <span className="historyrow-options-text">Delete</span>
                     </div>
                 </div>
             )
         } else if (permissions.isContributor(session)) {
             return (
-                <div className="taghistoryrow-options">
-                    <div className="taghistoryrow-options-container" onClick={revertTagHistoryDialog}>
-                        <img className="taghistoryrow-options-img" src={tagHistoryRevert}/>
-                        <span className="taghistoryrow-options-text">Revert</span>
+                <div className="historyrow-options">
+                    <div className="historyrow-options-container" onClick={revertTagHistoryDialog}>
+                        <img className="historyrow-options-img" src={tagHistoryRevert}/>
+                        <span className="historyrow-options-text">Revert</span>
                     </div>
                 </div>
             )
@@ -166,30 +166,30 @@ const TagHistoryRow: React.FunctionComponent<Props> = (props) => {
         let jsx = [] as any
         if (props.tagHistory.type === "artist") {
             if (props.tagHistory.website) {
-                jsx.push(<img className="taghistoryrow-social" src={website} onClick={() => window.open(props.tagHistory.website, "_blank")}/>)
+                jsx.push(<img className="historyrow-social" src={website} onClick={() => window.open(props.tagHistory.website, "_blank")}/>)
             }
             if (props.tagHistory.social?.includes("pixiv.net")) {
-                jsx.push(<img className="taghistoryrow-social" src={pixiv} onClick={() => window.open(props.tagHistory.social, "_blank")}/>)
+                jsx.push(<img className="historyrow-social" src={pixiv} onClick={() => window.open(props.tagHistory.social, "_blank")}/>)
             } else if (props.tagHistory.social?.includes("soundcloud.com")) {
-                jsx.push(<img className="taghistoryrow-social" src={soundcloud} onClick={() => window.open(props.tagHistory.social, "_blank")}/>)
+                jsx.push(<img className="historyrow-social" src={soundcloud} onClick={() => window.open(props.tagHistory.social, "_blank")}/>)
             } else if (props.tagHistory.social?.includes("sketchfab.com")) {
-                jsx.push(<img className="taghistoryrow-social" src={sketchfab} onClick={() => window.open(props.tagHistory.social, "_blank")}/>)
+                jsx.push(<img className="historyrow-social" src={sketchfab} onClick={() => window.open(props.tagHistory.social, "_blank")}/>)
             }
             if (props.tagHistory.twitter) {
-                jsx.push(<img className="taghistoryrow-social" src={twitter} onClick={() => window.open(props.tagHistory.twitter, "_blank")}/>)
+                jsx.push(<img className="historyrow-social" src={twitter} onClick={() => window.open(props.tagHistory.twitter, "_blank")}/>)
             }
         }
         if (props.tagHistory.type === "character") {
             if (props.tagHistory.fandom) {
-                jsx.push(<img className="taghistoryrow-social" src={fandom} onClick={() => window.open(props.tagHistory.fandom, "_blank")}/>)
+                jsx.push(<img className="historyrow-social" src={fandom} onClick={() => window.open(props.tagHistory.fandom, "_blank")}/>)
             }
         }
         if (props.tagHistory.type === "series") {
             if (props.tagHistory.website) {
-                jsx.push(<img className="taghistoryrow-social" src={website} onClick={() => window.open(props.tagHistory.website, "_blank")}/>)
+                jsx.push(<img className="historyrow-social" src={website} onClick={() => window.open(props.tagHistory.website, "_blank")}/>)
             }
             if (props.tagHistory.twitter) {
-                jsx.push(<img className="taghistoryrow-social" src={twitter} onClick={() => window.open(props.tagHistory.twitter, "_blank")}/>)
+                jsx.push(<img className="historyrow-social" src={twitter} onClick={() => window.open(props.tagHistory.twitter, "_blank")}/>)
             }
         }
         return jsx
@@ -202,20 +202,20 @@ const TagHistoryRow: React.FunctionComponent<Props> = (props) => {
         const editText = firstHistory ? "Uploaded" : "Edited"
         if (userRole === "admin") {
             return (
-                <div className="taghistoryrow-username-container" onClick={userClick} onAuxClick={userClick}>
-                    <span className="taghistoryrow-user-text admin-color">{editText} {functions.timeAgo(targetDate)} by {functions.toProperCase(props.tagHistory.user)}</span>
-                    <img className="taghistoryrow-user-label" src={adminCrown}/>
+                <div className="historyrow-username-container" onClick={userClick} onAuxClick={userClick}>
+                    <span className="historyrow-user-text admin-color">{editText} {functions.timeAgo(targetDate)} by {functions.toProperCase(props.tagHistory.user)}</span>
+                    <img className="historyrow-user-label" src={adminCrown}/>
                 </div>
             )
         } else if (userRole === "mod") {
             return (
-                <div className="taghistoryrow-username-container" onClick={userClick} onAuxClick={userClick}>
-                    <span className="taghistoryrow-user-text mod-color">{editText} {functions.timeAgo(targetDate)} by {functions.toProperCase(props.tagHistory.user)}</span>
-                    <img className="taghistoryrow-user-label" src={modCrown}/>
+                <div className="historyrow-username-container" onClick={userClick} onAuxClick={userClick}>
+                    <span className="historyrow-user-text mod-color">{editText} {functions.timeAgo(targetDate)} by {functions.toProperCase(props.tagHistory.user)}</span>
+                    <img className="historyrow-user-label" src={modCrown}/>
                 </div>
             )
         }
-        return <span className="taghistoryrow-user-text" onClick={userClick} onAuxClick={userClick}>{editText} {functions.timeAgo(targetDate)} by {functions.toProperCase(props.tagHistory.user)}</span>
+        return <span className="historyrow-user-text" onClick={userClick} onAuxClick={userClick}>{editText} {functions.timeAgo(targetDate)} by {functions.toProperCase(props.tagHistory.user)}</span>
     }
 
     const calculateImageDiff = async () => {
@@ -243,16 +243,16 @@ const TagHistoryRow: React.FunctionComponent<Props> = (props) => {
     const diffJSX = () => {
         let jsx = [] as React.ReactElement[]
         if (!props.previousHistory || (props.previousHistory?.description !== props.tagHistory.description)) {
-            jsx.push(<span className="taghistoryrow-text">{props.tagHistory.description || "None"}</span>)
+            jsx.push(<span className="historyrow-text">{props.tagHistory.description || "None"}</span>)
         }
         if (!props.previousHistory || (props.previousHistory?.aliases !== props.tagHistory.aliases)) {
             if (props.tagHistory.aliases?.[0]) {
-                jsx.push(<span className="taghistoryrow-text"><span className="taghistoryrow-label-text">Aliases:</span> {props.tagHistory.aliases.map((alias: string) => alias.replaceAll("-", " ")).join(", ")}</span>)
+                jsx.push(<span className="historyrow-text"><span className="historyrow-label-text">Aliases:</span> {props.tagHistory.aliases.map((alias: string) => alias.replaceAll("-", " ")).join(", ")}</span>)
             }
         }
         if (!props.previousHistory || (props.previousHistory?.implications !== props.tagHistory.implications)) {
             if (props.tagHistory.implications?.[0]) {
-                jsx.push(<span className="taghistoryrow-text"><span className="taghistoryrow-label-text">Implications:</span> {props.tagHistory.implications.map((implication: string) => implication.replaceAll("-", " ")).join(", ")}</span>)
+                jsx.push(<span className="historyrow-text"><span className="historyrow-label-text">Implications:</span> {props.tagHistory.implications.map((implication: string) => implication.replaceAll("-", " ")).join(", ")}</span>)
             }
         }
         return jsx
@@ -261,20 +261,20 @@ const TagHistoryRow: React.FunctionComponent<Props> = (props) => {
     //if (!hasAnyUpdate) return null
 
     return (
-        <div className="taghistoryrow">
+        <div className="historyrow">
             {session.username ? tagHistoryOptions() : null}
-            <div className="taghistoryrow-container">
-                <img className="taghistoryrow-img" src={img} onClick={imgClick} onAuxClick={imgClick}/>
-                <span className="taghistoryrow-tag-text" onClick={imgClick} onAuxClick={imgClick}>{functions.toProperCase(props.tagHistory.key.replaceAll("-", " "))}</span>
+            <div className="historyrow-container">
+                <img className="historyrow-img-small" src={img} onClick={imgClick} onAuxClick={imgClick}/>
+                <span className="historyrow-tag-text" onClick={imgClick} onAuxClick={imgClick}>{functions.toProperCase(props.tagHistory.key.replaceAll("-", " "))}</span>
                 {socialJSX()}
             </div>
-            <div className="taghistoryrow-container-row">
-                <div className="taghistoryrow-container">
-                    <div className="taghistoryrow-user-container">
+            <div className="historyrow-container-row">
+                <div className="historyrow-container">
+                    <div className="historyrow-user-container">
                         {dateTextJSX()}
-                        {hasImageUpdate ? <span className="taghistoryrow-text-strong">[Image Updated]</span> : null}
+                        {hasImageUpdate ? <span className="historyrow-text-strong">[Image Updated]</span> : null}
                         {diffJSX()}
-                        {props.tagHistory.reason ? <span className="taghistoryrow-text"><span className="taghistoryrow-label-text">Reason:</span> {props.tagHistory.reason}</span> : null}
+                        {props.tagHistory.reason ? <span className="historyrow-text"><span className="historyrow-label-text">Reason:</span> {props.tagHistory.reason}</span> : null}
                     </div>
                 </div>
             </div>

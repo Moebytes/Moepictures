@@ -163,7 +163,7 @@ const MobileInfo: React.FunctionComponent<Props> = (props) => {
                         <span className="tag-hover">
                             <span className="artist-tag" onClick={() => tagClick()}>{props.artists[i].tag.replaceAll("-", " ")}</span>
                             {artistSocials()}
-                            <span className="tag-count">{props.artists[i].count}</span>
+                            <span className={`tag-count ${props.artists[i].count === "1" ? "artist-tag-color" : ""}`}>{props.artists[i].count}</span>
                         </span>
                     </div>
                 </>)
@@ -195,7 +195,7 @@ const MobileInfo: React.FunctionComponent<Props> = (props) => {
                     <span className="tag-hover">
                         <span className="character-tag" onClick={() => tagClick()}>{props.characters[i].tag.replaceAll("-", " ")}</span>
                         {characterSocials()}
-                        <span className="tag-count">{props.characters[i].count}</span>
+                        <span className={`tag-count ${props.characters[i].count === "1" ? "artist-tag-color" : ""}`}>{props.characters[i].count}</span>
                     </span>
                 </div>
                 </>)
@@ -230,7 +230,7 @@ const MobileInfo: React.FunctionComponent<Props> = (props) => {
                     <span className="tag-hover">
                         <span className="series-tag" onClick={() => tagClick()}>{props.series[i].tag.replaceAll("-", " ")}</span>
                         {seriesSocials()}
-                        <span className="tag-count">{props.series[i].count}</span>
+                        <span className={`tag-count ${props.series[i].count === "1" ? "artist-tag-color" : ""}`}>{props.series[i].count}</span>
                     </span>
                 </div>
                 </>)
@@ -258,7 +258,7 @@ const MobileInfo: React.FunctionComponent<Props> = (props) => {
                 <div className="mobileinfo-row">
                     <span className="tag-hover" onClick={() => tagClick()}>
                         <span className={tagClass()}>{currentTags[i].tag.replaceAll("-", " ")}</span>
-                        <span className="tag-count">{currentTags[i].count}</span>
+                        <span className={`tag-count ${currentTags[i].count === "1" ? "artist-tag-color" : ""}`}>{currentTags[i].count}</span>
                     </span>
                 </div>
             )

@@ -272,7 +272,7 @@ const TagRoutes = (app: Express) => {
             const tagHistory = await sql.history.tagHistory(targetTag)
             const nextKey = await serverFunctions.getNextKey("tag", key, false)
             if (!tagHistory.length || (imgChange && nextKey === 1)) {
-                let vanilla = await sql.tag.tag(targetTag)
+                let vanilla = tagObj
                 vanilla.date = vanilla.createDate 
                 vanilla.user = vanilla.creator
                 vanilla.key = targetTag

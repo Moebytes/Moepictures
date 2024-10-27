@@ -31,6 +31,7 @@ const BanDialog: React.FunctionComponent = (props) => {
     const [deleteHistoryChanges, setDeleteHistoryChanges] = useState(true)
     const [deleteComments, setDeleteComments] = useState(true)
     const [deleteMessages, setDeleteMessages] = useState(true)
+    const [days, setDays] = useState("")
     const [error, setError] = useState(false)
     const errorRef = useRef<any>(null)
     const history = useHistory()
@@ -54,7 +55,14 @@ const BanDialog: React.FunctionComponent = (props) => {
 
     const ban = async () => {
         if (!permissions.isMod(session)) return setBanName(null)
-        const revertData = await functions.post("/api/user/ban", {username: banName, deleteUnverifiedChanges, deleteHistoryChanges, deleteComments, deleteMessages, reason}, session, setSessionFlag)
+        if (days && Number.isNaN(Number(days))) {
+            setError(true)
+            if (!errorRef.current) await functions.timeout(20)
+            errorRef.current!.innerText = "Invalid days."
+            await functions.timeout(2000)
+            return setError(false)
+        }
+        const revertData = await functions.post("/api/user/ban", {username: banName, deleteUnverifiedChanges, deleteHistoryChanges, deleteComments, deleteMessages, days, reason}, session, setSessionFlag)
         if (revertData.revertPostIDs?.length) {
             for (const postID of revertData.revertPostIDs) {
                 const result = await functions.get("/api/post/history", {postID}, session, setSessionFlag)
@@ -135,6 +143,10 @@ const BanDialog: React.FunctionComponent = (props) => {
                             <span className="dialog-text">Delete messages?</span>
                             <img className="dialog-checkbox" src={deleteMessages ? checkboxChecked : checkbox} onClick={() => setDeleteMessages((prev: boolean) => !prev)} style={{filter: getFilter()}}/>
                         </div>
+                        <div className="dialog-row">
+                            <span className="dialog-text">Days: </span>
+                            <input style={{width: "20%"}} className="dialog-input-taller" type="text" spellCheck={false} value={days} onChange={(event) => setDays(event.target.value)}/>
+                        </div> 
                         <div className="dialog-row">
                             <span className="dialog-text">Reason: </span>
                             <input style={{width: "100%"}} className="dialog-input-taller" type="text" spellCheck={false} value={reason} onChange={(event) => setReason(event.target.value)}/>

@@ -291,6 +291,88 @@ export default class SQLHistory {
         return result
     }
 
+    /** Insert group history */
+    public static insertGroupHistory = async (username: string, groupID: string, slug: string, name: string, restrict: string, 
+        description: string, posts: any, reason?: string) => {
+        const now = new Date().toISOString()
+        const query: QueryConfig = {
+            text: /*sql*/`INSERT INTO "group history" ("groupID", "user", "date", "slug", "name", "restrict", "description", "posts", "reason") VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)`,
+            values: [groupID, username, now, slug, name, restrict, description, posts, reason]
+        }
+        await SQLQuery.flushDB()
+        const result = await SQLQuery.run(query)
+        return result
+    }
+
+    /** Delete group history */
+    public static deleteGroupHistory = async (historyID: number) => {
+        const query: QueryConfig = {
+            text: functions.multiTrim(/*sql*/`DELETE FROM "group history" WHERE "group history"."historyID" = $1`),
+            values: [historyID]
+        }
+        await SQLQuery.flushDB()
+        const result = await SQLQuery.run(query)
+        return result
+    }
+
+    /** Get group history */
+    public static groupHistory = async (groupID?: string, offset?: string) => {
+        let i = 1
+        let values = [] as any
+        let groupValue = i
+        if (groupID) {
+            values.push(groupID)
+            i++
+        }
+        if (offset) values.push(offset)
+        const query: QueryConfig = {
+        text: functions.multiTrim(/*sql*/`
+                SELECT "group history".*,
+                COUNT(*) OVER() AS "historyCount"
+                FROM "group history"
+                ${groupID ? `WHERE "group history"."groupID" = $${groupValue}` : ""}
+                GROUP BY "group history"."historyID"
+                ORDER BY "group history"."date" DESC
+                LIMIT 100 ${offset ? `OFFSET $${i}` : ""}
+            `),
+            values: []
+        }
+        if (values?.[0]) query.values = values
+        const result = await SQLQuery.run(query, true)
+        return result
+    }
+
+    /** Get group history ID */
+    public static groupHistoryID = async (groupID: string, historyID: string) => {
+        const query: QueryConfig = {
+        text: functions.multiTrim(/*sql*/`
+                SELECT "group history".*
+                FROM "group history"
+                WHERE "group history"."groupID" = $1 AND "group history"."historyID" = $2
+            `),
+            values: [groupID, historyID]
+        }
+        const result = await SQLQuery.run(query, true)
+        return result[0]
+    }
+
+    /** Get user group history */
+    public static userGroupHistory = async (username: string) => {
+        const query: QueryConfig = {
+        text: functions.multiTrim(/*sql*/`
+                SELECT "group history".*,
+                COUNT(*) OVER() AS "historyCount"
+                FROM "group history"
+                WHERE "group history"."user" = $1
+                GROUP BY "group history"."historyID"
+                ORDER BY "group history"."date" DESC
+            `),
+            values: [username]
+        }
+        const result = await SQLQuery.run(query, true)
+        return result
+    }
+
     /** Update search history view date */
     public static updateSearchHistory = async (username: string, postID: number) => {
         const now = new Date().toISOString()
@@ -348,7 +430,7 @@ export default class SQLHistory {
         if (style === "chibi") styleQuery = `posts.style = 'chibi'`
         let sortQuery = ""
         if (sort === "random") sortQuery = `ORDER BY random()`
-        if (sort === "date") sortQuery = `ORDER BY "history"."viewDate" DESC`
+        if (!sort || sort === "date") sortQuery = `ORDER BY "history"."viewDate" DESC`
         if (sort === "reverse date") sortQuery = `ORDER BY "history"."viewDate" ASC`
         if (sort === "drawn") sortQuery = `ORDER BY post_json.drawn DESC NULLS LAST`
         if (sort === "reverse drawn") sortQuery = `ORDER BY post_json.drawn ASC NULLS LAST`
@@ -358,8 +440,10 @@ export default class SQLHistory {
         if (sort === "reverse popularity") sortQuery = `ORDER BY post_json."favoriteCount" ASC`
         if (sort === "variations") sortQuery = `ORDER BY post_json."imageCount" DESC`
         if (sort === "reverse variations") sortQuery = `ORDER BY post_json."imageCount" ASC`
-        if (sort === "thirdparty") sortQuery = `ORDER BY post_json."thirdParty" DESC NULLS LAST`
-        if (sort === "reverse thirdparty") sortQuery = `ORDER BY post_json."thirdParty" ASC NULLS LAST`
+        if (sort === "thirdparty") sortQuery = `ORDER BY "hasThirdParty" DESC`
+        if (sort === "reverse thirdparty") sortQuery = `ORDER BY "hasThirdParty" ASC`
+        if (sort === "groups") sortQuery = `ORDER BY "isGrouped" DESC`
+        if (sort === "reverse groups") sortQuery = `ORDER BY "isGrouped" ASC`
         if (sort === "tagcount") sortQuery = `ORDER BY post_json."tagCount" DESC`
         if (sort === "reverse tagcount") sortQuery = `ORDER BY post_json."tagCount" ASC`
         if (sort === "filesize") sortQuery = `ORDER BY post_json."imageSize" DESC`
@@ -397,7 +481,16 @@ export default class SQLHistory {
                     MAX(DISTINCT images."height") AS "imageHeight",
                     COUNT(DISTINCT images."imageID") AS "imageCount",
                     COUNT(DISTINCT favorites."username") AS "favoriteCount",
-                    ROUND(AVG(DISTINCT cuteness."cuteness")) AS "cuteness"${sessionUsername ? `,
+                    ROUND(AVG(DISTINCT cuteness."cuteness")) AS "cuteness",
+                    CASE
+                        WHEN COUNT("third party"."postID") > 0 
+                        THEN true ELSE false
+                    END AS "hasThirdParty",
+                    CASE 
+                        WHEN COUNT("group map"."groupID") > 0 
+                        THEN true ELSE false 
+                    END AS "isGrouped"
+                    ${sessionUsername ? `,
                     CASE 
                         WHEN COUNT(favorites."username") FILTER (WHERE favorites."username" = $${userValue}) > 0 
                         THEN true ELSE false
@@ -411,6 +504,8 @@ export default class SQLHistory {
                     ${includeTags ? `JOIN "tag map" ON posts."postID" = "tag map"."postID"` : ""}
                     FULL JOIN "favorites" ON posts."postID" = "favorites"."postID"
                     FULL JOIN "cuteness" ON posts."postID" = "cuteness"."postID"
+                    LEFT JOIN "third party" ON posts."postID" = "third party"."parentID"
+                    LEFT JOIN "group map" ON posts."postID" = "group map"."postID"
                     ${sessionUsername ? `LEFT JOIN "favgroup map" ON posts."postID" = "favgroup map"."postID"` : ""}
                     ${whereQueries ? `WHERE ${whereQueries}` : ""}
                     GROUP BY posts."postID"

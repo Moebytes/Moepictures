@@ -36,17 +36,26 @@ const pushNotification = (username: string) => {
 const MessageRoutes = (app: Express) => {
     app.post("/api/message/create", csrfProtection, messageUpdateLimiter, async (req: Request, res: Response) => {
         try {
-            const {title, content, recipient} = req.body
+            const {title, content, recipients} = req.body
             if (!req.session.username) return res.status(403).send("Unauthorized")
             if (req.session.banned) return res.status(403).send("You are banned")
             if (!title || !content) return res.status(400).send("Bad title or content")
+            if (recipients?.length < 1) return res.status(400).send("Bad recipients")
+            if (recipients.length > 5 && !permissions.isMod(req.session)) return res.status(403).send("Recipient limit exceeded")
             const badTitle = functions.validateTitle(title)
             if (badTitle) return res.status(400).send("Bad title")
             const badContent = functions.validateThread(content)
             if (badContent) return res.status(400).send("Bad content")
-            if (req.session.username === recipient) return res.status(400).send("Cannot send message to yourself")
-            const messageID = await sql.message.insertMessage(req.session.username, recipient, title, content)
-            pushNotification(recipient)
+            for (const recipient of recipients) {
+                if (req.session.username === recipient) return res.status(400).send("Cannot send message to yourself")
+                const user = await sql.user.user(recipient)
+                if (!user) return res.status(400).send("Invalid recipients")
+            }
+            const messageID = await sql.message.insertMessage(req.session.username, title, content)
+            await sql.message.bulkInsertRecipients(messageID, recipients)
+            for (const recipient of recipients) {
+                pushNotification(recipient)
+            }
             res.status(200).send(messageID)
         } catch (e) {
             console.log(e)
@@ -83,9 +92,13 @@ const MessageRoutes = (app: Express) => {
             if (!messageID) return res.status(400).send("Bad messageID")
             if (!req.session.username) return res.status(403).send("Unauthorized")
             const message = await sql.message.message(Number(messageID))
-            if (req.session.username !== message.creator && req.session.username !== message.recipient) {
-                if (!permissions.isMod(req.session)) return res.status(403).send("No permission to view")
+            let canView = false
+            for (const recipient of message.recipients) {
+                if (req.session.username === message.creator || req.session.username === recipient) {
+                    canView = true
+                }
             }
+            if (!canView && !permissions.isMod(req.session)) return res.status(403).send("No permission to view")
             res.status(200).json(message)
         } catch (e) {
             console.log(e)
@@ -121,20 +134,28 @@ const MessageRoutes = (app: Express) => {
             if (badReply) return res.status(400).send("Bad reply")
             const message = await sql.message.message(messageID)
             if (!message) return res.status(400).send("Invalid messageID")
-            if (req.session.username !== message.creator && req.session.username !== message.recipient) {
-                if (!permissions.isMod(req.session)) return res.status(403).send("No permission to reply")
+            let canReply = false
+            for (const recipient of message.recipients) {
+                if (req.session.username === message.creator || req.session.username === recipient) {
+                    canReply = true
+                }
             }
+            if (!canReply && !permissions.isMod(req.session)) return res.status(403).send("No permission to reply")
             if (message.role === "system") return res.status(403).send("Cannot reply to system messages")
             await sql.message.insertMessageReply(Number(messageID), req.session.username, content)
             await sql.message.updateMessage(Number(messageID), "updater", req.session.username)
             await sql.message.updateMessage(Number(messageID), "updatedDate", new Date().toISOString())
-            await sql.message.updateMessage(Number(messageID), "creatorDelete", false)
-            await sql.message.updateMessage(Number(messageID), "recipientDelete", false)
+            await sql.message.updateMessage(Number(messageID), "delete", false)
+            for (const recipient of message.recipients) {
+                await sql.message.updateRecipient(Number(messageID), recipient, "delete", false)
+            }
             if (req.session.username === message.creator) {
-                await sql.message.updateMessage(Number(messageID), "recipientRead", false)
-                pushNotification(message.recipient)
-            } else if (req.session.username === message.recipient) {
-                await sql.message.updateMessage(Number(messageID), "creatorRead", false)
+                for (const recipient of message.recipients) {
+                    await sql.message.updateRecipient(Number(messageID), recipient, "read", false)
+                    pushNotification(recipient)
+                }
+            } else {
+                await sql.message.updateMessage(Number(messageID), "read", false)
                 pushNotification(message.creator)
             }
             res.status(200).send("Success")
@@ -151,9 +172,13 @@ const MessageRoutes = (app: Express) => {
             if (!messageID) return res.status(400).send("Bad messageID")
             const message = await sql.message.message(Number(messageID))
             if (!message) return res.status(400).send("Invalid messageID")
-            if (req.session.username !== message.creator && req.session.username !== message.recipient) {
-                if (!permissions.isMod(req.session)) return res.status(403).send("No permission to view replies")
+            let canView = false
+            for (const recipient of message.recipients) {
+                if (req.session.username === message.creator || req.session.username === recipient) {
+                    canView = true
+                }
             }
+            if (!canView && !permissions.isMod(req.session)) return res.status(403).send("No permission to view replies")
             const result = await sql.message.messageReplies(Number(messageID), offset)
             res.status(200).json(result)
         } catch (e) {
@@ -224,17 +249,29 @@ const MessageRoutes = (app: Express) => {
             if (!messageID) return res.status(400).send("Bad messageID")
             const message = await sql.message.message(messageID)
             if (!message) return res.status(400).send("Invalid messageID")
-            if (req.session.username !== message.creator && req.session.username !== message.recipient) {
-                if (!permissions.isMod(req.session)) return res.status(403).send("No permission to softdelete")
+            let canDelete = false
+            for (const recipient of message.recipients) {
+                if (req.session.username === message.creator || req.session.username === recipient) canDelete = true
             }
+            if (!canDelete && !permissions.isMod(req.session)) return res.status(403).send("No permission to soft delete")
             const isCreator = req.session.username === message.creator
-            const isRecipient = req.session.username === message.recipient
             if (isCreator) {
-                await sql.message.updateMessage(Number(messageID), "creatorDelete", true)
-                if (message.recipientDelete) await sql.message.deleteMessage(Number(messageID))
-            } else if (isRecipient) {
-                await sql.message.updateMessage(Number(messageID), "recipientDelete", true)
-                if (message.creatorDelete) await sql.message.deleteMessage(Number(messageID))
+                await sql.message.updateMessage(Number(messageID), "delete", true)
+                let allDeleted = true
+                for (const data of message.recipientData) {
+                    if (!data.delete) {
+                        allDeleted = false
+                        break
+                    }
+                }
+                if (allDeleted) await sql.message.deleteMessage(Number(messageID))
+            } else {
+                for (const recipient of message.recipients) {
+                    if (req.session.username === recipient) {
+                        await sql.message.updateRecipient(Number(messageID), recipient, "delete", true)
+                        if (message.delete) await sql.message.deleteMessage(Number(messageID))
+                    }
+                }
             }
             res.status(200).send("Success")
         } catch (e) {
@@ -250,22 +287,26 @@ const MessageRoutes = (app: Express) => {
             if (!messageID) return res.status(400).send("Bad messageID")
             const message = await sql.message.message(messageID)
             if (!message) return res.status(400).send("Invalid messageID")
-            if (req.session.username !== message.creator && req.session.username !== message.recipient) {
-                if (!permissions.isMod(req.session)) return res.status(403).send("No permission to read")
+            let canRead = false
+            for (const recipient of message.recipients) {
+                if (req.session.username === message.creator || req.session.username === recipient) canRead = true
             }
-            const isCreator = req.session.username === message.creator
-            const isRecipient = req.session.username === message.recipient
-            if (isCreator) {
-                if (!message.creatorRead || forceRead) {
-                    await sql.message.updateMessage(Number(messageID), "creatorRead", true)
+            if (!canRead && !permissions.isMod(req.session)) return res.status(403).send("No permission to read")
+            if (req.session.username === message.creator) {
+                if (!message.read || forceRead) {
+                    await sql.message.updateMessage(Number(messageID), "read", true)
                 } else {
-                    await sql.message.updateMessage(Number(messageID), "creatorRead", false)
+                    await sql.message.updateMessage(Number(messageID), "read", false)
                 }
-            } else if (isRecipient) {
-                if (!message.recipientRead || forceRead) {
-                    await sql.message.updateMessage(Number(messageID), "recipientRead", true)
-                } else {
-                    await sql.message.updateMessage(Number(messageID), "recipientRead", false)
+            } else {
+                for (const data of message.recipientData) {
+                    if (req.session.username === data.recipient) {
+                        if (!data.read || forceRead) {
+                            await sql.message.updateRecipient(Number(messageID), data.recipient, "read", true)
+                        } else {
+                            await sql.message.updateRecipient(Number(messageID), data.recipient, "read", false)
+                        }
+                    }
                 }
             }
             res.status(200).send("Success")
@@ -283,10 +324,46 @@ const MessageRoutes = (app: Express) => {
             const messages = await sql.message.allMessages(req.session.username, "", "date", undefined, "99999")
             for (const message of messages) {
                 if (message.creator === req.session.username) {
-                    await sql.message.updateMessage(Number(message.messageID), "creatorRead", readStatus)
-                } else if (message.recipient === req.session.username) {
-                    await sql.message.updateMessage(Number(message.messageID), "recipientRead", readStatus)
+                    await sql.message.updateMessage(Number(message.messageID), "read", readStatus)
+                } else {
+                    for (const recipient of message.recipients) {
+                        if (req.session.username === recipient) {
+                            await sql.message.updateRecipient(Number(message.messageID), recipient, "read", readStatus)
+                        }
+                    }
                 }
+            }
+            res.status(200).send("Success")
+        } catch (e) {
+            console.log(e)
+            res.status(400).send("Bad request")
+        }
+    })
+
+    app.post("/api/message/forward", csrfProtection, messageUpdateLimiter, async (req: Request, res: Response) => {
+        try {
+            const {messageID, recipients} = req.body
+            if (!req.session.username) return res.status(403).send("Unauthorized")
+            if (req.session.banned) return res.status(403).send("You are banned")
+            if (!messageID) return res.status(400).send("Bad messageID or content")
+            const message = await sql.message.message(messageID)
+            if (!message) return res.status(400).send("Invalid messageID")
+            if (message.creator !== req.session.username) {
+                if (!permissions.isMod(req.session)) return res.status(403).send("No permission to forward")
+            }
+            if (recipients?.length < 1) return res.status(400).send("Bad recipients")
+            if (recipients.length > 5 && !permissions.isMod(req.session)) return res.status(403).send("Recipient limit exceeded")
+            for (const recipient of recipients) {
+                if (req.session.username === recipient) return res.status(400).send("Cannot send message to yourself")
+                const user = await sql.user.user(recipient)
+                if (!user) return res.status(400).send("Invalid recipients")
+            }
+            let toAdd = recipients.filter((r: string) => !message.recipients.includes(r))
+            let toRemove = message.recipients.filter((r: string) => !recipients.includes(r))
+            await sql.message.bulkDeleteRecipients(messageID, toRemove)
+            await sql.message.bulkInsertRecipients(messageID, toAdd)
+            for (const recipient of toAdd) {
+                pushNotification(recipient)
             }
             res.status(200).send("Success")
         } catch (e) {

@@ -377,7 +377,7 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
                             <img className="tag-info" src={question} onClick={(event) => tagInfo(event, props.artists[i].tag)} onAuxClick={(event) => tagInfo(event, props.artists[i].tag)}/>
                             <span className="artist-tag" onClick={() => tagClick()} onContextMenu={(event) => tagInfo(event, props.artists[i].tag)}>{props.artists[i].tag.replaceAll("-", " ")}</span>
                             {artistSocials()}
-                            <span className="tag-count">{props.artists[i].count}</span>
+                            <span className={`tag-count ${props.artists[i].count === "1" ? "artist-tag-color" : ""}`}>{props.artists[i].count}</span>
                         </span>
                     </div>
                 </>)
@@ -412,7 +412,7 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
                         <img className="tag-info" src={question} onClick={(event) => tagInfo(event, props.characters[i].tag)} onAuxClick={(event) => tagInfo(event, props.characters[i].tag)}/>
                         <span className="character-tag" onClick={() => tagClick()} onContextMenu={(event) => tagInfo(event, props.characters[i].tag)}>{props.characters[i].tag.replaceAll("-", " ")}</span>
                         {characterSocials()}
-                        <span className="tag-count">{props.characters[i].count}</span>
+                        <span className={`tag-count ${props.characters[i].count === "1" ? "artist-tag-color" : ""}`}>{props.characters[i].count}</span>
                     </span>
                 </div> </>
                 )
@@ -450,7 +450,7 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
                         <img className="tag-info" src={question} onClick={(event) => tagInfo(event, props.series[i].tag)} onAuxClick={(event) => tagInfo(event, props.series[i].tag)}/>
                         <span className="series-tag" onClick={() => tagClick()} onContextMenu={(event) => tagInfo(event, props.series[i].tag)}>{props.series[i].tag.replaceAll("-", " ")}</span>
                         {seriesSocials()}
-                        <span className="tag-count">{props.series[i].count}</span>
+                        <span className={`tag-count ${props.series[i].count === "1" ? "artist-tag-color" : ""}`}>{props.series[i].count}</span>
                     </span>
                 </div> </>
                 )
@@ -511,7 +511,7 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
                     <span className="tag-hover">
                         <img className="tag-info" src={question} onClick={(event) => tagInfo(event, currentTags[i].tag)} onAuxClick={(event) => tagInfo(event, currentTags[i].tag)}/>
                         <span className={tagClass()} onClick={() => tagClick()} onContextMenu={(event) => tagInfo(event, currentTags[i].tag)}>{currentTags[i].tag.replaceAll("-", " ")}</span>
-                        <span className="tag-count">{currentTags[i].count}</span>
+                        <span className={`tag-count ${currentTags[i].count === "1" ? "artist-tag-color" : ""}`}>{currentTags[i].count}</span>
                     </span>
                 </div>
             )

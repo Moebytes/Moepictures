@@ -194,8 +194,8 @@ const PremiumPage: React.FunctionComponent = (props) => {
             return (
                 <><img className="premium-banner" src={animatedAvatar}/>
                 <span className="premium-text" style={{color: "#fb1d90"}}>
-                    Regular users can only pick and crop from images on the site. Premium users can upload and 
-                    use any avatar. They can also have animated avatars.
+                    Premium users can render animated avatars out of animation posts. Regular users are only able 
+                    to use a static frame.
                 </span>
                 <div className="premium-img-container"><img className="premium-img" src={animatedImg}/></div></>
             )

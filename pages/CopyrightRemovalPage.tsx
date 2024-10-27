@@ -39,9 +39,7 @@ const CopyrightRemovalPage: React.FunctionComponent = (props) => {
     const [socialMediaLinks, setSocialMediaLinks] = useState("")
     const [postLinks, setPostLinks] = useState("")
     const [proofLinks, setProofLinks] = useState("")
-    const [signature, setSignature] = useState("")
-    const [attestUnauthorized, setAttestUnauthorized] = useState(false)
-    const [attestAccuracy, setAttestAccuracy] = useState(false)
+    const [attestOwnership, setAttestOwnership] = useState(false)
     const [removeAllRequest, setRemoveAllRequest] = useState(false)
     const errorRef = useRef(null) as any
     const history = useHistory()
@@ -134,26 +132,10 @@ const CopyrightRemovalPage: React.FunctionComponent = (props) => {
             setError(false)
             return
         }
-        if (!signature) {
+        if (!attestOwnership) {
             setError(true)
             if (!errorRef.current) await functions.timeout(20)
-            errorRef.current!.innerText = "Signature is required."
-            await functions.timeout(2000)
-            setError(false)
-            return
-        }
-        if (!attestUnauthorized) {
-            setError(true)
-            if (!errorRef.current) await functions.timeout(20)
-            errorRef.current!.innerText = "You must attest that the use of the materials is unauthorized."
-            await functions.timeout(2000)
-            setError(false)
-            return
-        }
-        if (!attestAccuracy) {
-            setError(true)
-            if (!errorRef.current) await functions.timeout(20)
-            errorRef.current!.innerText = "You must attest that the provided information is accurate."
+            errorRef.current!.innerText = "You must confirm that you are the copyright owner."
             await functions.timeout(2000)
             setError(false)
             return
@@ -162,7 +144,7 @@ const CopyrightRemovalPage: React.FunctionComponent = (props) => {
         if (!errorRef.current) await functions.timeout(20)
         errorRef.current!.innerText = "Submitting..."
         try {
-            await functions.post("/api/misc/copyright", {name, email, artistTag, socialMediaLinks, removeAllRequest, postLinks, proofLinks, signature, files}, session, setSessionFlag)
+            await functions.post("/api/misc/copyright", {name, email, artistTag, socialMediaLinks, removeAllRequest, postLinks, proofLinks, files}, session, setSessionFlag)
             setSubmitted(true)
             setError(false)
         } catch {
@@ -237,7 +219,7 @@ const CopyrightRemovalPage: React.FunctionComponent = (props) => {
                     </div>
                     </> : <>
                     <span className="contact-link">
-                        We are sorry if you are unhappy with your works appearing on our site. You 
+                        We are sorry that you are unhappy with your works appearing on our site! You 
                         may fill out this form to request the removal of your copyrighted content. <br/><br/>
 
                         If you prefer, you may also write an email containing all of this info to 
@@ -297,28 +279,17 @@ const CopyrightRemovalPage: React.FunctionComponent = (props) => {
                         {generateFilesJSX()}
                     </div>
                     <div className="contact-row-start">
-                        <span className="contact-text" style={{width: "200px"}}>Proof Links:</span>
+                        <span className="contact-text" style={{width: "200px"}}>Links to Proof:</span>
                     </div>
                     <div className="contact-row-start">
                         <textarea className="contact-textarea" style={{marginLeft: "0px", height: "100px"}} spellCheck={false} value={proofLinks} onChange={(event) => setProofLinks(event.target.value)}></textarea>
                     </div>
                     <div className="contact-row-start">
-                        <img className="contact-checkbox" src={attestUnauthorized ? checkboxChecked : checkbox} onClick={() => setAttestUnauthorized((prev: boolean) => !prev)} style={{filter: getFilter()}}/>
+                        <img className="contact-checkbox" src={attestOwnership ? checkboxChecked : checkbox} onClick={() => setAttestOwnership((prev: boolean) => !prev)} style={{filter: getFilter()}}/>
                         <span className="contact-link">
-                        <span className="contact-text-alt" style={{marginRight: "5px"}}>*</span>I sincerely believe that the use of the copyrighted materials mentioned above is not permitted by the 
-                        copyright owner, their representative, or by law.
+                        <span className="contact-text-alt" style={{marginRight: "5px"}}>*</span>I am the copyright owner of the 
+                        content linked above or am authorized to act on the behalf of the copyright owner.
                         </span>
-                    </div>
-                    <div className="contact-row-start">
-                        <img className="contact-checkbox" src={attestAccuracy ? checkboxChecked : checkbox} onClick={() => setAttestAccuracy((prev: boolean) => !prev)} style={{filter: getFilter()}}/>
-                        <span className="contact-link">
-                        <span className="contact-text-alt" style={{marginRight: "5px"}}>*</span>I swear under penalty of perjury that the information in this notice is accurate and that I am the 
-                        copyright owner of the rights being infringed or authorized to act on behalf of the copyright owner.
-                        </span>
-                    </div>
-                    <div className="contact-row">
-                        <span className="contact-text" style={{width: "100px"}}>Signature:</span>
-                        <input className="contact-input-small" type="text" spellCheck={false} value={signature} onChange={(event) => setSignature(event.target.value)}/>
                     </div>
                     {error ? <div className="contact-validation-container"><span className="contact-validation" ref={errorRef}></span></div> : null}
                     <div className="contact-button-container" style={{marginTop: "10px", marginBottom: "10px"}}>

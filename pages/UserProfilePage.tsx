@@ -472,10 +472,21 @@ const UserProfilePage: React.FunctionComponent = (props) => {
                     <span className="userprofile-text" style={{color: "var(--premiumColor)"}}>Premium until {functions.prettyDate(new Date(session.premiumExpiration))}</span>
                 </div>
             )
-        } else {
+        } else if (new Date(session.premiumExpiration) < new Date()) {
             return (
                 <div className="userprofile-row">
                     <span className="userprofile-text">Premium expired on {functions.prettyDate(new Date(session.premiumExpiration))}</span>
+                </div>
+            )
+        }
+    }
+
+    const banExpirationJSX = () => {
+        if (!session.banned && !session.banExpiration) return null
+        if (new Date(session.banExpiration) > new Date()) {
+            return (
+                <div className="userprofile-row">
+                    <span className="userprofile-text" style={{color: "var(--banText)"}}>Ban lasts for {functions.timeUntil(session.banExpiration)}</span>
                 </div>
             )
         }
@@ -528,7 +539,7 @@ const UserProfilePage: React.FunctionComponent = (props) => {
                     <div className="userprofile-top-container">
                         <img className="userprofile-img" src={userImg} onClick={userImgClick} onAuxClick={userImgClick} style={{filter: session.image ? "" : getFilter()}}/>
                         {generateUsernameJSX()}
-                        {permissions.isPremium(session) && <>
+                        {permissions.isAdmin(session) && <>
                         <label htmlFor="upload-pfp" className="uploadpfp-label">
                             <img className="userprofile-uploadimg" src={uploadPfpIcon} style={{filter: getFilter()}}/>
                         </label>
@@ -537,6 +548,7 @@ const UserProfilePage: React.FunctionComponent = (props) => {
                     </div>
                     {session.banned ? <span className="user-ban-text">{getBanText()}</span> : null}
                     {premiumExpirationJSX()}
+                    {banExpirationJSX()}
                     <div className="userprofile-row">
                         <span className="userprofile-text">Email: {session.email}</span>
                     </div>

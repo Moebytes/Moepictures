@@ -44,13 +44,13 @@ const Message: React.FunctionComponent<Props> = (props) => {
     const [creatorDefaultIcon, setCreatorDefaultIcon] = useState(false)
     const [recipientDefaultIcon, setRecipientDefaultIcon] = useState(false)
     const history = useHistory()
-
+    
     const getFilter = () => {
         return `hue-rotate(${siteHue - 180}deg) saturate(${siteSaturation}%) brightness(${siteLightness + 70}%)`
     }
 
     const updateRecipient = async () => {
-        const recipient = await functions.get("/api/user", {username: props.message.recipient}, session, setSessionFlag)
+        const recipient = await functions.get("/api/user", {username: props.message.recipients[0]}, session, setSessionFlag)
         setRecipientData(recipient)
         setRecipientDefaultIcon(recipient?.image ? false : true)
     }
@@ -111,10 +111,11 @@ const Message: React.FunctionComponent<Props> = (props) => {
     }
 
     const recipientPage = (event: React.MouseEvent) => {
+        if (!recipientData?.username) return
         if (event.ctrlKey || event.metaKey || event.button === 1) {
-            window.open(`/user/${props.message.recipient}`, "_blank")
+            window.open(`/user/${recipientData.username}`, "_blank")
         } else {
-            history.push(`/user/${props.message.recipient}`)
+            history.push(`/user/${recipientData.username}`)
         }
     }
 
@@ -207,71 +208,80 @@ const Message: React.FunctionComponent<Props> = (props) => {
             return (
                 <div className="message-username-container" onClick={(event) => recipientPage(event)} onAuxClick={(event) => recipientPage(event)}>
                     <img draggable={false} src={getRecipientPFP()} className="message-user-img" onClick={recipientImgClick} onAuxClick={recipientImgClick} style={{filter: recipientDefaultIcon ? getFilter() : ""}}/>
-                    <span className="message-user-text admin-color">{functions.toProperCase(props.message.recipient)}</span>
+                    <span className="message-user-text admin-color">{functions.toProperCase(props.message.recipients[0])}</span>
                     <img className="message-user-label" src={adminCrown}/>
+                    {props.message.recipients.length > 1 ? <span className="message-recipients-text">(+{props.message.recipients.length - 1})</span> : null}
                 </div>
             )
         } else if (recipientData?.role === "mod") {
             return (
                 <div className="message-username-container" onClick={(event) => recipientPage(event)} onAuxClick={(event) => recipientPage(event)}>
-                <img draggable={false} src={getRecipientPFP()} className="message-user-img" onClick={recipientImgClick} onAuxClick={recipientImgClick} style={{filter: recipientDefaultIcon ? getFilter() : ""}}/>
-                    <span className="message-user-text mod-color">{functions.toProperCase(props.message.recipient)}</span>
+                    <img draggable={false} src={getRecipientPFP()} className="message-user-img" onClick={recipientImgClick} onAuxClick={recipientImgClick} style={{filter: recipientDefaultIcon ? getFilter() : ""}}/>
+                    <span className="message-user-text mod-color">{functions.toProperCase(props.message.recipients[0])}</span>
                     <img className="message-user-label" src={modCrown}/>
+                    {props.message.recipients.length > 1 ? <span className="message-recipients-text">(+{props.message.recipients.length - 1})</span> : null}
                 </div>
             )
         } else if (recipientData?.role === "system") {
             return (
                 <div className="message-username-container" onClick={(event) => recipientPage(event)} onAuxClick={(event) => recipientPage(event)}>
-                <img draggable={false} src={getRecipientPFP()} className="message-user-img" onClick={recipientImgClick} onAuxClick={recipientImgClick} style={{filter: recipientDefaultIcon ? getFilter() : ""}}/>
-                    <span className="message-user-text system-color">{functions.toProperCase(props.message.recipient)}</span>
+                    <img draggable={false} src={getRecipientPFP()} className="message-user-img" onClick={recipientImgClick} onAuxClick={recipientImgClick} style={{filter: recipientDefaultIcon ? getFilter() : ""}}/>
+                    <span className="message-user-text system-color">{functions.toProperCase(props.message.recipients[0])}</span>
                     <img className="message-user-label" src={systemCrown}/>
+                    {props.message.recipients.length > 1 ? <span className="message-recipients-text">(+{props.message.recipients.length - 1})</span> : null}
                 </div>
             )
         } else if (recipientData?.role === "premium-curator") {
             return (
                 <div className="message-username-container" onClick={(event) => recipientPage(event)} onAuxClick={(event) => recipientPage(event)}>
-                <img draggable={false} src={getRecipientPFP()} className="message-user-img" onClick={recipientImgClick} onAuxClick={recipientImgClick} style={{filter: recipientDefaultIcon ? getFilter() : ""}}/>
-                    <span className="message-user-text curator-color">{functions.toProperCase(props.message.recipient)}</span>
+                    <img draggable={false} src={getRecipientPFP()} className="message-user-img" onClick={recipientImgClick} onAuxClick={recipientImgClick} style={{filter: recipientDefaultIcon ? getFilter() : ""}}/>
+                    <span className="message-user-text curator-color">{functions.toProperCase(props.message.recipients[0])}</span>
                     <img className="message-user-label" src={premiumCuratorStar}/>
+                    {props.message.recipients.length > 1 ? <span className="message-recipients-text">(+{props.message.recipients.length - 1})</span> : null}
                 </div>
             )
         } else if (recipientData?.role === "curator") {
             return (
                 <div className="message-username-container" onClick={(event) => recipientPage(event)} onAuxClick={(event) => recipientPage(event)}>
-                <img draggable={false} src={getRecipientPFP()} className="message-user-img" onClick={recipientImgClick} onAuxClick={recipientImgClick} style={{filter: recipientDefaultIcon ? getFilter() : ""}}/>
-                    <span className="message-user-text curator-color">{functions.toProperCase(props.message.recipient)}</span>
+                    <img draggable={false} src={getRecipientPFP()} className="message-user-img" onClick={recipientImgClick} onAuxClick={recipientImgClick} style={{filter: recipientDefaultIcon ? getFilter() : ""}}/>
+                    <span className="message-user-text curator-color">{functions.toProperCase(props.message.recipients[0])}</span>
                     <img className="message-user-label" src={curatorStar}/>
+                    {props.message.recipients.length > 1 ? <span className="message-recipients-text">(+{props.message.recipients.length - 1})</span> : null}
                 </div>
             )
         } else if (recipientData?.role === "premium-contributor") {
             return (
                 <div className="message-username-container" onClick={(event) => recipientPage(event)} onAuxClick={(event) => recipientPage(event)}>
-                <img draggable={false} src={getRecipientPFP()} className="message-user-img" onClick={recipientImgClick} onAuxClick={recipientImgClick} style={{filter: recipientDefaultIcon ? getFilter() : ""}}/>
-                    <span className="message-user-text premium-color">{functions.toProperCase(props.message.recipient)}</span>
+                    <img draggable={false} src={getRecipientPFP()} className="message-user-img" onClick={recipientImgClick} onAuxClick={recipientImgClick} style={{filter: recipientDefaultIcon ? getFilter() : ""}}/>
+                    <span className="message-user-text premium-color">{functions.toProperCase(props.message.recipients[0])}</span>
                     <img className="message-user-label" src={premiumContributorPencil}/>
+                    {props.message.recipients.length > 1 ? <span className="message-recipients-text">(+{props.message.recipients.length - 1})</span> : null}
                 </div>
             )
         } else if (recipientData?.role === "contributor") {
             return (
                 <div className="message-username-container" onClick={(event) => recipientPage(event)} onAuxClick={(event) => recipientPage(event)}>
-                <img draggable={false} src={getRecipientPFP()} className="message-user-img" onClick={recipientImgClick} onAuxClick={recipientImgClick} style={{filter: recipientDefaultIcon ? getFilter() : ""}}/>
-                    <span className="message-user-text contributor-color">{functions.toProperCase(props.message.recipient)}</span>
+                    <img draggable={false} src={getRecipientPFP()} className="message-user-img" onClick={recipientImgClick} onAuxClick={recipientImgClick} style={{filter: recipientDefaultIcon ? getFilter() : ""}}/>
+                    <span className="message-user-text contributor-color">{functions.toProperCase(props.message.recipients[0])}</span>
                     <img className="message-user-label" src={contributorPencil}/>
+                    {props.message.recipients.length > 1 ? <span className="message-recipients-text">(+{props.message.recipients.length - 1})</span> : null}
                 </div>
             )
         } else if (recipientData?.role === "premium") {
             return (
                 <div className="message-username-container" onClick={(event) => recipientPage(event)} onAuxClick={(event) => recipientPage(event)}>
-                <img draggable={false} src={getRecipientPFP()} className="message-user-img" onClick={recipientImgClick} onAuxClick={recipientImgClick} style={{filter: recipientDefaultIcon ? getFilter() : ""}}/>
-                    <span className="message-user-text premium-color">{functions.toProperCase(props.message.recipient)}</span>
+                    <img draggable={false} src={getRecipientPFP()} className="message-user-img" onClick={recipientImgClick} onAuxClick={recipientImgClick} style={{filter: recipientDefaultIcon ? getFilter() : ""}}/>
+                    <span className="message-user-text premium-color">{functions.toProperCase(props.message.recipients[0])}</span>
                     <img className="message-user-label" src={premiumStar}/>
+                    {props.message.recipients.length > 1 ? <span className="message-recipients-text">(+{props.message.recipients.length - 1})</span> : null}
                 </div>
             )
         }
         return (
             <div className="message-username-container" onClick={(event) => recipientPage(event)} onAuxClick={(event) => recipientPage(event)}>
                 <img draggable={false} src={getRecipientPFP()} className="message-user-img" onClick={recipientImgClick} onAuxClick={recipientImgClick} style={{filter: recipientDefaultIcon ? getFilter() : ""}}/>
-                <span className={`message-user-text ${recipientData?.banned ? "banned" : ""}`} onClick={(event) => recipientPage(event)} onAuxClick={(event) => recipientPage(event)}>{functions.toProperCase(props.message?.recipient || "deleted")}</span>
+                <span className={`message-user-text ${recipientData?.banned ? "banned" : ""}`} onClick={(event) => recipientPage(event)} onAuxClick={(event) => recipientPage(event)}>{functions.toProperCase(props.message?.recipients[0] || "deleted")}</span>
+                {props.message.recipients.length > 1 ? <span className="message-recipients-text">(+{props.message.recipients.length - 1})</span> : null}
             </div>
         )
     }
@@ -283,9 +293,13 @@ const Message: React.FunctionComponent<Props> = (props) => {
 
     const readStatus = () => {
         if (props.message.creator === session.username) {
-            return props.message.creatorRead
-        } else if (props.message.recipient === session.username) {
-            return props.message.recipientRead
+            return props.message.read
+        } else {
+            for (const data of props.message.recipientData) {
+                if (data.recipient === session.username) {
+                    return data.read
+                }
+            }
         }
     }
 
@@ -316,7 +330,7 @@ const Message: React.FunctionComponent<Props> = (props) => {
                             <span className="message-heading">Sender</span>
                         </div> : null}
                         {!mobile ? <div className="message-row">
-                            <span className="message-heading">Recipient</span>
+                            <span className="message-heading">Recipients</span>
                         </div> : null}
                         <div className="message-row">
                             <span className="message-heading">Updated</span>

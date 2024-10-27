@@ -95,6 +95,14 @@ const ImageGrid: React.FunctionComponent = (props) => {
             }
             if (!permissions.isPremium(session)) return setPremiumRequired("tags")
         }
+        if (query?.startsWith("history:")) {
+            if (!session.username) {
+                setSearch("")
+                setSidebarText("Login required.")
+                return history.push("/login")
+            }
+            if (!permissions.isPremium(session)) return setPremiumRequired(true)
+        }
         setNoResults(false)
         setEnded(false)
         setIndex(0)
@@ -553,8 +561,7 @@ const ImageGrid: React.FunctionComponent = (props) => {
         for (let i = 0; i < visible.length; i++) {
             const post = visible[i] as any
             if (post.fake) continue
-            // if (post.thirdParty) continue
-            // if (!session.username) if (post.restrict !== "safe") continue
+            if (post.thirdParty) continue
             if (restrictType !== "explicit") if (post.restrict === "explicit") continue
             if (!permissions.isMod(session)) if (post.hidden) continue
             const image = post.images[0]

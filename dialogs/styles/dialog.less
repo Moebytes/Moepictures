@@ -336,6 +336,73 @@
     cursor: pointer;
 }
 
+.dialog-emoji-button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: none;
+    padding-top: 2px;
+    padding-bottom: 2px;
+    padding-left: 3px;
+    padding-right: 3px;
+    color: black;
+    font-weight: bold;
+    font-size: 17px;
+    font-family: Tahoma, sans-serif;
+    background-color: var(--text);
+    border: 2px solid black;
+    & > img {
+        height: 27px;
+        width: auto;
+        cursor: pointer;
+    }
+    &:hover {
+        filter: brightness(130%);
+        cursor: pointer;
+        border-color: white;
+        & > img {
+            filter: invert(1);
+        }
+    }
+}
+
+.dialog-emoji-grid {
+    pointer-events: all;
+    position: absolute;
+    z-index: 7000;
+    bottom: 0;
+    right: 0;
+    display: flex;
+    flex-direction: column;
+    width: 250px;
+    height: 350px;
+    background-color: var(--sortbarBG);
+    overflow-y: auto;
+    overflow-x: hidden;
+    transform-origin: bottom;
+    transition: all 0.3s;
+}
+
+.hide-dialog-emoji-grid {
+    transform-origin: bottom;
+    transform: scaleY(0);
+}
+
+.dialog-emoji-row {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-evenly;
+    margin-top: 10px;
+    width: 100%;
+}
+
+.dialog-emoji-big {
+    width: auto;
+    height: 30px;
+    cursor: pointer;
+}
+
 @media screen and (max-width: 500px) {
     .dialog-box {
         width: 350px;

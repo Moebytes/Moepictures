@@ -2,7 +2,7 @@ import React, {useEffect, useContext, useState, useRef} from "react"
 import {useHistory} from "react-router-dom"
 import {HashLink as Link} from "react-router-hash-link"
 import {HideNavbarContext, HideSidebarContext, ThemeContext, EnableDragContext, SourceEditIDContext, HideTitlebarContext, 
-SessionContext, SessionFlagContext, MobileContext, PostFlagContext} from "../Context"
+SessionContext, SessionFlagContext, MobileContext, PostFlagContext, ActionBannerContext} from "../Context"
 import functions from "../structures/Functions"
 import Draggable from "react-draggable"
 import permissions from "../structures/Permissions"
@@ -17,6 +17,7 @@ const SourceEditDialog: React.FunctionComponent = (props) => {
     const {session, setSession} = useContext(SessionContext)
     const {sessionFlag, setSessionFlag} = useContext(SessionFlagContext)
     const {sourceEditID, setSourceEditID} = useContext(SourceEditIDContext)
+    const {actionBanner, setActionBanner} = useContext(ActionBannerContext)
     const {mobile, setMobile} = useContext(MobileContext)
     const {postFlag, setPostFlag} = useContext(PostFlagContext)
     const [title, setTitle] = useState("")
@@ -97,6 +98,7 @@ const SourceEditDialog: React.FunctionComponent = (props) => {
             setSourceEditID(null)
             await functions.put("/api/post/quickedit", data, session, setSessionFlag)
             setPostFlag(true)
+            setActionBanner("source-edit")
         } else {
             const badReason = functions.validateReason(reason)
             if (badReason) {

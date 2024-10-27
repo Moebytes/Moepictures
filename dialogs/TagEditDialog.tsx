@@ -2,7 +2,7 @@ import React, {useEffect, useContext, useState, useRef} from "react"
 import {useHistory} from "react-router-dom"
 import {HashLink as Link} from "react-router-hash-link"
 import {HideNavbarContext, HideSidebarContext, ThemeContext, EnableDragContext, TagEditIDContext, HideTitlebarContext, 
-SessionContext, SessionFlagContext, MobileContext, PostFlagContext} from "../Context"
+SessionContext, SessionFlagContext, MobileContext, PostFlagContext, ActionBannerContext} from "../Context"
 import functions from "../structures/Functions"
 import Draggable from "react-draggable"
 import permissions from "../structures/Permissions"
@@ -33,6 +33,7 @@ const TagEditDialog: React.FunctionComponent = (props) => {
     const {sessionFlag, setSessionFlag} = useContext(SessionFlagContext)
     const {postFlag, setPostFlag} = useContext(PostFlagContext)
     const {tagEditID, setTagEditID} = useContext(TagEditIDContext)
+    const {actionBanner, setActionBanner} = useContext(ActionBannerContext)
     const {mobile, setMobile} = useContext(MobileContext)
     const [type, setType] = useState("image")
     const [restrict, setRestrict] = useState("safe")
@@ -153,6 +154,7 @@ const TagEditDialog: React.FunctionComponent = (props) => {
             setTagEditID(null)
             await functions.put("/api/post/quickedit", data, session, setSessionFlag)
             setPostFlag(true)
+            setActionBanner("tag-edit")
         } else {
             const joined = `${artists} ${characters} ${series} ${tags} ${metaTags}`
             if (joined.includes("_") || joined.includes("/") || joined.includes("\\")) {

@@ -74,7 +74,7 @@ const UserRoutes = (app: Express) => {
             delete user.downloadPixivID
             delete user.autosearchInterval
             delete user.showTagBanner
-            delete user.upscaledImages
+            delete user.upscaledImage
             delete user.savedSearches
             delete user.premiumExpiration
             delete user.showR18
@@ -99,7 +99,7 @@ const UserRoutes = (app: Express) => {
             let ip = req.headers["x-forwarded-for"] || req.socket.remoteAddress
             ip = ip?.toString().replace("::ffff:", "") || ""
             if (req.session.captchaAnswer !== captchaResponse?.trim()) return res.status(400).send("Bad captchaResponse")
-            let bannedIp = await sql.report.bannedIP(ip)
+            let bannedIp = await sql.report.activeBannedIP(ip)
             if (bannedIp) return res.status(400).send("IP banned")
             try {
                 await sql.user.insertUser(username, email)
@@ -180,6 +180,7 @@ const UserRoutes = (app: Express) => {
                 req.session.savedSearches = user.savedSearches
                 req.session.showR18 = user.showR18
                 req.session.premiumExpiration = user.premiumExpiration
+                req.session.banExpiration = user.banExpiration
                 //req.session.accessToken = serverFunctions.generateAccessToken(req)
                 //req.session.refreshToken = serverFunctions.generateRefreshToken(req)
                 return res.status(200).send("Success")
@@ -227,6 +228,7 @@ const UserRoutes = (app: Express) => {
                 req.session.savedSearches = user.savedSearches
                 req.session.showR18 = user.showR18
                 req.session.premiumExpiration = user.premiumExpiration
+                req.session.banExpiration = user.banExpiration
 
                 if (user.role.includes("premium") && user.premiumExpiration) {
                     if (new Date(user.premiumExpiration) < new Date()) {
@@ -239,6 +241,17 @@ const UserRoutes = (app: Express) => {
                         }
                         const message = `Unfortunately, it seems like your premium membership has expired. Thank you for supporting us! We greatly appreciate your time spent as a premium member and we hope that you are interested in renewing it again.\n\n${functions.getDomain()}/premium#purchase`
                         await serverFunctions.systemMessage(req.session.username, "Notice: Your premium membership expired", message)
+                    }
+                }
+
+                if (user.banned && user.banExpiration) {
+                    if (new Date(user.banExpiration) < new Date()) {
+                        const activeBan = await sql.report.activeBan(req.session.username)
+                        await sql.report.updateBan(activeBan.banID, "active", false)
+                        await sql.user.updateUser(req.session.username, "banned", false)
+                        await sql.user.updateUser(req.session.username, "banExpiration", null)
+                        const message = `Hello, the duration of your ban ended and it has been lifted. Please have good behavior from now on, as future bans may be permanent.`
+                        await serverFunctions.systemMessage(req.session.username, "Notice: Your ban period has ended", message)
                     }
                 }
             }
@@ -843,14 +856,15 @@ const UserRoutes = (app: Express) => {
 
     app.post("/api/user/ban", csrfProtection, userLimiter, async (req: Request, res: Response) => {
         try {
-            const {username, reason, deleteUnverifiedChanges, deleteHistoryChanges, deleteComments, deleteMessages} = req.body
+            const {username, reason, deleteUnverifiedChanges, deleteHistoryChanges, deleteComments, deleteMessages, days} = req.body
             if (!username) return res.status(400).send("Bad username")
+            if (days && Number.isNaN(Number(days))) return res.status(400).send("Bad days")
             if (!req.session.username) return res.status(403).send("Unauthorized")
             if (!permissions.isMod(req.session)) return res.status(403).end()
             if (req.session.username === username) return res.status(400).send("Cannot perform action on yourself")
             const user = await sql.user.user(username)
             if (!user) return res.status(400).send("Bad username")
-            if (user.role === "admin" || user.role === "mod") return res.status(400).send("Cannot perform action on this user")
+            if (user.role === "admin" || user.role === "mod" || user.role === "system") return res.status(400).send("Cannot perform action on this user")
             if (deleteUnverifiedChanges) {
                 // Delete unverified posts
                 const unverifiedPosts = await sql.search.unverifiedUserPosts(username)
@@ -956,7 +970,14 @@ const UserRoutes = (app: Express) => {
             }
             await sql.report.insertBan(username, user.ip, req.session.username, reason)
             await sql.user.updateUser(username, "banned", true)
-            const message = `You have been banned for breaking the site rules. You can still view the site but you won't be able to interact with other users or edit content.${reason ? `\n\nHere is an additional provided reason: ${reason}` : ""}`
+            let banDuration = ""
+            if (days) {
+                let expiration = new Date()
+                expiration.setDate(expiration.getDate() + Number(days))
+                banDuration = functions.timeUntil(expiration.toISOString())
+                await sql.user.updateUser(username, "banExpiration", expiration.toISOString())
+            }
+            const message = `You have been banned for breaking the site rules. You can still view the site but you won't be able to interact with other users or edit content.${reason ? `\n\nHere is a provided reason: ${reason}` : ""}${banDuration ? `\n\nBan duration: ${banDuration}` : ""}`
             await serverFunctions.systemMessage(username, "Notice: You were banned", message)
             res.status(200).json({revertPostIDs: Array.from(revertPostIDs), revertTagIDs: Array.from(revertTagIDs)})
         } catch (e) {
@@ -975,8 +996,10 @@ const UserRoutes = (app: Express) => {
             const user = await sql.user.user(username)
             if (!user) return res.status(400).send("Bad username")
             if (user.role === "admin" || user.role === "mod") return res.status(400).send("Cannot perform action on this user")
-            await sql.report.deleteBan(username)
+            const activeBan = await sql.report.activeBan(username)
+            await sql.report.updateBan(activeBan.banID, "active", false)
             await sql.user.updateUser(username, "banned", false)
+            await sql.user.updateUser(username, "banExpiration", null)
             const message = `You have been unbanned. You may interact on the site again, but don't repeat the behavior that got you banned because you likely won't get another chance.`
             await serverFunctions.systemMessage(username, "Notice: You were unbanned", message)
             res.status(200).send("Success")
@@ -992,7 +1015,7 @@ const UserRoutes = (app: Express) => {
             if (!username) return res.status(400).send("Bad username")
             if (!req.session.username) return res.status(403).send("Unauthorized")
             if (req.session.username !== username && !permissions.isMod(req.session)) return res.status(403).send("No permission to view ban")
-            const ban = await sql.report.ban(username)
+            const ban = await sql.report.activeBan(username)
             res.status(200).json(ban)
         } catch (e) {
             console.log(e)

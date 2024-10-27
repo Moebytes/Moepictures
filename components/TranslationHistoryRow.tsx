@@ -9,7 +9,7 @@ import adminCrown from "../assets/icons/admin-crown.png"
 import modCrown from "../assets/icons/mod-crown.png"
 import permissions from "../structures/Permissions"
 import cryptoFunctions from "../structures/CryptoFunctions"
-import "./styles/translationhistoryrow.less"
+import "./styles/historyrow.less"
 
 interface Props {
     previousHistory: any
@@ -101,23 +101,23 @@ const TranslationHistoryRow: React.FunctionComponent<Props> = (props) => {
         if (session.banned) return null
         if (permissions.isMod(session)) {
             return (
-                <div className="translationhistoryrow-options">
-                    <div className="translationhistoryrow-options-container" onClick={revertTranslationHistoryDialog}>
-                        <img className="translationhistoryrow-options-img" src={translationHistoryRevert}/>
-                        <span className="translationhistoryrow-options-text">Revert</span>
+                <div className="historyrow-options">
+                    <div className="historyrow-options-container" onClick={revertTranslationHistoryDialog}>
+                        <img className="historyrow-options-img" src={translationHistoryRevert}/>
+                        <span className="historyrow-options-text">Revert</span>
                     </div>
-                    <div className="translationhistoryrow-options-container" onClick={deleteTranslationHistoryDialog}>
-                        <img className="translationhistoryrow-options-img" src={translationHistoryDelete}/>
-                        <span className="translationhistoryrow-options-text">Delete</span>
+                    <div className="historyrow-options-container" onClick={deleteTranslationHistoryDialog}>
+                        <img className="historyrow-options-img" src={translationHistoryDelete}/>
+                        <span className="historyrow-options-text">Delete</span>
                     </div>
                 </div>
             )
         } else if (permissions.isContributor(session)) {
             return (
-                <div className="translationhistoryrow-options">
-                    <div className="translationhistoryrow-options-container" onClick={revertTranslationHistoryDialog}>
-                        <img className="translationhistoryrow-options-img" src={translationHistoryRevert}/>
-                        <span className="translationhistoryrow-options-text">Revert</span>
+                <div className="historyrow-options">
+                    <div className="historyrow-options-container" onClick={revertTranslationHistoryDialog}>
+                        <img className="historyrow-options-img" src={translationHistoryRevert}/>
+                        <span className="historyrow-options-text">Revert</span>
                     </div>
                 </div>
             )
@@ -148,20 +148,20 @@ const TranslationHistoryRow: React.FunctionComponent<Props> = (props) => {
         const targetText = "Updated"
         if (userRole === "admin") {
             return (
-                <div className="translationhistoryrow-username-container" onClick={userClick} onAuxClick={userClick}>
-                    <span className="translationhistoryrow-user-text admin-color">{targetText} {functions.timeAgo(targetDate)} by {functions.toProperCase(targetUser)}</span>
-                    <img className="translationhistoryrow-user-label" src={adminCrown}/>
+                <div className="historyrow-username-container" onClick={userClick} onAuxClick={userClick}>
+                    <span className="historyrow-user-text admin-color">{targetText} {functions.timeAgo(targetDate)} by {functions.toProperCase(targetUser)}</span>
+                    <img className="historyrow-user-label" src={adminCrown}/>
                 </div>
             )
         } else if (userRole === "mod") {
             return (
-                <div className="translationhistoryrow-username-container" onClick={userClick} onAuxClick={userClick}>
-                    <span className="translationhistoryrow-user-text mod-color">{targetText} {functions.timeAgo(targetDate)} by {functions.toProperCase(targetUser)}</span>
-                    <img className="translationhistoryrow-user-label" src={modCrown}/>
+                <div className="historyrow-username-container" onClick={userClick} onAuxClick={userClick}>
+                    <span className="historyrow-user-text mod-color">{targetText} {functions.timeAgo(targetDate)} by {functions.toProperCase(targetUser)}</span>
+                    <img className="historyrow-user-label" src={modCrown}/>
                 </div>
             )
         }
-        return <span className="translationhistoryrow-user-text" onClick={userClick} onAuxClick={userClick}>{targetText} {functions.timeAgo(targetDate)} by {functions.toProperCase(targetUser)}</span>
+        return <span className="historyrow-user-text" onClick={userClick} onAuxClick={userClick}>{targetText} {functions.timeAgo(targetDate)} by {functions.toProperCase(targetUser)}</span>
     }
 
     const diffText = () => {
@@ -193,9 +193,9 @@ const TranslationHistoryRow: React.FunctionComponent<Props> = (props) => {
     const translationJSX = () => {
         let jsx = [] as any
         const diffs = diffText()
-        if (diffs === "No data") return <span className="translationhistoryrow-tag-text">No data</span>
+        if (diffs === "No data") return <span className="historyrow-tag-text">No data</span>
         for (let i = 0; i < diffs?.length; i++) {
-            jsx.push(<span className="translationhistoryrow-tag-text">{diffs[i]}</span>)
+            jsx.push(<span className="historyrow-tag-text">{diffs[i]}</span>)
         }
         return jsx
     }
@@ -203,14 +203,14 @@ const TranslationHistoryRow: React.FunctionComponent<Props> = (props) => {
     //if (!diffText()) return null
 
     return (
-        <div className="translationhistoryrow">
+        <div className="historyrow">
             {session.username ? translationhistoryOptions() : null}
-            <div className="translationhistoryrow-container">
-                <img className="translationhistoryrow-img" src={img} onClick={imgClick}/>
+            <div className="historyrow-container">
+                <img className="historyrow-img" src={img} onClick={imgClick}/>
             </div>
-            <div className="translationhistoryrow-container-row">
-                <div className="translationhistoryrow-container">
-                    <div className="translationhistoryrow-user-container">
+            <div className="historyrow-container-row">
+                <div className="historyrow-container">
+                    <div className="historyrow-user-container">
                         {dateTextJSX()}
                         {translationJSX()}
                         {props.translationHistory.reason ? <span className="taghistoryrow-text"><span className="taghistoryrow-label-text">Reason:</span> {props.translationHistory.reason}</span> : null}

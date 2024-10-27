@@ -17,6 +17,7 @@ interface Props {
     update?: () => void
     appendImages?: any[]
     marginLeft?: number
+    marginTop?: number
 }
 
 let startX = 0
@@ -446,11 +447,12 @@ const Carousel: React.FunctionComponent<Props> = (props) => {
         return jsx
     }
 
-    let maxWidth = props.marginLeft ? `calc(100vw - ${functions.sidebarWidth()}px - 120px - ${props.marginLeft}px)` : `calc(100vw - ${functions.sidebarWidth()}px - 120px)`
-    if (mobile) maxWidth = props.marginLeft ? `calc(100vw - 10px - ${props.marginLeft}px)` : `calc(100vw - 10px)`
+    let maxWidth = props.marginLeft !== undefined ? `calc(100vw - ${functions.sidebarWidth()}px - 120px - ${props.marginLeft}px)` : `calc(100vw - ${functions.sidebarWidth()}px - 120px)`
+    if (mobile) maxWidth = props.marginLeft !== undefined ? `calc(100vw - 10px - ${props.marginLeft}px)` : `calc(100vw - 10px)`
+    let marginTop = props.marginTop !== undefined ? `${props.marginTop}px` : ""
 
     return (
-        <div className="carousel" ref={carouselRef} style={{maxWidth, overflowX: trackPad ? "auto" : "hidden"}} onScroll={handleScroll}>
+        <div className="carousel" ref={carouselRef} style={{maxWidth, marginTop, overflowX: trackPad ? "auto" : "hidden"}} onScroll={handleScroll}>
             <img className={`carousel-left ${showLeftArrow ? "arrow-visible" : ""}`} src={arrowLeft} style={{filter: getFilter()}} onMouseEnter={arrowLeftEnter} onMouseLeave={() => setShowLeftArrow(false)} onClick={arrowLeftClick}/>
             <div className="slider" ref={sliderRef} onMouseDown={handleMouseDown} onMouseMove={handleMouseMove} onMouseUp={handleMouseUp} onTouchStart={handleTouchStart} onTouchMove={handleTouchMove} onTouchEnd={handleTouchEnd}>
                 {generateJSX()}

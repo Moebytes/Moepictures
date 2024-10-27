@@ -34,8 +34,10 @@ export default class SQLUser {
         if (sort === "reverse popularity") sortQuery = `ORDER BY "favoriteCount" ASC`
         if (sort === "variations") sortQuery = `ORDER BY "imageCount" DESC`
         if (sort === "reverse variations") sortQuery = `ORDER BY "imageCount" ASC`
-        if (sort === "thirdparty") sortQuery = `ORDER BY posts."thirdParty" DESC NULLS LAST`
-        if (sort === "reverse thirdparty") sortQuery = `ORDER BY posts."thirdParty" ASC NULLS LAST`
+        if (sort === "thirdparty") sortQuery = `ORDER BY "hasThirdParty" DESC`
+        if (sort === "reverse thirdparty") sortQuery = `ORDER BY "hasThirdParty" ASC`
+        if (sort === "groups") sortQuery = `ORDER BY "isGrouped" DESC`
+        if (sort === "reverse groups") sortQuery = `ORDER BY "isGrouped" ASC`
         if (sort === "tagcount") sortQuery = `ORDER BY "tagCount" DESC`
         if (sort === "reverse tagcount") sortQuery = `ORDER BY "tagCount" ASC`
         if (sort === "filesize") sortQuery = `ORDER BY "imageSize" DESC`
@@ -73,7 +75,16 @@ export default class SQLUser {
                     MAX(DISTINCT images."height") AS "imageHeight",
                     COUNT(DISTINCT images."imageID") AS "imageCount",
                     COUNT(DISTINCT favorites."username") AS "favoriteCount",
-                    ROUND(AVG(DISTINCT cuteness."cuteness")) AS "cuteness"${sessionUsername ? `,
+                    ROUND(AVG(DISTINCT cuteness."cuteness")) AS "cuteness",
+                    CASE
+                        WHEN COUNT("third party"."postID") > 0 
+                        THEN true ELSE false
+                    END AS "hasThirdParty",
+                    CASE 
+                        WHEN COUNT("group map"."groupID") > 0 
+                        THEN true ELSE false 
+                    END AS "isGrouped"
+                    ${sessionUsername ? `,
                     CASE 
                         WHEN COUNT(favorites."username") FILTER (WHERE favorites."username" = $${userValue}) > 0 
                         THEN true ELSE false
@@ -87,6 +98,8 @@ export default class SQLUser {
                     ${includeTags ? `JOIN "tag map" ON posts."postID" = "tag map"."postID"` : ""}
                     FULL JOIN "favorites" ON posts."postID" = "favorites"."postID"
                     FULL JOIN "cuteness" ON posts."postID" = "cuteness"."postID"
+                    LEFT JOIN "third party" ON posts."postID" = "third party"."parentID"
+                    LEFT JOIN "group map" ON posts."postID" = "group map"."postID"
                     ${sessionUsername ? `LEFT JOIN "favgroup map" ON posts."postID" = "favgroup map"."postID"` : ""}
                     ${whereQueries ? `WHERE ${whereQueries}` : ""}
                     GROUP BY posts."postID"

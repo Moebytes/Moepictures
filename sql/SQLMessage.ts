@@ -4,20 +4,65 @@ import functions from "../structures/Functions"
 
 export default class SQLMessage {
     /** Insert DM message. */
-    public static insertMessage = async (creator: string, recipient: string, title: string, content: string) => {
+    public static insertMessage = async (creator: string, title: string, content: string) => {
         const now = new Date().toISOString()
         const query: QueryConfig = {
-        text: /*sql*/`INSERT INTO messages ("creator", "createDate", "updatedDate", "recipient", "title", "content") VALUES ($1, $2, $3, $4, $5, $6) RETURNING "messageID"`,
-        values: [creator, now, now, recipient, title, content]
+        text: /*sql*/`INSERT INTO messages ("creator", "createDate", "updater", "updatedDate", "title", "content") VALUES ($1, $2, $3, $4, $5, $6) RETURNING "messageID"`,
+        values: [creator, now, creator, now, title, content]
         }
         const result = await SQLQuery.run(query)
-        return result.flat(Infinity)[0] as number
+        return result.flat(Infinity)[0]?.messageID as number
+    }
+
+    /** Bulk insert message recipients. */
+    public static bulkInsertRecipients = async (messageID: number, recipients: string[]) => {
+        if (!recipients.length) return
+        let dupeCheck = new Set<string>()
+        let rawValues = [] as any
+        let valueArray = [] as any 
+        let i = 1 
+        for (let j = 0; j < recipients.length; j++) {
+            if (dupeCheck.has(recipients[j])) continue
+            dupeCheck.add(recipients[j])
+            valueArray.push(`($${i}, $${i + 1})`)
+            rawValues.push(messageID)
+            rawValues.push(recipients[j])
+            i += 2
+        }
+        let valueQuery = `VALUES ${valueArray.join(", ")}`
+        const query: QueryConfig = {
+            text: /*sql*/`INSERT INTO "message recipients" ("messageID", "recipient") ${valueQuery}`,
+            values: [...rawValues]
+        }
+        return SQLQuery.run(query)
+    }
+
+    /** Bulk delete message recipients. */
+    public static bulkDeleteRecipients = async (messageID: number, recipients: string[]) => {
+        if (!recipients.length) return
+        let dupeCheck = new Set<string>()
+        let rawValues = [messageID] as any
+        let valueArray = [] as any 
+        let i = 2
+        for (let j = 0; j < recipients.length; j++) {
+            if (dupeCheck.has(recipients[j])) continue
+            dupeCheck.add(recipients[j])
+            valueArray.push(`$${i}`) 
+            rawValues.push(recipients[j])
+            i++
+        }
+        let valueQuery = valueArray.join(", ")
+        const query: QueryConfig = {
+            text: /*sql*/`DELETE FROM "message recipients" WHERE "messageID" = $1 AND "recipient" IN (${valueQuery})`,
+            values: [...rawValues]
+        }
+        return SQLQuery.run(query)
     }
 
     /** Search all messages. */
     public static allMessages = async (username: string, search: string, sort: string, offset?: string, limit?: string) => {
         let i = 2
-        let whereQuery = `WHERE (messages.recipient = $1 OR messages.creator = $1)`
+        let whereQuery = `WHERE (messages.creator = $1 OR "message recipients".recipient = $1)`
         if (search) {
             whereQuery += ` AND lower(messages."title") LIKE '%' || $${i} || '%'`
             i++
@@ -34,9 +79,11 @@ export default class SQLMessage {
         }
         const query: QueryConfig = {
             text: functions.multiTrim(/*sql*/`
-                SELECT messages.*,
+                SELECT messages.*, array_agg(DISTINCT "message recipients".recipient) AS recipients,
+                json_agg(DISTINCT "message recipients".*) AS "recipientData",
                 COUNT(*) OVER() AS "messageCount"
                 FROM messages
+                JOIN "message recipients" ON messages."messageID" = "message recipients"."messageID"
                 ${whereQuery}
                 GROUP BY messages."messageID"
                 ${sortQuery}
@@ -55,9 +102,11 @@ export default class SQLMessage {
     public static userMessages = async (username: string) => {
         const query: QueryConfig = {
         text: functions.multiTrim(/*sql*/`
-            SELECT messages.*,
+            SELECT messages.*, array_agg(DISTINCT "message recipients".recipient) AS recipients,
+            json_agg(DISTINCT "message recipients".*) AS "recipientData",
             COUNT(*) OVER() AS "messageCount"
             FROM messages
+            JOIN "message recipients" ON messages."messageID" = "message recipients"."messageID"
             WHERE messages.creator = $1
             GROUP BY messages."messageID"
             ORDER BY messages."updatedDate" DESC
@@ -72,8 +121,11 @@ export default class SQLMessage {
     public static message = async (messageID: number) => {
         const query: QueryConfig = {
         text: functions.multiTrim(/*sql*/`
-                SELECT messages.*, users.role, users.image, users.banned, users."imagePost"
+                SELECT messages.*, array_agg(DISTINCT "message recipients".recipient) AS recipients,
+                json_agg(DISTINCT "message recipients".*) AS "recipientData",
+                users.role, users.image, users.banned, users."imagePost"
                 FROM messages
+                JOIN "message recipients" ON messages."messageID" = "message recipients"."messageID"
                 JOIN users ON users.username = messages.creator
                 WHERE messages."messageID" = $1
                 GROUP BY messages."messageID", users.role, users.image, users.banned, users."imagePost"
@@ -101,6 +153,15 @@ export default class SQLMessage {
         }
         const result = await SQLQuery.run(query)
         return result
+    }
+
+    /** Update recipient */
+    public static updateRecipient = async (messageID: number, recipient: string, column: string, value: string | number | boolean) => {
+        const query: QueryConfig = {
+            text: /*sql*/`UPDATE "message recipients" SET "${column}" = $1 WHERE "messageID" = $2 AND "recipient" = $3`,
+            values: [value, messageID, recipient]
+        }
+        return SQLQuery.run(query)
     }
 
     /** Insert message reply. */
@@ -190,10 +251,12 @@ export default class SQLMessage {
     public static grabUnread = async (username: string) => {
         const query: QueryConfig = {
         text: functions.multiTrim(/*sql*/`
-                SELECT messages.*
+                SELECT messages.*, array_agg(DISTINCT "message recipients".recipient) AS recipients,
+                json_agg(DISTINCT "message recipients".*) AS "recipientData"
                 FROM messages
-                WHERE (messages."creator" = $1 AND (messages."creatorRead" = false OR messages."creatorRead" IS NULL)) OR 
-                (messages."recipient" = $1 AND (messages."recipientRead" = false OR messages."recipientRead" IS NULL))
+                JOIN "message recipients" ON messages."messageID" = "message recipients"."messageID"
+                WHERE (messages."creator" = $1 AND (messages."read" = false OR messages."read" IS NULL)) OR 
+                ("message recipients".recipient = $1 AND ("message recipients".read = false OR "message recipients".read IS NULL))
                 GROUP BY messages."messageID"
             `),
         values: [username]
