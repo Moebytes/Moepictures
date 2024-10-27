@@ -401,7 +401,7 @@ const PostRoutes = (app: Express) => {
                 if (!characters?.[0]) characters = ["unknown-character"]
                 if (!tags?.[0]) tags = ["needs-tags"]
 
-                let rawTags = `${artists.join(" ")} ${characters.join(" ")} ${series.join(" ")} ${tags.join(" ")}`
+                let rawTags = `${characters.join(" ")} ${series.join(" ")} ${tags.join(" ")}`
                 if (rawTags.includes("_") || rawTags.includes("/") || rawTags.includes("\\") || rawTags.includes(",")) {
                     return res.status(400).send("Invalid characters in tags: , _ / \\")
                 }
@@ -615,7 +615,7 @@ const PostRoutes = (app: Express) => {
             if (!characters?.[0]) characters = ["unknown-character"]
             if (!tags?.[0]) tags = ["needs-tags"]
 
-            let rawTags = `${artists.join(" ")} ${characters.join(" ")} ${series.join(" ")} ${tags.join(" ")}`
+            let rawTags = `${characters.join(" ")} ${series.join(" ")} ${tags.join(" ")}`
             if (rawTags.includes("_") || rawTags.includes("/") || rawTags.includes("\\") || rawTags.includes(",")) {
                 return res.status(400).send("Invalid characters in tags: , _ / \\")
             }

@@ -111,7 +111,7 @@ const TagEditDialog: React.FunctionComponent = (props) => {
 
     const tagEdit = async () => {
         if (permissions.isContributor(session)) {
-            const joined = `${artists} ${characters} ${series} ${tags} ${metaTags}`
+            const joined = `${characters} ${series} ${tags} ${metaTags}`
             if (joined.includes("_") || joined.includes("/") || joined.includes("\\")) {
                 setError(true)
                 await functions.timeout(20)
@@ -156,7 +156,7 @@ const TagEditDialog: React.FunctionComponent = (props) => {
             setPostFlag(true)
             setActionBanner("tag-edit")
         } else {
-            const joined = `${artists} ${characters} ${series} ${tags} ${metaTags}`
+            const joined = `${characters} ${series} ${tags} ${metaTags}`
             if (joined.includes("_") || joined.includes("/") || joined.includes("\\")) {
                 setError(true)
                 await functions.timeout(20)

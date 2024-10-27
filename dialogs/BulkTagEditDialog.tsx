@@ -7,6 +7,7 @@ import functions from "../structures/Functions"
 import Draggable from "react-draggable"
 import permissions from "../structures/Permissions"
 import SearchSuggestions from "../components/SearchSuggestions"
+import ContentEditable from "react-contenteditable"
 import "./styles/dialog.less"
 
 const BulkTagEditDialog: React.FunctionComponent = (props) => {
@@ -26,6 +27,7 @@ const BulkTagEditDialog: React.FunctionComponent = (props) => {
     const [characters, setCharacters] = useState("") as any
     const [series, setSeries] = useState("") as any
     const [metaTags, setMetaTags] = useState("")
+    const [appendTags, setAppendTags] = useState("")
     const [artistsActive, setArtistsActive] = useState(false)
     const [charactersActive, setCharactersActive] = useState(false)
     const [seriesActive, setSeriesActive] = useState(false)
@@ -37,6 +39,7 @@ const BulkTagEditDialog: React.FunctionComponent = (props) => {
     const [tagY, setTagY] = useState(0)
     const [error, setError] = useState(false)
     const errorRef = useRef<any>(null)
+    const tagRef = useRef<any>(null)
     const history = useHistory()
 
     const reset = () => {
@@ -44,6 +47,7 @@ const BulkTagEditDialog: React.FunctionComponent = (props) => {
         setCharacters("") as any
         setSeries("")
         setMetaTags("")
+        setAppendTags("")
     }
 
     useEffect(() => {
@@ -75,7 +79,7 @@ const BulkTagEditDialog: React.FunctionComponent = (props) => {
     const bulkQuickEdit = async () => {
         if (!permissions.isAdmin(session)) return setShowBulkTagEditDialog(false)
         if (!selectionMode) return setShowBulkTagEditDialog(false)
-        if (!artists?.trim() && !characters?.trim() && !series?.trim() && !metaTags?.trim()) return setShowBulkTagEditDialog(false)
+        if (!artists?.trim() && !characters?.trim() && !series?.trim() && !metaTags?.trim() && !appendTags?.trim()) return setShowBulkTagEditDialog(false)
         let promiseArray = [] as Promise<any>[]
         for (const postID of selectionItems.values()) {
             const promise = new Promise(async (resolve) => {
@@ -100,6 +104,23 @@ const BulkTagEditDialog: React.FunctionComponent = (props) => {
                 if (functions.cleanHTML(metaTags)?.trim()) {
                     tagData = functions.removeDuplicates([...tagData, ...functions.cleanHTML(metaTags).trim().split(/[\n\r\s]+/g)])
                 }
+                
+                if (functions.cleanHTML(appendTags)?.trim()) {
+                    const appendData = functions.cleanHTML(appendTags).trim().split(/[\n\r\s]+/g)
+                    let toAppend = [] as string[]
+                    let toRemove = [] as string[]
+                    for (const tag of appendData) {
+                        if (tag.startsWith("-")) {
+                            toRemove.push(tag.replace("-", ""))
+                        } else {
+                            toAppend.push(tag.startsWith("+") ? tag.replace("+", "") : tag)
+                        }
+                    }
+                    const tagSet = new Set(tagData)
+                    toAppend.forEach(tag => tagSet.add(tag))
+                    toRemove.forEach(tag => tagSet.delete(tag))
+                    tagData = Array.from(tagSet)
+                }
 
                 const data = {
                     postID: postID,
@@ -120,7 +141,7 @@ const BulkTagEditDialog: React.FunctionComponent = (props) => {
         await Promise.all(promiseArray)
         for (let i = 0; i < promiseArray.length; i++) {
             const data = await promiseArray[i]
-            functions.put("/api/post/quickedit", data, session, setSessionFlag)
+            //functions.put("/api/post/quickedit", data, session, setSessionFlag)
         }
         setShowBulkTagEditDialog(false)
         setSelectionMode(false)
@@ -142,10 +163,10 @@ const BulkTagEditDialog: React.FunctionComponent = (props) => {
         const tagY = posY
         setTagX(tagX)
         setTagY(tagY)
-    }, [artists, characters, series, metaTags])
+    }, [artists, characters, series, metaTags, appendTags])
 
     useEffect(() => {
-        if (artistsActive || charactersActive || seriesActive || metaActive) {
+        if (artistsActive || charactersActive || seriesActive || metaActive || tagActive) {
             const tagX = posX
             const tagY = posY
             setTagX(tagX)
@@ -185,6 +206,14 @@ const BulkTagEditDialog: React.FunctionComponent = (props) => {
         })
     }
 
+    const handleTagClick = (tag: string) => {
+        setAppendTags((prev: string) => {
+            const parts = functions.cleanHTML(prev).split(/ +/g)
+            parts[parts.length - 1] = tag
+            return parts.join(" ")
+        })
+    }
+
     if (showBulkTagEditDialog) {
         return (
             <div className="dialog">
@@ -213,6 +242,13 @@ const BulkTagEditDialog: React.FunctionComponent = (props) => {
                             <SearchSuggestions active={metaActive} x={tagX} y={tagY} width={mobile ? 140 : 200} fontSize={17} text={functions.cleanHTML(metaTags)} click={(tag) => handleMetaClick(tag)} type="meta"/>
                             <span className="dialog-text">Meta: </span>
                             <input className="dialog-input meta-tag-color" type="text" spellCheck={false} value={metaTags} onChange={(event) => setMetaTags(event.target.value)} onFocus={() => setMetaActive(true)} onBlur={() => setMetaActive(false)}/>
+                        </div>
+                        <div className="dialog-row">
+                            <span className="dialog-text">Append Tags: </span>
+                        </div>
+                        <div className="dialog-row">
+                            <SearchSuggestions active={tagActive} x={tagX} y={tagY} width={mobile ? 140 : 200} fontSize={17} text={functions.cleanHTML(appendTags)} click={(tag) => handleTagClick(tag)} type="tag"/>
+                            <ContentEditable innerRef={tagRef} className="dialog-textarea" style={{height: "140px"}} spellCheck={false} html={appendTags} onChange={(event) => setAppendTags(event.target.value)} onFocus={() => setTagActive(true)} onBlur={() => setTagActive(false)}/>
                         </div>
                         {error ? <div className="dialog-validation-container"><span className="dialog-validation" ref={errorRef}></span></div> : null}
                         <div className="dialog-row">
