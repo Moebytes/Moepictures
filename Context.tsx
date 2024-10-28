@@ -232,6 +232,8 @@ export const DeleteGroupHistoryIDContext = React.createContext<any>(null)
 export const RevertGroupHistoryIDContext = React.createContext<any>(null)
 export const DeleteGroupHistoryFlagContext = React.createContext<any>(null)
 export const RevertGroupHistoryFlagContext = React.createContext<any>(null)
+export const Disable2FADialogContext = React.createContext<any>(null)
+export const Disable2FAFlagContext = React.createContext<any>(null)
 
 const Context: React.FunctionComponent = (props) => {
     const [siteHue, setSiteHue] = useState(180)
@@ -445,9 +447,13 @@ const Context: React.FunctionComponent = (props) => {
     const [revertGroupHistoryID, setRevertGroupHistoryID] = useState(null)
     const [deleteGroupHistoryFlag, setDeleteGroupHistoryFlag] = useState(null)
     const [revertGroupHistoryFlag, setRevertGroupHistoryFlag] = useState(null)
+    const [disable2FADialog, setDisable2FADialog] = useState(false)
+    const [disable2FAFlag, setDisable2FAFlag] = useState(false)
 
 return (
     <>
+        <Disable2FAFlagContext.Provider value={{disable2FAFlag, setDisable2FAFlag}}>
+        <Disable2FADialogContext.Provider value={{disable2FADialog, setDisable2FADialog}}>
         <RevertGroupHistoryFlagContext.Provider value={{revertGroupHistoryFlag, setRevertGroupHistoryFlag}}>
         <DeleteGroupHistoryFlagContext.Provider value={{deleteGroupHistoryFlag, setDeleteGroupHistoryFlag}}>
         <RevertGroupHistoryIDContext.Provider value={{revertGroupHistoryID, setRevertGroupHistoryID}}>
@@ -871,6 +877,8 @@ return (
         </RevertGroupHistoryIDContext.Provider>
         </DeleteGroupHistoryFlagContext.Provider>
         </RevertGroupHistoryFlagContext.Provider>
+        </Disable2FADialogContext.Provider>
+        </Disable2FAFlagContext.Provider>
     </>
     )
 }

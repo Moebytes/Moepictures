@@ -75,9 +75,7 @@ const SetAvatarPage: React.FunctionComponent<Props> = (props) => {
             setSidebarText("Login required.")
         }
         if (post.restrict === "explicit") {
-            if (!session.showR18) {
-                functions.replaceLocation("/403")
-            }
+            functions.replaceLocation("/403")
         }
     }, [session, post])
 

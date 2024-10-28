@@ -34,6 +34,7 @@ import pixivDownloaderImg from "../assets/misc/pixiv-downloader.png"
 import setAvatarImg from "../assets/misc/set-avatar.png"
 import musicImg from "../assets/misc/music.png"
 import CaptchaDialog from "../dialogs/CaptchaDialog"
+import bookmarkletImg from "../assets/icons/bookmarklet.png"
 import functions from "../structures/Functions"
 import "./styles/helppage.less"
 
@@ -285,7 +286,6 @@ const HelpPage: React.FunctionComponent = (props) => {
                     Art with other subjects (animals, food, backgrounds, etc). is not allowed. <br/>
                     ⇾ It should be moe/cute! This is the primary focus of the site. <br/>
                     ⇾ No duplicates are allowed. Variations of the same image should be added to the original post. <br/>
-                    ⇾ Sketches and unfinished art may be allowed only if they are good. <br/>
                     ⇾ Color palette should be pleasant to look at, ie. there are no oversaturated colors that clash too much. <br/>
                     ⇾ The drawing should be clean overall and shouldn't look messy or have obvious mistakes. <br/>
                     ⇾ The perspective, proportions, and anatomy shouldn't look weird. <br/>
@@ -293,6 +293,7 @@ const HelpPage: React.FunctionComponent = (props) => {
                     ⇾ All posts require the source link from where it was obtained from. <br/>
                     ⇾ All tags should be romanized. Titles and commentary don't have to be romanized but may be translated. <br/>
                     ⇾ For images, adding an upscaled version is required. <br/>
+                    ⇾ Resolution: Keep original images under 2000x2000px and upscaled images under 8000x8000px. <br/>
                     ⇾ (Music only) The audio file must have a song cover in its metadata. <br/>
                     ⇾ Compress / re-encode files (maintaining high quality) to be storage efficient. <br/>
                     ⇾ No hentai. We only allow light nudity and suggestiveness. <br/>
@@ -424,7 +425,8 @@ const HelpPage: React.FunctionComponent = (props) => {
                     3D Models ⇾ GLB or FBX. Avoid OBJ, as it needs separate texture loading we don't support. <br/><br/>
                     </span>
 
-                    The compressing settings that we commonly use are quality at 95% with progressive turned on. <br/>
+                    The compressing settings that we commonly use are quality at 95% with progressive turned on. Please downscale original posts to 
+                    be under 2000x2000px, as anything bigger will result in an upscaled post that is way too large.<br/>
                 </span>
                 <div className="help-img-container"><img className="help-img" src={compressingImg}/></div></>
             )
@@ -446,10 +448,14 @@ const HelpPage: React.FunctionComponent = (props) => {
         if (helpTab === "bookmarklet") {
             return (
                 <><span className="help-heading">Bookmarklet</span>
-                <span className="help-text" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
-                    Drag and drop our bookmarklet into your browser's bookmark bar to quickly upload to Moepictures from a supported site. <br/><br/>
+                <span className="help-text">
+                    Drag and drop our bookmarklet into your browser's bookmark bar to quickly upload to Moepictures from 
+                    another site. <br/><br/>
 
-                    <a className="help-link" href={getBookmarklet()}>Upload to Moepictures</a><br/><br/>
+                    <a style={{width: "auto", height: "60px"}} className="help-link" href={getBookmarklet()}
+                    onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
+                        <img src={bookmarkletImg} alt="Upload to Moepictures"/>
+                    </a><br/><br/>
 
                     It supports the same sites as using "Enter Links" does, which are the following:<br/>
                     <a className="help-link" onClick={() => openLink("https://www.pixiv.net/")}>Pixiv</a><br/>

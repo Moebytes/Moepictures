@@ -720,7 +720,7 @@ const MobileInfo: React.FunctionComponent<Props> = (props) => {
                                 <span className="tag">Source Edit</span>
                             </span>
                         </div>
-                        {!props.unverified ? <div className="mobileinfo-row">
+                        {!props.unverified && props.post.restrict !== "explicit" ? <div className="mobileinfo-row">
                             <span className="tag-hover" onClick={triggerSetAvatar}>
                                 <img className="mobileinfo-icon" src={setAvatar} style={{filter: getFilter()}}/>
                                 <span className="tag">Set Avatar</span>

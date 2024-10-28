@@ -1064,7 +1064,7 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
                                 <span className="tag">Source Edit</span>
                             </span>
                         </div>
-                        {!props.unverified ? <div className="sidebar-row">
+                        {!props.unverified && props.post.restrict !== "explicit" ? <div className="sidebar-row">
                             <span className="tag-hover" onClick={triggerSetAvatar}>
                                 <img className="sidebar-icon" src={setAvatar} style={{filter: getFilter()}}/>
                                 <span className="tag">Set Avatar</span>

@@ -227,6 +227,18 @@ const MiscRoutes = (app: Express) => {
                 const response = await axios.get(post.url, {responseType: "arraybuffer"}).then((r) => r.data)
                 return res.status(200).send([response])
             }
+            if (link.includes("pinterest.com")) {
+                const html = await axios.get(link, {headers}).then((r) => r.data)
+                const image = html.match(/(?<=")https:\/\/i\.pinimg\.com\/originals.*?(?=")/gm)?.[0]
+                const response = await axios.get(image, {responseType: "arraybuffer", headers}).then((r) => r.data)
+                return res.status(200).send([response])
+            }
+            if (link.includes("medibang.com")) {
+                const html = await axios.get(link, {headers}).then((r) => r.data)
+                const image = html.match(/(?<=pictureImageUrl = ')(.*?)(?=')/gm)?.[0]
+                const response = await axios.get(image, {responseType: "arraybuffer", headers}).then((r) => r.data)
+                return res.status(200).send([response])
+            }
             if (link.includes("danbooru.donmai.us")) {
                 const image = await axios.get(`${link}.json`).then((r) => r.data.file_url)
                 const response = await axios.get(image, {responseType: "arraybuffer"}).then((r) => r.data)
@@ -255,15 +267,10 @@ const MiscRoutes = (app: Express) => {
                 const response = await axios.get(image, {responseType: "arraybuffer"}).then((r) => r.data)
                 return res.status(200).send([response])
             }
-            if (link.includes("pinterest.com")) {
+            if (link.includes("e-shuushuu.net")) {
                 const html = await axios.get(link, {headers}).then((r) => r.data)
-                const image = html.match(/(?<=")https:\/\/i\.pinimg\.com\/originals.*?(?=")/gm)?.[0]
-                const response = await axios.get(image, {responseType: "arraybuffer", headers}).then((r) => r.data)
-                return res.status(200).send([response])
-            }
-            if (link.includes("medibang.com")) {
-                const html = await axios.get(link, {headers}).then((r) => r.data)
-                const image = html.match(/(?<=pictureImageUrl = ')(.*?)(?=')/gm)?.[0]
+                const imagePart = html.match(/(\/images\/).*?(?=")/gm)?.[0]
+                const image = `https://e-shuushuu.net${imagePart}`
                 const response = await axios.get(image, {responseType: "arraybuffer", headers}).then((r) => r.data)
                 return res.status(200).send([response])
             }

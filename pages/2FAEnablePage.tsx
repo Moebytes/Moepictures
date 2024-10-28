@@ -5,8 +5,10 @@ import TitleBar from "../components/TitleBar"
 import NavBar from "../components/NavBar"
 import Footer from "../components/Footer"
 import SideBar from "../components/SideBar"
+import Disable2FADialog from "../dialogs/Disable2FADialog"
 import {HideNavbarContext, HideSidebarContext, ThemeContext, EnableDragContext, RelativeContext, HideTitlebarContext, 
-HeaderTextContext, SidebarTextContext, SessionContext, SessionFlagContext, RedirectContext, MobileContext} from "../Context"
+HeaderTextContext, SidebarTextContext, SessionContext, SessionFlagContext, RedirectContext, MobileContext, Disable2FADialogContext,
+Disable2FAFlagContext} from "../Context"
 import "./styles/2faenablepage.less"
 import functions from "../structures/Functions"
 
@@ -24,6 +26,8 @@ const $2FAEnablePage: React.FunctionComponent = (props) => {
     const {session, setSession} = useContext(SessionContext)
     const {sessionFlag, setSessionFlag} = useContext(SessionFlagContext)
     const {mobile, setMobile} = useContext(MobileContext)
+    const {disable2FADialog, setDisable2FADialog} = useContext(Disable2FADialogContext)
+    const {disable2FAFlag, setDisable2FAFlag} = useContext(Disable2FAFlagContext)
     const [qr, setQR] = useState(null) as any
     const [showValidation, setShowValidation] = useState(false)
     const [token, setToken] = useState("")
@@ -80,6 +84,21 @@ const $2FAEnablePage: React.FunctionComponent = (props) => {
         setSessionFlag(true)
     }
 
+    useEffect(() => {
+        if (disable2FAFlag) {
+            toggle()
+            setDisable2FAFlag(false)
+        }
+    }, [disable2FAFlag, session])
+
+    const changeStatus = async () => {
+        if (session.$2fa) {
+            setDisable2FADialog(true)
+        } else {
+            toggle()
+        }
+    }
+
     const enable2FA = async () => {
         if (!token.trim()) {
             setError(true)
@@ -106,6 +125,7 @@ const $2FAEnablePage: React.FunctionComponent = (props) => {
 
     return (
         <>
+        <Disable2FADialog/>
         <TitleBar/>
         <NavBar/>
         <div className="body">
@@ -116,7 +136,7 @@ const $2FAEnablePage: React.FunctionComponent = (props) => {
                     <span className="f2a-enable-link">2fa provides much stronger security for your account during login, by requiring an additional time-sensitive code.</span>
                     <div className="f2a-enable-row">
                         <span className="f2a-enable-text">Status: </span>
-                        <span className="f2a-enable-text" style={{cursor: "pointer", marginLeft: "10px"}} onClick={toggle}>{session.$2fa ? "Enabled" : "Disabled"}</span>
+                        <span className="f2a-enable-text" style={{cursor: "pointer", marginLeft: "10px"}} onClick={changeStatus}>{session.$2fa ? "Enabled" : "Disabled"}</span>
                     </div>
                     {qr ? <>
                     <div className="f2a-enable-row">

@@ -574,8 +574,10 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
                 }, 200)
             }
             jsx.push(
-                <div className="post-item" style={{margin: "0px", paddingLeft: "60px", paddingRight: "60px", paddingTop: "0px", paddingBottom: "0px"}}>
-                    <div className="post-item-title-clickable" style={{marginTop: "0px", marginBottom: "10px"}} onClick={() => history.push(`/group/${group.slug}`)}>{group.name}</div>
+                // style={{margin: "0px", paddingLeft: "60px", paddingRight: "60px", paddingTop: "0px", paddingBottom: "0px"}}
+                // style={{marginTop: "0px", marginBottom: "10px"}} 
+                <div className="post-item">
+                    <div className="post-item-title-clickable" onClick={() => history.push(`/group/${group.slug}`)}>{group.name}</div>
                     <div className="post-item-container">
                         <Carousel images={images} set={setGroup} noKey={true} marginTop={0}/>
                     </div>
@@ -641,15 +643,15 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
             <div className="content" onMouseEnter={() => setEnableDrag(true)}>
                 <div className="post-container">
                     {historyID || translationID ? getHistoryButtons() : null}
-                    {generateGroupsJSX()}
                     {/*nsfwChecker() &&*/ images.length > 1 ?
                     <div className="carousel-container">
                         <Carousel images={images} set={set} index={order-1}/>
                     </div> : null}
                     {/*nsfwChecker() &&*/ post ? getPostJSX() : null}
-                    {mobile && post && tagCategories ? <MobileInfo post={post} order={order} artists={tagCategories.artists} characters={tagCategories.characters} series={tagCategories.series} tags={tagCategories.tags}/> : null}
+                    {generateGroupsJSX()}
                     {parentPost ? <Parent post={parentPost}/>: null}
                     {thirdPartyPosts.length ? <ThirdParty posts={thirdPartyPosts}/> : null}
+                    {mobile && post && tagCategories ? <MobileInfo post={post} order={order} artists={tagCategories.artists} characters={tagCategories.characters} series={tagCategories.series} tags={tagCategories.tags}/> : null}
                     {session.username && !session.banned && post ? <CutenessMeter post={post}/> : null}
                     {post?.purchaseLink ? <BuyLink link={post.purchaseLink}/> : null}
                     {post?.commentary ? <Commentary text={post.commentary} translated={post.translatedCommentary}/> : null}
