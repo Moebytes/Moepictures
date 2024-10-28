@@ -19,6 +19,7 @@ let id = null as any
 
 interface Props {
     id: number
+    img: string
     model: string
     width?: number
     height?: number
@@ -135,7 +136,7 @@ const GridModel = forwardRef<Ref, Props>((props, componentRef) => {
     })
 
     const loadImage = async () => {
-        const img = await functions.decryptImg(props.model, `${props.model}`)
+        const img = await functions.decryptImg(props.img, `${props.img}`)
         setImage(img)
     }
 

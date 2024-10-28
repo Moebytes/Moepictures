@@ -30,6 +30,18 @@ const ActionBanner: React.FunctionComponent = (props) => {
             setStickyText("Edited Source!")
             document.documentElement.style.setProperty("--actionBannerColor", "#1a62ceCC")
         }
+        if (actionBanner === "logout-sessions") {
+            setStickyText("Logged out other sessions!")
+            document.documentElement.style.setProperty("--actionBannerColor", "#f71b86CC")
+        }
+        if (actionBanner === "blacklist") {
+            setStickyText("Blacklisted IP!")
+            document.documentElement.style.setProperty("--actionBannerColor", "#f71b86CC")
+        }
+        if (actionBanner === "unblacklist") {
+            setStickyText("Unblacklisted IP!")
+            document.documentElement.style.setProperty("--actionBannerColor", "#501aceCC")
+        }
     }, [actionBanner])
 
     if (actionBanner) {

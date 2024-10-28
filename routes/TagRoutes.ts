@@ -513,10 +513,14 @@ const TagRoutes = (app: Express) => {
         try {
             const tag = req.query.tag as string
             const historyID = req.query.historyID as string
+            const username = req.query.username as string
             const offset = req.query.offset as string
             if (!req.session.username) return res.status(403).send("Unauthorized")
             if (historyID) {
                 const result = await sql.history.tagHistoryID(tag, historyID)
+                res.status(200).json(result)
+            } else if (username) {
+                const result = await sql.history.userTagHistory(username)
                 res.status(200).json(result)
             } else {
                 const result = await sql.history.tagHistory(tag, offset)

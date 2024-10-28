@@ -163,4 +163,31 @@ export default class SQLReport {
         const result = await SQLQuery.run(query)
         return result[0]
     }
+
+    /** Insert blacklist */
+    public static insertBlacklist = async (ip: string, reason: string) => {
+        const now = new Date().toISOString()
+        const query: QueryConfig = {
+            text: /*sql*/`INSERT INTO blacklist ("ip", "reason", "blacklistDate") VALUES ($1, $2, $3)`,
+            values: [ip, reason, now]
+        }
+        return SQLQuery.run(query)
+    }
+
+    /** Delete blacklist */
+    public static deleteBlacklist = async (ip: string) => {
+        const query: QueryConfig = {
+            text: /*sql*/`DELETE FROM blacklist WHERE blacklist."ip" = $1`,
+            values: [ip]
+        }
+        return SQLQuery.run(query)
+    }
+
+    /** Get blacklist */
+    public static blacklist = async () => {
+        const query: QueryConfig = {
+            text: /*sql*/`SELECT * FROM blacklist`
+        }
+        return SQLQuery.run(query)
+    }
 }

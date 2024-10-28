@@ -2517,4 +2517,53 @@ export default class Functions {
     public static generateSlug = (name: string) => {
         return String(name).trim().toLowerCase().replace(/\s+/g, "-")
     }
+
+    public static parseUserAgent = (userAgent?: string) => {
+        console.log(userAgent)
+        if (!userAgent) return "unknown"
+        let os = "unknown"
+        let browser = "unknown"
+    
+        const osPatterns = {
+            "Windows": /Windows NT (\d+\.\d+)/,
+            "macOS": /Macintosh; Intel Mac OS X (\d+[_\.]\d+)/,
+            "Linux": /Linux/,
+            "iPhone": /iPhone OS (\d+[_\.]\d+)/,
+            "iPad": /iPad; CPU OS (\d+[_\.]\d+)/,
+            "Android": /Android (\d+\.\d+)/
+        }
+    
+        const browserPatterns = {
+            "Chrome": /Chrome\/(\d+\.\d+)/,
+            "Firefox": /Firefox\/(\d+\.\d+)/,
+            "Safari": /Version\/(\d+\.\d+).*Safari\//,
+            "Internet Explorer": /MSIE (\d+\.\d+)/,
+            "Edge": /Edg\/(\d+\.\d+)/,
+            "Opera": /Opera\/(\d+\.\d+)|OPR\/(\d+\.\d+)/,
+            "Brave": /Brave\/(\d+\.\d+)/,
+            "Vivaldi": /Vivaldi\/(\d+\.\d+)/
+        }
+    
+        for (const [key, pattern] of Object.entries(osPatterns)) {
+            const match = userAgent.match(pattern)
+            if (match) {
+                os = key
+                break
+            }
+        }
+    
+        for (const [key, pattern] of Object.entries(browserPatterns)) {
+            const match = userAgent.match(pattern)
+            if (match) {
+                browser = key
+                break
+            }
+        }
+      
+        if (os === "unknown" && browser === "unknown") {
+          return userAgent
+        }
+
+        return `${os} ${browser}`
+    }
 }

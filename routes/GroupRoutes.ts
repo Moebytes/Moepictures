@@ -18,7 +18,7 @@ const groupLimiter = rateLimit({
 const GroupRoutes = (app: Express) => {
     app.post("/api/group", csrfProtection, groupLimiter, async (req: Request, res: Response) => {
         try {
-            const {postID, name, username} = req.body
+            let {postID, name, username, date} = req.body
             if (Number.isNaN(Number(postID))) return res.status(400).send("Invalid postID")
             if (!name) return res.status(400).send("Invalid name")
             if (!req.session.username) return res.status(403).send("Unauthorized")
@@ -50,14 +50,16 @@ const GroupRoutes = (app: Express) => {
                 const groupHistory = await sql.history.groupHistory(group.groupID)
                 const updated = await sql.group.group(slug)
                 let posts = updated.posts.map((post: any) => ({postID: post.postID, order: post.order}))
+                if (!date) date = new Date().toISOString()
                 if (!groupHistory.length) {
                     let vanilla = group
                     vanilla.user = vanilla.creator
+                    vanilla.date = vanilla.createDate
                     let vanillaPosts = vanilla.posts.map((post: any) => ({postID: post.postID, order: post.order}))
-                    await sql.history.insertGroupHistory(vanilla.user, vanilla.groupID, vanilla.slug, vanilla.name, vanilla.restrict, vanilla.description, JSON.stringify(vanillaPosts))
-                    await sql.history.insertGroupHistory(targetUser, updated.groupID, updated.slug, updated.name, updated.restrict, updated.description, JSON.stringify(posts))
+                    await sql.history.insertGroupHistory(vanilla.user, vanilla.groupID, vanilla.slug, vanilla.name, vanilla.date, vanilla.restrict, vanilla.description, JSON.stringify(vanillaPosts))
+                    await sql.history.insertGroupHistory(targetUser, updated.groupID, updated.slug, updated.name, date, updated.restrict, updated.description, JSON.stringify(posts))
                 } else {
-                    await sql.history.insertGroupHistory(targetUser, updated.groupID, updated.slug, updated.name, updated.restrict, updated.description, JSON.stringify(posts))
+                    await sql.history.insertGroupHistory(targetUser, updated.groupID, updated.slug, updated.name, date, updated.restrict, updated.description, JSON.stringify(posts))
                 }
             }
             res.status(200).send("Success")
@@ -69,7 +71,7 @@ const GroupRoutes = (app: Express) => {
 
     app.put("/api/group/edit", csrfProtection, groupLimiter, async (req: Request, res: Response) => {
         try {
-            const {slug, name, description, username, reason} = req.body
+            let {slug, name, description, username, date, reason} = req.body
             if (!name) return res.status(400).send("Invalid name")
             if (!req.session.username) return res.status(403).send("Unauthorized")
             if (req.session.banned) return res.status(403).send("You are banned")
@@ -85,13 +87,15 @@ const GroupRoutes = (app: Express) => {
 
             const groupHistory = await sql.history.groupHistory(group.groupID)
             let posts = group.posts.map((post: any) => ({postID: post.postID, order: post.order}))
+            if (!date) date = new Date().toISOString()
             if (!groupHistory.length) {
                 let vanilla = group
                 vanilla.user = vanilla.creator
-                await sql.history.insertGroupHistory(vanilla.user, vanilla.groupID, vanilla.slug, vanilla.name, vanilla.restrict, vanilla.description, JSON.stringify(posts))
-                await sql.history.insertGroupHistory(targetUser, group.groupID, newSlug, name, group.restrict, description, JSON.stringify(posts), reason)
+                vanilla.date = vanilla.createDate
+                await sql.history.insertGroupHistory(vanilla.user, vanilla.groupID, vanilla.slug, vanilla.name, vanilla.date, vanilla.restrict, vanilla.description, JSON.stringify(posts))
+                await sql.history.insertGroupHistory(targetUser, group.groupID, newSlug, name, date, group.restrict, description, JSON.stringify(posts), reason)
             } else {
-                await sql.history.insertGroupHistory(targetUser, group.groupID, newSlug, name, group.restrict, description, JSON.stringify(posts), reason)
+                await sql.history.insertGroupHistory(targetUser, group.groupID, newSlug, name, date, group.restrict, description, JSON.stringify(posts), reason)
             }
             res.status(200).send("Success")
         } catch (e) {
@@ -154,9 +158,7 @@ const GroupRoutes = (app: Express) => {
 
     app.delete("/api/group/post/delete", csrfProtection, groupLimiter, async (req: Request, res: Response) => {
         try {
-            const postID = req.query.postID as string
-            const name = req.query.name as string
-            const username = req.query.username as string
+            let {postID, name, username, date} = req.query as any
             if (Number.isNaN(Number(postID))) return res.status(400).send("Invalid postID")
             if (!name) return res.status(400).send("Invalid name")
             if (!req.session.username) return res.status(403).send("Unauthorized")
@@ -184,14 +186,16 @@ const GroupRoutes = (app: Express) => {
                 const groupHistory = await sql.history.groupHistory(group.groupID)
                 const updated = await sql.group.group(slug)
                 let posts = updated.posts.map((post: any) => ({postID: post.postID, order: post.order}))
+                if (!date) date = new Date().toISOString()
                 if (!groupHistory.length) {
                     let vanilla = group
                     vanilla.user = vanilla.creator
+                    vanilla.date = vanilla.createDate
                     let vanillaPosts = vanilla.posts.map((post: any) => ({postID: post.postID, order: post.order}))
-                    await sql.history.insertGroupHistory(vanilla.user, vanilla.groupID, vanilla.slug, vanilla.name, vanilla.restrict, vanilla.description, JSON.stringify(vanillaPosts))
-                    await sql.history.insertGroupHistory(targetUser, updated.groupID, updated.slug, updated.name, updated.restrict, updated.description, JSON.stringify(posts))
+                    await sql.history.insertGroupHistory(vanilla.user, vanilla.groupID, vanilla.slug, vanilla.name, vanilla.date, vanilla.restrict, vanilla.description, JSON.stringify(vanillaPosts))
+                    await sql.history.insertGroupHistory(targetUser, updated.groupID, updated.slug, updated.name, date, updated.restrict, updated.description, JSON.stringify(posts))
                 } else {
-                    await sql.history.insertGroupHistory(targetUser, updated.groupID, updated.slug, updated.name, updated.restrict, updated.description, JSON.stringify(posts))
+                    await sql.history.insertGroupHistory(targetUser, updated.groupID, updated.slug, updated.name, date, updated.restrict, updated.description, JSON.stringify(posts))
                 }
             }
             res.status(200).send("Success")
@@ -229,14 +233,16 @@ const GroupRoutes = (app: Express) => {
 
             const groupHistory = await sql.history.groupHistory(group.groupID)
             const updated = await sql.group.group(slug)
+            const date = new Date().toISOString()
             if (!groupHistory.length) {
                 let vanilla = group
                 vanilla.user = vanilla.creator
+                vanilla.date = vanilla.createDate
                 let vanillaPosts = vanilla.posts.map((post: any) => ({postID: post.postID, order: post.order}))
-                await sql.history.insertGroupHistory(vanilla.user, vanilla.groupID, vanilla.slug, vanilla.name, vanilla.restrict, vanilla.description, JSON.stringify(vanillaPosts))
-                await sql.history.insertGroupHistory(req.session.username, updated.groupID, updated.slug, updated.name, updated.restrict, updated.description, JSON.stringify(posts))
+                await sql.history.insertGroupHistory(vanilla.user, vanilla.groupID, vanilla.slug, vanilla.name, vanilla.createDate, vanilla.restrict, vanilla.description, JSON.stringify(vanillaPosts))
+                await sql.history.insertGroupHistory(req.session.username, updated.groupID, updated.slug, updated.name, date, updated.restrict, updated.description, JSON.stringify(posts))
             } else {
-                await sql.history.insertGroupHistory(req.session.username, updated.groupID, updated.slug, updated.name, updated.restrict, updated.description, JSON.stringify(posts))
+                await sql.history.insertGroupHistory(req.session.username, updated.groupID, updated.slug, updated.name, date, updated.restrict, updated.description, JSON.stringify(posts))
             }
             res.status(200).send("Success")
         } catch (e) {
@@ -440,6 +446,7 @@ const GroupRoutes = (app: Express) => {
         try {
             const slug = req.query.slug as string
             const historyID = req.query.historyID as string
+            const username = req.query.username as string
             const offset = req.query.offset as string
             if (!req.session.username) return res.status(403).send("Unauthorized")
             if (slug) {
@@ -447,6 +454,9 @@ const GroupRoutes = (app: Express) => {
                 if (!group) return res.status(400).send("Bad group")
                 if (historyID) {
                     const result = await sql.history.groupHistoryID(group.groupID, historyID)
+                    res.status(200).json(result)
+                } else if (username) {
+                    const result = await sql.history.userGroupHistory(username)
                     res.status(200).json(result)
                 } else {
                     const result = await sql.history.groupHistory(group.groupID, offset)

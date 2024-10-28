@@ -54,6 +54,8 @@ import GroupsPage from "./pages/GroupsPage"
 import BulkUploadPage from "./pages/BulkUploadPage"
 import MailPage from "./pages/MailPage"
 import MessagePage from "./pages/MessagePage"
+import LoginHistoryPage from "./pages/LoginHistoryPage"
+import IPBlacklistPage from "./pages/IPBlacklistPage"
 import PremiumPage from "./pages/PremiumPage"
 import PremiumRequiredDialog from "./dialogs/PremiumRequiredDialog"
 import PremiumSuccessPage from "./pages/PremiumSuccessPage"
@@ -277,6 +279,7 @@ const App: React.FunctionComponent = (props) => {
                 setTablet(false)
             }
         }
+        resize()
         window.addEventListener("resize", resize)
         document.documentElement.style.visibility = "visible"
         return () => {
@@ -326,12 +329,16 @@ const App: React.FunctionComponent = (props) => {
                         <Route exact path="/premium"><PremiumPage/></Route>
                         <Route exact path="/user/:username" render={(props) => <UserPage {...props}/>}></Route>
                         <Route exact path="/tag/history/:tag" render={(props) => <TagHistoryPage {...props}/>}></Route>
+                        <Route exact path="/user/:username/tag/history" render={(props) => <TagHistoryPage {...props}/>}></Route>
                         <Route exact path="/tag/:tag" render={(props) => <TagPage {...props}/>}></Route>
                         <Route exact path="/group/:group" render={(props) => <GroupPage {...props}/>}></Route>
                         <Route exact path="/group/history/:group" render={(props) => <GroupHistoryPage {...props}/>}></Route>
+                        <Route exact path="/user/:username/group/history" render={(props) => <GroupHistoryPage {...props}/>}></Route>
                         <Route exact path="/favgroup/:username/:favgroup" render={(props) => <FavgroupPage {...props}/>}></Route>
                         <Route exact path="/translation/history/:id/:order" render={(props) => <TranslationHistoryPage {...props}/>}></Route>
+                        <Route exact path="/user/:username/translation/history" render={(props) => <TranslationHistoryPage {...props}/>}></Route>
                         <Route exact path="/post/history/:id" render={(props) => <PostHistoryPage {...props}/>}></Route>
+                        <Route exact path="/user/:username/post/history" render={(props) => <PostHistoryPage {...props}/>}></Route>
                         <Route exact path="/post/:id" render={(props) => <PostPage {...props}/>}></Route>
                         <Route exact path="/unverified/post/:id" render={(props) => <UnverifiedPostPage {...props}/>}></Route>
                         <Route exact path="/edit-post/:id" render={(props) => <EditPostPage {...props}/>}></Route>
@@ -355,11 +362,13 @@ const App: React.FunctionComponent = (props) => {
                         <Route exact path="/login"><LoginPage/></Route>
                         <Route exact path="/2fa"><$2FAPage/></Route>
                         <Route exact path="/enable-2fa"><$2FAEnablePage/></Route>
+                        <Route exact path="/login-history"><LoginHistoryPage/></Route>
                         <Route exact path="/contact"><ContactPage/></Route>
                         <Route exact path="/copyright-removal"><CopyrightRemovalPage/></Route>
                         <Route exact path="/mod-queue"><ModQueuePage/></Route>
                         <Route exact path={["/privacy", "/privacypolicy"]}><Redirect to="/terms#privacy"/></Route>
                         <Route exact path={["/terms", "termsofservice"]}><TermsPage/></Route>
+                        <Route exact path="/ip-blacklist"><IPBlacklistPage/></Route>
                         <Route exact path="/401"><$401Page/></Route>
                         <Route exact path="/403"><$403Page/></Route>
                         <Route path="*"><$404Page/></Route>

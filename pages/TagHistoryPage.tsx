@@ -41,6 +41,7 @@ const TagHistoryPage: React.FunctionComponent<Props> = (props) => {
     const [offset, setOffset] = useState(0)
     const [ended, setEnded] = useState(false)
     const tag = props.match?.params.tag
+    const username = props.match?.params.username
     const history = useHistory()
 
     useEffect(() => {
@@ -57,7 +58,7 @@ const TagHistoryPage: React.FunctionComponent<Props> = (props) => {
         if (props.all) {
             result = await functions.get("/api/tag/history", null, session, setSessionFlag)
         } else {
-            result = await functions.get("/api/tag/history", {tag}, session, setSessionFlag)
+            result = await functions.get("/api/tag/history", {tag, username}, session, setSessionFlag)
             if (!result.length) {
                 const tagObject = await functions.get("/api/tag", {tag}, session, setSessionFlag)
                 if (!tagObject.createDate && !tagObject.creator) {
@@ -122,7 +123,7 @@ const TagHistoryPage: React.FunctionComponent<Props> = (props) => {
     const updateOffset = async () => {
         if (ended) return
         const newOffset = offset + 100
-        const result = await functions.get("/api/tag/history", {tag, offset: newOffset}, session, setSessionFlag)
+        const result = await functions.get("/api/tag/history", {tag, username, offset: newOffset}, session, setSessionFlag)
         if (result?.length) {
             setOffset(newOffset)
             setRevisions((prev: any) => [...prev, ...result])

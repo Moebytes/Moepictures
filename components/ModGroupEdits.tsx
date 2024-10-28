@@ -64,8 +64,8 @@ const ModGroupEdits: React.FunctionComponent = (props) => {
         }
     }, [requests, index, updateVisibleRequestFlag])
 
-    const editGroup = async (username: string, slug: string, name: string, description: string, reason: string) => {
-        await functions.put("/api/group/edit", {username, slug, name, description, reason}, session, setSessionFlag)
+    const editGroup = async (username: string, slug: string, name: string, description: string, date: string, reason: string) => {
+        await functions.put("/api/group/edit", {username, date, slug, name, description, reason}, session, setSessionFlag)
         await functions.post("/api/group/edit/request/fulfill", {username, slug, accepted: true}, session, setSessionFlag)
         await updateGroups()
         setUpdateVisibleRequestFlag(true)
@@ -190,7 +190,7 @@ const ModGroupEdits: React.FunctionComponent = (props) => {
                             <img className="mod-post-options-img" src={reject} style={{filter: getFilter()}}/>
                             <span className="mod-post-options-text">Reject</span>
                         </div>
-                        <div className="mod-post-options-container" onClick={() => editGroup(request.username, request.group, request.name, request.description, request.reason)}>
+                        <div className="mod-post-options-container" onClick={() => editGroup(request.username, request.group, request.name, request.description, request.date, request.reason)}>
                             <img className="mod-post-options-img" src={approve} style={{filter: getFilter()}}/>
                             <span className="mod-post-options-text">Approve</span>
                         </div>

@@ -832,11 +832,16 @@ const PostRoutes = (app: Express) => {
         try {
             const postID = req.query.postID as string
             const historyID = req.query.historyID as string
+            const username = req.query.username as string
             const offset = req.query.offset as string
             if (!req.session.username) return res.status(403).send("Unauthorized")
             if (historyID) {
                 const result = await sql.history.postHistoryID(postID, historyID)
                 if (req.session.captchaNeeded) delete result.tags
+                res.status(200).json(result)
+            } else if (username) {
+                let result = await sql.history.userPostHistory(username)
+                if (req.session.captchaNeeded) result = functions.stripTags(result)
                 res.status(200).json(result)
             } else {
                 let result = await sql.history.postHistory(postID, offset)

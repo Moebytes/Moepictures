@@ -5,7 +5,6 @@ import sql from "../sql/SQLQuery"
 import functions from "../structures/Functions"
 import serverFunctions, {csrfProtection, keyGenerator, handler} from "../structures/ServerFunctions"
 import {generateSecret, verifyToken} from "node-2fa"
-import axios from "axios"
 
 const $2faLimiter = rateLimit({
 	windowMs: 60 * 1000,
@@ -25,15 +24,17 @@ const $2FARoutes = (app: Express) => {
             const enabled = !Boolean(user.$2fa)
             if (enabled) {
                 await sql.token.delete2faToken(req.session.username)
-                const token = generateSecret({name: "Moepictures", account: functions.toProperCase(req.session.username)})
+                const token = await generateSecret({name: "Moepictures", account: functions.toProperCase(req.session.username)})
                 await sql.token.insert2faToken(req.session.username, token.secret, token.qr)
-                const arrayBuffer = await axios.get(token.qr, {responseType: "arraybuffer"}).then((r) => r.data)
-                const base64 = functions.arrayBufferToBase64(arrayBuffer)
-                res.status(200).json(base64)
+                res.status(200).json(token.qr)
             } else {
                 await sql.user.updateUser(req.session.username, "$2fa", false)
                 req.session.$2fa = false
                 await sql.token.delete2faToken(req.session.username)
+                let ip = req.headers["x-forwarded-for"] || req.socket.remoteAddress
+                ip = ip?.toString().replace("::ffff:", "") || ""
+                const device = functions.parseUserAgent(req.headers["user-agent"])
+                await sql.user.insertLoginHistory(user.username, "2fa disabled", ip, device)
                 res.status(200).send("Success")
             }
         } catch (e) {
@@ -47,9 +48,7 @@ const $2FARoutes = (app: Express) => {
             if (!req.session.username) return res.status(403).send("Unauthorized")
             const $2FAToken = await sql.token.$2faToken(req.session.username)
             if (!$2FAToken) return res.status(400).send("User doesn't have 2FA token")
-            const arrayBuffer = await axios.get($2FAToken.qrcode, {responseType: "arraybuffer"}).then((r) => r.data)
-            const base64 = functions.arrayBufferToBase64(arrayBuffer)
-            res.status(200).json(base64)
+            res.status(200).json($2FAToken.qrcode)
         } catch (e) {
             console.log(e)
             res.status(400).send("Bad request")
@@ -58,7 +57,7 @@ const $2FARoutes = (app: Express) => {
 
     app.post("/api/2fa/enable", csrfProtection, $2faLimiter, async (req: Request, res: Response) => {
         try {
-            let {token} = req.body 
+            let {token} = req.body
             if (!req.session.username) return res.status(403).send("Unauthorized")
             if (!token) return res.status(400).send("Bad token")
             token = token.trim()
@@ -70,6 +69,10 @@ const $2FARoutes = (app: Express) => {
             if (validToken) {
                 await sql.user.updateUser(req.session.username, "$2fa", true)
                 req.session.$2fa = true
+                let ip = req.headers["x-forwarded-for"] || req.socket.remoteAddress
+                ip = ip?.toString().replace("::ffff:", "") || ""
+                const device = functions.parseUserAgent(req.headers["user-agent"])
+                await sql.user.insertLoginHistory(user.username, "2fa enabled", ip, device)
                 res.status(200).send("Success")
             } else {
                 res.status(400).send("Bad token")
@@ -88,6 +91,9 @@ const $2FARoutes = (app: Express) => {
             token = token.trim()
             const user = await sql.user.userByEmail(req.session.email)
             if (!user) return res.status(400).send("Bad email")
+            let ip = req.headers["x-forwarded-for"] || req.socket.remoteAddress
+            ip = ip?.toString().replace("::ffff:", "") || ""
+            const device = functions.parseUserAgent(req.headers["user-agent"])
             const $2FAToken = await sql.token.$2faToken(user.username)
             const validToken = verifyToken($2FAToken.token, token, 60)
             if (validToken) {
@@ -102,7 +108,6 @@ const $2FARoutes = (app: Express) => {
                 req.session.image = user.image
                 req.session.role = user.role
                 req.session.banned = user.banned
-                const ip = req.headers["x-forwarded-for"] || req.socket.remoteAddress
                 await sql.user.updateUser(user.username, "ip", ip as string)
                 req.session.ip = ip as string
                 const {secret, token} = serverFunctions.generateCSRF()
@@ -118,10 +123,10 @@ const $2FARoutes = (app: Express) => {
                 req.session.showR18 = user.showR18
                 req.session.premiumExpiration = user.premiumExpiration
                 req.session.banExpiration = user.banExpiration
-                //req.session.accessToken = serverFunctions.generateAccessToken(req)
-                //req.session.refreshToken = serverFunctions.generateRefreshToken(req)
+                await sql.user.insertLoginHistory(user.username, "login", ip, device)
                 res.status(200).send("Success")
             } else {
+                await sql.user.insertLoginHistory(user.username, "login 2fa failed", ip, device)
                 res.status(400).send("Bad token")
             }
         } catch (e) {

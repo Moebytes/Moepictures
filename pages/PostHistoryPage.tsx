@@ -15,6 +15,7 @@ import "./styles/historypage.less"
 interface Props {
     match?: any
     all?: boolean
+    user?: boolean
 }
 
 const PostHistoryPage: React.FunctionComponent<Props> = (props) => {
@@ -37,13 +38,14 @@ const PostHistoryPage: React.FunctionComponent<Props> = (props) => {
     const [offset, setOffset] = useState(0)
     const [ended, setEnded] = useState(false)
     const postID = props.match?.params.id
+    const username = props.match?.params.username
 
     const updateHistory = async () => {
         let result = [] as any
         if (props.all) {
             result = await functions.get("/api/post/history", null, session, setSessionFlag)
         } else {
-            result = await functions.get("/api/post/history", {postID}, session, setSessionFlag)
+            result = await functions.get("/api/post/history", {postID, username}, session, setSessionFlag)
             if (!result.length) {
                 const postObject = await functions.get("/api/post", {postID}, session, setSessionFlag)
                 postObject.date = postObject.uploadDate 
@@ -105,7 +107,7 @@ const PostHistoryPage: React.FunctionComponent<Props> = (props) => {
     const updateOffset = async () => {
         if (ended) return
         const newOffset = offset + 100
-        const result = await functions.get("/api/post/history", {postID, offset: newOffset}, session, setSessionFlag)
+        const result = await functions.get("/api/post/history", {postID, username, offset: newOffset}, session, setSessionFlag)
         if (result?.length) {
             setOffset(newOffset)
             setRevisions((prev: any) => [...prev, ...result])

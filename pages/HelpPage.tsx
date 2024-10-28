@@ -85,6 +85,10 @@ const HelpPage: React.FunctionComponent = (props) => {
         window.open(url, "_blank", "noreferrer")
     }
 
+    const getBookmarklet = () => {
+        return `javascript:location.href="${functions.getDomain()}/upload?link="+encodeURIComponent(location.href)`
+    }
+
     const getContainerJSX = () => {
         if (helpTab === "help") {
             return (
@@ -439,6 +443,30 @@ const HelpPage: React.FunctionComponent = (props) => {
                 <div className="help-img-container"><img className="help-img" src={pixivDownloaderImg}/></div></>
             )
         }
+        if (helpTab === "bookmarklet") {
+            return (
+                <><span className="help-heading">Bookmarklet</span>
+                <span className="help-text" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
+                    Drag and drop our bookmarklet into your browser's bookmark bar to quickly upload to Moepictures from a supported site. <br/><br/>
+
+                    <a className="help-link" href={getBookmarklet()}>Upload to Moepictures</a><br/><br/>
+
+                    It supports the same sites as using "Enter Links" does, which are the following:<br/>
+                    <a className="help-link" onClick={() => openLink("https://www.pixiv.net/")}>Pixiv</a><br/>
+                    <a className="help-link" onClick={() => openLink("https://www.deviantart.com/")}>Deviantart</a><br/>
+                    <a className="help-link" onClick={() => openLink("https://www.reddit.com/")}>Reddit</a><br/>
+                    <a className="help-link" onClick={() => openLink("https://www.pinterest.com/")}>Pinterest</a><br/>
+                    <a className="help-link" onClick={() => openLink("https://medibang.com/")}>ARTStreet</a><br/>
+                    <a className="help-link" onClick={() => openLink("https://danbooru.donmai.us/")}>Danbooru</a><br/>
+                    <a className="help-link" onClick={() => openLink("https://gelbooru.com/")}>Gelbooru</a><br/>
+                    <a className="help-link" onClick={() => openLink("https://yande.re/")}>Yandere</a><br/>
+                    <a className="help-link" onClick={() => openLink("https://konachan.com/")}>Konachan</a><br/>
+                    <a className="help-link" onClick={() => openLink("https://www.zerochan.net/")}>Zerochan</a><br/>
+                    <a className="help-link" onClick={() => openLink("https://e-shuushuu.net/")}>E-Shuushuu</a><br/>
+                </span>
+                <div className="help-img-container"><img className="help-img" src={""}/></div></>
+            )
+        }
         if (helpTab === "variations") {
             return (
                 <><span className="help-heading">Variations</span>
@@ -668,6 +696,7 @@ const HelpPage: React.FunctionComponent = (props) => {
                         <span className="help-nav-text" onClick={() => setHelpTab("upscaling")}>Upscaling</span>
                         <span className="help-nav-text" onClick={() => setHelpTab("compressing")}>Compressing</span>
                         <span className="help-nav-text" onClick={() => setHelpTab("pixiv-downloads")}>Pixiv Downloads</span>
+                        <span className="help-nav-text" onClick={() => setHelpTab("bookmarklet")}>Bookmarklet</span>
                         <span className="help-nav-text" onClick={() => setHelpTab("variations")}>Variations</span>
                         <span className="help-nav-text" onClick={() => setHelpTab("third-party-edits")}>Third Party Edits</span>
                         <span className="help-nav-text" onClick={() => setHelpTab("groups")}>Groups</span>

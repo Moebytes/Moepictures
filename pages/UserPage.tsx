@@ -77,6 +77,7 @@ const UserPage: React.FunctionComponent<Props> = (props) => {
     const [user, setUser] = useState(null) as any
     const [defaultIcon, setDefaultIcon] = useState(false)
     const {posts, setPosts} = useContext(PostsContext)
+    const [counts, setCounts] = useState(null as any)
     const history = useHistory()
     const username = props?.match.params.username
 
@@ -150,6 +151,11 @@ const UserPage: React.FunctionComponent<Props> = (props) => {
         setComments(filtered)
     }
 
+    const updateCounts = async () => {
+        const counts = await functions.get("/api/user/edit/counts", {username}, session, setSessionFlag)
+        setCounts(counts)
+    }
+
     useEffect(() => {
         setHideNavbar(false)
         setHideTitlebar(false)
@@ -166,6 +172,7 @@ const UserPage: React.FunctionComponent<Props> = (props) => {
         updateFavorites()
         updateFavgroups()
         updateComments()
+        updateCounts()
     }, [username, session])
 
     useEffect(() => {
@@ -408,6 +415,20 @@ const UserPage: React.FunctionComponent<Props> = (props) => {
                     <div className="user-row">
                         <span className="user-text">Join Date: {functions.prettyDate(new Date(user.joinDate || ""))}</span>
                     </div>
+                    {counts ? <>
+                    {counts.postEdits > 0 ? <div className="user-row">
+                        <span className="user-title" onClick={() => history.push(`/user/${username}/post/history`)}>Post Edits <span className="user-text-alt">{counts.postEdits}</span></span>
+                    </div>  : null}
+                    {counts.tagEdits > 0 ? <div className="user-row">
+                        <span className="user-title" onClick={() => history.push(`/user/${username}/tag/history`)}>Tag Edits <span className="user-text-alt">{counts.tagEdits}</span></span>
+                    </div> : null}
+                    {counts.translationEdits > 0 ? <div className="user-row">
+                        <span className="user-title" onClick={() => history.push(`/user/${username}/translation/history`)}>Translation Edits <span className="user-text-alt">{counts.translationEdits}</span></span>
+                    </div> : null}
+                    {counts.groupEdits > 0 ? <div className="user-row">
+                        <span className="user-title" onClick={() => history.push(`/user/${username}/group/history`)}>Group Edits <span className="user-text-alt">{counts.groupEdits}</span></span>
+                    </div> : null}
+                    </> : null}
                     {generateFavgroupsJSX()}
                     {generateFavoritesJSX()}
                     {uploads.length ?

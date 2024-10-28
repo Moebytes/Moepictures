@@ -37,7 +37,6 @@ import TranslationRoutes from "./routes/TranslationRoutes"
 import ThreadRoutes from "./routes/ThreadRoutes"
 import MessageRoutes from "./routes/MessageRoutes"
 import GroupRoutes from "./routes/GroupRoutes"
-import ipBans from "./assets/json/ip-bans.json"
 import {imageLock, imageMissing} from "./structures/ImageLock"
 const __dirname = path.resolve()
 
@@ -106,12 +105,13 @@ const pgSession = PGSession(session)
 app.use(session({
   store: new pgSession({
     pool: pgPool,
+    tableName: "sessions",
     sidColumnName: "sessionID",
     sessColumnName: "session",
     expireColumnName: "expires"
   }),
   secret: process.env.COOKIE_SECRET!,
-  cookie: {maxAge: 1000 * 60 * 60 * 24 * 30, sameSite: "strict", secure: "auto"},
+  cookie: {maxAge: 1000 * 60 * 60 * 24 * 30, sameSite: "lax", secure: "auto"},
   rolling: true,
   resave: false,
   saveUninitialized: false
@@ -132,24 +132,6 @@ ThreadRoutes(app)
 MessageRoutes(app)
 GroupRoutes(app)
 
-if (process.env.TESTING === "yes") {
-  app.use(middleware(compiler, {
-    index: false,
-    serverSideRender: false,
-    writeToDisk: false,
-  }))
-  app.use(hot(compiler))
-}
-
-app.use(express.static(path.join(__dirname, "./public")))
-app.use(express.static(path.join(__dirname, "./dist"), {index: false}))
-app.use("/assets", express.static(path.join(__dirname, "./assets")))
-
-app.use((req: Request, res: Response, next: NextFunction) => {
-  if (ipBans.banndIPs.includes(req.ip)) return res.status(403).send("This IP address has been blocked.")
-  next()
-})
-
 const imageLimiter = rateLimit({
 	windowMs: 60 * 1000,
 	max: 1500,
@@ -166,6 +148,58 @@ const tokenLimiter = rateLimit({
 	legacyHeaders: false,
     keyGenerator,
     handler
+})
+
+if (process.env.TESTING === "yes") {
+  app.use(middleware(compiler, {
+    index: false,
+    serverSideRender: false,
+    writeToDisk: false,
+  }))
+  app.use(hot(compiler))
+}
+
+app.use(express.static(path.join(__dirname, "./public")))
+app.use(express.static(path.join(__dirname, "./dist"), {index: false}))
+app.use("/assets", express.static(path.join(__dirname, "./assets")))
+
+let blacklist = null as unknown as Set<string>
+
+app.use(async (req: Request, res: Response, next: NextFunction) => {
+  if (!blacklist) {
+    const blacklistObj = await sql.report.blacklist()
+    const blacklistSet = new Set<string>()
+    for (const entry of blacklistObj) {
+      blacklistSet.add(entry.ip?.trim())
+    }
+    blacklist = blacklistSet
+  }
+  let ip = req.headers["x-forwarded-for"] || req.socket.remoteAddress
+  ip = ip?.toString().replace("::ffff:", "") || ""
+  if (blacklist.has(ip)) {
+    return res.status(403).json({message: "Your IP address has been blocked."})
+  }
+  next()
+})
+
+app.post("/api/misc/blacklistip", imageLimiter, async (req: Request, res: Response, next: NextFunction) => {
+  const {ip, reason} = req.body
+  if (!req.session.username) return res.status(403).send("Unauthorized")
+  if (!permissions.isAdmin(req.session)) return res.status(403).end()
+  if (!ip) return res.status(400).send("Bad ip")
+  await sql.report.insertBlacklist(ip, reason)
+  blacklist = null as any
+  res.status(200).send("Success")
+})
+
+app.delete("/api/misc/unblacklistip", imageLimiter, async (req: Request, res: Response, next: NextFunction) => {
+  const {ip} = req.query as any
+  if (!req.session.username) return res.status(403).send("Unauthorized")
+  if (!permissions.isAdmin(req.session)) return res.status(403).end()
+  if (!ip) return res.status(400).send("Bad ip")
+  await sql.report.deleteBlacklist(ip)
+  blacklist = null as any
+  res.status(200).send("Success")
 })
 
 let folders = ["animation", "artist", "character", "comic", "image", "pfp", "series", "tag", "video", "audio", "model", "history"]

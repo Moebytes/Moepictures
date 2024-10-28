@@ -165,7 +165,8 @@ export default class SQLHistory {
     public static userPostHistory = async (username: string) => {
         const query: QueryConfig = {
         text: functions.multiTrim(/*sql*/`
-                SELECT "post history".*
+                SELECT "post history".*,
+                COUNT(*) OVER() AS "historyCount"
                 FROM "post history"
                 WHERE "post history"."user" = $1
                 GROUP BY "post history"."historyID"
@@ -292,12 +293,11 @@ export default class SQLHistory {
     }
 
     /** Insert group history */
-    public static insertGroupHistory = async (username: string, groupID: string, slug: string, name: string, restrict: string, 
+    public static insertGroupHistory = async (username: string, groupID: string, slug: string, name: string, date: string, restrict: string, 
         description: string, posts: any, reason?: string) => {
-        const now = new Date().toISOString()
         const query: QueryConfig = {
             text: /*sql*/`INSERT INTO "group history" ("groupID", "user", "date", "slug", "name", "restrict", "description", "posts", "reason") VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)`,
-            values: [groupID, username, now, slug, name, restrict, description, posts, reason]
+            values: [groupID, username, date, slug, name, restrict, description, posts, reason]
         }
         await SQLQuery.flushDB()
         const result = await SQLQuery.run(query)

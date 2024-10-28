@@ -236,8 +236,11 @@ const GroupHistoryRow: React.FunctionComponent<Props> = (props) => {
                 {functions.isVideo(img) ? <video className="historyrow-img" autoPlay muted loop disablePictureInPicture src={img} onClick={imgClick} onAuxClick={imgClick} onContextMenu={updateImg}></video> :
                 functions.isGIF(img) ? <img className="historyrow-img" src={img} onClick={imgClick} onAuxClick={imgClick} onContextMenu={updateImg}/> : 
                 <canvas className="historyrow-img" ref={ref} onClick={imgClick} onAuxClick={imgClick} onContextMenu={updateImg}></canvas>}
-                <span className="historyrow-tag-text" style={{width: "max-content"}} onClick={imgClick} onAuxClick={imgClick}>{props.groupHistory.name}</span>
+                {!mobile ? <span className="historyrow-tag-text" style={{width: "max-content"}} onClick={imgClick} onAuxClick={imgClick}>{props.groupHistory.name}</span> : null}
             </div>
+            {mobile ? <div className="historyrow-container">
+                <span className="historyrow-tag-text" style={{width: "max-content"}} onClick={imgClick} onAuxClick={imgClick}>{props.groupHistory.name}</span>
+            </div> : null}
             <div className="historyrow-container-row">
                 <div className="historyrow-container">
                     <div className="historyrow-user-container">

@@ -1,6 +1,7 @@
 import {QueryArrayConfig, QueryConfig} from "pg"
 import SQLQuery from "./SQLQuery"
 import functions from "../structures/Functions"
+import axios from "axios"
 
 export default class SQLUser {
     /** Get uploads. */
@@ -170,8 +171,8 @@ export default class SQLUser {
     /** Delete user. */
     public static deleteUser = async (username: string) => {
         const query: QueryConfig = {
-        text: functions.multiTrim(/*sql*/`DELETE FROM users WHERE users."username" = $1`),
-        values: [username]
+            text: functions.multiTrim(/*sql*/`DELETE FROM users WHERE users."username" = $1`),
+            values: [username]
         }
         const result = await SQLQuery.run(query)
         return result
@@ -184,5 +185,45 @@ export default class SQLUser {
         }
         const result = await SQLQuery.run(query)
         return result
+    }
+
+    /** Insert login history. */
+    public static insertLoginHistory = async (username: string, type: string, ip: string, device: string) => {
+        const ipInfo = await axios.get(`http://ip-api.com/json/${ip}`).then((r) => r.data).catch(() => null)
+        let region = ipInfo?.regionName || "unknown"
+        if (ip === "127.0.0.1" || ip.startsWith("192.168.68")) region = "localhost"
+        const now = new Date().toISOString()
+        const query: QueryConfig = {
+            text: /*sql*/`INSERT INTO "login history" ("username", "type", "ip", "device", "region", "timestamp") VALUES ($1, $2, $3, $4, $5, $6)`,
+            values: [username, type, ip, device, region, now]
+        }
+        return SQLQuery.run(query)
+    }
+
+    /** Get login history. */
+    public static loginHistory = async (username: string) => {
+        const query: QueryConfig = {
+            text: functions.multiTrim(/*sql*/`
+                SELECT "login history".*, 
+                to_json((array_agg(users.*))[1]) AS user
+                FROM "login history"
+                JOIN users ON users.username = "login history"."username"
+                WHERE "login history"."username" = $1
+                GROUP BY "login history"."loginID"
+                ORDER BY "login history"."timestamp" DESC
+            `),
+            values: [username]
+        }
+        const result = await SQLQuery.run(query)
+        return result
+    }
+
+    /** Destroy other sessions. */
+    public static destroyOtherSessions = async (username: string, currentSession: string) => {
+        const query: QueryConfig = {
+            text: /*sql*/`DELETE FROM sessions WHERE session->>'username' = $1 AND "sessionID" != $2`,
+            values: [username, currentSession]
+        }
+        return SQLQuery.run(query)
     }
 }

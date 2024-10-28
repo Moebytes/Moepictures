@@ -41,6 +41,7 @@ const GroupHistoryPage: React.FunctionComponent<Props> = (props) => {
     const [offset, setOffset] = useState(0)
     const [ended, setEnded] = useState(false)
     const slug = props.match?.params.group
+    const username = props.match?.params.username
     const history = useHistory()
 
     useEffect(() => {
@@ -57,7 +58,7 @@ const GroupHistoryPage: React.FunctionComponent<Props> = (props) => {
         if (props.all) {
             result = await functions.get("/api/group/history", null, session, setSessionFlag)
         } else {
-            result = await functions.get("/api/group/history", {slug}, session, setSessionFlag)
+            result = await functions.get("/api/group/history", {slug, username}, session, setSessionFlag)
             if (!result.length) {
                 const groupObject = await functions.get("/api/group", {name: slug}, session, setSessionFlag)
                 groupObject.date = groupObject.createDate
@@ -115,7 +116,7 @@ const GroupHistoryPage: React.FunctionComponent<Props> = (props) => {
     const updateOffset = async () => {
         if (ended) return
         const newOffset = offset + 100
-        const result = await functions.get("/api/group/history", {slug, offset: newOffset}, session, setSessionFlag)
+        const result = await functions.get("/api/group/history", {slug, username, offset: newOffset}, session, setSessionFlag)
         if (result?.length) {
             setOffset(newOffset)
             setRevisions((prev: any) => [...prev, ...result])

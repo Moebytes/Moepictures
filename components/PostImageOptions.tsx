@@ -259,7 +259,7 @@ const PostImageOptions: React.FunctionComponent<Props> = (props) => {
             <div className="post-image-options">
                 <div className="post-image-options-box" onClick={() => props.previous?.()} style={{marginRight: "25px"}} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                     <img className="post-image-icon-small" src={prevIcon} style={{filter: getFilter()}}/>
-                    <div className="post-image-text-small">Prev</div>
+                    {!session.username ? <div className="post-image-text-small">Prev</div> : null}
                 </div>
                 {session.username ?
                 <div className="post-image-options-box" onClick={() => updateFavorite(!favorited)} style={{marginLeft: "-10px"}}
@@ -275,7 +275,7 @@ const PostImageOptions: React.FunctionComponent<Props> = (props) => {
                 </div> : null}
                 <div className="post-image-options-box" onClick={() => props.next?.()} style={{marginLeft: "25px"}} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                     <div className="post-image-text-small">Next</div>
-                    <img className="post-image-icon-small" src={nextIcon} style={{filter: getFilter()}}/>
+                    {!session.username ? <img className="post-image-icon-small" src={nextIcon} style={{filter: getFilter()}}/> : null}
                 </div>
             </div>
             <div className="post-image-options">

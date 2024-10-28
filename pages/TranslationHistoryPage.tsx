@@ -40,6 +40,7 @@ const TranslationHistoryPage: React.FunctionComponent<Props> = (props) => {
     const [ended, setEnded] = useState(false)
     const postID = props.match?.params.id
     const order = props.match?.params.order
+    const username = props.match?.params.username
     const history = useHistory()
 
     useEffect(() => {
@@ -56,7 +57,7 @@ const TranslationHistoryPage: React.FunctionComponent<Props> = (props) => {
         if (props.all) {
             result = await functions.get("/api/translation/history", null, session, setSessionFlag)
         } else {
-            result = await functions.get("/api/translation/history", {postID, order}, session, setSessionFlag)
+            result = await functions.get("/api/translation/history", {postID, order, username}, session, setSessionFlag)
         }
         if (!result.length) {
             const post = await functions.get("/api/post", {postID}, session, setSessionFlag)
@@ -106,7 +107,7 @@ const TranslationHistoryPage: React.FunctionComponent<Props> = (props) => {
     const updateOffset = async () => {
         if (ended) return
         const newOffset = offset + 100
-        const result = await functions.get("/api/translation/history", {postID, order, offset: newOffset}, session, setSessionFlag)
+        const result = await functions.get("/api/translation/history", {postID, order, username, offset: newOffset}, session, setSessionFlag)
         if (result?.length) {
             setOffset(newOffset)
             setRevisions((prev: any) => [...prev, ...result])

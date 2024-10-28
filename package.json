@@ -128,7 +128,7 @@
     "mkvdemuxjs": "^1.0.1",
     "mp4box": "^0.5.2",
     "music-metadata": "^7.13.1",
-    "node-2fa": "^2.0.3",
+    "node-2fa": "github:Moebits/node-2fa#dist",
     "nodemailer": "^6.7.3",
     "pace-js": "^1.2.4",
     "pg": "^8.7.3",

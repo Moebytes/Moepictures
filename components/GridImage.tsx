@@ -19,6 +19,7 @@ let timeout = null as any
 interface Props {
     id: number
     img: string
+    original: string
     cached: boolean
     width?: number
     height?: number
@@ -708,19 +709,19 @@ const GridImage = forwardRef<Ref, Props>((props, componentRef) => {
             if (image) {
                 return cryptoFunctions.decryptedLink(image)
             } else {
-                return cryptoFunctions.decryptedLink(props.img.replace(/thumbnail\/\d+\//, ""))
+                return cryptoFunctions.decryptedLink(props.original.replace(/thumbnail\/\d+\//, ""))
             }
 
         }
     }
 
     const multiRender = async () => {
-        let filename = path.basename(props.img).replace(/\?.*$/, "")
+        let filename = path.basename(props.original).replace(/\?.*$/, "")
         if (session.downloadPixivID && props.post?.link?.includes("pixiv.net")) {
-            filename = props.post.link.match(/\d+/g)?.[0] + path.extname(props.img).replace(/\?.*$/, "")
+            filename = props.post.link.match(/\d+/g)?.[0] + path.extname(props.original).replace(/\?.*$/, "")
         }
-        if (gifData || functions.isGIF(props.img) || functions.isVideo(props.img)) {
-            functions.download(filename, props.img)
+        if (gifData || functions.isGIF(props.original) || functions.isVideo(props.original)) {
+            functions.download(filename, props.original)
         } else {
             if (props.comicPages?.length > 1) {
                 const zip = new JSZip()
@@ -748,7 +749,7 @@ const GridImage = forwardRef<Ref, Props>((props, componentRef) => {
                 functions.download(downloadName , url)
                 window.URL.revokeObjectURL(url)
             } else {
-                let image = await renderImage(props.img.replace(/thumbnail\/\d+\//, ""))
+                let image = await renderImage(props.original.replace(/thumbnail\/\d+\//, ""))
                 if (filtersOn() || path.extname(filename) !== `.${format}`) {
                     image = await functions.convertToFormat(image, format)
                 }
