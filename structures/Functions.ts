@@ -60,10 +60,22 @@ export default class Functions {
 
     public static refreshCache = async (image: any) => {
         try {
-           await axios.post(image, null, {withCredentials: true})
+            await axios.post(image, null, {withCredentials: true})
         } catch {
             // ignore
         }
+    }
+
+    public static noCacheURL = (image: string) => {
+        const url = new URL(image)
+        url.searchParams.set("update", Date.now().toString())
+        return url.toString()
+    }
+
+    public static removeQueryParams = (image: string) => {
+        const url = new URL(image)
+        url.search = ""
+        return url.toString()
     }
 
     public static get = async (endpoint: string, params: any, session: any, setSessionFlag: (value: boolean) => void) => {
@@ -1124,7 +1136,8 @@ export default class Functions {
         if (!filename) return ""
         if (folder === "attribute") folder = "tag"
         if (!folder || filename.includes("history/")) return `${window.location.protocol}//${window.location.host}/${filename}`
-        return `${window.location.protocol}//${window.location.host}/${folder}/${encodeURIComponent(filename)}`
+        const link = `${window.location.protocol}//${window.location.host}/${folder}/${encodeURIComponent(filename)}`
+        return Functions.noCacheURL(link)
     }
 
     public static getUnverifiedTagLink = (folder: string, filename: string) => {
@@ -1261,7 +1274,13 @@ export default class Functions {
             sort === "width" || 
             sort === "reverse width" ||
             sort === "height" || 
-            sort === "reverse height") return true 
+            sort === "reverse height" ||
+            sort === "hidden" || 
+            sort === "reverse hidden" ||
+            sort === "locked" || 
+            sort === "reverse locked" ||
+            sort === "private" || 
+            sort === "reverse private") return true 
         return false
     }
 
@@ -2471,6 +2490,53 @@ export default class Functions {
             if (!exists) notExists.push({tag: tags[i], desc: `${Functions.toProperCase(tags[i]).replaceAll("-", " ")}.`})
         }
         return notExists
+    }
+
+    public static parsePostChanges = (oldPost: any, newPost: any) => {
+        let json = {} as any
+        if (oldPost.images.length !== newPost.images.length) {
+            json.images = newPost.images
+        }
+        if (oldPost.type !== newPost.type) {
+            json.type = newPost.type
+        }
+        if (oldPost.restrict !== newPost.restrict) {
+            json.restrict = oldPost.restrict
+        }
+        if (oldPost.style !== newPost.style) {
+            json.style = newPost.style
+        }
+        if (oldPost.title !== newPost.title) {
+            json.title = newPost.title
+        }
+        if (oldPost.translatedTitle !== newPost.translatedTitle) {
+            json.translatedTitle = newPost.translatedTitle
+        }
+        if (oldPost.artist !== newPost.artist) {
+            json.artist = newPost.artist
+        }
+        if (Functions.formatDate(new Date(oldPost.drawn)) !== Functions.formatDate(new Date(newPost.drawn))) {
+            json.drawn = newPost.drawn
+        }
+        if (oldPost.link !== newPost.link) {
+            json.link = newPost.link
+        }
+        if (JSON.stringify(oldPost.mirrors) !== JSON.stringify(newPost.mirrors)) {
+            json.mirrors = newPost.mirrors
+        }
+        if (oldPost.bookmarks !== newPost.bookmarks) {
+            json.bookmarks = newPost.bookmarks
+        }
+        if (oldPost.purchaseLink !== newPost.purchaseLink) {
+            json.purchaseLink = newPost.purchaseLink
+        }
+        if (oldPost.commentary !== newPost.commentary) {
+            json.commentary = newPost.commentary
+        }
+        if (oldPost.translatedCommentary !== newPost.translatedCommentary) {
+            json.translatedCommentary = newPost.translatedCommentary
+        }
+        return json
     }
 
     public static replaceLocation = (location: string) => {

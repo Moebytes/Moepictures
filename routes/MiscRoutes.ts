@@ -220,6 +220,26 @@ const MiscRoutes = (app: Express) => {
                 const response = await axios.get(deviationRSS.content[0].url, {responseType: "arraybuffer", headers}).then((r) => r.data)
                 return res.status(200).send([response])
             }
+            if (link.includes("artstation.com")) {
+                const id = link.match(/(?<=artwork\/)(.*?)(?=$|\/)/g)?.[0]
+                const apiLink = `https://www.artstation.com/projects/${id}.json`
+                const json = await axios.get(apiLink, {headers, responseType: "json"}).then((r) => r.data)
+                let images = [] as any[]
+                for (let i = 0; i < json.assets.length; i++) {
+                    const asset = json.assets[i]
+                    if (asset.asset_type === "image") {
+                        const response = await axios.get(asset.image_url, {responseType: "arraybuffer", headers}).then((r) => r.data)
+                        images.push(response)
+                    } else if (asset.asset_type === "video_clip") {
+                        const iframe = asset.player_embedded.match(/(?<=<iframe src=')(.*?)(?=')/g)?.[0]
+                        const html = await axios.get(iframe, {headers}).then((r) => r.data)
+                        const video = html.match(/(?<=src=")(.*?)(?=" type="video)/gm)?.[0]
+                        const response = await axios.get(video, {responseType: "arraybuffer", headers}).then((r) => r.data)
+                        images.push(response)
+                    }
+                }
+                return res.status(200).send(images)
+            }
             if (link.includes("reddit.com")) {
                 const postID = link.match(/(?<=comments\/).*?(?=\/|$)/)?.[0]
                 // @ts-ignore
@@ -233,9 +253,28 @@ const MiscRoutes = (app: Express) => {
                 const response = await axios.get(image, {responseType: "arraybuffer", headers}).then((r) => r.data)
                 return res.status(200).send([response])
             }
+            if (link.includes("imgur.com")) {
+                const html = await axios.get(link, {headers}).then((r) => r.data)
+                const image = html.match(/(https?:\/\/i\.imgur\.com\/)(.*?)(?=\?fb)/gm)?.[0]
+                const response = await axios.get(image, {responseType: "arraybuffer", headers}).then((r) => r.data)
+                return res.status(200).send([response])
+            }
+            if (link.includes("tumblr.com")) {
+                const html = await axios.get(link, {headers}).then((r) => r.data)
+                const part = html.match(/(?<=srcSet=").*?(?="\/><\/div><\/figure)/gm)?.[0]?.trim()
+                const image = part.match(/(?<=,?\s)(https?:\/\/[^ ]+)(?=\s\d+w"?$)/gm)?.[0]
+                const response = await axios.get(image, {responseType: "arraybuffer", headers}).then((r) => r.data)
+                return res.status(200).send([response])
+            }
             if (link.includes("medibang.com")) {
                 const html = await axios.get(link, {headers}).then((r) => r.data)
                 const image = html.match(/(?<=pictureImageUrl = ')(.*?)(?=')/gm)?.[0]
+                const response = await axios.get(image, {responseType: "arraybuffer", headers}).then((r) => r.data)
+                return res.status(200).send([response])
+            }
+            if (link.includes("newgrounds.com")) {
+                const html = await axios.get(link, {headers}).then((r) => r.data)
+                const image = html.match(/(?<=full_image_text":"<img src=\\")(.*?)(?=\\")/gm)?.[0]?.replaceAll("\\", "")
                 const response = await axios.get(image, {responseType: "arraybuffer", headers}).then((r) => r.data)
                 return res.status(200).send([response])
             }
@@ -247,6 +286,12 @@ const MiscRoutes = (app: Express) => {
             if (link.includes("gelbooru.com")) {
                 const apiLink = `https://gelbooru.com/index.php?page=dapi&s=post&q=index&json=1&id=${link.match(/\d+/g)?.[0]}`
                 const image = await axios.get(apiLink).then((r) => r.data.post[0]?.file_url)
+                const response = await axios.get(image, {responseType: "arraybuffer", headers}).then((r) => r.data)
+                return res.status(200).send([response])
+            }
+            if (link.includes("safebooru.org")) {
+                const apiLink = `https://safebooru.org/index.php?page=dapi&s=post&q=index&json=1&id=${link.match(/\d+/g)?.[0]}`
+                const image = await axios.get(apiLink).then((r) => r.data[0]?.file_url)
                 const response = await axios.get(image, {responseType: "arraybuffer", headers}).then((r) => r.data)
                 return res.status(200).send([response])
             }
@@ -271,6 +316,12 @@ const MiscRoutes = (app: Express) => {
                 const html = await axios.get(link, {headers}).then((r) => r.data)
                 const imagePart = html.match(/(\/images\/).*?(?=")/gm)?.[0]
                 const image = `https://e-shuushuu.net${imagePart}`
+                const response = await axios.get(image, {responseType: "arraybuffer", headers}).then((r) => r.data)
+                return res.status(200).send([response])
+            }
+            if (link.includes("anime-pictures.net")) {
+                const html = await axios.get(link, {headers}).then((r) => r.data)
+                const image = html.match(/(?<=download href=")(.*?)(?=")/gm)?.[0]
                 const response = await axios.get(image, {responseType: "arraybuffer", headers}).then((r) => r.data)
                 return res.status(200).send([response])
             }

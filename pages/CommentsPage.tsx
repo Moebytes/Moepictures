@@ -426,7 +426,6 @@ const CommentsPage: React.FunctionComponent = (props) => {
             if (comment.fake) continue
             if (!session.username) if (comment.post.restrict !== "safe") continue
             if (restrictType !== "explicit") if (comment.post.restrict === "explicit") continue
-            if (!permissions.isMod(session)) if (comment.post.hidden) continue
             jsx.push(<CommentRow key={comment.commentID} comment={comment} onDelete={updateComments} onEdit={updateComments} onCommentJump={onCommentJump}/>)
         }
         if (!scroll) {

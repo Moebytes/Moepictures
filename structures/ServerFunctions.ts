@@ -308,6 +308,7 @@ export default class ServerFunctions {
     }
 
     public static tagCategories = async (tags: string[]) => {
+        if (!tags) tags = []
         let result = await sql.tag.tags(tags.filter(Boolean))
         let artists = [] as any 
         let characters = [] as any 

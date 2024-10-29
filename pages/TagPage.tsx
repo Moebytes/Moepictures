@@ -133,7 +133,6 @@ const TagPage: React.FunctionComponent<Props> = (props) => {
     const updatePosts = async () => {
         let uploads = await functions.get("/api/search/posts", {query: tagName, type: "all", restrict: "all", style: "all", sort: "date", limit}, session, setSessionFlag)
         let filtered = uploads.filter((u: any) => restrictType === "explicit" ? u.post?.restrict === "explicit" : u.post?.restrict !== "explicit")
-        if (!permissions.isMod(session)) filtered = filtered.filter((u: any) => !u.hidden)
         const images = filtered.map((p: any) => functions.getThumbnailLink(p.images[0].type, p.postID, p.images[0].order, p.images[0].filename, "large"))
         setTagPosts(filtered)
         setPostImages(images)
@@ -145,7 +144,6 @@ const TagPage: React.FunctionComponent<Props> = (props) => {
         const result = await functions.get("/api/search/posts", {query: tag.tag, type: "all", restrict: "all", style: "all", sort: "date", limit, offset}, session, setSessionFlag)
         uploads.push(...result)
         let filtered = uploads.filter((u: any) => restrictType === "explicit" ? u.post?.restrict === "explicit" : u.post?.restrict !== "explicit")
-        if (!permissions.isMod(session)) filtered = filtered.filter((u: any) => !u.hidden)
         const images = filtered.map((p: any) => functions.getThumbnailLink(p.images[0].type, p.postID, p.images[0].order, p.images[0].filename, "large"))
         setTagPosts(filtered)
         setAppendImages(images)
@@ -248,6 +246,7 @@ const TagPage: React.FunctionComponent<Props> = (props) => {
         website: editTagWebsite, fandom: editTagFandom, reason: editTagReason}, session, setSessionFlag)
         if (editTagImage) functions.refreshCache(editTagImage)
         history.push(`/tag/${editTagKey}`)
+        setTagFlag(true)
     }
 
     useEffect(() => {

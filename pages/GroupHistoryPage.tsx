@@ -179,7 +179,7 @@ const GroupHistoryPage: React.FunctionComponent<Props> = (props) => {
             <SideBar/>
             <div className="content" onMouseEnter={() => setEnableDrag(true)}>
                 <div className="history-page">
-                    <span className="history-heading">Group History</span>
+                    <span className="history-heading">{username ? `${functions.toProperCase(username)}'s Group History` : "Group History"}</span>
                     <table className="history-container">
                         {generateRevisionsJSX()}
                     </table>

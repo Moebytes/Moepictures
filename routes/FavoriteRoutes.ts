@@ -96,6 +96,22 @@ const FavoriteRoutes = (app: Express) => {
             if (Number.isNaN(Number(postID))) return res.status(400).send("Invalid postID")
             if (!req.session.username) return res.status(403).send("Unauthorized")
             const favgroups = await sql.favorite.postFavgroups(Number(postID), req.session.username)
+            for (let i = 0; i < favgroups.length; i++) {
+                const group = favgroups[i]
+                if (!permissions.isMod(req.session)) {
+                    group.posts = group.posts.filter((p: any) => !p?.hidden)
+                }
+                if (!req.session.showR18) {
+                    group.posts = group.posts.filter((p: any) => p?.restrict !== "explicit")
+                }
+                for (let i = group.posts.length - 1; i >= 0; i--) {
+                    const post = group.posts[i]
+                    if (post.private) {
+                        const categories = await serverFunctions.tagCategories(post.tags)
+                        if (!permissions.canPrivate(req.session, categories.artists)) group.posts.splice(i, 1)
+                    }
+                }
+            }
             res.status(200).send(favgroups)
         } catch (e) {
             console.log(e)
@@ -133,6 +149,19 @@ const FavoriteRoutes = (app: Express) => {
             if (!favgroup) return res.status(400).send("Invalid favgroup")
             if (favgroup.private) {
                 if (!permissions.isMod(req.session) && username !== req.session.username) return res.status(403).send("Unauthorized")
+            }
+            if (!permissions.isMod(req.session)) {
+                favgroup.posts = favgroup.posts.filter((p: any) => !p?.hidden)
+            }
+            if (!req.session.showR18) {
+                favgroup.posts = favgroup.posts.filter((p: any) => p?.restrict !== "explicit")
+            }
+            for (let i = favgroup.posts.length - 1; i >= 0; i--) {
+                const post = favgroup.posts[i]
+                if (post.private) {
+                    const categories = await serverFunctions.tagCategories(post.tags)
+                    if (!permissions.canPrivate(req.session, categories.artists)) favgroup.posts.splice(i, 1)
+                }
             }
             res.status(200).json(favgroup)
         } catch (e) {

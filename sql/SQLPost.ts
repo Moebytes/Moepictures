@@ -38,9 +38,9 @@ export default class SQLPost {
     public static bulkUpdatePost = async (postID: number, params: {restrict?: string, style?: string, thirdParty?: boolean, 
         title?: string, translatedTitle?: string, artist?: string, drawn?: string, link?: string, commentary?: string, 
         translatedCommentary?: string, bookmarks?: string, purchaseLink?: string, mirrors?: string, type?: string, uploadDate?: string, uploader?: string, 
-        updatedDate?: string, updater?: string, hidden?: boolean, approver?: string, hasOriginal?: boolean, hasUpscaled?: boolean}) => {
+        updatedDate?: string, updater?: string, hidden?: boolean, approver?: string, approveDate?: string, hasOriginal?: boolean, hasUpscaled?: boolean}) => {
         const {restrict, style, thirdParty, title, translatedTitle, artist, drawn, link, commentary, translatedCommentary, bookmarks, 
-        purchaseLink, mirrors, type, uploadDate, uploader, updatedDate, updater, hidden, approver, hasOriginal, hasUpscaled} = params
+        purchaseLink, mirrors, type, uploadDate, uploader, updatedDate, updater, hidden, approver, approveDate, hasOriginal, hasUpscaled} = params
         let setArray = [] as any
         let values = [] as any
         let i = 1 
@@ -154,6 +154,11 @@ export default class SQLPost {
             values.push(approver)
             i++
         }
+        if (approveDate !== undefined) {
+            setArray.push(`"approveDate" = $${i}`)
+            values.push(approveDate)
+            i++
+        }
         let setQuery = `SET ${setArray.join(", ")}`
         const query: QueryConfig = {
             text: /*sql*/`UPDATE "posts" ${setQuery} WHERE "postID" = $${i}`,
@@ -167,9 +172,11 @@ export default class SQLPost {
     public static bulkUpdateUnverifiedPost = async (postID: number, params: {restrict?: string, style?: string, thirdParty?: boolean, 
         title?: string, translatedTitle?: string, artist?: string, drawn?: string, link?: string, commentary?: string, translatedCommentary?: string, 
         bookmarks?: string, purchaseLink?: string, mirrors?: string, type?: string, uploadDate?: string, uploader?: string, updatedDate?: string, updater?: string, 
-        duplicates?: boolean, newTags?: number, originalID?: number, reason?: string, hidden?: boolean, hasOriginal?: boolean, hasUpscaled?: boolean}) => {
+        duplicates?: boolean, newTags?: number, originalID?: number, reason?: string, hidden?: boolean, hasOriginal?: boolean, hasUpscaled?: boolean,
+        addedTags?: string[], removedTags?: string[], imageChanged?: boolean, changes?: any}) => {
         const {restrict, style, thirdParty, title, translatedTitle, artist, drawn, link, commentary, translatedCommentary, bookmarks, purchaseLink, 
-        mirrors, type, uploadDate, uploader, updatedDate, updater, duplicates, originalID, newTags, hidden, hasOriginal, hasUpscaled, reason} = params
+        mirrors, type, uploadDate, uploader, updatedDate, updater, duplicates, originalID, newTags, hidden, hasOriginal, hasUpscaled, addedTags, 
+        removedTags, imageChanged, changes, reason} = params
         let setArray = [] as any
         let values = [] as any
         let i = 1 
@@ -293,6 +300,26 @@ export default class SQLPost {
             values.push(hasUpscaled)
             i++
         }
+        if (addedTags !== undefined) {
+            setArray.push(`"addedTags" = $${i}`)
+            values.push(addedTags)
+            i++
+        }
+        if (removedTags !== undefined) {
+            setArray.push(`"removedTags" = $${i}`)
+            values.push(removedTags)
+            i++
+        }
+        if (imageChanged !== undefined) {
+            setArray.push(`"imageChanged" = $${i}`)
+            values.push(imageChanged)
+            i++
+        }
+        if (changes !== undefined) {
+            setArray.push(`"changes" = $${i}`)
+            values.push(changes)
+            i++
+        }
         if (reason !== undefined) {
             setArray.push(`"reason" = $${i}`)
             values.push(reason)
@@ -403,10 +430,11 @@ export default class SQLPost {
     public static unverifiedPost = async (postID: number) => {
         const query: QueryConfig = {
         text: functions.multiTrim(/*sql*/`
-            SELECT "unverified posts".*, json_agg(DISTINCT "unverified images".*) AS images, json_agg(DISTINCT "unverified tag map".tag) AS tags
+            SELECT "unverified posts".*, json_agg(DISTINCT "unverified images".*) AS images, 
+            json_agg(DISTINCT "unverified tag map".tag) AS tags
             FROM "unverified posts"
-            JOIN "unverified images" ON "unverified posts"."postID" = "unverified images"."postID"
-            JOIN "unverified tag map" ON "unverified posts"."postID" = "unverified tag map"."postID"
+            LEFT JOIN "unverified images" ON "unverified posts"."postID" = "unverified images"."postID"
+            LEFT JOIN "unverified tag map" ON "unverified posts"."postID" = "unverified tag map"."postID"
             WHERE "unverified posts"."postID" = $1
             GROUP BY "unverified posts"."postID"
             `),

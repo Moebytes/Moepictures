@@ -50,6 +50,12 @@ export default class SQLSearch {
         if (sort === "reverse bookmarks") sortQuery = `ORDER BY posts.bookmarks ASC NULLS LAST`
         if (sort === "favorites") sortQuery = `ORDER BY favorites."favoriteDate" DESC`
         if (sort === "reverse favorites") sortQuery = `ORDER BY favorites."favoriteDate" ASC`
+        if (sort === "hidden") sortQuery = `ORDER BY posts.hidden DESC NULLS LAST`
+        if (sort === "reverse hidden") sortQuery = `ORDER BY posts.hidden ASC NULLS LAST`
+        if (sort === "locked") sortQuery = `ORDER BY posts.locked DESC NULLS LAST`
+        if (sort === "reverse locked") sortQuery = `ORDER BY posts.locked ASC NULLS LAST`
+        if (sort === "private") sortQuery = `ORDER BY posts.private DESC NULLS LAST`
+        if (sort === "reverse private") sortQuery = `ORDER BY posts.private ASC NULLS LAST`
         let ANDtags = [] as string[]
         let ORtags = [] as string[]
         let NOTtags = [] as string[]
@@ -290,7 +296,9 @@ export default class SQLSearch {
     public static unverifiedPosts = async (offset?: string) => {
         const query: QueryConfig = {
         text: functions.multiTrim(/*sql*/`
-            SELECT "unverified posts".*, json_agg(DISTINCT "unverified images".*) AS images, json_agg(DISTINCT "unverified tag map".tag) AS tags
+            SELECT "unverified posts".*, json_agg(DISTINCT "unverified images".*) AS images, 
+            json_agg(DISTINCT "unverified tag map".tag) AS tags,
+            COUNT(*) OVER() AS "postCount"
             FROM "unverified posts"
             JOIN "unverified images" ON "unverified posts"."postID" = "unverified images"."postID"
             JOIN "unverified tag map" ON "unverified posts"."postID" = "unverified tag map"."postID"
@@ -309,7 +317,9 @@ export default class SQLSearch {
     public static unverifiedUserPosts = async (username: string) => {
         const query: QueryConfig = {
         text: functions.multiTrim(/*sql*/`
-            SELECT "unverified posts".*, json_agg(DISTINCT "unverified images".*) AS images, json_agg(DISTINCT "unverified tag map".tag) AS tags
+            SELECT "unverified posts".*, json_agg(DISTINCT "unverified images".*) AS images, 
+            json_agg(DISTINCT "unverified tag map".tag) AS tags,
+            COUNT(*) OVER() AS "postCount"
             FROM "unverified posts"
             JOIN "unverified images" ON "unverified posts"."postID" = "unverified images"."postID"
             JOIN "unverified tag map" ON "unverified posts"."postID" = "unverified tag map"."postID"
@@ -327,7 +337,9 @@ export default class SQLSearch {
     public static unverifiedPostEdits = async (offset?: string) => {
         const query: QueryConfig = {
         text: functions.multiTrim(/*sql*/`
-            SELECT "unverified posts".*, json_agg(DISTINCT "unverified images".*) AS images, json_agg(DISTINCT "unverified tag map".tag) AS tags
+            SELECT "unverified posts".*, json_agg(DISTINCT "unverified images".*) AS images, 
+            json_agg(DISTINCT "unverified tag map".tag) AS tags,
+            COUNT(*) OVER() AS "postCount"
             FROM "unverified posts"
             JOIN "unverified images" ON "unverified posts"."postID" = "unverified images"."postID"
             JOIN "unverified tag map" ON "unverified posts"."postID" = "unverified tag map"."postID"
@@ -346,7 +358,9 @@ export default class SQLSearch {
     public static unverifiedUserPostEdits = async (username: string) => {
         const query: QueryConfig = {
         text: functions.multiTrim(/*sql*/`
-            SELECT "unverified posts".*, json_agg(DISTINCT "unverified images".*) AS images, json_agg(DISTINCT "unverified tag map".tag) AS tags
+            SELECT "unverified posts".*, json_agg(DISTINCT "unverified images".*) AS images, 
+            json_agg(DISTINCT "unverified tag map".tag) AS tags,
+            COUNT(*) OVER() AS "postCount"
             FROM "unverified posts"
             JOIN "unverified images" ON "unverified posts"."postID" = "unverified images"."postID"
             JOIN "unverified tag map" ON "unverified posts"."postID" = "unverified tag map"."postID"

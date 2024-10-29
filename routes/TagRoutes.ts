@@ -302,6 +302,17 @@ const TagRoutes = (app: Express) => {
                         const imagePath = functions.getTagHistoryPath(key, nextKey, imageFilename)
                         await serverFunctions.uploadFile(imagePath, Buffer.from(Object.values(image) as any), false)
                         imageFilename = imagePath
+
+                        const result = await sql.history.tagHistory(targetTag)
+                        if (result.length > 1) {
+                            const lastResult = result[result.length - 1]
+                            const penultResult = result[result.length - 2]
+                            const lastImage = lastResult.image
+                            const penultImage = penultResult.image
+                            if (penultImage?.startsWith("history/tag") && !lastImage?.startsWith("history/tag")) {
+                                await sql.history.updateTagHistory(lastResult.historyID, "image", penultImage)
+                            }
+                        }
                     }
                 }
                 await sql.history.insertTagHistory(req.session.username, targetTag, key, tagObj.type, imageFilename, tagDescription, aliases, implications, pixivTags, website, social, twitter, fandom, reason)

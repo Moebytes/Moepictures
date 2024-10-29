@@ -414,7 +414,7 @@ const UploadPage: React.FunctionComponent = (props) => {
     const handleTagClick = async (tag: string, index: number) => {
         const tagDetail = await functions.get("/api/tag", {tag}, session, setSessionFlag)
         if (tagDetail.image) {
-            const tagLink = functions.getTagLink(tagDetail.type, tagDetail.image)
+            const tagLink = functions.removeQueryParams(functions.getTagLink(tagDetail.type, tagDetail.image))
             const arrayBuffer = await fetch(tagLink).then((r) => r.arrayBuffer())
             const bytes = new Uint8Array(arrayBuffer)
             const ext = path.extname(tagLink).replace(".", "")

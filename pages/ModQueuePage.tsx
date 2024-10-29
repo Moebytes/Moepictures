@@ -1,11 +1,11 @@
 import React, {useEffect, useContext, useReducer, useState} from "react"
-import {useHistory} from "react-router-dom"
+import {useHistory, useLocation} from "react-router-dom"
 import TitleBar from "../components/TitleBar"
 import NavBar from "../components/NavBar"
 import SideBar from "../components/SideBar"
 import Footer from "../components/Footer"
 import {EnableDragContext, HideNavbarContext, HideSidebarContext, SquareContext, RelativeContext, HideTitlebarContext, HeaderTextContext, SidebarTextContext, 
-MobileContext, SessionContext, ModStateContext, SiteHueContext, SiteSaturationContext, SiteLightnessContext} from "../Context"
+MobileContext, SessionContext, ModStateContext, SiteHueContext, SiteSaturationContext, SiteLightnessContext, ScrollContext, ModPageContext} from "../Context"
 import permissions from "../structures/Permissions"
 import ModPosts from "../components/ModPosts"
 import ModPostEdits from "../components/ModPostEdits"
@@ -17,6 +17,7 @@ import ModTranslations from "../components/ModTranslations"
 import ModGroups from "../components/ModGroups"
 import ModGroupEdits from "../components/ModGroupEdits"
 import ModGroupDeletions from "../components/ModGroupDeletions"
+import PageDialog from "../dialogs/PageDialog"
 import ModReports from "../components/ModReports"
 import functions from "../structures/Functions"
 import modPostUploadIcon from "../assets/icons/mod-post-upload.png"
@@ -43,6 +44,8 @@ import modTranslationActiveIcon from "../assets/icons/history-translate-active.p
 import modReportActiveIcon from "../assets/icons/mod-report-active.png"
 import "./styles/modqueuepage.less"
 
+let replace = false 
+
 const ModQueuePage: React.FunctionComponent = (props) => {
     const [ignored, forceUpdate] = useReducer(x => x + 1, 0)
     const {siteHue, setSiteHue} = useContext(SiteHueContext)
@@ -54,25 +57,68 @@ const ModQueuePage: React.FunctionComponent = (props) => {
     const {hideSidebar, setHideSidebar} = useContext(HideSidebarContext)
     const {headerText, setHeaderText} = useContext(HeaderTextContext)
     const {sidebarText, setSidebarText} = useContext(SidebarTextContext)
+    const {scroll, setScroll} = useContext(ScrollContext)
     const {square, setSquare} = useContext(SquareContext)
     const {relative, setRelative} = useContext(RelativeContext)
     const {session, setSession} = useContext(SessionContext)
     const {mobile, setMobile} = useContext(MobileContext)
     const {modState, setModState} = useContext(ModStateContext)
+    const [queryPage, setQueryPage] = useState(1)
+    const {modPage, setModPage} = useContext(ModPageContext)
     const history = useHistory()
+    const location = useLocation()
+
+    useEffect(() => {
+        const typeParam = new URLSearchParams(window.location.search).get("type")
+        if (typeParam) setModState(typeParam)
+        const pageParam = new URLSearchParams(window.location.search).get("page")
+        if (pageParam) setQueryPage(Number(pageParam))
+        const onDOMLoaded = () => {
+            const savedState = localStorage.getItem("modState")
+            if (savedState) setModState(savedState)
+            const savedScroll = localStorage.getItem("scroll")
+            if (savedScroll) setScroll(savedScroll === "true")
+            const savedPage = localStorage.getItem("modPage")
+            if (savedPage) setModPage(Number(savedPage))
+            setTimeout(() => {
+                if (pageParam) setModPage(Number(pageParam))
+            }, 200)
+        }
+        const updateStateChange = () => {
+            replace = true
+            const pageParam = new URLSearchParams(window.location.search).get("page")
+            if (pageParam) setModPage(Number(pageParam))
+        }
+        window.addEventListener("load", onDOMLoaded)
+        window.addEventListener("popstate", updateStateChange)
+        window.addEventListener("pushstate", updateStateChange)
+        return () => {
+            window.removeEventListener("load", onDOMLoaded)
+            window.removeEventListener("popstate", updateStateChange)
+            window.removeEventListener("pushstate", updateStateChange)
+        }
+    }, [])
 
     const getFilter = () => {
         return `hue-rotate(${siteHue - 180}deg) saturate(${siteSaturation}%) brightness(${siteLightness + 70}%)`
     }
 
     useEffect(() => {
-        const savedState = localStorage.getItem("modState")
-        if (savedState) setModState(savedState)
-    }, [])
+        localStorage.setItem("modState", modState)
+        localStorage.setItem("modPage", modPage)
+    }, [modState, modPage])
 
     useEffect(() => {
-        localStorage.setItem("modState", modState)
-    }, [modState])
+        const searchParams = new URLSearchParams(window.location.search)
+        if (modState) searchParams.set("type", modState)
+        if (!scroll) searchParams.set("page", modPage)
+        if (replace) {
+            if (!scroll) history.replace(`${location.pathname}?${searchParams.toString()}`)
+            replace = false
+        } else {
+            if (!scroll) history.push(`${location.pathname}?${searchParams.toString()}`)
+        }
+    }, [scroll, modState, modPage])
 
     useEffect(() => {
         setRelative(false)
@@ -131,6 +177,7 @@ const ModQueuePage: React.FunctionComponent = (props) => {
 
     return (
         <>
+        <PageDialog/>
         <TitleBar/>
         <NavBar/>
         <div className="body">

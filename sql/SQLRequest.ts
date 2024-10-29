@@ -34,6 +34,7 @@ export default class SQLRequest {
                 GROUP BY posts."postID"
             )
             SELECT "delete requests".*, 
+            COUNT(*) OVER() AS "requestCount",
             to_json((array_agg(post_json.*))[1]) AS post
             FROM "delete requests"
             JOIN post_json ON post_json."postID" = "delete requests"."postID"
@@ -59,6 +60,7 @@ export default class SQLRequest {
                 GROUP BY posts."postID"
             )
             SELECT "delete requests".*, 
+            COUNT(*) OVER() AS "requestCount",
             to_json((array_agg(post_json.*))[1]) AS post
             FROM "delete requests"
             JOIN post_json ON post_json."postID" = "delete requests"."postID"
@@ -96,7 +98,8 @@ export default class SQLRequest {
     public static tagDeleteRequests = async (offset?: string) => {
         const query: QueryConfig = {
         text: functions.multiTrim(/*sql*/`
-            SELECT "delete requests".*, tags.*
+            SELECT "delete requests".*, tags.*,
+            COUNT(*) OVER() AS "requestCount"
             FROM "delete requests"
             JOIN tags ON tags.tag = "delete requests".tag
             WHERE "delete requests"."tag" IS NOT NULL
@@ -114,7 +117,8 @@ export default class SQLRequest {
     public static userTagDeleteRequests = async (username: string) => {
         const query: QueryConfig = {
         text: functions.multiTrim(/*sql*/`
-            SELECT "delete requests".*, tags.*
+            SELECT "delete requests".*, tags.*,
+            COUNT(*) OVER() AS "requestCount"
             FROM "delete requests"
             JOIN tags ON tags.tag = "delete requests".tag
             WHERE "delete requests"."tag" IS NOT NULL AND "delete requests".username = $1
@@ -151,7 +155,8 @@ export default class SQLRequest {
     public static aliasRequests = async (offset?: string) => {
         const query: QueryConfig = {
         text: functions.multiTrim(/*sql*/`
-            SELECT "alias requests".*, tags.*
+            SELECT "alias requests".*, tags.*,
+            COUNT(*) OVER() AS "requestCount"
             FROM "alias requests"
             JOIN tags ON tags.tag = "alias requests".tag
             WHERE "alias requests"."tag" IS NOT NULL
@@ -169,7 +174,8 @@ export default class SQLRequest {
     public static userAliasRequests = async (username: string) => {
         const query: QueryConfig = {
         text: functions.multiTrim(/*sql*/`
-            SELECT "alias requests".*, tags.*
+            SELECT "alias requests".*, tags.*,
+            COUNT(*) OVER() AS "requestCount"
             FROM "alias requests"
             JOIN tags ON tags.tag = "alias requests".tag
             WHERE "alias requests"."tag" IS NOT NULL AND "alias requests".username = $1
@@ -206,7 +212,8 @@ export default class SQLRequest {
     public static tagEditRequests = async (offset?: string) => {
         const query: QueryConfig = {
         text: functions.multiTrim(/*sql*/`
-            SELECT tags.type, "tag edit requests".*
+            SELECT tags.type, "tag edit requests".*,
+            COUNT(*) OVER() AS "requestCount"
             FROM "tag edit requests"
             JOIN tags ON tags.tag = "tag edit requests".tag
             GROUP BY "tag edit requests"."requestID", tags.type
@@ -250,6 +257,7 @@ export default class SQLRequest {
                 GROUP BY posts."postID"
             )
             SELECT "group requests".*, 
+            COUNT(*) OVER() AS "requestCount",
             to_json((array_agg(post_json.*))[1]) AS post,
             CASE WHEN groups."groupID" IS NOT NULL THEN true ELSE false END AS "exists"
             FROM "group requests"
@@ -316,6 +324,7 @@ export default class SQLRequest {
                 GROUP BY posts."postID"
             )
             SELECT "delete requests".*, groups.*,
+            COUNT(*) OVER() AS "requestCount",
             to_json((array_agg(post_json.*))[1]) AS post
             FROM "delete requests"
             JOIN groups ON groups.slug = "delete requests".group
@@ -355,7 +364,8 @@ export default class SQLRequest {
     public static groupEditRequests = async (offset?: string) => {
         const query: QueryConfig = {
         text: functions.multiTrim(/*sql*/`
-            SELECT "group edit requests".*
+            SELECT "group edit requests".*,
+            COUNT(*) OVER() AS "requestCount"
             FROM "group edit requests"
             JOIN groups ON groups.slug = "group edit requests".group
             GROUP BY "group edit requests"."requestID"

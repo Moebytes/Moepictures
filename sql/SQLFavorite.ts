@@ -57,7 +57,7 @@ export default class SQLFavorite {
         if (style === "chibi") styleQuery = `posts.style = 'chibi'`
         let sortQuery = ""
         if (sort === "random") sortQuery = `ORDER BY random()`
-        if (sort === "date") sortQuery = `ORDER BY posts."uploadDate" DESC`
+        if (!sort || sort === "date") sortQuery = `ORDER BY posts."uploadDate" DESC`
         if (sort === "reverse date") sortQuery = `ORDER BY posts."uploadDate" ASC`
         if (sort === "drawn") sortQuery = `ORDER BY posts.drawn DESC NULLS LAST`
         if (sort === "reverse drawn") sortQuery = `ORDER BY posts.drawn ASC NULLS LAST`
@@ -81,6 +81,12 @@ export default class SQLFavorite {
         if (sort === "reverse height") sortQuery = `ORDER BY "imageHeight" ASC`
         if (sort === "bookmarks") sortQuery = `ORDER BY posts.bookmarks DESC NULLS LAST`
         if (sort === "reverse bookmarks") sortQuery = `ORDER BY posts.bookmarks ASC NULLS LAST`
+        if (sort === "hidden") sortQuery = `ORDER BY posts.hidden DESC NULLS LAST`
+        if (sort === "reverse hidden") sortQuery = `ORDER BY posts.hidden ASC NULLS LAST`
+        if (sort === "locked") sortQuery = `ORDER BY posts.locked DESC NULLS LAST`
+        if (sort === "reverse locked") sortQuery = `ORDER BY posts.locked ASC NULLS LAST`
+        if (sort === "private") sortQuery = `ORDER BY posts.private DESC NULLS LAST`
+        if (sort === "reverse private") sortQuery = `ORDER BY posts.private ASC NULLS LAST`
         let includeTags = sort === "tagcount" || sort === "reverse tagcount"
         let i = 2
         let values = [] as any
@@ -307,6 +313,12 @@ export default class SQLFavorite {
         if (sort === "reverse height") sortQuery = `ORDER BY "imageHeight" ASC`
         if (sort === "bookmarks") sortQuery = `ORDER BY posts.bookmarks DESC NULLS LAST`
         if (sort === "reverse bookmarks") sortQuery = `ORDER BY posts.bookmarks ASC NULLS LAST`
+        if (sort === "hidden") sortQuery = `ORDER BY posts.hidden DESC NULLS LAST`
+        if (sort === "reverse hidden") sortQuery = `ORDER BY posts.hidden ASC NULLS LAST`
+        if (sort === "locked") sortQuery = `ORDER BY posts.locked DESC NULLS LAST`
+        if (sort === "reverse locked") sortQuery = `ORDER BY posts.locked ASC NULLS LAST`
+        if (sort === "private") sortQuery = `ORDER BY posts.private DESC NULLS LAST`
+        if (sort === "reverse private") sortQuery = `ORDER BY posts.private ASC NULLS LAST`
         let includeTags = sort === "tagcount" || sort === "reverse tagcount"
         let i = 3
         let values = [] as any

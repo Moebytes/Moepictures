@@ -75,7 +75,6 @@ const validImages = (images: any[], skipMBCheck?: boolean) => {
   return true
 }
 
-
 const CreateRoutes = (app: Express) => {
     app.post("/api/post/upload", csrfProtection, uploadLimiter, async (req: Request, res: Response, next: NextFunction) => {
       try {
@@ -256,13 +255,13 @@ const CreateRoutes = (app: Express) => {
           uploader: req.session.username,
           updater: req.session.username,
           approver: req.session.username,
+          approveDate: uploadDate,
           hasUpscaled,
           hasOriginal,
           hidden
         })
 
         let tagMap = tags
-
         let bulkTagUpdate = [] as any
 
         for (let i = 0; i < newTags.length; i++) {
@@ -330,7 +329,6 @@ const CreateRoutes = (app: Express) => {
         }
 
         tagMap = functions.removeDuplicates(tagMap)
-
         await sql.tag.bulkInsertTags(bulkTagUpdate, req.session.username, noImageUpdate ? true : false)
         await sql.tag.insertTagMap(postID, tagMap)
 
@@ -553,7 +551,13 @@ const CreateRoutes = (app: Express) => {
           updater: req.session.username
         })
 
-        let tagMap = tags
+        let combinedTags = [...artists.map((a: any) => a.tag), ...characters.map((c: any) => c.tag), 
+        ...series.map((s: any) => s.tag), ...newTags.map((n: any) => n.tag), ...tags]
+        let oldTagsSet = new Set<string>(post.tags)
+        let newTagsSet = new Set<string>(combinedTags)
+        let addedTags = [...newTagsSet].filter(tag => !oldTagsSet.has(tag)).filter(Boolean)
+        let removedTags = [...oldTagsSet].filter(tag => !newTagsSet.has(tag)).filter(Boolean)
+
         let bulkTagUpdate = [] as any
 
         for (let i = 0; i < newTags.length; i++) {
@@ -579,7 +583,6 @@ const CreateRoutes = (app: Express) => {
             bulkObj.image = filename
           }
           bulkTagUpdate.push(bulkObj)
-          tagMap.push(artists[i].tag)
         }
 
         for (let i = 0; i < characters.length; i++) {
@@ -592,7 +595,6 @@ const CreateRoutes = (app: Express) => {
             bulkObj.image = filename
           }
           bulkTagUpdate.push(bulkObj)
-          tagMap.push(characters[i].tag)
         }
 
         for (let i = 0; i < series.length; i++) {
@@ -605,24 +607,23 @@ const CreateRoutes = (app: Express) => {
             bulkObj.image = filename
           }
           bulkTagUpdate.push(bulkObj)
-          tagMap.push(series[i].tag)
         }
 
-        for (let i = 0; i < tagMap.length; i++) {
-          const implications = await sql.tag.implications(tagMap[i])
+        for (let i = 0; i < addedTags.length; i++) {
+          const implications = await sql.tag.implications(addedTags[i])
           if (implications?.[0]) {
             for (const i of implications) {
-              tagMap.push(i.implication)
+              addedTags.push(i.implication)
               const tag = await sql.tag.tag(i.implication)
               bulkTagUpdate.push({tag: i.implication, type: functions.tagType(i.implication), description: tag?.description || null, image: tag?.image || null})
             }
           }
         }
 
-        tagMap = functions.removeDuplicates(tagMap)
-        await sql.tag.purgeTagMap(postID)
+        addedTags = functions.removeDuplicates(addedTags)
         await sql.tag.bulkInsertTags(bulkTagUpdate, req.session.username, noImageUpdate ? true : false)
-        await sql.tag.insertTagMap(postID, tagMap)
+        await sql.tag.deleteTagMap(postID, removedTags)
+        await sql.tag.insertTagMap(postID, addedTags)
 
         if (unverifiedID) {
           const unverifiedPost = await sql.post.unverifiedPost(Number(unverifiedID))
@@ -648,6 +649,8 @@ const CreateRoutes = (app: Express) => {
 
         const updated = await sql.post.post(postID)
         let r18 = updated.restrict === "explicit"
+
+        const changes = functions.parsePostChanges(post, updated)
 
         const postHistory = await sql.history.postHistory(postID)
         const nextKey = await serverFunctions.getNextKey("post", String(postID), r18)
@@ -683,7 +686,8 @@ const CreateRoutes = (app: Express) => {
               style: vanilla.style, thirdParty: vanilla.thirdParty, title: vanilla.title, translatedTitle: vanilla.translatedTitle, 
               drawn: vanilla.drawn, artist: vanilla.artist, link: vanilla.link, commentary: vanilla.commentary, translatedCommentary: vanilla.translatedCommentary, 
               bookmarks: vanilla.bookmarks, purchaseLink: vanilla.purchaseLink, mirrors: vanilla.mirrors, hasOriginal: vanilla.hasOriginal, hasUpscaled: vanilla.hasUpscaled, 
-              artists: vanilla.artists, characters: vanilla.characters, series: vanilla.series, tags: vanilla.tags, reason})
+              artists: vanilla.artists, characters: vanilla.characters, series: vanilla.series, tags: vanilla.tags, addedTags: [], removedTags: [],
+              imageChanged: false, changes: null, reason})
 
             let newImages = [] as any
             for (let i = 0; i < images.length; i++) {
@@ -710,7 +714,8 @@ const CreateRoutes = (app: Express) => {
               style: updated.style, thirdParty: updated.thirdParty, title: updated.title, translatedTitle: updated.translatedTitle, 
               drawn: updated.drawn, artist: updated.artist, link: updated.link, commentary: updated.commentary, 
               translatedCommentary: updated.translatedCommentary, bookmarks: updated.bookmarks, purchaseLink: updated.purchaseLink, mirrors: updated.mirrors, 
-              hasOriginal: updated.hasOriginal, hasUpscaled: updated.hasUpscaled, artists, characters, series, tags, reason})
+              hasOriginal: updated.hasOriginal, hasUpscaled: updated.hasUpscaled, artists, characters, series, tags, addedTags, removedTags, imageChanged: imgChanged,
+              changes, reason})
         } else {
             let newImages = [] as any
             for (let i = 0; i < images.length; i++) {
@@ -727,6 +732,17 @@ const CreateRoutes = (app: Express) => {
                   await serverFunctions.uploadFile(newImagePath, buffer, r18)
                 }
                 newImages.push(newImagePath)
+
+                let result = await sql.history.postHistory(postID)
+                if (result.length > 1) {
+                    const lastResult = result[result.length - 1]
+                    const penultResult = result[result.length - 2]
+                    const lastImage = lastResult.images[0]
+                    const penultImage = penultResult.images[0]
+                    if (penultImage?.startsWith("history/post") && !lastImage?.startsWith("history/post")) {
+                        await sql.history.updatePostHistory(lastResult.historyID, "images", penultResult.images)
+                    }
+                }
               } else {
                 newImages.push(functions.getImagePath(updated.images[i].type, postID, updated.images[i].order, updated.images[i].filename))
               }
@@ -737,7 +753,8 @@ const CreateRoutes = (app: Express) => {
               style: updated.style, thirdParty: updated.thirdParty, title: updated.title, translatedTitle: updated.translatedTitle, 
               drawn: updated.drawn, artist: updated.artist, link: updated.link, commentary: updated.commentary, 
               translatedCommentary: updated.translatedCommentary, bookmarks: updated.bookmarks, purchaseLink: updated.purchaseLink, mirrors: updated.mirrors, 
-              hasOriginal: updated.hasOriginal, hasUpscaled: updated.hasUpscaled, artists, characters, series, tags, reason})
+              hasOriginal: updated.hasOriginal, hasUpscaled: updated.hasUpscaled, artists, characters, series, tags, addedTags, removedTags, imageChanged: imgChanged,
+              changes, reason})
         }
         res.status(200).send("Success")
       } catch (e) {
@@ -916,7 +933,6 @@ const CreateRoutes = (app: Express) => {
         })
 
         let tagMap = tags
-
         let bulkTagUpdate = [] as any
         for (let i = 0; i < tagMap.length; i++) {
           bulkTagUpdate.push({tag: tagMap[i], type: functions.tagType(tagMap[i]), description: null, image: null})
@@ -986,7 +1002,6 @@ const CreateRoutes = (app: Express) => {
         }
 
         tagMap = functions.removeDuplicates(tagMap)
-
         await sql.tag.bulkInsertUnverifiedTags(bulkTagUpdate)
         await sql.tag.insertUnverifiedTagMap(postID, tagMap)
 
@@ -1064,27 +1079,29 @@ const CreateRoutes = (app: Express) => {
         if (!functions.validRestrict(restrict)) return res.status(400).send("Invalid restrict")
         if (!functions.validStyle(style)) return res.status(400).send("Invalid style")
 
-
         const originalPostID = postID as any
         postID = unverifiedID ? unverifiedID : await sql.post.insertUnverifiedPost()
+        const unverifiedPost = await sql.post.unverifiedPost(postID)
+        if (!unverifiedPost) return res.status(400).send("Bad unverifiedID")
+        let oldR18 = unverifiedPost.restrict === "explicit"
+        let newR18 = restrict === "explicit"
 
+        let post = null as any
         if (originalPostID) {
-          const post = await sql.post.post(originalPostID)
+          post = await sql.post.post(originalPostID)
           if (!post) return res.status(400).send("Bad postID")
-          if (post.locked && !permissions.isMod(req.session)) return res.status(403).send("Unauthorized")
-          await sql.post.bulkUpdateUnverifiedPost(postID, {
-            uploader: post.uploader,
-            uploadDate: post.uploadDate
-          })
         }
-        
+
+        let imgChanged = true
         if (unverifiedID) {
-          const unverified = await sql.post.unverifiedPost(unverifiedID)
-          if (!unverified) return res.status(400).send("Bad unverifiedID")
-          for (let i = 0; i < unverified.images.length; i++) {
-            await sql.post.deleteUnverifiedImage(unverified.images[i].imageID)
-            await serverFunctions.deleteUnverifiedFile(functions.getImagePath(unverified.images[i].type, unverifiedID, unverified.images[i].order, unverified.images[i].filename))
-            await serverFunctions.deleteUnverifiedFile(functions.getUpscaledImagePath(unverified.images[i].type, unverifiedID, unverified.images[i].order, unverified.images[i].filename))
+          imgChanged = await serverFunctions.imagesChangedUnverified(unverifiedPost.images, images, false, oldR18)
+          if (!imgChanged) imgChanged = await serverFunctions.imagesChangedUnverified(unverifiedPost.images, upscaledImages, true, oldR18)
+          if (imgChanged) {
+            for (let i = 0; i < unverifiedPost.images.length; i++) {
+              await sql.post.deleteUnverifiedImage(unverifiedPost.images[i].imageID)
+              await serverFunctions.deleteUnverifiedFile(functions.getImagePath(unverifiedPost.images[i].type, unverifiedID, unverifiedPost.images[i].order, unverifiedPost.images[i].filename))
+              await serverFunctions.deleteUnverifiedFile(functions.getUpscaledImagePath(unverifiedPost.images[i].type, unverifiedID, unverifiedPost.images[i].order, unverifiedPost.images[i].filename))
+            }
           }
         }
 
@@ -1131,30 +1148,32 @@ const CreateRoutes = (app: Express) => {
             kind = "model"
             type = "model"
         }
-          if (images[i]) {
-            let imagePath = functions.getImagePath(kind, postID, Number(fileOrder), filename)
-            const buffer = Buffer.from(Object.values(images[i].bytes) as any)
-            await serverFunctions.uploadUnverifiedFile(imagePath, buffer)
-            hasOriginal = true
+        if (imgChanged) {
+            if (images[i]) {
+              let imagePath = functions.getImagePath(kind, postID, Number(fileOrder), filename)
+              const buffer = Buffer.from(Object.values(images[i].bytes) as any)
+              await serverFunctions.uploadUnverifiedFile(imagePath, buffer)
+              hasOriginal = true
+            }
+            if (upscaledImages[i]) {
+              let imagePath = functions.getUpscaledImagePath(kind, postID, Number(fileOrder), filename)
+              const buffer = Buffer.from(Object.values(upscaledImages[i].bytes) as any)
+              await serverFunctions.uploadUnverifiedFile(imagePath, buffer)
+              hasUpscaled = true
+            }
+            let dimensions = null as any
+            let hash = ""
+            if (kind === "video" || kind === "audio" || kind === "model") {
+              const buffer = functions.base64ToBuffer(current[i].thumbnail)
+              hash = await phash(buffer).then((hash: string) => functions.binaryToHex(hash))
+              dimensions = await sharp(buffer).metadata()
+            } else {
+              const buffer = Buffer.from(Object.values(current[i].bytes) as any)
+              hash = await phash(buffer).then((hash: string) => functions.binaryToHex(hash))
+              dimensions = await sharp(buffer).metadata()
+            }
+            await sql.post.insertUnverifiedImage(postID, filename, kind, order, hash, dimensions.width, dimensions.height, current[i].size)
           }
-          if (upscaledImages[i]) {
-            let imagePath = functions.getUpscaledImagePath(kind, postID, Number(fileOrder), filename)
-            const buffer = Buffer.from(Object.values(upscaledImages[i].bytes) as any)
-            await serverFunctions.uploadUnverifiedFile(imagePath, buffer)
-            hasUpscaled = true
-          }
-          let dimensions = null as any
-          let hash = ""
-          if (kind === "video" || kind === "audio" || kind === "model") {
-            const buffer = functions.base64ToBuffer(current[i].thumbnail)
-            hash = await phash(buffer).then((hash: string) => functions.binaryToHex(hash))
-            dimensions = await sharp(buffer).metadata()
-          } else {
-            const buffer = Buffer.from(Object.values(current[i].bytes) as any)
-            hash = await phash(buffer).then((hash: string) => functions.binaryToHex(hash))
-            dimensions = await sharp(buffer).metadata()
-          }
-          await sql.post.insertUnverifiedImage(postID, filename, kind, order, hash, dimensions.width, dimensions.height, current[i].size)
         }
         if (upscaledImages?.length > images?.length) hasOriginal = false
         if (images?.length > upscaledImages?.length) hasUpscaled = false
@@ -1183,11 +1202,37 @@ const CreateRoutes = (app: Express) => {
           updater: req.session.username
         })
 
-        let tagMap = tags
+        if (originalPostID) {
+          const updated = await sql.post.unverifiedPost(postID)
+          let combinedTags = [...artists.map((a: any) => a.tag), ...characters.map((c: any) => c.tag), 
+            ...series.map((s: any) => s.tag), ...newTags.map((n: any) => n.tag), ...tags]
+          let oldTagsSet = new Set<string>(post.tags)
+          let newTagsSet = new Set<string>(combinedTags)
+          let addedTags = [...newTagsSet].filter(tag => !oldTagsSet.has(tag)).filter(Boolean)
+          let removedTags = [...oldTagsSet].filter(tag => !newTagsSet.has(tag)).filter(Boolean)
+          const changes = functions.parsePostChanges(post, updated)
+          
+          await sql.post.bulkUpdateUnverifiedPost(postID, {
+            uploader: post.uploader,
+            uploadDate: post.uploadDate,
+            addedTags,
+            removedTags,
+            imageChanged: imgChanged,
+            changes
+          })
+        }
+
+        let combinedTags = [...artists.map((a: any) => a.tag), ...characters.map((c: any) => c.tag), 
+        ...series.map((s: any) => s.tag), ...newTags.map((n: any) => n.tag), ...tags]
+        let oldTagsSet = new Set<string>(unverifiedPost.tags)
+        let newTagsSet = new Set<string>(combinedTags)
+        let addedTags = [...newTagsSet].filter(tag => !oldTagsSet.has(tag)).filter(Boolean)
+        let removedTags = [...oldTagsSet].filter(tag => !newTagsSet.has(tag)).filter(Boolean)
 
         let bulkTagUpdate = [] as any
-        for (let i = 0; i < tagMap.length; i++) {
-          bulkTagUpdate.push({tag: tagMap[i], type: functions.tagType(tagMap[i]), description: null, image: null})
+        
+        for (let i = 0; i < tags.length; i++) {
+          bulkTagUpdate.push({tag: tags[i], type: functions.tagType(tags[i]), description: null, image: null})
         }
 
         for (let i = 0; i < newTags.length; i++) {
@@ -1213,7 +1258,6 @@ const CreateRoutes = (app: Express) => {
             bulkObj.image = filename
           }
           bulkTagUpdate.push(bulkObj)
-          tagMap.push(artists[i].tag)
         }
 
         for (let i = 0; i < characters.length; i++) {
@@ -1226,7 +1270,6 @@ const CreateRoutes = (app: Express) => {
             bulkObj.image = filename
           }
           bulkTagUpdate.push(bulkObj)
-          tagMap.push(characters[i].tag)
         }
 
         for (let i = 0; i < series.length; i++) {
@@ -1239,24 +1282,23 @@ const CreateRoutes = (app: Express) => {
             bulkObj.image = filename
           }
           bulkTagUpdate.push(bulkObj)
-          tagMap.push(series[i].tag)
         }
 
-        for (let i = 0; i < tagMap.length; i++) {
-          const implications = await sql.tag.implications(tagMap[i])
+        for (let i = 0; i < addedTags.length; i++) {
+          const implications = await sql.tag.implications(addedTags[i])
           if (implications?.[0]) {
             for (const i of implications) {
-              tagMap.push(i.implication)
+              addedTags.push(i.implication)
               const tag = await sql.tag.tag(i.implication)
               bulkTagUpdate.push({tag: i.implication, type: functions.tagType(i.implication), description: tag?.description || null, image: tag?.image || null})
             }
           }
         }
 
-        tagMap = functions.removeDuplicates(tagMap)
-        await sql.tag.purgeUnverifiedTagMap(postID)
+        addedTags = functions.removeDuplicates(addedTags)
         await sql.tag.bulkInsertUnverifiedTags(bulkTagUpdate)
-        await sql.tag.insertUnverifiedTagMap(postID, tagMap)
+        if (unverifiedID) await sql.tag.deleteUnverifiedTagMap(postID, removedTags)
+        await sql.tag.insertUnverifiedTagMap(postID, addedTags)
 
         res.status(200).send("Success")
       } catch (e) {
@@ -1281,8 +1323,11 @@ const CreateRoutes = (app: Express) => {
         let oldR18 = post ? post.restrict === "explicit" : unverified.restrict === "explicit"
         let newR18 = unverified.restrict === "explicit"
 
-        let imgChanged = await serverFunctions.imagesChangedUnverified(post?.images, unverified.images, false, oldR18)
-        if (!imgChanged) imgChanged = await serverFunctions.imagesChangedUnverified(post?.images, unverified.images, true, oldR18)
+        let imgChanged = true
+        if (unverified.originalID) {
+          imgChanged = await serverFunctions.imagesChangedUnverified(post?.images, unverified.images, false, oldR18)
+          if (!imgChanged) imgChanged = await serverFunctions.imagesChangedUnverified(post?.images, unverified.images, true, oldR18)
+        }
 
         let vanillaBuffers = [] as any
         let upscaledVanillaBuffers = [] as any
@@ -1295,9 +1340,11 @@ const CreateRoutes = (app: Express) => {
             const upscaledBuffer = await serverFunctions.getFile(upscaledImagePath, false, oldR18) as Buffer
             vanillaBuffers.push(buffer)
             upscaledVanillaBuffers.push(upscaledBuffer)
-            await serverFunctions.deleteFile(functions.getImagePath(post.images[i].type, postID, post.images[i].order, post.images[i].filename), oldR18)
-            await serverFunctions.deleteFile(functions.getUpscaledImagePath(post.images[i].type, postID, post.images[i].order, post.images[i].filename), oldR18)
-            await sql.post.deleteImage(post.images[i].imageID)
+            if (imgChanged) {
+              await serverFunctions.deleteFile(functions.getImagePath(post.images[i].type, postID, post.images[i].order, post.images[i].filename), oldR18)
+              await serverFunctions.deleteFile(functions.getUpscaledImagePath(post.images[i].type, postID, post.images[i].order, post.images[i].filename), oldR18)
+              await sql.post.deleteImage(post.images[i].imageID)
+            }
           }
         }
 
@@ -1359,30 +1406,32 @@ const CreateRoutes = (app: Express) => {
             kind = "model"
             type = "model"
         }
-          if (buffer.byteLength) {
-            let newImagePath = functions.getImagePath(kind, newPostID, Number(fileOrder), filename)
-            await serverFunctions.uploadFile(newImagePath, buffer, oldR18)
-            hasOriginal = true
-            originalCheck.push(newImagePath)
-          }
-          if (upscaledBuffer.byteLength) {
-            let newImagePath = functions.getUpscaledImagePath(kind, newPostID, Number(fileOrder), filename)
-            await serverFunctions.uploadFile(newImagePath, upscaledBuffer, oldR18)
-            hasUpscaled = true
-            upscaledCheck.push(newImagePath)
-          }
+          if (imgChanged) {
+            if (buffer.byteLength) {
+              let newImagePath = functions.getImagePath(kind, newPostID, Number(fileOrder), filename)
+              await serverFunctions.uploadFile(newImagePath, buffer, oldR18)
+              hasOriginal = true
+              originalCheck.push(newImagePath)
+            }
+            if (upscaledBuffer.byteLength) {
+              let newImagePath = functions.getUpscaledImagePath(kind, newPostID, Number(fileOrder), filename)
+              await serverFunctions.uploadFile(newImagePath, upscaledBuffer, oldR18)
+              hasUpscaled = true
+              upscaledCheck.push(newImagePath)
+            }
 
-          let dimensions = null as any
-          let hash = ""
-          if (kind === "video" || kind === "audio" || kind === "model") {
-            const buffer = functions.base64ToBuffer(unverified.thumbnail)
-            hash = await phash(buffer).then((hash: string) => functions.binaryToHex(hash))
-            dimensions = await sharp(buffer).metadata()
-          } else {
-            hash = await phash(current).then((hash: string) => functions.binaryToHex(hash))
-            dimensions = await sharp(buffer).metadata()
+            let dimensions = null as any
+            let hash = ""
+            if (kind === "video" || kind === "audio" || kind === "model") {
+              const buffer = functions.base64ToBuffer(unverified.thumbnail)
+              hash = await phash(buffer).then((hash: string) => functions.binaryToHex(hash))
+              dimensions = await sharp(buffer).metadata()
+            } else {
+              hash = await phash(current).then((hash: string) => functions.binaryToHex(hash))
+              dimensions = await sharp(buffer).metadata()
+            }
+            await sql.post.insertImage(newPostID, filename, type, order, hash, dimensions.width, dimensions.height, current.byteLength)
           }
-          await sql.post.insertImage(newPostID, filename, type, order, hash, dimensions.width, dimensions.height, current.byteLength)
         }
         if (upscaledCheck?.length > originalCheck?.length) hasOriginal = false
         if (originalCheck?.length > upscaledCheck?.length) hasUpscaled = false
@@ -1414,13 +1463,19 @@ const CreateRoutes = (app: Express) => {
           uploader: unverified.uploader,
           updater: unverified.updater,
           approver: req.session.username,
+          approveDate: new Date().toISOString(),
           hasOriginal,
           hasUpscaled,
           hidden
         })
 
-        let tagMap = unverified.tags
-
+        let combinedTags = [...artists.map((a: any) => a.tag), ...characters.map((c: any) => c.tag), 
+        ...series.map((s: any) => s.tag), ...tags.map((n: any) => n.tag), ...unverified.tags]
+        let oldTagsSet = new Set<string>(post ? post.tags : [])
+        let newTagsSet = new Set<string>(combinedTags)
+        let addedTags = [...newTagsSet].filter(tag => !oldTagsSet.has(tag)).filter(Boolean)
+        let removedTags = [...oldTagsSet].filter(tag => !newTagsSet.has(tag)).filter(Boolean)
+  
         let bulkTagUpdate = [] as any
 
         for (let i = 0; i < tags.length; i++) {
@@ -1471,21 +1526,21 @@ const CreateRoutes = (app: Express) => {
           bulkTagUpdate.push(bulkObj)
         }
 
-        for (let i = 0; i < tagMap.length; i++) {
-          const implications = await sql.tag.implications(tagMap[i])
+        for (let i = 0; i < addedTags.length; i++) {
+          const implications = await sql.tag.implications(addedTags[i])
           if (implications?.[0]) {
             for (const i of implications) {
-              tagMap.push(i.implication)
+              addedTags.push(i.implication)
               const tag = await sql.tag.tag(i.implication)
               bulkTagUpdate.push({tag: i.implication, type: functions.tagType(i.implication), description: tag?.description || null, image: tag?.image || null})
             }
           }
         }
 
-        tagMap = functions.removeDuplicates(tagMap)
-        if (unverified.originalID) await sql.tag.purgeTagMap(unverified.originalID)
+        addedTags = functions.removeDuplicates(addedTags)
         await sql.tag.bulkInsertTags(bulkTagUpdate, unverified.uploader)
-        await sql.tag.insertTagMap(newPostID, tagMap)
+        if (unverified.originalID) await sql.tag.deleteTagMap(unverified.originalID, removedTags)
+        await sql.tag.insertTagMap(newPostID, addedTags)
 
         await sql.post.deleteUnverifiedPost(Number(postID))
         for (let i = 0; i < unverified.images.length; i++) {
@@ -1502,6 +1557,8 @@ const CreateRoutes = (app: Express) => {
         if (unverified.originalID) {
           const updated = await sql.post.post(unverified.originalID)
           let r18 = updated.restrict === "explicit"
+
+          const changes = functions.parsePostChanges(post, updated)
           const postHistory = await sql.history.postHistory(newPostID)
           const nextKey = await serverFunctions.getNextKey("post", String(newPostID), r18)
           if (!postHistory.length || (imgChanged && nextKey === 1)) {
@@ -1536,7 +1593,8 @@ const CreateRoutes = (app: Express) => {
                 style: vanilla.style, thirdParty: vanilla.thirdParty, title: vanilla.title, translatedTitle: vanilla.translatedTitle, 
                 drawn: vanilla.drawn, artist: vanilla.artist, link: vanilla.link, commentary: vanilla.commentary, translatedCommentary: vanilla.translatedCommentary, 
                 bookmarks: vanilla.bookmarks, purchaseLink: vanilla.purchaseLink, mirrors: vanilla.mirrors, hasOriginal: vanilla.hasOriginal, hasUpscaled: vanilla.hasUpscaled, 
-                artists: vanilla.artists, characters: vanilla.characters, series: vanilla.series, tags: vanilla.tags, reason})
+                artists: vanilla.artists, characters: vanilla.characters, series: vanilla.series, tags: vanilla.tags, addedTags: [], removedTags: [], imageChanged: false, 
+                changes: null, reason})
 
               let newImages = [] as any
               for (let i = 0; i < unverified.images.length; i++) {
@@ -1565,7 +1623,8 @@ const CreateRoutes = (app: Express) => {
                 style: updated.style, thirdParty: updated.thirdParty, title: updated.title, translatedTitle: updated.translatedTitle, 
                 drawn: updated.drawn, artist: updated.artist, link: updated.link, commentary: updated.commentary, 
                 translatedCommentary: updated.translatedCommentary, bookmarks: updated.bookmarks, purchaseLink: updated.purchaseLink, mirrors: updated.mirrors, 
-                hasOriginal: updated.hasOriginal, hasUpscaled: updated.hasUpscaled, artists, characters, series, tags, reason})
+                hasOriginal: updated.hasOriginal, hasUpscaled: updated.hasUpscaled, artists, characters, series, tags, addedTags, removedTags, imageChanged: imgChanged,
+                changes, reason})
           } else {
               let newImages = [] as any
               for (let i = 0; i < unverified.images.length; i++) {
@@ -1584,6 +1643,17 @@ const CreateRoutes = (app: Express) => {
                     await serverFunctions.uploadFile(newImagePath, buffer, r18)
                   }
                   newImages.push(newImagePath)
+
+                  let result = await sql.history.postHistory(postID)
+                  if (result.length > 1) {
+                      const lastResult = result[result.length - 1]
+                      const penultResult = result[result.length - 2]
+                      const lastImage = lastResult.images[0]
+                      const penultImage = penultResult.images[0]
+                      if (penultImage?.startsWith("history/post") && !lastImage?.startsWith("history/post")) {
+                          await sql.history.updatePostHistory(lastResult.historyID, "images", penultResult.images)
+                      }
+                  }
                 } else {
                   newImages.push(functions.getImagePath(updated.images[i].type, newPostID, updated.images[i].order, updated.images[i].filename))
                 }
@@ -1594,7 +1664,8 @@ const CreateRoutes = (app: Express) => {
                 style: updated.style, thirdParty: updated.thirdParty, title: updated.title, translatedTitle: updated.translatedTitle, 
                 drawn: updated.drawn, artist: updated.artist, link: updated.link, commentary: updated.commentary, 
                 translatedCommentary: updated.translatedCommentary, bookmarks: updated.bookmarks, purchaseLink: updated.purchaseLink, mirrors: updated.mirrors, 
-                hasOriginal: updated.hasOriginal, hasUpscaled: updated.hasUpscaled, artists, characters, series, tags, reason})
+                hasOriginal: updated.hasOriginal, hasUpscaled: updated.hasUpscaled, artists, characters, series, tags, addedTags, removedTags, imageChanged: imgChanged,
+                changes, reason})
           }
         }
 
@@ -1623,7 +1694,9 @@ const CreateRoutes = (app: Express) => {
         await sql.post.deleteUnverifiedPost(Number(postID))
         for (let i = 0; i < unverified.images.length; i++) {
             const file = functions.getImagePath(unverified.images[i].type, unverified.postID, unverified.images[i].order, unverified.images[i].filename)
+            const upscaledFile = functions.getUpscaledImagePath(unverified.images[i].type, unverified.postID, unverified.images[i].order, unverified.images[i].filename)
             await serverFunctions.deleteUnverifiedFile(file)
+            await serverFunctions.deleteUnverifiedFile(upscaledFile)
         }
 
         let subject = "Notice: Post has been rejected"

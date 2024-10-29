@@ -78,7 +78,8 @@ export default class SQLReport {
                 SELECT * FROM "reported comments"
             )
             SELECT reports."replyID" AS id, reports."reportID", reports.type, reports.reporter,
-            reports."reportDate", reports.reason, users.image, users."imagePost"
+            reports."reportDate", reports.reason, users.image, users."imagePost",
+            COUNT(*) OVER() AS "reportCount"
             FROM reports
             JOIN users ON users.username = reports.reporter
             ORDER BY reports."reportDate" DESC

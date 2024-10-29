@@ -113,30 +113,44 @@ export default class SQLTag {
 
     /** Insert a new tag map. */
     public static insertTagMap = async (postID: number, tags: string[]) => {
+        if (!tags.length) return
         let i = 2
         let valueArray = [] as any
         for (let j = 0; j < tags.length; j++) {
-        valueArray.push(`($1, $${i})`)
-        i++
+            valueArray.push(`($1, $${i})`)
+            i++
         }
         let valueQuery = `VALUES ${valueArray.join(", ")}`
         const query: QueryArrayConfig = {
-        text: /*sql*/`INSERT INTO "tag map" ("postID", "tag") ${valueQuery}`,
-        rowMode: "array",
-        values: [postID, ...tags]
+            text: /*sql*/`INSERT INTO "tag map" ("postID", "tag") ${valueQuery}`,
+            rowMode: "array",
+            values: [postID, ...tags]
         }
         await SQLQuery.flushDB()
         const result = await SQLQuery.run(query)
         return result.flat(Infinity)[0] as number
     }
 
+    /** Delete tag map. */
+    public static deleteTagMap = async (postID: number, tags: string[]) => {
+        if (!tags.length) return
+        const tagPlaceholders = tags.map((value, index) => `$${index + 2}`).join(", ")
+        const query: QueryConfig = {
+            text: /*sql*/`DELETE FROM "tag map" WHERE "postID" = $1 AND "tag" IN (${tagPlaceholders})`,
+            values: [postID, ...tags]
+        }
+        await SQLQuery.flushDB()
+        return SQLQuery.run(query)
+    }
+
     /** Insert a new tag map (unverified). */
     public static insertUnverifiedTagMap = async (postID: number, tags: string[]) => {
+        if (!tags.length) return
         let i = 2
         let valueArray = [] as any
         for (let j = 0; j < tags.length; j++) {
-        valueArray.push(`($1, $${i})`)
-        i++
+            valueArray.push(`($1, $${i})`)
+            i++
         }
         let valueQuery = `VALUES ${valueArray.join(", ")}`
         const query: QueryArrayConfig = {
@@ -146,6 +160,18 @@ export default class SQLTag {
         }
         const result = await SQLQuery.run(query)
         return result.flat(Infinity)[0] as number
+    }
+
+    /** Delete tag map (unverified). */
+    public static deleteUnverifiedTagMap = async (postID: number, tags: string[]) => {
+        if (!tags.length) return
+        const tagPlaceholders = tags.map((value, index) => `$${index + 2}`).join(", ")
+        const query: QueryConfig = {
+            text: /*sql*/`DELETE FROM "unverified tag map" WHERE "postID" = $1 AND "tag" IN (${tagPlaceholders})`,
+            values: [postID, ...tags]
+        }
+        await SQLQuery.flushDB()
+        return SQLQuery.run(query)
     }
 
     /** Get tags. */

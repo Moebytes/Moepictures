@@ -33,6 +33,7 @@ import captchaImg from "../assets/misc/captcha.png"
 import pixivDownloaderImg from "../assets/misc/pixiv-downloader.png"
 import setAvatarImg from "../assets/misc/set-avatar.png"
 import musicImg from "../assets/misc/music.png"
+import selfPostImg from "../assets/misc/selfpost.png"
 import CaptchaDialog from "../dialogs/CaptchaDialog"
 import bookmarkletImg from "../assets/icons/bookmarklet.png"
 import functions from "../structures/Functions"
@@ -390,6 +391,25 @@ const HelpPage: React.FunctionComponent = (props) => {
                 <div className="help-img-container"><img className="help-img" src={taggingImg}/></div></>
             )
         }
+        if (helpTab === "self-posts") {
+            return (
+                <><span className="help-heading">Self Posts</span>
+                <span className="help-text">
+                    Although the vast majority of posts are reposts, you are also welcomed to post your own art. <br/><br/>
+
+                    You should tag uploads of your own artwork with <span className="help-alt">self post</span>. We also require that your 
+                    artist tag is the same as your username on moepictures. This will let you have access to the additional option 
+                    to private a post. <br/><br/> 
+
+                    You may make your own posts private at any time, so that they are only visible to yourself and moderators. However 
+                    do note that we don't allow post deletions even if you uploaded your own post without approval. <br/><br/>
+
+                    If another user has already taken your artist name please contact us at <span style={{marginRight: "10px"}} className="help-alt">moepictures.moe@gmail.com</span> 
+                    so that we can attempt to change their name.
+                </span>
+                <div className="help-img-container"><img className="help-img" src={selfPostImg}/></div></>
+            )
+        }
         if (helpTab === "upscaling") {
             return (
                 <><span className="help-heading">Upscaling</span>
@@ -460,15 +480,21 @@ const HelpPage: React.FunctionComponent = (props) => {
                     It supports the same sites as using "Enter Links" does, which are the following:<br/>
                     <a className="help-link" onClick={() => openLink("https://www.pixiv.net/")}>Pixiv</a><br/>
                     <a className="help-link" onClick={() => openLink("https://www.deviantart.com/")}>Deviantart</a><br/>
+                    <a className="help-link" onClick={() => openLink("https://www.artstation.com/")}>Artstation</a><br/>
                     <a className="help-link" onClick={() => openLink("https://www.reddit.com/")}>Reddit</a><br/>
+                    <a className="help-link" onClick={() => openLink("https://www.tumblr.com/")}>Tumblr</a><br/>
+                    <a className="help-link" onClick={() => openLink("https://imgur.com/")}>Imgur</a><br/>
                     <a className="help-link" onClick={() => openLink("https://www.pinterest.com/")}>Pinterest</a><br/>
                     <a className="help-link" onClick={() => openLink("https://medibang.com/")}>ARTStreet</a><br/>
+                    <a className="help-link" onClick={() => openLink("https://newgrounds.com/")}>Newgrounds</a><br/>
                     <a className="help-link" onClick={() => openLink("https://danbooru.donmai.us/")}>Danbooru</a><br/>
                     <a className="help-link" onClick={() => openLink("https://gelbooru.com/")}>Gelbooru</a><br/>
+                    <a className="help-link" onClick={() => openLink("https://safebooru.org/")}>Safebooru</a><br/>
                     <a className="help-link" onClick={() => openLink("https://yande.re/")}>Yandere</a><br/>
                     <a className="help-link" onClick={() => openLink("https://konachan.com/")}>Konachan</a><br/>
                     <a className="help-link" onClick={() => openLink("https://www.zerochan.net/")}>Zerochan</a><br/>
                     <a className="help-link" onClick={() => openLink("https://e-shuushuu.net/")}>E-Shuushuu</a><br/>
+                    <a className="help-link" onClick={() => openLink("https://anime-pictures.net/")}>Anime-Pictures</a><br/>
                 </span>
                 <div className="help-img-container"><img className="help-img" src={""}/></div></>
             )
@@ -699,6 +725,7 @@ const HelpPage: React.FunctionComponent = (props) => {
                         <span className="help-nav-text" onClick={() => setHelpTab("cuteness")}>Cuteness</span>
                         <span className="help-nav-text" onClick={() => setHelpTab("uploading")}>Uploading</span>
                         <span className="help-nav-text" onClick={() => setHelpTab("tagging")}>Tagging</span>
+                        <span className="help-nav-text" onClick={() => setHelpTab("self-posts")}>Self Posts</span>
                         <span className="help-nav-text" onClick={() => setHelpTab("upscaling")}>Upscaling</span>
                         <span className="help-nav-text" onClick={() => setHelpTab("compressing")}>Compressing</span>
                         <span className="help-nav-text" onClick={() => setHelpTab("pixiv-downloads")}>Pixiv Downloads</span>

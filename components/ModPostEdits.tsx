@@ -1,6 +1,7 @@
 import React, {useContext, useEffect, useState, useReducer} from "react"
 import {useHistory} from "react-router-dom"
-import {ThemeContext, SearchContext, SessionContext, SessionFlagContext, SearchFlagContext, SiteHueContext, SiteLightnessContext, SiteSaturationContext} from "../Context"
+import {ThemeContext, SearchContext, SessionContext, SessionFlagContext, SearchFlagContext, SiteHueContext, SiteLightnessContext, 
+SiteSaturationContext, MobileContext, ShowPageDialogContext, ModPageContext, ScrollContext, PageFlagContext, ModStateContext} from "../Context"
 import {HashLink as Link} from "react-router-hash-link"
 import approve from "../assets/icons/approve.png"
 import reject from "../assets/icons/reject.png"
@@ -23,6 +24,13 @@ const ModPostEdits: React.FunctionComponent = (props) => {
     const [index, setIndex] = useState(0)
     const [visiblePosts, setVisiblePosts] = useState([]) as any
     const [updateVisiblePostFlag, setUpdateVisiblePostFlag] = useState(false)
+    const {scroll, setScroll} = useContext(ScrollContext)
+    const {mobile, setMobile} = useContext(MobileContext)
+    const {pageFlag, setPageFlag} = useContext(PageFlagContext)
+    const {modPage, setModPage} = useContext(ModPageContext)
+    const {showPageDialog, setShowPageDialog} = useContext(ShowPageDialogContext)
+    const {modState, setModState} = useContext(ModStateContext)
+    const [queryPage, setQueryPage] = useState(1)
     const [offset, setOffset] = useState(0)
     const [ended, setEnded] = useState(false)
     const [imagesRef, setImagesRef] = useState([]) as any
@@ -77,27 +85,57 @@ const ModPostEdits: React.FunctionComponent = (props) => {
         setUpdateVisiblePostFlag(true)
     }
 
+    const getPageAmount = () => {
+        return 15
+    }
+
     useEffect(() => {
-        let currentIndex = index
-        const newVisiblePosts = visiblePosts as any
-        for (let i = 0; i < 10; i++) {
-            if (!unverifiedPosts[currentIndex]) break
-            newVisiblePosts.push(unverifiedPosts[currentIndex])
-            currentIndex++
+        const updatePosts = () => {
+            let currentIndex = index
+            const newVisiblePosts = visiblePosts as any
+            for (let i = 0; i < 10; i++) {
+                if (!unverifiedPosts[currentIndex]) break
+                newVisiblePosts.push(unverifiedPosts[currentIndex])
+                currentIndex++
+            }
+            setIndex(currentIndex)
+            setVisiblePosts(functions.removeDuplicates(newVisiblePosts))
+            const newImagesRef = newVisiblePosts.map(() => React.createRef()) as any
+            setImagesRef(newImagesRef) as any
         }
-        setIndex(currentIndex)
-        setVisiblePosts(functions.removeDuplicates(newVisiblePosts))
-        const newImagesRef = newVisiblePosts.map(() => React.createRef()) as any
-        setImagesRef(newImagesRef) as any
-    }, [unverifiedPosts])
+        if (scroll) updatePosts()
+    }, [unverifiedPosts, scroll])
 
     const updateOffset = async () => {
         if (ended) return
-        const newOffset = offset + 100
-        const result = await functions.get("/api/post-edits/list/unverified", {offset: newOffset}, session, setSessionFlag)
-        if (result?.length >= 100) {
+        let newOffset = offset + 100
+        let padded = false
+        if (!scroll) {
+            newOffset = (modPage - 1) * getPageAmount()
+            if (newOffset === 0) {
+                if (modPage[newOffset]?.fake) {
+                    padded = true
+                } else {
+                    return
+                }
+            }
+        }
+        let result = await functions.get("/api/post-edits/list/unverified", {offset: newOffset}, session, setSessionFlag)
+        let hasMore = result?.length >= 100
+        const cleanHistory = unverifiedPosts.filter((t: any) => !t.fake)
+        if (!scroll) {
+            if (cleanHistory.length <= newOffset) {
+                result = [...new Array(newOffset).fill({fake: true, postCount: cleanHistory[0]?.postCount}), ...result]
+                padded = true
+            }
+        }
+        if (hasMore) {
             setOffset(newOffset)
-            setUnverifiedPosts((prev: any) => functions.removeDuplicates([...prev, ...result]))
+            if (padded) {
+                setUnverifiedPosts(result)
+            } else {
+                setUnverifiedPosts((prev: any) => functions.removeDuplicates([...prev, ...result]))
+            }
             const originals = await functions.get("/api/posts", {postIDs: result.map((p: any) => p.originalID)}, session, setSessionFlag)
             for (const original of originals) {
                 originalPosts.set(original.postID, original)
@@ -105,7 +143,11 @@ const ModPostEdits: React.FunctionComponent = (props) => {
             forceUpdate()
         } else {
             if (result?.length) {
-                setUnverifiedPosts((prev: any) => functions.removeDuplicates([...prev, ...result]))
+                if (padded) {
+                    setUnverifiedPosts(result)
+                } else {
+                    setUnverifiedPosts((prev: any) => functions.removeDuplicates([...prev, ...result]))
+                }
                 const originals = await functions.get("/api/posts", {postIDs: result.map((p: any) => p.originalID)}, session, setSessionFlag)
                 for (const original of originals) {
                     originalPosts.set(original.postID, original)
@@ -131,16 +173,131 @@ const ModPostEdits: React.FunctionComponent = (props) => {
                 setVisiblePosts(functions.removeDuplicates(newPosts))
             }
         }
-        window.addEventListener("scroll", scrollHandler)
+        if (scroll) window.addEventListener("scroll", scrollHandler)
         return () => {
             window.removeEventListener("scroll", scrollHandler)
         }
-    })
+    }, [scroll, index, visiblePosts, modState, session])
+
+    useEffect(() => {
+        window.scrollTo(0, 0)
+        if (scroll) {
+            setEnded(false)
+            setIndex(0)
+            setVisiblePosts([])
+            setModPage(1)
+            updatePosts()
+        }
+    }, [scroll, modPage, modState, session])
+
+    useEffect(() => {
+        if (!scroll) updateOffset()
+    }, [modState])
+
+    useEffect(() => {
+        const updatePageOffset = () => {
+            const modOffset = (modPage - 1) * getPageAmount()
+            if (unverifiedPosts[modOffset]?.fake) {
+                setEnded(false)
+                return updateOffset()
+            }
+            const modAmount = Number(unverifiedPosts[0]?.postCount)
+            let maximum = modOffset + getPageAmount()
+            if (maximum > modAmount) maximum = modAmount
+            const maxTag = unverifiedPosts[maximum - 1]
+            if (!maxTag) {
+                setEnded(false)
+                updateOffset()
+            }
+        }
+        if (!scroll) updatePageOffset()
+    }, [scroll, unverifiedPosts, modPage, ended])
+
+    useEffect(() => {
+        if (unverifiedPosts?.length) {
+            const maxTagPage = maxPage()
+            if (maxTagPage === 1) return
+            if (queryPage > maxTagPage) {
+                setQueryPage(maxTagPage)
+                setModPage(maxTagPage)
+            }
+        }
+    }, [unverifiedPosts, modPage, queryPage])
+
+    useEffect(() => {
+        if (pageFlag) {
+            goToPage(pageFlag)
+            setPageFlag(null)
+        }
+    }, [pageFlag])
+
+    const maxPage = () => {
+        if (!unverifiedPosts?.length) return 1
+        if (Number.isNaN(Number(unverifiedPosts[0]?.postCount))) return 10000
+        return Math.ceil(Number(unverifiedPosts[0]?.postCount) / getPageAmount())
+    }
+
+    const firstPage = () => {
+        setModPage(1)
+        window.scrollTo(0, 0)
+    }
+
+    const previousPage = () => {
+        let newPage = modPage - 1 
+        if (newPage < 1) newPage = 1 
+        setModPage(newPage)
+        window.scrollTo(0, 0)
+    }
+
+    const nextPage = () => {
+        let newPage = modPage + 1 
+        if (newPage > maxPage()) newPage = maxPage()
+        setModPage(newPage)
+        window.scrollTo(0, 0)
+    }
+
+    const lastPage = () => {
+        setModPage(maxPage())
+        window.scrollTo(0, 0)
+    }
+
+    const goToPage = (newPage: number) => {
+        setModPage(newPage)
+        window.scrollTo(0, 0)
+    }
+
+    const generatePageButtonsJSX = () => {
+        const jsx = [] as any
+        let buttonAmount = 7
+        if (mobile) buttonAmount = 3
+        if (maxPage() < buttonAmount) buttonAmount = maxPage()
+        let counter = 0
+        let increment = -3
+        if (modPage > maxPage() - 3) increment = -4
+        if (modPage > maxPage() - 2) increment = -5
+        if (modPage > maxPage() - 1) increment = -6
+        if (mobile) {
+            increment = -2
+            if (modPage > maxPage() - 2) increment = -3
+            if (modPage > maxPage() - 1) increment = -4
+        }
+        while (counter < buttonAmount) {
+            const pageNumber = modPage + increment
+            if (pageNumber > maxPage()) break
+            if (pageNumber >= 1) {
+                jsx.push(<button key={pageNumber} className={`page-button ${increment === 0 ? "page-button-active" : ""}`} onClick={() => goToPage(pageNumber)}>{pageNumber}</button>)
+                counter++
+            }
+            increment++
+        }
+        return jsx
+    }
 
     const loadImages = async () => {
         for (let i = 0; i < visiblePosts.length; i++) {
             const post = visiblePosts[i]
             const ref = imagesRef[i]
+            if (post.fake) continue
             const img = functions.getUnverifiedThumbnailLink(post.images[0].type, post.postID, post.images[0].order, post.images[0].filename, "tiny")
             if (functions.isGIF(img)) continue
             if (!ref.current) continue
@@ -166,18 +323,26 @@ const ModPostEdits: React.FunctionComponent = (props) => {
         loadImages()
     }, [visiblePosts])
 
-    const calculateDiff = (prevTags: string[], newTags: string[]) => {
-        const addedTags = newTags.filter((tag: string) => !prevTags.includes(tag)).map((tag: string) => `+${tag}`)
-        const removedTags = prevTags.filter((tag: string) => !newTags.includes(tag)).map((tag: string) =>`-${tag}`)
-        const addedTagsJSX = addedTags.map((tag: string) => <span className="tag-add">{tag}</span>)
-        const removedTagsJSX = removedTags.map((tag: string) => <span className="tag-remove">{tag}</span>)
+    useEffect(() => {
+        if (!scroll) {
+            const offset = (modPage - 1) * getPageAmount()
+            let visiblePosts = unverifiedPosts.slice(offset, offset + getPageAmount())
+            setVisiblePosts(visiblePosts)
+            const newImagesRef = visiblePosts.map(() => React.createRef()) as any
+            setImagesRef(newImagesRef)
+        }
+    }, [scroll, modPage, unverifiedPosts])
+
+    const calculateDiff = (addedTags: string[], removedTags: string[]) => {
+        const addedTagsJSX = addedTags.map((tag: string) => <span className="tag-add">+{tag}</span>)
+        const removedTagsJSX = removedTags.map((tag: string) => <span className="tag-remove">-{tag}</span>)
         if (![...addedTags, ...removedTags].length) return null
         return [...addedTagsJSX, ...removedTagsJSX]
     }
 
     const tagsDiff = (originalPost: any, newPost: any) => {
         if (!originalPost) return newPost.tags.join(" ")
-        return calculateDiff(originalPost.tags, newPost.tags)
+        return calculateDiff(newPost.addedTags, newPost.removedTags)
     }
 
     const printMirrors = (newPost: any) => {
@@ -192,55 +357,53 @@ const ModPostEdits: React.FunctionComponent = (props) => {
     const diffJSX = (originalPost: any, newPost: any) => {
         let jsx = [] as React.ReactElement[]
         if (!originalPost) return []
-        if (!originalPost || (originalPost?.images.length !== newPost.images.length)) {
-            if (!originalPost && newPost.images.length <= 1) {
-                // ignore condition
-            } else {
-                jsx.push(<span className="mod-post-text"><span className="mod-post-label">Images:</span> {newPost.images.length}</span>)
-            }
+        const changes = newPost.changes || {}
+        let tagChanges = newPost.addedTags.length || newPost.removedTags.length
+        if (changes.images) {
+            jsx.push(<span className="mod-post-text"><span className="mod-post-label">Images:</span> {newPost.images.length}</span>)
         }
-        if (!originalPost || (originalPost?.type !== newPost.type)) {
+        if (changes.type) {
             jsx.push(<span className="mod-post-text"><span className="mod-post-label">Type:</span> {functions.toProperCase(newPost.type)}</span>)
         }
-        if (!originalPost || (originalPost?.restrict !== newPost.restrict)) {
+        if (changes.restrict) {
             jsx.push(<span className="mod-post-text"><span className="mod-post-label">Restrict:</span> {functions.toProperCase(newPost.restrict)}</span>)
         }
-        if (!originalPost || (originalPost?.style !== newPost.style)) {
+        if (changes.style) {
             jsx.push(<span className="mod-post-text"><span className="mod-post-label">Style:</span> {functions.toProperCase(newPost.style)}</span>)
         }
-        if (!originalPost || (originalPost?.tags !== newPost.tags)) {
+        if (tagChanges) {
             if (tagsDiff(originalPost, newPost)) {
                 jsx.push(<span className="mod-post-text"><span className="mod-post-label">Tags:</span> {tagsDiff(originalPost, newPost)}</span>)
             }
         }
-        if (!originalPost || (originalPost?.title !== newPost.title)) {
+        if (changes.title) {
             jsx.push(<span className="mod-post-text"><span className="mod-post-label">Title:</span> {newPost.title || "None"}</span>)
         }
-        if (!originalPost || (originalPost?.translatedTitle !== newPost.translatedTitle)) {
+        if (changes.translatedTitle) {
             jsx.push(<span className="mod-post-text"><span className="mod-post-label">Translated Title:</span> {newPost.translatedTitle || "None"}</span>)
         }
-        if (!originalPost || (originalPost?.artist !== newPost.artist)) {
+        if (changes.artist) {
             jsx.push(<span className="mod-post-text"><span className="mod-post-label">Artist:</span> {newPost.artist || "Unknown"}</span>)
         }
-        if (!originalPost || (originalPost?.drawn !== newPost.drawn)) {
+        if (changes.drawn) {
             jsx.push(<span className="mod-post-text"><span className="mod-post-label">Drawn:</span> {newPost.drawn ? functions.formatDate(new Date(newPost.drawn)) : "Unknown"}</span>)
         }
-        if (!originalPost || (originalPost?.link !== newPost.link)) {
+        if (changes.link) {
             jsx.push(<span className="mod-post-text"><span className="mod-post-label">Link:</span> <span className="mod-post-link" onClick={() => window.open(newPost.link, "_blank")}>{functions.getSiteName(newPost.link)}</span></span>)
         }
-        if (!originalPost || (JSON.stringify(originalPost?.mirrors) !== JSON.stringify(newPost.mirrors))) {
+        if (changes.mirrors) {
             jsx.push(<span className="mod-post-text"><span className="mod-post-label">Mirrors:</span> {printMirrors(newPost)}</span>)
         }
-        if (!originalPost || (originalPost?.bookmarks !== newPost.bookmarks)) {
+        if (changes.bookmarks) {
             jsx.push(<span className="mod-post-text"><span className="mod-post-label">Bookmarks:</span> {newPost.bookmarks || "?"}</span>)
         }
-        if (!originalPost || (originalPost?.purchaseLink !== newPost.purchaseLink)) {
+        if (changes.purchaseLink) {
             jsx.push(<span className="mod-post-text"><span className="mod-post-label">Buy Link:</span> {newPost.purchaseLink || "None"}</span>)
         }
-        if (!originalPost || (originalPost?.commentary !== newPost.commentary)) {
+        if (changes.commentary) {
             jsx.push(<span className="mod-post-text"><span className="mod-post-label">Commentary:</span> {newPost.commentary || "None"}</span>)
         }
-        if (!originalPost || (originalPost?.translatedCommentary !== newPost.translatedCommentary)) {
+        if (changes.translatedCommentary) {
             jsx.push(<span className="mod-post-text"><span className="mod-post-label">Translated Commentary:</span> {newPost.translatedCommentary || "None"}</span>)
         }
         return jsx
@@ -248,8 +411,14 @@ const ModPostEdits: React.FunctionComponent = (props) => {
 
     const generatePostsJSX = () => {
         let jsx = [] as any
-        const posts = functions.removeDuplicates(visiblePosts)
-        if (!posts.length) {
+        let visible = [] as any
+        if (scroll) {
+            visible = functions.removeDuplicates(visiblePosts) as any
+        } else {
+            const offset = (modPage - 1) * getPageAmount()
+            visible = unverifiedPosts.slice(offset, offset + getPageAmount())
+        }
+        if (!visible.length) {
             return (
                 <div className="mod-post" style={{justifyContent: "center", alignItems: "center", height: "75px"}} 
                 onMouseEnter={() =>setHover(true)} onMouseLeave={() => setHover(false)} key={0}>
@@ -259,9 +428,10 @@ const ModPostEdits: React.FunctionComponent = (props) => {
                 </div>
             )
         }
-        for (let i = 0; i < posts.length; i++) {
-            const post = posts[i] as any
+        for (let i = 0; i < visible.length; i++) {
+            const post = visible[i] as any
             if (!post) break
+            if (post.fake) continue
             const originalPost = originalPosts.get(post.originalID)
             const imgClick = (event?: any, middle?: boolean) => {
                 if (middle) return window.open(`/unverified/post/${post.postID}`, "_blank")
@@ -291,6 +461,18 @@ const ModPostEdits: React.FunctionComponent = (props) => {
                             <span className="mod-post-options-text">Approve</span>
                         </div>
                     </div>
+                </div>
+            )
+        }
+        if (!scroll) {
+            jsx.push(
+                <div key="page-numbers" className="page-container">
+                    {modPage <= 1 ? null : <button className="page-button" onClick={firstPage}>{"<<"}</button>}
+                    {modPage <= 1 ? null : <button className="page-button" onClick={previousPage}>{"<"}</button>}
+                    {generatePageButtonsJSX()}
+                    {modPage >= maxPage() ? null : <button className="page-button" onClick={nextPage}>{">"}</button>}
+                    {modPage >= maxPage() ? null : <button className="page-button" onClick={lastPage}>{">>"}</button>}
+                    {maxPage() > 1 ? <button className="page-button" onClick={() => setShowPageDialog(true)}>{"?"}</button> : null}
                 </div>
             )
         }

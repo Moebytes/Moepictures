@@ -258,8 +258,6 @@ const TagHistoryRow: React.FunctionComponent<Props> = (props) => {
         return jsx
     }
 
-    //if (!hasAnyUpdate) return null
-
     return (
         <div className="historyrow">
             {session.username ? tagHistoryOptions() : null}
@@ -273,6 +271,7 @@ const TagHistoryRow: React.FunctionComponent<Props> = (props) => {
                     <div className="historyrow-user-container">
                         {dateTextJSX()}
                         {hasImageUpdate ? <span className="historyrow-text-strong">[Image Updated]</span> : null}
+                        {!hasAnyUpdate ? <span className="historyrow-text-strong">[Image Stored]</span> : null}
                         {diffJSX()}
                         {props.tagHistory.reason ? <span className="historyrow-text"><span className="historyrow-label-text">Reason:</span> {props.tagHistory.reason}</span> : null}
                     </div>

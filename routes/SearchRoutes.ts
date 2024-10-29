@@ -22,7 +22,7 @@ const searchLimiter = rateLimit({
 const SearchRoutes = (app: Express) => {
     app.get("/api/search/posts", searchLimiter, async (req: Request, res: Response, next: NextFunction) => {
         try {
-            const query = req.query.query as string
+            let query = req.query.query as string
             const type = req.query.type as string
             const restrict = req.query.restrict as string
             const style = req.query.style as string
@@ -30,6 +30,7 @@ const SearchRoutes = (app: Express) => {
             const offset = req.query.offset as string
             const limit = req.query.limit as string
             let withTags = req.query.withTags === "true"
+            if (!query) query = ""
             if (!functions.validType(type, true)) return res.status(400).send("Invalid type")
             if (!functions.validRestrict(restrict, true)) return res.status(400).send("Invalid restrict")
             if (restrict === "explicit") if (!req.session.showR18) return res.status(403).end()
@@ -44,11 +45,16 @@ const SearchRoutes = (app: Express) => {
                 }
             }
             let result = [] as any
-            if (tags.length > 3 || sort === "bookmarks" || sort === "reverse bookmarks") {
+            if (tags?.length > 3 || sort === "bookmarks" || sort === "reverse bookmarks") {
                 if (!permissions.isPremium(req.session)) return res.status(402).send("Premium only")
             }
             if (sort === "favorites" || sort === "reverse favorites") {
                 if (!req.session.username) return res.status(403).send("Unauthorized")
+            }
+            if (sort === "hidden" || sort === "reverse hidden" || 
+                sort === "locked" || sort === "reverse locked" ||
+                sort === "private" || sort === "reverse private") {
+                if (!permissions.isMod(req.session)) return res.status(403).send("Unauthorized")
             }
             if (sort === "tagcount" || sort === "reverse tagcount") withTags = true
             if (query.startsWith("pixiv:") || query.includes("pixiv.net")) {
@@ -112,6 +118,13 @@ const SearchRoutes = (app: Express) => {
             if (!req.session.showR18) {
                 result = result.filter((p: any) => p.restrict !== "explicit")
             }
+            for (let i = result.length - 1; i >= 0; i--) {
+                const post = result[i]
+                if (post.private) {
+                    const categories = await serverFunctions.tagCategories(post.tags)
+                    if (!permissions.canPrivate(req.session, categories.artists)) result.splice(i, 1)
+                }
+            }
             res.status(200).json(result)
         } catch (e) {
             console.log(e)
@@ -163,7 +176,23 @@ const SearchRoutes = (app: Express) => {
             if (!functions.validCategorySort(sort)) return res.status(400).send("Invalid sort")
             const search = query?.trim().split(/ +/g).filter(Boolean).join("-")
             let result = await sql.search.tagCategory("artists", sort, search, limit, offset)
-            result = functions.stripTags(result)
+            for (let i = 0; i < result.length; i++) {
+                const artist = result[i]
+                artist.posts = functions.stripTags(artist.posts)
+                if (!permissions.isMod(req.session)) {
+                    artist.posts = artist.posts.filter((p: any) => !p?.hidden)
+                }
+                if (!req.session.showR18) {
+                    artist.posts = artist.posts.filter((p: any) => p?.restrict !== "explicit")
+                }
+                for (let i = artist.posts.length - 1; i >= 0; i--) {
+                    const post = artist.posts[i]
+                    if (post.private) {
+                        const categories = await serverFunctions.tagCategories(post.tags)
+                        if (!permissions.canPrivate(req.session, categories.artists)) artist.posts.splice(i, 1)
+                    }
+                }
+            }
             res.status(200).json(result)
         } catch (e) {
             console.log(e)
@@ -180,7 +209,23 @@ const SearchRoutes = (app: Express) => {
             if (!functions.validCategorySort(sort)) return res.status(400).send("Invalid sort")
             const search = query?.trim().split(/ +/g).filter(Boolean).join("-")
             let result = await sql.search.tagCategory("characters", sort, search, limit, offset)
-            result = functions.stripTags(result)
+            for (let i = 0; i < result.length; i++) {
+                const character = result[i]
+                character.posts = functions.stripTags(character.posts)
+                if (!permissions.isMod(req.session)) {
+                    character.posts = character.posts.filter((p: any) => !p?.hidden)
+                }
+                if (!req.session.showR18) {
+                    character.posts = character.posts.filter((p: any) => p?.restrict !== "explicit")
+                }
+                for (let i = character.posts.length - 1; i >= 0; i--) {
+                    const post = character.posts[i]
+                    if (post.private) {
+                        const categories = await serverFunctions.tagCategories(post.tags)
+                        if (!permissions.canPrivate(req.session, categories.artists)) character.posts.splice(i, 1)
+                    }
+                }
+            }
             res.status(200).json(result)
         } catch (e) {
             console.log(e)
@@ -197,7 +242,23 @@ const SearchRoutes = (app: Express) => {
             if (!functions.validCategorySort(sort)) return res.status(400).send("Invalid sort")
             const search = query?.trim().split(/ +/g).filter(Boolean).join("-")
             let result = await sql.search.tagCategory("series", sort, search, limit, offset)
-            result = functions.stripTags(result)
+            for (let i = 0; i < result.length; i++) {
+                const series = result[i]
+                series.posts = functions.stripTags(series.posts)
+                if (!permissions.isMod(req.session)) {
+                    series.posts = series.posts.filter((p: any) => !p?.hidden)
+                }
+                if (!req.session.showR18) {
+                    series.posts = series.posts.filter((p: any) => p?.restrict !== "explicit")
+                }
+                for (let i = series.posts.length - 1; i >= 0; i--) {
+                    const post = series.posts[i]
+                    if (post.private) {
+                        const categories = await serverFunctions.tagCategories(post.tags)
+                        if (!permissions.canPrivate(req.session, categories.artists)) series.posts.splice(i, 1)
+                    }
+                }
+            }
             res.status(200).json(result)
         } catch (e) {
             console.log(e)
@@ -255,6 +316,19 @@ const SearchRoutes = (app: Express) => {
                 result = await sql.comment.searchCommentsByUsername(usernames, parsedSearch.trim(), sort, offset)
             } else {
                 result = await sql.comment.searchComments(parsedSearch.trim(), sort, offset)
+            }
+            for (let i = result.length - 1; i >= 0; i--) {
+                const comment = result[i]
+                if (!permissions.isMod(req.session)) {
+                    if (comment.post.hidden) result.splice(i, 1)
+                }
+                if (!req.session.showR18) {
+                    if (comment.post.restrict === "explicit") result.splice(i, 1)
+                }
+                if (comment.post.private) {
+                    const categories = await serverFunctions.tagCategories(comment.post.tags)
+                    if (!permissions.canPrivate(req.session, categories.artists)) result.splice(i, 1)
+                }
             }
             res.status(200).json(result)
         } catch (e) {
@@ -368,6 +442,7 @@ const SearchRoutes = (app: Express) => {
             const query = req.query.query as string
             let sort = req.query.sort as string
             const offset = req.query.offset as string
+            const hideSystem = req.query.hideSystem === "true"
             if (!functions.validThreadSort(sort)) return res.status(400).send("Invalid sort")
             if (!req.session.username) return res.status(403).send("Unauthorized")
             const search = query?.trim() ?? ""
@@ -375,6 +450,10 @@ const SearchRoutes = (app: Express) => {
             let filtered = [] as any
             let messageCount = messages[0]?.messageCount || 0
             for (const message of messages) {
+                if (hideSystem && message.creator === "moepictures") {
+                    messageCount--
+                    continue
+                }
                 if (message.creator === req.session.username) {
                     if (message.delete) {
                         messageCount--

@@ -27,6 +27,16 @@ export default class SQLHistory {
         return result
     }
 
+    /** Update tag history */
+    public static updateTagHistory = async (historyID: number, column: string, value: string | number | boolean) => {
+        const query: QueryConfig = {
+            text: /*sql*/`UPDATE "tag history" SET "${column}" = $1 WHERE "historyID" = $2`,
+            values: [value, historyID]
+        }
+        await SQLQuery.flushDB()
+        return SQLQuery.run(query)
+    }
+
     /** Get tag history */
     public static tagHistory = async (tag?: string, offset?: string) => {
         let i = 1
@@ -90,19 +100,20 @@ export default class SQLHistory {
         updater?: string, uploadDate: string, updatedDate: string, type: string, restrict: string, style: string, thirdParty: string, 
         title: string, translatedTitle: string, drawn: string, artist: string, link: string, hasUpscaled: boolean, hasOriginal: boolean,
         commentary: string, translatedCommentary: string, bookmarks: string, purchaseLink: string, mirrors: string, artists: string[], characters: string[], 
-        series: string[], tags: string[], reason: string}) => {
+        series: string[], tags: string[], addedTags: string[], removedTags: string[], imageChanged: boolean, changes: any, reason: string}) => {
         const {postID, username, images, uploader, updater, uploadDate, updatedDate, type, restrict, style, thirdParty, title, 
         translatedTitle, drawn, artist, link, commentary, translatedCommentary, bookmarks, purchaseLink, mirrors, hasOriginal, hasUpscaled, 
-        artists, characters, series, tags, reason} = options
+        artists, characters, series, tags, addedTags, removedTags, imageChanged, changes, reason} = options
         const now = new Date().toISOString()
         const query: QueryConfig = {
         text: /*sql*/`INSERT INTO "post history" ("postID", "user", "date", "images", "uploader", "updater", "uploadDate", "updatedDate",
-        "type", "restrict", "style", "thirdParty", "title", "translatedTitle", "drawn", "artist", "link", "commentary",
-        "translatedCommentary", "bookmarks", "purchaseLink", "mirrors", "hasOriginal", "hasUpscaled", "artists", "characters", "series", "tags", "reason") VALUES ($1, $2, 
-            $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25, $26, $27, $28, $29)`,
-            values: [postID, username, now, images, uploader, updater, uploadDate, updatedDate, type, restrict, style, thirdParty, 
-            title, translatedTitle, drawn, artist, link, commentary, translatedCommentary, bookmarks, purchaseLink, mirrors, hasOriginal, hasUpscaled, 
-            artists, characters, series, tags, reason]
+        "type", "restrict", "style", "thirdParty", "title", "translatedTitle", "drawn", "artist", "link", "commentary", "translatedCommentary", 
+        "bookmarks", "purchaseLink", "mirrors", "hasOriginal", "hasUpscaled", "artists", "characters", "series", "tags", "addedTags", "removedTags",
+        "imageChanged", "changes", "reason") VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, 
+            $22, $23, $24, $25, $26, $27, $28, $29, $30, $31, $32, $33)`,
+            values: [postID, username, now, images, uploader, updater, uploadDate, updatedDate, type, restrict, style, thirdParty, title, translatedTitle, 
+            drawn, artist, link, commentary, translatedCommentary, bookmarks, purchaseLink, mirrors, hasOriginal, hasUpscaled, artists, characters, series, 
+            tags, addedTags, removedTags, imageChanged, changes, reason]
         }
         await SQLQuery.flushDB()
         const result = await SQLQuery.run(query)
@@ -118,6 +129,16 @@ export default class SQLHistory {
         await SQLQuery.flushDB()
         const result = await SQLQuery.run(query)
         return result
+    }
+
+    /** Update post history */
+    public static updatePostHistory = async (historyID: number, column: string, value: string | number | boolean) => {
+        const query: QueryConfig = {
+            text: /*sql*/`UPDATE "post history" SET "${column}" = $1 WHERE "historyID" = $2`,
+            values: [value, historyID]
+        }
+        await SQLQuery.flushDB()
+        return SQLQuery.run(query)
     }
 
     /** Get post history */
@@ -454,6 +475,12 @@ export default class SQLHistory {
         if (sort === "reverse height") sortQuery = `ORDER BY post_json."imageHeight" ASC`
         if (sort === "bookmarks") sortQuery = `ORDER BY post_json.bookmarks DESC NULLS LAST`
         if (sort === "reverse bookmarks") sortQuery = `ORDER BY post_json.bookmarks ASC NULLS LAST`
+        if (sort === "hidden") sortQuery = `ORDER BY posts.hidden DESC NULLS LAST`
+        if (sort === "reverse hidden") sortQuery = `ORDER BY posts.hidden ASC NULLS LAST`
+        if (sort === "locked") sortQuery = `ORDER BY posts.locked DESC NULLS LAST`
+        if (sort === "reverse locked") sortQuery = `ORDER BY posts.locked ASC NULLS LAST`
+        if (sort === "private") sortQuery = `ORDER BY posts.private DESC NULLS LAST`
+        if (sort === "reverse private") sortQuery = `ORDER BY posts.private ASC NULLS LAST`
         let includeTags = sort === "tagcount" || sort === "reverse tagcount"
         let i = 2
         let values = [] as any

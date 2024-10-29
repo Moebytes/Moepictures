@@ -42,6 +42,10 @@ const PostRoutes = (app: Express) => {
             if (!req.session.showR18) {
                 if (result.restrict === "explicit") return res.status(403).end()
             }
+            if (result.private) {
+                const categories = await serverFunctions.tagCategories(result.tags)
+                if (!permissions.canPrivate(req.session, categories.artists)) return res.status(403).end()
+            }
             if (result?.images.length > 1) {
                 result.images = result.images.sort((a: any, b: any) => a.order - b.order)
             }
@@ -66,6 +70,13 @@ const PostRoutes = (app: Express) => {
             if (!req.session.showR18) {
                 result = result.filter((p: any) => p.restrict !== "explicit")
             }
+            for (let i = result.length - 1; i >= 0; i--) {
+                const post = result[i]
+                if (post.private) {
+                    const categories = await serverFunctions.tagCategories(post.tags)
+                    if (!permissions.canPrivate(req.session, categories.artists)) result.splice(i, 1)
+                }
+            }
             if (req.session.captchaNeeded) result = functions.stripTags(result)
             res.status(200).json(result)
         } catch (e) {
@@ -86,6 +97,10 @@ const PostRoutes = (app: Express) => {
             if (!req.session.showR18) {
                 if (result.restrict === "explicit") return res.status(403).end()
             }
+            if (result.private) {
+                const categories = await serverFunctions.tagCategories(result.tags)
+                if (!permissions.canPrivate(req.session, categories.artists)) return res.status(403).end()
+            }
             if (req.session.captchaNeeded) delete result.tags
             res.status(200).json(result)
         } catch (e) {
@@ -104,6 +119,10 @@ const PostRoutes = (app: Express) => {
             }
             if (!req.session.showR18) {
                 if (result.restrict === "explicit") return res.status(403).end()
+            }
+            if (result.private) {
+                const categories = await serverFunctions.tagCategories(result.tags)
+                if (!permissions.canPrivate(req.session, categories.artists)) return res.status(403).end()
             }
             res.status(200).json(result)
         } catch (e) {
@@ -149,6 +168,7 @@ const PostRoutes = (app: Express) => {
             } else {
                 await sql.post.updatePost(Number(postID), "hidden", true)
             }
+            await sql.flushDB()
             res.status(200).send("Success")
         } catch (e) {
             console.log(e) 
@@ -163,12 +183,35 @@ const PostRoutes = (app: Express) => {
             if (!req.session.username) return res.status(403).send("Unauthorized")
             if (!permissions.isMod(req.session)) return res.status(403).end()
             const post = await sql.post.post(Number(postID)).catch(() => null)
-            if (!post) return res.status(404).send("Doesn't exist")
+            if (!post) return res.status(404).send("Post doesn't exist")
             if (post.locked) {
                 await sql.post.updatePost(Number(postID), "locked", false)
             } else {
                 await sql.post.updatePost(Number(postID), "locked", true)
             }
+            await sql.flushDB()
+            res.status(200).send("Success")
+        } catch (e) {
+            console.log(e) 
+            res.status(400).send("Bad request")
+        }
+    })
+
+    app.post("/api/post/private", csrfProtection, postUpdateLimiter, async (req: Request, res: Response) => {
+        try {
+            const {postID} = req.body
+            if (Number.isNaN(Number(postID))) return res.status(400).send("Invalid postID")
+            if (!req.session.username) return res.status(403).send("Unauthorized")
+            const post = await sql.post.post(Number(postID)).catch(() => null)
+            if (!post) return res.status(404).send("Post doesn't exist")
+            const categories = await serverFunctions.tagCategories(post.tags)
+            if (!permissions.canPrivate(req.session, categories.artists)) return res.status(403).end()
+            if (post.private) {
+                await sql.post.updatePost(Number(postID), "private", false)
+            } else {
+                await sql.post.updatePost(Number(postID), "private", true)
+            }
+            await sql.flushDB()
             res.status(200).send("Success")
         } catch (e) {
             console.log(e) 
@@ -186,6 +229,13 @@ const PostRoutes = (app: Express) => {
             }
             if (!req.session.showR18) {
                 posts = posts.filter((p: any) => p?.restrict !== "explicit")
+            }
+            for (let i = posts.length - 1; i >= 0; i--) {
+                const post = posts[i]
+                if (post.private) {
+                    const categories = await serverFunctions.tagCategories(post.tags)
+                    if (!permissions.canPrivate(req.session, categories.artists)) posts.splice(i, 1)
+                }
             }
             posts = functions.stripTags(posts)
             res.status(200).json(posts)
@@ -206,6 +256,10 @@ const PostRoutes = (app: Express) => {
             }
             if (!req.session.showR18) {
                 if (post.restrict === "explicit") return res.status(403).end()
+            }
+            if (post.private) {
+                const categories = await serverFunctions.tagCategories(post.tags)
+                if (!permissions.canPrivate(req.session, categories.artists)) return res.status(403).end()
             }
             delete post.tags
             res.status(200).json(post)
@@ -361,6 +415,10 @@ const PostRoutes = (app: Express) => {
             if (!post) return res.status(400).send("Bad request")
             if (post.locked && !permissions.isMod(req.session)) return res.status(403).send("Unauthorized")
 
+
+            let addedTags = [] as string[]
+            let removedTags = [] as string[]
+
             if (sourceEdit) {
                 const updatedDate = new Date().toISOString()
 
@@ -438,57 +496,59 @@ const PostRoutes = (app: Express) => {
                     })
                 }
         
-                let tagMap = [] as any
+                let oldTagsSet = new Set<string>(post.tags)
+                let newTagsSet = new Set<string>([...artists, ...characters, ...series, ...tags])
+                addedTags = [...newTagsSet].filter(tag => !oldTagsSet.has(tag)).filter(Boolean)
+                removedTags = [...oldTagsSet].filter(tag => !newTagsSet.has(tag)).filter(Boolean)
+
                 let bulkTagUpdate = [] as any
         
                 for (let i = 0; i < artists.length; i++) {
-                if (!artists[i]) continue
-                let bulkObj = {tag: artists[i], type: "artist", description: "Artist.", image: null} as any
-                bulkTagUpdate.push(bulkObj)
-                tagMap.push(artists[i])
+                    if (!artists[i]) continue
+                    let bulkObj = {tag: artists[i], type: "artist", description: "Artist.", image: null} as any
+                    bulkTagUpdate.push(bulkObj)
                 }
                 
                 for (let i = 0; i < characters.length; i++) {
                     if (!characters[i]) continue
                     let bulkObj = {tag: characters[i], type: "character", description: "Character.", image: null} as any
                     bulkTagUpdate.push(bulkObj)
-                    tagMap.push(characters[i])
                 }
 
                 for (let i = 0; i < series.length; i++) {
                     if (!series[i]) continue
                     let bulkObj = {tag: series[i], type: "series", description: "Series.", image: null} as any
                     bulkTagUpdate.push(bulkObj)
-                    tagMap.push(series[i])
                 }
 
                 for (let i = 0; i < tags.length; i++) {
                     if (!tags[i]) continue
-                    let bulkObj = {tag: tags[i], type: functions.tagType(tags[i]), description: `${functions.toProperCase(tags[i]).replaceAll("-", " ")}.`, image: null} as any
-                    bulkTagUpdate.push(bulkObj)
-                    tagMap.push(tags[i])
+                    if (addedTags.includes(tags[i])) {
+                        let bulkObj = {tag: tags[i], type: functions.tagType(tags[i]), description: `${functions.toProperCase(tags[i]).replaceAll("-", " ")}.`, image: null} as any
+                        bulkTagUpdate.push(bulkObj)
+                    }
                 }
 
-                for (let i = 0; i < tagMap.length; i++) {
-                    const implications = await sql.tag.implications(tagMap[i])
+                for (let i = 0; i < addedTags.length; i++) {
+                    const implications = await sql.tag.implications(addedTags[i])
                     if (implications?.[0]) {
                         for (const i of implications) {
-                        tagMap.push(i.implication)
-                        const tag = await sql.tag.tag(i.implication)
-                        bulkTagUpdate.push({tag: i.implication, type: functions.tagType(i.implication), description: tag?.description || null, image: tag?.image || null})
+                            addedTags.push(i.implication)
+                            const tag = await sql.tag.tag(i.implication)
+                            bulkTagUpdate.push({tag: i.implication, type: functions.tagType(i.implication), description: tag?.description || null, image: tag?.image || null})
                         }
                     }
                 }
-        
-                tagMap = functions.removeDuplicates(tagMap)
+
+                addedTags = functions.removeDuplicates(addedTags)
                 if (unverified) {
-                    await sql.tag.purgeUnverifiedTagMap(postID)
                     await sql.tag.bulkInsertUnverifiedTags(bulkTagUpdate, true)
-                    await sql.tag.insertUnverifiedTagMap(postID, tagMap)
+                    await sql.tag.deleteUnverifiedTagMap(postID, removedTags)
+                    await sql.tag.insertUnverifiedTagMap(postID, addedTags)
                 } else {
-                    await sql.tag.purgeTagMap(postID)
                     await sql.tag.bulkInsertTags(bulkTagUpdate, req.session.username, true)
-                    await sql.tag.insertTagMap(postID, tagMap)
+                    await sql.tag.deleteTagMap(postID, removedTags)
+                    await sql.tag.insertTagMap(postID, addedTags)
                     
                     await serverFunctions.migratePost(post, oldR18, newR18)
                 }
@@ -506,6 +566,8 @@ const PostRoutes = (app: Express) => {
             updated.characters = updatedCategories.characters.map((c: any) => c.tag)
             updated.series = updatedCategories.series.map((s: any) => s.tag)
             updated.tags = updatedCategories.tags.map((t: any) => t.tag)
+
+            const changes = functions.parsePostChanges(post, updated)
 
             const postHistory = await sql.history.postHistory(postID)
             if (!postHistory.length) {
@@ -527,7 +589,8 @@ const PostRoutes = (app: Express) => {
                     style: vanilla.style, thirdParty: vanilla.thirdParty, title: vanilla.title, translatedTitle: vanilla.translatedTitle, 
                     drawn: vanilla.drawn, artist: vanilla.artist, link: vanilla.link, commentary: vanilla.commentary, translatedCommentary: vanilla.translatedCommentary, 
                     bookmarks: vanilla.bookmarks, purchaseLink: vanilla.purchaseLink, mirrors: vanilla.mirrors, hasOriginal: vanilla.hasOriginal, hasUpscaled: vanilla.hasUpscaled, 
-                    artists: vanilla.artists, characters: vanilla.characters, series: vanilla.series, tags: vanilla.tags, reason})
+                    artists: vanilla.artists, characters: vanilla.characters, series: vanilla.series, tags: vanilla.tags, addedTags: [], removedTags: [], imageChanged: false,
+                    changes: null, reason})
                 let images = [] as any
                 for (let i = 0; i < post.images.length; i++) {
                     images.push(functions.getImagePath(post.images[i].type, postID, post.images[i].order, post.images[i].filename))
@@ -539,7 +602,7 @@ const PostRoutes = (app: Express) => {
                     drawn: updated.drawn, artist: updated.artist, link: updated.link, commentary: updated.commentary, 
                     translatedCommentary: updated.translatedCommentary, bookmarks: updated.bookmarks, purchaseLink: updated.purchaseLink, mirrors: updated.mirrors, 
                     hasOriginal: updated.hasOriginal, hasUpscaled: updated.hasUpscaled, artists: updated.artists, 
-                    characters: updated.characters, series: updated.series, tags: updated.tags, reason})
+                    characters: updated.characters, series: updated.series, tags: updated.tags, addedTags, removedTags, imageChanged: false, changes, reason})
             } else {
                 let images = [] as any
                 for (let i = 0; i < post.images.length; i++) {
@@ -552,7 +615,7 @@ const PostRoutes = (app: Express) => {
                     drawn: updated.drawn, artist: updated.artist, link: updated.link, commentary: updated.commentary, 
                     translatedCommentary: updated.translatedCommentary, bookmarks: updated.bookmarks, purchaseLink: updated.purchaseLink, mirrors: updated.mirrors, 
                     hasOriginal: updated.hasOriginal, hasUpscaled: updated.hasUpscaled, artists: updated.artists, 
-                    characters: updated.characters, series: updated.series, tags: updated.tags, reason})
+                    characters: updated.characters, series: updated.series, tags: updated.tags, addedTags, removedTags, imageChanged: false, changes, reason})
             }
             res.status(200).send("Success")
           } catch (e) {
@@ -816,7 +879,6 @@ const PostRoutes = (app: Express) => {
             }
     
             tagMap = functions.removeDuplicates(tagMap)
-            await sql.tag.purgeUnverifiedTagMap(postID)
             await sql.tag.bulkInsertUnverifiedTags(bulkTagUpdate, true)
             await sql.tag.insertUnverifiedTagMap(postID, tagMap)
     

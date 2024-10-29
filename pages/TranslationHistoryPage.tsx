@@ -166,7 +166,7 @@ const TranslationHistoryPage: React.FunctionComponent<Props> = (props) => {
             <SideBar/>
             <div className="content" onMouseEnter={() => setEnableDrag(true)}>
                 <div className="history-page">
-                    <span className="history-heading">Translation History</span>
+                    <span className="history-heading">{username ? `${functions.toProperCase(username)}'s Translation History` : "Translation History"}</span>
                     <table className="history-container">
                         {generateRevisionsJSX()}
                     </table>

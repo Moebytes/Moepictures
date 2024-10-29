@@ -272,6 +272,12 @@ export default class SQLGroup {
         if (sort === "reverse height") sortQuery = `ORDER BY "imageHeight" ASC`
         if (sort === "bookmarks") sortQuery = `ORDER BY posts.bookmarks DESC NULLS LAST`
         if (sort === "reverse bookmarks") sortQuery = `ORDER BY posts.bookmarks ASC NULLS LAST`
+        if (sort === "hidden") sortQuery = `ORDER BY posts.hidden DESC NULLS LAST`
+        if (sort === "reverse hidden") sortQuery = `ORDER BY posts.hidden ASC NULLS LAST`
+        if (sort === "locked") sortQuery = `ORDER BY posts.locked DESC NULLS LAST`
+        if (sort === "reverse locked") sortQuery = `ORDER BY posts.locked ASC NULLS LAST`
+        if (sort === "private") sortQuery = `ORDER BY posts.private DESC NULLS LAST`
+        if (sort === "reverse private") sortQuery = `ORDER BY posts.private ASC NULLS LAST`
         let includeTags = sort === "tagcount" || sort === "reverse tagcount"
         let i = 2
         let values = [] as any

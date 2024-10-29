@@ -11,6 +11,7 @@ import functions from "../structures/Functions"
 import cryptoFunctions from "../structures/CryptoFunctions"
 import "./styles/gridimage.less"
 import musicNote from "../assets/icons/music-note.png"
+import privateIcon from "../assets/icons/lock-opt.png"
 
 let tooltipTimer = null as any
 
@@ -567,7 +568,7 @@ const GridSong = forwardRef<Ref, Props>((props, componentRef) => {
         <div style={{opacity: visible ? "1" : "0", transition: "opacity 0.1s"}} className="image-box" id={String(props.id)} ref={containerRef} onClick={onClick} 
         onAuxClick={onClick} onMouseDown={mouseDown} onMouseUp={mouseUp} onMouseMove={mouseMove} onMouseEnter={mouseEnter} onMouseLeave={mouseLeave}>
             <div className="image-filters" ref={imageFiltersRef} onMouseMove={(event) => imageAnimation(event)} onMouseLeave={() => cancelImageAnimation()}>
-                <img style={{opacity: hover ? "1" : "0", transition: "opacity 0.3s", filter: getFilter()}} className="song-icon" src={musicNote} 
+                <img style={{opacity: hover ? "1" : "0", transition: "opacity 0.3s", filter: getFilter()}} className="song-icon" src={props.post.private ? privateIcon : musicNote} 
                 ref={songIconRef} onClick={songClick} onMouseDown={(event) => {event.stopPropagation()}} onMouseUp={(event) => {event.stopPropagation()}}/>
                 <img draggable={false} className="lightness-overlay" ref={lightnessRef} src={image}/>
                 <img draggable={false} className="sharpen-overlay" ref={overlayRef} src={image}/>

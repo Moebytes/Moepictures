@@ -186,6 +186,7 @@ export const HelpTabContext = React.createContext<any>(null)
 export const DeleteSearchHistoryIDContext = React.createContext<any>(null)
 export const DeleteSearchHistoryFlagContext = React.createContext<any>(null)
 export const HistoryPageContext = React.createContext<any>(null)
+export const ModPageContext = React.createContext<any>(null)
 export const ShowDeleteAllHistoryDialogContext = React.createContext<any>(null)
 export const FormatContext = React.createContext<any>(null)
 export const PremiumRequiredContext = React.createContext<any>(null)
@@ -224,6 +225,7 @@ export const EditGroupObjContext = React.createContext<any>(null)
 export const DeleteGroupObjContext = React.createContext<any>(null)
 export const GroupFlagContext = React.createContext<any>(null)
 export const LockPostIDContext = React.createContext<any>(null)
+export const PrivatePostObjContext = React.createContext<any>(null)
 export const ShowCompressingDialogContext = React.createContext<any>(null)
 export const ShowUpscalingDialogContext = React.createContext<any>(null)
 export const ForwardMessageObjContext = React.createContext<any>(null)
@@ -259,6 +261,7 @@ const Context: React.FunctionComponent = (props) => {
     const [threadPage, setThreadPage] = useState(1)
     const [mailPage, setMailPage] = useState(1)
     const [historyPage, setHistoryPage] = useState(1)
+    const [modPage, setModPage] = useState(1)
     const [groupsPage, setGroupsPage] = useState(1)
     const [showDownloadDialog, setShowDownloadDialog] = useState(false)
     const [postAmount, setPostAmount] = useState(0)
@@ -438,6 +441,7 @@ const Context: React.FunctionComponent = (props) => {
     const [editGroupObj, setEditGroupObj] = useState(null)
     const [deleteGroupObj, setDeleteGroupObj] = useState(null)
     const [groupFlag, setGroupFlag] = useState(false)
+    const [privatePostObj, setPrivatePostObj] = useState(null)
     const [lockPostID, setLockPostID] = useState(null)
     const [showCompressingDialog, setShowCompressingDialog] = useState(false)
     const [showUpscalingDialog, setShowUpscalingDialog] = useState(false)
@@ -452,6 +456,8 @@ const Context: React.FunctionComponent = (props) => {
 
 return (
     <>
+        <ModPageContext.Provider value={{modPage, setModPage}}>
+        <PrivatePostObjContext.Provider value={{privatePostObj, setPrivatePostObj}}>
         <Disable2FAFlagContext.Provider value={{disable2FAFlag, setDisable2FAFlag}}>
         <Disable2FADialogContext.Provider value={{disable2FADialog, setDisable2FADialog}}>
         <RevertGroupHistoryFlagContext.Provider value={{revertGroupHistoryFlag, setRevertGroupHistoryFlag}}>
@@ -879,6 +885,8 @@ return (
         </RevertGroupHistoryFlagContext.Provider>
         </Disable2FADialogContext.Provider>
         </Disable2FAFlagContext.Provider>
+        </PrivatePostObjContext.Provider>
+        </ModPageContext.Provider>
     </>
     )
 }

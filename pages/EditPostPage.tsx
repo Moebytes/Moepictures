@@ -193,7 +193,7 @@ const EditPostPage: React.FunctionComponent<Props> = (props) => {
             if (!artists[i]) artists[i] = {}
             artists[i].tag = tagCategories.artists[i].tag
             if (tagCategories.artists[i].image) {
-                const imageLink = functions.getTagLink("artist", tagCategories.artists[i].image)
+                const imageLink = functions.removeQueryParams(functions.getTagLink("artist", tagCategories.artists[i].image))
                 artists[i].image = imageLink
                 const arrayBuffer = await fetch(imageLink).then((r) => r.arrayBuffer())
                 artists[i].ext = path.extname(imageLink).replace(".", "")
@@ -207,7 +207,7 @@ const EditPostPage: React.FunctionComponent<Props> = (props) => {
             if (!characters[i]) characters[i] = {}
             characters[i].tag = tagCategories.characters[i].tag
             if (tagCategories.characters[i].image) {
-                const imageLink = functions.getTagLink("character", tagCategories.characters[i].image)
+                const imageLink = functions.removeQueryParams(functions.getTagLink("character", tagCategories.characters[i].image))
                 characters[i].image = imageLink
                 const arrayBuffer = await fetch(imageLink).then((r) => r.arrayBuffer())
                 characters[i].ext = path.extname(imageLink).replace(".", "")
@@ -221,7 +221,7 @@ const EditPostPage: React.FunctionComponent<Props> = (props) => {
             if (!series[i]) series[i] = {}
             series[i].tag = tagCategories.series[i].tag
             if (tagCategories.series[i].image) {
-                const imageLink = functions.getTagLink("series", tagCategories.series[i].image)
+                const imageLink = functions.removeQueryParams(functions.getTagLink("series", tagCategories.series[i].image))
                 series[i].image = imageLink
                 const arrayBuffer = await fetch(imageLink).then((r) => r.arrayBuffer())
                 series[i].ext = path.extname(imageLink).replace(".", "")
@@ -511,7 +511,7 @@ const EditPostPage: React.FunctionComponent<Props> = (props) => {
     const handleTagClick = async (tag: string, index: number) => {
         const tagDetail = await functions.get("/api/tag", {tag}, session, setSessionFlag)
         if (tagDetail.image) {
-            const tagLink = functions.getTagLink(tagDetail.type, tagDetail.image)
+            const tagLink = functions.removeQueryParams(functions.getTagLink(tagDetail.type, tagDetail.image))
             const arrayBuffer = await fetch(tagLink).then((r) => r.arrayBuffer())
             const bytes = new Uint8Array(arrayBuffer)
             const ext = path.extname(tagLink).replace(".", "")

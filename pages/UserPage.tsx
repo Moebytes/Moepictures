@@ -100,7 +100,6 @@ const UserPage: React.FunctionComponent<Props> = (props) => {
     const updateUploads = async () => {
         const uploads = await functions.get("/api/user/uploads", {username}, session, setSessionFlag)
         let filtered = uploads.filter((u: any) => restrictType === "explicit" ? u.restrict === "explicit" : u.restrict !== "explicit")
-        if (!permissions.isMod(session)) filtered = filtered.filter((u: any) => !u.hidden)
         const images = filtered.map((p: any) => functions.getThumbnailLink(p.images[0].type, p.postID, p.images[0].order, p.images[0].filename, "tiny"))
         setUploads(filtered)
         setUploadImages(images)
@@ -112,7 +111,6 @@ const UserPage: React.FunctionComponent<Props> = (props) => {
         const result = await functions.get("/api/user/uploads", {limit, offset}, session, setSessionFlag)
         newUploads.push(...result)
         let filtered = newUploads.filter((u: any) => restrictType === "explicit" ? u.post?.restrict === "explicit" : u.post?.restrict !== "explicit")
-        if (!permissions.isMod(session)) filtered = filtered.filter((u: any) => !u.hidden)
         const images = filtered.map((p: any) => functions.getThumbnailLink(p.images[0].type, p.postID, p.images[0].order, p.images[0].filename, "large"))
         setUploads(filtered)
         setAppendUploadImages(images)
@@ -121,7 +119,6 @@ const UserPage: React.FunctionComponent<Props> = (props) => {
     const updateFavorites = async () => {
         const favorites = await functions.get("/api/user/favorites", {username}, session, setSessionFlag)
         let filtered = favorites.filter((f: any) => restrictType === "explicit" ? f.restrict === "explicit" : f.restrict !== "explicit")
-        if (!permissions.isMod(session)) filtered = filtered.filter((f: any) => !f.hidden)
         const images = filtered.map((f: any) => functions.getThumbnailLink(f.images[0].type, f.postID, f.images[0].order, f.images[0].filename, "tiny"))
         setFavorites(filtered)
         setFavoriteImages(images)
@@ -133,7 +130,6 @@ const UserPage: React.FunctionComponent<Props> = (props) => {
         const result = await functions.get("/api/user/favorites", {limit, offset}, session, setSessionFlag)
         newFavorites.push(...result)
         let filtered = favorites.filter((f: any) => restrictType === "explicit" ? f.restrict === "explicit" : f.restrict !== "explicit")
-        if (!permissions.isMod(session)) filtered = filtered.filter((f: any) => !f.hidden)
         const images = filtered.map((f: any) => functions.getThumbnailLink(f.images[0].type, f.postID, f.images[0].order, f.images[0].filename, "tiny"))
         setFavorites(filtered)
         setAppendFavoriteImages(images)
@@ -147,7 +143,6 @@ const UserPage: React.FunctionComponent<Props> = (props) => {
     const updateComments = async () => {
         const comments = await functions.get("/api/user/comments", {username, sort: "date"}, session, setSessionFlag)
         let filtered = comments.filter((c: any) => restrictType === "explicit" ? c.post?.restrict === "explicit" : c.post?.restrict !== "explicit")
-        if (!permissions.isMod(session)) filtered = filtered.filter((c: any) => !c.post?.hidden)
         setComments(filtered)
     }
 
@@ -361,7 +356,6 @@ const UserPage: React.FunctionComponent<Props> = (props) => {
             let favgroup = favgroups[i]
             if (favgroup.private) continue
             let filtered = favgroup.posts.filter((p: any) => restrictType === "explicit" ? p.restrict === "explicit" : p.restrict !== "explicit")
-            if (!permissions.isMod(session)) filtered = filtered.filter((f: any) => !f.hidden)
             const images = filtered.map((f: any) => functions.getThumbnailLink(f.images[0].type, f.postID, f.images[0].order, f.images[0].filename, "tiny"))
             const viewFavgroup = () => {
                 history.push(`/favgroup/${username}/${favgroup.slug}`)

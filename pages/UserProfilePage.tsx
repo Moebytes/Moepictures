@@ -99,7 +99,6 @@ const UserProfilePage: React.FunctionComponent = (props) => {
     const updateUploads = async () => {
         const uploads = await functions.get("/api/user/uploads", {limit}, session, setSessionFlag)
         let filtered = uploads.filter((u: any) => restrictType === "explicit" ? u.restrict === "explicit" : u.restrict !== "explicit")
-        if (!permissions.isMod(session)) filtered = filtered.filter((u: any) => !u.hidden)
         const images = filtered.map((p: any) => functions.getThumbnailLink(p.images[0].type, p.postID, p.images[0].order, p.images[0].filename, "tiny"))
         setUploads(filtered)
         setUploadImages(images)
@@ -111,7 +110,6 @@ const UserProfilePage: React.FunctionComponent = (props) => {
         const result = await functions.get("/api/user/uploads", {limit, offset}, session, setSessionFlag)
         newUploads.push(...result)
         let filtered = newUploads.filter((u: any) => restrictType === "explicit" ? u.post?.restrict === "explicit" : u.post?.restrict !== "explicit")
-        if (!permissions.isMod(session)) filtered = filtered.filter((u: any) => !u.hidden)
         const images = filtered.map((p: any) => functions.getThumbnailLink(p.images[0].type, p.postID, p.images[0].order, p.images[0].filename, "large"))
         setUploads(filtered)
         setAppendUploadImages(images)
@@ -120,7 +118,6 @@ const UserProfilePage: React.FunctionComponent = (props) => {
     const updateFavorites = async () => {
         const favorites = await functions.get("/api/user/favorites", {limit}, session, setSessionFlag)
         let filtered = favorites.filter((f: any) => restrictType === "explicit" ? f.restrict === "explicit" : f.restrict !== "explicit")
-        if (!permissions.isMod(session)) filtered = filtered.filter((f: any) => !f.hidden)
         const images = filtered.map((f: any) => functions.getThumbnailLink(f.images[0].type, f.postID, f.images[0].order, f.images[0].filename, "tiny"))
         setFavorites(filtered)
         setFavoriteImages(images)
@@ -132,7 +129,6 @@ const UserProfilePage: React.FunctionComponent = (props) => {
         const result = await functions.get("/api/user/favorites", {limit, offset}, session, setSessionFlag)
         newFavorites.push(...result)
         let filtered = favorites.filter((f: any) => restrictType === "explicit" ? f.restrict === "explicit" : f.restrict !== "explicit")
-        if (!permissions.isMod(session)) filtered = filtered.filter((f: any) => !f.hidden)
         const images = filtered.map((f: any) => functions.getThumbnailLink(f.images[0].type, f.postID, f.images[0].order, f.images[0].filename, "tiny"))
         setFavorites(filtered)
         setAppendFavoriteImages(images)
@@ -146,7 +142,6 @@ const UserProfilePage: React.FunctionComponent = (props) => {
     const updateComments = async () => {
         const comments = await functions.get("/api/user/comments", {sort: "date"}, session, setSessionFlag)
         let filtered = comments.filter((c: any) => restrictType === "explicit" ? c.post?.restrict === "explicit" : c.post?.restrict !== "explicit")
-        if (!permissions.isMod(session)) filtered = filtered.filter((c: any) => !c.post?.hidden)
         setComments(filtered)
     }
 
@@ -498,7 +493,6 @@ const UserProfilePage: React.FunctionComponent = (props) => {
         for (let i = 0; i < favgroups.length; i++) {
             let favgroup = favgroups[i]
             let filtered = favgroup.posts.filter((p: any) => restrictType === "explicit" ? p.restrict === "explicit" : p.restrict !== "explicit")
-            if (!permissions.isMod(session)) filtered = filtered.filter((f: any) => !f.hidden)
             const images = filtered.map((f: any) => functions.getThumbnailLink(f.images[0].type, f.postID, f.images[0].order, f.images[0].filename, "tiny"))
             const viewFavgroup = () => {
                 history.push(`/favgroup/${session.username}/${favgroup.slug}`)
@@ -570,7 +564,8 @@ const UserProfilePage: React.FunctionComponent = (props) => {
                         <button className="userprofile-button" onClick={changeBio}>Ok</button>
                     </div> : null}
                     <div className="userprofile-row">
-                        <span className="userprofile-text">Favorites Privacy: <span className="userprofile-text-action" onClick={favoritesPrivacy}>{session.publicFavorites ? "Public" : "Private"}</span></span>
+                        <span className="userprofile-text">Favorites Privacy: <span style={{color: !session.publicFavorites ? "var(--text-strong)" : "var(--text)"}} 
+                        className="userprofile-text-action" onClick={favoritesPrivacy}>{session.publicFavorites ? "Public" : "Private"}</span></span>
                     </div>
                     <div className="userprofile-row">
                         <span className="userprofile-text">Show Related: <span className="userprofile-text-action" onClick={showRelated}>{session.showRelated ? "Yes" : "No"}</span></span>

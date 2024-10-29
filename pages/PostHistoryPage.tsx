@@ -170,7 +170,7 @@ const PostHistoryPage: React.FunctionComponent<Props> = (props) => {
             <SideBar/>
             <div className="content" onMouseEnter={() => setEnableDrag(true)}>
                 <div className="history-page">
-                    <span className="history-heading">Post History</span>
+                    <span className="history-heading">{username ? `${functions.toProperCase(username)}'s Post History` : "Post History"}</span>
                     <table className="history-container">
                         {generateRevisionsJSX()}
                     </table>

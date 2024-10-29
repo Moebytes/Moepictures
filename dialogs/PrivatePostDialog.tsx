@@ -1,7 +1,7 @@
 import React, {useEffect, useContext, useState, useRef} from "react"
 import {useHistory} from "react-router-dom"
 import {HashLink as Link} from "react-router-hash-link"
-import {HideNavbarContext, HideSidebarContext, ThemeContext, EnableDragContext, ShowTakedownPostDialogContext, HideTitlebarContext,
+import {HideNavbarContext, HideSidebarContext, ThemeContext, EnableDragContext, PrivatePostObjContext, HideTitlebarContext,
 SessionContext, SessionFlagContext, PostFlagContext} from "../Context"
 import functions from "../structures/Functions"
 import Draggable from "react-draggable"
@@ -12,16 +12,16 @@ interface Props {
     post: any
 }
 
-const TakedownPostDialog: React.FunctionComponent<Props> = (props) => {
+const PrivatePostDialog: React.FunctionComponent<Props> = (props) => {
     const {theme, setTheme} = useContext(ThemeContext)
     const {hideNavbar, setHideNavbar} = useContext(HideNavbarContext)
     const {hideTitlebar, setHideTitlebar} = useContext(HideTitlebarContext)
     const {hideSidebar, setHideSidebar} = useContext(HideSidebarContext)
     const {enableDrag, setEnableDrag} = useContext(EnableDragContext)
-    const {showTakedownPostDialog, setShowTakedownPostDialog} = useContext(ShowTakedownPostDialogContext)
+    const {privatePostObj, setPrivatePostObj} = useContext(PrivatePostObjContext)
+    const {postFlag, setPostFlag} = useContext(PostFlagContext)
     const {session, setSession} = useContext(SessionContext)
     const {sessionFlag, setSessionFlag} = useContext(SessionFlagContext)
-    const {postFlag, setPostFlag} = useContext(PostFlagContext)
     const [reason, setReason] = useState("")
     const [submitted, setSubmitted] = useState(false)
     const [error, setError] = useState(false)
@@ -29,11 +29,11 @@ const TakedownPostDialog: React.FunctionComponent<Props> = (props) => {
     const history = useHistory()
 
     useEffect(() => {
-        document.title = "Takedown Post"
+        document.title = "Private Post"
     }, [])
 
     useEffect(() => {
-        if (showTakedownPostDialog) {
+        if (privatePostObj) {
             // document.body.style.overflowY = "hidden"
             document.body.style.pointerEvents = "none"
         } else {
@@ -41,11 +41,11 @@ const TakedownPostDialog: React.FunctionComponent<Props> = (props) => {
             document.body.style.pointerEvents = "all"
             setEnableDrag(true)
         }
-    }, [showTakedownPostDialog])
+    }, [privatePostObj])
 
-    const takedownPost = async () => {
-        if (permissions.isMod(session)) {
-            await functions.post("/api/post/takedown",  {postID: props.post.postID}, session, setSessionFlag)
+    const privatePost = async () => {
+        if (permissions.canPrivate(session, privatePostObj.artists)) {
+            await functions.post("/api/post/private",  {postID: props.post.postID}, session, setSessionFlag)
             setPostFlag(true)
             localStorage.removeItem("savedPost")
             localStorage.removeItem("savedPosts")
@@ -53,37 +53,31 @@ const TakedownPostDialog: React.FunctionComponent<Props> = (props) => {
         }
     }
 
-    const click = (button: "accept" | "reject", keep?: boolean) => {
+    const click = (button: "accept" | "reject") => {
         if (button === "accept") {
-            takedownPost()
+            privatePost()
         }
-        if (!keep) setShowTakedownPostDialog(false)
-    }
-
-    const close = () => {
-        setShowTakedownPostDialog(false)
-        setSubmitted(false)
-        setReason("")
+        setPrivatePostObj(null)
     }
 
     const getTitle = () => {
-        if (props.post.hidden) {
-            return "Restore Post"
+        if (props.post.private) {
+            return "Unprivate Post"
         } else {
-            return "Takedown Post"
+            return "Private Post"
         }
     }
 
     const getPrompt = () => {
-        if (props.post.hidden) {
-            return "Do you want to restore this post?"
+        if (props.post.private) {
+            return "Do you want to unprivate this post?"
         } else {
-            return "Are you sure that you want to takedown this post?"
+            return "Do you want to set this post to private?"
         }
     }
 
-    if (showTakedownPostDialog) {
-        if (permissions.isMod(session)) {
+    if (privatePostObj) {
+        if (permissions.canPrivate(session, privatePostObj.artists)) {
             return (
                 <div className="dialog">
                     <Draggable handle=".dialog-title-container">
@@ -109,4 +103,4 @@ const TakedownPostDialog: React.FunctionComponent<Props> = (props) => {
     return null
 }
 
-export default TakedownPostDialog
+export default PrivatePostDialog

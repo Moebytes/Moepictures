@@ -18,6 +18,8 @@ import permissions from "../structures/Permissions"
 import scrollIcon from "../assets/icons/scroll.png"
 import pageIcon from "../assets/icons/page.png"
 import PageDialog from "../dialogs/PageDialog"
+import radioButton from "../assets/icons/radiobutton.png"
+import radioButtonChecked from "../assets/icons/radiobutton-checked.png"
 import "./styles/itemspage.less"
 
 let replace = false
@@ -56,12 +58,15 @@ const MailPage: React.FunctionComponent = (props) => {
     const [offset, setOffset] = useState(0)
     const [ended, setEnded] = useState(false)
     const [queryPage, setQueryPage] = useState(1)
+    const [hideSystem, setHideSystem] = useState(false)
     const sortRef = useRef(null) as any
     const history = useHistory()
 
     useEffect(() => {
         const savedScroll = localStorage.getItem("scroll")
         if (savedScroll) setScroll(savedScroll === "true")
+        const savedHideSystem = localStorage.getItem("hideSystem")
+        if (savedHideSystem) setHideSystem(savedHideSystem === "true")
         const savedPage = localStorage.getItem("mailPage")
         const queryParam = new URLSearchParams(window.location.search).get("query")
         const pageParam = new URLSearchParams(window.location.search).get("page")
@@ -89,6 +94,10 @@ const MailPage: React.FunctionComponent = (props) => {
     }, [])
 
     useEffect(() => {
+        localStorage.setItem("hideSystem", String(hideSystem))
+    }, [hideSystem])
+
+    useEffect(() => {
         if (hasNotification) updateMessages()
     }, [hasNotification])
 
@@ -102,7 +111,7 @@ const MailPage: React.FunctionComponent = (props) => {
     }
 
     const updateMessages = async (query?: string) => {
-        const result = await functions.get("/api/search/messages", {sort: functions.parseSort(sortType, sortReverse), query: query ? query : searchQuery}, session, setSessionFlag)
+        const result = await functions.get("/api/search/messages", {sort: functions.parseSort(sortType, sortReverse), query: query ? query : searchQuery, hideSystem}, session, setSessionFlag)
         setEnded(false)
         setIndex(0)
         setVisibleMessages([])
@@ -130,7 +139,7 @@ const MailPage: React.FunctionComponent = (props) => {
                 setMessageSearchFlag(null)
             }, 500)
         }
-    }, [messageSearchFlag])
+    }, [messageSearchFlag, hideSystem])
 
     useEffect(() => {
         setHideNavbar(true)
@@ -142,7 +151,7 @@ const MailPage: React.FunctionComponent = (props) => {
         setSidebarText("")
         document.title = "Mail"
         updateMessages()
-    }, [])
+    }, [hideSystem])
 
     useEffect(() => {
         if (mobile) {
@@ -161,7 +170,7 @@ const MailPage: React.FunctionComponent = (props) => {
 
     useEffect(() => {
         updateMessages()
-    }, [sortType, sortReverse])
+    }, [sortType, sortReverse, hideSystem])
 
     const getPageAmount = () => {
         return scroll ? 15 : 50
@@ -180,7 +189,7 @@ const MailPage: React.FunctionComponent = (props) => {
             setVisibleMessages(functions.removeDuplicates(newVisibleMessages))
         }
         if (scroll) updateMessages()
-    }, [scroll, messages, session])
+    }, [scroll, messages, session, hideSystem])
 
     const updateOffset = async () => {
         if (ended) return
@@ -196,7 +205,7 @@ const MailPage: React.FunctionComponent = (props) => {
                 }
             }
         }
-        let result = await functions.get("/api/search/messages", {sort: functions.parseSort(sortType, sortReverse), query: searchQuery, offset: newOffset}, session, setSessionFlag)
+        let result = await functions.get("/api/search/messages", {sort: functions.parseSort(sortType, sortReverse), query: searchQuery, hideSystem, offset: newOffset}, session, setSessionFlag)
         let hasMore = result?.length >= 100
         const cleanMessages = messages.filter((t: any) => !t.fake)
         if (!scroll) {
@@ -254,7 +263,7 @@ const MailPage: React.FunctionComponent = (props) => {
             setMailPage(1)
             updateMessages()
         }
-    }, [scroll, session])
+    }, [scroll, session, hideSystem])
 
     useEffect(() => {
         if (!scroll) updateOffset()
@@ -449,6 +458,10 @@ const MailPage: React.FunctionComponent = (props) => {
             <div className="item-button-container" style={{marginLeft: "0px", justifyContent: "flex-start"}} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                 <button className="item-button" style={style} onClick={() => readAll()}>Read All</button>
                 <button className="item-button" style={style} onClick={() => unreadAll()}>Unread All</button>
+                {mobile ? <div className="itemsort-item" onClick={() => setHideSystem((prev: boolean) => !prev)} style={{marginLeft: "0px", marginTop: "7px"}}>
+                    <img className="itemsort-img" src={hideSystem ? radioButtonChecked : radioButton} style={{filter: getFilter()}}/>
+                    <span className="itemsort-text">Hide System</span>
+                </div> : null}
             </div> 
         )
     }
@@ -476,6 +489,10 @@ const MailPage: React.FunctionComponent = (props) => {
                         {!mobile ? <div className="itemsort-item" onClick={() => toggleScroll()}>
                             <img className="itemsort-img" src={scroll ? scrollIcon : pageIcon} style={{filter: getFilter()}}/>
                             <span className="itemsort-text">{scroll ? "Scrolling" : "Pages"}</span>
+                        </div> : null}
+                        {!mobile ? <div className="itemsort-item" onClick={() => setHideSystem((prev: boolean) => !prev)}>
+                            <img className="itemsort-img" src={hideSystem ? radioButtonChecked : radioButton} style={{filter: getFilter()}}/>
+                            <span className="itemsort-text">Hide System</span>
                         </div> : null}
                         <div className={`item-dropdown ${activeDropdown === "sort" ? "" : "hide-item-dropdown"}`} 
                         style={{marginRight: getSortMargin(), top: mobile ? "229px" : "209px"}} onClick={() => setActiveDropdown("none")}>

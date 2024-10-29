@@ -811,18 +811,30 @@ const UserRoutes = (app: Express) => {
             const username = req.query.username as string
             const offset = req.query.offset as string
             const limit = req.query.limit as string
+            let favorites = [] as any
             if (username) {
                 const user = await sql.user.user(username as string)
                 if (!user || !user.publicFavorites) return res.status(200).send([])
-                let favorites = await sql.favorite.favorites(username, limit, offset)
-                favorites = functions.stripTags(favorites)
-                res.status(200).send(favorites)
+                favorites = await sql.favorite.favorites(username, limit, offset)
             } else {
                 if (!req.session.username) return res.status(403).send("Unauthorized")
-                let favorites = await sql.favorite.favorites(req.session.username, limit, offset)
-                favorites = functions.stripTags(favorites)
-                res.status(200).send(favorites)
+                favorites = await sql.favorite.favorites(req.session.username, limit, offset)
             }
+            if (!permissions.isMod(req.session)) {
+                favorites = favorites.filter((p: any) => !p.hidden)
+            }
+            if (!req.session.showR18) {
+                favorites = favorites.filter((p: any) => p.restrict !== "explicit")
+            }
+            for (let i = favorites.length - 1; i >= 0; i--) {
+                const post = favorites[i]
+                if (post.private) {
+                    const categories = await serverFunctions.tagCategories(post.tags)
+                    if (!permissions.canPrivate(req.session, categories.artists)) favorites.splice(i, 1)
+                }
+            }
+            favorites = functions.stripTags(favorites)
+            res.status(200).send(favorites)
         } catch (e) {
             console.log(e)
             res.status(400).send("Bad request") 
@@ -834,16 +846,28 @@ const UserRoutes = (app: Express) => {
             const username = req.query.username as string
             const offset = req.query.offset as string
             const limit = req.query.limit as string
+            let uploads = [] as any
             if (username) {
-                let uploads = await sql.user.uploads(username, limit, offset)
-                uploads = functions.stripTags(uploads)
-                res.status(200).send(uploads)
+                uploads = await sql.user.uploads(username, limit, offset)
             } else {
                 if (!req.session.username) return res.status(403).send("Unauthorized")
-                let uploads = await sql.user.uploads(req.session.username, limit, offset)
-                uploads = functions.stripTags(uploads)
-                res.status(200).send(uploads)
+                uploads = await sql.user.uploads(req.session.username, limit, offset)
             }
+            if (!permissions.isMod(req.session)) {
+                uploads = uploads.filter((p: any) => !p.hidden)
+            }
+            if (!req.session.showR18) {
+                uploads = uploads.filter((p: any) => p.restrict !== "explicit")
+            }
+            for (let i = uploads.length - 1; i >= 0; i--) {
+                const post = uploads[i]
+                if (post.private) {
+                    const categories = await serverFunctions.tagCategories(post.tags)
+                    if (!permissions.canPrivate(req.session, categories.artists)) uploads.splice(i, 1)
+                }
+            }
+            uploads = functions.stripTags(uploads)
+            res.status(200).send(uploads)
         } catch (e) {
             console.log(e)
             res.status(400).send("Bad request") 
@@ -876,14 +900,27 @@ const UserRoutes = (app: Express) => {
             const sort = req.query.sort as string
             const offset = req.query.offset as string
             const username = req.query.username as string
+            let comments = [] as any
             if (username) {
-                let comments = await sql.comment.searchCommentsByUsername([username], query, sort, offset)
-                res.status(200).send(comments)
+                comments = await sql.comment.searchCommentsByUsername([username], query, sort, offset)
             } else {
                 if (!req.session.username) return res.status(400).send("Bad request")
-                let comments = await sql.comment.searchCommentsByUsername([req.session.username], query, sort, offset)
-                res.status(200).send(comments)
+                comments = await sql.comment.searchCommentsByUsername([req.session.username], query, sort, offset)
             }
+            for (let i = comments.length - 1; i >= 0; i--) {
+                const comment = comments[i]
+                if (!permissions.isMod(req.session)) {
+                    if (comment.post.hidden) comments.splice(i, 1)
+                }
+                if (!req.session.showR18) {
+                    if (comment.post.restrict === "explicit") comments.splice(i, 1)
+                }
+                if (comment.post.private) {
+                    const categories = await serverFunctions.tagCategories(comment.post.tags)
+                    if (!permissions.canPrivate(req.session, categories.artists)) comments.splice(i, 1)
+                }
+            }
+            res.status(200).send(comments)
         } catch (e) {
             console.log(e)
             res.status(400).send("Bad request") 

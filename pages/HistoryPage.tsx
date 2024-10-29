@@ -95,10 +95,12 @@ const HistoryPage: React.FunctionComponent = () => {
             const savedScroll = localStorage.getItem("scroll")
             if (savedScroll) setScroll(savedScroll === "true")
             const savedPage = localStorage.getItem("historyPage")
-            const savedTab = localStorage.getItem("historyTab")
             if (savedPage) setHistoryPage(Number(savedPage))
+            const savedTab = localStorage.getItem("historyTab")
             if (savedTab) setHistoryTab(savedTab)
-            if (pageParam) setHistoryPage(Number(pageParam))
+            setTimeout(() => {
+                if (pageParam) setHistoryPage(Number(pageParam))
+            }, 200)
         }
         const updateStateChange = () => {
             replace = true
@@ -113,7 +115,7 @@ const HistoryPage: React.FunctionComponent = () => {
             window.removeEventListener("popstate", updateStateChange)
             window.removeEventListener("pushstate", updateStateChange)
         }
-    }, [location])
+    }, [])
 
     const getFilter = () => {
         return `hue-rotate(${siteHue - 180}deg) saturate(${siteSaturation}%) brightness(${siteLightness + 70}%)`

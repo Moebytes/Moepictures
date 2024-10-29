@@ -16,6 +16,7 @@ import functions from "../structures/Functions"
 import Carousel from "../components/Carousel"
 import DeletePostDialog from "../dialogs/DeletePostDialog"
 import TakedownPostDialog from "../dialogs/TakedownPostDialog"
+import PrivatePostDialog from "../dialogs/PrivatePostDialog"
 import LockPostDialog from "../dialogs/LockPostDialog"
 import DeleteCommentDialog from "../dialogs/DeleteCommentDialog"
 import EditCommentDialog from "../dialogs/EditCommentDialog"
@@ -562,7 +563,6 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
         for (let i = 0; i < groups.length; i++) {
             let group = groups[i]
             let filtered = group.posts.filter((p: any) => restrictType === "explicit" ? p.restrict === "explicit" : p.restrict !== "explicit")
-            if (!permissions.isMod(session)) filtered = filtered.filter((f: any) => !f.hidden)
             const images = filtered.map((f: any) => functions.getThumbnailLink(f.images[0].type, f.postID, f.images[0].order, f.images[0].filename, "tiny"))
             const setGroup = (img: string, index: number) => {
                 const postID = group.posts[index].postID
@@ -630,6 +630,7 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
         <RevertPostHistoryDialog/>
         <RevertTranslationHistoryDialog/>
         {post ? <DeletePostDialog post={post}/> : null}
+        {post ? <PrivatePostDialog post={post}/> : null}
         {post ? <LockPostDialog post={post}/> : null}
         {post ? <TakedownPostDialog post={post}/> : null}
         {post ? <SaveTranslationDialog post={post}/> : null}

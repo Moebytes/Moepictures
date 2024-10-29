@@ -319,7 +319,6 @@ const TranslationRoutes = (app: Express) => {
             }
     
             tagMap = functions.removeDuplicates(tagMap)
-            await sql.tag.purgeUnverifiedTagMap(postID)
             await sql.tag.bulkInsertUnverifiedTags(bulkTagUpdate, true)
             await sql.tag.insertUnverifiedTagMap(postID, tagMap)
 
@@ -389,7 +388,9 @@ const TranslationRoutes = (app: Express) => {
             await sql.post.deleteUnverifiedPost(Number(postID))
             for (let i = 0; i < unverified.images.length; i++) {
                 const file = functions.getImagePath(unverified.images[i].type, unverified.postID, unverified.images[i].order, unverified.images[i].filename)
+                const upscaledFile = functions.getUpscaledImagePath(unverified.images[i].type, unverified.postID, unverified.images[i].order, unverified.images[i].filename)
                 await serverFunctions.deleteUnverifiedFile(file)
+                await serverFunctions.deleteUnverifiedFile(upscaledFile)
             }
             const unverifiedTranslation = await sql.translation.unverifiedTranslationID(Number(translationID))
             if (!unverifiedTranslation) return res.status(400).send("Bad translationID")
@@ -418,7 +419,9 @@ const TranslationRoutes = (app: Express) => {
             await sql.post.deleteUnverifiedPost(Number(postID))
             for (let i = 0; i < unverified.images.length; i++) {
                 const file = functions.getImagePath(unverified.images[i].type, unverified.postID, unverified.images[i].order, unverified.images[i].filename)
+                const upscaledFile = functions.getUpscaledImagePath(unverified.images[i].type, unverified.postID, unverified.images[i].order, unverified.images[i].filename)
                 await serverFunctions.deleteUnverifiedFile(file)
+                await serverFunctions.deleteUnverifiedFile(upscaledFile)
             }
             const unverifiedTranslation = await sql.translation.unverifiedTranslationID(Number(translationID))
             if (!unverifiedTranslation) return res.status(400).send("Bad translationID")

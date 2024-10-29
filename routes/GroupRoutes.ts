@@ -125,6 +125,19 @@ const GroupRoutes = (app: Express) => {
             if (!name) return res.status(400).send("Invalid name")
             const slug = functions.generateSlug(name)
             const group = await sql.group.group(slug)
+            if (!permissions.isMod(req.session)) {
+                group.posts = group.posts.filter((p: any) => !p?.hidden)
+            }
+            if (!req.session.showR18) {
+                group.posts = group.posts.filter((p: any) => p?.restrict !== "explicit")
+            }
+            for (let i = group.posts.length - 1; i >= 0; i--) {
+                const post = group.posts[i]
+                if (post.private) {
+                    const categories = await serverFunctions.tagCategories(post.tags)
+                    if (!permissions.canPrivate(req.session, categories.artists)) group.posts.splice(i, 1)
+                }
+            }
             res.status(200).send(group)
         } catch (e) {
             console.log(e)
@@ -137,6 +150,22 @@ const GroupRoutes = (app: Express) => {
             const postID = req.query.postID
             if (Number.isNaN(Number(postID))) return res.status(400).send("Invalid postID")
             const groups = await sql.group.postGroups(Number(postID))
+            for (let i = 0; i < groups.length; i++) {
+                const group = groups[i]
+                if (!permissions.isMod(req.session)) {
+                    group.posts = group.posts.filter((p: any) => !p?.hidden)
+                }
+                if (!req.session.showR18) {
+                    group.posts = group.posts.filter((p: any) => p?.restrict !== "explicit")
+                }
+                for (let i = group.posts.length - 1; i >= 0; i--) {
+                    const post = group.posts[i]
+                    if (post.private) {
+                        const categories = await serverFunctions.tagCategories(post.tags)
+                        if (!permissions.canPrivate(req.session, categories.artists)) group.posts.splice(i, 1)
+                    }
+                }
+            }
             res.status(200).send(groups)
         } catch (e) {
             console.log(e)
@@ -149,6 +178,22 @@ const GroupRoutes = (app: Express) => {
             let groups = req.query.groups as string[]
             if (!groups) groups = []
             let result = await sql.group.groups(groups.filter(Boolean))
+            for (let i = 0; i < result.length; i++) {
+                const group = result[i]
+                if (!permissions.isMod(req.session)) {
+                    group.posts = group.posts.filter((p: any) => !p?.hidden)
+                }
+                if (!req.session.showR18) {
+                    group.posts = group.posts.filter((p: any) => p?.restrict !== "explicit")
+                }
+                for (let i = group.posts.length - 1; i >= 0; i--) {
+                    const post = group.posts[i]
+                    if (post.private) {
+                        const categories = await serverFunctions.tagCategories(post.tags)
+                        if (!permissions.canPrivate(req.session, categories.artists)) group.posts.splice(i, 1)
+                    }
+                }
+            }
             res.status(200).json(result)
         } catch (e) {
             console.log(e)

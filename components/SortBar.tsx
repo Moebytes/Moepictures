@@ -512,6 +512,9 @@ const SortBar: React.FunctionComponent = (props) => {
         if (sortType === "filesize") offset = -30
         if (sortType === "width") offset = -30
         if (sortType === "height") offset = -30
+        if (sortType === "hidden") offset = -30
+        if (sortType === "locked") offset = -30
+        if (sortType === "private") offset = -30
         if (!session.username) offset += 10
         return `${raw + offset}px`
     }
@@ -1021,6 +1024,17 @@ const SortBar: React.FunctionComponent = (props) => {
                 <div className="sortbar-dropdown-row" onClick={() => changeSortType("height")}>
                     <span className="sortbar-dropdown-text">Height</span>
                 </div>
+                {permissions.isMod(session) ? <>
+                <div className="sortbar-dropdown-row" onClick={() => changeSortType("hidden")}>
+                    <span className="sortbar-dropdown-text">Hidden</span>
+                </div>
+                <div className="sortbar-dropdown-row" onClick={() => changeSortType("locked")}>
+                    <span className="sortbar-dropdown-text">Locked</span>
+                </div>
+                <div className="sortbar-dropdown-row" onClick={() => changeSortType("private")}>
+                    <span className="sortbar-dropdown-text">Private</span>
+                </div>
+                </> : null}
             </div>
             <div className={`dropdown-right ${activeDropdown === "filters" ? "" : "hide-dropdown"}`} 
             style={{marginRight: getFiltersMargin(), top: `${dropTop}px`}}>

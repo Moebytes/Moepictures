@@ -4,7 +4,7 @@ import {ThemeContext, HideNavbarContext, HideSortbarContext, EnableDragContext, 
 RelativeContext, HideTitlebarContext, SearchContext, SearchFlagContext, PostsContext, ShowDeletePostDialogContext,
 TagsContext, RandomFlagContext, ImageSearchFlagContext, SessionContext, SessionFlagContext, TagEditIDContext, SourceEditIDContext, ShowTakedownPostDialogContext,
 SiteHueContext, SiteLightnessContext, SiteSaturationContext, TranslationModeContext, TranslationDrawingEnabledContext,
-ActionBannerContext, GroupPostIDContext, LockPostIDContext, ShowUpscalingDialogContext, ShowCompressingDialogContext} from "../Context"
+ActionBannerContext, GroupPostIDContext, LockPostIDContext, PrivatePostObjContext, ShowUpscalingDialogContext, ShowCompressingDialogContext} from "../Context"
 import {HashLink as Link} from "react-router-hash-link"
 import permissions from "../structures/Permissions"
 import favicon from "../assets/icons/favicon.png"
@@ -45,6 +45,8 @@ import compressIcon from "../assets/icons/compress.png"
 import upscaleIcon from "../assets/icons/waifu2x.png"
 import lockIcon from "../assets/icons/lock-red.png"
 import unlockIcon from "../assets/icons/unlock-red.png"
+import privateIcon from "../assets/icons/private.png"
+import unprivateIcon from "../assets/icons/unprivate.png"
 import functions from "../structures/Functions"
 import "./styles/mobileinfo.less"
 
@@ -85,6 +87,7 @@ const MobileInfo: React.FunctionComponent<Props> = (props) => {
     const [uploaderImage, setUploaderImage] = useState("")
     const [uploaderRole, setUploaderRole] = useState("")
     const [updaterRole, setUpdaterRole] = useState("")
+    const [approverRole, setApproverRole] = useState("")
     const [suggestionsActive, setSuggestionsActive] = useState(false)
     const {tagEditID, setTagEditID} = useContext(TagEditIDContext)
     const {sourceEditID, setSourceEditID} = useContext(SourceEditIDContext)
@@ -92,6 +95,7 @@ const MobileInfo: React.FunctionComponent<Props> = (props) => {
     const {translationDrawingEnabled, setTranslationDrawingEnabled} = useContext(TranslationDrawingEnabledContext)
     const {actionBanner, setActionBanner} = useContext(ActionBannerContext)
     const {groupPostID, setGroupPostID} = useContext(GroupPostIDContext)
+    const {privatePostObj, setPrivatePostObj} = useContext(PrivatePostObjContext)
     const {lockPostID, setLockPostID} = useContext(LockPostIDContext)
     const {showUpscalingDialog, setShowUpscalingDialog} = useContext(ShowUpscalingDialogContext)
     const {showCompressingDialog, setShowCompressingDialog} = useContext(ShowCompressingDialogContext)
@@ -113,6 +117,8 @@ const MobileInfo: React.FunctionComponent<Props> = (props) => {
             if (uploader?.role) setUploaderRole(uploader.role)
             const updater = await functions.get("/api/user", {username: props.post.updater}, session, setSessionFlag)
             if (updater?.role) setUpdaterRole(updater.role)
+            const approver = await functions.get("/api/user", {username: props.post.approver}, session, setSessionFlag)
+            if (approver?.role) setApproverRole(approver.role)
         }
     }
 
@@ -322,6 +328,10 @@ const MobileInfo: React.FunctionComponent<Props> = (props) => {
         history.push(`/edit-post/${props.post.postID}`)
     }
 
+    const privatePost = async () => {
+        setPrivatePostObj({postID: props.post.postID, artists: props.artists})
+    }
+
     const lockPost = async () => {
         setLockPostID(props.post.postID)
     }
@@ -507,8 +517,16 @@ const MobileInfo: React.FunctionComponent<Props> = (props) => {
     }
 
     const generateUsernameJSX = (type?: string) => {
-        let username = type === "uploader" ? props.post.uploader : props.post.updater 
-        const role = type === "uploader" ? uploaderRole : updaterRole
+        let username = props.post.uploader
+        let role = uploaderRole
+        if (type === "updater") {
+            username = props.post.updater 
+            role = updaterRole
+        }
+        if (type === "approver") {
+            username = props.post.approver 
+            role = approverRole
+        }
         if (role === "admin") {
             return (
                 <div className="mobileinfo-username-container" onClick={() => username ? history.push(`/user/${username}`) : null}>
@@ -661,6 +679,7 @@ const MobileInfo: React.FunctionComponent<Props> = (props) => {
                                 <span className="tag-alt">{functions.formatDate(new Date(props.post.uploadDate))}</span>
                             </div>
                         </div>
+                        {props.post.uploadDate !== props.post.updatedDate ? 
                         <div className="mobileinfo-sub-row">
                             <div className="mobileinfo-row">
                                 <span className="tag">Updater:</span>
@@ -670,7 +689,18 @@ const MobileInfo: React.FunctionComponent<Props> = (props) => {
                                 <span className="tag">Updated:</span>
                                 <span className="tag-alt">{functions.formatDate(new Date(props.post.updatedDate))}</span>
                             </div>
-                        </div>
+                        </div> : null}
+                        {props.post.uploader !== props.post.approver ?
+                        <div className="mobileinfo-sub-row">
+                            <div className="mobileinfo-row">
+                                <span className="tag">Approver:</span>
+                                {generateUsernameJSX("approver")}
+                            </div>
+                            <div className="mobileinfo-row">
+                                <span className="tag">Approved:</span>
+                                <span className="tag-alt">{functions.formatDate(new Date(props.post.approveDate))}</span>
+                            </div>
+                        </div> : null}
                         <div className="mobileinfo-sub-row">
                             <div className="mobileinfo-row">
                                 <span className="tag">Type:</span>
@@ -736,6 +766,12 @@ const MobileInfo: React.FunctionComponent<Props> = (props) => {
                             <span className="tag-hover" onClick={triggerAddTranslation}>
                                 <img className="mobileinfo-icon" src={addTranslation} style={{filter: getFilter()}}/>
                                 <span className="tag">Add Translation</span>
+                            </span>
+                        </div> : null}
+                        {!props.unverified && permissions.canPrivate(session, props.artists) ? <div className="sidebar-row">
+                            <span className="tag-hover" onClick={privatePost}>
+                                <img className="mobileinfo-icon" src={props.post.private ? unprivateIcon : privateIcon} style={{filter: getFilter()}}/>
+                                <span className="tag">{props.post.private ? "Unprivate" : "Private"}</span>
                             </span>
                         </div> : null}
                         {!props.unverified && permissions.isMod(session) ? <div className="mobileinfo-row">

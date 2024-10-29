@@ -41,4 +41,11 @@ export default class Permissions {
         if (session.role === "system") return true
         return false
     }
+
+    public static canPrivate = (session: any, artists: any) => {
+        if (Permissions.isMod(session)) return true
+        const artistTags = artists.map((a: any) => a.tag ? a.tag : a)
+        if (artistTags.includes(session.username)) return true
+        return false
+    }
 }

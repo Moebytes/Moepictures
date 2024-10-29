@@ -12,6 +12,7 @@ SiteHueContext, SiteLightnessContext, SiteSaturationContext, AutoSearchContext, 
 import functions from "../structures/Functions"
 import hamburger from "../assets/icons/hamburger.png"
 import lockIcon from "../assets/icons/lock-red.png"
+import privateIcon from "../assets/icons/private.png"
 import "./styles/titlebar.less"
 
 const darkColorList = {
@@ -248,6 +249,7 @@ const TitleBar: React.FunctionComponent<Props> = (props) => {
             </div>
             {!mobile ? 
             <div className="titlebar-search-text-container">
+                {props.post?.private ? <img draggable={false} className="titlebar-search-icon" src={privateIcon}/> : null}
                 {props.post?.locked ? <img draggable={false} className="titlebar-search-icon" src={lockIcon}/> : null}
                 <span className={`titlebar-search-text ${props.post?.hidden ? "strikethrough" : ""}`}>
                     {props.historyID ? <span style={{color: "var(--historyColor)", marginRight: "10px"}}>{`[History: ${props.historyID}]`}</span> : null}

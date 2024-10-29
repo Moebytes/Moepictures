@@ -3,13 +3,15 @@ import {useHistory} from "react-router-dom"
 import loading from "../assets/icons/loading.gif"
 import {ThemeContext, SizeTypeContext, BrightnessContext, SessionContext, SessionFlagContext, ContrastContext, HueContext, SaturationContext, LightnessContext, MobileContext, ScrollYContext,
 BlurContext, SharpenContext, SquareContext, PixelateContext, DownloadFlagContext, DownloadIDsContext, SpeedContext, ReverseContext, ScrollContext, ActiveDropdownContext, FormatContext,
-ToolTipXContext, ToolTipYContext, ToolTipEnabledContext, ToolTipPostContext, ToolTipImgContext, SelectionModeContext, SelectionItemsContext, SelectionPostsContext} from "../Context"
+ToolTipXContext, ToolTipYContext, ToolTipEnabledContext, ToolTipPostContext, ToolTipImgContext, SelectionModeContext, SelectionItemsContext, SelectionPostsContext,
+SiteHueContext, SiteLightnessContext, SiteSaturationContext} from "../Context"
 import {HashLink as Link} from "react-router-hash-link"
 import gifFrames from "gif-frames"
 import JSZip from "jszip"
 import path from "path"
 import functions from "../structures/Functions"
 import cryptoFunctions from "../structures/CryptoFunctions"
+import privateIcon from "../assets/icons/lock-opt.png"
 import "./styles/gridimage.less"
 
 let tooltipTimer = null as any
@@ -38,6 +40,9 @@ interface Ref {
 
 const GridImage = forwardRef<Ref, Props>((props, componentRef) => {
     const {theme, setTheme} = useContext(ThemeContext)
+    const {siteHue, setSiteHue} = useContext(SiteHueContext)
+    const {siteSaturation, setSiteSaturation} = useContext(SiteSaturationContext)
+    const {siteLightness, setSiteLightness} = useContext(SiteLightnessContext)
     const {sizeType, setSizeType} = useContext(SizeTypeContext)
     const [imageSize, setImageSize] = useState(270) as any
     const {brightness, setBrightness} = useContext(BrightnessContext)
@@ -73,6 +78,7 @@ const GridImage = forwardRef<Ref, Props>((props, componentRef) => {
     const videoRef = useRef<HTMLVideoElement>(null)
     const imageFiltersRef = useRef<HTMLDivElement>(null)
     const videoOverlayRef = useRef<HTMLCanvasElement>(null)
+    const privateIconRef = useRef<HTMLImageElement>(null)
     const [imageWidth, setImageWidth] = useState(0)
     const [imageHeight, setImageHeight] = useState(0)
     const [naturalWidth, setNaturalWidth] = useState(0)
@@ -93,7 +99,12 @@ const GridImage = forwardRef<Ref, Props>((props, componentRef) => {
     const [loadingFrames, setLoadingFrames] = useState(false)
     const [pageBuffering, setPageBuffering] = useState(true)
     const [selected, setSelected] = useState(false)
+    const [hover, setHover] = useState(false)
     const history = useHistory()
+
+    const getFilter = () => {
+        return `hue-rotate(${siteHue - 180}deg) saturate(${siteSaturation}%) brightness(${siteLightness + 70}%)`
+    }
 
     useImperativeHandle(componentRef, () => ({
         shouldWait: async () => {
@@ -823,6 +834,7 @@ const GridImage = forwardRef<Ref, Props>((props, componentRef) => {
     }
 
     const mouseEnter = () => {
+        setHover(true)
         if (pageBuffering) return
         tooltipTimer = setTimeout(() => {
             if (!containerRef.current) return
@@ -839,6 +851,7 @@ const GridImage = forwardRef<Ref, Props>((props, componentRef) => {
     }
 
     const mouseLeave = () => {
+        setHover(false)
         if (pageBuffering) return
         if (tooltipTimer) clearTimeout(tooltipTimer)
         setToolTipEnabled(false)
@@ -872,6 +885,8 @@ const GridImage = forwardRef<Ref, Props>((props, componentRef) => {
         <div style={{opacity: visible ? "1" : "0", transition: "opacity 0.1s"}} className="image-box" id={String(props.id)} ref={containerRef} 
         onClick={onClick} onAuxClick={onClick} onMouseDown={mouseDown} onMouseUp={mouseUp} onMouseMove={mouseMove} onMouseEnter={mouseEnter} onMouseLeave={mouseLeave}>
             <div className="image-filters" ref={imageFiltersRef} onMouseMove={(event) => imageAnimation(event)} onMouseLeave={() => cancelImageAnimation()}>
+                {props.post.private ? <img style={{opacity: hover ? "1" : "0", transition: "opacity 0.3s", filter: getFilter()}} className="song-icon" src={privateIcon} 
+                ref={privateIconRef} onMouseDown={(event) => {event.stopPropagation()}} onMouseUp={(event) => {event.stopPropagation()}}/> : null}
                 {functions.isVideo(props.img) && !mobile ? <video draggable={false} autoPlay loop muted disablePictureInPicture playsInline className="dummy-video" ref={videoRef} src={img}></video> : null}   
                 <img draggable={false} className="lightness-overlay" ref={lightnessRef} src={functions.isVideo(props.img) ? backFrame : img}/>
                 <img draggable={false} className="sharpen-overlay" ref={overlayRef} src={functions.isVideo(props.img) ? backFrame : img}/>

@@ -47,7 +47,6 @@ const ArtistRow: React.FunctionComponent<Props> = (props) => {
             }
         }
         let filtered = props.artist.posts.filter((p: any) => restrictType === "explicit" ? p.restrict === "explicit" : p.restrict !== "explicit")
-        if (!permissions.isMod(session)) filtered = filtered.filter((p: any) => !p.hidden)
         const post = filtered[index] 
         if (newTab) {
             window.open(`/post/${post.postID}`, "_blank")
@@ -61,11 +60,9 @@ const ArtistRow: React.FunctionComponent<Props> = (props) => {
     const getImages = () => {
         if (!session.username) {
             let filtered = props.artist.posts.filter((p: any) => p.restrict === "safe")
-            if (!permissions.isMod(session)) filtered = filtered.filter((p: any) => !p.hidden)
             return filtered.map((p: any) => functions.getThumbnailLink(p.images[0].type, p.postID, p.images[0].order, p.images[0].filename, "tiny", mobile))
         }
         let filtered = props.artist.posts.filter((p: any) => restrictType === "explicit" ? p.restrict === "explicit" : p.restrict !== "explicit")
-        if (!permissions.isMod(session)) filtered = filtered.filter((p: any) => !p.hidden)
         return filtered.map((p: any) => functions.getThumbnailLink(p.images[0].type, p.postID, p.images[0].order, p.images[0].filename, "tiny", mobile))
     }
 

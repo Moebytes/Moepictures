@@ -153,6 +153,7 @@ export default class SQLTranslation {
                     GROUP BY "unverified posts"."postID"
                 )
                 SELECT "unverified translations".*, 
+                COUNT(*) OVER() AS "translationCount",
                 to_json((array_agg(post_json.*))[1]) AS post
                 FROM "unverified translations"
                 JOIN post_json ON post_json."postID" = "unverified translations"."postID"

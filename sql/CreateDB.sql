@@ -36,6 +36,7 @@ CREATE TABLE IF NOT EXISTS "posts" (
     "uploadDate" timestamptz,
     "updatedDate" timestamptz,
     "approver" text REFERENCES "users" ("username") ON UPDATE CASCADE ON DELETE SET NULL,
+    "approveDate" timestamptz,
     "title" text,
     "translatedTitle" text,
     "artist" text,
@@ -46,6 +47,7 @@ CREATE TABLE IF NOT EXISTS "posts" (
     "purchaseLink" text,
     "hidden" boolean,
     "locked" boolean,
+    "private" boolean,
     "hasOriginal" boolean,
     "hasUpscaled" boolean,
     "mirrors" jsonb
@@ -66,6 +68,7 @@ CREATE TABLE IF NOT EXISTS "unverified posts" (
     "drawn" date,
     "uploadDate" timestamptz,
     "updatedDate" timestamptz,
+    "approveDate" timestamptz,
     "title" text,
     "translatedTitle" text,
     "artist" text,
@@ -78,7 +81,11 @@ CREATE TABLE IF NOT EXISTS "unverified posts" (
     "hasOriginal" boolean,
     "hasUpscaled" boolean,
     "mirrors" jsonb,
-    "thumbnail" text
+    "thumbnail" text,
+    "addedTags" text[],
+    "removedTags" text[],
+    "imageChanged" boolean,
+    "changes" jsonb
 );
 
 CREATE TABLE IF NOT EXISTS "images" (
@@ -497,6 +504,10 @@ CREATE TABLE IF NOT EXISTS "post history" (
     "characters" text[],
     "series" text[],
     "tags" text[],
+    "addedTags" text[],
+    "removedTags" text[],
+    "imageChanged" boolean,
+    "changes" jsonb,
     "reason" text
 );
 
