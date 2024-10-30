@@ -95,6 +95,10 @@ const GroupPage: React.FunctionComponent<Props> = (props) => {
             group = await functions.get("/api/group", {name: slug}, session, setSessionFlag).catch(() => null)
         }
         if (!group) return functions.replaceLocation("/404")
+        if (group.restrict === "explicit") {
+            if (!session.cookie) return
+            if (!session.showR18) return functions.replaceLocation("/403")
+        }
         setGroup(group)
     }
 
@@ -113,6 +117,7 @@ const GroupPage: React.FunctionComponent<Props> = (props) => {
         let items = [] as any[]
         for (let i = 0; i < group.posts.length; i++) {
             const post = group.posts[i]
+            if (post.restrict === "explicit") if (restrictType !== "explicit") continue
             const imageLink = functions.getThumbnailLink(post.images[0]?.type, post.postID, post.images[0]?.order, post.images[0]?.filename, "medium", mobile)
             let img = await cryptoFunctions.decryptedLink(imageLink)
             if (functions.isModel(img)) {
@@ -131,7 +136,7 @@ const GroupPage: React.FunctionComponent<Props> = (props) => {
             setHeaderText(group.name)
             updateItems()
         }
-    }, [group])
+    }, [group, restrictType])
 
     useEffect(() => {
         if (mobile) {

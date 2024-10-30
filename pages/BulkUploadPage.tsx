@@ -36,6 +36,7 @@ BlurContext, SharpenContext, PixelateContext, HeaderTextContext, SessionContext,
 SiteHueContext, SiteLightnessContext, SiteSaturationContext, ShowUpscaledContext, SessionFlagContext} from "../Context"
 import JSZip from "jszip"
 import SearchSuggestions from "../components/SearchSuggestions"
+import ContentEditable from "react-contenteditable"
 import {ProgressBar} from "react-bootstrap"
 import permissions from "../structures/Permissions"
 import xButton from "../assets/icons/x-button-magenta.png"
@@ -94,15 +95,20 @@ const BulkUploadPage: React.FunctionComponent = (props) => {
     const [rawArtist, setRawArtist] = useState("")
     const [rawCharacter, setRawCharacter] = useState("")
     const [rawSeries, setRawSeries] = useState("")
+    const [rawAppendTags, setRawAppendTags] = useState("")
     const [artistActive, setArtistActive] = useState(false) as any
     const [characterActive, setCharacterActive] = useState(false) as any
     const [seriesActive, setSeriesActive] = useState(false) as any
+    const [tagActive, setTagActive] = useState(false) as any
+    const [tagX, setTagX] = useState(0)
+    const [tagY, setTagY] = useState(0)
     const [progress, setProgress] = useState(0)
     const [progressText, setProgressText] = useState("")
     const progressBarRef = useRef<any>(null)
     const artistInputRef = useRef(null) as any
     const characterInputRef = useRef(null) as any
     const seriesInputRef = useRef(null) as any
+    const appendTagsRef = useRef(null) as any
     const history = useHistory()
 
     useEffect(() => {
@@ -457,7 +463,7 @@ const BulkUploadPage: React.FunctionComponent = (props) => {
             }
 
             if (rawArtist?.trim()) {
-                const artistArr = functions.cleanHTML(rawArtist).split(/[\n\r\s]+/g)
+                const artistArr = functions.cleanHTML(rawArtist).trim().split(/[\n\r\s]+/g)
                 let newArtists = [] as any
                 for (let i = 0; i < artistArr.length; i++) {
                     newArtists.push({tag: artistArr[i]})
@@ -465,7 +471,7 @@ const BulkUploadPage: React.FunctionComponent = (props) => {
                 data.artists = newArtists
             }
             if (rawCharacter?.trim()) {
-                const characterArr = functions.cleanHTML(rawCharacter).split(/[\n\r\s]+/g)
+                const characterArr = functions.cleanHTML(rawCharacter).trim().split(/[\n\r\s]+/g)
                 let newCharacters = [] as any
                 for (let i = 0; i < characterArr.length; i++) {
                     newCharacters.push({tag: characterArr[i]})
@@ -478,7 +484,7 @@ const BulkUploadPage: React.FunctionComponent = (props) => {
                 data.characters = functions.removeDuplicates(data.characters)
             }
             if (rawSeries?.trim()) {
-                const seriesArr = functions.cleanHTML(rawSeries).split(/[\n\r\s]+/g)
+                const seriesArr = functions.cleanHTML(rawSeries).trim().split(/[\n\r\s]+/g)
                 let newSeries = [] as any
                 for (let i = 0; i < seriesArr.length; i++) {
                     newSeries.push({tag: seriesArr[i]})
@@ -489,6 +495,22 @@ const BulkUploadPage: React.FunctionComponent = (props) => {
                     data.series.push(...newSeries)
                 }
                 data.series = functions.removeDuplicates(data.series)
+            }
+            if (rawAppendTags?.trim()) {
+                const appendData = functions.cleanHTML(rawAppendTags).trim().split(/[\n\r\s]+/g)
+                let toAppend = [] as string[]
+                let toRemove = [] as string[]
+                for (const tag of appendData) {
+                    if (tag.startsWith("-")) {
+                        toRemove.push(tag.replace("-", ""))
+                    } else {
+                        toAppend.push(tag.startsWith("+") ? tag.replace("+", "") : tag)
+                    }
+                }
+                const tagSet = new Set(data.tags)
+                toAppend.forEach(tag => tagSet.add(tag))
+                toRemove.forEach(tag => tagSet.delete(tag))
+                data.tags = Array.from(tagSet)
             }
             try {
                 setProgress(Math.floor((100/submitData.length) * (i+1)))
@@ -796,7 +818,11 @@ const BulkUploadPage: React.FunctionComponent = (props) => {
             }
             newTags = notExists
         } else {
-            let tagArr = await functions.post(`/api/misc/wdtagger`, bytes, session, setSessionFlag).catch(() => null)
+            let result = await functions.post(`/api/misc/wdtagger`, bytes, session, setSessionFlag).catch(() => null)
+
+            let tagArr = result.tags
+            let characterArr = result.characters
+
             if (tagArr.includes("chibi")) style = "chibi"
             if (tagArr.includes("pixel-art")) style = "pixel"
             if (tagArr.includes("comic")) {
@@ -814,32 +840,40 @@ const BulkUploadPage: React.FunctionComponent = (props) => {
             }
             tagArr = tagArr.filter((tag: string) => tag.length >= 3)
 
+            characterArr = characterArr.map((tag: string) => functions.cleanTag(tag))
+            for (let i = 0; i < Object.keys(tagReplaceMap).length; i++) {
+                const key = Object.keys(tagReplaceMap)[i]
+                const value = Object.values(tagReplaceMap)[i]
+                characterArr = characterArr.map((tag: string) => tag.replaceAll(key, value))
+            }
+            for (let i = 0; i < blockedTags.length; i++) {
+                characterArr = characterArr.filter((tag: string) => !tag.includes(blockedTags[i]))
+            }
+            characterArr = characterArr.filter((tag: string) => tag.length >= 3)
 
-            let tagMapArr = tagArr.filter((tag: string) => !tag.includes("("))
-            tagMapArr.push("autotags")
-            tagMapArr.push("needscheck")
-            tagMapArr.push("upscaled")
-            let charStrArr = tagArr.filter((tag: string) => tag.includes("("))
+            tagArr.push("autotags")
+            tagArr.push("needscheck")
+            tagArr.push("upscaled")
 
-            let seriesStrArr = [] as string[]
+            let seriesArr = [] as string[]
 
-            for (let i = 0; i < charStrArr.length; i++) {
-                const seriesName = charStrArr[i].match(/(\()(.*?)(\))/)?.[0].replace("(", "").replace(")", "")
-                seriesStrArr.push(seriesName)
+            for (let i = 0; i < characterArr.length; i++) {
+                const seriesName = characterArr[i].match(/(\()(.*?)(\))/)?.[0].replace("(", "").replace(")", "")
+                seriesArr.push(seriesName)
             }
 
-            seriesStrArr = functions.removeDuplicates(seriesStrArr)
+            seriesArr = functions.removeDuplicates(seriesArr)
 
-            for (let i = 0; i < charStrArr.length; i++) {
-                characters[characters.length - 1].tag = charStrArr[i]
+            for (let i = 0; i < characterArr.length; i++) {
+                characters[characters.length - 1].tag = characterArr[i]
                 characters.push({})
             }
 
-            for (let i = 0; i < seriesStrArr.length; i++) {
-                series[series.length - 1].tag = seriesStrArr[i]
+            for (let i = 0; i < seriesArr.length; i++) {
+                series[series.length - 1].tag = seriesArr[i]
                 series.push({})
             }
-            tags = functions.cleanHTML(tagMapArr.join(" ")).split(/[\n\r\s]+/g)
+            tags = functions.cleanHTML(tagArr.join(" ")).split(/[\n\r\s]+/g)
             let notExists = [] as any
             for (let i = 0; i < tags.length; i++) {
                 const exists = tagMap[tags[i]]
@@ -1083,6 +1117,14 @@ const BulkUploadPage: React.FunctionComponent = (props) => {
         })
     }
 
+    const handleTagsClick = (tag: string) => {
+        setRawAppendTags((prev: string) => {
+            const parts = functions.cleanHTML(prev).split(/ +/g)
+            parts[parts.length - 1] = tag
+            return parts.join(" ") + " "
+        })
+    }
+
     const getX = (kind: string) => {
         if (typeof document === "undefined") return 15
         let element = null as any
@@ -1112,6 +1154,44 @@ const BulkUploadPage: React.FunctionComponent = (props) => {
         const rect = element.getBoundingClientRect()
         return rect.bottom + window.scrollY
     }
+
+    const getTagX = () => {
+        if (typeof window === "undefined") return 0
+        const selection = window.getSelection()
+        if (selection && selection.rangeCount > 0) {
+            const range = selection.getRangeAt(0)
+            const rect = functions.rangeRect(range, appendTagsRef)
+            return rect.left - 10
+        }
+        return 0
+    }
+
+    const getTagY = () => {
+        if (typeof window === "undefined") return 0
+        const selection = window.getSelection()
+        if (selection && selection.rangeCount > 0) {
+            const range = selection.getRangeAt(0)
+            const rect = functions.rangeRect(range, appendTagsRef)
+            return rect.bottom + window.scrollY + 10
+        }
+        return 0
+    }
+
+    useEffect(() => {
+        const tagX = getTagX()
+        const tagY = getTagY()
+        setTagX(tagX)
+        setTagY(tagY)
+    }, [rawAppendTags])
+
+    useEffect(() => {
+        if (tagActive) {
+            const tagX = getTagX()
+            const tagY = getTagY()
+            setTagX(tagX)
+            setTagY(tagY)
+        }
+    }, [tagActive])
 
     const updateProgressColor = () => {
         const progressBar = progressBarRef.current?.querySelector(".progress-bar") as HTMLElement
@@ -1275,6 +1355,13 @@ const BulkUploadPage: React.FunctionComponent = (props) => {
                 <div className="upload-container-row" style={{marginTop: "10px"}}>
                     <span className="upload-text">Common Series: </span>
                     <input ref={seriesInputRef} className="upload-input-wide2 series-tag-color" type="text" value={rawSeries} onChange={(event) => setRawSeries(event.target.value)} spellCheck={false} onFocus={() => setSeriesActive(true)} onBlur={() => setSeriesActive(false)} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}/>
+                </div>
+            </div>
+            <div className="upload-container">
+                <SearchSuggestions active={tagActive} x={tagX} y={tagY} width={mobile ? 150 : 200} text={rawAppendTags} click={handleTagsClick} type="tag"/>
+                <div className="upload-container-row" style={{marginTop: "10px"}}>
+                    <span className="upload-text" style={{marginRight: "10px"}}>Append Tags: </span>
+                    <ContentEditable style={{minHeight: "70px", width: mobile ? "100%" : "50%"}} innerRef={appendTagsRef} className="upload-textarea" spellCheck={false} html={rawAppendTags} onChange={(event) => setRawAppendTags(event.target.value)} onFocus={() => setTagActive(true)} onBlur={() => setTagActive(false)} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}/>
                 </div>
             </div>
             {progressText ?

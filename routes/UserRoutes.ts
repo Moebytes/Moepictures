@@ -809,16 +809,17 @@ const UserRoutes = (app: Express) => {
     app.get("/api/user/favorites", sessionLimiter, async (req: Request, res: Response) => {
         try {
             const username = req.query.username as string
+            const restrict = req.query.restrict as string
             const offset = req.query.offset as string
             const limit = req.query.limit as string
             let favorites = [] as any
             if (username) {
                 const user = await sql.user.user(username as string)
                 if (!user || !user.publicFavorites) return res.status(200).send([])
-                favorites = await sql.favorite.favorites(username, limit, offset)
+                favorites = await sql.favorite.favorites(username, limit, offset, "all", restrict)
             } else {
                 if (!req.session.username) return res.status(403).send("Unauthorized")
-                favorites = await sql.favorite.favorites(req.session.username, limit, offset)
+                favorites = await sql.favorite.favorites(req.session.username, limit, offset, "all", restrict)
             }
             if (!permissions.isMod(req.session)) {
                 favorites = favorites.filter((p: any) => !p.hidden)
@@ -844,14 +845,15 @@ const UserRoutes = (app: Express) => {
     app.get("/api/user/uploads", sessionLimiter, async (req: Request, res: Response) => {
         try {
             const username = req.query.username as string
+            const restrict = req.query.restrict as string
             const offset = req.query.offset as string
             const limit = req.query.limit as string
             let uploads = [] as any
             if (username) {
-                uploads = await sql.user.uploads(username, limit, offset)
+                uploads = await sql.user.uploads(username, limit, offset, "all", restrict)
             } else {
                 if (!req.session.username) return res.status(403).send("Unauthorized")
-                uploads = await sql.user.uploads(req.session.username, limit, offset)
+                uploads = await sql.user.uploads(req.session.username, limit, offset, "all", restrict)
             }
             if (!permissions.isMod(req.session)) {
                 uploads = uploads.filter((p: any) => !p.hidden)

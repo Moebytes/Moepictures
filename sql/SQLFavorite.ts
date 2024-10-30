@@ -170,15 +170,15 @@ export default class SQLFavorite {
     }
 
     /** Insert favgroup. */
-    public static insertFavgroup = async (username: string, slug: string, name: string, isPrivate: boolean) => {
+    public static insertFavgroup = async (username: string, slug: string, name: string, isPrivate: boolean, restrict: string) => {
         const query: QueryConfig = {
             text: functions.multiTrim(/*sql*/`
-                INSERT INTO favgroups ("username", "slug", "name", "private", "createDate")
-                VALUES ($1, $2, $3, $4, $5)
+                INSERT INTO favgroups ("username", "slug", "name", "restrict", "private", "createDate")
+                VALUES ($1, $2, $3, $4, $5, $6)
                 ON CONFLICT ("username", "slug") DO UPDATE
                 SET "private" = EXCLUDED."private"
             `),
-            values: [username, slug, name, isPrivate, new Date().toISOString()]
+            values: [username, slug, name, restrict, isPrivate, new Date().toISOString()]
         }
         const result = await SQLQuery.run(query)
         return result

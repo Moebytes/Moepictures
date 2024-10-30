@@ -98,40 +98,40 @@ const UserPage: React.FunctionComponent<Props> = (props) => {
     }
 
     const updateUploads = async () => {
-        const uploads = await functions.get("/api/user/uploads", {username}, session, setSessionFlag)
-        let filtered = uploads.filter((u: any) => restrictType === "explicit" ? u.restrict === "explicit" : u.restrict !== "explicit")
-        const images = filtered.map((p: any) => functions.getThumbnailLink(p.images[0].type, p.postID, p.images[0].order, p.images[0].filename, "tiny"))
-        setUploads(filtered)
+        let restrict = restrictType === "explicit" ? "explicit" : "all"
+        const uploads = await functions.get("/api/user/uploads", {username, restrict}, session, setSessionFlag)
+        const images = uploads.map((p: any) => functions.getThumbnailLink(p.images[0].type, p.postID, p.images[0].order, p.images[0].filename, "tiny"))
+        setUploads(uploads)
         setUploadImages(images)
     }
 
     const updateUploadOffset = async () => {
         const newUploads = uploads
         let offset = newUploads.length
-        const result = await functions.get("/api/user/uploads", {limit, offset}, session, setSessionFlag)
+        let restrict = restrictType === "explicit" ? "explicit" : "all"
+        const result = await functions.get("/api/user/uploads", {limit, restrict, offset}, session, setSessionFlag)
         newUploads.push(...result)
-        let filtered = newUploads.filter((u: any) => restrictType === "explicit" ? u.post?.restrict === "explicit" : u.post?.restrict !== "explicit")
-        const images = filtered.map((p: any) => functions.getThumbnailLink(p.images[0].type, p.postID, p.images[0].order, p.images[0].filename, "large"))
-        setUploads(filtered)
+        const images = result.map((p: any) => functions.getThumbnailLink(p.images[0].type, p.postID, p.images[0].order, p.images[0].filename, "large"))
+        setUploads(result)
         setAppendUploadImages(images)
     }
 
     const updateFavorites = async () => {
-        const favorites = await functions.get("/api/user/favorites", {username}, session, setSessionFlag)
-        let filtered = favorites.filter((f: any) => restrictType === "explicit" ? f.restrict === "explicit" : f.restrict !== "explicit")
-        const images = filtered.map((f: any) => functions.getThumbnailLink(f.images[0].type, f.postID, f.images[0].order, f.images[0].filename, "tiny"))
-        setFavorites(filtered)
+        let restrict = restrictType === "explicit" ? "explicit" : "all"
+        const favorites = await functions.get("/api/user/favorites", {username, restrict}, session, setSessionFlag)
+        const images = favorites.map((f: any) => functions.getThumbnailLink(f.images[0].type, f.postID, f.images[0].order, f.images[0].filename, "tiny"))
+        setFavorites(favorites)
         setFavoriteImages(images)
     }
 
     const updateFavoriteOffset = async () => {
         const newFavorites = favorites
         let offset = newFavorites.length
-        const result = await functions.get("/api/user/favorites", {limit, offset}, session, setSessionFlag)
+        let restrict = restrictType === "explicit" ? "explicit" : "all"
+        const result = await functions.get("/api/user/favorites", {limit, restrict, offset}, session, setSessionFlag)
         newFavorites.push(...result)
-        let filtered = favorites.filter((f: any) => restrictType === "explicit" ? f.restrict === "explicit" : f.restrict !== "explicit")
-        const images = filtered.map((f: any) => functions.getThumbnailLink(f.images[0].type, f.postID, f.images[0].order, f.images[0].filename, "tiny"))
-        setFavorites(filtered)
+        const images = result.map((f: any) => functions.getThumbnailLink(f.images[0].type, f.postID, f.images[0].order, f.images[0].filename, "tiny"))
+        setFavorites(result)
         setAppendFavoriteImages(images)
     }
 
@@ -168,7 +168,7 @@ const UserPage: React.FunctionComponent<Props> = (props) => {
         updateFavgroups()
         updateComments()
         updateCounts()
-    }, [username, session])
+    }, [username, restrictType, session])
 
     useEffect(() => {
         if (mobile) {
@@ -355,8 +355,12 @@ const UserPage: React.FunctionComponent<Props> = (props) => {
         for (let i = 0; i < favgroups.length; i++) {
             let favgroup = favgroups[i]
             if (favgroup.private) continue
-            let filtered = favgroup.posts.filter((p: any) => restrictType === "explicit" ? p.restrict === "explicit" : p.restrict !== "explicit")
-            const images = filtered.map((f: any) => functions.getThumbnailLink(f.images[0].type, f.postID, f.images[0].order, f.images[0].filename, "tiny"))
+            if (restrictType === "explicit") {
+                if (favgroup.restrict !== "explicit") continue
+            } else {
+                if (favgroup.restrict === "explicit") continue
+            }
+            const images = favgroup.posts.map((f: any) => functions.getThumbnailLink(f.images[0].type, f.postID, f.images[0].order, f.images[0].filename, "tiny"))
             const viewFavgroup = () => {
                 history.push(`/favgroup/${username}/${favgroup.slug}`)
             }

@@ -44,7 +44,7 @@ const CategorizeTagDialog: React.FunctionComponent = (props) => {
 
     const categorize = async () => {
         if (!permissions.isMod(session)) return setCategorizeTag(null)
-        await functions.post("/api/tag/categorize", {tag: categorizeTag.tag, category}, session, setSessionFlag)
+        await functions.put("/api/tag/edit", {tag: categorizeTag.tag, category}, session, setSessionFlag)
         setCategorizeTag(null)
     }
 

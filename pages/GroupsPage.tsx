@@ -140,7 +140,8 @@ const GroupsPage: React.FunctionComponent = (props) => {
     }
 
     const updateGroups = async (query?: string) => {
-        const result = await functions.get("/api/search/groups", {sort: functions.parseSort(sortType, sortReverse), query: query ? query : searchQuery, limit}, session, setSessionFlag)
+        let restrict = restrictType === "explicit" ? "explicit" : "all"
+        const result = await functions.get("/api/search/groups", {sort: functions.parseSort(sortType, sortReverse), query: query ? query : searchQuery, restrict, limit}, session, setSessionFlag)
         setEnded(false)
         setIndex(0)
         setVisibleGroups([])
@@ -179,7 +180,7 @@ const GroupsPage: React.FunctionComponent = (props) => {
 
     useEffect(() => {
         updateGroups()
-    }, [sortType, sortReverse, session])
+    }, [sortType, sortReverse, restrictType, session])
 
     const getPageAmount = () => {
         return scroll ? 15 : 25
@@ -198,7 +199,7 @@ const GroupsPage: React.FunctionComponent = (props) => {
             setVisibleGroups(functions.removeDuplicates(newVisibleGroups))
         }
         if (scroll) updateGroups()
-    }, [scroll, groups, session])
+    }, [scroll, groups, restrictType, session])
 
     const updateOffset = async () => {
         if (ended) return
@@ -214,7 +215,8 @@ const GroupsPage: React.FunctionComponent = (props) => {
                 }
             }
         }
-        let result = await functions.get("/api/search/groups", {sort: functions.parseSort(sortType, sortReverse), query: searchQuery, limit, offset: newOffset}, session, setSessionFlag)
+        let restrict = restrictType === "explicit" ? "explicit" : "all"
+        let result = await functions.get("/api/search/groups", {sort: functions.parseSort(sortType, sortReverse), query: searchQuery, restrict, limit, offset: newOffset}, session, setSessionFlag)
         let hasMore = result?.length >= limit
         const cleanGroups = groups.filter((t: any) => !t.fake)
         if (!scroll) {
@@ -261,7 +263,7 @@ const GroupsPage: React.FunctionComponent = (props) => {
         return () => {
             window.removeEventListener("scroll", scrollHandler)
         }
-    }, [scroll, visibleGroups, index, sortType, sortReverse])
+    }, [scroll, visibleGroups, index, sortType, sortReverse, restrictType])
 
     useEffect(() => {
         window.scrollTo(0, 0)
@@ -272,7 +274,7 @@ const GroupsPage: React.FunctionComponent = (props) => {
             setGroupsPage(1)
             updateGroups()
         }
-    }, [scroll, session])
+    }, [scroll, restrictType, session])
 
     useEffect(() => {
         if (!scroll) updateOffset()
@@ -295,7 +297,7 @@ const GroupsPage: React.FunctionComponent = (props) => {
             }
         }
         if (!scroll) updatePageOffset()
-    }, [scroll, groups, groupsPage, ended, sortType, sortReverse])
+    }, [scroll, groups, groupsPage, ended, sortType, sortReverse, restrictType])
 
     useEffect(() => {
         const searchParams = new URLSearchParams(window.location.search)
@@ -425,7 +427,6 @@ const GroupsPage: React.FunctionComponent = (props) => {
         for (let i = 0; i < visible.length; i++) {
             const group = visible[i]
             if (group.fake) continue
-            if (restrictType !== "explicit") if (group.restrict === "explicit") continue
             jsx.push(<GroupThumbnail key={group.groupID} group={group}/>)
         }
         if (!scroll) {

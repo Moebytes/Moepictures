@@ -121,11 +121,13 @@ const TagPage: React.FunctionComponent<Props> = (props) => {
             tag = await functions.get("/api/tag", {tag: tagName}, session, setSessionFlag)
         }
         if (!tag) return functions.replaceLocation("/404")
-        if (!permissions.isMod(session)) {
-            if (tag.hidden) return functions.replaceLocation("/403")
+        if (tag.hidden) {
+            if (!session.cookie) return
+            if (!permissions.isMod(session)) return functions.replaceLocation("/403")
         }
-        if (!session.showR18) {
-            if (tag.r18) return functions.replaceLocation("/403")
+        if (tag.r18) {
+            if (!session.cookie) return
+            if (!session.showR18) return functions.replaceLocation("/403")
         }
         const tagCount = await functions.get("/api/tag/counts", {tags: [tagName]}, session, setSessionFlag).then((r) => Number(r?.[0]?.count || 0))
         setTag(tag)
@@ -138,21 +140,21 @@ const TagPage: React.FunctionComponent<Props> = (props) => {
     }
 
     const updatePosts = async () => {
-        let uploads = await functions.get("/api/search/posts", {query: tagName, type: "all", restrict: "all", style: "all", sort: "date", limit}, session, setSessionFlag)
-        let filtered = uploads.filter((u: any) => restrictType === "explicit" ? u.post?.restrict === "explicit" : u.post?.restrict !== "explicit")
-        const images = filtered.map((p: any) => functions.getThumbnailLink(p.images[0].type, p.postID, p.images[0].order, p.images[0].filename, "large"))
-        setTagPosts(filtered)
+        let restrict = restrictType === "explicit" ? "explicit" : "all"
+        let uploads = await functions.get("/api/search/posts", {query: tagName, type: "all", restrict, style: "all", sort: "date", limit}, session, setSessionFlag)
+        const images = uploads.map((p: any) => functions.getThumbnailLink(p.images[0].type, p.postID, p.images[0].order, p.images[0].filename, "large"))
+        setTagPosts(uploads)
         setPostImages(images)
     }
 
     const updateOffset = async () => {
         let uploads = tagPosts
         let offset = tagPosts.length
-        const result = await functions.get("/api/search/posts", {query: tag.tag, type: "all", restrict: "all", style: "all", sort: "date", limit, offset}, session, setSessionFlag)
+        let restrict = restrictType === "explicit" ? "explicit" : "all"
+        const result = await functions.get("/api/search/posts", {query: tag.tag, type: "all", restrict, style: "all", sort: "date", limit, offset}, session, setSessionFlag)
         uploads.push(...result)
-        let filtered = uploads.filter((u: any) => restrictType === "explicit" ? u.post?.restrict === "explicit" : u.post?.restrict !== "explicit")
-        const images = filtered.map((p: any) => functions.getThumbnailLink(p.images[0].type, p.postID, p.images[0].order, p.images[0].filename, "large"))
-        setTagPosts(filtered)
+        const images = result.map((p: any) => functions.getThumbnailLink(p.images[0].type, p.postID, p.images[0].order, p.images[0].filename, "large"))
+        setTagPosts(result)
         setAppendImages(images)
     }
 
@@ -160,7 +162,7 @@ const TagPage: React.FunctionComponent<Props> = (props) => {
         tagInfo()
         updateRelatedTags()
         updatePosts()
-    }, [tagName, historyID, session])
+    }, [tagName, restrictType, historyID, session])
 
     useEffect(() => {
         if (tagFlag) {
@@ -407,7 +409,7 @@ const TagPage: React.FunctionComponent<Props> = (props) => {
         }
         await functions.put("/api/tag/edit", {tag: tag.tag, key: tag.key, description: tag.description, image,
         aliases: tag.aliases, implications: tag.implications, pixivTags: tag.pixivTags, social: tag.social,
-        twitter: tag.twitter, website: tag.website, fandom: tag.fandom}, session, setSessionFlag)
+        twitter: tag.twitter, website: tag.website, fandom: tag.fandom, category: tag.type}, session, setSessionFlag)
         currentHistory(tag.key)
     }
 
@@ -456,6 +458,16 @@ const TagPage: React.FunctionComponent<Props> = (props) => {
         return functions.toProperCase(tag.tag.replaceAll("-", " "))
     }
 
+    const getTagColor = () => {
+        if (tag.banned) return "strikethrough"
+        if (tag.r18) return "r18-tag-color"
+        if (tag.type === "artist") return "artist-tag-color"
+        if (tag.type === "character") return "character-tag-color"
+        if (tag.type === "series") return "series-tag-color"
+        if (tag.type === "meta") return "meta-tag-color"
+        return "tag-color"
+    }
+
     return (
         <>
         <EditTagDialog/>
@@ -475,7 +487,7 @@ const TagPage: React.FunctionComponent<Props> = (props) => {
                         <div className="tag-img-container">
                             <img className="tag-img" src={functions.getTagLink(tag.type, tag.image)}/>
                         </div> : null}
-                        <span className={`tag-heading ${tag.banned ? "strikethrough" : ""}`}>{getTagName()}</span>
+                        <span className={`tag-heading ${getTagColor()}`}>{getTagName()}</span>
                         {tagSocialJSX()}
                         {tagOptionsJSX()}
                     </div>

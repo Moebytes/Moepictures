@@ -11,7 +11,6 @@ import DeleteGroupHistoryDialog from "../dialogs/DeleteGroupHistoryDialog"
 import {ThemeContext, EnableDragContext, HideNavbarContext, HideSidebarContext, MobileContext, SessionContext, RedirectContext, RestrictTypeContext,
 RelativeContext, HideTitlebarContext, ActiveDropdownContext, HeaderTextContext, SidebarTextContext, SessionFlagContext} from "../Context"
 import permissions from "../structures/Permissions"
-import matureTags from "../assets/json/mature-tags.json"
 import "./styles/historypage.less"
 
 interface Props {

@@ -343,11 +343,15 @@ const SearchRoutes = (app: Express) => {
         try {
             const query = req.query.query as string
             let sort = req.query.sort as string
+            let restrict = req.query.restrict as string
             const limit = req.query.limit as string
             const offset = req.query.offset as string
             if (!functions.validGroupSort(sort)) return res.status(400).send("Invalid sort")
             const search = query?.trim() ?? ""
-            let  result = await sql.search.groupSearch(search, sort, limit, offset)
+            let  result = await sql.search.groupSearch(search, sort, restrict, limit, offset)
+            if (!req.session.showR18) {
+                result = result.filter((g: any) => g.restrict !== "explicit")
+            }
             res.status(200).json(result)
         } catch (e) {
             console.log(e)
@@ -362,7 +366,7 @@ const SearchRoutes = (app: Express) => {
             if (!type) type = "all"
             if (!functions.validTagType(type)) return res.status(400).send("Invalid type")
             let search = query?.trim().toLowerCase().split(/ +/g).filter(Boolean).join("-") ?? ""
-            let result = await sql.search.tagSearch(search, "posts", type, "10").then((r) => r.slice(0, 10))
+            let result = await sql.search.tagSearch(search, "posts", type, "100").then((r) => r.slice(0, 100))
             if (!result?.[0]) return res.status(200).json([])
             if (!permissions.isMod(req.session)) {
                 result = result.filter((tag: any) => !tag.hidden)
@@ -371,7 +375,7 @@ const SearchRoutes = (app: Express) => {
                 result = result.filter((tag: any) => !tag.r18)
             }
             const tags = await sql.tag.tagCounts(result.map((r: any) => r.tag))
-            res.status(200).json(tags.slice(0, 10))
+            res.status(200).json(tags.slice(0, 100))
         } catch (e) {
             console.log(e)
             return res.status(400).send("Bad request")

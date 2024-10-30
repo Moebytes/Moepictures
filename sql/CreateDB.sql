@@ -336,6 +336,7 @@ CREATE TABLE IF NOT EXISTS "favgroups" (
     "username" text REFERENCES "users" ON UPDATE CASCADE ON DELETE CASCADE,
     "slug" text UNIQUE NOT NULL,
     "name" text UNIQUE NOT NULL,
+    "restrict" text,
     "private" boolean,
     "createDate" timestamptz,
     PRIMARY KEY ("username", "slug")

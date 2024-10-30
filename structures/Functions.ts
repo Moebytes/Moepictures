@@ -1308,9 +1308,9 @@ export default class Functions {
         return false
     }
 
-    public static validTagType = (type: string) => {
-        if (type === "all" ||
-            type === "artist" ||
+    public static validTagType = (type: string, noAll?: boolean) => {
+        if (type === "all" && !noAll) return true
+        if (type === "artist" ||
             type === "character" ||
             type === "series" ||
             type === "meta" ||
@@ -2247,7 +2247,7 @@ export default class Functions {
     public static tagType = (tag: string) => {
         const metaTags = ["autotags", "upscaled", "needs-tags", "no-audio", "with-audio", "self-post", "text", "transparent", 
         "commentary", "translated", "untranslated", "partially-translated", "check-translation", "multiple-artists", "bad-pixiv-id",
-        "paid-reward", "paid-reward-available", "third-party-edit", "third-party-source"]
+        "paid-reward", "paid-reward-available", "third-party-edit", "third-party-source", "needscheck"]
         if (metaTags.includes(tag)) return "meta"
         return "tag"
     }
@@ -2538,6 +2538,9 @@ export default class Functions {
         let json = {} as any
         if (oldTag.tag !== newTag.tag) {
             json.tag = newTag.tag
+        }
+        if (oldTag.type !== newTag.type) {
+            json.type = newTag.type
         }
         if (oldTag.description !== newTag.description) {
             json.description = newTag.description

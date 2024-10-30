@@ -100,7 +100,7 @@ const BanDialog: React.FunctionComponent = (props) => {
                 }
                 await functions.put("/api/tag/edit", {silent: true, tag: currentHistory.tag, key: currentHistory.key, description: currentHistory.description,
                 image, aliases: currentHistory.aliases, implications: currentHistory.implications, social: currentHistory.social, twitter: currentHistory.twitter,
-                website: currentHistory.website, fandom: currentHistory.fandom, updatedDate: currentHistory.date}, session, setSessionFlag)
+                website: currentHistory.website, fandom: currentHistory.fandom, category: currentHistory.type, updatedDate: currentHistory.date}, session, setSessionFlag)
             }
         }
         if (revertData.revertGroupIDs?.length) {

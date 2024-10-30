@@ -142,7 +142,7 @@ const GroupRoutes = (app: Express) => {
                 group.posts = group.posts.filter((p: any) => !p?.hidden)
             }
             if (!req.session.showR18) {
-                group.posts = group.posts.filter((p: any) => p?.restrict !== "explicit")
+                if (group.restrict === "explicit") return res.status(403).end()
             }
             for (let i = group.posts.length - 1; i >= 0; i--) {
                 const post = group.posts[i]
@@ -163,13 +163,14 @@ const GroupRoutes = (app: Express) => {
             const postID = req.query.postID
             if (Number.isNaN(Number(postID))) return res.status(400).send("Invalid postID")
             const groups = await sql.group.postGroups(Number(postID))
+            let newGroups = [] as any[]
             for (let i = 0; i < groups.length; i++) {
                 const group = groups[i]
                 if (!permissions.isMod(req.session)) {
                     group.posts = group.posts.filter((p: any) => !p?.hidden)
                 }
                 if (!req.session.showR18) {
-                    group.posts = group.posts.filter((p: any) => p?.restrict !== "explicit")
+                    if (group.restrict === "explicit") continue
                 }
                 for (let i = group.posts.length - 1; i >= 0; i--) {
                     const post = group.posts[i]
@@ -178,8 +179,9 @@ const GroupRoutes = (app: Express) => {
                         if (!permissions.canPrivate(req.session, categories.artists)) group.posts.splice(i, 1)
                     }
                 }
+                newGroups.push(group)
             }
-            res.status(200).send(groups)
+            res.status(200).send(newGroups)
         } catch (e) {
             console.log(e)
             res.status(400).send("Bad request") 
@@ -191,13 +193,14 @@ const GroupRoutes = (app: Express) => {
             let groups = req.query.groups as string[]
             if (!groups) groups = []
             let result = await sql.group.groups(groups.filter(Boolean))
+            let newGroups = [] as any[]
             for (let i = 0; i < result.length; i++) {
                 const group = result[i]
                 if (!permissions.isMod(req.session)) {
                     group.posts = group.posts.filter((p: any) => !p?.hidden)
                 }
                 if (!req.session.showR18) {
-                    group.posts = group.posts.filter((p: any) => p?.restrict !== "explicit")
+                    if (group.restrict === "explicit") continue
                 }
                 for (let i = group.posts.length - 1; i >= 0; i--) {
                     const post = group.posts[i]
@@ -206,8 +209,9 @@ const GroupRoutes = (app: Express) => {
                         if (!permissions.canPrivate(req.session, categories.artists)) group.posts.splice(i, 1)
                     }
                 }
+                newGroups.push(group)
             }
-            res.status(200).json(result)
+            res.status(200).send(newGroups)
         } catch (e) {
             console.log(e)
             return res.status(400).send("Bad request")

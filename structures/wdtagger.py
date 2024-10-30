@@ -49,10 +49,14 @@ def get_tags(model_dir, probs, general_threshold = 0.35, character_threshold = 0
     character_labels = [probs[i] for i in labels["character"]]
     character_labels = dict([x for x in character_labels if x[1] > character_threshold])
     character_labels = dict(sorted(character_labels.items(), key=lambda item: item[1], reverse=True))
-    combined = [x for x in character_labels]
-    combined.extend([x for x in general_labels])
-    caption = ", ".join(combined).replace("_", "-")
-    return caption
+    # combined = [x for x in character_labels]
+    # combined.extend([x for x in general_labels])
+    # caption = ", ".join(combined).replace("_", "-")
+    # return caption
+    general_tags = [x.replace("_", "-") for x in general_labels]
+    character_tags = [x.replace("_", "-") for x in character_labels]
+    result = json.dumps({"tags": general_tags, "characters": character_tags})
+    return result
 
 def pad_square(image):
     w, h = image.size
@@ -86,5 +90,5 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     image = Image.open(args.input).convert("RGB")
-    tags = predict_wdtagger(args.model_dir, image)
-    sys.stdout.write(tags)
+    result = predict_wdtagger(args.model_dir, image)
+    sys.stdout.write(result)

@@ -136,7 +136,6 @@ const SortBar: React.FunctionComponent = (props) => {
 
     useEffect(() => {
         const savedType = localStorage.getItem("type")
-        const savedRestrict = localStorage.getItem("restrict")
         const savedStyle = localStorage.getItem("style")
         const savedSize = localStorage.getItem("size")
         const savedSort = localStorage.getItem("sort")
@@ -145,7 +144,6 @@ const SortBar: React.FunctionComponent = (props) => {
         const savedScroll = localStorage.getItem("scroll")
         const savedMultiplier = localStorage.getItem("pageMultiplier")
         if (savedType) setImageType(savedType)
-        if (savedRestrict) setRestrictType(savedRestrict)
         if (savedStyle) setStyleType(savedStyle)
         if (savedSize) setSizeType(savedSize)
         if (savedSort) setSortType(savedSort)

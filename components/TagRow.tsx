@@ -241,14 +241,14 @@ const TagRow: React.FunctionComponent<Props> = (props) => {
         return jsx
     }
 
-    const getClass = () => {
-        if (props.tag.r18) return "tagrow-tag r18-tag-color"
-        if (props.tag.banned) return "tagrow-tag strikethrough"
-        if (props.tag.type === "artist") return "tagrow-tag artist-tag-color"
-        if (props.tag.type === "character") return "tagrow-tag character-tag-color"
-        if (props.tag.type === "series") return "tagrow-tag series-tag-color"
-        if (props.tag.type === "meta") return "tagrow-tag meta-tag-color"
-        return "tagrow-tag"
+    const getTagColor = () => {
+        if (props.tag.banned) return "strikethrough"
+        if (props.tag.r18) return "r18-tag-color"
+        if (props.tag.type === "artist") return "artist-tag-color"
+        if (props.tag.type === "character") return "character-tag-color"
+        if (props.tag.type === "series") return "series-tag-color"
+        if (props.tag.type === "meta") return "meta-tag-color"
+        return "tag-color"
     }
 
     return (
@@ -260,7 +260,7 @@ const TagRow: React.FunctionComponent<Props> = (props) => {
             <div className="tagrow-content-container">
                 <td className="tagrow-container" style={{width: props.tag.image ? "16%" : "25%"}}>
                     <div className="tagrow-row">
-                        <span className={getClass()} onClick={tagPage} onAuxClick={tagPage} onContextMenu={tagPage}>{props.tag.tag.replaceAll("-", " ")}</span>
+                        <span className={`tagrow-tag ${getTagColor()}`} onClick={tagPage} onAuxClick={tagPage} onContextMenu={tagPage}>{props.tag.tag.replaceAll("-", " ")}</span>
                         {socialJSX()}
                         <span className="tagrow-tag-count">{props.tag.postCount}</span>
                     </div>

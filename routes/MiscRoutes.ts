@@ -502,9 +502,9 @@ const MiscRoutes = (app: Express) => {
             const scriptPath = path.join(__dirname, "../structures/wdtagger.py")
             let command = `python3 "${scriptPath}" -i "${imagePath}" -m "${process.env.WDTAGGER_PATH}"`
             const str = await exec(command).then((s: any) => s.stdout).catch((e: any) => e.stderr)
-            const result = str.split(", ")
+            const json = JSON.parse(str)
             fs.unlinkSync(imagePath)
-            res.status(200).json(result)
+            res.status(200).json(json)
         } catch (e) {
             console.log(e)
             res.status(400).send("Bad request") 

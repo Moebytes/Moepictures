@@ -1,7 +1,7 @@
 import React, {useEffect, useState, useContext} from "react"
 import {Switch, Route, Redirect, useHistory, useLocation} from "react-router-dom"
 import Context, {ThemeContext, HideNavbarContext, HideSidebarContext, HideSortbarContext, HasNotificationContext, TabletContext, ActiveGroupContext,
-HideTitlebarContext, EnableDragContext, ActiveDropdownContext, FilterDropActiveContext, MobileScrollingContext, EmojisContext, PostsContext,
+HideTitlebarContext, EnableDragContext, ActiveDropdownContext, FilterDropActiveContext, MobileScrollingContext, EmojisContext, PostsContext, RestrictTypeContext,
 SidebarHoverContext, SessionContext, SessionFlagContext, UserImgContext, UserImgPostContext, MobileContext, SelectionModeContext} from "./Context"
 import favicon from "./assets/icons/favicon.png"
 import permissions from "./structures/Permissions"
@@ -89,6 +89,7 @@ const App: React.FunctionComponent = (props) => {
     const [selectionMode, setSelectionMode] = useState(false)
     const [hasNotification, setHasNotification] = useState(false)
     const [emojis, setEmojis] = useState([])
+    const [restrictType, setRestrictType] = useState("all")
     const [posts, setPosts] = useState([]) as any
     const [activeGroup, setActiveGroup] = useState(null) as any
     const history = useHistory()
@@ -109,6 +110,8 @@ const App: React.FunctionComponent = (props) => {
 
     useEffect(() => {
         const savedActiveGroup = localStorage.getItem("activeGroup")
+        const savedRestrict = localStorage.getItem("restrict")
+        if (savedRestrict) setRestrictType(savedRestrict)
         const onDOMLoaded = () => {
             setLoaded(true)
             getSessionCookie()
@@ -292,6 +295,7 @@ const App: React.FunctionComponent = (props) => {
             <ActiveGroupContext.Provider value={{activeGroup, setActiveGroup}}>
             <PostsContext.Provider value={{posts, setPosts}}>
             <EmojisContext.Provider value={{emojis, setEmojis}}>
+            <RestrictTypeContext.Provider value={{restrictType, setRestrictType}}>
             <HasNotificationContext.Provider value={{hasNotification, setHasNotification}}>
             <SelectionModeContext.Provider value={{selectionMode, setSelectionMode}}>
             <MobileScrollingContext.Provider value={{mobileScrolling, setMobileScrolling}}>
@@ -393,6 +397,7 @@ const App: React.FunctionComponent = (props) => {
             </MobileScrollingContext.Provider>
             </SelectionModeContext.Provider>
             </HasNotificationContext.Provider>
+            </RestrictTypeContext.Provider>
             </EmojisContext.Provider>
             </PostsContext.Provider>
             </ActiveGroupContext.Provider>

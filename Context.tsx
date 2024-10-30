@@ -272,7 +272,6 @@ const Context: React.FunctionComponent = (props) => {
     const [disableZoom, setDisableZoom] = useState(true)
     const [uploadDropFiles, setUploadDropFiles] = useState([])
     const [imageType, setImageType] = useState("all")
-    const [restrictType, setRestrictType] = useState("all")
     const [styleType, setStyleType] = useState("all")
     const [sizeType, setSizeType] = useState("medium")
     const [sortType, setSortType] = useState("random")
@@ -652,7 +651,6 @@ return (
         <SearchContext.Provider value={{search, setSearch}}>
         <SortTypeContext.Provider value={{sortType, setSortType}}>
         <StyleTypeContext.Provider value={{styleType, setStyleType}}>
-        <RestrictTypeContext.Provider value={{restrictType, setRestrictType}}>
         <ImageTypeContext.Provider value={{imageType, setImageType}}>
         <UploadDropFilesContext.Provider value={{uploadDropFiles, setUploadDropFiles}}>
         <DisableZoomContext.Provider value={{disableZoom, setDisableZoom}}>
@@ -696,7 +694,6 @@ return (
         </DisableZoomContext.Provider>
         </UploadDropFilesContext.Provider>
         </ImageTypeContext.Provider>
-        </RestrictTypeContext.Provider>
         </StyleTypeContext.Provider>
         </SortTypeContext.Provider>
         </SearchContext.Provider>

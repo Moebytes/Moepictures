@@ -528,13 +528,18 @@ export default class SQLSearch {
     }
 
     /** Group search. */
-    public static groupSearch = async (search: string, sort: string, limit?: string, offset?: string) => {
-        let whereQuery = ""
+    public static groupSearch = async (search: string, sort: string, restrict: string, limit?: string, offset?: string) => {
+        let restrictQuery = ""
+        if (restrict === "safe") restrictQuery = `groups.restrict = 'safe'`
+        if (restrict === "questionable") restrictQuery = `groups.restrict = 'questionable'`
+        if (restrict === "explicit") restrictQuery = `groups.restrict = 'explicit'`
+        if (restrict === "all") restrictQuery = `(groups.restrict = 'safe' OR groups.restrict = 'questionable')`
+        let searchQuery = ""
         let values = [] as any
         let i = 1
         let searchValue = i
         if (search) {
-            whereQuery = `WHERE lower(groups."name") LIKE '%' || $${searchValue} || '%'`
+            searchQuery = `WHERE lower(groups."name") LIKE '%' || $${searchValue} || '%'`
             values.push(search.toLowerCase())
             i++
         }
@@ -551,6 +556,7 @@ export default class SQLSearch {
         if (sort === "reverse date") sortQuery = `ORDER BY groups."createDate" ASC`
         if (sort === "posts") sortQuery = `ORDER BY "postCount" DESC`
         if (sort === "reverse posts") sortQuery = `ORDER BY "postCount" ASC`
+        const whereQueries = [restrictQuery, searchQuery].filter(Boolean).join(" AND ")
         const query: QueryConfig = {
             text: functions.multiTrim(/*sql*/`
                 WITH post_json AS (
@@ -566,7 +572,7 @@ export default class SQLSearch {
                 FROM "group map"
                 JOIN groups ON groups."groupID" = "group map"."groupID"
                 JOIN post_json ON post_json."postID" = "group map"."postID"
-                ${whereQuery}
+                ${whereQueries ? `WHERE ${whereQueries}` : ""}
                 GROUP BY groups."groupID"
                 ${sortQuery}
                 ${limit ? `LIMIT $${limitValue}` : "LIMIT 100"} ${offset ? `OFFSET $${i}` : ""}

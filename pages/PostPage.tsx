@@ -562,8 +562,8 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
         let jsx = [] as any
         for (let i = 0; i < groups.length; i++) {
             let group = groups[i]
-            let filtered = group.posts.filter((p: any) => restrictType === "explicit" ? p.restrict === "explicit" : p.restrict !== "explicit")
-            const images = filtered.map((f: any) => functions.getThumbnailLink(f.images[0].type, f.postID, f.images[0].order, f.images[0].filename, "tiny"))
+            if (group.restrict === "explicit") if (restrictType !== "explicit") continue
+            const images = group.posts.map((f: any) => functions.getThumbnailLink(f.images[0].type, f.postID, f.images[0].order, f.images[0].filename, "tiny"))
             const setGroup = (img: string, index: number) => {
                 const postID = group.posts[index].postID
                 history.push(`/post/${postID}`)

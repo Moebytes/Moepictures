@@ -1144,8 +1144,11 @@ const UploadPage: React.FunctionComponent = (props) => {
 
                 setRawTags(tagArr.join(" "))
             } else {
-                let tagArr = await functions.post(`/api/misc/wdtagger`, bytes, session, setSessionFlag).catch(() => null)
-                if (!tagArr) return
+                let result = await functions.post(`/api/misc/wdtagger`, bytes, session, setSessionFlag).catch(() => null)
+                if (!result) return
+
+                let tagArr = result.tags
+                let characterArr = result.characters
 
                 if (tagArr.includes("chibi")) setStyle("chibi")
                 if (tagArr.includes("pixel-art")) setStyle("pixel")
@@ -1162,38 +1165,47 @@ const UploadPage: React.FunctionComponent = (props) => {
                 }
                 tagArr = tagArr.filter((tag: string) => tag.length >= 3)
 
+                characterArr = characterArr.map((tag: string) => functions.cleanTag(tag))
+                for (let i = 0; i < Object.keys(tagReplaceMap).length; i++) {
+                    const key = Object.keys(tagReplaceMap)[i]
+                    const value = Object.values(tagReplaceMap)[i]
+                    characterArr = characterArr.map((tag: string) => tag.replaceAll(key, value))
+                }
+                for (let i = 0; i < blockedTags.length; i++) {
+                    characterArr = characterArr.filter((tag: string) => !tag.includes(blockedTags[i]))
+                }
+                characterArr = characterArr.filter((tag: string) => tag.length >= 3)
 
-                let tagMapArr = tagArr.filter((tag: string) => !tag.includes("("))
-                tagMapArr.push("autotags")
-                tagMapArr.push("needscheck")
-                let charStrArr = tagArr.filter((tag: string) => tag.includes("("))
 
-                let seriesStrArr = [] as string[]
+                tagArr.push("autotags")
+                tagArr.push("needscheck")
 
-                for (let i = 0; i < charStrArr.length; i++) {
-                    const seriesName = charStrArr[i].match(/(\()(.*?)(\))/)?.[0].replace("(", "").replace(")", "")
-                    seriesStrArr.push(seriesName)
+                let seriesArr = [] as string[]
+
+                for (let i = 0; i < characterArr.length; i++) {
+                    const seriesName = characterArr[i].match(/(\()(.*?)(\))/)?.[0].replace("(", "").replace(")", "")
+                    seriesArr.push(seriesName)
                 }
 
-                seriesStrArr = functions.removeDuplicates(seriesStrArr)
+                seriesArr = functions.removeDuplicates(seriesArr)
 
-                for (let i = 0; i < charStrArr.length; i++) {
-                    characters[characters.length - 1].tag = charStrArr[i]
+                for (let i = 0; i < characterArr.length; i++) {
+                    characters[characters.length - 1].tag = characterArr[i]
                     characters.push({})
                     characterInputRefs.push(React.createRef())
                     setCharacters(characters)
                     forceUpdate()
                 }
 
-                for (let i = 0; i < seriesStrArr.length; i++) {
-                    series[series.length - 1].tag = seriesStrArr[i]
+                for (let i = 0; i < seriesArr.length; i++) {
+                    series[series.length - 1].tag = seriesArr[i]
                     series.push({})
                     seriesInputRefs.push(React.createRef())
                     setSeries(series)
                     forceUpdate()
                 }
 
-                setRawTags(tagMapArr.join(" "))
+                setRawTags(tagArr.join(" "))
             }
             setDanbooruError(false)
         } catch (e) {
