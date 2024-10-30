@@ -376,6 +376,13 @@ const ModTagEdits: React.FunctionComponent = (props) => {
                 jsx.push(<span className="mod-post-text mod-post-hover" onClick={() => window.open(newTag.fandom, "_blank")}>New Fandom: {newTag.fandom}</span>)
             }
         }
+        if (changes.r18) {
+            if (showOldTag && oldTag) {
+                jsx.push(<span className="mod-post-text">Old R18: {oldTag.r18 ? "Yes" : "No"}</span>)
+            } else {
+                jsx.push(<span className="mod-post-text">New R18: {newTag.r18 ? "Yes" : "No"}</span>)
+            }
+        }
         return jsx
     }
 

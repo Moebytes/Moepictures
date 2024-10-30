@@ -3,14 +3,17 @@ import {useHistory} from "react-router-dom"
 import {HashLink as Link} from "react-router-hash-link"
 import {HideNavbarContext, HideSidebarContext, ThemeContext, EnableDragContext, EditTagIDContext, EditTagFlagContext, EditTagImplicationsContext, 
 EditTagTypeContext, EditTagSocialContext, EditTagTwitterContext, EditTagKeyContext, EditTagAliasesContext, EditTagImageContext, EditTagWebsiteContext, 
-EditTagFandomContext, EditTagDescriptionContext, EditTagReasonContext, HideTitlebarContext, SessionContext, EditTagPixivTagsContext, SiteHueContext,
+EditTagFandomContext, EditTagDescriptionContext, EditTagR18Context, EditTagReasonContext, HideTitlebarContext, SessionContext, EditTagPixivTagsContext, SiteHueContext,
 SiteLightnessContext, SiteSaturationContext, SessionFlagContext} from "../Context"
 import functions from "../structures/Functions"
 import permissions from "../structures/Permissions"
 import uploadIcon from "../assets/icons/upload.png"
 import "./styles/dialog.less"
 import Draggable from "react-draggable"
+import lewdIcon from "../assets/icons/lewd.png"
 import xButton from "../assets/icons/x-button.png"
+import radioButton from "../assets/icons/radiobutton.png"
+import radioButtonChecked from "../assets/icons/radiobutton-checked.png"
 
 const EditTagDialog: React.FunctionComponent = (props) => {
     const {theme, setTheme} = useContext(ThemeContext)
@@ -34,6 +37,7 @@ const EditTagDialog: React.FunctionComponent = (props) => {
     const {editTagWebsite, setEditTagWebsite} = useContext(EditTagWebsiteContext)
     const {editTagFandom, setEditTagFandom} = useContext(EditTagFandomContext)
     const {editTagPixivTags, setEditTagPixivTags} = useContext(EditTagPixivTagsContext)
+    const {editTagR18, setEditTagR18} = useContext(EditTagR18Context)
     const {editTagReason, setEditTagReason} = useContext(EditTagReasonContext)
     const {session, setSession} = useContext(SessionContext)
     const {sessionFlag, setSessionFlag} = useContext(SessionFlagContext)
@@ -102,7 +106,9 @@ const EditTagDialog: React.FunctionComponent = (props) => {
                     image = Object.values(bytes)
                 }
             }
-            await functions.post("/api/tag/edit/request", {tag: editTagID, key: editTagKey, description: editTagDescription, image, aliases: editTagAliases, implications: editTagImplications, pixivTags: editTagPixivTags, social: editTagSocial, twitter: editTagTwitter, website: editTagWebsite, fandom: editTagFandom, reason: editTagReason}, session, setSessionFlag)
+            await functions.post("/api/tag/edit/request", {tag: editTagID, key: editTagKey, description: editTagDescription, image, aliases: editTagAliases, 
+            implications: editTagImplications, pixivTags: editTagPixivTags, social: editTagSocial, twitter: editTagTwitter, website: editTagWebsite, fandom: editTagFandom, 
+            r18: editTagR18, reason: editTagReason}, session, setSessionFlag)
             setSubmitted(true)
         }
     }
@@ -299,6 +305,12 @@ const EditTagDialog: React.FunctionComponent = (props) => {
                                 <span className="dialog-text">Reason: </span>
                                 <input style={{width: "100%"}} className="dialog-input-taller" type="text" spellCheck={false} value={editTagReason} onChange={(event) => setEditTagReason(event.target.value)}/>
                             </div>
+                            {editTagType === "tag" && session.showR18 ?
+                            <div className="dialog-row">
+                                <img className="dialog-checkbox" src={editTagR18 ? radioButtonChecked : radioButton} onClick={() => setEditTagR18((prev: boolean) => !prev)} style={{marginLeft: "0px", filter: getFilter()}}/>
+                                <span className="dialog-text" style={{marginLeft: "10px"}}>R18</span>
+                                <img className="dialog-title-img" src={lewdIcon} style={{marginLeft: "15px", height: "50px", filter: getFilter()}}/>
+                            </div> : null}
                             {error ? <div className="dialog-validation-container"><span className="dialog-validation" ref={errorRef}></span></div> : null}
                             <div className="dialog-row">
                                 <button onClick={() => click("reject")} className="dialog-button">{"Cancel"}</button>
@@ -378,6 +390,12 @@ const EditTagDialog: React.FunctionComponent = (props) => {
                             <span className="dialog-text">Reason: </span>
                             <input style={{width: "100%"}} className="dialog-input-taller" type="text" spellCheck={false} value={editTagReason} onChange={(event) => setEditTagReason(event.target.value)}/>
                         </div>
+                        {editTagType === "tag" && session.showR18 ?
+                        <div className="dialog-row">
+                            <img className="dialog-checkbox" src={editTagR18 ? radioButtonChecked : radioButton} onClick={() => setEditTagR18((prev: boolean) => !prev)} style={{marginLeft: "0px", filter: getFilter()}}/>
+                            <span className="dialog-text" style={{marginLeft: "10px"}}>R18</span>
+                            <img className="dialog-title-img" src={lewdIcon} style={{marginLeft: "15px", height: "50px", filter: getFilter()}}/>
+                        </div> : null}
                         {error ? <div className="dialog-validation-container"><span className="dialog-validation" ref={errorRef}></span></div> : null}
                         <div className="dialog-row">
                             <button onClick={() => click("reject")} className="dialog-button">{"Cancel"}</button>

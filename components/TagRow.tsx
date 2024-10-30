@@ -2,7 +2,7 @@ import React, {useContext, useEffect, useRef, useState} from "react"
 import {useHistory} from "react-router-dom"
 import {ThemeContext, SearchContext, SearchFlagContext, DeleteTagFlagContext, DeleteTagIDContext, MobileContext, EditTagTypeContext, EditTagReasonContext,
 EditTagSocialContext, EditTagTwitterContext, EditTagWebsiteContext, EditTagFandomContext, EditTagAliasesContext, EditTagImplicationsContext, 
-EditTagDescriptionContext, EditTagIDContext, EditTagFlagContext, EditTagPixivTagsContext, SessionContext, EditTagImageContext, EditTagKeyContext, AliasTagFlagContext, 
+EditTagDescriptionContext, EditTagIDContext, EditTagFlagContext, EditTagPixivTagsContext, EditTagR18Context, SessionContext, EditTagImageContext, EditTagKeyContext, AliasTagFlagContext, 
 AliasTagIDContext, AliasTagNameContext, SessionFlagContext, CategorizeTagContext} from "../Context"
 import {HashLink as Link} from "react-router-hash-link"
 import functions from "../structures/Functions"
@@ -46,6 +46,7 @@ const TagRow: React.FunctionComponent<Props> = (props) => {
     const {editTagWebsite, setEditTagWebsite} = useContext(EditTagWebsiteContext)
     const {editTagFandom, setEditTagFandom} = useContext(EditTagFandomContext)
     const {editTagPixivTags, setEditTagPixivTags} = useContext(EditTagPixivTagsContext)
+    const {editTagR18, setEditTagR18} = useContext(EditTagR18Context)
     const {editTagImage, setEditTagImage} = useContext(EditTagImageContext)
     const {editTagKey, setEditTagKey} = useContext(EditTagKeyContext)
     const {aliasTagID, setAliasTagID} = useContext(AliasTagIDContext)
@@ -150,7 +151,7 @@ const TagRow: React.FunctionComponent<Props> = (props) => {
         }
         await functions.put("/api/tag/edit", {tag: props.tag.tag, key: editTagKey, description: editTagDescription,
         image, aliases: editTagAliases, implications: editTagImplications, pixivTags: editTagPixivTags, social: editTagSocial, twitter: editTagTwitter,
-        website: editTagWebsite, fandom: editTagFandom, reason: editTagReason}, session, setSessionFlag)
+        website: editTagWebsite, fandom: editTagFandom, r18: editTagR18, reason: editTagReason}, session, setSessionFlag)
         if (editTagImage) functions.refreshCache(editTagImage)
         props.onEdit?.()
     }
@@ -176,6 +177,7 @@ const TagRow: React.FunctionComponent<Props> = (props) => {
         setEditTagTwitter(props.tag.twitter)
         setEditTagWebsite(props.tag.website)
         setEditTagFandom(props.tag.fandom)
+        setEditTagR18(props.tag.r18)
         setEditTagReason("")
     }
 
@@ -240,10 +242,12 @@ const TagRow: React.FunctionComponent<Props> = (props) => {
     }
 
     const getClass = () => {
-        if (props.tag.type === "artist") return "tagrow-artist-tag"
-        if (props.tag.type === "character") return "tagrow-character-tag"
-        if (props.tag.type === "series") return "tagrow-series-tag"
-        if (props.tag.type === "meta") return "tagrow-meta-tag"
+        if (props.tag.r18) return "tagrow-tag r18-tag-color"
+        if (props.tag.banned) return "tagrow-tag strikethrough"
+        if (props.tag.type === "artist") return "tagrow-tag artist-tag-color"
+        if (props.tag.type === "character") return "tagrow-tag character-tag-color"
+        if (props.tag.type === "series") return "tagrow-tag series-tag-color"
+        if (props.tag.type === "meta") return "tagrow-tag meta-tag-color"
         return "tagrow-tag"
     }
 

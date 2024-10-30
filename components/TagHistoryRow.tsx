@@ -252,6 +252,9 @@ const TagHistoryRow: React.FunctionComponent<Props> = (props) => {
                 jsx.push(<span className="historyrow-text"><span className="historyrow-label-text">Pixiv Tags:</span> {props.tagHistory.pixivTags.join(", ")}</span>)
             }
         }
+        if ((!props.previousHistory && props.tagHistory.r18) || changes.r18) {
+            jsx.push(<span className="historyrow-text"><span className="historyrow-label-text">R18:</span> {props.tagHistory.r18 ? "Yes" : "No"}</span>)
+        }
         return jsx
     }
 

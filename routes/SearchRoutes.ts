@@ -4,7 +4,6 @@ import functions from "../structures/Functions"
 import sql from "../sql/SQLQuery"
 import phash from "sharp-phash"
 import dist from "sharp-phash/distance"
-import matureTags from "../assets/json/mature-tags.json"
 import serverFunctions, {keyGenerator, handler} from "../structures/ServerFunctions"
 import permissions from "../structures/Permissions"
 import rateLimit from "express-rate-limit"
@@ -72,7 +71,7 @@ const SearchRoutes = (app: Express) => {
                     values: [query.replace("hash:", "").trim()]
                 }
                 let images = await sql.run(sqlQuery)
-                if (images.length) result = await sql.search.posts(images.map((i: any) => i.postID))
+                if (images?.length) result = await sql.search.posts(images.map((i: any) => i.postID))
             } else if (query.startsWith("favorites:")) {
                 const username = query.replace("favorites:", "").trim()
                 const user = await sql.user.user(username as string)
@@ -284,7 +283,10 @@ const SearchRoutes = (app: Express) => {
                 result = await sql.search.tagSearch(search, sort, type, limit, offset)
             }
             if (!permissions.isMod(req.session)) {
-                result = result.filter((t: any) => !functions.arrayIncludes(t.tag, matureTags, true))
+                result = result.filter((tag: any) => !tag.hidden)
+            }
+            if (!req.session.showR18) {
+                result = result.filter((tag: any) => !tag.r18)
             }
             res.status(200).json(result)
         } catch (e) {
@@ -363,7 +365,10 @@ const SearchRoutes = (app: Express) => {
             let result = await sql.search.tagSearch(search, "posts", type, "10").then((r) => r.slice(0, 10))
             if (!result?.[0]) return res.status(200).json([])
             if (!permissions.isMod(req.session)) {
-                result = result.filter((t: any) => !functions.arrayIncludes(t.tag, matureTags, true))
+                result = result.filter((tag: any) => !tag.hidden)
+            }
+            if (!req.session.showR18) {
+                result = result.filter((tag: any) => !tag.r18)
             }
             const tags = await sql.tag.tagCounts(result.map((r: any) => r.tag))
             res.status(200).json(tags.slice(0, 10))
@@ -378,7 +383,7 @@ const SearchRoutes = (app: Express) => {
             const {postIDs, isBanner} = req.body
             let postArray = Array.from(postIDs)?.slice(0, 100) as any
             if (req.session.captchaNeeded) {
-                if (postArray.length === 1) return res.status(200).json([])
+                if (postArray?.length === 1) return res.status(200).json([])
                 postArray = []
             }
             let slice = false

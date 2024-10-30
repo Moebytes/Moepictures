@@ -25,7 +25,6 @@ import pageIcon from "../assets/icons/page.png"
 import PageDialog from "../dialogs/PageDialog"
 import searchHistoryDelete from "../assets/icons/delete.png"
 import permissions from "../structures/Permissions"
-import matureTags from "../assets/json/mature-tags.json"
 import historyPost from "../assets/icons/history-post.png"
 import historySearch from "../assets/icons/history-search.png"
 import historyTag from "../assets/icons/history-tag.png"
@@ -275,7 +274,7 @@ const HistoryPage: React.FunctionComponent = () => {
                 if (!historyStates[currentIndex]) break
                 if (!session.showR18) {
                     if (historyTab === "tag") {
-                        if (functions.arrayIncludes(historyStates[currentIndex].tag, matureTags, true)) {
+                        if (historyStates[currentIndex].r18) {
                             currentIndex++
                             continue
                         }
@@ -361,7 +360,7 @@ const HistoryPage: React.FunctionComponent = () => {
                     if (!historyStates[currentIndex]) return updateOffset()
                     if (!session.showR18) {
                         if (historyTab === "tag") {
-                            if (functions.arrayIncludes(historyStates[currentIndex].tag, matureTags, true)) {
+                            if (historyStates[currentIndex].r18) {
                                 currentIndex++
                                 continue
                             }
@@ -524,8 +523,7 @@ const HistoryPage: React.FunctionComponent = () => {
             const postOffset = (historyPage - 1) * getPageAmount()
             visible = historyStates.slice(postOffset, postOffset + getPageAmount())
             if (!session.showR18) {
-                visible = visible.filter((item: any) => historyTab === "tag" ? 
-                !functions.arrayIncludes(item.tag || "", matureTags, true) : item.restrict !== "explicit")
+                visible = visible.filter((item: any) => historyTab === "tag" ? !item.r18 : item.restrict !== "explicit")
             }
         }
         let current = visible[0]

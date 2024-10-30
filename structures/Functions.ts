@@ -193,13 +193,9 @@ export default class Functions {
         return `${hours}${minutes}:${seconds}`
     }
     
-    public static arrayIncludes = (str: string, arr: string[], base64?: boolean) => {
+    public static arrayIncludes = (str: string, arr: string[]) => {
         for (let i = 0; i < arr.length; i++) {
-            if (base64) {
-                if (str.includes(atob(arr[i]))) return true
-            } else {
-                if (str.includes(arr[i])) return true
-            }
+            if (str.includes(arr[i])) return true
         }
         return false
     }
@@ -1089,7 +1085,7 @@ export default class Functions {
     public static linkToBase64 = async (link: string) => {
         const arrayBuffer = await axios.get(link, {responseType: "arraybuffer"}).then((r) => r.data) as ArrayBuffer
         const buffer = Buffer.from(arrayBuffer)
-        const mime = Functions.bufferFileType(buffer)[0]?.mime || "image/jpeg"
+        let mime = Functions.bufferFileType(buffer)[0]?.mime || "image/jpeg"
         return `data:${mime};base64,${buffer.toString("base64")}`
     }
 
@@ -2447,7 +2443,6 @@ export default class Functions {
             let filename = post.images[i]?.filename ? post.images[i].filename : post.images[i]
             const imgLink = Functions.getImageLink(post.images[i]?.type, post.postID, i+1, filename)
             let ext = path.extname(imgLink)
-            console.log(imgLink)
             let buffer = await Functions.getBuffer(`${imgLink}?upscaled=false`, {"x-force-upscale": "false"})
             let upscaledBuffer = await Functions.getBuffer(`${imgLink}?upscaled=true`, {"x-force-upscale": "true"})
             if (buffer.byteLength && Functions.isImage(imgLink)) {
@@ -2547,13 +2542,13 @@ export default class Functions {
         if (oldTag.description !== newTag.description) {
             json.description = newTag.description
         }
-        if (JSON.stringify(oldTag.aliases) !== JSON.stringify(newTag.aliases)) {
+        if (JSON.stringify(oldTag.aliases?.filter(Boolean)) !== JSON.stringify(newTag.aliases?.filter(Boolean))) {
             json.aliases = newTag.aliases
         }
-        if (JSON.stringify(oldTag.implications) !== JSON.stringify(newTag.implications)) {
+        if (JSON.stringify(oldTag.implications?.filter(Boolean)) !== JSON.stringify(newTag.implications?.filter(Boolean))) {
             json.implications = newTag.implications
         }
-        if (JSON.stringify(oldTag.pixivTags) !== JSON.stringify(newTag.pixivTags)) {
+        if (JSON.stringify(oldTag.pixivTags?.filter(Boolean)) !== JSON.stringify(newTag.pixivTags?.filter(Boolean))) {
             json.pixivTags = newTag.pixivTags
         }
         if (oldTag.website !== newTag.website) {
@@ -2567,6 +2562,9 @@ export default class Functions {
         }
         if (oldTag.fandom !== newTag.fandom) {
             json.fandom = newTag.fandom
+        }
+        if (Boolean(oldTag.r18) !== Boolean(newTag.r18)) {
+            json.r18 = newTag.r18
         }
         return json
     }
@@ -2623,16 +2621,17 @@ export default class Functions {
         }
         let isAnimatedWebP = false
         let arrayBuffer = null as any
+        let decryptedImg = img
         if (Functions.isImage(img)) {
             if (Functions.isWebP(img)) {
                 arrayBuffer = await fetch(img).then((r) => r.arrayBuffer())
                 isAnimatedWebP = Functions.isAnimatedWebp(arrayBuffer)
             }
-            if (!isAnimatedWebP) img = await cryptoFunctions.decryptedLink(img)
+            if (!isAnimatedWebP) decryptedImg = await cryptoFunctions.decryptedLink(img)
         }
-        const base64 = await Functions.linkToBase64(img)
+        const base64 = await Functions.linkToBase64(decryptedImg)
         if (Functions.isVideo(img) || Functions.isGIF(img) || isAnimatedWebP) {
-            if (!arrayBuffer) arrayBuffer = await fetch(img).then((r) => r.arrayBuffer())
+            if (!arrayBuffer) arrayBuffer = await fetch(decryptedImg).then((r) => r.arrayBuffer())
             const url = URL.createObjectURL(new Blob([arrayBuffer]))
             let cacheUrl = `${url}#${path.extname(img)}`
             Functions.setImageCache(cacheKey, cacheUrl)
@@ -2648,7 +2647,6 @@ export default class Functions {
     }
 
     public static parseUserAgent = (userAgent?: string) => {
-        console.log(userAgent)
         if (!userAgent) return "unknown"
         let os = "unknown"
         let browser = "unknown"

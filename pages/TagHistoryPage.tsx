@@ -11,7 +11,6 @@ import DeleteTagHistoryDialog from "../dialogs/DeleteTagHistoryDialog"
 import {ThemeContext, EnableDragContext, HideNavbarContext, HideSidebarContext, MobileContext, SessionContext, RedirectContext, RestrictTypeContext,
 RelativeContext, HideTitlebarContext, ActiveDropdownContext, HeaderTextContext, SidebarTextContext, SessionFlagContext} from "../Context"
 import permissions from "../structures/Permissions"
-import matureTags from "../assets/json/mature-tags.json"
 import "./styles/historypage.less"
 
 interface Props {
@@ -109,7 +108,7 @@ const TagHistoryPage: React.FunctionComponent<Props> = (props) => {
         const newVisibleRevisions = [] as any
         for (let i = 0; i < 10; i++) {
             if (!revisions[currentIndex]) break
-            if (functions.arrayIncludes(revisions[currentIndex].tag, matureTags, true)) if (restrictType !== "explicit") {
+            if (revisions[currentIndex].r18) if (restrictType !== "explicit") {
                 currentIndex++
                 continue
             }
@@ -141,7 +140,7 @@ const TagHistoryPage: React.FunctionComponent<Props> = (props) => {
                 const newRevisions = visibleRevisions as any
                 for (let i = 0; i < 10; i++) {
                     if (!revisions[currentIndex]) return updateOffset()
-                    if (functions.arrayIncludes(revisions[currentIndex].tag, matureTags, true)) if (restrictType !== "explicit") {
+                    if (revisions[currentIndex].r18) if (restrictType !== "explicit") {
                         currentIndex++
                         continue
                     }

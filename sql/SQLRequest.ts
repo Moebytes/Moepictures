@@ -190,12 +190,12 @@ export default class SQLRequest {
 
     /** Insert tag edit request. */
     public static insertTagEditRequest = async (username: string, tag: string, key: string, description: string, image: string, aliases: string[], 
-        implications: string[], pixivTags: string[], social: string, twitter: string, website: string, fandom: string, imageChanged: boolean, 
+        implications: string[], pixivTags: string[], social: string, twitter: string, website: string, fandom: string, r18: boolean, imageChanged: boolean, 
         changes: any, reason: string) => {
         const query: QueryConfig = {
         text: /*sql*/`INSERT INTO "tag edit requests" ("username", "tag", "key", "description", "image", "aliases", "implications", "pixivTags", 
-        "social", "twitter", "website", "fandom", "imageChanged", "changes", "reason") VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15)`,
-        values: [username, tag, key, description, image, aliases, implications, pixivTags, social, twitter, website, fandom, imageChanged, changes, reason]
+        "social", "twitter", "website", "fandom", "r18", "imageChanged", "changes", "reason") VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16)`,
+        values: [username, tag, key, description, image, aliases, implications, pixivTags, social, twitter, website, fandom, r18, imageChanged, changes, reason]
         }
         const result = await SQLQuery.run(query)
         return result

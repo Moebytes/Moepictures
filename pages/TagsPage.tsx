@@ -14,7 +14,6 @@ import AliasTagDialog from "../dialogs/AliasTagDialog"
 import EditTagDialog from "../dialogs/EditTagDialog"
 import DeleteTagDialog from "../dialogs/DeleteTagDialog"
 import CategorizeTagDialog from "../dialogs/CategorizeTagDialog"
-import matureTags from "../assets/json/mature-tags.json"
 import scrollIcon from "../assets/icons/scroll.png"
 import pageIcon from "../assets/icons/page.png"
 import permissions from "../structures/Permissions"
@@ -404,8 +403,8 @@ const TagsPage: React.FunctionComponent = (props) => {
         }
         for (let i = 0; i < visible.length; i++) {
             if (visible[i].fake) continue
-            if (!session.username) if (functions.arrayIncludes(visible[i].tag, matureTags, true)) continue
-            if (restrictType !== "explicit") if (functions.arrayIncludes(visible[i].tag, matureTags, true)) continue
+            if (!session.username) if (visible[i].r18) continue
+            if (restrictType !== "explicit") if (visible[i].r18) continue
             jsx.push(<TagRow key={visible[i].tag} tag={visible[i]} onDelete={updateTags} onEdit={updateTags}/>)
         }
         if (!scroll) {

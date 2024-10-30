@@ -5,7 +5,6 @@ RestrictTypeContext, HideMobileNavbarContext} from "../Context"
 import "./styles/searchsuggestions.less"
 import functions from "../structures/Functions"
 import permissions from "../structures/Permissions"
-import matureTags from "../assets/json/mature-tags.json"
 
 interface Props {
     active: boolean
@@ -105,8 +104,8 @@ const SearchSuggestions: React.FunctionComponent<Props> = (props) => {
     const generateSuggestionsJSX = () => {
         let jsx = [] as any
         for (let i = 0; i < suggestions.length; i++) {
-            if (!session.username) if (functions.arrayIncludes(suggestions[i].tag, matureTags, true)) continue
-            if (restrictType !== "explicit") if (functions.arrayIncludes(suggestions[i].tag, matureTags, true)) continue
+            if (!session.username) if (suggestions[i].r18) continue
+            if (restrictType !== "explicit") if (suggestions[i].r18) continue
             if (!suggestions[i]) break
             const tagClick = () => {
                 if (props.click) return props.click(suggestions[i].tag)

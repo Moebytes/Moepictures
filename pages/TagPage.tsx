@@ -3,7 +3,7 @@ import {ThemeContext, SiteHueContext, SiteSaturationContext, SiteLightnessContex
 HideTitlebarContext, MobileContext, ActiveDropdownContext, HeaderTextContext, SidebarTextContext, SessionContext, SessionFlagContext, SearchContext, 
 SearchFlagContext, TakedownTagContext, DeleteTagFlagContext, DeleteTagIDContext, EditTagTypeContext, EditTagReasonContext, EditTagImageContext, 
 EditTagKeyContext, EditTagSocialContext, EditTagTwitterContext, EditTagWebsiteContext, EditTagFandomContext, EditTagAliasesContext, EditTagImplicationsContext, 
-EditTagDescriptionContext, EditTagIDContext, EditTagFlagContext, EditTagPixivTagsContext, RestrictTypeContext, RevertTagHistoryIDContext, 
+EditTagDescriptionContext, EditTagIDContext, EditTagFlagContext, EditTagPixivTagsContext, EditTagR18Context, RestrictTypeContext, RevertTagHistoryIDContext, 
 RevertTagHistoryFlagContext, PostsContext} from "../Context"
 import {useHistory, useLocation} from "react-router-dom"
 import TitleBar from "../components/TitleBar"
@@ -72,6 +72,7 @@ const TagPage: React.FunctionComponent<Props> = (props) => {
     const {editTagWebsite, setEditTagWebsite} = useContext(EditTagWebsiteContext)
     const {editTagFandom, setEditTagFandom} = useContext(EditTagFandomContext)
     const {editTagPixivTags, setEditTagPixivTags} = useContext(EditTagPixivTagsContext)
+    const {editTagR18, setEditTagR18} = useContext(EditTagR18Context)
     const {editTagImage, setEditTagImage} = useContext(EditTagImageContext)
     const {editTagKey, setEditTagKey} = useContext(EditTagKeyContext)
     const {revertTagHistoryID, setRevertTagHistoryID} = useContext(RevertTagHistoryIDContext)
@@ -120,6 +121,12 @@ const TagPage: React.FunctionComponent<Props> = (props) => {
             tag = await functions.get("/api/tag", {tag: tagName}, session, setSessionFlag)
         }
         if (!tag) return functions.replaceLocation("/404")
+        if (!permissions.isMod(session)) {
+            if (tag.hidden) return functions.replaceLocation("/403")
+        }
+        if (!session.showR18) {
+            if (tag.r18) return functions.replaceLocation("/403")
+        }
         const tagCount = await functions.get("/api/tag/counts", {tags: [tagName]}, session, setSessionFlag).then((r) => Number(r?.[0]?.count || 0))
         setTag(tag)
         setCount(tagCount)
@@ -243,7 +250,7 @@ const TagPage: React.FunctionComponent<Props> = (props) => {
         }
         await functions.put("/api/tag/edit", {tag: tag.tag, key: editTagKey, description: editTagDescription,
         image, aliases: editTagAliases, implications: editTagImplications, pixivTags: editTagPixivTags, social: editTagSocial, twitter: editTagTwitter,
-        website: editTagWebsite, fandom: editTagFandom, reason: editTagReason}, session, setSessionFlag)
+        website: editTagWebsite, fandom: editTagFandom, r18: editTagR18, reason: editTagReason}, session, setSessionFlag)
         if (editTagImage) functions.refreshCache(editTagImage)
         history.push(`/tag/${editTagKey}`)
         setTagFlag(true)
@@ -270,6 +277,7 @@ const TagPage: React.FunctionComponent<Props> = (props) => {
         setEditTagTwitter(tag.twitter)
         setEditTagWebsite(tag.website)
         setEditTagFandom(tag.fandom)
+        setEditTagR18(tag.r18)
         setEditTagReason("")
     }
 

@@ -97,6 +97,7 @@ export const EditTagWebsiteContext = React.createContext<any>(null)
 export const EditTagFandomContext = React.createContext<any>(null)
 export const EditTagTwitterContext = React.createContext<any>(null)
 export const EditTagPixivTagsContext = React.createContext<any>(null)
+export const EditTagR18Context = React.createContext<any>(null)
 export const EditTagReasonContext = React.createContext<any>(null)
 export const AliasTagIDContext = React.createContext<any>(null)
 export const AliasTagFlagContext = React.createContext<any>(null)
@@ -319,6 +320,7 @@ const Context: React.FunctionComponent = (props) => {
     const [editTagFandom, setEditTagFandom] = useState(false)
     const [editTagTwitter, setEditTagTwitter] = useState(false)
     const [editTagPixivTags, setEditTagPixivTags] = useState(false)
+    const [editTagR18, setEditTagR18] = useState(false)
     const [editTagReason, setEditTagReason] = useState("")
     const [aliasTagID, setAliasTagID] = useState(null)
     const [aliasTagFlag, setAliasTagFlag] = useState(false)
@@ -571,6 +573,7 @@ return (
         <DeleteTranslationHistoryFlagContext.Provider value={{deleteTranslationHistoryFlag, setDeleteTranslationHistoryFlag}}>
         <RevertTranslationHistoryIDContext.Provider value={{revertTranslationHistoryID, setRevertTranslationHistoryID}}>
         <DeleteTranslationHistoryIDContext.Provider value={{deleteTranslationHistoryID, setDeleteTranslationHistoryID}}>
+        <EditTagR18Context.Provider value={{editTagR18, setEditTagR18}}>
         <EditTagPixivTagsContext.Provider value={{editTagPixivTags, setEditTagPixivTags}}>
         <SaveTranslationOrderContext.Provider value={{saveTranslationOrder, setSaveTranslationOrder}}>
         <SaveTranslationDataContext.Provider value={{saveTranslationData, setSaveTranslationData}}>
@@ -772,6 +775,7 @@ return (
         </SaveTranslationDataContext.Provider>
         </SaveTranslationOrderContext.Provider>
         </EditTagPixivTagsContext.Provider>
+        </EditTagR18Context.Provider>
         </DeleteTranslationHistoryIDContext.Provider>
         </RevertTranslationHistoryIDContext.Provider>
         </DeleteTranslationHistoryFlagContext.Provider>

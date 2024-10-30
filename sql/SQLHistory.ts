@@ -5,16 +5,16 @@ import functions from "../structures/Functions"
 export default class SQLHistory {
     /** Insert tag history */
     public static insertTagHistory = async (options: {username: string, tag: string, key: string, type: string, image: string, description: string, 
-        aliases: string[], implications: string[], pixivTags: string[], website: string, social: string, twitter: string, fandom: string, 
+        aliases: string[], implications: string[], pixivTags: string[], website: string, social: string, twitter: string, fandom: string, r18: boolean, 
         imageChanged: boolean, changes: any, reason?: string}) => {
-        const {username, tag, key, type, image, description, aliases, implications, pixivTags, website, social, twitter, fandom, imageChanged, 
+        const {username, tag, key, type, image, description, aliases, implications, pixivTags, website, social, twitter, fandom, r18, imageChanged, 
         changes, reason} = options
         const now = new Date().toISOString()
         const query: QueryConfig = {
         text: /*sql*/`INSERT INTO "tag history" ("tag", "user", "date", "key", "type", "image", "description", "aliases", "implications", 
-        "pixivTags", "website", "social", "twitter", "fandom", "imageChanged", "changes", "reason") VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, 
-        $10, $11, $12, $13, $14, $15, $16, $17)`,
-        values: [tag, username, now, key, type, image, description, aliases, implications, pixivTags, website, social, twitter, fandom, 
+        "pixivTags", "website", "social", "twitter", "fandom", "r18", "imageChanged", "changes", "reason") VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, 
+        $10, $11, $12, $13, $14, $15, $16, $17, $18)`,
+        values: [tag, username, now, key, type, image, description, aliases, implications, pixivTags, website, social, twitter, fandom, r18,
         imageChanged, changes, reason]
         }
         await SQLQuery.flushDB()

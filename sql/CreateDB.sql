@@ -127,7 +127,9 @@ CREATE TABLE IF NOT EXISTS "tags" (
     "twitter" text,
     "fandom" text,
     "pixivTags" text[],
-    "banned" boolean
+    "banned" boolean,
+    "hidden" boolean,
+    "r18" boolean
 );
 
 CREATE TABLE IF NOT EXISTS "unverified tags" (
