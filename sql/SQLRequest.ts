@@ -229,6 +229,24 @@ export default class SQLRequest {
         return result
     }
 
+    /** Get user tag edit requests */
+    public static userTagEditRequests = async (username: string) => {
+        const query: QueryConfig = {
+        text: functions.multiTrim(/*sql*/`
+            SELECT tags.type, "tag edit requests".*,
+            COUNT(*) OVER() AS "requestCount"
+            FROM "tag edit requests"
+            JOIN tags ON tags.tag = "tag edit requests".tag
+            WHERE "tag edit requests"."username" = $1
+            GROUP BY "tag edit requests"."requestID", tags.type
+            ORDER BY "tag edit requests"."requestID" DESC
+        `),
+        values: [username]
+        }
+        const result = await SQLQuery.run(query)
+        return result
+    }
+
     /** Insert group request. */
     public static insertGroupRequest = async (username: string, slug: string, name: string, postID: string, reason: string) => {
         const query: QueryConfig = {
@@ -272,6 +290,33 @@ export default class SQLRequest {
         `),
         }
         if (offset) query.values = [offset]
+        const result = await SQLQuery.run(query)
+        return result
+    }
+
+    /** Get user group requests */
+    public static userGroupRequests = async (username: string) => {
+        const query: QueryConfig = {
+        text: functions.multiTrim(/*sql*/`
+            WITH post_json AS (
+                SELECT posts.*, json_agg(DISTINCT images.*) AS images
+                FROM posts
+                JOIN images ON images."postID" = posts."postID"
+                GROUP BY posts."postID"
+            )
+            SELECT "group requests".*, 
+            COUNT(*) OVER() AS "requestCount",
+            to_json((array_agg(post_json.*))[1]) AS post,
+            CASE WHEN groups."groupID" IS NOT NULL THEN true ELSE false END AS "exists"
+            FROM "group requests"
+            JOIN post_json ON post_json."postID" = "group requests"."postID"
+            LEFT JOIN groups ON groups.slug = "group requests".slug
+            WHERE "group requests"."username" = $1
+            GROUP BY "group requests"."requestID", groups."groupID"
+            ORDER BY "group requests"."requestID" DESC
+        `),
+        values: [username]
+        }
         const result = await SQLQuery.run(query)
         return result
     }
@@ -343,6 +388,32 @@ export default class SQLRequest {
         return result
     }
 
+    /** Get user group delete requests */
+    public static userGroupDeleteRequests = async (username: string) => {
+        const query: QueryConfig = {
+        text: functions.multiTrim(/*sql*/`
+            WITH post_json AS (
+                SELECT posts.*, json_agg(DISTINCT images.*) AS images
+                FROM posts
+                JOIN images ON images."postID" = posts."postID"
+                GROUP BY posts."postID"
+            )
+            SELECT "delete requests".*, groups.*,
+            COUNT(*) OVER() AS "requestCount",
+            to_json((array_agg(post_json.*))[1]) AS post
+            FROM "delete requests"
+            JOIN groups ON groups.slug = "delete requests".group
+            LEFT JOIN post_json ON post_json."postID" = "delete requests"."groupPost"
+            WHERE "delete requests"."group" IS NOT NULL AND "delete requests"."username" = $1
+            GROUP BY "delete requests"."requestID", groups."groupID"
+            ORDER BY "delete requests"."requestID" DESC
+        `),
+        values: [username]
+        }
+        const result = await SQLQuery.run(query)
+        return result
+    }
+
     /** Insert group edit request. */
     public static insertGroupEditRequest = async (username: string, slug: string, name: string, description: string, addedPosts: string[], 
         removedPosts: string[], orderChanged: boolean, changes: any, reason: string) => {
@@ -379,6 +450,24 @@ export default class SQLRequest {
         `),
         }
         if (offset) query.values = [offset]
+        const result = await SQLQuery.run(query)
+        return result
+    }
+
+    /** Get user group edit requests */
+    public static userGroupEditRequests = async (username: string) => {
+        const query: QueryConfig = {
+        text: functions.multiTrim(/*sql*/`
+            SELECT "group edit requests".*,
+            COUNT(*) OVER() AS "requestCount"
+            FROM "group edit requests"
+            JOIN groups ON groups.slug = "group edit requests".group
+            WHERE "group edit requests"."username" = $1
+            GROUP BY "group edit requests"."requestID"
+            ORDER BY "group edit requests"."requestID" DESC
+        `),
+        values: [username]
+        }
         const result = await SQLQuery.run(query)
         return result
     }

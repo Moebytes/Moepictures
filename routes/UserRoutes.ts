@@ -967,10 +967,35 @@ const UserRoutes = (app: Express) => {
                 for (const aliasRequest of aliasRequests) {
                     await sql.request.deleteAliasRequest(username, aliasRequest.tag)
                 }
+                // Delete unverified tag edits
+                const tagEditRequests = await sql.request.userTagEditRequests(username)
+                for (const tagEditRequest of tagEditRequests) {
+                    await sql.request.deleteTagEditRequest(username, tagEditRequest.tag)
+                }
                 // Delete unverified tag deletions
                 const tagDeleteRequests = await sql.request.userTagDeleteRequests(username)
                 for (const tagDeleteRequest of tagDeleteRequests) {
                     await sql.request.deleteTagDeleteRequest(username, tagDeleteRequest.tag)
+                }
+                // Delete unverified groups
+                const groupRequests = await sql.request.userGroupRequests(username)
+                for (const groupRequest of groupRequests) {
+                    await sql.request.deleteGroupRequest(username, groupRequest.slug, groupRequest.postID)
+                }
+                // Delete unverified group edits
+                const groupEditRequests = await sql.request.userGroupEditRequests(username)
+                for (const groupEditRequest of groupEditRequests) {
+                    await sql.request.deleteGroupEditRequest(username, groupEditRequest.group)
+                }
+                // Delete unverified group deletions
+                const groupDeleteRequests = await sql.request.userGroupDeleteRequests(username)
+                for (const groupDeleteRequest of groupDeleteRequests) {
+                    await sql.request.deleteGroupDeleteRequest(username, groupDeleteRequest.group)
+                }
+                // Delete unverified translations
+                const unverifiedTranslations = await sql.translation.userUnverifiedTranslations(username)
+                for (const unverifiedTranslation of unverifiedTranslations) {
+                    await sql.translation.deleteUnverifiedTranslation(unverifiedTranslation.translationID)
                 }
                 // Delete reports
                 const reports = await sql.report.userReports(username)
@@ -1015,6 +1040,8 @@ const UserRoutes = (app: Express) => {
             }
             let revertPostIDs = new Set()
             let revertTagIDs = new Set()
+            let revertGroupIDs = new Set()
+            let revertTranslationIDs = new Set()
             if (deleteHistoryChanges) {
                 // Revert post history
                 const postHistory = await sql.history.userPostHistory(username)
@@ -1035,10 +1062,17 @@ const UserRoutes = (app: Express) => {
                     await sql.history.deleteTagHistory(history.historyID)
                     revertTagIDs.add(history.tag)
                 }
+                // Revert group history
+                const groupHistory = await sql.history.userGroupHistory(username)
+                for (const history of groupHistory) {
+                    await sql.history.deleteGroupHistory(history.historyID)
+                    revertGroupIDs.add(history.slug)
+                }
                 // Revert translation history
                 const translationHistory = await sql.history.userTranslationHistory(username)
                 for (const history of translationHistory) {
                     await sql.history.deleteTranslationHistory(history.historyID)
+                    revertTranslationIDs.add({postID: history.postID, order: history.order})
                 }
             }
             await sql.report.insertBan(username, user.ip, req.session.username, reason)
@@ -1052,7 +1086,7 @@ const UserRoutes = (app: Express) => {
             }
             const message = `You have been banned for breaking the site rules. You can still view the site but you won't be able to interact with other users or edit content.${reason ? `\n\nHere is a provided reason: ${reason}` : ""}${banDuration ? `\n\nBan duration: ${banDuration}` : ""}`
             await serverFunctions.systemMessage(username, "Notice: You were banned", message)
-            res.status(200).json({revertPostIDs: Array.from(revertPostIDs), revertTagIDs: Array.from(revertTagIDs)})
+            res.status(200).json({revertPostIDs: Array.from(revertPostIDs), revertTagIDs: Array.from(revertTagIDs), revertGroupIDs: Array.from(revertGroupIDs), revertTranslationIDs: Array.from(revertTranslationIDs)})
         } catch (e) {
             console.log(e)
             res.status(400).send("Bad request")

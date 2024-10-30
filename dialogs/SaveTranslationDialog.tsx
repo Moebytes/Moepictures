@@ -60,7 +60,7 @@ const SaveTranslationDialog: React.FunctionComponent<Props> = (props) => {
                     await functions.timeout(2000)
                     setError(false)
                 }
-                await functions.post("/api/translation/save/request", {postID: props.post.postID, data: saveTranslationData, order: saveTranslationOrder, reason}, session, setSessionFlag)
+                functions.post("/api/translation/save/request", {postID: props.post.postID, data: saveTranslationData, order: saveTranslationOrder, reason}, session, setSessionFlag)
                 setSubmitted(true)
             }
         }

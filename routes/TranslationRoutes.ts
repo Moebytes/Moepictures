@@ -56,7 +56,7 @@ const TranslationRoutes = (app: Express) => {
 
     app.put("/api/translation/save", csrfProtection, translationLimiter, async (req: Request, res: Response) => {
         try {
-            const {postID, order, data} = req.body
+            const {postID, order, data, silent} = req.body
             if (Number.isNaN(Number(postID))) return res.status(400).send("Invalid postID")
             if (Number.isNaN(Number(order)) || Number(order) < 1) return res.status(400).send("Invalid order")
             if (!req.session.username) return res.status(403).send("Unauthorized")
@@ -78,6 +78,11 @@ const TranslationRoutes = (app: Express) => {
                     await sql.translation.updateTranslation(translation.translationID, req.session.username, JSON.stringify(data))
                 }
             }
+
+            if (permissions.isMod(req.session)) {
+                if (silent) return res.status(200).send("Success")
+            }
+        
             const {addedEntries, removedEntries} = functions.parseTranslationDataChanges(translation?.data, data)
             await sql.history.insertTranslationHistory({postID, order, updater: req.session.username, data: JSON.stringify(data), addedEntries, removedEntries, reason: ""})
             res.status(200).send("Success")
@@ -235,6 +240,7 @@ const TranslationRoutes = (app: Express) => {
                 updatedDate,
                 hasOriginal,
                 hasUpscaled,
+                isTranslation: true,
                 updater: req.session.username
             })
 

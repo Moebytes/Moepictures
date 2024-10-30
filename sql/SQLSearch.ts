@@ -343,7 +343,7 @@ export default class SQLSearch {
             FROM "unverified posts"
             JOIN "unverified images" ON "unverified posts"."postID" = "unverified images"."postID"
             JOIN "unverified tag map" ON "unverified posts"."postID" = "unverified tag map"."postID"
-            WHERE "originalID" IS NOT NULL
+            WHERE "originalID" IS NOT NULL AND "isTranslation" IS NULL
             GROUP BY "unverified posts"."postID"
             ORDER BY "unverified posts"."uploadDate" DESC
             LIMIT 100 ${offset ? `OFFSET $1` : ""}
@@ -364,7 +364,7 @@ export default class SQLSearch {
             FROM "unverified posts"
             JOIN "unverified images" ON "unverified posts"."postID" = "unverified images"."postID"
             JOIN "unverified tag map" ON "unverified posts"."postID" = "unverified tag map"."postID"
-            WHERE "originalID" IS NOT NULL AND "unverified posts"."updater" = $1
+            WHERE "originalID" IS NOT NULL AND "isTranslation" IS NULL AND "unverified posts"."updater" = $1
             GROUP BY "unverified posts"."postID"
             ORDER BY "unverified posts"."uploadDate" DESC
             `),

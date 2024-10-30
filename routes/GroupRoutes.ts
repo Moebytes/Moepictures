@@ -75,7 +75,7 @@ const GroupRoutes = (app: Express) => {
 
     app.put("/api/group/edit", csrfProtection, groupLimiter, async (req: Request, res: Response) => {
         try {
-            let {slug, name, description, username, date, reason} = req.body
+            let {slug, name, description, username, date, silent, reason} = req.body
             if (!name) return res.status(400).send("Invalid name")
             if (!req.session.username) return res.status(403).send("Unauthorized")
             if (req.session.banned) return res.status(403).send("You are banned")
@@ -89,6 +89,10 @@ const GroupRoutes = (app: Express) => {
             && group.description === description) return res.status(200).send("Success")
             await sql.group.updateGroupName(group.groupID, targetUser, name, newSlug, description)
 
+            if (permissions.isMod(req.session)) {
+                if (silent) return res.status(200).send("Success")
+            }
+        
             const updated = await sql.group.group(newSlug)
             const changes = functions.parseGroupChanges(group, updated)
             const groupHistory = await sql.history.groupHistory(group.groupID)
@@ -101,10 +105,10 @@ const GroupRoutes = (app: Express) => {
                 await sql.history.insertGroupHistory({username: vanilla.user, groupID: vanilla.groupID, slug: vanilla.slug, name: vanilla.name, date: vanilla.date, 
                 restrict: vanilla.restrict, description: vanilla.description, posts: JSON.stringify(posts), orderChanged: false, addedPosts: [], removedPosts: [], changes})
                 await sql.history.insertGroupHistory({username: targetUser, groupID: updated.groupID, slug: updated.slug, name: updated.name, date, restrict: updated.restrict, 
-                description: updated.description, posts: JSON.stringify(posts), orderChanged: false, addedPosts: [], removedPosts: [], changes})
+                description: updated.description, posts: JSON.stringify(posts), orderChanged: false, addedPosts: [], removedPosts: [], changes, reason})
             } else {
                 await sql.history.insertGroupHistory({username: targetUser, groupID: updated.groupID, slug: updated.slug, name: updated.name, date, restrict: updated.restrict, 
-                description: updated.description, posts: JSON.stringify(posts), orderChanged: false, addedPosts: [], removedPosts: [], changes})
+                description: updated.description, posts: JSON.stringify(posts), orderChanged: false, addedPosts: [], removedPosts: [], changes, reason})
             }
             res.status(200).send("Success")
         } catch (e) {
@@ -265,7 +269,7 @@ const GroupRoutes = (app: Express) => {
 
     app.put("/api/group/reorder", csrfProtection, groupLimiter, async (req: Request, res: Response) => {
         try {
-            const {slug, posts} = req.body
+            const {slug, posts, silent} = req.body
             if (!req.session.username) return res.status(403).send("Unauthorized")
             if (req.session.banned) return res.status(403).send("You are banned")
             const group = await sql.group.group(slug)
@@ -303,6 +307,10 @@ const GroupRoutes = (app: Express) => {
             await sql.group.bulkInsertGroupMappings(group.groupID, toAdd)
             await sql.group.updateGroup(group.groupID, "updater", req.session.username)
             await sql.group.updateGroup(group.groupID, "updatedDate", new Date().toISOString())
+
+            if (permissions.isMod(req.session)) {
+                if (silent) return res.status(200).send("Success")
+            }
 
             const groupHistory = await sql.history.groupHistory(group.groupID)
             const updated = await sql.group.group(slug)

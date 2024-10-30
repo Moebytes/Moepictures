@@ -272,7 +272,7 @@ const TagRoutes = (app: Express) => {
                 await sql.tag.updateTag(tag, "tag", key.trim())
                 targetTag = key.trim()
             }
-            if (req.session.role === "admin" || req.session.role === "mod") {
+            if (permissions.isMod(req.session)) {
                 if (silent) return res.status(200).send("Success")
             }
 

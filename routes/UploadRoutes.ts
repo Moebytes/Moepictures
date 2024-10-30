@@ -638,7 +638,7 @@ const CreateRoutes = (app: Express) => {
 
         await serverFunctions.migratePost(post, oldR18, newR18)
 
-        if (req.session.role === "admin" || req.session.role === "mod") {
+        if (permissions.isMod(req.session)) {
           if (silent) return res.status(200).send("Success")
         }
 

@@ -22,7 +22,6 @@ const ModTranslations: React.FunctionComponent = (props) => {
     const [unverifiedTranslations, setUnverifiedTranslations] = useState([]) as any
     const [index, setIndex] = useState(0)
     const [visibleTranslations, setVisibleTranslations] = useState([]) as any
-    const [updateVisibleTranslationFlag, setUpdateVisibleTranslationFlag] = useState(false)
     const {scroll, setScroll} = useContext(ScrollContext)
     const {mobile, setMobile} = useContext(MobileContext)
     const {pageFlag, setPageFlag} = useContext(PageFlagContext)
@@ -58,23 +57,21 @@ const ModTranslations: React.FunctionComponent = (props) => {
         setVisibleTranslations(functions.removeDuplicates(newVisibleTranslations))
     }
 
-    useEffect(() => {
-        if (updateVisibleTranslationFlag) {
-            updateVisibleTranslations()
-            setUpdateVisibleTranslationFlag(false)
-        }
-    }, [unverifiedTranslations, index, updateVisibleTranslationFlag])
+    const refreshTranslations = async () => {
+        updateTranslations()
+        updateVisibleTranslations()
+    }
 
     const approveTranslation = async (translationID: number, username: string, postID: number) => {
         await functions.post("/api/translation/approve", {translationID, username, postID}, session, setSessionFlag)
         await updateTranslations()
-        setUpdateVisibleTranslationFlag(true)
+        refreshTranslations()
     }
 
     const rejectTranslation = async (translationID: number, username: string, postID: number) => {
         await functions.post("/api/translation/reject", {translationID, username, postID}, session, setSessionFlag)
         await updateTranslations()
-        setUpdateVisibleTranslationFlag(true)
+        refreshTranslations()
     }
 
     const getPageAmount = () => {

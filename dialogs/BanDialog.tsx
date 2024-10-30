@@ -103,6 +103,24 @@ const BanDialog: React.FunctionComponent = (props) => {
                 website: currentHistory.website, fandom: currentHistory.fandom, updatedDate: currentHistory.date}, session, setSessionFlag)
             }
         }
+        if (revertData.revertGroupIDs?.length) {
+            for (const slug of revertData.revertGroupIDs) {
+                const result = await functions.get("/api/group/history", {slug}, session, setSessionFlag)
+                if (!result?.[0]) continue
+                const currentHistory = result[0]
+                await functions.put("/api/group/reorder", {silent: true, slug: currentHistory.slug, posts: currentHistory.posts}, session, setSessionFlag)
+                await functions.put("/api/group/edit", {silent: true, slug: currentHistory.slug, name: currentHistory.name, description: currentHistory.description}, session, setSessionFlag)
+            }
+        }
+        if (revertData.revertTranslationIDs?.length) {
+            for (const item of revertData.revertTranslationIDs) {
+                const result = await functions.get("/api/translation/history", {postID: item.postID, order: item.order}, session, setSessionFlag)
+                if (!result?.[0]) continue
+                const currentHistory = result[0]
+                await functions.put("/api/translation/save", {silent: true, postID: currentHistory.postID, order: currentHistory.order, 
+                data: currentHistory.data}, session, setSessionFlag)
+            }
+        }
         setBanName(null)
         setUpdateUserFlag(true)
     }

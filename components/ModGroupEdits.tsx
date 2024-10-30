@@ -303,14 +303,14 @@ const ModGroupEdits: React.FunctionComponent = (props) => {
             }
         }
         if (changes.name) {
-            if (showOldGroup) {
+            if (showOldGroup && oldGroup) {
                 jsx.push(<span className="mod-post-link" onClick={openGroup} onAuxClick={openGroup}>Old Name: {oldGroup.name}</span>)
             } else {
                 jsx.push(<span className="mod-post-link" onClick={openGroup} onAuxClick={openGroup}>New Name: {newGroup.name}</span>)
             }
         }
         if (changes.description) {
-            if (showOldGroup) {
+            if (showOldGroup && oldGroup) {
                 jsx.push(<span className="mod-post-text">Old Description: {oldGroup.description || "No description."}</span>)
             } else {
                 jsx.push(<span className="mod-post-text">New Description: {newGroup.description || "No description."}</span>)

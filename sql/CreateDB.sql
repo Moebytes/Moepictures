@@ -82,6 +82,7 @@ CREATE TABLE IF NOT EXISTS "unverified posts" (
     "hasUpscaled" boolean,
     "mirrors" jsonb,
     "thumbnail" text,
+    "isTranslation" boolean,
     "addedTags" text[],
     "removedTags" text[],
     "imageChanged" boolean,

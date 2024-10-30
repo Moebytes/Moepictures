@@ -168,4 +168,29 @@ export default class SQLTranslation {
         const result = await SQLQuery.run(query)
         return result
     }
+
+    /** Get user translations (unverified). */
+    public static userUnverifiedTranslations = async (username: string) => {
+        const query: QueryConfig = {
+        text: functions.multiTrim(/*sql*/`
+                WITH post_json AS (
+                    SELECT "unverified posts".*, json_agg(DISTINCT "unverified images".*) AS images
+                    FROM "unverified posts"
+                    JOIN "unverified images" ON "unverified images"."postID" = "unverified posts"."postID"
+                    GROUP BY "unverified posts"."postID"
+                )
+                SELECT "unverified translations".*, 
+                COUNT(*) OVER() AS "translationCount",
+                to_json((array_agg(post_json.*))[1]) AS post
+                FROM "unverified translations"
+                JOIN post_json ON post_json."postID" = "unverified translations"."postID"
+                WHERE "unverified translations"."updater" = $1
+                GROUP BY "unverified translations"."translationID"
+                ORDER BY "unverified translations"."updatedDate" ASC
+            `),
+            values: [username]
+        }
+        const result = await SQLQuery.run(query)
+        return result
+    }
 }

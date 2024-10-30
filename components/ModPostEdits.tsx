@@ -358,7 +358,7 @@ const ModPostEdits: React.FunctionComponent = (props) => {
         let jsx = [] as React.ReactElement[]
         if (!originalPost) return []
         const changes = newPost.changes || {}
-        let tagChanges = newPost.addedTags.length || newPost.removedTags.length
+        let tagChanges = newPost.addedTags?.length || newPost.removedTags?.length
         if (changes.images) {
             jsx.push(<span className="mod-post-text"><span className="mod-post-label">Images:</span> {newPost.images.length}</span>)
         }
