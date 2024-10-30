@@ -189,10 +189,13 @@ export default class SQLRequest {
     }
 
     /** Insert tag edit request. */
-    public static insertTagEditRequest = async (username: string, tag: string, key: string, description: string, image: string, aliases: string[], implications: string[], pixivTags: string[], social: string, twitter: string, website: string, fandom: string, reason: string) => {
+    public static insertTagEditRequest = async (username: string, tag: string, key: string, description: string, image: string, aliases: string[], 
+        implications: string[], pixivTags: string[], social: string, twitter: string, website: string, fandom: string, imageChanged: boolean, 
+        changes: any, reason: string) => {
         const query: QueryConfig = {
-        text: /*sql*/`INSERT INTO "tag edit requests" ("username", "tag", "key", "description", "image", "aliases", "implications", "pixivTags", "social", "twitter", "website", "fandom", "reason") VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)`,
-        values: [username, tag, key, description, image, aliases, implications, pixivTags, social, twitter, website, fandom, reason]
+        text: /*sql*/`INSERT INTO "tag edit requests" ("username", "tag", "key", "description", "image", "aliases", "implications", "pixivTags", 
+        "social", "twitter", "website", "fandom", "imageChanged", "changes", "reason") VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15)`,
+        values: [username, tag, key, description, image, aliases, implications, pixivTags, social, twitter, website, fandom, imageChanged, changes, reason]
         }
         const result = await SQLQuery.run(query)
         return result
@@ -341,10 +344,12 @@ export default class SQLRequest {
     }
 
     /** Insert group edit request. */
-    public static insertGroupEditRequest = async (username: string, slug: string, name: string, description: string, reason: string) => {
+    public static insertGroupEditRequest = async (username: string, slug: string, name: string, description: string, addedPosts: string[], 
+        removedPosts: string[], orderChanged: boolean, changes: any, reason: string) => {
         const query: QueryConfig = {
-        text: /*sql*/`INSERT INTO "group edit requests" ("username", "group", "name", "description", "reason") VALUES ($1, $2, $3, $4, $5)`,
-        values: [username, slug, name, description, reason]
+        text: /*sql*/`INSERT INTO "group edit requests" ("username", "group", "name", "description", "addedPosts", 
+        "removedPosts", "orderChanged", "changes", "reason") VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)`,
+        values: [username, slug, name, description, addedPosts, removedPosts, orderChanged, changes, reason]
         }
         const result = await SQLQuery.run(query)
         return result

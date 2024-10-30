@@ -45,7 +45,8 @@ const TranslationRoutes = (app: Express) => {
                     await sql.translation.updateTranslation(translation.translationID, req.session.username, JSON.stringify(data))
                 }
             }
-            await sql.history.insertTranslationHistory(postID, order, req.session.username, JSON.stringify(data), reason)
+            const {addedEntries, removedEntries} = functions.parseTranslationDataChanges(translation?.data, data)
+            await sql.history.insertTranslationHistory({postID, order, updater: req.session.username, data: JSON.stringify(data), addedEntries, removedEntries, reason})
             res.status(200).send("Success")
         } catch (e) {
             console.log(e)
@@ -77,7 +78,8 @@ const TranslationRoutes = (app: Express) => {
                     await sql.translation.updateTranslation(translation.translationID, req.session.username, JSON.stringify(data))
                 }
             }
-            await sql.history.insertTranslationHistory(postID, order, req.session.username, JSON.stringify(data), "")
+            const {addedEntries, removedEntries} = functions.parseTranslationDataChanges(translation?.data, data)
+            await sql.history.insertTranslationHistory({postID, order, updater: req.session.username, data: JSON.stringify(data), addedEntries, removedEntries, reason: ""})
             res.status(200).send("Success")
         } catch (e) {
             console.log(e)
@@ -322,7 +324,9 @@ const TranslationRoutes = (app: Express) => {
             await sql.tag.bulkInsertUnverifiedTags(bulkTagUpdate, true)
             await sql.tag.insertUnverifiedTagMap(postID, tagMap)
 
-            await sql.translation.insertUnverifiedTranslation(postID, originalPostID, req.session.username, order, JSON.stringify(data), reason)
+            const translation = await sql.translation.translation(postID, order)
+            let {addedEntries, removedEntries} = functions.parseTranslationDataChanges(translation?.data, data)
+            await sql.translation.insertUnverifiedTranslation(postID, originalPostID, req.session.username, order, JSON.stringify(data), addedEntries, removedEntries, reason)
             res.status(200).send("Success")
         } catch (e) {
             console.log(e)

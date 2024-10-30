@@ -169,28 +169,16 @@ const TranslationHistoryRow: React.FunctionComponent<Props> = (props) => {
             if (props.translationHistory.data[0].transcript === "No data") return "No data"
             return props.translationHistory.data.map((item: any) => `${item.transcript} -> ${item.translation}`)
         }
-        const prevData = props.previousHistory.data
-        const newData = props.translationHistory.data
-        const prevMap = new Map(prevData.map((item: any) => [item.transcript, item.translation]))
-        const newMap = new Map(newData.map((item: any) => [item.transcript, item.translation]))
+        let translationChanges = props.translationHistory.addedEntries?.length || props.translationHistory.removedEntries?.length
+        if (!translationChanges) return null
+        const addedJSX = props.translationHistory.addedEntries.map((i: string) => <span className="tag-add">+{i}</span>)
+        const removedJSX = props.translationHistory.removedEntries.map((i: string) => <span className="tag-remove">-{i}</span>)
 
-        const addedEntries = newData
-            .filter((item: any) => !prevMap.has(item.transcript))
-            .map((item: any) => `+${item.transcript} -> ${item.translation}`)
-
-        const removedEntries = prevData
-            .filter((item: any) => !newMap.has(item.transcript))
-            .map((item: any) => `-${item.transcript} -> ${item.translation}`)
-
-        if (![...addedEntries, ...removedEntries].length) return null
-        
-        const addedJSX = addedEntries.map((i: string) => <span className="tag-add">{i}</span>)
-        const removedJSX = removedEntries.map((i: string) => <span className="tag-remove">{i}</span>)
-
+        if (![...addedJSX, ...removedJSX].length) return null
         return [...addedJSX, ...removedJSX]
     }
 
-    const translationJSX = () => {
+    const diffJSX = () => {
         let jsx = [] as any
         const diffs = diffText()
         if (diffs === "No data") return <span className="historyrow-tag-text">No data</span>
@@ -199,8 +187,6 @@ const TranslationHistoryRow: React.FunctionComponent<Props> = (props) => {
         }
         return jsx
     }
-
-    //if (!diffText()) return null
 
     return (
         <div className="historyrow">
@@ -212,7 +198,7 @@ const TranslationHistoryRow: React.FunctionComponent<Props> = (props) => {
                 <div className="historyrow-container">
                     <div className="historyrow-user-container">
                         {dateTextJSX()}
-                        {translationJSX()}
+                        {diffJSX()}
                         {props.translationHistory.reason ? <span className="taghistoryrow-text"><span className="taghistoryrow-label-text">Reason:</span> {props.translationHistory.reason}</span> : null}
                     </div>
                 </div>

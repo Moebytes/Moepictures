@@ -42,10 +42,14 @@ const GroupHistoryRow: React.FunctionComponent<Props> = (props) => {
     const slug = props.groupHistory.slug
 
     const updateImages = async () => {
-        const post = await functions.get("/api/post", {postID: props.groupHistory.posts[0].postID}, session, setSessionFlag)
+        let targetID = props.groupHistory.addedPosts?.length ? props.groupHistory.addedPosts[0] : 
+        props.groupHistory.removedPosts?.length ? props.groupHistory.removedPosts[0] : props.groupHistory.posts[0].postID
+        const post = await functions.get("/api/post", {postID: targetID}, session, setSessionFlag)
         const filename = post.images[0]?.filename
         const initialImg = functions.getThumbnailLink(post.images[0]?.type, post.postID, post.images[0]?.order, filename, "medium", mobile)
         setImg(initialImg + `#${path.extname(filename)}`)
+        const index = props.groupHistory.posts.findIndex((p: any) => String(p.postID) === String(targetID))
+        setPostIndex(index)
     }
 
     const updateUserRole = async () => {
@@ -219,15 +223,30 @@ const GroupHistoryRow: React.FunctionComponent<Props> = (props) => {
         }
     }, [props.previousHistory, props.groupHistory])
 
+    const postDiff = () => {
+        const addedPostsJSX = props.groupHistory.addedPosts.map((postID: string) => <span className="tag-add-clickable" onClick={() => history.push(`/post/${postID}`)}>+{postID}</span>)
+        const removedPostsJSX = props.groupHistory.removedPosts.map((postID: string) => <span className="tag-remove-clickable" onClick={() => history.push(`/post/${postID}`)}>-{postID}</span>)
+        if (![...addedPostsJSX, ...removedPostsJSX].length) return null
+        return [...addedPostsJSX, ...removedPostsJSX]
+    }
+
     const diffJSX = () => {
         let jsx = [] as React.ReactElement[]
-        if (!props.previousHistory || (props.previousHistory?.description !== props.groupHistory.description)) {
-            jsx.push(<span className="historyrow-text">{props.groupHistory.description || "None"}</span>)
+        let changes = props.groupHistory.changes || {}
+        let postChanges = props.groupHistory.addedPosts?.length || props.groupHistory.removedPosts?.length
+        if (!props.previousHistory || changes.name) {
+            jsx.push(<span className="historyrow-text"><span className="historyrow-label-text">Name:</span> {props.groupHistory.name}</span>)
+        }
+        if (!props.previousHistory || changes.description) {
+            jsx.push(<span className="historyrow-text"><span className="historyrow-label-text">Description:</span> {props.groupHistory.description || "None"}</span>)
+        }
+        if (postChanges) {
+            if (postDiff()) {
+                jsx.push(<span className="historyrow-text"><span className="historyrow-label-text">Posts:</span> {postDiff()}</span>)
+            }
         }
         return jsx
     }
-
-    //if (!hasAnyUpdate) return null
 
     return (
         <div className="historyrow">
@@ -245,7 +264,7 @@ const GroupHistoryRow: React.FunctionComponent<Props> = (props) => {
                 <div className="historyrow-container">
                     <div className="historyrow-user-container">
                         {dateTextJSX()}
-                        {hasOrderUpdate ? <span className="historyrow-text-strong">[Reorder]</span> : null}
+                        {props.groupHistory.orderChanged ? <span className="historyrow-text-strong">[Order Updated]</span> : null}
                         {diffJSX()}
                         {props.groupHistory.reason ? <span className="historyrow-text"><span className="historyrow-label-text">Reason:</span> {props.groupHistory.reason}</span> : null}
                     </div>

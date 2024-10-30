@@ -66,11 +66,13 @@ export default class SQLTranslation {
     }
 
     /** Insert translation (unverified). */
-    public static insertUnverifiedTranslation = async (postID: number, originalID: number, updater: string, order: number, data: any, reason: string) => {
+    public static insertUnverifiedTranslation = async (postID: number, originalID: number, updater: string, order: number, data: any, 
+        addedEntries: any, removedEntries: any, reason: string) => {
         const now = new Date().toISOString()
         const query: QueryConfig = {
-        text: /*sql*/`INSERT INTO "unverified translations" ("postID", "originalID", "updater", "updatedDate", "order", "data", "reason") VALUES ($1, $2, $3, $4, $5, $6, $7)`,
-        values: [postID, originalID, updater, now, order, data, reason]
+        text: /*sql*/`INSERT INTO "unverified translations" ("postID", "originalID", "updater", "updatedDate", "order", "data", 
+        "addedEntries", "removedEntries", "reason") VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)`,
+        values: [postID, originalID, updater, now, order, data, addedEntries, removedEntries, reason]
         }
         const result = await SQLQuery.run(query)
         return result

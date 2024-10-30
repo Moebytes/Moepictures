@@ -292,6 +292,33 @@ const ModGroupEdits: React.FunctionComponent = (props) => {
         return jsx
     }
 
+    const diffJSX = (oldGroup: any, newGroup: any, showOldGroup: boolean) => {
+        let jsx = [] as React.ReactElement[]
+        let changes = newGroup.changes || {}
+        const openGroup = (event: React.MouseEvent) => {
+            if (event.ctrlKey || event.metaKey || event.button === 1) {
+                window.open(`/group/${newGroup.group}`, "_blank")
+            } else {
+                history.push(`/group/${newGroup.group}`)
+            }
+        }
+        if (changes.name) {
+            if (showOldGroup) {
+                jsx.push(<span className="mod-post-link" onClick={openGroup} onAuxClick={openGroup}>Old Name: {oldGroup.name}</span>)
+            } else {
+                jsx.push(<span className="mod-post-link" onClick={openGroup} onAuxClick={openGroup}>New Name: {newGroup.name}</span>)
+            }
+        }
+        if (changes.description) {
+            if (showOldGroup) {
+                jsx.push(<span className="mod-post-text">Old Description: {oldGroup.description || "No description."}</span>)
+            } else {
+                jsx.push(<span className="mod-post-text">New Description: {newGroup.description || "No description."}</span>)
+            }
+        }
+        return jsx
+    }
+
     const generateGroupsJSX = () => {
         let jsx = [] as any
         let visible = [] as any
@@ -316,13 +343,6 @@ const ModGroupEdits: React.FunctionComponent = (props) => {
             if (!request) break
             if (request.fake) continue
             const oldGroup = oldGroups.get(request.name)
-            const openGroup = (event: React.MouseEvent) => {
-                if (event.ctrlKey || event.metaKey || event.button === 1) {
-                    window.open(`/group/${request.group}`, "_blank")
-                } else {
-                    history.push(`/group/${request.group}`)
-                }
-            }
             const changeOldGroup = () => {
                 const value = showOldGroups[i] || false 
                 showOldGroups[i] = !value 
@@ -335,14 +355,12 @@ const ModGroupEdits: React.FunctionComponent = (props) => {
                     <div className="mod-post-text-column">
                         <span className="mod-post-link" onClick={() => history.push(`/user/${request.username}`)}>Requester: {functions.toProperCase(request?.username) || "deleted"}</span>
                         <span className="mod-post-text">Reason: {request.reason}</span>
-                        <span className="mod-post-link" onClick={openGroup} onAuxClick={openGroup}>Old Name: {oldGroup.name}</span>
-                        <span className="mod-post-text">Old Description: {oldGroup.description || "No description."}</span>
+                        {diffJSX(oldGroup, request, showOldGroups[i])}
                     </div> :
                     <div className="mod-post-text-column">
                         <span className="mod-post-link" onClick={() => history.push(`/user/${request.username}`)}>Requester: {functions.toProperCase(request?.username) || "deleted"}</span>
                         <span className="mod-post-text">Reason: {request.reason}</span>
-                        <span className="mod-post-link" onClick={openGroup} onAuxClick={openGroup}>New Name: {request.name}</span>
-                        <span className="mod-post-text">New Description: {request.description || "No description."}</span>
+                        {diffJSX(oldGroup, request, showOldGroups[i])}
                     </div>}
                     <div className="mod-post-options">
                         <div className="mod-post-options-container" onClick={() => changeOldGroup()}>

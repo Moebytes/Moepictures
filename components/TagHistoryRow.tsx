@@ -40,8 +40,6 @@ const TagHistoryRow: React.FunctionComponent<Props> = (props) => {
     const history = useHistory()
     const [img, setImg] = useState("")
     const [userRole, setUserRole] = useState("")
-    const [hasImageUpdate, setHasImageUpdate] = useState(false)
-    const [hasAnyUpdate, setHasAnyUpdate] = useState(true)
     const tag = props.tagHistory.tag
 
     const updateImage = () => {
@@ -218,41 +216,40 @@ const TagHistoryRow: React.FunctionComponent<Props> = (props) => {
         return <span className="historyrow-user-text" onClick={userClick} onAuxClick={userClick}>{editText} {functions.timeAgo(targetDate)} by {functions.toProperCase(props.tagHistory.user)}</span>
     }
 
-    const calculateImageDiff = async () => {
-        if (!props.previousHistory) return false
-        const img = functions.getTagLink(props.tagHistory.type, props.tagHistory.image)
-        const previous = functions.getTagLink(props.previousHistory.type, props.previousHistory.image)
-
-        const imgBuffer = await functions.getBuffer(img)
-        const previousBuffer = await functions.getBuffer(previous)
-
-        const imgMD5 = crypto.createHash("md5").update(Buffer.from(imgBuffer) as any).digest("hex")
-        const previousMD5 = crypto.createHash("md5").update(Buffer.from(previousBuffer) as any).digest("hex")
-
-        if (imgMD5 !== previousMD5) return true
-        return false
-    }
-
-    useEffect(() => {
-        calculateImageDiff().then((answer) => {
-            setHasImageUpdate(answer)
-            if (!answer && !diffJSX().length && !props.tagHistory.reason) setHasAnyUpdate(false)
-        })
-    }, [props.previousHistory, props.tagHistory])
-
     const diffJSX = () => {
         let jsx = [] as React.ReactElement[]
-        if (!props.previousHistory || (props.previousHistory?.description !== props.tagHistory.description)) {
-            jsx.push(<span className="historyrow-text">{props.tagHistory.description || "None"}</span>)
+        let changes = props.tagHistory.changes || {}
+        if (!props.previousHistory || changes.tag) {
+            jsx.push(<span className="historyrow-text"><span className="historyrow-label-text">Name:</span> {props.tagHistory.tag}</span>)
         }
-        if (!props.previousHistory || (props.previousHistory?.aliases !== props.tagHistory.aliases)) {
+        if (!props.previousHistory || changes.description) {
+            jsx.push(<span className="historyrow-text"><span className="historyrow-label-text">Description:</span> {props.tagHistory.description || "None"}</span>)
+        }
+        if ((!props.previousHistory && props.tagHistory.website) || changes.website) {
+            jsx.push(<span className="historyrow-text"><span className="historyrow-label-text">Website:</span> <span className="historyrow-label-link" onClick={() => window.open(props.tagHistory.website, "_blank")}>{props.tagHistory.website}</span></span>)
+        }
+        if ((!props.previousHistory && props.tagHistory.social) || changes.social) {
+            jsx.push(<span className="historyrow-text"><span className="historyrow-label-text">Social:</span> <span className="historyrow-label-link" onClick={() => window.open(props.tagHistory.social, "_blank")}>{props.tagHistory.social}</span></span>)
+        }
+        if ((!props.previousHistory && props.tagHistory.twitter) || changes.twitter) {
+            jsx.push(<span className="historyrow-text"><span className="historyrow-label-text">Twitter:</span> <span className="historyrow-label-link" onClick={() => window.open(props.tagHistory.twitter, "_blank")}>{props.tagHistory.twitter}</span></span>)
+        }
+        if ((!props.previousHistory && props.tagHistory.fandom) || changes.fandom) {
+            jsx.push(<span className="historyrow-text"><span className="historyrow-label-text">Fandom:</span> <span className="historyrow-label-link" onClick={() => window.open(props.tagHistory.fandom, "_blank")}>{props.tagHistory.fandom}</span></span>)
+        }
+        if (!props.previousHistory || changes.aliases) {
             if (props.tagHistory.aliases?.[0]) {
                 jsx.push(<span className="historyrow-text"><span className="historyrow-label-text">Aliases:</span> {props.tagHistory.aliases.map((alias: string) => alias.replaceAll("-", " ")).join(", ")}</span>)
             }
         }
-        if (!props.previousHistory || (props.previousHistory?.implications !== props.tagHistory.implications)) {
+        if (!props.previousHistory || changes.implications) {
             if (props.tagHistory.implications?.[0]) {
                 jsx.push(<span className="historyrow-text"><span className="historyrow-label-text">Implications:</span> {props.tagHistory.implications.map((implication: string) => implication.replaceAll("-", " ")).join(", ")}</span>)
+            }
+        }
+        if (!props.previousHistory || changes.pixivTags) {
+            if (props.tagHistory.pixivTags?.[0]) {
+                jsx.push(<span className="historyrow-text"><span className="historyrow-label-text">Pixiv Tags:</span> {props.tagHistory.pixivTags.join(", ")}</span>)
             }
         }
         return jsx
@@ -270,8 +267,7 @@ const TagHistoryRow: React.FunctionComponent<Props> = (props) => {
                 <div className="historyrow-container">
                     <div className="historyrow-user-container">
                         {dateTextJSX()}
-                        {hasImageUpdate ? <span className="historyrow-text-strong">[Image Updated]</span> : null}
-                        {!hasAnyUpdate ? <span className="historyrow-text-strong">[Image Stored]</span> : null}
+                        {props.tagHistory.imageChanged ? <span className="historyrow-text-strong">[Image Updated]</span> : null}
                         {diffJSX()}
                         {props.tagHistory.reason ? <span className="historyrow-text"><span className="historyrow-label-text">Reason:</span> {props.tagHistory.reason}</span> : null}
                     </div>

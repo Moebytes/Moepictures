@@ -1,6 +1,6 @@
 import React, {useContext, useEffect, useRef, useState, useReducer, useMemo} from "react"
 import {ThemeContext, EnableDragContext, MobileContext, BrightnessContext, ContrastContext, HueContext, SaturationContext, LightnessContext,
-BlurContext, SharpenContext, PixelateContext, SiteHueContext, SiteLightnessContext, SiteSaturationContext} from "../Context"
+BlurContext, SharpenContext, PixelateContext, SiteHueContext, SiteLightnessContext, SiteSaturationContext, TranslationDrawingEnabledContext} from "../Context"
 import {HashLink as Link} from "react-router-hash-link"
 import functions from "../structures/Functions"
 import cryptoFunctions from "../structures/CryptoFunctions"
@@ -43,6 +43,7 @@ const Carousel: React.FunctionComponent<Props> = (props) => {
     const {blur, setBlur} = useContext(BlurContext)
     const {sharpen, setSharpen} = useContext(SharpenContext)
     const {pixelate, setPixelate} = useContext(PixelateContext)
+    const {translationDrawingEnabled, setTranslationDrawingEnabled} = useContext(TranslationDrawingEnabledContext)
     const [lastPos, setLastPos] = useState(null) as any
     const [dragging, setDragging] = useState(false) as any
     const [imagesRef, setImagesRef] = useState([]) as any
@@ -171,6 +172,9 @@ const Carousel: React.FunctionComponent<Props> = (props) => {
         if (props.noKey) return
         if (event.key !== "ArrowLeft" && event.key !== "ArrowRight") return
         if (!sliderRef?.current) return
+        if ((event.target instanceof HTMLTextAreaElement) || (event.target instanceof HTMLInputElement) 
+        || (event.target.classList.contains("dialog-textarea"))) return
+        if (translationDrawingEnabled) return
         let marginLeft = parseInt(sliderRef.current.style.marginLeft)
         if (Number.isNaN(marginLeft)) marginLeft = 0
         const width = document.querySelector(".carousel-img")?.clientWidth || 0

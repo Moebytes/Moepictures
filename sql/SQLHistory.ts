@@ -4,12 +4,18 @@ import functions from "../structures/Functions"
 
 export default class SQLHistory {
     /** Insert tag history */
-    public static insertTagHistory = async (username: string, tag: string, key: string, type: string, image?: string, description?: string, 
-        aliases?: string[], implications?: string[], pixivTags?: string[], website?: string, social?: string, twitter?: string, fandom?: string, reason?: string) => {
+    public static insertTagHistory = async (options: {username: string, tag: string, key: string, type: string, image: string, description: string, 
+        aliases: string[], implications: string[], pixivTags: string[], website: string, social: string, twitter: string, fandom: string, 
+        imageChanged: boolean, changes: any, reason?: string}) => {
+        const {username, tag, key, type, image, description, aliases, implications, pixivTags, website, social, twitter, fandom, imageChanged, 
+        changes, reason} = options
         const now = new Date().toISOString()
         const query: QueryConfig = {
-        text: /*sql*/`INSERT INTO "tag history" ("tag", "user", "date", "key", "type", "image", "description", "aliases", "implications", "pixivTags", "website", "social", "twitter", "fandom", "reason") VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15)`,
-        values: [tag, username, now, key, type, image, description, aliases, implications, pixivTags, website, social, twitter, fandom, reason]
+        text: /*sql*/`INSERT INTO "tag history" ("tag", "user", "date", "key", "type", "image", "description", "aliases", "implications", 
+        "pixivTags", "website", "social", "twitter", "fandom", "imageChanged", "changes", "reason") VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, 
+        $10, $11, $12, $13, $14, $15, $16, $17)`,
+        values: [tag, username, now, key, type, image, description, aliases, implications, pixivTags, website, social, twitter, fandom, 
+        imageChanged, changes, reason]
         }
         await SQLQuery.flushDB()
         const result = await SQLQuery.run(query)
@@ -200,11 +206,12 @@ export default class SQLHistory {
     }
 
     /** Insert translation history */
-    public static insertTranslationHistory = async (postID: number, order: number, updater: string, data: any, reason?: string) => {
+    public static insertTranslationHistory = async (options: {postID: number, order: number, updater: string, data: any, addedEntries: any, removedEntries: any, reason?: string}) => {
+        const {postID, order, updater, data, addedEntries, removedEntries, reason} = options
         const now = new Date().toISOString()
         const query: QueryConfig = {
-        text: /*sql*/`INSERT INTO "translation history" ("postID", "order", "updater", "updatedDate", "data", "reason") VALUES ($1, $2, $3, $4, $5, $6)`,
-        values: [postID, order, updater, now, data, reason]
+        text: /*sql*/`INSERT INTO "translation history" ("postID", "order", "updater", "updatedDate", "data", "addedEntries", "removedEntries", "reason") VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`,
+        values: [postID, order, updater, now, data, addedEntries, removedEntries, reason]
         }
         const result = await SQLQuery.run(query)
         return result
@@ -314,11 +321,13 @@ export default class SQLHistory {
     }
 
     /** Insert group history */
-    public static insertGroupHistory = async (username: string, groupID: string, slug: string, name: string, date: string, restrict: string, 
-        description: string, posts: any, reason?: string) => {
+    public static insertGroupHistory = async (options: {username: string, groupID: string, slug: string, name: string, date: string, restrict: string, 
+        description: string, posts: any, addedPosts: string[], removedPosts: string[], orderChanged: boolean, changes: any, reason?: string}) => {
+        const {username, groupID, slug, name, date, restrict, description, posts, addedPosts, removedPosts, orderChanged, changes, reason} = options
         const query: QueryConfig = {
-            text: /*sql*/`INSERT INTO "group history" ("groupID", "user", "date", "slug", "name", "restrict", "description", "posts", "reason") VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)`,
-            values: [groupID, username, date, slug, name, restrict, description, posts, reason]
+            text: /*sql*/`INSERT INTO "group history" ("groupID", "user", "date", "slug", "name", "restrict", "description", "posts", "addedPosts",
+            "removedPosts", "orderChanged", "changes", "reason") VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)`,
+            values: [groupID, username, date, slug, name, restrict, description, posts, addedPosts, removedPosts, orderChanged, changes, reason]
         }
         await SQLQuery.flushDB()
         const result = await SQLQuery.run(query)

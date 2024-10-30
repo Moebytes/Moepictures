@@ -309,6 +309,8 @@ CREATE TABLE IF NOT EXISTS "unverified translations" (
     "updatedDate" timestamptz,
     "order" int,
     "data" jsonb,
+    "addedEntries" text[],
+    "removedEntries" text[],
     "reason" text
 );
 
@@ -384,6 +386,8 @@ CREATE TABLE IF NOT EXISTS "tag edit requests" (
     "twitter" text,
     "fandom" text,
     "pixivTags" text[],
+    "imageChanged" boolean,
+    "changes" jsonb,
     "reason" text
 );
 
@@ -402,6 +406,10 @@ CREATE TABLE IF NOT EXISTS "group edit requests" (
     "group" text REFERENCES "groups" ("slug") ON UPDATE CASCADE ON DELETE CASCADE,
     "name" text,
     "description" text,
+    "addedPosts" text[],
+    "removedPosts" text[],
+    "orderChanged" boolean,
+    "changes" jsonb,
     "reason" text
 );
 
@@ -439,6 +447,8 @@ CREATE TABLE IF NOT EXISTS "translation history" (
     "updatedDate" timestamptz,
     "order" int,
     "data" jsonb,
+    "addedEntries" text[],
+    "removedEntries" text[],
     "reason" text
 );
 
@@ -452,6 +462,10 @@ CREATE TABLE IF NOT EXISTS "group history" (
     "restrict" text,
     "description" text,
     "posts" jsonb,
+    "addedPosts" text[],
+    "removedPosts" text[],
+    "orderChanged" boolean,
+    "changes" jsonb,
     "reason" text
 );
 
@@ -471,6 +485,8 @@ CREATE TABLE IF NOT EXISTS "tag history" (
     "twitter" text,
     "fandom" text,
     "pixivTags" text[],
+    "imageChanged" boolean,
+    "changes" jsonb,
     "reason" text
 );
 

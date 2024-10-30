@@ -303,6 +303,82 @@ const ModTagEdits: React.FunctionComponent = (props) => {
         return jsx
     }
 
+    const diffJSX = (oldTag: any, newTag: any, showOldTag: boolean) => {
+        let jsx = [] as React.ReactElement[]
+        let changes = newTag.changes || {}
+        const openTag = (event: React.MouseEvent) => {
+            if (event.ctrlKey || event.metaKey || event.button === 1) {
+                window.open(`/tag/${newTag.tag}`, "_blank")
+            } else {
+                history.push(`/tag/${newTag.tag}`)
+            }
+        }
+        if (changes.tag) {
+            if (showOldTag) {
+                jsx.push(<span className="mod-post-link" onClick={openTag} onAuxClick={openTag}>Old Tag: {oldTag.tag}</span>)
+            } else {
+                jsx.push(<span className="mod-post-link" onClick={openTag} onAuxClick={openTag}>New Tag: {newTag.key}</span>)
+            }
+        }
+        if (changes.description) {
+            if (showOldTag) {
+                jsx.push(<span className="mod-post-text">Old Description: {oldTag.description || "No description."}</span>)
+            } else {
+                jsx.push(<span className="mod-post-text">New Description: {newTag.description || "No description."}</span>)
+            }
+        }
+        if (changes.aliases) {
+            if (showOldTag) {
+                jsx.push(<span className="mod-post-text">Old Aliases: {oldTag.aliases.map((a: any) => a.alias).join(", ")}</span>)
+            } else {
+                jsx.push(<span className="mod-post-text">New Aliases: {newTag.aliases.join(", ")}</span>)
+            }
+        }
+        if (changes.implications) {
+            if (showOldTag) {
+                jsx.push(<span className="mod-post-text">Old Implications: {oldTag.implications.map((i: any) => i.implication).join(", ")}</span>)
+            } else {
+                jsx.push(<span className="mod-post-text">New Implications: {newTag.implications.join(", ")}</span>)
+            }
+        }
+        if (changes.pixivTags) {
+            if (showOldTag) {
+                jsx.push(<span className="mod-post-text">Old Pixiv Tags: {oldTag.pixivTags.join(", ")}</span>)
+            } else {
+                jsx.push(<span className="mod-post-text">New Pixiv Tags: {newTag.pixivTags.join(", ")}</span>)
+            }
+        }
+        if (changes.website) {
+            if (showOldTag) {
+                jsx.push(<span className="mod-post-text mod-post-hover" onClick={() => window.open(oldTag.website, "_blank")}>Old Website: {oldTag.website || "None."}</span>)
+            } else {
+                jsx.push(<span className="mod-post-text mod-post-hover" onClick={() => window.open(newTag.website, "_blank")}>New Website: {newTag.website}</span>)
+            }
+        }
+        if (changes.social) {
+            if (showOldTag) {
+                jsx.push(<span className="mod-post-text mod-post-hover" onClick={() => window.open(oldTag.social, "_blank")}>Old Social: {oldTag.social || "None."}</span>)
+            } else {
+                jsx.push(<span className="mod-post-text mod-post-hover" onClick={() => window.open(newTag.social, "_blank")}>New Social: {newTag.social}</span>)
+            }
+        }
+        if (changes.twitter) {
+            if (showOldTag) {
+                jsx.push(<span className="mod-post-text mod-post-hover" onClick={() => window.open(oldTag.twitter, "_blank")}>Old Twitter: {oldTag.twitter || "None."}</span>)
+            } else {
+                jsx.push(<span className="mod-post-text mod-post-hover" onClick={() => window.open(newTag.twitter, "_blank")}>New Twitter: {newTag.twitter}</span>)
+            }
+        }
+        if (changes.fandom) {
+            if (showOldTag) {
+                jsx.push(<span className="mod-post-text mod-post-hover" onClick={() => window.open(oldTag.fandom, "_blank")}>Old Fandom: {oldTag.fandom || "None."}</span>)
+            } else {
+                jsx.push(<span className="mod-post-text mod-post-hover" onClick={() => window.open(newTag.fandom, "_blank")}>New Fandom: {newTag.fandom}</span>)
+            }
+        }
+        return jsx
+    }
+
     const generateTagsJSX = () => {
         let jsx = [] as any
         let visible = [] as any
@@ -327,13 +403,6 @@ const ModTagEdits: React.FunctionComponent = (props) => {
             if (!request) break
             if (request.fake) continue
             const oldTag = oldTags.get(request.tag)
-            const openTag = (event: React.MouseEvent) => {
-                if (event.ctrlKey || event.metaKey || event.button === 1) {
-                    window.open(`/tag/${request.tag}`, "_blank")
-                } else {
-                    history.push(`/tag/${request.tag}`)
-                }
-            }
             const changeOldTag = () => {
                 const value = showOldTags[i] || false 
                 showOldTags[i] = !value 
@@ -354,23 +423,7 @@ const ModTagEdits: React.FunctionComponent = (props) => {
                     <div className="mod-post-text-column">
                         <span className="mod-post-link" onClick={() => history.push(`/user/${request.username}`)}>Requester: {functions.toProperCase(request?.username) || "deleted"}</span>
                         <span className="mod-post-text">Reason: {request.reason}</span>
-                        <span className="mod-post-link" onClick={openTag} onAuxClick={openTag}>Old Tag: {oldTag.tag}</span>
-                        <span className="mod-post-text">Old Description: {oldTag.description || "No description."}</span>
-                        {oldTag.aliases?.[0] ? <span className="mod-post-text">Old Aliases: {oldTag.aliases.map((a: any) => a.alias).join(", ")}</span> : null}
-                        {oldTag.implications?.[0] ? <span className="mod-post-text">Old Implications: {oldTag.implications.map((i: any) => i.implication).join(", ")}</span> : null}
-                        {oldTag.pixivTags?.[0] ? <span className="mod-post-text">Old Pixiv Tags: {oldTag.pixivTags.join(", ")}</span> : null}
-                        {oldTag.type === "artist" ? <>
-                        {oldTag.website ? <span className="mod-post-text mod-post-hover" onClick={() => window.open(oldTag.website, "_blank")}>Old Website: {oldTag.website || "None."}</span> : null}
-                        {oldTag.social ? <span className="mod-post-text mod-post-hover" onClick={() => window.open(oldTag.social, "_blank")}>Old Social: {oldTag.social || "None."}</span> : null}
-                        {oldTag.twitter ? <span className="mod-post-text mod-post-hover" onClick={() => window.open(oldTag.twitter, "_blank")}>Old Twitter: {oldTag.twitter || "None."}</span> : null}
-                        </> : null}
-                        {oldTag.type === "character" ? <>
-                        {oldTag.fandom ? <span className="mod-post-text mod-post-hover" onClick={() => window.open(oldTag.fandom, "_blank")}>Old Fandom: {oldTag.fandom || "None."}</span> : null}
-                        </> : null}
-                        {oldTag.type === "series" ? <>
-                        {oldTag.website ? <span className="mod-post-text mod-post-hover" onClick={() => window.open(oldTag.website, "_blank")}>Old Website: {oldTag.website || "None."}</span> : null}
-                        {oldTag.twitter ? <span className="mod-post-text mod-post-hover" onClick={() => window.open(oldTag.twitter, "_blank")}>Old Twitter: {oldTag.twitter || "None."}</span> : null}
-                        </> : null}
+                        {diffJSX(oldTag, request, showOldTags[i])}
                     </div>
                     </> : <>
                     {img ?
@@ -380,23 +433,7 @@ const ModTagEdits: React.FunctionComponent = (props) => {
                     <div className="mod-post-text-column">
                         <span className="mod-post-link" onClick={() => history.push(`/user/${request.username}`)}>Requester: {functions.toProperCase(request?.username) || "deleted"}</span>
                         <span className="mod-post-text">Reason: {request.reason}</span>
-                        <span className="mod-post-link" onClick={openTag} onAuxClick={openTag}>New Tag: {request.key}</span>
-                        <span className="mod-post-text">New Description: {request.description || "No description."}</span>
-                        {request.aliases?.[0] ? <span className="mod-post-text">New Aliases: {request.aliases.join(", ")}</span> : null}
-                        {request.implications?.[0] ? <span className="mod-post-text">New Implications: {request.implications.join(", ")}</span> : null}
-                        {request.pixivTags?.[0] ? <span className="mod-post-text">New Pixiv Tags: {request.pixivTags.join(", ")}</span> : null}
-                        {request.type === "artist" ? <>
-                        {request.website ? <span className="mod-post-text mod-post-hover" onClick={() => window.open(request.website, "_blank")}>New Website: {request.website}</span> : null}
-                        {request.social ? <span className="mod-post-text mod-post-hover" onClick={() => window.open(request.social, "_blank")}>New Social: {request.social}</span> : null}
-                        {request.twitter ? <span className="mod-post-text mod-post-hover" onClick={() => window.open(request.twitter, "_blank")}>New Twitter: {request.twitter}</span> : null}
-                        </> : null}
-                        {request.type === "character" ? <>
-                        {request.fandom ? <span className="mod-post-text mod-post-hover" onClick={() => window.open(request.fandom, "_blank")}>New Fandom: {request.fandom}</span> : null}
-                        </> : null}
-                        {request.type === "series" ? <>
-                        {request.website ? <span className="mod-post-text mod-post-hover" onClick={() => window.open(request.website, "_blank")}>New Website: {request.website}</span> : null}
-                        {request.twitter ? <span className="mod-post-text mod-post-hover" onClick={() => window.open(request.twitter, "_blank")}>New Twitter: {request.twitter}</span> : null}
-                        </> : null}
+                        {diffJSX(oldTag, request, showOldTags[i])}
                     </div> </>}
                     <div className="mod-post-options">
                         <div className="mod-post-options-container" onClick={() => changeOldTag()}>

@@ -276,12 +276,13 @@ const ModTranslations: React.FunctionComponent = (props) => {
     }
 
     const translationDataJSX = (translation: any) => {
-        let jsx = [] as any
-        for (let i = 0; i < translation.data.length; i++) {
-            const item = translation.data[i]
-            jsx.push(<span className="mod-post-text">{`${item.transcript} -> ${item.translation}`}</span>)
-        }
-        return jsx
+        let translationChanges = translation.addedEntries?.length || translation.removedEntries?.length
+        if (!translationChanges) return null
+        const addedJSX = translation.addedEntries.map((i: string) => <span className="tag-add">+{i}</span>)
+        const removedJSX = translation.removedEntries.map((i: string) => <span className="tag-remove">-{i}</span>)
+
+        if (![...addedJSX, ...removedJSX].length) return null
+        return [...addedJSX, ...removedJSX]
     }
 
     const generateTranslationsJSX = () => {
@@ -313,7 +314,7 @@ const ModTranslations: React.FunctionComponent = (props) => {
             }
             const img = functions.getUnverifiedThumbnailLink(translation.post.images[0].type, translation.postID, translation.post.images[0].order, translation.post.images[0].filename, "tiny")
             jsx.push(
-                <div className="mod-post" onMouseEnter={() =>setHover(true)} onMouseLeave={() => setHover(false)}>
+                <div className="mod-post" onMouseEnter={() => setHover(true)} onMouseLeave={() => setHover(false)}>
                     <div className="mod-post-img-container">
                         {functions.isVideo(img) ? 
                         <video className="mod-post-img" src={img} onClick={imgClick} onAuxClick={(event) => imgClick(event, true)}></video> :
@@ -321,6 +322,7 @@ const ModTranslations: React.FunctionComponent = (props) => {
                     </div>
                     <div className="mod-post-text-column">
                         <span className="mod-post-link" onClick={() => history.push(`/user/${translation.updater}`)}>Updater: {functions.toProperCase(translation?.updater) || "deleted"}</span>
+                        <span className="mod-post-text">Reason: {translation.reason}</span>
                         {translationDataJSX(translation)}
                     </div>
                     <div className="mod-post-options">

@@ -57,6 +57,7 @@ const PostHistoryRow: React.FunctionComponent<Props> = (props) => {
     }
 
     const updateTagCategories = async () => {
+        if (!props.postHistory.addedTags || !props.postHistory.removedTags) return
         let tagMap = [...props.postHistory.addedTags, ...props.postHistory.removedTags]
         const tagCategories = await functions.tagCategories(tagMap, session, setSessionFlag)
         setTagCategories(tagCategories)
@@ -302,7 +303,7 @@ const PostHistoryRow: React.FunctionComponent<Props> = (props) => {
     const diffJSX = () => {
         let jsx = [] as React.ReactElement[]
         let changes = props.postHistory.changes || {}
-        let tagChanges = props.postHistory.addedTags.length || props.postHistory.removedTags.length
+        let tagChanges = props.postHistory.addedTags?.length || props.postHistory.removedTags?.length
         if ((!props.previousHistory && props.postHistory.images.length > 1) || changes.images) {
             jsx.push(<span className="historyrow-text"><span className="historyrow-label-text">Images:</span> {props.postHistory.images.length}</span>)
         }

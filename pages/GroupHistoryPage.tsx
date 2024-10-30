@@ -65,7 +65,6 @@ const GroupHistoryPage: React.FunctionComponent<Props> = (props) => {
                 groupObject.user = groupObject.creator
                 result = [groupObject]
             }
-            console.log(result)
         }
         setEnded(false)
         setIndex(0)

@@ -2539,6 +2539,69 @@ export default class Functions {
         return json
     }
 
+    public static parseTagChanges = (oldTag: any, newTag: any) => {
+        let json = {} as any
+        if (oldTag.tag !== newTag.tag) {
+            json.tag = newTag.tag
+        }
+        if (oldTag.description !== newTag.description) {
+            json.description = newTag.description
+        }
+        if (JSON.stringify(oldTag.aliases) !== JSON.stringify(newTag.aliases)) {
+            json.aliases = newTag.aliases
+        }
+        if (JSON.stringify(oldTag.implications) !== JSON.stringify(newTag.implications)) {
+            json.implications = newTag.implications
+        }
+        if (JSON.stringify(oldTag.pixivTags) !== JSON.stringify(newTag.pixivTags)) {
+            json.pixivTags = newTag.pixivTags
+        }
+        if (oldTag.website !== newTag.website) {
+            json.website = newTag.website
+        }
+        if (oldTag.social !== newTag.social) {
+            json.social = newTag.social
+        }
+        if (oldTag.twitter !== newTag.twitter) {
+            json.twitter = newTag.twitter
+        }
+        if (oldTag.fandom !== newTag.fandom) {
+            json.fandom = newTag.fandom
+        }
+        return json
+    }
+
+    public static parseGroupChanges = (oldGroup: any, newGroup: any) => {
+        let json = {} as any
+        if (oldGroup.name !== newGroup.name) {
+            json.name = newGroup.name
+        }
+        if (oldGroup.description !== newGroup.description) {
+            json.description = newGroup.description
+        }
+        if (JSON.stringify(oldGroup.posts) !== JSON.stringify(newGroup.posts)) {
+            json.posts = newGroup.posts
+        }
+        return json
+    }
+
+    public static parseTranslationDataChanges = (oldData: any, newData: any) => {
+        if (!oldData) oldData = []
+        if (!newData) newData = []
+        const prevMap = new Map(oldData.map((item: any) => [item.transcript, item.translation]))
+        const newMap = new Map(newData.map((item: any) => [item.transcript, item.translation]))
+
+        const addedEntries = newData
+            .filter((item: any) => !prevMap.has(item.transcript))
+            .map((item: any) => `${item.transcript} -> ${item.translation}`)
+
+        const removedEntries = oldData
+            .filter((item: any) => !newMap.has(item.transcript))
+            .map((item: any) => `${item.transcript} -> ${item.translation}`)
+
+        return {addedEntries, removedEntries}
+    }
+
     public static replaceLocation = (location: string) => {
         window.location = `${Functions.getDomain()}${location}` as any
     }

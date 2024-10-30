@@ -9,6 +9,7 @@ import cryptoFunctions from "../structures/CryptoFunctions"
 import {ShapeEditor, ImageLayer, DrawLayer, wrapShape} from "react-shape-editor"
 import translationDelete from "../assets/icons/translation-delete.png"
 import translationEdit from "../assets/icons/translation-edit.png"
+import translationView from "../assets/icons/translation-view.png"
 import translationHistory from "../assets/icons/translation-history.png"
 import translationSave from "../assets/icons/translation-save.png"
 import translationText from "../assets/icons/translation-text.png"
@@ -352,7 +353,7 @@ const TranslationEditor: React.FunctionComponent<Props> = (props) => {
                     <img draggable={false} className="translation-editor-button" src={getTranslationShowTranscriptIcon()} style={{filter: getFilter()}} onClick={() => setShowTranscript((prev: boolean) => !prev)}/>
                     <img draggable={false} className="translation-editor-button" src={translationText} style={{filter: getFilter()}} onClick={() => editTextDialog()}/>
                     <img draggable={false} className="translation-editor-button" src={translationDelete} style={{filter: getFilter()}} onClick={() => deleteFocused()}/>
-                    <img draggable={false} className="translation-editor-button" src={translationEdit} style={{filter: getFilter()}} onClick={() => setTranslationDrawingEnabled((prev: boolean) => !prev)}/>
+                    <img draggable={false} className="translation-editor-button" src={translationDrawingEnabled ? translationView : translationEdit} style={{filter: getFilter()}} onClick={() => setTranslationDrawingEnabled((prev: boolean) => !prev)}/>
                     <img draggable={false} className="translation-editor-button" src={translationToggleOff} style={{filter: getFilter()}} onClick={() => setTranslationMode(false)}/>
                 </div>
                 {bubbleToggle ? <div className="translation-bubble" style={{width: `${bubbleData.width}px`, minHeight: "25px", left: `${bubbleData.x}px`, top: `${bubbleData.y}px`}}>{getBubbleText()}</div> : null}
