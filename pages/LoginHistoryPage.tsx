@@ -81,6 +81,10 @@ const LoginHistoryPage: React.FunctionComponent = (props) => {
         if (log.type === "login failed") return true
         if (log.type === "login 2fa failed") return true
         if (log.type === "2fa disabled") return true
+        if (log.type === "password reset") return true
+        if (log.type === "password changed") return true
+        if (log.type === "email changed") return true
+        if (log.type === "username changed") return true
         return false
     }
 

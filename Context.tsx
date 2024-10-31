@@ -241,6 +241,8 @@ export const DeleteGroupHistoryFlagContext = React.createContext<any>(null)
 export const RevertGroupHistoryFlagContext = React.createContext<any>(null)
 export const Disable2FADialogContext = React.createContext<any>(null)
 export const Disable2FAFlagContext = React.createContext<any>(null)
+export const TranslationOCRDialogContext = React.createContext<any>(null)
+export const TranslationOCRFlagContext = React.createContext<any>(null)
 
 const Context: React.FunctionComponent = (props) => {
     const [siteHue, setSiteHue] = useState(180)
@@ -462,9 +464,13 @@ const Context: React.FunctionComponent = (props) => {
     const [revertGroupHistoryFlag, setRevertGroupHistoryFlag] = useState(null)
     const [disable2FADialog, setDisable2FADialog] = useState(false)
     const [disable2FAFlag, setDisable2FAFlag] = useState(false)
+    const [translationOCRDialog, setTranslationOCRDialog] = useState(false)
+    const [translationOCRFlag, setTranslationOCRFlag] = useState(false)
 
 return (
     <>
+        <TranslationOCRFlagContext.Provider value={{translationOCRFlag, setTranslationOCRFlag}}>
+        <TranslationOCRDialogContext.Provider value={{translationOCRDialog, setTranslationOCRDialog}}>
         <ModPageContext.Provider value={{modPage, setModPage}}>
         <PrivatePostObjContext.Provider value={{privatePostObj, setPrivatePostObj}}>
         <Disable2FAFlagContext.Provider value={{disable2FAFlag, setDisable2FAFlag}}>
@@ -904,6 +910,8 @@ return (
         </Disable2FAFlagContext.Provider>
         </PrivatePostObjContext.Provider>
         </ModPageContext.Provider>
+        </TranslationOCRDialogContext.Provider>
+        </TranslationOCRFlagContext.Provider>
     </>
     )
 }

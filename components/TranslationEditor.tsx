@@ -3,7 +3,8 @@ import {useHistory} from "react-router-dom"
 import {ThemeContext, EnableDragContext, SessionContext, BrightnessContext, ContrastContext, HueContext, SaturationContext, LightnessContext,
 BlurContext, SharpenContext, PixelateContext, TranslationModeContext, EditTranslationIDContext, MobileContext, ShowSaveTranslationDialogContext,
 EditTranslationFlagContext, EditTranslationTextContext, EditTranslationTranscriptContext, TranslationDrawingEnabledContext, ImageExpandContext,
-SaveTranslationDataContext, SaveTranslationOrderContext, SiteHueContext, SiteLightnessContext, SiteSaturationContext, SessionFlagContext} from "../Context"
+SaveTranslationDataContext, SaveTranslationOrderContext, SiteHueContext, SiteLightnessContext, SiteSaturationContext, SessionFlagContext,
+TranslationOCRDialogContext, TranslationOCRFlagContext, RedirectContext, SidebarTextContext} from "../Context"
 import functions from "../structures/Functions"
 import cryptoFunctions from "../structures/CryptoFunctions"
 import {ShapeEditor, ImageLayer, DrawLayer, wrapShape} from "react-shape-editor"
@@ -17,6 +18,7 @@ import translationToggleOn from "../assets/icons/translation-toggle-on.png"
 import translationToggleOff from "../assets/icons/translation-toggle-off.png"
 import translationEN from "../assets/icons/translation-en.png"
 import translationJA from "../assets/icons/translation-ja.png"
+import translationOCR from "../assets/icons/translation-ocr.png"
 import "./styles/translationeditor.less"
 
 interface Props {
@@ -99,7 +101,11 @@ const TranslationEditor: React.FunctionComponent<Props> = (props) => {
     const {showSaveTranslationDialog, setShowSaveTranslationDialog} = useContext(ShowSaveTranslationDialogContext)
     const {saveTranslationData, setSaveTranslationData} = useContext(SaveTranslationDataContext)
     const {saveTranslationOrder, setSaveTranslationOrder} = useContext(SaveTranslationOrderContext)
+    const {translationOCRDialog, setTranslationOCRDialog} = useContext(TranslationOCRDialogContext)
+    const {translationOCRFlag, setTranslationOCRFlag} = useContext(TranslationOCRFlagContext)
     const {imageExpand, setImageExpand} = useContext(ImageExpandContext)
+    const {redirect, setRedirect} = useContext(RedirectContext)
+    const {sidebarText, setSidebarText} = useContext(SidebarTextContext)
     const [targetWidth, setTargetWidth] = useState(0)
     const [targetHeight, setTargetHeight] = useState(0)
     const [img, setImg] = useState("")
@@ -185,7 +191,7 @@ const TranslationEditor: React.FunctionComponent<Props> = (props) => {
             isAnimatedWebP = false
             if (functions.isWebP(props.img)) {
                 const arraybuffer = await fetch(props.img).then((r) => r.arrayBuffer())
-                isAnimatedWebP = await functions.isAnimatedWebp(arraybuffer)
+                isAnimatedWebP = functions.isAnimatedWebp(arraybuffer)
             }
             if (functions.isImage(props.img)) {
                 url = await cryptoFunctions.decryptedLink(props.img)
@@ -330,9 +336,34 @@ const TranslationEditor: React.FunctionComponent<Props> = (props) => {
     }, [editTranslationFlag])
 
     const saveTextDialog = () => {
+        if (!session.username) {
+            setRedirect(`/post/${props.post.postID}`)
+            history.push("/login")
+            return setSidebarText("Login required.")
+        }
         setSaveTranslationOrder(props.order || 1)
         setSaveTranslationData(items)
         setShowSaveTranslationDialog((prev: boolean) => !prev)
+    }
+
+    const ocrPage = async () => {
+        const arrayBuffer = await fetch(img).then((r) => r.arrayBuffer())
+        const bytes = Object.values(new Uint8Array(arrayBuffer))
+        let result = await functions.post(`/api/misc/ocr`, bytes, session, setSessionFlag).catch(() => null)
+        if (result?.length) setItems(result)
+    }
+
+    useEffect(() => {
+        if (translationOCRFlag) {
+            ocrPage().then(() => {
+                setTranslationOCRFlag(false)
+                setTranslationOCRDialog(false)
+            })
+        }
+    }, [translationOCRFlag])
+
+    const ocrDialog = () => {
+        setTranslationOCRDialog((prev: boolean) => !prev)
     }
 
     const getBubbleText = () => {
@@ -349,6 +380,7 @@ const TranslationEditor: React.FunctionComponent<Props> = (props) => {
             <div className="translation-editor-filters" ref={filtersRef} onMouseOver={() => {if (enableDrag) setEnableDrag(false)}}>
                 <div className={`translation-editor-buttons ${buttonHover ? "show-translation-buttons" : ""}`} onMouseEnter={() => setButtonHover(true)} onMouseLeave={() => setButtonHover(false)}>
                     {!props.unverified ? <img draggable={false} className="translation-editor-button" src={translationHistory} style={{filter: getFilter()}} onClick={() => showHistory()}/> : null}
+                    {session.username ? <img draggable={false} className="translation-editor-button" src={translationOCR} style={{filter: getFilter()}} onClick={() => ocrDialog()}/> : null}
                     <img draggable={false} className="translation-editor-button" src={translationSave} style={{filter: getFilter()}} onClick={() => saveTextDialog()}/>
                     <img draggable={false} className="translation-editor-button" src={getTranslationShowTranscriptIcon()} style={{filter: getFilter()}} onClick={() => setShowTranscript((prev: boolean) => !prev)}/>
                     <img draggable={false} className="translation-editor-button" src={translationText} style={{filter: getFilter()}} onClick={() => editTextDialog()}/>

@@ -96,7 +96,7 @@ const HelpPage: React.FunctionComponent = (props) => {
             return (
                 <><span className="help-heading">Help</span>
                 <span className="help-text">Welcome to Moepictures!</span>
-                <span className="help-text">
+                <span className="help-text" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                     Moepictures is an image board organized by tags, dedicated exclusively to showcasing the most cute and moe artworks. While the majority of content is (and will likely be)
                     2d art, we also accept many other artforms including animations, music, and 3d models. <br/><br/>
 
@@ -108,7 +108,7 @@ const HelpPage: React.FunctionComponent = (props) => {
         if (helpTab === "searching") {
             return (
                 <><span className="help-heading">Searching</span>
-                <span className="help-text">
+                <span className="help-text" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                     The tags on Moepictures use a dash ("-") as a delimeter, but you can also search with spaces because the search can guess what tags you are searching for.
                     If you encounter a problem with this, use dashed versions of the tags. These are examples
                     of valid searches: <br/>
@@ -173,7 +173,7 @@ const HelpPage: React.FunctionComponent = (props) => {
         if (helpTab === "image-searching") {
             return (
                 <><span className="help-heading">Image Searching</span>
-                <span className="help-text">
+                <span className="help-text" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                     Every image uploaded to Moepictures is hashed with a perceptual hash algorithm, and images that look the same should 
                     yield similar hashes irrespective of their resolution. <br/><br/>
 
@@ -191,7 +191,7 @@ const HelpPage: React.FunctionComponent = (props) => {
         if (helpTab === "filters") {
             return (
                 <><span className="help-heading">Filters</span>
-                <span className="help-text">
+                <span className="help-text" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                     You can apply custom filters such as brightness, contrast, hue, and sharpen. Some filters like pixelate and 
                     blur will ruin most images, and are purely for fun. <br/><br/>
 
@@ -203,7 +203,7 @@ const HelpPage: React.FunctionComponent = (props) => {
         if (helpTab === "custom-players") {
             return (
                 <><span className="help-heading">Custom Players</span>
-                <span className="help-text">
+                <span className="help-text" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                     Moepictures has custom players for animations, videos, music, and 3d models, which allows additionally functionality 
                     not available natively such as reverse playback and modification of the playback speed. <br/><br/>
 
@@ -216,7 +216,7 @@ const HelpPage: React.FunctionComponent = (props) => {
         if (helpTab === "music") {
             return (
                 <><span className="help-heading">Music</span>
-                <span className="help-text">
+                <span className="help-text" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                     The music player is available globally (apart from having the per-post player which is also synced). This means 
                     that when you play a song you can navigate to any page on the site and it will continue to play. To stop playback,
                     click the stop button on the left of the player or reload the page on a non-music post.
@@ -227,7 +227,7 @@ const HelpPage: React.FunctionComponent = (props) => {
         if (helpTab === "favorites") {
             return (
                 <><span className="help-heading">Favorites</span>
-                <span className="help-text">
+                <span className="help-text" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                     If you like an image, you can add it to your favorites for easier access later on.
                     By default, your favorites are public but they can be made private in your account
                     settings. <br/><br/>
@@ -241,7 +241,7 @@ const HelpPage: React.FunctionComponent = (props) => {
         if (helpTab === "favgroups") {
             return (
                 <><span className="help-heading">Favorite Groups</span>
-                <span className="help-text">
+                <span className="help-text" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                     Favorite groups are like your own custom category of "favorites" - you can specify a name and 
                     a privacy for each favorite group. And like groups, these also store the ordering of the posts and 
                     may be reordered on their page. There isn't a sorting for favorite groups, but you may search them 
@@ -253,7 +253,7 @@ const HelpPage: React.FunctionComponent = (props) => {
         if (helpTab === "cuteness") {
             return (
                 <><span className="help-heading">Cuteness</span>
-                <span className="help-text">
+                <span className="help-text" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                     The rating system on Moepictures is called cuteness. When you rate an
                     image you should rate the amount of cuteness the image evokes. The scale is from 0 (Not cute) to 500 (Pretty
                     cute) to 1000 (Insanely cute).
@@ -264,13 +264,21 @@ const HelpPage: React.FunctionComponent = (props) => {
         if (helpTab === "translations") {
             return (
                 <><span className="help-heading">Translations</span>
-                <span className="help-text">
+                <span className="help-text" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                     Translations can be added to any post containing non-english text. This is useful so that non-speakers 
                     can understand the post's context and any jokes. <br/><br/>
 
-                    If you want to translate a post, I recommend using an OCR app to obtain text more easily. For japanese, 
-                    KanjiTomo is a good option: 
-                    <a className="help-link" onClick={() => openLink("https://www.kanjitomo.net/")} style={{marginLeft: "10px"}}>{mobile ? "KanjiTomo" : "https://www.kanjitomo.net"}</a>
+                    If you want to translate a post, I recommend using an OCR app to obtain text more easily. For japanese text, you can use 
+                    <a className="help-link" onClick={() => openLink("https://www.kanjitomo.net/")} style={{marginLeft: "10px"}}>KanjiTomo.</a><br/><br/>
+
+                    We have an automatic translation generator for japanese text that uses 
+                    <a className="help-link" onClick={() => openLink("https://github.com/dmMaze/comic-text-detector")} style={{marginLeft: "10px", marginRight: "10px"}}>Comic Text Detector</a> 
+                    to detect the text bubbles, 
+                    <a className="help-link" onClick={() => openLink("https://github.com/kha-white/manga-ocr")} style={{marginLeft: "10px", marginRight: "10px"}}>Manga OCR</a> 
+                    to apply OCR, and 
+                    <a className="help-link" onClick={() => openLink("https://translate.google.com/")} style={{marginLeft: "10px", marginRight: "10px"}}>Google Translate</a> 
+                    for machine translation. This is not meant to be used as is, and you should always clean up the output by fixing text bubble positions 
+                    and verifying the accuracy of the transcripted and translated texts.
                 </span>
                 <div className="help-img-container"><img className="help-img" src={translationsImg}/></div></>
             )
@@ -278,7 +286,7 @@ const HelpPage: React.FunctionComponent = (props) => {
         if (helpTab === "uploading") {
             return (
                 <><span className="help-heading">Uploading</span>
-                <span className="help-text">
+                <span className="help-text" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                     Moepictures allows uploading images, comics, animations, videos, music, and 3d models.<br/><br/>
                     Please read carefully through all of the uploading guidelines. <br/>
                     <span className="help-alt">
@@ -345,7 +353,7 @@ const HelpPage: React.FunctionComponent = (props) => {
         if (helpTab === "tagging") {
             return (
                 <><span className="help-heading">Tagging</span>
-                <span className="help-text">
+                <span className="help-text" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                     Every post should be tagged with the features it contains, and although you don’t have to be exceedingly thorough some 
                     level of effort placed on tags is required. Aim for at least 10-20 tags. Anything below that is insufficient, and above that 
                     starts getting into excessive territory.<br/><br/>
@@ -394,7 +402,7 @@ const HelpPage: React.FunctionComponent = (props) => {
         if (helpTab === "self-posts") {
             return (
                 <><span className="help-heading">Self Posts</span>
-                <span className="help-text">
+                <span className="help-text" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                     Although the vast majority of posts are reposts, you are also welcomed to post your own art. <br/><br/>
 
                     You should tag uploads of your own artwork with <span className="help-alt">self post</span>. We also require that your 
@@ -413,7 +421,7 @@ const HelpPage: React.FunctionComponent = (props) => {
         if (helpTab === "upscaling") {
             return (
                 <><span className="help-heading">Upscaling</span>
-                <span className="help-text">
+                <span className="help-text" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                     Images, animations, and videos may have an upscaled version. For images, providing one is required. <br/><br/>
 
                     You can download the app that we use for upscaling here: <br/>
@@ -429,7 +437,7 @@ const HelpPage: React.FunctionComponent = (props) => {
         if (helpTab === "compressing") {
             return (
                 <><span className="help-heading">Compressing</span>
-                <span className="help-text">
+                <span className="help-text" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                     Compressing/re-encoding posts is advised for faster loading and better space efficiency. All compressions should be 
                     high quality and should not leave behind any artifacts. <br/><br/>
 
@@ -454,7 +462,7 @@ const HelpPage: React.FunctionComponent = (props) => {
         if (helpTab === "pixiv-downloads") {
             return (
                 <><span className="help-heading">Pixiv Downloads</span>
-                <span className="help-text">
+                <span className="help-text" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                     The vast majority of posts come from the Japanese art website <a className="help-link" onClick={() => openLink("https://www.pixiv.net/")}>Pixiv.</a><br/><br/>
 
                     However, it can take awhile to manually the download the art that you like, so we also have an app that makes it easy to download lots of posts at once. It 
@@ -468,7 +476,7 @@ const HelpPage: React.FunctionComponent = (props) => {
         if (helpTab === "bookmarklet") {
             return (
                 <><span className="help-heading">Bookmarklet</span>
-                <span className="help-text">
+                <span className="help-text" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                     Drag and drop our bookmarklet into your browser's bookmark bar to quickly upload to Moepictures from 
                     another site. <br/><br/>
 
@@ -502,7 +510,7 @@ const HelpPage: React.FunctionComponent = (props) => {
         if (helpTab === "variations") {
             return (
                 <><span className="help-heading">Variations</span>
-                <span className="help-text">
+                <span className="help-text" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                     Variations of the same image are combined into a single post. You can add a variation to an existing post by editing it (use the full fledged 
                     edit, not tag/source edit). All variations of an image should be created by the original artist, otherwise it is considered a third party edit instead. <br/><br/>
 
@@ -515,7 +523,7 @@ const HelpPage: React.FunctionComponent = (props) => {
         if (helpTab === "third-party-edits") {
             return (
                 <><span className="help-heading">Third Party Edits</span>
-                <span className="help-text">
+                <span className="help-text" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                     Third party edits are modifications to a work not done/endorsed by the original artist. For
                     example, an animation of an artwork done by someone else. Third party edits behave like their own post,
                     and are also added to the original post in a separate section. Also known as child posts, but third party edits are the 
@@ -527,7 +535,7 @@ const HelpPage: React.FunctionComponent = (props) => {
         if (helpTab === "groups") {
             return (
                 <><span className="help-heading">Groups</span>
-                <span className="help-text">
+                <span className="help-text" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                     Groups are a way to associate several related posts that have very different tags, so variations are not a great way to 
                     combine them. This is useful when an artist posts a pixiv post containing multiple artworks of different characters, or for 
                     a series of posts/comic strips that are related but not sequential. If it's a manga/comic with sequential pages, we still prefer to 
@@ -543,7 +551,7 @@ const HelpPage: React.FunctionComponent = (props) => {
         if (helpTab === "aliases") {
             return (
                 <><span className="help-heading">Aliases</span>
-                <span className="help-text">
+                <span className="help-text" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                     A tag can have multiple aliases that point to the same result. This is to
                     facilitate better searching for synonyms like "with audio" and "has audio". Unlike tags, aliases can include non-ASCII characters 
                     so it's possible to add an alias in Japanese in order to enable Japanese searching. Existing tags can also be aliased to another tag,
@@ -563,7 +571,7 @@ const HelpPage: React.FunctionComponent = (props) => {
         if (helpTab === "implications") {
             return (
                 <><span className="help-heading">Implications</span>
-                <span className="help-text">
+                <span className="help-text" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                     A tag can have implications which are tags that are automatically added to posts if they don't already exist. For instance, 
                     you can add an implication that the tag "red hat" implies "hat" and any post uploaded containing the "red hat" tag will also be 
                     given the "hat" tag. These are mainly useful to aid in tagging so you don't have to type out all the broader tags.
@@ -574,7 +582,7 @@ const HelpPage: React.FunctionComponent = (props) => {
         if (helpTab === "users") {
             return (
                 <><span className="help-heading">Users</span>
-                <span className="help-text">
+                <span className="help-text" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                     Moepictures has various user account levels that progressively give you more 
                     permissions and removes restrictions. <br/><br/>
 
@@ -606,7 +614,7 @@ const HelpPage: React.FunctionComponent = (props) => {
         if (helpTab === "commenting") {
             return (
                 <><span className="help-heading">Commenting</span>
-                <span className="help-text">
+                <span className="help-text" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                     Do not behave badly participating in comments, forum threads, or sending messages. 
                     These are some general guidelines for all the comment sections: <br/>
                     <span className="help-alt">
@@ -645,7 +653,7 @@ const HelpPage: React.FunctionComponent = (props) => {
         if (helpTab === "bans") {
             return (
                 <><span className="help-heading">Bans</span>
-                <span className="help-text">
+                <span className="help-text" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                     If you break the rules severely or consistently, you might get banned. If you get banned, you 
                     will still be able to browse the site but most interactions will get disabled. <br/><br/>
 
@@ -664,7 +672,7 @@ const HelpPage: React.FunctionComponent = (props) => {
         if (helpTab === "captcha") {
             return (
                 <><span className="help-heading">Captcha</span>
-                <span className="help-text">
+                <span className="help-text" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                     We don't condone the scraping of our website for purposes of AI-training, and we take 
                     various measures to make it harder like captchas and encrypting images. Hopefully 
                     this shouldn't be triggered by regular browsing. <br/><br/>
@@ -678,7 +686,7 @@ const HelpPage: React.FunctionComponent = (props) => {
         if (helpTab === "account-deletion") {
             return (
                 <><span className="help-heading">Account Deletion</span>
-                <span className="help-text">
+                <span className="help-text" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                     Since Moepictures is heavily focused on user contributions, when you delete your account we won't  
                     remove your public contributions like submitted posts and edits. The account that uploaded them will be 
                     anonymized and show up as "deleted". The rest of your account data will be deleted. <br/><br/>
@@ -688,7 +696,7 @@ const HelpPage: React.FunctionComponent = (props) => {
         if (helpTab === "copyright-removal") {
             return (
                 <><span className="help-heading">Copyright Removal</span>
-                <span className="help-text">
+                <span className="help-text" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                     If your work is up on Moepictures then it means that we love your work and we always make sure to source 
                     posts back to you.<br/><br/>
 

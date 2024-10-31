@@ -448,11 +448,11 @@ const PostSong: React.FunctionComponent<Props> = (props) => {
 
     return (
         <div className="post-song-container" style={{zoom: props.scale ? props.scale : 1}}>
-            {!props.noTranslations && session.username ? <TranslationEditor post={props.post} img={props.audio} order={props.order} unverified={props.unverified} translationID={props.translationID}/> : null}
+            {!props.noTranslations ? <TranslationEditor post={props.post} img={props.audio} order={props.order} unverified={props.unverified} translationID={props.translationID}/> : null}
             <div className="post-song-box" ref={containerRef} style={{display: translationMode ? "none" : "flex"}}>
                 <div className="post-song-filters" ref={fullscreenRef}>
                     <div className={`post-image-top-buttons ${buttonHover ? "show-post-image-top-buttons" : ""}`} onMouseEnter={() => setButtonHover(true)} onMouseLeave={() => setButtonHover(false)}>
-                        {!props.noTranslations && session.username ? <img draggable={false} className="post-image-top-button" src={translationToggleOn} style={{filter: getFilter()}} onClick={() => {setTranslationMode(true); setTranslationDrawingEnabled(true)}}/> : null}
+                        {!props.noTranslations ? <img draggable={false} className="post-image-top-button" src={translationToggleOn} style={{filter: getFilter()}} onClick={() => {setTranslationMode(true); setTranslationDrawingEnabled(true)}}/> : null}
                         <img draggable={false} className="post-image-top-button" src={imageExpand ? contract : expand} style={{filter: getFilter()}} onClick={() => setImageExpand((prev: boolean) => !prev)}/>
                     </div>
                     <div className={`post-image-previous-button ${previousButtonHover ? "show-post-image-mid-buttons" : ""}`} onMouseEnter={() => setPreviousButtonHover(true)} onMouseLeave={() => setPreviousButtonHover(false)}>

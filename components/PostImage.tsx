@@ -1261,12 +1261,12 @@ const PostImage: React.FunctionComponent<Props> = (props) => {
 
     return (
         <div className="post-image-container" style={{zoom: props.scale ? props.scale : 1}}>
-            {!props.noTranslations && session.username ? <TranslationEditor post={props.post} img={props.img} order={props.order} unverified={props.unverified} translationID={props.translationID}/> : null}
+            {!props.noTranslations ? <TranslationEditor post={props.post} img={props.img} order={props.order} unverified={props.unverified} translationID={props.translationID}/> : null}
             <div className="post-image-box" ref={containerRef} style={{display: translationMode && !props.noTranslations ? "none" : "flex"}}>
                 <div className="post-image-filters" ref={fullscreenRef}>
                     <div className={`post-image-top-buttons ${buttonHover ? "show-post-image-top-buttons" : ""}`} onMouseEnter={() => setButtonHover(true)} onMouseLeave={() => setButtonHover(false)}>
                         {!props.noTranslations && session.username ? <img draggable={false} className="post-image-top-button" src={waifu2xIcon} style={{filter: getFilter()}} onClick={() => toggleUpscale()}/> : null}
-                        {!props.noTranslations && session.username ? <img draggable={false} className="post-image-top-button" src={translationToggleOn} style={{filter: getFilter()}} onClick={() => {setTranslationMode(true); setTranslationDrawingEnabled(true)}}/> : null}
+                        {!props.noTranslations ? <img draggable={false} className="post-image-top-button" src={translationToggleOn} style={{filter: getFilter()}} onClick={() => {setTranslationMode(true); setTranslationDrawingEnabled(true)}}/> : null}
                         {!mobile ? <img draggable={false} className="post-image-top-button" src={imageExpand ? contract : expand} style={{filter: getFilter()}} onClick={() => setImageExpand((prev: boolean) => !prev)}/> : null}
                     </div>
                     <div className={`post-image-previous-button ${previousButtonHover ? "show-post-image-mid-buttons" : ""}`} onMouseEnter={() => setPreviousButtonHover(true)} onMouseLeave={() => setPreviousButtonHover(false)}>

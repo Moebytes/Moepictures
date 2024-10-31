@@ -25,6 +25,8 @@ import {stripIndents} from "common-tags"
 
 svgCaptcha.loadFont(dotline)
 
+let processingQueue = new Set<string>()
+
 const exec = util.promisify(child_process.exec)
 const pixiv = await Pixiv.refreshLogin(process.env.PIXIV_TOKEN!)
 const deviantart = await DeviantArt.login(process.env.DEVIANTART_CLIENT_ID!, process.env.DEVIANTART_CLIENT_SECRET!)
@@ -507,6 +509,33 @@ const MiscRoutes = (app: Express) => {
             res.status(200).json(json)
         } catch (e) {
             console.log(e)
+            res.status(400).send("Bad request") 
+        }
+    })
+
+    app.post("/api/misc/ocr", csrfProtection, miscLimiter, async (req: Request, res: Response, next: NextFunction) => {
+        try {
+            if (!req.session.username) return res.status(403).send("Unauthorized")
+            if (processingQueue.has(req.session.username)) return res.status(429).send("Processing in progress")
+            if (!req.body) return res.status(400).send("Image data must be provided")
+            processingQueue.add(req.session.username)
+            const buffer = Buffer.from(req.body, "binary") as any
+            const folder = path.join(__dirname, "./dump")
+            if (!fs.existsSync(folder)) fs.mkdirSync(folder, {recursive: true})
+
+            const filename = `${Math.floor(Math.random() * 100000000)}.jpg`
+            const imagePath = path.join(folder, filename)
+            fs.writeFileSync(imagePath, buffer)
+            const scriptPath = path.join(__dirname, "../structures/ocr.py")
+            let command = `python3 "${scriptPath}" -i "${imagePath}"`
+            const str = await exec(command).then((s: any) => s.stdout).catch((e: any) => e.stderr)
+            const json = JSON.parse(str)
+            fs.unlinkSync(imagePath)
+            processingQueue.delete(req.session.username)
+            res.status(200).json(json)
+        } catch (e) {
+            console.log(e)
+            if (req.session.username) processingQueue.delete(req.session.username)
             res.status(400).send("Bad request") 
         }
     })

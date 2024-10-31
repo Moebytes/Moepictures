@@ -129,7 +129,7 @@ const PremiumPage: React.FunctionComponent = (props) => {
                     <span className="premium-heading">Premium Upgrade</span>
                     <img className="premium-star" src={premiumStar}/>
                 </div>
-                <span className="premium-text">
+                <span className="premium-text" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                     You can purchase an account upgrade to unlock more features. Thank you for supporting us! <br/><br/>
 
                     Your contribution allows us to keep the site ad-free for the foreseeable future. We will use it to pay 
@@ -143,7 +143,7 @@ const PremiumPage: React.FunctionComponent = (props) => {
         if (premiumFeature === "upscaled-images") {
             return (
                 <><img className="premium-banner" src={upscaledImages}/>
-                <span className="premium-text" style={{color: "#2f91ff"}}>
+                <span className="premium-text" style={{color: "#2f91ff"}} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                     View images upscaled to a much higher resolution. Upscaled images have much sharper details 
                     and often fixes any blurriness. We currently use the Real-CUGAN 4x upscaler.
                 </span>
@@ -153,7 +153,7 @@ const PremiumPage: React.FunctionComponent = (props) => {
         if (premiumFeature === "autosearch") {
             return (
                 <><img className="premium-banner" src={autosearch}/>
-                <span className="premium-text" style={{color: "#5b2fff"}}>
+                <span className="premium-text" style={{color: "#5b2fff"}} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                     Use the autosearch, which automatically searches your current tags in a loop. You can 
                     configure the time interval between searches.
                 </span>
@@ -163,7 +163,7 @@ const PremiumPage: React.FunctionComponent = (props) => {
         if (premiumFeature === "search-history") {
             return (
                 <><img className="premium-banner" src={searchHistory}/>
-                <span className="premium-text" style={{color: "#ff2792"}}>
+                <span className="premium-text" style={{color: "#ff2792"}} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                     View the history of all posts you have viewed in the past. This is great if you saw a post 
                     you really liked but forgot to favorite it.
                 </span>
@@ -173,7 +173,7 @@ const PremiumPage: React.FunctionComponent = (props) => {
         if (premiumFeature === "unlimited-tags") {
             return (
                 <><img className="premium-banner" src={unlimitedTags}/>
-                <span className="premium-text" style={{color: "#ff3afd"}}>
+                <span className="premium-text" style={{color: "#ff3afd"}} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                     Regular accounts can only search for 3 tags. Premium accounts have this restriction removed
                     and you may search an unlimited number of tags.
                 </span>
@@ -183,7 +183,7 @@ const PremiumPage: React.FunctionComponent = (props) => {
         if (premiumFeature === "bookmark-sort") {
             return (
                 <><img className="premium-banner" src={bookmarkSort}/>
-                <span className="premium-text" style={{color: "#3a51ff"}}>
+                <span className="premium-text" style={{color: "#3a51ff"}} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                     Unlocks the sorting by amount of pixiv bookmarks. This makes it easy to find the posts that 
                     attracted the most popularity.
                 </span>
@@ -193,7 +193,7 @@ const PremiumPage: React.FunctionComponent = (props) => {
         if (premiumFeature === "animated-avatar") {
             return (
                 <><img className="premium-banner" src={animatedAvatar}/>
-                <span className="premium-text" style={{color: "#fb1d90"}}>
+                <span className="premium-text" style={{color: "#fb1d90"}} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                     Premium users can render animated avatars out of animation posts. Regular users are only able 
                     to use a static frame.
                 </span>
@@ -203,7 +203,7 @@ const PremiumPage: React.FunctionComponent = (props) => {
         if (premiumFeature === "change-username") {
             return (
                 <><img className="premium-banner" src={changeUsername}/>
-                <span className="premium-text" style={{color: "#5e2cff"}}>
+                <span className="premium-text" style={{color: "#5e2cff"}} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                     Premium users unlock the ability to change their username. You may change your name as 
                     many times as you wish.
                 </span>
@@ -213,7 +213,7 @@ const PremiumPage: React.FunctionComponent = (props) => {
         if (premiumFeature === "no-ads") {
             return (
                 <><img className="premium-banner" src={noAds} style={{width: "300px"}}/>
-                <span className="premium-text" style={{color: "#297aff"}}>
+                <span className="premium-text" style={{color: "#297aff"}} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                     Allow us to continue running the website without intrusive advertisements. They're annoying and 
                     not aesthetically pleasing. Thank you!
                 </span></>
@@ -222,7 +222,7 @@ const PremiumPage: React.FunctionComponent = (props) => {
         if (premiumFeature === "purchase") {
             return (
                 <><span className="premium-heading">Purchase</span>
-                <span className="premium-text">
+                <span className="premium-text" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                     If you would like to purchase a premium upgrade you can do so here via Coinbase. <br/><br/>
 
                     Currently the price is $15 USD/yr. Your upgrade will last for one year from the date of purchase. 
@@ -237,7 +237,7 @@ const PremiumPage: React.FunctionComponent = (props) => {
         if (premiumFeature === "refund-policy") {
             return (
                 <><span className="premium-heading">Refund Policy</span>
-                <span className="premium-text">
+                <span className="premium-text" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                     You can contact us within 48 hours of making your purchase if you weren’t satisfied. You will receive a refund 
                     minus any processing fees. Contact us at moepictures.moe@gmail.com.
                 </span></>

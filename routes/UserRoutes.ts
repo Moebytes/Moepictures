@@ -541,7 +541,7 @@ const UserRoutes = (app: Express) => {
             let ip = req.headers["x-forwarded-for"] || req.socket.remoteAddress
             ip = ip?.toString().replace("::ffff:", "") || ""
             const device = functions.parseUserAgent(req.headers["user-agent"])
-            await sql.user.insertLoginHistory(user.username, "username change", ip, device)
+            await sql.user.insertLoginHistory(user.username, "username changed", ip, device)
             if (user.image) {
                 const newFilename = `${req.session.username}${path.extname(user.image)}`
                 let oldImagePath = functions.getTagPath("pfp", user.image)
@@ -575,7 +575,7 @@ const UserRoutes = (app: Express) => {
                 let ip = req.headers["x-forwarded-for"] || req.socket.remoteAddress
                 ip = ip?.toString().replace("::ffff:", "") || ""
                 const device = functions.parseUserAgent(req.headers["user-agent"])
-                await sql.user.insertLoginHistory(user.username, "password change", ip, device)
+                await sql.user.insertLoginHistory(user.username, "password changed", ip, device)
                 return res.status(200).send("Success")
             } else {
                 return res.status(400).send("Bad oldPassword")
@@ -602,7 +602,7 @@ const UserRoutes = (app: Express) => {
                 let ip = req.headers["x-forwarded-for"] || req.socket.remoteAddress
                 ip = ip?.toString().replace("::ffff:", "") || ""
                 const device = functions.parseUserAgent(req.headers["user-agent"])
-                await sql.user.insertLoginHistory(req.session.username, "email change", ip, device)
+                await sql.user.insertLoginHistory(req.session.username, "email changed", ip, device)
                 res.status(200).redirect("/change-email-success")
             } else {
                 await sql.token.deleteEmailToken(tokenData.email)

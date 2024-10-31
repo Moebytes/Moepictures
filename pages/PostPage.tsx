@@ -27,6 +27,7 @@ import TagEditDialog from "../dialogs/TagEditDialog"
 import SourceEditDialog from "../dialogs/SourceEditDialog"
 import FavgroupDialog from "../dialogs/FavgroupDialog"
 import GroupDialog from "../dialogs/GroupDialog"
+import OCRDialog from "../dialogs/OCRDialog"
 import RevertPostHistoryDialog from "../dialogs/RevertPostHistoryDialog"
 import RevertTranslationHistoryDialog from "../dialogs/RevertTranslationHistoryDialog"
 import CaptchaDialog from "../dialogs/CaptchaDialog"
@@ -117,8 +118,10 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
                     if (savedPosts) setPosts(JSON.parse(savedPosts))
                 }
             }
-            const savedOrder = localStorage.getItem("order")
-            if (savedOrder) setOrder(Number(savedOrder))
+            setTimeout(() => {
+                const savedOrder = localStorage.getItem("order")
+                if (savedOrder) setOrder(Number(savedOrder))
+            }, 200)
         }
         window.addEventListener("load", onDOMLoaded)
         return () => {
@@ -624,6 +627,7 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
         <SourceEditDialog/>
         <FavgroupDialog/>
         <GroupDialog/>
+        <OCRDialog/>
         <EditCommentDialog/>
         <DeleteCommentDialog/>
         <ReportCommentDialog/>
