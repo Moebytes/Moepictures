@@ -21,6 +21,7 @@ import SearchHistoryRow from "../components/SearchHistoryRow"
 import DeleteSearchHistoryDialog from "../dialogs/DeleteSearchHistoryDialog"
 import DeleteAllSearchHistoryDialog from "../dialogs/DeleteAllSearchHistoryDialog"
 import scrollIcon from "../assets/icons/scroll.png"
+import search from "../assets/icons/search.png"
 import pageIcon from "../assets/icons/page.png"
 import PageDialog from "../dialogs/PageDialog"
 import searchHistoryDelete from "../assets/icons/delete.png"
@@ -82,6 +83,8 @@ const HistoryPage: React.FunctionComponent = () => {
     const [ended, setEnded] = useState(false)
     const [queryPage, setQueryPage] = useState(1)
     const [historyTab, setHistoryTab] = useState("")
+    const [searchQuery, setSearchQuery] = useState("")
+    const [commitSearch, setCommitSearch] = useState("")
     const history = useHistory()
     const location = useLocation()
 
@@ -117,6 +120,11 @@ const HistoryPage: React.FunctionComponent = () => {
     }, [])
 
     const getFilter = () => {
+        return `hue-rotate(${siteHue - 180}deg) saturate(${siteSaturation}%) brightness(${siteLightness + 70}%)`
+    }
+
+    const getFilterSearch = () => {
+        if (theme.includes("light")) return `hue-rotate(${siteHue - 180}deg) saturate(${siteSaturation - 60}%) brightness(${siteLightness + 220}%)`
         return `hue-rotate(${siteHue - 180}deg) saturate(${siteSaturation}%) brightness(${siteLightness + 70}%)`
     }
 
@@ -218,24 +226,25 @@ const HistoryPage: React.FunctionComponent = () => {
     const updateHistory = async () => {
         let result = []
         if (historyTab === "post") {
-            result = await functions.get("/api/post/history", null, session, setSessionFlag)
+            result = await functions.get("/api/post/history", {query: searchQuery}, session, setSessionFlag)
         }
         if (historyTab === "tag") {
-            result = await functions.get("/api/tag/history", null, session, setSessionFlag)
+            result = await functions.get("/api/tag/history", {query: searchQuery}, session, setSessionFlag)
         }
         if (historyTab === "translation") {
-            result = await functions.get("/api/translation/history", null, session, setSessionFlag)
+            result = await functions.get("/api/translation/history", {query: searchQuery}, session, setSessionFlag)
         }
         if (historyTab === "group") {
-            result = await functions.get("/api/group/history", null, session, setSessionFlag)
+            result = await functions.get("/api/group/history", {query: searchQuery}, session, setSessionFlag)
         }
         if (historyTab === "search") {
-            result = await functions.get("/api/user/history", null, session, setSessionFlag).catch(() => [])
+            result = await functions.get("/api/user/history", {query: searchQuery}, session, setSessionFlag).catch(() => [])
         }
         setEnded(false)
         setIndex(0)
         setVisibleHistory([])
         setHistoryStates(result)
+        setCommitSearch(searchQuery)
     }
 
     useEffect(() => {
@@ -309,19 +318,19 @@ const HistoryPage: React.FunctionComponent = () => {
         }
         let result = [] as any
         if (historyTab === "post") {
-            result = await functions.get("/api/post/history", {offset: newOffset}, session, setSessionFlag).catch(() => [])
+            result = await functions.get("/api/post/history", {query: searchQuery, offset: newOffset}, session, setSessionFlag).catch(() => [])
         }
         if (historyTab === "tag") {
-            result = await functions.get("/api/tag/history", {offset: newOffset}, session, setSessionFlag).catch(() => [])
+            result = await functions.get("/api/tag/history", {query: searchQuery, offset: newOffset}, session, setSessionFlag).catch(() => [])
         }
         if (historyTab === "translation") {
-            result = await functions.get("/api/translation/history", {offset: newOffset}, session, setSessionFlag).catch(() => [])
+            result = await functions.get("/api/translation/history", {query: searchQuery, offset: newOffset}, session, setSessionFlag).catch(() => [])
         }
         if (historyTab === "group") {
-            result = await functions.get("/api/group/history", {offset: newOffset}, session, setSessionFlag).catch(() => [])
+            result = await functions.get("/api/group/history", {query: searchQuery, offset: newOffset}, session, setSessionFlag).catch(() => [])
         }
         if (historyTab === "search") {
-            result = await functions.get("/api/user/history", {offset: newOffset}, session, setSessionFlag).catch(() => [])
+            result = await functions.get("/api/user/history", {query: searchQuery, offset: newOffset}, session, setSessionFlag).catch(() => [])
         }
         let hasMore = result?.length >= 100
         const cleanHistory = historyStates.filter((t: any) => !t.fake)
@@ -539,7 +548,7 @@ const HistoryPage: React.FunctionComponent = () => {
                 if (previous?.postID !== current.postID) previous = null
                 jsx.push(<PostHistoryRow historyIndex={i+1} postHistory={visible[i]} 
                     previousHistory={previous} currentHistory={current} current={i === currentIndex}
-                    onDelete={updateHistory} onEdit={updateHistory}/>)
+                    onDelete={updateHistory} onEdit={updateHistory} exact={commitSearch}/>)
             }
 
             if (historyTab === "tag") {
@@ -609,50 +618,100 @@ const HistoryPage: React.FunctionComponent = () => {
     const generateHeaderJSX = () => {
         if (historyTab === "post") {
             return (
-                <><span className="history-heading">Post History</span>
-                <div className="history-item" onClick={() => toggleScroll()}>
-                    <img className="history-img" src={scroll ? scrollIcon : pageIcon} style={{filter: getFilter()}}/>
-                    <span className="history-text">{scroll ? "Scrolling" : "Pages"}</span>
+                <><div className="history-row">
+                    <span className="history-heading">Post History</span>
+                </div>
+                <div className="history-row">
+                    <div className="history-search-container" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
+                        <input className="history-search" type="search" spellCheck="false" value={searchQuery} onChange={(event) => setSearchQuery(event.target.value)} onKeyDown={(event) => event.key === "Enter" ? updateHistory() : null}/>
+                        <button className="history-search-button" style={{filter: getFilterSearch()}} onClick={() => updateHistory()}>
+                            <img src={search}/>
+                        </button>
+                    </div>
+                    <div className="history-item" onClick={() => toggleScroll()}>
+                        <img className="history-img" src={scroll ? scrollIcon : pageIcon} style={{filter: getFilter()}}/>
+                        <span className="history-text">{scroll ? "Scrolling" : "Pages"}</span>
+                    </div>
                 </div></>
             )
         }
         if (historyTab === "tag") {
             return (
-                <><span className="history-heading">Tag History</span>
-                <div className="history-item" onClick={() => toggleScroll()}>
-                    <img className="history-img" src={scroll ? scrollIcon : pageIcon} style={{filter: getFilter()}}/>
-                    <span className="history-text">{scroll ? "Scrolling" : "Pages"}</span>
+                <><div className="history-row">
+                    <span className="history-heading">Tag History</span>
+                </div>
+                <div className="history-row">
+                    <div className="history-search-container" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
+                        <input className="history-search" type="search" spellCheck="false" value={searchQuery} onChange={(event) => setSearchQuery(event.target.value)} onKeyDown={(event) => event.key === "Enter" ? updateHistory() : null}/>
+                        <button className="history-search-button" style={{filter: getFilterSearch()}} onClick={() => updateHistory()}>
+                            <img src={search}/>
+                        </button>
+                    </div>
+                    <div className="history-item" onClick={() => toggleScroll()}>
+                        <img className="history-img" src={scroll ? scrollIcon : pageIcon} style={{filter: getFilter()}}/>
+                        <span className="history-text">{scroll ? "Scrolling" : "Pages"}</span>
+                    </div>
                 </div></>
             )
         }
         if (historyTab === "group") {
             return (
-                <><span className="history-heading">Group History</span>
-                <div className="history-item" onClick={() => toggleScroll()}>
-                    <img className="history-img" src={scroll ? scrollIcon : pageIcon} style={{filter: getFilter()}}/>
-                    <span className="history-text">{scroll ? "Scrolling" : "Pages"}</span>
+                <><div className="history-row">
+                    <span className="history-heading">Group History</span>
+                </div>
+                <div className="history-row">
+                    <div className="history-search-container" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
+                        <input className="history-search" type="search" spellCheck="false" value={searchQuery} onChange={(event) => setSearchQuery(event.target.value)} onKeyDown={(event) => event.key === "Enter" ? updateHistory() : null}/>
+                        <button className="history-search-button" style={{filter: getFilterSearch()}} onClick={() => updateHistory()}>
+                            <img src={search}/>
+                        </button>
+                    </div>
+                    <div className="history-item" onClick={() => toggleScroll()}>
+                        <img className="history-img" src={scroll ? scrollIcon : pageIcon} style={{filter: getFilter()}}/>
+                        <span className="history-text">{scroll ? "Scrolling" : "Pages"}</span>
+                    </div>
                 </div></>
             )
         }
         if (historyTab === "translation") {
             return (
-                <><span className="history-heading">Translation History</span>
-                <div className="history-item" onClick={() => toggleScroll()}>
-                    <img className="history-img" src={scroll ? scrollIcon : pageIcon} style={{filter: getFilter()}}/>
-                    <span className="history-text">{scroll ? "Scrolling" : "Pages"}</span>
+                <><div className="history-row">
+                    <span className="history-heading">Translation History</span>
+                </div>
+                <div className="history-row">
+                    <div className="history-search-container" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
+                        <input className="history-search" type="search" spellCheck="false" value={searchQuery} onChange={(event) => setSearchQuery(event.target.value)} onKeyDown={(event) => event.key === "Enter" ? updateHistory() : null}/>
+                        <button className="history-search-button" style={{filter: getFilterSearch()}} onClick={() => updateHistory()}>
+                            <img src={search}/>
+                        </button>
+                    </div>
+                    <div className="history-item" onClick={() => toggleScroll()}>
+                        <img className="history-img" src={scroll ? scrollIcon : pageIcon} style={{filter: getFilter()}}/>
+                        <span className="history-text">{scroll ? "Scrolling" : "Pages"}</span>
+                    </div>
                 </div></>
             )
         }
         if (historyTab === "search") {
             return (
-                <><span className="history-heading">Search History</span>
-                <div className="history-item" onClick={() => toggleScroll()}>
-                    <img className="history-img" src={scroll ? scrollIcon : pageIcon} style={{filter: getFilter()}}/>
-                    <span className="history-text">{scroll ? "Scrolling" : "Pages"}</span>
+                <><div className="history-row">
+                    <span className="history-heading">Search History</span>
                 </div>
-                <div className="history-item" onClick={() => setShowDeleteAllHistoryDialog((prev: boolean) => !prev)}>
-                    <img className="history-img" src={searchHistoryDelete}/>
-                    <span className="history-opt-text">Delete All</span>
+                <div className="history-row">
+                    <div className="history-search-container" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
+                        <input className="history-search" type="search" spellCheck="false" value={searchQuery} onChange={(event) => setSearchQuery(event.target.value)} onKeyDown={(event) => event.key === "Enter" ? updateHistory() : null}/>
+                        <button className="history-search-button" style={{filter: getFilterSearch()}} onClick={() => updateHistory()}>
+                            <img src={search}/>
+                        </button>
+                    </div>
+                    <div className="history-item" onClick={() => toggleScroll()}>
+                        <img className="history-img" src={scroll ? scrollIcon : pageIcon} style={{filter: getFilter()}}/>
+                        <span className="history-text">{scroll ? "Scrolling" : "Pages"}</span>
+                    </div>
+                    <div className="history-item" onClick={() => setShowDeleteAllHistoryDialog((prev: boolean) => !prev)}>
+                        <img className="history-img" src={searchHistoryDelete}/>
+                        <span className="history-opt-text">Delete All</span>
+                    </div>
                 </div></>
             )
         }
@@ -692,9 +751,7 @@ const HistoryPage: React.FunctionComponent = () => {
                         <img className="history-icon" onClick={() => setHistoryTab("group")} src={historyTab === "group" ? historyGroupActive : historyGroup} style={{filter: historyTab === "group" ? "" : getFilter()}}/>
                         <img className="history-icon" onClick={() => setHistoryTab("translation")} src={historyTab === "translation" ? historyTranslateActive : historyTranslate} style={{filter: historyTab === "translation" ? "" : getFilter()}}/>
                     </div>
-                    <div className="history-heading-container">
-                        {generateHeaderJSX()}
-                    </div>
+                    {generateHeaderJSX()}
                     <table className="history-container">
                         {generateHistoryJSX()}
                     </table>

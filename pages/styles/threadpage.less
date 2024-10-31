@@ -76,8 +76,9 @@
 .forum-thread-main-post {
     display: flex;
     flex-direction: row;
-    width: 100%;
+    width: 85%;
     align-items: flex-start;
+    padding-bottom: 10px;
 }
 
 .forum-thread-user-container {
@@ -172,6 +173,30 @@
     margin-left: 170px;
 }
 
+.forum-thread-replybox-row {
+    display: flex;
+    flex-direction: row;
+    width: 100%;
+    align-items: center;  
+    margin-top: 5px;
+}
+
+.forum-thread-replybox-text {
+    font-family: Tahoma, sans-serif;
+    font-size: 20px;
+    color: var(--text);
+    user-select: text;
+    word-wrap: break-word;
+    white-space: preserve;
+}
+
+.forum-thread-checkbox {
+    width: auto;
+    height: 20px;
+    margin-left: 10px;
+    cursor: pointer;
+}
+
 @media screen and (max-width: 500px) {
     .forum-thread-reply-box {
         margin-left: 0px;
@@ -188,6 +213,7 @@
 
     .forum-thread-main-post {
         flex-direction: column;
+        width: 100%;
     }
 
     .forum-thread-text-container {

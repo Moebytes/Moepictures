@@ -56,9 +56,17 @@ const ForwardMessageDialog: React.FunctionComponent = (props) => {
             await functions.timeout(2000)
             return setError(false)
         }
-        await functions.post("/api/message/forward", {messageID: forwardMessageObj.messageID, recipients: cleanedRecipients}, session, setSessionFlag)
-        setForwardMessageObj(null)
-        setMessageFlag(true)
+        try {
+            await functions.post("/api/message/forward", {messageID: forwardMessageObj.messageID, recipients: cleanedRecipients}, session, setSessionFlag)
+            setForwardMessageObj(null)
+            setMessageFlag(true)
+        } catch (err) {
+            setError(true)
+            if (!errorRef.current) await functions.timeout(20)
+            errorRef.current!.innerText = "Cannot forward this message."
+            await functions.timeout(2000)
+            setError(false)
+        }
     }
 
     const click = (button: "accept" | "reject") => {

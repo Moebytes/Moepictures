@@ -4,11 +4,11 @@ import functions from "../structures/Functions"
 
 export default class SQLMessage {
     /** Insert DM message. */
-    public static insertMessage = async (creator: string, title: string, content: string) => {
+    public static insertMessage = async (creator: string, title: string, content: string, r18: boolean) => {
         const now = new Date().toISOString()
         const query: QueryConfig = {
-        text: /*sql*/`INSERT INTO messages ("creator", "createDate", "updater", "updatedDate", "title", "content") VALUES ($1, $2, $3, $4, $5, $6) RETURNING "messageID"`,
-        values: [creator, now, creator, now, title, content]
+        text: /*sql*/`INSERT INTO messages ("creator", "createDate", "updater", "updatedDate", "title", "content", "r18") VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING "messageID"`,
+        values: [creator, now, creator, now, title, content, r18]
         }
         const result = await SQLQuery.run(query)
         return result.flat(Infinity)[0]?.messageID as number
@@ -165,11 +165,11 @@ export default class SQLMessage {
     }
 
     /** Insert message reply. */
-    public static insertMessageReply = async (messageID: number, creator: string, content: string) => {
+    public static insertMessageReply = async (messageID: number, creator: string, content: string, r18: boolean) => {
         const now = new Date().toISOString()
         const query: QueryConfig = {
-        text: /*sql*/`INSERT INTO "message replies" ("messageID", "creator", "createDate", "updatedDate", "content") VALUES ($1, $2, $3, $4, $5)`,
-        values: [messageID, creator, now, now, content]
+        text: /*sql*/`INSERT INTO "message replies" ("messageID", "creator", "createDate", "updatedDate", "content", "r18") VALUES ($1, $2, $3, $4, $5, $6)`,
+        values: [messageID, creator, now, now, content, r18]
         }
         const result = await SQLQuery.run(query)
         return result

@@ -332,7 +332,10 @@ const Thread: React.FunctionComponent<Props> = (props) => {
                         {session.username ? <img draggable={false} className="thread-opt-icon" src={getReadIcon()} onClick={toggleRead} style={{filter: getFilter()}}/> : null}
                         {props.thread.sticky ? <img draggable={false} className="thread-icon" src={sticky} style={{marginTop: "4px"}}/> : null}
                         {props.thread.locked ? <img draggable={false} className="thread-icon" src={lock}/> : null}
-                        <span className={`thread-title ${readStatus() ? "thread-read" : ""}`} onClick={threadPage} onAuxClick={threadPage}>{props.thread.title}</span>
+                        <span className={`thread-title ${readStatus() ? "thread-read" : ""}`} onClick={threadPage} onAuxClick={threadPage}>
+                            {props.thread.r18 ? <span style={{color: "var(--r18Color)", marginRight: "10px"}}>[R18]</span> : null}
+                            {props.thread.title}
+                        </span>
                     </div>
                     {!mobile ? <div className="thread-row">
                         {generateCreatorJSX()}

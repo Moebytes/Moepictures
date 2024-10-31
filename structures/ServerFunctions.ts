@@ -87,7 +87,7 @@ export default class ServerFunctions {
             const timeDifference = new Date().getTime() - new Date(userMessages[0].createDate).getTime()
             if (timeDifference < 10000) return
         }
-        const messageID = await sql.message.insertMessage("moepictures", subject, message)
+        const messageID = await sql.message.insertMessage("moepictures", subject, message, false)
         await sql.message.bulkInsertRecipients(messageID, [username])
     }
 

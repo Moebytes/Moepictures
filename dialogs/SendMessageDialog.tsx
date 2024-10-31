@@ -2,16 +2,22 @@ import React, {useEffect, useContext, useState, useRef, useReducer} from "react"
 import {useHistory} from "react-router-dom"
 import {HashLink as Link} from "react-router-hash-link"
 import {HideNavbarContext, HideSidebarContext, ThemeContext, EnableDragContext, DMTargetContext, HideTitlebarContext,
-SessionContext, SessionFlagContext, EmojisContext, MobileContext} from "../Context"
+SessionContext, SessionFlagContext, EmojisContext, MobileContext, SiteHueContext, SiteLightnessContext, SiteSaturationContext} from "../Context"
 import functions from "../structures/Functions"
 import permissions from "../structures/Permissions"
 import emojiSelect from "../assets/icons/emoji-select.png"
+import lewdIcon from "../assets/icons/lewd.png"
+import radioButton from "../assets/icons/radiobutton.png"
+import radioButtonChecked from "../assets/icons/radiobutton-checked.png"
 import "./styles/dialog.less"
 import Draggable from "react-draggable"
 
 const SendMessageDialog: React.FunctionComponent = (props) => {
     const [ignored, forceUpdate] = useReducer(x => x + 1, 0)
     const {theme, setTheme} = useContext(ThemeContext)
+    const {siteHue, setSiteHue} = useContext(SiteHueContext)
+    const {siteSaturation, setSiteSaturation} = useContext(SiteSaturationContext)
+    const {siteLightness, setSiteLightness} = useContext(SiteLightnessContext)
     const {hideNavbar, setHideNavbar} = useContext(HideNavbarContext)
     const {hideTitlebar, setHideTitlebar} = useContext(HideTitlebarContext)
     const {hideSidebar, setHideSidebar} = useContext(HideSidebarContext)
@@ -25,12 +31,17 @@ const SendMessageDialog: React.FunctionComponent = (props) => {
     const [recipients, setRecipients] = useState("")
     const [title, setTitle] = useState("")
     const [content, setContent] = useState("")
+    const [r18, setR18] = useState(false)
     const [error, setError] = useState(false)
     const emojiRef = useRef(null) as any
     const dialogRef = useRef(null) as any
     const textAreaRef = useRef(null) as any
     const errorRef = useRef<any>(null)
     const history = useHistory()
+
+    const getFilter = () => {
+        return `hue-rotate(${siteHue - 180}deg) saturate(${siteSaturation}%) brightness(${siteLightness + 70}%)`
+    }
 
     useEffect(() => {
         document.title = "Send Message"
@@ -82,13 +93,15 @@ const SendMessageDialog: React.FunctionComponent = (props) => {
             return setError(false)
         }
         try {
-            const message = await functions.post("/api/message/create", {title, content, recipients: cleanedRecipients}, session, setSessionFlag)
+            const message = await functions.post("/api/message/create", {title, content, r18, recipients: cleanedRecipients}, session, setSessionFlag)
             setDMTarget(null)
             if (message.messageID) history.push(`/message/${message.messageID}`)
-        } catch {
+        } catch (err: any) {
             setError(true)
+            let errMsg = "Bad title or content."
+            if (err.response?.data.includes("Cannot send r18 message")) errMsg = "Cannot send this message."
             if (!errorRef.current) await functions.timeout(20)
-            errorRef.current!.innerText = "Bad title or content."
+            errorRef.current!.innerText = errMsg
             await functions.timeout(2000)
             setError(false)
         }
@@ -186,6 +199,12 @@ const SendMessageDialog: React.FunctionComponent = (props) => {
                         <div className="dialog-row">
                             <textarea className="dialog-textarea" ref={textAreaRef} style={{resize: "vertical", height: "200px"}} spellCheck={false} value={content} onChange={(event) => setContent(event.target.value)}></textarea>
                         </div>
+                        {session.showR18 ?
+                        <div className="dialog-row">
+                            <img className="dialog-checkbox" src={r18 ? radioButtonChecked : radioButton} onClick={() => setR18((prev: boolean) => !prev)} style={{marginLeft: "0px", filter: getFilter()}}/>
+                            <span className="dialog-text" style={{marginLeft: "10px"}}>R18</span>
+                            <img className="dialog-title-img" src={lewdIcon} style={{marginLeft: "15px", height: "50px", filter: getFilter()}}/>
+                        </div> : null}
                         {error ? <div className="dialog-validation-container"><span className="dialog-validation" ref={errorRef}></span></div> : null}
                         <div className="dialog-row">
                             <button onClick={() => click("reject")} className="dialog-button">{"Cancel"}</button>

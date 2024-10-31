@@ -1,7 +1,7 @@
 import React, {useContext, useEffect, useRef, useState} from "react"
 import {useHistory} from "react-router-dom"
 import {ThemeContext, QuoteTextContext, SessionContext, DeleteReplyIDContext, DeleteReplyFlagContext,
-EditReplyIDContext, EditReplyFlagContext, EditReplyContentContext, ReportReplyIDContext, SiteHueContext,
+EditReplyIDContext, EditReplyFlagContext, EditReplyContentContext, EditReplyR18Context, ReportReplyIDContext, SiteHueContext,
 SiteLightnessContext, SiteSaturationContext, EnableDragContext, MobileContext, SessionFlagContext,
 EmojisContext} from "../Context"
 import {HashLink as Link} from "react-router-hash-link"
@@ -24,6 +24,7 @@ import jsxFunctions from "../structures/JSXFunctions"
 import "./styles/reply.less"
 
 interface Props {
+    thread: any
     reply: any
     onDelete?: () => void
     onEdit?: () => void
@@ -45,6 +46,7 @@ const Reply: React.FunctionComponent<Props> = (props) => {
     const {editReplyFlag, setEditReplyFlag} = useContext(EditReplyFlagContext)
     const {editReplyID, setEditReplyID} = useContext(EditReplyIDContext)
     const {editReplyContent, setEditReplyContent} = useContext(EditReplyContentContext)
+    const {editReplyR18, setEditReplyR18} = useContext(EditReplyR18Context)
     const {reportReplyID, setReportReplyID} = useContext(ReportReplyIDContext)
     const {emojis, setEmojis} = useContext(EmojisContext)
     const history = useHistory()
@@ -89,6 +91,7 @@ const Reply: React.FunctionComponent<Props> = (props) => {
     const parseText = () => {
         const pieces = functions.parseComment(props.reply.content)
         let jsx = [] as any
+        if (props.reply.r18) jsx.push(<span className="reply-text" style={{color: "var(--r18Color)", marginTop: "-38px"}}>[R18]</span>)
         for (let i = 0; i < pieces.length; i++) {
             const piece = pieces[i]
             if (piece.includes(">")) {
@@ -136,7 +139,7 @@ const Reply: React.FunctionComponent<Props> = (props) => {
         if (!editReplyContent) return
         const badReply = functions.validateReply(editReplyContent)
         if (badReply) return
-        await functions.put("/api/reply/edit", {replyID: props.reply?.replyID, content: editReplyContent}, session, setSessionFlag)
+        await functions.put("/api/reply/edit", {replyID: props.reply?.replyID, content: editReplyContent, r18: editReplyR18}, session, setSessionFlag)
         props.onEdit?.()
     }
 
@@ -146,11 +149,12 @@ const Reply: React.FunctionComponent<Props> = (props) => {
             setEditReplyFlag(false)
             setEditReplyID(null)
         }
-    }, [editReplyFlag, editReplyID, editReplyContent, session])
+    }, [editReplyFlag, editReplyID, editReplyContent, editReplyR18, session])
 
     const editReplyDialog = async () => {
         setEditReplyContent(props.reply?.content)
         setEditReplyID(props.reply?.replyID)
+        setEditReplyR18(props.reply?.r18)
     }
 
     const reportReplyDialog = async () => {
@@ -262,8 +266,17 @@ const Reply: React.FunctionComponent<Props> = (props) => {
         return <span className={`reply-user-text ${props.reply?.banned ? "banned" : ""}`} onClick={userClick} onAuxClick={userClick}>{functions.toProperCase(props.reply?.creator) || "deleted"}</span>
     }
 
+    const getBGColor = () => {
+        if (!props.thread) return ""
+        if (props.reply.r18) {
+            return props.thread.r18 ? "" : "var(--r18BGColor)"
+        } else {
+            return props.thread.r18 ? "var(--background)" : ""
+        }
+    }
+
     return (
-        <div className="reply" reply-id={props.reply?.replyID}>
+        <div className="reply" reply-id={props.reply?.replyID} style={{backgroundColor: props.reply.r18 ? "var(--r18BGColor)" : ""}}>
             <div className="reply-container">
                 <div className="reply-user-container">
                     {generateUsernameJSX()}

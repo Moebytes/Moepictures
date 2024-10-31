@@ -537,6 +537,7 @@ const GroupRoutes = (app: Express) => {
             const slug = req.query.slug as string
             const historyID = req.query.historyID as string
             const username = req.query.username as string
+            const query = req.query.query as string
             const offset = req.query.offset as string
             if (!req.session.username) return res.status(403).send("Unauthorized")
             if (slug) {
@@ -549,7 +550,7 @@ const GroupRoutes = (app: Express) => {
                     const result = await sql.history.userGroupHistory(username)
                     res.status(200).json(result)
                 } else {
-                    const result = await sql.history.groupHistory(group.groupID, offset)
+                    const result = await sql.history.groupHistory(group.groupID, offset, query)
                     res.status(200).json(result)
                 }
             } else {

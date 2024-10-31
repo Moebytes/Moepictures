@@ -10,7 +10,7 @@ import {ThemeContext, EnableDragContext, HideNavbarContext, HideSidebarContext, 
 RelativeContext, HideTitlebarContext, ActiveDropdownContext, HeaderTextContext, SidebarTextContext, SiteHueContext, 
 SiteLightnessContext, SiteSaturationContext, ScrollContext, ThreadPageContext, ShowPageDialogContext, PageFlagContext,
 DeleteThreadIDContext, DeleteThreadFlagContext, EditThreadIDContext, EditThreadFlagContext, EditThreadTitleContext,
-EditThreadContentContext, QuoteTextContext, ReportThreadIDContext, SessionFlagContext, EmojisContext} from "../Context"
+EditThreadContentContext, EditThreadR18Context, QuoteTextContext, ReportThreadIDContext, SessionFlagContext, EmojisContext} from "../Context"
 import permissions from "../structures/Permissions"
 import jsxFunctions from "../structures/JSXFunctions"
 import PageDialog from "../dialogs/PageDialog"
@@ -40,6 +40,9 @@ import EditReplyDialog from "../dialogs/EditReplyDialog"
 import ReportReplyDialog from "../dialogs/ReportReplyDialog"
 import emojiSelect from "../assets/icons/emoji-select.png"
 import favicon from "../assets/icons/favicon.png"
+import lewdIcon from "../assets/icons/lewd.png"
+import radioButton from "../assets/icons/radiobutton.png"
+import radioButtonChecked from "../assets/icons/radiobutton-checked.png"
 import "./styles/threadpage.less"
 
 interface Props {
@@ -74,6 +77,7 @@ const ThreadPage: React.FunctionComponent<Props> = (props) => {
     const {editThreadFlag, setEditThreadFlag} = useContext(EditThreadFlagContext)
     const {editThreadTitle, setEditThreadTitle} = useContext(EditThreadTitleContext)
     const {editThreadContent, setEditThreadContent} = useContext(EditThreadContentContext)
+    const {editThreadR18, setEditThreadR18} = useContext(EditThreadR18Context)
     const {reportThreadID, setReportThreadID} = useContext(ReportThreadIDContext)
     const {emojis, setEmojis} = useContext(EmojisContext)
     const [thread, setThread] = useState(null) as any
@@ -86,6 +90,7 @@ const ThreadPage: React.FunctionComponent<Props> = (props) => {
     const [replyID, setReplyID] = useState(-1)
     const [replyJumpFlag, setReplyJumpFlag] = useState(false)
     const [text, setText] = useState("")
+    const [r18, setR18] = useState(false)
     const [defaultIcon, setDefaultIcon] = useState(false)
     const [showEmojiDropdown, setShowEmojiDropdown] = useState(false)
     const [error, setError] = useState(false)
@@ -139,8 +144,12 @@ const ThreadPage: React.FunctionComponent<Props> = (props) => {
     }, [session])
 
     const updateThread = async () => {
-        const thread = await functions.get("/api/thread", {threadID}, session, setSessionFlag)
+        const thread = await functions.get("/api/thread", {threadID}, session, setSessionFlag).catch(() => null)
         if (!thread) return functions.replaceLocation("/404")
+        if (thread.r18) {
+            if (!session.cookie) return
+            if (!session.showR18) return functions.replaceLocation("/404")
+        }
         setThread(thread)
         document.title = `${thread.title}`
         setDefaultIcon(thread.image ? false : true)
@@ -365,8 +374,9 @@ const ThreadPage: React.FunctionComponent<Props> = (props) => {
             visible = replies.slice(postOffset, postOffset + getPageAmount())
         }
         for (let i = 0; i < visible.length; i++) {
-            if (visible[i].fake) continue
-            jsx.push(<Reply key={visible[i].replyID} reply={visible[i]} onDelete={updateReplies} onEdit={updateReplies} onReplyJump={onReplyJump}/>)
+            const reply = visible[i]
+            if (reply.fake) continue
+            jsx.push(<Reply key={visible[i].replyID} reply={reply} thread={thread} onDelete={updateReplies} onEdit={updateReplies} onReplyJump={onReplyJump}/>)
         }
         return jsx
     }
@@ -474,7 +484,7 @@ const ThreadPage: React.FunctionComponent<Props> = (props) => {
         if (badTitle) return
         const badContent = functions.validateThread(editThreadContent)
         if (badContent) return
-        await functions.put("/api/thread/edit", {threadID, title: editThreadTitle, content: editThreadContent}, session, setSessionFlag)
+        await functions.put("/api/thread/edit", {threadID, title: editThreadTitle, content: editThreadContent, r18: editThreadR18}, session, setSessionFlag)
         updateThread()
     }
 
@@ -484,13 +494,14 @@ const ThreadPage: React.FunctionComponent<Props> = (props) => {
             setEditThreadFlag(false)
             setEditThreadID(null)
         }
-    }, [editThreadFlag, editThreadID, editThreadTitle, editThreadContent])
+    }, [editThreadFlag, editThreadID, editThreadTitle, editThreadContent, editThreadR18])
 
     const editThreadDialog = () => {
         if (!thread) return
         setEditThreadContent(thread.content)
         setEditThreadTitle(thread.title)
         setEditThreadID(thread.threadID)
+        setEditThreadR18(thread.r18)
     }
 
     const deleteThread = async () => {
@@ -572,7 +583,7 @@ const ThreadPage: React.FunctionComponent<Props> = (props) => {
             await functions.timeout(2000)
             return setError(false)
         }
-        await functions.post("/api/thread/reply", {threadID, content: text}, session, setSessionFlag)
+        await functions.post("/api/thread/reply", {threadID, content: text, r18}, session, setSessionFlag)
         updateReplies()
         setText("")
     }
@@ -660,6 +671,12 @@ const ThreadPage: React.FunctionComponent<Props> = (props) => {
                             <button className="comments-emoji-button" ref={emojiRef} onClick={() => setShowEmojiDropdown((prev: boolean) => !prev)}>
                                 <img src={emojiSelect}/>
                             </button>
+                            {session.showR18 ?
+                            <div className="forum-thread-replybox-row">
+                                <img className="forum-thread-checkbox" src={r18 ? radioButtonChecked : radioButton} onClick={() => setR18((prev: boolean) => !prev)} style={{filter: getFilter()}}/>
+                                <span className="forum-thread-replybox-text" style={{marginLeft: "10px"}}>R18</span>
+                                <img className="forum-thread-icon" src={lewdIcon} style={{marginLeft: "15px", height: "50px", filter: getFilter()}}/>
+                            </div> : null}
                         </div>
                     </div>
                 </div>
@@ -686,10 +703,13 @@ const ThreadPage: React.FunctionComponent<Props> = (props) => {
                     <div className="forum-thread-title-container">
                         {thread.sticky ? <img draggable={false} className="forum-thread-icon" src={stickyIcon}/> : null}
                         {thread.locked ? <img draggable={false} className="forum-thread-icon" src={lockIcon}/> : null}
-                        <span className="forum-thread-title">{thread.title}</span>
+                        <span className="forum-thread-title">
+                            {thread.r18 ? <span style={{color: "var(--r18Color)", marginRight: "10px"}}>[R18]</span> : null}
+                            {thread.title}
+                        </span>
                         {getOptionsJSX()}
                     </div>
-                    <div className="forum-thread-main-post">
+                    <div className="forum-thread-main-post" style={{backgroundColor: thread.r18 ? "var(--r18BGColor)" : ""}}>
                         <div className="forum-thread-user-container">
                             {getCreatorJSX()}
                             <span className="forum-thread-date-text">{functions.timeAgo(thread.createDate)}</span>

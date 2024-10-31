@@ -44,21 +44,32 @@ export default class SQLHistory {
     }
 
     /** Get tag history */
-    public static tagHistory = async (tag?: string, offset?: string) => {
+    public static tagHistory = async (tag?: string, offset?: string, search?: string) => {
         let i = 1
         let values = [] as any
+        let searchValue = i
+        let searchQuery = ""
+        if (search) {
+            values.push(search)
+            searchQuery = "(" + `"tag history"."changes"::text ILIKE '%' || $${searchValue} || '%' 
+            ${search.toLowerCase().includes("image updated") ? `OR "tag history"."imageChanged" = true` : ""}` + ")"
+            i++
+        }
         let tagValue = i
+        let tagQuery = ""
         if (tag) {
             values.push(tag)
+            tagQuery = `"tag history"."tag" = $${tagValue}`
             i++
         }
         if (offset) values.push(offset)
+        const whereQueries = [searchQuery, tagQuery].filter(Boolean).join(" AND ")
         const query: QueryConfig = {
         text: functions.multiTrim(/*sql*/`
                 SELECT "tag history".*,
                 COUNT(*) OVER() AS "historyCount"
                 FROM "tag history"
-                ${tag ? `WHERE "tag history"."tag" = $${tagValue}` : ""}
+                ${whereQueries ? `WHERE ${whereQueries}` : ""}
                 GROUP BY "tag history"."historyID"
                 ORDER BY "tag history"."date" DESC
                 LIMIT 100 ${offset ? `OFFSET $${i}` : ""}
@@ -148,21 +159,34 @@ export default class SQLHistory {
     }
 
     /** Get post history */
-    public static postHistory = async (postID?: string | number, offset?: string) => {
+    public static postHistory = async (postID?: string | number, offset?: string, search?: string) => {
         let i = 1
         let values = [] as any
+        let searchValue = i
+        let searchQuery = ""
+        if (search) {
+            values.push(search)
+            searchQuery = "(" + `array_to_string("post history"."addedTags", ' ') ILIKE '%' || $${searchValue} || '%' 
+            OR array_to_string("post history"."removedTags", ' ') ILIKE '%' || $${searchValue} || '%' OR
+            "post history"."changes"::text ILIKE '%' || $${searchValue} || '%' 
+            ${search.toLowerCase().includes("image updated") ? `OR "post history"."imageChanged" = true` : ""}` + ")"
+            i++
+        }
         let postValue = i
+        let postQuery = ""
         if (postID) {
             values.push(postID)
+            postQuery =`"post history"."postID" = $${postValue}`
             i++
         }
         if (offset) values.push(offset)
+        const whereQueries = [searchQuery, postQuery].filter(Boolean).join(" AND ")
         const query: QueryConfig = {
         text: functions.multiTrim(/*sql*/`
                 SELECT "post history".*,
                 COUNT(*) OVER() AS "historyCount"
                 FROM "post history"
-                ${postID ? `WHERE "post history"."postID" = $${postValue}` : ""}
+                ${whereQueries ? `WHERE ${whereQueries}` : ""}
                 GROUP BY "post history"."historyID"
                 ORDER BY "post history"."date" DESC
                 LIMIT 100 ${offset ? `OFFSET $${i}` : ""}
@@ -228,24 +252,33 @@ export default class SQLHistory {
     }
 
     /** Get translation history */
-    public static translationHistory = async (postID?: string, order?: string, offset?: string) => {
+    public static translationHistory = async (postID?: string, order?: string, offset?: string, search?: string) => {
         let i = 1
         let values = [] as any
+        let searchValue = i
+        let searchQuery = ""
+        if (search) {
+            values.push(search)
+            searchQuery = "(" + `array_to_string("translation history"."addedEntries", ' ') ILIKE '%' || $${searchValue} || '%' 
+            OR array_to_string("translation history"."removedEntries", ' ') ILIKE '%' || $${searchValue} || '%'` + ")"
+            i++
+        }
         let postValue = i
+        let postQuery = ""
         if (postID) {
             values.push(postID)
+            postQuery = `"translation history"."postID" = $${postValue}`
             i++
         }
         let orderValue = i
+        let orderQuery = ""
         if (order) {
             values.push(order)
+            orderQuery = `"translation history"."order" = $${orderValue}`
             i++
         }
         if (offset) values.push(offset)
-        let whereArr = [] as string[]
-        if (postID) whereArr.push(`"translation history"."postID" = $${postValue}`)
-        if (order) whereArr.push(`"translation history"."order" = $${orderValue}`)
-        const whereQueries = whereArr.length ? `WHERE ${whereArr.join(" AND ")}` : ""
+        const whereQueries = [searchQuery, postQuery, orderQuery].filter(Boolean).join(" AND ")
         const query: QueryConfig = {
         text: functions.multiTrim(/*sql*/`
                 WITH post_json AS (
@@ -259,7 +292,7 @@ export default class SQLHistory {
                 to_json((array_agg(post_json.*))[1]) AS post
                 FROM "translation history"
                 JOIN post_json ON post_json."postID" = "translation history"."postID"
-                ${whereQueries}
+                ${whereQueries ? `WHERE ${whereQueries}` : ""}
                 GROUP BY "translation history"."historyID"
                 ORDER BY "translation history"."updatedDate" DESC
                 LIMIT 100 ${offset ? `OFFSET $${i}` : ""}
@@ -346,21 +379,34 @@ export default class SQLHistory {
     }
 
     /** Get group history */
-    public static groupHistory = async (groupID?: string, offset?: string) => {
+    public static groupHistory = async (groupID?: string, offset?: string, search?: string) => {
         let i = 1
         let values = [] as any
+        let searchValue = i
+        let searchQuery = ""
+        if (search) {
+            values.push(search)
+            searchQuery = "(" + `array_to_string("group history"."addedPosts", ' ') ILIKE '%' || $${searchValue} || '%' 
+            OR array_to_string("group history"."removedPosts", ' ') ILIKE '%' || $${searchValue} || '%' OR
+            "group history"."changes"::text ILIKE '%' || $${searchValue} || '%' 
+            ${search.toLowerCase().includes("order updated") ? `OR "group history"."orderChanged" = true` : ""}` + ")"
+            i++
+        }
         let groupValue = i
+        let groupQuery = ""
         if (groupID) {
             values.push(groupID)
+            groupQuery = `"group history"."groupID" = $${groupValue}`
             i++
         }
         if (offset) values.push(offset)
+        const whereQueries = [searchQuery, groupQuery].filter(Boolean).join(" AND ")
         const query: QueryConfig = {
         text: functions.multiTrim(/*sql*/`
                 SELECT "group history".*,
                 COUNT(*) OVER() AS "historyCount"
                 FROM "group history"
-                ${groupID ? `WHERE "group history"."groupID" = $${groupValue}` : ""}
+                ${whereQueries ? `WHERE ${whereQueries}` : ""}
                 GROUP BY "group history"."historyID"
                 ORDER BY "group history"."date" DESC
                 LIMIT 100 ${offset ? `OFFSET $${i}` : ""}
@@ -440,7 +486,7 @@ export default class SQLHistory {
     }
 
     /** Get user search history */
-    public static userSearchHistory = async (username: string, limit?: string, offset?: string, type?: string, restrict?: string, style?: string, sort?: string, sessionUsername?: string) => {
+    public static userSearchHistory = async (username: string, limit?: string, offset?: string, search?: string, type?: string, restrict?: string, style?: string, sort?: string, sessionUsername?: string) => {
         let typeQuery = ""
         if (type === "image") typeQuery = `posts.type = 'image'`
         if (type === "animation") typeQuery = `posts.type = 'animation'`
@@ -493,6 +539,11 @@ export default class SQLHistory {
         let includeTags = sort === "tagcount" || sort === "reverse tagcount"
         let i = 2
         let values = [] as any
+        let searchValue = i
+        if (search) {
+            values.push(search)
+            i++
+        }
         let userValue = i
         if (sessionUsername) {
             values.push(sessionUsername)
@@ -551,7 +602,10 @@ export default class SQLHistory {
                 to_json((array_agg(post_json.*))[1]) AS post
                 FROM "history"
                 JOIN post_json ON post_json."postID" = "history"."postID"
-                WHERE "history"."username" = $1
+                WHERE "history"."username" = $1 
+                ${search ? `AND (post_json."title" ILIKE '%' || $${searchValue} || '%' OR post_json."translatedTitle" ILIKE '%' || $${searchValue} || '%' 
+                OR post_json."artist" ILIKE '%' || $${searchValue} || '%' OR post_json."link" ILIKE '%' || $${searchValue} || '%' 
+                OR post_json."mirrors"::text ILIKE '%' || $${searchValue} || '%')` : ""}
                 GROUP BY "history"."username", "history"."postID", post_json."uploadDate", post_json.drawn, post_json."thirdParty",
                 post_json.bookmarks, post_json."cuteness", post_json."favoriteCount", post_json."imageCount", post_json."imageSize", 
                 post_json."imageWidth", post_json."imageHeight"${includeTags ? `, post_json."tagCount"` : ""}

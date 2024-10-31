@@ -36,7 +36,7 @@ const pushNotification = (username: string) => {
 const MessageRoutes = (app: Express) => {
     app.post("/api/message/create", csrfProtection, messageUpdateLimiter, async (req: Request, res: Response) => {
         try {
-            const {title, content, recipients} = req.body
+            const {title, content, r18, recipients} = req.body
             if (!req.session.username) return res.status(403).send("Unauthorized")
             if (req.session.banned) return res.status(403).send("You are banned")
             if (!title || !content) return res.status(400).send("Bad title or content")
@@ -50,8 +50,9 @@ const MessageRoutes = (app: Express) => {
                 if (req.session.username === recipient) return res.status(400).send("Cannot send message to yourself")
                 const user = await sql.user.user(recipient)
                 if (!user) return res.status(400).send("Invalid recipients")
+                if (r18 && !user.showR18) return res.status(400).send("Cannot send r18 message")
             }
-            const messageID = await sql.message.insertMessage(req.session.username, title, content)
+            const messageID = await sql.message.insertMessage(req.session.username, title, content, r18)
             await sql.message.bulkInsertRecipients(messageID, recipients)
             for (const recipient of recipients) {
                 pushNotification(recipient)
@@ -65,7 +66,7 @@ const MessageRoutes = (app: Express) => {
 
     app.put("/api/message/edit", csrfProtection, messageUpdateLimiter, async (req: Request, res: Response) => {
         try {
-            const {messageID, title, content} = req.body
+            const {messageID, title, content, r18} = req.body
             if (!req.session.username) return res.status(403).send("Unauthorized")
             if (!title || !content) return res.status(400).send("Bad title or content")
             const badTitle = functions.validateTitle(title)
@@ -79,6 +80,7 @@ const MessageRoutes = (app: Express) => {
             }
             await sql.message.updateMessage(Number(messageID), "title", title)
             await sql.message.updateMessage(Number(messageID), "content", content)
+            await sql.message.updateMessage(Number(messageID), "r18", r18)
             res.status(200).send("Success")
         } catch (e) {
             console.log(e)
@@ -98,6 +100,7 @@ const MessageRoutes = (app: Express) => {
                     canView = true
                 }
             }
+            if (message.r18 && !req.session.showR18) canView = false
             if (!canView && !permissions.isMod(req.session)) return res.status(403).send("No permission to view")
             res.status(200).json(message)
         } catch (e) {
@@ -126,7 +129,7 @@ const MessageRoutes = (app: Express) => {
 
     app.post("/api/message/reply", csrfProtection, messageUpdateLimiter, async (req: Request, res: Response) => {
         try {
-            const {messageID, content} = req.body
+            const {messageID, content, r18} = req.body
             if (!req.session.username) return res.status(403).send("Unauthorized")
             if (req.session.banned) return res.status(403).send("You are banned")
             if (!messageID || !content) return res.status(400).send("Bad messageID or content")
@@ -140,9 +143,10 @@ const MessageRoutes = (app: Express) => {
                     canReply = true
                 }
             }
+            if (message.r18 && !req.session.showR18) canReply = false
             if (!canReply && !permissions.isMod(req.session)) return res.status(403).send("No permission to reply")
             if (message.role === "system") return res.status(403).send("Cannot reply to system messages")
-            await sql.message.insertMessageReply(Number(messageID), req.session.username, content)
+            await sql.message.insertMessageReply(Number(messageID), req.session.username, content, r18)
             await sql.message.updateMessage(Number(messageID), "updater", req.session.username)
             await sql.message.updateMessage(Number(messageID), "updatedDate", new Date().toISOString())
             await sql.message.updateMessage(Number(messageID), "delete", false)
@@ -178,8 +182,12 @@ const MessageRoutes = (app: Express) => {
                     canView = true
                 }
             }
+            if (message.r18 && !req.session.showR18) canView = false
             if (!canView && !permissions.isMod(req.session)) return res.status(403).send("No permission to view replies")
-            const result = await sql.message.messageReplies(Number(messageID), offset)
+            let result = await sql.message.messageReplies(Number(messageID), offset)
+            if (!req.session.showR18) {
+                result = result.filter((r: any) => !r.r18)
+            }
             res.status(200).json(result)
         } catch (e) {
             console.log(e)
@@ -189,7 +197,7 @@ const MessageRoutes = (app: Express) => {
 
     app.put("/api/message/reply/edit", csrfProtection, messageUpdateLimiter, async (req: Request, res: Response) => {
         try {
-            const {replyID, content} = req.body
+            const {replyID, content, r18} = req.body
             if (!req.session.username) return res.status(403).send("Unauthorized")
             if (!replyID || !content) return res.status(400).send("Bad replyID or content")
             const badReply = functions.validateReply(content)
@@ -201,6 +209,7 @@ const MessageRoutes = (app: Express) => {
             }
             await sql.message.updateMessageReply(Number(replyID), "content", content)
             await sql.message.updateMessageReply(Number(replyID), "updatedDate", new Date().toISOString())
+            await sql.message.updateMessageReply(Number(replyID), "r18", r18)
             res.status(200).send("Success")
         } catch (e) {
             console.log(e)
@@ -357,6 +366,7 @@ const MessageRoutes = (app: Express) => {
                 if (req.session.username === recipient) return res.status(400).send("Cannot send message to yourself")
                 const user = await sql.user.user(recipient)
                 if (!user) return res.status(400).send("Invalid recipients")
+                if (message.r18 && !user.showR18) return res.status(400).send("Cannot send r18 message")
             }
             let toAdd = recipients.filter((r: string) => !message.recipients.includes(r))
             let toRemove = message.recipients.filter((r: string) => !recipients.includes(r))

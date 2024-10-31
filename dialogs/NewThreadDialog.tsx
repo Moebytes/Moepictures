@@ -6,6 +6,9 @@ SessionContext, SiteHueContext, SiteLightnessContext, SiteSaturationContext, Ses
 import functions from "../structures/Functions"
 import Draggable from "react-draggable"
 import emojiSelect from "../assets/icons/emoji-select.png"
+import lewdIcon from "../assets/icons/lewd.png"
+import radioButton from "../assets/icons/radiobutton.png"
+import radioButtonChecked from "../assets/icons/radiobutton-checked.png"
 import "./styles/dialog.less"
 
 const NewThreadDialog: React.FunctionComponent = (props) => {
@@ -26,6 +29,7 @@ const NewThreadDialog: React.FunctionComponent = (props) => {
     const [showEmojiDropdown, setShowEmojiDropdown] = useState(false)
     const [threadTitle, setThreadTitle] = useState("")
     const [threadContent, setThreadContent] = useState("")
+    const [r18, setR18] = useState(false)
     const [error, setError] = useState(false)
     const emojiRef = useRef(null) as any
     const dialogRef = useRef(null) as any
@@ -68,7 +72,7 @@ const NewThreadDialog: React.FunctionComponent = (props) => {
             return setError(false)
         }
         try {
-            const thread = await functions.post("/api/thread/create", {title: threadTitle, content: threadContent}, session, setSessionFlag)
+            const thread = await functions.post("/api/thread/create", {title: threadTitle, content: threadContent, r18}, session, setSessionFlag)
             setShowNewThreadDialog(false)
             if (thread.threadID) history.push(`/thread/${thread.threadID}`)
         } catch {
@@ -168,6 +172,12 @@ const NewThreadDialog: React.FunctionComponent = (props) => {
                         <div className="dialog-row">
                             <textarea className="dialog-textarea" ref={textAreaRef} style={{resize: "vertical", height: "330px"}} spellCheck={false} value={threadContent} onChange={(event) => setThreadContent(event.target.value)}></textarea>
                         </div>
+                        {session.showR18 ?
+                        <div className="dialog-row">
+                            <img className="dialog-checkbox" src={r18 ? radioButtonChecked : radioButton} onClick={() => setR18((prev: boolean) => !prev)} style={{marginLeft: "0px", filter: getFilter()}}/>
+                            <span className="dialog-text" style={{marginLeft: "10px"}}>R18</span>
+                            <img className="dialog-title-img" src={lewdIcon} style={{marginLeft: "15px", height: "50px", filter: getFilter()}}/>
+                        </div> : null}
                         {error ? <div className="dialog-validation-container"><span className="dialog-validation" ref={errorRef}></span></div> : null}
                         <div className="dialog-row">
                             <button onClick={() => click("reject")} className="dialog-button">{"Cancel"}</button>

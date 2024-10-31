@@ -1,16 +1,23 @@
 import React, {useEffect, useContext, useState, useRef, useReducer} from "react"
 import {useHistory} from "react-router-dom"
 import {HideNavbarContext, HideSidebarContext, ThemeContext, EnableDragContext, EditReplyIDContext, EditReplyFlagContext,
-EditReplyContentContext, HideTitlebarContext, SessionContext, EmojisContext, MobileContext} from "../Context"
+EditReplyContentContext, EditReplyR18Context, HideTitlebarContext, SessionContext, EmojisContext, MobileContext, SiteHueContext,
+SiteSaturationContext, SiteLightnessContext} from "../Context"
 import functions from "../structures/Functions"
 import "./styles/dialog.less"
 import Draggable from "react-draggable"
 import emojiSelect from "../assets/icons/emoji-select.png"
 import permissions from "../structures/Permissions"
+import lewdIcon from "../assets/icons/lewd.png"
+import radioButton from "../assets/icons/radiobutton.png"
+import radioButtonChecked from "../assets/icons/radiobutton-checked.png"
 
 const EditReplyDialog: React.FunctionComponent = (props) => {
     const [ignored, forceUpdate] = useReducer(x => x + 1, 0)
     const {theme, setTheme} = useContext(ThemeContext)
+    const {siteHue, setSiteHue} = useContext(SiteHueContext)
+    const {siteSaturation, setSiteSaturation} = useContext(SiteSaturationContext)
+    const {siteLightness, setSiteLightness} = useContext(SiteLightnessContext)
     const {hideNavbar, setHideNavbar} = useContext(HideNavbarContext)
     const {hideTitlebar, setHideTitlebar} = useContext(HideTitlebarContext)
     const {hideSidebar, setHideSidebar} = useContext(HideSidebarContext)
@@ -18,6 +25,7 @@ const EditReplyDialog: React.FunctionComponent = (props) => {
     const {editReplyID, setEditReplyID} = useContext(EditReplyIDContext)
     const {editReplyFlag, setEditReplyFlag} = useContext(EditReplyFlagContext)
     const {editReplyContent, setEditReplyContent} = useContext(EditReplyContentContext)
+    const {editReplyR18, setEditReplyR18} = useContext(EditReplyR18Context)
     const {session, setSession} = useContext(SessionContext)
     const {mobile, setMobile} = useContext(MobileContext)
     const {emojis, setEmojis} = useContext(EmojisContext)
@@ -28,6 +36,10 @@ const EditReplyDialog: React.FunctionComponent = (props) => {
     const dialogRef = useRef(null) as any
     const textAreaRef = useRef(null) as any
     const history = useHistory()
+
+    const getFilter = () => {
+        return `hue-rotate(${siteHue - 180}deg) saturate(${siteSaturation}%) brightness(${siteLightness + 70}%)`
+    }
 
     useEffect(() => {
         document.title = "Edit Reply"
@@ -130,6 +142,12 @@ const EditReplyDialog: React.FunctionComponent = (props) => {
                         <div className="dialog-row">
                             <textarea className="dialog-textarea" ref={textAreaRef} style={{resize: "vertical", height: "200px"}} spellCheck={false} value={editReplyContent} onChange={(event) => setEditReplyContent(event.target.value)}></textarea>
                         </div>
+                        {session.showR18 ?
+                        <div className="dialog-row">
+                            <img className="dialog-checkbox" src={editReplyR18 ? radioButtonChecked : radioButton} onClick={() => setEditReplyR18((prev: boolean) => !prev)} style={{marginLeft: "0px", filter: getFilter()}}/>
+                            <span className="dialog-text" style={{marginLeft: "10px"}}>R18</span>
+                            <img className="dialog-title-img" src={lewdIcon} style={{marginLeft: "15px", height: "50px", filter: getFilter()}}/>
+                        </div> : null}
                         {error ? <div className="dialog-validation-container"><span className="dialog-validation" ref={errorRef}></span></div> : null}
                         <div className="dialog-row">
                             <button onClick={() => click("reject")} className="dialog-button">{"Cancel"}</button>

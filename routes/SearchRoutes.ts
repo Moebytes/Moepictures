@@ -99,7 +99,7 @@ const SearchRoutes = (app: Express) => {
                 const [h, username] = query.split(":")
                 if (!permissions.isPremium(req.session)) return res.status(402).send("Premium only")
                 if (username !== req.session.username && !permissions.isAdmin(req.session)) return res.status(403).send("Unauthorized")
-                let history = await sql.history.userSearchHistory(username, limit, offset, type, restrict, style, sort, req.session.username)
+                let history = await sql.history.userSearchHistory(username, limit, offset, "", type, restrict, style, sort, req.session.username)
                 result = history.map((h: any) => ({postCount: h.historyCount, ...h.post}))
             } else {
                 result = await sql.search.search(tags, type, restrict, style, sort, offset, limit, withTags, req.session.username)
@@ -434,10 +434,11 @@ const SearchRoutes = (app: Express) => {
             const rulesThread = stickyThreads.find((thread: any) => thread.title.toLowerCase().includes("rules"))
             stickyThreads = functions.removeItem(stickyThreads, rulesThread)
             const threadResult = await sql.thread.searchThreads(search, sort, offset, req.session.username)
-            const result = [rulesThread, ...stickyThreads, ...threadResult]
+            let result = [rulesThread, ...stickyThreads, ...threadResult]
             const newThreadCount = (stickyThreads[0]?.threadCount || 0) + (threadResult[0]?.threadCount || 0)
-            for (let i = 0; i < result.length; i++) {
-                result[i].threadCount = newThreadCount
+            result = result.map((t: any) => ({...t, threadCount: newThreadCount}))
+            if (!req.session.showR18) {
+                result = result.filter((t: any) => !t.r18)
             }
             res.status(200).json(result)
         } catch (e) {
@@ -459,6 +460,10 @@ const SearchRoutes = (app: Express) => {
             let filtered = [] as any
             let messageCount = messages[0]?.messageCount || 0
             for (const message of messages) {
+                if (message.r18 && !req.session.showR18) {
+                    messageCount--
+                    continue
+                }
                 if (hideSystem && message.creator === "moepictures") {
                     messageCount--
                     continue

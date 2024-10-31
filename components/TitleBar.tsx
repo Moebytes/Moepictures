@@ -48,6 +48,7 @@ const darkColorList = {
     "--progressBG": "#000000",
     "--audioPlayerColor": "#130737",
     "--buttonBG": "#ff11af",
+    "--r18BGColor": "#5603033d",
 }
 
 const lightColorList = {
@@ -83,6 +84,7 @@ const lightColorList = {
     "--progressBG": "#ffffff",
     "--audioPlayerColor": "#fbfaff",
     "--buttonBG": "#ff92ff",
+    "--r18BGColor": "#e206444a",
 }
 
 interface Props {
@@ -136,7 +138,8 @@ const TitleBar: React.FunctionComponent<Props> = (props) => {
         let targetLightness = siteLightness
         if (theme.includes("light") && siteLightness > 50) targetLightness = 50
         let noRotation = [
-            "--buttonBG"
+            "--buttonBG",
+            "--r18BGColor"
         ]
         for (let i = 0; i < Object.keys(colorList).length; i++) {
             const key = Object.keys(colorList)[i]

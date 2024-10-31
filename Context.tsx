@@ -142,6 +142,7 @@ export const EditThreadIDContext = React.createContext<any>(null)
 export const EditThreadFlagContext = React.createContext<any>(null)
 export const EditThreadTitleContext = React.createContext<any>(null)
 export const EditThreadContentContext = React.createContext<any>(null)
+export const EditThreadR18Context = React.createContext<any>(null)
 export const ShowNewThreadDialogContext = React.createContext<any>(null)
 export const DeleteThreadIDContext = React.createContext<any>(null)
 export const DeleteThreadFlagContext = React.createContext<any>(null)
@@ -150,6 +151,7 @@ export const DeleteReplyFlagContext = React.createContext<any>(null)
 export const EditReplyIDContext = React.createContext<any>(null)
 export const EditReplyFlagContext = React.createContext<any>(null)
 export const EditReplyContentContext = React.createContext<any>(null)
+export const EditReplyR18Context = React.createContext<any>(null)
 export const ReportReplyIDContext = React.createContext<any>(null)
 export const ReportThreadIDContext = React.createContext<any>(null)
 export const BanNameContext = React.createContext<any>(null)
@@ -174,11 +176,13 @@ export const EditMessageIDContext = React.createContext<any>(null)
 export const EditMessageFlagContext = React.createContext<any>(null)
 export const EditMessageTitleContext = React.createContext<any>(null)
 export const EditMessageContentContext = React.createContext<any>(null)
+export const EditMessageR18Context = React.createContext<any>(null)
 export const DeleteMsgReplyIDContext = React.createContext<any>(null)
 export const DeleteMsgReplyFlagContext = React.createContext<any>(null)
 export const EditMsgReplyIDContext = React.createContext<any>(null)
 export const EditMsgReplyFlagContext = React.createContext<any>(null)
 export const EditMsgReplyContentContext = React.createContext<any>(null)
+export const EditMsgReplyR18Context = React.createContext<any>(null)
 export const SoftDeleteMessageIDContext = React.createContext<any>(null)
 export const SoftDeleteMessageFlagContext = React.createContext<any>(null)
 export const HasNotificationContext = React.createContext<any>(null)
@@ -365,11 +369,13 @@ const Context: React.FunctionComponent = (props) => {
     const [editThreadFlag, setEditThreadFlag] = useState(null)
     const [editThreadTitle, setEditThreadTitle] = useState(null)
     const [editThreadContent, setEditThreadContent] = useState(null)
+    const [editThreadR18, setEditThreadR18] = useState(false)
     const [deleteReplyID, setDeleteReplyID] = useState(null)
     const [deleteReplyFlag, setDeleteReplyFlag] = useState(false)
     const [editReplyFlag, setEditReplyFlag] = useState(false)
     const [editReplyID, setEditReplyID] = useState(null)
     const [editReplyContent, setEditReplyContent] = useState("")
+    const [editReplyR18, setEditReplyR18] = useState(false)
     const [reportReplyID, setReportReplyID] = useState(null)
     const [reportThreadID, setReportThreadID] = useState(null)
     const [banName, setBanName] = useState(null)
@@ -393,11 +399,13 @@ const Context: React.FunctionComponent = (props) => {
     const [editMessageFlag, setEditMessageFlag] = useState(null)
     const [editMessageTitle, setEditMessageTitle] = useState(null)
     const [editMessageContent, setEditMessageContent] = useState(null)
+    const [editMessageR18, setEditMessageR18] = useState(false)
     const [deleteMsgReplyID, setDeleteMsgReplyID] = useState(null)
     const [deleteMsgReplyFlag, setDeleteMsgReplyFlag] = useState(false)
     const [editMsgReplyFlag, setEditMsgReplyFlag] = useState(false)
     const [editMsgReplyID, setEditMsgReplyID] = useState(null)
     const [editMsgReplyContent, setEditMsgReplyContent] = useState("")
+    const [editMsgReplyR18, setEditMsgReplyR18] = useState(false)
     const [showUpscaled, setShowUpscaled] = useState(false)
     const [helpTab, setHelpTab] = useState("help")
     const [deleteSearchHistoryID, setDeleteSearchHistoryID] = useState(null)
@@ -521,10 +529,12 @@ return (
         <ShowUpscaledContext.Provider value={{showUpscaled, setShowUpscaled}}>
         <SoftDeleteMessageFlagContext.Provider value={{softDeleteMessageFlag, setSoftDeleteMessageFlag}}>
         <SoftDeleteMessageIDContext.Provider value={{softDeleteMessageID, setSoftDeleteMessageID}}>
+        <EditMessageR18Context.Provider value={{editMessageR18, setEditMessageR18}}>
         <EditMessageContentContext.Provider value={{editMessageContent, setEditMessageContent}}>
         <EditMessageTitleContext.Provider value={{editMessageTitle, setEditMessageTitle}}>
         <EditMessageFlagContext.Provider value={{editMessageFlag, setEditMessageFlag}}>
         <EditMessageIDContext.Provider value={{editMessageID, setEditMessageID}}>
+        <EditMsgReplyR18Context.Provider value={{editMsgReplyR18, setEditMsgReplyR18}}>
         <EditMsgReplyContentContext.Provider value={{editMsgReplyContent, setEditMsgReplyContent}}>
         <EditMsgReplyIDContext.Provider value={{editMsgReplyID, setEditMsgReplyID}}>
         <EditMsgReplyFlagContext.Provider value={{editMsgReplyFlag, setEditMsgReplyFlag}}>
@@ -548,6 +558,7 @@ return (
         <UnbanNameContext.Provider value={{unbanName, setUnbanName}}>
         <BanNameContext.Provider value={{banName, setBanName}}>
         <ReportThreadIDContext.Provider value={{reportThreadID, setReportThreadID}}>
+        <EditThreadR18Context.Provider value={{editThreadR18, setEditThreadR18}}>
         <EditThreadContentContext.Provider value={{editThreadContent, setEditThreadContent}}>
         <EditThreadTitleContext.Provider value={{editThreadTitle, setEditThreadTitle}}>
         <EditThreadFlagContext.Provider value={{editThreadFlag, setEditThreadFlag}}>
@@ -555,6 +566,7 @@ return (
         <DeleteThreadFlagContext.Provider value={{deleteThreadFlag, setDeleteThreadFlag}}>
         <DeleteThreadIDContext.Provider value={{deleteThreadID, setDeleteThreadID}}>
         <ReportReplyIDContext.Provider value={{reportReplyID, setReportReplyID}}>
+        <EditReplyR18Context.Provider value={{editReplyR18, setEditReplyR18}}>
         <EditReplyContentContext.Provider value={{editReplyContent, setEditReplyContent}}>
         <EditReplyIDContext.Provider value={{editReplyID, setEditReplyID}}>
         <EditReplyFlagContext.Provider value={{editReplyFlag, setEditReplyFlag}}>
@@ -790,6 +802,7 @@ return (
         </EditReplyFlagContext.Provider>
         </EditReplyIDContext.Provider>
         </EditReplyContentContext.Provider>
+        </EditReplyR18Context.Provider>
         </ReportReplyIDContext.Provider>
         </DeleteThreadIDContext.Provider>
         </DeleteThreadFlagContext.Provider>
@@ -797,6 +810,7 @@ return (
         </EditThreadFlagContext.Provider>
         </EditThreadTitleContext.Provider>
         </EditThreadContentContext.Provider>
+        </EditThreadR18Context.Provider>
         </ReportThreadIDContext.Provider>
         </BanNameContext.Provider>
         </UnbanNameContext.Provider>
@@ -820,10 +834,12 @@ return (
         </EditMsgReplyFlagContext.Provider>
         </EditMsgReplyIDContext.Provider>
         </EditMsgReplyContentContext.Provider>
+        </EditMsgReplyR18Context.Provider>
         </EditMessageIDContext.Provider>
         </EditMessageFlagContext.Provider>
         </EditMessageTitleContext.Provider>
         </EditMessageContentContext.Provider>
+        </EditMessageR18Context.Provider>
         </SoftDeleteMessageIDContext.Provider>
         </SoftDeleteMessageFlagContext.Provider>
         </ShowUpscaledContext.Provider>

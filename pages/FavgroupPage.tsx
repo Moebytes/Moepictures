@@ -87,10 +87,10 @@ const FavgroupPage: React.FunctionComponent<Props> = (props) => {
 
     const favgroupInfo = async () => {
         let favgroup = await functions.get("/api/favgroup", {name: favgroupName, username}, session, setSessionFlag).catch(() => null)
-        if (!favgroup) return functions.replaceLocation("/403")
+        if (!favgroup) return functions.replaceLocation("/404")
         if (favgroup.restrict === "explicit") {
             if (!session.cookie) return
-            if (!session.showR18) return functions.replaceLocation("/403")
+            if (!session.showR18) return functions.replaceLocation("/404")
         }
         setFavgroup(favgroup)
     }

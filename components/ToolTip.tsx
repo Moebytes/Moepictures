@@ -1,7 +1,8 @@
 import React, {useContext, useEffect, useRef, useState} from "react"
 import {useHistory} from "react-router-dom"
 import {ThemeContext, SessionContext, EnableDragContext, ToolTipXContext, ToolTipYContext, ToolTipEnabledContext, ToolTipPostContext,
-ToolTipImgContext, DownloadFlagContext, DownloadIDsContext, SelectionModeContext, SessionFlagContext, ActionBannerContext} from "../Context"
+ToolTipImgContext, DownloadFlagContext, DownloadIDsContext, SelectionModeContext, SessionFlagContext, ActionBannerContext, SearchContext,
+SearchFlagContext} from "../Context"
 import {HashLink as Link} from "react-router-hash-link"
 import functions from "../structures/Functions"
 import "./styles/tooltip.less"
@@ -36,6 +37,8 @@ const ToolTip: React.FunctionComponent = (props) => {
     const {tooltipImg, setToolTipImg} = useContext(ToolTipImgContext)
     const {selectionMode, setSelectionMode} = useContext(SelectionModeContext)
     const {actionBanner, setActionBanner} = useContext(ActionBannerContext)
+    const {search, setSearch} = useContext(SearchContext)
+    const {searchFlag, setSearchFlag} = useContext(SearchFlagContext)
     const [tags, setTags] = useState(null) as any
     const [artist, setArtist] = useState(null) as any
     const scrollRef = useRef(null) as any
@@ -154,13 +157,18 @@ const ToolTip: React.FunctionComponent = (props) => {
         if (artist.social?.includes("sketchfab.com")) return window.open(artist.social, "_blank")
         if (artist.twitter) return window.open(artist.twitter, "_blank")
     }
+
+    const searchArtist = () => {
+        setSearch(artist.tag)
+        setSearchFlag(true)
+    }
  
     return (
         <div className="tooltip" style={getStyle()} onMouseEnter={() => setToolTipEnabled(true)} onMouseLeave={() => setToolTipEnabled(false)}>
             <div className="tooltip-row">
                 <div className="tooltip-artist-container">
                     <img className="tooltip-img" src={functions.getTagLink(artist.type, artist.image)}/>
-                    <span className={`tooltip-artist-tag ${tooltipPost?.hidden ? "strikethrough" : ""}`} style={{marginRight: "5px"}} onClick={openArtist}>{artist.tag}</span>
+                    <span className={`tooltip-artist-tag ${tooltipPost?.hidden ? "strikethrough" : ""}`} style={{marginRight: "5px"}} onClick={searchArtist} onAuxClick={openArtist}>{artist.tag}</span>
                     <img className="tooltip-img-small" src={tagIcon} onClick={() => copyTags()} onContextMenu={(event) => {event.preventDefault(); copyTags(true, true)}}/>
                 </div>
                 <div className="tooltip-artist-container">
@@ -173,7 +181,7 @@ const ToolTip: React.FunctionComponent = (props) => {
                     <span className={`tooltip-artist-tag ${tooltipPost?.hidden ? "strikethrough" : ""}`}>{tooltipPost.translatedTitle}</span>
                     <span className={`tooltip-artist-tag ${tooltipPost?.hidden ? "strikethrough" : ""}`}>{functions.formatDate(new Date(tooltipPost.drawn))}</span>
                 </div>
-                <div className="tooltip-tag-container">
+                <div className="tooltip-tag-container" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                     {getTagsJSX()}
                 </div>
             </div>

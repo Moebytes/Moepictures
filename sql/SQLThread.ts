@@ -4,14 +4,14 @@ import functions from "../structures/Functions"
 
 export default class SQLThread {
     /** Insert thread. */
-    public static insertThread = async (creator: string, title: string, content: string) => {
+    public static insertThread = async (creator: string, title: string, content: string, r18: boolean) => {
         const now = new Date().toISOString()
         const sticky = false
         const locked = false
         const query: QueryArrayConfig = {
-            text: /*sql*/`INSERT INTO threads ("creator", "createDate", "updater", "updatedDate", "sticky", "locked", "title", "content") VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING "threadID"`,
+            text: /*sql*/`INSERT INTO threads ("creator", "createDate", "updater", "updatedDate", "sticky", "locked", "title", "content", "r18") VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING "threadID"`,
             rowMode: "array",
-            values: [creator, now, creator, now, sticky, locked, title, content]
+            values: [creator, now, creator, now, sticky, locked, title, content, r18]
         }
         const result = await SQLQuery.run(query)
         return result.flat(Infinity)[0] as number
@@ -126,12 +126,12 @@ export default class SQLThread {
     }
 
     /** Insert reply. */
-    public static insertReply = async (threadID: number, creator: string, content: string) => {
+    public static insertReply = async (threadID: number, creator: string, content: string, r18: boolean) => {
         const now = new Date().toISOString()
         const query: QueryArrayConfig = {
-            text: /*sql*/`INSERT INTO replies ("threadID", "creator", "createDate", "updatedDate", "content") VALUES ($1, $2, $3, $4, $5) RETURNING "replyID"`,
+            text: /*sql*/`INSERT INTO replies ("threadID", "creator", "createDate", "updatedDate", "content", "r18") VALUES ($1, $2, $3, $4, $5, $6) RETURNING "replyID"`,
             rowMode: "array",
-            values: [threadID, creator, now, now, content]
+            values: [threadID, creator, now, now, content, r18]
         }
         const result = await SQLQuery.run(query)
         return result.flat(Infinity)[0] as number

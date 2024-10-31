@@ -143,10 +143,10 @@ const SignUpPage: React.FunctionComponent = (props) => {
             await functions.post("/api/user/signup", {username, email, password, captchaResponse}, session, setSessionFlag)
             setSubmitted(true)
             setError(false)
-        } catch (err) {
+        } catch (err: any) {
             let errMsg = "Bad username, password, email, or captcha."
-            if (String(err).includes("Too many accounts created")) errMsg = "Too many accounts created, try again later."
-            if (String(err).includes("IP banned")) errMsg = "This IP is associated with a banned account."
+            if (err.response?.data.includes("Too many accounts created")) errMsg = "Too many accounts created, try again later."
+            if (err.response?.data.includes("IP banned")) errMsg = "This IP is associated with a banned account."
             errorRef.current!.innerText = errMsg
             await functions.timeout(2000)
             setError(false)

@@ -354,7 +354,10 @@ const Message: React.FunctionComponent<Props> = (props) => {
                     <div className="message-row" style={{width: "100%"}}>
                         <img draggable={false} className="message-opt-icon" src={getReadIcon()} onClick={toggleRead} style={{filter: getFilter()}}/>
                         <img draggable={false} className="message-opt-icon" src={softDelete} onClick={toggleSoftDelete} style={{filter: getFilter()}}/>
-                        <span className={`message-title ${readStatus() ? "message-read" : ""}`} onClick={messagePage} onAuxClick={messagePage}>{props.message.title}</span>
+                        <span className={`message-title ${readStatus() ? "message-read" : ""}`} onClick={messagePage} onAuxClick={messagePage}>
+                            {props.message.r18 ? <span style={{color: "var(--r18Color)", marginRight: "10px"}}>[R18]</span> : null}
+                            {props.message.title}
+                        </span>
                     </div>
                     {!mobile ? <div className="message-row">
                         {generateCreatorJSX()}

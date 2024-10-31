@@ -162,7 +162,7 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
         }
         if (post.restrict === "explicit") {
             if (!session.showR18) {
-                functions.replaceLocation("/403")
+                functions.replaceLocation("/404")
             } else {
                 setLoaded(true)
             }

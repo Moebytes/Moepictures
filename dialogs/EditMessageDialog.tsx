@@ -1,16 +1,23 @@
 import React, {useEffect, useContext, useState, useRef, useReducer} from "react"
 import {useHistory} from "react-router-dom"
-import {HideNavbarContext, HideSidebarContext, ThemeContext, EnableDragContext, EditMessageIDContext, EditMessageFlagContext,
-EditMessageTitleContext, EditMessageContentContext, HideTitlebarContext, SessionContext, EmojisContext, MobileContext} from "../Context"
+import {HideNavbarContext, HideSidebarContext, ThemeContext, EnableDragContext, EditMessageIDContext, EditMessageFlagContext, MobileContext,
+EditMessageTitleContext, EditMessageContentContext, EditMessageR18Context, HideTitlebarContext, SessionContext, EmojisContext,
+SiteHueContext, SiteLightnessContext, SiteSaturationContext} from "../Context"
 import functions from "../structures/Functions"
 import "./styles/dialog.less"
 import Draggable from "react-draggable"
 import emojiSelect from "../assets/icons/emoji-select.png"
 import permissions from "../structures/Permissions"
+import lewdIcon from "../assets/icons/lewd.png"
+import radioButton from "../assets/icons/radiobutton.png"
+import radioButtonChecked from "../assets/icons/radiobutton-checked.png"
 
 const EditMessageDialog: React.FunctionComponent = (props) => {
     const [ignored, forceUpdate] = useReducer(x => x + 1, 0)
     const {theme, setTheme} = useContext(ThemeContext)
+    const {siteHue, setSiteHue} = useContext(SiteHueContext)
+    const {siteSaturation, setSiteSaturation} = useContext(SiteSaturationContext)
+    const {siteLightness, setSiteLightness} = useContext(SiteLightnessContext)
     const {hideNavbar, setHideNavbar} = useContext(HideNavbarContext)
     const {hideTitlebar, setHideTitlebar} = useContext(HideTitlebarContext)
     const {hideSidebar, setHideSidebar} = useContext(HideSidebarContext)
@@ -19,6 +26,7 @@ const EditMessageDialog: React.FunctionComponent = (props) => {
     const {editMessageFlag, setEditMessageFlag} = useContext(EditMessageFlagContext)
     const {editMessageTitle, setEditMessageTitle} = useContext(EditMessageTitleContext)
     const {editMessageContent, setEditMessageContent} = useContext(EditMessageContentContext)
+    const {editMessageR18, setEditMessageR18} = useContext(EditMessageR18Context)
     const {session, setSession} = useContext(SessionContext)
     const {mobile, setMobile} = useContext(MobileContext)
     const {emojis, setEmojis} = useContext(EmojisContext)
@@ -29,6 +37,10 @@ const EditMessageDialog: React.FunctionComponent = (props) => {
     const dialogRef = useRef(null) as any
     const textAreaRef = useRef(null) as any
     const history = useHistory()
+
+    const getFilter = () => {
+        return `hue-rotate(${siteHue - 180}deg) saturate(${siteSaturation}%) brightness(${siteLightness + 70}%)`
+    }
 
     useEffect(() => {
         document.title = "Edit Message"
@@ -43,13 +55,9 @@ const EditMessageDialog: React.FunctionComponent = (props) => {
         }
     }, [editMessageID])
 
-    const editMessage = async () => {
-        setEditMessageFlag(true)
-    }
-
     const click = (button: "accept" | "reject") => {
         if (button === "accept") {
-            editMessage()
+            setEditMessageFlag(true)
         } else {
             setEditMessageID(null)
         }
@@ -135,6 +143,12 @@ const EditMessageDialog: React.FunctionComponent = (props) => {
                         <div className="dialog-row">
                             <textarea className="dialog-textarea" ref={textAreaRef} style={{resize: "vertical", height: "330px"}} spellCheck={false} value={editMessageContent} onChange={(event) => setEditMessageContent(event.target.value)}></textarea>
                         </div>
+                        {session.showR18 ?
+                        <div className="dialog-row">
+                            <img className="dialog-checkbox" src={editMessageR18 ? radioButtonChecked : radioButton} onClick={() => setEditMessageR18((prev: boolean) => !prev)} style={{marginLeft: "0px", filter: getFilter()}}/>
+                            <span className="dialog-text" style={{marginLeft: "10px"}}>R18</span>
+                            <img className="dialog-title-img" src={lewdIcon} style={{marginLeft: "15px", height: "50px", filter: getFilter()}}/>
+                        </div> : null}
                         {error ? <div className="dialog-validation-container"><span className="dialog-validation" ref={errorRef}></span></div> : null}
                         <div className="dialog-row">
                             <button onClick={() => click("reject")} className="dialog-button">{"Cancel"}</button>

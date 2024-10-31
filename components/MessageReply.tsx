@@ -1,7 +1,7 @@
 import React, {useContext, useEffect, useRef, useState} from "react"
 import {useHistory} from "react-router-dom"
 import {ThemeContext, QuoteTextContext, SessionContext, SessionFlagContext, DeleteMsgReplyIDContext, DeleteMsgReplyFlagContext,
-EditMsgReplyIDContext, EditMsgReplyFlagContext, EditMsgReplyContentContext, SiteHueContext,
+EditMsgReplyIDContext, EditMsgReplyFlagContext, EditMsgReplyContentContext, EditMsgReplyR18Context, SiteHueContext,
 SiteLightnessContext, SiteSaturationContext, EnableDragContext, MobileContext, EmojisContext} from "../Context"
 import {HashLink as Link} from "react-router-hash-link"
 import functions from "../structures/Functions"
@@ -43,6 +43,7 @@ const MessageReply: React.FunctionComponent<Props> = (props) => {
     const {editMsgReplyFlag, setEditMsgReplyFlag} = useContext(EditMsgReplyFlagContext)
     const {editMsgReplyID, setEditMsgReplyID} = useContext(EditMsgReplyIDContext)
     const {editMsgReplyContent, setEditMsgReplyContent} = useContext(EditMsgReplyContentContext)
+    const {editMsgReplyR18, setEditMsgReplyR18} = useContext(EditMsgReplyR18Context)
     const {emojis, setEmojis} = useContext(EmojisContext)
     const history = useHistory()
     const reply = props.reply.reply
@@ -87,6 +88,7 @@ const MessageReply: React.FunctionComponent<Props> = (props) => {
     const parseText = () => {
         const pieces = functions.parseComment(props.reply?.content)
         let jsx = [] as any
+        if (props.reply.r18) jsx.push(<span className="reply-text" style={{color: "var(--r18Color)", marginTop: "-38px"}}>[R18]</span>)
         for (let i = 0; i < pieces.length; i++) {
             const piece = pieces[i]
             if (piece.includes(">")) {
@@ -134,7 +136,7 @@ const MessageReply: React.FunctionComponent<Props> = (props) => {
         if (!editMsgReplyContent) return
         const badReply = functions.validateReply(editMsgReplyContent)
         if (badReply) return
-        await functions.put("/api/message/reply/edit", {replyID: props.reply?.replyID, content: editMsgReplyContent}, session, setSessionFlag)
+        await functions.put("/api/message/reply/edit", {replyID: props.reply?.replyID, content: editMsgReplyContent, r18: editMsgReplyR18}, session, setSessionFlag)
         props.onEdit?.()
     }
 
@@ -144,11 +146,12 @@ const MessageReply: React.FunctionComponent<Props> = (props) => {
             setEditMsgReplyFlag(false)
             setEditMsgReplyID(null)
         }
-    }, [editMsgReplyFlag, editMsgReplyID, editMsgReplyContent, session])
+    }, [editMsgReplyFlag, editMsgReplyID, editMsgReplyContent, editMsgReplyR18, session])
 
     const editReplyDialog = async () => {
         setEditMsgReplyContent(props.reply?.content)
         setEditMsgReplyID(props.reply?.replyID)
+        setEditMsgReplyR18(props.reply?.r18)
     }
 
     const replyOptions = () => {
@@ -253,7 +256,7 @@ const MessageReply: React.FunctionComponent<Props> = (props) => {
     }
 
     return (
-        <div className="reply" reply-id={props.reply?.replyID}>
+        <div className="reply" reply-id={props.reply?.replyID} style={{backgroundColor: props.reply.r18 ? "var(--r18BGColor)" : ""}}>
             <div className="reply-container">
                 <div className="reply-user-container">
                     {generateUsernameJSX()}

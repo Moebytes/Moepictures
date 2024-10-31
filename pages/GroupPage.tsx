@@ -97,7 +97,7 @@ const GroupPage: React.FunctionComponent<Props> = (props) => {
         if (!group) return functions.replaceLocation("/404")
         if (group.restrict === "explicit") {
             if (!session.cookie) return
-            if (!session.showR18) return functions.replaceLocation("/403")
+            if (!session.showR18) return functions.replaceLocation("/404")
         }
         setGroup(group)
     }

@@ -5,7 +5,7 @@ DeleteSearchHistoryFlagContext} from "../Context"
 import functions from "../structures/Functions"
 import searchHistoryDelete from "../assets/icons/delete.png"
 import cryptoFunctions from "../structures/CryptoFunctions"
-import "./styles/searchhistoryrow.less"
+import "./styles/historyrow.less"
 import path from "path"
 
 interface Props {
@@ -52,10 +52,10 @@ const SearchHistoryRow: React.FunctionComponent<Props> = (props) => {
 
     const searchHistoryOptions = () => {
         return (
-            <div className="searchhistoryrow-options">
-                <div className="searchhistoryrow-options-container" onClick={deleteSearchHistoryDialog}>
-                    <img className="searchhistoryrow-options-img" src={searchHistoryDelete}/>
-                    <span className="searchhistoryrow-options-text">Delete</span>
+            <div className="historyrow-options">
+                <div className="historyrow-options-container" onClick={deleteSearchHistoryDialog}>
+                    <img className="historyrow-options-img" src={searchHistoryDelete}/>
+                    <span className="historyrow-options-text">Delete</span>
                 </div>
             </div>
         )
@@ -108,28 +108,28 @@ const SearchHistoryRow: React.FunctionComponent<Props> = (props) => {
         const mapped = Object.values(props.history.post.mirrors) as string[]
         return mapped.map((m, i) => {
             let append = i !== mapped.length - 1 ? ", " : ""
-            return <span className="searchhistoryrow-label-link" onClick={() => window.open(m, "_blank")}>{getDomain(m) + append}</span>
+            return <span className="historyrow-label-link" onClick={() => window.open(m, "_blank")}>{getDomain(m) + append}</span>
         })
     }
 
     return (
-        <div className="searchhistoryrow">
+        <div className="historyrow">
             {searchHistoryOptions()}
-            <div className="searchhistoryrow-container">
-                {functions.isVideo(img) ? <video className="searchhistoryrow-img" autoPlay muted loop disablePictureInPicture src={img} onClick={imgClick} onAuxClick={imgClick}></video> :
-                functions.isGIF(img) ? <img className="searchhistoryrow-img" src={img} onClick={imgClick} onAuxClick={imgClick}/> : 
-                <canvas className="searchhistoryrow-img" ref={ref} onClick={imgClick} onAuxClick={imgClick}></canvas>}
+            <div className="historyrow-container">
+                {functions.isVideo(img) ? <video className="historyrow-img" autoPlay muted loop disablePictureInPicture src={img} onClick={imgClick} onAuxClick={imgClick}></video> :
+                functions.isGIF(img) ? <img className="historyrow-img" src={img} onClick={imgClick} onAuxClick={imgClick}/> : 
+                <canvas className="historyrow-img" ref={ref} onClick={imgClick} onAuxClick={imgClick}></canvas>}
             </div>
-            <div className="searchhistoryrow-container-row">
-                <div className="searchhistoryrow-container">
-                    <div className="searchhistoryrow-user-container">
-                        <span className="searchhistoryrow-user-text">Viewed on {functions.prettyDate(new Date(props.history.viewDate))}</span>
-                        <span className="searchhistoryrow-text"><span className="searchhistoryrow-label-text">Title:</span> {props.history.post.title || "None"}</span>
-                        {props.history.post.translatedTitle ? <span className="searchhistoryrow-text"><span className="searchhistoryrow-label-text">Translated:</span> {props.history.post.translatedTitle}</span> : null}
-                        <span className="searchhistoryrow-text"><span className="searchhistoryrow-label-text">Drawn:</span> {props.history.post.drawn ? functions.formatDate(new Date(props.history.post.drawn)) : "Unknown"}</span>
-                        <span className="searchhistoryrow-text"><span className="searchhistoryrow-label-text">Artist:</span> {props.history.post.artist ? props.history.post.artist : "Unknown"}</span>
-                        <span className="searchhistoryrow-text"><span className="searchhistoryrow-label-text">Link:</span> <span className="searchhistoryrow-label-link" onClick={() => window.open(props.history.post.link, "_blank")}>{getDomain(props.history.post.link)}</span></span>
-                        {props.history.post.mirrors ? <span className="searchhistoryrow-text"><span className="searchhistoryrow-label-text">Mirrors:</span> {printMirrors()}</span> : null}
+            <div className="historyrow-container-row">
+                <div className="historyrow-container">
+                    <div className="historyrow-user-container">
+                        <span className="historyrow-user-text">Viewed on {functions.prettyDate(new Date(props.history.viewDate))}</span>
+                        <span className="historyrow-text"><span className="historyrow-label-text-strong">Title:</span> {props.history.post.title || "None"}</span>
+                        {props.history.post.translatedTitle ? <span className="historyrow-text"><span className="historyrow-label-text-strong">Translated:</span> {props.history.post.translatedTitle}</span> : null}
+                        <span className="historyrow-text"><span className="historyrow-label-text-strong">Drawn:</span> {props.history.post.drawn ? functions.formatDate(new Date(props.history.post.drawn)) : "Unknown"}</span>
+                        <span className="historyrow-text"><span className="historyrow-label-text-strong">Artist:</span> {props.history.post.artist ? props.history.post.artist : "Unknown"}</span>
+                        <span className="historyrow-text"><span className="historyrow-label-text-strong">Link:</span> <span className="historyrow-label-link" onClick={() => window.open(props.history.post.link, "_blank")}>{getDomain(props.history.post.link)}</span></span>
+                        {props.history.post.mirrors ? <span className="historyrow-text"><span className="historyrow-label-text-strong">Mirrors:</span> {printMirrors()}</span> : null}
                     </div>
                 </div>
             </div>

@@ -17,6 +17,7 @@ interface Props {
     onDelete?: () => void
     onEdit?: () => void
     current?: boolean
+    exact?: any
 }
 
 const TranslationHistoryRow: React.FunctionComponent<Props> = (props) => {
@@ -33,6 +34,7 @@ const TranslationHistoryRow: React.FunctionComponent<Props> = (props) => {
     const [userRole, setUserRole] = useState("")
     const postID = props.translationHistory.postID
     const order = props.translationHistory.order
+    let prevHistory = props.previousHistory || Boolean(props.exact)
 
     const updateUserRole = async () => {
         const user = await functions.get("/api/user", {username: props.translationHistory.updater}, session, setSessionFlag)
@@ -165,7 +167,7 @@ const TranslationHistoryRow: React.FunctionComponent<Props> = (props) => {
     }
 
     const diffText = () => {
-        if (!props.previousHistory) {
+        if (!prevHistory) {
             if (props.translationHistory.data[0].transcript === "No data") return "No data"
             return props.translationHistory.data.map((item: any) => `${item.transcript} -> ${item.translation}`)
         }

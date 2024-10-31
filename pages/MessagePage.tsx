@@ -10,7 +10,7 @@ import {ThemeContext, EnableDragContext, HideNavbarContext, HideSidebarContext, 
 RelativeContext, HideTitlebarContext, ActiveDropdownContext, HeaderTextContext, SidebarTextContext, SiteHueContext, 
 SiteLightnessContext, SiteSaturationContext, ScrollContext, MessagePageContext, ShowPageDialogContext, PageFlagContext,
 DeleteMessageIDContext, DeleteMessageFlagContext, QuoteTextContext, EditMessageIDContext, EditMessageFlagContext,
-EditMessageTitleContext, EditMessageContentContext, HasNotificationContext, SessionFlagContext, EmojisContext,
+EditMessageTitleContext, EditMessageContentContext, EditMessageR18Context, HasNotificationContext, SessionFlagContext, EmojisContext,
 ForwardMessageObjContext, MessageFlagContext} from "../Context"
 import permissions from "../structures/Permissions"
 import jsxFunctions from "../structures/JSXFunctions"
@@ -34,6 +34,9 @@ import EditMessageReplyDialog from "../dialogs/EditMessageReplyDialog"
 import ForwardMessageDialog from "../dialogs/ForwardMessageDialog"
 import favicon from "../assets/icons/favicon.png"
 import emojiSelect from "../assets/icons/emoji-select.png"
+import lewdIcon from "../assets/icons/lewd.png"
+import radioButton from "../assets/icons/radiobutton.png"
+import radioButtonChecked from "../assets/icons/radiobutton-checked.png"
 import "./styles/messagepage.less"
 
 interface Props {
@@ -68,6 +71,7 @@ const MessagePage: React.FunctionComponent<Props> = (props) => {
     const {editMessageFlag, setEditMessageFlag} = useContext(EditMessageFlagContext)
     const {editMessageTitle, setEditMessageTitle} = useContext(EditMessageTitleContext)
     const {editMessageContent, setEditMessageContent} = useContext(EditMessageContentContext)
+    const {editMessageR18, setEditMessageR18} = useContext(EditMessageR18Context)
     const {forwardMessageObj, setForwardMessageObj} = useContext(ForwardMessageObjContext)
     const {messageFlag, setMessageFlag} = useContext(MessageFlagContext)
     const {hasNotification, setHasNotification} = useContext(HasNotificationContext)
@@ -82,6 +86,7 @@ const MessagePage: React.FunctionComponent<Props> = (props) => {
     const [replyID, setReplyID] = useState(-1)
     const [replyJumpFlag, setReplyJumpFlag] = useState(false)
     const [text, setText] = useState("")
+    const [r18, setR18] = useState(false)
     const [defaultIcon, setDefaultIcon] = useState(false)
     const [showEmojiDropdown, setShowEmojiDropdown] = useState(false)
     const [error, setError] = useState(false)
@@ -136,8 +141,12 @@ const MessagePage: React.FunctionComponent<Props> = (props) => {
     }, [session])
 
     const updateMessage = async () => {
-        const message = await functions.get("/api/message", {messageID}, session, setSessionFlag)
+        const message = await functions.get("/api/message", {messageID}, session, setSessionFlag).catch(() => null)
         if (!message) return functions.replaceLocation("/404")
+        if (message.r18) {
+            if (!session.cookie) return
+            if (!session.showR18) return functions.replaceLocation("/404")
+        }
         setMessage(message)
         document.title = `${message.title}`
         setDefaultIcon(message.image ? false : true)
@@ -486,7 +495,7 @@ const MessagePage: React.FunctionComponent<Props> = (props) => {
         if (badTitle) return
         const badContent = functions.validateThread(editMessageContent)
         if (badContent) return
-        await functions.put("/api/message/edit", {messageID, title: editMessageTitle, content: editMessageContent}, session, setSessionFlag)
+        await functions.put("/api/message/edit", {messageID, title: editMessageTitle, content: editMessageContent, r18: editMessageR18}, session, setSessionFlag)
         updateMessage()
     }
 
@@ -496,13 +505,14 @@ const MessagePage: React.FunctionComponent<Props> = (props) => {
             setEditMessageFlag(false)
             setEditMessageID(null)
         }
-    }, [editMessageFlag, editMessageID, editMessageTitle, editMessageContent])
+    }, [editMessageFlag, editMessageID, editMessageTitle, editMessageContent, editMessageR18])
 
     const editMessageDialog = () => {
         if (!message) return
         setEditMessageContent(message.content)
         setEditMessageTitle(message.title)
         setEditMessageID(message.messageID)
+        setEditMessageR18(message.r18)
     }
 
     const deleteMessage = async () => {
@@ -577,7 +587,7 @@ const MessagePage: React.FunctionComponent<Props> = (props) => {
             await functions.timeout(2000)
             return setError(false)
         }
-        await functions.post("/api/message/reply", {messageID, content: text}, session, setSessionFlag)
+        await functions.post("/api/message/reply", {messageID, content: text, r18}, session, setSessionFlag)
         updateReplies()
         setText("")
     }
@@ -665,6 +675,12 @@ const MessagePage: React.FunctionComponent<Props> = (props) => {
                             <button className="comments-emoji-button" ref={emojiRef} onClick={() => setShowEmojiDropdown((prev: boolean) => !prev)}>
                                 <img src={emojiSelect}/>
                             </button>
+                            {session.showR18 ?
+                            <div className="mail-message-replybox-row">
+                                <img className="mail-message-checkbox" src={r18 ? radioButtonChecked : radioButton} onClick={() => setR18((prev: boolean) => !prev)} style={{filter: getFilter()}}/>
+                                <span className="mail-message-replybox-text" style={{marginLeft: "10px"}}>R18</span>
+                                <img className="mail-message-icon" src={lewdIcon} style={{marginLeft: "15px", height: "50px", filter: getFilter()}}/>
+                            </div> : null}
                         </div>
                     </div>
                 </div>
@@ -688,13 +704,16 @@ const MessagePage: React.FunctionComponent<Props> = (props) => {
                 {message ?
                 <div className="mail-message" onMouseEnter={() => setEnableDrag(false)}>
                     <div className="mail-message-title-container">
-                        <span className="mail-message-title">{message.title}</span>
+                        <span className="mail-message-title">
+                            {message.r18 ? <span style={{color: "var(--r18Color)", marginRight: "10px"}}>[R18]</span> : null}
+                            {message.title}
+                        </span>
                         {getOptionsJSX()}
                     </div>
                     <div className="mail-message-title-container">
                         <span className="mail-message-info">{`${message.creator} -> ${message.recipients.map((r: any) => r === null ? "deleted" : r).join(", ")}`}</span>
                     </div>
-                    <div className="mail-message-main-post">
+                    <div className="mail-message-main-post" style={{backgroundColor: message.r18 ? "var(--r18BGColor)" : ""}}>
                         <div className="mail-message-user-container">
                             {getCreatorJSX()}
                             <span className="mail-message-date-text">{functions.timeAgo(message.createDate)}</span>

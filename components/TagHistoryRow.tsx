@@ -26,6 +26,7 @@ interface Props {
     onDelete?: () => void
     onEdit?: () => void
     current?: boolean
+    exact?: any
 }
 
 const TagHistoryRow: React.FunctionComponent<Props> = (props) => {
@@ -41,6 +42,7 @@ const TagHistoryRow: React.FunctionComponent<Props> = (props) => {
     const [img, setImg] = useState("")
     const [userRole, setUserRole] = useState("")
     const tag = props.tagHistory.tag
+    let prevHistory = props.previousHistory || Boolean(props.exact)
 
     const updateImage = () => {
         const img = functions.getTagLink(props.tagHistory.type, props.tagHistory.image)
@@ -195,6 +197,7 @@ const TagHistoryRow: React.FunctionComponent<Props> = (props) => {
 
     const dateTextJSX = () => {
         let firstHistory = props.historyIndex === Number(props.tagHistory.historyCount)
+        if (props.exact) firstHistory = false
         let targetDate = firstHistory ? props.tagHistory.createDate : props.tagHistory.date
         if (!targetDate) targetDate = props.tagHistory.date
         const editText = firstHistory ? "Uploaded" : "Edited"
@@ -231,40 +234,40 @@ const TagHistoryRow: React.FunctionComponent<Props> = (props) => {
         if (changes.type) {
             jsx.push(<span className="historyrow-text"><span className={`historyrow-label-text ${getTagColor(props.tagHistory)}`}>Category:</span> {props.tagHistory.type}</span>)
         }
-        if (!props.previousHistory || changes.tag) {
+        if (!prevHistory || changes.tag) {
             jsx.push(<span className="historyrow-text"><span className="historyrow-label-text">Name:</span> {props.tagHistory.tag}</span>)
         }
-        if (!props.previousHistory || changes.description) {
+        if (!prevHistory || changes.description) {
             jsx.push(<span className="historyrow-text"><span className="historyrow-label-text">Description:</span> {props.tagHistory.description || "None"}</span>)
         }
-        if ((!props.previousHistory && props.tagHistory.website) || changes.website) {
+        if ((!prevHistory && props.tagHistory.website) || changes.website) {
             jsx.push(<span className="historyrow-text"><span className="historyrow-label-text">Website:</span> <span className="historyrow-label-link" onClick={() => window.open(props.tagHistory.website, "_blank")}>{props.tagHistory.website}</span></span>)
         }
-        if ((!props.previousHistory && props.tagHistory.social) || changes.social) {
+        if ((!prevHistory && props.tagHistory.social) || changes.social) {
             jsx.push(<span className="historyrow-text"><span className="historyrow-label-text">Social:</span> <span className="historyrow-label-link" onClick={() => window.open(props.tagHistory.social, "_blank")}>{props.tagHistory.social}</span></span>)
         }
-        if ((!props.previousHistory && props.tagHistory.twitter) || changes.twitter) {
+        if ((!prevHistory && props.tagHistory.twitter) || changes.twitter) {
             jsx.push(<span className="historyrow-text"><span className="historyrow-label-text">Twitter:</span> <span className="historyrow-label-link" onClick={() => window.open(props.tagHistory.twitter, "_blank")}>{props.tagHistory.twitter}</span></span>)
         }
-        if ((!props.previousHistory && props.tagHistory.fandom) || changes.fandom) {
+        if ((!prevHistory && props.tagHistory.fandom) || changes.fandom) {
             jsx.push(<span className="historyrow-text"><span className="historyrow-label-text">Fandom:</span> <span className="historyrow-label-link" onClick={() => window.open(props.tagHistory.fandom, "_blank")}>{props.tagHistory.fandom}</span></span>)
         }
-        if (!props.previousHistory || changes.aliases) {
+        if (!prevHistory || changes.aliases) {
             if (props.tagHistory.aliases?.[0]) {
                 jsx.push(<span className="historyrow-text"><span className="historyrow-label-text">Aliases:</span> {props.tagHistory.aliases.map((alias: string) => alias.replaceAll("-", " ")).join(", ")}</span>)
             }
         }
-        if (!props.previousHistory || changes.implications) {
+        if (!prevHistory || changes.implications) {
             if (props.tagHistory.implications?.[0]) {
                 jsx.push(<span className="historyrow-text"><span className="historyrow-label-text">Implications:</span> {props.tagHistory.implications.map((implication: string) => implication.replaceAll("-", " ")).join(", ")}</span>)
             }
         }
-        if (!props.previousHistory || changes.pixivTags) {
+        if (!prevHistory || changes.pixivTags) {
             if (props.tagHistory.pixivTags?.[0]) {
                 jsx.push(<span className="historyrow-text"><span className="historyrow-label-text">Pixiv Tags:</span> {props.tagHistory.pixivTags.join(", ")}</span>)
             }
         }
-        if ((!props.previousHistory && props.tagHistory.r18) || changes.r18) {
+        if ((!prevHistory && props.tagHistory.r18) || changes.r18) {
             jsx.push(<span className="historyrow-text"><span className="historyrow-label-text">R18:</span> {props.tagHistory.r18 ? "Yes" : "No"}</span>)
         }
         return jsx

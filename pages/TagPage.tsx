@@ -123,7 +123,7 @@ const TagPage: React.FunctionComponent<Props> = (props) => {
         if (!tag) return functions.replaceLocation("/404")
         if (tag.hidden) {
             if (!session.cookie) return
-            if (!permissions.isMod(session)) return functions.replaceLocation("/403")
+            if (!permissions.isMod(session)) return functions.replaceLocation("/404")
         }
         if (tag.r18) {
             if (!session.cookie) return

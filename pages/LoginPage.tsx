@@ -112,9 +112,9 @@ const LoginPage: React.FunctionComponent = (props) => {
                 history.push("/2fa")
             }
             setError(false)
-        } catch (err) {
+        } catch (err: any) {
             let errMsg = "Invalid username, password, or captcha."
-            if (String(err).includes("Too many login attempts")) errMsg = "Too many login attempts, try again later."
+            if (err.response?.data.includes("Too many login attempts")) errMsg = "Too many login attempts, try again later."
             errorRef.current!.innerText = errMsg
             await functions.timeout(2000)
             setError(false)

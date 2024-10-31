@@ -37,10 +37,10 @@ const PostRoutes = (app: Express) => {
             let result = await sql.post.post(Number(postID))
             if (!result) return res.status(404).send("Not found")
             if (!permissions.isMod(req.session)) {
-                if (result.hidden) return res.status(403).end()
+                if (result.hidden) return res.status(404).end()
             }
             if (!req.session.showR18) {
-                if (result.restrict === "explicit") return res.status(403).end()
+                if (result.restrict === "explicit") return res.status(404).end()
             }
             if (result.private) {
                 const categories = await serverFunctions.tagCategories(result.tags)
@@ -895,6 +895,7 @@ const PostRoutes = (app: Express) => {
             const postID = req.query.postID as string
             const historyID = req.query.historyID as string
             const username = req.query.username as string
+            const query = req.query.query as string
             const offset = req.query.offset as string
             if (!req.session.username) return res.status(403).send("Unauthorized")
             if (historyID) {
@@ -906,7 +907,7 @@ const PostRoutes = (app: Express) => {
                 if (req.session.captchaNeeded) result = functions.stripTags(result)
                 res.status(200).json(result)
             } else {
-                let result = await sql.history.postHistory(postID, offset)
+                let result = await sql.history.postHistory(postID, offset, query)
                 if (req.session.captchaNeeded) result = functions.stripTags(result)
                 res.status(200).json(result)
             }

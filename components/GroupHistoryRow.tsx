@@ -21,6 +21,7 @@ interface Props {
     onDelete?: () => void
     onEdit?: () => void
     current?: boolean
+    exact?: any
 }
 
 const GroupHistoryRow: React.FunctionComponent<Props> = (props) => {
@@ -36,10 +37,9 @@ const GroupHistoryRow: React.FunctionComponent<Props> = (props) => {
     const [img, setImg] = useState("")
     const [postIndex, setPostIndex] = useState(0)
     const [userRole, setUserRole] = useState("")
-    const [hasOrderUpdate, setHasOrderUpdate] = useState(false)
-    const [hasAnyUpdate, setHasAnyUpdate] = useState(true)
     const ref = useRef(null) as any
     const slug = props.groupHistory.slug
+    let prevHistory = props.previousHistory || Boolean(props.exact)
 
     const updateImages = async () => {
         let targetID = props.groupHistory.addedPosts?.length ? props.groupHistory.addedPosts[0] : 
@@ -157,6 +157,7 @@ const GroupHistoryRow: React.FunctionComponent<Props> = (props) => {
 
     const dateTextJSX = () => {
         let firstHistory = props.historyIndex === Number(props.groupHistory.historyCount)
+        if (props.exact) firstHistory = false
         let targetDate = firstHistory ? props.groupHistory.createDate : props.groupHistory.date
         if (!targetDate) targetDate = props.groupHistory.date
         const editText = firstHistory ? "Uploaded" : "Edited"
@@ -215,14 +216,6 @@ const GroupHistoryRow: React.FunctionComponent<Props> = (props) => {
         }
     }
 
-    useEffect(() => {
-        if (props.previousHistory) {
-            const answer = JSON.stringify(props.previousHistory.posts) !== JSON.stringify(props.groupHistory.posts)
-            setHasOrderUpdate(answer)
-            if (!answer && !diffJSX().length && !props.groupHistory.reason) setHasAnyUpdate(false)
-        }
-    }, [props.previousHistory, props.groupHistory])
-
     const postDiff = () => {
         const addedPostsJSX = props.groupHistory.addedPosts.map((postID: string) => <span className="tag-add-clickable" onClick={() => history.push(`/post/${postID}`)}>+{postID}</span>)
         const removedPostsJSX = props.groupHistory.removedPosts.map((postID: string) => <span className="tag-remove-clickable" onClick={() => history.push(`/post/${postID}`)}>-{postID}</span>)
@@ -234,10 +227,10 @@ const GroupHistoryRow: React.FunctionComponent<Props> = (props) => {
         let jsx = [] as React.ReactElement[]
         let changes = props.groupHistory.changes || {}
         let postChanges = props.groupHistory.addedPosts?.length || props.groupHistory.removedPosts?.length
-        if (!props.previousHistory || changes.name) {
+        if (!prevHistory || changes.name) {
             jsx.push(<span className="historyrow-text"><span className="historyrow-label-text">Name:</span> {props.groupHistory.name}</span>)
         }
-        if (!props.previousHistory || changes.description) {
+        if (!prevHistory || changes.description) {
             jsx.push(<span className="historyrow-text"><span className="historyrow-label-text">Description:</span> {props.groupHistory.description || "None"}</span>)
         }
         if (postChanges) {

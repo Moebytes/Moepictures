@@ -87,7 +87,7 @@
 .mail-message-main-post {
     display: flex;
     flex-direction: row;
-    width: 100%;
+    width: 85%;
     align-items: flex-start;
 }
 
@@ -183,6 +183,30 @@
     margin-left: 170px;
 }
 
+.mail-message-replybox-row {
+    display: flex;
+    flex-direction: row;
+    width: 100%;
+    align-items: center;  
+    margin-top: 5px;
+}
+
+.mail-message-replybox-text {
+    font-family: Tahoma, sans-serif;
+    font-size: 20px;
+    color: var(--text);
+    user-select: text;
+    word-wrap: break-word;
+    white-space: preserve;
+}
+
+.mail-message-checkbox {
+    width: auto;
+    height: 20px;
+    margin-left: 10px;
+    cursor: pointer;
+}
+
 @media  screen and (max-width: 500px) {
     .mail-message-reply-box {
         margin-left: 0px;
@@ -199,6 +223,7 @@
 
     .mail-message-main-post {
         flex-direction: column;
+        width: 100%;
     }
 
     .mail-message-text-container {

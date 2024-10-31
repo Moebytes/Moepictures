@@ -153,7 +153,8 @@ CREATE TABLE IF NOT EXISTS "threads" (
     "sticky" boolean,
     "locked" boolean,
     "title" text,
-    "content" text
+    "content" text,
+    "r18" boolean
 );
 
 CREATE TABLE IF NOT EXISTS "thread reads" (
@@ -169,7 +170,8 @@ CREATE TABLE IF NOT EXISTS "replies" (
     "creator" text REFERENCES "users" ("username") ON UPDATE CASCADE ON DELETE SET NULL,
     "createDate" timestamptz,
     "updatedDate" timestamptz,
-    "content" text
+    "content" text,
+    "r18" boolean
 );
 
 CREATE TABLE IF NOT EXISTS "messages" (
@@ -181,7 +183,8 @@ CREATE TABLE IF NOT EXISTS "messages" (
     "read" boolean,
     "delete" boolean,
     "title" text,
-    "content" text
+    "content" text,
+    "r18" boolean
 );
 
 CREATE TABLE IF NOT EXISTS "message recipients" (
@@ -198,7 +201,8 @@ CREATE TABLE IF NOT EXISTS "message replies" (
     "creator" text REFERENCES "users" ("username") ON UPDATE CASCADE ON DELETE SET NULL,
     "createDate" timestamptz,
     "updatedDate" timestamptz,
-    "content" text
+    "content" text,
+    "r18" boolean
 );
 
 CREATE TABLE IF NOT EXISTS "tag map" (
