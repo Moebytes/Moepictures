@@ -1,7 +1,7 @@
 import React, {useEffect, useContext, useState, useRef} from "react"
 import {ThemeContext, SiteHueContext, SiteSaturationContext, SiteLightnessContext, EnableDragContext, HideNavbarContext, HideSidebarContext, RelativeContext, 
 HideTitlebarContext, MobileContext, PostsContext, GroupFlagContext, ActiveDropdownContext, HeaderTextContext, SidebarTextContext, SessionContext, SessionFlagContext, 
-RestrictTypeContext, ActiveGroupContext, EditFavGroupObjContext, DeleteFavGroupObjContext, SearchContext, SearchFlagContext} from "../Context"
+RestrictTypeContext, ActiveFavgroupContext, EditFavGroupObjContext, DeleteFavGroupObjContext, SearchContext, SearchFlagContext} from "../Context"
 import {useHistory, useLocation} from "react-router-dom"
 import TitleBar from "../components/TitleBar"
 import NavBar from "../components/NavBar"
@@ -50,7 +50,7 @@ const FavgroupPage: React.FunctionComponent<Props> = (props) => {
     const {sessionFlag, setSessionFlag} = useContext(SessionFlagContext)
     const {mobile, setMobile} = useContext(MobileContext)
     const {restrictType, setRestrictType} = useContext(RestrictTypeContext)
-    const {activeGroup, setActiveGroup} = useContext(ActiveGroupContext)
+    const {activeFavgroup, setActiveFavgroup} = useContext(ActiveFavgroupContext)
     const {groupFlag, setGroupFlag} = useContext(GroupFlagContext)
     const [reorderState, setReorderState] = useState(false)
     const {posts, setPosts} = useContext(PostsContext)
@@ -165,7 +165,7 @@ const FavgroupPage: React.FunctionComponent<Props> = (props) => {
                 }
                 setPosts(favgroup.posts)
                 setTimeout(() => {
-                    setActiveGroup(favgroup.name)
+                    setActiveFavgroup(favgroup)
                 }, 200)
             }
             jsx.push(

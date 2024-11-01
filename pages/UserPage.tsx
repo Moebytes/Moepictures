@@ -8,7 +8,8 @@ import SideBar from "../components/SideBar"
 import Footer from "../components/Footer"
 import {HideNavbarContext, HideSidebarContext, ThemeContext, EnableDragContext, RelativeContext, HideTitlebarContext, MobileContext, CommentSearchFlagContext, PostsContext,
 HeaderTextContext, SidebarTextContext, SessionContext, RedirectContext, SessionFlagContext, ShowDeleteAccountDialogContext, SiteHueContext, SiteLightnessContext,
-SiteSaturationContext, BanNameContext, UnbanNameContext, PromoteNameContext, UpdateUserFlagContext, DMTargetContext, RestrictTypeContext, SearchContext, SearchFlagContext} from "../Context"
+SiteSaturationContext, BanNameContext, UnbanNameContext, PromoteNameContext, UpdateUserFlagContext, DMTargetContext, RestrictTypeContext, SearchContext, SearchFlagContext,
+ActiveFavgroupContext} from "../Context"
 import functions from "../structures/Functions"
 import permissions from "../structures/Permissions"
 import Carousel from "../components/Carousel"
@@ -70,6 +71,7 @@ const UserPage: React.FunctionComponent<Props> = (props) => {
     const [appendUploadImages, setAppendUploadImages] = useState([]) as any
     const [favorites, setFavorites] = useState([]) as any
     const [appendFavoriteImages, setAppendFavoriteImages] = useState([]) as any
+    const {activeFavgroup, setActiveFavgroup} = useContext(ActiveFavgroupContext)
     const [comments, setComments] = useState([]) as any
     const [favgroups, setFavgroups] = useState([]) as any
     const [uploadImages, setUploadImages] = useState([]) as any
@@ -373,6 +375,9 @@ const UserPage: React.FunctionComponent<Props> = (props) => {
                 }
                 window.scrollTo(0, functions.navbarHeight() + functions.titlebarHeight())
                 setPosts(favgroup.posts)
+                setTimeout(() => {
+                    setActiveFavgroup(favgroup)
+                }, 200)
             }
             jsx.push(
                 <div className="user-column">

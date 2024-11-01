@@ -2,7 +2,7 @@ import React, {useEffect, useState, useContext} from "react"
 import {Switch, Route, Redirect, useHistory, useLocation} from "react-router-dom"
 import Context, {ThemeContext, HideNavbarContext, HideSidebarContext, HideSortbarContext, HasNotificationContext, TabletContext, ActiveGroupContext,
 HideTitlebarContext, EnableDragContext, ActiveDropdownContext, FilterDropActiveContext, MobileScrollingContext, EmojisContext, PostsContext, RestrictTypeContext,
-SidebarHoverContext, SessionContext, SessionFlagContext, UserImgContext, UserImgPostContext, MobileContext, SelectionModeContext} from "./Context"
+SidebarHoverContext, SessionContext, SessionFlagContext, UserImgContext, UserImgPostContext, MobileContext, SelectionModeContext, ActiveFavgroupContext} from "./Context"
 import favicon from "./assets/icons/favicon.png"
 import permissions from "./structures/Permissions"
 import PostsPage from "./pages/PostsPage"
@@ -92,6 +92,7 @@ const App: React.FunctionComponent = (props) => {
     const [restrictType, setRestrictType] = useState("all")
     const [posts, setPosts] = useState([]) as any
     const [activeGroup, setActiveGroup] = useState(null) as any
+    const [activeFavgroup, setActiveFavgroup] = useState(null) as any
     const history = useHistory()
     const location = useLocation()
 
@@ -110,6 +111,7 @@ const App: React.FunctionComponent = (props) => {
 
     useEffect(() => {
         const savedActiveGroup = localStorage.getItem("activeGroup")
+        const savedActiveFavgroup = localStorage.getItem("activeFavgroup")
         const savedRestrict = localStorage.getItem("restrict")
         if (savedRestrict) setRestrictType(savedRestrict)
         const onDOMLoaded = () => {
@@ -118,6 +120,7 @@ const App: React.FunctionComponent = (props) => {
             functions.clearCache()
             cacheEmojis()
             if (savedActiveGroup) setActiveGroup(savedActiveGroup)
+            if (savedActiveFavgroup) setActiveFavgroup(JSON.parse(savedActiveFavgroup))
         }
         window.addEventListener("load", onDOMLoaded)
         return () => {
@@ -126,13 +129,17 @@ const App: React.FunctionComponent = (props) => {
     }, [])
 
     useEffect(() => {
-        console.log(activeGroup)
         if (activeGroup) {
             localStorage.setItem("activeGroup", activeGroup)
         } else {
             localStorage.removeItem("activeGroup")
         }
-    }, [activeGroup])
+        if (activeFavgroup) {
+            localStorage.setItem("activeFavgroup", JSON.stringify(activeFavgroup))
+        } else {
+            localStorage.removeItem("activeFavgroup")
+        }
+    }, [activeGroup, activeFavgroup])
 
     const getImg = () => {
         if (session.username) {
@@ -176,6 +183,7 @@ const App: React.FunctionComponent = (props) => {
     useEffect(() => {
         if (!location.pathname.includes("/post")) {
             setActiveGroup(null)
+            setActiveFavgroup(null)
         }
         if (session.username && !session.emailVerified) {
             if (location.pathname !== "/verify-email") {
@@ -206,6 +214,7 @@ const App: React.FunctionComponent = (props) => {
 
     useEffect(() => {
         setActiveGroup(null)
+        setActiveFavgroup(null)
     }, [posts])
 
     useEffect(() => {
@@ -292,6 +301,7 @@ const App: React.FunctionComponent = (props) => {
 
     return (
         <div className={`app ${!loaded ? "stop-transitions" : ""}`}>
+            <ActiveFavgroupContext.Provider value={{activeFavgroup, setActiveFavgroup}}>
             <ActiveGroupContext.Provider value={{activeGroup, setActiveGroup}}>
             <PostsContext.Provider value={{posts, setPosts}}>
             <EmojisContext.Provider value={{emojis, setEmojis}}>
@@ -401,6 +411,7 @@ const App: React.FunctionComponent = (props) => {
             </EmojisContext.Provider>
             </PostsContext.Provider>
             </ActiveGroupContext.Provider>
+            </ActiveFavgroupContext.Provider>
         </div>
     )
 }

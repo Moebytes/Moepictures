@@ -8,7 +8,7 @@ import favicon4 from "../assets/icons/favicon4.png"
 import {ThemeContext, HideNavbarContext, EnableDragContext, RelativeContext, HideTitlebarContext, HeaderFlagContext,
 SearchContext, SearchFlagContext, ImageTypeContext, RestrictTypeContext, StyleTypeContext, SortTypeContext,
 HeaderTextContext, HideMobileNavbarContext, MobileContext, VisiblePostsContext, ScrollYContext, MobileScrollingContext, 
-SiteHueContext, SiteLightnessContext, SiteSaturationContext, AutoSearchContext, ActiveGroupContext} from "../Context"
+SiteHueContext, SiteLightnessContext, SiteSaturationContext, AutoSearchContext, ActiveGroupContext, ActiveFavgroupContext} from "../Context"
 import functions from "../structures/Functions"
 import hamburger from "../assets/icons/hamburger.png"
 import lockIcon from "../assets/icons/lock-red.png"
@@ -119,6 +119,7 @@ const TitleBar: React.FunctionComponent<Props> = (props) => {
     const {visiblePosts, setVisiblePosts} = useContext(VisiblePostsContext)
     const {scrollY, setScrollY} = useContext(ScrollYContext)
     const {activeGroup, setActiveGroup} = useContext(ActiveGroupContext)
+    const {activeFavgroup, setActiveFavgroup} = useContext(ActiveFavgroupContext)
     const history = useHistory()
 
     useEffect(() => {
@@ -259,6 +260,7 @@ const TitleBar: React.FunctionComponent<Props> = (props) => {
                     {props.translationID ? <span style={{color: "var(--translationColor)", marginRight: "10px"}}>{`[Translation: ${props.translationID}]`}</span> : null}
                     {restrictType === "explicit" ? <span style={{color: "var(--r18Color)", marginRight: "10px"}}>[R18]</span> : null}
                     {activeGroup ? <span style={{color: "var(--text-strong)", marginRight: "10px"}}>[{activeGroup}]</span> : null}
+                    {activeFavgroup ? <span style={{color: "var(--text-strong)", marginRight: "10px"}}>[{activeFavgroup.name}]</span> : null}
                     {autoSearch ? <span style={{color: "var(--premiumColor)", marginRight: "10px"}}>[Auto Search]</span> : null}
                     {headerText}
                 </span>

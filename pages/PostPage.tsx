@@ -40,7 +40,7 @@ import historyIcon from "../assets/icons/history-state.png"
 import currentIcon from "../assets/icons/current.png"
 import {HideNavbarContext, HideSidebarContext, RelativeContext, DownloadFlagContext, DownloadIDsContext, HideTitlebarContext, MobileContext, ReloadPostFlagContext,
 PostsContext, TagsContext, HeaderTextContext, PostFlagContext, RedirectContext, SidebarTextContext, SessionContext, SessionFlagContext, EnableDragContext, TranslationModeContext,
-RevertPostHistoryIDContext, RevertPostHistoryFlagContext, RevertTranslationHistoryIDContext, RevertTranslationHistoryFlagContext, RestrictTypeContext, ActiveGroupContext} from "../Context"
+RevertPostHistoryIDContext, RevertPostHistoryFlagContext, RevertTranslationHistoryIDContext, RevertTranslationHistoryFlagContext, RestrictTypeContext, ActiveGroupContext, ActiveFavgroupContext} from "../Context"
 import permissions from "../structures/Permissions"
 import "./styles/postpage.less"
 
@@ -76,6 +76,7 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
     const {revertTranslationHistoryFlag, setRevertTranslationHistoryFlag} = useContext(RevertTranslationHistoryFlagContext)
     const {restrictType, setRestrictType} = useContext(RestrictTypeContext)
     const {activeGroup, setActiveGroup} = useContext(ActiveGroupContext)
+    const {activeFavgroup, setActiveFavgroup} = useContext(ActiveFavgroupContext)
     const [images, setImages] = useState([]) as any
     const [thirdPartyPosts, setThirdPartyPosts] = useState([]) as any
     const [artistPosts, setArtistPosts] = useState([]) as any
@@ -561,6 +562,28 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
         )
     }
 
+    const generateActiveFavgroupJSX = () => {
+        if (activeFavgroup) {
+            if (activeFavgroup.restrict === "explicit") if (restrictType !== "explicit") return null
+            const images = activeFavgroup.posts.map((f: any) => functions.getThumbnailLink(f.images[0].type, f.postID, f.images[0].order, f.images[0].filename, "tiny"))
+            const setGroup = (img: string, index: number) => {
+                const postID = activeFavgroup.posts[index].postID
+                history.push(`/post/${postID}`)
+                window.scrollTo(0, functions.navbarHeight() + functions.titlebarHeight())
+            }
+            return (
+                <div className="post-item">
+                    <div className="post-item-title-clickable" onClick={() => history.push(`/favgroup/${activeFavgroup.username}/${activeFavgroup.slug}`)}>{activeFavgroup.name}</div>
+                    <div className="post-item-container">
+                        <Carousel images={images} set={setGroup} noKey={true} marginTop={0}/>
+                    </div>
+                </div>
+            )
+
+        }
+        return null
+    }
+
     const generateGroupsJSX = () => {
         let jsx = [] as any
         for (let i = 0; i < groups.length; i++) {
@@ -653,6 +676,7 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
                         <Carousel images={images} set={set} index={order-1}/>
                     </div> : null}
                     {/*nsfwChecker() &&*/ post ? getPostJSX() : null}
+                    {generateActiveFavgroupJSX()}
                     {generateGroupsJSX()}
                     {parentPost ? <Parent post={parentPost}/>: null}
                     {thirdPartyPosts.length ? <ThirdParty posts={thirdPartyPosts}/> : null}

@@ -9,7 +9,7 @@ import Footer from "../components/Footer"
 import {HideNavbarContext, HideSidebarContext, ThemeContext, EnableDragContext, RelativeContext, HideTitlebarContext, MobileContext, RestrictTypeContext,
 HeaderTextContext, SidebarTextContext, SessionContext, RedirectContext, SessionFlagContext, UserImgContext, ShowDeleteAccountDialogContext, PostsContext,
 CommentSearchFlagContext, SiteHueContext, SiteLightnessContext, UserImgPostContext, SiteSaturationContext, R18ConfirmationContext, SearchContext, SearchFlagContext,
-PremiumRequiredContext} from "../Context"
+PremiumRequiredContext, ActiveFavgroupContext} from "../Context"
 import functions from "../structures/Functions"
 import Carousel from "../components/Carousel"
 import CommentCarousel from "../components/CommentCarousel"
@@ -76,6 +76,7 @@ const UserProfilePage: React.FunctionComponent = (props) => {
     const [appendUploadImages, setAppendUploadImages] = useState([]) as any
     const [favoriteImages, setFavoriteImages] = useState([]) as any
     const [appendFavoriteImages, setAppendFavoriteImages] = useState([]) as any
+    const {activeFavgroup, setActiveFavgroup} = useContext(ActiveFavgroupContext)
     const [banReason, setBanReason] = useState("")
     const [counts, setCounts] = useState(null as any)
     const [bio, setBio] = useState("")
@@ -510,6 +511,9 @@ const UserProfilePage: React.FunctionComponent = (props) => {
                 }
                 window.scrollTo(0, functions.navbarHeight() + functions.titlebarHeight())
                 setPosts(favgroup.posts)
+                setTimeout(() => {
+                    setActiveFavgroup(favgroup)
+                }, 200)
             }
             jsx.push(
                 <div className="userprofile-column">
