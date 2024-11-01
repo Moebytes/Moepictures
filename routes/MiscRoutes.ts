@@ -491,9 +491,13 @@ const MiscRoutes = (app: Express) => {
         }
     })
 
-    app.post("/api/misc/wdtagger", miscLimiter, async (req: Request, res: Response, next: NextFunction) => {
+    app.post("/api/misc/wdtagger", captchaLimiter, async (req: Request, res: Response, next: NextFunction) => {
+        let ip = req.headers["x-forwarded-for"] || req.socket.remoteAddress
+        ip = ip?.toString().replace("::ffff:", "") || ""
         try {
+            if (processingQueue.has(ip)) return res.status(429).send("Processing in progress")
             if (!req.body) return res.status(400).send("Image data must be provided")
+            processingQueue.add(ip)
             const buffer = Buffer.from(req.body, "binary") as any
             const folder = path.join(__dirname, "./dump")
             if (!fs.existsSync(folder)) fs.mkdirSync(folder, {recursive: true})
@@ -506,14 +510,16 @@ const MiscRoutes = (app: Express) => {
             const str = await exec(command).then((s: any) => s.stdout).catch((e: any) => e.stderr)
             const json = JSON.parse(str)
             fs.unlinkSync(imagePath)
+            processingQueue.delete(ip)
             res.status(200).json(json)
         } catch (e) {
             console.log(e)
+            if (ip) processingQueue.delete(ip)
             res.status(400).send("Bad request") 
         }
     })
 
-    app.post("/api/misc/ocr", csrfProtection, miscLimiter, async (req: Request, res: Response, next: NextFunction) => {
+    app.post("/api/misc/ocr", csrfProtection, contactLimiter, async (req: Request, res: Response, next: NextFunction) => {
         try {
             if (!req.session.username) return res.status(403).send("Unauthorized")
             if (processingQueue.has(req.session.username)) return res.status(429).send("Processing in progress")

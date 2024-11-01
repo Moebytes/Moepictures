@@ -20,6 +20,9 @@ import DeleteGroupHistoryDialog from "../dialogs/DeleteGroupHistoryDialog"
 import SearchHistoryRow from "../components/SearchHistoryRow"
 import DeleteSearchHistoryDialog from "../dialogs/DeleteSearchHistoryDialog"
 import DeleteAllSearchHistoryDialog from "../dialogs/DeleteAllSearchHistoryDialog"
+import AliasHistoryRow from "../components/AliasHistoryRow"
+import RevertAliasHistoryDialog from "../dialogs/RevertAliasHistoryDialog"
+import DeleteAliasHistoryDialog from "../dialogs/DeleteAliasHistoryDialog"
 import scrollIcon from "../assets/icons/scroll.png"
 import search from "../assets/icons/search.png"
 import pageIcon from "../assets/icons/page.png"
@@ -31,11 +34,13 @@ import historySearch from "../assets/icons/history-search.png"
 import historyTag from "../assets/icons/history-tag.png"
 import historyTranslate from "../assets/icons/history-translate.png"
 import historyGroup from "../assets/icons/history-group.png"
+import historyAlias from "../assets/icons/history-alias.png"
 import historyPostActive from "../assets/icons/history-post-active.png"
 import historySearchActive from "../assets/icons/history-search-active.png"
 import historyTagActive from "../assets/icons/history-tag-active.png"
 import historyTranslateActive from "../assets/icons/history-translate-active.png"
 import historyGroupActive from "../assets/icons/history-group-active.png"
+import historyAliasActive from "../assets/icons/history-alias-active.png"
 import {ThemeContext, EnableDragContext, HideNavbarContext, HideSidebarContext, MobileContext, SessionContext, ScrollContext, ShowPageDialogContext,
 RelativeContext, HideTitlebarContext, ActiveDropdownContext, HeaderTextContext, SidebarTextContext, SessionFlagContext, HistoryPageContext, PageFlagContext,
 SiteHueContext, SiteSaturationContext, SiteLightnessContext, ShowDeleteAllHistoryDialogContext, RedirectContext, RestrictTypeContext, PremiumRequiredContext} from "../Context"
@@ -73,11 +78,13 @@ const HistoryPage: React.FunctionComponent = () => {
     const [tagStates, setTagStates] = useState([]) as any
     const [translationStates, setTranslationStates] = useState([]) as any
     const [groupStates, setGroupStates] = useState([]) as any
+    const [aliasStates, setAliasStates] = useState([]) as any
     const [searchStates, setSearchStates] = useState([]) as any
     const [visibleHistoryPosts, setVisibleHistoryPosts] = useState([]) as any
     const [visibleHistoryTags, setVisibleHistoryTags] = useState([]) as any
     const [visibleHistoryTranslations, setVisibleHistoryTranslations] = useState([]) as any
     const [visibleHistoryGroups, setVisibleHistoryGroups] = useState([]) as any
+    const [visibleHistoryAliases, setVisibleHistoryAliases] = useState([]) as any
     const [visibleHistorySearch, setVisibleHistorySearch] = useState([]) as any
     const [offset, setOffset] = useState(0)
     const [ended, setEnded] = useState(false)
@@ -152,6 +159,9 @@ const HistoryPage: React.FunctionComponent = () => {
         if (historyTab === "group") {
             return groupStates
         }
+        if (historyTab === "alias") {
+            return aliasStates
+        }
         if (historyTab === "search") {
             return searchStates
         }
@@ -173,6 +183,9 @@ const HistoryPage: React.FunctionComponent = () => {
         if (historyTab === "group") {
             setGroupStates(states)
         }
+        if (historyTab === "alias") {
+            setAliasStates(states)
+        }
         if (historyTab === "search") {
             setSearchStates(states)
         }
@@ -190,6 +203,9 @@ const HistoryPage: React.FunctionComponent = () => {
         }
         if (historyTab === "group") {
             return visibleHistoryGroups
+        }
+        if (historyTab === "alias") {
+            return visibleHistoryAliases
         }
         if (historyTab === "search") {
             return visibleHistorySearch
@@ -211,6 +227,9 @@ const HistoryPage: React.FunctionComponent = () => {
         }
         if (historyTab === "group") {
             setVisibleHistoryGroups(visible)
+        }
+        if (historyTab === "alias") {
+            setVisibleHistoryAliases(visible)
         }
         if (historyTab === "search") {
             setVisibleHistorySearch(visible)
@@ -236,6 +255,9 @@ const HistoryPage: React.FunctionComponent = () => {
         }
         if (historyTab === "group") {
             result = await functions.get("/api/group/history", {query: searchQuery}, session, setSessionFlag)
+        }
+        if (historyTab === "alias") {
+            result = await functions.get("/api/alias/history", {query: searchQuery}, session, setSessionFlag)
         }
         if (historyTab === "search") {
             result = await functions.get("/api/user/history", {query: searchQuery}, session, setSessionFlag).catch(() => [])
@@ -329,6 +351,9 @@ const HistoryPage: React.FunctionComponent = () => {
         if (historyTab === "group") {
             result = await functions.get("/api/group/history", {query: searchQuery, offset: newOffset}, session, setSessionFlag).catch(() => [])
         }
+        if (historyTab === "alias") {
+            result = await functions.get("/api/alias/history", {query: searchQuery, offset: newOffset}, session, setSessionFlag).catch(() => [])
+        }
         if (historyTab === "search") {
             result = await functions.get("/api/user/history", {query: searchQuery, offset: newOffset}, session, setSessionFlag).catch(() => [])
         }
@@ -368,7 +393,7 @@ const HistoryPage: React.FunctionComponent = () => {
                 for (let i = 0; i < 15; i++) {
                     if (!historyStates[currentIndex]) return updateOffset()
                     if (!session.showR18) {
-                        if (historyTab === "tag") {
+                        if (historyTab === "tag" || historyTab === "alias") {
                             if (historyStates[currentIndex].r18) {
                                 currentIndex++
                                 continue
@@ -532,7 +557,8 @@ const HistoryPage: React.FunctionComponent = () => {
             const postOffset = (historyPage - 1) * getPageAmount()
             visible = historyStates.slice(postOffset, postOffset + getPageAmount())
             if (!session.showR18) {
-                visible = visible.filter((item: any) => historyTab === "tag" ? !item.r18 : item.restrict !== "explicit")
+                visible = visible.filter((item: any) => historyTab === "tag" ||  historyTab === "alias" ? 
+                !item.r18 : item.restrict !== "explicit")
             }
         }
         let current = visible[0]
@@ -586,6 +612,10 @@ const HistoryPage: React.FunctionComponent = () => {
                     previous?.order !== current.order) previous = null
                 jsx.push(<TranslationHistoryRow previousHistory={previous} translationHistory={visible[i]} 
                     onDelete={updateHistory} onEdit={updateHistory} current={i === currentIndex}/>)
+            }
+
+            if (historyTab === "alias") {
+                jsx.push(<AliasHistoryRow history={visible[i]} onDelete={updateHistory} onEdit={updateHistory}/>)
             }
 
             if (historyTab === "search") {
@@ -692,6 +722,25 @@ const HistoryPage: React.FunctionComponent = () => {
                 </div></>
             )
         }
+        if (historyTab === "alias") {
+            return (
+                <><div className="history-row">
+                    <span className="history-heading">Alias/Implication History</span>
+                </div>
+                <div className="history-row">
+                    <div className="history-search-container" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
+                        <input className="history-search" type="search" spellCheck="false" value={searchQuery} onChange={(event) => setSearchQuery(event.target.value)} onKeyDown={(event) => event.key === "Enter" ? updateHistory() : null}/>
+                        <button className="history-search-button" style={{filter: getFilterSearch()}} onClick={() => updateHistory()}>
+                            <img src={search}/>
+                        </button>
+                    </div>
+                    <div className="history-item" onClick={() => toggleScroll()}>
+                        <img className="history-img" src={scroll ? scrollIcon : pageIcon} style={{filter: getFilter()}}/>
+                        <span className="history-text">{scroll ? "Scrolling" : "Pages"}</span>
+                    </div>
+                </div></>
+            )
+        }
         if (historyTab === "search") {
             return (
                 <><div className="history-row">
@@ -735,6 +784,8 @@ const HistoryPage: React.FunctionComponent = () => {
         <DeleteTranslationHistoryDialog/>
         <RevertGroupHistoryDialog/>
         <DeleteGroupHistoryDialog/>
+        <RevertAliasHistoryDialog/>
+        <DeleteAliasHistoryDialog/>
         <DeleteAllSearchHistoryDialog/>
         <DeleteSearchHistoryDialog/>
         <PageDialog/>
@@ -750,6 +801,7 @@ const HistoryPage: React.FunctionComponent = () => {
                         <img className="history-icon" onClick={() => setHistoryTab("tag")} src={historyTab === "tag" ? historyTagActive : historyTag} style={{filter: historyTab === "tag" ? "" : getFilter()}}/>
                         <img className="history-icon" onClick={() => setHistoryTab("group")} src={historyTab === "group" ? historyGroupActive : historyGroup} style={{filter: historyTab === "group" ? "" : getFilter()}}/>
                         <img className="history-icon" onClick={() => setHistoryTab("translation")} src={historyTab === "translation" ? historyTranslateActive : historyTranslate} style={{filter: historyTab === "translation" ? "" : getFilter()}}/>
+                        <img className="history-icon" onClick={() => setHistoryTab("alias")} src={historyTab === "alias" ? historyAliasActive : historyAlias} style={{filter: historyTab === "alias" ? "" : getFilter()}}/>
                     </div>
                     {generateHeaderJSX()}
                     <table className="history-container">

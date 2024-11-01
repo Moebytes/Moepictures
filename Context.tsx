@@ -70,8 +70,8 @@ export const TabletContext = React.createContext<any>(null)
 export const HideMobileNavbarContext = React.createContext<any>(null)
 export const ShowDeletePostDialogContext = React.createContext<any>(null)
 export const DeleteTagHistoryIDContext = React.createContext<any>(null)
-export const RevertTagHistoryIDContext = React.createContext<any>(null)
 export const DeleteTagHistoryFlagContext = React.createContext<any>(null)
+export const RevertTagHistoryIDContext = React.createContext<any>(null)
 export const RevertTagHistoryFlagContext = React.createContext<any>(null)
 export const DeletePostHistoryIDContext = React.createContext<any>(null)
 export const RevertPostHistoryIDContext = React.createContext<any>(null)
@@ -243,6 +243,10 @@ export const Disable2FADialogContext = React.createContext<any>(null)
 export const Disable2FAFlagContext = React.createContext<any>(null)
 export const TranslationOCRDialogContext = React.createContext<any>(null)
 export const TranslationOCRFlagContext = React.createContext<any>(null)
+export const DeleteAliasHistoryIDContext = React.createContext<any>(null)
+export const DeleteAliasHistoryFlagContext = React.createContext<any>(null)
+export const RevertAliasHistoryIDContext = React.createContext<any>(null)
+export const RevertAliasHistoryFlagContext = React.createContext<any>(null)
 
 const Context: React.FunctionComponent = (props) => {
     const [siteHue, setSiteHue] = useState(180)
@@ -298,8 +302,8 @@ const Context: React.FunctionComponent = (props) => {
     const [showTakedownPostDialog, setShowTakedownPostDialog] = useState(false)
     const [takedownTag, setTakedownTag] = useState(null)
     const [deleteTagHistoryID, setDeleteTagHistoryID] = useState(null)
-    const [revertTagHistoryID, setRevertTagHistoryID] = useState(null)
     const [deleteTagHistoryFlag, setDeleteTagHistoryFlag] = useState(null)
+    const [revertTagHistoryID, setRevertTagHistoryID] = useState(null)
     const [revertTagHistoryFlag, setRevertTagHistoryFlag] = useState(null)
     const [deletePostHistoryID, setDeletePostHistoryID] = useState(null)
     const [revertPostHistoryID, setRevertPostHistoryID] = useState(null)
@@ -466,9 +470,17 @@ const Context: React.FunctionComponent = (props) => {
     const [disable2FAFlag, setDisable2FAFlag] = useState(false)
     const [translationOCRDialog, setTranslationOCRDialog] = useState(false)
     const [translationOCRFlag, setTranslationOCRFlag] = useState(false)
+    const [deleteAliasHistoryID, setDeleteAliasHistoryID] = useState(null)
+    const [deleteAliasHistoryFlag, setDeleteAliasHistoryFlag] = useState(null)
+    const [revertAliasHistoryID, setRevertAliasHistoryID] = useState(null)
+    const [revertAliasHistoryFlag, setRevertAliasHistoryFlag] = useState(null)
 
 return (
     <>
+        <RevertAliasHistoryFlagContext.Provider value={{revertAliasHistoryFlag, setRevertAliasHistoryFlag}}>
+        <RevertAliasHistoryIDContext.Provider value={{revertAliasHistoryID, setRevertAliasHistoryID}}>
+        <DeleteAliasHistoryFlagContext.Provider value={{deleteAliasHistoryFlag, setDeleteAliasHistoryFlag}}>
+        <DeleteAliasHistoryIDContext.Provider value={{deleteAliasHistoryID, setDeleteAliasHistoryID}}>
         <TranslationOCRFlagContext.Provider value={{translationOCRFlag, setTranslationOCRFlag}}>
         <TranslationOCRDialogContext.Provider value={{translationOCRDialog, setTranslationOCRDialog}}>
         <ModPageContext.Provider value={{modPage, setModPage}}>
@@ -912,6 +924,10 @@ return (
         </ModPageContext.Provider>
         </TranslationOCRDialogContext.Provider>
         </TranslationOCRFlagContext.Provider>
+        </DeleteAliasHistoryIDContext.Provider>
+        </DeleteAliasHistoryFlagContext.Provider>
+        </RevertAliasHistoryIDContext.Provider>
+        </RevertAliasHistoryFlagContext.Provider>
     </>
     )
 }

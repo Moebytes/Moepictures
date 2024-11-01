@@ -431,11 +431,12 @@ export default class ServerFunctions {
         ServerFunctions.renameFile(`history/post/${post.postID}`, `history/post/${post.postID}`, oldR18, newR18)
     }
 
-    public static updateImplication = async (tag: string, implication: string) => {
-        const posts = await sql.search.search([tag], "all", "all", "all", "date", "0", "9999999", true)
+    public static updateImplications = async (posts: any[], implications: string[]) => {
         for (const post of posts) {
-            if (!post.tags.includes(implication)) {
-                await sql.tag.insertTagMap(post.postID, [implication])
+            for (const implication of implications) {
+                if (!post.tags.includes(implication)) {
+                    await sql.tag.insertTagMap(post.postID, [implication])
+                }
             }
         }
     }
@@ -451,8 +452,8 @@ export default class ServerFunctions {
                 if (implications?.[0]) tagMap.push(...implications.map(((i: any) => i.implication)))
             }
             tagMap = functions.removeDuplicates(tagMap)
-            await sql.tag.purgeTagMap(postID)
-            await sql.tag.insertTagMap(postID, tagMap)
+            //await sql.tag.purgeTagMap(postID)
+            //await sql.tag.insertTagMap(postID, tagMap)
         }
         console.log("Done")
     }

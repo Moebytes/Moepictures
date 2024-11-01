@@ -63,8 +63,8 @@ const ModTagAliases: React.FunctionComponent = (props) => {
         }
     }, [requests, index, updateVisibleRequestFlag])
 
-    const aliasTag = async (username: string, tag: string, aliasTo: string) => {
-        await functions.post("/api/tag/aliasto", {tag, aliasTo}, session, setSessionFlag)
+    const aliasTag = async (username: string, tag: string, aliasTo: string, reason: string) => {
+        await functions.post("/api/tag/aliasto", {tag, aliasTo, username, reason}, session, setSessionFlag)
         await functions.post("/api/tag/aliasto/request/fulfill", {username, tag, aliasTo, accepted: true}, session, setSessionFlag)
         await updateTags()
         setUpdateVisibleRequestFlag(true)
@@ -320,7 +320,7 @@ const ModTagAliases: React.FunctionComponent = (props) => {
                             <img className="mod-post-options-img" src={reject} style={{filter: getFilter()}}/>
                             <span className="mod-post-options-text">Reject</span>
                         </div>
-                        <div className="mod-post-options-container" onClick={() => aliasTag(request.username, request.tag, request.aliasTo)}>
+                        <div className="mod-post-options-container" onClick={() => aliasTag(request.username, request.tag, request.aliasTo, request.reason)}>
                             <img className="mod-post-options-img" src={approve} style={{filter: getFilter()}}/>
                             <span className="mod-post-options-text">Approve</span>
                         </div>

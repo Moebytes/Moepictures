@@ -176,15 +176,6 @@ export default class SQLGroup {
         return SQLQuery.run(decrementQuery)
     }
 
-    /** Purge group map. */
-    public static purgeGroupMap = async (groupID: number) => {
-        const query: QueryConfig = {
-            text: /*sql*/`DELETE FROM "group map" WHERE "group map"."groupID" = $1`,
-            values: [groupID]
-        }
-        return SQLQuery.run(query)
-    }
-
     /** Bulk insert group mappings. */
     public static bulkInsertGroupMappings = async (groupID: string, posts: any[]) => {
         if (!posts.length) return

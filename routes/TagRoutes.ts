@@ -161,10 +161,10 @@ const TagRoutes = (app: Express) => {
             const tagObj = await sql.tag.tag(tag)
             if (!tagObj) return res.status(400).send("Bad tag")
             let imageFilename = tagObj.image
-            let tagDescription = tagObj.description
+            if (!updater) updater = req.session.username
+            if (!updatedDate) updatedDate = new Date().toISOString()
             if (description !== undefined) {
                 await sql.tag.updateTag(tag, "description", description)
-                tagDescription = description
             }
             let vanillaImageBuffer = null as any
             let imgChange = false
@@ -194,32 +194,43 @@ const TagRoutes = (app: Express) => {
                 }
             }
             if (aliases !== undefined) {
-                await sql.tag.purgeAliases(tag)
-                for (let i = 0; i < aliases.length; i++) {
-                    const alias = aliases[i]?.trim()
-                    if (!alias) break
-                    await sql.tag.insertAlias(tag, alias)
-                }
-            } 
+                const oldAliases = tagObj.aliases?.filter(Boolean).map((a: any) => a.alias) || []
+                const newAliases = aliases.map((a: any) => a?.trim())
+                const toRemove = oldAliases.filter((alias: string) => !newAliases.includes(alias))
+                const toAdd = newAliases.filter((alias: string) => !oldAliases.includes(alias))
+
+                await sql.tag.bulkDeleteAliases(tag, toRemove)
+                await sql.tag.bulkInsertAliases(tag, toAdd)
+            }
             if (implications !== undefined) {
                 let verifiedImplications = [] as string[]
                 for (let i = 0; i < implications.length; i++) {
                     const implication = implications[i]?.trim()
-                    if (!implication) continue
-                    const tag = await sql.tag.tag(implication)
-                    if (tag) verifiedImplications.push(implication)
+                    const exists = await sql.tag.tag(implication)
+                    if (exists) verifiedImplications.push(implication)
                 }
                 implications = verifiedImplications
                 if (implications.length) {
-                    await sql.tag.purgeImplications(tag)
-                    //let promises = [] as Promise<void>[]
-                    for (let i = 0; i < implications.length; i++) {
-                        const implication = implications[i]
-                        await sql.tag.insertImplication(tag, implication)
-                        //const promise = serverFunctions.updateImplication(tag, implication)
-                        //promises.push(promise)
+                    const oldImplications = tagObj.implications?.filter(Boolean).map((i: any) => i.implication) || []
+                    const newImplications = implications
+                    const toRemove = oldImplications.filter((implication: string) => !newImplications.includes(implication))
+                    const toAdd = newImplications.filter((implication: string) => !oldImplications.includes(implication))
+
+                    await sql.tag.bulkDeleteImplications(tag, toRemove)
+                    await sql.tag.bulkInsertImplications(tag, toAdd)
+
+                    const posts = await sql.tag.tagPosts(tag)
+                    const postIDs = posts.map((p: any) => p.postID)
+
+                    for (const implication of toAdd) {
+                        await sql.tag.insertImplicationHistory(updater, tag, implication, "implication", postIDs, reason)
                     }
-                    //if (key.trim() !== tag) await Promise.all(promises)
+
+                    if (key.trim() !== tag) {
+                        await serverFunctions.updateImplications(posts, toAdd)
+                    } else {
+                        serverFunctions.updateImplications(posts, toAdd)
+                    }
                 }
             }
             if (pixivTags !== undefined) {
@@ -257,8 +268,6 @@ const TagRoutes = (app: Express) => {
                     await sql.tag.updateTag(tag, "type", category)
                 }
             }
-            if (!updater) updater = req.session.username
-            if (!updatedDate) updatedDate = new Date().toISOString()
             await sql.tag.updateTag(tag, "updater", updater)
             await sql.tag.updateTag(tag, "updatedDate", updatedDate)
             let targetTag = tag
@@ -353,16 +362,108 @@ const TagRoutes = (app: Express) => {
 
     app.post("/api/tag/aliasto", csrfProtection, tagUpdateLimiter, async (req: Request, res: Response) => {
         try {
-            let {tag, aliasTo} = req.body
+            let {tag, aliasTo, username, reason} = req.body
             tag = tag?.trim()
             if (!req.session.username) return res.status(403).send("Unauthorized")
             if (!tag || !aliasTo) return res.status(400).send("Bad tag or aliasTo")
             if (!permissions.isMod(req.session)) return res.status(403).end()
-            const exists = await sql.tag.tag(aliasTo)
-            if (!exists) return res.status(400).send("Bad tag")
+            const tagObj = await sql.tag.tag(tag)
+            if (!tagObj) return res.status(400).send("Bad aliasTo")
+            const aliasObj = await sql.tag.tag(aliasTo)
+            if (!aliasObj) return res.status(400).send("Bad aliasTo")
+            const sourceData = JSON.stringify(tagObj)
+            const posts = await sql.tag.tagPosts(tag)
+            const postIDs = posts.map((p: any) => p.postID)
+            let targetUser = username ? username : req.session.username
+            await sql.tag.insertAliasHistory(targetUser, tag, aliasTo, "alias", postIDs, sourceData, reason)
             await sql.tag.renameTagMap(tag, aliasTo)
             await sql.tag.deleteTag(tag)
-            await sql.tag.insertAlias(aliasTo, tag)
+            await sql.tag.bulkInsertAliases(aliasTo, [tag])
+            res.status(200).send("Success")
+        } catch (e) {
+            console.log(e)
+            res.status(400).send("Bad request") 
+        }
+    })
+
+    app.post("/api/tag/aliasto/undo", csrfProtection, tagUpdateLimiter, async (req: Request, res: Response) => {
+        try {
+            let {historyID} = req.body
+            if (Number.isNaN(Number(historyID))) return res.status(400).send("Invalid historyID")
+            if (!req.session.username) return res.status(403).send("Unauthorized")
+            if (!permissions.isMod(req.session)) return res.status(403).end()
+            const aliasHistory = await sql.tag.aliasHistoryID(historyID)
+            if (!aliasHistory) return res.status(400).send("Bad historyID")
+            const tag = aliasHistory.source
+            const aliasTo = aliasHistory.target
+            const sourceData = aliasHistory.sourceData
+            const affectedPosts = aliasHistory.affectedPosts || []
+
+            await sql.tag.bulkDeleteAliases(aliasTo, [tag])
+            await sql.tag.insertTagFromData(sourceData)
+            const aliases = sourceData.aliases?.filter(Boolean).map((a: any) => a.alias)
+            const implicatons = sourceData.implicatons?.filter(Boolean).map((i: any) => i.implicaton)
+            await sql.tag.bulkInsertAliases(tag, aliases)
+            await sql.tag.bulkInsertImplications(tag, implicatons)
+            for (const postID of affectedPosts) {
+                await sql.tag.deleteTagMap(postID, [aliasTo])
+                await sql.tag.insertTagMap(postID, [tag])
+            }
+            await sql.tag.insertAliasHistory(req.session.username, tag, aliasTo, "undo alias", affectedPosts, sourceData)
+            res.status(200).send("Success")
+        } catch (e) {
+            console.log(e)
+            res.status(400).send("Bad request") 
+        }
+    })
+
+    app.post("/api/tag/implication/undo", csrfProtection, tagUpdateLimiter, async (req: Request, res: Response) => {
+        try {
+            let {historyID} = req.body
+            if (Number.isNaN(Number(historyID))) return res.status(400).send("Invalid historyID")
+            if (!req.session.username) return res.status(403).send("Unauthorized")
+            if (!permissions.isMod(req.session)) return res.status(403).end()
+            const implicationHistory = await sql.tag.implicationHistoryID(historyID)
+            if (!implicationHistory) return res.status(400).send("Bad historyID")
+            const tag = implicationHistory.source
+            const implication = implicationHistory.target
+            const affectedPosts = implicationHistory.affectedPosts || []
+
+            const posts = await sql.search.posts(affectedPosts)
+            await sql.tag.bulkDeleteImplications(tag, [implication])
+            for (const post of posts) {
+                if (post.tags.includes(implication)) {
+                    await sql.tag.deleteTagMap(post.postID, [implication])
+                }
+            }
+            await sql.tag.insertImplicationHistory(req.session.username, tag, implication, "undo implication", affectedPosts)
+            res.status(200).send("Success")
+        } catch (e) {
+            console.log(e)
+            res.status(400).send("Bad request") 
+        }
+    })
+
+    app.post("/api/tag/implication/redo", csrfProtection, tagUpdateLimiter, async (req: Request, res: Response) => {
+        try {
+            let {historyID} = req.body
+            if (Number.isNaN(Number(historyID))) return res.status(400).send("Invalid historyID")
+            if (!req.session.username) return res.status(403).send("Unauthorized")
+            if (!permissions.isMod(req.session)) return res.status(403).end()
+            const implicationHistory = await sql.tag.implicationHistoryID(historyID)
+            if (!implicationHistory) return res.status(400).send("Bad historyID")
+            const tag = implicationHistory.source
+            const implication = implicationHistory.target
+            const affectedPosts = implicationHistory.affectedPosts || []
+
+            const posts = await sql.search.posts(affectedPosts)
+            await sql.tag.bulkInsertImplications(tag, [implication])
+            for (const post of posts) {
+                if (!post.tags.includes(implication)) {
+                    await sql.tag.insertTagMap(post.postID, [implication])
+                }
+            }
+            await sql.tag.insertImplicationHistory(req.session.username, tag, implication, "implication", affectedPosts)
             res.status(200).send("Success")
         } catch (e) {
             console.log(e)
@@ -594,6 +695,37 @@ const TagRoutes = (app: Express) => {
                     await serverFunctions.deleteIfEmpty(path.dirname(currentHistory.image), false)
                 }
                 await sql.history.deleteTagHistory(Number(historyID))
+            }
+            res.status(200).send("Success")
+        } catch (e) {
+            console.log(e)
+            res.status(400).send("Bad request")
+        }
+    })
+
+    app.get("/api/alias/history", tagLimiter, async (req: Request, res: Response) => {
+        try {
+            const query = req.query.query as string
+            const offset = req.query.offset as string
+            if (!req.session.username) return res.status(403).send("Unauthorized")
+            const result = await sql.tag.aliasImplicationHistory(offset, query)
+            res.status(200).json(result)
+        } catch (e) {
+            console.log(e)
+            res.status(400).send("Bad request")
+        }
+    })
+
+    app.delete("/api/alias/history/delete", csrfProtection, tagUpdateLimiter, async (req: Request, res: Response) => {
+        try {
+            const {historyID, type} = req.query
+            if (Number.isNaN(Number(historyID))) return res.status(400).send("Invalid historyID")
+            if (!req.session.username) return res.status(403).send("Unauthorized")
+            if (!permissions.isAdmin(req.session)) return res.status(403).end()
+            if (type === "alias" || type === "undo alias") {
+                await sql.tag.deleteAliasHistory(Number(historyID))
+            } else if (type === "implication" || type === "undo implication") {
+                await sql.tag.deleteImplicationHistory(Number(historyID))
             }
             res.status(200).send("Success")
         } catch (e) {

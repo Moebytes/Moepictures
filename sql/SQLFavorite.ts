@@ -408,16 +408,7 @@ export default class SQLFavorite {
         const result = await SQLQuery.run(query)
         return result
     }
-
-    /** Purge favgroup map. */
-    public static purgeFavgroupMap = async (username: string, slug: string) => {
-        const query: QueryConfig = {
-            text: /*sql*/`DELETE FROM "favgroup map" WHERE "favgroup map"."username" = $1 AND "favgroup map"."slug" = $2`,
-            values: [username, slug]
-        }
-        return SQLQuery.run(query)
-    }
-
+    
     /** Bulk insert favgroup mappings. */
     public static bulkInsertFavgroupMappings = async (username: string, slug: string, posts: any[]) => {
         if (!posts.length) return

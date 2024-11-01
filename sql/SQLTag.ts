@@ -14,11 +14,33 @@ export default class SQLTag {
         if (type) query.values?.push(type)
         if (creator) query.values?.push(creator)
         try {
-        await SQLQuery.flushDB()
-        await SQLQuery.run(query)
-        return false
+            await SQLQuery.flushDB()
+            await SQLQuery.run(query)
+            return false
         } catch {
-        return true
+            return true
+        }
+    }
+
+    /** Insert a new tag (all populated fields). */
+    public static insertTagFromData = async (data: {tag: string, type: string, image: string, description: string, creator: string, 
+        createDate: string, updater: string, updatedDate: string, website: string, social: string, twitter: string, fandom: string,
+        pixivTags: string[], banned: boolean, hidden: boolean, r18: boolean}) => {
+        const {tag, type, image, description, creator, createDate, updater, updatedDate, website, social, twitter, fandom, pixivTags, 
+            banned, hidden, r18} = data
+        const query: QueryConfig = {
+            text: /*sql*/`INSERT INTO "tags" ("tag", "type", "image", "description", "creator", "createDate", "updater", "updatedDate", 
+                "website", "social", "twitter", "fandom", "pixivTags", "banned", "hidden", "r18") VALUES ($1, $2, $3, $4, $5, $6, $7, 
+                $8, $9, $10, $11, $12, $13, $14, $15, $16)`,
+        values: [tag, type, image, description, creator, createDate, updater, updatedDate, website, social, twitter, fandom, pixivTags, 
+                banned, hidden, r18]
+        }
+        try {
+            await SQLQuery.flushDB()
+            await SQLQuery.run(query)
+            return false
+        } catch {
+            return true
         }
     }
 
@@ -29,18 +51,18 @@ export default class SQLTag {
         let valueArray = [] as any 
         let i = 1 
         for (let j = 0; j < bulkTags.length; j++) {
-        if (tagValues.has(bulkTags[j].tag)) continue
-        tagValues.add(bulkTags[j].tag)
-        valueArray.push(`($${i}, $${i + 1}, $${i + 2}, $${i + 3}, $${i + 4}, $${i + 5}, $${i + 6}, $${i + 7})`)
-        rawValues.push(bulkTags[j].tag)
-        rawValues.push(bulkTags[j].type)
-        rawValues.push(bulkTags[j].description)
-        rawValues.push(bulkTags[j].image)
-        rawValues.push(new Date().toISOString())
-        rawValues.push(creator)
-        rawValues.push(new Date().toISOString())
-        rawValues.push(creator)
-        i += 8
+            if (tagValues.has(bulkTags[j].tag)) continue
+            tagValues.add(bulkTags[j].tag)
+            valueArray.push(`($${i}, $${i + 1}, $${i + 2}, $${i + 3}, $${i + 4}, $${i + 5}, $${i + 6}, $${i + 7})`)
+            rawValues.push(bulkTags[j].tag)
+            rawValues.push(bulkTags[j].type)
+            rawValues.push(bulkTags[j].description)
+            rawValues.push(bulkTags[j].image)
+            rawValues.push(new Date().toISOString())
+            rawValues.push(creator)
+            rawValues.push(new Date().toISOString())
+            rawValues.push(creator)
+            i += 8
         }
         let valueQuery = `VALUES ${valueArray.join(", ")}`
         const query: QueryConfig = {
@@ -280,32 +302,41 @@ export default class SQLTag {
         return result
     }
 
-    /** Insert a new alias. */
-    public static insertAlias = async (tag: string, alias: string) => {
+    /** Insert aliases. */
+    public static bulkInsertAliases = async (tag: string, aliases: string[]) => {
+        if (!aliases?.length) return
+        const placeholders = aliases.map((_, index) => `($1, $${index + 2})`).join(", ")
         const query: QueryConfig = {
-        text: /*sql*/`INSERT INTO "aliases" ("tag", "alias") VALUES ($1, $2)`,
-        values: [tag, alias]
+            text: /*sql*/`INSERT INTO "aliases" ("tag", "alias") VALUES ${placeholders}`,
+            values: [tag, ...aliases]
         }
-        try {
-            await SQLQuery.flushDB()
-            await SQLQuery.run(query)
-            return false
-        } catch {
-            return true
+        await SQLQuery.flushDB()
+        return SQLQuery.run(query)
+    }
+
+    /** Delete aliases. */
+    public static bulkDeleteAliases = async (tag: string, aliases: string[]) => {
+        if (!aliases?.length) return
+        const placeholders = aliases.map((_, index) => `$${index + 2}`).join(", ")
+        const query: QueryConfig = {
+            text: /*sql*/`DELETE FROM "aliases" WHERE "tag" = $1 AND "alias" IN (${placeholders})`,
+            values: [tag, ...aliases]
         }
+        await SQLQuery.flushDB()
+        return SQLQuery.run(query)
     }
 
     /** Insert a new alias (unverified). */
     public static insertUnverifiedAlias = async (tag: string, alias: string) => {
         const query: QueryConfig = {
-        text: /*sql*/`INSERT INTO "unverified aliases" ("tag", "alias") VALUES ($1, $2)`,
-        values: [tag, alias]
+            text: /*sql*/`INSERT INTO "unverified aliases" ("tag", "alias") VALUES ($1, $2)`,
+            values: [tag, alias]
         }
         try {
-        await SQLQuery.run(query)
-        return false
+            await SQLQuery.run(query)
+            return false
         } catch {
-        return true
+            return true
         }
     }
 
@@ -321,25 +352,6 @@ export default class SQLTag {
         }
         const result = await SQLQuery.run(query, true)
         return result[0]
-    }
-
-    /** Purge aliases. */
-    public static purgeAliases = async (tag: string) => {
-        const query: QueryConfig = {
-        text: /*sql*/`DELETE FROM "aliases" WHERE aliases."tag" = $1`,
-        values: [tag]
-        }
-        await SQLQuery.flushDB()
-        return SQLQuery.run(query)
-    }
-
-    /** Purge aliases (unverified). */
-    public static purgeUnverifiedAliases = async (tag: string) => {
-        const query: QueryConfig = {
-        text: /*sql*/`DELETE FROM "unverified aliases" WHERE "unverified aliases"."tag" = $1`,
-        values: [tag]
-        }
-        return SQLQuery.run(query)
     }
 
     /** Alias search. */
@@ -358,19 +370,28 @@ export default class SQLTag {
         return result
     }
 
-    /** Insert a new implication. */
-    public static insertImplication = async (tag: string, implication: string) => {
+    /** Bulk insert implications. */
+    public static bulkInsertImplications = async (tag: string, implications: string[]) => {
+        if (!implications?.length) return
+        const placeholders = implications.map((_, index) => `($1, $${index + 2})`).join(", ")
         const query: QueryConfig = {
-        text: /*sql*/`INSERT INTO implications ("tag", "implication") VALUES ($1, $2)`,
-        values: [tag, implication]
+            text: /*sql*/`INSERT INTO implications ("tag", "implication") VALUES ${placeholders}`,
+            values: [tag, ...implications]
         }
-        try {
-            await SQLQuery.flushDB()
-            await SQLQuery.run(query)
-        return false
-        } catch {
-            return true
+        await SQLQuery.flushDB()
+        return SQLQuery.run(query)
+    }
+
+    /** Bulk delete implications. */
+    public static bulkDeleteImplications = async (tag: string, implications: string[]) => {
+        if (!implications?.length) return
+        const placeholders = implications.map((_, index) => `$${index + 2}`).join(", ")
+        const query: QueryConfig = {
+            text: /*sql*/`DELETE FROM implications WHERE "tag" = $1 AND "implication" IN (${placeholders})`,
+            values: [tag, ...implications]
         }
+        await SQLQuery.flushDB()
+        return SQLQuery.run(query)
     }
 
     /** Get implications. */
@@ -387,16 +408,6 @@ export default class SQLTag {
         return result
     }
 
-    /** Purge implications. */
-    public static purgeImplications = async (tag: string) => {
-        const query: QueryConfig = {
-        text: /*sql*/`DELETE FROM implications WHERE implications."tag" = $1`,
-        values: [tag]
-        }
-        await SQLQuery.flushDB()
-        return SQLQuery.run(query)
-    }
-
     /** Rename tag map. */
     public static renameTagMap = async (tag: string, newTag: string) => {
         const query: QueryConfig = {
@@ -407,22 +418,144 @@ export default class SQLTag {
         return SQLQuery.run(query)
     }
 
-    /** Purge tag map. */
-    public static purgeTagMap = async (postID: number) => {
+    /** Get tag posts. */
+    public static tagPosts = async (tag: string) => {
         const query: QueryConfig = {
-            text: /*sql*/`DELETE FROM "tag map" WHERE "tag map"."postID" = $1`,
-            values: [postID]
+            text: functions.multiTrim(/*sql*/`
+                    WITH post_json AS (
+                        SELECT posts.*, json_agg(DISTINCT images.*) AS images, 
+                        array_agg(DISTINCT "tag map".tag) AS tags
+                        FROM posts
+                        JOIN images ON posts."postID" = images."postID"
+                        JOIN "tag map" ON posts."postID" = "tag map"."postID"
+                        GROUP BY posts."postID"
+                    )
+                    SELECT "tag map"."postID",
+                    to_json((array_agg(post_json.*))[1]) AS post
+                    FROM "tag map"
+                    JOIN post_json ON post_json."postID" = "tag map"."postID"
+                    WHERE "tag map".tag = $1
+                    GROUP BY "tag map"."postID"
+            `),
+            values: [tag]
         }
-        await SQLQuery.flushDB()
-        return SQLQuery.run(query)
+        const result = await SQLQuery.run(query)
+        return result.map((r: any) => r.post)
     }
 
-    /** Purge tag map (unverified). */
-    public static purgeUnverifiedTagMap = async (postID: number) => {
+    /** Insert alias history */
+    public static insertAliasHistory = async (username: string, source: string, target: string, type: string, 
+        affectedPosts: any, sourceData: any, reason?: string) => {
+        const now = new Date().toISOString()
         const query: QueryConfig = {
-            text: /*sql*/`DELETE FROM "unverified tag map" WHERE "unverified tag map"."postID" = $1`,
-            values: [postID]
+            text: /*sql*/`INSERT INTO "alias history" ("user", "date", "source", "target", "type", "affectedPosts", "sourceData", 
+            "reason") VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`,
+            values: [username, now, source, target, type, affectedPosts, sourceData, reason]
         }
-        return SQLQuery.run(query)
+        await SQLQuery.flushDB()
+        const result = await SQLQuery.run(query)
+        return result
+    }
+
+    /** Delete alias history */
+    public static deleteAliasHistory = async (historyID: number) => {
+        const query: QueryConfig = {
+            text: functions.multiTrim(/*sql*/`DELETE FROM "alias history" WHERE "alias history"."historyID" = $1`),
+            values: [historyID]
+        }
+        await SQLQuery.flushDB()
+        const result = await SQLQuery.run(query)
+        return result
+    }
+
+    /** Insert implication history */
+    public static insertImplicationHistory = async (username: string, source: string, target: string, type: string, 
+        affectedPosts: any, reason?: string) => {
+        const now = new Date().toISOString()
+        const query: QueryConfig = {
+            text: /*sql*/`INSERT INTO "implication history" ("user", "date", "source", "target", "type", "affectedPosts", 
+            "reason") VALUES ($1, $2, $3, $4, $5, $6, $7)`,
+            values: [username, now, source, target, type, affectedPosts, reason]
+        }
+        await SQLQuery.flushDB()
+        const result = await SQLQuery.run(query)
+        return result
+    }
+
+    /** Delete implication history */
+    public static deleteImplicationHistory = async (historyID: number) => {
+        const query: QueryConfig = {
+            text: functions.multiTrim(/*sql*/`DELETE FROM "implication history" WHERE "implication history"."historyID" = $1`),
+            values: [historyID]
+        }
+        await SQLQuery.flushDB()
+        const result = await SQLQuery.run(query)
+        return result
+    }
+
+    /** Get alias history ID */
+    public static aliasHistoryID = async (historyID: string) => {
+        const query: QueryConfig = {
+        text: functions.multiTrim(/*sql*/`
+                SELECT "alias history".*
+                FROM "alias history"
+                WHERE "alias history"."historyID" = $1
+            `),
+            values: [historyID]
+        }
+        const result = await SQLQuery.run(query)
+        return result[0]
+    }
+
+    /** Get implication history ID */
+    public static implicationHistoryID = async (historyID: string) => {
+        const query: QueryConfig = {
+        text: functions.multiTrim(/*sql*/`
+                SELECT "implication history".*
+                FROM "implication history"
+                WHERE "implication history"."historyID" = $1
+            `),
+            values: [historyID]
+        }
+        const result = await SQLQuery.run(query)
+        return result[0]
+    }
+
+    /** Get alias/implication history */
+    public static aliasImplicationHistory = async (offset?: string, search?: string) => {
+        let i = 1
+        let values = [] as any
+        let searchValue = i
+        let searchQuery = ""
+        if (search) {
+            values.push(search)
+            searchQuery = "(" + `"history"."source" ILIKE '%' || $${searchValue} || '%' OR
+            "history"."target" ILIKE '%' || $${searchValue} || '%' OR 
+            "history"."type" ILIKE '%' || $${searchValue} || '%' ` + ")"
+            i++
+        }
+        if (offset) values.push(offset)
+        const whereQueries = [searchQuery].filter(Boolean).join(" AND ")
+        const query: QueryConfig = {
+        text: functions.multiTrim(/*sql*/`
+                SELECT "history".*, COUNT(*) OVER() AS "historyCount"
+                FROM (
+                    SELECT "historyID", "user", "date", "source", "target",
+                    "type", "affectedPosts", "sourceData", "reason"
+                    FROM "alias history"
+                    UNION ALL
+                    SELECT "historyID", "user", "date", "source", "target",
+                    "type", "affectedPosts", NULL::jsonb AS "sourceData", "reason"
+                    FROM "implication history"
+                ) AS "history"
+                ${whereQueries ? `WHERE ${whereQueries}` : ""}
+                ORDER BY "history"."date" DESC
+                LIMIT 100 ${offset ? `OFFSET $${i}` : ""}
+            `),
+            values: []
+        }
+        if (values?.[0]) query.values = values
+        const result = await SQLQuery.run(query, true)
+        return result
     }
 }
