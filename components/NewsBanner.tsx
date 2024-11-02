@@ -15,7 +15,8 @@ const NewsBanner: React.FunctionComponent = (props) => {
 
     const updateBanner = async () => {
         const banner = await functions.get("/api/misc/banner", null, session, setSessionFlag)
-        if (!session.bannerHide || new Date(session.bannerHide) <= new Date(banner.date)) {
+        const bannerHideDate = localStorage.getItem("bannerHideDate")
+        if (!bannerHideDate || new Date(bannerHideDate) <= new Date(banner.date)) {
             if (banner?.text) setNewsBanner(banner)
         }
     }
@@ -26,7 +27,7 @@ const NewsBanner: React.FunctionComponent = (props) => {
     }, [session])
 
     const closeBanner = async () => {
-        if (session.username) await functions.post("/api/user/hidebanner", null, session, setSessionFlag)
+        localStorage.setItem("bannerHideDate", new Date().toISOString())
         setNewsBanner(null)
     }
 

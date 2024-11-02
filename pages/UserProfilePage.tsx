@@ -96,7 +96,8 @@ const UserProfilePage: React.FunctionComponent = (props) => {
 
     const checkHiddenBanner = async () => {
         const banner = await functions.get("/api/misc/banner", null, session, setSessionFlag)
-        if (new Date(session.bannerHide) > new Date(banner?.date)) {
+        const bannerHideDate = localStorage.getItem("bannerHideDate")
+        if (bannerHideDate && new Date(bannerHideDate) > new Date(banner?.date)) {
             if (banner?.text) setBannerHidden(true)
         }
     }
@@ -175,8 +176,8 @@ const UserProfilePage: React.FunctionComponent = (props) => {
         updateFavgroups()
         updateComments()
         updateCounts()
+        checkHiddenBanner()
         if (session.banned) updateBanReason()
-        if (session.bannerHide) checkHiddenBanner()
     }, [session, restrictType])
 
     useEffect(() => {
@@ -471,7 +472,7 @@ const UserProfilePage: React.FunctionComponent = (props) => {
     }
 
     const showBanner = async () => {
-        await functions.post("/api/user/showbanner", null, session, setSessionFlag)
+        localStorage.removeItem("bannerHideDate")
         setSessionFlag(true)
     }
 

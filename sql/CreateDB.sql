@@ -21,7 +21,6 @@ CREATE TABLE IF NOT EXISTS "users" (
     "ip" inet,
     "banned" boolean,
     "banExpiration" timestamptz,
-    "bannerHide" timestamptz,
     "password" text
 );
 
