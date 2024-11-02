@@ -36,10 +36,10 @@ export default class SQLPost {
 
     /** Bulk updates a post */
     public static bulkUpdatePost = async (postID: number, params: {restrict?: string, style?: string, thirdParty?: boolean, 
-        title?: string, translatedTitle?: string, artist?: string, drawn?: string, link?: string, commentary?: string, 
+        title?: string, translatedTitle?: string, artist?: string, posted?: string, link?: string, commentary?: string, 
         translatedCommentary?: string, bookmarks?: string, purchaseLink?: string, mirrors?: string, type?: string, uploadDate?: string, uploader?: string, 
         updatedDate?: string, updater?: string, hidden?: boolean, approver?: string, approveDate?: string, hasOriginal?: boolean, hasUpscaled?: boolean}) => {
-        const {restrict, style, thirdParty, title, translatedTitle, artist, drawn, link, commentary, translatedCommentary, bookmarks, 
+        const {restrict, style, thirdParty, title, translatedTitle, artist, posted, link, commentary, translatedCommentary, bookmarks, 
         purchaseLink, mirrors, type, uploadDate, uploader, updatedDate, updater, hidden, approver, approveDate, hasOriginal, hasUpscaled} = params
         let setArray = [] as any
         let values = [] as any
@@ -74,9 +74,9 @@ export default class SQLPost {
             values.push(artist)
             i++
         }
-        if (drawn !== undefined) {
-            setArray.push(`"drawn" = $${i}`)
-            values.push(drawn)
+        if (posted !== undefined) {
+            setArray.push(`"posted" = $${i}`)
+            values.push(posted)
             i++
         }
         if (link !== undefined) {
@@ -170,11 +170,11 @@ export default class SQLPost {
 
     /** Bulk updates a post (unverified). */
     public static bulkUpdateUnverifiedPost = async (postID: number, params: {restrict?: string, style?: string, thirdParty?: boolean, 
-        title?: string, translatedTitle?: string, artist?: string, drawn?: string, link?: string, commentary?: string, translatedCommentary?: string, 
+        title?: string, translatedTitle?: string, artist?: string, posted?: string, link?: string, commentary?: string, translatedCommentary?: string, 
         bookmarks?: string, purchaseLink?: string, mirrors?: string, type?: string, uploadDate?: string, uploader?: string, updatedDate?: string, updater?: string, 
         duplicates?: boolean, newTags?: number, originalID?: number, reason?: string, hidden?: boolean, hasOriginal?: boolean, hasUpscaled?: boolean, isTranslation?: boolean, 
         addedTags?: string[], removedTags?: string[], imageChanged?: boolean, changes?: any}) => {
-        const {restrict, style, thirdParty, title, translatedTitle, artist, drawn, link, commentary, translatedCommentary, bookmarks, purchaseLink, 
+        const {restrict, style, thirdParty, title, translatedTitle, artist, posted, link, commentary, translatedCommentary, bookmarks, purchaseLink, 
         mirrors, type, uploadDate, uploader, updatedDate, updater, duplicates, originalID, newTags, hidden, hasOriginal, hasUpscaled, isTranslation, 
         addedTags, removedTags, imageChanged, changes, reason} = params
         let setArray = [] as any
@@ -210,9 +210,9 @@ export default class SQLPost {
             values.push(artist)
             i++
         }
-        if (drawn !== undefined) {
-            setArray.push(`"drawn" = $${i}`)
-            values.push(drawn)
+        if (posted !== undefined) {
+            setArray.push(`"posted" = $${i}`)
+            values.push(posted)
             i++
         }
         if (link !== undefined) {

@@ -8,7 +8,7 @@ import SideBar from "../components/SideBar"
 import {HideNavbarContext, HideSidebarContext, ThemeContext, EnableDragContext, RelativeContext, HideTitlebarContext, MobileContext,
 HeaderTextContext, SidebarTextContext, SessionContext, SessionFlagContext} from "../Context"
 import functions from "../structures/Functions"
-import "./styles/2fapage.less"
+import "./styles/sitepage.less"
 
 const $2FAPage: React.FunctionComponent = (props) => {
     const {theme, setTheme} = useContext(ThemeContext)
@@ -85,16 +85,16 @@ const $2FAPage: React.FunctionComponent = (props) => {
         <div className="body">
             <SideBar/>
             <div className="content">
-                <div className="f2a">
-                    <span className="f2a-title">2-Factor Authentication</span>
-                    <span className="f2a-link">Please enter your 2FA token.</span>
-                    <div className="f2a-row">
-                        <span className="f2a-text">2FA Token:</span>
-                        <input className="f2a-input" type="text" spellCheck={false} value={token} onChange={(event) => setToken(event.target.value)} onKeyDown={(event) => event.key === "Enter" ? validate() : null}/>
+                <div className="sitepage">
+                    <span className="sitepage-title">2-Factor Authentication</span>
+                    <span className="sitepage-link">Please enter your 2FA token.</span>
+                    <div className="sitepage-row">
+                        <span className="sitepage-text-wide">2FA Token:</span>
+                        <input className="sitepage-input" type="text" spellCheck={false} value={token} onChange={(event) => setToken(event.target.value)} onKeyDown={(event) => event.key === "Enter" ? validate() : null}/>
                     </div>
-                    {error ? <div className="f2a-validation-container"><span className="f2a-validation" ref={errorRef}></span></div> : null}
-                    <div className="f2a-button-container">
-                        <button className="f2a-button" onClick={validate}>Validate</button>
+                    {error ? <div className="sitepage-validation-container"><span className="sitepage-validation" ref={errorRef}></span></div> : null}
+                    <div className="sitepage-button-container">
+                        <button className="sitepage-button" onClick={validate}>Validate</button>
                     </div>
                 </div>
                 <Footer/>

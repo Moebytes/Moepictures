@@ -9,7 +9,7 @@ import functions from "../structures/Functions"
 import {HideNavbarContext, HideSidebarContext, ThemeContext, EnableDragContext, RedirectContext,
 RelativeContext, HideTitlebarContext, HeaderTextContext, SidebarTextContext, SessionContext, MobileContext,
 SessionFlagContext, SiteHueContext, SiteLightnessContext, SiteSaturationContext} from "../Context"
-import "./styles/verifyemailpage.less"
+import "./styles/sitepage.less"
 import session from "express-session"
 
 const VerifyEmailPage: React.FunctionComponent = (props) => {
@@ -121,32 +121,32 @@ const VerifyEmailPage: React.FunctionComponent = (props) => {
         <div className="body">
             <SideBar/>
             <div className="content">
-                <div className="verify-email">
-                    <span className="verify-email-title">Verify Email</span>
+                <div className="sitepage">
+                    <span className="sitepage-title">Verify Email</span>
                     {submitted ?
                     <>
-                    <span className="verify-email-link">Verification email resent. Check your email.</span>
-                    <div className="verify-email-button-container-left">
-                        <button className="verify-email-button" onClick={() => setSubmitted(false)}>Ok</button>
+                    <span className="sitepage-link">Verification email resent. Check your email.</span>
+                    <div className="sitepage-button-container-left">
+                        <button className="sitepage-button" onClick={() => setSubmitted(false)}>Ok</button>
                     </div>
                     </> : <>
-                    <span className="verify-email-link">You must verify your email address in order to use your account. If you need to 
+                    <span className="sitepage-link">You must verify your email address in order to use your account. If you need to 
                     change your email and/or resend the verification link, you can do so below.</span>
-                    <div className="verify-email-row">
-                        <span className="verify-email-text">Unverified Email: </span>
-                        <span className="verify-email-text-small">{session.email}</span>
+                    <div className="sitepage-row">
+                        <span className="sitepage-text">Unverified Email: </span>
+                        <span className="sitepage-text-small2">{session.email}</span>
                     </div>
-                    <div className="verify-email-row">
-                        <span className="verify-email-text">Optional Address Change: </span>
-                        <input className="verify-email-input" type="text" spellCheck={false} value={newEmail} onChange={(event) => setNewEmail(event.target.value)} onKeyDown={(event) => event.key === "Enter" ? submit() : null}/>
+                    <div className="sitepage-row">
+                        <span className="sitepage-text">Optional Address Change: </span>
+                        <input className="sitepage-input" type="text" spellCheck={false} value={newEmail} onChange={(event) => setNewEmail(event.target.value)} onKeyDown={(event) => event.key === "Enter" ? submit() : null}/>
                     </div>
-                    <div className="verify-email-row" style={{justifyContent: "center"}}>
+                    <div className="sitepage-row" style={{justifyContent: "center"}}>
                         <img src={`data:image/svg+xml;utf8,${encodeURIComponent(captcha)}`} style={{filter: getFilter()}}/>
-                        <input className="verify-email-input" type="text" spellCheck={false} value={captchaResponse} onChange={(event) => setCaptchaResponse(event.target.value)} onKeyDown={(event) => event.key === "Enter" ? submit() : null}/>
+                        <input className="sitepage-input" type="text" spellCheck={false} value={captchaResponse} onChange={(event) => setCaptchaResponse(event.target.value)} onKeyDown={(event) => event.key === "Enter" ? submit() : null}/>
                     </div>
-                    {error ? <div className="verify-email-validation-container"><span className="verify-email-validation" ref={errorRef}></span></div> : null}
-                    <div className="verify-email-button-container">
-                        <button className="verify-email-button" onClick={() => submit()}>Resend Verification Link</button>
+                    {error ? <div className="sitepage-validation-container"><span className="sitepage-validation" ref={errorRef}></span></div> : null}
+                    <div className="sitepage-button-container">
+                        <button className="sitepage-button" onClick={() => submit()}>Resend Verification Link</button>
                     </div>
                     </>
                     }

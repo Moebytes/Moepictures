@@ -185,26 +185,26 @@ const AliasHistoryRow: React.FunctionComponent<Props> = (props) => {
     const getJSX = () => {
         if (props.history.type === "alias") return (
             <span>
-                {props.history.source}
-                <span style={{color: "var(--text-strong)"}}> ⇢ {props.history.target}</span>
+                <span>{props.history.source}</span>
+                <span style={{cursor: "pointer", color: "var(--text-strong)"}} onClick={() => history.push(`/tag/${props.history.target}`)}> ⇢ {props.history.target}</span>
             </span>
         )
         if (props.history.type === "undo alias") return (
             <span>
-                <span style={{color: "var(--text-strong)"}}>{props.history.source} ⇠ </span>
-                {props.history.target}
+                <span style={{cursor: "pointer", color: "var(--text-strong)"}} onClick={() => history.push(`/tag/${props.history.source}`)}>{props.history.source} ⇠ </span>
+                <span style={{cursor: "pointer"}} onClick={() => history.push(`/tag/${props.history.target}`)}>{props.history.target}</span>
             </span>
         )
         if (props.history.type === "implication") return (
             <span>
-                {props.history.source}
-                <span style={{color: "var(--text-strong)"}}> ⇾ {props.history.target}</span>
+                <span style={{cursor: "pointer"}} onClick={() => history.push(`/tag/${props.history.source}`)}>{props.history.source}</span>
+                <span style={{cursor: "pointer", color: "var(--text-strong)"}} onClick={() => history.push(`/tag/${props.history.target}`)}> ⇾ {props.history.target}</span>
             </span>
         )
         if (props.history.type === "undo implication") return (
             <span>
-                <span style={{color: "var(--text-strong)"}}>{props.history.source} ⇽ </span>
-                {props.history.target}
+                <span style={{cursor: "pointer", color: "var(--text-strong)"}} onClick={() => history.push(`/tag/${props.history.source}`)}>{props.history.source} ⇽ </span>
+                <span style={{cursor: "pointer"}} onClick={() => history.push(`/tag/${props.history.target}`)}>{props.history.target}</span>
             </span>
         )
     }

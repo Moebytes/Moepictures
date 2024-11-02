@@ -10,7 +10,7 @@ import hide from "../assets/icons/hide.png"
 import {HideNavbarContext, HideSidebarContext, ThemeContext, EnableDragContext, RelativeContext, SessionContext, MobileContext,
 HideTitlebarContext, HeaderTextContext, SessionFlagContext, SidebarTextContext, RedirectContext, SiteHueContext, SiteLightnessContext,
 SiteSaturationContext} from "../Context"
-import "./styles/loginpage.less"
+import "./styles/sitepage.less"
 import functions from "../structures/Functions"
 
 const LoginPage: React.FunctionComponent = (props) => {
@@ -129,32 +129,32 @@ const LoginPage: React.FunctionComponent = (props) => {
         <div className="body">
             <SideBar/>
             <div className="content">
-                <div className="login">
-                    <span className="login-title">Login</span>
+                <div className="sitepage">
+                    <span className="sitepage-title">Login</span>
                     <Link to="/signup">
-                        <span className="login-link">Don't have an account? Sign up.</span>
+                        <span className="sitepage-link-clickable">Don't have an account? Sign up.</span>
                     </Link>
-                    <div className="login-row">
-                        <span className="login-text">Username:</span>
-                        <input className="login-input" type="text" spellCheck={false} value={username} onChange={(event) => setUsername(event.target.value)} onKeyDown={(event) => event.key === "Enter" ? login() : null}/>
+                    <div className="sitepage-row">
+                        <span className="sitepage-text">Username:</span>
+                        <input className="sitepage-input" type="text" spellCheck={false} value={username} onChange={(event) => setUsername(event.target.value)} onKeyDown={(event) => event.key === "Enter" ? login() : null}/>
                     </div>
-                    <div className="login-row">
-                        <span className="login-text">Password:</span>
-                        <div className="login-pass">
-                            <img className="login-pass-show" src={getEye()} style={{filter: getFilter()}} onClick={() => setShowPassword((prev) => !prev)}/>
-                            <input className="login-pass-input" type={showPassword ? "text" : "password"} spellCheck={false} value={password} onChange={(event) => setPassword(event.target.value)} onKeyDown={(event) => event.key === "Enter" ? login() : null}/>
+                    <div className="sitepage-row">
+                        <span className="sitepage-text">Password:</span>
+                        <div className="sitepage-pass">
+                            <img className="sitepage-pass-show" src={getEye()} style={{filter: getFilter()}} onClick={() => setShowPassword((prev) => !prev)}/>
+                            <input className="sitepage-pass-input" type={showPassword ? "text" : "password"} spellCheck={false} value={password} onChange={(event) => setPassword(event.target.value)} onKeyDown={(event) => event.key === "Enter" ? login() : null}/>
                         </div>
                     </div>
-                    <Link to ="/forgot-password">
-                        <span className="login-link">Forgot Password?</span>
+                    <Link style={{width: "max-content"}} to ="/forgot-password">
+                        <span className="sitepage-link-clickable">Forgot Password?</span>
                     </Link>
-                    <div className="login-row" style={{justifyContent: "center"}}>
+                    <div className="sitepage-row" style={{justifyContent: "center"}}>
                         <img src={`data:image/svg+xml;utf8,${encodeURIComponent(captcha)}`} style={{filter: getFilter()}}/>
-                        <input className="login-input" type="text" spellCheck={false} value={captchaResponse} onChange={(event) => setCaptchaResponse(event.target.value)} onKeyDown={(event) => event.key === "Enter" ? login() : null}/>
+                        <input className="sitepage-input" type="text" spellCheck={false} value={captchaResponse} onChange={(event) => setCaptchaResponse(event.target.value)} onKeyDown={(event) => event.key === "Enter" ? login() : null}/>
                     </div>
-                    {error ? <div className="login-validation-container"><span className="login-validation" ref={errorRef}></span></div> : null}
-                    <div className="login-button-container">
-                        <button className="login-button" onClick={() => login()}>Login</button>
+                    {error ? <div className="sitepage-validation-container"><span className="sitepage-validation" ref={errorRef}></span></div> : null}
+                    <div className="sitepage-button-container">
+                        <button className="sitepage-button" onClick={() => login()}>Login</button>
                     </div>
                 </div>
                 <Footer/>

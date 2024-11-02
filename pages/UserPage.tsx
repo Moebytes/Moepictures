@@ -114,7 +114,7 @@ const UserPage: React.FunctionComponent<Props> = (props) => {
         const result = await functions.get("/api/user/uploads", {limit, restrict, offset}, session, setSessionFlag)
         newUploads.push(...result)
         const images = result.map((p: any) => functions.getThumbnailLink(p.images[0].type, p.postID, p.images[0].order, p.images[0].filename, "large"))
-        setUploads(result)
+        setUploads(newUploads)
         setAppendUploadImages(images)
     }
 
@@ -133,7 +133,7 @@ const UserPage: React.FunctionComponent<Props> = (props) => {
         const result = await functions.get("/api/user/favorites", {limit, restrict, offset}, session, setSessionFlag)
         newFavorites.push(...result)
         const images = result.map((f: any) => functions.getThumbnailLink(f.images[0].type, f.postID, f.images[0].order, f.images[0].filename, "tiny"))
-        setFavorites(result)
+        setFavorites(newFavorites)
         setAppendFavoriteImages(images)
     }
 

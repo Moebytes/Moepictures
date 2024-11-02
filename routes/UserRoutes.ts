@@ -77,6 +77,7 @@ const UserRoutes = (app: Express) => {
             delete user.upscaledImage
             delete user.savedSearches
             delete user.premiumExpiration
+            delete user.bannerHide
             delete user.showR18
             res.status(200).json(user)
         } catch (e) {
@@ -184,6 +185,7 @@ const UserRoutes = (app: Express) => {
                 req.session.showR18 = user.showR18
                 req.session.premiumExpiration = user.premiumExpiration
                 req.session.banExpiration = user.banExpiration
+                req.session.bannerHide = user.bannerHide
                 await sql.user.insertLoginHistory(user.username, "login", ip, device)
                 return res.status(200).send("Success")
             } else {
@@ -243,6 +245,7 @@ const UserRoutes = (app: Express) => {
                 req.session.showR18 = user.showR18
                 req.session.premiumExpiration = user.premiumExpiration
                 req.session.banExpiration = user.banExpiration
+                req.session.bannerHide = user.bannerHide
 
                 if (user.role.includes("premium") && user.premiumExpiration) {
                     if (new Date(user.premiumExpiration) < new Date()) {
@@ -518,6 +521,28 @@ const UserRoutes = (app: Express) => {
             const newR18 = r18 !== undefined ? r18 : !Boolean(user.showR18)
             req.session.showR18 = newR18
             await sql.user.updateUser(req.session.username, "showR18", newR18)
+            res.status(200).send("Success")
+        } catch (e) {
+            console.log(e)
+            res.status(400).send("Bad request")
+        }
+    })
+
+    app.post("/api/user/hidebanner", csrfProtection, sessionLimiter, async (req: Request, res: Response) => {
+        try {
+            if (!req.session.username) return res.status(403).send("Unauthorized")
+            await sql.user.updateUser(req.session.username, "bannerHide", new Date().toISOString())
+            res.status(200).send("Success")
+        } catch (e) {
+            console.log(e)
+            res.status(400).send("Bad request")
+        }
+    })
+
+    app.post("/api/user/showbanner", csrfProtection, sessionLimiter, async (req: Request, res: Response) => {
+        try {
+            if (!req.session.username) return res.status(403).send("Unauthorized")
+            await sql.user.updateUser(req.session.username, "bannerHide", null)
             res.status(200).send("Success")
         } catch (e) {
             console.log(e)

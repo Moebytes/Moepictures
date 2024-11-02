@@ -831,7 +831,7 @@ const UploadPage: React.FunctionComponent = (props) => {
                 title: sourceTitle,
                 translatedTitle: sourceTranslatedTitle,
                 artist: sourceArtist,
-                drawn: sourceDate,
+                posted: sourceDate,
                 link: sourceLink,
                 commentary: sourceCommentary,
                 translatedCommentary: sourceTranslatedCommentary,
@@ -1669,7 +1669,7 @@ const UploadPage: React.FunctionComponent = (props) => {
                     <input className="upload-input-wide" type="text" value={sourceArtist} onChange={(event) => setSourceArtist(event.target.value)} spellCheck={false} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}/>
                 </div>
                 <div className="upload-container-row">
-                    <span className="upload-text">Drawn Date: </span>
+                    <span className="upload-text">Posted: </span>
                     <input className="upload-input-wide" type="date" value={sourceDate} onChange={(event) => setSourceDate(event.target.value)} spellCheck={false} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}/>
                 </div>
                 <div className="upload-container-row">

@@ -9,7 +9,7 @@ import Disable2FADialog from "../dialogs/Disable2FADialog"
 import {HideNavbarContext, HideSidebarContext, ThemeContext, EnableDragContext, RelativeContext, HideTitlebarContext, 
 HeaderTextContext, SidebarTextContext, SessionContext, SessionFlagContext, RedirectContext, MobileContext, Disable2FADialogContext,
 Disable2FAFlagContext} from "../Context"
-import "./styles/2faenablepage.less"
+import "./styles/sitepage.less"
 import functions from "../structures/Functions"
 
 const $2FAEnablePage: React.FunctionComponent = (props) => {
@@ -131,37 +131,37 @@ const $2FAEnablePage: React.FunctionComponent = (props) => {
         <div className="body">
             <SideBar/>
             <div className="content">
-                <div className="f2a-enable">
-                    <span className="f2a-enable-title">2-Factor Authentication</span>
-                    <span className="f2a-enable-link">2fa provides much stronger security for your account during login, by requiring an additional time-sensitive code.</span>
-                    <div className="f2a-enable-row">
-                        <span className="f2a-enable-text">Status: </span>
-                        <span className="f2a-enable-text" style={{cursor: "pointer", marginLeft: "10px"}} onClick={changeStatus}>{session.$2fa ? "Enabled" : "Disabled"}</span>
+                <div className="sitepage">
+                    <span className="sitepage-title">2-Factor Authentication</span>
+                    <span className="sitepage-link">2fa provides much stronger security for your account during login, by requiring an additional time-sensitive code.</span>
+                    <div className="sitepage-row">
+                        <span className="sitepage-text">Status: </span>
+                        <span className="sitepage-text" style={{cursor: "pointer", marginLeft: "10px"}} onClick={changeStatus}>{session.$2fa ? "Enabled" : "Disabled"}</span>
                     </div>
                     {qr ? <>
-                    <div className="f2a-enable-row">
-                        <span className="f2a-enable-link">Scan the following QR Code in a 2FA authentication app (eg. Authy). </span>
+                    <div className="sitepage-row">
+                        <span className="sitepage-link">Scan the following QR Code in a 2FA authentication app (eg. Authy). </span>
                     </div>
-                    <div className="f2a-enable-row">
+                    <div className="sitepage-row">
                         <img className="f2a-qr" src={qr}/>
                     </div>
                     </> : null}
                     {!showValidation ? 
-                    <div className="f2a-enable-row">
-                        <button className="change-username-button" onClick={() => history.push("/profile")}>←Back</button>
+                    <div className="sitepage-row">
+                        <button className="sitepage-button" onClick={() => history.push("/profile")}>←Back</button>
                     </div>
                     : null}
                     {showValidation ? <>
-                    <div className="f2a-enable-row">
-                        <span className="f2a-enable-link">To finish enabling 2FA, you must enter a valid 2fa token.</span>
+                    <div className="sitepage-row">
+                        <span className="sitepage-link">To finish enabling 2FA, you must enter a valid 2fa token.</span>
                     </div>
-                    <div className="f2a-enable-row">
-                        <span className="f2a-enable-text">2FA Token:</span>
-                        <input className="f2a-enable-input" type="text" spellCheck={false} value={token} onChange={(event) => setToken(event.target.value)} onKeyDown={(event) => event.key === "Enter" ? enable2FA() : null}/>
+                    <div className="sitepage-row">
+                        <span className="sitepage-text">2FA Token:</span>
+                        <input className="sitepage-input" type="text" spellCheck={false} value={token} onChange={(event) => setToken(event.target.value)} onKeyDown={(event) => event.key === "Enter" ? enable2FA() : null}/>
                     </div>
-                    {error ? <div className="f2a-enable-validation-container"><span className="f2a-enable-validation" ref={errorRef}></span></div> : null}
-                    <div className="f2a-enable-row">
-                        <button style={{marginRight: "20px"}} className="change-username-button" onClick={() => history.push("/profile")}>←Back</button>
+                    {error ? <div className="sitepage-validation-container"><span className="sitepage-validation" ref={errorRef}></span></div> : null}
+                    <div className="sitepage-row">
+                        <button style={{marginRight: "20px"}} className="sitepage-button" onClick={() => history.push("/profile")}>←Back</button>
                         <button className="f2a-button" onClick={enable2FA}>Enable 2FA</button>
                     </div>
                     </> : null}

@@ -163,6 +163,61 @@ const TagRoutes = (app: Express) => {
             let imageFilename = tagObj.image
             if (!updater) updater = req.session.username
             if (!updatedDate) updatedDate = new Date().toISOString()
+            if (implications !== undefined) {
+                let verifiedImplications = [] as string[]
+                for (let i = 0; i < implications.length; i++) {
+                    const implication = implications[i]?.trim()
+                    const exists = await sql.tag.tag(implication)
+                    if (exists) verifiedImplications.push(implication)
+                }
+                implications = verifiedImplications
+                if (implications.length) {
+                    const oldImplications = tagObj.implications?.filter(Boolean).map((i: any) => i.implication) || []
+                    const newImplications = implications
+                    const toRemove = oldImplications.filter((implication: string) => !newImplications.includes(implication)).filter(Boolean)
+                    const toAdd = newImplications.filter((implication: string) => !oldImplications.includes(implication)).filter(Boolean)
+
+                    const posts = await sql.tag.tagPosts(tag)
+                    const postIDs = posts.map((p: any) => p.postID)
+
+                    if (posts.length >  1000 && !permissions.isMod(req.session)) {
+                        return res.status(400).send("No permission to edit implications")
+                    } 
+                    await sql.tag.bulkDeleteImplications(tag, toRemove)
+                    await sql.tag.bulkInsertImplications(tag, toAdd)
+
+                    for (const implication of toAdd) {
+                        await sql.tag.insertImplicationHistory(updater, tag, implication, "implication", postIDs, reason)
+                    }
+
+                    if (key.trim() !== tag) {
+                        await serverFunctions.updateImplications(posts, toAdd)
+                    } else {
+                        serverFunctions.updateImplications(posts, toAdd)
+                    }
+                }
+            }
+            if (aliases !== undefined) {
+                let noConflictAliases = [] as string[]
+                for (let i = 0; i < aliases.length; i++) {
+                    const alias = aliases[i]?.trim()
+                    const conflict = await sql.tag.tag(alias)
+                    if (!conflict) noConflictAliases.push(alias)
+                }
+                aliases = noConflictAliases
+                if (aliases.length) {
+                    const oldAliases = tagObj.aliases?.filter(Boolean).map((a: any) => a.alias) || []
+                    const newAliases = aliases.map((a: any) => a?.trim())
+                    const toRemove = oldAliases.filter((alias: string) => !newAliases.includes(alias)).filter(Boolean)
+                    const toAdd = newAliases.filter((alias: string) => !oldAliases.includes(alias)).filter(Boolean)
+    
+                    await sql.tag.bulkDeleteAliases(tag, toRemove)
+                    await sql.tag.bulkInsertAliases(tag, toAdd)
+                }
+            }
+            if (pixivTags !== undefined) {
+                await sql.tag.updateTag(tag, "pixivTags", pixivTags)
+            }
             if (description !== undefined) {
                 await sql.tag.updateTag(tag, "description", description)
             }
@@ -192,49 +247,6 @@ const TagRoutes = (app: Express) => {
                     await sql.tag.updateTag(tag, "image", null as any)
                     imageFilename = null
                 }
-            }
-            if (aliases !== undefined) {
-                const oldAliases = tagObj.aliases?.filter(Boolean).map((a: any) => a.alias) || []
-                const newAliases = aliases.map((a: any) => a?.trim())
-                const toRemove = oldAliases.filter((alias: string) => !newAliases.includes(alias))
-                const toAdd = newAliases.filter((alias: string) => !oldAliases.includes(alias))
-
-                await sql.tag.bulkDeleteAliases(tag, toRemove)
-                await sql.tag.bulkInsertAliases(tag, toAdd)
-            }
-            if (implications !== undefined) {
-                let verifiedImplications = [] as string[]
-                for (let i = 0; i < implications.length; i++) {
-                    const implication = implications[i]?.trim()
-                    const exists = await sql.tag.tag(implication)
-                    if (exists) verifiedImplications.push(implication)
-                }
-                implications = verifiedImplications
-                if (implications.length) {
-                    const oldImplications = tagObj.implications?.filter(Boolean).map((i: any) => i.implication) || []
-                    const newImplications = implications
-                    const toRemove = oldImplications.filter((implication: string) => !newImplications.includes(implication))
-                    const toAdd = newImplications.filter((implication: string) => !oldImplications.includes(implication))
-
-                    await sql.tag.bulkDeleteImplications(tag, toRemove)
-                    await sql.tag.bulkInsertImplications(tag, toAdd)
-
-                    const posts = await sql.tag.tagPosts(tag)
-                    const postIDs = posts.map((p: any) => p.postID)
-
-                    for (const implication of toAdd) {
-                        await sql.tag.insertImplicationHistory(updater, tag, implication, "implication", postIDs, reason)
-                    }
-
-                    if (key.trim() !== tag) {
-                        await serverFunctions.updateImplications(posts, toAdd)
-                    } else {
-                        serverFunctions.updateImplications(posts, toAdd)
-                    }
-                }
-            }
-            if (pixivTags !== undefined) {
-                await sql.tag.updateTag(tag, "pixivTags", pixivTags)
             }
             if (tagObj.type === "artist") {
                 if (website !== undefined) {
@@ -296,6 +308,8 @@ const TagRoutes = (app: Express) => {
             }
 
             const updated = await sql.tag.tag(targetTag)
+            const updatedAliases = updated.aliases?.filter(Boolean).map((a: any) => a.alias)
+            const updatedImplications = updated.implications?.filter(Boolean).map((i: any) => i.implication)
             const changes = functions.parseTagChanges(tagObj, updated)
 
             const tagHistory = await sql.history.tagHistory(targetTag)
@@ -326,7 +340,7 @@ const TagRoutes = (app: Express) => {
                     }
                 }
                 await sql.history.insertTagHistory({username: req.session.username, tag: targetTag, key, type: updated.type, image: updated.image, 
-                description: updated.description, aliases: updated.aliases, implications: updated.implications, pixivTags: updated.pixivTags, 
+                description: updated.description, aliases: updatedAliases, implications: updatedImplications, pixivTags: updated.pixivTags, 
                 website: updated.website, social: updated.social, twitter: updated.twitter, fandom: updated.fandom, r18: updated.r18, 
                 imageChanged: imgChange, changes, reason})
             } else {
@@ -349,7 +363,7 @@ const TagRoutes = (app: Express) => {
                     }
                 }
                 await sql.history.insertTagHistory({username: req.session.username, tag: targetTag, key, type: updated.type, image: updated.image, 
-                description: updated.description, aliases: updated.aliases, implications: updated.implications, pixivTags: updated.pixivTags, 
+                description: updated.description, aliases: updatedAliases, implications: updatedImplications, pixivTags: updated.pixivTags, 
                 website: updated.website, social: updated.social, twitter: updated.twitter, fandom: updated.fandom, r18: updated.r18, 
                 imageChanged: imgChange, changes, reason})
             }

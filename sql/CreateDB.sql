@@ -21,6 +21,7 @@ CREATE TABLE IF NOT EXISTS "users" (
     "ip" inet,
     "banned" boolean,
     "banExpiration" timestamptz,
+    "bannerHide" timestamptz,
     "password" text
 );
 
@@ -32,7 +33,7 @@ CREATE TABLE IF NOT EXISTS "posts" (
     "restrict" text,
     "style" text,
     "thirdParty" boolean,
-    "drawn" date,
+    "posted" date,
     "uploadDate" timestamptz,
     "updatedDate" timestamptz,
     "approver" text REFERENCES "users" ("username") ON UPDATE CASCADE ON DELETE SET NULL,
@@ -65,7 +66,7 @@ CREATE TABLE IF NOT EXISTS "unverified posts" (
     "restrict" text,
     "style" text,
     "thirdParty" boolean,
-    "drawn" date,
+    "posted" date,
     "uploadDate" timestamptz,
     "updatedDate" timestamptz,
     "approveDate" timestamptz,
@@ -510,7 +511,7 @@ CREATE TABLE IF NOT EXISTS "post history" (
     "restrict" text,
     "style" text,
     "thirdParty" boolean,
-    "drawn" date,
+    "posted" date,
     "uploadDate" timestamptz,
     "updatedDate" timestamptz,
     "title" text,
@@ -592,6 +593,13 @@ CREATE TABLE IF NOT EXISTS "payments" (
     "email" text
 );
 
+CREATE TABLE IF NOT EXISTS "banner" (
+    "bannerID" int PRIMARY KEY DEFAULT 1,
+    "text" text,
+    "link" text,
+    "date" timestamptz
+);
+
 CREATE INDEX IF NOT EXISTS "idx_posts"
     ON "posts" USING btree
     ("postID" DESC NULLS LAST);
@@ -608,8 +616,8 @@ CREATE INDEX IF NOT EXISTS "idx_post_style"
 CREATE INDEX IF NOT EXISTS "idx_post_uploadDate" 
     ON "posts" USING btree ("uploadDate");
 
-CREATE INDEX IF NOT EXISTS "idx_post_drawn" 
-    ON "posts" USING btree ("drawn");
+CREATE INDEX IF NOT EXISTS "idx_post_posted" 
+    ON "posts" USING btree ("posted");
 
 CREATE INDEX IF NOT EXISTS "idx_post_bookmarks" 
     ON "posts" USING btree ("bookmarks");

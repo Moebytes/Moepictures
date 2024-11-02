@@ -74,10 +74,13 @@ const BanDialog: React.FunctionComponent = (props) => {
                     title: currentHistory.title,
                     translatedTitle: currentHistory.translatedTitle,
                     artist: currentHistory.artist,
-                    drawn: currentHistory.drawn,
+                    posted: currentHistory.posted,
                     link: currentHistory.link,
                     commentary: currentHistory.commentary,
-                    translatedCommentary: currentHistory.translatedCommentary
+                    translatedCommentary: currentHistory.translatedCommentary,
+                    bookmarks: currentHistory.bookmarks,
+                    purchaseLink: currentHistory.purchaseLink,
+                    mirrors: currentHistory.mirrors
                 }
                 await functions.put("/api/post/edit", {silent: true, postID: currentHistory.postID, images, upscaledImages, type: currentHistory.type, restrict: currentHistory.restrict, source,
                 style: currentHistory.style, artists: currentHistory.artists, characters: currentHistory.characters, preserveThirdParty: currentHistory.thirdParty,

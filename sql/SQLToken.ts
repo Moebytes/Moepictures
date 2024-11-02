@@ -41,6 +41,19 @@ export default class SQLToken {
         return result[0]
     }
 
+    /** Get email tokens. */
+    public static emailTokens = async () => {
+        const query: QueryConfig = {
+        text: functions.multiTrim(/*sql*/`
+            SELECT "email tokens".*
+            FROM "email tokens"
+            GROUP BY "email tokens"."email"
+            `)
+        }
+        const result = await SQLQuery.run(query)
+        return result
+    }
+
     /** Delete email token. */
     public static deleteEmailToken = async (email: string) => {
         const query: QueryConfig = {
@@ -113,6 +126,19 @@ export default class SQLToken {
         }
         const result = await SQLQuery.run(query)
         return result[0]
+    }
+
+    /** Get password tokens. */
+    public static passwordTokens = async () => {
+        const query: QueryConfig = {
+        text: functions.multiTrim(/*sql*/`
+            SELECT "password tokens".*
+            FROM "password tokens"
+            GROUP BY "password tokens"."username"
+            `)
+        }
+        const result = await SQLQuery.run(query)
+        return result
     }
 
     /** Delete password token. */

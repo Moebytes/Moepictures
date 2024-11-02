@@ -87,7 +87,7 @@ const PostHistoryRow: React.FunctionComponent<Props> = (props) => {
                 title: props.postHistory.title,
                 translatedTitle: props.postHistory.translatedTitle,
                 artist: props.postHistory.artist,
-                drawn: props.postHistory.drawn ? functions.formatDate(new Date(props.postHistory.drawn), true) : "",
+                posted: props.postHistory.posted ? functions.formatDate(new Date(props.postHistory.posted), true) : "",
                 link: props.postHistory.link,
                 commentary: props.postHistory.commentary,
                 translatedCommentary: props.postHistory.translatedCommentary,
@@ -388,8 +388,8 @@ const PostHistoryRow: React.FunctionComponent<Props> = (props) => {
         if (!prevHistory || changes.artist) {
             jsx.push(<span className="historyrow-text"><span className="historyrow-label-text">Artist:</span> {props.postHistory.artist || "Unknown"}</span>)
         }
-        if (!prevHistory || changes.drawn) {
-            jsx.push(<span className="historyrow-text"><span className="historyrow-label-text">Drawn:</span> {props.postHistory.drawn ? functions.formatDate(new Date(props.postHistory.drawn)) : "Unknown"}</span>)
+        if (!prevHistory || changes.posted) {
+            jsx.push(<span className="historyrow-text"><span className="historyrow-label-text">Posted:</span> {props.postHistory.posted ? functions.formatDate(new Date(props.postHistory.posted)) : "Unknown"}</span>)
         }
         if (!prevHistory || changes.link) {
             jsx.push(<span className="historyrow-text"><span className="historyrow-label-text">Link:</span> <span className="historyrow-label-link" onClick={() => window.open(props.postHistory.link, "_blank")}>{functions.getSiteName(props.postHistory.link)}</span></span>)

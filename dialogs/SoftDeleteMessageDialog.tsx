@@ -56,7 +56,7 @@ const SoftDeleteMessageDialog: React.FunctionComponent = (props) => {
                             <span className="dialog-title">Soft Delete Message</span>
                         </div>
                         <div className="dialog-row">
-                            <span className="dialog-text">Do you want to soft delete this message from your inbox? (It will appear again if the other recipient replies).</span>
+                            <span className="dialog-text">Do you want to soft delete this message? (It will appear again if any other recipient replies).</span>
                         </div>
                         <div className="dialog-row">
                             <button onClick={() => click("reject")} className="dialog-button">{"No"}</button>

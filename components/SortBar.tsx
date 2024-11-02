@@ -498,7 +498,7 @@ const SortBar: React.FunctionComponent = (props) => {
         let offset = 0
         if (sortType === "random") offset = -30
         if (sortType === "date") offset = -30
-        if (sortType === "drawn") offset = -30
+        if (sortType === "posted") offset = -30
         if (sortType === "cuteness") offset = -25
         if (sortType === "favorites") offset = -20
         if (sortType === "variations") offset = -20
@@ -984,8 +984,8 @@ const SortBar: React.FunctionComponent = (props) => {
                 <div className="sortbar-dropdown-row" onClick={() => changeSortType("date")}>
                     <span className="sortbar-dropdown-text">Date</span>
                 </div>
-                <div className="sortbar-dropdown-row" onClick={() => changeSortType("drawn")}>
-                    <span className="sortbar-dropdown-text">Drawn</span>
+                <div className="sortbar-dropdown-row" onClick={() => changeSortType("posted")}>
+                    <span className="sortbar-dropdown-text">Posted</span>
                 </div>
                 {session.username ? <div className="sortbar-dropdown-row" onClick={() => changeSortType("bookmarks")}>
                     <span className="sortbar-dropdown-text">Bookmarks ★</span>

@@ -41,6 +41,10 @@ const SearchRoutes = (app: Express) => {
                 if (!tag) {
                     const alias = await sql.tag.alias(tags[i])
                     if (alias) tags[i] = alias.tag
+                    if (!alias && functions.isJapaneseText(tags[i])) {
+                        const pixivTag = await sql.tag.tagFromPixivTag(tags[i])
+                        if (pixivTag) tags[i] = pixivTag.tag
+                    }
                 }
             }
             let result = [] as any

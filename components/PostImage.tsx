@@ -191,7 +191,7 @@ const PostImage: React.FunctionComponent<Props> = (props) => {
         if (videoRef.current) videoRef.current.style.opacity = "1"
         if (mobile) fetchVideo()
         const updateImg = async () => {
-            const decryptedImage = await functions.decryptImg(props.img, `${props.img}`)
+            const decryptedImage = await functions.decryptImg(props.img, props.img)
             let isAnimatedWebp = false
             if (functions.isWebP(props.img)) {
                 const arrayBuffer = await fetch(props.img).then((r) => r.arrayBuffer())

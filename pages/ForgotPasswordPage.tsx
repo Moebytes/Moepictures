@@ -7,7 +7,7 @@ import {HideNavbarContext, HideSidebarContext, ThemeContext, EnableDragContext, 
 RelativeContext, HideTitlebarContext, HeaderTextContext, SidebarTextContext, SiteHueContext,
 SiteLightnessContext, SiteSaturationContext, SessionContext, SessionFlagContext} from "../Context"
 import functions from "../structures/Functions"
-import "./styles/forgotpasspage.less"
+import "./styles/sitepage.less"
 
 const ForgotPasswordPage: React.FunctionComponent = (props) => {
     const {theme, setTheme} = useContext(ThemeContext)
@@ -94,27 +94,27 @@ const ForgotPasswordPage: React.FunctionComponent = (props) => {
         <div className="body">
             <SideBar/>
             <div className="content">
-                <div className="forgot-pass">
-                    <span className="forgot-pass-title">Forgot Password</span>
+                <div className="sitepage">
+                    <span className="sitepage-title">Forgot Password</span>
                     {submitted ?
                     <>
-                    <span className="forgot-pass-link">A password reset link was sent if this account exists.</span>
-                    <div className="forgot-pass-button-container-left">
-                        <button className="forgot-pass-button" onClick={() => setSubmitted(false)}>←Back</button>
+                    <span className="sitepage-link">A password reset link was sent if this account exists.</span>
+                    <div className="sitepage-button-container-left">
+                        <button className="sitepage-button" onClick={() => setSubmitted(false)}>←Back</button>
                     </div>
                     </> : <>
-                    <span className="forgot-pass-link">Enter your email to receive a password reset link.</span>
-                    <div className="forgot-pass-row">
-                        <span className="forgot-pass-text">Email Address:</span>
-                        <input className="forgot-pass-input" type="text" spellCheck={false} value={email} onChange={(event) => setEmail(event.target.value)} onKeyDown={(event) => event.key === "Enter" ? submit() : null}/>
+                    <span className="sitepage-link">Enter your email to receive a password reset link.</span>
+                    <div className="sitepage-row">
+                        <span className="sitepage-text">Email Address:</span>
+                        <input className="sitepage-input" type="text" spellCheck={false} value={email} onChange={(event) => setEmail(event.target.value)} onKeyDown={(event) => event.key === "Enter" ? submit() : null}/>
                     </div>
-                    <div className="forgot-pass-row" style={{justifyContent: "center"}}>
+                    <div className="sitepage-row" style={{justifyContent: "center"}}>
                         <img src={`data:image/svg+xml;utf8,${encodeURIComponent(captcha)}`} style={{filter: getFilter()}}/>
-                        <input className="forgot-pass-input" type="text" spellCheck={false} value={captchaResponse} onChange={(event) => setCaptchaResponse(event.target.value)} onKeyDown={(event) => event.key === "Enter" ? submit() : null}/>
+                        <input className="sitepage-input" type="text" spellCheck={false} value={captchaResponse} onChange={(event) => setCaptchaResponse(event.target.value)} onKeyDown={(event) => event.key === "Enter" ? submit() : null}/>
                     </div>
-                    {error ? <div className="forgot-pass-validation-container"><span className="forgot-pass-validation" ref={errorRef}></span></div> : null}
-                    <div className="forgot-pass-button-container">
-                        <button className="forgot-pass-button" onClick={() => submit()}>Send Link</button>
+                    {error ? <div className="sitepage-validation-container"><span className="sitepage-validation" ref={errorRef}></span></div> : null}
+                    <div className="sitepage-button-container">
+                        <button className="sitepage-button" onClick={() => submit()}>Send Link</button>
                     </div>
                     </>
                     }

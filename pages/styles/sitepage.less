@@ -3,7 +3,7 @@
 
 .sitepage {
     .form();
-    width: 50%;
+    //width: 50%;
 }
 
 .sitepage-title {
@@ -14,18 +14,46 @@
     .form-link();
 }
 
+.sitepage-link-clickable {
+    .form-link();
+    cursor: pointer;
+}
+
 .sitepage-row {
     .form-row();
 }
 
 .sitepage-text {
     .form-text();
+    white-space: nowrap;
+}
+
+.sitepage-text-wide {
+    .form-text();
     width: 200px;
+    white-space: nowrap;
+}
+
+.sitepage-text-wide2 {
+    .form-text();
+    width: 400px;
+    white-space: nowrap;
+}
+
+.sitepage-text-wide3 {
+    .form-text();
+    width: 600px;
+    white-space: nowrap;
 }
 
 .sitepage-text-small {
     .form-text-small();
     margin-left: -40px;
+}
+
+.sitepage-text-small2 {
+    .form-text-small();
+    margin-left: 10px;
 }
 
 .sitepage-input {
@@ -34,10 +62,12 @@
 
 .sitepage-button-container {
     .form-button-container();
+    margin-top: 10px;
 }
 
 .sitepage-button {
     .form-button();
+    margin-top: 5px;
 }
 
 .sitepage-pass {

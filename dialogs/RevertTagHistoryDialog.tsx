@@ -50,6 +50,28 @@ const RevertTagHistoryDialog: React.FunctionComponent = (props) => {
         setRevertTagHistoryID(null)
     }
 
+    if (revertTagHistoryID?.failed === "implication") {
+        return (
+            <div className="dialog">
+                <Draggable handle=".dialog-title-container">
+                <div className="dialog-box" style={{width: "250px", height: "190px"}} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
+                    <div className="dialog-container">
+                        <div className="dialog-title-container">
+                            <span className="dialog-title">Revert Tag History</span>
+                        </div>
+                        <div className="dialog-row">
+                            <span className="dialog-text">You don't have permission to revert these implications.</span>
+                        </div>
+                        <div className="dialog-row">
+                            <button onClick={() => click("reject")} className="dialog-button">{"Ok"}</button>
+                        </div>
+                    </div>
+                </div>
+                </Draggable>
+            </div>
+        )
+    }
+
     if (revertTagHistoryID?.failed) {
         return (
             <div className="dialog">

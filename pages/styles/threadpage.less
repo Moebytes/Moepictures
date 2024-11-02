@@ -1,7 +1,7 @@
 @import "../../index.less";
 @import "../../components/styles/form.less";
 
-.forum-thread {
+.thread-page {
     position: relative;
     display: flex;
     flex-direction: column;
@@ -10,7 +10,7 @@
     padding: 10px 30px;
 }
 
-.forum-thread-title-container {
+.thread-page-title-container {
     display: flex;
     flex-direction: row;
     align-items: center;
@@ -18,7 +18,7 @@
     margin-bottom: 10px;
 }
 
-.forum-thread-title {
+.thread-page-title {
     font-family: Inter, sans-serif;
     font-size: 35px;
     color: var(--text);
@@ -27,13 +27,21 @@
     }
 }
 
-.forum-thread-icon {
+.thread-page-info {
+    font-family: Inter, sans-serif;
+    font-size: 18px;
+    color: var(--text-alt);
+    font-style: italic;
+    filter: brightness(85%);
+}
+
+.thread-page-icon {
     width: auto;
     height: 22px;
     margin-right: 10px;
 }
 
-.forum-thread-opt-icon {
+.thread-page-opt-icon {
     width: auto;
     height: 22px;
     margin-left: 10px;
@@ -43,20 +51,20 @@
     }
 }
 
-.forum-thread-row {
+.thread-page-row {
     display: flex;
     flex-direction: row;
     width: 100%;
 }
 
-.forum-thread-container {
+.thread-page-container {
     display: flex;
     flex-direction: column;
     width: 100%;
     height: 100%;
 }
 
-.forum-thread-text-container {
+.thread-page-text-container {
     display: flex;
     flex-direction: row;
     flex-wrap: wrap;
@@ -64,7 +72,7 @@
     height: max-content;
 }
 
-.forum-thread-text {
+.thread-page-text {
     font-family: Inter, sans-serif;
     font-size: 20px;
     color: var(--text);
@@ -73,7 +81,7 @@
     white-space: preserve;
 }
 
-.forum-thread-main-post {
+.thread-page-main-post {
     display: flex;
     flex-direction: row;
     width: 85%;
@@ -81,7 +89,7 @@
     padding-bottom: 10px;
 }
 
-.forum-thread-user-container {
+.thread-page-user-container {
     display: flex;
     flex-direction: column;
     align-items: flex-start;
@@ -90,12 +98,12 @@
     margin-right: 30px;
 }
 
-.forum-thread-user-img {
+.thread-page-user-img {
     width: auto;
     height: 120px;
 }
 
-.forum-thread-username-container {
+.thread-page-username-container {
     display: flex;
     flex-direction: row;
     align-items: center;
@@ -106,19 +114,19 @@
     }
 }
 
-.forum-thread-user-label {
+.thread-page-user-label {
     margin-left: 3px;
     width: auto;
     height: 22px;
 }
 
-.forum-thread-user-text {
+.thread-page-user-text {
     font-family: Inter, sans-serif;
     font-size: 23px;
     color: var(--userColor);
 }
 
-.forum-thread-date-text {
+.thread-page-date-text {
     font-family: Inter, sans-serif;
     font-size: 15px;
     font-style: italic;
@@ -126,7 +134,7 @@
     margin-bottom: 10px;
 }
 
-.forum-thread-input-container {
+.thread-page-input-container {
     display: flex;
     flex-direction: column;
     width: 100%;
@@ -134,38 +142,38 @@
     margin-top: 10px;
 }
 
-.forum-thread-row-start {
+.thread-page-row-start {
     .form-row-start();
 }
 
-.forum-thread-textarea {
+.thread-page-textarea {
     .form-textarea();
     width: 70%;
     font-size: 25px;
 }
 
-.forum-thread-button-container-left {
+.thread-page-button-container-left {
     .form-button-container-left();
 }
 
-.forum-thread-button {
+.thread-page-button {
     .form-button();
     margin-left: 10px;
 }
 
-.forum-thread-validation {
+.thread-page-validation {
     .form-validation();
     font-size: 19px;
     margin-bottom: 10px;
 }
 
-.forum-thread-validation-container {
+.thread-page-validation-container {
     .form-validation-container();
     margin-left: 10px;  
     justify-content: flex-start;
 }
 
-.forum-thread-reply-box {
+.thread-page-reply-box {
     display: flex;
     flex-direction: row;
     justify-content: center;
@@ -173,7 +181,7 @@
     margin-left: 170px;
 }
 
-.forum-thread-replybox-row {
+.thread-page-replybox-row {
     display: flex;
     flex-direction: row;
     width: 100%;
@@ -181,7 +189,7 @@
     margin-top: 5px;
 }
 
-.forum-thread-replybox-text {
+.thread-page-replybox-text {
     font-family: Tahoma, sans-serif;
     font-size: 20px;
     color: var(--text);
@@ -190,7 +198,7 @@
     white-space: preserve;
 }
 
-.forum-thread-checkbox {
+.thread-page-checkbox {
     width: auto;
     height: 20px;
     margin-left: 10px;
@@ -198,25 +206,25 @@
 }
 
 @media screen and (max-width: 500px) {
-    .forum-thread-reply-box {
+    .thread-page-reply-box {
         margin-left: 0px;
     }
 
-    .forum-thread-textarea {
+    .thread-page-textarea {
         width: 100%;
         margin-left: 0px;
     }
 
-    .forum-thread-button {
+    .thread-page-button {
         margin-left: 0px;
     }
 
-    .forum-thread-main-post {
+    .thread-page-main-post {
         flex-direction: column;
         width: 100%;
     }
 
-    .forum-thread-text-container {
+    .thread-page-text-container {
         width: 100%;
         margin-top: 10px;
     }

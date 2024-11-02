@@ -1,6 +1,6 @@
-import React, {useEffect, useState, useContext} from "react"
+import React, {useEffect, useState} from "react"
 import {Switch, Route, Redirect, useHistory, useLocation} from "react-router-dom"
-import Context, {ThemeContext, HideNavbarContext, HideSidebarContext, HideSortbarContext, HasNotificationContext, TabletContext, ActiveGroupContext,
+import {Context, ThemeContext, HideNavbarContext, HideSidebarContext, HideSortbarContext, HasNotificationContext, TabletContext, ActiveGroupContext,
 HideTitlebarContext, EnableDragContext, ActiveDropdownContext, FilterDropActiveContext, MobileScrollingContext, EmojisContext, PostsContext, RestrictTypeContext,
 SidebarHoverContext, SessionContext, SessionFlagContext, UserImgContext, UserImgPostContext, MobileContext, SelectionModeContext, ActiveFavgroupContext} from "./Context"
 import favicon from "./assets/icons/favicon.png"
@@ -56,12 +56,14 @@ import MailPage from "./pages/MailPage"
 import MessagePage from "./pages/MessagePage"
 import LoginHistoryPage from "./pages/LoginHistoryPage"
 import IPBlacklistPage from "./pages/IPBlacklistPage"
+import NewsBannerPage from "./pages/NewsBannerPage"
 import PremiumPage from "./pages/PremiumPage"
 import PremiumRequiredDialog from "./dialogs/PremiumRequiredDialog"
 import PremiumSuccessPage from "./pages/PremiumSuccessPage"
 import DragAndDrop from "./components/DragAndDrop"
 import AudioPlayer from "./components/AudioPlayer"
 import ActionBanner from "./components/ActionBanner"
+import NewsBanner from "./components/NewsBanner"
 import "./index.less"
 
 require.context("./assets/icons", true)
@@ -326,6 +328,7 @@ const App: React.FunctionComponent = (props) => {
             <ThemeContext.Provider value={{theme, setTheme}}>
                 <Context>
                     <DragAndDrop/>
+                    <NewsBanner/>
                     <ActionBanner/>
                     <PremiumRequiredDialog/>
                     <Switch>
@@ -382,6 +385,7 @@ const App: React.FunctionComponent = (props) => {
                         <Route exact path="/mod-queue"><ModQueuePage/></Route>
                         <Route exact path={["/privacy", "/privacypolicy"]}><Redirect to="/terms#privacy"/></Route>
                         <Route exact path={["/terms", "termsofservice"]}><TermsPage/></Route>
+                        <Route exact path="/news-banner"><NewsBannerPage/></Route>
                         <Route exact path="/ip-blacklist"><IPBlacklistPage/></Route>
                         <Route exact path="/401"><$401Page/></Route>
                         <Route exact path="/403"><$403Page/></Route>

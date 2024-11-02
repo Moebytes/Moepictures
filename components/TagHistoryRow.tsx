@@ -90,8 +90,9 @@ const TagHistoryRow: React.FunctionComponent<Props> = (props) => {
             revertTagHistory().then(() => {
                 setRevertTagHistoryFlag(false)
                 setRevertTagHistoryID(null)
-            }).catch(() => {
+            }).catch((err) => {
                 setRevertTagHistoryFlag(false)
+                if (err.response?.data.includes("No permission to edit implications")) return setRevertTagHistoryID({failed: "implication", historyID: props.tagHistory.historyID})
                 setRevertTagHistoryID({failed: true, historyID: props.tagHistory.historyID})
             })
         }
@@ -294,12 +295,14 @@ const TagHistoryRow: React.FunctionComponent<Props> = (props) => {
         }
         if (!prevHistory || changes.aliases) {
             if (props.tagHistory.aliases?.[0]) {
-                jsx.push(<span className="historyrow-text"><span className="historyrow-label-text">Aliases:</span> {props.tagHistory.aliases.map((alias: string) => alias.replaceAll("-", " ")).join(", ")}</span>)
+                const aliases = props.tagHistory.aliases.map((a: any) => a.alias ? a.alias.replaceAll("-", " ") : a.replaceAll("-", " "))
+                jsx.push(<span className="historyrow-text"><span className="historyrow-label-text">Aliases:</span> {aliases.join(", ")}</span>)
             }
         }
         if (!prevHistory || changes.implications) {
             if (props.tagHistory.implications?.[0]) {
-                jsx.push(<span className="historyrow-text"><span className="historyrow-label-text">Implications:</span> {props.tagHistory.implications.map((implication: string) => implication.replaceAll("-", " ")).join(", ")}</span>)
+                const implications = props.tagHistory.implications.map((i: any) => i.implication ? i.implication.replaceAll("-", " ") : i.replaceAll("-", " "))
+                jsx.push(<span className="historyrow-text"><span className="historyrow-label-text">Implications:</span> {implications.join(", ")}</span>)
             }
         }
         if (!prevHistory || changes.pixivTags) {

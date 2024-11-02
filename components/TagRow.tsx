@@ -149,15 +149,26 @@ const TagRow: React.FunctionComponent<Props> = (props) => {
                 image = Object.values(bytes)
             }
         }
-        await functions.put("/api/tag/edit", {tag: props.tag.tag, key: editTagKey, description: editTagDescription,
-        image, aliases: editTagAliases, implications: editTagImplications, pixivTags: editTagPixivTags, social: editTagSocial, twitter: editTagTwitter,
-        website: editTagWebsite, fandom: editTagFandom, r18: editTagR18, reason: editTagReason}, session, setSessionFlag)
-        if (editTagImage) functions.refreshCache(editTagImage)
-        props.onEdit?.()
+        try {
+            await functions.put("/api/tag/edit", {tag: props.tag.tag, key: editTagKey, description: editTagDescription,
+            image, aliases: editTagAliases, implications: editTagImplications, pixivTags: editTagPixivTags, social: editTagSocial, twitter: editTagTwitter,
+            website: editTagWebsite, fandom: editTagFandom, r18: editTagR18, reason: editTagReason}, session, setSessionFlag)
+            if (editTagImage) functions.refreshCache(editTagImage)
+            props.onEdit?.()
+        } catch (err: any) {
+            if (err.response?.data.includes("No permission to edit implications")) {
+                await functions.post("/api/tag/edit/request", {tag: editTagID.tag, key: editTagKey, description: editTagDescription, image, aliases: editTagAliases, 
+                implications: editTagImplications, pixivTags: editTagPixivTags, social: editTagSocial, twitter: editTagTwitter, website: editTagWebsite, fandom: editTagFandom, 
+                r18: editTagR18, reason: editTagReason}, session, setSessionFlag)
+                setEditTagID({tag: props.tag.tag, failed: "implication"})
+            } else {
+                setEditTagID({tag: props.tag.tag, failed: true})
+            }
+        }
     }
 
     useEffect(() => {
-        if (editTagFlag && editTagID === props.tag.tag) {
+        if (editTagFlag && editTagID?.tag === props.tag.tag) {
             editTag()
             setEditTagFlag(false)
             setEditTagID(null)
@@ -171,7 +182,6 @@ const TagRow: React.FunctionComponent<Props> = (props) => {
         setEditTagAliases(props.tag.aliases?.[0] ? props.tag.aliases.map((a: any) => a.alias) : [])
         setEditTagImplications(props.tag.implications?.[0] ? props.tag.implications.map((i: any) => i.implication) : [])
         setEditTagPixivTags(props.tag.pixivTags?.[0] ? props.tag.pixivTags : [])
-        setEditTagID(props.tag.tag)
         setEditTagType(props.tag.type)
         setEditTagSocial(props.tag.social)
         setEditTagTwitter(props.tag.twitter)
@@ -179,6 +189,7 @@ const TagRow: React.FunctionComponent<Props> = (props) => {
         setEditTagFandom(props.tag.fandom)
         setEditTagR18(props.tag.r18)
         setEditTagReason("")
+        setEditTagID({tag: props.tag.tag, failed: false})
     }
 
     const aliasTag = async () => {

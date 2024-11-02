@@ -27,8 +27,8 @@ export default class SQLUser {
         if (sort === "random") sortQuery = `ORDER BY random()`
         if (!sort || sort === "date") sortQuery = `ORDER BY posts."uploadDate" DESC`
         if (sort === "reverse date") sortQuery = `ORDER BY posts."uploadDate" ASC`
-        if (sort === "drawn") sortQuery = `ORDER BY posts.drawn DESC NULLS LAST`
-        if (sort === "reverse drawn") sortQuery = `ORDER BY posts.drawn ASC NULLS LAST`
+        if (sort === "posted") sortQuery = `ORDER BY posts.posted DESC NULLS LAST`
+        if (sort === "reverse posted") sortQuery = `ORDER BY posts.posted ASC NULLS LAST`
         if (sort === "cuteness") sortQuery = `ORDER BY "cuteness" DESC`
         if (sort === "reverse cuteness") sortQuery = `ORDER BY "cuteness" ASC`
         if (sort === "popularity") sortQuery = `ORDER BY "favoriteCount" DESC`
@@ -187,7 +187,7 @@ export default class SQLUser {
     /** Get all admins. */
     public static admins = async () => {
         const query: QueryConfig = {
-            text: `SELECT * FROM users WHERE users."role" = 'admin'`
+            text: /*sql*/`SELECT * FROM users WHERE users."role" = 'admin'`
         }
         const result = await SQLQuery.run(query)
         return result
@@ -231,5 +231,34 @@ export default class SQLUser {
             values: [username, currentSession]
         }
         return SQLQuery.run(query)
+    }
+
+    /** Set banner */
+    public static setBanner = async (text: string, link: string) => {
+        let now = new Date().toISOString()
+        if (!text) {
+            text = null as any
+            link = null as any
+            now = null as any
+        }
+        const query: QueryConfig = {
+            text: functions.multiTrim(/*sql*/`
+                INSERT INTO banner ("bannerID", "text", "link", "date")
+                VALUES (1, $1, $2, $3)
+                ON CONFLICT ("bannerID")
+                DO UPDATE SET "text" = $1, "link" = $2, "date" = $3
+            `),
+            values: [text, link, now]
+        }
+        return SQLQuery.run(query)
+    }
+
+    /** Get banner. */
+    public static getBanner = async () => {
+        const query: QueryConfig = {
+            text: /*sql*/`SELECT * FROM banner`
+        }
+        const result = await SQLQuery.run(query)
+        return result[0]
     }
 }

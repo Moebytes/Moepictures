@@ -332,7 +332,7 @@ const HelpPage: React.FunctionComponent = (props) => {
                     <span className="help-alt">title</span> - The original title of the work as posted on social media.<br/>
                     <span className="help-alt">translated title</span> - A title english translation, as titles are very commonly in japanese.<br/>
                     <span className="help-alt">artist</span> - Name of the artist (doesn't have to be romanized) - not the same as their artist tag, which will have to be romanized.<br/>
-                    <span className="help-alt">drawn date</span> - The original date the work was posted.<br/>
+                    <span className="help-alt">posted</span> - The original date the work was posted.<br/>
                     <span className="help-alt">link</span> - The primary link to the work, preferably where the artist posted it themselves.<br/>
                     <span className="help-alt">bookmarks</span> - The amount of pixiv bookmarks or "likes" if it's a different site.<br/>
                     <span className="help-alt">commentary</span> - The original description of the work as posted on social media.<br/>
@@ -554,16 +554,15 @@ const HelpPage: React.FunctionComponent = (props) => {
                 <span className="help-text" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                     A tag can have multiple aliases that point to the same result. This is to
                     facilitate better searching for synonyms like "with audio" and "has audio". Unlike tags, aliases can include non-ASCII characters 
-                    so it's possible to add an alias in Japanese in order to enable Japanese searching. Existing tags can also be aliased to another tag,
-                    but this is an action that will need approval. <br/><br/>
+                    so it's possible to add an alias in Japanese in order to enable Japanese searching. But on that note, you can also search for tags 
+                    with their japanese pixiv tags if they were filled in. <br/><br/>
 
                     <span className="help-alt">Aliasing To</span><br/>
-                    It's supported to take an existing tag, delete it, and then add it as an alias to another tag. This is called 
-                    aliasing to. As aliasing to is a destructive action, they will have to be approved by mods. <br/><br/>
+                    Aliases do not have to be an existing tag, but if you want to alias an already existing tag to another tag we call this 
+                    "aliasing to". Since aliasing to is a more powerful action, they will have to get reviewed and approved by mods. <br/><br/>
 
-                    To make this more clear, the tag that you start the "alias to" on will be deleted and added as an alias to the other tag. This 
-                    is the aliasor. The tag that you type in the box is the aliasee, and is the tag that will receive this new alias. Every post 
-                    that was under the old tag will be moved to the new tag.<br/>
+                    To make this clear, the tag that you start the "alias to" on will be the one added as an alias to the other tag. The tag 
+                    that you type in the box is the tag that will receive this new alias. Every post that was under the old tag will be moved to the new tag.<br/>
                 </span>
                 <div className="help-img-container"><img className="help-img" src={aliasesImg}/></div></>
             )
@@ -574,7 +573,10 @@ const HelpPage: React.FunctionComponent = (props) => {
                 <span className="help-text" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                     A tag can have implications which are tags that are automatically added to posts if they don't already exist. For instance, 
                     you can add an implication that the tag "red hat" implies "hat" and any post uploaded containing the "red hat" tag will also be 
-                    given the "hat" tag. These are mainly useful to aid in tagging so you don't have to type out all the broader tags.
+                    given the "hat" tag. These are mainly useful to aid in tagging so you don't have to type out all the broader tags. <br/><br/>
+
+                    Only mods can add implications to tags with over 1000 posts as this will start a lot of post updates. Implications are mainly 
+                    meant to be used for more specific tags that naturally contain a smaller number of posts.
                 </span>
                 <div className="help-img-container"><img className="help-img" src={implicationsImg}/></div></>
             )

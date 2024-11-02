@@ -10,7 +10,7 @@ import hide from "../assets/icons/hide.png"
 import functions from "../structures/Functions"
 import {HideNavbarContext, HideSidebarContext, ThemeContext, EnableDragContext, RelativeContext, HideTitlebarContext, MobileContext,
 HeaderTextContext, SidebarTextContext, SessionContext, SiteHueContext, SiteLightnessContext, SiteSaturationContext, SessionFlagContext} from "../Context"
-import "./styles/signuppage.less"
+import "./styles/sitepage.less"
 
 const SignUpPage: React.FunctionComponent = (props) => {
     const {theme, setTheme} = useContext(ThemeContext)
@@ -165,52 +165,52 @@ const SignUpPage: React.FunctionComponent = (props) => {
         <div className="body">
             <SideBar/>
             <div className="content">
-                <div className="signup">
-                    <span className="signup-title">Sign Up</span>
+                <div className="sitepage">
+                    <span className="sitepage-title">Sign Up</span>
                     {submitted ? <>
-                    <span className="signup-validation">Your account has been created. You should have received a confirmation link in your email. Please verify your email and login again.</span>
-                    <div className="signup-button-container" style={{justifyContent: "flex-start"}}>
-                        <button className="signup-button" onClick={() => goToLogin()}>Login</button>
+                    <span className="sitepage-validation">Your account has been created. You should have received a confirmation link in your email. Please verify your email and login again.</span>
+                    <div className="sitepage-button-container" style={{justifyContent: "flex-start"}}>
+                        <button className="sitepage-button" onClick={() => goToLogin()}>Login</button>
                     </div>
                     </> :
                     <>
-                    <Link to="/login">
-                        <span className="signup-link">Already have an account? Login.</span>
+                    <Link style={{width: "max-content"}} to="/login">
+                        <span className="sitepage-link-clickable">Already have an account? Login.</span>
                     </Link>
-                    <div className="signup-row">
-                        <span className="signup-text">Email Address:</span>
-                        <input className="signup-input" type="text" spellCheck={false} value={email} onChange={(event) => setEmail(event.target.value)} onKeyDown={(event) => event.key === "Enter" ? submit() : null}/>
+                    <div className="sitepage-row">
+                        <span className="sitepage-text-wide2">Email Address:</span>
+                        <input className="sitepage-input" type="text" spellCheck={false} value={email} onChange={(event) => setEmail(event.target.value)} onKeyDown={(event) => event.key === "Enter" ? submit() : null}/>
                     </div>
-                    <div className="signup-row">
-                        <span className="signup-text">Username:</span>
-                        <input className="signup-input" type="text" spellCheck={false} value={username} onChange={(event) => setUsername(event.target.value)} onKeyDown={(event) => event.key === "Enter" ? submit() : null}/>
+                    <div className="sitepage-row">
+                        <span className="sitepage-text-wide2">Username:</span>
+                        <input className="sitepage-input" type="text" spellCheck={false} value={username} onChange={(event) => setUsername(event.target.value)} onKeyDown={(event) => event.key === "Enter" ? submit() : null}/>
                     </div>
-                    <div className="signup-row">
-                        <span className="signup-text">Password:</span>
-                        <div className="signup-pass">
-                            <img className="signup-pass-show" src={getEye()} style={{filter: getFilter()}} onClick={() => setShowPassword((prev) => !prev)}/>
-                            <input className="signup-pass-input" type={showPassword ? "text" : "password"} spellCheck={false} value={password} onChange={(event) => setPassword(event.target.value)} onKeyDown={(event) => event.key === "Enter" ? submit() : null}/>
+                    <div className="sitepage-row">
+                        <span className="sitepage-text-wide2">Password:</span>
+                        <div className="sitepage-pass">
+                            <img className="sitepage-pass-show" src={getEye()} style={{filter: getFilter()}} onClick={() => setShowPassword((prev) => !prev)}/>
+                            <input className="sitepage-pass-input" type={showPassword ? "text" : "password"} spellCheck={false} value={password} onChange={(event) => setPassword(event.target.value)} onKeyDown={(event) => event.key === "Enter" ? submit() : null}/>
                         </div>
                     </div>
-                    <div className="signup-row">
-                        <span className="signup-text">Confirm Password:</span>
-                        <div className="signup-pass">
-                            <img className="signup-pass-show" src={getEye2()} style={{filter: getFilter()}} onClick={() => setShowPassword2((prev) => !prev)}/>
-                            <input className="signup-pass-input" type={showPassword2 ? "text" : "password"} spellCheck={false} value={confirmPassword} onChange={(event) => setConfirmPassword(event.target.value)} onKeyDown={(event) => event.key === "Enter" ? submit() : null}/>
+                    <div className="sitepage-row">
+                        <span className="sitepage-text-wide2">Confirm Password:</span>
+                        <div className="sitepage-pass">
+                            <img className="sitepage-pass-show" src={getEye2()} style={{filter: getFilter()}} onClick={() => setShowPassword2((prev) => !prev)}/>
+                            <input className="sitepage-pass-input" type={showPassword2 ? "text" : "password"} spellCheck={false} value={confirmPassword} onChange={(event) => setConfirmPassword(event.target.value)} onKeyDown={(event) => event.key === "Enter" ? submit() : null}/>
                         </div>
                     </div>
-                    <div className="signup-row" style={{justifyContent: "center"}}>
+                    <div className="sitepage-row" style={{justifyContent: "center"}}>
                         <img src={`data:image/svg+xml;utf8,${encodeURIComponent(captcha)}`} style={{filter: getFilter()}}/>
-                        <input className="signup-input" type="text" spellCheck={false} value={captchaResponse} onChange={(event) => setCaptchaResponse(event.target.value)} onKeyDown={(event) => event.key === "Enter" ? submit() : null}/>
+                        <input className="sitepage-input" type="text" spellCheck={false} value={captchaResponse} onChange={(event) => setCaptchaResponse(event.target.value)} onKeyDown={(event) => event.key === "Enter" ? submit() : null}/>
                     </div>
-                    <span className="signup-validation">
+                    <span className="sitepage-validation">
                         -Passwords must contain at least 10 characters<br/>
                         -At least three of the following: lowercase letters, uppercase
                         letters, numbers, and special symbols
                     </span>
-                    {error ? <div className="signup-validation-container"><span className="signup-validation" ref={errorRef}></span></div> : null}
-                    <div className="signup-button-container">
-                        <button className="signup-button" onClick={() => submit()}>Sign Up</button>
+                    {error ? <div className="sitepage-validation-container"><span className="sitepage-validation" ref={errorRef}></span></div> : null}
+                    <div className="sitepage-button-container">
+                        <button className="sitepage-button" onClick={() => submit()}>Sign Up</button>
                     </div></>}
                 </div>
                 <Footer/>

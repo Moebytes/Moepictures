@@ -154,7 +154,7 @@ const TagPage: React.FunctionComponent<Props> = (props) => {
         const result = await functions.get("/api/search/posts", {query: tag.tag, type: "all", restrict, style: "all", sort: "date", limit, offset}, session, setSessionFlag)
         uploads.push(...result)
         const images = result.map((p: any) => functions.getThumbnailLink(p.images[0].type, p.postID, p.images[0].order, p.images[0].filename, "large"))
-        setTagPosts(result)
+        setTagPosts(uploads)
         setAppendImages(images)
     }
 
@@ -250,16 +250,27 @@ const TagPage: React.FunctionComponent<Props> = (props) => {
                 image = Object.values(bytes)
             }
         }
-        await functions.put("/api/tag/edit", {tag: tag.tag, key: editTagKey, description: editTagDescription,
-        image, aliases: editTagAliases, implications: editTagImplications, pixivTags: editTagPixivTags, social: editTagSocial, twitter: editTagTwitter,
-        website: editTagWebsite, fandom: editTagFandom, r18: editTagR18, reason: editTagReason}, session, setSessionFlag)
-        if (editTagImage) functions.refreshCache(editTagImage)
-        history.push(`/tag/${editTagKey}`)
-        setTagFlag(true)
+        try {
+            await functions.put("/api/tag/edit", {tag: tag.tag, key: editTagKey, description: editTagDescription,
+            image, aliases: editTagAliases, implications: editTagImplications, pixivTags: editTagPixivTags, social: editTagSocial, twitter: editTagTwitter,
+            website: editTagWebsite, fandom: editTagFandom, r18: editTagR18, reason: editTagReason}, session, setSessionFlag)
+            if (editTagImage) functions.refreshCache(editTagImage)
+            history.push(`/tag/${editTagKey}`)
+            setTagFlag(true)
+        } catch (err: any) {
+            if (err.response?.data.includes("No permission to edit implications")) {
+                await functions.post("/api/tag/edit/request", {tag: tag.tag, key: editTagKey, description: editTagDescription, image, aliases: editTagAliases, 
+                implications: editTagImplications, pixivTags: editTagPixivTags, social: editTagSocial, twitter: editTagTwitter, website: editTagWebsite, fandom: editTagFandom, 
+                r18: editTagR18, reason: editTagReason}, session, setSessionFlag)
+                setEditTagID({tag: tag.tag, failed: "implication"})
+            } else {
+                setEditTagID({tag: tag.tag, failed: true})
+            }
+        }
     }
 
     useEffect(() => {
-        if (editTagFlag && editTagID === tag.tag) {
+        if (editTagFlag && editTagID?.tag === tag.tag) {
             editTag()
             setEditTagFlag(false)
             setEditTagID(null)
@@ -273,7 +284,6 @@ const TagPage: React.FunctionComponent<Props> = (props) => {
         setEditTagAliases(tag.aliases?.[0] ? tag.aliases.map((a: any) => a.alias ? a.alias : a) : [])
         setEditTagImplications(tag.implications?.[0] ? tag.implications.map((i: any) => i.implication ? i.implication : i) : [])
         setEditTagPixivTags(tag.pixivTags?.[0] ? tag.pixivTags : [])
-        setEditTagID(tag.tag)
         setEditTagType(tag.type)
         setEditTagSocial(tag.social)
         setEditTagTwitter(tag.twitter)
@@ -281,6 +291,7 @@ const TagPage: React.FunctionComponent<Props> = (props) => {
         setEditTagFandom(tag.fandom)
         setEditTagR18(tag.r18)
         setEditTagReason("")
+        setEditTagID({tag: tag.tag, failed: false})
     }
 
     const deleteTag = async () => {
@@ -418,8 +429,9 @@ const TagPage: React.FunctionComponent<Props> = (props) => {
             revertTagHistory().then(() => {
                 setRevertTagHistoryFlag(false)
                 setRevertTagHistoryID(null)
-            }).catch(() => {
+            }).catch((err) => {
                 setRevertTagHistoryFlag(false)
+                if (err.response?.data.includes("No permission to edit implications")) return setRevertTagHistoryID({failed: "implication", historyID})
                 setRevertTagHistoryID({failed: true, historyID})
             })
         }

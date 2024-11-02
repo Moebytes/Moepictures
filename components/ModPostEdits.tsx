@@ -385,8 +385,8 @@ const ModPostEdits: React.FunctionComponent = (props) => {
         if (changes.artist) {
             jsx.push(<span className="mod-post-text"><span className="mod-post-label">Artist:</span> {newPost.artist || "Unknown"}</span>)
         }
-        if (changes.drawn) {
-            jsx.push(<span className="mod-post-text"><span className="mod-post-label">Drawn:</span> {newPost.drawn ? functions.formatDate(new Date(newPost.drawn)) : "Unknown"}</span>)
+        if (changes.posted) {
+            jsx.push(<span className="mod-post-text"><span className="mod-post-label">Posted:</span> {newPost.posted ? functions.formatDate(new Date(newPost.posted)) : "Unknown"}</span>)
         }
         if (changes.link) {
             jsx.push(<span className="mod-post-text"><span className="mod-post-label">Link:</span> <span className="mod-post-link" onClick={() => window.open(newPost.link, "_blank")}>{functions.getSiteName(newPost.link)}</span></span>)

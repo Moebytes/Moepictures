@@ -9,7 +9,7 @@ import functions from "../structures/Functions"
 import {HideNavbarContext, HideSidebarContext, ThemeContext, EnableDragContext, RedirectContext, MobileContext,
 RelativeContext, HideTitlebarContext, HeaderTextContext, SidebarTextContext, SessionContext, SiteHueContext, SiteLightnessContext,
 SiteSaturationContext, SessionFlagContext} from "../Context"
-import "./styles/changeemailpage.less"
+import "./styles/sitepage.less"
 import session from "express-session"
 
 const ChangeEmailPage: React.FunctionComponent = (props) => {
@@ -115,33 +115,33 @@ const ChangeEmailPage: React.FunctionComponent = (props) => {
         <div className="body">
             <SideBar/>
             <div className="content">
-                <div className="change-email">
-                    <span className="change-email-title">Change Email</span>
+                <div className="sitepage">
+                    <span className="sitepage-title">Change Email</span>
                     {submitted ?
                     <>
-                    <span className="change-email-link">A confirmation link has been sent to the new address. Your email will only get changed once you confirm it.</span>
-                    <div className="change-email-button-container-left">
-                        <button className="change-email-button" onClick={() => history.push("/profile")}>←Back</button>
+                    <span className="sitepage-link">A confirmation link has been sent to the new address. Your email will only get changed once you confirm it.</span>
+                    <div className="sitepage-button-container-left">
+                        <button className="sitepage-button" onClick={() => history.push("/profile")}>←Back</button>
                     </div>
                     </> : <>
-                    <span className="change-email-link">A confirmation email will be sent to the new address. 
+                    <span className="sitepage-link">A confirmation email will be sent to the new address. 
                     Your email will only be changed if you confirm the new one.</span>
-                    <div className="change-email-row">
-                        <span className="change-email-text">Email: </span>
-                        <span className="change-email-text-small">{session.email}</span>
+                    <div className="sitepage-row">
+                        <span className="sitepage-text-wide">Email: </span>
+                        <span className="sitepage-text-small">{session.email}</span>
                     </div>
-                    <div className="change-email-row">
-                        <span className="change-email-text">New Email: </span>
-                        <input className="change-email-input" type="text" spellCheck={false} value={newEmail} onChange={(event) => setNewEmail(event.target.value)} onKeyDown={(event) => event.key === "Enter" ? submit() : null}/>
+                    <div className="sitepage-row">
+                        <span className="sitepage-text-wide">New Email: </span>
+                        <input className="sitepage-input" type="text" spellCheck={false} value={newEmail} onChange={(event) => setNewEmail(event.target.value)} onKeyDown={(event) => event.key === "Enter" ? submit() : null}/>
                     </div>
-                    <div className="change-email-row" style={{justifyContent: "center"}}>
+                    <div className="sitepage-row" style={{justifyContent: "center"}}>
                         <img src={`data:image/svg+xml;utf8,${encodeURIComponent(captcha)}`} style={{filter: getFilter()}}/>
-                        <input className="change-email-input" type="text" spellCheck={false} value={captchaResponse} onChange={(event) => setCaptchaResponse(event.target.value)} onKeyDown={(event) => event.key === "Enter" ? submit() : null}/>
+                        <input className="sitepage-input" type="text" spellCheck={false} value={captchaResponse} onChange={(event) => setCaptchaResponse(event.target.value)} onKeyDown={(event) => event.key === "Enter" ? submit() : null}/>
                     </div>
-                    {error ? <div className="change-email-validation-container"><span className="change-email-validation" ref={errorRef}></span></div> : null}
-                    <div className="change-email-button-container">
-                        <button style={{marginRight: "20px"}} className="change-username-button" onClick={() => history.push("/profile")}>←Back</button>
-                        <button className="change-email-button" onClick={() => submit()}>Change Email</button>
+                    {error ? <div className="sitepage-validation-container"><span className="sitepage-validation" ref={errorRef}></span></div> : null}
+                    <div className="sitepage-button-container">
+                        <button style={{marginRight: "20px"}} className="sitepage-button" onClick={() => history.push("/profile")}>←Back</button>
+                        <button className="sitepage-button" onClick={() => submit()}>Change Email</button>
                     </div>
                     </>
                     }

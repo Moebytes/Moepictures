@@ -126,7 +126,7 @@ const SearchHistoryRow: React.FunctionComponent<Props> = (props) => {
                         <span className="historyrow-user-text">Viewed on {functions.prettyDate(new Date(props.history.viewDate))}</span>
                         <span className="historyrow-text"><span className="historyrow-label-text-strong">Title:</span> {props.history.post.title || "None"}</span>
                         {props.history.post.translatedTitle ? <span className="historyrow-text"><span className="historyrow-label-text-strong">Translated:</span> {props.history.post.translatedTitle}</span> : null}
-                        <span className="historyrow-text"><span className="historyrow-label-text-strong">Drawn:</span> {props.history.post.drawn ? functions.formatDate(new Date(props.history.post.drawn)) : "Unknown"}</span>
+                        <span className="historyrow-text"><span className="historyrow-label-text-strong">Posted:</span> {props.history.post.posted ? functions.formatDate(new Date(props.history.post.posted)) : "Unknown"}</span>
                         <span className="historyrow-text"><span className="historyrow-label-text-strong">Artist:</span> {props.history.post.artist ? props.history.post.artist : "Unknown"}</span>
                         <span className="historyrow-text"><span className="historyrow-label-text-strong">Link:</span> <span className="historyrow-label-link" onClick={() => window.open(props.history.post.link, "_blank")}>{getDomain(props.history.post.link)}</span></span>
                         {props.history.post.mirrors ? <span className="historyrow-text"><span className="historyrow-label-text-strong">Mirrors:</span> {printMirrors()}</span> : null}

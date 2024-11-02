@@ -25,7 +25,7 @@ const SourceEditDialog: React.FunctionComponent = (props) => {
     const [commentary, setCommentary] = useState("")
     const [translatedCommentary, setTranslatedCommentary] = useState("")
     const [artist, setArtist] = useState("")
-    const [drawn, setDrawn] = useState("")
+    const [posted, setPosted] = useState("")
     const [link, setLink] = useState("")
     const [mirrors, setMirrors] = useState("")
     const [bookmarks, setBookmarks] = useState("")
@@ -44,7 +44,7 @@ const SourceEditDialog: React.FunctionComponent = (props) => {
         setTranslatedCommentary(sourceEditID.post.translatedCommentary || "")
         setMirrors(sourceEditID.post.mirrors ? Object.values(sourceEditID.post.mirrors).join("\n") : "")
         setTranslatedTitle(sourceEditID.post.translatedTitle || "")
-        if (sourceEditID.post.drawn) setDrawn(functions.formatDate(new Date(sourceEditID.post.drawn), true))
+        if (sourceEditID.post.posted) setPosted(functions.formatDate(new Date(sourceEditID.post.posted), true))
         setLink(sourceEditID.post.link || "")
         setBookmarks(sourceEditID.post.bookmarks || "")
         setPurchaseLink(sourceEditID.post.purchaseLink || "")
@@ -57,7 +57,7 @@ const SourceEditDialog: React.FunctionComponent = (props) => {
         setTranslatedCommentary("")
         setArtist("")
         setLink("")
-        setDrawn("")
+        setPosted("")
         setMirrors("")
     }
 
@@ -85,7 +85,7 @@ const SourceEditDialog: React.FunctionComponent = (props) => {
                     title,
                     translatedTitle,
                     artist,
-                    drawn,
+                    posted,
                     link,
                     commentary,
                     translatedCommentary,
@@ -115,7 +115,7 @@ const SourceEditDialog: React.FunctionComponent = (props) => {
                     title,
                     translatedTitle,
                     artist,
-                    drawn,
+                    posted,
                     link,
                     commentary,
                     translatedCommentary,
@@ -203,8 +203,8 @@ const SourceEditDialog: React.FunctionComponent = (props) => {
                                 <input className="dialog-input-small" type="text" spellCheck={false} value={artist} onChange={(event) => setArtist(event.target.value)}/>
                             </div>
                             <div className="dialog-row">
-                                <span className="dialog-text">Drawn: </span>
-                                <input className="dialog-input-small" style={{width: "30%"}} type="date" spellCheck={false} value={drawn} onChange={(event) => setDrawn(event.target.value)}/>
+                                <span className="dialog-text">Posted: </span>
+                                <input className="dialog-input-small" style={{width: "30%"}} type="date" spellCheck={false} value={posted} onChange={(event) => setPosted(event.target.value)}/>
                             </div>
                             <div className="dialog-row">
                                 <span className="dialog-text">Link: </span>
@@ -282,8 +282,8 @@ const SourceEditDialog: React.FunctionComponent = (props) => {
                             <input className="dialog-input-small" type="text" spellCheck={false} value={artist} onChange={(event) => setArtist(event.target.value)}/>
                         </div>
                         <div className="dialog-row">
-                            <span className="dialog-text">Drawn: </span>
-                            <input className="dialog-input-small" style={{width: "30%"}} type="date" spellCheck={false} value={drawn} onChange={(event) => setDrawn(event.target.value)}/>
+                            <span className="dialog-text">Posted: </span>
+                            <input className="dialog-input-small" style={{width: "30%"}} type="date" spellCheck={false} value={posted} onChange={(event) => setPosted(event.target.value)}/>
                         </div>
                         <div className="dialog-row">
                             <span className="dialog-text">Link: </span>

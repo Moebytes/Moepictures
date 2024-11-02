@@ -592,7 +592,7 @@ const MiscRoutes = (app: Express) => {
         }
     })
 
-    app.post("/api/premium/payment",  async (req: Request, res: Response, next: NextFunction) => {
+    app.post("/api/premium/payment", async (req: Request, res: Response, next: NextFunction) => {
         try {
             const {event} = req.body
             const signature = req.headers["x-cc-webhook-signature"]
@@ -629,6 +629,29 @@ const MiscRoutes = (app: Express) => {
                 await serverFunctions.systemMessage(metadata.username, "Notice: Your account was upgraded to premium", message)
             }
             res.status(200).send("Success")
+        } catch (e) {
+            console.log(e)
+            res.status(400).send("Bad request") 
+        }
+    })
+
+    app.post("/api/misc/setbanner", csrfProtection, miscLimiter, async (req: Request, res: Response, next: NextFunction) => {
+        try {
+            const {text, link} = req.body
+            if (!req.session.username) return res.status(403).send("Unauthorized")
+            if (!permissions.isAdmin(req.session)) return res.status(403).end()
+            await sql.user.setBanner(text, link)
+            res.status(200).send("Success")
+        } catch (e) {
+            console.log(e)
+            res.status(400).send("Bad request") 
+        }
+    })
+
+    app.get("/api/misc/banner", miscLimiter, async (req: Request, res: Response, next: NextFunction) => {
+        try {
+            const banner = await sql.user.getBanner()
+            res.status(200).json(banner)
         } catch (e) {
             console.log(e)
             res.status(400).send("Bad request") 

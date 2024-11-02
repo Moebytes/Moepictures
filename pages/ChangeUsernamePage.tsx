@@ -10,7 +10,7 @@ import permissions from "../structures/Permissions"
 import {HideNavbarContext, HideSidebarContext, ThemeContext, EnableDragContext, SessionFlagContext, RedirectContext, MobileContext,
 RelativeContext, HideTitlebarContext, HeaderTextContext, SidebarTextContext, SessionContext, SiteHueContext, SiteLightnessContext,
 SiteSaturationContext} from "../Context"
-import "./styles/changeusernamepage.less"
+import "./styles/sitepage.less"
 
 const ChangeUsernamePage: React.FunctionComponent = (props) => {
     const {theme, setTheme} = useContext(ThemeContext)
@@ -119,32 +119,32 @@ const ChangeUsernamePage: React.FunctionComponent = (props) => {
         <div className="body">
             <SideBar/>
             <div className="content">
-                <div className="change-username">
-                    <span className="change-username-title">Change Username</span>
+                <div className="sitepage">
+                    <span className="sitepage-title">Change Username</span>
                     {submitted ?
                     <>
-                    <span className="change-username-link">Your username has been changed.</span>
-                    <div className="change-username-button-container-left">
-                        <button className="change-username-button" onClick={() => history.push("/profile")}>←Back</button>
+                    <span className="sitepage-link">Your username has been changed.</span>
+                    <div className="sitepage-button-container-left">
+                        <button className="sitepage-button" onClick={() => history.push("/profile")}>←Back</button>
                     </div>
                     </> : <>
-                    <span className="change-username-link">Your old username will become available after the change.</span>
-                    <div className="change-username-row">
-                        <span className="change-username-text">Username: </span>
-                        <span className="change-username-text-small">{session.username}</span>
+                    <span className="sitepage-link">Your old username will become available after the change.</span>
+                    <div className="sitepage-row">
+                        <span className="sitepage-text-wide">Username: </span>
+                        <span className="sitepage-text-small">{session.username}</span>
                     </div>
-                    <div className="change-username-row">
-                        <span className="change-username-text">New Username: </span>
-                        <input className="change-username-input" type="text" spellCheck={false} value={newUsername} onChange={(event) => setNewUsername(event.target.value)} onKeyDown={(event) => event.key === "Enter" ? submit() : null}/>
+                    <div className="sitepage-row">
+                        <span className="sitepage-text-wide">New Username: </span>
+                        <input className="sitepage-input" type="text" spellCheck={false} value={newUsername} onChange={(event) => setNewUsername(event.target.value)} onKeyDown={(event) => event.key === "Enter" ? submit() : null}/>
                     </div>
-                    <div className="change-username-row" style={{justifyContent: "center"}}>
+                    <div className="sitepage-row" style={{justifyContent: "center"}}>
                         <img src={`data:image/svg+xml;utf8,${encodeURIComponent(captcha)}`} style={{filter: getFilter()}}/>
-                        <input className="change-username-input" type="text" spellCheck={false} value={captchaResponse} onChange={(event) => setCaptchaResponse(event.target.value)} onKeyDown={(event) => event.key === "Enter" ? submit() : null}/>
+                        <input className="sitepage-input" type="text" spellCheck={false} value={captchaResponse} onChange={(event) => setCaptchaResponse(event.target.value)} onKeyDown={(event) => event.key === "Enter" ? submit() : null}/>
                     </div>
-                    {error ? <div className="change-username-validation-container"><span className="change-username-validation" ref={errorRef}></span></div> : null}
-                    <div className="change-username-button-container">
-                        <button style={{marginRight: "20px"}} className="change-username-button" onClick={() => history.push("/profile")}>←Back</button>
-                        <button className="change-username-button" onClick={() => submit()}>Change Username</button>
+                    {error ? <div className="sitepage-validation-container"><span className="sitepage-validation" ref={errorRef}></span></div> : null}
+                    <div className="sitepage-button-container">
+                        <button style={{marginRight: "20px"}} className="sitepage-button" onClick={() => history.push("/profile")}>←Back</button>
+                        <button className="sitepage-button" onClick={() => submit()}>Change Username</button>
                     </div>
                     </>
                     }

@@ -9,10 +9,10 @@ import functions from "../structures/Functions"
 import permissions from "../structures/Permissions"
 import {HideNavbarContext, HideSidebarContext, ThemeContext, EnableDragContext, RedirectContext, MobileContext,
 RelativeContext, HideTitlebarContext, HeaderTextContext, SidebarTextContext, SessionContext, SiteHueContext, SiteLightnessContext,
-SiteSaturationContext, SessionFlagContext, ActionBannerContext} from "../Context"
+SiteSaturationContext, SessionFlagContext, NewsBannerContext, ActionBannerContext} from "../Context"
 import "./styles/sitepage.less"
 
-const IPBlacklistPage: React.FunctionComponent = (props) => {
+const NewsBannerPage: React.FunctionComponent = (props) => {
     const {theme, setTheme} = useContext(ThemeContext)
     const {siteHue, setSiteHue} = useContext(SiteHueContext)
     const {siteSaturation, setSiteSaturation} = useContext(SiteSaturationContext)
@@ -29,9 +29,10 @@ const IPBlacklistPage: React.FunctionComponent = (props) => {
     const {sessionFlag, setSessionFlag} = useContext(SessionFlagContext)
     const {redirect, setRedirect} = useContext(RedirectContext)
     const [submitted, setSubmitted] = useState(false)
+    const {newsBanner, setNewsBanner} = useContext(NewsBannerContext)
     const {actionBanner, setActionBanner} = useContext(ActionBannerContext)
-    const [ip, setIP] = useState("")
-    const [reason, setReason] = useState("")
+    const [text, setText] = useState("")
+    const [link, setLink] = useState("")
     const [error, setError] = useState(false)
     const errorRef = useRef<any>(null)
     const history = useHistory()
@@ -48,7 +49,7 @@ const IPBlacklistPage: React.FunctionComponent = (props) => {
         setHeaderText("")
         setSidebarText("")
         setEnableDrag(false)
-        document.title = "IP Blacklist"
+        document.title = "News Banner"
     }, [])
 
     useEffect(() => {
@@ -66,16 +67,15 @@ const IPBlacklistPage: React.FunctionComponent = (props) => {
         }
     }, [session])
 
-    const blacklist = async () => {
-        await functions.post("/api/misc/blacklistip", {ip, reason}, session, setSessionFlag)
-        setActionBanner("blacklist")
-        setIP("")
-    }
-
-    const unblacklist = async () => {
-        await functions.delete("/api/misc/unblacklistip", {ip}, session, setSessionFlag)
-        setActionBanner("unblacklist")
-        setIP("")
+    const setBanner = async () => {
+        await functions.post("/api/misc/setbanner", {text, link}, session, setSessionFlag)
+        setText("")
+        setLink("")
+        setSessionFlag(true)
+        if (!text) {
+            setNewsBanner(null)
+            setActionBanner("remove-banner")
+        }
     }
 
     return (
@@ -87,20 +87,19 @@ const IPBlacklistPage: React.FunctionComponent = (props) => {
             <div className="content">
                 {permissions.isAdmin(session) ?
                 <div className="sitepage">
-                    <span className="sitepage-title">Blacklist IP</span>
+                    <span className="sitepage-title">News Banner</span>
                     <div className="sitepage-row">
-                        <span className="sitepage-text-wide">IP Address: </span>
-                        <input className="sitepage-input" type="text" spellCheck={false} value={ip} onChange={(event) => setIP(event.target.value)}/>
+                        <span className="sitepage-text-wide">Text: </span>
+                        <input className="sitepage-input" type="text" spellCheck={false} value={text} onChange={(event) => setText(event.target.value)}/>
                     </div>
                     <div className="sitepage-row">
-                        <span className="sitepage-text-wide">Reason: </span>
-                        <input className="sitepage-input" type="text" spellCheck={false} value={reason} onChange={(event) => setReason(event.target.value)}/>
+                        <span className="sitepage-text-wide">Link: </span>
+                        <input className="sitepage-input" type="text" spellCheck={false} value={link} onChange={(event) => setLink(event.target.value)}/>
                     </div>
                     {error ? <div className="sitepage-validation-container"><span className="sitepage-validation" ref={errorRef}></span></div> : null}
                     <div className="sitepage-button-container">
                         <button style={{marginRight: "20px"}} className="sitepage-button" onClick={() => history.push("/profile")}>←Back</button>
-                        <button style={{marginRight: "20px"}} className="sitepage-button" onClick={() => unblacklist()}>Unblacklist</button>
-                        <button className="sitepage-button" onClick={() => blacklist()}>Blacklist</button>
+                        <button className="sitepage-button" onClick={() => setBanner()}>Set Banner</button>
                     </div> 
                 </div> : null}
                 <Footer/>
@@ -110,4 +109,4 @@ const IPBlacklistPage: React.FunctionComponent = (props) => {
     )
 }
 
-export default IPBlacklistPage
+export default NewsBannerPage

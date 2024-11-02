@@ -30,7 +30,7 @@ import r18 from "../assets/icons/r18.png"
 import danger from "../assets/icons/danger.png"
 import lockIcon from "../assets/icons/private-lock.png"
 import deleteIcon from "../assets/icons/delete.png"
-import "./styles/userprofilepage.less"
+import "./styles/userpage.less"
 
 let intervalTimer = null as any
 let limit = 25
@@ -82,6 +82,7 @@ const UserProfilePage: React.FunctionComponent = (props) => {
     const [bio, setBio] = useState("")
     const [interval, setInterval] = useState("")
     const [init, setInit] = useState(true)
+    const [bannerHidden, setBannerHidden] = useState(false)
     const history = useHistory()
 
     useEffect(() => {
@@ -91,6 +92,13 @@ const UserProfilePage: React.FunctionComponent = (props) => {
     const updateBanReason = async () => {
         const ban = await functions.get("/api/user/ban", {username: session.username}, session, setSessionFlag)
         if (ban?.reason) setBanReason(ban.reason)
+    }
+
+    const checkHiddenBanner = async () => {
+        const banner = await functions.get("/api/misc/banner", null, session, setSessionFlag)
+        if (new Date(session.bannerHide) > new Date(banner?.date)) {
+            if (banner?.text) setBannerHidden(true)
+        }
     }
 
     const getFilter = () => {
@@ -112,7 +120,7 @@ const UserProfilePage: React.FunctionComponent = (props) => {
         const result = await functions.get("/api/user/uploads", {limit, restrict, offset}, session, setSessionFlag)
         newUploads.push(...result)
         const images = result.map((p: any) => functions.getThumbnailLink(p.images[0].type, p.postID, p.images[0].order, p.images[0].filename, "large"))
-        setUploads(result)
+        setUploads(newUploads)
         setAppendUploadImages(images)
     }
 
@@ -131,7 +139,7 @@ const UserProfilePage: React.FunctionComponent = (props) => {
         const result = await functions.get("/api/user/favorites", {limit, restrict, offset}, session, setSessionFlag)
         newFavorites.push(...result)
         const images = result.map((f: any) => functions.getThumbnailLink(f.images[0].type, f.postID, f.images[0].order, f.images[0].filename, "tiny"))
-        setFavorites(result)
+        setFavorites(newFavorites)
         setAppendFavoriteImages(images)
     }
 
@@ -168,6 +176,7 @@ const UserProfilePage: React.FunctionComponent = (props) => {
         updateComments()
         updateCounts()
         if (session.banned) updateBanReason()
+        if (session.bannerHide) checkHiddenBanner()
     }, [session, restrictType])
 
     useEffect(() => {
@@ -384,62 +393,62 @@ const UserProfilePage: React.FunctionComponent = (props) => {
     const generateUsernameJSX = () => {
         if (session.role === "admin") {
             return (
-                <div className="userprofile-name-container">
-                    <span className="userprofile-name-plain admin-color">{functions.toProperCase(session.username)}</span>
-                    <img className="userprofile-name-label" src={adminLabel}/>
+                <div className="user-name-container">
+                    <span className="user-name-plain admin-color">{functions.toProperCase(session.username)}</span>
+                    <img className="user-name-label" src={adminLabel}/>
                 </div>
             )
         } else if (session.role === "mod") {
             return (
-                <div className="userprofile-name-container">
-                    <span className="userprofile-name-plain mod-color">{functions.toProperCase(session.username)}</span>
-                    <img className="userprofile-name-label" src={modLabel}/>
+                <div className="user-name-container">
+                    <span className="user-name-plain mod-color">{functions.toProperCase(session.username)}</span>
+                    <img className="user-name-label" src={modLabel}/>
                 </div>
             )
         } else if (session.role === "system") {
             return (
-                <div className="userprofile-name-container">
-                    <span className="userprofile-name-plain system-color">{functions.toProperCase(session.username)}</span>
-                    <img className="userprofile-name-label" src={systemLabel}/>
+                <div className="user-name-container">
+                    <span className="user-name-plain system-color">{functions.toProperCase(session.username)}</span>
+                    <img className="user-name-label" src={systemLabel}/>
                 </div>
             )
         } else if (session.role === "premium-curator") {
             return (
-                <div className="userprofile-name-container">
-                    <span className="userprofile-name-plain curator-color">{functions.toProperCase(session.username)}</span>
-                    <img className="userprofile-name-label" src={premiumCuratorLabel}/>
+                <div className="user-name-container">
+                    <span className="user-name-plain curator-color">{functions.toProperCase(session.username)}</span>
+                    <img className="user-name-label" src={premiumCuratorLabel}/>
                 </div>
             )
         } else if (session.role === "curator") {
             return (
-                <div className="userprofile-name-container">
-                    <span className="userprofile-name-plain curator-color">{functions.toProperCase(session.username)}</span>
-                    <img className="userprofile-name-label" src={curatorLabel}/>
+                <div className="user-name-container">
+                    <span className="user-name-plain curator-color">{functions.toProperCase(session.username)}</span>
+                    <img className="user-name-label" src={curatorLabel}/>
                 </div>
             )
         } else if (session.role === "premium-contributor") {
             return (
-                <div className="userprofile-name-container">
-                    <span className="userprofile-name-plain premium-color">{functions.toProperCase(session.username)}</span>
-                    <img className="userprofile-name-label" src={premiumContributorLabel}/>
+                <div className="user-name-container">
+                    <span className="user-name-plain premium-color">{functions.toProperCase(session.username)}</span>
+                    <img className="user-name-label" src={premiumContributorLabel}/>
                 </div>
             )
         } else if (session.role === "contributor") {
             return (
-                <div className="userprofile-name-container">
-                    <span className="userprofile-name-plain contributor-color">{functions.toProperCase(session.username)}</span>
-                    <img className="userprofile-name-label" src={contributorLabel}/>
+                <div className="user-name-container">
+                    <span className="user-name-plain contributor-color">{functions.toProperCase(session.username)}</span>
+                    <img className="user-name-label" src={contributorLabel}/>
                 </div>
             )
         } else if (session.role === "premium") {
             return (
-                <div className="userprofile-name-container">
-                    <span className="userprofile-name-plain premium-color">{functions.toProperCase(session.username)}</span>
-                    <img className="userprofile-name-label" src={premiumLabel}/>
+                <div className="user-name-container">
+                    <span className="user-name-plain premium-color">{functions.toProperCase(session.username)}</span>
+                    <img className="user-name-label" src={premiumLabel}/>
                 </div>
             )
         } 
-        return <span className={`userprofile-name ${session.banned ? "banned" : ""}`}>{functions.toProperCase(session.username)}</span>
+        return <span className={`user-name ${session.banned ? "banned" : ""}`}>{functions.toProperCase(session.username)}</span>
     }
 
     const getBanText = () => {
@@ -461,18 +470,23 @@ const UserProfilePage: React.FunctionComponent = (props) => {
         setSessionFlag(true)
     }
 
+    const showBanner = async () => {
+        await functions.post("/api/user/showbanner", null, session, setSessionFlag)
+        setSessionFlag(true)
+    }
+
     const premiumExpirationJSX = () => {
         if (!session.premiumExpiration) return null
         if (new Date(session.premiumExpiration) > new Date()) {
             return (
-                <div className="userprofile-row">
-                    <span className="userprofile-text" style={{color: "var(--premiumColor)"}}>Premium until {functions.prettyDate(new Date(session.premiumExpiration))}</span>
+                <div className="user-row">
+                    <span className="user-text" style={{color: "var(--premiumColor)"}}>Premium until {functions.prettyDate(new Date(session.premiumExpiration))}</span>
                 </div>
             )
         } else if (new Date(session.premiumExpiration) < new Date()) {
             return (
-                <div className="userprofile-row">
-                    <span className="userprofile-text">Premium expired on {functions.prettyDate(new Date(session.premiumExpiration))}</span>
+                <div className="user-row">
+                    <span className="user-text">Premium expired on {functions.prettyDate(new Date(session.premiumExpiration))}</span>
                 </div>
             )
         }
@@ -482,8 +496,8 @@ const UserProfilePage: React.FunctionComponent = (props) => {
         if (!session.banned && !session.banExpiration) return null
         if (new Date(session.banExpiration) > new Date()) {
             return (
-                <div className="userprofile-row">
-                    <span className="userprofile-text" style={{color: "var(--banText)"}}>Ban lasts for {functions.timeUntil(session.banExpiration)}</span>
+                <div className="user-row">
+                    <span className="user-text" style={{color: "var(--banText)"}}>Ban lasts for {functions.timeUntil(session.banExpiration)}</span>
                 </div>
             )
         }
@@ -516,10 +530,10 @@ const UserProfilePage: React.FunctionComponent = (props) => {
                 }, 200)
             }
             jsx.push(
-                <div className="userprofile-column">
-                    <div className="userprofile-title-container">
-                        {favgroup.private ? <img className="userprofile-icon" src={lockIcon} style={{height: "20px", marginTop: "3px", filter: getFilter()}}/> : null}
-                        <span className="userprofile-title" onClick={viewFavgroup}>{favgroup.name} <span className="userprofile-text-alt">{favgroup.postCount}</span></span>
+                <div className="user-column">
+                    <div className="user-title-container">
+                        {favgroup.private ? <img className="user-icon" src={lockIcon} style={{height: "20px", marginTop: "3px", filter: getFilter()}}/> : null}
+                        <span className="user-title" onClick={viewFavgroup}>{favgroup.name} <span className="user-text-alt">{favgroup.postCount}</span></span>
                     </div>
                     <Carousel images={images} noKey={true} set={setFavgroup} index={0}/>
                 </div>
@@ -538,13 +552,13 @@ const UserProfilePage: React.FunctionComponent = (props) => {
         <div className="body">
             <SideBar/>
             <div className="content">
-                <div className="userprofile">
-                    <div className="userprofile-top-container">
-                        <img className="userprofile-img" src={userImg} onClick={userImgClick} onAuxClick={userImgClick} style={{filter: session.image ? "" : getFilter()}}/>
+                <div className="user">
+                    <div className="user-top-container">
+                        <img className="user-img" src={userImg} onClick={userImgClick} onAuxClick={userImgClick} style={{filter: session.image ? "" : getFilter()}}/>
                         {generateUsernameJSX()}
                         {permissions.isAdmin(session) && <>
                         <label htmlFor="upload-pfp" className="uploadpfp-label">
-                            <img className="userprofile-uploadimg" src={uploadPfpIcon} style={{filter: getFilter()}}/>
+                            <img className="user-uploadimg" src={uploadPfpIcon} style={{filter: getFilter()}}/>
                         </label>
                         <input id="upload-pfp" type="file" onChange={(event) => uploadPfp(event)}/>
                         </>}
@@ -552,110 +566,117 @@ const UserProfilePage: React.FunctionComponent = (props) => {
                     {session.banned ? <span className="user-ban-text">{getBanText()}</span> : null}
                     {premiumExpirationJSX()}
                     {banExpirationJSX()}
-                    <div className="userprofile-row">
-                        <span className="userprofile-text">Email: {session.email}</span>
+                    <div className="user-row">
+                        <span className="user-text">Email: {session.email}</span>
                     </div>
-                    <div className="userprofile-row">
-                        <span className="userprofile-text">Join Date: {functions.prettyDate(new Date(session.joinDate))}</span>
+                    <div className="user-row">
+                        <span className="user-text">Join Date: {functions.prettyDate(new Date(session.joinDate))}</span>
                     </div>
-                    <div className="userprofile-row">
-                        <span className="userprofile-text">Bio: {session.bio || "This user has not written anything."}</span>
+                    <div className="user-row">
+                        <span className="user-text">Bio: {session.bio || "This user has not written anything."}</span>
                     </div>
-                    <div className="userprofile-row">
-                        <span className="userprofile-link" onClick={() => setShowBioInput((prev) => !prev)}>Update Bio</span>
+                    <div className="user-row">
+                        <span className="user-link" onClick={() => setShowBioInput((prev) => !prev)}>Update Bio</span>
                     </div>
                     {showBioInput ?
-                    <div className="userprofile-column">
-                        <textarea ref={bioRef} className="userprofile-textarea" spellCheck={false} value={bio} onChange={(event) => setBio(event.target.value)}
+                    <div className="user-column">
+                        <textarea ref={bioRef} className="user-textarea" spellCheck={false} value={bio} onChange={(event) => setBio(event.target.value)}
                         onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}></textarea>
-                        {error ? <div className="userprofile-validation-container"><span className="userprofile-validation" ref={errorRef}></span></div> : null}
-                        <button className="userprofile-button" onClick={changeBio}>Ok</button>
+                        {error ? <div className="user-validation-container"><span className="user-validation" ref={errorRef}></span></div> : null}
+                        <button className="user-button" onClick={changeBio}>Ok</button>
                     </div> : null}
-                    <div className="userprofile-row">
-                        <span className="userprofile-text">Favorites Privacy: <span style={{color: !session.publicFavorites ? "var(--text-strong)" : "var(--text)"}} 
-                        className="userprofile-text-action" onClick={favoritesPrivacy}>{session.publicFavorites ? "Public" : "Private"}</span></span>
+                    <div className="user-row">
+                        <span className="user-text">Favorites Privacy: <span style={{color: !session.publicFavorites ? "var(--text-strong)" : "var(--text)"}} 
+                        className="user-text-action" onClick={favoritesPrivacy}>{session.publicFavorites ? "Public" : "Private"}</span></span>
                     </div>
-                    <div className="userprofile-row">
-                        <span className="userprofile-text">Show Related: <span className="userprofile-text-action" onClick={showRelated}>{session.showRelated ? "Yes" : "No"}</span></span>
+                    <div className="user-row">
+                        <span className="user-text">Show Related: <span className="user-text-action" onClick={showRelated}>{session.showRelated ? "Yes" : "No"}</span></span>
                     </div>
-                    <div className="userprofile-row">
-                        <span className="userprofile-text">Show Tooltips: <span className="userprofile-text-action" onClick={showTooltips}>{session.showTooltips ? "Yes" : "No"}</span></span>
+                    <div className="user-row">
+                        <span className="user-text">Show Tooltips: <span className="user-text-action" onClick={showTooltips}>{session.showTooltips ? "Yes" : "No"}</span></span>
                     </div>
-                    <div className="userprofile-row">
-                        <span className="userprofile-text">Show Tag Banner: <span className="userprofile-text-action" onClick={showTagBanner}>{session.showTagBanner ? "Yes" : "No"}</span></span>
+                    <div className="user-row">
+                        <span className="user-text">Show Tag Banner: <span className="user-text-action" onClick={showTagBanner}>{session.showTagBanner ? "Yes" : "No"}</span></span>
                     </div>
-                    <div className="userprofile-row">
-                        <span className="userprofile-text">Download Pixiv ID: <span className="userprofile-text-action" onClick={downloadPixivID}>{session.downloadPixivID ? "Yes" : "No"}</span></span>
+                    <div className="user-row">
+                        <span className="user-text">Download Pixiv ID: <span className="user-text-action" onClick={downloadPixivID}>{session.downloadPixivID ? "Yes" : "No"}</span></span>
                     </div>
-                    <div className="userprofile-row">
-                        <img className="userprofile-icon" src={premiumStar}/>
-                        <span style={{color: "var(--premiumColor)"}} className="userprofile-text">Upscaled Images: <span style={{color: "var(--premiumColor)"}} className="userprofile-text-action" onClick={upscaledImages}>{session.upscaledImages ? "Yes" : "No"}</span></span>
+                    <div className="user-row">
+                        <img className="user-icon" src={premiumStar}/>
+                        <span style={{color: "var(--premiumColor)"}} className="user-text">Upscaled Images: <span style={{color: "var(--premiumColor)"}} className="user-text-action" onClick={upscaledImages}>{session.upscaledImages ? "Yes" : "No"}</span></span>
                     </div>
-                    <div className="userprofile-row">
-                        <img className="userprofile-icon" src={premiumStar}/>
-                        <span style={{color: "var(--premiumColor)"}} className="userprofile-text">Autosearch Interval: </span>
-                        <input style={{color: "var(--premiumColor)"}} className="userprofile-input" spellCheck={false} value={interval} onChange={(event) => setInterval(event.target.value)}
+                    <div className="user-row">
+                        <img className="user-icon" src={premiumStar}/>
+                        <span style={{color: "var(--premiumColor)"}} className="user-text">Autosearch Interval: </span>
+                        <input style={{color: "var(--premiumColor)"}} className="user-input" spellCheck={false} value={interval} onChange={(event) => setInterval(event.target.value)}
                         onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}></input>
                     </div>
-                    {permissions.isAdmin(session) ? <div className="userprofile-row">
-                        <img className="userprofile-icon" src={r18}/>
-                        <span style={{color: "var(--r18Color)"}} className="userprofile-text">Show R18: <span style={{color: "var(--r18Color)"}} className="userprofile-text-action" onClick={showR18}>{session.showR18 ? "Yes" : "No"}</span></span>
+                    {permissions.isAdmin(session) ? <div className="user-row">
+                        <img className="user-icon" src={r18}/>
+                        <span style={{color: "var(--r18Color)"}} className="user-text">Show R18: <span style={{color: "var(--r18Color)"}} className="user-text-action" onClick={showR18}>{session.showR18 ? "Yes" : "No"}</span></span>
                     </div> : null}
                     {counts ? <>
-                    {counts.postEdits > 0 ? <div className="userprofile-row">
-                        <span className="userprofile-title" onClick={() => history.push(`/user/${session.username}/post/history`)}>Post Edits <span className="userprofile-text-alt">{counts.postEdits}</span></span>
+                    {counts.postEdits > 0 ? <div className="user-row">
+                        <span className="user-title" onClick={() => history.push(`/user/${session.username}/post/history`)}>Post Edits <span className="user-text-alt">{counts.postEdits}</span></span>
                     </div>  : null}
-                    {counts.tagEdits > 0 ? <div className="userprofile-row">
-                        <span className="userprofile-title" onClick={() => history.push(`/user/${session.username}/tag/history`)}>Tag Edits <span className="userprofile-text-alt">{counts.tagEdits}</span></span>
+                    {counts.tagEdits > 0 ? <div className="user-row">
+                        <span className="user-title" onClick={() => history.push(`/user/${session.username}/tag/history`)}>Tag Edits <span className="user-text-alt">{counts.tagEdits}</span></span>
                     </div> : null}
-                    {counts.translationEdits > 0 ? <div className="userprofile-row">
-                        <span className="userprofile-title" onClick={() => history.push(`/user/${session.username}/translation/history`)}>Translation Edits <span className="userprofile-text-alt">{counts.translationEdits}</span></span>
+                    {counts.translationEdits > 0 ? <div className="user-row">
+                        <span className="user-title" onClick={() => history.push(`/user/${session.username}/translation/history`)}>Translation Edits <span className="user-text-alt">{counts.translationEdits}</span></span>
                     </div> : null}
-                    {counts.groupEdits > 0 ? <div className="userprofile-row">
-                        <span className="userprofile-title" onClick={() => history.push(`/user/${session.username}/group/history`)}>Group Edits <span className="userprofile-text-alt">{counts.groupEdits}</span></span>
+                    {counts.groupEdits > 0 ? <div className="user-row">
+                        <span className="user-title" onClick={() => history.push(`/user/${session.username}/group/history`)}>Group Edits <span className="user-text-alt">{counts.groupEdits}</span></span>
                     </div> : null}
                     </> : null}
-                    <div onClick={clearPfp} className="userprofile-row">
-                        <span className="userprofile-link">Clear Pfp</span>
+                    <div onClick={clearPfp} className="user-row">
+                        <span className="user-link">Clear Pfp</span>
                     </div>
-                    <div onClick={changeUsername} className="userprofile-row">
-                        <img className="userprofile-icon" src={premiumStar} style={{height: "14px", marginRight: "5px"}}/>
-                        <span style={{color: "var(--premiumColor)"}} className="userprofile-link">Change Username</span>
+                    {bannerHidden ? 
+                    <div onClick={showBanner} className="user-row">
+                        <span className="user-link">Show Banner</span>
+                    </div> : null}
+                    <div onClick={changeUsername} className="user-row">
+                        <img className="user-icon" src={premiumStar} style={{height: "14px", marginRight: "5px"}}/>
+                        <span style={{color: "var(--premiumColor)"}} className="user-link">Change Username</span>
                     </div>
-                    <Link to="/change-email" className="userprofile-row">
-                        <span className="userprofile-link">Change Email</span>
+                    <Link to="/change-email" className="user-row">
+                        <span className="user-link">Change Email</span>
                     </Link>
-                    <Link to="/change-password" className="userprofile-row">
-                        <span className="userprofile-link">Change Password</span>
+                    <Link to="/change-password" className="user-row">
+                        <span className="user-link">Change Password</span>
                     </Link>
-                    <Link to="/enable-2fa" className="userprofile-row">
-                        <span className="userprofile-link">{session.$2fa ? "Disable" : "Enable"} 2-Factor Authentication</span>
+                    <Link to="/enable-2fa" className="user-row">
+                        <span className="user-link">{session.$2fa ? "Disable" : "Enable"} 2-Factor Authentication</span>
                     </Link>
-                    <Link to="/login-history" className="userprofile-row">
-                        <span className="userprofile-link">Login History</span>
+                    <Link to="/login-history" className="user-row">
+                        <span className="user-link">Login History</span>
                     </Link>
-                    {permissions.isAdmin(session) ? <Link to="/ip-blacklist" className="userprofile-row">
-                        <span className="userprofile-link">IP Blacklist</span>
+                    {permissions.isAdmin(session) ? <Link to="/ip-blacklist" className="user-row">
+                        <span className="user-link">IP Blacklist</span>
+                    </Link> : null}
+                    {permissions.isAdmin(session) ? <Link to="/news-banner" className="user-row">
+                        <span className="user-link">News Banner</span>
                     </Link> : null}
                     {generateFavgroupsJSX()}
                     {favorites.length ?
-                    <div className="userprofile-column">
-                        <span className="userprofile-title" onClick={viewFavorites}>Favorites <span className="userprofile-text-alt">{favorites[0].postCount}</span></span>
+                    <div className="user-column">
+                        <span className="user-title" onClick={viewFavorites}>Favorites <span className="user-text-alt">{favorites[0].postCount}</span></span>
                         <Carousel images={favoriteImages} noKey={true} set={setFav} index={favoriteIndex} update={updateFavoriteOffset} appendImages={appendFavoriteImages}/>
                     </div> : null}
                     {uploads.length ?
-                    <div className="userprofile-column">
-                        <span className="userprofile-title" onClick={viewUploads}>Uploads <span className="userprofile-text-alt">{uploads[0].postCount}</span></span>
+                    <div className="user-column">
+                        <span className="user-title" onClick={viewUploads}>Uploads <span className="user-text-alt">{uploads[0].postCount}</span></span>
                         <Carousel images={uploadImages} noKey={true} set={setUp} index={uploadIndex} update={updateUploadOffset} appendImages={appendUploadImages}/>
                     </div> : null}
                     {comments.length ?
-                    <div className="userprofile-column">
-                        <span className="userprofile-title" onClick={viewComments}>Comments <span className="userprofile-text-alt">{comments.length}</span></span>
+                    <div className="user-column">
+                        <span className="user-title" onClick={viewComments}>Comments <span className="user-text-alt">{comments.length}</span></span>
                         <CommentCarousel comments={comments}/>
                     </div> : null}
-                    <div className="userprofile-row">
-                        <img className="userprofile-icon" src={danger}/>
-                        <span className="userprofile-link" onClick={deleteAccountDialog}>Delete Account</span>
+                    <div className="user-row">
+                        <img className="user-icon" src={danger}/>
+                        <span className="user-link" onClick={deleteAccountDialog}>Delete Account</span>
                     </div>
                 </div>
                 <Footer/>

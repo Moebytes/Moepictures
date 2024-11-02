@@ -59,8 +59,8 @@ export default class SQLFavorite {
         if (sort === "random") sortQuery = `ORDER BY random()`
         if (!sort || sort === "date") sortQuery = `ORDER BY posts."uploadDate" DESC`
         if (sort === "reverse date") sortQuery = `ORDER BY posts."uploadDate" ASC`
-        if (sort === "drawn") sortQuery = `ORDER BY posts.drawn DESC NULLS LAST`
-        if (sort === "reverse drawn") sortQuery = `ORDER BY posts.drawn ASC NULLS LAST`
+        if (sort === "posted") sortQuery = `ORDER BY posts.posted DESC NULLS LAST`
+        if (sort === "reverse posted") sortQuery = `ORDER BY posts.posted ASC NULLS LAST`
         if (sort === "cuteness") sortQuery = `ORDER BY "cuteness" DESC`
         if (sort === "reverse cuteness") sortQuery = `ORDER BY "cuteness" ASC`
         if (sort === "popularity") sortQuery = `ORDER BY "favoriteCount" DESC`
@@ -291,8 +291,8 @@ export default class SQLFavorite {
         if (sort === "random") sortQuery = `ORDER BY random()`
         if (sort === "date") sortQuery = `ORDER BY posts."uploadDate" DESC`
         if (sort === "reverse date") sortQuery = `ORDER BY posts."uploadDate" ASC`
-        if (sort === "drawn") sortQuery = `ORDER BY posts.drawn DESC NULLS LAST`
-        if (sort === "reverse drawn") sortQuery = `ORDER BY posts.drawn ASC NULLS LAST`
+        if (sort === "posted") sortQuery = `ORDER BY posts.posted DESC NULLS LAST`
+        if (sort === "reverse posted") sortQuery = `ORDER BY posts.posted ASC NULLS LAST`
         if (sort === "cuteness") sortQuery = `ORDER BY "cuteness" DESC`
         if (sort === "reverse cuteness") sortQuery = `ORDER BY "cuteness" ASC`
         if (sort === "popularity") sortQuery = `ORDER BY "favoriteCount" DESC`

@@ -42,6 +42,10 @@ const ActionBanner: React.FunctionComponent = (props) => {
             setStickyText("Unblacklisted IP!")
             document.documentElement.style.setProperty("--actionBannerColor", "#501aceCC")
         }
+        if (actionBanner === "remove-banner") {
+            setStickyText("Removed Banner!")
+            document.documentElement.style.setProperty("--actionBannerColor", "#ce1a4dCC")
+        }
     }, [actionBanner])
 
     if (actionBanner) {

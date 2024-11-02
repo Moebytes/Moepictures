@@ -68,7 +68,8 @@ export default class Functions {
 
     public static noCacheURL = (image: string) => {
         const url = new URL(image)
-        url.searchParams.set("update", Date.now().toString())
+        const roundedTime = Math.floor(Date.now() / 30000) * 30000
+        url.searchParams.set("update", roundedTime.toString())
         return url.toString()
     }
 
@@ -1247,8 +1248,8 @@ export default class Functions {
         if (sort === "random" ||
             sort === "date" ||
             sort === "reverse date" ||
-            sort === "drawn" ||
-            sort === "reverse drawn" || 
+            sort === "posted" ||
+            sort === "reverse posted" || 
             sort === "bookmarks" || 
             sort === "reverse bookmarks" ||
             sort === "favorites" || 
@@ -2428,7 +2429,7 @@ export default class Functions {
     public static sourceChanged = (revertPost: any, currentPost: any) => {
         if (revertPost.title !== currentPost.title) return true
         if (revertPost.translatedTitle !== currentPost.translatedTitle) return true
-        if (revertPost.drawn !== currentPost.drawn) return true
+        if (revertPost.posted !== currentPost.posted) return true
         if (revertPost.link !== currentPost.link) return true
         if (revertPost.artist !== currentPost.artist) return true
         if (revertPost.commentary !== currentPost.commentary) return true
@@ -2510,8 +2511,8 @@ export default class Functions {
         if (oldPost.artist !== newPost.artist) {
             json.artist = newPost.artist
         }
-        if (Functions.formatDate(new Date(oldPost.drawn)) !== Functions.formatDate(new Date(newPost.drawn))) {
-            json.drawn = newPost.drawn
+        if (Functions.formatDate(new Date(oldPost.posted)) !== Functions.formatDate(new Date(newPost.posted))) {
+            json.posted = newPost.posted
         }
         if (oldPost.link !== newPost.link) {
             json.link = newPost.link
@@ -2695,5 +2696,9 @@ export default class Functions {
         }
 
         return `${os} ${browser}`
+    }
+
+    public static isJapaneseText = (text: string) => {
+        return /[\u3040-\u30FF\u4E00-\u9FFF\uFF66-\uFF9F]/.test(text)
     }
 }

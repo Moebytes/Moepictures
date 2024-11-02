@@ -19,7 +19,7 @@ module.exports = [
     entry: "./index",
     mode: "production",
     node: {__dirname: false},
-    output: {publicPath: "/", globalObject: "this", filename: "script.js", chunkFilename: "[name].js", path: path.resolve(__dirname, "./dist")},
+    output: {publicPath: "/", globalObject: "this", filename: "script.js", chunkFilename: "[id].js", path: path.resolve(__dirname, "./dist")},
     resolve: {extensions: [".js", ".jsx", ".ts", ".tsx"], alias: {"react-dom$": "react-dom/profiling", "scheduler/tracing": "scheduler/tracing-profiling"}, 
     fallback: {fs: false, "process/browser": require.resolve("process/browser"), path: require.resolve("path-browserify"), 
     crypto: require.resolve("crypto-browserify"), stream: require.resolve("stream-browserify"), assert: require.resolve("assert/"), 
@@ -43,7 +43,7 @@ module.exports = [
       new webpack.HotModuleReplacementPlugin(),
       new MiniCssExtractPlugin({
         filename: "styles.css",
-        chunkFilename: "styles.css"
+        chunkFilename: "[id].css"
       }),
       new HtmlWebpackPlugin({
         template: path.resolve(__dirname, "./index.html"),
@@ -70,7 +70,7 @@ module.exports = [
     mode: "production",
     node: {__dirname: false},
     externals: [nodeExternals()],
-    output: {filename: "server.js", chunkFilename: "server.js", path: path.resolve(__dirname, "./dist")},
+    output: {filename: "server.js", chunkFilename: "[id].js", path: path.resolve(__dirname, "./dist")},
     resolve: {extensions: [".js", ".jsx", ".ts", ".tsx"], 
     fallback: {zlib: require.resolve("browserify-zlib")}},
     performance: {hints: false},
@@ -91,7 +91,7 @@ module.exports = [
       new webpack.HotModuleReplacementPlugin(),
       new MiniCssExtractPlugin({
         filename: "styles.css",
-        chunkFilename: "styles.css"
+        chunkFilename: "[id].css"
       })
     ]
   }

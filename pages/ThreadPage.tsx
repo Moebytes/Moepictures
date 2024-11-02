@@ -411,62 +411,62 @@ const ThreadPage: React.FunctionComponent<Props> = (props) => {
     const getCreatorJSX = () => {
         if (thread.role === "admin") {
             return (
-                <div className="forum-thread-username-container" onClick={creatorClick} onAuxClick={creatorClick}>
-                    <span className="forum-thread-user-text admin-color">{functions.toProperCase(thread.creator)}</span>
-                    <img className="forum-thread-user-label" src={adminCrown}/>
+                <div className="thread-page-username-container" onClick={creatorClick} onAuxClick={creatorClick}>
+                    <span className="thread-page-user-text admin-color">{functions.toProperCase(thread.creator)}</span>
+                    <img className="thread-page-user-label" src={adminCrown}/>
                 </div>
             )
         } else if (thread.role === "mod") {
             return (
-                <div className="forum-thread-username-container" onClick={creatorClick} onAuxClick={creatorClick}>
-                <span className="forum-thread-user-text mod-color">{functions.toProperCase(thread.creator)}</span>
-                    <img className="forum-thread-user-label" src={modCrown}/>
+                <div className="thread-page-username-container" onClick={creatorClick} onAuxClick={creatorClick}>
+                <span className="thread-page-user-text mod-color">{functions.toProperCase(thread.creator)}</span>
+                    <img className="thread-page-user-label" src={modCrown}/>
                 </div>
             )
         } else if (thread.role === "system") {
             return (
-                <div className="forum-thread-username-container" onClick={creatorClick} onAuxClick={creatorClick}>
-                <span className="forum-thread-user-text system-color">{functions.toProperCase(thread.creator)}</span>
-                    <img className="forum-thread-user-label" src={systemCrown}/>
+                <div className="thread-page-username-container" onClick={creatorClick} onAuxClick={creatorClick}>
+                <span className="thread-page-user-text system-color">{functions.toProperCase(thread.creator)}</span>
+                    <img className="thread-page-user-label" src={systemCrown}/>
                 </div>
             )
         } else if (thread.role === "premium-curator") {
             return (
-                <div className="forum-thread-username-container" onClick={creatorClick} onAuxClick={creatorClick}>
-                <span className="forum-thread-user-text curator-color">{functions.toProperCase(thread.creator)}</span>
-                    <img className="forum-thread-user-label" src={premiumCuratorStar}/>
+                <div className="thread-page-username-container" onClick={creatorClick} onAuxClick={creatorClick}>
+                <span className="thread-page-user-text curator-color">{functions.toProperCase(thread.creator)}</span>
+                    <img className="thread-page-user-label" src={premiumCuratorStar}/>
                 </div>
             )
         } else if (thread.role === "curator") {
             return (
-                <div className="forum-thread-username-container" onClick={creatorClick} onAuxClick={creatorClick}>
-                <span className="forum-thread-user-text curator-color">{functions.toProperCase(thread.creator)}</span>
-                    <img className="forum-thread-user-label" src={curatorStar}/>
+                <div className="thread-page-username-container" onClick={creatorClick} onAuxClick={creatorClick}>
+                <span className="thread-page-user-text curator-color">{functions.toProperCase(thread.creator)}</span>
+                    <img className="thread-page-user-label" src={curatorStar}/>
                 </div>
             )
         } else if (thread.role === "premium-contributor") {
             return (
-                <div className="forum-thread-username-container" onClick={creatorClick} onAuxClick={creatorClick}>
-                <span className="forum-thread-user-text premium-color">{functions.toProperCase(thread.creator)}</span>
-                    <img className="forum-thread-user-label" src={premiumContributorPencil}/>
+                <div className="thread-page-username-container" onClick={creatorClick} onAuxClick={creatorClick}>
+                <span className="thread-page-user-text premium-color">{functions.toProperCase(thread.creator)}</span>
+                    <img className="thread-page-user-label" src={premiumContributorPencil}/>
                 </div>
             )
         } else if (thread.role === "contributor") {
             return (
-                <div className="forum-thread-username-container" onClick={creatorClick} onAuxClick={creatorClick}>
-                <span className="forum-thread-user-text contributor-color">{functions.toProperCase(thread.creator)}</span>
-                    <img className="forum-thread-user-label" src={contributorPencil}/>
+                <div className="thread-page-username-container" onClick={creatorClick} onAuxClick={creatorClick}>
+                <span className="thread-page-user-text contributor-color">{functions.toProperCase(thread.creator)}</span>
+                    <img className="thread-page-user-label" src={contributorPencil}/>
                 </div>
             )
         } else if (thread.role === "premium") {
             return (
-                <div className="forum-thread-username-container" onClick={creatorClick} onAuxClick={creatorClick}>
-                <span className="forum-thread-user-text premium-color">{functions.toProperCase(thread.creator)}</span>
-                    <img className="forum-thread-user-label" src={premiumStar}/>
+                <div className="thread-page-username-container" onClick={creatorClick} onAuxClick={creatorClick}>
+                <span className="thread-page-user-text premium-color">{functions.toProperCase(thread.creator)}</span>
+                    <img className="thread-page-user-label" src={premiumStar}/>
                 </div>
             )
         }
-        return <span className={`forum-thread-user-text ${thread.banned ? "banned" : ""}`} onClick={creatorClick} onAuxClick={creatorClick}>{functions.toProperCase(thread?.creator) || "deleted"}</span>
+        return <span className={`thread-page-user-text ${thread.banned ? "banned" : ""}`} onClick={creatorClick} onAuxClick={creatorClick}>{functions.toProperCase(thread?.creator) || "deleted"}</span>
     }
 
     const updateSticky = async () => {
@@ -541,24 +541,24 @@ const ThreadPage: React.FunctionComponent<Props> = (props) => {
         if (permissions.isMod(session)) {
             jsx.push(
                 <>
-                <img draggable={false} className="forum-thread-opt-icon" src={thread.sticky ? unstickyOptIcon : stickyOptIcon} onClick={updateSticky} style={{marginTop: "3px", filter: getFilter()}}/>
-                <img draggable={false} className="forum-thread-opt-icon" src={thread.locked ? unlockOptIcon : lockOptIcon} onClick={updateLocked} style={{filter: getFilter()}}/>
+                <img draggable={false} className="thread-page-opt-icon" src={thread.sticky ? unstickyOptIcon : stickyOptIcon} onClick={updateSticky} style={{marginTop: "3px", filter: getFilter()}}/>
+                <img draggable={false} className="thread-page-opt-icon" src={thread.locked ? unlockOptIcon : lockOptIcon} onClick={updateLocked} style={{filter: getFilter()}}/>
                 </>
             )
         }
         if (session.username && !session.banned) {
             jsx.push(
                 <>
-                <img draggable={false} className="forum-thread-opt-icon" src={quoteOptIcon} onClick={triggerQuote} style={{filter: getFilter()}}/>
-                <img draggable={false} className="forum-thread-opt-icon" src={reportOptIcon} onClick={reportThreadDialog} style={{filter: getFilter()}}/>
+                <img draggable={false} className="thread-page-opt-icon" src={quoteOptIcon} onClick={triggerQuote} style={{filter: getFilter()}}/>
+                <img draggable={false} className="thread-page-opt-icon" src={reportOptIcon} onClick={reportThreadDialog} style={{filter: getFilter()}}/>
                 </>
             )
         }
         if (session.username === thread.creator || permissions.isMod(session)) {
             jsx.push(
                 <>
-                <img draggable={false} className="forum-thread-opt-icon" src={editOptIcon} onClick={editThreadDialog} style={{filter: getFilter()}}/>
-                <img draggable={false} className="forum-thread-opt-icon" src={deleteOptIcon} onClick={deleteThreadDialog} style={{filter: getFilter()}}/>
+                <img draggable={false} className="thread-page-opt-icon" src={editOptIcon} onClick={editThreadDialog} style={{filter: getFilter()}}/>
+                <img draggable={false} className="thread-page-opt-icon" src={deleteOptIcon} onClick={deleteThreadDialog} style={{filter: getFilter()}}/>
                 </>
             )
         }
@@ -610,7 +610,7 @@ const ThreadPage: React.FunctionComponent<Props> = (props) => {
 
     const getEmojiMarginBottom = () => {
         if (typeof document === "undefined") return "0px"
-        let elementName = ".forum-thread-textarea"
+        let elementName = ".thread-page-textarea"
         const bodyRect = document.querySelector(elementName)?.getBoundingClientRect()
         const rect = emojiRef.current?.getBoundingClientRect()
         if (!rect || !bodyRect) return "0px"
@@ -649,33 +649,33 @@ const ThreadPage: React.FunctionComponent<Props> = (props) => {
 
     const getReplyBoxJSX = () => {
         if (thread.locked) return (
-            <div className="forum-thread-reply-box" style={{justifyContent: "flex-start"}}>
-                <span className="forum-thread-validation" style={{fontSize: "20px", marginLeft: mobile ? "0px" : "15px"}}>This thread is locked.</span>
+            <div className="thread-page-reply-box" style={{justifyContent: "flex-start"}}>
+                <span className="thread-page-validation" style={{fontSize: "20px", marginLeft: mobile ? "0px" : "15px"}}>This thread is locked.</span>
             </div>
         )
         if (session.banned) return (
-            <div className="forum-thread-reply-box" style={{justifyContent: "flex-start"}}>
+            <div className="thread-page-reply-box" style={{justifyContent: "flex-start"}}>
                 <span className="upload-ban-text" style={{fontSize: "20px", marginLeft: mobile ? "0px" : "15px"}}>You are banned. Cannot reply.</span>
             </div>
         )
         if (session.username) {
             return (
-                <div className="forum-thread-reply-box">
-                    <div className="forum-thread-input-container">
-                        <div className="forum-thread-row-start" onMouseEnter={() => setEnableDrag(false)}>
-                            <textarea className="forum-thread-textarea" spellCheck={false} value={text} onChange={(event) => setText(event.target.value)}></textarea>
+                <div className="thread-page-reply-box">
+                    <div className="thread-page-input-container">
+                        <div className="thread-page-row-start" onMouseEnter={() => setEnableDrag(false)}>
+                            <textarea className="thread-page-textarea" spellCheck={false} value={text} onChange={(event) => setText(event.target.value)}></textarea>
                         </div>
-                        {error ? <div className="forum-thread-validation-container"><span className="forum-thread-validation" ref={errorRef}></span></div> : null}
-                        <div className="forum-thread-button-container-left">
-                            <button className="forum-thread-button" onClick={reply}>Reply</button>
+                        {error ? <div className="thread-page-validation-container"><span className="thread-page-validation" ref={errorRef}></span></div> : null}
+                        <div className="thread-page-button-container-left">
+                            <button className="thread-page-button" onClick={reply}>Reply</button>
                             <button className="comments-emoji-button" ref={emojiRef} onClick={() => setShowEmojiDropdown((prev: boolean) => !prev)}>
                                 <img src={emojiSelect}/>
                             </button>
                             {session.showR18 ?
-                            <div className="forum-thread-replybox-row">
-                                <img className="forum-thread-checkbox" src={r18 ? radioButtonChecked : radioButton} onClick={() => setR18((prev: boolean) => !prev)} style={{filter: getFilter()}}/>
-                                <span className="forum-thread-replybox-text" style={{marginLeft: "10px"}}>R18</span>
-                                <img className="forum-thread-icon" src={lewdIcon} style={{marginLeft: "15px", height: "50px", filter: getFilter()}}/>
+                            <div className="thread-page-replybox-row">
+                                <img className="thread-page-checkbox" src={r18 ? radioButtonChecked : radioButton} onClick={() => setR18((prev: boolean) => !prev)} style={{filter: getFilter()}}/>
+                                <span className="thread-page-replybox-text" style={{marginLeft: "10px"}}>R18</span>
+                                <img className="thread-page-icon" src={lewdIcon} style={{marginLeft: "15px", height: "50px", filter: getFilter()}}/>
                             </div> : null}
                         </div>
                     </div>
@@ -699,27 +699,27 @@ const ThreadPage: React.FunctionComponent<Props> = (props) => {
             <SideBar/>
             <div className="content" onMouseEnter={() => setEnableDrag(false)}>
                 {thread ?
-                <div className="forum-thread" onMouseEnter={() => setEnableDrag(false)}>
-                    <div className="forum-thread-title-container">
-                        {thread.sticky ? <img draggable={false} className="forum-thread-icon" src={stickyIcon}/> : null}
-                        {thread.locked ? <img draggable={false} className="forum-thread-icon" src={lockIcon}/> : null}
-                        <span className="forum-thread-title">
+                <div className="thread-page" onMouseEnter={() => setEnableDrag(false)}>
+                    <div className="thread-page-title-container">
+                        {thread.sticky ? <img draggable={false} className="thread-page-icon" src={stickyIcon}/> : null}
+                        {thread.locked ? <img draggable={false} className="thread-page-icon" src={lockIcon}/> : null}
+                        <span className="thread-page-title">
                             {thread.r18 ? <span style={{color: "var(--r18Color)", marginRight: "10px"}}>[R18]</span> : null}
                             {thread.title}
                         </span>
                         {getOptionsJSX()}
                     </div>
-                    <div className="forum-thread-main-post" style={{backgroundColor: thread.r18 ? "var(--r18BGColor)" : ""}}>
-                        <div className="forum-thread-user-container">
+                    <div className="thread-page-main-post" style={{backgroundColor: thread.r18 ? "var(--r18BGColor)" : ""}}>
+                        <div className="thread-page-user-container">
                             {getCreatorJSX()}
-                            <span className="forum-thread-date-text">{functions.timeAgo(thread.createDate)}</span>
-                            <img draggable={false} className="forum-thread-user-img" src={getCreatorPFP()} onClick={creatorImgClick} onAuxClick={creatorImgClick} style={{filter: defaultIcon ? getFilter() : ""}}/>
+                            <span className="thread-page-date-text">{functions.timeAgo(thread.createDate)}</span>
+                            <img draggable={false} className="thread-page-user-img" src={getCreatorPFP()} onClick={creatorImgClick} onAuxClick={creatorImgClick} style={{filter: defaultIcon ? getFilter() : ""}}/>
                         </div>
-                        <div className="forum-thread-text-container">
-                            <p className="forum-thread-text">{jsxFunctions.parseTextLinks(thread.content, emojis)}</p>
+                        <div className="thread-page-text-container">
+                            <p className="thread-page-text">{jsxFunctions.parseTextLinks(thread.content, emojis)}</p>
                         </div>
                     </div>
-                    <table className="forum-thread-container">
+                    <table className="thread-page-container">
                         {generateRepliesJSX()}
                     </table>
                     {getReplyBoxJSX()}

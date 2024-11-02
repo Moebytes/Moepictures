@@ -10,7 +10,7 @@ import hide from "../assets/icons/hide.png"
 import functions from "../structures/Functions"
 import {HideNavbarContext, HideSidebarContext, ThemeContext, EnableDragContext, RelativeContext, HideTitlebarContext, MobileContext,
 HeaderTextContext, SidebarTextContext, SiteHueContext, SiteLightnessContext, SiteSaturationContext, SessionContext, SessionFlagContext} from "../Context"
-import "./styles/resetpasspage.less"
+import "./styles/sitepage.less"
 
 const ResetPasswordPage: React.FunctionComponent = (props) => {
     const {theme, setTheme} = useContext(ThemeContext)
@@ -113,34 +113,34 @@ const ResetPasswordPage: React.FunctionComponent = (props) => {
         <div className="body">
             <SideBar/>
             <div className="content">
-                <div className="reset-pass">
-                    <span className="reset-pass-title">Reset Password</span>
+                <div className="sitepage">
+                    <span className="sitepage-title">Reset Password</span>
                     {submitted ?
                     <>
-                    <span className="reset-pass-link">Your password has been reset.</span>
-                    <div className="reset-pass-button-container-left">
+                    <span className="sitepage-link">Your password has been reset.</span>
+                    <div className="sitepage-button-container-left">
                         <Link to="/login">
-                            <button className="reset-pass-button" onClick={() => history.push("/login")}>Login</button>
+                            <button className="sitepage-button" onClick={() => history.push("/login")}>Login</button>
                         </Link>
                     </div>
                     </> : <>
-                    <div className="reset-pass-row">
-                        <span className="reset-pass-text">New Password:</span>
-                        <div className="reset-pass-pass">
-                            <img className="reset-pass-pass-show" src={getEye()} style={{filter: getFilter()}} onClick={() => setShowPassword((prev) => !prev)}/>
-                            <input className="reset-pass-pass-input" type={showPassword ? "text" : "password"} spellCheck={false} value={newPassword} onChange={(event) => setNewPassword(event.target.value)} onKeyDown={(event) => event.key === "Enter" ? submit() : null}/>
+                    <div className="sitepage-row">
+                        <span className="sitepage-text-wide3">New Password:</span>
+                        <div className="sitepage-pass">
+                            <img className="sitepage-pass-show" src={getEye()} style={{filter: getFilter()}} onClick={() => setShowPassword((prev) => !prev)}/>
+                            <input className="sitepage-pass-input" type={showPassword ? "text" : "password"} spellCheck={false} value={newPassword} onChange={(event) => setNewPassword(event.target.value)} onKeyDown={(event) => event.key === "Enter" ? submit() : null}/>
                         </div>
                     </div>
-                    <div className="reset-pass-row">
-                        <span className="reset-pass-text">Confirm New Password:</span>
-                        <div className="reset-pass-pass">
-                            <img className="reset-pass-pass-show" src={getEye2()} style={{filter: getFilter()}} onClick={() => setShowPassword2((prev) => !prev)}/>
-                            <input className="reset-pass-pass-input" type={showPassword2 ? "text" : "password"} spellCheck={false} value={confirmNewPassword} onChange={(event) => setConfirmNewPassword(event.target.value)} onKeyDown={(event) => event.key === "Enter" ? submit() : null}/>
+                    <div className="sitepage-row">
+                        <span className="sitepage-text-wide3">Confirm New Password:</span>
+                        <div className="sitepage-pass">
+                            <img className="sitepage-pass-show" src={getEye2()} style={{filter: getFilter()}} onClick={() => setShowPassword2((prev) => !prev)}/>
+                            <input className="sitepage-pass-input" type={showPassword2 ? "text" : "password"} spellCheck={false} value={confirmNewPassword} onChange={(event) => setConfirmNewPassword(event.target.value)} onKeyDown={(event) => event.key === "Enter" ? submit() : null}/>
                         </div>
                     </div>
-                    {error ? <div className="reset-pass-validation-container"><span className="reset-pass-validation" ref={errorRef}></span></div> : null}
-                    <div className="reset-pass-button-container">
-                        <button className="reset-pass-button" onClick={() => submit()}>Reset Password</button>
+                    {error ? <div className="sitepage-validation-container"><span className="sitepage-validation" ref={errorRef}></span></div> : null}
+                    <div className="sitepage-button-container">
+                        <button className="sitepage-button" onClick={() => submit()}>Reset Password</button>
                     </div>
                     </>
                     }

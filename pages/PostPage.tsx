@@ -236,7 +236,7 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
             if (!tagCategories?.artists?.[0]?.tag || !post) return
             try {
                 if (tagCategories.artists[0].tag === "unknown-artist") return
-                let artistPosts = await functions.get("/api/search/posts", {query: tagCategories.artists[0].tag, type: "all", restrict: "all", style: "all", sort: "drawn", limit: mobile ? 10 : 100}, session, setSessionFlag)
+                let artistPosts = await functions.get("/api/search/posts", {query: tagCategories.artists[0].tag, type: "all", restrict: "all", style: "all", sort: "posted", limit: mobile ? 10 : 100}, session, setSessionFlag)
                 artistPosts = artistPosts.filter((p: any) => p.postID !== postID)
                 if (artistPosts?.length) setArtistPosts(artistPosts)
             } catch (err) {
@@ -479,7 +479,7 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
                 title: post.title,
                 translatedTitle: post.translatedTitle,
                 artist: post.artist,
-                drawn: post.drawn ? functions.formatDate(new Date(post.drawn), true) : "",
+                posted: post.posted ? functions.formatDate(new Date(post.posted), true) : "",
                 link: post.link,
                 commentary: post.commentary,
                 translatedCommentary: post.translatedCommentary,

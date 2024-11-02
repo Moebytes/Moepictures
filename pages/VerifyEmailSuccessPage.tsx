@@ -8,7 +8,7 @@ import SideBar from "../components/SideBar"
 import functions from "../structures/Functions"
 import {HideNavbarContext, HideSidebarContext, ThemeContext, EnableDragContext, RedirectContext, MobileContext,
 RelativeContext, HideTitlebarContext, HeaderTextContext, SidebarTextContext, SessionContext} from "../Context"
-import "./styles/verifyemailsuccesspage.less"
+import "./styles/sitepage.less"
 import session from "express-session"
 
 const VerifyEmailSuccessPage: React.FunctionComponent = (props) => {
@@ -55,14 +55,14 @@ const VerifyEmailSuccessPage: React.FunctionComponent = (props) => {
         <div className="body">
             <SideBar/>
             <div className="content">
-                <div className="verify-email-success">
-                    <span className="verify-email-success-title">Email Verified</span>
-                    <div className="verify-email-success-row">
-                        <span className="verify-email-success-text">Thank you, your email address has been verified! You should be 
+                <div className="sitepage">
+                    <span className="sitepage-title">Email Verified</span>
+                    <div className="sitepage-row">
+                        <span className="sitepage-text">Thank you, your email address has been verified! You should be 
                         able to use your account now.</span>
                     </div>
-                    <div className="verify-email-success-button-container">
-                        <button className="verify-email-success-button" onClick={() => history.push("/posts")}>Ok</button>
+                    <div className="sitepage-button-container">
+                        <button className="sitepage-button" onClick={() => history.push("/posts")}>Ok</button>
                     </div>
                 </div>
                 <Footer/>

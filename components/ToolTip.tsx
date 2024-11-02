@@ -105,6 +105,13 @@ const ToolTip: React.FunctionComponent = (props) => {
         setDownloadFlag(true)
     }
 
+    const openNewTab = async () => {
+        const postImage = tooltipPost.images[0]
+        const img = functions.getImageLink(postImage?.type, tooltipPost.postID, postImage?.order, postImage?.filename)
+        const decrypted = await functions.decryptImg(img, img)
+        window.open(decrypted, "_blank")
+    }
+
     const getImageDimensions = () => {
         return `${tooltipPost.images[0].width}x${tooltipPost.images[0].height}`
     }
@@ -172,14 +179,14 @@ const ToolTip: React.FunctionComponent = (props) => {
                     <img className="tooltip-img-small" src={tagIcon} onClick={() => copyTags()} onContextMenu={(event) => {event.preventDefault(); copyTags(true, true)}}/>
                 </div>
                 <div className="tooltip-artist-container">
-                    <span className={`tooltip-artist-tag ${tooltipPost?.hidden ? "strikethrough" : ""}`} onClick={download}>{getImageDimensions()}</span>
+                    <span className={`tooltip-artist-tag ${tooltipPost?.hidden ? "strikethrough" : ""}`} onClick={download} onAuxClick={openNewTab}>{getImageDimensions()}</span>
                     {getPostLinkJSX()}
                 </div>
             </div>
             <div className="tooltip-column" ref={scrollRef} style={{overflowY: "auto"}}>
                 <div className="tooltip-tag-container">
                     <span className={`tooltip-artist-tag ${tooltipPost?.hidden ? "strikethrough" : ""}`}>{tooltipPost.translatedTitle}</span>
-                    <span className={`tooltip-artist-tag ${tooltipPost?.hidden ? "strikethrough" : ""}`}>{functions.formatDate(new Date(tooltipPost.drawn))}</span>
+                    <span className={`tooltip-artist-tag ${tooltipPost?.hidden ? "strikethrough" : ""}`}>{functions.formatDate(new Date(tooltipPost.posted))}</span>
                 </div>
                 <div className="tooltip-tag-container" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                     {getTagsJSX()}

@@ -8,7 +8,7 @@ import SideBar from "../components/SideBar"
 import functions from "../structures/Functions"
 import {HideNavbarContext, HideSidebarContext, ThemeContext, EnableDragContext, RedirectContext, MobileContext,
 RelativeContext, HideTitlebarContext, HeaderTextContext, SidebarTextContext, SessionContext} from "../Context"
-import "./styles/changeemailsuccesspage.less"
+import "./styles/sitepage.less"
 import session from "express-session"
 
 const ChangeEmailSuccessPage: React.FunctionComponent = (props) => {
@@ -64,14 +64,14 @@ const ChangeEmailSuccessPage: React.FunctionComponent = (props) => {
         <div className="body">
             <SideBar/>
             <div className="content">
-                <div className="change-email-success">
-                    <span className="change-email-success-title">Email Changed Successfully</span>
-                    <div className="change-email-success-row">
-                        <span className="change-email-success-text">Your email has been changed to: </span>
-                        <span className="change-email-success-text-small">{session.email}</span>
+                <div className="sitepage">
+                    <span className="sitepage-title">Email Changed Successfully</span>
+                    <div className="sitepage-row">
+                        <span className="sitepage-text">Your email has been changed to: </span>
+                        <span className="sitepage-text-small2">{session.email}</span>
                     </div>
-                    <div className="change-email-success-button-container">
-                        <button className="change-email-success-button" onClick={() => history.push("/profile")}>Ok</button>
+                    <div className="sitepage-button-container">
+                        <button className="sitepage-button" onClick={() => history.push("/profile")}>Ok</button>
                     </div>
                 </div>
                 <Footer/>

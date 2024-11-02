@@ -443,6 +443,20 @@ export default class SQLTag {
         return result.map((r: any) => r.post)
     }
 
+    /** Get tag from pixiv tag. */
+    public static tagFromPixivTag = async (pixivTag: string) => {
+        const query: QueryConfig = {
+            text: functions.multiTrim(/*sql*/`
+                    SELECT tags.*
+                    FROM tags
+                    WHERE "tags"."pixivTags" @> ARRAY[$1]
+            `),
+            values: [pixivTag]
+        }
+        const result = await SQLQuery.run(query, true)
+        return result[0]
+    }
+
     /** Insert alias history */
     public static insertAliasHistory = async (username: string, source: string, target: string, type: string, 
         affectedPosts: any, sourceData: any, reason?: string) => {

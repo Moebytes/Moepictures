@@ -10,7 +10,7 @@ import permissions from "../structures/Permissions"
 import {HideNavbarContext, HideSidebarContext, ThemeContext, EnableDragContext, RedirectContext, MobileContext,
 RelativeContext, HideTitlebarContext, HeaderTextContext, SidebarTextContext, SessionContext, SessionFlagContext} from "../Context"
 import premiumStar from "../assets/icons/premium-star.png"
-import "./styles/verifyemailsuccesspage.less"
+import "./styles/sitepage.less"
 
 const PremiumSuccessPage: React.FunctionComponent = (props) => {
     const {theme, setTheme} = useContext(ThemeContext)
@@ -69,21 +69,21 @@ const PremiumSuccessPage: React.FunctionComponent = (props) => {
         <div className="body">
             <SideBar/>
             <div className="content">
-                <div className="verify-email-success">
+                <div className="sitepage">
                     {permissions.isPremium(session) ? <><div className="premium-row">
                         <span className="premium-heading">Account Upgraded!</span>
                         <img className="premium-star" src={premiumStar}/>
                     </div>
-                    <div className="verify-email-success-row">
-                        <span className="verify-email-success-text" style={{color: "var(--premiumColor)"}}>
+                    <div className="sitepage-row">
+                        <span className="sitepage-text" style={{color: "var(--premiumColor)"}}>
                             Thank you for purchasing premium! Your account has been upgraded and you can now 
                             access all of the premium features. <br/><br/>
 
                             Your premium membership will last until {functions.prettyDate(new Date(session.premiumExpiration))}.
                         </span>
                     </div>
-                    <div className="verify-email-success-button-container">
-                        <button className="verify-email-success-button" onClick={() => history.push("/posts")}>Ok</button>
+                    <div className="sitepage-button-container">
+                        <button className="sitepage-button" onClick={() => history.push("/posts")}>Ok</button>
                     </div></> : null}
                 </div>
                 <Footer/>

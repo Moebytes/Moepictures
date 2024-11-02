@@ -37,7 +37,7 @@ import emojiSelect from "../assets/icons/emoji-select.png"
 import lewdIcon from "../assets/icons/lewd.png"
 import radioButton from "../assets/icons/radiobutton.png"
 import radioButtonChecked from "../assets/icons/radiobutton-checked.png"
-import "./styles/messagepage.less"
+import "./styles/threadpage.less"
 
 interface Props {
     match?: any
@@ -432,62 +432,62 @@ const MessagePage: React.FunctionComponent<Props> = (props) => {
     const getCreatorJSX = () => {
         if (message.role === "admin") {
             return (
-                <div className="mail-message-username-container" onClick={creatorClick} onAuxClick={creatorClick}>
-                    <span className="mail-message-user-text admin-color">{functions.toProperCase(message.creator)}</span>
-                    <img className="mail-message-user-label" src={adminCrown}/>
+                <div className="thread-page-username-container" onClick={creatorClick} onAuxClick={creatorClick}>
+                    <span className="thread-page-user-text admin-color">{functions.toProperCase(message.creator)}</span>
+                    <img className="thread-page-user-label" src={adminCrown}/>
                 </div>
             )
         } else if (message.role === "mod") {
             return (
-                <div className="mail-message-username-container" onClick={creatorClick} onAuxClick={creatorClick}>
-                <span className="mail-message-user-text mod-color">{functions.toProperCase(message.creator)}</span>
-                    <img className="mail-message-user-label" src={modCrown}/>
+                <div className="thread-page-username-container" onClick={creatorClick} onAuxClick={creatorClick}>
+                <span className="thread-page-user-text mod-color">{functions.toProperCase(message.creator)}</span>
+                    <img className="thread-page-user-label" src={modCrown}/>
                 </div>
             )
         } else if (message.role === "system") {
             return (
-                <div className="mail-message-username-container" onClick={creatorClick} onAuxClick={creatorClick}>
-                <span className="mail-message-user-text system-color">{functions.toProperCase(message.creator)}</span>
-                    <img className="mail-message-user-label" src={systemCrown}/>
+                <div className="thread-page-username-container" onClick={creatorClick} onAuxClick={creatorClick}>
+                <span className="thread-page-user-text system-color">{functions.toProperCase(message.creator)}</span>
+                    <img className="thread-page-user-label" src={systemCrown}/>
                 </div>
             )
         } else if (message.role === "premium-curator") {
             return (
-                <div className="mail-message-username-container" onClick={creatorClick} onAuxClick={creatorClick}>
-                <span className="mail-message-user-text curator-color">{functions.toProperCase(message.creator)}</span>
-                    <img className="mail-message-user-label" src={premiumCuratorStar}/>
+                <div className="thread-page-username-container" onClick={creatorClick} onAuxClick={creatorClick}>
+                <span className="thread-page-user-text curator-color">{functions.toProperCase(message.creator)}</span>
+                    <img className="thread-page-user-label" src={premiumCuratorStar}/>
                 </div>
             )
         } else if (message.role === "curator") {
             return (
-                <div className="mail-message-username-container" onClick={creatorClick} onAuxClick={creatorClick}>
-                <span className="mail-message-user-text curator-color">{functions.toProperCase(message.creator)}</span>
-                    <img className="mail-message-user-label" src={curatorStar}/>
+                <div className="thread-page-username-container" onClick={creatorClick} onAuxClick={creatorClick}>
+                <span className="thread-page-user-text curator-color">{functions.toProperCase(message.creator)}</span>
+                    <img className="thread-page-user-label" src={curatorStar}/>
                 </div>
             )
         } else if (message.role === "premium-contributor") {
             return (
-                <div className="mail-message-username-container" onClick={creatorClick} onAuxClick={creatorClick}>
-                <span className="mail-message-user-text premium-color">{functions.toProperCase(message.creator)}</span>
-                    <img className="mail-message-user-label" src={premiumContributorPencil}/>
+                <div className="thread-page-username-container" onClick={creatorClick} onAuxClick={creatorClick}>
+                <span className="thread-page-user-text premium-color">{functions.toProperCase(message.creator)}</span>
+                    <img className="thread-page-user-label" src={premiumContributorPencil}/>
                 </div>
             )
         } else if (message.role === "contributor") {
             return (
-                <div className="mail-message-username-container" onClick={creatorClick} onAuxClick={creatorClick}>
-                <span className="mail-message-user-text contributor-color">{functions.toProperCase(message.creator)}</span>
-                    <img className="mail-message-user-label" src={contributorPencil}/>
+                <div className="thread-page-username-container" onClick={creatorClick} onAuxClick={creatorClick}>
+                <span className="thread-page-user-text contributor-color">{functions.toProperCase(message.creator)}</span>
+                    <img className="thread-page-user-label" src={contributorPencil}/>
                 </div>
             )
         } else if (message.role === "premium") {
             return (
-                <div className="mail-message-username-container" onClick={creatorClick} onAuxClick={creatorClick}>
-                <span className="mail-message-user-text premium-color">{functions.toProperCase(message.creator)}</span>
-                    <img className="mail-message-user-label" src={premiumStar}/>
+                <div className="thread-page-username-container" onClick={creatorClick} onAuxClick={creatorClick}>
+                <span className="thread-page-user-text premium-color">{functions.toProperCase(message.creator)}</span>
+                    <img className="thread-page-user-label" src={premiumStar}/>
                 </div>
             )
         }
-        return <span className={`mail-message-user-text ${message.banned ? "banned" : ""}`} onClick={creatorClick} onAuxClick={creatorClick}>{functions.toProperCase(message?.creator) || "deleted"}</span>
+        return <span className={`thread-page-user-text ${message.banned ? "banned" : ""}`} onClick={creatorClick} onAuxClick={creatorClick}>{functions.toProperCase(message?.creator) || "deleted"}</span>
     }
 
     const editMessage = async () => {
@@ -553,16 +553,16 @@ const MessagePage: React.FunctionComponent<Props> = (props) => {
         if (message.role !== "system" && session.username && !session.banned) {
             jsx.push(
                 <>
-                <img draggable={false} className="mail-message-opt-icon" src={quoteOptIcon} onClick={triggerQuote} style={{filter: getFilter()}}/>
+                <img draggable={false} className="thread-page-opt-icon" src={quoteOptIcon} onClick={triggerQuote} style={{filter: getFilter()}}/>
                 </>
             )
         }
         if (session.username === message.creator || permissions.isMod(session)) {
             jsx.push(
                 <>
-                <img draggable={false} className="mail-message-opt-icon" src={forwardOptIcon} onClick={forwardMessageDialog} style={{filter: getFilter()}}/>
-                <img draggable={false} className="mail-message-opt-icon" src={editOptIcon} onClick={editMessageDialog} style={{filter: getFilter()}}/>
-                <img draggable={false} className="mail-message-opt-icon" src={deleteOptIcon} onClick={deleteMessageDialog} style={{filter: getFilter()}}/>
+                <img draggable={false} className="thread-page-opt-icon" src={forwardOptIcon} onClick={forwardMessageDialog} style={{filter: getFilter()}}/>
+                <img draggable={false} className="thread-page-opt-icon" src={editOptIcon} onClick={editMessageDialog} style={{filter: getFilter()}}/>
+                <img draggable={false} className="thread-page-opt-icon" src={deleteOptIcon} onClick={deleteMessageDialog} style={{filter: getFilter()}}/>
                 </>
             )
         }
@@ -614,7 +614,7 @@ const MessagePage: React.FunctionComponent<Props> = (props) => {
 
     const getEmojiMarginBottom = () => {
         if (typeof document === "undefined") return "0px"
-        let elementName = ".mail-message-textarea"
+        let elementName = ".thread-page-textarea"
         const bodyRect = document.querySelector(elementName)?.getBoundingClientRect()
         const rect = emojiRef.current?.getBoundingClientRect()
         if (!rect || !bodyRect) return "0px"
@@ -653,33 +653,33 @@ const MessagePage: React.FunctionComponent<Props> = (props) => {
 
     const getReplyBoxJSX = () => {
         if (message.role === "system") return (
-            <div className="mail-message-reply-box" style={{justifyContent: "flex-start"}}>
+            <div className="thread-page-reply-box" style={{justifyContent: "flex-start"}}>
                 <span className="upload-ban-text" style={{fontSize: "20px", marginLeft: mobile ? "0px" : "15px"}}>Cannot respond to system messages.</span>
             </div>
         )
         if (session.banned) return (
-            <div className="mail-message-reply-box" style={{justifyContent: "flex-start"}}>
+            <div className="thread-page-reply-box" style={{justifyContent: "flex-start"}}>
                 <span className="upload-ban-text" style={{fontSize: "20px", marginLeft: mobile ? "0px" : "15px"}}>You are banned. Cannot reply.</span>
             </div>
         )
         if (session.username) {
             return (
-                <div className="mail-message-reply-box">
-                    <div className="mail-message-input-container">
-                        <div className="mail-message-row-start" onMouseEnter={() => setEnableDrag(false)}>
-                            <textarea className="mail-message-textarea" spellCheck={false} value={text} onChange={(event) => setText(event.target.value)}></textarea>
+                <div className="thread-page-reply-box">
+                    <div className="thread-page-input-container">
+                        <div className="thread-page-row-start" onMouseEnter={() => setEnableDrag(false)}>
+                            <textarea className="thread-page-textarea" spellCheck={false} value={text} onChange={(event) => setText(event.target.value)}></textarea>
                         </div>
-                        {error ? <div className="mail-message-validation-container"><span className="mail-message-validation" ref={errorRef}></span></div> : null}
-                        <div className="mail-message-button-container-left">
-                            <button className="mail-message-button" onClick={reply}>Message</button>
+                        {error ? <div className="thread-page-validation-container"><span className="thread-page-validation" ref={errorRef}></span></div> : null}
+                        <div className="thread-page-button-container-left">
+                            <button className="thread-page-button" onClick={reply}>Message</button>
                             <button className="comments-emoji-button" ref={emojiRef} onClick={() => setShowEmojiDropdown((prev: boolean) => !prev)}>
                                 <img src={emojiSelect}/>
                             </button>
                             {session.showR18 ?
-                            <div className="mail-message-replybox-row">
-                                <img className="mail-message-checkbox" src={r18 ? radioButtonChecked : radioButton} onClick={() => setR18((prev: boolean) => !prev)} style={{filter: getFilter()}}/>
-                                <span className="mail-message-replybox-text" style={{marginLeft: "10px"}}>R18</span>
-                                <img className="mail-message-icon" src={lewdIcon} style={{marginLeft: "15px", height: "50px", filter: getFilter()}}/>
+                            <div className="thread-page-replybox-row">
+                                <img className="thread-page-checkbox" src={r18 ? radioButtonChecked : radioButton} onClick={() => setR18((prev: boolean) => !prev)} style={{filter: getFilter()}}/>
+                                <span className="thread-page-replybox-text" style={{marginLeft: "10px"}}>R18</span>
+                                <img className="thread-page-icon" src={lewdIcon} style={{marginLeft: "15px", height: "50px", filter: getFilter()}}/>
                             </div> : null}
                         </div>
                     </div>
@@ -702,28 +702,28 @@ const MessagePage: React.FunctionComponent<Props> = (props) => {
             <SideBar/>
             <div className="content" onMouseEnter={() => setEnableDrag(false)}>
                 {message ?
-                <div className="mail-message" onMouseEnter={() => setEnableDrag(false)}>
-                    <div className="mail-message-title-container">
-                        <span className="mail-message-title">
+                <div className="thread-page" onMouseEnter={() => setEnableDrag(false)}>
+                    <div className="thread-page-title-container">
+                        <span className="thread-page-title">
                             {message.r18 ? <span style={{color: "var(--r18Color)", marginRight: "10px"}}>[R18]</span> : null}
                             {message.title}
                         </span>
                         {getOptionsJSX()}
                     </div>
-                    <div className="mail-message-title-container">
-                        <span className="mail-message-info">{`${message.creator} -> ${message.recipients.map((r: any) => r === null ? "deleted" : r).join(", ")}`}</span>
+                    <div className="thread-page-title-container">
+                        <span className="thread-page-info">{`${message.creator} -> ${message.recipients.map((r: any) => r === null ? "deleted" : r).join(", ")}`}</span>
                     </div>
-                    <div className="mail-message-main-post" style={{backgroundColor: message.r18 ? "var(--r18BGColor)" : ""}}>
-                        <div className="mail-message-user-container">
+                    <div className="thread-page-main-post" style={{backgroundColor: message.r18 ? "var(--r18BGColor)" : ""}}>
+                        <div className="thread-page-user-container">
                             {getCreatorJSX()}
-                            <span className="mail-message-date-text">{functions.timeAgo(message.createDate)}</span>
-                            <img draggable={false} className="mail-message-user-img" src={getCreatorPFP()} onClick={creatorImgClick} onAuxClick={creatorImgClick} style={{filter: defaultIcon ? getFilter() : ""}}/>
+                            <span className="thread-page-date-text">{functions.timeAgo(message.createDate)}</span>
+                            <img draggable={false} className="thread-page-user-img" src={getCreatorPFP()} onClick={creatorImgClick} onAuxClick={creatorImgClick} style={{filter: defaultIcon ? getFilter() : ""}}/>
                         </div>
-                        <div className="mail-message-text-container">
-                            <p className="mail-message-text">{jsxFunctions.parseTextLinks(message.content, emojis)}</p>
+                        <div className="thread-page-text-container">
+                            <p className="thread-page-text">{jsxFunctions.parseTextLinks(message.content, emojis)}</p>
                         </div>
                     </div>
-                    <table className="mail-message-container">
+                    <table className="thread-page-container">
                         {generateRepliesJSX()}
                     </table>
                     {getReplyBoxJSX()}

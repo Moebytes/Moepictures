@@ -217,6 +217,7 @@ export const VolumeFlagContext = React.createContext<any>(null)
 export const ResetFlagContext = React.createContext<any>(null)
 export const MuteFlagContext = React.createContext<any>(null)
 export const ActionBannerContext = React.createContext<any>(null)
+export const NewsBannerContext = React.createContext<any>(null)
 export const FavGroupIDContext = React.createContext<any>(null)
 export const EditFavGroupObjContext = React.createContext<any>(null)
 export const DeleteFavGroupObjContext = React.createContext<any>(null)
@@ -475,9 +476,11 @@ const Context: React.FunctionComponent = (props) => {
     const [deleteAliasHistoryFlag, setDeleteAliasHistoryFlag] = useState(null)
     const [revertAliasHistoryID, setRevertAliasHistoryID] = useState(null)
     const [revertAliasHistoryFlag, setRevertAliasHistoryFlag] = useState(null)
+    const [newsBanner, setNewsBanner] = useState(null)
 
 return (
     <>
+        <NewsBannerContext.Provider value={{newsBanner, setNewsBanner}}>
         <RevertAliasHistoryFlagContext.Provider value={{revertAliasHistoryFlag, setRevertAliasHistoryFlag}}>
         <RevertAliasHistoryIDContext.Provider value={{revertAliasHistoryID, setRevertAliasHistoryID}}>
         <DeleteAliasHistoryFlagContext.Provider value={{deleteAliasHistoryFlag, setDeleteAliasHistoryFlag}}>
@@ -929,8 +932,9 @@ return (
         </DeleteAliasHistoryFlagContext.Provider>
         </RevertAliasHistoryIDContext.Provider>
         </RevertAliasHistoryFlagContext.Provider>
+        </NewsBannerContext.Provider>
     </>
     )
 }
 
-export default Context
+export {Context}

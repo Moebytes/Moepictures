@@ -446,7 +446,7 @@ const BulkUploadPage: React.FunctionComponent = (props) => {
                     title: sourceData.source.title,
                     translatedTitle: sourceData.source.translatedTitle,
                     artist: sourceData.source.artist,
-                    drawn: sourceData.source.date,
+                    posted: sourceData.source.posted,
                     link: sourceData.source.link,
                     commentary: sourceData.source.commentary,
                     translatedCommentary: sourceData.source.translatedCommentary,
@@ -544,7 +544,7 @@ const BulkUploadPage: React.FunctionComponent = (props) => {
         let translatedTitle = ""
         let commentary = ""
         let translatedCommentary = ""
-        let date = ""
+        let posted = ""
         let bookmarks = ""
         let danbooruLink = ""
         let mirrors = [] as any
@@ -559,7 +559,7 @@ const BulkUploadPage: React.FunctionComponent = (props) => {
             try {
                 const illust = await functions.get(`/api/misc/pixiv?url=${link}`, null, session, setSessionFlag)
                 commentary = `${functions.decodeEntities(illust.caption.replace(/<\/?[^>]+(>|$)/g, ""))}` 
-                date = functions.formatDate(new Date(illust.create_date), true)
+                posted = functions.formatDate(new Date(illust.create_date), true)
                 link = illust.url 
                 title = illust.title
                 artist = illust.user.name
@@ -593,7 +593,7 @@ const BulkUploadPage: React.FunctionComponent = (props) => {
                     commentary,
                     translatedCommentary,
                     bookmarks,
-                    date,
+                    posted,
                     mirrors
                 }
             }
@@ -637,7 +637,7 @@ const BulkUploadPage: React.FunctionComponent = (props) => {
                     try {
                         const illust = await functions.get(`/api/misc/pixiv?url=${link}`, null, session, setSessionFlag)
                         commentary = `${functions.decodeEntities(illust.caption.replace(/<\/?[^>]+(>|$)/g, ""))}` 
-                        date = functions.formatDate(new Date(illust.create_date), true)
+                        posted = functions.formatDate(new Date(illust.create_date), true)
                         link = illust.url 
                         title = illust.title
                         artist = illust.user.name
@@ -673,7 +673,7 @@ const BulkUploadPage: React.FunctionComponent = (props) => {
                         artist = deviation.author.user.username
                         link = deviation.url
                         commentary = deviation.description
-                        date = functions.formatDate(new Date(deviation.date), true)
+                        posted = functions.formatDate(new Date(deviation.date), true)
                         if (deviation.rating === "adult") {
                             if (restrict === "safe") restrict = "questionable"
                         }
@@ -724,7 +724,7 @@ const BulkUploadPage: React.FunctionComponent = (props) => {
                     commentary,
                     translatedCommentary,
                     bookmarks,
-                    date,
+                    posted,
                     mirrors
                 }
             }

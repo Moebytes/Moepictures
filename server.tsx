@@ -15,7 +15,6 @@ import hot from "webpack-hot-middleware"
 import config from "./webpack.config.js"
 import dotenv from "dotenv"
 import rateLimit from "express-rate-limit"
-import App from "./App"
 import {renderToString} from "react-dom/server"
 import {StaticRouter as Router} from "react-router-dom"
 import permissions from "./structures/Permissions"
@@ -71,6 +70,7 @@ declare module "express-session" {
       showR18: boolean
       premiumExpiration: string
       banExpiration: string
+      bannerHide: string
       $2fa: boolean
       ip: string
       role: string
@@ -407,7 +407,7 @@ for (let i = 0; i < folders.length; i++) {
   })
 }
 
-app.get("/*", (req: Request, res: Response) => {
+app.get("/*", async (req: Request, res: Response) => {
   if (!req.hostname.includes("moepictures") && !req.hostname.includes("localhost") && !req.hostname.includes("192.168.68")) {
     res.redirect(301, `https://moepictures.moe${req.path}`)
   }
@@ -420,12 +420,31 @@ app.get("/*", (req: Request, res: Response) => {
   res.setHeader("Cross-Origin-Opener-Policy", "same-origin")
   res.setHeader("Cross-Origin-Embedder-Policy", "require-corp")
   const document = fs.readFileSync(path.join(__dirname, "./dist/index.html"), {encoding: "utf-8"})
+  const App = await import("./App").then((r) => r.default)
   const html = renderToString(<Router location={req.url}><App/></Router>)
   res.status(200).send(document?.replace(`<div id="root"></div>`, `<div id="root">${html}</div>`))
 })
 
+const deleteExpiredTokens = async () => {
+  const emailTokens = await sql.token.emailTokens()
+  for (const tokenData of emailTokens) {
+    const expireDate = new Date(tokenData.expires)
+    if (new Date() > expireDate) {
+      await sql.token.deleteEmailToken(tokenData.email)
+    }
+  }
+  const passwordTokens = await sql.token.passwordTokens()
+  for (const tokenData of passwordTokens) {
+    const expireDate = new Date(tokenData.expires)
+    if (new Date() > expireDate) {
+      await sql.token.deletePasswordToken(tokenData.username)
+    }
+  }
+}
+
 const run = async () => {
   await sql.createDB()
+  await deleteExpiredTokens()
 
   /** Unverified tags */
   await sql.tag.insertUnverifiedTag("unknown-artist", "artist")

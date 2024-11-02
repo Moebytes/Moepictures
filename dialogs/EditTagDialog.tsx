@@ -106,7 +106,7 @@ const EditTagDialog: React.FunctionComponent = (props) => {
                     image = Object.values(bytes)
                 }
             }
-            await functions.post("/api/tag/edit/request", {tag: editTagID, key: editTagKey, description: editTagDescription, image, aliases: editTagAliases, 
+            await functions.post("/api/tag/edit/request", {tag: editTagID.tag, key: editTagKey, description: editTagDescription, image, aliases: editTagAliases, 
             implications: editTagImplications, pixivTags: editTagPixivTags, social: editTagSocial, twitter: editTagTwitter, website: editTagWebsite, fandom: editTagFandom, 
             r18: editTagR18, reason: editTagReason}, session, setSessionFlag)
             setSubmitted(true)
@@ -225,6 +225,50 @@ const EditTagDialog: React.FunctionComponent = (props) => {
             )
         }
         return jsx 
+    }
+
+    if (editTagID?.failed === "implication") {
+        return (
+            <div className="dialog">
+                <Draggable handle=".dialog-title-container">
+                <div className="dialog-box" style={{width: "250px", height: "190px"}} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
+                    <div className="dialog-container">
+                        <div className="dialog-title-container">
+                            <span className="dialog-title">Edit Tag Request</span>
+                        </div>
+                        <div className="dialog-row">
+                            <span className="dialog-text">This includes implication edits that were submitted for approval.</span>
+                        </div>
+                        <div className="dialog-row">
+                            <button onClick={() => close()} className="dialog-button">{"OK"}</button>
+                        </div>
+                    </div>
+                </div>
+                </Draggable>
+            </div>
+        )
+    }
+
+    if (editTagID?.failed) {
+        return (
+            <div className="dialog">
+                <Draggable handle=".dialog-title-container">
+                <div className="dialog-box" style={{width: "250px", height: "190px"}} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
+                    <div className="dialog-container">
+                        <div className="dialog-title-container">
+                            <span className="dialog-title">Edit Tag</span>
+                        </div>
+                        <div className="dialog-row">
+                            <span className="dialog-text">Could not edit this tag.</span>
+                        </div>
+                        <div className="dialog-row">
+                            <button onClick={() => click("reject")} className="dialog-button">{"Ok"}</button>
+                        </div>
+                    </div>
+                </div>
+                </Draggable>
+            </div>
+        )
     }
 
     if (editTagID) {

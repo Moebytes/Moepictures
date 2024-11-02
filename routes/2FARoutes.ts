@@ -123,6 +123,7 @@ const $2FARoutes = (app: Express) => {
                 req.session.showR18 = user.showR18
                 req.session.premiumExpiration = user.premiumExpiration
                 req.session.banExpiration = user.banExpiration
+                req.session.bannerHide = user.bannerHide
                 await sql.user.insertLoginHistory(user.username, "login", ip, device)
                 res.status(200).send("Success")
             } else {
