@@ -509,7 +509,7 @@ const TagPage: React.FunctionComponent<Props> = (props) => {
                         <span className="tag-text strikethrough-color">You may not upload artwork from this artist.</span>
                     </div> : null}
                     <div className="tag-row" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
-                        <span className="tag-text">{jsxFunctions.parseTextLinks(tag.description)}</span>
+                        <span className="tag-text">{jsxFunctions.renderCommentaryText(tag.description)}</span>
                     </div>
                     {tagImplicationJSX()}
                     {relatedTagJSX()}

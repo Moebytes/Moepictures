@@ -31,7 +31,7 @@ const BuyLink: React.FunctionComponent<Props> = (props) => {
             </div>
             <div className="commentary-container" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                 <span className="commentary-text">
-                    {jsxFunctions.parseTextLinks(props.link)}   
+                    {jsxFunctions.renderCommentaryText(props.link)}   
                 </span>
             </div>
         </div>

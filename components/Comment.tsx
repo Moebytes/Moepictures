@@ -103,11 +103,11 @@ const Comment: React.FunctionComponent<Props> = (props) => {
                 jsx.push(
                     <div className="comment-quote-container">
                         {userPart ? <span className="comment-quote-user" onClick={() => goToComment(id)}>{`${username.trim()} ${said.trim()}`}</span> : null}
-                        <span className="comment-quote-text">{jsxFunctions.parseTextLinks(text.trim(), emojis)}</span>
+                        <span className="comment-quote-text">{jsxFunctions.renderCommentText(text.trim(), emojis)}</span>
                     </div>
                 )
             } else {
-                jsx.push(<span className="comment-text">{jsxFunctions.parseTextLinks(piece.trim(), emojis)}</span>)
+                jsx.push(<span className="comment-text">{jsxFunctions.renderCommentText(piece.trim(), emojis)}</span>)
             }
         }
         return jsx

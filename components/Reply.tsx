@@ -108,11 +108,11 @@ const Reply: React.FunctionComponent<Props> = (props) => {
                 jsx.push(
                     <div className="reply-quote-container">
                         {userPart ? <span className="reply-quote-user" onClick={() => goToReply(id)}>{`${username.trim()} ${said.trim()}`}</span> : null}
-                        <span className="reply-quote-text">{jsxFunctions.parseTextLinks(text.trim(), emojis)}</span>
+                        <span className="reply-quote-text">{jsxFunctions.renderThreadText(text.trim(), emojis)}</span>
                     </div>
                 )
             } else {
-                jsx.push(<span className="reply-text">{jsxFunctions.parseTextLinks(piece.trim(), emojis)}</span>)
+                jsx.push(<span className="reply-text">{jsxFunctions.renderThreadText(piece.trim(), emojis)}</span>)
             }
         }
         return jsx

@@ -65,11 +65,11 @@ const CommentCarousel: React.FunctionComponent<Props> = (props) => {
                 jsx.push(
                     <div className="comment-carousel-commentrow-quote-container">
                         {userPart ? <span className="comment-carousel-commentrow-quote-user">{`${username.trim()} ${said.trim()}`}</span> : null}
-                        <span className="comment-carousel-commentrow-quote-text">{jsxFunctions.parseTextLinks(text.trim(), emojis)}</span>
+                        <span className="comment-carousel-commentrow-quote-text">{jsxFunctions.renderCommentText(text.trim(), emojis)}</span>
                     </div>
                 )
             } else {
-                jsx.push(<span className="comment-carousel-commentrow-text">{jsxFunctions.parseTextLinks(piece.trim(), emojis)}</span>)
+                jsx.push(<span className="comment-carousel-commentrow-text">{jsxFunctions.renderCommentText(piece.trim(), emojis)}</span>)
             }
         }
         return jsx

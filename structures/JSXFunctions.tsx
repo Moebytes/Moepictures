@@ -17,57 +17,96 @@ export default class JSXFunctions {
         return <ResetPassword username={username} link={link}/>
     }
 
+    public static appendChain = (items: {text: any, jsx: any}[], func: (text: string) => {text: any, jsx: any}[]) => {
+        let result = [] as {text: any, jsx: any}[]
+        for (const item of items) {
+            if (item.jsx) {
+                result.push(item)
+            } else {
+                result.push(...func(item.text))
+            }
+        }
+        return result
+    }
+
+    public static appendParamChain = (items: {text: any, jsx: any}[], param: any, func: (text: string, param: any) => {text: any, jsx: any}[]) => {
+        let result = [] as {text: any, jsx: any}[]
+        for (const item of items) {
+            if (item.jsx) {
+                result.push(item)
+            } else {
+                result.push(...func(item.text, param))
+            }
+        }
+        return result
+    }
+
+    public static generateMarkup = (items: {text: any, jsx: any}[]) => {
+        let jsx = [] as JSX.Element[]
+        items.forEach((item, index) => {
+            if (item.jsx) {
+                jsx.push(item.jsx)
+            } else {
+                jsx.push(<span key={index}>{item.text}</span>)
+            }
+        })
+        return jsx
+    }
+
     public static parseBullets = (text: string) => {
-        return text.replace(/(^|\n)-\s+/g, "$1▪ ")
+        return [{text: text.replace(/(^|\n)-\s+/g, "$1▪ "), jsx: null}]
     }
 
     public static parseMention = (text: string) => {
+        let items = [] as {text: any, jsx: any}[]
         const history = useHistory()
         const parts = text.split(/(@\w+)/g)
-        const elements = parts.map((part, index) => {
+        parts.forEach((part, index) => {
             if (part.startsWith("@")) {
                 const click = () => {
                     history.push(`/user/${part.slice(1)}`)
                 }
                 const style = {color: "var(--text-strong)", fontWeight: "bold", cursor: "pointer"}
-                return <span style={style} onClick={click} key={index}>{part}</span>
+                items.push({text: null, jsx: <span key={index} style={style} onClick={click}>{part}</span>})
             } else {
-                return <span key={index}>{part}</span>
+                items.push({text: part, jsx: null})
             }
         })
-        return elements
+        return items
     }
 
     public static parseBold = (text: string) => {
+        let items = [] as {text: any, jsx: any}[]
         const parts = text.split(/(\*\*[^*]+\*\*)/g)
-        const elements = parts.map((part, index) => {
+        parts.forEach((part, index) => {
             if (part.startsWith("**") && part.endsWith("**")) {
                 const boldText = part.slice(2, -2)
-                return <span style={{color: "var(--text-strong)"}} key={index}>{boldText}</span>
+                items.push({text: null, jsx: <span key={index} style={{color: "var(--text-strong)"}}>{boldText}</span>})
             } else {
-                return JSXFunctions.parseMention(part)
+                items.push({text: part, jsx: null})
             }
         })
-        return elements
+        return items
     }
 
     public static parseEmojis = (text: string, emojis: any) => {
+        let items = [] as {text: any, jsx: any}[]
         const parts = text.split(/(emoji:[^\s]+)/g)
-        const elements = parts.map((part, index) => {
+        parts.forEach((part, index) => {
             if (part.match(/(emoji:[^\s]+)/g)) {
                 let key = part.split(":")[1]
-                return (<img src={emojis[key]} className="emoji"/>)
+                items.push({text: null, jsx:<img key={index} src={emojis[key]} className="emoji"/>})
             } else {
-                return JSXFunctions.parseBold(part)
+                items.push({text: part, jsx: null})
             }
         })
-        return elements
+        return items
     }
 
-    public static parseTextLinks = (text: string, emojis?: any) => {
-        text = JSXFunctions.parseBullets(text)
+    public static parseLinks = (text: string) => {
+        let items = [] as {text: any, jsx: any}[]
         const parts = text.split(/(https?:\/\/[^\s]+)/g)
-        const elements = parts.map((part, index) => {
+        parts.forEach((part, index) => {
             if (part.match(/(https?:\/\/[^\s]+)/g)) {
                 let name = part
                 if (name.includes(`${functions.getDomain()}/post`)) name = `Post #${name.replace(functions.getDomain(), "").match(/\d+/)?.[0] || ""}`
@@ -75,17 +114,43 @@ export default class JSXFunctions {
                 if (name.includes(`${functions.getDomain()}/message`)) name = `Message #${name.replace(functions.getDomain(), "").match(/\d+/)?.[0] || ""}`
                 if (name.includes(`${functions.getDomain()}/user`)) name = `User ${name.replace(functions.getDomain(), "").match(/(?<=\/user\/)(.+)/)?.[0] || ""}`
                 if (name.includes(`${functions.getDomain()}/tag`)) name = `Tag ${name.replace(functions.getDomain(), "").match(/(?<=\/tag\/)(.+)/)?.[0] || ""}`
-                if (functions.isImage(part) || functions.isGIF(part)) return (<img className="comment-image" src={part} crossOrigin="anonymous"/>)
-                if (functions.isVideo(part)) return (<video className="comment-image" src={part} crossOrigin="anonymous" autoPlay loop muted disablePictureInPicture playsInline controls></video>)
-                return (<a key={index} href={part} target="_blank" rel="noopener">{name}</a>)
+                if (functions.isImage(part) || functions.isGIF(part)) items.push({text: null, jsx: <img key={index} className="comment-image" src={part} crossOrigin="anonymous"/>})
+                if (functions.isVideo(part)) items.push({text: null, jsx: <video key={index} className="comment-image" src={part} crossOrigin="anonymous" autoPlay loop muted disablePictureInPicture playsInline controls></video>})
+                items.push({text: null, jsx: <a key={index} href={part} target="_blank" rel="noopener">{name}</a>})
             } else {
-                if (emojis) {
-                    return JSXFunctions.parseEmojis(part, emojis)
-                } else {
-                    return JSXFunctions.parseBold(part)
-                }
+                items.push({text: part, jsx: null})
             }
         })
-        return elements
+        return items
+    }
+
+    public static renderCommentaryText = (text: string) => {
+        let items = JSXFunctions.parseLinks(text)
+        return JSXFunctions.generateMarkup(items)
+    }
+
+    public static renderCommentText = (text: string, emojis: any) => {
+        let items = JSXFunctions.parseBullets(text)
+        items = JSXFunctions.appendChain(items, JSXFunctions.parseLinks)
+        items = JSXFunctions.appendParamChain(items, emojis, JSXFunctions.parseEmojis)
+        items = JSXFunctions.appendChain(items, JSXFunctions.parseBold)
+        return JSXFunctions.generateMarkup(items)
+    }
+
+    public static renderThreadText = (text: string, emojis: any) => {
+        let items = JSXFunctions.parseBullets(text)
+        items = JSXFunctions.appendChain(items, JSXFunctions.parseLinks)
+        items = JSXFunctions.appendParamChain(items, emojis, JSXFunctions.parseEmojis)
+        items = JSXFunctions.appendChain(items, JSXFunctions.parseBold)
+        items = JSXFunctions.appendChain(items, JSXFunctions.parseMention)
+        return JSXFunctions.generateMarkup(items)
+    }
+
+    public static renderMessageText = (text: string, emojis: any) => {
+        let items = JSXFunctions.parseBullets(text)
+        items = JSXFunctions.appendChain(items, JSXFunctions.parseLinks)
+        items = JSXFunctions.appendParamChain(items, emojis, JSXFunctions.parseEmojis)
+        items = JSXFunctions.appendChain(items, JSXFunctions.parseBold)
+        return JSXFunctions.generateMarkup(items)
     }
 }

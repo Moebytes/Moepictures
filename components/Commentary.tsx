@@ -58,7 +58,7 @@ const Commentary: React.FunctionComponent<Props> = (props) => {
             </div>
             <div className="commentary-container" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                 <span className="commentary-text">
-                    {jsxFunctions.parseTextLinks(text)}   
+                    {jsxFunctions.renderCommentaryText(text)}   
                 </span>
             </div>
         </div>

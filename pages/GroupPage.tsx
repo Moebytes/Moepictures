@@ -305,7 +305,7 @@ const GroupPage: React.FunctionComponent<Props> = (props) => {
                         {groupOptionsJSX()}
                     </div>
                     <div className="group-row" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
-                        <span className="group-text">{group.description ? jsxFunctions.parseTextLinks(group.description) : "No description."}</span>
+                        <span className="group-text">{group.description ? jsxFunctions.renderCommentaryText(group.description) : "No description."}</span>
                     </div>
                     <div className="group-row" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                         <span><span className="group-label" onClick={searchGroup}>Posts</span> <span className="group-label-alt">{group.postCount}</span></span>

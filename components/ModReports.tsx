@@ -104,15 +104,15 @@ const ReportRow: React.FunctionComponent<Props> = (props) => {
         username = asset.username ? asset.username : asset.creator
         if (props.request.type === "comment") {
             textType = "Comment: "
-            text = jsxFunctions.parseTextLinks(asset.comment, emojis)
+            text = jsxFunctions.renderCommentText(asset.comment, emojis)
             id = asset.postID
         } else if (props.request.type === "thread") {
             textType = "Thread: "
-            text = jsxFunctions.parseTextLinks(asset.title, emojis)
+            text = jsxFunctions.renderThreadText(asset.title, emojis)
             id = asset.threadID
         } else if (props.request.type === "reply") {
             textType = "Reply: "
-            text = jsxFunctions.parseTextLinks(asset.content, emojis)
+            text = jsxFunctions.renderThreadText(asset.content, emojis)
             id = asset.threadID
         }
     }

@@ -716,7 +716,7 @@ const ThreadPage: React.FunctionComponent<Props> = (props) => {
                             <img draggable={false} className="thread-page-user-img" src={getCreatorPFP()} onClick={creatorImgClick} onAuxClick={creatorImgClick} style={{filter: defaultIcon ? getFilter() : ""}}/>
                         </div>
                         <div className="thread-page-text-container">
-                            <p className="thread-page-text">{jsxFunctions.parseTextLinks(thread.content, emojis)}</p>
+                            <p className="thread-page-text">{jsxFunctions.renderThreadText(thread.content, emojis)}</p>
                         </div>
                     </div>
                     <table className="thread-page-container">
