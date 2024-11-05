@@ -159,7 +159,7 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
     const updateUserImg = async () => {
         if (props.post) {
             const uploader = await functions.get("/api/user", {username: props.post.uploader}, session, setSessionFlag)
-            setUploaderImage(uploader?.image ? functions.getTagLink("pfp", uploader.image) : favicon)
+            setUploaderImage(uploader?.image ? functions.getTagLink("pfp", uploader.image, uploader.imageHash) : favicon)
             if (uploader?.role) setUploaderRole(uploader.role)
             const updater = await functions.get("/api/user", {username: props.post.updater}, session, setSessionFlag)
             if (updater?.role) setUpdaterRole(updater.role)
@@ -350,7 +350,7 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
         let jsx = [] as any
         for (let i = 0; i < props.artists.length; i++) {
             if (!props.artists[i]) break
-            const link = functions.getTagLink("artist", props.artists[i].image)
+            const link = functions.getTagLink("artist", props.artists[i].image, props.artists[i].imageHash)
             const tagClick = () => {
                 history.push(`/posts`)
                 setSearch(props.artists[i].tag)
@@ -395,7 +395,7 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
         let jsx = [] as any
         for (let i = 0; i < props.characters.length; i++) {
             if (!props.characters[i]) break
-            const link = functions.getTagLink("character", props.characters[i].image)
+            const link = functions.getTagLink("character", props.characters[i].image, props.characters[i].imageHash)
             const tagClick = () => {
                 history.push(`/posts`)
                 setSearch(props.characters[i].tag)
@@ -430,7 +430,7 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
         let jsx = [] as any
         for (let i = 0; i < props.series.length; i++) {
             if (!props.series[i]) break
-            const link = functions.getTagLink("series", props.series[i].image)
+            const link = functions.getTagLink("series", props.series[i].image, props.series[i].imageHash)
             const tagClick = () => {
                 history.push(`/posts`)
                 setSearch(props.series[i].tag)
@@ -662,7 +662,7 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
     const randomSearch = async () => {
         if (history.location.pathname.includes("/post/")) {
             const posts = await functions.get("/api/search/posts", {type: "all", restrict: props.post.restrict === "explicit" ? "explicit" : "all", style: "all", sort: "random"}, session, setSessionFlag)
-            history.push(`/post/${posts[0].postID}`)
+            history.push(`/post/${posts[0].postID}/${posts[0].slug}`)
         } else {
             history.push(`/posts`)
             setRandomFlag(true)
@@ -865,7 +865,7 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
             const searchLoop = async () => {
                 if (!autoSearch) return
                 const posts = await functions.get("/api/search/posts", {type: "all", restrict: props.post.restrict === "explicit" ? "explicit" : "all", style: "all", sort: "random", limit: 1}, session, setSessionFlag)
-                history.push(`/post/${posts[0].postID}`)
+                history.push(`/post/${posts[0].postID}/${posts[0].slug}`)
             }
             if (autoSearch) {
                 interval = window.setInterval(searchLoop, Math.floor(Number(session.autosearchInterval || 3000)))

@@ -3,6 +3,7 @@ import rateLimit from "express-rate-limit"
 import slowDown from "express-slow-down"
 import sql from "../sql/SQLQuery"
 import functions from "../structures/Functions"
+import cryptoFunctions from "../structures/CryptoFunctions"
 import permissions from "../structures/Permissions"
 import serverFunctions, {csrfProtection, keyGenerator, handler} from "../structures/ServerFunctions"
 import fs from "fs"
@@ -34,7 +35,9 @@ const TagRoutes = (app: Express) => {
             let tag = req.query.tag as string
             if (!tag) return res.status(400).send("Bad tag")
             let result = await sql.tag.tag(tag)
-            res.status(200).json(result)
+            if (!req.session.publicKey) return res.status(401).send("No public key")
+            const encrypted = cryptoFunctions.encryptAPI(result, req.session.publicKey)
+            res.status(200).send(encrypted)
         } catch (e) {
             console.log(e)
             return res.status(400).send("Bad request")
@@ -46,7 +49,9 @@ const TagRoutes = (app: Express) => {
             let tag = req.query.tag as string
             if (!tag) return res.status(400).send("Bad tag")
             let result = await sql.tag.relatedTags(tag)
-            res.status(200).json(result?.related || [])
+            if (!req.session.publicKey) return res.status(401).send("No public key")
+            const encrypted = cryptoFunctions.encryptAPI(result?.related || [], req.session.publicKey)
+            res.status(200).send(encrypted)
         } catch (e) {
             console.log(e)
             return res.status(400).send("Bad request")
@@ -58,7 +63,9 @@ const TagRoutes = (app: Express) => {
             let tag = req.query.tag as string
             if (!tag) return res.status(400).send("Bad tag")
             let result = await sql.tag.unverifiedTags([tag])
-            res.status(200).json(result?.[0])
+            if (!req.session.publicKey) return res.status(401).send("No public key")
+            const encrypted = cryptoFunctions.encryptAPI(result?.[0], req.session.publicKey)
+            res.status(200).send(encrypted)
         } catch (e) {
             console.log(e)
             return res.status(400).send("Bad request")
@@ -70,7 +77,9 @@ const TagRoutes = (app: Express) => {
             let tags = req.query.tags as string[]
             if (!tags) tags = []
             let result = await sql.tag.tagCounts(tags.filter(Boolean))
-            res.status(200).json(result)
+            if (!req.session.publicKey) return res.status(401).send("No public key")
+            const encrypted = cryptoFunctions.encryptAPI(result, req.session.publicKey)
+            res.status(200).send(encrypted)
         } catch (e) {
             console.log(e)
             return res.status(400).send("Bad request")
@@ -82,7 +91,9 @@ const TagRoutes = (app: Express) => {
             let tags = req.query.tags as string[]
             if (!tags) tags = []
             let result = await sql.tag.tags(tags.filter(Boolean))
-            res.status(200).json(result)
+            if (!req.session.publicKey) return res.status(401).send("No public key")
+            const encrypted = cryptoFunctions.encryptAPI(result, req.session.publicKey)
+            res.status(200).send(encrypted)
         } catch (e) {
             console.log(e)
             return res.status(400).send("Bad request")
@@ -98,7 +109,9 @@ const TagRoutes = (app: Express) => {
             for (const tag of result) {
                 tagMap[tag.tag] = tag
             }
-            res.status(200).json(tagMap)
+            if (!req.session.publicKey) return res.status(401).send("No public key")
+            const encrypted = cryptoFunctions.encryptAPI(tagMap, req.session.publicKey)
+            res.status(200).send(encrypted)
         } catch (e) {
             console.log(e)
             return res.status(400).send("Bad request")
@@ -161,6 +174,7 @@ const TagRoutes = (app: Express) => {
             const tagObj = await sql.tag.tag(tag)
             if (!tagObj) return res.status(400).send("Bad tag")
             let imageFilename = tagObj.image
+            let imageHash = tagObj.imageHash
             if (!updater) updater = req.session.username
             if (!updatedDate) updatedDate = new Date().toISOString()
             if (implications !== undefined) {
@@ -230,8 +244,10 @@ const TagRoutes = (app: Express) => {
                         vanillaImageBuffer = await serverFunctions.getFile(imagePath, false, false)
                         await serverFunctions.deleteFile(imagePath, false)
                         tagObj.image = null
+                        tagObj.imageHash = null
                     } catch {
                         tagObj.image = null
+                        tagObj.imageHash = null
                     }
                 }
                 if (image[0] !== "delete") {
@@ -240,12 +256,18 @@ const TagRoutes = (app: Express) => {
                     const newBuffer = Buffer.from(Object.values(image) as any)
                     imgChange = serverFunctions.buffersChanged(vanillaImageBuffer, newBuffer)
                     await serverFunctions.uploadFile(imagePath, newBuffer, false)
+                    const hash = serverFunctions.md5(newBuffer)
                     await sql.tag.updateTag(tag, "image", filename)
+                    await sql.tag.updateTag(tag, "imageHash", hash)
                     tagObj.image = filename
+                    tagObj.imageHash = hash
                     imageFilename = filename
+                    imageHash = hash
                 } else {
                     await sql.tag.updateTag(tag, "image", null as any)
+                    await sql.tag.updateTag(tag, "imageHash", null as any)
                     imageFilename = null
+                    imageHash = null
                 }
             }
             if (tagObj.type === "artist") {
@@ -329,17 +351,18 @@ const TagRoutes = (app: Express) => {
                 } else {
                     vanilla.image = null
                 }
-                await sql.history.insertTagHistory({username: vanilla.user, tag: targetTag, key, type: vanilla.type, image: vanilla.image, 
+                await sql.history.insertTagHistory({username: vanilla.user, tag: targetTag, key, type: vanilla.type, image: vanilla.image, imageHash: vanilla.imageHash,
                     description: vanilla.description, aliases: vanilla.aliases, implications: vanilla.implications, pixivTags: vanilla.pixivTags, 
                     website: vanilla.website, social: vanilla.social, twitter: vanilla.twitter, fandom: vanilla.fandom, r18: vanilla.r18, imageChanged: false, changes: null})
                 if (image?.[0] && imageFilename) {
                     if (imgChange) {
                         const imagePath = functions.getTagHistoryPath(key, 2, imageFilename)
-                        await serverFunctions.uploadFile(imagePath, Buffer.from(Object.values(image) as any), false)
+                        const buffer = Buffer.from(Object.values(image) as any)
+                        await serverFunctions.uploadFile(imagePath, buffer, false)
                         imageFilename = imagePath
                     }
                 }
-                await sql.history.insertTagHistory({username: req.session.username, tag: targetTag, key, type: updated.type, image: updated.image, 
+                await sql.history.insertTagHistory({username: req.session.username, tag: targetTag, key, type: updated.type, image: updated.image, imageHash: updated.imageHash,
                 description: updated.description, aliases: updatedAliases, implications: updatedImplications, pixivTags: updated.pixivTags, 
                 website: updated.website, social: updated.social, twitter: updated.twitter, fandom: updated.fandom, r18: updated.r18, 
                 imageChanged: imgChange, changes, reason})
@@ -347,7 +370,8 @@ const TagRoutes = (app: Express) => {
                 if (image?.[0] && imageFilename) {
                     if (imgChange) {
                         const imagePath = functions.getTagHistoryPath(key, nextKey, imageFilename)
-                        await serverFunctions.uploadFile(imagePath, Buffer.from(Object.values(image) as any), false)
+                        const buffer = Buffer.from(Object.values(image) as any)
+                        await serverFunctions.uploadFile(imagePath, buffer, false)
                         imageFilename = imagePath
 
                         const result = await sql.history.tagHistory(targetTag)
@@ -362,7 +386,7 @@ const TagRoutes = (app: Express) => {
                         }
                     }
                 }
-                await sql.history.insertTagHistory({username: req.session.username, tag: targetTag, key, type: updated.type, image: updated.image, 
+                await sql.history.insertTagHistory({username: req.session.username, tag: targetTag, key, type: updated.type, image: updated.image, imageHash: updated.imageHash,
                 description: updated.description, aliases: updatedAliases, implications: updatedImplications, pixivTags: updated.pixivTags, 
                 website: updated.website, social: updated.social, twitter: updated.twitter, fandom: updated.fandom, r18: updated.r18, 
                 imageChanged: imgChange, changes, reason})
@@ -491,7 +515,9 @@ const TagRoutes = (app: Express) => {
             let tags = req.query.tags as string[]
             if (!tags) tags = []
             let result = await sql.tag.unverifiedTags(tags.filter(Boolean))
-            res.status(200).json(result)
+            if (!req.session.publicKey) return res.status(401).send("No public key")
+            const encrypted = cryptoFunctions.encryptAPI(result, req.session.publicKey)
+            res.status(200).send(encrypted)
         } catch (e) {
             console.log(e)
             return res.status(400).send("Bad request")
@@ -520,7 +546,9 @@ const TagRoutes = (app: Express) => {
             if (!req.session.username) return res.status(403).send("Unauthorized")
             if (!permissions.isMod(req.session)) return res.status(403).end()
             const result = await sql.request.tagDeleteRequests(offset)
-            res.status(200).json(result)
+            if (!req.session.publicKey) return res.status(401).send("No public key")
+            const encrypted = cryptoFunctions.encryptAPI(result, req.session.publicKey)
+            res.status(200).send(encrypted)
         } catch (e) {
             console.log(e)
             res.status(400).send("Bad request") 
@@ -572,7 +600,9 @@ const TagRoutes = (app: Express) => {
             if (!req.session.username) return res.status(403).send("Unauthorized")
             if (!permissions.isMod(req.session)) return res.status(403).end()
             const result = await sql.request.aliasRequests(offset)
-            res.status(200).json(result)
+            if (!req.session.publicKey) return res.status(401).send("No public key")
+            const encrypted = cryptoFunctions.encryptAPI(result, req.session.publicKey)
+            res.status(200).send(encrypted)
         } catch (e) {
             console.log(e)
             res.status(400).send("Bad request") 
@@ -609,14 +639,18 @@ const TagRoutes = (app: Express) => {
             const tagObj = await sql.tag.tag(tag)
             if (!tagObj) return res.status(400).send("Bad tag")
             let imagePath = null as any
+            let imageHash = null as any
             let imageChanged = false
             if (image?.[0]) {
                 if (image[0] !== "delete") {
                     const filename = `${tag}.${functions.fileExtension(image)}`
                     imagePath = functions.getTagPath(tagObj.type, filename)
-                    await serverFunctions.uploadUnverifiedFile(imagePath, Buffer.from(Object.values(image) as any))
+                    const buffer = Buffer.from(Object.values(image) as any)
+                    await serverFunctions.uploadUnverifiedFile(imagePath, buffer)
+                    imageHash = serverFunctions.md5(buffer)
                 } else {
                     imagePath = "delete"
+                    imageHash = null
                 }
                 imageChanged = true
             }
@@ -624,7 +658,7 @@ const TagRoutes = (app: Express) => {
             aliases = aliases?.[0] ? aliases : null
             implications = implications?.[0] ? implications : null
             pixivTags = pixivTags?.[0] ? pixivTags : null
-            await sql.request.insertTagEditRequest(req.session.username, tag, key, description, imagePath, aliases, implications, pixivTags, social, 
+            await sql.request.insertTagEditRequest(req.session.username, tag, key, description, imagePath, imageHash, aliases, implications, pixivTags, social, 
             twitter, website, fandom, r18, imageChanged, changes, reason)
             res.status(200).send("Success")
         } catch (e) {
@@ -639,7 +673,9 @@ const TagRoutes = (app: Express) => {
             if (!req.session.username) return res.status(403).send("Unauthorized")
             if (!permissions.isMod(req.session)) return res.status(403).end()
             const result = await sql.request.tagEditRequests(offset)
-            res.status(200).json(result)
+            if (!req.session.publicKey) return res.status(401).send("No public key")
+            const encrypted = cryptoFunctions.encryptAPI(result, req.session.publicKey)
+            res.status(200).send(encrypted)
         } catch (e) {
             console.log(e)
             res.status(400).send("Bad request") 
@@ -677,16 +713,17 @@ const TagRoutes = (app: Express) => {
             const query = req.query.query as string
             const offset = req.query.offset as string
             if (!req.session.username) return res.status(403).send("Unauthorized")
+            let result = null as any
             if (historyID) {
-                const result = await sql.history.tagHistoryID(tag, historyID)
-                res.status(200).json(result)
+                result = await sql.history.tagHistoryID(tag, historyID)
             } else if (username) {
-                const result = await sql.history.userTagHistory(username)
-                res.status(200).json(result)
+                result = await sql.history.userTagHistory(username)
             } else {
-                const result = await sql.history.tagHistory(tag, offset, query)
-                res.status(200).json(result)
+                result = await sql.history.tagHistory(tag, offset, query)
             }
+            if (!req.session.publicKey) return res.status(401).send("No public key")
+            const encrypted = cryptoFunctions.encryptAPI(result, req.session.publicKey)
+            res.status(200).send(encrypted)
         } catch (e) {
             console.log(e)
             res.status(400).send("Bad request")
@@ -723,7 +760,9 @@ const TagRoutes = (app: Express) => {
             const offset = req.query.offset as string
             if (!req.session.username) return res.status(403).send("Unauthorized")
             const result = await sql.tag.aliasImplicationHistory(offset, query)
-            res.status(200).json(result)
+            if (!req.session.publicKey) return res.status(401).send("No public key")
+            const encrypted = cryptoFunctions.encryptAPI(result, req.session.publicKey)
+            res.status(200).send(encrypted)
         } catch (e) {
             console.log(e)
             res.status(400).send("Bad request")

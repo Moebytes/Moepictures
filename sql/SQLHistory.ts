@@ -4,17 +4,17 @@ import functions from "../structures/Functions"
 
 export default class SQLHistory {
     /** Insert tag history */
-    public static insertTagHistory = async (options: {username: string, tag: string, key: string, type: string, image: string, description: string, 
+    public static insertTagHistory = async (options: {username: string, tag: string, key: string, type: string, image: string, imageHash: string, description: string, 
         aliases: string[], implications: string[], pixivTags: string[], website: string, social: string, twitter: string, fandom: string, r18: boolean, 
         imageChanged: boolean, changes: any, reason?: string}) => {
-        const {username, tag, key, type, image, description, aliases, implications, pixivTags, website, social, twitter, fandom, r18, imageChanged, 
+        const {username, tag, key, type, image, imageHash, description, aliases, implications, pixivTags, website, social, twitter, fandom, r18, imageChanged, 
         changes, reason} = options
         const now = new Date().toISOString()
         const query: QueryConfig = {
-        text: /*sql*/`INSERT INTO "tag history" ("tag", "user", "date", "key", "type", "image", "description", "aliases", "implications", 
+        text: /*sql*/`INSERT INTO "tag history" ("tag", "user", "date", "key", "type", "image", "imageHash", "description", "aliases", "implications", 
         "pixivTags", "website", "social", "twitter", "fandom", "r18", "imageChanged", "changes", "reason") VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, 
-        $10, $11, $12, $13, $14, $15, $16, $17, $18)`,
-        values: [tag, username, now, key, type, image, description, aliases, implications, pixivTags, website, social, twitter, fandom, r18,
+        $10, $11, $12, $13, $14, $15, $16, $17, $18, $19)`,
+        values: [tag, username, now, key, type, image, imageHash, description, aliases, implications, pixivTags, website, social, twitter, fandom, r18,
         imageChanged, changes, reason]
         }
         await SQLQuery.flushDB()
@@ -116,20 +116,20 @@ export default class SQLHistory {
     public static insertPostHistory = async (options: {username: string, postID: number, images: string[], uploader: string, 
         updater?: string, uploadDate: string, updatedDate: string, type: string, restrict: string, style: string, thirdParty: string, 
         title: string, translatedTitle: string, posted: string, artist: string, link: string, hasUpscaled: boolean, hasOriginal: boolean,
-        commentary: string, translatedCommentary: string, bookmarks: string, purchaseLink: string, mirrors: string, artists: string[], characters: string[], 
+        commentary: string, translatedCommentary: string, bookmarks: string, purchaseLink: string, mirrors: string, slug: string, artists: string[], characters: string[], 
         series: string[], tags: string[], addedTags: string[], removedTags: string[], imageChanged: boolean, changes: any, reason: string}) => {
         const {postID, username, images, uploader, updater, uploadDate, updatedDate, type, restrict, style, thirdParty, title, 
         translatedTitle, posted, artist, link, commentary, translatedCommentary, bookmarks, purchaseLink, mirrors, hasOriginal, hasUpscaled, 
-        artists, characters, series, tags, addedTags, removedTags, imageChanged, changes, reason} = options
+        slug, artists, characters, series, tags, addedTags, removedTags, imageChanged, changes, reason} = options
         const now = new Date().toISOString()
         const query: QueryConfig = {
         text: /*sql*/`INSERT INTO "post history" ("postID", "user", "date", "images", "uploader", "updater", "uploadDate", "updatedDate",
         "type", "restrict", "style", "thirdParty", "title", "translatedTitle", "posted", "artist", "link", "commentary", "translatedCommentary", 
-        "bookmarks", "purchaseLink", "mirrors", "hasOriginal", "hasUpscaled", "artists", "characters", "series", "tags", "addedTags", "removedTags",
+        "bookmarks", "purchaseLink", "mirrors", "slug", "hasOriginal", "hasUpscaled", "artists", "characters", "series", "tags", "addedTags", "removedTags",
         "imageChanged", "changes", "reason") VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, 
-            $22, $23, $24, $25, $26, $27, $28, $29, $30, $31, $32, $33)`,
+            $22, $23, $24, $25, $26, $27, $28, $29, $30, $31, $32, $33, $34)`,
             values: [postID, username, now, images, uploader, updater, uploadDate, updatedDate, type, restrict, style, thirdParty, title, translatedTitle, 
-            posted, artist, link, commentary, translatedCommentary, bookmarks, purchaseLink, mirrors, hasOriginal, hasUpscaled, artists, characters, series, 
+            posted, artist, link, commentary, translatedCommentary, bookmarks, purchaseLink, mirrors, slug, hasOriginal, hasUpscaled, artists, characters, series, 
             tags, addedTags, removedTags, imageChanged, changes, reason]
         }
         await SQLQuery.flushDB()

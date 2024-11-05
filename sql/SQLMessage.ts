@@ -123,12 +123,12 @@ export default class SQLMessage {
         text: functions.multiTrim(/*sql*/`
                 SELECT messages.*, array_agg(DISTINCT "message recipients".recipient) AS recipients,
                 json_agg(DISTINCT "message recipients".*) AS "recipientData",
-                users.role, users.image, users.banned, users."imagePost"
+                users.role, users.image, users.banned, users."imagePost", users."imageHash"
                 FROM messages
                 JOIN "message recipients" ON messages."messageID" = "message recipients"."messageID"
                 JOIN users ON users.username = messages.creator
                 WHERE messages."messageID" = $1
-                GROUP BY messages."messageID", users.role, users.image, users.banned, users."imagePost"
+                GROUP BY messages."messageID", users.role, users.image, users.banned, users."imagePost", users."imageHash"
             `),
         values: [messageID]
         }
@@ -180,12 +180,12 @@ export default class SQLMessage {
         if (offset && Number(offset) < 0) offset = "0"
         const query: QueryConfig = {
         text: functions.multiTrim(/*sql*/`
-                SELECT "message replies".*, users.role, users.image, users.banned, users."imagePost",
+                SELECT "message replies".*, users.role, users.image, users.banned, users."imagePost", users."imageHash",
                 COUNT(*) OVER() AS "replyCount"
                 FROM "message replies" 
                 JOIN users ON users.username = "message replies".creator
                 WHERE "message replies"."messageID" = $1 
-                GROUP BY "message replies"."replyID", users.role, users.image, users.banned, users."imagePost"
+                GROUP BY "message replies"."replyID", users.role, users.image, users.banned, users."imagePost", users."imageHash"
                 ${offset ? "OFFSET $2" : ""}
             `),
         values: [messageID]
@@ -199,12 +199,12 @@ export default class SQLMessage {
     public static userMessageReplies = async (username: string) => {
         const query: QueryConfig = {
         text: functions.multiTrim(/*sql*/`
-                SELECT "message replies".*, users.role, users.image, users.banned, users."imagePost",
+                SELECT "message replies".*, users.role, users.image, users.banned, users."imagePost", users."imageHash",
                 COUNT(*) OVER() AS "replyCount"
                 FROM "message replies" 
                 JOIN users ON users.username = "message replies".creator
                 WHERE "message replies".creator = $1 
-                GROUP BY "message replies"."replyID", users.role, users.image, users.banned, users."imagePost"
+                GROUP BY "message replies"."replyID", users.role, users.image, users.banned, users."imagePost", users."imageHash"
             `),
         values: [username]
         }
@@ -216,11 +216,11 @@ export default class SQLMessage {
     public static messageReply = async (replyID: number) => {
         const query: QueryConfig = {
         text: functions.multiTrim(/*sql*/`
-                SELECT "message replies".*, users.role, users.image, users.banned, users."imagePost"
+                SELECT "message replies".*, users.role, users.image, users.banned, users."imagePost", users."imageHash"
                 FROM "message replies" 
                 JOIN users ON users.username = "message replies".creator
                 WHERE "message replies"."replyID" = $1
-                GROUP BY "message replies"."replyID", users.role, users.image, users.banned, users."imagePost"
+                GROUP BY "message replies"."replyID", users.role, users.image, users.banned, users."imagePost", users."imageHash"
             `),
         values: [replyID]
         }

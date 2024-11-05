@@ -94,11 +94,11 @@ export default class SQLThread {
     public static thread = async (threadID: number) => {
         const query: QueryConfig = {
         text: functions.multiTrim(/*sql*/`
-                SELECT threads.*, users.role, users.image, users.banned, users."imagePost"
+                SELECT threads.*, users.role, users.image, users.banned, users."imagePost", users."imageHash"
                 FROM threads 
                 JOIN users ON users.username = threads.creator
                 WHERE threads."threadID" = $1
-                GROUP BY threads."threadID", users.role, users.image, users.banned, users."imagePost"
+                GROUP BY threads."threadID", users.role, users.image, users.banned, users."imagePost", users."imageHash"
             `),
         values: [threadID]
         }
@@ -142,12 +142,12 @@ export default class SQLThread {
         if (offset && Number(offset) < 0) offset = "0"
         const query: QueryConfig = {
         text: functions.multiTrim(/*sql*/`
-                SELECT replies.*, users.role, users.image, users.banned, users."imagePost",
+                SELECT replies.*, users.role, users.image, users.banned, users."imagePost", users."imageHash",
                 COUNT(*) OVER() AS "replyCount"
                 FROM replies 
                 JOIN users ON users.username = replies.creator
                 WHERE replies."threadID" = $1 
-                GROUP BY replies."replyID", users.role, users.image, users.banned, users."imagePost"
+                GROUP BY replies."replyID", users.role, users.image, users.banned, users."imagePost", users."imageHash"
                 ${offset ? "OFFSET $2" : ""}
             `),
         values: [threadID]
@@ -161,12 +161,12 @@ export default class SQLThread {
     public static userReplies = async (username: string) => {
         const query: QueryConfig = {
         text: functions.multiTrim(/*sql*/`
-                SELECT replies.*, users.role, users.image, users.banned, users."imagePost",
+                SELECT replies.*, users.role, users.image, users.banned, users."imagePost", users."imageHash",
                 COUNT(*) OVER() AS "replyCount"
                 FROM replies 
                 JOIN users ON users.username = replies.creator
                 WHERE replies.creator = $1 
-                GROUP BY replies."replyID", users.role, users.image, users.banned, users."imagePost"
+                GROUP BY replies."replyID", users.role, users.image, users.banned, users."imagePost", users."imageHash"
             `),
         values: [username]
         }
@@ -178,11 +178,11 @@ export default class SQLThread {
     public static reply = async (replyID: number) => {
         const query: QueryConfig = {
         text: functions.multiTrim(/*sql*/`
-                SELECT replies.*, users.role, users.image, users.banned, users."imagePost"
+                SELECT replies.*, users.role, users.image, users.banned, users."imagePost", users."imageHash"
                 FROM replies 
                 JOIN users ON users.username = replies.creator
                 WHERE replies."replyID" = $1
-                GROUP BY replies."replyID", users.role, users.image, users.banned, users."imagePost"
+                GROUP BY replies."replyID", users.role, users.image, users.banned, users."imagePost", users."imageHash"
             `),
         values: [replyID]
         }

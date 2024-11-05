@@ -113,7 +113,7 @@ const MobileInfo: React.FunctionComponent<Props> = (props) => {
     const updateUserImg = async () => {
         if (props.post) {
             const uploader = await functions.get("/api/user", {username: props.post.uploader}, session, setSessionFlag)
-            setUploaderImage(uploader?.image ? functions.getTagLink("pfp", uploader.image) : favicon)
+            setUploaderImage(uploader?.image ? functions.getTagLink("pfp", uploader.image, uploader.imageHash) : favicon)
             if (uploader?.role) setUploaderRole(uploader.role)
             const updater = await functions.get("/api/user", {username: props.post.updater}, session, setSessionFlag)
             if (updater?.role) setUpdaterRole(updater.role)
@@ -138,7 +138,7 @@ const MobileInfo: React.FunctionComponent<Props> = (props) => {
     const generateArtistsJSX = () => {
         let jsx = [] as any
         for (let i = 0; i < props.artists.length; i++) {
-            const link = functions.getTagLink("artist", props.artists[i].image)
+            const link = functions.getTagLink("artist", props.artists[i].image, props.artists[i].imageHash)
             if (!props.artists[i]) break
             const tagClick = () => {
                 history.push(`/tag/${props.artists[i].tag}`)
@@ -180,7 +180,7 @@ const MobileInfo: React.FunctionComponent<Props> = (props) => {
     const generateCharactersJSX = () => {
         let jsx = [] as any
         for (let i = 0; i < props.characters.length; i++) {
-            const link = functions.getTagLink("character", props.characters[i].image)
+            const link = functions.getTagLink("character", props.characters[i].image, props.characters[i].imageHash)
             if (!props.characters[i]) break
             const tagClick = () => {
                 history.push(`/tag/${props.characters[i].tag}`)
@@ -212,7 +212,7 @@ const MobileInfo: React.FunctionComponent<Props> = (props) => {
     const generateSeriesJSX = () => {
         let jsx = [] as any
         for (let i = 0; i < props.series.length; i++) {
-            const link = functions.getTagLink("series", props.series[i].image)
+            const link = functions.getTagLink("series", props.series[i].image, props.series[i].imageHash)
             if (!props.series[i]) break
             const tagClick = () => {
                 history.push(`/tag/${props.series[i].tag}`)

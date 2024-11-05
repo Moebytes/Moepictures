@@ -181,11 +181,11 @@ const TagPage: React.FunctionComponent<Props> = (props) => {
 
     const set = (img: string, index: number, newTab: boolean) => {
         setPostIndex(index)
-        const postID = tagPosts[index].postID
+        const post = tagPosts[index]
         if (newTab) {
-            window.open(`/post/${postID}`, "_blank")
+            window.open(`/post/${post.postID}/${post.slug}`, "_blank")
         } else {
-            history.push(`/post/${postID}`)
+            history.push(`/post/${post.postID}/${post.slug}`)
         }
         window.scrollTo(0, functions.navbarHeight() + functions.titlebarHeight())
         setPosts(tagPosts)
@@ -254,7 +254,6 @@ const TagPage: React.FunctionComponent<Props> = (props) => {
             await functions.put("/api/tag/edit", {tag: tag.tag, key: editTagKey, description: editTagDescription,
             image, aliases: editTagAliases, implications: editTagImplications, pixivTags: editTagPixivTags, social: editTagSocial, twitter: editTagTwitter,
             website: editTagWebsite, fandom: editTagFandom, r18: editTagR18, reason: editTagReason}, session, setSessionFlag)
-            if (editTagImage) functions.refreshCache(editTagImage)
             history.push(`/tag/${editTagKey}`)
             setTagFlag(true)
         } catch (err: any) {
@@ -280,7 +279,7 @@ const TagPage: React.FunctionComponent<Props> = (props) => {
     const showTagEditDialog = async () => {
         setEditTagKey(tag.tag)
         setEditTagDescription(tag.description)
-        setEditTagImage(tag.image ? functions.getTagLink(tag.type, tag.image) : null)
+        setEditTagImage(tag.image ? functions.getTagLink(tag.type, tag.image, tag.imageHash) : null)
         setEditTagAliases(tag.aliases?.[0] ? tag.aliases.map((a: any) => a.alias ? a.alias : a) : [])
         setEditTagImplications(tag.implications?.[0] ? tag.implications.map((i: any) => i.implication ? i.implication : i) : [])
         setEditTagPixivTags(tag.pixivTags?.[0] ? tag.pixivTags : [])
@@ -413,7 +412,7 @@ const TagPage: React.FunctionComponent<Props> = (props) => {
         if (!tag.image) {
             image = ["delete"]
         } else {
-            const imageLink = functions.getTagLink(tag.type, tag.image)
+            const imageLink = functions.getTagLink(tag.type, tag.image, tag.imageHash)
             const arrayBuffer = await fetch(imageLink).then((r) => r.arrayBuffer())
             const bytes = new Uint8Array(arrayBuffer)
             image = Object.values(bytes)
@@ -497,7 +496,7 @@ const TagPage: React.FunctionComponent<Props> = (props) => {
                     <div className="tag-row">
                         {tag.image ?
                         <div className="tag-img-container">
-                            <img className="tag-img" src={functions.getTagLink(tag.type, tag.image)}/>
+                            <img className="tag-img" src={functions.getTagLink(tag.type, tag.image, tag.imageHash)}/>
                         </div> : null}
                         <span className={`tag-heading ${getTagColor()}`}>{getTagName()}</span>
                         {tagSocialJSX()}

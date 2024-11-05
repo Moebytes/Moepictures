@@ -198,14 +198,7 @@ const SetAvatarPage: React.FunctionComponent<Props> = (props) => {
     const loadImage = async () => {
         if (!ref.current) return
         if (isAnimated) return
-        let src = image
-        if (functions.isImage(src)) {
-            src = await cryptoFunctions.decryptedLink(src)
-        } else if (functions.isModel(src)) {
-            src = await functions.modelImage(src)
-        } else if (functions.isAudio(src)) {
-            src = await functions.songCover(src)
-        }
+        let src = await functions.decryptThumb(image, session)
         const img = document.createElement("img")
         img.src = src 
         img.onload = () => {
@@ -221,7 +214,7 @@ const SetAvatarPage: React.FunctionComponent<Props> = (props) => {
     useEffect(() => {
         setImageLoaded(false)
         loadImage()
-    }, [image])
+    }, [image, session])
 
     const getCroppedURL = async () => {
         if (!previewRef.current) return
@@ -251,7 +244,7 @@ const SetAvatarPage: React.FunctionComponent<Props> = (props) => {
                 frameArray.push(cropped)
                 delayArray.push(gifData[i].delay)
             }
-            const {width, height} = await functions.imageDimensions(firstURL)
+            const {width, height} = await functions.imageDimensions(firstURL, session)
             const buffer = await functions.encodeGIF(frameArray, delayArray, width, height)
             const blob = new Blob([buffer])
             croppedURL = URL.createObjectURL(blob)

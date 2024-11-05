@@ -55,7 +55,7 @@ const Comment: React.FunctionComponent<Props> = (props) => {
 
     const getCommentPFP = () => {
         if (props.comment?.image) {
-            return functions.getTagLink("pfp", props.comment.image)
+            return functions.getTagLink("pfp", props.comment.image, props.comment.imageHash)
         } else {
             return favicon
         }

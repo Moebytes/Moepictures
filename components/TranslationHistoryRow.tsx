@@ -13,7 +13,6 @@ import premiumContributorPencil from "../assets/icons/premium-contributor-pencil
 import contributorPencil from "../assets/icons/contributor-pencil.png"
 import premiumStar from "../assets/icons/premium-star.png"
 import permissions from "../structures/Permissions"
-import cryptoFunctions from "../structures/CryptoFunctions"
 import "./styles/historyrow.less"
 
 interface Props {
@@ -48,7 +47,7 @@ const TranslationHistoryRow: React.FunctionComponent<Props> = (props) => {
 
     const updateImage = async () => {
         const thumb = functions.getThumbnailLink(props.translationHistory.post.images[0].type, props.translationHistory.postID, props.translationHistory.order, props.translationHistory.post.images[0].filename, "medium", mobile)
-        const decrypted = await cryptoFunctions.decryptedLink(thumb)
+        const decrypted = await functions.decryptThumb(thumb, session)
         setImg(decrypted)
     }
 

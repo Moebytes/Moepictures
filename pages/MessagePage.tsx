@@ -404,7 +404,7 @@ const MessagePage: React.FunctionComponent<Props> = (props) => {
 
     const getCreatorPFP = () => {
         if (message.image) {
-            return functions.getTagLink("pfp", message.image)
+            return functions.getTagLink("pfp", message.image, message.imageHash)
         } else {
             return favicon
         }

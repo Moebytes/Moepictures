@@ -36,6 +36,7 @@ import TranslationRoutes from "./routes/TranslationRoutes"
 import ThreadRoutes from "./routes/ThreadRoutes"
 import MessageRoutes from "./routes/MessageRoutes"
 import GroupRoutes from "./routes/GroupRoutes"
+import App from "./App"
 import {imageLock, imageMissing} from "./structures/ImageLock"
 const __dirname = path.resolve()
 
@@ -56,6 +57,7 @@ declare module "express-session" {
       email: string
       joinDate: string
       image: string | null
+      imageHash: string | null
       imagePost: string | null
       bio: string 
       emailVerified: boolean
@@ -78,6 +80,7 @@ declare module "express-session" {
       csrfToken: string
       captchaAnswer: string
       banned: boolean
+      publicKey: string
   }
 }
 
@@ -205,6 +208,8 @@ let folders = ["animation", "artist", "character", "comic", "image", "pfp", "ser
 let noCache = ["artist", "character", "series", "pfp", "tag"]
 let encrypted = ["image", "comic"]
 
+const lastModified = new Date().toUTCString()
+
 for (let i = 0; i < folders.length; i++) {
   app.get(`/${folders[i]}/*`, imageLimiter, async (req: Request, res: Response, next: NextFunction) => {
     let url = req.url.replace(/\?.*$/, "")
@@ -215,6 +220,7 @@ for (let i = 0; i < folders.length; i++) {
         !url.endsWith(".webp") && !url.endsWith(".gif")) return next()
       }
       res.setHeader("Content-Type", mimeType ?? "")
+      res.setHeader("Last-Modified", lastModified)
       if (!noCache.includes(folders[i])) res.setHeader("Cache-Control", "public, max-age=2592000")
       const key = decodeURIComponent(req.path.slice(1))
       let upscaled = false
@@ -241,11 +247,12 @@ for (let i = 0; i < folders.length; i++) {
       if (!noCache.includes(folders[i]) && req.session.captchaNeeded) {
         res.setHeader("Cache-Control", "no-store, no-cache, must-revalidate, proxy-revalidate")
         body = await imageLock(body, false)
-        return res.status(200).end(body)
+        return res.status(200).send(body)
       }
       if (encrypted.includes(folders[i]) || req.path.includes("history/post")) {
-        body = cryptoFunctions.encrypt(body)
-        contentLength = body.length
+        if (!req.session.publicKey) return res.status(401).end()
+        body = cryptoFunctions.encrypt(body, req.session.publicKey)
+        // contentLength = body.length
       }
       if (req.headers.range) {
         const parts = req.headers.range.replace(/bytes=/, "").split("-")
@@ -260,7 +267,7 @@ for (let i = 0; i < folders.length; i++) {
         return stream.pipe(res)
       }
       res.setHeader("Content-Length", contentLength)
-      res.status(200).end(body)
+      res.status(200).send(body)
     } catch {
       res.status(400).end()
     }
@@ -270,6 +277,7 @@ for (let i = 0; i < folders.length; i++) {
     try {
       const mimeType = mime.getType(req.path)
       res.setHeader("Content-Type", mimeType ?? "")
+      res.setHeader("Last-Modified", lastModified)
       if (!noCache.includes(folders[i])) res.setHeader("Cache-Control", "public, max-age=2592000")
       const key = decodeURIComponent(req.path.replace(`/thumbnail/${req.params.size}/`, ""))
       let r18 = false
@@ -290,7 +298,7 @@ for (let i = 0; i < folders.length; i++) {
       if (!noCache.includes(folders[i]) && req.session.captchaNeeded) {
         res.setHeader("Cache-Control", "no-store, no-cache, must-revalidate, proxy-revalidate")
         body = await imageLock(body)
-        return res.status(200).end(body)
+        return res.status(200).send(body)
       }
       if (mimeType?.includes("image")) {
         const metadata = await sharp(body).metadata()
@@ -303,8 +311,9 @@ for (let i = 0; i < folders.length; i++) {
         }
       }
       if (encrypted.includes(folders[i]) || req.path.includes("history/post")) {
-        body = cryptoFunctions.encrypt(body)
-        contentLength = body.length
+        if (!req.session.publicKey) return res.status(401).end()
+        body = cryptoFunctions.encrypt(body, req.session.publicKey!)
+        // contentLength = body.length
       }
       if (req.headers.range) {
         const parts = req.headers.range.replace(/bytes=/, "").split("-")
@@ -319,7 +328,7 @@ for (let i = 0; i < folders.length; i++) {
         return stream.pipe(res)
       }
       res.setHeader("Content-Length", contentLength)
-      res.status(200).end(body)
+      res.status(200).send(body)
     } catch (e) {
       console.log(e)
       res.status(400).end()
@@ -342,7 +351,7 @@ for (let i = 0; i < folders.length; i++) {
       if (!contentLength) {
         res.setHeader("Cache-Control", "no-store, no-cache, must-revalidate, proxy-revalidate")
         const noImg = await imageMissing()
-        return res.status(200).end(noImg)
+        return res.status(200).send(noImg)
       }
       if (req.headers.range) {
         const parts = req.headers.range.replace(/bytes=/, "").split("-")
@@ -357,7 +366,7 @@ for (let i = 0; i < folders.length; i++) {
         return stream.pipe(res)
       }
       res.setHeader("Content-Length", contentLength)
-      res.status(200).end(body)
+      res.status(200).send(body)
     } catch (e) {
       console.log(e)
       res.status(400).end()
@@ -376,7 +385,7 @@ for (let i = 0; i < folders.length; i++) {
       if (!contentLength) {
         res.setHeader("Cache-Control", "no-store, no-cache, must-revalidate, proxy-revalidate")
         const noImg = await imageMissing()
-        return res.status(200).end(noImg)
+        return res.status(200).send(noImg)
       }
       if (mimeType?.includes("image")) {
         const metadata = await sharp(body).metadata()
@@ -399,7 +408,7 @@ for (let i = 0; i < folders.length; i++) {
         return stream.pipe(res)
       }
       res.setHeader("Content-Length", contentLength)
-      res.status(200).end(body)
+      res.status(200).send(body)
     } catch {
       res.status(400).end()
     }
@@ -419,7 +428,6 @@ app.get("/*", async (req: Request, res: Response) => {
   res.setHeader("Cross-Origin-Opener-Policy", "same-origin")
   res.setHeader("Cross-Origin-Embedder-Policy", "require-corp")
   const document = fs.readFileSync(path.join(__dirname, "./dist/index.html"), {encoding: "utf-8"})
-  const App = await import("./App").then((r) => r.default)
   const html = renderToString(<Router location={req.url}><App/></Router>)
   res.status(200).send(document?.replace(`<div id="root"></div>`, `<div id="root">${html}</div>`))
 })

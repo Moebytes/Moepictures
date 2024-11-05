@@ -16,8 +16,8 @@ const ThirdParty: React.FunctionComponent<Props> = (props) => {
     const images = props.posts.map((t: any) => functions.getThumbnailLink(t.post.images[0].type, t.postID, t.post.images[0].order, t.post.images[0].filename, "small"))
 
     const click = (img: string, index: number) => {
-        const postID = props.posts[index].postID
-        history.push(`/post/${postID}`)
+        const post = props.posts[index]
+        history.push(`/post/${post.postID}/${post.slug}`)
     }
 
     return (

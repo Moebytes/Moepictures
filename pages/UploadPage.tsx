@@ -286,11 +286,11 @@ const UploadPage: React.FunctionComponent = (props) => {
                 let url = URL.createObjectURL(acceptedArray[i].file)
                 let link = `${url}#.${acceptedArray[i].ext}`
                 let thumbnail = ""
-                if (acceptedArray[i].ext === "mp4" || acceptedArray[i].ext === "webm") {
+                if (functions.isVideo(acceptedArray[i].ext)) {
                     thumbnail = await functions.videoThumbnail(link)
-                } else if (acceptedArray[i].ext === "glb" || acceptedArray[i].ext === "fbx" || acceptedArray[i].ext === "obj") {
+                } else if (functions.isModel(acceptedArray[i].ext)) {
                     thumbnail = await functions.modelImage(link)
-                } else if (acceptedArray[i].ext === "mp3" || acceptedArray[i].ext === "wav") {
+                } else if (functions.isAudio(acceptedArray[i].ext)) {
                     thumbnail = await functions.songCover(link)
                 }
                 urls.push({link, ext: acceptedArray[i].ext, size: acceptedArray[i].file.size, thumbnail,
@@ -370,7 +370,7 @@ const UploadPage: React.FunctionComponent = (props) => {
                             delayArray.push(gifData[i].delay)
                         }
                         const firstURL = await functions.crop(gifData[0].frame.toDataURL(), 1)
-                        const {width, height} = await functions.imageDimensions(firstURL)
+                        const {width, height} = await functions.imageDimensions(firstURL, session)
                         const buffer = await functions.encodeGIF(frameArray, delayArray, width, height)
                         const blob = new Blob([buffer])
                         croppedURL = URL.createObjectURL(blob)
@@ -414,7 +414,7 @@ const UploadPage: React.FunctionComponent = (props) => {
     const handleTagClick = async (tag: string, index: number) => {
         const tagDetail = await functions.get("/api/tag", {tag}, session, setSessionFlag)
         if (tagDetail.image) {
-            const tagLink = functions.removeQueryParams(functions.getTagLink(tagDetail.type, tagDetail.image))
+            const tagLink = functions.removeQueryParams(functions.getTagLink(tagDetail.type, tagDetail.image, tagDetail.imageHash))
             const arrayBuffer = await fetch(tagLink).then((r) => r.arrayBuffer())
             const bytes = new Uint8Array(arrayBuffer)
             const ext = path.extname(tagLink).replace(".", "")
@@ -726,11 +726,11 @@ const UploadPage: React.FunctionComponent = (props) => {
 
     const setDup = (img: string, index: number, newTab: boolean) => {
         setCurrentDupIndex(index)
-        const postID = dupPosts[index].postID
+        const dupPost = dupPosts[index]
         if (newTab) {
-            window.open(`/post/${postID}`, "_blank")
+            window.open(`/post/${dupPost.postID}/${dupPost.slug}`, "_blank")
         } else {
-            history.push(`/post/${postID}`)
+            history.push(`/post/${dupPost.postID}/${dupPost.slug}`)
         }
     }
 

@@ -100,7 +100,7 @@ const ReportRow: React.FunctionComponent<Props> = (props) => {
     let text = [] as any
     let id = ""
     if (asset) {
-        img = asset.image ? functions.getTagLink("pfp", asset.image) : favicon
+        img = asset.image ? functions.getTagLink("pfp", asset.image, asset.imageHash) : favicon
         username = asset.username ? asset.username : asset.creator
         if (props.request.type === "comment") {
             textType = "Comment: "

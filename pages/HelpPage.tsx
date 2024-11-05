@@ -675,12 +675,11 @@ const HelpPage: React.FunctionComponent = (props) => {
             return (
                 <><span className="help-heading">Captcha</span>
                 <span className="help-text" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
-                    We don't condone the scraping of our website for purposes of AI-training, and we take 
-                    various measures to make it harder like captchas and encrypting images. Hopefully 
-                    this shouldn't be triggered by regular browsing. <br/><br/>
+                    We don't condone the scraping of our website, and we have various measures in place 
+                    like captchas and end-to-end encryption. Hopefully this shouldn't be triggered by regular browsing. <br/><br/>
                     
-                    Although there is nothing we can to prevent your work being scraped on Pixiv/Twitter etc, on
-                    our website we do what we can to mitigate it.<br/><br/>
+                    If you happen to trigger this, simply solve the captcha to unlock the posts again. And if you are getting this 
+                    frequently (as a human visitor), you may let us know since that's obviously not intended.<br/><br/>
                 </span>
                 <div className="help-img-container"><img className="help-img" src={captchaImg}/></div></>
             )

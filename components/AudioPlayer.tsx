@@ -581,7 +581,7 @@ const AudioPlayer: React.FunctionComponent = (props) => {
         return (
             <div className="audio-player" style={{height: getHeight()}} ref={audioControls} onMouseEnter={() => setHover(true)} onMouseLeave={() => setHover(false)} onMouseUp={() => setDragging(false)}>
                 {audioPost ? <div className="audio-player-row" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
-                    <span className="audio-player-title" onClick={() => history.push(`/post/${audioPost.postID}`)}>{audioPost.title || "Unknown"}</span>
+                    <span className="audio-player-title" onClick={() => history.push(`/post/${audioPost.postID}/${audioPost.slug}`)}>{audioPost.title || "Unknown"}</span>
                 </div> : null}
                 {playerJSX()}
                 <div className={`audio-player-speed-dropdown ${showSpeedDropdown ? "" : "hide-player-speed-dropdown"}`} style={{marginRight: getAudioSpeedMarginRight(), marginTop: "-370px"}}

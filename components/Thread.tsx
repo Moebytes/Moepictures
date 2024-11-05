@@ -83,7 +83,7 @@ const Thread: React.FunctionComponent<Props> = (props) => {
 
     const getCreatorPFP = () => {
         if (creatorData?.image) {
-            return functions.getTagLink("pfp", creatorData.image)
+            return functions.getTagLink("pfp", creatorData.image, creatorData.imageHash)
         } else {
             return favicon
         }
@@ -109,7 +109,7 @@ const Thread: React.FunctionComponent<Props> = (props) => {
 
     const getUpdaterPFP = () => {
         if (updaterData?.image) {
-            return functions.getTagLink("pfp", updaterData.image)
+            return functions.getTagLink("pfp", updaterData.image, updaterData.imageHash)
         } else {
             return favicon
         }

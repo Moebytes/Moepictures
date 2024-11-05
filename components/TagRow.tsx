@@ -153,7 +153,6 @@ const TagRow: React.FunctionComponent<Props> = (props) => {
             await functions.put("/api/tag/edit", {tag: props.tag.tag, key: editTagKey, description: editTagDescription,
             image, aliases: editTagAliases, implications: editTagImplications, pixivTags: editTagPixivTags, social: editTagSocial, twitter: editTagTwitter,
             website: editTagWebsite, fandom: editTagFandom, r18: editTagR18, reason: editTagReason}, session, setSessionFlag)
-            if (editTagImage) functions.refreshCache(editTagImage)
             props.onEdit?.()
         } catch (err: any) {
             if (err.response?.data.includes("No permission to edit implications")) {
@@ -178,7 +177,7 @@ const TagRow: React.FunctionComponent<Props> = (props) => {
     const editTagDialog = async () => {
         setEditTagKey(props.tag.tag)
         setEditTagDescription(props.tag.description)
-        setEditTagImage(props.tag.image ? functions.getTagLink(props.tag.type, props.tag.image) : null)
+        setEditTagImage(props.tag.image ? functions.getTagLink(props.tag.type, props.tag.image, props.tag.imageHash) : null)
         setEditTagAliases(props.tag.aliases?.[0] ? props.tag.aliases.map((a: any) => a.alias) : [])
         setEditTagImplications(props.tag.implications?.[0] ? props.tag.implications.map((i: any) => i.implication) : [])
         setEditTagPixivTags(props.tag.pixivTags?.[0] ? props.tag.pixivTags : [])
@@ -266,7 +265,7 @@ const TagRow: React.FunctionComponent<Props> = (props) => {
         <tr className="tagrow">
             {props.tag.image ?
             <td className="tagrow-img-container">
-                <img className="tagrow-img" src={functions.getTagLink(props.tag.type, props.tag.image)}/>
+                <img className="tagrow-img" src={functions.getTagLink(props.tag.type, props.tag.image, props.tag.imageHash)}/>
             </td> : null}
             <div className="tagrow-content-container">
                 <td className="tagrow-container" style={{width: props.tag.image ? "16%" : "25%"}}>

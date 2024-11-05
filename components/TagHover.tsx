@@ -38,7 +38,7 @@ const TagHover: React.FunctionComponent<Props> = (props) => {
     const updateMetadata = async () => {
         const tag = await functions.get("/api/tag", {tag: props.tag}, session, setSessionFlag)
         setDescription(tag.description)
-        if (tag.image) setImg(functions.getTagLink(tag.type, tag.image))
+        if (tag.image) setImg(functions.getTagLink(tag.type, tag.image, tag.imageHash))
     }
 
     useEffect(() => {

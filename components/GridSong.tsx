@@ -101,7 +101,7 @@ const GridSong = forwardRef<Ref, Props>((props, componentRef) => {
         },
         load: async () => {
             if (decrypted) return
-            const decryptedImage = await functions.decryptImg(props.audio, `${props.audio}-${sizeType}`)
+            const decryptedImage = await functions.decryptThumb(props.audio, session, `${props.audio}-${sizeType}`)
             setImage(decryptedImage)
             setDecrypted(true)
         }
@@ -437,7 +437,7 @@ const GridSong = forwardRef<Ref, Props>((props, componentRef) => {
         //if (activeDropdown !== "none") return
         if (event.metaKey || event.ctrlKey || event.button === 1) {
             event.preventDefault()
-            const newWindow = window.open(`/post/${props.id}`, "_blank")
+            const newWindow = window.open(`/post/${props.id}/${props.post.slug}`, "_blank")
             newWindow?.blur()
             window.focus()
         }
@@ -468,16 +468,11 @@ const GridSong = forwardRef<Ref, Props>((props, componentRef) => {
                 setSelected(isSelected)
             }
         } else {
-            functions.get("/api/post", {postID: props.post.postID}, session, setSessionFlag).then(async (post) => {
-                localStorage.setItem("savedPost", JSON.stringify(post))
-                const tagCategories = await functions.tagCategories(post.tags, session, setSessionFlag, true)
-                localStorage.setItem("savedTags", JSON.stringify(tagCategories))
-            }).catch(() => null)
             if (!drag) {
                 if (event.metaKey || event.ctrlKey || event.button == 1) {
                     return
                 } else {
-                    history.push(`/post/${props.id}`)
+                    history.push(`/post/${props.id}/${props.post.slug}`)
                     window.scrollTo(0, 0)
                 }
             }

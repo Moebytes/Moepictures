@@ -1,6 +1,6 @@
 import React, {useContext, useEffect, useRef, useState, useReducer, useMemo} from "react"
 import {useHistory} from "react-router-dom"
-import {ThemeContext, EnableDragContext, MobileContext, EmojisContext} from "../Context"
+import {ThemeContext, EnableDragContext, MobileContext, EmojisContext, SessionContext} from "../Context"
 import {HashLink as Link} from "react-router-hash-link"
 import functions from "../structures/Functions"
 import cryptoFunctions from "../structures/CryptoFunctions"
@@ -16,6 +16,7 @@ const CommentCarousel: React.FunctionComponent<Props> = (props) => {
     const [ignored, forceUpdate] = useReducer(x => x + 1, 0)
     const {theme, setTheme} = useContext(ThemeContext)
     const {enableDrag, setEnableDrag} = useContext(EnableDragContext)
+    const {session, setSession} = useContext(SessionContext)
     const {mobile, setMobile} = useContext(MobileContext)
     const {emojis, setEmojis} = useContext(EmojisContext)
     const [images, setImages] = useState([])
@@ -26,27 +27,15 @@ const CommentCarousel: React.FunctionComponent<Props> = (props) => {
         for (let i = 0; i < props.comments.length; i++) {
             let type = props.comments[i].post.images[0].type
             let img = functions.getThumbnailLink(type, props.comments[i].postID, props.comments[i].post.images[0].order, props.comments[i].post.images[0].filename, "tiny")
-            if (type === "image" || type === "comic") {
-                const decrypted = await cryptoFunctions.decryptedLink(img)
-                newImages.push(decrypted)
-            } else if (type === "model") {
-                const link = functions.getImageLink(type, props.comments[i].postID, props.comments[i].post.images[0].order, props.comments[i].post.images[0].filename)
-                const modelImg = await functions.modelImage(link)
-                newImages.push(modelImg)
-            } else if (type === "audio") {
-                const link = functions.getImageLink(type, props.comments[i].postID, props.comments[i].post.images[0].order, props.comments[i].post.images[0].filename)
-                const coverImg = await functions.songCover(link)
-                newImages.push(coverImg)
-            } else {
-                newImages.push(img)
-            }
+            const decrypted = await functions.decryptThumb(img, session)
+            newImages.push(decrypted)
         }
         setImages(newImages)
     }
 
     useEffect(() => {
         loadImages()
-    }, [props.comments])
+    }, [props.comments, session])
 
     const parseText = (comment: string) => {
         const pieces = functions.parseComment(comment)

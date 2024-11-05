@@ -108,7 +108,7 @@ const ToolTip: React.FunctionComponent = (props) => {
     const openNewTab = async () => {
         const postImage = tooltipPost.images[0]
         const img = functions.getImageLink(postImage?.type, tooltipPost.postID, postImage?.order, postImage?.filename)
-        const decrypted = await functions.decryptImg(img, img)
+        const decrypted = await functions.decryptItem(img, session)
         window.open(decrypted, "_blank")
     }
 
@@ -174,7 +174,7 @@ const ToolTip: React.FunctionComponent = (props) => {
         <div className="tooltip" style={getStyle()} onMouseEnter={() => setToolTipEnabled(true)} onMouseLeave={() => setToolTipEnabled(false)}>
             <div className="tooltip-row">
                 <div className="tooltip-artist-container">
-                    <img className="tooltip-img" src={functions.getTagLink(artist.type, artist.image)}/>
+                    <img className="tooltip-img" src={functions.getTagLink(artist.type, artist.image, artist.imageHash)}/>
                     <span className={`tooltip-artist-tag ${tooltipPost?.hidden ? "strikethrough" : ""}`} style={{marginRight: "5px"}} onClick={searchArtist} onAuxClick={openArtist}>{artist.tag}</span>
                     <img className="tooltip-img-small" src={tagIcon} onClick={() => copyTags()} onContextMenu={(event) => {event.preventDefault(); copyTags(true, true)}}/>
                 </div>

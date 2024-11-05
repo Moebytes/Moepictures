@@ -50,7 +50,7 @@ const TagHistoryRow: React.FunctionComponent<Props> = (props) => {
     let prevHistory = props.previousHistory || Boolean(props.exact)
 
     const updateImage = () => {
-        const img = functions.getTagLink(props.tagHistory.type, props.tagHistory.image)
+        const img = functions.getTagLink(props.tagHistory.type, props.tagHistory.image, props.tagHistory.imageHash)
         setImg(img)
     }
 
@@ -70,7 +70,7 @@ const TagHistoryRow: React.FunctionComponent<Props> = (props) => {
         if (!props.tagHistory.image) {
             image = ["delete"]
         } else {
-            const imageLink = functions.getTagLink(props.tagHistory.type, props.tagHistory.image)
+            const imageLink = functions.getTagLink(props.tagHistory.type, props.tagHistory.image, props.tagHistory.imageHash)
             const arrayBuffer = await fetch(imageLink).then((r) => r.arrayBuffer())
             const bytes = new Uint8Array(arrayBuffer)
             image = Object.values(bytes)

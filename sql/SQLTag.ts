@@ -23,16 +23,16 @@ export default class SQLTag {
     }
 
     /** Insert a new tag (all populated fields). */
-    public static insertTagFromData = async (data: {tag: string, type: string, image: string, description: string, creator: string, 
+    public static insertTagFromData = async (data: {tag: string, type: string, image: string, imageHash: string, description: string, creator: string, 
         createDate: string, updater: string, updatedDate: string, website: string, social: string, twitter: string, fandom: string,
         pixivTags: string[], banned: boolean, hidden: boolean, r18: boolean}) => {
-        const {tag, type, image, description, creator, createDate, updater, updatedDate, website, social, twitter, fandom, pixivTags, 
+        const {tag, type, image, imageHash, description, creator, createDate, updater, updatedDate, website, social, twitter, fandom, pixivTags, 
             banned, hidden, r18} = data
         const query: QueryConfig = {
-            text: /*sql*/`INSERT INTO "tags" ("tag", "type", "image", "description", "creator", "createDate", "updater", "updatedDate", 
+            text: /*sql*/`INSERT INTO "tags" ("tag", "type", "image", "imageHash", "description", "creator", "createDate", "updater", "updatedDate", 
                 "website", "social", "twitter", "fandom", "pixivTags", "banned", "hidden", "r18") VALUES ($1, $2, $3, $4, $5, $6, $7, 
-                $8, $9, $10, $11, $12, $13, $14, $15, $16)`,
-        values: [tag, type, image, description, creator, createDate, updater, updatedDate, website, social, twitter, fandom, pixivTags, 
+                $8, $9, $10, $11, $12, $13, $14, $15, $16, $17)`,
+        values: [tag, type, image, imageHash, description, creator, createDate, updater, updatedDate, website, social, twitter, fandom, pixivTags, 
                 banned, hidden, r18]
         }
         try {
@@ -53,11 +53,12 @@ export default class SQLTag {
         for (let j = 0; j < bulkTags.length; j++) {
             if (tagValues.has(bulkTags[j].tag)) continue
             tagValues.add(bulkTags[j].tag)
-            valueArray.push(`($${i}, $${i + 1}, $${i + 2}, $${i + 3}, $${i + 4}, $${i + 5}, $${i + 6}, $${i + 7})`)
+            valueArray.push(`($${i}, $${i + 1}, $${i + 2}, $${i + 3}, $${i + 4}, $${i + 5}, $${i + 6}, $${i + 7}, $${i + 8})`)
             rawValues.push(bulkTags[j].tag)
             rawValues.push(bulkTags[j].type)
             rawValues.push(bulkTags[j].description)
             rawValues.push(bulkTags[j].image)
+            rawValues.push(bulkTags[j].imageHash)
             rawValues.push(new Date().toISOString())
             rawValues.push(creator)
             rawValues.push(new Date().toISOString())
@@ -66,8 +67,8 @@ export default class SQLTag {
         }
         let valueQuery = `VALUES ${valueArray.join(", ")}`
         const query: QueryConfig = {
-        text: /*sql*/`INSERT INTO "tags" ("tag", "type", "description", "image", "createDate", "creator", "updatedDate", "updater") ${valueQuery} 
-                ON CONFLICT ("tag") DO UPDATE SET "type" = EXCLUDED."type"${noImageUpdate ? "" : ", \"image\" = EXCLUDED.\"image\""}`,
+        text: /*sql*/`INSERT INTO "tags" ("tag", "type", "description", "image", "imageHash", "createDate", "creator", "updatedDate", "updater") ${valueQuery} 
+                ON CONFLICT ("tag") DO UPDATE SET "type" = EXCLUDED."type"${noImageUpdate ? "" : ", \"image\" = EXCLUDED.\"image\", \"imageHash\" = EXCLUDED.\"imageHash\""}`,
         values: [...rawValues]
         }
         await SQLQuery.flushDB()
@@ -103,12 +104,13 @@ export default class SQLTag {
         rawValues.push(bulkTags[j].type)
         rawValues.push(bulkTags[j].description)
         rawValues.push(bulkTags[j].image)
+        rawValues.push(bulkTags[j].imageHash)
         i += 4
         }
         let valueQuery = `VALUES ${valueArray.join(", ")}`
         const query: QueryConfig = {
-        text: /*sql*/`INSERT INTO "unverified tags" ("tag", "type", "description", "image") ${valueQuery} 
-                ON CONFLICT ("tag") DO UPDATE SET "type" = EXCLUDED."type"${noImageUpdate ? "" : ", \"image\" = EXCLUDED.\"image\""}`,
+        text: /*sql*/`INSERT INTO "unverified tags" ("tag", "type", "description", "image", "imageHash") ${valueQuery} 
+                ON CONFLICT ("tag") DO UPDATE SET "type" = EXCLUDED."type"${noImageUpdate ? "" : ", \"image\" = EXCLUDED.\"image\", \"imageHash\" = EXCLUDED.\"imageHash\""}`,
         values: [...rawValues]
         }
         return SQLQuery.run(query)
@@ -254,11 +256,11 @@ export default class SQLTag {
         let whereQuery = tags?.[0] ? `WHERE "tag map".tag = ANY ($1)` : ""
         const query: QueryConfig = {
             text: functions.multiTrim(/*sql*/`
-                    SELECT "tag map".tag, "tags".type, "tags".image, COUNT(*) AS count
+                    SELECT "tag map".tag, "tags".type, "tags".image, "tags"."imageHash", COUNT(*) AS count
                     FROM "tag map"
                     LEFT JOIN tags ON tags."tag" = "tag map".tag
                     ${whereQuery}
-                    GROUP BY "tag map".tag, "tags".type, "tags".image
+                    GROUP BY "tag map".tag, "tags".type, "tags".image, "tags"."imageHash"
                     ORDER BY count DESC
             `)
         }

@@ -4,7 +4,6 @@ import {ThemeContext, SessionContext, SessionFlagContext, MobileContext, DeleteG
 RevertGroupHistoryIDContext, DeleteGroupHistoryFlagContext, RevertGroupHistoryFlagContext} from "../Context"
 import {HashLink as Link} from "react-router-hash-link"
 import functions from "../structures/Functions"
-import cryptoFunctions from "../structures/CryptoFunctions"
 import groupHistoryRevert from "../assets/icons/revert.png"
 import groupHistoryDelete from "../assets/icons/delete.png"
 import adminCrown from "../assets/icons/admin-crown.png"
@@ -222,12 +221,7 @@ const GroupHistoryRow: React.FunctionComponent<Props> = (props) => {
     const loadImage = async () => {
         if (functions.isGIF(img)) return
         if (!ref.current) return
-        let src = await cryptoFunctions.decryptedLink(img)
-        if (functions.isModel(src)) {
-            src = await functions.modelImage(src)
-        } else if (functions.isAudio(src)) {
-            src = await functions.songCover(src)
-        }
+        let src = await functions.decryptThumb(img, session)
         const imgElement = document.createElement("img")
         imgElement.src = src 
         imgElement.onload = () => {
@@ -241,7 +235,7 @@ const GroupHistoryRow: React.FunctionComponent<Props> = (props) => {
 
     useEffect(() => {
         loadImage()
-    }, [img])
+    }, [img, session])
 
     const updateImg = async (event: React.MouseEvent) => {
         event.preventDefault()

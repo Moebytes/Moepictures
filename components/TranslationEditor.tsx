@@ -6,7 +6,6 @@ EditTranslationFlagContext, EditTranslationTextContext, EditTranslationTranscrip
 SaveTranslationDataContext, SaveTranslationOrderContext, SiteHueContext, SiteLightnessContext, SiteSaturationContext, SessionFlagContext,
 TranslationOCRDialogContext, TranslationOCRFlagContext, RedirectContext, SidebarTextContext} from "../Context"
 import functions from "../structures/Functions"
-import cryptoFunctions from "../structures/CryptoFunctions"
 import {ShapeEditor, ImageLayer, DrawLayer, wrapShape} from "react-shape-editor"
 import translationDelete from "../assets/icons/translation-delete.png"
 import translationEdit from "../assets/icons/translation-edit.png"
@@ -187,22 +186,11 @@ const TranslationEditor: React.FunctionComponent<Props> = (props) => {
 
     useEffect(() => {
         const decryptImg = async () => {
-            let url = props.img 
+            let url = await functions.decryptThumb(props.img, session, props.img, true)
             isAnimatedWebP = false
             if (functions.isWebP(props.img)) {
                 const arraybuffer = await fetch(props.img).then((r) => r.arrayBuffer())
                 isAnimatedWebP = functions.isAnimatedWebp(arraybuffer)
-            }
-            if (functions.isImage(props.img)) {
-                url = await cryptoFunctions.decryptedLink(props.img)
-            } else if (functions.isGIF(props.img) || isAnimatedWebP) {
-                url = props.img
-            } else if (functions.isVideo(props.img)) {
-                url = await functions.videoThumbnail(props.img)
-            } else if (functions.isAudio(props.img)) {
-                url = await functions.songCover(props.img)
-            } else if (functions.isModel(props.img)) {
-                url = await functions.modelImage(props.img)
             }
             const base64 = await functions.linkToBase64(url)
             const img = await functions.createImage(base64)
@@ -217,7 +205,7 @@ const TranslationEditor: React.FunctionComponent<Props> = (props) => {
             }
         }
         decryptImg()
-    }, [props.img])
+    }, [props.img, session])
 
     useEffect(() => {
         if (!filtersRef.current) return
@@ -337,7 +325,7 @@ const TranslationEditor: React.FunctionComponent<Props> = (props) => {
 
     const saveTextDialog = () => {
         if (!session.username) {
-            setRedirect(`/post/${props.post.postID}`)
+            setRedirect(`/post/${props.post.postID}/${props.post.slug}`)
             history.push("/login")
             return setSidebarText("Login required.")
         }

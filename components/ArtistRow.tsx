@@ -41,17 +41,17 @@ const ArtistRow: React.FunctionComponent<Props> = (props) => {
             const filtered = props.artist.posts.filter((p: any) => p.restrict === "safe")
             const post = filtered[index] 
             if (newTab) {
-                return window.open(`/post/${post.postID}`, "_blank")
+                return window.open(`/post/${post.postID}/${post.slug}`, "_blank")
             } else {
-                return history.push(`/post/${post.postID}`)
+                return history.push(`/post/${post.postID}/${post.slug}`)
             }
         }
         let filtered = props.artist.posts.filter((p: any) => restrictType === "explicit" ? p.restrict === "explicit" : p.restrict !== "explicit")
         const post = filtered[index] 
         if (newTab) {
-            window.open(`/post/${post.postID}`, "_blank")
+            window.open(`/post/${post.postID}/${post.slug}`, "_blank")
         } else {
-            history.push(`/post/${post.postID}`)
+            history.push(`/post/${post.postID}/${post.slug}`)
         }
         window.scrollTo(0, functions.navbarHeight() + functions.titlebarHeight())
         setPosts(props.artist.posts)
@@ -87,7 +87,7 @@ const ArtistRow: React.FunctionComponent<Props> = (props) => {
     return (
         <div className="artistrow">
             <div className="artistrow-row">
-                {props.artist.image ? <img className="artistrow-img" src={functions.getTagLink("artist", props.artist.image)}/> : null}
+                {props.artist.image ? <img className="artistrow-img" src={functions.getTagLink("artist", props.artist.image, props.artist.imageHash)}/> : null}
                 <span className="artistrow-text-hover">
                     <span className="artistrow-text" onClick={tagPage} onAuxClick={tagPage} onContextMenu={tagPage}>{functions.toProperCase(props.artist.tag.replaceAll("-", " "))}</span>
                     {artistSocialJSX()}

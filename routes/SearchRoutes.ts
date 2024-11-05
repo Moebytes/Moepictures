@@ -1,6 +1,7 @@
 import {Express, NextFunction, Request, Response} from "express"
 import crypto from "crypto"
 import functions from "../structures/Functions"
+import cryptoFunctions from "../structures/CryptoFunctions"
 import sql from "../sql/SQLQuery"
 import phash from "sharp-phash"
 import dist from "sharp-phash/distance"
@@ -128,7 +129,9 @@ const SearchRoutes = (app: Express) => {
                     if (!permissions.canPrivate(req.session, categories.artists)) result.splice(i, 1)
                 }
             }
-            res.status(200).json(result)
+            if (!req.session.publicKey) return res.status(401).send("No public key")
+            const encrypted = cryptoFunctions.encryptAPI(result, req.session.publicKey)
+            res.status(200).send(encrypted)
         } catch (e) {
             console.log(e)
             return res.status(400).send("Bad request")
@@ -195,8 +198,9 @@ const SearchRoutes = (app: Express) => {
                         if (!permissions.canPrivate(req.session, categories.artists)) artist.posts.splice(i, 1)
                     }
                 }
-            }
-            res.status(200).json(result)
+            }if (!req.session.publicKey) return res.status(401).send("No public key")
+            const encrypted = cryptoFunctions.encryptAPI(result, req.session.publicKey)
+            res.status(200).send(encrypted)
         } catch (e) {
             console.log(e)
             return res.status(400).send("Bad request")
@@ -228,8 +232,9 @@ const SearchRoutes = (app: Express) => {
                         if (!permissions.canPrivate(req.session, categories.artists)) character.posts.splice(i, 1)
                     }
                 }
-            }
-            res.status(200).json(result)
+            }if (!req.session.publicKey) return res.status(401).send("No public key")
+            const encrypted = cryptoFunctions.encryptAPI(result, req.session.publicKey)
+            res.status(200).send(encrypted)
         } catch (e) {
             console.log(e)
             return res.status(400).send("Bad request")
@@ -262,7 +267,9 @@ const SearchRoutes = (app: Express) => {
                     }
                 }
             }
-            res.status(200).json(result)
+            if (!req.session.publicKey) return res.status(401).send("No public key")
+            const encrypted = cryptoFunctions.encryptAPI(result, req.session.publicKey)
+            res.status(200).send(encrypted)
         } catch (e) {
             console.log(e)
             return res.status(400).send("Bad request")
@@ -292,7 +299,9 @@ const SearchRoutes = (app: Express) => {
             if (!req.session.showR18) {
                 result = result.filter((tag: any) => !tag.r18)
             }
-            res.status(200).json(result)
+            if (!req.session.publicKey) return res.status(401).send("No public key")
+            const encrypted = cryptoFunctions.encryptAPI(result, req.session.publicKey)
+            res.status(200).send(encrypted)
         } catch (e) {
             console.log(e)
             return res.status(400).send("Bad request")
@@ -336,7 +345,9 @@ const SearchRoutes = (app: Express) => {
                     if (!permissions.canPrivate(req.session, categories.artists)) result.splice(i, 1)
                 }
             }
-            res.status(200).json(result)
+            if (!req.session.publicKey) return res.status(401).send("No public key")
+            const encrypted = cryptoFunctions.encryptAPI(result, req.session.publicKey)
+            res.status(200).send(encrypted)
         } catch (e) {
             console.log(e)
             return res.status(400).send("Bad request")
@@ -356,7 +367,9 @@ const SearchRoutes = (app: Express) => {
             if (!req.session.showR18) {
                 result = result.filter((g: any) => g.restrict !== "explicit")
             }
-            res.status(200).json(result)
+            if (!req.session.publicKey) return res.status(401).send("No public key")
+            const encrypted = cryptoFunctions.encryptAPI(result, req.session.publicKey)
+            res.status(200).send(encrypted)
         } catch (e) {
             console.log(e)
             return res.status(400).send("Bad request")
@@ -371,7 +384,11 @@ const SearchRoutes = (app: Express) => {
             if (!functions.validTagType(type)) return res.status(400).send("Invalid type")
             let search = query?.trim().toLowerCase().split(/ +/g).filter(Boolean).join("-") ?? ""
             let result = await sql.search.tagSearch(search, "posts", type, "100").then((r) => r.slice(0, 100))
-            if (!result?.[0]) return res.status(200).json([])
+            if (!result?.[0]) {
+                if (!req.session.publicKey) return res.status(401).send("No public key")
+                const encrypted = cryptoFunctions.encryptAPI([], req.session.publicKey)
+                return res.status(200).send(encrypted)
+            }
             if (!permissions.isMod(req.session)) {
                 result = result.filter((tag: any) => !tag.hidden)
             }
@@ -379,19 +396,26 @@ const SearchRoutes = (app: Express) => {
                 result = result.filter((tag: any) => !tag.r18)
             }
             const tags = await sql.tag.tagCounts(result.map((r: any) => r.tag))
-            res.status(200).json(tags.slice(0, 100))
+            if (!req.session.publicKey) return res.status(401).send("No public key")
+            const encrypted = cryptoFunctions.encryptAPI(tags.slice(0, 100), req.session.publicKey)
+            res.status(200).send(encrypted)
         } catch (e) {
             console.log(e)
             return res.status(400).send("Bad request")
         }
     })
 
-    app.post("/api/search/sidebartags", searchLimiter, async (req: Request, res: Response, next: NextFunction) => {
+    app.get("/api/search/sidebartags", searchLimiter, async (req: Request, res: Response, next: NextFunction) => {
         try {
-            const {postIDs, isBanner} = req.body
+            const postIDs = req.query.postIDs || [] as any
+            const isBanner = req.query.isBanner as any
             let postArray = Array.from(postIDs)?.slice(0, 100) as any
             if (req.session.captchaNeeded) {
-                if (postArray?.length === 1) return res.status(200).json([])
+                if (postArray?.length === 1) {
+                    if (!req.session.publicKey) return res.status(401).send("No public key")
+                    const encrypted = cryptoFunctions.encryptAPI([], req.session.publicKey)
+                    return res.status(200).send(encrypted)
+                }
                 postArray = []
             }
             let slice = false
@@ -420,7 +444,10 @@ const SearchRoutes = (app: Express) => {
             } else {
                 finalTags = result
             }
-            res.status(200).json(slice ? finalTags.slice(0, 100) : finalTags)
+            finalTags = slice ? finalTags.slice(0, 100) : finalTags
+            if (!req.session.publicKey) return res.status(401).send("No public key")
+            const encrypted = cryptoFunctions.encryptAPI(finalTags, req.session.publicKey)
+            res.status(200).send(encrypted)
         } catch (e) {
             console.log(e)
             return res.status(400).send("Bad request")
@@ -444,7 +471,9 @@ const SearchRoutes = (app: Express) => {
             if (!req.session.showR18) {
                 result = result.filter((t: any) => !t.r18)
             }
-            res.status(200).json(result)
+            if (!req.session.publicKey) return res.status(401).send("No public key")
+            const encrypted = cryptoFunctions.encryptAPI(result, req.session.publicKey)
+            res.status(200).send(encrypted)
         } catch (e) {
             console.log(e)
             return res.status(400).send("Bad request")
@@ -488,7 +517,9 @@ const SearchRoutes = (app: Express) => {
             for (const message of filtered) {
                 message.messageCount = messageCount
             }
-            res.status(200).json(filtered)
+            if (!req.session.publicKey) return res.status(401).send("No public key")
+            const encrypted = cryptoFunctions.encryptAPI(filtered, req.session.publicKey)
+            res.status(200).send(encrypted)
         } catch (e) {
             console.log(e)
             return res.status(400).send("Bad request")
@@ -501,7 +532,9 @@ const SearchRoutes = (app: Express) => {
             if (!req.session.username) return res.status(403).send("Unauthorized")
             if (!permissions.isMod(req.session)) return res.status(403).end()
             const result = await sql.report.reports(offset)
-            res.status(200).json(result)
+            if (!req.session.publicKey) return res.status(401).send("No public key")
+            const encrypted = cryptoFunctions.encryptAPI(result, req.session.publicKey)
+            res.status(200).send(encrypted)
         } catch (e) {
             console.log(e)
             res.status(400).send("Bad request") 

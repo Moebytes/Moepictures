@@ -121,7 +121,7 @@ const GridImage = forwardRef<Ref, Props>((props, componentRef) => {
         },
         load: async () => {
             if (decrypted) return
-            const decryptedImg = await functions.decryptImg(props.img, `${props.img}-${sizeType}`)
+            const decryptedImg = await functions.decryptThumb(props.img, session, `${props.img}-${sizeType}`)
             setImg(decryptedImg)
             setDecrypted(true)
         },
@@ -710,7 +710,7 @@ const GridImage = forwardRef<Ref, Props>((props, componentRef) => {
     const renderImage = async (image?: string) => {
         if (filtersOn()) {
             if (image) {
-                const decrypted = await cryptoFunctions.decryptedLink(image)
+                const decrypted = await functions.decryptItem(image, session)
                 const img = await functions.createImage(decrypted)
                 return render(img)
             } else {
@@ -718,9 +718,10 @@ const GridImage = forwardRef<Ref, Props>((props, componentRef) => {
             }
         } else {
             if (image) {
-                return cryptoFunctions.decryptedLink(image)
+                return functions.decryptItem(image, session)
             } else {
-                return cryptoFunctions.decryptedLink(props.original.replace(/thumbnail\/\d+\//, ""))
+                let image = props.original.replace(/thumbnail\/\d+\//, "")
+                return functions.decryptItem(image, session)
             }
 
         }
@@ -742,7 +743,7 @@ const GridImage = forwardRef<Ref, Props>((props, componentRef) => {
                     if (session.downloadPixivID && props.post?.link?.includes("pixiv.net")) {
                         pageName = `${props.post.link.match(/\d+/g)?.[0]}_p${i}${path.extname(page)}`
                     }
-                    const decryptedPage = await cryptoFunctions.decryptedLink(page)
+                    const decryptedPage = await functions.decryptItem(page, session)
                     let image = await renderImage(decryptedPage)
                     if (filtersOn() || path.extname(pageName) !== `.${format}`) {
                         image = await functions.convertToFormat(image, format)
@@ -785,7 +786,7 @@ const GridImage = forwardRef<Ref, Props>((props, componentRef) => {
         //if (activeDropdown !== "none") return
         if (event.metaKey || event.ctrlKey || event.button === 1) {
             event.preventDefault()
-            const newWindow = window.open(`/post/${props.id}`, "_blank")
+            const newWindow = window.open(`/post/${props.id}/${props.post.slug}`, "_blank")
             newWindow?.blur()
             window.focus()
         }
@@ -817,16 +818,11 @@ const GridImage = forwardRef<Ref, Props>((props, componentRef) => {
                 setSelected(isSelected)
             }
         } else {
-            functions.get("/api/post", {postID: props.post.postID}, session, setSessionFlag).then(async (post) => {
-                localStorage.setItem("savedPost", JSON.stringify(post))
-                const tagCategories = await functions.tagCategories(post.tags, session, setSessionFlag, true)
-                localStorage.setItem("savedTags", JSON.stringify(tagCategories))
-            }).catch(() => null)
             if (!drag) {
                 if (event.metaKey || event.ctrlKey || event.button == 1) {
                     return
                 } else {
-                    history.push(`/post/${props.id}`)
+                    history.push(`/post/${props.id}/${props.post.slug}`)
                     window.scrollTo(0, 0)
                 }
             }

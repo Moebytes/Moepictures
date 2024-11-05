@@ -78,7 +78,7 @@ const Message: React.FunctionComponent<Props> = (props) => {
 
     const getCreatorPFP = () => {
         if (creatorData?.image) {
-            return functions.getTagLink("pfp", creatorData.image)
+            return functions.getTagLink("pfp", creatorData.image, creatorData.imageHash)
         } else {
             return favicon
         }
@@ -104,7 +104,7 @@ const Message: React.FunctionComponent<Props> = (props) => {
 
     const getRecipientPFP = () => {
         if (recipientData?.image) {
-            return functions.noCacheURL(functions.getTagLink("pfp", recipientData.image))
+            return functions.noCacheURL(functions.getTagLink("pfp", recipientData.image, recipientData.imageHash))
         } else {
             return favicon
         }

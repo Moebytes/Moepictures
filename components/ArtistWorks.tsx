@@ -22,8 +22,8 @@ const ArtistWorks: React.FunctionComponent<Props> = (props) => {
     }
 
     const click = (img: string, index: number) => {
-        const postID = props.posts[index].postID
-        history.push(`/post/${postID}`)
+        const post = props.posts[index]
+        history.push(`/post/${post.postID}/${post.slug}`)
         window.scrollTo(0, functions.navbarHeight() + functions.titlebarHeight())
         setPosts(props.posts)
     }

@@ -3,6 +3,7 @@ import sql from "../sql/SQLQuery"
 import fs from "fs"
 import path from "path"
 import functions from "../structures/Functions"
+import cryptoFunctions from "../structures/CryptoFunctions"
 import permissions from "../structures/Permissions"
 import serverFunctions, {csrfProtection, keyGenerator, handler} from "../structures/ServerFunctions"
 import rateLimit from "express-rate-limit"
@@ -172,26 +173,26 @@ const CreateRoutes = (app: Express) => {
           let kind = "image" as any
           if (type === "comic") {
             kind = "comic"
-          } else if (ext === "jpg" || ext === "png" || ext === "avif") {
-            kind = "image"
-          } else if (ext === "webp") {
-            const animated = await functions.isAnimatedWebp(Buffer.from(current[i].bytes))
+          } else if (functions.isWebP(`.${ext}`)) {
+            const animated = functions.isAnimatedWebp(Buffer.from(current[i].bytes))
             if (animated) {
               kind = "animation"
               if (type !== "video") type = "animation"
             } else {
               kind = "image"
             }
-          } else if (ext === "gif") {
+          } else if (functions.isImage(`.${ext}`)) {
+            kind = "image"
+          } else if (functions.isGIF(`.${ext}`)) {
             kind = "animation"
             if (type !== "video") type = "animation"
-          } else if (ext === "mp4" || ext === "webm") {
+          } else if (functions.isVideo(`.${ext}`)) {
             kind = "video"
             type = "video"
-          } else if (ext === "mp3" || ext === "wav") {
+          } else if (functions.isAudio(`.${ext}`)) {
             kind = "audio"
             type = "audio"
-          } else if (ext === "glb" || ext === "obj" || ext === "fbx") {
+          } else if (functions.isModel(`.${ext}`)) {
             kind = "model"
             type = "model"
           }
@@ -249,6 +250,7 @@ const CreateRoutes = (app: Express) => {
           bookmarks: source.bookmarks ? source.bookmarks : null,
           purchaseLink: source.purchaseLink ? source.purchaseLink : null,
           mirrors: source.mirrors ? functions.mirrorsJSON(source.mirrors) : null,
+          slug: functions.postSlug(source.title, source.translatedTitle),
           type,
           uploadDate,
           updatedDate: uploadDate,
@@ -266,25 +268,29 @@ const CreateRoutes = (app: Express) => {
 
         for (let i = 0; i < newTags.length; i++) {
           if (!newTags[i].tag) continue
-          let bulkObj = {tag: newTags[i].tag, type: functions.tagType(newTags[i].tag), description: null, image: null} as any
+          let bulkObj = {tag: newTags[i].tag, type: functions.tagType(newTags[i].tag), description: null, image: null, imageHash: null} as any
           if (newTags[i].desc) bulkObj.description = newTags[i].desc
           if (newTags[i].image) {
             const filename = `${newTags[i].tag}.${newTags[i].ext}`
             const imagePath = functions.getTagPath("tag", filename)
-            await serverFunctions.uploadFile(imagePath, Buffer.from(Object.values(newTags[i].bytes) as any), false)
+            const buffer = Buffer.from(Object.values(newTags[i].bytes) as any)
+            await serverFunctions.uploadFile(imagePath, buffer, false)
             bulkObj.image = filename
+            bulkObj.imageHash = serverFunctions.md5(buffer)
           }
           bulkTagUpdate.push(bulkObj)
         }
 
         for (let i = 0; i < artists.length; i++) {
           if (!artists[i].tag) continue
-          let bulkObj = {tag: artists[i].tag, type: "artist", description: "Artist.", image: null} as any
+          let bulkObj = {tag: artists[i].tag, type: "artist", description: "Artist.", image: null, imageHash: null} as any
           if (artists[i].image) {
             const filename = `${artists[i].tag}.${artists[i].ext}`
             const imagePath = functions.getTagPath("artist", filename)
-            await serverFunctions.uploadFile(imagePath, Buffer.from(Object.values(artists[i].bytes) as any), false)
+            const buffer = Buffer.from(Object.values(artists[i].bytes) as any)
+            await serverFunctions.uploadFile(imagePath, buffer, false)
             bulkObj.image = filename
+            bulkObj.imageHash = serverFunctions.md5(buffer)
           }
           bulkTagUpdate.push(bulkObj)
           tagMap.push(artists[i].tag)
@@ -292,12 +298,14 @@ const CreateRoutes = (app: Express) => {
 
         for (let i = 0; i < characters.length; i++) {
           if (!characters[i].tag) continue
-          let bulkObj = {tag: characters[i].tag, type: "character", description: "Character.", image: null} as any
+          let bulkObj = {tag: characters[i].tag, type: "character", description: "Character.", image: null, imageHash: null} as any
           if (characters[i].image) {
             const filename = `${characters[i].tag}.${characters[i].ext}`
             const imagePath = functions.getTagPath("character", filename)
-            await serverFunctions.uploadFile(imagePath, Buffer.from(Object.values(characters[i].bytes) as any), false)
+            const buffer = Buffer.from(Object.values(characters[i].bytes) as any)
+            await serverFunctions.uploadFile(imagePath, buffer, false)
             bulkObj.image = filename
+            bulkObj.imageHash = serverFunctions.md5(buffer)
           }
           bulkTagUpdate.push(bulkObj)
           tagMap.push(characters[i].tag)
@@ -305,12 +313,14 @@ const CreateRoutes = (app: Express) => {
 
         for (let i = 0; i < series.length; i++) {
           if (!series[i].tag) continue
-          let bulkObj = {tag: series[i].tag, type: "series", description: "Series.", image: null} as any
+          let bulkObj = {tag: series[i].tag, type: "series", description: "Series.", image: null, imageHash: null} as any
           if (series[i].image) {
             const filename = `${series[i].tag}.${series[i].ext}`
             const imagePath = functions.getTagPath("series", filename)
-            await serverFunctions.uploadFile(imagePath, Buffer.from(Object.values(series[i].bytes) as any), false)
+            const buffer = Buffer.from(Object.values(series[i].bytes) as any)
+            await serverFunctions.uploadFile(imagePath, buffer, false)
             bulkObj.image = filename
+            bulkObj.imageHash = serverFunctions.md5(buffer)
           }
           bulkTagUpdate.push(bulkObj)
           tagMap.push(series[i].tag)
@@ -323,7 +333,7 @@ const CreateRoutes = (app: Express) => {
             for (const i of implications) {
               tagMap.push(i.implication)
               const tag = await sql.tag.tag(i.implication)
-              bulkTagUpdate.push({tag: i.implication, type: functions.tagType(i.implication), description: tag?.description || null, image: tag?.image || null})
+              bulkTagUpdate.push({tag: i.implication, type: functions.tagType(i.implication), description: tag?.description || null, image: tag?.image || null, imageHash: tag?.imageHash || null})
             }
           }
         }
@@ -473,29 +483,29 @@ const CreateRoutes = (app: Express) => {
           let kind = "image" as any
           if (type === "comic") {
             kind = "comic"
-          } else if (ext === "jpg" || ext === "png" || ext === "avif") {
-            kind = "image"
-          } else if (ext === "webp") {
-            const animated = await functions.isAnimatedWebp(Buffer.from(current[i].bytes))
+          } else if (functions.isWebP(`.${ext}`)) {
+            const animated = functions.isAnimatedWebp(Buffer.from(current[i].bytes))
             if (animated) {
               kind = "animation"
               if (type !== "video") type = "animation"
             } else {
               kind = "image"
             }
-          } else if (ext === "gif") {
+          } else if (functions.isImage(`.${ext}`)) {
+            kind = "image"
+          } else if (functions.isGIF(`.${ext}`)) {
             kind = "animation"
             if (type !== "video") type = "animation"
-          } else if (ext === "mp4" || ext === "webm") {
+          } else if (functions.isVideo(`.${ext}`)) {
             kind = "video"
             type = "video"
-          } else if (ext === "mp3" || ext === "wav") {
+          } else if (functions.isAudio(`.${ext}`)) {
             kind = "audio"
             type = "audio"
-        } else if (ext === "glb" || ext === "obj" || ext === "fbx") {
+          } else if (functions.isModel(`.${ext}`)) {
             kind = "model"
             type = "model"
-        }
+          }
         if (imgChanged) {
             if (images[i]) {
               let imagePath = functions.getImagePath(kind, postID, Number(fileOrder), filename)
@@ -545,6 +555,7 @@ const CreateRoutes = (app: Express) => {
           bookmarks: source.bookmarks ? source.bookmarks : null,
           purchaseLink: source.purchaseLink ? source.purchaseLink : null,
           mirrors: source.mirrors ? functions.mirrorsJSON(source.mirrors) : null,
+          slug: functions.postSlug(source.title, source.translatedTitle),
           updatedDate,
           hasOriginal,
           hasUpscaled,
@@ -562,49 +573,57 @@ const CreateRoutes = (app: Express) => {
 
         for (let i = 0; i < newTags.length; i++) {
           if (!newTags[i].tag) continue
-          let bulkObj = {tag: newTags[i].tag, type: functions.tagType(newTags[i].tag), description: null, image: null} as any
+          let bulkObj = {tag: newTags[i].tag, type: functions.tagType(newTags[i].tag), description: null, image: null, imageHash: null} as any
           if (newTags[i].desc) bulkObj.description = newTags[i].desc
           if (newTags[i].image) {
             const filename = `${newTags[i].tag}.${newTags[i].ext}`
             const imagePath = functions.getTagPath("tag", filename)
-            await serverFunctions.uploadFile(imagePath, Buffer.from(Object.values(newTags[i].bytes) as any), false)
+            const buffer = Buffer.from(Object.values(newTags[i].bytes) as any)
+            await serverFunctions.uploadFile(imagePath, buffer, false)
             bulkObj.image = filename
+            bulkObj.imageHash = serverFunctions.md5(buffer)
           }
           bulkTagUpdate.push(bulkObj)
         }
 
         for (let i = 0; i < artists.length; i++) {
           if (!artists[i].tag) continue
-          let bulkObj = {tag: artists[i].tag, type: "artist", description: "Artist.", image: null} as any
+          let bulkObj = {tag: artists[i].tag, type: "artist", description: "Artist.", image: null, imageHash: null} as any
           if (artists[i].image) {
             const filename = `${artists[i].tag}.${artists[i].ext}`
             const imagePath = functions.getTagPath("artist", filename)
-            await serverFunctions.uploadFile(imagePath, Buffer.from(Object.values(artists[i].bytes) as any), false)
+            const buffer = Buffer.from(Object.values(artists[i].bytes) as any)
+            await serverFunctions.uploadFile(imagePath, buffer, false)
             bulkObj.image = filename
+            bulkObj.imageHash = serverFunctions.md5(buffer)
           }
           bulkTagUpdate.push(bulkObj)
         }
 
         for (let i = 0; i < characters.length; i++) {
           if (!characters[i].tag) continue
-          let bulkObj = {tag: characters[i].tag, type: "character", description: "Character.", image: null} as any
+          let bulkObj = {tag: characters[i].tag, type: "character", description: "Character.", image: null, imageHash: null} as any
           if (characters[i].image) {
             const filename = `${characters[i].tag}.${characters[i].ext}`
             const imagePath = functions.getTagPath("character", filename)
-            await serverFunctions.uploadFile(imagePath, Buffer.from(Object.values(characters[i].bytes) as any), false)
+            const buffer = Buffer.from(Object.values(characters[i].bytes) as any)
+            await serverFunctions.uploadFile(imagePath, buffer, false)
             bulkObj.image = filename
+            bulkObj.imageHash = serverFunctions.md5(buffer)
           }
           bulkTagUpdate.push(bulkObj)
         }
 
         for (let i = 0; i < series.length; i++) {
           if (!series[i].tag) continue
-          let bulkObj = {tag: series[i].tag, type: "series", description: "Series.", image: null} as any
+          let bulkObj = {tag: series[i].tag, type: "series", description: "Series.", image: null, imageHash: null} as any
           if (series[i].image) {
             const filename = `${series[i].tag}.${series[i].ext}`
             const imagePath = functions.getTagPath("series", filename)
-            await serverFunctions.uploadFile(imagePath, Buffer.from(Object.values(series[i].bytes) as any), false)
+            const buffer = Buffer.from(Object.values(series[i].bytes) as any)
+            await serverFunctions.uploadFile(imagePath, buffer, false)
             bulkObj.image = filename
+            bulkObj.imageHash = serverFunctions.md5(buffer)
           }
           bulkTagUpdate.push(bulkObj)
         }
@@ -615,7 +634,7 @@ const CreateRoutes = (app: Express) => {
             for (const i of implications) {
               addedTags.push(i.implication)
               const tag = await sql.tag.tag(i.implication)
-              bulkTagUpdate.push({tag: i.implication, type: functions.tagType(i.implication), description: tag?.description || null, image: tag?.image || null})
+              bulkTagUpdate.push({tag: i.implication, type: functions.tagType(i.implication), description: tag?.description || null, image: tag?.image || null, imageHash: tag?.imageHash || null})
             }
           }
         }
@@ -683,7 +702,7 @@ const CreateRoutes = (app: Express) => {
             await sql.history.insertPostHistory({
               postID, username: vanilla.user, images: vanillaImages, uploader: vanilla.uploader, updater: vanilla.updater, 
               uploadDate: vanilla.uploadDate, updatedDate: vanilla.updatedDate, type: vanilla.type, restrict: vanilla.restrict, 
-              style: vanilla.style, thirdParty: vanilla.thirdParty, title: vanilla.title, translatedTitle: vanilla.translatedTitle, 
+              style: vanilla.style, thirdParty: vanilla.thirdParty, title: vanilla.title, translatedTitle: vanilla.translatedTitle, slug: vanilla.slug,
               posted: vanilla.posted, artist: vanilla.artist, link: vanilla.link, commentary: vanilla.commentary, translatedCommentary: vanilla.translatedCommentary, 
               bookmarks: vanilla.bookmarks, purchaseLink: vanilla.purchaseLink, mirrors: vanilla.mirrors, hasOriginal: vanilla.hasOriginal, hasUpscaled: vanilla.hasUpscaled, 
               artists: vanilla.artists, characters: vanilla.characters, series: vanilla.series, tags: vanilla.tags, addedTags: [], removedTags: [],
@@ -712,7 +731,7 @@ const CreateRoutes = (app: Express) => {
               postID, username: req.session.username, images: newImages, uploader: updated.uploader, updater: updated.updater, 
               uploadDate: updated.uploadDate, updatedDate: updated.updatedDate, type: updated.type, restrict: updated.restrict, 
               style: updated.style, thirdParty: updated.thirdParty, title: updated.title, translatedTitle: updated.translatedTitle, 
-              posted: updated.posted, artist: updated.artist, link: updated.link, commentary: updated.commentary, 
+              posted: updated.posted, artist: updated.artist, link: updated.link, commentary: updated.commentary, slug: updated.slug,
               translatedCommentary: updated.translatedCommentary, bookmarks: updated.bookmarks, purchaseLink: updated.purchaseLink, mirrors: updated.mirrors, 
               hasOriginal: updated.hasOriginal, hasUpscaled: updated.hasUpscaled, artists, characters, series, tags, addedTags, removedTags, imageChanged: imgChanged,
               changes, reason})
@@ -751,7 +770,7 @@ const CreateRoutes = (app: Express) => {
               postID, username: req.session.username, images: newImages, uploader: updated.uploader, updater: updated.updater, 
               uploadDate: updated.uploadDate, updatedDate: updated.updatedDate, type: updated.type, restrict: updated.restrict, 
               style: updated.style, thirdParty: updated.thirdParty, title: updated.title, translatedTitle: updated.translatedTitle, 
-              posted: updated.posted, artist: updated.artist, link: updated.link, commentary: updated.commentary, 
+              posted: updated.posted, artist: updated.artist, link: updated.link, commentary: updated.commentary, slug: updated.slug,
               translatedCommentary: updated.translatedCommentary, bookmarks: updated.bookmarks, purchaseLink: updated.purchaseLink, mirrors: updated.mirrors, 
               hasOriginal: updated.hasOriginal, hasUpscaled: updated.hasUpscaled, artists, characters, series, tags, addedTags, removedTags, imageChanged: imgChanged,
               changes, reason})
@@ -846,29 +865,29 @@ const CreateRoutes = (app: Express) => {
           let kind = "image" as any
           if (type === "comic") {
             kind = "comic"
-          } else if (ext === "jpg" || ext === "png" || ext === "avif") {
-            kind = "image"
-          } else if (ext === "webp") {
-            const animated = await functions.isAnimatedWebp(Buffer.from(current[i].bytes))
+          } else if (functions.isWebP(`.${ext}`)) {
+            const animated = functions.isAnimatedWebp(Buffer.from(current[i].bytes))
             if (animated) {
               kind = "animation"
               if (type !== "video") type = "animation"
             } else {
               kind = "image"
             }
-          } else if (ext === "gif") {
+          } else if (functions.isImage(`.${ext}`)) {
+            kind = "image"
+          } else if (functions.isGIF(`.${ext}`)) {
             kind = "animation"
             if (type !== "video") type = "animation"
-          } else if (ext === "mp4" || ext === "webm") {
+          } else if (functions.isVideo(`.${ext}`)) {
             kind = "video"
             type = "video"
-          } else if (ext === "mp3" || ext === "wav") {
+          } else if (functions.isAudio(`.${ext}`)) {
             kind = "audio"
             type = "audio"
-        } else if (ext === "glb" || ext === "obj" || ext === "fbx") {
+          } else if (functions.isModel(`.${ext}`)) {
             kind = "model"
             type = "model"
-        }
+          }
           if (images[i]) {
             let imagePath = functions.getImagePath(kind, postID, Number(fileOrder), filename)
             const buffer = Buffer.from(Object.values(images[i].bytes) as any)
@@ -920,6 +939,7 @@ const CreateRoutes = (app: Express) => {
           bookmarks: source.bookmarks ? source.bookmarks : null,
           purchaseLink: source.purchaseLink ? source.purchaseLink : null,
           mirrors: source.mirrors ? functions.mirrorsJSON(source.mirrors) : null,
+          slug: functions.postSlug(source.title, source.translatedTitle),
           type,
           uploadDate,
           updatedDate: uploadDate,
@@ -935,30 +955,34 @@ const CreateRoutes = (app: Express) => {
         let tagMap = tags
         let bulkTagUpdate = [] as any
         for (let i = 0; i < tagMap.length; i++) {
-          bulkTagUpdate.push({tag: tagMap[i], type: functions.tagType(tagMap[i]), description: null, image: null})
+          bulkTagUpdate.push({tag: tagMap[i], type: functions.tagType(tagMap[i]), description: null, image: null, imageHash: null})
         }
 
         for (let i = 0; i < newTags.length; i++) {
           if (!newTags[i].tag) continue
-          let bulkObj = {tag: newTags[i].tag, type: functions.tagType(newTags[i].tag), description: null, image: null} as any
+          let bulkObj = {tag: newTags[i].tag, type: functions.tagType(newTags[i].tag), description: null, image: null, imageHash: null} as any
           if (newTags[i].desc) bulkObj.description = newTags[i].desc
           if (newTags[i].image) {
             const filename = `${newTags[i].tag}.${newTags[i].ext}`
             const imagePath = functions.getTagPath("tag", filename)
-            await serverFunctions.uploadUnverifiedFile(imagePath, Buffer.from(Object.values(newTags[i].bytes) as any))
+            const buffer = Buffer.from(Object.values(newTags[i].bytes) as any)
+            await serverFunctions.uploadUnverifiedFile(imagePath, buffer)
             bulkObj.image = filename
+            bulkObj.imageHash = serverFunctions.md5(buffer)
           }
           bulkTagUpdate.push(bulkObj)
         }
 
         for (let i = 0; i < artists.length; i++) {
           if (!artists[i].tag) continue
-          let bulkObj = {tag: artists[i].tag, type: "artist", description: "Artist.", image: null} as any
+          let bulkObj = {tag: artists[i].tag, type: "artist", description: "Artist.", image: null, imageHash: null} as any
           if (artists[i].image) {
             const filename = `${artists[i].tag}.${artists[i].ext}`
             const imagePath = functions.getTagPath("artist", filename)
-            await serverFunctions.uploadUnverifiedFile(imagePath, Buffer.from(Object.values(artists[i].bytes) as any))
+            const buffer = Buffer.from(Object.values(artists[i].bytes) as any)
+            await serverFunctions.uploadUnverifiedFile(imagePath, buffer)
             bulkObj.image = filename
+            bulkObj.imageHash = serverFunctions.md5(buffer)
           }
           bulkTagUpdate.push(bulkObj)
           tagMap.push(artists[i].tag)
@@ -966,12 +990,14 @@ const CreateRoutes = (app: Express) => {
 
         for (let i = 0; i < characters.length; i++) {
           if (!characters[i].tag) continue
-          let bulkObj = {tag: characters[i].tag, type: "character", description: "Character.", image: null} as any
+          let bulkObj = {tag: characters[i].tag, type: "character", description: "Character.", image: null, imageHash: null} as any
           if (characters[i].image) {
             const filename = `${characters[i].tag}.${characters[i].ext}`
             const imagePath = functions.getTagPath("character", filename)
-            await serverFunctions.uploadUnverifiedFile(imagePath, Buffer.from(Object.values(characters[i].bytes) as any))
+            const buffer = Buffer.from(Object.values(characters[i].bytes) as any)
+            await serverFunctions.uploadUnverifiedFile(imagePath, buffer)
             bulkObj.image = filename
+            bulkObj.imageHash = serverFunctions.md5(buffer)
           }
           bulkTagUpdate.push(bulkObj)
           tagMap.push(characters[i].tag)
@@ -979,12 +1005,14 @@ const CreateRoutes = (app: Express) => {
 
         for (let i = 0; i < series.length; i++) {
           if (!series[i].tag) continue
-          let bulkObj = {tag: series[i].tag, type: "series", description: "Series.", image: null} as any
+          let bulkObj = {tag: series[i].tag, type: "series", description: "Series.", image: null, imageHash: null} as any
           if (series[i].image) {
             const filename = `${series[i].tag}.${series[i].ext}`
             const imagePath = functions.getTagPath("series", filename)
-            await serverFunctions.uploadUnverifiedFile(imagePath, Buffer.from(Object.values(series[i].bytes) as any))
+            const buffer = Buffer.from(Object.values(series[i].bytes) as any)
+            await serverFunctions.uploadUnverifiedFile(imagePath, buffer)
             bulkObj.image = filename
+            bulkObj.imageHash = serverFunctions.md5(buffer)
           }
           bulkTagUpdate.push(bulkObj)
           tagMap.push(series[i].tag)
@@ -996,7 +1024,7 @@ const CreateRoutes = (app: Express) => {
             for (const i of implications) {
               tagMap.push(i.implication)
               const tag = await sql.tag.tag(i.implication)
-              bulkTagUpdate.push({tag: i.implication, type: functions.tagType(i.implication), description: tag?.description || null, image: tag?.image || null})
+              bulkTagUpdate.push({tag: i.implication, type: functions.tagType(i.implication), description: tag?.description || null, image: tag?.image || null, imageHash: tag?.imageHash || null})
             }
           }
         }
@@ -1125,29 +1153,29 @@ const CreateRoutes = (app: Express) => {
           let kind = "image" as any
           if (type === "comic") {
             kind = "comic"
-          } else if (ext === "jpg" || ext === "png" || ext === "avif") {
-            kind = "image"
-          } else if (ext === "webp") {
-            const animated = await functions.isAnimatedWebp(Buffer.from(current[i].bytes))
+          } else if (functions.isWebP(`.${ext}`)) {
+            const animated = functions.isAnimatedWebp(Buffer.from(current[i].bytes))
             if (animated) {
               kind = "animation"
               if (type !== "video") type = "animation"
             } else {
               kind = "image"
             }
-          } else if (ext === "gif") {
+          } else if (functions.isImage(`.${ext}`)) {
+            kind = "image"
+          } else if (functions.isGIF(`.${ext}`)) {
             kind = "animation"
             if (type !== "video") type = "animation"
-          } else if (ext === "mp4" || ext === "webm") {
+          } else if (functions.isVideo(`.${ext}`)) {
             kind = "video"
             type = "video"
-          } else if (ext === "mp3" || ext === "wav") {
+          } else if (functions.isAudio(`.${ext}`)) {
             kind = "audio"
             type = "audio"
-        } else if (ext === "glb" || ext === "obj" || ext === "fbx") {
+          } else if (functions.isModel(`.${ext}`)) {
             kind = "model"
             type = "model"
-        }
+          }
         if (imgChanged) {
             if (images[i]) {
               let imagePath = functions.getImagePath(kind, postID, Number(fileOrder), filename)
@@ -1195,6 +1223,7 @@ const CreateRoutes = (app: Express) => {
           bookmarks: source.bookmarks ? source.bookmarks : null,
           purchaseLink: source.purchaseLink ? source.purchaseLink : null,
           mirrors: source.mirrors ? functions.mirrorsJSON(source.mirrors) : null,
+          slug: functions.postSlug(source.title, source.translatedTitle),
           type,
           updatedDate,
           hasOriginal,
@@ -1232,54 +1261,62 @@ const CreateRoutes = (app: Express) => {
         let bulkTagUpdate = [] as any
         
         for (let i = 0; i < tags.length; i++) {
-          bulkTagUpdate.push({tag: tags[i], type: functions.tagType(tags[i]), description: null, image: null})
+          bulkTagUpdate.push({tag: tags[i], type: functions.tagType(tags[i]), description: null, image: null, imageHash: null})
         }
 
         for (let i = 0; i < newTags.length; i++) {
           if (!newTags[i].tag) continue
-          let bulkObj = {tag: newTags[i].tag, type: functions.tagType(newTags[i].tag), description: null, image: null} as any
+          let bulkObj = {tag: newTags[i].tag, type: functions.tagType(newTags[i].tag), description: null, image: null, imageHash: null} as any
           if (newTags[i].desc) bulkObj.description = newTags[i].desc
           if (newTags[i].image) {
             const filename = `${newTags[i].tag}.${newTags[i].ext}`
             const imagePath = functions.getTagPath("tag", filename)
-            await serverFunctions.uploadUnverifiedFile(imagePath, Buffer.from(Object.values(newTags[i].bytes) as any))
+            const buffer = Buffer.from(Object.values(newTags[i].bytes) as any)
+            await serverFunctions.uploadUnverifiedFile(imagePath, buffer)
             bulkObj.image = filename
+            bulkObj.imageHash = serverFunctions.md5(buffer)
           }
           bulkTagUpdate.push(bulkObj)
         }
 
         for (let i = 0; i < artists.length; i++) {
           if (!artists[i].tag) continue
-          let bulkObj = {tag: artists[i].tag, type: "artist", description: "Artist.", image: null} as any
+          let bulkObj = {tag: artists[i].tag, type: "artist", description: "Artist.", image: null, imageHash: null} as any
           if (artists[i].image) {
             const filename = `${artists[i].tag}.${artists[i].ext}`
             const imagePath = functions.getTagPath("artist", filename)
-            await serverFunctions.uploadUnverifiedFile(imagePath, Buffer.from(Object.values(artists[i].bytes) as any))
+            const buffer = Buffer.from(Object.values(artists[i].bytes) as any)
+            await serverFunctions.uploadUnverifiedFile(imagePath, buffer)
             bulkObj.image = filename
+            bulkObj.imageHash = serverFunctions.md5(buffer)
           }
           bulkTagUpdate.push(bulkObj)
         }
 
         for (let i = 0; i < characters.length; i++) {
           if (!characters[i].tag) continue
-          let bulkObj = {tag: characters[i].tag, type: "character", description: "Character.", image: null} as any
+          let bulkObj = {tag: characters[i].tag, type: "character", description: "Character.", image: null, imageHash: null} as any
           if (characters[i].image) {
             const filename = `${characters[i].tag}.${characters[i].ext}`
             const imagePath = functions.getTagPath("character", filename)
-            await serverFunctions.uploadUnverifiedFile(imagePath, Buffer.from(Object.values(characters[i].bytes) as any))
+            const buffer = Buffer.from(Object.values(characters[i].bytes) as any)
+            await serverFunctions.uploadUnverifiedFile(imagePath, buffer)
             bulkObj.image = filename
+            bulkObj.imageHash = serverFunctions.md5(buffer)
           }
           bulkTagUpdate.push(bulkObj)
         }
 
         for (let i = 0; i < series.length; i++) {
           if (!series[i].tag) continue
-          let bulkObj = {tag: series[i].tag, type: "series", description: "Series.", image: null} as any
+          let bulkObj = {tag: series[i].tag, type: "series", description: "Series.", image: null, imageHash: null} as any
           if (series[i].image) {
             const filename = `${series[i].tag}.${series[i].ext}`
             const imagePath = functions.getTagPath("series", filename)
-            await serverFunctions.uploadUnverifiedFile(imagePath, Buffer.from(Object.values(series[i].bytes) as any))
+            const buffer = Buffer.from(Object.values(series[i].bytes) as any)
+            await serverFunctions.uploadUnverifiedFile(imagePath, buffer)
             bulkObj.image = filename
+            bulkObj.imageHash = serverFunctions.md5(buffer)
           }
           bulkTagUpdate.push(bulkObj)
         }
@@ -1290,7 +1327,7 @@ const CreateRoutes = (app: Express) => {
             for (const i of implications) {
               addedTags.push(i.implication)
               const tag = await sql.tag.tag(i.implication)
-              bulkTagUpdate.push({tag: i.implication, type: functions.tagType(i.implication), description: tag?.description || null, image: tag?.image || null})
+              bulkTagUpdate.push({tag: i.implication, type: functions.tagType(i.implication), description: tag?.description || null, image: tag?.image || null, imageHash: tag?.imageHash || null})
             }
           }
         }
@@ -1383,29 +1420,29 @@ const CreateRoutes = (app: Express) => {
           let kind = "image" as any
           if (type === "comic") {
             kind = "comic"
-          } else if (ext === "jpg" || ext === "png" || ext === "avif") {
-            kind = "image"
-          } else if (ext === "webp") {
-            const animated = await functions.isAnimatedWebp(current)
+          } else if (functions.isWebP(`.${ext}`)) {
+            const animated = functions.isAnimatedWebp(current)
             if (animated) {
               kind = "animation"
               if (type !== "video") type = "animation"
             } else {
               kind = "image"
             }
-          } else if (ext === "gif") {
+          } else if (functions.isImage(`.${ext}`)) {
+            kind = "image"
+          } else if (functions.isGIF(`.${ext}`)) {
             kind = "animation"
             if (type !== "video") type = "animation"
-          } else if (ext === "mp4" || ext === "webm") {
+          } else if (functions.isVideo(`.${ext}`)) {
             kind = "video"
             type = "video"
-          } else if (ext === "mp3" || ext === "wav") {
+          } else if (functions.isAudio(`.${ext}`)) {
             kind = "audio"
             type = "audio"
-        } else if (ext === "glb" || ext === "obj" || ext === "fbx") {
+          } else if (functions.isModel(`.${ext}`)) {
             kind = "model"
             type = "model"
-        }
+          }
           if (imgChanged) {
             if (buffer.byteLength) {
               let newImagePath = functions.getImagePath(kind, newPostID, Number(fileOrder), filename)
@@ -1457,6 +1494,7 @@ const CreateRoutes = (app: Express) => {
           bookmarks: unverified.bookmarks ? unverified.bookmarks : null,
           purchaseLink: unverified.purchaseLink ? unverified.purchaseLink : null,
           mirrors: unverified.mirrors ? functions.mirrorsJSON(unverified.mirrors) : null,
+          slug: functions.postSlug(unverified.title, unverified.translatedTitle),
           type,
           uploadDate: unverified.uploadDate,
           updatedDate: unverified.updatedDate,
@@ -1480,48 +1518,52 @@ const CreateRoutes = (app: Express) => {
 
         for (let i = 0; i < tags.length; i++) {
           if (!tags[i].tag) continue
-          let bulkObj = {tag: tags[i].tag, type: functions.tagType(tags[i].tag), description: tags[i].description, image: null} as any
+          let bulkObj = {tag: tags[i].tag, type: functions.tagType(tags[i].tag), description: tags[i].description, image: null, imageHash: null} as any
           if (tags[i].image) {
             const imagePath = functions.getTagPath("tag", tags[i].image)
             const buffer = await serverFunctions.getUnverifiedFile(imagePath)
             await serverFunctions.uploadFile(imagePath, buffer, false)
             bulkObj.image = tags[i].image
+            bulkObj.imageHash = serverFunctions.md5(buffer)
           }
           bulkTagUpdate.push(bulkObj)
         }
 
         for (let i = 0; i < artists.length; i++) {
           if (!artists[i].tag) continue
-          let bulkObj = {tag: artists[i].tag, type: "artist", description: "Artist.", image: null} as any
+          let bulkObj = {tag: artists[i].tag, type: "artist", description: "Artist.", image: null, imageHash: null} as any
           if (artists[i].image) {
             const imagePath = functions.getTagPath("artist", artists[i].image)
             const buffer = await serverFunctions.getUnverifiedFile(imagePath)
             await serverFunctions.uploadFile(imagePath, buffer, false)
             bulkObj.image = artists[i].image
+            bulkObj.imageHash = serverFunctions.md5(buffer)
           }
           bulkTagUpdate.push(bulkObj)
         }
 
         for (let i = 0; i < characters.length; i++) {
           if (!characters[i].tag) continue
-          let bulkObj = {tag: characters[i].tag, type: "character", description: "Character.", image: null} as any
+          let bulkObj = {tag: characters[i].tag, type: "character", description: "Character.", image: null, imageHash: null} as any
           if (characters[i].image) {
             const imagePath = functions.getTagPath("character", characters[i].image)
             const buffer = await serverFunctions.getUnverifiedFile(imagePath)
             await serverFunctions.uploadFile(imagePath, buffer, false)
             bulkObj.image = characters[i].image
+            bulkObj.imageHash = serverFunctions.md5(buffer)
           }
           bulkTagUpdate.push(bulkObj)
         }
 
         for (let i = 0; i < series.length; i++) {
           if (!series[i].tag) continue
-          let bulkObj = {tag: series[i].tag, type: "series", description: "Series.", image: null} as any
+          let bulkObj = {tag: series[i].tag, type: "series", description: "Series.", image: null, imageHash: null} as any
           if (series[i].image) {
             const imagePath = functions.getTagPath("series", series[i].image)
             const buffer = await serverFunctions.getUnverifiedFile(imagePath)
             await serverFunctions.uploadFile(imagePath, buffer, false)
             bulkObj.image = series[i].image
+            bulkObj.imageHash = serverFunctions.md5(buffer)
           }
           bulkTagUpdate.push(bulkObj)
         }
@@ -1532,7 +1574,7 @@ const CreateRoutes = (app: Express) => {
             for (const i of implications) {
               addedTags.push(i.implication)
               const tag = await sql.tag.tag(i.implication)
-              bulkTagUpdate.push({tag: i.implication, type: functions.tagType(i.implication), description: tag?.description || null, image: tag?.image || null})
+              bulkTagUpdate.push({tag: i.implication, type: functions.tagType(i.implication), description: tag?.description || null, image: tag?.image || null, imageHash: tag?.imageHash || null})
             }
           }
         }
@@ -1590,7 +1632,7 @@ const CreateRoutes = (app: Express) => {
               await sql.history.insertPostHistory({
                 postID: newPostID, username: vanilla.user, images: vanillaImages, uploader: vanilla.uploader, updater: vanilla.updater, 
                 uploadDate: vanilla.uploadDate, updatedDate: vanilla.updatedDate, type: vanilla.type, restrict: vanilla.restrict, 
-                style: vanilla.style, thirdParty: vanilla.thirdParty, title: vanilla.title, translatedTitle: vanilla.translatedTitle, 
+                style: vanilla.style, thirdParty: vanilla.thirdParty, title: vanilla.title, translatedTitle: vanilla.translatedTitle, slug: vanilla.slug,
                 posted: vanilla.posted, artist: vanilla.artist, link: vanilla.link, commentary: vanilla.commentary, translatedCommentary: vanilla.translatedCommentary, 
                 bookmarks: vanilla.bookmarks, purchaseLink: vanilla.purchaseLink, mirrors: vanilla.mirrors, hasOriginal: vanilla.hasOriginal, hasUpscaled: vanilla.hasUpscaled, 
                 artists: vanilla.artists, characters: vanilla.characters, series: vanilla.series, tags: vanilla.tags, addedTags: [], removedTags: [], imageChanged: false, 
@@ -1621,7 +1663,7 @@ const CreateRoutes = (app: Express) => {
                 postID: newPostID, username: req.session.username, images: newImages, uploader: updated.uploader, updater: updated.updater, 
                 uploadDate: updated.uploadDate, updatedDate: updated.updatedDate, type: updated.type, restrict: updated.restrict, 
                 style: updated.style, thirdParty: updated.thirdParty, title: updated.title, translatedTitle: updated.translatedTitle, 
-                posted: updated.posted, artist: updated.artist, link: updated.link, commentary: updated.commentary, 
+                posted: updated.posted, artist: updated.artist, link: updated.link, commentary: updated.commentary, slug: updated.slug,
                 translatedCommentary: updated.translatedCommentary, bookmarks: updated.bookmarks, purchaseLink: updated.purchaseLink, mirrors: updated.mirrors, 
                 hasOriginal: updated.hasOriginal, hasUpscaled: updated.hasUpscaled, artists, characters, series, tags, addedTags, removedTags, imageChanged: imgChanged,
                 changes, reason})
@@ -1662,7 +1704,7 @@ const CreateRoutes = (app: Express) => {
                 postID, username: req.session.username, images: newImages, uploader: updated.uploader, updater: updated.updater, 
                 uploadDate: updated.uploadDate, updatedDate: updated.updatedDate, type: updated.type, restrict: updated.restrict, 
                 style: updated.style, thirdParty: updated.thirdParty, title: updated.title, translatedTitle: updated.translatedTitle, 
-                posted: updated.posted, artist: updated.artist, link: updated.link, commentary: updated.commentary, 
+                posted: updated.posted, artist: updated.artist, link: updated.link, commentary: updated.commentary, slug: updated.slug,
                 translatedCommentary: updated.translatedCommentary, bookmarks: updated.bookmarks, purchaseLink: updated.purchaseLink, mirrors: updated.mirrors, 
                 hasOriginal: updated.hasOriginal, hasUpscaled: updated.hasUpscaled, artists, characters, series, tags, addedTags, removedTags, imageChanged: imgChanged,
                 changes, reason})

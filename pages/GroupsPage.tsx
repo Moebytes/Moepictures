@@ -29,24 +29,20 @@ interface Props {
 
 const GroupThumbnail: React.FunctionComponent<Props> = (props) => {
     const {mobile, setMobile} = useContext(MobileContext)
+    const {session, setSession} = useContext(SessionContext)
     const [img, setImg] = useState("")
     const history = useHistory()
 
     const updateImage = async () => {
         const post = props.group.posts[0]
         const imageLink = functions.getThumbnailLink(post.images[0]?.type, post.postID, post.images[0]?.order, post.images[0]?.filename, "medium", mobile)
-        let img = await cryptoFunctions.decryptedLink(imageLink)
-        if (functions.isModel(img)) {
-            img = await functions.modelImage(img)
-        } else if (functions.isAudio(img)) {
-            img = await functions.songCover(img)
-        }
+        let img = await functions.decryptThumb(imageLink, session)
         setImg(img)
     }
 
     useEffect(() => {
         updateImage()
-    }, [props.group])
+    }, [props.group, session])
 
     const click = (event: React.MouseEvent) => {
         if (event.ctrlKey || event.metaKey || event.button === 1) {

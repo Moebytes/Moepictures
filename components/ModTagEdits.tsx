@@ -419,7 +419,7 @@ const ModTagEdits: React.FunctionComponent = (props) => {
             let parts = request.image?.split("/")
             if (request.image === "delete") parts = null
             const img = parts ? `${window.location.protocol}//${window.location.host}/unverified/${parts[0]}/${encodeURIComponent(parts[1])}` : ""
-            const oldImg = oldTag ? functions.getTagLink(oldTag.type, oldTag.image) : ""
+            const oldImg = oldTag ? functions.getTagLink(oldTag.type, oldTag.image, oldTag.imageHash) : ""
             jsx.push(
                 <div className="mod-post" onMouseEnter={() =>setHover(true)} onMouseLeave={() => setHover(false)}>
                     {showOldTags[i] && oldTag ? <>

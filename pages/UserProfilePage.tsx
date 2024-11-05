@@ -237,7 +237,7 @@ const UserProfilePage: React.FunctionComponent = (props) => {
                                 delayArray.push(gifData[i].delay)
                             }
                             const firstURL = await functions.crop(gifData[0].frame.toDataURL(), 1)
-                            const {width, height} = await functions.imageDimensions(firstURL)
+                            const {width, height} = await functions.imageDimensions(firstURL, session)
                             const buffer = await functions.encodeGIF(frameArray, delayArray, width, height)
                             const blob = new Blob([buffer])
                             croppedURL = URL.createObjectURL(blob)
@@ -338,11 +338,11 @@ const UserProfilePage: React.FunctionComponent = (props) => {
 
     const setUp = (img: string, index: number, newTab: boolean) => {
         setUploadIndex(index)
-        const postID = uploads[index].postID
+        const post = uploads[index]
         if (newTab) {
-            window.open(`/post/${postID}`, "_blank")
+            window.open(`/post/${post.postID}/${post.slug}`, "_blank")
         } else {
-            history.push(`/post/${postID}`)
+            history.push(`/post/${post.postID}/${post.slug}`)
         }
         window.scrollTo(0, functions.navbarHeight() + functions.titlebarHeight())
         setPosts(uploads)
@@ -350,11 +350,11 @@ const UserProfilePage: React.FunctionComponent = (props) => {
 
     const setFav = (img: string, index: number, newTab: boolean) => {
         setFavoriteIndex(index)
-        const postID = favorites[index].postID
+        const post = favorites[index]
         if (newTab) {
-            window.open(`/post/${postID}`, "_blank")
+            window.open(`/post/${post.postID}/${post.slug}`, "_blank")
         } else {
-            history.push(`/post/${postID}`)
+            history.push(`/post/${post.postID}/${post.slug}`)
         }
         window.scrollTo(0, functions.navbarHeight() + functions.titlebarHeight())
         setPosts(favorites)
@@ -518,11 +518,11 @@ const UserProfilePage: React.FunctionComponent = (props) => {
                 history.push(`/favgroup/${session.username}/${favgroup.slug}`)
             }
             const setFavgroup = (img: string, index: number, newTab: boolean) => {
-                const postID = favgroup.posts[index].postID
+                const post = favgroup.posts[index]
                 if (newTab) {
-                    window.open(`/post/${postID}`, "_blank")
+                    window.open(`/post/${post.postID}/${post.slug}`, "_blank")
                 } else {
-                    history.push(`/post/${postID}`)
+                    history.push(`/post/${post.postID}/${post.slug}`)
                 }
                 window.scrollTo(0, functions.navbarHeight() + functions.titlebarHeight())
                 setPosts(favgroup.posts)

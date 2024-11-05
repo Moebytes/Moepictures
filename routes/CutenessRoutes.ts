@@ -3,6 +3,7 @@ import rateLimit from "express-rate-limit"
 import slowDown from "express-slow-down"
 import sql from "../sql/SQLQuery"
 import functions from "../structures/Functions"
+import cryptoFunctions from "../structures/CryptoFunctions"
 import serverFunctions, {csrfProtection, keyGenerator, handler} from "../structures/ServerFunctions"
 
 const cutenessLimiter = rateLimit({
@@ -35,7 +36,9 @@ const CutenessRoutes = (app: Express) => {
             if (Number.isNaN(Number(postID))) return res.status(400).send("Invalid postID")
             if (!req.session.username) return res.status(403).send("Unauthorized")
             const cute = await sql.cuteness.cuteness(Number(postID), req.session.username)
-            res.status(200).send(cute)
+            if (!req.session.publicKey) return res.status(401).send("No public key")
+            const encrypted = cryptoFunctions.encryptAPI(cute, req.session.publicKey)
+            res.status(200).send(encrypted)
         } catch (e) {
             console.log(e)
             res.status(400).send("Bad request") 

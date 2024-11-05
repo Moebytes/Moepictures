@@ -3,6 +3,7 @@ import rateLimit from "express-rate-limit"
 import slowDown from "express-slow-down"
 import sql from "../sql/SQLQuery"
 import functions from "../structures/Functions"
+import cryptoFunctions from "../structures/CryptoFunctions"
 import permissions from "../structures/Permissions"
 import serverFunctions, {csrfProtection, keyGenerator, handler} from "../structures/ServerFunctions"
 
@@ -59,7 +60,9 @@ const FavoriteRoutes = (app: Express) => {
             if (Number.isNaN(Number(postID))) return res.status(400).send("Invalid postID")
             if (!req.session.username) return res.status(403).send("Unauthorized")
             const favorite = await sql.favorite.favorite(Number(postID), req.session.username)
-            res.status(200).send(favorite)
+            if (!req.session.publicKey) return res.status(401).send("No public key")
+            const encrypted = cryptoFunctions.encryptAPI(favorite, req.session.publicKey)
+            res.status(200).send(encrypted)
         } catch (e) {
             console.log(e)
             res.status(400).send("Bad request") 
@@ -123,7 +126,9 @@ const FavoriteRoutes = (app: Express) => {
                 }
                 newFavgroups.push(group)
             }
-            res.status(200).send(newFavgroups)
+            if (!req.session.publicKey) return res.status(401).send("No public key")
+            const encrypted = cryptoFunctions.encryptAPI(newFavgroups, req.session.publicKey)
+            res.status(200).send(encrypted)
         } catch (e) {
             console.log(e)
             res.status(400).send("Bad request") 
@@ -181,7 +186,9 @@ const FavoriteRoutes = (app: Express) => {
                     if (!permissions.canPrivate(req.session, categories.artists)) favgroup.posts.splice(i, 1)
                 }
             }
-            res.status(200).json(favgroup)
+            if (!req.session.publicKey) return res.status(401).send("No public key")
+            const encrypted = cryptoFunctions.encryptAPI(favgroup, req.session.publicKey)
+            res.status(200).send(encrypted)
         } catch (e) {
             console.log(e)
             res.status(400).send("Bad request") 

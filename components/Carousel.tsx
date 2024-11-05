@@ -1,9 +1,9 @@
 import React, {useContext, useEffect, useRef, useState, useReducer, useMemo} from "react"
 import {ThemeContext, EnableDragContext, MobileContext, BrightnessContext, ContrastContext, HueContext, SaturationContext, LightnessContext,
-BlurContext, SharpenContext, PixelateContext, SiteHueContext, SiteLightnessContext, SiteSaturationContext, TranslationDrawingEnabledContext} from "../Context"
+BlurContext, SharpenContext, PixelateContext, SiteHueContext, SiteLightnessContext, SiteSaturationContext, TranslationDrawingEnabledContext,
+SessionContext} from "../Context"
 import {HashLink as Link} from "react-router-hash-link"
 import functions from "../structures/Functions"
-import cryptoFunctions from "../structures/CryptoFunctions"
 import arrowLeft from "../assets/icons/carousel-left.png"
 import arrowRight from "../assets/icons/carousel-right.png"
 import "./styles/carousel.less"
@@ -44,6 +44,7 @@ const Carousel: React.FunctionComponent<Props> = (props) => {
     const {sharpen, setSharpen} = useContext(SharpenContext)
     const {pixelate, setPixelate} = useContext(PixelateContext)
     const {translationDrawingEnabled, setTranslationDrawingEnabled} = useContext(TranslationDrawingEnabledContext)
+    const {session, setSession} = useContext(SessionContext)
     const [lastPos, setLastPos] = useState(null) as any
     const [dragging, setDragging] = useState(false) as any
     const [imagesRef, setImagesRef] = useState([]) as any
@@ -409,15 +410,9 @@ const Carousel: React.FunctionComponent<Props> = (props) => {
         for (let i = startIndex; i < imagesRef.length; i++) {
             const ref = imagesRef[i]
             if (!ref.current) continue
-            let src = visibleImages[i]
+            let src = visibleImages[i] 
             if (functions.isVideo(src) || functions.isGIF(src)) continue
-            if (functions.isImage(src)) {
-                src = await cryptoFunctions.decryptedLink(src)
-            } else if (functions.isModel(src)) {
-                src = await functions.modelImage(src)
-            } else if (functions.isAudio(src)) {
-                src = await functions.songCover(src)
-            }
+            src = await functions.decryptThumb(visibleImages[i], session)
             const imgElement = document.createElement("img")
             imgElement.src = src
             imgElement.onload = () => {
@@ -433,7 +428,7 @@ const Carousel: React.FunctionComponent<Props> = (props) => {
 
     useEffect(() => {
         loadImages()
-    }, [visibleImages, visibleIndex, imagesRef, brightness, contrast, hue, saturation, lightness, blur, sharpen, pixelate])
+    }, [visibleImages, visibleIndex, imagesRef, brightness, contrast, hue, saturation, lightness, blur, sharpen, pixelate, session])
 
     const generateJSX = () => {
         const jsx = [] as any

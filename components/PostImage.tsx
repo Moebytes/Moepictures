@@ -7,7 +7,6 @@ import {HashLink as Link} from "react-router-hash-link"
 import {createFFmpeg, fetchFile} from "@ffmpeg/ffmpeg"
 import functions from "../structures/Functions"
 import permissions from "../structures/Permissions"
-import cryptoFunctions from "../structures/CryptoFunctions"
 import loading from "../assets/icons/loading.gif"
 import Slider from "react-slider"
 import gifReverseIcon from "../assets/icons/gif-reverse.png"
@@ -190,8 +189,11 @@ const PostImage: React.FunctionComponent<Props> = (props) => {
         if (ref.current) ref.current.style.opacity = "1"
         if (videoRef.current) videoRef.current.style.opacity = "1"
         if (mobile) fetchVideo()
+    }, [props.img])
+
+    useEffect(() => {
         const updateImg = async () => {
-            const decryptedImage = await functions.decryptImg(props.img, props.img)
+            const decryptedImage = await functions.decryptItem(props.img, session)
             let isAnimatedWebp = false
             if (functions.isWebP(props.img)) {
                 const arrayBuffer = await fetch(props.img).then((r) => r.arrayBuffer())
@@ -203,7 +205,7 @@ const PostImage: React.FunctionComponent<Props> = (props) => {
             setImg(decryptedImage)
         }
         updateImg()
-    }, [props.img])
+    }, [props.img, session])
 
     useEffect(() => {
         if (gifSliderRef.current) gifSliderRef.current.resize()
@@ -926,7 +928,7 @@ const PostImage: React.FunctionComponent<Props> = (props) => {
     const renderImage = async (image?: string) => {
         if (filtersOn()) {
             if (image) {
-                const decrypted = await cryptoFunctions.decryptedLink(image)
+                const decrypted = await functions.decryptItem(image, session)
                 const img = await functions.createImage(decrypted)
                 return render(img)
             } else {
@@ -934,9 +936,9 @@ const PostImage: React.FunctionComponent<Props> = (props) => {
             }
         } else {
             if (image) {
-                return cryptoFunctions.decryptedLink(image)
+                return functions.decryptItem(image, session)
             } else {
-                return cryptoFunctions.decryptedLink(props.img)
+                return functions.decryptItem(props.img, session)
             }
 
         }
@@ -1059,7 +1061,7 @@ const PostImage: React.FunctionComponent<Props> = (props) => {
                     if (session.downloadPixivID && props.post?.link?.includes("pixiv.net")) {
                         pageName = `${props.post.link.match(/\d+/g)?.[0]}_p${i}${path.extname(page)}`
                     }
-                    const decryptedPage = await cryptoFunctions.decryptedLink(page)
+                    const decryptedPage = await functions.decryptItem(page, session)
                     let image = await renderImage(decryptedPage)
                     if (filtersOn() || path.extname(pageName) !== `.${format}`) {
                         image = await functions.convertToFormat(image, format)

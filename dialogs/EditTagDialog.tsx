@@ -159,7 +159,7 @@ const EditTagDialog: React.FunctionComponent = (props) => {
                                 delayArray.push(gifData[i].delay)
                             }
                             const firstURL = await functions.crop(gifData[0].frame.toDataURL(), 1)
-                            const {width, height} = await functions.imageDimensions(firstURL)
+                            const {width, height} = await functions.imageDimensions(firstURL, session)
                             const buffer = await functions.encodeGIF(frameArray, delayArray, width, height)
                             const blob = new Blob([buffer])
                             croppedURL = URL.createObjectURL(blob)

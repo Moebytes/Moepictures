@@ -145,14 +145,13 @@ const App: React.FunctionComponent = (props) => {
 
     const getImg = () => {
         if (session.username) {
-            return session.image ? functions.getTagLink("pfp", session.image) : favicon
+            return session.image ? functions.getTagLink("pfp", session.image, session.imageHash) : favicon
         } else {
             return ""
         }
     }
 
     const updatePfp = async () => {
-        await functions.refreshCache(getImg())
         setUserImg(getImg())
         if (session.imagePost) setUserImgPost(session.imagePost)
     }
@@ -357,6 +356,7 @@ const App: React.FunctionComponent = (props) => {
                         <Route exact path="/post/history/:id" render={(props) => <PostHistoryPage {...props}/>}></Route>
                         <Route exact path="/user/:username/post/history" render={(props) => <PostHistoryPage {...props}/>}></Route>
                         <Route exact path="/post/:id" render={(props) => <PostPage {...props}/>}></Route>
+                        <Route exact path="/post/:id/:slug" render={(props) => <PostPage {...props}/>}></Route>
                         <Route exact path="/unverified/post/:id" render={(props) => <UnverifiedPostPage {...props}/>}></Route>
                         <Route exact path="/edit-post/:id" render={(props) => <EditPostPage {...props}/>}></Route>
                         <Route exact path="/unverified/edit-post/:id" render={(props) => <EditUnverifiedPostPage {...props}/>}></Route>

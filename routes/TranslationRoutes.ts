@@ -3,6 +3,7 @@ import rateLimit from "express-rate-limit"
 import slowDown from "express-slow-down"
 import sql from "../sql/SQLQuery"
 import functions from "../structures/Functions"
+import cryptoFunctions from "../structures/CryptoFunctions"
 import permissions from "../structures/Permissions"
 import path from "path"
 import sharp from "sharp"
@@ -97,7 +98,9 @@ const TranslationRoutes = (app: Express) => {
             const postID = req.query.postID
             if (Number.isNaN(Number(postID))) return res.status(400).send("Invalid postID")
             const translations = await sql.translation.translations(Number(postID))
-            res.status(200).json(translations)
+            if (!req.session.publicKey) return res.status(401).send("No public key")
+            const encrypted = cryptoFunctions.encryptAPI(translations, req.session.publicKey)
+            res.status(200).send(encrypted)
         } catch (e) {
             console.log(e)
             res.status(400).send("Bad request")
@@ -167,29 +170,29 @@ const TranslationRoutes = (app: Express) => {
                 let kind = "image" as any
                 if (type === "comic") {
                     kind = "comic"
-                } else if (ext === "jpg" || ext === "png" || ext === "avif") {
-                    kind = "image"
-                } else if (ext === "webp") {
+                  } else if (functions.isWebP(`.${ext}`)) {
                     const animated = functions.isAnimatedWebp(current)
                     if (animated) {
-                        kind = "animation"
-                    if (type !== "video") type = "animation"
+                      kind = "animation"
+                      if (type !== "video") type = "animation"
                     } else {
-                        kind = "image"
+                      kind = "image"
                     }
-                } else if (ext === "gif") {
+                  } else if (functions.isImage(`.${ext}`)) {
+                    kind = "image"
+                  } else if (functions.isGIF(`.${ext}`)) {
                     kind = "animation"
                     if (type !== "video") type = "animation"
-                } else if (ext === "mp4" || ext === "webm") {
+                  } else if (functions.isVideo(`.${ext}`)) {
                     kind = "video"
                     type = "video"
-                } else if (ext === "mp3" || ext === "wav") {
+                  } else if (functions.isAudio(`.${ext}`)) {
                     kind = "audio"
                     type = "audio"
-                } else if (ext === "glb" || ext === "obj" || ext === "fbx") {
+                  } else if (functions.isModel(`.${ext}`)) {
                     kind = "model"
                     type = "model"
-                }
+                  }
                 if (buffer.byteLength) {
                     let newImagePath = functions.getImagePath(kind, postID, Number(fileOrder), filename)
                     await serverFunctions.uploadUnverifiedFile(newImagePath, buffer)
@@ -235,6 +238,7 @@ const TranslationRoutes = (app: Express) => {
                 bookmarks: source.bookmarks ? source.bookmarks : null,
                 purchaseLink: source.purchaseLink ? source.purchaseLink : null,
                 mirrors: source.mirrors ? functions.mirrorsJSON(source.mirrors) : null,
+                slug: functions.postSlug(source.title, source.translatedTitle),
                 uploader: post.uploader,
                 uploadDate: post.uploadDate,
                 updatedDate,
@@ -249,7 +253,7 @@ const TranslationRoutes = (app: Express) => {
     
             for (let i = 0; i < artists.length; i++) {
                 if (!artists[i]) continue
-                let bulkObj = {tag: artists[i], type: "artist", description: "Artist.", image: null} as any
+                let bulkObj = {tag: artists[i], type: "artist", description: "Artist.", image: null, imageHash: null} as any
                 const existingTag = await sql.tag.tag(artists[i])
                 if (existingTag) {
                     if (existingTag.description) bulkObj.description = existingTag.description
@@ -258,6 +262,7 @@ const TranslationRoutes = (app: Express) => {
                         const buffer = await serverFunctions.getFile(imagePath, false, false)
                         await serverFunctions.uploadUnverifiedFile(imagePath, buffer)
                         bulkObj.image = existingTag.image
+                        bulkObj.imageHash = serverFunctions.md5(buffer)
                     }
                 }
                 bulkTagUpdate.push(bulkObj)
@@ -266,7 +271,7 @@ const TranslationRoutes = (app: Express) => {
             
             for (let i = 0; i < characters.length; i++) {
                 if (!characters[i]) continue
-                let bulkObj = {tag: characters[i], type: "character", description: "Character.", image: null} as any
+                let bulkObj = {tag: characters[i], type: "character", description: "Character.", image: null, imageHash: null} as any
                 const existingTag = await sql.tag.tag(characters[i])
                 if (existingTag) {
                     if (existingTag.description) bulkObj.description = existingTag.description
@@ -275,6 +280,7 @@ const TranslationRoutes = (app: Express) => {
                         const buffer = await serverFunctions.getFile(imagePath, false, false)
                         await serverFunctions.uploadUnverifiedFile(imagePath, buffer)
                         bulkObj.image = existingTag.image
+                        bulkObj.imageHash = serverFunctions.md5(buffer)
                     }
                 }
                 bulkTagUpdate.push(bulkObj)
@@ -283,7 +289,7 @@ const TranslationRoutes = (app: Express) => {
 
             for (let i = 0; i < series.length; i++) {
                 if (!series[i]) continue
-                let bulkObj = {tag: series[i], type: "series", description: "Series.", image: null} as any
+                let bulkObj = {tag: series[i], type: "series", description: "Series.", image: null, imageHash: null} as any
                 const existingTag = await sql.tag.tag(series[i])
                 if (existingTag) {
                     if (existingTag.description) bulkObj.description = existingTag.description
@@ -292,6 +298,7 @@ const TranslationRoutes = (app: Express) => {
                         const buffer = await serverFunctions.getFile(imagePath, false, false)
                         await serverFunctions.uploadUnverifiedFile(imagePath, buffer)
                         bulkObj.image = existingTag.image
+                        bulkObj.imageHash = serverFunctions.md5(buffer)
                     }
                 }
                 bulkTagUpdate.push(bulkObj)
@@ -300,7 +307,7 @@ const TranslationRoutes = (app: Express) => {
 
             for (let i = 0; i < tags.length; i++) {
                 if (!tags[i]) continue
-                let bulkObj = {tag: tags[i], type: functions.tagType(tags[i]), description: `${functions.toProperCase(tags[i]).replaceAll("-", " ")}.`, image: null} as any
+                let bulkObj = {tag: tags[i], type: functions.tagType(tags[i]), description: `${functions.toProperCase(tags[i]).replaceAll("-", " ")}.`, image: null, imageHash: null} as any
                 const existingTag = await sql.tag.tag(tags[i])
                 if (existingTag) {
                     if (existingTag.description) bulkObj.description = existingTag.description
@@ -309,6 +316,7 @@ const TranslationRoutes = (app: Express) => {
                         const buffer = await serverFunctions.getFile(imagePath, false, false)
                         await serverFunctions.uploadUnverifiedFile(imagePath, buffer)
                         bulkObj.image = existingTag.image
+                        bulkObj.imageHash = serverFunctions.md5(buffer)
                     }
                 }
                 bulkTagUpdate.push(bulkObj)
@@ -321,7 +329,7 @@ const TranslationRoutes = (app: Express) => {
                     for (const i of implications) {
                       tagMap.push(i.implication)
                       const tag = await sql.tag.tag(i.implication)
-                      bulkTagUpdate.push({tag: i.implication, type: functions.tagType(i.implication), description: tag?.description || null, image: tag?.image || null})
+                      bulkTagUpdate.push({tag: i.implication, type: functions.tagType(i.implication), description: tag?.description || null, image: tag?.image || null, imageHash: tag?.imageHash || null})
                     }
                 }
             }
@@ -347,7 +355,9 @@ const TranslationRoutes = (app: Express) => {
             if (!req.session.username) return res.status(403).send("Unauthorized")
             if (!permissions.isMod(req.session)) return res.status(403).end()
             const translations = await sql.translation.unverifiedPostTranslations(Number(postID))
-            res.status(200).json(translations)
+            if (!req.session.publicKey) return res.status(401).send("No public key")
+            const encrypted = cryptoFunctions.encryptAPI(translations, req.session.publicKey)
+            res.status(200).send(encrypted)
         } catch (e) {
             console.log(e)
             res.status(400).send("Bad request")
@@ -379,7 +389,9 @@ const TranslationRoutes = (app: Express) => {
             if (!req.session.username) return res.status(403).send("Unauthorized")
             if (!permissions.isMod(req.session)) return res.status(403).end()
             const result = await sql.translation.unverifiedTranslations(offset)
-            res.status(200).json(result)
+            if (!req.session.publicKey) return res.status(401).send("No public key")
+            const encrypted = cryptoFunctions.encryptAPI(result, req.session.publicKey)
+            res.status(200).send(encrypted)
         } catch (e) {
             console.log(e)
             return res.status(400).send("Bad request")
@@ -456,16 +468,17 @@ const TranslationRoutes = (app: Express) => {
             const query = req.query.query as string
             const offset = req.query.offset as string
             if (!req.session.username) return res.status(403).send("Unauthorized")
+            let result = null as any
             if (historyID) {
-                const result = await sql.history.translationHistoryID(postID, historyID)
-                res.status(200).json(result)
+                result = await sql.history.translationHistoryID(postID, historyID)
             } else if (username) {
-                const result = await sql.history.userTranslationHistory(username)
-                res.status(200).json(result)
+                result = await sql.history.userTranslationHistory(username)
             } else {
-                const result = await sql.history.translationHistory(postID, order, offset, query)
-                res.status(200).json(result)
+                result = await sql.history.translationHistory(postID, order, offset, query)
             }
+            if (!req.session.publicKey) return res.status(401).send("No public key")
+            const encrypted = cryptoFunctions.encryptAPI(result, req.session.publicKey)
+            res.status(200).send(encrypted)
         } catch (e) {
             console.log(e)
             res.status(400).send("Bad request")

@@ -3,6 +3,7 @@ import rateLimit from "express-rate-limit"
 import slowDown from "express-slow-down"
 import sql from "../sql/SQLQuery"
 import functions from "../structures/Functions"
+import cryptoFunctions from "../structures/CryptoFunctions"
 import permissions from "../structures/Permissions"
 import serverFunctions, {csrfProtection, keyGenerator, handler} from "../structures/ServerFunctions"
 
@@ -102,7 +103,9 @@ const MessageRoutes = (app: Express) => {
             }
             if (message.r18 && !req.session.showR18) canView = false
             if (!canView && !permissions.isMod(req.session)) return res.status(403).send("No permission to view")
-            res.status(200).json(message)
+            if (!req.session.publicKey) return res.status(401).send("No public key")
+            const encrypted = cryptoFunctions.encryptAPI(message, req.session.publicKey)
+            res.status(200).send(encrypted)
         } catch (e) {
             console.log(e)
             res.status(400).send("Bad request")
@@ -188,7 +191,9 @@ const MessageRoutes = (app: Express) => {
             if (!req.session.showR18) {
                 result = result.filter((r: any) => !r.r18)
             }
-            res.status(200).json(result)
+            if (!req.session.publicKey) return res.status(401).send("No public key")
+            const encrypted = cryptoFunctions.encryptAPI(result, req.session.publicKey)
+            res.status(200).send(encrypted)
         } catch (e) {
             console.log(e)
             res.status(400).send("Bad request")

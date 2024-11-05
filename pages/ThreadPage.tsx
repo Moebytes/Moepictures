@@ -383,7 +383,7 @@ const ThreadPage: React.FunctionComponent<Props> = (props) => {
 
     const getCreatorPFP = () => {
         if (thread.image) {
-            return functions.getTagLink("pfp", thread.image)
+            return functions.getTagLink("pfp", thread.image, thread.imageHash)
         } else {
             return favicon
         }

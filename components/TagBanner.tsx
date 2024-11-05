@@ -128,7 +128,7 @@ const TagBanner: React.FunctionComponent = (props) => {
 
     const updateBannerTags = async () => {
         const visibleSlice = getVisibleSlice()
-        const visibleTags = await functions.post("/api/search/sidebartags", {postIDs: visibleSlice.map((p: any) => p.postID)}, session, setSessionFlag)
+        const visibleTags = await functions.get("/api/search/sidebartags", {postIDs: visibleSlice.map((p: any) => p.postID)}, session, setSessionFlag)
         const characterTags = [] as any
         const characterTagsImg = [] as any
         const seriesTags = [] as any
@@ -167,7 +167,7 @@ const TagBanner: React.FunctionComponent = (props) => {
             }
             jsx.push(
                 <div className="tagbanner-box">
-                    {bannerTag.image ? <img className="tagbanner-img" src={functions.getTagLink(bannerTag.type, bannerTag.image)}/> : null}
+                    {bannerTag.image ? <img className="tagbanner-img" src={functions.getTagLink(bannerTag.type, bannerTag.image, bannerTag.imageHash)}/> : null}
                     <span className="tagbanner-tag" onClick={tagClick} onContextMenu={tagPage}>{bannerTag.tag}</span>
                 </div>
             )

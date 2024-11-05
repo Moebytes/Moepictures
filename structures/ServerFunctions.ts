@@ -478,6 +478,10 @@ export default class ServerFunctions {
         console.log("Done")
     }
 
+    public static md5 = (buffer: Buffer) => {
+        return crypto.createHash("md5").update(new Uint8Array(buffer)).digest("hex")
+    }
+
     private static removeLocalDirectory = (dir: string) => {
         if (!fs.existsSync(dir)) return
         fs.readdirSync(dir).forEach((file) => {

@@ -28,11 +28,11 @@ export default class SQLComment {
     public static comments = async (postID: number) => {
         const query: QueryConfig = {
         text: functions.multiTrim(/*sql*/`
-                SELECT comments.*, users."image", users."imagePost", users."role", users."banned"
+                SELECT comments.*, users."image", users."imageHash", users."imagePost", users."role", users."banned"
                 FROM comments
                 JOIN "users" ON "users"."username" = "comments"."username"
                 WHERE comments."postID" = $1
-                GROUP BY comments."commentID", users."image", users."imagePost", users."role", users."banned"
+                GROUP BY comments."commentID", users."image", users."imageHash", users."imagePost", users."role", users."banned"
                 ORDER BY comments."postDate" ASC
             `),
             values: [postID]
@@ -45,11 +45,11 @@ export default class SQLComment {
     public static userComments = async (username: string) => {
         const query: QueryConfig = {
         text: functions.multiTrim(/*sql*/`
-                SELECT comments.*, users."image", users."imagePost", users."role", users."banned"
+                SELECT comments.*, users."image", users."imageHash", users."imagePost", users."role", users."banned"
                 FROM comments
                 JOIN "users" ON "users"."username" = "comments"."username"
                 WHERE comments."username" = $1
-                GROUP BY comments."commentID", users."image", users."imagePost", users."role", users."banned"
+                GROUP BY comments."commentID", users."image", users."imageHash", users."imagePost", users."role", users."banned"
                 ORDER BY comments."postDate" ASC
             `),
             values: [username]
@@ -80,13 +80,13 @@ export default class SQLComment {
                 )
                 SELECT comments.*,
                 COUNT(*) OVER() AS "commentCount",
-                users."image", users."imagePost", users."role", users."banned", 
+                users."image", users."imageHash", users."imagePost", users."role", users."banned", 
                 to_json((array_agg(post_json.*))[1]) AS post
                 FROM comments
                 JOIN "users" ON "users"."username" = "comments"."username"
                 JOIN post_json ON post_json."postID" = "comments"."postID"
                 ${whereQuery}
-                GROUP BY comments."commentID", users."image", users."imagePost", users."role", users."banned"
+                GROUP BY comments."commentID", users."image", users."imageHash", users."imagePost", users."role", users."banned"
                 ${sortQuery}
                 LIMIT 100 ${offset ? `OFFSET $${i}` : ""}
             `),
@@ -120,13 +120,13 @@ export default class SQLComment {
                 )
                 SELECT comments.*, 
                 COUNT(*) OVER() AS "commentCount",
-                users."image", users."imagePost", users."role", users."banned", 
+                users."image", users."imageHash", users."imagePost", users."role", users."banned", 
                 to_json((array_agg(post_json.*))[1]) AS post
                 FROM comments
                 JOIN "users" ON "users"."username" = "comments"."username"
                 JOIN post_json ON post_json."postID" = "comments"."postID"
                 ${whereQuery}
-                GROUP BY comments."commentID", users."image", users."imagePost", users."role", users."banned"
+                GROUP BY comments."commentID", users."image", users."imageHash", users."imagePost", users."role", users."banned"
                 ${sortQuery}
                 LIMIT 100 ${offset ? `OFFSET $${i}` : ""}
             `),
@@ -142,11 +142,11 @@ export default class SQLComment {
     public static comment = async (commentID: number) => {
         const query: QueryConfig = {
         text: functions.multiTrim(/*sql*/`
-                SELECT comments.*, users."image", users."imagePost", users."role", users."banned"
+                SELECT comments.*, users."image", users."imageHash", users."imagePost", users."role", users."banned"
                 FROM comments
                 JOIN "users" ON "users"."username" = "comments"."username"
                 WHERE comments."commentID" = $1
-                GROUP BY comments."commentID", users."image", users."imagePost", users."role", users."banned"
+                GROUP BY comments."commentID", users."image", users."imageHash", users."imagePost", users."role", users."banned"
                 ORDER BY comments."postDate" ASC
             `),
             values: [commentID]

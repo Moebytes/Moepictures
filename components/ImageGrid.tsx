@@ -433,7 +433,7 @@ const ImageGrid: React.FunctionComponent = (props) => {
             }
         }
         loadImages()
-    }, [visiblePosts, postsRef])
+    }, [visiblePosts, postsRef, session])
 
     useEffect(() => {
         if (reupdateFlag) {
@@ -451,7 +451,7 @@ const ImageGrid: React.FunctionComponent = (props) => {
             updateImages()
             setReupdateFlag(false)
         }
-    }, [reupdateFlag])
+    }, [reupdateFlag, session])
 
     useEffect(() => {
         const populateCache = () => {
@@ -459,11 +459,11 @@ const ImageGrid: React.FunctionComponent = (props) => {
                 const image = post.images?.[0]
                 if (!image) continue
                 const thumbnail = functions.getThumbnailLink(image.type, post.postID, image.order, image.filename, sizeType, mobile)
-                functions.decryptImg(thumbnail, `${thumbnail}-${sizeType}`)
+                functions.decryptThumb(thumbnail, session, `${thumbnail}-${sizeType}`)
             }
         }
         populateCache()
-    }, [posts, sizeType, pageMultiplier])
+    }, [posts, sizeType, pageMultiplier, session])
 
     const firstPage = () => {
         setPage(1)

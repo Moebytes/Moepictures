@@ -88,12 +88,12 @@ const PostImageOptions: React.FunctionComponent<Props> = (props) => {
                 if (props.comicPages) {
                     let sizeTotal = 0
                     for (let i = 0; i < props.comicPages.length; i++) {
-                        let {size} = await functions.imageDimensions(props.comicPages[i])
+                        let {size} = await functions.imageDimensions(props.comicPages[i], session)
                         sizeTotal += size
                     }
                     setDownloadText(`${props.comicPages.length} pages (${functions.readableFileSize(sizeTotal)})`)
                 } else {
-                    let {width, height, size} = await functions.imageDimensions(props.img)
+                    let {width, height, size} = await functions.imageDimensions(props.img, session)
                     setDownloadText(`${width}x${height} (${functions.readableFileSize(size)})`)
                 }
             } else if (props.model) {
@@ -105,7 +105,7 @@ const PostImageOptions: React.FunctionComponent<Props> = (props) => {
             }
         }
         getDLText()
-    }, [props.img, props.model, props.audio, props.comicPages])
+    }, [props.img, props.model, props.audio, props.comicPages, session])
 
     const getFavorite = async () => {
         if (!props.post || !session.username) return

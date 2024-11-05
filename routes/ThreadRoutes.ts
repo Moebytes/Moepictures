@@ -3,6 +3,7 @@ import rateLimit from "express-rate-limit"
 import slowDown from "express-slow-down"
 import sql from "../sql/SQLQuery"
 import functions from "../structures/Functions"
+import cryptoFunctions from "../structures/CryptoFunctions"
 import permissions from "../structures/Permissions"
 import serverFunctions, {csrfProtection, keyGenerator, handler} from "../structures/ServerFunctions"
 
@@ -36,7 +37,8 @@ const pushMentionNotification = async (content: string, threadID: number, replyI
             const matchPart = piece.match(/(>>>(\[\d+\])?)(.*?)(?=$|>)/gm)?.[0] ?? ""
             const userPart = matchPart.replace(/(>>>(\[\d+\])?\s*)/, "")
             let username = userPart?.split(/ +/g)?.[0]?.toLowerCase() || ""
-            if (username) {
+            const user = await sql.user.user(username)
+            if (user) {
                 if (notified.has(username)) return
                 notified.add(username)
                 if (replyID) {
@@ -53,14 +55,17 @@ const pushMentionNotification = async (content: string, threadID: number, replyI
     parts.forEach(async (part, index) => {
         if (part.startsWith("@")) {
             const username = part.slice(1).toLowerCase()
-            if (notified.has(username)) return
-            notified.add(username)
-            if (replyID) {
-                let message = `You were mentioned in the thread "${thread.title}".\n\n${functions.getDomain()}/thread/${threadID}?reply=${replyID}`
-                await serverFunctions.systemMessage(username, `You were mentioned in the thread ${thread.title}`, message)
-            } else {
-                let message = `You were mentioned in the thread "${thread.title}".\n\n${functions.getDomain()}/thread/${threadID}`
-                await serverFunctions.systemMessage(username, `You were mentioned in the thread ${thread.title}`, message)
+            const user = await sql.user.user(username)
+            if (user) {
+                if (notified.has(username)) return
+                notified.add(username)
+                if (replyID) {
+                    let message = `You were mentioned in the thread "${thread.title}".\n\n${functions.getDomain()}/thread/${threadID}?reply=${replyID}`
+                    await serverFunctions.systemMessage(username, `You were mentioned in the thread ${thread.title}`, message)
+                } else {
+                    let message = `You were mentioned in the thread "${thread.title}".\n\n${functions.getDomain()}/thread/${threadID}`
+                    await serverFunctions.systemMessage(username, `You were mentioned in the thread ${thread.title}`, message)
+                }
             }
         }
     })
@@ -116,7 +121,9 @@ const ThreadRoutes = (app: Express) => {
             const threadID = req.query.threadID
             if (!threadID) return res.status(400).send("Bad threadID")
             const result = await sql.thread.thread(Number(threadID))
-            res.status(200).json(result)
+            if (!req.session.publicKey) return res.status(401).send("No public key")
+            const encrypted = cryptoFunctions.encryptAPI(result, req.session.publicKey)
+            res.status(200).send(encrypted)
         } catch (e) {
             console.log(e)
             res.status(400).send("Bad request")
@@ -205,7 +212,9 @@ const ThreadRoutes = (app: Express) => {
             if (!req.session.showR18) {
                 result = result.filter((r: any) => !r.r18)
             }
-            res.status(200).json(result)
+            if (!req.session.publicKey) return res.status(401).send("No public key")
+            const encrypted = cryptoFunctions.encryptAPI(result, req.session.publicKey)
+            res.status(200).send(encrypted)
         } catch (e) {
             console.log(e)
             res.status(400).send("Bad request")
@@ -217,7 +226,9 @@ const ThreadRoutes = (app: Express) => {
             const replyID = req.query.replyID
             if (!replyID) return res.status(400).send("Bad replyID")
             const result = await sql.thread.reply(Number(replyID))
-            res.status(200).json(result)
+            if (!req.session.publicKey) return res.status(401).send("No public key")
+            const encrypted = cryptoFunctions.encryptAPI(result, req.session.publicKey)
+            res.status(200).send(encrypted)
         } catch (e) {
             console.log(e)
             res.status(400).send("Bad request")

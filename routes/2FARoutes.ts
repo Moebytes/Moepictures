@@ -3,6 +3,7 @@ import rateLimit from "express-rate-limit"
 import slowDown from "express-slow-down"
 import sql from "../sql/SQLQuery"
 import functions from "../structures/Functions"
+import cryptoFunctions from "../structures/CryptoFunctions"
 import serverFunctions, {csrfProtection, keyGenerator, handler} from "../structures/ServerFunctions"
 import {generateSecret, verifyToken} from "node-2fa"
 
@@ -106,6 +107,8 @@ const $2FARoutes = (app: Express) => {
                 req.session.bio = user.bio
                 req.session.publicFavorites = user.publicFavorites
                 req.session.image = user.image
+                req.session.imageHash = user.imageHash
+                req.session.imagePost = user.imagePost
                 req.session.role = user.role
                 req.session.banned = user.banned
                 await sql.user.updateUser(user.username, "ip", ip as string)

@@ -146,7 +146,7 @@ const GridModel = forwardRef<Ref, Props>((props, componentRef) => {
     })
 
     const loadImage = async () => {
-        const img = await functions.decryptImg(props.img, `${props.img}`)
+        const img = await functions.decryptThumb(props.img, session)
         setImage(img)
     }
 
@@ -524,7 +524,7 @@ const GridModel = forwardRef<Ref, Props>((props, componentRef) => {
         //if (activeDropdown !== "none") return
         if (event.metaKey || event.ctrlKey || event.button === 1) {
             event.preventDefault()
-            const newWindow = window.open(`/post/${props.id}`, "_blank")
+            const newWindow = window.open(`/post/${props.id}/${props.post.slug}`, "_blank")
             newWindow?.blur()
             window.focus()
         }
@@ -556,16 +556,11 @@ const GridModel = forwardRef<Ref, Props>((props, componentRef) => {
                 setSelected(isSelected)
             }
         } else {
-            functions.get("/api/post", {postID: props.post.postID}, session, setSessionFlag).then(async (post) => {
-                localStorage.setItem("savedPost", JSON.stringify(post))
-                const tagCategories = await functions.tagCategories(post.tags, session, setSessionFlag, true)
-                localStorage.setItem("savedTags", JSON.stringify(tagCategories))
-            }).catch(() => null)
             if (!drag) {
                 if (event.metaKey || event.ctrlKey || event.button == 1) {
                     return
                 } else {
-                    history.push(`/post/${props.id}`)
+                    history.push(`/post/${props.id}/${props.post.slug}`)
                     window.scrollTo(0, 0)
                 }
             }
@@ -623,12 +618,8 @@ const GridModel = forwardRef<Ref, Props>((props, componentRef) => {
     const drawImage = async () => {
         const currentRef = ref ? ref : imageRef.current
         if (!currentRef || !overlayRef.current || !lightnessRef.current) return
-        let src = image
-        if (functions.isImage(src)) {
-            src = await cryptoFunctions.decryptedLink(src)
-        }
         const img = document.createElement("img")
-        img.src = src 
+        img.src = image 
         img.onload = () => {
             if (!currentRef || !overlayRef.current || !lightnessRef.current) return
             setImageWidth(img.width)

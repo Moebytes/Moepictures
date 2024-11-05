@@ -64,10 +64,6 @@ const UnverifiedPostPage: React.FunctionComponent<Props> = (props) => {
     const postID = props?.match.params.id
 
     useEffect(() => {
-        if (image) functions.refreshCache(image)
-    }, [image])
-
-    useEffect(() => {
         setHideNavbar(false)
         setHideTitlebar(false)
         setHideSidebar(false)

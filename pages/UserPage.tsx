@@ -182,11 +182,11 @@ const UserPage: React.FunctionComponent<Props> = (props) => {
 
     const setUp = (img: string, index: number, newTab: boolean) => {
         setUploadIndex(index)
-        const postID = uploads[index].postID
+        const post = uploads[index]
         if (newTab) {
-            window.open(`/post/${postID}`, "_blank")
+            window.open(`/post/${post.postID}/${post.slug}`, "_blank")
         } else {
-            history.push(`/post/${postID}`)
+            history.push(`/post/${post.postID}/${post.slug}`)
         }
         window.scrollTo(0, functions.navbarHeight() + functions.titlebarHeight())
         setPosts(uploads)
@@ -194,11 +194,11 @@ const UserPage: React.FunctionComponent<Props> = (props) => {
 
     const setFav = (img: string, index: number, newTab: boolean) => {
         setFavoriteIndex(index)
-        const postID = favorites[index].postID
+        const post = favorites[index]
         if (newTab) {
-            window.open(`/post/${postID}`, "_blank")
+            window.open(`/post/${post.postID}/${post.slug}`, "_blank")
         } else {
-            history.push(`/post/${postID}`)
+            history.push(`/post/${post.postID}/${post.slug}`)
         }
         window.scrollTo(0, functions.navbarHeight() + functions.titlebarHeight())
         setPosts(favorites)
@@ -206,7 +206,7 @@ const UserPage: React.FunctionComponent<Props> = (props) => {
 
     const getUserImg = () => {
         if (!user) return ""
-        return user.image ? functions.getTagLink("pfp", user.image) : favicon
+        return user.image ? functions.getTagLink("pfp", user.image, user.imageHash) : favicon
     }
 
     const userImgClick = (event: React.MouseEvent) => {
@@ -367,11 +367,11 @@ const UserPage: React.FunctionComponent<Props> = (props) => {
                 history.push(`/favgroup/${username}/${favgroup.slug}`)
             }
             const setFavgroup = (img: string, index: number, newTab: boolean) => {
-                const postID = favgroup.posts[index].postID
+                const post = favgroup.posts[index]
                 if (newTab) {
-                    window.open(`/post/${postID}`, "_blank")
+                    window.open(`/post/${post.postID}/${post.slug}`, "_blank")
                 } else {
-                    history.push(`/post/${postID}`)
+                    history.push(`/post/${post.postID}/${post.slug}`)
                 }
                 window.scrollTo(0, functions.navbarHeight() + functions.titlebarHeight())
                 setPosts(favgroup.posts)

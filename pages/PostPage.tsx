@@ -93,6 +93,7 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
     const history = useHistory()
     const location = useLocation()
     const postID = props?.match.params.id
+    const slug = props?.match.params.slug
 
     useEffect(() => {
         setHideNavbar(false)
@@ -131,6 +132,13 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
     }, [location])
 
     useEffect(() => {
+        if (!post) return
+        const searchParams = new URLSearchParams(window.location.search)
+        const newPath = location.pathname.replace(/(?<=\d+)\/[^/]+$/, "") + `/${post.slug}`
+        history.replace(`${newPath}?${searchParams}`)
+    }, [post])
+
+    useEffect(() => {
         localStorage.setItem("order", String(order))
         let orderParam = new URLSearchParams(window.location.search).get("order")
         if (!orderParam) orderParam = "1"
@@ -158,7 +166,7 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
         if (!session.cookie || !post) return
         if (post.postID !== postID) return
         if (!session.username) {
-            setRedirect(`/post/${postID}`)
+            setRedirect(slug ? `/post/${postID}/${slug}` : `/post/${postID}`)
         }
         if (!session.username && post.restrict !== "safe") {
             history.push("/login")
@@ -322,6 +330,8 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
                         return
                     }
                 }
+                localStorage.setItem("savedPost", JSON.stringify(post))
+                localStorage.setItem("savedTags", JSON.stringify(categories))
                 setSessionFlag(true)
             } else {
                 functions.replaceLocation("/404")
@@ -359,6 +369,8 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
                 setTagCategories(categories)
                 setTags(tags)
                 setPost(post)
+                localStorage.setItem("savedPost", JSON.stringify(post))
+                localStorage.setItem("savedTags", JSON.stringify(categories))
                 setSessionFlag(true)
             } else {
                 functions.replaceLocation("/404")
@@ -391,7 +403,7 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
             if (posts[currentIndex]) {
                 const post = posts[currentIndex]
                 if (post.fake) return
-                history.push(`/post/${post.postID}`)
+                history.push(`/post/${post.postID}/${post.slug}`)
                 window.scrollTo(0, functions.navbarHeight() + functions.titlebarHeight() + 20)
             }
         }
@@ -416,7 +428,7 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
             if (posts[currentIndex]) {
                 const post = posts[currentIndex]
                 if (post.fake) return
-                history.push(`/post/${post.postID}`)
+                history.push(`/post/${post.postID}/${post.slug}`)
                 window.scrollTo(0, functions.navbarHeight() + functions.titlebarHeight() + 20)
             }
         }
@@ -470,7 +482,7 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
             currentPost.series = categories.series.map((s: any) => s.tag)
             currentPost.tags = categories.tags.map((t: any) => t.tag)
         }
-        const imgChanged = await functions.imagesChanged(post, currentPost)
+        const imgChanged = await functions.imagesChanged(post, currentPost, session)
         const tagsChanged = functions.tagsChanged(post, currentPost)
         const srcChanged = functions.sourceChanged(post, currentPost)
         let source = undefined as any
@@ -490,7 +502,7 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
         }
         if (imgChanged || (srcChanged && tagsChanged)) {
             if (imgChanged && !permissions.isMod(session)) return Promise.reject("img")
-            const {images, upscaledImages} = await functions.parseImages(post)
+            const {images, upscaledImages} = await functions.parseImages(post, session)
             const newTags = await functions.parseNewTags(post, session, setSessionFlag)
             await functions.put("/api/post/edit", {postID: post.postID, images, upscaledImages, type: post.type, restrict: post.restrict, source,
             style: post.style, artists: post.artists, characters: post.characters, preserveThirdParty: post.thirdParty,
@@ -524,7 +536,7 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
         setHistoryID(null)
         setTranslationID(null)
         setPostFlag(true)
-        history.push(`/post/${postID}`)
+        history.push(slug ? `/post/${postID}/${slug}` : `/post/${postID}`)
     }
 
     const getHistoryButtons = () => {
@@ -568,7 +580,7 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
             const images = activeFavgroup.posts.map((f: any) => functions.getThumbnailLink(f.images[0].type, f.postID, f.images[0].order, f.images[0].filename, "tiny"))
             const setGroup = (img: string, index: number) => {
                 const postID = activeFavgroup.posts[index].postID
-                history.push(`/post/${postID}`)
+                history.push(slug ? `/post/${postID}/${slug}` : `/post/${postID}`)
                 window.scrollTo(0, functions.navbarHeight() + functions.titlebarHeight())
             }
             return (
@@ -592,7 +604,7 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
             const images = group.posts.map((f: any) => functions.getThumbnailLink(f.images[0].type, f.postID, f.images[0].order, f.images[0].filename, "tiny"))
             const setGroup = (img: string, index: number) => {
                 const postID = group.posts[index].postID
-                history.push(`/post/${postID}`)
+                history.push(slug ? `/post/${postID}/${slug}` : `/post/${postID}`)
                 window.scrollTo(0, functions.navbarHeight() + functions.titlebarHeight())
                 setPosts(group.posts)
                 setTimeout(() => {

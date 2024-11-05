@@ -4,7 +4,6 @@ import {ThemeContext, QuoteTextContext, SessionContext, SessionFlagContext, Mobi
 RevertPostHistoryIDContext, DeletePostHistoryFlagContext, RevertPostHistoryFlagContext} from "../Context"
 import {HashLink as Link} from "react-router-hash-link"
 import functions from "../structures/Functions"
-import cryptoFunctions from "../structures/CryptoFunctions"
 import postHistoryRevert from "../assets/icons/revert.png"
 import postHistoryDelete from "../assets/icons/delete.png"
 import adminCrown from "../assets/icons/admin-crown.png"
@@ -78,7 +77,7 @@ const PostHistoryRow: React.FunctionComponent<Props> = (props) => {
 
     const revertPostHistory = async () => {
         if (props.current) return Promise.reject()
-        const imgChanged = await functions.imagesChanged(props.postHistory, props.currentHistory)
+        const imgChanged = await functions.imagesChanged(props.postHistory, props.currentHistory, session)
         const tagsChanged = functions.tagsChanged(props.postHistory, props.currentHistory)
         const srcChanged = functions.sourceChanged(props.postHistory, props.currentHistory)
         let source = undefined as any
@@ -98,7 +97,7 @@ const PostHistoryRow: React.FunctionComponent<Props> = (props) => {
         }
         if (imgChanged || (srcChanged && tagsChanged)) {
             if (imgChanged && !permissions.isMod(session)) return Promise.reject("img")
-            const {images, upscaledImages} = await functions.parseImages(props.postHistory)
+            const {images, upscaledImages} = await functions.parseImages(props.postHistory, session)
             const newTags = await functions.parseNewTags(props.postHistory, session, setSessionFlag)
             await functions.put("/api/post/edit", {postID: props.postHistory.postID, images, upscaledImages, type: props.postHistory.type, restrict: props.postHistory.restrict, source,
             style: props.postHistory.style, artists: props.postHistory.artists, characters: props.postHistory.characters, preserveThirdParty: props.postHistory.thirdParty,
@@ -256,12 +255,7 @@ const PostHistoryRow: React.FunctionComponent<Props> = (props) => {
     const loadImage = async () => {
         if (functions.isGIF(img)) return
         if (!ref.current) return
-        let src = await cryptoFunctions.decryptedLink(img)
-        if (functions.isModel(src)) {
-            src = await functions.modelImage(src)
-        } else if (functions.isAudio(src)) {
-            src = await functions.songCover(src)
-        }
+        let src = await functions.decryptThumb(img, session)
         const imgElement = document.createElement("img")
         imgElement.src = src 
         imgElement.onload = () => {
@@ -275,7 +269,7 @@ const PostHistoryRow: React.FunctionComponent<Props> = (props) => {
 
     useEffect(() => {
         loadImage()
-    }, [img])
+    }, [img, session])
 
     const updateImg = async (event: React.MouseEvent) => {
         event.preventDefault()

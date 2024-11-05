@@ -6,7 +6,6 @@ import {HashLink as Link} from "react-router-hash-link"
 import approve from "../assets/icons/approve.png"
 import reject from "../assets/icons/reject.png"
 import functions from "../structures/Functions"
-import cryptoFunctions from "../structures/CryptoFunctions"
 import "./styles/modposts.less"
 
 const ModGroupDeletions: React.FunctionComponent = (props) => {
@@ -183,14 +182,7 @@ const ModGroupDeletions: React.FunctionComponent = (props) => {
             const img = functions.getThumbnailLink(request.post.images[0].type, request.post.postID, request.post.images[0].order, request.post.images[0].filename, "tiny")
             if (functions.isGIF(img)) continue
             if (!ref.current) continue
-            let src = img
-            if (functions.isImage(img)) {
-                src = await cryptoFunctions.decryptedLink(img)
-            } else if (functions.isModel(img)) {
-                src = await functions.modelImage(img)
-            } else if (functions.isAudio(img)) {
-                src = await functions.songCover(img)
-            }
+            let src = await functions.decryptThumb(img, session)
             const imgElement = document.createElement("img")
             imgElement.src = src 
             imgElement.onload = () => {
@@ -205,7 +197,7 @@ const ModGroupDeletions: React.FunctionComponent = (props) => {
 
     useEffect(() => {
         loadImages()
-    }, [visibleRequests])
+    }, [visibleRequests, session])
 
     useEffect(() => {
         if (!scroll) {

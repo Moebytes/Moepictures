@@ -37,6 +37,11 @@ const modelExtensions = [".glb", ".gltf", ".obj", ".fbx"]
 
 let cachedImages = new Map<string, string>()
 
+let privateKey = ""
+let clientKeyLock = false
+let serverPublicKey = ""
+let serverKeyLock = false
+
 export default class Functions {
     public static getImageCache = (img: string) => {
         return cachedImages.get(img) || ""
@@ -58,14 +63,6 @@ export default class Functions {
         return axios.get(link, {responseType: "arraybuffer", withCredentials: true, headers}).then((r) => r.data) as Promise<Buffer>
     }
 
-    public static refreshCache = async (image: any) => {
-        try {
-            await axios.post(image, null, {withCredentials: true})
-        } catch {
-            // ignore
-        }
-    }
-
     public static noCacheURL = (image: string) => {
         const url = new URL(image)
         const roundedTime = Math.floor(Date.now() / 30000) * 30000
@@ -79,17 +76,53 @@ export default class Functions {
         return url.toString()
     }
 
-    public static get = async (endpoint: string, params: any, session: any, setSessionFlag: (value: boolean) => void) => {
+    public static updateClientKeys = async (session: any, setSessionFlag?: (value: boolean) => void) => {
+        if (privateKey) return
+        if (clientKeyLock) await Functions.timeout(1000 + Math.random() * 1000)
+        if (!privateKey) {
+            clientKeyLock = true
+            const savedPublicKey = await localforage.getItem("publicKey") as any
+            const savedPrivateKey = await localforage.getItem("privateKey") as any
+            if (savedPublicKey && savedPrivateKey) {
+                await Functions.post("/api/client-key", {publicKey: savedPublicKey}, session, setSessionFlag)
+                privateKey = savedPrivateKey
+            } else {
+                const keys = cryptoFunctions.generateKeys()
+                await Functions.post("/api/client-key", {publicKey: keys.publicKey}, session, setSessionFlag)
+                await localforage.setItem("publicKey", keys.publicKey)
+                await localforage.setItem("privateKey", keys.privateKey)
+                privateKey = keys.privateKey
+            }
+        }
+    }
+
+    public static updateServerPublicKey = async (session: any, setSessionFlag?: (value: boolean) => void) => {
+        if (serverPublicKey) return
+        if (serverKeyLock) await Functions.timeout(1000 + Math.random() * 1000)
+        if (!serverPublicKey) {
+            serverKeyLock = true
+            const response = await Functions.post("/api/server-key", null, session, setSessionFlag)
+            serverPublicKey = response.publicKey
+        }
+    }
+
+    public static get = async (endpoint: string, params: any, session: any, setSessionFlag?: (value: boolean) => void) => {
+        if (!privateKey) await Functions.updateClientKeys(session)
+        if (!serverPublicKey) await Functions.updateServerPublicKey(session)
         const headers = {"x-csrf-token": session.csrfToken} as any
         try {
-            const response = await axios.get(endpoint, {params, headers, withCredentials: true}).then((r) => r.data)
-            return response
+            const response = await axios.get(endpoint, {params, headers, withCredentials: true, responseType: "arraybuffer"}).then((r) => r.data)
+            let decrypted = cryptoFunctions.decryptAPI(response, privateKey, serverPublicKey)?.toString()
+            try {
+                decrypted = JSON.parse(decrypted!)
+            } catch {}
+            return decrypted as any
         } catch (err: any) {
             return Promise.reject(err)
         }
     }
 
-    public static post = async (endpoint: string, data: any, session: any, setSessionFlag: (value: boolean) => void) => {
+    public static post = async (endpoint: string, data: any, session: any, setSessionFlag?: (value: boolean) => void) => {
         const headers = {"x-csrf-token": session.csrfToken} as any
         try {
             const response = await axios.post(endpoint, data, {headers, withCredentials: true}).then((r) => r.data)
@@ -99,7 +132,7 @@ export default class Functions {
         }
     }
 
-    public static put = async (endpoint: string, data: any, session: any, setSessionFlag: (value: boolean) => void) => {
+    public static put = async (endpoint: string, data: any, session: any, setSessionFlag?: (value: boolean) => void) => {
         const headers = {"x-csrf-token": session.csrfToken} as any
         try {
             const response = await axios.put(endpoint, data, {headers, withCredentials: true}).then((r) => r.data)
@@ -109,7 +142,7 @@ export default class Functions {
         }
     }
 
-    public static delete = async (endpoint: string, params: any, session: any, setSessionFlag: (value: boolean) => void) => {
+    public static delete = async (endpoint: string, params: any, session: any, setSessionFlag?: (value: boolean) => void) => {
         const headers = {"x-csrf-token": session.csrfToken} as any
         try {
             const response = await axios.delete(endpoint, {params, headers, withCredentials: true}).then((r) => r.data)
@@ -147,7 +180,7 @@ export default class Functions {
     
     public static proxyImage = async (link: string, session: any, setSessionFlag: (value: boolean) => void) => {
         try {
-            const images = await Functions.get(`/api/misc/proxy?url=${encodeURIComponent(link)}`, null, session, setSessionFlag)
+            const images = await Functions.post(`/api/misc/proxy`, {url: encodeURIComponent(link)}, session, setSessionFlag)
             let files = [] as File[]
             for (let i = 0; i < images.length; i++) {
                 const blob = new Blob([new Uint8Array(images[i].data)])
@@ -1129,12 +1162,12 @@ export default class Functions {
         return `history/tag/${tag}/${key}/${filename}`
     }
 
-    public static getTagLink = (folder: string, filename: string) => {
+    public static getTagLink = (folder: string, filename: string, hash: string) => {
         if (!filename) return ""
         if (folder === "attribute") folder = "tag"
         if (!folder || filename.includes("history/")) return `${window.location.protocol}//${window.location.host}/${filename}`
         const link = `${window.location.protocol}//${window.location.host}/${folder}/${encodeURIComponent(filename)}`
-        return Functions.noCacheURL(link)
+        return hash ? `${link}?hash=${hash}` : link
     }
 
     public static getUnverifiedTagLink = (folder: string, filename: string) => {
@@ -1405,7 +1438,7 @@ export default class Functions {
     public static parseTags = async (posts: any, session: any, setSessionFlag: (value: boolean) => void) => {
         let cleanPosts = posts.filter((p: any) => !p.fake)
         const postIDs = cleanPosts.map((post: any) => post.postID)
-        let result = await Functions.post("/api/search/sidebartags", {postIDs}, session, setSessionFlag).catch(() => null)
+        let result = await Functions.get("/api/search/sidebartags", {postIDs}, session, setSessionFlag).catch(() => null)
         return result ? result : []
     }
 
@@ -1519,7 +1552,7 @@ export default class Functions {
         return canvas
     }
 
-    public static imageDimensions = async (image: string) => {
+    public static imageDimensions = async (image: string, session: any) => {
         return new Promise<any>(async (resolve) => {
             if (Functions.isVideo(image)) {
                 const video = document.createElement("video")
@@ -1528,7 +1561,7 @@ export default class Functions {
                     let height = video.videoHeight
                     try {
                         const r = await fetch(image).then(((r) => r.arrayBuffer()))
-                        const size = r.byteLength // Number(r.headers.get("Content-Length"))
+                        const size = r.byteLength
                         resolve({width, height, size})
                     } catch {
                         resolve({width, height, size: 0})
@@ -1536,19 +1569,14 @@ export default class Functions {
                 })
                 video.src = image
             } else {
-                let imageLink = image
-                if (Functions.isImage(image)) {
-                    imageLink = await cryptoFunctions.decryptedLink(image)
-                    //const canvas = await Functions.toCanvas(imageLink)
-                    //imageLink = canvas.toDataURL("image/jpeg")
-                }
+                let imageLink = await Functions.decryptThumb(image, session)
                 const img = document.createElement("img")
                 img.addEventListener("load", async () => {
                     let width = img.width
                     let height = img.height
                     try {
                         const r = await fetch(imageLink).then((r) => r.arrayBuffer())
-                        const size = r.byteLength // Number(r.headers.get("Content-Length"))
+                        const size = r.byteLength 
                         resolve({width, height, size})
                     } catch {
                         resolve({width, height, size: 0})
@@ -2374,7 +2402,9 @@ export default class Functions {
         }, 300)
     }
 
-    public static imagesChanged = async (revertPost: any, currentPost: any) => {
+    public static imagesChanged = async (revertPost: any, currentPost: any, session: any) => {
+        if (!privateKey) await Functions.updateClientKeys(session)
+        if (!serverPublicKey) await Functions.updateServerPublicKey(session)
         if (revertPost.images.length !== currentPost.images.length) return true
         for (let i = 0; i < revertPost.images.length; i++) {
             let filename = revertPost.images[i]?.filename ? revertPost.images[i].filename : revertPost.images[i]
@@ -2389,19 +2419,19 @@ export default class Functions {
 
             if (imgBuffer.byteLength && Functions.isImage(imgLink)) {
                 const isAnimated = Functions.isAnimatedWebp(imgBuffer)
-                if (!isAnimated) imgBuffer = cryptoFunctions.decrypt(imgBuffer)
+                if (!isAnimated) imgBuffer = cryptoFunctions.decrypt(imgBuffer, privateKey, serverPublicKey)
             }
             if (currentBuffer.byteLength && Functions.isImage(currentLink)) {
                 const isAnimated = Functions.isAnimatedWebp(currentBuffer)
-                if (!isAnimated) currentBuffer = cryptoFunctions.decrypt(currentBuffer)
+                if (!isAnimated) currentBuffer = cryptoFunctions.decrypt(currentBuffer, privateKey, serverPublicKey)
             }
             if (upscaledImgBuffer.byteLength && Functions.isImage(imgLink)) {
                 const isAnimated = Functions.isAnimatedWebp(upscaledImgBuffer)
-                if (!isAnimated) upscaledImgBuffer = cryptoFunctions.decrypt(upscaledImgBuffer)
+                if (!isAnimated) upscaledImgBuffer = cryptoFunctions.decrypt(upscaledImgBuffer, privateKey, serverPublicKey)
             }
             if (upscaledCurrentBuffer.byteLength && Functions.isImage(currentLink)) {
                 const isAnimated = Functions.isAnimatedWebp(upscaledCurrentBuffer)
-                if (!isAnimated) upscaledCurrentBuffer = cryptoFunctions.decrypt(upscaledCurrentBuffer)
+                if (!isAnimated) upscaledCurrentBuffer = cryptoFunctions.decrypt(upscaledCurrentBuffer, privateKey, serverPublicKey)
             }
 
             if (imgBuffer.byteLength) {
@@ -2437,7 +2467,7 @@ export default class Functions {
         return false
     }
 
-    public static parseImages = async (post: any) => {
+    public static parseImages = async (post: any, session: any) => {
         let images = [] as any
         let upscaledImages = [] as any
         for (let i = 0; i < post.images.length; i++) {
@@ -2446,31 +2476,25 @@ export default class Functions {
             let ext = path.extname(imgLink)
             let buffer = await Functions.getBuffer(`${imgLink}?upscaled=false`, {"x-force-upscale": "false"})
             let upscaledBuffer = await Functions.getBuffer(`${imgLink}?upscaled=true`, {"x-force-upscale": "true"})
-            if (buffer.byteLength && Functions.isImage(imgLink)) {
-                const isAnimated = Functions.isAnimatedWebp(buffer)
-                if (!isAnimated) buffer = cryptoFunctions.decrypt(buffer)
-            }
-            if (upscaledBuffer.byteLength && Functions.isImage(imgLink)) {
-                const isAnimated = Functions.isAnimatedWebp(upscaledBuffer)
-                if (!isAnimated) upscaledBuffer = cryptoFunctions.decrypt(upscaledBuffer)
-            }
-            let link = await cryptoFunctions.decryptedLink(imgLink)
+            let link = await Functions.decryptItem(imgLink, session)
             if (!link.includes(ext)) link += `#${ext}`
             let thumbnail = ""
-            if (ext === ".mp4" || ext === ".webm") {
+            if (Functions.arrayIncludes(ext, videoExtensions)) {
                 thumbnail = await Functions.videoThumbnail(link)
-            } else if (ext === ".glb" || ext === ".fbx" || ext === ".obj") {
+            } else if (Functions.arrayIncludes(ext, modelExtensions)) {
                 thumbnail = await Functions.modelImage(link)
-            } else if (ext === ".mp3" || ext === ".wav") {
+            } else if (Functions.arrayIncludes(ext, audioExtensions)) {
                 thumbnail = await Functions.songCover(link)
             }
             if (buffer.byteLength) {
-                images.push({link, ext: ext.replace(".", ""), size: buffer.byteLength, thumbnail,
-                originalLink: imgLink, bytes: Object.values(new Uint8Array(buffer)), name: path.basename(imgLink)})
+                let decrypted = await Functions.decryptBuffer(buffer, imgLink, session)
+                images.push({link, ext: ext.replace(".", ""), size: decrypted.byteLength, thumbnail,
+                originalLink: imgLink, bytes: Object.values(new Uint8Array(decrypted)), name: path.basename(imgLink)})
             }
             if (upscaledBuffer.byteLength) {
-                upscaledImages.push({link, ext: ext.replace(".", ""), size: upscaledBuffer.byteLength, thumbnail,
-                originalLink: imgLink, bytes: Object.values(new Uint8Array(upscaledBuffer)), name: path.basename(imgLink)})
+                let decrypted = await Functions.decryptBuffer(upscaledBuffer, imgLink, session)
+                upscaledImages.push({link, ext: ext.replace(".", ""), size: decrypted.byteLength, thumbnail,
+                originalLink: imgLink, bytes: Object.values(new Uint8Array(decrypted)), name: path.basename(imgLink)})
             }
         }
         return {images, upscaledImages}
@@ -2608,7 +2632,10 @@ export default class Functions {
         window.location = `${Functions.getDomain()}${location}` as any
     }
 
-    public static decryptImg = async (img: string, cacheKey: string) => {
+    public static decryptThumb = async (img: string, session: any, cacheKey?: string, forceImage?: boolean) => {
+        if (!privateKey) await Functions.updateClientKeys(session)
+        if (!serverPublicKey) await Functions.updateServerPublicKey(session)
+        if (!cacheKey) cacheKey = img
         const cached = Functions.getImageCache(cacheKey)
         if (cached) return cached
         if (Functions.isModel(img)) {
@@ -2623,6 +2650,12 @@ export default class Functions {
             Functions.setImageCache(cacheKey, cacheUrl)
             return cacheUrl
         }
+        if (forceImage && Functions.isVideo(img)) {
+            const url = await Functions.videoThumbnail(img)
+            let cacheUrl = `${url}#${path.extname(img)}`
+            Functions.setImageCache(cacheKey, cacheUrl)
+            return cacheUrl
+        }
         let isAnimatedWebP = false
         let arrayBuffer = null as any
         let decryptedImg = img
@@ -2631,7 +2664,7 @@ export default class Functions {
                 arrayBuffer = await fetch(img).then((r) => r.arrayBuffer())
                 isAnimatedWebP = Functions.isAnimatedWebp(arrayBuffer)
             }
-            if (!isAnimatedWebP) decryptedImg = await cryptoFunctions.decryptedLink(img)
+            if (!isAnimatedWebP) decryptedImg = await cryptoFunctions.decryptedLink(img, privateKey, serverPublicKey)
         }
         const base64 = await Functions.linkToBase64(decryptedImg)
         if (Functions.isVideo(img) || Functions.isGIF(img) || isAnimatedWebP) {
@@ -2639,15 +2672,70 @@ export default class Functions {
             const url = URL.createObjectURL(new Blob([arrayBuffer]))
             let cacheUrl = `${url}#${path.extname(img)}`
             Functions.setImageCache(cacheKey, cacheUrl)
-            return url
+            return cacheUrl
         } else {
             Functions.setImageCache(cacheKey, base64)
             return base64
         }
     }
 
+    public static decryptItem = async (img: string, session: any, cacheKey?: string) => {
+        if (!privateKey) await Functions.updateClientKeys(session)
+        if (!serverPublicKey) await Functions.updateServerPublicKey(session)
+        if (!cacheKey) cacheKey = img
+        const cached = Functions.getImageCache(cacheKey)
+        if (cached) return cached
+        if (Functions.isModel(img) || Functions.isAudio(img) || Functions.isVideo(img)) {
+            return img
+        }
+        let isAnimatedWebP = false
+        let arrayBuffer = null as any
+        let decrypted = img
+        if (Functions.isImage(img)) {
+            if (Functions.isWebP(img)) {
+                arrayBuffer = await fetch(img).then((r) => r.arrayBuffer())
+                isAnimatedWebP = Functions.isAnimatedWebp(arrayBuffer)
+            }
+            if (!isAnimatedWebP) decrypted = await cryptoFunctions.decryptedLink(img, privateKey, serverPublicKey)
+        }
+        const base64 = await Functions.linkToBase64(decrypted)
+        if (Functions.isGIF(img) || isAnimatedWebP) {
+            if (!arrayBuffer) arrayBuffer = await fetch(decrypted).then((r) => r.arrayBuffer())
+            const url = URL.createObjectURL(new Blob([arrayBuffer]))
+            let cacheUrl = `${url}#${path.extname(img)}`
+            Functions.setImageCache(cacheKey, cacheUrl)
+            return cacheUrl
+        } else {
+            Functions.setImageCache(cacheKey, base64)
+            return base64
+        }
+    }
+
+    public static decryptBuffer = async (buffer: ArrayBuffer, imageLink: string, session: any) => {
+        if (!privateKey) await Functions.updateClientKeys(session)
+        if (!serverPublicKey) await Functions.updateServerPublicKey(session)
+        if (Functions.isModel(imageLink) || Functions.isAudio(imageLink) || Functions.isVideo(imageLink)) {
+            return buffer
+        }
+        let isAnimatedWebP = false
+        let decrypted = buffer
+        if (Functions.isImage(imageLink)) {
+            if (Functions.isWebP(imageLink)) {
+                isAnimatedWebP = Functions.isAnimatedWebp(buffer)
+            }
+            if (!isAnimatedWebP) decrypted = cryptoFunctions.decrypt(buffer, privateKey, serverPublicKey)
+        }
+        return decrypted
+    }
+
     public static generateSlug = (name: string) => {
         return String(name).trim().toLowerCase().replace(/\s+/g, "-")
+    }
+
+    public static postSlug = (title: string, translatedTitle: string) => {
+        if (!title) return "untitled"
+        if (translatedTitle) return Functions.generateSlug(translatedTitle)
+        return Functions.generateSlug(title)
     }
 
     public static parseUserAgent = (userAgent?: string) => {
@@ -2700,5 +2788,19 @@ export default class Functions {
 
     public static isJapaneseText = (text: string) => {
         return /[\u3040-\u30FF\u4E00-\u9FFF\uFF66-\uFF9F]/.test(text)
+    }
+
+    public static bufferToPem = (buffer: ArrayBuffer, label: string) => {
+        const base64 = btoa(String.fromCharCode(...new Uint8Array(buffer)))
+        return `-----BEGIN ${label}-----\n${base64.match(/.{1,64}/g)?.join('\n')}\n-----END ${label}-----`
+    }
+
+    public static pemToBuffer = (pem: string) => {
+        const base64 = pem.replace(/-----BEGIN .*-----|-----END .*-----|\s+/g, "")
+        const binary = atob(base64)
+        const buffer = new ArrayBuffer(binary.length)
+        const view = new Uint8Array(buffer)
+        for (let i = 0; i < binary.length; i++) view[i] = binary.charCodeAt(i)
+        return buffer
     }
 }

@@ -7,7 +7,6 @@ SiteSaturationContext, CommentIDContext, CommentJumpFlagContext, SessionFlagCont
 import {HashLink as Link} from "react-router-hash-link"
 import functions from "../structures/Functions"
 import permissions from "../structures/Permissions"
-import cryptoFunctions from "../structures/CryptoFunctions"
 import favicon from "../assets/icons/favicon.png"
 import commentQuote from "../assets/icons/commentquote.png"
 import commentReport from "../assets/icons/commentreport.png"
@@ -71,7 +70,7 @@ const CommentRow: React.FunctionComponent<Props> = (props) => {
 
     const getCommentPFP = () => {
         if (props.comment?.image) {
-            return functions.getTagLink("pfp", props.comment.image)
+            return functions.getTagLink("pfp", props.comment.image, props.comment.imageHash)
         } else {
             return favicon
         }
@@ -302,14 +301,7 @@ const CommentRow: React.FunctionComponent<Props> = (props) => {
     const loadImage = async () => {
         if (functions.isGIF(img)) return
         if (!ref.current) return
-        let src = img
-        if (functions.isImage(img)) {
-            src = await cryptoFunctions.decryptedLink(src)
-        } else if (functions.isModel(src)) {
-            src = await functions.modelImage(src)
-        } else if (functions.isAudio(src)) {
-            src = await functions.songCover(src)
-        }
+        let src = await functions.decryptThumb(img, session)
         const imgElement = document.createElement("img")
         imgElement.src = src 
         imgElement.onload = () => {
@@ -330,7 +322,7 @@ const CommentRow: React.FunctionComponent<Props> = (props) => {
 
     useEffect(() => {
         loadImage()
-    }, [img, brightness, contrast, hue, saturation, lightness, blur, sharpen, pixelate])
+    }, [img, brightness, contrast, hue, saturation, lightness, blur, sharpen, pixelate, session])
 
     return (
         <div className="commentrow" comment-id={props.comment?.commentID}>

@@ -302,7 +302,7 @@ const ModTagAliases: React.FunctionComponent = (props) => {
                     history.push(`/tag/${request.tag}`)
                 }
             }
-            const img = functions.getTagLink(request.type, request.image)
+            const img = functions.getTagLink(request.type, request.image, request.imageHash)
             jsx.push(
                 <div className="mod-post" onMouseEnter={() =>setHover(true)} onMouseLeave={() => setHover(false)}>
                     {img ?

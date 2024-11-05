@@ -3,6 +3,7 @@ import rateLimit from "express-rate-limit"
 import slowDown from "express-slow-down"
 import sql from "../sql/SQLQuery"
 import functions from "../structures/Functions"
+import cryptoFunctions from "../structures/CryptoFunctions"
 import permissions from "../structures/Permissions"
 import serverFunctions, {csrfProtection, keyGenerator, handler} from "../structures/ServerFunctions"
 import sharp from "sharp"
@@ -50,7 +51,9 @@ const PostRoutes = (app: Express) => {
                 result.images = result.images.sort((a: any, b: any) => a.order - b.order)
             }
             if (req.session.captchaNeeded) delete result.tags
-            res.status(200).json(result)
+            if (!req.session.publicKey) return res.status(401).send("No public key")
+            const encrypted = cryptoFunctions.encryptAPI(result, req.session.publicKey)
+            res.status(200).send(encrypted)
         } catch (e) {
             console.log(e)
             return res.status(400).send("Bad request")
@@ -78,7 +81,9 @@ const PostRoutes = (app: Express) => {
                 }
             }
             if (req.session.captchaNeeded) result = functions.stripTags(result)
-            res.status(200).json(result)
+            if (!req.session.publicKey) return res.status(401).send("No public key")
+            const encrypted = cryptoFunctions.encryptAPI(result, req.session.publicKey)
+            res.status(200).send(encrypted)
         } catch (e) {
             console.log(e)
             return res.status(400).send("Bad request")
@@ -102,7 +107,9 @@ const PostRoutes = (app: Express) => {
                 if (!permissions.canPrivate(req.session, categories.artists)) return res.status(403).end()
             }
             if (req.session.captchaNeeded) delete result.tags
-            res.status(200).json(result)
+            if (!req.session.publicKey) return res.status(401).send("No public key")
+            const encrypted = cryptoFunctions.encryptAPI(result, req.session.publicKey)
+            res.status(200).send(encrypted)
         } catch (e) {
             console.log(e)
             return res.status(400).send("Bad request")
@@ -124,7 +131,9 @@ const PostRoutes = (app: Express) => {
                 const categories = await serverFunctions.tagCategories(result.tags)
                 if (!permissions.canPrivate(req.session, categories.artists)) return res.status(403).end()
             }
-            res.status(200).json(result)
+            if (!req.session.publicKey) return res.status(401).send("No public key")
+            const encrypted = cryptoFunctions.encryptAPI(result, req.session.publicKey)
+            res.status(200).send(encrypted)
         } catch (e) {
             console.log(e)
             res.status(400).send("Bad request") 
@@ -238,7 +247,9 @@ const PostRoutes = (app: Express) => {
                 }
             }
             posts = functions.stripTags(posts)
-            res.status(200).json(posts)
+            if (!req.session.publicKey) return res.status(401).send("No public key")
+            const encrypted = cryptoFunctions.encryptAPI(posts, req.session.publicKey)
+            res.status(200).send(encrypted)
         } catch (e) {
             console.log(e)
             return res.status(400).send("Bad request")
@@ -262,7 +273,9 @@ const PostRoutes = (app: Express) => {
                 if (!permissions.canPrivate(req.session, categories.artists)) return res.status(403).end()
             }
             delete post.tags
-            res.status(200).json(post)
+            if (!req.session.publicKey) return res.status(401).send("No public key")
+            const encrypted = cryptoFunctions.encryptAPI(post, req.session.publicKey)
+            res.status(200).send(encrypted)
         } catch (e) {
             console.log(e)
             return res.status(400).send("Bad request")
@@ -278,7 +291,9 @@ const PostRoutes = (app: Express) => {
             if (result.images.length > 1) {
                 result.images = result.images.sort((a: any, b: any) => a.order - b.order)
             }
-            res.status(200).json(result)
+            if (!req.session.publicKey) return res.status(401).send("No public key")
+            const encrypted = cryptoFunctions.encryptAPI(result, req.session.publicKey)
+            res.status(200).send(encrypted)
         } catch (e) {
             console.log(e)
             return res.status(400).send("Bad request")
@@ -291,7 +306,9 @@ const PostRoutes = (app: Express) => {
             if (!req.session.username) return res.status(403).send("Unauthorized")
             if (!permissions.isMod(req.session)) return res.status(403).end()
             const result = await sql.search.unverifiedPosts(offset)
-            res.status(200).json(result)
+            if (!req.session.publicKey) return res.status(401).send("No public key")
+            const encrypted = cryptoFunctions.encryptAPI(result, req.session.publicKey)
+            res.status(200).send(encrypted)
         } catch (e) {
             console.log(e)
             return res.status(400).send("Bad request")
@@ -304,7 +321,9 @@ const PostRoutes = (app: Express) => {
             if (!req.session.username) return res.status(403).send("Unauthorized")
             if (!permissions.isMod(req.session)) return res.status(403).end()
             const result = await sql.search.unverifiedPostEdits(offset)
-            res.status(200).json(result)
+            if (!req.session.publicKey) return res.status(401).send("No public key")
+            const encrypted = cryptoFunctions.encryptAPI(result, req.session.publicKey)
+            res.status(200).send(encrypted)
         } catch (e) {
             console.log(e)
             return res.status(400).send("Bad request")
@@ -317,7 +336,9 @@ const PostRoutes = (app: Express) => {
             if (Number.isNaN(Number(postID))) return res.status(400).send("Invalid postID")
             if (!permissions.isMod(req.session)) return res.status(403).end()
             const posts = await sql.post.unverifiedThirdParty(Number(postID))
-            res.status(200).json(posts)
+            if (!req.session.publicKey) return res.status(401).send("No public key")
+            const encrypted = cryptoFunctions.encryptAPI(posts, req.session.publicKey)
+            res.status(200).send(encrypted)
         } catch (e) {
             console.log(e)
             return res.status(400).send("Bad request")
@@ -330,7 +351,9 @@ const PostRoutes = (app: Express) => {
             if (Number.isNaN(Number(postID))) return res.status(400).send("Invalid postID")
             if (!permissions.isMod(req.session)) return res.status(403).end()
             const post = await sql.post.unverifiedParent(Number(postID))
-            res.status(200).json(post)
+            if (!req.session.publicKey) return res.status(401).send("No public key")
+            const encrypted = cryptoFunctions.encryptAPI(post, req.session.publicKey)
+            res.status(200).send(encrypted)
         } catch (e) {
             console.log(e)
             return res.status(400).send("Bad request")
@@ -359,7 +382,9 @@ const PostRoutes = (app: Express) => {
             if (!req.session.username) return res.status(403).send("Unauthorized")
             if (!permissions.isMod(req.session)) return res.status(403).end()
             const result = await sql.request.postDeleteRequests(offset)
-            res.status(200).json(result)
+            if (!req.session.publicKey) return res.status(401).send("No public key")
+            const encrypted = cryptoFunctions.encryptAPI(result, req.session.publicKey)
+            res.status(200).send(encrypted)
         } catch (e) {
             console.log(e)
             res.status(400).send("Bad request") 
@@ -434,6 +459,7 @@ const PostRoutes = (app: Express) => {
                         bookmarks: source.bookmarks ? source.bookmarks : null,
                         purchaseLink: source.purchaseLink ? source.purchaseLink : null,
                         mirrors: source.mirrors ? functions.mirrorsJSON(source.mirrors) : null,
+                        slug: functions.postSlug(source.title, source.translatedTitle),
                         updatedDate,
                         updater: req.session.username
                     })
@@ -449,6 +475,7 @@ const PostRoutes = (app: Express) => {
                         bookmarks: source.bookmarks ? source.bookmarks : null,
                         purchaseLink: source.purchaseLink ? source.purchaseLink : null,
                         mirrors: source.mirrors ? functions.mirrorsJSON(source.mirrors) : null,
+                        slug: functions.postSlug(source.title, source.translatedTitle),
                         updatedDate,
                         updater: req.session.username
                     })
@@ -505,26 +532,26 @@ const PostRoutes = (app: Express) => {
         
                 for (let i = 0; i < artists.length; i++) {
                     if (!artists[i]) continue
-                    let bulkObj = {tag: artists[i], type: "artist", description: "Artist.", image: null} as any
+                    let bulkObj = {tag: artists[i], type: "artist", description: "Artist.", image: null, imageHash: null} as any
                     bulkTagUpdate.push(bulkObj)
                 }
                 
                 for (let i = 0; i < characters.length; i++) {
                     if (!characters[i]) continue
-                    let bulkObj = {tag: characters[i], type: "character", description: "Character.", image: null} as any
+                    let bulkObj = {tag: characters[i], type: "character", description: "Character.", image: null, imageHash: null} as any
                     bulkTagUpdate.push(bulkObj)
                 }
 
                 for (let i = 0; i < series.length; i++) {
                     if (!series[i]) continue
-                    let bulkObj = {tag: series[i], type: "series", description: "Series.", image: null} as any
+                    let bulkObj = {tag: series[i], type: "series", description: "Series.", image: null, imageHash: null} as any
                     bulkTagUpdate.push(bulkObj)
                 }
 
                 for (let i = 0; i < tags.length; i++) {
                     if (!tags[i]) continue
                     if (addedTags.includes(tags[i])) {
-                        let bulkObj = {tag: tags[i], type: functions.tagType(tags[i]), description: `${functions.toProperCase(tags[i]).replaceAll("-", " ")}.`, image: null} as any
+                        let bulkObj = {tag: tags[i], type: functions.tagType(tags[i]), description: `${functions.toProperCase(tags[i]).replaceAll("-", " ")}.`, image: null, imageHash: null} as any
                         bulkTagUpdate.push(bulkObj)
                     }
                 }
@@ -535,7 +562,7 @@ const PostRoutes = (app: Express) => {
                         for (const i of implications) {
                             addedTags.push(i.implication)
                             const tag = await sql.tag.tag(i.implication)
-                            bulkTagUpdate.push({tag: i.implication, type: functions.tagType(i.implication), description: tag?.description || null, image: tag?.image || null})
+                            bulkTagUpdate.push({tag: i.implication, type: functions.tagType(i.implication), description: tag?.description || null, image: tag?.image || null, imageHash: tag?.imageHash || null})
                         }
                     }
                 }
@@ -588,7 +615,7 @@ const PostRoutes = (app: Express) => {
                     uploadDate: vanilla.uploadDate, updatedDate: vanilla.updatedDate, type: vanilla.type, restrict: vanilla.restrict, 
                     style: vanilla.style, thirdParty: vanilla.thirdParty, title: vanilla.title, translatedTitle: vanilla.translatedTitle, 
                     posted: vanilla.posted, artist: vanilla.artist, link: vanilla.link, commentary: vanilla.commentary, translatedCommentary: vanilla.translatedCommentary, 
-                    bookmarks: vanilla.bookmarks, purchaseLink: vanilla.purchaseLink, mirrors: vanilla.mirrors, hasOriginal: vanilla.hasOriginal, hasUpscaled: vanilla.hasUpscaled, 
+                    bookmarks: vanilla.bookmarks, purchaseLink: vanilla.purchaseLink, mirrors: vanilla.mirrors, slug: vanilla.slug, hasOriginal: vanilla.hasOriginal, hasUpscaled: vanilla.hasUpscaled, 
                     artists: vanilla.artists, characters: vanilla.characters, series: vanilla.series, tags: vanilla.tags, addedTags: [], removedTags: [], imageChanged: false,
                     changes: null, reason})
                 let images = [] as any
@@ -599,7 +626,7 @@ const PostRoutes = (app: Express) => {
                     postID, username: req.session.username, images, uploader: updated.uploader, updater: updated.updater, 
                     uploadDate: updated.uploadDate, updatedDate: updated.updatedDate, type: updated.type, restrict: updated.restrict, 
                     style: updated.style, thirdParty: updated.thirdParty, title: updated.title, translatedTitle: updated.translatedTitle, 
-                    posted: updated.posted, artist: updated.artist, link: updated.link, commentary: updated.commentary, 
+                    posted: updated.posted, artist: updated.artist, link: updated.link, commentary: updated.commentary, slug: updated.slug,
                     translatedCommentary: updated.translatedCommentary, bookmarks: updated.bookmarks, purchaseLink: updated.purchaseLink, mirrors: updated.mirrors, 
                     hasOriginal: updated.hasOriginal, hasUpscaled: updated.hasUpscaled, artists: updated.artists, 
                     characters: updated.characters, series: updated.series, tags: updated.tags, addedTags, removedTags, imageChanged: false, changes, reason})
@@ -612,7 +639,7 @@ const PostRoutes = (app: Express) => {
                     postID, username: req.session.username, images, uploader: updated.uploader, updater: updated.updater, 
                     uploadDate: updated.uploadDate, updatedDate: updated.updatedDate, type: updated.type, restrict: updated.restrict, 
                     style: updated.style, thirdParty: updated.thirdParty, title: updated.title, translatedTitle: updated.translatedTitle, 
-                    posted: updated.posted, artist: updated.artist, link: updated.link, commentary: updated.commentary, 
+                    posted: updated.posted, artist: updated.artist, link: updated.link, commentary: updated.commentary, slug: updated.slug,
                     translatedCommentary: updated.translatedCommentary, bookmarks: updated.bookmarks, purchaseLink: updated.purchaseLink, mirrors: updated.mirrors, 
                     hasOriginal: updated.hasOriginal, hasUpscaled: updated.hasUpscaled, artists: updated.artists, 
                     characters: updated.characters, series: updated.series, tags: updated.tags, addedTags, removedTags, imageChanged: false, changes, reason})
@@ -720,29 +747,29 @@ const PostRoutes = (app: Express) => {
                 let kind = "image" as any
                 if (type === "comic") {
                     kind = "comic"
-                } else if (ext === "jpg" || ext === "png" || ext === "avif") {
-                    kind = "image"
-                } else if (ext === "webp") {
+                  } else if (functions.isWebP(`.${ext}`)) {
                     const animated = functions.isAnimatedWebp(current)
                     if (animated) {
-                        kind = "animation"
-                    if (type !== "video") type = "animation"
+                      kind = "animation"
+                      if (type !== "video") type = "animation"
                     } else {
-                        kind = "image"
+                      kind = "image"
                     }
-                } else if (ext === "gif") {
+                  } else if (functions.isImage(`.${ext}`)) {
+                    kind = "image"
+                  } else if (functions.isGIF(`.${ext}`)) {
                     kind = "animation"
                     if (type !== "video") type = "animation"
-                } else if (ext === "mp4" || ext === "webm") {
+                  } else if (functions.isVideo(`.${ext}`)) {
                     kind = "video"
                     type = "video"
-                } else if (ext === "mp3" || ext === "wav") {
+                  } else if (functions.isAudio(`.${ext}`)) {
                     kind = "audio"
                     type = "audio"
-                } else if (ext === "glb" || ext === "obj" || ext === "fbx") {
+                  } else if (functions.isModel(`.${ext}`)) {
                     kind = "model"
                     type = "model"
-                }
+                  }
                 if (buffer.byteLength) {
                     let newImagePath = functions.getImagePath(kind, postID, Number(fileOrder), filename)
                     await serverFunctions.uploadUnverifiedFile(newImagePath, buffer)
@@ -788,6 +815,7 @@ const PostRoutes = (app: Express) => {
                 bookmarks: source.bookmarks ? source.bookmarks : null,
                 purchaseLink: source.purchaseLink ? source.purchaseLink : null,
                 mirrors: source.mirrors ? functions.mirrorsJSON(source.mirrors) : null,
+                slug: functions.postSlug(source.title, source.translatedTitle),
                 uploader: post.uploader,
                 uploadDate: post.uploadDate,
                 updatedDate,
@@ -801,7 +829,7 @@ const PostRoutes = (app: Express) => {
     
             for (let i = 0; i < artists.length; i++) {
                 if (!artists[i]) continue
-                let bulkObj = {tag: artists[i], type: "artist", description: "Artist.", image: null} as any
+                let bulkObj = {tag: artists[i], type: "artist", description: "Artist.", image: null, imageHash: null} as any
                 const existingTag = await sql.tag.tag(artists[i])
                 if (existingTag) {
                     if (existingTag.description) bulkObj.description = existingTag.description
@@ -810,6 +838,7 @@ const PostRoutes = (app: Express) => {
                         const buffer = await serverFunctions.getFile(imagePath, false, false)
                         await serverFunctions.uploadUnverifiedFile(imagePath, buffer)
                         bulkObj.image = existingTag.image
+                        bulkObj.imageHash = serverFunctions.md5(buffer)
                     }
                 }
                 bulkTagUpdate.push(bulkObj)
@@ -818,7 +847,7 @@ const PostRoutes = (app: Express) => {
             
             for (let i = 0; i < characters.length; i++) {
                 if (!characters[i]) continue
-                let bulkObj = {tag: characters[i], type: "character", description: "Character.", image: null} as any
+                let bulkObj = {tag: characters[i], type: "character", description: "Character.", image: null, imageHash: null} as any
                 const existingTag = await sql.tag.tag(characters[i])
                 if (existingTag) {
                     if (existingTag.description) bulkObj.description = existingTag.description
@@ -827,6 +856,7 @@ const PostRoutes = (app: Express) => {
                         const buffer = await serverFunctions.getFile(imagePath, false, false)
                         await serverFunctions.uploadUnverifiedFile(imagePath, buffer)
                         bulkObj.image = existingTag.image
+                        bulkObj.imageHash = serverFunctions.md5(buffer)
                     }
                 }
                 bulkTagUpdate.push(bulkObj)
@@ -835,7 +865,7 @@ const PostRoutes = (app: Express) => {
 
             for (let i = 0; i < series.length; i++) {
                 if (!series[i]) continue
-                let bulkObj = {tag: series[i], type: "series", description: "Series.", image: null} as any
+                let bulkObj = {tag: series[i], type: "series", description: "Series.", image: null, imageHash: null} as any
                 const existingTag = await sql.tag.tag(series[i])
                 if (existingTag) {
                     if (existingTag.description) bulkObj.description = existingTag.description
@@ -844,6 +874,7 @@ const PostRoutes = (app: Express) => {
                         const buffer = await serverFunctions.getFile(imagePath, false, false)
                         await serverFunctions.uploadUnverifiedFile(imagePath, buffer)
                         bulkObj.image = existingTag.image
+                        bulkObj.imageHash = serverFunctions.md5(buffer)
                     }
                 }
                 bulkTagUpdate.push(bulkObj)
@@ -852,7 +883,7 @@ const PostRoutes = (app: Express) => {
 
             for (let i = 0; i < tags.length; i++) {
                 if (!tags[i]) continue
-                let bulkObj = {tag: tags[i], type: functions.tagType(tags[i]), description: `${functions.toProperCase(tags[i]).replaceAll("-", " ")}.`, image: null} as any
+                let bulkObj = {tag: tags[i], type: functions.tagType(tags[i]), description: `${functions.toProperCase(tags[i]).replaceAll("-", " ")}.`, image: null, imageHash: null} as any
                 const existingTag = await sql.tag.tag(tags[i])
                 if (existingTag) {
                     if (existingTag.description) bulkObj.description = existingTag.description
@@ -861,6 +892,7 @@ const PostRoutes = (app: Express) => {
                         const buffer = await serverFunctions.getFile(imagePath, false, false)
                         await serverFunctions.uploadUnverifiedFile(imagePath, buffer)
                         bulkObj.image = existingTag.image
+                        bulkObj.imageHash = serverFunctions.md5(buffer)
                     }
                 }
                 bulkTagUpdate.push(bulkObj)
@@ -873,7 +905,7 @@ const PostRoutes = (app: Express) => {
                     for (const i of implications) {
                       tagMap.push(i.implication)
                       const tag = await sql.tag.tag(i.implication)
-                      bulkTagUpdate.push({tag: i.implication, type: functions.tagType(i.implication), description: tag?.description || null, image: tag?.image || null})
+                      bulkTagUpdate.push({tag: i.implication, type: functions.tagType(i.implication), description: tag?.description || null, image: tag?.image || null, imageHash: tag?.imageHash || null})
                     }
                 }
             }
@@ -898,19 +930,20 @@ const PostRoutes = (app: Express) => {
             const query = req.query.query as string
             const offset = req.query.offset as string
             if (!req.session.username) return res.status(403).send("Unauthorized")
+            let result = null as any
             if (historyID) {
-                const result = await sql.history.postHistoryID(postID, historyID)
+                result = await sql.history.postHistoryID(postID, historyID)
                 if (req.session.captchaNeeded) delete result.tags
-                res.status(200).json(result)
             } else if (username) {
-                let result = await sql.history.userPostHistory(username)
+                result = await sql.history.userPostHistory(username)
                 if (req.session.captchaNeeded) result = functions.stripTags(result)
-                res.status(200).json(result)
             } else {
-                let result = await sql.history.postHistory(postID, offset, query)
+                result = await sql.history.postHistory(postID, offset, query)
                 if (req.session.captchaNeeded) result = functions.stripTags(result)
-                res.status(200).json(result)
             }
+            if (!req.session.publicKey) return res.status(401).send("No public key")
+            const encrypted = cryptoFunctions.encryptAPI(result, req.session.publicKey)
+            res.status(200).send(encrypted)
         } catch (e) {
             console.log(e)
             res.status(400).send("Bad request")

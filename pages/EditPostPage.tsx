@@ -160,23 +160,17 @@ const EditPostPage: React.FunctionComponent<Props> = (props) => {
         for (let i = 0; i < post.images.length; i++) {
             let imageLink = functions.getImageLink(post.images[i].type, postID, post.images[i].order, post.images[i].filename)
             let response = await fetch(`${imageLink}?upscaled=false`, {headers: {"x-force-upscale": "false"}}).then((r) => r.arrayBuffer())
-            if (response.byteLength && functions.isImage(imageLink)) {
-                const isAnimated = functions.isAnimatedWebp(response)
-                if (!isAnimated) response = cryptoFunctions.decrypt(response)
-            }
             if (response.byteLength) {
-                const blob = new Blob([new Uint8Array(response)])
+                const decrypted = await functions.decryptBuffer(response, imageLink, session)
+                const blob = new Blob([new Uint8Array(decrypted)])
                 const file = new File([blob], path.basename(imageLink))
                 files.push(file)
                 links.push(imageLink)
             }
             let upscaledResponse = await fetch(`${imageLink}?upscaled=true`, {headers: {"x-force-upscale": "true"}}).then((r) => r.arrayBuffer())
-            if (upscaledResponse.byteLength && functions.isImage(imageLink)) {
-                const isAnimated = functions.isAnimatedWebp(response)
-                if (!isAnimated) upscaledResponse = cryptoFunctions.decrypt(upscaledResponse)
-            }
             if (upscaledResponse.byteLength) {
-                const upscaledBlob = new Blob([new Uint8Array(upscaledResponse)])
+                const decrypted = await functions.decryptBuffer(upscaledResponse, imageLink, session)
+                const upscaledBlob = new Blob([new Uint8Array(decrypted)])
                 const upscaledFile = new File([upscaledBlob], path.basename(imageLink))
                 upscaledFiles.push(upscaledFile)
                 upscaledLinks.push(imageLink)
@@ -193,7 +187,7 @@ const EditPostPage: React.FunctionComponent<Props> = (props) => {
             if (!artists[i]) artists[i] = {}
             artists[i].tag = tagCategories.artists[i].tag
             if (tagCategories.artists[i].image) {
-                const imageLink = functions.removeQueryParams(functions.getTagLink("artist", tagCategories.artists[i].image))
+                const imageLink = functions.removeQueryParams(functions.getTagLink("artist", tagCategories.artists[i].image, tagCategories.artists[i].imageHash))
                 artists[i].image = imageLink
                 const arrayBuffer = await fetch(imageLink).then((r) => r.arrayBuffer())
                 artists[i].ext = path.extname(imageLink).replace(".", "")
@@ -207,7 +201,7 @@ const EditPostPage: React.FunctionComponent<Props> = (props) => {
             if (!characters[i]) characters[i] = {}
             characters[i].tag = tagCategories.characters[i].tag
             if (tagCategories.characters[i].image) {
-                const imageLink = functions.removeQueryParams(functions.getTagLink("character", tagCategories.characters[i].image))
+                const imageLink = functions.removeQueryParams(functions.getTagLink("character", tagCategories.characters[i].image, tagCategories.characters[i].imageHash))
                 characters[i].image = imageLink
                 const arrayBuffer = await fetch(imageLink).then((r) => r.arrayBuffer())
                 characters[i].ext = path.extname(imageLink).replace(".", "")
@@ -221,7 +215,7 @@ const EditPostPage: React.FunctionComponent<Props> = (props) => {
             if (!series[i]) series[i] = {}
             series[i].tag = tagCategories.series[i].tag
             if (tagCategories.series[i].image) {
-                const imageLink = functions.removeQueryParams(functions.getTagLink("series", tagCategories.series[i].image))
+                const imageLink = functions.removeQueryParams(functions.getTagLink("series", tagCategories.series[i].image, tagCategories.series[i].imageHash))
                 series[i].image = imageLink
                 const arrayBuffer = await fetch(imageLink).then((r) => r.arrayBuffer())
                 series[i].ext = path.extname(imageLink).replace(".", "")
@@ -264,7 +258,7 @@ const EditPostPage: React.FunctionComponent<Props> = (props) => {
         setSharpen(0)
         setPixelate(1)
         updateFields()
-    }, [])
+    }, [session])
 
     useEffect(() => {
         if (mobile) {
@@ -375,11 +369,11 @@ const EditPostPage: React.FunctionComponent<Props> = (props) => {
                 let url = URL.createObjectURL(acceptedArray[i].file)
                 let link = `${url}#.${acceptedArray[i].ext}`
                 let thumbnail = ""
-                if (acceptedArray[i].ext === "mp4" || acceptedArray[i].ext === "webm") {
+                if (functions.isVideo(acceptedArray[i].ext)) {
                     thumbnail = await functions.videoThumbnail(link)
-                } else if (acceptedArray[i].ext === "glb" || acceptedArray[i].ext === "fbx" || acceptedArray[i].ext === "obj") {
+                } else if (functions.isModel(acceptedArray[i].ext)) {
                     thumbnail = await functions.modelImage(link)
-                } else if (acceptedArray[i].ext === "mp3" || acceptedArray[i].ext === "wav") {
+                } else if (functions.isAudio(acceptedArray[i].ext)) {
                     thumbnail = await functions.songCover(link)
                 }
                 urls.push({link, ext: acceptedArray[i].ext, size: acceptedArray[i].file.size, thumbnail,
@@ -467,7 +461,7 @@ const EditPostPage: React.FunctionComponent<Props> = (props) => {
                             delayArray.push(gifData[i].delay)
                         }
                         const firstURL = await functions.crop(gifData[0].frame.toDataURL(), 1)
-                        const {width, height} = await functions.imageDimensions(firstURL)
+                        const {width, height} = await functions.imageDimensions(firstURL, session)
                         const buffer = await functions.encodeGIF(frameArray, delayArray, width, height)
                         const blob = new Blob([buffer])
                         croppedURL = URL.createObjectURL(blob)
@@ -511,7 +505,7 @@ const EditPostPage: React.FunctionComponent<Props> = (props) => {
     const handleTagClick = async (tag: string, index: number) => {
         const tagDetail = await functions.get("/api/tag", {tag}, session, setSessionFlag)
         if (tagDetail.image) {
-            const tagLink = functions.removeQueryParams(functions.getTagLink(tagDetail.type, tagDetail.image))
+            const tagLink = functions.removeQueryParams(functions.getTagLink(tagDetail.type, tagDetail.image, tagDetail.imageHash))
             const arrayBuffer = await fetch(tagLink).then((r) => r.arrayBuffer())
             const bytes = new Uint8Array(arrayBuffer)
             const ext = path.extname(tagLink).replace(".", "")

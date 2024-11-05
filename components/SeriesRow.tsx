@@ -38,17 +38,17 @@ const SeriesRow: React.FunctionComponent<Props> = (props) => {
             let filtered = props.series.posts.filter((p: any) => p.restrict === "safe")
             const post = filtered[index] 
             if (newTab) {
-                return window.open(`/post/${post.postID}`, "_blank")
+                return window.open(`/post/${post.postID}/${post.slug}`, "_blank")
             } else {
-                return history.push(`/post/${post.postID}`)
+                return history.push(`/post/${post.postID}/${post.slug}`)
             }
         }
         let filtered = props.series.posts.filter((p: any) => restrictType === "explicit" ? p.restrict === "explicit" : p.restrict !== "explicit")
         const post = filtered[index] 
         if (newTab) {
-            window.open(`/post/${post.postID}`, "_blank")
+            window.open(`/post/${post.postID}/${post.slug}`, "_blank")
         } else {
-            history.push(`/post/${post.postID}`)
+            history.push(`/post/${post.postID}/${post.slug}`)
         }
         window.scrollTo(0, functions.navbarHeight() + functions.titlebarHeight())
         setPosts(props.series.posts)
@@ -77,7 +77,7 @@ const SeriesRow: React.FunctionComponent<Props> = (props) => {
     return (
         <div className="seriesrow">
             <div className="seriesrow-row">
-                {props.series.image ? <img className="seriesrow-img" src={functions.getTagLink("series", props.series.image)}/> : null}
+                {props.series.image ? <img className="seriesrow-img" src={functions.getTagLink("series", props.series.image, props.series.imageHash)}/> : null}
                 <span className="seriesrow-text-hover">
                     <span className="seriesrow-text" onClick={tagPage} onAuxClick={tagPage} onContextMenu={tagPage}>{functions.toProperCase(props.series.tag.replaceAll("-", " "))}</span>
                     {seriesSocialJSX()}

@@ -4,7 +4,6 @@ import {ThemeContext, SessionContext, MobileContext, SessionFlagContext, DeleteS
 DeleteSearchHistoryFlagContext} from "../Context"
 import functions from "../structures/Functions"
 import searchHistoryDelete from "../assets/icons/delete.png"
-import cryptoFunctions from "../structures/CryptoFunctions"
 import "./styles/historyrow.less"
 import path from "path"
 
@@ -72,12 +71,7 @@ const SearchHistoryRow: React.FunctionComponent<Props> = (props) => {
     const loadImage = async () => {
         if (functions.isGIF(img)) return
         if (!ref.current) return
-        let src = await cryptoFunctions.decryptedLink(img)
-        if (functions.isModel(src)) {
-            src = await functions.modelImage(src)
-        } else if (functions.isAudio(src)) {
-            src = await functions.songCover(src)
-        }
+        let src = await functions.decryptThumb(img, session)
         const imgElement = document.createElement("img")
         imgElement.src = src 
         imgElement.onload = () => {
@@ -91,7 +85,7 @@ const SearchHistoryRow: React.FunctionComponent<Props> = (props) => {
 
     useEffect(() => {
         loadImage()
-    }, [img])
+    }, [img, session])
     
     const getDomain = (link: string) => {
         try {

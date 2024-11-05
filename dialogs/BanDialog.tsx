@@ -68,7 +68,7 @@ const BanDialog: React.FunctionComponent = (props) => {
                 const result = await functions.get("/api/post/history", {postID}, session, setSessionFlag)
                 if (!result?.[0]) continue
                 const currentHistory = result[0]
-                const {images, upscaledImages} = await functions.parseImages(currentHistory)
+                const {images, upscaledImages} = await functions.parseImages(currentHistory, session)
                 const newTags = await functions.parseNewTags(currentHistory, session, setSessionFlag)
                 const source = {
                     title: currentHistory.title,
@@ -96,7 +96,7 @@ const BanDialog: React.FunctionComponent = (props) => {
                 if (!currentHistory.image) {
                     image = ["delete"]
                 } else {
-                    const imageLink = functions.getTagLink(currentHistory.type, currentHistory.image)
+                    const imageLink = functions.getTagLink(currentHistory.type, currentHistory.image, currentHistory.imageHash)
                     const arrayBuffer = await fetch(imageLink).then((r) => r.arrayBuffer())
                     const bytes = new Uint8Array(arrayBuffer)
                     image = Object.values(bytes)

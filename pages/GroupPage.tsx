@@ -119,12 +119,7 @@ const GroupPage: React.FunctionComponent<Props> = (props) => {
             const post = group.posts[i]
             if (post.restrict === "explicit") if (restrictType !== "explicit") continue
             const imageLink = functions.getThumbnailLink(post.images[0]?.type, post.postID, post.images[0]?.order, post.images[0]?.filename, "medium", mobile)
-            let img = await cryptoFunctions.decryptedLink(imageLink)
-            if (functions.isModel(img)) {
-                img = await functions.modelImage(img)
-            } else if (functions.isAudio(img)) {
-                img = await functions.songCover(img)
-            }
+            let img = await functions.decryptThumb(imageLink, session)
             items.push({id: post.order, image: img, post})
         }
         setItems(items)
@@ -136,7 +131,7 @@ const GroupPage: React.FunctionComponent<Props> = (props) => {
             setHeaderText(group.name)
             updateItems()
         }
-    }, [group, restrictType])
+    }, [group, restrictType, session])
 
     useEffect(() => {
         if (mobile) {
@@ -161,9 +156,9 @@ const GroupPage: React.FunctionComponent<Props> = (props) => {
             const openPost = (event: React.MouseEvent) => {
                 if (reorderState) return
                 if (event.ctrlKey || event.metaKey || event.button === 1) {
-                    window.open(`/post/${item.post.postID}`, "_blank")
+                    window.open(`/post/${item.post.postID}/${item.post.slug}`, "_blank")
                 } else {
-                    history.push(`/post/${item.post.postID}`)
+                    history.push(`/post/${item.post.postID}/${item.post.slug}`)
                 }
                 setPosts(group.posts)
                 setTimeout(() => {

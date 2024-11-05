@@ -6,7 +6,6 @@ import {HashLink as Link} from "react-router-hash-link"
 import approve from "../assets/icons/approve.png"
 import reject from "../assets/icons/reject.png"
 import functions from "../structures/Functions"
-import cryptoFunctions from "../structures/CryptoFunctions"
 import "./styles/modposts.less"
 
 const ModTranslations: React.FunctionComponent = (props) => {

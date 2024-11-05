@@ -3,6 +3,7 @@ import rateLimit from "express-rate-limit"
 import slowDown from "express-slow-down"
 import sql from "../sql/SQLQuery"
 import functions from "../structures/Functions"
+import cryptoFunctions from "../structures/CryptoFunctions"
 import permissions from "../structures/Permissions"
 import serverFunctions, {csrfProtection, keyGenerator, handler} from "../structures/ServerFunctions"
 
@@ -151,7 +152,9 @@ const GroupRoutes = (app: Express) => {
                     if (!permissions.canPrivate(req.session, categories.artists)) group.posts.splice(i, 1)
                 }
             }
-            res.status(200).send(group)
+            if (!req.session.publicKey) return res.status(401).send("No public key")
+            const encrypted = cryptoFunctions.encryptAPI(group, req.session.publicKey)
+            res.status(200).send(encrypted)
         } catch (e) {
             console.log(e)
             res.status(400).send("Bad request") 
@@ -181,7 +184,9 @@ const GroupRoutes = (app: Express) => {
                 }
                 newGroups.push(group)
             }
-            res.status(200).send(newGroups)
+            if (!req.session.publicKey) return res.status(401).send("No public key")
+            const encrypted = cryptoFunctions.encryptAPI(newGroups, req.session.publicKey)
+            res.status(200).send(encrypted)
         } catch (e) {
             console.log(e)
             res.status(400).send("Bad request") 
@@ -211,7 +216,9 @@ const GroupRoutes = (app: Express) => {
                 }
                 newGroups.push(group)
             }
-            res.status(200).send(newGroups)
+            if (!req.session.publicKey) return res.status(401).send("No public key")
+            const encrypted = cryptoFunctions.encryptAPI(newGroups, req.session.publicKey)
+            res.status(200).send(encrypted)
         } catch (e) {
             console.log(e)
             return res.status(400).send("Bad request")
@@ -364,7 +371,9 @@ const GroupRoutes = (app: Express) => {
             if (!req.session.username) return res.status(403).send("Unauthorized")
             if (!permissions.isMod(req.session)) return res.status(403).end()
             const result = await sql.request.groupRequests(offset)
-            res.status(200).json(result)
+            if (!req.session.publicKey) return res.status(401).send("No public key")
+            const encrypted = cryptoFunctions.encryptAPI(result, req.session.publicKey)
+            res.status(200).send(encrypted)
         } catch (e) {
             console.log(e)
             res.status(400).send("Bad request") 
@@ -433,7 +442,9 @@ const GroupRoutes = (app: Express) => {
             if (!req.session.username) return res.status(403).send("Unauthorized")
             if (!permissions.isMod(req.session)) return res.status(403).end()
             const result = await sql.request.groupDeleteRequests(offset)
-            res.status(200).json(result)
+            if (!req.session.publicKey) return res.status(401).send("No public key")
+            const encrypted = cryptoFunctions.encryptAPI(result, req.session.publicKey)
+            res.status(200).send(encrypted)
         } catch (e) {
             console.log(e)
             res.status(400).send("Bad request") 
@@ -504,7 +515,9 @@ const GroupRoutes = (app: Express) => {
             if (!req.session.username) return res.status(403).send("Unauthorized")
             if (!permissions.isMod(req.session)) return res.status(403).end()
             const result = await sql.request.groupEditRequests(offset)
-            res.status(200).json(result)
+            if (!req.session.publicKey) return res.status(401).send("No public key")
+            const encrypted = cryptoFunctions.encryptAPI(result, req.session.publicKey)
+            res.status(200).send(encrypted)
         } catch (e) {
             console.log(e)
             res.status(400).send("Bad request") 
@@ -540,23 +553,23 @@ const GroupRoutes = (app: Express) => {
             const query = req.query.query as string
             const offset = req.query.offset as string
             if (!req.session.username) return res.status(403).send("Unauthorized")
+            let result = null as any
             if (slug) {
                 const group = await sql.group.group(slug)
                 if (!group) return res.status(400).send("Bad group")
                 if (historyID) {
-                    const result = await sql.history.groupHistoryID(group.groupID, historyID)
-                    res.status(200).json(result)
+                    result = await sql.history.groupHistoryID(group.groupID, historyID)
                 } else if (username) {
-                    const result = await sql.history.userGroupHistory(username)
-                    res.status(200).json(result)
+                    result = await sql.history.userGroupHistory(username)
                 } else {
-                    const result = await sql.history.groupHistory(group.groupID, offset, query)
-                    res.status(200).json(result)
+                    result = await sql.history.groupHistory(group.groupID, offset, query)
                 }
             } else {
-                const result = await sql.history.groupHistory(undefined, offset)
-                res.status(200).json(result)
+                result = await sql.history.groupHistory(undefined, offset)
             }
+            if (!req.session.publicKey) return res.status(401).send("No public key")
+            const encrypted = cryptoFunctions.encryptAPI(result, req.session.publicKey)
+            res.status(200).send(encrypted)
         } catch (e) {
             console.log(e)
             res.status(400).send("Bad request")
