@@ -381,7 +381,7 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
                     <div className="sidebar-row">
                         <span className="tag-hover">
                             <img className="tag-info" src={question} onClick={(event) => tagInfo(event, props.artists[i].tag)} onAuxClick={(event) => tagInfo(event, props.artists[i].tag)}/>
-                            <span className="artist-tag" onClick={() => tagClick()} onContextMenu={(event) => tagInfo(event, props.artists[i].tag)}>{props.artists[i].tag.replaceAll("-", " ")}</span>
+                            <span className="tag artist-tag-color" onClick={() => tagClick()} onContextMenu={(event) => tagInfo(event, props.artists[i].tag)}>{props.artists[i].tag.replaceAll("-", " ")}</span>
                             {artistSocials()}
                             <span className={`tag-count ${props.artists[i].count === "1" ? "artist-tag-color" : ""}`}>{props.artists[i].count}</span>
                         </span>
@@ -416,7 +416,7 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
                 <div className="sidebar-row">
                     <span className="tag-hover">
                         <img className="tag-info" src={question} onClick={(event) => tagInfo(event, props.characters[i].tag)} onAuxClick={(event) => tagInfo(event, props.characters[i].tag)}/>
-                        <span className="character-tag" onClick={() => tagClick()} onContextMenu={(event) => tagInfo(event, props.characters[i].tag)}>{props.characters[i].tag.replaceAll("-", " ")}</span>
+                        <span className="tag character-tag-color" onClick={() => tagClick()} onContextMenu={(event) => tagInfo(event, props.characters[i].tag)}>{props.characters[i].tag.replaceAll("-", " ")}</span>
                         {characterSocials()}
                         <span className={`tag-count ${props.characters[i].count === "1" ? "artist-tag-color" : ""}`}>{props.characters[i].count}</span>
                     </span>
@@ -454,7 +454,7 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
                 <div className="sidebar-row">
                     <span className="tag-hover">
                         <img className="tag-info" src={question} onClick={(event) => tagInfo(event, props.series[i].tag)} onAuxClick={(event) => tagInfo(event, props.series[i].tag)}/>
-                        <span className="series-tag" onClick={() => tagClick()} onContextMenu={(event) => tagInfo(event, props.series[i].tag)}>{props.series[i].tag.replaceAll("-", " ")}</span>
+                        <span className="tag series-tag-color" onClick={() => tagClick()} onContextMenu={(event) => tagInfo(event, props.series[i].tag)}>{props.series[i].tag.replaceAll("-", " ")}</span>
                         {seriesSocials()}
                         <span className={`tag-count ${props.series[i].count === "1" ? "artist-tag-color" : ""}`}>{props.series[i].count}</span>
                     </span>
@@ -493,10 +493,21 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
         return jsx
     }
 
+    const organizeTags = () => {
+        const meta = props.tags.filter((t: any) => t.type === "meta")
+        const appearance = props.tags.filter((t: any) => t.type === "appearance")
+        const outfit = props.tags.filter((t: any) => t.type === "outfit")
+        const accessory = props.tags.filter((t: any) => t.type === "accessory")
+        const action = props.tags.filter((t: any) => t.type === "action")
+        const scenery = props.tags.filter((t: any) => t.type === "scenery")
+        const tags = props.tags.filter((t: any) => t.type === "tag")
+        return [...meta, ...appearance, ...outfit, ...accessory, ...action, ...scenery, ...tags.reverse()]
+    }
+
     const generateTagJSX = () => {
         if (!props.tags && saveSearch) return generateSavedSearchJSX()
         let jsx = [] as any
-        let currentTags = props.tags ? props.tags : tags
+        let currentTags = props.tags ? organizeTags() : tags
         let max = props.tags ? currentTags.length : Math.min(currentTags.length, 100)
         for (let i = 0; i < max; i++) {
             if (!currentTags[i]) break
@@ -505,18 +516,24 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
                 setSearch(currentTags[i].tag)
                 setSearchFlag(true)
             }
-            const tagClass = () => {
-                if (currentTags[i].type === "artist") return "artist-tag"
-                if (currentTags[i].type === "character") return "character-tag"
-                if (currentTags[i].type === "series") return "series-tag"
-                if (currentTags[i].type === "meta") return "meta-tag"
+            const tagColor = () => {
+                if (currentTags[i].r18) return "r18-tag-color"
+                if (currentTags[i].type === "artist") return "artist-tag-color"
+                if (currentTags[i].type === "character") return "character-tag-color"
+                if (currentTags[i].type === "series") return "series-tag-color"
+                if (currentTags[i].type === "meta") return "meta-tag-color"
+                if (currentTags[i].type === "appearance") return "appearance-tag-color"
+                if (currentTags[i].type === "outfit") return "outfit-tag-color"
+                if (currentTags[i].type === "accessory") return "accessory-tag-color"
+                if (currentTags[i].type === "action") return "action-tag-color"
+                if (currentTags[i].type === "scenery") return "scenery-tag-color"
                 return "tag"
             }
             jsx.push(
                 <div className="sidebar-row">
                     <span className="tag-hover">
                         <img className="tag-info" src={question} onClick={(event) => tagInfo(event, currentTags[i].tag)} onAuxClick={(event) => tagInfo(event, currentTags[i].tag)}/>
-                        <span className={tagClass()} onClick={() => tagClick()} onContextMenu={(event) => tagInfo(event, currentTags[i].tag)}>{currentTags[i].tag.replaceAll("-", " ")}</span>
+                        <span className={`tag ${tagColor()}`} onClick={() => tagClick()} onContextMenu={(event) => tagInfo(event, currentTags[i].tag)}>{currentTags[i].tag.replaceAll("-", " ")}</span>
                         <span className={`tag-count ${currentTags[i].count === "1" ? "artist-tag-color" : ""}`}>{currentTags[i].count}</span>
                     </span>
                 </div>

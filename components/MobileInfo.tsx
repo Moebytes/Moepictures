@@ -167,7 +167,7 @@ const MobileInfo: React.FunctionComponent<Props> = (props) => {
                     </div> : null}
                     <div className="mobileinfo-row">
                         <span className="tag-hover">
-                            <span className="artist-tag" onClick={() => tagClick()}>{props.artists[i].tag.replaceAll("-", " ")}</span>
+                            <span className="tag artist-tag-color" onClick={() => tagClick()}>{props.artists[i].tag.replaceAll("-", " ")}</span>
                             {artistSocials()}
                             <span className={`tag-count ${props.artists[i].count === "1" ? "artist-tag-color" : ""}`}>{props.artists[i].count}</span>
                         </span>
@@ -199,7 +199,7 @@ const MobileInfo: React.FunctionComponent<Props> = (props) => {
                 </div> : null}
                 <div className="mobileinfo-row">
                     <span className="tag-hover">
-                        <span className="character-tag" onClick={() => tagClick()}>{props.characters[i].tag.replaceAll("-", " ")}</span>
+                        <span className="tag character-tag-color" onClick={() => tagClick()}>{props.characters[i].tag.replaceAll("-", " ")}</span>
                         {characterSocials()}
                         <span className={`tag-count ${props.characters[i].count === "1" ? "artist-tag-color" : ""}`}>{props.characters[i].count}</span>
                     </span>
@@ -234,7 +234,7 @@ const MobileInfo: React.FunctionComponent<Props> = (props) => {
                 </div> : null}
                 <div className="mobileinfo-row">
                     <span className="tag-hover">
-                        <span className="series-tag" onClick={() => tagClick()}>{props.series[i].tag.replaceAll("-", " ")}</span>
+                        <span className="tag series-tag-color" onClick={() => tagClick()}>{props.series[i].tag.replaceAll("-", " ")}</span>
                         {seriesSocials()}
                         <span className={`tag-count ${props.series[i].count === "1" ? "artist-tag-color" : ""}`}>{props.series[i].count}</span>
                     </span>
@@ -244,26 +244,43 @@ const MobileInfo: React.FunctionComponent<Props> = (props) => {
         return jsx
     }
 
+    const organizeTags = () => {
+        const meta = props.tags.filter((t: any) => t.type === "meta")
+        const appearance = props.tags.filter((t: any) => t.type === "appearance")
+        const outfit = props.tags.filter((t: any) => t.type === "outfit")
+        const accessory = props.tags.filter((t: any) => t.type === "accessory")
+        const action = props.tags.filter((t: any) => t.type === "action")
+        const scenery = props.tags.filter((t: any) => t.type === "scenery")
+        const tags = props.tags.filter((t: any) => t.type === "tag")
+        return [...meta, ...appearance, ...outfit, ...accessory, ...action, ...scenery, ...tags.reverse()]
+    }
+
     const generateTagJSX = () => {
         let jsx = [] as any
-        let currentTags = props.tags ? props.tags : tags
+        let currentTags = props.tags ? organizeTags() : tags
         let max = currentTags.length > maxTags ? maxTags : currentTags.length
         for (let i = 0; i < max; i++) {
             if (!currentTags[i]) break
             const tagClick = () => {
                 history.push(`/tag/${currentTags[i].tag}`)
             }
-            const tagClass = () => {
-                if (currentTags[i].type === "artist") return "artist-tag"
-                if (currentTags[i].type === "character") return "character-tag"
-                if (currentTags[i].type === "series") return "series-tag"
-                if (currentTags[i].type === "meta") return "meta-tag"
+            const tagColor = () => {
+                if (currentTags[i].r18) return "r18-tag-color"
+                if (currentTags[i].type === "artist") return "artist-tag-color"
+                if (currentTags[i].type === "character") return "character-tag-color"
+                if (currentTags[i].type === "series") return "series-tag-color"
+                if (currentTags[i].type === "meta") return "meta-tag-color"
+                if (currentTags[i].type === "appearance") return "appearance-tag-color"
+                if (currentTags[i].type === "outfit") return "outfit-tag-color"
+                if (currentTags[i].type === "accessory") return "accessory-tag-color"
+                if (currentTags[i].type === "action") return "action-tag-color"
+                if (currentTags[i].type === "scenery") return "scenery-tag-color"
                 return "tag"
             }
             jsx.push(
                 <div className="mobileinfo-row">
                     <span className="tag-hover" onClick={() => tagClick()}>
-                        <span className={tagClass()}>{currentTags[i].tag.replaceAll("-", " ")}</span>
+                        <span className={`tag ${tagColor()}`}>{currentTags[i].tag.replaceAll("-", " ")}</span>
                         <span className={`tag-count ${currentTags[i].count === "1" ? "artist-tag-color" : ""}`}>{currentTags[i].count}</span>
                     </span>
                 </div>

@@ -167,13 +167,14 @@ const EditPostPage: React.FunctionComponent<Props> = (props) => {
                 files.push(file)
                 links.push(imageLink)
             }
-            let upscaledResponse = await fetch(`${imageLink}?upscaled=true`, {headers: {"x-force-upscale": "true"}}).then((r) => r.arrayBuffer())
+            let upscaledImageLink = functions.getImageLink(post.images[i].type, postID, post.images[i].order, post.images[i].upscaledFilename || post.images[i].filename)
+            let upscaledResponse = await fetch(`${upscaledImageLink}?upscaled=true`, {headers: {"x-force-upscale": "true"}}).then((r) => r.arrayBuffer())
             if (upscaledResponse.byteLength) {
-                const decrypted = await functions.decryptBuffer(upscaledResponse, imageLink, session)
+                const decrypted = await functions.decryptBuffer(upscaledResponse, upscaledImageLink, session)
                 const upscaledBlob = new Blob([new Uint8Array(decrypted)])
-                const upscaledFile = new File([upscaledBlob], path.basename(imageLink))
+                const upscaledFile = new File([upscaledBlob], path.basename(upscaledImageLink))
                 upscaledFiles.push(upscaledFile)
-                upscaledLinks.push(imageLink)
+                upscaledLinks.push(upscaledImageLink)
             }
         }
         await validate(files, links, false)

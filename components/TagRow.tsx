@@ -3,7 +3,7 @@ import {useHistory} from "react-router-dom"
 import {ThemeContext, SearchContext, SearchFlagContext, DeleteTagFlagContext, DeleteTagIDContext, MobileContext, EditTagTypeContext, EditTagReasonContext,
 EditTagSocialContext, EditTagTwitterContext, EditTagWebsiteContext, EditTagFandomContext, EditTagAliasesContext, EditTagImplicationsContext, 
 EditTagDescriptionContext, EditTagIDContext, EditTagFlagContext, EditTagPixivTagsContext, EditTagR18Context, SessionContext, EditTagImageContext, EditTagKeyContext, AliasTagFlagContext, 
-AliasTagIDContext, AliasTagNameContext, SessionFlagContext, CategorizeTagContext} from "../Context"
+AliasTagIDContext, AliasTagNameContext, SessionFlagContext, CategorizeTagContext, TagFlagContext} from "../Context"
 import {HashLink as Link} from "react-router-hash-link"
 import functions from "../structures/Functions"
 import permissions from "../structures/Permissions"
@@ -55,6 +55,7 @@ const TagRow: React.FunctionComponent<Props> = (props) => {
     const {categorizeTag, setCategorizeTag} = useContext(CategorizeTagContext)
     const {session, setSession} = useContext(SessionContext)
     const {sessionFlag, setSessionFlag} = useContext(SessionFlagContext)
+    const {tagFlag, setTagFlag} = useContext(TagFlagContext)
     const history = useHistory()
     const scrollRef = useRef(null) as any
 
@@ -125,6 +126,13 @@ const TagRow: React.FunctionComponent<Props> = (props) => {
         await functions.delete("/api/tag/delete", {tag: props.tag.tag}, session, setSessionFlag)
         props.onDelete?.()
     }
+
+    useEffect(() => {
+        if (tagFlag === props.tag.tag) {
+            props.onEdit?.()
+            setTagFlag(false)
+        }
+    }, [tagFlag, session])
 
     useEffect(() => {
         if (deleteTagFlag && deleteTagID === props.tag.tag) {
@@ -258,6 +266,11 @@ const TagRow: React.FunctionComponent<Props> = (props) => {
         if (props.tag.type === "character") return "character-tag-color"
         if (props.tag.type === "series") return "series-tag-color"
         if (props.tag.type === "meta") return "meta-tag-color"
+        if (props.tag.type === "appearance") return "appearance-tag-color"
+        if (props.tag.type === "outfit") return "outfit-tag-color"
+        if (props.tag.type === "accessory") return "accessory-tag-color"
+        if (props.tag.type === "action") return "action-tag-color"
+        if (props.tag.type === "scenery") return "scenery-tag-color"
         return "tag-color"
     }
 

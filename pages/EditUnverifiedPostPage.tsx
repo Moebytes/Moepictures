@@ -157,12 +157,13 @@ const EditUnverifiedPostPage: React.FunctionComponent<Props> = (props) => {
                 files.push(file)
                 links.push(imageLink)
             }
-            const upscaledResponse = await fetch(`${imageLink}?upscaled=true`, {headers: {"x-force-upscale": "true"}}).then((r) => r.arrayBuffer())
+            let upscaledImageLink = functions.getUnverifiedImageLink(post.images[i].type, postID, post.images[i].order, post.images[i].upscaledFilename || post.images[i].filename)
+            const upscaledResponse = await fetch(`${upscaledImageLink}?upscaled=true`, {headers: {"x-force-upscale": "true"}}).then((r) => r.arrayBuffer())
             if (upscaledResponse.byteLength) {
                 const upscaledBlob = new Blob([new Uint8Array(upscaledResponse)])
-                const upscaledFile = new File([upscaledBlob], path.basename(imageLink))
+                const upscaledFile = new File([upscaledBlob], path.basename(upscaledImageLink))
                 upscaledFiles.push(upscaledFile)
-                upscaledLinks.push(imageLink)
+                upscaledLinks.push(upscaledImageLink)
             }
         }
         await validate(files, links, false)

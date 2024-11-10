@@ -368,7 +368,7 @@ export default class ServerFunctions {
             const oldImage = oldImages[i]
             let oldPath = ""
             if (upscaled) {
-                oldPath = functions.getUpscaledImagePath(oldImage.type, oldImage.postID, oldImage.order, oldImage.filename)
+                oldPath = functions.getUpscaledImagePath(oldImage.type, oldImage.postID, oldImage.order, oldImage.upscaledFilename || oldImage.filename)
             } else {
                 oldPath = functions.getImagePath(oldImage.type, oldImage.postID, oldImage.order, oldImage.filename)
             }
@@ -389,7 +389,7 @@ export default class ServerFunctions {
             const oldImage = oldImages[i]
             let oldPath = ""
             if (upscaled) {
-                oldPath = functions.getUpscaledImagePath(oldImage.type, oldImage.postID, oldImage.order, oldImage.filename)
+                oldPath = functions.getUpscaledImagePath(oldImage.type, oldImage.postID, oldImage.order, oldImage.upscaledFilename || oldImage.filename)
             } else {
                 oldPath = functions.getImagePath(oldImage.type, oldImage.postID, oldImage.order, oldImage.filename)
             }
@@ -398,7 +398,7 @@ export default class ServerFunctions {
             const currentImage = currentImages[i]
             let currentPath = ""
             if (upscaled) {
-                currentPath = functions.getUpscaledImagePath(currentImage.type, currentImage.postID, currentImage.order, currentImage.filename)
+                currentPath = functions.getUpscaledImagePath(currentImage.type, currentImage.postID, currentImage.order, currentImage.upscaledFilename || currentImage.filename)
             } else {
                 currentPath = functions.getImagePath(currentImage.type, currentImage.postID, currentImage.order, currentImage.filename)
             }
@@ -424,7 +424,7 @@ export default class ServerFunctions {
         if (oldR18 === newR18) return
         for (let i = 0; i < post.images.length; i++) {
             const imagePath = functions.getImagePath(post.images[i].type, post.postID, post.images[i].order, post.images[i].filename)
-            const upscaledImagePath = functions.getUpscaledImagePath(post.images[i].type, post.postID, post.images[i].order, post.images[i].filename) 
+            const upscaledImagePath = functions.getUpscaledImagePath(post.images[i].type, post.postID, post.images[i].order, post.images[i].upscaledFilename || post.images[i].filename) 
             ServerFunctions.renameFile(imagePath, imagePath, oldR18, newR18)
             ServerFunctions.renameFile(upscaledImagePath, upscaledImagePath, oldR18, newR18)
         }
@@ -480,6 +480,15 @@ export default class ServerFunctions {
 
     public static md5 = (buffer: Buffer) => {
         return crypto.createHash("md5").update(new Uint8Array(buffer)).digest("hex")
+    }
+
+    public static tagMap = async () => {
+        let result = await sql.tag.tags([])
+        const tagMap = {} as {[key: string]: any}
+        for (const tag of result) {
+            tagMap[tag.tag] = tag
+        }
+        return tagMap
     }
 
     private static removeLocalDirectory = (dir: string) => {

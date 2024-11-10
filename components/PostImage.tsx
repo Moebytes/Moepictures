@@ -2,7 +2,7 @@ import React, {useContext, useEffect, useRef, useState, useReducer} from "react"
 import {ThemeContext, EnableDragContext, BrightnessContext, ContrastContext, HueContext, SaturationContext, LightnessContext,
 BlurContext, SharpenContext, PixelateContext, DownloadFlagContext, DownloadIDsContext, DisableZoomContext, SpeedContext,
 ReverseContext, MobileContext, TranslationModeContext, TranslationDrawingEnabledContext, SessionContext, SiteHueContext, PreservePitchContext,
-SiteLightnessContext, SiteSaturationContext, ImageExpandContext, SessionFlagContext, FormatContext, PremiumRequiredContext} from "../Context"
+SiteLightnessContext, SiteSaturationContext, ImageExpandContext, SessionFlagContext, FormatContext, PremiumRequiredContext, PostFlagContext} from "../Context"
 import {HashLink as Link} from "react-router-hash-link"
 import {createFFmpeg, fetchFile} from "@ffmpeg/ffmpeg"
 import functions from "../structures/Functions"
@@ -151,6 +151,7 @@ const PostImage: React.FunctionComponent<Props> = (props) => {
     const [buttonHover, setButtonHover] = useState(false)
     const [previousButtonHover, setPreviousButtonHover] = useState(false)
     const [nextButtonHover, setNextButtonHover] = useState(false)
+    const {postFlag, setPostFlag} = useContext(PostFlagContext)
     const [img, setImg] = useState("")
 
     const getFilter = () => {
@@ -194,6 +195,7 @@ const PostImage: React.FunctionComponent<Props> = (props) => {
     useEffect(() => {
         const updateImg = async () => {
             const decryptedImage = await functions.decryptItem(props.img, session)
+            if (!decryptedImage) return
             let isAnimatedWebp = false
             if (functions.isWebP(props.img)) {
                 const arrayBuffer = await fetch(props.img).then((r) => r.arrayBuffer())
@@ -272,16 +274,19 @@ const PostImage: React.FunctionComponent<Props> = (props) => {
     useEffect(() => {
         let observer = null as any
         if (functions.isImage(props.img)) {
+            if (!ref.current) return
             observer = new ResizeObserver(resizeImageCanvas)
-            observer.observe(ref.current!)
+            observer.observe(ref.current)
         }
         if (functions.isGIF(props.img) || functions.isWebP(props.img)) {
+            if (!ref.current) return
             observer = new ResizeObserver(resizeGIFCanvas)
-            observer.observe(ref.current!)
+            observer.observe(ref.current)
         }
         if (functions.isVideo(props.img)) {
+            if (!videoRef.current) return
             observer = new ResizeObserver(resizeVideoCanvas)
-            observer.observe(videoRef.current!)
+            observer.observe(videoRef.current)
         }
         window.addEventListener("keydown", handleKeydown)
         window.addEventListener("fullscreenchange", exitFullScreen)

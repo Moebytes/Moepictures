@@ -500,6 +500,21 @@ const TagsPage: React.FunctionComponent = (props) => {
                             <div className="item-dropdown-row" onClick={() => setTypeType("meta")}>
                                 <span className="item-dropdown-text">Meta</span>
                             </div>
+                            <div className="item-dropdown-row" onClick={() => setTypeType("appearance")}>
+                                <span className="item-dropdown-text">Appearance</span>
+                            </div>
+                            <div className="item-dropdown-row" onClick={() => setTypeType("outfit")}>
+                                <span className="item-dropdown-text">Outfit</span>
+                            </div>
+                            <div className="item-dropdown-row" onClick={() => setTypeType("accessory")}>
+                                <span className="item-dropdown-text">Accessory</span>
+                            </div>
+                            <div className="item-dropdown-row" onClick={() => setTypeType("action")}>
+                                <span className="item-dropdown-text">Action</span>
+                            </div>
+                            <div className="item-dropdown-row" onClick={() => setTypeType("scenery")}>
+                                <span className="item-dropdown-text">Scenery</span>
+                            </div>
                             <div className="item-dropdown-row" onClick={() => setTypeType("tag")}>
                                 <span className="item-dropdown-text">Tag</span>
                             </div>

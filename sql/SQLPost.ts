@@ -358,11 +358,11 @@ export default class SQLPost {
     }
 
     /** Insert a new image. */
-    public static insertImage = async (postID: number, filename: string, type: string, order: number, hash: string, width: string, height: string, size: number) => {
+    public static insertImage = async (postID: number, filename: string, upscaledFilename: string, type: string, order: number, hash: string, width: string, height: string, size: number) => {
         const query: QueryArrayConfig = {
-        text: /*sql*/`INSERT INTO "images" ("postID", "filename", "type", "order", "hash", "width", "height", "size") VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING "imageID"`,
+        text: /*sql*/`INSERT INTO "images" ("postID", "filename", "upscaledFilename", "type", "order", "hash", "width", "height", "size") VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING "imageID"`,
         rowMode: "array",
-        values: [postID, filename, type, order, hash, width, height, size]
+        values: [postID, filename, upscaledFilename, type, order, hash, width, height, size]
         }
         await SQLQuery.flushDB()
         const result = await SQLQuery.run(query)
@@ -370,11 +370,11 @@ export default class SQLPost {
     }
 
     /** Insert a new image (unverified). */
-    public static insertUnverifiedImage = async (postID: number, filename: string, type: string, order: number, hash: string, width: string, height: string, size: string) => {
+    public static insertUnverifiedImage = async (postID: number, filename: string, upscaledFilename: string, type: string, order: number, hash: string, width: string, height: string, size: string) => {
         const query: QueryArrayConfig = {
-        text: /*sql*/`INSERT INTO "unverified images" ("postID", "filename", "type", "order", "hash", "width", "height", "size") VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING "imageID"`,
+        text: /*sql*/`INSERT INTO "unverified images" ("postID", "filename", "upscaledFilename", "type", "order", "hash", "width", "height", "size") VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING "imageID"`,
         rowMode: "array",
-        values: [postID, filename, type, order, hash, width, height, size]
+        values: [postID, filename, upscaledFilename, type, order, hash, width, height, size]
         }
         const result = await SQLQuery.run(query)
         return result.flat(Infinity)[0] as number

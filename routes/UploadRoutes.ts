@@ -167,9 +167,18 @@ const CreateRoutes = (app: Express) => {
           const ext = current[i].ext
           let fileOrder = current.length > 1 ? `${order}` : "1"
           const cleanTitle = functions.cleanTitle(source.title)
-          const filename = cleanTitle ? `${cleanTitle}.${ext}` : 
-          characters[0].tag !== "unknown-character" ? `${characters[0].tag}.${ext}` :
-          `${postID}.${ext}`
+          let filename = null as any
+          let upscaledFilename = null as any
+          if (images[i]) {
+            filename = cleanTitle ? `${cleanTitle}.${images[i].ext}` : 
+            characters[0].tag !== "unknown-character" ? `${characters[0].tag}.${images[i].ext}` :
+            `${postID}.${images[i].ext}`
+          }
+          if (upscaledImages[i]) {
+            upscaledFilename = cleanTitle ? `${cleanTitle}.${upscaledImages[i].ext}` : 
+            characters[0].tag !== "unknown-character" ? `${characters[0].tag}.${upscaledImages[i].ext}` :
+            `${postID}.${upscaledImages[i].ext}`
+          }
           let kind = "image" as any
           if (type === "comic") {
             kind = "comic"
@@ -205,7 +214,7 @@ const CreateRoutes = (app: Express) => {
           }
 
           if (upscaledImages[i]) {
-            let imagePath = functions.getUpscaledImagePath(kind, postID, Number(fileOrder), filename)
+            let imagePath = functions.getUpscaledImagePath(kind, postID, Number(fileOrder), upscaledFilename)
             const buffer = Buffer.from(Object.values(upscaledImages[i].bytes) as any)
             await serverFunctions.uploadFile(imagePath, buffer, r18)
             hasUpscaled = true
@@ -222,7 +231,7 @@ const CreateRoutes = (app: Express) => {
               hash = await phash(buffer).then((hash: string) => functions.binaryToHex(hash))
               dimensions = await sharp(buffer).metadata()
           }
-          await sql.post.insertImage(postID, filename, kind, order, hash, dimensions.width, dimensions.height, current[i].size)
+          await sql.post.insertImage(postID, filename, upscaledFilename, kind, order, hash, dimensions.width, dimensions.height, current[i].size)
         }
 
         if (upscaledImages?.length > images?.length) hasOriginal = false
@@ -263,12 +272,13 @@ const CreateRoutes = (app: Express) => {
           hidden
         })
 
+        let tagObjectMapping = await serverFunctions.tagMap()
         let tagMap = tags
         let bulkTagUpdate = [] as any
 
         for (let i = 0; i < newTags.length; i++) {
           if (!newTags[i].tag) continue
-          let bulkObj = {tag: newTags[i].tag, type: functions.tagType(newTags[i].tag), description: null, image: null, imageHash: null} as any
+          let bulkObj = {tag: newTags[i].tag, type: tagObjectMapping[newTags[i].tag]?.type, description: null, image: null, imageHash: null} as any
           if (newTags[i].desc) bulkObj.description = newTags[i].desc
           if (newTags[i].image) {
             const filename = `${newTags[i].tag}.${newTags[i].ext}`
@@ -333,7 +343,7 @@ const CreateRoutes = (app: Express) => {
             for (const i of implications) {
               tagMap.push(i.implication)
               const tag = await sql.tag.tag(i.implication)
-              bulkTagUpdate.push({tag: i.implication, type: functions.tagType(i.implication), description: tag?.description || null, image: tag?.image || null, imageHash: tag?.imageHash || null})
+              bulkTagUpdate.push({tag: i.implication, type: tagObjectMapping[i.implication]?.type, description: tag?.description || null, image: tag?.image || null, imageHash: tag?.imageHash || null})
             }
           }
         }
@@ -346,7 +356,7 @@ const CreateRoutes = (app: Express) => {
           const unverifiedPost = await sql.post.unverifiedPost(Number(unverifiedID))
           for (let i = 0; i < unverifiedPost.images.length; i++) {
             const imgPath = functions.getImagePath(unverifiedPost.images[i].type, Number(unverifiedID), unverifiedPost.images[i].order, unverifiedPost.images[i].filename)
-            const upscaledImgPath = functions.getUpscaledImagePath(unverifiedPost.images[i].type, Number(unverifiedID), unverifiedPost.images[i].order, unverifiedPost.images[i].filename)
+            const upscaledImgPath = functions.getUpscaledImagePath(unverifiedPost.images[i].type, Number(unverifiedID), unverifiedPost.images[i].order, unverifiedPost.images[i].upscaledFilename || unverifiedPost.images[i].filename)
             await serverFunctions.deleteUnverifiedFile(imgPath)
             await serverFunctions.deleteUnverifiedFile(upscaledImgPath)
           }
@@ -444,7 +454,7 @@ const CreateRoutes = (app: Express) => {
         let upscaledVanillaBuffers = [] as any
         for (let i = 0; i < post.images.length; i++) {
           const imagePath = functions.getImagePath(post.images[i].type, postID, post.images[i].order, post.images[i].filename)
-          const upscaledImagePath = functions.getUpscaledImagePath(post.images[i].type, postID, post.images[i].order, post.images[i].filename)
+          const upscaledImagePath = functions.getUpscaledImagePath(post.images[i].type, postID, post.images[i].order, post.images[i].upscaledFilename || post.images[i].filename)
           const oldImage = await serverFunctions.getFile(imagePath, false, oldR18) as Buffer
           const oldUpscaledImage = await serverFunctions.getFile(upscaledImagePath, false, oldR18) as Buffer
           vanillaBuffers.push(oldImage)
@@ -468,6 +478,7 @@ const CreateRoutes = (app: Express) => {
         let hasUpscaled = false
 
         let imageFilenames = [] as any
+        let upscaledImageFilenames = [] as any
         let imageOrders = [] as any
         for (let i = 0; i < images.length; i++) {
           let order = i + 1
@@ -475,10 +486,20 @@ const CreateRoutes = (app: Express) => {
           const ext = current[i].ext
           let fileOrder = current.length > 1 ? `${order}` : "1"
           const cleanTitle = functions.cleanTitle(source.title)
-          const filename = cleanTitle ? `${cleanTitle}.${ext}` : 
-          characters[0].tag !== "unknown-character" ? `${characters[0].tag}.${ext}` :
-          `${postID}.${ext}`
+          let filename = null as any
+          let upscaledFilename = null as any
+          if (images[i]) {
+            filename = cleanTitle ? `${cleanTitle}.${images[i].ext}` : 
+            characters[0].tag !== "unknown-character" ? `${characters[0].tag}.${images[i].ext}` :
+            `${postID}.${images[i].ext}`
+          }
+          if (upscaledImages[i]) {
+            upscaledFilename = cleanTitle ? `${cleanTitle}.${upscaledImages[i].ext}` : 
+            characters[0].tag !== "unknown-character" ? `${characters[0].tag}.${upscaledImages[i].ext}` :
+            `${postID}.${upscaledImages[i].ext}`
+          }
           imageFilenames.push(filename)
+          upscaledImageFilenames.push(upscaledFilename)
           imageOrders.push(order)
           let kind = "image" as any
           if (type === "comic") {
@@ -515,7 +536,7 @@ const CreateRoutes = (app: Express) => {
             }
             
             if (upscaledImages[i]) {
-              let upscaledImagePath = functions.getUpscaledImagePath(kind, postID, Number(fileOrder), filename)
+              let upscaledImagePath = functions.getUpscaledImagePath(kind, postID, Number(fileOrder), upscaledFilename)
               const upscaledBuffer = Buffer.from(Object.values(upscaledImages[i].bytes) as any)
               await serverFunctions.uploadFile(upscaledImagePath, upscaledBuffer, oldR18)
               hasUpscaled = true
@@ -532,7 +553,7 @@ const CreateRoutes = (app: Express) => {
                 hash = await phash(buffer).then((hash: string) => functions.binaryToHex(hash))
                 dimensions = await sharp(buffer).metadata()
             }
-            await sql.post.insertImage(postID, filename, kind, order, hash, dimensions.width, dimensions.height, current[i].size)
+            await sql.post.insertImage(postID, filename, upscaledFilename, kind, order, hash, dimensions.width, dimensions.height, current[i].size)
           }
         }
         if (upscaledImages?.length > images?.length) hasOriginal = false
@@ -570,10 +591,11 @@ const CreateRoutes = (app: Express) => {
         let removedTags = [...oldTagsSet].filter(tag => !newTagsSet.has(tag)).filter(Boolean)
 
         let bulkTagUpdate = [] as any
+        let tagObjectMapping = await serverFunctions.tagMap()
 
         for (let i = 0; i < newTags.length; i++) {
           if (!newTags[i].tag) continue
-          let bulkObj = {tag: newTags[i].tag, type: functions.tagType(newTags[i].tag), description: null, image: null, imageHash: null} as any
+          let bulkObj = {tag: newTags[i].tag, type: tagObjectMapping[newTags[i].tag]?.type, description: null, image: null, imageHash: null} as any
           if (newTags[i].desc) bulkObj.description = newTags[i].desc
           if (newTags[i].image) {
             const filename = `${newTags[i].tag}.${newTags[i].ext}`
@@ -634,7 +656,7 @@ const CreateRoutes = (app: Express) => {
             for (const i of implications) {
               addedTags.push(i.implication)
               const tag = await sql.tag.tag(i.implication)
-              bulkTagUpdate.push({tag: i.implication, type: functions.tagType(i.implication), description: tag?.description || null, image: tag?.image || null, imageHash: tag?.imageHash || null})
+              bulkTagUpdate.push({tag: i.implication, type: tagObjectMapping[i.implication]?.type, description: tag?.description || null, image: tag?.image || null, imageHash: tag?.imageHash || null})
             }
           }
         }
@@ -648,7 +670,7 @@ const CreateRoutes = (app: Express) => {
           const unverifiedPost = await sql.post.unverifiedPost(Number(unverifiedID))
           for (let i = 0; i < unverifiedPost.images.length; i++) {
             const imgPath = functions.getImagePath(unverifiedPost.images[i].type, Number(unverifiedID), unverifiedPost.images[i].order, unverifiedPost.images[i].filename)
-            const upscaledImgPath = functions.getUpscaledImagePath(unverifiedPost.images[i].type, Number(unverifiedID), unverifiedPost.images[i].order, unverifiedPost.images[i].filename)
+            const upscaledImgPath = functions.getUpscaledImagePath(unverifiedPost.images[i].type, Number(unverifiedID), unverifiedPost.images[i].order, unverifiedPost.images[i].upscaledFilename || unverifiedPost.images[i].filename)
             await serverFunctions.deleteUnverifiedFile(imgPath)
             await serverFunctions.deleteUnverifiedFile(upscaledImgPath)
           }
@@ -687,7 +709,7 @@ const CreateRoutes = (app: Express) => {
                 if (imgChanged) {
                   let newImagePath = ""
                   if (upscaledVanillaBuffers[i]) {
-                    newImagePath = functions.getUpscaledImageHistoryPath(postID, 1, vanilla.images[i].order, vanilla.images[i].filename)
+                    newImagePath = functions.getUpscaledImageHistoryPath(postID, 1, vanilla.images[i].order, vanilla.images[i].upscaledFilename || vanilla.images[i].filename)
                     await serverFunctions.uploadFile(newImagePath, upscaledVanillaBuffers[i], r18)
                   }
                   if (vanillaBuffers[i]) {
@@ -714,7 +736,7 @@ const CreateRoutes = (app: Express) => {
                   let newImagePath = ""
                   if (upscaledImages[i]) {
                     const buffer = Buffer.from(Object.values(upscaledImages[i].bytes) as any)
-                    newImagePath = functions.getUpscaledImageHistoryPath(postID, 2, imageOrders[i], imageFilenames[i])
+                    newImagePath = functions.getUpscaledImageHistoryPath(postID, 2, imageOrders[i], upscaledImageFilenames[i])
                     await serverFunctions.uploadFile(newImagePath, buffer, r18)
                   }
                   if (images[i]) {
@@ -742,7 +764,7 @@ const CreateRoutes = (app: Express) => {
                 let newImagePath = ""
                 if (upscaledImages[i]) {
                   const buffer = Buffer.from(Object.values(upscaledImages[i].bytes) as any)
-                  newImagePath = functions.getUpscaledImageHistoryPath(postID, nextKey, imageOrders[i], imageFilenames[i])
+                  newImagePath = functions.getUpscaledImageHistoryPath(postID, nextKey, imageOrders[i], upscaledImageFilenames[i])
                   await serverFunctions.uploadFile(newImagePath, buffer, r18)
                 }
                 if (images[i]) {
@@ -859,9 +881,18 @@ const CreateRoutes = (app: Express) => {
           const ext = current[i].ext
           let fileOrder = current.length > 1 ? `${order}` : "1"
           const cleanTitle = functions.cleanTitle(source.title)
-          const filename = cleanTitle ? `${source.title}.${ext}` : 
-          characters[0].tag !== "unknown-character" ? `${characters[0].tag}.${ext}` :
-          `${postID}.${ext}`
+          let filename = null as any
+          let upscaledFilename = null as any
+          if (images[i]) {
+            filename = cleanTitle ? `${cleanTitle}.${images[i].ext}` : 
+            characters[0].tag !== "unknown-character" ? `${characters[0].tag}.${images[i].ext}` :
+            `${postID}.${images[i].ext}`
+          }
+          if (upscaledImages[i]) {
+            upscaledFilename = cleanTitle ? `${cleanTitle}.${upscaledImages[i].ext}` : 
+            characters[0].tag !== "unknown-character" ? `${characters[0].tag}.${upscaledImages[i].ext}` :
+            `${postID}.${upscaledImages[i].ext}`
+          }
           let kind = "image" as any
           if (type === "comic") {
             kind = "comic"
@@ -896,7 +927,7 @@ const CreateRoutes = (app: Express) => {
           }
 
           if (upscaledImages[i]) {
-            let imagePath = functions.getUpscaledImagePath(kind, postID, Number(fileOrder), filename)
+            let imagePath = functions.getUpscaledImagePath(kind, postID, Number(fileOrder), upscaledFilename)
             const buffer = Buffer.from(Object.values(upscaledImages[i].bytes) as any)
             await serverFunctions.uploadUnverifiedFile(imagePath, buffer)
             hasUpscaled = true
@@ -912,7 +943,7 @@ const CreateRoutes = (app: Express) => {
             hash = await phash(buffer).then((hash: string) => functions.binaryToHex(hash))
             dimensions = await sharp(buffer).metadata()
           }
-          await sql.post.insertUnverifiedImage(postID, filename, kind, order, hash, dimensions.width, dimensions.height, current[i].size)
+          await sql.post.insertUnverifiedImage(postID, filename, upscaledFilename, kind, order, hash, dimensions.width, dimensions.height, current[i].size)
         }
         if (upscaledImages?.length > images?.length) hasOriginal = false
         if (images?.length > upscaledImages?.length) hasUpscaled = false
@@ -954,13 +985,15 @@ const CreateRoutes = (app: Express) => {
 
         let tagMap = tags
         let bulkTagUpdate = [] as any
+        let tagObjectMapping = await serverFunctions.tagMap()
+
         for (let i = 0; i < tagMap.length; i++) {
-          bulkTagUpdate.push({tag: tagMap[i], type: functions.tagType(tagMap[i]), description: null, image: null, imageHash: null})
+          bulkTagUpdate.push({tag: tagMap[i], type: tagObjectMapping[tagMap[i]]?.type, description: null, image: null, imageHash: null})
         }
 
         for (let i = 0; i < newTags.length; i++) {
           if (!newTags[i].tag) continue
-          let bulkObj = {tag: newTags[i].tag, type: functions.tagType(newTags[i].tag), description: null, image: null, imageHash: null} as any
+          let bulkObj = {tag: newTags[i].tag, type: tagObjectMapping[newTags[i].tag]?.type, description: null, image: null, imageHash: null} as any
           if (newTags[i].desc) bulkObj.description = newTags[i].desc
           if (newTags[i].image) {
             const filename = `${newTags[i].tag}.${newTags[i].ext}`
@@ -1024,7 +1057,7 @@ const CreateRoutes = (app: Express) => {
             for (const i of implications) {
               tagMap.push(i.implication)
               const tag = await sql.tag.tag(i.implication)
-              bulkTagUpdate.push({tag: i.implication, type: functions.tagType(i.implication), description: tag?.description || null, image: tag?.image || null, imageHash: tag?.imageHash || null})
+              bulkTagUpdate.push({tag: i.implication, type: tagObjectMapping[i.implication]?.type, description: tag?.description || null, image: tag?.image || null, imageHash: tag?.imageHash || null})
             }
           }
         }
@@ -1128,7 +1161,7 @@ const CreateRoutes = (app: Express) => {
             for (let i = 0; i < unverifiedPost.images.length; i++) {
               await sql.post.deleteUnverifiedImage(unverifiedPost.images[i].imageID)
               await serverFunctions.deleteUnverifiedFile(functions.getImagePath(unverifiedPost.images[i].type, unverifiedID, unverifiedPost.images[i].order, unverifiedPost.images[i].filename))
-              await serverFunctions.deleteUnverifiedFile(functions.getUpscaledImagePath(unverifiedPost.images[i].type, unverifiedID, unverifiedPost.images[i].order, unverifiedPost.images[i].filename))
+              await serverFunctions.deleteUnverifiedFile(functions.getUpscaledImagePath(unverifiedPost.images[i].type, unverifiedID, unverifiedPost.images[i].order, unverifiedPost.images[i].upscaledFilename || unverifiedPost.images[i].filename))
             }
           }
         }
@@ -1147,9 +1180,18 @@ const CreateRoutes = (app: Express) => {
           const ext = current[i].ext
           let fileOrder = current.length > 1 ? `${order}` : "1"
           const cleanTitle = functions.cleanTitle(source.title)
-          const filename = cleanTitle ? `${cleanTitle}.${ext}` : 
-          characters[0].tag !== "unknown-character" ? `${characters[0].tag}.${ext}` :
-          `${postID}.${ext}`
+          let filename = null as any
+          let upscaledFilename = null as any
+          if (images[i]) {
+            filename = cleanTitle ? `${cleanTitle}.${images[i].ext}` : 
+            characters[0].tag !== "unknown-character" ? `${characters[0].tag}.${images[i].ext}` :
+            `${postID}.${images[i].ext}`
+          }
+          if (upscaledImages[i]) {
+            upscaledFilename = cleanTitle ? `${cleanTitle}.${upscaledImages[i].ext}` : 
+            characters[0].tag !== "unknown-character" ? `${characters[0].tag}.${upscaledImages[i].ext}` :
+            `${postID}.${upscaledImages[i].ext}`
+          }
           let kind = "image" as any
           if (type === "comic") {
             kind = "comic"
@@ -1184,7 +1226,7 @@ const CreateRoutes = (app: Express) => {
               hasOriginal = true
             }
             if (upscaledImages[i]) {
-              let imagePath = functions.getUpscaledImagePath(kind, postID, Number(fileOrder), filename)
+              let imagePath = functions.getUpscaledImagePath(kind, postID, Number(fileOrder), upscaledFilename)
               const buffer = Buffer.from(Object.values(upscaledImages[i].bytes) as any)
               await serverFunctions.uploadUnverifiedFile(imagePath, buffer)
               hasUpscaled = true
@@ -1200,7 +1242,7 @@ const CreateRoutes = (app: Express) => {
               hash = await phash(buffer).then((hash: string) => functions.binaryToHex(hash))
               dimensions = await sharp(buffer).metadata()
             }
-            await sql.post.insertUnverifiedImage(postID, filename, kind, order, hash, dimensions.width, dimensions.height, current[i].size)
+            await sql.post.insertUnverifiedImage(postID, filename, upscaledFilename, kind, order, hash, dimensions.width, dimensions.height, current[i].size)
           }
         }
         if (upscaledImages?.length > images?.length) hasOriginal = false
@@ -1259,14 +1301,15 @@ const CreateRoutes = (app: Express) => {
         let removedTags = [...oldTagsSet].filter(tag => !newTagsSet.has(tag)).filter(Boolean)
 
         let bulkTagUpdate = [] as any
+        let tagObjectMapping = await serverFunctions.tagMap()
         
         for (let i = 0; i < tags.length; i++) {
-          bulkTagUpdate.push({tag: tags[i], type: functions.tagType(tags[i]), description: null, image: null, imageHash: null})
+          bulkTagUpdate.push({tag: tags[i], type: tagObjectMapping[tags[i]]?.type, description: null, image: null, imageHash: null})
         }
 
         for (let i = 0; i < newTags.length; i++) {
           if (!newTags[i].tag) continue
-          let bulkObj = {tag: newTags[i].tag, type: functions.tagType(newTags[i].tag), description: null, image: null, imageHash: null} as any
+          let bulkObj = {tag: newTags[i].tag, type: tagObjectMapping[newTags[i].tag]?.type, description: null, image: null, imageHash: null} as any
           if (newTags[i].desc) bulkObj.description = newTags[i].desc
           if (newTags[i].image) {
             const filename = `${newTags[i].tag}.${newTags[i].ext}`
@@ -1327,7 +1370,7 @@ const CreateRoutes = (app: Express) => {
             for (const i of implications) {
               addedTags.push(i.implication)
               const tag = await sql.tag.tag(i.implication)
-              bulkTagUpdate.push({tag: i.implication, type: functions.tagType(i.implication), description: tag?.description || null, image: tag?.image || null, imageHash: tag?.imageHash || null})
+              bulkTagUpdate.push({tag: i.implication, type: tagObjectMapping[i.implication]?.type, description: tag?.description || null, image: tag?.image || null, imageHash: tag?.imageHash || null})
             }
           }
         }
@@ -1372,14 +1415,14 @@ const CreateRoutes = (app: Express) => {
           if (!post) return res.status(400).send("Bad postID")
           for (let i = 0; i < post.images.length; i++) {
             const imagePath = functions.getImagePath(post.images[i].type, newPostID, post.images[i].order, post.images[i].filename)
-            const upscaledImagePath = functions.getUpscaledImagePath(post.images[i].type, newPostID, post.images[i].order, post.images[i].filename)
+            const upscaledImagePath = functions.getUpscaledImagePath(post.images[i].type, newPostID, post.images[i].order, post.images[i].upscaledFilename || post.images[i].filename)
             const buffer = await serverFunctions.getFile(imagePath, false, oldR18) as Buffer
             const upscaledBuffer = await serverFunctions.getFile(upscaledImagePath, false, oldR18) as Buffer
             vanillaBuffers.push(buffer)
             upscaledVanillaBuffers.push(upscaledBuffer)
             if (imgChanged) {
               await serverFunctions.deleteFile(functions.getImagePath(post.images[i].type, postID, post.images[i].order, post.images[i].filename), oldR18)
-              await serverFunctions.deleteFile(functions.getUpscaledImagePath(post.images[i].type, postID, post.images[i].order, post.images[i].filename), oldR18)
+              await serverFunctions.deleteFile(functions.getUpscaledImagePath(post.images[i].type, postID, post.images[i].order, post.images[i].upscaledFilename || post.images[i].filename), oldR18)
               await sql.post.deleteImage(post.images[i].imageID)
             }
           }
@@ -1401,21 +1444,34 @@ const CreateRoutes = (app: Express) => {
         let upscaledCheck = [] as string[]
 
         let imageFilenames = [] as any
+        let upscaledImageFilenames = [] as any
         let imageOrders = [] as any
         for (let i = 0; i < unverified.images.length; i++) {
           const imagePath = functions.getImagePath(unverified.images[i].type, postID, unverified.images[i].order, unverified.images[i].filename)
           let buffer = await serverFunctions.getUnverifiedFile(imagePath) as Buffer
-          const upscaledImagePath = functions.getUpscaledImagePath(unverified.images[i].type, postID, unverified.images[i].order, unverified.images[i].filename)
+          const upscaledImagePath = functions.getUpscaledImagePath(unverified.images[i].type, postID, unverified.images[i].order, unverified.images[i].upscaledFilename || unverified.images[i].filename)
           const upscaledBuffer = await serverFunctions.getUnverifiedFile(upscaledImagePath) as Buffer
 
           let current = upscaledBuffer ? upscaledBuffer : buffer
           let order = i + 1
-          const ext = path.extname(unverified.images[i].filename).replace(".", "")
+          const ext = path.extname(unverified.images[i].upscaledFilename || unverified.images[i].filename).replace(".", "")
           let fileOrder = unverified.images.length > 1 ? `${order}` : "1"
-          const filename = unverified.title ? `${unverified.title}.${ext}` : 
-          characters[0].tag !== "unknown-character" ? `${characters[0].tag}.${ext}` :
-          `${newPostID}.${ext}`
+          let filename = null as any
+          let upscaledFilename = null as any
+          if (unverified.images[i].filename) {
+            let ext = path.extname(unverified.images[i].filename).replace(".", "")
+            filename = unverified.title ? `${unverified.title}.${ext}` : 
+            characters[0].tag !== "unknown-character" ? `${characters[0].tag}.${ext}` :
+            `${postID}.${ext}`
+          }
+          if (unverified.images[i].upscaledFilename) {
+            const upscaledExt = path.extname(unverified.images[i].upscaledFilename).replace(".", "")
+            upscaledFilename = unverified.title ? `${unverified.title}.${upscaledExt}` : 
+            characters[0].tag !== "unknown-character" ? `${characters[0].tag}.${upscaledExt}` :
+            `${newPostID}.${upscaledExt}`
+          }
           imageFilenames.push(filename)
+          upscaledImageFilenames.push(upscaledFilename)
           imageOrders.push(order)
           let kind = "image" as any
           if (type === "comic") {
@@ -1451,7 +1507,7 @@ const CreateRoutes = (app: Express) => {
               originalCheck.push(newImagePath)
             }
             if (upscaledBuffer.byteLength) {
-              let newImagePath = functions.getUpscaledImagePath(kind, newPostID, Number(fileOrder), filename)
+              let newImagePath = functions.getUpscaledImagePath(kind, newPostID, Number(fileOrder), upscaledFilename)
               await serverFunctions.uploadFile(newImagePath, upscaledBuffer, oldR18)
               hasUpscaled = true
               upscaledCheck.push(newImagePath)
@@ -1467,7 +1523,7 @@ const CreateRoutes = (app: Express) => {
               hash = await phash(current).then((hash: string) => functions.binaryToHex(hash))
               dimensions = await sharp(buffer).metadata()
             }
-            await sql.post.insertImage(newPostID, filename, type, order, hash, dimensions.width, dimensions.height, current.byteLength)
+            await sql.post.insertImage(newPostID, filename, upscaledFilename, type, order, hash, dimensions.width, dimensions.height, current.byteLength)
           }
         }
         if (upscaledCheck?.length > originalCheck?.length) hasOriginal = false
@@ -1515,10 +1571,11 @@ const CreateRoutes = (app: Express) => {
         let removedTags = [...oldTagsSet].filter(tag => !newTagsSet.has(tag)).filter(Boolean)
   
         let bulkTagUpdate = [] as any
+        let tagObjectMapping = await serverFunctions.tagMap()
 
         for (let i = 0; i < tags.length; i++) {
           if (!tags[i].tag) continue
-          let bulkObj = {tag: tags[i].tag, type: functions.tagType(tags[i].tag), description: tags[i].description, image: null, imageHash: null} as any
+          let bulkObj = {tag: tags[i].tag, type: tagObjectMapping[tags[i].tag]?.type, description: tags[i].description, image: null, imageHash: null} as any
           if (tags[i].image) {
             const imagePath = functions.getTagPath("tag", tags[i].image)
             const buffer = await serverFunctions.getUnverifiedFile(imagePath)
@@ -1574,7 +1631,7 @@ const CreateRoutes = (app: Express) => {
             for (const i of implications) {
               addedTags.push(i.implication)
               const tag = await sql.tag.tag(i.implication)
-              bulkTagUpdate.push({tag: i.implication, type: functions.tagType(i.implication), description: tag?.description || null, image: tag?.image || null, imageHash: tag?.imageHash || null})
+              bulkTagUpdate.push({tag: i.implication, type: tagObjectMapping[i.implication]?.type, description: tag?.description || null, image: tag?.image || null, imageHash: tag?.imageHash || null})
             }
           }
         }
@@ -1587,7 +1644,7 @@ const CreateRoutes = (app: Express) => {
         await sql.post.deleteUnverifiedPost(Number(postID))
         for (let i = 0; i < unverified.images.length; i++) {
             const file = functions.getImagePath(unverified.images[i].type, unverified.postID, unverified.images[i].order, unverified.images[i].filename)
-            const upscaledFile = functions.getUpscaledImagePath(unverified.images[i].type, unverified.postID, unverified.images[i].order, unverified.images[i].filename)
+            const upscaledFile = functions.getUpscaledImagePath(unverified.images[i].type, unverified.postID, unverified.images[i].order, unverified.images[i].upscaledFilename || unverified.images[i].filename)
             await serverFunctions.deleteUnverifiedFile(file)
             await serverFunctions.deleteUnverifiedFile(upscaledFile)
         }
@@ -1617,7 +1674,7 @@ const CreateRoutes = (app: Express) => {
                   if (imgChanged) {
                     let newImagePath = ""
                     if (upscaledVanillaBuffers[i]) {
-                      newImagePath = functions.getUpscaledImageHistoryPath(newPostID, 1, vanilla.images[i].order, vanilla.images[i].filename)
+                      newImagePath = functions.getUpscaledImageHistoryPath(newPostID, 1, vanilla.images[i].order, vanilla.images[i].upscaledFilename || vanilla.images[i].filename)
                       await serverFunctions.uploadFile(newImagePath, upscaledVanillaBuffers[i], r18)
                     }
                     if (vanillaBuffers[i]) {
@@ -1642,10 +1699,10 @@ const CreateRoutes = (app: Express) => {
               for (let i = 0; i < unverified.images.length; i++) {
                 if (imgChanged) {
                   let newImagePath = ""
-                  const upscaledUnverifiedPath = functions.getUpscaledImagePath(unverified.images[i].type, unverified.images[i].postID, unverified.images[i].order, unverified.images[i].filename)
+                  const upscaledUnverifiedPath = functions.getUpscaledImagePath(unverified.images[i].type, unverified.images[i].postID, unverified.images[i].order, unverified.images[i].upscaledFilename || unverified.images[i].filename)
                   const upscaledBuffer = await serverFunctions.getUnverifiedFile(upscaledUnverifiedPath)
                   if (upscaledBuffer) {
-                    newImagePath = functions.getUpscaledImageHistoryPath(newPostID, 2, imageOrders[i], imageFilenames[i])
+                    newImagePath = functions.getUpscaledImageHistoryPath(newPostID, 2, imageOrders[i], upscaledImageFilenames[i])
                     await serverFunctions.uploadFile(newImagePath, upscaledBuffer, r18)
                   }
                   const unverifiedPath = functions.getImagePath(unverified.images[i].type, unverified.images[i].postID, unverified.images[i].order, unverified.images[i].filename)
@@ -1672,10 +1729,10 @@ const CreateRoutes = (app: Express) => {
               for (let i = 0; i < unverified.images.length; i++) {
                 if (imgChanged) {
                   let newImagePath = ""
-                  const upscaledUnverifiedPath = functions.getUpscaledImagePath(unverified.images[i].type, unverified.images[i].postID, unverified.images[i].order, unverified.images[i].filename)
+                  const upscaledUnverifiedPath = functions.getUpscaledImagePath(unverified.images[i].type, unverified.images[i].postID, unverified.images[i].order, unverified.images[i].upscaledFilename || unverified.images[i].filename)
                   const upscaledBuffer = await serverFunctions.getUnverifiedFile(upscaledUnverifiedPath)
                   if (upscaledBuffer) {
-                    newImagePath = functions.getUpscaledImageHistoryPath(newPostID, nextKey, imageOrders[i], imageFilenames[i])
+                    newImagePath = functions.getUpscaledImageHistoryPath(newPostID, nextKey, imageOrders[i], upscaledImageFilenames[i])
                     await serverFunctions.uploadFile(newImagePath, upscaledBuffer, r18)
                   }
                   const unverifiedPath = functions.getImagePath(unverified.images[i].type, unverified.images[i].postID, unverified.images[i].order, unverified.images[i].filename)
@@ -1736,7 +1793,7 @@ const CreateRoutes = (app: Express) => {
         await sql.post.deleteUnverifiedPost(Number(postID))
         for (let i = 0; i < unverified.images.length; i++) {
             const file = functions.getImagePath(unverified.images[i].type, unverified.postID, unverified.images[i].order, unverified.images[i].filename)
-            const upscaledFile = functions.getUpscaledImagePath(unverified.images[i].type, unverified.postID, unverified.images[i].order, unverified.images[i].filename)
+            const upscaledFile = functions.getUpscaledImagePath(unverified.images[i].type, unverified.postID, unverified.images[i].order, unverified.images[i].upscaledFilename || unverified.images[i].filename)
             await serverFunctions.deleteUnverifiedFile(file)
             await serverFunctions.deleteUnverifiedFile(upscaledFile)
         }

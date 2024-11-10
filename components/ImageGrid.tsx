@@ -574,7 +574,7 @@ const ImageGrid: React.FunctionComponent = (props) => {
             } else if (post.type === "audio") {
                 jsx.push(<GridSong key={post.postID} id={post.postID} img={img} cached={cached} audio={thumbnail} post={post} ref={postsRef[i]} reupdate={() => setReupdateFlag(true)}/>)
             } else {
-                const comicPages = post.type === "comic" ? post.images.map((i: any) => functions.getImageLink(i.type, post.postID, i.order, i.filename)) : null
+                const comicPages = post.type === "comic" ? post.images.map((i: any) => functions.getImageLink(i.type, post.postID, i.order, session.upscaledImages ? i.upscaledFilename || i.filename : i.filename)) : null
                 jsx.push(<GridImage key={post.postID} id={post.postID} img={img} cached={cached} original={thumbnail} comicPages={comicPages} post={post} ref={postsRef[i]} reupdate={() => setReupdateFlag(true)}/>)
             }
         }

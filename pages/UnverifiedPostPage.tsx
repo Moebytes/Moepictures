@@ -126,6 +126,7 @@ const UnverifiedPostPage: React.FunctionComponent<Props> = (props) => {
             let post = unverifiedPosts.find((p: any) => p.postID === postID)
             if (!post?.tags) post = await functions.get("/api/post/unverified", {postID}, session, setSessionFlag)
             if (post) {
+                /*
                 const images = post.images.map((i: any) => functions.getUnverifiedImageLink(i.type, post.postID, i.order, i.filename))
                 setImages(images)
                 if (images[order-1]) {
@@ -133,7 +134,7 @@ const UnverifiedPostPage: React.FunctionComponent<Props> = (props) => {
                 } else {
                     setImage(images[0])
                     setOrder(1)
-                }
+                }*/
                 const tags = await functions.parseTagsUnverified([post])
                 const categories = await functions.tagCategories(tags, session, setSessionFlag)
                 setTagCategories(categories)
@@ -145,6 +146,24 @@ const UnverifiedPostPage: React.FunctionComponent<Props> = (props) => {
         }
         updatePost()
     }, [postID, unverifiedPosts, order, session])
+
+    useEffect(() => {
+        if (post) {
+            let images = [] as string[]
+            if (session.upscaledImages) {
+                images = post.images.map((i: any) => functions.getUnverifiedImageLink(i.type, post.postID, i.order, i.upscaledFilename || i.filename))
+            } else {
+                images = post.images.map((i: any) => functions.getUnverifiedImageLink(i.type, post.postID, i.order, i.filename))
+            }
+            setImages(images)
+            if (images[order-1]) {
+                setImage(images[order-1])
+            } else {
+                setImage(images[0])
+                setOrder(1)
+            }
+        }
+    }, [post, order, session.upscaledImages])
 
     useEffect(() => {
         const updatePost = async () => {

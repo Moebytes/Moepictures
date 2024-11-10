@@ -31,7 +31,7 @@ let inertia = false
 let mouseDown = false
 
 const imageExtensions = [".jpg", ".jpeg", ".png", ".webp", ".avif"]
-const videoExtensions = [".mp4", ".webm", ".mov", ".avi", ".mkv"]
+const videoExtensions = [".mp4", ".webm", ".mov", ".mkv"]
 const audioExtensions = [".mp3", ".wav", ".ogg", ".flac", ".aac"]
 const modelExtensions = [".glb", ".gltf", ".obj", ".fbx"]
 
@@ -1118,6 +1118,7 @@ export default class Functions {
 
     public static linkToBase64 = async (link: string) => {
         const arrayBuffer = await axios.get(link, {responseType: "arraybuffer"}).then((r) => r.data) as ArrayBuffer
+        if (!arrayBuffer.byteLength) return ""
         const buffer = Buffer.from(arrayBuffer)
         let mime = Functions.bufferFileType(buffer)[0]?.mime || "image/jpeg"
         return `data:${mime};base64,${buffer.toString("base64")}`
@@ -1348,6 +1349,11 @@ export default class Functions {
             type === "character" ||
             type === "series" ||
             type === "meta" ||
+            type === "appearance" ||
+            type === "outfit" ||
+            type === "accessory" ||
+            type === "action" ||
+            type === "scenery" ||
             type === "tag") return true 
         return false
     }
@@ -2273,14 +2279,6 @@ export default class Functions {
         }
     }
 
-    public static tagType = (tag: string) => {
-        const metaTags = ["autotags", "upscaled", "needs-tags", "no-audio", "with-audio", "self-post", "text", "transparent", 
-        "commentary", "translated", "untranslated", "partially-translated", "check-translation", "multiple-artists", "bad-pixiv-id",
-        "paid-reward", "paid-reward-available", "third-party-edit", "third-party-source", "needscheck"]
-        if (metaTags.includes(tag)) return "meta"
-        return "tag"
-    }
-
     public static fixTwitterTag = (tag: string) => {
         return tag.toLowerCase().replaceAll("_", "-").replace(/^[-]+/, "").replace(/[-]+$/, "")
     }
@@ -2412,10 +2410,15 @@ export default class Functions {
             let currentFilename = currentPost.images[i]?.filename ? currentPost.images[i].filename : currentPost.images[i]
             const currentLink = Functions.getImageLink(currentPost.images[i]?.type, currentPost.postID, i+1, currentFilename)
             
+            let upscaledFilename = revertPost.images[i]?.upscaledFilename ? revertPost.images[i].upscaledFilename : (revertPost.images[i]?.filename ? revertPost.images[i].filename : revertPost.images[i])
+            const upscaledImgLink = Functions.getImageLink(revertPost.images[i]?.type, revertPost.postID, i+1, upscaledFilename)
+            let currentUpscaledFilename = currentPost.images[i]?.upscaledFilename ? currentPost.images[i].upscaledFilename : (currentPost.images[i]?.filename ? currentPost.images[i].filename : currentPost.images[i])
+            const currentUpscaledLink = Functions.getImageLink(currentPost.images[i]?.type, currentPost.postID, i+1, currentUpscaledFilename)
+            
             let imgBuffer = await Functions.getBuffer(`${imgLink}?upscaled=false`, {"x-force-upscale": "false"})
             let currentBuffer = await Functions.getBuffer(`${currentLink}?upscaled=false`, {"x-force-upscale": "false"})
-            let upscaledImgBuffer = await Functions.getBuffer(`${imgLink}?upscaled=true`, {"x-force-upscale": "true"})
-            let upscaledCurrentBuffer = await Functions.getBuffer(`${currentLink}?upscaled=true`, {"x-force-upscale": "true"})
+            let upscaledImgBuffer = await Functions.getBuffer(`${upscaledImgLink}?upscaled=true`, {"x-force-upscale": "true"})
+            let upscaledCurrentBuffer = await Functions.getBuffer(`${currentUpscaledLink}?upscaled=true`, {"x-force-upscale": "true"})
 
             if (imgBuffer.byteLength && Functions.isImage(imgLink)) {
                 const isAnimated = Functions.isAnimatedWebp(imgBuffer)
@@ -2425,11 +2428,11 @@ export default class Functions {
                 const isAnimated = Functions.isAnimatedWebp(currentBuffer)
                 if (!isAnimated) currentBuffer = cryptoFunctions.decrypt(currentBuffer, privateKey, serverPublicKey)
             }
-            if (upscaledImgBuffer.byteLength && Functions.isImage(imgLink)) {
+            if (upscaledImgBuffer.byteLength && Functions.isImage(upscaledImgLink)) {
                 const isAnimated = Functions.isAnimatedWebp(upscaledImgBuffer)
                 if (!isAnimated) upscaledImgBuffer = cryptoFunctions.decrypt(upscaledImgBuffer, privateKey, serverPublicKey)
             }
-            if (upscaledCurrentBuffer.byteLength && Functions.isImage(currentLink)) {
+            if (upscaledCurrentBuffer.byteLength && Functions.isImage(currentUpscaledLink)) {
                 const isAnimated = Functions.isAnimatedWebp(upscaledCurrentBuffer)
                 if (!isAnimated) upscaledCurrentBuffer = cryptoFunctions.decrypt(upscaledCurrentBuffer, privateKey, serverPublicKey)
             }
@@ -2473,28 +2476,41 @@ export default class Functions {
         for (let i = 0; i < post.images.length; i++) {
             let filename = post.images[i]?.filename ? post.images[i].filename : post.images[i]
             const imgLink = Functions.getImageLink(post.images[i]?.type, post.postID, i+1, filename)
-            let ext = path.extname(imgLink)
+            let upscaledFilename = post.images[i]?.upscaledFilename ? post.images[i].upscaledFilename : (post.images[i]?.filename ? post.images[i].filename : post.images[i])
+            const upscaledImgLink = Functions.getImageLink(post.images[i]?.type, post.postID, i+1, upscaledFilename)
             let buffer = await Functions.getBuffer(`${imgLink}?upscaled=false`, {"x-force-upscale": "false"})
-            let upscaledBuffer = await Functions.getBuffer(`${imgLink}?upscaled=true`, {"x-force-upscale": "true"})
-            let link = await Functions.decryptItem(imgLink, session)
-            if (!link.includes(ext)) link += `#${ext}`
-            let thumbnail = ""
-            if (Functions.arrayIncludes(ext, videoExtensions)) {
-                thumbnail = await Functions.videoThumbnail(link)
-            } else if (Functions.arrayIncludes(ext, modelExtensions)) {
-                thumbnail = await Functions.modelImage(link)
-            } else if (Functions.arrayIncludes(ext, audioExtensions)) {
-                thumbnail = await Functions.songCover(link)
-            }
+            let upscaledBuffer = await Functions.getBuffer(`${upscaledImgLink}?upscaled=true`, {"x-force-upscale": "true"})
             if (buffer.byteLength) {
+                let ext = path.extname(imgLink)
+                let link = await Functions.decryptItem(imgLink, session)
+                if (!link.includes(ext)) link += `#${ext}`
+                let thumbnail = ""
+                if (Functions.arrayIncludes(ext, videoExtensions)) {
+                    thumbnail = await Functions.videoThumbnail(link)
+                } else if (Functions.arrayIncludes(ext, modelExtensions)) {
+                    thumbnail = await Functions.modelImage(link)
+                } else if (Functions.arrayIncludes(ext, audioExtensions)) {
+                    thumbnail = await Functions.songCover(link)
+                }
                 let decrypted = await Functions.decryptBuffer(buffer, imgLink, session)
                 images.push({link, ext: ext.replace(".", ""), size: decrypted.byteLength, thumbnail,
                 originalLink: imgLink, bytes: Object.values(new Uint8Array(decrypted)), name: path.basename(imgLink)})
             }
             if (upscaledBuffer.byteLength) {
-                let decrypted = await Functions.decryptBuffer(upscaledBuffer, imgLink, session)
-                upscaledImages.push({link, ext: ext.replace(".", ""), size: decrypted.byteLength, thumbnail,
-                originalLink: imgLink, bytes: Object.values(new Uint8Array(decrypted)), name: path.basename(imgLink)})
+                let upscaledExt = path.extname(upscaledImgLink)
+                let upscaledLink = await Functions.decryptItem(upscaledImgLink, session)
+                if (!upscaledLink.includes(upscaledExt)) upscaledLink += `#${upscaledExt}`
+                let thumbnail = ""
+                if (Functions.arrayIncludes(upscaledExt, videoExtensions)) {
+                    thumbnail = await Functions.videoThumbnail(upscaledLink)
+                } else if (Functions.arrayIncludes(upscaledExt, modelExtensions)) {
+                    thumbnail = await Functions.modelImage(upscaledLink)
+                } else if (Functions.arrayIncludes(upscaledExt, audioExtensions)) {
+                    thumbnail = await Functions.songCover(upscaledLink)
+                }
+                let decrypted = await Functions.decryptBuffer(upscaledBuffer, upscaledImgLink, session)
+                upscaledImages.push({link: upscaledLink, ext: upscaledExt.replace(".", ""), size: decrypted.byteLength, thumbnail,
+                originalLink: upscaledImgLink, bytes: Object.values(new Uint8Array(decrypted)), name: path.basename(upscaledImgLink)})
             }
         }
         return {images, upscaledImages}
@@ -2674,7 +2690,7 @@ export default class Functions {
             Functions.setImageCache(cacheKey, cacheUrl)
             return cacheUrl
         } else {
-            Functions.setImageCache(cacheKey, base64)
+            if (base64) Functions.setImageCache(cacheKey, base64)
             return base64
         }
     }
@@ -2706,7 +2722,7 @@ export default class Functions {
             Functions.setImageCache(cacheKey, cacheUrl)
             return cacheUrl
         } else {
-            Functions.setImageCache(cacheKey, base64)
+            if (base64) Functions.setImageCache(cacheKey, base64)
             return base64
         }
     }

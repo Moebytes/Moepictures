@@ -453,9 +453,15 @@ export default class SQLSearch {
         }
         if (type === "all") type = undefined
         if (type) {
-            whereArray.push(`tags.type = $${i}`)
-            values.push(type)
-            i++
+            if (type === "all tags") {
+                whereArray.push(`(tags.type = 'appearance' OR tags.type = 'outfit' OR 
+                tags.type = 'accessory' OR tags.type = 'scenery' OR tags.type = 'action' 
+                OR tags.type = 'tag')`)
+            } else {
+                whereArray.push(`tags.type = $${i}`)
+                values.push(type)
+                i++
+            }
         }
         let limitValue = i
         if (limit) {

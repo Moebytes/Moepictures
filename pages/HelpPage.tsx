@@ -340,12 +340,17 @@ const HelpPage: React.FunctionComponent = (props) => {
                     <span className="help-alt">mirrors</span> - Reposts of the work posted on different sites. Include the artists own reposts.<br/>
                     <span className="help-alt">buy link</span> - If a paid reward is available, you may post the link to buy here.<br/><br/>
 
-                    Tags are divided into five categories. <br/>
+                    Tags are divided into several categories. <br/>
                     <span className="help-alt">artist</span> - Preferably the twitter username of the artist, otherwise their romanized name.<br/>
                     <span className="help-alt">character</span> - The character name with their series in parentheses: character-(series-name). Use "no-character" if not applicable.<br/>
                     <span className="help-alt">series</span> - The series (anime, manga, video game, etc.) the character belongs to. Use "no-series" if not applicable.<br/>
-                    <span className="help-alt">meta</span> - These are just tags with special uses, like unknown-artist and transparent.<br/>
-                    <span className="help-alt">tag</span> - Every tag is a small description of a feature that appears in the work. Check the tagging tab for more detailed help with tagging.<br/>
+                    <span className="help-alt">meta</span> - Tags with special uses like unknown-artist and transparent.<br/>
+                    <span className="help-alt">appearance</span> - Tags related to the appearance of the character, like their hair and eyes.<br/>
+                    <span className="help-alt">outfit</span> - Tags related to the outfit of the character, like skirts and shoes.<br/>
+                    <span className="help-alt">accessory</span> - Tags related to accessories and objects, like bracelets and books.<br/>
+                    <span className="help-alt">action</span> - Tags related to actions like sitting and running.<br/>
+                    <span className="help-alt">scenery</span> - Tags related to the background scenery such as the sky and trees.<br/>
+                    <span className="help-alt">tag</span> - Every other tag that doesn't fit in another category.<br/>
                 </span>
                 <div className="help-img-container"><img className="help-img" src={uploadImg}/></div></>
             )

@@ -50,9 +50,14 @@ const ToolTip: React.FunctionComponent = (props) => {
         const characters = result.tags.filter((t: any) => t.type === "character")
         const series = result.tags.filter((t: any) => t.type === "series")
         const meta = result.tags.filter((t: any) => t.type === "meta")
+        const appearance = result.tags.filter((t: any) => t.type === "appearance")
+        const outfit = result.tags.filter((t: any) => t.type === "outfit")
+        const accessory = result.tags.filter((t: any) => t.type === "accessory")
+        const action = result.tags.filter((t: any) => t.type === "action")
+        const scenery = result.tags.filter((t: any) => t.type === "scenery")
         const tags = result.tags.filter((t: any) => t.type === "tag")
         setArtist(artists[0])
-        setTags([...characters, ...series, ...meta, ...tags.reverse()])
+        setTags([...characters, ...series, ...meta, ...appearance, ...outfit, ...accessory, ...action, ...scenery, ...tags.reverse()])
     }
 
     useEffect(() => {
@@ -86,13 +91,23 @@ const ToolTip: React.FunctionComponent = (props) => {
         let jsxMap = [] as any
         for (let i = 0; i < tags.length; i++) {
             if (tags[i].type === "artist") {
-                jsxMap.push(<span className="tooltip-artist-tag">{tags[i].tag}</span>)
+                jsxMap.push(<span className="tooltip-tag-clickable">{tags[i].tag}</span>)
             } else if (tags[i].type === "character") {
-                jsxMap.push(<span className="tooltip-character-tag">{tags[i].tag}</span>)
+                jsxMap.push(<span className="tooltip-tag character-tag-color">{tags[i].tag}</span>)
             } else if (tags[i].type === "series") {
-                jsxMap.push(<span className="tooltip-series-tag">{tags[i].tag}</span>)
+                jsxMap.push(<span className="tooltip-tag series-tag-color">{tags[i].tag}</span>)
             } else if (tags[i].type === "meta") {
-                jsxMap.push(<span className="tooltip-meta-tag">{tags[i].tag}</span>)
+                jsxMap.push(<span className="tooltip-tag meta-tag-color">{tags[i].tag}</span>)
+            } else if (tags[i].type === "appearance") {
+                jsxMap.push(<span className="tooltip-tag appearance-tag-color">{tags[i].tag}</span>)
+            } else if (tags[i].type === "outfit") {
+                jsxMap.push(<span className="tooltip-tag outfit-tag-color">{tags[i].tag}</span>)
+            } else if (tags[i].type === "accessory") {
+                jsxMap.push(<span className="tooltip-tag accessory-tag-color">{tags[i].tag}</span>)
+            } else if (tags[i].type === "action") {
+                jsxMap.push(<span className="tooltip-tag action-tag-color">{tags[i].tag}</span>)
+            } else if (tags[i].type === "scenery") {
+                jsxMap.push(<span className="tooltip-tag scenery-tag-color">{tags[i].tag}</span>)
             } else {
                 jsxMap.push(<span className="tooltip-tag">{tags[i].tag}</span>)
             }
@@ -107,7 +122,12 @@ const ToolTip: React.FunctionComponent = (props) => {
 
     const openNewTab = async () => {
         const postImage = tooltipPost.images[0]
-        const img = functions.getImageLink(postImage?.type, tooltipPost.postID, postImage?.order, postImage?.filename)
+        let img = ""
+        if (session.upscaledImages) {
+            img = functions.getImageLink(postImage?.type, tooltipPost.postID, postImage?.order, postImage?.upscaledFilename || postImage?.filename)
+        } else {
+            img = functions.getImageLink(postImage?.type, tooltipPost.postID, postImage?.order, postImage?.filename)
+        }
         const decrypted = await functions.decryptItem(img, session)
         window.open(decrypted, "_blank")
     }
@@ -175,18 +195,18 @@ const ToolTip: React.FunctionComponent = (props) => {
             <div className="tooltip-row">
                 <div className="tooltip-artist-container">
                     <img className="tooltip-img" src={functions.getTagLink(artist.type, artist.image, artist.imageHash)}/>
-                    <span className={`tooltip-artist-tag ${tooltipPost?.hidden ? "strikethrough" : ""}`} style={{marginRight: "5px"}} onClick={searchArtist} onAuxClick={openArtist}>{artist.tag}</span>
+                    <span className={`tooltip-tag-clickable ${tooltipPost?.hidden ? "strikethrough" : ""}`} style={{marginRight: "5px"}} onClick={searchArtist} onAuxClick={openArtist}>{artist.tag}</span>
                     <img className="tooltip-img-small" src={tagIcon} onClick={() => copyTags()} onContextMenu={(event) => {event.preventDefault(); copyTags(true, true)}}/>
                 </div>
                 <div className="tooltip-artist-container">
-                    <span className={`tooltip-artist-tag ${tooltipPost?.hidden ? "strikethrough" : ""}`} onClick={download} onAuxClick={openNewTab}>{getImageDimensions()}</span>
+                    <span className={`tooltip-tag-clickable ${tooltipPost?.hidden ? "strikethrough" : ""}`} onClick={download} onAuxClick={openNewTab}>{getImageDimensions()}</span>
                     {getPostLinkJSX()}
                 </div>
             </div>
             <div className="tooltip-column" ref={scrollRef} style={{overflowY: "auto"}}>
                 <div className="tooltip-tag-container">
-                    <span className={`tooltip-artist-tag ${tooltipPost?.hidden ? "strikethrough" : ""}`}>{tooltipPost.translatedTitle}</span>
-                    <span className={`tooltip-artist-tag ${tooltipPost?.hidden ? "strikethrough" : ""}`}>{functions.formatDate(new Date(tooltipPost.posted))}</span>
+                    <span className={`tooltip-tag-clickable ${tooltipPost?.hidden ? "strikethrough" : ""}`}>{tooltipPost.translatedTitle}</span>
+                    <span className={`tooltip-tag-clickable ${tooltipPost?.hidden ? "strikethrough" : ""}`}>{functions.formatDate(new Date(tooltipPost.posted))}</span>
                 </div>
                 <div className="tooltip-tag-container" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                     {getTagsJSX()}

@@ -249,6 +249,7 @@ export const DeleteAliasHistoryIDContext = React.createContext<any>(null)
 export const DeleteAliasHistoryFlagContext = React.createContext<any>(null)
 export const RevertAliasHistoryIDContext = React.createContext<any>(null)
 export const RevertAliasHistoryFlagContext = React.createContext<any>(null)
+export const TagFlagContext = React.createContext<any>(null)
 
 const Context: React.FunctionComponent = (props) => {
     const [siteHue, setSiteHue] = useState(180)
@@ -477,9 +478,11 @@ const Context: React.FunctionComponent = (props) => {
     const [revertAliasHistoryID, setRevertAliasHistoryID] = useState(null)
     const [revertAliasHistoryFlag, setRevertAliasHistoryFlag] = useState(null)
     const [newsBanner, setNewsBanner] = useState(null)
+    const [tagFlag, setTagFlag] = useState(false)
 
 return (
     <>
+        <TagFlagContext.Provider value={{tagFlag, setTagFlag}}>
         <NewsBannerContext.Provider value={{newsBanner, setNewsBanner}}>
         <RevertAliasHistoryFlagContext.Provider value={{revertAliasHistoryFlag, setRevertAliasHistoryFlag}}>
         <RevertAliasHistoryIDContext.Provider value={{revertAliasHistoryID, setRevertAliasHistoryID}}>
@@ -933,6 +936,7 @@ return (
         </RevertAliasHistoryIDContext.Provider>
         </RevertAliasHistoryFlagContext.Provider>
         </NewsBannerContext.Provider>
+        </TagFlagContext.Provider>
     </>
     )
 }

@@ -157,16 +157,27 @@ const TranslationRoutes = (app: Express) => {
             for (let i = 0; i < post.images.length; i++) {
                 const imagePath = functions.getImagePath(post.images[i].type, originalPostID, post.images[i].order, post.images[i].filename)
                 const buffer = await serverFunctions.getFile(imagePath, false, r18) as Buffer
-                const upscaledImagePath = functions.getUpscaledImagePath(post.images[i].type, originalPostID, post.images[i].order, post.images[i].filename)
+                const upscaledImagePath = functions.getUpscaledImagePath(post.images[i].type, originalPostID, post.images[i].order, post.images[i].upscaledFilename || post.images[i].filename)
                 const upscaledBuffer = await serverFunctions.getFile(upscaledImagePath, false, r18) as Buffer
 
                 let current = upscaledBuffer ? upscaledBuffer : buffer
                 let order = i + 1
-                const ext = path.extname(post.images[i].filename).replace(".", "")
+                const ext = path.extname(post.images[i].upscaledFilename || post.images[i].filename).replace(".", "")
                 let fileOrder = post.images.length > 1 ? `${order}` : "1"
-                const filename = post.title ? `${post.title}.${ext}` : 
-                characters[0] !== "unknown-character" ? `${characters[0]}.${ext}` :
-                `${postID}.${ext}`
+                let filename = null as any
+                let upscaledFilename = null as any
+                if (post.images[i].filename) {
+                    let ext = path.extname(post.images[i].filename).replace(".", "")
+                    filename = post.title ? `${post.title}.${ext}` : 
+                    characters[0].tag !== "unknown-character" ? `${characters[0].tag}.${ext}` :
+                    `${postID}.${ext}`
+                }
+                if (post.images[i].upscaledFilename) {
+                    let upscaledExt = path.extname(post.images[i].upscaledFilename).replace(".", "")
+                    upscaledFilename = post.title ? `${post.title}.${upscaledExt}` : 
+                    characters[0].tag !== "unknown-character" ? `${characters[0].tag}.${upscaledExt}` :
+                    `${postID}.${upscaledExt}`
+                }
                 let kind = "image" as any
                 if (type === "comic") {
                     kind = "comic"
@@ -200,7 +211,7 @@ const TranslationRoutes = (app: Express) => {
                     originalCheck.push(newImagePath)
                 }
                 if (upscaledBuffer.byteLength) {
-                    let newImagePath = functions.getUpscaledImagePath(kind, postID, Number(fileOrder), filename)
+                    let newImagePath = functions.getUpscaledImagePath(kind, postID, Number(fileOrder), upscaledFilename)
                     await serverFunctions.uploadUnverifiedFile(newImagePath, upscaledBuffer)
                     hasUpscaled = true
                     upscaledCheck.push(newImagePath)
@@ -215,7 +226,7 @@ const TranslationRoutes = (app: Express) => {
                     hash = await phash(current).then((hash: string) => functions.binaryToHex(hash))
                     dimensions = await sharp(current).metadata()
                 }
-                await sql.post.insertUnverifiedImage(postID, filename, type, order, hash, dimensions.width, dimensions.height, String(current.byteLength))
+                await sql.post.insertUnverifiedImage(postID, filename, upscaledFilename, type, order, hash, dimensions.width, dimensions.height, String(current.byteLength))
             }
             if (upscaledCheck?.length > originalCheck?.length) hasOriginal = false
             if (originalCheck?.length > upscaledCheck?.length) hasUpscaled = false
@@ -250,6 +261,7 @@ const TranslationRoutes = (app: Express) => {
 
             let tagMap = [] as any
             let bulkTagUpdate = [] as any
+            let tagObjectMapping = await serverFunctions.tagMap()
     
             for (let i = 0; i < artists.length; i++) {
                 if (!artists[i]) continue
@@ -307,7 +319,7 @@ const TranslationRoutes = (app: Express) => {
 
             for (let i = 0; i < tags.length; i++) {
                 if (!tags[i]) continue
-                let bulkObj = {tag: tags[i], type: functions.tagType(tags[i]), description: `${functions.toProperCase(tags[i]).replaceAll("-", " ")}.`, image: null, imageHash: null} as any
+                let bulkObj = {tag: tags[i], type: tagObjectMapping[tags[i]]?.type, description: `${functions.toProperCase(tags[i]).replaceAll("-", " ")}.`, image: null, imageHash: null} as any
                 const existingTag = await sql.tag.tag(tags[i])
                 if (existingTag) {
                     if (existingTag.description) bulkObj.description = existingTag.description
@@ -329,7 +341,7 @@ const TranslationRoutes = (app: Express) => {
                     for (const i of implications) {
                       tagMap.push(i.implication)
                       const tag = await sql.tag.tag(i.implication)
-                      bulkTagUpdate.push({tag: i.implication, type: functions.tagType(i.implication), description: tag?.description || null, image: tag?.image || null, imageHash: tag?.imageHash || null})
+                      bulkTagUpdate.push({tag: i.implication, type: tagObjectMapping[i.implication]?.type, description: tag?.description || null, image: tag?.image || null, imageHash: tag?.imageHash || null})
                     }
                 }
             }
@@ -410,7 +422,7 @@ const TranslationRoutes = (app: Express) => {
             await sql.post.deleteUnverifiedPost(Number(postID))
             for (let i = 0; i < unverified.images.length; i++) {
                 const file = functions.getImagePath(unverified.images[i].type, unverified.postID, unverified.images[i].order, unverified.images[i].filename)
-                const upscaledFile = functions.getUpscaledImagePath(unverified.images[i].type, unverified.postID, unverified.images[i].order, unverified.images[i].filename)
+                const upscaledFile = functions.getUpscaledImagePath(unverified.images[i].type, unverified.postID, unverified.images[i].order, unverified.images[i].upscaledFilename || unverified.images[i].filename)
                 await serverFunctions.deleteUnverifiedFile(file)
                 await serverFunctions.deleteUnverifiedFile(upscaledFile)
             }
@@ -441,7 +453,7 @@ const TranslationRoutes = (app: Express) => {
             await sql.post.deleteUnverifiedPost(Number(postID))
             for (let i = 0; i < unverified.images.length; i++) {
                 const file = functions.getImagePath(unverified.images[i].type, unverified.postID, unverified.images[i].order, unverified.images[i].filename)
-                const upscaledFile = functions.getUpscaledImagePath(unverified.images[i].type, unverified.postID, unverified.images[i].order, unverified.images[i].filename)
+                const upscaledFile = functions.getUpscaledImagePath(unverified.images[i].type, unverified.postID, unverified.images[i].order, unverified.images[i].upscaledFilename || unverified.images[i].filename)
                 await serverFunctions.deleteUnverifiedFile(file)
                 await serverFunctions.deleteUnverifiedFile(upscaledFile)
             }

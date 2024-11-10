@@ -266,6 +266,11 @@ const TagHistoryRow: React.FunctionComponent<Props> = (props) => {
         if (tag.type === "character") return "character-tag-color"
         if (tag.type === "series") return "series-tag-color"
         if (tag.type === "meta") return "meta-tag-color"
+        if (tag.type === "appearance") return "appearance-tag-color"
+        if (tag.type === "outfit") return "outfit-tag-color"
+        if (tag.type === "accessory") return "accessory-tag-color"
+        if (tag.type === "action") return "action-tag-color"
+        if (tag.type === "scenery") return "scenery-tag-color"
         return "tag-color"
     }
 

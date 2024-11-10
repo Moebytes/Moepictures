@@ -2,7 +2,7 @@ import React, {useEffect, useContext, useState, useRef} from "react"
 import {useHistory} from "react-router-dom"
 import {HashLink as Link} from "react-router-hash-link"
 import {ThemeContext, EnableDragContext, CategorizeTagContext, SiteHueContext, SiteLightnessContext, 
-SiteSaturationContext, SessionContext, SessionFlagContext} from "../Context"
+SiteSaturationContext, SessionContext, SessionFlagContext, TagFlagContext} from "../Context"
 import functions from "../structures/Functions"
 import permissions from "../structures/Permissions"
 import "./styles/dialog.less"
@@ -20,6 +20,7 @@ const CategorizeTagDialog: React.FunctionComponent = (props) => {
     const {session, setSession} = useContext(SessionContext)
     const {sessionFlag, setSessionFlag} = useContext(SessionFlagContext)
     const [category, setCategory] = useState("tag")
+    const {tagFlag, setTagFlag} = useContext(TagFlagContext)
     const [error, setError] = useState(false)
     const errorRef = useRef<any>(null)
     const history = useHistory()
@@ -45,6 +46,7 @@ const CategorizeTagDialog: React.FunctionComponent = (props) => {
     const categorize = async () => {
         if (!permissions.isMod(session)) return setCategorizeTag(null)
         await functions.put("/api/tag/edit", {tag: categorizeTag.tag, category}, session, setSessionFlag)
+        setTagFlag(categorizeTag.tag)
         setCategorizeTag(null)
     }
 
@@ -60,7 +62,7 @@ const CategorizeTagDialog: React.FunctionComponent = (props) => {
         return (
             <div className="dialog">
                 <Draggable handle=".dialog-title-container">
-                <div className="dialog-box" style={{width: "220px", height: "300px"}} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
+                <div className="dialog-box" style={{width: "220px", height: "500px"}} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                     <div className="dialog-container">
                         <div className="dialog-title-container">
                             <span className="dialog-title">Categorize Tag</span>
@@ -80,6 +82,26 @@ const CategorizeTagDialog: React.FunctionComponent = (props) => {
                         <div className="dialog-row">
                             <span className="dialog-text meta-tag-color">Meta:</span>
                             <img className="dialog-checkbox" src={category === "meta" ? checkboxChecked : checkbox} onClick={() => setCategory("meta")} style={{filter: "hue-rotate(-70deg) saturate(100%) brightness(200%)"}}/>
+                        </div>
+                        <div className="dialog-row">
+                            <span className="dialog-text appearance-tag-color">Appearance:</span>
+                            <img className="dialog-checkbox" src={category === "appearance" ? checkboxChecked : checkbox} onClick={() => setCategory("appearance")} style={{filter: "hue-rotate(70deg) saturate(100%) brightness(200%)"}}/>
+                        </div>
+                        <div className="dialog-row">
+                            <span className="dialog-text outfit-tag-color">Outfit:</span>
+                            <img className="dialog-checkbox" src={category === "outfit" ? checkboxChecked : checkbox} onClick={() => setCategory("outfit")} style={{filter: "hue-rotate(160deg) saturate(100%) brightness(500%)"}}/>
+                        </div>
+                        <div className="dialog-row">
+                            <span className="dialog-text accessory-tag-color">Accessory:</span>
+                            <img className="dialog-checkbox" src={category === "accessory" ? checkboxChecked : checkbox} onClick={() => setCategory("accessory")} style={{filter: "hue-rotate(-120deg) saturate(100%) brightness(200%)"}}/>
+                        </div>
+                        <div className="dialog-row">
+                            <span className="dialog-text action-tag-color">Action:</span>
+                            <img className="dialog-checkbox" src={category === "action" ? checkboxChecked : checkbox} onClick={() => setCategory("action")} style={{filter: "hue-rotate(140deg) saturate(80%) brightness(300%)"}}/>
+                        </div>
+                        <div className="dialog-row">
+                            <span className="dialog-text scenery-tag-color">Scenery:</span>
+                            <img className="dialog-checkbox" src={category === "scenery" ? checkboxChecked : checkbox} onClick={() => setCategory("scenery")} style={{filter: "hue-rotate(-40deg) saturate(100%) brightness(200%)"}}/>
                         </div>
                         <div className="dialog-row">
                             <span className="dialog-text tag-color">Tag:</span>
