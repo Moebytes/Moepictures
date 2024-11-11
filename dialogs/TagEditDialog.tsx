@@ -67,7 +67,9 @@ const TagEditDialog: React.FunctionComponent = (props) => {
         setCharacters(tagEditID.characters.map((t: any) => t.tag).join(" "))
         setSeries(tagEditID.series.map((t: any) => t.tag).join(" "))
         const rawMetaTags = tagEditID.tags.filter((t: any) => t.type === "meta")
-        const rawTags = tagEditID.tags.filter((t: any) => t.type === "tag")
+        const rawTags = tagEditID.tags.filter((t: any) => t.type === "appearance" || 
+        t.type === "outfit" ||  t.type === "accessory" ||  t.type === "action" || 
+        t.type === "scenery" || t.type === "tag")
         setMetaTags(rawMetaTags.map((t: any) => t.tag).join(" "))
         setTags(rawTags.map((t: any) => t.tag).join(" "))
     }

@@ -512,7 +512,6 @@ export default class Functions {
 
     public static validateDescription = (desc: string) => {
         if (!desc) return null
-        if (gibberish(Functions.stripLinks(desc))) return "Description cannot be gibberish."
         return null
     }
 

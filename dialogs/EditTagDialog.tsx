@@ -349,7 +349,7 @@ const EditTagDialog: React.FunctionComponent = (props) => {
                                 <span className="dialog-text">Reason: </span>
                                 <input style={{width: "100%"}} className="dialog-input-taller" type="text" spellCheck={false} value={editTagReason} onChange={(event) => setEditTagReason(event.target.value)}/>
                             </div>
-                            {editTagType === "tag" && session.showR18 ?
+                            {!functions.arrayIncludes(editTagType, ["artist", "character", "series"]) && session.showR18 ?
                             <div className="dialog-row">
                                 <img className="dialog-checkbox" src={editTagR18 ? radioButtonChecked : radioButton} onClick={() => setEditTagR18((prev: boolean) => !prev)} style={{marginLeft: "0px", filter: getFilter()}}/>
                                 <span className="dialog-text" style={{marginLeft: "10px"}}>R18</span>

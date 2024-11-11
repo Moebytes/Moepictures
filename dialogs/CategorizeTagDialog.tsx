@@ -85,11 +85,11 @@ const CategorizeTagDialog: React.FunctionComponent = (props) => {
                         </div>
                         <div className="dialog-row">
                             <span className="dialog-text appearance-tag-color">Appearance:</span>
-                            <img className="dialog-checkbox" src={category === "appearance" ? checkboxChecked : checkbox} onClick={() => setCategory("appearance")} style={{filter: "hue-rotate(70deg) saturate(100%) brightness(200%)"}}/>
+                            <img className="dialog-checkbox" src={category === "appearance" ? checkboxChecked : checkbox} onClick={() => setCategory("appearance")} style={{filter: "hue-rotate(-5deg) saturate(100%) brightness(200%)"}}/>
                         </div>
                         <div className="dialog-row">
                             <span className="dialog-text outfit-tag-color">Outfit:</span>
-                            <img className="dialog-checkbox" src={category === "outfit" ? checkboxChecked : checkbox} onClick={() => setCategory("outfit")} style={{filter: "hue-rotate(160deg) saturate(100%) brightness(500%)"}}/>
+                            <img className="dialog-checkbox" src={category === "outfit" ? checkboxChecked : checkbox} onClick={() => setCategory("outfit")} style={{filter: "hue-rotate(75deg) saturate(80%) brightness(400%)"}}/>
                         </div>
                         <div className="dialog-row">
                             <span className="dialog-text accessory-tag-color">Accessory:</span>
@@ -97,7 +97,7 @@ const CategorizeTagDialog: React.FunctionComponent = (props) => {
                         </div>
                         <div className="dialog-row">
                             <span className="dialog-text action-tag-color">Action:</span>
-                            <img className="dialog-checkbox" src={category === "action" ? checkboxChecked : checkbox} onClick={() => setCategory("action")} style={{filter: "hue-rotate(140deg) saturate(80%) brightness(300%)"}}/>
+                            <img className="dialog-checkbox" src={category === "action" ? checkboxChecked : checkbox} onClick={() => setCategory("action")} style={{filter: "hue-rotate(160deg) saturate(100%) brightness(500%)"}}/>
                         </div>
                         <div className="dialog-row">
                             <span className="dialog-text scenery-tag-color">Scenery:</span>

@@ -339,18 +339,6 @@ const HelpPage: React.FunctionComponent = (props) => {
                     <span className="help-alt">translated commentary</span> - A commentary english translation, as they are very commonly written in japanese.<br/>
                     <span className="help-alt">mirrors</span> - Reposts of the work posted on different sites. Include the artists own reposts.<br/>
                     <span className="help-alt">buy link</span> - If a paid reward is available, you may post the link to buy here.<br/><br/>
-
-                    Tags are divided into several categories. <br/>
-                    <span className="help-alt">artist</span> - Preferably the twitter username of the artist, otherwise their romanized name.<br/>
-                    <span className="help-alt">character</span> - The character name with their series in parentheses: character-(series-name). Use "no-character" if not applicable.<br/>
-                    <span className="help-alt">series</span> - The series (anime, manga, video game, etc.) the character belongs to. Use "no-series" if not applicable.<br/>
-                    <span className="help-alt">meta</span> - Tags with special uses like unknown-artist and transparent.<br/>
-                    <span className="help-alt">appearance</span> - Tags related to the appearance of the character, like their hair and eyes.<br/>
-                    <span className="help-alt">outfit</span> - Tags related to the outfit of the character, like skirts and shoes.<br/>
-                    <span className="help-alt">accessory</span> - Tags related to accessories and objects, like bracelets and books.<br/>
-                    <span className="help-alt">action</span> - Tags related to actions like sitting and running.<br/>
-                    <span className="help-alt">scenery</span> - Tags related to the background scenery such as the sky and trees.<br/>
-                    <span className="help-alt">tag</span> - Every other tag that doesn't fit in another category.<br/>
                 </span>
                 <div className="help-img-container"><img className="help-img" src={uploadImg}/></div></>
             )
@@ -380,6 +368,18 @@ const HelpPage: React.FunctionComponent = (props) => {
 
                     If the post was already tagged on a different site you may copy over the tags and fix them up. There's no 
                     need to fully re-invent the wheel. <br/><br/>
+
+                    We organize tags into several categories, which also determine their color. <br/>
+                    <span className="help-alt artist-tag-color">artist</span> - Preferably the twitter username of the artist, otherwise their romanized name.<br/>
+                    <span className="help-alt character-tag-color">character</span> - The character name with their series in parentheses: character-(series-name). Use "no-character" if not applicable.<br/>
+                    <span className="help-alt series-tag-color">series</span> - The series (anime, manga, video game, etc.) the character belongs to. Use "no-series" if not applicable.<br/>
+                    <span className="help-alt meta-tag-color">meta</span> - Tags with special uses like unknown-artist and transparent.<br/>
+                    <span className="help-alt appearance-tag-color">appearance</span> - Tags related to the appearance of the character, like their hair and eyes.<br/>
+                    <span className="help-alt outfit-tag-color">outfit</span> - Tags related to the outfit of the character, like skirts and shoes.<br/>
+                    <span className="help-alt accessory-tag-color">accessory</span> - Tags related to accessories and objects, like bracelets and books.<br/>
+                    <span className="help-alt action-tag-color">action</span> - Tags related to actions like sitting and running.<br/>
+                    <span className="help-alt scenery-tag-color">scenery</span> - Tags related to the background scenery such as the sky and trees.<br/>
+                    <span className="help-alt tag-color">tag</span> - Every other tag that doesn't fit in another category.<br/><br/>
 
                     New tags that don't exist yet are created on post upload, and actually added once the post is approved. Once the 
                     tag is up, you may edit its more detailed image/description/links in the tags page. Not all of these fields will be available to 
