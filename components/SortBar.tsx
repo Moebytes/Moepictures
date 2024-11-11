@@ -2,13 +2,14 @@ import React, {useContext, useEffect, useState, useRef, useReducer} from "react"
 import {useHistory} from "react-router-dom"
 import {HashLink as Link} from "react-router-hash-link"
 import Slider from "react-slider"
-import {ThemeContext, HideSidebarContext, HideNavbarContext, HideSortbarContext, ActiveDropdownContext, ScrollContext, TabletContext,
-SizeTypeContext, BrightnessContext, ContrastContext, HueContext, SaturationContext, LightnessContext, SiteHueContext, PremiumRequiredContext,
-BlurContext, SharpenContext, EnableDragContext, FilterDropActiveContext, SquareContext, PixelateContext, SiteLightnessContext, PostsContext,
-ShowDownloadDialogContext, HideTitlebarContext, ImageTypeContext, RestrictTypeContext, SortTypeContext, SortReverseContext, SiteSaturationContext,
+import {HideSidebarContext, HideNavbarContext, HideSortbarContext, ActiveDropdownContext, ScrollContext, TabletContext,
+SizeTypeContext, BrightnessContext, ContrastContext, HueContext, SaturationContext, LightnessContext, PremiumRequiredContext,
+BlurContext, SharpenContext, EnableDragContext, FilterDropActiveContext, SquareContext, PixelateContext, PostsContext,
+ShowDownloadDialogContext, HideTitlebarContext, ImageTypeContext, RestrictTypeContext, SortTypeContext, SortReverseContext,
 StyleTypeContext, SpeedContext, ReverseContext, MobileContext, RelativeContext, SessionContext, MobileScrollingContext, SessionFlagContext,
 SelectionModeContext, SelectionItemsContext, SearchFlagContext, DownloadIDsContext, DownloadFlagContext, ShowBulkTagEditDialogContext,
 ShowBulkDeleteDialogContext, PageContext, PageFlagContext, PageMultiplierContext, ScrollYContext, BulkFavGroupDialogContext} from "../Context"
+import {useThemeSelector} from "../store"
 import leftArrow from "../assets/icons/leftArrow.png"
 import rightArrow from "../assets/icons/rightArrow.png"
 import upArrow from "../assets/icons/upArrow.png"
@@ -64,10 +65,7 @@ import permissions from "../structures/Permissions"
 import "./styles/sortbar.less"
 
 const SortBar: React.FunctionComponent = (props) => {
-    const {theme, setTheme} = useContext(ThemeContext)
-    const {siteHue, setSiteHue} = useContext(SiteHueContext)
-    const {siteSaturation, setSiteSaturation} = useContext(SiteSaturationContext)
-    const {siteLightness, setSiteLightness} = useContext(SiteLightnessContext)
+    const {siteHue, siteSaturation, siteLightness} = useThemeSelector()
     const {hideSortbar, setHideSortbar} = useContext(HideSortbarContext)
     const {hideSidebar, setHideSidebar} = useContext(HideSidebarContext)
     const {hideNavbar, setHideNavbar} = useContext(HideNavbarContext)

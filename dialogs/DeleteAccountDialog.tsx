@@ -1,14 +1,13 @@
 import React, {useEffect, useContext, useState} from "react"
 import {useHistory} from "react-router-dom"
 import {HashLink as Link} from "react-router-hash-link"
-import {HideNavbarContext, HideSidebarContext, ThemeContext, EnableDragContext, SidebarTextContext,
+import {HideNavbarContext, HideSidebarContext, EnableDragContext, SidebarTextContext,
 ShowDeleteAccountDialogContext, HideTitlebarContext, SessionContext, SessionFlagContext} from "../Context"
 import functions from "../structures/Functions"
 import Draggable from "react-draggable"
 import "./styles/dialog.less"
 
 const DeleteAccountDialog: React.FunctionComponent = (props) => {
-    const {theme, setTheme} = useContext(ThemeContext)
     const {hideNavbar, setHideNavbar} = useContext(HideNavbarContext)
     const {hideTitlebar, setHideTitlebar} = useContext(HideTitlebarContext)
     const {hideSidebar, setHideSidebar} = useContext(HideSidebarContext)

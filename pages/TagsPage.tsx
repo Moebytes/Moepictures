@@ -19,19 +19,17 @@ import pageIcon from "../assets/icons/page.png"
 import permissions from "../structures/Permissions"
 import PageDialog from "../dialogs/PageDialog"
 import CaptchaDialog from "../dialogs/CaptchaDialog"
-import {ThemeContext, EnableDragContext, HideNavbarContext, HideSidebarContext, RelativeContext, HideTitlebarContext, MobileContext, ScrollContext,
-ActiveDropdownContext, HeaderTextContext, SidebarTextContext, SessionContext, SiteHueContext, SiteLightnessContext, SiteSaturationContext, TagsPageContext,
+import {EnableDragContext, HideNavbarContext, HideSidebarContext, RelativeContext, HideTitlebarContext, MobileContext, ScrollContext,
+ActiveDropdownContext, HeaderTextContext, SidebarTextContext, SessionContext, TagsPageContext,
 ShowPageDialogContext, PageFlagContext, SessionFlagContext, RestrictTypeContext} from "../Context"
+import {useThemeSelector} from "../store"
 import "./styles/itemspage.less"
 
 let limit = 200
 let replace = false
 
 const TagsPage: React.FunctionComponent = (props) => {
-    const {theme, setTheme} = useContext(ThemeContext)
-    const {siteHue, setSiteHue} = useContext(SiteHueContext)
-    const {siteSaturation, setSiteSaturation} = useContext(SiteSaturationContext)
-    const {siteLightness, setSiteLightness} = useContext(SiteLightnessContext)
+    const {theme, siteHue, siteSaturation, siteLightness} = useThemeSelector()
     const {enableDrag, setEnableDrag} = useContext(EnableDragContext)
     const {hideNavbar, setHideNavbar} = useContext(HideNavbarContext)
     const {hideTitlebar, setHideTitlebar} = useContext(HideTitlebarContext)

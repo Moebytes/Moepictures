@@ -7,13 +7,13 @@ import NavBar from "../components/NavBar"
 import SideBar from "../components/SideBar"
 import functions from "../structures/Functions"
 import permissions from "../structures/Permissions"
-import {HideNavbarContext, HideSidebarContext, ThemeContext, EnableDragContext, RedirectContext, MobileContext,
+import {HideNavbarContext, HideSidebarContext, EnableDragContext, RedirectContext, MobileContext,
 RelativeContext, HideTitlebarContext, HeaderTextContext, SidebarTextContext, SessionContext, SessionFlagContext} from "../Context"
+import {useThemeSelector} from "../store"
 import premiumStar from "../assets/icons/premium-star.png"
 import "./styles/sitepage.less"
 
 const PremiumSuccessPage: React.FunctionComponent = (props) => {
-    const {theme, setTheme} = useContext(ThemeContext)
     const {hideNavbar, setHideNavbar} = useContext(HideNavbarContext)
     const {hideTitlebar, setHideTitlebar} = useContext(HideTitlebarContext)
     const {hideSidebar, setHideSidebar} = useContext(HideSidebarContext)

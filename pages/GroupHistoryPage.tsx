@@ -8,8 +8,9 @@ import functions from "../structures/Functions"
 import GroupHistoryRow from "../components/GroupHistoryRow"
 import RevertGroupHistoryDialog from "../dialogs/RevertGroupHistoryDialog"
 import DeleteGroupHistoryDialog from "../dialogs/DeleteGroupHistoryDialog"
-import {ThemeContext, EnableDragContext, HideNavbarContext, HideSidebarContext, MobileContext, SessionContext, RedirectContext, RestrictTypeContext,
+import {EnableDragContext, HideNavbarContext, HideSidebarContext, MobileContext, SessionContext, RedirectContext, RestrictTypeContext,
 RelativeContext, HideTitlebarContext, ActiveDropdownContext, HeaderTextContext, SidebarTextContext, SessionFlagContext} from "../Context"
+import {useThemeSelector} from "../store"
 import permissions from "../structures/Permissions"
 import "./styles/historypage.less"
 
@@ -20,7 +21,6 @@ interface Props {
 
 const GroupHistoryPage: React.FunctionComponent<Props> = (props) => {
     const [ignored, forceUpdate] = useReducer(x => x + 1, 0)
-    const {theme, setTheme} = useContext(ThemeContext)
     const {enableDrag, setEnableDrag} = useContext(EnableDragContext)
     const {hideNavbar, setHideNavbar} = useContext(HideNavbarContext)
     const {hideTitlebar, setHideTitlebar} = useContext(HideTitlebarContext)

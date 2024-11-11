@@ -1,7 +1,7 @@
 import React, {useContext, useEffect, useRef, useState} from "react"
-import {ThemeContext, EnableDragContext, BrightnessContext, ContrastContext, HueContext, SaturationContext, LightnessContext,
-BlurContext, SharpenContext, PixelateContext, SessionContext, MobileContext, TranslationModeContext, SiteHueContext,
-SiteLightnessContext, SiteSaturationContext, SessionFlagContext, FormatContext, PostsContext, FavGroupIDContext} from "../Context"
+import {EnableDragContext, BrightnessContext, ContrastContext, HueContext, SaturationContext, LightnessContext,
+BlurContext, SharpenContext, PixelateContext, SessionContext, MobileContext, TranslationModeContext, SessionFlagContext, FormatContext, PostsContext, FavGroupIDContext} from "../Context"
+import {useThemeSelector} from "../store"
 import {HashLink as Link} from "react-router-hash-link"
 import functions from "../structures/Functions"
 import Slider from "react-slider"
@@ -37,10 +37,7 @@ interface Props {
 }
 
 const PostImageOptions: React.FunctionComponent<Props> = (props) => {
-    const {theme, setTheme} = useContext(ThemeContext)
-    const {siteHue, setSiteHue} = useContext(SiteHueContext)
-    const {siteSaturation, setSiteSaturation} = useContext(SiteSaturationContext)
-    const {siteLightness, setSiteLightness} = useContext(SiteLightnessContext)
+    const {siteHue, siteSaturation, siteLightness} = useThemeSelector()
     const {enableDrag, setEnableDrag} = useContext(EnableDragContext)
     const {brightness, setBrightness} = useContext(BrightnessContext)
     const {contrast, setContrast} = useContext(ContrastContext)

@@ -1,6 +1,6 @@
 import React, {useContext, useEffect, useRef, useState} from "react"
 import {useHistory} from "react-router-dom"
-import {ThemeContext, SearchContext, SearchFlagContext, DeleteTagFlagContext, DeleteTagIDContext, MobileContext, EditTagTypeContext, EditTagReasonContext,
+import {SearchContext, SearchFlagContext, DeleteTagFlagContext, DeleteTagIDContext, MobileContext, EditTagTypeContext, EditTagReasonContext,
 EditTagSocialContext, EditTagTwitterContext, EditTagWebsiteContext, EditTagFandomContext, EditTagAliasesContext, EditTagImplicationsContext, 
 EditTagDescriptionContext, EditTagIDContext, EditTagFlagContext, EditTagPixivTagsContext, EditTagR18Context, SessionContext, EditTagImageContext, EditTagKeyContext, AliasTagFlagContext, 
 AliasTagIDContext, AliasTagNameContext, SessionFlagContext, CategorizeTagContext, TagFlagContext} from "../Context"
@@ -27,7 +27,6 @@ interface Props {
 }
 
 const TagRow: React.FunctionComponent<Props> = (props) => {
-    const {theme, setTheme} = useContext(ThemeContext)
     const [hover, setHover] = useState(false)
     const {search, setSearch} = useContext(SearchContext)
     const {searchFlag, setSearchFlag} = useContext(SearchFlagContext)

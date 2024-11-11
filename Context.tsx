@@ -1,9 +1,5 @@
 import React, {useState} from "react"
 
-export const SiteHueContext = React.createContext<any>(null)
-export const SiteSaturationContext = React.createContext<any>(null)
-export const SiteLightnessContext = React.createContext<any>(null)
-export const ThemeContext = React.createContext<any>(null)
 export const HideSortbarContext = React.createContext<any>(null)
 export const HideSidebarContext = React.createContext<any>(null)
 export const HideNavbarContext = React.createContext<any>(null)
@@ -251,10 +247,11 @@ export const RevertAliasHistoryIDContext = React.createContext<any>(null)
 export const RevertAliasHistoryFlagContext = React.createContext<any>(null)
 export const TagFlagContext = React.createContext<any>(null)
 
-const Context: React.FunctionComponent = (props) => {
-    const [siteHue, setSiteHue] = useState(180)
-    const [siteSaturation, setSiteSaturation] = useState(100)
-    const [siteLightness, setSiteLightness] = useState(50)
+interface Props {
+    children: any
+}
+
+const Context: React.FunctionComponent<Props> = (props) => {
     const [brightness, setBrightness] = useState(100)
     const [contrast, setContrast] = useState(100)
     const [hue, setHue] = useState(180)
@@ -706,13 +703,7 @@ return (
         <BlurContext.Provider value={{blur, setBlur}}>
         <SharpenContext.Provider value={{sharpen, setSharpen}}>
         <SizeTypeContext.Provider value={{sizeType, setSizeType}}>
-        <SiteLightnessContext.Provider value={{siteLightness, setSiteLightness}}>
-        <SiteSaturationContext.Provider value={{siteSaturation, setSiteSaturation}}>
-        <SiteHueContext.Provider value={{siteHue, setSiteHue}}>
             {props.children}
-        </SiteHueContext.Provider>
-        </SiteSaturationContext.Provider>
-        </SiteLightnessContext.Provider>
         </SizeTypeContext.Provider>
         </SharpenContext.Provider>
         </BlurContext.Provider>

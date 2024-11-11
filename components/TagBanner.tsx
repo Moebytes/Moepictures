@@ -1,6 +1,6 @@
 import React, {useContext, useEffect, useRef, useState} from "react"
 import {useHistory} from "react-router-dom"
-import {ThemeContext, SessionContext, EnableDragContext, PostsContext, VisiblePostsContext, SizeTypeContext, PageContext, ScrollContext,
+import {SessionContext, EnableDragContext, PostsContext, VisiblePostsContext, SizeTypeContext, PageContext, ScrollContext,
 SearchContext, SearchFlagContext, MobileContext, SessionFlagContext} from "../Context"
 import {HashLink as Link} from "react-router-hash-link"
 import functions from "../structures/Functions"
@@ -11,7 +11,6 @@ let deltaCounter = 0
 let lastDeltaY = 0
 
 const TagBanner: React.FunctionComponent = (props) => {
-    const {theme, setTheme} = useContext(ThemeContext)
     const [hover, setHover] = useState(false)
     const {enableDrag, setEnableDrag} = useContext(EnableDragContext)
     const {mobile, setMobile} = useContext(MobileContext)

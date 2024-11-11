@@ -1,6 +1,6 @@
 import React, {useContext, useEffect, useRef, useState} from "react"
 import {useHistory} from "react-router-dom"
-import {ThemeContext, EnableDragContext, SessionContext, MobileContext, SessionFlagContext, SearchContext, SearchFlagContext} from "../Context"
+import {EnableDragContext, SessionContext, MobileContext, SessionFlagContext, SearchContext, SearchFlagContext} from "../Context"
 import "./styles/taghover.less"
 import functions from "../structures/Functions"
 
@@ -14,7 +14,6 @@ interface Props {
 let timer = null as any
 
 const TagHover: React.FunctionComponent<Props> = (props) => {
-    const {theme, setTheme} = useContext(ThemeContext)
     const {enableDrag, setEnableDrag} = useContext(EnableDragContext)
     const {session, setSession} = useContext(SessionContext)
     const {sessionFlag, setSessionFlag} = useContext(SessionFlagContext)

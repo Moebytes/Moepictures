@@ -1,9 +1,10 @@
 import React, {useContext, useEffect, useRef, useState} from "react"
 import {useHistory} from "react-router-dom"
-import {ThemeContext, QuoteTextContext, SessionContext, DeleteCommentIDContext, DeleteCommentFlagContext, MobileContext,
+import {QuoteTextContext, SessionContext, DeleteCommentIDContext, DeleteCommentFlagContext, MobileContext,
 EditCommentFlagContext, EditCommentIDContext, EditCommentTextContext, ReportCommentIDContext, BrightnessContext, ContrastContext, 
-HueContext, SaturationContext, LightnessContext, BlurContext, SharpenContext, PixelateContext, SiteHueContext, SiteLightnessContext,
-SiteSaturationContext, CommentIDContext, CommentJumpFlagContext, SessionFlagContext, EmojisContext} from "../Context"
+HueContext, SaturationContext, LightnessContext, BlurContext, SharpenContext, PixelateContext, CommentIDContext, CommentJumpFlagContext, 
+SessionFlagContext, EmojisContext} from "../Context"
+import {useThemeSelector} from "../store"
 import {HashLink as Link} from "react-router-hash-link"
 import functions from "../structures/Functions"
 import permissions from "../structures/Permissions"
@@ -31,10 +32,7 @@ interface Props {
 }
 
 const CommentRow: React.FunctionComponent<Props> = (props) => {
-    const {theme, setTheme} = useContext(ThemeContext)
-    const {siteHue, setSiteHue} = useContext(SiteHueContext)
-    const {siteSaturation, setSiteSaturation} = useContext(SiteSaturationContext)
-    const {siteLightness, setSiteLightness} = useContext(SiteLightnessContext)
+    const {siteHue, siteSaturation, siteLightness} = useThemeSelector()
     const {quoteText, setQuoteText} = useContext(QuoteTextContext)
     const {mobile, setMobile} = useContext(MobileContext)
     const {session, setSession} = useContext(SessionContext)

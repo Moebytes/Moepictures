@@ -1,7 +1,7 @@
 import React, {useEffect, useContext, useState, useRef} from "react"
 import {useHistory} from "react-router-dom"
 import {HashLink as Link} from "react-router-hash-link"
-import {HideNavbarContext, HideSidebarContext, ThemeContext, EnableDragContext, DeletePostHistoryIDContext, 
+import {HideNavbarContext, HideSidebarContext, EnableDragContext, DeletePostHistoryIDContext, 
 DeletePostHistoryFlagContext, HideTitlebarContext, SessionContext} from "../Context"
 import functions from "../structures/Functions"
 import Draggable from "react-draggable"
@@ -9,7 +9,6 @@ import "./styles/dialog.less"
 import permissions from "../structures/Permissions"
 
 const DeletePostHistoryDialog: React.FunctionComponent = (props) => {
-    const {theme, setTheme} = useContext(ThemeContext)
     const {hideNavbar, setHideNavbar} = useContext(HideNavbarContext)
     const {hideTitlebar, setHideTitlebar} = useContext(HideTitlebarContext)
     const {hideSidebar, setHideSidebar} = useContext(HideSidebarContext)

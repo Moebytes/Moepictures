@@ -1,9 +1,9 @@
 import React, {useEffect, useContext, useState, useRef, useReducer} from "react"
 import {useHistory} from "react-router-dom"
 import {HashLink as Link} from "react-router-hash-link"
-import {ThemeContext, EnableDragContext, GroupPostIDContext, SessionContext, SiteHueContext,
-SiteLightnessContext, SiteSaturationContext, SessionFlagContext, PostFlagContext,
+import {EnableDragContext, GroupPostIDContext, SessionContext, SessionFlagContext, PostFlagContext,
 ActionBannerContext} from "../Context"
+import {useThemeSelector} from "../store"
 import functions from "../structures/Functions"
 import permissions from "../structures/Permissions"
 import radioButton from "../assets/icons/radiobutton.png"
@@ -15,10 +15,7 @@ import Draggable from "react-draggable"
 
 const GroupDialog: React.FunctionComponent = (props) => {
     const [ignored, forceUpdate] = useReducer(x => x + 1, 0)
-    const {theme, setTheme} = useContext(ThemeContext)
-    const {siteHue, setSiteHue} = useContext(SiteHueContext)
-    const {siteSaturation, setSiteSaturation} = useContext(SiteSaturationContext)
-    const {siteLightness, setSiteLightness} = useContext(SiteLightnessContext)
+    const {siteHue, siteSaturation, siteLightness} = useThemeSelector()
     const {enableDrag, setEnableDrag} = useContext(EnableDragContext)
     const {actionBanner, setActionBanner} = useContext(ActionBannerContext)
     const {session, setSession} = useContext(SessionContext)

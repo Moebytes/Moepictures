@@ -1,6 +1,6 @@
 import React, {useContext, useEffect, useRef, useState, useReducer} from "react"
 import {useHistory} from "react-router-dom"
-import {ThemeContext, EnableDragContext, SessionContext, SessionFlagContext, MobileContext, SearchContext, SearchFlagContext,
+import {SessionContext, SessionFlagContext, MobileContext, SearchContext, SearchFlagContext,
 RestrictTypeContext, HideMobileNavbarContext} from "../Context"
 import "./styles/searchsuggestions.less"
 import functions from "../structures/Functions"
@@ -19,9 +19,6 @@ interface Props {
 }
 
 const SearchSuggestions: React.FunctionComponent<Props> = (props) => {
-    const [ignored, forceUpdate] = useReducer(x => x + 1, 0)
-    const {theme, setTheme} = useContext(ThemeContext)
-    const {enableDrag, setEnableDrag} = useContext(EnableDragContext)
     const {session, setSession} = useContext(SessionContext)
     const {sessionFlag, setSessionFlag} = useContext(SessionFlagContext)
     const {mobile, setMobile} = useContext(MobileContext)

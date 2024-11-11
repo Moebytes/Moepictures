@@ -1,6 +1,6 @@
 import React, {useContext, useEffect, useRef, useState, useReducer, useMemo} from "react"
 import {useHistory} from "react-router-dom"
-import {ThemeContext, EnableDragContext, MobileContext, EmojisContext, SessionContext} from "../Context"
+import {EnableDragContext, MobileContext, EmojisContext, SessionContext} from "../Context"
 import {HashLink as Link} from "react-router-hash-link"
 import functions from "../structures/Functions"
 import cryptoFunctions from "../structures/CryptoFunctions"
@@ -14,7 +14,6 @@ interface Props {
 
 const CommentCarousel: React.FunctionComponent<Props> = (props) => {
     const [ignored, forceUpdate] = useReducer(x => x + 1, 0)
-    const {theme, setTheme} = useContext(ThemeContext)
     const {enableDrag, setEnableDrag} = useContext(EnableDragContext)
     const {session, setSession} = useContext(SessionContext)
     const {mobile, setMobile} = useContext(MobileContext)

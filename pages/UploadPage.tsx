@@ -30,9 +30,10 @@ import Carousel from "../components/Carousel"
 import PostImage from "../components/PostImage"
 import PostModel from "../components/PostModel"
 import PostSong from "../components/PostSong"
-import {HideNavbarContext, HideSidebarContext, RelativeContext, ThemeContext, EnableDragContext, HideTitlebarContext, SessionFlagContext,
+import {HideNavbarContext, HideSidebarContext, RelativeContext, EnableDragContext, HideTitlebarContext, SessionFlagContext,
 UploadDropFilesContext, BrightnessContext, ContrastContext, HueContext, SaturationContext, LightnessContext, MobileContext,
 BlurContext, SharpenContext, PixelateContext, HeaderTextContext, SessionContext, SidebarTextContext, RedirectContext, ShowUpscaledContext} from "../Context"
+import {useThemeSelector} from "../store"
 import JSZip from "jszip"
 import SearchSuggestions from "../components/SearchSuggestions"
 import ContentEditable from "react-contenteditable"

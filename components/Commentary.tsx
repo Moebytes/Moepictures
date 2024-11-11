@@ -1,5 +1,6 @@
 import React, {useContext, useEffect, useRef, useState} from "react"
-import {ThemeContext, EnableDragContext, SiteHueContext, SiteLightnessContext, SiteSaturationContext, SessionContext, SessionFlagContext} from "../Context"
+import {EnableDragContext, SessionContext, SessionFlagContext} from "../Context"
+import {useThemeSelector} from "../store"
 import {HashLink as Link} from "react-router-hash-link"
 import jsxFunctions from "../structures/JSXFunctions"
 import commentaryTranslate from "../assets/icons/commentarytranslate.png"
@@ -12,10 +13,7 @@ interface Props {
 }
 
 const Commentary: React.FunctionComponent<Props> = (props) => {
-    const {theme, setTheme} = useContext(ThemeContext)
-    const {siteHue, setSiteHue} = useContext(SiteHueContext)
-    const {siteSaturation, setSiteSaturation} = useContext(SiteSaturationContext)
-    const {siteLightness, setSiteLightness} = useContext(SiteLightnessContext)
+    const {siteHue, siteSaturation, siteLightness} = useThemeSelector()
     const {enableDrag, setEnableDrag} = useContext(EnableDragContext)
     const {session, setSession} = useContext(SessionContext)
     const {sessionFlag, setSessionFlag} = useContext(SessionFlagContext)

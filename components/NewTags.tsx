@@ -1,6 +1,6 @@
 import React, {useContext, useEffect, useRef, useState, useReducer} from "react"
 import {useHistory} from "react-router-dom"
-import {ThemeContext, SessionContext, SessionFlagContext} from "../Context"
+import {SessionContext, SessionFlagContext} from "../Context"
 import functions from "../structures/Functions"
 import "./styles/newtags.less"
 
@@ -9,7 +9,6 @@ interface Props {
 }
 
 const NewTags: React.FunctionComponent<Props> = (props) => {
-    const {theme, setTheme} = useContext(ThemeContext)
     const {session, setSession} = useContext(SessionContext)
     const {sessionFlag, setSessionFlag} = useContext(SessionFlagContext)
     const [rawNewTags, setRawNewTags] = useState([]) as any

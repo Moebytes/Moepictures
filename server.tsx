@@ -17,6 +17,8 @@ import dotenv from "dotenv"
 import rateLimit from "express-rate-limit"
 import {renderToString} from "react-dom/server"
 import {StaticRouter as Router} from "react-router-dom"
+import {Provider} from "react-redux"
+import store from "./store"
 import permissions from "./structures/Permissions"
 import functions from "./structures/Functions"
 import cryptoFunctions from "./structures/CryptoFunctions"
@@ -428,7 +430,8 @@ app.get("/*", async (req: Request, res: Response) => {
   res.setHeader("Cross-Origin-Opener-Policy", "same-origin")
   res.setHeader("Cross-Origin-Embedder-Policy", "require-corp")
   const document = fs.readFileSync(path.join(__dirname, "./dist/index.html"), {encoding: "utf-8"})
-  const html = renderToString(<Router location={req.url}><App/></Router>)
+  // @ts-ignore
+  const html = renderToString(<Router location={req.url}><Provider store={store}><App/></Provider></Router>)
   res.status(200).send(document?.replace(`<div id="root"></div>`, `<div id="root">${html}</div>`))
 })
 

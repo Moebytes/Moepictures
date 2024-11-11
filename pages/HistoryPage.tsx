@@ -41,19 +41,17 @@ import historyTagActive from "../assets/icons/history-tag-active.png"
 import historyTranslateActive from "../assets/icons/history-translate-active.png"
 import historyGroupActive from "../assets/icons/history-group-active.png"
 import historyAliasActive from "../assets/icons/history-alias-active.png"
-import {ThemeContext, EnableDragContext, HideNavbarContext, HideSidebarContext, MobileContext, SessionContext, ScrollContext, ShowPageDialogContext,
+import {EnableDragContext, HideNavbarContext, HideSidebarContext, MobileContext, SessionContext, ScrollContext, ShowPageDialogContext,
 RelativeContext, HideTitlebarContext, ActiveDropdownContext, HeaderTextContext, SidebarTextContext, SessionFlagContext, HistoryPageContext, PageFlagContext,
-SiteHueContext, SiteSaturationContext, SiteLightnessContext, ShowDeleteAllHistoryDialogContext, RedirectContext, RestrictTypeContext, PremiumRequiredContext} from "../Context"
+ShowDeleteAllHistoryDialogContext, RedirectContext, RestrictTypeContext, PremiumRequiredContext} from "../Context"
+import {useThemeSelector} from "../store"
 import "./styles/historypage.less"
 
 let replace = false
 
 const HistoryPage: React.FunctionComponent = () => {
     const [ignored, forceUpdate] = useReducer(x => x + 1, 0)
-    const {theme, setTheme} = useContext(ThemeContext)
-    const {siteHue, setSiteHue} = useContext(SiteHueContext)
-    const {siteSaturation, setSiteSaturation} = useContext(SiteSaturationContext)
-    const {siteLightness, setSiteLightness} = useContext(SiteLightnessContext)
+    const {theme, siteHue, siteSaturation, siteLightness} = useThemeSelector()
     const {enableDrag, setEnableDrag} = useContext(EnableDragContext)
     const {hideNavbar, setHideNavbar} = useContext(HideNavbarContext)
     const {hideTitlebar, setHideTitlebar} = useContext(HideTitlebarContext)

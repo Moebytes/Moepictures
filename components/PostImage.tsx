@@ -1,8 +1,9 @@
 import React, {useContext, useEffect, useRef, useState, useReducer} from "react"
-import {ThemeContext, EnableDragContext, BrightnessContext, ContrastContext, HueContext, SaturationContext, LightnessContext,
+import {EnableDragContext, BrightnessContext, ContrastContext, HueContext, SaturationContext, LightnessContext,
 BlurContext, SharpenContext, PixelateContext, DownloadFlagContext, DownloadIDsContext, DisableZoomContext, SpeedContext,
-ReverseContext, MobileContext, TranslationModeContext, TranslationDrawingEnabledContext, SessionContext, SiteHueContext, PreservePitchContext,
-SiteLightnessContext, SiteSaturationContext, ImageExpandContext, SessionFlagContext, FormatContext, PremiumRequiredContext, PostFlagContext} from "../Context"
+ReverseContext, MobileContext, TranslationModeContext, TranslationDrawingEnabledContext, SessionContext, PreservePitchContext,
+ImageExpandContext, SessionFlagContext, FormatContext, PremiumRequiredContext, PostFlagContext} from "../Context"
+import {useThemeSelector} from "../store"
 import {HashLink as Link} from "react-router-hash-link"
 import {createFFmpeg, fetchFile} from "@ffmpeg/ffmpeg"
 import functions from "../structures/Functions"
@@ -71,10 +72,7 @@ let id = 0
 
 const PostImage: React.FunctionComponent<Props> = (props) => {
     const [ignored, forceUpdate] = useReducer(x => x + 1, 0)
-    const {theme, setTheme} = useContext(ThemeContext)
-    const {siteHue, setSiteHue} = useContext(SiteHueContext)
-    const {siteSaturation, setSiteSaturation} = useContext(SiteSaturationContext)
-    const {siteLightness, setSiteLightness} = useContext(SiteLightnessContext)
+    const {siteHue, siteSaturation, siteLightness} = useThemeSelector()
     const {session, setSessions} = useContext(SessionContext)
     const {sessionFlag, setSessionFlag} = useContext(SessionFlagContext)
     const {enableDrag, setEnableDrag} = useContext(EnableDragContext)

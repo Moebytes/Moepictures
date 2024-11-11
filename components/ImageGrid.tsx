@@ -1,6 +1,6 @@
 import React, {useContext, useEffect, useRef, useState, useReducer} from "react"
 import {useHistory, useLocation} from "react-router-dom"
-import {ThemeContext, SizeTypeContext, PostAmountContext, PostsContext, ImageTypeContext, EnableDragContext, PremiumRequiredContext,
+import {SizeTypeContext, PostAmountContext, PostsContext, ImageTypeContext, EnableDragContext, PremiumRequiredContext,
 RestrictTypeContext, StyleTypeContext, SortTypeContext, SortReverseContext, SearchContext, SearchFlagContext, HeaderFlagContext, MobileScrollingContext,
 RandomFlagContext, ImageSearchFlagContext, SidebarTextContext, MobileContext, SessionContext, SessionFlagContext, VisiblePostsContext, PageMultiplierContext,
 ScrollYContext, ScrollContext, PageContext, AutoSearchContext, ShowPageDialogContext, PageFlagContext, ReloadPostFlagContext} from "../Context"
@@ -20,8 +20,6 @@ let replace = false
 let limit = 100
 
 const ImageGrid: React.FunctionComponent = (props) => {
-    const [ignored, forceUpdate] = useReducer(x => x + 1, 0)
-    const {theme, setTheme} = useContext(ThemeContext)
     const {sizeType, setSizeType} = useContext(SizeTypeContext)
     const {enableDrag, setEnableDrag} = useContext(EnableDragContext)
     const {postAmount, setPostAmount} = useContext(PostAmountContext)

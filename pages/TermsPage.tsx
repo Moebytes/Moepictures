@@ -6,15 +6,13 @@ import Footer from "../components/Footer"
 import tos from "../assets/icons/tos.png"
 import privacy from "../assets/icons/privacy.png"
 import functions from "../structures/Functions"
-import {HideNavbarContext, HideSidebarContext, ThemeContext, RelativeContext, HideTitlebarContext, HeaderTextContext, 
-SidebarTextContext, MobileContext, EnableDragContext, SiteHueContext, SiteLightnessContext, SiteSaturationContext} from "../Context"
+import {HideNavbarContext, HideSidebarContext, RelativeContext, HideTitlebarContext, HeaderTextContext, 
+SidebarTextContext, MobileContext, EnableDragContext} from "../Context"
+import {useThemeSelector} from "../store"
 import "./styles/tospage.less"
 
 const TermsPage: React.FunctionComponent = (props) => {
-    const {theme, setTheme} = useContext(ThemeContext)
-    const {siteHue, setSiteHue} = useContext(SiteHueContext)
-    const {siteSaturation, setSiteSaturation} = useContext(SiteSaturationContext)
-    const {siteLightness, setSiteLightness} = useContext(SiteLightnessContext)
+    const {siteHue, siteSaturation, siteLightness} = useThemeSelector()
     const {hideNavbar, setHideNavbar} = useContext(HideNavbarContext)
     const {hideTitlebar, setHideTitlebar} = useContext(HideTitlebarContext)
     const {hideSidebar, setHideSidebar} = useContext(HideSidebarContext)

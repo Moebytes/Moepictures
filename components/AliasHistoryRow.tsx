@@ -1,6 +1,6 @@
 import React, {useContext, useEffect, useRef, useState} from "react"
 import {useHistory} from "react-router-dom"
-import {ThemeContext, SessionContext, MobileContext, SessionFlagContext, DeleteAliasHistoryIDContext, 
+import {SessionContext, MobileContext, SessionFlagContext, DeleteAliasHistoryIDContext, 
 DeleteAliasHistoryFlagContext, RevertAliasHistoryIDContext, RevertAliasHistoryFlagContext} from "../Context"
 import functions from "../structures/Functions"
 import permissions from "../structures/Permissions"
@@ -24,7 +24,6 @@ interface Props {
 }
 
 const AliasHistoryRow: React.FunctionComponent<Props> = (props) => {
-    const {theme, setTheme} = useContext(ThemeContext)
     const {mobile, setMobile} = useContext(MobileContext)
     const {session, setSession} = useContext(SessionContext)
     const {sessionFlag, setSessionFlag} = useContext(SessionFlagContext)

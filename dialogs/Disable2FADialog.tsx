@@ -1,14 +1,13 @@
 import React, {useEffect, useContext, useState, useRef} from "react"
 import {useHistory} from "react-router-dom"
 import {HashLink as Link} from "react-router-hash-link"
-import {ThemeContext, EnableDragContext, Disable2FADialogContext,
+import {EnableDragContext, Disable2FADialogContext,
 Disable2FAFlagContext, SessionContext, SessionFlagContext} from "../Context"
 import functions from "../structures/Functions"
 import Draggable from "react-draggable"
 import "./styles/dialog.less"
 
 const Disable2FADialog: React.FunctionComponent = (props) => {
-    const {theme, setTheme} = useContext(ThemeContext)
     const {enableDrag, setEnableDrag} = useContext(EnableDragContext)
     const {disable2FADialog, setDisable2FADialog} = useContext(Disable2FADialogContext)
     const {disable2FAFlag, setDisable2FAFlag} = useContext(Disable2FAFlagContext)

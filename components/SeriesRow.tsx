@@ -1,6 +1,6 @@
 import React, {useContext, useRef, useState} from "react"
 import {useHistory} from "react-router-dom"
-import {ThemeContext, SearchContext, SearchFlagContext, SessionContext, MobileContext, RestrictTypeContext, PostsContext} from "../Context"
+import {SearchContext, SearchFlagContext, SessionContext, MobileContext, RestrictTypeContext, PostsContext} from "../Context"
 import {HashLink as Link} from "react-router-hash-link"
 import functions from "../structures/Functions"
 import Carousel from "./Carousel"
@@ -14,7 +14,6 @@ interface Props {
 }
 
 const SeriesRow: React.FunctionComponent<Props> = (props) => {
-    const {theme, setTheme} = useContext(ThemeContext)
     const [hover, setHover] = useState(false)
     const {search, setSearch} = useContext(SearchContext)
     const {searchFlag, setSearchFlag} = useContext(SearchFlagContext)

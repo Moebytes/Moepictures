@@ -1,13 +1,12 @@
 import React, {useEffect, useContext, useState} from "react"
 import {HashLink as Link} from "react-router-hash-link"
-import {HideNavbarContext, HideSidebarContext, ThemeContext, EnableDragContext, ShowDownloadDialogContext, PostAmountContext, 
+import {HideNavbarContext, HideSidebarContext, EnableDragContext, ShowDownloadDialogContext, PostAmountContext, 
 PostsContext, SizeTypeContext, DownloadIDsContext, DownloadFlagContext, HideTitlebarContext} from "../Context"
 import functions from "../structures/Functions"
 import "./styles/dialog.less"
 import Draggable from "react-draggable"
 
 const DownloadDialog: React.FunctionComponent = (props) => {
-    const {theme, setTheme} = useContext(ThemeContext)
     const {hideNavbar, setHideNavbar} = useContext(HideNavbarContext)
     const {hideTitlebar, setHideTitlebar} = useContext(HideTitlebarContext)
     const {hideSidebar, setHideSidebar} = useContext(HideSidebarContext)

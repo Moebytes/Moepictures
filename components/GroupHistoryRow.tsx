@@ -1,6 +1,6 @@
 import React, {useContext, useEffect, useRef, useState} from "react"
 import {useHistory} from "react-router-dom"
-import {ThemeContext, SessionContext, SessionFlagContext, MobileContext, DeleteGroupHistoryIDContext, 
+import {SessionContext, SessionFlagContext, MobileContext, DeleteGroupHistoryIDContext, 
 RevertGroupHistoryIDContext, DeleteGroupHistoryFlagContext, RevertGroupHistoryFlagContext} from "../Context"
 import {HashLink as Link} from "react-router-hash-link"
 import functions from "../structures/Functions"
@@ -29,7 +29,6 @@ interface Props {
 }
 
 const GroupHistoryRow: React.FunctionComponent<Props> = (props) => {
-    const {theme, setTheme} = useContext(ThemeContext)
     const {mobile, setMobile} = useContext(MobileContext)
     const {session, setSession} = useContext(SessionContext)
     const {sessionFlag, setSessionFlag} = useContext(SessionFlagContext)

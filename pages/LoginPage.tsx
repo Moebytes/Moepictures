@@ -7,17 +7,14 @@ import SideBar from "../components/SideBar"
 import Footer from "../components/Footer"
 import show from "../assets/icons/show.png"
 import hide from "../assets/icons/hide.png"
-import {HideNavbarContext, HideSidebarContext, ThemeContext, EnableDragContext, RelativeContext, SessionContext, MobileContext,
-HideTitlebarContext, HeaderTextContext, SessionFlagContext, SidebarTextContext, RedirectContext, SiteHueContext, SiteLightnessContext,
-SiteSaturationContext} from "../Context"
+import {HideNavbarContext, HideSidebarContext, EnableDragContext, RelativeContext, SessionContext, MobileContext,
+HideTitlebarContext, HeaderTextContext, SessionFlagContext, SidebarTextContext, RedirectContext} from "../Context"
+import {useThemeSelector} from "../store"
 import "./styles/sitepage.less"
 import functions from "../structures/Functions"
 
 const LoginPage: React.FunctionComponent = (props) => {
-    const {theme, setTheme} = useContext(ThemeContext)
-    const {siteHue, setSiteHue} = useContext(SiteHueContext)
-    const {siteSaturation, setSiteSaturation} = useContext(SiteSaturationContext)
-    const {siteLightness, setSiteLightness} = useContext(SiteLightnessContext)
+    const {theme, siteHue, siteSaturation, siteLightness} = useThemeSelector()
     const {hideNavbar, setHideNavbar} = useContext(HideNavbarContext)
     const {hideTitlebar, setHideTitlebar} = useContext(HideTitlebarContext)
     const {hideSidebar, setHideSidebar} = useContext(HideSidebarContext)

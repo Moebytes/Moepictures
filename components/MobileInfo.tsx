@@ -1,10 +1,10 @@
 import React, {useContext, useEffect, useState, useReducer} from "react"
 import {useHistory} from "react-router-dom"
-import {ThemeContext, HideNavbarContext, HideSortbarContext, EnableDragContext, MobileContext, UnverifiedPostsContext,
+import {HideNavbarContext, HideSortbarContext, EnableDragContext, MobileContext, UnverifiedPostsContext,
 RelativeContext, HideTitlebarContext, SearchContext, SearchFlagContext, PostsContext, ShowDeletePostDialogContext,
 TagsContext, RandomFlagContext, ImageSearchFlagContext, SessionContext, SessionFlagContext, TagEditIDContext, SourceEditIDContext, ShowTakedownPostDialogContext,
-SiteHueContext, SiteLightnessContext, SiteSaturationContext, TranslationModeContext, TranslationDrawingEnabledContext,
-ActionBannerContext, GroupPostIDContext, LockPostIDContext, PrivatePostObjContext, ShowUpscalingDialogContext, ShowCompressingDialogContext} from "../Context"
+TranslationModeContext, TranslationDrawingEnabledContext, ActionBannerContext, GroupPostIDContext, LockPostIDContext, PrivatePostObjContext, ShowUpscalingDialogContext, ShowCompressingDialogContext} from "../Context"
+import {useThemeSelector} from "../store"
 import {HashLink as Link} from "react-router-hash-link"
 import permissions from "../structures/Permissions"
 import favicon from "../assets/icons/favicon.png"
@@ -62,10 +62,7 @@ interface Props {
 
 const MobileInfo: React.FunctionComponent<Props> = (props) => {
     const [ignored, forceUpdate] = useReducer(x => x + 1, 0)
-    const {theme, setTheme} = useContext(ThemeContext)
-    const {siteHue, setSiteHue} = useContext(SiteHueContext)
-    const {siteSaturation, setSiteSaturation} = useContext(SiteSaturationContext)
-    const {siteLightness, setSiteLightness} = useContext(SiteLightnessContext)
+    const {siteHue, siteSaturation, siteLightness} = useThemeSelector()
     const {hideSortbar, setHideSortbar} = useContext(HideSortbarContext)
     const {hideNavbar, setHideNavbar} = useContext(HideNavbarContext)
     const {hideTitlebar, setHideTitlebar} = useContext(HideTitlebarContext)

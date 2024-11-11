@@ -7,6 +7,7 @@ import SideBar from "../components/SideBar"
 import Footer from "../components/Footer"
 import {HideNavbarContext, HideSidebarContext, RelativeContext, HideTitlebarContext, HeaderTextContext, SidebarTextContext,
 MobileContext, EnableDragContext, HelpTabContext} from "../Context"
+import {useThemeSelector} from "../store"
 import mainImg from "../assets/misc/mainimg.png"
 import imagefiltersImg from "../assets/misc/imagefilters.png"
 import gifPlayerImg from "../assets/misc/gifplayer.png"

@@ -1,7 +1,7 @@
 import React, {useContext, useEffect, useRef, useState} from "react"
 import {useHistory} from "react-router-dom"
-import {ThemeContext, SearchContext, SessionContext, SessionFlagContext, SearchFlagContext, SiteHueContext, SiteLightnessContext, 
-SiteSaturationContext, MobileContext, ShowPageDialogContext, ModPageContext, ScrollContext, PageFlagContext, ModStateContext} from "../Context"
+import {SearchContext, SessionContext, SessionFlagContext, SearchFlagContext, MobileContext, ShowPageDialogContext, ModPageContext, ScrollContext, PageFlagContext, ModStateContext} from "../Context"
+import {useThemeSelector} from "../store"
 import {HashLink as Link} from "react-router-hash-link"
 import approve from "../assets/icons/approve.png"
 import reject from "../assets/icons/reject.png"
@@ -9,10 +9,7 @@ import functions from "../structures/Functions"
 import "./styles/modposts.less"
 
 const ModPostDeletions: React.FunctionComponent = (props) => {
-    const {theme, setTheme} = useContext(ThemeContext)
-    const {siteHue, setSiteHue} = useContext(SiteHueContext)
-    const {siteSaturation, setSiteSaturation} = useContext(SiteSaturationContext)
-    const {siteLightness, setSiteLightness} = useContext(SiteLightnessContext)
+    const {siteHue, siteSaturation, siteLightness} = useThemeSelector()
     const [hover, setHover] = useState(false)
     const {search, setSearch} = useContext(SearchContext)
     const {searchFlag, setSearchFlag} = useContext(SearchFlagContext)

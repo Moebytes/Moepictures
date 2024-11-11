@@ -5,13 +5,12 @@ import TitleBar from "../components/TitleBar"
 import NavBar from "../components/NavBar"
 import Footer from "../components/Footer"
 import SideBar from "../components/SideBar"
-import {HideNavbarContext, HideSidebarContext, ThemeContext, EnableDragContext, RelativeContext, HideTitlebarContext, MobileContext,
+import {HideNavbarContext, HideSidebarContext, EnableDragContext, RelativeContext, HideTitlebarContext, MobileContext,
 HeaderTextContext, SidebarTextContext, SessionContext, SessionFlagContext} from "../Context"
 import functions from "../structures/Functions"
 import "./styles/sitepage.less"
 
 const $2FAPage: React.FunctionComponent = (props) => {
-    const {theme, setTheme} = useContext(ThemeContext)
     const {hideNavbar, setHideNavbar} = useContext(HideNavbarContext)
     const {hideTitlebar, setHideTitlebar} = useContext(HideTitlebarContext)
     const {hideSidebar, setHideSidebar} = useContext(HideSidebarContext)

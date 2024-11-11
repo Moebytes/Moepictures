@@ -1,7 +1,6 @@
 import React, {useEffect, useContext, useState, useRef} from "react"
 import {useHistory} from "react-router-dom"
-import {ThemeContext, EnableDragContext, SaveSearchDialogContext, SessionContext, SiteHueContext,
-SiteLightnessContext, SiteSaturationContext, SessionFlagContext, SearchContext} from "../Context"
+import {EnableDragContext, SaveSearchDialogContext, SessionContext, SessionFlagContext, SearchContext} from "../Context"
 import functions from "../structures/Functions"
 import uploadIcon from "../assets/icons/upload.png"
 import "./styles/dialog.less"
@@ -11,10 +10,6 @@ import ContentEditable from "react-contenteditable"
 import xButton from "../assets/icons/x-button.png"
 
 const SaveSearchDialog: React.FunctionComponent = (props) => {
-    const {theme, setTheme} = useContext(ThemeContext)
-    const {siteHue, setSiteHue} = useContext(SiteHueContext)
-    const {siteSaturation, setSiteSaturation} = useContext(SiteSaturationContext)
-    const {siteLightness, setSiteLightness} = useContext(SiteLightnessContext)
     const {enableDrag, setEnableDrag} = useContext(EnableDragContext)
     const {saveSearchDialog, setSaveSearchDialog} = useContext(SaveSearchDialogContext)
     const {session, setSession} = useContext(SessionContext)

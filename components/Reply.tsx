@@ -1,9 +1,9 @@
 import React, {useContext, useEffect, useRef, useState} from "react"
 import {useHistory} from "react-router-dom"
-import {ThemeContext, QuoteTextContext, SessionContext, DeleteReplyIDContext, DeleteReplyFlagContext,
-EditReplyIDContext, EditReplyFlagContext, EditReplyContentContext, EditReplyR18Context, ReportReplyIDContext, SiteHueContext,
-SiteLightnessContext, SiteSaturationContext, EnableDragContext, MobileContext, SessionFlagContext,
+import {QuoteTextContext, SessionContext, DeleteReplyIDContext, DeleteReplyFlagContext,
+EditReplyIDContext, EditReplyFlagContext, EditReplyContentContext, EditReplyR18Context, ReportReplyIDContext, EnableDragContext, MobileContext, SessionFlagContext,
 EmojisContext} from "../Context"
+import {useThemeSelector} from "../store"
 import {HashLink as Link} from "react-router-hash-link"
 import functions from "../structures/Functions"
 import favicon from "../assets/icons/favicon.png"
@@ -33,10 +33,7 @@ interface Props {
 
 const Reply: React.FunctionComponent<Props> = (props) => {
     const {mobile, setMobile} = useContext(MobileContext)
-    const {theme, setTheme} = useContext(ThemeContext)
-    const {siteHue, setSiteHue} = useContext(SiteHueContext)
-    const {siteSaturation, setSiteSaturation} = useContext(SiteSaturationContext)
-    const {siteLightness, setSiteLightness} = useContext(SiteLightnessContext)
+    const {siteHue, siteSaturation, siteLightness} = useThemeSelector()
     const {enableDrag, setEnableDrag} = useContext(EnableDragContext)
     const {quoteText, setQuoteText} = useContext(QuoteTextContext)
     const {session, setSession} = useContext(SessionContext)

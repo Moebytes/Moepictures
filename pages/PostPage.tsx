@@ -41,6 +41,7 @@ import currentIcon from "../assets/icons/current.png"
 import {HideNavbarContext, HideSidebarContext, RelativeContext, DownloadFlagContext, DownloadIDsContext, HideTitlebarContext, MobileContext, ReloadPostFlagContext,
 PostsContext, TagsContext, HeaderTextContext, PostFlagContext, RedirectContext, SidebarTextContext, SessionContext, SessionFlagContext, EnableDragContext, TranslationModeContext,
 RevertPostHistoryIDContext, RevertPostHistoryFlagContext, RevertTranslationHistoryIDContext, RevertTranslationHistoryFlagContext, RestrictTypeContext, ActiveGroupContext, ActiveFavgroupContext} from "../Context"
+import {useThemeSelector} from "../store"
 import permissions from "../structures/Permissions"
 import "./styles/postpage.less"
 

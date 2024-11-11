@@ -1,10 +1,11 @@
 import React, {useEffect, useContext, useState, useRef} from "react"
-import {ThemeContext, SiteHueContext, SiteSaturationContext, SiteLightnessContext, EnableDragContext, HideNavbarContext, HideSidebarContext, RelativeContext, 
+import {EnableDragContext, HideNavbarContext, HideSidebarContext, RelativeContext, 
 HideTitlebarContext, MobileContext, ActiveDropdownContext, HeaderTextContext, SidebarTextContext, SessionContext, SessionFlagContext, SearchContext, 
 SearchFlagContext, TakedownTagContext, DeleteTagFlagContext, DeleteTagIDContext, EditTagTypeContext, EditTagReasonContext, EditTagImageContext, 
 EditTagKeyContext, EditTagSocialContext, EditTagTwitterContext, EditTagWebsiteContext, EditTagFandomContext, EditTagAliasesContext, EditTagImplicationsContext, 
 EditTagDescriptionContext, EditTagIDContext, EditTagFlagContext, EditTagPixivTagsContext, EditTagR18Context, RestrictTypeContext, RevertTagHistoryIDContext, 
 RevertTagHistoryFlagContext, PostsContext, TagFlagContext} from "../Context"
+import {useThemeSelector} from "../store"
 import {useHistory, useLocation} from "react-router-dom"
 import TitleBar from "../components/TitleBar"
 import NavBar from "../components/NavBar"
@@ -40,10 +41,7 @@ interface Props {
 let limit = 25
 
 const TagPage: React.FunctionComponent<Props> = (props) => {
-    const {theme, setTheme} = useContext(ThemeContext)
-    const {siteHue, setSiteHue} = useContext(SiteHueContext)
-    const {siteSaturation, setSiteSaturation} = useContext(SiteSaturationContext)
-    const {siteLightness, setSiteLightness} = useContext(SiteLightnessContext)
+    const {siteHue, siteSaturation, siteLightness} = useThemeSelector()
     const {enableDrag, setEnableDrag} = useContext(EnableDragContext)
     const {hideNavbar, setHideNavbar} = useContext(HideNavbarContext)
     const {hideTitlebar, setHideTitlebar} = useContext(HideTitlebarContext)

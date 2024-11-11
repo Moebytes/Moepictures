@@ -1,7 +1,8 @@
 import React, {useEffect, useContext, useState, useRef} from "react"
-import {ThemeContext, SiteHueContext, SiteSaturationContext, SiteLightnessContext, EnableDragContext, HideNavbarContext, HideSidebarContext, RelativeContext, 
+import {EnableDragContext, HideNavbarContext, HideSidebarContext, RelativeContext, 
 HideTitlebarContext, MobileContext, PostsContext, GroupFlagContext, ActiveDropdownContext, HeaderTextContext, SidebarTextContext, SessionContext, SessionFlagContext, 
 RestrictTypeContext, ActiveGroupContext, EditGroupObjContext, DeleteGroupObjContext, SearchContext, SearchFlagContext, RevertGroupHistoryIDContext, RevertGroupHistoryFlagContext} from "../Context"
+import {useThemeSelector} from "../store"
 import {useHistory, useLocation} from "react-router-dom"
 import TitleBar from "../components/TitleBar"
 import NavBar from "../components/NavBar"
@@ -33,10 +34,7 @@ interface Props {
 let limit = 25
 
 const GroupPage: React.FunctionComponent<Props> = (props) => {
-    const {theme, setTheme} = useContext(ThemeContext)
-    const {siteHue, setSiteHue} = useContext(SiteHueContext)
-    const {siteSaturation, setSiteSaturation} = useContext(SiteSaturationContext)
-    const {siteLightness, setSiteLightness} = useContext(SiteLightnessContext)
+    const {theme, siteHue, siteSaturation, siteLightness} = useThemeSelector()
     const {enableDrag, setEnableDrag} = useContext(EnableDragContext)
     const {hideNavbar, setHideNavbar} = useContext(HideNavbarContext)
     const {hideTitlebar, setHideTitlebar} = useContext(HideTitlebarContext)

@@ -1,11 +1,12 @@
 import React, {useContext, useEffect, useRef, useState, useReducer} from "react"
 import {useLocation, useHistory} from "react-router-dom"
-import {ThemeContext, EnableDragContext, DownloadFlagContext, DownloadIDsContext, SpeedContext,
-ReverseContext, MobileContext, SessionContext, SiteHueContext,SiteLightnessContext, SiteSaturationContext, 
+import {EnableDragContext, DownloadFlagContext, DownloadIDsContext, SpeedContext,
+ReverseContext, MobileContext, SessionContext,
 ImageExpandContext, PixelateContext, AudioContext, PitchContext, VolumeContext, PreviousVolumeContext, DurationContext,
 ProgressContext, SecondsProgressContext, SeekToContext, DragProgressContext, DraggingContext, PausedContext,
 RewindFlagContext, FastforwardFlagContext, PlayFlagContext, VolumeFlagContext, ResetFlagContext, 
 MuteFlagContext, AudioPostContext} from "../Context"
+import {useThemeSelector} from "../store"
 import functions from "../structures/Functions"
 import Slider from "react-slider"
 import musicplaying from "../assets/icons/musicplaying.gif"
@@ -54,10 +55,6 @@ if (typeof window !== "undefined") initialize()
 
 const AudioPlayer: React.FunctionComponent = (props) => {
     const [ignored, forceUpdate] = useReducer(x => x + 1, 0)
-    const {theme, setTheme} = useContext(ThemeContext)
-    const {siteHue, setSiteHue} = useContext(SiteHueContext)
-    const {siteSaturation, setSiteSaturation} = useContext(SiteSaturationContext)
-    const {siteLightness, setSiteLightness} = useContext(SiteLightnessContext)
     const {session, setSessions} = useContext(SessionContext)
     const {enableDrag, setEnableDrag} = useContext(EnableDragContext)
     const {downloadFlag, setDownloadFlag} = useContext(DownloadFlagContext)
@@ -96,6 +93,7 @@ const AudioPlayer: React.FunctionComponent = (props) => {
     const {volumeFlag, setVolumeFlag} = useContext(VolumeFlagContext)
     const {muteFlag, setMuteFlag} = useContext(MuteFlagContext)
     const {resetFlag, setResetFlag} = useContext(ResetFlagContext)
+    const {theme, siteHue, siteSaturation, siteLightness} = useThemeSelector()
     const [hover, setHover] = useState(false)
     const location = useLocation()
     const history = useHistory()

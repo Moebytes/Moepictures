@@ -1,6 +1,6 @@
 import React, {useContext, useEffect, useRef, useState} from "react"
 import {useHistory} from "react-router-dom"
-import {ThemeContext, SessionContext, MobileContext, DeleteTranslationHistoryIDContext, RevertTranslationHistoryIDContext,
+import {SessionContext, MobileContext, DeleteTranslationHistoryIDContext, RevertTranslationHistoryIDContext,
 DeleteTranslationHistoryFlagContext, RevertTranslationHistoryFlagContext, SessionFlagContext} from "../Context"
 import functions from "../structures/Functions"
 import translationHistoryRevert from "../assets/icons/revert.png"
@@ -25,7 +25,6 @@ interface Props {
 }
 
 const TranslationHistoryRow: React.FunctionComponent<Props> = (props) => {
-    const {theme, setTheme} = useContext(ThemeContext)
     const {mobile, setMobile} = useContext(MobileContext)
     const {session, setSession} = useContext(SessionContext)
     const {sessionFlag, setSessionFlag} = useContext(SessionFlagContext)

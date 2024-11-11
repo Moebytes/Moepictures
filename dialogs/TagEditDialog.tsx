@@ -1,7 +1,7 @@
 import React, {useEffect, useContext, useState, useRef} from "react"
 import {useHistory} from "react-router-dom"
 import {HashLink as Link} from "react-router-hash-link"
-import {HideNavbarContext, HideSidebarContext, ThemeContext, EnableDragContext, TagEditIDContext, HideTitlebarContext, 
+import {HideNavbarContext, HideSidebarContext, EnableDragContext, TagEditIDContext, HideTitlebarContext, 
 SessionContext, SessionFlagContext, MobileContext, PostFlagContext, ActionBannerContext} from "../Context"
 import functions from "../structures/Functions"
 import Draggable from "react-draggable"
@@ -24,7 +24,6 @@ import ContentEditable from "react-contenteditable"
 import "./styles/dialog.less"
 
 const TagEditDialog: React.FunctionComponent = (props) => {
-    const {theme, setTheme} = useContext(ThemeContext)
     const {hideNavbar, setHideNavbar} = useContext(HideNavbarContext)
     const {hideTitlebar, setHideTitlebar} = useContext(HideTitlebarContext)
     const {hideSidebar, setHideSidebar} = useContext(HideSidebarContext)

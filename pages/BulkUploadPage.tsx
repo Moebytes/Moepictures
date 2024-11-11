@@ -30,10 +30,11 @@ import Carousel from "../components/Carousel"
 import PostImage from "../components/PostImage"
 import PostModel from "../components/PostModel"
 import PostSong from "../components/PostSong"
-import {HideNavbarContext, HideSidebarContext, RelativeContext, ThemeContext, EnableDragContext, HideTitlebarContext, 
+import {HideNavbarContext, HideSidebarContext, RelativeContext, EnableDragContext, HideTitlebarContext, 
 UploadDropFilesContext, BrightnessContext, ContrastContext, HueContext, SaturationContext, LightnessContext, MobileContext,
 BlurContext, SharpenContext, PixelateContext, HeaderTextContext, SessionContext, SidebarTextContext, RedirectContext,
-SiteHueContext, SiteLightnessContext, SiteSaturationContext, ShowUpscaledContext, SessionFlagContext} from "../Context"
+ShowUpscaledContext, SessionFlagContext} from "../Context"
+import {useThemeSelector} from "../store"
 import JSZip from "jszip"
 import SearchSuggestions from "../components/SearchSuggestions"
 import ContentEditable from "react-contenteditable"
@@ -49,9 +50,7 @@ let tagsTimer = null as any
 
 const BulkUploadPage: React.FunctionComponent = (props) => {
     const [ignored, forceUpdate] = useReducer(x => x + 1, 0)
-    const {siteHue, setSiteHue} = useContext(SiteHueContext)
-    const {siteSaturation, setSiteSaturation} = useContext(SiteSaturationContext)
-    const {siteLightness, setSiteLightness} = useContext(SiteLightnessContext)
+    const {siteHue, siteSaturation, siteLightness} = useThemeSelector()
     const {enableDrag, setEnableDrag} = useContext(EnableDragContext)
     const {hideNavbar, setHideNavbar} = useContext(HideNavbarContext)
     const {hideTitlebar, setHideTitlebar} = useContext(HideTitlebarContext)

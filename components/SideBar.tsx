@@ -1,11 +1,12 @@
 import React, {useContext, useEffect, useState, useReducer} from "react"
 import {useHistory} from "react-router-dom"
-import {ThemeContext, HideSidebarContext, HideNavbarContext, HideSortbarContext, EnableDragContext, MobileContext, UnverifiedPostsContext, SaveSearchContext,
+import {HideSidebarContext, HideNavbarContext, HideSortbarContext, EnableDragContext, MobileContext, UnverifiedPostsContext, SaveSearchContext,
 RelativeContext, HideTitlebarContext, SidebarHoverContext, SearchContext, SearchFlagContext, PostsContext, ShowDeletePostDialogContext, AutoSearchContext,
 TagsContext, RandomFlagContext, ImageSearchFlagContext, SidebarTextContext, SessionContext, MobileScrollingContext, TagEditIDContext, SourceEditIDContext, PremiumRequiredContext,
-TranslationModeContext, TranslationDrawingEnabledContext, SiteHueContext, SessionFlagContext, SiteLightnessContext, SiteSaturationContext, ShowTakedownPostDialogContext,
+TranslationModeContext, TranslationDrawingEnabledContext, SessionFlagContext, ShowTakedownPostDialogContext,
 SaveSearchDialogContext, DeleteAllSaveSearchDialogContext, EditSaveSearchNameContext, EditSaveSearchKeyContext, EditSaveSearchTagsContext,
 ActionBannerContext, GroupPostIDContext, LockPostIDContext, PrivatePostObjContext, ShowUpscalingDialogContext, ShowCompressingDialogContext} from "../Context"
+import {useThemeSelector} from "../store"
 import {HashLink as Link} from "react-router-hash-link"
 import permissions from "../structures/Permissions"
 import favicon from "../assets/icons/favicon.png"
@@ -85,11 +86,7 @@ let maxHeight2 = 625 // 655
 let maxHeight3 = 672 // 698
 
 const SideBar: React.FunctionComponent<Props> = (props) => {
-    const [ignored, forceUpdate] = useReducer(x => x + 1, 0)
-    const {theme, setTheme} = useContext(ThemeContext)
-    const {siteHue, setSiteHue} = useContext(SiteHueContext)
-    const {siteSaturation, setSiteSaturation} = useContext(SiteSaturationContext)
-    const {siteLightness, setSiteLightness} = useContext(SiteLightnessContext)
+    const {theme, siteHue, siteSaturation, siteLightness} = useThemeSelector()
     const {hideSortbar, setHideSortbar} = useContext(HideSortbarContext)
     const {hideSidebar, setHideSidebar} = useContext(HideSidebarContext)
     const {hideNavbar, setHideNavbar} = useContext(HideNavbarContext)

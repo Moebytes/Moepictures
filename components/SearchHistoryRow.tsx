@@ -1,6 +1,6 @@
 import React, {useContext, useEffect, useRef, useState} from "react"
 import {useHistory} from "react-router-dom"
-import {ThemeContext, SessionContext, MobileContext, SessionFlagContext, DeleteSearchHistoryIDContext,
+import {SessionContext, MobileContext, SessionFlagContext, DeleteSearchHistoryIDContext,
 DeleteSearchHistoryFlagContext} from "../Context"
 import functions from "../structures/Functions"
 import searchHistoryDelete from "../assets/icons/delete.png"
@@ -13,7 +13,6 @@ interface Props {
 }
 
 const SearchHistoryRow: React.FunctionComponent<Props> = (props) => {
-    const {theme, setTheme} = useContext(ThemeContext)
     const {mobile, setMobile} = useContext(MobileContext)
     const {session, setSession} = useContext(SessionContext)
     const {sessionFlag, setSessionFlag} = useContext(SessionFlagContext)

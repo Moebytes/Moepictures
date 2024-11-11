@@ -3,17 +3,14 @@ import TitleBar from "../components/TitleBar"
 import NavBar from "../components/NavBar"
 import SideBar from "../components/SideBar"
 import Footer from "../components/Footer"
-import {HideNavbarContext, HideSidebarContext, ThemeContext, EnableDragContext, MobileContext,
-RelativeContext, HideTitlebarContext, HeaderTextContext, SidebarTextContext, SiteHueContext,
-SiteLightnessContext, SiteSaturationContext, SessionContext, SessionFlagContext} from "../Context"
+import {HideNavbarContext, HideSidebarContext, EnableDragContext, MobileContext,
+RelativeContext, HideTitlebarContext, HeaderTextContext, SidebarTextContext, SessionContext, SessionFlagContext} from "../Context"
+import {useThemeSelector} from "../store"
 import functions from "../structures/Functions"
 import "./styles/sitepage.less"
 
 const ForgotPasswordPage: React.FunctionComponent = (props) => {
-    const {theme, setTheme} = useContext(ThemeContext)
-    const {siteHue, setSiteHue} = useContext(SiteHueContext)
-    const {siteSaturation, setSiteSaturation} = useContext(SiteSaturationContext)
-    const {siteLightness, setSiteLightness} = useContext(SiteLightnessContext)
+    const {theme, siteHue, siteSaturation, siteLightness} = useThemeSelector()
     const {hideNavbar, setHideNavbar} = useContext(HideNavbarContext)
     const {hideTitlebar, setHideTitlebar} = useContext(HideTitlebarContext)
     const {hideSidebar, setHideSidebar} = useContext(HideSidebarContext)

@@ -1,8 +1,9 @@
 import React, {useEffect, useContext, useState, useRef, useReducer} from "react"
 import {useHistory} from "react-router-dom"
 import {HashLink as Link} from "react-router-hash-link"
-import {HideNavbarContext, HideSidebarContext, ThemeContext, EnableDragContext, DMTargetContext, HideTitlebarContext,
-SessionContext, SessionFlagContext, EmojisContext, MobileContext, SiteHueContext, SiteLightnessContext, SiteSaturationContext} from "../Context"
+import {HideNavbarContext, HideSidebarContext, EnableDragContext, DMTargetContext, HideTitlebarContext,
+SessionContext, SessionFlagContext, EmojisContext, MobileContext} from "../Context"
+import {useThemeSelector} from "../store"
 import functions from "../structures/Functions"
 import permissions from "../structures/Permissions"
 import emojiSelect from "../assets/icons/emoji-select.png"
@@ -14,10 +15,7 @@ import Draggable from "react-draggable"
 
 const SendMessageDialog: React.FunctionComponent = (props) => {
     const [ignored, forceUpdate] = useReducer(x => x + 1, 0)
-    const {theme, setTheme} = useContext(ThemeContext)
-    const {siteHue, setSiteHue} = useContext(SiteHueContext)
-    const {siteSaturation, setSiteSaturation} = useContext(SiteSaturationContext)
-    const {siteLightness, setSiteLightness} = useContext(SiteLightnessContext)
+    const {siteHue, siteSaturation, siteLightness} = useThemeSelector()
     const {hideNavbar, setHideNavbar} = useContext(HideNavbarContext)
     const {hideTitlebar, setHideTitlebar} = useContext(HideTitlebarContext)
     const {hideSidebar, setHideSidebar} = useContext(HideSidebarContext)

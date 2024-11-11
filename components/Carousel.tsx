@@ -1,7 +1,8 @@
 import React, {useContext, useEffect, useRef, useState, useReducer, useMemo} from "react"
-import {ThemeContext, EnableDragContext, MobileContext, BrightnessContext, ContrastContext, HueContext, SaturationContext, LightnessContext,
-BlurContext, SharpenContext, PixelateContext, SiteHueContext, SiteLightnessContext, SiteSaturationContext, TranslationDrawingEnabledContext,
+import {EnableDragContext, MobileContext, BrightnessContext, ContrastContext, HueContext, SaturationContext, LightnessContext,
+BlurContext, SharpenContext, PixelateContext, TranslationDrawingEnabledContext,
 SessionContext} from "../Context"
+import {useThemeSelector} from "../store"
 import {HashLink as Link} from "react-router-hash-link"
 import functions from "../structures/Functions"
 import arrowLeft from "../assets/icons/carousel-left.png"
@@ -29,10 +30,7 @@ const loadAmount = 10
 
 const Carousel: React.FunctionComponent<Props> = (props) => {
     const [ignored, forceUpdate] = useReducer(x => x + 1, 0)
-    const {siteHue, setSiteHue} = useContext(SiteHueContext)
-    const {siteSaturation, setSiteSaturation} = useContext(SiteSaturationContext)
-    const {siteLightness, setSiteLightness} = useContext(SiteLightnessContext)
-    const {theme, setTheme} = useContext(ThemeContext)
+    const {siteHue, siteSaturation, siteLightness} = useThemeSelector()
     const {enableDrag, setEnableDrag} = useContext(EnableDragContext)
     const {mobile, setMobile} = useContext(MobileContext)
     const {brightness, setBrightness} = useContext(BrightnessContext)

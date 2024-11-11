@@ -1,8 +1,9 @@
 import React, {useContext, useEffect, useRef, useState} from "react"
 import {useHistory} from "react-router-dom"
-import {ThemeContext, QuoteTextContext, SessionContext, DeleteCommentIDContext, DeleteCommentFlagContext,
-EditCommentIDContext, EditCommentFlagContext, EditCommentTextContext, ReportCommentIDContext, SiteHueContext,
-SiteLightnessContext, SiteSaturationContext, SessionFlagContext, EmojisContext} from "../Context"
+import {QuoteTextContext, SessionContext, DeleteCommentIDContext, DeleteCommentFlagContext,
+EditCommentIDContext, EditCommentFlagContext, EditCommentTextContext, ReportCommentIDContext, 
+SessionFlagContext, EmojisContext} from "../Context"
+import {useThemeSelector} from "../store"
 import {HashLink as Link} from "react-router-hash-link"
 import functions from "../structures/Functions"
 import favicon from "../assets/icons/favicon.png"
@@ -31,10 +32,7 @@ interface Props {
 }
 
 const Comment: React.FunctionComponent<Props> = (props) => {
-    const {theme, setTheme} = useContext(ThemeContext)
-    const {siteHue, setSiteHue} = useContext(SiteHueContext)
-    const {siteSaturation, setSiteSaturation} = useContext(SiteSaturationContext)
-    const {siteLightness, setSiteLightness} = useContext(SiteLightnessContext)
+    const {siteHue, siteSaturation, siteLightness} = useThemeSelector()
     const {quoteText, setQuoteText} = useContext(QuoteTextContext)
     const {session, setSession} = useContext(SessionContext)
     const {sessionFlag, setSessionFlag} = useContext(SessionFlagContext)

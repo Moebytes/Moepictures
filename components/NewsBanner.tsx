@@ -1,12 +1,11 @@
 import React, {useContext, useEffect, useState} from "react"
 import {useHistory} from "react-router-dom"
-import {ThemeContext, MobileContext, SessionContext, SessionFlagContext, NewsBannerContext} from "../Context"
+import {MobileContext, SessionContext, SessionFlagContext, NewsBannerContext} from "../Context"
 import {HashLink as Link} from "react-router-hash-link"
 import functions from "../structures/Functions"
 import "./styles/newsbanner.less"
 
 const NewsBanner: React.FunctionComponent = (props) => {
-    const {theme, setTheme} = useContext(ThemeContext)
     const {mobile, setMobile} = useContext(MobileContext)
     let {newsBanner, setNewsBanner} = useContext(NewsBannerContext)
     const {session, setSession} = useContext(SessionContext)

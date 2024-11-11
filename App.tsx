@@ -1,8 +1,9 @@
 import React, {useEffect, useState} from "react"
 import {Switch, Route, Redirect, useHistory, useLocation} from "react-router-dom"
-import {Context, ThemeContext, HideNavbarContext, HideSidebarContext, HideSortbarContext, HasNotificationContext, TabletContext, ActiveGroupContext,
+import {Context, HideNavbarContext, HideSidebarContext, HideSortbarContext, HasNotificationContext, TabletContext, ActiveGroupContext,
 HideTitlebarContext, EnableDragContext, ActiveDropdownContext, FilterDropActiveContext, MobileScrollingContext, EmojisContext, PostsContext, RestrictTypeContext,
 SidebarHoverContext, SessionContext, SessionFlagContext, UserImgContext, UserImgPostContext, MobileContext, SelectionModeContext, ActiveFavgroupContext} from "./Context"
+import {useThemeSelector} from "./store"
 import favicon from "./assets/icons/favicon.png"
 import permissions from "./structures/Permissions"
 import PostsPage from "./pages/PostsPage"
@@ -72,7 +73,6 @@ let destroy2FATimeout = null as any
 
 const App: React.FunctionComponent = (props) => {
     const [loaded, setLoaded] = useState(false)
-    const [theme, setTheme] = useState("purple")
     const [hideSortbar, setHideSortbar] = useState(false)
     const [hideSidebar, setHideSidebar] = useState(false)
     const [hideNavbar, setHideNavbar] = useState(false)
@@ -95,6 +95,7 @@ const App: React.FunctionComponent = (props) => {
     const [posts, setPosts] = useState([]) as any
     const [activeGroup, setActiveGroup] = useState(null) as any
     const [activeFavgroup, setActiveFavgroup] = useState(null) as any
+    const {theme} = useThemeSelector()
     const history = useHistory()
     const location = useLocation()
 
@@ -324,7 +325,6 @@ const App: React.FunctionComponent = (props) => {
             <HideNavbarContext.Provider value={{hideNavbar, setHideNavbar}}>
             <HideTitlebarContext.Provider value={{hideTitlebar, setHideTitlebar}}>
             <HideSidebarContext.Provider value={{hideSidebar, setHideSidebar}}>
-            <ThemeContext.Provider value={{theme, setTheme}}>
                 <Context>
                     <DragAndDrop/>
                     <NewsBanner/>
@@ -393,7 +393,6 @@ const App: React.FunctionComponent = (props) => {
                     </Switch>
                     <AudioPlayer/>
                 </Context>
-            </ThemeContext.Provider>
             </HideSidebarContext.Provider>
             </HideTitlebarContext.Provider>
             </HideNavbarContext.Provider>

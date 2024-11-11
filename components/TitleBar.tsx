@@ -5,14 +5,15 @@ import favicon from "../assets/icons/favicon.png"
 import favicon2 from "../assets/icons/favicon2.png"
 import favicon3 from "../assets/icons/favicon3.png"
 import favicon4 from "../assets/icons/favicon4.png"
-import {ThemeContext, HideNavbarContext, EnableDragContext, RelativeContext, HideTitlebarContext, HeaderFlagContext,
+import {HideNavbarContext, EnableDragContext, RelativeContext, HideTitlebarContext, HeaderFlagContext,
 SearchContext, SearchFlagContext, ImageTypeContext, RestrictTypeContext, StyleTypeContext, SortTypeContext,
 HeaderTextContext, HideMobileNavbarContext, MobileContext, VisiblePostsContext, ScrollYContext, MobileScrollingContext, 
-SiteHueContext, SiteLightnessContext, SiteSaturationContext, AutoSearchContext, ActiveGroupContext, ActiveFavgroupContext} from "../Context"
+AutoSearchContext, ActiveGroupContext, ActiveFavgroupContext} from "../Context"
 import functions from "../structures/Functions"
 import hamburger from "../assets/icons/hamburger.png"
 import lockIcon from "../assets/icons/lock-red.png"
 import privateIcon from "../assets/icons/private.png"
+import {useThemeSelector, useThemeActions} from "../store"
 import "./styles/titlebar.less"
 
 const darkColorList = {
@@ -96,10 +97,6 @@ interface Props {
 }
 
 const TitleBar: React.FunctionComponent<Props> = (props) => {
-    const {siteHue, setSiteHue} = useContext(SiteHueContext)
-    const {siteSaturation, setSiteSaturation} = useContext(SiteSaturationContext)
-    const {siteLightness, setSiteLightness} = useContext(SiteLightnessContext)
-    const {theme, setTheme} = useContext(ThemeContext)
     const {hideNavbar, setHideNavbar} = useContext(HideNavbarContext)
     const {hideTitlebar, setHideTitlebar} = useContext(HideTitlebarContext)
     const {enableDrag, setEnableDrag} = useContext(EnableDragContext)
@@ -120,6 +117,8 @@ const TitleBar: React.FunctionComponent<Props> = (props) => {
     const {scrollY, setScrollY} = useContext(ScrollYContext)
     const {activeGroup, setActiveGroup} = useContext(ActiveGroupContext)
     const {activeFavgroup, setActiveFavgroup} = useContext(ActiveFavgroupContext)
+    const {theme, siteHue, siteSaturation, siteLightness} = useThemeSelector()
+    const {setTheme, setSiteHue, setSiteSaturation, setSiteLightness} = useThemeActions()
     const history = useHistory()
 
     useEffect(() => {
@@ -151,9 +150,9 @@ const TitleBar: React.FunctionComponent<Props> = (props) => {
                 document.documentElement.style.setProperty(key, functions.rotateColor(color, siteHue, siteSaturation, targetLightness))
             }
         }
-        localStorage.setItem("siteHue", siteHue)
-        localStorage.setItem("siteSaturation", siteSaturation)
-        localStorage.setItem("siteLightness", siteLightness)
+        localStorage.setItem("siteHue", String(siteHue))
+        localStorage.setItem("siteSaturation", String(siteSaturation))
+        localStorage.setItem("siteLightness", String(siteLightness))
     }, [theme, siteHue, siteSaturation, siteLightness])
 
     useEffect(() => {

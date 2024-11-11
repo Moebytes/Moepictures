@@ -29,6 +29,7 @@ import NewTags from "../components/NewTags"
 import MobileInfo from "../components/MobileInfo"
 import {HideNavbarContext, HideSidebarContext, RelativeContext, DownloadFlagContext, DownloadIDsContext, HideTitlebarContext, MobileContext,
 UnverifiedPostsContext, TagsContext, HeaderTextContext, PostFlagContext, SidebarTextContext, SessionContext, EnableDragContext, SessionFlagContext} from "../Context"
+import {useThemeSelector} from "../store"
 import permissions from "../structures/Permissions"
 import "./styles/postpage.less"
 

@@ -6,14 +6,13 @@ import NavBar from "../components/NavBar"
 import Footer from "../components/Footer"
 import SideBar from "../components/SideBar"
 import Disable2FADialog from "../dialogs/Disable2FADialog"
-import {HideNavbarContext, HideSidebarContext, ThemeContext, EnableDragContext, RelativeContext, HideTitlebarContext, 
+import {HideNavbarContext, HideSidebarContext, EnableDragContext, RelativeContext, HideTitlebarContext, 
 HeaderTextContext, SidebarTextContext, SessionContext, SessionFlagContext, RedirectContext, MobileContext, Disable2FADialogContext,
 Disable2FAFlagContext} from "../Context"
 import "./styles/sitepage.less"
 import functions from "../structures/Functions"
 
 const $2FAEnablePage: React.FunctionComponent = (props) => {
-    const {theme, setTheme} = useContext(ThemeContext)
     const {hideNavbar, setHideNavbar} = useContext(HideNavbarContext)
     const {hideTitlebar, setHideTitlebar} = useContext(HideTitlebarContext)
     const {hideSidebar, setHideSidebar} = useContext(HideSidebarContext)

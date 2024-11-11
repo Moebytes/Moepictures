@@ -1,7 +1,7 @@
 import React, {useEffect, useContext, useState, useRef, useReducer} from "react"
 import {useHistory} from "react-router-dom"
 import {HashLink as Link} from "react-router-hash-link"
-import {HideNavbarContext, HideSidebarContext, ThemeContext, EnableDragContext, EditCommentIDContext, EditCommentFlagContext, 
+import {HideNavbarContext, HideSidebarContext, EnableDragContext, EditCommentIDContext, EditCommentFlagContext, 
 EditCommentTextContext, HideTitlebarContext, EmojisContext, MobileContext} from "../Context"
 import functions from "../structures/Functions"
 import "./styles/dialog.less"
@@ -10,7 +10,6 @@ import Draggable from "react-draggable"
 
 const EditCommentDialog: React.FunctionComponent = (props) => {
     const [ignored, forceUpdate] = useReducer(x => x + 1, 0)
-    const {theme, setTheme} = useContext(ThemeContext)
     const {hideNavbar, setHideNavbar} = useContext(HideNavbarContext)
     const {hideTitlebar, setHideTitlebar} = useContext(HideTitlebarContext)
     const {hideSidebar, setHideSidebar} = useContext(HideSidebarContext)

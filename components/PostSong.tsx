@@ -1,11 +1,11 @@
 import React, {useContext, useEffect, useRef, useState, useReducer} from "react"
-import {ThemeContext, EnableDragContext, BrightnessContext, ContrastContext, HueContext, SaturationContext, LightnessContext,
+import {EnableDragContext, BrightnessContext, ContrastContext, HueContext, SaturationContext, LightnessContext,
 BlurContext, SharpenContext, PixelateContext, DownloadFlagContext, DownloadIDsContext, DisableZoomContext, SpeedContext,
-ReverseContext, MobileContext, TranslationModeContext, TranslationDrawingEnabledContext, SessionContext, SiteHueContext,
-SiteLightnessContext, SiteSaturationContext, ImageExpandContext, AudioContext, PitchContext, VolumeContext, PreviousVolumeContext, 
+ReverseContext, MobileContext, TranslationModeContext, TranslationDrawingEnabledContext, SessionContext, ImageExpandContext, AudioContext, PitchContext, VolumeContext, PreviousVolumeContext, 
 ProgressContext, SecondsProgressContext, SeekToContext, DragProgressContext, DraggingContext, PausedContext, DurationContext,
 RewindFlagContext, FastforwardFlagContext, PlayFlagContext, VolumeFlagContext, ResetFlagContext, 
 MuteFlagContext, AudioPostContext} from "../Context"
+import {useThemeSelector} from "../store"
 import functions from "../structures/Functions"
 import Slider from "react-slider"
 import audioReverseIcon from "../assets/icons/audio-reverse.png"
@@ -49,10 +49,7 @@ interface Props {
 
 const PostSong: React.FunctionComponent<Props> = (props) => {
     const [ignored, forceUpdate] = useReducer(x => x + 1, 0)
-    const {theme, setTheme} = useContext(ThemeContext)
-    const {siteHue, setSiteHue} = useContext(SiteHueContext)
-    const {siteSaturation, setSiteSaturation} = useContext(SiteSaturationContext)
-    const {siteLightness, setSiteLightness} = useContext(SiteLightnessContext)
+    const {siteHue, siteSaturation, siteLightness} = useThemeSelector()
     const {session, setSessions} = useContext(SessionContext)
     const {enableDrag, setEnableDrag} = useContext(EnableDragContext)
     const {brightness, setBrightness} = useContext(BrightnessContext)

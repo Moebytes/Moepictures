@@ -1,8 +1,8 @@
 import React, {useEffect, useContext, useState, useRef} from "react"
 import {useHistory} from "react-router-dom"
 import {HashLink as Link} from "react-router-hash-link"
-import {ThemeContext, EnableDragContext, CategorizeTagContext, SiteHueContext, SiteLightnessContext, 
-SiteSaturationContext, SessionContext, SessionFlagContext, TagFlagContext} from "../Context"
+import {EnableDragContext, CategorizeTagContext, SessionContext, SessionFlagContext, TagFlagContext} from "../Context"
+import {useThemeSelector} from "../store"
 import functions from "../structures/Functions"
 import permissions from "../structures/Permissions"
 import "./styles/dialog.less"
@@ -11,10 +11,7 @@ import checkbox from "../assets/icons/checkbox.png"
 import checkboxChecked from "../assets/icons/checkbox-checked.png"
 
 const CategorizeTagDialog: React.FunctionComponent = (props) => {
-    const {theme, setTheme} = useContext(ThemeContext)
-    const {siteHue, setSiteHue} = useContext(SiteHueContext)
-    const {siteSaturation, setSiteSaturation} = useContext(SiteSaturationContext)
-    const {siteLightness, setSiteLightness} = useContext(SiteLightnessContext)
+    const {siteHue, siteSaturation, siteLightness} = useThemeSelector()
     const {enableDrag, setEnableDrag} = useContext(EnableDragContext)
     const {categorizeTag, setCategorizeTag} = useContext(CategorizeTagContext)
     const {session, setSession} = useContext(SessionContext)

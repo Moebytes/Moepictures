@@ -1,18 +1,16 @@
 import React, {useEffect, useContext, useState, useRef} from "react"
 import {useHistory} from "react-router-dom"
 import {HashLink as Link} from "react-router-hash-link"
-import {HideNavbarContext, HideSidebarContext, ThemeContext, EnableDragContext, EditGroupObjContext, HideTitlebarContext, 
-SessionContext, SiteHueContext, SiteLightnessContext, SiteSaturationContext, SessionFlagContext, GroupFlagContext} from "../Context"
+import {HideNavbarContext, HideSidebarContext, EnableDragContext, EditGroupObjContext, HideTitlebarContext, 
+SessionContext, SessionFlagContext, GroupFlagContext} from "../Context"
+import {useThemeSelector} from "../store"
 import functions from "../structures/Functions"
 import permissions from "../structures/Permissions"
 import Draggable from "react-draggable"
 import "./styles/dialog.less"
 
 const EditGroupDialog: React.FunctionComponent = (props) => {
-    const {theme, setTheme} = useContext(ThemeContext)
-    const {siteHue, setSiteHue} = useContext(SiteHueContext)
-    const {siteSaturation, setSiteSaturation} = useContext(SiteSaturationContext)
-    const {siteLightness, setSiteLightness} = useContext(SiteLightnessContext)
+    const {siteHue, siteSaturation, siteLightness} = useThemeSelector()
     const {enableDrag, setEnableDrag} = useContext(EnableDragContext)
     const {editGroupObj, setEditGroupObj} = useContext(EditGroupObjContext)
     const {session, setSession} = useContext(SessionContext)

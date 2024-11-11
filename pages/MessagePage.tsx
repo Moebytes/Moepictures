@@ -6,12 +6,12 @@ import SideBar from "../components/SideBar"
 import Footer from "../components/Footer"
 import functions from "../structures/Functions"
 import MessageReply from "../components/MessageReply"
-import {ThemeContext, EnableDragContext, HideNavbarContext, HideSidebarContext, MobileContext, SessionContext,
-RelativeContext, HideTitlebarContext, ActiveDropdownContext, HeaderTextContext, SidebarTextContext, SiteHueContext, 
-SiteLightnessContext, SiteSaturationContext, ScrollContext, MessagePageContext, ShowPageDialogContext, PageFlagContext,
+import {EnableDragContext, HideNavbarContext, HideSidebarContext, MobileContext, SessionContext,
+RelativeContext, HideTitlebarContext, ActiveDropdownContext, HeaderTextContext, SidebarTextContext, ScrollContext, MessagePageContext, ShowPageDialogContext, PageFlagContext,
 DeleteMessageIDContext, DeleteMessageFlagContext, QuoteTextContext, EditMessageIDContext, EditMessageFlagContext,
 EditMessageTitleContext, EditMessageContentContext, EditMessageR18Context, HasNotificationContext, SessionFlagContext, EmojisContext,
 ForwardMessageObjContext, MessageFlagContext} from "../Context"
+import {useThemeSelector} from "../store"
 import permissions from "../structures/Permissions"
 import jsxFunctions from "../structures/JSXFunctions"
 import PageDialog from "../dialogs/PageDialog"
@@ -45,10 +45,7 @@ interface Props {
 
 const MessagePage: React.FunctionComponent<Props> = (props) => {
     const [ignored, forceUpdate] = useReducer(x => x + 1, 0)
-    const {theme, setTheme} = useContext(ThemeContext)
-    const {siteHue, setSiteHue} = useContext(SiteHueContext)
-    const {siteSaturation, setSiteSaturation} = useContext(SiteSaturationContext)
-    const {siteLightness, setSiteLightness} = useContext(SiteLightnessContext)
+    const {siteHue, siteSaturation, siteLightness} = useThemeSelector()
     const {enableDrag, setEnableDrag} = useContext(EnableDragContext)
     const {hideNavbar, setHideNavbar} = useContext(HideNavbarContext)
     const {hideTitlebar, setHideTitlebar} = useContext(HideTitlebarContext)

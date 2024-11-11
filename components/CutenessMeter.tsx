@@ -1,5 +1,6 @@
 import React, {useContext, useEffect, useRef, useState, useReducer} from "react"
-import {ThemeContext, SessionContext, SessionFlagContext, SiteHueContext, SiteLightnessContext, SiteSaturationContext} from "../Context"
+import {SessionContext, SessionFlagContext} from "../Context"
+import {useThemeSelector} from "../store"
 import Slider from "react-slider"
 import {Rating} from "react-simple-star-rating"
 import functions from "../structures/Functions"
@@ -18,10 +19,7 @@ interface Props {
 let cutenessTimer = null as any
 
 const CutenessMeter: React.FunctionComponent<Props> = (props) => {
-    const {theme, setTheme} = useContext(ThemeContext)
-    const {siteHue, setSiteHue} = useContext(SiteHueContext)
-    const {siteSaturation, setSiteSaturation} = useContext(SiteSaturationContext)
-    const {siteLightness, setSiteLightness} = useContext(SiteLightnessContext)
+    const {siteHue, siteSaturation, siteLightness} = useThemeSelector()
     const {session, setSession} = useContext(SessionContext)
     const {sessionFlag, setSessionFlag} = useContext(SessionFlagContext)
     const [cuteness, setCuteness] = useState(0)

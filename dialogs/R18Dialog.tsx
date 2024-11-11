@@ -1,7 +1,7 @@
 import React, {useEffect, useContext, useState, useRef} from "react"
 import {useHistory} from "react-router-dom"
 import {HashLink as Link} from "react-router-hash-link"
-import {HideNavbarContext, HideSidebarContext, ThemeContext, EnableDragContext, R18ConfirmationContext, 
+import {HideNavbarContext, HideSidebarContext, EnableDragContext, R18ConfirmationContext, 
 HideTitlebarContext, SessionContext, SessionFlagContext} from "../Context"
 import functions from "../structures/Functions"
 import Draggable from "react-draggable"
@@ -9,7 +9,6 @@ import r18 from "../assets/icons/r18.png"
 import "./styles/dialog.less"
 
 const R18Dialog: React.FunctionComponent = (props) => {
-    const {theme, setTheme} = useContext(ThemeContext)
     const {hideNavbar, setHideNavbar} = useContext(HideNavbarContext)
     const {hideTitlebar, setHideTitlebar} = useContext(HideTitlebarContext)
     const {hideSidebar, setHideSidebar} = useContext(HideSidebarContext)

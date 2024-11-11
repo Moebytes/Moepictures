@@ -6,12 +6,13 @@ import SideBar from "../components/SideBar"
 import SortBar from "../components/SortBar"
 import Footer from "../components/Footer"
 import $404 from "../assets/misc/404.png"
-import {HideNavbarContext, HideSidebarContext, ThemeContext, RelativeContext, HideTitlebarContext, HeaderTextContext, SidebarTextContext,
+import {HideNavbarContext, HideSidebarContext, RelativeContext, HideTitlebarContext, HeaderTextContext, SidebarTextContext,
 MobileContext} from "../Context"
+import {useThemeSelector} from "../store"
 import "./styles/404page.less"
 
 const $404Page: React.FunctionComponent = (props) => {
-    const {theme, setTheme} = useContext(ThemeContext)
+    const {theme} = useThemeSelector()
     const {hideNavbar, setHideNavbar} = useContext(HideNavbarContext)
     const {hideTitlebar, setHideTitlebar} = useContext(HideTitlebarContext)
     const {hideSidebar, setHideSidebar} = useContext(HideSidebarContext)

@@ -1,10 +1,11 @@
 import React, {useContext, useEffect, useRef, useState, forwardRef, useImperativeHandle} from "react"
 import {useHistory} from "react-router-dom"
 import loading from "../assets/icons/loading.gif"
-import {ThemeContext, SizeTypeContext, BrightnessContext, ContrastContext, HueContext, SaturationContext, LightnessContext, MobileContext, ScrollYContext,
+import {SizeTypeContext, BrightnessContext, ContrastContext, HueContext, SaturationContext, LightnessContext, MobileContext, ScrollYContext,
 BlurContext, SharpenContext, SquareContext, PixelateContext, DownloadFlagContext, DownloadIDsContext, SpeedContext, ReverseContext, ScrollContext,
 ToolTipXContext, ToolTipYContext, ToolTipEnabledContext, ToolTipPostContext, ToolTipImgContext, SelectionModeContext, SelectionItemsContext, 
-SelectionPostsContext, ActiveDropdownContext, SessionContext, SessionFlagContext, SiteHueContext, SiteLightnessContext, SiteSaturationContext} from "../Context"
+SelectionPostsContext, ActiveDropdownContext, SessionContext, SessionFlagContext} from "../Context"
+import {useThemeSelector} from "../store"
 import {HashLink as Link} from "react-router-hash-link"
 import path from "path"
 import functions from "../structures/Functions"
@@ -35,10 +36,7 @@ interface Ref {
 }
 
 const GridModel = forwardRef<Ref, Props>((props, componentRef) => {
-    const {theme, setTheme} = useContext(ThemeContext)
-    const {siteHue, setSiteHue} = useContext(SiteHueContext)
-    const {siteSaturation, setSiteSaturation} = useContext(SiteSaturationContext)
-    const {siteLightness, setSiteLightness} = useContext(SiteLightnessContext)
+    const {siteHue, siteSaturation, siteLightness} = useThemeSelector()
     const {sizeType, setSizeType} = useContext(SizeTypeContext)
     const [imageSize, setImageSize] = useState(270) as any
     const {brightness, setBrightness} = useContext(BrightnessContext)

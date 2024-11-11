@@ -7,16 +7,13 @@ import SideBar from "../components/SideBar"
 import Footer from "../components/Footer"
 import functions from "../structures/Functions"
 import permissions from "../structures/Permissions"
-import {HideNavbarContext, HideSidebarContext, ThemeContext, EnableDragContext, SessionFlagContext, RedirectContext, MobileContext,
-RelativeContext, HideTitlebarContext, HeaderTextContext, SidebarTextContext, SessionContext, SiteHueContext, SiteLightnessContext,
-SiteSaturationContext} from "../Context"
+import {HideNavbarContext, HideSidebarContext, EnableDragContext, SessionFlagContext, RedirectContext, MobileContext,
+RelativeContext, HideTitlebarContext, HeaderTextContext, SidebarTextContext, SessionContext} from "../Context"
+import {useThemeSelector} from "../store"
 import "./styles/sitepage.less"
 
 const ChangeUsernamePage: React.FunctionComponent = (props) => {
-    const {theme, setTheme} = useContext(ThemeContext)
-    const {siteHue, setSiteHue} = useContext(SiteHueContext)
-    const {siteSaturation, setSiteSaturation} = useContext(SiteSaturationContext)
-    const {siteLightness, setSiteLightness} = useContext(SiteLightnessContext)
+    const {theme, siteHue, siteSaturation, siteLightness} = useThemeSelector()
     const {hideNavbar, setHideNavbar} = useContext(HideNavbarContext)
     const {hideTitlebar, setHideTitlebar} = useContext(HideTitlebarContext)
     const {hideSidebar, setHideSidebar} = useContext(HideSidebarContext)

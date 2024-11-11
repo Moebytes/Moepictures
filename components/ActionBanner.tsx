@@ -1,6 +1,6 @@
 import React, {useContext, useEffect, useState} from "react"
 import {useHistory} from "react-router-dom"
-import {ThemeContext, MobileContext, ActionBannerContext} from "../Context"
+import {MobileContext, ActionBannerContext} from "../Context"
 import {HashLink as Link} from "react-router-hash-link"
 import functions from "../structures/Functions"
 import "./styles/actionbanner.less"
@@ -8,7 +8,6 @@ import "./styles/actionbanner.less"
 let timeout = null as any
 
 const ActionBanner: React.FunctionComponent = (props) => {
-    const {theme, setTheme} = useContext(ThemeContext)
     const {mobile, setMobile} = useContext(MobileContext)
     const {actionBanner, setActionBanner} = useContext(ActionBannerContext)
     const [stickyText, setStickyText] = useState("")

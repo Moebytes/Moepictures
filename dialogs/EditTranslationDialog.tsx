@@ -1,14 +1,13 @@
 import React, {useEffect, useContext, useState} from "react"
 import {useHistory} from "react-router-dom"
 import {HashLink as Link} from "react-router-hash-link"
-import {HideNavbarContext, HideSidebarContext, ThemeContext, EnableDragContext, EditTranslationIDContext, EditTranslationFlagContext, 
+import {HideNavbarContext, HideSidebarContext, EnableDragContext, EditTranslationIDContext, EditTranslationFlagContext, 
 EditTranslationTextContext, EditTranslationTranscriptContext, HideTitlebarContext} from "../Context"
 import functions from "../structures/Functions"
 import "./styles/edittranslationdialog.less"
 import Draggable from "react-draggable"
 
 const EditTranslationDialog: React.FunctionComponent = (props) => {
-    const {theme, setTheme} = useContext(ThemeContext)
     const {hideNavbar, setHideNavbar} = useContext(HideNavbarContext)
     const {hideTitlebar, setHideTitlebar} = useContext(HideTitlebarContext)
     const {hideSidebar, setHideSidebar} = useContext(HideSidebarContext)

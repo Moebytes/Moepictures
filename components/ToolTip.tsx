@@ -1,6 +1,6 @@
 import React, {useContext, useEffect, useRef, useState} from "react"
 import {useHistory} from "react-router-dom"
-import {ThemeContext, SessionContext, EnableDragContext, ToolTipXContext, ToolTipYContext, ToolTipEnabledContext, ToolTipPostContext,
+import {SessionContext, EnableDragContext, ToolTipXContext, ToolTipYContext, ToolTipEnabledContext, ToolTipPostContext,
 ToolTipImgContext, DownloadFlagContext, DownloadIDsContext, SelectionModeContext, SessionFlagContext, ActionBannerContext, SearchContext,
 SearchFlagContext} from "../Context"
 import {HashLink as Link} from "react-router-hash-link"
@@ -23,7 +23,6 @@ import sketchfab from "../assets/icons/sketchfab.png"
 import tagIcon from "../assets/icons/tag.png"
 
 const ToolTip: React.FunctionComponent = (props) => {
-    const {theme, setTheme} = useContext(ThemeContext)
     const [hover, setHover] = useState(false)
     const {enableDrag, setEnableDrag} = useContext(EnableDragContext)
     const {session, setSession} = useContext(SessionContext)

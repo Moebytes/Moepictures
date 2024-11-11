@@ -5,7 +5,8 @@ import NavBar from "../components/NavBar"
 import SideBar from "../components/SideBar"
 import Footer from "../components/Footer"
 import {EnableDragContext, HideNavbarContext, HideSidebarContext, SquareContext, RelativeContext, HideTitlebarContext, HeaderTextContext, SidebarTextContext, 
-MobileContext, SessionContext, ModStateContext, SiteHueContext, SiteSaturationContext, SiteLightnessContext, ScrollContext, ModPageContext} from "../Context"
+MobileContext, SessionContext, ModStateContext, ScrollContext, ModPageContext} from "../Context"
+import {useThemeSelector} from "../store"
 import permissions from "../structures/Permissions"
 import ModPosts from "../components/ModPosts"
 import ModPostEdits from "../components/ModPostEdits"
@@ -48,10 +49,8 @@ let replace = false
 
 const ModQueuePage: React.FunctionComponent = (props) => {
     const [ignored, forceUpdate] = useReducer(x => x + 1, 0)
-    const {siteHue, setSiteHue} = useContext(SiteHueContext)
+    const {siteHue, siteSaturation, siteLightness} = useThemeSelector()
     const {enableDrag, setEnableDrag} = useContext(EnableDragContext)
-    const {siteSaturation, setSiteSaturation} = useContext(SiteSaturationContext)
-    const {siteLightness, setSiteLightness} = useContext(SiteLightnessContext)
     const {hideNavbar, setHideNavbar} = useContext(HideNavbarContext)
     const {hideTitlebar, setHideTitlebar} = useContext(HideTitlebarContext)
     const {hideSidebar, setHideSidebar} = useContext(HideSidebarContext)

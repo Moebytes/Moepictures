@@ -31,9 +31,10 @@ import scrollIcon from "../assets/icons/scroll.png"
 import pageIcon from "../assets/icons/page.png"
 import premiumStar from "../assets/icons/premium-star.png"
 import Slider from "react-slider"
-import {ThemeContext, HideNavbarContext, HideSortbarContext, HideSidebarContext, EnableDragContext,  HideMobileNavbarContext, MobileContext,
-RelativeContext, HideTitlebarContext, SearchContext, SearchFlagContext, SessionContext, SessionFlagContext, UserImgContext, SiteHueContext,
-SiteSaturationContext, SiteLightnessContext, ScrollContext, HasNotificationContext, TabletContext} from "../Context"
+import {HideNavbarContext, HideSortbarContext, HideSidebarContext, EnableDragContext,  HideMobileNavbarContext, MobileContext,
+RelativeContext, HideTitlebarContext, SearchContext, SearchFlagContext, SessionContext, SessionFlagContext, UserImgContext, ScrollContext, 
+HasNotificationContext, TabletContext} from "../Context"
+import {useThemeSelector, useThemeActions} from "../store"
 import "./styles/navbar.less"
 
 interface Props {
@@ -42,10 +43,6 @@ interface Props {
 
 const NavBar: React.FunctionComponent<Props> = (props) => {
     const [ignored, forceUpdate] = useReducer(x => x + 1, 0)
-    const {theme, setTheme} = useContext(ThemeContext)
-    const {siteHue, setSiteHue} = useContext(SiteHueContext)
-    const {siteSaturation, setSiteSaturation} = useContext(SiteSaturationContext)
-    const {siteLightness, setSiteLightness} = useContext(SiteLightnessContext)
     const {hideNavbar, setHideNavbar} = useContext(HideNavbarContext)
     const {hideTitlebar, setHideTitlebar} = useContext(HideTitlebarContext)
     const {hideSidebar, setHideSidebar} = useContext(HideSidebarContext)
@@ -66,6 +63,8 @@ const NavBar: React.FunctionComponent<Props> = (props) => {
     const [marginR, setMarginR] = useState("60px")
     const [activeDropdown, setActiveDropdown] = useState(false)
     const {hasNotification, setHasNotification} = useContext(HasNotificationContext)
+    const {theme, siteHue, siteSaturation, siteLightness} = useThemeSelector()
+    const {setTheme, setSiteHue, setSiteSaturation, setSiteLightness} = useThemeActions()
     const history = useHistory()
 
     const getFilter = () => {

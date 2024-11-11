@@ -1,10 +1,11 @@
 import React, {useContext, useEffect, useRef, useState} from "react"
 import {useHistory} from "react-router-dom"
-import {ThemeContext, EnableDragContext, SessionContext, BrightnessContext, ContrastContext, HueContext, SaturationContext, LightnessContext,
+import {EnableDragContext, SessionContext, BrightnessContext, ContrastContext, HueContext, SaturationContext, LightnessContext,
 BlurContext, SharpenContext, PixelateContext, TranslationModeContext, EditTranslationIDContext, MobileContext, ShowSaveTranslationDialogContext,
 EditTranslationFlagContext, EditTranslationTextContext, EditTranslationTranscriptContext, TranslationDrawingEnabledContext, ImageExpandContext,
-SaveTranslationDataContext, SaveTranslationOrderContext, SiteHueContext, SiteLightnessContext, SiteSaturationContext, SessionFlagContext,
+SaveTranslationDataContext, SaveTranslationOrderContext, SessionFlagContext,
 TranslationOCRDialogContext, TranslationOCRFlagContext, RedirectContext, SidebarTextContext} from "../Context"
+import {useThemeSelector} from "../store"
 import functions from "../structures/Functions"
 import {ShapeEditor, ImageLayer, DrawLayer, wrapShape} from "react-shape-editor"
 import translationDelete from "../assets/icons/translation-delete.png"
@@ -32,10 +33,7 @@ let isAnimatedWebP = false
 
 const RectHandle = ({active, cursor, onMouseDown, scale, x, y}) => {
     const {translationDrawingEnabled, setTranslationDrawingEnabled} = useContext(TranslationDrawingEnabledContext)
-    const {theme, setTheme} = useContext(ThemeContext)
-    const {siteHue, setSiteHue} = useContext(SiteHueContext)
-    const {siteSaturation, setSiteSaturation} = useContext(SiteSaturationContext)
-    const {siteLightness, setSiteLightness} = useContext(SiteLightnessContext)
+    const {siteHue, siteSaturation, siteLightness} = useThemeSelector()
     const getFilter = () => {
         return `hue-rotate(${siteHue - 180}deg) saturate(${siteSaturation}%) brightness(${siteLightness + 70}%)`
     }
@@ -55,10 +53,7 @@ const RectHandle = ({active, cursor, onMouseDown, scale, x, y}) => {
 }
 
 const RectShape = wrapShape(({width, height, extraShapeProps, scale}) => {
-    const {theme, setTheme} = useContext(ThemeContext)
-    const {siteHue, setSiteHue} = useContext(SiteHueContext)
-    const {siteSaturation, setSiteSaturation} = useContext(SiteSaturationContext)
-    const {siteLightness, setSiteLightness} = useContext(SiteLightnessContext)
+    const {siteHue, siteSaturation, siteLightness} = useThemeSelector()
     const getFilter = () => {
         return `hue-rotate(${siteHue - 180}deg) saturate(${siteSaturation}%) brightness(${siteLightness + 70}%)`
     }
@@ -77,10 +72,7 @@ const RectShape = wrapShape(({width, height, extraShapeProps, scale}) => {
 
 const TranslationEditor: React.FunctionComponent<Props> = (props) => {
     const {mobile, setMobile} = useContext(MobileContext)
-    const {theme, setTheme} = useContext(ThemeContext)
-    const {siteHue, setSiteHue} = useContext(SiteHueContext)
-    const {siteSaturation, setSiteSaturation} = useContext(SiteSaturationContext)
-    const {siteLightness, setSiteLightness} = useContext(SiteLightnessContext)
+    const {siteHue, siteSaturation, siteLightness} = useThemeSelector()
     const {enableDrag, setEnableDrag} = useContext(EnableDragContext)
     const {session, setSession} = useContext(SessionContext)
     const {sessionFlag, setSessionFlag} = useContext(SessionFlagContext)

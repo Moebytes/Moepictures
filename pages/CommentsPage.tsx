@@ -12,10 +12,11 @@ import CommentRow from "../components/CommentRow"
 import DeleteCommentDialog from "../dialogs/DeleteCommentDialog"
 import EditCommentDialog from "../dialogs/EditCommentDialog"
 import ReportCommentDialog from "../dialogs/ReportCommentDialog"
-import {ThemeContext, EnableDragContext, HideNavbarContext, HideSidebarContext, MobileContext, SessionContext,
+import {EnableDragContext, HideNavbarContext, HideSidebarContext, MobileContext, SessionContext,
 RelativeContext, HideTitlebarContext, ActiveDropdownContext, HeaderTextContext, SidebarTextContext, RestrictTypeContext,
-CommentSearchFlagContext, SiteHueContext, SiteLightnessContext, SiteSaturationContext, ScrollContext, CommentsPageContext,
+CommentSearchFlagContext, ScrollContext, CommentsPageContext,
 PageFlagContext, ShowPageDialogContext, CommentIDContext, CommentJumpFlagContext, SessionFlagContext} from "../Context"
+import {useThemeSelector} from "../store"
 import permissions from "../structures/Permissions"
 import scrollIcon from "../assets/icons/scroll.png"
 import pageIcon from "../assets/icons/page.png"
@@ -27,10 +28,7 @@ let replace = false
 
 const CommentsPage: React.FunctionComponent = (props) => {
     const [ignored, forceUpdate] = useReducer(x => x + 1, 0)
-    const {theme, setTheme} = useContext(ThemeContext)
-    const {siteHue, setSiteHue} = useContext(SiteHueContext)
-    const {siteSaturation, setSiteSaturation} = useContext(SiteSaturationContext)
-    const {siteLightness, setSiteLightness} = useContext(SiteLightnessContext)
+    const {theme, siteHue, siteSaturation, siteLightness} = useThemeSelector()
     const {enableDrag, setEnableDrag} = useContext(EnableDragContext)
     const {hideNavbar, setHideNavbar} = useContext(HideNavbarContext)
     const {hideTitlebar, setHideTitlebar} = useContext(HideTitlebarContext)

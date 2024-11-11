@@ -8,6 +8,7 @@ import functions from "../structures/Functions"
 import cryptoFunctions from "../structures/CryptoFunctions"
 import {HideNavbarContext, HideSidebarContext, RelativeContext, HideTitlebarContext, MobileContext, UserImgContext, SessionFlagContext,
 PostsContext, TagsContext, PostFlagContext, RedirectContext, SidebarTextContext, SessionContext, EnableDragContext} from "../Context"
+import {useThemeSelector} from "../store"
 import permissions from "../structures/Permissions"
 import ReactCrop, {makeAspectCrop, centerCrop} from "react-image-crop"
 import "./styles/setavatarpage.less"

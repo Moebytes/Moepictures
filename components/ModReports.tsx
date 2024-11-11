@@ -1,7 +1,8 @@
 import React, {useContext, useEffect, useState} from "react"
 import {useHistory} from "react-router-dom"
-import {ThemeContext, SearchContext, SearchFlagContext, SessionContext, SessionFlagContext, EmojisContext, MobileContext, ShowPageDialogContext,
-SiteHueContext, SiteLightnessContext, SiteSaturationContext, ModPageContext, ScrollContext, PageFlagContext, ModStateContext} from "../Context"
+import {SessionContext, SessionFlagContext, EmojisContext, MobileContext, ShowPageDialogContext,
+ModPageContext, ScrollContext, PageFlagContext, ModStateContext} from "../Context"
+import {useThemeSelector} from "../store"
 import {HashLink as Link} from "react-router-hash-link"
 import favicon from "../assets/icons/favicon.png"
 import approve from "../assets/icons/approve.png"
@@ -16,9 +17,7 @@ interface Props {
 }
 
 const ReportRow: React.FunctionComponent<Props> = (props) => {
-    const {siteHue, setSiteHue} = useContext(SiteHueContext)
-    const {siteSaturation, setSiteSaturation} = useContext(SiteSaturationContext)
-    const {siteLightness, setSiteLightness} = useContext(SiteLightnessContext)
+    const {siteHue, siteSaturation, siteLightness} = useThemeSelector()
     const {session, setSession} = useContext(SessionContext)
     const {sessionFlag, setSessionFlag} = useContext(SessionFlagContext)
     const {emojis, setEmojis} = useContext(EmojisContext)
@@ -143,7 +142,6 @@ const ReportRow: React.FunctionComponent<Props> = (props) => {
 }
 
 const ModReports: React.FunctionComponent = (props) => {
-    const {theme, setTheme} = useContext(ThemeContext)
     const [requests, setRequests] = useState([]) as any
     const [index, setIndex] = useState(0)
     const [visibleRequests, setVisibleRequests] = useState([]) as any

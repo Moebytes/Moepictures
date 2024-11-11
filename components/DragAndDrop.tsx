@@ -1,6 +1,6 @@
 import React, {useContext, useEffect, useRef, useState, useReducer} from "react"
 import {useHistory} from "react-router-dom"
-import {ThemeContext, UploadDropFilesContext, ImageSearchFlagContext, SessionContext, SessionFlagContext} from "../Context"
+import {UploadDropFilesContext, ImageSearchFlagContext, SessionContext, SessionFlagContext} from "../Context"
 import {HashLink as Link} from "react-router-hash-link"
 import functions from "../structures/Functions"
 import "./styles/draganddrop.less"
@@ -9,7 +9,6 @@ let showDrag = false
 let timeout = null as any
 
 const DragAndDrop: React.FunctionComponent = (props) => {
-    const {theme, setTheme} = useContext(ThemeContext)
     const {uploadDropFiles, setUploadDropFiles} = useContext(UploadDropFilesContext)
     const {imageSearchFlag, setImageSearchFlag} = useContext(ImageSearchFlagContext)
     const {session, setSession} = useContext(SessionContext)

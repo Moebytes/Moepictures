@@ -1,6 +1,6 @@
 import React, {useContext, useEffect, useRef, useState} from "react"
 import {useHistory} from "react-router-dom"
-import {ThemeContext, EnableDragContext, SessionContext, MobileContext, RestrictTypeContext, PostsContext} from "../Context"
+import {EnableDragContext, SessionContext, MobileContext, RestrictTypeContext, PostsContext} from "../Context"
 import {HashLink as Link} from "react-router-hash-link"
 import functions from "../structures/Functions"
 import permissions from "../structures/Permissions"
@@ -14,7 +14,6 @@ interface Props {
 
 const Related: React.FunctionComponent<Props> = (props) => {
     const {mobile, setMobile} = useContext(MobileContext)
-    const {theme, setTheme} = useContext(ThemeContext)
     const {enableDrag, setEnableDrag} = useContext(EnableDragContext)
     const {session, setSession} = useContext(SessionContext)
     const {restrictType, setRestrictType} = useContext(RestrictTypeContext)

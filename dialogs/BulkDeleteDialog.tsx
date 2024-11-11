@@ -1,6 +1,6 @@
 import React, {useEffect, useContext, useState, useRef} from "react"
 import {useHistory} from "react-router-dom"
-import {HideNavbarContext, HideSidebarContext, ThemeContext, EnableDragContext, 
+import {HideNavbarContext, HideSidebarContext, EnableDragContext, 
 ShowBulkDeleteDialogContext, HideTitlebarContext, SessionContext, SessionFlagContext, MobileContext, SelectionModeContext, 
 SelectionItemsContext, SelectionPostsContext} from "../Context"
 import functions from "../structures/Functions"
@@ -10,7 +10,6 @@ import SearchSuggestions from "../components/SearchSuggestions"
 import "./styles/dialog.less"
 
 const BulkDeleteDialog: React.FunctionComponent = (props) => {
-    const {theme, setTheme} = useContext(ThemeContext)
     const {hideNavbar, setHideNavbar} = useContext(HideNavbarContext)
     const {hideTitlebar, setHideTitlebar} = useContext(HideTitlebarContext)
     const {hideSidebar, setHideSidebar} = useContext(HideSidebarContext)

@@ -10,10 +10,10 @@ import sort from "../assets/icons/sort.png"
 import sortRev from "../assets/icons/sort-reverse.png"
 import Thread from "../components/Thread"
 import NewThreadDialog from "../dialogs/NewThreadDialog"
-import {ThemeContext, EnableDragContext, HideNavbarContext, HideSidebarContext, MobileContext, SessionContext,
-RelativeContext, HideTitlebarContext, ActiveDropdownContext, HeaderTextContext, SidebarTextContext, SiteHueContext, 
-SiteLightnessContext, SiteSaturationContext, ShowNewThreadDialogContext, ScrollContext, ForumPageContext, ShowPageDialogContext,
+import {EnableDragContext, HideNavbarContext, HideSidebarContext, MobileContext, SessionContext,
+RelativeContext, HideTitlebarContext, ActiveDropdownContext, HeaderTextContext, SidebarTextContext, ShowNewThreadDialogContext, ScrollContext, ForumPageContext, ShowPageDialogContext,
 PageFlagContext, SessionFlagContext} from "../Context"
+import {useThemeSelector} from "../store"
 import permissions from "../structures/Permissions"
 import scrollIcon from "../assets/icons/scroll.png"
 import pageIcon from "../assets/icons/page.png"
@@ -25,10 +25,7 @@ let replace = false
 
 const ForumPage: React.FunctionComponent = (props) => {
     const [ignored, forceUpdate] = useReducer(x => x + 1, 0)
-    const {theme, setTheme} = useContext(ThemeContext)
-    const {siteHue, setSiteHue} = useContext(SiteHueContext)
-    const {siteSaturation, setSiteSaturation} = useContext(SiteSaturationContext)
-    const {siteLightness, setSiteLightness} = useContext(SiteLightnessContext)
+    const {theme, siteHue, siteSaturation, siteLightness} = useThemeSelector()
     const {enableDrag, setEnableDrag} = useContext(EnableDragContext)
     const {hideNavbar, setHideNavbar} = useContext(HideNavbarContext)
     const {hideTitlebar, setHideTitlebar} = useContext(HideTitlebarContext)

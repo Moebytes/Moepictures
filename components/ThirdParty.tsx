@@ -1,6 +1,6 @@
 import React, {useContext, useRef, useState, useReducer} from "react"
 import {useHistory} from "react-router-dom"
-import {ThemeContext, SessionContext} from "../Context"
+import {SessionContext} from "../Context"
 import functions from "../structures/Functions"
 import "./styles/thirdparty.less"
 import Carousel from "./Carousel"
@@ -10,7 +10,6 @@ interface Props {
 }
 
 const ThirdParty: React.FunctionComponent<Props> = (props) => {
-    const {theme, setTheme} = useContext(ThemeContext)
     const {session, setSession} = useContext(SessionContext)
     const history = useHistory()
     const images = props.posts.map((t: any) => functions.getThumbnailLink(t.post.images[0].type, t.postID, t.post.images[0].order, t.post.images[0].filename, "small"))

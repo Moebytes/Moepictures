@@ -13,9 +13,9 @@ import scrollIcon from "../assets/icons/scroll.png"
 import pageIcon from "../assets/icons/page.png"
 import PageDialog from "../dialogs/PageDialog"
 import CaptchaDialog from "../dialogs/CaptchaDialog"
-import {ThemeContext, EnableDragContext, HideNavbarContext, HideSidebarContext, RelativeContext, MobileContext, SessionContext, SessionFlagContext,
-HideTitlebarContext, ActiveDropdownContext, HeaderTextContext, SidebarTextContext, SiteHueContext, SiteLightnessContext,
-SiteSaturationContext, ScrollContext, ArtistsPageContext, ShowPageDialogContext, PageFlagContext} from "../Context"
+import {EnableDragContext, HideNavbarContext, HideSidebarContext, RelativeContext, MobileContext, SessionContext, SessionFlagContext,
+HideTitlebarContext, ActiveDropdownContext, HeaderTextContext, SidebarTextContext, ScrollContext, ArtistsPageContext, ShowPageDialogContext, PageFlagContext} from "../Context"
+import {useThemeSelector} from "../store"
 import "./styles/itemspage.less"
 
 let limit = 25
@@ -23,10 +23,7 @@ let replace = false
 let pageAmount = 7
 
 const ArtistsPage: React.FunctionComponent = (props) => {
-    const {theme, setTheme} = useContext(ThemeContext)
-    const {siteHue, setSiteHue} = useContext(SiteHueContext)
-    const {siteSaturation, setSiteSaturation} = useContext(SiteSaturationContext)
-    const {siteLightness, setSiteLightness} = useContext(SiteLightnessContext)
+    const {theme, siteHue, siteSaturation, siteLightness} = useThemeSelector()
     const {enableDrag, setEnableDrag} = useContext(EnableDragContext)
     const {hideNavbar, setHideNavbar} = useContext(HideNavbarContext)
     const {hideTitlebar, setHideTitlebar} = useContext(HideTitlebarContext)

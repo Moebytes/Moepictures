@@ -8,15 +8,13 @@ import Footer from "../components/Footer"
 import show from "../assets/icons/show.png"
 import hide from "../assets/icons/hide.png"
 import functions from "../structures/Functions"
-import {HideNavbarContext, HideSidebarContext, ThemeContext, EnableDragContext, RelativeContext, HideTitlebarContext, MobileContext,
-HeaderTextContext, SidebarTextContext, SessionContext, SiteHueContext, SiteLightnessContext, SiteSaturationContext, SessionFlagContext} from "../Context"
+import {HideNavbarContext, HideSidebarContext, EnableDragContext, RelativeContext, HideTitlebarContext, MobileContext,
+HeaderTextContext, SidebarTextContext, SessionContext, SessionFlagContext} from "../Context"
+import {useThemeSelector} from "../store"
 import "./styles/sitepage.less"
 
 const SignUpPage: React.FunctionComponent = (props) => {
-    const {theme, setTheme} = useContext(ThemeContext)
-    const {siteHue, setSiteHue} = useContext(SiteHueContext)
-    const {siteSaturation, setSiteSaturation} = useContext(SiteSaturationContext)
-    const {siteLightness, setSiteLightness} = useContext(SiteLightnessContext)
+    const {theme, siteHue, siteSaturation, siteLightness} = useThemeSelector()
     const {hideNavbar, setHideNavbar} = useContext(HideNavbarContext)
     const {hideTitlebar, setHideTitlebar} = useContext(HideTitlebarContext)
     const {hideSidebar, setHideSidebar} = useContext(HideSidebarContext)

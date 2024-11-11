@@ -6,13 +6,12 @@ import Footer from "../components/Footer"
 import NavBar from "../components/NavBar"
 import SideBar from "../components/SideBar"
 import functions from "../structures/Functions"
-import {HideNavbarContext, HideSidebarContext, ThemeContext, EnableDragContext, RedirectContext, MobileContext,
+import {HideNavbarContext, HideSidebarContext, EnableDragContext, RedirectContext, MobileContext,
 RelativeContext, HideTitlebarContext, HeaderTextContext, SidebarTextContext, SessionContext} from "../Context"
 import "./styles/sitepage.less"
 import session from "express-session"
 
 const ChangeEmailSuccessPage: React.FunctionComponent = (props) => {
-    const {theme, setTheme} = useContext(ThemeContext)
     const {hideNavbar, setHideNavbar} = useContext(HideNavbarContext)
     const {hideTitlebar, setHideTitlebar} = useContext(HideTitlebarContext)
     const {hideSidebar, setHideSidebar} = useContext(HideSidebarContext)

@@ -7,6 +7,7 @@ import SideBar from "../components/SideBar"
 import Footer from "../components/Footer"
 import {HideNavbarContext, HideSidebarContext, RelativeContext, HideTitlebarContext, HeaderTextContext, SidebarTextContext,
 MobileContext, EnableDragContext, SessionContext, SessionFlagContext} from "../Context"
+import {useThemeSelector} from "../store"
 import CaptchaDialog from "../dialogs/CaptchaDialog"
 import premiumStar from "../assets/icons/premium-star.png"
 import premiumImg from "../assets/misc/premiumupgrade.png"

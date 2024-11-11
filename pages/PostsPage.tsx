@@ -18,6 +18,7 @@ import EditSaveSearchDialog from "../dialogs/EditSaveSearchDialog"
 import DeleteAllSaveSearchDialog from "../dialogs/DeleteAllSaveSearchDialog"
 import {HideNavbarContext, HideSidebarContext, SquareContext, RelativeContext, HideTitlebarContext, 
 HeaderTextContext, SidebarTextContext, MobileContext, MobileScrollingContext, SessionContext} from "../Context"
+import {useThemeSelector} from "../store"
 
 let scrollTimer = null as any
 let lastPos = 0

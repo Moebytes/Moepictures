@@ -1,10 +1,11 @@
 import React, {useEffect, useContext, useState, useRef} from "react"
 import {useHistory} from "react-router-dom"
 import {HashLink as Link} from "react-router-hash-link"
-import {HideNavbarContext, HideSidebarContext, ThemeContext, EnableDragContext, EditTagIDContext, EditTagFlagContext, EditTagImplicationsContext, 
+import {HideNavbarContext, HideSidebarContext, EnableDragContext, EditTagIDContext, EditTagFlagContext, EditTagImplicationsContext, 
 EditTagTypeContext, EditTagSocialContext, EditTagTwitterContext, EditTagKeyContext, EditTagAliasesContext, EditTagImageContext, EditTagWebsiteContext, 
-EditTagFandomContext, EditTagDescriptionContext, EditTagR18Context, EditTagReasonContext, HideTitlebarContext, SessionContext, EditTagPixivTagsContext, SiteHueContext,
-SiteLightnessContext, SiteSaturationContext, SessionFlagContext} from "../Context"
+EditTagFandomContext, EditTagDescriptionContext, EditTagR18Context, EditTagReasonContext, HideTitlebarContext, SessionContext, EditTagPixivTagsContext,
+SessionFlagContext} from "../Context"
+import {useThemeSelector} from "../store"
 import functions from "../structures/Functions"
 import permissions from "../structures/Permissions"
 import uploadIcon from "../assets/icons/upload.png"
@@ -16,10 +17,7 @@ import radioButton from "../assets/icons/radiobutton.png"
 import radioButtonChecked from "../assets/icons/radiobutton-checked.png"
 
 const EditTagDialog: React.FunctionComponent = (props) => {
-    const {theme, setTheme} = useContext(ThemeContext)
-    const {siteHue, setSiteHue} = useContext(SiteHueContext)
-    const {siteSaturation, setSiteSaturation} = useContext(SiteSaturationContext)
-    const {siteLightness, setSiteLightness} = useContext(SiteLightnessContext)
+    const {siteHue, siteSaturation, siteLightness} = useThemeSelector()
     const {hideNavbar, setHideNavbar} = useContext(HideNavbarContext)
     const {hideTitlebar, setHideTitlebar} = useContext(HideTitlebarContext)
     const {hideSidebar, setHideSidebar} = useContext(HideSidebarContext)

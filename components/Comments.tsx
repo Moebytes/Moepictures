@@ -1,6 +1,6 @@
 import React, {useContext, useEffect, useRef, useState} from "react"
 import {useHistory} from "react-router-dom"
-import {ThemeContext, EnableDragContext, SessionContext, SessionFlagContext, EmojisContext,
+import {EnableDragContext, SessionContext, SessionFlagContext, EmojisContext,
 QuoteTextContext, CommentIDContext, CommentJumpFlagContext, MobileContext} from "../Context"
 import functions from "../structures/Functions"
 import emojiSelect from "../assets/icons/emoji-select.png"
@@ -12,7 +12,6 @@ interface Props {
 }
 
 const Comments: React.FunctionComponent<Props> = (props) => {
-    const {theme, setTheme} = useContext(ThemeContext)
     const {enableDrag, setEnableDrag} = useContext(EnableDragContext)
     const {session, setSession} = useContext(SessionContext)
     const {sessionFlag, setSessionFlag} = useContext(SessionFlagContext)

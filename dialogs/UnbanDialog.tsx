@@ -1,7 +1,7 @@
 import React, {useEffect, useContext, useState, useRef} from "react"
 import {useHistory} from "react-router-dom"
 import {HashLink as Link} from "react-router-hash-link"
-import {HideNavbarContext, HideSidebarContext, ThemeContext, EnableDragContext, UnbanNameContext, HideTitlebarContext, UpdateUserFlagContext,
+import {HideNavbarContext, HideSidebarContext, EnableDragContext, UnbanNameContext, HideTitlebarContext, UpdateUserFlagContext,
 SessionContext, SessionFlagContext} from "../Context"
 import functions from "../structures/Functions"
 import permissions from "../structures/Permissions"
@@ -9,7 +9,6 @@ import "./styles/dialog.less"
 import Draggable from "react-draggable"
 
 const UnbanDialog: React.FunctionComponent = (props) => {
-    const {theme, setTheme} = useContext(ThemeContext)
     const {hideNavbar, setHideNavbar} = useContext(HideNavbarContext)
     const {hideTitlebar, setHideTitlebar} = useContext(HideTitlebarContext)
     const {hideSidebar, setHideSidebar} = useContext(HideSidebarContext)

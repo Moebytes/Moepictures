@@ -1,7 +1,8 @@
 import React, {useContext, useEffect, useRef, useState} from "react"
 import {useHistory} from "react-router-dom"
-import {ThemeContext, SearchContext, SearchFlagContext, MobileContext, SessionContext, SiteHueContext, SiteLightnessContext,
-SiteSaturationContext, SoftDeleteMessageIDContext, HasNotificationContext, SessionFlagContext} from "../Context"
+import {SearchContext, SearchFlagContext, MobileContext, SessionContext, SoftDeleteMessageIDContext, 
+HasNotificationContext, SessionFlagContext} from "../Context"
+import {useThemeSelector} from "../store"
 import {HashLink as Link} from "react-router-hash-link"
 import functions from "../structures/Functions"
 import adminCrown from "../assets/icons/admin-crown.png"
@@ -27,10 +28,7 @@ interface Props {
 }
 
 const Message: React.FunctionComponent<Props> = (props) => {
-    const {theme, setTheme} = useContext(ThemeContext)
-    const {siteHue, setSiteHue} = useContext(SiteHueContext)
-    const {siteSaturation, setSiteSaturation} = useContext(SiteSaturationContext)
-    const {siteLightness, setSiteLightness} = useContext(SiteLightnessContext)
+    const {theme, siteHue, siteSaturation, siteLightness} = useThemeSelector()
     const [hover, setHover] = useState(false)
     const {search, setSearch} = useContext(SearchContext)
     const {searchFlag, setSearchFlag} = useContext(SearchFlagContext)

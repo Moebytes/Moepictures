@@ -1,8 +1,9 @@
 import React, {useEffect, useContext, useState, useRef} from "react"
 import {useHistory} from "react-router-dom"
 import {HashLink as Link} from "react-router-hash-link"
-import {HideNavbarContext, HideSidebarContext, ThemeContext, EnableDragContext, ShowUpscalingDialogContext, HideTitlebarContext,
-SessionContext, SessionFlagContext, PostFlagContext, SiteHueContext, SiteSaturationContext, SiteLightnessContext} from "../Context"
+import {HideNavbarContext, HideSidebarContext, EnableDragContext, ShowUpscalingDialogContext, HideTitlebarContext,
+SessionContext, SessionFlagContext, PostFlagContext} from "../Context"
+import {useThemeSelector} from "../store"
 import functions from "../structures/Functions"
 import Draggable from "react-draggable"
 import "./styles/dialog.less"
@@ -17,10 +18,7 @@ interface Props {
 }
 
 const UpscalePostDialog: React.FunctionComponent<Props> = (props) => {
-    const {theme, setTheme} = useContext(ThemeContext)
-    const {siteHue, setSiteHue} = useContext(SiteHueContext)
-    const {siteSaturation, setSiteSaturation} = useContext(SiteSaturationContext)
-    const {siteLightness, setSiteLightness} = useContext(SiteLightnessContext)
+    const {siteHue, siteSaturation, siteLightness} = useThemeSelector()
     const {hideNavbar, setHideNavbar} = useContext(HideNavbarContext)
     const {hideTitlebar, setHideTitlebar} = useContext(HideTitlebarContext)
     const {hideSidebar, setHideSidebar} = useContext(HideSidebarContext)

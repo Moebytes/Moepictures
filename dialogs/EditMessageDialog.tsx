@@ -1,8 +1,8 @@
 import React, {useEffect, useContext, useState, useRef, useReducer} from "react"
 import {useHistory} from "react-router-dom"
-import {HideNavbarContext, HideSidebarContext, ThemeContext, EnableDragContext, EditMessageIDContext, EditMessageFlagContext, MobileContext,
-EditMessageTitleContext, EditMessageContentContext, EditMessageR18Context, HideTitlebarContext, SessionContext, EmojisContext,
-SiteHueContext, SiteLightnessContext, SiteSaturationContext} from "../Context"
+import {HideNavbarContext, HideSidebarContext, EnableDragContext, EditMessageIDContext, EditMessageFlagContext, MobileContext,
+EditMessageTitleContext, EditMessageContentContext, EditMessageR18Context, HideTitlebarContext, SessionContext, EmojisContext} from "../Context"
+import {useThemeSelector} from "../store"
 import functions from "../structures/Functions"
 import "./styles/dialog.less"
 import Draggable from "react-draggable"
@@ -14,10 +14,7 @@ import radioButtonChecked from "../assets/icons/radiobutton-checked.png"
 
 const EditMessageDialog: React.FunctionComponent = (props) => {
     const [ignored, forceUpdate] = useReducer(x => x + 1, 0)
-    const {theme, setTheme} = useContext(ThemeContext)
-    const {siteHue, setSiteHue} = useContext(SiteHueContext)
-    const {siteSaturation, setSiteSaturation} = useContext(SiteSaturationContext)
-    const {siteLightness, setSiteLightness} = useContext(SiteLightnessContext)
+    const {siteHue, siteSaturation, siteLightness} = useThemeSelector()
     const {hideNavbar, setHideNavbar} = useContext(HideNavbarContext)
     const {hideTitlebar, setHideTitlebar} = useContext(HideTitlebarContext)
     const {hideSidebar, setHideSidebar} = useContext(HideSidebarContext)

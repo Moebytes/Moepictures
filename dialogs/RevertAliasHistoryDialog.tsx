@@ -1,7 +1,7 @@
 import React, {useEffect, useContext, useState, useRef} from "react"
 import {useHistory} from "react-router-dom"
 import {HashLink as Link} from "react-router-hash-link"
-import {HideNavbarContext, HideSidebarContext, ThemeContext, EnableDragContext,
+import {HideNavbarContext, HideSidebarContext, EnableDragContext,
 RevertAliasHistoryIDContext, RevertAliasHistoryFlagContext, HideTitlebarContext, SessionContext} from "../Context"
 import functions from "../structures/Functions"
 import permissions from "../structures/Permissions"
@@ -9,7 +9,6 @@ import Draggable from "react-draggable"
 import "./styles/dialog.less"
 
 const RevertAliasHistoryDialog: React.FunctionComponent = (props) => {
-    const {theme, setTheme} = useContext(ThemeContext)
     const {hideNavbar, setHideNavbar} = useContext(HideNavbarContext)
     const {hideTitlebar, setHideTitlebar} = useContext(HideTitlebarContext)
     const {hideSidebar, setHideSidebar} = useContext(HideSidebarContext)
