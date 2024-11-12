@@ -1,9 +1,7 @@
-import React, {useContext, useEffect, useRef, useState} from "react"
+import React, {useEffect} from "react"
 import {useHistory} from "react-router-dom"
-import {QuoteTextContext, SessionContext, DeleteCommentIDContext, DeleteCommentFlagContext,
-EditCommentIDContext, EditCommentFlagContext, EditCommentTextContext, ReportCommentIDContext, 
-SessionFlagContext, EmojisContext} from "../Context"
-import {useThemeSelector} from "../store"
+import {useThemeSelector, useSessionSelector, useLayoutSelector, useActiveActions, useSessionActions, 
+useFilterSelector, useCommentDialogSelector, useCommentDialogActions, useFlagActions, useCacheSelector} from "../store"
 import {HashLink as Link} from "react-router-hash-link"
 import functions from "../structures/Functions"
 import favicon from "../assets/icons/favicon.png"
@@ -33,16 +31,15 @@ interface Props {
 
 const Comment: React.FunctionComponent<Props> = (props) => {
     const {siteHue, siteSaturation, siteLightness} = useThemeSelector()
-    const {quoteText, setQuoteText} = useContext(QuoteTextContext)
-    const {session, setSession} = useContext(SessionContext)
-    const {sessionFlag, setSessionFlag} = useContext(SessionFlagContext)
-    const {deleteCommentID, setDeleteCommentID} = useContext(DeleteCommentIDContext)
-    const {deleteCommentFlag, setDeleteCommentFlag} = useContext(DeleteCommentFlagContext)
-    const {editCommentFlag, setEditCommentFlag} = useContext(EditCommentFlagContext)
-    const {editCommentID, setEditCommentID} = useContext(EditCommentIDContext)
-    const {editCommentText, setEditCommentText} = useContext(EditCommentTextContext)
-    const {reportCommentID, setReportCommentID} = useContext(ReportCommentIDContext)
-    const {emojis, setEmojis} = useContext(EmojisContext)
+    const {mobile} = useLayoutSelector()
+    const {session} = useSessionSelector()
+    const {setSessionFlag} = useSessionActions()
+    const {emojis} = useCacheSelector()
+    const {setQuoteText} = useActiveActions()
+    const {brightness, contrast, hue, saturation, lightness, blur, sharpen, pixelate} = useFilterSelector()
+    const {deleteCommentID, deleteCommentFlag, editCommentFlag, editCommentID, editCommentText} = useCommentDialogSelector()
+    const {setDeleteCommentID, setDeleteCommentFlag, setEditCommentFlag, setEditCommentID, setEditCommentText, setReportCommentID} = useCommentDialogActions()
+    const {setCommentID, setCommentJumpFlag} = useFlagActions()
     const history = useHistory()
 
     const getFilter = () => {

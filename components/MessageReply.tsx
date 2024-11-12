@@ -1,10 +1,7 @@
-import React, {useContext, useEffect, useRef, useState} from "react"
+import React, {useEffect} from "react"
 import {useHistory} from "react-router-dom"
-import {QuoteTextContext, SessionContext, SessionFlagContext, DeleteMsgReplyIDContext, DeleteMsgReplyFlagContext,
-EditMsgReplyIDContext, EditMsgReplyFlagContext, EditMsgReplyContentContext, EditMsgReplyR18Context, EnableDragContext, MobileContext, 
-EmojisContext} from "../Context"
-import {useThemeSelector} from "../store"
-import {HashLink as Link} from "react-router-hash-link"
+import {useThemeSelector, useLayoutSelector, useSessionSelector, useSessionActions, useMessageDialogActions, 
+useCacheSelector, useActiveActions, useMessageDialogSelector, useInteractionActions} from "../store"
 import functions from "../structures/Functions"
 import favicon from "../assets/icons/favicon.png"
 import quoteOptIcon from "../assets/icons/quote-opt.png"
@@ -30,19 +27,15 @@ interface Props {
 }
 
 const MessageReply: React.FunctionComponent<Props> = (props) => {
-    const {mobile, setMobile} = useContext(MobileContext)
     const {siteHue, siteSaturation, siteLightness} = useThemeSelector()
-    const {enableDrag, setEnableDrag} = useContext(EnableDragContext)
-    const {quoteText, setQuoteText} = useContext(QuoteTextContext)
-    const {session, setSession} = useContext(SessionContext)
-    const {sessionFlag, setSessionFlag} = useContext(SessionFlagContext)
-    const {deleteMsgReplyID, setDeleteMsgReplyID} = useContext(DeleteMsgReplyIDContext)
-    const {deleteMsgReplyFlag, setDeleteMsgReplyFlag} = useContext(DeleteMsgReplyFlagContext)
-    const {editMsgReplyFlag, setEditMsgReplyFlag} = useContext(EditMsgReplyFlagContext)
-    const {editMsgReplyID, setEditMsgReplyID} = useContext(EditMsgReplyIDContext)
-    const {editMsgReplyContent, setEditMsgReplyContent} = useContext(EditMsgReplyContentContext)
-    const {editMsgReplyR18, setEditMsgReplyR18} = useContext(EditMsgReplyR18Context)
-    const {emojis, setEmojis} = useContext(EmojisContext)
+    const {setEnableDrag} = useInteractionActions()
+    const {mobile} = useLayoutSelector()
+    const {session} = useSessionSelector()
+    const {setSessionFlag} = useSessionActions()
+    const {setQuoteText} = useActiveActions()
+    const {deleteMsgReplyID, deleteMsgReplyFlag, editMsgReplyFlag, editMsgReplyID, editMsgReplyContent, editMsgReplyR18} = useMessageDialogSelector()
+    const {setDeleteMsgReplyID, setDeleteMsgReplyFlag, setEditMsgReplyFlag, setEditMsgReplyID, setEditMsgReplyContent, setEditMsgReplyR18} = useMessageDialogActions()
+    const {emojis} = useCacheSelector()
     const history = useHistory()
     const reply = props.reply.reply
 

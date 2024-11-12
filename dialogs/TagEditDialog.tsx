@@ -1,8 +1,7 @@
-import React, {useEffect, useContext, useState, useRef} from "react"
+import React, {useEffect, useState, useRef} from "react"
 import {useHistory} from "react-router-dom"
-import {HashLink as Link} from "react-router-hash-link"
-import {HideNavbarContext, HideSidebarContext, EnableDragContext, TagEditIDContext, HideTitlebarContext, 
-SessionContext, SessionFlagContext, MobileContext, PostFlagContext, ActionBannerContext} from "../Context"
+import {useInteractionActions, useSessionSelector, useSessionActions, usePostDialogSelector, usePostDialogActions,
+useFlagActions, useLayoutSelector, useActiveActions} from "../store"
 import functions from "../structures/Functions"
 import Draggable from "react-draggable"
 import permissions from "../structures/Permissions"
@@ -24,16 +23,14 @@ import ContentEditable from "react-contenteditable"
 import "./styles/dialog.less"
 
 const TagEditDialog: React.FunctionComponent = (props) => {
-    const {hideNavbar, setHideNavbar} = useContext(HideNavbarContext)
-    const {hideTitlebar, setHideTitlebar} = useContext(HideTitlebarContext)
-    const {hideSidebar, setHideSidebar} = useContext(HideSidebarContext)
-    const {enableDrag, setEnableDrag} = useContext(EnableDragContext)
-    const {session, setSession} = useContext(SessionContext)
-    const {sessionFlag, setSessionFlag} = useContext(SessionFlagContext)
-    const {postFlag, setPostFlag} = useContext(PostFlagContext)
-    const {tagEditID, setTagEditID} = useContext(TagEditIDContext)
-    const {actionBanner, setActionBanner} = useContext(ActionBannerContext)
-    const {mobile, setMobile} = useContext(MobileContext)
+    const {setEnableDrag} = useInteractionActions()
+    const {session} = useSessionSelector()
+    const {setSessionFlag} = useSessionActions()
+    const {setPostFlag} = useFlagActions()
+    const {tagEditID} = usePostDialogSelector()
+    const {setTagEditID} = usePostDialogActions()
+    const {setActionBanner} = useActiveActions()
+    const {mobile} = useLayoutSelector()
     const [type, setType] = useState("image")
     const [restrict, setRestrict] = useState("safe")
     const [style, setStyle] = useState("2d")

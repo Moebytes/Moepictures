@@ -1,4 +1,4 @@
-import React, {useEffect, useContext, useState, useRef} from "react"
+import React, {useEffect, useState, useRef} from "react"
 import {useHistory} from "react-router-dom"
 import {HashLink as Link} from "react-router-hash-link"
 import TitleBar from "../components/TitleBar"
@@ -7,25 +7,23 @@ import SideBar from "../components/SideBar"
 import Footer from "../components/Footer"
 import show from "../assets/icons/show.png"
 import hide from "../assets/icons/hide.png"
-import {HideNavbarContext, HideSidebarContext, EnableDragContext, RelativeContext, SessionContext, MobileContext,
-HideTitlebarContext, HeaderTextContext, SessionFlagContext, SidebarTextContext, RedirectContext} from "../Context"
-import {useThemeSelector} from "../store"
+import {useThemeSelector, useInteractionActions, useSessionSelector, useSessionActions,
+useLayoutActions, useActiveActions, useFlagActions, useLayoutSelector, useActiveSelector,
+useFlagSelector} from "../store"
 import "./styles/sitepage.less"
 import functions from "../structures/Functions"
 
 const LoginPage: React.FunctionComponent = (props) => {
-    const {theme, siteHue, siteSaturation, siteLightness} = useThemeSelector()
-    const {hideNavbar, setHideNavbar} = useContext(HideNavbarContext)
-    const {hideTitlebar, setHideTitlebar} = useContext(HideTitlebarContext)
-    const {hideSidebar, setHideSidebar} = useContext(HideSidebarContext)
-    const {enableDrag, setEnableDrag} = useContext(EnableDragContext)
-    const {headerText, setHeaderText} = useContext(HeaderTextContext)
-    const {sidebarText, setSidebarText} = useContext(SidebarTextContext)
-    const {relative, setRelative} = useContext(RelativeContext)
-    const {redirect, setRedirect} = useContext(RedirectContext)
-    const {session, setSession} = useContext(SessionContext)
-    const {sessionFlag, setSessionFlag} = useContext(SessionFlagContext)
-    const {mobile, setMobile} = useContext(MobileContext)
+    const {theme, siteHue, siteLightness, siteSaturation} = useThemeSelector()
+    const {setHideNavbar, setHideTitlebar, setHideSidebar, setRelative} = useLayoutActions()
+    const {setEnableDrag} = useInteractionActions()
+    const {sidebarText} = useActiveSelector()
+    const {setHeaderText, setSidebarText} = useActiveActions()
+    const {redirect} = useFlagSelector()
+    const {setRedirect} = useFlagActions()
+    const {session} = useSessionSelector()
+    const {setSessionFlag} = useSessionActions()
+    const {mobile} = useLayoutSelector()
     const [showPassword, setShowPassword] = useState(false)
     const [username, setUsername] = useState("")
     const [password, setPassword] = useState("")

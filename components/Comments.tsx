@@ -1,7 +1,7 @@
-import React, {useContext, useEffect, useRef, useState} from "react"
+import React, {useEffect, useRef, useState} from "react"
 import {useHistory} from "react-router-dom"
-import {EnableDragContext, SessionContext, SessionFlagContext, EmojisContext,
-QuoteTextContext, CommentIDContext, CommentJumpFlagContext, MobileContext} from "../Context"
+import {useInteractionActions, useThemeSelector, useSessionSelector, useSessionActions, useActiveSelector, 
+useActiveActions, useLayoutSelector, useFlagSelector, useFlagActions, useCacheSelector} from "../store"
 import functions from "../structures/Functions"
 import emojiSelect from "../assets/icons/emoji-select.png"
 import Comment from "./Comment"
@@ -12,18 +12,19 @@ interface Props {
 }
 
 const Comments: React.FunctionComponent<Props> = (props) => {
-    const {enableDrag, setEnableDrag} = useContext(EnableDragContext)
-    const {session, setSession} = useContext(SessionContext)
-    const {sessionFlag, setSessionFlag} = useContext(SessionFlagContext)
-    const {quoteText, setQuoteText} = useContext(QuoteTextContext)
-    const {mobile, setMobile} = useContext(MobileContext)
+    const {setEnableDrag} = useInteractionActions()
+    const {session} = useSessionSelector()
+    const {setSessionFlag} = useSessionActions()
+    const {quoteText} = useActiveSelector()
+    const {setQuoteText} = useActiveActions()
+    const {mobile} = useLayoutSelector()
+    const {commentID, commentJumpFlag} = useFlagSelector()
+    const {setCommentID, setCommentJumpFlag} = useFlagActions()
+    const {emojis} = useCacheSelector()
     const [text, setText] = useState("")
     const [error, setError] = useState(false)
     const [comments, setComments] = useState([]) as any
     const [commentFlag, setCommentFlag] = useState(false)
-    const {commentID, setCommentID} = useContext(CommentIDContext)
-    const {commentJumpFlag, setCommentJumpFlag} = useContext(CommentJumpFlagContext)
-    const {emojis, setEmojis} = useContext(EmojisContext)
     const [showEmojiDropdown, setShowEmojiDropdown] = useState(false)
     const errorRef = useRef(null) as any
     const emojiRef = useRef(null) as any

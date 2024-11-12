@@ -1,7 +1,6 @@
-import React, {useContext, useEffect, useRef, useState} from "react"
+import React, {useEffect, useRef, useState} from "react"
 import {useHistory} from "react-router-dom"
-import {SessionContext, MobileContext, DeleteTranslationHistoryIDContext, RevertTranslationHistoryIDContext,
-DeleteTranslationHistoryFlagContext, RevertTranslationHistoryFlagContext, SessionFlagContext} from "../Context"
+import {useSessionSelector, useSessionActions, useTranslationDialogSelector, useTranslationDialogActions, useLayoutSelector} from "../store"
 import functions from "../structures/Functions"
 import translationHistoryRevert from "../assets/icons/revert.png"
 import translationHistoryDelete from "../assets/icons/delete.png"
@@ -25,13 +24,11 @@ interface Props {
 }
 
 const TranslationHistoryRow: React.FunctionComponent<Props> = (props) => {
-    const {mobile, setMobile} = useContext(MobileContext)
-    const {session, setSession} = useContext(SessionContext)
-    const {sessionFlag, setSessionFlag} = useContext(SessionFlagContext)
-    const {deleteTranslationHistoryID, setDeleteTranslationHistoryID} = useContext(DeleteTranslationHistoryIDContext)
-    const {revertTranslationHistoryID, setRevertTranslationHistoryID} = useContext(RevertTranslationHistoryIDContext)
-    const {deleteTranslationHistoryFlag, setDeleteTranslationHistoryFlag} = useContext(DeleteTranslationHistoryFlagContext)
-    const {revertTranslationHistoryFlag, setRevertTranslationHistoryFlag} = useContext(RevertTranslationHistoryFlagContext)
+    const {mobile} = useLayoutSelector()
+    const {session} = useSessionSelector()
+    const {setSessionFlag} = useSessionActions()
+    const {deleteTranslationHistoryID, revertTranslationHistoryID, deleteTranslationHistoryFlag, revertTranslationHistoryFlag} = useTranslationDialogSelector()
+    const {setDeleteTranslationHistoryID, setRevertTranslationHistoryID, setDeleteTranslationHistoryFlag, setRevertTranslationHistoryFlag} = useTranslationDialogActions()
     const history = useHistory()
     const [img, setImg] = useState("")
     const [userRole, setUserRole] = useState("")

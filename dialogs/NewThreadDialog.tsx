@@ -1,8 +1,7 @@
-import React, {useEffect, useContext, useState, useRef, useReducer} from "react"
+import React, {useEffect, useState, useRef, useReducer} from "react"
 import {useHistory} from "react-router-dom"
-import {HashLink as Link} from "react-router-hash-link"
-import {HideNavbarContext, HideSidebarContext, EnableDragContext, ShowNewThreadDialogContext, HideTitlebarContext, 
-SessionContext, SessionFlagContext, EmojisContext, MobileContext} from "../Context"
+import {useInteractionActions, useThreadDialogSelector, useThreadDialogActions, useSessionSelector, 
+useSessionActions, useLayoutSelector, useCacheSelector} from "../store"
 import {useThemeSelector} from "../store"
 import functions from "../structures/Functions"
 import Draggable from "react-draggable"
@@ -15,15 +14,13 @@ import "./styles/dialog.less"
 const NewThreadDialog: React.FunctionComponent = (props) => {
     const [ignored, forceUpdate] = useReducer(x => x + 1, 0)
     const {siteHue, siteSaturation, siteLightness} = useThemeSelector()
-    const {hideNavbar, setHideNavbar} = useContext(HideNavbarContext)
-    const {hideTitlebar, setHideTitlebar} = useContext(HideTitlebarContext)
-    const {hideSidebar, setHideSidebar} = useContext(HideSidebarContext)
-    const {enableDrag, setEnableDrag} = useContext(EnableDragContext)
-    const {showNewThreadDialog, setShowNewThreadDialog} = useContext(ShowNewThreadDialogContext)
-    const {session, setSession} = useContext(SessionContext)
-    const {sessionFlag, setSessionFlag} = useContext(SessionFlagContext)
-    const {mobile, setMobile} = useContext(MobileContext)
-    const {emojis, setEmojis} = useContext(EmojisContext)
+    const {setEnableDrag} = useInteractionActions()
+    const {showNewThreadDialog} = useThreadDialogSelector()
+    const {setShowNewThreadDialog} = useThreadDialogActions()
+    const {session} = useSessionSelector()
+    const {setSessionFlag} = useSessionActions()
+    const {mobile} = useLayoutSelector()
+    const {emojis} = useCacheSelector()
     const [showEmojiDropdown, setShowEmojiDropdown] = useState(false)
     const [threadTitle, setThreadTitle] = useState("")
     const [threadContent, setThreadContent] = useState("")

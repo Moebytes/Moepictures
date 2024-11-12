@@ -1,7 +1,6 @@
-import React, {useContext, useRef, useState} from "react"
+import React from "react"
 import {useHistory} from "react-router-dom"
-import {SearchContext, SearchFlagContext, SessionContext, RestrictTypeContext, MobileContext, PostsContext} from "../Context"
-import {HashLink as Link} from "react-router-hash-link"
+import {useSessionSelector, useLayoutSelector, useSearchSelector, useCacheActions} from "../store"
 import functions from "../structures/Functions"
 import Carousel from "./Carousel"
 import website from "../assets/icons/support.png"
@@ -17,13 +16,10 @@ interface Props {
 }
 
 const ArtistRow: React.FunctionComponent<Props> = (props) => {
-    const [hover, setHover] = useState(false)
-    const {search, setSearch} = useContext(SearchContext)
-    const {mobile, setMobile} = useContext(MobileContext)
-    const {searchFlag, setSearchFlag} = useContext(SearchFlagContext)
-    const {session, setSession} = useContext(SessionContext)
-    const {restrictType, setRestrictType} = useContext(RestrictTypeContext)
-    const {posts, setPosts} = useContext(PostsContext)
+    const {mobile} = useLayoutSelector()
+    const {session} = useSessionSelector()
+    const {restrictType} = useSearchSelector()
+    const {setPosts} = useCacheActions()
     const history = useHistory()
 
     const tagPage = (event: React.MouseEvent) => {

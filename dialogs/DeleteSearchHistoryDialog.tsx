@@ -1,23 +1,15 @@
-import React, {useEffect, useContext, useState, useRef} from "react"
+import React, {useEffect, useState, useRef} from "react"
 import {useHistory} from "react-router-dom"
-import {HashLink as Link} from "react-router-hash-link"
-import {HideNavbarContext, HideSidebarContext, EnableDragContext, DeleteSearchHistoryIDContext, 
-DeleteSearchHistoryFlagContext, HideTitlebarContext, SessionContext} from "../Context"
+import {useInteractionActions, useSearchDialogSelector, useSearchDialogActions} from "../store"
 import functions from "../structures/Functions"
 import Draggable from "react-draggable"
 import "./styles/dialog.less"
 import permissions from "../structures/Permissions"
 
 const DeleteSearchHistoryDialog: React.FunctionComponent = (props) => {
-    const {hideNavbar, setHideNavbar} = useContext(HideNavbarContext)
-    const {hideTitlebar, setHideTitlebar} = useContext(HideTitlebarContext)
-    const {hideSidebar, setHideSidebar} = useContext(HideSidebarContext)
-    const {enableDrag, setEnableDrag} = useContext(EnableDragContext)
-    const {deleteSearchHistoryID, setDeleteSearchHistoryID} = useContext(DeleteSearchHistoryIDContext)
-    const {deleteSearchHistoryFlag, setDeleteSearchHistoryFlag} = useContext(DeleteSearchHistoryFlagContext)
-    const {session, setSession} = useContext(SessionContext)
-    const [reason, setReason] = useState("")
-    const [submitted, setSubmitted] = useState(false)
+    const {setEnableDrag} = useInteractionActions()
+    const {deleteSearchHistoryID} = useSearchDialogSelector()
+    const {setDeleteSearchHistoryID, setDeleteSearchHistoryFlag} = useSearchDialogActions()
     const [error, setError] = useState(false)
     const errorRef = useRef<any>(null)
     const history = useHistory()

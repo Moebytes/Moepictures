@@ -1,7 +1,6 @@
-import React, {useContext, useEffect, useRef, useState} from "react"
+import React, {useEffect, useState} from "react"
 import {useHistory} from "react-router-dom"
-import {EnableDragContext, SessionContext, MobileContext, RestrictTypeContext, PostsContext} from "../Context"
-import {HashLink as Link} from "react-router-hash-link"
+import {useCacheActions, useLayoutSelector} from "../store"
 import functions from "../structures/Functions"
 import permissions from "../structures/Permissions"
 import GridImage from "./GridImage"
@@ -13,11 +12,8 @@ interface Props {
 }
 
 const Related: React.FunctionComponent<Props> = (props) => {
-    const {mobile, setMobile} = useContext(MobileContext)
-    const {enableDrag, setEnableDrag} = useContext(EnableDragContext)
-    const {session, setSession} = useContext(SessionContext)
-    const {restrictType, setRestrictType} = useContext(RestrictTypeContext)
-    const {posts, setPosts} = useContext(PostsContext)
+    const {mobile} = useLayoutSelector()
+    const {setPosts} = useCacheActions()
     const [related, setRelated] = useState([]) as any
     const history = useHistory()
 

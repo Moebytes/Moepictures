@@ -1,6 +1,6 @@
 import React, {useContext, useRef, useState} from "react"
 import {useHistory} from "react-router-dom"
-import {EnableDragContext, SessionContext, MobileContext, PostsContext} from "../Context"
+import {useLayoutSelector, useCacheActions} from "../store"
 import functions from "../structures/Functions"
 import Carousel from "./Carousel"
 import "./styles/related.less"
@@ -10,10 +10,8 @@ interface Props {
 }
 
 const ArtistWorks: React.FunctionComponent<Props> = (props) => {
-    const {mobile, setMobile} = useContext(MobileContext)
-    const {enableDrag, setEnableDrag} = useContext(EnableDragContext)
-    const {session, setSession} = useContext(SessionContext)
-    const {posts, setPosts} = useContext(PostsContext)
+    const {mobile} = useLayoutSelector()
+    const {setPosts} = useCacheActions()
     const history = useHistory()
 
     const getImages = () => {

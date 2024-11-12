@@ -1,32 +1,25 @@
-import React, {useEffect, useContext, useState, useRef} from "react"
+import React, {useEffect, useState, useRef} from "react"
 import {useHistory} from "react-router-dom"
-import {HashLink as Link} from "react-router-hash-link"
 import TitleBar from "../components/TitleBar"
 import NavBar from "../components/NavBar"
 import Footer from "../components/Footer"
 import SideBar from "../components/SideBar"
 import Disable2FADialog from "../dialogs/Disable2FADialog"
-import {HideNavbarContext, HideSidebarContext, EnableDragContext, RelativeContext, HideTitlebarContext, 
-HeaderTextContext, SidebarTextContext, SessionContext, SessionFlagContext, RedirectContext, MobileContext, Disable2FADialogContext,
-Disable2FAFlagContext} from "../Context"
+import {useInteractionActions, useSessionSelector, useSessionActions, useMiscDialogSelector, useMiscDialogActions,
+useLayoutActions, useActiveActions, useFlagActions, useLayoutSelector} from "../store"
 import "./styles/sitepage.less"
 import functions from "../structures/Functions"
 
 const $2FAEnablePage: React.FunctionComponent = (props) => {
-    const {hideNavbar, setHideNavbar} = useContext(HideNavbarContext)
-    const {hideTitlebar, setHideTitlebar} = useContext(HideTitlebarContext)
-    const {hideSidebar, setHideSidebar} = useContext(HideSidebarContext)
-    const {enableDrag, setEnableDrag} = useContext(EnableDragContext)
-    const [showPassword, setShowPassword] = useState(false)
-    const {relative, setRelative} = useContext(RelativeContext)
-    const {headerText, setHeaderText} = useContext(HeaderTextContext)
-    const {sidebarText, setSidebarText} = useContext(SidebarTextContext)
-    const {redirect, setRedirect} = useContext(RedirectContext)
-    const {session, setSession} = useContext(SessionContext)
-    const {sessionFlag, setSessionFlag} = useContext(SessionFlagContext)
-    const {mobile, setMobile} = useContext(MobileContext)
-    const {disable2FADialog, setDisable2FADialog} = useContext(Disable2FADialogContext)
-    const {disable2FAFlag, setDisable2FAFlag} = useContext(Disable2FAFlagContext)
+    const {setHideNavbar, setHideTitlebar, setHideSidebar, setRelative} = useLayoutActions()
+    const {setEnableDrag} = useInteractionActions()
+    const {setHeaderText, setSidebarText} = useActiveActions()
+    const {setRedirect} = useFlagActions()
+    const {session} = useSessionSelector()
+    const {setSessionFlag} = useSessionActions()
+    const {mobile} = useLayoutSelector()
+    const {disable2FAFlag} = useMiscDialogSelector()
+    const {setDisable2FAFlag, setDisable2FADialog} = useMiscDialogActions()
     const [qr, setQR] = useState(null) as any
     const [showValidation, setShowValidation] = useState(false)
     const [token, setToken] = useState("")

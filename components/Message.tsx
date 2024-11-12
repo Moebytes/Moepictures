@@ -1,9 +1,6 @@
-import React, {useContext, useEffect, useRef, useState} from "react"
+import React, {useEffect, useState} from "react"
 import {useHistory} from "react-router-dom"
-import {SearchContext, SearchFlagContext, MobileContext, SessionContext, SoftDeleteMessageIDContext, 
-HasNotificationContext, SessionFlagContext} from "../Context"
-import {useThemeSelector} from "../store"
-import {HashLink as Link} from "react-router-hash-link"
+import {useThemeSelector, useLayoutSelector, useSessionSelector, useSessionActions, useMessageDialogActions} from "../store"
 import functions from "../structures/Functions"
 import adminCrown from "../assets/icons/admin-crown.png"
 import modCrown from "../assets/icons/mod-crown.png"
@@ -29,14 +26,10 @@ interface Props {
 
 const Message: React.FunctionComponent<Props> = (props) => {
     const {theme, siteHue, siteSaturation, siteLightness} = useThemeSelector()
-    const [hover, setHover] = useState(false)
-    const {search, setSearch} = useContext(SearchContext)
-    const {searchFlag, setSearchFlag} = useContext(SearchFlagContext)
-    const {mobile, setMobile} = useContext(MobileContext)
-    const {session, setSession} = useContext(SessionContext)
-    const {sessionFlag, setSessionFlag} = useContext(SessionFlagContext)
-    const {softDeleteMessageID, setSoftDeleteMessageID} = useContext(SoftDeleteMessageIDContext)
-    const {hasNotification, setHasNotification} = useContext(HasNotificationContext)
+    const {mobile} = useLayoutSelector()
+    const {session} = useSessionSelector()
+    const {setSessionFlag, setHasNotification} = useSessionActions()
+    const {setSoftDeleteMessageID} = useMessageDialogActions()
     const [creatorData, setCreatorData] = useState({}) as any
     const [recipientData, setRecipientData] = useState({}) as any
     const [creatorDefaultIcon, setCreatorDefaultIcon] = useState(false)

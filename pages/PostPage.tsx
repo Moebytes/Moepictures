@@ -38,10 +38,10 @@ import Related from "../components/Related"
 import MobileInfo from "../components/MobileInfo"
 import historyIcon from "../assets/icons/history-state.png"
 import currentIcon from "../assets/icons/current.png"
-import {HideNavbarContext, HideSidebarContext, RelativeContext, DownloadFlagContext, DownloadIDsContext, HideTitlebarContext, MobileContext, ReloadPostFlagContext,
-PostsContext, TagsContext, HeaderTextContext, PostFlagContext, RedirectContext, SidebarTextContext, SessionContext, SessionFlagContext, EnableDragContext, TranslationModeContext,
-RevertPostHistoryIDContext, RevertPostHistoryFlagContext, RevertTranslationHistoryIDContext, RevertTranslationHistoryFlagContext, RestrictTypeContext, ActiveGroupContext, ActiveFavgroupContext} from "../Context"
-import {useThemeSelector} from "../store"
+import {useSessionSelector, useSessionActions, useLayoutActions, useActiveActions, useFlagActions, 
+useLayoutSelector, useSearchSelector, useFlagSelector, useCacheActions, usePostDialogActions, 
+useTranslationDialogSelector, useTranslationDialogActions, useActiveSelector, usePostDialogSelector,
+useCacheSelector, useInteractionActions} from "../store"
 import permissions from "../structures/Permissions"
 import "./styles/postpage.less"
 
@@ -52,32 +52,22 @@ interface Props {
 }
 
 const PostPage: React.FunctionComponent<Props> = (props) => {
-    const [ignored, forceUpdate] = useReducer(x => x + 1, 0)
-    const {hideNavbar, setHideNavbar} = useContext(HideNavbarContext)
-    const {hideTitlebar, setHideTitlebar} = useContext(HideTitlebarContext)
-    const {hideSidebar, setHideSidebar} = useContext(HideSidebarContext)
-    const {enableDrag, setEnableDrag} = useContext(EnableDragContext)
-    const {relative, setRelative} = useContext(RelativeContext)
-    const {downloadFlag, setDownloadFlag} = useContext(DownloadFlagContext)
-    const {downloadIDs, setDownloadIDs} = useContext(DownloadIDsContext)
-    const {translationMode, setTranslationMode} = useContext(TranslationModeContext)
-    const {posts, setPosts} = useContext(PostsContext)
-    const {tags, setTags} = useContext(TagsContext)
-    const {headerText, setHeaderText} = useContext(HeaderTextContext)
-    const {sidebarText, setSidebarText} = useContext(SidebarTextContext)
-    const {session, setSession} = useContext(SessionContext)
-    const {sessionFlag, setSessionFlag} = useContext(SessionFlagContext)
-    const {redirect, setRedirect} = useContext(RedirectContext)
-    const {mobile, setMobile} = useContext(MobileContext)
-    const {postFlag, setPostFlag} = useContext(PostFlagContext)
-    const {reloadPostFlag, setReloadPostFlag} = useContext(ReloadPostFlagContext)
-    const {revertPostHistoryID, setRevertPostHistoryID} = useContext(RevertPostHistoryIDContext)
-    const {revertPostHistoryFlag, setRevertPostHistoryFlag} = useContext(RevertPostHistoryFlagContext)
-    const {revertTranslationHistoryID, setRevertTranslationHistoryID} = useContext(RevertTranslationHistoryIDContext)
-    const {revertTranslationHistoryFlag, setRevertTranslationHistoryFlag} = useContext(RevertTranslationHistoryFlagContext)
-    const {restrictType, setRestrictType} = useContext(RestrictTypeContext)
-    const {activeGroup, setActiveGroup} = useContext(ActiveGroupContext)
-    const {activeFavgroup, setActiveFavgroup} = useContext(ActiveFavgroupContext)
+    const {setEnableDrag} = useInteractionActions()
+    const {setHideNavbar, setHideTitlebar, setHideSidebar, setRelative} = useLayoutActions()
+    const {activeFavgroup} = useActiveSelector()
+    const {setHeaderText, setSidebarText, setActiveGroup} = useActiveActions()
+    const {session} = useSessionSelector()
+    const {setSessionFlag} = useSessionActions()
+    const {mobile} = useLayoutSelector()
+    const {restrictType} = useSearchSelector()
+    const {posts} = useCacheSelector()
+    const {setPosts, setTags} = useCacheActions()
+    const {postFlag} = useFlagSelector()
+    const {setReloadPostFlag, setRedirect, setPostFlag, setDownloadIDs, setDownloadFlag} = useFlagActions()
+    const {revertPostHistoryID, revertPostHistoryFlag} = usePostDialogSelector()
+    const {setRevertPostHistoryID, setRevertPostHistoryFlag} = usePostDialogActions()
+    const {revertTranslationHistoryID, revertTranslationHistoryFlag} = useTranslationDialogSelector()
+    const {setRevertTranslationHistoryID, setRevertTranslationHistoryFlag} = useTranslationDialogActions()
     const [images, setImages] = useState([]) as any
     const [thirdPartyPosts, setThirdPartyPosts] = useState([]) as any
     const [artistPosts, setArtistPosts] = useState([]) as any

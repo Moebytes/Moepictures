@@ -1,21 +1,15 @@
-import React, {useEffect, useContext, useState, useRef} from "react"
+import React, {useEffect, useState, useRef} from "react"
 import {useHistory} from "react-router-dom"
-import {HashLink as Link} from "react-router-hash-link"
-import {HideNavbarContext, HideSidebarContext, EnableDragContext, SoftDeleteMessageIDContext, SoftDeleteMessageFlagContext, 
-HideTitlebarContext, SessionContext} from "../Context"
+import {useInteractionActions, useMessageDialogSelector, useMessageDialogActions} from "../store"
 import functions from "../structures/Functions"
 import "./styles/dialog.less"
 import Draggable from "react-draggable"
 import permissions from "../structures/Permissions"
 
 const SoftDeleteMessageDialog: React.FunctionComponent = (props) => {
-    const {hideNavbar, setHideNavbar} = useContext(HideNavbarContext)
-    const {hideTitlebar, setHideTitlebar} = useContext(HideTitlebarContext)
-    const {hideSidebar, setHideSidebar} = useContext(HideSidebarContext)
-    const {enableDrag, setEnableDrag} = useContext(EnableDragContext)
-    const {softDeleteMessageID, setSoftDeleteMessageID} = useContext(SoftDeleteMessageIDContext)
-    const {softDeleteMessageFlag, setSoftDeleteMessageFlag} = useContext(SoftDeleteMessageFlagContext)
-    const {session, setSession} = useContext(SessionContext)
+    const {setEnableDrag} = useInteractionActions()
+    const {softDeleteMessageID} = useMessageDialogSelector()
+    const {setSoftDeleteMessageID, setSoftDeleteMessageFlag} = useMessageDialogActions()
     const [error, setError] = useState(false)
     const errorRef = useRef<any>(null)
     const history = useHistory()

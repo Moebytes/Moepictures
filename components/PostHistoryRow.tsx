@@ -1,8 +1,6 @@
-import React, {useContext, useEffect, useRef, useState} from "react"
+import React, {useEffect, useRef, useState} from "react"
 import {useHistory} from "react-router-dom"
-import {SessionContext, SessionFlagContext, MobileContext, DeletePostHistoryIDContext, 
-RevertPostHistoryIDContext, DeletePostHistoryFlagContext, RevertPostHistoryFlagContext} from "../Context"
-import {HashLink as Link} from "react-router-hash-link"
+import {useSessionSelector, useSessionActions, usePostDialogSelector, usePostDialogActions, useLayoutSelector} from "../store"
 import functions from "../structures/Functions"
 import postHistoryRevert from "../assets/icons/revert.png"
 import postHistoryDelete from "../assets/icons/delete.png"
@@ -30,13 +28,11 @@ interface Props {
 }
 
 const PostHistoryRow: React.FunctionComponent<Props> = (props) => {
-    const {mobile, setMobile} = useContext(MobileContext)
-    const {session, setSession} = useContext(SessionContext)
-    const {sessionFlag, setSessionFlag} = useContext(SessionFlagContext)
-    const {deletePostHistoryID, setDeletePostHistoryID} = useContext(DeletePostHistoryIDContext)
-    const {revertPostHistoryID, setRevertPostHistoryID} = useContext(RevertPostHistoryIDContext)
-    const {deletePostHistoryFlag, setDeletePostHistoryFlag} = useContext(DeletePostHistoryFlagContext)
-    const {revertPostHistoryFlag, setRevertPostHistoryFlag} = useContext(RevertPostHistoryFlagContext)
+    const {mobile} = useLayoutSelector()
+    const {session} = useSessionSelector()
+    const {setSessionFlag} = useSessionActions()
+    const {deletePostHistoryID, revertPostHistoryID, deletePostHistoryFlag, revertPostHistoryFlag} = usePostDialogSelector()
+    const {setDeletePostHistoryID, setRevertPostHistoryID, setDeletePostHistoryFlag, setRevertPostHistoryFlag} = usePostDialogActions()
     const history = useHistory()
     const [img, setImg] = useState("")
     const [currentImg, setCurrentImg] = useState("")

@@ -1,9 +1,7 @@
-import React, {useEffect, useContext, useState, useRef} from "react"
+import React, {useEffect, useState, useRef} from "react"
 import {useHistory} from "react-router-dom"
-import {HashLink as Link} from "react-router-hash-link"
-import {HideNavbarContext, HideSidebarContext, EnableDragContext, EditGroupObjContext, HideTitlebarContext, 
-SessionContext, SessionFlagContext, GroupFlagContext} from "../Context"
-import {useThemeSelector} from "../store"
+import {useThemeSelector, useInteractionActions, useGroupDialogSelector, useGroupDialogActions, useSessionSelector,
+useSessionActions, useFlagActions} from "../store"
 import functions from "../structures/Functions"
 import permissions from "../structures/Permissions"
 import Draggable from "react-draggable"
@@ -11,11 +9,12 @@ import "./styles/dialog.less"
 
 const EditGroupDialog: React.FunctionComponent = (props) => {
     const {siteHue, siteSaturation, siteLightness} = useThemeSelector()
-    const {enableDrag, setEnableDrag} = useContext(EnableDragContext)
-    const {editGroupObj, setEditGroupObj} = useContext(EditGroupObjContext)
-    const {session, setSession} = useContext(SessionContext)
-    const {sessionFlag, setSessionFlag} = useContext(SessionFlagContext)
-    const {groupFlag, setGroupFlag} = useContext(GroupFlagContext)
+    const {setEnableDrag} = useInteractionActions()
+    const {editGroupObj} = useGroupDialogSelector()
+    const {setEditGroupObj} = useGroupDialogActions()
+    const {session} = useSessionSelector()
+    const {setSessionFlag} = useSessionActions()
+    const {setGroupFlag} = useFlagActions()
     const [name, setName] = useState("")
     const [description, setDescription] = useState("")
     const [reason, setReason] = useState("")

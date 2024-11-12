@@ -1,23 +1,15 @@
-import React, {useEffect, useContext, useState, useRef} from "react"
+import React, {useEffect, useState, useRef} from "react"
 import {useHistory} from "react-router-dom"
-import {HashLink as Link} from "react-router-hash-link"
-import {HideNavbarContext, HideSidebarContext, EnableDragContext, DeleteGroupHistoryIDContext, 
-DeleteGroupHistoryFlagContext, HideTitlebarContext, SessionContext} from "../Context"
+import {useInteractionActions, useGroupDialogSelector, useGroupDialogActions} from "../store"
 import functions from "../structures/Functions"
 import Draggable from "react-draggable"
 import "./styles/dialog.less"
 import permissions from "../structures/Permissions"
 
 const DeleteGroupHistoryDialog: React.FunctionComponent = (props) => {
-    const {hideNavbar, setHideNavbar} = useContext(HideNavbarContext)
-    const {hideTitlebar, setHideTitlebar} = useContext(HideTitlebarContext)
-    const {hideSidebar, setHideSidebar} = useContext(HideSidebarContext)
-    const {enableDrag, setEnableDrag} = useContext(EnableDragContext)
-    const {deleteGroupHistoryID, setDeleteGroupHistoryID} = useContext(DeleteGroupHistoryIDContext)
-    const {deleteGroupHistoryFlag, setDeleteGroupHistoryFlag} = useContext(DeleteGroupHistoryFlagContext)
-    const {session, setSession} = useContext(SessionContext)
-    const [reason, setReason] = useState("")
-    const [submitted, setSubmitted] = useState(false)
+    const {setEnableDrag} = useInteractionActions()
+    const {deleteGroupHistoryID} = useGroupDialogSelector()
+    const {setDeleteGroupHistoryID, setDeleteGroupHistoryFlag} = useGroupDialogActions()
     const [error, setError] = useState(false)
     const errorRef = useRef<any>(null)
     const history = useHistory()

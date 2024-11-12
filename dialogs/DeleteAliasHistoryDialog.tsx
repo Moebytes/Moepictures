@@ -1,21 +1,17 @@
-import React, {useEffect, useContext, useState, useRef} from "react"
+import React, {useEffect, useState, useRef} from "react"
 import {useHistory} from "react-router-dom"
-import {HashLink as Link} from "react-router-hash-link"
-import {HideNavbarContext, HideSidebarContext, EnableDragContext, DeleteAliasHistoryIDContext, 
-DeleteAliasHistoryFlagContext, HideTitlebarContext, SessionContext} from "../Context"
+import {useInteractionActions, useSessionSelector, 
+useTagDialogSelector, useTagDialogActions} from "../store"
 import functions from "../structures/Functions"
 import permissions from "../structures/Permissions"
 import Draggable from "react-draggable"
 import "./styles/dialog.less"
 
 const DeleteAliasHistoryDialog: React.FunctionComponent = (props) => {
-    const {hideNavbar, setHideNavbar} = useContext(HideNavbarContext)
-    const {hideTitlebar, setHideTitlebar} = useContext(HideTitlebarContext)
-    const {hideSidebar, setHideSidebar} = useContext(HideSidebarContext)
-    const {enableDrag, setEnableDrag} = useContext(EnableDragContext)
-    const {deleteAliasHistoryID, setDeleteAliasHistoryID} = useContext(DeleteAliasHistoryIDContext)
-    const {deleteAliasHistoryFlag, setDeleteAliasHistoryFlag} = useContext(DeleteAliasHistoryFlagContext)
-    const {session, setSession} = useContext(SessionContext)
+    const {setEnableDrag} = useInteractionActions()
+    const {deleteAliasHistoryID} = useTagDialogSelector()
+    const {setDeleteAliasHistoryID, setDeleteAliasHistoryFlag} = useTagDialogActions()
+    const {session} = useSessionSelector()
     const [error, setError] = useState(false)
     const errorRef = useRef<any>(null)
     const history = useHistory()

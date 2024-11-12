@@ -1,11 +1,7 @@
-import React, {useContext, useEffect, useRef, useState} from "react"
+import React, {useEffect, useRef, useState} from "react"
 import {useHistory} from "react-router-dom"
-import {QuoteTextContext, SessionContext, DeleteCommentIDContext, DeleteCommentFlagContext, MobileContext,
-EditCommentFlagContext, EditCommentIDContext, EditCommentTextContext, ReportCommentIDContext, BrightnessContext, ContrastContext, 
-HueContext, SaturationContext, LightnessContext, BlurContext, SharpenContext, PixelateContext, CommentIDContext, CommentJumpFlagContext, 
-SessionFlagContext, EmojisContext} from "../Context"
-import {useThemeSelector} from "../store"
-import {HashLink as Link} from "react-router-hash-link"
+import {useThemeSelector, useSessionSelector, useLayoutSelector, useActiveActions, useSessionActions, 
+useFilterSelector, useCommentDialogSelector, useCommentDialogActions, useFlagActions, useCacheSelector} from "../store"
 import functions from "../structures/Functions"
 import permissions from "../structures/Permissions"
 import favicon from "../assets/icons/favicon.png"
@@ -33,28 +29,15 @@ interface Props {
 
 const CommentRow: React.FunctionComponent<Props> = (props) => {
     const {siteHue, siteSaturation, siteLightness} = useThemeSelector()
-    const {quoteText, setQuoteText} = useContext(QuoteTextContext)
-    const {mobile, setMobile} = useContext(MobileContext)
-    const {session, setSession} = useContext(SessionContext)
-    const {sessionFlag, setSessionFlag} = useContext(SessionFlagContext)
-    const {brightness, setBrightness} = useContext(BrightnessContext)
-    const {contrast, setContrast} = useContext(ContrastContext)
-    const {hue, setHue} = useContext(HueContext)
-    const {saturation, setSaturation} = useContext(SaturationContext)
-    const {lightness, setLightness} = useContext(LightnessContext)
-    const {blur, setBlur} = useContext(BlurContext)
-    const {sharpen, setSharpen} = useContext(SharpenContext)
-    const {pixelate, setPixelate} = useContext(PixelateContext)
-    const {deleteCommentID, setDeleteCommentID} = useContext(DeleteCommentIDContext)
-    const {deleteCommentFlag, setDeleteCommentFlag} = useContext(DeleteCommentFlagContext)
-    const {editCommentFlag, setEditCommentFlag} = useContext(EditCommentFlagContext)
-    const {editCommentID, setEditCommentID} = useContext(EditCommentIDContext)
-    const {editCommentText, setEditCommentText} = useContext(EditCommentTextContext)
-    const {reportCommentID, setReportCommentID} = useContext(ReportCommentIDContext)
-    const {commentID, setCommentID} = useContext(CommentIDContext)
-    const {commentJumpFlag, setCommentJumpFlag} = useContext(CommentJumpFlagContext)
-    const {emojis, setEmojis} = useContext(EmojisContext)
-    const [hover, setHover] = useState(false)
+    const {mobile} = useLayoutSelector()
+    const {session} = useSessionSelector()
+    const {setSessionFlag} = useSessionActions()
+    const {emojis} = useCacheSelector()
+    const {setQuoteText} = useActiveActions()
+    const {brightness, contrast, hue, saturation, lightness, blur, sharpen, pixelate} = useFilterSelector()
+    const {deleteCommentID, deleteCommentFlag, editCommentFlag, editCommentID, editCommentText} = useCommentDialogSelector()
+    const {setDeleteCommentID, setDeleteCommentFlag, setEditCommentFlag, setEditCommentID, setEditCommentText, setReportCommentID} = useCommentDialogActions()
+    const {setCommentID, setCommentJumpFlag} = useFlagActions()
     const history = useHistory()
     const initialImg = functions.getThumbnailLink(props.comment?.post.images[0].type, props.comment?.postID, props.comment?.post.images[0].order, props.comment?.post.images[0].filename, "tiny")
     const [img, setImg] = useState(initialImg)

@@ -1,32 +1,26 @@
-import React, {useEffect, useContext, useState, useRef} from "react"
+import React, {useEffect, useState, useRef} from "react"
 import {useHistory} from "react-router-dom"
-import {HashLink as Link} from "react-router-hash-link"
 import TitleBar from "../components/TitleBar"
 import Footer from "../components/Footer"
 import NavBar from "../components/NavBar"
 import SideBar from "../components/SideBar"
 import functions from "../structures/Functions"
 import permissions from "../structures/Permissions"
-import {HideNavbarContext, HideSidebarContext, EnableDragContext, RedirectContext, MobileContext,
-RelativeContext, HideTitlebarContext, HeaderTextContext, SidebarTextContext, SessionContext, SessionFlagContext, ActionBannerContext} from "../Context"
-import {useThemeSelector} from "../store"
+import {useThemeSelector, useInteractionActions, useSessionSelector, useSessionActions,
+useLayoutActions, useActiveActions, useFlagActions, useLayoutSelector} from "../store"
 import "./styles/sitepage.less"
 
 const IPBlacklistPage: React.FunctionComponent = (props) => {
-    const {siteHue, siteSaturation, siteLightness} = useThemeSelector()
-    const {hideNavbar, setHideNavbar} = useContext(HideNavbarContext)
-    const {hideTitlebar, setHideTitlebar} = useContext(HideTitlebarContext)
-    const {hideSidebar, setHideSidebar} = useContext(HideSidebarContext)
-    const {enableDrag, setEnableDrag} = useContext(EnableDragContext)
-    const {relative, setRelative} = useContext(RelativeContext)
-    const {headerText, setHeaderText} = useContext(HeaderTextContext)
-    const {sidebarText, setSidebarText} = useContext(SidebarTextContext)
-    const {mobile, setMobile} = useContext(MobileContext)
-    const {session, setSession} = useContext(SessionContext)
-    const {sessionFlag, setSessionFlag} = useContext(SessionFlagContext)
-    const {redirect, setRedirect} = useContext(RedirectContext)
+    const {theme, siteHue, siteLightness, siteSaturation} = useThemeSelector()
+    const {setHideNavbar, setHideTitlebar, setHideSidebar, setRelative} = useLayoutActions()
+    const {setEnableDrag} = useInteractionActions()
+    const {setHeaderText, setSidebarText} = useActiveActions()
+    const {setRedirect} = useFlagActions()
+    const {session} = useSessionSelector()
+    const {setSessionFlag} = useSessionActions()
+    const {mobile} = useLayoutSelector()
     const [submitted, setSubmitted] = useState(false)
-    const {actionBanner, setActionBanner} = useContext(ActionBannerContext)
+    const {setActionBanner} = useActiveActions()
     const [ip, setIP] = useState("")
     const [reason, setReason] = useState("")
     const [error, setError] = useState(false)

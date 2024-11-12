@@ -1,12 +1,12 @@
-import React, {useEffect, useContext, useReducer, useState} from "react"
+import React, {useEffect, useReducer, useState} from "react"
 import {useHistory, useLocation} from "react-router-dom"
 import TitleBar from "../components/TitleBar"
 import NavBar from "../components/NavBar"
 import SideBar from "../components/SideBar"
 import Footer from "../components/Footer"
-import {EnableDragContext, HideNavbarContext, HideSidebarContext, SquareContext, RelativeContext, HideTitlebarContext, HeaderTextContext, SidebarTextContext, 
-MobileContext, SessionContext, ModStateContext, ScrollContext, ModPageContext} from "../Context"
-import {useThemeSelector} from "../store"
+import {useInteractionActions, useSessionSelector, useSessionActions, useLayoutActions, 
+useActiveActions, useFlagActions, useLayoutSelector, useSearchSelector, useActiveSelector, 
+usePageSelector, useSearchActions, usePageActions, useThemeSelector} from "../store"
 import permissions from "../structures/Permissions"
 import ModPosts from "../components/ModPosts"
 import ModPostEdits from "../components/ModPostEdits"
@@ -48,22 +48,20 @@ import "./styles/modqueuepage.less"
 let replace = false 
 
 const ModQueuePage: React.FunctionComponent = (props) => {
-    const [ignored, forceUpdate] = useReducer(x => x + 1, 0)
     const {siteHue, siteSaturation, siteLightness} = useThemeSelector()
-    const {enableDrag, setEnableDrag} = useContext(EnableDragContext)
-    const {hideNavbar, setHideNavbar} = useContext(HideNavbarContext)
-    const {hideTitlebar, setHideTitlebar} = useContext(HideTitlebarContext)
-    const {hideSidebar, setHideSidebar} = useContext(HideSidebarContext)
-    const {headerText, setHeaderText} = useContext(HeaderTextContext)
-    const {sidebarText, setSidebarText} = useContext(SidebarTextContext)
-    const {scroll, setScroll} = useContext(ScrollContext)
-    const {square, setSquare} = useContext(SquareContext)
-    const {relative, setRelative} = useContext(RelativeContext)
-    const {session, setSession} = useContext(SessionContext)
-    const {mobile, setMobile} = useContext(MobileContext)
-    const {modState, setModState} = useContext(ModStateContext)
+    const {setHideNavbar, setHideTitlebar, setHideSidebar, setRelative} = useLayoutActions()
+    const {setEnableDrag} = useInteractionActions()
+    const {modState} = useActiveSelector()
+    const {setHeaderText, setSidebarText, setModState} = useActiveActions()
+    const {setRedirect} = useFlagActions()
+    const {session} = useSessionSelector()
+    const {setSessionFlag} = useSessionActions()
+    const {mobile} = useLayoutSelector()
+    const {scroll} = useSearchSelector()
+    const {setScroll} = useSearchActions()
+    const {modPage} = usePageSelector()
+    const {setModPage} = usePageActions()
     const [queryPage, setQueryPage] = useState(1)
-    const {modPage, setModPage} = useContext(ModPageContext)
     const history = useHistory()
     const location = useLocation()
 
@@ -104,13 +102,13 @@ const ModQueuePage: React.FunctionComponent = (props) => {
 
     useEffect(() => {
         localStorage.setItem("modState", modState)
-        localStorage.setItem("modPage", modPage)
+        localStorage.setItem("modPage", String(modPage))
     }, [modState, modPage])
 
     useEffect(() => {
         const searchParams = new URLSearchParams(window.location.search)
         if (modState) searchParams.set("type", modState)
-        if (!scroll) searchParams.set("page", modPage)
+        if (!scroll) searchParams.set("page", String(modPage))
         if (replace) {
             if (!scroll) history.replace(`${location.pathname}?${searchParams.toString()}`)
             replace = false

@@ -1,8 +1,7 @@
-import React, {useContext, useEffect, useRef, useState} from "react"
-import {EnableDragContext, BrightnessContext, ContrastContext, HueContext, SaturationContext, LightnessContext,
-BlurContext, SharpenContext, PixelateContext, SessionContext, MobileContext, TranslationModeContext, SessionFlagContext, FormatContext, PostsContext, FavGroupIDContext} from "../Context"
-import {useThemeSelector} from "../store"
-import {HashLink as Link} from "react-router-hash-link"
+import React, {useEffect, useRef, useState} from "react"
+import {useFilterSelector, useInteractionActions, useLayoutSelector,  
+useThemeSelector, useSearchSelector, useSessionSelector, useSearchActions, 
+useSessionActions, useCacheSelector, useGroupDialogActions, useFilterActions} from "../store"
 import functions from "../structures/Functions"
 import Slider from "react-slider"
 import star from "../assets/icons/star.png"
@@ -37,28 +36,22 @@ interface Props {
 }
 
 const PostImageOptions: React.FunctionComponent<Props> = (props) => {
-    const {siteHue, siteSaturation, siteLightness} = useThemeSelector()
-    const {enableDrag, setEnableDrag} = useContext(EnableDragContext)
-    const {brightness, setBrightness} = useContext(BrightnessContext)
-    const {contrast, setContrast} = useContext(ContrastContext)
-    const {hue, setHue} = useContext(HueContext)
-    const {saturation, setSaturation} = useContext(SaturationContext)
-    const {lightness, setLightness} = useContext(LightnessContext)
-    const {pixelate, setPixelate} = useContext(PixelateContext)
-    const {blur, setBlur} = useContext(BlurContext)
-    const {sharpen, setSharpen} = useContext(SharpenContext)
-    const {translationMode, setTranslationMode} = useContext(TranslationModeContext)
-    const {session, setSession} = useContext(SessionContext)
-    const {sessionFlag, setSessionFlag} = useContext(SessionFlagContext)
-    const {mobile, setMobile} = useContext(MobileContext)
+    const {theme, siteHue, siteSaturation, siteLightness} = useThemeSelector()
+    const {setEnableDrag} = useInteractionActions()
+    const {mobile} = useLayoutSelector()
+    const {session} = useSessionSelector()
+    const {setSessionFlag} = useSessionActions()
+    const {brightness, contrast, hue, saturation, lightness, blur, sharpen, pixelate} = useFilterSelector()
+    const {setBrightness, setContrast, setHue, setSaturation, setLightness, setBlur, setSharpen, setPixelate} = useFilterActions()
+    const {translationMode, format} = useSearchSelector()
+    const {setTranslationMode, setTranslationDrawingEnabled, setFormat} = useSearchActions()
+    const {posts} = useCacheSelector()
+    const {setFavGroupID} = useGroupDialogActions()
     const [favorited, setFavorited] = useState(false)
     const [favGrouped, setFavGrouped] = useState(false)
     const [showFilterDropdown, setShowFilterDropdown] = useState(false)
     const [showFormatDropdown, setShowFormatDropdown] = useState(false)
     const [downloadText, setDownloadText] = useState("")
-    const {format, setFormat} = useContext(FormatContext)
-    const {posts, setPosts} = useContext(PostsContext)
-    const {favGroupID, setFavGroupID} = useContext(FavGroupIDContext)
     const filterRef = useRef(null) as any
     const formatRef = useRef(null) as any
 
@@ -122,14 +115,14 @@ const PostImageOptions: React.FunctionComponent<Props> = (props) => {
     }, [props.post, session])
 
     useEffect(() => {
-        localStorage.setItem("brightness", brightness)
-        localStorage.setItem("contrast", contrast)
-        localStorage.setItem("hue", hue)
-        localStorage.setItem("saturation", saturation)
-        localStorage.setItem("lightness", lightness)
-        localStorage.setItem("blur", blur)
-        localStorage.setItem("sharpen", sharpen)
-        localStorage.setItem("pixelate", pixelate)
+        localStorage.setItem("brightness", String(brightness))
+        localStorage.setItem("contrast", String(contrast))
+        localStorage.setItem("hue", String(hue))
+        localStorage.setItem("saturation", String(saturation))
+        localStorage.setItem("lightness", String(lightness))
+        localStorage.setItem("blur", String(blur))
+        localStorage.setItem("sharpen", String(sharpen))
+        localStorage.setItem("pixelate", String(pixelate))
     }, [brightness, contrast, hue, saturation, lightness, blur, sharpen, pixelate])
 
     const getStar = () => {

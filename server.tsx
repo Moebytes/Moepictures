@@ -52,9 +52,6 @@ app.disable("x-powered-by")
 
 declare module "express-session" {
   interface SessionData {
-      visitorId: string
-      accessToken: string
-      refreshToken: string
       username: string
       email: string
       joinDate: string

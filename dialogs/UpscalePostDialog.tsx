@@ -1,8 +1,7 @@
-import React, {useEffect, useContext, useState, useRef} from "react"
+import React, {useEffect, useState, useRef} from "react"
 import {useHistory} from "react-router-dom"
-import {HashLink as Link} from "react-router-hash-link"
-import {HideNavbarContext, HideSidebarContext, EnableDragContext, ShowUpscalingDialogContext, HideTitlebarContext,
-SessionContext, SessionFlagContext, PostFlagContext} from "../Context"
+import {useInteractionActions, useSessionSelector, useSessionActions, 
+usePostDialogSelector, usePostDialogActions, useFlagActions} from "../store"
 import {useThemeSelector} from "../store"
 import functions from "../structures/Functions"
 import Draggable from "react-draggable"
@@ -19,18 +18,15 @@ interface Props {
 
 const UpscalePostDialog: React.FunctionComponent<Props> = (props) => {
     const {siteHue, siteSaturation, siteLightness} = useThemeSelector()
-    const {hideNavbar, setHideNavbar} = useContext(HideNavbarContext)
-    const {hideTitlebar, setHideTitlebar} = useContext(HideTitlebarContext)
-    const {hideSidebar, setHideSidebar} = useContext(HideSidebarContext)
-    const {enableDrag, setEnableDrag} = useContext(EnableDragContext)
-    const {showUpscalingDialog, setShowUpscalingDialog} = useContext(ShowUpscalingDialogContext)
-    const {postFlag, setPostFlag} = useContext(PostFlagContext)
-    const {session, setSession} = useContext(SessionContext)
-    const {sessionFlag, setSessionFlag} = useContext(SessionFlagContext)
+    const {setEnableDrag} = useInteractionActions()
+    const {showUpscalingDialog} = usePostDialogSelector()
+    const {setShowUpscalingDialog} = usePostDialogActions()
+    const {setPostFlag} = useFlagActions()
+    const {session} = useSessionSelector()
+    const {setSessionFlag} = useSessionActions()
     const [upscaler, setUpscaler] = useState("real-cugan")
     const [scaleFactor, setScaleFactor] = useState("4")
     const [compressJPG, setCompressJPG] = useState(true)
-    const [error, setError] = useState(false)
     const errorRef = useRef<any>(null)
     const history = useHistory()
 

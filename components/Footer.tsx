@@ -1,8 +1,5 @@
-import React, {useContext, useState} from "react"
-import {HideSidebarContext, HideNavbarContext, HideTitlebarContext, SearchContext, SearchFlagContext, ImageTypeContext, 
-RestrictTypeContext, StyleTypeContext, SortTypeContext, MobileContext} from "../Context"
-import {useThemeSelector} from "../store"
-import {HashLink as Link} from "react-router-hash-link"
+import React from "react"
+import {useThemeSelector, useLayoutSelector, useSearchActions} from "../store"
 import backToTop from "../assets/icons/backtotop.png"
 import "./styles/footer.less"
 
@@ -11,17 +8,9 @@ interface Props {
 }
 
 const Footer: React.FunctionComponent<Props> = (props) => {
-    const {mobile, setMobile} = useContext(MobileContext)
     const {siteHue, siteSaturation, siteLightness} = useThemeSelector()
-    const {hideSidebar, setHideSidebar} = useContext(HideSidebarContext)
-    const {hideNavbar, setHideNavbar} = useContext(HideNavbarContext)
-    const {hideTitlebar, setHideTitlebar} = useContext(HideTitlebarContext)
-    const {search, setSearch} = useContext(SearchContext)
-    const {searchFlag, setSearchFlag} = useContext(SearchFlagContext)
-    const {imageType, setImageType} = useContext(ImageTypeContext)
-    const {restrictType, setRestrictType} = useContext(RestrictTypeContext)
-    const {styleType, setStyleType} = useContext(StyleTypeContext)
-    const {sortType, setSortType} = useContext(SortTypeContext)
+    const {mobile} = useLayoutSelector()
+    const {setSearch, setSearchFlag, setImageType, setRestrictType, setStyleType, setSortType} = useSearchActions()
 
     const getFilter = () => {
         return `hue-rotate(${siteHue - 180}deg) saturate(${siteSaturation}%) brightness(${siteLightness + 70}%)`

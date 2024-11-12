@@ -1162,7 +1162,7 @@ export default class Functions {
         return `history/tag/${tag}/${key}/${filename}`
     }
 
-    public static getTagLink = (folder: string, filename: string, hash: string) => {
+    public static getTagLink = (folder: string, filename: string, hash: string | null) => {
         if (!filename) return ""
         if (folder === "attribute") folder = "tag"
         if (!folder || filename.includes("history/")) return `${window.location.protocol}//${window.location.host}/${filename}`

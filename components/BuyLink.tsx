@@ -1,10 +1,8 @@
-import React, {useContext, useEffect, useRef, useState} from "react"
-import {EnableDragContext, SessionContext, SessionFlagContext} from "../Context"
-import {HashLink as Link} from "react-router-hash-link"
+import React from "react"
+import {useInteractionActions, useThemeSelector} from "../store"
 import jsxFunctions from "../structures/JSXFunctions"
 import buyLinkIcon from "../assets/icons/buy-link.png"
 import functions from "../structures/Functions"
-import {useThemeSelector} from "../store"
 import "./styles/commentary.less"
 
 interface Props {
@@ -13,9 +11,7 @@ interface Props {
 
 const BuyLink: React.FunctionComponent<Props> = (props) => {
     const {siteHue, siteSaturation, siteLightness} = useThemeSelector()
-    const {enableDrag, setEnableDrag} = useContext(EnableDragContext)
-    const {session, setSession} = useContext(SessionContext)
-    const {sessionFlag, setSessionFlag} = useContext(SessionFlagContext)
+    const {setEnableDrag} = useInteractionActions()
 
     const getFilter = () => {
         return `hue-rotate(${siteHue - 180}deg) saturate(${siteSaturation}%) brightness(${siteLightness + 70}%)`

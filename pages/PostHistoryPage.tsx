@@ -1,4 +1,4 @@
-import React, {useEffect, useContext, useState, useRef, useReducer} from "react"
+import React, {useEffect, useState} from "react"
 import TitleBar from "../components/TitleBar"
 import NavBar from "../components/NavBar"
 import SideBar from "../components/SideBar"
@@ -7,9 +7,8 @@ import functions from "../structures/Functions"
 import PostHistoryRow from "../components/PostHistoryRow"
 import RevertPostHistoryDialog from "../dialogs/RevertPostHistoryDialog"
 import DeletePostHistoryDialog from "../dialogs/DeletePostHistoryDialog"
-import {EnableDragContext, HideNavbarContext, HideSidebarContext, MobileContext, SessionContext,
-RelativeContext, HideTitlebarContext, ActiveDropdownContext, HeaderTextContext, SidebarTextContext, SessionFlagContext} from "../Context"
-import {useThemeSelector} from "../store"
+import {useInteractionActions, useSessionSelector, useSessionActions, useLayoutActions, 
+useActiveActions, useFlagActions, useLayoutSelector, useSearchSelector} from "../store"
 import permissions from "../structures/Permissions"
 import "./styles/historypage.less"
 
@@ -20,18 +19,14 @@ interface Props {
 }
 
 const PostHistoryPage: React.FunctionComponent<Props> = (props) => {
-    const [ignored, forceUpdate] = useReducer(x => x + 1, 0)
-    const {enableDrag, setEnableDrag} = useContext(EnableDragContext)
-    const {hideNavbar, setHideNavbar} = useContext(HideNavbarContext)
-    const {hideTitlebar, setHideTitlebar} = useContext(HideTitlebarContext)
-    const {hideSidebar, setHideSidebar} = useContext(HideSidebarContext)
-    const {relative, setRelative} = useContext(RelativeContext)
-    const {activeDropdown, setActiveDropdown} = useContext(ActiveDropdownContext)
-    const {headerText, setHeaderText} = useContext(HeaderTextContext)
-    const {sidebarText, setSidebarText} = useContext(SidebarTextContext)
-    const {mobile, setMobile} = useContext(MobileContext)
-    const {session, setSession} = useContext(SessionContext)
-    const {sessionFlag, setSessionFlag} = useContext(SessionFlagContext)
+    const {setHideNavbar, setHideTitlebar, setHideSidebar, setRelative} = useLayoutActions()
+    const {setEnableDrag} = useInteractionActions()
+    const {setHeaderText, setSidebarText, setActiveDropdown} = useActiveActions()
+    const {setRedirect} = useFlagActions()
+    const {session} = useSessionSelector()
+    const {setSessionFlag} = useSessionActions()
+    const {mobile} = useLayoutSelector()
+    const {restrictType} = useSearchSelector()
     const [revisions, setRevisions] = useState([]) as any
     const [index, setIndex] = useState(0)
     const [visibleRevisions, setVisibleRevisions] = useState([]) as any

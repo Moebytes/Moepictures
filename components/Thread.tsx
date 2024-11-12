@@ -1,8 +1,6 @@
-import React, {useContext, useEffect, useRef, useState} from "react"
+import React, {useEffect, useState} from "react"
 import {useHistory} from "react-router-dom"
-import {SearchContext, SearchFlagContext, SessionFlagContext, MobileContext, SessionContext} from "../Context"
-import {useThemeSelector} from "../store"
-import {HashLink as Link} from "react-router-hash-link"
+import {useThemeSelector, useLayoutSelector, useSessionSelector, useSessionActions} from "../store"
 import functions from "../structures/Functions"
 import adminCrown from "../assets/icons/admin-crown.png"
 import modCrown from "../assets/icons/mod-crown.png"
@@ -29,12 +27,9 @@ interface Props {
 
 const Thread: React.FunctionComponent<Props> = (props) => {
     const {theme, siteHue, siteSaturation, siteLightness} = useThemeSelector()
-    const [hover, setHover] = useState(false)
-    const {search, setSearch} = useContext(SearchContext)
-    const {searchFlag, setSearchFlag} = useContext(SearchFlagContext)
-    const {mobile, setMobile} = useContext(MobileContext)
-    const {session, setSession} = useContext(SessionContext)
-    const {sessionFlag, setSessionFlag} = useContext(SessionFlagContext)
+    const {mobile} = useLayoutSelector()
+    const {session} = useSessionSelector()
+    const {setSessionFlag} = useSessionActions()
     const [creatorData, setCreatorData] = useState({}) as any
     const [updaterData, setUpdaterData] = useState({}) as any
     const [creatorDefaultIcon, setCreatorDefaultIcon] = useState(false)

@@ -1,15 +1,14 @@
-import React, {useContext, useEffect, useState} from "react"
+import React, {useEffect, useState} from "react"
 import {useHistory} from "react-router-dom"
-import {MobileContext, ActionBannerContext} from "../Context"
-import {HashLink as Link} from "react-router-hash-link"
+import {useActiveSelector, useActiveActions} from "../store"
 import functions from "../structures/Functions"
 import "./styles/actionbanner.less"
 
 let timeout = null as any
 
 const ActionBanner: React.FunctionComponent = (props) => {
-    const {mobile, setMobile} = useContext(MobileContext)
-    const {actionBanner, setActionBanner} = useContext(ActionBannerContext)
+    const {actionBanner} = useActiveSelector()
+    const {setActionBanner} = useActiveActions()
     const [stickyText, setStickyText] = useState("")
 
     useEffect(() => {

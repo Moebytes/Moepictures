@@ -1,12 +1,8 @@
-import React, {useContext, useEffect, useLayoutEffect, useRef, useState, forwardRef, useImperativeHandle} from "react"
+import React, {useEffect, useRef, useState, forwardRef, useImperativeHandle} from "react"
 import {useHistory} from "react-router-dom"
 import loading from "../assets/icons/loading.gif"
-import {SizeTypeContext, BrightnessContext, SessionContext, SessionFlagContext, ContrastContext, HueContext, SaturationContext, LightnessContext, MobileContext, ScrollYContext,
-BlurContext, SharpenContext, SquareContext, PixelateContext, DownloadFlagContext, DownloadIDsContext, SpeedContext, ReverseContext, ScrollContext, ActiveDropdownContext, FormatContext,
-ToolTipXContext, ToolTipYContext, ToolTipEnabledContext, ToolTipPostContext, ToolTipImgContext, SelectionModeContext, SelectionItemsContext, SelectionPostsContext} from "../Context"
-import {useThemeSelector} from "../store"
-import {HashLink as Link} from "react-router-hash-link"
-import gifFrames from "gif-frames"
+import {useFilterSelector, useInteractionActions, useLayoutSelector, usePlaybackSelector, usePlaybackActions, 
+useThemeSelector, useSearchSelector, useSessionSelector, useFlagSelector, useFlagActions} from "../store"
 import JSZip from "jszip"
 import path from "path"
 import functions from "../structures/Functions"
@@ -40,33 +36,16 @@ interface Ref {
 
 const GridImage = forwardRef<Ref, Props>((props, componentRef) => {
     const {siteHue, siteSaturation, siteLightness} = useThemeSelector()
-    const {sizeType, setSizeType} = useContext(SizeTypeContext)
-    const [imageSize, setImageSize] = useState(270) as any
-    const {brightness, setBrightness} = useContext(BrightnessContext)
-    const {contrast, setContrast} = useContext(ContrastContext)
-    const {hue, setHue} = useContext(HueContext)
-    const {saturation, setSaturation} = useContext(SaturationContext)
-    const {lightness, setLightness} = useContext(LightnessContext)
-    const {blur, setBlur} = useContext(BlurContext)
-    const {sharpen, setSharpen} = useContext(SharpenContext)
-    const {pixelate, setPixelate} = useContext(PixelateContext)
-    const {square, setSquare} = useContext(SquareContext)
-    const {downloadFlag, setDownloadFlag} = useContext(DownloadFlagContext)
-    const {downloadIDs, setDownloadIDs} = useContext(DownloadIDsContext)
-    const {scrollY, setScrollY} = useContext(ScrollYContext)
-    const {mobile, setMobile} = useContext(MobileContext)
-    const {tooltipX, setToolTipX} = useContext(ToolTipXContext)
-    const {tooltipY, setToolTipY} = useContext(ToolTipYContext)
-    const {tooltipEnabled, setToolTipEnabled} = useContext(ToolTipEnabledContext)
-    const {tooltipPost, setToolTipPost} = useContext(ToolTipPostContext)
-    const {tooltipImg, setToolTipImg} = useContext(ToolTipImgContext)
-    const {selectionMode, setSelectionMode} = useContext(SelectionModeContext)
-    const {activeDropdown, setActiveDropdown} = useContext(ActiveDropdownContext)
-    const {selectionItems, setSelectionItems} = useContext(SelectionItemsContext) as {selectionItems: Set<string>, setSelectionItems: any}
-    const {selectionPosts, setSelectionPosts} = useContext(SelectionPostsContext) as {selectionPosts: Map<string, any>, setSelectionPosts: any}
-    const {session, setSession} = useContext(SessionContext)
-    const {sessionFlag, setSessionFlag} = useContext(SessionFlagContext)
-    const {format, setFormat} = useContext(FormatContext)
+    const {mobile} = useLayoutSelector()
+    const {session} = useSessionSelector()
+    const {brightness, contrast, hue, saturation, lightness, blur, sharpen, pixelate} = useFilterSelector()
+    const {secondsProgress, reverse, speed, seekTo} = usePlaybackSelector()
+    const {setSecondsProgress, setReverse, setSeekTo} = usePlaybackActions()
+    const {sizeType, square, scroll, format, selectionMode, selectionItems, selectionPosts} = useSearchSelector()
+    const {downloadFlag, downloadIDs} = useFlagSelector()
+    const {setDownloadFlag, setDownloadIDs} = useFlagActions()
+    const {setScrollY, setToolTipX, setToolTipY, setToolTipEnabled, setToolTipPost, setToolTipImg} = useInteractionActions()
+    const [imageSize, setImageSize] = useState(240) as any
     const containerRef = useRef<HTMLDivElement>(null)
     const pixelateRef = useRef<HTMLCanvasElement>(null)
     const overlayRef = useRef<HTMLImageElement>(null)
@@ -85,12 +64,7 @@ const GridImage = forwardRef<Ref, Props>((props, componentRef) => {
     const [drag, setDrag] = useState(false)
     const [gifData, setGIFData] = useState(null) as any
     const [videoData, setVideoData] = useState(null) as any
-    const {speed, setSpeed} = useContext(SpeedContext)
-    const {reverse, setReverse} = useContext(ReverseContext)
-    const [seekTo, setSeekTo] = useState(null) as any
-    const [secondsProgress, setSecondsProgress] = useState(0)
     const [visible, setVisible] = useState(true)
-    const {scroll, setScroll} = useContext(ScrollContext)
     const [img, setImg] = useState(props.cached ? props.img : "")
     const [decrypted, setDecrypted] = useState(props.cached)
     const [loadingFrames, setLoadingFrames] = useState(false)

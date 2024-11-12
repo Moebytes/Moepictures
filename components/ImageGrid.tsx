@@ -1,9 +1,8 @@
 import React, {useContext, useEffect, useRef, useState, useReducer} from "react"
 import {useHistory, useLocation} from "react-router-dom"
-import {SizeTypeContext, PostAmountContext, PostsContext, ImageTypeContext, EnableDragContext, PremiumRequiredContext,
-RestrictTypeContext, StyleTypeContext, SortTypeContext, SortReverseContext, SearchContext, SearchFlagContext, HeaderFlagContext, MobileScrollingContext,
-RandomFlagContext, ImageSearchFlagContext, SidebarTextContext, MobileContext, SessionContext, SessionFlagContext, VisiblePostsContext, PageMultiplierContext,
-ScrollYContext, ScrollContext, PageContext, AutoSearchContext, ShowPageDialogContext, PageFlagContext, ReloadPostFlagContext} from "../Context"
+import {useThemeSelector, useLayoutSelector, useSearchActions, useSearchSelector, useInteractionSelector, 
+useFlagActions, useInteractionActions, useCacheActions, useCacheSelector, useFlagSelector, useActiveActions,
+useMiscDialogActions, useSessionSelector, useSessionActions, usePageSelector, usePageActions} from "../store"
 import GridImage from "./GridImage"
 import GridModel from "./GridModel"
 import GridSong from "./GridSong"
@@ -20,42 +19,28 @@ let replace = false
 let limit = 100
 
 const ImageGrid: React.FunctionComponent = (props) => {
-    const {sizeType, setSizeType} = useContext(SizeTypeContext)
-    const {enableDrag, setEnableDrag} = useContext(EnableDragContext)
-    const {postAmount, setPostAmount} = useContext(PostAmountContext)
-    const {posts, setPosts} = useContext(PostsContext) as any
+    const {mobile} = useLayoutSelector()
+    const {search, searchFlag, scroll, imageType, restrictType, styleType, sortType, sortReverse, sizeType, pageMultiplier, autoSearch} = useSearchSelector()
+    const {setSearch, setSearchFlag} = useSearchActions()
+    const {posts, visiblePosts} = useCacheSelector()
+    const {setPosts, setVisiblePosts} = useCacheActions()
     const [index, setIndex] = useState(0)
-    const {visiblePosts, setVisiblePosts} = useContext(VisiblePostsContext)
-    const {scrollY, setScrollY} = useContext(ScrollYContext)
-    const {scroll, setScroll} = useContext(ScrollContext)
-    const {imageType, setImageType} = useContext(ImageTypeContext)
-    const {restrictType, setRestrictType} = useContext(RestrictTypeContext)
-    const {styleType, setStyleType} = useContext(StyleTypeContext)
-    const {sortType, setSortType} = useContext(SortTypeContext)
-    const {sortReverse, setSortReverse} = useContext(SortReverseContext)
-    const {search, setSearch} = useContext(SearchContext)
-    const {searchFlag, setSearchFlag} = useContext(SearchFlagContext)
-    const {randomFlag, setRandomFlag} = useContext(RandomFlagContext)
-    const {sidebarText, setSidebarText} = useContext(SidebarTextContext)
-    const {imageSearchFlag, setImageSearchFlag} = useContext(ImageSearchFlagContext)
-    const {premiumRequired, setPremiumRequired} = useContext(PremiumRequiredContext)
-    const {headerFlag, setHeaderFlag} = useContext(HeaderFlagContext)
-    const {mobile, setMobile} = useContext(MobileContext)
-    const {mobileScrolling, setMobileScrolling} = useContext(MobileScrollingContext)
-    const {session, setSession} = useContext(SessionContext)
-    const {sessionFlag, setSessionFlag} = useContext(SessionFlagContext)
+    const {scrollY} = useInteractionSelector()
+    const {setScrollY, setEnableDrag, setMobileScrolling} = useInteractionActions()
+    const {setSidebarText} = useActiveActions()
+    const {randomFlag, imageSearchFlag, pageFlag, reloadPostFlag} = useFlagSelector()
+    const {setRandomFlag, setImageSearchFlag, setPostAmount, setHeaderFlag, setPageFlag} = useFlagActions()
+    const {setPremiumRequired, setShowPageDialog} = useMiscDialogActions()
+    const {session} = useSessionSelector()
+    const {setSessionFlag} = useSessionActions()
+    const {page} = usePageSelector()
+    const {setPage} = usePageActions()
     const [loaded, setLoaded] = useState(false)
     const [noResults, setNoResults] = useState(false)
     const [isRandomSearch, setIsRandomSearch] = useState(false)
     const [offset, setOffset] = useState(0)
     const [ended, setEnded] = useState(false)
     const [updatePostFlag, setUpdatePostFlag] = useState(false)
-    const {page, setPage} = useContext(PageContext)
-    const {pageFlag, setPageFlag} = useContext(PageFlagContext)
-    const {pageMultiplier, setPageMultiplier} = useContext(PageMultiplierContext)
-    const {autoSearch, setAutoSearch} = useContext(AutoSearchContext)
-    const {showPageDialog, setShowPageDialog} = useContext(ShowPageDialogContext)
-    const {reloadPostFlag, setReloadPostFlag} = useContext(ReloadPostFlagContext)
     const [postsRef, setPostsRef] = useState([]) as any
     const [reupdateFlag, setReupdateFlag] = useState(false)
     const [queryPage, setQueryPage] = useState(1)
@@ -329,14 +314,14 @@ const ImageGrid: React.FunctionComponent = (props) => {
             if (padded) {
                 setPosts(result)
             } else {
-                setPosts((prev: any) => functions.removeDuplicates([...prev, ...result]))
+                setPosts(functions.removeDuplicates([...posts, ...result]))
             }
         } else {
             if (result?.length) {
                 if (padded) {
                     setPosts(result)
                 } else {
-                    setPosts((prev: any) => functions.removeDuplicates([...prev, ...result]))
+                    setPosts(functions.removeDuplicates([...posts, ...result]))
                 }
             }
             setEnded(true)
@@ -390,7 +375,7 @@ const ImageGrid: React.FunctionComponent = (props) => {
     useEffect(() => {
         const searchParams = new URLSearchParams(window.location.search)
         if (search) searchParams.set("search", search)
-        if (!scroll) searchParams.set("page", page)
+        if (!scroll) searchParams.set("page", String(page))
         if (replace) {
             if (!scroll) history.replace(`${location.pathname}?${searchParams.toString()}`)
             replace = false
@@ -549,7 +534,7 @@ const ImageGrid: React.FunctionComponent = (props) => {
 
     const generateImagesJSX = () => {
         const jsx = [] as any
-        let visible = []
+        let visible = [] as any[]
         if (scroll) {
             visible = functions.removeDuplicates(visiblePosts)
         } else {

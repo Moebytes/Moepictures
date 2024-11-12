@@ -1,12 +1,6 @@
-import React, {useContext, useEffect, useRef, useState, useReducer} from "react"
+import React, {useEffect, useRef, useState} from "react"
 import {useLocation, useHistory} from "react-router-dom"
-import {EnableDragContext, DownloadFlagContext, DownloadIDsContext, SpeedContext,
-ReverseContext, MobileContext, SessionContext,
-ImageExpandContext, PixelateContext, AudioContext, PitchContext, VolumeContext, PreviousVolumeContext, DurationContext,
-ProgressContext, SecondsProgressContext, SeekToContext, DragProgressContext, DraggingContext, PausedContext,
-RewindFlagContext, FastforwardFlagContext, PlayFlagContext, VolumeFlagContext, ResetFlagContext, 
-MuteFlagContext, AudioPostContext} from "../Context"
-import {useThemeSelector} from "../store"
+import {useFilterSelector, useInteractionActions, useLayoutSelector, usePlaybackSelector, usePlaybackActions, useThemeSelector} from "../store"
 import functions from "../structures/Functions"
 import Slider from "react-slider"
 import musicplaying from "../assets/icons/musicplaying.gif"
@@ -54,14 +48,15 @@ const initialize = async () => {
 if (typeof window !== "undefined") initialize()
 
 const AudioPlayer: React.FunctionComponent = (props) => {
-    const [ignored, forceUpdate] = useReducer(x => x + 1, 0)
-    const {session, setSessions} = useContext(SessionContext)
-    const {enableDrag, setEnableDrag} = useContext(EnableDragContext)
-    const {downloadFlag, setDownloadFlag} = useContext(DownloadFlagContext)
-    const {downloadIDs, setDownloadIDs} = useContext(DownloadIDsContext)
-    const {pixelate, setPixelate} = useContext(PixelateContext)
-    const {mobile, setMobile} = useContext(MobileContext)
-    const {imageExpand, setImageExpand} = useContext(ImageExpandContext)
+    const {theme, siteHue, siteSaturation, siteLightness} = useThemeSelector()
+    const {setEnableDrag} = useInteractionActions()
+    const {mobile} = useLayoutSelector()
+    const {pixelate} = useFilterSelector()
+    const {audio, audioPost, rewindFlag, fastForwardFlag, playFlag, volumeFlag, muteFlag, resetFlag, secondsProgress, progress, 
+    dragProgress, reverse, speed, pitch, volume, previousVolume, paused, duration, dragging, seekTo} = usePlaybackSelector()
+    const {setAudio, setAudioPost, setRewindFlag, setFastForwardFlag, setPlayFlag, setVolumeFlag, setMuteFlag, setResetFlag, 
+    setSecondsProgress, setProgress, setDragProgress, setReverse, setSpeed, setPitch, setVolume, setPreviousVolume, setPaused, 
+    setDuration, setDragging, setSeekTo} = usePlaybackActions()
     const [showSpeedDropdown, setShowSpeedDropdown] = useState(false)
     const [showPitchDropdown, setShowPitchDropdown] = useState(false)
     const [showVolumeSlider, setShowVolumeSlider] = useState(false)
@@ -72,28 +67,7 @@ const AudioPlayer: React.FunctionComponent = (props) => {
     const audioVolumeRef = useRef(null) as any
     const audioSpeedSliderRef = useRef<any>(null)
     const audioVolumeSliderRef = useRef<any>(null)
-    const {secondsProgress, setSecondsProgress} = useContext(SecondsProgressContext)
-    const {progress, setProgress} = useContext(ProgressContext)
-    const {dragProgress, setDragProgress} = useContext(DragProgressContext)
-    const {reverse, setReverse} = useContext(ReverseContext)
-    const {speed, setSpeed} = useContext(SpeedContext)
-    const {pitch, setPitch} = useContext(PitchContext)
-    const {volume, setVolume} = useContext(VolumeContext)
-    const {previousVolume, setPreviousVolume} = useContext(PreviousVolumeContext)
-    const {paused, setPaused} = useContext(PausedContext)
-    const {duration, setDuration} = useContext(DurationContext)
-    const {dragging, setDragging} = useContext(DraggingContext)
-    const {seekTo, setSeekTo} = useContext(SeekToContext)
     const [init, setInit] = useState(false)
-    const {audio, setAudio} = useContext(AudioContext)
-    const {audioPost, setAudioPost} = useContext(AudioPostContext)
-    const {rewindFlag, setRewindFlag} = useContext(RewindFlagContext)
-    const {fastForwardFlag, setFastForwardFlag} = useContext(FastforwardFlagContext)
-    const {playFlag, setPlayFlag} = useContext(PlayFlagContext)
-    const {volumeFlag, setVolumeFlag} = useContext(VolumeFlagContext)
-    const {muteFlag, setMuteFlag} = useContext(MuteFlagContext)
-    const {resetFlag, setResetFlag} = useContext(ResetFlagContext)
-    const {theme, siteHue, siteSaturation, siteLightness} = useThemeSelector()
     const [hover, setHover] = useState(false)
     const location = useLocation()
     const history = useHistory()
@@ -437,6 +411,7 @@ const AudioPlayer: React.FunctionComponent = (props) => {
 
     useEffect(() => {
         const seekToPosition = async () => {
+            if (!seekTo) return
             let progress = (100 / duration) * seekTo
             if (reverse) progress = 100 - progress
             Tone.getTransport().seconds = seekTo

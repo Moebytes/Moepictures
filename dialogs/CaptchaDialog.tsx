@@ -1,8 +1,6 @@
-import React, {useEffect, useContext, useState, useRef} from "react"
+import React, {useEffect, useState, useRef} from "react"
 import {useHistory} from "react-router-dom"
-import {HashLink as Link} from "react-router-hash-link"
-import {HideNavbarContext, HideSidebarContext, EnableDragContext, HideTitlebarContext, 
-SessionContext, MobileContext, SessionFlagContext} from "../Context"
+import {useInteractionActions, useSessionSelector, useSessionActions} from "../store"
 import {useThemeSelector} from "../store"
 import functions from "../structures/Functions"
 import "./styles/dialog.less"
@@ -14,15 +12,9 @@ interface Props {
 
 const CaptchaDialog: React.FunctionComponent<Props> = (props) => {
     const {theme, siteHue, siteSaturation, siteLightness} = useThemeSelector()
-    const {hideNavbar, setHideNavbar} = useContext(HideNavbarContext)
-    const {hideTitlebar, setHideTitlebar} = useContext(HideTitlebarContext)
-    const {hideSidebar, setHideSidebar} = useContext(HideSidebarContext)
-    const {enableDrag, setEnableDrag} = useContext(EnableDragContext)
-    const {sessionFlag, setSessionFlag} = useContext(SessionFlagContext)
-    const {session, setSession} = useContext(SessionContext)
-    const {mobile, setMobile} = useContext(MobileContext)
-    const [posX, setPosX] = useState(0)
-    const [posY, setPosY] = useState(0)
+    const {setEnableDrag} = useInteractionActions()
+    const {setSessionFlag} = useSessionActions()
+    const {session} = useSessionSelector()
     const [submitted, setSubmitted] = useState(false)
     const [error, setError] = useState(false)
     const errorRef = useRef<any>(null)

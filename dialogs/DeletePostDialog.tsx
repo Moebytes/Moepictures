@@ -1,8 +1,6 @@
-import React, {useEffect, useContext, useState, useRef} from "react"
+import React, {useEffect, useState, useRef} from "react"
 import {useHistory} from "react-router-dom"
-import {HashLink as Link} from "react-router-hash-link"
-import {HideNavbarContext, HideSidebarContext, SessionFlagContext, EnableDragContext, ShowDeletePostDialogContext, HideTitlebarContext,
-SessionContext} from "../Context"
+import {useInteractionActions, useSessionSelector, useSessionActions, usePostDialogSelector, usePostDialogActions} from "../store"
 import functions from "../structures/Functions"
 import Draggable from "react-draggable"
 import "./styles/dialog.less"
@@ -13,13 +11,11 @@ interface Props {
 }
 
 const DeletePostDialog: React.FunctionComponent<Props> = (props) => {
-    const {hideNavbar, setHideNavbar} = useContext(HideNavbarContext)
-    const {hideTitlebar, setHideTitlebar} = useContext(HideTitlebarContext)
-    const {hideSidebar, setHideSidebar} = useContext(HideSidebarContext)
-    const {enableDrag, setEnableDrag} = useContext(EnableDragContext)
-    const {session, setSession} = useContext(SessionContext)
-    const {sessionFlag, setSessionFlag} = useContext(SessionFlagContext)
-    const {showDeletePostDialog, setShowDeletePostDialog} = useContext(ShowDeletePostDialogContext)
+    const {setEnableDrag} = useInteractionActions()
+    const {session} = useSessionSelector()
+    const {setSessionFlag} = useSessionActions()
+    const {showDeletePostDialog} = usePostDialogSelector()
+    const {setShowDeletePostDialog} = usePostDialogActions()
     const [reason, setReason] = useState("")
     const [submitted, setSubmitted] = useState(false)
     const [error, setError] = useState(false)

@@ -1,6 +1,6 @@
-import React, {useContext, useEffect, useRef, useState, useReducer} from "react"
+import React, {useEffect, useState} from "react"
 import {useHistory} from "react-router-dom"
-import {SessionContext, SessionFlagContext} from "../Context"
+import {useSessionSelector, useSessionActions} from "../store"
 import functions from "../structures/Functions"
 import "./styles/newtags.less"
 
@@ -9,8 +9,8 @@ interface Props {
 }
 
 const NewTags: React.FunctionComponent<Props> = (props) => {
-    const {session, setSession} = useContext(SessionContext)
-    const {sessionFlag, setSessionFlag} = useContext(SessionFlagContext)
+    const {session} = useSessionSelector()
+    const {setSessionFlag} = useSessionActions()
     const [rawNewTags, setRawNewTags] = useState([]) as any
     const [newTags, setNewTags] = useState([]) as any
     const history = useHistory()

@@ -1,10 +1,7 @@
-import React, {useContext, useEffect, useRef, useState} from "react"
+import React, {useEffect} from "react"
 import {useHistory} from "react-router-dom"
-import {QuoteTextContext, SessionContext, DeleteReplyIDContext, DeleteReplyFlagContext,
-EditReplyIDContext, EditReplyFlagContext, EditReplyContentContext, EditReplyR18Context, ReportReplyIDContext, EnableDragContext, MobileContext, SessionFlagContext,
-EmojisContext} from "../Context"
-import {useThemeSelector} from "../store"
-import {HashLink as Link} from "react-router-hash-link"
+import {useThemeSelector, useLayoutSelector, useSessionSelector, useSessionActions, useThreadDialogActions, 
+useCacheSelector, useActiveActions, useThreadDialogSelector, useInteractionActions} from "../store"
 import functions from "../structures/Functions"
 import favicon from "../assets/icons/favicon.png"
 import quoteOptIcon from "../assets/icons/quote-opt.png"
@@ -32,20 +29,15 @@ interface Props {
 }
 
 const Reply: React.FunctionComponent<Props> = (props) => {
-    const {mobile, setMobile} = useContext(MobileContext)
     const {siteHue, siteSaturation, siteLightness} = useThemeSelector()
-    const {enableDrag, setEnableDrag} = useContext(EnableDragContext)
-    const {quoteText, setQuoteText} = useContext(QuoteTextContext)
-    const {session, setSession} = useContext(SessionContext)
-    const {sessionFlag, setSessionFlag} = useContext(SessionFlagContext)
-    const {deleteReplyID, setDeleteReplyID} = useContext(DeleteReplyIDContext)
-    const {deleteReplyFlag, setDeleteReplyFlag} = useContext(DeleteReplyFlagContext)
-    const {editReplyFlag, setEditReplyFlag} = useContext(EditReplyFlagContext)
-    const {editReplyID, setEditReplyID} = useContext(EditReplyIDContext)
-    const {editReplyContent, setEditReplyContent} = useContext(EditReplyContentContext)
-    const {editReplyR18, setEditReplyR18} = useContext(EditReplyR18Context)
-    const {reportReplyID, setReportReplyID} = useContext(ReportReplyIDContext)
-    const {emojis, setEmojis} = useContext(EmojisContext)
+    const {setEnableDrag} = useInteractionActions()
+    const {mobile} = useLayoutSelector()
+    const {session} = useSessionSelector()
+    const {setSessionFlag} = useSessionActions()
+    const {setQuoteText} = useActiveActions()
+    const {deleteReplyID, deleteReplyFlag, editReplyFlag, editReplyID, editReplyContent, editReplyR18} = useThreadDialogSelector()
+    const {setDeleteReplyID, setDeleteReplyFlag, setEditReplyFlag, setEditReplyID, setEditReplyContent, setEditReplyR18, setReportReplyID} = useThreadDialogActions()
+    const {emojis} = useCacheSelector()
     const history = useHistory()
 
     const defaultIcon = props.reply?.image ? false : true

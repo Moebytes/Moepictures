@@ -1,21 +1,17 @@
-import React, {useEffect, useContext, useState, useRef} from "react"
+import React, {useEffect, useState, useRef} from "react"
 import {useHistory} from "react-router-dom"
-import {HashLink as Link} from "react-router-hash-link"
-import {HideNavbarContext, HideSidebarContext, EnableDragContext, R18ConfirmationContext, 
-HideTitlebarContext, SessionContext, SessionFlagContext} from "../Context"
+import {useInteractionActions, useMiscDialogSelector, useMiscDialogActions, useSessionSelector, useSessionActions} from "../store"
 import functions from "../structures/Functions"
 import Draggable from "react-draggable"
 import r18 from "../assets/icons/r18.png"
 import "./styles/dialog.less"
 
 const R18Dialog: React.FunctionComponent = (props) => {
-    const {hideNavbar, setHideNavbar} = useContext(HideNavbarContext)
-    const {hideTitlebar, setHideTitlebar} = useContext(HideTitlebarContext)
-    const {hideSidebar, setHideSidebar} = useContext(HideSidebarContext)
-    const {enableDrag, setEnableDrag} = useContext(EnableDragContext)
-    const {r18Confirmation, setR18Confirmation} = useContext(R18ConfirmationContext)
-    const {session, setSession} = useContext(SessionContext)
-    const {sessionFlag, setSessionFlag} = useContext(SessionFlagContext)
+    const {setEnableDrag} = useInteractionActions()
+    const {r18Confirmation} = useMiscDialogSelector()
+    const {setR18Confirmation} = useMiscDialogActions()
+    const {session} = useSessionSelector()
+    const {setSessionFlag} = useSessionActions()
     const [reason, setReason] = useState("")
     const [submitted, setSubmitted] = useState(false)
     const [error, setError] = useState(false)

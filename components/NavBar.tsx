@@ -31,10 +31,8 @@ import scrollIcon from "../assets/icons/scroll.png"
 import pageIcon from "../assets/icons/page.png"
 import premiumStar from "../assets/icons/premium-star.png"
 import Slider from "react-slider"
-import {HideNavbarContext, HideSortbarContext, HideSidebarContext, EnableDragContext,  HideMobileNavbarContext, MobileContext,
-RelativeContext, HideTitlebarContext, SearchContext, SearchFlagContext, SessionContext, SessionFlagContext, UserImgContext, ScrollContext, 
-HasNotificationContext, TabletContext} from "../Context"
-import {useThemeSelector, useThemeActions} from "../store"
+import {useThemeSelector, useThemeActions, useLayoutSelector, useSearchActions, useSearchSelector, 
+useInteractionActions, useSessionSelector, useSessionActions, useLayoutActions} from "../store"
 import "./styles/navbar.less"
 
 interface Props {
@@ -43,28 +41,19 @@ interface Props {
 
 const NavBar: React.FunctionComponent<Props> = (props) => {
     const [ignored, forceUpdate] = useReducer(x => x + 1, 0)
-    const {hideNavbar, setHideNavbar} = useContext(HideNavbarContext)
-    const {hideTitlebar, setHideTitlebar} = useContext(HideTitlebarContext)
-    const {hideSidebar, setHideSidebar} = useContext(HideSidebarContext)
-    const {hideSortbar, setHideSortbar} = useContext(HideSortbarContext)
-    const {enableDrag, setEnableDrag} = useContext(EnableDragContext)
-    const {relative, setRelative} = useContext(RelativeContext)
-    const {search, setSearch} = useContext(SearchContext)
-    const {searchFlag, setSearchFlag} = useContext(SearchFlagContext)
-    const {scroll, setScroll} = useContext(ScrollContext)
-    const {session, setSession} = useContext(SessionContext)
-    const {sessionFlag, setSessionFlag} = useContext(SessionFlagContext)
-    const {userImg, setUserImg} = useContext(UserImgContext)
-    const {hideMobileNavbar, setHideMobileNavbar} = useContext(HideMobileNavbarContext)
-    const {mobile, setMobile} = useContext(MobileContext)
-    const {tablet, setTablet} = useContext(TabletContext)
+    const {theme, siteHue, siteSaturation, siteLightness} = useThemeSelector()
+    const {setTheme, setSiteHue, setSiteSaturation, setSiteLightness} = useThemeActions()
+    const {mobile, tablet, relative, hideNavbar, hideSidebar, hideSortbar, hideTitlebar, hideMobileNavbar} = useLayoutSelector()
+    const {setHideMobileNavbar, setHideNavbar} = useLayoutActions()
+    const {search, scroll} = useSearchSelector()
+    const {setSearch, setSearchFlag, setScroll} = useSearchActions()
+    const {setEnableDrag} = useInteractionActions()
+    const {session, userImg, hasNotification} = useSessionSelector()
+    const {setSessionFlag, setUserImg, setHasNotification} = useSessionActions()
     const [showMiniTitle, setShowMiniTitle] = useState(false)
     const [suggestionsActive, setSuggestionsActive] = useState(false)
     const [marginR, setMarginR] = useState("60px")
     const [activeDropdown, setActiveDropdown] = useState(false)
-    const {hasNotification, setHasNotification} = useContext(HasNotificationContext)
-    const {theme, siteHue, siteSaturation, siteLightness} = useThemeSelector()
-    const {setTheme, setSiteHue, setSiteSaturation, setSiteLightness} = useThemeActions()
     const history = useHistory()
 
     const getFilter = () => {
@@ -135,7 +124,7 @@ const NavBar: React.FunctionComponent<Props> = (props) => {
     }, [hideTitlebar])
 
     const colorChange = () => {
-        setActiveDropdown((prev: boolean) => !prev)
+        setActiveDropdown(!activeDropdown)
     }
 
     const lightChange = () => {
@@ -350,11 +339,9 @@ const NavBar: React.FunctionComponent<Props> = (props) => {
     }
 
     const toggleScroll = () => {
-        setScroll((prev: boolean) => {
-            const newValue = !prev
-            localStorage.setItem("scroll", `${newValue}`)
-            return newValue
-        })
+        const newValue = !scroll
+        localStorage.setItem("scroll", `${newValue}`)
+        setScroll(newValue)
     }
 
     if (mobile) {

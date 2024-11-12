@@ -1,8 +1,8 @@
-import React, {useEffect, useContext, useState, useRef} from "react"
-import {EnableDragContext, HideNavbarContext, HideSidebarContext, RelativeContext, 
-HideTitlebarContext, MobileContext, PostsContext, GroupFlagContext, ActiveDropdownContext, HeaderTextContext, SidebarTextContext, SessionContext, SessionFlagContext, 
-RestrictTypeContext, ActiveGroupContext, EditGroupObjContext, DeleteGroupObjContext, SearchContext, SearchFlagContext, RevertGroupHistoryIDContext, RevertGroupHistoryFlagContext} from "../Context"
-import {useThemeSelector} from "../store"
+import React, {useEffect, useState, useRef} from "react"
+import {useThemeSelector, useInteractionActions, useSessionSelector, useSessionActions,
+useLayoutActions, useActiveActions, useFlagActions, useLayoutSelector, useSearchSelector, 
+useFlagSelector, useCacheActions, useGroupDialogActions, useSearchActions,
+useGroupDialogSelector} from "../store"
 import {useHistory, useLocation} from "react-router-dom"
 import TitleBar from "../components/TitleBar"
 import NavBar from "../components/NavBar"
@@ -34,29 +34,21 @@ interface Props {
 let limit = 25
 
 const GroupPage: React.FunctionComponent<Props> = (props) => {
-    const {theme, siteHue, siteSaturation, siteLightness} = useThemeSelector()
-    const {enableDrag, setEnableDrag} = useContext(EnableDragContext)
-    const {hideNavbar, setHideNavbar} = useContext(HideNavbarContext)
-    const {hideTitlebar, setHideTitlebar} = useContext(HideTitlebarContext)
-    const {hideSidebar, setHideSidebar} = useContext(HideSidebarContext)
-    const {relative, setRelative} = useContext(RelativeContext)
-    const {activeDropdown, setActiveDropdown} = useContext(ActiveDropdownContext)
-    const {search, setSearch} = useContext(SearchContext)
-    const {searchFlag, setSearchFlag} = useContext(SearchFlagContext)
-    const {headerText, setHeaderText} = useContext(HeaderTextContext)
-    const {sidebarText, setSidebarText} = useContext(SidebarTextContext)
-    const {editGroupObj, setEditGroupObj} = useContext(EditGroupObjContext)
-    const {editDeleteObj, setDeleteGroupObj} = useContext(DeleteGroupObjContext)
-    const {revertGroupHistoryID, setRevertGroupHistoryID} = useContext(RevertGroupHistoryIDContext)
-    const {revertGroupHistoryFlag, setRevertGroupHistoryFlag} = useContext(RevertGroupHistoryFlagContext)
-    const {session, setSession} = useContext(SessionContext)
-    const {sessionFlag, setSessionFlag} = useContext(SessionFlagContext)
-    const {mobile, setMobile} = useContext(MobileContext)
-    const {restrictType, setRestrictType} = useContext(RestrictTypeContext)
-    const {activeGroup, setActiveGroup} = useContext(ActiveGroupContext)
-    const {groupFlag, setGroupFlag} = useContext(GroupFlagContext)
+    const {siteHue, siteLightness, siteSaturation} = useThemeSelector()
+    const {setHideNavbar, setHideTitlebar, setHideSidebar, setRelative} = useLayoutActions()
+    const {setEnableDrag} = useInteractionActions()
+    const {setHeaderText, setSidebarText, setActiveGroup, setActiveDropdown} = useActiveActions()
+    const {groupFlag} = useFlagSelector()
+    const {setGroupFlag} = useFlagActions()
+    const {session} = useSessionSelector()
+    const {setSessionFlag} = useSessionActions()
+    const {mobile} = useLayoutSelector()
+    const {setEditGroupObj, setDeleteGroupObj, setRevertGroupHistoryID, setRevertGroupHistoryFlag} = useGroupDialogActions()
+    const {restrictType} = useSearchSelector()
+    const {setSearch, setSearchFlag} = useSearchActions()
+    const {revertGroupHistoryID, revertGroupHistoryFlag} = useGroupDialogSelector()
+    const {setPosts} = useCacheActions()
     const [reorderState, setReorderState] = useState(false)
-    const {posts, setPosts} = useContext(PostsContext)
     const [historyID, setHistoryID] = useState(null as any)
     const [group, setGroup] = useState(null) as any
     const [items, setItems] = useState([]) as any

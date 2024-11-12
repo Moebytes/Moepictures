@@ -1,6 +1,7 @@
-import React, {useEffect, useContext, useState, useRef} from "react"
+import React, {useEffect, useState, useRef} from "react"
 import {useHistory} from "react-router-dom"
-import {EnableDragContext, SaveSearchDialogContext, SessionContext, SessionFlagContext, SearchContext} from "../Context"
+import {useInteractionActions, useSearchDialogSelector, useSearchDialogActions, useSessionSelector, 
+useSessionActions, useSearchSelector} from "../store"
 import functions from "../structures/Functions"
 import uploadIcon from "../assets/icons/upload.png"
 import "./styles/dialog.less"
@@ -10,11 +11,12 @@ import ContentEditable from "react-contenteditable"
 import xButton from "../assets/icons/x-button.png"
 
 const SaveSearchDialog: React.FunctionComponent = (props) => {
-    const {enableDrag, setEnableDrag} = useContext(EnableDragContext)
-    const {saveSearchDialog, setSaveSearchDialog} = useContext(SaveSearchDialogContext)
-    const {session, setSession} = useContext(SessionContext)
-    const {sessionFlag, setSessionFlag} = useContext(SessionFlagContext)
-    const {search, setSearch} = useContext(SearchContext)
+    const {setEnableDrag} = useInteractionActions()
+    const {saveSearchDialog} = useSearchDialogSelector()
+    const {setSaveSearchDialog} = useSearchDialogActions()
+    const {session} = useSessionSelector()
+    const {setSessionFlag} = useSessionActions()
+    const {search} = useSearchSelector()
     const [error, setError] = useState(false)
     const [tagActive, setTagActive] = useState(false)
     const [posX, setPosX] = useState(0)

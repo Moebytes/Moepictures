@@ -13,9 +13,10 @@ import scrollIcon from "../assets/icons/scroll.png"
 import pageIcon from "../assets/icons/page.png"
 import PageDialog from "../dialogs/PageDialog"
 import CaptchaDialog from "../dialogs/CaptchaDialog"
-import {EnableDragContext, HideNavbarContext, HideSidebarContext, RelativeContext, MobileContext, SessionContext, SessionFlagContext,
-HideTitlebarContext, ActiveDropdownContext, HeaderTextContext, SidebarTextContext, ScrollContext, ArtistsPageContext, ShowPageDialogContext, PageFlagContext} from "../Context"
-import {useThemeSelector} from "../store"
+import {useThemeSelector, useInteractionActions, useSessionSelector, useSessionActions,
+useLayoutActions, useActiveActions, useFlagActions, useLayoutSelector, usePageActions,
+useActiveSelector, useSearchActions, useSearchSelector, usePageSelector, useFlagSelector,
+useMiscDialogActions} from "../store"
 import "./styles/itemspage.less"
 
 let limit = 25
@@ -24,21 +25,22 @@ let pageAmount = 7
 
 const ArtistsPage: React.FunctionComponent = (props) => {
     const {theme, siteHue, siteSaturation, siteLightness} = useThemeSelector()
-    const {enableDrag, setEnableDrag} = useContext(EnableDragContext)
-    const {hideNavbar, setHideNavbar} = useContext(HideNavbarContext)
-    const {hideTitlebar, setHideTitlebar} = useContext(HideTitlebarContext)
-    const {hideSidebar, setHideSidebar} = useContext(HideSidebarContext)
-    const {relative, setRelative} = useContext(RelativeContext)
-    const {activeDropdown, setActiveDropdown} = useContext(ActiveDropdownContext)
-    const {headerText, setHeaderText} = useContext(HeaderTextContext)
-    const {sidebarText, setSidebarText} = useContext(SidebarTextContext)
-    const {scroll, setScroll} = useContext(ScrollContext)
-    const {mobile, setMobile} = useContext(MobileContext)
-    const {artistsPage, setArtistsPage} = useContext(ArtistsPageContext)
-    const {showPageDialog, setShowPageDialog} = useContext(ShowPageDialogContext)
-    const {pageFlag, setPageFlag} = useContext(PageFlagContext)
-    const {session, setSession} = useContext(SessionContext)
-    const {sessionFlag, setSessionFlag} = useContext(SessionFlagContext)
+    const {setHideNavbar, setHideTitlebar, setHideSidebar, setRelative} = useLayoutActions()
+    const {setEnableDrag} = useInteractionActions()
+    const {setHeaderText, setSidebarText} = useActiveActions()
+    const {setRedirect} = useFlagActions()
+    const {session} = useSessionSelector()
+    const {setSessionFlag} = useSessionActions()
+    const {mobile} = useLayoutSelector()
+    const {activeDropdown} = useActiveSelector()
+    const {setActiveDropdown} = useActiveActions()
+    const {scroll} = useSearchSelector()
+    const {setScroll} = useSearchActions()
+    const {artistsPage} = usePageSelector()
+    const {setArtistsPage} = usePageActions()
+    const {setShowPageDialog} = useMiscDialogActions()
+    const {pageFlag} = useFlagSelector()
+    const {setPageFlag} = useFlagActions()
     const [sortType, setSortType] = useState("posts")
     const [sortReverse, setSortReverse] = useState(false)
     const [artists, setArtists] = useState([]) as any
@@ -245,7 +247,7 @@ const ArtistsPage: React.FunctionComponent = (props) => {
     useEffect(() => {
         const searchParams = new URLSearchParams(window.location.search)
         if (searchQuery) searchParams.set("query", searchQuery)
-        if (!scroll) searchParams.set("page", artistsPage)
+        if (!scroll) searchParams.set("page", String(artistsPage))
         if (replace) {
             if (!scroll) history.replace(`${location.pathname}?${searchParams.toString()}`)
             replace = false
@@ -353,7 +355,7 @@ const ArtistsPage: React.FunctionComponent = (props) => {
     const getSortJSX = () => {
         return (
             <div className="itemsort-item" ref={sortRef}>
-                <img className="itemsort-img" src={sortReverse ? sortRev : sort} style={{filter: getFilter()}} onClick={() => setSortReverse((prev: boolean) => !prev)}/>
+                <img className="itemsort-img" src={sortReverse ? sortRev : sort} style={{filter: getFilter()}} onClick={() => setSortReverse(!sortReverse)}/>
                 <span className="itemsort-text" onClick={() => {setActiveDropdown(activeDropdown === "sort" ? "none" : "sort")}}>{functions.toProperCase(sortType)}</span>
             </div>
         )
@@ -389,11 +391,9 @@ const ArtistsPage: React.FunctionComponent = (props) => {
     }
 
     const toggleScroll = () => {
-        setScroll((prev: boolean) => {
-            const newValue = !prev
-            localStorage.setItem("scroll", `${newValue}`)
-            return newValue
-        })
+        const newValue = !scroll
+        localStorage.setItem("scroll", `${newValue}`)
+        setScroll(newValue)
     }
 
     return (

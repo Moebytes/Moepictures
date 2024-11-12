@@ -1,8 +1,7 @@
-import React, {useEffect, useContext, useState, useRef} from "react"
+import React, {useEffect, useState, useRef} from "react"
 import {useHistory} from "react-router-dom"
-import {HideNavbarContext, HideSidebarContext, EnableDragContext, 
-ShowBulkTagEditDialogContext, HideTitlebarContext, SessionContext, SessionFlagContext, MobileContext, SelectionModeContext, 
-SelectionItemsContext, SelectionPostsContext} from "../Context"
+import {useInteractionActions, useSessionSelector, useSessionActions, usePostDialogSelector, usePostDialogActions,
+useSearchSelector, useSearchActions, useLayoutSelector} from "../store"
 import functions from "../structures/Functions"
 import Draggable from "react-draggable"
 import permissions from "../structures/Permissions"
@@ -11,17 +10,14 @@ import ContentEditable from "react-contenteditable"
 import "./styles/dialog.less"
 
 const BulkTagEditDialog: React.FunctionComponent = (props) => {
-    const {hideNavbar, setHideNavbar} = useContext(HideNavbarContext)
-    const {hideTitlebar, setHideTitlebar} = useContext(HideTitlebarContext)
-    const {hideSidebar, setHideSidebar} = useContext(HideSidebarContext)
-    const {enableDrag, setEnableDrag} = useContext(EnableDragContext)
-    const {session, setSession} = useContext(SessionContext)
-    const {sessionFlag, setSessionFlag} = useContext(SessionFlagContext)
-    const {showBulkTagEditDialog, setShowBulkTagEditDialog} = useContext(ShowBulkTagEditDialogContext)
-    const {selectionMode, setSelectionMode} = useContext(SelectionModeContext)
-    const {selectionItems, setSelectionItems} = useContext(SelectionItemsContext) as {selectionItems: Set<string>, setSelectionItems: any}
-    const {selectionPosts, setSelectionPosts} = useContext(SelectionPostsContext) as {selectionPosts: Map<string, any>, setSelectionPosts: any}
-    const {mobile, setMobile} = useContext(MobileContext)
+    const {setEnableDrag} = useInteractionActions()
+    const {session} = useSessionSelector()
+    const {setSessionFlag} = useSessionActions()
+    const {showBulkTagEditDialog} = usePostDialogSelector()
+    const {setShowBulkTagEditDialog} = usePostDialogActions()
+    const {selectionMode, selectionItems, selectionPosts} = useSearchSelector()
+    const {setSelectionMode} = useSearchActions()
+    const {mobile} = useLayoutSelector()
     const [artists, setArtists] = useState("") as any
     const [characters, setCharacters] = useState("") as any
     const [series, setSeries] = useState("") as any

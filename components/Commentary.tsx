@@ -1,7 +1,5 @@
-import React, {useContext, useEffect, useRef, useState} from "react"
-import {EnableDragContext, SessionContext, SessionFlagContext} from "../Context"
-import {useThemeSelector} from "../store"
-import {HashLink as Link} from "react-router-hash-link"
+import React, {useEffect, useState} from "react"
+import {useInteractionActions, useThemeSelector, useSessionSelector, useSessionActions} from "../store"
 import jsxFunctions from "../structures/JSXFunctions"
 import commentaryTranslate from "../assets/icons/commentarytranslate.png"
 import functions from "../structures/Functions"
@@ -14,9 +12,9 @@ interface Props {
 
 const Commentary: React.FunctionComponent<Props> = (props) => {
     const {siteHue, siteSaturation, siteLightness} = useThemeSelector()
-    const {enableDrag, setEnableDrag} = useContext(EnableDragContext)
-    const {session, setSession} = useContext(SessionContext)
-    const {sessionFlag, setSessionFlag} = useContext(SessionFlagContext)
+    const {setEnableDrag} = useInteractionActions()
+    const {session} = useSessionSelector()
+    const {setSessionFlag} = useSessionActions()
     const [showTranslated, setShowTranslated] = useState(false)
     const [text, setText] = useState(props.text)
     const [translatedText, setTranslatedText] = useState(null)

@@ -1,8 +1,7 @@
-import React, {useEffect, useContext, useState, useRef, useReducer} from "react"
+import React, {useEffect, useState, useRef, useReducer} from "react"
 import {useHistory} from "react-router-dom"
-import {HideNavbarContext, HideSidebarContext, EnableDragContext, EditReplyIDContext, EditReplyFlagContext,
-EditReplyContentContext, EditReplyR18Context, HideTitlebarContext, SessionContext, EmojisContext, MobileContext} from "../Context"
-import {useThemeSelector} from "../store"
+import {useThemeSelector, useInteractionActions, useThreadDialogSelector, useThreadDialogActions, useSessionSelector,
+useLayoutSelector, useCacheSelector} from "../store"
 import functions from "../structures/Functions"
 import "./styles/dialog.less"
 import Draggable from "react-draggable"
@@ -15,17 +14,12 @@ import radioButtonChecked from "../assets/icons/radiobutton-checked.png"
 const EditReplyDialog: React.FunctionComponent = (props) => {
     const [ignored, forceUpdate] = useReducer(x => x + 1, 0)
     const {siteHue, siteSaturation, siteLightness} = useThemeSelector()
-    const {hideNavbar, setHideNavbar} = useContext(HideNavbarContext)
-    const {hideTitlebar, setHideTitlebar} = useContext(HideTitlebarContext)
-    const {hideSidebar, setHideSidebar} = useContext(HideSidebarContext)
-    const {enableDrag, setEnableDrag} = useContext(EnableDragContext)
-    const {editReplyID, setEditReplyID} = useContext(EditReplyIDContext)
-    const {editReplyFlag, setEditReplyFlag} = useContext(EditReplyFlagContext)
-    const {editReplyContent, setEditReplyContent} = useContext(EditReplyContentContext)
-    const {editReplyR18, setEditReplyR18} = useContext(EditReplyR18Context)
-    const {session, setSession} = useContext(SessionContext)
-    const {mobile, setMobile} = useContext(MobileContext)
-    const {emojis, setEmojis} = useContext(EmojisContext)
+    const {setEnableDrag} = useInteractionActions()
+    const {editReplyID, editReplyContent, editReplyR18} = useThreadDialogSelector()
+    const {setEditReplyID, setEditReplyFlag, setEditReplyContent, setEditReplyR18} = useThreadDialogActions()
+    const {session} = useSessionSelector()
+    const {mobile} = useLayoutSelector()
+    const {emojis} = useCacheSelector()
     const [showEmojiDropdown, setShowEmojiDropdown] = useState(false)
     const [error, setError] = useState(false)
     const errorRef = useRef<any>(null)
@@ -106,7 +100,7 @@ const EditReplyDialog: React.FunctionComponent = (props) => {
                 const key = Object.keys(emojis)[k]
                 if (!key) break
                 const appendText = () => {
-                    setEditReplyContent((prev: string) => prev + ` emoji:${key}`)
+                    setEditReplyContent(editReplyContent + ` emoji:${key}`)
                     setShowEmojiDropdown(false)
                 }
                 items.push(
@@ -141,7 +135,7 @@ const EditReplyDialog: React.FunctionComponent = (props) => {
                         </div>
                         {session.showR18 ?
                         <div className="dialog-row">
-                            <img className="dialog-checkbox" src={editReplyR18 ? radioButtonChecked : radioButton} onClick={() => setEditReplyR18((prev: boolean) => !prev)} style={{marginLeft: "0px", filter: getFilter()}}/>
+                            <img className="dialog-checkbox" src={editReplyR18 ? radioButtonChecked : radioButton} onClick={() => setEditReplyR18(!editReplyR18)} style={{marginLeft: "0px", filter: getFilter()}}/>
                             <span className="dialog-text" style={{marginLeft: "10px"}}>R18</span>
                             <img className="dialog-title-img" src={lewdIcon} style={{marginLeft: "15px", height: "50px", filter: getFilter()}}/>
                         </div> : null}

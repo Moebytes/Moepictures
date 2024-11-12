@@ -1,7 +1,7 @@
-import React, {useEffect, useContext, useState, useRef} from "react"
+import React, {useEffect, useState, useRef} from "react"
 import {useHistory} from "react-router-dom"
-import {HashLink as Link} from "react-router-hash-link"
-import {EnableDragContext, FavGroupIDContext, SessionContext, SessionFlagContext} from "../Context"
+import {useInteractionActions, useGroupDialogSelector, useGroupDialogActions, useSessionSelector, 
+useSessionActions} from "../store"
 import {useThemeSelector} from "../store"
 import functions from "../structures/Functions"
 import radioButton from "../assets/icons/radiobutton.png"
@@ -13,10 +13,11 @@ import Draggable from "react-draggable"
 
 const FavgroupDialog: React.FunctionComponent = (props) => {
     const {siteHue, siteSaturation, siteLightness} = useThemeSelector()
-    const {enableDrag, setEnableDrag} = useContext(EnableDragContext)
-    const {session, setSession} = useContext(SessionContext)
-    const {sessionFlag, setSessionFlag} = useContext(SessionFlagContext)
-    const {favGroupID, setFavGroupID} = useContext(FavGroupIDContext)
+    const {setEnableDrag} = useInteractionActions()
+    const {session} = useSessionSelector()
+    const {setSessionFlag} = useSessionActions()
+    const {favGroupID} = useGroupDialogSelector()
+    const {setFavGroupID} = useGroupDialogActions()
     const [submitted, setSubmitted] = useState(false)
     const [name, setName] = useState("")
     const [isPrivate, setIsPrivate] = useState(false)

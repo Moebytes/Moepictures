@@ -1,8 +1,6 @@
-import React, {useContext, useEffect, useRef, useState} from "react"
+import React, {useEffect, useRef, useState} from "react"
 import {useHistory} from "react-router-dom"
-import {SessionContext, SessionFlagContext, MobileContext, DeleteGroupHistoryIDContext, 
-RevertGroupHistoryIDContext, DeleteGroupHistoryFlagContext, RevertGroupHistoryFlagContext} from "../Context"
-import {HashLink as Link} from "react-router-hash-link"
+import {useSessionSelector, useSessionActions, useGroupDialogSelector, useGroupDialogActions, useLayoutSelector} from "../store"
 import functions from "../structures/Functions"
 import groupHistoryRevert from "../assets/icons/revert.png"
 import groupHistoryDelete from "../assets/icons/delete.png"
@@ -29,13 +27,11 @@ interface Props {
 }
 
 const GroupHistoryRow: React.FunctionComponent<Props> = (props) => {
-    const {mobile, setMobile} = useContext(MobileContext)
-    const {session, setSession} = useContext(SessionContext)
-    const {sessionFlag, setSessionFlag} = useContext(SessionFlagContext)
-    const {deleteGroupHistoryID, setDeleteGroupHistoryID} = useContext(DeleteGroupHistoryIDContext)
-    const {revertGroupHistoryID, setRevertGroupHistoryID} = useContext(RevertGroupHistoryIDContext)
-    const {deleteGroupHistoryFlag, setDeleteGroupHistoryFlag} = useContext(DeleteGroupHistoryFlagContext)
-    const {revertGroupHistoryFlag, setRevertGroupHistoryFlag} = useContext(RevertGroupHistoryFlagContext)
+    const {mobile} = useLayoutSelector()
+    const {session} = useSessionSelector()
+    const {setSessionFlag} = useSessionActions()
+    const {deleteGroupHistoryID, revertGroupHistoryID, deleteGroupHistoryFlag, revertGroupHistoryFlag} = useGroupDialogSelector()
+    const {setDeleteGroupHistoryID, setRevertGroupHistoryID, setDeleteGroupHistoryFlag, setRevertGroupHistoryFlag} = useGroupDialogActions()
     const history = useHistory()
     const [img, setImg] = useState("")
     const [postIndex, setPostIndex] = useState(0)

@@ -1,22 +1,19 @@
-import React, {useEffect, useContext, useState, useRef} from "react"
+import React, {useEffect, useState, useRef} from "react"
 import {useHistory} from "react-router-dom"
-import {HashLink as Link} from "react-router-hash-link"
-import {HideNavbarContext, HideSidebarContext, EnableDragContext, MessageFlagContext, 
-ForwardMessageObjContext, HideTitlebarContext, SessionContext, SessionFlagContext} from "../Context"
+import {useInteractionActions, useMessageDialogSelector, useMessageDialogActions, useSessionSelector, 
+useSessionActions, useFlagActions} from "../store"
 import functions from "../structures/Functions"
 import permissions from "../structures/Permissions"
 import "./styles/dialog.less"
 import Draggable from "react-draggable"
 
 const ForwardMessageDialog: React.FunctionComponent = (props) => {
-    const {hideNavbar, setHideNavbar} = useContext(HideNavbarContext)
-    const {hideTitlebar, setHideTitlebar} = useContext(HideTitlebarContext)
-    const {hideSidebar, setHideSidebar} = useContext(HideSidebarContext)
-    const {enableDrag, setEnableDrag} = useContext(EnableDragContext)
-    const {forwardMessageObj, setForwardMessageObj} = useContext(ForwardMessageObjContext)
-    const {messageFlag, setMessageFlag} = useContext(MessageFlagContext)
-    const {session, setSession} = useContext(SessionContext)
-    const {sessionFlag, setSessionFlag} = useContext(SessionFlagContext)
+    const {setEnableDrag} = useInteractionActions()
+    const {forwardMessageObj} = useMessageDialogSelector()
+    const {setForwardMessageObj} = useMessageDialogActions()
+    const {setMessageFlag} = useFlagActions()
+    const {session} = useSessionSelector()
+    const {setSessionFlag} = useSessionActions()
     const [recipients, setRecipients] = useState("")
     const [error, setError] = useState(false)
     const errorRef = useRef<any>(null)

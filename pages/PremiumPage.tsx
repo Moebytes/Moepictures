@@ -1,13 +1,11 @@
-import React, {useContext, useEffect, useState} from "react"
+import React, {useEffect, useState} from "react"
 import {useHistory} from "react-router-dom"
-import {HashLink as Link} from "react-router-hash-link"
 import TitleBar from "../components/TitleBar"
 import NavBar from "../components/NavBar"
 import SideBar from "../components/SideBar"
 import Footer from "../components/Footer"
-import {HideNavbarContext, HideSidebarContext, RelativeContext, HideTitlebarContext, HeaderTextContext, SidebarTextContext,
-MobileContext, EnableDragContext, SessionContext, SessionFlagContext} from "../Context"
-import {useThemeSelector} from "../store"
+import {useInteractionActions, useSessionSelector, useSessionActions,
+useLayoutActions, useActiveActions, useLayoutSelector} from "../store"
 import CaptchaDialog from "../dialogs/CaptchaDialog"
 import premiumStar from "../assets/icons/premium-star.png"
 import premiumImg from "../assets/misc/premiumupgrade.png"
@@ -32,8 +30,8 @@ import "./styles/premiumpage.less"
 import axios from "axios"
 
 const PaymentButton: React.FunctionComponent = (props) => {
-    const {session, setSession} = useContext(SessionContext)
-    const {sessionFlag, setSessionFlag} = useContext(SessionFlagContext)
+    const {session} = useSessionSelector()
+    const {setSessionFlag} = useSessionActions()
     const [paymentLink, setPaymentLink] = useState("")
     const history = useHistory()
 
@@ -60,15 +58,11 @@ const PaymentButton: React.FunctionComponent = (props) => {
 }
 
 const PremiumPage: React.FunctionComponent = (props) => {
-    const {hideNavbar, setHideNavbar} = useContext(HideNavbarContext)
-    const {hideTitlebar, setHideTitlebar} = useContext(HideTitlebarContext)
-    const {hideSidebar, setHideSidebar} = useContext(HideSidebarContext)
-    const {enableDrag, setEnableDrag} = useContext(EnableDragContext)
-    const {relative, setRelative} = useContext(RelativeContext)
-    const {headerText, setHeaderText} = useContext(HeaderTextContext)
-    const {sidebarText, setSidebarText} = useContext(SidebarTextContext)
-    const {session, setSession} = useContext(SessionContext)
-    const {mobile, setMobile} = useContext(MobileContext)
+    const {setHideNavbar, setHideTitlebar, setHideSidebar, setRelative} = useLayoutActions()
+    const {setEnableDrag} = useInteractionActions()
+    const {setHeaderText, setSidebarText} = useActiveActions()
+    const {session} = useSessionSelector()
+    const {mobile} = useLayoutSelector()
     const [premiumFeature, setPremiumFeature] = useState("premium")
     const history = useHistory()
 

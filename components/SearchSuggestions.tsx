@@ -1,7 +1,7 @@
-import React, {useContext, useEffect, useRef, useState, useReducer} from "react"
+import React, {useEffect, useState} from "react"
 import {useHistory} from "react-router-dom"
-import {SessionContext, SessionFlagContext, MobileContext, SearchContext, SearchFlagContext,
-RestrictTypeContext, HideMobileNavbarContext} from "../Context"
+import {useInteractionActions, useThemeSelector, useLayoutSelector, useSessionSelector, useSessionActions, 
+useSearchSelector, useSearchActions} from "../store"
 import "./styles/searchsuggestions.less"
 import functions from "../structures/Functions"
 import permissions from "../structures/Permissions"
@@ -19,13 +19,11 @@ interface Props {
 }
 
 const SearchSuggestions: React.FunctionComponent<Props> = (props) => {
-    const {session, setSession} = useContext(SessionContext)
-    const {sessionFlag, setSessionFlag} = useContext(SessionFlagContext)
-    const {mobile, setMobile} = useContext(MobileContext)
-    const {hideMobileNavbar, setHideMobileNavbar} = useContext(HideMobileNavbarContext)
-    const {search, setSearch} = useContext(SearchContext)
-    const {searchFlag, setSearchFlag} = useContext(SearchFlagContext)
-    const {restrictType, setRestrictType} = useContext(RestrictTypeContext)
+    const {session} = useSessionSelector()
+    const {setSessionFlag} = useSessionActions()
+    const {mobile, hideMobileNavbar} = useLayoutSelector()
+    const {search, restrictType} = useSearchSelector()
+    const {setSearch, setSearchFlag} = useSearchActions()
     const [suggestions, setSuggestions] = useState([]) as any
     const [activeIndex, setActiveIndex] = useState(-1)
     const [active, setActive] = useState(props.active)
@@ -39,11 +37,10 @@ const SearchSuggestions: React.FunctionComponent<Props> = (props) => {
                 props.click(suggestions[activeIndex]?.tag)
                 return setActiveIndex(-1)
             }
-            setSearch((prev: string) => {
-                const parts = prev.split(/ +/g)
-                parts[parts.length - 1] = suggestions[activeIndex]?.tag
-                return parts.join(" ") + " "
-            })
+            const parts = search.split(/ +/g)
+            parts[parts.length - 1] = suggestions[activeIndex]?.tag
+            const newSearch = parts.join(" ") + " "
+            setSearch(newSearch)
             setSearchFlag(true)
             setActiveIndex(-1)
         }
@@ -107,11 +104,10 @@ const SearchSuggestions: React.FunctionComponent<Props> = (props) => {
             const tagClick = () => {
                 if (props.click) return props.click(suggestions[i].tag)
                 history.push(`/posts`)
-                setSearch((prev: string) => {
-                    const parts = prev.split(/ +/g)
-                    parts[parts.length - 1] = suggestions[i].tag
-                    return parts.join(" ")
-                })
+                const parts = search.split(/ +/g)
+                parts[parts.length - 1] = suggestions[i].tag
+                const newSearch = parts.join(" ")
+                setSearch(newSearch)
                 setSearchFlag(true)
             }
             jsx.push(

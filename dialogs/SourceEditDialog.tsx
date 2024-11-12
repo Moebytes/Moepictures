@@ -1,24 +1,20 @@
-import React, {useEffect, useContext, useState, useRef} from "react"
+import React, {useEffect, useState, useRef} from "react"
 import {useHistory} from "react-router-dom"
-import {HashLink as Link} from "react-router-hash-link"
-import {HideNavbarContext, HideSidebarContext, EnableDragContext, SourceEditIDContext, HideTitlebarContext, 
-SessionContext, SessionFlagContext, MobileContext, PostFlagContext, ActionBannerContext} from "../Context"
+import {useInteractionActions, useSessionSelector, useSessionActions, usePostDialogSelector, usePostDialogActions,
+useFlagActions, useActiveActions} from "../store"
 import functions from "../structures/Functions"
 import Draggable from "react-draggable"
 import permissions from "../structures/Permissions"
 import "./styles/dialog.less"
 
 const SourceEditDialog: React.FunctionComponent = (props) => {
-    const {hideNavbar, setHideNavbar} = useContext(HideNavbarContext)
-    const {hideTitlebar, setHideTitlebar} = useContext(HideTitlebarContext)
-    const {hideSidebar, setHideSidebar} = useContext(HideSidebarContext)
-    const {enableDrag, setEnableDrag} = useContext(EnableDragContext)
-    const {session, setSession} = useContext(SessionContext)
-    const {sessionFlag, setSessionFlag} = useContext(SessionFlagContext)
-    const {sourceEditID, setSourceEditID} = useContext(SourceEditIDContext)
-    const {actionBanner, setActionBanner} = useContext(ActionBannerContext)
-    const {mobile, setMobile} = useContext(MobileContext)
-    const {postFlag, setPostFlag} = useContext(PostFlagContext)
+    const {setEnableDrag} = useInteractionActions()
+    const {session} = useSessionSelector()
+    const {setSessionFlag} = useSessionActions()
+    const {setPostFlag} = useFlagActions()
+    const {sourceEditID} = usePostDialogSelector()
+    const {setSourceEditID} = usePostDialogActions()
+    const {setActionBanner} = useActiveActions()
     const [title, setTitle] = useState("")
     const [translatedTitle, setTranslatedTitle] = useState("")
     const [commentary, setCommentary] = useState("")

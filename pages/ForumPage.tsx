@@ -1,4 +1,4 @@
-import React, {useEffect, useContext, useState, useRef, useReducer} from "react"
+import React, {useEffect, useState, useRef} from "react"
 import {useHistory} from "react-router-dom"
 import TitleBar from "../components/TitleBar"
 import NavBar from "../components/NavBar"
@@ -10,10 +10,10 @@ import sort from "../assets/icons/sort.png"
 import sortRev from "../assets/icons/sort-reverse.png"
 import Thread from "../components/Thread"
 import NewThreadDialog from "../dialogs/NewThreadDialog"
-import {EnableDragContext, HideNavbarContext, HideSidebarContext, MobileContext, SessionContext,
-RelativeContext, HideTitlebarContext, ActiveDropdownContext, HeaderTextContext, SidebarTextContext, ShowNewThreadDialogContext, ScrollContext, ForumPageContext, ShowPageDialogContext,
-PageFlagContext, SessionFlagContext} from "../Context"
-import {useThemeSelector} from "../store"
+import {useThemeSelector, useInteractionActions, useSessionSelector, useSessionActions,
+useLayoutActions, useActiveActions, useFlagActions, useLayoutSelector, usePageActions,
+useActiveSelector, useSearchActions, useSearchSelector, usePageSelector, useFlagSelector,
+useMiscDialogActions, useThreadDialogActions, useThreadDialogSelector} from "../store"
 import permissions from "../structures/Permissions"
 import scrollIcon from "../assets/icons/scroll.png"
 import pageIcon from "../assets/icons/page.png"
@@ -24,25 +24,26 @@ import "./styles/itemspage.less"
 let replace = false
 
 const ForumPage: React.FunctionComponent = (props) => {
-    const [ignored, forceUpdate] = useReducer(x => x + 1, 0)
     const {theme, siteHue, siteSaturation, siteLightness} = useThemeSelector()
-    const {enableDrag, setEnableDrag} = useContext(EnableDragContext)
-    const {hideNavbar, setHideNavbar} = useContext(HideNavbarContext)
-    const {hideTitlebar, setHideTitlebar} = useContext(HideTitlebarContext)
-    const {hideSidebar, setHideSidebar} = useContext(HideSidebarContext)
-    const {relative, setRelative} = useContext(RelativeContext)
-    const {activeDropdown, setActiveDropdown} = useContext(ActiveDropdownContext)
-    const {headerText, setHeaderText} = useContext(HeaderTextContext)
-    const {sidebarText, setSidebarText} = useContext(SidebarTextContext)
-    const {forumPage, setForumPage} = useContext(ForumPageContext)
-    const {showPageDialog, setShowPageDialog} = useContext(ShowPageDialogContext)
-    const {pageFlag, setPageFlag} = useContext(PageFlagContext)
-    const {scroll, setScroll} = useContext(ScrollContext)
-    const {mobile, setMobile} = useContext(MobileContext)
-    const {showNewThreadDialog, setShowNewThreadDialog} = useContext(ShowNewThreadDialogContext)
+    const {setHideNavbar, setHideTitlebar, setHideSidebar, setRelative} = useLayoutActions()
+    const {setEnableDrag} = useInteractionActions()
+    const {setHeaderText, setSidebarText} = useActiveActions()
+    const {setRedirect} = useFlagActions()
+    const {session} = useSessionSelector()
+    const {setSessionFlag} = useSessionActions()
+    const {mobile} = useLayoutSelector()
+    const {activeDropdown} = useActiveSelector()
+    const {setActiveDropdown} = useActiveActions()
+    const {scroll} = useSearchSelector()
+    const {setScroll} = useSearchActions()
+    const {forumPage} = usePageSelector()
+    const {setForumPage} = usePageActions()
+    const {setShowPageDialog} = useMiscDialogActions()
+    const {pageFlag} = useFlagSelector()
+    const {setPageFlag} = useFlagActions()
+    const {showNewThreadDialog} = useThreadDialogSelector()
+    const {setShowNewThreadDialog} = useThreadDialogActions()
     const [threadSearchFlag, setThreadSearchFlag] = useState(null) as any
-    const {session, setSession} = useContext(SessionContext)
-    const {sessionFlag, setSessionFlag} = useContext(SessionFlagContext)
     const [sortType, setSortType] = useState("date")
     const [sortReverse, setSortReverse] = useState(false)
     const [threads, setThreads] = useState([]) as any
@@ -254,7 +255,7 @@ const ForumPage: React.FunctionComponent = (props) => {
     useEffect(() => {
         const searchParams = new URLSearchParams(window.location.search)
         if (searchQuery) searchParams.set("query", searchQuery)
-        if (!scroll) searchParams.set("page", forumPage)
+        if (!scroll) searchParams.set("page", String(forumPage))
         if (replace) {
             if (!scroll) history.replace(`${location.pathname}?${searchParams.toString()}`)
             replace = false
@@ -348,7 +349,7 @@ const ForumPage: React.FunctionComponent = (props) => {
     }
 
     const newThreadDialog = () => {
-        setShowNewThreadDialog((prev: boolean) => !prev)
+        setShowNewThreadDialog(!showNewThreadDialog)
     }
 
     const getSortMargin = () => {
@@ -364,7 +365,7 @@ const ForumPage: React.FunctionComponent = (props) => {
     const getSortJSX = () => {
         return (
             <div className="itemsort-item" ref={sortRef}>
-                <img className="itemsort-img" src={sortReverse ? sortRev : sort} style={{filter: getFilter()}} onClick={() => setSortReverse((prev: boolean) => !prev)}/>
+                <img className="itemsort-img" src={sortReverse ? sortRev : sort} style={{filter: getFilter()}} onClick={() => setSortReverse(!sortReverse)}/>
                 <span className="itemsort-text" onClick={() => {setActiveDropdown(activeDropdown === "sort" ? "none" : "sort")}}>{functions.toProperCase(sortType)}</span>
             </div>
         )
@@ -400,11 +401,9 @@ const ForumPage: React.FunctionComponent = (props) => {
     }
 
     const toggleScroll = () => {
-        setScroll((prev: boolean) => {
-            const newValue = !prev
-            localStorage.setItem("scroll", `${newValue}`)
-            return newValue
-        })
+        const newValue = !scroll
+        localStorage.setItem("scroll", `${newValue}`)
+        setScroll(newValue)
     }
 
     const getNewThreadButton = () => {

@@ -1,7 +1,7 @@
-import React, {useEffect, useContext, useState, useRef} from "react"
+import React, {useEffect, useState, useRef} from "react"
 import {useHistory} from "react-router-dom"
-import {HashLink as Link} from "react-router-hash-link"
-import {EnableDragContext, CategorizeTagContext, SessionContext, SessionFlagContext, TagFlagContext} from "../Context"
+import {useInteractionActions, useSessionSelector, useSessionActions, 
+useTagDialogSelector, useTagDialogActions, useFlagActions} from "../store"
 import {useThemeSelector} from "../store"
 import functions from "../structures/Functions"
 import permissions from "../structures/Permissions"
@@ -12,12 +12,13 @@ import checkboxChecked from "../assets/icons/checkbox-checked.png"
 
 const CategorizeTagDialog: React.FunctionComponent = (props) => {
     const {siteHue, siteSaturation, siteLightness} = useThemeSelector()
-    const {enableDrag, setEnableDrag} = useContext(EnableDragContext)
-    const {categorizeTag, setCategorizeTag} = useContext(CategorizeTagContext)
-    const {session, setSession} = useContext(SessionContext)
-    const {sessionFlag, setSessionFlag} = useContext(SessionFlagContext)
+    const {setEnableDrag} = useInteractionActions()
+    const {categorizeTag} = useTagDialogSelector()
+    const {setCategorizeTag} = useTagDialogActions()
+    const {session} = useSessionSelector()
+    const {setSessionFlag} = useSessionActions()
+    const {setTagFlag} = useFlagActions()
     const [category, setCategory] = useState("tag")
-    const {tagFlag, setTagFlag} = useContext(TagFlagContext)
     const [error, setError] = useState(false)
     const errorRef = useRef<any>(null)
     const history = useHistory()

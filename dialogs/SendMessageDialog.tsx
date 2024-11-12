@@ -1,8 +1,7 @@
-import React, {useEffect, useContext, useState, useRef, useReducer} from "react"
+import React, {useEffect, useState, useRef, useReducer} from "react"
 import {useHistory} from "react-router-dom"
-import {HashLink as Link} from "react-router-hash-link"
-import {HideNavbarContext, HideSidebarContext, EnableDragContext, DMTargetContext, HideTitlebarContext,
-SessionContext, SessionFlagContext, EmojisContext, MobileContext} from "../Context"
+import {useInteractionActions, useMessageDialogSelector, useMessageDialogActions, useSessionSelector, 
+useSessionActions, useCacheSelector, useLayoutSelector} from "../store"
 import {useThemeSelector} from "../store"
 import functions from "../structures/Functions"
 import permissions from "../structures/Permissions"
@@ -16,15 +15,13 @@ import Draggable from "react-draggable"
 const SendMessageDialog: React.FunctionComponent = (props) => {
     const [ignored, forceUpdate] = useReducer(x => x + 1, 0)
     const {siteHue, siteSaturation, siteLightness} = useThemeSelector()
-    const {hideNavbar, setHideNavbar} = useContext(HideNavbarContext)
-    const {hideTitlebar, setHideTitlebar} = useContext(HideTitlebarContext)
-    const {hideSidebar, setHideSidebar} = useContext(HideSidebarContext)
-    const {enableDrag, setEnableDrag} = useContext(EnableDragContext)
-    const {dmTarget, setDMTarget} = useContext(DMTargetContext)
-    const {session, setSession} = useContext(SessionContext)
-    const {sessionFlag, setSessionFlag} = useContext(SessionFlagContext)
-    const {mobile, setMobile} = useContext(MobileContext)
-    const {emojis, setEmojis} = useContext(EmojisContext)
+    const {setEnableDrag} = useInteractionActions()
+    const {dmTarget} = useMessageDialogSelector()
+    const {setDMTarget} = useMessageDialogActions()
+    const {session} = useSessionSelector()
+    const {setSessionFlag} = useSessionActions()
+    const {mobile} = useLayoutSelector()
+    const {emojis} = useCacheSelector()
     const [showEmojiDropdown, setShowEmojiDropdown] = useState(false)
     const [recipients, setRecipients] = useState("")
     const [title, setTitle] = useState("")

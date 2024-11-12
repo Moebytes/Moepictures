@@ -1,11 +1,9 @@
-import React, {useContext, useEffect, useState, useReducer} from "react"
+import React, {useEffect, useState} from "react"
 import {useHistory} from "react-router-dom"
-import {HideNavbarContext, HideSortbarContext, EnableDragContext, MobileContext, UnverifiedPostsContext,
-RelativeContext, HideTitlebarContext, SearchContext, SearchFlagContext, PostsContext, ShowDeletePostDialogContext,
-TagsContext, RandomFlagContext, ImageSearchFlagContext, SessionContext, SessionFlagContext, TagEditIDContext, SourceEditIDContext, ShowTakedownPostDialogContext,
-TranslationModeContext, TranslationDrawingEnabledContext, ActionBannerContext, GroupPostIDContext, LockPostIDContext, PrivatePostObjContext, ShowUpscalingDialogContext, ShowCompressingDialogContext} from "../Context"
-import {useThemeSelector} from "../store"
-import {HashLink as Link} from "react-router-hash-link"
+import {useThemeSelector, useSearchActions, useSearchSelector, 
+useFlagActions, useInteractionActions, useCacheActions, useCacheSelector, useActiveActions,
+useSessionSelector, useSessionActions, usePostDialogActions, useGroupDialogActions,
+usePostDialogSelector} from "../store"
 import permissions from "../structures/Permissions"
 import favicon from "../assets/icons/favicon.png"
 import setAvatar from "../assets/icons/setavatar.png"
@@ -61,41 +59,25 @@ interface Props {
 }
 
 const MobileInfo: React.FunctionComponent<Props> = (props) => {
-    const [ignored, forceUpdate] = useReducer(x => x + 1, 0)
     const {siteHue, siteSaturation, siteLightness} = useThemeSelector()
-    const {hideSortbar, setHideSortbar} = useContext(HideSortbarContext)
-    const {hideNavbar, setHideNavbar} = useContext(HideNavbarContext)
-    const {hideTitlebar, setHideTitlebar} = useContext(HideTitlebarContext)
-    const {enableDrag, setEnableDrag} = useContext(EnableDragContext)
-    const {relative, setRelative} = useContext(RelativeContext)
-    const {posts, setPosts} = useContext(PostsContext)
-    const {unverifiedPosts, setUnverifiedPosts} = useContext(UnverifiedPostsContext)
-    const {search, setSearch} = useContext(SearchContext)
-    const {searchFlag, setSearchFlag} = useContext(SearchFlagContext)
-    const {tags, setTags} = useContext(TagsContext)
-    const {randomFlag, setRandomFlag} = useContext(RandomFlagContext)
-    const {imageSearchFlag, setImageSearchFlag} = useContext(ImageSearchFlagContext)
-    const {showDeletePostDialog, setShowDeletePostDialog} = useContext(ShowDeletePostDialogContext)
-    const {showTakedownPostDialog, setShowTakedownPostDialog} = useContext(ShowTakedownPostDialogContext)
-    const {mobile, setMobile} = useContext(MobileContext)
-    const {session, setSession} = useContext(SessionContext)
-    const {sessionFlag, setSessionFlag} = useContext(SessionFlagContext)
+    const {translationMode} = useSearchSelector()
+    const {setSearchFlag, setTranslationMode, setTranslationDrawingEnabled} = useSearchActions()
+    const {posts, unverifiedPosts, tags} = useCacheSelector()
+    const {setTags} = useCacheActions()
+    const {setEnableDrag} = useInteractionActions()
+    const {setRandomFlag, setImageSearchFlag} = useFlagActions()
+    const {session} = useSessionSelector()
+    const {setSessionFlag} = useSessionActions()
+    const {showUpscalingDialog, showCompressingDialog, showDeletePostDialog, showTakedownPostDialog} = usePostDialogSelector()
+    const {setTagEditID, setSourceEditID, setPrivatePostObj, setLockPostID, setShowUpscalingDialog, setShowCompressingDialog, setShowDeletePostDialog, setShowTakedownPostDialog} = usePostDialogActions()
+    const {setActionBanner} = useActiveActions()
+    const {setGroupPostID} = useGroupDialogActions()
     const [maxTags, setMaxTags] = useState(23)
     const [uploaderImage, setUploaderImage] = useState("")
     const [uploaderRole, setUploaderRole] = useState("")
     const [updaterRole, setUpdaterRole] = useState("")
     const [approverRole, setApproverRole] = useState("")
     const [suggestionsActive, setSuggestionsActive] = useState(false)
-    const {tagEditID, setTagEditID} = useContext(TagEditIDContext)
-    const {sourceEditID, setSourceEditID} = useContext(SourceEditIDContext)
-    const {translationMode, setTranslationMode} = useContext(TranslationModeContext)
-    const {translationDrawingEnabled, setTranslationDrawingEnabled} = useContext(TranslationDrawingEnabledContext)
-    const {actionBanner, setActionBanner} = useContext(ActionBannerContext)
-    const {groupPostID, setGroupPostID} = useContext(GroupPostIDContext)
-    const {privatePostObj, setPrivatePostObj} = useContext(PrivatePostObjContext)
-    const {lockPostID, setLockPostID} = useContext(LockPostIDContext)
-    const {showUpscalingDialog, setShowUpscalingDialog} = useContext(ShowUpscalingDialogContext)
-    const {showCompressingDialog, setShowCompressingDialog} = useContext(ShowCompressingDialogContext)
     const history = useHistory()
 
     const getFilter = () => {
@@ -334,7 +316,7 @@ const MobileInfo: React.FunctionComponent<Props> = (props) => {
     }
 
     const deletePost = async () => {
-        setShowDeletePostDialog((prev: boolean) => !prev)
+        setShowDeletePostDialog(!showDeletePostDialog)
     }
 
     const editPost = async () => {
@@ -363,11 +345,11 @@ const MobileInfo: React.FunctionComponent<Props> = (props) => {
     }
 
     const upscalingDialog = () => {
-        setShowUpscalingDialog((prev: boolean) => !prev)
+        setShowUpscalingDialog(!showUpscalingDialog)
     }
 
     const compressingDialog = () => {
-        setShowCompressingDialog((prev: boolean) => !prev)
+        setShowCompressingDialog(!showCompressingDialog)
     }
 
     const approvePost = async () => {
@@ -522,7 +504,7 @@ const MobileInfo: React.FunctionComponent<Props> = (props) => {
     }
 
     const triggerTakedown = () => {
-        setShowTakedownPostDialog((prev: boolean) => !prev)
+        setShowTakedownPostDialog(!showTakedownPostDialog)
     }
 
     const postHistory = () => {

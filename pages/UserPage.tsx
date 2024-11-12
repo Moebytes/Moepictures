@@ -1,16 +1,14 @@
-import React, {useEffect, useContext, useState, useReducer, useRef} from "react"
+import React, {useEffect, useState, useReducer} from "react"
 import {useHistory} from "react-router-dom"
-import {HashLink as Link} from "react-router-hash-link"
 import favicon from "../assets/icons/favicon.png"
 import TitleBar from "../components/TitleBar"
 import NavBar from "../components/NavBar"
 import SideBar from "../components/SideBar"
 import Footer from "../components/Footer"
-import {HideNavbarContext, HideSidebarContext, EnableDragContext, RelativeContext, HideTitlebarContext, MobileContext, CommentSearchFlagContext, PostsContext,
-HeaderTextContext, SidebarTextContext, SessionContext, RedirectContext, SessionFlagContext, ShowDeleteAccountDialogContext, 
-BanNameContext, UnbanNameContext, PromoteNameContext, UpdateUserFlagContext, DMTargetContext, RestrictTypeContext, SearchContext, SearchFlagContext,
-ActiveFavgroupContext} from "../Context"
-import {useThemeSelector} from "../store"
+import {useThemeSelector, useSessionSelector, useSessionActions,
+useLayoutActions, useActiveActions, useFlagActions, useLayoutSelector, useSearchActions, 
+useSearchSelector, useFlagSelector, useMiscDialogActions, useMessageDialogActions,
+useCacheActions} from "../store"
 import functions from "../structures/Functions"
 import permissions from "../structures/Permissions"
 import Carousel from "../components/Carousel"
@@ -42,41 +40,31 @@ let limit = 25
 const UserPage: React.FunctionComponent<Props> = (props) => {
     const [ignored, forceUpdate] = useReducer(x => x + 1, 0)
     const {siteHue, siteSaturation, siteLightness} = useThemeSelector()
-    const {hideNavbar, setHideNavbar} = useContext(HideNavbarContext)
-    const {hideTitlebar, setHideTitlebar} = useContext(HideTitlebarContext)
-    const {hideSidebar, setHideSidebar} = useContext(HideSidebarContext)
-    const {enableDrag, setEnableDrag} = useContext(EnableDragContext)
-    const {relative, setRelative} = useContext(RelativeContext)
-    const {headerText, setHeaderText} = useContext(HeaderTextContext)
-    const {sidebarText, setSidebarText} = useContext(SidebarTextContext)
-    const {session, setSession} = useContext(SessionContext)
-    const {sessionFlag, setSessionFlag} = useContext(SessionFlagContext)
-    const {updateUserFlag, setUpdateUserFlag} = useContext(UpdateUserFlagContext)
-    const {redirect, setRedirect} = useContext(RedirectContext)
-    const {mobile, setMobile} = useContext(MobileContext)
-    const {showDeleteAccountDialog, setShowDeleteAccountDialog} = useContext(ShowDeleteAccountDialogContext)
-    const {commentSearchFlag, setCommentSearchFlag} = useContext(CommentSearchFlagContext)
-    const {banName, setBanName} = useContext(BanNameContext)
-    const {unbanName, setUnbanName} = useContext(UnbanNameContext)
-    const {promoteName, setPromoteName} = useContext(PromoteNameContext)
-    const {dmTarget, setDMTarget} = useContext(DMTargetContext)
-    const {restrictType, setRestrictType} = useContext(RestrictTypeContext)
-    const {search, setSearch} = useContext(SearchContext)
-    const {searchFlag, setSearchFlag} = useContext(SearchFlagContext)
+    const {setHideNavbar, setHideTitlebar, setHideSidebar, setRelative} = useLayoutActions()
+    const {setHeaderText, setSidebarText} = useActiveActions()
+    const {session} = useSessionSelector()
+    const {setSessionFlag} = useSessionActions()
+    const {mobile} = useLayoutSelector()
+    const {setActiveFavgroup} = useActiveActions()
+    const {restrictType} = useSearchSelector()
+    const {setSearch, setSearchFlag} = useSearchActions()
+    const {updateUserFlag} = useFlagSelector()
+    const {setUpdateUserFlag, setCommentSearchFlag} = useFlagActions()
+    const {setBanName, setUnbanName, setPromoteName} = useMiscDialogActions()
+    const {setDMTarget} = useMessageDialogActions()
+    const {setPosts} = useCacheActions()
     const [uploadIndex, setUploadIndex] = useState(0)
     const [favoriteIndex, setFavoriteIndex] = useState(0) as any
     const [uploads, setUploads] = useState([]) as any
     const [appendUploadImages, setAppendUploadImages] = useState([]) as any
     const [favorites, setFavorites] = useState([]) as any
     const [appendFavoriteImages, setAppendFavoriteImages] = useState([]) as any
-    const {activeFavgroup, setActiveFavgroup} = useContext(ActiveFavgroupContext)
     const [comments, setComments] = useState([]) as any
     const [favgroups, setFavgroups] = useState([]) as any
     const [uploadImages, setUploadImages] = useState([]) as any
     const [favoriteImages, setFavoriteImages] = useState([]) as any
     const [user, setUser] = useState(null) as any
     const [defaultIcon, setDefaultIcon] = useState(false)
-    const {posts, setPosts} = useContext(PostsContext)
     const [counts, setCounts] = useState(null as any)
     const history = useHistory()
     const username = props?.match.params.username

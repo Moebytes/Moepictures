@@ -1,6 +1,5 @@
-import React, {useContext, useEffect, useRef, useState, useReducer} from "react"
-import {SessionContext, SessionFlagContext} from "../Context"
-import {useThemeSelector} from "../store"
+import React, {useEffect, useState} from "react"
+import {useThemeSelector, useSessionSelector, useSessionActions} from "../store"
 import Slider from "react-slider"
 import {Rating} from "react-simple-star-rating"
 import functions from "../structures/Functions"
@@ -20,8 +19,8 @@ let cutenessTimer = null as any
 
 const CutenessMeter: React.FunctionComponent<Props> = (props) => {
     const {siteHue, siteSaturation, siteLightness} = useThemeSelector()
-    const {session, setSession} = useContext(SessionContext)
-    const {sessionFlag, setSessionFlag} = useContext(SessionFlagContext)
+    const {session} = useSessionSelector()
+    const {setSessionFlag} = useSessionActions()
     const [cuteness, setCuteness] = useState(0)
     const [averageCuteness, setAverageCuteness] = useState(props.post?.cuteness || 0)
     const [isAverage, setIsAverage] = useState(false)

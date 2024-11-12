@@ -1,18 +1,14 @@
-import React, {useEffect, useContext, useState} from "react"
+import React, {useEffect} from "react"
 import {useHistory} from "react-router-dom"
-import {HashLink as Link} from "react-router-hash-link"
-import {HideNavbarContext, HideSidebarContext, EnableDragContext, DeleteCommentIDContext, DeleteCommentFlagContext, HideTitlebarContext} from "../Context"
+import {useInteractionActions, useCommentDialogSelector, useCommentDialogActions} from "../store"
 import functions from "../structures/Functions"
 import "./styles/dialog.less"
 import Draggable from "react-draggable"
 
 const DeleteCommentDialog: React.FunctionComponent = (props) => {
-    const {hideNavbar, setHideNavbar} = useContext(HideNavbarContext)
-    const {hideTitlebar, setHideTitlebar} = useContext(HideTitlebarContext)
-    const {hideSidebar, setHideSidebar} = useContext(HideSidebarContext)
-    const {enableDrag, setEnableDrag} = useContext(EnableDragContext)
-    const {deleteCommentID, setDeleteCommentID} = useContext(DeleteCommentIDContext)
-    const {deleteCommentFlag, setDeleteCommentFlag} = useContext(DeleteCommentFlagContext)
+    const {setEnableDrag} = useInteractionActions()
+    const {deleteCommentID} = useCommentDialogSelector()
+    const {setDeleteCommentID, setDeleteCommentFlag} = useCommentDialogActions()
     const history = useHistory()
 
     useEffect(() => {

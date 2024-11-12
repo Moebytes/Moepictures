@@ -6,11 +6,10 @@ import TitleBar from "../components/TitleBar"
 import NavBar from "../components/NavBar"
 import SideBar from "../components/SideBar"
 import Footer from "../components/Footer"
-import {HideNavbarContext, HideSidebarContext, EnableDragContext, RelativeContext, HideTitlebarContext, MobileContext, RestrictTypeContext,
-HeaderTextContext, SidebarTextContext, SessionContext, RedirectContext, SessionFlagContext, UserImgContext, ShowDeleteAccountDialogContext, PostsContext,
-CommentSearchFlagContext, UserImgPostContext, R18ConfirmationContext, SearchContext, SearchFlagContext,
-PremiumRequiredContext, ActiveFavgroupContext} from "../Context"
-import {useThemeSelector} from "../store"
+import {useThemeSelector, useSessionSelector, useSessionActions,
+useLayoutActions, useActiveActions, useFlagActions, useLayoutSelector, useSearchActions, 
+useSearchSelector, useFlagSelector, useMiscDialogActions, useMessageDialogActions,
+useCacheActions, useInteractionActions, useMiscDialogSelector} from "../store"
 import functions from "../structures/Functions"
 import Carousel from "../components/Carousel"
 import CommentCarousel from "../components/CommentCarousel"
@@ -39,27 +38,21 @@ let limit = 25
 const UserProfilePage: React.FunctionComponent = (props) => {
     const [ignored, forceUpdate] = useReducer(x => x + 1, 0)
     const {siteHue, siteSaturation, siteLightness} = useThemeSelector()
-    const {hideNavbar, setHideNavbar} = useContext(HideNavbarContext)
-    const {hideTitlebar, setHideTitlebar} = useContext(HideTitlebarContext)
-    const {hideSidebar, setHideSidebar} = useContext(HideSidebarContext)
-    const {enableDrag, setEnableDrag} = useContext(EnableDragContext)
-    const {relative, setRelative} = useContext(RelativeContext)
-    const {headerText, setHeaderText} = useContext(HeaderTextContext)
-    const {sidebarText, setSidebarText} = useContext(SidebarTextContext)
-    const {session, setSession} = useContext(SessionContext)
-    const {sessionFlag, setSessionFlag} = useContext(SessionFlagContext)
-    const {redirect, setRedirect} = useContext(RedirectContext)
-    const {mobile, setMobile} = useContext(MobileContext)
-    const {userImg, setUserImg} = useContext(UserImgContext)
-    const {userImgPost, setUserImgPost} = useContext(UserImgPostContext)
-    const {premiumRequired, setPremiumRequired} = useContext(PremiumRequiredContext)
-    const {r18Confirmation, setR18Confirmation} = useContext(R18ConfirmationContext)
-    const {showDeleteAccountDialog, setShowDeleteAccountDialog} = useContext(ShowDeleteAccountDialogContext)
-    const {commentSearchFlag, setCommentSearchFlag} = useContext(CommentSearchFlagContext)
-    const {restrictType, setRestrictType} = useContext(RestrictTypeContext)
-    const {search, setSearch} = useContext(SearchContext)
-    const {searchFlag, setSearchFlag} = useContext(SearchFlagContext)
-    const {posts, setPosts} = useContext(PostsContext)
+    const {setEnableDrag} = useInteractionActions()
+    const {setHideNavbar, setHideTitlebar, setHideSidebar, setRelative} = useLayoutActions()
+    const {setHeaderText, setSidebarText} = useActiveActions()
+    const {session, userImg, userImgPost} = useSessionSelector()
+    const {setSessionFlag, setUserImg} = useSessionActions()
+    const {mobile} = useLayoutSelector()
+    const {setActiveFavgroup} = useActiveActions()
+    const {restrictType} = useSearchSelector()
+    const {setSearch, setSearchFlag} = useSearchActions()
+    const {updateUserFlag} = useFlagSelector()
+    const {setRedirect, setCommentSearchFlag} = useFlagActions()
+    const {showDeleteAccountDialog} = useMiscDialogSelector()
+    const {setPremiumRequired, setR18Confirmation, setShowDeleteAccountDialog} = useMiscDialogActions()
+    const {setDMTarget} = useMessageDialogActions()
+    const {setPosts} = useCacheActions()
     const bioRef = useRef<any>(null)
     const errorRef = useRef<any>(null)
     const [error, setError] = useState(false)
@@ -74,7 +67,6 @@ const UserProfilePage: React.FunctionComponent = (props) => {
     const [appendUploadImages, setAppendUploadImages] = useState([]) as any
     const [favoriteImages, setFavoriteImages] = useState([]) as any
     const [appendFavoriteImages, setAppendFavoriteImages] = useState([]) as any
-    const {activeFavgroup, setActiveFavgroup} = useContext(ActiveFavgroupContext)
     const [banReason, setBanReason] = useState("")
     const [counts, setCounts] = useState(null as any)
     const [bio, setBio] = useState("")
@@ -359,7 +351,7 @@ const UserProfilePage: React.FunctionComponent = (props) => {
     }
 
     const deleteAccountDialog = () => {
-        setShowDeleteAccountDialog((prev: boolean) => !prev)
+        setShowDeleteAccountDialog(!showDeleteAccountDialog)
     }
 
     const viewFavorites = () => {

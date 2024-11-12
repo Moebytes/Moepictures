@@ -1,7 +1,7 @@
-import React, {useEffect, useContext, useState, useRef} from "react"
+import React, {useEffect, useState, useRef} from "react"
 import {useHistory} from "react-router-dom"
-import {HashLink as Link} from "react-router-hash-link"
-import {EnableDragContext, BulkFavGroupDialogContext, SessionContext, SessionFlagContext, SelectionModeContext, SelectionItemsContext} from "../Context"
+import {useInteractionActions, useSessionSelector, useSessionActions, useGroupDialogSelector, useGroupDialogActions,
+useSearchSelector, useSearchActions} from "../store"
 import {useThemeSelector} from "../store"
 import functions from "../structures/Functions"
 import radioButton from "../assets/icons/radiobutton.png"
@@ -13,16 +13,15 @@ import Draggable from "react-draggable"
 
 const BulkFavgroupDialog: React.FunctionComponent = (props) => {
     const {siteHue, siteSaturation, siteLightness} = useThemeSelector()
-    const {enableDrag, setEnableDrag} = useContext(EnableDragContext)
-    const {session, setSession} = useContext(SessionContext)
-    const {sessionFlag, setSessionFlag} = useContext(SessionFlagContext)
-    const {bulkFavGroupDialog, setBulkFavGroupDialog} = useContext(BulkFavGroupDialogContext)
-    const {selectionMode, setSelectionMode} = useContext(SelectionModeContext)
-    const {selectionItems, setSelectionItems} = useContext(SelectionItemsContext) as {selectionItems: Set<string>, setSelectionItems: any}
-    const [submitted, setSubmitted] = useState(false)
+    const {setEnableDrag} = useInteractionActions()
+    const {session} = useSessionSelector()
+    const {setSessionFlag} = useSessionActions()
+    const {bulkFavGroupDialog} = useGroupDialogSelector()
+    const {setBulkFavGroupDialog} = useGroupDialogActions()
+    const {selectionMode, selectionItems} = useSearchSelector()
+    const {setSelectionMode} = useSearchActions()
     const [name, setName] = useState("")
     const [isPrivate, setIsPrivate] = useState(false)
-    const [favGroups, setFavGroups] = useState([])
     const [error, setError] = useState(false)
     const errorRef = useRef<any>(null)
     const history = useHistory()

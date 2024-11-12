@@ -1,22 +1,18 @@
-import React, {useEffect, useContext, useState} from "react"
-import {HashLink as Link} from "react-router-hash-link"
-import {HideNavbarContext, HideSidebarContext, EnableDragContext, ShowDownloadDialogContext, PostAmountContext, 
-PostsContext, SizeTypeContext, DownloadIDsContext, DownloadFlagContext, HideTitlebarContext} from "../Context"
+import React, {useEffect, useState} from "react"
+import {useInteractionActions, useMiscDialogSelector, useMiscDialogActions,
+useFlagSelector, useFlagActions, useCacheSelector, useSearchSelector} from "../store"
 import functions from "../structures/Functions"
 import "./styles/dialog.less"
 import Draggable from "react-draggable"
 
 const DownloadDialog: React.FunctionComponent = (props) => {
-    const {hideNavbar, setHideNavbar} = useContext(HideNavbarContext)
-    const {hideTitlebar, setHideTitlebar} = useContext(HideTitlebarContext)
-    const {hideSidebar, setHideSidebar} = useContext(HideSidebarContext)
-    const {enableDrag, setEnableDrag} = useContext(EnableDragContext)
-    const {showDownloadDialog, setShowDownloadDialog} = useContext(ShowDownloadDialogContext)
-    const {postAmount, setPostAmount} = useContext(PostAmountContext)
-    const {posts, setPosts} = useContext(PostsContext)
-    const {sizeType, setSizeType} = useContext(SizeTypeContext)
-    const {downloadIDs, setDownloadIDs} = useContext(DownloadIDsContext)
-    const {downloadFlag, setDownloadFlag} = useContext(DownloadFlagContext)
+    const {setEnableDrag} = useInteractionActions()
+    const {showDownloadDialog} = useMiscDialogSelector()
+    const {setShowDownloadDialog} = useMiscDialogActions()
+    const {postAmount} = useFlagSelector()
+    const {posts} = useCacheSelector()
+    const {sizeType} = useSearchSelector()
+    const {setDownloadIDs, setDownloadFlag} = useFlagActions()
     const [offsetField, setOffsetField] = useState("")
     const [amountField, setAmountField] = useState("")
 

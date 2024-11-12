@@ -1,8 +1,6 @@
-import React, {useContext, useEffect, useRef, useState} from "react"
+import React, {useEffect, useRef, useState} from "react"
 import {useHistory} from "react-router-dom"
-import {SessionContext, SessionFlagContext, MobileContext, DeleteTagHistoryIDContext, 
-RevertTagHistoryIDContext, DeleteTagHistoryFlagContext, RevertTagHistoryFlagContext} from "../Context"
-import {HashLink as Link} from "react-router-hash-link"
+import {useSessionSelector, useSessionActions, useTagDialogSelector, useTagDialogActions} from "../store"
 import functions from "../structures/Functions"
 import tagHistoryRevert from "../assets/icons/revert.png"
 import tagHistoryDelete from "../assets/icons/delete.png"
@@ -35,13 +33,10 @@ interface Props {
 }
 
 const TagHistoryRow: React.FunctionComponent<Props> = (props) => {
-    const {mobile, setMobile} = useContext(MobileContext)
-    const {session, setSession} = useContext(SessionContext)
-    const {sessionFlag, setSessionFlag} = useContext(SessionFlagContext)
-    const {deleteTagHistoryID, setDeleteTagHistoryID} = useContext(DeleteTagHistoryIDContext)
-    const {revertTagHistoryID, setRevertTagHistoryID} = useContext(RevertTagHistoryIDContext)
-    const {deleteTagHistoryFlag, setDeleteTagHistoryFlag} = useContext(DeleteTagHistoryFlagContext)
-    const {revertTagHistoryFlag, setRevertTagHistoryFlag} = useContext(RevertTagHistoryFlagContext)
+    const {session} = useSessionSelector()
+    const {setSessionFlag} = useSessionActions()
+    const {deleteTagHistoryID, revertTagHistoryID, deleteTagHistoryFlag, revertTagHistoryFlag} = useTagDialogSelector()
+    const {setDeleteTagHistoryID, setRevertTagHistoryID, setDeleteTagHistoryFlag, setRevertTagHistoryFlag} = useTagDialogActions()
     const history = useHistory()
     const [img, setImg] = useState("")
     const [userRole, setUserRole] = useState("")

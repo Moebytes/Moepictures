@@ -1,4 +1,4 @@
-import React, {useEffect, useContext, useState, useRef, useReducer} from "react"
+import React, {useEffect, useState, useRef, useReducer} from "react"
 import {useHistory} from "react-router-dom"
 import TitleBar from "../components/TitleBar"
 import NavBar from "../components/NavBar"
@@ -6,12 +6,10 @@ import SideBar from "../components/SideBar"
 import Footer from "../components/Footer"
 import functions from "../structures/Functions"
 import Reply from "../components/Reply"
-import {EnableDragContext, HideNavbarContext, HideSidebarContext, MobileContext, SessionContext,
-RelativeContext, HideTitlebarContext, ActiveDropdownContext, HeaderTextContext, SidebarTextContext, ScrollContext, 
-ThreadPageContext, ShowPageDialogContext, PageFlagContext,
-DeleteThreadIDContext, DeleteThreadFlagContext, EditThreadIDContext, EditThreadFlagContext, EditThreadTitleContext,
-EditThreadContentContext, EditThreadR18Context, QuoteTextContext, ReportThreadIDContext, SessionFlagContext, EmojisContext} from "../Context"
-import {useThemeSelector} from "../store"
+import {useThemeSelector, useInteractionActions, useSessionSelector, useSessionActions,
+useLayoutActions, useActiveActions, useFlagActions, useLayoutSelector, usePageActions,
+useActiveSelector, useSearchActions, useSearchSelector, usePageSelector, useFlagSelector,
+useMiscDialogActions, useThreadDialogActions, useThreadDialogSelector, useCacheSelector} from "../store"
 import permissions from "../structures/Permissions"
 import jsxFunctions from "../structures/JSXFunctions"
 import PageDialog from "../dialogs/PageDialog"
@@ -51,33 +49,25 @@ interface Props {
 }
 
 const ThreadPage: React.FunctionComponent<Props> = (props) => {
-    const [ignored, forceUpdate] = useReducer(x => x + 1, 0)
     const {siteHue, siteSaturation, siteLightness} = useThemeSelector()
-    const {enableDrag, setEnableDrag} = useContext(EnableDragContext)
-    const {hideNavbar, setHideNavbar} = useContext(HideNavbarContext)
-    const {hideTitlebar, setHideTitlebar} = useContext(HideTitlebarContext)
-    const {hideSidebar, setHideSidebar} = useContext(HideSidebarContext)
-    const {relative, setRelative} = useContext(RelativeContext)
-    const {activeDropdown, setActiveDropdown} = useContext(ActiveDropdownContext)
-    const {headerText, setHeaderText} = useContext(HeaderTextContext)
-    const {sidebarText, setSidebarText} = useContext(SidebarTextContext)
-    const {threadPage, setThreadPage} = useContext(ThreadPageContext)
-    const {showPageDialog, setShowPageDialog} = useContext(ShowPageDialogContext)
-    const {quoteText, setQuoteText} = useContext(QuoteTextContext)
-    const {pageFlag, setPageFlag} = useContext(PageFlagContext)
-    const {scroll, setScroll} = useContext(ScrollContext)
-    const {mobile, setMobile} = useContext(MobileContext)
-    const {session, setSession} = useContext(SessionContext)
-    const {sessionFlag, setSessionFlag} = useContext(SessionFlagContext)
-    const {deleteThreadID, setDeleteThreadID} = useContext(DeleteThreadIDContext)
-    const {deleteThreadFlag, setDeleteThreadFlag} = useContext(DeleteThreadFlagContext)
-    const {editThreadID, setEditThreadID} = useContext(EditThreadIDContext)
-    const {editThreadFlag, setEditThreadFlag} = useContext(EditThreadFlagContext)
-    const {editThreadTitle, setEditThreadTitle} = useContext(EditThreadTitleContext)
-    const {editThreadContent, setEditThreadContent} = useContext(EditThreadContentContext)
-    const {editThreadR18, setEditThreadR18} = useContext(EditThreadR18Context)
-    const {reportThreadID, setReportThreadID} = useContext(ReportThreadIDContext)
-    const {emojis, setEmojis} = useContext(EmojisContext)
+    const {setHideNavbar, setHideTitlebar, setHideSidebar, setRelative} = useLayoutActions()
+    const {setEnableDrag} = useInteractionActions()
+    const {setHeaderText, setSidebarText} = useActiveActions()
+    const {session} = useSessionSelector()
+    const {setSessionFlag, setHasNotification} = useSessionActions()
+    const {mobile} = useLayoutSelector()
+    const {quoteText} = useActiveSelector()
+    const {setActiveDropdown, setQuoteText} = useActiveActions()
+    const {scroll} = useSearchSelector()
+    const {setScroll} = useSearchActions()
+    const {threadPage} = usePageSelector()
+    const {setThreadPage} = usePageActions()
+    const {setShowPageDialog} = useMiscDialogActions()
+    const {pageFlag} = useFlagSelector()
+    const {setPageFlag} = useFlagActions()
+    const {deleteThreadID, deleteThreadFlag, editThreadID, editThreadFlag, editThreadTitle, editThreadContent, editThreadR18} = useThreadDialogSelector()
+    const {setDeleteThreadID, setDeleteThreadFlag, setEditThreadID, setEditThreadFlag, setEditThreadTitle, setEditThreadContent, setEditThreadR18, setReportThreadID} = useThreadDialogActions()
+    const {emojis} = useCacheSelector()
     const [thread, setThread] = useState(null) as any
     const [replies, setReplies] = useState([]) as any
     const [index, setIndex] = useState(0)

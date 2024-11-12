@@ -1,11 +1,7 @@
-import React, {useEffect, useContext, useState, useRef} from "react"
-import {EnableDragContext, HideNavbarContext, HideSidebarContext, RelativeContext, 
-HideTitlebarContext, MobileContext, ActiveDropdownContext, HeaderTextContext, SidebarTextContext, SessionContext, SessionFlagContext, SearchContext, 
-SearchFlagContext, TakedownTagContext, DeleteTagFlagContext, DeleteTagIDContext, EditTagTypeContext, EditTagReasonContext, EditTagImageContext, 
-EditTagKeyContext, EditTagSocialContext, EditTagTwitterContext, EditTagWebsiteContext, EditTagFandomContext, EditTagAliasesContext, EditTagImplicationsContext, 
-EditTagDescriptionContext, EditTagIDContext, EditTagFlagContext, EditTagPixivTagsContext, EditTagR18Context, RestrictTypeContext, RevertTagHistoryIDContext, 
-RevertTagHistoryFlagContext, PostsContext, TagFlagContext} from "../Context"
-import {useThemeSelector} from "../store"
+import React, {useEffect, useState, useRef} from "react"
+import {useThemeSelector, useSessionSelector, useSessionActions, useLayoutActions, useActiveActions, useFlagActions, 
+useLayoutSelector, useFlagSelector, useCacheActions, useInteractionActions, useSearchActions, useTagDialogActions,
+useTagDialogSelector, useSearchSelector} from "../store"
 import {useHistory, useLocation} from "react-router-dom"
 import TitleBar from "../components/TitleBar"
 import NavBar from "../components/NavBar"
@@ -42,43 +38,20 @@ let limit = 25
 
 const TagPage: React.FunctionComponent<Props> = (props) => {
     const {siteHue, siteSaturation, siteLightness} = useThemeSelector()
-    const {enableDrag, setEnableDrag} = useContext(EnableDragContext)
-    const {hideNavbar, setHideNavbar} = useContext(HideNavbarContext)
-    const {hideTitlebar, setHideTitlebar} = useContext(HideTitlebarContext)
-    const {hideSidebar, setHideSidebar} = useContext(HideSidebarContext)
-    const {relative, setRelative} = useContext(RelativeContext)
-    const {activeDropdown, setActiveDropdown} = useContext(ActiveDropdownContext)
-    const {headerText, setHeaderText} = useContext(HeaderTextContext)
-    const {sidebarText, setSidebarText} = useContext(SidebarTextContext)
-    const {session, setSession} = useContext(SessionContext)
-    const {sessionFlag, setSessionFlag} = useContext(SessionFlagContext)
-    const {mobile, setMobile} = useContext(MobileContext)
-    const {search, setSearch} = useContext(SearchContext)
-    const {searchFlag, setSearchFlag} = useContext(SearchFlagContext)
-    const {takedownTag, setTakedownTag} = useContext(TakedownTagContext)
-    const {deleteTagID, setDeleteTagID} = useContext(DeleteTagIDContext)
-    const {deleteTagFlag, setDeleteTagFlag} = useContext(DeleteTagFlagContext)
-    const {editTagReason, setEditTagReason} = useContext(EditTagReasonContext)
-    const {editTagFlag, setEditTagFlag} = useContext(EditTagFlagContext)
-    const {editTagID, setEditTagID} = useContext(EditTagIDContext)
-    const {editTagAliases, setEditTagAliases} = useContext(EditTagAliasesContext)
-    const {editTagImplications, setEditTagImplications} = useContext(EditTagImplicationsContext)
-    const {editTagDescription, setEditTagDescription} = useContext(EditTagDescriptionContext)
-    const {editTagType, setEditTagType} = useContext(EditTagTypeContext)
-    const {editTagSocial, setEditTagSocial} = useContext(EditTagSocialContext)
-    const {editTagTwitter, setEditTagTwitter} = useContext(EditTagTwitterContext)
-    const {editTagWebsite, setEditTagWebsite} = useContext(EditTagWebsiteContext)
-    const {editTagFandom, setEditTagFandom} = useContext(EditTagFandomContext)
-    const {editTagPixivTags, setEditTagPixivTags} = useContext(EditTagPixivTagsContext)
-    const {editTagR18, setEditTagR18} = useContext(EditTagR18Context)
-    const {editTagImage, setEditTagImage} = useContext(EditTagImageContext)
-    const {editTagKey, setEditTagKey} = useContext(EditTagKeyContext)
-    const {revertTagHistoryID, setRevertTagHistoryID} = useContext(RevertTagHistoryIDContext)
-    const {revertTagHistoryFlag, setRevertTagHistoryFlag} = useContext(RevertTagHistoryFlagContext)
-    const {restrictType, setRestrictType} = useContext(RestrictTypeContext)
-    const {posts, setPosts} = useContext(PostsContext)
+    const {setEnableDrag} = useInteractionActions()
+    const {setHideNavbar, setHideTitlebar, setHideSidebar, setRelative} = useLayoutActions()
+    const {setSidebarText, setHeaderText, setActiveDropdown} = useActiveActions()
+    const {session} = useSessionSelector()
+    const {setSessionFlag} = useSessionActions()
+    const {mobile} = useLayoutSelector()
+    const {setPosts} = useCacheActions()
+    const {tagFlag} = useFlagSelector()
+    const {setTagFlag} = useFlagActions()
+    const {restrictType} = useSearchSelector()
+    const {setSearch, setSearchFlag} = useSearchActions()
+    const {editTagObj, editTagFlag, deleteTagID, deleteTagFlag, revertTagHistoryID, revertTagHistoryFlag} = useTagDialogSelector()
+    const {setEditTagObj, setEditTagFlag, setTakedownTag, setDeleteTagID, setDeleteTagFlag, setRevertTagHistoryID, setRevertTagHistoryFlag} = useTagDialogActions()
     const [tag, setTag] = useState(null) as any
-    const {tagFlag, setTagFlag} = useContext(TagFlagContext)
     const [tagPosts, setTagPosts] = useState([]) as any
     const [postImages, setPostImages] = useState([]) as any
     const [appendImages, setAppendImages] = useState([]) as any
@@ -239,56 +212,59 @@ const TagPage: React.FunctionComponent<Props> = (props) => {
 
     const editTag = async () => {
         let image = null as any
-        if (editTagImage) {
-            if (editTagImage === "delete") {
+        if (editTagObj.image) {
+            if (editTagObj.image === "delete") {
                 image = ["delete"]
             } else {
-                const arrayBuffer = await fetch(editTagImage).then((r) => r.arrayBuffer())
+                const arrayBuffer = await fetch(editTagObj.image).then((r) => r.arrayBuffer())
                 const bytes = new Uint8Array(arrayBuffer)
                 image = Object.values(bytes)
             }
         }
         try {
-            await functions.put("/api/tag/edit", {tag: tag.tag, key: editTagKey, description: editTagDescription,
-            image, aliases: editTagAliases, implications: editTagImplications, pixivTags: editTagPixivTags, social: editTagSocial, twitter: editTagTwitter,
-            website: editTagWebsite, fandom: editTagFandom, r18: editTagR18, reason: editTagReason}, session, setSessionFlag)
-            history.push(`/tag/${editTagKey}`)
+            await functions.put("/api/tag/edit", {tag: tag.tag, key: editTagObj.key, description: editTagObj.description,
+            image, aliases: editTagObj.aliases, implications: editTagObj.implications, pixivTags: editTagObj.pixivTags, social: editTagObj.social, twitter: editTagObj.twitter,
+            website: editTagObj.website, fandom: editTagObj.fandom, r18: editTagObj.r18, reason: editTagObj.reason}, session, setSessionFlag)
+            history.push(`/tag/${editTagObj.key}`)
             setTagFlag(true)
         } catch (err: any) {
             if (err.response?.data.includes("No permission to edit implications")) {
-                await functions.post("/api/tag/edit/request", {tag: tag.tag, key: editTagKey, description: editTagDescription, image, aliases: editTagAliases, 
-                implications: editTagImplications, pixivTags: editTagPixivTags, social: editTagSocial, twitter: editTagTwitter, website: editTagWebsite, fandom: editTagFandom, 
-                r18: editTagR18, reason: editTagReason}, session, setSessionFlag)
-                setEditTagID({tag: tag.tag, failed: "implication"})
+                await functions.post("/api/tag/edit/request", {tag: tag.tag, key: editTagObj.key, description: editTagObj.description, image, aliases: editTagObj.aliases, 
+                implications: editTagObj.implications, pixivTags: editTagObj.pixivTags, social: editTagObj.social, twitter: editTagObj.twitter, website: editTagObj.website, fandom: editTagObj.fandom, 
+                r18: editTagObj.r18, reason: editTagObj.reason}, session, setSessionFlag)
+                setEditTagObj({tag: tag.tag, failed: "implication"})
             } else {
-                setEditTagID({tag: tag.tag, failed: true})
+                setEditTagObj({tag: tag.tag, failed: true})
             }
         }
     }
 
     useEffect(() => {
-        if (editTagFlag && editTagID?.tag === tag.tag) {
+        if (editTagFlag && editTagObj?.tag === tag.tag) {
             editTag()
             setEditTagFlag(false)
-            setEditTagID(null)
+            setEditTagObj(null)
         }
     }, [editTagFlag, session])
 
     const showTagEditDialog = async () => {
-        setEditTagKey(tag.tag)
-        setEditTagDescription(tag.description)
-        setEditTagImage(tag.image ? functions.getTagLink(tag.type, tag.image, tag.imageHash) : null)
-        setEditTagAliases(tag.aliases?.[0] ? tag.aliases.map((a: any) => a.alias ? a.alias : a) : [])
-        setEditTagImplications(tag.implications?.[0] ? tag.implications.map((i: any) => i.implication ? i.implication : i) : [])
-        setEditTagPixivTags(tag.pixivTags?.[0] ? tag.pixivTags : [])
-        setEditTagType(tag.type)
-        setEditTagSocial(tag.social)
-        setEditTagTwitter(tag.twitter)
-        setEditTagWebsite(tag.website)
-        setEditTagFandom(tag.fandom)
-        setEditTagR18(tag.r18)
-        setEditTagReason("")
-        setEditTagID({tag: tag.tag, failed: false})
+        setEditTagObj({
+            failed: false,
+            tag: tag.tag,
+            key: tag.tag,
+            description: tag.description,
+            image: tag.image ? functions.getTagLink(tag.type, tag.image, tag.imageHash) : null,
+            aliases: tag.aliases?.[0] ? tag.aliases.map((a: any) => a.alias ? a.alias : a) : [],
+            implications: tag.implications?.[0] ? tag.implications.map((i: any) => i.implication ? i.implication : i) : [],
+            pixivTags: tag.pixivTags?.[0] ? tag.pixivTags : [],
+            type: tag.type,
+            social: tag.social,
+            twitter: tag.twitter,
+            website: tag.website,
+            fandom: tag.fandom,
+            r18: tag.r18,
+            reason: ""
+        })
     }
 
     const deleteTag = async () => {

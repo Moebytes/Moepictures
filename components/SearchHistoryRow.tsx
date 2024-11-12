@@ -1,7 +1,6 @@
-import React, {useContext, useEffect, useRef, useState} from "react"
+import React, {useEffect, useRef, useState} from "react"
 import {useHistory} from "react-router-dom"
-import {SessionContext, MobileContext, SessionFlagContext, DeleteSearchHistoryIDContext,
-DeleteSearchHistoryFlagContext} from "../Context"
+import {useSessionSelector, useSessionActions, useSearchDialogSelector, useSearchDialogActions, useLayoutSelector} from "../store"
 import functions from "../structures/Functions"
 import searchHistoryDelete from "../assets/icons/delete.png"
 import "./styles/historyrow.less"
@@ -13,11 +12,11 @@ interface Props {
 }
 
 const SearchHistoryRow: React.FunctionComponent<Props> = (props) => {
-    const {mobile, setMobile} = useContext(MobileContext)
-    const {session, setSession} = useContext(SessionContext)
-    const {sessionFlag, setSessionFlag} = useContext(SessionFlagContext)
-    const {deleteSearchHistoryID, setDeleteSearchHistoryID} = useContext(DeleteSearchHistoryIDContext)
-    const {deleteSearchHistoryFlag, setDeleteSearchHistoryFlag} = useContext(DeleteSearchHistoryFlagContext)
+    const {mobile} = useLayoutSelector()
+    const {session} = useSessionSelector()
+    const {setSessionFlag} = useSessionActions()
+    const {deleteSearchHistoryID, deleteSearchHistoryFlag} = useSearchDialogSelector()
+    const {setDeleteSearchHistoryID, setDeleteSearchHistoryFlag} = useSearchDialogActions()
     const [img, setImg] = useState("")
     const ref = useRef(null) as any
     const history = useHistory()

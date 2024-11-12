@@ -1,21 +1,15 @@
-import React, {useEffect, useContext, useState, useRef} from "react"
+import React, {useEffect, useState, useRef} from "react"
 import {useHistory} from "react-router-dom"
-import {HashLink as Link} from "react-router-hash-link"
-import {HideNavbarContext, HideSidebarContext, EnableDragContext, ShowPageDialogContext, PageFlagContext,
-HideTitlebarContext, MobileScrollingContext, SessionContext} from "../Context"
+import {useInteractionActions, useMiscDialogSelector, useMiscDialogActions, useFlagActions} from "../store"
 import functions from "../structures/Functions"
 import Draggable from "react-draggable"
 import "./styles/dialog.less"
 
 const PageDialog: React.FunctionComponent = (props) => {
-    const {hideNavbar, setHideNavbar} = useContext(HideNavbarContext)
-    const {hideTitlebar, setHideTitlebar} = useContext(HideTitlebarContext)
-    const {hideSidebar, setHideSidebar} = useContext(HideSidebarContext)
-    const {enableDrag, setEnableDrag} = useContext(EnableDragContext)
-    const {mobileScrolling, setMobileScrolling} = useContext(MobileScrollingContext)
-    const {session, setSession} = useContext(SessionContext)
-    const {showPageDialog, setShowPageDialog} = useContext(ShowPageDialogContext)
-    const {pageFlag, setPageFlag} = useContext(PageFlagContext)
+    const {setEnableDrag, setMobileScrolling} = useInteractionActions()
+    const {showPageDialog} = useMiscDialogSelector()
+    const {setShowPageDialog} = useMiscDialogActions()
+    const {setPageFlag} = useFlagActions()
     const [pageField, setPageField] = useState("")
     const history = useHistory()
 

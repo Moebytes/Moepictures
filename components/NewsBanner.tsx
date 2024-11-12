@@ -1,15 +1,14 @@
 import React, {useContext, useEffect, useState} from "react"
 import {useHistory} from "react-router-dom"
-import {MobileContext, SessionContext, SessionFlagContext, NewsBannerContext} from "../Context"
-import {HashLink as Link} from "react-router-hash-link"
+import {useActiveSelector, useActiveActions, useSessionSelector, useSessionActions} from "../store"
 import functions from "../structures/Functions"
 import "./styles/newsbanner.less"
 
 const NewsBanner: React.FunctionComponent = (props) => {
-    const {mobile, setMobile} = useContext(MobileContext)
-    let {newsBanner, setNewsBanner} = useContext(NewsBannerContext)
-    const {session, setSession} = useContext(SessionContext)
-    const {sessionFlag, setSessionFlag} = useContext(SessionFlagContext)
+    const {newsBanner} = useActiveSelector()
+    const {setNewsBanner} = useActiveActions()
+    const {session} = useSessionSelector()
+    const {setSessionFlag} = useSessionActions()
     const history = useHistory()
 
     const updateBanner = async () => {

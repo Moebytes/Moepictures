@@ -1,8 +1,7 @@
-import React, {useContext, useEffect, useRef, useState} from "react"
+import React, {useEffect, useRef, useState} from "react"
 import {useHistory} from "react-router-dom"
-import {SessionContext, EnableDragContext, PostsContext, VisiblePostsContext, SizeTypeContext, PageContext, ScrollContext,
-SearchContext, SearchFlagContext, MobileContext, SessionFlagContext} from "../Context"
-import {HashLink as Link} from "react-router-hash-link"
+import {useLayoutSelector, useSessionSelector, useSessionActions, 
+useSearchSelector, useSearchActions, useCacheSelector, usePageSelector} from "../store"
 import functions from "../structures/Functions"
 import "./styles/tagbanner.less"
 
@@ -11,18 +10,13 @@ let deltaCounter = 0
 let lastDeltaY = 0
 
 const TagBanner: React.FunctionComponent = (props) => {
-    const [hover, setHover] = useState(false)
-    const {enableDrag, setEnableDrag} = useContext(EnableDragContext)
-    const {mobile, setMobile} = useContext(MobileContext)
-    const {session, setSession} = useContext(SessionContext)
-    const {sessionFlag, setSessionFlag} = useContext(SessionFlagContext)
-    const {search, setSearch} = useContext(SearchContext)
-    const {searchFlag, setSearchFlag} = useContext(SearchFlagContext)
-    const {posts, setPosts} = useContext(PostsContext) as any
-    const {visiblePosts, setVisiblePosts} = useContext(VisiblePostsContext)
-    const {sizeType, setSizeType} = useContext(SizeTypeContext)
-    const {page, setPage} = useContext(PageContext)
-    const {scroll, setScroll} = useContext(ScrollContext)
+    const {session} = useSessionSelector()
+    const {setSessionFlag} = useSessionActions()
+    const {mobile} = useLayoutSelector()
+    const {sizeType, scroll} = useSearchSelector()
+    const {setSearch, setSearchFlag} = useSearchActions()
+    const {posts, visiblePosts} = useCacheSelector()
+    const {page} = usePageSelector()
     const [dragging, setDragging] = useState(false)
     const [bannerTags, setBannerTags] = useState([]) as any
     const [trackPad, setTrackPad] = useState(false)

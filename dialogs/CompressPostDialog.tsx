@@ -1,8 +1,7 @@
 import React, {useEffect, useContext, useState, useRef} from "react"
 import {useHistory} from "react-router-dom"
-import {HashLink as Link} from "react-router-hash-link"
-import {HideNavbarContext, HideSidebarContext, EnableDragContext, ShowCompressingDialogContext, HideTitlebarContext,
-SessionContext, SessionFlagContext, PostFlagContext} from "../Context"
+import {useInteractionActions, useSessionSelector, useSessionActions, 
+usePostDialogSelector, usePostDialogActions, useFlagActions} from "../store"
 import {useThemeSelector} from "../store"
 import functions from "../structures/Functions"
 import Draggable from "react-draggable"
@@ -19,14 +18,12 @@ interface Props {
 
 const CompressPostDialog: React.FunctionComponent<Props> = (props) => {
     const {siteHue, siteSaturation, siteLightness} = useThemeSelector()
-    const {hideNavbar, setHideNavbar} = useContext(HideNavbarContext)
-    const {hideTitlebar, setHideTitlebar} = useContext(HideTitlebarContext)
-    const {hideSidebar, setHideSidebar} = useContext(HideSidebarContext)
-    const {enableDrag, setEnableDrag} = useContext(EnableDragContext)
-    const {showCompressingDialog, setShowCompressingDialog} = useContext(ShowCompressingDialogContext)
-    const {postFlag, setPostFlag} = useContext(PostFlagContext)
-    const {session, setSession} = useContext(SessionContext)
-    const {sessionFlag, setSessionFlag} = useContext(SessionFlagContext)
+    const {setEnableDrag} = useInteractionActions()
+    const {showCompressingDialog} = usePostDialogSelector()
+    const {setShowCompressingDialog} = usePostDialogActions()
+    const {setPostFlag} = useFlagActions()
+    const {session} = useSessionSelector()
+    const {setSessionFlag} = useSessionActions()
     const [quality, setQuality] = useState("95")
     const [format, setFormat] = useState(props.post.type === "animation" ? "webp" : "jpg")
     const [maxDimension, setMaxDimension] = useState("2000")
