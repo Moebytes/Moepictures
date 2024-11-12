@@ -452,7 +452,7 @@ const HistoryPage: React.FunctionComponent = () => {
     useEffect(() => {
         const searchParams = new URLSearchParams(window.location.search)
         if (historyTab) searchParams.set("type", historyTab)
-        if (!scroll) searchParams.set("page", String(historyPage))
+        if (!scroll) searchParams.set("page", String(historyPage || ""))
         if (replace) {
             if (!scroll) history.replace(`${location.pathname}?${searchParams.toString()}`)
             replace = false
@@ -480,7 +480,7 @@ const HistoryPage: React.FunctionComponent = () => {
     }, [pageFlag])
 
     useEffect(() => {
-        localStorage.setItem("historyPage", String(historyPage))
+        localStorage.setItem("historyPage", String(historyPage || ""))
         localStorage.setItem("historyTab", String(historyTab))
     }, [historyPage, historyTab])
 

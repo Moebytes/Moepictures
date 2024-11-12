@@ -248,7 +248,7 @@ const CharactersPage: React.FunctionComponent = (props) => {
     useEffect(() => {
         const searchParams = new URLSearchParams(window.location.search)
         if (searchQuery) searchParams.set("query", searchQuery)
-        if (!scroll) searchParams.set("page", String(charactersPage))
+        if (!scroll) searchParams.set("page", String(charactersPage || ""))
         if (replace) {
             if (!scroll) history.replace(`${location.pathname}?${searchParams.toString()}`)
             replace = false
@@ -276,7 +276,7 @@ const CharactersPage: React.FunctionComponent = (props) => {
     }, [pageFlag])
 
     useEffect(() => {
-        localStorage.setItem("charactersPage", String(charactersPage))
+        localStorage.setItem("charactersPage", String(charactersPage || ""))
     }, [charactersPage])
 
     const maxPage = () => {

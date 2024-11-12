@@ -255,7 +255,7 @@ const ForumPage: React.FunctionComponent = (props) => {
     useEffect(() => {
         const searchParams = new URLSearchParams(window.location.search)
         if (searchQuery) searchParams.set("query", searchQuery)
-        if (!scroll) searchParams.set("page", String(forumPage))
+        if (!scroll) searchParams.set("page", String(forumPage || ""))
         if (replace) {
             if (!scroll) history.replace(`${location.pathname}?${searchParams.toString()}`)
             replace = false
@@ -283,7 +283,7 @@ const ForumPage: React.FunctionComponent = (props) => {
     }, [pageFlag])
 
     useEffect(() => {
-        localStorage.setItem("forumPage", String(forumPage))
+        localStorage.setItem("forumPage", String(forumPage || ""))
     }, [forumPage])
 
     const maxPage = () => {

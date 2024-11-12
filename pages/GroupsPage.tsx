@@ -294,7 +294,7 @@ const GroupsPage: React.FunctionComponent = (props) => {
     useEffect(() => {
         const searchParams = new URLSearchParams(window.location.search)
         if (searchQuery) searchParams.set("query", searchQuery)
-        if (!scroll) searchParams.set("page", String(groupsPage))
+        if (!scroll) searchParams.set("page", String(groupsPage || ""))
         if (replace) {
             if (!scroll) history.replace(`${location.pathname}?${searchParams.toString()}`)
             replace = false
@@ -322,7 +322,7 @@ const GroupsPage: React.FunctionComponent = (props) => {
     }, [pageFlag])
 
     useEffect(() => {
-        localStorage.setItem("groupsPage", String(groupsPage))
+        localStorage.setItem("groupsPage", String(groupsPage || ""))
     }, [groupsPage])
 
     const maxPage = () => {

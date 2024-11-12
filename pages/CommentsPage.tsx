@@ -271,7 +271,7 @@ const CommentsPage: React.FunctionComponent = (props) => {
     useEffect(() => {
         const searchParams = new URLSearchParams(window.location.search)
         if (searchQuery) searchParams.set("query", searchQuery)
-        if (!scroll) searchParams.set("page", String(commentsPage))
+        if (!scroll) searchParams.set("page", String(commentsPage || ""))
         if (commentID) searchParams.set("comment", String(commentID))
         if (replace) {
             if (!scroll) history.replace(`${location.pathname}?${searchParams.toString()}`)
@@ -324,7 +324,7 @@ const CommentsPage: React.FunctionComponent = (props) => {
     }, [pageFlag])
 
     useEffect(() => {
-        localStorage.setItem("commentsPage", String(commentsPage))
+        localStorage.setItem("commentsPage", String(commentsPage || ""))
     }, [commentsPage])
 
     const maxPage = () => {

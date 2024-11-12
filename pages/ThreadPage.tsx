@@ -276,7 +276,7 @@ const ThreadPage: React.FunctionComponent<Props> = (props) => {
     }, [pageFlag])
 
     useEffect(() => {
-        localStorage.setItem("threadPage", String(threadPage))
+        localStorage.setItem("threadPage", String(threadPage || ""))
     }, [threadPage])
 
     const maxPage = () => {

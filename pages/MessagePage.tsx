@@ -295,7 +295,7 @@ const MessagePage: React.FunctionComponent<Props> = (props) => {
     }, [pageFlag])
 
     useEffect(() => {
-        localStorage.setItem("messagePage", String(messagePage))
+        localStorage.setItem("messagePage", String(messagePage || ""))
     }, [messagePage])
 
     const maxPage = () => {
