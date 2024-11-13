@@ -134,6 +134,7 @@ const HelpPage: React.FunctionComponent = (props) => {
                     <span className="help-alt">uploads:user</span> - Search for uploads of a user. <br/>
                     <span className="help-alt">history:user</span> - Get your search history (only works on yourself!) <br/>
                     <span className="help-alt">comments:user</span> - (Comments page) get all comments by the user. <br/>
+                    <span className="help-alt">posts:user</span> - (Forum page) get all threads the user posted in. <br/>
                     <span className="help-alt">social:link</span> - (Tags page) find an artist by their social link. <br/><br/>
 
                     These are some tags with special uses: <br/>

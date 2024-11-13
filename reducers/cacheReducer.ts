@@ -28,12 +28,12 @@ const {setEmojis, setPosts, setTags, setVisiblePosts, setUnverifiedPosts, setUpl
 export const useCacheSelector = () => {
     const selector = useSelector.withTypes<StoreState>()
     return {
-        emojis: selector((state) => state.cache.emojis),
-        posts: selector((state) => state.cache.posts),
-        tags: selector((state) => state.cache.tags),
-        visiblePosts: selector((state) => state.cache.visiblePosts),
-        unverifiedPosts: selector((state) => state.cache.unverifiedPosts),
-        uploadDropFiles: selector((state) => state.cache.uploadDropFiles)
+        emojis: selector(createSelector((state: StoreState) => state.cache, (cache) => cache.emojis)),
+        posts: selector(createSelector((state: StoreState) => state.cache, (cache) => cache.posts)),
+        tags: selector(createSelector((state: StoreState) => state.cache, (cache) => cache.tags)),
+        visiblePosts: selector(createSelector((state: StoreState) => state.cache, (cache) => cache.visiblePosts)),
+        unverifiedPosts: selector(createSelector((state: StoreState) => state.cache, (cache) => cache.unverifiedPosts)),
+        uploadDropFiles: selector(createSelector((state: StoreState) => state.cache, (cache) => cache.uploadDropFiles))
     }
 }
 

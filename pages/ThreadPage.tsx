@@ -64,7 +64,7 @@ const ThreadPage: React.FunctionComponent<Props> = (props) => {
     const {setThreadPage} = usePageActions()
     const {setShowPageDialog} = useMiscDialogActions()
     const {pageFlag} = useFlagSelector()
-    const {setPageFlag} = useFlagActions()
+    const {setPageFlag, setThreadSearchFlag} = useFlagActions()
     const {deleteThreadID, deleteThreadFlag, editThreadID, editThreadFlag, editThreadTitle, editThreadContent, editThreadR18} = useThreadDialogSelector()
     const {setDeleteThreadID, setDeleteThreadFlag, setEditThreadID, setEditThreadFlag, setEditThreadTitle, setEditThreadContent, setEditThreadR18, setReportThreadID} = useThreadDialogActions()
     const {emojis} = useCacheSelector()
@@ -635,6 +635,11 @@ const ThreadPage: React.FunctionComponent<Props> = (props) => {
         )
     }
 
+    const viewThreads = () => {
+        history.push("/forum")
+        setThreadSearchFlag(`posts:${thread.creator}`)
+    }
+
     const getReplyBoxJSX = () => {
         if (thread.locked) return (
             <div className="thread-page-reply-box" style={{justifyContent: "flex-start"}}>
@@ -702,6 +707,7 @@ const ThreadPage: React.FunctionComponent<Props> = (props) => {
                             {getCreatorJSX()}
                             <span className="thread-page-date-text">{functions.timeAgo(thread.createDate)}</span>
                             <img draggable={false} className="thread-page-user-img" src={getCreatorPFP()} onClick={creatorImgClick} onAuxClick={creatorImgClick} style={{filter: defaultIcon ? getFilter() : ""}}/>
+                            <span className="thread-page-mini-link" onClick={viewThreads}>Posts: {thread.postCount}</span>
                         </div>
                         <div className="thread-page-text-container">
                             <p className="thread-page-text">{jsxFunctions.renderThreadText(thread.content, emojis)}</p>

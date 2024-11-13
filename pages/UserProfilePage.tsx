@@ -368,7 +368,7 @@ const UserProfilePage: React.FunctionComponent = (props) => {
 
     const viewComments = () => {
         history.push("/comments")
-        setCommentSearchFlag(`user:${session.username}`)
+        setCommentSearchFlag(`comments:${session.username}`)
     }
 
     const userImgClick = (event: React.MouseEvent) => {

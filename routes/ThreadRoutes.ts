@@ -28,47 +28,51 @@ const threadUpdateLimiter = rateLimit({
 })
 
 const pushMentionNotification = async (content: string, threadID: number, replyID?: number) => {
-    const notified = new Set<string>()
-    const thread = await sql.thread.thread(threadID)
-    const pieces = functions.parseComment(content)
-    for (let i = 0; i < pieces.length; i++) {
-        const piece = pieces[i]
-        if (piece.includes(">")) {
-            const matchPart = piece.match(/(>>>(\[\d+\])?)(.*?)(?=$|>)/gm)?.[0] ?? ""
-            const userPart = matchPart.replace(/(>>>(\[\d+\])?\s*)/, "")
-            let username = userPart?.split(/ +/g)?.[0]?.toLowerCase() || ""
-            const user = await sql.user.user(username)
-            if (user) {
-                if (notified.has(username)) return
-                notified.add(username)
-                if (replyID) {
-                    let message = `You were quoted in the thread "${thread.title}".\n\n${functions.getDomain()}/thread/${threadID}?reply=${replyID}`
-                    await serverFunctions.systemMessage(username, `You were quoted in the thread ${thread.title}`, message)
-                } else {
-                    let message = `You were quoted in the thread "${thread.title}".\n\n${functions.getDomain()}/thread/${threadID}`
-                    await serverFunctions.systemMessage(username, `You were quoted in the thread ${thread.title}`, message)
+    try {
+        const notified = new Set<string>()
+        const thread = await sql.thread.thread(threadID)
+        const pieces = functions.parseComment(content)
+        for (let i = 0; i < pieces.length; i++) {
+            const piece = pieces[i]
+            if (piece.includes(">")) {
+                const matchPart = piece.match(/(>>>(\[\d+\])?)(.*?)(?=$|>)/gm)?.[0] ?? ""
+                const userPart = matchPart.replace(/(>>>(\[\d+\])?\s*)/, "")
+                let username = userPart?.split(/ +/g)?.[0]?.toLowerCase() || ""
+                const user = await sql.user.user(username)
+                if (user) {
+                    if (notified.has(username)) return
+                    notified.add(username)
+                    if (replyID) {
+                        let message = `You were quoted in the thread "${thread.title}".\n\n${functions.getDomain()}/thread/${threadID}?reply=${replyID}`
+                        await serverFunctions.systemMessage(username, `You were quoted in the thread ${thread.title}`, message)
+                    } else {
+                        let message = `You were quoted in the thread "${thread.title}".\n\n${functions.getDomain()}/thread/${threadID}`
+                        await serverFunctions.systemMessage(username, `You were quoted in the thread ${thread.title}`, message)
+                    }
                 }
             }
         }
+        const parts = content.split(/(@\w+)/g)
+        parts.forEach(async (part, index) => {
+            if (part.startsWith("@")) {
+                const username = part.slice(1).toLowerCase()
+                const user = await sql.user.user(username)
+                if (user) {
+                    if (notified.has(username)) return
+                    notified.add(username)
+                    if (replyID) {
+                        let message = `You were mentioned in the thread "${thread.title}".\n\n${functions.getDomain()}/thread/${threadID}?reply=${replyID}`
+                        await serverFunctions.systemMessage(username, `You were mentioned in the thread ${thread.title}`, message)
+                    } else {
+                        let message = `You were mentioned in the thread "${thread.title}".\n\n${functions.getDomain()}/thread/${threadID}`
+                        await serverFunctions.systemMessage(username, `You were mentioned in the thread ${thread.title}`, message)
+                    }
+                }
+            }
+        })
+    } catch (e) {
+        console.log(e)
     }
-    const parts = content.split(/(@\w+)/g)
-    parts.forEach(async (part, index) => {
-        if (part.startsWith("@")) {
-            const username = part.slice(1).toLowerCase()
-            const user = await sql.user.user(username)
-            if (user) {
-                if (notified.has(username)) return
-                notified.add(username)
-                if (replyID) {
-                    let message = `You were mentioned in the thread "${thread.title}".\n\n${functions.getDomain()}/thread/${threadID}?reply=${replyID}`
-                    await serverFunctions.systemMessage(username, `You were mentioned in the thread ${thread.title}`, message)
-                } else {
-                    let message = `You were mentioned in the thread "${thread.title}".\n\n${functions.getDomain()}/thread/${threadID}`
-                    await serverFunctions.systemMessage(username, `You were mentioned in the thread ${thread.title}`, message)
-                }
-            }
-        }
-    })
 }
 
 const ThreadRoutes = (app: Express) => {
@@ -85,6 +89,8 @@ const ThreadRoutes = (app: Express) => {
             const threadID = await sql.thread.insertThread(req.session.username, title, content, r18)
             pushMentionNotification(content, threadID)
             await sql.thread.bulkUpdateReads(threadID, false, req.session.username)
+            const postCount = await sql.thread.postCount(req.session.username)
+            await sql.user.updateUser(req.session.username, "postCount", postCount)
             res.status(200).send(threadID)
         } catch (e) {
             console.log(e)
@@ -141,6 +147,8 @@ const ThreadRoutes = (app: Express) => {
                 if (!permissions.isMod(req.session)) return res.status(403).send("No permission to delete")
             }
             await sql.thread.deleteThread(Number(threadID))
+            const postCount = await sql.thread.postCount(thread.creator)
+            await sql.user.updateUser(thread.creator, "postCount", postCount)
             res.status(200).send("Success")
         } catch (e) {
             console.log(e)
@@ -196,6 +204,8 @@ const ThreadRoutes = (app: Express) => {
             await sql.thread.updateThread(Number(threadID), "updatedDate", new Date().toISOString())
             pushMentionNotification(content, threadID, replyID)
             await sql.thread.bulkUpdateReads(threadID, false, req.session.username)
+            const postCount = await sql.thread.postCount(req.session.username)
+            await sql.user.updateUser(req.session.username, "postCount", postCount)
             res.status(200).send("Success")
         } catch (e) {
             console.log(e)
@@ -284,6 +294,8 @@ const ThreadRoutes = (app: Express) => {
             } else {
                 await sql.thread.deleteReply(Number(replyID))
             }
+            const postCount = await sql.thread.postCount(reply.creator)
+            await sql.user.updateUser(reply.creator, "postCount", postCount)
             res.status(200).send("Success")
         } catch (e) {
             console.log(e)

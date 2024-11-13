@@ -90,15 +90,56 @@ export default class SQLThread {
         return result
     }
 
+    /** Search threads by username. */
+    public static searchThreadsByUsername = async (usernames: string[], search: string, sort: string, offset?: string, sessionUsername?: string) => {
+        let i = 2
+        let whereQuery = `WHERE (threads."creator" = ANY ($1) OR replies."creator" = ANY ($1))`
+        let values = [] as any
+        if (search) {
+            values.push(search.toLowerCase())
+            whereQuery += ` AND lower(threads."title") LIKE '%' || $${i} || '%'`
+            i++
+        }
+        let userValue = i
+        if (sessionUsername) {
+            values.push(sessionUsername)
+            i++
+        }
+        if (offset) values.push(offset)
+        let sortQuery = ""
+        if (sort === "random") sortQuery = `ORDER BY random()`
+        if (sort === "date") sortQuery = `ORDER BY threads."updatedDate" DESC`
+        if (sort === "reverse date") sortQuery = `ORDER BY threads."updatedDate" ASC`
+        const query: QueryConfig = {
+            text: functions.multiTrim(/*sql*/`
+                SELECT DISTINCT threads.*, ${sessionUsername ? `"thread reads".read,` : ""}
+                COUNT(*) OVER() AS "threadCount"
+                FROM threads
+                LEFT JOIN replies ON replies."threadID" = threads."threadID"
+                ${sessionUsername ? `LEFT JOIN "thread reads" ON "thread reads"."threadID" = threads."threadID" AND "thread reads".username = $${userValue}` : ""}
+                ${whereQuery}
+                GROUP BY threads."threadID"${sessionUsername ? `, "thread reads".read` : ""}
+                ${sortQuery}
+                LIMIT 100 ${offset ? `OFFSET $${i}` : ""}
+            `),
+            values: [usernames]
+        }
+        if (values?.[0]) query.values?.push(...values)
+        const result = await SQLQuery.run(query)
+        return result
+    }
+
     /** Get thread. */
     public static thread = async (threadID: number) => {
         const query: QueryConfig = {
         text: functions.multiTrim(/*sql*/`
-                SELECT threads.*, users.role, users.image, users.banned, users."imagePost", users."imageHash"
+                SELECT threads.*, users.role, users.image, users.banned, 
+                users."imagePost", users."imageHash", users."postCount"
                 FROM threads 
                 JOIN users ON users.username = threads.creator
                 WHERE threads."threadID" = $1
-                GROUP BY threads."threadID", users.role, users.image, users.banned, users."imagePost", users."imageHash"
+                GROUP BY threads."threadID", users.role, users.image, users.banned, 
+                users."imagePost", users."imageHash", users."postCount"
             `),
         values: [threadID]
         }
@@ -142,12 +183,14 @@ export default class SQLThread {
         if (offset && Number(offset) < 0) offset = "0"
         const query: QueryConfig = {
         text: functions.multiTrim(/*sql*/`
-                SELECT replies.*, users.role, users.image, users.banned, users."imagePost", users."imageHash",
+                SELECT replies.*, users.role, users.image, users.banned, 
+                users."imagePost", users."imageHash", users."postCount",
                 COUNT(*) OVER() AS "replyCount"
                 FROM replies 
                 JOIN users ON users.username = replies.creator
                 WHERE replies."threadID" = $1 
-                GROUP BY replies."replyID", users.role, users.image, users.banned, users."imagePost", users."imageHash"
+                GROUP BY replies."replyID", users.role, users.image, users.banned, 
+                users."imagePost", users."imageHash", users."postCount"
                 ${offset ? "OFFSET $2" : ""}
             `),
         values: [threadID]
@@ -161,12 +204,14 @@ export default class SQLThread {
     public static userReplies = async (username: string) => {
         const query: QueryConfig = {
         text: functions.multiTrim(/*sql*/`
-                SELECT replies.*, users.role, users.image, users.banned, users."imagePost", users."imageHash",
+                SELECT replies.*, users.role, users.image, users.banned, 
+                users."imagePost", users."imageHash", users."postCount",
                 COUNT(*) OVER() AS "replyCount"
                 FROM replies 
                 JOIN users ON users.username = replies.creator
                 WHERE replies.creator = $1 
-                GROUP BY replies."replyID", users.role, users.image, users.banned, users."imagePost", users."imageHash"
+                GROUP BY replies."replyID", users.role, users.image, users.banned, 
+                users."imagePost", users."imageHash", users."postCount"
             `),
         values: [username]
         }
@@ -178,11 +223,13 @@ export default class SQLThread {
     public static reply = async (replyID: number) => {
         const query: QueryConfig = {
         text: functions.multiTrim(/*sql*/`
-                SELECT replies.*, users.role, users.image, users.banned, users."imagePost", users."imageHash"
+                SELECT replies.*, users.role, users.image, users.banned, 
+                users."imagePost", users."imageHash", users."postCount"
                 FROM replies 
                 JOIN users ON users.username = replies.creator
                 WHERE replies."replyID" = $1
-                GROUP BY replies."replyID", users.role, users.image, users.banned, users."imagePost", users."imageHash"
+                GROUP BY replies."replyID", users.role, users.image, users.banned, 
+                users."imagePost", users."imageHash", users."postCount"
             `),
         values: [replyID]
         }
@@ -240,5 +287,33 @@ export default class SQLThread {
         }
         const result = await SQLQuery.run(query)
         return result[0]
+    }
+
+    /** Get post count of user */
+    public static postCount = async (username: string) => {
+        const query: QueryArrayConfig = {
+            text: functions.multiTrim(/*sql*/`
+                WITH "threadCounts" AS (
+                    SELECT creator, COUNT(*) AS "threadCount"
+                    FROM threads
+                    WHERE creator = $1
+                    GROUP BY creator
+                ),
+                "replyCounts" AS (
+                    SELECT creator, COUNT(*) AS "replyCount"
+                    FROM replies
+                    WHERE creator = $1
+                    GROUP BY creator
+                )
+                SELECT (COALESCE("threadCount", 0) + COALESCE("replyCount", 0)) AS postCount
+                FROM "threadCounts"
+                FULL JOIN "replyCounts"
+                ON "threadCounts".creator = "replyCounts".creator
+            `),
+            rowMode: "array",
+            values: [username]
+        }
+        const result = await SQLQuery.run(query)
+        return Number(result[0] || 0)
     }
 }

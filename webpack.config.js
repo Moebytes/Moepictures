@@ -9,6 +9,7 @@ const nodeExternals = require("webpack-node-externals")
 const webpack = require("webpack")
 const path = require("path")
 const Dotenv = require("dotenv-webpack")
+const {reactCompilerLoader} = require("react-compiler-webpack")
 let exclude = [/node_modules/, /dist/]
 let webExclude = [...exclude, /server.tsx/, /routes/]
 let nodeExclude = [...exclude, /structures\/BrowserFunctions.tsx/]
@@ -34,7 +35,7 @@ module.exports = [
         {test: /\.html$/, exclude: webExclude, use: [{loader: "html-loader", options: {sources: false, minimize: false}}]},
         {test: /\.css$/, exclude: webExclude, use: [{loader: MiniCssExtractPlugin.loader}, "css-loader"]},
         {test: /\.less$/, exclude: webExclude, use: [{loader: MiniCssExtractPlugin.loader}, "css-loader", {loader: "less-loader"}]},
-        {test: /\.(tsx?|jsx?)$/, exclude: webExclude, use: [{loader: "ts-loader", options: {transpileOnly: true}}]}
+        {test: /\.(tsx?|jsx?)$/, exclude: webExclude, use: [{loader: "ts-loader", options: {transpileOnly: true}}]},
       ]
     },
     plugins: [

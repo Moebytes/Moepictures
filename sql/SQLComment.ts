@@ -103,8 +103,8 @@ export default class SQLComment {
         let i = 2
         let whereQuery = `WHERE comments."username" = ANY ($1)`
         if (search) {
-        whereQuery += `AND lower(comments."comment") LIKE '%' || $${i} || '%'`
-        i++
+            whereQuery += `AND lower(comments."comment") LIKE '%' || $${i} || '%'`
+            i++
         }
         let sortQuery = ""
         if (sort === "random") sortQuery = `ORDER BY random()`

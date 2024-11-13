@@ -71,6 +71,7 @@ declare module "express-session" {
       showR18: boolean
       premiumExpiration: string
       banExpiration: string
+      postCount: number
       $2fa: boolean
       ip: string
       role: string

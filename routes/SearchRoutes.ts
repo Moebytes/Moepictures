@@ -462,13 +462,34 @@ const SearchRoutes = (app: Express) => {
             const offset = req.query.offset as string
             if (!functions.validThreadSort(sort)) return res.status(400).send("Invalid sort")
             const search = query?.trim() ?? ""
-            let stickyThreads = await sql.thread.stickyThreads(req.session.username)
-            const rulesThread = stickyThreads.find((thread: any) => thread.title.toLowerCase().includes("rules"))
-            stickyThreads = functions.removeItem(stickyThreads, rulesThread)
-            const threadResult = await sql.thread.searchThreads(search, sort, offset, req.session.username)
-            let result = [rulesThread, ...stickyThreads, ...threadResult]
-            const newThreadCount = (stickyThreads[0]?.threadCount || 0) + (threadResult[0]?.threadCount || 0)
-            result = result.map((t: any) => ({...t, threadCount: newThreadCount}))
+            let parts = search.split(/ +/g)
+            let usernames = [] as any 
+            let parsedSearch = ""
+            for (let i = 0; i < parts.length; i++) {
+                if (parts[i].includes("posts:")) {
+                    const username = parts[i].split(":")[1]
+                    usernames.push(username)
+                } else {
+                    parsedSearch += `${parts[i]} `
+                }
+            }
+            let result = [] as any
+            if (usernames.length) {
+                let unsorted = await sql.thread.searchThreadsByUsername(usernames, parsedSearch.trim(), sort, offset, req.session.username)
+                let stickyThreads = unsorted.filter((thread: any) => thread.sticky)
+                const rulesThread = stickyThreads.find((thread: any) => thread.title.toLowerCase().includes("rules"))
+                if (rulesThread) stickyThreads = functions.removeItem(stickyThreads, rulesThread)
+                let threadResult = unsorted.filter((thread: any) => !thread.sticky)
+                result = [rulesThread, ...stickyThreads, ...threadResult].filter(Boolean)
+            } else {
+                let stickyThreads = await sql.thread.stickyThreads(req.session.username)
+                const rulesThread = stickyThreads.find((thread: any) => thread.title.toLowerCase().includes("rules"))
+                if (rulesThread) stickyThreads = functions.removeItem(stickyThreads, rulesThread)
+                let threadResult = await sql.thread.searchThreads(parsedSearch.trim(), sort, offset, req.session.username)
+                result = [rulesThread, ...stickyThreads, ...threadResult].filter(Boolean)
+                const newThreadCount = (stickyThreads[0]?.threadCount || 0) + (threadResult[0]?.threadCount || 0)
+                result = result.map((t: any) => ({...t, threadCount: newThreadCount}))
+            }
             if (!req.session.showR18) {
                 result = result.filter((t: any) => !t.r18)
             }

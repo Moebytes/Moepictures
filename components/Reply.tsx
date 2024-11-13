@@ -1,7 +1,8 @@
 import React, {useEffect} from "react"
 import {useHistory} from "react-router-dom"
 import {useThemeSelector, useLayoutSelector, useSessionSelector, useSessionActions, useThreadDialogActions, 
-useCacheSelector, useActiveActions, useThreadDialogSelector, useInteractionActions} from "../store"
+useCacheSelector, useActiveActions, useThreadDialogSelector, useInteractionActions,
+useFlagActions} from "../store"
 import functions from "../structures/Functions"
 import favicon from "../assets/icons/favicon.png"
 import quoteOptIcon from "../assets/icons/quote-opt.png"
@@ -35,6 +36,7 @@ const Reply: React.FunctionComponent<Props> = (props) => {
     const {session} = useSessionSelector()
     const {setSessionFlag} = useSessionActions()
     const {setQuoteText} = useActiveActions()
+    const {setThreadSearchFlag} = useFlagActions()
     const {deleteReplyID, deleteReplyFlag, editReplyFlag, editReplyID, editReplyContent, editReplyR18} = useThreadDialogSelector()
     const {setDeleteReplyID, setDeleteReplyFlag, setEditReplyFlag, setEditReplyID, setEditReplyContent, setEditReplyR18, setReportReplyID} = useThreadDialogActions()
     const {emojis} = useCacheSelector()
@@ -264,6 +266,11 @@ const Reply: React.FunctionComponent<Props> = (props) => {
         }
     }
 
+    const viewThreads = () => {
+        history.push("/forum")
+        setThreadSearchFlag(`posts:${props.reply?.creator}`)
+    }
+
     return (
         <div className="reply" reply-id={props.reply?.replyID} style={{backgroundColor: props.reply.r18 ? "var(--r18BGColor)" : ""}}>
             <div className="reply-container">
@@ -271,6 +278,7 @@ const Reply: React.FunctionComponent<Props> = (props) => {
                     {generateUsernameJSX()}
                     <span className="reply-date-text">{functions.timeAgo(props.reply?.createDate)}</span>
                     <img className="reply-user-img" src={getReplyPFP()} onClick={userImgClick} onAuxClick={userImgClick} style={{filter: defaultIcon ? getFilter() : ""}}/>
+                    <span className="reply-mini-link" onClick={viewThreads}>Posts: {props.reply?.postCount}</span>
                 </div>
             </div>
             <div className="reply-text-container" onMouseEnter={() => setEnableDrag(false)}>

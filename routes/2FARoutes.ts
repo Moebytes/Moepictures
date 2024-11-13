@@ -124,6 +124,7 @@ const $2FARoutes = (app: Express) => {
                 req.session.upscaledImages = user.upscaledImages
                 req.session.savedSearches = user.savedSearches
                 req.session.showR18 = user.showR18
+                req.session.postCount = user.postCount
                 req.session.premiumExpiration = user.premiumExpiration
                 req.session.banExpiration = user.banExpiration
                 await sql.user.insertLoginHistory(user.username, "login", ip, device)

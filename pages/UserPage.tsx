@@ -219,7 +219,7 @@ const UserPage: React.FunctionComponent<Props> = (props) => {
 
     const viewComments = () => {
         history.push("/comments")
-        setCommentSearchFlag(`user:${user.username}`)
+        setCommentSearchFlag(`comments:${user.username}`)
     }
 
     const generateFavoritesJSX = () => {

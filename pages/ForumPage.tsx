@@ -28,7 +28,6 @@ const ForumPage: React.FunctionComponent = (props) => {
     const {setHideNavbar, setHideTitlebar, setHideSidebar, setRelative} = useLayoutActions()
     const {setEnableDrag} = useInteractionActions()
     const {setHeaderText, setSidebarText} = useActiveActions()
-    const {setRedirect} = useFlagActions()
     const {session} = useSessionSelector()
     const {setSessionFlag} = useSessionActions()
     const {mobile} = useLayoutSelector()
@@ -39,11 +38,10 @@ const ForumPage: React.FunctionComponent = (props) => {
     const {forumPage} = usePageSelector()
     const {setForumPage} = usePageActions()
     const {setShowPageDialog} = useMiscDialogActions()
-    const {pageFlag} = useFlagSelector()
-    const {setPageFlag} = useFlagActions()
+    const {pageFlag, threadSearchFlag} = useFlagSelector()
+    const {setPageFlag, setThreadSearchFlag} = useFlagActions()
     const {showNewThreadDialog} = useThreadDialogSelector()
     const {setShowNewThreadDialog} = useThreadDialogActions()
-    const [threadSearchFlag, setThreadSearchFlag] = useState(null) as any
     const [sortType, setSortType] = useState("date")
     const [sortReverse, setSortReverse] = useState(false)
     const [threads, setThreads] = useState([]) as any

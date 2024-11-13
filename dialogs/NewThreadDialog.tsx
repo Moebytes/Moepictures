@@ -67,9 +67,9 @@ const NewThreadDialog: React.FunctionComponent = (props) => {
             return setError(false)
         }
         try {
-            const thread = await functions.post("/api/thread/create", {title: threadTitle, content: threadContent, r18}, session, setSessionFlag)
+            const threadID = await functions.post("/api/thread/create", {title: threadTitle, content: threadContent, r18}, session, setSessionFlag)
             setShowNewThreadDialog(false)
-            if (thread.threadID) history.push(`/thread/${thread.threadID}`)
+            if (threadID) history.push(`/thread/${threadID}`)
         } catch {
             setError(true)
             if (!errorRef.current) await functions.timeout(20)

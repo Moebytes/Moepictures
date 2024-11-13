@@ -19,6 +19,7 @@ CREATE TABLE IF NOT EXISTS "users" (
     "image" text,
     "imageHash" text,
     "imagePost" bigint REFERENCES posts ("postID") ON UPDATE CASCADE ON DELETE SET NULL,
+    "postCount" int,
     "ip" inet,
     "banned" boolean,
     "banExpiration" timestamptz,

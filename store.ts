@@ -42,6 +42,19 @@ const store = configureStore({
         searchDialog: searchDialogReducer,
         groupDialog: groupDialogReducer,
         miscDialog: miscDialogReducer
+    },
+    devTools: {
+        maxAge: 50,
+        serialize: {
+            replacer: (key, value) => {
+                if (key === "posts") return undefined
+                if (key === "visiblePosts") return undefined
+                if (key === "unverifiedPosts") return undefined
+                if (key === "tags") return undefined
+                if (key === "emojis") return undefined
+                return value
+            }
+        }
     }
 })
 

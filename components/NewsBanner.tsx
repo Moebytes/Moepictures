@@ -30,6 +30,7 @@ const NewsBanner: React.FunctionComponent = (props) => {
     }
 
     const openLink = () => {
+        if (!newsBanner) return
         history.push(newsBanner.link)
         closeBanner()
     }

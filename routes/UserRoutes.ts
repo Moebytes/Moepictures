@@ -115,6 +115,7 @@ const UserRoutes = (app: Express) => {
                 await sql.user.updateUser(username, "upscaledImages", false)
                 await sql.user.updateUser(username, "showR18", false)
                 await sql.user.updateUser(username, "savedSearches", "{}")
+                await sql.user.updateUser(username, "postCount", 0)
                 await sql.user.updateUser(username, "emailVerified", false)
                 await sql.user.updateUser(username, "$2fa", false)
                 await sql.user.updateUser(username, "bio", "This user has not written anything.")
@@ -184,6 +185,7 @@ const UserRoutes = (app: Express) => {
                 req.session.autosearchInterval = user.autosearchInterval
                 req.session.upscaledImages = user.upscaledImages
                 req.session.savedSearches = user.savedSearches
+                req.session.postCount = user.postCount
                 req.session.showR18 = user.showR18
                 req.session.premiumExpiration = user.premiumExpiration
                 req.session.banExpiration = user.banExpiration
@@ -242,6 +244,7 @@ const UserRoutes = (app: Express) => {
                 req.session.showTagBanner = user.showTagBanner
                 req.session.downloadPixivID = user.downloadPixivID
                 req.session.autosearchInterval = user.autosearchInterval
+                req.session.postCount = user.postCount
                 req.session.upscaledImages = user.upscaledImages
                 req.session.savedSearches = user.savedSearches
                 req.session.showR18 = user.showR18
