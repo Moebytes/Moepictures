@@ -1,13 +1,12 @@
-import React, {useEffect, useContext, useState, useRef} from "react"
+import React, {useEffect, useState, useRef} from "react"
 import {useHistory} from "react-router-dom"
 import TitleBar from "../components/TitleBar"
 import NavBar from "../components/NavBar"
 import SideBar from "../components/SideBar"
 import Footer from "../components/Footer"
 import functions from "../structures/Functions"
-import cryptoFunctions from "../structures/CryptoFunctions"
-import {HideNavbarContext, HideSidebarContext, RelativeContext, HideTitlebarContext, MobileContext, UserImgContext, SessionFlagContext,
-PostsContext, TagsContext, PostFlagContext, RedirectContext, SidebarTextContext, SessionContext, EnableDragContext} from "../Context"
+import {useSessionSelector, useSessionActions, useLayoutActions, useActiveActions, useFlagActions, 
+useLayoutSelector, useFlagSelector, useCacheActions, useCacheSelector, useInteractionActions} from "../store"
 import permissions from "../structures/Permissions"
 import ReactCrop, {makeAspectCrop, centerCrop} from "react-image-crop"
 import "./styles/setavatarpage.less"
@@ -17,20 +16,16 @@ interface Props {
 }
 
 const SetAvatarPage: React.FunctionComponent<Props> = (props) => {
-    const {hideNavbar, setHideNavbar} = useContext(HideNavbarContext)
-    const {hideTitlebar, setHideTitlebar} = useContext(HideTitlebarContext)
-    const {hideSidebar, setHideSidebar} = useContext(HideSidebarContext)
-    const {enableDrag, setEnableDrag} = useContext(EnableDragContext)
-    const {relative, setRelative} = useContext(RelativeContext)
-    const {posts, setPosts} = useContext(PostsContext)
-    const {tags, setTags} = useContext(TagsContext)
-    const {sidebarText, setSidebarText} = useContext(SidebarTextContext)
-    const {session, setSession} = useContext(SessionContext)
-    const {redirect, setRedirect} = useContext(RedirectContext)
-    const {mobile, setMobile} = useContext(MobileContext)
-    const {postFlag, setPostFlag} = useContext(PostFlagContext)
-    const {sessionFlag, setSessionFlag} = useContext(SessionFlagContext)
-    const {userImg, setUserImg} = useContext(UserImgContext)
+    const {setEnableDrag} = useInteractionActions()
+    const {setHideNavbar, setHideTitlebar, setHideSidebar, setRelative} = useLayoutActions()
+    const {setSidebarText} = useActiveActions()
+    const {session} = useSessionSelector()
+    const {setSessionFlag, setUserImg} = useSessionActions()
+    const {mobile} = useLayoutSelector()
+    const {posts} = useCacheSelector()
+    const {setPosts, setTags} = useCacheActions()
+    const {postFlag} = useFlagSelector()
+    const {setRedirect, setPostFlag} = useFlagActions()
     const [images, setImages] = useState([]) as any
     const [image, setImage] = useState("") as any
     const [post, setPost] = useState(null) as any

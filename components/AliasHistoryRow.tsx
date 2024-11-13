@@ -1,7 +1,6 @@
-import React, {useContext, useEffect, useRef, useState} from "react"
+import React, {useEffect, useRef, useState} from "react"
 import {useHistory} from "react-router-dom"
-import {ThemeContext, SessionContext, MobileContext, SessionFlagContext, DeleteAliasHistoryIDContext, 
-DeleteAliasHistoryFlagContext, RevertAliasHistoryIDContext, RevertAliasHistoryFlagContext} from "../Context"
+import {useSessionSelector, useSessionActions, useTagDialogSelector, useTagDialogActions} from "../store"
 import functions from "../structures/Functions"
 import permissions from "../structures/Permissions"
 import aliasHistoryUndo from "../assets/icons/revert.png"
@@ -24,14 +23,10 @@ interface Props {
 }
 
 const AliasHistoryRow: React.FunctionComponent<Props> = (props) => {
-    const {theme, setTheme} = useContext(ThemeContext)
-    const {mobile, setMobile} = useContext(MobileContext)
-    const {session, setSession} = useContext(SessionContext)
-    const {sessionFlag, setSessionFlag} = useContext(SessionFlagContext)
-    const {deleteAliasHistoryID, setDeleteAliasHistoryID} = useContext(DeleteAliasHistoryIDContext)
-    const {deleteAliasHistoryFlag, setDeleteAliasHistoryFlag} = useContext(DeleteAliasHistoryFlagContext)
-    const {revertAliasHistoryID, setRevertAliasHistoryID} = useContext(RevertAliasHistoryIDContext)
-    const {revertAliasHistoryFlag, setRevertAliasHistoryFlag} = useContext(RevertAliasHistoryFlagContext)
+    const {session} = useSessionSelector()
+    const {setSessionFlag} = useSessionActions()
+    const {deleteAliasHistoryID, deleteAliasHistoryFlag, revertAliasHistoryID, revertAliasHistoryFlag} = useTagDialogSelector()
+    const {setDeleteAliasHistoryID, setDeleteAliasHistoryFlag, setRevertAliasHistoryID, setRevertAliasHistoryFlag} = useTagDialogActions()
     const [userRole, setUserRole] = useState("")
     const history = useHistory()
 

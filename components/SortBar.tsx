@@ -1,14 +1,12 @@
-import React, {useContext, useEffect, useState, useRef, useReducer} from "react"
+import React, {useEffect, useState, useRef, useReducer} from "react"
 import {useHistory} from "react-router-dom"
 import {HashLink as Link} from "react-router-hash-link"
 import Slider from "react-slider"
-import {ThemeContext, HideSidebarContext, HideNavbarContext, HideSortbarContext, ActiveDropdownContext, ScrollContext, TabletContext,
-SizeTypeContext, BrightnessContext, ContrastContext, HueContext, SaturationContext, LightnessContext, SiteHueContext, PremiumRequiredContext,
-BlurContext, SharpenContext, EnableDragContext, FilterDropActiveContext, SquareContext, PixelateContext, SiteLightnessContext, PostsContext,
-ShowDownloadDialogContext, HideTitlebarContext, ImageTypeContext, RestrictTypeContext, SortTypeContext, SortReverseContext, SiteSaturationContext,
-StyleTypeContext, SpeedContext, ReverseContext, MobileContext, RelativeContext, SessionContext, MobileScrollingContext, SessionFlagContext,
-SelectionModeContext, SelectionItemsContext, SearchFlagContext, DownloadIDsContext, DownloadFlagContext, ShowBulkTagEditDialogContext,
-ShowBulkDeleteDialogContext, PageContext, PageFlagContext, PageMultiplierContext, ScrollYContext, BulkFavGroupDialogContext} from "../Context"
+import {useFilterSelector, useInteractionActions, useLayoutSelector, usePlaybackSelector, usePlaybackActions, 
+useThemeSelector, useSearchSelector, useSessionSelector, useSearchActions, useFlagActions, useMiscDialogActions, 
+useInteractionSelector, useSessionActions, usePostDialogActions, useGroupDialogActions, useActiveSelector,
+usePageSelector, useCacheSelector, useFilterActions, useActiveActions, useLayoutActions,
+useMiscDialogSelector, usePostDialogSelector, useGroupDialogSelector, useCacheActions} from "../store"
 import leftArrow from "../assets/icons/leftArrow.png"
 import rightArrow from "../assets/icons/rightArrow.png"
 import upArrow from "../assets/icons/upArrow.png"
@@ -64,58 +62,32 @@ import permissions from "../structures/Permissions"
 import "./styles/sortbar.less"
 
 const SortBar: React.FunctionComponent = (props) => {
-    const {theme, setTheme} = useContext(ThemeContext)
-    const {siteHue, setSiteHue} = useContext(SiteHueContext)
-    const {siteSaturation, setSiteSaturation} = useContext(SiteSaturationContext)
-    const {siteLightness, setSiteLightness} = useContext(SiteLightnessContext)
-    const {hideSortbar, setHideSortbar} = useContext(HideSortbarContext)
-    const {hideSidebar, setHideSidebar} = useContext(HideSidebarContext)
-    const {hideNavbar, setHideNavbar} = useContext(HideNavbarContext)
-    const {hideTitlebar, setHideTitlebar} = useContext(HideTitlebarContext)
-    const {enableDrag, setEnableDrag} = useContext(EnableDragContext)
-    const {activeDropdown, setActiveDropdown} = useContext(ActiveDropdownContext)
-    const {filterDropActive, setFilterDropActive} = useContext(FilterDropActiveContext)
-    const {premiumRequired, setPremiumRequired} = useContext(PremiumRequiredContext)
-    const {square, setSquare} = useContext(SquareContext)
-    const {brightness, setBrightness} = useContext(BrightnessContext)
-    const {contrast, setContrast} = useContext(ContrastContext)
-    const {hue, setHue} = useContext(HueContext)
-    const {saturation, setSaturation} = useContext(SaturationContext)
-    const {lightness, setLightness} = useContext(LightnessContext)
-    const {pixelate, setPixelate} = useContext(PixelateContext)
-    const {blur, setBlur} = useContext(BlurContext)
-    const {sharpen, setSharpen} = useContext(SharpenContext)
-    const {showDownloadDialog, setShowDownloadDialog} = useContext(ShowDownloadDialogContext)
-    const {downloadFlag, setDownloadFlag} = useContext(DownloadFlagContext)
-    const {downloadIDs, setDownloadIDs} = useContext(DownloadIDsContext)
-    const {scrollY, setScrollY} = useContext(ScrollYContext)
-    const [ignored, forceUpdate] = useReducer(x => x + 1, 0)
+    const {siteHue, siteSaturation, siteLightness} = useThemeSelector()
+    const {setEnableDrag} = useInteractionActions()
+    const {mobile, tablet, relative, hideSortbar, hideSidebar, hideTitlebar, hideNavbar} = useLayoutSelector()
+    const {setHideSortbar, setHideSidebar, setHideTitlebar, setHideNavbar} = useLayoutActions()
+    const {session} = useSessionSelector()
+    const {setSessionFlag} = useSessionActions()
+    const {activeDropdown, filterDropActive} = useActiveSelector()
+    const {setActiveDropdown, setFilterDropActive} = useActiveActions()
+    const {brightness, contrast, hue, saturation, lightness, blur, sharpen, pixelate} = useFilterSelector()
+    const {setBrightness, setContrast, setHue, setSaturation, setLightness, setBlur, setSharpen, setPixelate} = useFilterActions()
+    const {reverse} = usePlaybackSelector()
+    const {setReverse, setSpeed} = usePlaybackActions()
+    const {scroll, square, imageType, restrictType, styleType, sizeType, sortType, sortReverse, selectionMode, pageMultiplier, selectionItems} = useSearchSelector()
+    const {setScroll, setImageType, setRestrictType, setStyleType, setSizeType, setSortType, setSortReverse, setSelectionMode, setPageMultiplier, setSquare, setSearchFlag} = useSearchActions()
+    const {setDownloadFlag, setDownloadIDs, setPageFlag} = useFlagActions()
+    const {showDownloadDialog} = useMiscDialogSelector()
+    const {setPremiumRequired, setShowDownloadDialog} = useMiscDialogActions()
+    const {mobileScrolling} = useInteractionSelector()
+    const {showBulkTagEditDialog, showBulkDeleteDialog} = usePostDialogSelector()
+    const {setShowBulkTagEditDialog, setShowBulkDeleteDialog} = usePostDialogActions()
+    const {bulkFavGroupDialog} = useGroupDialogSelector()
+    const {setBulkFavGroupDialog} = useGroupDialogActions()
+    const {page} = usePageSelector()
+    const {posts} = useCacheSelector()
+    const {setPosts} = useCacheActions()
     const [mouseOver, setMouseOver] = useState(false)
-    const {imageType, setImageType} = useContext(ImageTypeContext)
-    const {restrictType, setRestrictType} = useContext(RestrictTypeContext)
-    const {styleType, setStyleType} = useContext(StyleTypeContext)
-    const {sizeType, setSizeType} = useContext(SizeTypeContext)
-    const {sortType, setSortType} = useContext(SortTypeContext)
-    const {sortReverse, setSortReverse} = useContext(SortReverseContext)
-    const {speed, setSpeed} = useContext(SpeedContext)
-    const {reverse, setReverse} = useContext(ReverseContext)
-    const {mobile, setMobile} = useContext(MobileContext)
-    const {tablet, setTablet} = useContext(TabletContext)
-    const {mobileScrolling, setMobileScrolling} = useContext(MobileScrollingContext)
-    const {selectionMode, setSelectionMode} = useContext(SelectionModeContext)
-    const {selectionItems, setSelectionItems} = useContext(SelectionItemsContext) as {selectionItems: Set<string>, setSelectionItems: any}
-    const {showBulkTagEditDialog, setShowBulkTagEditDialog} = useContext(ShowBulkTagEditDialogContext)
-    const {showBulkDeleteDialog, setShowBulkDeleteDialog} = useContext(ShowBulkDeleteDialogContext)
-    const {bulkFavGroupDialog, setBulkFavGroupDialog} = useContext(BulkFavGroupDialogContext)
-    const {searchFlag, setSearchFlag} = useContext(SearchFlagContext)
-    const {relative, setRelative} = useContext(RelativeContext)
-    const {session, setSession} = useContext(SessionContext)
-    const {sessionFlag, setSessionFlag} = useContext(SessionFlagContext)
-    const {page, setPage} = useContext(PageContext)
-    const {pageFlag, setPageFlag} = useContext(PageFlagContext)
-    const {pageMultiplier, setPageMultiplier} = useContext(PageMultiplierContext)
-    const {scroll, setScroll} = useContext(ScrollContext)
-    const {posts, setPosts} = useContext(PostsContext)
     const [dropLeft, setDropLeft] = useState(0)
     const [dropTop, setDropTop] = useState(-2)
     const [lastImageType, setLastImageType] = useState(null) as any
@@ -219,24 +191,21 @@ const SortBar: React.FunctionComponent = (props) => {
         localStorage.setItem("style", styleType)
         localStorage.setItem("size", sizeType)
         localStorage.setItem("sort", sortType)
-        localStorage.setItem("sortReverse", sortReverse)
-        localStorage.setItem("pageMultiplier", pageMultiplier)
+        localStorage.setItem("sortReverse", String(sortReverse))
+        localStorage.setItem("pageMultiplier", String(pageMultiplier))
     }, [imageType, restrictType, styleType, sizeType, sortType, sortReverse, pageMultiplier])
 
     const hideTheSidebar = () => {
-        setHideSidebar((prev: boolean) => {
-            localStorage.setItem("sidebar", `${prev}`)
-            return !prev
-        })
+        const newValue = !hideSidebar
+        localStorage.setItem("sidebar", `${newValue}`)
+        setHideSidebar(newValue)
     }
 
     const hideTheTitlebar = () => {
-        setHideTitlebar((prev: boolean) => {
-            let val = !prev
-            setHideNavbar(val)
-            localStorage.setItem("titlebar", `${!val}`)
-            return val
-        })
+        let newValue = !hideTitlebar
+        setHideNavbar(newValue)
+        localStorage.setItem("titlebar", `${!newValue}`)
+        setHideTitlebar(newValue)
     }
 
     const getImageJSX = () => {
@@ -526,7 +495,7 @@ const SortBar: React.FunctionComponent = (props) => {
         }
         return (
             <div className="sortbar-item" ref={sortRef}>
-                <img className="sortbar-img" src={sortReverse ? sortRev : sort} style={{filter: getFilter()}} onClick={() => setSortReverse((prev: boolean) => !prev)}/>
+                <img className="sortbar-img" src={sortReverse ? sortRev : sort} style={{filter: getFilter()}} onClick={() => setSortReverse(!sortReverse)}/>
                 <span className="sortbar-text" onClick={() => {setActiveDropdown(activeDropdown === "sort" ? "none" : "sort"); setFilterDropActive(false)}}>{getSort()}</span>
             </div>
         )
@@ -553,14 +522,14 @@ const SortBar: React.FunctionComponent = (props) => {
     }
 
     useEffect(() => {
-        localStorage.setItem("brightness", brightness)
-        localStorage.setItem("contrast", contrast)
-        localStorage.setItem("hue", hue)
-        localStorage.setItem("saturation", saturation)
-        localStorage.setItem("lightness", lightness)
-        localStorage.setItem("blur", blur)
-        localStorage.setItem("sharpen", sharpen)
-        localStorage.setItem("pixelate", pixelate)
+        localStorage.setItem("brightness", String(brightness))
+        localStorage.setItem("contrast", String(contrast))
+        localStorage.setItem("hue", String(hue))
+        localStorage.setItem("saturation", String(saturation))
+        localStorage.setItem("lightness", String(lightness))
+        localStorage.setItem("blur", String(blur))
+        localStorage.setItem("sharpen", String(sharpen))
+        localStorage.setItem("pixelate", String(pixelate))
     }, [brightness, contrast, hue, saturation, lightness, blur, sharpen, pixelate])
 
     const resetFilters = () => {
@@ -575,19 +544,15 @@ const SortBar: React.FunctionComponent = (props) => {
     }
 
     const toggleSquare = () => {
-        setSquare((prev: boolean) => {
-            const newValue = !prev
-            localStorage.setItem("square", `${newValue}`)
-            return newValue
-        })
+        const newValue = !square
+        localStorage.setItem("square", `${newValue}`)
+        setSquare(newValue)
     }
 
     const toggleScroll = () => {
-        setScroll((prev: boolean) => {
-            const newValue = !prev
-            localStorage.setItem("scroll", `${newValue}`)
-            return newValue
-        })
+        const newValue = !scroll
+        localStorage.setItem("scroll", `${newValue}`)
+        setScroll(newValue)
     }
 
     const styleDropdownJSX = () => {
@@ -672,12 +637,10 @@ const SortBar: React.FunctionComponent = (props) => {
 
     const bulkFavorite = async () => {
         if (!selectionItems.size) return
-        console.log(selectionItems.keys())
-        console.log(selectionItems.values())
         for (const postID of selectionItems.values()) {
             await functions.post("/api/favorite/toggle", {postID}, session, setSessionFlag)
             functions.get("/api/favorite", {postID}, session, setSessionFlag).then((favorite) => {
-                functions.updateLocalFavorite(postID, favorite ? true : false, posts)
+                functions.updateLocalFavorite(postID, favorite ? true : false, posts, setPosts)
             })
         }
         setSelectionMode(false)
@@ -701,20 +664,20 @@ const SortBar: React.FunctionComponent = (props) => {
                 setSelectionMode(true)
             }, 200)
         } else {
-            setShowDownloadDialog((prev: boolean) => !prev)
+            setShowDownloadDialog(!showDownloadDialog)
         }
     }
 
     const bulkFavgroup = () => {
-        setBulkFavGroupDialog((prev: boolean) => !prev)
+        setBulkFavGroupDialog(!bulkFavGroupDialog)
     }
 
     const bulkTagEdit = () => {
-        setShowBulkTagEditDialog((prev: boolean) => !prev)
+        setShowBulkTagEditDialog(!showBulkTagEditDialog)
     }
 
     const bulkDelete = () => {
-        setShowBulkDeleteDialog((prev: boolean) => !prev)
+        setShowBulkDeleteDialog(!showBulkDeleteDialog)
     }
 
     const changeSortType = (sortType: string) => {
@@ -819,7 +782,7 @@ const SortBar: React.FunctionComponent = (props) => {
                         <img className="sortbar-img" src={star} style={{filter: getFilter()}}/>
                     </div> : null}
                     {session.username ? 
-                    <div className="sortbar-item" onClick={() => setSelectionMode((prev: boolean) => !prev)}>
+                    <div className="sortbar-item" onClick={() => setSelectionMode(!selectionMode)}>
                         <img className="sortbar-img" src={selectionMode ? selectOn : select} style={{filter: getFilter()}}/>
                     </div> : null}
                     {!scroll ? <>
@@ -840,7 +803,7 @@ const SortBar: React.FunctionComponent = (props) => {
                     <div className="sortbar-item" onClick={() => toggleSquare()}>
                         <img className="sortbar-img" src={squareIcon} style={{filter: getFilter()}}/>
                     </div>
-                    <div className="sortbar-item" onClick={() => setReverse((prev: boolean) => !prev)}>
+                    <div className="sortbar-item" onClick={() => setReverse(!reverse)}>
                         {reverse ? <>
                         <img className="sortbar-img" src={reverseIcon} style={{transform: "scaleX(-1)", filter: getFilter()}}/>
                         {!tablet ? <span className="sortbar-text">Forward</span> : null}
@@ -975,7 +938,7 @@ const SortBar: React.FunctionComponent = (props) => {
             <div className={`dropdown-right ${activeDropdown === "sort" ? "" : "hide-dropdown"}`} 
             style={{marginRight: getSortMargin(), top: `${dropTop}px`}} onClick={() => setActiveDropdown("none")}>
                 {mobile ? 
-                <div className="sortbar-dropdown-row" onClick={() => setSortReverse((prev: boolean) => !prev)}>
+                <div className="sortbar-dropdown-row" onClick={() => setSortReverse(!sortReverse)}>
                     <span className="sortbar-dropdown-text">Reverse</span>
                 </div> : null}
                 <div className="sortbar-dropdown-row" onClick={() => changeSortType("random")}>

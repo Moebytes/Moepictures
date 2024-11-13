@@ -1,11 +1,9 @@
-import React, {useContext, useEffect, useState, useReducer} from "react"
+import React, {useEffect, useState} from "react"
 import {useHistory} from "react-router-dom"
-import {ThemeContext, HideNavbarContext, HideSortbarContext, EnableDragContext, MobileContext, UnverifiedPostsContext,
-RelativeContext, HideTitlebarContext, SearchContext, SearchFlagContext, PostsContext, ShowDeletePostDialogContext,
-TagsContext, RandomFlagContext, ImageSearchFlagContext, SessionContext, SessionFlagContext, TagEditIDContext, SourceEditIDContext, ShowTakedownPostDialogContext,
-SiteHueContext, SiteLightnessContext, SiteSaturationContext, TranslationModeContext, TranslationDrawingEnabledContext,
-ActionBannerContext, GroupPostIDContext, LockPostIDContext, PrivatePostObjContext, ShowUpscalingDialogContext, ShowCompressingDialogContext} from "../Context"
-import {HashLink as Link} from "react-router-hash-link"
+import {useThemeSelector, useSearchActions, useSearchSelector, 
+useFlagActions, useInteractionActions, useCacheActions, useCacheSelector, useActiveActions,
+useSessionSelector, useSessionActions, usePostDialogActions, useGroupDialogActions,
+usePostDialogSelector} from "../store"
 import permissions from "../structures/Permissions"
 import favicon from "../assets/icons/favicon.png"
 import setAvatar from "../assets/icons/setavatar.png"
@@ -61,44 +59,25 @@ interface Props {
 }
 
 const MobileInfo: React.FunctionComponent<Props> = (props) => {
-    const [ignored, forceUpdate] = useReducer(x => x + 1, 0)
-    const {theme, setTheme} = useContext(ThemeContext)
-    const {siteHue, setSiteHue} = useContext(SiteHueContext)
-    const {siteSaturation, setSiteSaturation} = useContext(SiteSaturationContext)
-    const {siteLightness, setSiteLightness} = useContext(SiteLightnessContext)
-    const {hideSortbar, setHideSortbar} = useContext(HideSortbarContext)
-    const {hideNavbar, setHideNavbar} = useContext(HideNavbarContext)
-    const {hideTitlebar, setHideTitlebar} = useContext(HideTitlebarContext)
-    const {enableDrag, setEnableDrag} = useContext(EnableDragContext)
-    const {relative, setRelative} = useContext(RelativeContext)
-    const {posts, setPosts} = useContext(PostsContext)
-    const {unverifiedPosts, setUnverifiedPosts} = useContext(UnverifiedPostsContext)
-    const {search, setSearch} = useContext(SearchContext)
-    const {searchFlag, setSearchFlag} = useContext(SearchFlagContext)
-    const {tags, setTags} = useContext(TagsContext)
-    const {randomFlag, setRandomFlag} = useContext(RandomFlagContext)
-    const {imageSearchFlag, setImageSearchFlag} = useContext(ImageSearchFlagContext)
-    const {showDeletePostDialog, setShowDeletePostDialog} = useContext(ShowDeletePostDialogContext)
-    const {showTakedownPostDialog, setShowTakedownPostDialog} = useContext(ShowTakedownPostDialogContext)
-    const {mobile, setMobile} = useContext(MobileContext)
-    const {session, setSession} = useContext(SessionContext)
-    const {sessionFlag, setSessionFlag} = useContext(SessionFlagContext)
+    const {siteHue, siteSaturation, siteLightness} = useThemeSelector()
+    const {translationMode} = useSearchSelector()
+    const {setSearchFlag, setTranslationMode, setTranslationDrawingEnabled} = useSearchActions()
+    const {posts, unverifiedPosts, tags} = useCacheSelector()
+    const {setTags} = useCacheActions()
+    const {setEnableDrag} = useInteractionActions()
+    const {setRandomFlag, setImageSearchFlag} = useFlagActions()
+    const {session} = useSessionSelector()
+    const {setSessionFlag} = useSessionActions()
+    const {showUpscalingDialog, showCompressingDialog, showDeletePostDialog, showTakedownPostDialog} = usePostDialogSelector()
+    const {setTagEditID, setSourceEditID, setPrivatePostObj, setLockPostID, setShowUpscalingDialog, setShowCompressingDialog, setShowDeletePostDialog, setShowTakedownPostDialog} = usePostDialogActions()
+    const {setActionBanner} = useActiveActions()
+    const {setGroupPostID} = useGroupDialogActions()
     const [maxTags, setMaxTags] = useState(23)
     const [uploaderImage, setUploaderImage] = useState("")
     const [uploaderRole, setUploaderRole] = useState("")
     const [updaterRole, setUpdaterRole] = useState("")
     const [approverRole, setApproverRole] = useState("")
     const [suggestionsActive, setSuggestionsActive] = useState(false)
-    const {tagEditID, setTagEditID} = useContext(TagEditIDContext)
-    const {sourceEditID, setSourceEditID} = useContext(SourceEditIDContext)
-    const {translationMode, setTranslationMode} = useContext(TranslationModeContext)
-    const {translationDrawingEnabled, setTranslationDrawingEnabled} = useContext(TranslationDrawingEnabledContext)
-    const {actionBanner, setActionBanner} = useContext(ActionBannerContext)
-    const {groupPostID, setGroupPostID} = useContext(GroupPostIDContext)
-    const {privatePostObj, setPrivatePostObj} = useContext(PrivatePostObjContext)
-    const {lockPostID, setLockPostID} = useContext(LockPostIDContext)
-    const {showUpscalingDialog, setShowUpscalingDialog} = useContext(ShowUpscalingDialogContext)
-    const {showCompressingDialog, setShowCompressingDialog} = useContext(ShowCompressingDialogContext)
     const history = useHistory()
 
     const getFilter = () => {
@@ -264,23 +243,10 @@ const MobileInfo: React.FunctionComponent<Props> = (props) => {
             const tagClick = () => {
                 history.push(`/tag/${currentTags[i].tag}`)
             }
-            const tagColor = () => {
-                if (currentTags[i].r18) return "r18-tag-color"
-                if (currentTags[i].type === "artist") return "artist-tag-color"
-                if (currentTags[i].type === "character") return "character-tag-color"
-                if (currentTags[i].type === "series") return "series-tag-color"
-                if (currentTags[i].type === "meta") return "meta-tag-color"
-                if (currentTags[i].type === "appearance") return "appearance-tag-color"
-                if (currentTags[i].type === "outfit") return "outfit-tag-color"
-                if (currentTags[i].type === "accessory") return "accessory-tag-color"
-                if (currentTags[i].type === "action") return "action-tag-color"
-                if (currentTags[i].type === "scenery") return "scenery-tag-color"
-                return "tag"
-            }
             jsx.push(
                 <div className="mobileinfo-row">
                     <span className="tag-hover" onClick={() => tagClick()}>
-                        <span className={`tag ${tagColor()}`}>{currentTags[i].tag.replaceAll("-", " ")}</span>
+                        <span className={`tag ${functions.getTagColor(currentTags[i])}`}>{currentTags[i].tag.replaceAll("-", " ")}</span>
                         <span className={`tag-count ${currentTags[i].count === "1" ? "artist-tag-color" : ""}`}>{currentTags[i].count}</span>
                     </span>
                 </div>
@@ -337,7 +303,7 @@ const MobileInfo: React.FunctionComponent<Props> = (props) => {
     }
 
     const deletePost = async () => {
-        setShowDeletePostDialog((prev: boolean) => !prev)
+        setShowDeletePostDialog(!showDeletePostDialog)
     }
 
     const editPost = async () => {
@@ -366,11 +332,11 @@ const MobileInfo: React.FunctionComponent<Props> = (props) => {
     }
 
     const upscalingDialog = () => {
-        setShowUpscalingDialog((prev: boolean) => !prev)
+        setShowUpscalingDialog(!showUpscalingDialog)
     }
 
     const compressingDialog = () => {
-        setShowCompressingDialog((prev: boolean) => !prev)
+        setShowCompressingDialog(!showCompressingDialog)
     }
 
     const approvePost = async () => {
@@ -525,7 +491,7 @@ const MobileInfo: React.FunctionComponent<Props> = (props) => {
     }
 
     const triggerTakedown = () => {
-        setShowTakedownPostDialog((prev: boolean) => !prev)
+        setShowTakedownPostDialog(!showTakedownPostDialog)
     }
 
     const postHistory = () => {

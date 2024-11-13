@@ -392,6 +392,7 @@ CREATE TABLE IF NOT EXISTS "tag edit requests" (
     "username" text REFERENCES "users" ON UPDATE CASCADE ON DELETE CASCADE,
     "tag" text REFERENCES "tags" ON UPDATE CASCADE ON DELETE CASCADE,
     "key" text,
+    "type" text,
     "description" text,
     "image" text,
     "imageHash" text,

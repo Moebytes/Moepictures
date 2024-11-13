@@ -274,7 +274,6 @@ const UserRoutes = (app: Express) => {
                 }
             }
             const session = structuredClone(req.session)
-            delete session.refreshToken
             delete session.captchaAnswer
             delete session.csrfSecret
             delete session.ip

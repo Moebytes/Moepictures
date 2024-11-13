@@ -1,6 +1,5 @@
-import React, {useContext, useEffect, useRef, useState} from "react"
-import {ThemeContext, EnableDragContext, SiteHueContext, SiteLightnessContext, SiteSaturationContext, SessionContext, SessionFlagContext} from "../Context"
-import {HashLink as Link} from "react-router-hash-link"
+import React, {useEffect, useState} from "react"
+import {useInteractionActions, useThemeSelector, useSessionSelector, useSessionActions} from "../store"
 import jsxFunctions from "../structures/JSXFunctions"
 import commentaryTranslate from "../assets/icons/commentarytranslate.png"
 import functions from "../structures/Functions"
@@ -12,13 +11,10 @@ interface Props {
 }
 
 const Commentary: React.FunctionComponent<Props> = (props) => {
-    const {theme, setTheme} = useContext(ThemeContext)
-    const {siteHue, setSiteHue} = useContext(SiteHueContext)
-    const {siteSaturation, setSiteSaturation} = useContext(SiteSaturationContext)
-    const {siteLightness, setSiteLightness} = useContext(SiteLightnessContext)
-    const {enableDrag, setEnableDrag} = useContext(EnableDragContext)
-    const {session, setSession} = useContext(SessionContext)
-    const {sessionFlag, setSessionFlag} = useContext(SessionFlagContext)
+    const {siteHue, siteSaturation, siteLightness} = useThemeSelector()
+    const {setEnableDrag} = useInteractionActions()
+    const {session} = useSessionSelector()
+    const {setSessionFlag} = useSessionActions()
     const [showTranslated, setShowTranslated] = useState(false)
     const [text, setText] = useState(props.text)
     const [translatedText, setTranslatedText] = useState(null)

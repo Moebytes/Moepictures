@@ -1,4 +1,4 @@
-import React, {useEffect, useContext, useState, useRef, useReducer} from "react"
+import React, {useEffect, useState, useRef, useReducer} from "react"
 import {useHistory} from "react-router-dom"
 import {HashLink as Link} from "react-router-hash-link"
 import TitleBar from "../components/TitleBar"
@@ -30,8 +30,9 @@ import Carousel from "../components/Carousel"
 import PostImage from "../components/PostImage"
 import PostModel from "../components/PostModel"
 import PostSong from "../components/PostSong"
-import {HideNavbarContext, HideSidebarContext, RelativeContext, UploadDropFilesContext, ThemeContext, EnableDragContext, HideTitlebarContext, BrightnessContext, ContrastContext, HueContext, SaturationContext, LightnessContext, MobileContext,
-BlurContext, SharpenContext, PixelateContext, HeaderTextContext, SessionContext, SidebarTextContext, RedirectContext, PostFlagContext, ShowUpscaledContext, SessionFlagContext} from "../Context"
+import {useThemeSelector, useInteractionActions, useSessionSelector, useSessionActions,
+useLayoutActions, useActiveActions, useFlagActions, useLayoutSelector, useSearchActions, 
+useSearchSelector, useCacheSelector, useCacheActions, useFilterActions} from "../store"
 import JSZip from "jszip"
 import "./styles/uploadpage.less"
 import ContentEditable from "react-contenteditable"
@@ -50,28 +51,19 @@ interface Props {
 
 const EditUnverifiedPostPage: React.FunctionComponent<Props> = (props) => {
     const [ignored, forceUpdate] = useReducer(x => x + 1, 0)
-    const {enableDrag, setEnableDrag} = useContext(EnableDragContext)
-    const {hideNavbar, setHideNavbar} = useContext(HideNavbarContext)
-    const {hideTitlebar, setHideTitlebar} = useContext(HideTitlebarContext)
-    const {hideSidebar, setHideSidebar} = useContext(HideSidebarContext)
-    const {relative, setRelative} = useContext(RelativeContext)
-    const {brightness, setBrightness} = useContext(BrightnessContext)
-    const {contrast, setContrast} = useContext(ContrastContext)
-    const {hue, setHue} = useContext(HueContext)
-    const {saturation, setSaturation} = useContext(SaturationContext)
-    const {lightness, setLightness} = useContext(LightnessContext)
-    const {pixelate, setPixelate} = useContext(PixelateContext)
-    const {blur, setBlur} = useContext(BlurContext)
-    const {sharpen, setSharpen} = useContext(SharpenContext)
-    const {headerText, setHeaderText} = useContext(HeaderTextContext)
-    const {sidebarText, setSidebarText} = useContext(SidebarTextContext)
-    const {session, setSession} = useContext(SessionContext)
-    const {sessionFlag, setSessionFlag} = useContext(SessionFlagContext)
-    const {redirect, setRedirect} = useContext(RedirectContext)
-    const {mobile, setMobile} = useContext(MobileContext)
-    const {showUpscaled, setShowUpscaled} = useContext(ShowUpscaledContext)
-    const {postFlag, setPostFlag} = useContext(PostFlagContext)
-    const {uploadDropFiles, setUploadDropFiles} = useContext(UploadDropFilesContext)
+    const {theme, siteHue, siteSaturation, siteLightness} = useThemeSelector()
+    const {setHideNavbar, setHideTitlebar, setHideSidebar, setRelative} = useLayoutActions()
+    const {setEnableDrag} = useInteractionActions()
+    const {setHeaderText, setSidebarText} = useActiveActions()
+    const {setPostFlag} = useFlagActions()
+    const {session} = useSessionSelector()
+    const {setSessionFlag} = useSessionActions()
+    const {mobile} = useLayoutSelector()
+    const {showUpscaled} = useSearchSelector()
+    const {setShowUpscaled} = useSearchActions()
+    const {setBrightness, setContrast, setHue, setSaturation, setLightness, setPixelate, setBlur, setSharpen} = useFilterActions()
+    const {uploadDropFiles} = useCacheSelector()
+    const {setUploadDropFiles} = useCacheActions()
     const [displayImage, setDisplayImage] = useState(false)
     const [editPostError, setEditPostError] = useState(false)
     const [submitError, setSubmitError] = useState(false)
@@ -1539,7 +1531,7 @@ const EditUnverifiedPostPage: React.FunctionComponent<Props> = (props) => {
     }
 
     const changeUpscaled = () => {
-        setShowUpscaled((prev) => !prev)
+        setShowUpscaled(!showUpscaled)
         setImgChangeFlag(true)
     }
 

@@ -1,24 +1,15 @@
-import React, {useEffect, useContext, useState, useRef} from "react"
+import React, {useEffect, useState, useRef} from "react"
 import {useHistory} from "react-router-dom"
-import {HashLink as Link} from "react-router-hash-link"
-import {HideNavbarContext, HideSidebarContext, ThemeContext, EnableDragContext, PremiumRequiredContext, 
-HideTitlebarContext, SessionContext, SessionFlagContext} from "../Context"
+import {useInteractionActions, useMiscDialogSelector, useMiscDialogActions} from "../store"
 import functions from "../structures/Functions"
 import Draggable from "react-draggable"
 import premiumStar from "../assets/icons/premium-star.png"
 import "./styles/dialog.less"
 
 const PremiumRequiredDialog: React.FunctionComponent = (props) => {
-    const {theme, setTheme} = useContext(ThemeContext)
-    const {hideNavbar, setHideNavbar} = useContext(HideNavbarContext)
-    const {hideTitlebar, setHideTitlebar} = useContext(HideTitlebarContext)
-    const {hideSidebar, setHideSidebar} = useContext(HideSidebarContext)
-    const {enableDrag, setEnableDrag} = useContext(EnableDragContext)
-    const {premiumRequired, setPremiumRequired} = useContext(PremiumRequiredContext)
-    const {session, setSession} = useContext(SessionContext)
-    const {sessionFlag, setSessionFlag} = useContext(SessionFlagContext)
-    const [reason, setReason] = useState("")
-    const [submitted, setSubmitted] = useState(false)
+    const {setEnableDrag} = useInteractionActions()
+    const {premiumRequired} = useMiscDialogSelector()
+    const {setPremiumRequired} = useMiscDialogActions()
     const [error, setError] = useState(false)
     const errorRef = useRef<any>(null)
     const history = useHistory()

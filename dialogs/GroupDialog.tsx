@@ -1,9 +1,8 @@
-import React, {useEffect, useContext, useState, useRef, useReducer} from "react"
+import React, {useEffect, useState, useRef, useReducer} from "react"
 import {useHistory} from "react-router-dom"
-import {HashLink as Link} from "react-router-hash-link"
-import {ThemeContext, EnableDragContext, GroupPostIDContext, SessionContext, SiteHueContext,
-SiteLightnessContext, SiteSaturationContext, SessionFlagContext, PostFlagContext,
-ActionBannerContext} from "../Context"
+import {useInteractionActions, useGroupDialogSelector, useGroupDialogActions, useSessionSelector, 
+useSessionActions, useFlagActions} from "../store"
+import {useThemeSelector} from "../store"
 import functions from "../structures/Functions"
 import permissions from "../structures/Permissions"
 import radioButton from "../assets/icons/radiobutton.png"
@@ -15,16 +14,13 @@ import Draggable from "react-draggable"
 
 const GroupDialog: React.FunctionComponent = (props) => {
     const [ignored, forceUpdate] = useReducer(x => x + 1, 0)
-    const {theme, setTheme} = useContext(ThemeContext)
-    const {siteHue, setSiteHue} = useContext(SiteHueContext)
-    const {siteSaturation, setSiteSaturation} = useContext(SiteSaturationContext)
-    const {siteLightness, setSiteLightness} = useContext(SiteLightnessContext)
-    const {enableDrag, setEnableDrag} = useContext(EnableDragContext)
-    const {actionBanner, setActionBanner} = useContext(ActionBannerContext)
-    const {session, setSession} = useContext(SessionContext)
-    const {sessionFlag, setSessionFlag} = useContext(SessionFlagContext)
-    const {groupPostID, setGroupPostID} = useContext(GroupPostIDContext)
-    const {postFlag, setPostFlag} = useContext(PostFlagContext)
+    const {siteHue, siteSaturation, siteLightness} = useThemeSelector()
+    const {setEnableDrag} = useInteractionActions()
+    const {session} = useSessionSelector()
+    const {setSessionFlag} = useSessionActions()
+    const {groupPostID} = useGroupDialogSelector()
+    const {setGroupPostID} = useGroupDialogActions()
+    const {setPostFlag} = useFlagActions()
     const [name, setName] = useState("")
     const [groups, setGroups] = useState([] as any[])
     const [reason, setReason] = useState("")

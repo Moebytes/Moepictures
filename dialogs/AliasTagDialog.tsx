@@ -1,24 +1,17 @@
-import React, {useEffect, useContext, useState, useRef} from "react"
+import React, {useEffect, useState, useRef} from "react"
 import {useHistory} from "react-router-dom"
-import {HashLink as Link} from "react-router-hash-link"
-import {HideNavbarContext, HideSidebarContext, ThemeContext, EnableDragContext, AliasTagIDContext, 
-AliasTagFlagContext, AliasTagNameContext, HideTitlebarContext, SessionContext, SessionFlagContext} from "../Context"
+import {useInteractionActions, useSessionSelector, useSessionActions, useTagDialogSelector, useTagDialogActions} from "../store"
 import functions from "../structures/Functions"
 import Draggable from "react-draggable"
 import "./styles/dialog.less"
 import permissions from "../structures/Permissions"
 
 const AliasTagDialog: React.FunctionComponent = (props) => {
-    const {theme, setTheme} = useContext(ThemeContext)
-    const {hideNavbar, setHideNavbar} = useContext(HideNavbarContext)
-    const {hideTitlebar, setHideTitlebar} = useContext(HideTitlebarContext)
-    const {hideSidebar, setHideSidebar} = useContext(HideSidebarContext)
-    const {enableDrag, setEnableDrag} = useContext(EnableDragContext)
-    const {aliasTagID, setAliasTagID} = useContext(AliasTagIDContext)
-    const {aliasTagFlag, setAliasTagFlag} = useContext(AliasTagFlagContext)
-    const {aliasTagName, setAliasTagName} = useContext(AliasTagNameContext)
-    const {session, setSession} = useContext(SessionContext)
-    const {sessionFlag, setSessionFlag} = useContext(SessionFlagContext)
+    const {setEnableDrag} = useInteractionActions()
+    const {aliasTagID, aliasTagName} = useTagDialogSelector()
+    const {setAliasTagID, setAliasTagName, setAliasTagFlag} = useTagDialogActions()
+    const {session} = useSessionSelector()
+    const {setSessionFlag} = useSessionActions()
     const [reason, setReason] = useState("")
     const [submitted, setSubmitted] = useState(false)
     const [error, setError] = useState(false)

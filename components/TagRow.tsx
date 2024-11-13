@@ -1,10 +1,8 @@
-import React, {useContext, useEffect, useRef, useState} from "react"
+import React, {useEffect, useRef, useState} from "react"
 import {useHistory} from "react-router-dom"
-import {ThemeContext, SearchContext, SearchFlagContext, DeleteTagFlagContext, DeleteTagIDContext, MobileContext, EditTagTypeContext, EditTagReasonContext,
-EditTagSocialContext, EditTagTwitterContext, EditTagWebsiteContext, EditTagFandomContext, EditTagAliasesContext, EditTagImplicationsContext, 
-EditTagDescriptionContext, EditTagIDContext, EditTagFlagContext, EditTagPixivTagsContext, EditTagR18Context, SessionContext, EditTagImageContext, EditTagKeyContext, AliasTagFlagContext, 
-AliasTagIDContext, AliasTagNameContext, SessionFlagContext, CategorizeTagContext, TagFlagContext} from "../Context"
-import {HashLink as Link} from "react-router-hash-link"
+import {useThemeSelector, useSessionSelector, useSessionActions, useLayoutActions, useActiveActions, useFlagActions, 
+useLayoutSelector, useFlagSelector, useCacheActions, useInteractionActions, useSearchActions, useTagDialogActions,
+useTagDialogSelector, useSearchSelector} from "../store"
 import functions from "../structures/Functions"
 import permissions from "../structures/Permissions"
 import alias from "../assets/icons/alias.png"
@@ -27,35 +25,13 @@ interface Props {
 }
 
 const TagRow: React.FunctionComponent<Props> = (props) => {
-    const {theme, setTheme} = useContext(ThemeContext)
-    const [hover, setHover] = useState(false)
-    const {search, setSearch} = useContext(SearchContext)
-    const {searchFlag, setSearchFlag} = useContext(SearchFlagContext)
-    const {mobile, setMobile} = useContext(MobileContext)
-    const {deleteTagID, setDeleteTagID} = useContext(DeleteTagIDContext)
-    const {deleteTagFlag, setDeleteTagFlag} = useContext(DeleteTagFlagContext)
-    const {editTagReason, setEditTagReason} = useContext(EditTagReasonContext)
-    const {editTagFlag, setEditTagFlag} = useContext(EditTagFlagContext)
-    const {editTagID, setEditTagID} = useContext(EditTagIDContext)
-    const {editTagAliases, setEditTagAliases} = useContext(EditTagAliasesContext)
-    const {editTagImplications, setEditTagImplications} = useContext(EditTagImplicationsContext)
-    const {editTagDescription, setEditTagDescription} = useContext(EditTagDescriptionContext)
-    const {editTagType, setEditTagType} = useContext(EditTagTypeContext)
-    const {editTagSocial, setEditTagSocial} = useContext(EditTagSocialContext)
-    const {editTagTwitter, setEditTagTwitter} = useContext(EditTagTwitterContext)
-    const {editTagWebsite, setEditTagWebsite} = useContext(EditTagWebsiteContext)
-    const {editTagFandom, setEditTagFandom} = useContext(EditTagFandomContext)
-    const {editTagPixivTags, setEditTagPixivTags} = useContext(EditTagPixivTagsContext)
-    const {editTagR18, setEditTagR18} = useContext(EditTagR18Context)
-    const {editTagImage, setEditTagImage} = useContext(EditTagImageContext)
-    const {editTagKey, setEditTagKey} = useContext(EditTagKeyContext)
-    const {aliasTagID, setAliasTagID} = useContext(AliasTagIDContext)
-    const {aliasTagFlag, setAliasTagFlag} = useContext(AliasTagFlagContext)
-    const {aliasTagName, setAliasTagName} = useContext(AliasTagNameContext)
-    const {categorizeTag, setCategorizeTag} = useContext(CategorizeTagContext)
-    const {session, setSession} = useContext(SessionContext)
-    const {sessionFlag, setSessionFlag} = useContext(SessionFlagContext)
-    const {tagFlag, setTagFlag} = useContext(TagFlagContext)
+    const {session} = useSessionSelector()
+    const {setSessionFlag} = useSessionActions()
+    const {tagFlag} = useFlagSelector()
+    const {setTagFlag} = useFlagActions()
+    const {setSearch, setSearchFlag} = useSearchActions()
+    const {editTagObj, editTagFlag, deleteTagID, deleteTagFlag, aliasTagID, aliasTagFlag, aliasTagName} = useTagDialogSelector()
+    const {setEditTagObj, setEditTagFlag, setDeleteTagID, setDeleteTagFlag, setCategorizeTag, setAliasTagID, setAliasTagFlag, setAliasTagName} = useTagDialogActions()
     const history = useHistory()
     const scrollRef = useRef(null) as any
 
@@ -148,55 +124,58 @@ const TagRow: React.FunctionComponent<Props> = (props) => {
 
     const editTag = async () => {
         let image = null as any
-        if (editTagImage) {
-            if (editTagImage === "delete") {
+        if (editTagObj.image) {
+            if (editTagObj.image === "delete") {
                 image = ["delete"]
             } else {
-                const arrayBuffer = await fetch(editTagImage).then((r) => r.arrayBuffer())
+                const arrayBuffer = await fetch(editTagObj.image).then((r) => r.arrayBuffer())
                 const bytes = new Uint8Array(arrayBuffer)
                 image = Object.values(bytes)
             }
         }
         try {
-            await functions.put("/api/tag/edit", {tag: props.tag.tag, key: editTagKey, description: editTagDescription,
-            image, aliases: editTagAliases, implications: editTagImplications, pixivTags: editTagPixivTags, social: editTagSocial, twitter: editTagTwitter,
-            website: editTagWebsite, fandom: editTagFandom, r18: editTagR18, reason: editTagReason}, session, setSessionFlag)
+            await functions.put("/api/tag/edit", {tag: props.tag.tag, key: editTagObj.key, description: editTagObj.description,
+            image, aliases: editTagObj.aliases, implications: editTagObj.implications, pixivTags: editTagObj.pixivTags, social: editTagObj.social, twitter: editTagObj.twitter,
+            website: editTagObj.website, fandom: editTagObj.fandom, r18: editTagObj.r18, reason: editTagObj.reason}, session, setSessionFlag)
             props.onEdit?.()
         } catch (err: any) {
             if (err.response?.data.includes("No permission to edit implications")) {
-                await functions.post("/api/tag/edit/request", {tag: editTagID.tag, key: editTagKey, description: editTagDescription, image, aliases: editTagAliases, 
-                implications: editTagImplications, pixivTags: editTagPixivTags, social: editTagSocial, twitter: editTagTwitter, website: editTagWebsite, fandom: editTagFandom, 
-                r18: editTagR18, reason: editTagReason}, session, setSessionFlag)
-                setEditTagID({tag: props.tag.tag, failed: "implication"})
+                await functions.post("/api/tag/edit/request", {tag: editTagObj.tag, key: editTagObj.key, description: editTagObj.description, image, aliases: editTagObj.aliases, 
+                implications: editTagObj.implications, pixivTags: editTagObj.pixivTags, social: editTagObj.social, twitter: editTagObj.twitter, website: editTagObj.website, fandom: editTagObj.fandom, 
+                r18: editTagObj.r18, reason: editTagObj.reason}, session, setSessionFlag)
+                setEditTagObj({tag: props.tag.tag, failed: "implication"})
             } else {
-                setEditTagID({tag: props.tag.tag, failed: true})
+                setEditTagObj({tag: props.tag.tag, failed: true})
             }
         }
     }
 
     useEffect(() => {
-        if (editTagFlag && editTagID?.tag === props.tag.tag) {
+        if (editTagFlag && editTagObj?.tag === props.tag.tag) {
             editTag()
             setEditTagFlag(false)
-            setEditTagID(null)
+            setEditTagObj(null)
         }
     }, [editTagFlag, session])
 
     const editTagDialog = async () => {
-        setEditTagKey(props.tag.tag)
-        setEditTagDescription(props.tag.description)
-        setEditTagImage(props.tag.image ? functions.getTagLink(props.tag.type, props.tag.image, props.tag.imageHash) : null)
-        setEditTagAliases(props.tag.aliases?.[0] ? props.tag.aliases.map((a: any) => a.alias) : [])
-        setEditTagImplications(props.tag.implications?.[0] ? props.tag.implications.map((i: any) => i.implication) : [])
-        setEditTagPixivTags(props.tag.pixivTags?.[0] ? props.tag.pixivTags : [])
-        setEditTagType(props.tag.type)
-        setEditTagSocial(props.tag.social)
-        setEditTagTwitter(props.tag.twitter)
-        setEditTagWebsite(props.tag.website)
-        setEditTagFandom(props.tag.fandom)
-        setEditTagR18(props.tag.r18)
-        setEditTagReason("")
-        setEditTagID({tag: props.tag.tag, failed: false})
+        setEditTagObj({
+            failed: false,
+            tag: props.tag.tag,
+            key: props.tag.tag,
+            description: props.tag.description,
+            image: props.tag.image ? functions.getTagLink(props.tag.type, props.tag.image, props.tag.imageHash) : null,
+            aliases: props.tag.aliases?.[0] ? props.tag.aliases.map((a: any) => a.alias) : [],
+            implications: props.tag.implications?.[0] ? props.tag.implications.map((i: any) => i.implication) : [],
+            pixivTags: props.tag.pixivTags?.[0] ? props.tag.pixivTags : [],
+            type: props.tag.type,
+            social: props.tag.social,
+            twitter: props.tag.twitter,
+            website: props.tag.website,
+            fandom: props.tag.fandom,
+            r18: props.tag.r18,
+            reason: ""
+        })
     }
 
     const aliasTag = async () => {
@@ -259,21 +238,6 @@ const TagRow: React.FunctionComponent<Props> = (props) => {
         return jsx
     }
 
-    const getTagColor = () => {
-        if (props.tag.banned) return "strikethrough"
-        if (props.tag.r18) return "r18-tag-color"
-        if (props.tag.type === "artist") return "artist-tag-color"
-        if (props.tag.type === "character") return "character-tag-color"
-        if (props.tag.type === "series") return "series-tag-color"
-        if (props.tag.type === "meta") return "meta-tag-color"
-        if (props.tag.type === "appearance") return "appearance-tag-color"
-        if (props.tag.type === "outfit") return "outfit-tag-color"
-        if (props.tag.type === "accessory") return "accessory-tag-color"
-        if (props.tag.type === "action") return "action-tag-color"
-        if (props.tag.type === "scenery") return "scenery-tag-color"
-        return "tag-color"
-    }
-
     return (
         <tr className="tagrow">
             {props.tag.image ?
@@ -283,7 +247,7 @@ const TagRow: React.FunctionComponent<Props> = (props) => {
             <div className="tagrow-content-container">
                 <td className="tagrow-container" style={{width: props.tag.image ? "16%" : "25%"}}>
                     <div className="tagrow-row">
-                        <span className={`tagrow-tag ${getTagColor()}`} onClick={tagPage} onAuxClick={tagPage} onContextMenu={tagPage}>{props.tag.tag.replaceAll("-", " ")}</span>
+                        <span className={`tagrow-tag ${functions.getTagColor(props.tag)}`} onClick={tagPage} onAuxClick={tagPage} onContextMenu={tagPage}>{props.tag.tag.replaceAll("-", " ")}</span>
                         {socialJSX()}
                         <span className="tagrow-tag-count">{props.tag.postCount}</span>
                     </div>
@@ -304,7 +268,7 @@ const TagRow: React.FunctionComponent<Props> = (props) => {
             </div>
             {session.username ?
             <div className="tag-buttons">
-                {permissions.isMod(session) ? <img className="tag-button" src={categoryIcon} onClick={categorizeTagDialog}/> : null}
+                <img className="tag-button" src={categoryIcon} onClick={categorizeTagDialog}/>
                 <img className="tag-button" src={historyIcon} onClick={tagHistory}/>
                 <img className="tag-button" src={alias} onClick={aliasTagDialog}/>
                 <img className="tag-button" src={edit} onClick={editTagDialog}/>

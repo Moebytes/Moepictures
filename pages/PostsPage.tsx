@@ -16,25 +16,19 @@ import CaptchaDialog from "../dialogs/CaptchaDialog"
 import SaveSearchDialog from "../dialogs/SaveSearchDialog"
 import EditSaveSearchDialog from "../dialogs/EditSaveSearchDialog"
 import DeleteAllSaveSearchDialog from "../dialogs/DeleteAllSaveSearchDialog"
-import {HideNavbarContext, HideSidebarContext, SquareContext, RelativeContext, HideTitlebarContext, 
-HeaderTextContext, SidebarTextContext, MobileContext, MobileScrollingContext, SessionContext} from "../Context"
+import {useInteractionActions, useSessionSelector, useLayoutActions, 
+useActiveActions, useLayoutSelector, useSearchActions} from "../store"
 
 let scrollTimer = null as any
 let lastPos = 0
 
 const PostsPage: React.FunctionComponent = (props) => {
-    const [ignored, forceUpdate] = useReducer(x => x + 1, 0)
-    const {hideNavbar, setHideNavbar} = useContext(HideNavbarContext)
-    const {hideTitlebar, setHideTitlebar} = useContext(HideTitlebarContext)
-    const {hideSidebar, setHideSidebar} = useContext(HideSidebarContext)
-    const {headerText, setHeaderText} = useContext(HeaderTextContext)
-    const {sidebarText, setSidebarText} = useContext(SidebarTextContext)
-    const {square, setSquare} = useContext(SquareContext)
-    const {relative, setRelative} = useContext(RelativeContext)
-    const {mobile, setMobile} = useContext(MobileContext)
-    const {session, setSession} = useContext(SessionContext)
-    const {mobileScrolling, setMobileScrolling} = useContext(MobileScrollingContext)
-    const [clicked, setClicked] = useState(false)
+    const {setHideNavbar, setHideTitlebar, setHideSidebar, setRelative} = useLayoutActions()
+    const {setHeaderText, setSidebarText} = useActiveActions()
+    const {setMobileScrolling} = useInteractionActions()
+    const {setSquare} = useSearchActions()
+    const {session} = useSessionSelector()
+    const {mobile} = useLayoutSelector()
 
     useEffect(() => {
         setRelative(false)

@@ -1,8 +1,7 @@
-import React, {useEffect, useContext, useState, useRef} from "react"
+import React, {useEffect, useState, useRef} from "react"
 import {useHistory} from "react-router-dom"
-import {HashLink as Link} from "react-router-hash-link"
-import {HideNavbarContext, HideTitlebarContext, HideSidebarContext, ThemeContext, EnableDragContext, 
-ShowSaveTranslationDialogContext, SaveTranslationDataContext, SaveTranslationOrderContext, SessionContext, SessionFlagContext} from "../Context"
+import {useInteractionActions, useTranslationDialogSelector, useTranslationDialogActions, useSessionSelector, 
+useSessionActions} from "../store"
 import functions from "../structures/Functions"
 import Draggable from "react-draggable"
 import "./styles/dialog.less"
@@ -14,16 +13,11 @@ interface Props {
 }
 
 const SaveTranslationDialog: React.FunctionComponent<Props> = (props) => {
-    const {theme, setTheme} = useContext(ThemeContext)
-    const {hideNavbar, setHideNavbar} = useContext(HideNavbarContext)
-    const {hideTitlebar, setHideTitlebar} = useContext(HideTitlebarContext)
-    const {hideSidebar, setHideSidebar} = useContext(HideSidebarContext)
-    const {enableDrag, setEnableDrag} = useContext(EnableDragContext)
-    const {showSaveTranslationDialog, setShowSaveTranslationDialog} = useContext(ShowSaveTranslationDialogContext)
-    const {saveTranslationData, setSaveTranslationData} = useContext(SaveTranslationDataContext)
-    const {saveTranslationOrder, setSaveTranslationOrder} = useContext(SaveTranslationOrderContext)
-    const {session, setSession} = useContext(SessionContext)
-    const {sessionFlag, setSessionFlag} = useContext(SessionFlagContext)
+    const {setEnableDrag} = useInteractionActions()
+    const {showSaveTranslationDialog, saveTranslationData, saveTranslationOrder} = useTranslationDialogSelector()
+    const {setShowSaveTranslationDialog, setSaveTranslationData} = useTranslationDialogActions()
+    const {session} = useSessionSelector()
+    const {setSessionFlag} = useSessionActions()
     const [reason, setReason] = useState("")
     const [submitted, setSubmitted] = useState(false)
     const [error, setError] = useState(false)

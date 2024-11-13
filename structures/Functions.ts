@@ -1162,7 +1162,7 @@ export default class Functions {
         return `history/tag/${tag}/${key}/${filename}`
     }
 
-    public static getTagLink = (folder: string, filename: string, hash: string) => {
+    public static getTagLink = (folder: string, filename: string, hash: string | null) => {
         if (!filename) return ""
         if (folder === "attribute") folder = "tag"
         if (!folder || filename.includes("history/")) return `${window.location.protocol}//${window.location.host}/${filename}`
@@ -2385,11 +2385,13 @@ export default class Functions {
         return "var(--imageBorder)"
     }
 
-    public static updateLocalFavorite = (postID: string, favorited: boolean, posts: any) => {
+    public static updateLocalFavorite = (postID: string, favorited: boolean, posts: any, setPosts: any) => {
         if (!posts?.length) return
         const postIndex = posts.findIndex((p: any) => p.postID === postID)
         if (postIndex === -1) return
+        posts = structuredClone(posts)
         posts[postIndex].favorited = favorited
+        setPosts(posts)
         localStorage.setItem("savedPosts", JSON.stringify(posts))
     }
 
@@ -2585,10 +2587,14 @@ export default class Functions {
         if (oldTag.description !== newTag.description) {
             json.description = newTag.description
         }
-        if (JSON.stringify(oldTag.aliases?.filter(Boolean)) !== JSON.stringify(newTag.aliases?.filter(Boolean))) {
+        let oldAliases = oldTag.aliases?.filter(Boolean).map((a: any) => a.alias ? a.alias : a) || []
+        let newAliases = newTag.aliases?.filter(Boolean).map((a: any) => a.alias ? a.alias : a) || []
+        if (JSON.stringify(oldAliases) !== JSON.stringify(newAliases)) {
             json.aliases = newTag.aliases
         }
-        if (JSON.stringify(oldTag.implications?.filter(Boolean)) !== JSON.stringify(newTag.implications?.filter(Boolean))) {
+        let oldImplications = oldTag.implications?.filter(Boolean).map((i: any) => i.implication ? i.implication : i) || []
+        let newImplications = newTag.implications?.filter(Boolean).map((i: any) => i.implication ? i.implication : i) || []
+        if (JSON.stringify(oldImplications) !== JSON.stringify(newImplications)) {
             json.implications = newTag.implications
         }
         if (JSON.stringify(oldTag.pixivTags?.filter(Boolean)) !== JSON.stringify(newTag.pixivTags?.filter(Boolean))) {
@@ -2744,7 +2750,7 @@ export default class Functions {
     }
 
     public static generateSlug = (name: string) => {
-        return String(name).trim().toLowerCase().replace(/\s+/g, "-")
+        return String(name).trim().toLowerCase().replace(/\s+/g, "-").replaceAll("/", "").replaceAll("\\", "")
     }
 
     public static postSlug = (title: string, translatedTitle: string) => {
@@ -2817,5 +2823,20 @@ export default class Functions {
         const view = new Uint8Array(buffer)
         for (let i = 0; i < binary.length; i++) view[i] = binary.charCodeAt(i)
         return buffer
+    }
+
+    public static getTagColor = (tag: any) => {
+        if (tag.banned) return "strikethrough"
+        if (tag.r18) return "r18-tag-color"
+        if (tag.type === "artist") return "artist-tag-color"
+        if (tag.type === "character") return "character-tag-color"
+        if (tag.type === "series") return "series-tag-color"
+        if (tag.type === "meta") return "meta-tag-color"
+        if (tag.type === "appearance") return "appearance-tag-color"
+        if (tag.type === "outfit") return "outfit-tag-color"
+        if (tag.type === "accessory") return "accessory-tag-color"
+        if (tag.type === "action") return "action-tag-color"
+        if (tag.type === "scenery") return "scenery-tag-color"
+        return "tag-color"
     }
 }

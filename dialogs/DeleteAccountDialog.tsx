@@ -1,22 +1,18 @@
-import React, {useEffect, useContext, useState} from "react"
+import React, {useEffect} from "react"
 import {useHistory} from "react-router-dom"
-import {HashLink as Link} from "react-router-hash-link"
-import {HideNavbarContext, HideSidebarContext, ThemeContext, EnableDragContext, SidebarTextContext,
-ShowDeleteAccountDialogContext, HideTitlebarContext, SessionContext, SessionFlagContext} from "../Context"
+import {useInteractionActions, useSessionSelector, useSessionActions, 
+useMiscDialogSelector, useMiscDialogActions, useActiveActions} from "../store"
 import functions from "../structures/Functions"
 import Draggable from "react-draggable"
 import "./styles/dialog.less"
 
 const DeleteAccountDialog: React.FunctionComponent = (props) => {
-    const {theme, setTheme} = useContext(ThemeContext)
-    const {hideNavbar, setHideNavbar} = useContext(HideNavbarContext)
-    const {hideTitlebar, setHideTitlebar} = useContext(HideTitlebarContext)
-    const {hideSidebar, setHideSidebar} = useContext(HideSidebarContext)
-    const {enableDrag, setEnableDrag} = useContext(EnableDragContext)
-    const {sidebarText, setSidebarText} = useContext(SidebarTextContext)
-    const {showDeleteAccountDialog, setShowDeleteAccountDialog} = useContext(ShowDeleteAccountDialogContext)
-    const {session, setSession} = useContext(SessionContext)
-    const {sessionFlag, setSessionFlag} = useContext(SessionFlagContext)
+    const {setEnableDrag} = useInteractionActions()
+    const {setSidebarText} = useActiveActions()
+    const {showDeleteAccountDialog} = useMiscDialogSelector()
+    const {setShowDeleteAccountDialog} = useMiscDialogActions()
+    const {session} = useSessionSelector()
+    const {setSessionFlag} = useSessionActions()
     const history = useHistory()
 
     useEffect(() => {

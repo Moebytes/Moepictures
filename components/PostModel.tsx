@@ -1,9 +1,6 @@
-import React, {useContext, useEffect, useRef, useState, useReducer} from "react"
-import {ThemeContext, EnableDragContext, BrightnessContext, ContrastContext, HueContext, SaturationContext, LightnessContext,
-BlurContext, SharpenContext, PixelateContext, DownloadFlagContext, DownloadIDsContext, DisableZoomContext, SpeedContext,
-ReverseContext, MobileContext, TranslationModeContext, TranslationDrawingEnabledContext, SessionContext, SiteHueContext,
-SiteLightnessContext, SiteSaturationContext, ImageExpandContext} from "../Context"
-import {HashLink as Link} from "react-router-hash-link"
+import React, {useEffect, useRef, useState, useReducer} from "react"
+import {useFilterSelector, useInteractionActions, useLayoutSelector, usePlaybackSelector, usePlaybackActions, 
+useThemeSelector, useSearchSelector, useSearchActions, useFlagSelector, useFlagActions} from "../store"
 import functions from "../structures/Functions"
 import cryptoFunctions from "../structures/CryptoFunctions"
 import Slider from "react-slider"
@@ -56,27 +53,18 @@ interface Props {
 
 const PostModel: React.FunctionComponent<Props> = (props) => {
     const [ignored, forceUpdate] = useReducer(x => x + 1, 0)
-    const {theme, setTheme} = useContext(ThemeContext)
-    const {siteHue, setSiteHue} = useContext(SiteHueContext)
-    const {siteSaturation, setSiteSaturation} = useContext(SiteSaturationContext)
-    const {siteLightness, setSiteLightness} = useContext(SiteLightnessContext)
-    const {session, setSessions} = useContext(SessionContext)
-    const {enableDrag, setEnableDrag} = useContext(EnableDragContext)
-    const {brightness, setBrightness} = useContext(BrightnessContext)
-    const {contrast, setContrast} = useContext(ContrastContext)
-    const {hue, setHue} = useContext(HueContext)
-    const {saturation, setSaturation} = useContext(SaturationContext)
-    const {lightness, setLightness} = useContext(LightnessContext)
-    const {pixelate, setPixelate} = useContext(PixelateContext)
-    const {blur, setBlur} = useContext(BlurContext)
-    const {sharpen, setSharpen} = useContext(SharpenContext)
-    const {downloadFlag, setDownloadFlag} = useContext(DownloadFlagContext)
-    const {downloadIDs, setDownloadIDs} = useContext(DownloadIDsContext)
-    const {disableZoom, setDisableZoom} = useContext(DisableZoomContext)
-    const {translationMode, setTranslationMode} = useContext(TranslationModeContext)
-    const {translationDrawingEnabled, setTranslationDrawingEnabled} = useContext(TranslationDrawingEnabledContext)
-    const {mobile, setMobile} = useContext(MobileContext)
-    const {imageExpand, setImageExpand} = useContext(ImageExpandContext)
+    const {siteHue, siteSaturation, siteLightness} = useThemeSelector()
+    const {setEnableDrag} = useInteractionActions()
+    const {mobile} = useLayoutSelector()
+    const {brightness, contrast, hue, saturation, lightness, blur, sharpen, pixelate} = useFilterSelector()
+    const {secondsProgress, progress, dragProgress, reverse, speed, 
+    paused, duration, dragging, seekTo} = usePlaybackSelector()
+    const {setSecondsProgress, setProgress, setDragProgress, setReverse, setSpeed,
+    setPaused, setDuration, setDragging, setSeekTo} = usePlaybackActions()
+    const {translationMode, imageExpand} = useSearchSelector()
+    const {setTranslationMode, setTranslationDrawingEnabled, setImageExpand} = useSearchActions()
+    const {downloadFlag, downloadIDs} = useFlagSelector()
+    const {setDownloadFlag, setDownloadIDs} = useFlagActions()
     const [showSpeedDropdown, setShowSpeedDropdown] = useState(false)
     const [showLightDropdown, setShowLightDropdown] = useState(false)
     const [showMorphDropdown, setShowMorphDropdown] = useState(false)
@@ -91,15 +79,6 @@ const PostModel: React.FunctionComponent<Props> = (props) => {
     const modelSpeedRef = useRef(null) as any
     const modelLightRef = useRef(null) as any
     const modelMorphRef = useRef(null) as any
-    const [secondsProgress, setSecondsProgress] = useState(0)
-    const [progress, setProgress] = useState(0)
-    const [dragProgress, setDragProgress] = useState(0) as any
-    const {reverse, setReverse} = useContext(ReverseContext)
-    const {speed, setSpeed} = useContext(SpeedContext)
-    const [paused, setPaused] = useState(false)
-    const [duration, setDuration] = useState(0)
-    const [dragging, setDragging] = useState(false)
-    const [seekTo, setSeekTo] = useState(null) as any
     const [image, setImage] = useState(null) as any
     const [mixer, setMixer] = useState(null as unknown as THREE.AnimationMixer | null)
     const [animations, setAnimations] = useState(null as unknown as THREE.AnimationClip[] | null)
@@ -419,7 +398,7 @@ const PostModel: React.FunctionComponent<Props> = (props) => {
                 if (!props.noKeydown) fullscreen()
             }
             if (value === "t") {
-                setTranslationMode((prev: boolean) => !prev)
+                setTranslationMode(!translationMode)
                 setTranslationDrawingEnabled(true)
             }
         }
@@ -745,7 +724,7 @@ const PostModel: React.FunctionComponent<Props> = (props) => {
                 <div className="post-model-filters" ref={fullscreenRef} onMouseOver={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                     <div className={`post-image-top-buttons ${buttonHover ? "show-post-image-top-buttons" : ""}`} onMouseEnter={() => setButtonHover(true)} onMouseLeave={() => setButtonHover(false)}>
                         {!props.noTranslations ? <img draggable={false} className="post-image-top-button" src={translationToggleOn} style={{filter: getFilter()}} onClick={() => {setTranslationMode(true); setTranslationDrawingEnabled(true)}}/> : null}
-                        <img draggable={false} className="post-image-top-button" src={imageExpand ? contract : expand} style={{filter: getFilter()}} onClick={() => setImageExpand((prev: boolean) => !prev)}/>
+                        <img draggable={false} className="post-image-top-button" src={imageExpand ? contract : expand} style={{filter: getFilter()}} onClick={() => setImageExpand(!imageExpand)}/>
                     </div>
                     <div className={`post-image-previous-button ${previousButtonHover ? "show-post-image-mid-buttons" : ""}`} onMouseEnter={() => setPreviousButtonHover(true)} onMouseLeave={() => setPreviousButtonHover(false)}>
                         <img draggable={false} className="post-image-mid-button" src={prevIcon} style={{filter: getFilter()}} onClick={() => props.previous?.()}/>
@@ -769,7 +748,7 @@ const PostModel: React.FunctionComponent<Props> = (props) => {
                                 <div className="model-control-row-container">
                                     <img draggable={false} className="model-control-img" src={modelClearIcon} onClick={reset}/>
                                     {/* <img className="control-img" src={modelRewindIcon}/> */}
-                                    <img draggable={false} className="model-control-img" onClick={() => setPaused((prev) => !prev)} src={getModelPlayIcon()}/>
+                                    <img draggable={false} className="model-control-img" onClick={() => setPaused(!paused)} src={getModelPlayIcon()}/>
                                     {/* <img className="control-img" src={modelFastforwardIcon}/> */}
                                 </div></> : null}
                                 <div className="model-control-row-container">

@@ -1,10 +1,9 @@
 import React, {useContext, useEffect, useRef, useState} from "react"
 import {useHistory} from "react-router-dom"
-import {ThemeContext, EnableDragContext, SessionContext, BrightnessContext, ContrastContext, HueContext, SaturationContext, LightnessContext,
-BlurContext, SharpenContext, PixelateContext, TranslationModeContext, EditTranslationIDContext, MobileContext, ShowSaveTranslationDialogContext,
-EditTranslationFlagContext, EditTranslationTextContext, EditTranslationTranscriptContext, TranslationDrawingEnabledContext, ImageExpandContext,
-SaveTranslationDataContext, SaveTranslationOrderContext, SiteHueContext, SiteLightnessContext, SiteSaturationContext, SessionFlagContext,
-TranslationOCRDialogContext, TranslationOCRFlagContext, RedirectContext, SidebarTextContext} from "../Context"
+import {useFilterSelector, useInteractionActions, useLayoutSelector,  
+useThemeSelector, useSearchSelector, useSessionSelector, useSearchActions, 
+useSessionActions, useActiveActions, useFlagActions, useTranslationDialogSelector, 
+useTranslationDialogActions, useInteractionSelector} from "../store"
 import functions from "../structures/Functions"
 import {ShapeEditor, ImageLayer, DrawLayer, wrapShape} from "react-shape-editor"
 import translationDelete from "../assets/icons/translation-delete.png"
@@ -31,11 +30,8 @@ interface Props {
 let isAnimatedWebP = false
 
 const RectHandle = ({active, cursor, onMouseDown, scale, x, y}) => {
-    const {translationDrawingEnabled, setTranslationDrawingEnabled} = useContext(TranslationDrawingEnabledContext)
-    const {theme, setTheme} = useContext(ThemeContext)
-    const {siteHue, setSiteHue} = useContext(SiteHueContext)
-    const {siteSaturation, setSiteSaturation} = useContext(SiteSaturationContext)
-    const {siteLightness, setSiteLightness} = useContext(SiteLightnessContext)
+    const {translationDrawingEnabled} = useSearchSelector()
+    const {siteHue, siteSaturation, siteLightness} = useThemeSelector()
     const getFilter = () => {
         return `hue-rotate(${siteHue - 180}deg) saturate(${siteSaturation}%) brightness(${siteLightness + 70}%)`
     }
@@ -55,10 +51,7 @@ const RectHandle = ({active, cursor, onMouseDown, scale, x, y}) => {
 }
 
 const RectShape = wrapShape(({width, height, extraShapeProps, scale}) => {
-    const {theme, setTheme} = useContext(ThemeContext)
-    const {siteHue, setSiteHue} = useContext(SiteHueContext)
-    const {siteSaturation, setSiteSaturation} = useContext(SiteSaturationContext)
-    const {siteLightness, setSiteLightness} = useContext(SiteLightnessContext)
+    const {siteHue, siteSaturation, siteLightness} = useThemeSelector()
     const getFilter = () => {
         return `hue-rotate(${siteHue - 180}deg) saturate(${siteSaturation}%) brightness(${siteLightness + 70}%)`
     }
@@ -76,42 +69,26 @@ const RectShape = wrapShape(({width, height, extraShapeProps, scale}) => {
 })
 
 const TranslationEditor: React.FunctionComponent<Props> = (props) => {
-    const {mobile, setMobile} = useContext(MobileContext)
-    const {theme, setTheme} = useContext(ThemeContext)
-    const {siteHue, setSiteHue} = useContext(SiteHueContext)
-    const {siteSaturation, setSiteSaturation} = useContext(SiteSaturationContext)
-    const {siteLightness, setSiteLightness} = useContext(SiteLightnessContext)
-    const {enableDrag, setEnableDrag} = useContext(EnableDragContext)
-    const {session, setSession} = useContext(SessionContext)
-    const {sessionFlag, setSessionFlag} = useContext(SessionFlagContext)
-    const {brightness, setBrightness} = useContext(BrightnessContext)
-    const {contrast, setContrast} = useContext(ContrastContext)
-    const {hue, setHue} = useContext(HueContext)
-    const {saturation, setSaturation} = useContext(SaturationContext)
-    const {lightness, setLightness} = useContext(LightnessContext)
-    const {pixelate, setPixelate} = useContext(PixelateContext)
-    const {blur, setBlur} = useContext(BlurContext)
-    const {sharpen, setSharpen} = useContext(SharpenContext)
-    const {translationMode, setTranslationMode} = useContext(TranslationModeContext)
-    const {editTranslationFlag, setEditTranslationFlag} = useContext(EditTranslationFlagContext)
-    const {editTranslationID, setEditTranslationID} = useContext(EditTranslationIDContext)
-    const {editTranslationText, setEditTranslationText} = useContext(EditTranslationTextContext)
-    const {editTranslationTranscript, setEditTranslationTranscript} = useContext(EditTranslationTranscriptContext)
-    const {showSaveTranslationDialog, setShowSaveTranslationDialog} = useContext(ShowSaveTranslationDialogContext)
-    const {saveTranslationData, setSaveTranslationData} = useContext(SaveTranslationDataContext)
-    const {saveTranslationOrder, setSaveTranslationOrder} = useContext(SaveTranslationOrderContext)
-    const {translationOCRDialog, setTranslationOCRDialog} = useContext(TranslationOCRDialogContext)
-    const {translationOCRFlag, setTranslationOCRFlag} = useContext(TranslationOCRFlagContext)
-    const {imageExpand, setImageExpand} = useContext(ImageExpandContext)
-    const {redirect, setRedirect} = useContext(RedirectContext)
-    const {sidebarText, setSidebarText} = useContext(SidebarTextContext)
+    const {theme, siteHue, siteSaturation, siteLightness} = useThemeSelector()
+    const {enableDrag} = useInteractionSelector()
+    const {setEnableDrag} = useInteractionActions()
+    const {mobile} = useLayoutSelector()
+    const {session} = useSessionSelector()
+    const {setSessionFlag} = useSessionActions()
+    const {setSidebarText} = useActiveActions()
+    const {brightness, contrast, hue, saturation, lightness, blur, sharpen, pixelate} = useFilterSelector()
+    const {translationMode, translationDrawingEnabled, imageExpand} = useSearchSelector()
+    const {setTranslationMode, setTranslationDrawingEnabled} = useSearchActions()
+    const {setRedirect} = useFlagActions()
+    const {editTranslationFlag, editTranslationID, editTranslationText, editTranslationTranscript, showSaveTranslationDialog, translationOCRDialog, translationOCRFlag} = useTranslationDialogSelector()
+    const {setEditTranslationFlag, setEditTranslationID, setEditTranslationText, setEditTranslationTranscript, setShowSaveTranslationDialog,
+    setSaveTranslationData, setSaveTranslationOrder, setTranslationOCRDialog, setTranslationOCRFlag} = useTranslationDialogActions()
     const [targetWidth, setTargetWidth] = useState(0)
     const [targetHeight, setTargetHeight] = useState(0)
     const [img, setImg] = useState("")
     const [id, setID] = useState(0)
     const [items, setItems] = useState([]) as any
     const [activeIndex, setActiveIndex] = useState(-1)
-    const {translationDrawingEnabled, setTranslationDrawingEnabled} = useContext(TranslationDrawingEnabledContext)
     const [buttonHover, setButtonHover] = useState(false)
     const filtersRef = useRef(null) as any
     const lightnessRef = useRef<HTMLImageElement>(null)
@@ -179,10 +156,6 @@ const TranslationEditor: React.FunctionComponent<Props> = (props) => {
     useEffect(() => {
         localStorage.setItem("showTranscript", String(showTranscript))
     }, [showTranscript])
-
-    const getTranslationShowTranscriptIcon = () => {
-        return showTranscript ? translationJA : translationEN
-    }
 
     useEffect(() => {
         const decryptImg = async () => {
@@ -331,7 +304,7 @@ const TranslationEditor: React.FunctionComponent<Props> = (props) => {
         }
         setSaveTranslationOrder(props.order || 1)
         setSaveTranslationData(items)
-        setShowSaveTranslationDialog((prev: boolean) => !prev)
+        setShowSaveTranslationDialog(!showSaveTranslationDialog)
     }
 
     const ocrPage = async () => {
@@ -351,7 +324,7 @@ const TranslationEditor: React.FunctionComponent<Props> = (props) => {
     }, [translationOCRFlag])
 
     const ocrDialog = () => {
-        setTranslationOCRDialog((prev: boolean) => !prev)
+        setTranslationOCRDialog(!translationOCRDialog)
     }
 
     const getBubbleText = () => {
@@ -370,10 +343,10 @@ const TranslationEditor: React.FunctionComponent<Props> = (props) => {
                     {!props.unverified ? <img draggable={false} className="translation-editor-button" src={translationHistory} style={{filter: getFilter()}} onClick={() => showHistory()}/> : null}
                     {session.username ? <img draggable={false} className="translation-editor-button" src={translationOCR} style={{filter: getFilter()}} onClick={() => ocrDialog()}/> : null}
                     <img draggable={false} className="translation-editor-button" src={translationSave} style={{filter: getFilter()}} onClick={() => saveTextDialog()}/>
-                    <img draggable={false} className="translation-editor-button" src={getTranslationShowTranscriptIcon()} style={{filter: getFilter()}} onClick={() => setShowTranscript((prev: boolean) => !prev)}/>
+                    <img draggable={false} className="translation-editor-button" src={showTranscript ? translationJA : translationEN} style={{filter: getFilter()}} onClick={() => setShowTranscript((prev: boolean) => !prev)}/>
                     <img draggable={false} className="translation-editor-button" src={translationText} style={{filter: getFilter()}} onClick={() => editTextDialog()}/>
                     <img draggable={false} className="translation-editor-button" src={translationDelete} style={{filter: getFilter()}} onClick={() => deleteFocused()}/>
-                    <img draggable={false} className="translation-editor-button" src={translationDrawingEnabled ? translationView : translationEdit} style={{filter: getFilter()}} onClick={() => setTranslationDrawingEnabled((prev: boolean) => !prev)}/>
+                    <img draggable={false} className="translation-editor-button" src={translationDrawingEnabled ? translationEdit : translationView} style={{filter: getFilter()}} onClick={() => setTranslationDrawingEnabled(!translationDrawingEnabled)}/>
                     <img draggable={false} className="translation-editor-button" src={translationToggleOff} style={{filter: getFilter()}} onClick={() => setTranslationMode(false)}/>
                 </div>
                 {bubbleToggle ? <div className="translation-bubble" style={{width: `${bubbleData.width}px`, minHeight: "25px", left: `${bubbleData.x}px`, top: `${bubbleData.y}px`}}>{getBubbleText()}</div> : null}

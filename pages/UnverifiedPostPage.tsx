@@ -1,4 +1,4 @@
-import React, {useEffect, useContext, useState, useReducer} from "react"
+import React, {useEffect, useState, useReducer} from "react"
 import {useHistory} from "react-router-dom"
 import TitleBar from "../components/TitleBar"
 import NavBar from "../components/NavBar"
@@ -27,8 +27,8 @@ import ThirdParty from "../components/ThirdParty"
 import Parent from "../components/Parent"
 import NewTags from "../components/NewTags"
 import MobileInfo from "../components/MobileInfo"
-import {HideNavbarContext, HideSidebarContext, RelativeContext, DownloadFlagContext, DownloadIDsContext, HideTitlebarContext, MobileContext,
-UnverifiedPostsContext, TagsContext, HeaderTextContext, PostFlagContext, SidebarTextContext, SessionContext, EnableDragContext, SessionFlagContext} from "../Context"
+import {useSessionSelector, useSessionActions, useLayoutActions, useActiveActions, useFlagActions, 
+useLayoutSelector, useFlagSelector, useCacheActions, useCacheSelector, useInteractionActions} from "../store"
 import permissions from "../structures/Permissions"
 import "./styles/postpage.less"
 
@@ -37,22 +37,16 @@ interface Props {
 }
 
 const UnverifiedPostPage: React.FunctionComponent<Props> = (props) => {
-    const [ignored, forceUpdate] = useReducer(x => x + 1, 0)
-    const {hideNavbar, setHideNavbar} = useContext(HideNavbarContext)
-    const {hideTitlebar, setHideTitlebar} = useContext(HideTitlebarContext)
-    const {hideSidebar, setHideSidebar} = useContext(HideSidebarContext)
-    const {enableDrag, setEnableDrag} = useContext(EnableDragContext)
-    const {relative, setRelative} = useContext(RelativeContext)
-    const {downloadFlag, setDownloadFlag} = useContext(DownloadFlagContext)
-    const {downloadIDs, setDownloadIDs} = useContext(DownloadIDsContext)
-    const {unverifiedPosts, setUnverifiedPosts} = useContext(UnverifiedPostsContext)
-    const {tags, setTags} = useContext(TagsContext)
-    const {headerText, setHeaderText} = useContext(HeaderTextContext)
-    const {sidebarText, setSidebarText} = useContext(SidebarTextContext)
-    const {session, setSession} = useContext(SessionContext)
-    const {sessionFlag, setSessionFlag} = useContext(SessionFlagContext)
-    const {mobile, setMobile} = useContext(MobileContext)
-    const {postFlag, setPostFlag} = useContext(PostFlagContext)
+    const {setEnableDrag} = useInteractionActions()
+    const {setHideNavbar, setHideTitlebar, setHideSidebar, setRelative} = useLayoutActions()
+    const {setHeaderText, setSidebarText} = useActiveActions()
+    const {session} = useSessionSelector()
+    const {setSessionFlag} = useSessionActions()
+    const {mobile} = useLayoutSelector()
+    const {unverifiedPosts} = useCacheSelector()
+    const {setTags} = useCacheActions()
+    const {postFlag} = useFlagSelector()
+    const {setPostFlag, setDownloadIDs, setDownloadFlag} = useFlagActions()
     const [images, setImages] = useState([]) as any
     const [thirdPartyPosts, setThirdPartyPosts] = useState([]) as any
     const [parentPost, setParentPost] = useState(null) as any

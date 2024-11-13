@@ -21,7 +21,7 @@ module.exports = [
     node: {__dirname: false},
     output: {publicPath: "/", globalObject: "this", filename: "script.js", chunkFilename: "script.js", path: path.resolve(__dirname, "./dist")},
     resolve: {extensions: [".js", ".jsx", ".ts", ".tsx"], alias: {"react-dom$": "react-dom/profiling", "scheduler/tracing": "scheduler/tracing-profiling"}, 
-    fallback: {fs: false, "process/browser": require.resolve("process/browser"), path: require.resolve("path-browserify"), 
+    fallback: {fs: false, "process/browser": require.resolve("process/browser.js"), path: require.resolve("path-browserify"), 
     crypto: require.resolve("crypto-browserify"), stream: require.resolve("stream-browserify"), assert: require.resolve("assert/"), 
     zlib: require.resolve("browserify-zlib"), url: require.resolve("url/"), os: require.resolve("os/")}},
     performance: {hints: false},

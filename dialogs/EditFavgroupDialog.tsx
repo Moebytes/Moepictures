@@ -1,8 +1,7 @@
-import React, {useEffect, useContext, useState, useRef} from "react"
+import React, {useEffect, useState, useRef} from "react"
 import {useHistory} from "react-router-dom"
-import {HashLink as Link} from "react-router-hash-link"
-import {ThemeContext, EnableDragContext, EditFavGroupObjContext, SessionContext, SiteHueContext, 
-SiteLightnessContext, SiteSaturationContext, SessionFlagContext, GroupFlagContext} from "../Context"
+import {useThemeSelector, useInteractionActions, useGroupDialogSelector, useGroupDialogActions, useSessionSelector,
+useSessionActions, useFlagActions} from "../store"
 import functions from "../structures/Functions"
 import Draggable from "react-draggable"
 import radioButton from "../assets/icons/radiobutton.png"
@@ -10,15 +9,13 @@ import radioButtonChecked from "../assets/icons/radiobutton-checked.png"
 import "./styles/dialog.less"
 
 const EditFavgroupDialog: React.FunctionComponent = (props) => {
-    const {theme, setTheme} = useContext(ThemeContext)
-    const {siteHue, setSiteHue} = useContext(SiteHueContext)
-    const {siteSaturation, setSiteSaturation} = useContext(SiteSaturationContext)
-    const {siteLightness, setSiteLightness} = useContext(SiteLightnessContext)
-    const {enableDrag, setEnableDrag} = useContext(EnableDragContext)
-    const {editFavGroupObj, setEditFavGroupObj} = useContext(EditFavGroupObjContext)
-    const {session, setSession} = useContext(SessionContext)
-    const {sessionFlag, setSessionFlag} = useContext(SessionFlagContext)
-    const {groupFlag, setGroupFlag} = useContext(GroupFlagContext)
+    const {siteHue, siteSaturation, siteLightness} = useThemeSelector()
+    const {setEnableDrag} = useInteractionActions()
+    const {editFavGroupObj} = useGroupDialogSelector()
+    const {setEditFavGroupObj} = useGroupDialogActions()
+    const {session} = useSessionSelector()
+    const {setSessionFlag} = useSessionActions()
+    const {setGroupFlag} = useFlagActions()
     const [name, setName] = useState("")
     const [isPrivate, setIsPrivate] = useState(false)
     const [error, setError] = useState(false)

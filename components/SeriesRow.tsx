@@ -1,6 +1,6 @@
 import React, {useContext, useRef, useState} from "react"
 import {useHistory} from "react-router-dom"
-import {ThemeContext, SearchContext, SearchFlagContext, SessionContext, MobileContext, RestrictTypeContext, PostsContext} from "../Context"
+import {useSessionSelector, useLayoutSelector, useSearchSelector, useCacheActions} from "../store"
 import {HashLink as Link} from "react-router-hash-link"
 import functions from "../structures/Functions"
 import Carousel from "./Carousel"
@@ -14,14 +14,10 @@ interface Props {
 }
 
 const SeriesRow: React.FunctionComponent<Props> = (props) => {
-    const {theme, setTheme} = useContext(ThemeContext)
-    const [hover, setHover] = useState(false)
-    const {search, setSearch} = useContext(SearchContext)
-    const {searchFlag, setSearchFlag} = useContext(SearchFlagContext)
-    const {mobile, setMobile} = useContext(MobileContext)
-    const {session, setSession} = useContext(SessionContext)
-    const {restrictType, setRestrictType} = useContext(RestrictTypeContext)
-    const {posts, setPosts} = useContext(PostsContext)
+    const {mobile} = useLayoutSelector()
+    const {session} = useSessionSelector()
+    const {restrictType} = useSearchSelector()
+    const {setPosts} = useCacheActions()
     const history = useHistory()
 
     const tagPage = (event: React.MouseEvent) => {

@@ -1,4 +1,4 @@
-import React, {useEffect, useContext, useState, useRef} from "react"
+import React, {useEffect, useState, useRef} from "react"
 import {useHistory} from "react-router-dom"
 import TitleBar from "../components/TitleBar"
 import NavBar from "../components/NavBar"
@@ -19,35 +19,33 @@ import pageIcon from "../assets/icons/page.png"
 import permissions from "../structures/Permissions"
 import PageDialog from "../dialogs/PageDialog"
 import CaptchaDialog from "../dialogs/CaptchaDialog"
-import {ThemeContext, EnableDragContext, HideNavbarContext, HideSidebarContext, RelativeContext, HideTitlebarContext, MobileContext, ScrollContext,
-ActiveDropdownContext, HeaderTextContext, SidebarTextContext, SessionContext, SiteHueContext, SiteLightnessContext, SiteSaturationContext, TagsPageContext,
-ShowPageDialogContext, PageFlagContext, SessionFlagContext, RestrictTypeContext} from "../Context"
+import {useThemeSelector, useInteractionActions, useSessionSelector, useSessionActions,
+useLayoutActions, useActiveActions, useFlagActions, useLayoutSelector, usePageActions,
+useActiveSelector, useSearchActions, useSearchSelector, usePageSelector, useFlagSelector,
+useMiscDialogActions} from "../store"
 import "./styles/itemspage.less"
 
 let limit = 200
 let replace = false
 
 const TagsPage: React.FunctionComponent = (props) => {
-    const {theme, setTheme} = useContext(ThemeContext)
-    const {siteHue, setSiteHue} = useContext(SiteHueContext)
-    const {siteSaturation, setSiteSaturation} = useContext(SiteSaturationContext)
-    const {siteLightness, setSiteLightness} = useContext(SiteLightnessContext)
-    const {enableDrag, setEnableDrag} = useContext(EnableDragContext)
-    const {hideNavbar, setHideNavbar} = useContext(HideNavbarContext)
-    const {hideTitlebar, setHideTitlebar} = useContext(HideTitlebarContext)
-    const {hideSidebar, setHideSidebar} = useContext(HideSidebarContext)
-    const {relative, setRelative} = useContext(RelativeContext)
-    const {activeDropdown, setActiveDropdown} = useContext(ActiveDropdownContext)
-    const {headerText, setHeaderText} = useContext(HeaderTextContext)
-    const {sidebarText, setSidebarText} = useContext(SidebarTextContext)
-    const {tagsPage, setTagsPage} = useContext(TagsPageContext)
-    const {showPageDialog, setShowPageDialog} = useContext(ShowPageDialogContext)
-    const {pageFlag, setPageFlag} = useContext(PageFlagContext)
-    const {session, setSession} = useContext(SessionContext)
-    const {sessionFlag, setSessionFlag} = useContext(SessionFlagContext)
-    const {restrictType, setRestrictType} = useContext(RestrictTypeContext)
-    const {mobile, setMobile} = useContext(MobileContext)
-    const {scroll, setScroll} = useContext(ScrollContext)
+    const {theme, siteHue, siteSaturation, siteLightness} = useThemeSelector()
+    const {setHideNavbar, setHideTitlebar, setHideSidebar, setRelative} = useLayoutActions()
+    const {setEnableDrag} = useInteractionActions()
+    const {setHeaderText, setSidebarText} = useActiveActions()
+    const {setRedirect} = useFlagActions()
+    const {session, hasNotification} = useSessionSelector()
+    const {setSessionFlag, setHasNotification} = useSessionActions()
+    const {mobile} = useLayoutSelector()
+    const {activeDropdown} = useActiveSelector()
+    const {setActiveDropdown} = useActiveActions()
+    const {scroll, restrictType} = useSearchSelector()
+    const {setScroll} = useSearchActions()
+    const {tagsPage} = usePageSelector()
+    const {setTagsPage} = usePageActions()
+    const {setShowPageDialog} = useMiscDialogActions()
+    const {pageFlag} = useFlagSelector()
+    const {setPageFlag} = useFlagActions()
     const [sortType, setSortType] = useState("posts")
     const [sortReverse, setSortReverse] = useState(false)
     const [typeType, setTypeType] = useState("all")
@@ -252,7 +250,7 @@ const TagsPage: React.FunctionComponent = (props) => {
     useEffect(() => {
         const searchParams = new URLSearchParams(window.location.search)
         if (searchQuery) searchParams.set("query", searchQuery)
-        if (!scroll) searchParams.set("page", tagsPage)
+        if (!scroll) searchParams.set("page", String(tagsPage || ""))
         if (replace) {
             if (!scroll) history.replace(`${location.pathname}?${searchParams.toString()}`)
             replace = false
@@ -280,7 +278,7 @@ const TagsPage: React.FunctionComponent = (props) => {
     }, [pageFlag])
 
     useEffect(() => {
-        localStorage.setItem("tagsPage", String(tagsPage))
+        localStorage.setItem("tagsPage", String(tagsPage || ""))
     }, [tagsPage])
 
     const maxPage = () => {
@@ -377,7 +375,7 @@ const TagsPage: React.FunctionComponent = (props) => {
     const getSortJSX = () => {
         return (
             <div className="itemsort-item" ref={sortRef}>
-                <img className="itemsort-img" src={sortReverse ? sortRev : sort} style={{filter: getFilter()}} onClick={() => setSortReverse((prev: boolean) => !prev)}/>
+                <img className="itemsort-img" src={sortReverse ? sortRev : sort} style={{filter: getFilter()}} onClick={() => setSortReverse(!sortReverse)}/>
                 <span className="itemsort-text" onClick={() => {setActiveDropdown(activeDropdown === "sort" ? "none" : "sort")}}>{functions.toProperCase(sortType)}</span>
             </div>
         )
@@ -423,11 +421,9 @@ const TagsPage: React.FunctionComponent = (props) => {
     }
 
     const toggleScroll = () => {
-        setScroll((prev: boolean) => {
-            const newValue = !prev
-            localStorage.setItem("scroll", `${newValue}`)
-            return newValue
-        })
+        const newValue = !scroll
+        localStorage.setItem("scroll", `${newValue}`)
+        setScroll(newValue)
     }
 
     return (

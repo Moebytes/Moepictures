@@ -1,7 +1,6 @@
 import React, {useEffect, useContext, useState, useRef} from "react"
 import {useHistory} from "react-router-dom"
-import {ThemeContext, EnableDragContext, EditSaveSearchNameContext, EditSaveSearchKeyContext, EditSaveSearchTagsContext, 
-SessionContext, SiteHueContext, SiteLightnessContext, SiteSaturationContext, SessionFlagContext, SearchContext} from "../Context"
+import {useInteractionActions, useSearchDialogSelector, useSearchDialogActions, useSessionSelector, useSessionActions} from "../store"
 import functions from "../structures/Functions"
 import uploadIcon from "../assets/icons/upload.png"
 import "./styles/dialog.less"
@@ -11,17 +10,11 @@ import ContentEditable from "react-contenteditable"
 import xButton from "../assets/icons/x-button.png"
 
 const EditSaveSearchDialog: React.FunctionComponent = (props) => {
-    const {theme, setTheme} = useContext(ThemeContext)
-    const {siteHue, setSiteHue} = useContext(SiteHueContext)
-    const {siteSaturation, setSiteSaturation} = useContext(SiteSaturationContext)
-    const {siteLightness, setSiteLightness} = useContext(SiteLightnessContext)
-    const {enableDrag, setEnableDrag} = useContext(EnableDragContext)
-    const {editSaveSearchName, setEditSaveSearchName} = useContext(EditSaveSearchNameContext)
-    const {editSaveSearchKey, setEditSaveSearchKey} = useContext(EditSaveSearchKeyContext)
-    const {editSaveSearchTags, setEditSaveSearchTags} = useContext(EditSaveSearchTagsContext)
-    const {session, setSession} = useContext(SessionContext)
-    const {sessionFlag, setSessionFlag} = useContext(SessionFlagContext)
-    const {search, setSearch} = useContext(SearchContext)
+    const {setEnableDrag} = useInteractionActions()
+    const {editSaveSearchName, editSaveSearchKey, editSaveSearchTags} = useSearchDialogSelector()
+    const {setEditSaveSearchName, setEditSaveSearchKey, setEditSaveSearchTags} = useSearchDialogActions()
+    const {session} = useSessionSelector()
+    const {setSessionFlag} = useSessionActions()
     const [error, setError] = useState(false)
     const [tagActive, setTagActive] = useState(false)
     const [posX, setPosX] = useState(0)
@@ -111,11 +104,10 @@ const EditSaveSearchDialog: React.FunctionComponent = (props) => {
     }, [tagActive])
 
     const handleTagClick = (tag: string) => {
-        setEditSaveSearchTags((prev: string) => {
-            const parts = functions.cleanHTML(prev).split(/ +/g)
-            parts[parts.length - 1] = tag
-            return parts.join(" ")
-        })
+        const parts = functions.cleanHTML(editSaveSearchTags).split(/ +/g)
+        parts[parts.length - 1] = tag
+        const newTags = parts.join(" ")
+        setEditSaveSearchTags(newTags)
     }
 
     if (editSaveSearchName) {

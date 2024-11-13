@@ -1,4 +1,4 @@
-import React, {useEffect, useContext, useState, useRef, useReducer} from "react"
+import React, {useEffect, useState, useRef, useReducer} from "react"
 import {useHistory} from "react-router-dom"
 import TitleBar from "../components/TitleBar"
 import NavBar from "../components/NavBar"
@@ -8,10 +8,10 @@ import functions from "../structures/Functions"
 import search from "../assets/icons/search.png"
 import sort from "../assets/icons/sort.png"
 import sortRev from "../assets/icons/sort-reverse.png"
-import {ThemeContext, EnableDragContext, HideNavbarContext, HideSidebarContext, MobileContext, SessionContext,
-RelativeContext, HideTitlebarContext, ActiveDropdownContext, HeaderTextContext, SidebarTextContext, RestrictTypeContext,
-GroupSearchFlagContext, SiteHueContext, SiteLightnessContext, SiteSaturationContext, ScrollContext, GroupsPageContext,
-PageFlagContext, ShowPageDialogContext, SessionFlagContext} from "../Context"
+import {useThemeSelector, useInteractionActions, useSessionSelector, useSessionActions,
+useLayoutActions, useActiveActions, useFlagActions, useLayoutSelector, usePageActions,
+useActiveSelector, useSearchActions, useSearchSelector, usePageSelector, useFlagSelector,
+useMiscDialogActions} from "../store"
 import permissions from "../structures/Permissions"
 import scrollIcon from "../assets/icons/scroll.png"
 import pageIcon from "../assets/icons/page.png"
@@ -28,8 +28,8 @@ interface Props {
 }
 
 const GroupThumbnail: React.FunctionComponent<Props> = (props) => {
-    const {mobile, setMobile} = useContext(MobileContext)
-    const {session, setSession} = useContext(SessionContext)
+    const {mobile} = useLayoutSelector()
+    const {session} = useSessionSelector()
     const [img, setImg] = useState("")
     const history = useHistory()
 
@@ -63,27 +63,23 @@ const GroupThumbnail: React.FunctionComponent<Props> = (props) => {
 }
 
 const GroupsPage: React.FunctionComponent = (props) => {
-    const [ignored, forceUpdate] = useReducer(x => x + 1, 0)
-    const {theme, setTheme} = useContext(ThemeContext)
-    const {siteHue, setSiteHue} = useContext(SiteHueContext)
-    const {siteSaturation, setSiteSaturation} = useContext(SiteSaturationContext)
-    const {siteLightness, setSiteLightness} = useContext(SiteLightnessContext)
-    const {enableDrag, setEnableDrag} = useContext(EnableDragContext)
-    const {hideNavbar, setHideNavbar} = useContext(HideNavbarContext)
-    const {hideTitlebar, setHideTitlebar} = useContext(HideTitlebarContext)
-    const {hideSidebar, setHideSidebar} = useContext(HideSidebarContext)
-    const {relative, setRelative} = useContext(RelativeContext)
-    const {activeDropdown, setActiveDropdown} = useContext(ActiveDropdownContext)
-    const {headerText, setHeaderText} = useContext(HeaderTextContext)
-    const {sidebarText, setSidebarText} = useContext(SidebarTextContext)
-    const {groupsPage, setGroupsPage} = useContext(GroupsPageContext)
-    const {showPageDialog, setShowPageDialog} = useContext(ShowPageDialogContext)
-    const {pageFlag, setPageFlag} = useContext(PageFlagContext)
-    const {scroll, setScroll} = useContext(ScrollContext)
-    const {mobile, setMobile} = useContext(MobileContext)
-    const {groupSearchFlag, setGroupSearchFlag} = useContext(GroupSearchFlagContext)
-    const {session, setSession} = useContext(SessionContext)
-    const {sessionFlag, setSessionFlag} = useContext(SessionFlagContext)
+    const {theme, siteHue, siteSaturation, siteLightness} = useThemeSelector()
+    const {setHideNavbar, setHideTitlebar, setHideSidebar, setRelative} = useLayoutActions()
+    const {setEnableDrag} = useInteractionActions()
+    const {setHeaderText, setSidebarText} = useActiveActions()
+    const {setRedirect} = useFlagActions()
+    const {session} = useSessionSelector()
+    const {setSessionFlag} = useSessionActions()
+    const {mobile} = useLayoutSelector()
+    const {activeDropdown} = useActiveSelector()
+    const {setActiveDropdown} = useActiveActions()
+    const {scroll} = useSearchSelector()
+    const {setScroll} = useSearchActions()
+    const {groupsPage} = usePageSelector()
+    const {setGroupsPage} = usePageActions()
+    const {setShowPageDialog} = useMiscDialogActions()
+    const {pageFlag, groupSearchFlag} = useFlagSelector()
+    const {setPageFlag, setGroupSearchFlag} = useFlagActions()
     const [sortType, setSortType] = useState("date")
     const [sortReverse, setSortReverse] = useState(false)
     const [groups, setGroups] = useState([]) as any
@@ -93,7 +89,7 @@ const GroupsPage: React.FunctionComponent = (props) => {
     const [offset, setOffset] = useState(0)
     const [ended, setEnded] = useState(false)
     const [queryPage, setQueryPage] = useState(1)
-    const {restrictType, setRestrictType} = useContext(RestrictTypeContext)
+    const {restrictType} = useSearchSelector()
     const sortRef = useRef(null) as any
     const history = useHistory()
 
@@ -298,7 +294,7 @@ const GroupsPage: React.FunctionComponent = (props) => {
     useEffect(() => {
         const searchParams = new URLSearchParams(window.location.search)
         if (searchQuery) searchParams.set("query", searchQuery)
-        if (!scroll) searchParams.set("page", groupsPage)
+        if (!scroll) searchParams.set("page", String(groupsPage || ""))
         if (replace) {
             if (!scroll) history.replace(`${location.pathname}?${searchParams.toString()}`)
             replace = false
@@ -326,7 +322,7 @@ const GroupsPage: React.FunctionComponent = (props) => {
     }, [pageFlag])
 
     useEffect(() => {
-        localStorage.setItem("groupsPage", String(groupsPage))
+        localStorage.setItem("groupsPage", String(groupsPage || ""))
     }, [groupsPage])
 
     const maxPage = () => {
@@ -405,7 +401,7 @@ const GroupsPage: React.FunctionComponent = (props) => {
     const getSortJSX = () => {
         return (
             <div className="itemsort-item" ref={sortRef}>
-                <img className="itemsort-img" src={sortReverse ? sortRev : sort} style={{filter: getFilter()}} onClick={() => setSortReverse((prev: boolean) => !prev)}/>
+                <img className="itemsort-img" src={sortReverse ? sortRev : sort} style={{filter: getFilter()}} onClick={() => setSortReverse(!sortReverse)}/>
                 <span className="itemsort-text" onClick={() => {setActiveDropdown(activeDropdown === "sort" ? "none" : "sort")}}>{functions.toProperCase(sortType)}</span>
             </div>
         )
@@ -441,11 +437,9 @@ const GroupsPage: React.FunctionComponent = (props) => {
     }
 
     const toggleScroll = () => {
-        setScroll((prev: boolean) => {
-            const newValue = !prev
-            localStorage.setItem("scroll", `${newValue}`)
-            return newValue
-        })
+        const newValue = !scroll
+        localStorage.setItem("scroll", `${newValue}`)
+        setScroll(newValue)
     }
 
     return (

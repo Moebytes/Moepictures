@@ -1,8 +1,7 @@
 import React, {useEffect, useState} from "react"
 import {Switch, Route, Redirect, useHistory, useLocation} from "react-router-dom"
-import {Context, ThemeContext, HideNavbarContext, HideSidebarContext, HideSortbarContext, HasNotificationContext, TabletContext, ActiveGroupContext,
-HideTitlebarContext, EnableDragContext, ActiveDropdownContext, FilterDropActiveContext, MobileScrollingContext, EmojisContext, PostsContext, RestrictTypeContext,
-SidebarHoverContext, SessionContext, SessionFlagContext, UserImgContext, UserImgPostContext, MobileContext, SelectionModeContext, ActiveFavgroupContext} from "./Context"
+import {useThemeSelector, useLayoutSelector, useLayoutActions, useSessionSelector, useSessionActions, useInteractionSelector, 
+useInteractionActions, useActiveSelector, useActiveActions, useCacheSelector, useCacheActions, useSearchSelector, useSearchActions} from "./store"
 import favicon from "./assets/icons/favicon.png"
 import permissions from "./structures/Permissions"
 import PostsPage from "./pages/PostsPage"
@@ -72,29 +71,19 @@ let destroy2FATimeout = null as any
 
 const App: React.FunctionComponent = (props) => {
     const [loaded, setLoaded] = useState(false)
-    const [theme, setTheme] = useState("purple")
-    const [hideSortbar, setHideSortbar] = useState(false)
-    const [hideSidebar, setHideSidebar] = useState(false)
-    const [hideNavbar, setHideNavbar] = useState(false)
-    const [hideTitlebar, setHideTitlebar] = useState(false)
-    const [enableDrag, setEnableDrag] = useState(false)
-    const [activeDropdown, setActiveDropdown] = useState("none")
-    const [filterDropActive, setFilterDropActive] = useState(false)
-    const [sidebarHover, setSidebarHover] = useState(false)
-    const [session, setSession] = useState({}) as any
-    const [sessionFlag, setSessionFlag] = useState(false)
-    const [userImg, setUserImg] = useState("")
-    const [userImgPost, setUserImgPost] = useState("")
-    const [mobile, setMobile] = useState(false)
-    const [tablet, setTablet] = useState(false)
-    const [mobileScrolling, setMobileScrolling] = useState(false)
-    const [selectionMode, setSelectionMode] = useState(false)
-    const [hasNotification, setHasNotification] = useState(false)
-    const [emojis, setEmojis] = useState([])
-    const [restrictType, setRestrictType] = useState("all")
-    const [posts, setPosts] = useState([]) as any
-    const [activeGroup, setActiveGroup] = useState(null) as any
-    const [activeFavgroup, setActiveFavgroup] = useState(null) as any
+    const {theme} = useThemeSelector()
+    const {mobile, hideTitlebar} = useLayoutSelector()
+    const {setMobile, setTablet, setHideSortbar} = useLayoutActions()
+    const {enableDrag, sidebarHover} = useInteractionSelector()
+    const {setMobileScrolling} = useInteractionActions()
+    const {activeDropdown, filterDropActive, activeGroup, activeFavgroup} = useActiveSelector()
+    const {setActiveDropdown, setActiveGroup, setActiveFavgroup} = useActiveActions()
+    const {session, sessionFlag} = useSessionSelector()
+    const {setSession, setSessionFlag, setUserImg, setUserImgPost, setHasNotification} = useSessionActions()
+    const {posts} = useCacheSelector()
+    const {setEmojis} = useCacheActions()
+    const {selectionMode} = useSearchSelector()
+    const {setRestrictType} = useSearchActions()
     const history = useHistory()
     const location = useLocation()
 
@@ -152,7 +141,8 @@ const App: React.FunctionComponent = (props) => {
     }
 
     const updatePfp = async () => {
-        setUserImg(getImg())
+        const img = getImg()
+        setUserImg(img)
         if (session.imagePost) setUserImgPost(session.imagePost)
     }
 
@@ -302,120 +292,72 @@ const App: React.FunctionComponent = (props) => {
 
     return (
         <div className={`app ${!loaded ? "stop-transitions" : ""}`}>
-            <ActiveFavgroupContext.Provider value={{activeFavgroup, setActiveFavgroup}}>
-            <ActiveGroupContext.Provider value={{activeGroup, setActiveGroup}}>
-            <PostsContext.Provider value={{posts, setPosts}}>
-            <EmojisContext.Provider value={{emojis, setEmojis}}>
-            <RestrictTypeContext.Provider value={{restrictType, setRestrictType}}>
-            <HasNotificationContext.Provider value={{hasNotification, setHasNotification}}>
-            <SelectionModeContext.Provider value={{selectionMode, setSelectionMode}}>
-            <MobileScrollingContext.Provider value={{mobileScrolling, setMobileScrolling}}>
-            <TabletContext.Provider value={{tablet, setTablet}}>
-            <MobileContext.Provider value={{mobile, setMobile}}>
-            <UserImgPostContext.Provider value={{userImgPost, setUserImgPost}}>
-            <UserImgContext.Provider value={{userImg, setUserImg}}>
-            <SessionFlagContext.Provider value={{sessionFlag, setSessionFlag}}>
-            <SessionContext.Provider value={{session, setSession}}>
-            <SidebarHoverContext.Provider value={{sidebarHover, setSidebarHover}}>
-            <FilterDropActiveContext.Provider value={{filterDropActive, setFilterDropActive}}>
-            <ActiveDropdownContext.Provider value={{activeDropdown, setActiveDropdown}}>
-            <EnableDragContext.Provider value={{enableDrag, setEnableDrag}}>
-            <HideSortbarContext.Provider value={{hideSortbar, setHideSortbar}}>
-            <HideNavbarContext.Provider value={{hideNavbar, setHideNavbar}}>
-            <HideTitlebarContext.Provider value={{hideTitlebar, setHideTitlebar}}>
-            <HideSidebarContext.Provider value={{hideSidebar, setHideSidebar}}>
-            <ThemeContext.Provider value={{theme, setTheme}}>
-                <Context>
-                    <DragAndDrop/>
-                    <NewsBanner/>
-                    <ActionBanner/>
-                    <PremiumRequiredDialog/>
-                    <Switch>
-                        <Route exact path={["/", "/posts", "/home"]}><PostsPage/></Route>
-                        <Route exact path="/profile"><UserProfilePage/></Route>
-                        <Route exact path="/upload"><UploadPage/></Route>
-                        <Route exact path="/bulk-upload"><BulkUploadPage/></Route>
-                        <Route exact path="/tags"><TagsPage/></Route>
-                        <Route exact path="/series"><SeriesPage/></Route>
-                        <Route exact path="/characters"><CharactersPage/></Route>
-                        <Route exact path="/artists"><ArtistsPage/></Route>
-                        <Route exact path="/comments"><CommentsPage/></Route>
-                        <Route exact path="/groups"><GroupsPage/></Route>
-                        <Route exact path="/history"><HistoryPage/></Route>
-                        <Route exact path="/premium"><PremiumPage/></Route>
-                        <Route exact path="/user/:username" render={(props) => <UserPage {...props}/>}></Route>
-                        <Route exact path="/tag/history/:tag" render={(props) => <TagHistoryPage {...props}/>}></Route>
-                        <Route exact path="/user/:username/tag/history" render={(props) => <TagHistoryPage {...props}/>}></Route>
-                        <Route exact path="/tag/:tag" render={(props) => <TagPage {...props}/>}></Route>
-                        <Route exact path="/group/:group" render={(props) => <GroupPage {...props}/>}></Route>
-                        <Route exact path="/group/history/:group" render={(props) => <GroupHistoryPage {...props}/>}></Route>
-                        <Route exact path="/user/:username/group/history" render={(props) => <GroupHistoryPage {...props}/>}></Route>
-                        <Route exact path="/favgroup/:username/:favgroup" render={(props) => <FavgroupPage {...props}/>}></Route>
-                        <Route exact path="/translation/history/:id/:order" render={(props) => <TranslationHistoryPage {...props}/>}></Route>
-                        <Route exact path="/user/:username/translation/history" render={(props) => <TranslationHistoryPage {...props}/>}></Route>
-                        <Route exact path="/post/history/:id" render={(props) => <PostHistoryPage {...props}/>}></Route>
-                        <Route exact path="/user/:username/post/history" render={(props) => <PostHistoryPage {...props}/>}></Route>
-                        <Route exact path="/post/:id" render={(props) => <PostPage {...props}/>}></Route>
-                        <Route exact path="/post/:id/:slug" render={(props) => <PostPage {...props}/>}></Route>
-                        <Route exact path="/unverified/post/:id" render={(props) => <UnverifiedPostPage {...props}/>}></Route>
-                        <Route exact path="/edit-post/:id" render={(props) => <EditPostPage {...props}/>}></Route>
-                        <Route exact path="/unverified/edit-post/:id" render={(props) => <EditUnverifiedPostPage {...props}/>}></Route>
-                        <Route exact path="/set-avatar/:id" render={(props) => <SetAvatarPage {...props}/>}></Route>
-                        <Route exact path="/help"><HelpPage/></Route>
-                        <Route exact path="/forum"><ForumPage/></Route>
-                        <Route exact path="/thread/:id" render={(props) => <ThreadPage {...props}/>}></Route>
-                        <Route exact path="/mail"><MailPage/></Route>
-                        <Route exact path="/message/:id" render={(props) => <MessagePage {...props}/>}></Route>
-                        <Route exact path="/change-username"><ChangeUsernamePage/></Route>
-                        <Route exact path="/change-email"><ChangeEmailPage/></Route>
-                        <Route exact path="/change-email-success"><ChangeEmailSuccessPage/></Route>
-                        <Route exact path="/verify-email"><VerifyEmailPage/></Route>
-                        <Route exact path="/verify-email-success"><VerifyEmailSuccessPage/></Route>
-                        <Route exact path="/premium-success"><PremiumSuccessPage/></Route>
-                        <Route exact path="/reset-password"><ResetPasswordPage/></Route>
-                        <Route exact path="/change-password"><ChangePasswordPage/></Route>
-                        <Route exact path="/forgot-password"><ForgotPasswordPage/></Route>
-                        <Route exact path={["/signup", "/register"]}><SignUpPage/></Route>
-                        <Route exact path="/login"><LoginPage/></Route>
-                        <Route exact path="/2fa"><$2FAPage/></Route>
-                        <Route exact path="/enable-2fa"><$2FAEnablePage/></Route>
-                        <Route exact path="/login-history"><LoginHistoryPage/></Route>
-                        <Route exact path="/contact"><ContactPage/></Route>
-                        <Route exact path="/copyright-removal"><CopyrightRemovalPage/></Route>
-                        <Route exact path="/mod-queue"><ModQueuePage/></Route>
-                        <Route exact path={["/privacy", "/privacypolicy"]}><Redirect to="/terms#privacy"/></Route>
-                        <Route exact path={["/terms", "termsofservice"]}><TermsPage/></Route>
-                        <Route exact path="/news-banner"><NewsBannerPage/></Route>
-                        <Route exact path="/ip-blacklist"><IPBlacklistPage/></Route>
-                        <Route exact path="/401"><$401Page/></Route>
-                        <Route exact path="/403"><$403Page/></Route>
-                        <Route path="*"><$404Page/></Route>
-                    </Switch>
-                    <AudioPlayer/>
-                </Context>
-            </ThemeContext.Provider>
-            </HideSidebarContext.Provider>
-            </HideTitlebarContext.Provider>
-            </HideNavbarContext.Provider>
-            </HideSortbarContext.Provider>
-            </EnableDragContext.Provider>
-            </ActiveDropdownContext.Provider>
-            </FilterDropActiveContext.Provider>
-            </SidebarHoverContext.Provider>
-            </SessionContext.Provider>
-            </SessionFlagContext.Provider>
-            </UserImgContext.Provider>
-            </UserImgPostContext.Provider>
-            </MobileContext.Provider>
-            </TabletContext.Provider>
-            </MobileScrollingContext.Provider>
-            </SelectionModeContext.Provider>
-            </HasNotificationContext.Provider>
-            </RestrictTypeContext.Provider>
-            </EmojisContext.Provider>
-            </PostsContext.Provider>
-            </ActiveGroupContext.Provider>
-            </ActiveFavgroupContext.Provider>
+            <DragAndDrop/>
+            <NewsBanner/>
+            <ActionBanner/>
+            <PremiumRequiredDialog/>
+            <Switch>
+                <Route exact path={["/", "/posts", "/home"]}><PostsPage/></Route>
+                <Route exact path="/profile"><UserProfilePage/></Route>
+                <Route exact path="/upload"><UploadPage/></Route>
+                <Route exact path="/bulk-upload"><BulkUploadPage/></Route>
+                <Route exact path="/tags"><TagsPage/></Route>
+                <Route exact path="/series"><SeriesPage/></Route>
+                <Route exact path="/characters"><CharactersPage/></Route>
+                <Route exact path="/artists"><ArtistsPage/></Route>
+                <Route exact path="/comments"><CommentsPage/></Route>
+                <Route exact path="/groups"><GroupsPage/></Route>
+                <Route exact path="/history"><HistoryPage/></Route>
+                <Route exact path="/premium"><PremiumPage/></Route>
+                <Route exact path="/user/:username" render={(props) => <UserPage {...props}/>}></Route>
+                <Route exact path="/tag/history/:tag" render={(props) => <TagHistoryPage {...props}/>}></Route>
+                <Route exact path="/user/:username/tag/history" render={(props) => <TagHistoryPage {...props}/>}></Route>
+                <Route exact path="/tag/:tag" render={(props) => <TagPage {...props}/>}></Route>
+                <Route exact path="/group/:group" render={(props) => <GroupPage {...props}/>}></Route>
+                <Route exact path="/group/history/:group" render={(props) => <GroupHistoryPage {...props}/>}></Route>
+                <Route exact path="/user/:username/group/history" render={(props) => <GroupHistoryPage {...props}/>}></Route>
+                <Route exact path="/favgroup/:username/:favgroup" render={(props) => <FavgroupPage {...props}/>}></Route>
+                <Route exact path="/translation/history/:id/:order" render={(props) => <TranslationHistoryPage {...props}/>}></Route>
+                <Route exact path="/user/:username/translation/history" render={(props) => <TranslationHistoryPage {...props}/>}></Route>
+                <Route exact path="/post/history/:id" render={(props) => <PostHistoryPage {...props}/>}></Route>
+                <Route exact path="/user/:username/post/history" render={(props) => <PostHistoryPage {...props}/>}></Route>
+                <Route exact path="/post/:id" render={(props) => <PostPage {...props}/>}></Route>
+                <Route exact path="/post/:id/:slug" render={(props) => <PostPage {...props}/>}></Route>
+                <Route exact path="/unverified/post/:id" render={(props) => <UnverifiedPostPage {...props}/>}></Route>
+                <Route exact path="/edit-post/:id" render={(props) => <EditPostPage {...props}/>}></Route>
+                <Route exact path="/unverified/edit-post/:id" render={(props) => <EditUnverifiedPostPage {...props}/>}></Route>
+                <Route exact path="/set-avatar/:id" render={(props) => <SetAvatarPage {...props}/>}></Route>
+                <Route exact path="/help"><HelpPage/></Route>
+                <Route exact path="/forum"><ForumPage/></Route>
+                <Route exact path="/thread/:id" render={(props) => <ThreadPage {...props}/>}></Route>
+                <Route exact path="/mail"><MailPage/></Route>
+                <Route exact path="/message/:id" render={(props) => <MessagePage {...props}/>}></Route>
+                <Route exact path="/change-username"><ChangeUsernamePage/></Route>
+                <Route exact path="/change-email"><ChangeEmailPage/></Route>
+                <Route exact path="/change-email-success"><ChangeEmailSuccessPage/></Route>
+                <Route exact path="/verify-email"><VerifyEmailPage/></Route>
+                <Route exact path="/verify-email-success"><VerifyEmailSuccessPage/></Route>
+                <Route exact path="/premium-success"><PremiumSuccessPage/></Route>
+                <Route exact path="/reset-password"><ResetPasswordPage/></Route>
+                <Route exact path="/change-password"><ChangePasswordPage/></Route>
+                <Route exact path="/forgot-password"><ForgotPasswordPage/></Route>
+                <Route exact path={["/signup", "/register"]}><SignUpPage/></Route>
+                <Route exact path="/login"><LoginPage/></Route>
+                <Route exact path="/2fa"><$2FAPage/></Route>
+                <Route exact path="/enable-2fa"><$2FAEnablePage/></Route>
+                <Route exact path="/login-history"><LoginHistoryPage/></Route>
+                <Route exact path="/contact"><ContactPage/></Route>
+                <Route exact path="/copyright-removal"><CopyrightRemovalPage/></Route>
+                <Route exact path="/mod-queue"><ModQueuePage/></Route>
+                <Route exact path={["/privacy", "/privacypolicy"]}><Redirect to="/terms#privacy"/></Route>
+                <Route exact path={["/terms", "termsofservice"]}><TermsPage/></Route>
+                <Route exact path="/news-banner"><NewsBannerPage/></Route>
+                <Route exact path="/ip-blacklist"><IPBlacklistPage/></Route>
+                <Route exact path="/401"><$401Page/></Route>
+                <Route exact path="/403"><$403Page/></Route>
+                <Route path="*"><$404Page/></Route>
+            </Switch>
+            <AudioPlayer/>
         </div>
     )
 }

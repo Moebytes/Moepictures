@@ -1,14 +1,12 @@
-import React, {useContext, useEffect, useState} from "react"
+import React, {useEffect} from "react"
 import {useHistory} from "react-router-dom"
-import {HashLink as Link} from "react-router-hash-link"
 import favicon from "../assets/icons/favicon.png"
 import favicon2 from "../assets/icons/favicon2.png"
 import favicon3 from "../assets/icons/favicon3.png"
 import favicon4 from "../assets/icons/favicon4.png"
-import {ThemeContext, HideNavbarContext, EnableDragContext, RelativeContext, HideTitlebarContext, HeaderFlagContext,
-SearchContext, SearchFlagContext, ImageTypeContext, RestrictTypeContext, StyleTypeContext, SortTypeContext,
-HeaderTextContext, HideMobileNavbarContext, MobileContext, VisiblePostsContext, ScrollYContext, MobileScrollingContext, 
-SiteHueContext, SiteLightnessContext, SiteSaturationContext, AutoSearchContext, ActiveGroupContext, ActiveFavgroupContext} from "../Context"
+import {useThemeSelector, useThemeActions, useLayoutSelector, useSearchActions, useSearchSelector, 
+useInteractionActions, useLayoutActions, useActiveSelector, useInteractionSelector, useCacheSelector, 
+useCacheActions, useFlagSelector, useActiveActions, useFlagActions} from "../store"
 import functions from "../structures/Functions"
 import hamburger from "../assets/icons/hamburger.png"
 import lockIcon from "../assets/icons/lock-red.png"
@@ -96,30 +94,20 @@ interface Props {
 }
 
 const TitleBar: React.FunctionComponent<Props> = (props) => {
-    const {siteHue, setSiteHue} = useContext(SiteHueContext)
-    const {siteSaturation, setSiteSaturation} = useContext(SiteSaturationContext)
-    const {siteLightness, setSiteLightness} = useContext(SiteLightnessContext)
-    const {theme, setTheme} = useContext(ThemeContext)
-    const {hideNavbar, setHideNavbar} = useContext(HideNavbarContext)
-    const {hideTitlebar, setHideTitlebar} = useContext(HideTitlebarContext)
-    const {enableDrag, setEnableDrag} = useContext(EnableDragContext)
-    const {relative, setRelative} = useContext(RelativeContext)
-    const {search, setSearch} = useContext(SearchContext)
-    const {searchFlag, setSearchFlag} = useContext(SearchFlagContext)
-    const {imageType, setImageType} = useContext(ImageTypeContext)
-    const {restrictType, setRestrictType} = useContext(RestrictTypeContext)
-    const {autoSearch, setAutoSearch} = useContext(AutoSearchContext)
-    const {styleType, setStyleType} = useContext(StyleTypeContext)
-    const {sortType, setSortType} = useContext(SortTypeContext)
-    const {headerText, setHeaderText} = useContext(HeaderTextContext)
-    const {mobile, setMobile} = useContext(MobileContext)
-    const {mobileScrolling, setMobileScrolling} = useContext(MobileScrollingContext)
-    const {hideMobileNavbar, setHideMobileNavbar} = useContext(HideMobileNavbarContext)
-    const {headerFlag, setHeaderFlag} = useContext(HeaderFlagContext)
-    const {visiblePosts, setVisiblePosts} = useContext(VisiblePostsContext)
-    const {scrollY, setScrollY} = useContext(ScrollYContext)
-    const {activeGroup, setActiveGroup} = useContext(ActiveGroupContext)
-    const {activeFavgroup, setActiveFavgroup} = useContext(ActiveFavgroupContext)
+    const {theme, siteHue, siteSaturation, siteLightness} = useThemeSelector()
+    const {setTheme, setSiteHue, setSiteSaturation, setSiteLightness} = useThemeActions()
+    const {mobile, relative, hideTitlebar, hideMobileNavbar} = useLayoutSelector()
+    const {setHideMobileNavbar, setRelative, setHideTitlebar} = useLayoutActions()
+    const {search, restrictType, autoSearch} = useSearchSelector()
+    const {setSearch, setSearchFlag, setImageType, setRestrictType, setStyleType, setSortType} = useSearchActions()
+    const {scrollY, mobileScrolling} = useInteractionSelector()
+    const {setEnableDrag, setScrollY, setMobileScrolling} = useInteractionActions()
+    const {headerFlag} = useFlagSelector()
+    const {setHeaderFlag} = useFlagActions()
+    const {visiblePosts} = useCacheSelector()
+    const {setVisiblePosts} = useCacheActions()
+    const {activeGroup, activeFavgroup, headerText} = useActiveSelector()
+    const {setHeaderText} = useActiveActions()
     const history = useHistory()
 
     useEffect(() => {
@@ -151,9 +139,9 @@ const TitleBar: React.FunctionComponent<Props> = (props) => {
                 document.documentElement.style.setProperty(key, functions.rotateColor(color, siteHue, siteSaturation, targetLightness))
             }
         }
-        localStorage.setItem("siteHue", siteHue)
-        localStorage.setItem("siteSaturation", siteSaturation)
-        localStorage.setItem("siteLightness", siteLightness)
+        localStorage.setItem("siteHue", String(siteHue))
+        localStorage.setItem("siteSaturation", String(siteSaturation))
+        localStorage.setItem("siteLightness", String(siteLightness))
     }, [theme, siteHue, siteSaturation, siteLightness])
 
     useEffect(() => {
@@ -173,7 +161,7 @@ const TitleBar: React.FunctionComponent<Props> = (props) => {
     }
 
     const toggleMobileNavbar = () => {
-        setHideMobileNavbar((prev: boolean) => !prev)
+        setHideMobileNavbar(!hideMobileNavbar)
     }
 
     const titleClick = (event: any) => {

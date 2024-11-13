@@ -1,8 +1,7 @@
-import React, {useContext, useEffect, useState, useReducer} from "react"
+import React, {useEffect, useState, useReducer} from "react"
 import {useHistory} from "react-router-dom"
-import {ThemeContext, SearchContext, SearchFlagContext, SessionContext, SessionFlagContext, SiteHueContext, SiteLightnessContext, 
-SiteSaturationContext, MobileContext, ShowPageDialogContext, ModPageContext, ScrollContext, PageFlagContext, ModStateContext} from "../Context"
-import {HashLink as Link} from "react-router-hash-link"
+import {useThemeSelector, useLayoutSelector, useSessionSelector, useSessionActions, useFlagActions, usePageActions,
+useSearchSelector, useFlagSelector, usePageSelector, useMiscDialogActions, useActiveSelector} from "../store"
 import approve from "../assets/icons/approve.png"
 import reject from "../assets/icons/reject.png"
 import tagDiff from "../assets/icons/tagdiff.png"
@@ -11,27 +10,24 @@ import "./styles/modposts.less"
 
 const ModTagEdits: React.FunctionComponent = (props) => {
     const [ignored, forceUpdate] = useReducer(x => x + 1, 0)
-    const {theme, setTheme} = useContext(ThemeContext)
-    const {siteHue, setSiteHue} = useContext(SiteHueContext)
-    const {siteSaturation, setSiteSaturation} = useContext(SiteSaturationContext)
-    const {siteLightness, setSiteLightness} = useContext(SiteLightnessContext)
+    const {siteHue, siteSaturation, siteLightness} = useThemeSelector()
+    const {mobile} = useLayoutSelector()
+    const {session} = useSessionSelector()
+    const {setSessionFlag} = useSessionActions()
+    const {scroll} = useSearchSelector()
+    const {pageFlag} = useFlagSelector()
+    const {setPageFlag} = useFlagActions()
+    const {modPage} = usePageSelector()
+    const {setModPage} = usePageActions()
+    const {setShowPageDialog} = useMiscDialogActions()
+    const {modState} = useActiveSelector()
     const [hover, setHover] = useState(false)
-    const {search, setSearch} = useContext(SearchContext)
-    const {searchFlag, setSearchFlag} = useContext(SearchFlagContext)
-    const {session, setSession} = useContext(SessionContext)
-    const {sessionFlag, setSessionFlag} = useContext(SessionFlagContext)
     const [requests, setRequests] = useState([]) as any
     const [oldTags, setOldTags] = useState(new Map())
     const [showOldTags, setShowOldTags] = useState([]) as any
     const [index, setIndex] = useState(0)
     const [visibleRequests, setVisibleRequests] = useState([]) as any
     const [updateVisibleRequestFlag, setUpdateVisibleRequestFlag] = useState(false)
-    const {scroll, setScroll} = useContext(ScrollContext)
-    const {mobile, setMobile} = useContext(MobileContext)
-    const {pageFlag, setPageFlag} = useContext(PageFlagContext)
-    const {modPage, setModPage} = useContext(ModPageContext)
-    const {showPageDialog, setShowPageDialog} = useContext(ShowPageDialogContext)
-    const {modState, setModState} = useContext(ModStateContext)
     const [queryPage, setQueryPage] = useState(1)
     const [offset, setOffset] = useState(0)
     const [ended, setEnded] = useState(false)
@@ -318,6 +314,15 @@ const ModTagEdits: React.FunctionComponent = (props) => {
                 jsx.push(<span className="mod-post-link" onClick={openTag} onAuxClick={openTag}>Old Tag: {oldTag.tag}</span>)
             } else {
                 jsx.push(<span className="mod-post-link" onClick={openTag} onAuxClick={openTag}>New Tag: {newTag.key}</span>)
+            }
+        } else {
+            jsx.push(<span className="mod-post-link" onClick={openTag} onAuxClick={openTag}>Tag: {newTag.key}</span>)
+        }
+        if (changes.type) {
+            if (showOldTag && oldTag) {
+                jsx.push(<span className={`mod-post-text ${functions.getTagColor(oldTag)}`}>Old Category: {oldTag.type}</span>)
+            } else {
+                jsx.push(<span className={`mod-post-text ${functions.getTagColor(newTag)}`}>New Category: {newTag.type}</span>)
             }
         }
         if (changes.description) {

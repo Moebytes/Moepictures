@@ -1,8 +1,7 @@
-import React, {useEffect, useContext, useState, useRef, useReducer} from "react"
+import React, {useEffect, useState, useRef, useReducer} from "react"
 import {useHistory} from "react-router-dom"
-import {HideNavbarContext, HideSidebarContext, ThemeContext, EnableDragContext, EditMessageIDContext, EditMessageFlagContext, MobileContext,
-EditMessageTitleContext, EditMessageContentContext, EditMessageR18Context, HideTitlebarContext, SessionContext, EmojisContext,
-SiteHueContext, SiteLightnessContext, SiteSaturationContext} from "../Context"
+import {useThemeSelector, useInteractionActions, useMessageDialogSelector, useMessageDialogActions, useSessionSelector,
+useLayoutSelector, useCacheSelector} from "../store"
 import functions from "../structures/Functions"
 import "./styles/dialog.less"
 import Draggable from "react-draggable"
@@ -14,22 +13,13 @@ import radioButtonChecked from "../assets/icons/radiobutton-checked.png"
 
 const EditMessageDialog: React.FunctionComponent = (props) => {
     const [ignored, forceUpdate] = useReducer(x => x + 1, 0)
-    const {theme, setTheme} = useContext(ThemeContext)
-    const {siteHue, setSiteHue} = useContext(SiteHueContext)
-    const {siteSaturation, setSiteSaturation} = useContext(SiteSaturationContext)
-    const {siteLightness, setSiteLightness} = useContext(SiteLightnessContext)
-    const {hideNavbar, setHideNavbar} = useContext(HideNavbarContext)
-    const {hideTitlebar, setHideTitlebar} = useContext(HideTitlebarContext)
-    const {hideSidebar, setHideSidebar} = useContext(HideSidebarContext)
-    const {enableDrag, setEnableDrag} = useContext(EnableDragContext)
-    const {editMessageID, setEditMessageID} = useContext(EditMessageIDContext)
-    const {editMessageFlag, setEditMessageFlag} = useContext(EditMessageFlagContext)
-    const {editMessageTitle, setEditMessageTitle} = useContext(EditMessageTitleContext)
-    const {editMessageContent, setEditMessageContent} = useContext(EditMessageContentContext)
-    const {editMessageR18, setEditMessageR18} = useContext(EditMessageR18Context)
-    const {session, setSession} = useContext(SessionContext)
-    const {mobile, setMobile} = useContext(MobileContext)
-    const {emojis, setEmojis} = useContext(EmojisContext)
+    const {siteHue, siteSaturation, siteLightness} = useThemeSelector()
+    const {setEnableDrag} = useInteractionActions()
+    const {editMessageID, editMessageTitle, editMessageContent, editMessageR18} = useMessageDialogSelector()
+    const {setEditMessageID, setEditMessageFlag, setEditMessageTitle, setEditMessageContent, setEditMessageR18} = useMessageDialogActions()
+    const {session} = useSessionSelector()
+    const {mobile} = useLayoutSelector()
+    const {emojis} = useCacheSelector()
     const [showEmojiDropdown, setShowEmojiDropdown] = useState(false)
     const [error, setError] = useState(false)
     const errorRef = useRef<any>(null)
@@ -106,7 +96,7 @@ const EditMessageDialog: React.FunctionComponent = (props) => {
                 const key = Object.keys(emojis)[k]
                 if (!key) break
                 const appendText = () => {
-                    setEditMessageContent((prev: string) => prev + ` emoji:${key}`)
+                    setEditMessageContent(editMessageContent + ` emoji:${key}`)
                     setShowEmojiDropdown(false)
                 }
                 items.push(
@@ -145,7 +135,7 @@ const EditMessageDialog: React.FunctionComponent = (props) => {
                         </div>
                         {session.showR18 ?
                         <div className="dialog-row">
-                            <img className="dialog-checkbox" src={editMessageR18 ? radioButtonChecked : radioButton} onClick={() => setEditMessageR18((prev: boolean) => !prev)} style={{marginLeft: "0px", filter: getFilter()}}/>
+                            <img className="dialog-checkbox" src={editMessageR18 ? radioButtonChecked : radioButton} onClick={() => setEditMessageR18(!editMessageR18)} style={{marginLeft: "0px", filter: getFilter()}}/>
                             <span className="dialog-text" style={{marginLeft: "10px"}}>R18</span>
                             <img className="dialog-title-img" src={lewdIcon} style={{marginLeft: "15px", height: "50px", filter: getFilter()}}/>
                         </div> : null}

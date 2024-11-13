@@ -1,7 +1,7 @@
-import React, {useEffect, useContext, useState, useRef} from "react"
-import {ThemeContext, SiteHueContext, SiteSaturationContext, SiteLightnessContext, EnableDragContext, HideNavbarContext, HideSidebarContext, RelativeContext, 
-HideTitlebarContext, MobileContext, PostsContext, GroupFlagContext, ActiveDropdownContext, HeaderTextContext, SidebarTextContext, SessionContext, SessionFlagContext, 
-RestrictTypeContext, ActiveFavgroupContext, EditFavGroupObjContext, DeleteFavGroupObjContext, SearchContext, SearchFlagContext} from "../Context"
+import React, {useEffect, useState} from "react"
+import {useThemeSelector, useInteractionActions, useSessionSelector, useSessionActions,
+useLayoutActions, useActiveActions, useFlagActions, useLayoutSelector, useSearchSelector, 
+useFlagSelector, useCacheActions, useGroupDialogActions, useSearchActions} from "../store"
 import {useHistory, useLocation} from "react-router-dom"
 import TitleBar from "../components/TitleBar"
 import NavBar from "../components/NavBar"
@@ -30,30 +30,20 @@ interface Props {
 let limit = 25
 
 const FavgroupPage: React.FunctionComponent<Props> = (props) => {
-    const {theme, setTheme} = useContext(ThemeContext)
-    const {siteHue, setSiteHue} = useContext(SiteHueContext)
-    const {siteSaturation, setSiteSaturation} = useContext(SiteSaturationContext)
-    const {siteLightness, setSiteLightness} = useContext(SiteLightnessContext)
-    const {enableDrag, setEnableDrag} = useContext(EnableDragContext)
-    const {hideNavbar, setHideNavbar} = useContext(HideNavbarContext)
-    const {hideTitlebar, setHideTitlebar} = useContext(HideTitlebarContext)
-    const {hideSidebar, setHideSidebar} = useContext(HideSidebarContext)
-    const {relative, setRelative} = useContext(RelativeContext)
-    const {activeDropdown, setActiveDropdown} = useContext(ActiveDropdownContext)
-    const {search, setSearch} = useContext(SearchContext)
-    const {searchFlag, setSearchFlag} = useContext(SearchFlagContext)
-    const {headerText, setHeaderText} = useContext(HeaderTextContext)
-    const {sidebarText, setSidebarText} = useContext(SidebarTextContext)
-    const {editFavGroupObj, setEditFavGroupObj} = useContext(EditFavGroupObjContext)
-    const {deleteFavGroupObj, setDeleteFavGroupObj} = useContext(DeleteFavGroupObjContext)
-    const {session, setSession} = useContext(SessionContext)
-    const {sessionFlag, setSessionFlag} = useContext(SessionFlagContext)
-    const {mobile, setMobile} = useContext(MobileContext)
-    const {restrictType, setRestrictType} = useContext(RestrictTypeContext)
-    const {activeFavgroup, setActiveFavgroup} = useContext(ActiveFavgroupContext)
-    const {groupFlag, setGroupFlag} = useContext(GroupFlagContext)
+    const {theme, siteHue, siteLightness, siteSaturation} = useThemeSelector()
+    const {setHideNavbar, setHideTitlebar, setHideSidebar, setRelative} = useLayoutActions()
+    const {setEnableDrag} = useInteractionActions()
+    const {setHeaderText, setSidebarText, setActiveFavgroup, setActiveDropdown} = useActiveActions()
+    const {groupFlag} = useFlagSelector()
+    const {setGroupFlag} = useFlagActions()
+    const {session} = useSessionSelector()
+    const {setSessionFlag} = useSessionActions()
+    const {mobile} = useLayoutSelector()
+    const {setEditFavGroupObj, setDeleteFavGroupObj} = useGroupDialogActions()
+    const {restrictType} = useSearchSelector()
+    const {setSearch, setSearchFlag} = useSearchActions()
     const [reorderState, setReorderState] = useState(false)
-    const {posts, setPosts} = useContext(PostsContext)
+    const {setPosts} = useCacheActions()
     const [favgroup, setFavgroup] = useState(null) as any
     const [items, setItems] = useState([]) as any
     const history = useHistory()

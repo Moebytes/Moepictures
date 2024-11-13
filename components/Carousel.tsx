@@ -1,8 +1,6 @@
-import React, {useContext, useEffect, useRef, useState, useReducer, useMemo} from "react"
-import {ThemeContext, EnableDragContext, MobileContext, BrightnessContext, ContrastContext, HueContext, SaturationContext, LightnessContext,
-BlurContext, SharpenContext, PixelateContext, SiteHueContext, SiteLightnessContext, SiteSaturationContext, TranslationDrawingEnabledContext,
-SessionContext} from "../Context"
-import {HashLink as Link} from "react-router-hash-link"
+import React, {useEffect, useRef, useState, useReducer} from "react"
+import {useInteractionActions, useThemeSelector, useSessionSelector, useSessionActions, useLayoutSelector, 
+useSearchSelector, useFilterSelector} from "../store"
 import functions from "../structures/Functions"
 import arrowLeft from "../assets/icons/carousel-left.png"
 import arrowRight from "../assets/icons/carousel-right.png"
@@ -29,22 +27,13 @@ const loadAmount = 10
 
 const Carousel: React.FunctionComponent<Props> = (props) => {
     const [ignored, forceUpdate] = useReducer(x => x + 1, 0)
-    const {siteHue, setSiteHue} = useContext(SiteHueContext)
-    const {siteSaturation, setSiteSaturation} = useContext(SiteSaturationContext)
-    const {siteLightness, setSiteLightness} = useContext(SiteLightnessContext)
-    const {theme, setTheme} = useContext(ThemeContext)
-    const {enableDrag, setEnableDrag} = useContext(EnableDragContext)
-    const {mobile, setMobile} = useContext(MobileContext)
-    const {brightness, setBrightness} = useContext(BrightnessContext)
-    const {contrast, setContrast} = useContext(ContrastContext)
-    const {hue, setHue} = useContext(HueContext)
-    const {saturation, setSaturation} = useContext(SaturationContext)
-    const {lightness, setLightness} = useContext(LightnessContext)
-    const {blur, setBlur} = useContext(BlurContext)
-    const {sharpen, setSharpen} = useContext(SharpenContext)
-    const {pixelate, setPixelate} = useContext(PixelateContext)
-    const {translationDrawingEnabled, setTranslationDrawingEnabled} = useContext(TranslationDrawingEnabledContext)
-    const {session, setSession} = useContext(SessionContext)
+    const {siteHue, siteSaturation, siteLightness} = useThemeSelector()
+    const {setEnableDrag} = useInteractionActions()
+    const {session} = useSessionSelector()
+    const {setSessionFlag} = useSessionActions()
+    const {mobile} = useLayoutSelector()
+    const {brightness, contrast, hue, saturation, lightness, blur, sharpen, pixelate} = useFilterSelector()
+    const {translationDrawingEnabled} = useSearchSelector()
     const [lastPos, setLastPos] = useState(null) as any
     const [dragging, setDragging] = useState(false) as any
     const [imagesRef, setImagesRef] = useState([]) as any

@@ -1,14 +1,10 @@
-import React, {useContext, useEffect, useRef, useState, forwardRef, useImperativeHandle} from "react"
+import React, {useEffect, useRef, useState, forwardRef, useImperativeHandle} from "react"
 import {useHistory} from "react-router-dom"
 import loading from "../assets/icons/loading.gif"
-import {ThemeContext, SizeTypeContext, BrightnessContext, ContrastContext, HueContext, SaturationContext, LightnessContext, MobileContext, ScrollYContext,
-BlurContext, SharpenContext, SquareContext, PixelateContext, DownloadFlagContext, DownloadIDsContext, SpeedContext, ReverseContext, ScrollContext,
-ToolTipXContext, ToolTipYContext, ToolTipEnabledContext, ToolTipPostContext, ToolTipImgContext, SelectionModeContext, SelectionItemsContext, 
-SelectionPostsContext, ActiveDropdownContext, SessionContext, SessionFlagContext, SiteHueContext, SiteLightnessContext, SiteSaturationContext} from "../Context"
-import {HashLink as Link} from "react-router-hash-link"
+import {useFilterSelector, useInteractionActions, useLayoutSelector, usePlaybackSelector, usePlaybackActions, 
+useThemeSelector, useSearchSelector, useSessionSelector, useFlagSelector, useFlagActions, useSearchActions} from "../store"
 import path from "path"
 import functions from "../structures/Functions"
-import cryptoFunctions from "../structures/CryptoFunctions"
 import "./styles/gridimage.less"
 import * as THREE from "three"
 import privateIcon from "../assets/icons/lock-opt.png"
@@ -35,36 +31,18 @@ interface Ref {
 }
 
 const GridModel = forwardRef<Ref, Props>((props, componentRef) => {
-    const {theme, setTheme} = useContext(ThemeContext)
-    const {siteHue, setSiteHue} = useContext(SiteHueContext)
-    const {siteSaturation, setSiteSaturation} = useContext(SiteSaturationContext)
-    const {siteLightness, setSiteLightness} = useContext(SiteLightnessContext)
-    const {sizeType, setSizeType} = useContext(SizeTypeContext)
-    const [imageSize, setImageSize] = useState(270) as any
-    const {brightness, setBrightness} = useContext(BrightnessContext)
-    const {contrast, setContrast} = useContext(ContrastContext)
-    const {hue, setHue} = useContext(HueContext)
-    const {saturation, setSaturation} = useContext(SaturationContext)
-    const {lightness, setLightness} = useContext(LightnessContext)
-    const {blur, setBlur} = useContext(BlurContext)
-    const {sharpen, setSharpen} = useContext(SharpenContext)
-    const {pixelate, setPixelate} = useContext(PixelateContext)
-    const {square, setSquare} = useContext(SquareContext)
-    const {downloadFlag, setDownloadFlag} = useContext(DownloadFlagContext)
-    const {downloadIDs, setDownloadIDs} = useContext(DownloadIDsContext)
-    const {scrollY, setScrollY} = useContext(ScrollYContext)
-    const {mobile, setMobile} = useContext(MobileContext)
-    const {tooltipX, setToolTipX} = useContext(ToolTipXContext)
-    const {tooltipY, setToolTipY} = useContext(ToolTipYContext)
-    const {tooltipEnabled, setToolTipEnabled} = useContext(ToolTipEnabledContext)
-    const {tooltipPost, setToolTipPost} = useContext(ToolTipPostContext)
-    const {tooltipImg, setToolTipImg} = useContext(ToolTipImgContext)
-    const {selectionMode, setSelectionMode} = useContext(SelectionModeContext)
-    const {activeDropdown, setActiveDropdown} = useContext(ActiveDropdownContext)
-    const {selectionItems, setSelectionItems} = useContext(SelectionItemsContext) as {selectionItems: Set<string>, setSelectionItems: any}
-    const {selectionPosts, setSelectionPosts} = useContext(SelectionPostsContext) as {selectionPosts: Map<string, any>, setSelectionPosts: any}
-    const {session, setSession} = useContext(SessionContext)
-    const {sessionFlag, setSessionFlag} = useContext(SessionFlagContext)
+    const {siteHue, siteSaturation, siteLightness} = useThemeSelector()
+    const {mobile} = useLayoutSelector()
+    const {session} = useSessionSelector()
+    const {brightness, contrast, hue, saturation, lightness, blur, sharpen, pixelate} = useFilterSelector()
+    const {reverse, speed, duration} = usePlaybackSelector()
+    const {setSecondsProgress, setReverse, setSeekTo, setProgress, setDuration} = usePlaybackActions()
+    const {sizeType, square, scroll, selectionMode, selectionItems, selectionPosts} = useSearchSelector()
+    const {setSelectionItems, setSelectionPosts} = useSearchActions()
+    const {downloadFlag, downloadIDs} = useFlagSelector()
+    const {setDownloadFlag, setDownloadIDs} = useFlagActions()
+    const {setScrollY, setToolTipX, setToolTipY, setToolTipEnabled, setToolTipPost, setToolTipImg} = useInteractionActions()
+    const [imageSize, setImageSize] = useState(240) as any
     const containerRef = useRef<HTMLDivElement>(null)
     const pixelateRef = useRef<HTMLCanvasElement>(null)
     const overlayRef = useRef<HTMLCanvasElement>(null)
@@ -83,14 +61,7 @@ const GridModel = forwardRef<Ref, Props>((props, componentRef) => {
     const [drag, setDrag] = useState(false)
     const [gifData, setGIFData] = useState(null) as any
     const [videoData, setVideoData] = useState(null) as any
-    const {speed, setSpeed} = useContext(SpeedContext)
-    const {reverse, setReverse} = useContext(ReverseContext)
-    const [seekTo, setSeekTo] = useState(null) as any
-    const [secondsProgress, setSecondsProgress] = useState(0)
-    const [progress, setProgress] = useState(0)
-    const [duration, setDuration] = useState(0)
     const [visible, setVisible] = useState(true)
-    const {scroll, setScroll} = useContext(ScrollContext)
     const [pageBuffering, setPageBuffering] = useState(true)
     const [image, setImage] = useState(null) as any
     const [mixer, setMixer] = useState(null as unknown as THREE.AnimationMixer | null)
@@ -380,7 +351,7 @@ const GridModel = forwardRef<Ref, Props>((props, componentRef) => {
         } else {
             containerRef.current.style.boxShadow = "none"
         }
-    }, [imageLoaded, sizeType, session, props.post?.favorited])
+    }, [imageLoaded, sizeType, session, props.post])
 
     useEffect(() => {
         if (mobile) {
@@ -393,7 +364,7 @@ const GridModel = forwardRef<Ref, Props>((props, componentRef) => {
             } else if (sizeType === "large") {
                 setImageSize(230)
             } else if (sizeType === "massive") {
-                setImageSize(500)
+                setImageSize(400)
             }
         } else {
             if (sizeType === "tiny") {
@@ -401,11 +372,11 @@ const GridModel = forwardRef<Ref, Props>((props, componentRef) => {
             } else if (sizeType === "small") {
                 setImageSize(200)
             } else if (sizeType === "medium") {
-                setImageSize(270)
+                setImageSize(240)
             } else if (sizeType === "large") {
-                setImageSize(400)
+                setImageSize(300)
             } else if (sizeType === "massive") {
-                setImageSize(500)
+                setImageSize(400)
             }
         }
     }, [sizeType])
@@ -554,6 +525,8 @@ const GridModel = forwardRef<Ref, Props>((props, componentRef) => {
                     selectionPosts.delete(props.post.postID)
                 }
                 setSelected(isSelected)
+                setSelectionItems(selectionItems)
+                setSelectionPosts(selectionPosts)
             }
         } else {
             if (!drag) {

@@ -1,11 +1,6 @@
-import React, {useContext, useEffect, useRef, useState, useReducer} from "react"
-import {ThemeContext, EnableDragContext, BrightnessContext, ContrastContext, HueContext, SaturationContext, LightnessContext,
-BlurContext, SharpenContext, PixelateContext, DownloadFlagContext, DownloadIDsContext, DisableZoomContext, SpeedContext,
-ReverseContext, MobileContext, TranslationModeContext, TranslationDrawingEnabledContext, SessionContext, SiteHueContext,
-SiteLightnessContext, SiteSaturationContext, ImageExpandContext, AudioContext, PitchContext, VolumeContext, PreviousVolumeContext, 
-ProgressContext, SecondsProgressContext, SeekToContext, DragProgressContext, DraggingContext, PausedContext, DurationContext,
-RewindFlagContext, FastforwardFlagContext, PlayFlagContext, VolumeFlagContext, ResetFlagContext, 
-MuteFlagContext, AudioPostContext} from "../Context"
+import React, {useEffect, useRef, useState, useReducer} from "react"
+import {useFilterSelector, useInteractionActions, useLayoutSelector, usePlaybackSelector, usePlaybackActions, 
+useThemeSelector, useSearchSelector, useSessionSelector, useSearchActions, useFlagSelector, useFlagActions} from "../store"
 import functions from "../structures/Functions"
 import Slider from "react-slider"
 import audioReverseIcon from "../assets/icons/audio-reverse.png"
@@ -49,27 +44,20 @@ interface Props {
 
 const PostSong: React.FunctionComponent<Props> = (props) => {
     const [ignored, forceUpdate] = useReducer(x => x + 1, 0)
-    const {theme, setTheme} = useContext(ThemeContext)
-    const {siteHue, setSiteHue} = useContext(SiteHueContext)
-    const {siteSaturation, setSiteSaturation} = useContext(SiteSaturationContext)
-    const {siteLightness, setSiteLightness} = useContext(SiteLightnessContext)
-    const {session, setSessions} = useContext(SessionContext)
-    const {enableDrag, setEnableDrag} = useContext(EnableDragContext)
-    const {brightness, setBrightness} = useContext(BrightnessContext)
-    const {contrast, setContrast} = useContext(ContrastContext)
-    const {hue, setHue} = useContext(HueContext)
-    const {saturation, setSaturation} = useContext(SaturationContext)
-    const {lightness, setLightness} = useContext(LightnessContext)
-    const {pixelate, setPixelate} = useContext(PixelateContext)
-    const {blur, setBlur} = useContext(BlurContext)
-    const {sharpen, setSharpen} = useContext(SharpenContext)
-    const {downloadFlag, setDownloadFlag} = useContext(DownloadFlagContext)
-    const {downloadIDs, setDownloadIDs} = useContext(DownloadIDsContext)
-    const {disableZoom, setDisableZoom} = useContext(DisableZoomContext)
-    const {translationMode, setTranslationMode} = useContext(TranslationModeContext)
-    const {translationDrawingEnabled, setTranslationDrawingEnabled} = useContext(TranslationDrawingEnabledContext)
-    const {mobile, setMobile} = useContext(MobileContext)
-    const {imageExpand, setImageExpand} = useContext(ImageExpandContext)
+    const {theme, siteHue, siteSaturation, siteLightness} = useThemeSelector()
+    const {setEnableDrag} = useInteractionActions()
+    const {mobile} = useLayoutSelector()
+    const {session} = useSessionSelector()
+    const {brightness, contrast, hue, saturation, lightness, blur, sharpen, pixelate} = useFilterSelector()
+    const {audio, audioPost, rewindFlag, fastForwardFlag, playFlag, volumeFlag, muteFlag, resetFlag, secondsProgress, progress, 
+    dragProgress, reverse, speed, pitch, volume, previousVolume, paused, duration, dragging, seekTo} = usePlaybackSelector()
+    const {setAudio, setAudioPost, setRewindFlag, setFastForwardFlag, setPlayFlag, setVolumeFlag, setMuteFlag, setResetFlag, 
+    setSecondsProgress, setProgress, setDragProgress, setReverse, setSpeed, setPitch, setVolume, setPreviousVolume, setPaused, 
+    setDuration, setDragging, setSeekTo} = usePlaybackActions()
+    const {translationMode, imageExpand} = useSearchSelector()
+    const {setTranslationMode, setTranslationDrawingEnabled, setImageExpand} = useSearchActions()
+    const {downloadFlag, downloadIDs} = useFlagSelector()
+    const {setDownloadFlag, setDownloadIDs} = useFlagActions()
     const [showSpeedDropdown, setShowSpeedDropdown] = useState(false)
     const [showPitchDropdown, setShowPitchDropdown] = useState(false)
     const [showVolumeSlider, setShowVolumeSlider] = useState(false)
@@ -87,29 +75,9 @@ const PostSong: React.FunctionComponent<Props> = (props) => {
     const audioVolumeRef = useRef(null) as any
     const audioSpeedSliderRef = useRef<any>(null)
     const audioVolumeSliderRef = useRef<any>(null)
-    const {secondsProgress, setSecondsProgress} = useContext(SecondsProgressContext)
-    const {progress, setProgress} = useContext(ProgressContext)
-    const {dragProgress, setDragProgress} = useContext(DragProgressContext)
-    const {reverse, setReverse} = useContext(ReverseContext)
-    const {speed, setSpeed} = useContext(SpeedContext)
-    const {pitch, setPitch} = useContext(PitchContext)
-    const {volume, setVolume} = useContext(VolumeContext)
-    const {previousVolume, setPreviousVolume} = useContext(PreviousVolumeContext)
-    const {paused, setPaused} = useContext(PausedContext)
-    const {duration, setDuration} = useContext(DurationContext)
-    const {dragging, setDragging} = useContext(DraggingContext)
-    const {seekTo, setSeekTo} = useContext(SeekToContext)
     const [init, setInit] = useState(false)
     const [buttonHover, setButtonHover] = useState(false)
     const [coverImg, setCoverImg] = useState("")
-    const {audio, setAudio} = useContext(AudioContext)
-    const {rewindFlag, setRewindFlag} = useContext(RewindFlagContext)
-    const {fastForwardFlag, setFastForwardFlag} = useContext(FastforwardFlagContext)
-    const {playFlag, setPlayFlag} = useContext(PlayFlagContext)
-    const {volumeFlag, setVolumeFlag} = useContext(VolumeFlagContext)
-    const {muteFlag, setMuteFlag} = useContext(MuteFlagContext)
-    const {resetFlag, setResetFlag} = useContext(ResetFlagContext)
-    const {audioPost, setAudioPost} = useContext(AudioPostContext)
     const [previousButtonHover, setPreviousButtonHover] = useState(false)
     const [nextButtonHover, setNextButtonHover] = useState(false)
 
@@ -158,7 +126,7 @@ const PostSong: React.FunctionComponent<Props> = (props) => {
                 if (!props.noKeydown) fullscreen()
             }
             if (key === "t") {
-                setTranslationMode((prev: boolean) => !prev)
+                setTranslationMode(!translationMode)
                 setTranslationDrawingEnabled(true)
             }
         }
@@ -453,7 +421,7 @@ const PostSong: React.FunctionComponent<Props> = (props) => {
                 <div className="post-song-filters" ref={fullscreenRef}>
                     <div className={`post-image-top-buttons ${buttonHover ? "show-post-image-top-buttons" : ""}`} onMouseEnter={() => setButtonHover(true)} onMouseLeave={() => setButtonHover(false)}>
                         {!props.noTranslations ? <img draggable={false} className="post-image-top-button" src={translationToggleOn} style={{filter: getFilter()}} onClick={() => {setTranslationMode(true); setTranslationDrawingEnabled(true)}}/> : null}
-                        <img draggable={false} className="post-image-top-button" src={imageExpand ? contract : expand} style={{filter: getFilter()}} onClick={() => setImageExpand((prev: boolean) => !prev)}/>
+                        <img draggable={false} className="post-image-top-button" src={imageExpand ? contract : expand} style={{filter: getFilter()}} onClick={() => setImageExpand(!imageExpand)}/>
                     </div>
                     <div className={`post-image-previous-button ${previousButtonHover ? "show-post-image-mid-buttons" : ""}`} onMouseEnter={() => setPreviousButtonHover(true)} onMouseLeave={() => setPreviousButtonHover(false)}>
                         <img draggable={false} className="post-image-mid-button" src={prevIcon} style={{filter: getFilter()}} onClick={() => props.previous?.()}/>

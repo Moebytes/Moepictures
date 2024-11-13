@@ -1,9 +1,7 @@
-import React, {useContext, useEffect, useRef, useState, useReducer} from "react"
-import {ThemeContext, EnableDragContext, BrightnessContext, ContrastContext, HueContext, SaturationContext, LightnessContext,
-BlurContext, SharpenContext, PixelateContext, DownloadFlagContext, DownloadIDsContext, DisableZoomContext, SpeedContext,
-ReverseContext, MobileContext, TranslationModeContext, TranslationDrawingEnabledContext, SessionContext, SiteHueContext, PreservePitchContext,
-SiteLightnessContext, SiteSaturationContext, ImageExpandContext, SessionFlagContext, FormatContext, PremiumRequiredContext, PostFlagContext} from "../Context"
-import {HashLink as Link} from "react-router-hash-link"
+import React, {useEffect, useRef, useState, useReducer} from "react"
+import {useFilterSelector, useInteractionActions, useLayoutSelector, usePlaybackSelector, usePlaybackActions, 
+useThemeSelector, useSearchSelector, useSessionSelector, useSearchActions, useFlagSelector, useFlagActions,
+useMiscDialogActions, useInteractionSelector, useSessionActions} from "../store"
 import {createFFmpeg, fetchFile} from "@ffmpeg/ffmpeg"
 import functions from "../structures/Functions"
 import permissions from "../structures/Permissions"
@@ -71,30 +69,22 @@ let id = 0
 
 const PostImage: React.FunctionComponent<Props> = (props) => {
     const [ignored, forceUpdate] = useReducer(x => x + 1, 0)
-    const {theme, setTheme} = useContext(ThemeContext)
-    const {siteHue, setSiteHue} = useContext(SiteHueContext)
-    const {siteSaturation, setSiteSaturation} = useContext(SiteSaturationContext)
-    const {siteLightness, setSiteLightness} = useContext(SiteLightnessContext)
-    const {session, setSessions} = useContext(SessionContext)
-    const {sessionFlag, setSessionFlag} = useContext(SessionFlagContext)
-    const {enableDrag, setEnableDrag} = useContext(EnableDragContext)
-    const {brightness, setBrightness} = useContext(BrightnessContext)
-    const {contrast, setContrast} = useContext(ContrastContext)
-    const {hue, setHue} = useContext(HueContext)
-    const {saturation, setSaturation} = useContext(SaturationContext)
-    const {lightness, setLightness} = useContext(LightnessContext)
-    const {pixelate, setPixelate} = useContext(PixelateContext)
-    const {blur, setBlur} = useContext(BlurContext)
-    const {sharpen, setSharpen} = useContext(SharpenContext)
-    const {downloadFlag, setDownloadFlag} = useContext(DownloadFlagContext)
-    const {downloadIDs, setDownloadIDs} = useContext(DownloadIDsContext)
-    const {disableZoom, setDisableZoom} = useContext(DisableZoomContext)
-    const {translationMode, setTranslationMode} = useContext(TranslationModeContext)
-    const {translationDrawingEnabled, setTranslationDrawingEnabled} = useContext(TranslationDrawingEnabledContext)
-    const {premiumRequired, setPremiumRequired} = useContext(PremiumRequiredContext)
-    const {mobile, setMobile} = useContext(MobileContext)
-    const {imageExpand, setImageExpand} = useContext(ImageExpandContext)
-    const {format, setFormat} = useContext(FormatContext)
+    const {theme, siteHue, siteSaturation, siteLightness} = useThemeSelector()
+    const {enableDrag} = useInteractionSelector()
+    const {setEnableDrag} = useInteractionActions()
+    const {mobile} = useLayoutSelector()
+    const {session} = useSessionSelector()
+    const {setSessionFlag} = useSessionActions()
+    const {brightness, contrast, hue, saturation, lightness, blur, sharpen, pixelate} = useFilterSelector()
+    const {disableZoom, secondsProgress, progress, dragProgress, reverse, speed, preservePitch, volume, previousVolume, 
+    paused, duration, dragging, seekTo} = usePlaybackSelector()
+    const {setDisableZoom, setSecondsProgress, setProgress, setDragProgress, setReverse, setSpeed, setPreservePitch, setVolume, 
+    setPreviousVolume, setPaused, setDuration, setDragging, setSeekTo} = usePlaybackActions()
+    const {translationMode, imageExpand, format} = useSearchSelector()
+    const {setTranslationMode, setTranslationDrawingEnabled, setImageExpand} = useSearchActions()
+    const {downloadFlag, downloadIDs} = useFlagSelector()
+    const {setDownloadFlag, setDownloadIDs} = useFlagActions()
+    const {setPremiumRequired} = useMiscDialogActions()
     const [showSpeedDropdown, setShowSpeedDropdown] = useState(false)
     const [showVolumeSlider, setShowVolumeSlider] = useState(false)
     const containerRef = useRef<HTMLDivElement>(null)
@@ -134,24 +124,11 @@ const PostImage: React.FunctionComponent<Props> = (props) => {
     const [reverseVideo, setReverseVideo] = useState(null) as any
     const [videoData, setVideoData] = useState(null) as any
     const [backFrame, setBackFrame] = useState(null) as any
-    const [secondsProgress, setSecondsProgress] = useState(0)
-    const [progress, setProgress] = useState(0)
-    const [dragProgress, setDragProgress] = useState(0) as any
-    const {reverse, setReverse} = useContext(ReverseContext)
-    const {speed, setSpeed} = useContext(SpeedContext)
-    const [volume, setVolume] = useState(0)
-    const [previousVolume, setPreviousVolume] = useState(0)
-    const [paused, setPaused] = useState(false)
-    const {preservePitch, setPreservePitch} = useContext(PreservePitchContext)
-    const [duration, setDuration] = useState(0)
     const [zoom, setZoom] = useState(1)
-    const [dragging, setDragging] = useState(false)
     const [encodingOverlay, setEncodingOverlay] = useState(false)
-    const [seekTo, setSeekTo] = useState(null) as any
     const [buttonHover, setButtonHover] = useState(false)
     const [previousButtonHover, setPreviousButtonHover] = useState(false)
     const [nextButtonHover, setNextButtonHover] = useState(false)
-    const {postFlag, setPostFlag} = useContext(PostFlagContext)
     const [img, setImg] = useState("")
 
     const getFilter = () => {
@@ -196,9 +173,11 @@ const PostImage: React.FunctionComponent<Props> = (props) => {
         const updateImg = async () => {
             const decryptedImage = await functions.decryptItem(props.img, session)
             if (!decryptedImage) return
+            const arrayBuffer = await fetch(decryptedImage).then((r) => r.arrayBuffer())
+            const type = functions.bufferFileType(arrayBuffer)
+            if (!type?.length) return
             let isAnimatedWebp = false
             if (functions.isWebP(props.img)) {
-                const arrayBuffer = await fetch(props.img).then((r) => r.arrayBuffer())
                 isAnimatedWebp = functions.isAnimatedWebp(arrayBuffer)
             }
             if (functions.isGIF(props.img) || isAnimatedWebp) {
@@ -265,7 +244,7 @@ const PostImage: React.FunctionComponent<Props> = (props) => {
                 if (!props.noKeydown) fullscreen()
             }
             if (value === "t") {
-                setTranslationMode((prev: boolean) => !prev)
+                setTranslationMode(!translationMode)
                 setTranslationDrawingEnabled(true)
             }
         }
@@ -709,7 +688,7 @@ const PostImage: React.FunctionComponent<Props> = (props) => {
 
     const changePreservesPitch = (value?: boolean) => {
         const secondsProgress = (progress / 100) * duration
-        setPreservePitch((prev) => value !== undefined ? value : !prev)
+        setPreservePitch(value !== undefined ? value : !preservePitch)
         setSeekTo(secondsProgress)
     }
 
@@ -1274,7 +1253,7 @@ const PostImage: React.FunctionComponent<Props> = (props) => {
                     <div className={`post-image-top-buttons ${buttonHover ? "show-post-image-top-buttons" : ""}`} onMouseEnter={() => setButtonHover(true)} onMouseLeave={() => setButtonHover(false)}>
                         {!props.noTranslations && session.username ? <img draggable={false} className="post-image-top-button" src={waifu2xIcon} style={{filter: getFilter()}} onClick={() => toggleUpscale()}/> : null}
                         {!props.noTranslations ? <img draggable={false} className="post-image-top-button" src={translationToggleOn} style={{filter: getFilter()}} onClick={() => {setTranslationMode(true); setTranslationDrawingEnabled(true)}}/> : null}
-                        {!mobile ? <img draggable={false} className="post-image-top-button" src={imageExpand ? contract : expand} style={{filter: getFilter()}} onClick={() => setImageExpand((prev: boolean) => !prev)}/> : null}
+                        {!mobile ? <img draggable={false} className="post-image-top-button" src={imageExpand ? contract : expand} style={{filter: getFilter()}} onClick={() => setImageExpand(!imageExpand)}/> : null}
                     </div>
                     <div className={`post-image-previous-button ${previousButtonHover ? "show-post-image-mid-buttons" : ""}`} onMouseEnter={() => setPreviousButtonHover(true)} onMouseLeave={() => setPreviousButtonHover(false)}>
                         <img draggable={false} className="post-image-mid-button" src={prevIcon} style={{filter: getFilter()}} onClick={() => props.previous?.()}/>
@@ -1304,7 +1283,7 @@ const PostImage: React.FunctionComponent<Props> = (props) => {
                             </div> 
                             <div className="video-ontrol-row-container">
                                 <img draggable={false} className="video-control-img" src={videoRewindIcon} onClick={() => rewind()}/>
-                                <img draggable={false} className="video-control-img" onClick={() => setPaused((prev) => !prev)} src={getVideoPlayIcon()}/>
+                                <img draggable={false} className="video-control-img" onClick={() => setPaused(!paused)} src={getVideoPlayIcon()}/>
                                 <img draggable={false} className="video-control-img" src={videoFastforwardIcon} onClick={() => fastforward()}/>
                             </div>    
                             <div className="video-control-row-container">
@@ -1376,7 +1355,7 @@ const PostImage: React.FunctionComponent<Props> = (props) => {
                             </div> 
                             <div className="gif-control-row-container">
                                 {/* <img className="control-img" src={gifRewindIcon}/> */}
-                                <img draggable={false} className="gif-control-img" onClick={() => setPaused((prev) => !prev)} src={getGIFPlayIcon()}/>
+                                <img draggable={false} className="gif-control-img" onClick={() => setPaused(!paused)} src={getGIFPlayIcon()}/>
                                 {/* <img className="control-img" src={gifFastforwardIcon}/> */}
                             </div>    
                             <div className="gif-control-row-container">
@@ -1430,7 +1409,7 @@ const PostImage: React.FunctionComponent<Props> = (props) => {
                         <div className="image-controls" ref={imageControls} onMouseOver={controlMouseEnter} onMouseLeave={controlMouseLeave}>
                             <div className="image-control-row" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                                 <div className="image-control-row-container">
-                                    <img draggable={false} className="image-control-img" onClick={() => setDisableZoom((prev) => !prev)} src={getZoomOffIcon()}/>
+                                    <img draggable={false} className="image-control-img" onClick={() => setDisableZoom(!disableZoom)} src={getZoomOffIcon()}/>
                                     <img draggable={false} className="image-control-img" onClick={zoomOut} src={imageZoomOutIcon}/>
                                     <img draggable={false} className="image-control-img" onClick={zoomIn} src={imageZoomInIcon}/>
                                     <img draggable={false} className="image-control-img" onClick={() => fullscreen()} src={imageFullscreenIcon}/>

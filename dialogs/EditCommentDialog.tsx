@@ -1,8 +1,7 @@
-import React, {useEffect, useContext, useState, useRef, useReducer} from "react"
+import React, {useEffect, useState, useRef, useReducer} from "react"
 import {useHistory} from "react-router-dom"
-import {HashLink as Link} from "react-router-hash-link"
-import {HideNavbarContext, HideSidebarContext, ThemeContext, EnableDragContext, EditCommentIDContext, EditCommentFlagContext, 
-EditCommentTextContext, HideTitlebarContext, EmojisContext, MobileContext} from "../Context"
+import {useInteractionActions, useCommentDialogSelector, useCommentDialogActions, 
+useLayoutSelector, useCacheSelector} from "../store"
 import functions from "../structures/Functions"
 import "./styles/dialog.less"
 import emojiSelect from "../assets/icons/emoji-select.png"
@@ -10,16 +9,11 @@ import Draggable from "react-draggable"
 
 const EditCommentDialog: React.FunctionComponent = (props) => {
     const [ignored, forceUpdate] = useReducer(x => x + 1, 0)
-    const {theme, setTheme} = useContext(ThemeContext)
-    const {hideNavbar, setHideNavbar} = useContext(HideNavbarContext)
-    const {hideTitlebar, setHideTitlebar} = useContext(HideTitlebarContext)
-    const {hideSidebar, setHideSidebar} = useContext(HideSidebarContext)
-    const {enableDrag, setEnableDrag} = useContext(EnableDragContext)
-    const {editCommentID, setEditCommentID} = useContext(EditCommentIDContext)
-    const {editCommentFlag, setEditCommentFlag} = useContext(EditCommentFlagContext)
-    const {editCommentText, setEditCommentText} = useContext(EditCommentTextContext)
-    const {mobile, setMobile} = useContext(MobileContext)
-    const {emojis, setEmojis} = useContext(EmojisContext)
+    const {setEnableDrag} = useInteractionActions()
+    const {editCommentID, editCommentText} = useCommentDialogSelector()
+    const {setEditCommentID, setEditCommentFlag, setEditCommentText} = useCommentDialogActions()
+    const {mobile} = useLayoutSelector()
+    const {emojis} = useCacheSelector()
     const [showEmojiDropdown, setShowEmojiDropdown] = useState(false)
     const emojiRef = useRef(null) as any
     const dialogRef = useRef(null) as any
@@ -92,7 +86,7 @@ const EditCommentDialog: React.FunctionComponent = (props) => {
                 const key = Object.keys(emojis)[k]
                 if (!key) break
                 const appendText = () => {
-                    setEditCommentText((prev: string) => prev + ` emoji:${key}`)
+                    setEditCommentText(editCommentText + ` emoji:${key}`)
                     setShowEmojiDropdown(false)
                 }
                 items.push(

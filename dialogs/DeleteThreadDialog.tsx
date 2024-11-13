@@ -1,22 +1,15 @@
-import React, {useEffect, useContext, useState, useRef} from "react"
+import React, {useEffect, useState, useRef} from "react"
 import {useHistory} from "react-router-dom"
-import {HashLink as Link} from "react-router-hash-link"
-import {HideNavbarContext, HideSidebarContext, ThemeContext, EnableDragContext, DeleteThreadIDContext, DeleteThreadFlagContext, 
-HideTitlebarContext, SessionContext} from "../Context"
+import {useInteractionActions, useThreadDialogSelector, useThreadDialogActions} from "../store"
 import functions from "../structures/Functions"
 import "./styles/dialog.less"
 import Draggable from "react-draggable"
 import permissions from "../structures/Permissions"
 
 const DeleteThreadDialog: React.FunctionComponent = (props) => {
-    const {theme, setTheme} = useContext(ThemeContext)
-    const {hideNavbar, setHideNavbar} = useContext(HideNavbarContext)
-    const {hideTitlebar, setHideTitlebar} = useContext(HideTitlebarContext)
-    const {hideSidebar, setHideSidebar} = useContext(HideSidebarContext)
-    const {enableDrag, setEnableDrag} = useContext(EnableDragContext)
-    const {deleteThreadID, setDeleteThreadID} = useContext(DeleteThreadIDContext)
-    const {deleteThreadFlag, setDeleteThreadFlag} = useContext(DeleteThreadFlagContext)
-    const {session, setSession} = useContext(SessionContext)
+    const {setEnableDrag} = useInteractionActions()
+    const {deleteThreadID} = useThreadDialogSelector()
+    const {setDeleteThreadID, setDeleteThreadFlag} = useThreadDialogActions()
     const [error, setError] = useState(false)
     const errorRef = useRef<any>(null)
     const history = useHistory()

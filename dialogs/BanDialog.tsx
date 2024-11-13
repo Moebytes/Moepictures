@@ -1,32 +1,24 @@
-import React, {useEffect, useContext, useState, useRef} from "react"
-import {useHistory} from "react-router-dom"
-import {HashLink as Link} from "react-router-hash-link"
-import {HideNavbarContext, HideSidebarContext, ThemeContext, EnableDragContext, BanNameContext, HideTitlebarContext, UpdateUserFlagContext,
-SiteHueContext, SiteLightnessContext, SiteSaturationContext, SessionContext, SessionFlagContext} from "../Context"
+import React, {useEffect, useState, useRef} from "react"
+import {useInteractionActions, useSessionSelector, useSessionActions, useMiscDialogSelector, useMiscDialogActions,
+useFlagActions} from "../store"
+import {useThemeSelector} from "../store"
 import functions from "../structures/Functions"
 import permissions from "../structures/Permissions"
 import "./styles/dialog.less"
 import Draggable from "react-draggable"
 import checkbox from "../assets/icons/checkbox.png"
 import checkboxChecked from "../assets/icons/checkbox-checked.png"
-import cryptoFunctions from "../structures/CryptoFunctions"
 import path from "path"
 
 const BanDialog: React.FunctionComponent = (props) => {
-    const {theme, setTheme} = useContext(ThemeContext)
-    const {siteHue, setSiteHue} = useContext(SiteHueContext)
-    const {siteSaturation, setSiteSaturation} = useContext(SiteSaturationContext)
-    const {siteLightness, setSiteLightness} = useContext(SiteLightnessContext)
-    const {hideNavbar, setHideNavbar} = useContext(HideNavbarContext)
-    const {hideTitlebar, setHideTitlebar} = useContext(HideTitlebarContext)
-    const {hideSidebar, setHideSidebar} = useContext(HideSidebarContext)
-    const {enableDrag, setEnableDrag} = useContext(EnableDragContext)
-    const {banName, setBanName} = useContext(BanNameContext)
-    const {updateUserFlag, setUpdateUserFlag} = useContext(UpdateUserFlagContext)
-    const {session, setSession} = useContext(SessionContext)
-    const {sessionFlag, setSessionFlag} = useContext(SessionFlagContext)
+    const {siteHue, siteSaturation, siteLightness} = useThemeSelector()
+    const {setEnableDrag} = useInteractionActions()
+    const {banName} = useMiscDialogSelector()
+    const {setBanName} = useMiscDialogActions()
+    const {setUpdateUserFlag} = useFlagActions()
+    const {session} = useSessionSelector()
+    const {setSessionFlag} = useSessionActions()
     const [reason, setReason] = useState("")
-    const [submitted, setSubmitted] = useState(false)
     const [deleteUnverifiedChanges, setDeleteUnverifiedChanges] = useState(true)
     const [deleteHistoryChanges, setDeleteHistoryChanges] = useState(true)
     const [deleteComments, setDeleteComments] = useState(true)
@@ -34,7 +26,6 @@ const BanDialog: React.FunctionComponent = (props) => {
     const [days, setDays] = useState("")
     const [error, setError] = useState(false)
     const errorRef = useRef<any>(null)
-    const history = useHistory()
 
     const getFilter = () => {
         return `hue-rotate(${siteHue - 180}deg) saturate(${siteSaturation}%) brightness(${siteLightness + 70}%)`

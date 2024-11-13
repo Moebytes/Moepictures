@@ -1,17 +1,16 @@
-import React, {useEffect, useContext, useState} from "react"
+import React, {useEffect} from "react"
 import {useHistory} from "react-router-dom"
-import {HashLink as Link} from "react-router-hash-link"
-import {ThemeContext, EnableDragContext, DeleteFavGroupObjContext, SessionContext, SessionFlagContext} from "../Context"
+import {useInteractionActions, useSessionSelector, useSessionActions, useGroupDialogSelector, useGroupDialogActions} from "../store"
 import functions from "../structures/Functions"
 import "./styles/dialog.less"
 import Draggable from "react-draggable"
 
 const DeleteFavgroupDialog: React.FunctionComponent = (props) => {
-    const {theme, setTheme} = useContext(ThemeContext)
-    const {enableDrag, setEnableDrag} = useContext(EnableDragContext)
-    const {session, setSession} = useContext(SessionContext)
-    const {sessionFlag, setSessionFlag} = useContext(SessionFlagContext)
-    const {deleteFavGroupObj, setDeleteFavGroupObj} = useContext(DeleteFavGroupObjContext)
+    const {setEnableDrag} = useInteractionActions()
+    const {session} = useSessionSelector()
+    const {setSessionFlag} = useSessionActions()
+    const {deleteFavGroupObj} = useGroupDialogSelector()
+    const {setDeleteFavGroupObj} = useGroupDialogActions()
     const history = useHistory()
 
     useEffect(() => {

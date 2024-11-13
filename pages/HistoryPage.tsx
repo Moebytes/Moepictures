@@ -1,4 +1,4 @@
-import React, {useEffect, useContext, useState, useRef, useReducer} from "react"
+import React, {useEffect, useState, useReducer} from "react"
 import {useHistory, useLocation} from "react-router-dom"
 import TitleBar from "../components/TitleBar"
 import NavBar from "../components/NavBar"
@@ -41,38 +41,36 @@ import historyTagActive from "../assets/icons/history-tag-active.png"
 import historyTranslateActive from "../assets/icons/history-translate-active.png"
 import historyGroupActive from "../assets/icons/history-group-active.png"
 import historyAliasActive from "../assets/icons/history-alias-active.png"
-import {ThemeContext, EnableDragContext, HideNavbarContext, HideSidebarContext, MobileContext, SessionContext, ScrollContext, ShowPageDialogContext,
-RelativeContext, HideTitlebarContext, ActiveDropdownContext, HeaderTextContext, SidebarTextContext, SessionFlagContext, HistoryPageContext, PageFlagContext,
-SiteHueContext, SiteSaturationContext, SiteLightnessContext, ShowDeleteAllHistoryDialogContext, RedirectContext, RestrictTypeContext, PremiumRequiredContext} from "../Context"
+import {useThemeSelector, useInteractionActions, useSessionSelector, useSessionActions,
+useLayoutActions, useActiveActions, useFlagActions, useLayoutSelector, usePageActions,
+useActiveSelector, useSearchActions, useSearchSelector, usePageSelector, useFlagSelector,
+useMiscDialogActions, useSearchDialogActions,
+useSearchDialogSelector} from "../store"
 import "./styles/historypage.less"
 
 let replace = false
 
 const HistoryPage: React.FunctionComponent = () => {
-    const [ignored, forceUpdate] = useReducer(x => x + 1, 0)
-    const {theme, setTheme} = useContext(ThemeContext)
-    const {siteHue, setSiteHue} = useContext(SiteHueContext)
-    const {siteSaturation, setSiteSaturation} = useContext(SiteSaturationContext)
-    const {siteLightness, setSiteLightness} = useContext(SiteLightnessContext)
-    const {enableDrag, setEnableDrag} = useContext(EnableDragContext)
-    const {hideNavbar, setHideNavbar} = useContext(HideNavbarContext)
-    const {hideTitlebar, setHideTitlebar} = useContext(HideTitlebarContext)
-    const {hideSidebar, setHideSidebar} = useContext(HideSidebarContext)
-    const {relative, setRelative} = useContext(RelativeContext)
-    const {activeDropdown, setActiveDropdown} = useContext(ActiveDropdownContext)
-    const {headerText, setHeaderText} = useContext(HeaderTextContext)
-    const {sidebarText, setSidebarText} = useContext(SidebarTextContext)
-    const {scroll, setScroll} = useContext(ScrollContext)
-    const {mobile, setMobile} = useContext(MobileContext)
-    const {session, setSession} = useContext(SessionContext)
-    const {sessionFlag, setSessionFlag} = useContext(SessionFlagContext)
-    const {historyPage, setHistoryPage} = useContext(HistoryPageContext)
-    const {showPageDialog, setShowPageDialog} = useContext(ShowPageDialogContext)
-    const {redirect, setRedirect} = useContext(RedirectContext)
-    const {premiumRequired, setPremiumRequired} = useContext(PremiumRequiredContext)
-    const {showDeleteAllHistoryDialog, setShowDeleteAllHistoryDialog} = useContext(ShowDeleteAllHistoryDialogContext)
-    const {restrictType, setRestrictType} = useContext(RestrictTypeContext)
-    const {pageFlag, setPageFlag} = useContext(PageFlagContext)
+    const {theme, siteHue, siteSaturation, siteLightness} = useThemeSelector()
+    const {setHideNavbar, setHideTitlebar, setHideSidebar, setRelative} = useLayoutActions()
+    const {setEnableDrag} = useInteractionActions()
+    const {setHeaderText, setSidebarText} = useActiveActions()
+    const {setRedirect} = useFlagActions()
+    const {session} = useSessionSelector()
+    const {setSessionFlag} = useSessionActions()
+    const {mobile} = useLayoutSelector()
+    const {activeDropdown} = useActiveSelector()
+    const {setActiveDropdown} = useActiveActions()
+    const {scroll} = useSearchSelector()
+    const {setScroll} = useSearchActions()
+    const {historyPage} = usePageSelector()
+    const {setHistoryPage} = usePageActions()
+    const {setShowPageDialog} = useMiscDialogActions()
+    const {pageFlag, groupSearchFlag} = useFlagSelector()
+    const {setPageFlag, setGroupSearchFlag} = useFlagActions()
+    const {showDeleteAllHistoryDialog} = useSearchDialogSelector()
+    const {setShowDeleteAllHistoryDialog} = useSearchDialogActions()
+    const {setPremiumRequired} = useMiscDialogActions()
     const [index, setIndex] = useState(0)
     const [postStates, setPostStates] = useState([]) as any
     const [tagStates, setTagStates] = useState([]) as any
@@ -454,7 +452,7 @@ const HistoryPage: React.FunctionComponent = () => {
     useEffect(() => {
         const searchParams = new URLSearchParams(window.location.search)
         if (historyTab) searchParams.set("type", historyTab)
-        if (!scroll) searchParams.set("page", historyPage)
+        if (!scroll) searchParams.set("page", String(historyPage || ""))
         if (replace) {
             if (!scroll) history.replace(`${location.pathname}?${searchParams.toString()}`)
             replace = false
@@ -482,7 +480,7 @@ const HistoryPage: React.FunctionComponent = () => {
     }, [pageFlag])
 
     useEffect(() => {
-        localStorage.setItem("historyPage", String(historyPage))
+        localStorage.setItem("historyPage", String(historyPage || ""))
         localStorage.setItem("historyTab", String(historyTab))
     }, [historyPage, historyTab])
 
@@ -638,11 +636,9 @@ const HistoryPage: React.FunctionComponent = () => {
     }
 
     const toggleScroll = () => {
-        setScroll((prev: boolean) => {
-            const newValue = !prev
-            localStorage.setItem("scroll", `${newValue}`)
-            return newValue
-        })
+        const newValue = !scroll
+        localStorage.setItem("scroll", `${newValue}`)
+        setScroll(newValue)
     }
 
     const generateHeaderJSX = () => {
@@ -757,7 +753,7 @@ const HistoryPage: React.FunctionComponent = () => {
                         <img className="history-img" src={scroll ? scrollIcon : pageIcon} style={{filter: getFilter()}}/>
                         <span className="history-text">{scroll ? "Scrolling" : "Pages"}</span>
                     </div>
-                    <div className="history-item" onClick={() => setShowDeleteAllHistoryDialog((prev: boolean) => !prev)}>
+                    <div className="history-item" onClick={() => setShowDeleteAllHistoryDialog(!showDeleteAllHistoryDialog)}>
                         <img className="history-img" src={searchHistoryDelete}/>
                         <span className="history-opt-text">Delete All</span>
                     </div>

@@ -1,4 +1,4 @@
-import React, {useEffect, useContext, useState, useRef, useReducer} from "react"
+import React, {useEffect, useState, useRef} from "react"
 import {useHistory} from "react-router-dom"
 import TitleBar from "../components/TitleBar"
 import NavBar from "../components/NavBar"
@@ -6,12 +6,10 @@ import SideBar from "../components/SideBar"
 import Footer from "../components/Footer"
 import functions from "../structures/Functions"
 import MessageReply from "../components/MessageReply"
-import {ThemeContext, EnableDragContext, HideNavbarContext, HideSidebarContext, MobileContext, SessionContext,
-RelativeContext, HideTitlebarContext, ActiveDropdownContext, HeaderTextContext, SidebarTextContext, SiteHueContext, 
-SiteLightnessContext, SiteSaturationContext, ScrollContext, MessagePageContext, ShowPageDialogContext, PageFlagContext,
-DeleteMessageIDContext, DeleteMessageFlagContext, QuoteTextContext, EditMessageIDContext, EditMessageFlagContext,
-EditMessageTitleContext, EditMessageContentContext, EditMessageR18Context, HasNotificationContext, SessionFlagContext, EmojisContext,
-ForwardMessageObjContext, MessageFlagContext} from "../Context"
+import {useThemeSelector, useInteractionActions, useSessionSelector, useSessionActions,
+useLayoutActions, useActiveActions, useFlagActions, useLayoutSelector, usePageActions,
+useActiveSelector, useSearchActions, useSearchSelector, usePageSelector, useFlagSelector,
+useMiscDialogActions, useMessageDialogActions, useMessageDialogSelector, useCacheSelector} from "../store"
 import permissions from "../structures/Permissions"
 import jsxFunctions from "../structures/JSXFunctions"
 import PageDialog from "../dialogs/PageDialog"
@@ -44,38 +42,25 @@ interface Props {
 }
 
 const MessagePage: React.FunctionComponent<Props> = (props) => {
-    const [ignored, forceUpdate] = useReducer(x => x + 1, 0)
-    const {theme, setTheme} = useContext(ThemeContext)
-    const {siteHue, setSiteHue} = useContext(SiteHueContext)
-    const {siteSaturation, setSiteSaturation} = useContext(SiteSaturationContext)
-    const {siteLightness, setSiteLightness} = useContext(SiteLightnessContext)
-    const {enableDrag, setEnableDrag} = useContext(EnableDragContext)
-    const {hideNavbar, setHideNavbar} = useContext(HideNavbarContext)
-    const {hideTitlebar, setHideTitlebar} = useContext(HideTitlebarContext)
-    const {hideSidebar, setHideSidebar} = useContext(HideSidebarContext)
-    const {relative, setRelative} = useContext(RelativeContext)
-    const {activeDropdown, setActiveDropdown} = useContext(ActiveDropdownContext)
-    const {headerText, setHeaderText} = useContext(HeaderTextContext)
-    const {sidebarText, setSidebarText} = useContext(SidebarTextContext)
-    const {messagePage, setMessagePage} = useContext(MessagePageContext)
-    const {showPageDialog, setShowPageDialog} = useContext(ShowPageDialogContext)
-    const {quoteText, setQuoteText} = useContext(QuoteTextContext)
-    const {pageFlag, setPageFlag} = useContext(PageFlagContext)
-    const {scroll, setScroll} = useContext(ScrollContext)
-    const {mobile, setMobile} = useContext(MobileContext)
-    const {session, setSession} = useContext(SessionContext)
-    const {sessionFlag, setSessionFlag} = useContext(SessionFlagContext)
-    const {deleteMessageID, setDeleteMessageID} = useContext(DeleteMessageIDContext)
-    const {deleteMessageFlag, setDeleteMessageFlag} = useContext(DeleteMessageFlagContext)
-    const {editMessageID, setEditMessageID} = useContext(EditMessageIDContext)
-    const {editMessageFlag, setEditMessageFlag} = useContext(EditMessageFlagContext)
-    const {editMessageTitle, setEditMessageTitle} = useContext(EditMessageTitleContext)
-    const {editMessageContent, setEditMessageContent} = useContext(EditMessageContentContext)
-    const {editMessageR18, setEditMessageR18} = useContext(EditMessageR18Context)
-    const {forwardMessageObj, setForwardMessageObj} = useContext(ForwardMessageObjContext)
-    const {messageFlag, setMessageFlag} = useContext(MessageFlagContext)
-    const {hasNotification, setHasNotification} = useContext(HasNotificationContext)
-    const {emojis, setEmojis} = useContext(EmojisContext)
+    const {siteHue, siteSaturation, siteLightness} = useThemeSelector()
+    const {setHideNavbar, setHideTitlebar, setHideSidebar, setRelative} = useLayoutActions()
+    const {setEnableDrag} = useInteractionActions()
+    const {setHeaderText, setSidebarText} = useActiveActions()
+    const {session} = useSessionSelector()
+    const {setSessionFlag, setHasNotification} = useSessionActions()
+    const {mobile} = useLayoutSelector()
+    const {quoteText} = useActiveSelector()
+    const {setActiveDropdown, setQuoteText} = useActiveActions()
+    const {scroll} = useSearchSelector()
+    const {setScroll} = useSearchActions()
+    const {messagePage} = usePageSelector()
+    const {setMessagePage} = usePageActions()
+    const {setShowPageDialog} = useMiscDialogActions()
+    const {pageFlag, messageFlag} = useFlagSelector()
+    const {setPageFlag, setMessageFlag} = useFlagActions()
+    const {deleteMessageID, deleteMessageFlag, editMessageID, editMessageFlag, editMessageTitle, editMessageContent, editMessageR18} = useMessageDialogSelector()
+    const {setDeleteMessageID, setDeleteMessageFlag, setEditMessageID, setEditMessageFlag, setEditMessageTitle, setEditMessageContent, setEditMessageR18, setForwardMessageObj} = useMessageDialogActions()
+    const {emojis} = useCacheSelector()
     const [message, setMessage] = useState(null) as any
     const [replies, setReplies] = useState([]) as any
     const [index, setIndex] = useState(0)
@@ -310,7 +295,7 @@ const MessagePage: React.FunctionComponent<Props> = (props) => {
     }, [pageFlag])
 
     useEffect(() => {
-        localStorage.setItem("messagePage", String(messagePage))
+        localStorage.setItem("messagePage", String(messagePage || ""))
     }, [messagePage])
 
     const maxPage = () => {

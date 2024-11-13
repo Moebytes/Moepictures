@@ -1,11 +1,9 @@
-import React, {useContext, useEffect, useState, useReducer} from "react"
+import React, {useEffect, useState} from "react"
 import {useHistory} from "react-router-dom"
-import {ThemeContext, HideSidebarContext, HideNavbarContext, HideSortbarContext, EnableDragContext, MobileContext, UnverifiedPostsContext, SaveSearchContext,
-RelativeContext, HideTitlebarContext, SidebarHoverContext, SearchContext, SearchFlagContext, PostsContext, ShowDeletePostDialogContext, AutoSearchContext,
-TagsContext, RandomFlagContext, ImageSearchFlagContext, SidebarTextContext, SessionContext, MobileScrollingContext, TagEditIDContext, SourceEditIDContext, PremiumRequiredContext,
-TranslationModeContext, TranslationDrawingEnabledContext, SiteHueContext, SessionFlagContext, SiteLightnessContext, SiteSaturationContext, ShowTakedownPostDialogContext,
-SaveSearchDialogContext, DeleteAllSaveSearchDialogContext, EditSaveSearchNameContext, EditSaveSearchKeyContext, EditSaveSearchTagsContext,
-ActionBannerContext, GroupPostIDContext, LockPostIDContext, PrivatePostObjContext, ShowUpscalingDialogContext, ShowCompressingDialogContext} from "../Context"
+import {useThemeSelector, useLayoutSelector, useSearchActions, useSearchSelector, useInteractionSelector, 
+useFlagActions, useInteractionActions, useCacheActions, useCacheSelector, useActiveActions, usePostDialogSelector,
+useMiscDialogActions, useSessionSelector, useSessionActions, usePostDialogActions, useSearchDialogActions, 
+useGroupDialogActions, useActiveSelector, useSearchDialogSelector} from "../store"
 import {HashLink as Link} from "react-router-hash-link"
 import permissions from "../structures/Permissions"
 import favicon from "../assets/icons/favicon.png"
@@ -85,56 +83,31 @@ let maxHeight2 = 625 // 655
 let maxHeight3 = 672 // 698
 
 const SideBar: React.FunctionComponent<Props> = (props) => {
-    const [ignored, forceUpdate] = useReducer(x => x + 1, 0)
-    const {theme, setTheme} = useContext(ThemeContext)
-    const {siteHue, setSiteHue} = useContext(SiteHueContext)
-    const {siteSaturation, setSiteSaturation} = useContext(SiteSaturationContext)
-    const {siteLightness, setSiteLightness} = useContext(SiteLightnessContext)
-    const {hideSortbar, setHideSortbar} = useContext(HideSortbarContext)
-    const {hideSidebar, setHideSidebar} = useContext(HideSidebarContext)
-    const {hideNavbar, setHideNavbar} = useContext(HideNavbarContext)
-    const {hideTitlebar, setHideTitlebar} = useContext(HideTitlebarContext)
-    const {enableDrag, setEnableDrag} = useContext(EnableDragContext)
-    const {relative, setRelative} = useContext(RelativeContext)
-    const {sidebarHover, setSidebarHover} = useContext(SidebarHoverContext)
-    const {posts, setPosts} = useContext(PostsContext)
-    const {unverifiedPosts, setUnverifiedPosts} = useContext(UnverifiedPostsContext)
-    const {search, setSearch} = useContext(SearchContext)
-    const {searchFlag, setSearchFlag} = useContext(SearchFlagContext)
-    const {tags, setTags} = useContext(TagsContext)
-    const {randomFlag, setRandomFlag} = useContext(RandomFlagContext)
-    const {imageSearchFlag, setImageSearchFlag} = useContext(ImageSearchFlagContext)
-    const {sidebarText, setSidebarText} = useContext(SidebarTextContext)
-    const {showDeletePostDialog, setShowDeletePostDialog} = useContext(ShowDeletePostDialogContext)
-    const {showTakedownPostDialog, setShowTakedownPostDialog} = useContext(ShowTakedownPostDialogContext)
-    const {mobile, setMobile} = useContext(MobileContext)
-    const {mobileScrolling, setMobileScrolling} = useContext(MobileScrollingContext)
-    const {premiumRequired, setPremiumRequired} = useContext(PremiumRequiredContext)
-    const {session, setSession} = useContext(SessionContext)
-    const {sessionFlag, setSessionFlag} = useContext(SessionFlagContext)
+    const {theme, siteHue, siteSaturation, siteLightness} = useThemeSelector()
+    const {mobile, relative, hideNavbar, hideSidebar, hideSortbar, hideTitlebar} = useLayoutSelector()
+    const {search, translationMode, autoSearch, saveSearch} = useSearchSelector()
+    const {setSearch, setSearchFlag, setTranslationMode, setTranslationDrawingEnabled, setAutoSearch, setSaveSearch} = useSearchActions()
+    const {posts, unverifiedPosts, tags} = useCacheSelector()
+    const {setTags} = useCacheActions()
+    const {mobileScrolling} = useInteractionSelector()
+    const {setEnableDrag, setSidebarHover} = useInteractionActions()
+    const {sidebarText} = useActiveSelector()
+    const {setRandomFlag, setImageSearchFlag} = useFlagActions()
+    const {setPremiumRequired} = useMiscDialogActions()
+    const {session} = useSessionSelector()
+    const {setSessionFlag} = useSessionActions()
+    const {showUpscalingDialog, showCompressingDialog, showDeletePostDialog, showTakedownPostDialog} = usePostDialogSelector()
+    const {setTagEditID, setSourceEditID, setPrivatePostObj, setLockPostID, setShowUpscalingDialog, setShowCompressingDialog, setShowDeletePostDialog, setShowTakedownPostDialog} = usePostDialogActions()
+    const {saveSearchDialog, deleteAllSaveSearchDialog} = useSearchDialogSelector()
+    const {setSaveSearchDialog, setDeleteAllSaveSearchDialog, setEditSaveSearchName, setEditSaveSearchKey, setEditSaveSearchTags} = useSearchDialogActions()
+    const {setActionBanner} = useActiveActions()
+    const {setGroupPostID} = useGroupDialogActions()
     const [maxHeight, setMaxHeight] = useState(maxHeight1)
     const [uploaderImage, setUploaderImage] = useState("")
     const [uploaderRole, setUploaderRole] = useState("")
     const [updaterRole, setUpdaterRole] = useState("")
     const [approverRole, setApproverRole] = useState("")
     const [suggestionsActive, setSuggestionsActive] = useState(false)
-    const {tagEditID, setTagEditID} = useContext(TagEditIDContext)
-    const {sourceEditID, setSourceEditID} = useContext(SourceEditIDContext)
-    const {translationMode, setTranslationMode} = useContext(TranslationModeContext)
-    const {translationDrawingEnabled, setTranslationDrawingEnabled} = useContext(TranslationDrawingEnabledContext)
-    const {autoSearch, setAutoSearch} = useContext(AutoSearchContext)
-    const {saveSearch, setSaveSearch} = useContext(SaveSearchContext)
-    const {saveSearchDialog, setSaveSearchDialog} = useContext(SaveSearchDialogContext)
-    const {deleteAllSaveSearchDialog, setDeleteAllSaveSearchDialog} = useContext(DeleteAllSaveSearchDialogContext)
-    const {editSaveSearchName, setEditSaveSearchName} = useContext(EditSaveSearchNameContext)
-    const {editSaveSearchKey, setEditSaveSearchKey} = useContext(EditSaveSearchKeyContext)
-    const {editSaveSearchTags, setEditSaveSearchTags} = useContext(EditSaveSearchTagsContext)
-    const {actionBanner, setActionBanner} = useContext(ActionBannerContext)
-    const {groupPostID, setGroupPostID} = useContext(GroupPostIDContext)
-    const {privatePostObj, setPrivatePostObj} = useContext(PrivatePostObjContext)
-    const {lockPostID, setLockPostID} = useContext(LockPostIDContext)
-    const {showUpscalingDialog, setShowUpscalingDialog} = useContext(ShowUpscalingDialogContext)
-    const {showCompressingDialog, setShowCompressingDialog} = useContext(ShowCompressingDialogContext)
     const history = useHistory()
 
     const getFilter = () => {
@@ -181,7 +154,7 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
         functions.linkToBase64(uploaderImage).then((uploaderImage) => {
             localStorage.setItem("uploaderImage", uploaderImage)
         })
-        localStorage.setItem("saveSearch", saveSearch)
+        localStorage.setItem("saveSearch", String(saveSearch))
     }, [uploaderImage, saveSearch])
 
     useEffect(() => {
@@ -516,24 +489,11 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
                 setSearch(currentTags[i].tag)
                 setSearchFlag(true)
             }
-            const tagColor = () => {
-                if (currentTags[i].r18) return "r18-tag-color"
-                if (currentTags[i].type === "artist") return "artist-tag-color"
-                if (currentTags[i].type === "character") return "character-tag-color"
-                if (currentTags[i].type === "series") return "series-tag-color"
-                if (currentTags[i].type === "meta") return "meta-tag-color"
-                if (currentTags[i].type === "appearance") return "appearance-tag-color"
-                if (currentTags[i].type === "outfit") return "outfit-tag-color"
-                if (currentTags[i].type === "accessory") return "accessory-tag-color"
-                if (currentTags[i].type === "action") return "action-tag-color"
-                if (currentTags[i].type === "scenery") return "scenery-tag-color"
-                return "tag"
-            }
             jsx.push(
                 <div className="sidebar-row">
                     <span className="tag-hover">
                         <img className="tag-info" src={question} onClick={(event) => tagInfo(event, currentTags[i].tag)} onAuxClick={(event) => tagInfo(event, currentTags[i].tag)}/>
-                        <span className={`tag ${tagColor()}`} onClick={() => tagClick()} onContextMenu={(event) => tagInfo(event, currentTags[i].tag)}>{currentTags[i].tag.replaceAll("-", " ")}</span>
+                        <span className={`tag ${functions.getTagColor(currentTags[i])}`} onClick={() => tagClick()} onContextMenu={(event) => tagInfo(event, currentTags[i].tag)}>{currentTags[i].tag.replaceAll("-", " ")}</span>
                         <span className={`tag-count ${currentTags[i].count === "1" ? "artist-tag-color" : ""}`}>{currentTags[i].count}</span>
                     </span>
                 </div>
@@ -696,7 +656,7 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
     }
 
     const deletePost = async () => {
-        setShowDeletePostDialog((prev: boolean) => !prev)
+        setShowDeletePostDialog(!showDeletePostDialog)
     }
 
     const editPost = async () => {
@@ -725,11 +685,11 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
     }
 
     const upscalingDialog = () => {
-        setShowUpscalingDialog((prev: boolean) => !prev)
+        setShowUpscalingDialog(!showUpscalingDialog)
     }
 
     const compressingDialog = () => {
-        setShowCompressingDialog((prev: boolean) => !prev)
+        setShowCompressingDialog(!showCompressingDialog)
     }
 
     const approvePost = async () => {
@@ -776,7 +736,7 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
     }
 
     const triggerTakedown = () => {
-        setShowTakedownPostDialog((prev: boolean) => !prev)
+        setShowTakedownPostDialog(!showTakedownPostDialog)
     }
 
     const generateUsernameJSX = (type?: string) => {
@@ -897,7 +857,7 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
 
     const toggleAutoSearch = async () => {
         if (permissions.isPremium(session)) {
-            setAutoSearch((prev: boolean) => !prev)
+            setAutoSearch(!autoSearch)
         } else {
             setPremiumRequired(true)
         }
@@ -961,15 +921,15 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
                         <img src={random}/>
                     </button>
                     {session.username ? <img className="autosearch" style={{filter: getFilter()}} src={getAutoSearch()} onClick={toggleAutoSearch}/> : null}
-                    {!props.post && session.username ? <img className="autosearch" style={{filter: getFilter()}} src={getSaveSearch()} onClick={() => setSaveSearch((prev: boolean) => !prev)}/> : null}
+                    {!props.post && session.username ? <img className="autosearch" style={{filter: getFilter()}} src={getSaveSearch()} onClick={() => setSaveSearch(!saveSearch)}/> : null}
                 </div>
                 {!props.post && session.username && saveSearch ? 
                 <div className="random-container">
-                    <button className="save-search-button" style={{filter: getFilterSearch()}} onClick={() => setSaveSearchDialog((prev: boolean) => !prev)}>
+                    <button className="save-search-button" style={{filter: getFilterSearch()}} onClick={() => setSaveSearchDialog(!saveSearchDialog)}>
                         <img src={bookmark}/>
                         <span>Save Search</span>
                     </button>
-                    <img className="autosearch" style={{filter: getFilter()}} src={deleteOptIcon} onClick={() => setDeleteAllSaveSearchDialog((prev: boolean) => !prev)}/>
+                    <img className="autosearch" style={{filter: getFilter()}} src={deleteOptIcon} onClick={() => setDeleteAllSaveSearchDialog(!deleteAllSaveSearchDialog)}/>
                 </div> : null}
 
                 {copyTagsJSX()}

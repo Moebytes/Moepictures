@@ -1,7 +1,6 @@
-import React, {useContext, useEffect, useRef, useState} from "react"
+import React, {useEffect, useRef, useState} from "react"
 import {useHistory} from "react-router-dom"
-import {ThemeContext, SessionContext, MobileContext, DeleteTranslationHistoryIDContext, RevertTranslationHistoryIDContext,
-DeleteTranslationHistoryFlagContext, RevertTranslationHistoryFlagContext, SessionFlagContext} from "../Context"
+import {useSessionSelector, useSessionActions, useTranslationDialogSelector, useTranslationDialogActions, useLayoutSelector} from "../store"
 import functions from "../structures/Functions"
 import translationHistoryRevert from "../assets/icons/revert.png"
 import translationHistoryDelete from "../assets/icons/delete.png"
@@ -25,14 +24,11 @@ interface Props {
 }
 
 const TranslationHistoryRow: React.FunctionComponent<Props> = (props) => {
-    const {theme, setTheme} = useContext(ThemeContext)
-    const {mobile, setMobile} = useContext(MobileContext)
-    const {session, setSession} = useContext(SessionContext)
-    const {sessionFlag, setSessionFlag} = useContext(SessionFlagContext)
-    const {deleteTranslationHistoryID, setDeleteTranslationHistoryID} = useContext(DeleteTranslationHistoryIDContext)
-    const {revertTranslationHistoryID, setRevertTranslationHistoryID} = useContext(RevertTranslationHistoryIDContext)
-    const {deleteTranslationHistoryFlag, setDeleteTranslationHistoryFlag} = useContext(DeleteTranslationHistoryFlagContext)
-    const {revertTranslationHistoryFlag, setRevertTranslationHistoryFlag} = useContext(RevertTranslationHistoryFlagContext)
+    const {mobile} = useLayoutSelector()
+    const {session} = useSessionSelector()
+    const {setSessionFlag} = useSessionActions()
+    const {deleteTranslationHistoryID, revertTranslationHistoryID, deleteTranslationHistoryFlag, revertTranslationHistoryFlag} = useTranslationDialogSelector()
+    const {setDeleteTranslationHistoryID, setRevertTranslationHistoryID, setDeleteTranslationHistoryFlag, setRevertTranslationHistoryFlag} = useTranslationDialogActions()
     const history = useHistory()
     const [img, setImg] = useState("")
     const [userRole, setUserRole] = useState("")
@@ -155,49 +151,49 @@ const TranslationHistoryRow: React.FunctionComponent<Props> = (props) => {
         if (userRole === "admin") {
             return (
                 <div className="historyrow-username-container" onClick={userClick} onAuxClick={userClick}>
-                    <span className="historyrow-user-text admin-color">{editText} {functions.timeAgo(targetDate)} by {functions.toProperCase(props.translationHistory.user)}</span>
+                    <span className="historyrow-user-text admin-color">{editText} {functions.timeAgo(targetDate)} by {functions.toProperCase(targetUser)}</span>
                     <img className="historyrow-user-label" src={adminCrown}/>
                 </div>
             )
         } else if (userRole === "mod") {
             return (
                 <div className="historyrow-username-container" onClick={userClick} onAuxClick={userClick}>
-                    <span className="historyrow-user-text mod-color">{editText} {functions.timeAgo(targetDate)} by {functions.toProperCase(props.translationHistory.user)}</span>
+                    <span className="historyrow-user-text mod-color">{editText} {functions.timeAgo(targetDate)} by {functions.toProperCase(targetUser)}</span>
                     <img className="historyrow-user-label" src={modCrown}/>
                 </div>
             )
         } else if (userRole === "premium-curator") {
             return (
                 <div className="historyrow-username-container" onClick={userClick} onAuxClick={userClick}>
-                    <span className="historyrow-user-text curator-color">{editText} {functions.timeAgo(targetDate)} by {functions.toProperCase(props.translationHistory.user)}</span>
+                    <span className="historyrow-user-text curator-color">{editText} {functions.timeAgo(targetDate)} by {functions.toProperCase(targetUser)}</span>
                     <img className="historyrow-user-label" src={premiumCuratorStar}/>
                 </div>
             )
         } else if (userRole === "curator") {
             return (
                 <div className="historyrow-username-container" onClick={userClick} onAuxClick={userClick}>
-                    <span className="historyrow-user-text curator-color">{editText} {functions.timeAgo(targetDate)} by {functions.toProperCase(props.translationHistory.user)}</span>
+                    <span className="historyrow-user-text curator-color">{editText} {functions.timeAgo(targetDate)} by {functions.toProperCase(targetUser)}</span>
                     <img className="historyrow-user-label" src={curatorStar}/>
                 </div>
             )
         } else if (userRole === "premium-contributor") {
             return (
                 <div className="historyrow-username-container" onClick={userClick} onAuxClick={userClick}>
-                    <span className="historyrow-user-text premium-color">{editText} {functions.timeAgo(targetDate)} by {functions.toProperCase(props.translationHistory.user)}</span>
+                    <span className="historyrow-user-text premium-color">{editText} {functions.timeAgo(targetDate)} by {functions.toProperCase(targetUser)}</span>
                     <img className="historyrow-user-label" src={premiumContributorPencil}/>
                 </div>
             )
         } else if (userRole === "contributor") {
             return (
                 <div className="historyrow-username-container" onClick={userClick} onAuxClick={userClick}>
-                    <span className="historyrow-user-text contributor-color">{editText} {functions.timeAgo(targetDate)} by {functions.toProperCase(props.translationHistory.user)}</span>
+                    <span className="historyrow-user-text contributor-color">{editText} {functions.timeAgo(targetDate)} by {functions.toProperCase(targetUser)}</span>
                     <img className="historyrow-user-label" src={contributorPencil}/>
                 </div>
             )
         } else if (userRole === "premium") {
             return (
                 <div className="historyrow-username-container" onClick={userClick} onAuxClick={userClick}>
-                    <span className="historyrow-user-text premium-color">{editText} {functions.timeAgo(targetDate)} by {functions.toProperCase(props.translationHistory.user)}</span>
+                    <span className="historyrow-user-text premium-color">{editText} {functions.timeAgo(targetDate)} by {functions.toProperCase(targetUser)}</span>
                     <img className="historyrow-user-label" src={premiumStar}/>
                 </div>
             )
