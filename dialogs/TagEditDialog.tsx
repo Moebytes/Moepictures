@@ -337,6 +337,143 @@ const TagEditDialog: React.FunctionComponent = (props) => {
         }
     }, [type, style])
 
+    const mainJSX = () => {
+        return (
+            <>
+            <div className="dialog-row">
+                <span className="dialog-text">Classification: </span>
+            </div>
+            {mobile ? <>
+            <div className="dialog-row">
+                <button className={`quickedit-button ${type === "image" ? "button-selected" : ""}`} onClick={() => setType("image")}>
+                    <img className="quickedit-button-img" src={image}/>
+                    <span className="quickedit-button-text">Image</span>
+                </button>
+                <button className={`quickedit-button ${type === "animation" ? "button-selected" : ""}`} onClick={() => setType("animation")}>
+                    <img className="quickedit-button-img" src={animation}/>
+                    <span className="quickedit-button-text">Animation</span>
+                </button>
+            </div>
+            <div className="dialog-row">
+                <button className={`quickedit-button ${type === "video" ? "button-selected" : ""}`} onClick={() => setType("video")}>
+                    <img className="quickedit-button-img" src={video}/>
+                    <span className="quickedit-button-text">Video</span>
+                </button>
+                <button className={`quickedit-button ${type === "comic" ? "button-selected" : ""}`} onClick={() => setType("comic")}>
+                    <img className="quickedit-button-img" src={comic}/>
+                    <span className="quickedit-button-text">Comic</span>
+                </button>
+            </div>
+            <div className="dialog-row">
+                <button className={`quickedit-button ${type === "audio" ? "button-selected" : ""}`} onClick={() => setType("audio")}>
+                    <img className="quickedit-button-img" src={audio}/>
+                    <span className="quickedit-button-text">Audio</span>
+                </button>
+                <button className={`quickedit-button ${type === "model" ? "button-selected" : ""}`} onClick={() => setType("model")}>
+                    <img className="quickedit-button-img" src={model}/>
+                    <span className="quickedit-button-text">Model</span>
+                </button>
+            </div>
+            </> : <>
+            <div className="dialog-row">
+                <button className={`quickedit-button ${type === "image" ? "button-selected" : ""}`} onClick={() => setType("image")}>
+                    <img className="quickedit-button-img" src={image}/>
+                    <span className="quickedit-button-text">Image</span>
+                </button>
+                <button className={`quickedit-button ${type === "animation" ? "button-selected" : ""}`} onClick={() => setType("animation")}>
+                    <img className="quickedit-button-img" src={animation}/>
+                    <span className="quickedit-button-text">Animation</span>
+                </button>
+                <button className={`quickedit-button ${type === "video" ? "button-selected" : ""}`} onClick={() => setType("video")}>
+                    <img className="quickedit-button-img" src={video}/>
+                    <span className="quickedit-button-text">Video</span>
+                </button>
+            </div>
+            <div className="dialog-row">
+                <button className={`quickedit-button ${type === "comic" ? "button-selected" : ""}`} onClick={() => setType("comic")}>
+                    <img className="quickedit-button-img" src={comic}/>
+                    <span className="quickedit-button-text">Comic</span>
+                </button>
+                <button className={`quickedit-button ${type === "audio" ? "button-selected" : ""}`} onClick={() => setType("audio")}>
+                    <img className="quickedit-button-img" src={audio}/>
+                    <span className="quickedit-button-text">Audio</span>
+                </button>
+                <button className={`quickedit-button ${type === "model" ? "button-selected" : ""}`} onClick={() => setType("model")}>
+                    <img className="quickedit-button-img" src={model}/>
+                    <span className="quickedit-button-text">Model</span>
+                </button>
+            </div> </>}
+            {mobile ? <>
+            <div className="dialog-row">
+                <button className={`quickedit-button ${restrict === "safe" ? "button-selected" : ""}`} onClick={() => setRestrict("safe")}>
+                    <img className="quickedit-button-img" src={safe}/>
+                    <span className="quickedit-button-text">Safe</span>
+                </button>
+                <button className={`quickedit-button ${restrict === "questionable" ? "button-selected" : ""}`} onClick={() => setRestrict("questionable")}>
+                    <img className="quickedit-button-img" src={questionable}/>
+                    <span className="quickedit-button-text">Questionable</span>
+                </button>
+            </div>
+            <div className="dialog-row">
+                {session.showR18 ?
+                <button className={`quickedit-button ${restrict === "explicit" ? "button-selected" : ""}`} onClick={() => setRestrict("explicit")}>
+                    <img className="quickedit-button-img" src={explicit}/>
+                    <span className="quickedit-button-text">Explicit</span>
+                </button> : null}
+            </div>
+            </> : <>
+            <div className="dialog-row">
+                <button className={`quickedit-button ${restrict === "safe" ? "button-selected" : ""}`} onClick={() => setRestrict("safe")}>
+                    <img className="quickedit-button-img" src={safe}/>
+                    <span className="quickedit-button-text">Safe</span>
+                </button>
+                <button className={`quickedit-button ${restrict === "questionable" ? "button-selected" : ""}`} onClick={() => setRestrict("questionable")}>
+                    <img className="quickedit-button-img" src={questionable}/>
+                    <span className="quickedit-button-text">Questionable</span>
+                </button>
+                {session.showR18 ?
+                <button className={`quickedit-button ${restrict === "explicit" ? "button-selected" : ""}`} onClick={() => setRestrict("explicit")}>
+                    <img className="quickedit-button-img" src={explicit}/>
+                    <span className="quickedit-button-text">Explicit</span>
+                </button> : null}
+            </div>
+            </>}
+            {getStyleJSX()}
+            <div className="dialog-row">
+                <SearchSuggestions active={artistsActive} x={tagX} y={tagY} width={mobile ? 140 : 200} fontSize={17} text={functions.cleanHTML(artists)} click={(tag) => handleArtistClick(tag)} type="artist"/>
+                <span className="dialog-text">Artists: </span>
+                <input className="dialog-input artist-tag-color" type="text" spellCheck={false} value={artists} onChange={(event) => setArtists(event.target.value)} onFocus={() => setArtistsActive(true)} onBlur={() => setArtistsActive(false)}/>
+            </div>
+            <div className="dialog-row">
+                <SearchSuggestions active={charactersActive} x={tagX} y={tagY} width={mobile ? 140 : 200} fontSize={17} text={functions.cleanHTML(characters)} click={(tag) => handleCharacterClick(tag)} type="character"/>
+                <span className="dialog-text">Characters: </span>
+                <input className="dialog-input character-tag-color" type="text" spellCheck={false} value={characters} onChange={(event) => setCharacters(event.target.value)} onFocus={() => setCharactersActive(true)} onBlur={() => setCharactersActive(false)}/>
+            </div>
+            <div className="dialog-row">
+                <SearchSuggestions active={seriesActive} x={tagX} y={tagY} width={mobile ? 140 : 200} fontSize={17} text={functions.cleanHTML(series)} click={(tag) => handleSeriesClick(tag)} type="series"/>
+                <span className="dialog-text">Series: </span>
+                <input className="dialog-input series-tag-color" type="text" spellCheck={false} value={series} onChange={(event) => setSeries(event.target.value)} onFocus={() => setSeriesActive(true)} onBlur={() => setSeriesActive(false)}/>
+            </div>
+            <div className="dialog-row">
+                <SearchSuggestions active={metaActive} x={tagX} y={tagY} width={mobile ? 140 : 200} fontSize={17} text={functions.cleanHTML(metaTags)} click={(tag) => handleMetaClick(tag)} type="meta"/>
+                <span className="dialog-text">Meta: </span>
+                <input className="dialog-input meta-tag-color" type="text" spellCheck={false} value={metaTags} onChange={(event) => setMetaTags(event.target.value)} onFocus={() => setMetaActive(true)} onBlur={() => setMetaActive(false)}/>
+            </div>
+            <div className="dialog-row">
+                <span className="dialog-text tag-color">Tags: </span>
+            </div>
+            <div className="dialog-row">
+                <SearchSuggestions active={tagActive} text={functions.cleanHTML(tags)} x={tagX} y={tagY} width={mobile ? 140 : 200} fontSize={17} click={handleTagClick} type="tag"/>
+                <ContentEditable innerRef={tagRef} className="dialog-textarea" style={{height: "140px"}} spellCheck={false} html={tags} onChange={(event) => setTags(event.target.value)} onFocus={() => setTagActive(true)} onBlur={() => setTagActive(false)}/>
+            </div>
+            <div className="dialog-row">
+                <span className="dialog-text">Reason: </span>
+                <input style={{width: "100%"}} className="dialog-input" type="text" spellCheck={false} value={reason} onChange={(event) => setReason(event.target.value)}/>
+            </div>
+            </>
+        )
+    }
+
     if (tagEditID) {
         if (session.banned) {
             return (
@@ -383,136 +520,7 @@ const TagEditDialog: React.FunctionComponent = (props) => {
                             <div className="dialog-title-container">
                                 <span className="dialog-title">Tag Edit</span>
                             </div>
-                            <div className="dialog-row">
-                                <span className="dialog-text">Classification: </span>
-                            </div>
-                            {mobile ? <>
-                            <div className="dialog-row">
-                                <button className={`quickedit-button ${type === "image" ? "button-selected" : ""}`} onClick={() => setType("image")}>
-                                    <img className="quickedit-button-img" src={image}/>
-                                    <span className="quickedit-button-text">Image</span>
-                                </button>
-                                <button className={`quickedit-button ${type === "animation" ? "button-selected" : ""}`} onClick={() => setType("animation")}>
-                                    <img className="quickedit-button-img" src={animation}/>
-                                    <span className="quickedit-button-text">Animation</span>
-                                </button>
-                            </div>
-                            <div className="dialog-row">
-                                <button className={`quickedit-button ${type === "video" ? "button-selected" : ""}`} onClick={() => setType("video")}>
-                                    <img className="quickedit-button-img" src={video}/>
-                                    <span className="quickedit-button-text">Video</span>
-                                </button>
-                                <button className={`quickedit-button ${type === "comic" ? "button-selected" : ""}`} onClick={() => setType("comic")}>
-                                    <img className="quickedit-button-img" src={comic}/>
-                                    <span className="quickedit-button-text">Comic</span>
-                                </button>
-                            </div>
-                            <div className="dialog-row">
-                                <button className={`quickedit-button ${type === "audio" ? "button-selected" : ""}`} onClick={() => setType("audio")}>
-                                    <img className="quickedit-button-img" src={audio}/>
-                                    <span className="quickedit-button-text">Audio</span>
-                                </button>
-                                <button className={`quickedit-button ${type === "model" ? "button-selected" : ""}`} onClick={() => setType("model")}>
-                                    <img className="quickedit-button-img" src={model}/>
-                                    <span className="quickedit-button-text">Model</span>
-                                </button>
-                            </div>
-                            </> : <>
-                            <div className="dialog-row">
-                                <button className={`quickedit-button ${type === "image" ? "button-selected" : ""}`} onClick={() => setType("image")}>
-                                    <img className="quickedit-button-img" src={image}/>
-                                    <span className="quickedit-button-text">Image</span>
-                                </button>
-                                <button className={`quickedit-button ${type === "animation" ? "button-selected" : ""}`} onClick={() => setType("animation")}>
-                                    <img className="quickedit-button-img" src={animation}/>
-                                    <span className="quickedit-button-text">Animation</span>
-                                </button>
-                                <button className={`quickedit-button ${type === "video" ? "button-selected" : ""}`} onClick={() => setType("video")}>
-                                    <img className="quickedit-button-img" src={video}/>
-                                    <span className="quickedit-button-text">Video</span>
-                                </button>
-                            </div>
-                            <div className="dialog-row">
-                                <button className={`quickedit-button ${type === "comic" ? "button-selected" : ""}`} onClick={() => setType("comic")}>
-                                    <img className="quickedit-button-img" src={comic}/>
-                                    <span className="quickedit-button-text">Comic</span>
-                                </button>
-                                <button className={`quickedit-button ${type === "audio" ? "button-selected" : ""}`} onClick={() => setType("audio")}>
-                                    <img className="quickedit-button-img" src={audio}/>
-                                    <span className="quickedit-button-text">Audio</span>
-                                </button>
-                                <button className={`quickedit-button ${type === "model" ? "button-selected" : ""}`} onClick={() => setType("model")}>
-                                    <img className="quickedit-button-img" src={model}/>
-                                    <span className="quickedit-button-text">Model</span>
-                                </button>
-                            </div> </>}
-                            {mobile ? <>
-                            <div className="dialog-row">
-                                <button className={`quickedit-button ${restrict === "safe" ? "button-selected" : ""}`} onClick={() => setRestrict("safe")}>
-                                    <img className="quickedit-button-img" src={safe}/>
-                                    <span className="quickedit-button-text">Safe</span>
-                                </button>
-                                <button className={`quickedit-button ${restrict === "questionable" ? "button-selected" : ""}`} onClick={() => setRestrict("questionable")}>
-                                    <img className="quickedit-button-img" src={questionable}/>
-                                    <span className="quickedit-button-text">Questionable</span>
-                                </button>
-                            </div>
-                            <div className="dialog-row">
-                                {session.showR18 ?
-                                <button className={`quickedit-button ${restrict === "explicit" ? "button-selected" : ""}`} onClick={() => setRestrict("explicit")}>
-                                    <img className="quickedit-button-img" src={explicit}/>
-                                    <span className="quickedit-button-text">Explicit</span>
-                                </button> : null}
-                            </div>
-                            </> : <>
-                            <div className="dialog-row">
-                                <button className={`quickedit-button ${restrict === "safe" ? "button-selected" : ""}`} onClick={() => setRestrict("safe")}>
-                                    <img className="quickedit-button-img" src={safe}/>
-                                    <span className="quickedit-button-text">Safe</span>
-                                </button>
-                                <button className={`quickedit-button ${restrict === "questionable" ? "button-selected" : ""}`} onClick={() => setRestrict("questionable")}>
-                                    <img className="quickedit-button-img" src={questionable}/>
-                                    <span className="quickedit-button-text">Questionable</span>
-                                </button>
-                                {session.showR18 ?
-                                <button className={`quickedit-button ${restrict === "explicit" ? "button-selected" : ""}`} onClick={() => setRestrict("explicit")}>
-                                    <img className="quickedit-button-img" src={explicit}/>
-                                    <span className="quickedit-button-text">Explicit</span>
-                                </button> : null}
-                            </div>
-                            </>}
-                            {getStyleJSX()}
-                            <div className="dialog-row">
-                                <SearchSuggestions active={artistsActive} x={tagX} y={tagY} width={mobile ? 140 : 200} fontSize={17} text={functions.cleanHTML(artists)} click={(tag) => handleArtistClick(tag)} type="artist"/>
-                                <span className="dialog-text">Artists: </span>
-                                <input className="dialog-input artist-tag-color" type="text" spellCheck={false} value={artists} onChange={(event) => setArtists(event.target.value)} onFocus={() => setArtistsActive(true)} onBlur={() => setArtistsActive(false)}/>
-                            </div>
-                            <div className="dialog-row">
-                                <SearchSuggestions active={charactersActive} x={tagX} y={tagY} width={mobile ? 140 : 200} fontSize={17} text={functions.cleanHTML(characters)} click={(tag) => handleCharacterClick(tag)} type="character"/>
-                                <span className="dialog-text">Characters: </span>
-                                <input className="dialog-input character-tag-color" type="text" spellCheck={false} value={characters} onChange={(event) => setCharacters(event.target.value)} onFocus={() => setCharactersActive(true)} onBlur={() => setCharactersActive(false)}/>
-                            </div>
-                            <div className="dialog-row">
-                                <SearchSuggestions active={seriesActive} x={tagX} y={tagY} width={mobile ? 140 : 200} fontSize={17} text={functions.cleanHTML(series)} click={(tag) => handleSeriesClick(tag)} type="series"/>
-                                <span className="dialog-text">Series: </span>
-                                <input className="dialog-input series-tag-color" type="text" spellCheck={false} value={series} onChange={(event) => setSeries(event.target.value)} onFocus={() => setSeriesActive(true)} onBlur={() => setSeriesActive(false)}/>
-                            </div>
-                            <div className="dialog-row">
-                                <SearchSuggestions active={metaActive} x={tagX} y={tagY} width={mobile ? 140 : 200} fontSize={17} text={functions.cleanHTML(metaTags)} click={(tag) => handleMetaClick(tag)} type="meta"/>
-                                <span className="dialog-text">Meta: </span>
-                                <input className="dialog-input meta-tag-color" type="text" spellCheck={false} value={metaTags} onChange={(event) => setMetaTags(event.target.value)} onFocus={() => setMetaActive(true)} onBlur={() => setMetaActive(false)}/>
-                            </div>
-                            <div className="dialog-row">
-                                <span className="dialog-text tag-color">Tags: </span>
-                            </div>
-                            <div className="dialog-row">
-                                <SearchSuggestions active={tagActive} text={functions.cleanHTML(tags)} x={tagX} y={tagY} width={mobile ? 140 : 200} fontSize={17} click={handleTagClick} type="tag"/>
-                                <ContentEditable innerRef={tagRef} className="dialog-textarea" style={{height: "140px"}} spellCheck={false} html={tags} onChange={(event) => setTags(event.target.value)} onFocus={() => setTagActive(true)} onBlur={() => setTagActive(false)}/>
-                            </div>
-                            <div className="dialog-row">
-                                <span className="dialog-text">Reason: </span>
-                                <input style={{width: "100%"}} className="dialog-input" type="text" spellCheck={false} value={reason} onChange={(event) => setReason(event.target.value)}/>
-                            </div>
+                            {mainJSX()}
                             {error ? <div className="dialog-validation-container"><span className="dialog-validation" ref={errorRef}></span></div> : null}
                             <div className="dialog-row">
                                 <button onClick={() => click("reject")} className="dialog-button">{"Cancel"}</button>
@@ -542,91 +550,7 @@ const TagEditDialog: React.FunctionComponent = (props) => {
                             <button onClick={() => close()} className="dialog-button">{"OK"}</button>
                         </div> 
                         </> : <>
-                        <div className="dialog-row">
-                            <span className="dialog-text">Classification: </span>
-                        </div>
-                        <div className="dialog-row">
-                            <button className={`quickedit-button ${type === "image" ? "button-selected" : ""}`} onClick={() => setType("image")}>
-                                <img className="quickedit-button-img" src={image}/>
-                                <span className="quickedit-button-text">Image</span>
-                            </button>
-                            <button className={`quickedit-button ${type === "animation" ? "button-selected" : ""}`} onClick={() => setType("animation")}>
-                                <img className="quickedit-button-img" src={animation}/>
-                                <span className="quickedit-button-text">Animation</span>
-                            </button>
-                            <button className={`quickedit-button ${type === "video" ? "button-selected" : ""}`} onClick={() => setType("video")}>
-                                <img className="quickedit-button-img" src={video}/>
-                                <span className="quickedit-button-text">Video</span>
-                            </button>
-                            <button className={`quickedit-button ${type === "comic" ? "button-selected" : ""}`} onClick={() => setType("comic")}>
-                                <img className="quickedit-button-img" src={comic}/>
-                                <span className="quickedit-button-text">Comic</span>
-                            </button>
-                        </div>
-                        <div className="dialog-row">
-                            <button className={`quickedit-button ${restrict === "safe" ? "button-selected" : ""}`} onClick={() => setRestrict("safe")}>
-                                <img className="quickedit-button-img" src={safe}/>
-                                <span className="quickedit-button-text">Safe</span>
-                            </button>
-                            <button className={`quickedit-button ${restrict === "questionable" ? "button-selected" : ""}`} onClick={() => setRestrict("questionable")}>
-                                <img className="quickedit-button-img" src={questionable}/>
-                                <span className="quickedit-button-text">Questionable</span>
-                            </button>
-                            {session.showR18 ?
-                            <button className={`quickedit-button ${restrict === "explicit" ? "button-selected" : ""}`} onClick={() => setRestrict("explicit")}>
-                                <img className="quickedit-button-img" src={explicit}/>
-                                <span className="quickedit-button-text">Explicit</span>
-                            </button> : null}
-                        </div>
-                        <div className="dialog-row">
-                            <button className={`quickedit-button ${style === "2d" ? "button-selected" : ""}`} onClick={() => setStyle("2d")}>
-                                <img className="quickedit-button-img" src={$2d}/>
-                                <span className="quickedit-button-text">2D</span>
-                            </button>
-                            <button className={`quickedit-button ${style === "3d" ? "button-selected" : ""}`} onClick={() => setStyle("3d")}>
-                                <img className="quickedit-button-img" src={$3d}/>
-                                <span className="quickedit-button-text">3D</span>
-                            </button>
-                            <button className={`quickedit-button ${style === "chibi" ? "button-selected" : ""}`} onClick={() => setStyle("chibi")}>
-                                <img className="quickedit-button-img" src={chibi}/>
-                                <span className="quickedit-button-text">Chibi</span>
-                            </button>
-                            <button className={`quickedit-button ${style === "pixel" ? "button-selected" : ""}`} onClick={() => setStyle("pixel")}>
-                                <img className="quickedit-button-img" src={pixel}/>
-                                <span className="quickedit-button-text">Pixel</span>
-                            </button>
-                            </div>
-                        <div className="dialog-row">
-                            <SearchSuggestions active={artistsActive} x={tagX} y={tagY} width={200} text={functions.cleanHTML(artists)} click={(tag) => handleArtistClick(tag)} type="artist"/>
-                            <span className="dialog-text">Artists: </span>
-                            <input className="dialog-input artist-tag-color" type="text" spellCheck={false} value={artists} onChange={(event) => setArtists(event.target.value)} onFocus={() => setArtistsActive(true)} onBlur={() => setArtistsActive(false)}/>
-                        </div>
-                        <div className="dialog-row">
-                            <SearchSuggestions active={charactersActive} x={tagX} y={tagY} width={200} text={functions.cleanHTML(characters)} click={(tag) => handleCharacterClick(tag)} type="character"/>
-                            <span className="dialog-text">Characters: </span>
-                            <input className="dialog-input character-tag-color" type="text" spellCheck={false} value={characters} onChange={(event) => setCharacters(event.target.value)} onFocus={() => setCharactersActive(true)} onBlur={() => setCharactersActive(false)}/>
-                        </div>
-                        <div className="dialog-row">
-                            <SearchSuggestions active={seriesActive} x={tagX} y={tagY} width={200} text={functions.cleanHTML(series)} click={(tag) => handleSeriesClick(tag)} type="series"/>
-                            <span className="dialog-text">Series: </span>
-                            <input className="dialog-input series-tag-color" type="text" spellCheck={false} value={series} onChange={(event) => setSeries(event.target.value)} onFocus={() => setSeriesActive(true)} onBlur={() => setSeriesActive(false)}/>
-                        </div>
-                        <div className="dialog-row">
-                            <SearchSuggestions active={metaActive} x={tagX} y={tagY} width={mobile ? 140 : 200} fontSize={17} text={functions.cleanHTML(metaTags)} click={(tag) => handleMetaClick(tag)} type="meta"/>
-                            <span className="dialog-text">Meta: </span>
-                            <input className="dialog-input meta-tag-color" type="text" spellCheck={false} value={metaTags} onChange={(event) => setMetaTags(event.target.value)} onFocus={() => setMetaActive(true)} onBlur={() => setMetaActive(false)}/>
-                        </div>
-                        <div className="dialog-row">
-                            <span className="dialog-text tag-color">Tags: </span>
-                        </div>
-                        <div className="dialog-row">
-                            <SearchSuggestions active={tagActive} text={functions.cleanHTML(tags)} x={tagX} y={tagY} width={200} click={handleTagClick} type="tag"/>
-                            <ContentEditable innerRef={tagRef} className="dialog-textarea" style={{height: "140px"}} spellCheck={false} html={tags} onChange={(event) => setTags(event.target.value)} onFocus={() => setTagActive(true)} onBlur={() => setTagActive(false)}/>
-                        </div>
-                        <div className="dialog-row">
-                            <span className="dialog-text">Reason: </span>
-                            <input style={{width: "100%"}} className="dialog-input" type="text" spellCheck={false} value={reason} onChange={(event) => setReason(event.target.value)}/>
-                        </div>
+                        {mainJSX()}
                         {error ? <div className="dialog-validation-container"><span className="dialog-validation" ref={errorRef}></span></div> : null}
                         <div className="dialog-row">
                             <button onClick={() => click("reject")} className="dialog-button">{"Cancel"}</button>

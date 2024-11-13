@@ -1,7 +1,7 @@
 import React, {useEffect, useRef, useState, forwardRef, useImperativeHandle} from "react"
 import {useHistory} from "react-router-dom"
 import loading from "../assets/icons/loading.gif"
-import {useFilterSelector, useInteractionActions, useLayoutSelector, usePlaybackActions, 
+import {useFilterSelector, useInteractionActions, useLayoutSelector, usePlaybackActions, useSearchActions,
 useThemeSelector, useSearchSelector, useSessionSelector, useFlagSelector, useFlagActions} from "../store"
 import path from "path"
 import functions from "../structures/Functions"
@@ -34,6 +34,7 @@ const GridSong = forwardRef<Ref, Props>((props, componentRef) => {
     const {brightness, contrast, hue, saturation, lightness, blur, sharpen, pixelate} = useFilterSelector()
     const {setAudio, setAudioPost, setPlayFlag, setSecondsProgress, setReverse, setSeekTo} = usePlaybackActions()
     const {sizeType, square, scroll, selectionMode, selectionItems, selectionPosts} = useSearchSelector()
+    const {setSelectionItems, setSelectionPosts} = useSearchActions()
     const {downloadFlag, downloadIDs} = useFlagSelector()
     const {setDownloadFlag, setDownloadIDs} = useFlagActions()
     const {setScrollY, setToolTipX, setToolTipY, setToolTipEnabled, setToolTipPost, setToolTipImg} = useInteractionActions()
@@ -199,7 +200,7 @@ const GridSong = forwardRef<Ref, Props>((props, componentRef) => {
         } else {
             containerRef.current.style.boxShadow = "none"
         }
-    }, [imageLoaded, sizeType, session, props.post?.favorited])
+    }, [imageLoaded, sizeType, session, props.post])
 
     useEffect(() => {
         if (mobile) {
@@ -434,6 +435,8 @@ const GridSong = forwardRef<Ref, Props>((props, componentRef) => {
                     selectionPosts.delete(props.post.postID)
                 }
                 setSelected(isSelected)
+                setSelectionItems(selectionItems)
+                setSelectionPosts(selectionPosts)
             }
         } else {
             if (!drag) {

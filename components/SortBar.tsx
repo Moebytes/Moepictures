@@ -6,7 +6,7 @@ import {useFilterSelector, useInteractionActions, useLayoutSelector, usePlayback
 useThemeSelector, useSearchSelector, useSessionSelector, useSearchActions, useFlagActions, useMiscDialogActions, 
 useInteractionSelector, useSessionActions, usePostDialogActions, useGroupDialogActions, useActiveSelector,
 usePageSelector, useCacheSelector, useFilterActions, useActiveActions, useLayoutActions,
-useMiscDialogSelector, usePostDialogSelector, useGroupDialogSelector} from "../store"
+useMiscDialogSelector, usePostDialogSelector, useGroupDialogSelector, useCacheActions} from "../store"
 import leftArrow from "../assets/icons/leftArrow.png"
 import rightArrow from "../assets/icons/rightArrow.png"
 import upArrow from "../assets/icons/upArrow.png"
@@ -86,6 +86,7 @@ const SortBar: React.FunctionComponent = (props) => {
     const {setBulkFavGroupDialog} = useGroupDialogActions()
     const {page} = usePageSelector()
     const {posts} = useCacheSelector()
+    const {setPosts} = useCacheActions()
     const [mouseOver, setMouseOver] = useState(false)
     const [dropLeft, setDropLeft] = useState(0)
     const [dropTop, setDropTop] = useState(-2)
@@ -551,7 +552,6 @@ const SortBar: React.FunctionComponent = (props) => {
     const toggleScroll = () => {
         const newValue = !scroll
         localStorage.setItem("scroll", `${newValue}`)
-        return newValue
         setScroll(newValue)
     }
 
@@ -637,12 +637,10 @@ const SortBar: React.FunctionComponent = (props) => {
 
     const bulkFavorite = async () => {
         if (!selectionItems.size) return
-        console.log(selectionItems.keys())
-        console.log(selectionItems.values())
         for (const postID of selectionItems.values()) {
             await functions.post("/api/favorite/toggle", {postID}, session, setSessionFlag)
             functions.get("/api/favorite", {postID}, session, setSessionFlag).then((favorite) => {
-                functions.updateLocalFavorite(postID, favorite ? true : false, posts)
+                functions.updateLocalFavorite(postID, favorite ? true : false, posts, setPosts)
             })
         }
         setSelectionMode(false)

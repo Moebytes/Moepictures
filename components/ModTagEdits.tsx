@@ -315,6 +315,15 @@ const ModTagEdits: React.FunctionComponent = (props) => {
             } else {
                 jsx.push(<span className="mod-post-link" onClick={openTag} onAuxClick={openTag}>New Tag: {newTag.key}</span>)
             }
+        } else {
+            jsx.push(<span className="mod-post-link" onClick={openTag} onAuxClick={openTag}>Tag: {newTag.key}</span>)
+        }
+        if (changes.type) {
+            if (showOldTag && oldTag) {
+                jsx.push(<span className={`mod-post-text ${functions.getTagColor(oldTag)}`}>Old Category: {oldTag.type}</span>)
+            } else {
+                jsx.push(<span className={`mod-post-text ${functions.getTagColor(newTag)}`}>New Category: {newTag.type}</span>)
+            }
         }
         if (changes.description) {
             if (showOldTag && oldTag) {

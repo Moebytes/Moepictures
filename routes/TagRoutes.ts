@@ -165,12 +165,12 @@ const TagRoutes = (app: Express) => {
 
     app.put("/api/tag/edit", csrfProtection, tagUpdateLimiter, async (req: Request, res: Response) => {
         try {
-            let {tag, key, description, image, aliases, implications, pixivTags, social, twitter, website, fandom, category, r18, reason, updater, updatedDate, silent} = req.body
+            let {tag, key, type, description, image, aliases, implications, pixivTags, social, twitter, website, fandom, r18, reason, updater, updatedDate, silent} = req.body
             if (!req.session.username) return res.status(403).send("Unauthorized")
             if (!permissions.isContributor(req.session)) return res.status(403).send("Unauthorized")
             if (req.session.banned) return res.status(403).send("You are banned")
             if (!tag) return res.status(400).send("Bad tag")
-            if (category && !functions.validTagType(category, true)) return res.status(400).send("Bad category")
+            if (type && !functions.validTagType(type, true)) return res.status(400).send("Bad type")
             const tagObj = await sql.tag.tag(tag)
             if (!tagObj) return res.status(400).send("Bad tag")
             let imageFilename = tagObj.image
@@ -297,10 +297,8 @@ const TagRoutes = (app: Express) => {
             if (r18 !== undefined) {
                 await sql.tag.updateTag(tag, "r18", r18)
             }
-            if (permissions.isMod(req.session)) {
-                if (category !== undefined) {
-                    await sql.tag.updateTag(tag, "type", category)
-                }
+            if (type !== undefined) {
+                await sql.tag.updateTag(tag, "type", type)
             }
             await sql.tag.updateTag(tag, "updater", updater)
             await sql.tag.updateTag(tag, "updatedDate", updatedDate)
@@ -633,13 +631,24 @@ const TagRoutes = (app: Express) => {
 
     app.post("/api/tag/edit/request", csrfProtection, tagUpdateLimiter, async (req: Request, res: Response) => {
         try {
-            let {tag, key, description, image, aliases, implications, pixivTags, social, twitter, website, fandom, r18, reason} = req.body
+            let {tag, key, type, description, image, aliases, implications, pixivTags, social, twitter, website, fandom, r18, reason} = req.body
             if (!req.session.username) return res.status(403).send("Unauthorized")
             if (!tag) return res.status(400).send("Bad tag")
             const tagObj = await sql.tag.tag(tag)
             if (!tagObj) return res.status(400).send("Bad tag")
-            let imagePath = null as any
-            let imageHash = null as any
+            if (key === undefined) key = tagObj.tag
+            if (type === undefined) type = tagObj.type
+            if (description === undefined) description = tagObj.description
+            if (aliases === undefined) aliases = tagObj.aliases?.filter(Boolean).map((a: any) => a.alias) || []
+            if (implications === undefined) implications = tagObj.implications?.filter(Boolean).map((i: any) => i.implication) || []
+            if (pixivTags === undefined) pixivTags = tagObj.pixivTags
+            if (social === undefined) social = tagObj.social
+            if (twitter === undefined) twitter = tagObj.twitter
+            if (website === undefined) website = tagObj.website
+            if (fandom === undefined) fandom = tagObj.fandom
+            if (r18 === undefined) r18 = tagObj.r18
+            let imagePath = tagObj.image
+            let imageHash = tagObj.imageHash
             let imageChanged = false
             if (image?.[0]) {
                 if (image[0] !== "delete") {
@@ -654,11 +663,11 @@ const TagRoutes = (app: Express) => {
                 }
                 imageChanged = true
             }
-            const changes = functions.parseTagChanges(tagObj, {tag: key, description, aliases, implications, pixivTags, website, social, twitter, fandom, r18})
+            const changes = functions.parseTagChanges(tagObj, {tag: key, type, description, aliases, implications, pixivTags, website, social, twitter, fandom, r18})
             aliases = aliases?.[0] ? aliases : null
             implications = implications?.[0] ? implications : null
             pixivTags = pixivTags?.[0] ? pixivTags : null
-            await sql.request.insertTagEditRequest(req.session.username, tag, key, description, imagePath, imageHash, aliases, implications, pixivTags, social, 
+            await sql.request.insertTagEditRequest(req.session.username, tag, key, type, description, imagePath, imageHash, aliases, implications, pixivTags, social, 
             twitter, website, fandom, r18, imageChanged, changes, reason)
             res.status(200).send("Success")
         } catch (e) {

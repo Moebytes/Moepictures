@@ -10,10 +10,12 @@ import Footer from "../components/Footer"
 import functions from "../structures/Functions"
 import permissions from "../structures/Permissions"
 import EditTagDialog from "../dialogs/EditTagDialog"
+import CategorizeTagDialog from "../dialogs/CategorizeTagDialog"
 import DeleteTagDialog from "../dialogs/DeleteTagDialog"
 import TakedownTagDialog from "../dialogs/TakedownTagDialog"
 import takedown from "../assets/icons/takedown.png"
 import tagHistory from "../assets/icons/tag-history.png"
+import tagCategorize from "../assets/icons/tag-category.png"
 import tagEdit from "../assets/icons/tag-edit.png"
 import tagDelete from "../assets/icons/tag-delete.png"
 import restore from "../assets/icons/restore.png"
@@ -50,7 +52,7 @@ const TagPage: React.FunctionComponent<Props> = (props) => {
     const {restrictType} = useSearchSelector()
     const {setSearch, setSearchFlag} = useSearchActions()
     const {editTagObj, editTagFlag, deleteTagID, deleteTagFlag, revertTagHistoryID, revertTagHistoryFlag} = useTagDialogSelector()
-    const {setEditTagObj, setEditTagFlag, setTakedownTag, setDeleteTagID, setDeleteTagFlag, setRevertTagHistoryID, setRevertTagHistoryFlag} = useTagDialogActions()
+    const {setEditTagObj, setEditTagFlag, setTakedownTag, setDeleteTagID, setDeleteTagFlag, setRevertTagHistoryID, setRevertTagHistoryFlag, setCategorizeTag} = useTagDialogActions()
     const [tag, setTag] = useState(null) as any
     const [tagPosts, setTagPosts] = useState([]) as any
     const [postImages, setPostImages] = useState([]) as any
@@ -284,10 +286,15 @@ const TagPage: React.FunctionComponent<Props> = (props) => {
         setDeleteTagID(tag.tag)
     }
 
+    const showTagCategorizeDialog = async () => {
+        setCategorizeTag({tag: tag.tag, type: tag.type})
+    }
+
     const tagOptionsJSX = () => {
         let jsx = [] as any
         if (session.username) {
             jsx.push(<img className="tag-social" src={tagHistory} onClick={() => showTagHistory()} style={{filter: getFilter()}}/>)
+            jsx.push(<img className="tag-social" src={tagCategorize} onClick={() => showTagCategorizeDialog()} style={{filter: getFilter()}}/>)
             jsx.push(<img className="tag-social" src={tagEdit} onClick={() => showTagEditDialog()} style={{filter: getFilter()}}/>)
             jsx.push(<img className="tag-social" src={tagDelete} onClick={() => showTagDeleteDialog()} style={{filter: getFilter()}}/>)
         }
@@ -443,23 +450,9 @@ const TagPage: React.FunctionComponent<Props> = (props) => {
         return functions.toProperCase(tag.tag.replaceAll("-", " "))
     }
 
-    const getTagColor = () => {
-        if (tag.banned) return "strikethrough"
-        if (tag.r18) return "r18-tag-color"
-        if (tag.type === "artist") return "artist-tag-color"
-        if (tag.type === "character") return "character-tag-color"
-        if (tag.type === "series") return "series-tag-color"
-        if (tag.type === "meta") return "meta-tag-color"
-        if (tag.type === "appearance") return "appearance-tag-color"
-        if (tag.type === "outfit") return "outfit-tag-color"
-        if (tag.type === "accessory") return "accessory-tag-color"
-        if (tag.type === "action") return "action-tag-color"
-        if (tag.type === "scenery") return "scenery-tag-color"
-        return "tag-color"
-    }
-
     return (
         <>
+        <CategorizeTagDialog/>
         <EditTagDialog/>
         <DeleteTagDialog/>
         <TakedownTagDialog/>
@@ -477,7 +470,7 @@ const TagPage: React.FunctionComponent<Props> = (props) => {
                         <div className="tag-img-container">
                             <img className="tag-img" src={functions.getTagLink(tag.type, tag.image, tag.imageHash)}/>
                         </div> : null}
-                        <span className={`tag-heading ${getTagColor()}`}>{getTagName()}</span>
+                        <span className={`tag-heading ${functions.getTagColor(tag)}`}>{getTagName()}</span>
                         {tagSocialJSX()}
                         {tagOptionsJSX()}
                     </div>

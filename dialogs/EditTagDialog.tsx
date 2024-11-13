@@ -248,6 +248,69 @@ const EditTagDialog: React.FunctionComponent = (props) => {
         )
     }
 
+    const mainJSX = () => {
+        return (
+            <>
+            <div className="dialog-row">
+                <span className="dialog-text">Tag: </span>
+                <input className="dialog-input-taller" type="text" spellCheck={false} value={editTagObj.key} onChange={(event) => setEditTagObj({...editTagObj, key: event.target.value})} style={{width: "max-content"}}/>
+            </div>
+            {tagSocialJSX()}
+            <div className="dialog-row">
+                <span className="dialog-text">Image: </span>
+                <label htmlFor="tag-img" className="dialog-button" style={{marginLeft: "5px", paddingTop: "0px", paddingBottom: "0px"}}>
+                    <img className="dialog-button-img-small" src={uploadIcon}/>
+                    <span className="dialog-button-text-small">Upload</span>
+                </label>
+                <input id="tag-img" type="file" onChange={(event) => uploadTagImg(event)}/>
+                {editTagObj.image && editTagObj.image !== "delete" ? 
+                <img className="dialog-x-button" src={xButton} style={{filter: getFilter()}} onClick={() => setEditTagObj({...editTagObj, image: "delete"})}/>
+                : null}
+            </div>
+            {editTagObj.image && editTagObj.image !== "delete" ? 
+            <div className="dialog-row">
+                <img className="dialog-img" src={editTagObj.image === "delete" ? "" : editTagObj.image}/>
+            </div>
+            : null}
+            <div className="dialog-row">
+                <span className="dialog-text">Description: </span>
+            </div>
+            <div className="dialog-row">
+                <textarea className="dialog-textarea-small" style={{resize: "vertical"}} spellCheck={false} value={editTagObj.description} onChange={(event) => setEditTagObj({...editTagObj, description: event.target.value})}></textarea>
+            </div>
+            <div className="dialog-row">
+                <span className="dialog-text">Aliases: </span>
+            </div>
+            <div className="dialog-row">
+                <textarea className="dialog-textarea-small" style={{resize: "vertical", height: "30px"}} spellCheck={false} value={editTagObj.aliases.join(" ")} onChange={(event) => setEditTagObj({...editTagObj, aliases: event.target.value.split(/ +/g)})}></textarea>
+            </div>
+            <div className="dialog-row">
+                <span className="dialog-text">Implications: </span>
+            </div>
+            <div className="dialog-row">
+                <textarea className="dialog-textarea-small" style={{resize: "vertical", height: "30px"}} spellCheck={false} value={editTagObj.implications.join(" ")} onChange={(event) => setEditTagObj({...editTagObj, implications: event.target.value.split(/ +/g)})}></textarea>
+            </div>
+            {editTagObj.type !== "artist" ? <>
+            <div className="dialog-row">
+                <span className="dialog-text">Pixiv Tags: </span>
+            </div>
+            <div className="dialog-row">
+                <textarea className="dialog-textarea-small" style={{resize: "vertical", height: "30px"}} spellCheck={false} value={editTagObj.pixivTags.join(" ")} onChange={(event) => setEditTagObj({...editTagObj, pixivTags: event.target.value.split(/ +/g)})}></textarea>
+            </div></> : null}
+            <div className="dialog-row">
+                <span className="dialog-text">Reason: </span>
+                <input style={{width: "100%"}} className="dialog-input-taller" type="text" spellCheck={false} value={editTagObj.reason} onChange={(event) => setEditTagObj({...editTagObj, reason: event.target.value})}/>
+            </div>
+            {!functions.arrayIncludes(editTagObj.type, ["artist", "character", "series"]) && session.showR18 ?
+            <div className="dialog-row">
+                <img className="dialog-checkbox" src={editTagObj.r18 ? radioButtonChecked : radioButton} onClick={() => setEditTagObj({...editTagObj, r18: !editTagObj.r18})} style={{marginLeft: "0px", filter: getFilter()}}/>
+                <span className="dialog-text" style={{marginLeft: "10px"}}>R18</span>
+                <img className="dialog-title-img" src={lewdIcon} style={{marginLeft: "15px", height: "50px", filter: getFilter()}}/>
+            </div> : null}
+            </>
+        )
+    }
+
     if (editTagObj) {
         if (session.banned) {
             return (
@@ -276,62 +339,7 @@ const EditTagDialog: React.FunctionComponent = (props) => {
                             <div className="dialog-title-container">
                                 <span className="dialog-title">Edit Tag</span>
                             </div>
-                            <div className="dialog-row">
-                                <span className="dialog-text">Tag: </span>
-                                <input className="dialog-input-taller" type="text" spellCheck={false} value={editTagObj.key} onChange={(event) => setEditTagObj({...editTagObj, key: event.target.value})} style={{width: "max-content"}}/>
-                            </div>
-                            {tagSocialJSX()}
-                            <div className="dialog-row">
-                                <span className="dialog-text">Image: </span>
-                                <label htmlFor="tag-img" className="dialog-button" style={{marginLeft: "5px", paddingTop: "0px", paddingBottom: "0px"}}>
-                                    <img className="dialog-button-img-small" src={uploadIcon}/>
-                                    <span className="dialog-button-text-small">Upload</span>
-                                </label>
-                                <input id="tag-img" type="file" onChange={(event) => uploadTagImg(event)}/>
-                                {editTagObj.image && editTagObj.image !== "delete" ? 
-                                <img className="dialog-x-button" src={xButton} style={{filter: getFilter()}} onClick={() => setEditTagObj({...editTagObj, image: "delete"})}/>
-                                : null}
-                            </div>
-                            {editTagObj.image && editTagObj.image !== "delete" ? 
-                            <div className="dialog-row">
-                                <img className="dialog-img" src={editTagObj.image === "delete" ? "" : editTagObj.image}/>
-                            </div>
-                            : null}
-                            <div className="dialog-row">
-                                <span className="dialog-text">Description: </span>
-                            </div>
-                            <div className="dialog-row">
-                                <textarea className="dialog-textarea-small" style={{resize: "vertical"}} spellCheck={false} value={editTagObj.description} onChange={(event) => setEditTagObj({...editTagObj, description: event.target.value})}></textarea>
-                            </div>
-                            <div className="dialog-row">
-                                <span className="dialog-text">Aliases: </span>
-                            </div>
-                            <div className="dialog-row">
-                                <textarea className="dialog-textarea-small" style={{resize: "vertical", height: "30px"}} spellCheck={false} value={editTagObj.aliases.join(" ")} onChange={(event) => setEditTagObj({...editTagObj, aliases: event.target.value.split(/ +/g)})}></textarea>
-                            </div>
-                            <div className="dialog-row">
-                                <span className="dialog-text">Implications: </span>
-                            </div>
-                            <div className="dialog-row">
-                                <textarea className="dialog-textarea-small" style={{resize: "vertical", height: "30px"}} spellCheck={false} value={editTagObj.implications.join(" ")} onChange={(event) => setEditTagObj({...editTagObj, implications: event.target.value.split(/ +/g)})}></textarea>
-                            </div>
-                            {editTagObj.type !== "artist" ? <>
-                            <div className="dialog-row">
-                                <span className="dialog-text">Pixiv Tags: </span>
-                            </div>
-                            <div className="dialog-row">
-                                <textarea className="dialog-textarea-small" style={{resize: "vertical", height: "30px"}} spellCheck={false} value={editTagObj.pixivTags.join(" ")} onChange={(event) => setEditTagObj({...editTagObj, pixivTags: event.target.value.split(/ +/g)})}></textarea>
-                            </div></> : null}
-                            <div className="dialog-row">
-                                <span className="dialog-text">Reason: </span>
-                                <input style={{width: "100%"}} className="dialog-input-taller" type="text" spellCheck={false} value={editTagObj.reason} onChange={(event) => setEditTagObj({...editTagObj, reason: event.target.value})}/>
-                            </div>
-                            {!functions.arrayIncludes(editTagObj.type, ["artist", "character", "series"]) && session.showR18 ?
-                            <div className="dialog-row">
-                                <img className="dialog-checkbox" src={editTagObj.r18 ? radioButtonChecked : radioButton} onClick={() => setEditTagObj({...editTagObj, r18: !editTagObj.r18})} style={{marginLeft: "0px", filter: getFilter()}}/>
-                                <span className="dialog-text" style={{marginLeft: "10px"}}>R18</span>
-                                <img className="dialog-title-img" src={lewdIcon} style={{marginLeft: "15px", height: "50px", filter: getFilter()}}/>
-                            </div> : null}
+                            {mainJSX()}
                             {error ? <div className="dialog-validation-container"><span className="dialog-validation" ref={errorRef}></span></div> : null}
                             <div className="dialog-row">
                                 <button onClick={() => click("reject")} className="dialog-button">{"Cancel"}</button>
@@ -361,62 +369,7 @@ const EditTagDialog: React.FunctionComponent = (props) => {
                             <button onClick={() => close()} className="dialog-button">{"OK"}</button>
                         </div> 
                         </> : <>
-                        <div className="dialog-row">
-                            <span className="dialog-text">Tag: </span>
-                            <input className="dialog-input-taller" type="text" spellCheck={false} value={editTagObj.key} onChange={(event) => setEditTagObj({...editTagObj, key: event.target.value})} style={{width: "max-content"}}/>
-                        </div>
-                        {tagSocialJSX()}
-                        <div className="dialog-row">
-                            <span className="dialog-text">Image: </span>
-                            <label htmlFor="tag-img" className="dialog-button" style={{marginLeft: "5px", paddingTop: "0px", paddingBottom: "0px"}}>
-                                <img className="dialog-button-img-small" src={uploadIcon}/>
-                                <span className="dialog-button-text-small">Upload</span>
-                            </label>
-                            <input id="tag-img" type="file" onChange={(event) => uploadTagImg(event)}/>
-                            {editTagObj.image && editTagObj.image !== "delete" ? 
-                            <img className="dialog-x-button" src={xButton} style={{filter: getFilter()}} onClick={() => setEditTagObj({...editTagObj, image: "delete"})}/>
-                            : null}
-                        </div>
-                        {editTagObj.image && editTagObj.image !== "delete" ? 
-                        <div className="dialog-row">
-                            <img className="dialog-img" src={editTagObj.image === "delete" ? "" : editTagObj.image}/>
-                        </div>
-                        : null}
-                        <div className="dialog-row">
-                            <span className="dialog-text">Description: </span>
-                        </div>
-                        <div className="dialog-row">
-                            <textarea className="dialog-textarea-small" style={{resize: "vertical", height: "30px"}} spellCheck={false} value={editTagObj.description} onChange={(event) => setEditTagObj({...editTagObj, description: event.target.value})}></textarea>
-                        </div>
-                        <div className="dialog-row">
-                            <span className="dialog-text">Aliases: </span>
-                        </div>
-                        <div className="dialog-row">
-                            <textarea className="dialog-textarea-small" style={{resize: "vertical", height: "30px"}} spellCheck={false} value={editTagObj.aliases.join(" ")} onChange={(event) => setEditTagObj({...editTagObj, aliases: event.target.value.split(/ +/g)})}></textarea>
-                        </div>
-                        <div className="dialog-row">
-                            <span className="dialog-text">Implications: </span>
-                        </div>
-                        <div className="dialog-row">
-                            <textarea className="dialog-textarea-small" style={{resize: "vertical", height: "30px"}} spellCheck={false} value={editTagObj.implications.join(" ")} onChange={(event) => setEditTagObj({...editTagObj, implications: event.target.value.split(/ +/g)})}></textarea>
-                        </div>
-                        {editTagObj.type !== "artist" ? <>
-                        <div className="dialog-row">
-                            <span className="dialog-text">Pixiv Tags: </span>
-                        </div>
-                        <div className="dialog-row">
-                            <textarea className="dialog-textarea-small" style={{resize: "vertical", height: "30px"}} spellCheck={false} value={editTagObj.pixivTags.join(" ")} onChange={(event) => setEditTagObj({...editTagObj, pixivTags: event.target.value.split(/ +/g)})}></textarea>
-                        </div></> : null}
-                        <div className="dialog-row">
-                            <span className="dialog-text">Reason: </span>
-                            <input style={{width: "100%"}} className="dialog-input-taller" type="text" spellCheck={false} value={editTagObj.reason} onChange={(event) => setEditTagObj({...editTagObj, reason: event.target.value})}/>
-                        </div>
-                        {!functions.arrayIncludes(editTagObj.type, ["artist", "character", "series"]) && session.showR18 ?
-                        <div className="dialog-row">
-                            <img className="dialog-checkbox" src={editTagObj.r18 ? radioButtonChecked : radioButton} onClick={() => setEditTagObj({...editTagObj, r18: !editTagObj.r18})} style={{marginLeft: "0px", filter: getFilter()}}/>
-                            <span className="dialog-text" style={{marginLeft: "10px"}}>R18</span>
-                            <img className="dialog-title-img" src={lewdIcon} style={{marginLeft: "15px", height: "50px", filter: getFilter()}}/>
-                        </div> : null}
+                        {mainJSX()}
                         {error ? <div className="dialog-validation-container"><span className="dialog-validation" ref={errorRef}></span></div> : null}
                         <div className="dialog-row">
                             <button onClick={() => click("reject")} className="dialog-button">{"Cancel"}</button>

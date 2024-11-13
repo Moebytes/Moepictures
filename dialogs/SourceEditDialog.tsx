@@ -139,6 +139,63 @@ const SourceEditDialog: React.FunctionComponent = (props) => {
         setReason("")
     }
 
+    const mainJSX = () => {
+        return (
+            <>
+            <div className="dialog-row">
+                <span className="dialog-text">Title: </span>
+                <input className="dialog-input-small" type="text" spellCheck={false} value={title} onChange={(event) => setTitle(event.target.value)}/>
+            </div>
+            <div className="dialog-row">
+                <span className="dialog-text">Translated Title: </span>
+                <input className="dialog-input-small" type="text" spellCheck={false} value={translatedTitle} onChange={(event) => setTranslatedTitle(event.target.value)}/>
+            </div>
+            <div className="dialog-row">
+                <span className="dialog-text">Artist: </span>
+                <input className="dialog-input-small" type="text" spellCheck={false} value={artist} onChange={(event) => setArtist(event.target.value)}/>
+            </div>
+            <div className="dialog-row">
+                <span className="dialog-text">Posted: </span>
+                <input className="dialog-input-small" style={{width: "30%"}} type="date" spellCheck={false} value={posted} onChange={(event) => setPosted(event.target.value)}/>
+            </div>
+            <div className="dialog-row">
+                <span className="dialog-text">Link: </span>
+                <input className="dialog-input" type="text" spellCheck={false} value={link} onChange={(event) => setLink(event.target.value)}/>
+            </div>
+            <div className="dialog-row">
+                <span className="dialog-text">Bookmarks: </span>
+                <input className="dialog-input-small" style={{width: "15%"}} type="text" spellCheck={false} value={bookmarks} onChange={(event) => setBookmarks(event.target.value)}/>
+            </div>
+            <div className="dialog-row">
+                <span className="dialog-text">Commentary: </span>
+            </div>
+            <div className="dialog-row">
+                <textarea className="dialog-textarea-small" style={{resize: "vertical"}} spellCheck={false} value={commentary} onChange={(event) => setCommentary(event.target.value)}></textarea>
+            </div>
+            <div className="dialog-row">
+                <span className="dialog-text">Translated Commentary: </span>
+            </div>
+            <div className="dialog-row">
+                <textarea className="dialog-textarea-small" style={{resize: "vertical"}} spellCheck={false} value={translatedCommentary} onChange={(event) => setTranslatedCommentary(event.target.value)}></textarea>
+            </div>
+            <div className="dialog-row">
+                <span className="dialog-text">Mirrors: </span>
+            </div>
+            <div className="dialog-row">
+                <textarea className="dialog-textarea-small" style={{resize: "vertical"}} spellCheck={false} value={mirrors} onChange={(event) => setMirrors(event.target.value)}></textarea>
+            </div>
+            <div className="dialog-row">
+                <span className="dialog-text">Buy Link: </span>
+                <input className="dialog-input" style={{width: "75%"}} type="text" spellCheck={false} value={purchaseLink} onChange={(event) => setPurchaseLink(event.target.value)}/>
+            </div>
+            <div className="dialog-row">
+                <span className="dialog-text">Reason: </span>
+                <input style={{width: "100%"}} className="dialog-input" type="text" spellCheck={false} value={reason} onChange={(event) => setReason(event.target.value)}/>
+            </div>
+            </>
+        )
+    }
+
     if (sourceEditID) {
         if (session.banned) {
             return (
@@ -185,56 +242,7 @@ const SourceEditDialog: React.FunctionComponent = (props) => {
                             <div className="dialog-title-container">
                                 <span className="dialog-title">Source Edit</span>
                             </div>
-                            <div className="dialog-row">
-                                <span className="dialog-text">Title: </span>
-                                <input className="dialog-input-small" type="text" spellCheck={false} value={title} onChange={(event) => setTitle(event.target.value)}/>
-                            </div>
-                            <div className="dialog-row">
-                                <span className="dialog-text">Translated Title: </span>
-                                <input className="dialog-input-small" type="text" spellCheck={false} value={translatedTitle} onChange={(event) => setTranslatedTitle(event.target.value)}/>
-                            </div>
-                            <div className="dialog-row">
-                                <span className="dialog-text">Artist: </span>
-                                <input className="dialog-input-small" type="text" spellCheck={false} value={artist} onChange={(event) => setArtist(event.target.value)}/>
-                            </div>
-                            <div className="dialog-row">
-                                <span className="dialog-text">Posted: </span>
-                                <input className="dialog-input-small" style={{width: "30%"}} type="date" spellCheck={false} value={posted} onChange={(event) => setPosted(event.target.value)}/>
-                            </div>
-                            <div className="dialog-row">
-                                <span className="dialog-text">Link: </span>
-                                <input className="dialog-input" type="text" spellCheck={false} value={link} onChange={(event) => setLink(event.target.value)}/>
-                            </div>
-                            <div className="dialog-row">
-                                <span className="dialog-text">Bookmarks: </span>
-                                <input className="dialog-input-small" style={{width: "15%"}} type="text" spellCheck={false} value={bookmarks} onChange={(event) => setBookmarks(event.target.value)}/>
-                            </div>
-                            <div className="dialog-row">
-                                <span className="dialog-text">Commentary: </span>
-                            </div>
-                            <div className="dialog-row">
-                                <textarea className="dialog-textarea-small" style={{resize: "vertical"}} spellCheck={false} value={commentary} onChange={(event) => setCommentary(event.target.value)}></textarea>
-                            </div>
-                            <div className="dialog-row">
-                                <span className="dialog-text">Translated Commentary: </span>
-                            </div>
-                            <div className="dialog-row">
-                                <textarea className="dialog-textarea-small" style={{resize: "vertical"}} spellCheck={false} value={translatedCommentary} onChange={(event) => setTranslatedCommentary(event.target.value)}></textarea>
-                            </div>
-                            <div className="dialog-row">
-                                <span className="dialog-text">Mirrors: </span>
-                            </div>
-                            <div className="dialog-row">
-                                <textarea className="dialog-textarea-small" style={{resize: "vertical"}} spellCheck={false} value={mirrors} onChange={(event) => setMirrors(event.target.value)}></textarea>
-                            </div>
-                            <div className="dialog-row">
-                                <span className="dialog-text">Buy Link: </span>
-                                <input className="dialog-input" style={{width: "75%"}} type="text" spellCheck={false} value={purchaseLink} onChange={(event) => setPurchaseLink(event.target.value)}/>
-                            </div>
-                            <div className="dialog-row">
-                                <span className="dialog-text">Reason: </span>
-                                <input style={{width: "100%"}} className="dialog-input" type="text" spellCheck={false} value={reason} onChange={(event) => setReason(event.target.value)}/>
-                            </div>
+                            {mainJSX()}
                             {error ? <div className="dialog-validation-container"><span className="dialog-validation" ref={errorRef}></span></div> : null}
                             <div className="dialog-row">
                                 <button onClick={() => click("reject")} className="dialog-button">{"Cancel"}</button>
@@ -264,56 +272,7 @@ const SourceEditDialog: React.FunctionComponent = (props) => {
                             <button onClick={() => close()} className="dialog-button">{"OK"}</button>
                         </div> 
                         </> : <>
-                        <div className="dialog-row">
-                            <span className="dialog-text">Title: </span>
-                            <input className="dialog-input-small" type="text" spellCheck={false} value={title} onChange={(event) => setTitle(event.target.value)}/>
-                        </div>
-                        <div className="dialog-row">
-                            <span className="dialog-text">Translated Title: </span>
-                            <input className="dialog-input-small" type="text" spellCheck={false} value={translatedTitle} onChange={(event) => setTranslatedTitle(event.target.value)}/>
-                        </div>
-                        <div className="dialog-row">
-                            <span className="dialog-text">Artist: </span>
-                            <input className="dialog-input-small" type="text" spellCheck={false} value={artist} onChange={(event) => setArtist(event.target.value)}/>
-                        </div>
-                        <div className="dialog-row">
-                            <span className="dialog-text">Posted: </span>
-                            <input className="dialog-input-small" style={{width: "30%"}} type="date" spellCheck={false} value={posted} onChange={(event) => setPosted(event.target.value)}/>
-                        </div>
-                        <div className="dialog-row">
-                            <span className="dialog-text">Link: </span>
-                            <input className="dialog-input" type="text" spellCheck={false} value={link} onChange={(event) => setLink(event.target.value)}/>
-                        </div>
-                        <div className="dialog-row">
-                            <span className="dialog-text">Bookmarks: </span>
-                            <input className="dialog-input-small" style={{width: "15%"}} type="text" spellCheck={false} value={bookmarks} onChange={(event) => setBookmarks(event.target.value)}/>
-                        </div>
-                        <div className="dialog-row">
-                            <span className="dialog-text">Commentary: </span>
-                        </div>
-                        <div className="dialog-row">
-                            <textarea className="dialog-textarea-small" style={{resize: "vertical"}} spellCheck={false} value={commentary} onChange={(event) => setCommentary(event.target.value)}></textarea>
-                        </div>
-                        <div className="dialog-row">
-                            <span className="dialog-text">Translated Commentary: </span>
-                        </div>
-                        <div className="dialog-row">
-                            <textarea className="dialog-textarea-small" style={{resize: "vertical"}} spellCheck={false} value={translatedCommentary} onChange={(event) => setTranslatedCommentary(event.target.value)}></textarea>
-                        </div>
-                        <div className="dialog-row">
-                            <span className="dialog-text">Mirrors: </span>
-                        </div>
-                        <div className="dialog-row">
-                            <textarea className="dialog-textarea-small" style={{resize: "vertical"}} spellCheck={false} value={mirrors} onChange={(event) => setMirrors(event.target.value)}></textarea>
-                        </div>
-                        <div className="dialog-row">
-                            <span className="dialog-text">Buy Link: </span>
-                            <input className="dialog-input" style={{width: "75%"}} type="text" spellCheck={false} value={purchaseLink} onChange={(event) => setPurchaseLink(event.target.value)}/>
-                        </div>
-                        <div className="dialog-row">
-                            <span className="dialog-text">Reason: </span>
-                            <input style={{width: "100%"}} className="dialog-input" type="text" spellCheck={false} value={reason} onChange={(event) => setReason(event.target.value)}/>
-                        </div>
+                        {mainJSX()}
                         {error ? <div className="dialog-validation-container"><span className="dialog-validation" ref={errorRef}></span></div> : null}
                         <div className="dialog-row">
                             <button onClick={() => click("reject")} className="dialog-button">{"Cancel"}</button>

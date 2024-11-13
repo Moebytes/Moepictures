@@ -173,9 +173,11 @@ const PostImage: React.FunctionComponent<Props> = (props) => {
         const updateImg = async () => {
             const decryptedImage = await functions.decryptItem(props.img, session)
             if (!decryptedImage) return
+            const arrayBuffer = await fetch(decryptedImage).then((r) => r.arrayBuffer())
+            const type = functions.bufferFileType(arrayBuffer)
+            if (!type?.length) return
             let isAnimatedWebp = false
             if (functions.isWebP(props.img)) {
-                const arrayBuffer = await fetch(props.img).then((r) => r.arrayBuffer())
                 isAnimatedWebp = functions.isAnimatedWebp(arrayBuffer)
             }
             if (functions.isGIF(props.img) || isAnimatedWebp) {

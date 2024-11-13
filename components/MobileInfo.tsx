@@ -243,23 +243,10 @@ const MobileInfo: React.FunctionComponent<Props> = (props) => {
             const tagClick = () => {
                 history.push(`/tag/${currentTags[i].tag}`)
             }
-            const tagColor = () => {
-                if (currentTags[i].r18) return "r18-tag-color"
-                if (currentTags[i].type === "artist") return "artist-tag-color"
-                if (currentTags[i].type === "character") return "character-tag-color"
-                if (currentTags[i].type === "series") return "series-tag-color"
-                if (currentTags[i].type === "meta") return "meta-tag-color"
-                if (currentTags[i].type === "appearance") return "appearance-tag-color"
-                if (currentTags[i].type === "outfit") return "outfit-tag-color"
-                if (currentTags[i].type === "accessory") return "accessory-tag-color"
-                if (currentTags[i].type === "action") return "action-tag-color"
-                if (currentTags[i].type === "scenery") return "scenery-tag-color"
-                return "tag"
-            }
             jsx.push(
                 <div className="mobileinfo-row">
                     <span className="tag-hover" onClick={() => tagClick()}>
-                        <span className={`tag ${tagColor()}`}>{currentTags[i].tag.replaceAll("-", " ")}</span>
+                        <span className={`tag ${functions.getTagColor(currentTags[i])}`}>{currentTags[i].tag.replaceAll("-", " ")}</span>
                         <span className={`tag-count ${currentTags[i].count === "1" ? "artist-tag-color" : ""}`}>{currentTags[i].count}</span>
                     </span>
                 </div>

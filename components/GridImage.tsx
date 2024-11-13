@@ -2,11 +2,10 @@ import React, {useEffect, useRef, useState, forwardRef, useImperativeHandle} fro
 import {useHistory} from "react-router-dom"
 import loading from "../assets/icons/loading.gif"
 import {useFilterSelector, useInteractionActions, useLayoutSelector, usePlaybackSelector, usePlaybackActions, 
-useThemeSelector, useSearchSelector, useSessionSelector, useFlagSelector, useFlagActions} from "../store"
+useThemeSelector, useSearchSelector, useSessionSelector, useFlagSelector, useFlagActions, useSearchActions} from "../store"
 import JSZip from "jszip"
 import path from "path"
 import functions from "../structures/Functions"
-import cryptoFunctions from "../structures/CryptoFunctions"
 import privateIcon from "../assets/icons/lock-opt.png"
 import "./styles/gridimage.less"
 
@@ -42,6 +41,7 @@ const GridImage = forwardRef<Ref, Props>((props, componentRef) => {
     const {secondsProgress, reverse, speed, seekTo} = usePlaybackSelector()
     const {setSecondsProgress, setReverse, setSeekTo} = usePlaybackActions()
     const {sizeType, square, scroll, format, selectionMode, selectionItems, selectionPosts} = useSearchSelector()
+    const {setSelectionItems, setSelectionPosts} = useSearchActions()
     const {downloadFlag, downloadIDs} = useFlagSelector()
     const {setDownloadFlag, setDownloadIDs} = useFlagActions()
     const {setScrollY, setToolTipX, setToolTipY, setToolTipEnabled, setToolTipPost, setToolTipImg} = useInteractionActions()
@@ -463,7 +463,7 @@ const GridImage = forwardRef<Ref, Props>((props, componentRef) => {
         } else {
             containerRef.current.style.boxShadow = "none"
         }
-    }, [imageLoaded, sizeType, selected, session, props.post?.favorited])
+    }, [imageLoaded, sizeType, selected, session, props.post])
 
     useEffect(() => {
         if (mobile) {
@@ -787,6 +787,8 @@ const GridImage = forwardRef<Ref, Props>((props, componentRef) => {
                     selectionPosts.delete(props.post.postID)
                 }
                 setSelected(isSelected)
+                setSelectionItems(selectionItems)
+                setSelectionPosts(selectionPosts)
             }
         } else {
             if (!drag) {

@@ -1,7 +1,8 @@
 import React, {useEffect, useRef, useState} from "react"
 import {useFilterSelector, useInteractionActions, useLayoutSelector,  
 useThemeSelector, useSearchSelector, useSessionSelector, useSearchActions, 
-useSessionActions, useCacheSelector, useGroupDialogActions, useFilterActions} from "../store"
+useSessionActions, useCacheSelector, useGroupDialogActions, useFilterActions,
+useCacheActions} from "../store"
 import functions from "../structures/Functions"
 import Slider from "react-slider"
 import star from "../assets/icons/star.png"
@@ -20,7 +21,6 @@ import sharpenIcon from "../assets/icons/sharpen.png"
 import pixelateIcon from "../assets/icons/pixelate.png"
 import nextIcon from "../assets/icons/next.png"
 import prevIcon from "../assets/icons/prev.png"
-import cryptoFunctions from "../structures/CryptoFunctions"
 import "./styles/postimageoptions.less"
 
 interface Props {
@@ -44,8 +44,9 @@ const PostImageOptions: React.FunctionComponent<Props> = (props) => {
     const {brightness, contrast, hue, saturation, lightness, blur, sharpen, pixelate} = useFilterSelector()
     const {setBrightness, setContrast, setHue, setSaturation, setLightness, setBlur, setSharpen, setPixelate} = useFilterActions()
     const {translationMode, format} = useSearchSelector()
-    const {setTranslationMode, setTranslationDrawingEnabled, setFormat} = useSearchActions()
+    const {setFormat} = useSearchActions()
     const {posts} = useCacheSelector()
+    const {setPosts} = useCacheActions()
     const {setFavGroupID} = useGroupDialogActions()
     const [favorited, setFavorited] = useState(false)
     const [favGrouped, setFavGrouped] = useState(false)
@@ -210,7 +211,7 @@ const PostImageOptions: React.FunctionComponent<Props> = (props) => {
     const updateFavorite = async (value: boolean) => {
         if (!props.post || !session.username) return
         await functions.post("/api/favorite/update", {postID: props.post.postID, favorited: value}, session, setSessionFlag)
-        functions.updateLocalFavorite(props.post.postID, value, posts)
+        functions.updateLocalFavorite(props.post.postID, value, posts, setPosts)
         setFavorited(value)
     }
 

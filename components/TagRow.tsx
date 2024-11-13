@@ -238,21 +238,6 @@ const TagRow: React.FunctionComponent<Props> = (props) => {
         return jsx
     }
 
-    const getTagColor = () => {
-        if (props.tag.banned) return "strikethrough"
-        if (props.tag.r18) return "r18-tag-color"
-        if (props.tag.type === "artist") return "artist-tag-color"
-        if (props.tag.type === "character") return "character-tag-color"
-        if (props.tag.type === "series") return "series-tag-color"
-        if (props.tag.type === "meta") return "meta-tag-color"
-        if (props.tag.type === "appearance") return "appearance-tag-color"
-        if (props.tag.type === "outfit") return "outfit-tag-color"
-        if (props.tag.type === "accessory") return "accessory-tag-color"
-        if (props.tag.type === "action") return "action-tag-color"
-        if (props.tag.type === "scenery") return "scenery-tag-color"
-        return "tag-color"
-    }
-
     return (
         <tr className="tagrow">
             {props.tag.image ?
@@ -262,7 +247,7 @@ const TagRow: React.FunctionComponent<Props> = (props) => {
             <div className="tagrow-content-container">
                 <td className="tagrow-container" style={{width: props.tag.image ? "16%" : "25%"}}>
                     <div className="tagrow-row">
-                        <span className={`tagrow-tag ${getTagColor()}`} onClick={tagPage} onAuxClick={tagPage} onContextMenu={tagPage}>{props.tag.tag.replaceAll("-", " ")}</span>
+                        <span className={`tagrow-tag ${functions.getTagColor(props.tag)}`} onClick={tagPage} onAuxClick={tagPage} onContextMenu={tagPage}>{props.tag.tag.replaceAll("-", " ")}</span>
                         {socialJSX()}
                         <span className="tagrow-tag-count">{props.tag.postCount}</span>
                     </div>
@@ -283,7 +268,7 @@ const TagRow: React.FunctionComponent<Props> = (props) => {
             </div>
             {session.username ?
             <div className="tag-buttons">
-                {permissions.isMod(session) ? <img className="tag-button" src={categoryIcon} onClick={categorizeTagDialog}/> : null}
+                <img className="tag-button" src={categoryIcon} onClick={categorizeTagDialog}/>
                 <img className="tag-button" src={historyIcon} onClick={tagHistory}/>
                 <img className="tag-button" src={alias} onClick={aliasTagDialog}/>
                 <img className="tag-button" src={edit} onClick={editTagDialog}/>

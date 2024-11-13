@@ -111,6 +111,23 @@ const EditGroupDialog: React.FunctionComponent = (props) => {
         setReason("")
     }
 
+    const mainJSX = () => {
+        return (
+            <>
+            <div className="dialog-row">
+                <span className="dialog-text">Name: </span>
+                <input className="dialog-input-taller" type="text" spellCheck={false} value={name} onChange={(event) => setName(event.target.value)}/>
+            </div>
+            <div className="dialog-row">
+                <span className="dialog-text">Description: </span>
+            </div>
+            <div className="dialog-row">
+                <textarea className="dialog-textarea" style={{resize: "vertical"}} spellCheck={false} value={description} onChange={(event) => setDescription(event.target.value)}></textarea>
+            </div>
+            </>
+        )
+    }
+
     if (editGroupObj) {
         if (session.banned) {
             return (
@@ -139,16 +156,7 @@ const EditGroupDialog: React.FunctionComponent = (props) => {
                             <div className="dialog-title-container">
                                 <span className="dialog-title">Edit Group</span>
                             </div>
-                            <div className="dialog-row">
-                                <span className="dialog-text">Name: </span>
-                                <input className="dialog-input-taller" type="text" spellCheck={false} value={name} onChange={(event) => setName(event.target.value)}/>
-                            </div>
-                            <div className="dialog-row">
-                                <span className="dialog-text">Description: </span>
-                            </div>
-                            <div className="dialog-row">
-                                <textarea className="dialog-textarea" style={{resize: "vertical"}} spellCheck={false} value={description} onChange={(event) => setDescription(event.target.value)}></textarea>
-                            </div>
+                            {mainJSX()}
                             {error ? <div className="dialog-validation-container"><span className="dialog-validation" ref={errorRef}></span></div> : null}
                             <div className="dialog-row">
                                 <button onClick={() => click("reject")} className="dialog-button">{"Cancel"}</button>
@@ -178,16 +186,7 @@ const EditGroupDialog: React.FunctionComponent = (props) => {
                             <button onClick={() => close()} className="dialog-button">{"OK"}</button>
                         </div>
                         </> : <>
-                        <div className="dialog-row">
-                            <span className="dialog-text">Name: </span>
-                            <input className="dialog-input-taller" type="text" spellCheck={false} value={name} onChange={(event) => setName(event.target.value)}/>
-                        </div>
-                        <div className="dialog-row">
-                            <span className="dialog-text">Description: </span>
-                        </div>
-                        <div className="dialog-row">
-                            <textarea className="dialog-textarea" style={{resize: "vertical"}} spellCheck={false} value={description} onChange={(event) => setDescription(event.target.value)}></textarea>
-                        </div>
+                        {mainJSX()}
                         <div className="dialog-row">
                             <span className="dialog-text">Reason: </span>
                             <input className="dialog-input-taller" type="text" spellCheck={false} value={reason} onChange={(event) => setReason(event.target.value)}/>

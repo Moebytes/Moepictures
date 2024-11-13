@@ -254,25 +254,11 @@ const TagHistoryRow: React.FunctionComponent<Props> = (props) => {
         return <span className="historyrow-user-text" onClick={userClick} onAuxClick={userClick}>{editText} {functions.timeAgo(targetDate)} by {functions.toProperCase(props.tagHistory.user) || "deleted"}</span>
     }
 
-    const getTagColor = (tag: any) => {
-        if (tag.r18) return "r18-tag-color"
-        if (tag.type === "artist") return "artist-tag-color"
-        if (tag.type === "character") return "character-tag-color"
-        if (tag.type === "series") return "series-tag-color"
-        if (tag.type === "meta") return "meta-tag-color"
-        if (tag.type === "appearance") return "appearance-tag-color"
-        if (tag.type === "outfit") return "outfit-tag-color"
-        if (tag.type === "accessory") return "accessory-tag-color"
-        if (tag.type === "action") return "action-tag-color"
-        if (tag.type === "scenery") return "scenery-tag-color"
-        return "tag-color"
-    }
-
     const diffJSX = () => {
         let jsx = [] as React.ReactElement[]
         let changes = props.tagHistory.changes || {}
         if (changes.type) {
-            jsx.push(<span className="historyrow-text"><span className={`historyrow-label-text ${getTagColor(props.tagHistory)}`}>Category:</span> {props.tagHistory.type}</span>)
+            jsx.push(<span className="historyrow-text"><span className={`historyrow-label-text ${functions.getTagColor(props.tagHistory)}`}>Category:</span> {props.tagHistory.type}</span>)
         }
         if (!prevHistory || changes.tag) {
             jsx.push(<span className="historyrow-text"><span className="historyrow-label-text">Name:</span> {props.tagHistory.tag}</span>)
@@ -320,7 +306,7 @@ const TagHistoryRow: React.FunctionComponent<Props> = (props) => {
             {session.username ? tagHistoryOptions() : null}
             <div className="historyrow-container">
                 <img className="historyrow-img-small" src={img} onClick={imgClick} onAuxClick={imgClick}/>
-                <span className={`historyrow-tag-text ${getTagColor(props.tagHistory)}`} onClick={imgClick} onAuxClick={imgClick}>{functions.toProperCase(props.tagHistory.key.replaceAll("-", " "))}</span>
+                <span className={`historyrow-tag-text ${functions.getTagColor(props.tagHistory)}`} onClick={imgClick} onAuxClick={imgClick}>{functions.toProperCase(props.tagHistory.key.replaceAll("-", " "))}</span>
                 {socialJSX()}
             </div>
             <div className="historyrow-container-row">
