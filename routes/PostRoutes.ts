@@ -422,6 +422,7 @@ const PostRoutes = (app: Express) => {
             const restrict = req.body.restrict 
             const style = req.body.style
             const source = req.body.source
+            const parentID = req.body.parentID
             let artists = req.body.artists
             let characters = req.body.characters
             let series = req.body.series
@@ -429,9 +430,12 @@ const PostRoutes = (app: Express) => {
             let reason = req.body.reason
             let silent = req.body.silent
 
-            let sourceEdit = source ? true : false
+            let sourceEdit = source !== undefined ? true : false
+            let tagEdit = tags !== undefined ? true : false
+            let parentEdit = parentID !== undefined ? true : false
     
             if (Number.isNaN(postID)) return res.status(400).send("Bad postID")
+            if (parentID && Number.isNaN(Number(parentID))) return res.status(400).send("Bad parentID")
             if (!req.session.username) return res.status(403).send("Unauthorized")
             if (!permissions.isContributor(req.session)) return res.status(403).send("Unauthorized")
             if (req.session.banned) return res.status(403).send("You are banned")
@@ -444,6 +448,25 @@ const PostRoutes = (app: Express) => {
             let addedTags = [] as string[]
             let removedTags = [] as string[]
 
+            if (parentEdit) {
+                const updatedDate = new Date().toISOString()
+
+                await sql.post.deleteChild(postID)
+                if (parentID && !Number.isNaN(Number(parentID))) await sql.post.insertChild(postID, Number(parentID))
+                if (unverified) {
+                    await sql.post.bulkUpdateUnverifiedPost(postID, {
+                        parentID: parentID || null,
+                        updatedDate,
+                        updater: req.session.username
+                    })
+                } else {
+                    await sql.post.bulkUpdatePost(postID, {
+                        parentID: parentID || null,
+                        updatedDate,
+                        updater: req.session.username
+                    })
+                }
+            } 
             if (sourceEdit) {
                 const updatedDate = new Date().toISOString()
 
@@ -480,7 +503,8 @@ const PostRoutes = (app: Express) => {
                         updater: req.session.username
                     })
                 }
-            } else {
+            } 
+            if (tagEdit) {
                 if (!artists?.[0]) artists = ["unknown-artist"]
                 if (!series?.[0]) series = characters.includes("original") ? ["no-series"] : ["unknown-series"]
                 if (!characters?.[0]) characters = ["unknown-character"]
@@ -614,7 +638,7 @@ const PostRoutes = (app: Express) => {
                 await sql.history.insertPostHistory({
                     postID, username: vanilla.user, images: vanillaImages, uploader: vanilla.uploader, updater: vanilla.updater, 
                     uploadDate: vanilla.uploadDate, updatedDate: vanilla.updatedDate, type: vanilla.type, restrict: vanilla.restrict, 
-                    style: vanilla.style, child: vanilla.child, title: vanilla.title, translatedTitle: vanilla.translatedTitle, 
+                    style: vanilla.style, parentID: vanilla.parentID, title: vanilla.title, translatedTitle: vanilla.translatedTitle, 
                     posted: vanilla.posted, artist: vanilla.artist, link: vanilla.link, commentary: vanilla.commentary, translatedCommentary: vanilla.translatedCommentary, 
                     bookmarks: vanilla.bookmarks, purchaseLink: vanilla.purchaseLink, mirrors: vanilla.mirrors, slug: vanilla.slug, hasOriginal: vanilla.hasOriginal, hasUpscaled: vanilla.hasUpscaled, 
                     artists: vanilla.artists, characters: vanilla.characters, series: vanilla.series, tags: vanilla.tags, addedTags: [], removedTags: [], imageChanged: false,
@@ -626,7 +650,7 @@ const PostRoutes = (app: Express) => {
                 await sql.history.insertPostHistory({
                     postID, username: req.session.username, images, uploader: updated.uploader, updater: updated.updater, 
                     uploadDate: updated.uploadDate, updatedDate: updated.updatedDate, type: updated.type, restrict: updated.restrict, 
-                    style: updated.style, child: updated.child, title: updated.title, translatedTitle: updated.translatedTitle, 
+                    style: updated.style, parentID: updated.parentID, title: updated.title, translatedTitle: updated.translatedTitle, 
                     posted: updated.posted, artist: updated.artist, link: updated.link, commentary: updated.commentary, slug: updated.slug,
                     translatedCommentary: updated.translatedCommentary, bookmarks: updated.bookmarks, purchaseLink: updated.purchaseLink, mirrors: updated.mirrors, 
                     hasOriginal: updated.hasOriginal, hasUpscaled: updated.hasUpscaled, artists: updated.artists, 
@@ -639,7 +663,7 @@ const PostRoutes = (app: Express) => {
                 await sql.history.insertPostHistory({
                     postID, username: req.session.username, images, uploader: updated.uploader, updater: updated.updater, 
                     uploadDate: updated.uploadDate, updatedDate: updated.updatedDate, type: updated.type, restrict: updated.restrict, 
-                    style: updated.style, child: updated.child, title: updated.title, translatedTitle: updated.translatedTitle, 
+                    style: updated.style, parentID: updated.parentID, title: updated.title, translatedTitle: updated.translatedTitle, 
                     posted: updated.posted, artist: updated.artist, link: updated.link, commentary: updated.commentary, slug: updated.slug,
                     translatedCommentary: updated.translatedCommentary, bookmarks: updated.bookmarks, purchaseLink: updated.purchaseLink, mirrors: updated.mirrors, 
                     hasOriginal: updated.hasOriginal, hasUpscaled: updated.hasUpscaled, artists: updated.artists, 
@@ -659,13 +683,16 @@ const PostRoutes = (app: Express) => {
             let restrict = req.body.restrict 
             let style = req.body.style
             let source = req.body.source
+            let parentID = req.body.parentID
             let artists = req.body.artists
             let characters = req.body.characters
             let series = req.body.series
             let tags = req.body.tags
             let reason = req.body.reason
 
-            let sourceEdit = source ? true : false
+            let sourceEdit = source !== undefined ? true : false
+            let tagEdit = tags !== undefined ? true : false
+            let parentEdit = parentID !== undefined ? true : false
     
             if (Number.isNaN(postID)) return res.status(400).send("Bad postID")
             if (!req.session.username) return res.status(403).send("Unauthorized")
@@ -677,7 +704,7 @@ const PostRoutes = (app: Express) => {
             if (post.locked && !permissions.isMod(req.session)) return res.status(403).send("Unauthorized")
             postID = await sql.post.insertUnverifiedPost()
 
-            if (sourceEdit) {
+            if (!tagEdit) {
                 const categories = await serverFunctions.tagCategories(post.tags)
                 artists = categories.artists.map((a: any) => a.tag)
                 characters = categories.characters.map((c: any) => c.tag)
@@ -686,7 +713,8 @@ const PostRoutes = (app: Express) => {
                 type = post.type
                 restrict = post.restrict
                 style = post.style
-            } else {
+            } 
+            if (!sourceEdit) {
                 source = {
                     title: post.title,
                     translatedTitle: post.translatedTitle,
@@ -699,6 +727,10 @@ const PostRoutes = (app: Express) => {
                     purchaseLink: post.purchaseLink,
                     mirrors: post.mirrors ? Object.values(post.mirrors).join("\n") : null
                 }
+            }
+            if (!parentEdit) {
+                const parentPost = await sql.post.parent(originalPostID)
+                parentID = parentPost?.parentID || null
             }
     
             if (!artists?.[0]) artists = ["unknown-artist"]
@@ -720,8 +752,7 @@ const PostRoutes = (app: Express) => {
             if (!functions.validRestrict(restrict)) return res.status(400).send("Invalid restrict")
             if (!functions.validStyle(style)) return res.status(400).send("Invalid style")
     
-            if (post.child) {
-                const parentID = await sql.post.parent(originalPostID).then((r) => r.parentID)
+            if (parentID) {
                 await sql.post.insertUnverifiedChild(postID, Number(parentID))
             }
             if (type !== "comic") type = "image"
@@ -816,7 +847,7 @@ const PostRoutes = (app: Express) => {
                 type,
                 restrict, 
                 style, 
-                child: post.child,
+                parentID: post.parentID,
                 title: source.title ? source.title : null,
                 translatedTitle: source.translatedTitle ? source.translatedTitle : null,
                 artist: source.artist ? source.artist : null,

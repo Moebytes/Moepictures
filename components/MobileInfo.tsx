@@ -39,6 +39,7 @@ import yandere from "../assets/icons/yandere.png"
 import konachan from "../assets/icons/konachan.png"
 import zerochan from "../assets/icons/zerochan.png"
 import group from "../assets/icons/group.png"
+import parent from "../assets/icons/parent.png"
 import compressIcon from "../assets/icons/compress.png"
 import upscaleIcon from "../assets/icons/waifu2x.png"
 import lockIcon from "../assets/icons/lock-red.png"
@@ -69,7 +70,7 @@ const MobileInfo: React.FunctionComponent<Props> = (props) => {
     const {session} = useSessionSelector()
     const {setSessionFlag} = useSessionActions()
     const {showUpscalingDialog, showCompressingDialog, showDeletePostDialog, showTakedownPostDialog} = usePostDialogSelector()
-    const {setTagEditID, setSourceEditID, setPrivatePostObj, setLockPostID, setShowUpscalingDialog, setShowCompressingDialog, setShowDeletePostDialog, setShowTakedownPostDialog} = usePostDialogActions()
+    const {setTagEditID, setSourceEditID, setPrivatePostObj, setLockPostID, setShowUpscalingDialog, setShowCompressingDialog, setShowDeletePostDialog, setShowTakedownPostDialog, setChildPostObj} = usePostDialogActions()
     const {setActionBanner} = useActiveActions()
     const {setGroupPostID} = useGroupDialogActions()
     const [maxTags, setMaxTags] = useState(23)
@@ -486,6 +487,10 @@ const MobileInfo: React.FunctionComponent<Props> = (props) => {
         if (newMode) setTranslationDrawingEnabled(true)
     }
 
+    const triggerParent = () => {
+        setChildPostObj({post: props.post, unverified: props.unverified})
+    }
+
     const triggerGroup = () => {
         setGroupPostID(props.post.postID)
     }
@@ -737,6 +742,12 @@ const MobileInfo: React.FunctionComponent<Props> = (props) => {
                             <span className="tag-hover" onClick={triggerSetAvatar}>
                                 <img className="mobileinfo-icon" src={setAvatar} style={{filter: getFilter()}}/>
                                 <span className="tag">Set Avatar</span>
+                            </span>
+                        </div> : null}
+                        {!props.unverified ? <div className="sidebar-row">
+                            <span className="tag-hover" onClick={triggerParent}>
+                                <img className="sidebar-icon" src={parent} style={{filter: getFilter()}}/>
+                                <span className="tag">Add to Parent</span>
                             </span>
                         </div> : null}
                         {!props.unverified ? <div className="sidebar-row">

@@ -27,6 +27,7 @@ import TagEditDialog from "../dialogs/TagEditDialog"
 import SourceEditDialog from "../dialogs/SourceEditDialog"
 import FavgroupDialog from "../dialogs/FavGroupDialog"
 import GroupDialog from "../dialogs/GroupDialog"
+import ParentDialog from "../dialogs/ParentDialog"
 import OCRDialog from "../dialogs/OCRDialog"
 import RevertPostHistoryDialog from "../dialogs/RevertPostHistoryDialog"
 import RevertTranslationHistoryDialog from "../dialogs/RevertTranslationHistoryDialog"
@@ -177,7 +178,6 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
     const updateChildren = async () => {
         if (post) {
             const childPosts = await functions.get("/api/post/children", {postID: post.postID}, session, setSessionFlag).catch(() => [])
-            console.log(childPosts)
             if (childPosts?.[0]) {
                 setChildPosts(childPosts)
             } else {
@@ -524,11 +524,11 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
             const {images, upscaledImages} = await functions.parseImages(post, session)
             const newTags = await functions.parseNewTags(post, session, setSessionFlag)
             await functions.put("/api/post/edit", {postID: post.postID, images, upscaledImages, type: post.type, restrict: post.restrict, source,
-            style: post.style, artists: post.artists, characters: post.characters, preserveChildren: post.child,
+            style: post.style, artists: post.artists, characters: post.characters, preserveChildren: Boolean(post.parentID),
             series: post.series, tags: post.tags, newTags, reason: post.reason}, session, setSessionFlag)
         } else {
             await functions.put("/api/post/quickedit", {postID: post.postID, type: post.type, restrict: post.restrict, source,
-            style: post.style, artists: post.artists, characters: post.characters, preserveChildren: post.child,
+            style: post.style, artists: post.artists, characters: post.characters, preserveChildren: Boolean(post.parentID),
             series: post.series, tags: post.tags, reason: post.reason}, session, setSessionFlag)
         }
         currentHistory()
@@ -681,6 +681,7 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
         <SourceEditDialog/>
         <FavgroupDialog/>
         <GroupDialog/>
+        <ParentDialog/>
         <OCRDialog/>
         <EditCommentDialog/>
         <DeleteCommentDialog/>

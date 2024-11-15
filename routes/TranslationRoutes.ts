@@ -142,9 +142,8 @@ const TranslationRoutes = (app: Express) => {
                 mirrors: post.mirrors ? Object.values(post.mirrors).join("\n") : null
             }
 
-            if (post.child) {
-                const parentID = await sql.post.parent(originalPostID).then((r) => r.parentID)
-                await sql.post.insertUnverifiedChild(postID, Number(parentID))
+            if (post.parentID) {
+                await sql.post.insertUnverifiedChild(postID, Number(post.parentID))
             }
             if (type !== "comic") type = "image"
 
@@ -238,7 +237,7 @@ const TranslationRoutes = (app: Express) => {
                 type,
                 restrict, 
                 style, 
-                child: post.child,
+                parentID: post.parentID,
                 title: source.title ? source.title : null,
                 translatedTitle: source.translatedTitle ? source.translatedTitle : null,
                 artist: source.artist ? source.artist : null,

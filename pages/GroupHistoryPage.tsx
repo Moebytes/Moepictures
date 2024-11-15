@@ -153,7 +153,7 @@ const GroupHistoryPage: React.FunctionComponent<Props> = (props) => {
                 currentIndex = i
             }
             if (previous?.groupID !== current.groupID) previous = null
-            jsx.push(<GroupHistoryRow historyIndex={i+1} groupHistory={visibleRevisions[i]} 
+            jsx.push(<GroupHistoryRow key={i} historyIndex={i+1} groupHistory={visibleRevisions[i]} 
                 previousHistory={previous} currentHistory={current} current={i === currentIndex}
                 onDelete={updateHistory} onEdit={updateHistory}/>)
         }
@@ -171,9 +171,9 @@ const GroupHistoryPage: React.FunctionComponent<Props> = (props) => {
             <div className="content" onMouseEnter={() => setEnableDrag(true)}>
                 <div className="history-page">
                     <span className="history-heading">{username ? `${functions.toProperCase(username)}'s Group History` : "Group History"}</span>
-                    <table className="history-container">
+                    <div className="history-container">
                         {generateRevisionsJSX()}
-                    </table>
+                    </div>
                 </div>
                 <Footer/>
             </div>

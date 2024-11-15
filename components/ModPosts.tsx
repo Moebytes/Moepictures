@@ -349,7 +349,7 @@ const ModPosts: React.FunctionComponent = (props) => {
                     </div>
                     <div className="mod-post-text-column">
                         <span className="mod-post-link" onClick={() => history.push(`/user/${post.uploader}`)}>Uploader: {functions.toProperCase(post?.uploader) || "deleted"}</span>
-                        {post.child ? <span className="mod-post-text">(Child)</span> : null}
+                        {post.parentID ? <span className="mod-post-link" onClick={() => history.push(`/post/${post.parentID}`)}>Parent ID: {post.parentID}</span> : null}
                         <span className="mod-post-text">Artist: {functions.toProperCase(post.artist || "None")}</span>
                         <span className="mod-post-text">Tags: {post.tags?.length}</span>
                         <span className="mod-post-text">New Tags: {post.newTags || 0}</span>

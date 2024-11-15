@@ -468,10 +468,8 @@ export default class ServerFunctions {
             for (let j = 0; j < post.images.length; j++) {
                 const image = post.images[j]
                 const imgPath = functions.getImagePath(image.type, post.postID, image.order, image.filename)
-                console.log(imgPath)
                 const buffer = await ServerFunctions.getFile(imgPath, false, false) as any
                 const md5 = crypto.createHash("md5").update(buffer).digest("hex")
-                console.log(md5)
                 await sql.post.updateImage(image.imageID, "hash", md5)
             }
         }

@@ -8,15 +8,11 @@ import PostImage from "../components/PostImage"
 import PostModel from "../components/PostModel"
 import PostSong from "../components/PostSong"
 import PostImageOptions from "../components/PostImageOptions"
-import CutenessMeter from "../components/CutenessMeter"
-import Comments from "../components/Comments"
 import Commentary from "../components/Commentary"
 import BuyLink from "../components/BuyLink"
 import functions from "../structures/Functions"
 import Carousel from "../components/Carousel"
-import DeletePostDialog from "../dialogs/DeletePostDialog"
-import DeleteCommentDialog from "../dialogs/DeleteCommentDialog"
-import EditCommentDialog from "../dialogs/EditCommentDialog"
+import ParentDialog from "../dialogs/ParentDialog"
 import TagEditDialog from "../dialogs/TagEditDialog"
 import SourceEditDialog from "../dialogs/SourceEditDialog"
 import UpscalePostDialog from "../dialogs/UpscalePostDialog"
@@ -264,6 +260,7 @@ const UnverifiedPostPage: React.FunctionComponent<Props> = (props) => {
 
     return (
         <>
+        <ParentDialog/>
         <TagEditDialog/>
         <SourceEditDialog/>
         {post ? <UpscalePostDialog post={post}/> : null}

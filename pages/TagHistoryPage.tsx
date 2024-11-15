@@ -161,7 +161,7 @@ const TagHistoryPage: React.FunctionComponent<Props> = (props) => {
                 currentIndex = i
             }
             if (previous?.tag !== current.tag) previous = null
-            jsx.push(<TagHistoryRow historyIndex={i+1} tagHistory={visibleRevisions[i]} 
+            jsx.push(<TagHistoryRow key={i} historyIndex={i+1} tagHistory={visibleRevisions[i]} 
                 previousHistory={previous} currentHistory={current} current={i === currentIndex}
                 onDelete={updateHistory} onEdit={updateHistory}/>)
         }
@@ -179,9 +179,9 @@ const TagHistoryPage: React.FunctionComponent<Props> = (props) => {
             <div className="content" onMouseEnter={() => setEnableDrag(true)}>
                 <div className="history-page">
                     <span className="history-heading">{username ? `${functions.toProperCase(username)}'s Tag History` : "Tag History"}</span>
-                    <table className="history-container">
+                    <div className="history-container">
                         {generateRevisionsJSX()}
-                    </table>
+                    </div>
                 </div>
                 <Footer/>
             </div>

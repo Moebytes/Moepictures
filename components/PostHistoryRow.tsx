@@ -95,11 +95,11 @@ const PostHistoryRow: React.FunctionComponent<Props> = (props) => {
             const {images, upscaledImages} = await functions.parseImages(props.postHistory, session)
             const newTags = await functions.parseNewTags(props.postHistory, session, setSessionFlag)
             await functions.put("/api/post/edit", {postID: props.postHistory.postID, images, upscaledImages, type: props.postHistory.type, restrict: props.postHistory.restrict, source,
-            style: props.postHistory.style, artists: props.postHistory.artists, characters: props.postHistory.characters, preserveChildren: props.postHistory.child,
+            style: props.postHistory.style, artists: props.postHistory.artists, characters: props.postHistory.characters, preserveChildren: Boolean(props.postHistory.parentID),
             series: props.postHistory.series, tags: props.postHistory.tags, newTags, reason: props.postHistory.reason}, session, setSessionFlag)
         } else {
             await functions.put("/api/post/quickedit", {postID: props.postHistory.postID, type: props.postHistory.type, restrict: props.postHistory.restrict, source,
-            style: props.postHistory.style, artists: props.postHistory.artists, characters: props.postHistory.characters, preserveChildren: props.postHistory.child,
+            style: props.postHistory.style, artists: props.postHistory.artists, characters: props.postHistory.characters, preserveChildren: Boolean(props.postHistory.parentID),
             series: props.postHistory.series, tags: props.postHistory.tags, reason: props.postHistory.reason}, session, setSessionFlag)
         }
         props.onEdit?.()
@@ -336,8 +336,14 @@ const PostHistoryRow: React.FunctionComponent<Props> = (props) => {
         let jsx = [] as React.ReactElement[]
         let changes = props.postHistory.changes || {}
         let tagChanges = props.postHistory.addedTags?.length || props.postHistory.removedTags?.length
+        if (changes.parentID !== undefined && !changes.parentID) {
+            jsx.push(<span className="historyrow-text-strong">[Parent Removed]</span>)
+        }
         if ((!prevHistory && props.postHistory.images.length > 1) || changes.images) {
             jsx.push(<span className="historyrow-text"><span className="historyrow-label-text">Images:</span> {props.postHistory.images.length}</span>)
+        }
+        if ((!prevHistory && props.postHistory.parentID) || changes.parentID) {
+            jsx.push(<span className="historyrow-text"><span className="historyrow-label-text">Parent ID:</span> <span className="historyrow-label-link" onClick={() => history.push(`/post/${props.postHistory.parentID}`)}>{props.postHistory.parentID}</span></span>)
         }
         if (!prevHistory || changes.type) {
             jsx.push(<span className="historyrow-text"><span className="historyrow-label-text">Type:</span> {functions.toProperCase(props.postHistory.type)}</span>)

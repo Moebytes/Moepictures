@@ -526,6 +526,7 @@ export default class Functions {
     }
 
     public static changeFavicon = (url: string) => {
+        if (typeof window === "undefined") return
         let link = document.querySelector(`link[rel~="icon"]`) as any
         if (!link) {
             link = document.createElement("link")
@@ -1130,7 +1131,6 @@ export default class Functions {
 
     public static getThumbnailLink = (folder: string, postID: number, order: number, filename: string, sizeType: string, mobile?: boolean) => {
         if (!filename) return ""
-        if (folder !== "image" && folder !== "comic" && folder !== "animation") return Functions.getImageLink(folder, postID, order, filename)
         let size = 265
         if (sizeType === "tiny") size = 350
         if (sizeType === "small") size = 400
@@ -1138,6 +1138,10 @@ export default class Functions {
         if (sizeType === "large") size = 800
         if (sizeType === "massive") size = 1000
         if (mobile) size = Math.floor(size / 2)
+        if (folder !== "image" && folder !== "comic" && folder !== "animation") {
+            if (!folder || filename.includes("history/")) return `${window.location.protocol}//${window.location.host}/${`thumbnail/${size}/${filename}`}`
+            return Functions.getImageLink(folder, postID, order, filename)
+        }
         return `${window.location.protocol}//${window.location.host}/thumbnail/${size}/${folder}/${postID}-${order}-${encodeURIComponent(filename)}`
     }
 
@@ -2546,6 +2550,9 @@ export default class Functions {
         }
         if (oldPost.style !== newPost.style) {
             json.style = newPost.style
+        }
+        if (oldPost.parentID !== newPost.parentID) {
+            json.parentID = newPost.parentID
         }
         if (oldPost.title !== newPost.title) {
             json.title = newPost.title

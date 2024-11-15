@@ -570,7 +570,7 @@ const HistoryPage: React.FunctionComponent = () => {
                     currentIndex = i
                 }
                 if (previous?.postID !== current.postID) previous = null
-                jsx.push(<PostHistoryRow historyIndex={i+1} postHistory={visible[i]} 
+                jsx.push(<PostHistoryRow key={i} historyIndex={i+1} postHistory={visible[i]} 
                     previousHistory={previous} currentHistory={current} current={i === currentIndex}
                     onDelete={updateHistory} onEdit={updateHistory} exact={commitSearch}/>)
             }
@@ -582,7 +582,7 @@ const HistoryPage: React.FunctionComponent = () => {
                     currentIndex = i
                 }
                 if (previous?.tag !== current.tag) previous = null
-                jsx.push(<TagHistoryRow historyIndex={i+1} tagHistory={visible[i]} 
+                jsx.push(<TagHistoryRow key={i} historyIndex={i+1} tagHistory={visible[i]} 
                     previousHistory={previous} currentHistory={current} current={i === currentIndex}
                     onDelete={updateHistory} onEdit={updateHistory}/>)
             }
@@ -594,7 +594,7 @@ const HistoryPage: React.FunctionComponent = () => {
                     currentIndex = i
                 }
                 if (previous?.groupID !== current.groupID) previous = null
-                jsx.push(<GroupHistoryRow historyIndex={i+1} groupHistory={visible[i]} 
+                jsx.push(<GroupHistoryRow key={i} historyIndex={i+1} groupHistory={visible[i]} 
                     previousHistory={previous} currentHistory={current} current={i === currentIndex}
                     onDelete={updateHistory} onEdit={updateHistory}/>)
             }
@@ -608,16 +608,16 @@ const HistoryPage: React.FunctionComponent = () => {
                 }
                 if (previous?.postID !== current.postID &&
                     previous?.order !== current.order) previous = null
-                jsx.push(<TranslationHistoryRow previousHistory={previous} translationHistory={visible[i]} 
+                jsx.push(<TranslationHistoryRow key={i} previousHistory={previous} translationHistory={visible[i]} 
                     onDelete={updateHistory} onEdit={updateHistory} current={i === currentIndex}/>)
             }
 
             if (historyTab === "alias") {
-                jsx.push(<AliasHistoryRow history={visible[i]} onDelete={updateHistory} onEdit={updateHistory}/>)
+                jsx.push(<AliasHistoryRow key={i} history={visible[i]} onDelete={updateHistory} onEdit={updateHistory}/>)
             }
 
             if (historyTab === "search") {
-                jsx.push(<SearchHistoryRow history={visible[i]} onDelete={updateHistory}/>)
+                jsx.push(<SearchHistoryRow key={i} history={visible[i]} onDelete={updateHistory}/>)
             }
         }
         if (!scroll) {
@@ -800,9 +800,9 @@ const HistoryPage: React.FunctionComponent = () => {
                         <img className="history-icon" onClick={() => setHistoryTab("alias")} src={historyTab === "alias" ? historyAliasActive : historyAlias} style={{filter: historyTab === "alias" ? "" : getFilter()}}/>
                     </div>
                     {generateHeaderJSX()}
-                    <table className="history-container">
+                    <div className="history-container">
                         {generateHistoryJSX()}
-                    </table>
+                    </div>
                 </div>
                 <Footer/>
             </div>

@@ -74,7 +74,7 @@ const BanDialog: React.FunctionComponent = (props) => {
                     mirrors: currentHistory.mirrors
                 }
                 await functions.put("/api/post/edit", {silent: true, postID: currentHistory.postID, images, upscaledImages, type: currentHistory.type, restrict: currentHistory.restrict, source,
-                style: currentHistory.style, artists: currentHistory.artists, characters: currentHistory.characters, preserveChildren: currentHistory.child,
+                style: currentHistory.style, artists: currentHistory.artists, characters: currentHistory.characters, preserveChildren: Boolean(currentHistory.parentID),
                 series: currentHistory.series, tags: currentHistory.tags, newTags, updatedDate: currentHistory.date, reason: currentHistory.reason}, session, setSessionFlag)
             }
         }

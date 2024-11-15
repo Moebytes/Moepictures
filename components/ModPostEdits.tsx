@@ -358,6 +358,9 @@ const ModPostEdits: React.FunctionComponent = (props) => {
         if (changes.images) {
             jsx.push(<span className="mod-post-text"><span className="mod-post-label">Images:</span> {newPost.images.length}</span>)
         }
+        if (changes.parentID !== undefined) {
+            jsx.push(<span className="mod-post-text"><span className="mod-post-label">Parent ID:</span> <span className="mod-post-link" onClick={() => newPost.parentID ? history.push(`/post/${newPost.parentID}`) : null}>{newPost.parentID || "removed"}</span></span>)
+        }
         if (changes.type) {
             jsx.push(<span className="mod-post-text"><span className="mod-post-label">Type:</span> {functions.toProperCase(newPost.type)}</span>)
         }

@@ -35,11 +35,11 @@ export default class SQLPost {
     }
 
     /** Bulk updates a post */
-    public static bulkUpdatePost = async (postID: number, params: {restrict?: string, style?: string, child?: boolean, 
+    public static bulkUpdatePost = async (postID: number, params: {restrict?: string, style?: string, parentID?: string, 
         title?: string, translatedTitle?: string, artist?: string, posted?: string, link?: string, commentary?: string, 
         translatedCommentary?: string, bookmarks?: string, purchaseLink?: string, mirrors?: string, slug?: string, type?: string, uploadDate?: string, uploader?: string, 
         updatedDate?: string, updater?: string, hidden?: boolean, approver?: string, approveDate?: string, hasOriginal?: boolean, hasUpscaled?: boolean}) => {
-        const {restrict, style, child, title, translatedTitle, artist, posted, link, commentary, translatedCommentary, bookmarks, 
+        const {restrict, style, parentID, title, translatedTitle, artist, posted, link, commentary, translatedCommentary, bookmarks, 
         purchaseLink, mirrors, slug, type, uploadDate, uploader, updatedDate, updater, hidden, approver, approveDate, hasOriginal, hasUpscaled} = params
         let setArray = [] as any
         let values = [] as any
@@ -54,9 +54,9 @@ export default class SQLPost {
             values.push(style)
             i++
         }
-        if (child !== undefined) {
-            setArray.push(`"child" = $${i}`)
-            values.push(child)
+        if (parentID !== undefined) {
+            setArray.push(`"parentID" = $${i}`)
+            values.push(parentID)
             i++
         }
         if (title !== undefined) {
@@ -174,12 +174,12 @@ export default class SQLPost {
     }
 
     /** Bulk updates a post (unverified). */
-    public static bulkUpdateUnverifiedPost = async (postID: number, params: {restrict?: string, style?: string, child?: boolean, 
+    public static bulkUpdateUnverifiedPost = async (postID: number, params: {restrict?: string, style?: string, parentID?: string, 
         title?: string, translatedTitle?: string, artist?: string, posted?: string, link?: string, commentary?: string, translatedCommentary?: string, 
         bookmarks?: string, purchaseLink?: string, mirrors?: string, slug?: string, type?: string, uploadDate?: string, uploader?: string, updatedDate?: string, updater?: string, 
         duplicates?: boolean, newTags?: number, originalID?: number, reason?: string, hidden?: boolean, hasOriginal?: boolean, hasUpscaled?: boolean, isTranslation?: boolean, 
         addedTags?: string[], removedTags?: string[], imageChanged?: boolean, changes?: any}) => {
-        const {restrict, style, child, title, translatedTitle, artist, posted, link, commentary, translatedCommentary, bookmarks, purchaseLink, 
+        const {restrict, style, parentID, title, translatedTitle, artist, posted, link, commentary, translatedCommentary, bookmarks, purchaseLink, 
         mirrors, slug, type, uploadDate, uploader, updatedDate, updater, duplicates, originalID, newTags, hidden, hasOriginal, hasUpscaled, isTranslation, 
         addedTags, removedTags, imageChanged, changes, reason} = params
         let setArray = [] as any
@@ -195,9 +195,9 @@ export default class SQLPost {
             values.push(style)
             i++
         }
-        if (child !== undefined) {
-            setArray.push(`"child" = $${i}`)
-            values.push(child)
+        if (parentID !== undefined) {
+            setArray.push(`"parentID" = $${i}`)
+            values.push(parentID)
             i++
         }
         if (title !== undefined) {

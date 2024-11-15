@@ -114,21 +114,21 @@ export default class SQLHistory {
 
     /** Insert post history */
     public static insertPostHistory = async (options: {username: string, postID: number, images: string[], uploader: string, 
-        updater?: string, uploadDate: string, updatedDate: string, type: string, restrict: string, style: string, child: string, 
+        updater?: string, uploadDate: string, updatedDate: string, type: string, restrict: string, style: string, parentID: string, 
         title: string, translatedTitle: string, posted: string, artist: string, link: string, hasUpscaled: boolean, hasOriginal: boolean,
         commentary: string, translatedCommentary: string, bookmarks: string, purchaseLink: string, mirrors: string, slug: string, artists: string[], characters: string[], 
         series: string[], tags: string[], addedTags: string[], removedTags: string[], imageChanged: boolean, changes: any, reason: string}) => {
-        const {postID, username, images, uploader, updater, uploadDate, updatedDate, type, restrict, style, child, title, 
+        const {postID, username, images, uploader, updater, uploadDate, updatedDate, type, restrict, style, parentID, title, 
         translatedTitle, posted, artist, link, commentary, translatedCommentary, bookmarks, purchaseLink, mirrors, hasOriginal, hasUpscaled, 
         slug, artists, characters, series, tags, addedTags, removedTags, imageChanged, changes, reason} = options
         const now = new Date().toISOString()
         const query: QueryConfig = {
         text: /*sql*/`INSERT INTO "post history" ("postID", "user", "date", "images", "uploader", "updater", "uploadDate", "updatedDate",
-        "type", "restrict", "style", "child", "title", "translatedTitle", "posted", "artist", "link", "commentary", "translatedCommentary", 
+        "type", "restrict", "style", "parentID", "title", "translatedTitle", "posted", "artist", "link", "commentary", "translatedCommentary", 
         "bookmarks", "purchaseLink", "mirrors", "slug", "hasOriginal", "hasUpscaled", "artists", "characters", "series", "tags", "addedTags", "removedTags",
         "imageChanged", "changes", "reason") VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, 
             $22, $23, $24, $25, $26, $27, $28, $29, $30, $31, $32, $33, $34)`,
-            values: [postID, username, now, images, uploader, updater, uploadDate, updatedDate, type, restrict, style, child, title, translatedTitle, 
+            values: [postID, username, now, images, uploader, updater, uploadDate, updatedDate, type, restrict, style, parentID, title, translatedTitle, 
             posted, artist, link, commentary, translatedCommentary, bookmarks, purchaseLink, mirrors, slug, hasOriginal, hasUpscaled, artists, characters, series, 
             tags, addedTags, removedTags, imageChanged, changes, reason]
         }
@@ -606,7 +606,7 @@ export default class SQLHistory {
                 ${search ? `AND (post_json."title" ILIKE '%' || $${searchValue} || '%' OR post_json."translatedTitle" ILIKE '%' || $${searchValue} || '%' 
                 OR post_json."artist" ILIKE '%' || $${searchValue} || '%' OR post_json."link" ILIKE '%' || $${searchValue} || '%' 
                 OR post_json."mirrors"::text ILIKE '%' || $${searchValue} || '%')` : ""}
-                GROUP BY "history"."username", "history"."postID", post_json."uploadDate", post_json.posted, post_json."child",
+                GROUP BY "history"."username", "history"."postID", post_json."uploadDate", post_json.posted, post_json."parentID",
                 post_json.bookmarks, post_json."cuteness", post_json."favoriteCount", post_json."imageCount", post_json."imageSize", 
                 post_json."imageWidth", post_json."imageHeight"${includeTags ? `, post_json."tagCount"` : ""}
                 ${sortQuery}

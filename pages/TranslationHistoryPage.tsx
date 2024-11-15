@@ -144,7 +144,7 @@ const TranslationHistoryPage: React.FunctionComponent<Props> = (props) => {
             }
             if (previous?.postID !== current.postID &&
                 previous?.order !== current.order) previous = null
-            jsx.push(<TranslationHistoryRow previousHistory={previous} translationHistory={visibleRevisions[i]} 
+            jsx.push(<TranslationHistoryRow key={i} previousHistory={previous} translationHistory={visibleRevisions[i]} 
                 onDelete={updateHistory} onEdit={updateHistory} current={i === currentIndex}/>)
         }
         return jsx
@@ -161,9 +161,9 @@ const TranslationHistoryPage: React.FunctionComponent<Props> = (props) => {
             <div className="content" onMouseEnter={() => setEnableDrag(true)}>
                 <div className="history-page">
                     <span className="history-heading">{username ? `${functions.toProperCase(username)}'s Translation History` : "Translation History"}</span>
-                    <table className="history-container">
+                    <div className="history-container">
                         {generateRevisionsJSX()}
-                    </table>
+                    </div>
                 </div>
                 <Footer/>
             </div>

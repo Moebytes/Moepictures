@@ -248,7 +248,7 @@ const CreateRoutes = (app: Express) => {
         await sql.post.bulkUpdatePost(postID, {
           restrict, 
           style, 
-          child: parentID ? true : false,
+          parentID: parentID || null,
           title: source.title ? source.title : null,
           translatedTitle: source.translatedTitle ? source.translatedTitle : null,
           artist: source.artist ? source.artist : null,
@@ -565,7 +565,7 @@ const CreateRoutes = (app: Express) => {
           type,
           restrict, 
           style, 
-          child: parentID ? true : false,
+          parentID: parentID || null,
           title: source.title ? source.title : null,
           translatedTitle: source.translatedTitle ? source.translatedTitle : null,
           artist: source.artist ? source.artist : null,
@@ -724,7 +724,7 @@ const CreateRoutes = (app: Express) => {
             await sql.history.insertPostHistory({
               postID, username: vanilla.user, images: vanillaImages, uploader: vanilla.uploader, updater: vanilla.updater, 
               uploadDate: vanilla.uploadDate, updatedDate: vanilla.updatedDate, type: vanilla.type, restrict: vanilla.restrict, 
-              style: vanilla.style, child: vanilla.child, title: vanilla.title, translatedTitle: vanilla.translatedTitle, slug: vanilla.slug,
+              style: vanilla.style, parentID: vanilla.parentID, title: vanilla.title, translatedTitle: vanilla.translatedTitle, slug: vanilla.slug,
               posted: vanilla.posted, artist: vanilla.artist, link: vanilla.link, commentary: vanilla.commentary, translatedCommentary: vanilla.translatedCommentary, 
               bookmarks: vanilla.bookmarks, purchaseLink: vanilla.purchaseLink, mirrors: vanilla.mirrors, hasOriginal: vanilla.hasOriginal, hasUpscaled: vanilla.hasUpscaled, 
               artists: vanilla.artists, characters: vanilla.characters, series: vanilla.series, tags: vanilla.tags, addedTags: [], removedTags: [],
@@ -752,7 +752,7 @@ const CreateRoutes = (app: Express) => {
             await sql.history.insertPostHistory({
               postID, username: req.session.username, images: newImages, uploader: updated.uploader, updater: updated.updater, 
               uploadDate: updated.uploadDate, updatedDate: updated.updatedDate, type: updated.type, restrict: updated.restrict, 
-              style: updated.style, child: updated.child, title: updated.title, translatedTitle: updated.translatedTitle, 
+              style: updated.style, parentID: updated.parentID, title: updated.title, translatedTitle: updated.translatedTitle, 
               posted: updated.posted, artist: updated.artist, link: updated.link, commentary: updated.commentary, slug: updated.slug,
               translatedCommentary: updated.translatedCommentary, bookmarks: updated.bookmarks, purchaseLink: updated.purchaseLink, mirrors: updated.mirrors, 
               hasOriginal: updated.hasOriginal, hasUpscaled: updated.hasUpscaled, artists, characters, series, tags, addedTags, removedTags, imageChanged: imgChanged,
@@ -791,7 +791,7 @@ const CreateRoutes = (app: Express) => {
             await sql.history.insertPostHistory({
               postID, username: req.session.username, images: newImages, uploader: updated.uploader, updater: updated.updater, 
               uploadDate: updated.uploadDate, updatedDate: updated.updatedDate, type: updated.type, restrict: updated.restrict, 
-              style: updated.style, child: updated.child, title: updated.title, translatedTitle: updated.translatedTitle, 
+              style: updated.style, parentID: updated.parentID, title: updated.title, translatedTitle: updated.translatedTitle, 
               posted: updated.posted, artist: updated.artist, link: updated.link, commentary: updated.commentary, slug: updated.slug,
               translatedCommentary: updated.translatedCommentary, bookmarks: updated.bookmarks, purchaseLink: updated.purchaseLink, mirrors: updated.mirrors, 
               hasOriginal: updated.hasOriginal, hasUpscaled: updated.hasUpscaled, artists, characters, series, tags, addedTags, removedTags, imageChanged: imgChanged,
@@ -959,7 +959,7 @@ const CreateRoutes = (app: Express) => {
         await sql.post.bulkUpdateUnverifiedPost(postID, {
           restrict, 
           style, 
-          child: parentID ? true : false,
+          parentID: parentID || null,
           title: source.title ? source.title : null,
           translatedTitle: source.translatedTitle ? source.translatedTitle : null,
           artist: source.artist ? source.artist : null,
@@ -1254,7 +1254,7 @@ const CreateRoutes = (app: Express) => {
           reason: reason ? reason : null,
           restrict, 
           style, 
-          child: parentID ? true : false,
+          parentID: parentID || null,
           title: source.title ? source.title : null,
           translatedTitle: source.translatedTitle ? source.translatedTitle : null,
           artist: source.artist ? source.artist : null,
@@ -1428,9 +1428,8 @@ const CreateRoutes = (app: Express) => {
           }
         }
 
-        if (unverified.child) {
-          const parentID = await sql.post.unverifiedParent(postID).then((r) => r.parentID)
-          await sql.post.insertChild(newPostID, parentID)
+        if (unverified.parentID) {
+          await sql.post.insertChild(newPostID, unverified.parentID)
         }
 
         const {artists, characters, series, tags} = await serverFunctions.unverifiedTagCategories(unverified.tags)
@@ -1539,7 +1538,7 @@ const CreateRoutes = (app: Express) => {
         await sql.post.bulkUpdatePost(newPostID, {
           restrict: unverified.restrict,
           style: unverified.style,
-          child: unverified.child,
+          parentID: unverified.parentID,
           title: unverified.title ? unverified.title : null,
           translatedTitle: unverified.translatedTitle ? unverified.translatedTitle : null,
           artist: unverified.artist ? unverified.artist : null,
@@ -1689,7 +1688,7 @@ const CreateRoutes = (app: Express) => {
               await sql.history.insertPostHistory({
                 postID: newPostID, username: vanilla.user, images: vanillaImages, uploader: vanilla.uploader, updater: vanilla.updater, 
                 uploadDate: vanilla.uploadDate, updatedDate: vanilla.updatedDate, type: vanilla.type, restrict: vanilla.restrict, 
-                style: vanilla.style, child: vanilla.child, title: vanilla.title, translatedTitle: vanilla.translatedTitle, slug: vanilla.slug,
+                style: vanilla.style, parentID: vanilla.parentID, title: vanilla.title, translatedTitle: vanilla.translatedTitle, slug: vanilla.slug,
                 posted: vanilla.posted, artist: vanilla.artist, link: vanilla.link, commentary: vanilla.commentary, translatedCommentary: vanilla.translatedCommentary, 
                 bookmarks: vanilla.bookmarks, purchaseLink: vanilla.purchaseLink, mirrors: vanilla.mirrors, hasOriginal: vanilla.hasOriginal, hasUpscaled: vanilla.hasUpscaled, 
                 artists: vanilla.artists, characters: vanilla.characters, series: vanilla.series, tags: vanilla.tags, addedTags: [], removedTags: [], imageChanged: false, 
@@ -1719,7 +1718,7 @@ const CreateRoutes = (app: Express) => {
               await sql.history.insertPostHistory({
                 postID: newPostID, username: req.session.username, images: newImages, uploader: updated.uploader, updater: updated.updater, 
                 uploadDate: updated.uploadDate, updatedDate: updated.updatedDate, type: updated.type, restrict: updated.restrict, 
-                style: updated.style, child: updated.child, title: updated.title, translatedTitle: updated.translatedTitle, 
+                style: updated.style, parentID: updated.parentID, title: updated.title, translatedTitle: updated.translatedTitle, 
                 posted: updated.posted, artist: updated.artist, link: updated.link, commentary: updated.commentary, slug: updated.slug,
                 translatedCommentary: updated.translatedCommentary, bookmarks: updated.bookmarks, purchaseLink: updated.purchaseLink, mirrors: updated.mirrors, 
                 hasOriginal: updated.hasOriginal, hasUpscaled: updated.hasUpscaled, artists, characters, series, tags, addedTags, removedTags, imageChanged: imgChanged,
@@ -1760,7 +1759,7 @@ const CreateRoutes = (app: Express) => {
               await sql.history.insertPostHistory({
                 postID, username: req.session.username, images: newImages, uploader: updated.uploader, updater: updated.updater, 
                 uploadDate: updated.uploadDate, updatedDate: updated.updatedDate, type: updated.type, restrict: updated.restrict, 
-                style: updated.style, child: updated.child, title: updated.title, translatedTitle: updated.translatedTitle, 
+                style: updated.style, parentID: updated.parentID, title: updated.title, translatedTitle: updated.translatedTitle, 
                 posted: updated.posted, artist: updated.artist, link: updated.link, commentary: updated.commentary, slug: updated.slug,
                 translatedCommentary: updated.translatedCommentary, bookmarks: updated.bookmarks, purchaseLink: updated.purchaseLink, mirrors: updated.mirrors, 
                 hasOriginal: updated.hasOriginal, hasUpscaled: updated.hasUpscaled, artists, characters, series, tags, addedTags, removedTags, imageChanged: imgChanged,

@@ -18,7 +18,8 @@ const postDialogSlice = createSlice({
         showBulkTagEditDialog: false,
         showBulkDeleteDialog: false,
         showCompressingDialog: false,
-        showUpscalingDialog: false
+        showUpscalingDialog: false,
+        childPostObj: null as any
     },
     reducers: {
         setShowDeletePostDialog: (state, action) => {state.showDeletePostDialog = action.payload},
@@ -34,14 +35,15 @@ const postDialogSlice = createSlice({
         setShowBulkTagEditDialog: (state, action) => {state.showBulkTagEditDialog = action.payload},
         setShowBulkDeleteDialog: (state, action) => {state.showBulkDeleteDialog = action.payload},
         setShowCompressingDialog: (state, action) => {state.showCompressingDialog = action.payload},
-        setShowUpscalingDialog: (state, action) => {state.showUpscalingDialog = action.payload}
+        setShowUpscalingDialog: (state, action) => {state.showUpscalingDialog = action.payload},
+        setChildPostObj: (state, action) => {state.childPostObj = action.payload}
     }
 })
 
 const {
     setShowDeletePostDialog, setShowTakedownPostDialog, setDeletePostHistoryID,
     setDeletePostHistoryFlag, setRevertPostHistoryID, setRevertPostHistoryFlag, 
-    setLockPostID, setPrivatePostObj, setTagEditID, setSourceEditID,
+    setLockPostID, setPrivatePostObj, setTagEditID, setSourceEditID, setChildPostObj,
     setShowBulkTagEditDialog, setShowBulkDeleteDialog, setShowCompressingDialog, setShowUpscalingDialog
 } = postDialogSlice.actions
 
@@ -61,7 +63,8 @@ export const usePostDialogSelector = () => {
         showBulkTagEditDialog: selector((state) => state.postDialog.showBulkTagEditDialog),
         showBulkDeleteDialog: selector((state) => state.postDialog.showBulkDeleteDialog),
         showCompressingDialog: selector((state) => state.postDialog.showCompressingDialog),
-        showUpscalingDialog: selector((state) => state.postDialog.showUpscalingDialog)
+        showUpscalingDialog: selector((state) => state.postDialog.showUpscalingDialog),
+        childPostObj: selector((state) => state.postDialog.childPostObj)
     }
 }
 
@@ -81,7 +84,8 @@ export const usePostDialogActions = () => {
         setShowBulkTagEditDialog: (state: any) => dispatch(setShowBulkTagEditDialog(state)),
         setShowBulkDeleteDialog: (state: any) => dispatch(setShowBulkDeleteDialog(state)),
         setShowCompressingDialog: (state: any) => dispatch(setShowCompressingDialog(state)),
-        setShowUpscalingDialog: (state: any) => dispatch(setShowUpscalingDialog(state))
+        setShowUpscalingDialog: (state: any) => dispatch(setShowUpscalingDialog(state)),
+        setChildPostObj: (state: any) => dispatch(setChildPostObj(state))
     }
 }
 

@@ -148,7 +148,7 @@ const PostHistoryPage: React.FunctionComponent<Props> = (props) => {
                 currentIndex = i
             }
             if (previous?.postID !== current.postID) previous = null
-            jsx.push(<PostHistoryRow historyIndex={i+1} postHistory={visibleRevisions[i]} 
+            jsx.push(<PostHistoryRow key={i} historyIndex={i+1} postHistory={visibleRevisions[i]} 
                 previousHistory={previous} currentHistory={current} current={i === currentIndex}
                 onDelete={updateHistory} onEdit={updateHistory}/>)
         }
@@ -166,9 +166,9 @@ const PostHistoryPage: React.FunctionComponent<Props> = (props) => {
             <div className="content" onMouseEnter={() => setEnableDrag(true)}>
                 <div className="history-page">
                     <span className="history-heading">{username ? `${functions.toProperCase(username)}'s Post History` : "Post History"}</span>
-                    <table className="history-container">
+                    <div className="history-container">
                         {generateRevisionsJSX()}
-                    </table>
+                    </div>
                 </div>
                 <Footer/>
             </div>
