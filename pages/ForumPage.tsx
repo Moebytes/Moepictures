@@ -371,7 +371,7 @@ const ForumPage: React.FunctionComponent = (props) => {
 
     const generateThreadsJSX = () => {
         const jsx = [] as any
-        jsx.push(<Thread titlePage={true}/>)
+        jsx.push(<Thread key={"0"} titlePage={true}/>)
         let visible = [] as any
         if (scroll) {
             visible = functions.removeDuplicates(visibleThreads) as any

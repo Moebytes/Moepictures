@@ -403,7 +403,7 @@ const MailPage: React.FunctionComponent = (props) => {
 
     const generateMessagesJSX = () => {
         const jsx = [] as any
-        jsx.push(<Message titlePage={true}/>)
+        jsx.push(<Message key={"0"} titlePage={true}/>)
         let visible = [] as any
         if (scroll) {
             visible = functions.removeDuplicates(visibleMessages) as any

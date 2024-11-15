@@ -142,9 +142,9 @@ const TranslationRoutes = (app: Express) => {
                 mirrors: post.mirrors ? Object.values(post.mirrors).join("\n") : null
             }
 
-            if (post.thirdParty) {
-                const thirdPartyID = await sql.post.parent(originalPostID).then((r) => r.parentID)
-                await sql.post.insertUnverifiedThirdParty(postID, Number(thirdPartyID))
+            if (post.child) {
+                const parentID = await sql.post.parent(originalPostID).then((r) => r.parentID)
+                await sql.post.insertUnverifiedChild(postID, Number(parentID))
             }
             if (type !== "comic") type = "image"
 
@@ -238,7 +238,7 @@ const TranslationRoutes = (app: Express) => {
                 type,
                 restrict, 
                 style, 
-                thirdParty: post.thirdParty,
+                child: post.child,
                 title: source.title ? source.title : null,
                 translatedTitle: source.translatedTitle ? source.translatedTitle : null,
                 artist: source.artist ? source.artist : null,
@@ -346,7 +346,7 @@ const TranslationRoutes = (app: Express) => {
                 }
             }
     
-            tagMap = functions.removeDuplicates(tagMap)
+            tagMap = functions.removeDuplicates(tagMap).filter(Boolean)
             await sql.tag.bulkInsertUnverifiedTags(bulkTagUpdate, true)
             await sql.tag.insertUnverifiedTagMap(postID, tagMap)
 

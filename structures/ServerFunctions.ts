@@ -94,7 +94,7 @@ export default class ServerFunctions {
     public static getFirstHistoryFile = async (file: string, r18: boolean) => {
         const defaultBuffer = Buffer.from("")
         if (file.includes("artist") || file.includes("character") || file.includes("series") || file.includes("pfp")) {
-            if (functions.isLocalHost()) {
+            if (functions.useLocalFiles()) {
                 let folder = r18 ? localR18 : local
                 const id = file.split("-")?.[0]?.match(/\d+/)?.[0]
                 if (!id) return defaultBuffer
@@ -113,7 +113,7 @@ export default class ServerFunctions {
                 return defaultBuffer
             }
         } else {
-            if (functions.isLocalHost()) {
+            if (functions.useLocalFiles()) {
                 let folder = r18 ? localR18 : local
                 const id = file.split("-")?.[0]?.match(/\d+/)?.[0]
                 if (!id) return defaultBuffer
@@ -136,7 +136,7 @@ export default class ServerFunctions {
 
     public static getFile = async (file: string, upscaled: boolean, r18: boolean) => {
         if (file.includes("history/post")) upscaled = false
-        if (functions.isLocalHost()) {
+        if (functions.useLocalFiles()) {
             let folder = r18 ? localR18 : local
             let originalKey = `${folder}/${decodeURIComponent(file)}`
             let upscaledKey = `${folder}/${decodeURIComponent(`${file.split("/")[0]}-upscaled/${file.split("/")[1]}`)}`
@@ -148,7 +148,7 @@ export default class ServerFunctions {
     }
 
     public static uploadFile = async (file: string, content: any, r18: boolean) => {
-        if (functions.isLocalHost()) {
+        if (functions.useLocalFiles()) {
             let folder = r18 ? localR18 : local
             const dir = path.dirname(`${folder}/${file}`)
             if (!fs.existsSync(dir)) fs.mkdirSync(dir, {recursive: true})
@@ -160,7 +160,7 @@ export default class ServerFunctions {
     }
 
     public static deleteFile = async (file: string, r18: boolean) => {
-        if (functions.isLocalHost()) {
+        if (functions.useLocalFiles()) {
             try {
                 let folder = r18 ? localR18 : local
                 fs.unlinkSync(`${folder}/${file}`)
@@ -171,7 +171,7 @@ export default class ServerFunctions {
     }
 
     public static deleteIfEmpty = async (folderPath: string, r18: boolean) => {
-        if (functions.isLocalHost()) {
+        if (functions.useLocalFiles()) {
             try {
                 let folder = r18 ? localR18 : local
                 fs.rmdirSync(`${folder}/${folderPath}`)
@@ -181,7 +181,7 @@ export default class ServerFunctions {
     }
 
     public static deleteFolder = async (folderPath: string, r18: boolean) => {
-        if (functions.isLocalHost()) {
+        if (functions.useLocalFiles()) {
             let folder = r18 ? localR18 : local
             const dir = `${folder}/${folderPath}`
             return ServerFunctions.removeLocalDirectory(dir)
@@ -199,7 +199,7 @@ export default class ServerFunctions {
     }
 
     public static renameFile = async (oldFile: string, newFile: string, oldR18: boolean, newR18: boolean) => {
-        if (functions.isLocalHost()) {
+        if (functions.useLocalFiles()) {
             let oldFolder = oldR18 ? localR18 : local
             let newFolder = newR18 ? localR18 : local
             try {
@@ -216,7 +216,7 @@ export default class ServerFunctions {
     }
 
     public static renameFolder = async (oldFolder: string, newFolder: string, r18: boolean) => {
-        if (functions.isLocalHost()) {
+        if (functions.useLocalFiles()) {
             let folder = r18 ? localR18 : local
             try {
                 fs.renameSync(`${folder}/${oldFolder}`, `${folder}/${newFolder}`)
@@ -248,7 +248,7 @@ export default class ServerFunctions {
 
     public static getNextKey = async (type: string, name: string, r18: boolean) => {
         const key = `history/${type}/${name}`
-        if (functions.isLocalHost()) {
+        if (functions.useLocalFiles()) {
             let folder = r18 ? localR18 : local
             if (!fs.existsSync(`${folder}/${key}`)) return 1
             const objects = fs.readdirSync(`${folder}/${key}`)
@@ -275,7 +275,7 @@ export default class ServerFunctions {
     }
 
     public static getUnverifiedFile = async (file: string, upscaled?: boolean) => {
-        if (functions.isLocalHost()) {
+        if (functions.useLocalFiles()) {
             let originalKey = `${localUnverified}/${decodeURIComponent(file)}`
             let upscaledKey = `${localUnverified}/${decodeURIComponent(`${file.split("/")[0]}-upscaled/${file.split("/")[1]}`)}`
             if (upscaled) return fs.existsSync(upscaledKey) ? fs.readFileSync(upscaledKey) : Buffer.from("")
@@ -285,7 +285,7 @@ export default class ServerFunctions {
     }
 
     public static uploadUnverifiedFile = async (file: string, content: any) => {
-        if (functions.isLocalHost()) {
+        if (functions.useLocalFiles()) {
             const dir = path.dirname(`${localUnverified}/${file}`)
             if (!fs.existsSync(dir)) fs.mkdirSync(dir, {recursive: true})
             fs.writeFileSync(`${localUnverified}/${file}`, content)
@@ -296,7 +296,7 @@ export default class ServerFunctions {
     }
 
     public static deleteUnverifiedFile = async (file: string) => {
-        if (functions.isLocalHost()) {
+        if (functions.useLocalFiles()) {
             const dir = path.dirname(`${localUnverified}/${file}`)
             try {
                 fs.unlinkSync(`${localUnverified}/${file}`)

@@ -471,7 +471,7 @@ const SortBar: React.FunctionComponent = (props) => {
         if (sortType === "cuteness") offset = -25
         if (sortType === "favorites") offset = -20
         if (sortType === "variations") offset = -20
-        if (sortType === "thirdparty") offset = -20
+        if (sortType === "children") offset = -20
         if (sortType === "groups") offset = -30
         if (sortType === "popularity") offset = -20
         if (sortType === "bookmarks") offset = -10
@@ -490,7 +490,6 @@ const SortBar: React.FunctionComponent = (props) => {
         const getSort = () => {
             if (sortType === "bookmarks") return "Bookmarks ★"
             if (sortType === "favorites") return "Favorites ✧"
-            if (sortType === "thirdparty") return "Third Party"
             return functions.toProperCase(sortType)
         }
         return (
@@ -967,8 +966,8 @@ const SortBar: React.FunctionComponent = (props) => {
                 <div className="sortbar-dropdown-row" onClick={() => changeSortType("variations")}>
                     <span className="sortbar-dropdown-text">Variations</span>
                 </div>
-                <div className="sortbar-dropdown-row" onClick={() => changeSortType("thirdparty")}>
-                    <span className="sortbar-dropdown-text">Third Party</span>
+                <div className="sortbar-dropdown-row" onClick={() => changeSortType("children")}>
+                    <span className="sortbar-dropdown-text">Children</span>
                 </div>
                 <div className="sortbar-dropdown-row" onClick={() => changeSortType("groups")}>
                     <span className="sortbar-dropdown-text">Groups</span>

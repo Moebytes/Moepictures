@@ -311,9 +311,9 @@ const Message: React.FunctionComponent<Props> = (props) => {
 
     if (props.titlePage) {
         return (
-            <tr className="message-no-hover">
+            <div className="message-no-hover">
                 <div className="message-content-container">
-                    <td className="message-container">
+                    <div className="message-container">
                         <div className="message-row" style={{width: "100%"}}>
                             <span className="message-heading">Title</span>
                         </div>
@@ -326,9 +326,9 @@ const Message: React.FunctionComponent<Props> = (props) => {
                         <div className="message-row">
                             <span className="message-heading">Updated</span>
                         </div>
-                    </td>
+                    </div>
                 </div>
-            </tr>
+            </div>
         )
     }
 
@@ -339,9 +339,9 @@ const Message: React.FunctionComponent<Props> = (props) => {
     }
 
     return (
-        <tr className="message">
+        <div className="message">
             <div className="message-content-container">
-                <td className="message-container">
+                <div className="message-container">
                     <div className="message-row" style={{width: "100%"}}>
                         <img draggable={false} className="message-opt-icon" src={getReadIcon()} onClick={toggleRead} style={{filter: getFilter()}}/>
                         <img draggable={false} className="message-opt-icon" src={softDelete} onClick={toggleSoftDelete} style={{filter: getFilter()}}/>
@@ -359,9 +359,9 @@ const Message: React.FunctionComponent<Props> = (props) => {
                     <div className="message-row">
                         {dateTextJSX()}
                     </div>
-                </td>
+                </div>
             </div>
-        </tr>
+        </div>
     )
 }
 

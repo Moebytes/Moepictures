@@ -295,9 +295,9 @@ const Thread: React.FunctionComponent<Props> = (props) => {
 
     if (props.titlePage) {
         return (
-            <tr className="thread-no-hover">
+            <div className="thread-no-hover">
                 <div className="thread-content-container">
-                    <td className="thread-container">
+                    <div className="thread-container">
                         <div className="thread-row" style={{width: "100%"}}>
                             <span className="thread-heading">Title</span>
                         </div>
@@ -310,16 +310,16 @@ const Thread: React.FunctionComponent<Props> = (props) => {
                         <div className="thread-row">
                             <span className="thread-heading">Updated</span>
                         </div>
-                    </td>
+                    </div>
                 </div>
-            </tr>
+            </div>
         )
     }
 
     return (
-        <tr className="thread">
+        <div className="thread">
             <div className="thread-content-container">
-                <td className="thread-container">
+                <div className="thread-container">
                     <div className="thread-row" style={{width: "100%"}}>
                         {session.username ? <img draggable={false} className="thread-opt-icon" src={getReadIcon()} onClick={toggleRead} style={{filter: getFilter()}}/> : null}
                         {props.thread.sticky ? <img draggable={false} className="thread-icon" src={sticky} style={{marginTop: "4px"}}/> : null}
@@ -338,9 +338,9 @@ const Thread: React.FunctionComponent<Props> = (props) => {
                     <div className="thread-row">
                         {dateTextJSX()}
                     </div>
-                </td>
+                </div>
             </div>
-        </tr>
+        </div>
     )
 }
 

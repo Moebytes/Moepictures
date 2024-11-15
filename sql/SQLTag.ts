@@ -51,6 +51,7 @@ export default class SQLTag {
         let valueArray = [] as any 
         let i = 1 
         for (let j = 0; j < bulkTags.length; j++) {
+            if (!bulkTags[j].tag) continue
             if (tagValues.has(bulkTags[j].tag)) continue
             tagValues.add(bulkTags[j].tag)
             valueArray.push(`($${i}, $${i + 1}, $${i + 2}, $${i + 3}, $${i + 4}, $${i + 5}, $${i + 6}, $${i + 7}, $${i + 8})`)
@@ -63,7 +64,7 @@ export default class SQLTag {
             rawValues.push(creator)
             rawValues.push(new Date().toISOString())
             rawValues.push(creator)
-            i += 8
+            i += 9
         }
         let valueQuery = `VALUES ${valueArray.join(", ")}`
         const query: QueryConfig = {
@@ -97,15 +98,16 @@ export default class SQLTag {
         let valueArray = [] as any 
         let i = 1 
         for (let j = 0; j < bulkTags.length; j++) {
-        if (tagValues.includes(bulkTags[j].tag)) continue
-        tagValues.push(bulkTags[j].tag)
-        valueArray.push(`($${i}, $${i + 1}, $${i + 2}, $${i + 3})`)
-        rawValues.push(bulkTags[j].tag)
-        rawValues.push(bulkTags[j].type)
-        rawValues.push(bulkTags[j].description)
-        rawValues.push(bulkTags[j].image)
-        rawValues.push(bulkTags[j].imageHash)
-        i += 4
+            if (!bulkTags[j].tag) continue
+            if (tagValues.includes(bulkTags[j].tag)) continue
+            tagValues.push(bulkTags[j].tag)
+            valueArray.push(`($${i}, $${i + 1}, $${i + 2}, $${i + 3}, $${i + 4})`)
+            rawValues.push(bulkTags[j].tag)
+            rawValues.push(bulkTags[j].type)
+            rawValues.push(bulkTags[j].description)
+            rawValues.push(bulkTags[j].image)
+            rawValues.push(bulkTags[j].imageHash)
+            i += 5
         }
         let valueQuery = `VALUES ${valueArray.join(", ")}`
         const query: QueryConfig = {

@@ -9,7 +9,6 @@ const nodeExternals = require("webpack-node-externals")
 const webpack = require("webpack")
 const path = require("path")
 const Dotenv = require("dotenv-webpack")
-const {reactCompilerLoader} = require("react-compiler-webpack")
 let exclude = [/node_modules/, /dist/]
 let webExclude = [...exclude, /server.tsx/, /routes/]
 let nodeExclude = [...exclude, /structures\/BrowserFunctions.tsx/]
@@ -18,7 +17,7 @@ module.exports = [
   {
     target: "web",
     entry: "./index",
-    mode: "production",
+    mode: process.env.TESTING === "yes" ? "development" : "production",
     node: {__dirname: false},
     output: {publicPath: "/", globalObject: "this", filename: "script.js", chunkFilename: "script.js", path: path.resolve(__dirname, "./dist")},
     resolve: {extensions: [".js", ".jsx", ".ts", ".tsx"], alias: {"react-dom$": "react-dom/profiling", "scheduler/tracing": "scheduler/tracing-profiling"}, 
@@ -68,7 +67,7 @@ module.exports = [
   {
   target: "node",
     entry: "./server",
-    mode: "production",
+    mode: process.env.TESTING === "yes" ? "development" : "production",
     node: {__dirname: false},
     externals: [nodeExternals()],
     output: {filename: "server.js", chunkFilename: "server.js", path: path.resolve(__dirname, "./dist")},

@@ -428,7 +428,7 @@ const BulkUploadPage: React.FunctionComponent = (props) => {
                 type: tagData.type,
                 restrict: sourceData.restrict,
                 style: tagData.style,
-                thirdPartyID: "",
+                parentID: "",
                 source: {
                     title: sourceData.source.title,
                     translatedTitle: sourceData.source.translatedTitle,

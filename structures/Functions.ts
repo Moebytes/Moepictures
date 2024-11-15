@@ -175,7 +175,7 @@ export default class Functions {
     }
 
     public static cleanHTML = (str: string) => {
-        return Functions.decodeEntities(str).replace(/<\/?[^>]+(>|$)/g, "")
+        return Functions.decodeEntities(str).replace(/<\/?[a-z][^>]*>/gi, "")
     }
     
     public static proxyImage = async (link: string, session: any, setSessionFlag: (value: boolean) => void) => {
@@ -1291,8 +1291,8 @@ export default class Functions {
             sort === "reverse cuteness" ||
             sort === "variations" || 
             sort === "reverse variations" ||
-            sort === "thirdparty" || 
-            sort === "reverse thirdparty" ||
+            sort === "children" || 
+            sort === "reverse children" ||
             sort === "groups" || 
             sort === "reverse groups" ||
             sort === "popularity" || 
@@ -2130,6 +2130,10 @@ export default class Functions {
         return window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1"
     }
 
+    public static useLocalFiles = () => {
+        return process.env.LOCAL_FILES === "yes"
+    }
+
     public static mirrorsJSON = (sourceMirrors: string) => {
         if (!sourceMirrors) return ""
         const mirrorsArr = sourceMirrors.split("\n")
@@ -2379,7 +2383,7 @@ export default class Functions {
         if (post.favgrouped) return "var(--favgroupBorder)"
         if (post.hidden) return "var(--takendownBorder)"
         if (post.locked) return "var(--lockedBorder)"
-        if (post.hasThirdParty) return "var(--thirdPartyBorder)"
+        if (post.hasChildren) return "var(--childrenBorder)"
         if (post.isGrouped) return "var(--groupBorder)"
         if (Number(post.imageCount) > 1) return "var(--variationBorder)"
         return "var(--imageBorder)"

@@ -37,6 +37,7 @@ const PrivatePostDialog: React.FunctionComponent<Props> = (props) => {
     }, [privatePostObj])
 
     const privatePost = async () => {
+        if (!privatePostObj) return
         if (permissions.canPrivate(session, privatePostObj.artists)) {
             await functions.post("/api/post/private",  {postID: props.post.postID}, session, setSessionFlag)
             setPostFlag(true)

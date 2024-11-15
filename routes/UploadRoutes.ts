@@ -84,7 +84,7 @@ const CreateRoutes = (app: Express) => {
         let type = req.body.type 
         const restrict = req.body.restrict 
         const style = req.body.style
-        const thirdPartyID = req.body.thirdPartyID 
+        const parentID = req.body.parentID 
         const source = req.body.source 
         let artists = req.body.artists
         let characters = req.body.characters
@@ -143,7 +143,7 @@ const CreateRoutes = (app: Express) => {
         if (!functions.validStyle(style)) return res.status(400).send("Invalid style")
 
         const postID = await sql.post.insertPost()
-        if (thirdPartyID && !Number.isNaN(Number(thirdPartyID))) await sql.post.insertThirdParty(postID, Number(thirdPartyID))
+        if (parentID && !Number.isNaN(Number(parentID))) await sql.post.insertChild(postID, Number(parentID))
 
         if (type !== "comic") type = "image"
 
@@ -248,7 +248,7 @@ const CreateRoutes = (app: Express) => {
         await sql.post.bulkUpdatePost(postID, {
           restrict, 
           style, 
-          thirdParty: thirdPartyID ? true : false,
+          child: parentID ? true : false,
           title: source.title ? source.title : null,
           translatedTitle: source.translatedTitle ? source.translatedTitle : null,
           artist: source.artist ? source.artist : null,
@@ -348,7 +348,7 @@ const CreateRoutes = (app: Express) => {
           }
         }
 
-        tagMap = functions.removeDuplicates(tagMap)
+        tagMap = functions.removeDuplicates(tagMap).filter(Boolean)
         await sql.tag.bulkInsertTags(bulkTagUpdate, req.session.username, noImageUpdate ? true : false)
         await sql.tag.insertTagMap(postID, tagMap)
 
@@ -377,7 +377,7 @@ const CreateRoutes = (app: Express) => {
         let type = req.body.type 
         const restrict = req.body.restrict 
         const style = req.body.style
-        const thirdPartyID = req.body.thirdPartyID 
+        const parentID = req.body.parentID 
         const source = req.body.source 
         let artists = req.body.artists
         let characters = req.body.characters
@@ -387,7 +387,7 @@ const CreateRoutes = (app: Express) => {
         let unverifiedID = req.body.unverifiedID
         let reason = req.body.reason
         let noImageUpdate = req.body.noImageUpdate
-        let preserveThirdParty = req.body.preserveThirdParty
+        let preserveChildren = req.body.preserveChildren
         let updatedDate = req.body.updatedDate
         let silent = req.body.silent
 
@@ -467,9 +467,9 @@ const CreateRoutes = (app: Express) => {
           }
         }
 
-        if (String(preserveThirdParty) !== "true") {
-          await sql.post.deleteThirdParty(postID)
-          if (thirdPartyID && !Number.isNaN(Number(thirdPartyID))) await sql.post.insertThirdParty(postID, Number(thirdPartyID))
+        if (String(preserveChildren) !== "true") {
+          await sql.post.deleteChild(postID)
+          if (parentID && !Number.isNaN(Number(parentID))) await sql.post.insertChild(postID, Number(parentID))
         }
 
         if (type !== "comic") type = "image"
@@ -565,7 +565,7 @@ const CreateRoutes = (app: Express) => {
           type,
           restrict, 
           style, 
-          thirdParty: thirdPartyID ? true : false,
+          child: parentID ? true : false,
           title: source.title ? source.title : null,
           translatedTitle: source.translatedTitle ? source.translatedTitle : null,
           artist: source.artist ? source.artist : null,
@@ -661,7 +661,7 @@ const CreateRoutes = (app: Express) => {
           }
         }
 
-        addedTags = functions.removeDuplicates(addedTags)
+        addedTags = functions.removeDuplicates(addedTags).filter(Boolean)
         await sql.tag.bulkInsertTags(bulkTagUpdate, req.session.username, noImageUpdate ? true : false)
         await sql.tag.deleteTagMap(postID, removedTags)
         await sql.tag.insertTagMap(postID, addedTags)
@@ -724,7 +724,7 @@ const CreateRoutes = (app: Express) => {
             await sql.history.insertPostHistory({
               postID, username: vanilla.user, images: vanillaImages, uploader: vanilla.uploader, updater: vanilla.updater, 
               uploadDate: vanilla.uploadDate, updatedDate: vanilla.updatedDate, type: vanilla.type, restrict: vanilla.restrict, 
-              style: vanilla.style, thirdParty: vanilla.thirdParty, title: vanilla.title, translatedTitle: vanilla.translatedTitle, slug: vanilla.slug,
+              style: vanilla.style, child: vanilla.child, title: vanilla.title, translatedTitle: vanilla.translatedTitle, slug: vanilla.slug,
               posted: vanilla.posted, artist: vanilla.artist, link: vanilla.link, commentary: vanilla.commentary, translatedCommentary: vanilla.translatedCommentary, 
               bookmarks: vanilla.bookmarks, purchaseLink: vanilla.purchaseLink, mirrors: vanilla.mirrors, hasOriginal: vanilla.hasOriginal, hasUpscaled: vanilla.hasUpscaled, 
               artists: vanilla.artists, characters: vanilla.characters, series: vanilla.series, tags: vanilla.tags, addedTags: [], removedTags: [],
@@ -752,7 +752,7 @@ const CreateRoutes = (app: Express) => {
             await sql.history.insertPostHistory({
               postID, username: req.session.username, images: newImages, uploader: updated.uploader, updater: updated.updater, 
               uploadDate: updated.uploadDate, updatedDate: updated.updatedDate, type: updated.type, restrict: updated.restrict, 
-              style: updated.style, thirdParty: updated.thirdParty, title: updated.title, translatedTitle: updated.translatedTitle, 
+              style: updated.style, child: updated.child, title: updated.title, translatedTitle: updated.translatedTitle, 
               posted: updated.posted, artist: updated.artist, link: updated.link, commentary: updated.commentary, slug: updated.slug,
               translatedCommentary: updated.translatedCommentary, bookmarks: updated.bookmarks, purchaseLink: updated.purchaseLink, mirrors: updated.mirrors, 
               hasOriginal: updated.hasOriginal, hasUpscaled: updated.hasUpscaled, artists, characters, series, tags, addedTags, removedTags, imageChanged: imgChanged,
@@ -791,7 +791,7 @@ const CreateRoutes = (app: Express) => {
             await sql.history.insertPostHistory({
               postID, username: req.session.username, images: newImages, uploader: updated.uploader, updater: updated.updater, 
               uploadDate: updated.uploadDate, updatedDate: updated.updatedDate, type: updated.type, restrict: updated.restrict, 
-              style: updated.style, thirdParty: updated.thirdParty, title: updated.title, translatedTitle: updated.translatedTitle, 
+              style: updated.style, child: updated.child, title: updated.title, translatedTitle: updated.translatedTitle, 
               posted: updated.posted, artist: updated.artist, link: updated.link, commentary: updated.commentary, slug: updated.slug,
               translatedCommentary: updated.translatedCommentary, bookmarks: updated.bookmarks, purchaseLink: updated.purchaseLink, mirrors: updated.mirrors, 
               hasOriginal: updated.hasOriginal, hasUpscaled: updated.hasUpscaled, artists, characters, series, tags, addedTags, removedTags, imageChanged: imgChanged,
@@ -811,7 +811,7 @@ const CreateRoutes = (app: Express) => {
         let type = req.body.type 
         const restrict = req.body.restrict 
         const style = req.body.style
-        const thirdPartyID = req.body.thirdPartyID 
+        const parentID = req.body.parentID 
         const source = req.body.source 
         let artists = req.body.artists
         let characters = req.body.characters
@@ -868,7 +868,7 @@ const CreateRoutes = (app: Express) => {
         if (!functions.validStyle(style)) return res.status(400).send("Invalid style")
 
         const postID = await sql.post.insertUnverifiedPost()
-        if (thirdPartyID && !Number.isNaN(Number(thirdPartyID))) await sql.post.insertUnverifiedThirdParty(postID, Number(thirdPartyID))
+        if (parentID && !Number.isNaN(Number(parentID))) await sql.post.insertUnverifiedChild(postID, Number(parentID))
 
         if (type !== "comic") type = "image"
 
@@ -959,7 +959,7 @@ const CreateRoutes = (app: Express) => {
         await sql.post.bulkUpdateUnverifiedPost(postID, {
           restrict, 
           style, 
-          thirdParty: thirdPartyID ? true : false,
+          child: parentID ? true : false,
           title: source.title ? source.title : null,
           translatedTitle: source.translatedTitle ? source.translatedTitle : null,
           artist: source.artist ? source.artist : null,
@@ -1062,7 +1062,7 @@ const CreateRoutes = (app: Express) => {
           }
         }
 
-        tagMap = functions.removeDuplicates(tagMap)
+        tagMap = functions.removeDuplicates(tagMap).filter(Boolean)
         await sql.tag.bulkInsertUnverifiedTags(bulkTagUpdate)
         await sql.tag.insertUnverifiedTagMap(postID, tagMap)
 
@@ -1082,7 +1082,7 @@ const CreateRoutes = (app: Express) => {
         let type = req.body.type 
         const restrict = req.body.restrict 
         const style = req.body.style
-        const thirdPartyID = req.body.thirdPartyID 
+        const parentID = req.body.parentID 
         const source = req.body.source 
         let artists = req.body.artists
         let characters = req.body.characters
@@ -1166,8 +1166,8 @@ const CreateRoutes = (app: Express) => {
           }
         }
 
-        if (unverifiedID) await sql.post.deleteUnverifiedThirdParty(postID)
-        if (thirdPartyID && !Number.isNaN(Number(thirdPartyID))) await sql.post.insertUnverifiedThirdParty(postID, Number(thirdPartyID))
+        if (unverifiedID) await sql.post.deleteUnverifiedChild(postID)
+        if (parentID && !Number.isNaN(Number(parentID))) await sql.post.insertUnverifiedChild(postID, Number(parentID))
 
         if (type !== "comic") type = "image"
 
@@ -1254,7 +1254,7 @@ const CreateRoutes = (app: Express) => {
           reason: reason ? reason : null,
           restrict, 
           style, 
-          thirdParty: thirdPartyID ? true : false,
+          child: parentID ? true : false,
           title: source.title ? source.title : null,
           translatedTitle: source.translatedTitle ? source.translatedTitle : null,
           artist: source.artist ? source.artist : null,
@@ -1375,7 +1375,7 @@ const CreateRoutes = (app: Express) => {
           }
         }
 
-        addedTags = functions.removeDuplicates(addedTags)
+        addedTags = functions.removeDuplicates(addedTags).filter(Boolean)
         await sql.tag.bulkInsertUnverifiedTags(bulkTagUpdate)
         if (unverifiedID) await sql.tag.deleteUnverifiedTagMap(postID, removedTags)
         await sql.tag.insertUnverifiedTagMap(postID, addedTags)
@@ -1428,9 +1428,9 @@ const CreateRoutes = (app: Express) => {
           }
         }
 
-        if (unverified.thirdParty) {
-          const thirdPartyID = await sql.post.unverifiedParent(postID).then((r) => r.parentID)
-          await sql.post.insertThirdParty(newPostID, thirdPartyID)
+        if (unverified.child) {
+          const parentID = await sql.post.unverifiedParent(postID).then((r) => r.parentID)
+          await sql.post.insertChild(newPostID, parentID)
         }
 
         const {artists, characters, series, tags} = await serverFunctions.unverifiedTagCategories(unverified.tags)
@@ -1539,7 +1539,7 @@ const CreateRoutes = (app: Express) => {
         await sql.post.bulkUpdatePost(newPostID, {
           restrict: unverified.restrict,
           style: unverified.style,
-          thirdParty: unverified.thirdParty,
+          child: unverified.child,
           title: unverified.title ? unverified.title : null,
           translatedTitle: unverified.translatedTitle ? unverified.translatedTitle : null,
           artist: unverified.artist ? unverified.artist : null,
@@ -1636,7 +1636,7 @@ const CreateRoutes = (app: Express) => {
           }
         }
 
-        addedTags = functions.removeDuplicates(addedTags)
+        addedTags = functions.removeDuplicates(addedTags).filter(Boolean)
         await sql.tag.bulkInsertTags(bulkTagUpdate, unverified.uploader)
         if (unverified.originalID) await sql.tag.deleteTagMap(unverified.originalID, removedTags)
         await sql.tag.insertTagMap(newPostID, addedTags)
@@ -1689,7 +1689,7 @@ const CreateRoutes = (app: Express) => {
               await sql.history.insertPostHistory({
                 postID: newPostID, username: vanilla.user, images: vanillaImages, uploader: vanilla.uploader, updater: vanilla.updater, 
                 uploadDate: vanilla.uploadDate, updatedDate: vanilla.updatedDate, type: vanilla.type, restrict: vanilla.restrict, 
-                style: vanilla.style, thirdParty: vanilla.thirdParty, title: vanilla.title, translatedTitle: vanilla.translatedTitle, slug: vanilla.slug,
+                style: vanilla.style, child: vanilla.child, title: vanilla.title, translatedTitle: vanilla.translatedTitle, slug: vanilla.slug,
                 posted: vanilla.posted, artist: vanilla.artist, link: vanilla.link, commentary: vanilla.commentary, translatedCommentary: vanilla.translatedCommentary, 
                 bookmarks: vanilla.bookmarks, purchaseLink: vanilla.purchaseLink, mirrors: vanilla.mirrors, hasOriginal: vanilla.hasOriginal, hasUpscaled: vanilla.hasUpscaled, 
                 artists: vanilla.artists, characters: vanilla.characters, series: vanilla.series, tags: vanilla.tags, addedTags: [], removedTags: [], imageChanged: false, 
@@ -1719,7 +1719,7 @@ const CreateRoutes = (app: Express) => {
               await sql.history.insertPostHistory({
                 postID: newPostID, username: req.session.username, images: newImages, uploader: updated.uploader, updater: updated.updater, 
                 uploadDate: updated.uploadDate, updatedDate: updated.updatedDate, type: updated.type, restrict: updated.restrict, 
-                style: updated.style, thirdParty: updated.thirdParty, title: updated.title, translatedTitle: updated.translatedTitle, 
+                style: updated.style, child: updated.child, title: updated.title, translatedTitle: updated.translatedTitle, 
                 posted: updated.posted, artist: updated.artist, link: updated.link, commentary: updated.commentary, slug: updated.slug,
                 translatedCommentary: updated.translatedCommentary, bookmarks: updated.bookmarks, purchaseLink: updated.purchaseLink, mirrors: updated.mirrors, 
                 hasOriginal: updated.hasOriginal, hasUpscaled: updated.hasUpscaled, artists, characters, series, tags, addedTags, removedTags, imageChanged: imgChanged,
@@ -1760,7 +1760,7 @@ const CreateRoutes = (app: Express) => {
               await sql.history.insertPostHistory({
                 postID, username: req.session.username, images: newImages, uploader: updated.uploader, updater: updated.updater, 
                 uploadDate: updated.uploadDate, updatedDate: updated.updatedDate, type: updated.type, restrict: updated.restrict, 
-                style: updated.style, thirdParty: updated.thirdParty, title: updated.title, translatedTitle: updated.translatedTitle, 
+                style: updated.style, child: updated.child, title: updated.title, translatedTitle: updated.translatedTitle, 
                 posted: updated.posted, artist: updated.artist, link: updated.link, commentary: updated.commentary, slug: updated.slug,
                 translatedCommentary: updated.translatedCommentary, bookmarks: updated.bookmarks, purchaseLink: updated.purchaseLink, mirrors: updated.mirrors, 
                 hasOriginal: updated.hasOriginal, hasUpscaled: updated.hasUpscaled, artists, characters, series, tags, addedTags, removedTags, imageChanged: imgChanged,

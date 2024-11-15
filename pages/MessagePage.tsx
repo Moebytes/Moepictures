@@ -708,9 +708,9 @@ const MessagePage: React.FunctionComponent<Props> = (props) => {
                             <p className="thread-page-text">{jsxFunctions.renderMessageText(message.content, emojis)}</p>
                         </div>
                     </div>
-                    <table className="thread-page-container">
+                    <div className="thread-page-container">
                         {generateRepliesJSX()}
-                    </table>
+                    </div>
                     {getReplyBoxJSX()}
                     {emojiGrid()}
                     {generatePageButtonsJSX()}

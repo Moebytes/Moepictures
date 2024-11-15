@@ -26,7 +26,7 @@ import upscalingImg from "../assets/misc/upscaling.png"
 import emojisImg from "../assets/misc/emojis.png"
 import compressingImg from "../assets/misc/compressing.png"
 import variationsImg from "../assets/misc/variations.png"
-import thirdPartyImg from "../assets/misc/thirdparty.png"
+import childrenImg from "../assets/misc/children.png"
 import aliasesImg from "../assets/misc/aliases.png"
 import implicationsImg from "../assets/misc/implications.png"
 import captchaImg from "../assets/misc/captcha.png"
@@ -139,7 +139,7 @@ const HelpPage: React.FunctionComponent = (props) => {
 
                     These are some tags with special uses: <br/>
                     <span className="help-alt">original</span> - the drawing is original, ie. not fanart. <br/>
-                    <span className="help-alt">self post</span> - the post was uploaded by its original creator. <br/>
+                    <span className="help-alt">self upload</span> - the post was uploaded by its original creator. <br/>
                     <span className="help-alt">official art</span> - this is official art without a publicized artist. <br/>
                     <span className="help-alt">unknown artist</span> - the artist is not known. <br/>
                     <span className="help-alt">unknown character</span> - the character is unknown and might not be original. <br/>
@@ -165,9 +165,9 @@ const HelpPage: React.FunctionComponent = (props) => {
                     <span className="help-alt">pink</span> - the post is favorited. <br/>
                     <span className="help-alt">purple</span> - the post is favgrouped. <br/>
                     <span className="help-alt">red</span> - the post is edit locked. <br/>
-                    <span className="help-alt">green</span> - the post contains third party posts. <br/>
+                    <span className="help-alt">green</span> - the post has child posts. <br/>
                     <span className="help-alt">orange</span> - the post is in a group. <br/>
-                    <span className="help-alt">blue</span> - the post contains multiple variations. <br/>
+                    <span className="help-alt">blue</span> - the post has multiple variations. <br/>
                 </span>
                 <div className="help-img-container"><img className="help-img" src={searchingImg}/></div></>
             )
@@ -327,8 +327,8 @@ const HelpPage: React.FunctionComponent = (props) => {
                     <span className="help-alt">chibi</span> - Art made in chibi or super deformed style.<br/>
                     <span className="help-alt">pixel</span> - Art made in pixel art style or chiptune music.<br/><br/>
 
-                    Third party ID - Specify a post ID on the site and this post will be added as a child to that post. This is only used for third party edits. 
-                    For post variations, simply include them in the same post as multiple images are supported.<br/><br/>
+                    Parent ID - Specify a post ID and this post will be added as a child to that post. 
+                    For post variations, simply add multiple images to the post.<br/><br/>
 
                     Please provide source information for all posts. You can fill in these fields: <br/>
                     <span className="help-alt">title</span> - The original title of the work as posted on social media.<br/>
@@ -406,17 +406,17 @@ const HelpPage: React.FunctionComponent = (props) => {
                 <div className="help-img-container"><img className="help-img" src={taggingImg}/></div></>
             )
         }
-        if (helpTab === "self-posts") {
+        if (helpTab === "self-uploads") {
             return (
-                <><span className="help-heading">Self Posts</span>
+                <><span className="help-heading">Self Uploads</span>
                 <span className="help-text" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                     Although the vast majority of posts are reposts, you are also welcomed to post your own art. <br/><br/>
 
-                    You should tag uploads of your own artwork with <span className="help-alt">self post</span>. We also require that your 
+                    You should tag uploads of your own artwork with <span className="help-alt">self upload</span>. We also require that your 
                     artist tag is the same as your username on moepictures. This will let you have access to the additional option 
                     to private a post. <br/><br/> 
 
-                    You may make your own posts private at any time, so that they are only visible to yourself and moderators. However 
+                    You may make your own posts private at any time so that they are only visible to yourself and moderators. However 
                     do note that we don't allow post deletions even if you uploaded your own post without approval. <br/><br/>
 
                     If another user has already taken your artist name please contact us at <span style={{marginRight: "10px"}} className="help-alt">moepictures.moe@gmail.com</span> 
@@ -519,7 +519,10 @@ const HelpPage: React.FunctionComponent = (props) => {
                 <><span className="help-heading">Variations</span>
                 <span className="help-text" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                     Variations of the same image are combined into a single post. You can add a variation to an existing post by editing it (use the full fledged 
-                    edit, not tag/source edit). All variations of an image should be created by the original artist, otherwise it is considered a third party edit instead. <br/><br/>
+                    edit, not tag/source edit). All variations of an image should be created by the original artist, otherwise it is considered a third party edit and 
+                    should be added as a child post instead. <br/><br/>
+
+                    Variations all share the same tags as the main post, and only the main post will appear directly in search. <br/><br/>
 
                     If an image has significantly different tags to the main post (eg. different characters), it's better to make it it's own post and associate the posts by 
                     creating a group. This doesn't include multiple pages of a sequential manga/comic. Please use variations and not groups for these.
@@ -527,26 +530,28 @@ const HelpPage: React.FunctionComponent = (props) => {
                 <div className="help-img-container"><img className="help-img" src={variationsImg}/></div></>
             )
         }
-        if (helpTab === "third-party-edits") {
+        if (helpTab === "child-posts") {
             return (
-                <><span className="help-heading">Third Party Edits</span>
+                <><span className="help-heading">Child Posts</span>
                 <span className="help-text" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
-                    Third party edits are modifications to a work not done/endorsed by the original artist. For
-                    example, an animation of an artwork done by someone else. Third party edits behave like their own post,
-                    and are also added to the original post in a separate section. Also known as child posts, but third party edits are the 
-                    only thing we use them for.
+                    Child posts are very similar posts that we still want to tag or categorize differently. For example, a video version of a post should 
+                    be the parent post and the image version should be a child post. Or, the same image that just has a color palette change. Child posts are 
+                    also used for all third party edits (modifications to a work not done by the original artist). <br/><br/>
+                    
+                    Child posts behave like their own post with their own tags, and can be toggled to show up in search. They are added to 
+                    the parent post in a separate section. <br/><br/>
                 </span>
-                <div className="help-img-container"><img className="help-img" src={thirdPartyImg}/></div></>
+                <div className="help-img-container"><img className="help-img" src={childrenImg}/></div></>
             )
         }
         if (helpTab === "groups") {
             return (
                 <><span className="help-heading">Groups</span>
                 <span className="help-text" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
-                    Groups are a way to associate several related posts that have very different tags, so variations are not a great way to 
-                    combine them. This is useful when an artist posts a pixiv post containing multiple artworks of different characters, or for 
-                    a series of posts/comic strips that are related but not sequential. If it's a manga/comic with sequential pages, we still prefer to 
-                    use variations for it. <br/><br/>
+                    Groups are a way to associate several loosely related posts with very different tags, so variations and child posts are not a great way to 
+                    relate them. This is useful when an artist posts a pixiv post containing multiple artworks of different characters, or for 
+                    a series of posts/comic strips that are not sequential. If it's a manga/comic with sequential pages, we still prefer to 
+                    use variations. <br/><br/>
 
                     If all the posts in the group have the same source then name the group like <span className="help-alt">Sitename PostID</span>, eg. 
                     Pixiv 123456 and make the description a link to it. Otherwise name it a translated name of the post series. You can provide the original 
@@ -741,13 +746,13 @@ const HelpPage: React.FunctionComponent = (props) => {
                         <span className="help-nav-text" onClick={() => setHelpTab("cuteness")}>Cuteness</span>
                         <span className="help-nav-text" onClick={() => setHelpTab("uploading")}>Uploading</span>
                         <span className="help-nav-text" onClick={() => setHelpTab("tagging")}>Tagging</span>
-                        <span className="help-nav-text" onClick={() => setHelpTab("self-posts")}>Self Posts</span>
+                        <span className="help-nav-text" onClick={() => setHelpTab("self-uploads")}>Self Uploads</span>
                         <span className="help-nav-text" onClick={() => setHelpTab("upscaling")}>Upscaling</span>
                         <span className="help-nav-text" onClick={() => setHelpTab("compressing")}>Compressing</span>
                         <span className="help-nav-text" onClick={() => setHelpTab("pixiv-downloads")}>Pixiv Downloads</span>
                         <span className="help-nav-text" onClick={() => setHelpTab("bookmarklet")}>Bookmarklet</span>
                         <span className="help-nav-text" onClick={() => setHelpTab("variations")}>Variations</span>
-                        <span className="help-nav-text" onClick={() => setHelpTab("third-party-edits")}>Third Party Edits</span>
+                        <span className="help-nav-text" onClick={() => setHelpTab("child-posts")}>Child Posts</span>
                         <span className="help-nav-text" onClick={() => setHelpTab("groups")}>Groups</span>
                         <span className="help-nav-text" onClick={() => setHelpTab("aliases")}>Aliases</span>
                         <span className="help-nav-text" onClick={() => setHelpTab("implications")}>Implications</span>

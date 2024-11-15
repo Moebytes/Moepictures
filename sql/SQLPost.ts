@@ -35,11 +35,11 @@ export default class SQLPost {
     }
 
     /** Bulk updates a post */
-    public static bulkUpdatePost = async (postID: number, params: {restrict?: string, style?: string, thirdParty?: boolean, 
+    public static bulkUpdatePost = async (postID: number, params: {restrict?: string, style?: string, child?: boolean, 
         title?: string, translatedTitle?: string, artist?: string, posted?: string, link?: string, commentary?: string, 
         translatedCommentary?: string, bookmarks?: string, purchaseLink?: string, mirrors?: string, slug?: string, type?: string, uploadDate?: string, uploader?: string, 
         updatedDate?: string, updater?: string, hidden?: boolean, approver?: string, approveDate?: string, hasOriginal?: boolean, hasUpscaled?: boolean}) => {
-        const {restrict, style, thirdParty, title, translatedTitle, artist, posted, link, commentary, translatedCommentary, bookmarks, 
+        const {restrict, style, child, title, translatedTitle, artist, posted, link, commentary, translatedCommentary, bookmarks, 
         purchaseLink, mirrors, slug, type, uploadDate, uploader, updatedDate, updater, hidden, approver, approveDate, hasOriginal, hasUpscaled} = params
         let setArray = [] as any
         let values = [] as any
@@ -54,9 +54,9 @@ export default class SQLPost {
             values.push(style)
             i++
         }
-        if (thirdParty !== undefined) {
-            setArray.push(`"thirdParty" = $${i}`)
-            values.push(thirdParty)
+        if (child !== undefined) {
+            setArray.push(`"child" = $${i}`)
+            values.push(child)
             i++
         }
         if (title !== undefined) {
@@ -174,12 +174,12 @@ export default class SQLPost {
     }
 
     /** Bulk updates a post (unverified). */
-    public static bulkUpdateUnverifiedPost = async (postID: number, params: {restrict?: string, style?: string, thirdParty?: boolean, 
+    public static bulkUpdateUnverifiedPost = async (postID: number, params: {restrict?: string, style?: string, child?: boolean, 
         title?: string, translatedTitle?: string, artist?: string, posted?: string, link?: string, commentary?: string, translatedCommentary?: string, 
         bookmarks?: string, purchaseLink?: string, mirrors?: string, slug?: string, type?: string, uploadDate?: string, uploader?: string, updatedDate?: string, updater?: string, 
         duplicates?: boolean, newTags?: number, originalID?: number, reason?: string, hidden?: boolean, hasOriginal?: boolean, hasUpscaled?: boolean, isTranslation?: boolean, 
         addedTags?: string[], removedTags?: string[], imageChanged?: boolean, changes?: any}) => {
-        const {restrict, style, thirdParty, title, translatedTitle, artist, posted, link, commentary, translatedCommentary, bookmarks, purchaseLink, 
+        const {restrict, style, child, title, translatedTitle, artist, posted, link, commentary, translatedCommentary, bookmarks, purchaseLink, 
         mirrors, slug, type, uploadDate, uploader, updatedDate, updater, duplicates, originalID, newTags, hidden, hasOriginal, hasUpscaled, isTranslation, 
         addedTags, removedTags, imageChanged, changes, reason} = params
         let setArray = [] as any
@@ -195,9 +195,9 @@ export default class SQLPost {
             values.push(style)
             i++
         }
-        if (thirdParty !== undefined) {
-            setArray.push(`"thirdParty" = $${i}`)
-            values.push(thirdParty)
+        if (child !== undefined) {
+            setArray.push(`"child" = $${i}`)
+            values.push(child)
             i++
         }
         if (title !== undefined) {
@@ -496,10 +496,10 @@ export default class SQLPost {
         return result
     }
 
-    /** Insert third party relation. */
-    public static insertThirdParty = async (postID: number, parentID: number) => {
+    /** Insert child relation. */
+    public static insertChild = async (postID: number, parentID: number) => {
         const query: QueryConfig = {
-        text: /*sql*/`INSERT INTO "third party" ("postID", "parentID") VALUES ($1, $2)`,
+        text: /*sql*/`INSERT INTO "child posts" ("postID", "parentID") VALUES ($1, $2)`,
         values: [postID, parentID]
         }
         await SQLQuery.flushDB()
@@ -507,20 +507,20 @@ export default class SQLPost {
         return result
     }
 
-    /** Insert third party relation (unverified). */
-    public static insertUnverifiedThirdParty = async (postID: number, parentID: number) => {
+    /** Insert child relation (unverified). */
+    public static insertUnverifiedChild = async (postID: number, parentID: number) => {
         const query: QueryConfig = {
-        text: /*sql*/`INSERT INTO "unverified third party" ("postID", "parentID") VALUES ($1, $2)`,
+        text: /*sql*/`INSERT INTO "unverified child posts" ("postID", "parentID") VALUES ($1, $2)`,
         values: [postID, parentID]
         }
         const result = await SQLQuery.run(query)
         return result
     }
 
-    /** Delete third party relation. */
-    public static deleteThirdParty = async (postID: number) => {
+    /** Delete child relation. */
+    public static deleteChild = async (postID: number) => {
         const query: QueryConfig = {
-        text: /*sql*/`DELETE FROM "third party" WHERE "third party"."postID" = $1`,
+        text: /*sql*/`DELETE FROM "child posts" WHERE "child posts"."postID" = $1`,
         values: [postID]
         }
         await SQLQuery.flushDB()
@@ -528,18 +528,18 @@ export default class SQLPost {
         return result
     }
 
-    /** Delete third party relation (unverified). */
-    public static deleteUnverifiedThirdParty = async (postID: number) => {
+    /** Delete child relation (unverified). */
+    public static deleteUnverifiedChild = async (postID: number) => {
         const query: QueryConfig = {
-        text: /*sql*/`DELETE FROM "unverified third party" WHERE "unverified third party"."postID" = $1`,
+        text: /*sql*/`DELETE FROM "unverified child posts" WHERE "unverified child posts"."postID" = $1`,
         values: [postID]
         }
         const result = await SQLQuery.run(query)
         return result
     }
 
-    /** Get third party posts. */
-    public static thirdParty = async (parentID: number) => {
+    /** Get child posts. */
+    public static childPosts = async (parentID: number) => {
         const query: QueryConfig = {
         text: functions.multiTrim(/*sql*/`
                 WITH post_json AS (
@@ -550,12 +550,12 @@ export default class SQLPost {
                     FULL JOIN "cuteness" ON posts."postID" = "cuteness"."postID"
                     GROUP BY posts."postID"
                 )
-                SELECT "third party".*, 
+                SELECT "child posts".*, 
                 to_json((array_agg(post_json.*))[1]) AS post
-                FROM "third party"
-                JOIN post_json ON post_json."postID" = "third party"."postID"
-                WHERE "third party"."parentID" = $1
-                GROUP BY "third party"."thirdPartyID"
+                FROM "child posts"
+                JOIN post_json ON post_json."postID" = "child posts"."postID"
+                WHERE "child posts"."parentID" = $1
+                GROUP BY "child posts"."childID"
             `),
         values: [parentID]
         }
@@ -563,8 +563,8 @@ export default class SQLPost {
         return result
     }
 
-    /** Get third party posts (unverified). */
-    public static unverifiedThirdParty = async (parentID: number) => {
+    /** Get child posts (unverified). */
+    public static unverifiedChildPosts = async (parentID: number) => {
         const query: QueryConfig = {
         text: functions.multiTrim(/*sql*/`
                 WITH post_json AS (
@@ -575,12 +575,12 @@ export default class SQLPost {
                     FULL JOIN "cuteness" ON posts."postID" = "cuteness"."postID"
                     GROUP BY posts."postID"
                 )
-                SELECT "unverified third party".*, 
+                SELECT "unverified child posts".*, 
                 to_json((array_agg(post_json.*))[1]) AS post
-                FROM "unverified third party"
-                JOIN post_json ON post_json."postID" = "unverified third party"."postID"
-                WHERE "unverified third party"."parentID" = $1
-                GROUP BY "unverified third party"."thirdPartyID"
+                FROM "unverified child posts"
+                JOIN post_json ON post_json."postID" = "unverified child posts"."postID"
+                WHERE "unverified child posts"."parentID" = $1
+                GROUP BY "unverified child posts"."childID"
             `),
         values: [parentID]
         }
@@ -588,7 +588,7 @@ export default class SQLPost {
         return result
     }
 
-    /** Get the parent of a third party post. */
+    /** Get the parent of a child post. */
     public static parent = async (postID: number) => {
         const query: QueryConfig = {
         text: functions.multiTrim(/*sql*/`
@@ -600,12 +600,12 @@ export default class SQLPost {
                     FULL JOIN "cuteness" ON posts."postID" = "cuteness"."postID"
                     GROUP BY posts."postID"
                 )
-                SELECT "third party".*, 
+                SELECT "child posts".*, 
                 to_json((array_agg(post_json.*))[1]) AS post
-                FROM "third party"
-                JOIN post_json ON post_json."postID" = "third party"."parentID"
-                WHERE "third party"."postID" = $1
-                GROUP BY "third party"."thirdPartyID"
+                FROM "child posts"
+                JOIN post_json ON post_json."postID" = "child posts"."parentID"
+                WHERE "child posts"."postID" = $1
+                GROUP BY "child posts"."childID"
             `),
         values: [postID]
         }
@@ -613,7 +613,7 @@ export default class SQLPost {
         return result[0]
     }
 
-    /** Get the parent of a third party post (unverified). */
+    /** Get the parent of a child post (unverified). */
     public static unverifiedParent = async (postID: number) => {
         const query: QueryConfig = {
         text: functions.multiTrim(/*sql*/`
@@ -625,12 +625,12 @@ export default class SQLPost {
                     FULL JOIN "cuteness" ON posts."postID" = "cuteness"."postID"
                     GROUP BY posts."postID"
                 )
-                SELECT "unverified third party".*, 
+                SELECT "unverified child posts".*, 
                 to_json((array_agg(post_json.*))[1]) AS post
-                FROM "unverified third party"
-                JOIN post_json ON post_json."postID" = "unverified third party"."parentID"
-                WHERE "unverified third party"."postID" = $1
-                GROUP BY "unverified third party"."thirdPartyID"
+                FROM "unverified child posts"
+                JOIN post_json ON post_json."postID" = "unverified child posts"."parentID"
+                WHERE "unverified child posts"."postID" = $1
+                GROUP BY "unverified child posts"."childID"
             `),
         values: [postID]
         }

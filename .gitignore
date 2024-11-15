@@ -5,7 +5,6 @@ dist
 .vscode
 .idea
 .DS_Store
-assets/images
 files
 *.pem
 .ssh

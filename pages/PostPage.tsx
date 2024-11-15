@@ -31,8 +31,8 @@ import OCRDialog from "../dialogs/OCRDialog"
 import RevertPostHistoryDialog from "../dialogs/RevertPostHistoryDialog"
 import RevertTranslationHistoryDialog from "../dialogs/RevertTranslationHistoryDialog"
 import CaptchaDialog from "../dialogs/CaptchaDialog"
-import ThirdParty from "../components/ThirdParty"
 import Parent from "../components/Parent"
+import Children from "../components/Children"
 import ArtistWorks from "../components/ArtistWorks"
 import Related from "../components/Related"
 import MobileInfo from "../components/MobileInfo"
@@ -69,7 +69,7 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
     const {revertTranslationHistoryID, revertTranslationHistoryFlag} = useTranslationDialogSelector()
     const {setRevertTranslationHistoryID, setRevertTranslationHistoryFlag} = useTranslationDialogActions()
     const [images, setImages] = useState([]) as any
-    const [thirdPartyPosts, setThirdPartyPosts] = useState([]) as any
+    const [childPosts, setChildPosts] = useState([]) as any
     const [artistPosts, setArtistPosts] = useState([]) as any
     const [relatedPosts, setRelatedPosts] = useState([]) as any
     const [parentPost, setParentPost] = useState(null) as any
@@ -174,13 +174,14 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
         }
     }, [session, post])
 
-    const updateThirdParty = async () => {
+    const updateChildren = async () => {
         if (post) {
-            const thirdPartyPosts = await functions.get("/api/post/thirdparty", {postID: post.postID}, session, setSessionFlag).catch(() => [])
-            if (thirdPartyPosts?.[0]) {
-                setThirdPartyPosts(thirdPartyPosts)
+            const childPosts = await functions.get("/api/post/children", {postID: post.postID}, session, setSessionFlag).catch(() => [])
+            console.log(childPosts)
+            if (childPosts?.[0]) {
+                setChildPosts(childPosts)
             } else {
-                setThirdPartyPosts([])
+                setChildPosts([])
             }
         }
     }
@@ -224,7 +225,7 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
         }
         updatePost()
         updateParent()
-        updateThirdParty()
+        updateChildren()
         updateGroups()
         saveHistory()
     }, [post, session])
@@ -523,11 +524,11 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
             const {images, upscaledImages} = await functions.parseImages(post, session)
             const newTags = await functions.parseNewTags(post, session, setSessionFlag)
             await functions.put("/api/post/edit", {postID: post.postID, images, upscaledImages, type: post.type, restrict: post.restrict, source,
-            style: post.style, artists: post.artists, characters: post.characters, preserveThirdParty: post.thirdParty,
+            style: post.style, artists: post.artists, characters: post.characters, preserveChildren: post.child,
             series: post.series, tags: post.tags, newTags, reason: post.reason}, session, setSessionFlag)
         } else {
             await functions.put("/api/post/quickedit", {postID: post.postID, type: post.type, restrict: post.restrict, source,
-            style: post.style, artists: post.artists, characters: post.characters, preserveThirdParty: post.thirdParty,
+            style: post.style, artists: post.artists, characters: post.characters, preserveChildren: post.child,
             series: post.series, tags: post.tags, reason: post.reason}, session, setSessionFlag)
         }
         currentHistory()
@@ -709,7 +710,7 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
                     {generateActiveFavgroupJSX()}
                     {generateGroupsJSX()}
                     {parentPost ? <Parent post={parentPost}/>: null}
-                    {thirdPartyPosts.length ? <ThirdParty posts={thirdPartyPosts}/> : null}
+                    {childPosts.length ? <Children posts={childPosts}/> : null}
                     {mobile && post && tagCategories ? <MobileInfo post={post} order={order} artists={tagCategories.artists} characters={tagCategories.characters} series={tagCategories.series} tags={tagCategories.tags}/> : null}
                     {session.username && !session.banned && post ? <CutenessMeter post={post}/> : null}
                     {post?.purchaseLink ? <BuyLink link={post.purchaseLink}/> : null}

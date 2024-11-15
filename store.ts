@@ -47,11 +47,12 @@ const store = configureStore({
         maxAge: 50,
         serialize: {
             replacer: (key, value) => {
-                if (key === "posts") return undefined
-                if (key === "visiblePosts") return undefined
-                if (key === "unverifiedPosts") return undefined
-                if (key === "tags") return undefined
-                if (key === "emojis") return undefined
+                let removed = "[Removed for performance]"
+                if (key === "posts") return removed
+                if (key === "visiblePosts") return removed
+                if (key === "unverifiedPosts") return removed
+                if (key === "tags") return removed
+                if (key === "emojis") return removed
                 return value
             }
         }

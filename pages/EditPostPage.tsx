@@ -85,7 +85,7 @@ const EditPostPage: React.FunctionComponent<Props> = (props) => {
     const [restrict, setRestrict] = useState("safe")
     const [style, setStyle] = useState("2d")
     const [showLinksInput, setShowLinksInput] = useState(false)
-    const [thirdPartyID, setThirdPartyID] = useState("")
+    const [parentID, setParentID] = useState("")
     const [sourceTitle, setSourceTitle] = useState("")
     const [sourceTranslatedTitle, setSourceTranslatedTitle] = useState("")
     const [sourceArtist, setSourceArtist] = useState("")
@@ -143,7 +143,7 @@ const EditPostPage: React.FunctionComponent<Props> = (props) => {
         setSourceBookmarks(post.bookmarks || "")
         setSourcePurchaseLink(post.purchaseLink || "")
         const parentPost = await functions.get("/api/post/parent", {postID}, session, setSessionFlag)
-        if (parentPost) setThirdPartyID(parentPost.parentID)
+        if (parentPost) setParentID(parentPost.parentID)
 
         let files = [] as any
         let links = [] as any
@@ -398,7 +398,7 @@ const EditPostPage: React.FunctionComponent<Props> = (props) => {
     }
 
     const reset = () => {
-        setThirdPartyID("")
+        setParentID("")
         setSourceTitle("")
         setSourceTranslatedTitle("")
         setSourceArtist("")
@@ -915,7 +915,7 @@ const EditPostPage: React.FunctionComponent<Props> = (props) => {
             type,
             restrict,
             style,
-            thirdPartyID,
+            parentID,
             source: {
                 title: sourceTitle,
                 translatedTitle: sourceTranslatedTitle,
@@ -1765,8 +1765,8 @@ const EditPostPage: React.FunctionComponent<Props> = (props) => {
             {getStyleJSX()}
             <div className="upload-container">
                     <div className="upload-container-row">
-                        <span className="upload-text-alt">If this is a third-party edit, enter the original post ID: </span>
-                        <input className="upload-input" type="number" value={thirdPartyID} onChange={(event) => setThirdPartyID(event.target.value)} spellCheck={false} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}/>
+                        <span className="upload-text-alt">If this is a child post, enter the parent post ID: </span>
+                        <input className="upload-input" type="number" value={parentID} onChange={(event) => setParentID(event.target.value)} spellCheck={false} onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}/>
                     </div>
             </div>
             <span className="upload-heading">Source</span>

@@ -1,14 +1,14 @@
 import React from "react"
 import {useHistory} from "react-router-dom"
 import functions from "../structures/Functions"
-import "./styles/thirdparty.less"
+import "./styles/children.less"
 import Carousel from "./Carousel"
 
 interface Props {
     posts: any
 }
 
-const ThirdParty: React.FunctionComponent<Props> = (props) => {
+const Children: React.FunctionComponent<Props> = (props) => {
     const history = useHistory()
     const images = props.posts.map((t: any) => functions.getThumbnailLink(t.post.images[0].type, t.postID, t.post.images[0].order, t.post.images[0].filename, "small"))
 
@@ -18,13 +18,13 @@ const ThirdParty: React.FunctionComponent<Props> = (props) => {
     }
 
     return (
-        <div className="third-party">
-            <div className="third-party-title">Third Party Posts</div>
-            <div className="third-party-container">
+        <div className="children">
+            <div className="children-title">Child Posts</div>
+            <div className="children-container">
                 <Carousel images={images} set={click} noKey={true}/>
             </div>
         </div>
     )
 }
 
-export default ThirdParty
+export default Children

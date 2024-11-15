@@ -23,7 +23,7 @@ import UpscalePostDialog from "../dialogs/UpscalePostDialog"
 import CompressPostDialog from "../dialogs/CompressPostDialog"
 import SaveTranslationDialog from "../dialogs/SaveTranslationDialog"
 import EditTranslationDialog from "../dialogs/EditTranslationDialog"
-import ThirdParty from "../components/ThirdParty"
+import Children from "../components/Children"
 import Parent from "../components/Parent"
 import NewTags from "../components/NewTags"
 import MobileInfo from "../components/MobileInfo"
@@ -48,7 +48,7 @@ const UnverifiedPostPage: React.FunctionComponent<Props> = (props) => {
     const {postFlag} = useFlagSelector()
     const {setPostFlag, setDownloadIDs, setDownloadFlag} = useFlagActions()
     const [images, setImages] = useState([]) as any
-    const [thirdPartyPosts, setThirdPartyPosts] = useState([]) as any
+    const [childPosts, setChildPosts] = useState([]) as any
     const [parentPost, setParentPost] = useState(null) as any
     const [image, setImage] = useState("") as any
     const [post, setPost] = useState(null) as any
@@ -79,13 +79,13 @@ const UnverifiedPostPage: React.FunctionComponent<Props> = (props) => {
         }
     }, [session])
 
-    const updateThirdParty = async () => {
+    const updateChildren = async () => {
         if (post) {
-            const thirdPartyPosts = await functions.get("/api/post/thirdparty/unverified", {postID: post.postID}, session, setSessionFlag)
-            if (thirdPartyPosts?.[0]) {
-                setThirdPartyPosts(thirdPartyPosts)
+            const childPosts = await functions.get("/api/post/children/unverified", {postID: post.postID}, session, setSessionFlag)
+            if (childPosts?.[0]) {
+                setChildPosts(childPosts)
             } else {
-                setThirdPartyPosts([])
+                setChildPosts([])
             }
         }
     }
@@ -111,7 +111,7 @@ const UnverifiedPostPage: React.FunctionComponent<Props> = (props) => {
             }
         }
         updatePost()
-        updateThirdParty()
+        updateChildren()
         updateParent()
     }, [post, session])
 
@@ -288,7 +288,7 @@ const UnverifiedPostPage: React.FunctionComponent<Props> = (props) => {
                     {originalPostJSX()}
                     {post ? <NewTags post={post}/> : null}
                     {parentPost ? <Parent post={parentPost}/>: null}
-                    {thirdPartyPosts.length ? <ThirdParty posts={thirdPartyPosts}/>: null}
+                    {childPosts.length ? <Children posts={childPosts}/>: null}
                     {post?.purchaseLink ? <BuyLink link={post.purchaseLink}/> : null}
                     {post?.commentary ? <Commentary text={post.commentary} translated={post.translatedCommentary}/> : null}
                     <Footer/>
