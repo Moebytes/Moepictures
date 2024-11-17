@@ -20,7 +20,7 @@ let limit = 100
 
 const ImageGrid: React.FunctionComponent = (props) => {
     const {mobile} = useLayoutSelector()
-    const {search, searchFlag, scroll, imageType, restrictType, styleType, sortType, sortReverse, sizeType, pageMultiplier, autoSearch} = useSearchSelector()
+    const {search, searchFlag, scroll, imageType, restrictType, styleType, sortType, sortReverse, sizeType, pageMultiplier, autoSearch, showChildren} = useSearchSelector()
     const {setSearch, setSearchFlag} = useSearchActions()
     const {posts, visiblePosts} = useCacheSelector()
     const {setPosts, setVisiblePosts} = useCacheActions()
@@ -544,7 +544,7 @@ const ImageGrid: React.FunctionComponent = (props) => {
         for (let i = 0; i < visible.length; i++) {
             const post = visible[i] as any
             if (post.fake) continue
-            //if (post.parentID) continue
+            if (!showChildren) if (post.parentID) continue
             if (restrictType !== "explicit") if (post.restrict === "explicit") continue
             const image = post.images[0]
             if (!image) continue

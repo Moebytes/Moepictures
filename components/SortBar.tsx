@@ -57,8 +57,12 @@ import rightIcon from "../assets/icons/go-right.png"
 import multiplier1xIcon from "../assets/icons/1x.png"
 import multiplier2xIcon from "../assets/icons/2x.png"
 import multiplier3xIcon from "../assets/icons/3x.png"
+import multiplier4xIcon from "../assets/icons/4x.png"
+import multiplier5xIcon from "../assets/icons/5x.png"
 import functions from "../structures/Functions"
 import permissions from "../structures/Permissions"
+import checkbox from "../assets/icons/checkbox2.png"
+import checkboxChecked from "../assets/icons/checkbox2-checked.png"
 import "./styles/sortbar.less"
 
 const SortBar: React.FunctionComponent = (props) => {
@@ -74,8 +78,8 @@ const SortBar: React.FunctionComponent = (props) => {
     const {setBrightness, setContrast, setHue, setSaturation, setLightness, setBlur, setSharpen, setPixelate} = useFilterActions()
     const {reverse} = usePlaybackSelector()
     const {setReverse, setSpeed} = usePlaybackActions()
-    const {scroll, square, imageType, restrictType, styleType, sizeType, sortType, sortReverse, selectionMode, pageMultiplier, selectionItems} = useSearchSelector()
-    const {setScroll, setImageType, setRestrictType, setStyleType, setSizeType, setSortType, setSortReverse, setSelectionMode, setPageMultiplier, setSquare, setSearchFlag} = useSearchActions()
+    const {scroll, square, imageType, restrictType, styleType, sizeType, sortType, sortReverse, selectionMode, pageMultiplier, selectionItems, showChildren} = useSearchSelector()
+    const {setScroll, setImageType, setRestrictType, setStyleType, setSizeType, setSortType, setSortReverse, setSelectionMode, setPageMultiplier, setSquare, setSearchFlag, setShowChildren} = useSearchActions()
     const {setDownloadFlag, setDownloadIDs, setPageFlag} = useFlagActions()
     const {showDownloadDialog} = useMiscDialogSelector()
     const {setPremiumRequired, setShowDownloadDialog} = useMiscDialogActions()
@@ -100,6 +104,7 @@ const SortBar: React.FunctionComponent = (props) => {
     const sortRef = useRef(null) as any
     const filterRef = useRef(null) as any
     const speedRef = useRef(null) as any
+    const pageMultiplierRef = useRef(null) as any
     const history = useHistory()
 
     const getFilter = () => {
@@ -115,6 +120,7 @@ const SortBar: React.FunctionComponent = (props) => {
         const savedSquare = localStorage.getItem("square")
         const savedScroll = localStorage.getItem("scroll")
         const savedMultiplier = localStorage.getItem("pageMultiplier")
+        const savedShowChildren = localStorage.getItem("showChildren")
         if (savedType) setImageType(savedType)
         if (savedStyle) setStyleType(savedStyle)
         if (savedSize) setSizeType(savedSize)
@@ -123,6 +129,7 @@ const SortBar: React.FunctionComponent = (props) => {
         if (savedSquare) setSquare(savedSquare === "true")
         if (savedScroll) setScroll(savedScroll === "true")
         if (savedMultiplier) setPageMultiplier(Number(savedMultiplier))
+        if (savedShowChildren) setShowChildren(savedShowChildren)
 
         const savedBrightness = localStorage.getItem("brightness")
         const savedContrast = localStorage.getItem("contrast")
@@ -451,12 +458,21 @@ const SortBar: React.FunctionComponent = (props) => {
         return `${raw + offset}px`
     }
 
+    const getPageMultiplierMargin = () => {
+        const rect = pageMultiplierRef.current?.getBoundingClientRect()
+        if (!rect) return "250px"
+        const raw = window.innerWidth - rect.right
+        let offset = -8
+        if (tablet) offset -= 0
+        return `${raw + offset}px`
+    }
+
     const getSpeedMargin = () => {
         const rect = speedRef.current?.getBoundingClientRect()
         if (!rect) return "250px"
         const raw = window.innerWidth - rect.right
-        let offset = 2
-        if (tablet) offset -= 20
+        let offset = -22
+        if (tablet) offset -= 0
         return `${raw + offset}px`
     }
 
@@ -520,6 +536,12 @@ const SortBar: React.FunctionComponent = (props) => {
         setFilterDropActive(newValue === "speed")
     }
 
+    const togglePageMultiplierDrop = () => {
+        const newValue = activeDropdown === "page-multiplier" ? "none" : "page-multiplier"
+        setActiveDropdown(newValue)
+        setFilterDropActive(newValue === "page-multiplier")
+    }
+
     useEffect(() => {
         localStorage.setItem("brightness", String(brightness))
         localStorage.setItem("contrast", String(contrast))
@@ -546,6 +568,12 @@ const SortBar: React.FunctionComponent = (props) => {
         const newValue = !square
         localStorage.setItem("square", `${newValue}`)
         setSquare(newValue)
+    }
+
+    const toggleShowChildren = () => {
+        const newValue = !showChildren
+        localStorage.setItem("showChildren", `${newValue}`)
+        setShowChildren(newValue)
     }
 
     const toggleScroll = () => {
@@ -690,6 +718,8 @@ const SortBar: React.FunctionComponent = (props) => {
         if (pageMultiplier === 1) return multiplier1xIcon
         if (pageMultiplier === 2) return multiplier2xIcon
         if (pageMultiplier === 3) return multiplier3xIcon
+        if (pageMultiplier === 4) return multiplier4xIcon
+        if (pageMultiplier === 5) return multiplier5xIcon
         return multiplier1xIcon
     }
 
@@ -705,13 +735,6 @@ const SortBar: React.FunctionComponent = (props) => {
         setTimeout(() => {
             setHideSortbar(false)
         }, 100)
-    }
-
-    const changePageMultiplier = () => {
-        if (pageMultiplier === 1) return setPageMultiplier(2)
-        if (pageMultiplier === 2) return setPageMultiplier(3)
-        if (pageMultiplier === 3) return setPageMultiplier(1)
-        return setPageMultiplier(1)
     }
  
     let sortBarJSX = () => {
@@ -762,6 +785,10 @@ const SortBar: React.FunctionComponent = (props) => {
                     {getImageJSX()}
                     {getRestrictJSX()}
                     {getStyleJSX()}
+                    <div className="sortbar-item" onClick={() => toggleShowChildren()}>
+                        <img className="sortbar-img" src={showChildren ? checkboxChecked : checkbox} style={{filter: getFilter()}}/>
+                        <span className="sortbar-text">Child</span> 
+                    </div>
                 </div>
                 <div className="sortbar-right">
                     {permissions.isAdmin(session) && selectionMode ? 
@@ -791,7 +818,7 @@ const SortBar: React.FunctionComponent = (props) => {
                     <div className="sortbar-item" onClick={nextPage}>
                         <img className="sortbar-img" src={rightIcon} style={{filter: getFilter()}}/>
                     </div>
-                    <div className="sortbar-item" onClick={changePageMultiplier}>
+                    <div className="sortbar-item" ref={pageMultiplierRef} onClick={() => togglePageMultiplierDrop()}>
                         <img className="sortbar-img" src={getPageMultiplierIcon()} style={{filter: getFilter()}}/>
                     </div>
                     </> : null}
@@ -805,15 +832,12 @@ const SortBar: React.FunctionComponent = (props) => {
                     <div className="sortbar-item" onClick={() => setReverse(!reverse)}>
                         {reverse ? <>
                         <img className="sortbar-img" src={reverseIcon} style={{transform: "scaleX(-1)", filter: getFilter()}}/>
-                        {!tablet ? <span className="sortbar-text">Forward</span> : null}
                         </> : <>
                         <img className="sortbar-img" src={reverseIcon} style={{filter: getFilter()}}/>
-                        {!tablet ? <span className="sortbar-text">Reverse</span> : null}
                         </>}
                     </div>
                     <div className="sortbar-item" ref={speedRef} onClick={() => toggleSpeedDrop()}>
                         <img className="sortbar-img" src={speedIcon} style={{filter: getFilter()}}/>
-                        {!tablet ? <span className="sortbar-text">Speed</span> : null}
                     </div>
                     <div className="sortbar-item" ref={filterRef} onClick={() => toggleFilterDrop()}>
                         <img className="sortbar-img" src={filters} style={{filter: getFilter()}}/>
@@ -885,6 +909,24 @@ const SortBar: React.FunctionComponent = (props) => {
             <div className={`dropdown ${activeDropdown === "style" ? "" : "hide-dropdown"}`} 
             style={{marginLeft: getStyleMargin(), left: `${dropLeft}px`, top: `${dropTop}px`}} onClick={() => setActiveDropdown("none")}>
                 {styleDropdownJSX()}
+            </div>
+            <div className={`dropdown-right ${activeDropdown === "page-multiplier" ? "" : "hide-dropdown"}`} 
+            style={{marginRight: getPageMultiplierMargin(), top: `${dropTop}px`}} onClick={() => setActiveDropdown("none")}>
+                <div className="sortbar-dropdown-row" onClick={() => setPageMultiplier(1)}>
+                    <span className="sortbar-dropdown-text">1x</span>
+                </div>
+                <div className="sortbar-dropdown-row" onClick={() => setPageMultiplier(2)}>
+                    <span className="sortbar-dropdown-text">2x</span>
+                </div>
+                <div className="sortbar-dropdown-row" onClick={() => setPageMultiplier(3)}>
+                    <span className="sortbar-dropdown-text">3x</span>
+                </div>
+                <div className="sortbar-dropdown-row" onClick={() => setPageMultiplier(4)}>
+                    <span className="sortbar-dropdown-text">4x</span>
+                </div>
+                <div className="sortbar-dropdown-row" onClick={() => setPageMultiplier(5)}>
+                    <span className="sortbar-dropdown-text">5x</span>
+                </div>
             </div>
             <div className={`dropdown-right ${activeDropdown === "speed" ? "" : "hide-dropdown"}`} 
             style={{marginRight: getSpeedMargin(), top: `${dropTop}px`}} onClick={() => setActiveDropdown("none")}>

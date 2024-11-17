@@ -59,9 +59,12 @@ export default class SQLSearch {
         let ANDtags = [] as string[]
         let ORtags = [] as string[]
         let NOTtags = [] as string[]
+        let NOTORtags = [] as string[]
         let STARtags = [] as string[]
         tags?.forEach((tag) => {
-            if (tag.startsWith("+")) {
+            if (tag.startsWith("+-")) {
+                NOTORtags.push(tag.replace("+-", ""))
+            } else if (tag.startsWith("+")) {
                 ORtags.push(tag.replace("+", ""))
             } else if (tag.startsWith("-")) {
                 NOTtags.push(tag.replace("-", ""))
@@ -88,6 +91,11 @@ export default class SQLSearch {
             values.push(NOTtags)
             tagQueryArray.push(`NOT tags @> $${i}`)
             i++
+        }
+        if (NOTORtags.length) {
+            values.push(NOTORtags)
+            tagQueryArray.push(`NOT tags && $${i}`)
+            i++ 
         }
         if (STARtags.length) {
             for (const starTag of STARtags) {

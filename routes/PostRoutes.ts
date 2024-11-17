@@ -585,7 +585,7 @@ const PostRoutes = (app: Express) => {
                     const implications = await sql.tag.implications(addedTags[i])
                     if (implications?.[0]) {
                         for (const i of implications) {
-                            addedTags.push(i.implication)
+                            if (!oldTagsSet.has(i.implication)) addedTags.push(i.implication)
                             const tag = await sql.tag.tag(i.implication)
                             bulkTagUpdate.push({tag: i.implication, type: tagObjectMapping[i.implication]?.type, description: tag?.description || null, image: tag?.image || null, imageHash: tag?.imageHash || null})
                         }

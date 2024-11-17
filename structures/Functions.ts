@@ -1886,6 +1886,10 @@ export default class Functions {
         let specialFlagsArray = new Array(permutations.length).fill("")
         for (let i = 0; i < permutations.length; i++) {
             for (let j = 0; j < permutations[i].length; j++) {
+                if (permutations[i][j]?.startsWith("+-")) {
+                    specialFlagsArray[j] = "+-"
+                    permutations[i][j] = permutations[i][j].replace("+-", "")
+                }
                 if (permutations[i][j]?.startsWith("+")) {
                     specialFlagsArray[j] = "+"
                     permutations[i][j] = permutations[i][j].replace("+", "")
@@ -1919,6 +1923,25 @@ export default class Functions {
             return queries.join(" ")
         }
         return query
+    }
+
+    public static trimSpecialCharacters = (query: string) => {
+        return query?.trim().split(/ +/g).map((item) => {
+            if (item.startsWith("+-")) return item.replace("+-", "")
+            if (item.startsWith("+")) return item.replace("+", "")
+            if (item.startsWith("-")) return item.replace("-", "")
+            if (item.startsWith("*")) return item.replace("*", "")
+            return item
+        }).join(" ") || ""
+    }
+
+    public static appendSpecialCharacters = (parts: string[], tag: string) => {
+        const last = parts[parts.length - 1]
+        if (last.startsWith("+-")) return `+-${tag}`
+        if (last.startsWith("+")) return `+${tag}`
+        if (last.startsWith("-")) return `-${tag}`
+        if (last.startsWith("*")) return `*${tag}`
+        return tag
     }
 
     public static insertNodeAtCaret(node: any) {
@@ -2387,7 +2410,8 @@ export default class Functions {
         if (post.favgrouped) return "var(--favgroupBorder)"
         if (post.hidden) return "var(--takendownBorder)"
         if (post.locked) return "var(--lockedBorder)"
-        if (post.hasChildren) return "var(--childrenBorder)"
+        if (post.hasChildren) return "var(--parentBorder)"
+        if (post.parentID) return "var(--childBorder)"
         if (post.isGrouped) return "var(--groupBorder)"
         if (Number(post.imageCount) > 1) return "var(--variationBorder)"
         return "var(--imageBorder)"

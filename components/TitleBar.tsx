@@ -148,6 +148,7 @@ const TitleBar: React.FunctionComponent<Props> = (props) => {
         if (headerFlag) {
             setHeaderFlag(false)
             const text = functions.toProperCase(search.trim().split(/ +/g).map((t: string) => {
+                if (t.startsWith("+-")) return `+-${t.replaceAll("+-", " ").trim()}`
                 if (t.startsWith("-")) return `-${t.replaceAll("-", " ").trim()}`
                 return t.replaceAll("-", " ")
             }).join(", "))

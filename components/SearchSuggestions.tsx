@@ -38,7 +38,7 @@ const SearchSuggestions: React.FunctionComponent<Props> = (props) => {
                 return setActiveIndex(-1)
             }
             const parts = search.split(/ +/g)
-            parts[parts.length - 1] = suggestions[activeIndex]?.tag
+            parts[parts.length - 1] = functions.appendSpecialCharacters(parts, suggestions[activeIndex]?.tag)
             const newSearch = parts.join(" ") + " "
             setSearch(newSearch)
             setSearchFlag(true)
@@ -105,7 +105,7 @@ const SearchSuggestions: React.FunctionComponent<Props> = (props) => {
                 if (props.click) return props.click(suggestions[i].tag)
                 history.push(`/posts`)
                 const parts = search.split(/ +/g)
-                parts[parts.length - 1] = suggestions[i].tag
+                parts[parts.length - 1] = functions.appendSpecialCharacters(parts, suggestions[i].tag)
                 const newSearch = parts.join(" ")
                 setSearch(newSearch)
                 setSearchFlag(true)

@@ -378,11 +378,12 @@ const SearchRoutes = (app: Express) => {
 
     app.get("/api/search/suggestions", searchLimiter, async (req: Request, res: Response, next: NextFunction) => {
         try {
-            const query = req.query.query as string
+            let query = req.query.query as string
             let type = req.query.type as string
             if (!type) type = "all"
             if (type === "tags") type = "all tags"
             if (!functions.validTagType(type)) return res.status(400).send("Invalid type")
+            query = functions.trimSpecialCharacters(query)
             let search = query?.trim().toLowerCase().split(/ +/g).filter(Boolean).join("-") ?? ""
             let result = await sql.search.tagSearch(search, "posts", type, "100").then((r) => r.slice(0, 100))
             if (!result?.[0]) {

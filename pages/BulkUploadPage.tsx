@@ -378,8 +378,8 @@ const BulkUploadPage: React.FunctionComponent = (props) => {
     }
 
     const submit = async () => {
-        let submitData = [] as any
-        let upscaledSubmitData = [] as any
+        let submitObj = {} as any
+        let upscaledSubmitObj = {} as any
         for (let i = 0; i < originalFiles.length; i++) {
             const current = originalFiles[i]
             const upscaledCurrent = upscaledFiles[i]
@@ -392,9 +392,21 @@ const BulkUploadPage: React.FunctionComponent = (props) => {
                 dupes = await functions.post("/api/search/similar", {bytes: Object.values(current.bytes), type: current.ext}, session, setSessionFlag)
             }
             if (dupes.length) continue
-            submitData.push(current)
-            upscaledSubmitData.push(upscaledCurrent)
+            let id = current.name.includes("_s") ? current.name : current.name.split("_")[0]
+            let upscaledID = current.name.includes("_s") ? current.name : current.name.split("_")[0]
+            if (submitObj[id]) {
+                submitObj[id].push(current)
+            } else {
+                submitObj[id] = [current]
+            }
+            if (upscaledSubmitObj[upscaledID]) {
+                upscaledSubmitObj[upscaledID].push(upscaledCurrent)
+            } else {
+                upscaledSubmitObj[upscaledID] = [upscaledCurrent]
+            }
         }
+        const submitData = Object.values(submitObj) as any[][]
+        const upscaledSubmitData = Object.values(upscaledSubmitObj) as any[][]
         if (!submitData.length) {
             setSubmitError(true)
             submitErrorRef.current.innerText = "All of the posts already exist."
@@ -406,18 +418,18 @@ const BulkUploadPage: React.FunctionComponent = (props) => {
         setProgress(0)
         setProgressText(`0/${submitData.length}`)
         for (let i = 0; i < submitData.length; i++) {
-            const current = submitData[i]
-            const upscaledCurrent = upscaledSubmitData[i]
-            const sourceData = await sourceLookup(current, restrict)
-            const tagData = await tagLookup(current, type, style, sourceData.danbooruLink)
+            const currentArr = submitData[i]
+            const upscaledCurrentArr = upscaledSubmitData[i]
+            const sourceData = await sourceLookup(currentArr[0], restrict)
+            const tagData = await tagLookup(currentArr[0], type, style, sourceData.danbooruLink, sourceData.restrict)
 
             let dataArtists = sourceData.artists?.[0]?.tag ? sourceData.artists : tagData.artists
 
-            let newOriginalFiles = [current].map((a: any) => {
+            let newOriginalFiles = currentArr.map((a: any) => {
                 a.bytes = Object.values(a.bytes)
                 return a
             })
-            let newUpscaledFiles = [upscaledCurrent].map((a: any) => {
+            let newUpscaledFiles = upscaledCurrentArr.map((a: any) => {
                 a.bytes = Object.values(a.bytes)
                 return a
             })
@@ -426,7 +438,7 @@ const BulkUploadPage: React.FunctionComponent = (props) => {
                 images: newOriginalFiles,
                 upscaledImages: newUpscaledFiles,
                 type: tagData.type,
-                restrict: sourceData.restrict,
+                restrict: tagData.restrict,
                 style: tagData.style,
                 parentID: "",
                 source: {
@@ -502,7 +514,6 @@ const BulkUploadPage: React.FunctionComponent = (props) => {
             try {
                 setProgress(Math.floor((100/submitData.length) * (i+1)))
                 setProgressText(`${i+1}/${submitData.length}`)
-                console.log(data)
                 await functions.post("/api/post/upload", data, session, setSessionFlag)
             } catch (e) {
                 console.log(e)
@@ -542,7 +553,11 @@ const BulkUploadPage: React.FunctionComponent = (props) => {
             const pixivID = basename.match(/^\d+(?=$|_p)/gm)?.[0] ?? ""
             link = `https://www.pixiv.net/en/artworks/${pixivID}`
             const result = await functions.fetch(`https://danbooru.donmai.us/posts.json?tags=pixiv_id%3A${pixivID}`)
-            if (result.length) danbooruLink = `https://danbooru.donmai.us/posts/${result[0].id}.json`
+            if (result.length) {
+                danbooruLink = `https://danbooru.donmai.us/posts/${result[0].id}.json`
+                if (result[0].rating === "q") restrict = "questionable"
+                if (result[0].rating === "e") restrict = "explicit"
+            }
             try {
                 const illust = await functions.get(`/api/misc/pixiv?url=${link}`, null, session, setSessionFlag)
                 commentary = `${functions.decodeEntities(illust.caption.replace(/<\/?[^>]+(>|$)/g, ""))}` 
@@ -617,7 +632,11 @@ const BulkUploadPage: React.FunctionComponent = (props) => {
                     link = `https://www.pixiv.net/en/artworks/${pixiv[0].data.pixiv_id}`
                     if (!danbooru.length) {
                         const result = await functions.fetch(`https://danbooru.donmai.us/posts.json?tags=pixiv_id%3A${pixiv[0].data.pixiv_id}`)
-                        if (result.length) danbooruLink = `https://danbooru.donmai.us/posts/${result[0].id}.json`
+                        if (result.length) {
+                            danbooruLink = `https://danbooru.donmai.us/posts/${result[0].id}.json`
+                            if (result[0].rating === "q") restrict = "questionable"
+                            if (result[0].rating === "e") restrict = "explicit"
+                        }
                     }
                     artist = pixiv[0].data.author_name
                     title = pixiv[0].data.title
@@ -718,7 +737,7 @@ const BulkUploadPage: React.FunctionComponent = (props) => {
         }
     }
 
-    const tagLookup = async (current: any, type: string, style: string, danbooruLink?: string) => {
+    const tagLookup = async (current: any, type: string, style: string, danbooruLink: string, restrict: string) => {
         let tagArr = [] as any
         let blockedTags = functions.blockedTags()
         let tagReplaceMap = functions.tagReplaceMap()
@@ -740,6 +759,8 @@ const BulkUploadPage: React.FunctionComponent = (props) => {
 
         if (danbooruLink) {
             const json = await functions.fetch(danbooruLink)
+            if (json.rating === "q") restrict = "questionable"
+            if (json.rating === "e") restrict = "explicit"
             tagArr = json.tag_string_general.split(" ").map((tag: string) => tag.replaceAll("_", "-"))
             tagArr.push("autotags")
             tagArr.push("upscaled")
@@ -873,8 +894,9 @@ const BulkUploadPage: React.FunctionComponent = (props) => {
             newTags = notExists
         }
         return {
-            style,
             type,
+            restrict,
+            style,
             artists,
             characters,
             series,

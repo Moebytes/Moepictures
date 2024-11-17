@@ -121,7 +121,8 @@ const HelpPage: React.FunctionComponent = (props) => {
                     Special tag modifiers: <br/>
                     <span className="help-alt">-Tag 1 -Tag 2</span> - Exclude posts containing Tag 1 and Tag 2. <br/>
                     <span className="help-alt">+Tag 1 +Tag 2</span> - Include posts containing either Tag 1 or Tag 2. <br/>
-                    <span className="help-alt">*Tag 1 *Tag 2</span> - Match all tags that contain Tag 1 and Tag 2. <br/><br/>
+                    <span className="help-alt">+-Tag 1 +-Tag 2</span> - Exclude posts containing either Tag 1 or Tag 2. <br/>
+                    <span className="help-alt">*Tag 1</span> - Match all tags containing Tag 1. <br/><br/>
 
                     Special searches: <br/>
                     <span className="help-alt">pixiv:id</span> - Search for post matching the pixiv id (if it exists). <br/>
@@ -165,7 +166,8 @@ const HelpPage: React.FunctionComponent = (props) => {
                     <span className="help-alt">pink</span> - the post is favorited. <br/>
                     <span className="help-alt">purple</span> - the post is favgrouped. <br/>
                     <span className="help-alt">red</span> - the post is edit locked. <br/>
-                    <span className="help-alt">green</span> - the post has child posts. <br/>
+                    <span className="help-alt">green</span> - the post is a parent post. <br/>
+                    <span className="help-alt">yellow</span> - the post is a child post. <br/>
                     <span className="help-alt">orange</span> - the post is in a group. <br/>
                     <span className="help-alt">blue</span> - the post has multiple variations. <br/>
                 </span>

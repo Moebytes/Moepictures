@@ -458,11 +458,7 @@ const GridImage = forwardRef<Ref, Props>((props, componentRef) => {
 
     useEffect(() => {
         if (!containerRef.current) return
-        if (imageLoaded) {
-            containerRef.current.style.boxShadow = getBorder()
-        } else {
-            containerRef.current.style.boxShadow = "none"
-        }
+        if (imageLoaded) containerRef.current.style.boxShadow = getBorder()
     }, [imageLoaded, sizeType, selected, session, props.post])
 
     useEffect(() => {

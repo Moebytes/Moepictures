@@ -26,7 +26,8 @@ const searchSlice = createSlice({
         translationMode: false,
         translationDrawingEnabled: false,
         imageExpand: false,
-        showUpscaled: false
+        showUpscaled: false,
+        showChildren: false
     },
     reducers: {
         setSearch: (state, action) => {state.search = action.payload},
@@ -49,7 +50,8 @@ const searchSlice = createSlice({
         setTranslationMode: (state, action) => {state.translationMode = action.payload},
         setTranslationDrawingEnabled: (state, action) => {state.translationDrawingEnabled = action.payload},
         setImageExpand: (state, action) => {state.imageExpand = action.payload},
-        setShowUpscaled: (state, action) => {state.showUpscaled = action.payload}
+        setShowUpscaled: (state, action) => {state.showUpscaled = action.payload},
+        setShowChildren: (state, action) => {state.showChildren = action.payload}
     }    
 })
 
@@ -57,7 +59,8 @@ const {
     setSearch, setSearchFlag, setImageType, setRestrictType, setStyleType, setSizeType,
     setSortType, setSortReverse, setSquare, setScroll, setSelectionMode, setPageMultiplier,
     setSelectionItems, setSelectionPosts, setFormat, setAutoSearch, setSaveSearch,
-    setTranslationMode, setTranslationDrawingEnabled, setImageExpand, setShowUpscaled
+    setTranslationMode, setTranslationDrawingEnabled, setImageExpand, setShowUpscaled,
+    setShowChildren
 } = searchSlice.actions
 
 export const useSearchSelector = () => {
@@ -83,7 +86,8 @@ export const useSearchSelector = () => {
         translationMode: selector((state) => state.search.translationMode),
         translationDrawingEnabled: selector((state) => state.search.translationDrawingEnabled),
         imageExpand: selector((state) => state.search.imageExpand),
-        showUpscaled: selector((state) => state.search.showUpscaled)
+        showUpscaled: selector((state) => state.search.showUpscaled),
+        showChildren: selector((state) => state.search.showChildren),
     }
 }
 
@@ -110,7 +114,8 @@ export const useSearchActions = () => {
         setTranslationMode: (state: any) => dispatch(setTranslationMode(state)),
         setTranslationDrawingEnabled: (state: any) => dispatch(setTranslationDrawingEnabled(state)),
         setImageExpand: (state: any) => dispatch(setImageExpand(state)),
-        setShowUpscaled: (state: any) => dispatch(setShowUpscaled(state))
+        setShowUpscaled: (state: any) => dispatch(setShowUpscaled(state)),
+        setShowChildren: (state: any) => dispatch(setShowChildren(state))
     }
 }
 
