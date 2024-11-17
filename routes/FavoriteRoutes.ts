@@ -60,9 +60,7 @@ const FavoriteRoutes = (app: Express) => {
             if (Number.isNaN(Number(postID))) return res.status(400).send("Invalid postID")
             if (!req.session.username) return res.status(403).send("Unauthorized")
             const favorite = await sql.favorite.favorite(Number(postID), req.session.username)
-            if (!req.session.publicKey) return res.status(401).send("No public key")
-            const encrypted = cryptoFunctions.encryptAPI(favorite, req.session.publicKey)
-            res.status(200).send(encrypted)
+            serverFunctions.sendEncrypted(favorite, req, res)
         } catch (e) {
             console.log(e)
             res.status(400).send("Bad request") 
@@ -126,9 +124,7 @@ const FavoriteRoutes = (app: Express) => {
                 }
                 newFavgroups.push(group)
             }
-            if (!req.session.publicKey) return res.status(401).send("No public key")
-            const encrypted = cryptoFunctions.encryptAPI(newFavgroups, req.session.publicKey)
-            res.status(200).send(encrypted)
+            serverFunctions.sendEncrypted(newFavgroups, req, res)
         } catch (e) {
             console.log(e)
             res.status(400).send("Bad request") 
@@ -186,9 +182,7 @@ const FavoriteRoutes = (app: Express) => {
                     if (!permissions.canPrivate(req.session, categories.artists)) favgroup.posts.splice(i, 1)
                 }
             }
-            if (!req.session.publicKey) return res.status(401).send("No public key")
-            const encrypted = cryptoFunctions.encryptAPI(favgroup, req.session.publicKey)
-            res.status(200).send(encrypted)
+            serverFunctions.sendEncrypted(favgroup, req, res)
         } catch (e) {
             console.log(e)
             res.status(400).send("Bad request") 

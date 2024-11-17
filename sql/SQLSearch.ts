@@ -3,8 +3,10 @@ import SQLQuery from "./SQLQuery"
 import functions from "../structures/Functions"
 
 export default class SQLSearch {
-    /** Search posts. */
-    public static search = async (tags: string[], type: string, restrict: string, style: string, sort: string, offset?: string, limit?: string, withTags?: boolean, username?: string) => {
+    public static boilerplate = (options: {i?: number, tags?: string[], type?: string, restrict?: string, style?: string, sort?: string, 
+        offset?: string, limit?: string, username?: string, withTags?: boolean, search?: string, favgroupOrder?: boolean, outerSort?: boolean}) => {
+        let {i, tags, search, type, restrict, style, sort, offset, limit, username, withTags, favgroupOrder, outerSort} = options
+        if (!i) i = 1
         let typeQuery = ""
         if (type === "image") typeQuery = `posts.type = 'image'`
         if (type === "animation") typeQuery = `posts.type = 'animation'`
@@ -24,8 +26,10 @@ export default class SQLSearch {
         if (style === "chibi") styleQuery = `posts.style = 'chibi'`
         let sortQuery = ""
         if (sort === "random") sortQuery = `ORDER BY random()`
-        if (sort === "date") sortQuery = `ORDER BY posts."uploadDate" DESC`
+        if (!sort || sort === "date") sortQuery = `ORDER BY posts."uploadDate" DESC`
         if (sort === "reverse date") sortQuery = `ORDER BY posts."uploadDate" ASC`
+        if (sort === "viewDate") sortQuery = `ORDER BY "history"."viewDate" DESC`
+        if (sort === "reverse viewDate") sortQuery = `ORDER BY "history"."viewDate" ASC`
         if (sort === "posted") sortQuery = `ORDER BY posts.posted DESC NULLS LAST`
         if (sort === "reverse posted") sortQuery = `ORDER BY posts.posted ASC NULLS LAST`
         if (sort === "cuteness") sortQuery = `ORDER BY "cuteness" DESC`
@@ -34,18 +38,18 @@ export default class SQLSearch {
         if (sort === "reverse popularity") sortQuery = `ORDER BY "favoriteCount" ASC`
         if (sort === "variations") sortQuery = `ORDER BY "imageCount" DESC`
         if (sort === "reverse variations") sortQuery = `ORDER BY "imageCount" ASC`
-        if (sort === "children") sortQuery = `ORDER BY "hasChildren" DESC`
-        if (sort === "reverse children") sortQuery = `ORDER BY "hasChildren" ASC`
+        if (sort === "parent") sortQuery = `ORDER BY "hasChildren" DESC`
+        if (sort === "reverse parent") sortQuery = `ORDER BY "hasChildren" ASC`
+        if (sort === "child") sortQuery = `ORDER BY posts."parentID" DESC NULLS LAST`
+        if (sort === "reverse child") sortQuery = `ORDER BY posts."parentID" ASC NULLS LAST`
         if (sort === "groups") sortQuery = `ORDER BY "isGrouped" DESC`
         if (sort === "reverse groups") sortQuery = `ORDER BY "isGrouped" ASC`
         if (sort === "tagcount") sortQuery = `ORDER BY "tagCount" DESC`
         if (sort === "reverse tagcount") sortQuery = `ORDER BY "tagCount" ASC`
         if (sort === "filesize") sortQuery = `ORDER BY "imageSize" DESC`
         if (sort === "reverse filesize") sortQuery = `ORDER BY "imageSize" ASC`
-        if (sort === "width") sortQuery = `ORDER BY "imageWidth" DESC`
-        if (sort === "reverse width") sortQuery = `ORDER BY "imageWidth" ASC`
-        if (sort === "height") sortQuery = `ORDER BY "imageHeight" DESC`
-        if (sort === "reverse height") sortQuery = `ORDER BY "imageHeight" ASC`
+        if (sort === "aspectRatio") sortQuery = `ORDER BY "aspectRatio" DESC`
+        if (sort === "reverse aspectRatio") sortQuery = `ORDER BY "aspectRatio" ASC`
         if (sort === "bookmarks") sortQuery = `ORDER BY posts.bookmarks DESC NULLS LAST`
         if (sort === "reverse bookmarks") sortQuery = `ORDER BY posts.bookmarks ASC NULLS LAST`
         if (sort === "favorites") sortQuery = `ORDER BY favorites."favoriteDate" DESC`
@@ -74,7 +78,6 @@ export default class SQLSearch {
                 ANDtags.push(tag)
             }
         })
-        let i = 1
         let values = [] as any
         let tagQueryArray = [] as any
         if (ANDtags.length) {
@@ -104,6 +107,11 @@ export default class SQLSearch {
                 i++
             }
         }
+        let searchValue = i
+        if (search) {
+            values.push(search)
+            i++
+        }
         let userValue = i
         if (username) {
             values.push(username)
@@ -119,19 +127,22 @@ export default class SQLSearch {
             values.push(limit)
             i++
         }
+        let offsetValue = i
         if (offset) values.push(offset)
         let tagQuery = tagQueryArray.length ? "WHERE " + tagQueryArray.join(" AND ") : ""
         const whereQueries = [favoriteQuery, typeQuery, restrictQuery, styleQuery].filter(Boolean).join(" AND ")
-        let includeTags = withTags || tagQuery
-        const query: QueryConfig = {
-        text: functions.multiTrim(/*sql*/`
+        let includeTags = withTags || tagQuery || sort === "tagcount" || sort === "reverse tagcount"
+
+        let postJSON = functions.multiTrim(/*sql*/`
             WITH post_json AS (
                 SELECT posts.*, json_agg(DISTINCT images.*) AS images, 
+                ${favgroupOrder ? `"favgroup map"."order",` : ""} 
                 ${includeTags ? `array_agg(DISTINCT "tag map".tag) AS tags,` : ""}
                 ${includeTags ? `COUNT(DISTINCT "tag map"."tag") AS "tagCount",` : ""}
                 MAX(DISTINCT images."size") AS "imageSize",
                 MAX(DISTINCT images."width") AS "imageWidth",
                 MAX(DISTINCT images."height") AS "imageHeight",
+                MAX(DISTINCT images."width")::float / MAX(DISTINCT images."height")::float AS "aspectRatio",
                 COUNT(DISTINCT images."imageID") AS "imageCount",
                 COUNT(DISTINCT favorites."username") AS "favoriteCount",
                 ROUND(AVG(DISTINCT cuteness."cuteness")) AS "cuteness",
@@ -159,16 +170,28 @@ export default class SQLSearch {
                 FULL JOIN "cuteness" ON posts."postID" = "cuteness"."postID"
                 LEFT JOIN "child posts" ON posts."postID" = "child posts"."parentID"
                 LEFT JOIN "group map" ON posts."postID" = "group map"."postID"
-                ${username ? `LEFT JOIN "favgroup map" ON posts."postID" = "favgroup map"."postID"` : ""}
+                ${username || favgroupOrder ? `LEFT JOIN "favgroup map" ON posts."postID" = "favgroup map"."postID"` : ""}
                 ${whereQueries ? `WHERE ${whereQueries}` : ""}
-                GROUP BY posts."postID"${favoriteQuery ? `, favorites."postID", favorites."username"` : ""}
-                ${sortQuery}
-            )
+                GROUP BY posts."postID"${favoriteQuery ? `, favorites."postID", favorites."username"` : ""}${favgroupOrder ? `, "favgroup map"."order"` : ""}
+                ${!outerSort ? sortQuery : ""}
+            )`)
+
+        return {postJSON, values, searchValue, tagQuery, sortQuery, includeTags, limitValue, offsetValue}
+    }
+
+    /** Search posts. */
+    public static search = async (tags: string[], type: string, restrict: string, style: string, sort: string, offset?: string, limit?: string, withTags?: boolean, username?: string) => {
+        const {postJSON, values, tagQuery, limitValue, offsetValue} = 
+        SQLQuery.search.boilerplate({tags, type, restrict, style, sort, offset, limit, username, withTags})
+
+        const query: QueryConfig = {
+        text: functions.multiTrim(/*sql*/`
+            ${postJSON}
             SELECT post_json.*,
             COUNT(*) OVER() AS "postCount"
             FROM post_json
             ${tagQuery}
-            ${limit ? `LIMIT $${limitValue}` : "LIMIT 100"} ${offset ? `OFFSET $${i}` : ""}
+            ${limit ? `LIMIT $${limitValue}` : "LIMIT 100"} ${offset ? `OFFSET $${offsetValue}` : ""}
         `)
         }
         if (values?.[0]) query.values = values

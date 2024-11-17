@@ -22,9 +22,7 @@ const CommentRoutes = (app: Express) => {
             const commentID = req.query.commentID as string
             if (!commentID) return res.status(400).send("Bad commentID")
             const result = await sql.comment.comment(Number(commentID))
-            if (!req.session.publicKey) return res.status(401).send("No public key")
-            const encrypted = cryptoFunctions.encryptAPI(result, req.session.publicKey)
-            res.status(200).send(encrypted)
+            serverFunctions.sendEncrypted(result, req, res)
         } catch (e) {
             console.log(e)
             res.status(400).send("Bad request") 

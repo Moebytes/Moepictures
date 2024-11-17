@@ -79,9 +79,7 @@ const MiscRoutes = (app: Express) => {
                 width: 230
             })
             req.session.captchaAnswer = captcha.text
-            if (!req.session.publicKey) return res.status(401).send("No public key")
-            const encrypted = cryptoFunctions.encryptAPI(captcha.data, req.session.publicKey)
-            res.status(200).send(encrypted)
+            serverFunctions.sendEncrypted(captcha.data, req, res)
         } catch (e) {
             console.log(e)
             res.status(400).send("Bad request") 
@@ -165,9 +163,7 @@ const MiscRoutes = (app: Express) => {
                 const html = await axios.get(`https://www.pixiv.net/en/users/${illust.user.id}`).then((r) => r.data)
                 const twitter = html.match(/(?<=twitter\.com\/|x\.com\/)(.*?)(?=[\\"&])/)?.[0]
                 illust.user.twitter = twitter
-                if (!req.session.publicKey) return res.status(401).send("No public key")
-                const encrypted = cryptoFunctions.encryptAPI(illust, req.session.publicKey)
-                res.status(200).send(encrypted)
+                serverFunctions.sendEncrypted(illust, req, res)
             } catch (e) {
                 res.status(400).end()
             }
@@ -183,9 +179,7 @@ const MiscRoutes = (app: Express) => {
             try {
                 const deviationRSS = await deviantart.rss.get(link)
                 const deviation = await deviantart.extendRSSDeviations([deviationRSS]).then((r) => r[0])
-                if (!req.session.publicKey) return res.status(401).send("No public key")
-                const encrypted = cryptoFunctions.encryptAPI(deviation, req.session.publicKey)
-                res.status(200).send(encrypted)
+                serverFunctions.sendEncrypted(deviation, req, res)
             } catch (e) {
                 res.status(400).end()
             }
@@ -346,9 +340,7 @@ const MiscRoutes = (app: Express) => {
         if (!link) return res.status(400).send("No url")
         try {
             const response = await axios.head(link).then((r) => r.request.res.responseUrl)
-            if (!req.session.publicKey) return res.status(401).send("No public key")
-            const encrypted = cryptoFunctions.encryptAPI(response, req.session.publicKey)
-            res.status(200).send(encrypted)
+            serverFunctions.sendEncrypted(response, req, res)
         } catch {
             res.status(400).end()
         }
@@ -568,9 +560,7 @@ const MiscRoutes = (app: Express) => {
                 const data = `data:image/${path.extname(file).replace(".", "")};base64,${buffer.toString("base64")}`
                 fileData[name] = data
             }
-            if (!req.session.publicKey) return res.status(401).send("No public key")
-            const encrypted = cryptoFunctions.encryptAPI(fileData, req.session.publicKey)
-            res.status(200).send(encrypted)
+            serverFunctions.sendEncrypted(fileData, req, res)
         } catch (e) {
             console.log(e)
             res.status(400).send("Bad request") 
@@ -662,9 +652,7 @@ const MiscRoutes = (app: Express) => {
     app.get("/api/misc/banner", miscLimiter, async (req: Request, res: Response, next: NextFunction) => {
         try {
             const banner = await sql.user.getBanner()
-            if (!req.session.publicKey) return res.status(401).send("No public key")
-            const encrypted = cryptoFunctions.encryptAPI(banner, req.session.publicKey)
-            res.status(200).send(encrypted)
+            serverFunctions.sendEncrypted(banner, req, res)
         } catch (e) {
             console.log(e)
             res.status(400).send("Bad request") 

@@ -35,9 +35,7 @@ const TagRoutes = (app: Express) => {
             let tag = req.query.tag as string
             if (!tag) return res.status(400).send("Bad tag")
             let result = await sql.tag.tag(tag)
-            if (!req.session.publicKey) return res.status(401).send("No public key")
-            const encrypted = cryptoFunctions.encryptAPI(result, req.session.publicKey)
-            res.status(200).send(encrypted)
+            serverFunctions.sendEncrypted(result, req, res)
         } catch (e) {
             console.log(e)
             return res.status(400).send("Bad request")
@@ -49,9 +47,7 @@ const TagRoutes = (app: Express) => {
             let tag = req.query.tag as string
             if (!tag) return res.status(400).send("Bad tag")
             let result = await sql.tag.relatedTags(tag)
-            if (!req.session.publicKey) return res.status(401).send("No public key")
-            const encrypted = cryptoFunctions.encryptAPI(result?.related || [], req.session.publicKey)
-            res.status(200).send(encrypted)
+            serverFunctions.sendEncrypted(result?.related || [], req, res)
         } catch (e) {
             console.log(e)
             return res.status(400).send("Bad request")
@@ -63,9 +59,7 @@ const TagRoutes = (app: Express) => {
             let tag = req.query.tag as string
             if (!tag) return res.status(400).send("Bad tag")
             let result = await sql.tag.unverifiedTags([tag])
-            if (!req.session.publicKey) return res.status(401).send("No public key")
-            const encrypted = cryptoFunctions.encryptAPI(result?.[0], req.session.publicKey)
-            res.status(200).send(encrypted)
+            serverFunctions.sendEncrypted(result?.[0], req, res)
         } catch (e) {
             console.log(e)
             return res.status(400).send("Bad request")
@@ -77,9 +71,7 @@ const TagRoutes = (app: Express) => {
             let tags = req.query.tags as string[]
             if (!tags) tags = []
             let result = await sql.tag.tagCounts(tags.filter(Boolean))
-            if (!req.session.publicKey) return res.status(401).send("No public key")
-            const encrypted = cryptoFunctions.encryptAPI(result, req.session.publicKey)
-            res.status(200).send(encrypted)
+            serverFunctions.sendEncrypted(result, req, res)
         } catch (e) {
             console.log(e)
             return res.status(400).send("Bad request")
@@ -91,9 +83,7 @@ const TagRoutes = (app: Express) => {
             let tags = req.query.tags as string[]
             if (!tags) tags = []
             let result = await sql.tag.tags(tags.filter(Boolean))
-            if (!req.session.publicKey) return res.status(401).send("No public key")
-            const encrypted = cryptoFunctions.encryptAPI(result, req.session.publicKey)
-            res.status(200).send(encrypted)
+            serverFunctions.sendEncrypted(result, req, res)
         } catch (e) {
             console.log(e)
             return res.status(400).send("Bad request")
@@ -109,9 +99,7 @@ const TagRoutes = (app: Express) => {
             for (const tag of result) {
                 tagMap[tag.tag] = tag
             }
-            if (!req.session.publicKey) return res.status(401).send("No public key")
-            const encrypted = cryptoFunctions.encryptAPI(tagMap, req.session.publicKey)
-            res.status(200).send(encrypted)
+            serverFunctions.sendEncrypted(tagMap, req, res)
         } catch (e) {
             console.log(e)
             return res.status(400).send("Bad request")
@@ -513,9 +501,7 @@ const TagRoutes = (app: Express) => {
             let tags = req.query.tags as string[]
             if (!tags) tags = []
             let result = await sql.tag.unverifiedTags(tags.filter(Boolean))
-            if (!req.session.publicKey) return res.status(401).send("No public key")
-            const encrypted = cryptoFunctions.encryptAPI(result, req.session.publicKey)
-            res.status(200).send(encrypted)
+            serverFunctions.sendEncrypted(result, req, res)
         } catch (e) {
             console.log(e)
             return res.status(400).send("Bad request")
@@ -544,9 +530,7 @@ const TagRoutes = (app: Express) => {
             if (!req.session.username) return res.status(403).send("Unauthorized")
             if (!permissions.isMod(req.session)) return res.status(403).end()
             const result = await sql.request.tagDeleteRequests(offset)
-            if (!req.session.publicKey) return res.status(401).send("No public key")
-            const encrypted = cryptoFunctions.encryptAPI(result, req.session.publicKey)
-            res.status(200).send(encrypted)
+            serverFunctions.sendEncrypted(result, req, res)
         } catch (e) {
             console.log(e)
             res.status(400).send("Bad request") 
@@ -598,9 +582,7 @@ const TagRoutes = (app: Express) => {
             if (!req.session.username) return res.status(403).send("Unauthorized")
             if (!permissions.isMod(req.session)) return res.status(403).end()
             const result = await sql.request.aliasRequests(offset)
-            if (!req.session.publicKey) return res.status(401).send("No public key")
-            const encrypted = cryptoFunctions.encryptAPI(result, req.session.publicKey)
-            res.status(200).send(encrypted)
+            serverFunctions.sendEncrypted(result, req, res)
         } catch (e) {
             console.log(e)
             res.status(400).send("Bad request") 
@@ -682,9 +664,7 @@ const TagRoutes = (app: Express) => {
             if (!req.session.username) return res.status(403).send("Unauthorized")
             if (!permissions.isMod(req.session)) return res.status(403).end()
             const result = await sql.request.tagEditRequests(offset)
-            if (!req.session.publicKey) return res.status(401).send("No public key")
-            const encrypted = cryptoFunctions.encryptAPI(result, req.session.publicKey)
-            res.status(200).send(encrypted)
+            serverFunctions.sendEncrypted(result, req, res)
         } catch (e) {
             console.log(e)
             res.status(400).send("Bad request") 
@@ -730,9 +710,7 @@ const TagRoutes = (app: Express) => {
             } else {
                 result = await sql.history.tagHistory(tag, offset, query)
             }
-            if (!req.session.publicKey) return res.status(401).send("No public key")
-            const encrypted = cryptoFunctions.encryptAPI(result, req.session.publicKey)
-            res.status(200).send(encrypted)
+            serverFunctions.sendEncrypted(result, req, res)
         } catch (e) {
             console.log(e)
             res.status(400).send("Bad request")
@@ -769,9 +747,7 @@ const TagRoutes = (app: Express) => {
             const offset = req.query.offset as string
             if (!req.session.username) return res.status(403).send("Unauthorized")
             const result = await sql.tag.aliasImplicationHistory(offset, query)
-            if (!req.session.publicKey) return res.status(401).send("No public key")
-            const encrypted = cryptoFunctions.encryptAPI(result, req.session.publicKey)
-            res.status(200).send(encrypted)
+            serverFunctions.sendEncrypted(result, req, res)
         } catch (e) {
             console.log(e)
             res.status(400).send("Bad request")

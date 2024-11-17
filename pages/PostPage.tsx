@@ -42,7 +42,8 @@ import currentIcon from "../assets/icons/current.png"
 import {useSessionSelector, useSessionActions, useLayoutActions, useActiveActions, useFlagActions, 
 useLayoutSelector, useSearchSelector, useFlagSelector, useCacheActions, usePostDialogActions, 
 useTranslationDialogSelector, useTranslationDialogActions, useActiveSelector, usePostDialogSelector,
-useCacheSelector, useInteractionActions} from "../store"
+useCacheSelector, useInteractionActions,
+useSearchActions} from "../store"
 import permissions from "../structures/Permissions"
 import "./styles/postpage.less"
 
@@ -61,6 +62,7 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
     const {setSessionFlag} = useSessionActions()
     const {mobile} = useLayoutSelector()
     const {restrictType} = useSearchSelector()
+    const {setRestrictType} = useSearchActions()
     const {posts} = useCacheSelector()
     const {setPosts, setTags} = useCacheActions()
     const {postFlag} = useFlagSelector()
@@ -352,8 +354,13 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
                 setImage(images[0])
                 setOrder(1)
             }
+            if (restrictType === "explicit") {
+                if (post.restrict !== "explicit") setRestrictType("all")
+            } else {
+                if (post.restrict === "explicit") setRestrictType("explicit")
+            }
         }
-    }, [post, order, session.upscaledImages])
+    }, [post, restrictType, order, session.upscaledImages])
 
     useEffect(() => {
         const historyParam = new URLSearchParams(window.location.search).get("history")

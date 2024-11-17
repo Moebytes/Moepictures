@@ -103,9 +103,7 @@ const MessageRoutes = (app: Express) => {
             }
             if (message.r18 && !req.session.showR18) canView = false
             if (!canView && !permissions.isMod(req.session)) return res.status(403).send("No permission to view")
-            if (!req.session.publicKey) return res.status(401).send("No public key")
-            const encrypted = cryptoFunctions.encryptAPI(message, req.session.publicKey)
-            res.status(200).send(encrypted)
+            serverFunctions.sendEncrypted(message, req, res)
         } catch (e) {
             console.log(e)
             res.status(400).send("Bad request")
@@ -191,9 +189,7 @@ const MessageRoutes = (app: Express) => {
             if (!req.session.showR18) {
                 result = result.filter((r: any) => !r.r18)
             }
-            if (!req.session.publicKey) return res.status(401).send("No public key")
-            const encrypted = cryptoFunctions.encryptAPI(result, req.session.publicKey)
-            res.status(200).send(encrypted)
+            serverFunctions.sendEncrypted(result, req, res)
         } catch (e) {
             console.log(e)
             res.status(400).send("Bad request")

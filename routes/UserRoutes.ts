@@ -78,9 +78,7 @@ const UserRoutes = (app: Express) => {
             delete user.savedSearches
             delete user.premiumExpiration
             delete user.showR18
-            if (!req.session.publicKey) return res.status(401).send("No public key")
-            const encrypted = cryptoFunctions.encryptAPI(user, req.session.publicKey)
-            res.status(200).send(encrypted)
+            serverFunctions.sendEncrypted(user, req, res)
         } catch (e) {
             console.log(e)
             return res.status(400).send("Bad request")
@@ -281,9 +279,7 @@ const UserRoutes = (app: Express) => {
             delete session.csrfSecret
             delete session.ip
             
-            if (!req.session.publicKey) return res.status(401).send("No public key")
-            const encrypted = cryptoFunctions.encryptAPI(session, req.session.publicKey)
-            res.status(200).send(encrypted)
+            serverFunctions.sendEncrypted(session, req, res)
         } catch (e) {
             console.log(e)
             res.status(400).send("Bad request")
@@ -848,9 +844,7 @@ const UserRoutes = (app: Express) => {
                 }
             }
             favorites = functions.stripTags(favorites)
-            if (!req.session.publicKey) return res.status(401).send("No public key")
-            const encrypted = cryptoFunctions.encryptAPI(favorites, req.session.publicKey)
-            res.status(200).send(encrypted)
+            serverFunctions.sendEncrypted(favorites, req, res)
         } catch (e) {
             console.log(e)
             res.status(400).send("Bad request") 
@@ -884,9 +878,7 @@ const UserRoutes = (app: Express) => {
                 }
             }
             uploads = functions.stripTags(uploads)
-            if (!req.session.publicKey) return res.status(401).send("No public key")
-            const encrypted = cryptoFunctions.encryptAPI(uploads, req.session.publicKey)
-            res.status(200).send(encrypted)
+            serverFunctions.sendEncrypted(uploads, req, res)
         } catch (e) {
             console.log(e)
             res.status(400).send("Bad request") 
@@ -906,9 +898,7 @@ const UserRoutes = (app: Express) => {
                 if (!req.session.username) return res.status(403).send("Unauthorized")
                 favgroups = await sql.favorite.favgroups(req.session.username)
             }
-            if (!req.session.publicKey) return res.status(401).send("No public key")
-            const encrypted = cryptoFunctions.encryptAPI(favgroups, req.session.publicKey)
-            res.status(200).send(encrypted)
+            serverFunctions.sendEncrypted(favgroups, req, res)
         } catch (e) {
             console.log(e)
             res.status(400).send("Bad request") 
@@ -941,9 +931,7 @@ const UserRoutes = (app: Express) => {
                     if (!permissions.canPrivate(req.session, categories.artists)) comments.splice(i, 1)
                 }
             }
-            if (!req.session.publicKey) return res.status(401).send("No public key")
-            const encrypted = cryptoFunctions.encryptAPI(comments, req.session.publicKey)
-            res.status(200).send(encrypted)
+            serverFunctions.sendEncrypted(comments, req, res)
         } catch (e) {
             console.log(e)
             res.status(400).send("Bad request") 
@@ -1146,9 +1134,7 @@ const UserRoutes = (app: Express) => {
             if (!req.session.username) return res.status(403).send("Unauthorized")
             if (req.session.username !== username && !permissions.isMod(req.session)) return res.status(403).send("No permission to view ban")
             const ban = await sql.report.activeBan(username)
-            if (!req.session.publicKey) return res.status(401).send("No public key")
-            const encrypted = cryptoFunctions.encryptAPI(ban, req.session.publicKey)
-            res.status(200).send(encrypted)
+            serverFunctions.sendEncrypted(ban, req, res)
         } catch (e) {
             console.log(e)
             res.status(400).send("Bad request")
@@ -1224,9 +1210,7 @@ const UserRoutes = (app: Express) => {
         try {
             if (!req.session.username) return res.status(403).send("Unauthorized")
             const unread = await sql.message.grabUnread(req.session.username)
-            if (!req.session.publicKey) return res.status(401).send("No public key")
-            const encrypted = cryptoFunctions.encryptAPI(unread.length ? true : false, req.session.publicKey)
-            res.status(200).send(encrypted)
+            serverFunctions.sendEncrypted(unread.length ? true : false, req, res)
         } catch (e) {
             console.log(e)
             res.status(400).send("Bad request")
@@ -1240,9 +1224,7 @@ const UserRoutes = (app: Express) => {
             if (!req.session.username) return res.status(403).send("Unauthorized")
             if (!permissions.isPremium(req.session)) return res.status(402).send("Premium only")
             const result = await sql.history.userSearchHistory(req.session.username, "100", offset, query)
-            if (!req.session.publicKey) return res.status(401).send("No public key")
-            const encrypted = cryptoFunctions.encryptAPI(result, req.session.publicKey)
-            res.status(200).send(encrypted)
+            serverFunctions.sendEncrypted(result, req, res)
         } catch (e) {
             console.log(e)
             res.status(400).send("Bad request")
@@ -1270,9 +1252,7 @@ const UserRoutes = (app: Express) => {
         try {
             if (!req.session.username) return res.status(403).send("Unauthorized")
             const result = await sql.user.loginHistory(req.session.username)
-            if (!req.session.publicKey) return res.status(401).send("No public key")
-            const encrypted = cryptoFunctions.encryptAPI(result, req.session.publicKey)
-            res.status(200).send(encrypted)
+            serverFunctions.sendEncrypted(result, req, res)
         } catch (e) {
             console.log(e)
             res.status(400).send("Bad request")
@@ -1294,9 +1274,7 @@ const UserRoutes = (app: Express) => {
                 translationEdits: translationHistory[0]?.historyCount || 0,
                 groupEdits: groupHistory[0]?.historyCount || 0
             }
-            if (!req.session.publicKey) return res.status(401).send("No public key")
-            const encrypted = cryptoFunctions.encryptAPI(json, req.session.publicKey)
-            res.status(200).send(encrypted)
+            serverFunctions.sendEncrypted(json, req, res)
         } catch (e) {
             console.log(e)
             res.status(400).send("Bad request")

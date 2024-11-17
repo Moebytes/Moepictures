@@ -527,7 +527,7 @@ const HelpPage: React.FunctionComponent = (props) => {
                     Variations all share the same tags as the main post, and only the main post will appear directly in search. <br/><br/>
 
                     If an image has significantly different tags to the main post (eg. different characters), it's better to make it it's own post and associate the posts by 
-                    creating a group. This doesn't include multiple pages of a sequential manga/comic. Please use variations and not groups for these.
+                    creating a group. This doesn't include multiple pages of a sequential manga/comic. Please use variations and not groups for these for a better reading experience.
                 </span>
                 <div className="help-img-container"><img className="help-img" src={variationsImg}/></div></>
             )
@@ -537,11 +537,15 @@ const HelpPage: React.FunctionComponent = (props) => {
                 <><span className="help-heading">Child Posts</span>
                 <span className="help-text" onMouseEnter={() => setEnableDrag(false)} onMouseLeave={() => setEnableDrag(true)}>
                     Child posts are very similar posts that we still want to tag or categorize differently. For example, a video version of a post should 
-                    be the parent post and the image version should be a child post. Or, the same image that just has a color palette change. Child posts are 
-                    also used for all third party edits (modifications to a work not done by the original artist). <br/><br/>
+                    be the parent post and the image version should be a child post. Or, the same image that has an entire color palette change or a transparent 
+                    background. Child posts are also used for all third party edits (modifications to a work not done by the original artist). <br/><br/>
                     
                     Child posts behave like their own post with their own tags, and can be toggled to show up in search. They are added to 
                     the parent post in a separate section. <br/><br/>
+
+                    Another important thing to note is that images containing multiple characters that have crops of specific characters in the image should be 
+                    related with child posts and not variations. If a parent image containing all the characters doesn't exist, then they should be related 
+                    using groups instead.
                 </span>
                 <div className="help-img-container"><img className="help-img" src={childrenImg}/></div></>
             )
@@ -554,6 +558,8 @@ const HelpPage: React.FunctionComponent = (props) => {
                     relate them. This is useful when an artist posts a pixiv post containing multiple artworks of different characters, or for 
                     a series of posts/comic strips that are not sequential. If it's a manga/comic with sequential pages, we still prefer to 
                     use variations. <br/><br/>
+
+                    All grouped posts otherwise act like their own posts and always appear directly in search. <br/><br/>
 
                     If all the posts in the group have the same source then name the group like <span className="help-alt">Sitename PostID</span>, eg. 
                     Pixiv 123456 and make the description a link to it. Otherwise name it a translated name of the post series. You can provide the original 

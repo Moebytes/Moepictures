@@ -127,9 +127,7 @@ const ThreadRoutes = (app: Express) => {
             const threadID = req.query.threadID
             if (!threadID) return res.status(400).send("Bad threadID")
             const result = await sql.thread.thread(Number(threadID))
-            if (!req.session.publicKey) return res.status(401).send("No public key")
-            const encrypted = cryptoFunctions.encryptAPI(result, req.session.publicKey)
-            res.status(200).send(encrypted)
+            serverFunctions.sendEncrypted(result, req, res)
         } catch (e) {
             console.log(e)
             res.status(400).send("Bad request")
@@ -222,9 +220,7 @@ const ThreadRoutes = (app: Express) => {
             if (!req.session.showR18) {
                 result = result.filter((r: any) => !r.r18)
             }
-            if (!req.session.publicKey) return res.status(401).send("No public key")
-            const encrypted = cryptoFunctions.encryptAPI(result, req.session.publicKey)
-            res.status(200).send(encrypted)
+            serverFunctions.sendEncrypted(result, req, res)
         } catch (e) {
             console.log(e)
             res.status(400).send("Bad request")
@@ -236,9 +232,7 @@ const ThreadRoutes = (app: Express) => {
             const replyID = req.query.replyID
             if (!replyID) return res.status(400).send("Bad replyID")
             const result = await sql.thread.reply(Number(replyID))
-            if (!req.session.publicKey) return res.status(401).send("No public key")
-            const encrypted = cryptoFunctions.encryptAPI(result, req.session.publicKey)
-            res.status(200).send(encrypted)
+            serverFunctions.sendEncrypted(result, req, res)
         } catch (e) {
             console.log(e)
             res.status(400).send("Bad request")

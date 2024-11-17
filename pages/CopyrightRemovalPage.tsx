@@ -211,8 +211,9 @@ const CopyrightRemovalPage: React.FunctionComponent = (props) => {
                     </div>
                     </> : <>
                     <span className="contact-link">
-                        We are sorry that you are unhappy with your works appearing on our site! You 
-                        may fill out this form to request the removal of your copyrighted content. <br/><br/>
+                        If your work is on Moepictures then it means that we love your work, but we 
+                        are sorry if you are unhappy with your works appearing on our site. You 
+                        may fill out this form to request the removal of your content. <br/><br/>
 
                         If you prefer, you may also write an email containing all of this info to 
                         <span className="contact-text-alt" style={{marginLeft: "5px"}}>moepictures.moe@gmail.com.</span>
@@ -227,7 +228,7 @@ const CopyrightRemovalPage: React.FunctionComponent = (props) => {
                     </div>
                     <div className="contact-row">
                         <span className="contact-text-alt">
-                        Please provide the name of your artist tag on Moepictures.<br/>
+                        Please provide the exact name of your artist tag on Moepictures.<br/>
                         </span>
                     </div>
                     <div className="contact-row">
@@ -280,7 +281,8 @@ const CopyrightRemovalPage: React.FunctionComponent = (props) => {
                         <img className="contact-checkbox" src={attestOwnership ? checkboxChecked : checkbox} onClick={() => setAttestOwnership((prev: boolean) => !prev)} style={{filter: getFilter()}}/>
                         <span className="contact-link">
                         <span className="contact-text-alt" style={{marginRight: "5px"}}>*</span>I am the copyright owner of the 
-                        content linked above or am authorized to act on the behalf of the copyright owner.
+                        content linked above or am authorized to act on the behalf of the copyright owner. I verify that all of 
+                        provided information is accurate.
                         </span>
                     </div>
                     {error ? <div className="contact-validation-container"><span className="contact-validation" ref={errorRef}></span></div> : null}

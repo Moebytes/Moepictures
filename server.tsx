@@ -22,7 +22,7 @@ import store from "./store"
 import permissions from "./structures/Permissions"
 import functions from "./structures/Functions"
 import cryptoFunctions from "./structures/CryptoFunctions"
-import serverFunctions, {keyGenerator, handler} from "./structures/ServerFunctions"
+import serverFunctions, {keyGenerator, handler, apiKeyLogin} from "./structures/ServerFunctions"
 import sql from "./sql/SQLQuery"
 import $2FARoutes from "./routes/2FARoutes"
 import CommentRoutes from "./routes/CommentRoutes"
@@ -166,6 +166,8 @@ app.use(express.static(path.join(__dirname, "./dist"), {index: false}))
 app.use("/assets", express.static(path.join(__dirname, "./assets")))
 
 let blacklist = null as unknown as Set<string>
+
+app.use(apiKeyLogin)
 
 app.use(async (req: Request, res: Response, next: NextFunction) => {
   if (!blacklist) {

@@ -51,9 +51,7 @@ const PostRoutes = (app: Express) => {
                 result.images = result.images.sort((a: any, b: any) => a.order - b.order)
             }
             if (req.session.captchaNeeded) delete result.tags
-            if (!req.session.publicKey) return res.status(401).send("No public key")
-            const encrypted = cryptoFunctions.encryptAPI(result, req.session.publicKey)
-            res.status(200).send(encrypted)
+            serverFunctions.sendEncrypted(result, req, res)
         } catch (e) {
             console.log(e)
             return res.status(400).send("Bad request")
@@ -81,9 +79,7 @@ const PostRoutes = (app: Express) => {
                 }
             }
             if (req.session.captchaNeeded) result = functions.stripTags(result)
-            if (!req.session.publicKey) return res.status(401).send("No public key")
-            const encrypted = cryptoFunctions.encryptAPI(result, req.session.publicKey)
-            res.status(200).send(encrypted)
+            serverFunctions.sendEncrypted(result, req, res)
         } catch (e) {
             console.log(e)
             return res.status(400).send("Bad request")
@@ -94,22 +90,21 @@ const PostRoutes = (app: Express) => {
         try {
             const postID = req.query.postID as string
             if (Number.isNaN(Number(postID))) return res.status(400).send("Invalid postID")
-            let result = await sql.post.postTags(Number(postID))
-            if (!result) return res.status(400).send("Invalid postID")
+            const post = await sql.post.post(Number(postID))
+            if (!post) return res.status(400).send("Invalid postID")
             if (!permissions.isMod(req.session)) {
-                if (result.hidden) return res.status(403).end()
+                if (post.hidden) return res.status(403).end()
             }
             if (!req.session.showR18) {
-                if (result.restrict === "explicit") return res.status(403).end()
+                if (post.restrict === "explicit") return res.status(403).end()
             }
-            if (result.private) {
-                const categories = await serverFunctions.tagCategories(result.tags)
+            if (post.private) {
+                const categories = await serverFunctions.tagCategories(post.tags)
                 if (!permissions.canPrivate(req.session, categories.artists)) return res.status(403).end()
             }
+            let result = await sql.post.postTags(Number(postID))
             if (req.session.captchaNeeded) delete result.tags
-            if (!req.session.publicKey) return res.status(401).send("No public key")
-            const encrypted = cryptoFunctions.encryptAPI(result, req.session.publicKey)
-            res.status(200).send(encrypted)
+            serverFunctions.sendEncrypted(result, req, res)
         } catch (e) {
             console.log(e)
             return res.status(400).send("Bad request")
@@ -120,20 +115,20 @@ const PostRoutes = (app: Express) => {
         try {
             const postID = req.query.postID
             if (Number.isNaN(Number(postID))) return res.status(400).send("Invalid postID")
-            const result = await sql.comment.comments(Number(postID))
+            const post = await sql.post.post(Number(postID))
+            if (!post) return res.status(400).send("Invalid postID")
             if (!permissions.isMod(req.session)) {
-                if (result.hidden) return res.status(403).end()
+                if (post.hidden) return res.status(403).end()
             }
             if (!req.session.showR18) {
-                if (result.restrict === "explicit") return res.status(403).end()
+                if (post.restrict === "explicit") return res.status(403).end()
             }
-            if (result.private) {
-                const categories = await serverFunctions.tagCategories(result.tags)
+            if (post.private) {
+                const categories = await serverFunctions.tagCategories(post.tags)
                 if (!permissions.canPrivate(req.session, categories.artists)) return res.status(403).end()
             }
-            if (!req.session.publicKey) return res.status(401).send("No public key")
-            const encrypted = cryptoFunctions.encryptAPI(result, req.session.publicKey)
-            res.status(200).send(encrypted)
+            const result = await sql.comment.comments(Number(postID))
+            serverFunctions.sendEncrypted(result, req, res)
         } catch (e) {
             console.log(e)
             res.status(400).send("Bad request") 
@@ -232,24 +227,21 @@ const PostRoutes = (app: Express) => {
         try {
             const postID = req.query.postID as string
             if (Number.isNaN(Number(postID))) return res.status(400).send("Invalid postID")
-            let posts = await sql.post.childPosts(Number(postID))
+            let result = await sql.post.childPosts(Number(postID))
             if (!permissions.isMod(req.session)) {
-                posts = posts.filter((p: any) => !p?.hidden)
+                result = result.filter((r: any) => !r.post?.hidden)
             }
             if (!req.session.showR18) {
-                posts = posts.filter((p: any) => p?.restrict !== "explicit")
+                result = result.filter((r: any) => r.post?.restrict !== "explicit")
             }
-            for (let i = posts.length - 1; i >= 0; i--) {
-                const post = posts[i]
+            for (let i = result.length - 1; i >= 0; i--) {
+                const post = result[i].post
                 if (post.private) {
                     const categories = await serverFunctions.tagCategories(post.tags)
-                    if (!permissions.canPrivate(req.session, categories.artists)) posts.splice(i, 1)
+                    if (!permissions.canPrivate(req.session, categories.artists)) result.splice(i, 1)
                 }
             }
-            posts = functions.stripTags(posts)
-            if (!req.session.publicKey) return res.status(401).send("No public key")
-            const encrypted = cryptoFunctions.encryptAPI(posts, req.session.publicKey)
-            res.status(200).send(encrypted)
+            serverFunctions.sendEncrypted(result, req, res)
         } catch (e) {
             console.log(e)
             return res.status(400).send("Bad request")
@@ -273,9 +265,7 @@ const PostRoutes = (app: Express) => {
                 if (!permissions.canPrivate(req.session, categories.artists)) return res.status(403).end()
             }
             delete post.tags
-            if (!req.session.publicKey) return res.status(401).send("No public key")
-            const encrypted = cryptoFunctions.encryptAPI(post, req.session.publicKey)
-            res.status(200).send(encrypted)
+            serverFunctions.sendEncrypted(post, req, res)
         } catch (e) {
             console.log(e)
             return res.status(400).send("Bad request")
@@ -291,9 +281,7 @@ const PostRoutes = (app: Express) => {
             if (result.images.length > 1) {
                 result.images = result.images.sort((a: any, b: any) => a.order - b.order)
             }
-            if (!req.session.publicKey) return res.status(401).send("No public key")
-            const encrypted = cryptoFunctions.encryptAPI(result, req.session.publicKey)
-            res.status(200).send(encrypted)
+            serverFunctions.sendEncrypted(result, req, res)
         } catch (e) {
             console.log(e)
             return res.status(400).send("Bad request")
@@ -306,9 +294,7 @@ const PostRoutes = (app: Express) => {
             if (!req.session.username) return res.status(403).send("Unauthorized")
             if (!permissions.isMod(req.session)) return res.status(403).end()
             const result = await sql.search.unverifiedPosts(offset)
-            if (!req.session.publicKey) return res.status(401).send("No public key")
-            const encrypted = cryptoFunctions.encryptAPI(result, req.session.publicKey)
-            res.status(200).send(encrypted)
+            serverFunctions.sendEncrypted(result, req, res)
         } catch (e) {
             console.log(e)
             return res.status(400).send("Bad request")
@@ -321,9 +307,7 @@ const PostRoutes = (app: Express) => {
             if (!req.session.username) return res.status(403).send("Unauthorized")
             if (!permissions.isMod(req.session)) return res.status(403).end()
             const result = await sql.search.unverifiedPostEdits(offset)
-            if (!req.session.publicKey) return res.status(401).send("No public key")
-            const encrypted = cryptoFunctions.encryptAPI(result, req.session.publicKey)
-            res.status(200).send(encrypted)
+            serverFunctions.sendEncrypted(result, req, res)
         } catch (e) {
             console.log(e)
             return res.status(400).send("Bad request")
@@ -336,9 +320,7 @@ const PostRoutes = (app: Express) => {
             if (Number.isNaN(Number(postID))) return res.status(400).send("Invalid postID")
             if (!permissions.isMod(req.session)) return res.status(403).end()
             const posts = await sql.post.unverifiedChildPosts(Number(postID))
-            if (!req.session.publicKey) return res.status(401).send("No public key")
-            const encrypted = cryptoFunctions.encryptAPI(posts, req.session.publicKey)
-            res.status(200).send(encrypted)
+            serverFunctions.sendEncrypted(posts, req, res)
         } catch (e) {
             console.log(e)
             return res.status(400).send("Bad request")
@@ -351,9 +333,7 @@ const PostRoutes = (app: Express) => {
             if (Number.isNaN(Number(postID))) return res.status(400).send("Invalid postID")
             if (!permissions.isMod(req.session)) return res.status(403).end()
             const post = await sql.post.unverifiedParent(Number(postID))
-            if (!req.session.publicKey) return res.status(401).send("No public key")
-            const encrypted = cryptoFunctions.encryptAPI(post, req.session.publicKey)
-            res.status(200).send(encrypted)
+            serverFunctions.sendEncrypted(post, req, res)
         } catch (e) {
             console.log(e)
             return res.status(400).send("Bad request")
@@ -382,9 +362,7 @@ const PostRoutes = (app: Express) => {
             if (!req.session.username) return res.status(403).send("Unauthorized")
             if (!permissions.isMod(req.session)) return res.status(403).end()
             const result = await sql.request.postDeleteRequests(offset)
-            if (!req.session.publicKey) return res.status(401).send("No public key")
-            const encrypted = cryptoFunctions.encryptAPI(result, req.session.publicKey)
-            res.status(200).send(encrypted)
+            serverFunctions.sendEncrypted(result, req, res)
         } catch (e) {
             console.log(e)
             res.status(400).send("Bad request") 
@@ -985,9 +963,7 @@ const PostRoutes = (app: Express) => {
                 result = await sql.history.postHistory(postID, offset, query)
                 if (req.session.captchaNeeded) result = functions.stripTags(result)
             }
-            if (!req.session.publicKey) return res.status(401).send("No public key")
-            const encrypted = cryptoFunctions.encryptAPI(result, req.session.publicKey)
-            res.status(200).send(encrypted)
+            serverFunctions.sendEncrypted(result, req, res)
         } catch (e) {
             console.log(e)
             res.status(400).send("Bad request")

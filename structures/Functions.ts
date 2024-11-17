@@ -1295,8 +1295,10 @@ export default class Functions {
             sort === "reverse cuteness" ||
             sort === "variations" || 
             sort === "reverse variations" ||
-            sort === "children" || 
-            sort === "reverse children" ||
+            sort === "parent" || 
+            sort === "reverse parent" ||
+            sort === "child" || 
+            sort === "reverse child" ||
             sort === "groups" || 
             sort === "reverse groups" ||
             sort === "popularity" || 
@@ -1305,10 +1307,8 @@ export default class Functions {
             sort === "reverse tagcount" ||
             sort === "filesize" || 
             sort === "reverse filesize" ||
-            sort === "width" || 
-            sort === "reverse width" ||
-            sort === "height" || 
-            sort === "reverse height" ||
+            sort === "aspectRatio" || 
+            sort === "reverse aspectRatio" ||
             sort === "hidden" || 
             sort === "reverse hidden" ||
             sort === "locked" || 

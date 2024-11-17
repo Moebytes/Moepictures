@@ -36,9 +36,7 @@ const CutenessRoutes = (app: Express) => {
             if (Number.isNaN(Number(postID))) return res.status(400).send("Invalid postID")
             if (!req.session.username) return res.status(403).send("Unauthorized")
             const cute = await sql.cuteness.cuteness(Number(postID), req.session.username)
-            if (!req.session.publicKey) return res.status(401).send("No public key")
-            const encrypted = cryptoFunctions.encryptAPI(cute, req.session.publicKey)
-            res.status(200).send(encrypted)
+            serverFunctions.sendEncrypted(cute, req, res)
         } catch (e) {
             console.log(e)
             res.status(400).send("Bad request") 

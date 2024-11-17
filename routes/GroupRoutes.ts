@@ -152,9 +152,7 @@ const GroupRoutes = (app: Express) => {
                     if (!permissions.canPrivate(req.session, categories.artists)) group.posts.splice(i, 1)
                 }
             }
-            if (!req.session.publicKey) return res.status(401).send("No public key")
-            const encrypted = cryptoFunctions.encryptAPI(group, req.session.publicKey)
-            res.status(200).send(encrypted)
+            serverFunctions.sendEncrypted(group, req, res)
         } catch (e) {
             console.log(e)
             res.status(400).send("Bad request") 
@@ -184,9 +182,7 @@ const GroupRoutes = (app: Express) => {
                 }
                 newGroups.push(group)
             }
-            if (!req.session.publicKey) return res.status(401).send("No public key")
-            const encrypted = cryptoFunctions.encryptAPI(newGroups, req.session.publicKey)
-            res.status(200).send(encrypted)
+            serverFunctions.sendEncrypted(newGroups, req, res)
         } catch (e) {
             console.log(e)
             res.status(400).send("Bad request") 
@@ -216,9 +212,7 @@ const GroupRoutes = (app: Express) => {
                 }
                 newGroups.push(group)
             }
-            if (!req.session.publicKey) return res.status(401).send("No public key")
-            const encrypted = cryptoFunctions.encryptAPI(newGroups, req.session.publicKey)
-            res.status(200).send(encrypted)
+            serverFunctions.sendEncrypted(newGroups, req, res)
         } catch (e) {
             console.log(e)
             return res.status(400).send("Bad request")
@@ -371,9 +365,7 @@ const GroupRoutes = (app: Express) => {
             if (!req.session.username) return res.status(403).send("Unauthorized")
             if (!permissions.isMod(req.session)) return res.status(403).end()
             const result = await sql.request.groupRequests(offset)
-            if (!req.session.publicKey) return res.status(401).send("No public key")
-            const encrypted = cryptoFunctions.encryptAPI(result, req.session.publicKey)
-            res.status(200).send(encrypted)
+            serverFunctions.sendEncrypted(result, req, res)
         } catch (e) {
             console.log(e)
             res.status(400).send("Bad request") 
@@ -442,9 +434,7 @@ const GroupRoutes = (app: Express) => {
             if (!req.session.username) return res.status(403).send("Unauthorized")
             if (!permissions.isMod(req.session)) return res.status(403).end()
             const result = await sql.request.groupDeleteRequests(offset)
-            if (!req.session.publicKey) return res.status(401).send("No public key")
-            const encrypted = cryptoFunctions.encryptAPI(result, req.session.publicKey)
-            res.status(200).send(encrypted)
+            serverFunctions.sendEncrypted(result, req, res)
         } catch (e) {
             console.log(e)
             res.status(400).send("Bad request") 
@@ -515,9 +505,7 @@ const GroupRoutes = (app: Express) => {
             if (!req.session.username) return res.status(403).send("Unauthorized")
             if (!permissions.isMod(req.session)) return res.status(403).end()
             const result = await sql.request.groupEditRequests(offset)
-            if (!req.session.publicKey) return res.status(401).send("No public key")
-            const encrypted = cryptoFunctions.encryptAPI(result, req.session.publicKey)
-            res.status(200).send(encrypted)
+            serverFunctions.sendEncrypted(result, req, res)
         } catch (e) {
             console.log(e)
             res.status(400).send("Bad request") 
@@ -567,9 +555,7 @@ const GroupRoutes = (app: Express) => {
             } else {
                 result = await sql.history.groupHistory(undefined, offset)
             }
-            if (!req.session.publicKey) return res.status(401).send("No public key")
-            const encrypted = cryptoFunctions.encryptAPI(result, req.session.publicKey)
-            res.status(200).send(encrypted)
+            serverFunctions.sendEncrypted(result, req, res)
         } catch (e) {
             console.log(e)
             res.status(400).send("Bad request")

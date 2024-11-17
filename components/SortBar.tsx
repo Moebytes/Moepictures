@@ -487,14 +487,14 @@ const SortBar: React.FunctionComponent = (props) => {
         if (sortType === "cuteness") offset = -25
         if (sortType === "favorites") offset = -20
         if (sortType === "variations") offset = -20
-        if (sortType === "children") offset = -20
+        if (sortType === "parent") offset = -25
+        if (sortType === "child") offset = -30
         if (sortType === "groups") offset = -30
         if (sortType === "popularity") offset = -20
         if (sortType === "bookmarks") offset = -10
         if (sortType === "tagcount") offset = -30
         if (sortType === "filesize") offset = -30
-        if (sortType === "width") offset = -30
-        if (sortType === "height") offset = -30
+        if (sortType === "aspectRatio") offset = -10
         if (sortType === "hidden") offset = -30
         if (sortType === "locked") offset = -30
         if (sortType === "private") offset = -30
@@ -504,6 +504,7 @@ const SortBar: React.FunctionComponent = (props) => {
 
     const getSortJSX = () => {
         const getSort = () => {
+            if (sortType === "aspectRatio") return "Aspect Ratio"
             if (sortType === "bookmarks") return "Bookmarks ★"
             if (sortType === "favorites") return "Favorites ✧"
             return functions.toProperCase(sortType)
@@ -1008,8 +1009,11 @@ const SortBar: React.FunctionComponent = (props) => {
                 <div className="sortbar-dropdown-row" onClick={() => changeSortType("variations")}>
                     <span className="sortbar-dropdown-text">Variations</span>
                 </div>
-                <div className="sortbar-dropdown-row" onClick={() => changeSortType("children")}>
-                    <span className="sortbar-dropdown-text">Children</span>
+                <div className="sortbar-dropdown-row" onClick={() => changeSortType("parent")}>
+                    <span className="sortbar-dropdown-text">Parent</span>
+                </div>
+                <div className="sortbar-dropdown-row" onClick={() => changeSortType("child")}>
+                    <span className="sortbar-dropdown-text">Child</span>
                 </div>
                 <div className="sortbar-dropdown-row" onClick={() => changeSortType("groups")}>
                     <span className="sortbar-dropdown-text">Groups</span>
@@ -1020,11 +1024,8 @@ const SortBar: React.FunctionComponent = (props) => {
                 <div className="sortbar-dropdown-row" onClick={() => changeSortType("filesize")}>
                     <span className="sortbar-dropdown-text">Filesize</span>
                 </div>
-                <div className="sortbar-dropdown-row" onClick={() => changeSortType("width")}>
-                    <span className="sortbar-dropdown-text">Width</span>
-                </div>
-                <div className="sortbar-dropdown-row" onClick={() => changeSortType("height")}>
-                    <span className="sortbar-dropdown-text">Height</span>
+                <div className="sortbar-dropdown-row" onClick={() => changeSortType("aspectRatio")}>
+                    <span className="sortbar-dropdown-text">Aspect Ratio</span>
                 </div>
                 {permissions.isMod(session) ? <>
                 <div className="sortbar-dropdown-row" onClick={() => changeSortType("hidden")}>

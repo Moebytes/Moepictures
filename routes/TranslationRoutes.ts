@@ -98,9 +98,7 @@ const TranslationRoutes = (app: Express) => {
             const postID = req.query.postID
             if (Number.isNaN(Number(postID))) return res.status(400).send("Invalid postID")
             const translations = await sql.translation.translations(Number(postID))
-            if (!req.session.publicKey) return res.status(401).send("No public key")
-            const encrypted = cryptoFunctions.encryptAPI(translations, req.session.publicKey)
-            res.status(200).send(encrypted)
+            serverFunctions.sendEncrypted(translations, req, res)
         } catch (e) {
             console.log(e)
             res.status(400).send("Bad request")
@@ -366,9 +364,7 @@ const TranslationRoutes = (app: Express) => {
             if (!req.session.username) return res.status(403).send("Unauthorized")
             if (!permissions.isMod(req.session)) return res.status(403).end()
             const translations = await sql.translation.unverifiedPostTranslations(Number(postID))
-            if (!req.session.publicKey) return res.status(401).send("No public key")
-            const encrypted = cryptoFunctions.encryptAPI(translations, req.session.publicKey)
-            res.status(200).send(encrypted)
+            serverFunctions.sendEncrypted(translations, req, res)
         } catch (e) {
             console.log(e)
             res.status(400).send("Bad request")
@@ -400,9 +396,7 @@ const TranslationRoutes = (app: Express) => {
             if (!req.session.username) return res.status(403).send("Unauthorized")
             if (!permissions.isMod(req.session)) return res.status(403).end()
             const result = await sql.translation.unverifiedTranslations(offset)
-            if (!req.session.publicKey) return res.status(401).send("No public key")
-            const encrypted = cryptoFunctions.encryptAPI(result, req.session.publicKey)
-            res.status(200).send(encrypted)
+            serverFunctions.sendEncrypted(result, req, res)
         } catch (e) {
             console.log(e)
             return res.status(400).send("Bad request")
@@ -487,9 +481,7 @@ const TranslationRoutes = (app: Express) => {
             } else {
                 result = await sql.history.translationHistory(postID, order, offset, query)
             }
-            if (!req.session.publicKey) return res.status(401).send("No public key")
-            const encrypted = cryptoFunctions.encryptAPI(result, req.session.publicKey)
-            res.status(200).send(encrypted)
+            serverFunctions.sendEncrypted(result, req, res)
         } catch (e) {
             console.log(e)
             res.status(400).send("Bad request")

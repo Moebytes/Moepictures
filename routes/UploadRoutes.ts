@@ -13,7 +13,7 @@ import axios from "axios"
 
 const uploadLimiter = rateLimit({
 	windowMs: 60 * 1000,
-	max: 10,
+	max: 60,
 	message: "Too many requests, try again later.",
 	standardHeaders: true,
 	legacyHeaders: false,
@@ -23,7 +23,7 @@ const uploadLimiter = rateLimit({
 
 const editLimiter = rateLimit({
 	windowMs: 60 * 1000,
-	max: 20,
+	max: 60,
 	message: "Too many requests, try again later.",
 	standardHeaders: true,
 	legacyHeaders: false
