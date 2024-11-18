@@ -505,8 +505,8 @@ export default class SQLHistory {
                 OR post_json."artist" ILIKE '%' || $${searchValue} || '%' OR post_json."link" ILIKE '%' || $${searchValue} || '%' 
                 OR post_json."mirrors"::text ILIKE '%' || $${searchValue} || '%')` : ""}
                 GROUP BY "history"."username", "history"."postID", post_json."uploadDate", post_json.posted, post_json."parentID",
-                post_json.bookmarks, post_json."cuteness", post_json."favoriteCount", post_json."imageCount", post_json."imageSize", 
-                post_json."imageWidth", post_json."imageHeight"${includeTags ? `, post_json."tagCount"` : ""}
+                post_json.bookmarks, post_json."cuteness", post_json."favoriteCount", post_json."variationCount", post_json."fileSize", 
+                post_json."aspectRatio"${includeTags ? `, post_json."tagCount"` : ""}
                 ${sortQuery}
                 ${limit ? `LIMIT $${limitValue}` : "LIMIT 100"} ${offset ? `OFFSET $${offsetValue}` : ""}
             `),

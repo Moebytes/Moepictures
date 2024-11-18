@@ -36,8 +36,8 @@ export default class SQLSearch {
         if (sort === "reverse cuteness") sortQuery = `ORDER BY "cuteness" ASC`
         if (sort === "popularity") sortQuery = `ORDER BY "favoriteCount" DESC`
         if (sort === "reverse popularity") sortQuery = `ORDER BY "favoriteCount" ASC`
-        if (sort === "variations") sortQuery = `ORDER BY "imageCount" DESC`
-        if (sort === "reverse variations") sortQuery = `ORDER BY "imageCount" ASC`
+        if (sort === "variations") sortQuery = `ORDER BY "variationCount" DESC`
+        if (sort === "reverse variations") sortQuery = `ORDER BY "variationCount" ASC`
         if (sort === "parent") sortQuery = `ORDER BY "hasChildren" DESC`
         if (sort === "reverse parent") sortQuery = `ORDER BY "hasChildren" ASC`
         if (sort === "child") sortQuery = `ORDER BY posts."parentID" DESC NULLS LAST`
@@ -46,8 +46,8 @@ export default class SQLSearch {
         if (sort === "reverse groups") sortQuery = `ORDER BY "isGrouped" ASC`
         if (sort === "tagcount") sortQuery = `ORDER BY "tagCount" DESC`
         if (sort === "reverse tagcount") sortQuery = `ORDER BY "tagCount" ASC`
-        if (sort === "filesize") sortQuery = `ORDER BY "imageSize" DESC`
-        if (sort === "reverse filesize") sortQuery = `ORDER BY "imageSize" ASC`
+        if (sort === "filesize") sortQuery = `ORDER BY "fileSize" DESC`
+        if (sort === "reverse filesize") sortQuery = `ORDER BY "fileSize" ASC`
         if (sort === "aspectRatio") sortQuery = `ORDER BY "aspectRatio" DESC`
         if (sort === "reverse aspectRatio") sortQuery = `ORDER BY "aspectRatio" ASC`
         if (sort === "bookmarks") sortQuery = `ORDER BY posts.bookmarks DESC NULLS LAST`
@@ -139,11 +139,9 @@ export default class SQLSearch {
                 ${favgroupOrder ? `"favgroup map"."order",` : ""} 
                 ${includeTags ? `array_agg(DISTINCT "tag map".tag) AS tags,` : ""}
                 ${includeTags ? `COUNT(DISTINCT "tag map"."tag") AS "tagCount",` : ""}
-                MAX(DISTINCT images."size") AS "imageSize",
-                MAX(DISTINCT images."width") AS "imageWidth",
-                MAX(DISTINCT images."height") AS "imageHeight",
+                MAX(DISTINCT images."size") AS "fileSize",
                 MAX(DISTINCT images."width")::float / MAX(DISTINCT images."height")::float AS "aspectRatio",
-                COUNT(DISTINCT images."imageID") AS "imageCount",
+                COUNT(DISTINCT images."imageID") AS "variationCount",
                 COUNT(DISTINCT favorites."username") AS "favoriteCount",
                 ROUND(AVG(DISTINCT cuteness."cuteness")) AS "cuteness",
                 CASE
@@ -210,10 +208,9 @@ export default class SQLSearch {
                 SELECT posts.*, json_agg(DISTINCT images.*) AS images, 
                 ${includeTags ? `array_agg(DISTINCT "tag map".tag) AS tags,` : ""}
                 ${includeTags ? `COUNT(DISTINCT "tag map"."tag") AS "tagCount",` : ""}
-                MAX(DISTINCT images."size") AS "imageSize",
-                MAX(DISTINCT images."width") AS "imageWidth",
-                MAX(DISTINCT images."height") AS "imageHeight",
-                COUNT(DISTINCT images."imageID") AS "imageCount",
+                MAX(DISTINCT images."size") AS "fileSize",
+                MAX(DISTINCT images."width")::float / MAX(DISTINCT images."height")::float AS "aspectRatio",
+                COUNT(DISTINCT images."imageID") AS "variationCount",
                 COUNT(DISTINCT favorites."username") AS "favoriteCount",
                 ROUND(AVG(DISTINCT cuteness."cuteness")) AS "cuteness"
                 FROM posts
@@ -243,10 +240,9 @@ export default class SQLSearch {
                 SELECT posts.*, json_agg(DISTINCT images.*) AS images, 
                 ${includeTags ? `array_agg(DISTINCT "tag map".tag) AS tags,` : ""}
                 ${includeTags ? `COUNT(DISTINCT "tag map"."tag") AS "tagCount",` : ""}
-                MAX(DISTINCT images."size") AS "imageSize",
-                MAX(DISTINCT images."width") AS "imageWidth",
-                MAX(DISTINCT images."height") AS "imageHeight",
-                COUNT(DISTINCT images."imageID") AS "imageCount",
+                MAX(DISTINCT images."size") AS "fileSize",
+                MAX(DISTINCT images."width")::float / MAX(DISTINCT images."height")::float AS "aspectRatio",
+                COUNT(DISTINCT images."imageID") AS "variationCount",
                 COUNT(DISTINCT favorites."username") AS "favoriteCount",
                 ROUND(AVG(DISTINCT cuteness."cuteness")) AS "cuteness"
                 FROM posts
@@ -277,10 +273,9 @@ export default class SQLSearch {
                 SELECT posts.*, json_agg(DISTINCT images.*) AS images, 
                 ${includeTags ? `array_agg(DISTINCT "tag map".tag) AS tags,` : ""}
                 ${includeTags ? `COUNT(DISTINCT "tag map"."tag") AS "tagCount",` : ""}
-                MAX(DISTINCT images."size") AS "imageSize",
-                MAX(DISTINCT images."width") AS "imageWidth",
-                MAX(DISTINCT images."height") AS "imageHeight",
-                COUNT(DISTINCT images."imageID") AS "imageCount",
+                MAX(DISTINCT images."size") AS "fileSize",
+                MAX(DISTINCT images."width")::float / MAX(DISTINCT images."height")::float AS "aspectRatio",
+                COUNT(DISTINCT images."imageID") AS "variationCount",
                 COUNT(DISTINCT favorites."username") AS "favoriteCount",
                 ROUND(AVG(DISTINCT cuteness."cuteness")) AS "cuteness"
                 FROM posts
@@ -509,8 +504,8 @@ export default class SQLSearch {
         if (sort === "reverse alphabetic") sortQuery = `ORDER BY tags.tag DESC`
         if (sort === "posts") sortQuery = `ORDER BY "postCount" DESC`
         if (sort === "reverse posts") sortQuery = `ORDER BY "postCount" ASC`
-        if (sort === "image") sortQuery = `ORDER BY "imageCount" DESC`
-        if (sort === "reverse image") sortQuery = `ORDER BY "imageCount" ASC`
+        if (sort === "image") sortQuery = `ORDER BY "variationCount" DESC`
+        if (sort === "reverse image") sortQuery = `ORDER BY "variationCount" ASC`
         if (sort === "aliases") sortQuery = `ORDER BY "aliasCount" DESC`
         if (sort === "reverse aliases") sortQuery = `ORDER BY "aliasCount" ASC`
         if (sort === "length") sortQuery = `ORDER BY LENGTH(tags.tag) ASC`
@@ -520,7 +515,7 @@ export default class SQLSearch {
                     SELECT tags.*, json_agg(DISTINCT aliases.*) AS aliases, json_agg(DISTINCT implications.*) AS implications,
                     COUNT(*) OVER() AS "tagCount",
                     COUNT(DISTINCT posts."postID") AS "postCount", 
-                    COUNT(DISTINCT tags."image") AS "imageCount", 
+                    COUNT(DISTINCT tags."image") AS "variationCount", 
                     COUNT(DISTINCT aliases."alias") AS "aliasCount"
                     FROM tags
                     FULL JOIN aliases ON aliases."tag" = tags."tag"
@@ -548,7 +543,7 @@ export default class SQLSearch {
                     SELECT tags.*, json_agg(DISTINCT aliases.*) AS aliases, json_agg(DISTINCT implications.*) AS implications,
                     COUNT(*) OVER() AS "tagCount",
                     COUNT(DISTINCT posts."postID") AS "postCount", 
-                    COUNT(DISTINCT tags."image") AS "imageCount", 
+                    COUNT(DISTINCT tags."image") AS "variationCount", 
                     COUNT(DISTINCT aliases."alias") AS "aliasCount"
                     FROM tags
                     FULL JOIN aliases ON aliases."tag" = tags."tag"
