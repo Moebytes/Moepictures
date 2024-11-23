@@ -19,7 +19,7 @@ module.exports = [
     entry: "./index",
     mode: process.env.TESTING === "yes" ? "development" : "production",
     node: {__dirname: false},
-    output: {publicPath: "/", globalObject: "this", filename: "script.js", chunkFilename: "script.js", path: path.resolve(__dirname, "./dist")},
+    output: {publicPath: "/", globalObject: "this", filename: "script.js", chunkFilename: "[id].js", path: path.resolve(__dirname, "./dist")},
     resolve: {extensions: [".js", ".jsx", ".ts", ".tsx"], alias: {"react-dom$": "react-dom/profiling", "scheduler/tracing": "scheduler/tracing-profiling"}, 
     fallback: {fs: false, "process/browser": require.resolve("process/browser.js"), path: require.resolve("path-browserify"), 
     crypto: require.resolve("crypto-browserify"), stream: require.resolve("stream-browserify"), assert: require.resolve("assert/"), 
@@ -28,7 +28,7 @@ module.exports = [
     optimization: {minimize: false, minimizer: [new TerserJSPlugin({extractComments: false}), new WebpackObfuscator(), new MinimizerCSSPlugin()], moduleIds: "named", splitChunks: {chunks(chunk) {return false}}},
     module: {
       rules: [
-        {test: /\.(jpe?g|png|gif|webp|svg|mp3|wav|mp4|webm|glb|obj|fbx|ttf|otf)$/, exclude: webExclude, use: [{loader: "file-loader", options: {name: "[path][name].[ext]"}}]},
+        {test: /\.(jpe?g|png|gif|webp|svg|mp3|wav|mp4|webm|glb|obj|fbx|ttf|otf|zip)$/, exclude: webExclude, use: [{loader: "file-loader", options: {name: "[path][name].[ext]"}}]},
         {test: /\.(txt|sql)$/, exclude: webExclude, use: ["raw-loader"]},
         {test: /\.html$/, exclude: webExclude, use: [{loader: "html-loader", options: {sources: false, minimize: false}}]},
         {test: /\.css$/, exclude: webExclude, use: [{loader: MiniCssExtractPlugin.loader}, "css-loader"]},
@@ -42,7 +42,7 @@ module.exports = [
       new webpack.HotModuleReplacementPlugin(),
       new MiniCssExtractPlugin({
         filename: "styles.css",
-        chunkFilename: "styles.css"
+        chunkFilename: "[id].css"
       }),
       new HtmlWebpackPlugin({
         template: path.resolve(__dirname, "./index.html"),
@@ -54,11 +54,12 @@ module.exports = [
       }),
       new CopyPlugin({
         patterns: [
-          {from: "structures/bitcrusher.js", to: "[name][ext]"},
-          {from: "structures/soundtouch.js", to: "[name][ext]"},
-          {from: "structures/webpxmux.wasm", to: "[name][ext]"},
-          {from: "structures/avif_enc.wasm", to: "[name][ext]"},
-          {from: "structures/jxl_enc.wasm", to: "[name][ext]"}
+          {from: "assets/worklet/bitcrusher.js", to: "[name][ext]"},
+          {from: "assets/worklet/soundtouch.js", to: "[name][ext]"},
+          {from: "assets/wasm/webpxmux.wasm", to: "[name][ext]"},
+          {from: "assets/wasm/avif_enc.wasm", to: "[name][ext]"},
+          {from: "assets/wasm/jxl_enc.wasm", to: "[name][ext]"},
+          {from: "assets/live2d/live2dcubismcore.min.js", to: "[name][ext]"}
         ]
       })
     ]
@@ -69,14 +70,14 @@ module.exports = [
     mode: process.env.TESTING === "yes" ? "development" : "production",
     node: {__dirname: false},
     externals: [nodeExternals()],
-    output: {filename: "server.js", chunkFilename: "server.js", path: path.resolve(__dirname, "./dist")},
+    output: {filename: "server.js", chunkFilename: "[id].js", path: path.resolve(__dirname, "./dist")},
     resolve: {extensions: [".js", ".jsx", ".ts", ".tsx"], 
     fallback: {zlib: require.resolve("browserify-zlib")}},
     performance: {hints: false},
     optimization: {minimize: false, minimizer: [new TerserJSPlugin({extractComments: false}), new WebpackObfuscator()], moduleIds: "named"},
     module: {
       rules: [
-        {test: /\.(jpe?g|png|webp|gif|svg|mp3|wav|mp4|webm|glb|obj|fbx|ttf|otf)$/, exclude: nodeExclude, use: [{loader: "file-loader", options: {name: "[path][name].[ext]"}}]},
+        {test: /\.(jpe?g|png|webp|gif|svg|mp3|wav|mp4|webm|glb|obj|fbx|ttf|otf|zip)$/, exclude: nodeExclude, use: [{loader: "file-loader", options: {name: "[path][name].[ext]"}}]},
         {test: /\.(txt|sql)$/, exclude: nodeExclude, use: ["raw-loader"]},
         {test: /\.html$/, exclude: nodeExclude, use: [{loader: "html-loader", options: {minimize: false}}]},
         {test: /\.css$/, exclude: nodeExclude, use: [{loader: MiniCssExtractPlugin.loader}, "css-loader"]},
@@ -90,7 +91,7 @@ module.exports = [
       new webpack.HotModuleReplacementPlugin(),
       new MiniCssExtractPlugin({
         filename: "styles.css",
-        chunkFilename: "styles.css"
+        chunkFilename: "[id].css"
       })
     ]
   }

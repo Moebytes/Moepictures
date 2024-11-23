@@ -577,16 +577,6 @@ const MessagePage: React.FunctionComponent<Props> = (props) => {
         setText("")
     }
 
-    useEffect(() => {
-        const clickListener = () => {
-            if (showEmojiDropdown) setShowEmojiDropdown(false)
-        }
-        window.addEventListener("click", clickListener)
-        return () => {
-            window.removeEventListener("click", clickListener)
-        }
-    }, [showEmojiDropdown])
-
     const getEmojiMarginRight = () => {
         if (typeof document === "undefined") return "0px"
         const rect = emojiRef.current?.getBoundingClientRect()

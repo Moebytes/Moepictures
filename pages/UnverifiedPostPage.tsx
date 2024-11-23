@@ -6,6 +6,7 @@ import SideBar from "../components/SideBar"
 import Footer from "../components/Footer"
 import PostImage from "../components/PostImage"
 import PostModel from "../components/PostModel"
+import PostLive2D from "../components/PostLive2D"
 import PostSong from "../components/PostSong"
 import PostImageOptions from "../components/PostImageOptions"
 import Commentary from "../components/Commentary"
@@ -235,6 +236,13 @@ const UnverifiedPostPage: React.FunctionComponent<Props> = (props) => {
                 <>
                 <PostModel unverified={true} post={post} model={image} order={order}/>
                 <PostImageOptions post={post} noFavorite={true} model={image} download={download} next={next} previous={previous}/>
+                </>
+            )
+        } else if (post.type === "live2d") {
+            return (
+                <>
+                <PostLive2D unverified={true} post={post} live2d={image} order={order}/>
+                <PostImageOptions post={post} noFavorite={true} live2d={image} download={download} next={next} previous={previous}/>
                 </>
             )
         } else if (post.type === "audio") {

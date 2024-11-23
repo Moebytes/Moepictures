@@ -43,8 +43,8 @@ import prevIcon from "../assets/icons/go-left.png"
 import JSZip from "jszip"
 import {TransformWrapper, TransformComponent} from "react-zoom-pan-pinch"
 import path from "path"
-import "./styles/postimage.less"
 import mime from "mime-types"
+import "./styles/postimage.less"
 const ffmpeg = createFFmpeg()
 
 interface Props {
@@ -130,6 +130,18 @@ const PostImage: React.FunctionComponent<Props> = (props) => {
     const [previousButtonHover, setPreviousButtonHover] = useState(false)
     const [nextButtonHover, setNextButtonHover] = useState(false)
     const [img, setImg] = useState("")
+
+    useEffect(() => {
+        const savedDisableZoom = localStorage.getItem("disableZoom")
+        if (savedDisableZoom) setDisableZoom(savedDisableZoom === "true")
+        const savedPaused = localStorage.getItem("paused")
+        if (savedPaused) setPaused(savedPaused === "true")
+    }, [])
+
+    useEffect(() => {
+        localStorage.setItem("disableZoom", String(disableZoom))
+        localStorage.setItem("paused", String(paused))
+    }, [disableZoom, paused])
 
     const getFilter = () => {
         return `hue-rotate(${siteHue - 180}deg) saturate(${siteSaturation}%) brightness(${siteLightness + 70}%)`

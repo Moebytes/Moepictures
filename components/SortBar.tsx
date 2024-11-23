@@ -19,6 +19,7 @@ import image from "../assets/icons/image.png"
 import animation from "../assets/icons/animation.png"
 import video from "../assets/icons/video.png"
 import comic from "../assets/icons/comic.png"
+import live2d from "../assets/icons/live2d.png"
 import model from "../assets/icons/model.png"
 import audio from "../assets/icons/audio.png"
 import explicit from "../assets/icons/explicit.png"
@@ -28,6 +29,7 @@ import $2d from "../assets/icons/2d.png"
 import $3d from "../assets/icons/3d.png"
 import pixel from "../assets/icons/pixel.png"
 import chibi from "../assets/icons/chibi.png"
+import daki from "../assets/icons/daki.png"
 import filters from "../assets/icons/filters.png"
 import size from "../assets/icons/size.png"
 import sort from "../assets/icons/sort.png"
@@ -251,6 +253,13 @@ const SortBar: React.FunctionComponent = (props) => {
                         <span className="sortbar-text">Model</span>
                     </div>
                 )
+        } else if (imageType === "live2d") {
+            return (
+                <div className="sortbar-item" ref={imageRef} onClick={() => {setActiveDropdown(activeDropdown === "image" ? "none" : "image"); setFilterDropActive(false)}}>
+                    <img className="sortbar-img" src={live2d} style={{filter: getFilter()}}/>
+                    <span className="sortbar-text">Live2D</span>
+                </div>
+            )
         } else if (imageType === "audio") {
                 return (
                     <div className="sortbar-item" ref={imageRef} onClick={() => {setActiveDropdown(activeDropdown === "image" ? "none" : "image"); setFilterDropActive(false)}}>
@@ -279,6 +288,8 @@ const SortBar: React.FunctionComponent = (props) => {
             return <img style={{height: "30px", filter: getFilter()}} className="sortbar-img" src={comic} onClick={() => {setActiveDropdown(activeDropdown === "image" ? "none" : "image"); setFilterDropActive(false)}}/>
         } else if (imageType === "model") {
                 return <img style={{height: "30px", filter: getFilter()}} className="sortbar-img" src={model} onClick={() => {setActiveDropdown(activeDropdown === "image" ? "none" : "image"); setFilterDropActive(false)}}/>
+        } else if (imageType === "live2d") {
+            return <img style={{height: "30px", filter: getFilter()}} className="sortbar-img" src={live2d} onClick={() => {setActiveDropdown(activeDropdown === "image" ? "none" : "image"); setFilterDropActive(false)}}/>
         } else if (imageType === "audio") {
                     return <img style={{height: "30px", filter: getFilter()}} className="sortbar-img" src={audio} onClick={() => {setActiveDropdown(activeDropdown === "image" ? "none" : "image"); setFilterDropActive(false)}}/>
         } else {
@@ -299,6 +310,7 @@ const SortBar: React.FunctionComponent = (props) => {
         if (imageType === "comic") offset = -15
         if (imageType === "audio") offset = -15
         if (imageType === "model") offset = -15
+        if (imageType === "live2d") offset = -15
         return `${raw + offset}px`
     }
 
@@ -391,6 +403,13 @@ const SortBar: React.FunctionComponent = (props) => {
                     <span className="sortbar-text">Chibi</span>
                 </div>
             )
+        } else if (styleType === "daki") {
+                return (
+                    <div className="sortbar-item" ref={styleRef} onClick={() => {setActiveDropdown(activeDropdown === "style" ? "none" : "style"); setFilterDropActive(false)}}>
+                        <img className="sortbar-img" src={daki} style={{filter: getFilter()}}/>
+                        <span className="sortbar-text">Daki</span>
+                    </div>
+                )
         } else {
             return (
                 <div className="sortbar-item" ref={styleRef} onClick={() => {setActiveDropdown(activeDropdown === "style" ? "none" : "style"); setFilterDropActive(false)}}>
@@ -410,6 +429,8 @@ const SortBar: React.FunctionComponent = (props) => {
             return <img style={{height: "30px", filter: getFilter()}} className="sortbar-img" src={pixel} onClick={() => {setActiveDropdown(activeDropdown === "style" ? "none" : "style"); setFilterDropActive(false)}}/>
         } else if (styleType === "chibi") {
             return <img style={{height: "30px", filter: getFilter()}} className="sortbar-img" src={chibi} onClick={() => {setActiveDropdown(activeDropdown === "style" ? "none" : "style"); setFilterDropActive(false)}}/>
+        } else if (styleType === "daki") {
+            return <img style={{height: "30px", filter: getFilter()}} className="sortbar-img" src={daki} onClick={() => {setActiveDropdown(activeDropdown === "style" ? "none" : "style"); setFilterDropActive(false)}}/>
         } else {
             return <img style={{height: "30px", filter: getFilter()}} className="sortbar-img rotate" src={all} onClick={() => {setActiveDropdown(activeDropdown === "style" ? "none" : "style"); setFilterDropActive(false)}}/>
         }
@@ -426,6 +447,7 @@ const SortBar: React.FunctionComponent = (props) => {
         if (styleType === "3d") offset = -15
         if (styleType === "pixel") offset = -5
         if (styleType === "chibi") offset = -5
+        if (styleType === "daki") offset = -5
         return `${raw + offset}px`
     }
 
@@ -605,7 +627,7 @@ const SortBar: React.FunctionComponent = (props) => {
                     </div>
                 </>
             )
-
+            
         } else if (imageType === "audio") {
             return (
                 <>
@@ -616,7 +638,7 @@ const SortBar: React.FunctionComponent = (props) => {
                     <div className="sortbar-dropdown-row" onClick={() => setStyleType("2d")}>
                         <img className="sortbar-dropdown-img" src={$2d} style={{filter: getFilter()}}/>
                         <span className="sortbar-dropdown-text">2D</span>
-                    </div>
+                    </div> 
                     <div className="sortbar-dropdown-row" onClick={() => setStyleType("pixel")}>
                         <img className="sortbar-dropdown-img" src={pixel} style={{filter: getFilter()}}/>
                         <span className="sortbar-dropdown-text">Pixel</span>
@@ -634,10 +656,10 @@ const SortBar: React.FunctionComponent = (props) => {
                         <img className="sortbar-dropdown-img" src={$2d} style={{filter: getFilter()}}/>
                         <span className="sortbar-dropdown-text">2D</span>
                     </div>
-                    <div className="sortbar-dropdown-row" onClick={() => setStyleType("3d")}>
+                    {imageType !== "live2d" ? <div className="sortbar-dropdown-row" onClick={() => setStyleType("3d")}>
                         <img className="sortbar-dropdown-img" src={$3d} style={{filter: getFilter()}}/>
                         <span className="sortbar-dropdown-text">3D</span>
-                    </div>
+                    </div> : null}
                     <div className="sortbar-dropdown-row" onClick={() => setStyleType("chibi")}>
                         <img className="sortbar-dropdown-img" src={chibi} style={{filter: getFilter()}}/>
                         <span className="sortbar-dropdown-text">Chibi</span>
@@ -646,18 +668,31 @@ const SortBar: React.FunctionComponent = (props) => {
                         <img className="sortbar-dropdown-img" src={pixel} style={{filter: getFilter()}}/>
                         <span className="sortbar-dropdown-text">Pixel</span>
                     </div>
+                    {imageType !== "comic" ? 
+                    <div className="sortbar-dropdown-row" onClick={() => setStyleType("daki")}>
+                        <img className="sortbar-dropdown-img" src={daki} style={{filter: getFilter()}}/>
+                        <span className="sortbar-dropdown-text">Daki</span>
+                    </div> : null}
                 </>
             )
         }
     }
 
     useEffect(() => {
-        if (imageType === "model") {
-            if (styleType === "2d") {
+        if (imageType === "comic") {
+            if (styleType === "daki") {
+                setStyleType("2d")
+            }
+        } else if (imageType === "model") {
+            if (styleType === "2d" || styleType === "daki") {
                 setStyleType("3d")
             }
+        } else if (imageType === "live2d") {
+            if (styleType === "3d") {
+                setStyleType("2d")
+            }
         } else if (imageType === "audio") {
-            if (styleType === "3d" || styleType === "chibi") {
+            if (styleType === "3d" || styleType === "chibi" || styleType === "daki") {
                 setStyleType("2d")
             }
         }
@@ -881,6 +916,10 @@ const SortBar: React.FunctionComponent = (props) => {
                 <div className="sortbar-dropdown-row" onClick={() => setImageType("audio")}>
                     <img className="sortbar-dropdown-img" src={audio} style={{filter: getFilter()}}/>
                     <span className="sortbar-dropdown-text">Audio</span>
+                </div>
+                <div className="sortbar-dropdown-row" onClick={() => setImageType("live2d")}>
+                    <img className="sortbar-dropdown-img" src={live2d} style={{filter: getFilter()}}/>
+                    <span className="sortbar-dropdown-text">Live2D</span>
                 </div>
                 <div className="sortbar-dropdown-row" onClick={() => setImageType("model")}>
                     <img className="sortbar-dropdown-img" src={model} style={{filter: getFilter()}}/>

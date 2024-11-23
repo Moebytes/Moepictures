@@ -14,6 +14,7 @@ export default class SQLSearch {
         if (type === "comic") typeQuery = `posts.type = 'comic'`
         if (type === "audio") typeQuery = `posts.type = 'audio'`
         if (type === "model") typeQuery = `posts.type = 'model'`
+        if (type === "live2d") typeQuery = `posts.type = 'live2d'`
         let restrictQuery = ""
         if (restrict === "safe") restrictQuery = `posts.restrict = 'safe'`
         if (restrict === "questionable") restrictQuery = `posts.restrict = 'questionable'`
@@ -24,6 +25,7 @@ export default class SQLSearch {
         if (style === "3d") styleQuery = `lower(posts.style) = '3d'`
         if (style === "pixel") styleQuery = `posts.style = 'pixel'`
         if (style === "chibi") styleQuery = `posts.style = 'chibi'`
+        if (style === "daki") styleQuery = `posts.style = 'daki'`
         let sortQuery = ""
         if (sort === "random") sortQuery = `ORDER BY random()`
         if (!sort || sort === "date") sortQuery = `ORDER BY posts."uploadDate" DESC`

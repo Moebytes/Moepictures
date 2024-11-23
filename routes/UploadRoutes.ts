@@ -40,9 +40,9 @@ const modLimiter = rateLimit({
 const validImages = (images: any[], skipMBCheck?: boolean) => {
   if (!images.length) return false
   for (let i = 0; i < images.length; i++) {
-    if (functions.isModel(images[i].link)) {
+    if (functions.isModel(images[i].link) || functions.isLive2D(images[i].link)) {
       const MB = images[i].size / (1024*1024)
-      const maxSize = 100
+      const maxSize = 200
       if (skipMBCheck || MB <= maxSize) continue
       return false
     }
@@ -204,6 +204,9 @@ const CreateRoutes = (app: Express) => {
           } else if (functions.isModel(`.${ext}`)) {
             kind = "model"
             type = "model"
+          } else if (functions.isLive2D(`.${ext}`)) {
+            kind = "live2d"
+            type = "live2d"
           }
 
           if (images[i]) {
@@ -222,10 +225,14 @@ const CreateRoutes = (app: Express) => {
 
           let dimensions = null as any
           let hash = ""
-          if (kind === "video" || kind === "audio" || kind === "model") {
+          if (kind === "video" || kind === "audio" || kind === "model" || kind === "live2d") {
               const buffer = functions.base64ToBuffer(current[i].thumbnail)
               hash = await phash(buffer).then((hash: string) => functions.binaryToHex(hash))
               dimensions = await sharp(buffer).metadata()
+              if (kind === "live2d") {
+                dimensions.width = current[i].width
+                dimensions.height = current[i].height
+              }
           } else {
               const buffer = Buffer.from(Object.values(current[i].bytes) as any)
               hash = await phash(buffer).then((hash: string) => functions.binaryToHex(hash))
@@ -526,6 +533,9 @@ const CreateRoutes = (app: Express) => {
           } else if (functions.isModel(`.${ext}`)) {
             kind = "model"
             type = "model"
+          } else if (functions.isLive2D(`.${ext}`)) {
+            kind = "live2d"
+            type = "live2d"
           }
         if (imgChanged) {
             if (images[i]) {
@@ -544,10 +554,14 @@ const CreateRoutes = (app: Express) => {
 
             let dimensions = null as any
             let hash = ""
-            if (kind === "video" || kind === "audio" || kind === "model") {
+            if (kind === "video" || kind === "audio" || kind === "model" || kind === "live2d") {
               const buffer = functions.base64ToBuffer(current[i].thumbnail)
               hash = await phash(buffer).then((hash: string) => functions.binaryToHex(hash))
               dimensions = await sharp(buffer).metadata()
+              if (kind === "live2d") {
+                dimensions.width = current[i].width
+                dimensions.height = current[i].height
+              }
             } else {
                 const buffer = Buffer.from(Object.values(current[i].bytes) as any)
                 hash = await phash(buffer).then((hash: string) => functions.binaryToHex(hash))
@@ -918,6 +932,9 @@ const CreateRoutes = (app: Express) => {
           } else if (functions.isModel(`.${ext}`)) {
             kind = "model"
             type = "model"
+          } else if (functions.isLive2D(`.${ext}`)) {
+            kind = "live2d"
+            type = "live2d"
           }
           if (images[i]) {
             let imagePath = functions.getImagePath(kind, postID, Number(fileOrder), filename)
@@ -934,10 +951,14 @@ const CreateRoutes = (app: Express) => {
           }
           let dimensions = null as any
           let hash = ""
-          if (kind === "video" || kind === "audio" || kind === "model") {
+          if (kind === "video" || kind === "audio" || kind === "model" || kind === "live2d") {
             const buffer = functions.base64ToBuffer(current[i].thumbnail)
             hash = await phash(buffer).then((hash: string) => functions.binaryToHex(hash))
             dimensions = await sharp(buffer).metadata()
+            if (kind === "live2d") {
+              dimensions.width = current[i].width
+              dimensions.height = current[i].height
+            }
           } else {
             const buffer = Buffer.from(Object.values(current[i].bytes) as any)
             hash = await phash(buffer).then((hash: string) => functions.binaryToHex(hash))
@@ -1217,6 +1238,9 @@ const CreateRoutes = (app: Express) => {
           } else if (functions.isModel(`.${ext}`)) {
             kind = "model"
             type = "model"
+          } else if (functions.isLive2D(`.${ext}`)) {
+            kind = "live2d"
+            type = "live2d"
           }
         if (imgChanged) {
             if (images[i]) {
@@ -1233,10 +1257,14 @@ const CreateRoutes = (app: Express) => {
             }
             let dimensions = null as any
             let hash = ""
-            if (kind === "video" || kind === "audio" || kind === "model") {
+            if (kind === "video" || kind === "audio" || kind === "model" || kind === "live2d") {
               const buffer = functions.base64ToBuffer(current[i].thumbnail)
               hash = await phash(buffer).then((hash: string) => functions.binaryToHex(hash))
               dimensions = await sharp(buffer).metadata()
+              if (kind === "live2d") {
+                dimensions.width = current[i].width
+                dimensions.height = current[i].height
+              }
             } else {
               const buffer = Buffer.from(Object.values(current[i].bytes) as any)
               hash = await phash(buffer).then((hash: string) => functions.binaryToHex(hash))
@@ -1497,6 +1525,9 @@ const CreateRoutes = (app: Express) => {
           } else if (functions.isModel(`.${ext}`)) {
             kind = "model"
             type = "model"
+          } else if (functions.isLive2D(`.${ext}`)) {
+            kind = "live2d"
+            type = "live2d"
           }
           if (imgChanged) {
             if (buffer.byteLength) {
@@ -1514,10 +1545,14 @@ const CreateRoutes = (app: Express) => {
 
             let dimensions = null as any
             let hash = ""
-            if (kind === "video" || kind === "audio" || kind === "model") {
+            if (kind === "video" || kind === "audio" || kind === "model" || kind === "live2d") {
               const buffer = functions.base64ToBuffer(unverified.thumbnail)
               hash = await phash(buffer).then((hash: string) => functions.binaryToHex(hash))
               dimensions = await sharp(buffer).metadata()
+              if (kind === "live2d") {
+                dimensions.width = unverified.images[i].width
+                dimensions.height = unverified.images[i].height
+              }
             } else {
               hash = await phash(current).then((hash: string) => functions.binaryToHex(hash))
               dimensions = await sharp(buffer).metadata()

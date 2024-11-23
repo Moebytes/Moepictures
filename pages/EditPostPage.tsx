@@ -19,6 +19,7 @@ import video from "../assets/icons/video.png"
 import comic from "../assets/icons/comic.png"
 import audio from "../assets/icons/audio.png"
 import model from "../assets/icons/model.png"
+import live2d from "../assets/icons/live2d.png"
 import explicit from "../assets/icons/explicit.png"
 import questionable from "../assets/icons/questionable.png"
 import safe from "../assets/icons/safe.png"
@@ -26,9 +27,11 @@ import $2d from "../assets/icons/2d.png"
 import $3d from "../assets/icons/3d.png"
 import pixel from "../assets/icons/pixel.png"
 import chibi from "../assets/icons/chibi.png"
+import daki from "../assets/icons/daki.png"
 import Carousel from "../components/Carousel"
 import PostImage from "../components/PostImage"
 import PostModel from "../components/PostModel"
+import PostLive2D from "../components/PostLive2D"
 import PostSong from "../components/PostSong"
 import CaptchaDialog from "../dialogs/CaptchaDialog"
 import {useThemeSelector, useInteractionActions, useSessionSelector, useSessionActions,
@@ -41,6 +44,7 @@ import ContentEditable from "react-contenteditable"
 import SearchSuggestions from "../components/SearchSuggestions"
 import permissions from "../structures/Permissions"
 import xButton from "../assets/icons/x-button-magenta.png"
+import tagConvert from "../assets/json/tag-convert.json"
 import path from "path"
 
 let enterLinksTimer = null as any
@@ -273,10 +277,12 @@ const EditPostPage: React.FunctionComponent<Props> = (props) => {
     const validate = async (files: File[], links?: string[], forceUpscale?: boolean) => {
         let acceptedArray = [] as any 
         let error = ""
+        let isLive2DArr = [] as any
         for (let i = 0; i < files.length; i++) {
             const fileReader = new FileReader()
             await new Promise<void>((resolve) => {
                 fileReader.onloadend = async (f: any) => {
+                    let live2d = false
                     const bytes = new Uint8Array(f.target.result)
                     const result = functions.bufferFileType(bytes)?.[0] || {}
                     const jpg = result?.mime === "image/jpeg"
@@ -304,42 +310,48 @@ const EditPostPage: React.FunctionComponent<Props> = (props) => {
                                         wav ? 50 :
                                         gif ? 100 :
                                         webp ? 100 :
-                                        glb ? 100 :
-                                        fbx ? 100 :
-                                        obj ? 100 :
+                                        glb ? 200 :
+                                        fbx ? 200 :
+                                        obj ? 200 :
                                         mp4 ? 300 :
                                         webm ? 300 : 300
                         if (MB <= maxSize || permissions.isMod(session)) {
                             if (zip) {
-                                const reader = new JSZip()
-                                const content = await reader.loadAsync(bytes)
-                                for (const filename in content.files) {
-                                    const file = content.files[filename]
-                                    if (file.dir || filename.startsWith("__MACOSX/")) continue
-                                    const data = await file.async("uint8array")
-                                    const result = functions.bufferFileType(data)?.[0] || {}
-                                    const jpg = result?.mime === "image/jpeg"
-                                    const png = result?.mime === "image/png"
-                                    let webp = result?.mime === "image/webp"
-                                    let avif = result?.mime === "image/avif"
-                                    const gif = result?.mime === "image/gif"
-                                    const mp4 = result?.mime === "video/mp4"
-                                    const mp3 = result?.mime === "audio/mpeg"
-                                    const wav = result?.mime === "audio/x-wav"
-                                    const glb = functions.isGLTF(filename)
-                                    const fbx = functions.isFBX(filename)
-                                    const obj = functions.isOBJ(filename)
-                                    if (glb) result.typename = "glb"
-                                    if (fbx) result.typename = "fbx"
-                                    if (obj) result.typename = "obj"
-                                    const webm = (path.extname(filename) === ".webm" && result?.typename === "mkv")
-                                    if (jpg || png || webp || avif || gif || mp4 || webm || mp3 || wav || glb || fbx || obj) {
-                                        acceptedArray.push({file: new File([data], filename), ext: result.typename === "mkv" ? "webm" : result.typename, originalLink: links ? links[i] : null, bytes: data})
-                                    } else {
-                                        error = `Supported types in zip: png, jpg, webp, avif, gif, mp4, webm, mp3, wav, glb, fbx, obj.`
+                                live2d = await functions.isLive2DZip(bytes)
+                                if (live2d) {
+                                    acceptedArray.push({file: files[i], ext: result.typename === "mkv" ? "webm" : result.typename, originalLink: links ? links[i] : null, bytes})
+                                    resolve()
+                                } else {
+                                    const reader = new JSZip()
+                                    const content = await reader.loadAsync(bytes)
+                                    for (const filename in content.files) {
+                                        const file = content.files[filename]
+                                        if (file.dir || filename.startsWith("__MACOSX/")) continue
+                                        const data = await file.async("uint8array")
+                                        const result = functions.bufferFileType(data)?.[0] || {}
+                                        const jpg = result?.mime === "image/jpeg"
+                                        const png = result?.mime === "image/png"
+                                        let webp = result?.mime === "image/webp"
+                                        let avif = result?.mime === "image/avif"
+                                        const gif = result?.mime === "image/gif"
+                                        const mp4 = result?.mime === "video/mp4"
+                                        const mp3 = result?.mime === "audio/mpeg"
+                                        const wav = result?.mime === "audio/x-wav"
+                                        const glb = functions.isGLTF(filename)
+                                        const fbx = functions.isFBX(filename)
+                                        const obj = functions.isOBJ(filename)
+                                        if (glb) result.typename = "glb"
+                                        if (fbx) result.typename = "fbx"
+                                        if (obj) result.typename = "obj"
+                                        const webm = (path.extname(filename) === ".webm" && result?.typename === "mkv")
+                                        if (jpg || png || webp || avif || gif || mp4 || webm || mp3 || wav || glb || fbx || obj || live2d) {
+                                            acceptedArray.push({file: new File([data], filename), ext: result.typename === "mkv" ? "webm" : result.typename, originalLink: links ? links[i] : null, bytes: data})
+                                        } else {
+                                            error = `Supported types in zip: png, jpg, webp, avif, gif, mp4, webm, mp3, wav, glb, fbx, obj.`
+                                        }
                                     }
+                                    resolve()
                                 }
-                                resolve()
                             } else {
                                 acceptedArray.push({file: files[i], ext: result.typename === "mkv" ? "webm" : result.typename, originalLink: links ? links[i] : null, bytes})
                                 resolve()
@@ -352,6 +364,7 @@ const EditPostPage: React.FunctionComponent<Props> = (props) => {
                         error = `Supported file types: png, jpg, webp, avif, gif, mp4, webm, mp3, wav, glb, fbx, obj, zip.`
                         resolve()
                     }
+                    isLive2DArr.push(live2d)
                 }
                 fileReader.readAsArrayBuffer(files[i])
             })
@@ -362,7 +375,14 @@ const EditPostPage: React.FunctionComponent<Props> = (props) => {
                 let url = URL.createObjectURL(acceptedArray[i].file)
                 let link = `${url}#.${acceptedArray[i].ext}`
                 let thumbnail = ""
-                if (functions.isVideo(acceptedArray[i].ext)) {
+                let width = ""
+                let height = ""
+                if (isLive2DArr[i]) {
+                    thumbnail = await functions.live2dScreenshot(link)
+                    let dimensions = await functions.live2dDimensions(link)
+                    width = dimensions.width
+                    height = dimensions.height
+                } else if (functions.isVideo(acceptedArray[i].ext)) {
                     thumbnail = await functions.videoThumbnail(link)
                 } else if (functions.isModel(acceptedArray[i].ext)) {
                     thumbnail = await functions.modelImage(link)
@@ -1185,8 +1205,8 @@ const EditPostPage: React.FunctionComponent<Props> = (props) => {
         danbooruErrorRef.current.innerText = "Fetching..."
         let tagArr = [] as any
 
-        let blockedTags = functions.blockedTags()
-        let tagReplaceMap = functions.tagReplaceMap()
+        let blockedTags = tagConvert.blockedTags
+        let tagReplaceMap = tagConvert.tagReplaceMap
 
         const currentFiles = getCurrentFiles()
         let current = currentFiles[currentIndex]
@@ -1210,6 +1230,7 @@ const EditPostPage: React.FunctionComponent<Props> = (props) => {
 
                 if (tagArr.includes("chibi")) setStyle("chibi")
                 if (tagArr.includes("pixel-art")) setStyle("pixel")
+                if (tagArr.includes("dakimakura")) setStyle("daki")
                 if (tagArr.includes("comic")) setType("comic")
 
                 tagArr = tagArr.map((tag: string) => functions.cleanTag(tag))
@@ -1257,6 +1278,7 @@ const EditPostPage: React.FunctionComponent<Props> = (props) => {
 
                 if (tagArr.includes("chibi")) setStyle("chibi")
                 if (tagArr.includes("pixel-art")) setStyle("pixel")
+                if (tagArr.includes("dakimakura")) setStyle("daki")
                 if (tagArr.includes("comic")) setType("comic")
 
                 tagArr = tagArr.map((tag: string) => functions.cleanTag(tag))
@@ -1448,12 +1470,14 @@ const EditPostPage: React.FunctionComponent<Props> = (props) => {
     }
 
     const getPostJSX = () => {
-        if (functions.isModel(currentImg)) {
+        if (functions.isLive2D(currentImg)) {
+            return <PostLive2D live2d={currentImg} noKeydown={true} noTranslations={true}/>
+        } else if (functions.isModel(currentImg)) {
             return <PostModel model={currentImg} noKeydown={true} noTranslations={true}/>
         } else if (functions.isAudio(currentImg)) {
             return <PostSong audio={currentImg} noKeydown={true} noTranslations={true}/>
         } else {
-            return <PostImage img={currentImg} noKeydown={true} noEncryption={false} noTranslations={true}/>
+            return <PostImage img={currentImg} noKeydown={true} noEncryption={true} noTranslations={true}/>
         }
     }
 
@@ -1495,10 +1519,10 @@ const EditPostPage: React.FunctionComponent<Props> = (props) => {
                         <img className="upload-button-img" src={$2d}/>
                         <span className="upload-button-text">2D</span>
                     </button>
-                    <button className={`upload-button ${style === "3d" ? "button-selected" : ""}`} onClick={() => setStyle("3d")}>
+                    {type !== "live2d" ? <button className={`upload-button ${style === "3d" ? "button-selected" : ""}`} onClick={() => setStyle("3d")}>
                         <img className="upload-button-img" src={$3d}/>
                         <span className="upload-button-text">3D</span>
-                    </button>
+                    </button> : null}
                     <button className={`upload-button ${style === "chibi" ? "button-selected" : ""}`} onClick={() => setStyle("chibi")}>
                         <img className="upload-button-img" src={chibi}/>
                         <span className="upload-button-text">Chibi</span>
@@ -1507,16 +1531,25 @@ const EditPostPage: React.FunctionComponent<Props> = (props) => {
                         <img className="upload-button-img" src={pixel}/>
                         <span className="upload-button-text">Pixel</span>
                     </button>
+                    {type !== "comic" ?
+                    <button className={`upload-button ${style === "daki" ? "button-selected" : ""}`} onClick={() => setStyle("daki")}>
+                        <img className="upload-button-img" src={daki}/>
+                        <span className="upload-button-text">Daki</span>
+                    </button> : null}
                 </div>
             )
         }
     }
 
     useEffect(() => {
-        if (type === "model") {
-            if (style === "2d") setStyle("3d")
+        if (type === "comic") {
+            if (style === "daki") setStyle("2d")
+        } else if (type === "model") {
+            if (style === "2d" || style === "daki") setStyle("3d")
+        } else if (type === "live2d") {
+            if (style === "3d") setStyle("2d")
         } else if (type === "audio") {
-            if (style === "3d" || style === "chibi") setStyle("2d")
+            if (style === "3d" || style === "chibi" || style === "daki") setStyle("2d")
         }
     }, [type, style])
 
@@ -1696,6 +1729,12 @@ const EditPostPage: React.FunctionComponent<Props> = (props) => {
                     <img className="upload-button-img" src={audio}/>
                     <span className="upload-button-text">Audio</span>
                 </button>
+                <button className={`upload-button ${type === "live2d" ? "button-selected" : ""}`} onClick={() => setType("live2d")}>
+                    <img className="upload-button-img" src={live2d}/>
+                    <span className="upload-button-text">Live2D</span>
+                </button>
+            </div> 
+            <div className="upload-row">
                 <button className={`upload-button ${type === "model" ? "button-selected" : ""}`} onClick={() => setType("model")}>
                     <img className="upload-button-img" src={model}/>
                     <span className="upload-button-text">Model</span>

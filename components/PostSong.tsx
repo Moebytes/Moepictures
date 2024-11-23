@@ -81,6 +81,15 @@ const PostSong: React.FunctionComponent<Props> = (props) => {
     const [previousButtonHover, setPreviousButtonHover] = useState(false)
     const [nextButtonHover, setNextButtonHover] = useState(false)
 
+    useEffect(() => {
+        const savedPaused = localStorage.getItem("paused")
+        if (savedPaused) setPaused(savedPaused === "true")
+    }, [])
+
+    useEffect(() => {
+        localStorage.setItem("paused", String(paused))
+    }, [paused])
+
     const getFilter = () => {
         return `hue-rotate(${siteHue - 180}deg) saturate(${siteSaturation}%) brightness(${siteLightness + 70}%)`
     }

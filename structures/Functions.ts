@@ -16,12 +16,14 @@ import cryptoFunctions from "./CryptoFunctions"
 import localforage from "localforage"
 import mm from "music-metadata"
 import * as THREE from "three"
+import * as PIXI from "pixi.js"
 import WebPXMux from "webpxmux"
 import ImageTracer from "imagetracerjs"
 import {optimize} from "svgo"
-import avifJS from "../structures/avif_enc"
-import jxlJS from "../structures/jxl_enc"
+import avifJS from "../assets/wasm/avif_enc"
+import jxlJS from "../assets/wasm/jxl_enc"
 import crypto from "crypto"
+import JSZip from "jszip"
 import {GLTFLoader, OBJLoader, FBXLoader} from "three-stdlib"
 
 let newScrollY = 0
@@ -34,6 +36,7 @@ const imageExtensions = [".jpg", ".jpeg", ".png", ".webp", ".avif"]
 const videoExtensions = [".mp4", ".webm", ".mov", ".mkv"]
 const audioExtensions = [".mp3", ".wav", ".ogg", ".flac", ".aac"]
 const modelExtensions = [".glb", ".gltf", ".obj", ".fbx"]
+const live2dExtensions = [".zip"]
 
 let cachedImages = new Map<string, string>()
 
@@ -244,7 +247,8 @@ export default class Functions {
         if (file.startsWith("data:image")) {
             return true
         }
-        return Functions.arrayIncludes(path.extname(file), imageExtensions)
+        const ext = file.startsWith(".") ? file : path.extname(file)
+        return Functions.arrayIncludes(ext, imageExtensions)
     }
 
     public static isAudio = (file?: string) => {
@@ -254,7 +258,8 @@ export default class Functions {
             const ext = file.split("#")?.[1] || ""
             return Functions.arrayIncludes(ext, audioExtensions)
         }
-        return Functions.arrayIncludes(path.extname(file), audioExtensions)
+        const ext = file.startsWith(".") ? file : path.extname(file)
+        return Functions.arrayIncludes(ext, audioExtensions)
     }
 
     public static isModel = (file?: string) => {
@@ -264,7 +269,33 @@ export default class Functions {
             const ext = file.split("#")?.[1] || ""
             return Functions.arrayIncludes(ext, modelExtensions)
         }
-        return Functions.arrayIncludes(path.extname(file), modelExtensions)
+        const ext = file.startsWith(".") ? file : path.extname(file)
+        return Functions.arrayIncludes(ext, modelExtensions)
+    }
+
+    public static isLive2D = (file?: string) => {
+        if (!file) return false
+        file = file.replace(/\?.*$/, "")
+        if (file?.startsWith("blob:")) {
+            const ext = file.split("#")?.[1] || ""
+            return Functions.arrayIncludes(ext, live2dExtensions)
+        }
+        const ext = file.startsWith(".") ? file : path.extname(file)
+        return Functions.arrayIncludes(ext, live2dExtensions)
+    }
+
+    public static isLive2DZip = async (buffer: ArrayBuffer) => {
+        try {
+            const reader = new JSZip()
+            const content = await reader.loadAsync(buffer)
+            for (const filename in content.files) {
+                if (filename.includes(".moc3")) return true
+                if (filename.includes(".model3.json")) return true
+            }
+            return false
+        } catch {
+            return false
+        }
     }
 
     public static isGIF = (file?: string) => {
@@ -277,7 +308,8 @@ export default class Functions {
         if (file?.startsWith("data:image/gif")) {
             return true
         }
-        return path.extname(file) === ".gif"
+        const ext = file.startsWith(".") ? file : path.extname(file)
+        return ext === ".gif"
     }
 
     public static isWebP = (file?: string) => {
@@ -290,7 +322,8 @@ export default class Functions {
         if (file?.startsWith("data:image/webp")) {
             return true
         }
-        return path.extname(file) === ".webp"
+        const ext = file.startsWith(".") ? file : path.extname(file)
+        return ext === ".webp"
     }
 
     public static isGLTF = (file?: string) => {
@@ -300,7 +333,8 @@ export default class Functions {
             const ext = file.split("#")?.[1] || ""
             return ext === ".glb"
         }
-        return path.extname(file) === ".glb"
+        const ext = file.startsWith(".") ? file : path.extname(file)
+        return ext === ".glb"
     }
 
     public static isOBJ = (file?: string) => {
@@ -310,7 +344,8 @@ export default class Functions {
             const ext = file.split("#")?.[1] || ""
             return ext === ".obj"
         }
-        return path.extname(file) === ".obj"
+        const ext = file.startsWith(".") ? file : path.extname(file)
+        return ext === ".obj"
     }
 
     public static isFBX = (file?: string) => {
@@ -320,7 +355,8 @@ export default class Functions {
             const ext = file.split("#")?.[1] || ""
             return ext === ".fbx"
         }
-        return path.extname(file) === ".fbx"
+        const ext = file.startsWith(".") ? file : path.extname(file)
+        return ext === ".fbx"
     }
 
     public static isAnimatedWebp = (buffer: ArrayBuffer) => {
@@ -339,7 +375,8 @@ export default class Functions {
             const ext = file.split("#")?.[1] || ""
             return Functions.arrayIncludes(ext, videoExtensions)
         }
-        return Functions.arrayIncludes(path.extname(file), videoExtensions)
+        const ext = file.startsWith(".") ? file : path.extname(file)
+        return Functions.arrayIncludes(ext, videoExtensions)
     }
 
     public static isMP4 = (file?: string) => {
@@ -349,7 +386,8 @@ export default class Functions {
             const ext = file.split("#")?.[1] || ""
             return ext === ".mp4"
         }
-        return path.extname(file) === ".mp4"
+        const ext = file.startsWith(".") ? file : path.extname(file)
+        return ext === ".mp4"
     }
 
     public static isWebM = (file?: string) => {
@@ -359,7 +397,8 @@ export default class Functions {
             const ext = file.split("#")?.[1] || ""
             return ext === ".webm"
         }
-        return path.extname(file) === ".webm"
+        const ext = file.startsWith(".") ? file : path.extname(file)
+        return ext === ".webm"
     }
 
     public static timeout = (ms: number) => {
@@ -1251,7 +1290,8 @@ export default class Functions {
             type === "video" ||
             type === "comic" ||
             type === "audio" ||
-            type === "model") return true 
+            type === "model" ||
+            type === "live2d") return true 
         return false
     }
       
@@ -1268,7 +1308,8 @@ export default class Functions {
         if (style === "2d" ||
             style === "3d" ||
             style === "pixel" ||
-            style === "chibi") return true 
+            style === "chibi" ||
+            style === "daki") return true 
         return false
     }
 
@@ -1626,7 +1667,7 @@ export default class Functions {
     }
 
     public static modelImage = async (model: string, imageSize?: number) => {
-        if (!imageSize) imageSize = 100
+        if (!imageSize) imageSize = 500
         const width = imageSize
         const height = imageSize
         const scene = new THREE.Scene()
@@ -1671,6 +1712,71 @@ export default class Functions {
         await Functions.timeout(100)
         renderer.render(scene, camera)
         return renderer.domElement.toDataURL()
+    }
+
+    public static live2dDimensions = async (live2d: string) => {
+        // @ts-expect-error
+        const {Live2DModel} = await import("pixi-live2d-display/cubism4")
+        const model = await Live2DModel.from(live2d)
+        const width = model.internalModel.width
+        const height = model.internalModel.height
+        const r = await fetch(live2d).then((r) => r.arrayBuffer())
+        const size = r.byteLength
+        return {width, height, size}
+    }
+
+    public static live2dScreenshot = async (live2d: string, imageSize?: number) => {
+        if (!imageSize) imageSize = 500
+        // @ts-expect-error
+        window.PIXI = PIXI
+        const app = new PIXI.Application({
+            view: document.createElement("canvas"),
+            autoStart: true,
+            width: imageSize,
+            height: imageSize,
+            backgroundAlpha: 0,
+            powerPreference: "low-power",
+            preserveDrawingBuffer: true
+        })
+
+        // @ts-expect-error
+        const {Live2DModel, ZipLoader} = await import("pixi-live2d-display/cubism4")
+
+        ZipLoader.zipReader = (data: Blob, url: string) => JSZip.loadAsync(data)
+        ZipLoader.readText = (jsZip: JSZip, path: string) => {
+            const file = jsZip.file(path)
+            if (!file) throw new Error("Cannot find file: " + path)
+            return file.async("text")
+        }
+        ZipLoader.getFilePaths = (jsZip: JSZip) => {
+            const paths: string[] = []
+            jsZip.forEach(relativePath => paths.push(relativePath))
+            return Promise.resolve(paths)
+        }
+        ZipLoader.getFiles = (jsZip: JSZip, paths: string[]) =>
+            Promise.all(paths.map(
+                async path => {
+                    const fileName = path.slice(path.lastIndexOf("/") + 1)
+                    const blob = await jsZip.file(path)!.async("blob")
+                    return new File([blob], fileName)
+        }))
+
+        const model = await Live2DModel.from(live2d)
+        app.stage.addChild(model)
+
+        const initialScale = Math.min(app.screen.width / model.internalModel.width, app.screen.height / model.internalModel.height)
+        model.transform.scale.set(initialScale)
+        model.transform.position.set(app.screen.width / 2, app.screen.height / 2)
+        model.anchor.set(0.5)
+
+        await Functions.timeout(100)
+
+        return new Promise<string>(async (resolve) => {
+            app.ticker.add(() => {
+                resolve(app.view.toDataURL?.()!)
+                app.destroy(true)
+            })
+        })
     }
 
     
@@ -1978,76 +2084,6 @@ export default class Functions {
 
     public static stripLinks = (text: string) => {
         return text.replace(/(https?:\/\/[^\s]+)/g, "").replace(/(emoji:[^\s]+)/g, "")
-    }
-
-    public static blockedTags = () => {
-        return ["rating", "girl", "boy", "chibi", "pixel-art", "comic", "tress-ribbon", "no-hat", "ribbon-trimmed-sleeves",
-        "hair-between-eyes", "solo", "looking-at-viewer", "eyebrows-visible-through-hair", "one-side-up", "tareme", "caustics",
-        "kemonomimi-mode", "cowboy-shot", "underwear", "depth-of-field", "holding", "bangs", "short-sleeves", "hair-tubes",
-        "v-shaped-eyebrows", "v-arms", "v-over-eye", "pixiv-id", "long-sleeves", "frills", "collarbone", "midriff", "argyle",
-        "bangs", "ahoge", "two-side-up", "sleeves-past-wrists", "sleeves-past-fingers", "legwear", "serafuku", "copyright", 
-        "hand-on-another", "^^^", "+ +", "2021", "1other", "vision-(genshin-impact)", "jumpy-dumpty", "pom-pom-(clothes)",
-        "boo-tao-(genshin-impact)", "baron-bunny-(genshin-impact)", "lily-(flower)", "abyss-mage-(genshin-impact)",
-        "crystalfly-(genshin-impact)"]
-    }
-
-    public static tagReplaceMap = () => {
-        return {
-            "-(symbol)": "",
-            "-(sky)": "",
-            "-(object)": "",
-            "-(medium)": "",
-            "-(machine)": "",
-            "transparent": "transparency",
-            "transparent-background": "transparent",
-            "background": "bg",
-            "headwear": "hat",
-            "pantyhose": "leggings",
-            "neckerchief": "necktie",
-            "hand-on-own": "hand-on",
-            "hand-in-own": "hand-on",
-            "x-hair-ornament": "hair-ornament",
-            "dodoco-(genshin-impact)": "dodoco",
-            "gabriel-tenma-white": "gabriel-(gabriel-dropout)",
-            "kanna-kamui": "kanna-kamui-(dragon-maid)",
-            "tedeza-rize": "rize-tedeza-(is-the-order-a-rabbit)",
-            "hakurei-reimu": "reimu-hakurei-(touhou)",
-            "kirima-sharo": "sharo-kirima-(is-the-order-a-rabbit)",
-            "kirima-syaro": "sharo-kirima-(is-the-order-a-rabbit)",
-            "ujimatsu-chiya": "chiya-ujimatsu-(is-the-order-a-rabbit)",
-            "flandre-scarlet": "flandre-scarlet-(touhou)",
-            "llenn-(sao)": "llenn-(sword-art-online)",
-            "slime-(genshin-impact)": "slime",
-            "tippy-(gochiusa)": "tippy",
-            "doma-umaru": "umaru-doma-(himouto-umaru-chan)",
-            "firo-(tate-no-yuusha-no-nariagari)": "filo-(shield-hero)",
-            "tate-no-yuusha-no-nariagari": "shield-hero",
-            "raphtalia": "raphtalia-(shield-hero)",
-            "satanichia-kurumizawa-mcdowell": "satania-(gabriel-dropout)",
-            "tapris-chisaki-sugarbell": "tapris-(gabriel-dropout)",
-            "platelet-(hataraku-saibou)": "platelet-(cells-at-work)",
-            "megumin": "megumin-(konosuba)",
-            "tohru-(maidragon)": "tohru-(dragon-maid)",
-            "fhilippe124": "fhilippe",
-            "setoman": "setmen",
-            "aruka@2nichimehigashishi-20a": "aruka",
-            "arlenetachibana": "arlene",
-            "ratsuchi": "racchi",
-            "sakuraani": "sakura-ani",
-            "shibainu-niki": "shibainuniki",
-            "kusakashi": "yukki",
-            "捺": "natsu",
-            "tsubasatsubasa": "tsubasa",
-            "mitsumurazaja": "mimurazaja",
-            "zaja": "mimurazaja",
-            "nogitakayoshimi": "nogi-takayoshi",
-            "kyūkon": "usanagi",
-            "azumiichiju": "kazukiadumi",
-            "2drr/diru@fanbox": "2drr",
-            "fujichoko(fujiwara)": "fuzichoco",
-            "naruyashin@skebboshūchū": "naruyashin",
-            "nanamiyarin@oshigotoboshūchū": "bitter-crown"
-        }
     }
 
     public static cleanTag = (tag: string) => {
@@ -2694,6 +2730,12 @@ export default class Functions {
         if (!cacheKey) cacheKey = img
         const cached = Functions.getImageCache(cacheKey)
         if (cached) return cached
+        if (Functions.isLive2D(img)) {
+            const url = await Functions.live2dScreenshot(img)
+            let cacheUrl = `${url}#${path.extname(img)}`
+            Functions.setImageCache(cacheKey, cacheUrl)
+            return cacheUrl
+        }
         if (Functions.isModel(img)) {
             const url = await Functions.modelImage(img)
             let cacheUrl = `${url}#${path.extname(img)}`
@@ -2741,7 +2783,8 @@ export default class Functions {
         if (!cacheKey) cacheKey = img
         const cached = Functions.getImageCache(cacheKey)
         if (cached) return cached
-        if (Functions.isModel(img) || Functions.isAudio(img) || Functions.isVideo(img)) {
+        if (Functions.isModel(img) || Functions.isAudio(img) || 
+            Functions.isVideo(img) || Functions.isLive2D(img)) {
             return img
         }
         let isAnimatedWebP = false
@@ -2770,7 +2813,8 @@ export default class Functions {
     public static decryptBuffer = async (buffer: ArrayBuffer, imageLink: string, session: any) => {
         if (!privateKey) await Functions.updateClientKeys(session)
         if (!serverPublicKey) await Functions.updateServerPublicKey(session)
-        if (Functions.isModel(imageLink) || Functions.isAudio(imageLink) || Functions.isVideo(imageLink)) {
+        if (Functions.isModel(imageLink) || Functions.isAudio(imageLink) || 
+            Functions.isVideo(imageLink) || Functions.isLive2D(imageLink)) {
             return buffer
         }
         let isAnimatedWebP = false

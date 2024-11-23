@@ -58,7 +58,7 @@ def split_into_chunks(img, mask_refined, block, line_index, textheight=64, max_r
         return np.split(line_crop, cut_points, axis=1), cut_points
 
 def ocr_image(img_path):
-    text_detector = TextDetector(model_path="structures/comictextdetector.pt", input_size=1024, device=device, act="leaky")
+    text_detector = TextDetector(model_path="assets/python/comictextdetector.pt", input_size=1024, device=device, act="leaky")
     manga_ocr = MangaOcr()
     translator = Translator(to_lang="en", from_lang="ja")
     img = cv2.imdecode(np.fromfile(img_path, dtype=np.uint8), cv2.IMREAD_COLOR)

@@ -27,10 +27,9 @@ import TranslationEditor from "./TranslationEditor"
 import path from "path"
 import nextIcon from "../assets/icons/go-right.png"
 import prevIcon from "../assets/icons/go-left.png"
-import "./styles/postmodel.less"
-import mime from "mime-types"
 import * as THREE from "three"
 import {OrbitControls, GLTFLoader, OBJLoader, FBXLoader} from "three-stdlib"
+import "./styles/postmodel.less"
 
 let imageTimer = null as any
 let id = null as any
@@ -98,6 +97,15 @@ const PostModel: React.FunctionComponent<Props> = (props) => {
     const [nextButtonHover, setNextButtonHover] = useState(false)
     const [objMaterials, setObjMaterials] = useState([]) as any
     const [buttonHover, setButtonHover] = useState(false)
+
+    useEffect(() => {
+        const savedPaused = localStorage.getItem("paused")
+        if (savedPaused) setPaused(savedPaused === "true")
+    }, [])
+
+    useEffect(() => {
+        localStorage.setItem("paused", String(paused))
+    }, [paused])
 
     const getFilter = () => {
         return `hue-rotate(${siteHue - 180}deg) saturate(${siteSaturation}%) brightness(${siteLightness + 70}%)`
@@ -201,7 +209,6 @@ const PostModel: React.FunctionComponent<Props> = (props) => {
         scene.add(model)
 
         const controlElement = fullscreenRef.current || undefined
-
         const controls = new OrbitControls(camera, controlElement)
 
         const box = new THREE.Box3().setFromObject(model)
@@ -693,7 +700,6 @@ const PostModel: React.FunctionComponent<Props> = (props) => {
 
     const shapeKeysDropdownJSX = () => {
         let jsx = [] as any
-
         for (let i = 0; i < morphTargets.length; i++) {
             jsx.push(
                 <div className="model-morph-dropdown-row morph-row">

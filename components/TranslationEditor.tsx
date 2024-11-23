@@ -212,8 +212,12 @@ const TranslationEditor: React.FunctionComponent<Props> = (props) => {
         element.style.filter = `brightness(${brightness}%) contrast(${newContrast}%) hue-rotate(${hue - 180}deg) saturate(${saturation}%) blur(${blur}px)`
     }, [brightness, contrast, hue, saturation, lightness, blur, sharpen])
 
-    let maxWidth = mobile ? window.innerWidth - 20 : window.innerWidth - functions.sidebarWidth() - 70
+    let maxWidth = 1000
     let maxHeight = 1000
+
+    if (typeof window !== "undefined") {
+        maxWidth = mobile ? window.innerWidth - 20 : window.innerWidth - functions.sidebarWidth() - 70
+    }
 
     if (imageExpand) {
         maxHeight = 1797

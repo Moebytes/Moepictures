@@ -790,6 +790,9 @@ const PostRoutes = (app: Express) => {
                   } else if (functions.isModel(`.${ext}`)) {
                     kind = "model"
                     type = "model"
+                  } else if (functions.isLive2D(`.${ext}`)) {
+                    kind = "live2d"
+                    type = "live2d"
                   }
                 if (buffer.byteLength) {
                     let newImagePath = functions.getImagePath(kind, postID, Number(fileOrder), filename)
@@ -805,10 +808,14 @@ const PostRoutes = (app: Express) => {
                 }
                 let dimensions = null as any
                 let hash = ""
-                if (kind === "video" || kind === "audio" || kind === "model") {
+                if (kind === "video" || kind === "audio" || kind === "model" || kind === "live2d") {
                     const buffer = functions.base64ToBuffer(post.thumbnail)
                     hash = await phash(buffer).then((hash: string) => functions.binaryToHex(hash))
                     dimensions = await sharp(buffer).metadata()
+                    if (kind === "live2d") {
+                        dimensions.width = post.images[i].width
+                        dimensions.height = post.images[i].height
+                      }
                 } else {
                     hash = await phash(current).then((hash: string) => functions.binaryToHex(hash))
                     dimensions = await sharp(current).metadata()
@@ -1026,7 +1033,7 @@ const PostRoutes = (app: Express) => {
             let post = await sql.post.unverifiedPost(Number(postID))
             if (!post) return res.status(400).send("Invalid postID")
 
-            if (post.type === "video" || post.type === "audio" || post.type === "model") return res.status(400).send("Bad request")
+            if (post.type === "video" || post.type === "audio" || post.type === "model" || post.type === "live2d") return res.status(400).send("Bad request")
             let animated = post.type === "animation"
 
             for (let i = 0; i < post.images.length; i++) {
@@ -1134,7 +1141,7 @@ const PostRoutes = (app: Express) => {
             let post = await sql.post.unverifiedPost(Number(postID))
             if (!post) return res.status(400).send("Invalid postID")
 
-            if (post.type === "video" || post.type === "audio" || post.type === "model") return res.status(400).send("Bad request")
+            if (post.type === "video" || post.type === "audio" || post.type === "model" || post.type === "live2d") return res.status(400).send("Bad request")
 
             for (let i = 0; i < post.images.length; i++) {
                 const file = functions.getImagePath(post.images[i].type, post.postID, post.images[i].order, post.images[i].filename)

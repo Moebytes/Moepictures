@@ -10,7 +10,7 @@ Moepictures's tags use the dash ("-") as the delimeter, but the search can guess
 
 ### Multiple Images Per Post
 
-Moepictures supports multiple images per post, which is great for comics and posts with lots of variations. We also have parent/child relationships for third-party posts.
+Moepictures supports multiple images per post, which is great for comics and posts with lots of variations. We also have parent/child relationships and groups.
 
 ### Image Filters
 
@@ -21,7 +21,7 @@ can make everything look like a pixel game. When playing audio, the pixelate fil
 
 ### Custom Players
 
-Moepictures uses custom gif/video/music/3d players, so you can do many things that aren't normally possible like pausing/seeking 
+Moepictures uses custom gif/video/music/3d/live2d players, so you can do many things that aren't normally possible like pausing/seeking 
 gifs, reverse playback, and modification of playback speed. 
 
 Video Player:
@@ -29,7 +29,8 @@ Video Player:
 <img src="assets/misc/videoplayer.png">
 
 The video player has some additional controls for volume and pitch preservement. The 3d model player has 
-controls for wireframe, matcap, shapekeys, and lighting. The music player can playback audio in reverse.
+controls for wireframe, matcap, shapekeys, and lighting. The music player can playback audio in reverse. The 
+live2d player has controls for speed, parameters, and parts.
 
 ### Translations
 
@@ -53,11 +54,15 @@ Rename the file `.env.example` to `.env` and put in your credentials. `COOKIE_SE
 
 To add files locally create folders "moepictures" and "moepictures-unverified" and add the path to `MOEPICTURES_LOCAL` and `MOEPICTURES_LOCAL_UNVERIFIED`, each containing the following subfolders:
 
-`["animation", "artist", "character", "comic", "image", "pfp", "series", "tag", "video", "audio", "model"]`
+`["animation", "artist", "character", "comic", "image", "pfp", "series", "tag", "video", "audio", "model", "live2d"]`
 
 The site runs on port 8082 by default but it can be configured by changing `PORT`.
 
 Install all of the dependencies for this project by running `npm install`. \
 Start the project by running the server `npm start`.
+
+#### Live2D
+To enable live2d support, you need to download the proprietary Cubism Core library and place it in `assets/live2d`.
+https://www.live2d.com/en/sdk/download/web/
 
 That's pretty much it. Following our license (CC BY-NC 4.0) you may not commercialize self-hosted instances.

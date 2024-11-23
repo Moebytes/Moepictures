@@ -11,3 +11,4 @@ files
 dump.rdb
 dump
 structures/CryptoFunctions.ts
+assets/live2d/*

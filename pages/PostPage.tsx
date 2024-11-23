@@ -6,6 +6,7 @@ import SideBar from "../components/SideBar"
 import Footer from "../components/Footer"
 import PostImage from "../components/PostImage"
 import PostModel from "../components/PostModel"
+import PostLive2D from "../components/PostLive2D"
 import PostSong from "../components/PostSong"
 import PostImageOptions from "../components/PostImageOptions"
 import CutenessMeter from "../components/CutenessMeter"
@@ -658,6 +659,13 @@ const PostPage: React.FunctionComponent<Props> = (props) => {
                 <>
                 <PostModel post={post} model={image} order={order} next={next} previous={previous} translationID={translationID}/>
                 <PostImageOptions post={post} model={image} download={download} next={next} previous={previous}/>
+                </>
+            )
+        } else if (post.type === "live2d") {
+            return (
+                <>
+                <PostLive2D post={post} live2d={image} order={order} next={next} previous={previous} translationID={translationID}/>
+                <PostImageOptions post={post} live2d={image} download={download} next={next} previous={previous}/>
                 </>
             )
         } else if (post.type === "audio") {

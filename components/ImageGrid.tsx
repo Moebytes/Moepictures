@@ -6,6 +6,7 @@ useMiscDialogActions, useSessionSelector, useSessionActions, usePageSelector, us
 import GridImage from "./GridImage"
 import GridModel from "./GridModel"
 import GridSong from "./GridSong"
+import GridLive2D from "./GridLive2D"
 import noresults from "../assets/misc/noresults.png"
 import functions from "../structures/Functions"
 import permissions from "../structures/Permissions"
@@ -404,35 +405,43 @@ const ImageGrid: React.FunctionComponent = (props) => {
     }, [posts, page, queryPage, pageMultiplier])
 
     useEffect(() => {
+        let cleanup = null as any
         const loadImages = async () => {
             for (let i = 0; i < postsRef.length; i++) {
                 if (!postsRef[i].current) continue
                 const shouldWait = await postsRef[i].current?.shouldWait?.()
                 if (shouldWait) {
-                    await postsRef[i].current?.load?.()
+                    cleanup = await postsRef[i].current?.load?.()
                 } else {
-                    postsRef[i].current?.load?.()
+                    cleanup = postsRef[i].current?.load?.()
                 }
             }
         }
         loadImages()
+        return () => {
+            if (cleanup instanceof Function) cleanup()
+        }
     }, [visiblePosts, postsRef, session])
 
     useEffect(() => {
+        let cleanup = null as any
         if (reupdateFlag) {
             const updateImages = async () => {
                 for (let i = 0; i < postsRef.length; i++) {
                     if (!postsRef[i].current) continue
                     const shouldWait = await postsRef[i].current?.shouldWait?.()
                     if (shouldWait) {
-                        await postsRef[i].current?.update?.()
+                        cleanup = await postsRef[i].current?.update?.()
                     } else {
-                        postsRef[i].current?.update?.()
+                        cleanup = postsRef[i].current?.update?.()
                     }
                 }
             }
             updateImages()
             setReupdateFlag(false)
+        }
+        return () => {
+            if (cleanup instanceof Function) cleanup()
         }
     }, [reupdateFlag, session])
 
@@ -554,6 +563,8 @@ const ImageGrid: React.FunctionComponent = (props) => {
             if (!img) img = thumbnail
             if (post.type === "model") {
                 jsx.push(<GridModel key={post.postID} id={post.postID} img={img }model={thumbnail} post={post} ref={postsRef[i]} reupdate={() => setReupdateFlag(true)}/>)
+            } else if (post.type === "live2d") {
+                jsx.push(<GridLive2D key={post.postID} id={post.postID} img={img} live2d={thumbnail} post={post} ref={postsRef[i]} reupdate={() => setReupdateFlag(true)}/>)
             } else if (post.type === "audio") {
                 jsx.push(<GridSong key={post.postID} id={post.postID} img={img} cached={cached} audio={thumbnail} post={post} ref={postsRef[i]} reupdate={() => setReupdateFlag(true)}/>)
             } else {

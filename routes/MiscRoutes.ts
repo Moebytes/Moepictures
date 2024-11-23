@@ -506,7 +506,7 @@ const MiscRoutes = (app: Express) => {
             const filename = `${Math.floor(Math.random() * 100000000)}.jpg`
             const imagePath = path.join(folder, filename)
             fs.writeFileSync(imagePath, buffer)
-            const scriptPath = path.join(__dirname, "../structures/wdtagger.py")
+            const scriptPath = path.join(__dirname, "../assets/python/wdtagger.py")
             let command = `python3 "${scriptPath}" -i "${imagePath}" -m "${process.env.WDTAGGER_PATH}"`
             const str = await exec(command).then((s: any) => s.stdout).catch((e: any) => e.stderr)
             const json = JSON.parse(str)
@@ -533,7 +533,7 @@ const MiscRoutes = (app: Express) => {
             const filename = `${Math.floor(Math.random() * 100000000)}.jpg`
             const imagePath = path.join(folder, filename)
             fs.writeFileSync(imagePath, buffer)
-            const scriptPath = path.join(__dirname, "../structures/ocr.py")
+            const scriptPath = path.join(__dirname, "../assets/python/ocr.py")
             let command = `python3 "${scriptPath}" -i "${imagePath}"`
             const str = await exec(command).then((s: any) => s.stdout).catch((e: any) => e.stderr)
             const json = JSON.parse(str)

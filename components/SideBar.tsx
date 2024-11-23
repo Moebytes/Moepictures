@@ -549,15 +549,13 @@ const SideBar: React.FunctionComponent<Props> = (props) => {
                 jsx.push(<img className="sidebar-social" src={bandcamp} onClick={() => window.open(props.post.link, "_blank")}/>)
             }
         }
-        if (jsx.length) {
-            return (
-                <div className="sidebar-row">
-                    <span className="tag">Source:</span>
-                    <span className={`tag-alt-link ${props.post.hidden ? "strikethrough" : ""}`} onClick={() => window.open(props.post.link, "_blank")}>{getDomain()}</span>
-                    {jsx}
-                </div>
-            )
-        }
+        return (
+            <div className="sidebar-row">
+                <span className="tag">Source:</span>
+                <span className={`tag-alt-link ${props.post.hidden ? "strikethrough" : ""}`} onClick={() => window.open(props.post.link, "_blank")}>{getDomain()}</span>
+                {jsx}
+            </div>
+        )
         return null
     }
 

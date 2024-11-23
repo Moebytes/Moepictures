@@ -206,7 +206,7 @@ app.delete("/api/misc/unblacklistip", imageLimiter, async (req: Request, res: Re
   res.status(200).send("Success")
 })
 
-let folders = ["animation", "artist", "character", "comic", "image", "pfp", "series", "tag", "video", "audio", "model", "history"]
+let folders = ["animation", "artist", "character", "comic", "image", "pfp", "series", "tag", "video", "audio", "model", "live2d", "history"]
 let noCache = ["artist", "character", "series", "pfp", "tag"]
 let encrypted = ["image", "comic"]
 

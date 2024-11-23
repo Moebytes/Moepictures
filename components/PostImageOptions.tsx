@@ -26,6 +26,7 @@ import "./styles/postimageoptions.less"
 interface Props {
     img?: string
     model?: string
+    live2d?: string
     audio?: string
     post?: any
     comicPages?: any
@@ -93,10 +94,13 @@ const PostImageOptions: React.FunctionComponent<Props> = (props) => {
             } else if (props.audio) {
                 let {duration, size} = await functions.audioDimensions(props.audio)
                 setDownloadText(`${functions.formatSeconds(duration)} (${functions.readableFileSize(size)})`)
-            }
+            } else if (props.live2d) {
+                let {width, height, size} = await functions.live2dDimensions(props.live2d)
+                setDownloadText(`${width}x${height} (${functions.readableFileSize(size)})`)
+            } 
         }
         getDLText()
-    }, [props.img, props.model, props.audio, props.comicPages, session])
+    }, [props.img, props.model, props.audio, props.live2d, props.comicPages, session])
 
     const getFavorite = async () => {
         if (!props.post || !session.username) return
@@ -168,6 +172,7 @@ const PostImageOptions: React.FunctionComponent<Props> = (props) => {
         if (typeof document === "undefined") return "0px"
         let elementName = ".post-image-box"
         if (props.model) elementName = ".post-model-box"
+        if (props.live2d) elementName = ".post-model-box"
         if (props.audio) elementName = ".post-song-box"
         if (translationMode) elementName = ".translation-editor"
         const bodyRect = document.querySelector(elementName)?.getBoundingClientRect()
@@ -197,6 +202,7 @@ const PostImageOptions: React.FunctionComponent<Props> = (props) => {
         if (typeof document === "undefined") return "0px"
         let elementName = ".post-image-box"
         if (props.model) elementName = ".post-model-box"
+        if (props.live2d) elementName = ".post-model-box"
         if (props.audio) elementName = ".post-song-box"
         if (translationMode) elementName = ".translation-editor"
         const bodyRect = document.querySelector(elementName)?.getBoundingClientRect()
